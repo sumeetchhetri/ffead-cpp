@@ -1,0 +1,116 @@
+/*
+	Copyright 2010, Sumeet Chhetri 
+  
+    Licensed under the Apache License, Version 2.0 (the "License"); 
+    you may not use this file except in compliance with the License. 
+    You may obtain a copy of the License at 
+  
+        http://www.apache.org/licenses/LICENSE-2.0 
+  
+    Unless required by applicable law or agreed to in writing, software 
+    distributed under the License is distributed on an "AS IS" BASIS, 
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+    See the License for the specific language governing permissions and 
+    limitations under the License.  
+*/
+/*
+ * CHServer.h
+ *
+ *  Created on: Aug 11, 2009
+ *      Author: sumeet
+ */
+
+#ifndef CHSERVER_H_
+#define CHSERVER_H_
+#include "Cibernate.h"
+#include <algorithm>
+
+#include "PropFileReader.h"
+#include "AfcUtil.h"
+
+#include "Controller.h"
+
+#include "PropFileReader.h"
+#include "TemplateEngine.h"
+#include "DCPGenerator.h"
+#include "Reflection.h"
+#include <cstdlib>
+#include <dlfcn.h>
+#include "json_spirit.h"
+#include "WsUtil.h"
+#include "sstream"
+
+#include "ClassInfo.h"
+#include <boost/lexical_cast.hpp>
+#include "View.h"
+#include "XmlParser.h"
+#include "TemplateHandler.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include "DynamicView.h"
+#include "HttpRequest.h"
+#include <boost/thread/thread.hpp>
+#include <boost/bind.hpp>
+#include <boost/date_time.hpp>
+#include "ApplicationUtil.h"
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/epoll.h>
+#include <sys/resource.h>
+#include <sys/time.h>
+#include <boost/thread/recursive_mutex.hpp>
+#include <queue>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include "Cibernate.h"
+#include "ComponentGen.h"
+#include "ComponentHandler.h"
+#include "MessageHandler.h"
+#include "MethodInvoc.h"
+#include "Reflector.h"
+#include "AppContext.h"
+#include "ExceptionHandler.h"
+#include "Logger.h"
+
+#ifdef WINDOWS
+    #include <direct.h>
+    #define pwd _getcwd
+#else
+    #include <unistd.h>
+    #define pwd getcwd
+ #endif
+
+
+//#include <boost/filesystem.hpp>
+#define MAXEPOLLSIZE 100
+#define BACKLOGM 500
+#define MAXBUFLENM 32768
+typedef bool (*FunPtr1) (void *);
+typedef ClassInfo (*FunPtr) ();
+typedef void (*DCPPtr) ();
+typedef void (*ReceiveTask1)(int);
+
+using namespace std;
+
+map<string,HttpSession> sessionMap;
+
+boost::mutex m_mutex;
+boost::mutex p_mutex;
+
+
+class CHServer {
+public:
+	CHServer();
+	virtual ~CHServer();
+};
+
+#endif /* CHSERVER_H_ */

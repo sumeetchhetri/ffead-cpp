@@ -1,0 +1,3 @@
+<web-services>
+	<web-service name="testing" class="Testing"></web-service>
+</web-services>

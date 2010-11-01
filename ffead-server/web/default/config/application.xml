@@ -1,0 +1,12 @@
+<app>
+	<controllers>
+		<controller class="DefaultController" url="*.action"/>
+		<controller class="DefaultController" url="*.do"/>
+	</controllers>
+	<templates>
+		<template class="DefTemp" file="test.tpe"/>
+	</templates>
+	<dviews>
+		<dview class="Dview" path="test.view"/>
+	</dviews>
+</app>
