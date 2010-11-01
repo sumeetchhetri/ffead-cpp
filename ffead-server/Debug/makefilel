@@ -7,10 +7,9 @@
 RM := rm -rf
 
 # All of the sources participating in the build are defined here
--include sources.mk
--include subdir.mk
--include src/subdir.mk
--include objects.mk
+-include sourcesl.mk
+-include src/subdirl.mk
+-include objectsl.mk
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(C++_DEPS)),)
@@ -38,36 +37,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: CHS
+all: libweblib.so
 
 # Tool invocations
-CHS: $(OBJS) $(USER_OBJS)
-	make -f makefilel all
+libweblib.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L../lib -rdynamic -o"CHS" $(OBJS) $(USER_OBJS) $(LIBS)
-	@echo 'Finished building target: $@'	
-	rm -Rf server
-	mkdir server
-	mkdir server/resources
-	mkdir server/lib
-	mkdir server/public
-	mkdir server/include
-	mkdir server/rtdcf
-	mkdir server/web
-	cp -Rf ../resources/* server/resources/
-	cp -Rf ../lib/* server/lib/
-	cp -Rf ../public/* server/public/
-	cp -Rf ../include/* server/include/
-	cp -Rf ../rtdcf/* server/rtdcf/
-	cp -Rf ../web/* server/web
-	cp -Rf ../script/* server/
-	cp -Rf CHS server/
+	g++ -shared -o"../lib/libweblib.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) CHS
+	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(LIBRARIES)$(CPP_DEPS)$(CXX_DEPS)$(C_UPPER_DEPS) libweblib.so
 	-@echo ' '
 
 .PHONY: all clean dependents
