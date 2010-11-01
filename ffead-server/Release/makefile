@@ -47,22 +47,22 @@ CHS: $(OBJS) $(USER_OBJS)
 	@echo 'Invoking: GCC C++ Linker'
 	g++ -L../lib -rdynamic -o"CHS" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'	
-	rm -Rf server
-	mkdir server
-	mkdir server/resources
-	mkdir server/lib
-	mkdir server/public
-	mkdir server/include
-	mkdir server/rtdcf
-	mkdir server/web
-	cp -Rf ../resources/* server/resources/
-	cp -Rf ../lib/* server/lib/
-	cp -Rf ../public/* server/public/
-	cp -Rf ../include/* server/include/
-	cp -Rf ../rtdcf/* server/rtdcf/
-	cp -Rf ../web/* server/web
-	cp -Rf ../script/* server/
-	cp -Rf CHS server/
+	rm -Rf ffead-server
+	mkdir ffead-server
+	mkdir ffead-server/resources
+	mkdir ffead-server/lib
+	mkdir ffead-server/public
+	mkdir ffead-server/include
+	mkdir ffead-server/rtdcf
+	mkdir ffead-server/web
+	cp -Rf ../resources/* ffead-server/resources/
+	cp -Rf ../lib/* ffead-server/lib/
+	cp -Rf ../public/* ffead-server/public/
+	cp -Rf ../include/* ffead-server/include/
+	cp -Rf ../rtdcf/* ffead-server/rtdcf/
+	cp -Rf ../web/* ffead-server/web
+	cp -Rf ../script/* ffead-server/
+	cp -Rf CHS ffead-server/
 	@echo ' '
 
 # Other Targets
