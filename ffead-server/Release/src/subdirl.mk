@@ -224,9 +224,9 @@ CPP_DEPS += \
 ./src/WsUtil.d \
 ./src/XmlParseException.d \
 ./src/XmlParser.d \
-./src/json_spirit_reader.o \
-./src/json_spirit_value.o \
-./src/json_spirit_writer.o	
+./src/json_spirit_reader.d \
+./src/json_spirit_value.d \
+./src/json_spirit_writer.d	
 
 
 # Each subdirectory must supply rules for building sources it contributes
