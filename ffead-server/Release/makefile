@@ -55,12 +55,14 @@ CHS: $(OBJS) $(USER_OBJS)
 	mkdir ffead-server/include
 	mkdir ffead-server/rtdcf
 	mkdir ffead-server/web
+	mkdir ffead-server/web/default/public
 	cp -Rf ../resources/* ffead-server/resources/
 	cp -Rf ../lib/* ffead-server/lib/
 	cp -Rf ../public/* ffead-server/public/
 	cp -Rf ../include/* ffead-server/include/
 	cp -Rf ../rtdcf/* ffead-server/rtdcf/
 	cp -Rf ../web/* ffead-server/web
+	cp -Rf ../public/* ffead-server/web/default/public/
 	cp -Rf ../script/* ffead-server/
 	cp -Rf CHS ffead-server/
 	@echo ' '
