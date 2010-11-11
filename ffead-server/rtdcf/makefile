@@ -37,8 +37,9 @@ all: libinter.so
 libinter.so: $(OBJS) $(USER_OBJS) clean
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++  -L"../lib" -shared -o"../lib/libinter.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++  -L"../lib" -shared -o"libinter.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
+	cp -f libinter.so ../lib/
 	@echo ' '
 
 # Other Targets
