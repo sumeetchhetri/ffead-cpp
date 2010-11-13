@@ -39,6 +39,21 @@ Cibernate::Cibernate(string appName) {
 	}
 }
 
+Cibernate::Cibernate() {
+	this->init = false;
+	this->appName = "default";
+	if (this->appName != "" && CibernateConnPools::isInitialized()
+			&& CibernateConnPools::getPool(this->appName) != NULL) {
+		this->init = true;
+		this->pool = CibernateConnPools::getPool(this->appName);
+		this->mapping = CibernateConnPools::getMapping(this->appName);
+		cout << "\ngot pool " << this->pool << " mapping " << this->mapping
+				<< " for application " << appName << "\n" << flush;
+	}
+	else
+		throw "Error connecting to Database server";
+}
+
 string Cibernate::demangle(const char *mangled)
 {
 	int status;	char *demangled;
@@ -84,7 +99,7 @@ bool Cibernate::allocateStmt(bool read) {
 }
 void Cibernate::procedureCall(string procName) {
 	bool flagc = allocateStmt(true);
-	if(!flagc)return;
+	if(!flagc)throw "Error getting Database connection";
 	int V_OD_erg;// result of functions
 	char V_OD_stat[10];
 	SQLSMALLINT V_OD_mlen, V_OD_colanz;
@@ -105,9 +120,10 @@ void Cibernate::procedureCall(string procName) {
 				== "INOUT" || it->second == "inout") {
 			quer += ("@" + it->first);
 			outq = true;
-			inoutq = true;
+
 			outargs.push_back("@" + it->first);
 			if (it->second == "INOUT" || it->second == "inout") {
+				inoutq = true;
 				inoutargs.push_back("@" + it->first);
 			}
 		}
@@ -136,10 +152,6 @@ void Cibernate::procedureCall(string procName) {
 		inoutQuery = (temp + " into " + inoutQuery);
 	}
 
-	cout << inoutQuery << flush;
-	cout << quer << flush;
-	cout << outQuery << flush;
-
 	int par = 1;
 	for (it = ntmap.begin(); it != ntmap.end(); ++it) {
 		if (it->second == "INOUT" || it->second == "inout") {
@@ -155,38 +167,49 @@ void Cibernate::procedureCall(string procName) {
 							&V_OD_mlen);
 					printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
 					close();
+					throw "Error in call to stored procedure";
 				}
 			}
 		}
 	}
-	V_OD_erg
-			= SQLExecDirect(V_OD_hstmt, (SQLCHAR*) inoutQuery.c_str(), SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		printf("Error in call to stored procedure %d\n", V_OD_erg);
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
-				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
-		printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
-		close();
+	if (inoutq)
+	{
+		cout << inoutQuery << flush;
+		V_OD_erg
+				= SQLExecDirect(V_OD_hstmt, (SQLCHAR*) inoutQuery.c_str(), SQL_NTS);
+		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
+			printf("Error in call to stored procedure %d\n", V_OD_erg);
+			SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
+					&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
+			printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+			close();
+			throw "Error in call to stored procedure";
+		}
+		SQLCloseCursor(V_OD_hstmt);
 	}
-	SQLCloseCursor(V_OD_hstmt);
 
+	cout << quer << flush;
 	query = (SQLCHAR*) quer.c_str();
-	V_OD_erg = SQLPrepare(V_OD_hstmt, query, SQL_NTS);
+	/*V_OD_erg = SQLPrepare(V_OD_hstmt, query, SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		printf("Error in prepare statement stored procedure %d\n", V_OD_erg);
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
 		printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
 		close();
-	}
+	}*/
 	par = 1;
 	for (it = ntmap.begin(); it != ntmap.end(); ++it) {
+		SQLINTEGER  hotelInd;hotelInd = SQL_NTS;
 		if (it->second == "OUT" || it->second == "out" || it->second == "INOUT"
 				|| it->second == "inout")
+		{
 			revType["@" + it->first] = params[it->first]->getTypeName();
+		}
 		if (it->second == "IN" || it->second == "in") {
+			cout << "binding in parameter " << params[it->first]->getVoidPointer() << endl;
 			if (params[it->first]->getTypeName() == "int") {
-				V_OD_erg = SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT,
+				V_OD_erg = SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT,
 						SQL_C_LONG, SQL_INTEGER, 0, 0,
 						params[it->first]->getVoidPointer(), 20, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
@@ -197,19 +220,55 @@ void Cibernate::procedureCall(string procName) {
 							&V_OD_mlen);
 					printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
 					close();
+					throw "Error Binding parameter";
+				}
+			}
+			else if (params[it->first]->getTypeName() == "short") {
+				short* parmv =  (short*)params[it->first]->getVoidPointer();
+				V_OD_erg = SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT,
+						SQL_C_SHORT, SQL_SMALLINT, 0, 0,
+						parmv, 20, NULL);
+				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
+						!= SQL_SUCCESS_WITH_INFO)) {
+					printf("Error in binding parameter %d\n", V_OD_erg);
+					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1,
+							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
+							&V_OD_mlen);
+					printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+					close();
+					throw "Error Binding parameter";
+				}
+			}
+			else if (params[it->first]->getTypeName() == "std::string") {
+				string *parm = (string*)params[it->first]->getVoidPointer();
+				char *parmv = (char*)parm->c_str();
+				V_OD_erg= SQLBindParameter(V_OD_hstmt, par , SQL_PARAM_INPUT,
+						SQL_C_CHAR,SQL_VARCHAR, 0, 0, (SQLPOINTER)parm->c_str() ,parm->length(), &hotelInd);
+				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
+						!= SQL_SUCCESS_WITH_INFO)) {
+					printf("Error in binding parameter %d\n", V_OD_erg);
+					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1,
+							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
+							&V_OD_mlen);
+					printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+					close();
+					throw "Error Binding parameter";
 				}
 			}
 		}
+		par++;
 	}
-	V_OD_erg = SQLExecute(V_OD_hstmt);
+	V_OD_erg =  SQLExecDirect(V_OD_hstmt, query, SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		printf("Error in call to stored procedure %d\n", V_OD_erg);
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
+		SQLGetDiagRec(SQL_HANDLE_STMT, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
 		printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
 		close();
+		throw "Error in call to stored procedure";
 	}
-	V_OD_erg = SQLNumResultCols(V_OD_hstmt, &V_OD_colanz);
+
+	/*V_OD_erg = SQLNumResultCols(V_OD_hstmt, &V_OD_colanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		close();
 	}
@@ -219,9 +278,10 @@ void Cibernate::procedureCall(string procName) {
 		printf("Number ofRowCount %d\n", V_OD_erg);
 		close();
 	}
-	printf("Number of Rows %d\n", (int) V_OD_rowanz);
-	SQLCloseCursor(V_OD_hstmt);
+	printf("Number of Rows %d\n", (int) V_OD_rowanz);*/
+	//SQLCloseCursor(V_OD_hstmt);
 
+	cout << outQuery << flush;
 	SQLINTEGER siz;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) outQuery.c_str(), SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
@@ -230,8 +290,9 @@ void Cibernate::procedureCall(string procName) {
 				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
 		printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
 		close();
+		throw "Error in call to stored procedure";
 	}
-	V_OD_erg = SQLNumResultCols(V_OD_hstmt, &V_OD_colanz);
+	/*V_OD_erg = SQLNumResultCols(V_OD_hstmt, &V_OD_colanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		close();
 	}
@@ -241,11 +302,12 @@ void Cibernate::procedureCall(string procName) {
 		printf("Number ofRowCount %d\n", V_OD_erg);
 		close();
 	}
-	printf("Number of Rows %d\n", (int) V_OD_rowanz);
+	printf("Number of Rows %d\n", (int) V_OD_rowanz);*/
 	V_OD_erg = SQLFetch(V_OD_hstmt);
 	while (V_OD_erg != SQL_NO_DATA) {
 		for (unsigned int var = 0; var < outargs.size(); ++var) {
 			if (revType[outargs.at(var)] == "int") {
+
 				boost::replace_first(outargs.at(var), "@", "");
 				SQLGetData(V_OD_hstmt, var + 1, SQL_C_LONG, params[outargs.at(
 						var)]->getVoidPointer(),
@@ -253,11 +315,20 @@ void Cibernate::procedureCall(string procName) {
 				printf("%d\n",
 						*(int*) params[outargs.at(var)]->getVoidPointer());
 			}
+			else if (revType[outargs.at(var)] == "short") {
+				boost::replace_first(outargs.at(var), "@", "");
+				SQLGetData(V_OD_hstmt, var + 1, SQL_C_SHORT, params[outargs.at(
+						var)]->getVoidPointer(),
+						sizeof(params[outargs.at(var)]->getVoidPointer()), &siz);
+				printf("%d\n",
+						*(short*) params[outargs.at(var)]->getVoidPointer());
+			}
 		}
 		V_OD_erg = SQLFetch(V_OD_hstmt);
 	}
 	SQLCloseCursor(V_OD_hstmt);
 	clearMaps();
+	close();
 }
 
 void Cibernate::close() {

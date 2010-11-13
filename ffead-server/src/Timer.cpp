@@ -36,11 +36,19 @@ void Timer::start()
 	clock_gettime(CLOCK_REALTIME, &st);
 	cout << "\n--------------------------start Timer-------------------------::" << ((st.tv_sec*1000000000 + st.tv_nsec)/1000) << "\n"<< flush;
 }
+
+long Timer::getCurrentTime()
+{
+	timespec en;
+	clock_gettime(CLOCK_REALTIME, &en);
+	return ((en.tv_sec * 1000000000) + en.tv_nsec - st.tv_nsec);
+}
+
 void Timer::end()
 {
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
-	int elap = (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000;
+	long elap = (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000;
 	cout << "\n--------------------------end Timer-------------------------::" << ((en.tv_sec*1000000000 + en.tv_nsec)/1000) << "\n"<< flush;
 	cout << "\n" << elap << "\n"<< flush;
 }
