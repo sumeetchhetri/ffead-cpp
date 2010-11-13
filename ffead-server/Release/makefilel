@@ -45,7 +45,7 @@ libweblib.so: $(OBJS) $(USER_OBJS)
 	@echo 'Invoking: GCC C++ Linker'
 	g++ -shared -o"libweblib.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
-	cp -f libinter.so ../lib/
+	cp -f libweblib.so ../lib/
 	@echo ' '
 
 # Other Targets
