@@ -33,7 +33,7 @@ WsUtil::~WsUtil() {
 
 string WsUtil::generateAllWSDL(vector<string> files,string resp)
 {
-	string ret,headers="#include \"string\"\n#include <sstream>\n#include <boost/lexical_cast.hpp>\n#include \"Element.h\"\n";
+	string ret,headers="#include \"string\"\n#include <sstream>\n#include <boost/lexical_cast.hpp>\n#include \"Element.h\"\ntypedef vector<Element> ElementList;\ntypedef map<string,string> AttributeList;\n";
 	for(unsigned int var = 0; var < files.size(); ++var)
 	{
 		ret += generateWSDL(files.at(var)+"config/ws.xml",files.at(var)+"include/",resp,headers);
@@ -68,17 +68,21 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 		gcntxt["WS_NAME"] = ws_name;
 		strVec info = ref.getAfcObjectData(usrinc+ws.getAttribute("class")+".h", false);
 		headers.append("#include \""+ws.getAttribute("class")+".h\"\n");
+
 		for(unsigned int i=0;i<info.size();i++)
 		{
-			string temp;
+			string temp,temp11;
 			strMap in_out_info;
 			temp = info.at(i);
-			boost::replace_first(temp,"("," ");
-			boost::replace_all(temp,";","");
-			boost::replace_first(temp,")"," ");
-			boost::replace_all(temp,","," ");
-			strVec results;
+			temp11 = temp.substr(temp.find("(")+1);
+			temp = temp.substr(0,temp.find("("));
+
+			//boost::replace_first(temp,"("," ");
+			boost::replace_all(temp11,";","");
+			boost::replace_first(temp11,")"," ");
+			strVec results,results1;
 			boost::iter_split(results, temp, boost::first_finder(" "));
+			boost::iter_split(results1, temp11, boost::first_finder(","));
 			string retType,methName,inp_params;
 			if(results.size()<2)
 				continue;
@@ -93,12 +97,15 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 			}
 			methName = results.at(1);
 
-			in_out_info["RETURN"] = results.at(0);
-			for(unsigned int j=2;j<results.size();j++)
+			in_out_info["RETURN"] = ws.getChildElements().at(0).getAttribute("outname");
+			in_out_info["RETURNTYP"] = results.at(0);
+			for(unsigned int j=0;j<results1.size();j++)
 			{
 				string type;
-				type = results.at(j);
-				int srn = j-2;
+				strVec results2;
+				boost::iter_split(results2, results1.at(j), boost::first_finder(" "));
+				type = results2.at(0);
+				int srn = j;
 				stringstream ss;
 				ss << srn;
 				string te;
@@ -106,20 +113,33 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 				if(type=="int" || type=="float" || type=="double")
 				{
 					inp_params.append("<xsd:element name=\"arg"+te+"\" type=\"xsd:"+type+"\"/>");
-					in_out_info["arg"+te] = type;
+					in_out_info[te+results2.at(1)] = type;
 				}
 				else if(type=="string")
 				{
 					inp_params.append("<xsd:element minOccurs=\"0\" name=\"arg"+te+"\" type=\"xsd:string\"/>");
-					in_out_info["arg"+te] = type;
+					in_out_info[te+results2.at(1)] = type;
 				}
 				else if(type!="")
 				{
 					inp_params.append("<xsd:element minOccurs=\"0\" name=\"arg"+te+"\" type=\"ns0:"+type+"\"/>");
-					in_out_info["arg"+te] = type;
-					strVec onjinf = ref.getAfcObjectData(usrinc+type+".h", false);
+					in_out_info[te+results2.at(1)] = type;
+
 					strMap allfs,tyfs;
-					headers.append("#include \""+type+".h\"\n");
+					if(type.find("vector<")!=string::npos)
+					{
+						string vecn = type;
+						boost::replace_first(vecn,"vector<"," ");
+						boost::replace_first(vecn,">"," ");
+						boost::trim(vecn);
+						headers.append("#include \""+vecn+".h\"\n");
+						type = vecn;
+					}
+					else
+						headers.append("#include \""+type+".h\"\n");
+					strVec onjinf = ref.getAfcObjectData(usrinc+type+".h", false);
+					if(type=="int" || type=="float" || type=="double" || type=="string")
+						continue;
 					obj_mapng.append(type+" _getObj"+type+"(Element ele)\n{\n");
 					obj_mapng.append(type+" _obj;\n");
 					retObj_xml.append("string _getRetXmlFor"+type+"("+type+" _obj,string namespce)\n{\n");
@@ -148,6 +168,9 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 							field = AfcUtil::reverseCamelCased(field);
 							field = field.substr(0,field.find("("));
 							type = temp1.substr(e+1,ed-e-1);
+							strVec results3;
+							boost::iter_split(results3, type, boost::first_finder(" "));
+							type = results3.at(0);
 							cout << "\nField--- " << field << flush;
 							cout << "\nType--- " << type << flush;
 							allfs[field] = field;
@@ -225,42 +248,79 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 			{
 				string me_n = iter1->first;
 				strMap pars = iter1->second;
-				ws_funcs.append("string "+me_n+ws_n+"(Element _req)\n{\n");
+				ws_funcs.append("string "+me_n+ws_n+"(Element _req)\n{\nElement ele;\n");
 				strMap::iterator iter2;
 				string args;
 				unsigned int ter = 1;
 				for(iter2=pars.begin();iter2!=pars.end();iter2++,ter++)
 				{
-					if(iter2->first!="RETURN")
+					if(iter2->first!="RETURN" && iter2->first!="RETURNTYP")
 					{
+						string argname =  iter2->first.substr(1);
 						if(iter2->second=="int" || iter2->second=="double" || iter2->second=="float" || iter2->second=="string")
-							ws_funcs.append(iter2->second+" "+iter2->first+" = boost::lexical_cast<"+iter2->second+">(_req.getElementByName(\""+iter2->first+"\").getText());\n");
+							ws_funcs.append(iter2->second+" "+argname+" = boost::lexical_cast<"+iter2->second+">(_req.getElementByName(\""+argname+"\").getText());\n");
+						else if(iter2->second.find("vector<")!=string::npos)
+						{
+							string vecn = iter2->second;
+							boost::replace_first(vecn,"vector<"," ");
+							boost::replace_first(vecn,">"," ");
+							boost::trim(vecn);
+							if(vecn=="int" || vecn=="double" || vecn=="float" || vecn=="string")
+							{
+								ws_funcs.append("vector<"+vecn+"> "+argname+";\n");
+								ws_funcs.append("ElementList list = _req.getElementsByName(\""+argname+"\");\n");
+								ws_funcs.append("for(int i=0;i<list.size();i++)");
+								ws_funcs.append(argname+".push_back(boost::lexical_cast<"+vecn+">(list.at(i).getText()));\n");
+							}
+							else
+							{
+								ws_funcs.append("vector<"+vecn+"> "+argname+";\n");
+								ws_funcs.append("ElementList list = _req.getElementsByName(\""+argname+"\");\n");
+								ws_funcs.append("for(int i=0;i<list.size();i++)");
+								ws_funcs.append(argname+".push_back(_getObjTest(list.at(i)));\n");
+							}
+						}
 						else
 						{
-							ws_funcs.append("Element ele = _req.getElementByName(\""+iter2->first+"\");\n");
-							ws_funcs.append(iter2->second+" "+iter2->first+" = _getObj"+iter2->second+"(ele);\n");
+							ws_funcs.append("ele = _req.getElementByName(\""+argname+"\");\n");
+							ws_funcs.append(iter2->second+" "+argname+" = _getObj"+iter2->second+"(ele);\n");
 						}
-						args.append(iter2->first);
-						if(ter<pars.size())
+						args.append(argname);
+						if(ter<pars.size()-2)
 							args.append(",");
 					}
 				}
 				ws_funcs.append(ws_n+" _obj;\n");
 				ws_funcs.append("string _retStr;\n");
-				if(pars["RETURN"]=="void")
+				ws_funcs.append("AttributeList attl = _req.getAttributes();\n");
+				ws_funcs.append("AttributeList::iterator it;\n");
+				ws_funcs.append("_retStr = \"<\" + _req.getTagNameSpc() + \"Response\";\n");
+				ws_funcs.append("for(it=attl.begin();it!=attl.end();it++)\n");
+				ws_funcs.append("_retStr.append(\" \" + it->first + \"=\\\"\" + it->second + \"\\\" \");\n");
+				ws_funcs.append("_retStr.append(\">\");\n");
+				if(pars["RETURNTYP"]=="void")
 				{
 					ws_funcs.append("_obj."+me_n+"("+args+");\n");
 				}
-				else if(pars["RETURN"]=="int" || pars["RETURN"]=="double" || pars["RETURN"]=="float" || pars["RETURN"]=="string")
+				else if(pars["RETURNTYP"]=="int" || pars["RETURNTYP"]=="double" || pars["RETURNTYP"]=="float" || pars["RETURNTYP"]=="string")
 				{
-					ws_funcs.append(pars["RETURN"]+" _retval = _obj."+me_n+"("+args+");\n");
-					ws_funcs.append("_retStr = \"<"+pars["RETURN"]+">\"+_retval+\"</"+pars["RETURN"]+">\";\n");
+					ws_funcs.append(pars["RETURNTYP"]+" _retval;\n");
+					ws_funcs.append("try{\n");
+					ws_funcs.append("_retval = _obj."+me_n+"("+args+");\n");
+					ws_funcs.append("}catch(string &fault){\n");
+					ws_funcs.append("return fault;\n}\n");
+					ws_funcs.append("_retStr += \"<\" + _req.getNameSpc() +\":"+pars["RETURN"]+">\"+_retval+\"</\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\";\n");
 				}
-				else if(pars["RETURN"]!="")
+				else if(pars["RETURNTYP"]!="")
 				{
-					ws_funcs.append(pars["RETURN"]+" _retval = _obj."+me_n+"("+args+");\n");
-					ws_funcs.append("_retStr = \"<"+pars["RETURN"]+">\"+_getRetXmlFor"+pars["RETURN"]+"(_retval,_req.getNameSpc())+\"</"+pars["RETURN"]+">\";\n");
+					ws_funcs.append(pars["RETURNTYP"]+" _retval;\n");
+					ws_funcs.append("try{\n");
+					ws_funcs.append("_retval = _obj."+me_n+"("+args+");\n");
+					ws_funcs.append("}catch(string &fault){\n");
+					ws_funcs.append("return fault;\n}\n");
+					ws_funcs.append("_retStr += \"<\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\"+_getRetXmlFor"+pars["RETURNTYP"]+"(_retval,_req.getNameSpc())+\"</\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\";\n");
 				}
+				ws_funcs.append("_retStr += \"</\" + _req.getTagNameSpc() + \"Response>\";\n");
 				ws_funcs.append("return _retStr;\n}\n");
 			}
 			ws_funcs.append("}\n");
