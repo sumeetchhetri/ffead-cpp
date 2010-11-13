@@ -1,3 +1,5 @@
 <web-services>
-	<web-service name="testing" class="Testing"></web-service>
+	<web-service name="testing" class="Testing">
+		<testing outname="result"/>
+	</web-service>
 </web-services>
