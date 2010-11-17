@@ -66,6 +66,7 @@ void Thread::run()
 						cout << e.what() << flush;
 					}
 				}
+				task->~Task();
 				this->task = NULL;
 			}
 			this->idle = true;
