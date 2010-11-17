@@ -24,22 +24,29 @@
 #define LOGGER_H_
 #include "PropFileReader.h"
 #include "DateFormat.h"
+#include <boost/thread/thread.hpp>
 class Logger {
 public:
+	static Logger* getLogger();
+	static void info(string);
+	static void debug(string);
+	static void error(string);
+	static void init();
+	static void init(string file);
+	static void init(string level,string mode,string file);
+private:
+	virtual ~Logger();
 	Logger();
 	Logger(string);
 	Logger(string,string,string);
-	virtual ~Logger();
-	void info(string);
-	void debug(string);
-	void error(string);
-private:
 	DateFormat datFormat;
 	string level;
 	string mode;
 	string filepath;
 	ofstream out;
 	void write(string,string);
+	boost::mutex p_mutex;
+	static Logger* m_pInstance;
 };
 
 #endif /* LOGGER_H_ */
