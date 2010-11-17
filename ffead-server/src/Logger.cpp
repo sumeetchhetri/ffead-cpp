@@ -22,6 +22,42 @@
 
 #include "Logger.h"
 
+// Global static pointer used to ensure a single instance of the class.
+Logger* Logger::m_pInstance = NULL;
+
+Logger* Logger::getLogger()
+{
+	if(m_pInstance==NULL)
+	{
+		m_pInstance = new Logger();
+	}
+	return m_pInstance;
+}
+
+void Logger::init()
+{
+	if(m_pInstance==NULL)
+	{
+		m_pInstance = new Logger();
+	}
+}
+
+void Logger::init(string file)
+{
+	if(m_pInstance==NULL)
+	{
+		m_pInstance = new Logger(file);
+	}
+}
+
+void Logger::init(string level,string mode,string file)
+{
+	if(m_pInstance==NULL)
+	{
+		m_pInstance = new Logger(level,mode,file);
+	}
+}
+
 Logger::Logger()
 {
 	PropFileReader pf;
@@ -34,9 +70,18 @@ Logger::Logger(string file)
 {
 	PropFileReader pf;
 	propMap props = pf.getProperties(file);
+	if(props.size()==0)
+	{
+		level = "ERROR";
+		mode = "CONSOLE";
+		datFormat.setFormatspec("dd/mm/yyyy hh:mi:ss");
+		return;
+	}
 	level = props["LEVEL"];
 	mode = props["MODE"];
 	filepath = props["FILEPATH"];
+	if(mode=="FILE")
+		out.open(filepath.c_str(),ios::app | ios::binary);
 	datFormat.setFormatspec(props["DATEFMT"]);
 }
 Logger::Logger(string level,string mode,string file)
@@ -57,29 +102,32 @@ void Logger::write(string msg,string mod)
 	string te = this->datFormat.format(dat);
 	if(mode=="FILE")
 	{
-		out.open(filepath.c_str(),ios::app | ios::binary);
 		msg = "[" + te + "] <"+mod+"> :"+msg+"\n";
-		out.write(msg.c_str(),msg.length());
-		out.close();
+		m_pInstance->p_mutex.lock();
+		m_pInstance->out.write(msg.c_str(),msg.length());
+		m_pInstance->out << flush;
+		m_pInstance->p_mutex.unlock();
 	}
 	else
 	{
 		msg = "[" + te + "] <"+mod+"> :"+msg+"\n";
+		m_pInstance->p_mutex.lock();
 		cout << msg << flush;
+		m_pInstance->p_mutex.unlock();
 	}
 }
 
 void Logger::info(string msg)
 {
-	write(msg,"info");
+	m_pInstance->write(msg,"info");
 }
 
 void Logger::debug(string msg)
 {
-	write(msg,"debug");
+	m_pInstance->write(msg,"debug");
 }
 
 void Logger::error(string msg)
 {
-	write(msg,"error");
+	m_pInstance->write(msg,"error");
 }
