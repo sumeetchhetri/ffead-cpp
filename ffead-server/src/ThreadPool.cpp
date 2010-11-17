@@ -21,6 +21,28 @@
  */
 #include "ThreadPool.h"
 
+ThreadPool::ThreadPool()
+{
+
+}
+void ThreadPool::init(int initThreads, int maxThreads,bool console)
+{
+	this->console = console;
+	this->lowp = -1;
+	this->highp = -1;
+	this->initThreads = initThreads;
+	this->maxThreads = maxThreads;
+	wpool = new TaskPool;
+	wpool->console = console;
+	tpool = new vector<Thread*> ;
+	for (int i = 0; i < initThreads; i++) {
+		Thread *thread = new Thread();
+		thread->console = console;
+		tpool->push_back(thread);
+	}
+	poller = new boost::thread(boost::bind(&ThreadPool::poll, this));
+}
+
 ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp) {
 	if (lowp > highp)
 		throw "Low Priority should be less than Highest Priority";
@@ -104,7 +126,7 @@ void ThreadPool::poll() {
 				idleThread->idle = false;
 				idleThread->mthread->interrupt();
 			} else {
-				boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+				boost::this_thread::sleep(boost::posix_time::milliseconds(1));
 			}
 		} else {
 			if (wpool->tasksPPending()) {
@@ -114,7 +136,7 @@ void ThreadPool::poll() {
 				idleThread->idle = false;
 				idleThread->mthread->interrupt();
 			} else {
-				boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+				boost::this_thread::sleep(boost::posix_time::milliseconds(1));
 			}
 		}
 	}
