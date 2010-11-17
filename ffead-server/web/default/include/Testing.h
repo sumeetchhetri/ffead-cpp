@@ -29,10 +29,10 @@ class Testing {
 public:
 	Testing();
 	virtual ~Testing();
-	void test1(string);
+	void test1(string in);
 	string test2();
-	void test3(Test);
-	Test test4(string);
+	void test3(Test t);
+	Test test4(string in);
 };
 
 #endif /* TESTING_H_ */
