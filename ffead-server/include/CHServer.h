@@ -24,10 +24,10 @@
 #define CHSERVER_H_
 #include "Cibernate.h"
 #include <algorithm>
-
+#include "Client.h"
 #include "PropFileReader.h"
 #include "AfcUtil.h"
-
+#include "string"
 #include "Controller.h"
 
 #include "PropFileReader.h"
@@ -80,7 +80,7 @@
 #include "AppContext.h"
 #include "ExceptionHandler.h"
 #include "Logger.h"
-
+#include "ThreadPool.h"
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd
@@ -90,13 +90,28 @@
  #endif
 
 
+/*HTTPS related*/
+#include <openssl/ssl.h>
+#define CLIENT_AUTH_REQUEST 1
+#define CLIENT_AUTH_REQUIRE 2
+#define CLIENT_AUTH_REHANDSHAKE 3
+
+#define CA_LIST "root.pem"
+#define HOST1	"localhost"
+#define RANDOM1  "random.pem"
+#define PORT1	4433
+#define BUFSIZZ 1024
+#define KEYFILE "server.pem"
+#define PASSWORD "password"
+#define DHFILE "dh1024.pem"
+
 //#include <boost/filesystem.hpp>
 #define MAXEPOLLSIZE 100
 #define BACKLOGM 500
 #define MAXBUFLENM 32768
 typedef bool (*FunPtr1) (void *);
 typedef ClassInfo (*FunPtr) ();
-typedef void (*DCPPtr) ();
+typedef string (*DCPPtr) ();
 typedef void (*ReceiveTask1)(int);
 
 using namespace std;
@@ -105,7 +120,41 @@ map<string,HttpSession> sessionMap;
 
 boost::mutex m_mutex;
 boost::mutex p_mutex;
+class SharedData
+{
+private:
+	static SharedData* shared_instance;
+	void *dlib;
+public:
+	static void init()
+	{
+		if(shared_instance==NULL)
+		{
+			shared_instance = new SharedData();
+			shared_instance->dlib = NULL;
+			cout << "\nInitialised Shared data" << endl;
+		}
+	}
+	static void setDLIB(void *dlib)
+	{
+		shared_instance->dlib = dlib;
+	}
+	static void* getDLIB()
+	{
+		return shared_instance->dlib;
+	}
+};
 
+class ServiceTask : public Task
+{
+private:
+	int fd;
+	string serverRootDirectory;
+public:
+	ServiceTask(int fd,string serverRootDirectory){this->fd=fd;this->serverRootDirectory=serverRootDirectory;}
+	virtual ~ServiceTask(){}
+	void run();
+};
 
 class CHServer {
 public:
