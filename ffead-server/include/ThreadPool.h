@@ -42,6 +42,8 @@ public:
 	ThreadPool(int,int,int,int);
 	ThreadPool(int,int,bool);
 	ThreadPool(int,int);
+	ThreadPool();
+	void init(int,int,bool);
 	void joinAll();
 	void execute(Task &task, int priority);
 	void execute(Task &task) ;
