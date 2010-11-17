@@ -14,6 +14,5 @@ DCP_ENAB=true
 TPE_ENAB=true
 DVIW_ENAB=true
 THRD_PREQ=true
-THRD_POOL=false
-THRD_PTYP=small|medium|large|vlarge
+THRD_PSIZ=30
 DB_CONN_POOL_SIZE=
