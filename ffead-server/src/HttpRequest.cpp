@@ -258,7 +258,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 	}*/
 	if(this->getContent()!="")
 	{
-		cout << this->getContent() << flush;
+		//cout << this->getContent() << flush;
 		if(this->getContent_type().find("application/x-www-form-urlencoded")!=string::npos)
 		{
 			strVec params;
