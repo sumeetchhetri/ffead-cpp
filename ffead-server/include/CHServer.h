@@ -96,14 +96,14 @@
 #define CLIENT_AUTH_REQUIRE 2
 #define CLIENT_AUTH_REHANDSHAKE 3
 
-#define CA_LIST "root.pem"
+//#define CA_LIST "root.pem"
 #define HOST1	"localhost"
-#define RANDOM1  "random.pem"
+//#define RANDOM1  "random.pem"
 #define PORT1	4433
 #define BUFSIZZ 1024
-#define KEYFILE "server.pem"
-#define PASSWORD "password"
-#define DHFILE "dh1024.pem"
+//#define KEYFILE "server.pem"
+//#define PASSWORD "password"
+//#define DHFILE "dh1024.pem"
 
 //#include <boost/filesystem.hpp>
 #define MAXEPOLLSIZE 100
