@@ -30,7 +30,7 @@ CHServer::~CHServer() {
 	// TODO Auto-generated destructor stub
 }
 SharedData* SharedData::shared_instance = NULL;
-
+string servd;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap;
 static string resourcePath;
 static bool isSSLEnabled,isThreadprq;
@@ -42,6 +42,8 @@ static int client_auth=0;
 static char *ciphers=0;
 static BIO *bio_err=0;
 static char *pass;
+map<int,pid_t> pds;
+static string key_file,dh_file,ca_list,rand_file,sec_password;
 /*The password code is not thread safe*/
 static int password_cb(char *buf,int num,
   int rwflag,void *userdata)
@@ -105,7 +107,7 @@ SSL_CTX *initialize_ctx(char *keyfile,char *password)
 
     /* Load the CAs we trust*/
     if(!(SSL_CTX_load_verify_locations(ctx,
-      CA_LIST,0)))
+      ca_list.c_str(),0)))
     	cout << "Can't read CA list" << flush;
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
     SSL_CTX_set_verify_depth(ctx,1);
@@ -144,8 +146,9 @@ void error_occurred(char *error,int fd,SSL *ssl)
 	SSL_free(ssl);
 }
 
-void closeSSL(int fd,SSL *ssl)
+void closeSSL(int fd,SSL *ssl,BIO* bio)
 {
+	BIO_free(bio);
 	int r=SSL_shutdown(ssl);
 	if(!r){
 	  /* If we called SSL_shutdown() first then
@@ -296,7 +299,7 @@ vector<unsigned char> getContentVec(string url,string locale,string ext)
 		string fnj = fname;
 		boost::replace_first(fnj,".",("_" + locale+"."));
 		myfile.open(&fnj[0],ios::in | ios::binary);
-		cout << fnj << flush;
+		//cout << fnj << flush;
 	}
 	if(!myfile.is_open())
 		myfile.open(&fname[0],ios::in | ios::binary);
@@ -334,7 +337,7 @@ string getContentStr(string url,string locale,string ext)
 		string fnj = fname;
 		boost::replace_first(fnj,".",("_" + locale+"."));
 		myfile.open(&fnj[0],ios::in | ios::binary);
-		cout << fnj << flush;
+		//cout << fnj << flush;
 	}
 	if(!myfile.is_open())
 		myfile.open(&fname[0],ios::in | ios::binary);
@@ -411,7 +414,7 @@ void listi(string cwd,string type,bool apDir,strVec &folders)
 void ServiceTask::run()
 {
 	string ip = "invalid session";
-	cout << "inside service method" << endl;
+	string alldatlg = "\ngot fd from parent";
 	SSL *ssl=NULL;
 	BIO *sbio=NULL;
 	BIO *io=NULL,*ssl_bio=NULL;
@@ -425,10 +428,10 @@ void ServiceTask::run()
 		int bytes = -1;
 		if(isSSLEnabled)
 		{
-			sbio=BIO_new_socket(fd,BIO_NOCLOSE);
-			cout << "\nBefore = " << ssl << flush;
+			sbio=BIO_new_socket(fd,BIO_CLOSE);
+			//cout << "\nBefore = " << ssl << flush;
 			ssl=SSL_new(ctx);
-			cout << "\nAfter = " << ssl << flush;
+			//cout << "\nAfter = " << ssl << flush;
 			SSL_set_bio(ssl,sbio,sbio);
 			int r;
 			if((r=SSL_accept(ssl)<=0))
@@ -453,42 +456,29 @@ void ServiceTask::run()
 					case SSL_ERROR_ZERO_RETURN:
 					{
 						error_occurred("SSL error problem",fd,ssl);
+						if(io!=NULL)BIO_free(io);
 						return;
 					}
 					default:
 					{
 						error_occurred("SSL read problem",fd,ssl);
+						if(io!=NULL)BIO_free(io);
 						return;
 					}
 				}
-				ss << buf;cout <<buf <<endl;
-				if(!strcmp(buf,"\r\n") || !strcmp(buf,"\n"))
-					break;
-				memset(&buf[0], 0, sizeof(buf));
-			}
-		}
-		else
-		{
-			int er=-1;
-			bool flag = true;
-			sbio=BIO_new_socket(fd,BIO_NOCLOSE);
-			io=BIO_new(BIO_f_buffer());
-			BIO_push(io,sbio);
-			while(flag)
-			{
-				er = BIO_gets(io,buf,BUFSIZZ-1);
 				ss << buf;
-				if(!strcmp(buf,"\r\n") || !strcmp(buf,"\n") || er<0)
+				//cout <<buf <<endl;
+				if(!strcmp(buf,"\r\n") || !strcmp(buf,"\n"))
 					break;
 				string temp(buf);
 				temp = temp.substr(0,temp.length()-1);
 				results.push_back(temp);
-				cout << temp <<endl;
+				//cout << temp <<endl;
 				if(temp.find("Content-Length:")!=string::npos)
 				{
 					std::string cntle = temp.substr(temp.find(": ")+2);
 					cntle = cntle.substr(0,cntle.length()-1);
-					cout << "contne-length="<<cntle <<endl;
+					//cout << "contne-length="<<cntle <<endl;
 					try
 					{
 						cntlen = boost::lexical_cast<int>(cntle);
@@ -501,14 +491,54 @@ void ServiceTask::run()
 				memset(&buf[0], 0, sizeof(buf));
 			}
 		}
-		cout << "\nDone with headers\n" << flush;
+		else
+		{
+			int er=-1;
+			bool flag = true;
+			sbio=BIO_new_socket(fd,BIO_CLOSE);
+			io=BIO_new(BIO_f_buffer());
+			BIO_push(io,sbio);
+			while(flag)
+			{
+				er = BIO_gets(io,buf,BUFSIZZ-1);
+				if(er==0)
+				{
+					close(fd);
+					cout << "\nsocket closed before being serviced" <<flush;
+					return;
+				}
+				ss << buf;
+				if(!strcmp(buf,"\r\n") || !strcmp(buf,"\n") || er<0)
+					break;
+				string temp(buf);
+				temp = temp.substr(0,temp.length()-1);
+				results.push_back(temp);
+				//cout << temp <<endl;
+				if(temp.find("Content-Length:")!=string::npos)
+				{
+					std::string cntle = temp.substr(temp.find(": ")+2);
+					cntle = cntle.substr(0,cntle.length()-1);
+					//cout << "contne-length="<<cntle <<endl;
+					try
+					{
+						cntlen = boost::lexical_cast<int>(cntle);
+					}
+					catch(boost::bad_lexical_cast&)
+					{
+						cout << "bad lexical cast" <<endl;
+					}
+				}
+				memset(&buf[0], 0, sizeof(buf));
+			}
+		}
+
 		ss.clear();
 		if(isSSLEnabled && cntlen>0)
 		{
 			int er=-1;
 			if(cntlen>0)
 			{
-				cout << "reading conetnt " << cntlen << endl;
+				//cout << "reading conetnt " << cntlen << endl;
 				er = BIO_read(io,buf,cntlen);
 				switch(SSL_get_error(ssl,er))
 				{
@@ -518,21 +548,21 @@ void ServiceTask::run()
 					case SSL_ERROR_ZERO_RETURN:
 					{
 						error_occurred("SSL error problem",fd,ssl);
+						if(io!=NULL)BIO_free(io);
 						return;
 					}
 					default:
 					{
 						error_occurred("SSL read problem",fd,ssl);
+						if(io!=NULL)BIO_free(io);
 						return;
 					}
 				}
-				ss << buf;
-				cout <<buf <<endl;
-				memset(&buf[0], 0, sizeof(buf));
-			}
-			while(getline(ss,temp,'\n'))
-			{
+				string temp(buf);
+				results.push_back("\r");
 				results.push_back(temp);
+				//cout <<buf <<endl;
+				memset(&buf[0], 0, sizeof(buf));
 			}
 		}
 		else if(cntlen>0)
@@ -540,19 +570,25 @@ void ServiceTask::run()
 			int er=-1;
 			if(cntlen>0)
 			{
-				cout << "reading conetnt " << cntlen << endl;
+				//cout << "reading conetnt " << cntlen << endl;
 				er = BIO_read(io,buf,cntlen);
-				if(er>0)
+				if(er==0)
+				{
+					close(fd);
+					cout << "\nsocket closed before being serviced" <<flush;
+					return;
+				}
+				else if(er>0)
 				{
 					string temp(buf);
 					results.push_back("\r");
 					results.push_back(temp);
-					cout << temp <<endl;
+					//cout << temp <<endl;
 					memset(&buf[0], 0, sizeof(buf));
 				}
 			}
 		}
-		cout << "\nDone with content\n" << flush;
+		alldatlg += "--read data";
 		string webpath = serverRootDirectory + "web/";
 		HttpRequest* req= new HttpRequest(results,webpath);
 		string sessId = (ip + req->getUser_agent());
@@ -579,7 +615,7 @@ void ServiceTask::run()
 				typedef string (*DCPPtr1) (string,HttpSession);
 				DCPPtr1 f =  (DCPPtr1)mkr1;
 				path1 = f(req->getUrl(),sess);
-				cout << path1 << flush;
+				//cout << path1 << flush;
 				if(path1=="FAILED")
 				{
 					req->setUrl("");
@@ -593,14 +629,14 @@ void ServiceTask::run()
 
 		HttpResponse res;
 		res.setHttpVersion(req->getHttpVersion());
-		if(sess.getSessionId()!="")
+		/*if(sess.getSessionId()!="")
 			req->setSession(sess);
 		else
 		{
 			sess = req->getSession();
 			sess.setSessionId(sessId);
-		}
-
+		}*/
+		//cout << "\nDone with request initialization\n" << flush;
 		string ext = getFileExtension(req->getUrl());
 		vector<unsigned char> test;
 		string content;
@@ -608,7 +644,7 @@ void ServiceTask::run()
 			test = getContentVec(req->getUrl(),lprops[req->getDefaultLocale()],ext);
 
 		string claz;
-		cout << urlpattMap["*.*"] << flush;
+		//cout << urlpattMap["*.*"] << flush;
 		if(urlpattMap["*.*"]!="" || urlMap[ext]!="")
 		{
 			if(urlpattMap["*.*"]!="")
@@ -645,8 +681,16 @@ void ServiceTask::run()
 			res.setStatusCode("200");
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".txt"]);
-			res.setContent(con);
-			res.setContent_len(boost::lexical_cast<string>(con.size()));
+			if(isSSLEnabled)
+			{
+				content = con;
+				res.setContent_len(boost::lexical_cast<string>(content.length()));
+			}
+			else
+			{
+				res.setContent(con);
+				res.setContent_len(boost::lexical_cast<string>(con.length()));
+			}
 		}
 		else if(ext==".dcp")
 		{
@@ -670,11 +714,14 @@ void ServiceTask::run()
 				f();
 				string patf;
 				patf = req->getCntxt_root() + "/dcp_" + file + ".html";
-				test = getContentVec(patf,lprops[req->getDefaultLocale()],ext);
+				if(isSSLEnabled)
+					content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);
+				else
+					test = getContentVec(patf,lprops[req->getDefaultLocale()],ext);
 				//delete mkr;
 			}
 			ext = ".html";
-			if(ext!="" && test.size()==0)
+			if(ext!="" && (test.size()==0 && content.length()==0))
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
@@ -686,8 +733,15 @@ void ServiceTask::run()
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
-				res.setContent(test);
-				res.setContent_len(boost::lexical_cast<string>(test.size()));
+				if(isSSLEnabled)
+				{
+					res.setContent_len(boost::lexical_cast<string>(content.length()));
+				}
+				else
+				{
+					res.setContent(test);
+					res.setContent_len(boost::lexical_cast<string>(test.size()));
+				}
 			}
 		}
 		else if(ext==".view" && vwMap[req->getFile()]!="")
@@ -712,12 +766,19 @@ void ServiceTask::run()
 				Document doc = thrd->getDocument();
 				View view;
 				string t = view.generateDocument(doc);
-				Cont test1(t.begin(),t.end());
-				test = test1;
+				if(isSSLEnabled)
+				{
+					content = t;
+				}
+				else
+				{
+					Cont test1(t.begin(),t.end());
+					test = test1;
+				}
 				//delete mkr;
 			}
 			ext = ".html";
-			if(ext!="" && test.size()==0)
+			if(ext!="" && (test.size()==0 && content.length()==0))
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
@@ -729,8 +790,15 @@ void ServiceTask::run()
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
-				res.setContent(test);
-				res.setContent_len(boost::lexical_cast<string>(test.size()));
+				if(isSSLEnabled)
+				{
+					res.setContent_len(boost::lexical_cast<string>(content.length()));
+				}
+				else
+				{
+					res.setContent(test);
+					res.setContent_len(boost::lexical_cast<string>(test.size()));
+				}
 			}
 		}
 		else if(ext==".tpe" && tmplMap[req->getFile()]!="")
@@ -755,11 +823,18 @@ void ServiceTask::run()
 				TemplateHandler *thrd = (TemplateHandler *)_temp;
 				Context cnt = thrd->getContext();
 				string t = te.evaluate(req->getUrl(),cnt);
-				Cont test1(t.begin(),t.end());
-				test = test1;
+				if(isSSLEnabled)
+				{
+					content = t;
+				}
+				else
+				{
+					Cont test1(t.begin(),t.end());
+					test = test1;
+				}
 				//delete mkr;
 			}
-			if(ext!="" && test.size()==0)
+			if(ext!="" && (test.size()==0 && content.length()==0))
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
@@ -771,8 +846,15 @@ void ServiceTask::run()
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
-				res.setContent(test);
-				res.setContent_len(boost::lexical_cast<string>(test.size()));
+				if(isSSLEnabled)
+				{
+					res.setContent_len(boost::lexical_cast<string>(content.length()));
+				}
+				else
+				{
+					res.setContent(test);
+					res.setContent_len(boost::lexical_cast<string>(test.size()));
+				}
 			}
 		}
 		else if((req->getContent_type().find("application/soap+xml")!=string::npos || req->getContent_type().find("text/xml")!=string::npos)
@@ -887,13 +969,25 @@ void ServiceTask::run()
 			res.setStatusCode("200");
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".xml"]);
-			res.setContent(env);
-			res.setContent_len(boost::lexical_cast<string>(env.size()));
+
+			if(isSSLEnabled)
+			{
+				content = env;
+				res.setContent_len(boost::lexical_cast<string>(env.length()));
+			}
+			else
+			{
+				res.setContent(env);
+				res.setContent_len(boost::lexical_cast<string>(env.size()));
+			}
 		}
 		else if(ext==".wsdl")
 		{
-			test = getContentVec(resourcePath+req->getFile(),"english",ext);
-			if(test.size()==0)
+			if(isSSLEnabled)
+				content = getContentStr(resourcePath+req->getFile(),"english",ext);
+			else
+				test = getContentVec(resourcePath+req->getFile(),"english",ext);
+			if((test.size()==0 && content.length()==0))
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
@@ -905,8 +999,15 @@ void ServiceTask::run()
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
-				res.setContent(test);
-				res.setContent_len(boost::lexical_cast<string>(test.size()));
+				if(isSSLEnabled)
+				{
+					res.setContent_len(boost::lexical_cast<string>(content.length()));
+				}
+				else
+				{
+					res.setContent(test);
+					res.setContent_len(boost::lexical_cast<string>(test.size()));
+				}
 				sess.setAttribute("CURR",req->getUrl());
 			}
 		}
@@ -940,7 +1041,7 @@ void ServiceTask::run()
 				//sess.setAttribute("CURR",req->getUrl());
 			}
 		}
-
+		alldatlg += "--processed data";
 		string h1;
 		h1 = createResponse(res);
 		if(isSSLEnabled)
@@ -960,63 +1061,81 @@ void ServiceTask::run()
 			  if(SSL_renegotiate(ssl)<=0)
 			  {
 				  error_occurred("SSL renegotiation error",fd,ssl);
+				  if(io!=NULL)BIO_free(io);
 				  return;
 			  }
 			  if(SSL_do_handshake(ssl)<=0)
 			  {
 				  error_occurred("SSL renegotiation error",fd,ssl);
+				  if(io!=NULL)BIO_free(io);
 				  return;
 			  }
 			  ssl->state=SSL_ST_ACCEPT;
 			  if(SSL_do_handshake(ssl)<=0)
 			  {
 				  error_occurred("SSL renegotiation error",fd,ssl);
+				  if(io!=NULL)BIO_free(io);
 				  return;
 			  }
 			}
 			if((r=BIO_puts(io,h1.c_str()))<=0)
 			{
 				  error_occurred("send failed",fd,ssl);
+				  if(io!=NULL)BIO_free(io);
 				  return;
 			}
 			int size;
-			if(res.getStatusCode()!="404" && (res.getContent().size()>0 || content.length()>0))
+			if(res.getStatusCode()!="404" && content.length()>0)
 			{
 				if ((size=BIO_puts(io,content.c_str()))<=0)
 				{
 					  error_occurred("send failed",fd,ssl);
+					  if(io!=NULL)BIO_free(io);
 					  return;
 				}
 			}
 			if((r=BIO_flush(io))<0)
 			{
 				  error_occurred("Error flushing BIO",fd,ssl);
+				  if(io!=NULL)BIO_free(io);
 				  return;
 			}
-			cout << h1 << flush;
-			closeSSL(fd,ssl);
+			//cout << h1 << flush;
+			//if(io!=NULL)BIO_free_all(io);
+			closeSSL(fd,ssl,io);
 		}
 		else
 		{
-			if (send(fd,&h1[0] , h1.length(), 0) == -1)
-				cout << "send failed" << flush;
-
 			int size;
+			if ((size=send(fd,&h1[0] , h1.length(), 0)) == -1)
+				cout << "send failed" << flush;
+			else if(size==0)
+			{
+				close(fd);memset(&buf[0], 0, sizeof(buf));
+				cout << "socket closed for writing" <<flush;return;
+			}
+
+
 			if(res.getStatusCode()!="404" && res.getContent().size()>0)
 			{
 				if ((size=send(fd,&(res.getContent())[0],res.getContent().size(),0)) == -1)
 					cout << "send failed" << flush;
+				else if(size==0)
+				{
+					close(fd);memset(&buf[0], 0, sizeof(buf));
+					cout << "socket closed for writing" <<flush;return;
+				}
 			}
+			if(io!=NULL)BIO_free_all(io);
 		}
-
-		memset(&buf[0], 0, sizeof(buf));
 		close(fd);
-
+		memset(&buf[0], 0, sizeof(buf));
 		ss.clear();
-		Logger::info("got new connection to process\n"+req->getFile()+" :: " + res.getStatusCode() + "\n"+req->getCntxt_name() + "\n"+req->getCntxt_root() + "\n"+req->getUrl());
+
+		//Logger::info("got new connection to process\n"+req->getFile()+" :: " + res.getStatusCode() + "\n"+req->getCntxt_name() + "\n"+req->getCntxt_root() + "\n"+req->getUrl());
 		delete req;
-		if(io!=NULL)BIO_free_all(io);
-		sessionMap[sessId] = sess;
+		cout << alldatlg << "--sent data--DONE" << flush;
+		//sessionMap[sessId] = sess;
 	}
 	catch(...)
 	{
@@ -1027,7 +1146,7 @@ void ServiceTask::run()
 
 void sigchld_handler(int s)
 {
-    while(waitpid(-1, NULL, WNOHANG) > 0);
+	while(waitpid(-1, NULL, WNOHANG) > 0);
 }
 
 // get sockaddr, IPv4 or IPv6:
@@ -1118,7 +1237,7 @@ int receive_fd(int fd)
   }
   return *(int*)CMSG_DATA(cmsg);
 }
-string servd;
+
 void signalSIGSEGV(int dummy)
 {
 	signal(SIGSEGV,signalSIGSEGV);
@@ -1140,6 +1259,123 @@ void signalSIGSEGV(int dummy)
 	}
 	free(symbols);
 	cout << "Segmentation fault occurred for process" << getpid() << "\n" << tempo << flush;
+	abort();
+}
+void signalSIGCHLD(int dummy)
+{
+	signal(SIGCHLD,signalSIGCHLD);
+	string filename;
+	stringstream ss;
+	ss << servd;
+	ss << getpid();
+	ss >> filename;
+	filename.append(".cntrl");
+	remove(filename.c_str());
+	void * array[25];
+	int nSize = backtrace(array, 25);
+	char ** symbols = backtrace_symbols(array, nSize);
+	string tempo;
+	for (int i = 0; i < nSize; i++)
+	{
+		tempo = symbols[i];
+		tempo += "\n";
+	}
+	free(symbols);
+	cout << "Child process got killed " << getpid() << "\n" << tempo << flush;
+	abort();
+}
+void signalSIGABRT(int dummy)
+{
+	signal(SIGABRT,signalSIGABRT);
+	string filename;
+	stringstream ss;
+	ss << servd;
+	ss << getpid();
+	ss >> filename;
+	filename.append(".cntrl");
+	remove(filename.c_str());
+	void * array[25];
+	int nSize = backtrace(array, 25);
+	char ** symbols = backtrace_symbols(array, nSize);
+	string tempo;
+	for (int i = 0; i < nSize; i++)
+	{
+		tempo = symbols[i];
+		tempo += "\n";
+	}
+	free(symbols);
+	cout << "Abort signal occurred for process" << getpid() << "\n" << tempo << flush;
+	abort();
+}
+void signalSIGTERM(int dummy)
+{
+	signal(SIGTERM,signalSIGTERM);
+	string filename;
+	stringstream ss;
+	ss << servd;
+	ss << getpid();
+	ss >> filename;
+	filename.append(".cntrl");
+	remove(filename.c_str());
+	void * array[25];
+	int nSize = backtrace(array, 25);
+	char ** symbols = backtrace_symbols(array, nSize);
+	string tempo;
+	for (int i = 0; i < nSize; i++)
+	{
+		tempo = symbols[i];
+		tempo += "\n";
+	}
+	free(symbols);
+	cout << "Termination signal occurred for process" << getpid() << "\n" << tempo << flush;
+	abort();
+}
+
+void signalSIGKILL(int dummy)
+{
+	signal(SIGKILL,signalSIGKILL);
+	string filename;
+	stringstream ss;
+	ss << servd;
+	ss << getpid();
+	ss >> filename;
+	filename.append(".cntrl");
+	remove(filename.c_str());
+	void * array[25];
+	int nSize = backtrace(array, 25);
+	char ** symbols = backtrace_symbols(array, nSize);
+	string tempo;
+	for (int i = 0; i < nSize; i++)
+	{
+		tempo = symbols[i];
+		tempo += "\n";
+	}
+	free(symbols);
+	cout << "Kill signal occurred for process" << getpid() << "\n" << tempo << flush;
+	abort();
+}
+
+void signalSIGINT(int dummy)
+{
+	signal(SIGINT,signalSIGINT);
+	string filename;
+	stringstream ss;
+	ss << servd;
+	ss << getpid();
+	ss >> filename;
+	filename.append(".cntrl");
+	remove(filename.c_str());
+	void * array[25];
+	int nSize = backtrace(array, 25);
+	char ** symbols = backtrace_symbols(array, nSize);
+	string tempo;
+	for (int i = 0; i < nSize; i++)
+	{
+		tempo = symbols[i];
+		tempo += "\n";
+	}
+	free(symbols);
+	cout << "Interrupt signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
 
@@ -1166,17 +1402,66 @@ void signalSIGFPE(int dummy)
 	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
+void signalSIGPIPE(int dummy)
+{
+	signal(SIGPIPE,signalSIGPIPE);
+	/*string filename;
+	stringstream ss;
+	ss << servd;
+	ss << getpid();
+	ss >> filename;
+	filename.append(".cntrl");
+	remove(filename.c_str());*/
+	void * array[25];
+	int nSize = backtrace(array, 25);
+	char ** symbols = backtrace_symbols(array, nSize);
+	string tempo;
+	for (int i = 0; i < nSize; i++)
+	{
+		tempo = symbols[i];
+		tempo += "\n";
+	}
+	free(symbols);
+	cout << "Broken pipe ignore it" << getpid() << "\n" << tempo << flush;
+	//abort();
+}
+
+void signalSIGILL(int dummy)
+{
+	signal(SIGILL,signalSIGILL);
+	string filename;
+	stringstream ss;
+	ss << servd;
+	ss << getpid();
+	ss >> filename;
+	filename.append(".cntrl");
+	remove(filename.c_str());
+	void * array[25];
+	int nSize = backtrace(array, 25);
+	char ** symbols = backtrace_symbols(array, nSize);
+	string tempo;
+	for (int i = 0; i < nSize; i++)
+	{
+		tempo = symbols[i];
+		tempo += "\n";
+	}
+	free(symbols);
+	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
+	abort();
+}
 
 void cleanUpRoutine(string tempo)
 {
 	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
-
 void service(int fd,string serverRootDirectory)
+
 {
-	ServiceTask task(fd,serverRootDirectory);
-	task.run();
+	ServiceTask *task = new ServiceTask(fd,serverRootDirectory);
+	task->run();
+	delete task;
+	//cout << "\nDestroyed task" << flush;
 }
 
 pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
@@ -1190,15 +1475,13 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	}
 	if((pid=fork())==0)
 	{
-		signal(SIGSEGV,signalSIGSEGV);
-		signal(SIGFPE,signalSIGFPE);
 		if(isSSLEnabled)
 		{
 			/*HTTPS related*/
-			client_auth=CLIENT_AUTH_REQUIRE;
+			//client_auth=CLIENT_AUTH_REQUIRE;
 			/* Build our SSL context*/
-			ctx=initialize_ctx(KEYFILE,PASSWORD);
-			load_dh_params(ctx,DHFILE);
+			ctx=initialize_ctx((char*)key_file.c_str(),(char*)sec_password.c_str());
+			load_dh_params(ctx,(char*)dh_file.c_str());
 
 			SSL_CTX_set_session_id_context(ctx,
 			  (const unsigned char*)&s_server_session_id_context,
@@ -1208,8 +1491,10 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			if(ciphers){
 			  SSL_CTX_set_cipher_list(ctx,ciphers);
 			}
-			SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);
-			//SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
+			if(client_auth==2)
+				SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
+			else
+				SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);
 		}
 		servd = serverRootDirectory;
 		string filename;
@@ -1254,7 +1539,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			return -1;
 		}
 		ThreadPool pool;
-		if(isThreadprq)
+		if(!isThreadprq)
 		{
 			pool.init(thrdpsiz,30,true);
 		}
@@ -1264,6 +1549,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			if (nfds == -1)
 			{
 				perror("epoll_wait child process");
+				cout << "\n----------epoll_wait child process----" << flush;
 				//break;
 			}
 			else
@@ -1273,6 +1559,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				if (rv == -1)
 				{
 					perror("recvmsg");
+					cout << "\n----------error occurred----" << flush;
 					exit(1);
 				}
 
@@ -1284,6 +1571,16 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				}
 				int fd = *(int*)CMSG_DATA(cmsg);
 				fcntl(fd, F_SETFL,O_SYNC);
+
+				char buf[10];
+				int err;
+				if((err=recv(fd,buf,10,MSG_PEEK))==0)
+				{
+					close(fd);
+					cout << "\nsocket conn closed before being serviced" << flush;
+					continue;
+				}
+
 				if(isThreadprq)
 					boost::thread m_thread(boost::bind(&service,fd,serverRootDirectory));
 				else
@@ -1351,6 +1648,31 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 	PropFileReader pread;
 	XmlParser parser("Parser");
 	ComponentGen gen;
+	if(isSSLEnabled)
+	{
+		propMap sslsec = pread.getProperties(respath+"/security.prop");
+		if(sslsec.size()>0)
+		{
+			key_file = sslsec["KEYFILE"];
+			dh_file = sslsec["DHFILE"];
+			ca_list = sslsec["CA_LIST"];
+			rand_file = sslsec["RANDOM"];
+			sec_password = sslsec["PASSWORD"];
+			string tempcl = sslsec["CLIENT_SEC_LEVEL"];
+			if(tempcl!="")
+			{
+				try
+				{
+					client_auth = boost::lexical_cast<int>(tempcl);
+				}
+				catch(...)
+				{
+					cout << "\nInvalid client auth level defined" << flush;
+					client_auth = 1;
+				}
+			}
+		}
+	}
 	for(unsigned int var=0;var<webdirs.size();var++)
 
 	{
@@ -1617,7 +1939,14 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 
 int main(int argc, char* argv[])
 {
-	//std::cout << argv[0] << std::endl;
+	signal(SIGSEGV,signalSIGSEGV);
+	signal(SIGFPE,signalSIGFPE);
+	//signal(SIGTERM,signalSIGTERM);
+	//signal(SIGKILL,signalSIGKILL);
+	//signal(SIGINT,signalSIGINT);
+	//signal(SIGABRT,signalSIGABRT);
+	//signal(SIGILL,signalSIGILL);
+	signal(SIGPIPE,signalSIGPIPE);
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo, *p;
     struct sockaddr_storage their_addr; // connector's address information
@@ -2067,7 +2396,7 @@ int main(int argc, char* argv[])
 	printf("server: waiting for connections...\n");
 	//logfile << "Server: waiting for connections on port " << PORT << "\n" << flush;
 	Logger::info("Server: waiting for connections on port "+PORT);
-	map<int,pid_t> pds;
+
 	vector<string> files;
 	for(int j=0;j<preForked;j++)
 	{
@@ -2124,7 +2453,11 @@ int main(int argc, char* argv[])
 	msg.msg_flags = 0;
 	int curfds = 1;
 	ifstream cntrlfile;
-
+	ThreadPool pool;
+	if(!isThreadprq)
+	{
+		pool.init(thrdpsiz,30,true);
+	}
 	while(1)
 	{
 
@@ -2136,6 +2469,15 @@ int main(int argc, char* argv[])
 			perror("epoll_wait main process");
 			//logfile << "Interruption Signal Received\n" << flush;
 			Logger::info("Interruption Signal Received\n");
+			curfds = 1;
+			if(errno==EBADF)
+				cout << "\nInavlid fd" <<flush;
+			else if(errno==EFAULT)
+				cout << "\nThe memory area pointed to by events is not accessible" <<flush;
+			else if(errno==EINTR)
+				cout << "\ncall was interrupted by a signal handler before any of the requested events occurred" <<flush;
+			else
+				cout << "\nnot an epoll file descriptor" <<flush;
 			//break;
 		}
 		for(int n=0;n<nfds;n++)
@@ -2147,7 +2489,7 @@ int main(int argc, char* argv[])
 				new_fd = -1;
 				sin_size = sizeof their_addr;
 				new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-				printf("new http request\n");
+				//cout << "\nnew http request" <<flush;
 				//logfile << "Interruption Signal Received\n" << flush;
 				if (new_fd == -1)
 				{
@@ -2163,6 +2505,7 @@ int main(int argc, char* argv[])
 					if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, new_fd, &ev) < 0)
 					{
 						perror("epoll");
+						cout << "\nerror adding to epoll cntl list" << flush;
 						return -1;
 					}
 				}
@@ -2171,8 +2514,6 @@ int main(int argc, char* argv[])
 			{
 				epoll_ctl(epoll_handle, EPOLL_CTL_DEL, events[n].data.fd,&ev);
 				curfds--;
-				//send_connection(events[n].data.fd,sp[childNo++][0]);
-
 				cntrlfile.open(files.at(childNo).c_str());
 				if(cntrlfile.is_open())
 				{
@@ -2184,11 +2525,8 @@ int main(int argc, char* argv[])
 					  exit(1);
 					}
 					string cno = boost::lexical_cast<string>(childNo);
-					//logfile << ("sent socket to process "+cno+"\n") << flush;
 					close(events[n].data.fd);
 					childNo++;
-					//boost::thread m_thread(boost::bind(&send_connection,events[n].data.fd,sp[childNo++][0]));
-					//m_thread.join();
 				}
 				else
 				{
