@@ -1,0 +1,6 @@
+KEYFILE=server.pem
+PASSWORD=password
+DHFILE=dh1024.pem
+CA_LIST=root.pem
+RANDOM=random.pem
+CLIENT_SEC_LEVEL=
