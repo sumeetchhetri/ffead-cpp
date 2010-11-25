@@ -28,7 +28,8 @@
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include "stdio.h"
-
+#include <openssl/ssl.h>
+#include "CryptoHandler.h"
 
 typedef vector<string> strVec;
 #ifndef HTTPREQUEST_H_
@@ -74,9 +75,14 @@ class HttpRequest {
 	HttpSession session;
 	strVec localeInfo;
 	string actUrl;
+	map<string,string> authinfo;
+	map<int,string> reqorderinf;
+	map<int,string> authorderinf;
+	void unbase64(string);
+	void getOauthParams(string);
 public:
 	HttpRequest();
-	HttpRequest(strVec,string);
+	HttpRequest(strVec,string,string);
 	virtual ~HttpRequest();
     Map getAttributes() const;
     void setAttributes(Map attributes);
@@ -135,8 +141,12 @@ public:
     void setFile(string);
     string getActUrl() const;
     void setActUrl(string);
+    map<string,string> getAuthinfo() const;
+    void setAuthinfo(map<string,string>);
     string buildRequest(const char* key,const char* value);
     string toString();
+    map<int,string> getAuthOrderinfo() const{return authorderinf;}
+    map<int,string> getReqOrderinfo() const{return reqorderinf;}
 };
 
 #endif /* HTTPREQUEST_H_ */
