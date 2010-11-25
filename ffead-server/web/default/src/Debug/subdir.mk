@@ -16,7 +16,8 @@ CPP_SRCS += \
 ../Test3.cpp \
 ../Test4.cpp \
 ../TestMany.cpp \
-../Testing.cpp 
+../Testing.cpp \
+../DefaultOAUTHController.cpp
 
 OBJS += \
 ./DefTemp.o \
@@ -31,7 +32,8 @@ OBJS += \
 ./Test3.o \
 ./Test4.o \
 ./TestMany.o \
-./Testing.o 
+./Testing.o \
+./DefaultOAUTHController.o
 
 CPP_DEPS += \
 ./DefTemp.d \
@@ -46,7 +48,8 @@ CPP_DEPS += \
 ./Test3.d \
 ./Test4.d \
 ./TestMany.d \
-./Testing.d 
+./Testing.d \
+./DefaultOAUTHController.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
