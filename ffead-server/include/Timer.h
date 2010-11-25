@@ -33,7 +33,7 @@ public:
 	virtual ~Timer();
 	void start();
 	void end();
-	long getCurrentTime();
+	static long getCurrentTime();
 	int elapsedMicroSeconds();
 	int elapsedMilliSeconds();
 	int elapsedNanoSeconds();
