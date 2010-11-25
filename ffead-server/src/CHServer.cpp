@@ -43,7 +43,7 @@ static char *ciphers=0;
 static BIO *bio_err=0;
 static char *pass;
 map<int,pid_t> pds;
-static string key_file,dh_file,ca_list,rand_file,sec_password;
+static string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_auth_mode,srv_auth_file;
 /*The password code is not thread safe*/
 static int password_cb(char *buf,int num,
   int rwflag,void *userdata)
@@ -168,6 +168,45 @@ void closeSSL(int fd,SSL *ssl,BIO* bio)
 		  cout << "shutdown failed" << flush;
 	}
 	SSL_free(ssl);
+}
+
+char *unbase64(unsigned char *input, int length)
+{
+  BIO *b64, *bmem;
+
+  char *buffer = (char *)malloc(length);
+  memset(buffer, 0, length);
+
+  b64 = BIO_new(BIO_f_base64());
+  bmem = BIO_new_mem_buf(input, length);
+  bmem = BIO_push(b64, bmem);
+
+  BIO_read(bmem, buffer, length);
+
+  BIO_free_all(bmem);
+
+  return buffer;
+}
+
+char *base64(const unsigned char *input, int length)
+{
+  BIO *bmem, *b64;
+  BUF_MEM *bptr;
+
+  b64 = BIO_new(BIO_f_base64());
+  bmem = BIO_new(BIO_s_mem());
+  b64 = BIO_push(b64, bmem);
+  BIO_write(b64, input, length);
+  BIO_flush(b64);
+  BIO_get_mem_ptr(b64, &bptr);
+
+  char *buff = (char *)malloc(bptr->length);
+  memcpy(buff, bptr->data, bptr->length-1);
+  buff[bptr->length-1] = 0;
+
+  BIO_free_all(b64);
+
+  return buff;
 }
 
 string createResponse(string htm,string url)
@@ -589,8 +628,9 @@ void ServiceTask::run()
 			}
 		}
 		alldatlg += "--read data";
+		map<string,string> params1 = *params;
 		string webpath = serverRootDirectory + "web/";
-		HttpRequest* req= new HttpRequest(results,webpath);
+		HttpRequest* req= new HttpRequest(results,webpath,params1["SRV_OAUTH_ENAB"]);
 		string sessId = (ip + req->getUser_agent());
 		HttpSession sess = sessionMap[sessId];
 
@@ -645,7 +685,128 @@ void ServiceTask::run()
 
 		string claz;
 		//cout << urlpattMap["*.*"] << flush;
-		if(urlpattMap["*.*"]!="" || urlMap[ext]!="")
+		bool isAuthenticated = false;
+		bool isoAuthRes = false;
+		if(req->getAuthinfo().size()>0)
+		{
+			if((params1["SRV_OAUTH_ENAB"]=="true" || params1["SRV_OAUTH_ENAB"]=="TRUE") && req->getAuthinfo()["Method"]=="OAuth")
+			{
+				AuthController *authc;
+				cout << "OAUTH/HTTP Authorization requested" << endl;
+				map<string,string>::iterator it;
+				map<string,string> tempmap = req->getAuthinfo();
+				for(it=tempmap.begin();it!=tempmap.end();it++)
+				{
+					cout << it->first << " = " << it->second << endl;
+				}
+				claz = "getReflectionCIFor" + AfcUtil::camelCased(req->getCntxt_name()) + "OAUTHController";
+
+				if(SharedData::getDLIB() == NULL)
+				{
+					cerr << dlerror() << endl;
+					exit(-1);
+				}
+				void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
+				if(mkr!=NULL)
+				{
+					cout << "got OAUTH class => " << AfcUtil::camelCased(req->getCntxt_name()) << "OAUTHController" << endl;
+					FunPtr f =  (FunPtr)mkr;
+					ClassInfo srv = f();
+					args argus;
+					Constructor ctor = srv.getConstructor(argus);
+					Reflector ref;
+					void *_temp = ref.newInstanceGVP(ctor);
+					authc = (AuthController*)_temp;
+					isoAuthRes = authc->handle(req,&res);
+					if(isoAuthRes)
+					{
+						cout << "oauth response being sent---no actual resource requested" << endl;
+					}
+					else
+					{
+						cout << "oauth response being sent---resource requested" << endl;
+					}
+				}
+			}
+			else
+			{
+				cout << "HTTP Authorization requested" << endl;
+				cout << "Method = " << req->getAuthinfo()["Method"] << endl;
+				cout << "Username = " << req->getAuthinfo()["Username"] << endl;
+				cout << "Password = " << req->getAuthinfo()["Password"] << endl;
+
+				cout << "Security parameters => TYPE=" << params1["SRV_AUTH_PRVD"] << " MODE=" << params1["SRV_AUTH_MODE"]
+					 << " FILE=" <<  params1["SRV_AUTH_FILE"] << endl;
+				AuthController *authc;
+				if(params1["SRV_AUTH_PRVD"]=="true" || params1["SRV_AUTH_PRVD"]=="TRUE")
+				{
+					if(params1["SRV_AUTH_MODE"]=="")
+					{
+						isAuthenticated = true;
+					}
+					else
+					{
+						if(params1["SRV_AUTH_MODE"]=="file" && params1["SRV_AUTH_FILE"]!="")
+						{
+							authc = new FileAuthController(params1["SRV_AUTH_FILE"],":");
+							if(authc->isInitialized())
+							{
+								if(authc->authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
+								{
+									cout << "valid user" << endl;
+								}
+								else
+								{
+									cout << "invalid user" << endl;
+								}
+							}
+							else
+							{
+								isAuthenticated = true;
+								cout << "invalid user repo defined" << endl;
+							}
+						}
+					}
+				}
+				else if(params1["SRV_AUTH_MODE"]!="")
+				{
+					claz = "getReflectionCIFor" + AfcUtil::camelCased(req->getCntxt_name()) + "Controller";
+					if(SharedData::getDLIB() == NULL)
+					{
+						cerr << dlerror() << endl;
+						exit(-1);
+					}
+					void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
+					if(mkr!=NULL)
+					{
+						FunPtr f =  (FunPtr)mkr;
+						ClassInfo srv = f();
+						args argus;
+						Constructor ctor = srv.getConstructor(argus);
+						Reflector ref;
+						void *_temp = ref.newInstanceGVP(ctor);
+						authc = (AuthController*)_temp;
+						if(authc->authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
+						{
+							cout << "valid user" << endl;
+						}
+						else
+						{
+							cout << "invalid user" << endl;
+						}
+					}
+				}
+				else
+				{
+					isAuthenticated = true;
+				}
+			}
+		}
+		if(isoAuthRes)
+		{
+
+		}
+		else if(urlpattMap["*.*"]!="" || urlMap[ext]!="")
 		{
 			if(urlpattMap["*.*"]!="")
 				claz = "getReflectionCIFor" + urlpattMap["*.*"];
@@ -684,6 +845,7 @@ void ServiceTask::run()
 			if(isSSLEnabled)
 			{
 				content = con;
+				res.setContent_str(con);
 				res.setContent_len(boost::lexical_cast<string>(content.length()));
 			}
 			else
@@ -735,6 +897,7 @@ void ServiceTask::run()
 				res.setContent_type(props[ext]);
 				if(isSSLEnabled)
 				{
+					res.setContent_str(content);
 					res.setContent_len(boost::lexical_cast<string>(content.length()));
 				}
 				else
@@ -792,6 +955,7 @@ void ServiceTask::run()
 				res.setContent_type(props[ext]);
 				if(isSSLEnabled)
 				{
+					res.setContent_str(content);
 					res.setContent_len(boost::lexical_cast<string>(content.length()));
 				}
 				else
@@ -848,6 +1012,7 @@ void ServiceTask::run()
 				res.setContent_type(props[ext]);
 				if(isSSLEnabled)
 				{
+					res.setContent_str(content);
 					res.setContent_len(boost::lexical_cast<string>(content.length()));
 				}
 				else
@@ -973,6 +1138,7 @@ void ServiceTask::run()
 			if(isSSLEnabled)
 			{
 				content = env;
+				res.setContent_str(content);
 				res.setContent_len(boost::lexical_cast<string>(env.length()));
 			}
 			else
@@ -1001,6 +1167,7 @@ void ServiceTask::run()
 				res.setContent_type(props[ext]);
 				if(isSSLEnabled)
 				{
+					res.setContent_str(content);
 					res.setContent_len(boost::lexical_cast<string>(content.length()));
 				}
 				else
@@ -1031,6 +1198,7 @@ void ServiceTask::run()
 				res.setContent_type(props[ext]);
 				if(isSSLEnabled)
 				{
+					res.setContent_str(content);
 					res.setContent_len(boost::lexical_cast<string>(content.length()));
 				}
 				else
@@ -1085,9 +1253,9 @@ void ServiceTask::run()
 				  return;
 			}
 			int size;
-			if(res.getStatusCode()!="404" && content.length()>0)
+			if(res.getStatusCode()=="200" && res.getContent_str().length()>0)
 			{
-				if ((size=BIO_puts(io,content.c_str()))<=0)
+				if ((size=BIO_puts(io,res.getContent_str().c_str()))<=0)
 				{
 					  error_occurred("send failed",fd,ssl);
 					  if(io!=NULL)BIO_free(io);
@@ -1116,7 +1284,7 @@ void ServiceTask::run()
 			}
 
 
-			if(res.getStatusCode()!="404" && res.getContent().size()>0)
+			if(res.getStatusCode()=="200" && res.getContent().size()>0)
 			{
 				if ((size=send(fd,&(res.getContent())[0],res.getContent().size(),0)) == -1)
 					cout << "send failed" << flush;
@@ -1455,10 +1623,10 @@ void cleanUpRoutine(string tempo)
 	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
-void service(int fd,string serverRootDirectory)
+void service(int fd,string serverRootDirectory,map<string,string> *params)
 
 {
-	ServiceTask *task = new ServiceTask(fd,serverRootDirectory);
+	ServiceTask *task = new ServiceTask(fd,serverRootDirectory,params);
 	task->run();
 	delete task;
 	//cout << "\nDestroyed task" << flush;
@@ -1543,6 +1711,10 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		{
 			pool.init(thrdpsiz,30,true);
 		}
+		PropFileReader pread;
+		propMap params = pread.getProperties(serverRootDirectory+"resources/security.prop");
+
+		cout << params.size() <<endl;
 		while(1)
 		{
 			int nfds = epoll_wait(epoll_handle, events, 1,-1);
@@ -1582,10 +1754,10 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				}
 
 				if(isThreadprq)
-					boost::thread m_thread(boost::bind(&service,fd,serverRootDirectory));
+					boost::thread m_thread(boost::bind(&service,fd,serverRootDirectory,&params));
 				else
 				{
-					ServiceTask *task = new ServiceTask(fd,serverRootDirectory);
+					ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params);
 					pool.execute(*task);
 				}
 			}
@@ -1659,6 +1831,9 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 			rand_file = sslsec["RANDOM"];
 			sec_password = sslsec["PASSWORD"];
 			string tempcl = sslsec["CLIENT_SEC_LEVEL"];
+			srv_auth_prvd = sslsec["SRV_AUTH_PRVD"];
+			srv_auth_mode = sslsec["SRV_AUTH_MODE"];
+			srv_auth_file = sslsec["SRV_AUTH_FILE"];
 			if(tempcl!="")
 			{
 				try
@@ -2009,6 +2184,7 @@ int main(int argc, char* argv[])
    			}
    		}
    	}
+
     /* Set each process to allow the maximum number of files to open */
 	/*rt.rlim_max = rt.rlim_cur = MAXEPOLLSIZE;
 	if(setrlimit(RLIMIT_NOFILE, &rt) == -1)
