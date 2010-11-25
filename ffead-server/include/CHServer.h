@@ -81,6 +81,7 @@
 #include "ExceptionHandler.h"
 #include "Logger.h"
 #include "ThreadPool.h"
+#include "FileAuthController.h"
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd
@@ -150,8 +151,10 @@ class ServiceTask : public Task
 private:
 	int fd;
 	string serverRootDirectory;
+	map<string,string> *params;
 public:
-	ServiceTask(int fd,string serverRootDirectory){this->fd=fd;this->serverRootDirectory=serverRootDirectory;}
+	ServiceTask(int fd,string serverRootDirectory,map<string,string> *params){this->fd=fd;this->serverRootDirectory=serverRootDirectory;
+	this->params= params;}
 	virtual ~ServiceTask(){}
 	void run();
 };
