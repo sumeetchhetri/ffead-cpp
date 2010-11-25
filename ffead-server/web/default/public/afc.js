@@ -35,6 +35,28 @@ function afcPrototypeAjaxCall()
 	new Ajax.Request('/', opt);
 }
 
+function afcPrototypeAjaxOAUTHCall()
+{
+	alert("OAUTH CALL");
+	var form = prepForm(null);
+	alert(form);
+	var obj = new Array();
+	obj.push("Authorization");
+	obj.push('OAuth realm="http://test.com:/test",oauth_consumer_key="sumeet",oauth_token="",oauth_nonce="",oauth_timestamp="0",oauth_signature_method="HMAC-SHA1",oauth_version="1.0",oauth_signature="dUI%2F1p7xOKm2ojIjyDs7KghENOk%3D"');
+	var opt = {
+	    method: 'get',
+	    requestHeaders: obj,
+	    postBody: '',
+	    onSuccess: function(response) 
+		{
+			var msg = response.responseText;
+			alert(msg);
+	   	}
+	}
+	document.body.removeChild(form);
+	new Ajax.Request('/', opt);
+}
+
 function AfcCall(claz,meth,param)
 {	
 	var form = prepForm(null);
