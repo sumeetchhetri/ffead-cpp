@@ -76,7 +76,12 @@ CPP_SRCS += \
 ../src/XmlParser.cpp \
 ../src/json_spirit_reader.cpp \
 ../src/json_spirit_value.cpp \
-../src/json_spirit_writer.cpp
+../src/json_spirit_writer.cpp \
+../src/AuthController.cpp \
+../src/FileAuthController.cpp \
+../src/DBAuthController.cpp \
+../src/LDAPAuthController.cpp \
+../src/CryptoHandler.cpp
 
 OBJS += \
 ./src/AOPEngine.o \
@@ -151,7 +156,12 @@ OBJS += \
 ./src/XmlParser.o \
 ./src/json_spirit_reader.o \
 ./src/json_spirit_value.o \
-./src/json_spirit_writer.o
+./src/json_spirit_writer.o \
+./src/AuthController.o \
+./src/FileAuthController.o \
+./src/DBAuthController.o \
+./src/LDAPAuthController.o \
+./src/CryptoHandler.o
 
 CPP_DEPS += \
 ./src/AOPEngine.d \
@@ -226,7 +236,12 @@ CPP_DEPS += \
 ./src/XmlParser.d \
 ./src/json_spirit_reader.d \
 ./src/json_spirit_value.d \
-./src/json_spirit_writer.d	
+./src/json_spirit_writer.d \
+./src/AuthController.d \
+./src/FileAuthController.d \
+./src/DBAuthController.d \
+./src/LDAPAuthController.d \
+./src/CryptoHandler.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
