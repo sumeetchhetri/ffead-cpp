@@ -23,9 +23,65 @@
 #include "HttpRequest.h"
 using namespace std;
 
+void HttpRequest::unbase64(string str)
+{
+	authinfo["Method"] = (str.substr(0,str.find(" ")));
+	str = str.substr(str.find(" ")+1);
+	cout << str << endl;
+
+	/*unsigned char *input = (unsigned char *)str.c_str();
+	int length = str.length();
+
+	BIO *b64, *bmem;
+
+	char *buffer = (char *)malloc(length);
+	memset(buffer, 0, length);
+
+	b64 = BIO_new(BIO_f_base64());
+	bmem = BIO_new_mem_buf(input, length);
+	bmem = BIO_push(b64, bmem);
+
+	BIO_read(bmem, buffer, length);
+
+	BIO_free_all(bmem);
+
+	string temp(buffer);*/
+	unsigned char *input = (unsigned char *)str.c_str();
+	int length = str.length();
+	string temp = CryptoHandler::base64decode(input,length);
+	cout << temp << endl;
+
+	authinfo["Username"] = (temp.substr(0,temp.find(":")));
+	temp = temp.substr(temp.find(":")+1);
+	authinfo["Password"] = (temp);
+}
+
+void HttpRequest::getOauthParams(string str)
+{
+	authinfo["Method"] = str.substr(0,str.find(" "));
+	str = str.substr(str.find(" ")+1);
+	cout << str << endl;
+
+	strVec tempv;
+	boost::iter_split(tempv, str, boost::first_finder(","));
+	for(unsigned int i=0;i<tempv.size();i++)
+	{
+		strVec tempvv;
+		boost::iter_split(tempvv, tempv.at(i), boost::first_finder("="));
+		boost::replace_first(tempvv.at(0),"\r","");
+		boost::replace_first(tempvv.at(0),"\n","");
+		string temr = tempvv.at(1);
+		temr = temr.substr(temr.find("\"")+1);
+		temr = temr.substr(0,temr.find("\""));
+		authinfo[tempvv.at(0)] = temr;
+		authorderinf[authorderinf.size()+1] = tempvv.at(0);
+		//cout << tempvv.at(0) << " = " << temr << endl;
+	}
+}
+
 HttpRequest::HttpRequest()
 {}
-HttpRequest::HttpRequest(strVec vec,string path)
+HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 {
 	if(vec.size()!=0){
 	this->setContent("");
@@ -46,6 +102,16 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				this->setUser_agent(temp.at(1));
 			else if(temp.at(0)=="Accept")
 				this->setAccept(temp.at(1));
+			else if(temp.at(0)=="Authorization")
+			{
+				cout << "found auth" <<endl;
+				if(oauth=="true" || oauth=="TRUE")
+				{
+					this->getOauthParams(temp.at(1));
+				}
+				else
+					this->unbase64(temp.at(1));
+			}
 			else if(temp.at(0)=="Accept-Language")
 			{
 				strVec lemp;
@@ -275,6 +341,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 					boost::replace_first(att,"\t","");
 					boost::replace_first(att," ","");
 					this->setRequestParam(att,param.at(1));
+					reqorderinf[reqorderinf.size()+1] = att;
 				}
 			}
 		}
@@ -988,4 +1055,14 @@ string HttpRequest::getActUrl() const
 void HttpRequest::setActUrl(string actUrl)
 {
 	this->actUrl = actUrl;
+}
+
+map<string,string> HttpRequest::getAuthinfo() const
+{
+	return authinfo;
+}
+
+void HttpRequest::setAuthinfo(map<string,string> authinfo)
+{
+	this->authinfo = authinfo;
 }
