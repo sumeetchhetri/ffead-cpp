@@ -91,9 +91,9 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 			if(results.at(0)!="void")
 			{
 				if(results.at(0)=="int" || results.at(0)=="double" || results.at(0)=="float" || results.at(0)=="string")
-					retType = "<xsd:element name=\"return\" type=\"xsd:"+results.at(0)+"\"/>";
+					retType = "\n<xsd:element name=\"return\" type=\"xsd:"+results.at(0)+"\"/>";
 				else
-					retType = "<xsd:element name=\"return\" type=\"ns0:"+results.at(0)+"\"/>";
+					retType = "\n<xsd:element name=\"return\" type=\"ns0:"+results.at(0)+"\"/>";
 			}
 			methName = results.at(1);
 
@@ -127,17 +127,16 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 				ss >> te;
 				if(type=="int" || type=="float" || type=="double")
 				{
-					inp_params.append("<xsd:element name=\"arg"+te+"\" type=\"xsd:"+type+"\"/>");
+					inp_params.append("\n<xsd:element name=\"arg"+te+"\" type=\"xsd:"+type+"\"/>");
 					in_out_info[te+results2.at(1)] = type;
 				}
 				else if(type=="string")
 				{
-					inp_params.append("<xsd:element minOccurs=\"0\" name=\"arg"+te+"\" type=\"xsd:string\"/>");
+					inp_params.append("\n<xsd:element minOccurs=\"0\" name=\"arg"+te+"\" type=\"xsd:string\"/>");
 					in_out_info[te+results2.at(1)] = type;
 				}
 				else if(type!="")
 				{
-					inp_params.append("<xsd:element minOccurs=\"0\" name=\"arg"+te+"\" type=\"ns0:"+type+"\"/>");
 					if(results2.size()>=2)
 						in_out_info[te+results2.at(1)] = type;
 
@@ -150,9 +149,13 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 						boost::trim(vecn);
 						headers.append("#include \""+vecn+".h\"\n");
 						type = vecn;
+						inp_params.append("\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\"arg"+te+"\" type=\"ns0:"+type+"\"/>");
 					}
 					else
+					{
 						headers.append("#include \""+type+".h\"\n");
+						inp_params.append("\n<xsd:element minOccurs=\"0\" name=\"arg"+te+"\" type=\"ns0:"+type+"\"/>");
+					}
 					strVec onjinf = ref.getAfcObjectData(usrinc+type+".h", false);
 					if(type=="int" || type=="float" || type=="double" || type=="string")
 						continue;
@@ -210,12 +213,12 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 							{
 								retObj_xml.append("ss << _obj.get"+AfcUtil::camelCased(iter->second)+"();\n");
 								retObj_xml.append("ss >> val;\n");
-								obj_binding.append("<xsd:element name=\""+iter->second+"\" type=\"xsd:"+typ+"\"/>");
+								obj_binding.append("\n<xsd:element name=\""+iter->second+"\" type=\"xsd:"+typ+"\"/>");
 							}
 							else if(typ=="string")
 							{
 								retObj_xml.append("val = _obj.get"+AfcUtil::camelCased(iter->second)+"();\n");
-								obj_binding.append("<xsd:element minOccurs=\"0\" name=\""+iter->second+"\" type=\"xsd:string\"/>");
+								obj_binding.append("\n<xsd:element minOccurs=\"0\" name=\""+iter->second+"\" type=\"xsd:string\"/>");
 							}
 							obj_mapng.append("_obj.set"+AfcUtil::camelCased(iter->second)+"(boost::lexical_cast<"+typ+">(ele.getElementByName(\""+iter->second+"\").getText()));\n");
 							retObj_xml.append("_ret.append(\"<\"+namespce+\":"+iter->second+">\"+val+\"</\"+namespce+\":"+iter->second+">\");\n");
@@ -237,10 +240,10 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 			cntxt["METH_NAME"] = methName;
 			cntxt["RET_TYPE"] = retType;
 			cntxt["INP_PARAMS"] = inp_params;
-			reqr_res_bind.append(templ.evaluate(resp+"templateReqRes.wsdl",cntxt));
-			wsdl_msgs.append(templ.evaluate(resp+"templateWsdlMsg.wsdl",cntxt));
-			wsdl_ops.append(templ.evaluate(resp+"templateWsdlOpe.wsdl",cntxt));
-			wsdl_bind.append(templ.evaluate(resp+"templateWsdlBind.wsdl",cntxt));
+			reqr_res_bind.append("\n"+templ.evaluate(resp+"templateReqRes.wsdl",cntxt));
+			wsdl_msgs.append("\n"+templ.evaluate(resp+"templateWsdlMsg.wsdl",cntxt));
+			wsdl_ops.append("\n"+templ.evaluate(resp+"templateWsdlOpe.wsdl",cntxt));
+			wsdl_bind.append("\n"+templ.evaluate(resp+"templateWsdlBind.wsdl",cntxt));
 		}
 		ws_info[ws_name] = meth_info;
 		gcntxt["REQ_RES_BINDING"] = reqr_res_bind;
