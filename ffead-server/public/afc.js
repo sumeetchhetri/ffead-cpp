@@ -51,6 +51,10 @@ function afcPrototypeAjaxOAUTHCall()
 		{
 			var msg = response.responseText;
 			alert(msg);
+			if(msg!="")
+			{
+				window.location.href = "http://localhost:8080/index.html";
+			}
 	   	}
 	}
 	document.body.removeChild(form);
