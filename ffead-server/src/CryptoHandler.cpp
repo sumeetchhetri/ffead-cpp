@@ -175,6 +175,7 @@ string CryptoHandler::urlDecode(string str)
 	boost::replace_all(strret,"%23","#");
 	boost::replace_all(strret,"%3F","?");
 	boost::replace_all(strret,"%2F","/");
+	boost::replace_all(strret,"%2B","+");
 	return strret;
 }
 
@@ -242,6 +243,9 @@ string CryptoHandler::urlEncode(string str)
 			break;
 		case '/':
 			strret.append("%2F");
+			break;
+		case '+':
+			strret.append("%2B");
 			break;
 		default:
 			strret.push_back(str[i]);
