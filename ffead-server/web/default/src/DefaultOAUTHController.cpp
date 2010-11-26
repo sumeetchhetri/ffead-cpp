@@ -25,22 +25,21 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 	map<string,string>::iterator it;
 	map<string,string> reqparams = req->getRequestParams();
 	map<string,string> oauthparams = req->getAuthinfo();
+	for(it=oauthparams.begin();it!=oauthparams.end();it++)
+	{
+		reqparams[it->first] = it->second;
+	}
 
-	string allpars = (method + "&" + CryptoHandler::urlEncode(oauthparams["realm"]) + "&");
+	string url = reqparams["realm"];
+	if(url=="")
+		url = "http://" + req->getHost() + req->getActUrl();
+
+	string allpars = (method + "&" + CryptoHandler::urlEncode(url) + "&");
 	string allparst;
 	cout << "init" <<endl;
 
-	int cnt = 0;
-	for(it=reqparams.begin();it!=reqparams.end();it++)
-	{
-		allparst += (it->first + "=" + it->second);
-		if(cnt++!=reqparams.size()-1)
-			allparst += "&";
-	}
-	cout << "req params" <<endl;
-	cnt = 0;
 	vector<string> temps;
-	for(it=oauthparams.begin();it!=oauthparams.end();it++)
+	for(it=reqparams.begin();it!=reqparams.end();it++)
 	{
 		if(it->first!="realm" && it->first!="oauth_signature" && it->first!="Method")
 		{
@@ -53,19 +52,28 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 		if(var!=temps.size()-1)
 			allparst += "&";
 	}
-	cout << "oauth params" <<endl;
+	cout << "req and oauth params" <<endl;
 
 	FileAuthController fauthu(req->getCntxt_root()+"/users",":");
 	FileAuthController fautht(req->getCntxt_root()+"/tokens",":");
-	cout << req->getCntxt_root()+"/users" << endl;
+	FileAuthController fauthta(req->getCntxt_root()+"/access_tokens",":");
 
 	string key,tokk,resu;
-	bool flag = fauthu.getPassword(oauthparams["oauth_consumer_key"],key);
+	bool isreqtype;
+	bool flag = fauthu.getPassword(reqparams["oauth_consumer_key"],key);
 
-	if(oauthparams.find("oauth_token")!=oauthparams.end()
-			&& oauthparams["oauth_token"]!="")
+	if(reqparams.find("oauth_token")!=reqparams.end()
+			&& reqparams["oauth_token"]!="")
 	{
-		flag &= fautht.getPassword(oauthparams["oauth_token"],tokk);
+		bool tempfl = fautht.getPassword(reqparams["oauth_token"],tokk);
+		if(tempfl)
+			isreqtype = true;
+		else
+		{
+			tempfl = fauthta.getPassword(reqparams["oauth_token"],tokk);
+			isreqtype = false;
+		}
+		flag &= tempfl;
 	}
 	key += ("&" + tokk);
 	cout << "key = " << key << endl;
@@ -80,32 +88,80 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 		resu.append(resst);
 	}
 
-	cout << "encoded sig = " << oauthparams["oauth_signature"] << endl;
-	string signature = CryptoHandler::urlDecode(oauthparams["oauth_signature"]);
+	cout << "encoded sig = " << reqparams["oauth_signature"] << endl;
+	string signature = CryptoHandler::urlDecode(reqparams["oauth_signature"]);
 	cout << "decoded sig = " << signature << endl;
 	if(resu==signature)
 	{
 		res->setStatusCode("200");
 		res->setStatusMsg("OK");
 		res->setContent_type("text/plain");
-		string filen = req->getCntxt_root()+"/tokens";
-		ofstream ofs(filen.c_str(),ios_base::app);
-		string oauthtok,oauthsec;
-		oauthtok = boost::lexical_cast<string>(Timer::getCurrentTime());
-		oauthsec = boost::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + boost::lexical_cast<string>(rand()%1000 + 12353);
-		string wrf = oauthtok + ":" + oauthsec;
-		ofs.write(wrf.c_str(),wrf.length());
-		ofs.close();
-		res->setContent("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec);
-		cout << "verified request token signature is valid" << endl;
+		string filen;
+		if(tokk=="")
+		{
+			filen = req->getCntxt_root()+"/tokens";
+			ofstream ofs(filen.c_str(),ios_base::app);
+			string oauthtok,oauthsec;
+			oauthtok = boost::lexical_cast<string>(Timer::getCurrentTime());
+			oauthsec = boost::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + boost::lexical_cast<string>(rand()%1000 + 12353);
+			string wrf = oauthtok + ":" + oauthsec + "\n";
+			ofs.write(wrf.c_str(),wrf.length());
+			ofs.close();
+			res->setContent("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec);
+			cout << "verified initial request signature is valid" << endl;
+			cout << "provided a request token" << endl;
+		}
+		else if(reqparams["username"]!="" && reqparams["password"]!="")
+		{
+			flag = fauthu.getPassword(reqparams["username"],key);
+			if(!flag)
+			{
+				res->setStatusCode("401");
+				res->setStatusMsg("Unauthorized\r\nWWW-Authenticate: OAuth realm=\""+url+"\"");
+				res->setContent_type("text/plain");
+				cout << "invalid username/password" << endl;
+			}
+			else if(key==reqparams["password"])
+			{
+				cout << "valid username/password" << endl;
+				if(reqparams["oauth_callback"]!="")
+				{
+					res->setStatusCode("303");
+					res->setStatusMsg("Moved Permanently\r\nLocation: "+CryptoHandler::urlDecode(reqparams["oauth_callback"])+"?"+allparst+"&access=true");
+					cout << "redirecting to callback url" << endl;
+				}
+				else
+				{
+					res->setContent(allparst+"&access=true");
+					cout << "no callback url specified sending access info in content" << endl;
+				}
+			}
+		}
+		else if(isreqtype && reqparams["oauth_token"]!="" && reqparams["oauth_consumer_key"]!="")
+		{
+			filen = req->getCntxt_root()+"/access_tokens";
+			ofstream ofs(filen.c_str(),ios_base::app);
+			string oauthtok,oauthsec;
+			oauthtok = boost::lexical_cast<string>(Timer::getCurrentTime());
+			oauthsec = boost::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + boost::lexical_cast<string>(rand()%1000 + 12353);
+			string wrf = oauthtok + ":" + oauthsec + "\n";
+			ofs.write(wrf.c_str(),wrf.length());
+			ofs.close();
+			res->setContent("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec);
+			cout << "verified request token signature is valid" << endl;
+			cout << "provided an access token" << endl;
+		}
+		else if(!isreqtype)
+		{
+			cout << "resource access granted" << endl;
+			return false;
+		}
 		return true;
 	}
 	else
 	{
 		res->setStatusCode("401");
-		res->setStatusMsg("Unauthorized\r\nWWW-Authenticate: OAuth realm=\""+oauthparams["realm"]+"\"");
-		res->setContent_type("text/plain");
-		res->setContent("oauth_token=ab3cd9j4ks73hf7g&oauth_token_secret=xyz4992k83j47x0b");
+		res->setStatusMsg("Unauthorized\r\nWWW-Authenticate: OAuth realm=\""+url+"\"");
 		cout << "verified request token signature is invalid" << endl;
 		return true;
 	}
