@@ -52,6 +52,7 @@ class Element : public Renderer
 		string getText() const;
 		void setText(string);
 		Element getElementByName(string);
+		ElementList getElementsByName(string name);
 		string render();
 		string renderChildren();
 private:
