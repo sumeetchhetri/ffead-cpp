@@ -687,9 +687,10 @@ void ServiceTask::run()
 		//cout << urlpattMap["*.*"] << flush;
 		bool isAuthenticated = false;
 		bool isoAuthRes = false;
-		if(req->getAuthinfo().size()>0)
+		if(req->getAuthinfo().size()>0 || params1["SRV_OAUTH_ENAB"]=="true" || params1["SRV_OAUTH_ENAB"]=="TRUE")
 		{
-			if((params1["SRV_OAUTH_ENAB"]=="true" || params1["SRV_OAUTH_ENAB"]=="TRUE") && req->getAuthinfo()["Method"]=="OAuth")
+			if(((params1["SRV_OAUTH_ENAB"]=="true" || params1["SRV_OAUTH_ENAB"]=="TRUE") && req->getAuthinfo()["Method"]=="OAuth")
+				|| (req->getRequestParam("oauth_consumer_key")!="" && req->getRequestParam("oauth_signature_method")!=""))
 			{
 				AuthController *authc;
 				cout << "OAUTH/HTTP Authorization requested" << endl;
@@ -728,7 +729,7 @@ void ServiceTask::run()
 					}
 				}
 			}
-			else
+			else if(req->getAuthinfo().size()>0)
 			{
 				cout << "HTTP Authorization requested" << endl;
 				cout << "Method = " << req->getAuthinfo()["Method"] << endl;
