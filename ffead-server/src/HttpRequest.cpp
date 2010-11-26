@@ -191,6 +191,28 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 					boost::replace_first(vemp.at(1),"\r","");
 					this->setHttpVersion(vemp.at(1));
 					boost::replace_first(vemp.at(0)," ","");
+					if(vemp.at(0).find("?")!=string ::npos)
+					{
+						strVec params;
+						string valu(vemp.at(0));
+						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+						valu = valu.substr(valu.find("?")+1);
+						boost::iter_split(params,valu , boost::first_finder("&"));
+						for(unsigned j=0;j<params.size();j++)
+						{
+							strVec param;
+							boost::iter_split(param, params.at(j), boost::first_finder("="));
+							if(param.size()==2)
+							{
+								string att = param.at(0);
+								boost::replace_first(att,"\r","");
+								boost::replace_first(att,"\t","");
+								boost::replace_first(att," ","");
+								this->setRequestParam(att,param.at(1));
+								reqorderinf[reqorderinf.size()+1] = att;
+							}
+						}
+					}
 					this->setActUrl(vemp.at(0));
 					boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
 					int fs = vemp.at(0).find_first_of("/");
@@ -213,6 +235,7 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 							this->setFile(vemp.at(0).substr(es+1));
 						}
 					}
+
 					//cout << "\n\n\n\nmemp------" << memp.at(0) << flush;
 					/*if(memp.size()>0)
 					{
