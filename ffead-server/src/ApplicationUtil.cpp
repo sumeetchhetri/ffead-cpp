@@ -32,7 +32,7 @@ ApplicationUtil::~ApplicationUtil() {
 
 string ApplicationUtil::buildAllApplications(vector<string> files,vector<string> apps,map<string,string> &appMap)
 {
-	string headers = "#include \"fstream\"\n#include \"string\"\n#include \"HttpSession.h\"\n#include <boost/lexical_cast.hpp>\n";
+	string headers = "#include \"fstream\"\n#include \"string\"\n#include \"HttpSession.h\"\n#include <boost/lexical_cast.hpp>\nusing namespace std;\n";
 	string code;
 	string meth,methdef,vars;
 	for (unsigned int var = 0; var < files.size(); ++var)
@@ -47,7 +47,7 @@ string ApplicationUtil::buildAllApplications(vector<string> files,vector<string>
 			appMap[appName] = "false";
 		else
 		{
-			vars = "string "+appName+"checkRules(string to,HttpSession session)\n{\nstring curr=session.getAttribute(\"CURR\");\n";
+			meth += "string "+appName+"checkRules(string to,HttpSession session)\n{\nstring curr=session.getAttribute(\"CURR\");\n";
 			for (unsigned int var = 0; var < eles.size(); var++)
 			{
 				if(eles.at(var).getTagName()=="include")
@@ -62,7 +62,7 @@ string ApplicationUtil::buildAllApplications(vector<string> files,vector<string>
 				}
 				else if(eles.at(var).getTagName()=="page" || eles.at(var).getTagName()=="welcome")
 				{
-					vars += ("string " + eles.at(var).getAttribute("id") + " = \""+path+eles.at(var).getAttribute("path")+"\";\n");
+					meth += ("string " + eles.at(var).getAttribute("id") + " = \""+path+eles.at(var).getAttribute("path")+"\";\n");
 					if(eles.at(var).getAttribute("who")!="" && eles.at(var).getAttribute("where")!="")
 					{
 						if(eles.at(var).getAttribute("where").find("FILE:")!=string::npos)
