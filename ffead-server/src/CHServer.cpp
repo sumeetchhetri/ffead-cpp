@@ -807,12 +807,13 @@ void ServiceTask::run()
 		{
 
 		}
-		else if(urlpattMap["*.*"]!="" || urlMap[ext]!="")
+		else if(urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!="")
 		{
-			if(urlpattMap["*.*"]!="")
-				claz = "getReflectionCIFor" + urlpattMap["*.*"];
+			//cout << "Controller requested for " << req->getCntxt_name() << " name " << urlMap[req->getCntxt_name()+ext] << endl;
+			if(urlpattMap[req->getCntxt_name()+"*.*"]!="")
+				claz = "getReflectionCIFor" + urlpattMap[req->getCntxt_name()+"*.*"];
 			else
-				claz = "getReflectionCIFor" + urlMap[ext];
+				claz = "getReflectionCIFor" + urlMap[req->getCntxt_name()+ext];
 			string libName = "libinter.so";
 			if(SharedData::getDLIB() == NULL)
 			{
@@ -831,7 +832,7 @@ void ServiceTask::run()
 				Controller *thrd = (Controller *)_temp;
 				try{
 					 cout << "Controller called" << endl;
-					 thrd->service(*req);
+					 res = thrd->service(*req);
 					 //delete mkr;
 				}catch(...){ cout << "Controller exception" << endl;}
 				cout << "Controller called\n" << flush;
@@ -908,7 +909,7 @@ void ServiceTask::run()
 				}
 			}
 		}
-		else if(ext==".view" && vwMap[req->getFile()]!="")
+		else if(ext==".view" && vwMap[req->getCntxt_name()+req->getFile()]!="")
 		{
 			string libName = "libinter.so";
 			if(SharedData::getDLIB() == NULL)
@@ -916,7 +917,7 @@ void ServiceTask::run()
 				cerr << dlerror() << endl;
 				exit(-1);
 			}
-			claz = "getReflectionCIFor" + vwMap[req->getFile()];
+			claz = "getReflectionCIFor" + vwMap[req->getCntxt_name()+req->getFile()];
 			void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
 			if(mkr!=NULL)
 			{
@@ -966,7 +967,7 @@ void ServiceTask::run()
 				}
 			}
 		}
-		else if(ext==".tpe" && tmplMap[req->getFile()]!="")
+		else if(ext==".tpe" && tmplMap[req->getCntxt_name()+req->getFile()]!="")
 		{
 			TemplateEngine te;
 			ext = ".html";
@@ -975,7 +976,7 @@ void ServiceTask::run()
 				cerr << dlerror() << endl;
 				exit(-1);
 			}
-			claz = "getReflectionCIFor" + tmplMap[req->getFile()];
+			claz = "getReflectionCIFor" + tmplMap[req->getCntxt_name()+req->getFile()];
 			void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
 			if(mkr!=NULL)
 			{
@@ -1888,16 +1889,16 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 							if(cntrls.at(cntn).getAttribute("url").find("*")!=string::npos)
 							{
 								if(url=="*.*")
-									urlpattMap[url] = cntrls.at(cntn).getAttribute("class");
+									urlpattMap[name+url] = cntrls.at(cntn).getAttribute("class");
 								else
 								{
 									url = url.substr(url.find("*")+1);
-									urlMap[url] = cntrls.at(cntn).getAttribute("class");
+									urlMap[name+url] = cntrls.at(cntn).getAttribute("class");
 								}
 							}
 							else
-								urlMap[url] = cntrls.at(cntn).getAttribute("class");
-							//cout << url << " :: " << cntrls.at(cntn).getAttribute("class") << flush;
+								urlMap[name+url] = cntrls.at(cntn).getAttribute("class");
+							cout << name << url << " :: " << cntrls.at(cntn).getAttribute("class") << endl;
 						}
 					}
 				}
@@ -1908,7 +1909,7 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 					{
 						if(tmplts.at(tmpn).getTagName()=="template")
 						{
-							tmplMap[tmplts.at(tmpn).getAttribute("file")] = tmplts.at(tmpn).getAttribute("class");
+							tmplMap[name+tmplts.at(tmpn).getAttribute("file")] = tmplts.at(tmpn).getAttribute("class");
 							//cout << tmplts.at(tmpn).getAttribute("file") << " :: " << tmplts.at(tmpn).getAttribute("class") << flush;
 						}
 					}
@@ -1920,7 +1921,7 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 					{
 						if(dvs.at(dn).getTagName()=="dview")
 						{
-							vwMap[dvs.at(dn).getAttribute("path")] = dvs.at(dn).getAttribute("class");
+							vwMap[name+dvs.at(dn).getAttribute("path")] = dvs.at(dn).getAttribute("class");
 							//cout << dvs.at(dn).getAttribute("path") << " :: " << dvs.at(dn).getAttribute("class") << flush;
 						}
 					}
