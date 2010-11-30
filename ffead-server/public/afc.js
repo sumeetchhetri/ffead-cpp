@@ -58,7 +58,7 @@ function afcPrototypeAjaxOAUTHCall()
 	   	}
 	}
 	document.body.removeChild(form);
-	new Ajax.Request('/', opt);
+	new Ajax.Request('/index.oauth', opt);
 }
 
 function AfcCall(claz,meth,param)
