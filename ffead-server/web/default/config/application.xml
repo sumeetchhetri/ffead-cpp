@@ -4,6 +4,10 @@
 		<controller class="DefaultController" url="*.do"/>
 		<controller from="*.yourext" to="*.html"/>
 	</controllers>
+	<authhandlers>
+		<authhandler provider="file:users" url="*.authenticate"/>
+		<authhandler provider="class:DefaultOAUTHController" url="*.oauth"/>
+	</authhandlers>
 	<templates>
 		<template class="DefTemp" file="test.tpe"/>
 	</templates>
