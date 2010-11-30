@@ -2,6 +2,7 @@
 	<controllers>
 		<controller class="DefaultController" url="*.action"/>
 		<controller class="DefaultController" url="*.do"/>
+		<controller from="*.yourext" to="*.html"/>
 	</controllers>
 	<templates>
 		<template class="DefTemp" file="test.tpe"/>
