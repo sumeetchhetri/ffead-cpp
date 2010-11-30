@@ -90,8 +90,13 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 	for(unsigned int i=0;i<vec.size();i++)
 	{
 		strVec temp,vemp,memp;
-		if(!contStarts && vec.at(i)=="\r")
+		if((vec.at(i)=="\r" || vec.at(i)==""|| vec.at(i)=="\r\n") && !contStarts)
+		{
 			contStarts = true;
+			continue;
+		}
+		//if(!contStarts && vec.at(i)=="\r")
+		//	contStarts = true;
 		boost::iter_split(temp, vec.at(i), boost::first_finder(": "));
 		if(!contStarts && temp.size()>1)
 		{
@@ -220,9 +225,9 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 					if(fs==es)
 					{
 						this->setCntxt_root(path+"default");
-						this->setUrl(path+"default/"+vemp.at(0));
 						this->setCntxt_name("default");
 						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
 					}
 					else
 					{
@@ -231,8 +236,8 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 						{
 							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
 							this->setCntxt_root(path+this->getCntxt_name());
-							this->setUrl(path+vemp.at(0));
 							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+vemp.at(0));
 						}
 					}
 
@@ -274,9 +279,9 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 					if(fs==es)
 					{
 						this->setCntxt_root(path+"default");
-						this->setUrl(path+"default/"+vemp.at(0));
 						this->setCntxt_name("default");
 						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
 					}
 					else
 					{
@@ -285,8 +290,8 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 						{
 							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
 							this->setCntxt_root(path+this->getCntxt_name());
-							this->setUrl(path+vemp.at(0));
 							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+vemp.at(0));
 						}
 					}
 					//cout << "\n\n\n\nmemp------" << memp.at(0) << flush;
@@ -307,14 +312,16 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 			}
 			else if(contStarts)
 			{
-				string temp;
+				/*string temp;
 				if(vec.at(i).find("<?")!=string::npos && vec.at(i).find("?>")!=string::npos)
 				{
 					temp = vec.at(i).substr(vec.at(i).find("?>")+2);
 					conten.append(temp);
 				}
-				else
-					conten.append(vec.at(i));
+				else*/
+				conten.append(vec.at(i));
+				if(i!=vec.size()-1)
+					conten.append("\n");
 				//this->content=con;
 			}
 		}
@@ -720,9 +727,9 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 		if(fs==es)
 		{
 			this->setCntxt_root(key+"default");
-			this->setUrl(key+"default/"+value);
 			this->setCntxt_name("default");
 			this->setFile(value.substr(es+1));
+			this->setUrl(key+"default/"+value);
 		}
 		else
 		{
@@ -731,8 +738,8 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 			{
 				this->setCntxt_name(value.substr(fs+1,ss-fs));
 				this->setCntxt_root(key+this->getCntxt_name());
-				this->setUrl(key+value);
 				this->setFile(value.substr(es+1));
+				this->setUrl(key+value);
 			}
 		}
 	}
@@ -1067,6 +1074,7 @@ string HttpRequest::getFile() const
 
 void HttpRequest::setFile(string file)
 {
+	this->url = this->cntxt_root + "/" + file;
 	this->file = file;
 }
 
