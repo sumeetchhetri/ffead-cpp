@@ -31,7 +31,7 @@ CHServer::~CHServer() {
 }
 SharedData* SharedData::shared_instance = NULL;
 string servd;
-static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap;
+static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap;
 static string resourcePath;
 static bool isSSLEnabled,isThreadprq;
 static int thrdpsiz;
@@ -401,7 +401,7 @@ string createResponse(HttpResponse res)
 {
 	string resp;
 	resp = (res.getHttpVersion() + " " + res.getStatusCode() + " " + res.getStatusMsg() + "\r\n");
-	if(res.getContent().size()>0)
+	if(res.getContent_str().length()>0)
 	{
 		resp += ("Content-Length: "+res.getContent_len() + "\r\n");
 		resp += ("Content-Type: "+res.getContent_type() + "\r\n\r\n");
@@ -640,6 +640,8 @@ void ServiceTask::run()
 			req->setCntxt_root(webpath+"default");
 			req->setUrl(webpath+"default"+req->getActUrl());
 		}
+		//cout << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
+
 		if(appMap[req->getCntxt_name()]!="false")
 		{
 			if(SharedData::getDLIB() == NULL)
@@ -668,7 +670,7 @@ void ServiceTask::run()
 		}
 
 		HttpResponse res;
-		res.setHttpVersion(req->getHttpVersion());
+
 		/*if(sess.getSessionId()!="")
 			req->setSession(sess);
 		else
@@ -680,14 +682,15 @@ void ServiceTask::run()
 		string ext = getFileExtension(req->getUrl());
 		vector<unsigned char> test;
 		string content;
-		if(ext!=".dcp" && ext!=".view" && ext!=".tpe" && ext!=".wsdl")
-			test = getContentVec(req->getUrl(),lprops[req->getDefaultLocale()],ext);
+		//if(ext!=".dcp" && ext!=".view" && ext!=".tpe" && ext!=".wsdl")
+		//	test = getContentVec(req->getUrl(),lprops[req->getDefaultLocale()],ext);
 
 		string claz;
 		//cout << urlpattMap["*.*"] << flush;
 		bool isAuthenticated = false;
 		bool isoAuthRes = false;
-		if(req->getAuthinfo().size()>0 || params1["SRV_OAUTH_ENAB"]=="true" || params1["SRV_OAUTH_ENAB"]=="TRUE")
+		bool isContrl = false;
+		/*if(req->getAuthinfo().size()>0 || params1["SRV_OAUTH_ENAB"]=="true" || params1["SRV_OAUTH_ENAB"]=="TRUE")
 		{
 			if(((params1["SRV_OAUTH_ENAB"]=="true" || params1["SRV_OAUTH_ENAB"]=="TRUE") && req->getAuthinfo()["Method"]=="OAuth")
 				|| (req->getRequestParam("oauth_consumer_key")!="" && req->getRequestParam("oauth_signature_method")!=""))
@@ -802,12 +805,82 @@ void ServiceTask::run()
 					isAuthenticated = true;
 				}
 			}
-		}
-		if(isoAuthRes)
+		}*/
+		if(autpattMap[req->getCntxt_name()+"*.*"]!="" || autMap[req->getCntxt_name()+ext]!="")
 		{
-
+			if(autpattMap[req->getCntxt_name()+"*.*"]!="")
+			{
+				claz = autpattMap[req->getCntxt_name()+"*.*"];
+			}
+			else
+			{
+				claz = autMap[req->getCntxt_name()+ext];
+			}
+			AuthController *authc;
+			cout << "OAUTH/HTTP Authorization requested " <<  claz << endl;
+			map<string,string>::iterator it;
+			map<string,string> tempmap = req->getAuthinfo();
+			for(it=tempmap.begin();it!=tempmap.end();it++)
+			{
+				cout << it->first << " = " << it->second << endl;
+			}
+			map<string,string> tempmap1 = req->getRequestParams();
+			for(it=tempmap1.begin();it!=tempmap1.end();it++)
+			{
+				cout << it->first << " = " << it->second << endl;
+			}
+			if(claz.find("file:")==0)
+			{
+				claz = claz.substr(claz.find(":")+1);
+				cout << "auth handled by file " << claz << endl;
+				authc = new FileAuthController(claz,":");
+				if(authc->isInitialized())
+				{
+					if(authc->authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
+					{
+						cout << "valid user" << endl;
+					}
+					else
+					{
+						cout << "invalid user" << endl;
+					}
+				}
+				else
+				{
+					isAuthenticated = true;
+					cout << "invalid user repo defined" << endl;
+				}
+			}
+			else if(claz.find("class:")==0)
+			{
+				claz = claz.substr(claz.find(":")+1);
+				claz = "getReflectionCIFor" + claz;
+				cout << "auth handled by class " << claz << endl;
+				if(SharedData::getDLIB() == NULL)
+				{
+					cerr << dlerror() << endl;
+					exit(-1);
+				}
+				void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
+				if(mkr!=NULL)
+				{
+					FunPtr f =  (FunPtr)mkr;
+					ClassInfo srv = f();
+					args argus;
+					Constructor ctor = srv.getConstructor(argus);
+					Reflector ref;
+					void *_temp = ref.newInstanceGVP(ctor);
+					authc = (AuthController*)_temp;
+					isoAuthRes = authc->handle(req,&res);
+					if(res.getStatusCode()!="")
+						isContrl = true;
+					cout << "authhandler called" << endl;
+					ext = getFileExtension(req->getUrl());
+				}
+			}
 		}
-		else if(urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!="")
+
+		if(urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!="")
 		{
 			//cout << "Controller requested for " << req->getCntxt_name() << " name " << urlMap[req->getCntxt_name()+ext] << endl;
 			if(urlpattMap[req->getCntxt_name()+"*.*"]!="")
@@ -833,28 +906,49 @@ void ServiceTask::run()
 				try{
 					 cout << "Controller called" << endl;
 					 res = thrd->service(*req);
+					 cout << res.getStatusCode() << endl;
+					 cout << res.getContent_type() << endl;
+					 cout << res.getContent_len() << endl;
+					 if(res.getStatusCode()!="")
+						 isContrl = true;
+					 ext = getFileExtension(req->getUrl());
 					 //delete mkr;
 				}catch(...){ cout << "Controller exception" << endl;}
 				cout << "Controller called\n" << flush;
 			}
 		}
-		else if(req->getMethod()=="POST" && req->getRequestParam("claz")!="" && req->getRequestParam("method")!="")
+		else if(mappattMap[req->getCntxt_name()+"*.*"]!="" || mapMap[req->getCntxt_name()+ext]!="")
 		{
-			string con = AfcUtil::execute(*req);
-			res.setStatusCode("200");
-			res.setStatusMsg("OK");
-			res.setContent_type(props[".txt"]);
-			if(isSSLEnabled)
+			string file = req->getFile();
+			string fili = file.substr(0,file.find_last_of("."));
+			if(mappattMap[req->getCntxt_name()+"*.*"]!="")
 			{
-				content = con;
-				res.setContent_str(con);
-				res.setContent_len(boost::lexical_cast<string>(content.length()));
+				req->setFile(fili+mappattMap[req->getCntxt_name()+"*.*"]);
+				cout << "URL mapped from * to " << mappattMap[req->getCntxt_name()+"*.*"] << endl;
 			}
 			else
 			{
-				res.setContent(con);
-				res.setContent_len(boost::lexical_cast<string>(con.length()));
+				req->setFile(fili+mapMap[req->getCntxt_name()+ext]);
+				cout << "URL mapped from " << ext << " to " << mapMap[req->getCntxt_name()+ext] << endl;
 			}
+
+		}
+
+		/*After going through the controller the response might be blank, just set the HTTP version*/
+		res.setHttpVersion(req->getHttpVersion());
+
+		if(isContrl)
+		{
+
+		}
+		else if(req->getMethod()=="POST" && req->getRequestParam("claz")!="" && req->getRequestParam("method")!="")
+		{
+			content = AfcUtil::execute(*req);
+			res.setStatusCode("200");
+			res.setStatusMsg("OK");
+			res.setContent_type(props[".txt"]);
+			res.setContent_str(content);
+			res.setContent_len(boost::lexical_cast<string>(content.length()));
 		}
 		else if(ext==".dcp")
 		{
@@ -878,18 +972,14 @@ void ServiceTask::run()
 				f();
 				string patf;
 				patf = req->getCntxt_root() + "/dcp_" + file + ".html";
-				if(isSSLEnabled)
-					content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);
-				else
-					test = getContentVec(patf,lprops[req->getDefaultLocale()],ext);
+				content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);
 				//delete mkr;
 			}
 			ext = ".html";
-			if(ext!="" && (test.size()==0 && content.length()==0))
+			if(ext!="" && content.length()==0)
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				res.setContent(test);
 				res.setContent_len("0");
 			}
 			else
@@ -897,16 +987,8 @@ void ServiceTask::run()
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
-				if(isSSLEnabled)
-				{
-					res.setContent_str(content);
-					res.setContent_len(boost::lexical_cast<string>(content.length()));
-				}
-				else
-				{
-					res.setContent(test);
-					res.setContent_len(boost::lexical_cast<string>(test.size()));
-				}
+				res.setContent_str(content);
+				res.setContent_len(boost::lexical_cast<string>(content.length()));
 			}
 		}
 		else if(ext==".view" && vwMap[req->getCntxt_name()+req->getFile()]!="")
@@ -931,23 +1013,13 @@ void ServiceTask::run()
 				Document doc = thrd->getDocument();
 				View view;
 				string t = view.generateDocument(doc);
-				if(isSSLEnabled)
-				{
-					content = t;
-				}
-				else
-				{
-					Cont test1(t.begin(),t.end());
-					test = test1;
-				}
-				//delete mkr;
+				content = t;
 			}
 			ext = ".html";
-			if(ext!="" && (test.size()==0 && content.length()==0))
+			if(ext!="" && (content.length()==0))
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				res.setContent(test);
 				res.setContent_len("0");
 			}
 			else
@@ -955,16 +1027,8 @@ void ServiceTask::run()
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
-				if(isSSLEnabled)
-				{
-					res.setContent_str(content);
-					res.setContent_len(boost::lexical_cast<string>(content.length()));
-				}
-				else
-				{
-					res.setContent(test);
-					res.setContent_len(boost::lexical_cast<string>(test.size()));
-				}
+				res.setContent_str(content);
+				res.setContent_len(boost::lexical_cast<string>(content.length()));
 			}
 		}
 		else if(ext==".tpe" && tmplMap[req->getCntxt_name()+req->getFile()]!="")
@@ -989,22 +1053,12 @@ void ServiceTask::run()
 				TemplateHandler *thrd = (TemplateHandler *)_temp;
 				Context cnt = thrd->getContext();
 				string t = te.evaluate(req->getUrl(),cnt);
-				if(isSSLEnabled)
-				{
-					content = t;
-				}
-				else
-				{
-					Cont test1(t.begin(),t.end());
-					test = test1;
-				}
-				//delete mkr;
+				content = t;
 			}
-			if(ext!="" && (test.size()==0 && content.length()==0))
+			if(ext!="" && (content.length()==0))
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				res.setContent(test);
 				res.setContent_len("0");
 			}
 			else
@@ -1012,16 +1066,8 @@ void ServiceTask::run()
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
-				if(isSSLEnabled)
-				{
-					res.setContent_str(content);
-					res.setContent_len(boost::lexical_cast<string>(content.length()));
-				}
-				else
-				{
-					res.setContent(test);
-					res.setContent_len(boost::lexical_cast<string>(test.size()));
-				}
+				res.setContent_str(content);
+				res.setContent_len(boost::lexical_cast<string>(content.length()));
 			}
 		}
 		else if((req->getContent_type().find("application/soap+xml")!=string::npos || req->getContent_type().find("text/xml")!=string::npos)
@@ -1136,30 +1182,16 @@ void ServiceTask::run()
 			res.setStatusCode("200");
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".xml"]);
-
-			if(isSSLEnabled)
-			{
-				content = env;
-				res.setContent_str(content);
-				res.setContent_len(boost::lexical_cast<string>(env.length()));
-			}
-			else
-			{
-				res.setContent(env);
-				res.setContent_len(boost::lexical_cast<string>(env.size()));
-			}
+			res.setContent_str(env);
+			res.setContent_len(boost::lexical_cast<string>(env.length()));
 		}
 		else if(ext==".wsdl")
 		{
-			if(isSSLEnabled)
-				content = getContentStr(resourcePath+req->getFile(),"english",ext);
-			else
-				test = getContentVec(resourcePath+req->getFile(),"english",ext);
-			if((test.size()==0 && content.length()==0))
+			content = getContentStr(resourcePath+req->getFile(),"english",ext);
+			if((content.length()==0))
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				res.setContent(test);
 				res.setContent_len("0");
 			}
 			else
@@ -1167,30 +1199,18 @@ void ServiceTask::run()
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
-				if(isSSLEnabled)
-				{
-					res.setContent_str(content);
-					res.setContent_len(boost::lexical_cast<string>(content.length()));
-				}
-				else
-				{
-					res.setContent(test);
-					res.setContent_len(boost::lexical_cast<string>(test.size()));
-				}
+				res.setContent_str(content);
+				res.setContent_len(boost::lexical_cast<string>(content.length()));
 				sess.setAttribute("CURR",req->getUrl());
 			}
 		}
 		else
 		{
-			if(isSSLEnabled)
-				content = getContentStr(req->getUrl(),lprops[req->getDefaultLocale()],ext);
-			else
-				test =  getContentVec(req->getUrl(),lprops[req->getDefaultLocale()],ext);
-			if(ext!="" && (content.length()==0  && test.size()==0))
+			content = getContentStr(req->getUrl(),lprops[req->getDefaultLocale()],ext);
+			if(ext!="" && (content.length()==0))
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				res.setContent(test);
 				res.setContent_len(boost::lexical_cast<string>(0));
 			}
 			else
@@ -1198,22 +1218,15 @@ void ServiceTask::run()
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
-				if(isSSLEnabled)
-				{
-					res.setContent_str(content);
-					res.setContent_len(boost::lexical_cast<string>(content.length()));
-				}
-				else
-				{
-					res.setContent(test);
-					res.setContent_len(boost::lexical_cast<string>(test.size()));
-				}
+				res.setContent_str(content);
+				res.setContent_len(boost::lexical_cast<string>(content.length()));
 				//sess.setAttribute("CURR",req->getUrl());
 			}
 		}
 		alldatlg += "--processed data";
 		string h1;
 		h1 = createResponse(res);
+		//cout << h1 << endl;
 		if(isSSLEnabled)
 		{
 			int r;
@@ -1286,9 +1299,9 @@ void ServiceTask::run()
 			}
 
 
-			if(res.getStatusCode()=="200" && res.getContent().size()>0)
+			if(res.getStatusCode()=="200" &&  res.getContent_str().length()>0)
 			{
-				if ((size=send(fd,&(res.getContent())[0],res.getContent().size(),0)) == -1)
+				if ((size=send(fd,res.getContent_str().c_str(), res.getContent_str().length(),0)) == -1)
 					cout << "send failed" << flush;
 				else if(size==0)
 				{
@@ -1886,19 +1899,73 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 						if(cntrls.at(cntn).getTagName()=="controller")
 						{
 							string url = cntrls.at(cntn).getAttribute("url");
-							if(cntrls.at(cntn).getAttribute("url").find("*")!=string::npos)
+							string clas = cntrls.at(cntn).getAttribute("class");
+							if(url!="" && clas!="")
 							{
-								if(url=="*.*")
-									urlpattMap[name+url] = cntrls.at(cntn).getAttribute("class");
-								else
+								if(cntrls.at(cntn).getAttribute("url").find("*")!=string::npos)
 								{
-									url = url.substr(url.find("*")+1);
-									urlMap[name+url] = cntrls.at(cntn).getAttribute("class");
+									if(url=="*.*")
+										urlpattMap[name+url] = clas;
+									else
+									{
+										url = url.substr(url.find("*")+1);
+										urlMap[name+url] = clas;
+									}
 								}
+								else if(clas!="")
+									urlMap[name+url] = clas;
+								cout << "adding controller => " << name << url << " :: " << clas << endl;
 							}
 							else
-								urlMap[name+url] = cntrls.at(cntn).getAttribute("class");
-							cout << name << url << " :: " << cntrls.at(cntn).getAttribute("class") << endl;
+							{
+								string from = cntrls.at(cntn).getAttribute("from");
+								string to = cntrls.at(cntn).getAttribute("to");
+								if(to.find("*")!=string::npos && to!="")
+									to = to.substr(to.find("*")+1);
+								if(from.find("*")!=string::npos && to!="")
+								{
+									if(from=="*.*")
+										mappattMap[name+from] = to;
+									else
+									{
+										from = from.substr(from.find("*")+1);
+										mapMap[name+from] = to;
+									}
+								}
+								else if(to!="")
+								{
+									mapMap[name+from] = to;
+								}
+								cout << "adding mapping => " << name << from << " :: " << to << endl;
+							}
+						}
+					}
+				}
+				else if(eles.at(apps).getTagName()=="authhandlers")
+				{
+					ElementList cntrls = eles.at(apps).getChildElements();
+					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
+					{
+						if(cntrls.at(cntn).getTagName()=="authhandler")
+						{
+							string url = cntrls.at(cntn).getAttribute("url");
+							string provider = cntrls.at(cntn).getAttribute("provider");
+							if(url!="" && provider!="")
+							{
+								if(url.find("*")!=string::npos)
+								{
+									if(url=="*.*")
+										autpattMap[name+url] = provider;
+									else
+									{
+										url = url.substr(url.find("*")+1);
+										autMap[name+url] = provider;
+									}
+								}
+								else if(provider!="")
+									autMap[name+url] = provider;
+								cout << "adding authhandler => " << name << url << " :: " << provider << endl;
+							}
 						}
 					}
 				}
