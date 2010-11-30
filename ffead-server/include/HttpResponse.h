@@ -24,6 +24,7 @@
 #define HTTPRESPONSE_H_
 #include "string"
 #include "vector"
+#include <boost/lexical_cast.hpp>
 using namespace std;
 typedef vector<unsigned char> Cont;
 class HttpResponse {
@@ -38,6 +39,7 @@ public:
     void setContent_str(string content_str)
     {
         this->content_str = content_str;
+        this->content_len = boost::lexical_cast<string>(content_str.length());
     }
 
     string getHttpVersion() const
@@ -130,21 +132,21 @@ public:
         this->content_len = content_len;
     }
 
-    Cont getContent() const
+    string getContent() const
 	{
-		return content;
+		return content_str;
 	}
 
-	void setContent(Cont content)
+	/*void setContent(Cont content)
 	{
-		this->content = content;
-	}
+		this->content_str = content_str;
+		this->content_len = boost::lexical_cast<string>(content_str.length());
+	}*/
 
 	void setContent(string content)
 	{
-		this->content.clear();
-		for(unsigned int i=0;i<content.length();i++)
-			this->content.push_back(content[i]);
+		this->content_str = content_str;
+		this->content_len = boost::lexical_cast<string>(content_str.length());
 	}
 
     string getLast_modified() const
