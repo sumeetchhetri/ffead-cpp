@@ -75,6 +75,7 @@ class HttpRequest {
 	HttpSession session;
 	strVec localeInfo;
 	string actUrl;
+	string sessionID;
 	map<string,string> authinfo;
 	map<int,string> reqorderinf;
 	map<int,string> authorderinf;
@@ -141,6 +142,8 @@ public:
     void setFile(string);
     string getActUrl() const;
     void setActUrl(string);
+    string getSessionID() const{return sessionID;}
+    void setSessionID(string sessionID){this->sessionID = sessionID;}
     map<string,string> getAuthinfo() const;
     void setAuthinfo(map<string,string>);
     string buildRequest(const char* key,const char* value);
