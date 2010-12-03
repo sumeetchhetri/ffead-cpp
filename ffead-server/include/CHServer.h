@@ -82,6 +82,7 @@
 #include "Logger.h"
 #include "ThreadPool.h"
 #include "FileAuthController.h"
+#include <sys/stat.h>
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd
