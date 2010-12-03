@@ -33,7 +33,8 @@ SharedData* SharedData::shared_instance = NULL;
 string servd;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap;
 static string resourcePath;
-static bool isSSLEnabled,isThreadprq;
+static strVec dcpsss;
+static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone;
 static int thrdpsiz;
 static SSL_CTX *ctx;
 static int s_server_session_id_context = 1;
@@ -43,6 +44,7 @@ static char *ciphers=0;
 static BIO *bio_err=0;
 static char *pass;
 map<int,pid_t> pds;
+void *dlib = NULL;
 static string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_auth_mode,srv_auth_file;
 /*The password code is not thread safe*/
 static int password_cb(char *buf,int num,
@@ -452,6 +454,7 @@ void listi(string cwd,string type,bool apDir,strVec &folders)
 
 void ServiceTask::run()
 {
+	//cout << dlib << endl;
 	string ip = "invalid session";
 	string alldatlg = "\ngot fd from parent";
 	SSL *ssl=NULL;
@@ -644,14 +647,14 @@ void ServiceTask::run()
 
 		if(appMap[req->getCntxt_name()]!="false")
 		{
-			if(SharedData::getDLIB() == NULL)
+			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
 				exit(-1);
 			}
 			string meth1 = (req->getCntxt_name()+"checkRules");
 			string path1;
-			void *mkr1 = dlsym(SharedData::getDLIB(), meth1.c_str());
+			void *mkr1 = dlsym(dlib, meth1.c_str());
 			if(mkr1!=NULL)
 			{
 				typedef string (*DCPPtr1) (string,HttpSession);
@@ -705,12 +708,12 @@ void ServiceTask::run()
 				}
 				claz = "getReflectionCIFor" + AfcUtil::camelCased(req->getCntxt_name()) + "OAUTHController";
 
-				if(SharedData::getDLIB() == NULL)
+				if(dlib == NULL)
 				{
 					cerr << dlerror() << endl;
 					exit(-1);
 				}
-				void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
+				void *mkr = dlsym(dlib, claz.c_str());
 				if(mkr!=NULL)
 				{
 					cout << "got OAUTH class => " << AfcUtil::camelCased(req->getCntxt_name()) << "OAUTHController" << endl;
@@ -775,12 +778,12 @@ void ServiceTask::run()
 				else if(params1["SRV_AUTH_MODE"]!="")
 				{
 					claz = "getReflectionCIFor" + AfcUtil::camelCased(req->getCntxt_name()) + "Controller";
-					if(SharedData::getDLIB() == NULL)
+					if(dlib == NULL)
 					{
 						cerr << dlerror() << endl;
 						exit(-1);
 					}
-					void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
+					void *mkr = dlsym(dlib, claz.c_str());
 					if(mkr!=NULL)
 					{
 						FunPtr f =  (FunPtr)mkr;
@@ -856,12 +859,12 @@ void ServiceTask::run()
 				claz = claz.substr(claz.find(":")+1);
 				claz = "getReflectionCIFor" + claz;
 				cout << "auth handled by class " << claz << endl;
-				if(SharedData::getDLIB() == NULL)
+				if(dlib == NULL)
 				{
 					cerr << dlerror() << endl;
 					exit(-1);
 				}
-				void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
+				void *mkr = dlsym(dlib, claz.c_str());
 				if(mkr!=NULL)
 				{
 					FunPtr f =  (FunPtr)mkr;
@@ -888,12 +891,12 @@ void ServiceTask::run()
 			else
 				claz = "getReflectionCIFor" + urlMap[req->getCntxt_name()+ext];
 			string libName = "libinter.so";
-			if(SharedData::getDLIB() == NULL)
+			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
 				exit(-1);
 			}
-			void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
+			void *mkr = dlsym(dlib, claz.c_str());
 			if(mkr!=NULL)
 			{
 				FunPtr f =  (FunPtr)mkr;
@@ -953,7 +956,7 @@ void ServiceTask::run()
 		else if(ext==".dcp")
 		{
 			string libName = "libinter.so";
-			if(SharedData::getDLIB() == NULL)
+			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
 				exit(-1);
@@ -964,15 +967,15 @@ void ServiceTask::run()
 			file = req->getUrl().substr(s,en-s);
 			meth = "_" + file + "emittHTML";
 
-			void *mkr = dlsym(SharedData::getDLIB(), meth.c_str());
+			void *mkr = dlsym(dlib, meth.c_str());
 			if(mkr!=NULL)
 			{
 				cout << endl << "inside dcp " << meth << endl;
 				DCPPtr f =  (DCPPtr)mkr;
-				f();
-				string patf;
-				patf = req->getCntxt_root() + "/dcp_" + file + ".html";
-				content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);
+				content = f();
+				//string patf;
+				//patf = req->getCntxt_root() + "/dcp_" + file + ".html";
+				//content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);
 				//delete mkr;
 			}
 			ext = ".html";
@@ -994,13 +997,13 @@ void ServiceTask::run()
 		else if(ext==".view" && vwMap[req->getCntxt_name()+req->getFile()]!="")
 		{
 			string libName = "libinter.so";
-			if(SharedData::getDLIB() == NULL)
+			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
 				exit(-1);
 			}
 			claz = "getReflectionCIFor" + vwMap[req->getCntxt_name()+req->getFile()];
-			void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
+			void *mkr = dlsym(dlib, claz.c_str());
 			if(mkr!=NULL)
 			{
 				FunPtr f =  (FunPtr)mkr;
@@ -1035,13 +1038,13 @@ void ServiceTask::run()
 		{
 			TemplateEngine te;
 			ext = ".html";
-			if(SharedData::getDLIB() == NULL)
+			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
 				exit(-1);
 			}
 			claz = "getReflectionCIFor" + tmplMap[req->getCntxt_name()+req->getFile()];
-			void *mkr = dlsym(SharedData::getDLIB(), claz.c_str());
+			void *mkr = dlsym(dlib, claz.c_str());
 			if(mkr!=NULL)
 			{
 				FunPtr f =  (FunPtr)mkr;
@@ -1097,7 +1100,7 @@ void ServiceTask::run()
 				meth = method.getTagName();
 				string methodname = meth + ws_name;
 				cout << methodname << "----\n" << flush;
-				void *mkr = dlsym(SharedData::getDLIB(), methodname.c_str());
+				void *mkr = dlsym(dlib, methodname.c_str());
 				if(mkr!=NULL)
 				{
 					typedef string (*WsPtr) (Element);
@@ -1658,6 +1661,15 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	}
 	if((pid=fork())==0)
 	{
+		dlib = dlopen("libinter.so", RTLD_NOW|RTLD_GLOBAL);
+		cout << endl <<dlib << endl;
+		if(dlib==NULL)
+		{
+			cout << dlerror() << endl;
+			Logger::info("Could not load Library");
+		}
+		else
+			Logger::info("Library loaded successfully");
 		if(isSSLEnabled)
 		{
 			/*HTTPS related*/
@@ -2162,6 +2174,7 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 	cntxt["RUNTIME_COMP_DEPS"] = ideps;
 	ret = templ.evaluate(rtdcfpath+"subdir.mk.template",cntxt);
 	AfcUtil::writeTofile(rtdcfpath+"subdir.mk",ret,true);
+	dcpsss = dcps;
 	ret = DCPGenerator::generateDCPAll(dcps);
 	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
 	string headers,objs,infjs;
@@ -2178,6 +2191,66 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 	ret = wsu.generateAllWSDL(wspath,respath);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
 	return cmpnames;
+}
+
+void dynamic_page_monitor(string serverRootDirectory)
+{
+	struct stat statbuf;
+	map<string,long> statsinf;
+	for(int i=0;i<(int)dcpsss.size();i++)
+	{
+		stat(dcpsss.at(i).c_str(), &statbuf);
+		time_t tm = statbuf.st_mtime;
+		long tim = (uintmax_t)tm;
+		statsinf[dcpsss.at(i)] = tim;
+	}
+	while(true)
+	{
+		boost::this_thread::sleep(boost::posix_time::seconds(5));
+		bool flag = false;
+		if(!processgendone)
+			continue;
+		for(int i=0;i<(int)dcpsss.size();i++)
+		{
+			stat(dcpsss.at(i).c_str(), &statbuf);
+			time_t tm = statbuf.st_mtime;
+			long tim = (uintmax_t)tm;
+			if(tim!=statsinf[dcpsss.at(i)])
+			{
+				string rtdcfpath = serverRootDirectory + "rtdcf/";
+				string respath = serverRootDirectory + "resources/";
+				string ret = DCPGenerator::generateDCPAll(dcpsss);
+				AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
+				string compres = "/"+respath+"rundyn.sh";
+				int i=system(compres.c_str());
+				if(!i)
+				{
+					cout << "regenarting intermediate code-----Done" << endl;
+					Logger::info("Done generating intermediate code");
+				}
+				m_mutex.lock();
+				map<int,pid_t>::iterator it;
+				for(it=pds.begin();it!=pds.end();it++)
+				{
+					kill(it->second,9);
+				}
+				m_mutex.unlock();
+				processforcekilled = true;
+				flag = true;
+				break;
+			}
+		}
+		if(flag)
+		{
+			for(int ii=0;ii<(int)dcpsss.size();ii++)
+			{
+				stat(dcpsss.at(ii).c_str(), &statbuf);
+				time_t tm = statbuf.st_mtime;
+				long tim = (uintmax_t)tm;
+				statsinf[dcpsss.at(ii)] = tim;
+			}
+		}
+	}
 }
 
 
@@ -2603,17 +2676,7 @@ int main(int argc, char* argv[])
 		Logger::info("Done generating intermediate code");
 		//logfile << "Done generating intermediate code\n" << flush;
 	}
-	SharedData::init();
-	void *dlib = dlopen("libinter.so", RTLD_NOW|RTLD_GLOBAL);
-	cout << endl<<dlib << endl;
-	SharedData::setDLIB(dlib);
-	if(SharedData::getDLIB()==NULL)
-	{
-		cout << dlerror() << endl;
-		Logger::info("Could not load Library");
-	}
-	else
-		Logger::info("Library loaded successfully");
+
 
 	for (unsigned int var1 = 0;var1<cmpnames.size();var1++)
 	{
@@ -2655,6 +2718,7 @@ int main(int argc, char* argv[])
 		filename.append(".cntrl");
 		files.push_back(filename);
 	}
+	boost::thread m_thread(boost::bind(&dynamic_page_monitor ,serverRootDirectory));
 	struct epoll_event events[MAXEPOLLSIZE];
 	int epoll_handle = epoll_create(MAXEPOLLSIZE);
 	ev.events = EPOLLIN | EPOLLPRI;
@@ -2724,6 +2788,24 @@ int main(int argc, char* argv[])
 			else
 				cout << "\nnot an epoll file descriptor" <<flush;
 			//break;
+		}
+		if(processforcekilled)
+		{
+			files.clear();
+			for(int j=0;j<preForked;j++)
+			{
+				pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
+				pds[j] = pid;
+				stringstream ss;
+				string filename;
+				ss << serverRootDirectory;
+				ss << pds[j];
+				ss >> filename;
+				filename.append(".cntrl");
+				files.push_back(filename);
+			}
+			processforcekilled = false;
+			processgendone = true;
 		}
 		for(int n=0;n<nfds;n++)
 		{
