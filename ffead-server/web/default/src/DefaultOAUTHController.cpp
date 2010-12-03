@@ -55,12 +55,19 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 	cout << "req and oauth params" <<endl;
 
 	FileAuthController fauthu(req->getCntxt_root()+"/users",":");
-	FileAuthController fautht(req->getCntxt_root()+"/"+reqparams["oauth_consumer_key"]+"-tokens",":");
-	FileAuthController fauthta(req->getCntxt_root()+"/"+reqparams["oauth_consumer_key"]+"-access_tokens",":");
+	FileAuthController fautht(req->getCntxt_root()+"/tokens",":");
+	FileAuthController fauthta(req->getCntxt_root()+"/access_tokens",":");
 
-	string key,tokk,resu;
+	string key,tokk,resu,csec;
 	bool isreqtype;
-	bool flag = fauthu.getPassword(reqparams["oauth_consumer_key"],key);
+	bool flag = true;
+	string conss;
+	if(reqparams["oauth_consumer_key"]!="")
+	{
+		flag = fauthu.getPassword(reqparams["oauth_consumer_key"],key);
+		key += ("&");
+		csec = key;
+	}
 
 	if(reqparams.find("oauth_token")!=reqparams.end()
 			&& reqparams["oauth_token"]!="")
@@ -74,15 +81,15 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			isreqtype = false;
 		}
 		flag &= tempfl;
+		key = tokk;
 	}
-	key += ("&" + tokk);
-	cout << "key = " << key << endl;
 
 	if(flag)
 	{
 		cout << allpars << allparst << endl;
 		allpars += CryptoHandler::urlEncode(allparst);
 		cout << allpars << endl;
+		cout << "key = " << key << endl;
 		char* resst = (char*)CryptoHandler::hmac_sha1((char*)allpars.c_str(),(char*)key.c_str(),true);
 		cout << "done crypto " << resst << endl;
 		resu.append(resst);
@@ -99,80 +106,47 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 		string filen;
 		if(tokk=="" && req->getFile()=="request.oauth")
 		{
-			filen = req->getCntxt_root()+"/"+reqparams["oauth_consumer_key"]+"-tokens";
+			filen = req->getCntxt_root()+"/tokens";
 			ofstream ofs(filen.c_str());
 			string oauthtok,oauthsec;
 			oauthtok = boost::lexical_cast<string>(Timer::getCurrentTime());
 			oauthsec = boost::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + boost::lexical_cast<string>(rand()%1000 + 12353);
-			string wrf = oauthtok + ":" + oauthsec + "\n";
+			string wrf = oauthtok + ":" + key + oauthsec + "\n";
 			ofs.write(wrf.c_str(),wrf.length());
 			ofs.close();
-			string cont = ("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec+"&");
+			string parsc;
 			for(it=reqparams.begin();it!=reqparams.end();it++)
 			{
 				if(it->first!="realm" && it->first.find("oauth_")==string::npos && it->first!="Method")
 				{
-					cont.append(it->first + "=" + it->second + "&");
+					parsc.append(it->first + "=" + it->second + "&");
 				}
 			}
+			if(reqparams["oauth_callback"]!="")
+			{
+				filen = req->getCntxt_root()+"/callbacks";
+				ofs.open(filen.c_str());
+				string oauth_ver = boost::lexical_cast<string>(boost::lexical_cast<long>(oauthtok)/100000000000000 + rand()%1000);
+				wrf = CryptoHandler::urlDecode(reqparams["oauth_callback"])+"?oauth_verifier="+oauth_ver+"&"+parsc;
+				ofs.write(wrf.c_str(),wrf.length());
+				ofs.close();
+			}
+			string cont = ("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec+"&")+parsc;
 			if(cont[cont.length()-1]=='&')
 				cont = cont.substr(0,cont.length()-1);
 			res->setContent_str(cont);
 			cout << "verified initial request signature is valid" << endl;
 			cout << "provided a request token" << endl;
 		}
-		else if(req->getFile()=="login.oauth")
-		{
-			/*if(reqparams["username"]!="" && reqparams["password"]!="" && reqparams["oauthparms"]!="")
-			{
-				flag = fauthu.getPassword(reqparams["username"],key);
-				if(!flag)
-				{
-					res->setStatusCode("401");
-					res->setStatusMsg("Unauthorized\r\nWWW-Authenticate: OAuth realm=\""+url+"\"");
-					res->setContent_type("text/plain");
-					cout << "invalid username/password" << endl;
-				}
-				else if(key==reqparams["password"])
-				{
-					cout << "valid username/password" << endl;
-					if(reqparams["oauthparms"]!="")
-					{
-						res->setStatusCode("303");
-						res->setStatusMsg("Moved Permanently\r\nLocation: "+reqparams["oauthparms"]+"&access=true");
-						cout << "redirecting to callback url" << endl;
-					}
-					else
-					{
-						res->setContent_str(allparst+"&access=true");
-						cout << "no callback url specified sending access info in content" << endl;
-					}
-				}
-			}
-			else*/
-			{
-				string wrf = allparst;
-				if(reqparams["oauth_callback"]!="")
-					wrf = CryptoHandler::urlDecode(reqparams["oauth_callback"])+"?"+allparst;
-				string html = "<html><head></head><body><form name=\"name1\" method=\"POST\" action=\"/login.oauth\">";
-				html += "<input name='oauthparms' type='hidden' value='"+wrf+"'/>";
-				html += "Username:<input name='username' type='text'/>";
-				html += "Password:<input name='password' type='password'/>";
-				html += "<input type='submit' value='Submit'/>";
-				html += "</form></body></html>";
-				res->setContent_type("text/html");
-				res->setContent_str(html);
-			}
-		}
 		else if(isreqtype && reqparams["oauth_token"]!="" && reqparams["oauth_consumer_key"]!=""
 				&& req->getFile()=="access.oauth")
 		{
-			filen = req->getCntxt_root()+"/"+reqparams["oauth_consumer_key"]+"-access_tokens";
+			filen = req->getCntxt_root()+"/access_tokens";
 			ofstream ofs(filen.c_str());
 			string oauthtok,oauthsec;
 			oauthtok = boost::lexical_cast<string>(Timer::getCurrentTime());
 			oauthsec = boost::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + boost::lexical_cast<string>(rand()%1000 + 12353);
-			string wrf = oauthtok + ":" + oauthsec + "\n";
+			string wrf = oauthtok + ":" + csec + oauthsec + "\n";
 			ofs.write(wrf.c_str(),wrf.length());
 			ofs.close();
 			string cont = ("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec+"&");
@@ -225,6 +199,27 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 				cout << "no callback url specified sending access info in content" << endl;
 			}
 		}
+	}
+	else if(req->getFile()=="login.oauth")
+	{
+		string filen = req->getCntxt_root()+"/callbacks";
+		ifstream ifs(filen.c_str());
+		string wrf;
+		getline(ifs,wrf);
+		ifs.close();
+		if(reqparams["oauth_token"]!="")
+			wrf = wrf+"oauth_token="+reqparams["oauth_token"];
+		string html = "<html><head></head><body><form name=\"name1\" method=\"POST\" action=\"/login.oauth\">";
+		html += "<input name='oauthparms' type='hidden' value='"+wrf+"'/>";
+		html += "Username:<input name='username' type='text'/>";
+		html += "Password:<input name='password' type='password'/>";
+		html += "<input type='submit' value='Submit'/>";
+		html += "</form></body></html>";
+		res->setStatusCode("200");
+		res->setStatusMsg("OK");
+		res->setContent_type("text/html");
+		res->setContent_str(html);
+		cout << "Login page display" << endl;
 	}
 	else
 	{
