@@ -34,7 +34,7 @@ endif
 all: libinter.so
 
 # Tool invocations
-libinter.so: $(OBJS) $(USER_OBJS) clean
+libinter.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
 	g++  -L"../lib" -shared -o"libinter.so" $(OBJS) $(USER_OBJS) $(LIBS)
