@@ -2208,7 +2208,7 @@ void dynamic_page_monitor(string serverRootDirectory)
 	{
 		boost::this_thread::sleep(boost::posix_time::seconds(5));
 		bool flag = false;
-		if(!processgendone)
+		if(processgendone)
 			continue;
 		for(int i=0;i<(int)dcpsss.size();i++)
 		{
