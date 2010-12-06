@@ -31,18 +31,19 @@ WsUtil::~WsUtil() {
 	// TODO Auto-generated destructor stub
 }
 
-string WsUtil::generateAllWSDL(vector<string> files,string resp)
+string WsUtil::generateAllWSDL(vector<string> files,string resp,map<string,string> &wsmap)
 {
 	string ret,headers="#include \"string\"\n#include <sstream>\n#include <boost/lexical_cast.hpp>\n#include \"Element.h\"\ntypedef vector<Element> ElementList;\ntypedef map<string,string> AttributeList;\n";
 	for(unsigned int var = 0; var < files.size(); ++var)
 	{
-		ret += generateWSDL(files.at(var)+"config/ws.xml",files.at(var)+"include/",resp,headers);
+		string webdir = resp+"../web/"+files.at(var);
+		ret += generateWSDL(webdir+"/config/ws.xml",webdir+"/include/",resp,headers,wsmap,files.at(var));
 	}
 	ret = (headers + "using namespace std;\n\n" + ret);
 	return ret;
 }
 
-string WsUtil::generateWSDL(string file,string usrinc,string resp,string &headers)
+string WsUtil::generateWSDL(string file,string usrinc,string resp,string &headers,map<string,string> &wsmap,string appname)
 {
 	XmlParser parser("Parser");
 	Document doc = parser.getDocument(file);
@@ -66,6 +67,8 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 		Element ws = wsvcs.at(i);
 		ws_name = ws.getAttribute("class");
 		gcntxt["WS_NAME"] = ws_name;
+		wsmap[ws_name] = appname;
+		cout << "Web service " << ws_name << " found for appname " << appname << endl;
 		strVec info = ref.getAfcObjectData(usrinc+ws.getAttribute("class")+".h", false);
 		headers.append("#include \""+ws.getAttribute("class")+".h\"\n");
 
