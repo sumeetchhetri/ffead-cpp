@@ -191,8 +191,6 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 				boost::iter_split(vemp, tem, boost::first_finder(" "));
 				if(vemp.size()==2)
 				{
-					//this->setUrl(vemp.at(0));
-					//string pat(vemp.at(0));
 					boost::replace_first(vemp.at(1),"\r","");
 					this->setHttpVersion(vemp.at(1));
 					boost::replace_first(vemp.at(0)," ","");
@@ -202,6 +200,7 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 						string valu(vemp.at(0));
 						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
 						valu = valu.substr(valu.find("?")+1);
+						valu = CryptoHandler::urlDecode(valu);
 						boost::iter_split(params,valu , boost::first_finder("&"));
 						for(unsigned j=0;j<params.size();j++)
 						{
@@ -240,39 +239,42 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 							this->setUrl(path+vemp.at(0));
 						}
 					}
-
-					//cout << "\n\n\n\nmemp------" << memp.at(0) << flush;
-					/*if(memp.size()>0)
-					{
-						if(boost::find_first(memp.at(0), ".") || memp.at(0)=="")
-						{
-							this->setCntxt_root(path+"default");
-							this->setUrl(path+"default"+vemp.at(0));
-							this->setCntxt_name("default");
-						}
-						else
-						{
-							this->setCntxt_root(path+memp.at(0));
-							this->setUrl(path+vemp.at(0));
-							this->setCntxt_name(memp.at(0));
-						}
-					}*/
 				}
-				//cout << memp.at(0) << flush;
-				//cout << vemp.at(0) << vemp.at(1) << flush;
 			}
-			else if(!contStarts && boost::find_first(tem, "POST"))
+			else if(!contStarts && boost::find_first(tem, "DELETE"))
 			{
-				boost::replace_first(tem,"POST ","");
-				this->setMethod("POST");
+				boost::replace_first(tem,"DELETE ","");
+				this->setMethod("DELETE");
 				boost::iter_split(vemp, tem, boost::first_finder(" "));
 				if(vemp.size()==2)
 				{
-					//this->setUrl(vemp.at(0));
-					//string pat(vemp.at(0));
 					boost::replace_first(vemp.at(1),"\r","");
 					this->setHttpVersion(vemp.at(1));
 					boost::replace_first(vemp.at(0)," ","");
+					if(vemp.at(0).find("?")!=string ::npos)
+					{
+						strVec params;
+						string valu(vemp.at(0));
+						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+						valu = valu.substr(valu.find("?")+1);
+						valu = CryptoHandler::urlDecode(valu);
+						boost::iter_split(params,valu, boost::first_finder("&"));
+						for(unsigned j=0;j<params.size();j++)
+						{
+							strVec param;
+							boost::iter_split(param, params.at(j), boost::first_finder("="));
+							if(param.size()==2)
+							{
+								string att = param.at(0);
+								boost::replace_first(att,"\r","");
+								boost::replace_first(att,"\t","");
+								boost::replace_first(att," ","");
+								this->setRequestParam(att,param.at(1));
+								reqorderinf[reqorderinf.size()+1] = att;
+							}
+						}
+					}
+					this->setActUrl(vemp.at(0));
 					boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
 					int fs = vemp.at(0).find_first_of("/");
 					int es = vemp.at(0).find_last_of("/");
@@ -294,20 +296,42 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 							this->setUrl(path+vemp.at(0));
 						}
 					}
-					//cout << "\n\n\n\nmemp------" << memp.at(0) << flush;
-					/*if(memp.size()>0)
+				}
+			}
+			else if(!contStarts && boost::find_first(tem, "POST"))
+			{
+				boost::replace_first(tem,"POST ","");
+				this->setMethod("POST");
+				boost::iter_split(vemp, tem, boost::first_finder(" "));
+				if(vemp.size()==2)
+				{
+					//this->setUrl(vemp.at(0));
+					//string pat(vemp.at(0));
+					boost::replace_first(vemp.at(1),"\r","");
+					this->setHttpVersion(vemp.at(1));
+					boost::replace_first(vemp.at(0)," ","");
+					this->setActUrl(vemp.at(0));
+					boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+					int fs = vemp.at(0).find_first_of("/");
+					int es = vemp.at(0).find_last_of("/");
+					if(fs==es)
 					{
-						if(boost::find_first(memp.at(0), ".") || memp.at(0)=="")
+						this->setCntxt_root(path+"default");
+						this->setCntxt_name("default");
+						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
+					}
+					else
+					{
+						int ss = vemp.at(0).substr(fs+1).find("/");
+						if(ss>fs)
 						{
-							this->setCntxt_root(path+"default");
-							this->setUrl(path+"default"+vemp.at(0));
-						}
-						else
-						{
-							this->setCntxt_root(memp.at(0));
+							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+							this->setCntxt_root(path+this->getCntxt_name());
+							this->setFile(vemp.at(0).substr(es+1));
 							this->setUrl(path+vemp.at(0));
 						}
-					}*/
+					}
 				}
 			}
 			else if(contStarts)
