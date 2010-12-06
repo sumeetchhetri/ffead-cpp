@@ -44,14 +44,14 @@ strVec Reflection::list(string cwd)
 		printf("pipe open error in cmd_list\n");
 		return files;
 	}
-	char t_char;
+	int t_char;
 	string fileName;
 	while ((t_char = fgetc(pipe_fp)) != EOF)
 	{
 		if(t_char!='\n')
 		{
 			stringstream ss;
-			ss << t_char;
+			ss << (char)t_char;
 			string temp;
 			ss >> temp;
 			fileName.append(temp);
