@@ -31,7 +31,7 @@ CHServer::~CHServer() {
 }
 SharedData* SharedData::shared_instance = NULL;
 string servd;
-static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap;
+static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap;
 static string resourcePath;
 static strVec dcpsss;
 static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone;
@@ -846,11 +846,14 @@ void ServiceTask::run()
 					else
 					{
 						cout << "invalid user" << endl;
+						res.setStatusCode("401");
+						res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
+						isContrl = true;
+						cout << "verified request token signature is invalid" << endl;
 					}
 				}
 				else
 				{
-					isAuthenticated = true;
 					cout << "invalid user repo defined" << endl;
 				}
 			}
@@ -883,7 +886,7 @@ void ServiceTask::run()
 			}
 		}
 
-		if(urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!="")
+		if(!isContrl && (urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!=""))
 		{
 			//cout << "Controller requested for " << req->getCntxt_name() << " name " << urlMap[req->getCntxt_name()+ext] << endl;
 			if(urlpattMap[req->getCntxt_name()+"*.*"]!="")
@@ -920,7 +923,7 @@ void ServiceTask::run()
 				cout << "Controller called\n" << flush;
 			}
 		}
-		else if(mappattMap[req->getCntxt_name()+"*.*"]!="" || mapMap[req->getCntxt_name()+ext]!="")
+		else if(!isContrl && (mappattMap[req->getCntxt_name()+"*.*"]!="" || mapMap[req->getCntxt_name()+ext]!=""))
 		{
 			string file = req->getFile();
 			string fili = file.substr(0,file.find_last_of("."));
@@ -1074,7 +1077,8 @@ void ServiceTask::run()
 			}
 		}
 		else if((req->getContent_type().find("application/soap+xml")!=string::npos || req->getContent_type().find("text/xml")!=string::npos)
-				&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos))
+				&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos)
+				&& wsdlmap[req->getFile()]==req->getCntxt_name())
 		{
 			string meth,ws_name,env;
 			ws_name = req->getFile();
@@ -1895,7 +1899,7 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 
 		libs += ("-l"+ name+" ");
 		ilibs += ("-I" + usrincludes+" ");
-		wspath.push_back(defpath);
+		wspath.push_back(name);
 
 		Element root = parser.getDocument(defpath+"config/application.xml").getRootElement();
 		if(root.getTagName()=="app" && root.getChildElements().size()>0)
@@ -2188,7 +2192,7 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 	ret = apputil.buildAllApplications(appf,webdirs1,appMap);
 	AfcUtil::writeTofile(rtdcfpath+"ApplicationInterface.cpp",ret,true);
 	WsUtil wsu;
-	ret = wsu.generateAllWSDL(wspath,respath);
+	ret = wsu.generateAllWSDL(wspath,respath,wsdlmap);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
 	return cmpnames;
 }
