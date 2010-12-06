@@ -31,8 +31,8 @@ class WsUtil {
 public:
 	WsUtil();
 	virtual ~WsUtil();
-	string generateWSDL(string,string,string,string &);
-	string generateAllWSDL(vector<string>,string);
+	string generateWSDL(string file,string usrinc,string resp,string &headers,map<string,string> &wsmap,string appname);
+	string generateAllWSDL(vector<string> files,string resp,map<string,string> &wsmap);
 };
 
 #endif /* WSUTIL_H_ */
