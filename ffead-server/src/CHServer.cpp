@@ -423,14 +423,14 @@ void listi(string cwd,string type,bool apDir,strVec &folders)
 	{
 		printf("pipe open error in cmd_list\n");
 	}
-	char t_char;
+	int t_char;
 	string folderName;
 	while ((t_char = fgetc(pipe_fp)) != EOF)
 	{
 		if(t_char!='\n')
 		{
 			stringstream ss;
-			ss << t_char;
+			ss << (char)t_char;
 			string temp;
 			ss >> temp;
 			folderName.append(temp);
