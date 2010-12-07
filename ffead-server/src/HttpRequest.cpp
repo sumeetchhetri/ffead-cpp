@@ -25,9 +25,10 @@ using namespace std;
 
 void HttpRequest::unbase64(string str)
 {
+	cout << "before " << str << endl;
 	authinfo["Method"] = (str.substr(0,str.find(" ")));
 	str = str.substr(str.find(" ")+1);
-	cout << str << endl;
+	cout << "bafter " << str << endl;
 
 	/*unsigned char *input = (unsigned char *)str.c_str();
 	int length = str.length();
@@ -49,7 +50,7 @@ void HttpRequest::unbase64(string str)
 	unsigned char *input = (unsigned char *)str.c_str();
 	int length = str.length();
 	string temp = CryptoHandler::base64decode(input,length);
-	cout << temp << endl;
+	cout << "after " << temp << endl;
 
 	authinfo["Username"] = (temp.substr(0,temp.find(":")));
 	temp = temp.substr(temp.find(":")+1);
@@ -81,7 +82,7 @@ void HttpRequest::getOauthParams(string str)
 
 HttpRequest::HttpRequest()
 {}
-HttpRequest::HttpRequest(strVec vec,string path,string oauth)
+HttpRequest::HttpRequest(strVec vec,string path)
 {
 	if(vec.size()!=0){
 	this->setContent("");
@@ -110,7 +111,7 @@ HttpRequest::HttpRequest(strVec vec,string path,string oauth)
 			else if(temp.at(0)=="Authorization")
 			{
 				cout << "found auth" <<endl;
-				if(oauth=="true" || oauth=="TRUE")
+				if(temp.at(1).find("oauth_")!=string::npos)
 				{
 					this->getOauthParams(temp.at(1));
 				}
