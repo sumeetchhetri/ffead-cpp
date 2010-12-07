@@ -83,7 +83,7 @@ class HttpRequest {
 	void getOauthParams(string);
 public:
 	HttpRequest();
-	HttpRequest(strVec,string,string);
+	HttpRequest(strVec,string);
 	virtual ~HttpRequest();
     Map getAttributes() const;
     void setAttributes(Map attributes);
