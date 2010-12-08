@@ -91,13 +91,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 				continue;
 			if(results.size()>0 && (results.at(0)==ws.getAttribute("class") || temp.find("~")!=string::npos))
 				continue;
-			if(results.at(0)!="void")
-			{
-				if(results.at(0)=="int" || results.at(0)=="double" || results.at(0)=="float" || results.at(0)=="string")
-					retType = "\n<xsd:element name=\"return\" type=\"xsd:"+results.at(0)+"\"/>";
-				else
-					retType = "\n<xsd:element name=\"return\" type=\"ns0:"+results.at(0)+"\"/>";
-			}
+
 			methName = results.at(1);
 
 			in_out_info["RETURN"] = ws.getElementByName(methName).getAttribute("outname");
@@ -111,10 +105,22 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 				boost::trim(vecn);
 				if(vecn=="int" || vecn=="double" || vecn=="float" || vecn=="string")
 				{
+					retType = "\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""+in_out_info["RETURN"]+"\" type=\"xsd:"+vecn+"\"/>";
 				}
 				else
 				{
 					results1.push_back(vecn);
+					retType = "\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""+in_out_info["RETURN"]+"\" type=\"ns0:"+vecn+"\"/>";
+				}
+			}
+			else
+			{
+				if(results.at(0)!="void")
+				{
+					if(results.at(0)=="int" || results.at(0)=="double" || results.at(0)=="float" || results.at(0)=="string")
+						retType = "\n<xsd:element name=\""+in_out_info["RETURN"]+"\" type=\"xsd:"+results.at(0)+"\"/>";
+					else
+						retType = "\n<xsd:element name=\""+in_out_info["RETURN"]+"\" type=\"ns0:"+results.at(0)+"\"/>";
 				}
 			}
 			for(unsigned int j=0;j<results1.size();j++)
@@ -124,27 +130,29 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 				boost::iter_split(results2, results1.at(j), boost::first_finder(" "));
 				type = results2.at(0);
 				int srn = j;
+				char chr = boost::lexical_cast<char>(j);
 				stringstream ss;
 				ss << srn;
 				string te;
 				ss >> te;
 				if(type=="int" || type=="float" || type=="double")
 				{
-					inp_params.append("\n<xsd:element name=\"arg"+te+"\" type=\"xsd:"+type+"\"/>");
-					in_out_info[te+results2.at(1)] = type;
+					inp_params.append("\n<xsd:element name=\""+results2.at(1)+"\" type=\"xsd:"+type+"\"/>");
+					in_out_info[chr+results2.at(1)] = type;
 				}
 				else if(type=="string")
 				{
-					inp_params.append("\n<xsd:element minOccurs=\"0\" name=\"arg"+te+"\" type=\"xsd:string\"/>");
-					in_out_info[te+results2.at(1)] = type;
+					inp_params.append("\n<xsd:element minOccurs=\"0\" name=\""+results2.at(1)+"\" type=\"xsd:string\"/>");
+					in_out_info[chr+results2.at(1)] = type;
 				}
 				else if(type!="")
 				{
 					if(results2.size()>=2)
-						in_out_info[te+results2.at(1)] = type;
-
+						in_out_info[chr+results2.at(1)] = type;
+					else
+						cout << "invalid thing happenin " << results1.at(j) << endl;
 					strMap allfs,tyfs;
-					if(type.find("vector<")!=string::npos)
+					if(type.find("vector<")!=string::npos && results2.size()==2)
 					{
 						string vecn = type;
 						boost::replace_first(vecn,"vector<"," ");
@@ -152,12 +160,12 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 						boost::trim(vecn);
 						headers.append("#include \""+vecn+".h\"\n");
 						type = vecn;
-						inp_params.append("\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\"arg"+te+"\" type=\"ns0:"+type+"\"/>");
+						inp_params.append("\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""+results2.at(1)+"\" type=\"ns0:"+type+"\"/>");
 					}
-					else
+					else if(results2.size()==2)
 					{
 						headers.append("#include \""+type+".h\"\n");
-						inp_params.append("\n<xsd:element minOccurs=\"0\" name=\"arg"+te+"\" type=\"ns0:"+type+"\"/>");
+						inp_params.append("\n<xsd:element minOccurs=\"0\" name=\""+results2.at(1)+"\" type=\"ns0:"+type+"\"/>");
 					}
 					strVec onjinf = ref.getAfcObjectData(usrinc+type+".h", false);
 					if(type=="int" || type=="float" || type=="double" || type=="string")
@@ -276,7 +284,8 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 				strMap::iterator iter2;
 				string args;
 				unsigned int ter = 1;
-				for(iter2=pars.begin();iter2!=pars.end();iter2++,ter++)
+				cout << me_n << ws_n << pars.size() << endl;
+				for(iter2=pars.begin();iter2!=pars.end();iter2++)
 				{
 					if(iter2->first!="RETURN" && iter2->first!="RETURNTYP")
 					{
@@ -317,7 +326,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 							ws_funcs.append(argname+" = _getObj"+iter2->second+"(ele);\n");
 						}
 						args.append(argname);
-						if(ter<pars.size()-2)
+						if(ter++<pars.size()-2)
 							args.append(",");
 					}
 				}
