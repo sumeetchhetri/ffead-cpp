@@ -75,7 +75,7 @@ bool Client::connection(string host,int port)
 
     if (p == NULL) {
         fprintf(stderr, "client: failed to connect\n");
-        return false;;
+        return false;
     }
 
     inet_ntop(p->ai_family, get_in_addr1((struct sockaddr *)p->ai_addr),
@@ -84,6 +84,7 @@ bool Client::connection(string host,int port)
 
     freeaddrinfo(servinfo); // all done with this structure
 
+    fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
     /*if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv");
         exit(1);
@@ -112,12 +113,18 @@ string Client::getData()
 {
 	int numbytes;
 	char buf[MAXDATASIZE];
-	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1)
+	while ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1)
 	{
-		perror("recv");
-		string data;
-		return data;
+		//perror("recv");
+		if(errno!=EAGAIN)
+			return "";
 		//exit(1);
+	}
+	if(numbytes==0)
+	{
+		connected = false;
+		close(sockfd);
+		return "";
 	}
 	string data(buf,buf+numbytes);
 	memset(&buf[0], 0, sizeof(buf));
@@ -126,10 +133,17 @@ string Client::getData()
 
 void Client::closeConnection()
 {
+	connected = false;
 	close(sockfd);
 }
 
 bool Client::isConnected()
 {
+	int numbytes;
+	char buf[1];
+	if ((numbytes = recv(sockfd, buf, 1, MSG_PEEK)) == 0)
+	{
+		return false;
+	}
 	return connected;
 }
