@@ -633,7 +633,7 @@ void ServiceTask::run()
 		alldatlg += "--read data";
 		map<string,string> params1 = *params;
 		string webpath = serverRootDirectory + "web/";
-		HttpRequest* req= new HttpRequest(results,webpath,params1["SRV_OAUTH_ENAB"]);
+		HttpRequest* req= new HttpRequest(results,webpath);
 		string sessId = (ip + req->getUser_agent());
 		HttpSession sess = sessionMap[sessId];
 
@@ -834,7 +834,7 @@ void ServiceTask::run()
 			}
 			if(claz.find("file:")==0)
 			{
-				claz = claz.substr(claz.find(":")+1);
+				claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
 				cout << "auth handled by file " << claz << endl;
 				authc = new FileAuthController(claz,":");
 				if(authc->isInitialized())
