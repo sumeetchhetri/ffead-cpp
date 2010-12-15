@@ -44,6 +44,13 @@ long Timer::getCurrentTime()
 	return ((en.tv_sec * 1000000000) + en.tv_nsec);
 }
 
+long Timer::getTimestamp()
+{
+	timespec en;
+	clock_gettime(CLOCK_REALTIME, &en);
+	return en.tv_sec;
+}
+
 void Timer::end()
 {
 	timespec en;
