@@ -1275,7 +1275,7 @@ void ServiceTask::run()
 				  return;
 			}
 			int size;
-			if(res.getStatusCode()=="200" && res.getContent_str().length()>0)
+			if(res.getContent_str().length()>0)
 			{
 				if ((size=BIO_puts(io,res.getContent_str().c_str()))<=0)
 				{
@@ -1306,7 +1306,7 @@ void ServiceTask::run()
 			}
 
 
-			if(res.getStatusCode()=="200" &&  res.getContent_str().length()>0)
+			if(res.getContent_str().length()>0)
 			{
 				if ((size=send(fd,res.getContent_str().c_str(), res.getContent_str().length(),0)) == -1)
 					cout << "send failed" << flush;
