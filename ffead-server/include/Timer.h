@@ -34,6 +34,7 @@ public:
 	void start();
 	void end();
 	static long getCurrentTime();
+	static long getTimestamp();
 	int elapsedMicroSeconds();
 	int elapsedMilliSeconds();
 	int elapsedNanoSeconds();
