@@ -37,6 +37,8 @@ Cibernate::Cibernate(string appName) {
 		cout << "\ngot pool " << this->pool << " mapping " << this->mapping
 				<< " for application " << appName << "\n" << flush;
 	}
+	else
+		throw "Error connecting to Database server";
 }
 
 Cibernate::Cibernate() {
@@ -70,6 +72,8 @@ string Cibernate::demangle(const char *mangled)
 Cibernate::Cibernate(string dbName, string uname, string pass) {
 	this->pool = new CibernateConnectionPool(5, dbName, uname, pass);
 	this->init = true;
+	if(!CibernateConnPools::isInitialized())
+		throw "Error connecting to Database server";
 }
 bool Cibernate::allocateStmt(bool read) {
 	if(!this->init)
