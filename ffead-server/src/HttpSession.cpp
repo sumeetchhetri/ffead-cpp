@@ -49,7 +49,11 @@ Map HttpSession::getSessionAttributes() const
 
 void HttpSession::setSessionAttributes(Map sessionAttributes)
 {
-	this->sessionAttributes = sessionAttributes;
+	map<string,string>::iterator it;
+	for(it=sessionAttributes.begin();it!=sessionAttributes.end();it++)
+	{
+		this->sessionAttributes[it->first] = it->second;
+	}
 }
 string HttpSession::getAttribute(string key)
 {
