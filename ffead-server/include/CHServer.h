@@ -83,6 +83,12 @@
 #include "ThreadPool.h"
 #include "FileAuthController.h"
 #include <sys/stat.h>
+#include "Timer.h"
+#include "DateFormat.h"
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd
@@ -117,11 +123,6 @@ typedef string (*DCPPtr) ();
 typedef void (*ReceiveTask1)(int);
 
 using namespace std;
-
-map<string,HttpSession> sessionMap;
-
-boost::mutex m_mutex;
-boost::mutex p_mutex;
 class SharedData
 {
 private:
