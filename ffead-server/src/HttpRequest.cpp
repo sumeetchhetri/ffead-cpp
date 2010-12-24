@@ -88,6 +88,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 	this->setContent("");
 	string conten;
 	bool contStarts = false;
+	this->cookie = false;
 	for(unsigned int i=0;i<vec.size();i++)
 	{
 		strVec temp,vemp,memp;
@@ -172,6 +173,23 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						string bound = "--" + results.at(1).substr(0,results.at(1).length());
 						this->setContent_boundary(bound);
 					}
+				}
+			}
+			else if(temp.at(0)=="Cookie")
+			{
+				this->cookie = true;
+				cout << "found cookie" << endl;
+				strVec results;
+				boost::iter_split(results, temp.at(1), boost::first_finder("; "));
+				for(unsigned j=0;j<(int)results.size();j++)
+				{
+					cout << results.at(j) << endl;
+					strVec results1;
+					boost::iter_split(results1, results.at(j), boost::first_finder("="));
+					if(results1.size()==2)
+						cookieattrs[results1.at(0)] = results1.at(1);
+					else
+						cookieattrs[results1.at(0)] = "true";
 				}
 			}
 			else if(temp.at(0)=="Content-Length")
@@ -931,9 +949,9 @@ void HttpRequest::setAttribute(string key,string value)
 	this->attributes[key] = value;
 }
 
-HttpSession HttpRequest::getSession()
+HttpSession* HttpRequest::getSession()
 {
-	return this->session;
+	return &(this->session);
 }
 void HttpRequest::setSession(HttpSession session)
 {
