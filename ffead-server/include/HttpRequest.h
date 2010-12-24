@@ -76,6 +76,8 @@ class HttpRequest {
 	strVec localeInfo;
 	string actUrl;
 	string sessionID;
+	bool cookie;
+	map<string,string> cookieattrs;
 	map<string,string> authinfo;
 	map<int,string> reqorderinf;
 	map<int,string> authorderinf;
@@ -90,7 +92,7 @@ public:
     string getAttribute(string key);
     void setAttribute(string key,string value);
     void setSession(HttpSession session);
-    HttpSession getSession();
+    HttpSession* getSession();
     string getMethod() const;
 	void setMethod(string method);
 	string getUser_agent() const;
@@ -148,8 +150,11 @@ public:
     void setAuthinfo(map<string,string>);
     string buildRequest(const char* key,const char* value);
     string toString();
+    bool hasCookie() const{return this->cookie;}
     map<int,string> getAuthOrderinfo() const{return authorderinf;}
     map<int,string> getReqOrderinfo() const{return reqorderinf;}
+    map<string,string> getCookieInfo() const{return cookieattrs;}
+
 };
 
 #endif /* HTTPREQUEST_H_ */
