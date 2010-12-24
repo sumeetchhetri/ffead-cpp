@@ -35,7 +35,7 @@ static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap
 static string resourcePath;
 static strVec dcpsss;
 static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone;
-static int thrdpsiz;
+static int thrdpsiz,shmid;
 static SSL_CTX *ctx;
 static int s_server_session_id_context = 1;
 static int s_server_auth_session_id_context = 2;
@@ -44,8 +44,88 @@ static char *ciphers=0;
 static BIO *bio_err=0;
 static char *pass;
 map<int,pid_t> pds;
+static pid_t parid;
 void *dlib = NULL;
 static string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_auth_mode,srv_auth_file;
+typedef map<string,string> sessionMap;
+static boost::mutex m_mutex,p_mutex;
+
+void createSharedMemeory()
+{
+	key_t key;
+	sessionMap *shm;
+	/*
+	 * We'll name our shared memory segment
+	 * "5678".
+	 */
+	key = 11112;
+
+	/*
+	 * Create the segment.
+	 */
+	if ((shmid = shmget(key, 27, IPC_CREAT | 0666)) < 0) {
+		perror("shmget");
+		exit(1);
+	}
+	cout << "init memeory " << shmid << endl;
+	/*
+	 * Now we attach the segment to our data space.
+	 */
+	if ((shm = (sessionMap*)shmat(shmid, NULL, 0)) == (sessionMap *) -1) {
+		perror("shmat");
+		exit(1);
+	}
+	cout << "shared memeory created" << endl;
+
+}
+
+void writeToSharedMemeory(string key, string value)
+{
+	sessionMap* shm;
+	/*
+	 * Now we attach the segment to our data space.
+	 */
+	if ((shm = (sessionMap*)shmat(shmid, NULL, 0)) == (sessionMap *) -1) {
+		perror("shmat");
+		exit(1);
+	}
+	cout << "got shared memeory area " << shm << endl;
+
+	//(*(shm))["sdfsd"] = "sdfdsa";
+	p_mutex.lock();
+	sessionMap sess = *shm;
+	sess[key] = value;
+	*shm = sess;
+	p_mutex.unlock();
+	cout << shm->size() << endl;
+	/*
+	 * Now put some things into the memory for the
+	 * other process to read.
+	 */
+	//shm->insert(pair<string,string>("sad","1"));
+}
+
+string readFromSharedMemeory(string key)
+{
+	sessionMap* shm;
+	/*
+	 * Now we attach the segment to our data space.
+	 */
+	if ((shm = (sessionMap*)shmat(shmid, NULL, 0)) == (sessionMap *) -1) {
+		perror("shmat");
+		exit(1);
+	}
+	p_mutex.lock();
+	sessionMap sess = *shm;
+	p_mutex.unlock();
+	if(sess.find(key)!=sess.end())
+	{
+		cout << "reading from shredmem " << sess[key] << endl;
+		return sess[key];
+	}
+	return "";
+}
+
 /*The password code is not thread safe*/
 static int password_cb(char *buf,int num,
   int rwflag,void *userdata)
@@ -399,10 +479,28 @@ string getContentStr(string url,string locale,string ext)
     return all;
 }
 
-string createResponse(HttpResponse res)
+string createResponse(HttpResponse res,bool flag,map<string,string> vals)
 {
 	string resp;
 	resp = (res.getHttpVersion() + " " + res.getStatusCode() + " " + res.getStatusMsg() + "\r\n");
+	if(!flag)
+	{
+		cout << "session object modified " << vals.size() << endl;
+		Date date;
+		string id = boost::lexical_cast<string>(Timer::getCurrentTime());
+		date.setHh(date.getHh()+6);
+		DateFormat dformat("ddd, dd-mmm-yyyy hh:mi:ss");
+		map<string,string>::iterator it;
+		for(it=vals.begin();it!=vals.end();it++)
+		{
+			string key = it->first;
+			string value = it->second;
+			boost::replace_all(key,"; ","%3B%20");
+			boost::replace_all(value,"; ","%3B%20");
+			cout << it->first << " = " << it->second << endl;
+			resp += "Set-Cookie: "+ key + "=" + value + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly\r\n";
+		}
+	}
 	if(res.getContent_str().length()>0)
 	{
 		resp += ("Content-Length: "+res.getContent_len() + "\r\n");
@@ -634,8 +732,11 @@ void ServiceTask::run()
 		map<string,string> params1 = *params;
 		string webpath = serverRootDirectory + "web/";
 		HttpRequest* req= new HttpRequest(results,webpath);
-		string sessId = (ip + req->getUser_agent());
-		HttpSession sess = sessionMap[sessId];
+
+		if(req->hasCookie())
+		{
+			req->getSession()->setSessionAttributes(req->getCookieInfo());
+		}
 
 		if(cntMap[req->getCntxt_name()]!="true")
 		{
@@ -659,7 +760,7 @@ void ServiceTask::run()
 			{
 				typedef string (*DCPPtr1) (string,HttpSession);
 				DCPPtr1 f =  (DCPPtr1)mkr1;
-				path1 = f(req->getUrl(),sess);
+				path1 = f(req->getUrl(),*(req->getSession()));
 				//cout << path1 << flush;
 				if(path1=="FAILED")
 				{
@@ -673,15 +774,6 @@ void ServiceTask::run()
 		}
 
 		HttpResponse res;
-
-		/*if(sess.getSessionId()!="")
-			req->setSession(sess);
-		else
-		{
-			sess = req->getSession();
-			sess.setSessionId(sessId);
-		}*/
-		//cout << "\nDone with request initialization\n" << flush;
 		string ext = getFileExtension(req->getUrl());
 		vector<unsigned char> test;
 		string content;
@@ -693,122 +785,6 @@ void ServiceTask::run()
 		bool isAuthenticated = false;
 		bool isoAuthRes = false;
 		bool isContrl = false;
-		/*if(req->getAuthinfo().size()>0 || params1["SRV_OAUTH_ENAB"]=="true" || params1["SRV_OAUTH_ENAB"]=="TRUE")
-		{
-			if(((params1["SRV_OAUTH_ENAB"]=="true" || params1["SRV_OAUTH_ENAB"]=="TRUE") && req->getAuthinfo()["Method"]=="OAuth")
-				|| (req->getRequestParam("oauth_consumer_key")!="" && req->getRequestParam("oauth_signature_method")!=""))
-			{
-				AuthController *authc;
-				cout << "OAUTH/HTTP Authorization requested" << endl;
-				map<string,string>::iterator it;
-				map<string,string> tempmap = req->getAuthinfo();
-				for(it=tempmap.begin();it!=tempmap.end();it++)
-				{
-					cout << it->first << " = " << it->second << endl;
-				}
-				claz = "getReflectionCIFor" + AfcUtil::camelCased(req->getCntxt_name()) + "OAUTHController";
-
-				if(dlib == NULL)
-				{
-					cerr << dlerror() << endl;
-					exit(-1);
-				}
-				void *mkr = dlsym(dlib, claz.c_str());
-				if(mkr!=NULL)
-				{
-					cout << "got OAUTH class => " << AfcUtil::camelCased(req->getCntxt_name()) << "OAUTHController" << endl;
-					FunPtr f =  (FunPtr)mkr;
-					ClassInfo srv = f();
-					args argus;
-					Constructor ctor = srv.getConstructor(argus);
-					Reflector ref;
-					void *_temp = ref.newInstanceGVP(ctor);
-					authc = (AuthController*)_temp;
-					isoAuthRes = authc->handle(req,&res);
-					if(isoAuthRes)
-					{
-						cout << "oauth response being sent---no actual resource requested" << endl;
-					}
-					else
-					{
-						cout << "oauth response being sent---resource requested" << endl;
-					}
-				}
-			}
-			else if(req->getAuthinfo().size()>0)
-			{
-				cout << "HTTP Authorization requested" << endl;
-				cout << "Method = " << req->getAuthinfo()["Method"] << endl;
-				cout << "Username = " << req->getAuthinfo()["Username"] << endl;
-				cout << "Password = " << req->getAuthinfo()["Password"] << endl;
-
-				cout << "Security parameters => TYPE=" << params1["SRV_AUTH_PRVD"] << " MODE=" << params1["SRV_AUTH_MODE"]
-					 << " FILE=" <<  params1["SRV_AUTH_FILE"] << endl;
-				AuthController *authc;
-				if(params1["SRV_AUTH_PRVD"]=="true" || params1["SRV_AUTH_PRVD"]=="TRUE")
-				{
-					if(params1["SRV_AUTH_MODE"]=="")
-					{
-						isAuthenticated = true;
-					}
-					else
-					{
-						if(params1["SRV_AUTH_MODE"]=="file" && params1["SRV_AUTH_FILE"]!="")
-						{
-							authc = new FileAuthController(params1["SRV_AUTH_FILE"],":");
-							if(authc->isInitialized())
-							{
-								if(authc->authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
-								{
-									cout << "valid user" << endl;
-								}
-								else
-								{
-									cout << "invalid user" << endl;
-								}
-							}
-							else
-							{
-								isAuthenticated = true;
-								cout << "invalid user repo defined" << endl;
-							}
-						}
-					}
-				}
-				else if(params1["SRV_AUTH_MODE"]!="")
-				{
-					claz = "getReflectionCIFor" + AfcUtil::camelCased(req->getCntxt_name()) + "Controller";
-					if(dlib == NULL)
-					{
-						cerr << dlerror() << endl;
-						exit(-1);
-					}
-					void *mkr = dlsym(dlib, claz.c_str());
-					if(mkr!=NULL)
-					{
-						FunPtr f =  (FunPtr)mkr;
-						ClassInfo srv = f();
-						args argus;
-						Constructor ctor = srv.getConstructor(argus);
-						Reflector ref;
-						void *_temp = ref.newInstanceGVP(ctor);
-						authc = (AuthController*)_temp;
-						if(authc->authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
-						{
-							cout << "valid user" << endl;
-						}
-						else
-						{
-							cout << "invalid user" << endl;
-						}
-					}
-				}
-				else
-				{
-					isAuthenticated = true;
-				}
-			}
-		}*/
 		if(autpattMap[req->getCntxt_name()+"*.*"]!="" || autMap[req->getCntxt_name()+ext]!="")
 		{
 			if(autpattMap[req->getCntxt_name()+"*.*"]!="")
@@ -1133,13 +1109,19 @@ void ServiceTask::run()
 					typedef map<string,string> AttributeList;
 					AttributeList attl = soapbody.getAttributes();
 					AttributeList::iterator it;
+					string bod = "<" + soapbody.getTagNameSpc();
+					for(it=attl.begin();it!=attl.end();it++)
+					{
+						bod.append(" " + it->first + "=\"" + it->second + "\" ");
+					}
+					bod.append("><soap-fault><faultcode>Client</faultcode><faultstring>Operation not supported</faultstring><faultactor/><detail>No such method error</detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+					attl = soapenv.getAttributes();
 					env = "<" + soapenv.getTagNameSpc();
 					for(it=attl.begin();it!=attl.end();it++)
 					{
 						env.append(" " + it->first + "=\"" + it->second + "\" ");
 					}
-					string head = ("<soap-header><soap-fault><faultcode>Client</faultcode><faultstring>Operation not supported</faultstring><faultactor/><detail>No such method error</detail></soap-header>");
-					env.append(">"+head + "</" + soapenv.getTagNameSpc()+">");
+					env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
 				}
 				cout << "\n----------------------------------------------------------------------------\n" << flush;
 				cout << env << "\n----------------------------------------------------------------------------\n" << flush;
@@ -1149,13 +1131,19 @@ void ServiceTask::run()
 				typedef map<string,string> AttributeList;
 				AttributeList attl = soapbody.getAttributes();
 				AttributeList::iterator it;
+				string bod = "<" + soapbody.getTagNameSpc();
+				for(it=attl.begin();it!=attl.end();it++)
+				{
+					bod.append(" " + it->first + "=\"" + it->second + "\" ");
+				}
+				bod.append("><soap-fault><faultcode>Client</faultcode><faultstring>No such method error</faultstring><faultactor/><detail>"+fault+"</detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+				attl = soapenv.getAttributes();
 				env = "<" + soapenv.getTagNameSpc();
 				for(it=attl.begin();it!=attl.end();it++)
 				{
 					env.append(" " + it->first + "=\"" + it->second + "\" ");
 				}
-				string head = ("<soap-header><soap-fault><faultcode>Client</faultcode><faultstring>"+fault+"</faultstring><faultactor/><detail>No such method error</detail></soap-header>");
-				env.append(">"+head + "</" + soapenv.getTagNameSpc()+">");
+				env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
 				cout << fault << flush;
 			}
 			catch(Exception *e)
@@ -1163,13 +1151,19 @@ void ServiceTask::run()
 				typedef map<string,string> AttributeList;
 				AttributeList attl = soapbody.getAttributes();
 				AttributeList::iterator it;
+				string bod = "<" + soapbody.getTagNameSpc();
+				for(it=attl.begin();it!=attl.end();it++)
+				{
+					bod.append(" " + it->first + "=\"" + it->second + "\" ");
+				}
+				bod.append("><soap-fault><faultcode>Client</faultcode><faultstring>"+e->what()+"</faultstring><faultactor/><detail></detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+				attl = soapenv.getAttributes();
 				env = "<" + soapenv.getTagNameSpc();
 				for(it=attl.begin();it!=attl.end();it++)
 				{
 					env.append(" " + it->first + "=\"" + it->second + "\" ");
 				}
-				string head = ("<soap-header><soap-fault><faultcode>Client</faultcode><faultstring>"+e->what()+"</faultstring><faultactor/><detail>No such method error</detail></soap-header>");
-				env.append(">"+head + "</" + soapenv.getTagNameSpc()+">");
+				env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
 				cout << e->what() << flush;
 			}
 			catch(...)
@@ -1177,13 +1171,19 @@ void ServiceTask::run()
 				typedef map<string,string> AttributeList;
 				AttributeList attl = soapbody.getAttributes();
 				AttributeList::iterator it;
+				string bod = "<" + soapbody.getTagNameSpc();
+				for(it=attl.begin();it!=attl.end();it++)
+				{
+					bod.append(" " + it->first + "=\"" + it->second + "\" ");
+				}
+				bod.append("><soap-fault><faultcode>Client</faultcode><faultstring>Standard Exception</faultstring><faultactor/><detail></detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+				attl = soapenv.getAttributes();
 				env = "<" + soapenv.getTagNameSpc();
 				for(it=attl.begin();it!=attl.end();it++)
 				{
 					env.append(" " + it->first + "=\"" + it->second + "\" ");
 				}
-				string head = ("<soap-header><soap-fault><faultcode>Client</faultcode><faultstring>Standard Exception</faultstring><faultactor/><detail>No such method error</detail></soap-header>");
-				env.append(">"+head + "</" + soapenv.getTagNameSpc()+">");
+				env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
 				cout << "Standard Exception" << flush;
 			}
 			res.setStatusCode("200");
@@ -1208,7 +1208,6 @@ void ServiceTask::run()
 				res.setContent_type(props[ext]);
 				res.setContent_str(content);
 				res.setContent_len(boost::lexical_cast<string>(content.length()));
-				sess.setAttribute("CURR",req->getUrl());
 			}
 		}
 		else
@@ -1232,7 +1231,10 @@ void ServiceTask::run()
 		}
 		alldatlg += "--processed data";
 		string h1;
-		h1 = createResponse(res);
+		bool sessionchanged = req->hasCookie();
+		if(req->getCookieInfo().size()!=req->getSession()->getSessionAttributes().size())
+			sessionchanged = false;
+		h1 = createResponse(res,sessionchanged,req->getSession()->getSessionAttributes());
 		//cout << h1 << endl;
 		if(isSSLEnabled)
 		{
@@ -1500,25 +1502,14 @@ void signalSIGABRT(int dummy)
 void signalSIGTERM(int dummy)
 {
 	signal(SIGTERM,signalSIGTERM);
-	string filename;
-	stringstream ss;
-	ss << servd;
-	ss << getpid();
-	ss >> filename;
-	filename.append(".cntrl");
-	remove(filename.c_str());
-	void * array[25];
-	int nSize = backtrace(array, 25);
-	char ** symbols = backtrace_symbols(array, nSize);
-	string tempo;
-	for (int i = 0; i < nSize; i++)
+	string smd = "ipcrm -m " + boost::lexical_cast<string>(shmid);
+	if(getpid()==parid)
 	{
-		tempo = symbols[i];
-		tempo += "\n";
+		system(smd.c_str());
+		cout << "cleared shared memory area" << endl;
 	}
-	free(symbols);
-	cout << "Termination signal occurred for process" << getpid() << "\n" << tempo << flush;
-	abort();
+	cout << "Termination signal occurred for process" << endl;
+	exit(dummy);
 }
 
 void signalSIGKILL(int dummy)
@@ -2260,12 +2251,20 @@ void dynamic_page_monitor(string serverRootDirectory)
 
 int main(int argc, char* argv[])
 {
+	/*createSharedMemeory();
+	writeToSharedMemeory("key","asdfghjklmnbvcagsjwkiejekhjkhlhlhlhlhlhlhblhb");
+	writeToSharedMemeory("key1","asdfghjklmnbvcagsjwkiejekhjkhlhlhlhlhlhlhblhb");
+	readFromSharedMemeory("key");
+	readFromSharedMemeory("key1");
+	signal(SIGTERM,signalSIGTERM);
+	signal(SIGKILL,signalSIGTERM);
+	signal(SIGINT,signalSIGTERM);
+	signal(SIGABRT,signalSIGTERM);*/
+	parid = getpid();
 	signal(SIGSEGV,signalSIGSEGV);
 	signal(SIGFPE,signalSIGFPE);
-	//signal(SIGTERM,signalSIGTERM);
-	//signal(SIGKILL,signalSIGKILL);
-	//signal(SIGINT,signalSIGINT);
-	//signal(SIGABRT,signalSIGABRT);
+
+
 	//signal(SIGILL,signalSIGILL);
 	signal(SIGPIPE,signalSIGPIPE);
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
@@ -2396,278 +2395,6 @@ int main(int argc, char* argv[])
     {
     	pubMap[pubfiles.at(var)] = "true";
     }
-    /*strVec all,dcps,afcd,appf,wspath,compnts,cmpnames;
-    string includeRef;
-    TemplateEngine templ;
-	Context cntxt;
-	string libs,ilibs,isrcs,iobjs,ideps;
-	Reflection ref;
-	vector<string> vecvec;
-	vector<bool> stat;
-	propMap srp;
-
-	XmlParser parser("Parser");
-	ComponentGen gen;
-
-    for(unsigned int var=0;var<webdirs.size();var++)
-    {
-    	//cout <<  webdirs.at(0) << flush;
-		string defpath = webdirs.at(var);
-		string dcppath = defpath + "dcp/";
-		string cmppath = defpath + "components/";
-		string usrincludes = defpath + "include/";
-		//propMap srp = pread.getProperties(defpath+"config/app.prop");
-
-		string name = webdirs1.at(var);
-		boost::replace_all(name,"/","");
-		cntMap[name] = "true";
-		listi(dcppath,".dcp",true,dcps);
-		listi(cmppath,".cmp",true,compnts);
-		all.push_back(usrincludes);
-		appf.push_back(defpath+"app.xml");
-
-		libs += ("-l"+ name+" ");
-		ilibs += ("-I" + usrincludes+" ");
-		wspath.push_back(defpath);
-
-		Element root = parser.getDocument(defpath+"config/application.xml").getRootElement();
-		if(root.getTagName()=="app" && root.getChildElements().size()>0)
-		{
-			ElementList eles = root.getChildElements();
-			for (unsigned int apps = 0; apps < eles.size(); apps++)
-			{
-				if(eles.at(apps).getTagName()=="controllers")
-				{
-					ElementList cntrls = eles.at(apps).getChildElements();
-					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
-					{
-						if(cntrls.at(cntn).getTagName()=="controller")
-						{
-							string url = cntrls.at(cntn).getAttribute("url");
-							if(cntrls.at(cntn).getAttribute("url").find("*")!=string::npos)
-							{
-								if(url=="*.*")
-									urlpattMap[url] = cntrls.at(cntn).getAttribute("class");
-								else
-								{
-									url = url.substr(url.find("*")+1);
-									urlMap[url] = cntrls.at(cntn).getAttribute("class");
-								}
-							}
-							else
-								urlMap[url] = cntrls.at(cntn).getAttribute("class");
-							//cout << url << " :: " << cntrls.at(cntn).getAttribute("class") << flush;
-						}
-					}
-				}
-				else if(eles.at(apps).getTagName()=="templates")
-				{
-					ElementList tmplts = eles.at(apps).getChildElements();
-					for (unsigned int tmpn = 0; tmpn < tmplts.size(); tmpn++)
-					{
-						if(tmplts.at(tmpn).getTagName()=="template")
-						{
-							tmplMap[tmplts.at(tmpn).getAttribute("file")] = tmplts.at(tmpn).getAttribute("class");
-							//cout << tmplts.at(tmpn).getAttribute("file") << " :: " << tmplts.at(tmpn).getAttribute("class") << flush;
-						}
-					}
-				}
-				else if(eles.at(apps).getTagName()=="dviews")
-				{
-					ElementList dvs = eles.at(apps).getChildElements();
-					for (unsigned int dn = 0; dn < dvs.size(); dn++)
-					{
-						if(dvs.at(dn).getTagName()=="dview")
-						{
-							vwMap[dvs.at(dn).getAttribute("path")] = dvs.at(dn).getAttribute("class");
-							//cout << dvs.at(dn).getAttribute("path") << " :: " << dvs.at(dn).getAttribute("class") << flush;
-						}
-					}
-				}
-			}
-		}
-		Mapping* mapping = new Mapping;
-		smstrMap appTableColMapping;
-		strMap maptc,maptcl;
-		relMap appTableRelMapping;
-		Element dbroot = parser.getDocument(defpath+"config/cibernate.xml").getRootElement();
-		if(dbroot.getTagName()=="cibernate")
-		{
-			ElementList dbeles = dbroot.getChildElements();
-			for (unsigned int dbs = 0; dbs < dbeles.size(); dbs++)
-			{
-				if(dbeles.at(dbs).getTagName()=="config")
-				{
-					ElementList confs = dbeles.at(dbs).getChildElements();
-					string uid,pwd,dsn;
-					int psize= 2;
-					for (unsigned int cns = 0; cns < confs.size(); cns++)
-					{
-						if(confs.at(cns).getTagName()=="uid")
-						{
-							uid = confs.at(cns).getText();
-						}
-						else if(confs.at(cns).getTagName()=="pwd")
-						{
-							pwd = confs.at(cns).getText();
-						}
-						else if(confs.at(cns).getTagName()=="dsn")
-						{
-							dsn = confs.at(cns).getText();
-						}
-						else if(confs.at(cns).getTagName()=="pool-size")
-						{
-							if(confs.at(cns).getText()!="")
-								psize = boost::lexical_cast<int>(confs.at(cns).getText());
-						}
-					}
-					CibernateConnPools::addPool(psize,uid,pwd,dsn,name);
-				}
-				else if(dbeles.at(dbs).getTagName()=="tables")
-				{
-					ElementList tabs = dbeles.at(dbs).getChildElements();
-					for (unsigned int dn = 0; dn < tabs.size(); dn++)
-					{
-						if(tabs.at(dn).getTagName()=="table")
-						{
-							vector<DBRel> relv;
-							DBRel relation;
-							relation.type = (tabs.at(dn).getAttribute("hasOne")!="")?1:((tabs.at(dn).getAttribute("hasMany")!="")?2:((tabs.at(dn).getAttribute("many")!="")?3:0));
-							if(relation.type==1)
-								relation.clsName = tabs.at(dn).getAttribute("hasOne");
-							else if(relation.type==2)
-								relation.clsName = tabs.at(dn).getAttribute("hasMany");
-							else if(relation.type==3)
-								relation.clsName = tabs.at(dn).getAttribute("many");
-							relation.fk = tabs.at(dn).getAttribute("fk");
-							relation.pk_rel = tabs.at(dn).getAttribute("pk");
-							maptcl[tabs.at(dn).getAttribute("class")] = tabs.at(dn).getAttribute("name");
-							ElementList cols = tabs.at(dn).getChildElements();
-							for (unsigned int cn = 0; cn < cols.size(); cn++)
-							{
-								if(cols.at(cn).getTagName()=="hasOne")
-								{
-									DBRel relation;
-									relation.clsName = cols.at(cn).getText();
-									relation.type = 1;
-									relation.fk = cols.at(cn).getAttribute("fk");
-									relation.pk = cols.at(cn).getAttribute("pk");
-									relv.push_back(relation);
-								}
-								else if(cols.at(cn).getTagName()=="hasMany")
-								{
-									DBRel relation;
-									relation.clsName = cols.at(cn).getText();
-									relation.type = 2;
-									relation.fk = cols.at(cn).getAttribute("fk");
-									relation.pk = cols.at(cn).getAttribute("pk");
-									relation.field = cols.at(cn).getAttribute("field");
-									relv.push_back(relation);
-								}
-								else if(cols.at(cn).getTagName()=="many")
-								{
-									DBRel relation;
-									relation.clsName = cols.at(cn).getText();
-									relation.type = 3;
-									relation.fk = cols.at(cn).getAttribute("fk");
-									relation.pk = cols.at(cn).getAttribute("pk");
-									relv.push_back(relation);
-								}
-								else if(cols.at(cn).getTagName()=="col")
-								{
-									maptc[cols.at(cn).getAttribute("obf")] = cols.at(cn).getAttribute("dbf");
-								}
-							}
-							appTableColMapping[tabs.at(dn).getAttribute("class")] = maptc;
-							appTableRelMapping[tabs.at(dn).getAttribute("class")] = relv;
-						}
-					}
-				}
-			}
-		}
-		mapping->setAppTableColMapping(appTableColMapping);
-		mapping->setAppTableClassMapping(maptcl);
-		mapping->setAppTableRelMapping(appTableRelMapping);
-		CibernateConnPools::addMapping(name,mapping);
-		//cout << (defpath+"config/app.prop") << flush;
-		propMap afc = pread.getProperties(defpath+"config/afc.prop");
-
-		string filepath;
-		if(afc.size()>0)
-		{
-			string objs = afc["PROP"];
-			strVec objv;
-			boost::iter_split(objv, objs, boost::first_finder(","));
-			for (unsigned int var1 = 0;var1<objv.size();var1++)
-			{
-				if(objv.at(var1)!="")
-				{
-					//strVec info = ref.getAfcObjectData(usrincludes+objv.at(var)+".h", true);
-					vecvec.push_back(usrincludes);
-					stat.push_back(true);
-					afcd.push_back(objv.at(var1));
-				}
-			}
-			objs = afc["INTF"];
-			objv.clear();
-			boost::iter_split(objv, objs, boost::first_finder(","));
-			for (unsigned int var1 = 0;var1<objv.size();var1++)
-			{
-				if(objv.at(var1)!="")
-				{
-					//strVec info = ref.getAfcObjectData(usrincludes+objv.at(var)+".h", false);
-					vecvec.push_back(usrincludes);
-					stat.push_back(false);
-					afcd.push_back(objv.at(var1));
-				}
-			}
-		}
-    }
-
-    for (unsigned int var1 = 0;var1<compnts.size();var1++)
-	{
-		string cudata,cuheader,curemote,curemoteheaders;
-		string file = gen.generateComponentCU(compnts.at(var1),cudata,cuheader,curemote,curemoteheaders);
-		AfcUtil::writeTofile(rtdcfpath+file+".h",cuheader,true);
-		AfcUtil::writeTofile(rtdcfpath+file+".cpp",cudata,true);
-		AfcUtil::writeTofile(rtdcfpath+file+"_Remote.h",curemoteheaders,true);
-		AfcUtil::writeTofile(rtdcfpath+file+"_Remote.cpp",curemote,true);
-		isrcs += "./"+file+".cpp \\\n"+"./"+file+"_Remote.cpp \\\n";
-		iobjs += "./"+file+".o \\\n"+"./"+file+"_Remote.o \\\n";
-		ideps += "./"+file+".d \\\n"+"./"+file+"_Remote.d \\\n";
-		cmpnames.push_back(file);
-	}
-
-    string ret = ref.generateClassDefinitionsAll(all,includeRef);
-    AfcUtil::writeTofile(rtdcfpath+"ReflectorInterface.cpp",ret,true);
-    ret = ref.generateSerDefinitionAll(all,includeRef);
-    AfcUtil::writeTofile(rtdcfpath+"SerializeInterface.cpp",ret,true);
-    cntxt["RUNTIME_LIBRARIES"] = libs;
-	ret = templ.evaluate(rtdcfpath+"objects.mk.template",cntxt);
-	AfcUtil::writeTofile(rtdcfpath+"objects.mk",ret,true);
-	cntxt.clear();
-	cntxt["USER_DEFINED_INC"] = ilibs;
-	cntxt["RUNTIME_COMP_SRCS"] = isrcs;
-	cntxt["RUNTIME_COMP_OBJS"] = iobjs;
-	cntxt["RUNTIME_COMP_DEPS"] = ideps;
-	ret = templ.evaluate(rtdcfpath+"subdir.mk.template",cntxt);
-	AfcUtil::writeTofile(rtdcfpath+"subdir.mk",ret,true);
-	ret = DCPGenerator::generateDCPAll(dcps);
-	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
-	string headers,objs,infjs;
-	ret = AfcUtil::generateJsObjectsAll(vecvec,afcd,stat,headers,objs,infjs);
-	AfcUtil::writeTofile(rtdcfpath+"AjaxInterface.cpp",ret,true);
-	AfcUtil::writeTofile(pubpath+"_afc_Objects.js",objs,true);
-	AfcUtil::writeTofile(pubpath+"_afc_Interfaces.js",infjs,true);
-	AfcUtil::writeTofile(incpath+"AfcInclude.h",headers,true);
-	ApplicationUtil apputil;
-	webdirs.clear();
-	ret = apputil.buildAllApplications(appf,webdirs1,appMap);
-	AfcUtil::writeTofile(rtdcfpath+"ApplicationInterface.cpp",ret,true);
-	WsUtil wsu;
-	ret = wsu.generateAllWSDL(wspath,respath);
-	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);*/
-
     strVec cmpnames = temporaray(webdirs,webdirs1,incpath,rtdcfpath,pubpath,respath);
 
 	props = pread.getProperties(respath+"mime-types.prop");
