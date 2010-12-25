@@ -178,12 +178,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 			else if(temp.at(0)=="Cookie")
 			{
 				this->cookie = true;
-				cout << "found cookie" << endl;
 				strVec results;
 				boost::iter_split(results, temp.at(1), boost::first_finder("; "));
 				for(unsigned j=0;j<(int)results.size();j++)
 				{
-					cout << results.at(j) << endl;
 					strVec results1;
 					boost::iter_split(results1, results.at(j), boost::first_finder("="));
 					if(results1.size()==2)
@@ -397,7 +395,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 	}*/
 	if(this->getContent()!="")
 	{
-		//cout << this->getContent() << flush;
+		cout << this->getContent() << flush;
 		if(this->getContent_type().find("application/x-www-form-urlencoded")!=string::npos)
 		{
 			strVec params;
