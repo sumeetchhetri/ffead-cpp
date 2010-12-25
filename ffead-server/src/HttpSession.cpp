@@ -25,7 +25,7 @@
 #include <iostream>
 HttpSession::HttpSession()
 {
-
+	this->dirty = false;
 }
 
 HttpSession::~HttpSession()
@@ -42,7 +42,7 @@ void HttpSession::setSessionId(string sessionId)
 	this->sessionId = sessionId;
 }
 
-Map HttpSession::getSessionAttributes() const
+Map HttpSession::getSessionAttributes()
 {
 	return sessionAttributes;
 }
@@ -63,4 +63,5 @@ string HttpSession::getAttribute(string key)
 void HttpSession::setAttribute(string key,string value)
 {
 	this->sessionAttributes[key] = value;
+	this->dirty = true;
 }
