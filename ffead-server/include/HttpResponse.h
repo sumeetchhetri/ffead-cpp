@@ -39,7 +39,7 @@ public:
     void setContent_str(string content_str)
     {
         this->content_str = content_str;
-        this->content_len = boost::lexical_cast<string>(content_str.length());
+        //this->content_len = boost::lexical_cast<string>(content_str.length());
     }
 
     string getHttpVersion() const
@@ -122,15 +122,15 @@ public:
         this->content_type = content_type;
     }
 
-    string getContent_len() const
+    int getContent_len() const
     {
-        return content_len;
+        return content_str.length();
     }
 
-    void setContent_len(string content_len)
+    /*void setContent_len(string content_len)
     {
         this->content_len = content_len;
-    }
+    }*/
 
     string getContent() const
 	{
@@ -146,7 +146,7 @@ public:
 	void setContent(string content)
 	{
 		this->content_str = content_str;
-		this->content_len = boost::lexical_cast<string>(content_str.length());
+		//this->content_len = boost::lexical_cast<string>(content_str.length());
 	}
 
     string getLast_modified() const
@@ -159,6 +159,48 @@ public:
         this->last_modified = last_modified;
     }
 
+    string getLocation() const
+	{
+		return location;
+	}
+	void setLocation(string location)
+	{
+		this->location = location;
+	}
+
+	string getWww_authenticate() const
+	{
+		return www_authenticate;
+	}
+	void setWww_authenticate(string www_authenticate)
+	{
+		this->www_authenticate = www_authenticate;
+	}
+
+	void addCookie(string cookie)
+	{
+		this->cookies.push_back(cookie);
+	}
+
+    string generateResponse()
+    {
+    	string resp;
+    	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
+    	if(this->server!="")resp += "Server: " + this->server + "\r\n";
+    	if(this->date!="")resp += "Date: " + this->date + "\r\n";
+    	if(this->connection!="")resp += "Connection: " + this->connection + "\r\n";
+    	if(this->accept_ranges!="")resp += "Accept-Ranges: " + this->accept_ranges + "\r\n";
+    	if(this->content_type!="")resp += "Content-Type: " + this->content_type + "\r\n";
+    	if(this->content_str!="")resp += "Content-Length: " + boost::lexical_cast<string>(content_str.length()) + "\r\n";
+    	if(this->last_modified!="")resp += "Last-Modified: " + this->last_modified + "\r\n";
+    	for (int var = 0; var < (int)this->cookies.size(); var++)
+    	{
+    		resp += "Set-Cookie: " + this->cookies.at(var) + "\r\n";
+		}
+    	resp += "\r\n";
+    	resp += this->content_str;
+    	return resp;
+    }
 private:
 	string httpVersion;
 	string statusCode;
@@ -169,9 +211,12 @@ private:
 	string accept_ranges;
 	Cont content;
 	string content_type;
-	string content_len;
+	//string content_len;
 	string last_modified;
 	string content_str;
+	string location;
+	vector<string> cookies;
+	string www_authenticate;
 };
 
 #endif /* HTTPRESPONSE_H_ */
