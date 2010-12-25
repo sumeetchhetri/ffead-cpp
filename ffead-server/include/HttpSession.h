@@ -32,15 +32,17 @@ typedef map<string, string> Map;
 class HttpSession {
 	string sessionId;
 	Map sessionAttributes;
+	bool dirty;
 public:
 	HttpSession();
 	virtual ~HttpSession();
     string getSessionId() const;
     void setSessionId(string);
-    Map getSessionAttributes() const;
+    Map getSessionAttributes();
     void setSessionAttributes(Map);
     string getAttribute(string);
     void setAttribute(string,string);
+    bool isDirty() const{return dirty;}
 };
 
 #endif /* HTTPSESSION_H_ */
