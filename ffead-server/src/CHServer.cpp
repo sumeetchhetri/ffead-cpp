@@ -34,7 +34,7 @@ string servd;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap;
 static string resourcePath;
 static strVec dcpsss;
-static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone;
+static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone,sessatserv;
 static int thrdpsiz,shmid;
 static SSL_CTX *ctx;
 static int s_server_session_id_context = 1;
@@ -50,80 +50,43 @@ static string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_
 typedef map<string,string> sessionMap;
 static boost::mutex m_mutex,p_mutex;
 
-void createSharedMemeory()
+void writeToSharedMemeory(string sessionId, string value)
 {
-	key_t key;
-	sessionMap *shm;
-	/*
-	 * We'll name our shared memory segment
-	 * "5678".
-	 */
-	key = 11112;
-
-	/*
-	 * Create the segment.
-	 */
-	if ((shmid = shmget(key, 27, IPC_CREAT | 0666)) < 0) {
-		perror("shmget");
-		exit(1);
-	}
-	cout << "init memeory " << shmid << endl;
-	/*
-	 * Now we attach the segment to our data space.
-	 */
-	if ((shm = (sessionMap*)shmat(shmid, NULL, 0)) == (sessionMap *) -1) {
-		perror("shmat");
-		exit(1);
-	}
-	cout << "shared memeory created" << endl;
-
+	string filen = servd+"/tmp/"+sessionId+".sess";
+	ofstream ofs(filen.c_str(),ios_base::app);
+	ofs.write(value.c_str(),value.length());
+	ofs.close();
 }
 
-void writeToSharedMemeory(string key, string value)
+map<string,string> readFromSharedMemeory(string sessionId)
 {
-	sessionMap* shm;
-	/*
-	 * Now we attach the segment to our data space.
-	 */
-	if ((shm = (sessionMap*)shmat(shmid, NULL, 0)) == (sessionMap *) -1) {
-		perror("shmat");
-		exit(1);
-	}
-	cout << "got shared memeory area " << shm << endl;
-
-	//(*(shm))["sdfsd"] = "sdfdsa";
-	p_mutex.lock();
-	sessionMap sess = *shm;
-	sess[key] = value;
-	*shm = sess;
-	p_mutex.unlock();
-	cout << shm->size() << endl;
-	/*
-	 * Now put some things into the memory for the
-	 * other process to read.
-	 */
-	//shm->insert(pair<string,string>("sad","1"));
-}
-
-string readFromSharedMemeory(string key)
-{
-	sessionMap* shm;
-	/*
-	 * Now we attach the segment to our data space.
-	 */
-	if ((shm = (sessionMap*)shmat(shmid, NULL, 0)) == (sessionMap *) -1) {
-		perror("shmat");
-		exit(1);
-	}
-	p_mutex.lock();
-	sessionMap sess = *shm;
-	p_mutex.unlock();
-	if(sess.find(key)!=sess.end())
+	map<string,string> valss;
+	string filen = servd+"/tmp/"+sessionId+".sess";
+	ifstream ifs(filen.c_str());
+	string tem,all;
+	while(getline(ifs,tem))
+		all.append(tem+"\n");
+	strVec results;
+	boost::iter_split(results, all, boost::first_finder("; "));
+	for(unsigned j=0;j<(int)results.size();j++)
 	{
-		cout << "reading from shredmem " << sess[key] << endl;
-		return sess[key];
+		if(results.at(j)=="")continue;
+		strVec results1;
+		boost::replace_all(results.at(j),"%3B%20","; ");
+		boost::iter_split(results1, results.at(j), boost::first_finder("="));
+		if(results1.size()==2)
+		{
+			boost::replace_all(results1.at(0),"%3D","=");
+			boost::replace_all(results1.at(1),"%3D","=");
+			valss[results1.at(0)] = results1.at(1);
+		}
+		else
+		{
+			boost::replace_all(results1.at(0),"%3D","=");
+			valss[results1.at(0)] = "true";
+		}
 	}
-	return "";
+	return valss;
 }
 
 /*The password code is not thread safe*/
@@ -479,12 +442,11 @@ string getContentStr(string url,string locale,string ext)
     return all;
 }
 
-string createResponse(HttpResponse res,bool flag,map<string,string> vals)
+void createResponse(HttpResponse &res,bool flag,map<string,string> vals)
 {
-	string resp;
-	resp = (res.getHttpVersion() + " " + res.getStatusCode() + " " + res.getStatusMsg() + "\r\n");
-	if(!flag)
+	if(flag)
 	{
+		string values;
 		cout << "session object modified " << vals.size() << endl;
 		Date date;
 		string id = boost::lexical_cast<string>(Timer::getCurrentTime());
@@ -496,19 +458,23 @@ string createResponse(HttpResponse res,bool flag,map<string,string> vals)
 			string key = it->first;
 			string value = it->second;
 			boost::replace_all(key,"; ","%3B%20");
+			boost::replace_all(key,"=","%3D");
 			boost::replace_all(value,"; ","%3B%20");
+			boost::replace_all(value,"=","%3D");
 			cout << it->first << " = " << it->second << endl;
-			resp += "Set-Cookie: "+ key + "=" + value + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly\r\n";
+			if(!sessatserv)
+				res.addCookie(key + "=" + value + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
+			else
+			{
+				values += key + "=" + value + "; ";
+			}
+		}
+		if(sessatserv)
+		{
+			res.addCookie("FFEADID=" + id + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
+			if(values!="")writeToSharedMemeory(id,values);
 		}
 	}
-	if(res.getContent_str().length()>0)
-	{
-		resp += ("Content-Length: "+res.getContent_len() + "\r\n");
-		resp += ("Content-Type: "+res.getContent_type() + "\r\n\r\n");
-	}
-	else
-		resp += "\r\n";
-	return resp;
 }
 
 void listi(string cwd,string type,bool apDir,strVec &folders)
@@ -735,7 +701,14 @@ void ServiceTask::run()
 
 		if(req->hasCookie())
 		{
-			req->getSession()->setSessionAttributes(req->getCookieInfo());
+			if(!sessatserv)
+				req->getSession()->setSessionAttributes(req->getCookieInfo());
+			else
+			{
+				string id = req->getCookieInfo()["FFEADID"];
+				map<string,string> values = readFromSharedMemeory(id);
+				req->getSession()->setSessionAttributes(values);
+			}
 		}
 
 		if(cntMap[req->getCntxt_name()]!="true")
@@ -930,7 +903,7 @@ void ServiceTask::run()
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".txt"]);
 			res.setContent_str(content);
-			res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(boost::lexical_cast<string>(content.length()));
 		}
 		else if(ext==".dcp")
 		{
@@ -962,7 +935,7 @@ void ServiceTask::run()
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				res.setContent_len("0");
+				//res.setContent_len("0");
 			}
 			else
 			{
@@ -970,7 +943,7 @@ void ServiceTask::run()
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
 				res.setContent_str(content);
-				res.setContent_len(boost::lexical_cast<string>(content.length()));
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
 			}
 		}
 		else if(ext==".view" && vwMap[req->getCntxt_name()+req->getFile()]!="")
@@ -1002,7 +975,7 @@ void ServiceTask::run()
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				res.setContent_len("0");
+				//res.setContent_len("0");
 			}
 			else
 			{
@@ -1010,7 +983,7 @@ void ServiceTask::run()
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
 				res.setContent_str(content);
-				res.setContent_len(boost::lexical_cast<string>(content.length()));
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
 			}
 		}
 		else if(ext==".tpe" && tmplMap[req->getCntxt_name()+req->getFile()]!="")
@@ -1041,7 +1014,7 @@ void ServiceTask::run()
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				res.setContent_len("0");
+				//res.setContent_len("0");
 			}
 			else
 			{
@@ -1049,7 +1022,7 @@ void ServiceTask::run()
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
 				res.setContent_str(content);
-				res.setContent_len(boost::lexical_cast<string>(content.length()));
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
 			}
 		}
 		else if((req->getContent_type().find("application/soap+xml")!=string::npos || req->getContent_type().find("text/xml")!=string::npos)
@@ -1190,7 +1163,7 @@ void ServiceTask::run()
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".xml"]);
 			res.setContent_str(env);
-			res.setContent_len(boost::lexical_cast<string>(env.length()));
+			//res.setContent_len(boost::lexical_cast<string>(env.length()));
 		}
 		else if(ext==".wsdl")
 		{
@@ -1199,7 +1172,7 @@ void ServiceTask::run()
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				res.setContent_len("0");
+				//res.setContent_len("0");
 			}
 			else
 			{
@@ -1207,7 +1180,7 @@ void ServiceTask::run()
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
 				res.setContent_str(content);
-				res.setContent_len(boost::lexical_cast<string>(content.length()));
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
 			}
 		}
 		else
@@ -1217,7 +1190,7 @@ void ServiceTask::run()
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				res.setContent_len(boost::lexical_cast<string>(0));
+				//res.setContent_len(boost::lexical_cast<string>(0));
 			}
 			else
 			{
@@ -1225,16 +1198,17 @@ void ServiceTask::run()
 				res.setStatusMsg("OK");
 				res.setContent_type(props[ext]);
 				res.setContent_str(content);
-				res.setContent_len(boost::lexical_cast<string>(content.length()));
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
 				//sess.setAttribute("CURR",req->getUrl());
 			}
 		}
 		alldatlg += "--processed data";
 		string h1;
-		bool sessionchanged = req->hasCookie();
-		if(req->getCookieInfo().size()!=req->getSession()->getSessionAttributes().size())
-			sessionchanged = false;
-		h1 = createResponse(res,sessionchanged,req->getSession()->getSessionAttributes());
+		bool sessionchanged = !req->hasCookie();
+		sessionchanged |= req->getSession()->isDirty();
+
+		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes());
+		h1 = res.generateResponse();
 		//cout << h1 << endl;
 		if(isSSLEnabled)
 		{
@@ -1276,7 +1250,7 @@ void ServiceTask::run()
 				  if(io!=NULL)BIO_free(io);
 				  return;
 			}
-			int size;
+			/*int size;
 			if(res.getContent_str().length()>0)
 			{
 				if ((size=BIO_puts(io,res.getContent_str().c_str()))<=0)
@@ -1285,7 +1259,7 @@ void ServiceTask::run()
 					  if(io!=NULL)BIO_free(io);
 					  return;
 				}
-			}
+			}*/
 			if((r=BIO_flush(io))<0)
 			{
 				  error_occurred("Error flushing BIO",fd,ssl);
@@ -1308,7 +1282,7 @@ void ServiceTask::run()
 			}
 
 
-			if(res.getContent_str().length()>0)
+			/*if(res.getContent_str().length()>0)
 			{
 				if ((size=send(fd,res.getContent_str().c_str(), res.getContent_str().length(),0)) == -1)
 					cout << "send failed" << flush;
@@ -1317,7 +1291,7 @@ void ServiceTask::run()
 					close(fd);memset(&buf[0], 0, sizeof(buf));
 					cout << "socket closed for writing" <<flush;return;
 				}
-			}
+			}*/
 			if(io!=NULL)BIO_free_all(io);
 		}
 		close(fd);
@@ -1501,15 +1475,26 @@ void signalSIGABRT(int dummy)
 }
 void signalSIGTERM(int dummy)
 {
-	signal(SIGTERM,signalSIGTERM);
-	string smd = "ipcrm -m " + boost::lexical_cast<string>(shmid);
-	if(getpid()==parid)
+	signal(SIGKILL,signalSIGTERM);
+	string filename;
+	stringstream ss;
+	ss << servd;
+	ss << getpid();
+	ss >> filename;
+	filename.append(".cntrl");
+	remove(filename.c_str());
+	void * array[25];
+	int nSize = backtrace(array, 25);
+	char ** symbols = backtrace_symbols(array, nSize);
+	string tempo;
+	for (int i = 0; i < nSize; i++)
 	{
-		system(smd.c_str());
-		cout << "cleared shared memory area" << endl;
+		tempo = symbols[i];
+		tempo += "\n";
 	}
-	cout << "Termination signal occurred for process" << endl;
-	exit(dummy);
+	free(symbols);
+	cout << "Termination signal occurred for process" << getpid() << "\n" << tempo << flush;
+	abort();
 }
 
 void signalSIGKILL(int dummy)
@@ -2251,19 +2236,9 @@ void dynamic_page_monitor(string serverRootDirectory)
 
 int main(int argc, char* argv[])
 {
-	/*createSharedMemeory();
-	writeToSharedMemeory("key","asdfghjklmnbvcagsjwkiejekhjkhlhlhlhlhlhlhblhb");
-	writeToSharedMemeory("key1","asdfghjklmnbvcagsjwkiejekhjkhlhlhlhlhlhlhblhb");
-	readFromSharedMemeory("key");
-	readFromSharedMemeory("key1");
-	signal(SIGTERM,signalSIGTERM);
-	signal(SIGKILL,signalSIGTERM);
-	signal(SIGINT,signalSIGTERM);
-	signal(SIGABRT,signalSIGTERM);*/
 	parid = getpid();
 	signal(SIGSEGV,signalSIGSEGV);
 	signal(SIGFPE,signalSIGFPE);
-
 
 	//signal(SIGILL,signalSIGILL);
 	signal(SIGPIPE,signalSIGPIPE);
@@ -2329,7 +2304,8 @@ int main(int argc, char* argv[])
    			}
    		}
    	}
-
+   	if(srprps["SESS_STATE"]=="server")
+   		sessatserv = true;
     /* Set each process to allow the maximum number of files to open */
 	/*rt.rlim_max = rt.rlim_cur = MAXEPOLLSIZE;
 	if(setrlimit(RLIMIT_NOFILE, &rt) == -1)
