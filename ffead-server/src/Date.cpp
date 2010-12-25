@@ -117,7 +117,7 @@ int Date::getHh() const
 
 void Date::setHh(int hh)
 {
-	this->hh = hh;
+	this->hh = boost::lexical_cast<string>(hh);
 }
 
 int Date::getMm() const
@@ -127,7 +127,7 @@ int Date::getMm() const
 
 void Date::setMm(int mm)
 {
-	this->mm = mm;
+	this->mm = boost::lexical_cast<string>(mm);
 }
 
 int Date::getSs() const
@@ -137,7 +137,7 @@ int Date::getSs() const
 
 void Date::setSs(int ss)
 {
-	this->ss = ss;
+	this->ss = boost::lexical_cast<string>(ss);
 }
 
 string Date::getDayw() const
