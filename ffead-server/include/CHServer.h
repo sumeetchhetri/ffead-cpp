@@ -85,9 +85,6 @@
 #include <sys/stat.h>
 #include "Timer.h"
 #include "DateFormat.h"
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
 
 #ifdef WINDOWS
     #include <direct.h>
@@ -145,6 +142,13 @@ public:
 	static void* getDLIB()
 	{
 		return shared_instance->dlib;
+	}
+	static void deinit()
+	{
+		if(shared_instance->dlib!=NULL)dlclose(shared_instance->dlib);
+		shared_instance->~SharedData();
+		shared_instance = NULL;
+		cout << "\nclosed handle" << endl;
 	}
 };
 
