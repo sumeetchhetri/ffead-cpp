@@ -24,7 +24,7 @@
 
 HttpResponse::HttpResponse() {
 	// TODO Auto-generated constructor stub
-
+	this->server = "FFEAD 1.1";
 }
 
 HttpResponse::~HttpResponse() {
