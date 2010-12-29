@@ -373,10 +373,10 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 						ws_funcs.append("_retStr += \"<\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\"+_getRetXmlFor"+pars["RETURNTYP"]+"(_retval,_req.getNameSpc())+\"</\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\";\n");
 				}
 				ws_funcs.append("_retStr += \"</\" + _req.getTagNameSpc() + \"Response>\";\n");
-				ws_funcs.append("}catch(string &fault){\n");
-				ws_funcs.append("return fault;\n}\n");
+				ws_funcs.append("}catch(Exception e){\n");
+				ws_funcs.append("return e.getMessage();\n}\n");
 				ws_funcs.append("catch(...){\n");
-				ws_funcs.append("return \"Exception occurred\";\n}\n");
+				ws_funcs.append("return \"<soap:Fault><faultcode>soap:Server</faultcode><faultstring>Exception occurred</faultstring></soap:Fault>\";\n}\n");
 				ws_funcs.append("return _retStr;\n}\n");
 			}
 			ws_funcs.append("}\n");
