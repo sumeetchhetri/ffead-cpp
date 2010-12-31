@@ -50,10 +50,14 @@ static string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_
 typedef map<string,string> sessionMap;
 static boost::mutex m_mutex,p_mutex;
 
-void writeToSharedMemeory(string sessionId, string value)
+void writeToSharedMemeory(string sessionId, string value,bool napp)
 {
 	string filen = servd+"/tmp/"+sessionId+".sess";
-	ofstream ofs(filen.c_str(),ios_base::app);
+	ofstream ofs;
+	if(napp)
+		ofs.open(filen.c_str());
+	else
+		ofs.open(filen.c_str(),ios_base::app);
 	ofs.write(value.c_str(),value.length());
 	ofs.close();
 }
@@ -68,7 +72,7 @@ map<string,string> readFromSharedMemeory(string sessionId)
 		all.append(tem+"\n");
 	strVec results;
 	boost::iter_split(results, all, boost::first_finder("; "));
-	for(unsigned j=0;j<(int)results.size();j++)
+	for(unsigned j=0;j<(int)results.size()-1;j++)
 	{
 		if(results.at(j)=="")continue;
 		strVec results1;
@@ -442,7 +446,7 @@ string getContentStr(string url,string locale,string ext)
     return all;
 }
 
-void createResponse(HttpResponse &res,bool flag,map<string,string> vals)
+void createResponse(HttpResponse &res,bool flag,map<string,string> vals,string prevcookid)
 {
 	if(flag)
 	{
@@ -471,8 +475,16 @@ void createResponse(HttpResponse &res,bool flag,map<string,string> vals)
 		}
 		if(sessatserv)
 		{
-			res.addCookie("FFEADID=" + id + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
-			if(values!="")writeToSharedMemeory(id,values);
+			if(values!="")
+			{
+				if(prevcookid!="")
+					writeToSharedMemeory(prevcookid,values,true);
+				else
+				{
+					writeToSharedMemeory(id,values,false);
+					res.addCookie("FFEADID=" + id + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
+				}
+			}
 		}
 	}
 }
@@ -1087,7 +1099,7 @@ void ServiceTask::run()
 					{
 						bod.append(" " + it->first + "=\"" + it->second + "\" ");
 					}
-					bod.append("><soap-fault><faultcode>Client</faultcode><faultstring>Operation not supported</faultstring><faultactor/><detail>No such method error</detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+					bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>Operation not supported</faultstring><faultactor/><detail>No such method error</detail><soap-fault></" + soapbody.getTagNameSpc()+">");
 					attl = soapenv.getAttributes();
 					env = "<" + soapenv.getTagNameSpc();
 					for(it=attl.begin();it!=attl.end();it++)
@@ -1109,7 +1121,7 @@ void ServiceTask::run()
 				{
 					bod.append(" " + it->first + "=\"" + it->second + "\" ");
 				}
-				bod.append("><soap-fault><faultcode>Client</faultcode><faultstring>No such method error</faultstring><faultactor/><detail>"+fault+"</detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+				bod.append("><soap-fault><faultcode>Client</faultcode><faultstring>No such method error</faultstring><detail>"+fault+"</detail><soap-fault></" + soapbody.getTagNameSpc()+">");
 				attl = soapenv.getAttributes();
 				env = "<" + soapenv.getTagNameSpc();
 				for(it=attl.begin();it!=attl.end();it++)
@@ -1129,7 +1141,7 @@ void ServiceTask::run()
 				{
 					bod.append(" " + it->first + "=\"" + it->second + "\" ");
 				}
-				bod.append("><soap-fault><faultcode>Client</faultcode><faultstring>"+e->what()+"</faultstring><faultactor/><detail></detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+				bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>"+e->what()+"</faultstring><detail></detail><soap-fault></" + soapbody.getTagNameSpc()+">");
 				attl = soapenv.getAttributes();
 				env = "<" + soapenv.getTagNameSpc();
 				for(it=attl.begin();it!=attl.end();it++)
@@ -1149,7 +1161,7 @@ void ServiceTask::run()
 				{
 					bod.append(" " + it->first + "=\"" + it->second + "\" ");
 				}
-				bod.append("><soap-fault><faultcode>Client</faultcode><faultstring>Standard Exception</faultstring><faultactor/><detail></detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+				bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>Standard Exception</faultstring><detail></detail><soap-fault></" + soapbody.getTagNameSpc()+">");
 				attl = soapenv.getAttributes();
 				env = "<" + soapenv.getTagNameSpc();
 				for(it=attl.begin();it!=attl.end();it++)
@@ -1207,7 +1219,7 @@ void ServiceTask::run()
 		bool sessionchanged = !req->hasCookie();
 		sessionchanged |= req->getSession()->isDirty();
 
-		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes());
+		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfo()["FFEADID"]);
 		h1 = res.generateResponse();
 		//cout << h1 << endl;
 		if(isSSLEnabled)
