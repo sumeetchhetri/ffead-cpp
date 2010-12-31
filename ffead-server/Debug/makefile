@@ -55,6 +55,7 @@ CHS: $(OBJS) $(USER_OBJS)
 	mkdir ffead-server/include
 	mkdir ffead-server/rtdcf
 	mkdir ffead-server/web
+	mkdir ffead-server/tmp
 	cp -Rf ../resources/* ffead-server/resources/
 	cp -Rf ../lib/* ffead-server/lib/
 	cp -Rf ../public/* ffead-server/public/
