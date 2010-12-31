@@ -710,7 +710,10 @@ void ServiceTask::run()
 		map<string,string> params1 = *params;
 		string webpath = serverRootDirectory + "web/";
 		HttpRequest* req= new HttpRequest(results,webpath);
-
+		if(req->getFile()=="")
+		{
+			req->setFile("index.html");
+		}
 		if(req->hasCookie())
 		{
 			if(!sessatserv)
@@ -1121,7 +1124,7 @@ void ServiceTask::run()
 				{
 					bod.append(" " + it->first + "=\"" + it->second + "\" ");
 				}
-				bod.append("><soap-fault><faultcode>Client</faultcode><faultstring>No such method error</faultstring><detail>"+fault+"</detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+				bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>"+fault+"</faultstring><detail></detail><soap-fault></" + soapbody.getTagNameSpc()+">");
 				attl = soapenv.getAttributes();
 				env = "<" + soapenv.getTagNameSpc();
 				for(it=attl.begin();it!=attl.end();it++)
