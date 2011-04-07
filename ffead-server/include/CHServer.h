@@ -85,7 +85,7 @@
 #include <sys/stat.h>
 #include "Timer.h"
 #include "DateFormat.h"
-
+#include "Filter.h"
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd
