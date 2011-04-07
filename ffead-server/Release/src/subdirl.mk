@@ -83,7 +83,8 @@ CPP_SRCS += \
 ../src/LDAPAuthController.cpp \
 ../src/CryptoHandler.cpp \
 ../src/HttpResponseParser.cpp \
-../src/SSLClient.cpp
+../src/SSLClient.cpp \
+../src/Filter.cpp
 
 OBJS += \
 ./src/AOPEngine.o \
@@ -165,7 +166,8 @@ OBJS += \
 ./src/LDAPAuthController.o \
 ./src/CryptoHandler.o \
 ./src/HttpResponseParser.o \
-./src/SSLClient.o
+./src/SSLClient.o \
+./src/Filter.o
 
 CPP_DEPS += \
 ./src/AOPEngine.d \
@@ -247,7 +249,8 @@ CPP_DEPS += \
 ./src/LDAPAuthController.d \
 ./src/CryptoHandler.d \
 ./src/HttpResponseParser.d \
-./src/SSLClient.d
+./src/SSLClient.d \
+./src/Filter.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
