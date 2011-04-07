@@ -14,4 +14,8 @@
 	<dviews>
 		<dview class="Dview" path="test.view"/>
 	</dviews>
+	<filters>
+		<filter class="DefaultIOFilter" type="in"/>
+		<filter class="DefaultIOFilter" type="out"/>
+	</filters>
 </app>
