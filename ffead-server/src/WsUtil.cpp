@@ -33,7 +33,7 @@ WsUtil::~WsUtil() {
 
 string WsUtil::generateAllWSDL(vector<string> files,string resp,map<string,string> &wsmap)
 {
-	string ret,headers="#include \"string\"\n#include <sstream>\n#include <boost/lexical_cast.hpp>\n#include \"Element.h\"\ntypedef vector<Element> ElementList;\ntypedef map<string,string> AttributeList;\n";
+	string ret,headers="#include \"Exception.h\"\n#include \"string\"\n#include <sstream>\n#include <boost/lexical_cast.hpp>\n#include \"Element.h\"\ntypedef vector<Element> ElementList;\ntypedef map<string,string> AttributeList;\n";
 	for(unsigned int var = 0; var < files.size(); ++var)
 	{
 		string webdir = resp+"../web/"+files.at(var);

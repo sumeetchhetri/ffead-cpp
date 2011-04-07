@@ -32,9 +32,10 @@ CHServer::~CHServer() {
 SharedData* SharedData::shared_instance = NULL;
 string servd;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap;
+static map<string, vector<string> > filterMap;
 static string resourcePath;
 static strVec dcpsss;
-static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone,sessatserv;
+static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone,sessatserv,isCompileEnabled;
 static int thrdpsiz,shmid;
 static SSL_CTX *ctx;
 static int s_server_session_id_context = 1;
@@ -773,6 +774,41 @@ void ServiceTask::run()
 		bool isAuthenticated = false;
 		bool isoAuthRes = false;
 		bool isContrl = false;
+
+		if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"in")!=filterMap.end())
+		{
+			vector<string> tempp;
+			if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end())
+				tempp = filterMap[req->getCntxt_name()+"*.*in"];
+			else
+				tempp = filterMap[req->getCntxt_name()+ext+"in"];
+
+			for (int var = 0; var < tempp.size(); ++var)
+			{
+				string clasz = tempp.at(var);
+				clasz = "getReflectionCIFor" + clasz;
+				cout << "filter handled by class " << clasz << endl;
+				if(dlib == NULL)
+				{
+					cerr << dlerror() << endl;
+					exit(-1);
+				}
+				void *mkr = dlsym(dlib, clasz.c_str());
+				if(mkr!=NULL)
+				{
+					FunPtr f =  (FunPtr)mkr;
+					ClassInfo srv = f();
+					args argus;
+					Constructor ctor = srv.getConstructor(argus);
+					Reflector ref;
+					void *_temp = ref.newInstanceGVP(ctor);
+					Filter *filter = (Filter*)_temp;
+					filter->doInputFilter(req);
+					cout << "filter called" << endl;
+					delete _temp;
+				}
+			}
+		}
 		if(autpattMap[req->getCntxt_name()+"*.*"]!="" || autMap[req->getCntxt_name()+ext]!="")
 		{
 			if(autpattMap[req->getCntxt_name()+"*.*"]!="")
@@ -846,6 +882,7 @@ void ServiceTask::run()
 						isContrl = true;
 					cout << "authhandler called" << endl;
 					ext = getFileExtension(req->getUrl());
+					delete authc;
 				}
 			}
 		}
@@ -1217,6 +1254,42 @@ void ServiceTask::run()
 				//sess.setAttribute("CURR",req->getUrl());
 			}
 		}
+
+		if(filterMap.find(req->getCntxt_name()+"*.*out")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"out")!=filterMap.end())
+		{
+			vector<string> tempp;
+			if(filterMap.find(req->getCntxt_name()+"*.*out")!=filterMap.end())
+				tempp = filterMap[req->getCntxt_name()+"*.*out"];
+			else
+				tempp = filterMap[req->getCntxt_name()+ext+"out"];
+
+			for (int var = 0; var < tempp.size(); ++var)
+			{
+				string clasz = tempp.at(var);
+				clasz = "getReflectionCIFor" + clasz;
+				cout << "filter handled by class " << clasz << endl;
+				if(dlib == NULL)
+				{
+					cerr << dlerror() << endl;
+					exit(-1);
+				}
+				void *mkr = dlsym(dlib, clasz.c_str());
+				if(mkr!=NULL)
+				{
+					FunPtr f =  (FunPtr)mkr;
+					ClassInfo srv = f();
+					args argus;
+					Constructor ctor = srv.getConstructor(argus);
+					Reflector ref;
+					void *_temp = ref.newInstanceGVP(ctor);
+					Filter *filter = (Filter*)_temp;
+					filter->doOutputFilter(&res);
+					cout << "filter called" << endl;
+					delete _temp;
+				}
+			}
+		}
+
 		alldatlg += "--processed data";
 		string h1;
 		bool sessionchanged = !req->hasCookie();
@@ -1976,6 +2049,36 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 						}
 					}
 				}
+				else if(eles.at(apps).getTagName()=="filters")
+				{
+					ElementList cntrls = eles.at(apps).getChildElements();
+					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
+					{
+						if(cntrls.at(cntn).getTagName()=="filter")
+						{
+							string url = cntrls.at(cntn).getAttribute("url");
+							string clas = cntrls.at(cntn).getAttribute("class");
+							string type = cntrls.at(cntn).getAttribute("type");
+							if(clas!="" && (type=="in" || type=="out"))
+							{
+								if(url=="")url="*.*";
+								if(url.find("*")!=string::npos)
+								{
+									if(url=="*.*")
+									{
+										filterMap[name+url+type].push_back(clas);
+									}
+									else
+									{
+										url = url.substr(url.find("*")+1);
+										filterMap[name+url+type].push_back(clas);
+									}
+								}
+								cout << "adding filter => " << name << url << type << " :: " << clas << endl;
+							}
+						}
+					}
+				}
 				else if(eles.at(apps).getTagName()=="templates")
 				{
 					ElementList tmplts = eles.at(apps).getChildElements();
@@ -2301,6 +2404,9 @@ int main(int argc, char* argv[])
    	string thrdpreq = srprps["THRD_PREQ"];
    	if(thrdpreq=="true" || thrdpreq=="TRUE")
    		isThreadprq = true;
+   	string compileEnabled = srprps["COMPILE_ENABLED"];
+	if(compileEnabled=="true" || compileEnabled=="TRUE")
+		isCompileEnabled = true;
    	else
    	{
    		thrdpreq = srprps["THRD_PSIZ"];
@@ -2388,17 +2494,33 @@ int main(int argc, char* argv[])
     }
     strVec cmpnames = temporaray(webdirs,webdirs1,incpath,rtdcfpath,pubpath,respath);
 
+    bool libpresent = true;
+    void *dlibtemp = dlopen("libinter.so", RTLD_NOW|RTLD_GLOBAL);
+	cout << endl <<dlibtemp << endl;
+	if(dlibtemp==NULL)
+	{
+		libpresent = false;
+		cout << dlerror() << endl;
+		Logger::info("Could not load Library");
+	}
+	else
+		dlclose(dlibtemp);
+    if(isCompileEnabled)
+    	libpresent = false;
+
 	props = pread.getProperties(respath+"mime-types.prop");
 	lprops = pread.getProperties(respath+"locale.prop");
 	string compres = "/"+respath+"run.sh";
-	int i=system(compres.c_str());
-	if(!i)
+	if(!libpresent)
 	{
-		cout << "Done" << flush;
-		Logger::info("Done generating intermediate code");
-		//logfile << "Done generating intermediate code\n" << flush;
+		int i=system(compres.c_str());
+		if(!i)
+		{
+			cout << "Done" << flush;
+			Logger::info("Done generating intermediate code");
+			//logfile << "Done generating intermediate code\n" << flush;
+		}
 	}
-
 
 	for (unsigned int var1 = 0;var1<cmpnames.size();var1++)
 	{
@@ -2440,7 +2562,7 @@ int main(int argc, char* argv[])
 		filename.append(".cntrl");
 		files.push_back(filename);
 	}
-	boost::thread m_thread(boost::bind(&dynamic_page_monitor ,serverRootDirectory));
+	if(isCompileEnabled)boost::thread m_thread(boost::bind(&dynamic_page_monitor ,serverRootDirectory));
 	struct epoll_event events[MAXEPOLLSIZE];
 	int epoll_handle = epoll_create(MAXEPOLLSIZE);
 	ev.events = EPOLLIN | EPOLLPRI;
