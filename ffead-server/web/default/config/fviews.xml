@@ -1,0 +1,14 @@
+<fview>
+	<page htm="test.html" class="TestPage">
+		<event eid="text" type="onclick" func="textonclick" args="1,document.getElementById('link').innerText,'Hello'" cb="alert(response)"/>
+		<event eid="link" type="onclick" func="linkonclick" cb="document.getElementById('para').innerHTML=response;alert(response)"/>
+		<functions>
+			<![CDATA[
+				function test()
+				{
+					alert("Hello />");
+				}
+			]]>
+		</functions>
+	</page>	
+</fview>
