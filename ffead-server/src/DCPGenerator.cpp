@@ -65,7 +65,7 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 				s = data.find_last_of("/")+1;
 				en = data.find_last_of(".");
 				string file1 = data.substr(s,en-s);
-				allcontent.append("<DCPB>_temp_.append(_"+file1+"emittHTML());\n</DCPB>");
+				allcontent.append("<DCPB>screen << _"+file1+"emittHTML();\n</DCPB>");
 				/*ifstream inf(data.c_str());
 				if(inf)
 				{
@@ -110,14 +110,14 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 	//bodies.append();
 	funcdefs.append("string _"+file+"emittHTML();\n");
 	bodies.append("string _"+file+"emittHTML()\n{\n");
-	bodies.append("string _temp_;\n");
+	bodies.append("stringstream screen;\n");
 	while(allcontent.find("<DCPB>")!=string::npos)
 	{
 		b = allcontent.find("<DCPB>") + 6;
 		string ter(allcontent.substr(0,b-6));
 		boost::replace_all(ter,"\n","");
 		boost::replace_all(ter,"\"","\\\"");
-		bodies.append("_temp_.append(\""+ter+"\");");
+		bodies.append("screen << \""+ter+"\";");
 		e = allcontent.find("</DCPB>");
 		len = e - b;
 		bodies.append(allcontent.substr(b,len));
@@ -127,9 +127,9 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 	string ter(allcontent.substr(0));
 	boost::replace_all(ter,"\n","");
 	boost::replace_all(ter,"\"","\\\"");
-	bodies.append("_temp_.append(\""+ter+"\");");
-	bodies.append("\nAfcUtil::writeTofile(\""+dir+"_"+file+".html\",_temp_,true);\n");
-	bodies.append("\nreturn _temp_;\n");
+	bodies.append("screen << \""+ter+"\";\nstring scr;\nscreen >> scr;\n");
+	bodies.append("\nAfcUtil::writeTofile(\""+dir+"_"+file+".html\",scr,true);\n");
+	bodies.append("\nreturn scr;\n");
 	bodies.append("\n}\n");
 	//bodies.append("}\n");
 	cout << bodies << flush;

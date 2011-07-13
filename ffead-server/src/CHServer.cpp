@@ -31,7 +31,7 @@ CHServer::~CHServer() {
 }
 SharedData* SharedData::shared_instance = NULL;
 string servd;
-static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap;
+static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap;
 static map<string, vector<string> > filterMap;
 static string resourcePath;
 static strVec dcpsss;
@@ -943,7 +943,7 @@ void ServiceTask::run()
 
 		/*After going through the controller the response might be blank, just set the HTTP version*/
 		res.setHttpVersion(req->getHttpVersion());
-
+		//cout << req->toString() << endl;
 		if(isContrl)
 		{
 
@@ -1237,7 +1237,56 @@ void ServiceTask::run()
 		}
 		else
 		{
-			content = getContentStr(req->getUrl(),lprops[req->getDefaultLocale()],ext);
+			if(ext==".fview")
+			{
+				cout << "inside fview " << req->getFile() << endl;
+				string file = req->getFile();
+				boost::replace_first(file,"fview","html");
+				string ffile = req->getCntxt_root()+"/fviews/"+file;
+				cout << ffile << endl;
+				ifstream infile(ffile.c_str());
+				string temp;
+				if(infile.is_open())
+				{
+					content = "";
+					while(getline(infile, temp))
+					{
+						if(temp.find("<?")==string::npos && temp.find("?>")==string::npos)
+							content.append(temp);
+					}
+					int h = content.find("</head>");
+					int ht = content.find("<html>");
+					if(h!=string::npos)
+					{
+						string st = content.substr(0,h-1);
+						string en = content.substr(h);
+						content = st + "<script type=\"text/javascript\" src=\"public/json2.js\"></script>";
+						content += "<script type=\"text/javascript\" src=\"public/prototype.js\"></script>";
+						content += "<script type=\"text/javascript\" src=\"public/afc.js\"></script>";
+						content += "<script type=\"text/javascript\" src=\"public/_afc_Objects.js\"></script>";
+						content += "<script type=\"text/javascript\" src=\"public/_afc_Interfaces.js\"></script>";
+						content += "<script type=\"text/javascript\" src=\"public/"+fviewmap[file]+".js\"></script>" + en;
+					}
+					else
+					{
+						if(ht!=string::npos)
+						{
+							string st = content.substr(0,ht+6);
+							string en = content.substr(ht+6);
+							content = st + "<script type=\"text/javascript\" src=\"public/json2.js\"></script>";
+							content += "<script type=\"text/javascript\" src=\"public/prototype.js\"></script>";
+							content += "<script type=\"text/javascript\" src=\"public/afc.js\"></script>";
+							content += "<script type=\"text/javascript\" src=\"public/_afc_Objects.js\"></script>";
+							content += "<script type=\"text/javascript\" src=\"public/_afc_Interfaces.js\"></script>";
+							content += "<script type=\"text/javascript\" src=\"public/"+fviewmap[file]+".js\"></script>" + en;
+						}
+					}
+				}
+				infile.close();
+				cout << content << flush;
+			}
+			else
+				content = getContentStr(req->getUrl(),lprops[req->getDefaultLocale()],ext);
 			if(ext!="" && (content.length()==0))
 			{
 				res.setStatusCode("404");
@@ -1909,8 +1958,8 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 	Context cntxt;
 	string libs,ilibs,isrcs,iobjs,ideps;
 	Reflection ref;
-	vector<string> vecvec;
 	vector<bool> stat;
+	strVec vecvp,pathvec;
 	propMap srp;
 	PropFileReader pread;
 	XmlParser parser("Parser");
@@ -1944,7 +1993,6 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 		}
 	}
 	for(unsigned int var=0;var<webdirs.size();var++)
-
 	{
 		//cout <<  webdirs.at(0) << flush;
 		string defpath = webdirs.at(var);
@@ -2222,7 +2270,8 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 				if(objv.at(var1)!="")
 				{
 					//strVec info = ref.getAfcObjectData(usrincludes+objv.at(var)+".h", true);
-					vecvec.push_back(usrincludes);
+					pathvec.push_back(name);
+					vecvp.push_back(usrincludes);
 					stat.push_back(true);
 					afcd.push_back(objv.at(var1));
 				}
@@ -2235,9 +2284,52 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 				if(objv.at(var1)!="")
 				{
 					//strVec info = ref.getAfcObjectData(usrincludes+objv.at(var)+".h", false);
-					vecvec.push_back(usrincludes);
+					pathvec.push_back(name);
+					vecvp.push_back(usrincludes);
 					stat.push_back(false);
 					afcd.push_back(objv.at(var1));
+				}
+			}
+		}
+		root = parser.getDocument(defpath+"config/fviews.xml").getRootElement();
+		if(root.getTagName()=="fview" && root.getChildElements().size()>0)
+		{
+			ElementList eles = root.getChildElements();
+			for (unsigned int apps = 0; apps < eles.size(); apps++)
+			{
+				if(eles.at(apps).getTagName()=="page")
+				{
+					string fvw = eles.at(apps).getAttribute("htm");
+					boost::replace_first(fvw,".html",".fview");
+					fviewmap[eles.at(apps).getAttribute("htm")] = eles.at(apps).getAttribute("class");
+					pathvec.push_back(name);
+					vecvp.push_back(usrincludes);
+					stat.push_back(false);
+					afcd.push_back(eles.at(apps).getAttribute("class"));
+					ElementList elese = eles.at(apps).getChildElements();
+					string js = "window.onload = function(){";
+					for (unsigned int appse = 0; appse < elese.size(); appse++)
+					{
+						if(elese.at(appse).getTagName()=="event")
+						{
+							js += "\ndocument.getElementById('"+elese.at(appse).getAttribute("eid")+"').";
+							js += elese.at(appse).getAttribute("type") + " = function(){";
+							js += eles.at(apps).getAttribute("class")+"."+elese.at(appse).getAttribute("func")+"(";
+							string args = elese.at(appse).getAttribute("args");
+							if(args!="")
+								args += ",";
+							js += args + "\""+elese.at(appse).getAttribute("cb")+"\",\"/"+name+"/"+fvw+"\");}";
+						}
+					}
+					js += "\n}\n\n";
+					for (unsigned int appse = 0; appse < elese.size(); appse++)
+					{
+						if(elese.at(appse).getTagName()=="functions")
+						{
+							js += elese.at(appse).getText();
+						}
+					}
+					AfcUtil::writeTofile(pubpath+eles.at(apps).getAttribute("class")+".js",js,true);
 				}
 			}
 		}
@@ -2276,7 +2368,7 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 	ret = DCPGenerator::generateDCPAll(dcps);
 	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
 	string headers,objs,infjs;
-	ret = AfcUtil::generateJsObjectsAll(vecvec,afcd,stat,headers,objs,infjs);
+	ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,stat,headers,objs,infjs,pathvec);
 	AfcUtil::writeTofile(rtdcfpath+"AjaxInterface.cpp",ret,true);
 	AfcUtil::writeTofile(pubpath+"_afc_Objects.js",objs,true);
 	AfcUtil::writeTofile(pubpath+"_afc_Interfaces.js",infjs,true);
@@ -2492,7 +2584,15 @@ int main(int argc, char* argv[])
     {
     	pubMap[pubfiles.at(var)] = "true";
     }
-    strVec cmpnames = temporaray(webdirs,webdirs1,incpath,rtdcfpath,pubpath,respath);
+    strVec cmpnames;
+    try
+    {
+    	cmpnames = temporaray(webdirs,webdirs1,incpath,rtdcfpath,pubpath,respath);
+    }
+    catch(XmlParseException *p)
+    {
+    	cout << p->getMessage() << endl;
+    }
 
     bool libpresent = true;
     void *dlibtemp = dlopen("libinter.so", RTLD_NOW|RTLD_GLOBAL);

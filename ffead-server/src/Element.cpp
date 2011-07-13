@@ -137,6 +137,16 @@ void Element::setText(string text)
 	this->text = text;
 }
 
+bool Element::getCdata() const
+{
+	return this->cdata;
+}
+
+void Element::setCdata(bool cdata)
+{
+	this->cdata = cdata;
+}
+
 Element Element::getElementByName(string name)
 {
 	return this->mapOfEle[name];

@@ -42,7 +42,7 @@ Document XmlParser::getDocument(string xml)
 		while(getline(infile, temp))
 		{
 			if(temp.find("<?")==string::npos && temp.find("?>")==string::npos)
-				xml.append(temp);
+				xml.append(temp+"\n");
 		}
 	}
 	Document doc;
@@ -63,6 +63,39 @@ void XmlParser::readXML(string xml,string parent,Element *par)
 {
 	if(xml=="")
 		return;
+	boost::trim(xml);
+	int cdt = xml.find("<![CDATA[");
+	if(cdt==0)
+	{
+		int ecdt = xml.find("]]>");
+		if(ecdt==string::npos)
+		{
+			string errmsg = ("Incomplete CDATA tag\n");
+			throw new XmlParseException(errmsg);
+		}
+		else
+		{
+			par->setCdata(true);
+			par->setText(xml.substr(cdt+9,ecdt-cdt-9));
+			return;
+		}
+	}
+	int cmt =  xml.find("<!--");
+	if(cmt!=string::npos)
+	{
+		int ecmt = xml.find("-->");
+		if(ecmt==string::npos)
+		{
+			string errmsg = ("Incomplete Comment tag\n");
+			throw new XmlParseException(errmsg);
+		}
+		else
+		{
+			string stx = xml.substr(0,cmt);
+			string enx = xml.substr(ecmt+3);
+			xml = stx + enx;
+		}
+	}
 	int st = xml.find("<")+1;
     int ed = 0;
     int ed1 = xml.find("/>");
@@ -194,7 +227,9 @@ void XmlParser::readXML(string xml,string parent,Element *par)
 			{
 				element.setTagName(ta);
 				if(txml.find("<")!=string::npos)
+				{
 					readXML(txml,ta,&element);
+				}
 				else
 					element.setText(txml);
 				par->addElement(element);
@@ -203,7 +238,9 @@ void XmlParser::readXML(string xml,string parent,Element *par)
 			{
 				par->setTagName(ta);
 				if(txml.find("<")!=string::npos)
+				{
 					readXML(txml,ta,par);
+				}
 				else
 					par->setText(txml);
 			}

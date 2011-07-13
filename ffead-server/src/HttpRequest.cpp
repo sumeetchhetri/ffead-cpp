@@ -105,7 +105,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 			boost::replace_first(temp.at(1),"\r","");
 			if(temp.at(0)=="Host")
 				this->setHost(temp.at(1));
-			else if(temp.at(0)=="User-Agent")
+			else if(temp.at(0)=="User-Agent" || temp.at(0)=="User-agent")
 				this->setUser_agent(temp.at(1));
 			else if(temp.at(0)=="Accept")
 				this->setAccept(temp.at(1));
@@ -119,7 +119,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				else
 					this->unbase64(temp.at(1));
 			}
-			else if(temp.at(0)=="Accept-Language")
+			else if(temp.at(0)=="Accept-Language" || temp.at(0)=="Accept-language")
 			{
 				strVec lemp;
 				this->setAccept_lang(temp.at(1));
@@ -147,17 +147,17 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				}
 				//cout << temp.at(1) << flush;
 			}
-			else if(temp.at(0)=="Accept-Encoding")
+			else if(temp.at(0)=="Accept-Encoding" || temp.at(0)=="Accept-encoding")
 				this->setAccept_encod(temp.at(1));
-			else if(temp.at(0)=="Accept-Charset")
+			else if(temp.at(0)=="Accept-Charset" || temp.at(0)=="Accept-charset")
 				this->setAccept_lang(temp.at(1));
-			else if(temp.at(0)=="Keep-Alive")
+			else if(temp.at(0)=="Keep-Alive" || temp.at(0)=="Keep-alive")
 				this->setKeep_alive(temp.at(1));
 			else if(temp.at(0)=="Connection")
 				this->setConnection(temp.at(1));
-			else if(temp.at(0)=="Cache-Control")
+			else if(temp.at(0)=="Cache-Control" || temp.at(0)=="Cache-control")
 				this->setCache_ctrl(temp.at(1));
-			else if(temp.at(0)=="Content-Type")
+			else if(temp.at(0)=="Content-Type" || temp.at(0)=="Content-type")
 			{
 				this->setContent_type(temp.at(1));
 				string tempi(temp.at(1));
@@ -190,7 +190,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						cookieattrs[results1.at(0)] = "true";
 				}
 			}
-			else if(temp.at(0)=="Content-Length")
+			else if(temp.at(0)=="Content-Length" || temp.at(0)=="Content-length")
 				this->setContent_len(temp.at(1));
 			else if(temp.at(0)=="Referer")
 				this->setReferer(temp.at(1));
@@ -440,10 +440,14 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				string parm = parameters.at(j);
 				//cout << parm << "\nparm" << flush;
 				size_t dis = parm.find("Content-Disposition: ");
+				if(dis==string::npos)
+					dis = parm.find("Content-disposition: ");
 				string cont_disp,cont_type;
 				if(dis!=string::npos)
 				{
 					size_t dist = parm.find("Content-Type: ");
+					if(dist==string::npos)
+						dist = parm.find("Content-yype: ");
 					size_t dise;
 					if(dist==string::npos)
 					{
@@ -521,11 +525,11 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 	value = valuec;
 	if(key=="Host")
 		this->setHost(value);
-	else if(key=="User-Agent")
+	else if(key=="User-Agent" || key=="User-agent")
 		this->setUser_agent(value);
 	else if(key=="Accept")
 		this->setAccept(value);
-	else if(key=="Accept-Language")
+	else if(key=="Accept-Language" || key=="Accept-language")
 	{
 		strVec lemp;
 		this->setAccept_lang(value);
@@ -553,17 +557,17 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 		}
 		//cout << temp.at(1) << flush;
 	}
-	else if(key=="Accept-Encoding")
+	else if(key=="Accept-Encoding" || key=="Accept-encoding")
 		this->setAccept_encod(value);
-	else if(key=="Accept-Charset")
+	else if(key=="Accept-Charset" || key=="Accept-charset")
 		this->setAccept_lang(value);
-	else if(key=="Keep-Alive")
+	else if(key=="Keep-Alive" || key=="Keep-alive")
 		this->setKeep_alive(value);
 	else if(key=="Connection")
 		this->setConnection(value);
-	else if(key=="Cache-Control")
+	else if(key=="Cache-Control" || key=="Cache-control")
 		this->setCache_ctrl(value);
-	else if(key=="Content-Type")
+	else if(key=="Content-Type" || key=="Content-type")
 	{
 		this->setContent_type(value);
 		string tempi(value);
@@ -648,10 +652,14 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 				string parm = parameters.at(j);
 				retval+= parm + "\nparm";
 				size_t dis = parm.find("Content-Disposition: ");
+				if(dis==string::npos)
+					dis = parm.find("Content-disposition: ");
 				string cont_disp,cont_type;
 				if(dis!=string::npos)
 				{
 					size_t dist = parm.find("Content-Type: ");
+					if(dist==string::npos)
+						dist = parm.find("Content-type: ");
 					size_t dise;
 					if(dist==string::npos)
 					{
@@ -711,7 +719,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 		}
 
 	}
-	else if(key=="Content-Length")
+	else if(key=="Content-Length" || key=="Content-length")
 		this->setContent_len(value);
 	else if(key=="Referer")
 		this->setReferer(value);

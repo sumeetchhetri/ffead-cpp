@@ -32,7 +32,7 @@ AfcUtil::~AfcUtil() {
 	// TODO Auto-generated destructor stub
 }
 static map<string,string> doneMap;
-string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool> stat,string &headers,string &objs,string &infjs)
+string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool> stat,string &headers,string &objs,string &infjs,vector<string> pv)
 {
 	Reflection ref;
 	string ret="#include \"AfcInclude.h\"\n\nextern \"C\"\n{\n";
@@ -48,8 +48,9 @@ string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool
 		}
 		else
 		{
+			//cout << "=============" << obj.at(var)+files.at(var)+".h" << flush;
 			strVec info = ref.getAfcObjectData(obj.at(var)+files.at(var)+".h", false);
-			ret += generateJsInterfaces(info,files.at(var),headers,obj.at(var),infjs);
+			ret += generateJsInterfaces(info,files.at(var),headers,obj.at(var),infjs,pv.at(var));
 		}
 	}
 	headers += "\nusing namespace json_spirit;\n";
@@ -141,7 +142,7 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	return test;
 }
 
-string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,string path,string &infjs)
+string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,string path,string &infjs,string pv)
 {
 	string test,intf,intff,inc;
 	headers += "#include \"" + claz + ".h\"\n";
@@ -170,7 +171,8 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 				string pars,parswt,types,jsonstr;
 				if(emp.size()==2)
 				{
-					test += emp.at(1) + ": function(){\n";
+					test += emp.at(1) + ": function(_cb,_url){\n";
+					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"),_cb,(_url==null?\""+pv+"\":_url));\n";
 				}
 				else
 				{
@@ -234,8 +236,8 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 						//cout << vemp.at(i) << "\n" << flush;
 					}
 					fl = true;
-					test += "){\n";
-					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"));\n";
+					test += ",_cb,_url){\n";
+					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"),_cb,(_url==null?\""+pv+"\":_url));\n";
 				}
 				inc += updateAjaxInterface(emp,claz,pars,parswt,types);
 				test += "}\n";
@@ -270,9 +272,13 @@ string AfcUtil::updateAjaxInterface(strVec emp,string claz,string pars,string pa
 	{
 		test += "return \"\";\n}\n";
 	}
-	else if(retType=="string" || retType=="int" || retType=="float" || retType=="double")
+	else if(retType=="string")
 	{
 		test += "return _obj."+funcName+"("+pars+");\n}\n";
+	}
+	else if(retType=="int" || retType=="float" || retType=="double")
+	{
+		test += "string outp = boost::lexical_cast<string>(_obj."+funcName+"("+pars+"));\nreturn outp;\n}\n";
 	}
 	else
 		test += "return from"+retType+"ToJSON(_obj."+funcName+"("+pars+"));\n}\n";
