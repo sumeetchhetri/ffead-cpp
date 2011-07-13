@@ -61,7 +61,7 @@ function afcPrototypeAjaxOAUTHCall()
 	new Ajax.Request('/index.oauth', opt);
 }
 
-function AfcCall(claz,meth,param)
+function AfcCall(claz,meth,param,cb,url)
 {	
 	var form = prepForm(null);
 	alert("ASDSADASD");
@@ -85,16 +85,21 @@ function AfcCall(claz,meth,param)
 	}
 	//prepForm(obj);
 	var opt = {
+		cb: cb,
 	    method: 'post',
 	    postBody: postdata,
 	    //postBody: Form.serialize($('afc-form')) + '&ajax=true',
 	    onSuccess: function(response) 
 		{
 			var msg = response.responseText;
-			alert(msg);
+			if(cb==null){alert("No callback specified.");alert(msg)}
+			else
+			{
+				eval("var response = '"+msg+"';"+cb);
+			}
 	   	}
 	}
-	new Ajax.Request('/', opt);
+	new Ajax.Request((url==null?"/":url), opt);
 	//alert(postdata);
 	document.body.removeChild(form);
 }
