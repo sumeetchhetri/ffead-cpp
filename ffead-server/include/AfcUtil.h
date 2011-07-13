@@ -35,13 +35,13 @@ public:
 	AfcUtil();
 	virtual ~AfcUtil();
 	static string generateJsObjects(strVec,string,string&,string,string &);
-	static string generateJsInterfaces(strVec,string,string&,string,string &);
+	static string generateJsInterfaces(strVec,string,string&,string,string &,string);
 	static string updateAjaxInterface(strVec,string,string,string,string);
 	static void writeTofile(string,string,bool);
 	static string execute(HttpRequest);
 	static string camelCased(const string&);
 	static string reverseCamelCased(const string&);
-	static string generateJsObjectsAll(vector<string>,strVec,vector<bool>,string &,string &,string &);
+	static string generateJsObjectsAll(vector<string>,strVec,vector<bool>,string &,string &,string &,vector<string>);
 };
 
 #endif /* AFCUTIL_H_ */

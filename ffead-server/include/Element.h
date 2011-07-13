@@ -49,6 +49,8 @@ class Element : public Renderer
 		void setTagName(string tagName);
 		bool operator == (Element);
 		bool operator == (Element *);
+		bool getCdata() const;
+		void setCdata(bool);
 		string getText() const;
 		void setText(string);
 		Element getElementByName(string);
@@ -61,6 +63,7 @@ private:
 		string tagName;
 		string nameSpace;
 		string text;
+		bool cdata;
 		ElementMap mapOfEle;
 };
 #endif
