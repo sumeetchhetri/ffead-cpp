@@ -546,6 +546,64 @@ propMap Reflection::getDbTableInfo(string file)
 	return tabInfo;
 }
 
+strVec Reflection::getAfcObjectData(string className,bool object,strVec& privf)
+{
+	strVec refDef;
+	if (!generateClassInfo(className))
+	{
+		return refDef;
+	}
+	strVec publf, protf ,publm, privm, protm;
+
+	size_t tes;
+	if (this->pub.size() > 0)
+	{
+		for (unsigned int i = 0; i < this->pub.size(); i++)
+		{
+			if((tes=this->pub.at(i).find("("))!=string::npos && (tes=this->pub.at(i).find(")"))!=string::npos)
+			{
+				publm.push_back(this->pub.at(i));
+			}
+			else
+			{
+				publf.push_back(this->pub.at(i));
+			}
+		}
+	}
+	if (this->pri.size() > 0)
+	{
+		for (unsigned int i = 0; i < this->pri.size(); i++)
+		{
+			if((tes=this->pri.at(i).find("("))!=string::npos && (tes=this->pri.at(i).find(")"))!=string::npos)
+			{
+				privm.push_back(this->pri.at(i));
+			}
+			else
+			{
+				privf.push_back(this->pri.at(i));
+			}
+		}
+	}
+	if (this->pro.size() > 0)
+	{
+		for (unsigned int i = 0; i < this->pro.size(); i++)
+		{
+			if((tes=this->pro.at(i).find("("))!=string::npos && (tes=this->pro.at(i).find(")"))!=string::npos)
+			{
+				protm.push_back(this->pro.at(i));
+			}
+		}
+	}
+	if(!object)
+	{
+		return publm;
+	}
+	else
+	{
+		return publf;
+	}
+}
+
 strVec Reflection::getAfcObjectData(string className,bool object)
 {
 	strVec refDef;

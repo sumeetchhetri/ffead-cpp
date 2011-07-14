@@ -70,7 +70,7 @@ string ApplicationUtil::buildAllApplications(vector<string> files,vector<string>
 							string fileName = eles.at(var).getAttribute("where");
 							boost::replace_first(fileName,"FILE:","");
 							fileName = (path + fileName);
-							meth += "string path;\nif(to==\""+path+eles.at(var).getAttribute("path")+"\")\n{";
+							meth += "string path;\nif(to=="+eles.at(var).getAttribute("id")+")\n{";
 							meth += "string user = session.getAttribute(\"USER\");\n";
 							meth += "string pass = session.getAttribute(\"PASS\");\n";
 							meth += "ifstream f(\""+fileName+"\");\n";

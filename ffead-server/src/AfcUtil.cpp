@@ -43,13 +43,15 @@ string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool
 	{
 		if(stat.at(var))
 		{
-			strVec info = ref.getAfcObjectData(obj.at(var)+files.at(var)+".h", true);
-			ret += generateJsObjects(info,files.at(var),headers,obj.at(var),objs);
+			strVec pinfo;
+			strVec info = ref.getAfcObjectData(obj.at(var)+files.at(var)+".h", true,pinfo);
+			ret += generateJsObjects(info,files.at(var),headers,obj.at(var),objs,pinfo);
 		}
 		else
 		{
 			//cout << "=============" << obj.at(var)+files.at(var)+".h" << flush;
-			strVec info = ref.getAfcObjectData(obj.at(var)+files.at(var)+".h", false);
+			strVec pinfo;
+			strVec info = ref.getAfcObjectData(obj.at(var)+files.at(var)+".h", false,pinfo);
 			ret += generateJsInterfaces(info,files.at(var),headers,obj.at(var),infjs,pv.at(var));
 		}
 	}
@@ -59,7 +61,7 @@ string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool
 	return ret;
 }
 
-string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string path,string &objs)
+string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string path,string &objs,strVec pobj)
 {
 	if(doneMap.find(claz)==doneMap.end())
 		doneMap[claz] = "done";
@@ -70,6 +72,12 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	string retu;
 	string test = "function _"+claz+"()\n{\n";
 	fres = "string json=\"{";
+	bool priv = false;
+	if(obj.size()==0 && pobj.size()>0)
+	{
+		obj = pobj;
+		priv = true;
+	}
 	for(unsigned int i=0;i<obj.size();i++)
 	{
 		strVec vemp;
@@ -80,22 +88,31 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 		if(vemp.at(0)=="float")
 		{
 			tes += "double te_ = find_value( obj, \""+vemp.at(1)+"\" ).get_value<double>();\n";
-			tes += "_obj."+vemp.at(1)+" = boost::lexical_cast<"+vemp.at(0)+">(te_);";
+			if(!priv)tes += "_obj."+vemp.at(1)+" = boost::lexical_cast<"+vemp.at(0)+">(te_);\n";
+			else tes += "_obj.set"+camelCased(vemp.at(1))+"(boost::lexical_cast<"+vemp.at(0)+">(te_));\n";
 		}
 		else if(vemp.at(0)=="int" || vemp.at(0)=="double" || vemp.at(0)=="string")
 		{
-			tes += "_obj." + vemp.at(1) + "= find_value( obj, \""+vemp.at(1)+"\" ).get_value<"+vemp.at(0)+">();\n";
+			if(!priv)tes += "_obj." + vemp.at(1) + "= find_value( obj, \""+vemp.at(1)+"\" ).get_value<"+vemp.at(0)+">();\n";
+			else tes += "_obj.set"+camelCased(vemp.at(1))+"(find_value( obj, \""+vemp.at(1)+"\" ).get_value<"+vemp.at(0)+">());\n";
 		}
 		else
 		{
-			tes += "_obj." + vemp.at(1) + "= read"+vemp.at(0)+"(find_value( obj, \""+vemp.at(1)+"\" ).get_obj());\n";
+			if(!priv)tes += "_obj." + vemp.at(1) + "= read"+vemp.at(0)+"(find_value( obj, \""+vemp.at(1)+"\" ).get_obj());\n";
+			else tes += "_obj.set"+camelCased(vemp.at(1))+"(read"+vemp.at(0)+"(find_value( obj, \""+vemp.at(1)+"\" ).get_obj()));\n";
 		}
 		if(vemp.at(0)=="int" || vemp.at(0)=="float" || vemp.at(0)=="double" || vemp.at(0)=="string")
 		{
 			if(vemp.at(0)=="string")
-				fres += "'"+vemp.at(1)+"' : '\"+_obj."+vemp.at(1)+"+\"'";
+			{
+				if(!priv)fres += "'"+vemp.at(1)+"' : '\"+_obj."+vemp.at(1)+"+\"'";
+				else fres += "'"+vemp.at(1)+"' : '\"+_obj.get"+camelCased(vemp.at(1))+"()+\"'";
+			}
 			else
-				fres += "'"+vemp.at(1)+"' : '\"+boost::lexical_cast<string>(_obj."+vemp.at(1)+")+\"'";
+			{
+				if(!priv)fres += "'"+vemp.at(1)+"' : '\"+boost::lexical_cast<string>(_obj."+vemp.at(1)+")+\"'";
+				else fres += "'"+vemp.at(1)+"' : '\"+boost::lexical_cast<string>(_obj.get"+camelCased(vemp.at(1))+"())+\"'";
+			}
 			if(i!=obj.size()-1)
 			{
 				fres += ",";
@@ -103,9 +120,11 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 		}
 		else
 		{
-			strVec info = ref.getAfcObjectData(path+vemp.at(0)+".h", true);
-			retu += generateJsObjects(info,vemp.at(0),headers,path,objs);
-			fres += "'"+vemp.at(1)+"' : '\"+from"+vemp.at(0)+"ToJSON(_obj."+vemp.at(1)+")+\"'";
+			strVec pppinfo;
+			strVec info = ref.getAfcObjectData(path+vemp.at(0)+".h", true, pppinfo);
+			retu += generateJsObjects(info,vemp.at(0),headers,path,objs,pppinfo);
+			if(!priv)fres += "'"+vemp.at(1)+"' : '\"+from"+vemp.at(0)+"ToJSON(_obj."+vemp.at(1)+")+\"'";
+			else fres += "'"+vemp.at(1)+"' : '\"+from"+vemp.at(0)+"ToJSON(_obj.get."+camelCased(vemp.at(1))+"())+\"'";
 			if(i!=obj.size()-1)
 			{
 				fres += ",";
@@ -138,6 +157,7 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	}*/
 	test += tes + "\nreturn _obj;\n}\n";
 	test += claz + " to"+claz+"(string s)\n{\nmValue value;\nread(s,value);\n"+ claz +" _obj = read"+claz+"(value.get_obj());\nreturn _obj;\n}\n";
+	test += "void* toVoidP"+claz+"(string s)\n{\nmValue value;\nread(s,value);\n"+ claz +" *_obj = new "+claz+";\n*_obj = read"+claz+"(value.get_obj());\nreturn _obj;\n}\n";
 	test += "\nstring from"+claz+"ToJSON("+claz+" _obj)\n{\n"+fres+"\nreturn json;\n}\n";
 	return test;
 }
@@ -171,8 +191,8 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 				string pars,parswt,types,jsonstr;
 				if(emp.size()==2)
 				{
-					test += emp.at(1) + ": function(_cb,_url){\n";
-					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"),_cb,(_url==null?\""+pv+"\":_url));\n";
+					test += emp.at(1) + ": function(_cb,_url,_cntxt){\n";
+					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"),_cb,(_url==null?\""+pv+"\":_url),_cntxt);\n";
 				}
 				else
 				{
@@ -236,8 +256,8 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 						//cout << vemp.at(i) << "\n" << flush;
 					}
 					fl = true;
-					test += ",_cb,_url){\n";
-					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"),_cb,(_url==null?\""+pv+"\":_url));\n";
+					test += ",_cb,_url,_cntxt){\n";
+					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"),_cb,(_url==null?\""+pv+"\":_url),_cntxt);\n";
 				}
 				inc += updateAjaxInterface(emp,claz,pars,parswt,types);
 				test += "}\n";

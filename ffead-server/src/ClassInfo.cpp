@@ -111,7 +111,7 @@ void ClassInfo::addMethod(Method meth)
 
 Field ClassInfo::getField(string fldName)
 {
-	string key = getClassName()+fldName;
+	string key = fldName;
 	return fields[key];
 }
 void ClassInfo::addField(Field fld)

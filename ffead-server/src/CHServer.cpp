@@ -32,6 +32,7 @@ CHServer::~CHServer() {
 SharedData* SharedData::shared_instance = NULL;
 string servd;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap;
+static map<string, Element> formMap;
 static map<string, vector<string> > filterMap;
 static string resourcePath;
 static strVec dcpsss;
@@ -948,6 +949,63 @@ void ServiceTask::run()
 		{
 
 		}
+		else if(ext==".form")
+		{
+			Reflector ref;
+			Element ele = formMap[req->getFile()];
+			cout << ele.getTagName() << endl;
+			cout << ele.render() << endl;
+			ClassInfo binfo = ref.getClassInfo(ele.getAttribute("bean"));
+			ElementList eles = ele.getChildElements();
+			string json = "{";
+			for (unsigned int apps = 0; apps < eles.size(); apps++)
+			{
+				if(eles.at(apps).getTagName()=="field")
+				{
+					string name = eles.at(apps).getAttribute("name");
+					Field fld = binfo.getField(eles.at(apps).getAttribute("prop"));
+					if(fld.getType()=="string")
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": \"" + req->getRequestParam(name) + "\",";
+					else
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getRequestParam(name) + ",";
+				}
+			}
+			if(json.find(",")!=string::npos)
+			{
+				json = json.substr(0,json.length()-1);
+			}
+			json += "}";
+			cout << json << endl;
+			string libName = "libinter.so";
+			if(dlib == NULL)
+			{
+				cerr << dlerror() << endl;
+				exit(-1);
+			}
+			string meth = "toVoidP" + ele.getAttribute("bean");
+			cout << meth << endl;
+			void *mkr = dlsym(dlib, meth.c_str());
+			if(mkr!=NULL)
+			{
+				toVoidP f1 = (toVoidP)mkr;
+				void *_beaninst = f1(json);
+				string claz = "getReflectionCIFor" + ele.getAttribute("controller");
+				cout << claz << endl;
+				mkr = NULL;
+				mkr = dlsym(dlib, claz.c_str());
+				if(mkr!=NULL)
+				{
+					FunPtr f =  (FunPtr)mkr;
+					ClassInfo srv = f();
+					args argus;
+					Constructor ctor = srv.getConstructor(argus);
+					void *_temp = ref.newInstanceGVP(ctor);
+					FormController *thrd = (FormController *)_temp;
+					thrd->onSubmit(_beaninst,&res);
+					cout << "successfully called formcontroller" << endl;
+				}
+			}
+		}
 		else if(req->getMethod()=="POST" && req->getRequestParam("claz")!="" && req->getRequestParam("method")!="")
 		{
 			content = AfcUtil::execute(*req);
@@ -1283,6 +1341,7 @@ void ServiceTask::run()
 					}
 				}
 				infile.close();
+				res.setContent_type("text/html");
 				cout << content << flush;
 			}
 			else
@@ -2307,21 +2366,33 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 					stat.push_back(false);
 					afcd.push_back(eles.at(apps).getAttribute("class"));
 					ElementList elese = eles.at(apps).getChildElements();
-					string js = "window.onload = function(){";
+					string nsfns = "\nvar _fview_namespace = {";
+					string js = "\n\nwindow.onload = function(){";
 					for (unsigned int appse = 0; appse < elese.size(); appse++)
 					{
 						if(elese.at(appse).getTagName()=="event")
 						{
+							nsfns += "\n\"_fview_cntxt_global_js_callback"+boost::lexical_cast<string>(appse)+"\" : function(response){" + elese.at(appse).getAttribute("cb") + "},";
 							js += "\ndocument.getElementById('"+elese.at(appse).getAttribute("eid")+"').";
 							js += elese.at(appse).getAttribute("type") + " = function(){";
 							js += eles.at(apps).getAttribute("class")+"."+elese.at(appse).getAttribute("func")+"(";
 							string args = elese.at(appse).getAttribute("args");
 							if(args!="")
 								args += ",";
-							js += args + "\""+elese.at(appse).getAttribute("cb")+"\",\"/"+name+"/"+fvw+"\");}";
+							js += args + "\"_fview_cntxt_global_js_callback"+boost::lexical_cast<string>(appse)+"\",\"/"+name+"/"+fvw+"\",_fview_namespace);}";
+						}
+						else if(elese.at(appse).getTagName()=="form")
+						{
+							pathvec.push_back(name);
+							vecvp.push_back(usrincludes);
+							stat.push_back(true);
+							afcd.push_back(elese.at(appse).getAttribute("bean"));
+							formMap[elese.at(appse).getAttribute("name")] = elese.at(appse);
 						}
 					}
 					js += "\n}\n\n";
+					nsfns = nsfns.substr(0,nsfns.length()-1) + "\n}\n";
+					js = nsfns + js;
 					for (unsigned int appse = 0; appse < elese.size(); appse++)
 					{
 						if(elese.at(appse).getTagName()=="functions")
