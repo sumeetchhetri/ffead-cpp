@@ -86,6 +86,7 @@
 #include "Timer.h"
 #include "DateFormat.h"
 #include "Filter.h"
+#include "FormController.h"
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd
@@ -116,6 +117,7 @@
 #define MAXBUFLENM 32768
 typedef bool (*FunPtr1) (void *);
 typedef ClassInfo (*FunPtr) ();
+typedef void* (*toVoidP) (string);
 typedef string (*DCPPtr) ();
 typedef void (*ReceiveTask1)(int);
 

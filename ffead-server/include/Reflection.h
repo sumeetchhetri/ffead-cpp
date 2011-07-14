@@ -42,6 +42,7 @@ public:
 	virtual ~Reflection();
 	string updateClassDefinition(string, bool);
 	string updateTemplateContextDefinition(string, bool);
+	strVec getAfcObjectData(string,bool,strVec &);
 	strVec getAfcObjectData(string,bool);
 	propMap getDbTableInfo(string);
 	string generateClassDefinitionsAll(strVec,string &);

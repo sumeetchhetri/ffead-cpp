@@ -34,7 +34,7 @@ class AfcUtil {
 public:
 	AfcUtil();
 	virtual ~AfcUtil();
-	static string generateJsObjects(strVec,string,string&,string,string &);
+	static string generateJsObjects(strVec,string,string&,string,string &,strVec);
 	static string generateJsInterfaces(strVec,string,string&,string,string &,string);
 	static string updateAjaxInterface(strVec,string,string,string,string);
 	static void writeTofile(string,string,bool);
