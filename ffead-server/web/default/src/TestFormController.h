@@ -9,10 +9,9 @@
 #define TESTFORMCONTROLLER_H_
 #include "HttpResponse.h"
 #include "TestForm.h"
-#include "FormController.h"
 #include "iostream"
 
-class TestFormController: public FormController {
+class TestFormController {
 public:
 	TestFormController();
 	virtual ~TestFormController();

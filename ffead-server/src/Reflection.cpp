@@ -822,7 +822,7 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 					//{
 						typedefs += argtn.at(0);
 						typdefName += argtn.at(0);
-						methsd += argtn.at(0);
+						methsd += argtn.at(0) + (type12=="*"?"ptr":"adr");
 						if(j!=argpm.size()-1)
 						{
 							typdefName += ",";
@@ -1065,10 +1065,10 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				}
 				else
 				{
-					boost::replace_first(methsd,"<","");
-					boost::replace_first(methsd,">","");
-					boost::replace_first(methsd,"*","");
-					boost::replace_first(methsd,"&","");
+					boost::replace_first(methsd,"<","ts");
+					boost::replace_first(methsd,">","te");
+					//boost::replace_first(methsd,"*","ptr");
+					//boost::replace_first(methsd,"&","adr");
 					if(methpm.at(0)!=this->classN)
 					{
 						typedefs += (") ("+typdefName+");\n");

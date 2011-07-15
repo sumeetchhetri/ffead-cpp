@@ -989,20 +989,29 @@ void ServiceTask::run()
 			{
 				toVoidP f1 = (toVoidP)mkr;
 				void *_beaninst = f1(json);
-				string claz = "getReflectionCIFor" + ele.getAttribute("controller");
-				cout << claz << endl;
-				mkr = NULL;
-				mkr = dlsym(dlib, claz.c_str());
-				if(mkr!=NULL)
+				FunPtr f =  (FunPtr)mkr;
+				ClassInfo srv = ref.getClassInfo(ele.getAttribute("controller"));
+				args argus;
+				vals valus;
+				Constructor ctor = srv.getConstructor(argus);
+				void *_temp = ref.newInstanceGVP(ctor);
+				argus.push_back("void*");
+				argus.push_back("HttpResponse*");
+				valus.push_back(_beaninst);
+				valus.push_back(&res);
+				Method meth = srv.getMethod("onSubmit",argus);
+				if(meth.getMethodName()!="")
 				{
-					FunPtr f =  (FunPtr)mkr;
-					ClassInfo srv = f();
-					args argus;
-					Constructor ctor = srv.getConstructor(argus);
-					void *_temp = ref.newInstanceGVP(ctor);
-					FormController *thrd = (FormController *)_temp;
-					thrd->onSubmit(_beaninst,&res);
+					ref.invokeMethodUnknownReturn(_temp,meth,valus);
 					cout << "successfully called formcontroller" << endl;
+				}
+				else
+				{
+					res.setStatusCode("404");
+					res.setStatusMsg("Not Found");
+					res.setContent_type("text/plain");
+					res.setContent_str("Controller Method Not Found");
+					cout << "Controller Method Not Found" << endl;
 				}
 			}
 		}

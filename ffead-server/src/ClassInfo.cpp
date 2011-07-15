@@ -94,7 +94,15 @@ Method ClassInfo::getMethod(string methodName,args argumentTypes)
 	for (unsigned int var = 0; var < argumentTypes.size(); var++)
 	{
 		if(argumentTypes.at(var)!="")
-			key += argumentTypes.at(var);
+		{
+			string temp = argumentTypes.at(var);
+			boost::replace_first(temp," ","");
+			boost::replace_first(temp,"<","ts");
+			boost::replace_first(temp,">","te");
+			boost::replace_first(temp,"*","ptr");
+			boost::replace_first(temp,"&","adr");
+			key += temp;
+		}
 	}
 	return meths[key];
 }
