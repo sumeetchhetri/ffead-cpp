@@ -36,7 +36,7 @@ string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool
 {
 	Reflection ref;
 	string ret="#include \"AfcInclude.h\"\n\nextern \"C\"\n{\n";
-	headers = "#include <boost/lexical_cast.hpp>\n#include \"json_spirit.h\"\n";
+	headers = "#include <boost/lexical_cast.hpp>\n#include \"json_spirit.h\"\n#include \"sstream\"\n";
 	if(obj.size()==0)return ret + "}";
 	ret += "\nconst mValue& find_value(const mObject& obj, const string& name)\n{\nmObject::const_iterator i = obj.find(name);\nreturn i->second;\n}\n";
 	for (unsigned int var = 0; var < obj.size(); ++var)

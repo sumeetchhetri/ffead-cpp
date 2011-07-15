@@ -127,7 +127,7 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 	string ter(allcontent.substr(0));
 	boost::replace_all(ter,"\n","");
 	boost::replace_all(ter,"\"","\\\"");
-	bodies.append("screen << \""+ter+"\";\nstring scr;\nscreen >> scr;\n");
+	bodies.append("screen << \""+ter+"\";\nstring scr;\nscr = screen.str();\n");
 	bodies.append("\nAfcUtil::writeTofile(\""+dir+"_"+file+".html\",scr,true);\n");
 	bodies.append("\nreturn scr;\n");
 	bodies.append("\n}\n");

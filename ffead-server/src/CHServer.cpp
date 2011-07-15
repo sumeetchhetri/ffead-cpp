@@ -2813,6 +2813,7 @@ int main(int argc, char* argv[])
 				cout << "\nnot an epoll file descriptor" <<flush;
 			//break;
 		}
+		processgendone = false;
 		if(processforcekilled)
 		{
 			files.clear();
