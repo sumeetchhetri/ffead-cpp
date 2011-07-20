@@ -22,7 +22,7 @@
 
 #ifndef EXCEPTIONHANDLER_H_
 #define EXCEPTIONHANDLER_H_
-#include <execinfo.h>
+/*Fix for Windows Cygwin*///#include <execinfo.h>
 #include <signal.h>
 #include "stdlib.h"
 #include <exception>

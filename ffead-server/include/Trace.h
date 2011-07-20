@@ -14,7 +14,7 @@
     limitations under the License.  
 */
 #include <stdexcept>
-#include <execinfo.h>
+/*Fix for Windows Cygwin*///#include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #include <stdio.h>
@@ -32,7 +32,6 @@
 #define TRACE_H_
 
 #include <stdexcept>
-#include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #include <stdio.h>

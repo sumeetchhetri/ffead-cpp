@@ -1619,7 +1619,8 @@ void signalSIGSEGV(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	void * array[25];
+	string tempo;
+	/*void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -1628,7 +1629,7 @@ void signalSIGSEGV(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);
+	free(symbols);*/
 	cout << "Segmentation fault occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -1642,7 +1643,8 @@ void signalSIGCHLD(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	void * array[25];
+	string tempo;
+	/*void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -1651,7 +1653,7 @@ void signalSIGCHLD(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);
+	free(symbols);*/
 	cout << "Child process got killed " << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -1665,7 +1667,8 @@ void signalSIGABRT(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	void * array[25];
+	string tempo;
+	/*void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -1674,7 +1677,7 @@ void signalSIGABRT(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);
+	free(symbols);*/
 	cout << "Abort signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -1688,7 +1691,8 @@ void signalSIGTERM(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	void * array[25];
+	string tempo;
+	/*void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -1697,7 +1701,7 @@ void signalSIGTERM(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);
+	free(symbols);*/
 	cout << "Termination signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -1712,7 +1716,8 @@ void signalSIGKILL(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	void * array[25];
+	string tempo;
+	/*void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -1721,7 +1726,7 @@ void signalSIGKILL(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);
+	free(symbols);*/
 	cout << "Kill signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -1736,7 +1741,8 @@ void signalSIGINT(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	void * array[25];
+	string tempo;
+	/*void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -1745,7 +1751,7 @@ void signalSIGINT(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);
+	free(symbols);*/
 	cout << "Interrupt signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -1760,7 +1766,8 @@ void signalSIGFPE(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	void * array[25];
+	string tempo;
+	/*void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -1769,7 +1776,7 @@ void signalSIGFPE(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);
+	free(symbols);*/
 	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -1783,7 +1790,8 @@ void signalSIGPIPE(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());*/
-	void * array[25];
+	string tempo;
+	/*void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -1792,7 +1800,7 @@ void signalSIGPIPE(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);
+	free(symbols);*/
 	cout << "Broken pipe ignore it" << getpid() << "\n" << tempo << flush;
 	//abort();
 }
@@ -1807,7 +1815,8 @@ void signalSIGILL(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	void * array[25];
+	string tempo;
+	/*void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -1816,7 +1825,7 @@ void signalSIGILL(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);
+	free(symbols);*/
 	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -1838,7 +1847,6 @@ void service(int fd,string serverRootDirectory,map<string,string> *params)
 pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 {
 	pid_t pid;
-	struct epoll_event ev;
 	if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sp) == -1)
 	{
 		perror("socketpair");
@@ -1908,16 +1916,19 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		msg.msg_control = ccmsg;
 		msg.msg_controllen = sizeof(ccmsg); /* ? seems to work... */
 		close(sockfd);
-		struct epoll_event events[1];
-		//printf("parent side--%d child side---%d child pid--%ld\n",sp[j][0],sp[j][1],(long)getpid());
-		int epoll_handle = epoll_create(1);
-		ev.events = EPOLLIN | EPOLLPRI;
-		ev.data.fd = sp[1];
-		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, sp[1], &ev) < 0)
-		{
-			fprintf(stderr, "epoll set insertion error: fd=%d\n", sp[1]);
-			return -1;
-		}
+
+		fd_set master;    // master file descriptor list
+		fd_set read_fds;  // temp file descriptor list for select()
+		int fdmax;        // maximum file descriptor number
+
+		FD_ZERO(&master);    // clear the master and temp sets
+		FD_ZERO(&read_fds);
+
+		FD_SET(sp[1], &master);
+
+		// keep track of the biggest file descriptor
+		fdmax = sp[1]; // so far, it's this on
+
 		ThreadPool pool;
 		if(!isThreadprq)
 		{
@@ -1929,48 +1940,55 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		cout << params.size() <<endl;
 		while(1)
 		{
-			int nfds = epoll_wait(epoll_handle, events, 1,-1);
+			read_fds = master; // copy it
+			int nfds = select(fdmax+1, &read_fds, NULL, NULL, NULL);
 			if (nfds == -1)
 			{
-				perror("epoll_wait child process");
+				perror("select_wait child process");
 				cout << "\n----------epoll_wait child process----" << flush;
 				//break;
 			}
 			else
 			{
-				//int fd = receive_fd(sp[j][1]);
-				rv = recvmsg(sp[1], &msg, 0);
-				if (rv == -1)
+				for(int n=0;n<=fdmax;n++)
 				{
-					perror("recvmsg");
-					cout << "\n----------error occurred----" << flush;
-					exit(1);
-				}
+					if (FD_ISSET(n, &read_fds))
+					{
+						//int fd = receive_fd(sp[j][1]);
+						rv = recvmsg(n, &msg, 0);
+						if (rv == -1)
+						{
+							perror("recvmsg");
+							cout << "\n----------error occurred----" << flush;
+							exit(1);
+						}
 
-				cmsg = CMSG_FIRSTHDR(&msg);
-				if (!cmsg->cmsg_type == SCM_RIGHTS)
-				{
-					fprintf(stderr, "got control message of unknown type %d\n",cmsg->cmsg_type);
-					exit(1);
-				}
-				int fd = *(int*)CMSG_DATA(cmsg);
-				fcntl(fd, F_SETFL,O_SYNC);
+						cmsg = CMSG_FIRSTHDR(&msg);
+						if (!cmsg->cmsg_type == SCM_RIGHTS)
+						{
+							fprintf(stderr, "got control message of unknown type %d\n",cmsg->cmsg_type);
+							exit(1);
+						}
+						int fd = *(int*)CMSG_DATA(cmsg);
+						fcntl(fd, F_SETFL,O_SYNC);
 
-				char buf[10];
-				int err;
-				if((err=recv(fd,buf,10,MSG_PEEK))==0)
-				{
-					close(fd);
-					cout << "\nsocket conn closed before being serviced" << flush;
-					continue;
-				}
+						char buf[10];
+						int err;
+						if((err=recv(fd,buf,10,MSG_PEEK))==0)
+						{
+							close(fd);
+							cout << "\nsocket conn closed before being serviced" << flush;
+							continue;
+						}
 
-				if(isThreadprq)
-					boost::thread m_thread(boost::bind(&service,fd,serverRootDirectory,&params));
-				else
-				{
-					ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params);
-					pool.execute(*task);
+						if(isThreadprq)
+							boost::thread m_thread(boost::bind(&service,fd,serverRootDirectory,&params));
+						else
+						{
+							ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params);
+							pool.execute(*task);
+						}
+					}
 				}
 			}
 		}
@@ -2539,8 +2557,7 @@ int main(int argc, char* argv[])
     struct sigaction sa;
 
 
-    struct epoll_event ev;
-	//struct rlimit rt;
+    //struct rlimit rt;
     int yes=1;
     //char s[INET6_ADDRSTRLEN];
     int rv,nfds,preForked=5;
@@ -2743,7 +2760,15 @@ int main(int argc, char* argv[])
 		files.push_back(filename);
 	}
 	if(isCompileEnabled)boost::thread m_thread(boost::bind(&dynamic_page_monitor ,serverRootDirectory));
-	struct epoll_event events[MAXEPOLLSIZE];
+
+	fd_set master;    // master file descriptor list
+	fd_set read_fds;  // temp file descriptor list for select()
+	int fdmax;        // maximum file descriptor number
+
+	FD_ZERO(&master);    // clear the master and temp sets
+	FD_ZERO(&read_fds);
+
+	/*struct epoll_event events[MAXEPOLLSIZE];
 	int epoll_handle = epoll_create(MAXEPOLLSIZE);
 	ev.events = EPOLLIN | EPOLLPRI;
 	ev.data.fd = sockfd;
@@ -2753,7 +2778,14 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	else
-		printf("listener socket to join epoll success!\n");
+		printf("listener socket to join epoll success!\n");*/
+
+	// add the listener to the master set
+	FD_SET(sockfd, &master);
+
+	// keep track of the biggest file descriptor
+	fdmax = sockfd; // so far, it's this one
+
 	int childNo = 0;
 	/*if(fork()==0)
 	{
@@ -2793,13 +2825,13 @@ int main(int argc, char* argv[])
 	}
 	while(1)
 	{
-
 		if(childNo>=preForked)
 			childNo = 0;
-		nfds = epoll_wait(epoll_handle, events, curfds,-1);
+		read_fds = master; // copy it
+		nfds = select(fdmax+1, &read_fds, NULL, NULL, NULL);
 		if (nfds == -1)
 		{
-			perror("epoll_wait main process");
+			perror("select_wait main process");
 			//logfile << "Interruption Signal Received\n" << flush;
 			Logger::info("Interruption Signal Received\n");
 			curfds = 1;
@@ -2832,93 +2864,89 @@ int main(int argc, char* argv[])
 			processforcekilled = false;
 			processgendone = true;
 		}
-		for(int n=0;n<nfds;n++)
+		for(int n=0;n<=fdmax;n++)
 		{
-			if(childNo>=preForked)
-				childNo = 0;
-			if (events[n].data.fd == sockfd)
+			if (FD_ISSET(n, &read_fds))
 			{
-				new_fd = -1;
-				sin_size = sizeof their_addr;
-				new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-				//cout << "\nnew http request" <<flush;
-				//logfile << "Interruption Signal Received\n" << flush;
-				if (new_fd == -1)
+				if(childNo>=preForked)
+					childNo = 0;
+				if (n == sockfd)
 				{
-					perror("accept");
-					continue;
-				}
-				else
-				{
-					curfds++;
-					fcntl(new_fd, F_SETFL, fcntl(new_fd, F_GETFD, 0) | O_NONBLOCK);
-					ev.events = EPOLLIN | EPOLLPRI;
-					ev.data.fd = new_fd;
-					if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, new_fd, &ev) < 0)
+					new_fd = -1;
+					sin_size = sizeof their_addr;
+					new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+					//cout << "\nnew http request" <<flush;
+					//logfile << "Interruption Signal Received\n" << flush;
+					if (new_fd == -1)
 					{
-						perror("epoll");
-						cout << "\nerror adding to epoll cntl list" << flush;
-						return -1;
+						perror("accept");
+						continue;
 					}
-				}
-			}
-			else
-			{
-				epoll_ctl(epoll_handle, EPOLL_CTL_DEL, events[n].data.fd,&ev);
-				curfds--;
-				cntrlfile.open(files.at(childNo).c_str());
-				if(cntrlfile.is_open())
-				{
-					*(int*)CMSG_DATA(cmsg) = events[n].data.fd;
-					msg.msg_controllen = cmsg->cmsg_len;
-					if((rv= sendmsg(sp[childNo][0], &msg, 0)) < 0)
+					else
 					{
-					  perror("sendmsg()");
-					  exit(1);
-					}
-					string cno = boost::lexical_cast<string>(childNo);
-					close(events[n].data.fd);
-					childNo++;
-				}
-				else
-				{
-					int tcn = childNo;
-					for(int o=0;o<preForked;o++)
-					{
-						cntrlfile.open(files.at(o).c_str());
-						if(cntrlfile.is_open())
-						{
-							*(int*)CMSG_DATA(cmsg) = events[n].data.fd;
-							msg.msg_controllen = cmsg->cmsg_len;
-							if((rv= sendmsg(sp[o][0], &msg, 0)) < 0)
-							{
-							  perror("sendmsg()");
-							  exit(1);
-							}
-							string cno = boost::lexical_cast<string>(o);
-							//logfile << ("sent socket to process "+cno+"\n") << flush;
-							close(events[n].data.fd);
-							childNo = o+1;
-							break;
+						FD_SET(new_fd, &master); // add to master set
+						if (new_fd > fdmax) {    // keep track of the max
+							fdmax = new_fd;
 						}
 					}
-					close(sp[tcn][0]);
-					close(sp[tcn][1]);
-					cout << "Process got killed" << flush;
-					pid_t pid = createChildProcess(serverRootDirectory,sp[tcn],sockfd);
-					pds[tcn] = pid;
-					stringstream ss;
-					string filename;
-					ss << serverRootDirectory;
-					ss << pid;
-					ss >> filename;
-					filename.append(".cntrl");
-					files[tcn] = filename;
-					cout << "created a new Process" << flush;
-					//logfile << "Process got killed hence created a new Process " << pid << flush;
-					Logger::info("Process got killed hence created a new Process\n");
 				}
-				cntrlfile.close();
+				else
+				{
+					FD_CLR(n, &master); // remove from master set
+					cntrlfile.open(files.at(childNo).c_str());
+					if(cntrlfile.is_open())
+					{
+						*(int*)CMSG_DATA(cmsg) = n;
+						msg.msg_controllen = cmsg->cmsg_len;
+						if((rv= sendmsg(sp[childNo][0], &msg, 0)) < 0)
+						{
+						  perror("sendmsg()");
+						  exit(1);
+						}
+						string cno = boost::lexical_cast<string>(childNo);
+						close(n);
+						childNo++;
+					}
+					else
+					{
+						int tcn = childNo;
+						for(int o=0;o<preForked;o++)
+						{
+							cntrlfile.open(files.at(o).c_str());
+							if(cntrlfile.is_open())
+							{
+								*(int*)CMSG_DATA(cmsg) = n;
+								msg.msg_controllen = cmsg->cmsg_len;
+								if((rv= sendmsg(sp[o][0], &msg, 0)) < 0)
+								{
+								  perror("sendmsg()");
+								  exit(1);
+								}
+								string cno = boost::lexical_cast<string>(o);
+								//logfile << ("sent socket to process "+cno+"\n") << flush;
+								close(n);
+								childNo = o+1;
+								break;
+							}
+						}
+						close(sp[tcn][0]);
+						close(sp[tcn][1]);
+						cout << "Process got killed" << flush;
+						pid_t pid = createChildProcess(serverRootDirectory,sp[tcn],sockfd);
+						pds[tcn] = pid;
+						stringstream ss;
+						string filename;
+						ss << serverRootDirectory;
+						ss << pid;
+						ss >> filename;
+						filename.append(".cntrl");
+						files[tcn] = filename;
+						cout << "created a new Process" << flush;
+						//logfile << "Process got killed hence created a new Process " << pid << flush;
+						Logger::info("Process got killed hence created a new Process\n");
+					}
+					cntrlfile.close();
+				}
 			}
 		}
 	}

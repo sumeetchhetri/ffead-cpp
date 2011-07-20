@@ -40,7 +40,7 @@
 #include "sstream"
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <sys/epoll.h>
+/*Fix for Windows Cygwin*///#include <sys/epoll.h>
 #include <sys/resource.h>
 #include <boost/thread/thread.hpp>
 #define MAXEPOLLSIZES 10000

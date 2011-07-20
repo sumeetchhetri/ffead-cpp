@@ -88,52 +88,51 @@ Server::Server(string port,int waiting,Service serv)
 
 	if(fork()==0)
 	{
-		struct epoll_event events[MAXEPOLLSIZES];
-		int epoll_handle = epoll_create(MAXEPOLLSIZES);
-		int curfds =1;
-		struct epoll_event ev;
-		ev.events = EPOLLIN | EPOLLPRI;
-		ev.data.fd = this->sock;
-		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, this->sock, &ev) < 0)
-		{
-			fprintf(stderr, "epoll set insertion error: fd=%d\n", this->sock);
-			//return -1;
-		}
-		else
-			printf("listener socket to join epoll success!\n");
+		fd_set master;    // master file descriptor list
+		fd_set read_fds;  // temp file descriptor list for select()
+		int fdmax;        // maximum file descriptor number
+
+		FD_ZERO(&master);    // clear the master and temp sets
+		FD_ZERO(&read_fds);
+
+		FD_SET(this->sock, &master);
+		// keep track of the biggest file descriptor
+		fdmax = this->sock; // so far, it's this on
+
 		while(1)
 		{
-			int nfds = epoll_wait(epoll_handle, events, curfds,-1);
+			read_fds = master; // copy it
+			int nfds = select(fdmax+1, &read_fds, NULL, NULL, NULL);
 			if (nfds == -1)
 			{
 				perror("epoll_wait");
 				break;
 			}
-			for(int n=0;n<nfds;n++)
+			for(int n=0;n<=fdmax;n++)
 			{
-				if (events[n].data.fd == this->sock)
+				if (FD_ISSET(n, &read_fds))
 				{
-					int new_fd = this->Accept();
-					if (new_fd == -1)
+					if (n == this->sock)
 					{
-						perror("accept");
-						continue;
+						int new_fd = this->Accept();
+						if (new_fd == -1)
+						{
+							perror("accept");
+							continue;
+						}
+						else
+						{
+							fcntl(new_fd, F_SETFL, fcntl(new_fd, F_GETFD, 0) | O_NONBLOCK);
+							FD_SET(new_fd, &master); // add to master set
+							if (new_fd > fdmax) {    // keep track of the max
+								fdmax = new_fd;
+							}
+						}
 					}
 					else
 					{
-						fcntl(new_fd, F_SETFL, fcntl(new_fd, F_GETFD, 0) | O_NONBLOCK);
-						ev.events = EPOLLIN | EPOLLPRI;
-						ev.data.fd = new_fd;
-						if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, new_fd, &ev) < 0)
-						{
-							perror("epoll");
-							//return -1;
-						}
+						boost::thread m_thread(boost::bind(serv,n));
 					}
-				}
-				else
-				{
-					boost::thread m_thread(boost::bind(serv,events[n].data.fd));
 				}
 			}
 		}

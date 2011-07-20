@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <stdexcept>
-#include <execinfo.h>
+/*Fix for Windows Cygwin*///#include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #include <stdio.h>

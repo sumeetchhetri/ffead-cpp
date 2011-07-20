@@ -33,7 +33,7 @@ Trace::~Trace() {
 
 void Trace::trace()
 {
-	using namespace abi;
+	/*using namespace abi;
 	enum{MAX_DEPTH = 10};
 	void *trace[MAX_DEPTH];
 	Dl_info dlinfo;
@@ -55,7 +55,7 @@ void Trace::trace()
 		printf("object: %s, function: %s\n", dlinfo.dli_fname, symname);
 		if (demangled)
 			free(demangled);
-	}
+	}*/
 }
 
 string Trace::demangle(const char *mangled)

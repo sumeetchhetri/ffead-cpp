@@ -30,7 +30,7 @@ ExceptionHandler::ExceptionHandler()
 
 ExceptionTracer::ExceptionTracer()
 {
-	 void * array[25];
+	 /*void * array[25];
 	 int nSize = backtrace(array, 25);
 	 char ** symbols = backtrace_symbols(array, nSize);
 
@@ -39,5 +39,5 @@ ExceptionTracer::ExceptionTracer()
 		 cout << symbols[i] << endl;
 	 }
 
-	 free(symbols);
+	 free(symbols);*/
 }
