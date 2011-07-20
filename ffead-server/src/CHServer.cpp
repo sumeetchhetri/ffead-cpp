@@ -895,7 +895,7 @@ void ServiceTask::run()
 				claz = "getReflectionCIFor" + urlpattMap[req->getCntxt_name()+"*.*"];
 			else
 				claz = "getReflectionCIFor" + urlMap[req->getCntxt_name()+ext];
-			string libName = "libinter.so";
+			string libName = "libinter.a";
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -976,7 +976,7 @@ void ServiceTask::run()
 			}
 			json += "}";
 			cout << json << endl;
-			string libName = "libinter.so";
+			string libName = "libinter.a";
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -1026,7 +1026,7 @@ void ServiceTask::run()
 		}
 		else if(ext==".dcp")
 		{
-			string libName = "libinter.so";
+			string libName = "libinter.a";
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -1067,7 +1067,7 @@ void ServiceTask::run()
 		}
 		else if(ext==".view" && vwMap[req->getCntxt_name()+req->getFile()]!="")
 		{
-			string libName = "libinter.so";
+			string libName = "libinter.a";
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -1854,7 +1854,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	}
 	if((pid=fork())==0)
 	{
-		dlib = dlopen("libinter.so", RTLD_NOW|RTLD_GLOBAL);
+		dlib = dlopen("libinter.a", RTLD_NOW|RTLD_GLOBAL);
 		cout << endl <<dlib << endl;
 		if(dlib==NULL)
 		{
@@ -2509,7 +2509,7 @@ void dynamic_page_monitor(string serverRootDirectory)
 				string respath = serverRootDirectory + "resources/";
 				string ret = DCPGenerator::generateDCPAll(dcpsss);
 				AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
-				string compres = "/"+respath+"rundyn.sh";
+				string compres = respath+"rundyn.sh";
 				int i=system(compres.c_str());
 				if(!i)
 				{
@@ -2692,7 +2692,7 @@ int main(int argc, char* argv[])
     }
 
     bool libpresent = true;
-    void *dlibtemp = dlopen("libinter.so", RTLD_NOW|RTLD_GLOBAL);
+    void *dlibtemp = dlopen("libinter.a", RTLD_NOW|RTLD_GLOBAL);
 	cout << endl <<dlibtemp << endl;
 	if(dlibtemp==NULL)
 	{
@@ -2707,7 +2707,7 @@ int main(int argc, char* argv[])
 
 	props = pread.getProperties(respath+"mime-types.prop");
 	lprops = pread.getProperties(respath+"locale.prop");
-	string compres = "/"+respath+"run.sh";
+	string compres = respath+"run.sh";
 	if(!libpresent)
 	{
 		int i=system(compres.c_str());

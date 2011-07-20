@@ -18,7 +18,7 @@
 #include "XmlParser.h"
 #include <boost/lexical_cast.hpp>
 #include <stdexcept>
-#include <execinfo.h>
+//#include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #include <stdio.h>

@@ -1,5 +1,5 @@
 <cibernate>
-	<config>
+	<!--config>
 		<uid>sumeet</uid>
 		<pwd>sumeet</pwd>
 		<dsn>MySQL-test</dsn>
@@ -25,5 +25,5 @@
 			<col dbf="id" obf="id"></col>
 			<col dbf="test_id" obf="test_id"></col>
 		</table>
-	</tables>
+	</tables-->
 </cibernate>
