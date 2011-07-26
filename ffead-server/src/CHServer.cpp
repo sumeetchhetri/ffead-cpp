@@ -1996,6 +1996,8 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	return pid;
 }
 
+
+
 pid_t createChildMonitProcess(int sp[])
 {
 	pid_t pid;
@@ -2516,13 +2518,6 @@ void dynamic_page_monitor(string serverRootDirectory)
 					cout << "regenarting intermediate code-----Done" << endl;
 					Logger::info("Done generating intermediate code");
 				}
-				m_mutex.lock();
-				map<int,pid_t>::iterator it;
-				for(it=pds.begin();it!=pds.end();it++)
-				{
-					kill(it->second,9);
-				}
-				m_mutex.unlock();
 				processforcekilled = true;
 				flag = true;
 				break;
@@ -2616,15 +2611,6 @@ int main(int argc, char* argv[])
    	}
    	if(srprps["SESS_STATE"]=="server")
    		sessatserv = true;
-    /* Set each process to allow the maximum number of files to open */
-	/*rt.rlim_max = rt.rlim_cur = MAXEPOLLSIZE;
-	if(setrlimit(RLIMIT_NOFILE, &rt) == -1)
-	{
-		perror("setrlimit");
-		exit(1);
-	}
-	else
-		printf("set the parameters of system resources, the success!\n");*/
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -2746,19 +2732,6 @@ int main(int argc, char* argv[])
 	//logfile << "Server: waiting for connections on port " << PORT << "\n" << flush;
 	Logger::info("Server: waiting for connections on port "+PORT);
 
-	vector<string> files;
-	for(int j=0;j<preForked;j++)
-	{
-		pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
-		pds[j] = pid;
-		stringstream ss;
-		string filename;
-		ss << serverRootDirectory;
-		ss << pds[j];
-		ss >> filename;
-		filename.append(".cntrl");
-		files.push_back(filename);
-	}
 	if(isCompileEnabled)boost::thread m_thread(boost::bind(&dynamic_page_monitor ,serverRootDirectory));
 
 	fd_set master;    // master file descriptor list
@@ -2768,61 +2741,22 @@ int main(int argc, char* argv[])
 	FD_ZERO(&master);    // clear the master and temp sets
 	FD_ZERO(&read_fds);
 
-	/*struct epoll_event events[MAXEPOLLSIZE];
-	int epoll_handle = epoll_create(MAXEPOLLSIZE);
-	ev.events = EPOLLIN | EPOLLPRI;
-	ev.data.fd = sockfd;
-	if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, sockfd, &ev) < 0)
-	{
-		fprintf(stderr, "epoll set insertion error: fd=%d\n", sockfd);
-		return -1;
-	}
-	else
-		printf("listener socket to join epoll success!\n");*/
-
-	// add the listener to the master set
 	FD_SET(sockfd, &master);
 
 	// keep track of the biggest file descriptor
 	fdmax = sockfd; // so far, it's this one
 
 	int childNo = 0;
-	/*if(fork()==0)
-	{
-		//start  of hotdeployment process
 
-	}*/
-	//cout << "Done" << flush;
-	struct msghdr msg;
-	char ccmsg[CMSG_SPACE(sizeof(int))];
-	struct cmsghdr *cmsg;
-	struct iovec vec;  /* stupidity: must send/receive at least one byte */
-	char *str = (char *)"x";
-	//msg.msg_name = (struct sockaddr*)&unix_socket_name;
-	//msg.msg_namelen = sizeof(unix_socket_name);
-	msg.msg_name = 0;
-	msg.msg_namelen = 0;
-	vec.iov_base = str;
-	vec.iov_len = 1;
-	msg.msg_iov = &vec;
-	msg.msg_iovlen = 1;
-
-	/* old BSD implementations should use msg_accrights instead of
-	* msg_control; the interface is different. */
-	msg.msg_control = ccmsg;
-	msg.msg_controllen = sizeof(ccmsg);
-	cmsg = CMSG_FIRSTHDR(&msg);
-	cmsg->cmsg_level = SOL_SOCKET;
-	cmsg->cmsg_type = SCM_RIGHTS;
-	cmsg->cmsg_len = CMSG_LEN(sizeof(int));
-	msg.msg_flags = 0;
 	int curfds = 1;
 	ifstream cntrlfile;
-	ThreadPool pool;
+	ThreadPool *pool;
 	if(!isThreadprq)
 	{
-		pool.init(thrdpsiz,30,true);
+		pool = new ThreadPool;
+		pool->init(thrdpsiz,thrdpsiz+30,true);
 	}
+	propMap params = pread.getProperties(serverRootDirectory+"resources/security.prop");
 	while(1)
 	{
 		if(childNo>=preForked)
@@ -2849,18 +2783,9 @@ int main(int argc, char* argv[])
 		if(processforcekilled)
 		{
 			files.clear();
-			for(int j=0;j<preForked;j++)
-			{
-				pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
-				pds[j] = pid;
-				stringstream ss;
-				string filename;
-				ss << serverRootDirectory;
-				ss << pds[j];
-				ss >> filename;
-				filename.append(".cntrl");
-				files.push_back(filename);
-			}
+			delete pool;
+			pool = new ThreadPool;
+			pool->init(thrdpsiz,thrdpsiz+30,true);
 			processforcekilled = false;
 			processgendone = true;
 		}
@@ -2893,59 +2818,13 @@ int main(int argc, char* argv[])
 				else
 				{
 					FD_CLR(n, &master); // remove from master set
-					cntrlfile.open(files.at(childNo).c_str());
-					if(cntrlfile.is_open())
-					{
-						*(int*)CMSG_DATA(cmsg) = n;
-						msg.msg_controllen = cmsg->cmsg_len;
-						if((rv= sendmsg(sp[childNo][0], &msg, 0)) < 0)
-						{
-						  perror("sendmsg()");
-						  exit(1);
-						}
-						string cno = boost::lexical_cast<string>(childNo);
-						close(n);
-						childNo++;
-					}
+					if(isThreadprq)
+						boost::thread m_thread(boost::bind(&service,n,serverRootDirectory,&params));
 					else
 					{
-						int tcn = childNo;
-						for(int o=0;o<preForked;o++)
-						{
-							cntrlfile.open(files.at(o).c_str());
-							if(cntrlfile.is_open())
-							{
-								*(int*)CMSG_DATA(cmsg) = n;
-								msg.msg_controllen = cmsg->cmsg_len;
-								if((rv= sendmsg(sp[o][0], &msg, 0)) < 0)
-								{
-								  perror("sendmsg()");
-								  exit(1);
-								}
-								string cno = boost::lexical_cast<string>(o);
-								//logfile << ("sent socket to process "+cno+"\n") << flush;
-								close(n);
-								childNo = o+1;
-								break;
-							}
-						}
-						close(sp[tcn][0]);
-						close(sp[tcn][1]);
-						cout << "Process got killed" << flush;
-						pid_t pid = createChildProcess(serverRootDirectory,sp[tcn],sockfd);
-						pds[tcn] = pid;
-						stringstream ss;
-						string filename;
-						ss << serverRootDirectory;
-						ss << pid;
-						ss >> filename;
-						filename.append(".cntrl");
-						files[tcn] = filename;
-						cout << "created a new Process" << flush;
-						//logfile << "Process got killed hence created a new Process " << pid << flush;
-						Logger::info("Process got killed hence created a new Process\n");
+						ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params);
+						pool->execute(*task);
 					}
-					cntrlfile.close();
 				}
 			}
 		}
