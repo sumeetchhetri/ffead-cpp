@@ -49,4 +49,4 @@ clean:
 
 .PHONY: all clean dependents
 .SECONDARY:
-libweblib.so:
+libweblib.a:
