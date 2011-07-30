@@ -413,38 +413,33 @@ vector<unsigned char> getContentVec(string url,string locale,string ext)
 string getContentStr(string url,string locale,string ext)
 {
 	string all;
-	string fname = ""+url;
-
+    string fname = url;
 	if (url=="/")
-	{
-		//cout << "\nURL is" << fname << flush;
-		return all;
-	}
-	ifstream myfile;
-	//Magick::Image image("/home/sumeet/test123.jpg");
-	if(locale.find("english")==string::npos && (ext==".html" || ext==".htm"))
-	{
-		string fnj = fname;
-		boost::replace_first(fnj,".",("_" + locale+"."));
-		myfile.open(&fnj[0],ios::in | ios::binary);
-		//cout << fnj << flush;
-	}
-	if(!myfile.is_open())
-		myfile.open(&fname[0],ios::in | ios::binary);
-    unsigned char byte = '\0';
-    if (myfile.is_open())
     {
-      while (myfile.read((char*)&byte, sizeof(byte)))
-	  {
-		  all.push_back(byte);
-	  }
-	  myfile.close();
+       return all;
     }
-    else
+    ifstream myfile;
+    if(locale.find("english")==string::npos && (ext==".html" || ext==".htm"))
     {
-    	//cout << "Unable to open file";
+            string fnj = fname;
+            boost::replace_first(fnj,".",("_" + locale+"."));
+            myfile.open(fnj.c_str(),ios::in | ios::binary);
+			if (myfile.is_open())
+			{
+				string line;
+				while(getline(myfile,line)){all.append(line+"\n");}
+				myfile.close();
+				return all;
+			}
     }
-    //ss >> all;
+	ifstream myfile1;
+    myfile1.open(fname.c_str(),ios::in | ios::binary);		
+    if (myfile1.is_open())
+    {
+		string line;
+		while(getline(myfile1,line)){all.append(line+"\n");}
+        myfile1.close();
+    }
     return all;
 }
 
@@ -618,6 +613,7 @@ void ServiceTask::run()
 			sbio=BIO_new_socket(fd,BIO_CLOSE);
 			io=BIO_new(BIO_f_buffer());
 			BIO_push(io,sbio);
+			cout << "into run method" << endl;
 			while(flag)
 			{
 				er = BIO_gets(io,buf,BUFSIZZ-1);
@@ -712,6 +708,7 @@ void ServiceTask::run()
 		map<string,string> params1 = *params;
 		string webpath = serverRootDirectory + "web/";
 		HttpRequest* req= new HttpRequest(results,webpath);
+		
 		if(req->getFile()=="")
 		{
 			req->setFile("index.html");
@@ -788,9 +785,10 @@ void ServiceTask::run()
 			{
 				string clasz = tempp.at(var);
 				clasz = "getReflectionCIFor" + clasz;
-				cout << "filter handled by class " << clasz << endl;
+				cout << "filter handled by class " << clasz << " " << dlib << endl;
 				if(dlib == NULL)
 				{
+					cout << "error" << endl;
 					cerr << dlerror() << endl;
 					exit(-1);
 				}
@@ -1304,6 +1302,7 @@ void ServiceTask::run()
 		}
 		else
 		{
+			cout << "html page requested" <<endl;
 			if(ext==".fview")
 			{
 				cout << "inside fview " << req->getFile() << endl;
@@ -1351,10 +1350,11 @@ void ServiceTask::run()
 				}
 				infile.close();
 				res.setContent_type("text/html");
-				cout << content << flush;
+				//cout << content << flush;
 			}
 			else
 				content = getContentStr(req->getUrl(),lprops[req->getDefaultLocale()],ext);
+			//cout << content << endl;
 			if(ext!="" && (content.length()==0))
 			{
 				res.setStatusCode("404");
@@ -1411,8 +1411,9 @@ void ServiceTask::run()
 		string h1;
 		bool sessionchanged = !req->hasCookie();
 		sessionchanged |= req->getSession()->isDirty();
-
-		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfo()["FFEADID"]);
+		if(req->getConnection()!="")
+			res.setConnection("close");
+		//createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfo()["FFEADID"]);
 		h1 = res.generateResponse();
 		//cout << h1 << endl;
 		if(isSSLEnabled)
@@ -1478,6 +1479,7 @@ void ServiceTask::run()
 		else
 		{
 			int size;
+			//cout << h1 << endl;
 			if ((size=send(fd,&h1[0] , h1.length(), 0)) == -1)
 				cout << "send failed" << flush;
 			else if(size==0)
@@ -1836,8 +1838,8 @@ void cleanUpRoutine(string tempo)
 	abort();
 }
 void service(int fd,string serverRootDirectory,map<string,string> *params)
-
 {
+	cout << "service method " << endl;
 	ServiceTask *task = new ServiceTask(fd,serverRootDirectory,params);
 	task->run();
 	delete task;
@@ -2756,6 +2758,15 @@ int main(int argc, char* argv[])
 		pool = new ThreadPool;
 		pool->init(thrdpsiz,thrdpsiz+30,true);
 	}
+	dlib = dlopen("libinter.a", RTLD_NOW|RTLD_GLOBAL);
+	cout << endl <<dlib << endl;
+	if(dlib==NULL)
+	{
+		cout << dlerror() << endl;
+		Logger::info("Could not load Library");
+	}
+	else
+		Logger::info("Library loaded successfully");
 	propMap params = pread.getProperties(serverRootDirectory+"resources/security.prop");
 	while(1)
 	{
@@ -2782,7 +2793,6 @@ int main(int argc, char* argv[])
 		processgendone = false;
 		if(processforcekilled)
 		{
-			files.clear();
 			delete pool;
 			pool = new ThreadPool;
 			pool->init(thrdpsiz,thrdpsiz+30,true);
@@ -2817,7 +2827,9 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
+					cout << "got new connection " << endl;
 					FD_CLR(n, &master); // remove from master set
+					fcntl(n, F_SETFL,O_SYNC);
 					if(isThreadprq)
 						boost::thread m_thread(boost::bind(&service,n,serverRootDirectory,&params));
 					else
