@@ -36,6 +36,12 @@ CibernateConnectionPool::CibernateConnectionPool(int size,string dbName,string u
 
 CibernateConnectionPool::~CibernateConnectionPool()
 {
+	for (int var = 0; var < readConnections.size(); ++var) {
+		delete readConnections.at(var);
+	}
+	for (int var = 0; var < writeConnections.size(); ++var) {
+		delete writeConnections.at(var);
+	}
 	SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 	cout << "\nDestructed CibernateConnectionPool" << flush;
 }
