@@ -36,11 +36,13 @@ CibernateConnPools::CibernateConnPools()
 }
 
 CibernateConnPools::~CibernateConnPools() {
-	for (int var = 0; var < cpools.size(); ++var) {
-		delete cpools.at(var);
+	map<string,CibernateConnectionPool*>::iterator it1;
+	for (it1=cpools.begin();it1!=cpools.end();it1++) {
+		delete it1->second;
 	}
-	for (int var = 0; var < mappings.size(); ++var) {
-		delete mappings.at(var);
+	map<string,Mapping*>::iterator it2;
+	for (it2=mappings.begin();it2!=mappings.end();it2++) {
+		delete it2->second;
 	}
 	instance=NULL;
 	cout << "\nDestructed CibernateConnPools" << flush;

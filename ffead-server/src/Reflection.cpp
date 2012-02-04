@@ -745,7 +745,11 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				for(unsigned int j = 0; j < argp.size(); j++)
 				{
 					if(argp.at(j)!="" && argp.at(j)!="(")
-						argpm.push_back(argp.at(j));
+					{
+						string argpmtemp = argp.at(j);
+						argpmtemp = argpmtemp.substr(argpmtemp.find_first_not_of(" "));
+						argpm.push_back(argpmtemp);
+					}
 				}
 				string typdefName,methsd,valsd,valsa;
 				//bool ctor = false;
@@ -822,7 +826,7 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 					//{
 						typedefs += argtn.at(0);
 						typdefName += argtn.at(0);
-						methsd += argtn.at(0) + (type12=="*"?"ptr":"adr");
+						methsd += argtn.at(0) + (type12=="*"?"ptr":"");
 						if(j!=argpm.size()-1)
 						{
 							typdefName += ",";
@@ -1527,7 +1531,11 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 					for(unsigned int j = 0; j < argp.size(); j++)
 					{
 						if(argp.at(j)!="" && argp.at(j)!="(")
-							argpm.push_back(argp.at(j));
+						{
+							string argpmtemp = argp.at(j);
+							argpmtemp = argpmtemp.substr(argpmtemp.find_first_not_of(" "));
+							argpm.push_back(argpmtemp);
+						}
 					}
 
 					if(methpm.at(0)!=this->classN)

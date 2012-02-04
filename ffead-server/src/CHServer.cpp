@@ -32,6 +32,7 @@ CHServer::~CHServer() {
 SharedData* SharedData::shared_instance = NULL;
 string servd;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap;
+static resFuncMap rstCntMap;
 static map<string, Element> formMap;
 static map<string, vector<string> > filterMap;
 static string resourcePath;
@@ -887,7 +888,8 @@ void ServiceTask::run()
 				}
 			}
 		}
-
+		string pthwofile = req->getCntxt_name()+req->getActUrl();
+		//pthwofile = pthwofile.substr(0, pthwofile.find_last_of("/")+1);
 		if(!isContrl && (urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!=""))
 		{
 			//cout << "Controller requested for " << req->getCntxt_name() << " name " << urlMap[req->getCntxt_name()+ext] << endl;
@@ -939,7 +941,126 @@ void ServiceTask::run()
 				req->setFile(fili+mapMap[req->getCntxt_name()+ext]);
 				cout << "URL mapped from " << ext << " to " << mapMap[req->getCntxt_name()+ext] << endl;
 			}
+		}
+		else if(!isContrl)
+		{
+			resFuncMap::iterator it;
+			RestFunction rft;
+			bool flag = false;
+			vector<string> valss;
+			int prsiz = 0;
+			cout << pthwofile << endl;
+			for (it=rstCntMap.begin();it!=rstCntMap.end();it++)
+			{
+				cout << it->first << endl;
+				if(pthwofile.find(it->first)!=string::npos)
+				{
+					RestFunction ft = it->second;
+					prsiz = ft.params.size();
+					string pthwofiletemp(pthwofile);
+					for (int var = 0; var < prsiz; var++)
+					{
+						cout << "loop - " << pthwofiletemp << endl;
+						string valsvv(pthwofiletemp.substr(pthwofiletemp.find_last_of("/")+1));
+						pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.find_last_of("/"));
+						valss.push_back(valsvv);
+					}
+					cout << "after - " << pthwofiletemp << endl;
+					/*if(pthwofiletemp.at(pthwofiletemp.length()-1)=='/')
+					{
+						pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.length()-1);
+					}*/
+					//cout << "after - " << pthwofiletemp << endl;
+					if(it->first==pthwofiletemp)
+					{
+						if(prsiz==valss.size())
+						{
+							cout << "got correct url -- restcontroller " << endl;
+							rft = ft;
+							flag = true;
+						}
+						break;
+					}
+				}
+			}
+			if(flag)
+			{
+				cout << "inside restcontroller logic ..." << endl;
+				string libName = "libinter.so";
+				if(dlib == NULL)
+				{
+					cerr << dlerror() << endl;
+					exit(-1);
+				}
+				string clasnam("getReflectionCIFor"+rft.clas);
+				void *mkr = dlsym(dlib, clasnam.c_str());
+				cout << mkr << endl;
+				if(mkr!=NULL)
+				{
+					FunPtr f =  (FunPtr)mkr;
+					ClassInfo srv = f();
+					args argus;
+					Constructor ctor = srv.getConstructor(argus);
+					Reflector ref;
+					void *_temp = ref.newInstanceGVP(ctor);
+					RestController* rstcnt = (RestController*)_temp;
+					rstcnt->request = req;
+					rstcnt->response = &res;
 
+					vals valus;
+					for (int var = 0; var < prsiz; var++)
+					{
+						argus.push_back(rft.params.at(var).type);
+						if(rft.params.at(var).type=="int")
+						{
+							int* ival = new int(boost::lexical_cast<int>(valss.at(var)));
+							valus.push_back(ival);
+						}
+						else if(rft.params.at(var).type=="long")
+						{
+							long* ival = new long(boost::lexical_cast<long>(valss.at(var)));
+							valus.push_back(ival);
+						}
+						else if(rft.params.at(var).type=="double")
+						{
+							double* ival = new double(boost::lexical_cast<double>(valss.at(var)));
+							valus.push_back(ival);
+						}
+						else if(rft.params.at(var).type=="float")
+						{
+							float* ival = new float(boost::lexical_cast<float>(valss.at(var)));
+							valus.push_back(ival);
+						}
+						else if(rft.params.at(var).type=="bool")
+						{
+							bool* ival = new bool(boost::lexical_cast<bool>(valss.at(var)));
+							valus.push_back(ival);
+						}
+						else if(rft.params.at(var).type=="string")
+						{
+							string* sval = new string(valss.at(var));
+							valus.push_back(sval);
+						}
+					}
+
+					Method meth = srv.getMethod(rft.name, argus);
+					if(meth.getMethodName()!="")
+					{
+						ref.invokeMethodUnknownReturn(_temp,meth,valus);
+						cout << "successfully called restcontroller" << endl;
+						//return;
+					}
+					else
+					{
+						res.setStatusCode("404");
+						res.setStatusMsg("Not Found");
+						res.setContent_type("text/plain");
+						res.setContent_str("Rest Controller Method Not Found");
+						cout << "Rest Controller Method Not Found" << endl;
+						//return;
+					}
+				}
+			}
 		}
 
 		/*After going through the controller the response might be blank, just set the HTTP version*/
@@ -967,7 +1088,29 @@ void ServiceTask::run()
 					if(fld.getType()=="string")
 						json += "\""+eles.at(apps).getAttribute("prop")+"\": \"" + req->getRequestParam(name) + "\",";
 					else
-						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getRequestParam(name) + ",";
+					{
+						if(fld.getType()=="int" || fld.getType()=="long")
+						{
+							if(req->getRequestParam(name)=="")
+								json += "\""+eles.at(apps).getAttribute("prop")+"\": 0,";
+							else
+								json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getRequestParam(name) + ",";
+						}
+						else if(fld.getType()=="double" || fld.getType()=="float")
+						{
+							if(req->getRequestParam(name)=="")
+								json += "\""+eles.at(apps).getAttribute("prop")+"\": 0.0,";
+							else
+								json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getRequestParam(name) + ",";
+						}
+						else if(fld.getType()=="bool")
+						{
+							if(req->getRequestParam(name)=="")
+								json += "\""+eles.at(apps).getAttribute("prop")+"\": false,";
+							else
+								json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getRequestParam(name) + ",";
+						}
+					}
 				}
 			}
 			if(json.find(",")!=string::npos)
@@ -1004,6 +1147,7 @@ void ServiceTask::run()
 				{
 					ref.invokeMethodUnknownReturn(_temp,meth,valus);
 					cout << "successfully called formcontroller" << endl;
+					//return;
 				}
 				else
 				{
@@ -1012,6 +1156,7 @@ void ServiceTask::run()
 					res.setContent_type("text/plain");
 					res.setContent_str("Controller Method Not Found");
 					cout << "Controller Method Not Found" << endl;
+					//return;
 				}
 			}
 		}
@@ -1354,7 +1499,12 @@ void ServiceTask::run()
 				cout << content << flush;
 			}
 			else
-				content = getContentStr(req->getUrl(),lprops[req->getDefaultLocale()],ext);
+			{
+				if(res.getContent_str()=="")
+					content = getContentStr(req->getUrl(),lprops[req->getDefaultLocale()],ext);
+				else
+					content = res.getContent_str();
+			}
 			if(ext!="" && (content.length()==0))
 			{
 				res.setStatusCode("404");
@@ -2216,6 +2366,79 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 						{
 							vwMap[name+dvs.at(dn).getAttribute("path")] = dvs.at(dn).getAttribute("class");
 							//cout << dvs.at(dn).getAttribute("path") << " :: " << dvs.at(dn).getAttribute("class") << flush;
+						}
+					}
+				}
+				else if(eles.at(apps).getTagName()=="restcontrollers")
+				{
+					ElementList cntrls = eles.at(apps).getChildElements();
+					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
+					{
+						if(cntrls.at(cntn).getTagName()=="restcontroller")
+						{
+							string url = cntrls.at(cntn).getAttribute("urlpath");
+							string clas = cntrls.at(cntn).getAttribute("class");
+							string rname = cntrls.at(cntn).getAttribute("name");
+							ElementList resfuncs = cntrls.at(cntn).getChildElements();
+							for (unsigned int cntn1 = 0; cntn1 < resfuncs.size(); cntn1++)
+							{
+								if(resfuncs.at(cntn1).getTagName()=="restfunction")
+								{
+									RestFunction restfunction;
+									restfunction.name = resfuncs.at(cntn1).getAttribute("name");
+									restfunction.alias = resfuncs.at(cntn1).getAttribute("alias");
+									restfunction.clas = clas;
+									ElementList resfuncparams = resfuncs.at(cntn1).getChildElements();
+									for (unsigned int cntn2 = 0; cntn2 < resfuncparams.size(); cntn2++)
+									{
+										if(resfuncparams.at(cntn2).getTagName()=="param")
+										{
+											RestFunctionParams param;
+											param.pos = boost::lexical_cast<int>(resfuncparams.at(cntn2).getAttribute("pos"));
+											param.type = resfuncparams.at(cntn2).getAttribute("type");
+											restfunction.params.push_back(param);
+										}
+									}
+									if(restfunction.params.size()==0)
+										continue;
+									if(clas!="")
+									{
+										if(url.find("*")==string::npos)
+										{
+											if(url=="")
+												url = "/";
+											string urlmpp;
+											if(rname!="")
+											{
+												if(restfunction.alias!="")
+												{
+													urlmpp = name+url+rname+"/"+restfunction.alias;
+													rstCntMap[urlmpp] = restfunction;
+												}
+												else
+												{
+													urlmpp = name+url+rname+"/"+restfunction.name;
+													rstCntMap[name+url+rname+"/"+restfunction.name] = restfunction;
+												}
+											}
+											else
+											{
+												if(restfunction.alias!="")
+												{
+													urlmpp = name+url+clas+"/"+restfunction.alias;
+													rstCntMap[urlmpp] = restfunction;
+												}
+												else
+												{
+													urlmpp = name+url+clas+"/"+restfunction.name;
+													rstCntMap[urlmpp] = restfunction;
+												}
+											}
+											cout << "adding rest-controller => " << urlmpp  << " , class => " << clas << endl;
+										}
+									}
+								}
+							}
 						}
 					}
 				}

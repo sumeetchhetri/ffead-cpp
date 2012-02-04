@@ -73,7 +73,8 @@ CPP_SRCS += \
 ../src/View.cpp \
 ../src/WsUtil.cpp \
 ../src/XmlParseException.cpp \
-../src/XmlParser.cpp 
+../src/XmlParser.cpp \
+../src/RestController.cpp
 
 OBJS += \
 ./src/AOPEngine.o \
@@ -145,7 +146,8 @@ OBJS += \
 ./src/View.o \
 ./src/WsUtil.o \
 ./src/XmlParseException.o \
-./src/XmlParser.o 
+./src/XmlParser.o \
+./src/RestController.o
 
 CPP_DEPS += \
 ./src/AOPEngine.d \
@@ -217,7 +219,8 @@ CPP_DEPS += \
 ./src/View.d \
 ./src/WsUtil.d \
 ./src/XmlParseException.d \
-./src/XmlParser.d 
+./src/XmlParser.d \
+./src/RestController.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
