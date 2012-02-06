@@ -949,10 +949,10 @@ void ServiceTask::run()
 			bool flag = false;
 			vector<string> valss;
 			int prsiz = 0;
-			cout << pthwofile << endl;
+			//cout << pthwofile << endl;
 			for (it=rstCntMap.begin();it!=rstCntMap.end();it++)
 			{
-				cout << it->first << endl;
+				//cout << it->first << endl;
 				if(pthwofile.find(it->first)!=string::npos)
 				{
 					RestFunction ft = it->second;
@@ -960,12 +960,12 @@ void ServiceTask::run()
 					string pthwofiletemp(pthwofile);
 					for (int var = 0; var < prsiz; var++)
 					{
-						cout << "loop - " << pthwofiletemp << endl;
+						//cout << "loop - " << pthwofiletemp << endl;
 						string valsvv(pthwofiletemp.substr(pthwofiletemp.find_last_of("/")+1));
 						pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.find_last_of("/"));
 						valss.push_back(valsvv);
 					}
-					cout << "after - " << pthwofiletemp << endl;
+					//cout << "after - " << pthwofiletemp << endl;
 					/*if(pthwofiletemp.at(pthwofiletemp.length()-1)=='/')
 					{
 						pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.length()-1);
@@ -985,7 +985,7 @@ void ServiceTask::run()
 			}
 			if(flag)
 			{
-				cout << "inside restcontroller logic ..." << endl;
+				//cout << "inside restcontroller logic ..." << endl;
 				string libName = "libinter.so";
 				if(dlib == NULL)
 				{
