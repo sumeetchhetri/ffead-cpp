@@ -55,7 +55,7 @@
 <a name="l00032"></a>00032 
 <a name="l00033"></a>00033 <span class="keywordtype">string</span> ApplicationUtil::buildAllApplications(vector&lt;string&gt; files,vector&lt;string&gt; apps,map&lt;string,string&gt; &amp;appMap)
 <a name="l00034"></a>00034 {
-<a name="l00035"></a>00035         <span class="keywordtype">string</span> headers = <span class="stringliteral">&quot;#include \&quot;fstream\&quot;\n#include \&quot;string\&quot;\n#include \&quot;HttpSession.h\&quot;\n#include &lt;boost/lexical_cast.hpp&gt;\n&quot;</span>;
+<a name="l00035"></a>00035         <span class="keywordtype">string</span> headers = <span class="stringliteral">&quot;#include \&quot;fstream\&quot;\n#include \&quot;string\&quot;\n#include \&quot;HttpSession.h\&quot;\n#include &lt;boost/lexical_cast.hpp&gt;\nusing namespace std;\n&quot;</span>;
 <a name="l00036"></a>00036         <span class="keywordtype">string</span> code;
 <a name="l00037"></a>00037         <span class="keywordtype">string</span> meth,methdef,vars;
 <a name="l00038"></a>00038         <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> var = 0; var &lt; files.size(); ++var)
@@ -70,7 +70,7 @@
 <a name="l00047"></a>00047                         appMap[appName] = <span class="stringliteral">&quot;false&quot;</span>;
 <a name="l00048"></a>00048                 <span class="keywordflow">else</span>
 <a name="l00049"></a>00049                 {
-<a name="l00050"></a>00050                         vars = <span class="stringliteral">&quot;string &quot;</span>+appName+<span class="stringliteral">&quot;checkRules(string to,HttpSession session)\n{\nstring curr=session.getAttribute(\&quot;CURR\&quot;);\n&quot;</span>;
+<a name="l00050"></a>00050                         meth += <span class="stringliteral">&quot;string &quot;</span>+appName+<span class="stringliteral">&quot;checkRules(string to,HttpSession session)\n{\nstring curr=session.getAttribute(\&quot;CURR\&quot;);\n&quot;</span>;
 <a name="l00051"></a>00051                         <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> var = 0; var &lt; eles.size(); var++)
 <a name="l00052"></a>00052                         {
 <a name="l00053"></a>00053                                 <span class="keywordflow">if</span>(eles.at(var).getTagName()==<span class="stringliteral">&quot;include&quot;</span>)
@@ -85,7 +85,7 @@
 <a name="l00062"></a>00062                                 }
 <a name="l00063"></a>00063                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(eles.at(var).getTagName()==<span class="stringliteral">&quot;page&quot;</span> || eles.at(var).getTagName()==<span class="stringliteral">&quot;welcome&quot;</span>)
 <a name="l00064"></a>00064                                 {
-<a name="l00065"></a>00065                                         vars += (<span class="stringliteral">&quot;string &quot;</span> + eles.at(var).getAttribute(<span class="stringliteral">&quot;id&quot;</span>) + <span class="stringliteral">&quot; = \&quot;&quot;</span>+path+eles.at(var).getAttribute(<span class="stringliteral">&quot;path&quot;</span>)+<span class="stringliteral">&quot;\&quot;;\n&quot;</span>);
+<a name="l00065"></a>00065                                         meth += (<span class="stringliteral">&quot;string &quot;</span> + eles.at(var).getAttribute(<span class="stringliteral">&quot;id&quot;</span>) + <span class="stringliteral">&quot; = \&quot;&quot;</span>+path+eles.at(var).getAttribute(<span class="stringliteral">&quot;path&quot;</span>)+<span class="stringliteral">&quot;\&quot;;\n&quot;</span>);
 <a name="l00066"></a>00066                                         <span class="keywordflow">if</span>(eles.at(var).getAttribute(<span class="stringliteral">&quot;who&quot;</span>)!=<span class="stringliteral">&quot;&quot;</span> &amp;&amp; eles.at(var).getAttribute(<span class="stringliteral">&quot;where&quot;</span>)!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00067"></a>00067                                         {
 <a name="l00068"></a>00068                                                 <span class="keywordflow">if</span>(eles.at(var).getAttribute(<span class="stringliteral">&quot;where&quot;</span>).find(<span class="stringliteral">&quot;FILE:&quot;</span>)!=string::npos)
@@ -93,7 +93,7 @@
 <a name="l00070"></a>00070                                                         <span class="keywordtype">string</span> fileName = eles.at(var).getAttribute(<span class="stringliteral">&quot;where&quot;</span>);
 <a name="l00071"></a>00071                                                         boost::replace_first(fileName,<span class="stringliteral">&quot;FILE:&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00072"></a>00072                                                         fileName = (path + fileName);
-<a name="l00073"></a>00073                                                         meth += <span class="stringliteral">&quot;string path;\nif(to==\&quot;&quot;</span>+path+eles.at(var).getAttribute(<span class="stringliteral">&quot;path&quot;</span>)+<span class="stringliteral">&quot;\&quot;)\n{&quot;</span>;
+<a name="l00073"></a>00073                                                         meth += <span class="stringliteral">&quot;string path;\nif(to==&quot;</span>+eles.at(var).getAttribute(<span class="stringliteral">&quot;id&quot;</span>)+<span class="stringliteral">&quot;)\n{&quot;</span>;
 <a name="l00074"></a>00074                                                         meth += <span class="stringliteral">&quot;string user = session.getAttribute(\&quot;USER\&quot;);\n&quot;</span>;
 <a name="l00075"></a>00075                                                         meth += <span class="stringliteral">&quot;string pass = session.getAttribute(\&quot;PASS\&quot;);\n&quot;</span>;
 <a name="l00076"></a>00076                                                         meth += <span class="stringliteral">&quot;ifstream f(\&quot;&quot;</span>+fileName+<span class="stringliteral">&quot;\&quot;);\n&quot;</span>;
@@ -148,7 +148,7 @@
 <a name="l00125"></a>00125 
 <a name="l00126"></a>00126 }
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:05 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

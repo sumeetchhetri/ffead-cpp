@@ -59,129 +59,135 @@
 <a name="l00036"></a>00036 
 <a name="l00037"></a>00037 CibernateConnectionPool::~CibernateConnectionPool()
 <a name="l00038"></a>00038 {
-<a name="l00039"></a>00039         SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
-<a name="l00040"></a>00040         cout &lt;&lt; <span class="stringliteral">&quot;\nDestructed CibernateConnectionPool&quot;</span> &lt;&lt; flush;
-<a name="l00041"></a>00041 }
-<a name="l00042"></a>00042 
-<a name="l00043"></a>00043 <span class="keywordtype">void</span> CibernateConnectionPool::closeConnection(<a class="code" href="classConnection.html">Connection</a> *conn)
-<a name="l00044"></a>00044 {
-<a name="l00045"></a>00045         conn-&gt;busy = <span class="keyword">false</span>;
-<a name="l00046"></a>00046 }
-<a name="l00047"></a>00047 
-<a name="l00048"></a>00048 <span class="keywordtype">void</span>  CibernateConnectionPool::newConnection(<span class="keywordtype">bool</span> read)
-<a name="l00049"></a>00049 {
-<a name="l00050"></a>00050         <span class="keywordtype">int</span> V_OD_erg;<span class="comment">// result of functions</span>
-<a name="l00051"></a>00051         SQLCHAR V_OD_msg[200],V_OD_stat[10];            <span class="comment">// Status SQL;</span>
-<a name="l00052"></a>00052         SQLSMALLINT     V_OD_mlen;
-<a name="l00053"></a>00053         SQLINTEGER V_OD_err_s;
-<a name="l00054"></a>00054         <a class="code" href="classConnection.html">Connection</a> *connection = <span class="keyword">new</span> <a class="code" href="classConnection.html">Connection</a>;
-<a name="l00055"></a>00055         <span class="comment">// 2. allocate connection handle, set timeout</span>
-<a name="l00056"></a>00056         V_OD_erg = SQLAllocHandle(SQL_HANDLE_DBC, V_OD_Env, &amp;(connection-&gt;conn));
-<a name="l00057"></a>00057         <span class="keywordflow">if</span> ((V_OD_erg != SQL_SUCCESS) &amp;&amp; (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-<a name="l00058"></a>00058         {
-<a name="l00059"></a>00059                 printf(<span class="stringliteral">&quot;Error AllocHDB %d\n&quot;</span>,V_OD_erg);
-<a name="l00060"></a>00060                 SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
-<a name="l00061"></a>00061                 this-&gt;initialized = <span class="keyword">false</span>;
-<a name="l00062"></a>00062                 <span class="keywordflow">return</span>;
-<a name="l00063"></a>00063                 <span class="comment">//exit(0);</span>
-<a name="l00064"></a>00064         }
-<a name="l00065"></a>00065         SQLSetConnectAttr(connection-&gt;conn, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
-<a name="l00066"></a>00066         <span class="comment">// 3. Connect to the datasource &quot;MySQL-test&quot;</span>
-<a name="l00067"></a>00067         V_OD_erg = SQLConnect(connection-&gt;conn, (SQLCHAR*) this-&gt;dbName.c_str(), SQL_NTS,
-<a name="l00068"></a>00068                                                                          (SQLCHAR*) this-&gt;uname.c_str(), SQL_NTS,
-<a name="l00069"></a>00069                                                                          (SQLCHAR*) this-&gt;pass.c_str(), SQL_NTS);
-<a name="l00070"></a>00070         <span class="keywordflow">if</span> ((V_OD_erg != SQL_SUCCESS) &amp;&amp; (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-<a name="l00071"></a>00071         {
-<a name="l00072"></a>00072                 printf(<span class="stringliteral">&quot;Error SQLConnect %d\n&quot;</span>,V_OD_erg);
-<a name="l00073"></a>00073                 SQLGetDiagRec(SQL_HANDLE_DBC, connection-&gt;conn,1,
-<a name="l00074"></a>00074                                           V_OD_stat, &amp;V_OD_err_s,V_OD_msg,100,&amp;V_OD_mlen);
-<a name="l00075"></a>00075                 printf(<span class="stringliteral">&quot;%s (%d)\n&quot;</span>,V_OD_msg,(<span class="keywordtype">int</span>)V_OD_err_s);
-<a name="l00076"></a>00076                 SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
-<a name="l00077"></a>00077                 this-&gt;initialized = <span class="keyword">false</span>;
-<a name="l00078"></a>00078                 <span class="keywordflow">return</span>;
-<a name="l00079"></a>00079                 <span class="comment">//exit(0);</span>
-<a name="l00080"></a>00080         }
-<a name="l00081"></a>00081         connection-&gt;busy = <span class="keyword">false</span>;
-<a name="l00082"></a>00082         connection-&gt;type = read;
-<a name="l00083"></a>00083         <span class="keywordflow">if</span>(read)
-<a name="l00084"></a>00084                 this-&gt;readConnections.push_back(connection);
-<a name="l00085"></a>00085         <span class="keywordflow">else</span>
-<a name="l00086"></a>00086                 this-&gt;writeConnections.push_back(connection);
-<a name="l00087"></a>00087 
-<a name="l00088"></a>00088 }
-<a name="l00089"></a>00089 
-<a name="l00090"></a>00090 <span class="keywordtype">void</span> CibernateConnectionPool::createPool(<span class="keywordtype">int</span> size,<span class="keywordtype">string</span> dbName,<span class="keywordtype">string</span> uname,<span class="keywordtype">string</span> pass)
-<a name="l00091"></a>00091 {
-<a name="l00092"></a>00092         this-&gt;dbName = dbName;
-<a name="l00093"></a>00093         this-&gt;uname = uname;
-<a name="l00094"></a>00094         this-&gt;pass = pass;
-<a name="l00095"></a>00095         this-&gt;readNumber = 0;
-<a name="l00096"></a>00096         <span class="keywordtype">int</span> reads = round(size/5);
-<a name="l00097"></a>00097         <span class="keywordflow">if</span>(reads&lt;1)
-<a name="l00098"></a>00098                 reads = 1;
-<a name="l00099"></a>00099         <span class="keywordtype">int</span> V_OD_erg;<span class="comment">// result of functions</span>
-<a name="l00100"></a>00100         <span class="comment">// 1. allocate Environment handle and register version</span>
-<a name="l00101"></a>00101         this-&gt;initialized = <span class="keyword">true</span>;
-<a name="l00102"></a>00102         V_OD_erg=SQLAllocHandle(SQL_HANDLE_ENV,SQL_NULL_HANDLE,&amp;V_OD_Env);
-<a name="l00103"></a>00103         <span class="keywordflow">if</span> ((V_OD_erg != SQL_SUCCESS) &amp;&amp; (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-<a name="l00104"></a>00104         {
-<a name="l00105"></a>00105                 printf(<span class="stringliteral">&quot;Error AllocHandle\n&quot;</span>);
-<a name="l00106"></a>00106                 this-&gt;initialized = <span class="keyword">false</span>;
-<a name="l00107"></a>00107         }
-<a name="l00108"></a>00108         V_OD_erg=SQLSetEnvAttr(V_OD_Env, SQL_ATTR_ODBC_VERSION, (<span class="keywordtype">void</span>*)SQL_OV_ODBC3, 0);
-<a name="l00109"></a>00109         <span class="keywordflow">if</span>((V_OD_erg != SQL_SUCCESS) &amp;&amp; (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+<a name="l00039"></a>00039         <span class="keywordflow">for</span> (<span class="keywordtype">int</span> var = 0; var &lt; readConnections.size(); ++var) {
+<a name="l00040"></a>00040                 <span class="keyword">delete</span> readConnections.at(var);
+<a name="l00041"></a>00041         }
+<a name="l00042"></a>00042         <span class="keywordflow">for</span> (<span class="keywordtype">int</span> var = 0; var &lt; writeConnections.size(); ++var) {
+<a name="l00043"></a>00043                 <span class="keyword">delete</span> writeConnections.at(var);
+<a name="l00044"></a>00044         }
+<a name="l00045"></a>00045         SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
+<a name="l00046"></a>00046         cout &lt;&lt; <span class="stringliteral">&quot;\nDestructed CibernateConnectionPool&quot;</span> &lt;&lt; flush;
+<a name="l00047"></a>00047 }
+<a name="l00048"></a>00048 
+<a name="l00049"></a>00049 <span class="keywordtype">void</span> CibernateConnectionPool::closeConnection(<a class="code" href="classConnection.html">Connection</a> *conn)
+<a name="l00050"></a>00050 {
+<a name="l00051"></a>00051         conn-&gt;busy = <span class="keyword">false</span>;
+<a name="l00052"></a>00052 }
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="keywordtype">void</span>  CibernateConnectionPool::newConnection(<span class="keywordtype">bool</span> read)
+<a name="l00055"></a>00055 {
+<a name="l00056"></a>00056         <span class="keywordtype">int</span> V_OD_erg;<span class="comment">// result of functions</span>
+<a name="l00057"></a>00057         SQLCHAR V_OD_msg[200],V_OD_stat[10];            <span class="comment">// Status SQL;</span>
+<a name="l00058"></a>00058         SQLSMALLINT     V_OD_mlen;
+<a name="l00059"></a>00059         SQLINTEGER V_OD_err_s;
+<a name="l00060"></a>00060         <a class="code" href="classConnection.html">Connection</a> *connection = <span class="keyword">new</span> <a class="code" href="classConnection.html">Connection</a>;
+<a name="l00061"></a>00061         <span class="comment">// 2. allocate connection handle, set timeout</span>
+<a name="l00062"></a>00062         V_OD_erg = SQLAllocHandle(SQL_HANDLE_DBC, V_OD_Env, &amp;(connection-&gt;conn));
+<a name="l00063"></a>00063         <span class="keywordflow">if</span> ((V_OD_erg != SQL_SUCCESS) &amp;&amp; (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+<a name="l00064"></a>00064         {
+<a name="l00065"></a>00065                 printf(<span class="stringliteral">&quot;Error AllocHDB %d\n&quot;</span>,V_OD_erg);
+<a name="l00066"></a>00066                 SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
+<a name="l00067"></a>00067                 this-&gt;initialized = <span class="keyword">false</span>;
+<a name="l00068"></a>00068                 <span class="keywordflow">return</span>;
+<a name="l00069"></a>00069                 <span class="comment">//exit(0);</span>
+<a name="l00070"></a>00070         }
+<a name="l00071"></a>00071         SQLSetConnectAttr(connection-&gt;conn, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
+<a name="l00072"></a>00072         <span class="comment">// 3. Connect to the datasource &quot;MySQL-test&quot;</span>
+<a name="l00073"></a>00073         V_OD_erg = SQLConnect(connection-&gt;conn, (SQLCHAR*) this-&gt;dbName.c_str(), SQL_NTS,
+<a name="l00074"></a>00074                                                                          (SQLCHAR*) this-&gt;uname.c_str(), SQL_NTS,
+<a name="l00075"></a>00075                                                                          (SQLCHAR*) this-&gt;pass.c_str(), SQL_NTS);
+<a name="l00076"></a>00076         <span class="keywordflow">if</span> ((V_OD_erg != SQL_SUCCESS) &amp;&amp; (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+<a name="l00077"></a>00077         {
+<a name="l00078"></a>00078                 printf(<span class="stringliteral">&quot;Error SQLConnect %d\n&quot;</span>,V_OD_erg);
+<a name="l00079"></a>00079                 SQLGetDiagRec(SQL_HANDLE_DBC, connection-&gt;conn,1,
+<a name="l00080"></a>00080                                           V_OD_stat, &amp;V_OD_err_s,V_OD_msg,100,&amp;V_OD_mlen);
+<a name="l00081"></a>00081                 printf(<span class="stringliteral">&quot;%s (%d)\n&quot;</span>,V_OD_msg,(<span class="keywordtype">int</span>)V_OD_err_s);
+<a name="l00082"></a>00082                 SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
+<a name="l00083"></a>00083                 this-&gt;initialized = <span class="keyword">false</span>;
+<a name="l00084"></a>00084                 <span class="keywordflow">return</span>;
+<a name="l00085"></a>00085                 <span class="comment">//exit(0);</span>
+<a name="l00086"></a>00086         }
+<a name="l00087"></a>00087         connection-&gt;busy = <span class="keyword">false</span>;
+<a name="l00088"></a>00088         connection-&gt;type = read;
+<a name="l00089"></a>00089         <span class="keywordflow">if</span>(read)
+<a name="l00090"></a>00090                 this-&gt;readConnections.push_back(connection);
+<a name="l00091"></a>00091         <span class="keywordflow">else</span>
+<a name="l00092"></a>00092                 this-&gt;writeConnections.push_back(connection);
+<a name="l00093"></a>00093 
+<a name="l00094"></a>00094 }
+<a name="l00095"></a>00095 
+<a name="l00096"></a>00096 <span class="keywordtype">void</span> CibernateConnectionPool::createPool(<span class="keywordtype">int</span> size,<span class="keywordtype">string</span> dbName,<span class="keywordtype">string</span> uname,<span class="keywordtype">string</span> pass)
+<a name="l00097"></a>00097 {
+<a name="l00098"></a>00098         this-&gt;dbName = dbName;
+<a name="l00099"></a>00099         this-&gt;uname = uname;
+<a name="l00100"></a>00100         this-&gt;pass = pass;
+<a name="l00101"></a>00101         this-&gt;readNumber = 0;
+<a name="l00102"></a>00102         <span class="keywordtype">int</span> reads = round(size/5);
+<a name="l00103"></a>00103         <span class="keywordflow">if</span>(reads&lt;1)
+<a name="l00104"></a>00104                 reads = 1;
+<a name="l00105"></a>00105         <span class="keywordtype">int</span> V_OD_erg;<span class="comment">// result of functions</span>
+<a name="l00106"></a>00106         <span class="comment">// 1. allocate Environment handle and register version</span>
+<a name="l00107"></a>00107         this-&gt;initialized = <span class="keyword">true</span>;
+<a name="l00108"></a>00108         V_OD_erg=SQLAllocHandle(SQL_HANDLE_ENV,SQL_NULL_HANDLE,&amp;V_OD_Env);
+<a name="l00109"></a>00109         <span class="keywordflow">if</span> ((V_OD_erg != SQL_SUCCESS) &amp;&amp; (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 <a name="l00110"></a>00110         {
-<a name="l00111"></a>00111                 printf(<span class="stringliteral">&quot;Error SetEnv\n&quot;</span>);
-<a name="l00112"></a>00112                 SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
-<a name="l00113"></a>00113                 this-&gt;initialized = <span class="keyword">false</span>;
-<a name="l00114"></a>00114         }
-<a name="l00115"></a>00115         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;reads;i++)
+<a name="l00111"></a>00111                 printf(<span class="stringliteral">&quot;Error AllocHandle\n&quot;</span>);
+<a name="l00112"></a>00112                 this-&gt;initialized = <span class="keyword">false</span>;
+<a name="l00113"></a>00113         }
+<a name="l00114"></a>00114         V_OD_erg=SQLSetEnvAttr(V_OD_Env, SQL_ATTR_ODBC_VERSION, (<span class="keywordtype">void</span>*)SQL_OV_ODBC3, 0);
+<a name="l00115"></a>00115         <span class="keywordflow">if</span>((V_OD_erg != SQL_SUCCESS) &amp;&amp; (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 <a name="l00116"></a>00116         {
-<a name="l00117"></a>00117                 this-&gt;newConnection(<span class="keyword">true</span>);
-<a name="l00118"></a>00118                 <span class="keywordflow">if</span>(!this-&gt;initialized)
-<a name="l00119"></a>00119                         <span class="keywordflow">break</span>;
+<a name="l00117"></a>00117                 printf(<span class="stringliteral">&quot;Error SetEnv\n&quot;</span>);
+<a name="l00118"></a>00118                 SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
+<a name="l00119"></a>00119                 this-&gt;initialized = <span class="keyword">false</span>;
 <a name="l00120"></a>00120         }
-<a name="l00121"></a>00121         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;size-reads;i++)
+<a name="l00121"></a>00121         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;reads;i++)
 <a name="l00122"></a>00122         {
-<a name="l00123"></a>00123                 this-&gt;newConnection(<span class="keyword">false</span>);
+<a name="l00123"></a>00123                 this-&gt;newConnection(<span class="keyword">true</span>);
 <a name="l00124"></a>00124                 <span class="keywordflow">if</span>(!this-&gt;initialized)
 <a name="l00125"></a>00125                         <span class="keywordflow">break</span>;
 <a name="l00126"></a>00126         }
-<a name="l00127"></a>00127         <span class="keywordflow">if</span>(!this-&gt;initialized)
+<a name="l00127"></a>00127         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;size-reads;i++)
 <a name="l00128"></a>00128         {
-<a name="l00129"></a>00129                 printf(<span class="stringliteral">&quot;Failed to create pool !\n&quot;</span>);
-<a name="l00130"></a>00130         }
-<a name="l00131"></a>00131         <span class="keywordflow">else</span>
-<a name="l00132"></a>00132                 printf(<span class="stringliteral">&quot;Created pool successfully !\n&quot;</span>);
-<a name="l00133"></a>00133 }
-<a name="l00134"></a>00134 
-<a name="l00135"></a>00135 <a class="code" href="classConnection.html">Connection</a>* CibernateConnectionPool::getReadConnection()
-<a name="l00136"></a>00136 {
-<a name="l00137"></a>00137         <span class="keywordflow">if</span>(this-&gt;readNumber==(<span class="keywordtype">int</span>)this-&gt;readConnections.size())
-<a name="l00138"></a>00138                 this-&gt;readNumber = 0;
-<a name="l00139"></a>00139         <span class="keywordflow">return</span> this-&gt;readConnections.at(this-&gt;readNumber++);
-<a name="l00140"></a>00140 }
-<a name="l00141"></a>00141 <a class="code" href="classConnection.html">Connection</a>* CibernateConnectionPool::getWriteConnection()
+<a name="l00129"></a>00129                 this-&gt;newConnection(<span class="keyword">false</span>);
+<a name="l00130"></a>00130                 <span class="keywordflow">if</span>(!this-&gt;initialized)
+<a name="l00131"></a>00131                         <span class="keywordflow">break</span>;
+<a name="l00132"></a>00132         }
+<a name="l00133"></a>00133         <span class="keywordflow">if</span>(!this-&gt;initialized)
+<a name="l00134"></a>00134         {
+<a name="l00135"></a>00135                 printf(<span class="stringliteral">&quot;Failed to create pool !\n&quot;</span>);
+<a name="l00136"></a>00136         }
+<a name="l00137"></a>00137         <span class="keywordflow">else</span>
+<a name="l00138"></a>00138                 printf(<span class="stringliteral">&quot;Created pool successfully !\n&quot;</span>);
+<a name="l00139"></a>00139 }
+<a name="l00140"></a>00140 
+<a name="l00141"></a>00141 <a class="code" href="classConnection.html">Connection</a>* CibernateConnectionPool::getReadConnection()
 <a name="l00142"></a>00142 {
-<a name="l00143"></a>00143         <a class="code" href="classTimer.html">Timer</a> t;
-<a name="l00144"></a>00144         t.start();
-<a name="l00145"></a>00145         <span class="keywordflow">while</span>(<span class="keyword">true</span>)
-<a name="l00146"></a>00146         {
-<a name="l00147"></a>00147                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i=0;i&lt;this-&gt;writeConnections.size();i++)
-<a name="l00148"></a>00148                 {
-<a name="l00149"></a>00149                         <span class="keywordflow">if</span>(!this-&gt;writeConnections.at(i)-&gt;busy)
-<a name="l00150"></a>00150                                 <span class="keywordflow">return</span> this-&gt;writeConnections.at(i);
-<a name="l00151"></a>00151                 }
-<a name="l00152"></a>00152                 <span class="keywordflow">if</span>(t.elapsedMilliSeconds()&gt;500)
-<a name="l00153"></a>00153                 {
-<a name="l00154"></a>00154                         newConnection(<span class="keyword">false</span>);
-<a name="l00155"></a>00155                         <span class="keywordflow">return</span> this-&gt;writeConnections.at(this-&gt;writeConnections.size()-1);
-<a name="l00156"></a>00156                 }
-<a name="l00157"></a>00157 
-<a name="l00158"></a>00158         }
-<a name="l00159"></a>00159 }
+<a name="l00143"></a>00143         <span class="keywordflow">if</span>(this-&gt;readNumber==(<span class="keywordtype">int</span>)this-&gt;readConnections.size())
+<a name="l00144"></a>00144                 this-&gt;readNumber = 0;
+<a name="l00145"></a>00145         <span class="keywordflow">return</span> this-&gt;readConnections.at(this-&gt;readNumber++);
+<a name="l00146"></a>00146 }
+<a name="l00147"></a>00147 <a class="code" href="classConnection.html">Connection</a>* CibernateConnectionPool::getWriteConnection()
+<a name="l00148"></a>00148 {
+<a name="l00149"></a>00149         <a class="code" href="classTimer.html">Timer</a> t;
+<a name="l00150"></a>00150         t.start();
+<a name="l00151"></a>00151         <span class="keywordflow">while</span>(<span class="keyword">true</span>)
+<a name="l00152"></a>00152         {
+<a name="l00153"></a>00153                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i=0;i&lt;this-&gt;writeConnections.size();i++)
+<a name="l00154"></a>00154                 {
+<a name="l00155"></a>00155                         <span class="keywordflow">if</span>(!this-&gt;writeConnections.at(i)-&gt;busy)
+<a name="l00156"></a>00156                                 <span class="keywordflow">return</span> this-&gt;writeConnections.at(i);
+<a name="l00157"></a>00157                 }
+<a name="l00158"></a>00158                 <span class="keywordflow">if</span>(t.elapsedMilliSeconds()&gt;500)
+<a name="l00159"></a>00159                 {
+<a name="l00160"></a>00160                         newConnection(<span class="keyword">false</span>);
+<a name="l00161"></a>00161                         <span class="keywordflow">return</span> this-&gt;writeConnections.at(this-&gt;writeConnections.size()-1);
+<a name="l00162"></a>00162                 }
+<a name="l00163"></a>00163 
+<a name="l00164"></a>00164         }
+<a name="l00165"></a>00165 }
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:06 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

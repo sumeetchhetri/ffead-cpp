@@ -88,7 +88,7 @@
 <a name="l00065"></a>00065                                 s = data.find_last_of(<span class="stringliteral">&quot;/&quot;</span>)+1;
 <a name="l00066"></a>00066                                 en = data.find_last_of(<span class="stringliteral">&quot;.&quot;</span>);
 <a name="l00067"></a>00067                                 <span class="keywordtype">string</span> file1 = data.substr(s,en-s);
-<a name="l00068"></a>00068                                 allcontent.append(<span class="stringliteral">&quot;&lt;DCPB&gt;_temp_.append(_&quot;</span>+file1+<span class="stringliteral">&quot;emittHTML());\n&lt;/DCPB&gt;&quot;</span>);
+<a name="l00068"></a>00068                                 allcontent.append(<span class="stringliteral">&quot;&lt;DCPB&gt;screen &lt;&lt; _&quot;</span>+file1+<span class="stringliteral">&quot;emittHTML();\n&lt;/DCPB&gt;&quot;</span>);
 <a name="l00069"></a>00069                                 <span class="comment">/*ifstream inf(data.c_str());</span>
 <a name="l00070"></a>00070 <span class="comment">                                if(inf)</span>
 <a name="l00071"></a>00071 <span class="comment">                                {</span>
@@ -133,14 +133,14 @@
 <a name="l00110"></a>00110         <span class="comment">//bodies.append();</span>
 <a name="l00111"></a>00111         funcdefs.append(<span class="stringliteral">&quot;string _&quot;</span>+file+<span class="stringliteral">&quot;emittHTML();\n&quot;</span>);
 <a name="l00112"></a>00112         bodies.append(<span class="stringliteral">&quot;string _&quot;</span>+file+<span class="stringliteral">&quot;emittHTML()\n{\n&quot;</span>);
-<a name="l00113"></a>00113         bodies.append(<span class="stringliteral">&quot;string _temp_;\n&quot;</span>);
+<a name="l00113"></a>00113         bodies.append(<span class="stringliteral">&quot;stringstream screen;\n&quot;</span>);
 <a name="l00114"></a>00114         <span class="keywordflow">while</span>(allcontent.find(<span class="stringliteral">&quot;&lt;DCPB&gt;&quot;</span>)!=string::npos)
 <a name="l00115"></a>00115         {
 <a name="l00116"></a>00116                 b = allcontent.find(<span class="stringliteral">&quot;&lt;DCPB&gt;&quot;</span>) + 6;
 <a name="l00117"></a>00117                 <span class="keywordtype">string</span> ter(allcontent.substr(0,b-6));
 <a name="l00118"></a>00118                 boost::replace_all(ter,<span class="stringliteral">&quot;\n&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00119"></a>00119                 boost::replace_all(ter,<span class="stringliteral">&quot;\&quot;&quot;</span>,<span class="stringliteral">&quot;\\\&quot;&quot;</span>);
-<a name="l00120"></a>00120                 bodies.append(<span class="stringliteral">&quot;_temp_.append(\&quot;&quot;</span>+ter+<span class="stringliteral">&quot;\&quot;);&quot;</span>);
+<a name="l00120"></a>00120                 bodies.append(<span class="stringliteral">&quot;screen &lt;&lt; \&quot;&quot;</span>+ter+<span class="stringliteral">&quot;\&quot;;&quot;</span>);
 <a name="l00121"></a>00121                 e = allcontent.find(<span class="stringliteral">&quot;&lt;/DCPB&gt;&quot;</span>);
 <a name="l00122"></a>00122                 len = e - b;
 <a name="l00123"></a>00123                 bodies.append(allcontent.substr(b,len));
@@ -150,9 +150,9 @@
 <a name="l00127"></a>00127         <span class="keywordtype">string</span> ter(allcontent.substr(0));
 <a name="l00128"></a>00128         boost::replace_all(ter,<span class="stringliteral">&quot;\n&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00129"></a>00129         boost::replace_all(ter,<span class="stringliteral">&quot;\&quot;&quot;</span>,<span class="stringliteral">&quot;\\\&quot;&quot;</span>);
-<a name="l00130"></a>00130         bodies.append(<span class="stringliteral">&quot;_temp_.append(\&quot;&quot;</span>+ter+<span class="stringliteral">&quot;\&quot;);&quot;</span>);
-<a name="l00131"></a>00131         bodies.append(<span class="stringliteral">&quot;\nAfcUtil::writeTofile(\&quot;&quot;</span>+dir+<span class="stringliteral">&quot;_&quot;</span>+file+<span class="stringliteral">&quot;.html\&quot;,_temp_,true);\n&quot;</span>);
-<a name="l00132"></a>00132         bodies.append(<span class="stringliteral">&quot;\nreturn _temp_;\n&quot;</span>);
+<a name="l00130"></a>00130         bodies.append(<span class="stringliteral">&quot;screen &lt;&lt; \&quot;&quot;</span>+ter+<span class="stringliteral">&quot;\&quot;;\nstring scr;\nscr = screen.str();\n&quot;</span>);
+<a name="l00131"></a>00131         bodies.append(<span class="stringliteral">&quot;\nAfcUtil::writeTofile(\&quot;&quot;</span>+dir+<span class="stringliteral">&quot;_&quot;</span>+file+<span class="stringliteral">&quot;.html\&quot;,scr,true);\n&quot;</span>);
+<a name="l00132"></a>00132         bodies.append(<span class="stringliteral">&quot;\nreturn scr;\n&quot;</span>);
 <a name="l00133"></a>00133         bodies.append(<span class="stringliteral">&quot;\n}\n&quot;</span>);
 <a name="l00134"></a>00134         <span class="comment">//bodies.append(&quot;}\n&quot;);</span>
 <a name="l00135"></a>00135         cout &lt;&lt; bodies &lt;&lt; flush;
@@ -161,7 +161,7 @@
 <a name="l00138"></a>00138 
 <a name="l00139"></a>00139 
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:06 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

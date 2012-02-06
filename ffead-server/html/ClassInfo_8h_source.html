@@ -53,70 +53,71 @@
 <a name="l00030"></a>00030 <span class="preprocessor">#include &quot;Field.h&quot;</span>
 <a name="l00031"></a>00031 <span class="preprocessor">#include &quot;vector&quot;</span>
 <a name="l00032"></a>00032 <span class="preprocessor">#include &quot;map&quot;</span>
-<a name="l00033"></a>00033 <span class="keyword">using namespace </span>std;
-<a name="l00034"></a>00034 <span class="keyword">typedef</span> map&lt;string,Constructor&gt; ctorMap;
-<a name="l00035"></a>00035 <span class="keyword">typedef</span> map&lt;string,Method&gt; methMap;
-<a name="l00036"></a>00036 <span class="keyword">typedef</span> map&lt;string,Field&gt; fldMap;
-<a name="l00037"></a>00037 <span class="keyword">typedef</span> vector&lt;Field&gt; fldVec;
-<a name="l00038"></a>00038 <span class="keyword">typedef</span> vector&lt;string&gt; args;
-<a name="l00039"></a><a class="code" href="classClassInfo.html">00039</a> <span class="keyword">class </span><a class="code" href="classClassInfo.html">ClassInfo</a> {
-<a name="l00040"></a>00040 <span class="keyword">public</span>:
-<a name="l00041"></a>00041         <a class="code" href="classClassInfo.html">ClassInfo</a>();
-<a name="l00042"></a>00042         <span class="keyword">virtual</span> ~<a class="code" href="classClassInfo.html">ClassInfo</a>();
-<a name="l00043"></a>00043     <span class="comment">//void *getInstance() const;</span>
-<a name="l00044"></a>00044     <span class="comment">//void setInstance(void *);</span>
-<a name="l00045"></a>00045     <span class="keywordtype">string</span> getClassName() <span class="keyword">const</span>;
-<a name="l00046"></a>00046     <span class="keywordtype">void</span> setClassName(<span class="keywordtype">string</span>);
-<a name="l00047"></a>00047     <span class="keywordtype">string</span> getBase() <span class="keyword">const</span>;
-<a name="l00048"></a>00048     <span class="keywordtype">void</span> setBase(<span class="keywordtype">string</span>);
-<a name="l00049"></a>00049     <span class="comment">/*string getPublic_fields() const;</span>
-<a name="l00050"></a>00050 <span class="comment">    void setPublic_fields(string);</span>
-<a name="l00051"></a>00051 <span class="comment">    string getPrivate_fields() const;</span>
-<a name="l00052"></a>00052 <span class="comment">    void setPrivate_fields(string);</span>
-<a name="l00053"></a>00053 <span class="comment">    string getProtected_fields() const;</span>
-<a name="l00054"></a>00054 <span class="comment">    void setProtected_fields(string);</span>
-<a name="l00055"></a>00055 <span class="comment">    string getPublic_meths() const;</span>
-<a name="l00056"></a>00056 <span class="comment">    void setPublic_meths(string);</span>
-<a name="l00057"></a>00057 <span class="comment">    string getPrivate_meths() const;</span>
-<a name="l00058"></a>00058 <span class="comment">    void setPrivate_meths(string);</span>
-<a name="l00059"></a>00059 <span class="comment">    string getProtected_meths() const;</span>
-<a name="l00060"></a>00060 <span class="comment">    void setProtected_meths(string);</span>
-<a name="l00061"></a>00061 <span class="comment">    vector&lt;Method&gt; getMethods() const;</span>
-<a name="l00062"></a>00062 <span class="comment">    void setMethods(vector&lt;Method&gt;);</span>
-<a name="l00063"></a>00063 <span class="comment">    vector&lt;Field&gt; getFields() const;</span>
-<a name="l00064"></a>00064 <span class="comment">    void setFields(vector&lt;Field&gt;);</span>
-<a name="l00065"></a>00065 <span class="comment">    void setMeths(methMap);*/</span>
-<a name="l00066"></a>00066     <a class="code" href="classConstructor.html">Constructor</a> getConstructor(args);
-<a name="l00067"></a>00067         <span class="keywordtype">void</span> addConstructor(<a class="code" href="classConstructor.html">Constructor</a>);
-<a name="l00068"></a>00068         ctorMap getConstructors();
-<a name="l00069"></a>00069     <a class="code" href="classMethod.html">Method</a> getMethod(<span class="keywordtype">string</span>,args);
-<a name="l00070"></a>00070     <span class="keywordtype">void</span> addMethod(<a class="code" href="classMethod.html">Method</a>);
-<a name="l00071"></a>00071     methMap getMethods();
-<a name="l00072"></a>00072     <a class="code" href="classField.html">Field</a> getField(<span class="keywordtype">string</span>);
-<a name="l00073"></a>00073     <span class="keywordtype">void</span> addField(<a class="code" href="classField.html">Field</a>);
-<a name="l00074"></a>00074     fldMap getFields();
-<a name="l00075"></a>00075     fldVec getFieldVec();
-<a name="l00076"></a>00076 <span class="keyword">private</span>:
-<a name="l00077"></a>00077         <span class="keywordtype">void</span>* instance;
-<a name="l00078"></a>00078         <span class="keywordtype">string</span> className;
-<a name="l00079"></a>00079         <span class="keywordtype">string</span> base;
-<a name="l00080"></a>00080         <span class="comment">/*string public_fields;</span>
-<a name="l00081"></a>00081 <span class="comment">        string private_fields;</span>
-<a name="l00082"></a>00082 <span class="comment">        string protected_fields;</span>
-<a name="l00083"></a>00083 <span class="comment">        string public_meths;</span>
-<a name="l00084"></a>00084 <span class="comment">        string private_meths;</span>
-<a name="l00085"></a>00085 <span class="comment">        string protected_meths;</span>
-<a name="l00086"></a>00086 <span class="comment">        vector&lt;Method&gt; methods;</span>
-<a name="l00087"></a>00087 <span class="comment">        vector&lt;Field&gt; fields;*/</span>
-<a name="l00088"></a>00088         ctorMap ctors;
-<a name="l00089"></a>00089         methMap meths;
-<a name="l00090"></a>00090         fldMap fields;
-<a name="l00091"></a>00091         fldVec fldvec;
-<a name="l00092"></a>00092 };
-<a name="l00093"></a>00093 
-<a name="l00094"></a>00094 <span class="preprocessor">#endif </span><span class="comment">/* CLASSINFO_H_ */</span>
+<a name="l00033"></a>00033 <span class="preprocessor">#include &quot;boost/algorithm/string.hpp&quot;</span>
+<a name="l00034"></a>00034 <span class="keyword">using namespace </span>std;
+<a name="l00035"></a>00035 <span class="keyword">typedef</span> map&lt;string,Constructor&gt; ctorMap;
+<a name="l00036"></a>00036 <span class="keyword">typedef</span> map&lt;string,Method&gt; methMap;
+<a name="l00037"></a>00037 <span class="keyword">typedef</span> map&lt;string,Field&gt; fldMap;
+<a name="l00038"></a>00038 <span class="keyword">typedef</span> vector&lt;Field&gt; fldVec;
+<a name="l00039"></a>00039 <span class="keyword">typedef</span> vector&lt;string&gt; args;
+<a name="l00040"></a><a class="code" href="classClassInfo.html">00040</a> <span class="keyword">class </span><a class="code" href="classClassInfo.html">ClassInfo</a> {
+<a name="l00041"></a>00041 <span class="keyword">public</span>:
+<a name="l00042"></a>00042         <a class="code" href="classClassInfo.html">ClassInfo</a>();
+<a name="l00043"></a>00043         <span class="keyword">virtual</span> ~<a class="code" href="classClassInfo.html">ClassInfo</a>();
+<a name="l00044"></a>00044     <span class="comment">//void *getInstance() const;</span>
+<a name="l00045"></a>00045     <span class="comment">//void setInstance(void *);</span>
+<a name="l00046"></a>00046     <span class="keywordtype">string</span> getClassName() <span class="keyword">const</span>;
+<a name="l00047"></a>00047     <span class="keywordtype">void</span> setClassName(<span class="keywordtype">string</span>);
+<a name="l00048"></a>00048     <span class="keywordtype">string</span> getBase() <span class="keyword">const</span>;
+<a name="l00049"></a>00049     <span class="keywordtype">void</span> setBase(<span class="keywordtype">string</span>);
+<a name="l00050"></a>00050     <span class="comment">/*string getPublic_fields() const;</span>
+<a name="l00051"></a>00051 <span class="comment">    void setPublic_fields(string);</span>
+<a name="l00052"></a>00052 <span class="comment">    string getPrivate_fields() const;</span>
+<a name="l00053"></a>00053 <span class="comment">    void setPrivate_fields(string);</span>
+<a name="l00054"></a>00054 <span class="comment">    string getProtected_fields() const;</span>
+<a name="l00055"></a>00055 <span class="comment">    void setProtected_fields(string);</span>
+<a name="l00056"></a>00056 <span class="comment">    string getPublic_meths() const;</span>
+<a name="l00057"></a>00057 <span class="comment">    void setPublic_meths(string);</span>
+<a name="l00058"></a>00058 <span class="comment">    string getPrivate_meths() const;</span>
+<a name="l00059"></a>00059 <span class="comment">    void setPrivate_meths(string);</span>
+<a name="l00060"></a>00060 <span class="comment">    string getProtected_meths() const;</span>
+<a name="l00061"></a>00061 <span class="comment">    void setProtected_meths(string);</span>
+<a name="l00062"></a>00062 <span class="comment">    vector&lt;Method&gt; getMethods() const;</span>
+<a name="l00063"></a>00063 <span class="comment">    void setMethods(vector&lt;Method&gt;);</span>
+<a name="l00064"></a>00064 <span class="comment">    vector&lt;Field&gt; getFields() const;</span>
+<a name="l00065"></a>00065 <span class="comment">    void setFields(vector&lt;Field&gt;);</span>
+<a name="l00066"></a>00066 <span class="comment">    void setMeths(methMap);*/</span>
+<a name="l00067"></a>00067     <a class="code" href="classConstructor.html">Constructor</a> getConstructor(args);
+<a name="l00068"></a>00068         <span class="keywordtype">void</span> addConstructor(<a class="code" href="classConstructor.html">Constructor</a>);
+<a name="l00069"></a>00069         ctorMap getConstructors();
+<a name="l00070"></a>00070     <a class="code" href="classMethod.html">Method</a> getMethod(<span class="keywordtype">string</span>,args);
+<a name="l00071"></a>00071     <span class="keywordtype">void</span> addMethod(<a class="code" href="classMethod.html">Method</a>);
+<a name="l00072"></a>00072     methMap getMethods();
+<a name="l00073"></a>00073     <a class="code" href="classField.html">Field</a> getField(<span class="keywordtype">string</span>);
+<a name="l00074"></a>00074     <span class="keywordtype">void</span> addField(<a class="code" href="classField.html">Field</a>);
+<a name="l00075"></a>00075     fldMap getFields();
+<a name="l00076"></a>00076     fldVec getFieldVec();
+<a name="l00077"></a>00077 <span class="keyword">private</span>:
+<a name="l00078"></a>00078         <span class="keywordtype">void</span>* instance;
+<a name="l00079"></a>00079         <span class="keywordtype">string</span> className;
+<a name="l00080"></a>00080         <span class="keywordtype">string</span> base;
+<a name="l00081"></a>00081         <span class="comment">/*string public_fields;</span>
+<a name="l00082"></a>00082 <span class="comment">        string private_fields;</span>
+<a name="l00083"></a>00083 <span class="comment">        string protected_fields;</span>
+<a name="l00084"></a>00084 <span class="comment">        string public_meths;</span>
+<a name="l00085"></a>00085 <span class="comment">        string private_meths;</span>
+<a name="l00086"></a>00086 <span class="comment">        string protected_meths;</span>
+<a name="l00087"></a>00087 <span class="comment">        vector&lt;Method&gt; methods;</span>
+<a name="l00088"></a>00088 <span class="comment">        vector&lt;Field&gt; fields;*/</span>
+<a name="l00089"></a>00089         ctorMap ctors;
+<a name="l00090"></a>00090         methMap meths;
+<a name="l00091"></a>00091         fldMap fields;
+<a name="l00092"></a>00092         fldVec fldvec;
+<a name="l00093"></a>00093 };
+<a name="l00094"></a>00094 
+<a name="l00095"></a>00095 <span class="preprocessor">#endif </span><span class="comment">/* CLASSINFO_H_ */</span>
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:05 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

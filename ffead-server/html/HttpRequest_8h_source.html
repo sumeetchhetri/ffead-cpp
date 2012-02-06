@@ -51,120 +51,138 @@
 <a name="l00028"></a>00028 <span class="preprocessor">#include &lt;boost/foreach.hpp&gt;</span>
 <a name="l00029"></a>00029 <span class="preprocessor">#include &lt;boost/lexical_cast.hpp&gt;</span>
 <a name="l00030"></a>00030 <span class="preprocessor">#include &quot;stdio.h&quot;</span>
-<a name="l00031"></a>00031 
-<a name="l00032"></a>00032 
-<a name="l00033"></a>00033 <span class="keyword">typedef</span> vector&lt;string&gt; strVec;
-<a name="l00034"></a>00034 <span class="preprocessor">#ifndef HTTPREQUEST_H_</span>
-<a name="l00035"></a>00035 <span class="preprocessor"></span><span class="preprocessor">#define HTTPREQUEST_H_</span>
-<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="keyword">using namespace </span>std;
-<a name="l00037"></a>00037 <span class="keyword">typedef</span> map&lt;string, string&gt; RMap;
-<a name="l00038"></a>00038 
+<a name="l00031"></a>00031 <span class="preprocessor">#include &lt;openssl/ssl.h&gt;</span>
+<a name="l00032"></a>00032 <span class="preprocessor">#include &quot;CryptoHandler.h&quot;</span>
+<a name="l00033"></a>00033 
+<a name="l00034"></a>00034 <span class="keyword">typedef</span> vector&lt;string&gt; strVec;
+<a name="l00035"></a>00035 <span class="preprocessor">#ifndef HTTPREQUEST_H_</span>
+<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define HTTPREQUEST_H_</span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="keyword">using namespace </span>std;
+<a name="l00038"></a>00038 <span class="keyword">typedef</span> map&lt;string, string&gt; RMap;
 <a name="l00039"></a>00039 
-<a name="l00040"></a><a class="code" href="classFormData.html">00040</a> <span class="keyword">class </span><a class="code" href="classFormData.html">FormData</a>
-<a name="l00041"></a>00041 {
-<a name="l00042"></a>00042 <span class="keyword">public</span>:
-<a name="l00043"></a>00043         <span class="keywordtype">string</span> type;
-<a name="l00044"></a>00044         <span class="keywordtype">string</span> value;
-<a name="l00045"></a>00045         <span class="keywordtype">string</span> fileName;
-<a name="l00046"></a>00046 };
-<a name="l00047"></a>00047 <span class="keyword">typedef</span> map&lt;string, FormData&gt; FMap;
-<a name="l00048"></a><a class="code" href="classHttpRequest.html">00048</a> <span class="keyword">class </span><a class="code" href="classHttpRequest.html">HttpRequest</a> {
-<a name="l00049"></a>00049         <span class="comment">//friend class HttpSession;</span>
-<a name="l00050"></a>00050         <span class="keywordtype">string</span> host;
-<a name="l00051"></a>00051         <span class="keywordtype">string</span> url;
-<a name="l00052"></a>00052         <span class="keywordtype">string</span> cntxt_root;
-<a name="l00053"></a>00053         <span class="keywordtype">string</span> cntxt_name;
-<a name="l00054"></a>00054         <span class="keywordtype">string</span> httpVersion;
-<a name="l00055"></a>00055         <span class="keywordtype">string</span> method;
-<a name="l00056"></a>00056         <span class="keywordtype">string</span> user_agent;
-<a name="l00057"></a>00057         <span class="keywordtype">string</span> accept;
-<a name="l00058"></a>00058         <span class="keywordtype">string</span> accept_lang;
-<a name="l00059"></a>00059         <span class="keywordtype">string</span> accept_encod;
-<a name="l00060"></a>00060         <span class="keywordtype">string</span> accept_chars;
-<a name="l00061"></a>00061         <span class="keywordtype">string</span> keep_alive;
-<a name="l00062"></a>00062         <span class="keywordtype">string</span> connection;
-<a name="l00063"></a>00063         <span class="keywordtype">string</span> cache_ctrl;
-<a name="l00064"></a>00064         <span class="keywordtype">string</span> content;
-<a name="l00065"></a>00065         <span class="keywordtype">string</span> content_type;
-<a name="l00066"></a>00066         <span class="keywordtype">string</span> content_boundary;
-<a name="l00067"></a>00067         <span class="keywordtype">string</span> content_len;
-<a name="l00068"></a>00068         <span class="keywordtype">string</span> referer;
-<a name="l00069"></a>00069         <span class="keywordtype">string</span> pragma;
-<a name="l00070"></a>00070         <span class="keywordtype">string</span> file;
-<a name="l00071"></a>00071         Map attributes;
-<a name="l00072"></a>00072         RMap requestParams;
-<a name="l00073"></a>00073         FMap requestParamsF;
-<a name="l00074"></a>00074         <a class="code" href="classHttpSession.html">HttpSession</a> session;
-<a name="l00075"></a>00075         strVec localeInfo;
-<a name="l00076"></a>00076         <span class="keywordtype">string</span> actUrl;
-<a name="l00077"></a>00077 <span class="keyword">public</span>:
-<a name="l00078"></a>00078         <a class="code" href="classHttpRequest.html">HttpRequest</a>();
-<a name="l00079"></a>00079         <a class="code" href="classHttpRequest.html">HttpRequest</a>(strVec,<span class="keywordtype">string</span>);
-<a name="l00080"></a>00080         <span class="keyword">virtual</span> ~<a class="code" href="classHttpRequest.html">HttpRequest</a>();
-<a name="l00081"></a>00081     Map getAttributes() <span class="keyword">const</span>;
-<a name="l00082"></a>00082     <span class="keywordtype">void</span> setAttributes(Map attributes);
-<a name="l00083"></a>00083     <span class="keywordtype">string</span> getAttribute(<span class="keywordtype">string</span> key);
-<a name="l00084"></a>00084     <span class="keywordtype">void</span> setAttribute(<span class="keywordtype">string</span> key,<span class="keywordtype">string</span> value);
-<a name="l00085"></a>00085     <span class="keywordtype">void</span> setSession(<a class="code" href="classHttpSession.html">HttpSession</a> session);
-<a name="l00086"></a>00086     <a class="code" href="classHttpSession.html">HttpSession</a> getSession();
-<a name="l00087"></a>00087     <span class="keywordtype">string</span> getMethod() <span class="keyword">const</span>;
-<a name="l00088"></a>00088         <span class="keywordtype">void</span> setMethod(<span class="keywordtype">string</span> method);
-<a name="l00089"></a>00089         <span class="keywordtype">string</span> getUser_agent() <span class="keyword">const</span>;
-<a name="l00090"></a>00090         <span class="keywordtype">void</span> setUser_agent(<span class="keywordtype">string</span> user_agent);
-<a name="l00091"></a>00091         <span class="keywordtype">string</span> getAccept() <span class="keyword">const</span>;
-<a name="l00092"></a>00092         <span class="keywordtype">void</span> setAccept(<span class="keywordtype">string</span> accept);
-<a name="l00093"></a>00093         <span class="keywordtype">string</span> getAccept_lang() <span class="keyword">const</span>;
-<a name="l00094"></a>00094         <span class="keywordtype">void</span> setAccept_lang(<span class="keywordtype">string</span> accept_lang);
-<a name="l00095"></a>00095         <span class="keywordtype">string</span> getAccept_encod() <span class="keyword">const</span>;
-<a name="l00096"></a>00096         <span class="keywordtype">void</span> setAccept_encod(<span class="keywordtype">string</span> accept_encod);
-<a name="l00097"></a>00097         <span class="keywordtype">string</span> getAccept_chars() <span class="keyword">const</span>;
-<a name="l00098"></a>00098         <span class="keywordtype">void</span> setAccept_chars(<span class="keywordtype">string</span> accept_chars);
-<a name="l00099"></a>00099         <span class="keywordtype">string</span> getKeep_alive() <span class="keyword">const</span>;
-<a name="l00100"></a>00100         <span class="keywordtype">void</span> setKeep_alive(<span class="keywordtype">string</span> keep_alive);
-<a name="l00101"></a>00101         <span class="keywordtype">string</span> getConnection() <span class="keyword">const</span>;
-<a name="l00102"></a>00102         <span class="keywordtype">void</span> setConnection(<span class="keywordtype">string</span> connection);
-<a name="l00103"></a>00103         <span class="keywordtype">string</span> getCache_ctrl() <span class="keyword">const</span>;
-<a name="l00104"></a>00104         <span class="keywordtype">void</span> setCache_ctrl(<span class="keywordtype">string</span> cache_ctrl);
-<a name="l00105"></a>00105         <span class="keywordtype">string</span> getHost() <span class="keyword">const</span>;
-<a name="l00106"></a>00106         <span class="keywordtype">void</span> setHost(<span class="keywordtype">string</span> host);
-<a name="l00107"></a>00107         <span class="keywordtype">void</span> setUrl(<span class="keywordtype">string</span>);
-<a name="l00108"></a>00108         <span class="keywordtype">string</span> getUrl();
-<a name="l00109"></a>00109         <span class="keywordtype">void</span> setHttpVersion(<span class="keywordtype">string</span>);
-<a name="l00110"></a>00110         <span class="keywordtype">string</span> getHttpVersion();
-<a name="l00111"></a>00111         <span class="keywordtype">string</span> getContent_type() <span class="keyword">const</span>;
-<a name="l00112"></a>00112         <span class="keywordtype">void</span> setContent_type(<span class="keywordtype">string</span>);
-<a name="l00113"></a>00113         <span class="keywordtype">string</span> getContent_boundary() <span class="keyword">const</span>;
-<a name="l00114"></a>00114         <span class="keywordtype">void</span> setContent_boundary(<span class="keywordtype">string</span>);
-<a name="l00115"></a>00115         <span class="keywordtype">string</span> getContent_len() <span class="keyword">const</span>;
-<a name="l00116"></a>00116         <span class="keywordtype">void</span> setContent_len(<span class="keywordtype">string</span>);
-<a name="l00117"></a>00117         <span class="keywordtype">string</span> getContent() <span class="keyword">const</span>;
-<a name="l00118"></a>00118         <span class="keywordtype">void</span> setContent(<span class="keywordtype">string</span>);
-<a name="l00119"></a>00119     <span class="keywordtype">string</span> getReferer() <span class="keyword">const</span>;
-<a name="l00120"></a>00120     <span class="keywordtype">void</span> setReferer(<span class="keywordtype">string</span>);
-<a name="l00121"></a>00121     <span class="keywordtype">string</span> getPragma() <span class="keyword">const</span>;
-<a name="l00122"></a>00122     <span class="keywordtype">void</span> setPragma(<span class="keywordtype">string</span>);
-<a name="l00123"></a>00123     RMap getRequestParams() <span class="keyword">const</span>;
-<a name="l00124"></a>00124     <span class="keywordtype">void</span> setRequestParams(RMap);
-<a name="l00125"></a>00125     <span class="keywordtype">void</span> setRequestParam(<span class="keywordtype">string</span>,<span class="keywordtype">string</span>);
-<a name="l00126"></a>00126     <span class="keywordtype">void</span> setRequestParamF(<span class="keywordtype">string</span>,<a class="code" href="classFormData.html">FormData</a>);
-<a name="l00127"></a>00127     <span class="keywordtype">string</span> getRequestParam(<span class="keywordtype">string</span>);
-<a name="l00128"></a>00128     <span class="keywordtype">string</span> getRequestParamType(<span class="keywordtype">string</span> key);
-<a name="l00129"></a>00129     <span class="keywordtype">string</span> getCntxt_root() <span class="keyword">const</span>;
-<a name="l00130"></a>00130     <span class="keywordtype">void</span> setCntxt_root(<span class="keywordtype">string</span>);
-<a name="l00131"></a>00131     <span class="keywordtype">string</span> getDefaultLocale();
-<a name="l00132"></a>00132     <span class="keywordtype">string</span> getCntxt_name() <span class="keyword">const</span>;
-<a name="l00133"></a>00133     <span class="keywordtype">void</span> setCntxt_name(<span class="keywordtype">string</span>);
-<a name="l00134"></a>00134     <span class="keywordtype">string</span> getFile() <span class="keyword">const</span>;
-<a name="l00135"></a>00135     <span class="keywordtype">void</span> setFile(<span class="keywordtype">string</span>);
-<a name="l00136"></a>00136     <span class="keywordtype">string</span> getActUrl() <span class="keyword">const</span>;
-<a name="l00137"></a>00137     <span class="keywordtype">void</span> setActUrl(<span class="keywordtype">string</span>);
-<a name="l00138"></a>00138     <span class="keywordtype">string</span> buildRequest(<span class="keyword">const</span> <span class="keywordtype">char</span>* key,<span class="keyword">const</span> <span class="keywordtype">char</span>* value);
-<a name="l00139"></a>00139     <span class="keywordtype">string</span> toString();
-<a name="l00140"></a>00140 };
-<a name="l00141"></a>00141 
-<a name="l00142"></a>00142 <span class="preprocessor">#endif </span><span class="comment">/* HTTPREQUEST_H_ */</span>
+<a name="l00040"></a>00040 
+<a name="l00041"></a><a class="code" href="classFormData.html">00041</a> <span class="keyword">class </span><a class="code" href="classFormData.html">FormData</a>
+<a name="l00042"></a>00042 {
+<a name="l00043"></a>00043 <span class="keyword">public</span>:
+<a name="l00044"></a>00044         <span class="keywordtype">string</span> type;
+<a name="l00045"></a>00045         <span class="keywordtype">string</span> value;
+<a name="l00046"></a>00046         <span class="keywordtype">string</span> fileName;
+<a name="l00047"></a>00047 };
+<a name="l00048"></a>00048 <span class="keyword">typedef</span> map&lt;string, FormData&gt; FMap;
+<a name="l00049"></a><a class="code" href="classHttpRequest.html">00049</a> <span class="keyword">class </span><a class="code" href="classHttpRequest.html">HttpRequest</a> {
+<a name="l00050"></a>00050         <span class="comment">//friend class HttpSession;</span>
+<a name="l00051"></a>00051         <span class="keywordtype">string</span> host;
+<a name="l00052"></a>00052         <span class="keywordtype">string</span> url;
+<a name="l00053"></a>00053         <span class="keywordtype">string</span> cntxt_root;
+<a name="l00054"></a>00054         <span class="keywordtype">string</span> cntxt_name;
+<a name="l00055"></a>00055         <span class="keywordtype">string</span> httpVersion;
+<a name="l00056"></a>00056         <span class="keywordtype">string</span> method;
+<a name="l00057"></a>00057         <span class="keywordtype">string</span> user_agent;
+<a name="l00058"></a>00058         <span class="keywordtype">string</span> accept;
+<a name="l00059"></a>00059         <span class="keywordtype">string</span> accept_lang;
+<a name="l00060"></a>00060         <span class="keywordtype">string</span> accept_encod;
+<a name="l00061"></a>00061         <span class="keywordtype">string</span> accept_chars;
+<a name="l00062"></a>00062         <span class="keywordtype">string</span> keep_alive;
+<a name="l00063"></a>00063         <span class="keywordtype">string</span> connection;
+<a name="l00064"></a>00064         <span class="keywordtype">string</span> cache_ctrl;
+<a name="l00065"></a>00065         <span class="keywordtype">string</span> content;
+<a name="l00066"></a>00066         <span class="keywordtype">string</span> content_type;
+<a name="l00067"></a>00067         <span class="keywordtype">string</span> content_boundary;
+<a name="l00068"></a>00068         <span class="keywordtype">string</span> content_len;
+<a name="l00069"></a>00069         <span class="keywordtype">string</span> referer;
+<a name="l00070"></a>00070         <span class="keywordtype">string</span> pragma;
+<a name="l00071"></a>00071         <span class="keywordtype">string</span> file;
+<a name="l00072"></a>00072         Map attributes;
+<a name="l00073"></a>00073         RMap requestParams;
+<a name="l00074"></a>00074         FMap requestParamsF;
+<a name="l00075"></a>00075         <a class="code" href="classHttpSession.html">HttpSession</a> session;
+<a name="l00076"></a>00076         strVec localeInfo;
+<a name="l00077"></a>00077         <span class="keywordtype">string</span> actUrl;
+<a name="l00078"></a>00078         <span class="keywordtype">string</span> sessionID;
+<a name="l00079"></a>00079         <span class="keywordtype">bool</span> cookie;
+<a name="l00080"></a>00080         map&lt;string,string&gt; cookieattrs;
+<a name="l00081"></a>00081         map&lt;string,string&gt; authinfo;
+<a name="l00082"></a>00082         map&lt;int,string&gt; reqorderinf;
+<a name="l00083"></a>00083         map&lt;int,string&gt; authorderinf;
+<a name="l00084"></a>00084         <span class="keywordtype">void</span> unbase64(<span class="keywordtype">string</span>);
+<a name="l00085"></a>00085         <span class="keywordtype">void</span> getOauthParams(<span class="keywordtype">string</span>);
+<a name="l00086"></a>00086 <span class="keyword">public</span>:
+<a name="l00087"></a>00087         <a class="code" href="classHttpRequest.html">HttpRequest</a>();
+<a name="l00088"></a>00088         <a class="code" href="classHttpRequest.html">HttpRequest</a>(strVec,<span class="keywordtype">string</span>);
+<a name="l00089"></a>00089         <span class="keyword">virtual</span> ~<a class="code" href="classHttpRequest.html">HttpRequest</a>();
+<a name="l00090"></a>00090     Map getAttributes() <span class="keyword">const</span>;
+<a name="l00091"></a>00091     <span class="keywordtype">void</span> setAttributes(Map attributes);
+<a name="l00092"></a>00092     <span class="keywordtype">string</span> getAttribute(<span class="keywordtype">string</span> key);
+<a name="l00093"></a>00093     <span class="keywordtype">void</span> setAttribute(<span class="keywordtype">string</span> key,<span class="keywordtype">string</span> value);
+<a name="l00094"></a>00094     <span class="keywordtype">void</span> setSession(<a class="code" href="classHttpSession.html">HttpSession</a> session);
+<a name="l00095"></a>00095     <a class="code" href="classHttpSession.html">HttpSession</a>* getSession();
+<a name="l00096"></a>00096     <span class="keywordtype">string</span> getMethod() <span class="keyword">const</span>;
+<a name="l00097"></a>00097         <span class="keywordtype">void</span> setMethod(<span class="keywordtype">string</span> method);
+<a name="l00098"></a>00098         <span class="keywordtype">string</span> getUser_agent() <span class="keyword">const</span>;
+<a name="l00099"></a>00099         <span class="keywordtype">void</span> setUser_agent(<span class="keywordtype">string</span> user_agent);
+<a name="l00100"></a>00100         <span class="keywordtype">string</span> getAccept() <span class="keyword">const</span>;
+<a name="l00101"></a>00101         <span class="keywordtype">void</span> setAccept(<span class="keywordtype">string</span> accept);
+<a name="l00102"></a>00102         <span class="keywordtype">string</span> getAccept_lang() <span class="keyword">const</span>;
+<a name="l00103"></a>00103         <span class="keywordtype">void</span> setAccept_lang(<span class="keywordtype">string</span> accept_lang);
+<a name="l00104"></a>00104         <span class="keywordtype">string</span> getAccept_encod() <span class="keyword">const</span>;
+<a name="l00105"></a>00105         <span class="keywordtype">void</span> setAccept_encod(<span class="keywordtype">string</span> accept_encod);
+<a name="l00106"></a>00106         <span class="keywordtype">string</span> getAccept_chars() <span class="keyword">const</span>;
+<a name="l00107"></a>00107         <span class="keywordtype">void</span> setAccept_chars(<span class="keywordtype">string</span> accept_chars);
+<a name="l00108"></a>00108         <span class="keywordtype">string</span> getKeep_alive() <span class="keyword">const</span>;
+<a name="l00109"></a>00109         <span class="keywordtype">void</span> setKeep_alive(<span class="keywordtype">string</span> keep_alive);
+<a name="l00110"></a>00110         <span class="keywordtype">string</span> getConnection() <span class="keyword">const</span>;
+<a name="l00111"></a>00111         <span class="keywordtype">void</span> setConnection(<span class="keywordtype">string</span> connection);
+<a name="l00112"></a>00112         <span class="keywordtype">string</span> getCache_ctrl() <span class="keyword">const</span>;
+<a name="l00113"></a>00113         <span class="keywordtype">void</span> setCache_ctrl(<span class="keywordtype">string</span> cache_ctrl);
+<a name="l00114"></a>00114         <span class="keywordtype">string</span> getHost() <span class="keyword">const</span>;
+<a name="l00115"></a>00115         <span class="keywordtype">void</span> setHost(<span class="keywordtype">string</span> host);
+<a name="l00116"></a>00116         <span class="keywordtype">void</span> setUrl(<span class="keywordtype">string</span>);
+<a name="l00117"></a>00117         <span class="keywordtype">string</span> getUrl();
+<a name="l00118"></a>00118         <span class="keywordtype">void</span> setHttpVersion(<span class="keywordtype">string</span>);
+<a name="l00119"></a>00119         <span class="keywordtype">string</span> getHttpVersion();
+<a name="l00120"></a>00120         <span class="keywordtype">string</span> getContent_type() <span class="keyword">const</span>;
+<a name="l00121"></a>00121         <span class="keywordtype">void</span> setContent_type(<span class="keywordtype">string</span>);
+<a name="l00122"></a>00122         <span class="keywordtype">string</span> getContent_boundary() <span class="keyword">const</span>;
+<a name="l00123"></a>00123         <span class="keywordtype">void</span> setContent_boundary(<span class="keywordtype">string</span>);
+<a name="l00124"></a>00124         <span class="keywordtype">string</span> getContent_len() <span class="keyword">const</span>;
+<a name="l00125"></a>00125         <span class="keywordtype">void</span> setContent_len(<span class="keywordtype">string</span>);
+<a name="l00126"></a>00126         <span class="keywordtype">string</span> getContent() <span class="keyword">const</span>;
+<a name="l00127"></a>00127         <span class="keywordtype">void</span> setContent(<span class="keywordtype">string</span>);
+<a name="l00128"></a>00128     <span class="keywordtype">string</span> getReferer() <span class="keyword">const</span>;
+<a name="l00129"></a>00129     <span class="keywordtype">void</span> setReferer(<span class="keywordtype">string</span>);
+<a name="l00130"></a>00130     <span class="keywordtype">string</span> getPragma() <span class="keyword">const</span>;
+<a name="l00131"></a>00131     <span class="keywordtype">void</span> setPragma(<span class="keywordtype">string</span>);
+<a name="l00132"></a>00132     RMap getRequestParams() <span class="keyword">const</span>;
+<a name="l00133"></a>00133     <span class="keywordtype">void</span> setRequestParams(RMap);
+<a name="l00134"></a>00134     <span class="keywordtype">void</span> setRequestParam(<span class="keywordtype">string</span>,<span class="keywordtype">string</span>);
+<a name="l00135"></a>00135     <span class="keywordtype">void</span> setRequestParamF(<span class="keywordtype">string</span>,<a class="code" href="classFormData.html">FormData</a>);
+<a name="l00136"></a>00136     <span class="keywordtype">string</span> getRequestParam(<span class="keywordtype">string</span>);
+<a name="l00137"></a>00137     <span class="keywordtype">string</span> getRequestParamType(<span class="keywordtype">string</span> key);
+<a name="l00138"></a>00138     <span class="keywordtype">string</span> getCntxt_root() <span class="keyword">const</span>;
+<a name="l00139"></a>00139     <span class="keywordtype">void</span> setCntxt_root(<span class="keywordtype">string</span>);
+<a name="l00140"></a>00140     <span class="keywordtype">string</span> getDefaultLocale();
+<a name="l00141"></a>00141     <span class="keywordtype">string</span> getCntxt_name() <span class="keyword">const</span>;
+<a name="l00142"></a>00142     <span class="keywordtype">void</span> setCntxt_name(<span class="keywordtype">string</span>);
+<a name="l00143"></a>00143     <span class="keywordtype">string</span> getFile() <span class="keyword">const</span>;
+<a name="l00144"></a>00144     <span class="keywordtype">void</span> setFile(<span class="keywordtype">string</span>);
+<a name="l00145"></a>00145     <span class="keywordtype">string</span> getActUrl() <span class="keyword">const</span>;
+<a name="l00146"></a>00146     <span class="keywordtype">void</span> setActUrl(<span class="keywordtype">string</span>);
+<a name="l00147"></a>00147     <span class="keywordtype">string</span> getSessionID()<span class="keyword"> const</span>{<span class="keywordflow">return</span> sessionID;}
+<a name="l00148"></a>00148     <span class="keywordtype">void</span> setSessionID(<span class="keywordtype">string</span> sessionID){this-&gt;sessionID = sessionID;}
+<a name="l00149"></a>00149     map&lt;string,string&gt; getAuthinfo() <span class="keyword">const</span>;
+<a name="l00150"></a>00150     <span class="keywordtype">void</span> setAuthinfo(map&lt;string,string&gt;);
+<a name="l00151"></a>00151     <span class="keywordtype">string</span> buildRequest(<span class="keyword">const</span> <span class="keywordtype">char</span>* key,<span class="keyword">const</span> <span class="keywordtype">char</span>* value);
+<a name="l00152"></a>00152     <span class="keywordtype">string</span> toString();
+<a name="l00153"></a>00153     <span class="keywordtype">bool</span> hasCookie()<span class="keyword"> const</span>{<span class="keywordflow">return</span> this-&gt;cookie;}
+<a name="l00154"></a>00154     map&lt;int,string&gt; getAuthOrderinfo()<span class="keyword"> const</span>{<span class="keywordflow">return</span> authorderinf;}
+<a name="l00155"></a>00155     map&lt;int,string&gt; getReqOrderinfo()<span class="keyword"> const</span>{<span class="keywordflow">return</span> reqorderinf;}
+<a name="l00156"></a>00156     map&lt;string,string&gt; getCookieInfo()<span class="keyword"> const</span>{<span class="keywordflow">return</span> cookieattrs;}
+<a name="l00157"></a>00157 
+<a name="l00158"></a>00158 };
+<a name="l00159"></a>00159 
+<a name="l00160"></a>00160 <span class="preprocessor">#endif </span><span class="comment">/* HTTPREQUEST_H_ */</span>
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:05 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

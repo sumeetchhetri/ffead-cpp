@@ -89,29 +89,30 @@
 <a name="l00066"></a>00066                                                 cout &lt;&lt; e.what() &lt;&lt; flush;
 <a name="l00067"></a>00067                                         }
 <a name="l00068"></a>00068                                 }
-<a name="l00069"></a>00069                                 this-&gt;task = NULL;
-<a name="l00070"></a>00070                         }
-<a name="l00071"></a>00071                         this-&gt;idle = <span class="keyword">true</span>;
-<a name="l00072"></a>00072                 }
-<a name="l00073"></a>00073         }
-<a name="l00074"></a>00074 }
-<a name="l00075"></a>00075 
-<a name="l00076"></a>00076 Thread::Thread() {
-<a name="l00077"></a>00077         task = NULL;
-<a name="l00078"></a>00078         idle = <span class="keyword">true</span>;
-<a name="l00079"></a>00079         mthread = <span class="keyword">new</span> boost::thread(boost::bind(&amp;Thread::run, <span class="keyword">this</span>));
-<a name="l00080"></a>00080 }
-<a name="l00081"></a>00081 
-<a name="l00082"></a>00082 Thread::~Thread() {
-<a name="l00083"></a>00083         <span class="keyword">delete</span> mthread;
-<a name="l00084"></a>00084         <span class="keyword">delete</span> task;
-<a name="l00085"></a>00085         <span class="keywordflow">if</span>(console)
-<a name="l00086"></a>00086         {
-<a name="l00087"></a>00087                 cout &lt;&lt; <span class="stringliteral">&quot;Destroyed Thread\n&quot;</span> &lt;&lt; flush;
-<a name="l00088"></a>00088         }
-<a name="l00089"></a>00089 }
+<a name="l00069"></a>00069                                 task-&gt;~Task();
+<a name="l00070"></a>00070                                 this-&gt;task = NULL;
+<a name="l00071"></a>00071                         }
+<a name="l00072"></a>00072                         this-&gt;idle = <span class="keyword">true</span>;
+<a name="l00073"></a>00073                 }
+<a name="l00074"></a>00074         }
+<a name="l00075"></a>00075 }
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077 Thread::Thread() {
+<a name="l00078"></a>00078         task = NULL;
+<a name="l00079"></a>00079         idle = <span class="keyword">true</span>;
+<a name="l00080"></a>00080         mthread = <span class="keyword">new</span> boost::thread(boost::bind(&amp;Thread::run, <span class="keyword">this</span>));
+<a name="l00081"></a>00081 }
+<a name="l00082"></a>00082 
+<a name="l00083"></a>00083 Thread::~Thread() {
+<a name="l00084"></a>00084         <span class="keyword">delete</span> mthread;
+<a name="l00085"></a>00085         <span class="keyword">delete</span> task;
+<a name="l00086"></a>00086         <span class="keywordflow">if</span>(console)
+<a name="l00087"></a>00087         {
+<a name="l00088"></a>00088                 cout &lt;&lt; <span class="stringliteral">&quot;Destroyed Thread\n&quot;</span> &lt;&lt; flush;
+<a name="l00089"></a>00089         }
+<a name="l00090"></a>00090 }
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:06 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

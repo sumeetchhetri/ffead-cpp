@@ -48,7 +48,7 @@
 <a name="l00025"></a>00025 <span class="preprocessor">#include &lt;iostream&gt;</span>
 <a name="l00026"></a>00026 HttpSession::HttpSession()
 <a name="l00027"></a>00027 {
-<a name="l00028"></a>00028 
+<a name="l00028"></a>00028         this-&gt;dirty = <span class="keyword">false</span>;
 <a name="l00029"></a>00029 }
 <a name="l00030"></a>00030 
 <a name="l00031"></a>00031 HttpSession::~HttpSession()
@@ -65,26 +65,31 @@
 <a name="l00042"></a>00042         this-&gt;sessionId = sessionId;
 <a name="l00043"></a>00043 }
 <a name="l00044"></a>00044 
-<a name="l00045"></a>00045 Map HttpSession::getSessionAttributes()<span class="keyword"> const</span>
-<a name="l00046"></a>00046 <span class="keyword"></span>{
+<a name="l00045"></a>00045 Map HttpSession::getSessionAttributes()
+<a name="l00046"></a>00046 {
 <a name="l00047"></a>00047         <span class="keywordflow">return</span> sessionAttributes;
 <a name="l00048"></a>00048 }
 <a name="l00049"></a>00049 
 <a name="l00050"></a>00050 <span class="keywordtype">void</span> HttpSession::setSessionAttributes(Map sessionAttributes)
 <a name="l00051"></a>00051 {
-<a name="l00052"></a>00052         this-&gt;sessionAttributes = sessionAttributes;
-<a name="l00053"></a>00053 }
-<a name="l00054"></a>00054 <span class="keywordtype">string</span> HttpSession::getAttribute(<span class="keywordtype">string</span> key)
-<a name="l00055"></a>00055 {
-<a name="l00056"></a>00056         <span class="keywordflow">return</span> sessionAttributes[key];
+<a name="l00052"></a>00052         map&lt;string,string&gt;::iterator it;
+<a name="l00053"></a>00053         <span class="keywordflow">for</span>(it=sessionAttributes.begin();it!=sessionAttributes.end();it++)
+<a name="l00054"></a>00054         {
+<a name="l00055"></a>00055                 this-&gt;sessionAttributes[it-&gt;first] = it-&gt;second;
+<a name="l00056"></a>00056         }
 <a name="l00057"></a>00057 }
-<a name="l00058"></a>00058 
-<a name="l00059"></a>00059 <span class="keywordtype">void</span> HttpSession::setAttribute(<span class="keywordtype">string</span> key,<span class="keywordtype">string</span> value)
-<a name="l00060"></a>00060 {
-<a name="l00061"></a>00061         this-&gt;sessionAttributes[key] = value;
-<a name="l00062"></a>00062 }
+<a name="l00058"></a>00058 <span class="keywordtype">string</span> HttpSession::getAttribute(<span class="keywordtype">string</span> key)
+<a name="l00059"></a>00059 {
+<a name="l00060"></a>00060         <span class="keywordflow">return</span> sessionAttributes[key];
+<a name="l00061"></a>00061 }
+<a name="l00062"></a>00062 
+<a name="l00063"></a>00063 <span class="keywordtype">void</span> HttpSession::setAttribute(<span class="keywordtype">string</span> key,<span class="keywordtype">string</span> value)
+<a name="l00064"></a>00064 {
+<a name="l00065"></a>00065         this-&gt;sessionAttributes[key] = value;
+<a name="l00066"></a>00066         this-&gt;dirty = <span class="keyword">true</span>;
+<a name="l00067"></a>00067 }
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:06 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

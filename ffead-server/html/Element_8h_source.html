@@ -72,24 +72,28 @@
 <a name="l00049"></a>00049                 <span class="keywordtype">void</span> setTagName(<span class="keywordtype">string</span> tagName);
 <a name="l00050"></a>00050                 <span class="keywordtype">bool</span> operator == (<a class="code" href="classElement.html">Element</a>);
 <a name="l00051"></a>00051                 <span class="keywordtype">bool</span> operator == (<a class="code" href="classElement.html">Element</a> *);
-<a name="l00052"></a>00052                 <span class="keywordtype">string</span> getText() <span class="keyword">const</span>;
-<a name="l00053"></a>00053                 <span class="keywordtype">void</span> setText(<span class="keywordtype">string</span>);
-<a name="l00054"></a>00054                 <a class="code" href="classElement.html">Element</a> getElementByName(<span class="keywordtype">string</span>);
-<a name="l00055"></a>00055                 <span class="keywordtype">string</span> render();
-<a name="l00056"></a>00056                 <span class="keywordtype">string</span> renderChildren();
-<a name="l00057"></a>00057 <span class="keyword">private</span>:
-<a name="l00058"></a>00058                 AttributeList attributes;
-<a name="l00059"></a>00059                 ElementList elements;
-<a name="l00060"></a>00060                 <span class="keywordtype">string</span> tagName;
-<a name="l00061"></a>00061                 <span class="keywordtype">string</span> nameSpace;
-<a name="l00062"></a>00062                 <span class="keywordtype">string</span> text;
-<a name="l00063"></a>00063                 ElementMap mapOfEle;
-<a name="l00064"></a>00064 };
-<a name="l00065"></a>00065 <span class="preprocessor">#endif</span>
-<a name="l00066"></a>00066 <span class="preprocessor"></span>
-<a name="l00067"></a>00067 
+<a name="l00052"></a>00052                 <span class="keywordtype">bool</span> getCdata() <span class="keyword">const</span>;
+<a name="l00053"></a>00053                 <span class="keywordtype">void</span> setCdata(<span class="keywordtype">bool</span>);
+<a name="l00054"></a>00054                 <span class="keywordtype">string</span> getText() <span class="keyword">const</span>;
+<a name="l00055"></a>00055                 <span class="keywordtype">void</span> setText(<span class="keywordtype">string</span>);
+<a name="l00056"></a>00056                 <a class="code" href="classElement.html">Element</a> getElementByName(<span class="keywordtype">string</span>);
+<a name="l00057"></a>00057                 ElementList getElementsByName(<span class="keywordtype">string</span> name);
+<a name="l00058"></a>00058                 <span class="keywordtype">string</span> render();
+<a name="l00059"></a>00059                 <span class="keywordtype">string</span> renderChildren();
+<a name="l00060"></a>00060 <span class="keyword">private</span>:
+<a name="l00061"></a>00061                 AttributeList attributes;
+<a name="l00062"></a>00062                 ElementList elements;
+<a name="l00063"></a>00063                 <span class="keywordtype">string</span> tagName;
+<a name="l00064"></a>00064                 <span class="keywordtype">string</span> nameSpace;
+<a name="l00065"></a>00065                 <span class="keywordtype">string</span> text;
+<a name="l00066"></a>00066                 <span class="keywordtype">bool</span> cdata;
+<a name="l00067"></a>00067                 ElementMap mapOfEle;
+<a name="l00068"></a>00068 };
+<a name="l00069"></a>00069 <span class="preprocessor">#endif</span>
+<a name="l00070"></a>00070 <span class="preprocessor"></span>
+<a name="l00071"></a>00071 
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:05 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

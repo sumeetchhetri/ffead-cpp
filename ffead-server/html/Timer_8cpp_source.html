@@ -59,40 +59,55 @@
 <a name="l00036"></a>00036         clock_gettime(CLOCK_REALTIME, &amp;st);
 <a name="l00037"></a>00037         cout &lt;&lt; <span class="stringliteral">&quot;\n--------------------------start Timer-------------------------::&quot;</span> &lt;&lt; ((st.tv_sec*1000000000 + st.tv_nsec)/1000) &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span>&lt;&lt; flush;
 <a name="l00038"></a>00038 }
-<a name="l00039"></a>00039 <span class="keywordtype">void</span> Timer::end()
-<a name="l00040"></a>00040 {
-<a name="l00041"></a>00041         timespec en;
-<a name="l00042"></a>00042         clock_gettime(CLOCK_REALTIME, &amp;en);
-<a name="l00043"></a>00043         <span class="keywordtype">int</span> elap = (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000;
-<a name="l00044"></a>00044         cout &lt;&lt; <span class="stringliteral">&quot;\n--------------------------end Timer-------------------------::&quot;</span> &lt;&lt; ((en.tv_sec*1000000000 + en.tv_nsec)/1000) &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span>&lt;&lt; flush;
-<a name="l00045"></a>00045         cout &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span> &lt;&lt; elap &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span>&lt;&lt; flush;
-<a name="l00046"></a>00046 }
-<a name="l00047"></a>00047 <span class="keywordtype">int</span> Timer::elapsedMicroSeconds()
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="keywordtype">long</span> Timer::getCurrentTime()
+<a name="l00041"></a>00041 {
+<a name="l00042"></a>00042         timespec en;
+<a name="l00043"></a>00043         clock_gettime(CLOCK_REALTIME, &amp;en);
+<a name="l00044"></a>00044         <span class="keywordflow">return</span> ((en.tv_sec * 1000000000) + en.tv_nsec);
+<a name="l00045"></a>00045 }
+<a name="l00046"></a>00046 
+<a name="l00047"></a>00047 <span class="keywordtype">long</span> Timer::getTimestamp()
 <a name="l00048"></a>00048 {
 <a name="l00049"></a>00049         timespec en;
 <a name="l00050"></a>00050         clock_gettime(CLOCK_REALTIME, &amp;en);
-<a name="l00051"></a>00051         <span class="keywordflow">return</span> (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000;
+<a name="l00051"></a>00051         <span class="keywordflow">return</span> en.tv_sec;
 <a name="l00052"></a>00052 }
-<a name="l00053"></a>00053 <span class="keywordtype">int</span> Timer::elapsedMilliSeconds()
-<a name="l00054"></a>00054 {
-<a name="l00055"></a>00055         timespec en;
-<a name="l00056"></a>00056         clock_gettime(CLOCK_REALTIME, &amp;en);
-<a name="l00057"></a>00057         <span class="keywordflow">return</span> (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000000;
-<a name="l00058"></a>00058 }
-<a name="l00059"></a>00059 <span class="keywordtype">int</span> Timer::elapsedNanoSeconds()
-<a name="l00060"></a>00060 {
-<a name="l00061"></a>00061         timespec en;
-<a name="l00062"></a>00062         clock_gettime(CLOCK_REALTIME, &amp;en);
-<a name="l00063"></a>00063         <span class="keywordflow">return</span> (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec));
-<a name="l00064"></a>00064 }
-<a name="l00065"></a>00065 <span class="keywordtype">int</span> Timer::elapsedSeconds()
-<a name="l00066"></a>00066 {
-<a name="l00067"></a>00067         timespec en;
-<a name="l00068"></a>00068         clock_gettime(CLOCK_REALTIME, &amp;en);
-<a name="l00069"></a>00069         <span class="keywordflow">return</span> (en.tv_sec - st.tv_sec);
-<a name="l00070"></a>00070 }
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="keywordtype">void</span> Timer::end()
+<a name="l00055"></a>00055 {
+<a name="l00056"></a>00056         timespec en;
+<a name="l00057"></a>00057         clock_gettime(CLOCK_REALTIME, &amp;en);
+<a name="l00058"></a>00058         <span class="keywordtype">long</span> elap = (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000;
+<a name="l00059"></a>00059         cout &lt;&lt; <span class="stringliteral">&quot;\n--------------------------end Timer-------------------------::&quot;</span> &lt;&lt; ((en.tv_sec*1000000000 + en.tv_nsec)/1000) &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span>&lt;&lt; flush;
+<a name="l00060"></a>00060         cout &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span> &lt;&lt; elap &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span>&lt;&lt; flush;
+<a name="l00061"></a>00061 }
+<a name="l00062"></a>00062 <span class="keywordtype">int</span> Timer::elapsedMicroSeconds()
+<a name="l00063"></a>00063 {
+<a name="l00064"></a>00064         timespec en;
+<a name="l00065"></a>00065         clock_gettime(CLOCK_REALTIME, &amp;en);
+<a name="l00066"></a>00066         <span class="keywordflow">return</span> (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000;
+<a name="l00067"></a>00067 }
+<a name="l00068"></a>00068 <span class="keywordtype">int</span> Timer::elapsedMilliSeconds()
+<a name="l00069"></a>00069 {
+<a name="l00070"></a>00070         timespec en;
+<a name="l00071"></a>00071         clock_gettime(CLOCK_REALTIME, &amp;en);
+<a name="l00072"></a>00072         <span class="keywordflow">return</span> (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000000;
+<a name="l00073"></a>00073 }
+<a name="l00074"></a>00074 <span class="keywordtype">int</span> Timer::elapsedNanoSeconds()
+<a name="l00075"></a>00075 {
+<a name="l00076"></a>00076         timespec en;
+<a name="l00077"></a>00077         clock_gettime(CLOCK_REALTIME, &amp;en);
+<a name="l00078"></a>00078         <span class="keywordflow">return</span> (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec));
+<a name="l00079"></a>00079 }
+<a name="l00080"></a>00080 <span class="keywordtype">int</span> Timer::elapsedSeconds()
+<a name="l00081"></a>00081 {
+<a name="l00082"></a>00082         timespec en;
+<a name="l00083"></a>00083         clock_gettime(CLOCK_REALTIME, &amp;en);
+<a name="l00084"></a>00084         <span class="keywordflow">return</span> (en.tv_sec - st.tv_sec);
+<a name="l00085"></a>00085 }
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:06 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

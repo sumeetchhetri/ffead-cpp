@@ -65,15 +65,17 @@
 <a name="l00042"></a>00042         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">int</span>);
 <a name="l00043"></a>00043         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">bool</span>);
 <a name="l00044"></a>00044         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>);
-<a name="l00045"></a>00045         <span class="keywordtype">void</span> joinAll();
-<a name="l00046"></a>00046         <span class="keywordtype">void</span> execute(<a class="code" href="classTask.html">Task</a> &amp;task, <span class="keywordtype">int</span> priority);
-<a name="l00047"></a>00047         <span class="keywordtype">void</span> execute(<a class="code" href="classTask.html">Task</a> &amp;task) ;
-<a name="l00048"></a>00048         <span class="keywordtype">void</span> schedule(<a class="code" href="classTask.html">Task</a> &amp;task, <span class="keywordtype">int</span> tunit, <span class="keywordtype">int</span> type);
-<a name="l00049"></a>00049         <span class="keyword">virtual</span> ~<a class="code" href="classThreadPool.html">ThreadPool</a>();
-<a name="l00050"></a>00050 };
-<a name="l00051"></a>00051 <span class="preprocessor">#endif </span><span class="comment">/* THREADPOOL_H_ */</span>
+<a name="l00045"></a>00045         <a class="code" href="classThreadPool.html">ThreadPool</a>();
+<a name="l00046"></a>00046         <span class="keywordtype">void</span> init(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">bool</span>);
+<a name="l00047"></a>00047         <span class="keywordtype">void</span> joinAll();
+<a name="l00048"></a>00048         <span class="keywordtype">void</span> execute(<a class="code" href="classTask.html">Task</a> &amp;task, <span class="keywordtype">int</span> priority);
+<a name="l00049"></a>00049         <span class="keywordtype">void</span> execute(<a class="code" href="classTask.html">Task</a> &amp;task) ;
+<a name="l00050"></a>00050         <span class="keywordtype">void</span> schedule(<a class="code" href="classTask.html">Task</a> &amp;task, <span class="keywordtype">int</span> tunit, <span class="keywordtype">int</span> type);
+<a name="l00051"></a>00051         <span class="keyword">virtual</span> ~<a class="code" href="classThreadPool.html">ThreadPool</a>();
+<a name="l00052"></a>00052 };
+<a name="l00053"></a>00053 <span class="preprocessor">#endif </span><span class="comment">/* THREADPOOL_H_ */</span>
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:05 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

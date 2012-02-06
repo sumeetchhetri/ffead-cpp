@@ -140,7 +140,7 @@
 <a name="l00117"></a>00117 
 <a name="l00118"></a>00118 <span class="keywordtype">void</span> Date::setHh(<span class="keywordtype">int</span> hh)
 <a name="l00119"></a>00119 {
-<a name="l00120"></a>00120         this-&gt;hh = hh;
+<a name="l00120"></a>00120         this-&gt;hh = boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(hh);
 <a name="l00121"></a>00121 }
 <a name="l00122"></a>00122 
 <a name="l00123"></a>00123 <span class="keywordtype">int</span> Date::getMm()<span class="keyword"> const</span>
@@ -150,7 +150,7 @@
 <a name="l00127"></a>00127 
 <a name="l00128"></a>00128 <span class="keywordtype">void</span> Date::setMm(<span class="keywordtype">int</span> mm)
 <a name="l00129"></a>00129 {
-<a name="l00130"></a>00130         this-&gt;mm = mm;
+<a name="l00130"></a>00130         this-&gt;mm = boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(mm);
 <a name="l00131"></a>00131 }
 <a name="l00132"></a>00132 
 <a name="l00133"></a>00133 <span class="keywordtype">int</span> Date::getSs()<span class="keyword"> const</span>
@@ -160,7 +160,7 @@
 <a name="l00137"></a>00137 
 <a name="l00138"></a>00138 <span class="keywordtype">void</span> Date::setSs(<span class="keywordtype">int</span> ss)
 <a name="l00139"></a>00139 {
-<a name="l00140"></a>00140         this-&gt;ss = ss;
+<a name="l00140"></a>00140         this-&gt;ss = boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(ss);
 <a name="l00141"></a>00141 }
 <a name="l00142"></a>00142 
 <a name="l00143"></a>00143 <span class="keywordtype">string</span> Date::getDayw()<span class="keyword"> const</span>
@@ -208,7 +208,7 @@
 <a name="l00185"></a>00185         <span class="keywordflow">return</span> dayw+<span class="stringliteral">&quot; &quot;</span>+monthw+<span class="stringliteral">&quot; &quot;</span>+day+<span class="stringliteral">&quot; &quot;</span>+hh+<span class="stringliteral">&quot;:&quot;</span>+mm+<span class="stringliteral">&quot;:&quot;</span>+ss+<span class="stringliteral">&quot; &quot;</span>+year;
 <a name="l00186"></a>00186 }
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:06 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

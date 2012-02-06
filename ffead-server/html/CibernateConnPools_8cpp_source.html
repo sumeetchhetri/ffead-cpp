@@ -59,40 +59,48 @@
 <a name="l00036"></a>00036 }
 <a name="l00037"></a>00037 
 <a name="l00038"></a>00038 CibernateConnPools::~CibernateConnPools() {
-<a name="l00039"></a>00039         instance=NULL;
-<a name="l00040"></a>00040         cout &lt;&lt; <span class="stringliteral">&quot;\nDestructed CibernateConnPools&quot;</span> &lt;&lt; flush;
-<a name="l00041"></a>00041 }
-<a name="l00042"></a>00042 
-<a name="l00043"></a>00043 <span class="keywordtype">void</span> CibernateConnPools::addPool(<span class="keywordtype">int</span> size,<span class="keywordtype">string</span> uid,<span class="keywordtype">string</span> pwd,<span class="keywordtype">string</span> dsn,<span class="keywordtype">string</span> appName)
-<a name="l00044"></a>00044 {
-<a name="l00045"></a>00045         <span class="keyword">get</span>()-&gt;cpools[appName] = <span class="keyword">new</span> <a class="code" href="classCibernateConnectionPool.html">CibernateConnectionPool</a>(size,dsn,uid,pwd);
-<a name="l00046"></a>00046         instance-&gt;initialized = <span class="keyword">get</span>()-&gt;cpools[appName]-&gt;initialized;
-<a name="l00047"></a>00047 }
-<a name="l00048"></a>00048 
-<a name="l00049"></a>00049 <span class="keywordtype">bool</span> CibernateConnPools::isInitialized()
-<a name="l00050"></a>00050 {
-<a name="l00051"></a>00051         <span class="keywordflow">return</span> instance-&gt;initialized;
-<a name="l00052"></a>00052 }
-<a name="l00053"></a>00053 <a class="code" href="classCibernateConnectionPool.html">CibernateConnectionPool</a>* CibernateConnPools::getPool(<span class="keywordtype">string</span> appName)
-<a name="l00054"></a>00054 {
-<a name="l00055"></a>00055         <span class="keywordflow">if</span>(instance-&gt;cpools.find(appName)!=instance-&gt;cpools.end())
-<a name="l00056"></a>00056                 <span class="keywordflow">return</span> instance-&gt;cpools[appName];
-<a name="l00057"></a>00057         <span class="keywordflow">return</span> NULL;
-<a name="l00058"></a>00058 }
-<a name="l00059"></a>00059 
-<a name="l00060"></a>00060 <a class="code" href="classMapping.html">Mapping</a>* CibernateConnPools::getMapping(<span class="keywordtype">string</span> appName)
-<a name="l00061"></a>00061 {
-<a name="l00062"></a>00062         <span class="keywordflow">if</span>(instance-&gt;mappings.find(appName)!=instance-&gt;mappings.end())
-<a name="l00063"></a>00063                 <span class="keywordflow">return</span> instance-&gt;mappings[appName];
-<a name="l00064"></a>00064         <span class="keywordflow">return</span> NULL;
-<a name="l00065"></a>00065 }
-<a name="l00066"></a>00066 
-<a name="l00067"></a>00067 <span class="keywordtype">void</span> CibernateConnPools::addMapping(<span class="keywordtype">string</span> appName,<a class="code" href="classMapping.html">Mapping</a>* mapping)
-<a name="l00068"></a>00068 {
-<a name="l00069"></a>00069         <span class="keyword">get</span>()-&gt;mappings[appName] = mapping;
-<a name="l00070"></a>00070 }
+<a name="l00039"></a>00039         map&lt;string,CibernateConnectionPool*&gt;::iterator it1;
+<a name="l00040"></a>00040         <span class="keywordflow">for</span> (it1=cpools.begin();it1!=cpools.end();it1++) {
+<a name="l00041"></a>00041                 <span class="keyword">delete</span> it1-&gt;second;
+<a name="l00042"></a>00042         }
+<a name="l00043"></a>00043         map&lt;string,Mapping*&gt;::iterator it2;
+<a name="l00044"></a>00044         <span class="keywordflow">for</span> (it2=mappings.begin();it2!=mappings.end();it2++) {
+<a name="l00045"></a>00045                 <span class="keyword">delete</span> it2-&gt;second;
+<a name="l00046"></a>00046         }
+<a name="l00047"></a>00047         instance=NULL;
+<a name="l00048"></a>00048         cout &lt;&lt; <span class="stringliteral">&quot;\nDestructed CibernateConnPools&quot;</span> &lt;&lt; flush;
+<a name="l00049"></a>00049 }
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051 <span class="keywordtype">void</span> CibernateConnPools::addPool(<span class="keywordtype">int</span> size,<span class="keywordtype">string</span> uid,<span class="keywordtype">string</span> pwd,<span class="keywordtype">string</span> dsn,<span class="keywordtype">string</span> appName)
+<a name="l00052"></a>00052 {
+<a name="l00053"></a>00053         <span class="keyword">get</span>()-&gt;cpools[appName] = <span class="keyword">new</span> <a class="code" href="classCibernateConnectionPool.html">CibernateConnectionPool</a>(size,dsn,uid,pwd);
+<a name="l00054"></a>00054         instance-&gt;initialized = <span class="keyword">get</span>()-&gt;cpools[appName]-&gt;initialized;
+<a name="l00055"></a>00055 }
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057 <span class="keywordtype">bool</span> CibernateConnPools::isInitialized()
+<a name="l00058"></a>00058 {
+<a name="l00059"></a>00059         <span class="keywordflow">return</span> instance-&gt;initialized;
+<a name="l00060"></a>00060 }
+<a name="l00061"></a>00061 <a class="code" href="classCibernateConnectionPool.html">CibernateConnectionPool</a>* CibernateConnPools::getPool(<span class="keywordtype">string</span> appName)
+<a name="l00062"></a>00062 {
+<a name="l00063"></a>00063         <span class="keywordflow">if</span>(instance-&gt;cpools.find(appName)!=instance-&gt;cpools.end())
+<a name="l00064"></a>00064                 <span class="keywordflow">return</span> instance-&gt;cpools[appName];
+<a name="l00065"></a>00065         <span class="keywordflow">return</span> NULL;
+<a name="l00066"></a>00066 }
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068 <a class="code" href="classMapping.html">Mapping</a>* CibernateConnPools::getMapping(<span class="keywordtype">string</span> appName)
+<a name="l00069"></a>00069 {
+<a name="l00070"></a>00070         <span class="keywordflow">if</span>(instance-&gt;mappings.find(appName)!=instance-&gt;mappings.end())
+<a name="l00071"></a>00071                 <span class="keywordflow">return</span> instance-&gt;mappings[appName];
+<a name="l00072"></a>00072         <span class="keywordflow">return</span> NULL;
+<a name="l00073"></a>00073 }
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075 <span class="keywordtype">void</span> CibernateConnPools::addMapping(<span class="keywordtype">string</span> appName,<a class="code" href="classMapping.html">Mapping</a>* mapping)
+<a name="l00076"></a>00076 {
+<a name="l00077"></a>00077         <span class="keyword">get</span>()-&gt;mappings[appName] = mapping;
+<a name="l00078"></a>00078 }
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Nov 1 15:39:06 2010 for ffead.server.doc by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Mon Feb 6 13:07:55 2012 for ffead.server.doc by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>
