@@ -217,7 +217,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						string valu(vemp.at(0));
 						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
 						valu = valu.substr(valu.find("?")+1);
-						valu = CryptoHandler::urlDecode(valu);
+						//valu = CryptoHandler::urlDecode(valu);
 						boost::iter_split(params,valu , boost::first_finder("&"));
 						for(unsigned j=0;j<params.size();j++)
 						{
@@ -229,7 +229,8 @@ HttpRequest::HttpRequest(strVec vec,string path)
 								boost::replace_first(att,"\r","");
 								boost::replace_first(att,"\t","");
 								boost::replace_first(att," ","");
-								this->setRequestParam(att,param.at(1));
+								this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
+								//cout << att << " = " << param.at(1) << endl;
 								reqorderinf[reqorderinf.size()+1] = att;
 							}
 						}
