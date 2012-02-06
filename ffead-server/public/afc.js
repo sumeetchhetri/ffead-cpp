@@ -42,7 +42,7 @@ function afcPrototypeAjaxOAUTHCall()
 	alert(form);
 	var obj = new Array();
 	obj.push("Authorization");
-	obj.push('OAuth realm="http://test.com:/test",oauth_consumer_key="sumeet",oauth_token="",oauth_nonce="",oauth_timestamp="0",oauth_signature_method="HMAC-SHA1",oauth_version="1.0",oauth_signature="dUI%2F1p7xOKm2ojIjyDs7KghENOk%3D"');
+	obj.push('OAuth realm="",oauth_version="1.0",oauth_consumer_key="sumeet",oauth_timestamp="0",oauth_signature_method="HMAC-SHA1",oauth_signature="x8%2BuM66zVOYU8bbSwRbooLOicD4%3D"');
 	var opt = {
 	    method: 'get',
 	    requestHeaders: obj,
@@ -51,14 +51,10 @@ function afcPrototypeAjaxOAUTHCall()
 		{
 			var msg = response.responseText;
 			alert(msg);
-			if(msg!="")
-			{
-				window.location.href = "http://localhost:8080/index.html";
-			}
 	   	}
 	}
 	document.body.removeChild(form);
-	new Ajax.Request('/index.oauth', opt);
+	new Ajax.Request('/request.oauth', opt);
 }
 
 function AfcCall(claz,meth,param,cb,url,_cntxt)

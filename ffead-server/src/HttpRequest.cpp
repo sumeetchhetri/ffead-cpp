@@ -75,7 +75,7 @@ void HttpRequest::getOauthParams(string str)
 		temr = temr.substr(temr.find("\"")+1);
 		temr = temr.substr(0,temr.find("\""));
 		authinfo[tempvv.at(0)] = temr;
-		authorderinf[authorderinf.size()+1] = tempvv.at(0);
+		authorderinf[authorderinf.size()+1] = CryptoHandler::urlDecode(tempvv.at(0));
 		//cout << tempvv.at(0) << " = " << temr << endl;
 	}
 }
