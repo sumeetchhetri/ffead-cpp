@@ -1,4 +1,4 @@
-var usern;
+var usern = "sumeet";
 function login()
 {
 	var obj = new Array();

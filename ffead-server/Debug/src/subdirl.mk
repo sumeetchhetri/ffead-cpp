@@ -84,6 +84,7 @@ CPP_SRCS += \
 ../src/CryptoHandler.cpp \
 ../src/HttpResponseParser.cpp \
 ../src/SSLClient.cpp \
+../src/RestController.cpp \
 ../src/Filter.cpp
 
 OBJS += \
@@ -167,6 +168,7 @@ OBJS += \
 ./src/CryptoHandler.o \
 ./src/HttpResponseParser.o \
 ./src/SSLClient.o \
+./src/RestController.o \
 ./src/Filter.o
 
 CPP_DEPS += \
@@ -250,6 +252,7 @@ CPP_DEPS += \
 ./src/CryptoHandler.d \
 ./src/HttpResponseParser.d \
 ./src/SSLClient.d \
+./src/RestController.d \
 ./src/Filter.d
 
 

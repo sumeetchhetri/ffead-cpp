@@ -87,6 +87,7 @@
 #include "DateFormat.h"
 #include "Filter.h"
 #include "FormController.h"
+#include "RestController.h"
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd
@@ -166,6 +167,23 @@ public:
 	virtual ~ServiceTask(){}
 	void run();
 };
+
+class RestFunctionParams
+{
+public:
+	int pos;
+	string type;
+};
+
+class RestFunction
+{
+public:
+	string name;
+	string alias;
+	string clas;
+	vector<RestFunctionParams> params;
+};
+typedef map<string, RestFunction> resFuncMap;
 
 class CHServer {
 public:

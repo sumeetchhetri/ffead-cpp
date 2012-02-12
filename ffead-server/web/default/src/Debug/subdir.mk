@@ -21,6 +21,7 @@ CPP_SRCS += \
 ../DefaultIOFilter.cpp \
 ../TestPage.cpp \
 ../TestForm.cpp \
+../DefaultRestController.cpp \
 ../TestFormController.cpp
 
 OBJS += \
@@ -41,6 +42,7 @@ OBJS += \
 ./DefaultIOFilter.o \
 ./TestPage.o \
 ./TestForm.o \
+./DefaultRestController.o \
 ./TestFormController.o
 
 CPP_DEPS += \
@@ -61,6 +63,7 @@ CPP_DEPS += \
 ./DefaultIOFilter.d \
 ./TestPage.d \
 ./TestForm.d \
+./DefaultRestController.d \
 ./TestFormController.d
 
 

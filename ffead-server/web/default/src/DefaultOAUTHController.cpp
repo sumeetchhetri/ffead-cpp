@@ -126,7 +126,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			{
 				filen = req->getCntxt_root()+"/callbacks";
 				ofs.open(filen.c_str());
-				string oauth_ver = boost::lexical_cast<string>(boost::lexical_cast<long>(oauthtok)/100000000000000 + rand()%1000);
+				string oauth_ver = boost::lexical_cast<string>(boost::lexical_cast<long>(oauthtok)/100000000000000LL + rand()%1000);
 				wrf = CryptoHandler::urlDecode(reqparams["oauth_callback"])+"?oauth_verifier="+oauth_ver+"&"+parsc;
 				ofs.write(wrf.c_str(),wrf.length());
 				ofs.close();
