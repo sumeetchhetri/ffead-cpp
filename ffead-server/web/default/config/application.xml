@@ -1,0 +1,47 @@
+<app>
+	<controllers>
+		<controller class="DefaultController" url="*.action"/>
+		<controller class="DefaultController" url="*.do"/>
+		<controller from="*.yourext" to="*.html"/>
+	</controllers>
+	<authhandlers>
+		<authhandler provider="file:users" url="*.authenticate"/>
+		<authhandler provider="class:DefaultOAUTHController" url="*.oauth"/>
+	</authhandlers>
+	<templates>
+		<template class="DefTemp" file="test.tpe"/>
+	</templates>
+	<dviews>
+		<dview class="Dview" path="test.view"/>
+	</dviews>
+	<filters>
+		<filter class="DefaultIOFilter" type="in"/>
+		<filter class="DefaultIOFilter" type="out"/>
+	</filters>
+	<restcontrollers>
+		<restcontroller class="DefaultRestController" urlpath="/rest/path/" name="rest1">
+			<restfunction name="addNumbers" alias="add">
+				<param pos="1" type="int"/>
+				<param pos="2" type="int"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" urlpath="/rest/path1/" name="rest2">
+			<restfunction name="addNumbers" alias="+">
+				<param pos="1" type="int"/>
+				<param pos="2" type="int"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="rest3">
+			<restfunction name="addNumbers" alias="ad">
+				<param pos="1" type="int"/>
+				<param pos="2" type="int"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController">
+			<restfunction name="addNumbers">
+				<param pos="1" type="int"/>
+				<param pos="2" type="int"/>
+			</restfunction>
+		</restcontroller>
+	</restcontrollers>
+</app>
