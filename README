@@ -1,6 +1,11 @@
 README
 
 Framework for Enterprise application development in C++ 
+The framework is developed for rapid development of Enterprise application on the C++ platform. 
+It is a c++ web framework, c++ application framework, c++ rest framework and c++ soap framework all bundled into one. 
+It consists of the following and is currently implemented for LINUX/WINDOWS(Cygwin). 
+It is the first and only C++ Application framework to provide non-intrusive Dependency Injection and Business Driven 
+Component Logic and POCO based Development. Most of the features are controlled by configuration files.
 Sumeet Chhetri
 21-04-2012
 
