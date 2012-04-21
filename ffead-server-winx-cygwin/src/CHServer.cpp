@@ -2418,8 +2418,8 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 											restfunction.params.push_back(param);
 										}
 									}
-									if(restfunction.params.size()==0)
-										continue;
+									//if(restfunction.params.size()==0)
+									//	continue;
 									if(clas!="")
 									{
 										if(url.find("*")==string::npos)
