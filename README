@@ -1,0 +1,63 @@
+README
+
+Framework for Enterprise application development in C++ 
+Sumeet Chhetri
+21-04-2012
+
+FEATURES
+1. Easy to use View Framework
+2. SSL Support available
+3. Web Server (Multi process, Multi Threaded – EPOLL based)
+4. Inbuilt Authentication handlers and OAUTH support
+5. Configuration driven URL mapping
+6. Dependency Injection (constructor and setter injection)
+7. ORM library (currently implemented for MySQL, Integrated with STL, Table mappings through configuration files –> One – Many, Many – Many ,One – One. The ORM Can be easily extended to other Databases).
+8. SOAP Integration (Web Service implementation through configuration file –> Methods in a C++ header file exposed as Web-Services)
+9. REST Controller framework (pretty URL's)
+10. AJAX Integration (Using property based configuration - On the lines of DWR for Java –> Just define C++ header files and Methods will be exposed as AJAX calls)
+11. EJB styled Beans (Remote and Local Interfaces exposed -> C++ files have the services, and the methods to be exposed are defined in a configuration file)
+12. Universal Object type for C++ (intelligent pointer - no need of extending any class – identifies the object type)
+13. XML based Serialization (Limited -> only for single level /no nesting of objects - header files required)
+14. Reflection (Limited –> header files required)
+15. Dynamic C++ Pages (Mix HTML and C++ code to produce run time views without web server restart)
+16. Template Engine and Dynamic Views generated from C++ objects.
+17. Controller Pattern (Implement controllers mapped with URL patterns to define custom behaviors)
+18. Request/Response Filters (Implement a chain of custom Filters for Pre/Post processing of request/response)
+19. Thread Pool Implementation
+20. C++ Interpreter (Limited support)
+21. Rule based WEB Behavior(idea can be expanded to other areas application wide)
+22. XML Parser (DOM Styled)
+23. Database Connection Pooling
+24. Internationalization support
+25. Utilities such as Timer, Logging, Property Files etc.
+26. File Upload
+27. FTP Server
+28. Security features for Method access (Web Services, AJAX calls, C++ Bean service calls, Server URL’s)
+29. Module for Integration of the framework with Apache Web Server
+30. Method Invoker Server for cross platform Method Invocation (A daemon per language/platform approach – XML based Serialization/De- Serialization)
+
+
+REQUIREMENTS
+1. Any box that runs linux or Windows/Cygwin
+2. Boost >v1.4 and development files
+3. UnixODBC and development files
+4. OpenSSl and development files
+4. GCC C++ compiler, make, configure etc
+
+
+INSTALL
+Unix
+Refer the INSTALL-UNIX file for installation directions.
+
+Windows/Cygwin
+Refer the INSTALL-WINDOWS-CYGWIN file for installation direction on Windows platform having Cygwin installed
+
+
+UPDATES
+Find latest and older version on 
+Google Code - http://code.google.com/p/ffead-cpp
+Github - https://github.com/sumeetchhetri/ffead-cpp
+
+
+Copyright © 2012 Sumeet Chhetri
+
