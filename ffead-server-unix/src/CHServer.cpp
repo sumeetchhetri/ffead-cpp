@@ -38,7 +38,7 @@ static map<string, vector<string> > filterMap;
 static string resourcePath;
 static strVec dcpsss;
 static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone,sessatserv,isCompileEnabled;
-static int thrdpsiz,shmid;
+static int thrdpsiz/*,shmid*/;
 static SSL_CTX *ctx;
 static int s_server_session_id_context = 1;
 static int s_server_auth_session_id_context = 2;
@@ -100,7 +100,7 @@ map<string,string> readFromSharedMemeory(string sessionId)
 static int password_cb(char *buf,int num,
   int rwflag,void *userdata)
   {
-    if(num<strlen(pass)+1)
+    if(num<(int)strlen(pass)+1)
       return(0);
 
     strcpy(buf,pass);
@@ -546,7 +546,7 @@ void ServiceTask::run()
 		strVec results;
 		stringstream ss;
 		string temp;
-		int bytes = -1;
+		//int bytes = -1;
 		if(isSSLEnabled)
 		{
 			sbio=BIO_new_socket(fd,BIO_CLOSE);
@@ -557,7 +557,7 @@ void ServiceTask::run()
 			int r;
 			if((r=SSL_accept(ssl)<=0))
 			{
-				error_occurred("SSL accept error",fd,ssl);
+				error_occurred((char*)"SSL accept error",fd,ssl);
 				return;
 			}
 
@@ -576,13 +576,13 @@ void ServiceTask::run()
 						break;
 					case SSL_ERROR_ZERO_RETURN:
 					{
-						error_occurred("SSL error problem",fd,ssl);
+						error_occurred((char*)"SSL error problem",fd,ssl);
 						if(io!=NULL)BIO_free(io);
 						return;
 					}
 					default:
 					{
-						error_occurred("SSL read problem",fd,ssl);
+						error_occurred((char*)"SSL read problem",fd,ssl);
 						if(io!=NULL)BIO_free(io);
 						return;
 					}
@@ -668,13 +668,13 @@ void ServiceTask::run()
 						break;
 					case SSL_ERROR_ZERO_RETURN:
 					{
-						error_occurred("SSL error problem",fd,ssl);
+						error_occurred((char*)"SSL error problem",fd,ssl);
 						if(io!=NULL)BIO_free(io);
 						return;
 					}
 					default:
 					{
-						error_occurred("SSL read problem",fd,ssl);
+						error_occurred((char*)"SSL read problem",fd,ssl);
 						if(io!=NULL)BIO_free(io);
 						return;
 					}
@@ -773,7 +773,7 @@ void ServiceTask::run()
 
 		string claz;
 		//cout << urlpattMap["*.*"] << flush;
-		bool isAuthenticated = false;
+		//bool isAuthenticated = false;
 		bool isoAuthRes = false;
 		bool isContrl = false;
 
@@ -952,34 +952,116 @@ void ServiceTask::run()
 			//cout << pthwofile << endl;
 			for (it=rstCntMap.begin();it!=rstCntMap.end();it++)
 			{
+				valss.clear();
 				//cout << it->first << endl;
-				if(pthwofile.find(it->first)!=string::npos)
+				//if(pthwofile.find(it->first)!=string::npos)
 				{
 					RestFunction ft = it->second;
 					prsiz = ft.params.size();
 					string pthwofiletemp(pthwofile);
-					for (int var = 0; var < prsiz; var++)
+					if(ft.baseUrl=="")
 					{
-						//cout << "loop - " << pthwofiletemp << endl;
-						string valsvv(pthwofiletemp.substr(pthwofiletemp.find_last_of("/")+1));
-						pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.find_last_of("/"));
-						valss.push_back(valsvv);
-					}
-					//cout << "after - " << pthwofiletemp << endl;
-					/*if(pthwofiletemp.at(pthwofiletemp.length()-1)=='/')
-					{
-						pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.length()-1);
-					}*/
-					//cout << "after - " << pthwofiletemp << endl;
-					if(it->first==pthwofiletemp)
-					{
-						if(prsiz==valss.size())
+						cout << "checking url : " << pthwofiletemp << ",param size: " << prsiz <<
+								", against url: " << it->first << endl;
+						for (int var = 0; var < prsiz; var++)
 						{
+							cout << "loop - " << pthwofiletemp << endl;
+							string valsvv(pthwofiletemp.substr(pthwofiletemp.find_last_of("/")+1));
+							pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.find_last_of("/"));
+							valss.push_back(valsvv);
+						}
+						reverse(valss.begin(),valss.end());
+						//cout << "after - " << pthwofiletemp << endl;
+						/*if(pthwofiletemp.at(pthwofiletemp.length()-1)=='/')
+						{
+							pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.length()-1);
+						}*/
+						//cout << "after - " << pthwofiletemp << endl;
+						cout << "checking url : " << pthwofiletemp << ",param size: " << prsiz << ",vals: " << valss.size() <<
+								", against url: " << it->first << endl;
+						if(it->first==pthwofiletemp)
+						{
+							string lhs = boost::to_upper_copy(ft.meth);
+							string rhs = boost::to_upper_copy(req->getMethod());
+							cout << lhs << " <> " << rhs << endl;
+							if(prsiz==(int)valss.size() && lhs==rhs)
+							{
+								cout << "got correct url -- restcontroller " << endl;
+								rft = ft;
+								flag = true;
+							}
+							else
+							{
+								res.setStatusCode("404");
+								res.setStatusMsg("Not Found");
+								//res.setContent_type("text/plain");
+								/*if(prsiz==valss.size())
+									res.setContent_str("Invalid number of arguments");
+								else
+									res.setContent_str("Invalid HTTPMethod used");*/
+								cout << "Rest Controller Param/Method Error" << endl;
+							}
+							break;
+						}
+					}
+					else
+					{
+						string baseUrl(req->getCntxt_name()+ft.baseUrl);
+						cout << "checking url : " << pthwofiletemp << ",param size: " << prsiz <<
+								", against url: " << baseUrl << endl;
+						for (int var = 1; var <= prsiz; var++)
+						{
+							strVec vemp;
+							stringstream ss;
+							ss << "{";
+							ss << var;
+							ss << "}";
+							string param;
+							ss >> param;
+							boost::iter_split(vemp, baseUrl, boost::first_finder(param));
+							if(vemp.size()==2 && pthwofiletemp.find(vemp.at(0))!=string::npos)
+							{
+								string temp = pthwofiletemp;
+								boost::replace_first(temp, vemp.at(0), "");
+								if(temp.find("/")!=string::npos)
+								{
+									pthwofiletemp = temp.substr(temp.find("/"));
+									temp = temp.substr(0, temp.find("/"));
+								}
+								valss.push_back(temp);
+								baseUrl = vemp.at(1);
+								cout << "variable at " << param << " mapped to " << temp << " from URL" << endl;
+								cout << baseUrl << endl;
+								cout << pthwofiletemp << endl;
+							}
+							else
+							{
+								flag = false;
+								break;
+							}
+						}
+						string lhs = boost::to_upper_copy(ft.meth);
+						string rhs = boost::to_upper_copy(req->getMethod());
+						cout << lhs << " <> " << rhs << endl;
+						if(prsiz==(int)valss.size() && lhs==rhs)
+						{
+
 							cout << "got correct url -- restcontroller " << endl;
 							rft = ft;
 							flag = true;
+							break;
 						}
-						break;
+						else
+						{
+							res.setStatusCode("404");
+							res.setStatusMsg("Not Found");
+							//res.setContent_type("text/plain");
+							/*if(prsiz==valss.size())
+								res.setContent_str("Invalid number of arguments");
+							else
+								res.setContent_str("Invalid HTTPMethod used");*/
+							cout << "Rest Controller Param/Method Error" << endl;
+						}
 					}
 				}
 			}
@@ -1008,38 +1090,45 @@ void ServiceTask::run()
 					rstcnt->response = &res;
 
 					vals valus;
+					bool invValue = false;
 					for (int var = 0; var < prsiz; var++)
 					{
-						argus.push_back(rft.params.at(var).type);
-						if(rft.params.at(var).type=="int")
+						try
 						{
-							int* ival = new int(boost::lexical_cast<int>(valss.at(var)));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="long")
-						{
-							long* ival = new long(boost::lexical_cast<long>(valss.at(var)));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="double")
-						{
-							double* ival = new double(boost::lexical_cast<double>(valss.at(var)));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="float")
-						{
-							float* ival = new float(boost::lexical_cast<float>(valss.at(var)));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="bool")
-						{
-							bool* ival = new bool(boost::lexical_cast<bool>(valss.at(var)));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="string")
-						{
-							string* sval = new string(valss.at(var));
-							valus.push_back(sval);
+							argus.push_back(rft.params.at(var).type);
+							if(rft.params.at(var).type=="int")
+							{
+								int* ival = new int(boost::lexical_cast<int>(valss.at(var)));
+								valus.push_back(ival);
+							}
+							else if(rft.params.at(var).type=="long")
+							{
+								long* ival = new long(boost::lexical_cast<long>(valss.at(var)));
+								valus.push_back(ival);
+							}
+							else if(rft.params.at(var).type=="double")
+							{
+								double* ival = new double(boost::lexical_cast<double>(valss.at(var)));
+								valus.push_back(ival);
+							}
+							else if(rft.params.at(var).type=="float")
+							{
+								float* ival = new float(boost::lexical_cast<float>(valss.at(var)));
+								valus.push_back(ival);
+							}
+							else if(rft.params.at(var).type=="bool")
+							{
+								bool* ival = new bool(boost::lexical_cast<bool>(valss.at(var)));
+								valus.push_back(ival);
+							}
+							else if(rft.params.at(var).type=="string")
+							{
+								string* sval = new string(valss.at(var));
+								valus.push_back(sval);
+							}
+						} catch (...) {
+							invValue= true;
+							break;
 						}
 					}
 
@@ -1054,8 +1143,8 @@ void ServiceTask::run()
 					{
 						res.setStatusCode("404");
 						res.setStatusMsg("Not Found");
-						res.setContent_type("text/plain");
-						res.setContent_str("Rest Controller Method Not Found");
+						//res.setContent_type("text/plain");
+						//res.setContent_str("Rest Controller Method Not Found");
 						cout << "Rest Controller Method Not Found" << endl;
 						//return;
 					}
@@ -1132,7 +1221,7 @@ void ServiceTask::run()
 			{
 				toVoidP f1 = (toVoidP)mkr;
 				void *_beaninst = f1(json);
-				FunPtr f =  (FunPtr)mkr;
+				//FunPtr f =  (FunPtr)mkr;
 				ClassInfo srv = ref.getClassInfo(ele.getAttribute("controller"));
 				args argus;
 				vals valus;
@@ -1505,7 +1594,7 @@ void ServiceTask::run()
 				else
 					content = res.getContent_str();
 			}
-			if(ext!="" && (content.length()==0))
+			if(content.length()==0)
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
@@ -1515,7 +1604,7 @@ void ServiceTask::run()
 			{
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
-				res.setContent_type(props[ext]);
+				if(res.getContent_type()!="")res.setContent_type(props[ext]);
 				res.setContent_str(content);
 				//res.setContent_len(boost::lexical_cast<string>(content.length()));
 				//sess.setAttribute("CURR",req->getUrl());
@@ -1530,7 +1619,7 @@ void ServiceTask::run()
 			else
 				tempp = filterMap[req->getCntxt_name()+ext+"out"];
 
-			for (int var = 0; var < tempp.size(); ++var)
+			for (int var = 0; var < (int)tempp.size(); ++var)
 			{
 				string clasz = tempp.at(var);
 				clasz = "getReflectionCIFor" + clasz;
@@ -1581,27 +1670,27 @@ void ServiceTask::run()
 
 			  if(SSL_renegotiate(ssl)<=0)
 			  {
-				  error_occurred("SSL renegotiation error",fd,ssl);
+				  error_occurred((char*)"SSL renegotiation error",fd,ssl);
 				  if(io!=NULL)BIO_free(io);
 				  return;
 			  }
 			  if(SSL_do_handshake(ssl)<=0)
 			  {
-				  error_occurred("SSL renegotiation error",fd,ssl);
+				  error_occurred((char*)"SSL renegotiation error",fd,ssl);
 				  if(io!=NULL)BIO_free(io);
 				  return;
 			  }
 			  ssl->state=SSL_ST_ACCEPT;
 			  if(SSL_do_handshake(ssl)<=0)
 			  {
-				  error_occurred("SSL renegotiation error",fd,ssl);
+				  error_occurred((char*)"SSL renegotiation error",fd,ssl);
 				  if(io!=NULL)BIO_free(io);
 				  return;
 			  }
 			}
 			if((r=BIO_puts(io,h1.c_str()))<=0)
 			{
-				  error_occurred("send failed",fd,ssl);
+				  error_occurred((char*)"send failed",fd,ssl);
 				  if(io!=NULL)BIO_free(io);
 				  return;
 			}
@@ -1610,14 +1699,14 @@ void ServiceTask::run()
 			{
 				if ((size=BIO_puts(io,res.getContent_str().c_str()))<=0)
 				{
-					  error_occurred("send failed",fd,ssl);
+					  error_occurred((char*)"send failed",fd,ssl);
 					  if(io!=NULL)BIO_free(io);
 					  return;
 				}
 			}*/
 			if((r=BIO_flush(io))<0)
 			{
-				  error_occurred("Error flushing BIO",fd,ssl);
+				  error_occurred((char*)"Error flushing BIO",fd,ssl);
 				  if(io!=NULL)BIO_free(io);
 				  return;
 			}
@@ -2388,13 +2477,21 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 									restfunction.name = resfuncs.at(cntn1).getAttribute("name");
 									restfunction.alias = resfuncs.at(cntn1).getAttribute("alias");
 									restfunction.clas = clas;
+									restfunction.meth = resfuncs.at(cntn1).getAttribute("meth");
+									restfunction.baseUrl = resfuncs.at(cntn1).getAttribute("baseUrl");
 									ElementList resfuncparams = resfuncs.at(cntn1).getChildElements();
 									for (unsigned int cntn2 = 0; cntn2 < resfuncparams.size(); cntn2++)
 									{
 										if(resfuncparams.at(cntn2).getTagName()=="param")
 										{
 											RestFunctionParams param;
-											param.pos = boost::lexical_cast<int>(resfuncparams.at(cntn2).getAttribute("pos"));
+											/*try
+											{
+												param.pos = boost::lexical_cast<int>(resfuncparams.at(cntn2).getAttribute("pos"));
+											} catch(...) {
+												cout << "CONFIGURATION_ERROR-> Invalid pos attribute specified for function "
+														<< restfunction.name << ",pos value should be an integer." << endl;
+											}*/
 											param.type = resfuncparams.at(cntn2).getAttribute("type");
 											restfunction.params.push_back(param);
 										}
@@ -2412,12 +2509,18 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 											{
 												if(restfunction.alias!="")
 												{
-													urlmpp = name+url+rname+"/"+restfunction.alias;
+													if(restfunction.baseUrl=="")
+														urlmpp = name+url+rname+"/"+restfunction.alias;
+													else
+														urlmpp = name+restfunction.baseUrl;
 													rstCntMap[urlmpp] = restfunction;
 												}
 												else
 												{
-													urlmpp = name+url+rname+"/"+restfunction.name;
+													if(restfunction.baseUrl=="")
+														urlmpp = name+url+rname+"/"+restfunction.name;
+													else
+														urlmpp = name+restfunction.baseUrl;
 													rstCntMap[name+url+rname+"/"+restfunction.name] = restfunction;
 												}
 											}
@@ -2425,12 +2528,18 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 											{
 												if(restfunction.alias!="")
 												{
-													urlmpp = name+url+clas+"/"+restfunction.alias;
+													if(restfunction.baseUrl=="")
+														urlmpp = name+url+clas+"/"+restfunction.alias;
+													else
+														urlmpp = name+restfunction.baseUrl;
 													rstCntMap[urlmpp] = restfunction;
 												}
 												else
 												{
-													urlmpp = name+url+clas+"/"+restfunction.name;
+													if(restfunction.baseUrl=="")
+														urlmpp = name+url+clas+"/"+restfunction.name;
+													else
+														urlmpp = name+restfunction.baseUrl;
 													rstCntMap[urlmpp] = restfunction;
 												}
 											}
@@ -2799,7 +2908,7 @@ int main(int argc, char* argv[])
    	string thrdpreq = srprps["THRD_PREQ"];
    	if(thrdpreq=="true" || thrdpreq=="TRUE")
    		isThreadprq = true;
-   	string compileEnabled = srprps["COMPILE_ENABLED"];
+   	string compileEnabled = srprps["DEV_MODE"];
 	if(compileEnabled=="true" || compileEnabled=="TRUE")
 		isCompileEnabled = true;
    	else

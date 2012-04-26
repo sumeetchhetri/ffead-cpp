@@ -181,6 +181,8 @@ public:
 	string name;
 	string alias;
 	string clas;
+	string meth;
+	string baseUrl;
 	vector<RestFunctionParams> params;
 };
 typedef map<string, RestFunction> resFuncMap;
