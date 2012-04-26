@@ -9,6 +9,7 @@
 #define DEFAULTRESTCONTROLLER_H_
 
 #include "RestController.h"
+#include <math.h>
 #include <iostream>
 
 class DefaultRestController: public RestController {
