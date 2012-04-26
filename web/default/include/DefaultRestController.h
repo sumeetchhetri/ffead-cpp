@@ -16,6 +16,7 @@ public:
 	DefaultRestController();
 	virtual ~DefaultRestController();
 	void addNumbers(int,int);
+	void power(int,int);
 };
 
 #endif /* DEFAULTRESTCONTROLLER_H_ */
