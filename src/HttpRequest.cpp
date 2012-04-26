@@ -316,6 +316,63 @@ HttpRequest::HttpRequest(strVec vec,string path)
 					}
 				}
 			}
+			else if(!contStarts && boost::find_first(tem, "PUT"))
+			{
+				boost::replace_first(tem,"PUT ","");
+				this->setMethod("PUT");
+				boost::iter_split(vemp, tem, boost::first_finder(" "));
+				if(vemp.size()==2)
+				{
+					boost::replace_first(vemp.at(1),"\r","");
+					this->setHttpVersion(vemp.at(1));
+					boost::replace_first(vemp.at(0)," ","");
+					if(vemp.at(0).find("?")!=string ::npos)
+					{
+						strVec params;
+						string valu(vemp.at(0));
+						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+						valu = valu.substr(valu.find("?")+1);
+						valu = CryptoHandler::urlDecode(valu);
+						boost::iter_split(params,valu, boost::first_finder("&"));
+						for(unsigned j=0;j<params.size();j++)
+						{
+							strVec param;
+							boost::iter_split(param, params.at(j), boost::first_finder("="));
+							if(param.size()==2)
+							{
+								string att = param.at(0);
+								boost::replace_first(att,"\r","");
+								boost::replace_first(att,"\t","");
+								boost::replace_first(att," ","");
+								this->setRequestParam(att,param.at(1));
+								reqorderinf[reqorderinf.size()+1] = att;
+							}
+						}
+					}
+					this->setActUrl(vemp.at(0));
+					boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+					int fs = vemp.at(0).find_first_of("/");
+					int es = vemp.at(0).find_last_of("/");
+					if(fs==es)
+					{
+						this->setCntxt_root(path+"default");
+						this->setCntxt_name("default");
+						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
+					}
+					else
+					{
+						int ss = vemp.at(0).substr(fs+1).find("/");
+						if(ss>fs)
+						{
+							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+							this->setCntxt_root(path+this->getCntxt_name());
+							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+vemp.at(0));
+						}
+					}
+				}
+			}
 			else if(!contStarts && boost::find_first(tem, "POST"))
 			{
 				boost::replace_first(tem,"POST ","");

@@ -29,7 +29,7 @@
 #include "fstream"
 #include "Serialize.h"
 
-#define BACKLOG 500
+#define BACKLOGMI 500
 #define MAXBUFLEN 1024
 
 using namespace std;
