@@ -20,27 +20,33 @@
 	</filters>
 	<restcontrollers>
 		<restcontroller class="DefaultRestController" urlpath="/rest/path/" name="rest1">
-			<restfunction name="addNumbers" alias="add">
-				<param pos="1" type="int"/>
-				<param pos="2" type="int"/>
+			<restfunction name="addNumbers" alias="add" meth="GET">
+				<param type="int"/>
+				<param type="int"/>
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" urlpath="/rest/path1/" name="rest2">
-			<restfunction name="addNumbers" alias="+">
-				<param pos="1" type="int"/>
-				<param pos="2" type="int"/>
+			<restfunction name="addNumbers" alias="+" meth="GET">
+				<param type="int"/>
+				<param type="int"/>
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" name="rest3">
-			<restfunction name="addNumbers" alias="ad">
-				<param pos="1" type="int"/>
-				<param pos="2" type="int"/>
+			<restfunction name="addNumbers" alias="ad" meth="GET">
+				<param type="int"/>
+				<param type="int"/>
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController">
-			<restfunction name="addNumbers">
-				<param pos="1" type="int"/>
-				<param pos="2" type="int"/>
+			<restfunction name="power" meth="GET" baseUrl="/rest/controller/base{1}/power/exp{2}">
+				<param type="int"/>
+				<param type="int"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController">
+			<restfunction name="addNumbers" meth="GET">
+				<param type="int"/>
+				<param type="int"/>
 			</restfunction>
 		</restcontroller>
 	</restcontrollers>
