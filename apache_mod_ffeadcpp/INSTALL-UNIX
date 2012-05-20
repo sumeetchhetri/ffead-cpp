@@ -1,0 +1,23 @@
+GNU/Linux based Installation
+
+1. Refer INSTALL-WINDOWS-CYGWIN file for directions on how to install on Windows and Cygwin
+2. Download the tar file and extract it to the location of your choice.
+3. Make sure boost >=v1.4 libraries and boost devel packages are installed on your system
+4. Install Unix-ODBC and required odbc files for MySQL dependency alongwith development files
+5. Install Open-SSL and development files
+5. JSON-SPIRIT source and header files are already included in the source code distribution
+5. Go to the ffead-server-unix/Release or ffead-server-unix/Debug depending on whether you need to debug the server code
+7. Open terminal and type make all
+8. This will create the distribution folder named ffead-server-unix inside ffead-server-unix/Release or ffead-server-unix/Debug folders accordingly
+9. Place your application shared library inside the ffead-server-unix/Release/ffead-server-unix/lib or ffead-server-unix/Debug/ffead-server-unix/lib folder.
+10. Place your web application specific files inside the ffead-server-unix/Release/ffead-server-unix/web folder inside a folder with your application name
+11. There will be a libweblib.so file which will be created in the ffead-server-unix/lib folder 
+12. A default application is already provided for your reference inside the ffead-server-unix/web folder
+13. To compile the default application shared library go to the ffead-server-unix/Release/ffead-server-unix/web/default/src/Debug folder and run "make all"
+14. Copy the libdefault library to the ffead-server-unix/Release/ffead-server-unix/lib folder
+15. Copy the ffead-server-unix/Release/ffead-server folder to the apache web folder eg, /var/www/html
+16. Download the apache_mod_ffeadcpp folder/zip file
+17. cd apache_mod_ffeadcpp and chmod 755 run.sh
+18. This will install the mod_ffeadcpp module to apache http modules and update config as well
+19. Modify the Document path in httpd.conf to /var/www/html/ffead-server
+20. It will also restart apache server, check the url http://localhost/index.html on your browser
