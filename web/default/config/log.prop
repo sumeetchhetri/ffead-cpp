@@ -1,0 +1,5 @@
+MODE=CONSOLE
+LEVEL=INFO
+FILEPATH=/home/sumeet/server/web/default/cls.log
+
+

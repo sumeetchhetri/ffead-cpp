@@ -1,0 +1,8 @@
+<web-services>
+	<web-service name="testing" class="Testing">
+		<test1 outname="result"/>
+		<test2 outname="result"/>
+		<test3 outname="result"/>
+		<test4 outname="result"/>
+	</web-service>
+</web-services>
