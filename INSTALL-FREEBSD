@@ -1,0 +1,20 @@
+BSD based Installation
+
+1. Refer INSTALL-WINDOWS-CYGWIN file for directions on how to install on Windows and Cygwin
+2. Download the tar file and extract it to the location of your choice.
+3. Make sure boost >=v1.4 libraries and boost devel packages are installed on your system(install from ports or use pkg_add)
+4. Install Unix-ODBC and required odbc files for MySQL dependency alongwith development files
+5. Install Open-SSL and development files
+5. JSON-SPIRIT source and header files are already included in the source code distribution
+5. Also included prototype.js in source for AJAX support
+6. Go to the ffead-server-freebsd/Release or ffead-server-freebsd/Debug depending on whether you need to debug the server code
+7. Open terminal and type gmake all
+8. This will create the distribution folder named ffead-server-freebsd inside ffead-server-freebsd/Release or ffead-server-freebsd/Debug folders accordingly
+9. Place your application shared library inside the ffead-server-freebsd/Release/ffead-server-freebsd/lib or ffead-server-freebsd/Debug/ffead-server-freebsd/lib folder.
+10. Place your web application specific files inside the ffead-server-freebsd/Release/ffead-server-freebsd/web folder inside a folder with your application name
+11. Type ./server.sh when inside the ffead-server-freebsd folder to start the application server
+12. A default application is already provided for your reference inside the ffead-server-freebsd/web folder
+13. To compile the default application shared library go to the ffead-server-freebsd/Release/ffead-server-freebsd/web/default/src/Debug folder and run "gmake all"
+14. Copy the libdefault library to the ffead-server-freebsd/Release/ffead-server-freebsd/lib folder
+15. Remember all installation files(makefile,subdir.mk) assume the ports are installed to the /usr/local/lib directory, in case you choose custom settings during 
+    installation of dependencies then make sure to change all files to include the -L/usr/local/lib to -L/location/of your/choice
