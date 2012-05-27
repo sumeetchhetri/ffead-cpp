@@ -38,7 +38,7 @@ FEATURES
 
 
 REQUIREMENTS
-1. Any box that runs linux or Windows/Cygwin
+1. Any box that runs linux, BSD or Windows/Cygwin
 2. Boost >v1.4 and development files
 3. UnixODBC and development files
 4. OpenSSl and development files
@@ -48,6 +48,9 @@ REQUIREMENTS
 INSTALL
 Unix
 Refer the INSTALL-UNIX file for installation directions.
+
+BSD
+Refer the INSTALL-FREEBSD file for installation directions.
 
 Windows/Cygwin
 Refer the INSTALL-WINDOWS-CYGWIN file for installation direction on Windows platform having Cygwin installed
