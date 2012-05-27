@@ -2965,7 +2965,10 @@ int main(int argc, char* argv[])
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
     string PORT = srprps["PORT_NO"];
-    if ((rv = getaddrinfo(NULL, &PORT[0], &hints, &servinfo)) != 0) {
+    const char *ip_addr = NULL;
+	if(IP!="")
+		ip_addr = IP.c_str();
+    if ((rv = getaddrinfo(ip_addr, &PORT[0], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
