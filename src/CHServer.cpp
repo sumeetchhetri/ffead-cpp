@@ -780,7 +780,7 @@ void ServiceTask::run()
 		string actUrl = serverUrl + req->getActUrl();
 		string userRole = "ROLE_ANONYMOUS";
 		cout << actUrl << endl;
-		if(securityObject.isLoginConfigured() && !securityObject.isLoginUrl(serverUrl, actUrl) &&
+		if(securityObject.isLoginConfigured() && !securityObject.isLoginPage(serverUrl, actUrl) && !securityObject.isLoginUrl(serverUrl, actUrl) &&
 				(req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")==""
 						|| req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")=="ROLE_ANONYMOUS"))
 		{
@@ -790,7 +790,7 @@ void ServiceTask::run()
 			isContrl = true;
 		}
 		else if(securityObject.isLoginConfigured() && securityObject.isLoginUrl(serverUrl, actUrl)
-				&& req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")!="")
+				&& req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")=="")
 		{
 			claz = securityObject.loginProvider;
 			AuthController *authc;

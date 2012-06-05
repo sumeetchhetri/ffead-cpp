@@ -198,6 +198,10 @@ public:
 	}
 	bool isLoginUrl(string url, string actUrl)
 	{
+		return (actUrl==(url+"/_ffead_security_cntxt_login_url"));
+	}
+	bool isLoginPage(string url, string actUrl)
+	{
 		return (actUrl==(url+"/"+loginUrl));
 	}
 	SecureAspect matchesPath(string url)
