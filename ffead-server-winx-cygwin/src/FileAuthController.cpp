@@ -39,7 +39,7 @@ bool FileAuthController::authenticate(string username,string password)
 		string temp;
 		while(getline(ifs, temp))
 		{
-			if(userstamp==temp)
+			if(temp.find(userstamp)!=string::npos)
 			{
 				ifs.close();
 				return true;
