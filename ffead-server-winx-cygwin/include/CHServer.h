@@ -207,18 +207,24 @@ public:
 	SecureAspect matchesPath(string url)
 	{
 		bool pathval = false;
-		if(url.find("*")==url.length()-1)
-		{
-			url = url.substr(0, url.length()-1);
-		}
 		SecureAspect aspect;
 		for (int var = 0; var < secures.size(); ++var) {
 			SecureAspect secureAspect = secures.at(var);
-			if(pathval && secureAspect.path.find(url)!=string::npos)
+			string pathurl = secureAspect.path;
+			if(pathurl=="*")
 			{
 				return secureAspect;
 			}
-			else if(!pathval && secureAspect.path==url)
+			if(pathurl.find("*")==pathurl.length()-1)
+			{
+				pathurl = pathurl.substr(0, url.length()-1);
+				pathval = true;
+			}
+			if(pathval && url.find(pathurl)!=string::npos)
+			{
+				return secureAspect;
+			}
+			else if(!pathval && pathurl==url)
 			{
 				return secureAspect;
 			}
