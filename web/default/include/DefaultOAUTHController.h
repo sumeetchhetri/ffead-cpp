@@ -22,6 +22,7 @@ public:
 	bool authenticate(string,string){return false;}
 	bool isInitialized(){return false;}
 	bool authenticate(map<string,string>){return false;}
+	string getUserRole(string username){return "ROLE_ANONYMOUS";}
 };
 
 #endif /* DEFAULTOAUTHCONTROLLER_H_ */

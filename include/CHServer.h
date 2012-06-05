@@ -175,6 +175,54 @@ public:
 	string type;
 };
 
+class SecureAspect
+{
+public:
+	string path;
+	string role;
+};
+
+class Security
+{
+public:
+	vector<SecureAspect> secures;
+	string loginProvider;
+	string loginUrl;
+	bool isLoginConfigured()
+	{
+		return (loginProvider!="" && loginUrl!="");
+	}
+	bool isSecureConfigured()
+	{
+		return secures.size()!=0;
+	}
+	bool isLoginUrl(string url, string actUrl)
+	{
+		return (actUrl==(url+"/"+loginUrl));
+	}
+	SecureAspect matchesPath(string url)
+	{
+		bool pathval = false;
+		if(url.find("*")==url.length()-1)
+		{
+			url = url.substr(0, url.length()-1);
+		}
+		SecureAspect aspect;
+		for (int var = 0; var < secures.size(); ++var) {
+			SecureAspect secureAspect = secures.at(var);
+			if(pathval && secureAspect.path.find(url)!=string::npos)
+			{
+				return secureAspect;
+			}
+			else if(!pathval && secureAspect.path==url)
+			{
+				return secureAspect;
+			}
+		}
+		return aspect;
+	}
+};
+
 class RestFunction
 {
 public:
