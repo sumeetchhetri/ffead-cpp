@@ -19,6 +19,7 @@ public:
 	virtual bool authenticate(string user,string password)=0;
 	virtual bool authenticate(map<string,string>)=0;
 	virtual bool handle(HttpRequest* req,HttpResponse* res)=0;
+	virtual string getUserRole(string username)=0;
 	virtual bool isInitialized()=0;
 };
 

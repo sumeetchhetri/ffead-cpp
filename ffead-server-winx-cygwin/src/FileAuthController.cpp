@@ -72,3 +72,24 @@ bool FileAuthController::getPassword(string username,string &passwd)
 	}
 	return passwdf;
 }
+
+string FileAuthController::getUserRole(string username)
+{
+	string userstamp = (username + delimiter);
+	ifstream ifs(this->filename.c_str());
+	if(ifs.is_open() && username!="")
+	{
+		string temp;
+		while(getline(ifs, temp))
+		{
+			if(temp.find(userstamp)!=string::npos)
+			{
+				userstamp = userstamp.substr(userstamp.find_last_of(":")+1);
+				ifs.close();
+				break;
+			}
+		}
+		ifs.close();
+	}
+	return userstamp;
+}

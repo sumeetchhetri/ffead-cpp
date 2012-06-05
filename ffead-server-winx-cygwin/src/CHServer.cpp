@@ -33,6 +33,7 @@ SharedData* SharedData::shared_instance = NULL;
 string servd;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap;
 static resFuncMap rstCntMap;
+static Security securityObject;
 static map<string, Element> formMap;
 static map<string, vector<string> > filterMap;
 static string resourcePath;
@@ -49,7 +50,7 @@ static char *pass;
 map<int,pid_t> pds;
 static pid_t parid;
 void *dlib = NULL;
-static string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_auth_mode,srv_auth_file;
+static string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_auth_mode,srv_auth_file,IP_ADDRESS;
 typedef map<string,string> sessionMap;
 static boost::mutex m_mutex,p_mutex;
 
@@ -773,6 +774,98 @@ void ServiceTask::run()
 		//bool isAuthenticated = false;
 		bool isoAuthRes = false;
 		bool isContrl = false;
+		string serverUrl = "http://" + IP_ADDRESS;
+		if(req->getCntxt_name()!="default")
+			serverUrl += "/" + req->getCntxt_name();
+		string actUrl = serverUrl + req->getActUrl();
+		string userRole = "ROLE_ANONYMOUS";
+		cout << actUrl << endl;
+		if(securityObject.isLoginConfigured() && !securityObject.isLoginUrl(serverUrl, actUrl) &&
+				(req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")==""
+						|| req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")=="ROLE_ANONYMOUS"))
+		{
+			res.setStatusCode("307");
+			res.setStatusMsg("Temporary Redirect");
+			res.setLocation(serverUrl+"/"+securityObject.loginUrl);
+			isContrl = true;
+		}
+		else if(securityObject.isLoginConfigured() && securityObject.isLoginUrl(serverUrl, actUrl)
+				&& req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")!="")
+		{
+			claz = securityObject.loginProvider;
+			AuthController *authc;
+			if(claz.find("file:")!=string::npos)
+			{
+				claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
+				cout << "auth handled by file " << claz << endl;
+				authc = new FileAuthController(claz,":");
+				if(authc->isInitialized())
+				{
+					if(authc->authenticate(req->getRequestParam("_ffead_security_cntxt_username"),
+							req->getRequestParam("_ffead_security_cntxt_password")))
+					{
+						cout << "valid user" << endl;
+						userRole = authc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
+					}
+					else
+					{
+						cout << "invalid user" << endl;
+						res.setStatusCode("401");
+						res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
+						isContrl = true;
+					}
+				}
+				else
+				{
+					cout << "invalid user repo defined" << endl;
+				}
+			}
+			else if(claz.find("class:")!=string::npos)
+			{
+				claz = claz.substr(claz.find(":")+1);
+				claz = "getReflectionCIFor" + claz;
+				cout << "auth handled by class " << claz << endl;
+				if(dlib == NULL)
+				{
+					cerr << dlerror() << endl;
+					exit(-1);
+				}
+				void *mkr = dlsym(dlib, claz.c_str());
+				if(mkr!=NULL)
+				{
+					FunPtr f =  (FunPtr)mkr;
+					ClassInfo srv = f();
+					args argus;
+					Constructor ctor = srv.getConstructor(argus);
+					Reflector ref;
+					void *_temp = ref.newInstanceGVP(ctor);
+					AuthController* loginc = (AuthController*)_temp;
+					isoAuthRes = loginc->authenticate(req->getRequestParam("_ffead_security_cntxt_username"),
+							req->getRequestParam("_ffead_security_cntxt_password"));
+					if(!isoAuthRes)
+						isContrl = true;
+					userRole = loginc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
+					cout << "login controller called" << endl;
+					ext = getFileExtension(req->getUrl());
+					delete loginc;
+				}
+			}
+			SecureAspect aspect = securityObject.matchesPath(req->getActUrl());
+			if(aspect.path!="")
+			{
+				if(aspect.role==userRole)
+				{
+					req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", userRole);
+					cout << "valid role " << userRole << " for path " << req->getActUrl();
+				}
+				else
+				{
+					res.setStatusCode("401");
+					res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
+					isContrl = true;
+				}
+			}
+		}
 
 		if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"in")!=filterMap.end())
 		{
@@ -832,7 +925,7 @@ void ServiceTask::run()
 			{
 				cout << it->first << " = " << it->second << endl;
 			}
-			if(claz.find("file:")==0)
+			if(claz.find("file:")!=string::npos)
 			{
 				claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
 				cout << "auth handled by file " << claz << endl;
@@ -857,7 +950,7 @@ void ServiceTask::run()
 					cout << "invalid user repo defined" << endl;
 				}
 			}
-			else if(claz.find("class:")==0)
+			else if(claz.find("class:")!=string::npos)
 			{
 				claz = claz.substr(claz.find(":")+1);
 				claz = "getReflectionCIFor" + claz;
@@ -2575,6 +2668,29 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 						}
 					}
 				}
+				else if(eles.at(apps).getTagName()=="security")
+				{
+					ElementList cntrls = eles.at(apps).getChildElements();
+					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
+					{
+						if(cntrls.at(cntn).getTagName()=="login-handler")
+						{
+							string provider = cntrls.at(cntn).getAttribute("provider");
+							string url = cntrls.at(cntn).getAttribute("url");
+							securityObject.loginProvider = provider;
+							securityObject.loginUrl = url;
+						}
+						else if(cntrls.at(cntn).getTagName()=="secure")
+						{
+							string path = cntrls.at(cntn).getAttribute("path");
+							string role = cntrls.at(cntn).getAttribute("role");
+							SecureAspect secureAspect;
+							secureAspect.path = path;
+							secureAspect.role = role;
+							securityObject.secures.push_back(secureAspect);
+						}
+					}
+				}
 			}
 		}
 		Mapping* mapping = new Mapping;
@@ -2965,14 +3081,18 @@ int main(int argc, char* argv[])
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
     string PORT = srprps["PORT_NO"];
+    string IP_ADDRES = srprps["IP_ADDR"];
     const char *ip_addr = NULL;
-	if(IP!="")
-		ip_addr = IP.c_str();
+	if(IP_ADDRES!="")
+		ip_addr = IP_ADDRES.c_str();
     if ((rv = getaddrinfo(ip_addr, &PORT[0], &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
-
+    if(IP_ADDRES!="")
+    	IP_ADDRESS = IP_ADDRES + ":" + PORT;
+    else
+    	IP_ADDRESS = "localhost:" + PORT;
     // loop through all the results and bind to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,

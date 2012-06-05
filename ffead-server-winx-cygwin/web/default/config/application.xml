@@ -18,6 +18,13 @@
 		<filter class="DefaultIOFilter" type="in"/>
 		<filter class="DefaultIOFilter" type="out"/>
 	</filters>
+	<security>
+		<login-handler provider="file:users" url="login.html"/>
+		<!--login-handler provider="class:DefaultLoginHandler"/-->
+		<!--login-handler provider="db:DefaultLoginHandler"/-->
+		<secure path="*" role="ROLE_ANONYMOUS"/>
+		<secure path="/rest/*" role="ROLE_USER"/>
+	</security>
 	<restcontrollers>
 		<restcontroller class="DefaultRestController" urlpath="/rest/path/" name="rest1">
 			<restfunction name="addNumbers" alias="add" meth="GET">
