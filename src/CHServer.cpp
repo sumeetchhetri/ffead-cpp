@@ -1745,7 +1745,7 @@ void ServiceTask::run()
 		sessionchanged |= req->getSession()->isDirty();
 		if(req->getConnection()!="")
 			res.setConnection("close");
-		//createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfo()["FFEADID"]);
+		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfo()["FFEADID"]);
 		h1 = res.generateResponse();
 		//cout << h1 << endl;
 		if(isSSLEnabled)
