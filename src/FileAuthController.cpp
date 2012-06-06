@@ -50,6 +50,27 @@ bool FileAuthController::authenticate(string username,string password)
 	return false;
 }
 
+bool FileAuthController::authenticateSecurity(string username,string password)
+{
+	password = treat_password(password);
+	string userstamp = (username + delimiter + password + delimiter);
+	ifstream ifs(this->filename.c_str());
+	if(ifs.is_open())
+	{
+		string temp;
+		while(getline(ifs, temp))
+		{
+			if(temp.find(userstamp)!=string::npos)
+			{
+				ifs.close();
+				return true;
+			}
+		}
+		ifs.close();
+	}
+	return false;
+}
+
 bool FileAuthController::getPassword(string username,string &passwd)
 {
 	string userstamp = (username + delimiter);
@@ -84,7 +105,7 @@ string FileAuthController::getUserRole(string username)
 		{
 			if(temp.find(userstamp)!=string::npos)
 			{
-				userstamp = userstamp.substr(userstamp.find_last_of(":")+1);
+				userstamp = temp.substr(temp.find_last_of(":")+1);
 				ifs.close();
 				break;
 			}

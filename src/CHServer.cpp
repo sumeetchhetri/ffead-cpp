@@ -780,7 +780,7 @@ void ServiceTask::run()
 		string actUrl = serverUrl + req->getActUrl();
 		string userRole = "ROLE_ANONYMOUS";
 		cout << actUrl << endl;
-		if(securityObject.isLoginConfigured() && !securityObject.isLoginPage(serverUrl, actUrl) && !securityObject.isLoginUrl(serverUrl, actUrl) &&
+		if(securityObject.isLoginConfigured() && !securityObject.isLoginPage(serverUrl, actUrl) &&
 				(req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")==""
 						|| req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")=="ROLE_ANONYMOUS"))
 		{
@@ -789,23 +789,24 @@ void ServiceTask::run()
 			res.setLocation(serverUrl+"/"+securityObject.loginUrl);
 			isContrl = true;
 		}
-		else if(securityObject.isLoginConfigured() && securityObject.isLoginUrl(serverUrl, actUrl)
-				&& req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")=="")
+		else if(securityObject.isLoginConfigured() && securityObject.isLoginPage(serverUrl, actUrl)
+				&& req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")==""
+						&& req->getRequestParam("_ffead_security_cntxt_username")!="")
 		{
 			claz = securityObject.loginProvider;
-			AuthController *authc;
 			if(claz.find("file:")!=string::npos)
 			{
 				claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
 				cout << "auth handled by file " << claz << endl;
-				authc = new FileAuthController(claz,":");
+				FileAuthController* authc = new FileAuthController(claz,":");
 				if(authc->isInitialized())
 				{
-					if(authc->authenticate(req->getRequestParam("_ffead_security_cntxt_username"),
+					if(authc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
 							req->getRequestParam("_ffead_security_cntxt_password")))
 					{
-						cout << "valid user" << endl;
 						userRole = authc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
+						cout << "valid user " << req->getRequestParam("_ffead_security_cntxt_username")
+								<< ", role is "  << userRole << endl;
 					}
 					else
 					{
@@ -819,6 +820,7 @@ void ServiceTask::run()
 				{
 					cout << "invalid user repo defined" << endl;
 				}
+				delete authc;
 			}
 			else if(claz.find("class:")!=string::npos)
 			{
@@ -840,13 +842,21 @@ void ServiceTask::run()
 					Reflector ref;
 					void *_temp = ref.newInstanceGVP(ctor);
 					AuthController* loginc = (AuthController*)_temp;
-					isoAuthRes = loginc->authenticate(req->getRequestParam("_ffead_security_cntxt_username"),
-							req->getRequestParam("_ffead_security_cntxt_password"));
-					if(!isoAuthRes)
+					if(loginc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
+						req->getRequestParam("_ffead_security_cntxt_password")))
+					{
+						userRole = loginc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
+						cout << "valid user " << req->getRequestParam("_ffead_security_cntxt_username")
+								<< ", role is "  << userRole << endl;
+					}
+					else
+					{
+						cout << "invalid user" << endl;
+						res.setStatusCode("401");
+						res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
 						isContrl = true;
-					userRole = loginc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
+					}
 					cout << "login controller called" << endl;
-					ext = getFileExtension(req->getUrl());
 					delete loginc;
 				}
 			}
