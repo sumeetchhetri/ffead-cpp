@@ -33,7 +33,7 @@ SharedData* SharedData::shared_instance = NULL;
 string servd;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap;
 static resFuncMap rstCntMap;
-static Security securityObject;
+static map<string, Security> securityObjectMap;
 static map<string, Element> formMap;
 static map<string, vector<string> > filterMap;
 static string resourcePath;
@@ -57,6 +57,7 @@ static boost::mutex m_mutex,p_mutex;
 void writeToSharedMemeory(string sessionId, string value,bool napp)
 {
 	string filen = servd+"/tmp/"+sessionId+".sess";
+	cout << "saving session to file " << filen << endl;
 	ofstream ofs;
 	if(napp)
 		ofs.open(filen.c_str());
@@ -93,6 +94,7 @@ map<string,string> readFromSharedMemeory(string sessionId)
 			boost::replace_all(results1.at(0),"%3D","=");
 			valss[results1.at(0)] = "true";
 		}
+		cout << "read key/value pair " << results1.at(0) << " = " << valss[results1.at(0)] << endl;
 	}
 	return valss;
 }
@@ -717,11 +719,13 @@ void ServiceTask::run()
 		}
 		if(req->hasCookie())
 		{
+			cout << "has the session id" << endl;
 			if(!sessatserv)
 				req->getSession()->setSessionAttributes(req->getCookieInfo());
 			else
 			{
-				string id = req->getCookieInfo()["FFEADID"];
+				string id = req->getCookieInfoAttribute("FFEADID");
+				cout << id << endl;
 				map<string,string> values = readFromSharedMemeory(id);
 				req->getSession()->setSessionAttributes(values);
 			}
@@ -778,97 +782,103 @@ void ServiceTask::run()
 		if(req->getCntxt_name()!="default")
 			serverUrl += "/" + req->getCntxt_name();
 		string actUrl = serverUrl + req->getActUrl();
-		string userRole = "ROLE_ANONYMOUS";
-		cout << actUrl << endl;
-		if(securityObject.isLoginConfigured() && !securityObject.isLoginPage(serverUrl, actUrl) &&
-				(req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")==""
-						|| req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")=="ROLE_ANONYMOUS"))
+		string userRole = req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE");
+		if(userRole=="")
 		{
-			res.setStatusCode("307");
-			res.setStatusMsg("Temporary Redirect");
-			res.setLocation(serverUrl+"/"+securityObject.loginUrl);
-			isContrl = true;
+			userRole = "ROLE_ANONYMOUS";
 		}
-		else if(securityObject.isLoginConfigured() && securityObject.isLoginPage(serverUrl, actUrl)
-				&& req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE")==""
-						&& req->getRequestParam("_ffead_security_cntxt_username")!="")
+		cout << actUrl << endl;
+		Security securityObject = securityObjectMap[req->getCntxt_name()];
+		SecureAspect aspect = securityObject.matchesPath(req->getActUrl());
+		if(securityObject.isLoginConfigured() && ((aspect.path!="" && aspect.role!="ROLE_ANONYMOUS")
+				|| (securityObject.isLoginPage(serverUrl, actUrl) && req->getRequestParam("_ffead_security_cntxt_username")!="")))
 		{
-			claz = securityObject.loginProvider;
-			if(claz.find("file:")!=string::npos)
+			cout << "matched secure path " << aspect.path << ", which requires role " << aspect.role << endl;
+			if(!securityObject.isLoginPage(serverUrl, actUrl) && aspect.role!=userRole)
 			{
-				claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
-				cout << "auth handled by file " << claz << endl;
-				FileAuthController* authc = new FileAuthController(claz,":");
-				if(authc->isInitialized())
+				res.setStatusCode("307");
+				res.setStatusMsg("Temporary Redirect");
+				res.setLocation(serverUrl+"/"+securityObject.loginUrl);
+				isContrl = true;
+			}
+			else if(securityObject.isLoginPage(serverUrl, actUrl) && req->getRequestParam("_ffead_security_cntxt_username")!="")
+			{
+				claz = securityObject.loginProvider;
+				bool validUser = false;
+				if(claz.find("file:")!=string::npos)
 				{
-					if(authc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
+					claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
+					cout << "auth handled by file " << claz << endl;
+					FileAuthController* authc = new FileAuthController(claz,":");
+					if(authc->isInitialized())
+					{
+						if(authc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
+								req->getRequestParam("_ffead_security_cntxt_password")))
+						{
+							userRole = authc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
+							cout << "valid user " << req->getRequestParam("_ffead_security_cntxt_username")
+									<< ", role is "  << userRole << endl;
+							validUser = true;
+						}
+						else
+						{
+							cout << "invalid user" << endl;
+							res.setStatusCode("401");
+							res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
+							isContrl = true;
+						}
+					}
+					else
+					{
+						cout << "invalid user repo defined" << endl;
+					}
+					delete authc;
+				}
+				else if(claz.find("class:")!=string::npos)
+				{
+					claz = claz.substr(claz.find(":")+1);
+					claz = "getReflectionCIFor" + claz;
+					cout << "auth handled by class " << claz << endl;
+					if(dlib == NULL)
+					{
+						cerr << dlerror() << endl;
+						exit(-1);
+					}
+					void *mkr = dlsym(dlib, claz.c_str());
+					if(mkr!=NULL)
+					{
+						FunPtr f =  (FunPtr)mkr;
+						ClassInfo srv = f();
+						args argus;
+						Constructor ctor = srv.getConstructor(argus);
+						Reflector ref;
+						void *_temp = ref.newInstanceGVP(ctor);
+						AuthController* loginc = (AuthController*)_temp;
+						if(loginc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
 							req->getRequestParam("_ffead_security_cntxt_password")))
-					{
-						userRole = authc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
-						cout << "valid user " << req->getRequestParam("_ffead_security_cntxt_username")
-								<< ", role is "  << userRole << endl;
-					}
-					else
-					{
-						cout << "invalid user" << endl;
-						res.setStatusCode("401");
-						res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
-						isContrl = true;
+						{
+							userRole = loginc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
+							cout << "valid user " << req->getRequestParam("_ffead_security_cntxt_username")
+									<< ", role is "  << userRole << endl;
+							validUser = true;
+						}
+						else
+						{
+							cout << "invalid user" << endl;
+							res.setStatusCode("401");
+							res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
+							isContrl = true;
+						}
+						cout << "login controller called" << endl;
+						delete loginc;
 					}
 				}
-				else
-				{
-					cout << "invalid user repo defined" << endl;
-				}
-				delete authc;
-			}
-			else if(claz.find("class:")!=string::npos)
-			{
-				claz = claz.substr(claz.find(":")+1);
-				claz = "getReflectionCIFor" + claz;
-				cout << "auth handled by class " << claz << endl;
-				if(dlib == NULL)
-				{
-					cerr << dlerror() << endl;
-					exit(-1);
-				}
-				void *mkr = dlsym(dlib, claz.c_str());
-				if(mkr!=NULL)
-				{
-					FunPtr f =  (FunPtr)mkr;
-					ClassInfo srv = f();
-					args argus;
-					Constructor ctor = srv.getConstructor(argus);
-					Reflector ref;
-					void *_temp = ref.newInstanceGVP(ctor);
-					AuthController* loginc = (AuthController*)_temp;
-					if(loginc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
-						req->getRequestParam("_ffead_security_cntxt_password")))
-					{
-						userRole = loginc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
-						cout << "valid user " << req->getRequestParam("_ffead_security_cntxt_username")
-								<< ", role is "  << userRole << endl;
-					}
-					else
-					{
-						cout << "invalid user" << endl;
-						res.setStatusCode("401");
-						res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
-						isContrl = true;
-					}
-					cout << "login controller called" << endl;
-					delete loginc;
-				}
-			}
-			SecureAspect aspect = securityObject.matchesPath(req->getActUrl());
-			if(aspect.path!="")
-			{
-				if(aspect.role==userRole)
+				if(validUser && (aspect.role==userRole || securityObject.isLoginPage(serverUrl, actUrl)))
 				{
 					req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", userRole);
 					cout << "valid role " << userRole << " for path " << req->getActUrl();
 				}
-				else
+				else if(!validUser)
 				{
 					res.setStatusCode("401");
 					res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
@@ -1066,7 +1076,7 @@ void ServiceTask::run()
 								", against url: " << it->first << endl;
 						for (int var = 0; var < prsiz; var++)
 						{
-							cout << "loop - " << pthwofiletemp << endl;
+							//cout << "loop - " << pthwofiletemp << endl;
 							string valsvv(pthwofiletemp.substr(pthwofiletemp.find_last_of("/")+1));
 							pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.find_last_of("/"));
 							valss.push_back(valsvv);
@@ -1755,7 +1765,7 @@ void ServiceTask::run()
 		sessionchanged |= req->getSession()->isDirty();
 		if(req->getConnection()!="")
 			res.setConnection("close");
-		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfo()["FFEADID"]);
+		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfoAttribute("FFEADID"));
 		h1 = res.generateResponse();
 		//cout << h1 << endl;
 		if(isSSLEnabled)
@@ -2687,17 +2697,24 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 						{
 							string provider = cntrls.at(cntn).getAttribute("provider");
 							string url = cntrls.at(cntn).getAttribute("url");
+							Security securityObject;
 							securityObject.loginProvider = provider;
 							securityObject.loginUrl = url;
+							securityObjectMap[name] = securityObject;
 						}
 						else if(cntrls.at(cntn).getTagName()=="secure")
 						{
-							string path = cntrls.at(cntn).getAttribute("path");
-							string role = cntrls.at(cntn).getAttribute("role");
-							SecureAspect secureAspect;
-							secureAspect.path = path;
-							secureAspect.role = role;
-							securityObject.secures.push_back(secureAspect);
+							if(securityObjectMap.find(name)!=securityObjectMap.end())
+							{
+								Security securityObject = securityObjectMap[name];
+								string path = cntrls.at(cntn).getAttribute("path");
+								string role = cntrls.at(cntn).getAttribute("role");
+								SecureAspect secureAspect;
+								secureAspect.path = path;
+								secureAspect.role = role;
+								securityObject.secures.push_back(secureAspect);
+								securityObjectMap[name] = securityObject;
+							}
 						}
 					}
 				}
@@ -3047,6 +3064,7 @@ int main(int argc, char* argv[])
 	string webpath = serverRootDirectory + "web/";
 	resourcePath = respath;
 
+	servd = serverRootDirectory;
 	//string logf = serverRootDirectory+"/server.log";
 	//logfile.open(logf.c_str());
 	string logp = respath+"/log.prop";

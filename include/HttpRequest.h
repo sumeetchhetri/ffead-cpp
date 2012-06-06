@@ -152,8 +152,26 @@ public:
     string toString();
     bool hasCookie() const{return this->cookie;}
     map<int,string> getAuthOrderinfo() const{return authorderinf;}
-    map<int,string> getReqOrderinfo() const{return reqorderinf;}
-    map<string,string> getCookieInfo() const{return cookieattrs;}
+	map<int,string> getReqOrderinfo() const{return reqorderinf;}
+	map<string,string> getCookieInfo() const{return cookieattrs;}
+    string getAuthOrderinfoAttribute(int key)
+    {
+    	if(authorderinf.find(key)!=authorderinf.end())
+			return authorderinf[key];
+		else return "";
+    }
+    string getReqOrderinfoAttribute(int key)
+    {
+    	if(reqorderinf.find(key)!=reqorderinf.end())
+			return reqorderinf[key];
+		else return "";
+    }
+    string getCookieInfoAttribute(string key)
+    {
+    	if(cookieattrs.find(key)!=cookieattrs.end())
+    		return cookieattrs[key];
+    	else return "";
+    }
 
 };
 
