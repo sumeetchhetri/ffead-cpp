@@ -211,22 +211,24 @@ public:
 		for (int var = 0; var < secures.size(); ++var) {
 			SecureAspect secureAspect = secures.at(var);
 			string pathurl = secureAspect.path;
+			cout << "checking security path " << pathurl << " against url " << url << endl;
 			if(pathurl=="*")
 			{
-				return secureAspect;
+				aspect = secureAspect;
+				continue;
 			}
 			if(pathurl.find("*")==pathurl.length()-1)
 			{
-				pathurl = pathurl.substr(0, url.length()-1);
+				pathurl = pathurl.substr(0, pathurl.length()-1);
 				pathval = true;
 			}
 			if(pathval && url.find(pathurl)!=string::npos)
 			{
-				return secureAspect;
+				aspect = secureAspect;
 			}
 			else if(!pathval && pathurl==url)
 			{
-				return secureAspect;
+				aspect = secureAspect;
 			}
 		}
 		return aspect;
