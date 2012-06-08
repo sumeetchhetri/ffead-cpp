@@ -188,6 +188,7 @@ public:
 	vector<SecureAspect> secures;
 	string loginProvider;
 	string loginUrl;
+	string welocmeFile;
 	bool isLoginConfigured()
 	{
 		return (loginProvider!="" && loginUrl!="");
