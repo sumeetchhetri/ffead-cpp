@@ -20,6 +20,7 @@
 	</filters>
 	<security>
 		<login-handler provider="file:users" url="login.html"/>
+		<welcome file="index.html"/>
 		<!--login-handler provider="class:DefaultLoginHandler"/-->
 		<!--login-handler provider="db:DefaultLoginHandler"/-->
 		<secure path="*" role="ROLE_ANONYMOUS"/>

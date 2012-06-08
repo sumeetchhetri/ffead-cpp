@@ -1181,7 +1181,11 @@ string HttpRequest::getFile() const
 
 void HttpRequest::setFile(string file)
 {
-	this->url = this->cntxt_root + "/" + file;
+	cout << this->file << endl;
+	//this->url = this->cntxt_root + "/" + file;
+	int fst = this->url.find_last_of(this->file) - this->file.length() + 1;
+	this->url = this->url.substr(0, fst) +  file;
+	cout << this->url << endl;
 	this->file = file;
 }
 

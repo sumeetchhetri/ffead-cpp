@@ -876,10 +876,15 @@ void ServiceTask::run()
 				if(validUser && (aspect.role==userRole || securityObject.isLoginPage(serverUrl, actUrl)))
 				{
 					req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", userRole);
+					res.setStatusCode("307");
+					res.setStatusMsg("Temporary Redirect");
+					res.setLocation(serverUrl+"/"+securityObject.welocmeFile);
 					cout << "valid role " << userRole << " for path " << req->getActUrl();
+					isContrl = true;
 				}
 				else if(!validUser)
 				{
+					req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", "ROLE_ANONYMOUS");
 					res.setStatusCode("401");
 					res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
 					isContrl = true;
@@ -2713,6 +2718,16 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 								secureAspect.path = path;
 								secureAspect.role = role;
 								securityObject.secures.push_back(secureAspect);
+								securityObjectMap[name] = securityObject;
+							}
+						}
+						else if(cntrls.at(cntn).getTagName()=="welcome")
+						{
+							string welcomeFile = cntrls.at(cntn).getAttribute("file");
+							if(securityObjectMap.find(name)!=securityObjectMap.end())
+							{
+								Security securityObject = securityObjectMap[name];
+								securityObject.welocmeFile = welcomeFile;
 								securityObjectMap[name] = securityObject;
 							}
 						}
