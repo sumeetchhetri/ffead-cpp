@@ -150,6 +150,27 @@ public:
     void setAuthinfo(map<string,string>);
     string buildRequest(const char* key,const char* value);
     string toString();
+    string toPHPVariablesString(string);
+	string toPerlVariablesString();
+	string toRubyVariablesString();
+	string toPythonVariablesString();
+	string toLuaVariablesString();
+	string toNodejsVariablesString();
+	RMap getQueryParams() const {
+		return queryParams;
+	}
+
+	void setQueryParams(RMap queryParams) {
+		this->queryParams = queryParams;
+	}
+	void setQueryParam(string name,string value){this->queryParams[name] = value;}
+	string getQueryParam(string key)
+	{
+		if(this->queryParams.find(key)!=this->queryParams.end())
+			return this->queryParams[key];
+		return "";
+	}
+	RMap getAllParams();
     bool hasCookie() const{return this->cookie;}
     map<int,string> getAuthOrderinfo() const{return authorderinf;}
 	map<int,string> getReqOrderinfo() const{return reqorderinf;}

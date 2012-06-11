@@ -33,6 +33,7 @@ SharedData* SharedData::shared_instance = NULL;
 string servd;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap;
 static resFuncMap rstCntMap;
+static map<string, string> handoffs;
 static map<string, Security> securityObjectMap;
 static map<string, Element> formMap;
 static map<string, vector<string> > filterMap;
@@ -53,6 +54,76 @@ void *dlib = NULL;
 static string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_auth_mode,srv_auth_file,IP_ADDRESS;
 typedef map<string,string> sessionMap;
 static boost::mutex m_mutex,p_mutex;
+
+static int popenRWE(int *rwepipe, const char *exe, const char *const argv[],string tmpf)
+{
+	int in[2];
+	int out[2];
+	int err[2];
+	int pid;
+	int rc;
+
+	rc = pipe(in);
+	if (rc<0)
+		goto error_in;
+
+	rc = pipe(out);
+	if (rc<0)
+		goto error_out;
+
+	rc = pipe(err);
+	if (rc<0)
+		goto error_err;
+
+	pid = fork();
+	if (pid > 0) { // parent
+		close(in[0]);
+		close(out[1]);
+		close(err[1]);
+		rwepipe[0] = in[1];
+		rwepipe[1] = out[0];
+		rwepipe[2] = err[0];
+		return pid;
+	} else if (pid == 0) { // child
+		close(in[1]);
+		close(out[0]);
+		close(err[0]);
+		close(0);
+		dup(in[0]);
+		close(1);
+		dup(out[1]);
+		close(2);
+		dup(err[1]);cout << tmpf << endl;
+		chdir(tmpf.c_str());
+		execvp(exe, (char**)argv);
+		exit(1);
+	} else
+		goto error_fork;
+
+	return pid;
+
+error_fork:
+	close(err[0]);
+	close(err[1]);
+error_err:
+	close(out[0]);
+	close(out[1]);
+error_out:
+	close(in[0]);
+	close(in[1]);
+error_in:
+	return -1;
+}
+
+static int pcloseRWE(int pid, int *rwepipe)
+{
+	int rc, status;
+	close(rwepipe[0]);
+	close(rwepipe[1]);
+	close(rwepipe[2]);
+	rc = waitpid(pid, &status, 0);
+	return status;
+}
 
 void writeToSharedMemeory(string sessionId, string value,bool napp)
 {
@@ -1653,6 +1724,388 @@ void ServiceTask::run()
 				//res.setContent_len(boost::lexical_cast<string>(content.length()));
 			}
 		}
+		else if(ext==".php")
+		{
+			int pipe[3];
+			int pid;
+			string def;
+			string tmpf = "/temp/";
+			string filen;
+			if(handoffs.find(req->getCntxt_name())!=handoffs.end())
+			{
+				def = handoffs[req->getCntxt_name()];
+				tmpf = "/";
+			}
+			string phpcnts = req->toPHPVariablesString(def);
+			//cout << phpcnts << endl;
+			filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".php";
+			tmpf = req->getCntxt_root() + tmpf;
+
+			AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
+			const char *const args[] = {
+					"php",
+					filen.c_str(),
+					NULL
+			};
+			pid = popenRWE(pipe, args[0], args, tmpf);
+
+			char buffer[1024];
+			memset(buffer, 0, 1024);
+			int length;
+			string content;
+			while ((length = read(pipe[1], buffer, 1024)) != 0)
+			{
+				//cout << length << endl;
+				string data(buffer, length);
+				//cout << data << endl;
+				content += data;
+				memset(buffer, 0, 1024);
+			}
+			memset(buffer, 0, 1024);
+			if(content=="")
+			{
+				while ((length = read(pipe[2], buffer, 1024)) != 0)
+				{
+					//cout << length << endl;
+					string data(buffer, length);
+					//cout << data << endl;
+					content += data;
+					memset(buffer, 0, 1024);
+				}
+				memset(buffer, 0, 1024);
+			}
+			pcloseRWE(pid, pipe);
+			if((content.length()==0))
+			{
+				res.setStatusCode("404");
+				res.setStatusMsg("Not Found");
+				//res.setContent_len("0");
+			}
+			else
+			{
+				res.setStatusCode("200");
+				res.setStatusMsg("OK");
+				res.setContent_type(props[".html"]);
+				res.setContent_str(content);
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			}
+		}
+		else if(ext==".pl")
+		{
+			int pipe[3];
+			int pid;
+
+			string phpcnts = req->toPerlVariablesString();
+			//cout << phpcnts << endl;
+			string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".pl";
+			//cout << tmpf << endl;
+			string plfile = req->getCntxt_root()+"/scripts/perl/"+req->getFile();
+			ifstream infile(plfile.c_str());
+			string xml;
+			if(infile.is_open())
+			{
+				while(getline(infile, xml))
+				{
+					phpcnts.append(xml+"\n");
+				}
+			}
+			infile.close();
+			AfcUtil::writeTofile(tmpf, phpcnts, true);
+			const char *const args[] = {
+					"perl",
+					tmpf.c_str(),
+					NULL
+			};
+			pid = popenRWE(pipe, args[0], args, "");
+
+			char buffer[1024];
+			memset(buffer, 0, 1024);
+			int length;
+			string content;
+			while ((length = read(pipe[1], buffer, 1024)) != 0)
+			{
+				//cout << length << endl;
+				string data(buffer, length);
+				//cout << data << endl;
+				content += data;
+				memset(buffer, 0, 1024);
+			}
+			memset(buffer, 0, 1024);
+			if(content=="")
+			{
+				while ((length = read(pipe[2], buffer, 1024)) != 0)
+				{
+					//cout << length << endl;
+					string data(buffer, length);
+					//cout << data << endl;
+					content += data;
+					memset(buffer, 0, 1024);
+				}
+				memset(buffer, 0, 1024);
+			}
+			pcloseRWE(pid, pipe);
+			if((content.length()==0))
+			{
+				res.setStatusCode("404");
+				res.setStatusMsg("Not Found");
+				//res.setContent_len("0");
+			}
+			else
+			{
+				res.setStatusCode("200");
+				res.setStatusMsg("OK");
+				res.setContent_type(props[".html"]);
+				res.setContent_str(content);
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			}
+		}
+		else if(ext==".rb")
+		{
+			int pipe[3];
+			int pid;
+
+			string phpcnts = req->toRubyVariablesString();
+			//cout << phpcnts << endl;
+			string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".rb";
+			//cout << tmpf << endl;
+			AfcUtil::writeTofile(tmpf, phpcnts, true);
+			const char *const args[] = {
+					"ruby",
+					tmpf.c_str(),
+					NULL
+			};
+			pid = popenRWE(pipe, args[0], args, "");
+
+			char buffer[1024];
+			memset(buffer, 0, 1024);
+			int length;
+			string content;
+			while ((length = read(pipe[1], buffer, 1024)) != 0)
+			{
+				//cout << length << endl;
+				string data(buffer, length);
+				//cout << data << endl;
+				content += data;
+				memset(buffer, 0, 1024);
+			}
+			memset(buffer, 0, 1024);
+			if(content=="")
+			{
+				while ((length = read(pipe[2], buffer, 1024)) != 0)
+				{
+					//cout << length << endl;
+					string data(buffer, length);
+					//cout << data << endl;
+					content += data;
+					memset(buffer, 0, 1024);
+				}
+				memset(buffer, 0, 1024);
+			}
+
+			pcloseRWE(pid, pipe);
+			if((content.length()==0))
+			{
+				res.setStatusCode("404");
+				res.setStatusMsg("Not Found");
+				//res.setContent_len("0");
+			}
+			else
+			{
+				res.setStatusCode("200");
+				res.setStatusMsg("OK");
+				res.setContent_type(props[".html"]);
+				res.setContent_str(content);
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			}
+		}
+		else if(ext==".py")
+		{
+			int pipe[3];
+			int pid;
+
+			string phpcnts = req->toPythonVariablesString();
+			//cout << phpcnts << endl;
+			string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".py";
+			//cout << tmpf << endl;
+			string plfile = req->getCntxt_root()+"/scripts/python/"+req->getFile();
+			ifstream infile(plfile.c_str());
+			string xml;
+			if(infile.is_open())
+			{
+				while(getline(infile, xml))
+				{
+					phpcnts.append(xml+"\n");
+				}
+			}
+			infile.close();
+			AfcUtil::writeTofile(tmpf, phpcnts, true);
+			const char *const args[] = {
+					"python",
+					tmpf.c_str(),
+					NULL
+			};
+			pid = popenRWE(pipe, args[0], args, "");
+
+			char buffer[1024];
+			memset(buffer, 0, 1024);
+			int length;
+			string content;
+			while ((length = read(pipe[1], buffer, 1024)) != 0)
+			{
+				//cout << length << endl;
+				string data(buffer, length);
+				//cout << data << endl;
+				content += data;
+				memset(buffer, 0, 1024);
+			}
+			memset(buffer, 0, 1024);
+			if(content=="")
+			{
+				while ((length = read(pipe[2], buffer, 1024)) != 0)
+				{
+					//cout << length << endl;
+					string data(buffer, length);
+					//cout << data << endl;
+					content += data;
+					memset(buffer, 0, 1024);
+				}
+				memset(buffer, 0, 1024);
+			}
+
+			pcloseRWE(pid, pipe);
+			if((content.length()==0))
+			{
+				res.setStatusCode("404");
+				res.setStatusMsg("Not Found");
+				//res.setContent_len("0");
+			}
+			else
+			{
+				res.setStatusCode("200");
+				res.setStatusMsg("OK");
+				res.setContent_type(props[".html"]);
+				res.setContent_str(content);
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			}
+		}
+		else if(ext==".lua")
+		{
+			int pipe[3];
+			int pid;
+
+			string phpcnts = req->toLuaVariablesString();
+			//cout << phpcnts << endl;
+			string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".lua";
+			//cout << tmpf << endl;
+			AfcUtil::writeTofile(tmpf, phpcnts, true);
+			const char *const args[] = {
+					"lua",
+					tmpf.c_str(),
+					NULL
+			};
+			pid = popenRWE(pipe, args[0], args, "");
+
+			char buffer[1024];
+			memset(buffer, 0, 1024);
+			int length;
+			string content;
+			while ((length = read(pipe[1], buffer, 1024)) != 0)
+			{
+				//cout << length << endl;
+				string data(buffer, length);
+				//cout << data << endl;
+				content += data;
+				memset(buffer, 0, 1024);
+			}
+			memset(buffer, 0, 1024);
+			if(content=="")
+			{
+				while ((length = read(pipe[2], buffer, 1024)) != 0)
+				{
+					//cout << length << endl;
+					string data(buffer, length);
+					//cout << data << endl;
+					content += data;
+					memset(buffer, 0, 1024);
+				}
+				memset(buffer, 0, 1024);
+			}
+
+			pcloseRWE(pid, pipe);
+			if((content.length()==0))
+			{
+				res.setStatusCode("404");
+				res.setStatusMsg("Not Found");
+				//res.setContent_len("0");
+			}
+			else
+			{
+				res.setStatusCode("200");
+				res.setStatusMsg("OK");
+				res.setContent_type(props[".html"]);
+				res.setContent_str(content);
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			}
+		}
+		else if(ext==".njs")
+		{
+			int pipe[3];
+			int pid;
+
+			string phpcnts = req->toNodejsVariablesString();
+			//cout << phpcnts << endl;
+			string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".njs";
+			//cout << tmpf << endl;
+			AfcUtil::writeTofile(tmpf, phpcnts, true);
+			const char *const args[] = {
+					"node",
+					tmpf.c_str(),
+					NULL
+			};
+			pid = popenRWE(pipe, args[0], args, "");
+
+			char buffer[1024];
+			memset(buffer, 0, 1024);
+			int length;
+			string content;
+			while ((length = read(pipe[1], buffer, 1024)) != 0)
+			{
+				//cout << length << endl;
+				string data(buffer, length);
+				//cout << data << endl;
+				content += data;
+				memset(buffer, 0, 1024);
+			}
+			memset(buffer, 0, 1024);
+			if(content=="")
+			{
+				while ((length = read(pipe[2], buffer, 1024)) != 0)
+				{
+					//cout << length << endl;
+					string data(buffer, length);
+					//cout << data << endl;
+					content += data;
+					memset(buffer, 0, 1024);
+				}
+				memset(buffer, 0, 1024);
+			}
+
+			pcloseRWE(pid, pipe);
+			if((content.length()==0))
+			{
+				res.setStatusCode("404");
+				res.setStatusMsg("Not Found");
+				//res.setContent_len("0");
+			}
+			else
+			{
+				res.setStatusCode("200");
+				res.setStatusMsg("OK");
+				res.setContent_type(props[".html"]);
+				res.setContent_str(content);
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			}
+		}
 		else
 		{
 			cout << "html page requested" <<endl;
@@ -2401,7 +2854,7 @@ pid_t createChildMonitProcess(int sp[])
 
 strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string pubpath,string respath)
 {
-	strVec all,dcps,afcd,appf,wspath,compnts,cmpnames;
+	strVec all,dcps,afcd,appf,wspath,compnts,cmpnames,handoffVec;
 	string includeRef;
 	TemplateEngine templ;
 	Context cntxt;
@@ -2441,6 +2894,7 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 			}
 		}
 	}
+	string rundyncontent;
 	for(unsigned int var=0;var<webdirs.size();var++)
 	{
 		//cout <<  webdirs.at(0) << flush;
@@ -2452,6 +2906,7 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 
 		string name = webdirs1.at(var);
 		boost::replace_all(name,"/","");
+		rundyncontent += "cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/"+name+"/public/\n";
 		cntMap[name] = "true";
 		listi(dcppath,".dcp",true,dcps);
 		listi(cmppath,".cmp",true,compnts);
@@ -2733,6 +3188,22 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 						}
 					}
 				}
+				else if(eles.at(apps).getTagName()=="handoffs")
+				{
+					ElementList cntrls = eles.at(apps).getChildElements();
+					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
+					{
+						if(cntrls.at(cntn).getTagName()=="handoff")
+						{
+							string app = cntrls.at(cntn).getAttribute("app");
+							string def = cntrls.at(cntn).getAttribute("default");
+							string ext = cntrls.at(cntn).getAttribute("ext");
+							handoffs[app] = def;
+							handoffs[app+"extension"] = ext;
+							handoffVec.push_back("-l"+ app+" ");
+						}
+					}
+				}
 			}
 		}
 		Mapping* mapping = new Mapping;
@@ -2943,6 +3414,10 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 		cmpnames.push_back(file);
 		cout << endl<< compnts.at(var1) <<endl;
 	}
+	for (unsigned int cntn = 0; cntn < handoffVec.size(); cntn++)
+	{
+		boost::replace_first(libs, handoffVec.at(cntn), "");
+	}
 	cout << endl<< "done generating compoenent code" <<endl;
 	string ret = ref.generateClassDefinitionsAll(all,includeRef);
 	AfcUtil::writeTofile(rtdcfpath+"ReflectorInterface.cpp",ret,true);
@@ -2974,6 +3449,11 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 	WsUtil wsu;
 	ret = wsu.generateAllWSDL(wspath,respath,wsdlmap);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
+	TemplateEngine engine;
+	cntxt.clear();
+	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
+	string cont = engine.evaluate(respath+"/rundyn_template.sh", cntxt);
+	AfcUtil::writeTofile(respath+"/rundyn.sh", cont, true);
 	return cmpnames;
 }
 
