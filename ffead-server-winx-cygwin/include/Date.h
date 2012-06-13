@@ -39,6 +39,17 @@ class Date {
 	string ss;
 	string dayw;
 	string getMon(string);
+
+	long getDaysInt()
+	{
+		long y = getYear();
+		long m = getMonth();
+		long d = getDay();
+		y = y -1900;
+		m = (m + 9) % 12;
+		y = y - m/10;
+		return 365*y + y/4 - y/100 + y/400 + (m*306 + 5)/10 + ( d - 1 );
+	}
 	long getDays(long y,long m,long d)
 	{
 		y = y -1900;
@@ -71,7 +82,7 @@ class Date {
 		return (g+sfm)*60 + ss;
 	}
 
-	void getDateFromDays(long days)
+	Date getDateFromDays(long days)
 	{
 		long y = (10000*days + 14780)/3652425;
 		long ddd = days - (365*y + y/4 - y/100 + y/400);
@@ -85,6 +96,17 @@ class Date {
 		y = y + (mi + 2)/12 + 1900;
 		long dd = ddd - (mi*306 + 5)/10 + 1;
 		cout << y << " " << mm << " " << dd;
+		Date d;
+		d.setDay(dd);
+		d.setMonth(mm);
+		d.setYear(y);
+		return d;
+	}
+
+	Date addDays(long days)
+	{
+		long g = getDaysInt();
+		return getDateFromDays(g+days);
 	}
 
 	void getDateFromHours(long hours)
