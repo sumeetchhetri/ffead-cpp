@@ -40,6 +40,7 @@ static map<string, vector<string> > filterMap;
 static string resourcePath;
 static strVec dcpsss;
 static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone,sessatserv,isCompileEnabled;
+static long sessionTimeout;
 static int thrdpsiz/*,shmid*/;
 static SSL_CTX *ctx;
 static int s_server_session_id_context = 1;
@@ -518,7 +519,7 @@ string getContentStr(string url,string locale,string ext)
     return all;
 }
 
-void createResponse(HttpResponse &res,bool flag,map<string,string> vals,string prevcookid)
+void createResponse(HttpResponse &res,bool flag,map<string,string> vals,string prevcookid, long sessionTimeout)
 {
 	if(flag)
 	{
@@ -526,7 +527,8 @@ void createResponse(HttpResponse &res,bool flag,map<string,string> vals,string p
 		cout << "session object modified " << vals.size() << endl;
 		Date date;
 		string id = boost::lexical_cast<string>(Timer::getCurrentTime());
-		date.setHh(date.getHh()+6);
+		int seconds = sessionTimeout;
+		//date.setHh(date.getHh()+6);
 		DateFormat dformat("ddd, dd-mmm-yyyy hh:mi:ss");
 		map<string,string>::iterator it;
 		for(it=vals.begin();it!=vals.end();it++)
@@ -860,6 +862,11 @@ void ServiceTask::run()
 		}
 		cout << actUrl << endl;
 		Security securityObject = securityObjectMap[req->getCntxt_name()];
+		long sessionTimeoutVar = sessionTimeout;
+		if(securityObject.isLoginConfigured())
+		{
+			sessionTimeoutVar = securityObject.sessTimeout;
+		}
 		SecureAspect aspect = securityObject.matchesPath(req->getActUrl());
 		if(securityObject.isLoginConfigured() && ((aspect.path!="" && aspect.role!="ROLE_ANONYMOUS")
 				|| (securityObject.isLoginPage(serverUrl, actUrl) && req->getRequestParam("_ffead_security_cntxt_username")!="")))
@@ -2223,7 +2230,7 @@ void ServiceTask::run()
 		sessionchanged |= req->getSession()->isDirty();
 		if(req->getConnection()!="")
 			res.setConnection("close");
-		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfoAttribute("FFEADID"));
+		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfoAttribute("FFEADID"), sessionTimeoutVar);
 		h1 = res.generateResponse();
 		//cout << h1 << endl;
 		if(isSSLEnabled)
@@ -3157,9 +3164,16 @@ strVec temporaray(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath
 						{
 							string provider = cntrls.at(cntn).getAttribute("provider");
 							string url = cntrls.at(cntn).getAttribute("url");
+							string sessionTimeoutV = cntrls.at(cntn).getAttribute("sessionTimeout");
 							Security securityObject;
 							securityObject.loginProvider = provider;
 							securityObject.loginUrl = url;
+							try {
+								securityObject.sessTimeout = boost::lexical_cast<long>(sessionTimeoutV);
+							} catch (...) {
+								securityObject.sessTimeout = 3600;
+								cout << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
+							}
 							securityObjectMap[name] = securityObject;
 						}
 						else if(cntrls.at(cntn).getTagName()=="secure")
@@ -3598,7 +3612,15 @@ int main(int argc, char* argv[])
    	}
    	if(srprps["SESS_STATE"]=="server")
    		sessatserv = true;
-
+   	if(srprps["SESS_TIME_OUT"]!="")
+   	{
+   		try {
+   			sessionTimeout = boost::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
+		} catch (...) {
+			sessionTimeout = 3600;
+			cout << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
+		}
+   	}
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
