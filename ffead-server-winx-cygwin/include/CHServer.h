@@ -189,6 +189,7 @@ public:
 	string loginProvider;
 	string loginUrl;
 	string welocmeFile;
+	long sessTimeout;
 	bool isLoginConfigured()
 	{
 		return (loginProvider!="" && loginUrl!="");

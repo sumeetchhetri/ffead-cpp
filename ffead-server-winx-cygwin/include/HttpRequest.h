@@ -24,6 +24,7 @@
 #include "HttpSession.h"
 #include "vector"
 #include "sstream"
+#include "fstream"
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
@@ -44,6 +45,8 @@ public:
 	string type;
 	string value;
 	string fileName;
+	int length;
+	string tmpFileName;
 };
 typedef map<string, FormData> FMap;
 class HttpRequest {
@@ -72,6 +75,7 @@ class HttpRequest {
 	Map attributes;
 	RMap requestParams;
 	FMap requestParamsF;
+	RMap queryParams;
 	HttpSession session;
 	strVec localeInfo;
 	string actUrl;
