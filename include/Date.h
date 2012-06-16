@@ -1,5 +1,5 @@
 /*
-	Copyright 2010, Sumeet Chhetri 
+	Copyright 0, Sumeet Chhetri
   
     Licensed under the Apache License, Version 2.0 (the "License"); 
     you may not use this file except in compliance with the License. 
@@ -34,205 +34,91 @@ class Date {
 	string monthw;
 	string year;
 	string day;
+	int weekday;
 	string hh;
 	string mm;
 	string ss;
 	string dayw;
+	long long nanoseconds;
 	string getMon(string);
-
-	long getDaysInt()
-	{
-		long y = getYear();
-		long m = getMonth();
-		long d = getDay();
-		y = y -1900;
-		m = (m + 9) % 12;
-		y = y - m/10;
-		return 365*y + y/4 - y/100 + y/400 + (m*306 + 5)/10 + ( d - 1 );
-	}
-	long getDays(long y,long m,long d)
-	{
-		y = y -1900;
-		m = (m + 9) % 12;
-		y = y - m/10;
-		return 365*y + y/4 - y/100 + y/400 + (m*306 + 5)/10 + ( d - 1 );
-	}
-
-	long getHours(long y,long m,long d, long hh)
-	{
-		long g = getDays(y,m,d);
-		int hfd = hh/24;
-		hh = hh%24;
-		return (g+hfd)*24 + hh;
-	}
-
-	long getMinutes(long y,long m,long d, long hh, long mi)
-	{
-		long g = getHours(y,m,d,hh);
-		int mfh = mi/60;
-		mi = mi%60;
-		return (g+mfh)*60 + mi;
-	}
-
-	unsigned long long getSeconds(long y,long m,long d, long hh, long mi, long ss)
-	{
-		long g = getMinutes(y,m,d,hh,mi);
-		int sfm = ss/60;
-		ss = ss%60;
-		return (g+sfm)*60 + ss;
-	}
-
-	Date getDateFromDays(long days)
-	{
-		long y = (10000*days + 14780)/3652425;
-		long ddd = days - (365*y + y/4 - y/100 + y/400);
-		if (ddd < 0)
-		{
-			y = y - 1;
-			ddd = days - (365*y + y/4 - y/100 + y/400);
-		}
-		long mi = (100*ddd + 52)/3060;
-		long mm = (mi + 2)%12 + 1;
-		y = y + (mi + 2)/12 + 1900;
-		long dd = ddd - (mi*306 + 5)/10 + 1;
-		cout << y << " " << mm << " " << dd;
-		Date d;
-		d.setDay(dd);
-		d.setMonth(mm);
-		d.setYear(y);
-		return d;
-	}
-
-	Date addDays(long days)
-	{
-		long g = getDaysInt();
-		return getDateFromDays(g+days);
-	}
-
-	void getDateFromHours(long hours)
-	{
-		long days = hours/24;
-		hours = hours%24;
-		long y = (10000*days + 14780)/3652425;
-		long ddd = days - (365*y + y/4 - y/100 + y/400);
-		if (ddd < 0)
-		{
-			y = y - 1;
-			ddd = days - (365*y + y/4 - y/100 + y/400);
-		}
-		long mi = (100*ddd + 52)/3060;
-		long mm = (mi + 2)%12 + 1;
-		y = y + (mi + 2)/12 + 1900;
-		long dd = ddd - (mi*306 + 5)/10 + 1;
-		cout << y << " " << mm << " " << dd << " " << hours;
-	}
-
-	void getDateFromMinutes(long long minutes)
-	{
-		long hours = minutes/60;
-		minutes = minutes%60;
-		long days = hours/24;
-		hours = hours%24;
-		long y = (10000*days + 14780)/3652425;
-		long ddd = days - (365*y + y/4 - y/100 + y/400);
-		if (ddd < 0)
-		{
-			y = y - 1;
-			ddd = days - (365*y + y/4 - y/100 + y/400);
-		}
-		long mi = (100*ddd + 52)/3060;
-		long mm = (mi + 2)%12 + 1;
-		y = y + (mi + 2)/12 + 1900;
-		long dd = ddd - (mi*306 + 5)/10 + 1;
-		cout << y << " " << mm << " " << dd << " " << hours << ":" << minutes;
-	}
-
-	void getDateFromSeconds(long long seconds)
-	{
-		long long minutes = seconds/60;
-		seconds = seconds%60;
-		long hours = minutes/60;
-		minutes = minutes%60;
-		long days = hours/24;
-		hours = hours%24;
-		long y = (10000*days + 14780)/3652425;
-		long ddd = days - (365*y + y/4 - y/100 + y/400);
-		if (ddd < 0)
-		{
-			y = y - 1;
-			ddd = days - (365*y + y/4 - y/100 + y/400);
-		}
-		long mi = (100*ddd + 52)/3060;
-		long mm = (mi + 2)%12 + 1;
-		y = y + (mi + 2)/12 + 1900;
-		long dd = ddd - (mi*306 + 5)/10 + 1;
-		cout << y << " " << mm << " " << dd << " " << hours << ":" << minutes << ":" << seconds <<  "\n" << endl << flush;
-	}
-
-	int test()
-	{
-		unsigned long long gg = getDays(2008,12,31);
-		getDateFromDays(gg);
-		cout << endl;
-		gg = getHours(2008,12,31,12);
-		getDateFromHours(gg);
-		cout << endl;
-		gg = getMinutes(2008,12,31,12,56);
-		getDateFromMinutes(gg);
-		cout << endl;
-		gg = getSeconds(2008,12,31,12,56,56);
-		getDateFromSeconds(gg);
-		return 0;
-	}
+	string getMonFd(string);
+	long getDaysInt();
+	long getDays(long y,long m,long d);
+	long getHours(long y,long m,long d, long hh);
+	long getMinutes(long y,long m,long d, long hh, long mi);
+	unsigned long long getSeconds(long y,long m,long d, long hh, long mi, long ss);
+	Date getDateFromDays(long days);
+	void getDateFromHours(long hours);
+	void getDateFromMinutes(long long minutes);
+	void getDateFromSeconds(long long seconds);
+	void setMonthw(string monthw);
+	void setDayw(string dayw);
+	int getWeekDayVal(string dayName);
+	void setSs(int ss);
+	void setMm(int mm);
+	void setHh(int hh);
+	void setDay(int day);
+	void setYear(int year);
+	void setMonth(int month);
 public:
 	Date();
+	Date(int yyyy,string mmm,int dd);
+	Date(int yyyy,int mm,int dd);
+	Date(int yy,string mmm,int dd,bool);
+	Date(int yy,int mm,int dd,bool);
+	void setTime(int hh,int mi,int ss);
 	virtual ~Date();
     int getMonth();
-    void setMonth(int month);
     string getMonthw() const;
-    void setMonthw(string monthw);
     int getYear() const;
-    void setYear(int year);
     int getDay() const;
-    void setDay(int day);
     int getHh() const;
-    void setHh(int hh);
     int getMm() const;
-    void setMm(int mm);
     int getSs() const;
-    void setSs(int ss);
+	long long getNanoSeconds() const;
     string getDayw() const;
-    void setDayw(string dayw);
     string toString();
     string getDayStr() const;
     string getMonthStr() const;
     string getHhStr() const;
     string getSsStr() const;
+    string getNsStr() const;
     string getMmStr() const;
     string getYearStr() const;
-    void setYearf(string year)
-    {
-    	this->year = year;
-    }
-    void setDayf(string day)
+    int getWeekDay() const;
+    Date addSeconds(long seconds);
+	Date addMinutes(long minutes);
+	Date addHours(long hours);
+	Date addDays(long days);
+	Date addMonths(long months);
+	Date addYears(long years);
+	static bool validateDate(int dd, int mm, int yyyy);
+	static string getDayName(int dd, int mm, int yyyy);
+	int test()
 	{
-		this->day = day;
-	}
-    void setMmf(string month)
-	{
-		this->month = month;
-	}
-    void setHhf(string hh)
-	{
-		this->hh = hh;
-	}
-    void setMif(string mi)
-	{
-		this->mm = mi;
-	}
-    void setSsf(string ss)
-	{
-		this->ss = ss;
+		unsigned long long gg = getDays(2008,12,31);
+		getDateFromDays(gg);
+		gg = getHours(2008,12,31,12);
+		getDateFromHours(gg);
+		gg = getMinutes(2008,12,31,12,56);
+		getDateFromMinutes(gg);
+		gg = getSeconds(2008,12,31,12,56,56);
+		getDateFromSeconds(gg);
+		Date d;
+		cout << d.toString() << endl;
+		Date d1 = d.addYears(1);
+		cout << d1.toString() << endl;
+		Date d2 = d.addMonths(23);
+		cout << d2.toString() << endl;
+		Date d3 = d.addDays(17);
+		cout << d3.toString() << endl;
+		Date d4 = d.addHours(25);
+		cout << d4.toString() << endl;
+		Date d5 = d.addMinutes(61);
+		cout << d5.toString() << endl;
+		Date d6 = d.addSeconds(61);
+		cout << d6.toString() << endl;
+		return 0;
 	}
 };
 

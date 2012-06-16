@@ -528,7 +528,7 @@ void createResponse(HttpResponse &res,bool flag,map<string,string> vals,string p
 		Date date;
 		string id = boost::lexical_cast<string>(Timer::getCurrentTime());
 		int seconds = sessionTimeout;
-		//date.setHh(date.getHh()+6);
+		date = date.addSeconds(sessionTimeout);
 		DateFormat dformat("ddd, dd-mmm-yyyy hh:mi:ss");
 		map<string,string>::iterator it;
 		for(it=vals.begin();it!=vals.end();it++)
