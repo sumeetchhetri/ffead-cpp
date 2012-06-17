@@ -53,14 +53,15 @@ bool FileAuthController::authenticate(string username,string password)
 bool FileAuthController::authenticateSecurity(string username,string password)
 {
 	password = treat_password(password);
-	string userstamp = (username + delimiter + password + delimiter);
 	ifstream ifs(this->filename.c_str());
 	if(ifs.is_open())
 	{
 		string temp;
 		while(getline(ifs, temp))
 		{
-			if(temp.find(userstamp)!=string::npos)
+			vector<string> tempv;
+			boost::iter_split(tempv, temp, boost::first_finder(this->delimiter));
+			if(tempv.size()>=2 && tempv.at(0)==username && tempv.at(1)==password)
 			{
 				ifs.close();
 				return true;
@@ -73,19 +74,20 @@ bool FileAuthController::authenticateSecurity(string username,string password)
 
 bool FileAuthController::getPassword(string username,string &passwd)
 {
-	string userstamp = (username + delimiter);
-	ifstream ifs(this->filename.c_str());
 	bool passwdf = false;
+	ifstream ifs(this->filename.c_str());
 	if(ifs.is_open() && username!="")
 	{
 		string temp;
 		while(getline(ifs, temp))
 		{
-			if(temp.find(userstamp)!=string::npos)
+			vector<string> tempv;
+			boost::iter_split(tempv, temp, boost::first_finder(this->delimiter));
+			if(tempv.size()>=2 && tempv.at(0)==username)
 			{
 				passwdf = true;
 				ifs.close();
-				passwd = temp.substr(temp.find(delimiter)+1);
+				passwd = tempv.at(1);
 				break;
 			}
 		}
@@ -96,21 +98,24 @@ bool FileAuthController::getPassword(string username,string &passwd)
 
 string FileAuthController::getUserRole(string username)
 {
-	string userstamp = (username + delimiter);
+	bool passwdf = false;
 	ifstream ifs(this->filename.c_str());
 	if(ifs.is_open() && username!="")
 	{
 		string temp;
 		while(getline(ifs, temp))
 		{
-			if(temp.find(userstamp)!=string::npos)
+			vector<string> tempv;
+			boost::iter_split(tempv, temp, boost::first_finder(this->delimiter));
+			if(tempv.size()>=3 && tempv.at(0)==username)
 			{
-				userstamp = temp.substr(temp.find_last_of(":")+1);
+				passwdf = true;
 				ifs.close();
-				break;
+				return tempv.at(2);
 			}
 		}
 		ifs.close();
 	}
-	return userstamp;
+	string blnk;
+	return blnk;
 }

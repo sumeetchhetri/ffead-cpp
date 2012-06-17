@@ -55,76 +55,15 @@ void *dlib = NULL;
 static string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_auth_mode,srv_auth_file,IP_ADDRESS;
 typedef map<string,string> sessionMap;
 static boost::mutex m_mutex,p_mutex;
-
-static int popenRWE(int *rwepipe, const char *exe, const char *const argv[],string tmpf)
-{
-	int in[2];
-	int out[2];
-	int err[2];
-	int pid;
-	int rc;
-
-	rc = pipe(in);
-	if (rc<0)
-		goto error_in;
-
-	rc = pipe(out);
-	if (rc<0)
-		goto error_out;
-
-	rc = pipe(err);
-	if (rc<0)
-		goto error_err;
-
-	pid = fork();
-	if (pid > 0) { // parent
-		close(in[0]);
-		close(out[1]);
-		close(err[1]);
-		rwepipe[0] = in[1];
-		rwepipe[1] = out[0];
-		rwepipe[2] = err[0];
-		return pid;
-	} else if (pid == 0) { // child
-		close(in[1]);
-		close(out[0]);
-		close(err[0]);
-		close(0);
-		dup(in[0]);
-		close(1);
-		dup(out[1]);
-		close(2);
-		dup(err[1]);cout << tmpf << endl;
-		chdir(tmpf.c_str());
-		execvp(exe, (char**)argv);
-		exit(1);
-	} else
-		goto error_fork;
-
-	return pid;
-
-error_fork:
-	close(err[0]);
-	close(err[1]);
-error_err:
-	close(out[0]);
-	close(out[1]);
-error_out:
-	close(in[0]);
-	close(in[1]);
-error_in:
-	return -1;
-}
-
-static int pcloseRWE(int pid, int *rwepipe)
-{
-	int rc, status;
-	close(rwepipe[0]);
-	close(rwepipe[1]);
-	close(rwepipe[2]);
-	rc = waitpid(pid, &status, 0);
-	return status;
-}
+static SecurityHandler securityHandler;
+static FilterHandler filterHandler;
+static AuthHandler authHandler;
+static ControllerHandler controllerHandler;
+static FormHandler formHandler;
+static SoapHandler soapHandler;
+static ScriptHandler scriptHandler;
+static FviewHandler fviewHandler;
+static ExtHandler extHandler;
 
 void writeToSharedMemeory(string sessionId, string value,bool napp)
 {
@@ -509,7 +448,7 @@ string getContentStr(string url,string locale,string ext)
 			}
     }
 	ifstream myfile1;
-    myfile1.open(fname.c_str(),ios::in | ios::binary);		
+    myfile1.open(fname.c_str(),ios::in | ios::binary);
     if (myfile1.is_open())
     {
 		string line;
@@ -785,7 +724,7 @@ void ServiceTask::run()
 		map<string,string> params1 = *params;
 		string webpath = serverRootDirectory + "web/";
 		HttpRequest* req= new HttpRequest(results,webpath);
-		
+
 		if(req->getFile()=="")
 		{
 			req->setFile("index.html");
@@ -850,8 +789,9 @@ void ServiceTask::run()
 		//cout << urlpattMap["*.*"] << flush;
 		//bool isAuthenticated = false;
 		bool isoAuthRes = false;
-		bool isContrl = false;
-		string serverUrl = "http://" + IP_ADDRESS;
+		long sessionTimeoutVar = sessionTimeout;
+		bool isContrl = securityHandler.handle(IP_ADDRESS, req, res, securityObjectMap, sessionTimeout, dlib, cntMap);
+		/*string serverUrl = "http://" + IP_ADDRESS;
 		if(req->getCntxt_name()!="default")
 			serverUrl += "/" + req->getCntxt_name();
 		string actUrl = serverUrl + req->getActUrl();
@@ -968,9 +908,10 @@ void ServiceTask::run()
 					isContrl = true;
 				}
 			}
-		}
+		}*/
 
-		if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"in")!=filterMap.end())
+		filterHandler.handleIn(req, res, filterMap, dlib, ext);
+		/*if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"in")!=filterMap.end())
 		{
 			vector<string> tempp;
 			if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end())
@@ -1004,8 +945,13 @@ void ServiceTask::run()
 					delete _temp;
 				}
 			}
+		}*/
+		if(!isContrl)
+		{
+			isContrl = authHandler.handle(autMap, autpattMap, req, res, filterMap, dlib, ext);
 		}
-		if(autpattMap[req->getCntxt_name()+"*.*"]!="" || autMap[req->getCntxt_name()+ext]!="")
+
+		/*if(autpattMap[req->getCntxt_name()+"*.*"]!="" || autMap[req->getCntxt_name()+ext]!="")
 		{
 			if(autpattMap[req->getCntxt_name()+"*.*"]!="")
 			{
@@ -1081,10 +1027,18 @@ void ServiceTask::run()
 					delete authc;
 				}
 			}
-		}
+		}*/
 		string pthwofile = req->getCntxt_name()+req->getActUrl();
+		if(req->getCntxt_name()!="default" && cntMap[req->getCntxt_name()]=="true")
+		{
+			pthwofile = req->getActUrl();
+		}
+		if(!isContrl)
+		{
+			isContrl = controllerHandler.handle(req, res, urlpattMap, mappattMap, dlib, ext, rstCntMap, mapMap, urlMap, pthwofile);
+		}
 		//pthwofile = pthwofile.substr(0, pthwofile.find_last_of("/")+1);
-		if(!isContrl && (urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!=""))
+		/*if(!isContrl && (urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!=""))
 		{
 			//cout << "Controller requested for " << req->getCntxt_name() << " name " << urlMap[req->getCntxt_name()+ext] << endl;
 			if(urlpattMap[req->getCntxt_name()+"*.*"]!="")
@@ -1166,10 +1120,10 @@ void ServiceTask::run()
 						}
 						reverse(valss.begin(),valss.end());
 						//cout << "after - " << pthwofiletemp << endl;
-						/*if(pthwofiletemp.at(pthwofiletemp.length()-1)=='/')
+						if(pthwofiletemp.at(pthwofiletemp.length()-1)=='/')
 						{
 							pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.length()-1);
-						}*/
+						}
 						//cout << "after - " << pthwofiletemp << endl;
 						cout << "checking url : " << pthwofiletemp << ",param size: " << prsiz << ",vals: " << valss.size() <<
 								", against url: " << it->first << endl;
@@ -1189,10 +1143,10 @@ void ServiceTask::run()
 								res.setStatusCode("404");
 								res.setStatusMsg("Not Found");
 								//res.setContent_type("text/plain");
-								/*if(prsiz==valss.size())
+								if(prsiz==valss.size())
 									res.setContent_str("Invalid number of arguments");
 								else
-									res.setContent_str("Invalid HTTPMethod used");*/
+									res.setContent_str("Invalid HTTPMethod used");
 								cout << "Rest Controller Param/Method Error" << endl;
 							}
 							break;
@@ -1250,10 +1204,10 @@ void ServiceTask::run()
 							res.setStatusCode("404");
 							res.setStatusMsg("Not Found");
 							//res.setContent_type("text/plain");
-							/*if(prsiz==valss.size())
+							if(prsiz==valss.size())
 								res.setContent_str("Invalid number of arguments");
 							else
-								res.setContent_str("Invalid HTTPMethod used");*/
+								res.setContent_str("Invalid HTTPMethod used");
 							cout << "Rest Controller Param/Method Error" << endl;
 						}
 					}
@@ -1338,16 +1292,16 @@ void ServiceTask::run()
 						res.setStatusCode("404");
 						res.setStatusMsg("Not Found");
 						//res.setContent_type("text/plain");
-						/*if(invValue)
+						if(invValue)
 							res.setContent_str("Invalid value passed as URL param");
 						else
-							res.setContent_str("Rest Controller Method Not Found");*/
+							res.setContent_str("Rest Controller Method Not Found");
 						cout << "Rest Controller Method Not Found" << endl;
 						//return;
 					}
 				}
 			}
-		}
+		}*/
 
 		/*After going through the controller the response might be blank, just set the HTTP version*/
 		res.setHttpVersion(req->getHttpVersion());
@@ -1358,7 +1312,8 @@ void ServiceTask::run()
 		}
 		else if(ext==".form")
 		{
-			Reflector ref;
+			formHandler.handle(req, res, formMap, dlib);
+			/*Reflector ref;
 			Element ele = formMap[req->getFile()];
 			cout << ele.getTagName() << endl;
 			cout << ele.render() << endl;
@@ -1442,9 +1397,9 @@ void ServiceTask::run()
 					res.setContent_str("Controller Method Not Found");
 					cout << "Controller Method Not Found" << endl;
 				}
-			}
+			}*/
 		}
-		else if(req->getMethod()=="POST" && req->getRequestParam("claz")!="" && req->getRequestParam("method")!="")
+		/*else if(req->getMethod()=="POST" && req->getRequestParam("claz")!="" && req->getRequestParam("method")!="")
 		{
 			content = AfcUtil::execute(*req);
 			res.setStatusCode("200");
@@ -1572,12 +1527,13 @@ void ServiceTask::run()
 				res.setContent_str(content);
 				//res.setContent_len(boost::lexical_cast<string>(content.length()));
 			}
-		}
+		}*/
 		else if((req->getContent_type().find("application/soap+xml")!=string::npos || req->getContent_type().find("text/xml")!=string::npos)
 				&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos)
 				&& wsdlmap[req->getFile()]==req->getCntxt_name())
 		{
-			string meth,ws_name,env;
+			soapHandler.handle(req, res, dlib, props[".xml"]);
+			/*string meth,ws_name,env;
 			ws_name = req->getFile();
 			Element soapenv;
 			Logger::info("request => "+req->getContent());
@@ -1711,414 +1667,24 @@ void ServiceTask::run()
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".xml"]);
 			res.setContent_str(env);
-			//res.setContent_len(boost::lexical_cast<string>(env.length()));
-		}
-		else if(ext==".wsdl")
-		{
-			content = getContentStr(resourcePath+req->getFile(),"english",ext);
-			if((content.length()==0))
-			{
-				res.setStatusCode("404");
-				res.setStatusMsg("Not Found");
-				//res.setContent_len("0");
-			}
-			else
-			{
-				res.setStatusCode("200");
-				res.setStatusMsg("OK");
-				res.setContent_type(props[ext]);
-				res.setContent_str(content);
-				//res.setContent_len(boost::lexical_cast<string>(content.length()));
-			}
-		}
-		else if(ext==".php")
-		{
-			int pipe[3];
-			int pid;
-			string def;
-			string tmpf = "/temp/";
-			string filen;
-			if(handoffs.find(req->getCntxt_name())!=handoffs.end())
-			{
-				def = handoffs[req->getCntxt_name()];
-				tmpf = "/";
-			}
-			string phpcnts = req->toPHPVariablesString(def);
-			//cout << phpcnts << endl;
-			filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".php";
-			tmpf = req->getCntxt_root() + tmpf;
-
-			AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
-			const char *const args[] = {
-					"php",
-					filen.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, tmpf);
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			string content;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//cout << length << endl;
-				string data(buffer, length);
-				//cout << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//cout << length << endl;
-					string data(buffer, length);
-					//cout << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-			pcloseRWE(pid, pipe);
-			if((content.length()==0))
-			{
-				res.setStatusCode("404");
-				res.setStatusMsg("Not Found");
-				//res.setContent_len("0");
-			}
-			else
-			{
-				res.setStatusCode("200");
-				res.setStatusMsg("OK");
-				res.setContent_type(props[".html"]);
-				res.setContent_str(content);
-				//res.setContent_len(boost::lexical_cast<string>(content.length()));
-			}
-		}
-		else if(ext==".pl")
-		{
-			int pipe[3];
-			int pid;
-
-			string phpcnts = req->toPerlVariablesString();
-			//cout << phpcnts << endl;
-			string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".pl";
-			//cout << tmpf << endl;
-			string plfile = req->getCntxt_root()+"/scripts/perl/"+req->getFile();
-			ifstream infile(plfile.c_str());
-			string xml;
-			if(infile.is_open())
-			{
-				while(getline(infile, xml))
-				{
-					phpcnts.append(xml+"\n");
-				}
-			}
-			infile.close();
-			AfcUtil::writeTofile(tmpf, phpcnts, true);
-			const char *const args[] = {
-					"perl",
-					tmpf.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, "");
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			string content;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//cout << length << endl;
-				string data(buffer, length);
-				//cout << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//cout << length << endl;
-					string data(buffer, length);
-					//cout << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-			pcloseRWE(pid, pipe);
-			if((content.length()==0))
-			{
-				res.setStatusCode("404");
-				res.setStatusMsg("Not Found");
-				//res.setContent_len("0");
-			}
-			else
-			{
-				res.setStatusCode("200");
-				res.setStatusMsg("OK");
-				res.setContent_type(props[".html"]);
-				res.setContent_str(content);
-				//res.setContent_len(boost::lexical_cast<string>(content.length()));
-			}
-		}
-		else if(ext==".rb")
-		{
-			int pipe[3];
-			int pid;
-
-			string phpcnts = req->toRubyVariablesString();
-			//cout << phpcnts << endl;
-			string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".rb";
-			//cout << tmpf << endl;
-			AfcUtil::writeTofile(tmpf, phpcnts, true);
-			const char *const args[] = {
-					"ruby",
-					tmpf.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, "");
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			string content;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//cout << length << endl;
-				string data(buffer, length);
-				//cout << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//cout << length << endl;
-					string data(buffer, length);
-					//cout << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-
-			pcloseRWE(pid, pipe);
-			if((content.length()==0))
-			{
-				res.setStatusCode("404");
-				res.setStatusMsg("Not Found");
-				//res.setContent_len("0");
-			}
-			else
-			{
-				res.setStatusCode("200");
-				res.setStatusMsg("OK");
-				res.setContent_type(props[".html"]);
-				res.setContent_str(content);
-				//res.setContent_len(boost::lexical_cast<string>(content.length()));
-			}
-		}
-		else if(ext==".py")
-		{
-			int pipe[3];
-			int pid;
-
-			string phpcnts = req->toPythonVariablesString();
-			//cout << phpcnts << endl;
-			string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".py";
-			//cout << tmpf << endl;
-			string plfile = req->getCntxt_root()+"/scripts/python/"+req->getFile();
-			ifstream infile(plfile.c_str());
-			string xml;
-			if(infile.is_open())
-			{
-				while(getline(infile, xml))
-				{
-					phpcnts.append(xml+"\n");
-				}
-			}
-			infile.close();
-			AfcUtil::writeTofile(tmpf, phpcnts, true);
-			const char *const args[] = {
-					"python",
-					tmpf.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, "");
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			string content;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//cout << length << endl;
-				string data(buffer, length);
-				//cout << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//cout << length << endl;
-					string data(buffer, length);
-					//cout << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-
-			pcloseRWE(pid, pipe);
-			if((content.length()==0))
-			{
-				res.setStatusCode("404");
-				res.setStatusMsg("Not Found");
-				//res.setContent_len("0");
-			}
-			else
-			{
-				res.setStatusCode("200");
-				res.setStatusMsg("OK");
-				res.setContent_type(props[".html"]);
-				res.setContent_str(content);
-				//res.setContent_len(boost::lexical_cast<string>(content.length()));
-			}
-		}
-		else if(ext==".lua")
-		{
-			int pipe[3];
-			int pid;
-
-			string phpcnts = req->toLuaVariablesString();
-			//cout << phpcnts << endl;
-			string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".lua";
-			//cout << tmpf << endl;
-			AfcUtil::writeTofile(tmpf, phpcnts, true);
-			const char *const args[] = {
-					"lua",
-					tmpf.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, "");
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			string content;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//cout << length << endl;
-				string data(buffer, length);
-				//cout << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//cout << length << endl;
-					string data(buffer, length);
-					//cout << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-
-			pcloseRWE(pid, pipe);
-			if((content.length()==0))
-			{
-				res.setStatusCode("404");
-				res.setStatusMsg("Not Found");
-				//res.setContent_len("0");
-			}
-			else
-			{
-				res.setStatusCode("200");
-				res.setStatusMsg("OK");
-				res.setContent_type(props[".html"]);
-				res.setContent_str(content);
-				//res.setContent_len(boost::lexical_cast<string>(content.length()));
-			}
-		}
-		else if(ext==".njs")
-		{
-			int pipe[3];
-			int pid;
-
-			string phpcnts = req->toNodejsVariablesString();
-			//cout << phpcnts << endl;
-			string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".njs";
-			//cout << tmpf << endl;
-			AfcUtil::writeTofile(tmpf, phpcnts, true);
-			const char *const args[] = {
-					"node",
-					tmpf.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, "");
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			string content;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//cout << length << endl;
-				string data(buffer, length);
-				//cout << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//cout << length << endl;
-					string data(buffer, length);
-					//cout << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-
-			pcloseRWE(pid, pipe);
-			if((content.length()==0))
-			{
-				res.setStatusCode("404");
-				res.setStatusMsg("Not Found");
-				//res.setContent_len("0");
-			}
-			else
-			{
-				res.setStatusCode("200");
-				res.setStatusMsg("OK");
-				res.setContent_type(props[".html"]);
-				res.setContent_str(content);
-				//res.setContent_len(boost::lexical_cast<string>(content.length()));
-			}
+			//res.setContent_len(boost::lexical_cast<string>(env.length()));*/
 		}
 		else
 		{
+			bool cntrlit = scriptHandler.handle(req, res, handoffs, dlib, ext, props);
 			cout << "html page requested" <<endl;
-			if(ext==".fview")
+			if(cntrlit)
 			{
-				cout << "inside fview " << req->getFile() << endl;
+
+			}
+			else
+			{
+				cntrlit = extHandler.handle(req, res, dlib, resourcePath, tmplMap, vwMap, ext, props);
+			}
+			if(!cntrlit && ext==".fview")
+			{
+				content = fviewHandler.handle(req, res, fviewmap);
+				/*cout << "inside fview " << req->getFile() << endl;
 				string file = req->getFile();
 				boost::replace_first(file,"fview","html");
 				string ffile = req->getCntxt_root()+"/fviews/"+file;
@@ -2163,7 +1729,7 @@ void ServiceTask::run()
 				}
 				infile.close();
 				res.setContent_type("text/html");
-				//cout << content << flush;
+				//cout << content << flush;*/
 			}
 			else
 			{
@@ -2189,7 +1755,8 @@ void ServiceTask::run()
 			}
 		}
 
-		if(filterMap.find(req->getCntxt_name()+"*.*out")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"out")!=filterMap.end())
+		filterHandler.handleOut(req, res, filterMap, dlib, ext);
+		/*if(filterMap.find(req->getCntxt_name()+"*.*out")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"out")!=filterMap.end())
 		{
 			vector<string> tempp;
 			if(filterMap.find(req->getCntxt_name()+"*.*out")!=filterMap.end())
@@ -2222,7 +1789,7 @@ void ServiceTask::run()
 					delete _temp;
 				}
 			}
-		}
+		}*/
 
 		alldatlg += "--processed data";
 		string h1;
