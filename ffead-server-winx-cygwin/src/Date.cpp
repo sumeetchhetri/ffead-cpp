@@ -444,7 +444,7 @@ bool Date::validateDate(int dd, int mm, int yyyy)
 	string mtc = "," + boost::lexical_cast<string>(mm) + ",";
 	if (mm==2)
 	{
-		if (!(yyyy % 4) && (yyyy % 100) || !(yyyy % 400))
+		if (!(yyyy % 4) && ((yyyy % 100) || !(yyyy % 400)))
 		{
 			if (dd < 1 || dd > 29)
 				error = false;
@@ -486,7 +486,7 @@ string Date::getDayName(int dd, int mm, int yyyy)
 		case 2:dd += 31;
 	}
 	days += dd;
-	if ((!(yyyy % 4) && (yyyy % 100) || !(yyyy % 400)) && mm > 2)
+	if ((!(yyyy % 4) && ((yyyy % 100) || !(yyyy % 400)))&& mm > 2)
 		days++;
 	days = days%7;
 	switch(days)

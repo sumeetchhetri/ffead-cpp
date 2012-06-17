@@ -4,6 +4,15 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/ExtHandler.cpp \
+../src/FviewHandler.cpp \
+../src/ScriptHandler.cpp \
+../src/SoapHandler.cpp \
+../src/FormHandler.cpp \
+../src/ControllerHandler.cpp \
+../src/AuthHandler.cpp \
+../src/FilterHandler.cpp \
+../src/SecurityHandler.cpp \
 ../src/AOPEngine.cpp \
 ../src/AfcUtil.cpp \
 ../src/AppContext.cpp \
@@ -88,6 +97,15 @@ CPP_SRCS += \
 ../src/Filter.cpp
 
 OBJS += \
+./src/ExtHandler.o \
+./src/FviewHandler.o \
+./src/ScriptHandler.o \
+./src/SoapHandler.o \
+./src/FormHandler.o \
+./src/ControllerHandler.o \
+./src/AuthHandler.o \
+./src/FilterHandler.o \
+./src/SecurityHandler.o \
 ./src/AOPEngine.o \
 ./src/AfcUtil.o \
 ./src/AppContext.o \
@@ -172,6 +190,15 @@ OBJS += \
 ./src/Filter.o
 
 CPP_DEPS += \
+./src/ExtHandler.d \
+./src/FviewHandler.d \
+./src/ScriptHandler.d \
+./src/SoapHandler.d \
+./src/FormHandler.d \
+./src/ControllerHandler.d \
+./src/AuthHandler.d \
+./src/FilterHandler.d \
+./src/SecurityHandler.d \
 ./src/AOPEngine.d \
 ./src/AfcUtil.d \
 ./src/AppContext.d \
