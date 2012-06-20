@@ -5,14 +5,14 @@
  *      Author: sumeetc
  */
 
-#include "ConfiguartionData.h"
+#include "ConfigurationData.h"
 
-ConfiguartionData::ConfiguartionData() {
+ConfigurationData::ConfigurationData() {
 	// TODO Auto-generated constructor stub
 
 }
 
-ConfiguartionData::~ConfiguartionData() {
+ConfigurationData::~ConfigurationData() {
 	// TODO Auto-generated destructor stub
 }
 

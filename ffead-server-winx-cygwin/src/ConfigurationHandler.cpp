@@ -17,7 +17,7 @@ ConfigurationHandler::~ConfigurationHandler() {
 }
 
 
-void listi(string cwd,string type,bool apDir,strVec &folders)
+void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folders)
 {
 	FILE *pipe_fp;
 	string command;
@@ -56,9 +56,9 @@ void listi(string cwd,string type,bool apDir,strVec &folders)
 	pclose(pipe_fp);
 }
 
-ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string pubpath,string respath,bool isSSLEnabled)
+ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string pubpath,string respath,bool isSSLEnabled)
 {
-	ConfiguartionData configuartionData;
+	ConfigurationData configurationData;
 	strVec all,dcps,afcd,appf,wspath,compnts,handoffVec;
 	string includeRef;
 	TemplateEngine templ;
@@ -76,25 +76,25 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		propMap sslsec = pread.getProperties(respath+"/security.prop");
 		if(sslsec.size()>0)
 		{
-			configuartionData.key_file = sslsec["KEYFILE"];
-			configuartionData.dh_file = sslsec["DHFILE"];
-			configuartionData.ca_list = sslsec["CA_LIST"];
-			configuartionData.rand_file = sslsec["RANDOM"];
-			configuartionData.sec_password = sslsec["PASSWORD"];
+			configurationData.key_file = sslsec["KEYFILE"];
+			configurationData.dh_file = sslsec["DHFILE"];
+			configurationData.ca_list = sslsec["CA_LIST"];
+			configurationData.rand_file = sslsec["RANDOM"];
+			configurationData.sec_password = sslsec["PASSWORD"];
 			string tempcl = sslsec["CLIENT_SEC_LEVEL"];
-			configuartionData.srv_auth_prvd = sslsec["SRV_AUTH_PRVD"];
-			configuartionData.srv_auth_mode = sslsec["SRV_AUTH_MODE"];
-			configuartionData.srv_auth_file = sslsec["SRV_AUTH_FILE"];
+			configurationData.srv_auth_prvd = sslsec["SRV_AUTH_PRVD"];
+			configurationData.srv_auth_mode = sslsec["SRV_AUTH_MODE"];
+			configurationData.srv_auth_file = sslsec["SRV_AUTH_FILE"];
 			if(tempcl!="")
 			{
 				try
 				{
-					configuartionData.client_auth = boost::lexical_cast<int>(tempcl);
+					configurationData.client_auth = boost::lexical_cast<int>(tempcl);
 				}
 				catch(...)
 				{
 					cout << "\nInvalid client auth level defined" << flush;
-					configuartionData.client_auth = 1;
+					configurationData.client_auth = 1;
 				}
 			}
 		}
@@ -112,7 +112,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		string name = webdirs1.at(var);
 		boost::replace_all(name,"/","");
 		rundyncontent += "cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/"+name+"/public/\n";
-		configuartionData.cntMap[name] = "true";
+		configurationData.cntMap[name] = "true";
 		listi(dcppath,".dcp",true,dcps);
 		listi(cmppath,".cmp",true,compnts);
 		all.push_back(usrincludes);
@@ -142,15 +142,15 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								if(cntrls.at(cntn).getAttribute("url").find("*")!=string::npos)
 								{
 									if(url=="*.*")
-										configuartionData.urlpattMap[name+url] = clas;
+										configurationData.urlpattMap[name+url] = clas;
 									else
 									{
 										url = url.substr(url.find("*")+1);
-										configuartionData.urlMap[name+url] = clas;
+										configurationData.urlMap[name+url] = clas;
 									}
 								}
 								else if(clas!="")
-									configuartionData.urlMap[name+url] = clas;
+									configurationData.urlMap[name+url] = clas;
 								cout << "adding controller => " << name << url << " :: " << clas << endl;
 							}
 							else
@@ -162,16 +162,16 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								if(from.find("*")!=string::npos && to!="")
 								{
 									if(from=="*.*")
-										configuartionData.mappattMap[name+from] = to;
+										configurationData.mappattMap[name+from] = to;
 									else
 									{
 										from = from.substr(from.find("*")+1);
-										configuartionData.mapMap[name+from] = to;
+										configurationData.mapMap[name+from] = to;
 									}
 								}
 								else if(to!="")
 								{
-									configuartionData.mapMap[name+from] = to;
+									configurationData.mapMap[name+from] = to;
 								}
 								cout << "adding mapping => " << name << from << " :: " << to << endl;
 							}
@@ -192,15 +192,15 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								if(url.find("*")!=string::npos)
 								{
 									if(url=="*.*")
-										configuartionData.autpattMap[name+url] = provider;
+										configurationData.autpattMap[name+url] = provider;
 									else
 									{
 										url = url.substr(url.find("*")+1);
-										configuartionData.autMap[name+url] = provider;
+										configurationData.autMap[name+url] = provider;
 									}
 								}
 								else if(provider!="")
-									configuartionData.autMap[name+url] = provider;
+									configurationData.autMap[name+url] = provider;
 								cout << "adding authhandler => " << name << url << " :: " << provider << endl;
 							}
 						}
@@ -223,12 +223,12 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								{
 									if(url=="*.*")
 									{
-										configuartionData.filterMap[name+url+type].push_back(clas);
+										configurationData.filterMap[name+url+type].push_back(clas);
 									}
 									else
 									{
 										url = url.substr(url.find("*")+1);
-										configuartionData.filterMap[name+url+type].push_back(clas);
+										configurationData.filterMap[name+url+type].push_back(clas);
 									}
 								}
 								cout << "adding filter => " << name << url << type << " :: " << clas << endl;
@@ -243,7 +243,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 					{
 						if(tmplts.at(tmpn).getTagName()=="template")
 						{
-							configuartionData.tmplMap[name+tmplts.at(tmpn).getAttribute("file")] = tmplts.at(tmpn).getAttribute("class");
+							configurationData.tmplMap[name+tmplts.at(tmpn).getAttribute("file")] = tmplts.at(tmpn).getAttribute("class");
 							//cout << tmplts.at(tmpn).getAttribute("file") << " :: " << tmplts.at(tmpn).getAttribute("class") << flush;
 						}
 					}
@@ -255,7 +255,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 					{
 						if(dvs.at(dn).getTagName()=="dview")
 						{
-							configuartionData.vwMap[name+dvs.at(dn).getAttribute("path")] = dvs.at(dn).getAttribute("class");
+							configurationData.vwMap[name+dvs.at(dn).getAttribute("path")] = dvs.at(dn).getAttribute("class");
 							//cout << dvs.at(dn).getAttribute("path") << " :: " << dvs.at(dn).getAttribute("class") << flush;
 						}
 					}
@@ -315,7 +315,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 														urlmpp = name+url+rname+"/"+restfunction.alias;
 													else
 														urlmpp = name+restfunction.baseUrl;
-													configuartionData.rstCntMap[urlmpp] = restfunction;
+													configurationData.rstCntMap[urlmpp] = restfunction;
 												}
 												else
 												{
@@ -323,7 +323,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 														urlmpp = name+url+rname+"/"+restfunction.name;
 													else
 														urlmpp = name+restfunction.baseUrl;
-													configuartionData.rstCntMap[name+url+rname+"/"+restfunction.name] = restfunction;
+													configurationData.rstCntMap[name+url+rname+"/"+restfunction.name] = restfunction;
 												}
 											}
 											else
@@ -334,7 +334,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 														urlmpp = name+url+clas+"/"+restfunction.alias;
 													else
 														urlmpp = name+restfunction.baseUrl;
-													configuartionData.rstCntMap[urlmpp] = restfunction;
+													configurationData.rstCntMap[urlmpp] = restfunction;
 												}
 												else
 												{
@@ -342,7 +342,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 														urlmpp = name+url+clas+"/"+restfunction.name;
 													else
 														urlmpp = name+restfunction.baseUrl;
-													configuartionData.rstCntMap[urlmpp] = restfunction;
+													configurationData.rstCntMap[urlmpp] = restfunction;
 												}
 											}
 											cout << "adding rest-controller => " << urlmpp  << " , class => " << clas << endl;
@@ -372,30 +372,30 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								securityObject.sessTimeout = 3600;
 								cout << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
 							}
-							configuartionData.securityObjectMap[name] = securityObject;
+							configurationData.securityObjectMap[name] = securityObject;
 						}
 						else if(cntrls.at(cntn).getTagName()=="secure")
 						{
-							if(configuartionData.securityObjectMap.find(name)!=configuartionData.securityObjectMap.end())
+							if(configurationData.securityObjectMap.find(name)!=configurationData.securityObjectMap.end())
 							{
-								Security securityObject = configuartionData.securityObjectMap[name];
+								Security securityObject = configurationData.securityObjectMap[name];
 								string path = cntrls.at(cntn).getAttribute("path");
 								string role = cntrls.at(cntn).getAttribute("role");
 								SecureAspect secureAspect;
 								secureAspect.path = path;
 								secureAspect.role = role;
 								securityObject.secures.push_back(secureAspect);
-								configuartionData.securityObjectMap[name] = securityObject;
+								configurationData.securityObjectMap[name] = securityObject;
 							}
 						}
 						else if(cntrls.at(cntn).getTagName()=="welcome")
 						{
 							string welcomeFile = cntrls.at(cntn).getAttribute("file");
-							if(configuartionData.securityObjectMap.find(name)!=configuartionData.securityObjectMap.end())
+							if(configurationData.securityObjectMap.find(name)!=configurationData.securityObjectMap.end())
 							{
-								Security securityObject = configuartionData.securityObjectMap[name];
+								Security securityObject = configurationData.securityObjectMap[name];
 								securityObject.welocmeFile = welcomeFile;
-								configuartionData.securityObjectMap[name] = securityObject;
+								configurationData.securityObjectMap[name] = securityObject;
 							}
 						}
 					}
@@ -410,8 +410,8 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							string app = cntrls.at(cntn).getAttribute("app");
 							string def = cntrls.at(cntn).getAttribute("default");
 							string ext = cntrls.at(cntn).getAttribute("ext");
-							configuartionData.handoffs[app] = def;
-							configuartionData.handoffs[app+"extension"] = ext;
+							configurationData.handoffs[app] = def;
+							configurationData.handoffs[app+"extension"] = ext;
 							handoffVec.push_back("-l"+ app+" ");
 						}
 					}
@@ -566,7 +566,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 				{
 					string fvw = eles.at(apps).getAttribute("htm");
 					boost::replace_first(fvw,".html",".fview");
-					configuartionData.fviewmap[eles.at(apps).getAttribute("htm")] = eles.at(apps).getAttribute("class");
+					configurationData.fviewmap[eles.at(apps).getAttribute("htm")] = eles.at(apps).getAttribute("class");
 					pathvec.push_back(name);
 					vecvp.push_back(usrincludes);
 					stat.push_back(false);
@@ -593,7 +593,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							vecvp.push_back(usrincludes);
 							stat.push_back(true);
 							afcd.push_back(elese.at(appse).getAttribute("bean"));
-							configuartionData.formMap[elese.at(appse).getAttribute("name")] = elese.at(appse);
+							configurationData.formMap[elese.at(appse).getAttribute("name")] = elese.at(appse);
 						}
 					}
 					js += "\n}\n\n";
@@ -623,7 +623,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		isrcs += "./"+file+".cpp \\\n"+"./"+file+"_Remote.cpp \\\n";
 		iobjs += "./"+file+".o \\\n"+"./"+file+"_Remote.o \\\n";
 		ideps += "./"+file+".d \\\n"+"./"+file+"_Remote.d \\\n";
-		configuartionData.cmpnames.push_back(file);
+		configurationData.cmpnames.push_back(file);
 		cout << endl<< compnts.at(var1) <<endl;
 	}
 	for (unsigned int cntn = 0; cntn < handoffVec.size(); cntn++)
@@ -645,7 +645,7 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	cntxt["RUNTIME_COMP_DEPS"] = ideps;
 	ret = templ.evaluate(rtdcfpath+"subdir.mk.template",cntxt);
 	AfcUtil::writeTofile(rtdcfpath+"subdir.mk",ret,true);
-	configuartionData.dcpsss = dcps;
+	configurationData.dcpsss = dcps;
 	ret = DCPGenerator::generateDCPAll(dcps);
 	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
 	string headers,objs,infjs;
@@ -656,17 +656,17 @@ ConfiguartionData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	AfcUtil::writeTofile(incpath+"AfcInclude.h",headers,true);
 	ApplicationUtil apputil;
 	webdirs.clear();
-	ret = apputil.buildAllApplications(appf,webdirs1,configuartionData.appMap);
+	ret = apputil.buildAllApplications(appf,webdirs1,configurationData.appMap);
 	AfcUtil::writeTofile(rtdcfpath+"ApplicationInterface.cpp",ret,true);
 	WsUtil wsu;
-	ret = wsu.generateAllWSDL(wspath,respath,configuartionData.wsdlmap);
+	ret = wsu.generateAllWSDL(wspath,respath,configurationData.wsdlmap);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
 	TemplateEngine engine;
 	cntxt.clear();
 	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
 	string cont = engine.evaluate(respath+"/rundyn_template.sh", cntxt);
 	AfcUtil::writeTofile(respath+"/rundyn.sh", cont, true);
-	return configuartionData;
+	return configurationData;
 }
 
 
