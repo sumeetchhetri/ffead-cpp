@@ -204,7 +204,7 @@ void Cibernate::procedureCall(string procName) {
 	}*/
 	par = 1;
 	for (it = ntmap.begin(); it != ntmap.end(); ++it) {
-		SQLINTEGER  hotelInd;hotelInd = SQL_NTS;
+		SQLLEN  hotelInd;hotelInd = SQL_NTS;
 		if (it->second == "OUT" || it->second == "out" || it->second == "INOUT"
 				|| it->second == "inout")
 		{
@@ -286,7 +286,7 @@ void Cibernate::procedureCall(string procName) {
 	//SQLCloseCursor(V_OD_hstmt);
 
 	cout << outQuery << flush;
-	SQLINTEGER siz;
+	SQLLEN siz;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) outQuery.c_str(), SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		printf("Error in Select %d\n", V_OD_erg);
@@ -483,7 +483,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 			{
 				col = NULL;
 				SQLRETURN ret;
-				SQLINTEGER indicator;
+				SQLLEN indicator;
 				Field fe = clas.getFieldVec().at(ii);
 				string te = fe.getType();
 				if(te=="int")
@@ -614,7 +614,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 			for(unsigned int u=0;u<cols.size();u++)
 			{
 				SQLRETURN ret;
-				SQLINTEGER indicator;
+				SQLLEN indicator;
 				Field fe = fields[cols.at(u)];
 				string te = fe.getType();
 				if(te=="int")
@@ -754,7 +754,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 					{
 						col = NULL;
 						SQLRETURN ret;
-						SQLINTEGER indicator;
+						SQLLEN indicator;
 						Field fe = clas.getFieldVec().at(ii);
 						string te = fe.getType();
 						if(te=="int")
@@ -1224,7 +1224,8 @@ vector<map<string, void*> > Cibernate::getARSCW(string tableName,
 	//SQLINTEGER V_OD_id;
 	char V_OD_stat[10];
 	SQLSMALLINT V_OD_mlen, V_OD_colanz;
-	SQLINTEGER V_OD_err, V_OD_rowanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
 	SQLCHAR V_OD_msg[200];
 
 	string query = "select ";
@@ -1303,7 +1304,7 @@ vector<map<string, void*> > Cibernate::getARSCW(string tableName,
 		for (unsigned int u = 0; u < cols.size(); u++) {
 			void* col = NULL;
 			SQLRETURN ret;
-			SQLINTEGER indicator;
+			SQLLEN indicator;
 			string columnName = cols.at(u);
 			if (this->mapping->getAppTableColMapping(tableName, columnName) != "")
 				columnName = this->mapping->getAppTableColMapping(tableName,
@@ -1350,7 +1351,8 @@ void* Cibernate::getORW(string clasName)
 	int V_OD_erg;
 	char V_OD_stat[10];
 	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err,V_OD_rowanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
 	SQLCHAR V_OD_msg[200];
 	string query = selectQuery(clasName);
 	query += " LIMIT 1";
@@ -1389,7 +1391,8 @@ void* Cibernate::getARACW(string clasName)
 	int V_OD_erg;
 	char V_OD_stat[10];
 	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err,V_OD_rowanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
 	SQLCHAR V_OD_msg[200];
 	string query = selectQuery(clasName);
 	V_OD_erg=SQLExecDirect(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
@@ -1426,7 +1429,8 @@ void* Cibernate::getARSCW(string clasName,vector<string> cols)
 	int V_OD_erg;
 	char V_OD_stat[10];
 	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err,V_OD_rowanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
 	SQLCHAR V_OD_msg[200];
 	string query = selectQuery(cols,clasName);
 	V_OD_erg=SQLExecDirect(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
@@ -1529,7 +1533,8 @@ void* Cibernate::sqlfuncs(string type,string clasName)
 	int V_OD_erg;
 	char V_OD_stat[10];
 	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err,V_OD_rowanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
 	SQLCHAR V_OD_msg[200];
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
 	string query = "select "+type+" from "+tableName;
@@ -1568,7 +1573,7 @@ void* Cibernate::sqlfuncs(string type,string clasName)
 	while (V_OD_erg != SQL_NO_DATA)
 	{
 		SQLRETURN ret;
-		SQLINTEGER indicator;
+		SQLLEN indicator;
 		if (clasName == "int")
 		{
 			col = new int;

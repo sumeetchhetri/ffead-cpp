@@ -84,7 +84,7 @@ Logger::Logger(string file)
 		out.open(filepath.c_str(),ios::app | ios::binary);
 	datFormat.setFormatspec(props["DATEFMT"]);
 }
-Logger::Logger(string level,string mode,string file)
+Logger::Logger(string level,string mode,string filepath)
 {
 	this->level = level;
 	this->mode = mode;

@@ -57,7 +57,10 @@ void HttpSession::setSessionAttributes(Map sessionAttributes)
 }
 string HttpSession::getAttribute(string key)
 {
-	return sessionAttributes[key];
+	string tem;
+	if(sessionAttributes.find(key)!=sessionAttributes.end())
+		return sessionAttributes[key];
+	else return tem;
 }
 
 void HttpSession::setAttribute(string key,string value)

@@ -41,7 +41,7 @@
 #include "sstream"
 
 #include "ClassInfo.h"
-#include <boost/lexical_cast.hpp>
+
 #include "View.h"
 #include "XmlParser.h"
 #include "TemplateHandler.h"
@@ -50,7 +50,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/socket.h>
+
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -88,6 +88,19 @@
 #include "Filter.h"
 #include "FormController.h"
 #include "RestController.h"
+#include "SecurityHandler.h"
+#include "FilterHandler.h"
+#include "AuthHandler.h"
+#include "ControllerHandler.h"
+#include "FormHandler.h"
+#include "SoapHandler.h"
+#include "ScriptHandler.h"
+#include "FviewHandler.h"
+#include "ExtHandler.h"
+#include "ServiceTask.h"
+#include "ConfigurationHandler.h"
+#include "SSLHandler.h"
+#include "ServiceTask.h"
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd
@@ -97,11 +110,7 @@
  #endif
 
 
-/*HTTPS related*/
-#include <openssl/ssl.h>
-#define CLIENT_AUTH_REQUEST 1
-#define CLIENT_AUTH_REQUIRE 2
-#define CLIENT_AUTH_REHANDSHAKE 3
+
 
 //#define CA_LIST "root.pem"
 #define HOST1	"localhost"
@@ -115,7 +124,7 @@
 //#include <boost/filesystem.hpp>
 #define MAXEPOLLSIZE 100
 #define BACKLOGM 500
-#define MAXBUFLENM 32768
+
 typedef bool (*FunPtr1) (void *);
 typedef ClassInfo (*FunPtr) ();
 typedef void* (*toVoidP) (string);
@@ -155,37 +164,6 @@ public:
 	}
 };
 
-class ServiceTask : public Task
-{
-private:
-	int fd;
-	string serverRootDirectory;
-	map<string,string> *params;
-public:
-	ServiceTask(int fd,string serverRootDirectory,map<string,string> *params){this->fd=fd;this->serverRootDirectory=serverRootDirectory;
-	this->params= params;}
-	virtual ~ServiceTask(){}
-	void run();
-};
-
-class RestFunctionParams
-{
-public:
-	int pos;
-	string type;
-};
-
-class RestFunction
-{
-public:
-	string name;
-	string alias;
-	string clas;
-	string meth;
-	string baseUrl;
-	vector<RestFunctionParams> params;
-};
-typedef map<string, RestFunction> resFuncMap;
 
 class CHServer {
 public:

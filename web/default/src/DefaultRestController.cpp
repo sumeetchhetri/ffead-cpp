@@ -29,7 +29,7 @@ void DefaultRestController::addNumbers(int a, int b)
 
 void DefaultRestController::power(int base, int exponent)
 {
-	int c = pow((double)base, (double)exponent);
+	int c = pow(base, exponent);
 	response->setStatusCode("200");
 	response->setStatusMsg("OK");
 	response->setContent_type("text/plain");
