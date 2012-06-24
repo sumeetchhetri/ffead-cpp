@@ -1,4 +1,19 @@
 /*
+	Copyright 2010, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * ServiceTask.cpp
  *
  *  Created on: 20-Jun-2012
@@ -7,9 +22,15 @@
 
 #include "ServiceTask.h"
 
-ServiceTask::ServiceTask(int fd,string serverRootDirectory,map<string,string> *params) {
+ServiceTask::ServiceTask(int fd,string serverRootDirectory,map<string,string> *params,
+		bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib) {
 	this->fd=fd;this->serverRootDirectory=serverRootDirectory;
 	this->params= params;
+	this->isSSLEnabled = isSSLEnabled;
+	this->ctx = ctx;
+	this->sslHandler = sslHandler;
+	this->configData = configData;
+	this->dlib = dlib;
 }
 
 ServiceTask::~ServiceTask() {
@@ -61,22 +82,10 @@ map<string,string> ServiceTask::readFromSharedMemeory(string sessionId)
 	return valss;
 }
 
-string ServiceTask::getFileExtension(const string& file)
+string ServiceTask::getFileExtension(string file)
 {
-	string str = file;
-	string ext = "";
-	for(unsigned int i=0; i<str.length(); i++)
-	{
-		if(str[i] == '.')
-		{
-			for(unsigned int j = i; j<str.length(); j++)
-			{
-				ext += str[j];
-			}
-			return ext;
-		}
-	}
-	return ext;
+	if(file.find_last_of(".")!=string::npos)return file.substr(file.find_last_of("."));
+	return file;
 }
 
 void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> vals,string prevcookid, long sessionTimeout, bool sessatserv)
@@ -125,6 +134,7 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 
 string ServiceTask::getContentStr(string url,string locale,string ext)
 {
+	cout << "content request for -- " << url << " " << ext << endl;
 	string all;
     string fname = url;
 	if (url=="/")
@@ -156,7 +166,7 @@ string ServiceTask::getContentStr(string url,string locale,string ext)
     return all;
 }
 
-void ServiceTask::run(bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib)
+void ServiceTask::run()
 {
 	//cout << dlib << endl;
 	string ip = "invalid session";
@@ -342,6 +352,7 @@ void ServiceTask::run(bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, Co
 
 		if(req->getFile()=="")
 		{
+			cout << req->getFile() << endl;
 			req->setFile("index.html");
 		}
 		if(req->hasCookie())
@@ -469,7 +480,7 @@ void ServiceTask::run(bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, Co
 			{
 				res.setStatusCode("200");
 				res.setStatusMsg("OK");
-				if(res.getContent_type()!="")res.setContent_type(configData.props[ext]);
+				if(res.getContent_type()=="")res.setContent_type(configData.props[ext]);
 				res.setContent_str(content);
 				//res.setContent_len(boost::lexical_cast<string>(content.length()));
 				//sess.setAttribute("CURR",req->getUrl());

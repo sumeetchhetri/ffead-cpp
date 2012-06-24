@@ -327,7 +327,7 @@ string AfcUtil::execute(HttpRequest req)
 		string tem = req.getRequestParam(ss);
 		vemp.push_back(tem);
 	}
-	string libName = "libinter.a";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL){
 	 cerr << dlerror() << endl;

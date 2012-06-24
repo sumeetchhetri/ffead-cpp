@@ -1,4 +1,19 @@
 /*
+	Copyright 2010, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * ServiceTask.h
  *
  *  Created on: 20-Jun-2012
@@ -40,15 +55,21 @@ private:
 	int fd;
 	string serverRootDirectory;
 	map<string,string> *params;
+	bool isSSLEnabled;
+	SSL_CTX *ctx;
+	SSLHandler sslHandler;
+	ConfigurationData configData;
+	void* dlib;
 	void writeToSharedMemeory(string sessionId, string value,bool napp);
 	map<string,string> readFromSharedMemeory(string sessionId);
 	void createResponse(HttpResponse &res,bool flag,map<string,string> vals,string prevcookid, long sessionTimeout, bool sessatserv);
 	string getContentStr(string url,string locale,string ext);
 public:
-	ServiceTask(int fd,string serverRootDirectory,map<string,string> *params);
+	ServiceTask(int fd,string serverRootDirectory,map<string,string> *params,
+			bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib);
 	virtual ~ServiceTask();
-	void run(bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib);
-	static string getFileExtension(const string& file);
+	void run();
+	static string getFileExtension(string file);
 };
 
 #endif /* SERVICETASK_H_ */

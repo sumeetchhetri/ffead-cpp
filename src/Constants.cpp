@@ -14,19 +14,12 @@
     limitations under the License.
 */
 /*
- * RestController.cpp
+ * Constants.cpp
  *
- *  Created on: Apr 7, 2011
- *      Author: sumeet
+ *  Created on: 19-Jun-2012
+ *      Author: sumeetc
  */
 
-#include "RestController.h"
+#include "Constants.h"
 
-RestController::RestController() {
-	// TODO Auto-generated constructor stub
-
-}
-
-RestController::~RestController() {
-	// TODO Auto-generated destructor stub
-}
+string Constants::INTER_LIB_FILE = "libinter.a";

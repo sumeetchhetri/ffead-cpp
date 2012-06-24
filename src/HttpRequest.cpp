@@ -1348,12 +1348,17 @@ string HttpRequest::getFile() const
 
 void HttpRequest::setFile(string file)
 {
-	cout << this->file << endl;
-	//this->url = this->cntxt_root + "/" + file;
-	int fst = this->url.find_last_of(this->file) - this->file.length() + 1;
-	this->url = this->url.substr(0, fst) +  file;
-	cout << this->url << endl;
 	this->file = file;
+	cout << "file is " << this->file << endl;
+	if(this->file!="" && this->url.find(this->file)!=string::npos)
+	{
+		int fst = this->url.find_last_of(this->file) - this->file.length() + 1;
+		this->url = this->url.substr(0, fst) +  this->file;
+	}
+	else
+	{
+		this->url +=  this->file;
+	}
 }
 
 string HttpRequest::getActUrl() const
