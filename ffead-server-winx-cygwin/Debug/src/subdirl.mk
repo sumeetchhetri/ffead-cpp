@@ -4,6 +4,11 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/Constants.cpp \
+../src/ServiceTask.cpp \
+../src/SSLHandler.cpp \
+../src/ConfigurationHandler.cpp \
+../src/ConfigurationData.cpp \
 ../src/ExtHandler.cpp \
 ../src/FviewHandler.cpp \
 ../src/ScriptHandler.cpp \
@@ -97,6 +102,11 @@ CPP_SRCS += \
 ../src/Filter.cpp
 
 OBJS += \
+./src/Constants.o \
+./src/ServiceTask.o \
+./src/SSLHandler.o \
+./src/ConfigurationHandler.o \
+./src/ConfigurationData.o \
 ./src/ExtHandler.o \
 ./src/FviewHandler.o \
 ./src/ScriptHandler.o \
@@ -190,6 +200,11 @@ OBJS += \
 ./src/Filter.o
 
 CPP_DEPS += \
+./src/Constants.d \
+./src/ServiceTask.d \
+./src/SSLHandler.d \
+./src/ConfigurationHandler.d \
+./src/ConfigurationData.d \
 ./src/ExtHandler.d \
 ./src/FviewHandler.d \
 ./src/ScriptHandler.d \

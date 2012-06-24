@@ -23,11 +23,11 @@ HttpResponse OAUTHController::service(HttpRequest req)
 
 	if(req.getFile()=="login.auth")
 	{
-		if(req.getAllParams()["username"]!="" && req.getAllParams()["password"]!="")
+		if(req.getRequestParams()["username"]!="" && req.getRequestParams()["password"]!="")
 		{
 			FileAuthController fauthu(req.getCntxt_root()+"/users",":");
 			string key;
-			bool flag = fauthu.getPassword(req.getAllParams()["username"],key);
+			bool flag = fauthu.getPassword(req.getRequestParams()["username"],key);
 			if(flag)
 			{
 				res.setStatusCode("200");
@@ -58,9 +58,9 @@ HttpResponse OAUTHController::service(HttpRequest req)
 		Client client;
 		client.connection("localhost",8080);
 		string data = "GET /request.oauth?";
-		data += "oauth_callback=http://localhost:8080/oauthApp/calledback.auth&oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token=&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+req.getAllParams()["tusername"]+"&";
+		data += "oauth_callback=http://localhost:8080/oauthApp/calledback.auth&oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token=&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+req.getRequestParams()["tusername"]+"&";
 		string sig = "GET&" + CryptoHandler::urlEncode("http://localhost:8080/request.oauth") + "&";
-		sig += CryptoHandler::urlEncode("oauth_callback=http://localhost:8080/oauthApp/calledback.auth&oauth_consumer_key=sumeet&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=0&oauth_token=&oauth_version=1.0&tusername="+req.getAllParams()["tusername"]);
+		sig += CryptoHandler::urlEncode("oauth_callback=http://localhost:8080/oauthApp/calledback.auth&oauth_consumer_key=sumeet&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=0&oauth_token=&oauth_version=1.0&tusername="+req.getRequestParams()["tusername"]);
 
 		cout << sig << endl;
 
@@ -94,7 +94,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 		}
 		if(mapsd["oauth_token"]!="" && mapsd["oauth_token_secret"]!="" && mapsd["tusername"]!="")
 		{
-			string filen = req.getCntxt_root()+"/"+req.getAllParams()["tusername"]+"-tokens-secrets";
+			string filen = req.getCntxt_root()+"/"+req.getRequestParams()["tusername"]+"-tokens-secrets";
 			ofstream ofs(filen.c_str());
 			string wrf = mapsd["tusername"] + ":" + mapsd["oauth_token"] + ":" + mapsd["oauth_token_secret"]+"\n";
 			ofs.write(wrf.c_str(),wrf.length());
@@ -114,21 +114,20 @@ HttpResponse OAUTHController::service(HttpRequest req)
 	}
 	else if(req.getFile()=="authorizeUser.auth")
 	{
-		FileAuthController fauthu(req.getCntxt_root()+"/"+req.getAllParams()["tusername"]+"-tokens-secrets",":");
+		FileAuthController fauthu(req.getCntxt_root()+"/"+req.getRequestParams()["tusername"]+"-tokens-secrets",":");
 		string key1 = "sumeet&",key;
-		bool flag = fauthu.getPassword(req.getAllParams()["tusername"],key);
-		if(req.getAllParams()["tusername"]!="" && flag)
+		bool flag = fauthu.getPassword(req.getRequestParams()["tusername"],key);
+		if(req.getRequestParams()["tusername"]!="" && flag)
 		{
-			string tok = key;
-			key = key1 + fauthu.getUserRole(req.getAllParams()["tusername"]);
+			string tok = key.substr(0,key.find(":"));
+			key = key1 + key.substr(key.find(":")+1);
 
 			string data = "http://localhost:8080/login.oauth?";
-			data += "oauth_token="+tok+"&username="+req.getAllParams()["tusername"];
+			data += "oauth_token="+tok+"&username="+req.getRequestParams()["tusername"];
 			cout << data << endl;
 
 			res.setStatusCode("303");
-			res.setStatusMsg("Moved Permanently");
-			res.setLocation(data);
+			res.setStatusMsg("Moved Permanently\r\nLocation: "+data+"\r\n\r\n");
 			cout << "redirecting to third party url" << endl;
 		}
 		else
@@ -143,20 +142,20 @@ HttpResponse OAUTHController::service(HttpRequest req)
 	}
 	else if(req.getFile()=="calledback.auth")
 	{
-		FileAuthController fauthu(req.getCntxt_root()+"/"+req.getAllParams()["tusername"]+"-tokens-secrets",":");
+		FileAuthController fauthu(req.getCntxt_root()+"/"+req.getRequestParams()["tusername"]+"-tokens-secrets",":");
 		string key1 = "sumeet&",key;
-		bool flag = fauthu.getPassword(req.getAllParams()["tusername"],key);
-		if(req.getAllParams()["tusername"]!="" && flag && req.getAllParams()["access"]=="true")
+		bool flag = fauthu.getPassword(req.getRequestParams()["tusername"],key);
+		if(req.getRequestParams()["tusername"]!="" && flag && req.getRequestParams()["access"]=="true")
 		{
-			string tok = key;
-			key = key1 + fauthu.getUserRole(req.getAllParams()["tusername"]);
+			string tok = key.substr(0,key.find(":"));
+			key = key1 + key.substr(key.find(":")+1);
 
 			Client client;
 			client.connection("localhost",8080);
 			string data = "GET /access.oauth?";
-			data += "oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token="+tok+"&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+req.getAllParams()["tusername"]+"&";
+			data += "oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token="+tok+"&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+req.getRequestParams()["tusername"]+"&";
 			string sig = "GET&" + CryptoHandler::urlEncode("http://localhost:8080/access.oauth") + "&";
-			sig += CryptoHandler::urlEncode("oauth_consumer_key=sumeet&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=0&oauth_token="+tok+"&oauth_version=1.0&tusername="+req.getAllParams()["tusername"]);
+			sig += CryptoHandler::urlEncode("oauth_consumer_key=sumeet&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=0&oauth_token="+tok+"&oauth_version=1.0&tusername="+req.getRequestParams()["tusername"]);
 
 			cout << sig << endl;
 			cout << key << endl;
@@ -190,7 +189,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			}
 			if(mapsd["oauth_token"]!="" && mapsd["oauth_token_secret"]!="" && mapsd["tusername"]!="")
 			{
-				string filen = req.getCntxt_root()+"/"+req.getAllParams()["tusername"]+"-access-secrets";
+				string filen = req.getCntxt_root()+"/"+req.getRequestParams()["tusername"]+"-access-secrets";
 				ofstream ofs(filen.c_str());
 				string wrf = mapsd["tusername"] + ":" + mapsd["oauth_token"] + ":" + mapsd["oauth_token_secret"]+"\n";
 				ofs.write(wrf.c_str(),wrf.length());
@@ -199,7 +198,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 				res.setStatusMsg("OK");
 				res.setContent_type("text/html");
 				string conte = "<html><head><script type='text/javascript' src='public/json2.js'></script><script type='text/javascript' src='public/prototype.js'></script><script type='text/javascript' src='public/oauth.js'></script></head>";
-				conte += "File Name: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+req.getAllParams()["tusername"]+"\")'/></body>";
+				conte += "File Name: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+req.getRequestParams()["tusername"]+"\")'/></body>";
 				conte += "</html>";
 				res.setContent_str(conte);
 			}
@@ -225,20 +224,20 @@ HttpResponse OAUTHController::service(HttpRequest req)
 	}
 	else if(req.getFile()=="getResource.auth")
 	{
-		FileAuthController fauthu(req.getCntxt_root()+"/"+req.getAllParams()["tusername"]+"-access-secrets",":");
+		FileAuthController fauthu(req.getCntxt_root()+"/"+req.getRequestParams()["tusername"]+"-access-secrets",":");
 		string key1 = "sumeet&",key;
-		bool flag = fauthu.getPassword(req.getAllParams()["tusername"],key);
-		if(req.getAllParams()["tusername"]!="" && flag && req.getAllParams()["file"]!="")
+		bool flag = fauthu.getPassword(req.getRequestParams()["tusername"],key);
+		if(req.getRequestParams()["tusername"]!="" && flag && req.getRequestParams()["file"]!="")
 		{
-			string tok = key;
-			key = key1 + fauthu.getUserRole(req.getAllParams()["tusername"]);
+			string tok = key.substr(0,key.find(":"));
+			key = key1 + key.substr(key.find(":")+1);
 
 			Client client;
 			client.connection("localhost",8080);
-			string data = "GET /getResource.oauth?file="+req.getAllParams()["file"];
-			data += "&oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token="+tok+"&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+req.getAllParams()["tusername"]+"&";
+			string data = "GET /getResource.oauth?file="+req.getRequestParams()["file"];
+			data += "&oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token="+tok+"&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+req.getRequestParams()["tusername"]+"&";
 			string sig = "GET&" + CryptoHandler::urlEncode("http://localhost:8080/getResource.oauth") + "&";
-			sig += CryptoHandler::urlEncode("file="+req.getAllParams()["file"]+"&oauth_consumer_key=sumeet&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=0&oauth_token="+tok+"&oauth_version=1.0&tusername="+req.getAllParams()["tusername"]);
+			sig += CryptoHandler::urlEncode("file="+req.getRequestParams()["file"]+"&oauth_consumer_key=sumeet&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=0&oauth_token="+tok+"&oauth_version=1.0&tusername="+req.getRequestParams()["tusername"]);
 
 			cout << sig << endl;
 			cout << key << endl;

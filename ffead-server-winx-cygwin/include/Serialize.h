@@ -34,6 +34,7 @@
 #include "set"
 #include "DateFormat.h"
 #include "BinaryData.h"
+#include "Constants.h"
 
 using namespace std;
 typedef string (*SerPtr) (void*);

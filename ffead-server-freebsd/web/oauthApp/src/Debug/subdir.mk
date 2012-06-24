@@ -4,13 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../OAUTHController.cpp
+../OAUTHController.cpp \
+../OAUTH2Controller.cpp
 
 OBJS += \
-./OAUTHController.o
+./OAUTHController.o \
+./OAUTH2Controller.o
 
 CPP_DEPS += \
-./OAUTHController.d
+./OAUTHController.d \
+./OAUTH2Controller.d
 
 # Each subdirectory must supply rules for building sources it contributes
 %.o: ../%.cpp

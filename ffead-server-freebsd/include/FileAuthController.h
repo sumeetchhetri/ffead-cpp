@@ -19,10 +19,12 @@ public:
 	FileAuthController(string,string);
 	virtual ~FileAuthController();
 	bool authenticate(string,string);
+	bool authenticateSecurity(string,string);
 	bool isInitialized();
 	bool authenticate(map<string,string>){return false;};
 	bool handle(HttpRequest* req,HttpResponse* res){return false;};
 	bool getPassword(string username,string &passwd);
+	string getUserRole(string);
 };
 
 #endif /* FILEAUTHCONTROLLER_H_ */

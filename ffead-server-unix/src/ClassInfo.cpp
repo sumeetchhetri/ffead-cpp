@@ -100,7 +100,7 @@ Method ClassInfo::getMethod(string methodName,args argumentTypes)
 			boost::replace_first(temp,"<","ts");
 			boost::replace_first(temp,">","te");
 			boost::replace_first(temp,"*","ptr");
-			//boost::replace_first(temp,"&","adr");
+			boost::replace_first(temp,"&","adr");
 			key += temp;
 		}
 	}

@@ -148,7 +148,7 @@ Thread* ThreadPool::getIdleThread() {
 				return tpool->at(var);
 			}
 		}
-		boost::this_thread::sleep(boost::posix_time::milliseconds(40));
+		boost::this_thread::sleep(boost::posix_time::milliseconds(1));
 	}
 }
 void ThreadPool::joinAll() {

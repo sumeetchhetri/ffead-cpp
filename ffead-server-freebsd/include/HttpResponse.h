@@ -189,6 +189,7 @@ public:
     	if(this->server!="")resp += "Server: " + this->server + "\r\n";
     	if(this->date!="")resp += "Date: " + this->date + "\r\n";
     	if(this->connection!="")resp += "Connection: " + this->connection + "\r\n";
+    	if(this->location!="")resp += "Location: " + this->location + "\r\n";
     	if(this->accept_ranges!="")resp += "Accept-Ranges: " + this->accept_ranges + "\r\n";
     	if(this->content_type!="")resp += "Content-Type: " + this->content_type + "\r\n";
     	if(this->content_str!="")resp += "Content-Length: " + boost::lexical_cast<string>(content_str.length()) + "\r\n";

@@ -36,6 +36,14 @@ CibernateConnPools::CibernateConnPools()
 }
 
 CibernateConnPools::~CibernateConnPools() {
+	map<string,CibernateConnectionPool*>::iterator it1;
+	for (it1=cpools.begin();it1!=cpools.end();it1++) {
+		delete it1->second;
+	}
+	map<string,Mapping*>::iterator it2;
+	for (it2=mappings.begin();it2!=mappings.end();it2++) {
+		delete it2->second;
+	}
 	instance=NULL;
 	cout << "\nDestructed CibernateConnPools" << flush;
 }

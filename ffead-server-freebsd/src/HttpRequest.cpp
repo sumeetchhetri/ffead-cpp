@@ -85,491 +85,658 @@ HttpRequest::HttpRequest()
 HttpRequest::HttpRequest(strVec vec,string path)
 {
 	if(vec.size()!=0){
-	this->setContent("");
-	string conten;
-	bool contStarts = false;
-	this->cookie = false;
-	for(unsigned int i=0;i<vec.size();i++)
-	{
-		strVec temp,vemp,memp;
-		if((vec.at(i)=="\r" || vec.at(i)==""|| vec.at(i)=="\r\n") && !contStarts)
+		this->setContent("");
+		string conten;
+		bool contStarts = false;
+		this->cookie = false;
+		for(unsigned int i=0;i<vec.size();i++)
 		{
-			contStarts = true;
-			continue;
-		}
-		//if(!contStarts && vec.at(i)=="\r")
-		//	contStarts = true;
-		boost::iter_split(temp, vec.at(i), boost::first_finder(": "));
-		if(!contStarts && temp.size()>1)
-		{
-			boost::replace_first(temp.at(1),"\r","");
-			if(temp.at(0)=="Host")
-				this->setHost(temp.at(1));
-			else if(temp.at(0)=="User-Agent" || temp.at(0)=="User-agent")
-				this->setUser_agent(temp.at(1));
-			else if(temp.at(0)=="Accept")
-				this->setAccept(temp.at(1));
-			else if(temp.at(0)=="Authorization")
+			strVec temp,vemp,memp;
+			if((vec.at(i)=="\r" || vec.at(i)==""|| vec.at(i)=="\r\n") && !contStarts)
 			{
-				cout << "found auth" <<endl;
-				if(temp.at(1).find("oauth_")!=string::npos)
-				{
-					this->getOauthParams(temp.at(1));
-				}
-				else
-					this->unbase64(temp.at(1));
+				contStarts = true;
+				continue;
 			}
-			else if(temp.at(0)=="Accept-Language" || temp.at(0)=="Accept-language")
+			//if(!contStarts && vec.at(i)=="\r")
+			//	contStarts = true;
+			boost::iter_split(temp, vec.at(i), boost::first_finder(": "));
+			if(!contStarts && temp.size()>1)
 			{
-				strVec lemp;
-				this->setAccept_lang(temp.at(1));
-				boost::iter_split(lemp, temp.at(1), boost::first_finder(","));
-				for(unsigned int li=0;li<lemp.size();li++)
+				boost::replace_first(temp.at(1),"\r","");
+				if(temp.at(0)=="Host")
+					this->setHost(temp.at(1));
+				else if(temp.at(0)=="User-Agent" || temp.at(0)=="User-agent")
+					this->setUser_agent(temp.at(1));
+				else if(temp.at(0)=="Accept")
+					this->setAccept(temp.at(1));
+				else if(temp.at(0)=="Authorization")
 				{
-					if(lemp.at(li).find(";")==string::npos && lemp.at(li)!="")
+					cout << "found auth" <<endl;
+					if(temp.at(1).find("oauth_")!=string::npos)
 					{
-						string t = lemp.at(li);
-						size_t s = t.find_first_not_of(" ");
-						size_t e = t.find_last_not_of(" ")+1;
-						t = t.substr(s,e-s);
-						this->localeInfo.push_back(t);
+						this->getOauthParams(temp.at(1));
 					}
-					else if(lemp.at(li)!="")
+					else
+						this->unbase64(temp.at(1));
+				}
+				else if(temp.at(0)=="Accept-Language" || temp.at(0)=="Accept-language")
+				{
+					strVec lemp;
+					this->setAccept_lang(temp.at(1));
+					boost::iter_split(lemp, temp.at(1), boost::first_finder(","));
+					for(unsigned int li=0;li<lemp.size();li++)
 					{
-						string t = lemp.at(li);
-						size_t s = t.find_first_not_of(" ");
-						size_t e = t.find(";");
-						t = t.substr(s,e-s);
-						e = t.find_last_not_of(" ")+1;
-						t = t.substr(0,e);
-						this->localeInfo.push_back(t);
+						if(lemp.at(li).find(";")==string::npos && lemp.at(li)!="")
+						{
+							string t = lemp.at(li);
+							size_t s = t.find_first_not_of(" ");
+							size_t e = t.find_last_not_of(" ")+1;
+							t = t.substr(s,e-s);
+							this->localeInfo.push_back(t);
+						}
+						else if(lemp.at(li)!="")
+						{
+							string t = lemp.at(li);
+							size_t s = t.find_first_not_of(" ");
+							size_t e = t.find(";");
+							t = t.substr(s,e-s);
+							e = t.find_last_not_of(" ")+1;
+							t = t.substr(0,e);
+							this->localeInfo.push_back(t);
+						}
+					}
+					//cout << temp.at(1) << flush;
+				}
+				else if(temp.at(0)=="Accept-Encoding" || temp.at(0)=="Accept-encoding")
+					this->setAccept_encod(temp.at(1));
+				else if(temp.at(0)=="Accept-Charset" || temp.at(0)=="Accept-charset")
+					this->setAccept_lang(temp.at(1));
+				else if(temp.at(0)=="Keep-Alive" || temp.at(0)=="Keep-alive")
+					this->setKeep_alive(temp.at(1));
+				else if(temp.at(0)=="Connection")
+					this->setConnection(temp.at(1));
+				else if(temp.at(0)=="Cache-Control" || temp.at(0)=="Cache-control")
+					this->setCache_ctrl(temp.at(1));
+				else if(temp.at(0)=="Content-Type" || temp.at(0)=="Content-type")
+				{
+					this->setContent_type(temp.at(1));
+					string tempi(temp.at(1));
+					size_t s = tempi.find("boundary");
+					if(s!=string::npos)
+					{
+						this->setContent_type(tempi.substr(0,s));
+						tempi = tempi.substr(s);
+						strVec results;
+						boost::iter_split(results, tempi, boost::first_finder("="));
+						if(results.size()==2)
+						{
+							string bound = "--" + results.at(1).substr(0,results.at(1).length());
+							this->setContent_boundary(bound);
+						}
 					}
 				}
-				//cout << temp.at(1) << flush;
-			}
-			else if(temp.at(0)=="Accept-Encoding" || temp.at(0)=="Accept-encoding")
-				this->setAccept_encod(temp.at(1));
-			else if(temp.at(0)=="Accept-Charset" || temp.at(0)=="Accept-charset")
-				this->setAccept_lang(temp.at(1));
-			else if(temp.at(0)=="Keep-Alive" || temp.at(0)=="Keep-alive")
-				this->setKeep_alive(temp.at(1));
-			else if(temp.at(0)=="Connection")
-				this->setConnection(temp.at(1));
-			else if(temp.at(0)=="Cache-Control" || temp.at(0)=="Cache-control")
-				this->setCache_ctrl(temp.at(1));
-			else if(temp.at(0)=="Content-Type" || temp.at(0)=="Content-type")
-			{
-				this->setContent_type(temp.at(1));
-				string tempi(temp.at(1));
-				size_t s = tempi.find("boundary");
-				if(s!=string::npos)
+				else if(temp.at(0)=="Cookie")
 				{
-					this->setContent_type(tempi.substr(0,s));
-					tempi = tempi.substr(s);
+					this->cookie = true;
 					strVec results;
-					boost::iter_split(results, tempi, boost::first_finder("="));
-					if(results.size()==2)
+					boost::iter_split(results, temp.at(1), boost::first_finder("; "));
+					for(unsigned j=0;j<(int)results.size();j++)
 					{
-						string bound = "--" + results.at(1).substr(0,results.at(1).length());
-						this->setContent_boundary(bound);
+						strVec results1;
+						boost::iter_split(results1, results.at(j), boost::first_finder("="));
+						if(results1.size()==2)
+							cookieattrs[results1.at(0)] = results1.at(1);
+						else
+							cookieattrs[results1.at(0)] = "true";
 					}
 				}
+				else if(temp.at(0)=="Content-Length" || temp.at(0)=="Content-length")
+					this->setContent_len(temp.at(1));
+				else if(temp.at(0)=="Referer")
+					this->setReferer(temp.at(1));
+				else if(temp.at(0)=="Pragma")
+					this->setPragma(temp.at(1));
+				//cout << temp.at(0) <<  "---" << temp.at(1) << flush;
 			}
-			else if(temp.at(0)=="Cookie")
+			else
 			{
-				this->cookie = true;
-				strVec results;
-				boost::iter_split(results, temp.at(1), boost::first_finder("; "));
-				for(unsigned j=0;j<(int)results.size();j++)
+				string tem = temp.at(0);
+				if(!contStarts && boost::find_first(tem, "GET"))
 				{
-					strVec results1;
-					boost::iter_split(results1, results.at(j), boost::first_finder("="));
-					if(results1.size()==2)
-						cookieattrs[results1.at(0)] = results1.at(1);
-					else
-						cookieattrs[results1.at(0)] = "true";
-				}
-			}
-			else if(temp.at(0)=="Content-Length" || temp.at(0)=="Content-length")
-				this->setContent_len(temp.at(1));
-			else if(temp.at(0)=="Referer")
-				this->setReferer(temp.at(1));
-			else if(temp.at(0)=="Pragma")
-				this->setPragma(temp.at(1));
-			//cout << temp.at(0) <<  "---" << temp.at(1) << flush;
-		}
-		else
-		{
-			string tem = temp.at(0);
-			if(!contStarts && boost::find_first(tem, "GET"))
-			{
-				boost::replace_first(tem,"GET ","");
-				this->setMethod("GET");
-				boost::iter_split(vemp, tem, boost::first_finder(" "));
-				if(vemp.size()==2)
-				{
-					boost::replace_first(vemp.at(1),"\r","");
-					this->setHttpVersion(vemp.at(1));
-					boost::replace_first(vemp.at(0)," ","");
-					if(vemp.at(0).find("?")!=string ::npos)
+					boost::replace_first(tem,"GET ","");
+					this->setMethod("GET");
+					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					if(vemp.size()==2)
 					{
-						strVec params;
-						string valu(vemp.at(0));
-						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-						valu = valu.substr(valu.find("?")+1);
-						//valu = CryptoHandler::urlDecode(valu);
-						boost::iter_split(params,valu , boost::first_finder("&"));
-						for(unsigned j=0;j<params.size();j++)
+						boost::replace_first(vemp.at(1),"\r","");
+						this->setHttpVersion(vemp.at(1));
+						boost::replace_first(vemp.at(0)," ","");
+						if(vemp.at(0).find("?")!=string ::npos)
 						{
-							strVec param;
-							boost::iter_split(param, params.at(j), boost::first_finder("="));
-							if(param.size()==2)
+							strVec params;
+							string valu(vemp.at(0));
+							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+							valu = valu.substr(valu.find("?")+1);
+							//valu = CryptoHandler::urlDecode(valu);
+							boost::iter_split(params,valu , boost::first_finder("&"));
+							map<string ,int> indices;
+							map<string,string>::iterator it;
+							for(unsigned j=0;j<params.size();j++)
 							{
-								string att = param.at(0);
-								boost::replace_first(att,"\r","");
-								boost::replace_first(att,"\t","");
-								boost::replace_first(att," ","");
-								this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
-								//cout << att << " = " << param.at(1) << endl;
-								reqorderinf[reqorderinf.size()+1] = att;
+								strVec param;
+								boost::iter_split(param, params.at(j), boost::first_finder("="));
+								if(param.size()==2)
+								{
+									string att = param.at(0);
+									boost::replace_first(att,"\r","");
+									boost::replace_first(att,"\t","");
+									boost::replace_first(att," ","");
+									//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
+									string attN = CryptoHandler::urlDecode(att);
+									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+									{
+										if(indices.find(attN)==indices.end())
+										{
+											indices[attN] = 0;
+										}
+										else
+										{
+											indices[attN] = indices[attN] + 1;
+										}
+										this->requestParams[attN.substr(0, attN.find("[")+1)
+												  + boost::lexical_cast<string>(indices[attN])
+												  + "]"] = CryptoHandler::urlDecode(param.at(1));
+										cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+														  + boost::lexical_cast<string>(indices[attN])
+														  + "]"
+														  << CryptoHandler::urlDecode(param.at(1)) << endl;
+									}
+									else
+										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+									//cout << att << " = " << param.at(1) << endl;
+									reqorderinf[reqorderinf.size()+1] = att;
+								}
+							}
+						}
+						this->setActUrl(vemp.at(0));
+						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						int fs = vemp.at(0).find_first_of("/");
+						int es = vemp.at(0).find_last_of("/");
+						if(fs==es)
+						{
+							this->setCntxt_root(path+"default");
+							this->setCntxt_name("default");
+							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+"default/"+vemp.at(0));
+						}
+						else
+						{
+							int ss = vemp.at(0).substr(fs+1).find("/");
+							if(ss>fs)
+							{
+								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+								this->setCntxt_root(path+this->getCntxt_name());
+								this->setFile(vemp.at(0).substr(es+1));
+								this->setUrl(path+vemp.at(0));
 							}
 						}
 					}
-					this->setActUrl(vemp.at(0));
-					boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
-					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
-					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
-						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
-						}
-					}
 				}
-			}
-			else if(!contStarts && boost::find_first(tem, "DELETE"))
-			{
-				boost::replace_first(tem,"DELETE ","");
-				this->setMethod("DELETE");
-				boost::iter_split(vemp, tem, boost::first_finder(" "));
-				if(vemp.size()==2)
+				else if(!contStarts && boost::find_first(tem, "DELETE"))
 				{
-					boost::replace_first(vemp.at(1),"\r","");
-					this->setHttpVersion(vemp.at(1));
-					boost::replace_first(vemp.at(0)," ","");
-					if(vemp.at(0).find("?")!=string ::npos)
+					boost::replace_first(tem,"DELETE ","");
+					this->setMethod("DELETE");
+					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					if(vemp.size()==2)
 					{
-						strVec params;
-						string valu(vemp.at(0));
-						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-						valu = valu.substr(valu.find("?")+1);
-						valu = CryptoHandler::urlDecode(valu);
-						boost::iter_split(params,valu, boost::first_finder("&"));
-						for(unsigned j=0;j<params.size();j++)
+						boost::replace_first(vemp.at(1),"\r","");
+						this->setHttpVersion(vemp.at(1));
+						boost::replace_first(vemp.at(0)," ","");
+						if(vemp.at(0).find("?")!=string ::npos)
 						{
-							strVec param;
-							boost::iter_split(param, params.at(j), boost::first_finder("="));
-							if(param.size()==2)
+							strVec params;
+							string valu(vemp.at(0));
+							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+							valu = valu.substr(valu.find("?")+1);
+							valu = CryptoHandler::urlDecode(valu);
+							boost::iter_split(params,valu, boost::first_finder("&"));
+							map<string ,int> indices;
+							map<string,string>::iterator it;
+							for(unsigned j=0;j<params.size();j++)
 							{
-								string att = param.at(0);
-								boost::replace_first(att,"\r","");
-								boost::replace_first(att,"\t","");
-								boost::replace_first(att," ","");
-								this->setRequestParam(att,param.at(1));
-								reqorderinf[reqorderinf.size()+1] = att;
+								strVec param;
+								boost::iter_split(param, params.at(j), boost::first_finder("="));
+								if(param.size()==2)
+								{
+									string att = param.at(0);
+									boost::replace_first(att,"\r","");
+									boost::replace_first(att,"\t","");
+									boost::replace_first(att," ","");
+									string attN = CryptoHandler::urlDecode(att);
+									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+									{
+										if(indices.find(attN)==indices.end())
+										{
+											indices[attN] = 0;
+										}
+										else
+										{
+											indices[attN] = indices[attN] + 1;
+										}
+										this->requestParams[attN.substr(0, attN.find("[")+1)
+												  + boost::lexical_cast<string>(indices[attN])
+												  + "]"] = CryptoHandler::urlDecode(param.at(1));
+										cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+														  + boost::lexical_cast<string>(indices[attN])
+														  + "]"
+														  << CryptoHandler::urlDecode(param.at(1)) << endl;
+									}
+									else
+										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+									reqorderinf[reqorderinf.size()+1] = att;
+								}
+							}
+						}
+						this->setActUrl(vemp.at(0));
+						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						int fs = vemp.at(0).find_first_of("/");
+						int es = vemp.at(0).find_last_of("/");
+						if(fs==es)
+						{
+							this->setCntxt_root(path+"default");
+							this->setCntxt_name("default");
+							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+"default/"+vemp.at(0));
+						}
+						else
+						{
+							int ss = vemp.at(0).substr(fs+1).find("/");
+							if(ss>fs)
+							{
+								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+								this->setCntxt_root(path+this->getCntxt_name());
+								this->setFile(vemp.at(0).substr(es+1));
+								this->setUrl(path+vemp.at(0));
 							}
 						}
 					}
-					this->setActUrl(vemp.at(0));
-					boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
-					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
-					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
-						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
-						}
-					}
 				}
-			}
-			else if(!contStarts && boost::find_first(tem, "PUT"))
-			{
-				boost::replace_first(tem,"PUT ","");
-				this->setMethod("PUT");
-				boost::iter_split(vemp, tem, boost::first_finder(" "));
-				if(vemp.size()==2)
+				else if(!contStarts && boost::find_first(tem, "PUT"))
 				{
-					boost::replace_first(vemp.at(1),"\r","");
-					this->setHttpVersion(vemp.at(1));
-					boost::replace_first(vemp.at(0)," ","");
-					if(vemp.at(0).find("?")!=string ::npos)
+					boost::replace_first(tem,"PUT ","");
+					this->setMethod("PUT");
+					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					if(vemp.size()==2)
 					{
-						strVec params;
-						string valu(vemp.at(0));
-						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-						valu = valu.substr(valu.find("?")+1);
-						valu = CryptoHandler::urlDecode(valu);
-						boost::iter_split(params,valu, boost::first_finder("&"));
-						for(unsigned j=0;j<params.size();j++)
+						boost::replace_first(vemp.at(1),"\r","");
+						this->setHttpVersion(vemp.at(1));
+						boost::replace_first(vemp.at(0)," ","");
+						if(vemp.at(0).find("?")!=string ::npos)
 						{
-							strVec param;
-							boost::iter_split(param, params.at(j), boost::first_finder("="));
-							if(param.size()==2)
+							strVec params;
+							string valu(vemp.at(0));
+							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+							valu = valu.substr(valu.find("?")+1);
+							valu = CryptoHandler::urlDecode(valu);
+							boost::iter_split(params,valu, boost::first_finder("&"));
+							map<string ,int> indices;
+							map<string,string>::iterator it;
+							for(unsigned j=0;j<params.size();j++)
 							{
-								string att = param.at(0);
-								boost::replace_first(att,"\r","");
-								boost::replace_first(att,"\t","");
-								boost::replace_first(att," ","");
-								this->setRequestParam(att,param.at(1));
-								reqorderinf[reqorderinf.size()+1] = att;
+								strVec param;
+								boost::iter_split(param, params.at(j), boost::first_finder("="));
+								if(param.size()==2)
+								{
+									string att = param.at(0);
+									boost::replace_first(att,"\r","");
+									boost::replace_first(att,"\t","");
+									boost::replace_first(att," ","");
+									string attN = CryptoHandler::urlDecode(att);
+									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+									{
+										if(indices.find(attN)==indices.end())
+										{
+											indices[attN] = 0;
+										}
+										else
+										{
+											indices[attN] = indices[attN] + 1;
+										}
+										this->requestParams[attN.substr(0, attN.find("[")+1)
+												  + boost::lexical_cast<string>(indices[attN])
+												  + "]"] = CryptoHandler::urlDecode(param.at(1));
+										cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+														  + boost::lexical_cast<string>(indices[attN])
+														  + "]"
+														  << CryptoHandler::urlDecode(param.at(1)) << endl;
+									}
+									else
+										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+									reqorderinf[reqorderinf.size()+1] = att;
+								}
+							}
+						}
+						this->setActUrl(vemp.at(0));
+						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						int fs = vemp.at(0).find_first_of("/");
+						int es = vemp.at(0).find_last_of("/");
+						if(fs==es)
+						{
+							this->setCntxt_root(path+"default");
+							this->setCntxt_name("default");
+							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+"default/"+vemp.at(0));
+						}
+						else
+						{
+							int ss = vemp.at(0).substr(fs+1).find("/");
+							if(ss>fs)
+							{
+								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+								this->setCntxt_root(path+this->getCntxt_name());
+								this->setFile(vemp.at(0).substr(es+1));
+								this->setUrl(path+vemp.at(0));
 							}
 						}
 					}
-					this->setActUrl(vemp.at(0));
-					boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
+				}
+				else if(!contStarts && boost::find_first(tem, "POST"))
+				{
+					boost::replace_first(tem,"POST ","");
+					this->setMethod("POST");
+					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					if(vemp.size()==2)
 					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
-					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
+						//this->setUrl(vemp.at(0));
+						//string pat(vemp.at(0));
+						boost::replace_first(vemp.at(1),"\r","");
+						this->setHttpVersion(vemp.at(1));
+						boost::replace_first(vemp.at(0)," ","");
+						if(vemp.at(0).find("?")!=string ::npos)
 						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
+							strVec params;
+							string valu(vemp.at(0));
+							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+							valu = valu.substr(valu.find("?")+1);
+							valu = CryptoHandler::urlDecode(valu);
+							boost::iter_split(params,valu, boost::first_finder("&"));
+							map<string ,int> indices;
+							map<string,string>::iterator it;
+							for(unsigned j=0;j<params.size();j++)
+							{
+								strVec param;
+								boost::iter_split(param, params.at(j), boost::first_finder("="));
+								if(param.size()==2)
+								{
+									string att = param.at(0);
+									boost::replace_first(att,"\r","");
+									boost::replace_first(att,"\t","");
+									boost::replace_first(att," ","");
+									string attN = CryptoHandler::urlDecode(att);
+									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+									{
+										if(indices.find(attN)==indices.end())
+										{
+											indices[attN] = 0;
+										}
+										else
+										{
+											indices[attN] = indices[attN] + 1;
+										}
+										this->requestParams[attN.substr(0, attN.find("[")+1)
+												  + boost::lexical_cast<string>(indices[attN])
+												  + "]"] = CryptoHandler::urlDecode(param.at(1));
+										cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+														  + boost::lexical_cast<string>(indices[attN])
+														  + "]"
+														  << CryptoHandler::urlDecode(param.at(1)) << endl;
+									}
+									else
+										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+									reqorderinf[reqorderinf.size()+1] = att;
+								}
+							}
+						}
+						this->setActUrl(vemp.at(0));
+						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						int fs = vemp.at(0).find_first_of("/");
+						int es = vemp.at(0).find_last_of("/");
+						if(fs==es)
+						{
+							this->setCntxt_root(path+"default");
+							this->setCntxt_name("default");
 							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
+							this->setUrl(path+"default/"+vemp.at(0));
+						}
+						else
+						{
+							int ss = vemp.at(0).substr(fs+1).find("/");
+							if(ss>fs)
+							{
+								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+								this->setCntxt_root(path+this->getCntxt_name());
+								this->setFile(vemp.at(0).substr(es+1));
+								this->setUrl(path+vemp.at(0));
+							}
 						}
 					}
 				}
-			}
-			else if(!contStarts && boost::find_first(tem, "POST"))
-			{
-				boost::replace_first(tem,"POST ","");
-				this->setMethod("POST");
-				boost::iter_split(vemp, tem, boost::first_finder(" "));
-				if(vemp.size()==2)
+				else if(contStarts)
 				{
-					//this->setUrl(vemp.at(0));
-					//string pat(vemp.at(0));
-					boost::replace_first(vemp.at(1),"\r","");
-					this->setHttpVersion(vemp.at(1));
-					boost::replace_first(vemp.at(0)," ","");
-					this->setActUrl(vemp.at(0));
-					boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
+					/*string temp;
+					if(vec.at(i).find("<?")!=string::npos && vec.at(i).find("?>")!=string::npos)
 					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
+						temp = vec.at(i).substr(vec.at(i).find("?>")+2);
+						conten.append(temp);
 					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
-						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
-						}
-					}
+					else*/
+					conten.append(vec.at(i));
+					if(i!=vec.size()-1)
+						conten.append("\n");
+					//this->content=con;
 				}
 			}
-			else if(contStarts)
-			{
-				/*string temp;
-				if(vec.at(i).find("<?")!=string::npos && vec.at(i).find("?>")!=string::npos)
-				{
-					temp = vec.at(i).substr(vec.at(i).find("?>")+2);
-					conten.append(temp);
-				}
-				else*/
-				conten.append(vec.at(i));
-				if(i!=vec.size()-1)
-					conten.append("\n");
-				//this->content=con;
-			}
 		}
-	}
-	this->setContent(conten);
-	/*if(this->getContent()!="")
-	{
-		strVec params;
-		string content = this->getContent();
-		//cout << content << flush;
-		boost::iter_split(params, content, boost::first_finder("&"));
-		//cout << "\n\n\nsize: " << params.size() << flush;
-		for(unsigned j=0;j<params.size();j++)
-		{
-			strVec param;
-			//cout << params.at(j) << flush;
-			boost::iter_split(param, params.at(j), boost::first_finder("="));
-			//cout << param.size() << flush;
-			if(param.size()==2)
-			{
-				string att = param.at(0);
-				boost::replace_first(att,"\r","");
-				boost::replace_first(att,"\t","");
-				boost::replace_first(att," ","");
-				//cout << "attribute:  " << param.at(0) << "\n"<< flush;
-				//cout << "value: " << param.at(1) << "\n" << flush;
-				this->setRequestParam(att,param.at(1));
-			}
-		}
-	}*/
-	if(this->getContent()!="")
-	{
-		cout << this->getContent() << flush;
-		if(this->getContent_type().find("application/x-www-form-urlencoded")!=string::npos)
+		this->setContent(conten);
+		/*if(this->getContent()!="")
 		{
 			strVec params;
-			string valu(this->getContent());
-			boost::iter_split(params,valu , boost::first_finder("&"));
+			string content = this->getContent();
+			//cout << content << flush;
+			boost::iter_split(params, content, boost::first_finder("&"));
+			//cout << "\n\n\nsize: " << params.size() << flush;
 			for(unsigned j=0;j<params.size();j++)
 			{
 				strVec param;
+				//cout << params.at(j) << flush;
 				boost::iter_split(param, params.at(j), boost::first_finder("="));
+				//cout << param.size() << flush;
 				if(param.size()==2)
 				{
 					string att = param.at(0);
 					boost::replace_first(att,"\r","");
 					boost::replace_first(att,"\t","");
 					boost::replace_first(att," ","");
+					//cout << "attribute:  " << param.at(0) << "\n"<< flush;
+					//cout << "value: " << param.at(1) << "\n" << flush;
 					this->setRequestParam(att,param.at(1));
-					reqorderinf[reqorderinf.size()+1] = att;
 				}
 			}
-		}
-		else if(this->getContent()!="" && this->getContent_boundary()!="")
+		}*/
+		if(this->getContent()!="")
 		{
-			string delb = "\r"+this->getContent_boundary();
-			string delend = "\r"+this->getContent_boundary()+"--";
-			size_t stb = this->getContent().find_first_of(delb)+delb.length()+1;
-			size_t enb = this->getContent().find_last_not_of(delend);
-			string param_conts = this->getContent().substr(stb);
-			boost::replace_first(param_conts,delend,"");
-			param_conts = param_conts.substr(0,param_conts.length()-1);
-			strVec parameters;
-			boost::iter_split(parameters, param_conts, boost::first_finder(delb));
-			//cout << "Boundary: " << this->getContent_boundary() << flush;
-			//cout << "\nLength: " << this->getContent().length() << flush;
-			//cout << "\nStart End: " << stb << " " << enb << "\n" << flush;
-			//cout << "\nContent: " << param_conts << "\n" << flush;
-			for(unsigned j=0;j<parameters.size();j++)
+			cout << this->getContent() << flush;
+			if(this->getContent_type().find("application/x-www-form-urlencoded")!=string::npos)
 			{
-				if(parameters.at(j)=="" || parameters.at(j).find_first_not_of(" ")==string::npos
-						|| parameters.at(j).find_first_not_of("\r")==string::npos)
-					continue;
-				FormData datf;
-				string parm = parameters.at(j);
-				//cout << parm << "\nparm" << flush;
-				size_t dis = parm.find("Content-Disposition: ");
-				if(dis==string::npos)
-					dis = parm.find("Content-disposition: ");
-				string cont_disp,cont_type;
-				if(dis!=string::npos)
+				strVec params;
+				string valu(this->getContent());
+				boost::iter_split(params,valu , boost::first_finder("&"));
+				map<string ,int> indices;
+				map<string,string>::iterator it;
+				for(unsigned j=0;j<params.size();j++)
 				{
-					size_t dist = parm.find("Content-Type: ");
-					if(dist==string::npos)
-						dist = parm.find("Content-yype: ");
-					size_t dise;
-					if(dist==string::npos)
+					strVec param;
+					boost::iter_split(param, params.at(j), boost::first_finder("="));
+					if(param.size()==2)
 					{
-						dist = parm.find("\r\r");
-						dise = dist + 2;
-						//cout << "\ndist = npos" << flush;
-					}
-					else
-					{
-						//parm = parm.substr(dist+14);
-						cont_type = parm.substr(dist+14,parm.find("\r\r")-(dist+14));
-						dise = parm.find("\r\r") + 2;
-						//cout << "\nctype = " << cont_type << flush;
-						//dist = dist-12;
-					}
-					cont_disp = parm.substr(dis+21,dist-(dis+21));
-					boost::replace_first(cont_disp,"\r","");
-					//cout << "\ncdisp = " << cont_disp << flush;
-					//cout << "\ndise = " << dise << flush;
-					parm = parm.substr(dise);
-				}
-				strVec parmdef;
-				boost::iter_split(parmdef, cont_disp, boost::first_finder(";"));
-				string key;
-				for(unsigned k=0;k<parmdef.size();k++)
-				{
-					if(parmdef.at(k)!="" && parmdef.at(k).find("=")!=string::npos)
-					{
-						size_t stpd = parmdef.at(k).find_first_not_of(" ");
-						size_t enpd = parmdef.at(k).find_last_not_of(" ");
-						//cout << "\nparmdef = " << parmdef.at(k) << flush;
-						//cout << "\nst en = " << stpd  << " " << enpd << flush;
-						string propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
-						strVec proplr;
-						boost::iter_split(proplr, propert, boost::first_finder("="));
-						if(proplr.size()==2)
+						string att = param.at(0);
+						boost::replace_first(att,"\r","");
+						boost::replace_first(att,"\t","");
+						boost::replace_first(att," ","");
+						string attN = CryptoHandler::urlDecode(att);
+						if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 						{
-							if(proplr.at(0)=="name" && proplr.at(1)!="\"\"")
+							if(indices.find(attN)==indices.end())
 							{
-								key = proplr.at(1);
-								key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
-								boost::replace_first(cont_type,"\r","");
-								datf.type = cont_type;
-								datf.value = parm;
+								indices[attN] = 0;
 							}
-							else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")
+							else
 							{
-								string fna = proplr.at(1);
-								fna = fna.substr(fna.find_first_not_of("\""),fna.find_last_not_of("\"")-fna.find_first_not_of("\"")+1);
-								datf.fileName = fna;
+								indices[attN] = indices[attN] + 1;
+							}
+							this->requestParams[attN.substr(0, attN.find("[")+1)
+									  + boost::lexical_cast<string>(indices[attN])
+									  + "]"] = CryptoHandler::urlDecode(param.at(1));
+							cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+											  << boost::lexical_cast<string>(indices[attN])
+											  << "]"
+											  << CryptoHandler::urlDecode(param.at(1)) << endl;
+						}
+						else
+							this->setRequestParam(attN,CryptoHandler::urlDecode(param.at(1)));
+						reqorderinf[reqorderinf.size()+1] = att;
+					}
+				}
+			}
+			else if(this->getContent()!="" && this->getContent_boundary()!="")
+			{
+				string delb = "\r"+this->getContent_boundary();
+				string delend = "\r"+this->getContent_boundary()+"--";
+				size_t stb = this->getContent().find_first_of(delb)+delb.length()+1;
+				size_t enb = this->getContent().find_last_not_of(delend);
+				string param_conts = this->getContent().substr(stb);
+				boost::replace_first(param_conts,delend,"");
+				param_conts = param_conts.substr(0,param_conts.length()-1);
+				strVec parameters;
+				boost::iter_split(parameters, param_conts, boost::first_finder(delb));
+				//cout << "Boundary: " << this->getContent_boundary() << flush;
+				//cout << "\nLength: " << this->getContent().length() << flush;
+				//cout << "\nStart End: " << stb << " " << enb << "\n" << flush;
+				//cout << "\nContent: " << param_conts << "\n" << flush;
+				map<string ,int> indices;
+				map<string,string>::iterator it;
+				for(unsigned j=0;j<parameters.size();j++)
+				{
+					if(parameters.at(j)=="" || parameters.at(j).find_first_not_of(" ")==string::npos
+							|| parameters.at(j).find_first_not_of("\r")==string::npos)
+						continue;
+					FormData datf;
+					string parm = parameters.at(j);
+					//cout << parm << "\nparm" << flush;
+					size_t dis = parm.find("Content-Disposition: ");
+					if(dis==string::npos)
+						dis = parm.find("Content-disposition: ");
+					string cont_disp,cont_type;
+					if(dis!=string::npos)
+					{
+						size_t dist = parm.find("Content-Type: ");
+						if(dist==string::npos)
+							dist = parm.find("Content-yype: ");
+						size_t dise;
+						if(dist==string::npos)
+						{
+							dist = parm.find("\r\r");
+							dise = dist + 2;
+							//cout << "\ndist = npos" << flush;
+						}
+						else
+						{
+							//parm = parm.substr(dist+14);
+							cont_type = parm.substr(dist+14,parm.find("\r\r")-(dist+14));
+							dise = parm.find("\r\r") + 2;
+							//cout << "\nctype = " << cont_type << flush;
+							//dist = dist-12;
+						}
+						cont_disp = parm.substr(dis+21,dist-(dis+21));
+						boost::replace_first(cont_disp,"\r","");
+						//cout << "\ncdisp = " << cont_disp << flush;
+						//cout << "\ndise = " << dise << flush;
+						parm = parm.substr(dise);
+					}
+					strVec parmdef;
+					boost::iter_split(parmdef, cont_disp, boost::first_finder(";"));
+					string key;
+					for(unsigned k=0;k<parmdef.size();k++)
+					{
+						if(parmdef.at(k)!="" && parmdef.at(k).find("=")!=string::npos)
+						{
+							size_t stpd = parmdef.at(k).find_first_not_of(" ");
+							size_t enpd = parmdef.at(k).find_last_not_of(" ");
+							//cout << "\nparmdef = " << parmdef.at(k) << flush;
+							//cout << "\nst en = " << stpd  << " " << enpd << flush;
+							string propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
+							strVec proplr;
+							boost::iter_split(proplr, propert, boost::first_finder("="));
+							if(proplr.size()==2)
+							{
+								if(proplr.at(0)=="name" && proplr.at(1)!="\"\"")
+								{
+									key = proplr.at(1);
+									key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
+									key = CryptoHandler::urlDecode(key);
+									boost::replace_first(cont_type,"\r","");
+									datf.type = cont_type;
+									datf.value = parm;
+								}
+								else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")
+								{
+									string fna = proplr.at(1);
+									fna = fna.substr(fna.find_first_not_of("\""),fna.find_last_not_of("\"")-fna.find_first_not_of("\"")+1);
+									fna = CryptoHandler::urlDecode(fna);
+									datf.fileName = fna;
+								}
 							}
 						}
 					}
-				}
-				if(key!="")
-				{
-					this->setRequestParamF(key,datf);
-					string hr = (key + " " + datf.type + " "+ datf.fileName+" "+ datf.value);
-					//cout << hr << flush;
+					if(key!="")
+					{
+						string attN = CryptoHandler::urlDecode(key);
+						if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+						{
+							if(indices.find(attN)==indices.end())
+							{
+								indices[attN] = 0;
+							}
+							else
+							{
+								indices[attN] = indices[attN] + 1;
+							}
+							this->requestParamsF[attN.substr(0, attN.find("[")+1)
+									  + boost::lexical_cast<string>(indices[attN])
+									  + "]"] = datf;
+							cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+											  << boost::lexical_cast<string>(indices[attN])
+											  << "]"
+											  << datf.fileName << endl;
+						}
+						this->setRequestParamF(attN,datf);
+						if(datf.fileName!="")
+						{
+							string tmpfile = this->getCntxt_root() + "/temp/"+ this->getContent_boundary() +datf.value;
+							ofstream os;
+							os.open(tmpfile.c_str());
+							os.write(datf.value.c_str(), datf.value.length());
+							os.close();
+							datf.tmpFileName = tmpfile;
+							datf.length = datf.value.length();
+						}
+						string hr = (key + " " + datf.type + " "+ datf.fileName+" "+ datf.value);
+						//cout << hr << flush;
+					}
 				}
 			}
-		}
 
-	}
+		}
 	}
 	//cout << this->toString() << flush;
 }
@@ -1181,8 +1348,17 @@ string HttpRequest::getFile() const
 
 void HttpRequest::setFile(string file)
 {
-	this->url = this->cntxt_root + "/" + file;
 	this->file = file;
+	cout << "file is " << this->file << endl;
+	if(this->file!="" && this->url.find(this->file)!=string::npos)
+	{
+		int fst = this->url.find_last_of(this->file) - this->file.length() + 1;
+		this->url = this->url.substr(0, fst) +  this->file;
+	}
+	else
+	{
+		this->url +=  this->file;
+	}
 }
 
 string HttpRequest::getActUrl() const
@@ -1203,4 +1379,613 @@ map<string,string> HttpRequest::getAuthinfo() const
 void HttpRequest::setAuthinfo(map<string,string> authinfo)
 {
 	this->authinfo = authinfo;
+}
+
+string HttpRequest::toPHPVariablesString(string def)
+{
+	string ret;
+	ret = "<?php\n$_SERVER['HTTP_HOST'] = '"+this->getHost();
+	ret += "';\n$_SERVER['HTTP_ACCEPT'] = '"+this->getAccept();
+	ret += "';\n$_SERVER['HTTP_ACCEPT_CHARSET'] = '"+this->getAccept_chars();
+	ret += "';\n$_SERVER['HTTP_ACCEPT_ENCODING'] = '"+this->getAccept_encod();
+	ret += "';\n$_SERVER['HTTP_ACCEPT_LANGUAGE'] = '"+this->getAccept_lang();
+	ret += "';\n$_SERVER_EX['CACHE_CNTRL'] = '"+this->getCache_ctrl();
+	ret += "';\n$_SERVER['HTTP_CONNECTION'] = '"+this->getConnection();
+	ret += "';\n$_SERVER_EX['HTTP_CONTENT'] = '"+this->getContent();
+	ret += "';\n$_SERVER_EX['HTTP_CNTENT_LENGTH'] = '"+this->getContent_len();
+	ret += "';\n$_SERVER_EX['HTTP_CNTENT_TYPE'] = '"+this->getContent_type();
+	ret += "';\n$_SERVER_EX['HTTP_VERSION'] = '"+this->getHttpVersion();
+	ret += "';\n$_SERVER['REQUEST_METHOD'] = '"+this->getMethod();
+	ret += "';\n$_SERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
+	string requri = this->getActUrl();
+	boost::replace_first(requri, ("/"+this->getCntxt_name()), "");
+	if(requri=="")
+		requri = "/";
+	ret += "';\n$_SERVER['REQUEST_URI'] = '"+requri;
+	ret += "';\n$_SERVER_EX['HTTP_REQ_FILE'] = '"+this->getFile();
+	ret += "';\n$_SERVER_EX['CONTEXT_NAME'] = '"+this->getCntxt_name();
+	if(def=="")
+		ret += "';\n$_SERVER['DOCUMENT_ROOT'] = '"+this->getCntxt_root();
+	else
+		ret += "';\n$_SERVER['DOCUMENT_ROOT'] = '/"+this->getCntxt_name();
+	ret += "';\n$_SERVER_EX['DEFAULT_LOCALE'] = '"+this->getDefaultLocale();
+	ret += "';\n$_SERVER['HTTP_HOST'] = '"+this->getContent_boundary() + "';\n";
+	if(this->queryParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->queryParams.begin();iter!=this->queryParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				ret += "\nif(!isset($_GET['"+iter->first.substr(0, iter->first.find("["))+"']))\n{\n$_GET['"+iter->first.substr(0, iter->first.find("["))+"']=array();\n}\n";
+				ret += ("\n$_GET['"+iter->first.substr(0, iter->first.find("["))+"']" +
+					iter->first.substr(iter->first.find("[")) + " = '"+iter->second + "';");
+			}
+			else
+				ret += "\n$_GET['"+iter->first+"'] = '"+ iter->second + "';";
+		}
+	}
+	if(this->requestParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->requestParams.begin();iter!=this->requestParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				ret += "\nif(!isset($_POST['"+iter->first.substr(0, iter->first.find("["))+"']))\n{\n$_POST['"+iter->first.substr(0, iter->first.find("["))+"']=array();\n}\n";
+				ret += ("\n$_POST['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + " = '"+iter->second + "';");
+			}
+			else
+				ret += "\n$_POST['"+iter->first+"'] = '"+iter->second + "';";
+		}
+	}
+	if(this->requestParamsF.size()>0)
+	{
+		FMap::iterator iter;
+		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
+		{
+			FormData dat = iter->second;
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				ret += "\nif(!isset($_FILES['"+iter->first.substr(0, iter->first.find("["))+"']))\n{\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']=array()\n}\n";
+				ret += "\nif(!isset($_FILES['"+iter->first.substr(0, iter->first.find("["))+"']"+iter->first.substr(iter->first.find("["))+"))\n"
+						+ "{\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']"+iter->first.substr(iter->first.find("["))+"=array();\n}\n";
+				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.fileName + "';";
+				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "';";
+				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ boost::lexical_cast<string>(dat.length) + ";";
+				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "';";
+				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['error'] = 0;";
+			}
+			else
+			{
+				ret += "\nif(!isset($_FILES['"+iter->first+"']))\n{\n$_FILES['"+iter->first+"']=array();\n}\n";
+				ret += "\n$_FILES['"+iter->first+"']['name'] = '"+ dat.fileName + "';";
+				ret += "\n$_FILES['"+iter->first+"']['type'] = '"+ dat.type + "';";
+				ret += "\n$_FILES['"+iter->first+"']['size'] = "+ boost::lexical_cast<string>(dat.length) + ";";
+				ret += "\n$_FILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "';";
+				ret += "\n$_FILES['"+iter->first+"']['error'] = 0;";
+			}
+		}
+	}
+	if(def=="")
+		ret += "\ninclude_once('"+this->getCntxt_root()+"/scripts/php/"+this->getFile()+"');";
+	else
+		ret += "\ninclude_once('"+def+"');";
+	ret += "?>";
+	return ret;
+}
+
+string HttpRequest::toPerlVariablesString()
+{
+	string ret;
+	ret += "$_SERVER = {};";
+	ret += "\n$_SERVER_EX = {};";
+	ret += "\n$_GET = {};";
+	ret += "\n$_POST = {};";
+	ret += "\n$_FILES = {};";
+	ret += "\n$_SERVER{'HTTP_HOST'} = '"+this->getHost();
+	ret += "';\n$_SERVER{'HTTP_ACCEPT'} = '"+this->getAccept();
+	ret += "';\n$_SERVER{'HTTP_ACCEPT_CHARSET'} = '"+this->getAccept_chars();
+	ret += "';\n$_SERVER{'HTTP_ACCEPT_ENCODING'} = '"+this->getAccept_encod();
+	ret += "';\n$_SERVER{'HTTP_ACCEPT_LANGUAGE'} = '"+this->getAccept_lang();
+	ret += "';\n$_SERVER_EX{'CACHE_CNTRL'} = '"+this->getCache_ctrl();
+	ret += "';\n$_SERVER{'HTTP_CONNECTION'} = '"+this->getConnection();
+	ret += "';\n$_SERVER_EX{'HTTP_CONTENT'} = '"+this->getContent();
+	ret += "';\n$_SERVER_EX{'HTTP_CNTENT_LENGTH'} = '"+this->getContent_len();
+	ret += "';\n$_SERVER_EX{'HTTP_CNTENT_TYPE'} = '"+this->getContent_type();
+	ret += "';\n$_SERVER_EX{'HTTP_VERSION'} = '"+this->getHttpVersion();
+	ret += "';\n$_SERVER{'REQUEST_METHOD'} = '"+this->getMethod();
+	ret += "';\n$_SERVER{'HTTP_USER_AGENT'} = '"+this->getUser_agent();
+	ret += "';\n$_SERVER{'REQUEST_URI'} = '"+this->getUrl();
+	ret += "';\n$_SERVER_EX{'HTTP_REQ_FILE'} = '"+this->getFile();
+	ret += "';\n$_SERVER_EX{'CONTEXT_NAME'} = '"+this->getCntxt_name();
+	ret += "';\n$_SERVER{'DOCUMENT_ROOT'} = '"+this->getCntxt_root();
+	ret += "';\n$_SERVER_EX{'DEFAULT_LOCALE'} = '"+this->getDefaultLocale();
+	ret += "';\n$_SERVER{'HTTP_HOST'} = '"+this->getContent_boundary() + "';\n";
+	if(this->queryParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->queryParams.begin();iter!=this->queryParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first;
+				boost::replace_first(key,"[","{");
+				boost::replace_first(key,"]","}");
+				ret += "\nif(!exists $_GET{'"+key.substr(0, key.find("{"))+"'})\n{\n$_GET{'"+key.substr(0, key.find("{"))+"'}={}\n}\n";
+				ret += ("\n$_GET{'"+key.substr(0, key.find("{"))+"'}" +
+						key.substr(key.find("{")) + " = '"+iter->second + "';");
+			}
+			else
+				ret += "\n$_GET{'"+iter->first+"'} = '"+ iter->second + "';";
+		}
+	}
+	if(this->requestParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->requestParams.begin();iter!=this->requestParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first;
+				boost::replace_first(key,"[","{");
+				boost::replace_first(key,"]","}");
+				ret += "\nif(!exists $_POST{'"+key.substr(0, key.find("{"))+"'})\n{\n$_POST{'"+key.substr(0, key.find("{"))+"'}={}\n}\n";
+				ret += ("\n$_POST{'"+key.substr(0, key.find("{"))+"'}" +
+						key.substr(key.find("{")) + " = '"+iter->second + "';");
+			}
+			else
+				ret += "\n$_POST{'"+iter->first+"'} = '"+iter->second + "';";
+		}
+	}
+	if(this->requestParamsF.size()>0)
+	{
+		FMap::iterator iter;
+		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
+		{
+			FormData dat = iter->second;
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first;
+				boost::replace_first(key,"[","{");
+				boost::replace_first(key,"]","}");
+				ret += "\nif(!exists $_FILES{'"+key.substr(0, key.find("{"))+"'})\n{\n$_FILES{'"+key.substr(0, key.find("{"))+"'}={}\n}\n";
+				ret += "\nif(!exists $_FILES{'"+key.substr(0, key.find("{"))+"'}{'"+key.substr(key.find("{"))+"'})\n"
+						+ "{\n$_FILES{'"+key.substr(0, key.find("{"))+"'}{'"+key.substr(key.find("{"))+"'}={}\n}\n";
+				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
+						key.substr(key.find("{")) + "{'name'} = '"+ dat.fileName + "';";
+				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
+						key.substr(key.find("{")) + "{'type'} = '"+ dat.type + "';";
+				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
+						key.substr(key.find("{")) + "{'size'} = "+ boost::lexical_cast<string>(dat.length) + ";";
+				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
+						key.substr(key.find("{")) + "{'tmp_name'} = '"+ dat.tmpFileName + "';";
+				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
+						key.substr(key.find("{")) + "{'error'} = 0;";
+			}
+			else
+			{
+				ret += "\nif(!exists $_FILES{'"+iter->first+"'})\n{\n$_FILES{'"+iter->first+"'}={}\n}\n";
+				ret += "\n$_FILES{'"+iter->first+"'}{'name'} = '"+ dat.fileName + "';";
+				ret += "\n$_FILES{'"+iter->first+"'}{'type'} = '"+ dat.type + "';";
+				ret += "\n$_FILES{'"+iter->first+"'}{'size'} = "+ boost::lexical_cast<string>(dat.length) + ";";
+				ret += "\n$_FILES{'"+iter->first+"'}{'tmp_name'} = '"+ dat.tmpFileName + "';";
+				ret += "\n$_FILES{'"+iter->first+"'}{'error'} = 0;";
+			}
+		}
+	}
+	ret += "\n\n";
+	return ret;
+}
+
+string HttpRequest::toRubyVariablesString()
+{
+	string ret;
+	ret += "SERVER = {}";
+	ret += "\nSERVER_EX = {}";
+	ret += "\nGET = {}";
+	ret += "\nPOST = {}";
+	ret += "\nFILES = {}";
+	ret += "\nSERVER['HTTP_HOST'] = '"+this->getHost();
+	ret += "'\nSERVER['HTTP_ACCEPT'] = '"+this->getAccept();
+	ret += "'\nSERVER['HTTP_ACCEPT_CHARSET'] = '"+this->getAccept_chars();
+	ret += "'\nSERVER['HTTP_ACCEPT_ENCODING'] = '"+this->getAccept_encod();
+	ret += "'\nSERVER['HTTP_ACCEPT_LANGUAGE'] = '"+this->getAccept_lang();
+	ret += "'\nSERVER_EX['CACHE_CNTRL'] = '"+this->getCache_ctrl();
+	ret += "'\nSERVER['HTTP_CONNECTION'] = '"+this->getConnection();
+	ret += "'\nSERVER_EX['HTTP_CONTENT'] = '"+this->getContent();
+	ret += "'\nSERVER_EX['HTTP_CNTENT_LENGTH'] = '"+this->getContent_len();
+	ret += "'\nSERVER_EX['HTTP_CNTENT_TYPE'] = '"+this->getContent_type();
+	ret += "'\nSERVER_EX['HTTP_VERSION'] = '"+this->getHttpVersion();
+	ret += "'\nSERVER['REQUEST_METHOD'] = '"+this->getMethod();
+	ret += "'\nSERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
+	ret += "'\nSERVER['REQUEST_URI'] = '"+this->getUrl();
+	ret += "'\nSERVER_EX['HTTP_REQ_FILE'] = '"+this->getFile();
+	ret += "'\nSERVER_EX['CONTEXT_NAME'] = '"+this->getCntxt_name();
+	ret += "'\nSERVER['DOCUMENT_ROOT'] = '"+this->getCntxt_root();
+	ret += "'\nSERVER_EX['DEFAULT_LOCALE'] = '"+this->getDefaultLocale();
+	ret += "'\nSERVER['HTTP_HOST'] = '"+this->getContent_boundary() + "'\n";
+	if(this->queryParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->queryParams.begin();iter!=this->queryParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first.substr(0, iter->first.find("["));
+				ret += "\nif(!GET.has_key?('"+key+"'))\nGET['"+key+"']={}\nend";
+				ret += ("\nGET['"+iter->first.substr(0, iter->first.find("["))+"']" +
+					iter->first.substr(iter->first.find("[")) + " = '"+iter->second + "'");
+			}
+			else
+				ret += "\nGET['"+iter->first+"'] = '"+ iter->second + "'";
+		}
+	}
+	if(this->requestParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->requestParams.begin();iter!=this->requestParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first.substr(0, iter->first.find("["));
+				ret += "\nif(!POST.has_key?('"+key+"'))\nPOST['"+key+"']={}\nend";
+				ret += ("\nPOST['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + " = '"+iter->second + "'");
+			}
+			else
+				ret += "\nPOST['"+iter->first+"'] = '"+iter->second + "'";
+		}
+	}
+	if(this->requestParamsF.size()>0)
+	{
+		FMap::iterator iter;
+		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
+		{
+			FormData dat = iter->second;
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first.substr(iter->first.find("["));
+				boost::replace_first(key,"[","");
+				boost::replace_first(key,"]","");
+				ret += "\nif(!FILES.has_key?('"+iter->first.substr(0, iter->first.find("["))
+						+"'))\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']={}\nend";
+				ret += "\nif(!FILES['"+iter->first.substr(0, iter->first.find("["))+"'].has_key?('"+key+"'))"
+						+ "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']['"+key+"']={}\nend";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.fileName + "'";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "'";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ boost::lexical_cast<string>(dat.length);
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "'";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['error'] = 0;";
+			}
+			else
+			{
+				ret += "\nFILES['"+iter->first+"'] = {}";
+				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "'";
+				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "'";
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ boost::lexical_cast<string>(dat.length);
+				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "'";
+				ret += "\nFILES['"+iter->first+"']['error'] = 0";
+			}
+		}
+	}
+	ret += "\nrequire ('"+this->getCntxt_root()+"/scripts/ruby/"+this->getFile()+"')\n";
+	return ret;
+}
+
+string HttpRequest::toPythonVariablesString()
+{
+	string ret;
+	ret += "SERVER = {}";
+	ret += "\nSERVER_EX = {}";
+	ret += "\nGET = {}";
+	ret += "\nPOST = {}";
+	ret += "\nFILES = {}";
+	ret += "\nSERVER['HTTP_HOST'] = '"+this->getHost();
+	ret += "'\nSERVER['HTTP_ACCEPT'] = '"+this->getAccept();
+	ret += "'\nSERVER['HTTP_ACCEPT_CHARSET'] = '"+this->getAccept_chars();
+	ret += "'\nSERVER['HTTP_ACCEPT_ENCODING'] = '"+this->getAccept_encod();
+	ret += "'\nSERVER['HTTP_ACCEPT_LANGUAGE'] = '"+this->getAccept_lang();
+	ret += "'\nSERVER_EX['CACHE_CNTRL'] = '"+this->getCache_ctrl();
+	ret += "'\nSERVER['HTTP_CONNECTION'] = '"+this->getConnection();
+	ret += "'\nSERVER_EX['HTTP_CONTENT'] = '"+this->getContent();
+	ret += "'\nSERVER_EX['HTTP_CNTENT_LENGTH'] = '"+this->getContent_len();
+	ret += "'\nSERVER_EX['HTTP_CNTENT_TYPE'] = '"+this->getContent_type();
+	ret += "'\nSERVER_EX['HTTP_VERSION'] = '"+this->getHttpVersion();
+	ret += "'\nSERVER['REQUEST_METHOD'] = '"+this->getMethod();
+	ret += "'\nSERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
+	ret += "'\nSERVER['REQUEST_URI'] = '"+this->getUrl();
+	ret += "'\nSERVER_EX['HTTP_REQ_FILE'] = '"+this->getFile();
+	ret += "'\nSERVER_EX['CONTEXT_NAME'] = '"+this->getCntxt_name();
+	ret += "'\nSERVER['DOCUMENT_ROOT'] = '"+this->getCntxt_root();
+	ret += "'\nSERVER_EX['DEFAULT_LOCALE'] = '"+this->getDefaultLocale();
+	ret += "'\nSERVER['HTTP_HOST'] = '"+this->getContent_boundary() + "'\n";
+	if(this->queryParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->queryParams.begin();iter!=this->queryParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first.substr(0, iter->first.find("["));
+				ret += "\nif '"+key+"' not in GET:\n\tGET['"+key+"']={}\n";
+				ret += ("\nGET['"+iter->first.substr(0, iter->first.find("["))+"']" +
+					iter->first.substr(iter->first.find("[")) + " = '"+iter->second + "'");
+			}
+			else
+				ret += "\nGET['"+iter->first+"'] = '"+ iter->second + "'";
+		}
+	}
+	if(this->requestParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->requestParams.begin();iter!=this->requestParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first.substr(0, iter->first.find("["));
+				ret += "\nif '"+key+"' not in POST:\n\tPOST['"+key+"']={}\n";
+				ret += ("\nPOST['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + " = '"+iter->second + "'");
+			}
+			else
+				ret += "\nPOST['"+iter->first+"'] = '"+iter->second + "'";
+		}
+	}
+	if(this->requestParamsF.size()>0)
+	{
+		FMap::iterator iter;
+		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
+		{
+			FormData dat = iter->second;
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first.substr(iter->first.find("["));
+				boost::replace_first(key,"[","");
+				boost::replace_first(key,"]","");
+				ret += "\nif '"+iter->first.substr(0, iter->first.find("["))
+						+"' not in FILES:\n\tFILES['"+iter->first.substr(0, iter->first.find("["))+"']={}\n";
+				ret += "\nif '"+key+"' not in FILES['"+iter->first.substr(0, iter->first.find("["))+"']:\n"
+						+ "\n\tFILES['"+iter->first.substr(0, iter->first.find("["))+"']['"+key+"']={}\n";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.fileName + "'";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "'";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ boost::lexical_cast<string>(dat.length);
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "'";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['error'] = 0;";
+			}
+			else
+			{
+				ret += "\nFILES['"+iter->first+"'] = {}";
+				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "'";
+				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "'";
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ boost::lexical_cast<string>(dat.length);
+				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "'";
+				ret += "\nFILES['"+iter->first+"']['error'] = 0";
+			}
+		}
+	}
+	ret += "\n\n";
+	return ret;
+}
+
+string HttpRequest::toLuaVariablesString()
+{
+	string ret;
+	ret += "SERVER = {}";
+	ret += "\nSERVER_EX = {}";
+	ret += "\nGET = {}";
+	ret += "\nPOST = {}";
+	ret += "\nFILES = {}";
+	ret += "\nSERVER['HTTP_HOST'] = '"+this->getHost();
+	ret += "'\nSERVER['HTTP_ACCEPT'] = '"+this->getAccept();
+	ret += "'\nSERVER['HTTP_ACCEPT_CHARSET'] = '"+this->getAccept_chars();
+	ret += "'\nSERVER['HTTP_ACCEPT_ENCODING'] = '"+this->getAccept_encod();
+	ret += "'\nSERVER['HTTP_ACCEPT_LANGUAGE'] = '"+this->getAccept_lang();
+	ret += "'\nSERVER_EX['CACHE_CNTRL'] = '"+this->getCache_ctrl();
+	ret += "'\nSERVER['HTTP_CONNECTION'] = '"+this->getConnection();
+	ret += "'\nSERVER_EX['HTTP_CONTENT'] = '"+this->getContent();
+	ret += "'\nSERVER_EX['HTTP_CNTENT_LENGTH'] = '"+this->getContent_len();
+	ret += "'\nSERVER_EX['HTTP_CNTENT_TYPE'] = '"+this->getContent_type();
+	ret += "'\nSERVER_EX['HTTP_VERSION'] = '"+this->getHttpVersion();
+	ret += "'\nSERVER['REQUEST_METHOD'] = '"+this->getMethod();
+	ret += "'\nSERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
+	ret += "'\nSERVER['REQUEST_URI'] = '"+this->getUrl();
+	ret += "'\nSERVER_EX['HTTP_REQ_FILE'] = '"+this->getFile();
+	ret += "'\nSERVER_EX['CONTEXT_NAME'] = '"+this->getCntxt_name();
+	ret += "'\nSERVER['DOCUMENT_ROOT'] = '"+this->getCntxt_root();
+	ret += "'\nSERVER_EX['DEFAULT_LOCALE'] = '"+this->getDefaultLocale();
+	ret += "'\nSERVER['HTTP_HOST'] = '"+this->getContent_boundary() + "'\n";
+	if(this->queryParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->queryParams.begin();iter!=this->queryParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first.substr(0, iter->first.find("["));
+				ret += "\nif GET['"+key+"'] == nil then\nGET['"+key+"']={}\nend\n";
+				ret += ("\nGET['"+iter->first.substr(0, iter->first.find("["))+"']" +
+					iter->first.substr(iter->first.find("[")) + " = '"+iter->second + "'");
+			}
+			else
+				ret += "\nGET['"+iter->first+"'] = '"+ iter->second + "'";
+		}
+	}
+	if(this->requestParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->requestParams.begin();iter!=this->requestParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first.substr(0, iter->first.find("["));
+				ret += "\nif POST['"+key+"'] == nil then\nPOST['"+key+"']={}\nend\n";
+				ret += ("\nPOST['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + " = '"+iter->second + "'");
+			}
+			else
+				ret += "\nPOST['"+iter->first+"'] = '"+iter->second + "'";
+		}
+	}
+	if(this->requestParamsF.size()>0)
+	{
+		FMap::iterator iter;
+		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
+		{
+			FormData dat = iter->second;
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				string key = iter->first.substr(iter->first.find("["));
+				boost::replace_first(key,"[","");
+				boost::replace_first(key,"]","");
+				ret += "\nif FILES['"+iter->first.substr(0, iter->first.find("["))+"'] == nil then"
+						+ "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']={}\nend\n";
+				ret += "\nif FILES['"+iter->first.substr(0, iter->first.find("["))+"']['"+key+"']  == nil then"
+						+ "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']['"+key+"']={}\nend\n";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.fileName + "'";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "'";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ boost::lexical_cast<string>(dat.length);
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "'";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['error'] = 0;";
+			}
+			else
+			{
+				ret += "\nFILES['"+iter->first+"'] = {}";
+				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "'";
+				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "'";
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ boost::lexical_cast<string>(dat.length);
+				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "'";
+				ret += "\nFILES['"+iter->first+"']['error'] = 0";
+			}
+		}
+	}
+	ret += "\ndofile(\""+this->getCntxt_root()+"/scripts/lua/"+this->getFile()+"\")\n";
+	return ret;
+}
+
+string HttpRequest::toNodejsVariablesString()
+{
+	string ret;
+	ret += "SERVER = {};";
+	ret += "\nSERVER_EX = {};";
+	ret += "\nGET = {};";
+	ret += "\nPOST = {};";
+	ret += "\nFILES = {};";
+	ret += "\nSERVER['HTTP_HOST'] = '"+this->getHost();
+	ret += "';\nSERVER['HTTP_ACCEPT'] = '"+this->getAccept();
+	ret += "';\nSERVER['HTTP_ACCEPT_CHARSET'] = '"+this->getAccept_chars();
+	ret += "';\nSERVER['HTTP_ACCEPT_ENCODING'] = '"+this->getAccept_encod();
+	ret += "';\nSERVER['HTTP_ACCEPT_LANGUAGE'] = '"+this->getAccept_lang();
+	ret += "';\nSERVER_EX['CACHE_CNTRL'] = '"+this->getCache_ctrl();
+	ret += "';\nSERVER['HTTP_CONNECTION'] = '"+this->getConnection();
+	ret += "';\nSERVER_EX['HTTP_CONTENT'] = '"+this->getContent();
+	ret += "';\nSERVER_EX['HTTP_CNTENT_LENGTH'] = '"+this->getContent_len();
+	ret += "';\nSERVER_EX['HTTP_CNTENT_TYPE'] = '"+this->getContent_type();
+	ret += "';\nSERVER_EX['HTTP_VERSION'] = '"+this->getHttpVersion();
+	ret += "';\nSERVER['REQUEST_METHOD'] = '"+this->getMethod();
+	ret += "';\nSERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
+	ret += "';\nSERVER['REQUEST_URI'] = '"+this->getUrl();
+	ret += "';\nSERVER_EX['HTTP_REQ_FILE'] = '"+this->getFile();
+	ret += "';\nSERVER_EX['CONTEXT_NAME'] = '"+this->getCntxt_name();
+	ret += "';\nSERVER['DOCUMENT_ROOT'] = '"+this->getCntxt_root();
+	ret += "';\nSERVER_EX['DEFAULT_LOCALE'] = '"+this->getDefaultLocale();
+	ret += "';\nSERVER['HTTP_HOST'] = '"+this->getContent_boundary() + "';\n";
+	if(this->queryParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->queryParams.begin();iter!=this->queryParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				ret += "\nif((GET['"+iter->first.substr(0, iter->first.find("["))+"'])==undefined)\n{\nGET['"+iter->first.substr(0, iter->first.find("["))+"']={};\n}\n";
+				ret += ("\nGET['"+iter->first.substr(0, iter->first.find("["))+"']" +
+					iter->first.substr(iter->first.find("[")) + " = '"+iter->second + "';");
+			}
+			else
+				ret += "\nGET['"+iter->first+"'] = '"+ iter->second + "';";
+		}
+	}
+	if(this->requestParams.size()>0)
+	{
+		RMap::iterator iter;
+		for (iter=this->requestParams.begin();iter!=this->requestParams.end();iter++)
+		{
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				ret += "\nif((POST['"+iter->first.substr(0, iter->first.find("["))+"'])==undefined)\n{\nPOST['"+iter->first.substr(0, iter->first.find("["))+"']={};\n}\n";
+				ret += ("\nPOST['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + " = '"+iter->second + "';");
+			}
+			else
+				ret += "\nPOST['"+iter->first+"'] = '"+iter->second + "';";
+		}
+	}
+	if(this->requestParamsF.size()>0)
+	{
+		FMap::iterator iter;
+		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
+		{
+			FormData dat = iter->second;
+			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
+			{
+				ret += "\nif((FILES['"+iter->first.substr(0, iter->first.find("["))+"'])==undefined)\n{\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']={};\n}\n";
+				ret += "\nif((FILES['"+iter->first.substr(0, iter->first.find("["))+"']"+iter->first.substr(iter->first.find("["))+")==undefined)\n"
+						+ "{\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']"+iter->first.substr(iter->first.find("["))+"={};\n}\n";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.fileName + "';";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "';";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ boost::lexical_cast<string>(dat.length) + ";";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "';";
+				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
+						iter->first.substr(iter->first.find("[")) + "['error'] = 0;";
+			}
+			else
+			{
+				ret += "\nif(!isset(FILES['"+iter->first+"']))\n{\nFILES['"+iter->first+"']={};\n}\n";
+				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "';";
+				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "';";
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ boost::lexical_cast<string>(dat.length) + ";";
+				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "';";
+				ret += "\nFILES['"+iter->first+"']['error'] = 0;";
+			}
+		}
+	}
+	ret += "\nrequire('"+this->getCntxt_root()+"/scripts/nodejs/"+this->getFile()+"');";
+	return ret;
+}
+
+RMap HttpRequest::getAllParams()
+{
+	map<string,string>::iterator it;
+	map<string,string> reqparams = this->getRequestParams();
+	map<string,string> qryparams = this->getQueryParams();
+	for(it=qryparams.begin();it!=qryparams.end();it++)
+	{
+		reqparams[it->first] = it->second;
+	}
+	return reqparams;
 }
