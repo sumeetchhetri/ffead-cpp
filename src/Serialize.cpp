@@ -584,7 +584,7 @@ string Serialize::serializevec(vector<double> *t)
 string Serialize::_servec(void* t,string className)
 {
 	string objXml;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -603,7 +603,7 @@ string Serialize::_servec(void* t,string className)
 string Serialize::_serlis(void* t,string className)
 {
 	string objXml;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -621,7 +621,7 @@ string Serialize::_serlis(void* t,string className)
 string Serialize::_serset(void* t,string className)
 {
 	string objXml;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -639,7 +639,7 @@ string Serialize::_serset(void* t,string className)
 string Serialize::_sermultiset(void* t,string className)
 {
 	string objXml;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -657,7 +657,7 @@ string Serialize::_sermultiset(void* t,string className)
 string Serialize::_serq(void* t,string className)
 {
 	string objXml;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -675,7 +675,7 @@ string Serialize::_serq(void* t,string className)
 string Serialize::_serdq(void* t,string className)
 {
 	string objXml;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -694,7 +694,7 @@ string Serialize::_serdq(void* t,string className)
 string Serialize::_ser(void* t,string className)
 {
 	string objXml;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -1189,7 +1189,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 void* Serialize::_unserSet(string objXml,string className)
 {
 	void* obj = NULL;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -1210,7 +1210,7 @@ void* Serialize::_unserSet(string objXml,string className)
 void* Serialize::_unserMulSet(string objXml,string className)
 {
 	void* obj = NULL;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -1231,7 +1231,7 @@ void* Serialize::_unserMulSet(string objXml,string className)
 void* Serialize::_unserQ(string objXml,string className)
 {
 	void* obj = NULL;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -1252,7 +1252,7 @@ void* Serialize::_unserQ(string objXml,string className)
 void* Serialize::_unserDq(string objXml,string className)
 {
 	void* obj = NULL;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -1273,7 +1273,7 @@ void* Serialize::_unserDq(string objXml,string className)
 void* Serialize::_unserLis(string objXml,string className)
 {
 	void* obj = NULL;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -1294,7 +1294,7 @@ void* Serialize::_unserLis(string objXml,string className)
 void* Serialize::_unserVec(string objXml,string className)
 {
 	void* obj = NULL;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -1316,7 +1316,7 @@ void* Serialize::_unserVec(string objXml,string className)
 void* Serialize::_unser(string objXml,string className)
 {
 	void* obj = NULL;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{

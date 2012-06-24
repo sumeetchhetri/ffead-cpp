@@ -34,17 +34,17 @@ Timer::~Timer() {
 void Timer::start()
 {
 	clock_gettime(CLOCK_REALTIME, &st);
-	cout << "\n--------------------------start Timer-------------------------::" << ((st.tv_sec*1000000000 + st.tv_nsec)/1000) << "\n"<< flush;
+	cout << "\n--------------------------start Timer-------------------------::" << ((st.tv_sec*1E9 + st.tv_nsec)/1000) << "\n"<< flush;
 }
 
-long Timer::getCurrentTime()
+long long Timer::getCurrentTime()
 {
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
-	return ((en.tv_sec * 1000000000) + en.tv_nsec);
+	return ((en.tv_sec * 1E9) + en.tv_nsec);
 }
 
-long Timer::getTimestamp()
+long long Timer::getTimestamp()
 {
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
@@ -55,27 +55,27 @@ void Timer::end()
 {
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
-	long elap = (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000;
-	cout << "\n--------------------------end Timer-------------------------::" << ((en.tv_sec*1000000000 + en.tv_nsec)/1000) << "\n"<< flush;
+	long long elap = (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec))/1E3;
+	cout << "\n--------------------------end Timer-------------------------::" << ((en.tv_sec*1E9 + en.tv_nsec)/1000) << "\n"<< flush;
 	cout << "\n" << elap << "\n"<< flush;
 }
-int Timer::elapsedMicroSeconds()
+long Timer::elapsedMicroSeconds()
 {
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
-	return (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000;
+	return (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec))/1E3;
 }
-int Timer::elapsedMilliSeconds()
+long Timer::elapsedMilliSeconds()
 {
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
-	return (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec))/1000000;
+	return (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec))/1E6;
 }
-int Timer::elapsedNanoSeconds()
+long Timer::elapsedNanoSeconds()
 {
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
-	return (((en.tv_sec - st.tv_sec) * 1000000000) + (en.tv_nsec - st.tv_nsec));
+	return (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec));
 }
 int Timer::elapsedSeconds()
 {

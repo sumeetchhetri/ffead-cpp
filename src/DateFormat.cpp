@@ -40,61 +40,106 @@ DateFormat::DateFormat(string format)
 string DateFormat::format(Date date)
 {
 	string temp = this->formatspec;
-	boost::replace_first(temp,"hh",date.getHhStr());
-	boost::replace_first(temp,"mi",date.getMmStr());
-	boost::replace_first(temp,"ss",date.getSsStr());
-	boost::replace_first(temp,"ddd",date.getDayw());
-	boost::replace_first(temp,"dd",date.getDayStr());
-	boost::replace_first(temp,"mmm",date.getMonthw());
-	boost::replace_first(temp,"mm",date.getMonthStr());
-	boost::replace_first(temp,"yyyy",date.getYearStr());
-	boost::replace_first(temp,"yy",date.getYearStr().substr(2));
+	boost::replace_all(temp,"hh",date.getHhStr());
+	boost::replace_all(temp,"mi",date.getMmStr());
+	boost::replace_all(temp,"ss",date.getSsStr());
+	boost::replace_all(temp,"ns",date.getNsStr());
+	boost::replace_all(temp,"ddd",date.getDayw());
+	boost::replace_all(temp,"dd",date.getDayStr());
+	boost::replace_all(temp,"mmm",date.getMonthw());
+	boost::replace_all(temp,"mm",date.getMonthStr());
+	boost::replace_all(temp,"yyyy",date.getYearStr());
+	boost::replace_all(temp,"yy",date.getYearStr().substr(2));
 	return temp;
 }
 
 Date* DateFormat::parse(string strdate)
 {
 	string temp = this->formatspec;
-	Date* date = new Date;
+	Date* date = NULL;
+	string yyyy,yy,ddd,dd,mmm,mm,hh,mi,ss;
 	if(temp.find("yyyy")!=string::npos)
 	{
-		string yrf = strdate.substr(temp.find("yyyy"),4);
-		date->setYearf(yrf);
+		yyyy = strdate.substr(temp.find("yyyy"),4);
+	}
+	else if(temp.find("yy")!=string::npos)
+	{
+		yy = strdate.substr(temp.find("yy"),2);
 	}
 	if(temp.find("ddd")!=string::npos)
 	{
-		string yrf = strdate.substr(temp.find("ddd"),3);
-		date->setDayw(yrf);
+		ddd = strdate.substr(temp.find("ddd"),3);
+	}
+	if(temp.find("dd", temp.find("ddd")+3)!=string::npos)
+	{
+		dd = strdate.substr(temp.find("dd", temp.find("ddd")+3),2);
 	}
 	if(temp.find("mmm")!=string::npos)
 	{
-		string yrf = strdate.substr(temp.find("mmm"),3);
-		date->setMonthw(yrf);
+		mmm = strdate.substr(temp.find("mmm"),3);
 	}
-	if(temp.find("mm")!=string::npos)
+	else if(temp.find("mm")!=string::npos)
 	{
-		string yrf = strdate.substr(temp.find("mm"),2);
-		date->setMmf(yrf);
-	}
-	if(temp.find("dd")!=string::npos)
-	{
-		string yrf = strdate.substr(temp.find("dd"),2);
-		date->setDayf(yrf);
+		mm = strdate.substr(temp.find("mm"),2);
 	}
 	if(temp.find("hh")!=string::npos)
 	{
-		string yrf = strdate.substr(temp.find("hh"),2);
-		date->setHhf(yrf);
+		hh = strdate.substr(temp.find("hh"),2);
 	}
 	if(temp.find("mi")!=string::npos)
 	{
-		string yrf = strdate.substr(temp.find("mi"),2);
-		date->setMif(yrf);
+		mi = strdate.substr(temp.find("mi"),2);
 	}
 	if(temp.find("ss")!=string::npos)
 	{
-		string yrf = strdate.substr(temp.find("ss"),2);
-		date->setSsf(yrf);
+		ss = strdate.substr(temp.find("ss"),2);
 	}
+	try
+	{
+		if(yyyy!="")
+		{
+			if(mmm!="")
+			{
+				date = new Date(boost::lexical_cast<int>(yyyy),
+						mmm, boost::lexical_cast<int>(dd));
+			}
+			else if(mm!="")
+			{
+				date = new Date(boost::lexical_cast<int>(yyyy),
+						boost::lexical_cast<int>(mm), boost::lexical_cast<int>(dd));
+			}
+			else
+			{
+				throw "Invalid Date month specified";
+			}
+		}
+		else if(yy!="")
+		{
+			if(mmm!="")
+			{
+				date = new Date(boost::lexical_cast<int>(yy),
+						mmm, boost::lexical_cast<int>(dd));
+			}
+			else if(mm!="")
+			{
+				date = new Date(boost::lexical_cast<int>(yy),
+						boost::lexical_cast<int>(mm), boost::lexical_cast<int>(dd));
+			}
+			else
+			{
+				throw "Invalid Date month specified";
+			}
+		}
+		else
+		{
+			throw "Invalid Date year specified";
+		}
+	} catch (const char* s) {
+		throw s;
+	} catch (...) {
+		throw "Invalid Date specified";
+	}
+	date->setTime(boost::lexical_cast<int>(hh),
+		boost::lexical_cast<int>(mi), boost::lexical_cast<int>(ss));
 	return date;
 }

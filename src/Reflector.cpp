@@ -43,7 +43,7 @@ void Reflector::cleanUp()
 ClassInfo Reflector::getClassInfo(string className)
 {
 	ClassInfo info;
-	string libName = "libinter.so";
+	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
