@@ -22,4 +22,4 @@
 
 #include "Constants.h"
 
-string Constants::INTER_LIB_FILE = "libinter.a";
+string Constants::INTER_LIB_FILE = "libinter.so";
