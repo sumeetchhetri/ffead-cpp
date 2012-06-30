@@ -148,8 +148,7 @@ void signalSIGSEGV(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	string tempo;
-	/*void * array[25];
+	void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -158,7 +157,7 @@ void signalSIGSEGV(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);*/
+	free(symbols);
 	cout << "Segmentation fault occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -172,8 +171,7 @@ void signalSIGCHLD(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	string tempo;
-	/*void * array[25];
+	void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -182,7 +180,7 @@ void signalSIGCHLD(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);*/
+	free(symbols);
 	cout << "Child process got killed " << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -196,8 +194,7 @@ void signalSIGABRT(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	string tempo;
-	/*void * array[25];
+	void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -206,7 +203,7 @@ void signalSIGABRT(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);*/
+	free(symbols);
 	cout << "Abort signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -220,8 +217,7 @@ void signalSIGTERM(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	string tempo;
-	/*void * array[25];
+	void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -230,7 +226,7 @@ void signalSIGTERM(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);*/
+	free(symbols);
 	cout << "Termination signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -245,8 +241,7 @@ void signalSIGKILL(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	string tempo;
-	/*void * array[25];
+	void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -255,7 +250,7 @@ void signalSIGKILL(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);*/
+	free(symbols);
 	cout << "Kill signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -270,8 +265,7 @@ void signalSIGINT(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	string tempo;
-	/*void * array[25];
+	void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -280,7 +274,7 @@ void signalSIGINT(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);*/
+	free(symbols);
 	cout << "Interrupt signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -295,8 +289,7 @@ void signalSIGFPE(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	string tempo;
-	/*void * array[25];
+	void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -305,7 +298,7 @@ void signalSIGFPE(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);*/
+	free(symbols);
 	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -319,8 +312,7 @@ void signalSIGPIPE(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());*/
-	string tempo;
-	/*void * array[25];
+	void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -329,7 +321,7 @@ void signalSIGPIPE(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);*/
+	free(symbols);
 	cout << "Broken pipe ignore it" << getpid() << "\n" << tempo << flush;
 	//abort();
 }
@@ -344,8 +336,7 @@ void signalSIGILL(int dummy)
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
-	string tempo;
-	/*void * array[25];
+	void * array[25];
 	int nSize = backtrace(array, 25);
 	char ** symbols = backtrace_symbols(array, nSize);
 	string tempo;
@@ -354,7 +345,7 @@ void signalSIGILL(int dummy)
 		tempo = symbols[i];
 		tempo += "\n";
 	}
-	free(symbols);*/
+	free(symbols);
 	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
@@ -378,6 +369,7 @@ void service(int fd,string serverRootDirectory,map<string,string> *params,
 pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 {
 	pid_t pid;
+	struct epoll_event ev;
 	if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sp) == -1)
 	{
 		perror("socketpair");
@@ -448,19 +440,16 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		msg.msg_control = ccmsg;
 		msg.msg_controllen = sizeof(ccmsg); /* ? seems to work... */
 		close(sockfd);
-
-		fd_set master;    // master file descriptor list
-		fd_set read_fds;  // temp file descriptor list for select()
-		int fdmax;        // maximum file descriptor number
-
-		FD_ZERO(&master);    // clear the master and temp sets
-		FD_ZERO(&read_fds);
-
-		FD_SET(sp[1], &master);
-
-		// keep track of the biggest file descriptor
-		fdmax = sp[1]; // so far, it's this on
-
+		struct epoll_event events[1];
+		//printf("parent side--%d child side---%d child pid--%ld\n",sp[j][0],sp[j][1],(long)getpid());
+		int epoll_handle = epoll_create(1);
+		ev.events = EPOLLIN | EPOLLPRI;
+		ev.data.fd = sp[1];
+		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, sp[1], &ev) < 0)
+		{
+			fprintf(stderr, "epoll set insertion error: fd=%d\n", sp[1]);
+			return -1;
+		}
 		ThreadPool pool;
 		if(!isThreadprq)
 		{
@@ -472,57 +461,50 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		cout << params.size() <<endl;
 		while(1)
 		{
-			read_fds = master; // copy it
-			int nfds = select(fdmax+1, &read_fds, NULL, NULL, NULL);
+			int nfds = epoll_wait(epoll_handle, events, 1,-1);
 			if (nfds == -1)
 			{
-				perror("select_wait child process");
+				perror("epoll_wait child process");
 				cout << "\n----------epoll_wait child process----" << flush;
 				//break;
 			}
 			else
 			{
-				for(int n=0;n<=fdmax;n++)
+				//int fd = receive_fd(sp[j][1]);
+				rv = recvmsg(sp[1], &msg, 0);
+				if (rv == -1)
 				{
-					if (FD_ISSET(n, &read_fds))
-					{
-						//int fd = receive_fd(sp[j][1]);
-						rv = recvmsg(n, &msg, 0);
-						if (rv == -1)
-						{
-							perror("recvmsg");
-							cout << "\n----------error occurred----" << flush;
-							exit(1);
-						}
+					perror("recvmsg");
+					cout << "\n----------error occurred----" << flush;
+					exit(1);
+				}
 
-						cmsg = CMSG_FIRSTHDR(&msg);
-						if (!cmsg->cmsg_type == SCM_RIGHTS)
-						{
-							fprintf(stderr, "got control message of unknown type %d\n",cmsg->cmsg_type);
-							exit(1);
-						}
-						int fd = *(int*)CMSG_DATA(cmsg);
-						fcntl(fd, F_SETFL,O_SYNC);
+				cmsg = CMSG_FIRSTHDR(&msg);
+				if (!cmsg->cmsg_type == SCM_RIGHTS)
+				{
+					fprintf(stderr, "got control message of unknown type %d\n",cmsg->cmsg_type);
+					exit(1);
+				}
+				int fd = *(int*)CMSG_DATA(cmsg);
+				fcntl(fd, F_SETFL,O_SYNC);
 
-						char buf[10];
-						int err;
-						if((err=recv(fd,buf,10,MSG_PEEK))==0)
-						{
-							close(fd);
-							cout << "\nsocket conn closed before being serviced" << flush;
-							continue;
-						}
+				char buf[10];
+				int err;
+				if((err=recv(fd,buf,10,MSG_PEEK))==0)
+				{
+					close(fd);
+					cout << "\nsocket conn closed before being serviced" << flush;
+					continue;
+				}
 
-						if(isThreadprq)
-							boost::thread m_thread(boost::bind(&service,n,serverRootDirectory,&params,
-									isSSLEnabled, ctx, sSLHandler, configurationData, dlib));
-						else
-						{
-							ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
-									isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
-							pool.execute(*task);
-						}
-					}
+				if(isThreadprq)
+					boost::thread m_thread(boost::bind(&service,n,serverRootDirectory,&params,
+							isSSLEnabled, ctx, sSLHandler, configurationData, dlib));
+				else
+				{
+					ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
+							isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+					pool.execute(*task);
 				}
 			}
 		}
@@ -607,19 +589,14 @@ void dynamic_page_monitor(string serverRootDirectory)
 				{
 					cout << "regenarting intermediate code-----Done" << endl;
 					Logger::info("Done generating intermediate code");
-					int error = dlclose(dlib);
-					int attempts = 1;
-					while(error!=0 && attempts++<20)
-					{
-						error = dlclose(dlib);
-					}
-					dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
-					if(dlib==NULL)
-					{
-						cout << dlerror() << endl;
-						Logger::info("Could not load Library");
-					}
 				}
+				m_mutex.lock();
+				map<int,pid_t>::iterator it;
+				for(it=pds.begin();it!=pds.end();it++)
+				{
+					kill(it->second,9);
+				}
+				m_mutex.unlock();
 				processforcekilled = true;
 				flag = true;
 				break;
@@ -654,7 +631,8 @@ int main(int argc, char* argv[])
     struct sigaction sa;
 
 
-    //struct rlimit rt;
+    struct epoll_event ev;
+	//struct rlimit rt;
     int yes=1;
     //char s[INET6_ADDRSTRLEN];
     int rv,nfds,preForked=5;
@@ -851,54 +829,82 @@ int main(int argc, char* argv[])
 		srprps["MI_PORT"] = "7003";
 	}
 	MethodInvoc::trigger(srprps["MI_PORT"]);
-	//int sp[preForked][2]; /* the pair of socket descriptors */
+	int sp[preForked][2]; /* the pair of socket descriptors */
 	printf("server: waiting for connections...\n");
 	//logfile << "Server: waiting for connections on port " << PORT << "\n" << flush;
 	Logger::info("Server: waiting for connections on port "+PORT);
 
-	if(isCompileEnabled)boost::thread m_thread(boost::bind(&dynamic_page_monitor ,serverRootDirectory));
-
-	fd_set master;    // master file descriptor list
-	fd_set read_fds;  // temp file descriptor list for select()
-	int fdmax;        // maximum file descriptor number
-
-	FD_ZERO(&master);    // clear the master and temp sets
-	FD_ZERO(&read_fds);
-
-	FD_SET(sockfd, &master);
-
-	// keep track of the biggest file descriptor
-	fdmax = sockfd; // so far, it's this one
-
-	int childNo = 0;
-
-	int curfds = 1;
-	ifstream cntrlfile;
-	ThreadPool *pool;
-	if(!isThreadprq)
+	vector<string> files;
+	for(int j=0;j<preForked;j++)
 	{
-		pool = new ThreadPool;
-		pool->init(thrdpsiz,thrdpsiz+30,true);
+		pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
+		pds[j] = pid;
+		stringstream ss;
+		string filename;
+		ss << serverRootDirectory;
+		ss << pds[j];
+		ss >> filename;
+		filename.append(".cntrl");
+		files.push_back(filename);
 	}
-	dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
-	cout << endl <<dlib << endl;
-	if(dlib==NULL)
+	if(isCompileEnabled)boost::thread m_thread(boost::bind(&dynamic_page_monitor ,serverRootDirectory));
+	struct epoll_event events[MAXEPOLLSIZE];
+	int epoll_handle = epoll_create(MAXEPOLLSIZE);
+	ev.events = EPOLLIN | EPOLLPRI;
+	ev.data.fd = sockfd;
+	if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, sockfd, &ev) < 0)
 	{
-		cout << dlerror() << endl;
-		Logger::info("Could not load Library");
+		fprintf(stderr, "epoll set insertion error: fd=%d\n", sockfd);
+		return -1;
 	}
 	else
-		Logger::info("Library loaded successfully");
-	propMap params = pread.getProperties(serverRootDirectory+"resources/security.prop");
+		printf("listener socket to join epoll success!\n");
+	int childNo = 0;
+	/*if(fork()==0)
+	{
+		//start  of hotdeployment process
+
+	}*/
+	//cout << "Done" << flush;
+	struct msghdr msg;
+	char ccmsg[CMSG_SPACE(sizeof(int))];
+	struct cmsghdr *cmsg;
+	struct iovec vec;  /* stupidity: must send/receive at least one byte */
+	char *str = (char *)"x";
+	//msg.msg_name = (struct sockaddr*)&unix_socket_name;
+	//msg.msg_namelen = sizeof(unix_socket_name);
+	msg.msg_name = 0;
+	msg.msg_namelen = 0;
+	vec.iov_base = str;
+	vec.iov_len = 1;
+	msg.msg_iov = &vec;
+	msg.msg_iovlen = 1;
+
+	/* old BSD implementations should use msg_accrights instead of
+	* msg_control; the interface is different. */
+	msg.msg_control = ccmsg;
+	msg.msg_controllen = sizeof(ccmsg);
+	cmsg = CMSG_FIRSTHDR(&msg);
+	cmsg->cmsg_level = SOL_SOCKET;
+	cmsg->cmsg_type = SCM_RIGHTS;
+	cmsg->cmsg_len = CMSG_LEN(sizeof(int));
+	msg.msg_flags = 0;
+	int curfds = 1;
+	ifstream cntrlfile;
+	ThreadPool pool;
+	if(!isThreadprq)
+	{
+		pool.init(thrdpsiz,30,true);
+	}
 	while(1)
 	{
+
 		if(childNo>=preForked)
 			childNo = 0;
-		read_fds = master; // copy it
-		nfds = select(fdmax+1, &read_fds, NULL, NULL, NULL);
+		nfds = epoll_wait(epoll_handle, events, curfds,-1);
 		if (nfds == -1)
 		{
-			perror("select_wait main process");
+			perror("epoll_wait main process");
 			//logfile << "Interruption Signal Received\n" << flush;
 			Logger::info("Interruption Signal Received\n");
 			curfds = 1;
@@ -915,55 +921,112 @@ int main(int argc, char* argv[])
 		processgendone = false;
 		if(processforcekilled)
 		{
-			delete pool;
-			pool = new ThreadPool;
-			pool->init(thrdpsiz,thrdpsiz+30,true);
+			files.clear();
+			for(int j=0;j<preForked;j++)
+			{
+				pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
+				pds[j] = pid;
+				stringstream ss;
+				string filename;
+				ss << serverRootDirectory;
+				ss << pds[j];
+				ss >> filename;
+				filename.append(".cntrl");
+				files.push_back(filename);
+			}
 			processforcekilled = false;
 			processgendone = true;
 		}
-		for(int n=0;n<=fdmax;n++)
+		for(int n=0;n<nfds;n++)
 		{
-			if (FD_ISSET(n, &read_fds))
+			if(childNo>=preForked)
+				childNo = 0;
+			if (events[n].data.fd == sockfd)
 			{
-				if(childNo>=preForked)
-					childNo = 0;
-				if (n == sockfd)
+				new_fd = -1;
+				sin_size = sizeof their_addr;
+				new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+				//cout << "\nnew http request" <<flush;
+				//logfile << "Interruption Signal Received\n" << flush;
+				if (new_fd == -1)
 				{
-					new_fd = -1;
-					sin_size = sizeof their_addr;
-					new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-					//cout << "\nnew http request" <<flush;
-					//logfile << "Interruption Signal Received\n" << flush;
-					if (new_fd == -1)
-					{
-						perror("accept");
-						continue;
-					}
-					else
-					{
-						FD_SET(new_fd, &master); // add to master set
-						if (new_fd > fdmax) {    // keep track of the max
-							fdmax = new_fd;
-						}
-					}
+					perror("accept");
+					continue;
 				}
 				else
 				{
-					cout << "got new connection " << endl;
-					FD_CLR(n, &master); // remove from master set
-					fcntl(n, F_SETFL,O_SYNC);
-					if(isThreadprq)
-						boost::thread m_thread(boost::bind(&service,n,serverRootDirectory,&params,
-								isSSLEnabled, ctx, sSLHandler, configurationData, dlib));
-					else
+					curfds++;
+					fcntl(new_fd, F_SETFL, fcntl(new_fd, F_GETFD, 0) | O_NONBLOCK);
+					ev.events = EPOLLIN | EPOLLPRI;
+					ev.data.fd = new_fd;
+					if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, new_fd, &ev) < 0)
 					{
-						ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
-								isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
-						pool->execute(*task);
+						perror("epoll");
+						cout << "\nerror adding to epoll cntl list" << flush;
+						return -1;
 					}
 				}
+			}
+			else
+			{
+				epoll_ctl(epoll_handle, EPOLL_CTL_DEL, events[n].data.fd,&ev);
+				curfds--;
+				cntrlfile.open(files.at(childNo).c_str());
+				if(cntrlfile.is_open())
+				{
+					*(int*)CMSG_DATA(cmsg) = events[n].data.fd;
+					msg.msg_controllen = cmsg->cmsg_len;
+					if((rv= sendmsg(sp[childNo][0], &msg, 0)) < 0)
+					{
+					  perror("sendmsg()");
+					  exit(1);
+					}
+					string cno = boost::lexical_cast<string>(childNo);
+					close(events[n].data.fd);
+					childNo++;
+				}
+				else
+				{
+					int tcn = childNo;
+					for(int o=0;o<preForked;o++)
+					{
+						cntrlfile.open(files.at(o).c_str());
+						if(cntrlfile.is_open())
+						{
+							*(int*)CMSG_DATA(cmsg) = events[n].data.fd;
+							msg.msg_controllen = cmsg->cmsg_len;
+							if((rv= sendmsg(sp[o][0], &msg, 0)) < 0)
+							{
+							  perror("sendmsg()");
+							  exit(1);
+							}
+							string cno = boost::lexical_cast<string>(o);
+							//logfile << ("sent socket to process "+cno+"\n") << flush;
+							close(events[n].data.fd);
+							childNo = o+1;
+							break;
+						}
+					}
+					close(sp[tcn][0]);
+					close(sp[tcn][1]);
+					cout << "Process got killed" << flush;
+					pid_t pid = createChildProcess(serverRootDirectory,sp[tcn],sockfd);
+					pds[tcn] = pid;
+					stringstream ss;
+					string filename;
+					ss << serverRootDirectory;
+					ss << pid;
+					ss >> filename;
+					filename.append(".cntrl");
+					files[tcn] = filename;
+					cout << "created a new Process" << flush;
+					//logfile << "Process got killed hence created a new Process " << pid << flush;
+					Logger::info("Process got killed hence created a new Process\n");
+				}
+				cntrlfile.close();
 			}
 		}
 	}
 	return 0;
 }
+
