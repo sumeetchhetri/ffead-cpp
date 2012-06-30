@@ -50,7 +50,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/types.h>
-
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -64,7 +64,7 @@
 #include "ApplicationUtil.h"
 #include <fcntl.h>
 #include <sys/ioctl.h>
-/*Fix for Windows Cygwin*///#include <sys/epoll.h>
+#include <sys/epoll.h>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <boost/thread/recursive_mutex.hpp>
