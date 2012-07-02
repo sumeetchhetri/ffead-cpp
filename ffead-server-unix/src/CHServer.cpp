@@ -498,11 +498,11 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				}
 
 				if(isThreadprq)
-					boost::thread m_thread(boost::bind(&service,n,serverRootDirectory,&params,
+					boost::thread m_thread(boost::bind(&service,fd,serverRootDirectory,&params,
 							isSSLEnabled, ctx, sSLHandler, configurationData, dlib));
 				else
 				{
-					ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
+					ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params,
 							isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
 					pool.execute(*task);
 				}
