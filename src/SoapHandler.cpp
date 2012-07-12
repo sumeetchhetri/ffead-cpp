@@ -33,10 +33,11 @@ SoapHandler::~SoapHandler() {
 
 void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string xmlcnttype)
 {
+	Logger logger = Logger::getLogger("SoapHandler");
 	string meth,ws_name,env;
 	ws_name = req->getFile();
 	Element soapenv;
-	Logger::info("request => "+req->getContent());
+	logger.info("request => "+req->getContent());
 	Element soapbody;
 	try
 	{
