@@ -28,6 +28,7 @@
 #include "Document.h"
 #include <dlfcn.h>
 #include "Constants.h"
+#include "Logger.h"
 
 typedef void* (*toVoidP) (string);
 

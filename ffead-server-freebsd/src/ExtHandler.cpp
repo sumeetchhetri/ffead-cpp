@@ -67,6 +67,7 @@ string ExtHandler::getContentStr(string url,string locale,string ext)
 bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string resourcePath,
 		map<string, string> tmplMap, map<string, string> vwMap,string ext, map<string, string> props)
 {
+	Logger logger = Logger::getLogger("ExtHandler");
 	bool cntrlit;
 	string content, claz;
 	if(req->getMethod()=="POST" && req->getRequestParam("claz")!="" && req->getRequestParam("method")!="")
@@ -97,7 +98,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string 
 		void *mkr = dlsym(dlib, meth.c_str());
 		if(mkr!=NULL)
 		{
-			cout << endl << "inside dcp " << meth << endl;
+			logger << endl << "inside dcp " << meth << endl;
 			DCPPtr f =  (DCPPtr)mkr;
 			content = f();
 			//string patf;

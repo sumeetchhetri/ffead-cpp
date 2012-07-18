@@ -45,6 +45,7 @@
 #include "Queue.h"
 #include "Server.h"
 #include "string"
+#include "Logger.h"
 
 
 #define MAXBUFLEN 1024
@@ -53,6 +54,7 @@ typedef vector<unsigned char> Cont;
 using namespace std;
 class MessageHandler {
 	string path;
+	Logger logger;
 public:
 	MessageHandler(string);
 	~MessageHandler()
@@ -66,7 +68,13 @@ private:
 	bool running;
 	static void service(int);
 	static void init(string);
-
+	Message readMessageFromQ(string fileName);
+	void writeMessageToQ(Message msg,string fileName);
+	bool tempUnSubscribe(string subs,string fileName);
+	Message readMessageFromT(string fileName,string subs);
+	void writeMessageToT(Message msg,string fileName);
+	void subscribe(string subs,string fileName);
+	void unSubscribe(string subs,string fileName);
 };
 
 #endif /* MESSAGEHANDLER_H_ */

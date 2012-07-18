@@ -26,6 +26,7 @@
 #include "XmlParser.h"
 #include "MessageHandler.h"
 #include <boost/algorithm/string.hpp>
+#include "Logger.h"
 
 class MessageUtil {
 public:
@@ -39,6 +40,7 @@ public:
     string getSubscriber() const;
     void setSubscriber(string);
 private:
+    Logger logger;
 	Destination destination;
 	string host;
 	string port;

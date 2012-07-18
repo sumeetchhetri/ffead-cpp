@@ -24,8 +24,7 @@
 
 using namespace std;
 Reflection::Reflection() {
-	// TODO Auto-generated constructor stub
-
+	logger = Logger::getLogger("Reflection");
 }
 
 Reflection::~Reflection() {
@@ -38,7 +37,7 @@ strVec Reflection::list(string cwd)
 	string command;
 	strVec files;
 	command = "ls -F1 "+cwd+"|grep '.h'";
-	cout << "\nCommand:" << command << flush;
+	logger << "\nCommand:" << command << flush;
 	if ((pipe_fp = popen(command.c_str(), "r")) == NULL)
 	{
 		printf("pipe open error in cmd_list\n");
@@ -62,7 +61,7 @@ strVec Reflection::list(string cwd)
 			if(fileName.find("~")==string::npos)
 			{
 				files.push_back(cwd+"/"+fileName);
-				cout << "\nlist for file" << (cwd+"/"+fileName) << "\n" << flush;
+				logger << "\nlist for file" << (cwd+"/"+fileName) << "\n" << flush;
 			}
 			fileName = "";
 		}
@@ -105,7 +104,7 @@ bool Reflection::generateClassInfo(string className)
 	string data;
 	//className += ".h";
 	ifstream infile;
-	cout << "Reading from the file" << endl;
+	logger << "Reading from the file" << endl;
 	//className = "/home/sumeet/workspace/weblib/" + className;
 	infile.open(className.c_str());
 	string flag = "";
@@ -168,7 +167,7 @@ bool Reflection::generateClassInfo(string className)
 						boost::replace_all(this->bcvisib," ","");
 						this->baseClassN = results.at(2);
 						boost::replace_all(this->baseClassN," ","");
-						//cout << results.size() << flush;
+						//logger << results.size() << flush;
 					}
 					classdone = true;
 					classset = true;
@@ -238,7 +237,7 @@ bool Reflection::generateClassInfoFromDD(string alldata)
 			{
 				this->bcvisib = results.at(2);
 				this->baseClassN = results.at(3);
-				//cout << results.size() << flush;
+				//logger << results.size() << flush;
 			}
 			//boost::iter_split(results, data, boost::first_finder(": "));
 		}
@@ -257,7 +256,7 @@ bool Reflection::generateClassInfoFromDD(string alldata)
 			collectInfo(data, flag);
 		}
 	}
-	//cout << pub.size() << pri.size() << pro.size() << flush;
+	//logger << pub.size() << pri.size() << pro.size() << flush;
 	if (this->pub.size() > 0 || this->pri.size() > 0 || this->pro.size() > 0)
 		return true;
 	else
@@ -668,7 +667,7 @@ string Reflection::generateClassDefinitionsAll(strVec all,string &includeRef)
 	ret += "extern \"C\"\n{\n";
 	for (unsigned int var = 0; var < all.size(); ++var)
 	{
-		cout << "\nstarting for classes " << all.size() << "\n" << flush;
+		logger << "\nstarting for classes " << all.size() << "\n" << flush;
 		ret += this->generateClassDefinitions(all.at(var),inc,typedefs,classes,methods,opers);
 
 	}
@@ -691,9 +690,9 @@ string Reflection::generateClassDefinitions(string includeDir,string &includesDe
 	string ret,in,ty,cl,me;
 	for (unsigned int var = 0; var < includes.size(); ++var)
 	{
-		cout << "\ngenerating for file" << includes.at(var) << "\n" << flush;
+		logger << "\ngenerating for file" << includes.at(var) << "\n" << flush;
 		ret += generateClassDefinition(includes.at(var),includesDefs,typedefs,classes,methods,opers);
-		cout << "\ndone generating for file" << includes.at(var) << "\n" << flush;
+		logger << "\ndone generating for file" << includes.at(var) << "\n" << flush;
 	}
 	return ret;
 }
@@ -1348,9 +1347,9 @@ string Reflection::generateSerDefinitions(string includeDir,string &includesDefs
 	string ret;
 	for (unsigned int var = 0; var < includes.size(); ++var)
 	{
-		cout << "\ngenerating Ser for file" << includes.at(var) << "\n" << flush;
+		logger << "\ngenerating Ser for file" << includes.at(var) << "\n" << flush;
 		ret += generateSerDefinition(includes.at(var),includesDefs,typedefs,classes,methods);
-		cout << "\ndone generating Ser for file" << includes.at(var) << "\n" << flush;
+		logger << "\ndone generating Ser for file" << includes.at(var) << "\n" << flush;
 	}
 	return ret;
 }

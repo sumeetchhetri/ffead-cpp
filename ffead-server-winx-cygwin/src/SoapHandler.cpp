@@ -44,7 +44,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 		XmlParser parser("Parser");
 		Document doc = parser.getDocument(req->getContent());
 		soapenv = doc.getRootElement();
-		cout << soapenv.getTagName() << "----\n" << flush;
+		logger << soapenv.getTagName() << "----\n" << flush;
 
 		if(soapenv.getChildElements().size()==1
 				&& soapenv.getChildElements().at(0).getTagName()=="Body")
@@ -52,12 +52,12 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 		else if(soapenv.getChildElements().size()==2
 				&& soapenv.getChildElements().at(1).getTagName()=="Body")
 			soapbody = soapenv.getChildElements().at(1);
-		cout << soapbody.getTagName() << "----\n" << flush;
+		logger << soapbody.getTagName() << "----\n" << flush;
 		Element method = soapbody.getChildElements().at(0);
-		cout << method.getTagName() << "----\n" << flush;
+		logger << method.getTagName() << "----\n" << flush;
 		meth = method.getTagName();
 		string methodname = meth + ws_name;
-		cout << methodname << "----\n" << flush;
+		logger << methodname << "----\n" << flush;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		if(mkr!=NULL)
 		{
@@ -101,8 +101,8 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 			}
 			env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
 		}
-		cout << "\n----------------------------------------------------------------------------\n" << flush;
-		cout << env << "\n----------------------------------------------------------------------------\n" << flush;
+		logger << "\n----------------------------------------------------------------------------\n" << flush;
+		logger << env << "\n----------------------------------------------------------------------------\n" << flush;
 	}
 	catch(string &fault)
 	{
@@ -122,7 +122,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
-		cout << fault << flush;
+		logger << fault << flush;
 	}
 	catch(Exception *e)
 	{
@@ -142,7 +142,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
-		cout << e->what() << flush;
+		logger << e->what() << flush;
 	}
 	catch(...)
 	{
@@ -162,7 +162,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
-		cout << "Standard Exception" << flush;
+		logger << "Standard Exception" << flush;
 	}
 	res.setStatusCode("200");
 	res.setStatusMsg("OK");

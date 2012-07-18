@@ -25,6 +25,7 @@
 #include <boost/thread.hpp>
 #include "Task.h"
 #include "TimeUnit.h"
+#include "Logger.h"
 
 class Thread {
 	bool console;
@@ -34,6 +35,7 @@ class Thread {
 	boost::thread *mthread;
 	bool idle;
 	Task *task;
+	Logger logger;
 	friend class ThreadPool;
 };
 

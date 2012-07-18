@@ -19,7 +19,6 @@
  *  Created on: Jun 4, 2010
  *      Author: sumeet
  */
-
 #include "Date.h"
 
 string Date::getMon(string mmm)
@@ -87,6 +86,7 @@ string getHalfDayName(string dayName)
 
 Date::Date()
 {
+	//logger = //logger::get//logger("Date");
 	time_t rawtime;
 	struct tm * timeinfo;
 	time (&rawtime);
@@ -362,7 +362,7 @@ Date Date::getDateFromDays(long days)
 	long mm = (mi + 2)%12 + 1;
 	y = y + (mi + 2)/12 + 1900;
 	long dd = ddd - (mi*306 + 5)/10 + 1;
-	//cout << y << " " << mm << " " << dd << endl;
+	////logger << y << " " << mm << " " << dd << endl;
 	Date d;
 	d.setDay(dd);
 	d.setMonth(mm);
@@ -386,7 +386,7 @@ void Date::getDateFromHours(long hours)
 	long mm = (mi + 2)%12 + 1;
 	y = y + (mi + 2)/12 + 1900;
 	long dd = ddd - (mi*306 + 5)/10 + 1;
-	//cout << y << " " << mm << " " << dd << " " << hours;
+	////logger << y << " " << mm << " " << dd << " " << hours;
 }
 
 void Date::getDateFromMinutes(long long minutes)
@@ -406,7 +406,7 @@ void Date::getDateFromMinutes(long long minutes)
 	long mm = (mi + 2)%12 + 1;
 	y = y + (mi + 2)/12 + 1900;
 	long dd = ddd - (mi*306 + 5)/10 + 1;
-	//cout << y << " " << mm << " " << dd << " " << hours << ":" << minutes;
+	////logger << y << " " << mm << " " << dd << " " << hours << ":" << minutes;
 }
 
 void Date::getDateFromSeconds(long long seconds)
@@ -428,7 +428,7 @@ void Date::getDateFromSeconds(long long seconds)
 	long mm = (mi + 2)%12 + 1;
 	y = y + (mi + 2)/12 + 1900;
 	long dd = ddd - (mi*306 + 5)/10 + 1;
-	//cout << y << " " << mm << " " << dd << " " << hours << ":" << minutes << ":" << seconds <<  "\n" << endl << flush;
+	////logger << y << " " << mm << " " << dd << " " << hours << ":" << minutes << ":" << seconds <<  "\n" << endl << flush;
 }
 
 bool Date::validateDate(int dd, int mm, int yyyy)
@@ -552,4 +552,31 @@ void Date::setTime(int hh,int mi,int ss)
 	setMm(mi);
 	setSs(ss);
 	this->nanoseconds = 0;
+}
+
+int Date::test()
+{
+	unsigned long long gg = getDays(2008,12,31);
+	getDateFromDays(gg);
+	gg = getHours(2008,12,31,12);
+	getDateFromHours(gg);
+	gg = getMinutes(2008,12,31,12,56);
+	getDateFromMinutes(gg);
+	gg = getSeconds(2008,12,31,12,56,56);
+	getDateFromSeconds(gg);
+	Date d;
+	//logger << d.toString() << endl;
+	Date d1 = d.addYears(1);
+	//logger << d1.toString() << endl;
+	Date d2 = d.addMonths(23);
+	//logger << d2.toString() << endl;
+	Date d3 = d.addDays(17);
+	//logger << d3.toString() << endl;
+	Date d4 = d.addHours(25);
+	//logger << d4.toString() << endl;
+	Date d5 = d.addMinutes(61);
+	//logger << d5.toString() << endl;
+	Date d6 = d.addSeconds(61);
+	//logger << d6.toString() << endl;
+	return 0;
 }

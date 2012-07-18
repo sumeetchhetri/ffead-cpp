@@ -44,6 +44,7 @@ void MessageUtil::setSubscriber(string subscriber)
 
 MessageUtil::MessageUtil(string file)
 {
+	logger = Logger::getLogger("MessageUtil");
 	XmlParser parser("Parser");
 	Document doc = parser.getDocument(file);
 	Element msgng = doc.getRootElement();
@@ -112,10 +113,10 @@ bool MessageUtil::sendMessage(Message msg)
 	bool flag = true;
 	if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 	{
-		cout << "send failed" << flush;
+		logger << "send failed" << flush;
 		flag = false;
 	}
-	cout << h << flush;
+	logger << h << flush;
 
 	if ((numbytes = recv(sockfd, buf, 99, 0)) == -1) {
 		perror("recv");
@@ -178,10 +179,10 @@ Message MessageUtil::receiveMessage()
 	bool flag = true;
 	if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 	{
-		cout << "send failed" << flush;
+		logger << "send failed" << flush;
 		flag = false;
 	}
-	cout << h << flush;
+	logger << h << flush;
 
 	if ((numbytes = recv(sockfd, buf, 1024, 0)) == -1) {
 		perror("recv");
@@ -192,11 +193,11 @@ Message MessageUtil::receiveMessage()
 	ss << buf;
 	while(getline(ss,temp))
 	{
-		cout << temp << flush;
+		logger << temp << flush;
 		results += temp;
 	}
-	cout << "\n\nclient: received" << flush;
-	cout << results << flush;
+	logger << "\n\nclient: received" << flush;
+	logger << results << flush;
 	Message msg(results);
 	buf[numbytes] = '\0';
 
@@ -260,10 +261,10 @@ void MessageUtil::subscribe(string subs)
 		bool flag = true;
 		if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 		{
-			cout << "send failed" << flush;
+			logger << "send failed" << flush;
 			flag = false;
 		}
-		cout << h << flush;
+		logger << h << flush;
 
 		if ((numbytes = recv(sockfd, buf, 1024, 0)) == -1) {
 			perror("recv");
@@ -274,11 +275,11 @@ void MessageUtil::subscribe(string subs)
 		ss << buf;
 		while(getline(ss,temp))
 		{
-			cout << temp << flush;
+			logger << temp << flush;
 			results += temp;
 		}
-		cout << "\n\nclient: received" << flush;
-		cout << results << flush;
+		logger << "\n\nclient: received" << flush;
+		logger << results << flush;
 		buf[numbytes] = '\0';
 		close(sockfd);
 		memset(&buf[0], 0, sizeof(buf));
@@ -334,10 +335,10 @@ void MessageUtil::unSubscribe(string subs)
 		bool flag = true;
 		if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 		{
-			cout << "send failed" << flush;
+			logger << "send failed" << flush;
 			flag = false;
 		}
-		cout << h << flush;
+		logger << h << flush;
 
 		if ((numbytes = recv(sockfd, buf, 1024, 0)) == -1) {
 			perror("recv");
@@ -348,11 +349,11 @@ void MessageUtil::unSubscribe(string subs)
 		ss << buf;
 		while(getline(ss,temp))
 		{
-			cout << temp << flush;
+			logger << temp << flush;
 			results += temp;
 		}
-		cout << "\n\nclient: received" << flush;
-		cout << results << flush;
+		logger << "\n\nclient: received" << flush;
+		logger << results << flush;
 		buf[numbytes] = '\0';
 
 		close(sockfd);

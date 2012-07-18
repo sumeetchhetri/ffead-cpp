@@ -35,10 +35,12 @@
 #include "CibernateConnPools.h"
 #include "DateFormat.h"
 #include "BinaryData.h"
+#include "Logger.h"
 
 typedef map<string,Object*> Params;
 class Cibernate {
 private:
+	Logger logger;
 	string demangle(const char *mangled);
 	CibernateConnectionPool* pool;
 	Mapping* mapping;

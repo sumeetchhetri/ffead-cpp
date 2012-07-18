@@ -27,6 +27,7 @@
 #include "vector"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+
 using namespace std;
 
 class Date {
@@ -94,32 +95,7 @@ public:
 	Date addYears(long years);
 	static bool validateDate(int dd, int mm, int yyyy);
 	static string getDayName(int dd, int mm, int yyyy);
-	int test()
-	{
-		unsigned long long gg = getDays(2008,12,31);
-		getDateFromDays(gg);
-		gg = getHours(2008,12,31,12);
-		getDateFromHours(gg);
-		gg = getMinutes(2008,12,31,12,56);
-		getDateFromMinutes(gg);
-		gg = getSeconds(2008,12,31,12,56,56);
-		getDateFromSeconds(gg);
-		Date d;
-		cout << d.toString() << endl;
-		Date d1 = d.addYears(1);
-		cout << d1.toString() << endl;
-		Date d2 = d.addMonths(23);
-		cout << d2.toString() << endl;
-		Date d3 = d.addDays(17);
-		cout << d3.toString() << endl;
-		Date d4 = d.addHours(25);
-		cout << d4.toString() << endl;
-		Date d5 = d.addMinutes(61);
-		cout << d5.toString() << endl;
-		Date d6 = d.addSeconds(61);
-		cout << d6.toString() << endl;
-		return 0;
-	}
+	int test();
 };
 
 #endif /* DATE_H_ */

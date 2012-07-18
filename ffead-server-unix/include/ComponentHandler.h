@@ -32,6 +32,7 @@
 #include "Serialize.h"
 #include <boost/thread/thread.hpp>
 #include "map"
+#include "Logger.h"
 
 #define BACKLOG1 500
 #define MAXBUFLEN1 1024
@@ -46,6 +47,7 @@ class ComponentHandlerException: public exception
 		string message;
 };
 class ComponentHandler{
+	Logger logger;
 	static void service(int fd);
 	Server *server;
 	bool running;

@@ -31,6 +31,7 @@
 #include "stdio.h"
 #include <openssl/ssl.h>
 #include "CryptoHandler.h"
+#include "Logger.h"
 
 typedef vector<string> strVec;
 #ifndef HTTPREQUEST_H_
@@ -50,6 +51,7 @@ public:
 };
 typedef map<string, FormData> FMap;
 class HttpRequest {
+	Logger logger;
 	//friend class HttpSession;
 	string host;
 	string url;

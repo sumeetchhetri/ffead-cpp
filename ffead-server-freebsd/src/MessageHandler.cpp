@@ -25,10 +25,11 @@
 using namespace std;
 MessageHandler::MessageHandler(string path)
 {
+	logger = Logger::getLogger("MessageHandler");
 	this->path = path;
 }
 MessageHandler* _mess_instance = NULL;
-Message readMessageFromQ(string fileName)
+Message MessageHandler::readMessageFromQ(string fileName)
 {
 	Queue q;
 	Message msg;
@@ -48,7 +49,7 @@ Message readMessageFromQ(string fileName)
 	return msg;
 }
 
-void writeMessageToQ(Message msg,string fileName)
+void MessageHandler::writeMessageToQ(Message msg,string fileName)
 {
 	Queue q;
 	ifstream myfile1;
@@ -65,7 +66,7 @@ void writeMessageToQ(Message msg,string fileName)
 	oa << q.msgs;
 }
 
-bool tempUnSubscribe(string subs,string fileName)
+bool MessageHandler::tempUnSubscribe(string subs,string fileName)
 {
 	string subscribers;
 	ifstream myfile1;
@@ -74,7 +75,7 @@ bool tempUnSubscribe(string subs,string fileName)
 	{
 		while(getline(myfile1,subscribers))
 		{
-			cout << subscribers << flush;
+			_mess_instance->logger << subscribers << flush;
 			break;
 		}
 	}
@@ -91,7 +92,7 @@ bool tempUnSubscribe(string subs,string fileName)
 		return true;
 }
 
-Message readMessageFromT(string fileName,string subs)
+Message MessageHandler::readMessageFromT(string fileName,string subs)
 {
 	Queue t;
 	Message msg;
@@ -113,7 +114,7 @@ Message readMessageFromT(string fileName,string subs)
 	return msg;
 }
 
-void writeMessageToT(Message msg,string fileName)
+void MessageHandler::writeMessageToT(Message msg,string fileName)
 {
 	Queue t;
 	ifstream myfile1;
@@ -130,7 +131,7 @@ void writeMessageToT(Message msg,string fileName)
 	oa << t.msgs;
 }
 
-void subscribe(string subs,string fileName)
+void MessageHandler::subscribe(string subs,string fileName)
 {
 	ifstream myfile1;
 	myfile1.open(fileName.c_str());
@@ -139,7 +140,7 @@ void subscribe(string subs,string fileName)
 	{
 		while(getline(myfile1,subscribers))
 		{
-			cout << subscribers << flush;
+			_mess_instance->logger << subscribers << flush;
 			break;
 		}
 	}
@@ -155,7 +156,7 @@ void subscribe(string subs,string fileName)
 	myfile.close();
 }
 
-void unSubscribe(string subs,string fileName)
+void MessageHandler::unSubscribe(string subs,string fileName)
 {
 	string subscribers;
 	ifstream myfile1;
@@ -164,7 +165,7 @@ void unSubscribe(string subs,string fileName)
 	{
 		while(getline(myfile1,subscribers))
 		{
-			cout << subscribers << flush;
+			_mess_instance->logger << subscribers << flush;
 			break;
 		}
 	}
@@ -192,11 +193,11 @@ void MessageHandler::service(int fd)
 	ss << buf;
 	while(getline(ss,temp))
 	{
-		cout << temp << flush;
+		_mess_instance->logger << temp << flush;
 		results.append(temp);
 	}*/
 	results = results.substr(0,results.find_last_of(">")+1);
-	cout << results << flush;
+	_mess_instance->logger << results << flush;
 
 	if(results.find("<")!=string::npos && results.find(">")!=string::npos)
 	{
@@ -207,18 +208,18 @@ void MessageHandler::service(int fd)
 			Message msg(results);
 			string fileName = _mess_instance->path+msg.getDestination().getName()+":"+msg.getDestination().getType();
 			if(msg.getDestination().getType()=="Queue")
-				writeMessageToQ(msg,fileName);
+				_mess_instance->writeMessageToQ(msg,fileName);
 			else if(msg.getDestination().getType()=="Topic")
-				writeMessageToT(msg,fileName);
+				_mess_instance->writeMessageToT(msg,fileName);
 		}
 		catch(Exception *e)
 		{
-			cout << e->what() << flush;
+			_mess_instance->logger << e->what() << flush;
 		}
 		_mess_instance->getServer()->Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	cout << "send failed" << flush;
-		cout << h << flush;
+		//	_mess_instance->logger << "send failed" << flush;
+		_mess_instance->logger << h << flush;
 	}
 	else if(results.find("GET FROM ")!=string::npos)
 	{
@@ -226,7 +227,7 @@ void MessageHandler::service(int fd)
 		if(results.find("Queue")!=string::npos)
 		{
 			boost::replace_first(results,"GET FROM ",_mess_instance->path);
-			msg = readMessageFromQ(results);
+			msg = _mess_instance->readMessageFromQ(results);
 		}
 		else if(results.find("Topic")!=string::npos)
 		{
@@ -234,19 +235,19 @@ void MessageHandler::service(int fd)
 			string te = "-" + subs;
 			boost::replace_first(results,te,"");
 			boost::replace_first(results,"GET FROM ",_mess_instance->path);
-			msg = readMessageFromT(results,subs);
+			msg = _mess_instance->readMessageFromT(results,subs);
 		}
 		string h;
 		if(results.find("Queue")!=string::npos || results.find("Topic")!=string::npos)
 		{
 			h = msg.toXml();
-			cout << h << flush;
+			_mess_instance->logger << h << flush;
 		}
 		else
 			h = "Improper Destination";
 		_mess_instance->getServer()->Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	cout << "send failed" << flush;
+		//	_mess_instance->logger << "send failed" << flush;
 	}
 	else if(results.find("SUBSCRIBE ")!=string::npos)
 	{
@@ -254,11 +255,11 @@ void MessageHandler::service(int fd)
 		string subs  = results.substr(results.find("SUBSCRIBE ")+10,len);
 		results = results.substr(results.find("TO ")+3);
 		results = (_mess_instance->path+results+":Subslist");
-		subscribe(subs,results);
+		_mess_instance->subscribe(subs,results);
 		string h = "Subscribed";
 		_mess_instance->getServer()->Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	cout << "send failed" << flush;
+		//	_mess_instance->logger << "send failed" << flush;
 	}
 	else if(results.find("UNSUBSCRIBE ")!=string::npos)
 	{
@@ -266,11 +267,11 @@ void MessageHandler::service(int fd)
 		string subs  = results.substr(results.find("UNSUBSCRIBE ")+11,len);
 		results = results.substr(results.find("TO ")+3);
 		results = (_mess_instance->path+results+":Subslist");
-		subscribe(subs,results);
+		_mess_instance->subscribe(subs,results);
 		string h = "Unsubscribed";
 		_mess_instance->getServer()->Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	cout << "send failed" << flush;
+		//	_mess_instance->logger << "send failed" << flush;
 	}
 	memset(&buf[0], 0, sizeof(buf));
 	close(fd);

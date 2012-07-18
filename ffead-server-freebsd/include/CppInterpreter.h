@@ -31,6 +31,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include "bitset"
+#include "Logger.h"
 typedef map<string,Object> mapVars;
 typedef map<string,string> mapStrs;
 using namespace std;
@@ -64,6 +65,7 @@ public:
 
 };
 class CppInterpreter {
+	Logger logger;
 	mapVars localVariables;
 	mapVars boundVariables;
 	mapStrs literals;

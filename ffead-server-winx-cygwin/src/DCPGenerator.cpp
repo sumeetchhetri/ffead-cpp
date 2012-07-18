@@ -45,7 +45,6 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 {
 	ifstream infile;
 	string data,allcontent;
-	cout << "Reading from the file" << endl;
 	infile.open(fileName.c_str());
 	string file,dir;
 	int s,en;
@@ -103,7 +102,6 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 		e = temp1.find("</DCPF>");
 		len = e - b;
 		funcs.append(temp1.substr(6,e-6));
-		//cout << allcontent.substr(b,len) << flush;
 		//allcontent = allcontent.substr(e+7);
 	}
 	bodies.append(funcs);
@@ -121,7 +119,6 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 		e = allcontent.find("</DCPB>");
 		len = e - b;
 		bodies.append(allcontent.substr(b,len));
-		//cout << allcontent.substr(b,len) << flush;
 		allcontent = allcontent.substr(e+7);
 	}
 	string ter(allcontent.substr(0));
@@ -132,7 +129,6 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 	bodies.append("\nreturn scr;\n");
 	bodies.append("\n}\n");
 	//bodies.append("}\n");
-	cout << bodies << flush;
 	return bodies;
 }
 

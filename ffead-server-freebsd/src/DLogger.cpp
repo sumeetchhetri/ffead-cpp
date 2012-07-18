@@ -23,123 +23,111 @@
 #include "DLogger.h"
 
 // Global static pointer used to ensure a single instance of the class.
-boost::mutex* DLogger::_theLogmutex = NULL;
-string DLogger::level = NULL;
-string DLogger::mode = NULL;
-DateFormat DLogger::datFormat = NULL;
-ofstream DLogger::out = NULL;
+DLogger* DLogger::m_pInstance = NULL;
 
-DLogger* DLogger::getLogger(string className)
+DLogger* DLogger::getDLogger()
 {
-	DLogger dlogger = new DLogger(className);
-	return dlogger;
+	if(m_pInstance==NULL)
+	{
+		m_pInstance = new DLogger();
+	}
+	return m_pInstance;
 }
 
 void DLogger::init()
 {
-	if(_theLogmutex==NULL)
+	if(m_pInstance==NULL)
 	{
-		_theLogmutex = new boost::mutex();
-		level = new string("ERROR");
-		mode = new string("CONSOLE");
-		datFormat = new DateFormat("dd/mm/yyyy hh:mi:ss");
+		m_pInstance = new DLogger();
 	}
 }
 
 void DLogger::init(string file)
 {
-	if(_theLogmutex==NULL)
+	if(m_pInstance==NULL)
 	{
-		_theLogmutex = new boost::mutex();
-
-		PropFileReader pf;
-		propMap props = pf.getProperties(file);
-		if(props.size()==0)
-		{
-			level = new string("ERROR");
-			mode = new string("CONSOLE");
-			datFormat = new DateFormat("dd/mm/yyyy hh:mi:ss");
-			return;
-		}
-		level = new string(props["LEVEL"]);
-		mode = new string(props["MODE"]);
-		filepath = new string(props["FILEPATH"]);
-		datFormat = new DateFormat(props["DATEFMT"]);
-		if(*mode=="FILE")
-		{
-			out = new ofstream();
-			out->open(filepath->c_str(),ios::app | ios::binary);
-		}
+		m_pInstance = new DLogger(file);
 	}
 }
 
-void DLogger::init(string llevel,string lmode,string lfilepath)
+void DLogger::init(string level,string mode,string file)
 {
-	if(_theLogmutex==NULL)
+	if(m_pInstance==NULL)
 	{
-		_theLogmutex = new boost::mutex();
-
-		level = new string(llevel);
-		mode = new string(lmode);
-		filepath = new string(lfilepath);
-		datFormat = new DateFormat(props["DATEFMT"]);
-		if(*mode=="FILE")
-		{
-			out = new ofstream();
-			out->open(filepath->c_str(),ios::app | ios::binary);
-		}
+		m_pInstance = new DLogger(level,mode,file);
 	}
 }
 
-DLogger::DLogger(string className)
+DLogger::DLogger()
 {
-	this->className = className;
+	PropFileReader pf;
+	level = "ERROR";
+	mode = "CONSOLE";
+	datFormat.setFormatspec("dd/mm/yyyy hh:mi:ss");
+}
+
+DLogger::DLogger(string file)
+{
+	PropFileReader pf;
+	propMap props = pf.getProperties(file);
+	if(props.size()==0)
+	{
+		level = "ERROR";
+		mode = "CONSOLE";
+		datFormat.setFormatspec("dd/mm/yyyy hh:mi:ss");
+		return;
+	}
+	level = props["LEVEL"];
+	mode = props["MODE"];
+	filepath = props["FILEPATH"];
+	if(mode=="FILE")
+		out.open(filepath.c_str(),ios::app | ios::binary);
+	datFormat.setFormatspec(props["DATEFMT"]);
+}
+DLogger::DLogger(string level,string mode,string filepath)
+{
+	this->level = level;
+	this->mode = mode;
+	this->filepath = filepath;
 }
 
 DLogger::~DLogger()
 {
-	if(_theLogmutex!=NULL)
-	{
-		delete _theLogmutex;
-		delete level;
-		delete mode;
-		delete datFormat;
-		if(filepath!=NULL)delete filepath;
-		if(out!=NULL)delete out;
-	}
+	out.close();
 }
 
 void DLogger::write(string msg,string mod)
 {
 	Date dat;
-	string te = datFormat->format(dat);
-	msg = "[" + te + "] ("+this->className + ") <"+mod+"> :"+msg+"\n";
-	if(*mode=="FILE")
+	string te = this->datFormat.format(dat);
+	if(mode=="FILE")
 	{
-		_theLogmutex->lock();
-		out->write(msg.c_str(),msg.length());
-		*out << flush;
-		_theLogmutex->unlock();
+		msg = "[" + te + "] <"+mod+"> :"+msg+"\n";
+		m_pInstance->p_mutex.lock();
+		m_pInstance->out.write(msg.c_str(),msg.length());
+		m_pInstance->out << flush;
+		m_pInstance->p_mutex.unlock();
 	}
 	else
 	{
-		_theLogmutex->lock();
+		msg = "[" + te + "] <"+mod+"> :"+msg+"\n";
+		m_pInstance->p_mutex.lock();
 		cout << msg << flush;
-		_theLogmutex->unlock();
+		m_pInstance->p_mutex.unlock();
 	}
 }
 
 void DLogger::info(string msg)
 {
-	write(msg,"info");
+	m_pInstance->write(msg,"info");
 }
 
 void DLogger::debug(string msg)
 {
-	write(msg,"debug");
+	m_pInstance->write(msg,"debug");
 }
 
 void DLogger::error(string msg)
 {
-	write(msg,"error");
+	m_pInstance->write(msg,"error");
 }

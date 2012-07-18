@@ -29,6 +29,7 @@
 #include <fstream>
 #include "XmlParseException.h"
 #include <boost/lexical_cast.hpp>
+#include "Logger.h"
 
 class XmlParser {
 	public:
@@ -36,6 +37,7 @@ class XmlParser {
 		virtual ~XmlParser();
 		Document getDocument(string);
 	private:
+		Logger logger;
 		Document doc;
 		string mode;
 		void readXML(string,string,Element *);

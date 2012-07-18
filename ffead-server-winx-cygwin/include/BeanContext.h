@@ -28,11 +28,13 @@
 #include "Serialize.h"
 #include "Object.h"
 #include "XmlParser.h"
+#include "Logger.h"
 
 class BeanContext {
 	string host;
 	int port;
 	Client client;
+	Logger logger;
 public:
 	BeanContext();
 	BeanContext(string host,int port);

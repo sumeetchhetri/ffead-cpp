@@ -24,7 +24,6 @@
 #define LOGGER_H_
 #include "PropFileReader.h"
 #include "DateFormat.h"
-#include "queue.h"
 #include <boost/thread/thread.hpp>
 class Logger {
 public:
@@ -36,12 +35,17 @@ public:
 	void debug(string);
 	void error(string);
 	static void init();
+	static void destroy();
 	static void init(string file);
 	static void init(string level,string mode,string file);
 	Logger();
 	virtual ~Logger();
 	template <typename T>
-	friend Logger& operator<< (Logger& logger, T msg);
+	friend Logger& operator<< (Logger& logger, T msg)
+	{
+		logger.write(msg,"info");
+		return logger;
+	}
 	friend Logger& operator<< (Logger& logger, ostream& (*pf) (ostream&));
 private:
 	Logger(string);
@@ -54,7 +58,24 @@ private:
 	static ofstream* out;
 	void write(string,string);
 	template <typename T>
-	void write(T tmsg,string mod);
+	void write(T tmsg, string mod)
+	{
+		Date dat;
+		string te = datFormat->format(dat);
+		string msg = "[" + te + "] ("+this->className + ") <"+mod+"> :";
+		if(*mode=="FILE")
+		{
+			_theLogmutex->lock();
+			*out << msg << tmsg << endl;
+			_theLogmutex->unlock();
+		}
+		else
+		{
+			_theLogmutex->lock();
+			cout << msg << tmsg << endl;
+			_theLogmutex->unlock();
+		}
+	}
 	void write(ostream& (*pf) (ostream&), string mod);
 	static boost::mutex* _theLogmutex;
 };

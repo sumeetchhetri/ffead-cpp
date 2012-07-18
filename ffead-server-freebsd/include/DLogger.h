@@ -20,18 +20,17 @@
  *      Author: sumeet
  */
 
-#ifndef DLogger_H_
-#define DLogger_H_
+#ifndef DLOGGER_H_
+#define DLOGGER_H_
 #include "PropFileReader.h"
 #include "DateFormat.h"
-#include "queue.h"
 #include <boost/thread/thread.hpp>
 class DLogger {
 public:
 	static DLogger* getDLogger();
-	void info(string);
-	void debug(string);
-	void error(string);
+	static void info(string);
+	static void debug(string);
+	static void error(string);
 	static void init();
 	static void init(string file);
 	static void init(string level,string mode,string file);
@@ -40,14 +39,14 @@ private:
 	DLogger();
 	DLogger(string);
 	DLogger(string,string,string);
-	string className;
-	static DateFormat datFormat;
-	static string level;
-	static string mode;
-	static string filepath;
-	static ofstream out;
+	DateFormat datFormat;
+	string level;
+	string mode;
+	string filepath;
+	ofstream out;
 	void write(string,string);
-	static boost::mutex* _theLogmutex;
+	boost::mutex p_mutex;
+	static DLogger* m_pInstance;
 };
 
-#endif /* DLogger_H_ */
+#endif /* DLOGGER_H_ */

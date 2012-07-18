@@ -31,23 +31,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Timer.h"
+#include "Logger.h"
 using namespace std;
 
 class Connection
 {
+	Logger logger;
+	Connection();
+	friend class CibernateConnectionPool;
 public:
 	bool busy;
 	bool type;
 	SQLHDBC conn;
-	~Connection()
-	{
-		SQLDisconnect(conn);
-		SQLFreeHandle(SQL_HANDLE_DBC,conn);
-		cout << "\nDestructed Connection" << flush;
-	}
+	~Connection();
 };
 typedef vector<Connection*> connVec;
 class CibernateConnectionPool {
+	Logger logger;
 	int readNumber;
 	string dbName,uname,pass;
 	SQLHENV	V_OD_Env;// Handle ODBC environment

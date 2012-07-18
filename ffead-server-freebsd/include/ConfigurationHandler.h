@@ -29,6 +29,7 @@
 #include "ApplicationUtil.h"
 #include "DCPGenerator.h"
 #include "ConfigurationData.h"
+#include "Logger.h"
 
 class ConfigurationHandler {
 public:

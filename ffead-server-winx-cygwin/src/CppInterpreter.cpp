@@ -23,8 +23,7 @@
 #include "CppInterpreter.h"
 
 CppInterpreter::CppInterpreter() {
-	// TODO Auto-generated constructor stub
-
+	logger = Logger::getLogger("CppInterpreter");
 }
 
 CppInterpreter::~CppInterpreter() {
@@ -933,17 +932,17 @@ bool CppInterpreter::evalCond(vector<string> str)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			prev = "";
 			cond = "";
@@ -955,17 +954,17 @@ bool CppInterpreter::evalCond(vector<string> str)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			prev = "|";
 			cond = "";
@@ -975,17 +974,17 @@ bool CppInterpreter::evalCond(vector<string> str)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			prev = "&";
 			cond = "";
@@ -1000,7 +999,7 @@ bool CppInterpreter::evalCond(vector<string> str)
 	}
 	if(cond!="" && cond!=" ")
 	{
-		cout << "state=" << state << "\n" << flush;
+		logger << "state=" << state << "\n" << flush;
 		state = evaluateCondition(cond);
 	}
 	return state;
@@ -1067,17 +1066,17 @@ void CppInterpreter::hanldeIF(vector<string>::iterator &iter)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			prev = "";
 			cond = "";
@@ -1089,17 +1088,17 @@ void CppInterpreter::hanldeIF(vector<string>::iterator &iter)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			prev = "|";
 			cond = "";
@@ -1109,17 +1108,17 @@ void CppInterpreter::hanldeIF(vector<string>::iterator &iter)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				cout << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
 			}
 			prev = "&";
 			cond = "";
@@ -1476,7 +1475,7 @@ void CppInterpreter::hanldeCommand(vector<string>::iterator &itr)
 
 void CppInterpreter::eval(string str)
 {
-	cout << str << flush;
+	logger << str << flush;
 	string temp = str;
 	int st = 1;
 	while(temp.find("\"")!=string::npos)
@@ -1492,20 +1491,20 @@ void CppInterpreter::eval(string str)
 		string ini = str.substr(0,s-1);
 		str = (ini + varn + temp);
 		temp = str;
-		cout << "\n" << flush;
-		cout << litval << flush;
-		cout << "\n" << flush;
-		cout << s << e << flush;
-		cout << "\n" << flush;
-		cout << temp << flush;
-		cout << "\n" << flush;
+		logger << "\n" << flush;
+		logger << litval << flush;
+		logger << "\n" << flush;
+		logger << s << e << flush;
+		logger << "\n" << flush;
+		logger << temp << flush;
+		logger << "\n" << flush;
 	}
-	cout << str << flush;
+	logger << str << flush;
 	boost::regex pattern("\\s+",boost::regex_constants::icase|boost::regex_constants::perl);
 	str = boost::regex_replace (str, pattern, " ");
-	cout << "\n" << flush;
-	cout << str << flush;
-	cout << "\n" << flush;
+	logger << "\n" << flush;
+	logger << str << flush;
+	logger << "\n" << flush;
 
 	string comm;
 	vector<string> commands;//stack of command structure
@@ -1602,7 +1601,7 @@ void CppInterpreter::eval(string str)
 	}
 	//while(iter!=commands.end())
 	//{
-		//cout << commands.at(k) << "\n" << flush;
+		//logger << commands.at(k) << "\n" << flush;
 		/*string curr = *(iter++);
 		int crcnt = 0;
 		vector<string> state;
@@ -1620,7 +1619,7 @@ void CppInterpreter::eval(string str)
 			{
 				crcnt--;
 				state.push_back(evaluate(cond,"IF"));
-				cout << cond << flush;
+				logger << cond << flush;
 				if(crcnt==0)
 					break;
 			}
@@ -1628,8 +1627,8 @@ void CppInterpreter::eval(string str)
 			{
 				state.push_back(evaluate(cond,"IF"));
 				state.push_back("OR");
-				cout << cond << flush;
-				cout << " OR " << flush;
+				logger << cond << flush;
+				logger << " OR " << flush;
 				cond = "";
 				prev = "OR";
 			}
@@ -1637,8 +1636,8 @@ void CppInterpreter::eval(string str)
 			{
 				state.push_back(evaluate(cond,"IF"));
 				state.push_back("AND");
-				cout << cond << flush;
-				cout << " AND " << flush;
+				logger << cond << flush;
+				logger << " AND " << flush;
 				cond = "";
 				prev = "AND";
 			}
@@ -1697,7 +1696,7 @@ void CppInterpreter::eval(string str)
 			if(target.getType()!="" && source.getType()!="" && target.getType()==source.getType())
 				target.setPointer(source.getPointer());
 			else
-				cout << "run time exception" << flush;
+				logger << "run time exception" << flush;
 		}
 		else if(tokens.size()==3 && tokens.at(1)=="=")//assignment operation
 		{
@@ -1710,7 +1709,7 @@ void CppInterpreter::eval(string str)
 			if(target.getType()!="" && source.getType()!="" && target.getType()==source.getType())
 				target.setPointer(source.getPointer());
 			else
-				cout << "run time exception" << flush;
+				logger << "run time exception" << flush;
 		}
 		else if(tokens.size()>=5 && tokens.at(1)=="=")//multiple opeartions and final addition on this line
 		{

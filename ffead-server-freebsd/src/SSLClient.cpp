@@ -8,8 +8,7 @@
 #include "SSLClient.h"
 
 SSLClient::SSLClient() {
-	// TODO Auto-generated constructor stub
-
+	logger = Logger::getLogger("SSLClient");
 }
 
 SSLClient::~SSLClient() {
@@ -63,19 +62,19 @@ SSL_CTX *SSLClient::initialize_ctx(char *keyfile,char *password)
     /* Load our keys and certificates*/
     if(!(SSL_CTX_use_certificate_chain_file(ctx,
       keyfile)))
-    	cout << "Can't read certificate file" << flush;
+    	logger << "Can't read certificate file" << flush;
 
     pass=password;
     SSL_CTX_set_default_passwd_cb(ctx,
       password_cb);
     if(!(SSL_CTX_use_PrivateKey_file(ctx,
       keyfile,SSL_FILETYPE_PEM)))
-    	cout << "Can't read key file" << flush;
+    	logger << "Can't read key file" << flush;
 
     /* Load the CAs we trust*/
     if(!(SSL_CTX_load_verify_locations(ctx,
     		CA_LIST,0)))
-    	cout << "Can't read CA list" << flush;
+    	logger << "Can't read CA list" << flush;
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
     SSL_CTX_set_verify_depth(ctx,1);
 #endif
@@ -108,13 +107,13 @@ void SSLClient::closeSSL()
 	  case 0:
 	  case -1:
 	  default:
-		  cout << "shutdown failed" << flush;
+		  logger << "shutdown failed" << flush;
 	}
 	SSL_free(ssl);
 }
 void SSLClient::error_occurred(char *error)
 {
-	cout << error << flush;
+	logger << error << flush;
 }
 
 bool SSLClient::connection(string host,int port)
@@ -157,7 +156,7 @@ bool SSLClient::connection(string host,int port)
 
     inet_ntop(p->ai_family, get_in_addr1((struct sockaddr *)p->ai_addr),
             s, sizeof s);
-    cout << "SSLClient connecting to " << host << ":" << port << endl;
+    logger << "SSLClient connecting to " << host << ":" << port << endl;
 
     freeaddrinfo(servinfo); // all done with this structure
 
@@ -235,7 +234,7 @@ string SSLClient::getData(string hdrdelm,string cntlnhdr)
 			break;
 		}
 		string temp(buf);
-		//cout << temp << endl;
+		//logger << temp << endl;
 		temp = temp.substr(0,temp.length()-1);
 		alldat += (temp + "\n");
 		if(temp.find(cntlnhdr)!=string::npos)
@@ -248,14 +247,14 @@ string SSLClient::getData(string hdrdelm,string cntlnhdr)
 			}
 			catch(boost::bad_lexical_cast&)
 			{
-				cout << "bad lexical cast" <<endl;
+				logger << "bad lexical cast" <<endl;
 			}
 		}
 		memset(&buf[0], 0, sizeof(buf));
 	}
 	while(cntlen>0)
 	{
-		cout << "reading conetnt " << cntlen << endl;
+		logger << "reading conetnt " << cntlen << endl;
 		er = BIO_read(io,buf,cntlen);
 		switch(SSL_get_error(ssl,er))
 		{
@@ -276,7 +275,7 @@ string SSLClient::getData(string hdrdelm,string cntlnhdr)
 			}
 		}
 		alldat += (buf);
-		//cout << buf << endl;
+		//logger << buf << endl;
 		memset(&buf[0], 0, sizeof(buf));
 	}
 	return alldat;
@@ -289,7 +288,7 @@ string SSLClient::getData(int cntlen)
 	int er;
 	while(cntlen>0)
 	{
-		cout << "reading conetnt " << cntlen << endl;
+		logger << "reading conetnt " << cntlen << endl;
 		er = BIO_read(io,buf,cntlen);
 		switch(SSL_get_error(ssl,er))
 		{
@@ -310,7 +309,7 @@ string SSLClient::getData(int cntlen)
 			}
 		}
 		alldat += (buf);
-		//cout << buf << endl;
+		//logger << buf << endl;
 		memset(&buf[0], 0, sizeof(buf));
 	}
 	return alldat;

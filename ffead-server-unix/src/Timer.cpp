@@ -23,8 +23,7 @@
 #include "Timer.h"
 
 Timer::Timer() {
-	// TODO Auto-generated constructor stub
-
+	logger = Logger::getLogger("Timer");
 }
 
 Timer::~Timer() {
@@ -34,7 +33,7 @@ Timer::~Timer() {
 void Timer::start()
 {
 	clock_gettime(CLOCK_REALTIME, &st);
-	cout << "\n--------------------------start Timer-------------------------::" << ((st.tv_sec*1E9 + st.tv_nsec)/1000) << "\n"<< flush;
+	logger << "\n--------------------------start Timer-------------------------::" << ((st.tv_sec*1E9 + st.tv_nsec)/1000) << "\n"<< flush;
 }
 
 long long Timer::getCurrentTime()
@@ -56,8 +55,8 @@ void Timer::end()
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
 	long long elap = (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec))/1E3;
-	cout << "\n--------------------------end Timer-------------------------::" << ((en.tv_sec*1E9 + en.tv_nsec)/1000) << "\n"<< flush;
-	cout << "\n" << elap << "\n"<< flush;
+	logger << "\n--------------------------end Timer-------------------------::" << ((en.tv_sec*1E9 + en.tv_nsec)/1000) << "\n"<< flush;
+	logger << "\n" << elap << "\n"<< flush;
 }
 long Timer::elapsedMicroSeconds()
 {

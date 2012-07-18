@@ -32,7 +32,7 @@ CibernateConnPools* CibernateConnPools::get()
 
 CibernateConnPools::CibernateConnPools()
 {
-
+	logger = Logger::getLogger("CibernateConnPools");
 }
 
 CibernateConnPools::~CibernateConnPools() {
@@ -45,7 +45,7 @@ CibernateConnPools::~CibernateConnPools() {
 		delete it2->second;
 	}
 	instance=NULL;
-	cout << "\nDestructed CibernateConnPools" << flush;
+	logger << "\nDestructed CibernateConnPools" << flush;
 }
 
 void CibernateConnPools::addPool(int size,string uid,string pwd,string dsn,string appName)

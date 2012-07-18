@@ -34,11 +34,12 @@ ControllerHandler::~ControllerHandler() {
 bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> urlpattMap, map<string, string> mappattMap, void* dlib,
 		string ext, resFuncMap rstCntMap, map<string, string> mapMap, map<string, string> urlMap, string pthwofile)
 {
+	Logger logger = Logger::getLogger("ControllerHandler");
 	string claz;
 	bool isContrl = false;
 	if((urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!=""))
 	{
-		//cout << "Controller requested for " << req->getCntxt_name() << " name " << urlMap[req->getCntxt_name()+ext] << endl;
+		//logger << "Controller requested for " << req->getCntxt_name() << " name " << urlMap[req->getCntxt_name()+ext] << endl;
 		if(urlpattMap[req->getCntxt_name()+"*.*"]!="")
 			claz = "getReflectionCIFor" + urlpattMap[req->getCntxt_name()+"*.*"];
 		else
@@ -60,17 +61,17 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 			void *_temp = ref.newInstanceGVP(ctor);
 			Controller *thrd = (Controller *)_temp;
 			try{
-				 cout << "Controller called" << endl;
+				 logger << "Controller called" << endl;
 				 res = thrd->service(*req);
-				 cout << res.getStatusCode() << endl;
-				 cout << res.getContent_type() << endl;
-				 cout << res.getContent_len() << endl;
+				 logger << res.getStatusCode() << endl;
+				 logger << res.getContent_type() << endl;
+				 logger << res.getContent_len() << endl;
 				 if(res.getStatusCode()!="")
 					 isContrl = true;
 				 ext = AuthHandler::getFileExtension(req->getUrl());
 				 //delete mkr;
-			}catch(...){ cout << "Controller exception" << endl;}
-			cout << "Controller called\n" << flush;
+			}catch(...){ logger << "Controller exception" << endl;}
+			logger << "Controller called\n" << flush;
 		}
 	}
 	else if((mappattMap[req->getCntxt_name()+"*.*"]!="" || mapMap[req->getCntxt_name()+ext]!=""))
@@ -80,12 +81,12 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 		if(mappattMap[req->getCntxt_name()+"*.*"]!="")
 		{
 			req->setFile(fili+mappattMap[req->getCntxt_name()+"*.*"]);
-			cout << "URL mapped from * to " << mappattMap[req->getCntxt_name()+"*.*"] << endl;
+			logger << "URL mapped from * to " << mappattMap[req->getCntxt_name()+"*.*"] << endl;
 		}
 		else
 		{
 			req->setFile(fili+mapMap[req->getCntxt_name()+ext]);
-			cout << "URL mapped from " << ext << " to " << mapMap[req->getCntxt_name()+ext] << endl;
+			logger << "URL mapped from " << ext << " to " << mapMap[req->getCntxt_name()+ext] << endl;
 		}
 	}
 	else
@@ -95,11 +96,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 		bool flag = false;
 		int prsiz = 0;
 		vector<string> valss;
-		//cout << pthwofile << endl;
+		//logger << pthwofile << endl;
 		for (it=rstCntMap.begin();it!=rstCntMap.end();it++)
 		{
 			valss.clear();
-			//cout << it->first << endl;
+			//logger << it->first << endl;
 			//if(pthwofile.find(it->first)!=string::npos)
 			{
 				RestFunction ft = it->second;
@@ -107,32 +108,32 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 				string pthwofiletemp(pthwofile);
 				if(ft.baseUrl=="")
 				{
-					cout << "checking url : " << pthwofiletemp << ",param size: " << prsiz <<
+					logger << "checking url : " << pthwofiletemp << ",param size: " << prsiz <<
 							", against url: " << it->first << endl;
 					for (int var = 0; var < prsiz; var++)
 					{
-						//cout << "loop - " << pthwofiletemp << endl;
+						//logger << "loop - " << pthwofiletemp << endl;
 						string valsvv(pthwofiletemp.substr(pthwofiletemp.find_last_of("/")+1));
 						pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.find_last_of("/"));
 						valss.push_back(valsvv);
 					}
 					reverse(valss.begin(),valss.end());
-					//cout << "after - " << pthwofiletemp << endl;
+					//logger << "after - " << pthwofiletemp << endl;
 					/*if(pthwofiletemp.at(pthwofiletemp.length()-1)=='/')
 					{
 						pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.length()-1);
 					}*/
-					//cout << "after - " << pthwofiletemp << endl;
-					cout << "checking url : " << pthwofiletemp << ",param size: " << prsiz << ",vals: " << valss.size() <<
+					//logger << "after - " << pthwofiletemp << endl;
+					logger << "checking url : " << pthwofiletemp << ",param size: " << prsiz << ",vals: " << valss.size() <<
 							", against url: " << it->first << endl;
 					if(it->first==pthwofiletemp)
 					{
 						string lhs = boost::to_upper_copy(ft.meth);
 						string rhs = boost::to_upper_copy(req->getMethod());
-						cout << lhs << " <> " << rhs << endl;
+						logger << lhs << " <> " << rhs << endl;
 						if(prsiz==(int)valss.size() && lhs==rhs)
 						{
-							cout << "got correct url -- restcontroller " << endl;
+							logger << "got correct url -- restcontroller " << endl;
 							rft = ft;
 							flag = true;
 						}
@@ -145,7 +146,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 								res.setContent_str("Invalid number of arguments");
 							else
 								res.setContent_str("Invalid HTTPMethod used");*/
-							cout << "Rest Controller Param/Method Error" << endl;
+							logger << "Rest Controller Param/Method Error" << endl;
 						}
 						break;
 					}
@@ -153,7 +154,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 				else
 				{
 					string baseUrl(req->getCntxt_name()+ft.baseUrl);
-					cout << "checking url : " << pthwofiletemp << ",param size: " << prsiz <<
+					logger << "checking url : " << pthwofiletemp << ",param size: " << prsiz <<
 							", against url: " << baseUrl << endl;
 					for (int var = 1; var <= prsiz; var++)
 					{
@@ -176,9 +177,9 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 							}
 							valss.push_back(temp);
 							baseUrl = vemp.at(1);
-							cout << "variable at " << param << " mapped to " << temp << " from URL" << endl;
-							cout << baseUrl << endl;
-							cout << pthwofiletemp << endl;
+							logger << "variable at " << param << " mapped to " << temp << " from URL" << endl;
+							logger << baseUrl << endl;
+							logger << pthwofiletemp << endl;
 						}
 						else
 						{
@@ -188,11 +189,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 					}
 					string lhs = boost::to_upper_copy(ft.meth);
 					string rhs = boost::to_upper_copy(req->getMethod());
-					cout << lhs << " <> " << rhs << endl;
+					logger << lhs << " <> " << rhs << endl;
 					if(prsiz==(int)valss.size() && lhs==rhs)
 					{
 
-						cout << "got correct url -- restcontroller " << endl;
+						logger << "got correct url -- restcontroller " << endl;
 						rft = ft;
 						flag = true;
 						break;
@@ -206,14 +207,14 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 							res.setContent_str("Invalid number of arguments");
 						else
 							res.setContent_str("Invalid HTTPMethod used");*/
-						cout << "Rest Controller Param/Method Error" << endl;
+						logger << "Rest Controller Param/Method Error" << endl;
 					}
 				}
 			}
 		}
 		if(flag)
 		{
-			//cout << "inside restcontroller logic ..." << endl;
+			//logger << "inside restcontroller logic ..." << endl;
 			string libName = Constants::INTER_LIB_FILE;
 			if(dlib == NULL)
 			{
@@ -222,7 +223,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 			}
 			string clasnam("getReflectionCIFor"+rft.clas);
 			void *mkr = dlsym(dlib, clasnam.c_str());
-			cout << mkr << endl;
+			logger << mkr << endl;
 			if(mkr!=NULL)
 			{
 				FunPtr f =  (FunPtr)mkr;
@@ -282,7 +283,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 				if(meth.getMethodName()!="" && !invValue)
 				{
 					ref.invokeMethodUnknownReturn(_temp,meth,valus);
-					cout << "successfully called restcontroller" << endl;
+					logger << "successfully called restcontroller" << endl;
 					//return;
 				}
 				else
@@ -294,7 +295,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 						res.setContent_str("Invalid value passed as URL param");
 					else
 						res.setContent_str("Rest Controller Method Not Found");*/
-					cout << "Rest Controller Method Not Found" << endl;
+					logger << "Rest Controller Method Not Found" << endl;
 					//return;
 				}
 			}

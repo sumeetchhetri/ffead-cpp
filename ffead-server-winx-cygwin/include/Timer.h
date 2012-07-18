@@ -25,9 +25,11 @@
 #include <stdlib.h>
 #include <iostream>
 #include <time.h>
+#include "Logger.h"
 using namespace std;
 class Timer {
 	timespec st;
+	Logger logger;
 public:
 	Timer();
 	virtual ~Timer();
