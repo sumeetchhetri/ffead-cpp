@@ -25,8 +25,7 @@
 string* HttpResponseParser::headernames = NULL;
 
 HttpResponseParser::HttpResponseParser() {
-	// TODO Auto-generated constructor stub
-
+	logger = Logger::getLogger("HttpResponseParser");
 }
 
 HttpResponseParser::~HttpResponseParser() {
@@ -48,7 +47,7 @@ HttpResponseParser::HttpResponseParser(string vecstr,string path)
 		{
 			HttpResponseParser::headernames->append(tempios);
 		}
-		cout << endl << "done reading header types" << endl;
+		logger << endl << "done reading header types" << endl;
 	}
 	if(vec.size()!=0)
 	{
@@ -57,7 +56,7 @@ HttpResponseParser::HttpResponseParser(string vecstr,string path)
 		bool contStarts = false;
 		for(unsigned int i=0;i<vec.size();i++)
 		{
-			//cout << endl << "Reading line " << vec.at(i) << endl << flush;
+			//logger << endl << "Reading line " << vec.at(i) << endl << flush;
 			vector<string> temp,vemp,memp;
 
 			if(vec.at(i)=="\r" || vec.at(i)==""|| vec.at(i)=="\r\n")
@@ -68,15 +67,15 @@ HttpResponseParser::HttpResponseParser(string vecstr,string path)
 			boost::iter_split(temp, vec.at(i), boost::first_finder(": "));
 			if(temp.size()>1)
 			{
-				cout << "line => " << vec.at(i) << endl;
+				logger << "line => " << vec.at(i) << endl;
 				boost::replace_first(temp.at(1),"\r","");
 				if(HttpResponseParser::headernames->find(temp.at(0)+":")!=string::npos)
 				{
-					//cout << temp.at(0) << " = " << temp.at(1) << endl;
+					//logger << temp.at(0) << " = " << temp.at(1) << endl;
 					this->headers[temp.at(0)] = temp.at(1);
 				}
 				else
-					cout << "\nnot a valid header" << temp.at(0) << endl;
+					logger << "\nnot a valid header" << temp.at(0) << endl;
 			}
 			else
 			{
@@ -84,7 +83,7 @@ HttpResponseParser::HttpResponseParser(string vecstr,string path)
 				string tem = vec.at(i);
 				if(!contStarts)
 				{
-					cout << "line => " << vec.at(i) << endl;
+					logger << "line => " << vec.at(i) << endl;
 					vector<string> httpst;
 					boost::iter_split(httpst, tem, boost::first_finder(" "));
 					if(httpst.at(0).find("HTTP")==string::npos)
@@ -116,7 +115,7 @@ HttpResponseParser::HttpResponseParser(string vecstr,string path)
 		this->content = conten;
 		if(this->content!="")
 		{
-			//cout << this->content << flush;
+			//logger << this->content << flush;
 		}
 	}
 }
@@ -132,7 +131,7 @@ HttpResponseParser::HttpResponseParser(string vecstr)
 		bool contStarts = false;
 		for(unsigned int i=0;i<vec.size();i++)
 		{
-			//cout << endl << "Reading line " << vec.at(i) << endl << flush;
+			//logger << endl << "Reading line " << vec.at(i) << endl << flush;
 			vector<string> temp,vemp,memp;
 			if((vec.at(i)=="\r" || vec.at(i)==""|| vec.at(i)=="\r\n") && !contStarts)
 			{
@@ -142,7 +141,7 @@ HttpResponseParser::HttpResponseParser(string vecstr)
 			boost::iter_split(temp, vec.at(i), boost::first_finder(": "));
 			if(temp.size()>1 && !contStarts)
 			{
-				cout << temp.at(0) << " => " << temp.at(1) << endl;
+				logger << temp.at(0) << " => " << temp.at(1) << endl;
 				boost::replace_first(temp.at(1),"\r","");
 				this->headers[temp.at(0)] = temp.at(1);
 			}
@@ -151,7 +150,7 @@ HttpResponseParser::HttpResponseParser(string vecstr)
 				string tem = vec.at(i);
 				if(!contStarts)
 				{
-					cout << "line => " << vec.at(i) << endl;
+					logger << "line => " << vec.at(i) << endl;
 					boost::replace_first(tem,"\r","");
 					vector<string> httpst;
 					boost::iter_split(httpst, tem, boost::first_finder(" "));
@@ -177,7 +176,7 @@ HttpResponseParser::HttpResponseParser(string vecstr)
 		this->content = conten;
 		if(this->content!="")
 		{
-			//cout << this->content << flush;
+			//logger << this->content << flush;
 		}
 	}
 }

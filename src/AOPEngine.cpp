@@ -37,7 +37,6 @@ void AOPEngine::execute(string fileName)
 	string include;
 	ifstream infile;
 	ofstream ofile;
-	cout << "Reading from the file" << endl;
 	infile.open(fileName.c_str());
 	Aspect aspect;
 	if(infile)
@@ -186,7 +185,6 @@ void AOPEngine::execute(string fileName)
 							temp = (temp + "\n" + arginit + aspect.getCode() + "\n");
 						}
 						content = (include + prior + temp + later);
-						cout << "Reading from the file" << endl;
 						string aop_name = "/home/sumeet/Desktop/_AOP_"+aspect.getClassName()+".cpp";
 						ofile.open(aop_name.c_str());
 						ofile.write(content.c_str(),content.length());

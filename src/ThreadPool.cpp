@@ -23,7 +23,7 @@
 
 ThreadPool::ThreadPool()
 {
-
+	logger = Logger::getLogger("ThreadPool");
 }
 void ThreadPool::init(int initThreads, int maxThreads,bool console)
 {
@@ -46,6 +46,7 @@ void ThreadPool::init(int initThreads, int maxThreads,bool console)
 ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp) {
 	if (lowp > highp)
 		throw "Low Priority should be less than Highest Priority";
+	logger = Logger::getLogger("ThreadPool");
 	this->console = false;
 	this->initThreads = initThreads;
 	this->maxThreads = maxThreads;
@@ -66,6 +67,7 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp,bool
 	this->console = console;
 	if (lowp > highp)
 		throw "Low Priority should be less than Highest Priority";
+	logger = Logger::getLogger("ThreadPool");
 	this->initThreads = initThreads;
 	this->maxThreads = maxThreads;
 	this->lowp = lowp;
@@ -83,6 +85,7 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp,bool
 }
 
 ThreadPool::ThreadPool(int initThreads, int maxThreads) {
+	logger = Logger::getLogger("ThreadPool");
 	this->lowp = -1;
 	this->highp = -1;
 	this->console = false;
@@ -100,6 +103,7 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads) {
 }
 
 ThreadPool::ThreadPool(int initThreads, int maxThreads,bool console) {
+	logger = Logger::getLogger("ThreadPool");
 	this->console = console;
 	this->lowp = -1;
 	this->highp = -1;
@@ -178,7 +182,7 @@ void ThreadPool::joinAll() {
 void ThreadPool::execute(Task &task, int priority) {
 	if(console)
 	{
-		cout << "Added task to wpool\n" << flush;
+		logger << "Added task to wpool\n" << flush;
 	}
 	task.tunit = -1;
 	task.type = -1;
@@ -193,7 +197,7 @@ void ThreadPool::execute(Task &task, int priority) {
 void ThreadPool::execute(Task &task) {
 	if(console)
 	{
-		cout << "Added task to wpool\n" << flush;
+		logger << "Added task to wpool\n" << flush;
 	}
 	task.tunit = -1;
 	task.type = -1;
@@ -208,7 +212,7 @@ void ThreadPool::execute(Task &task) {
 void ThreadPool::schedule(Task &task, int tunit, int type) {
 	if(console)
 	{
-		cout << "Added task to wpool\n" << flush;
+		logger << "Added task to wpool\n" << flush;
 	}
 	task.tunit = tunit;
 	task.type = type;
@@ -227,6 +231,6 @@ ThreadPool::~ThreadPool() {
 	delete wpool;
 	if(console)
 	{
-		cout << "Destroyed Thread Pool\n" << flush;
+		logger << "Destroyed Thread Pool\n" << flush;
 	}
 }

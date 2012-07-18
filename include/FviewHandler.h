@@ -24,6 +24,7 @@
 #define FVIEWHANDLER_H_
 #include "HttpResponse.h"
 #include "HttpRequest.h"
+#include "Logger.h"
 
 class FviewHandler {
 public:

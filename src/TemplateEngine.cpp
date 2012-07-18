@@ -48,7 +48,6 @@ string TemplateEngine::evaluate(string fileName,Context cntxt)
 {
 	string ret,data;
 	ifstream infile;
-	cout << "Reading from the file" << endl;
 	infile.open(fileName.c_str());
 	if(infile.is_open())
 	{

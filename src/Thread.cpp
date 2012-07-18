@@ -38,7 +38,7 @@ void Thread::run()
 				{
 					if(console)
 					{
-						cout << "Task scheduled for sleep\n" << flush;
+						logger << "Task scheduled for sleep\n" << flush;
 					}
 					if (task->type == TimeUnit::NANOSECONDS)
 						boost::this_thread::sleep(boost::posix_time::microseconds(task->tunit/1000));
@@ -63,7 +63,7 @@ void Thread::run()
 				{
 					if(console)
 					{
-						cout << e.what() << flush;
+						logger << e.what() << flush;
 					}
 				}
 				task->~Task();
@@ -75,6 +75,7 @@ void Thread::run()
 }
 
 Thread::Thread() {
+	logger = Logger::getLogger("Thread");
 	task = NULL;
 	idle = true;
 	mthread = new boost::thread(boost::bind(&Thread::run, this));
@@ -85,6 +86,6 @@ Thread::~Thread() {
 	delete task;
 	if(console)
 	{
-		cout << "Destroyed Thread\n" << flush;
+		logger << "Destroyed Thread\n" << flush;
 	}
 }

@@ -25,17 +25,22 @@
 #include "AfcUtil.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
+#include <sys/types.h>
 #include <sys/wait.h>
 #include "Timer.h"
 #include <unistd.h>
+#include "Logger.h"
 
 class ScriptHandler {
-public:
-	ScriptHandler();
-	static bool handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs, void* dlib,
-			string ext, map<string, string> props);
+	static Logger logger;
 	static int pcloseRWE(int pid, int *rwepipe);
 	static int popenRWE(int *rwepipe, const char *exe, const char *const argv[],string tmpf);
+	static int popenRWEN(int *rwepipe, const char *exe, const char** argv);
+public:
+	ScriptHandler();
+	static bool execute(string command, vector<string> argss, string& output);
+	static bool handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs, void* dlib,
+			string ext, map<string, string> props);
 	virtual ~ScriptHandler();
 };
 

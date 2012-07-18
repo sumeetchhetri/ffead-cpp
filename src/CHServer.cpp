@@ -29,7 +29,7 @@ CHServer::CHServer()
 CHServer::~CHServer() {
 	// TODO Auto-generated destructor stub
 }
-SharedData* SharedData::shared_instance = NULL;
+//SharedData* SharedData::shared_instance = NULL;
 string servd;
 static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone,sessatserv,isCompileEnabled;
 static long sessionTimeout;
@@ -42,7 +42,8 @@ void *dlib = NULL;
 typedef map<string,string> sessionMap;
 static boost::mutex m_mutex,p_mutex;
 ConfigurationData configurationData;
-SSLHandler sSLHandler;
+
+Logger logger;
 
 void sigchld_handler(int s)
 {
@@ -158,7 +159,7 @@ void signalSIGSEGV(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);
-	cout << "Segmentation fault occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Segmentation fault occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
 void signalSIGCHLD(int dummy)
@@ -181,7 +182,7 @@ void signalSIGCHLD(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);
-	cout << "Child process got killed " << getpid() << "\n" << tempo << flush;
+	logger << "Child process got killed " << getpid() << "\n" << tempo << flush;
 	abort();
 }
 void signalSIGABRT(int dummy)
@@ -204,7 +205,7 @@ void signalSIGABRT(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);
-	cout << "Abort signal occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Abort signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
 void signalSIGTERM(int dummy)
@@ -227,7 +228,7 @@ void signalSIGTERM(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);
-	cout << "Termination signal occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Termination signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
 
@@ -251,7 +252,7 @@ void signalSIGKILL(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);
-	cout << "Kill signal occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Kill signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
 
@@ -275,7 +276,7 @@ void signalSIGINT(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);
-	cout << "Interrupt signal occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Interrupt signal occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
 
@@ -299,7 +300,7 @@ void signalSIGFPE(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);
-	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
 void signalSIGPIPE(int dummy)
@@ -322,7 +323,7 @@ void signalSIGPIPE(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);
-	cout << "Broken pipe ignore it" << getpid() << "\n" << tempo << flush;
+	logger << "Broken pipe ignore it" << getpid() << "\n" << tempo << flush;
 	//abort();
 }
 
@@ -346,24 +347,24 @@ void signalSIGILL(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);
-	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }
 
 /*void cleanUpRoutine(string tempo)
 {
-	cout << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }*/
 void service(int fd,string serverRootDirectory,map<string,string> *params,
 		bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib)
 {
-	cout << "service method " << endl;
+	logger << "service method " << endl;
 	ServiceTask *task = new ServiceTask(fd,serverRootDirectory,params,
 			isSSLEnabled, ctx, sslHandler, configurationData, dlib);
 	task->run();
 	delete task;
-	//cout << "\nDestroyed task" << flush;
+	//logger << "\nDestroyed task" << flush;
 }
 
 pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
@@ -377,15 +378,16 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	}
 	if((pid=fork())==0)
 	{
+		SSLHandler sSLHandler;
 		dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
-		cout << endl <<dlib << endl;
+		logger << endl <<dlib << endl;
 		if(dlib==NULL)
 		{
-			cout << dlerror() << endl;
-			Logger::info("Could not load Library");
+			logger << dlerror() << endl;
+			logger.info("Could not load Library");
 		}
 		else
-			Logger::info("Library loaded successfully");
+			logger.info("Library loaded successfully");
 		if(isSSLEnabled)
 		{
 			/*HTTPS related*/
@@ -415,7 +417,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		ss << getpid();
 		ss >> filename;
 		filename.append(".cntrl");
-		cout << "generated file " << filename << flush;
+		logger << "generated file " << filename << flush;
 		ofstream cntrlfile;
 		cntrlfile.open(filename.c_str());
 		cntrlfile << "Process Running" << flush;
@@ -458,14 +460,14 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		PropFileReader pread;
 		propMap params = pread.getProperties(serverRootDirectory+"resources/security.prop");
 
-		cout << params.size() <<endl;
+		logger << params.size() <<endl;
 		while(1)
 		{
 			int nfds = epoll_wait(epoll_handle, events, 1,-1);
 			if (nfds == -1)
 			{
 				perror("epoll_wait child process");
-				cout << "\n----------epoll_wait child process----" << flush;
+				logger << "\n----------epoll_wait child process----" << flush;
 				//break;
 			}
 			else
@@ -475,7 +477,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				if (rv == -1)
 				{
 					perror("recvmsg");
-					cout << "\n----------error occurred----" << flush;
+					logger << "\n----------error occurred----" << flush;
 					exit(1);
 				}
 
@@ -493,7 +495,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				if((err=recv(fd,buf,10,MSG_PEEK))==0)
 				{
 					close(fd);
-					cout << "\nsocket conn closed before being serviced" << flush;
+					logger << "\nsocket conn closed before being serviced" << flush;
 					continue;
 				}
 
@@ -587,8 +589,8 @@ void dynamic_page_monitor(string serverRootDirectory)
 				int i=system(compres.c_str());
 				if(!i)
 				{
-					cout << "regenarting intermediate code-----Done" << endl;
-					Logger::info("Done generating intermediate code");
+					logger << "regenarting intermediate code-----Done" << endl;
+					logger.info("Done generating intermediate code");
 				}
 				m_mutex.lock();
 				map<int,pid_t>::iterator it;
@@ -659,6 +661,8 @@ int main(int argc, char* argv[])
 	string logp = respath+"/log.prop";
 	Logger::init(logp);
 
+	logger = Logger::getLogger("CHServer");
+
     PropFileReader pread;
     propMap srprps = pread.getProperties(respath+"server.prop");
     if(srprps["NUM_PROC"]!="")
@@ -685,7 +689,7 @@ int main(int argc, char* argv[])
    			}
    			catch(...)
    			{
-   				cout << "\nInvalid thread pool size defined" <<flush;
+   				logger << "\nInvalid thread pool size defined" << flush;
    				thrdpsiz = 30;
    			}
    		}
@@ -698,7 +702,7 @@ int main(int argc, char* argv[])
    			sessionTimeout = boost::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
 		} catch (...) {
 			sessionTimeout = 3600;
-			cout << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
+			logger << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
 		}
    	}
     memset(&hints, 0, sizeof hints);
@@ -770,7 +774,7 @@ int main(int argc, char* argv[])
     }
     catch(XmlParseException *p)
     {
-    	cout << p->getMessage() << endl;
+    	logger << p->getMessage() << endl;
     }
     configurationData.sessionTimeout = sessionTimeout;
     configurationData.ip_address = IP_ADDRESS;
@@ -781,12 +785,12 @@ int main(int argc, char* argv[])
 	}
     bool libpresent = true;
     void *dlibtemp = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
-	cout << endl <<dlibtemp << endl;
+	logger << endl <<dlibtemp << endl;
 	if(dlibtemp==NULL)
 	{
 		libpresent = false;
-		cout << dlerror() << endl;
-		Logger::info("Could not load Library");
+		logger << dlerror() << endl;
+		logger.info("Could not load Library");
 	}
 	else
 		dlclose(dlibtemp);
@@ -798,13 +802,17 @@ int main(int argc, char* argv[])
 	string compres = respath+"run.sh";
 	if(!libpresent)
 	{
-		int i=system(compres.c_str());
+		vector<string> argss;
+		string output;
+		bool passed = ScriptHandler::execute(compres, argss, output);
+		/*int i=system(compres.c_str());
 		if(!i)
 		{
-			cout << "Done" << flush;
-			Logger::info("Done generating intermediate code");
+			logger << "Done" << flush;
+			logger.info("Done generating intermediate code");
 			//logfile << "Done generating intermediate code\n" << flush;
-		}
+		}*/
+		logger << "Intermediate code generation pass = " << passed << endl;
 	}
 
 	for (unsigned int var1 = 0;var1<configurationData.cmpnames.size();var1++)
@@ -832,7 +840,7 @@ int main(int argc, char* argv[])
 	int sp[preForked][2]; /* the pair of socket descriptors */
 	printf("server: waiting for connections...\n");
 	//logfile << "Server: waiting for connections on port " << PORT << "\n" << flush;
-	Logger::info("Server: waiting for connections on port "+PORT);
+	logger.info("Server: waiting for connections on port "+PORT);
 
 	vector<string> files;
 	for(int j=0;j<preForked;j++)
@@ -865,7 +873,7 @@ int main(int argc, char* argv[])
 		//start  of hotdeployment process
 
 	}*/
-	//cout << "Done" << flush;
+	//logger << "Done" << flush;
 	struct msghdr msg;
 	char ccmsg[CMSG_SPACE(sizeof(int))];
 	struct cmsghdr *cmsg;
@@ -906,16 +914,16 @@ int main(int argc, char* argv[])
 		{
 			perror("epoll_wait main process");
 			//logfile << "Interruption Signal Received\n" << flush;
-			Logger::info("Interruption Signal Received\n");
+			logger.info("Interruption Signal Received\n");
 			curfds = 1;
 			if(errno==EBADF)
-				cout << "\nInavlid fd" <<flush;
+				logger << "\nInavlid fd" <<flush;
 			else if(errno==EFAULT)
-				cout << "\nThe memory area pointed to by events is not accessible" <<flush;
+				logger << "\nThe memory area pointed to by events is not accessible" <<flush;
 			else if(errno==EINTR)
-				cout << "\ncall was interrupted by a signal handler before any of the requested events occurred" <<flush;
+				logger << "\ncall was interrupted by a signal handler before any of the requested events occurred" <<flush;
 			else
-				cout << "\nnot an epoll file descriptor" <<flush;
+				logger << "\nnot an epoll file descriptor" <<flush;
 			//break;
 		}
 		processgendone = false;
@@ -946,7 +954,7 @@ int main(int argc, char* argv[])
 				new_fd = -1;
 				sin_size = sizeof their_addr;
 				new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-				//cout << "\nnew http request" <<flush;
+				//logger << "\nnew http request" <<flush;
 				//logfile << "Interruption Signal Received\n" << flush;
 				if (new_fd == -1)
 				{
@@ -962,7 +970,7 @@ int main(int argc, char* argv[])
 					if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, new_fd, &ev) < 0)
 					{
 						perror("epoll");
-						cout << "\nerror adding to epoll cntl list" << flush;
+						logger << "\nerror adding to epoll cntl list" << flush;
 						return -1;
 					}
 				}
@@ -1009,7 +1017,7 @@ int main(int argc, char* argv[])
 					}
 					close(sp[tcn][0]);
 					close(sp[tcn][1]);
-					cout << "Process got killed" << flush;
+					logger << "Process got killed" << flush;
 					pid_t pid = createChildProcess(serverRootDirectory,sp[tcn],sockfd);
 					pds[tcn] = pid;
 					stringstream ss;
@@ -1019,9 +1027,9 @@ int main(int argc, char* argv[])
 					ss >> filename;
 					filename.append(".cntrl");
 					files[tcn] = filename;
-					cout << "created a new Process" << flush;
+					logger << "created a new Process" << flush;
 					//logfile << "Process got killed hence created a new Process " << pid << flush;
-					Logger::info("Process got killed hence created a new Process\n");
+					logger.info("Process got killed hence created a new Process\n");
 				}
 				cntrlfile.close();
 			}

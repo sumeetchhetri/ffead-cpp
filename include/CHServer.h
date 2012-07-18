@@ -132,7 +132,7 @@ typedef string (*DCPPtr) ();
 typedef void (*ReceiveTask1)(int);
 
 using namespace std;
-class SharedData
+/*class SharedData
 {
 private:
 	static SharedData* shared_instance;
@@ -144,7 +144,7 @@ public:
 		{
 			shared_instance = new SharedData();
 			shared_instance->dlib = NULL;
-			cout << "\nInitialised Shared data" << endl;
+			logger << "\nInitialised Shared data" << endl;
 		}
 	}
 	static void setDLIB(void *dlib)
@@ -160,9 +160,9 @@ public:
 		if(shared_instance->dlib!=NULL)dlclose(shared_instance->dlib);
 		shared_instance->~SharedData();
 		shared_instance = NULL;
-		cout << "\nclosed handle" << endl;
+		logger << "\nclosed handle" << endl;
 	}
-};
+};*/
 
 
 class CHServer {

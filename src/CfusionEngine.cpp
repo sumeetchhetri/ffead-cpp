@@ -266,8 +266,6 @@ void CfusionEngine::execute(string file)
 		}
 	}
 	codeh += ("private:\n"+pri+"protected:\n"+pro+"public:\n"+pub+"};\n#endif");
-	cout << codeh <<flush;
-	cout << codem <<flush;
 	path = "/home/sumeet/workspace/inter/";
 	AfcUtil::writeTofile((path+root.getAttribute("name")+".h"),codeh,true);
 	AfcUtil::writeTofile((path+root.getAttribute("name")+".cpp"),codem,true);

@@ -31,6 +31,7 @@ CibernateConnectionPool* CibernateConnectionPool::getinstance()
 }*/
 CibernateConnectionPool::CibernateConnectionPool(int size,string dbName,string uname,string pass)
 {
+	logger = Logger::getLogger("CibernateConnectionPool");
 	createPool(size,dbName,uname,pass);
 }
 
@@ -43,7 +44,7 @@ CibernateConnectionPool::~CibernateConnectionPool()
 		delete writeConnections.at(var);
 	}
 	SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
-	cout << "\nDestructed CibernateConnectionPool" << flush;
+	logger << "\nDestructed CibernateConnectionPool" << flush;
 }
 
 void CibernateConnectionPool::closeConnection(Connection *conn)
@@ -62,7 +63,7 @@ void  CibernateConnectionPool::newConnection(bool read)
 	V_OD_erg = SQLAllocHandle(SQL_HANDLE_DBC, V_OD_Env, &(connection->conn));
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error AllocHDB %d\n",V_OD_erg);
+		logger << "Error AllocHDB " << V_OD_erg << endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		this->initialized = false;
 		return;
@@ -75,10 +76,10 @@ void  CibernateConnectionPool::newConnection(bool read)
 									 (SQLCHAR*) this->pass.c_str(), SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error SQLConnect %d\n",V_OD_erg);
+		logger << "Error SQLConnect " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, connection->conn,1,
 					  V_OD_stat, &V_OD_err_s,V_OD_msg,100,&V_OD_mlen);
-		printf("%s (%d)\n",V_OD_msg,(int)V_OD_err_s);
+		logger << V_OD_msg << " (" << (int)V_OD_err_s <<  ")" << endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		this->initialized = false;
 		return;
@@ -108,13 +109,13 @@ void CibernateConnectionPool::createPool(int size,string dbName,string uname,str
 	V_OD_erg=SQLAllocHandle(SQL_HANDLE_ENV,SQL_NULL_HANDLE,&V_OD_Env);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error AllocHandle\n");
+		logger << "Error AllocHandle" << endl;
 		this->initialized = false;
 	}
 	V_OD_erg=SQLSetEnvAttr(V_OD_Env, SQL_ATTR_ODBC_VERSION, (void*)SQL_OV_ODBC3, 0);
 	if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error SetEnv\n");
+		logger << "Error SetEnv" << endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		this->initialized = false;
 	}
@@ -132,10 +133,12 @@ void CibernateConnectionPool::createPool(int size,string dbName,string uname,str
 	}
 	if(!this->initialized)
 	{
-		printf("Failed to create pool !\n");
+		logger << "Failed to create pool !" << endl;
 	}
 	else
-		printf("Created pool successfully !\n");
+	{
+		logger << "Created pool successfully !" << endl;
+	}
 }
 
 Connection* CibernateConnectionPool::getReadConnection()
@@ -162,4 +165,17 @@ Connection* CibernateConnectionPool::getWriteConnection()
 		}
 
 	}
+}
+
+Connection::Connection()
+{
+	logger = Logger::getLogger("Connection");
+	logger << "\nCreated Connection" << flush;
+}
+
+Connection::~Connection()
+{
+	SQLDisconnect(conn);
+	SQLFreeHandle(SQL_HANDLE_DBC,conn);
+	logger << "\nDestructed Connection" << flush;
 }
