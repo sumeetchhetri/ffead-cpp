@@ -194,7 +194,7 @@ bool ScriptHandler::execute(string command, vector<string> argss, string& output
 		memset(buffer, 0, 1024);
 	}
 	memset(buffer, 0, 1024);
-	if(output=="")
+	//if(output=="")
 	{
 		while ((length = read(pipe[2], buffer, 1024)) > 0)
 		{
