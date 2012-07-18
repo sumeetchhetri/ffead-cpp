@@ -24,8 +24,10 @@
 #define THREADPOOL_H_
 #include "TaskPool.h"
 #include "Thread.h"
+#include "Logger.h"
 
 class ThreadPool {
+	Logger logger;
 	int maxThreads;
 	int initThreads;
 	int lowp;

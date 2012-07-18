@@ -26,6 +26,7 @@
 boost::mutex* Logger::_theLogmutex = NULL;
 string* Logger::level = NULL;
 string* Logger::mode = NULL;
+string* Logger::filepath = NULL;
 DateFormat* Logger::datFormat = NULL;
 ofstream* Logger::out = NULL;
 
@@ -35,13 +36,14 @@ string Logger::LEVEL_INFO = "INFO";
 
 Logger Logger::getLogger(string className)
 {
+	init();
 	Logger logger(className);
 	return logger;
 }
 
 void Logger::init()
 {
-	if(_theLogmutex==NULL)
+	if(!_theLogmutex)
 	{
 		_theLogmutex = new boost::mutex();
 		level = new string(LEVEL_ERROR);
@@ -52,7 +54,7 @@ void Logger::init()
 
 void Logger::init(string file)
 {
-	if(_theLogmutex==NULL)
+	if(!_theLogmutex)
 	{
 		_theLogmutex = new boost::mutex();
 
@@ -62,13 +64,13 @@ void Logger::init(string file)
 		{
 			level = new string(LEVEL_ERROR);
 			mode = new string("CONSOLE");
-			datFormat = new DateFormat("dd/mm/yyyy hh:mi:ss");
+			datFormat = new DateFormat("dd/mm/yyyy hh:mi:ss");cout << mode << endl;
 			return;
 		}
 		level = new string(props["LEVEL"]);
 		mode = new string(props["MODE"]);
 		filepath = new string(props["FILEPATH"]);
-		datFormat = new DateFormat(props["DATEFMT"]);
+		datFormat = new DateFormat(props["DATEFMT"]);cout << mode << endl;
 		if(*mode=="FILE")
 		{
 			out = new ofstream();
@@ -79,7 +81,7 @@ void Logger::init(string file)
 
 void Logger::init(string llevel,string lmode,string lfilepath)
 {
-	if(_theLogmutex==NULL)
+	if(!_theLogmutex)
 	{
 		_theLogmutex = new boost::mutex();
 
@@ -95,6 +97,9 @@ void Logger::init(string llevel,string lmode,string lfilepath)
 	}
 }
 
+Logger::Logger()
+{}
+
 Logger::Logger(string className)
 {
 	this->className = className;
@@ -102,15 +107,7 @@ Logger::Logger(string className)
 
 Logger::~Logger()
 {
-	if(_theLogmutex!=NULL)
-	{
-		delete _theLogmutex;
-		delete level;
-		delete mode;
-		delete datFormat;
-		if(filepath!=NULL)delete filepath;
-		if(out!=NULL)delete out;
-	}
+
 }
 
 void Logger::write(string msg,string mod)
@@ -129,26 +126,6 @@ void Logger::write(string msg,string mod)
 	{
 		_theLogmutex->lock();
 		cout << msg << flush;
-		_theLogmutex->unlock();
-	}
-}
-
-template <typename T>
-void Logger::write(T tmsg, string mod)
-{
-	Date dat;
-	string te = datFormat->format(dat);
-	string msg = "[" + te + "] ("+this->className + ") <"+mod+"> :";
-	if(*mode=="FILE")
-	{
-		_theLogmutex->lock();
-		*out << msg << tmsg << endl;
-		_theLogmutex->unlock();
-	}
-	else
-	{
-		_theLogmutex->lock();
-		cout << msg << tmsg << endl;
 		_theLogmutex->unlock();
 	}
 }
@@ -190,14 +167,21 @@ void Logger::error(string msg)
 	write(msg,"error");
 }
 
-template <typename T>
-Logger& operator<< (Logger& logger, T msg)
-{
-	logger.write(msg,"info");
-	return logger;
-}
 Logger& operator<< (Logger& logger, ostream& (*pf) (ostream&))
 {
 	logger.write(pf,"info");
 	return logger;
+}
+
+void Logger::destroy()
+{
+	if(_theLogmutex)
+	{
+		delete _theLogmutex;
+		delete level;
+		delete mode;
+		delete datFormat;
+		if(filepath!=NULL)delete filepath;
+		if(out!=NULL)delete out;
+	}
 }

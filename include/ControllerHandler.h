@@ -26,6 +26,7 @@
 #include "RestController.h"
 #include "AuthHandler.h"
 #include "Constants.h"
+#include "Logger.h"
 
 class RestFunctionParams
 {

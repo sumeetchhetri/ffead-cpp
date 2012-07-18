@@ -85,8 +85,4 @@ TaskPool::~TaskPool() {
 	delete tasks;
 	delete ptasks;
 	delete m_mutex;
-	if(console)
-	{
-		cout << "Destroyed Task Pool\n" << flush;
-	}
 }

@@ -28,6 +28,7 @@
 /*HTTPS related*/
 #include <openssl/ssl.h>
 #include <signal.h>
+#include "Logger.h"
 #define CLIENT_AUTH_REQUEST 1
 #define CLIENT_AUTH_REQUIRE 2
 #define CLIENT_AUTH_REHANDSHAKE 3
@@ -37,6 +38,7 @@ using namespace std;
 class SSLHandler {
 	static char *pass;
 	static BIO *bio_err;
+	static Logger logger;
 public:
 	static int s_server_session_id_context;
 	static int s_server_auth_session_id_context;

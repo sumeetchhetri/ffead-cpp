@@ -26,8 +26,10 @@
 #include "Reflection.h"
 #include "TemplateEngine.h"
 #include "AfcUtil.h"
+#include "Logger.h"
 
 class WsUtil {
+	Logger logger;
 public:
 	WsUtil();
 	virtual ~WsUtil();

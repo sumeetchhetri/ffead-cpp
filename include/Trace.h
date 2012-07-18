@@ -39,10 +39,12 @@
 #include "string"
 #include <sstream>
 #include <typeinfo>
+#include "Logger.h"
 using namespace std;
 
 
 class Trace {
+	Logger logger;
 public:
 	Trace();
 	virtual ~Trace();

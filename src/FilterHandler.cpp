@@ -34,6 +34,7 @@ FilterHandler::~FilterHandler() {
 void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, map<string, vector<string> > filterMap, void* dlib,
 		string ext)
 {
+	Logger logger = Logger::getLogger("FilterHandler");
 	if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"in")!=filterMap.end())
 	{
 		vector<string> tempp;
@@ -46,10 +47,10 @@ void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, map<string, ve
 		{
 			string clasz = tempp.at(var);
 			clasz = "getReflectionCIFor" + clasz;
-			cout << "filter handled by class " << clasz << " " << dlib << endl;
+			logger << "filter handled by class " << clasz << " " << dlib << endl;
 			if(dlib == NULL)
 			{
-				cout << "error" << endl;
+				logger << "error" << endl;
 				cerr << dlerror() << endl;
 				exit(-1);
 			}
@@ -64,7 +65,7 @@ void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, map<string, ve
 				void *_temp = ref.newInstanceGVP(ctor);
 				Filter *filter = (Filter*)_temp;
 				filter->doInputFilter(req);
-				cout << "filter called" << endl;
+				logger << "filter called" << endl;
 				delete _temp;
 			}
 		}
@@ -74,6 +75,7 @@ void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, map<string, ve
 void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, map<string, vector<string> > filterMap, void* dlib,
 		string ext)
 {
+	Logger logger = Logger::getLogger("FilterHandler");
 	if(filterMap.find(req->getCntxt_name()+"*.*out")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"out")!=filterMap.end())
 	{
 		vector<string> tempp;
@@ -86,7 +88,7 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, map<string, v
 		{
 			string clasz = tempp.at(var);
 			clasz = "getReflectionCIFor" + clasz;
-			cout << "filter handled by class " << clasz << endl;
+			logger << "filter handled by class " << clasz << endl;
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -103,7 +105,7 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, map<string, v
 				void *_temp = ref.newInstanceGVP(ctor);
 				Filter *filter = (Filter*)_temp;
 				filter->doOutputFilter(&res);
-				cout << "filter called" << endl;
+				logger << "filter called" << endl;
 				delete _temp;
 			}
 		}

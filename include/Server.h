@@ -43,11 +43,13 @@
 /*Fix for Windows Cygwin*///#include <sys/epoll.h>
 #include <sys/resource.h>
 #include <boost/thread/thread.hpp>
+#include "Logger.h"
 #define MAXEPOLLSIZES 10000
 using namespace std;
 
 typedef void (*Service)(int);
 class Server {
+	Logger logger;
 	int sock;
 	struct sockaddr_storage their_addr;
 	void servicing(Service);

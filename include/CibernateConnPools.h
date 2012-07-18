@@ -24,6 +24,7 @@
 #define CIBERNATECONNPOOLS_H_
 #include "CibernateConnectionPool.h"
 #include "map"
+#include "Logger.h"
 typedef map<string,string> strMap;
 typedef map<string,strMap> smstrMap;
 
@@ -91,6 +92,7 @@ public:
 
 };
 class CibernateConnPools {
+	Logger logger;
 	map<string,CibernateConnectionPool*> cpools;
 	map<string,Mapping*> mappings;
 	static CibernateConnPools* get();

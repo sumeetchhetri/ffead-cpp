@@ -25,6 +25,7 @@
 #include "Filter.h"
 #include "Reflector.h"
 #include <dlfcn.h>
+#include "Logger.h"
 
 typedef ClassInfo (*FunPtr) ();
 

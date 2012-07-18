@@ -19,7 +19,6 @@
 
 
 AMEFObject::~AMEFObject() {
-	//cout << packets.size() << endl;
 	for (int var = 0; var < (int)packets.size(); var++) {
 		AMEFObject *ob = packets.at(var);
 		delete ob;

@@ -37,12 +37,13 @@
 #include "ScriptHandler.h"
 #include "FviewHandler.h"
 #include "ExtHandler.h"
+#include "Logger.h"
 #define MAXBUFLENM 32768
 #define BUFSIZZ 1024
 
 class ServiceTask : public Task
 {
-private:
+	Logger logger;
 	SecurityHandler securityHandler;
 	FilterHandler filterHandler;
 	AuthHandler authHandler;

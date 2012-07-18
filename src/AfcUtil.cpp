@@ -23,9 +23,11 @@
 #include "AfcUtil.h"
 #include <dlfcn.h>
 typedef map<string,strVec> mapofvec;
-AfcUtil::AfcUtil() {
-	// TODO Auto-generated constructor stub
 
+Logger AfcUtil::logger;
+
+AfcUtil::AfcUtil() {
+	logger = Logger::getLogger("AfcUtil");
 }
 
 AfcUtil::~AfcUtil() {
@@ -49,7 +51,7 @@ string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool
 		}
 		else
 		{
-			//cout << "=============" << obj.at(var)+files.at(var)+".h" << flush;
+			//logger << "=============" << obj.at(var)+files.at(var)+".h" << flush;
 			strVec pinfo;
 			strVec info = ref.getAfcObjectData(obj.at(var)+files.at(var)+".h", false,pinfo);
 			ret += generateJsInterfaces(info,files.at(var),headers,obj.at(var),infjs,pv.at(var));
@@ -132,9 +134,9 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 		}
 	}
 	fres += "}\";";
-	cout << fres << flush;
+	logger << fres << flush;
 	test += "}";
-	cout << test << flush;
+	logger << test << flush;
 	//writeTofile("/home/sumeet/server/web/default/_afc_Objects.js",test,true);
 	objs += test;
 	headers += "#include \""+claz+".h\"\n";
@@ -180,9 +182,9 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 		{
 			if(vemp.at(k)!="")
 				emp.push_back(vemp.at(k));
-			//cout << vemp.at(i) << "\n" << flush;
+			//logger << vemp.at(i) << "\n" << flush;
 		}
-		//cout << "\n------------------------------------\n" << flush;
+		//logger << "\n------------------------------------\n" << flush;
 		if(emp.size()>1)
 		{
 			size_t te = emp.at(1).find("~");
@@ -253,7 +255,7 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 							jsonstr += ",";
 						}
 						//types += (emp.at(j).c_str() + " __" + (j-1));
-						//cout << vemp.at(i) << "\n" << flush;
+						//logger << vemp.at(i) << "\n" << flush;
 					}
 					fl = true;
 					test += ",_cb,_url,_cntxt){\n";
@@ -276,7 +278,7 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 	infjs += test;
 	//writeTofile("/home/sumeet/workspace/inter/AjaxInterface.cpp",inc,false);
 	return inc;
-	//cout << test << flush;
+	//logger << test << flush;
 }
 
 string AfcUtil::updateAjaxInterface(strVec emp,string claz,string pars,string parswt,string types)
@@ -302,20 +304,20 @@ string AfcUtil::updateAjaxInterface(strVec emp,string claz,string pars,string pa
 	}
 	else
 		test += "return from"+retType+"ToJSON(_obj."+funcName+"("+pars+"));\n}\n";
-	cout << test << flush;
+	logger << test << flush;
 
 	return test;
 }
 
 string AfcUtil::execute(HttpRequest req)
 {
-	cout << "\ninside executeAFC::" << flush;
+	logger << "\ninside executeAFC::" << flush;
 	strVec vemp;
 	string methName = req.getRequestParam("method");
 	string claz = req.getRequestParam("claz");
 	string temp = req.getRequestParam("paramsize");
 	int paramSize = boost::lexical_cast<int>(temp.c_str());
-	cout << "\nreading params::" << flush;
+	logger << "\nreading params::" << flush;
 	for(int i=0;i<paramSize;i++)
 	{
 		stringstream s;
@@ -323,7 +325,7 @@ string AfcUtil::execute(HttpRequest req)
 		s << (i+1);
 		s >> ss;
 		ss = "param_" + ss;
-		cout << ss << flush;
+		logger << ss << flush;
 		string tem = req.getRequestParam(ss);
 		vemp.push_back(tem);
 	}
@@ -341,9 +343,9 @@ string AfcUtil::execute(HttpRequest req)
 	{
 		typedef string (*Funptr2) (strVec);
 		Funptr2 f2 = (Funptr2)mkr;
-		cout << "\ncalling method: " << metn << flush;
+		logger << "\ncalling method: " << metn << flush;
 		re = f2(vemp);
-		cout << "\nend of executeAFC::" << re << flush;
+		logger << "\nend of executeAFC::" << re << flush;
 	}
 	return re;
 }

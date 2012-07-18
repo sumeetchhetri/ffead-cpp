@@ -23,8 +23,7 @@
 #include "ComponentGen.h"
 
 ComponentGen::ComponentGen() {
-	// TODO Auto-generated constructor stub
-
+	logger = Logger::getLogger("ComponentGen");
 }
 
 ComponentGen::~ComponentGen() {
@@ -499,18 +498,18 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 			cuheader += servsh + "};\n";
 			cuheader = initheaders + cuheader+"#endif";
 			curemoteheaders = cuinithdrs + curemoteheaders+"#endif";
-			cout << cuheader << flush;
-			cout << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
-			cout << cudata << flush;
-			cout << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
-			cout << curemoteheaders << flush;
-			cout << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
-			cout << curemote << flush;
+			logger << cuheader << flush;
+			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
+			logger << cudata << flush;
+			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
+			logger << curemoteheaders << flush;
+			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
+			logger << curemote << flush;
 
 	    }
 		catch(boost::bad_lexical_cast &)
 		{
-			cout << "exception occurred" << flush;
+			logger << "exception occurred" << flush;
 		}
 
 	}

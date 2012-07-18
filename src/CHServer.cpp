@@ -29,7 +29,7 @@ CHServer::CHServer()
 CHServer::~CHServer() {
 	// TODO Auto-generated destructor stub
 }
-SharedData* SharedData::shared_instance = NULL;
+//SharedData* SharedData::shared_instance = NULL;
 string servd;
 static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone,sessatserv,isCompileEnabled;
 static long sessionTimeout;
@@ -42,7 +42,7 @@ void *dlib = NULL;
 typedef map<string,string> sessionMap;
 static boost::mutex m_mutex,p_mutex;
 ConfigurationData configurationData;
-SSLHandler sSLHandler;
+
 Logger logger;
 
 void sigchld_handler(int s)
@@ -386,6 +386,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	}
 	if((pid=fork())==0)
 	{
+		SSLHandler sSLHandler;
 		dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
 		logger << endl <<dlib << endl;
 		if(dlib==NULL)
@@ -823,13 +824,17 @@ int main(int argc, char* argv[])
 	string compres = respath+"run.sh";
 	if(!libpresent)
 	{
-		int i=system(compres.c_str());
+		vector<string> argss;
+		string output;
+		bool passed = ScriptHandler::execute(compres, argss, output);
+		/*int i=system(compres.c_str());
 		if(!i)
 		{
 			logger << "Done" << flush;
 			logger.info("Done generating intermediate code");
 			//logfile << "Done generating intermediate code\n" << flush;
-		}
+		}*/
+		logger << "Intermediate code generation pass = " << passed << endl;
 	}
 
 	for (unsigned int var1 = 0;var1<configurationData.cmpnames.size();var1++)
@@ -893,6 +898,29 @@ int main(int argc, char* argv[])
 	else
 		logger.info("Library loaded successfully");
 	propMap params = pread.getProperties(serverRootDirectory+"resources/security.prop");
+	SSLHandler sSLHandler;
+	if(isSSLEnabled)
+	{
+		/*HTTPS related*/
+		//client_auth=CLIENT_AUTH_REQUIRE;
+		/* Build our SSL context*/
+		ctx = sSLHandler.initialize_ctx((char*)configurationData.key_file.c_str(),(char*)configurationData.sec_password.c_str(),
+				configurationData.ca_list);
+		sSLHandler.load_dh_params(ctx,(char*)configurationData.dh_file.c_str());
+
+		SSL_CTX_set_session_id_context(ctx,
+		  (const unsigned char*)&SSLHandler::s_server_session_id_context,
+		  sizeof SSLHandler::s_server_session_id_context);
+
+		/* Set our cipher list */
+		if(ciphers){
+		  SSL_CTX_set_cipher_list(ctx,ciphers);
+		}
+		if(configurationData.client_auth==2)
+			SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
+		else
+			SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);
+	}
 	while(1)
 	{
 		if(childNo>=preForked)

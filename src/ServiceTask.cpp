@@ -31,6 +31,7 @@ ServiceTask::ServiceTask(int fd,string serverRootDirectory,map<string,string> *p
 	this->sslHandler = sslHandler;
 	this->configData = configData;
 	this->dlib = dlib;
+	logger = Logger::getLogger("ServiceTask");
 }
 
 ServiceTask::~ServiceTask() {
@@ -40,7 +41,7 @@ ServiceTask::~ServiceTask() {
 void ServiceTask::writeToSharedMemeory(string sessionId, string value,bool napp)
 {
 	string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
-	cout << "saving session to file " << filen << endl;
+	logger << "saving session to file " << filen << endl;
 	ofstream ofs;
 	if(napp)
 		ofs.open(filen.c_str());
@@ -77,7 +78,7 @@ map<string,string> ServiceTask::readFromSharedMemeory(string sessionId)
 			boost::replace_all(results1.at(0),"%3D","=");
 			valss[results1.at(0)] = "true";
 		}
-		cout << "read key/value pair " << results1.at(0) << " = " << valss[results1.at(0)] << endl;
+		logger << "read key/value pair " << results1.at(0) << " = " << valss[results1.at(0)] << endl;
 	}
 	return valss;
 }
@@ -93,7 +94,7 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 	if(flag)
 	{
 		string values;
-		cout << "session object modified " << vals.size() << endl;
+		logger << "session object modified " << vals.size() << endl;
 		Date date;
 		string id = boost::lexical_cast<string>(Timer::getCurrentTime());
 		int seconds = sessionTimeout;
@@ -108,7 +109,7 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 			boost::replace_all(key,"=","%3D");
 			boost::replace_all(value,"; ","%3B%20");
 			boost::replace_all(value,"=","%3D");
-			cout << it->first << " = " << it->second << endl;
+			logger << it->first << " = " << it->second << endl;
 			if(!sessatserv)
 				res.addCookie(key + "=" + value + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
 			else
@@ -134,7 +135,7 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 
 string ServiceTask::getContentStr(string url,string locale,string ext)
 {
-	cout << "content request for -- " << url << " " << ext << endl;
+	logger << "content request for -- " << url << " " << ext << endl;
 	string all;
     string fname = url;
 	if (url=="/")
@@ -168,7 +169,7 @@ string ServiceTask::getContentStr(string url,string locale,string ext)
 
 void ServiceTask::run()
 {
-	//cout << dlib << endl;
+	//logger << dlib << endl;
 	string ip = "invalid session";
 	string alldatlg = "\ngot fd from parent";
 	SSL *ssl=NULL;
@@ -185,9 +186,9 @@ void ServiceTask::run()
 		if(isSSLEnabled)
 		{
 			sbio=BIO_new_socket(fd,BIO_CLOSE);
-			//cout << "\nBefore = " << ssl << flush;
+			//logger << "\nBefore = " << ssl << flush;
 			ssl=SSL_new(ctx);
-			//cout << "\nAfter = " << ssl << flush;
+			//logger << "\nAfter = " << ssl << flush;
 			SSL_set_bio(ssl,sbio,sbio);
 			int r;
 			if((r=SSL_accept(ssl)<=0))
@@ -223,25 +224,25 @@ void ServiceTask::run()
 					}
 				}
 				ss << buf;
-				//cout <<buf <<endl;
+				//logger <<buf <<endl;
 				if(!strcmp(buf,"\r\n") || !strcmp(buf,"\n"))
 					break;
 				string temp(buf);
 				temp = temp.substr(0,temp.length()-1);
 				results.push_back(temp);
-				//cout << temp <<endl;
+				//logger << temp <<endl;
 				if(temp.find("Content-Length:")!=string::npos)
 				{
 					std::string cntle = temp.substr(temp.find(": ")+2);
 					cntle = cntle.substr(0,cntle.length()-1);
-					//cout << "contne-length="<<cntle <<endl;
+					//logger << "contne-length="<<cntle <<endl;
 					try
 					{
 						cntlen = boost::lexical_cast<int>(cntle);
 					}
 					catch(boost::bad_lexical_cast&)
 					{
-						cout << "bad lexical cast" <<endl;
+						logger << "bad lexical cast" <<endl;
 					}
 				}
 				memset(&buf[0], 0, sizeof(buf));
@@ -254,14 +255,14 @@ void ServiceTask::run()
 			sbio=BIO_new_socket(fd,BIO_CLOSE);
 			io=BIO_new(BIO_f_buffer());
 			BIO_push(io,sbio);
-			cout << "into run method" << endl;
+			logger << "into run method" << endl;
 			while(flag)
 			{
 				er = BIO_gets(io,buf,BUFSIZZ-1);
 				if(er==0)
 				{
 					close(fd);
-					cout << "\nsocket closed before being serviced" <<flush;
+					logger << "\nsocket closed before being serviced" <<flush;
 					return;
 				}
 				ss << buf;
@@ -270,19 +271,19 @@ void ServiceTask::run()
 				string temp(buf);
 				temp = temp.substr(0,temp.length()-1);
 				results.push_back(temp);
-				//cout << temp <<endl;
+				//logger << temp <<endl;
 				if(temp.find("Content-Length:")!=string::npos)
 				{
 					std::string cntle = temp.substr(temp.find(": ")+2);
 					cntle = cntle.substr(0,cntle.length()-1);
-					//cout << "contne-length="<<cntle <<endl;
+					//logger << "contne-length="<<cntle <<endl;
 					try
 					{
 						cntlen = boost::lexical_cast<int>(cntle);
 					}
 					catch(boost::bad_lexical_cast&)
 					{
-						cout << "bad lexical cast" <<endl;
+						logger << "bad lexical cast" <<endl;
 					}
 				}
 				memset(&buf[0], 0, sizeof(buf));
@@ -295,7 +296,7 @@ void ServiceTask::run()
 			int er=-1;
 			if(cntlen>0)
 			{
-				//cout << "reading conetnt " << cntlen << endl;
+				//logger << "reading conetnt " << cntlen << endl;
 				er = BIO_read(io,buf,cntlen);
 				switch(SSL_get_error(ssl,er))
 				{
@@ -318,7 +319,7 @@ void ServiceTask::run()
 				string temp(buf);
 				results.push_back("\r");
 				results.push_back(temp);
-				//cout <<buf <<endl;
+				//logger <<buf <<endl;
 				memset(&buf[0], 0, sizeof(buf));
 			}
 		}
@@ -327,12 +328,12 @@ void ServiceTask::run()
 			int er=-1;
 			if(cntlen>0)
 			{
-				//cout << "reading conetnt " << cntlen << endl;
+				//logger << "reading conetnt " << cntlen << endl;
 				er = BIO_read(io,buf,cntlen);
 				if(er==0)
 				{
 					close(fd);
-					cout << "\nsocket closed before being serviced" <<flush;
+					logger << "\nsocket closed before being serviced" <<flush;
 					return;
 				}
 				else if(er>0)
@@ -340,7 +341,7 @@ void ServiceTask::run()
 					string temp(buf);
 					results.push_back("\r");
 					results.push_back(temp);
-					//cout << temp <<endl;
+					//logger << temp <<endl;
 					memset(&buf[0], 0, sizeof(buf));
 				}
 			}
@@ -352,18 +353,18 @@ void ServiceTask::run()
 
 		if(req->getFile()=="")
 		{
-			cout << req->getFile() << endl;
+			logger << req->getFile() << endl;
 			req->setFile("index.html");
 		}
 		if(req->hasCookie())
 		{
-			cout << "has the session id" << endl;
+			logger << "has the session id" << endl;
 			if(!configData.sessatserv)
 				req->getSession()->setSessionAttributes(req->getCookieInfo());
 			else
 			{
 				string id = req->getCookieInfoAttribute("FFEADID");
-				cout << id << endl;
+				logger << id << endl;
 				map<string,string> values = readFromSharedMemeory(id);
 				req->getSession()->setSessionAttributes(values);
 			}
@@ -375,7 +376,7 @@ void ServiceTask::run()
 			req->setCntxt_root(webpath+"default");
 			req->setUrl(webpath+"default"+req->getActUrl());
 		}
-		//cout << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
+		//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
 
 		if(configData.appMap[req->getCntxt_name()]!="false")
 		{
@@ -392,7 +393,7 @@ void ServiceTask::run()
 				typedef string (*DCPPtr1) (string,HttpSession);
 				DCPPtr1 f =  (DCPPtr1)mkr1;
 				path1 = f(req->getUrl(),*(req->getSession()));
-				//cout << path1 << flush;
+				//logger << path1 << flush;
 				if(path1=="FAILED")
 				{
 					req->setUrl("");
@@ -432,7 +433,7 @@ void ServiceTask::run()
 
 		/*After going through the controller the response might be blank, just set the HTTP version*/
 		res.setHttpVersion(req->getHttpVersion());
-		//cout << req->toString() << endl;
+		//logger << req->toString() << endl;
 		if(isContrl)
 		{
 
@@ -450,7 +451,7 @@ void ServiceTask::run()
 		else
 		{
 			bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, dlib, ext, configData.props);
-			cout << "html page requested" <<endl;
+			logger << "html page requested" <<endl;
 			if(cntrlit)
 			{
 
@@ -497,7 +498,7 @@ void ServiceTask::run()
 			res.setConnection("close");
 		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfoAttribute("FFEADID"), sessionTimeoutVar, configData.sessatserv);
 		h1 = res.generateResponse();
-		//cout << h1 << endl;
+		//logger << h1 << endl;
 		if(isSSLEnabled)
 		{
 			int r;
@@ -550,12 +551,12 @@ void ServiceTask::run()
 		{
 			int size;
 			if ((size=send(fd,&h1[0] , h1.length(), 0)) == -1)
-				cout << "send failed" << flush;
+				logger << "send failed" << flush;
 			else if(size==0)
 			{
 				close(fd);
 				memset(&buf[0], 0, sizeof(buf));
-				cout << "socket closed for writing" << flush;
+				logger << "socket closed for writing" << flush;
 				return;
 			}
 
@@ -567,12 +568,12 @@ void ServiceTask::run()
 
 		//Logger::info("got new connection to process\n"+req->getFile()+" :: " + res.getStatusCode() + "\n"+req->getCntxt_name() + "\n"+req->getCntxt_root() + "\n"+req->getUrl());
 		delete req;
-		cout << alldatlg << "--sent data--DONE" << flush;
+		logger << alldatlg << "--sent data--DONE" << flush;
 		//sessionMap[sessId] = sess;
 	}
 	catch(...)
 	{
-		cout << "Standard exception: " << endl;
+		logger << "Standard exception: " << endl;
 	}
 }
 
