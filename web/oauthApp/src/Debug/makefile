@@ -43,7 +43,7 @@ all: liboauthApp.so
 liboauthApp.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -fPIC -shared -o"liboauthApp.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -fPIC -L../../../../lib -shared -o"liboauthApp.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
