@@ -33,10 +33,11 @@ FormHandler::~FormHandler() {
 
 string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Element> formMap, void* dlib)
 {
+	Logger logger = Logger::getLogger("FormHandler");
 	Reflector ref;
 	Element ele = formMap[req->getFile()];
-	cout << ele.getTagName() << endl;
-	cout << ele.render() << endl;
+	logger << ele.getTagName() << endl;
+	logger << ele.render() << endl;
 	ClassInfo binfo = ref.getClassInfo(ele.getAttribute("bean"));
 	ElementList eles = ele.getChildElements();
 	string json = "{";
@@ -79,7 +80,7 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Elem
 		json = json.substr(0,json.length()-1);
 	}
 	json += "}";
-	cout << json << endl;
+	logger << json << endl;
 	string libName = Constants::INTER_LIB_FILE;
 	if(dlib == NULL)
 	{
@@ -87,7 +88,7 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Elem
 		exit(-1);
 	}
 	string meth = "toVoidP" + ele.getAttribute("bean");
-	cout << meth << endl;
+	logger << meth << endl;
 	void *mkr = dlsym(dlib, meth.c_str());
 	if(mkr!=NULL)
 	{
@@ -107,7 +108,7 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Elem
 		if(meth.getMethodName()!="")
 		{
 			ref.invokeMethodUnknownReturn(_temp,meth,valus);
-			cout << "successfully called formcontroller" << endl;
+			logger << "successfully called formcontroller" << endl;
 		}
 		else
 		{
@@ -115,7 +116,7 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Elem
 			res.setStatusMsg("Not Found");
 			res.setContent_type("text/plain");
 			res.setContent_str("Controller Method Not Found");
-			cout << "Controller Method Not Found" << endl;
+			logger << "Controller Method Not Found" << endl;
 		}
 	}
 	return json;

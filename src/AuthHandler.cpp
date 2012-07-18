@@ -52,6 +52,7 @@ string AuthHandler::getFileExtension(const string& file)
 bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpattMap, HttpRequest* req, HttpResponse& res, map<string, vector<string> > filterMap, void* dlib,
 		string ext)
 {
+	Logger logger = Logger::getLogger("AuthHandler");
 	bool isContrl = false;
 	string claz;
 	if(autpattMap[req->getCntxt_name()+"*.*"]!="" || autMap[req->getCntxt_name()+ext]!="")
@@ -65,48 +66,48 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 			claz = autMap[req->getCntxt_name()+ext];
 		}
 		AuthController *authc;
-		cout << "OAUTH/HTTP Authorization requested " <<  claz << endl;
+		logger << "OAUTH/HTTP Authorization requested " <<  claz << endl;
 		map<string,string>::iterator it;
 		map<string,string> tempmap = req->getAuthinfo();
 		for(it=tempmap.begin();it!=tempmap.end();it++)
 		{
-			cout << it->first << " = " << it->second << endl;
+			logger << it->first << " = " << it->second << endl;
 		}
 		map<string,string> tempmap1 = req->getRequestParams();
 		for(it=tempmap1.begin();it!=tempmap1.end();it++)
 		{
-			cout << it->first << " = " << it->second << endl;
+			logger << it->first << " = " << it->second << endl;
 		}
 		if(claz.find("file:")!=string::npos)
 		{
 			claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
-			cout << "auth handled by file " << claz << endl;
+			logger << "auth handled by file " << claz << endl;
 			authc = new FileAuthController(claz,":");
 			if(authc->isInitialized())
 			{
 				if(authc->authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
 				{
-					cout << "valid user" << endl;
+					logger << "valid user" << endl;
 				}
 				else
 				{
-					cout << "invalid user" << endl;
+					logger << "invalid user" << endl;
 					res.setStatusCode("401");
 					res.setStatusMsg("Unauthorized\r\nWWW-Authenticate: Invalid authentication details");
 					isContrl = true;
-					cout << "verified request token signature is invalid" << endl;
+					logger << "verified request token signature is invalid" << endl;
 				}
 			}
 			else
 			{
-				cout << "invalid user repo defined" << endl;
+				logger << "invalid user repo defined" << endl;
 			}
 		}
 		else if(claz.find("class:")!=string::npos)
 		{
 			claz = claz.substr(claz.find(":")+1);
 			claz = "getReflectionCIFor" + claz;
-			cout << "auth handled by class " << claz << endl;
+			logger << "auth handled by class " << claz << endl;
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -125,7 +126,7 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 				bool isoAuthRes = authc->handle(req,&res);
 				if(res.getStatusCode()!="")
 					isContrl = true;
-				cout << "authhandler called" << endl;
+				logger << "authhandler called" << endl;
 				ext = getFileExtension(req->getUrl());
 				delete authc;
 			}

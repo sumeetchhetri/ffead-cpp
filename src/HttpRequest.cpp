@@ -25,10 +25,10 @@ using namespace std;
 
 void HttpRequest::unbase64(string str)
 {
-	cout << "before " << str << endl;
+	logger << "before " << str << endl;
 	authinfo["Method"] = (str.substr(0,str.find(" ")));
 	str = str.substr(str.find(" ")+1);
-	cout << "bafter " << str << endl;
+	logger << "bafter " << str << endl;
 
 	/*unsigned char *input = (unsigned char *)str.c_str();
 	int length = str.length();
@@ -50,7 +50,7 @@ void HttpRequest::unbase64(string str)
 	unsigned char *input = (unsigned char *)str.c_str();
 	int length = str.length();
 	string temp = CryptoHandler::base64decode(input,length);
-	cout << "after " << temp << endl;
+	logger << "after " << temp << endl;
 
 	authinfo["Username"] = (temp.substr(0,temp.find(":")));
 	temp = temp.substr(temp.find(":")+1);
@@ -61,7 +61,7 @@ void HttpRequest::getOauthParams(string str)
 {
 	authinfo["Method"] = str.substr(0,str.find(" "));
 	str = str.substr(str.find(" ")+1);
-	cout << str << endl;
+	logger << str << endl;
 
 	strVec tempv;
 	boost::iter_split(tempv, str, boost::first_finder(","));
@@ -76,12 +76,15 @@ void HttpRequest::getOauthParams(string str)
 		temr = temr.substr(0,temr.find("\""));
 		authinfo[tempvv.at(0)] = temr;
 		authorderinf[authorderinf.size()+1] = CryptoHandler::urlDecode(tempvv.at(0));
-		//cout << tempvv.at(0) << " = " << temr << endl;
+		//logger << tempvv.at(0) << " = " << temr << endl;
 	}
 }
 
 HttpRequest::HttpRequest()
-{}
+{
+	logger = Logger::getLogger("HttpRequest");
+}
+
 HttpRequest::HttpRequest(strVec vec,string path)
 {
 	if(vec.size()!=0){
@@ -111,7 +114,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 					this->setAccept(temp.at(1));
 				else if(temp.at(0)=="Authorization")
 				{
-					cout << "found auth" <<endl;
+					logger << "found auth" <<endl;
 					if(temp.at(1).find("oauth_")!=string::npos)
 					{
 						this->getOauthParams(temp.at(1));
@@ -145,7 +148,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							this->localeInfo.push_back(t);
 						}
 					}
-					//cout << temp.at(1) << flush;
+					//logger << temp.at(1) << flush;
 				}
 				else if(temp.at(0)=="Accept-Encoding" || temp.at(0)=="Accept-encoding")
 					this->setAccept_encod(temp.at(1));
@@ -196,7 +199,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 					this->setReferer(temp.at(1));
 				else if(temp.at(0)=="Pragma")
 					this->setPragma(temp.at(1));
-				//cout << temp.at(0) <<  "---" << temp.at(1) << flush;
+				//logger << temp.at(0) <<  "---" << temp.at(1) << flush;
 			}
 			else
 			{
@@ -246,14 +249,14 @@ HttpRequest::HttpRequest(strVec vec,string path)
 										this->requestParams[attN.substr(0, attN.find("[")+1)
 												  + boost::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
 														  + boost::lexical_cast<string>(indices[attN])
 														  + "]"
 														  << CryptoHandler::urlDecode(param.at(1)) << endl;
 									}
 									else
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
-									//cout << att << " = " << param.at(1) << endl;
+									//logger << att << " = " << param.at(1) << endl;
 									reqorderinf[reqorderinf.size()+1] = att;
 								}
 							}
@@ -326,7 +329,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 										this->requestParams[attN.substr(0, attN.find("[")+1)
 												  + boost::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
 														  + boost::lexical_cast<string>(indices[attN])
 														  + "]"
 														  << CryptoHandler::urlDecode(param.at(1)) << endl;
@@ -405,7 +408,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 										this->requestParams[attN.substr(0, attN.find("[")+1)
 												  + boost::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
 														  + boost::lexical_cast<string>(indices[attN])
 														  + "]"
 														  << CryptoHandler::urlDecode(param.at(1)) << endl;
@@ -486,7 +489,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 										this->requestParams[attN.substr(0, attN.find("[")+1)
 												  + boost::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
 														  + boost::lexical_cast<string>(indices[attN])
 														  + "]"
 														  << CryptoHandler::urlDecode(param.at(1)) << endl;
@@ -542,30 +545,30 @@ HttpRequest::HttpRequest(strVec vec,string path)
 		{
 			strVec params;
 			string content = this->getContent();
-			//cout << content << flush;
+			//logger << content << flush;
 			boost::iter_split(params, content, boost::first_finder("&"));
-			//cout << "\n\n\nsize: " << params.size() << flush;
+			//logger << "\n\n\nsize: " << params.size() << flush;
 			for(unsigned j=0;j<params.size();j++)
 			{
 				strVec param;
-				//cout << params.at(j) << flush;
+				//logger << params.at(j) << flush;
 				boost::iter_split(param, params.at(j), boost::first_finder("="));
-				//cout << param.size() << flush;
+				//logger << param.size() << flush;
 				if(param.size()==2)
 				{
 					string att = param.at(0);
 					boost::replace_first(att,"\r","");
 					boost::replace_first(att,"\t","");
 					boost::replace_first(att," ","");
-					//cout << "attribute:  " << param.at(0) << "\n"<< flush;
-					//cout << "value: " << param.at(1) << "\n" << flush;
+					//logger << "attribute:  " << param.at(0) << "\n"<< flush;
+					//logger << "value: " << param.at(1) << "\n" << flush;
 					this->setRequestParam(att,param.at(1));
 				}
 			}
 		}*/
 		if(this->getContent()!="")
 		{
-			cout << this->getContent() << flush;
+			logger << this->getContent() << flush;
 			if(this->getContent_type().find("application/x-www-form-urlencoded")!=string::npos)
 			{
 				strVec params;
@@ -597,7 +600,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							this->requestParams[attN.substr(0, attN.find("[")+1)
 									  + boost::lexical_cast<string>(indices[attN])
 									  + "]"] = CryptoHandler::urlDecode(param.at(1));
-							cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+							logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
 											  << boost::lexical_cast<string>(indices[attN])
 											  << "]"
 											  << CryptoHandler::urlDecode(param.at(1)) << endl;
@@ -619,10 +622,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				param_conts = param_conts.substr(0,param_conts.length()-1);
 				strVec parameters;
 				boost::iter_split(parameters, param_conts, boost::first_finder(delb));
-				//cout << "Boundary: " << this->getContent_boundary() << flush;
-				//cout << "\nLength: " << this->getContent().length() << flush;
-				//cout << "\nStart End: " << stb << " " << enb << "\n" << flush;
-				//cout << "\nContent: " << param_conts << "\n" << flush;
+				//logger << "Boundary: " << this->getContent_boundary() << flush;
+				//logger << "\nLength: " << this->getContent().length() << flush;
+				//logger << "\nStart End: " << stb << " " << enb << "\n" << flush;
+				//logger << "\nContent: " << param_conts << "\n" << flush;
 				map<string ,int> indices;
 				map<string,string>::iterator it;
 				for(unsigned j=0;j<parameters.size();j++)
@@ -632,7 +635,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						continue;
 					FormData datf;
 					string parm = parameters.at(j);
-					//cout << parm << "\nparm" << flush;
+					//logger << parm << "\nparm" << flush;
 					size_t dis = parm.find("Content-Disposition: ");
 					if(dis==string::npos)
 						dis = parm.find("Content-disposition: ");
@@ -647,20 +650,20 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						{
 							dist = parm.find("\r\r");
 							dise = dist + 2;
-							//cout << "\ndist = npos" << flush;
+							//logger << "\ndist = npos" << flush;
 						}
 						else
 						{
 							//parm = parm.substr(dist+14);
 							cont_type = parm.substr(dist+14,parm.find("\r\r")-(dist+14));
 							dise = parm.find("\r\r") + 2;
-							//cout << "\nctype = " << cont_type << flush;
+							//logger << "\nctype = " << cont_type << flush;
 							//dist = dist-12;
 						}
 						cont_disp = parm.substr(dis+21,dist-(dis+21));
 						boost::replace_first(cont_disp,"\r","");
-						//cout << "\ncdisp = " << cont_disp << flush;
-						//cout << "\ndise = " << dise << flush;
+						//logger << "\ncdisp = " << cont_disp << flush;
+						//logger << "\ndise = " << dise << flush;
 						parm = parm.substr(dise);
 					}
 					strVec parmdef;
@@ -672,8 +675,8 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						{
 							size_t stpd = parmdef.at(k).find_first_not_of(" ");
 							size_t enpd = parmdef.at(k).find_last_not_of(" ");
-							//cout << "\nparmdef = " << parmdef.at(k) << flush;
-							//cout << "\nst en = " << stpd  << " " << enpd << flush;
+							//logger << "\nparmdef = " << parmdef.at(k) << flush;
+							//logger << "\nst en = " << stpd  << " " << enpd << flush;
 							string propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
 							strVec proplr;
 							boost::iter_split(proplr, propert, boost::first_finder("="));
@@ -714,7 +717,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							this->requestParamsF[attN.substr(0, attN.find("[")+1)
 									  + boost::lexical_cast<string>(indices[attN])
 									  + "]"] = datf;
-							cout << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+							logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
 											  << boost::lexical_cast<string>(indices[attN])
 											  << "]"
 											  << datf.fileName << endl;
@@ -731,14 +734,14 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							datf.length = datf.value.length();
 						}
 						string hr = (key + " " + datf.type + " "+ datf.fileName+" "+ datf.value);
-						//cout << hr << flush;
+						//logger << hr << flush;
 					}
 				}
 			}
 
 		}
 	}
-	//cout << this->toString() << flush;
+	//logger << this->toString() << flush;
 }
 
 string HttpRequest::buildRequest(const char *keyc,const char *valuec)
@@ -780,7 +783,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 				this->localeInfo.push_back(t);
 			}
 		}
-		//cout << temp.at(1) << flush;
+		//logger << temp.at(1) << flush;
 	}
 	else if(key=="Accept-Encoding" || key=="Accept-encoding")
 		this->setAccept_encod(value);
@@ -1349,7 +1352,7 @@ string HttpRequest::getFile() const
 void HttpRequest::setFile(string file)
 {
 	this->file = file;
-	cout << "file is " << this->file << endl;
+	logger << "file is " << this->file << endl;
 	if(this->file!="" && this->url.find(this->file)!=string::npos)
 	{
 		int fst = this->url.find_last_of(this->file) - this->file.length() + 1;

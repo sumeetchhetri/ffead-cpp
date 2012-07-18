@@ -42,7 +42,7 @@ BeanContext RemoteComponentInt::getContext()
 
 
 BeanContext::BeanContext() {
-
+	logger = Logger::getLogger("BeanContext");
 }
 
 BeanContext::BeanContext(string host,int port) {
@@ -113,7 +113,7 @@ void* BeanContext::invoke(string name,vector<Object> args,string bname,string re
 		while((call=client.getData())=="")
 		{
 		}
-		cout << call << flush;
+		logger << call << flush;
 		XmlParser parser("Parser");
 		Document doc = parser.getDocument(call);
 		Element message = doc.getRootElement();
@@ -123,14 +123,14 @@ void* BeanContext::invoke(string name,vector<Object> args,string bname,string re
 			boost::replace_first(tag,"return:","");
 			message.setTagName(tag);
 			call = message.render();
-			cout << call << flush;
+			logger << call << flush;
 			retval = ser.unSerializeUnknown(call,tag);
 		}
 		else
 		{
 			throw "Exception occurred";
 		}
-		cout << retval << flush;
+		logger << retval << flush;
 	}
 	else
 	{

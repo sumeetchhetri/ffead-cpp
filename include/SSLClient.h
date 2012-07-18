@@ -27,6 +27,7 @@
 #include "cstring"
 #include "openssl/ssl.h"
 #include <signal.h>
+#include "Logger.h"
 using namespace std;
 #define KEYFILE "server.pem"
 #define PASSWORD "password"
@@ -34,6 +35,7 @@ using namespace std;
 #define CA_LIST "root.pem"
 #define MAXBUFLE 32768
 class SSLClient {
+	Logger logger;
 	SSL *ssl;
 	SSL_CTX *ctx;
 	BIO *sbio,*io,*ssl_bio;

@@ -23,8 +23,7 @@
 #include "SSLHandler.h"
 
 SSLHandler::SSLHandler() {
-	// TODO Auto-generated constructor stub
-
+	logger = Logger::getLogger("SSLHandler");
 }
 
 SSLHandler::~SSLHandler() {
@@ -36,6 +35,7 @@ BIO* SSLHandler::bio_err = NULL;
 
 int SSLHandler::s_server_session_id_context = 1;
 int SSLHandler::s_server_auth_session_id_context = 2;
+Logger SSLHandler::logger;
 
 /*The password code is not thread safe*/
 int SSLHandler::password_cb(char *buf,int num, int rwflag,void *userdata)
@@ -53,13 +53,13 @@ void SSLHandler::load_dh_params(SSL_CTX *ctx,char *file)
     BIO *bio;
 
     if ((bio=BIO_new_file(file,"r")) == NULL)
-    	cout << "Couldn't open DH file" << flush;
+    	logger << "Couldn't open DH file" << flush;
 
     ret=PEM_read_bio_DHparams(bio,NULL,NULL,
       NULL);
     BIO_free(bio);
     if(SSL_CTX_set_tmp_dh(ctx,ret)<0)
-    	cout << "Couldn't set DH parameters" << flush;
+    	logger << "Couldn't set DH parameters" << flush;
   }
 
 void SSLHandler::sigpipe_handle(int x){
@@ -89,19 +89,19 @@ SSL_CTX *SSLHandler::initialize_ctx(char *keyfile,char *password, string ca_list
     /* Load our keys and certificates*/
     if(!(SSL_CTX_use_certificate_chain_file(ctx,
       keyfile)))
-    	cout << "Can't read certificate file" << flush;
+    	logger << "Can't read certificate file" << flush;
 
     pass=password;
     SSL_CTX_set_default_passwd_cb(ctx,
       password_cb);
     if(!(SSL_CTX_use_PrivateKey_file(ctx,
       keyfile,SSL_FILETYPE_PEM)))
-    	cout << "Can't read key file" << flush;
+    	logger << "Can't read key file" << flush;
 
     /* Load the CAs we trust*/
     if(!(SSL_CTX_load_verify_locations(ctx,
       ca_list.c_str(),0)))
-    	cout << "Can't read CA list" << flush;
+    	logger << "Can't read CA list" << flush;
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
     SSL_CTX_set_verify_depth(ctx,1);
 #endif
@@ -116,7 +116,7 @@ void SSLHandler::destroy_ctx(SSL_CTX *ctx)
 
 void SSLHandler::error_occurred(char *error,int fd,SSL *ssl)
 {
-	cout << error << flush;
+	logger << error << flush;
 	close(fd);
 	int r=SSL_shutdown(ssl);
 	if(!r){
@@ -134,7 +134,7 @@ void SSLHandler::error_occurred(char *error,int fd,SSL *ssl)
 	  case 0:
 	  case -1:
 	  default:
-		  cout << "shutdown failed" << flush;
+		  logger << "shutdown failed" << flush;
 		  break;
 	}
 	SSL_free(ssl);
@@ -159,7 +159,7 @@ void SSLHandler::closeSSL(int fd,SSL *ssl,BIO* bio)
 	  case 0:
 	  case -1:
 	  default:
-		  cout << "shutdown failed" << flush;
+		  logger << "shutdown failed" << flush;
 		  break;
 	}
 	SSL_free(ssl);

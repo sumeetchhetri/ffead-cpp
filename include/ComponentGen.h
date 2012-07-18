@@ -32,9 +32,11 @@
 #include "boost/algorithm/string.hpp"
 #include "Component.h"
 #include "AfcUtil.h"
+#include "Logger.h"
 using namespace std;
 typedef vector<string> Cont1;
 class ComponentGen {
+	Logger logger;
 public:
 	ComponentGen();
 	virtual ~ComponentGen();

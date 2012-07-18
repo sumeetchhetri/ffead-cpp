@@ -36,7 +36,6 @@ propMap PropFileReader::getProperties(string filepath)
 	string line;
 	if (filepath=="")
 	{
-		cout << "\nerror openeing File" << flush;
 		return all;
 	}
 	ifstream myfile (&filepath[0],ios::in | ios::binary);
@@ -56,13 +55,10 @@ propMap PropFileReader::getProperties(string filepath)
 		  		  if(all[vemp.at(0)]!="")
 		  			temp += ("," + all[vemp.at(0)]);
 		  		  all[vemp.at(0)] = temp;
-		  	   	  //cout << vemp.at(0) << " : " << all[vemp.at(0)] << "\n" << flush;
 		  	  }
 		  }
 	  }
 	  myfile.close();
     }
-    else
-    	cout << "Unable to open file";
     return all;
 }

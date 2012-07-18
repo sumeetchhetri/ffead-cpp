@@ -31,12 +31,14 @@
 #include "stdio.h"
 #include "fstream"
 #include "iostream"
+#include "Logger.h"
 
 using namespace std;
 class HttpResponseParser {
 	map<string,string> headers;
 	static string *headernames;
 	string content;
+	Logger logger;
 public:
 	HttpResponseParser();
 	string getHeaderValue(string head)

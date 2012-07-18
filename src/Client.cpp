@@ -104,7 +104,7 @@ int Client::sendData(string data)
 	int bytes = send(sockfd,data.c_str(),data.length(),0);
 	if(bytes == -1)
 	{
-		cout << "send failed" << flush;
+
 	}
 	return bytes;
 }
