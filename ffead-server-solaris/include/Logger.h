@@ -56,6 +56,7 @@ private:
 	static string* mode;
 	static string* filepath;
 	static ofstream* out;
+	static boost::mutex* _theLogmutex;
 	void write(string,string);
 	template <typename T>
 	void write(T tmsg, string mod)
@@ -77,6 +78,5 @@ private:
 		}
 	}
 	void write(ostream& (*pf) (ostream&), string mod);
-	static boost::mutex* _theLogmutex;
 };
 #endif /* LOGGER_H_ */
