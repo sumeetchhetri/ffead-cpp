@@ -173,29 +173,29 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 		string vtyp = className.substr(0,className.find(","));
 		return _sermultiset(t,vtyp);
 	}
-	else if(className.find("std::queue<std::string,")!=string::npos)
+	else if(className.find("std::std::queue<std::string,")!=string::npos)
 	{
-		queue<string> *tt = (queue<string>*)t;
+		std::queue<string> *tt = (std::queue<string>*)t;
 		objXml = serializeqstring(tt);
 	}
-	else if(className.find("std::queue<int,")!=string::npos)
+	else if(className.find("std::std::queue<int,")!=string::npos)
 	{
-		queue<int> *tt = (queue<int>*)t;
+		std::queue<int> *tt = (std::queue<int>*)t;
 		objXml = serializeqint(tt);
 	}
-	else if(className.find("std::queue<double,")!=string::npos)
+	else if(className.find("std::std::queue<double,")!=string::npos)
 	{
-		queue<double> *tt = (queue<double>*)t;
+		std::queue<double> *tt = (std::queue<double>*)t;
 		objXml = serializeqdouble(tt);
 	}
-	else if(className.find("std::queue<float,")!=string::npos)
+	else if(className.find("std::std::queue<float,")!=string::npos)
 	{
-		queue<float> *tt = (queue<float>*)t;
+		std::queue<float> *tt = (std::queue<float>*)t;
 		objXml = serializeqfloat(tt);
 	}
-	else if(className.find("std::queue<")!=string::npos)
+	else if(className.find("std::std::queue<")!=string::npos)
 	{
-		boost::replace_first(className,"std::queue<","");
+		boost::replace_first(className,"std::std::queue<","");
 		string vtyp = className.substr(0,className.find(","));
 		return _serq(t,vtyp);
 	}
@@ -395,11 +395,11 @@ string Serialize::serializelistdouble(list<double> *t)
 	return objXml;
 }
 
-string Serialize::serializeqstring(queue<string> *t)
+string Serialize::serializeqstring(std::queue<string> *t)
 {
-	queue<string> *tt = new queue<string>;
+	std::queue<string> *tt = new std::queue<string>;
 	*tt = *t;
-	string objXml = "<queue-string>";
+	string objXml = "<std::queue-string>";
 	if(!t->empty())
 	{
 		for(int var=0;var<(int)t->size();var++)
@@ -408,15 +408,15 @@ string Serialize::serializeqstring(queue<string> *t)
 			tt->pop();
 		}
 	}
-	objXml += "</queue-string>";
+	objXml += "</std::queue-string>";
 	return objXml;
 
 }
-string Serialize::serializeqint(queue<int> *t)
+string Serialize::serializeqint(std::queue<int> *t)
 {
-	queue<int> *tt = new queue<int>;
+	std::queue<int> *tt = new std::queue<int>;
 	*tt = *t;
-	string objXml = "<queue-int>";
+	string objXml = "<std::queue-int>";
 	if(!t->empty())
 	{
 		for(int var=0;var<(int)t->size();var++)
@@ -425,15 +425,15 @@ string Serialize::serializeqint(queue<int> *t)
 			tt->pop();
 		}
 	}
-	objXml += "</queue-int>";
+	objXml += "</std::queue-int>";
 	return objXml;
 
 }
-string Serialize::serializeqfloat(queue<float> *t)
+string Serialize::serializeqfloat(std::queue<float> *t)
 {
-	queue<float> *tt = new queue<float>;
+	std::queue<float> *tt = new std::queue<float>;
 	*tt = *t;
-	string objXml = "<queue-float>";
+	string objXml = "<std::queue-float>";
 	if(!t->empty())
 	{
 		for(int var=0;var<(int)t->size();var++)
@@ -442,15 +442,15 @@ string Serialize::serializeqfloat(queue<float> *t)
 			tt->pop();
 		}
 	}
-	objXml += "</queue-float>";
+	objXml += "</std::queue-float>";
 	return objXml;
 
 }
-string Serialize::serializeqdouble(queue<double> *t)
+string Serialize::serializeqdouble(std::queue<double> *t)
 {
-	queue<double> *tt = new queue<double>;
+	std::queue<double> *tt = new std::queue<double>;
 	*tt = *t;
-	string objXml = "<queue-double>";
+	string objXml = "<std::queue-double>";
 	if(!t->empty())
 	{
 		for(int var=0;var<(int)t->size();var++)
@@ -459,7 +459,7 @@ string Serialize::serializeqdouble(queue<double> *t)
 			tt->pop();
 		}
 	}
-	objXml += "</queue-double>";
+	objXml += "</std::queue-double>";
 	return objXml;
 
 }
@@ -1043,12 +1043,12 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 		else
 			return _unserLis(objXml,cls);
 	}
-	else if(objXml.find("<queue-")==0)
+	else if(objXml.find("<std::queue-")==0)
 	{
 		string cls = objXml.substr(8,objXml.find(">")-8);
 		if(cls=="string")
 		{
-			queue<string> *t = new queue<string>;
+			std::queue<string> *t = new std::queue<string>;
 			XmlParser parser("Parser");
 			Document doc = parser.getDocument(objXml);
 			Element message = doc.getRootElement();
@@ -1064,7 +1064,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 		}
 		else if(cls=="double")
 		{
-			queue<double> *t = new queue<double>;
+			std::queue<double> *t = new std::queue<double>;
 			XmlParser parser("Parser");
 			Document doc = parser.getDocument(objXml);
 			Element message = doc.getRootElement();
@@ -1080,7 +1080,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 		}
 		else if(cls=="float")
 		{
-			queue<float> *t = new queue<float>;
+			std::queue<float> *t = new std::queue<float>;
 			XmlParser parser("Parser");
 			Document doc = parser.getDocument(objXml);
 			Element message = doc.getRootElement();
@@ -1096,7 +1096,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 		}
 		else if(cls=="int")
 		{
-			queue<int> *t = new queue<int>;
+			std::queue<int> *t = new std::queue<int>;
 			XmlParser parser("Parser");
 			Document doc = parser.getDocument(objXml);
 			Element message = doc.getRootElement();
