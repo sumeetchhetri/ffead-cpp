@@ -1,0 +1,34 @@
+SOLARIS based Installation
+
+1. Refer INSTALL-WINDOWS-CYGWIN file for directions on how to install on Windows and Cygwin
+2. Download the tar file and extract it to the location of your choice.
+3. Install the following using the commands mentioned below
+	System Header files
+		sudo pkg install system/header
+	Install OpenCSW and edit PATH variable for CSW
+		sudo pkgadd -d http://get.opencsw.org/now
+		vi ~/.profile
+			- change the PATH to add /opt/csw/bin before the /usr/bin part
+			- PATH should now look like /opt/csw/bin:/usr/bin:/usr/share/bin
+	Install GCC/UnixODBC and SSL devel and libraries
+		sudo pkgutil -y -i gcc4core gcc4g++ libstdc++6 unixodbc unixodbc_dev libssl1_0_0 libssl_dev subversion(optional)
+	Install Boost libraries and devel headers
+		wget http://nchc.dl.sourceforge.net/project/boost/boost/1.50.0/boost_1_50_0.tar.bz2
+		tar xvf boost_1_50_0.tar.bz2
+		cd boost_1_50_0
+		sudo ./bootstrap.sh
+		sudo ./bjam address-model=64
+		sudo ./bjam install --prefix=/usr/
+4. JSON-SPIRIT source and header files are already included in the source code distribution
+5. Also included prototype.js in source for AJAX support
+6. Go to the ffead-server-solaris/Release or ffead-server-solaris/Debug depending on whether you need to debug the server code
+7. Open terminal and type gmake all
+8. This will create the distribution folder named ffead-server-solaris inside ffead-server-solaris/Release or ffead-server-solaris/Debug folders accordingly
+9. Place your application shared library inside the ffead-server-solaris/Release/ffead-server-solaris/lib or ffead-server-solaris/Debug/ffead-server-solaris/lib folder.
+10. Place your web application specific files inside the ffead-server-solaris/Release/ffead-server-solaris/web folder inside a folder with your application name
+11. Type ./server.sh when inside the ffead-server-solaris folder to start the application server
+12. A default application is already provided for your reference inside the ffead-server-solaris/web folder
+13. To compile the default application shared library go to the ffead-server-solaris/Release/ffead-server-solaris/web/default/src/Debug folder and run "gmake all"
+14. Copy the libdefault library to the ffead-server-solaris/Release/ffead-server-solaris/lib folder
+15. Remember all installation files(makefile,subdir.mk) assume the ports are installed to the /usr/local/lib directory, in case you choose custom settings during 
+    installation of dependencies then make sure to change all files to include the -L/usr/local/lib to -L/location/of your/choice
