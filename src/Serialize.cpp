@@ -87,7 +87,7 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	else if(className.find("std::vector<float,")!=string::npos)
 	{
 		vector<float> *tt = (vector<float>*)t;
-		objXml = serializevefloatc(tt);
+		objXml = serializevecfloat(tt);
 	}
 	else if(className.find("std::vector<")!=string::npos)
 	{
