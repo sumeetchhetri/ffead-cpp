@@ -1,0 +1,6 @@
+<application scope="session">
+	<welcome path="welcome.html" id="p1"/>
+	<page path="index1.html" id="p2"/>
+	<page path="index2.html" id="p3" onsuccess="p2" onfail="p1"/>
+	<page path="index3.html" id="p4" who="USER" where="FILE:users"/>
+</application>

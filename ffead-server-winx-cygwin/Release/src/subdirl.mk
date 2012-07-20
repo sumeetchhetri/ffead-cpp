@@ -63,7 +63,7 @@ CPP_SRCS += \
 ../src/Method.cpp \
 ../src/MethodInvoc.cpp \
 ../src/PropFileReader.cpp \
-../src/Queue.cpp \
+../src/MQueue.cpp \
 ../src/Reflection.cpp \
 ../src/Reflector.cpp \
 ../src/RemoteComponent.cpp \
@@ -161,7 +161,7 @@ OBJS += \
 ./src/Method.o \
 ./src/MethodInvoc.o \
 ./src/PropFileReader.o \
-./src/Queue.o \
+./src/MQueue.o \
 ./src/Reflection.o \
 ./src/Reflector.o \
 ./src/RemoteComponent.o \
@@ -259,7 +259,7 @@ CPP_DEPS += \
 ./src/Method.d \
 ./src/MethodInvoc.d \
 ./src/PropFileReader.d \
-./src/Queue.d \
+./src/MQueue.d \
 ./src/Reflection.d \
 ./src/Reflector.d \
 ./src/RemoteComponent.d \

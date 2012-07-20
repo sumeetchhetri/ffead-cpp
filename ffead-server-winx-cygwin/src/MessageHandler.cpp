@@ -31,7 +31,7 @@ MessageHandler::MessageHandler(string path)
 MessageHandler* _mess_instance = NULL;
 Message MessageHandler::readMessageFromQ(string fileName)
 {
-	Queue q;
+	MQueue q;
 	Message msg;
 	ifstream myfile1;
 	myfile1.open(fileName.c_str());
@@ -51,7 +51,7 @@ Message MessageHandler::readMessageFromQ(string fileName)
 
 void MessageHandler::writeMessageToQ(Message msg,string fileName)
 {
-	Queue q;
+	MQueue q;
 	ifstream myfile1;
 	myfile1.open(fileName.c_str());
 	if (myfile1.is_open())
@@ -94,7 +94,7 @@ bool MessageHandler::tempUnSubscribe(string subs,string fileName)
 
 Message MessageHandler::readMessageFromT(string fileName,string subs)
 {
-	Queue t;
+	MQueue t;
 	Message msg;
 	ifstream myfile1;
 	myfile1.open(fileName.c_str());
@@ -116,7 +116,7 @@ Message MessageHandler::readMessageFromT(string fileName,string subs)
 
 void MessageHandler::writeMessageToT(Message msg,string fileName)
 {
-	Queue t;
+	MQueue t;
 	ifstream myfile1;
 	myfile1.open(fileName.c_str());
 	if (myfile1.is_open())
