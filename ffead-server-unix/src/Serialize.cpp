@@ -72,22 +72,22 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	else if(className.find("std::vector<std::string,")!=string::npos)
 	{
 		vector<string> *tt = (vector<string>*)t;
-		objXml = serializevec(tt);
+		objXml = serializevecstring(tt);
 	}
 	else if(className.find("std::vector<int,")!=string::npos)
 	{
 		vector<int> *tt = (vector<int>*)t;
-		objXml = serializevec(tt);
+		objXml = serializevecint(tt);
 	}
 	else if(className.find("std::vector<double,")!=string::npos)
 	{
 		vector<double> *tt = (vector<double>*)t;
-		objXml = serializevec(tt);
+		objXml = serializevecdouble(tt);
 	}
 	else if(className.find("std::vector<float,")!=string::npos)
 	{
 		vector<float> *tt = (vector<float>*)t;
-		objXml = serializevec(tt);
+		objXml = serializevefloatc(tt);
 	}
 	else if(className.find("std::vector<")!=string::npos)
 	{
@@ -98,22 +98,22 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	else if(className.find("std::list<std::string,")!=string::npos)
 	{
 		list<string> *tt = (list<string>*)t;
-		objXml = serializelist(tt);
+		objXml = serializeliststring(tt);
 	}
 	else if(className.find("std::list<int,")!=string::npos)
 	{
 		list<int> *tt = (list<int>*)t;
-		objXml = serializelist(tt);
+		objXml = serializelistint(tt);
 	}
 	else if(className.find("std::list<double,")!=string::npos)
 	{
 		list<double> *tt = (list<double>*)t;
-		objXml = serializelist(tt);
+		objXml = serializelistdouble(tt);
 	}
 	else if(className.find("std::list<float,")!=string::npos)
 	{
 		list<float> *tt = (list<float>*)t;
-		objXml = serializelist(tt);
+		objXml = serializelistfloat(tt);
 	}
 	else if(className.find("std::list<")!=string::npos)
 	{
@@ -124,22 +124,22 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	else if(className.find("std::set<std::string,")!=string::npos)
 	{
 		set<string> *tt = (set<string>*)t;
-		objXml = serializeset(tt);
+		objXml = serializesetstring(tt);
 	}
 	else if(className.find("std::set<int,")!=string::npos)
 	{
 		set<int> *tt = (set<int>*)t;
-		objXml = serializeset(tt);
+		objXml = serializesetint(tt);
 	}
 	else if(className.find("std::set<double,")!=string::npos)
 	{
 		set<double> *tt = (set<double>*)t;
-		objXml = serializeset(tt);
+		objXml = serializesetdouble(tt);
 	}
 	else if(className.find("std::set<float,")!=string::npos)
 	{
 		set<float> *tt = (set<float>*)&t;
-		objXml = serializeset(tt);
+		objXml = serializesetfloat(tt);
 	}
 	else if(className.find("std::set<")!=string::npos)
 	{
@@ -150,22 +150,22 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	else if(className.find("std::multiset<std::string,")!=string::npos)
 	{
 		multiset<string> *tt = (multiset<string>*)t;
-		objXml = serializemultiset(tt);
+		objXml = serializemultisetstring(tt);
 	}
 	else if(className.find("std::multiset<int,")!=string::npos)
 	{
 		multiset<int> *tt = (multiset<int>*)t;
-		objXml = serializemultiset(tt);
+		objXml = serializemultisetint(tt);
 	}
 	else if(className.find("std::set<double,")!=string::npos)
 	{
 		multiset<double> *tt = (multiset<double>*)t;
-		objXml = serializemultiset(tt);
+		objXml = serializemultisetdouble(tt);
 	}
 	else if(className.find("std::set<float,")!=string::npos)
 	{
 		multiset<float> *tt = (multiset<float>*)t;
-		objXml = serializemultiset(tt);
+		objXml = serializemultisetfloat(tt);
 	}
 	else if(className.find("std::multiset<")!=string::npos)
 	{
@@ -176,22 +176,22 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	else if(className.find("std::queue<std::string,")!=string::npos)
 	{
 		queue<string> *tt = (queue<string>*)t;
-		objXml = serializeq(tt);
+		objXml = serializeqstring(tt);
 	}
 	else if(className.find("std::queue<int,")!=string::npos)
 	{
 		queue<int> *tt = (queue<int>*)t;
-		objXml = serializeq(tt);
+		objXml = serializeqint(tt);
 	}
 	else if(className.find("std::queue<double,")!=string::npos)
 	{
 		queue<double> *tt = (queue<double>*)t;
-		objXml = serializeq(tt);
+		objXml = serializeqdouble(tt);
 	}
 	else if(className.find("std::queue<float,")!=string::npos)
 	{
 		queue<float> *tt = (queue<float>*)t;
-		objXml = serializeq(tt);
+		objXml = serializeqfloat(tt);
 	}
 	else if(className.find("std::queue<")!=string::npos)
 	{
@@ -202,22 +202,22 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	else if(className.find("std::deque<std::string,")!=string::npos)
 	{
 		deque<string> *tt = (deque<string>*)t;
-		objXml = serializedq(tt);
+		objXml = serializedqstring(tt);
 	}
 	else if(className.find("std::deque<int,")!=string::npos)
 	{
 		deque<int> *tt = (deque<int>*)t;
-		objXml = serializedq(tt);
+		objXml = serializedqint(tt);
 	}
 	else if(className.find("std::deque<double,")!=string::npos)
 	{
 		deque<double> *tt = (deque<double>*)t;
-		objXml = serializedq(tt);
+		objXml = serializedqdouble(tt);
 	}
 	else if(className.find("std::deque<float,")!=string::npos)
 	{
 		deque<float> *tt = (deque<float>*)t;
-		objXml = serializedq(tt);
+		objXml = serializedqfloat(tt);
 	}
 	else if(className.find("std::deque<")!=string::npos)
 	{
@@ -259,7 +259,7 @@ string Serialize::serialize(bool t)
 	return "<bool>"+boost::lexical_cast<string>(t)+"</bool>";
 }
 
-string Serialize::serializeset(set<string> *t)
+string Serialize::serializesetstring(set<string> *t)
 {
 	set<string>::iterator it;
 	string objXml = "<set-string>";
@@ -270,7 +270,7 @@ string Serialize::serializeset(set<string> *t)
 	objXml += "</set-string>";
 	return objXml;
 }
-string Serialize::serializeset(set<int> *t)
+string Serialize::serializesetint(set<int> *t)
 {
 	set<int>::iterator it;
 	string objXml = "<set-int>";
@@ -281,7 +281,7 @@ string Serialize::serializeset(set<int> *t)
 	objXml += "</set-int>";
 	return objXml;
 }
-string Serialize::serializeset(set<float> *t)
+string Serialize::serializesetfloat(set<float> *t)
 {
 	set<float>::iterator it;
 	string objXml = "<set-float>";
@@ -292,7 +292,7 @@ string Serialize::serializeset(set<float> *t)
 	objXml += "</set-float>";
 	return objXml;
 }
-string Serialize::serializeset(set<double> *t)
+string Serialize::serializesetdouble(set<double> *t)
 {
 	set<double>::iterator it;
 	string objXml = "<set-double>";
@@ -304,7 +304,7 @@ string Serialize::serializeset(set<double> *t)
 	return objXml;
 }
 
-string Serialize::serializemultiset(multiset<string> *t)
+string Serialize::serializemultisetstring(multiset<string> *t)
 {
 	multiset<string>::iterator it;
 	string objXml = "<multiset-string>";
@@ -315,7 +315,7 @@ string Serialize::serializemultiset(multiset<string> *t)
 	objXml += "</multiset-string>";
 	return objXml;
 }
-string Serialize::serializemultiset(multiset<int> *t)
+string Serialize::serializemultisetint(multiset<int> *t)
 {
 	multiset<int>::iterator it;
 	string objXml = "<multiset-int>";
@@ -326,7 +326,7 @@ string Serialize::serializemultiset(multiset<int> *t)
 	objXml += "</multiset-int>";
 	return objXml;
 }
-string Serialize::serializemultiset(multiset<float> *t)
+string Serialize::serializemultisetfloat(multiset<float> *t)
 {
 	multiset<float>::iterator it;
 	string objXml = "<multiset-float>";
@@ -337,7 +337,7 @@ string Serialize::serializemultiset(multiset<float> *t)
 	objXml += "</multiset-float>";
 	return objXml;
 }
-string Serialize::serializemultiset(multiset<double> *t)
+string Serialize::serializemultisetdouble(multiset<double> *t)
 {
 	multiset<double>::iterator it;
 	string objXml = "<multiset-double>";
@@ -350,7 +350,7 @@ string Serialize::serializemultiset(multiset<double> *t)
 }
 
 
-string Serialize::serializelist(list<string> *t)
+string Serialize::serializeliststring(list<string> *t)
 {
 	list<string>::iterator it;
 	string objXml = "<list-string>";
@@ -361,7 +361,7 @@ string Serialize::serializelist(list<string> *t)
 	objXml += "</list-string>";
 	return objXml;
 }
-string Serialize::serializelist(list<int> *t)
+string Serialize::serializelistint(list<int> *t)
 {
 	list<int>::iterator it;
 	string objXml = "<list-int>";
@@ -372,7 +372,7 @@ string Serialize::serializelist(list<int> *t)
 	objXml += "</list-int>";
 	return objXml;
 }
-string Serialize::serializelist(list<float> *t)
+string Serialize::serializelistfloat(list<float> *t)
 {
 	list<float>::iterator it;
 	string objXml = "<list-float>";
@@ -383,7 +383,7 @@ string Serialize::serializelist(list<float> *t)
 	objXml += "</list-float>";
 	return objXml;
 }
-string Serialize::serializelist(list<double> *t)
+string Serialize::serializelistdouble(list<double> *t)
 {
 	list<double>::iterator it;
 	string objXml = "<list-double>";
@@ -395,7 +395,7 @@ string Serialize::serializelist(list<double> *t)
 	return objXml;
 }
 
-string Serialize::serializeq(queue<string> *t)
+string Serialize::serializeqstring(queue<string> *t)
 {
 	queue<string> *tt = new queue<string>;
 	*tt = *t;
@@ -412,7 +412,7 @@ string Serialize::serializeq(queue<string> *t)
 	return objXml;
 
 }
-string Serialize::serializeq(queue<int> *t)
+string Serialize::serializeqint(queue<int> *t)
 {
 	queue<int> *tt = new queue<int>;
 	*tt = *t;
@@ -429,7 +429,7 @@ string Serialize::serializeq(queue<int> *t)
 	return objXml;
 
 }
-string Serialize::serializeq(queue<float> *t)
+string Serialize::serializeqfloat(queue<float> *t)
 {
 	queue<float> *tt = new queue<float>;
 	*tt = *t;
@@ -446,7 +446,7 @@ string Serialize::serializeq(queue<float> *t)
 	return objXml;
 
 }
-string Serialize::serializeq(queue<double> *t)
+string Serialize::serializeqdouble(queue<double> *t)
 {
 	queue<double> *tt = new queue<double>;
 	*tt = *t;
@@ -464,7 +464,7 @@ string Serialize::serializeq(queue<double> *t)
 
 }
 
-string Serialize::serializedq(deque<string> *t)
+string Serialize::serializedqstring(deque<string> *t)
 {
 
 	string objXml = "<deque-string>";
@@ -479,7 +479,7 @@ string Serialize::serializedq(deque<string> *t)
 	return objXml;
 
 }
-string Serialize::serializedq(deque<int> *t)
+string Serialize::serializedqint(deque<int> *t)
 {
 
 	string objXml = "<deque-int>";
@@ -494,7 +494,7 @@ string Serialize::serializedq(deque<int> *t)
 	return objXml;
 
 }
-string Serialize::serializedq(deque<float> *t)
+string Serialize::serializedqfloat(deque<float> *t)
 {
 
 	string objXml = "<deque-float>";
@@ -509,7 +509,7 @@ string Serialize::serializedq(deque<float> *t)
 	return objXml;
 
 }
-string Serialize::serializedq(deque<double> *t)
+string Serialize::serializedqdouble(deque<double> *t)
 {
 
 	string objXml = "<deque-double>";
@@ -525,7 +525,7 @@ string Serialize::serializedq(deque<double> *t)
 
 }
 
-string Serialize::serializevec(vector<string> *t)
+string Serialize::serializevecstring(vector<string> *t)
 {
 	string objXml = "<vector-string>";
 	if(!t->empty())
@@ -539,7 +539,7 @@ string Serialize::serializevec(vector<string> *t)
 	return objXml;
 }
 
-string Serialize::serializevec(vector<int> *t)
+string Serialize::serializevecint(vector<int> *t)
 {
 	string objXml = "<vector-int>";
 	if(!t->empty())
@@ -553,7 +553,7 @@ string Serialize::serializevec(vector<int> *t)
 	return objXml;
 }
 
-string Serialize::serializevec(vector<float> *t)
+string Serialize::serializevecfloat(vector<float> *t)
 {
 	string objXml = "<vector-float>";
 	if(!t->empty())
@@ -567,7 +567,7 @@ string Serialize::serializevec(vector<float> *t)
 	return objXml;
 }
 
-string Serialize::serializevec(vector<double> *t)
+string Serialize::serializevecdouble(vector<double> *t)
 {
 	string objXml = "<vector-double>";
 	if(!t->empty())

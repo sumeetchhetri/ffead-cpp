@@ -24,7 +24,7 @@
 #define OBJECT_H_
 #include <stdexcept>
 #include "iostream"
-/*Fix for Windows Cygwin*///#include <execinfo.h>
+#include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #include <stdio.h>

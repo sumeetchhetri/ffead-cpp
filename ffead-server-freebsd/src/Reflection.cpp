@@ -1461,11 +1461,11 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 						string stlcnttyp = "";
 						if(fldp.at(0).find("vector")!=string::npos)
 							stlcnttyp = "Vec";
-						else if(fldp.at(0).find("vector")!=string::npos)
+						else if(fldp.at(0).find("queue")!=string::npos)
 							stlcnttyp = "Q";
-						else if(fldp.at(0).find("vector")!=string::npos)
+						else if(fldp.at(0).find("deque")!=string::npos)
 							stlcnttyp = "Dq";
-						else if(fldp.at(0).find("vector")!=string::npos)
+						else if(fldp.at(0).find("list")!=string::npos)
 							stlcnttyp = "Lis";
 						else
 							stlcnttyp = "Set";

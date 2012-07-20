@@ -54,35 +54,35 @@ class Serialize{
 	string _ser(Object);
 	void* _unser(string objXml,string classN);
 
-	string serializevec(vector<string> *t);
-	string serializevec(vector<int> *t);
-	string serializevec(vector<float> *t);
-	string serializevec(vector<double> *t);
+	string serializevecstring(vector<string> *t);
+	string serializevecint(vector<int> *t);
+	string serializevecfloat(vector<float> *t);
+	string serializevecdouble(vector<double> *t);
 
-	string serializeset(set<string> *t);
-	string serializeset(set<int> *t);
-	string serializeset(set<float> *t);
-	string serializeset(set<double> *t);
+	string serializesetstring(set<string> *t);
+	string serializesetint(set<int> *t);
+	string serializesetfloat(set<float> *t);
+	string serializesetdouble(set<double> *t);
 
-	string serializemultiset(multiset<string> *t);
-	string serializemultiset(multiset<int> *t);
-	string serializemultiset(multiset<float> *t);
-	string serializemultiset(multiset<double> *t);
+	string serializemultisetstring(multiset<string> *t);
+	string serializemultisetint(multiset<int> *t);
+	string serializemultisetfloat(multiset<float> *t);
+	string serializemultisetdouble(multiset<double> *t);
 
-	string serializelist(list<string> *t);
-	string serializelist(list<int> *t);
-	string serializelist(list<float> *t);
-	string serializelist(list<double> *t);
+	string serializeliststring(list<string> *t);
+	string serializelistint(list<int> *t);
+	string serializelistfloat(list<float> *t);
+	string serializelistdouble(list<double> *t);
 
-	string serializeq(queue<string> *t);
-	string serializeq(queue<int> *t);
-	string serializeq(queue<float> *t);
-	string serializeq(queue<double> *t);
+	string serializeqstring(queue<string> *t);
+	string serializeqint(queue<int> *t);
+	string serializeqfloat(queue<float> *t);
+	string serializeqdouble(queue<double> *t);
 
-	string serializedq(deque<string> *t);
-	string serializedq(deque<int> *t);
-	string serializedq(deque<float> *t);
-	string serializedq(deque<double> *t);
+	string serializedqstring(deque<string> *t);
+	string serializedqint(deque<int> *t);
+	string serializedqfloat(deque<float> *t);
+	string serializedqdouble(deque<double> *t);
 
 	void* _unserVec(string objXml,string className);
 	void* _unserLis(string objXml,string className);
