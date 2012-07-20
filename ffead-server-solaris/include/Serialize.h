@@ -74,10 +74,10 @@ class Serialize{
 	string serializelistfloat(list<float> *t);
 	string serializelistdouble(list<double> *t);
 
-	string serializeqstring(queue<string> *t);
-	string serializeqint(queue<int> *t);
-	string serializeqfloat(queue<float> *t);
-	string serializeqdouble(queue<double> *t);
+	string serializeqstring(std::queue<string> *t);
+	string serializeqint(std::queue<int> *t);
+	string serializeqfloat(std::queue<float> *t);
+	string serializeqdouble(std::queue<double> *t);
 
 	string serializedqstring(deque<string> *t);
 	string serializedqint(deque<int> *t);
