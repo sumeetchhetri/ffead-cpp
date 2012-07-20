@@ -14,19 +14,19 @@
     limitations under the License.  
 */
 /*
- * Queue.cpp
+ * MQueue.cpp
  *
  *  Created on: Sep 21, 2009
  *      Author: sumeet
  */
 
-#include "Queue.h"
+#include "MQueue.h"
 
-Queue::Queue() {
+MQueue::MQueue() {
 	// TODO Auto-generated constructor stub
 
 }
 
-Queue::~Queue() {
+MQueue::~MQueue() {
 	// TODO Auto-generated destructor stub
 }
