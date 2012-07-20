@@ -45,7 +45,7 @@ CHS: $(OBJS) $(USER_OBJS)
 	gmake -f makefilel all
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -pthreads -L../lib -L/usr/local/lib -rdynamic -o"CHS" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -pthreads -L../lib -rdynamic -o"CHS" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'	
 	rm -Rf ffead-server
 	mkdir ffead-server
