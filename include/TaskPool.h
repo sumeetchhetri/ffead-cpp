@@ -29,7 +29,7 @@
 #include <boost/thread/mutex.hpp>
 
 class TaskPool {
-	queue<Task*> *tasks;
+	std::queue<Task*> *tasks;
 	list<Task*> *ptasks;
 	boost::mutex *m_mutex;
 	bool console;
