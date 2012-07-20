@@ -14,18 +14,18 @@
     limitations under the License.  
 */
 /*
- * Queue.h
+ * MQueue.h
  *
  *  Created on: Sep 21, 2009
  *      Author: sumeet
  */
 
-#ifndef QUEUE_H_
-#define QUEUE_H_
+#ifndef MQUEUE_H_
+#define MQUEUE_H_
 #include "Message.h"
 #include <boost/serialization/vector.hpp>
 typedef vector<Message> msgQ;
-class Queue {
+class MQueue {
 	friend class boost::serialization::access;
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int version)
@@ -34,8 +34,8 @@ class Queue {
 	}
 public:
 	msgQ msgs;
-	Queue();
-	virtual ~Queue();
+	MQueue();
+	virtual ~MQueue();
 };
 
-#endif /* QUEUE_H_ */
+#endif /* MQUEUE_H_ */
