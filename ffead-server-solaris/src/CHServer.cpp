@@ -376,7 +376,7 @@ void service(int fd,string serverRootDirectory,map<string,string> *params,
 	//logger << "\nDestroyed task" << flush;
 }
 
-pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
+/*pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 {
 	pid_t pid;
 	if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sp) == -1)
@@ -398,9 +398,6 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			logger.info("Library loaded successfully");
 		if(isSSLEnabled)
 		{
-			/*HTTPS related*/
-			//client_auth=CLIENT_AUTH_REQUIRE;
-			/* Build our SSL context*/
 			ctx = sSLHandler.initialize_ctx((char*)configurationData.key_file.c_str(),(char*)configurationData.sec_password.c_str(),
 					configurationData.ca_list);
 			sSLHandler.load_dh_params(ctx,(char*)configurationData.dh_file.c_str());
@@ -409,7 +406,6 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			  (const unsigned char*)&SSLHandler::s_server_session_id_context,
 			  sizeof SSLHandler::s_server_session_id_context);
 
-			/* Set our cipher list */
 			if(ciphers){
 			  SSL_CTX_set_cipher_list(ctx,ciphers);
 			}
@@ -445,10 +441,8 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		msg.msg_namelen = 0;
 		msg.msg_iov = &iov;
 		msg.msg_iovlen = 1;
-		/* old BSD implementations should use msg_accrights instead of
-		* msg_control; the interface is different. */
 		msg.msg_control = ccmsg;
-		msg.msg_controllen = sizeof(ccmsg); /* ? seems to work... */
+		msg.msg_controllen = sizeof(ccmsg);
 		close(sockfd);
 
 		fd_set master;    // master file descriptor list
@@ -530,7 +524,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		}
 	}
 	return pid;
-}
+}*/
 
 
 
