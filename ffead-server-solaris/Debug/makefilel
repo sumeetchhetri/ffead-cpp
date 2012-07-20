@@ -43,7 +43,7 @@ all: libweblib.so
 libweblib.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -pthreads -shared -L/usr/local/lib -o"libweblib.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -pthreads -shared -o"libweblib.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	cp -f libweblib.so ../lib/
 	@echo ' '
