@@ -43,7 +43,7 @@ all: libdefault.so
 libdefault.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L/usr/local/lib -L../../../../lib -shared -o"libdefault.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -pthreads -L../../../../lib -shared -o"libdefault.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
