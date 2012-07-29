@@ -46,7 +46,6 @@ void MethodInvoc::service(int fd)
 	string methInfo,retValue;
 	_methinv_instance->getServer()->Receive(fd,methInfo,1024);
 	methInfo =methInfo.substr(0,methInfo.find_last_of(">")+1);
-	cout << methInfo << flush;
 	try
 	{
 		XmlParser parser("Parser");
@@ -195,13 +194,11 @@ void MethodInvoc::service(int fd)
 	}
 	catch(MethodInvokerException *e)
 	{
-		cout << e->getMessage() << flush;
 		_methinv_instance->getServer()->Send(fd,retValue);
 		close(fd);
 	}
 	catch(...)
 	{
-		cout << "exception occurred" << flush;
 		retValue = ("<return:exception>XmlParseException occurred</return:exception>");
 		_methinv_instance->getServer()->Send(fd,retValue);
 		close(fd);

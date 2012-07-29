@@ -31,6 +31,7 @@ void sigchld_handler(int s)
 
 Server::Server(string port,int waiting,Service serv)
 {
+	logger = Logger::getLogger("Server");
 	struct addrinfo hints, *servinfo, *p;
 	struct sigaction sa;
 	int yes=1;
@@ -84,7 +85,7 @@ Server::Server(string port,int waiting,Service serv)
 		perror("sigaction");
 		exit(1);
 	}
-	cout << "waiting for connections on " << port << ".....\n" << flush;
+	logger << "waiting for connections on " << port << ".....\n" << flush;
 
 	if(fork()==0)
 	{
@@ -198,7 +199,7 @@ Server::Server(string port,bool block,int waiting,Service serv,bool tobefork)
 		perror("sigaction");
 		exit(1);
 	}
-	cout << "waiting for connections on " << port << ".....\n" << flush;
+	logger << "waiting for connections on " << port << ".....\n" << flush;
 	if(tobefork)
 	{
 		if(fork()==0)
@@ -242,7 +243,7 @@ int Server::Send(int fd,string data)
 	int bytes = send(fd,data.c_str(),data.length(),0);
 	if(bytes == -1)
 	{
-		cout << "send failed" << flush;
+		logger << "send failed" << flush;
 	}
 	return bytes;
 }
@@ -251,7 +252,7 @@ int Server::Send(int fd,vector<char> data)
 	int bytes = send(fd,&data[0],data.size(),0);
 	if(bytes == -1)
 	{
-		cout << "send failed" << flush;
+		logger << "send failed" << flush;
 	}
 	return bytes;
 }
@@ -260,7 +261,7 @@ int Server::Send(int fd,vector<unsigned char> data)
 	int bytes = send(fd,&data[0],data.size(),0);
 	if(bytes == -1)
 	{
-		cout << "send failed" << flush;
+		logger << "send failed" << flush;
 	}
 	return bytes;
 }
@@ -269,7 +270,7 @@ int Server::Send(int fd,char *data)
 	int bytes = send(fd,data,sizeof data,0);
 	if(bytes == -1)
 	{
-		cout << "send failed" << flush;
+		logger << "send failed" << flush;
 	}
 	return bytes;
 }
@@ -278,7 +279,7 @@ int Server::Send(int fd,unsigned char *data)
 	int bytes = send(fd,data,sizeof data,0);
 	if(bytes == -1)
 	{
-		cout << "send failed" << flush;
+		logger << "send failed" << flush;
 	}
 	return bytes;
 }
@@ -347,7 +348,7 @@ int Server::Receive(int fd,vector<string>& data,int bytes)
 	while(getline(ss,temp,'\n'))
 	{
 		data.push_back(temp);
-		cout << temp << flush;
+		logger << temp << flush;
 	}
 	memset(&te[0], 0, sizeof(te));
 	return bytesr;

@@ -27,6 +27,7 @@
 #include "vector"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+
 using namespace std;
 
 class Date {
@@ -34,61 +35,67 @@ class Date {
 	string monthw;
 	string year;
 	string day;
+	int weekday;
 	string hh;
 	string mm;
 	string ss;
 	string dayw;
+	long long nanoseconds;
 	string getMon(string);
+	string getMonFd(string);
+	long getDaysInt();
+	long getDays(long y,long m,long d);
+	long getHours(long y,long m,long d, long hh);
+	long getMinutes(long y,long m,long d, long hh, long mi);
+	unsigned long long getSeconds(long y,long m,long d, long hh, long mi, long ss);
+	Date getDateFromDays(long days);
+	void getDateFromHours(long hours);
+	void getDateFromMinutes(long long minutes);
+	void getDateFromSeconds(long long seconds);
+	void setMonthw(string monthw);
+	void setDayw(string dayw);
+	int getWeekDayVal(string dayName);
+	void setSs(int ss);
+	void setMm(int mm);
+	void setHh(int hh);
+	void setDay(int day);
+	void setYear(int year);
+	void setMonth(int month);
 public:
 	Date();
+	Date(int yyyy,string mmm,int dd);
+	Date(int yyyy,int mm,int dd);
+	Date(int yy,string mmm,int dd,bool);
+	Date(int yy,int mm,int dd,bool);
+	void setTime(int hh,int mi,int ss);
 	virtual ~Date();
     int getMonth();
-    void setMonth(int month);
     string getMonthw() const;
-    void setMonthw(string monthw);
     int getYear() const;
-    void setYear(int year);
     int getDay() const;
-    void setDay(int day);
     int getHh() const;
-    void setHh(int hh);
     int getMm() const;
-    void setMm(int mm);
     int getSs() const;
-    void setSs(int ss);
+	long long getNanoSeconds() const;
     string getDayw() const;
-    void setDayw(string dayw);
     string toString();
     string getDayStr() const;
     string getMonthStr() const;
     string getHhStr() const;
     string getSsStr() const;
+    string getNsStr() const;
     string getMmStr() const;
     string getYearStr() const;
-    void setYearf(string year)
-    {
-    	this->year = year;
-    }
-    void setDayf(string day)
-	{
-		this->day = day;
-	}
-    void setMmf(string month)
-	{
-		this->month = month;
-	}
-    void setHhf(string hh)
-	{
-		this->hh = hh;
-	}
-    void setMif(string mi)
-	{
-		this->mm = mi;
-	}
-    void setSsf(string ss)
-	{
-		this->ss = ss;
-	}
+    int getWeekDay() const;
+    Date addSeconds(long seconds);
+	Date addMinutes(long minutes);
+	Date addHours(long hours);
+	Date addDays(long days);
+	Date addMonths(long months);
+	Date addYears(long years);
+	static bool validateDate(int dd, int mm, int yyyy);
+	static string getDayName(int dd, int mm, int yyyy);
+	int test();
 };
 
 #endif /* DATE_H_ */

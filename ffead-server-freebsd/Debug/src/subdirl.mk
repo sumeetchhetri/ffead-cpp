@@ -4,6 +4,20 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/Constants.cpp \
+../src/ServiceTask.cpp \
+../src/SSLHandler.cpp \
+../src/ConfigurationHandler.cpp \
+../src/ConfigurationData.cpp \
+../src/ExtHandler.cpp \
+../src/FviewHandler.cpp \
+../src/ScriptHandler.cpp \
+../src/SoapHandler.cpp \
+../src/FormHandler.cpp \
+../src/ControllerHandler.cpp \
+../src/AuthHandler.cpp \
+../src/FilterHandler.cpp \
+../src/SecurityHandler.cpp \
 ../src/AOPEngine.cpp \
 ../src/AfcUtil.cpp \
 ../src/AppContext.cpp \
@@ -49,7 +63,7 @@ CPP_SRCS += \
 ../src/Method.cpp \
 ../src/MethodInvoc.cpp \
 ../src/PropFileReader.cpp \
-../src/Queue.cpp \
+../src/MQueue.cpp \
 ../src/Reflection.cpp \
 ../src/Reflector.cpp \
 ../src/RemoteComponent.cpp \
@@ -88,6 +102,20 @@ CPP_SRCS += \
 ../src/Filter.cpp
 
 OBJS += \
+./src/Constants.o \
+./src/ServiceTask.o \
+./src/SSLHandler.o \
+./src/ConfigurationHandler.o \
+./src/ConfigurationData.o \
+./src/ExtHandler.o \
+./src/FviewHandler.o \
+./src/ScriptHandler.o \
+./src/SoapHandler.o \
+./src/FormHandler.o \
+./src/ControllerHandler.o \
+./src/AuthHandler.o \
+./src/FilterHandler.o \
+./src/SecurityHandler.o \
 ./src/AOPEngine.o \
 ./src/AfcUtil.o \
 ./src/AppContext.o \
@@ -133,7 +161,7 @@ OBJS += \
 ./src/Method.o \
 ./src/MethodInvoc.o \
 ./src/PropFileReader.o \
-./src/Queue.o \
+./src/MQueue.o \
 ./src/Reflection.o \
 ./src/Reflector.o \
 ./src/RemoteComponent.o \
@@ -172,6 +200,20 @@ OBJS += \
 ./src/Filter.o
 
 CPP_DEPS += \
+./src/Constants.d \
+./src/ServiceTask.d \
+./src/SSLHandler.d \
+./src/ConfigurationHandler.d \
+./src/ConfigurationData.d \
+./src/ExtHandler.d \
+./src/FviewHandler.d \
+./src/ScriptHandler.d \
+./src/SoapHandler.d \
+./src/FormHandler.d \
+./src/ControllerHandler.d \
+./src/AuthHandler.d \
+./src/FilterHandler.d \
+./src/SecurityHandler.d \
 ./src/AOPEngine.d \
 ./src/AfcUtil.d \
 ./src/AppContext.d \
@@ -217,7 +259,7 @@ CPP_DEPS += \
 ./src/Method.d \
 ./src/MethodInvoc.d \
 ./src/PropFileReader.d \
-./src/Queue.d \
+./src/MQueue.d \
 ./src/Reflection.d \
 ./src/Reflector.d \
 ./src/RemoteComponent.d \

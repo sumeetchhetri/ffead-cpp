@@ -166,7 +166,6 @@ ElementList Element::getElementsByName(string name)
 string Element::render()
 {
 	string rend;
-	//cout << this->getTagName() << flush;
 	rend.append(generateStartOpenTag(this->getTagName()));
 	rend.append(generateAttributes(this->getAttributes()));
 	rend.append(generateEndOpenTag());

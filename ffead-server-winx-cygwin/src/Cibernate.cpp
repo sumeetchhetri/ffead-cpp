@@ -24,9 +24,10 @@
 
 Cibernate::~Cibernate() {
 	close();
-	cout << "\nDestructed Cibernate" << flush;
+	logger << "\nDestructed Cibernate" << flush;
 }
 Cibernate::Cibernate(string appName) {
+	logger = Logger::getLogger("Cibernate");
 	this->init = false;
 	this->appName = appName;
 	if (this->appName != "" && CibernateConnPools::isInitialized()
@@ -34,7 +35,7 @@ Cibernate::Cibernate(string appName) {
 		this->init = true;
 		this->pool = CibernateConnPools::getPool(this->appName);
 		this->mapping = CibernateConnPools::getMapping(this->appName);
-		cout << "\ngot pool " << this->pool << " mapping " << this->mapping
+		logger << "\ngot pool " << this->pool << " mapping " << this->mapping
 				<< " for application " << appName << "\n" << flush;
 	}
 	else
@@ -49,7 +50,7 @@ Cibernate::Cibernate() {
 		this->init = true;
 		this->pool = CibernateConnPools::getPool(this->appName);
 		this->mapping = CibernateConnPools::getMapping(this->appName);
-		cout << "\ngot pool " << this->pool << " mapping " << this->mapping
+		logger << "\ngot pool " << this->pool << " mapping " << this->mapping
 				<< " for application " << appName << "\n" << flush;
 	}
 	else
@@ -61,7 +62,6 @@ string Cibernate::demangle(const char *mangled)
 	int status;	char *demangled;
 	using namespace abi;
 	demangled = __cxa_demangle(mangled, NULL, 0, &status);
-	//printf("\n---------Demanged --%s\n\n", demangled);
 	stringstream ss;
 	ss << demangled;
 	string s;
@@ -165,11 +165,11 @@ void Cibernate::procedureCall(string procName) {
 						params[it->first]->getVoidPointer(), 20, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
 						!= SQL_SUCCESS_WITH_INFO)) {
-					printf("Error in binding parameter %d\n", V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1,
 							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
 							&V_OD_mlen);
-					printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 					throw "Error in call to stored procedure";
 				}
@@ -178,51 +178,51 @@ void Cibernate::procedureCall(string procName) {
 	}
 	if (inoutq)
 	{
-		cout << inoutQuery << flush;
+		logger << inoutQuery << flush;
 		V_OD_erg
 				= SQLExecDirect(V_OD_hstmt, (SQLCHAR*) inoutQuery.c_str(), SQL_NTS);
 		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-			printf("Error in call to stored procedure %d\n", V_OD_erg);
+			logger << "Error in call to stored procedure " << V_OD_erg << endl;
 			SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 					&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
-			printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+			logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 			close();
 			throw "Error in call to stored procedure";
 		}
 		SQLCloseCursor(V_OD_hstmt);
 	}
 
-	cout << quer << flush;
+	logger << quer << flush;
 	query = (SQLCHAR*) quer.c_str();
 	/*V_OD_erg = SQLPrepare(V_OD_hstmt, query, SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		printf("Error in prepare statement stored procedure %d\n", V_OD_erg);
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
-		printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 	}*/
 	par = 1;
 	for (it = ntmap.begin(); it != ntmap.end(); ++it) {
-		SQLINTEGER  hotelInd;hotelInd = SQL_NTS;
+		SQLLEN  hotelInd;hotelInd = SQL_NTS;
 		if (it->second == "OUT" || it->second == "out" || it->second == "INOUT"
 				|| it->second == "inout")
 		{
 			revType["@" + it->first] = params[it->first]->getTypeName();
 		}
 		if (it->second == "IN" || it->second == "in") {
-			cout << "binding in parameter " << params[it->first]->getVoidPointer() << endl;
+			logger << "binding in parameter " << params[it->first]->getVoidPointer() << endl;
 			if (params[it->first]->getTypeName() == "int") {
 				V_OD_erg = SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT,
 						SQL_C_LONG, SQL_INTEGER, 0, 0,
 						params[it->first]->getVoidPointer(), 20, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
 						!= SQL_SUCCESS_WITH_INFO)) {
-					printf("Error in binding parameter %d\n", V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1,
 							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
 							&V_OD_mlen);
-					printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 					throw "Error Binding parameter";
 				}
@@ -234,11 +234,11 @@ void Cibernate::procedureCall(string procName) {
 						parmv, 20, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
 						!= SQL_SUCCESS_WITH_INFO)) {
-					printf("Error in binding parameter %d\n", V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1,
 							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
 							&V_OD_mlen);
-					printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 					throw "Error Binding parameter";
 				}
@@ -250,11 +250,11 @@ void Cibernate::procedureCall(string procName) {
 						SQL_C_CHAR,SQL_VARCHAR, 0, 0, (SQLPOINTER)parm->c_str() ,parm->length(), &hotelInd);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
 						!= SQL_SUCCESS_WITH_INFO)) {
-					printf("Error in binding parameter %d\n", V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1,
 							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
 							&V_OD_mlen);
-					printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 					throw "Error Binding parameter";
 				}
@@ -264,10 +264,10 @@ void Cibernate::procedureCall(string procName) {
 	}
 	V_OD_erg =  SQLExecDirect(V_OD_hstmt, query, SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		printf("Error in call to stored procedure %d\n", V_OD_erg);
+		logger << "Error in call to stored procedure " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_STMT, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
-		printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 		throw "Error in call to stored procedure";
 	}
@@ -276,23 +276,23 @@ void Cibernate::procedureCall(string procName) {
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		close();
 	}
-	printf("Number of Columns %d\n", V_OD_colanz);
+	logger << "Number of Columns " << V_OD_colanz << endl;
 	V_OD_erg = SQLRowCount(V_OD_hstmt, &V_OD_rowanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		printf("Number ofRowCount %d\n", V_OD_erg);
+		logger << "Number of RowCount " << V_OD_erg << endl;
 		close();
 	}
-	printf("Number of Rows %d\n", (int) V_OD_rowanz);*/
+	logger << "Number of Rows " << (int)V_OD_rowanz << endl;*/
 	//SQLCloseCursor(V_OD_hstmt);
 
-	cout << outQuery << flush;
-	SQLINTEGER siz;
+	logger << outQuery << flush;
+	SQLLEN siz;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) outQuery.c_str(), SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		printf("Error in Select %d\n", V_OD_erg);
+		logger << "Error in Select " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
-		printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 		throw "Error in call to stored procedure";
 	}
@@ -300,13 +300,13 @@ void Cibernate::procedureCall(string procName) {
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		close();
 	}
-	printf("Number of Columns %d\n", V_OD_colanz);
+	logger << "Number of Columns " << V_OD_colanz << endl;
 	V_OD_erg = SQLRowCount(V_OD_hstmt, &V_OD_rowanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		printf("Number ofRowCount %d\n", V_OD_erg);
+		logger << "Number of RowCount " << V_OD_erg << endl;
 		close();
 	}
-	printf("Number of Rows %d\n", (int) V_OD_rowanz);*/
+	logger << "Number of Rows " << (int)V_OD_rowanz << endl;*/
 	V_OD_erg = SQLFetch(V_OD_hstmt);
 	while (V_OD_erg != SQL_NO_DATA) {
 		for (unsigned int var = 0; var < outargs.size(); ++var) {
@@ -316,16 +316,14 @@ void Cibernate::procedureCall(string procName) {
 				SQLGetData(V_OD_hstmt, var + 1, SQL_C_LONG, params[outargs.at(
 						var)]->getVoidPointer(),
 						sizeof(params[outargs.at(var)]->getVoidPointer()), &siz);
-				printf("%d\n",
-						*(int*) params[outargs.at(var)]->getVoidPointer());
+				logger << *(int*) params[outargs.at(var)]->getVoidPointer() << endl;
 			}
 			else if (revType[outargs.at(var)] == "short") {
 				boost::replace_first(outargs.at(var), "@", "");
 				SQLGetData(V_OD_hstmt, var + 1, SQL_C_SHORT, params[outargs.at(
 						var)]->getVoidPointer(),
 						sizeof(params[outargs.at(var)]->getVoidPointer()), &siz);
-				printf("%d\n",
-						*(short*) params[outargs.at(var)]->getVoidPointer());
+				logger << *(short*) params[outargs.at(var)]->getVoidPointer() << endl;
 			}
 		}
 		V_OD_erg = SQLFetch(V_OD_hstmt);
@@ -374,9 +372,9 @@ void Cibernate::binPrams(string &query)
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_LONG,SQL_INTEGER, 0, 0, params[ite->first]->getVoidPointer() , 20, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 				{
-					printf("Error in binding parameter %d\n",V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -386,9 +384,9 @@ void Cibernate::binPrams(string &query)
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_CHAR,SQL_VARCHAR, 0, 0, &parm[0] ,parm.length(), NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 				{
-					printf("Error in binding parameter %d\n",V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -414,13 +412,13 @@ void Cibernate::delW(string clasName) {
 	SQLCHAR V_OD_msg[200];
 	string query = "delete from "+tableName;
 	binPrams(query);
-	cout << query << flush;
+	logger << query << flush;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error in Delete %d\n",V_OD_erg);
+		logger << "Error in Delete " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 	}
 
@@ -439,13 +437,13 @@ void Cibernate::empty(string clasName) {
 	SQLINTEGER V_OD_err;
 	SQLCHAR V_OD_msg[200];
 	string query = "tuncate table "+tableName;
-	cout << query << flush;
+	logger << query << flush;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error in Truncate %d\n",V_OD_erg);
+		logger << "Error in Truncate " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 	}
 	SQLCloseCursor(V_OD_hstmt);
@@ -483,7 +481,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 			{
 				col = NULL;
 				SQLRETURN ret;
-				SQLINTEGER indicator;
+				SQLLEN indicator;
 				Field fe = clas.getFieldVec().at(ii);
 				string te = fe.getType();
 				if(te=="int")
@@ -524,17 +522,17 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 					string *temp = new string;
 					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 					temp->append(buf);
-					//cout << indicator << flush;
+					//logger << indicator << flush;
 					if(indicator > (long)24)
 					{
 						int len = indicator-24;
 						char buf1[len];
 						ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 						temp->append(buf1);
-						//cout << buf1 << flush;
+						//logger << buf1 << flush;
 					}
 					col = temp;
-					cout << *temp << "\n" << flush;
+					logger << *temp << "\n" << flush;
 				}
 				else if(te=="binary")
 				{
@@ -552,21 +550,21 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 					string temp;
 					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 					temp.append(buf);
-					//cout << indicator << flush;
+					//logger << indicator << flush;
 					if(indicator > (long)24)
 					{
 						int len = indicator-24;
 						char buf1[len];
 						ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 						temp.append(buf1);
-						//cout << buf1 << flush;
+						//logger << buf1 << flush;
 					}
 					DateFormat datf("yyyy-mm-dd");
 					if(temp.length()>10)
 						datf.setFormatspec("yyyy-mm-dd hh:mi:ss");
 					Date *date = datf.parse(temp);
 					col = date;
-					cout << temp << "\n" << flush;
+					logger << temp << "\n" << flush;
 				}
 				else if(te=="BinaryData")
 				{
@@ -576,7 +574,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 					BinaryData *temp = new BinaryData;
 					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
 					//temp->append(buf,indicator);
-					//cout << indicator << flush;
+					//logger << indicator << flush;
 
 					if(indicator > (long)24)
 					{
@@ -589,7 +587,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 					else
 						temp->append(buf,indicator);
 					col = temp;
-					cout << buf << "\n" << flush;
+					logger << buf << "\n" << flush;
 				}
 				else//if its not a vector means its a one-to-one relationship
 				{
@@ -614,7 +612,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 			for(unsigned int u=0;u<cols.size();u++)
 			{
 				SQLRETURN ret;
-				SQLINTEGER indicator;
+				SQLLEN indicator;
 				Field fe = fields[cols.at(u)];
 				string te = fe.getType();
 				if(te=="int")
@@ -656,17 +654,17 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 					string *temp = new string;
 					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 					temp->append(buf);
-					//cout << indicator << flush;
+					//logger << indicator << flush;
 					if(indicator > (long)24)
 					{
 						int len = indicator-24;
 						char buf1[len];
 						ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 						temp->append(buf1);
-						//cout << buf1 << flush;
+						//logger << buf1 << flush;
 					}
 					col = temp;
-					cout << *temp << "\n" << flush;
+					logger << *temp << "\n" << flush;
 				}
 				else if(te=="binary")
 				{
@@ -684,21 +682,21 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 					string temp;
 					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 					temp.append(buf);
-					//cout << indicator << flush;
+					//logger << indicator << flush;
 					if(indicator > (long)24)
 					{
 						int len = indicator-24;
 						char buf1[len];
 						ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 						temp.append(buf1);
-						//cout << buf1 << flush;
+						//logger << buf1 << flush;
 					}
 					DateFormat datf("yyyy-mm-dd");
 					if(temp.length()>10)
 						datf.setFormatspec("yyyy-mm-dd hh:mi:ss");
 					Date *date = datf.parse(temp);
 					col = date;
-					cout << temp << "\n" << flush;
+					logger << temp << "\n" << flush;
 				}
 				else if(te=="BinaryData")
 				{
@@ -708,7 +706,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 					BinaryData *temp = new BinaryData;
 					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
 					//temp->append(buf,indicator);
-					//cout << indicator << flush;
+					//logger << indicator << flush;
 
 					if(indicator > (long)24)
 					{
@@ -721,7 +719,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 					else
 						temp->append(buf,indicator);
 					col = temp;
-					cout << buf << "\n" << flush;
+					logger << buf << "\n" << flush;
 				}
 				if(col!=NULL)
 				{
@@ -754,7 +752,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 					{
 						col = NULL;
 						SQLRETURN ret;
-						SQLINTEGER indicator;
+						SQLLEN indicator;
 						Field fe = clas.getFieldVec().at(ii);
 						string te = fe.getType();
 						if(te=="int")
@@ -797,17 +795,17 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 							string *temp = new string;
 							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 							temp->append(buf);
-							//cout << indicator << flush;
+							//logger << indicator << flush;
 							if(indicator > (long)24)
 							{
 								int len = indicator-24;
 								char buf1[len];
 								ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 								temp->append(buf1);
-								//cout << buf1 << flush;
+								//logger << buf1 << flush;
 							}
 							col = temp;
-							cout << *temp << "\n" << flush;
+							logger << *temp << "\n" << flush;
 						}
 						else if(te=="binary")
 						{
@@ -825,21 +823,21 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 							string temp;
 							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 							temp.append(buf);
-							//cout << indicator << flush;
+							//logger << indicator << flush;
 							if(indicator > (long)24)
 							{
 								int len = indicator-24;
 								char buf1[len];
 								ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 								temp.append(buf1);
-								//cout << buf1 << flush;
+								//logger << buf1 << flush;
 							}
 							DateFormat datf("yyyy-mm-dd");
 							if(temp.length()>10)
 								datf.setFormatspec("yyyy-mm-dd hh:mi:ss");
 							Date *date = datf.parse(temp);
 							col = date;
-							cout << temp << "\n" << flush;
+							logger << temp << "\n" << flush;
 						}
 						else if(te=="BinaryData")
 						{
@@ -849,7 +847,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 							BinaryData *temp = new BinaryData;
 							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
 							//temp->append(buf,indicator);
-							//cout << indicator << flush;
+							//logger << indicator << flush;
 
 							if(indicator > (long)24)
 							{
@@ -862,7 +860,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 							else
 								temp->append(buf,indicator);
 							col = temp;
-							cout << buf << "\n" << flush;
+							logger << buf << "\n" << flush;
 						}
 						else//if its not a vector means its a one-to-one relationship
 						{
@@ -985,7 +983,7 @@ string Cibernate::selectQuery(vector<string> cols,string clasName)
 			}
 		}
 	}
-	cout << query << flush;
+	logger << query << flush;
 	return query;
 }
 
@@ -1022,9 +1020,9 @@ string Cibernate::insertQuery(vector<string> cols,string clasName,void *t)
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_LONG,SQL_INTEGER, 0, 0, &temp , 0, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 				{
-					printf("Error in binding parameter %d\n",V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -1035,9 +1033,9 @@ string Cibernate::insertQuery(vector<string> cols,string clasName,void *t)
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_CHAR,SQL_CHAR, 0, 0, parm ,0, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 				{
-					printf("Error in binding parameter %d\n",V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -1067,9 +1065,9 @@ string Cibernate::insertQuery(vector<string> cols,string clasName,void *t)
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_LONG,SQL_INTEGER, 0, 0, &temp , 0, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 				{
-					printf("Error in binding parameter %d\n",V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -1080,9 +1078,9 @@ string Cibernate::insertQuery(vector<string> cols,string clasName,void *t)
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_CHAR,SQL_CHAR, 0, 0, parm ,0, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 				{
-					printf("Error in binding parameter %d\n",V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -1097,7 +1095,7 @@ string Cibernate::insertQuery(vector<string> cols,string clasName,void *t)
 	}
 	query += (") values("+vals+")");
 	binPrams(query);
-	cout << query << flush;
+	logger << query << flush;
 	return query;
 }
 
@@ -1134,9 +1132,9 @@ string Cibernate::updateQuery(vector<string> cols,string clasName,void *t)
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_LONG,SQL_INTEGER, 0, 0, &temp , 0, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 				{
-					printf("Error in binding parameter %d\n",V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -1147,9 +1145,9 @@ string Cibernate::updateQuery(vector<string> cols,string clasName,void *t)
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_CHAR,SQL_CHAR, 0, 0, parm ,0, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 				{
-					printf("Error in binding parameter %d\n",V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -1177,9 +1175,9 @@ string Cibernate::updateQuery(vector<string> cols,string clasName,void *t)
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_LONG,SQL_INTEGER, 0, 0, &temp , 0, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 				{
-					printf("Error in binding parameter %d\n",V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -1190,9 +1188,9 @@ string Cibernate::updateQuery(vector<string> cols,string clasName,void *t)
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_CHAR,SQL_CHAR, 0, 0, parm ,0, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 				{
-					printf("Error in binding parameter %d\n",V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -1204,7 +1202,7 @@ string Cibernate::updateQuery(vector<string> cols,string clasName,void *t)
 		}
 	}
 	binPrams(query);
-	cout << query << flush;
+	logger << query << flush;
 	return query;
 }
 
@@ -1224,7 +1222,8 @@ vector<map<string, void*> > Cibernate::getARSCW(string tableName,
 	//SQLINTEGER V_OD_id;
 	char V_OD_stat[10];
 	SQLSMALLINT V_OD_mlen, V_OD_colanz;
-	SQLINTEGER V_OD_err, V_OD_rowanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
 	SQLCHAR V_OD_msg[200];
 
 	string query = "select ";
@@ -1250,11 +1249,11 @@ vector<map<string, void*> > Cibernate::getARSCW(string tableName,
 						params[ite->first]->getVoidPointer(), 20, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
 						!= SQL_SUCCESS_WITH_INFO)) {
-					printf("Error in binding parameter %d\n", V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1,
 							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
 							&V_OD_mlen);
-					printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			} else if (params[ite->first]->getTypeName() == "std::string") {
@@ -1264,11 +1263,11 @@ vector<map<string, void*> > Cibernate::getARSCW(string tableName,
 						SQL_C_CHAR, SQL_VARCHAR, 0, 0, parm, 0, NULL);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
 						!= SQL_SUCCESS_WITH_INFO)) {
-					printf("Error in binding parameter %d\n", V_OD_erg);
+					logger << "Error in binding parameter " << V_OD_erg << endl;
 					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1,
 							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
 							&V_OD_mlen);
-					printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 					close();
 				}
 			}
@@ -1277,33 +1276,33 @@ vector<map<string, void*> > Cibernate::getARSCW(string tableName,
 				query += (" and ");
 		}
 	}
-	cout << query << flush;
+	logger << query << flush;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		printf("Error in Select %d\n", V_OD_erg);
+		logger << "Error in Select " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
-		printf("%s (%d)\n", V_OD_msg, (int) V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 	}
 	V_OD_erg = SQLNumResultCols(V_OD_hstmt, &V_OD_colanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		close();
 	}
-	printf("Number of Columns %d\n", V_OD_colanz);
+	logger << "Number of Columns " << V_OD_colanz << endl;
 	V_OD_erg = SQLRowCount(V_OD_hstmt, &V_OD_rowanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		printf("Number ofRowCount %d\n", V_OD_erg);
+		logger << "Number of RowCount " << V_OD_erg << endl;
 		close();
 	}
-	printf("Number of Rows %d\n", (int) V_OD_rowanz);
+	logger << "Number of Rows " << (int)V_OD_rowanz << endl;
 	V_OD_erg = SQLFetch(V_OD_hstmt);
 	while (V_OD_erg != SQL_NO_DATA) {
 		map<string, void*> retValue;
 		for (unsigned int u = 0; u < cols.size(); u++) {
 			void* col = NULL;
 			SQLRETURN ret;
-			SQLINTEGER indicator;
+			SQLLEN indicator;
 			string columnName = cols.at(u);
 			if (this->mapping->getAppTableColMapping(tableName, columnName) != "")
 				columnName = this->mapping->getAppTableColMapping(tableName,
@@ -1319,7 +1318,7 @@ vector<map<string, void*> > Cibernate::getARSCW(string tableName,
 				ret = SQLGetData(V_OD_hstmt, u + 1, SQL_C_CHAR, buf,
 						sizeof(buf), &indicator);
 				temp->append(buf);
-				cout << indicator << flush;
+				logger << indicator << flush;
 				if (indicator > (long) 24) {
 					char buf1[indicator - 22];
 					ret = SQLGetData(V_OD_hstmt, u + 1, SQL_C_CHAR, buf1,
@@ -1327,7 +1326,7 @@ vector<map<string, void*> > Cibernate::getARSCW(string tableName,
 					temp->append(buf1);
 				}
 				col = temp;
-				cout << *temp << "\n" << flush;
+				logger << *temp << "\n" << flush;
 			}
 			retValue[columnName] = col;
 		}
@@ -1350,16 +1349,17 @@ void* Cibernate::getORW(string clasName)
 	int V_OD_erg;
 	char V_OD_stat[10];
 	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err,V_OD_rowanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
 	SQLCHAR V_OD_msg[200];
 	string query = selectQuery(clasName);
 	query += " LIMIT 1";
 	V_OD_erg=SQLExecDirect(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-	   printf("Error in Select %d\n",V_OD_erg);
+	   logger << "Error in Select " << V_OD_erg << endl;
 	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 	   close();
 	}
 	V_OD_erg=SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
@@ -1367,14 +1367,14 @@ void* Cibernate::getORW(string clasName)
 	{
 		close();
 	}
-	printf("Number of Columns %d\n",V_OD_colanz);
+	logger << "Number of Columns " << V_OD_colanz << endl;
 	V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-	  printf("Number ofRowCount %d\n",V_OD_erg);
+	  logger << "Number of RowCount " << V_OD_erg << endl;
 	  close();
 	}
-	printf("Number of Rows %d\n",(int)V_OD_rowanz);
+	logger << "Number of Rows " << (int)V_OD_rowanz << endl;
 	return getElements(clasName);
 }
 
@@ -1389,15 +1389,16 @@ void* Cibernate::getARACW(string clasName)
 	int V_OD_erg;
 	char V_OD_stat[10];
 	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err,V_OD_rowanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
 	SQLCHAR V_OD_msg[200];
 	string query = selectQuery(clasName);
 	V_OD_erg=SQLExecDirect(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-	   printf("Error in Select %d\n",V_OD_erg);
+	   logger << "Error in Select " << V_OD_erg << endl;
 	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 	   close();
 	}
 	V_OD_erg=SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
@@ -1405,14 +1406,14 @@ void* Cibernate::getARACW(string clasName)
 	{
 		close();
 	}
-	printf("Number of Columns %d\n",V_OD_colanz);
+	logger << "Number of Columns " << V_OD_colanz << endl;
 	V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-	  printf("Number ofRowCount %d\n",V_OD_erg);
+	  logger << "Number of RowCount " << V_OD_erg << endl;
 	  close();
 	}
-	printf("Number of Rows %d\n",(int)V_OD_rowanz);
+	logger << "Number of Rows " << (int)V_OD_rowanz << endl;
 	return getElements(clasName);
 }
 
@@ -1426,15 +1427,16 @@ void* Cibernate::getARSCW(string clasName,vector<string> cols)
 	int V_OD_erg;
 	char V_OD_stat[10];
 	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err,V_OD_rowanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
 	SQLCHAR V_OD_msg[200];
 	string query = selectQuery(cols,clasName);
 	V_OD_erg=SQLExecDirect(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-	   printf("Error in Select %d\n",V_OD_erg);
+		logger << "Error in Select " << V_OD_erg << endl;
 	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 	   close();
 	}
 	V_OD_erg=SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
@@ -1442,14 +1444,14 @@ void* Cibernate::getARSCW(string clasName,vector<string> cols)
 	{
 		close();
 	}
-	printf("Number of Columns %d\n",V_OD_colanz);
+	logger << "Number of Columns " << V_OD_colanz << endl;
 	V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-	  printf("Number ofRowCount %d\n",V_OD_erg);
+	  logger << "Number of RowCount " << V_OD_erg << endl;
 	  close();
 	}
-	printf("Number of Rows %d\n",(int)V_OD_rowanz);
+	logger << "Number of Rows " << (int)V_OD_rowanz << endl;
 	return getElements(clasName);
 }
 
@@ -1469,17 +1471,17 @@ void Cibernate::insertORSC(void* t,vector<string> cols,string className)
 	V_OD_erg = SQLPrepare(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
 	if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error in prepare statement %d\n",V_OD_erg);
+		logger << "Error in prepare statement " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 	}
 	V_OD_erg=SQLExecute(V_OD_hstmt);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-	   printf("Error in Insert %d\n",V_OD_erg);
+	   logger << "Error in Insert " << V_OD_erg << endl;
 	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 	   close();
 	}
 	SQLCloseCursor(V_OD_hstmt);
@@ -1502,17 +1504,17 @@ void Cibernate::updateORSC(void* t,vector<string> cols,string className)
 	V_OD_erg = SQLPrepare(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
 	if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error in prepare statement %d\n",V_OD_erg);
+		logger << "Error in prepare statement " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 	}
 	V_OD_erg=SQLExecute(V_OD_hstmt);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-	   printf("Error in Update %d\n",V_OD_erg);
+	   logger << "Error in Update " << V_OD_erg << endl;
 	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 	   close();
 	}
 	SQLCloseCursor(V_OD_hstmt);
@@ -1529,7 +1531,8 @@ void* Cibernate::sqlfuncs(string type,string clasName)
 	int V_OD_erg;
 	char V_OD_stat[10];
 	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err,V_OD_rowanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
 	SQLCHAR V_OD_msg[200];
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
 	string query = "select "+type+" from "+tableName;
@@ -1537,17 +1540,17 @@ void* Cibernate::sqlfuncs(string type,string clasName)
 	V_OD_erg = SQLPrepare(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
 	if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error in prepare statement %d\n",V_OD_erg);
+		logger << "Error in prepare statement " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 	}
 	V_OD_erg=SQLExecute(V_OD_hstmt);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-	   printf("Error in Function %s %d\n",type.c_str(),V_OD_erg);
+	   logger << "Error in Function " << type.c_str() << ", " << V_OD_erg << endl;
 	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 	   close();
 	}
 	V_OD_erg=SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
@@ -1555,20 +1558,20 @@ void* Cibernate::sqlfuncs(string type,string clasName)
 	{
 		close();
 	}
-	printf("Number of Columns %d\n",V_OD_colanz);
+	logger << "Number of Columns " << V_OD_colanz << endl;
 	V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-	  printf("Number ofRowCount %d\n",V_OD_erg);
+	  logger << "Number of RowCount " << V_OD_erg << endl;
 	  close();
 	}
-	printf("Number of Rows %d\n",(int)V_OD_rowanz);
+	logger << "Number of Rows " << (int)V_OD_rowanz << endl;
 	V_OD_erg = SQLFetch(V_OD_hstmt);
 	void* col = NULL;
 	while (V_OD_erg != SQL_NO_DATA)
 	{
 		SQLRETURN ret;
-		SQLINTEGER indicator;
+		SQLLEN indicator;
 		if (clasName == "int")
 		{
 			col = new int;
@@ -1580,7 +1583,7 @@ void* Cibernate::sqlfuncs(string type,string clasName)
 			string *temp = new string;
 			ret = SQLGetData(V_OD_hstmt, 1, SQL_C_CHAR, buf,sizeof(buf), &indicator);
 			temp->append(buf);
-			cout << indicator << flush;
+			logger << indicator << flush;
 			if (indicator > (long) 24)
 			{
 				char buf1[indicator - 22];
@@ -1588,7 +1591,7 @@ void* Cibernate::sqlfuncs(string type,string clasName)
 				temp->append(buf1);
 			}
 			col = temp;
-			cout << *temp << "\n" << flush;
+			logger << *temp << "\n" << flush;
 		}
 	}
 	SQLCloseCursor(V_OD_hstmt);
@@ -1608,13 +1611,13 @@ void Cibernate::startTransaction()
 	SQLCHAR V_OD_msg[200];
 	string vals;
 	string query = "start transaction";
-	cout << query << flush;
+	logger << query << flush;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error in Start transaction %d\n",V_OD_erg);
+		logger << "Error in Start transaction " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 	}
 	SQLCloseCursor(V_OD_hstmt);
@@ -1634,13 +1637,13 @@ void Cibernate::commit()
 	SQLCHAR V_OD_msg[200];
 	string vals;
 	string query = "commit";
-	cout << query << flush;
+	logger << query << flush;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error in commit %d\n",V_OD_erg);
+		logger << "Error in commit " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 	}
 	SQLCloseCursor(V_OD_hstmt);
@@ -1660,13 +1663,13 @@ void Cibernate::rollback()
 	SQLCHAR V_OD_msg[200];
 	string vals;
 	string query = "rollback";
-	cout << query << flush;
+	logger << query << flush;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		printf("Error in rollback %d\n",V_OD_erg);
+		logger << "Error in rollback " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		printf("%s (%d)\n",V_OD_msg,(int)V_OD_err);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
 		close();
 	}
 	SQLCloseCursor(V_OD_hstmt);

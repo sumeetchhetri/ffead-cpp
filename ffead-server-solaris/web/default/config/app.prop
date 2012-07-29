@@ -1,0 +1,7 @@
+CONTEXT_ROOT=default
+CONTROLLER=default
+CLASS=DefaultController
+TMPL=DefTemp
+DVIW=Dview
+URL=*.*
+

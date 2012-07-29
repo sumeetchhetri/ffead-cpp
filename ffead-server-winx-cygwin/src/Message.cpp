@@ -87,7 +87,7 @@ Message::Message(string xml)
 	}
 	catch(Exception *e)
 	{
-		cout << e->what() << flush;
+		throw e;
 	}
 }
 

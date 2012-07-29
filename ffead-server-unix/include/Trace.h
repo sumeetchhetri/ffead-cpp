@@ -32,7 +32,6 @@
 #define TRACE_H_
 
 #include <stdexcept>
-#include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #include <stdio.h>
@@ -40,10 +39,12 @@
 #include "string"
 #include <sstream>
 #include <typeinfo>
+#include "Logger.h"
 using namespace std;
 
 
 class Trace {
+	Logger logger;
 public:
 	Trace();
 	virtual ~Trace();

@@ -32,10 +32,12 @@
 #include "string"
 #include <sstream>
 #include <typeinfo>
+#include "Logger.h"
 using namespace std;
 
 class Object {
 private:
+	Logger logger;
 	string demangle(const char *mangled)
 	{
 		int status;
@@ -64,7 +66,7 @@ private:
 public:
 	Object()
 	{
-			// TODO Auto-generated destructor stub
+		logger = Logger::getLogger("Object");
 	}
 	template <typename T> void operator<<(T &t)
 	{
@@ -79,8 +81,8 @@ public:
 			this->typeName = getClassName(t);
 			this->pointer = &t;
 		}
-		cout << " " << this->pointer << " " << flush;
-		cout << this->typeName << "\n" << flush;
+		logger << " " << this->pointer << " " << flush;
+		logger << this->typeName << "\n" << flush;
 	}
 	template <typename T> void operator<<(T *t)
 	{
@@ -95,8 +97,8 @@ public:
 			this->typeName = getClassName(t);
 			this->pointer = t;
 		}
-		cout << " " << this->pointer << " " << flush;
-		cout << this->typeName << "\n" << flush;
+		logger << " " << this->pointer << " " << flush;
+		logger << this->typeName << "\n" << flush;
 	}
 	~Object() {
 		// TODO Auto-generated destructor stub
@@ -111,7 +113,7 @@ public:
 	template <typename T> bool isSimilarObject(T t)
 	{
 		string cn = getClassName(&t);
-		//cout << cn << flush;
+		//logger << cn << flush;
 		if(isInstanceOf(cn))
 			return true;
 		else
@@ -120,7 +122,7 @@ public:
 	template <typename T> bool isSimilarObject(T *t)
 	{
 		string cn = getClassName(t);
-		//cout << cn << flush;
+		//logger << cn << flush;
 		if(isInstanceOf(cn))
 			return true;
 		else
@@ -138,7 +140,7 @@ public:
 	{
 		T t;
 		string cn = getClassName(&t);
-		//cout << cn << flush;
+		//logger << cn << flush;
 		if(isInstanceOf(cn))
 			return (T*)this->pointer;
 		else

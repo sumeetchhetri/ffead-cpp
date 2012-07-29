@@ -120,7 +120,6 @@ string ApplicationUtil::buildAllApplications(vector<string> files,vector<string>
 		}
 	}
 	code += (headers + "extern \"C\"\n{\n"+vars+meth+"}\n");
-	cout << code <<flush;
 	return code;
 
 }

@@ -26,7 +26,7 @@ ComponentHandler* _cmp_instance = NULL;
 
 ComponentHandler::ComponentHandler()
 {
-
+	logger = Logger::getLogger("ComponentHandler");
 }
 
 ComponentHandler::~ComponentHandler()
@@ -49,11 +49,11 @@ void ComponentHandler::service(int fd)
 	string methInfo,retValue;
 	_cmp_instance->getServer()->Receive(fd,methInfo,1024);
 	methInfo =methInfo.substr(0,methInfo.find_last_of(">")+1);
-	cout << methInfo << flush;
+	_cmp_instance->logger << methInfo << flush;
 	try
 	{
 		XmlParser parser("Parser");
-		cout << "\nBean call parsed successfully\n" << flush;
+		_cmp_instance->logger << "\nBean call parsed successfully\n" << flush;
 		if(methInfo.find("lang=\"c++\"")!=string::npos || methInfo.find("lang='c++'")!=string::npos)
 		{
 			Document doc = parser.getDocument(methInfo);
@@ -116,12 +116,12 @@ void ComponentHandler::service(int fd)
 				valus.push_back(value);
 			}
 			string className = "Component_"+message.getAttribute("beanName");
-			cout << "\nBean class = " << className << "\n" << flush;
+			_cmp_instance->logger << "\nBean class = " << className << "\n" << flush;
 			string returnType = message.getAttribute("returnType");
 			string lang = message.getAttribute("lang");
 			ClassInfo clas = reflector.getClassInfo(className);
 			string methodName = message.getAttribute("name");
-			cout << "\nBean service = " << methodName << "\n" << flush;
+			_cmp_instance->logger << "\nBean service = " << methodName << "\n" << flush;
 			if(clas.getClassName()=="")
 			{
 				throw new ComponentHandlerException("bean does not exist or is not regsitered\n",retValue);
@@ -133,20 +133,20 @@ void ComponentHandler::service(int fd)
 			}
 			else
 			{
-				cout << "\nGot Bean service " << methodName << "\n" << flush;
+				_cmp_instance->logger << "\nGot Bean service " << methodName << "\n" << flush;
 				args argus;
 				Constructor ctor = clas.getConstructor(argus);
 				void *_temp = reflector.newInstanceGVP(ctor);
-				cout << "\nGot Bean " << _temp << "\n" << flush;
+				_cmp_instance->logger << "\nGot Bean " << _temp << "\n" << flush;
 				if(returnType=="void" || returnType=="")
 				{
-					cout << "\nVoid return " << "\n" << flush;
+					_cmp_instance->logger << "\nVoid return " << "\n" << flush;
 					reflector.invokeMethod<void*>(_temp,meth,valus);
 					retValue = ("<return:void></return:void>");
 				}
 				else
 				{
-					cout << "\nReturn type = "<< returnType << "\n" << flush;
+					_cmp_instance->logger << "\nReturn type = "<< returnType << "\n" << flush;
 					if(returnType=="int")
 					{
 						int retv = reflector.invokeMethod<int>(_temp,meth,valus);
@@ -181,20 +181,20 @@ void ComponentHandler::service(int fd)
 		{
 			retValue = "<return:exception>This is a C++ daemon</return:exception>";
 		}
-		cout << "\nSending data = "<< retValue << "\n" << flush;
+		_cmp_instance->logger << "\nSending data = "<< retValue << "\n" << flush;
 		if(retValue!="")
 			_cmp_instance->getServer()->Send(fd,retValue);
 		//close(fd);
 	}
 	catch(ComponentHandlerException *e)
 	{
-		cout << e->getMessage() << flush;
+		_cmp_instance->logger << e->getMessage() << flush;
 		_cmp_instance->getServer()->Send(fd,retValue);
 		close(fd);
 	}
 	catch(...)
 	{
-		cout << "exception occurred" << flush;
+		_cmp_instance->logger << "exception occurred" << flush;
 		retValue = ("<return:exception>XmlParseException occurred</return:exception>");
 		_cmp_instance->getServer()->Send(fd,retValue);
 		close(fd);

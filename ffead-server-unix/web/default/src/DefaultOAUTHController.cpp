@@ -23,7 +23,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 	boost::to_upper(method);
 
 	map<string,string>::iterator it;
-	map<string,string> reqparams = req->getRequestParams();
+	map<string,string> reqparams = req->getAllParams();
 	map<string,string> oauthparams = req->getAuthinfo();
 	for(it=oauthparams.begin();it!=oauthparams.end();it++)
 	{
@@ -125,11 +125,11 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			if(reqparams["oauth_callback"]!="")
 			{
 				filen = req->getCntxt_root()+"/callbacks";
-				ofs.open(filen.c_str());
-				string oauth_ver = boost::lexical_cast<string>(boost::lexical_cast<long>(oauthtok)/100000000000000 + rand()%1000);
+				ofstream ofs1(filen.c_str());
+				string oauth_ver = oauthtok + boost::lexical_cast<string>(rand()%1000);
 				wrf = CryptoHandler::urlDecode(reqparams["oauth_callback"])+"?oauth_verifier="+oauth_ver+"&"+parsc;
-				ofs.write(wrf.c_str(),wrf.length());
-				ofs.close();
+				ofs1.write(wrf.c_str(),wrf.length());
+				ofs1.close();
 			}
 			string cont = ("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec+"&")+parsc;
 			if(cont[cont.length()-1]=='&')
@@ -190,7 +190,8 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			if(reqparams["oauthparms"]!="")
 			{
 				res->setStatusCode("303");
-				res->setStatusMsg("Moved Permanently\r\nLocation: "+CryptoHandler::urlDecode(reqparams["oauthparms"])+"&access=true");
+				res->setStatusMsg("Moved Permanently");
+				res->setLocation(CryptoHandler::urlDecode(reqparams["oauthparms"])+"&access=true");
 				cout << "redirecting to callback url" << endl;
 			}
 			else

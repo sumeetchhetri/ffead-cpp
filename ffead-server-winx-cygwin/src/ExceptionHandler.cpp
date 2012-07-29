@@ -36,7 +36,7 @@ ExceptionTracer::ExceptionTracer()
 
 	 for (int i = 0; i < nSize; i++)
 	 {
-		 cout << symbols[i] << endl;
+
 	 }
 
 	 free(symbols);*/

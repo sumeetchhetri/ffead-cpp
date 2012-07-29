@@ -59,7 +59,6 @@ string generateAttributes(AttributeList attributes)
 
 void traverseElement(string *ss,Element element)
 {
-	cout << element.getTagName() << flush;
 	ss->append(generateStartOpenTag(element.getTagName()));
 	ss->append(generateAttributes(element.getAttributes()));
 	ss->append(generateEndOpenTag());

@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS :=
+LIBS := -lweblib -lboost_thread-mt -lboost_regex-mt
 

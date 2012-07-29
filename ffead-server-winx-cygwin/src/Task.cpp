@@ -35,9 +35,4 @@ Task::Task(int tunit, int type) :
 	this->type = type;
 }
 Task::~Task()
-{
-	if(console)
-	{
-		cout << "Destroyed Task\n" << flush;
-	}
-}
+{}

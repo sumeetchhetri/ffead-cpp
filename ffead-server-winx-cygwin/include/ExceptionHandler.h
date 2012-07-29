@@ -104,15 +104,15 @@ class ExceptionHandler
     	 	 }
     	 	 catch (SegmentationFault &)
     	 	 {
-    	 		 cout << "SegmentationFault" << endl;
+
     	 	 }
     	 	 catch (FloatingPointException &)
     	 	 {
-    	 		 cout << "FloatingPointException" << endl;
+
     	 	 }
     	 	 catch (...)
     	 	 {
-    	 		 cout << "Unknown Exception" << endl;
+
     	 	 }
 
     	 	 //if this is a thread performing some core activity

@@ -22,13 +22,14 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <stdexcept>
-#include <execinfo.h>
+/*Fix for Windows Cygwin*///#include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
 #include <typeinfo>
+#include "Constants.h"
 
 class Reflector
 {
@@ -59,7 +60,7 @@ public:
 	template <class T> T invokeMethod(void* instance,Method method,vals values)
 	{
 		T *obj;
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{
@@ -81,7 +82,7 @@ public:
 	}
 	void destroy(void* instance,string classn)
 	{
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{
@@ -100,7 +101,7 @@ public:
 	void* invokeMethodGVP(void* instance,Method method,vals values)
 	{
 		void *obj = NULL;
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{
@@ -124,7 +125,7 @@ public:
 	template <class T> T newInstance(Constructor ctor,vals values)
 	{
 		T *obj;
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{
@@ -152,7 +153,7 @@ public:
 	void* newInstanceGVP(Constructor ctor,vals values)
 	{
 		void *obj = NULL;
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{
@@ -180,7 +181,7 @@ public:
 	void* invokeMethodUnknownReturn(void* instance,Method method,vals values)
 	{
 		void* obj = NULL;
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{
@@ -204,7 +205,7 @@ public:
 	template <class T> T getField(void* instance,Field field)
 	{
 		T t;
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{
@@ -226,7 +227,7 @@ public:
 		void *resul = NULL;
 		if(operato=="<")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -244,7 +245,7 @@ public:
 		}
 		else if(operato==">")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -262,7 +263,7 @@ public:
 		}
 		else if(operato=="==")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -280,7 +281,7 @@ public:
 		}
 		else if(operato=="!=")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -298,7 +299,7 @@ public:
 		}
 		else if(operato=="<=")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -316,7 +317,7 @@ public:
 		}
 		else if(operato==">=")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -334,7 +335,7 @@ public:
 		}
 		else if(operato=="!")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -360,7 +361,7 @@ public:
 		}
 		else if(operato=="+")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -378,7 +379,7 @@ public:
 		}
 		else if(operato=="-")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -396,7 +397,7 @@ public:
 		}
 		else if(operato=="/")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -414,7 +415,7 @@ public:
 		}
 		else if(operato=="*")
 		{
-			string libName = "libinter.so";
+			string libName = Constants::INTER_LIB_FILE;
 			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -459,7 +460,7 @@ public:
 
 	void vectorPushBack(void* vec,void* instance,string classN)
 	{
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{
@@ -478,7 +479,7 @@ public:
 	void* getNewVector(string classN)
 	{
 		void *obj = NULL;
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{
@@ -498,7 +499,7 @@ public:
 	int getVectorSize(void* vec,string classN)
 	{
 		int obj = 0;
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{
@@ -518,7 +519,7 @@ public:
 	void* getVectorElement(void* vec,int pos,string classN)
 	{
 		void *obj = NULL;
-		string libName = "libinter.so";
+		string libName = Constants::INTER_LIB_FILE;
 		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 		if(dlib == NULL)
 		{

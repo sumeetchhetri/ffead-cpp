@@ -28,6 +28,7 @@
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include "AfcUtil.h"
+#include "Logger.h"
 class Reflection {
 	strVec pub,pri,pro;
 	bool prosetser;
@@ -37,6 +38,7 @@ class Reflection {
 	void collectInfo(string,string);
 	strVec list(string);
 	map<string,bool> methsall;
+	Logger logger;
 public:
 	Reflection();
 	virtual ~Reflection();

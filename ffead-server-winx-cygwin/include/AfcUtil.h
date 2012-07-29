@@ -25,12 +25,14 @@
 #include "Constants.h"
 #include "HttpRequest.h"
 #include <boost/lexical_cast.hpp>
+#include "Logger.h"
 
 
 #ifndef AFCUTIL_H_
 #define AFCUTIL_H_
 
 class AfcUtil {
+	static Logger logger;
 public:
 	AfcUtil();
 	virtual ~AfcUtil();

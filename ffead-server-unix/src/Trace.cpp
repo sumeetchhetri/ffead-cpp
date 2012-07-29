@@ -23,8 +23,7 @@
 #include "Trace.h"
 #include <iostream>
 Trace::Trace() {
-	// TODO Auto-generated constructor stub
-
+	logger = Logger::getLogger("Trace");
 }
 
 Trace::~Trace() {
@@ -41,7 +40,7 @@ void Trace::trace()
 	int status;
 	const char *symname;
 	char *demangled;
-	printf("Call stack: \n");
+	logger << "Call stack: " << endl;
 
 	for (int i=0; i<trace_size; ++i)
 	{
@@ -52,7 +51,7 @@ void Trace::trace()
 		demangled = __cxa_demangle(symname, NULL, 0, &status);
 		if(status == 0 && demangled)
 			symname = demangled;
-		printf("object: %s, function: %s\n", dlinfo.dli_fname, symname);
+		logger << "object: " << dlinfo.dli_fname << ", function: " << symname << endl;
 		if (demangled)
 			free(demangled);
 	}
@@ -64,7 +63,7 @@ string Trace::demangle(const char *mangled)
 	char *demangled;
 	using namespace abi;
 	demangled = __cxa_demangle(mangled, NULL, 0, &status);
-	printf("\n---------Demanged --%s\n\n", demangled);
+	logger << "\n---------Demanged --" << demangled << endl;
 	stringstream ss;
 	ss << demangled;
 	string s;
@@ -76,6 +75,5 @@ string Trace::demangle(const char *mangled)
 string Trace::getClassName(void* instance)
 {
 	const char *mangled = typeid(instance).name();
-	//cout << typeof(instance) << flush;
 	return demangle(mangled);
 }

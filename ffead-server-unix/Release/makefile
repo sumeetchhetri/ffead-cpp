@@ -61,7 +61,7 @@ CHS: $(OBJS) $(USER_OBJS)
 	cp -Rf ../public/* ffead-server/public/
 	cp -Rf ../include/* ffead-server/include/
 	cp -Rf ../rtdcf/* ffead-server/rtdcf/
-	cp -Rf ../web/* ffead-server/web	
+	cp -Rf ../web/* ffead-server/web
 	cp -Rf ../script/* ffead-server/
 	cp -Rf CHS ffead-server/
 	@echo ' '

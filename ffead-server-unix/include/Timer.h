@@ -25,19 +25,21 @@
 #include <stdlib.h>
 #include <iostream>
 #include <time.h>
+#include "Logger.h"
 using namespace std;
 class Timer {
 	timespec st;
+	Logger logger;
 public:
 	Timer();
 	virtual ~Timer();
 	void start();
 	void end();
-	static long getCurrentTime();
-	static long getTimestamp();
-	int elapsedMicroSeconds();
-	int elapsedMilliSeconds();
-	int elapsedNanoSeconds();
+	static long long getCurrentTime();
+	static long long getTimestamp();
+	long elapsedMicroSeconds();
+	long elapsedMilliSeconds();
+	long elapsedNanoSeconds();
 	int elapsedSeconds();
 };
 

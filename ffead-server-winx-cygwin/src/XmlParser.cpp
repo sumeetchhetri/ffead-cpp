@@ -25,6 +25,7 @@
 
 XmlParser::XmlParser(string mode)
 {
+	logger = Logger::getLogger("XmlParser");
 	this->mode = mode;
 }
 
@@ -139,7 +140,7 @@ void XmlParser::readXML(string xml,string parent,Element *par)
 			{
 				par->addAttribute(atname,atvalue);
 			}
-            cout << "attname = " << atname << "   attvalue = " << atvalue << "\n" << flush;
+            logger << "attname = " << atname << "   attvalue = " << atvalue << "\n" << flush;
         }
     }
     else
@@ -198,9 +199,9 @@ void XmlParser::readXML(string xml,string parent,Element *par)
     }
     if(xml.find("<"+ta)!=string::npos && (xml.find("</"+ta)!=string::npos || xml.find("/>")!=string::npos))
     {
-        cout << "tag = " << ta << flush;
-        cout << "   parent = " << parent << flush;
-        cout << "\n" << flush;
+        logger << "tag = " << ta << flush;
+        logger << "   parent = " << parent << flush;
+        logger << "\n" << flush;
 
         if(ed==ed1)
         {
@@ -221,8 +222,8 @@ void XmlParser::readXML(string xml,string parent,Element *par)
 			string tagx = "</"+ta+">";
 			int end = xml.find("</"+ta+">");
 			string txml = xml.substr(ed+1,end-ed-1);
-			cout << "temp = " << txml << flush;
-			cout << "\n" << flush;
+			logger << "temp = " << txml << flush;
+			logger << "\n" << flush;
 			if(parent!="")
 			{
 				element.setTagName(ta);
@@ -249,8 +250,8 @@ void XmlParser::readXML(string xml,string parent,Element *par)
     }
     if(xml.find("<")!=string::npos && (xml.find("</")!=string::npos || xml.find("/>")!=string::npos))
     {
-        cout << "xml = " << xml << flush;
-        cout << "\n" << flush;
+        logger << "xml = " << xml << flush;
+        logger << "\n" << flush;
         readXML(xml,parent,par);
     }
     else if(xml.find("<")!=string::npos && (xml.find("</")==string::npos || xml.find("/>")==string::npos))
