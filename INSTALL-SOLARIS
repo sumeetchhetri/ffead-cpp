@@ -30,5 +30,3 @@ SOLARIS based Installation
 12. A default application is already provided for your reference inside the ffead-server-solaris/web folder
 13. To compile the default application shared library go to the ffead-server-solaris/Release/ffead-server-solaris/web/default/src/Debug folder and run "gmake all"
 14. Copy the libdefault library to the ffead-server-solaris/Release/ffead-server-solaris/lib folder
-15. Remember all installation files(makefile,subdir.mk) assume the ports are installed to the /usr/local/lib directory, in case you choose custom settings during 
-    installation of dependencies then make sure to change all files to include the -L/usr/local/lib to -L/location/of your/choice
