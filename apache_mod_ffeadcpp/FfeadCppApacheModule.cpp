@@ -130,23 +130,6 @@ SSLHandler sSLHandler;
 static long sessionTimeout;
 static string ip_address;
 
-class RestFunctionParams
-{
-public:
-	int pos;
-	string type;
-};
-
-class RestFunction
-{
-public:
-	string name;
-	string alias;
-	string clas;
-	string meth;
-	string baseUrl;
-	vector<RestFunctionParams> params;
-};
 typedef map<string, RestFunction> resFuncMap;
 static resFuncMap rstCntMap;
 static map<string, string> handoffs;
@@ -169,10 +152,9 @@ string get_env_var(string key) {
 HttpResponse service(HttpRequest* req)
 {
 	logger << "service method " << endl;
-	propMap params;
-	ServiceTask *task = new ServiceTask(0,serverRootDirectory,params,
+	ServiceTask *task = new ServiceTask(0,serverRootDirectory,NULL,
 			isSSLEnabled, NULL, sSLHandler, configurationData, dlib);
-	HttpResponse res = task->apacheRun();
+	HttpResponse res = task->apacheRun(req);
 	delete task;
 	return res;
 }
@@ -279,10 +261,12 @@ static apr_bucket* get_file_bucket(request_rec* r, const char* fname)
 
 static int mod_ffeadcpp_method_handler (request_rec *r)
 {
-	string port = boost::lexical_cast<string>(atoi(r->server->port));
+	string port = boost::lexical_cast<string>(r->server->port);
 	if(ip_address=="")
 	{
-		ip_address = r->server->server_hostname + ":" + port;
+		ip_address = r->server->server_hostname;
+		ip_address += ":";
+		ip_address += port;
 		configurationData.ip_address = ip_address;
 	}
 	signal(SIGSEGV,signalSIGSEGV);
@@ -452,10 +436,10 @@ static void one_time_init()
 	if(dlib==NULL)
 	{
 		cout << dlerror() << endl;
-		Logger::info("Could not load Library");
+		logger.info("Could not load Library");
 	}
 	else
-		Logger::info("Library loaded successfully");
+		logger.info("Library loaded successfully");
 }
 
 
