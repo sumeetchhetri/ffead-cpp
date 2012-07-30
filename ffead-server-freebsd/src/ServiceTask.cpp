@@ -577,4 +577,169 @@ void ServiceTask::run()
 	}
 }
 
+HttpResponse ServiceTask::apacheRun(HttpRequest* req)
+{
+	//logger << dlib << endl;
+	HttpResponse res;
+	string ip;
+	string alldatlg = "\ngot fd from parent";
+	try
+	{
+		string webpath = serverRootDirectory + "web/";
 
+		if(req->getFile()=="")
+		{
+			logger << req->getFile() << endl;
+			req->setFile("index.html");
+		}
+		if(req->hasCookie())
+		{
+			logger << "has the session id" << endl;
+			if(!configData.sessatserv)
+				req->getSession()->setSessionAttributes(req->getCookieInfo());
+			else
+			{
+				string id = req->getCookieInfoAttribute("FFEADID");
+				logger << id << endl;
+				map<string,string> values = readFromSharedMemeory(id);
+				req->getSession()->setSessionAttributes(values);
+			}
+		}
+
+		if(configData.cntMap[req->getCntxt_name()]!="true")
+		{
+			req->setCntxt_name("default");
+			req->setCntxt_root(webpath+"default");
+			req->setUrl(webpath+"default"+req->getActUrl());
+		}
+		//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
+
+		if(configData.appMap[req->getCntxt_name()]!="false")
+		{
+			if(dlib == NULL)
+			{
+				cerr << dlerror() << endl;
+				exit(-1);
+			}
+			string meth1 = (req->getCntxt_name()+"checkRules");
+			string path1;
+			void *mkr1 = dlsym(dlib, meth1.c_str());
+			if(mkr1!=NULL)
+			{
+				typedef string (*DCPPtr1) (string,HttpSession);
+				DCPPtr1 f =  (DCPPtr1)mkr1;
+				path1 = f(req->getUrl(),*(req->getSession()));
+				//logger << path1 << flush;
+				if(path1=="FAILED")
+				{
+					req->setUrl("");
+				}
+				else if(path1!="" && path1!=req->getUrl())
+				{
+					req->setUrl(path1);
+				}
+			}
+		}
+
+		string ext = getFileExtension(req->getUrl());
+		vector<unsigned char> test;
+		string content;
+		string claz;
+		bool isoAuthRes = false;
+		long sessionTimeoutVar = configData.sessionTimeout;
+		bool isContrl = securityHandler.handle(configData.ip_address, req, res, configData.securityObjectMap, sessionTimeoutVar, dlib, configData.cntMap);
+
+		filterHandler.handleIn(req, res, configData.filterMap, dlib, ext);
+
+		if(!isContrl)
+		{
+			isContrl = authHandler.handle(configData.autMap, configData.autpattMap, req, res, configData.filterMap, dlib, ext);
+		}
+		string pthwofile = req->getCntxt_name()+req->getActUrl();
+		if(req->getCntxt_name()!="default" && configData.cntMap[req->getCntxt_name()]=="true")
+		{
+			pthwofile = req->getActUrl();
+		}
+		if(!isContrl)
+		{
+			isContrl = controllerHandler.handle(req, res, configData.urlpattMap, configData.mappattMap, dlib, ext,
+					configData.rstCntMap, configData.mapMap, configData.urlMap, pthwofile);
+		}
+
+		/*After going through the controller the response might be blank, just set the HTTP version*/
+		res.setHttpVersion(req->getHttpVersion());
+		//logger << req->toString() << endl;
+		if(isContrl)
+		{
+
+		}
+		else if(ext==".form")
+		{
+			formHandler.handle(req, res, configData.formMap, dlib);
+		}
+		else if((req->getContent_type().find("application/soap+xml")!=string::npos || req->getContent_type().find("text/xml")!=string::npos)
+				&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos)
+				&& configData.wsdlmap[req->getFile()]==req->getCntxt_name())
+		{
+			soapHandler.handle(req, res, dlib, configData.props[".xml"]);
+		}
+		else
+		{
+			bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, dlib, ext, configData.props);
+			logger << "html page requested" <<endl;
+			if(cntrlit)
+			{
+
+			}
+			else
+			{
+				cntrlit = extHandler.handle(req, res, dlib, configData.resourcePath, configData.tmplMap, configData.vwMap, ext, configData.props);
+			}
+			if(!cntrlit && ext==".fview")
+			{
+				content = fviewHandler.handle(req, res, configData.fviewmap);
+			}
+			else
+			{
+				if(res.getContent_str()=="")
+					content = getContentStr(req->getUrl(),configData.lprops[req->getDefaultLocale()],ext);
+				else
+					content = res.getContent_str();
+			}
+			if(content.length()==0)
+			{
+				res.setStatusCode("404");
+				res.setStatusMsg("Not Found");
+				//res.setContent_len(boost::lexical_cast<string>(0));
+			}
+			else
+			{
+				res.setStatusCode("200");
+				res.setStatusMsg("OK");
+				if(res.getContent_type()=="")res.setContent_type(configData.props[ext]);
+				res.setContent_str(content);
+				//res.setContent_len(boost::lexical_cast<string>(content.length()));
+				//sess.setAttribute("CURR",req->getUrl());
+			}
+		}
+
+		filterHandler.handleOut(req, res, configData.filterMap, dlib, ext);
+
+		alldatlg += "--processed data";
+		string h1;
+		bool sessionchanged = !req->hasCookie();
+		sessionchanged |= req->getSession()->isDirty();
+		if(req->getConnection()!="")
+			res.setConnection("close");
+		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfoAttribute("FFEADID"), sessionTimeoutVar, configData.sessatserv);
+		//h1 = res.generateResponse();
+		delete req;
+		logger << alldatlg << "--sent data--DONE" << flush;
+		//sessionMap[sessId] = sess;
+	}
+	catch(...)
+	{
+		logger << "Standard exception: " << endl;
+	}
+	return res;
+}
