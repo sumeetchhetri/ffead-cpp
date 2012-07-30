@@ -70,6 +70,7 @@ public:
 			bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib);
 	virtual ~ServiceTask();
 	void run();
+	HttpResponse apacheRun(HttpRequest* req);
 	static string getFileExtension(string file);
 };
 
