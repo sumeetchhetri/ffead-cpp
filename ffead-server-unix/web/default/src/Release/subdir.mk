@@ -21,8 +21,8 @@ CPP_SRCS += \
 ../DefaultIOFilter.cpp \
 ../TestPage.cpp \
 ../TestForm.cpp \
-../DefaultRestController.cpp \
-../TestFormController.cpp
+../TestFormController.cpp \
+../DefaultRestController.cpp
 
 OBJS += \
 ./DefTemp.o \
@@ -42,8 +42,8 @@ OBJS += \
 ./DefaultIOFilter.o \
 ./TestPage.o \
 ./TestForm.o \
-./DefaultRestController.o \
-./TestFormController.o
+./TestFormController.o \
+./DefaultRestController.o
 
 CPP_DEPS += \
 ./DefTemp.d \
@@ -63,15 +63,15 @@ CPP_DEPS += \
 ./DefaultIOFilter.d \
 ./TestPage.d \
 ./TestForm.d \
-./DefaultRestController.d \
-./TestFormController.d
+./TestFormController.d \
+./DefaultRestController.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
 %.o: ../%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -pthreads -I"../../../../include" -I"../../include" -O0 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	g++ -I"../../../../include" -I"../../include" -O0 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

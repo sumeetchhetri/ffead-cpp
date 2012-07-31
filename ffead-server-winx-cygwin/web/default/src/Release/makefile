@@ -3,7 +3,7 @@
 ################################################################################
 
 -include ../makefile.init
- 
+
 RM := rm -rf
 
 # All of the sources participating in the build are defined here
@@ -37,19 +37,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: libdefault.so
+all: libdefault.a
 
 # Tool invocations
-libdefault.so: $(OBJS) $(USER_OBJS)
+libdefault.a: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -pthreads -L../../../../lib -shared -o"libdefault.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L../../../../lib -fPIC -shared -o"libdefault.a" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(LIBRARIES)$(CPP_DEPS)$(CXX_DEPS)$(C_UPPER_DEPS) libdefault.so
+	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(LIBRARIES)$(CPP_DEPS)$(CXX_DEPS)$(C_UPPER_DEPS) libdefault.a
 	-@echo ' '
 
 .PHONY: all clean dependents
