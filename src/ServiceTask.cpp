@@ -434,61 +434,64 @@ void ServiceTask::run()
 		/*After going through the controller the response might be blank, just set the HTTP version*/
 		res.setHttpVersion(req->getHttpVersion());
 		//logger << req->toString() << endl;
-		if(isContrl)
+		if(req->getMethod()!="TRACE")
 		{
-
-		}
-		else if(ext==".form")
-		{
-			formHandler.handle(req, res, configData.formMap, dlib);
-		}
-		else if((req->getContent_type().find("application/soap+xml")!=string::npos || req->getContent_type().find("text/xml")!=string::npos)
-				&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos)
-				&& configData.wsdlmap[req->getFile()]==req->getCntxt_name())
-		{
-			soapHandler.handle(req, res, dlib, configData.props[".xml"]);
-		}
-		else
-		{
-			bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, dlib, ext, configData.props);
-			logger << "html page requested" <<endl;
-			if(cntrlit)
+			if(isContrl)
 			{
 
 			}
+			else if(ext==".form")
+			{
+				formHandler.handle(req, res, configData.formMap, dlib);
+			}
+			else if((req->getContent_type().find("application/soap+xml")!=string::npos || req->getContent_type().find("text/xml")!=string::npos)
+					&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos)
+					&& configData.wsdlmap[req->getFile()]==req->getCntxt_name())
+			{
+				soapHandler.handle(req, res, dlib, configData.props[".xml"]);
+			}
 			else
 			{
-				cntrlit = extHandler.handle(req, res, dlib, configData.resourcePath, configData.tmplMap, configData.vwMap, ext, configData.props);
-			}
-			if(!cntrlit && ext==".fview")
-			{
-				content = fviewHandler.handle(req, res, configData.fviewmap);
-			}
-			else
-			{
-				if(res.getContent_str()=="")
-					content = getContentStr(req->getUrl(),configData.lprops[req->getDefaultLocale()],ext);
+				bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, dlib, ext, configData.props);
+				logger << "html page requested" <<endl;
+				if(cntrlit)
+				{
+
+				}
 				else
-					content = res.getContent_str();
+				{
+					cntrlit = extHandler.handle(req, res, dlib, configData.resourcePath, configData.tmplMap, configData.vwMap, ext, configData.props);
+				}
+				if(!cntrlit && ext==".fview")
+				{
+					content = fviewHandler.handle(req, res, configData.fviewmap);
+				}
+				else
+				{
+					if(res.getContent_str()=="")
+						content = getContentStr(req->getUrl(),configData.lprops[req->getDefaultLocale()],ext);
+					else
+						content = res.getContent_str();
+				}
+				if(content.length()==0)
+				{
+					res.setStatusCode("404");
+					res.setStatusMsg("Not Found");
+					//res.setContent_len(boost::lexical_cast<string>(0));
+				}
+				else
+				{
+					res.setStatusCode("200");
+					res.setStatusMsg("OK");
+					if(res.getContent_type()=="")res.setContent_type(configData.props[ext]);
+					res.setContent_str(content);
+					//res.setContent_len(boost::lexical_cast<string>(content.length()));
+					//sess.setAttribute("CURR",req->getUrl());
+				}
 			}
-			if(content.length()==0)
-			{
-				res.setStatusCode("404");
-				res.setStatusMsg("Not Found");
-				//res.setContent_len(boost::lexical_cast<string>(0));
-			}
-			else
-			{
-				res.setStatusCode("200");
-				res.setStatusMsg("OK");
-				if(res.getContent_type()=="")res.setContent_type(configData.props[ext]);
-				res.setContent_str(content);
-				//res.setContent_len(boost::lexical_cast<string>(content.length()));
-				//sess.setAttribute("CURR",req->getUrl());
-			}
-		}
 
-		filterHandler.handleOut(req, res, configData.filterMap, dlib, ext);
+			filterHandler.handleOut(req, res, configData.filterMap, dlib, ext);
+		}
 
 		alldatlg += "--processed data";
 		string h1;
@@ -497,7 +500,23 @@ void ServiceTask::run()
 		if(req->getConnection()!="")
 			res.setConnection("close");
 		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfoAttribute("FFEADID"), sessionTimeoutVar, configData.sessatserv);
-		h1 = res.generateResponse();
+		//Head should behave exactly as Get but there should be no entity body
+		if(req->getMethod()=="HEAD")
+		{
+			h1 = res.generateHeadResponse();
+		}
+		else if(req->getMethod()=="OPTIONS")
+		{
+			h1 = res.generateOptionsResponse();
+		}
+		else if(req->getMethod()=="TRACE")
+		{
+			h1 = res.generateTraceResponse(req);
+		}
+		else
+		{
+			h1 = res.generateResponse();
+		}
 		//logger << h1 << endl;
 		if(isSSLEnabled)
 		{
