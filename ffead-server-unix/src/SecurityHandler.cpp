@@ -36,7 +36,7 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 		long sessionTimeout, void* dlib, map<string, string> cntMap)
 {
 	bool isContrl = false;
-	string serverUrl = "http://" + ip_addr;
+	string serverUrl = "";//"http://" + ip_addr;
 	if(req->getCntxt_name()!="default" && cntMap[req->getCntxt_name()]!="true")
 		serverUrl += "/" + req->getCntxt_name();
 	string actUrl = serverUrl + req->getActUrl();
