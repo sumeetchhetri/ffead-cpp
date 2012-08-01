@@ -826,15 +826,15 @@ int main(int argc, char* argv[])
 	{
 		vector<string> argss;
 		string output;
-		bool passed = ScriptHandler::execute(compres, argss, output);
-		/*int i=system(compres.c_str());
+		//bool passed = ScriptHandler::execute(compres, argss, output);
+		int i=system(compres.c_str());
 		if(!i)
 		{
 			logger << "Done" << flush;
 			logger.info("Done generating intermediate code");
 			//logfile << "Done generating intermediate code\n" << flush;
-		}*/
-		logger << "Intermediate code generation pass = " << passed << endl;
+		}
+		logger << "Intermediate code generation" << endl;
 	}
 
 	for (unsigned int var1 = 0;var1<configurationData.cmpnames.size();var1++)
