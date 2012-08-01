@@ -1673,7 +1673,7 @@ string HttpRequest::toPHPVariablesString(string def)
 		}
 	}
 	if(def=="")
-		ret += "\ninclude_once('"+this->getCntxt_root()+"/scripts/php/"+this->getFile()+"');";
+		ret += "\ninclude_once('"+this->getCntxt_root()+"/"+this->getFile()+"');";
 	else
 		ret += "\ninclude_once('"+def+"');";
 	ret += "?>";
@@ -1879,7 +1879,7 @@ string HttpRequest::toRubyVariablesString()
 			}
 		}
 	}
-	ret += "\nrequire ('"+this->getCntxt_root()+"/scripts/ruby/"+this->getFile()+"')\n";
+	ret += "\nrequire ('"+this->getCntxt_root()+"/"+this->getFile()+"')\n";
 	return ret;
 }
 
@@ -2079,7 +2079,7 @@ string HttpRequest::toLuaVariablesString()
 			}
 		}
 	}
-	ret += "\ndofile(\""+this->getCntxt_root()+"/scripts/lua/"+this->getFile()+"\")\n";
+	ret += "\ndofile(\""+this->getCntxt_root()+"/"+this->getFile()+"\")\n";
 	return ret;
 }
 
@@ -2173,7 +2173,7 @@ string HttpRequest::toNodejsVariablesString()
 			}
 		}
 	}
-	ret += "\nrequire('"+this->getCntxt_root()+"/scripts/nodejs/"+this->getFile()+"');";
+	ret += "\nrequire('"+this->getCntxt_root()+"/"+this->getFile()+"');";
 	return ret;
 }
 

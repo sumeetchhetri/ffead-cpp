@@ -286,12 +286,19 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		skipit = true;
 		int pipe[3];
 		int pid;
-
+		string def;
+		string tmpf = "/temp/";
+		string filen;
+		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
+		{
+			def = handoffs[req->getCntxt_name()];
+			tmpf = "/";
+		}
+		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".pl";
+		tmpf = req->getCntxt_root() + tmpf;
 		string phpcnts = req->toPerlVariablesString();
-		//logger << phpcnts << endl;
-		string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".pl";
 		//logger << tmpf << endl;
-		string plfile = req->getCntxt_root()+"/scripts/perl/"+req->getFile();
+		string plfile = req->getCntxt_root()+"/"+req->getFile();
 		ifstream infile(plfile.c_str());
 		string xml;
 		if(infile.is_open())
@@ -302,13 +309,13 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 			}
 		}
 		infile.close();
-		AfcUtil::writeTofile(tmpf, phpcnts, true);
+		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 		const char *const args[] = {
 				"perl",
 				tmpf.c_str(),
 				NULL
 		};
-		pid = popenRWE(pipe, args[0], args, "");
+		pid = popenRWE(pipe, args[0], args, tmpf);
 
 		char buffer[1024];
 		memset(buffer, 0, 1024);
@@ -356,18 +363,26 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		skipit = true;
 		int pipe[3];
 		int pid;
-
+		string def;
+		string tmpf = "/temp/";
+		string filen;
+		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
+		{
+			def = handoffs[req->getCntxt_name()];
+			tmpf = "/";
+		}
 		string phpcnts = req->toRubyVariablesString();
 		//logger << phpcnts << endl;
-		string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".rb";
-		//logger << tmpf << endl;
-		AfcUtil::writeTofile(tmpf, phpcnts, true);
+		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".rb";
+		tmpf = req->getCntxt_root() + tmpf;
+
+		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 		const char *const args[] = {
 				"ruby",
 				tmpf.c_str(),
 				NULL
 		};
-		pid = popenRWE(pipe, args[0], args, "");
+		pid = popenRWE(pipe, args[0], args, tmpf);
 
 		char buffer[1024];
 		memset(buffer, 0, 1024);
@@ -416,12 +431,18 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		skipit = true;
 		int pipe[3];
 		int pid;
-
+		string def;
+		string tmpf = "/temp/";
+		string filen;
+		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
+		{
+			def = handoffs[req->getCntxt_name()];
+			tmpf = "/";
+		}
+		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".py";
+		tmpf = req->getCntxt_root() + tmpf;
 		string phpcnts = req->toPythonVariablesString();
-		//logger << phpcnts << endl;
-		string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".py";
-		//logger << tmpf << endl;
-		string plfile = req->getCntxt_root()+"/scripts/python/"+req->getFile();
+		string plfile = req->getCntxt_root()+"/"+req->getFile();
 		ifstream infile(plfile.c_str());
 		string xml;
 		if(infile.is_open())
@@ -432,13 +453,13 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 			}
 		}
 		infile.close();
-		AfcUtil::writeTofile(tmpf, phpcnts, true);
+		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 		const char *const args[] = {
 				"python",
 				tmpf.c_str(),
 				NULL
 		};
-		pid = popenRWE(pipe, args[0], args, "");
+		pid = popenRWE(pipe, args[0], args, tmpf);
 
 		char buffer[1024];
 		memset(buffer, 0, 1024);
@@ -487,18 +508,26 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		skipit = true;
 		int pipe[3];
 		int pid;
-
+		string def;
+		string tmpf = "/temp/";
+		string filen;
+		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
+		{
+			def = handoffs[req->getCntxt_name()];
+			tmpf = "/";
+		}
 		string phpcnts = req->toLuaVariablesString();
 		//logger << phpcnts << endl;
-		string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".lua";
-		//logger << tmpf << endl;
-		AfcUtil::writeTofile(tmpf, phpcnts, true);
+		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".lua";
+		tmpf = req->getCntxt_root() + tmpf;
+
+		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 		const char *const args[] = {
 				"lua",
 				tmpf.c_str(),
 				NULL
 		};
-		pid = popenRWE(pipe, args[0], args, "");
+		pid = popenRWE(pipe, args[0], args, tmpf);
 
 		char buffer[1024];
 		memset(buffer, 0, 1024);
@@ -547,18 +576,26 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		skipit = true;
 		int pipe[3];
 		int pid;
-
+		string def;
+		string tmpf = "/temp/";
+		string filen;
+		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
+		{
+			def = handoffs[req->getCntxt_name()];
+			tmpf = "/";
+		}
 		string phpcnts = req->toNodejsVariablesString();
 		//logger << phpcnts << endl;
-		string tmpf = req->getCntxt_root() + "/temp/" + boost::lexical_cast<string>(Timer::getCurrentTime()) + ".njs";
-		//logger << tmpf << endl;
-		AfcUtil::writeTofile(tmpf, phpcnts, true);
+		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".njs";
+		tmpf = req->getCntxt_root() + tmpf;
+
+		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 		const char *const args[] = {
 				"node",
 				tmpf.c_str(),
 				NULL
 		};
-		pid = popenRWE(pipe, args[0], args, "");
+		pid = popenRWE(pipe, args[0], args, tmpf);
 
 		char buffer[1024];
 		memset(buffer, 0, 1024);

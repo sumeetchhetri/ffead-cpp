@@ -73,7 +73,7 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 		{
 			logger << it->first << " = " << it->second << endl;
 		}
-		map<string,string> tempmap1 = req->getRequestParams();
+		map<string,string> tempmap1 = req->getAllParams();
 		for(it=tempmap1.begin();it!=tempmap1.end();it++)
 		{
 			logger << it->first << " = " << it->second << endl;
