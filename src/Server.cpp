@@ -208,7 +208,10 @@ Server::Server(string port,bool block,int waiting,Service serv,bool tobefork)
 		}
 	}
 	else
-		servicing(serv);
+	{
+		boost::thread m_thread(boost::bind(&Server::servicing, this, serv));
+		//servicing(serv);
+	}
 }
 
 Server::~Server() {

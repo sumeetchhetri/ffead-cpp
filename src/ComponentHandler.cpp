@@ -239,7 +239,7 @@ void ComponentHandler::trigger(string port)
 	init();
 	if(_cmp_instance->running)
 		return;
-	_cmp_instance->setServer(new Server(port,false,500,&service,true));
+	_cmp_instance->setServer(new Server(port,false,500,&service,Constants::SYS_FORK_AVAIL));
 	//_cmp_instance->getServer() = new Server(port,500,&service);
 	_cmp_instance->running = true;
 	return;

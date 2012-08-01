@@ -33,6 +33,7 @@ using namespace std;
 class Constants {
 public:
 	static string INTER_LIB_FILE;
+	static bool SYS_FORK_AVAIL;
 };
 
 #endif /* CONSTANTS_H_ */

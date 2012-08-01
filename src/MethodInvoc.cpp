@@ -211,7 +211,7 @@ void MethodInvoc::trigger(string port)
 	init();
 	if(_methinv_instance->running)
 		return;
-	_methinv_instance->setServer(new Server(port,false,500,&service,true));
+	_methinv_instance->setServer(new Server(port,false,500,&service,Constants::SYS_FORK_AVAIL));
 	_methinv_instance->running = true;
 	return;
 }

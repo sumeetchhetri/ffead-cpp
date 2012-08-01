@@ -22,6 +22,7 @@
 
 #ifndef SCRIPTHANDLER_H_
 #define SCRIPTHANDLER_H_
+#include <stdlib.h>
 #include "AfcUtil.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
@@ -30,9 +31,12 @@
 #include "Timer.h"
 #include <unistd.h>
 #include "Logger.h"
+#include "Constants.h"
 
 class ScriptHandler {
 	static Logger logger;
+	static string pipeIt(string exe, string tmpf);
+	static string pipeIt(string exe);
 	static int pcloseRWE(int pid, int *rwepipe);
 	static int popenRWE(int *rwepipe, const char *exe, const char *const argv[],string tmpf);
 	static int popenRWEN(int *rwepipe, const char *exe, const char** argv);
