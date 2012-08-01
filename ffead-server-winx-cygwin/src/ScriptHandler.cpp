@@ -298,7 +298,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		tmpf = req->getCntxt_root() + tmpf;
 		string phpcnts = req->toPerlVariablesString();
 		//logger << tmpf << endl;
-		string plfile = req->getCntxt_root()+"/"+req->getFile();
+		string plfile = req->getUrl();
 		ifstream infile(plfile.c_str());
 		string xml;
 		if(infile.is_open())
@@ -442,7 +442,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".py";
 		tmpf = req->getCntxt_root() + tmpf;
 		string phpcnts = req->toPythonVariablesString();
-		string plfile = req->getCntxt_root()+"/"+req->getFile();
+		string plfile = req->getUrl();
 		ifstream infile(plfile.c_str());
 		string xml;
 		if(infile.is_open())
