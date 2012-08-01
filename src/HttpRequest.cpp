@@ -1673,7 +1673,7 @@ string HttpRequest::toPHPVariablesString(string def)
 		}
 	}
 	if(def=="")
-		ret += "\ninclude_once('"+this->getCntxt_root()+"/"+this->getFile()+"');";
+		ret += "\ninclude_once('"+this->getUrl()+"');";
 	else
 		ret += "\ninclude_once('"+def+"');";
 	ret += "?>";
@@ -1879,7 +1879,7 @@ string HttpRequest::toRubyVariablesString()
 			}
 		}
 	}
-	ret += "\nrequire ('"+this->getCntxt_root()+"/"+this->getFile()+"')\n";
+	ret += "\nrequire ('"+this->getUrl()+"')\n";
 	return ret;
 }
 
@@ -2079,7 +2079,7 @@ string HttpRequest::toLuaVariablesString()
 			}
 		}
 	}
-	ret += "\ndofile(\""+this->getCntxt_root()+"/"+this->getFile()+"\")\n";
+	ret += "\ndofile(\""+this->getUrl()+"\")\n";
 	return ret;
 }
 
@@ -2173,7 +2173,7 @@ string HttpRequest::toNodejsVariablesString()
 			}
 		}
 	}
-	ret += "\nrequire('"+this->getCntxt_root()+"/"+this->getFile()+"');";
+	ret += "\nrequire('"+this->getUrl()+"');";
 	return ret;
 }
 
