@@ -33,6 +33,7 @@
 #include <boost/thread/thread.hpp>
 #include "map"
 #include "Logger.h"
+#include "Constants.h"
 
 #define BACKLOG1 500
 #define MAXBUFLEN1 1024
