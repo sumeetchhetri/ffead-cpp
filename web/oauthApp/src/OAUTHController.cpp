@@ -145,11 +145,12 @@ HttpResponse OAUTHController::service(HttpRequest req)
 	{
 		FileAuthController fauthu(req.getCntxt_root()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
 		string key1 = "sumeet&",key;
-		bool flag = fauthu.getPassword(reqParams["tusername"],key);
+		key = fauthu.get(reqParams["tusername"],2);
+		string tok = fauthu.get(reqParams["tusername"],1);
+		bool flag = (tok!="" && key!="");
 		if(reqParams["tusername"]!="" && flag && reqParams["access"]=="true")
 		{
-			string tok = key.substr(0,key.find(":"));
-			key = key1 + key.substr(key.find(":")+1);
+			key = key1 + key;
 
 			Client client;
 			client.connection("localhost",8080);
@@ -227,11 +228,12 @@ HttpResponse OAUTHController::service(HttpRequest req)
 	{
 		FileAuthController fauthu(req.getCntxt_root()+"/"+reqParams["tusername"]+"-access-secrets",":");
 		string key1 = "sumeet&",key;
-		bool flag = fauthu.getPassword(reqParams["tusername"],key);
+		key = fauthu.get(reqParams["tusername"],2);
+		string tok = fauthu.get(reqParams["tusername"],1);
+		bool flag = (tok!="" && key!="");
 		if(reqParams["tusername"]!="" && flag && reqParams["file"]!="")
 		{
-			string tok = key.substr(0,key.find(":"));
-			key = key1 + key.substr(key.find(":")+1);
+			key = key1 + key;
 
 			Client client;
 			client.connection("localhost",8080);

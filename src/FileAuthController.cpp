@@ -119,3 +119,27 @@ string FileAuthController::getUserRole(string username)
 	string blnk;
 	return blnk;
 }
+
+string FileAuthController::get(string username, int pos)
+{
+	bool passwdf = false;
+	ifstream ifs(this->filename.c_str());
+	if(ifs.is_open() && username!="")
+	{
+		string temp;
+		while(getline(ifs, temp))
+		{
+			vector<string> tempv;
+			boost::iter_split(tempv, temp, boost::first_finder(this->delimiter));
+			if(tempv.size()>pos && tempv.at(0)==username)
+			{
+				passwdf = true;
+				ifs.close();
+				return tempv.at(pos);
+			}
+		}
+		ifs.close();
+	}
+	string blnk;
+	return blnk;
+}
