@@ -25,6 +25,7 @@ public:
 	bool handle(HttpRequest* req,HttpResponse* res){return false;};
 	bool getPassword(string username,string &passwd);
 	string getUserRole(string);
+	string get(string username, int pos);
 };
 
 #endif /* FILEAUTHCONTROLLER_H_ */

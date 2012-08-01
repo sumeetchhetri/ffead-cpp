@@ -292,7 +292,7 @@ void MessageHandler::trigger(string port,string path)
 	init(path);
 	if(_mess_instance->running)
 		return;
-	_mess_instance->setServer(new Server(port,false,500,&service,true));
+	_mess_instance->setServer(new Server(port,false,500,&service,Constants::SYS_FORK_AVAIL));
 	_mess_instance->running = true;
 	return;
 }

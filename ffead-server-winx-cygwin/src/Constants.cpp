@@ -23,3 +23,4 @@
 #include "Constants.h"
 
 string Constants::INTER_LIB_FILE = "libinter.a";
+bool Constants::SYS_FORK_AVAIL = false;

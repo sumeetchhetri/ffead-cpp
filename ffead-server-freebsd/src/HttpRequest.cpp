@@ -1547,17 +1547,18 @@ string HttpRequest::getFile() const
 
 void HttpRequest::setFile(string file)
 {
-	this->file = file;
 	logger << "file is " << this->file << endl;
-	if(this->file!="" && this->url.find(this->file)!=string::npos)
+	if(this->file!="" && this->url.find(this->file)!=string::npos
+			&& this->url.find("/")!=string::npos)
 	{
-		int fst = this->url.find_last_of(this->file) - this->file.length() + 1;
-		this->url = this->url.substr(0, fst) +  this->file;
+		//int fst = this->url.find_last_of(this->file) - this->file.length() + 1;
+		this->url = this->url.substr(0, this->url.find_last_of("/")+1) +  file;
 	}
 	else
 	{
-		this->url +=  this->file;
+		this->url +=  "/" + file;
 	}
+	this->file = file;
 }
 
 string HttpRequest::getActUrl() const

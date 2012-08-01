@@ -21,8 +21,8 @@ CPP_SRCS += \
 ../DefaultIOFilter.cpp \
 ../TestPage.cpp \
 ../TestForm.cpp \
-../TestFormController.cpp \
-../DefaultRestController.cpp
+../DefaultRestController.cpp \
+../TestFormController.cpp
 
 OBJS += \
 ./DefTemp.o \
@@ -42,8 +42,8 @@ OBJS += \
 ./DefaultIOFilter.o \
 ./TestPage.o \
 ./TestForm.o \
-./TestFormController.o \
-./DefaultRestController.o
+./DefaultRestController.o \
+./TestFormController.o
 
 CPP_DEPS += \
 ./DefTemp.d \
@@ -63,8 +63,8 @@ CPP_DEPS += \
 ./DefaultIOFilter.d \
 ./TestPage.d \
 ./TestForm.d \
-./TestFormController.d \
-./DefaultRestController.d
+./DefaultRestController.d \
+./TestFormController.d
 
 
 # Each subdirectory must supply rules for building sources it contributes

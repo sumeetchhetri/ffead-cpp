@@ -52,7 +52,7 @@ class Server {
 	Logger logger;
 	int sock;
 	struct sockaddr_storage their_addr;
-	void servicing(Service);
+	void servicing(Service serv);
 public:
 	Server(string,bool,int,Service,bool);
 	Server(string port,int waiting,Service serv);
