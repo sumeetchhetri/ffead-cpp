@@ -74,7 +74,6 @@
 #include "ApplicationUtil.h"
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <sys/epoll.h>
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <boost/thread/recursive_mutex.hpp>
@@ -218,7 +217,7 @@ static void getRequestStructure(request_rec *r,HttpRequest* req)
 void signalSIGSEGV(int dummy)
 {
 	signal(SIGSEGV,signalSIGSEGV);
-	string filename;
+	/*string filename;
 	stringstream ss;
 	ss << serverRootDirectory;
 	ss << getpid();
@@ -236,8 +235,8 @@ void signalSIGSEGV(int dummy)
 	}
 	free(symbols);
 	fprintf(stderr, tempo.c_str());
-	fflush(stderr);
-	cout << "Segmentation fault occurred for process" << getpid() << "\n" << tempo << flush;
+	fflush(stderr);*/
+	cout << "Segmentation fault occurred for process" << getpid() << "\n" << flush;
 	abort();
 }
 
