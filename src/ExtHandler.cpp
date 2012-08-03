@@ -68,7 +68,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string 
 		map<string, string> tmplMap, map<string, string> vwMap,string ext, map<string, string> props)
 {
 	Logger logger = Logger::getLogger("ExtHandler");
-	bool cntrlit;
+	bool cntrlit = false;
 	string content, claz;
 	if(req->getMethod()=="POST" && req->getRequestParam("claz")!="" && req->getRequestParam("method")!="")
 	{
@@ -205,6 +205,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string 
 	}
 	else if(ext==".wsdl")
 	{
+		cntrlit = true;
 		content = getContentStr(resourcePath+req->getFile(),"english",ext);
 		if((content.length()==0))
 		{
