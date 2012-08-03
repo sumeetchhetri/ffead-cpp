@@ -32,31 +32,19 @@ ScriptHandler::~ScriptHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-string ScriptHandler::pipeIt(string exe, string tmpf)
+string ScriptHandler::chdirExecute(string exe, string tmpf, bool retErrs)
 {
 	chdir(tmpf.c_str());
-	string data;
-	exe += " 2>&1";
-	FILE *pp;
-	pp = popen(exe.c_str(), "r");
-	if (pp != NULL) {
-		while (1) {
-		  char *line;
-		  char buf[1000];
-		  line = fgets(buf, sizeof buf, pp);
-		  if (line == NULL) break;
-		  data.append(line);
-		  //if (line[0] == 'd') printf("%s", line); /* line includes '\n' */
-		}
-		pclose(pp);
-	}
-	return data;
+	return execute(exe, retErrs);
 }
 
-string ScriptHandler::pipeIt(string exe)
+string ScriptHandler::execute(string exe, bool retErrs)
 {
 	string data;
-	exe += " 2>&1";
+	if(retErrs)
+	{
+		exe += " 2>&1";
+	}
 	FILE *pp;
 	pp = popen(exe.c_str(), "r");
 	if (pp != NULL) {
@@ -203,62 +191,6 @@ int ScriptHandler::pcloseRWE(int pid, int *rwepipe)
 	return status;
 }
 
-bool ScriptHandler::execute(string command, vector<string> argss, string& output)
-{
-	bool success = true;
-	if(Constants::SYS_FORK_AVAIL)
-	{
-		int pipe[3];
-		int pid;
-		const char** args = new const char*[argss.size()+2];
-		args[0] = command.c_str();
-		for (int var = 0; var < (int)argss.size(); ++var) {
-			args[var] = argss.at(var).c_str();
-		}
-		if(argss.size()==0)
-		{
-			args[1] = NULL;
-		}
-		else
-		{
-			args[argss.size()-1] = NULL;
-		}
-		pid = popenRWEN(pipe, command.c_str(), args);
-
-		char buffer[1024];
-		memset(buffer, 0, 1024);
-		int length;
-		logger << pipe[1] <<" " << pipe[2] << endl;
-		while ((length = read(pipe[1], buffer, 1024)) > 0)
-		{
-			string data(buffer, length);
-			output += data;
-			logger << data << endl;
-			memset(buffer, 0, 1024);
-		}
-		memset(buffer, 0, 1024);
-		//if(output=="")
-		{
-			while ((length = read(pipe[2], buffer, 1024)) > 0)
-			{
-				string data(buffer, length);
-				output += data;
-				logger << data << endl;
-				memset(buffer, 0, 1024);
-				success = false;
-			}
-			memset(buffer, 0, 1024);
-		}
-		pcloseRWE(pid, pipe);
-	}
-	else
-	{
-		output = pipeIt(command);
-		logger << output << endl;
-	}
-	return success;
-}
-
 bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs, void* dlib,
 		string ext, map<string, string> props)
 {
@@ -282,48 +214,9 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		tmpf = req->getCntxt_root() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
-		string content;
-		if(Constants::SYS_FORK_AVAIL)
-		{
-			const char *const args[] = {
-					"php",
-					filen.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, tmpf);
 
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//logger << length << endl;
-				string data(buffer, length);
-				//logger << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//logger << length << endl;
-					string data(buffer, length);
-					//logger << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-			pcloseRWE(pid, pipe);
-		}
-		else
-		{
-			string command = "php " + filen;
-			content = pipeIt(command, tmpf);
-		}
+		string command = "php " + filen;
+		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setStatusCode("404");
@@ -369,47 +262,8 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		infile.close();
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string content;
-		if(Constants::SYS_FORK_AVAIL)
-		{
-			const char *const args[] = {
-					"perl",
-					filen.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, tmpf);
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//logger << length << endl;
-				string data(buffer, length);
-				//logger << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//logger << length << endl;
-					string data(buffer, length);
-					//logger << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-			pcloseRWE(pid, pipe);
-		}
-		else
-		{
-			string command = "perl " + filen;
-			content = pipeIt(command, tmpf);
-		}
+		string command = "perl " + filen;
+		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setStatusCode("404");
@@ -445,47 +299,8 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string content;
-		if(Constants::SYS_FORK_AVAIL)
-		{
-			const char *const args[] = {
-					"ruby",
-					filen.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, tmpf);
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//logger << length << endl;
-				string data(buffer, length);
-				//logger << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//logger << length << endl;
-					string data(buffer, length);
-					//logger << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-			pcloseRWE(pid, pipe);
-		}
-		else
-		{
-			string command = "ruby " + filen;
-			content = pipeIt(command, tmpf);
-		}
+		string command = "ruby " + filen;
+		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setStatusCode("404");
@@ -530,47 +345,8 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		infile.close();
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string content;
-		if(Constants::SYS_FORK_AVAIL)
-		{
-			const char *const args[] = {
-					"python",
-					filen.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, tmpf);
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//logger << length << endl;
-				string data(buffer, length);
-				//logger << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//logger << length << endl;
-					string data(buffer, length);
-					//logger << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-			pcloseRWE(pid, pipe);
-		}
-		else
-		{
-			string command = "python " + filen;
-			content = pipeIt(command, tmpf);
-		}
+		string command = "python " + filen;
+		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setStatusCode("404");
@@ -606,47 +382,8 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string content;
-		if(Constants::SYS_FORK_AVAIL)
-		{
-			const char *const args[] = {
-					"lua",
-					filen.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, tmpf);
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//logger << length << endl;
-				string data(buffer, length);
-				//logger << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//logger << length << endl;
-					string data(buffer, length);
-					//logger << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-			pcloseRWE(pid, pipe);
-		}
-		else
-		{
-			string command = "lua " + filen;
-			content = pipeIt(command, tmpf);
-		}
+		string command = "lua " + filen;
+		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setStatusCode("404");
@@ -682,47 +419,8 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string content;
-		if(Constants::SYS_FORK_AVAIL)
-		{
-			const char *const args[] = {
-					"node",
-					filen.c_str(),
-					NULL
-			};
-			pid = popenRWE(pipe, args[0], args, tmpf);
-
-			char buffer[1024];
-			memset(buffer, 0, 1024);
-			int length;
-			while ((length = read(pipe[1], buffer, 1024)) != 0)
-			{
-				//logger << length << endl;
-				string data(buffer, length);
-				//logger << data << endl;
-				content += data;
-				memset(buffer, 0, 1024);
-			}
-			memset(buffer, 0, 1024);
-			if(content=="")
-			{
-				while ((length = read(pipe[2], buffer, 1024)) != 0)
-				{
-					//logger << length << endl;
-					string data(buffer, length);
-					//logger << data << endl;
-					content += data;
-					memset(buffer, 0, 1024);
-				}
-				memset(buffer, 0, 1024);
-			}
-			pcloseRWE(pid, pipe);
-		}
-		else
-		{
-			string command = "node " + filen;
-			content = pipeIt(command, tmpf);
-		}
+		string command = "node " + filen;
+		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setStatusCode("404");

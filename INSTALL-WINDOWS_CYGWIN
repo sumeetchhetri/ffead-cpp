@@ -26,9 +26,9 @@ and build files, hence had provided the *_libs.zip file.
 13. Go to the ffead-server-winx-cygwin/Release or ffead-server-winx-cygwin/Debug depending on whether you need to debug the server code
 14. Open terminal and type make all
 15. This will create the distribution folder named ffead-server-winx-cygwin inside ffead-server-winx-cygwin/Release or ffead-server-winx-cygwin/Debug folders accordingly
-16. Place your application shared library inside the ffead-server-winx-cygwin/Release/ffead-server-winx-cygwin or ffead-server-winx-cygwin/Debug/ffead-server-winx-cygwin folder.
-17. Place your web application specific files inside the ffead-server-winx-cygwin/Release/ffead-server-winx-cygwin/web folder inside a folder with your application name
+16. Place your application shared library inside the ffead-server-winx-cygwin/Release/ffead-server or ffead-server-winx-cygwin/Debug/ffead-server folder.
+17. Place your web application specific files inside the ffead-server-winx-cygwin/Release/ffead-server/web folder inside a folder with your application name
 18. Type ./server.sh when inside the ffead-server-winx-cygwin folder to start the application server
 19. A default application is already provided for your reference inside the ffead-server-winx-cygwin/web folder
-20. To compile the default application shared library go to the ffead-server-winx-cygwin/Release/ffead-server-winx-cygwin/web/default/src/Debug folder and run "make all"
-21. Copy the libdefault library to the ffead-server-winx-cygwin/Release/ffead-server-winx-cygwin/lib folder
+20. To compile the default application shared library go to the ffead-server-winx-cygwin/Release/ffead-server/web/default/src/Debug folder and run "make all"
+21. Copy the libdefault library to the ffead-server-winx-cygwin/Release/ffead-server/lib folder
