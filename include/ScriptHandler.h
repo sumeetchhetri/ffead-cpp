@@ -35,14 +35,13 @@
 
 class ScriptHandler {
 	static Logger logger;
-	static string pipeIt(string exe, string tmpf);
-	static string pipeIt(string exe);
 	static int pcloseRWE(int pid, int *rwepipe);
 	static int popenRWE(int *rwepipe, const char *exe, const char *const argv[],string tmpf);
 	static int popenRWEN(int *rwepipe, const char *exe, const char** argv);
 public:
 	ScriptHandler();
-	static bool execute(string command, vector<string> argss, string& output);
+	static string execute(string exe, bool retErrs);
+	static string chdirExecute(string exe, string tmpf, bool retErrs);
 	static bool handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs, void* dlib,
 			string ext, map<string, string> props);
 	virtual ~ScriptHandler();
