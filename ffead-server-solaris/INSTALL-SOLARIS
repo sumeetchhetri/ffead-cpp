@@ -24,9 +24,9 @@ SOLARIS based Installation
 6. Go to the ffead-server-solaris/Release or ffead-server-solaris/Debug depending on whether you need to debug the server code
 7. Open terminal and type gmake all
 8. This will create the distribution folder named ffead-server-solaris inside ffead-server-solaris/Release or ffead-server-solaris/Debug folders accordingly
-9. Place your application shared library inside the ffead-server-solaris/Release/ffead-server-solaris/lib or ffead-server-solaris/Debug/ffead-server-solaris/lib folder.
-10. Place your web application specific files inside the ffead-server-solaris/Release/ffead-server-solaris/web folder inside a folder with your application name
+9. Place your application shared library inside the ffead-server-solaris/Release/ffead-server/lib or ffead-server-solaris/Debug/ffead-server/lib folder.
+10. Place your web application specific files inside the ffead-server-solaris/Release/ffead-server/web folder inside a folder with your application name
 11. Type ./server.sh when inside the ffead-server-solaris folder to start the application server
 12. A default application is already provided for your reference inside the ffead-server-solaris/web folder
-13. To compile the default application shared library go to the ffead-server-solaris/Release/ffead-server-solaris/web/default/src/Debug folder and run "gmake all"
-14. Copy the libdefault library to the ffead-server-solaris/Release/ffead-server-solaris/lib folder
+13. To compile the default application shared library go to the ffead-server-solaris/Release/ffead-server/web/default/src/Debug folder and run "gmake all"
+14. Copy the libdefault library to the ffead-server-solaris/Release/ffead-server/lib folder

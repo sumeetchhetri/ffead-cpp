@@ -716,6 +716,10 @@ int main(int argc, char* argv[])
    			}
    		}
    	}
+	if(srprps["SCRIPT_ERRS"]=="true" || srprps["SCRIPT_ERRS"]=="TRUE")
+	{
+		Constants::SCRIPT_EXEC_SHOW_ERRS = true;
+	}
    	if(srprps["SESS_STATE"]=="server")
    		sessatserv = true;
    	if(srprps["SESS_TIME_OUT"]!="")
@@ -824,17 +828,9 @@ int main(int argc, char* argv[])
 	string compres = respath+"run.sh";
 	if(!libpresent)
 	{
-		vector<string> argss;
-		string output;
-		bool passed = ScriptHandler::execute(compres, argss, output);
-		/*int i=system(compres.c_str());
-		if(!i)
-		{
-			logger << "Done" << flush;
-			logger.info("Done generating intermediate code");
-			//logfile << "Done generating intermediate code\n" << flush;
-		}*/
-		logger << "Intermediate code generation " << passed << endl;
+		string output = ScriptHandler::execute(compres, true);
+		logger << "Intermediate code generation task " << endl;
+		logger << output << endl;
 	}
 
 	for (unsigned int var1 = 0;var1<configurationData.cmpnames.size();var1++)
