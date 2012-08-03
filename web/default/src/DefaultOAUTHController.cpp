@@ -59,7 +59,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 	FileAuthController fauthta(req->getCntxt_root()+"/access_tokens",":");
 
 	string key,tokk,resu,csec;
-	bool isreqtype;
+	bool isreqtype = false;
 	bool flag = true;
 	string conss;
 	if(reqparams["oauth_consumer_key"]!="")
