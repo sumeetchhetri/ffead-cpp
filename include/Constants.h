@@ -34,6 +34,7 @@ class Constants {
 public:
 	static string INTER_LIB_FILE;
 	static bool SYS_FORK_AVAIL;
+	static bool SCRIPT_EXEC_SHOW_ERRS;
 };
 
 #endif /* CONSTANTS_H_ */
