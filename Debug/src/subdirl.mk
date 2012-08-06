@@ -99,7 +99,8 @@ CPP_SRCS += \
 ../src/HttpResponseParser.cpp \
 ../src/SSLClient.cpp \
 ../src/RestController.cpp \
-../src/Filter.cpp
+../src/Filter.cpp \
+../src/StringUtil.cpp
 
 OBJS += \
 ./src/Constants.o \
@@ -197,7 +198,8 @@ OBJS += \
 ./src/HttpResponseParser.o \
 ./src/SSLClient.o \
 ./src/RestController.o \
-./src/Filter.o
+./src/Filter.o \
+./src/StringUtil.o
 
 CPP_DEPS += \
 ./src/Constants.d \
@@ -295,7 +297,8 @@ CPP_DEPS += \
 ./src/HttpResponseParser.d \
 ./src/SSLClient.d \
 ./src/RestController.d \
-./src/Filter.d
+./src/Filter.d \
+./src/StringUtil.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
