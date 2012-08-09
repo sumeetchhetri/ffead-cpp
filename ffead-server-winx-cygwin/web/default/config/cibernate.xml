@@ -1,0 +1,29 @@
+<cibernate>
+	<!--config>
+		<uid>sumeet</uid>
+		<pwd>sumeet</pwd>
+		<dsn>MySQL-test</dsn>
+		<pool-size>5</pool-size>
+	</config>
+	<tables>
+		<table name="test4" class="Test4">
+			<col dbf="dat" obf="date"></col>
+			<col dbf="datt" obf="datt"></col>
+			<col dbf="datm" obf="dattm"></col>
+		</table>
+		<table name="test" class="Test">
+			<col dbf="id" obf="id"></col>
+			<col dbf="name" obf="name"></col>
+		</table>
+		<table name="test2" class="Test2">
+			<hasOne fk="id" pk="test_id">Test</hasOne>
+			<col dbf="id" obf="id"></col>
+			<col dbf="test_id" obf="test_id"></col>
+		</table>
+		<table name="test3" class="Test3">
+			<hasMany fk="id" pk="test_id" field="tests">Test</hasMany>
+			<col dbf="id" obf="id"></col>
+			<col dbf="test_id" obf="test_id"></col>
+		</table>
+	</tables-->
+</cibernate>
