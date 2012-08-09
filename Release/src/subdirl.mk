@@ -100,7 +100,9 @@ CPP_SRCS += \
 ../src/SSLClient.cpp \
 ../src/RestController.cpp \
 ../src/Filter.cpp \
-../src/StringUtil.cpp
+../src/StringUtil.cpp \
+../src/JSONElement.cpp \
+../src/JSONUtil.cpp
 
 OBJS += \
 ./src/Constants.o \
@@ -199,7 +201,9 @@ OBJS += \
 ./src/SSLClient.o \
 ./src/RestController.o \
 ./src/Filter.o \
-./src/StringUtil.o
+./src/StringUtil.o \
+./src/JSONElement.o \
+./src/JSONUtil.o
 
 CPP_DEPS += \
 ./src/Constants.d \
@@ -298,7 +302,9 @@ CPP_DEPS += \
 ./src/SSLClient.d \
 ./src/RestController.d \
 ./src/Filter.d \
-./src/StringUtil.o
+./src/StringUtil.d \
+./src/JSONElement.d \
+./src/JSONUtil.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
