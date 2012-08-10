@@ -22,21 +22,23 @@
 
 #ifndef THREAD_H_
 #define THREAD_H_
-#include <boost/thread.hpp>
 #include "Task.h"
+#include "Pthread.h"
 #include "TimeUnit.h"
-#include "Logger.h"
+//#include "Logger.h"
 
 class Thread {
 	bool console;
-	void run();
+	static void* run(void *arg);
 	Thread();
 	virtual ~Thread();
-	boost::thread *mthread;
+	Pthread *mthread;
 	bool idle;
 	Task *task;
-	Logger logger;
+	//Logger logger;
 	friend class ThreadPool;
+public:
+	void execute();
 };
 
 #endif /* THREAD_H_ */

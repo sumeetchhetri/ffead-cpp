@@ -42,7 +42,7 @@
 #include <sys/ioctl.h>
 /*Fix for Windows Cygwin*///#include <sys/epoll.h>
 #include <sys/resource.h>
-#include <boost/thread/thread.hpp>
+#include <thread>
 #include "Logger.h"
 #define MAXEPOLLSIZES 10000
 using namespace std;

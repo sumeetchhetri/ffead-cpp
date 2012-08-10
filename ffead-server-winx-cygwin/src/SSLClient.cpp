@@ -125,7 +125,7 @@ bool SSLClient::connection(string host,int port)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    string sport = boost::lexical_cast<string>(port);
+    string sport = CastUtil::lexical_cast<string>(port);
     if ((rv = getaddrinfo(host.c_str(), sport.c_str(), &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return false;
@@ -243,9 +243,9 @@ string SSLClient::getData(string hdrdelm,string cntlnhdr)
 			cntle = cntle.substr(0,cntle.length()-1);
 			try
 			{
-				cntlen = boost::lexical_cast<int>(cntle);
+				cntlen = CastUtil::lexical_cast<int>(cntle);
 			}
-			catch(boost::bad_lexical_cast&)
+			catch(const char* ex)
 			{
 				logger << "bad lexical cast" <<endl;
 			}

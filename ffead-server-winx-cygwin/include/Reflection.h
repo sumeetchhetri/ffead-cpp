@@ -26,7 +26,7 @@
 #include "Method.h"
 #include "Field.h"
 #include <boost/regex.hpp>
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 #include "AfcUtil.h"
 #include "Logger.h"
 class Reflection {

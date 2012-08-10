@@ -20,7 +20,7 @@
 *      Author: sumeet
 */
 #include "Element.h"
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 bool Element::operator == (Element ele)
 {
 	if(this->tagName == ele.tagName
@@ -117,7 +117,7 @@ string Element::getTagNameSpc()
 void Element::setTagName(string tagName)
 {
 	vector<string> vemp;
-	boost::iter_split(vemp, tagName, boost::first_finder(":"));
+	StringUtil::split(vemp, tagName, (":"));
 	if(vemp.size()==2)
 	{
 		this->tagName = vemp.at(1);

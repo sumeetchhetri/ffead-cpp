@@ -24,10 +24,10 @@
 #define THREADPOOL_H_
 #include "TaskPool.h"
 #include "Thread.h"
-#include "Logger.h"
+//#include "Logger.h"
 
 class ThreadPool {
-	Logger logger;
+	//Logger logger;
 	int maxThreads;
 	int initThreads;
 	int lowp;
@@ -35,10 +35,11 @@ class ThreadPool {
 	bool console;
 	vector<Thread*> *tpool;
 	TaskPool *wpool;
-	boost::thread *poller;
+	Pthread *poller;
 	bool prioritypooling;
-	void poll();
+	static void* poll(void *arg);
 	Thread* getIdleThread();
+	bool started;
 public:
 	ThreadPool(int,int,int,int,bool);
 	ThreadPool(int,int,int,int);
@@ -51,5 +52,6 @@ public:
 	void execute(Task &task) ;
 	void schedule(Task &task, int tunit, int type);
 	virtual ~ThreadPool();
+	void start();
 };
 #endif /* THREADPOOL_H_ */

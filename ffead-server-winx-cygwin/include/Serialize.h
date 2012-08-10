@@ -16,7 +16,7 @@
 #ifndef SERIALIZABLE_H_
 #define SERIALIZABLE_H_
 #include "XmlParser.h"
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 #include <stdexcept>
 //#include <execinfo.h>
 #include <dlfcn.h>

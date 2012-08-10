@@ -88,9 +88,9 @@ $(document).ready(initResizable);
 <a name="l00028"></a>00028         {
 <a name="l00029"></a>00029                 <span class="keywordflow">try</span>
 <a name="l00030"></a>00030                 {
-<a name="l00031"></a>00031                         boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+<a name="l00031"></a>00031                         std::this_thread::sleep_for(std::chrono::milliseconds(1));
 <a name="l00032"></a>00032                 }
-<a name="l00033"></a>00033                 <span class="keywordflow">catch</span> (boost::thread_interrupted e)
+<a name="l00033"></a>00033                 <span class="keywordflow">catch</span> (std::thread_interrupted e)
 <a name="l00034"></a>00034                 {
 <a name="l00035"></a>00035                         <span class="keywordflow">if</span> (task != NULL)
 <a name="l00036"></a>00036                         {
@@ -101,19 +101,19 @@ $(document).ready(initResizable);
 <a name="l00041"></a>00041                                                 logger &lt;&lt; <span class="stringliteral">&quot;Task scheduled for sleep\n&quot;</span> &lt;&lt; flush;
 <a name="l00042"></a>00042                                         }
 <a name="l00043"></a>00043                                         <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::NANOSECONDS)
-<a name="l00044"></a>00044                                                 boost::this_thread::sleep(boost::posix_time::microseconds(task-&gt;tunit/1000));
+<a name="l00044"></a>00044                                                 std::this_thread::sleep_for(std::chrono::microseconds(task-&gt;tunit/1000));
 <a name="l00045"></a>00045                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::MICROSECONDS)
-<a name="l00046"></a>00046                                                 boost::this_thread::sleep(boost::posix_time::microseconds(task-&gt;tunit));
+<a name="l00046"></a>00046                                                 std::this_thread::sleep_for(std::chrono::microseconds(task-&gt;tunit));
 <a name="l00047"></a>00047                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::MILLISECONDS)
-<a name="l00048"></a>00048                                                 boost::this_thread::sleep(boost::posix_time::milliseconds(task-&gt;tunit));
+<a name="l00048"></a>00048                                                 std::this_thread::sleep_for(std::chrono::milliseconds(task-&gt;tunit));
 <a name="l00049"></a>00049                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::SECONDS)
-<a name="l00050"></a>00050                                                 boost::this_thread::sleep(boost::posix_time::seconds(task-&gt;tunit));
+<a name="l00050"></a>00050                                                 std::this_thread::sleep_for(std::chrono::seconds(task-&gt;tunit));
 <a name="l00051"></a>00051                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::MINUTES)
-<a name="l00052"></a>00052                                                 boost::this_thread::sleep(boost::posix_time::seconds(task-&gt;tunit * 60));
+<a name="l00052"></a>00052                                                 std::this_thread::sleep_for(std::chrono::seconds(task-&gt;tunit * 60));
 <a name="l00053"></a>00053                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::HOURS)
-<a name="l00054"></a>00054                                                 boost::this_thread::sleep(boost::posix_time::seconds(task-&gt;tunit * 60* 60 ));
+<a name="l00054"></a>00054                                                 std::this_thread::sleep_for(std::chrono::seconds(task-&gt;tunit * 60* 60 ));
 <a name="l00055"></a>00055                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(task-&gt;type==TimeUnit::DAYS)
-<a name="l00056"></a>00056                                                 boost::this_thread::sleep(boost::posix_time::seconds(task-&gt;tunit*60*60*24));
+<a name="l00056"></a>00056                                                 std::this_thread::sleep_for(std::chrono::seconds(task-&gt;tunit*60*60*24));
 <a name="l00057"></a>00057                                 }
 <a name="l00058"></a>00058                                 <span class="keywordflow">try</span>
 <a name="l00059"></a>00059                                 {
@@ -138,7 +138,7 @@ $(document).ready(initResizable);
 <a name="l00078"></a>00078         logger = Logger::getLogger(<span class="stringliteral">&quot;Thread&quot;</span>);
 <a name="l00079"></a>00079         task = NULL;
 <a name="l00080"></a>00080         idle = <span class="keyword">true</span>;
-<a name="l00081"></a>00081         mthread = <span class="keyword">new</span> boost::thread(boost::bind(&amp;Thread::run, <span class="keyword">this</span>));
+<a name="l00081"></a>00081         mthread = <span class="keyword">new</span> std::thread((&amp;Thread::run, <span class="keyword">this</span>));
 <a name="l00082"></a>00082 }
 <a name="l00083"></a>00083 
 <a name="l00084"></a>00084 Thread::~Thread() {

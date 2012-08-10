@@ -116,7 +116,7 @@ $(document).ready(initResizable);
 <a name="l00056"></a>00056         <span class="keyword">static</span> <span class="keywordtype">string</span>* mode;
 <a name="l00057"></a>00057         <span class="keyword">static</span> <span class="keywordtype">string</span>* filepath;
 <a name="l00058"></a>00058         <span class="keyword">static</span> ofstream* out;
-<a name="l00059"></a>00059         <span class="keyword">static</span> boost::mutex* _theLogmutex;
+<a name="l00059"></a>00059         <span class="keyword">static</span> std::mutex* _theLogmutex;
 <a name="l00060"></a>00060         <span class="keywordtype">void</span> write(<span class="keywordtype">string</span>,<span class="keywordtype">string</span>);
 <a name="l00061"></a>00061         <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;
 <a name="l00062"></a>00062         <span class="keywordtype">void</span> write(T tmsg, <span class="keywordtype">string</span> mod)

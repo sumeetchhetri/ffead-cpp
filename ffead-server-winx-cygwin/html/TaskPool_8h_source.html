@@ -91,7 +91,7 @@ $(document).ready(initResizable);
 <a name="l00031"></a><a class="code" href="classTaskPool.html">00031</a> <span class="keyword">class </span><a class="code" href="classTaskPool.html">TaskPool</a> {
 <a name="l00032"></a>00032         queue&lt;Task*&gt; *tasks;
 <a name="l00033"></a>00033         list&lt;Task*&gt; *ptasks;
-<a name="l00034"></a>00034         boost::mutex *m_mutex;
+<a name="l00034"></a>00034         std::mutex *m_mutex;
 <a name="l00035"></a>00035         <span class="keywordtype">bool</span> console;
 <a name="l00036"></a>00036         <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classThreadPool.html">ThreadPool</a>;
 <a name="l00037"></a>00037 <span class="keyword">public</span>:

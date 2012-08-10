@@ -20,7 +20,7 @@
 #include "string"
 #include "cstring"
 #include "vector"
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 using namespace std;
 
 class AMEFObject
@@ -594,7 +594,7 @@ public:
 		AMEFObject* JDBObjectNew = new AMEFObject();
 		JDBObjectNew->type = DOUBLE_FLOAT_TYPE;
 		JDBObjectNew->name = "";
-		JDBObjectNew->value = boost::lexical_cast<string>(doub);
+		JDBObjectNew->value = CastUtil::lexical_cast<string>(doub);
 		JDBObjectNew->length = JDBObjectNew->value.length();
 		length += JDBObjectNew->value.length() + 2;
 		namedLength += JDBObjectNew->value.length() + 4;
@@ -626,7 +626,7 @@ public:
 		AMEFObject* JDBObjectNew = new AMEFObject();
 		JDBObjectNew->type = DOUBLE_FLOAT_TYPE;
 		JDBObjectNew->name = "";
-		JDBObjectNew->value = boost::lexical_cast<string>(doub);
+		JDBObjectNew->value = CastUtil::lexical_cast<string>(doub);
 		JDBObjectNew->length = JDBObjectNew->value.length();
 		length += JDBObjectNew->value.length() + 2;
 		namedLength += JDBObjectNew->value.length() + 4;
@@ -1141,7 +1141,7 @@ public:
 	double getDoubleValue()
 	{
 		if(type=='u')
-			return (boost::lexical_cast<double>("12312.123"));
+			return (CastUtil::lexical_cast<double>("12312.123"));
 		else
 			return -1;
 	}
@@ -1210,13 +1210,13 @@ public:
 			else if(obj->isChar())
 			{
 				if(obj->type=='b')
-					displ += boost::lexical_cast<string>(obj->getBooleanValue()) + "\n";
+					displ += CastUtil::lexical_cast<string>(obj->getBooleanValue()) + "\n";
 				else
 					displ += (char)obj->value[0] + "\n";
 			}
 			else if(obj->isNumber())
 			{
-				displ += boost::lexical_cast<string>(obj->getNumericValue()) + "\n";
+				displ += CastUtil::lexical_cast<string>(obj->getNumericValue()) + "\n";
 			}
 			if(obj->type=='o' || obj->type=='p' || obj->type=='q' || obj->type=='m')
 			{

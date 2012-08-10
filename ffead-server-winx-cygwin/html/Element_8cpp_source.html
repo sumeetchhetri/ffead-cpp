@@ -177,7 +177,7 @@ $(document).ready(initResizable);
 <a name="l00117"></a>00117 <span class="keywordtype">void</span> Element::setTagName(<span class="keywordtype">string</span> tagName)
 <a name="l00118"></a>00118 {
 <a name="l00119"></a>00119         vector&lt;string&gt; vemp;
-<a name="l00120"></a>00120         boost::iter_split(vemp, tagName, boost::first_finder(<span class="stringliteral">&quot;:&quot;</span>));
+<a name="l00120"></a>00120         StringUtil::split(vemp, tagName, (<span class="stringliteral">&quot;:&quot;</span>));
 <a name="l00121"></a>00121         <span class="keywordflow">if</span>(vemp.size()==2)
 <a name="l00122"></a>00122         {
 <a name="l00123"></a>00123                 this-&gt;tagName = vemp.at(1);

@@ -27,7 +27,7 @@
 #include "stdlib.h"
 #include <exception>
 #include <iostream>
-#include <boost/thread/thread.hpp>
+#include <thread>
 #include <pthread.h>
 
 using namespace std;

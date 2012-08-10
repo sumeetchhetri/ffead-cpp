@@ -192,7 +192,7 @@ $(document).ready(initResizable);
 <a name="l00132"></a>00132                                         }
 <a name="l00133"></a>00133                                         <span class="keywordflow">else</span>
 <a name="l00134"></a>00134                                         {
-<a name="l00135"></a>00135                                                 boost::thread m_thread(boost::bind(serv,n));
+<a name="l00135"></a>00135                                                 std::thread m_thread((serv,n));
 <a name="l00136"></a>00136                                         }
 <a name="l00137"></a>00137                                 }
 <a name="l00138"></a>00138                         }
@@ -287,7 +287,7 @@ $(document).ready(initResizable);
 <a name="l00227"></a>00227                 }
 <a name="l00228"></a>00228                 <span class="keywordflow">else</span>
 <a name="l00229"></a>00229                 {
-<a name="l00230"></a>00230                         boost::thread m_thread(boost::bind(serv,new_fd));
+<a name="l00230"></a>00230                         std::thread m_thread((serv,new_fd));
 <a name="l00231"></a>00231                 }
 <a name="l00232"></a>00232         }
 <a name="l00233"></a>00233 }

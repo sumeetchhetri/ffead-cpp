@@ -180,7 +180,7 @@ $(document).ready(initResizable);
 <a name="l00120"></a>00120                 <span class="keywordflow">if</span>(message.getTagName().find(<span class="stringliteral">&quot;&lt;return:exception&gt;&quot;</span>)==string::npos)
 <a name="l00121"></a>00121                 {
 <a name="l00122"></a>00122                         <span class="keywordtype">string</span> tag = message.getTagName();
-<a name="l00123"></a>00123                         boost::replace_first(tag,<span class="stringliteral">&quot;return:&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00123"></a>00123                         StringUtil::replaceFirst(tag,<span class="stringliteral">&quot;return:&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00124"></a>00124                         message.setTagName(tag);
 <a name="l00125"></a>00125                         call = message.render();
 <a name="l00126"></a>00126                         logger &lt;&lt; call &lt;&lt; flush;

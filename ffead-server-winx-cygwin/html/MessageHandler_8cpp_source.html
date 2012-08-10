@@ -143,7 +143,7 @@ $(document).ready(initResizable);
 <a name="l00083"></a>00083         ofstream myfile;
 <a name="l00084"></a>00084         myfile.open(fileName.c_str());
 <a name="l00085"></a>00085         <span class="keywordtype">string</span> rep = subs + <span class="stringliteral">&quot;:&quot;</span>;
-<a name="l00086"></a>00086         boost::replace_first(subscribers,rep,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00086"></a>00086         StringUtil::replaceFirst(subscribers,rep,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00087"></a>00087         myfile.write(subscribers.c_str(),subscribers.length());
 <a name="l00088"></a>00088         myfile.close();
 <a name="l00089"></a>00089         <span class="keywordflow">if</span>(subscribers.find(<span class="stringliteral">&quot;:&quot;</span>)!=string::npos)
@@ -233,7 +233,7 @@ $(document).ready(initResizable);
 <a name="l00173"></a>00173         ofstream myfile;
 <a name="l00174"></a>00174         myfile.open(fileName.c_str());
 <a name="l00175"></a>00175         <span class="keywordtype">string</span> rep = subs + <span class="stringliteral">&quot;:&quot;</span>;
-<a name="l00176"></a>00176         boost::replace_first(subscribers,rep,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00176"></a>00176         StringUtil::replaceFirst(subscribers,rep,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00177"></a>00177         myfile.write(subscribers.c_str(),subscribers.length());
 <a name="l00178"></a>00178         myfile.close();
 <a name="l00179"></a>00179         fileName += <span class="stringliteral">&quot;Temp&quot;</span>;
@@ -286,15 +286,15 @@ $(document).ready(initResizable);
 <a name="l00226"></a>00226                 <a class="code" href="classMessage.html">Message</a> msg;
 <a name="l00227"></a>00227                 <span class="keywordflow">if</span>(results.find(<span class="stringliteral">&quot;Queue&quot;</span>)!=string::npos)
 <a name="l00228"></a>00228                 {
-<a name="l00229"></a>00229                         boost::replace_first(results,<span class="stringliteral">&quot;GET FROM &quot;</span>,_mess_instance-&gt;path);
+<a name="l00229"></a>00229                         StringUtil::replaceFirst(results,<span class="stringliteral">&quot;GET FROM &quot;</span>,_mess_instance-&gt;path);
 <a name="l00230"></a>00230                         msg = _mess_instance-&gt;readMessageFromQ(results);
 <a name="l00231"></a>00231                 }
 <a name="l00232"></a>00232                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(results.find(<span class="stringliteral">&quot;Topic&quot;</span>)!=string::npos)
 <a name="l00233"></a>00233                 {
 <a name="l00234"></a>00234                         <span class="keywordtype">string</span> subs = results.substr(results.find(<span class="stringliteral">&quot;-&quot;</span>)+1);
 <a name="l00235"></a>00235                         <span class="keywordtype">string</span> te = <span class="stringliteral">&quot;-&quot;</span> + subs;
-<a name="l00236"></a>00236                         boost::replace_first(results,te,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00237"></a>00237                         boost::replace_first(results,<span class="stringliteral">&quot;GET FROM &quot;</span>,_mess_instance-&gt;path);
+<a name="l00236"></a>00236                         StringUtil::replaceFirst(results,te,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00237"></a>00237                         StringUtil::replaceFirst(results,<span class="stringliteral">&quot;GET FROM &quot;</span>,_mess_instance-&gt;path);
 <a name="l00238"></a>00238                         msg = _mess_instance-&gt;readMessageFromT(results,subs);
 <a name="l00239"></a>00239                 }
 <a name="l00240"></a>00240                 <span class="keywordtype">string</span> h;

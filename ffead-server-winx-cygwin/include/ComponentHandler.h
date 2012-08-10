@@ -30,7 +30,7 @@
 #include "Reflector.h"
 #include "fstream"
 #include "Serialize.h"
-#include <boost/thread/thread.hpp>
+#include <thread>
 #include "map"
 #include "Logger.h"
 #include "Constants.h"

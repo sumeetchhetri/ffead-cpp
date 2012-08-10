@@ -117,7 +117,7 @@ $(document).ready(initResizable);
 <a name="l00057"></a>00057                 }
 <a name="l00058"></a>00058                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(fileName!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00059"></a>00059                 {
-<a name="l00060"></a>00060                         boost::replace_first(fileName,<span class="stringliteral">&quot;*&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00060"></a>00060                         StringUtil::replaceFirst(fileName,<span class="stringliteral">&quot;*&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00061"></a>00061                         <span class="keywordflow">if</span>(fileName.find(<span class="stringliteral">&quot;~&quot;</span>)==string::npos)
 <a name="l00062"></a>00062                         {
 <a name="l00063"></a>00063                                 files.push_back(cwd+<span class="stringliteral">&quot;/&quot;</span>+fileName);
@@ -209,34 +209,34 @@ $(document).ready(initResizable);
 <a name="l00149"></a>00149                                 <span class="keywordflow">if</span>((tes=data.find(<span class="stringliteral">&quot;class&quot;</span>))!=string::npos &amp;&amp; !classdone)
 <a name="l00150"></a>00150                                 {
 <a name="l00151"></a>00151                                         strVec results;
-<a name="l00152"></a>00152                                         boost::replace_first(data,<span class="stringliteral">&quot;:&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00153"></a>00153                                         boost::replace_first(data,<span class="stringliteral">&quot;class &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00152"></a>00152                                         StringUtil::replaceFirst(data,<span class="stringliteral">&quot;:&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00153"></a>00153                                         StringUtil::replaceFirst(data,<span class="stringliteral">&quot;class &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00154"></a>00154                                         <span class="keywordflow">if</span>((tes=data.find(<span class="stringliteral">&quot;{&quot;</span>))!=string::npos)
 <a name="l00155"></a>00155                                         {
 <a name="l00156"></a>00156                                                 start = <span class="keyword">true</span>;
 <a name="l00157"></a>00157                                                 cnt += 1;
 <a name="l00158"></a>00158                                         }
-<a name="l00159"></a>00159                                         boost::replace_first(data,<span class="stringliteral">&quot;{&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00160"></a>00160                                         boost::replace_first(data,<span class="stringliteral">&quot;:&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00161"></a>00161                                         boost::iter_split(results, data, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00159"></a>00159                                         StringUtil::replaceFirst(data,<span class="stringliteral">&quot;{&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00160"></a>00160                                         StringUtil::replaceFirst(data,<span class="stringliteral">&quot;:&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00161"></a>00161                                         StringUtil::split(results, data, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00162"></a>00162                                         this-&gt;classN = results.at(0);
-<a name="l00163"></a>00163                                         boost::replace_all(this-&gt;classN,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00163"></a>00163                                         StringUtil::replaceAll(this-&gt;classN,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00164"></a>00164                                         <span class="keywordflow">if</span>(results.size()==3)
 <a name="l00165"></a>00165                                         {
 <a name="l00166"></a>00166                                                 this-&gt;bcvisib = results.at(1);
-<a name="l00167"></a>00167                                                 boost::replace_all(this-&gt;bcvisib,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00167"></a>00167                                                 StringUtil::replaceAll(this-&gt;bcvisib,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00168"></a>00168                                                 this-&gt;baseClassN = results.at(2);
-<a name="l00169"></a>00169                                                 boost::replace_all(this-&gt;baseClassN,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00169"></a>00169                                                 StringUtil::replaceAll(this-&gt;baseClassN,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00170"></a>00170                                                 <span class="comment">//logger &lt;&lt; results.size() &lt;&lt; flush;</span>
 <a name="l00171"></a>00171                                         }
 <a name="l00172"></a>00172                                         classdone = <span class="keyword">true</span>;
 <a name="l00173"></a>00173                                         classset = <span class="keyword">true</span>;
-<a name="l00174"></a>00174                                         <span class="comment">//boost::iter_split(results, data, boost::first_finder(&quot;: &quot;));</span>
+<a name="l00174"></a>00174                                         <span class="comment">//StringUtil::split(results, data, (&quot;: &quot;));</span>
 <a name="l00175"></a>00175                                 }
 <a name="l00176"></a>00176                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>((tes=data.find(<span class="stringliteral">&quot;{&quot;</span>))!=string::npos &amp;&amp; !start)
 <a name="l00177"></a>00177                                 {
 <a name="l00178"></a>00178                                         start = <span class="keyword">true</span>;
-<a name="l00179"></a>00179                                         boost::replace_first(data,<span class="stringliteral">&quot;{&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00179"></a>00179                                         StringUtil::replaceFirst(data,<span class="stringliteral">&quot;{&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00180"></a>00180                                         cnt += 1;
 <a name="l00181"></a>00181                                 }
 <a name="l00182"></a>00182                                 <span class="keywordflow">if</span>(start &amp;&amp; !classset &amp;&amp; data!=<span class="stringliteral">&quot;&quot;</span>)
@@ -290,8 +290,8 @@ $(document).ready(initResizable);
 <a name="l00230"></a>00230                 <span class="keywordflow">if</span> ((tes = data.find(<span class="stringliteral">&quot;class&quot;</span>)) != string::npos)
 <a name="l00231"></a>00231                 {
 <a name="l00232"></a>00232                         strVec results;
-<a name="l00233"></a>00233                         boost::replace_first(data,<span class="stringliteral">&quot;:&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00234"></a>00234                         boost::iter_split(results, data, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00233"></a>00233                         StringUtil::replaceFirst(data,<span class="stringliteral">&quot;:&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00234"></a>00234                         StringUtil::split(results, data, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00235"></a>00235                         this-&gt;classN = results.at(1);
 <a name="l00236"></a>00236                         <span class="keywordflow">if</span>(results.size()&gt;3)
 <a name="l00237"></a>00237                         {
@@ -299,7 +299,7 @@ $(document).ready(initResizable);
 <a name="l00239"></a>00239                                 this-&gt;baseClassN = results.at(3);
 <a name="l00240"></a>00240                                 <span class="comment">//logger &lt;&lt; results.size() &lt;&lt; flush;</span>
 <a name="l00241"></a>00241                         }
-<a name="l00242"></a>00242                         <span class="comment">//boost::iter_split(results, data, boost::first_finder(&quot;: &quot;));</span>
+<a name="l00242"></a>00242                         <span class="comment">//StringUtil::split(results, data, (&quot;: &quot;));</span>
 <a name="l00243"></a>00243                 }
 <a name="l00244"></a>00244                 <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((tes = data.find(<span class="stringliteral">&quot;}&quot;</span>)) != string::npos)
 <a name="l00245"></a>00245                         <span class="keywordflow">break</span>;
@@ -355,12 +355,12 @@ $(document).ready(initResizable);
 <a name="l00295"></a>00295                                 refDef += (<span class="stringliteral">&quot;me.clear();\n&quot;</span>);
 <a name="l00296"></a>00296                                 publm += this-&gt;pub.at(i);
 <a name="l00297"></a>00297                                 meth = this-&gt;pub.at(i);
-<a name="l00298"></a>00298                                 boost::replace_first(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00299"></a>00299                                 boost::replace_first(meth,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00300"></a>00300                                 boost::replace_all(meth,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00301"></a>00301                                 boost::replace_first(meth,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00298"></a>00298                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00299"></a>00299                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00300"></a>00300                                 StringUtil::replaceAll(meth,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00301"></a>00301                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
 <a name="l00302"></a>00302                                 strVec methp,methpm;
-<a name="l00303"></a>00303                                 boost::iter_split(methp, meth, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00303"></a>00303                                 StringUtil::split(methp, meth, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00304"></a>00304                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; methp.size(); j++)
 <a name="l00305"></a>00305                                 {
 <a name="l00306"></a>00306                                         <span class="keywordflow">if</span>(methp.at(j)!=<span class="stringliteral">&quot;&quot;</span>)
@@ -405,9 +405,9 @@ $(document).ready(initResizable);
 <a name="l00345"></a>00345                                 refDef += (<span class="stringliteral">&quot;f.clear();\n&quot;</span>);
 <a name="l00346"></a>00346                                 publf += this-&gt;pub.at(i);
 <a name="l00347"></a>00347                                 fld = this-&gt;pub.at(i);
-<a name="l00348"></a>00348                                 boost::replace_first(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00348"></a>00348                                 StringUtil::replaceFirst(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00349"></a>00349                                 strVec fldp;
-<a name="l00350"></a>00350                                 boost::iter_split(fldp, fld, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00350"></a>00350                                 StringUtil::split(fldp, fld, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00351"></a>00351                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; fldp.size(); j++)
 <a name="l00352"></a>00352                                 {
 <a name="l00353"></a>00353                                         <span class="keywordflow">if</span>(j==0)
@@ -434,12 +434,12 @@ $(document).ready(initResizable);
 <a name="l00374"></a>00374                                 refDef += (<span class="stringliteral">&quot;me.clear();\n&quot;</span>);
 <a name="l00375"></a>00375                                 privm += this-&gt;pri.at(i);
 <a name="l00376"></a>00376                                 meth = this-&gt;pri.at(i);
-<a name="l00377"></a>00377                                 boost::replace_first(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00378"></a>00378                                 boost::replace_first(meth,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00379"></a>00379                                 boost::replace_all(meth,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00380"></a>00380                                 boost::replace_first(meth,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00377"></a>00377                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00378"></a>00378                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00379"></a>00379                                 StringUtil::replaceAll(meth,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00380"></a>00380                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
 <a name="l00381"></a>00381                                 strVec methp;
-<a name="l00382"></a>00382                                 boost::iter_split(methp, meth, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00382"></a>00382                                 StringUtil::split(methp, meth, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00383"></a>00383                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; methp.size(); j++)
 <a name="l00384"></a>00384                                 {
 <a name="l00385"></a>00385                                         <span class="keywordflow">if</span>(j==0)
@@ -469,9 +469,9 @@ $(document).ready(initResizable);
 <a name="l00409"></a>00409                                 refDef += (<span class="stringliteral">&quot;f.clear();\n&quot;</span>);
 <a name="l00410"></a>00410                                 privf += this-&gt;pri.at(i);
 <a name="l00411"></a>00411                                 fld = this-&gt;pri.at(i);
-<a name="l00412"></a>00412                                 boost::replace_first(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00412"></a>00412                                 StringUtil::replaceFirst(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00413"></a>00413                                 strVec fldp;
-<a name="l00414"></a>00414                                 boost::iter_split(fldp, fld, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00414"></a>00414                                 StringUtil::split(fldp, fld, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00415"></a>00415                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; fldp.size(); j++)
 <a name="l00416"></a>00416                                 {
 <a name="l00417"></a>00417                                         <span class="keywordflow">if</span>(j==0)
@@ -498,12 +498,12 @@ $(document).ready(initResizable);
 <a name="l00438"></a>00438                                 refDef += (<span class="stringliteral">&quot;me.clear();\n&quot;</span>);
 <a name="l00439"></a>00439                                 protm += this-&gt;pro.at(i);
 <a name="l00440"></a>00440                                 meth = this-&gt;pro.at(i);
-<a name="l00441"></a>00441                                 boost::replace_first(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00442"></a>00442                                 boost::replace_first(meth,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00443"></a>00443                                 boost::replace_all(meth,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00444"></a>00444                                 boost::replace_first(meth,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00441"></a>00441                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00442"></a>00442                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00443"></a>00443                                 StringUtil::replaceAll(meth,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00444"></a>00444                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
 <a name="l00445"></a>00445                                 strVec methp;
-<a name="l00446"></a>00446                                 boost::iter_split(methp, meth, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00446"></a>00446                                 StringUtil::split(methp, meth, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00447"></a>00447                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; methp.size(); j++)
 <a name="l00448"></a>00448                                 {
 <a name="l00449"></a>00449                                         <span class="keywordflow">if</span>(j==0)
@@ -533,9 +533,9 @@ $(document).ready(initResizable);
 <a name="l00473"></a>00473                                 refDef += (<span class="stringliteral">&quot;f.clear();\n&quot;</span>);
 <a name="l00474"></a>00474                                 protf += this-&gt;pro.at(i);
 <a name="l00475"></a>00475                                 fld = this-&gt;pro.at(i);
-<a name="l00476"></a>00476                                 boost::replace_first(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00476"></a>00476                                 StringUtil::replaceFirst(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00477"></a>00477                                 strVec fldp;
-<a name="l00478"></a>00478                                 boost::iter_split(fldp, fld, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00478"></a>00478                                 StringUtil::split(fldp, fld, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00479"></a>00479                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; fldp.size(); j++)
 <a name="l00480"></a>00480                                 {
 <a name="l00481"></a>00481                                         <span class="keywordflow">if</span>(j==0)
@@ -786,16 +786,16 @@ $(document).ready(initResizable);
 <a name="l00726"></a>00726                                 refDef += (<span class="stringliteral">&quot;ctor.clear();\nme.clear();\n&quot;</span>);
 <a name="l00727"></a>00727                                 publm += this-&gt;pub.at(i);
 <a name="l00728"></a>00728                                 meth = this-&gt;pub.at(i);
-<a name="l00729"></a>00729                                 boost::replace_first(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00729"></a>00729                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00730"></a>00730 
 <a name="l00731"></a>00731                                 <span class="keywordtype">string</span> argts = meth.substr(meth.find(<span class="stringliteral">&quot;(&quot;</span>),meth.find(<span class="stringliteral">&quot;)&quot;</span>)-meth.find(<span class="stringliteral">&quot;(&quot;</span>));
-<a name="l00732"></a>00732                                 boost::replace_first(argts,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00733"></a>00733                                 boost::replace_all(argts,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00732"></a>00732                                 StringUtil::replaceFirst(argts,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00733"></a>00733                                 StringUtil::replaceAll(argts,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00734"></a>00734                                 meth = meth.substr(0,meth.find(<span class="stringliteral">&quot;(&quot;</span>));
-<a name="l00735"></a>00735                                 <span class="comment">//boost::replace_first(meth,&quot;)&quot;,&quot; &quot;);</span>
+<a name="l00735"></a>00735                                 <span class="comment">//StringUtil::replaceFirst(meth,&quot;)&quot;,&quot; &quot;);</span>
 <a name="l00736"></a>00736                                 strVec methp,methpm,argp,argpm;
-<a name="l00737"></a>00737                                 boost::iter_split(argp, argts, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
-<a name="l00738"></a>00738                                 boost::iter_split(methp, meth, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00737"></a>00737                                 StringUtil::split(argp, argts, (<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00738"></a>00738                                 StringUtil::split(methp, meth, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00739"></a>00739                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; methp.size(); j++)
 <a name="l00740"></a>00740                                 {
 <a name="l00741"></a>00741                                         <span class="keywordflow">if</span>(methp.at(j)!=<span class="stringliteral">&quot;&quot;</span>)
@@ -839,8 +839,8 @@ $(document).ready(initResizable);
 <a name="l00779"></a>00779                                         <span class="comment">/*else if(methpm.at(j)!=&quot;&quot;)</span>
 <a name="l00780"></a>00780 <span class="comment">                                        {</span>
 <a name="l00781"></a>00781 <span class="comment">                                                refDef += (&quot;argu.push_back(\&quot;&quot;+methpm.at(j)+&quot;\&quot;);\n&quot;);</span>
-<a name="l00782"></a>00782 <span class="comment">                                                valsd += &quot;\t\t&quot;+(methpm.at(j) + &quot; *_&quot; + boost::lexical_cast&lt;string&gt;(j-1)+&quot; = (&quot;+methpm.at(j)+&quot;*)values.at(&quot;+boost::lexical_cast&lt;string&gt;(j-2)+&quot;);&quot;);</span>
-<a name="l00783"></a>00783 <span class="comment">                                                valsa += &quot;*_&quot; + boost::lexical_cast&lt;string&gt;(j-1);</span>
+<a name="l00782"></a>00782 <span class="comment">                                                valsd += &quot;\t\t&quot;+(methpm.at(j) + &quot; *_&quot; + CastUtil::lexical_cast&lt;string&gt;(j-1)+&quot; = (&quot;+methpm.at(j)+&quot;*)values.at(&quot;+CastUtil::lexical_cast&lt;string&gt;(j-2)+&quot;);&quot;);</span>
+<a name="l00783"></a>00783 <span class="comment">                                                valsa += &quot;*_&quot; + CastUtil::lexical_cast&lt;string&gt;(j-1);</span>
 <a name="l00784"></a>00784 <span class="comment">                                                if(methpm.at(0)!=this-&gt;classN)</span>
 <a name="l00785"></a>00785 <span class="comment">                                                {</span>
 <a name="l00786"></a>00786 <span class="comment">                                                        typedefs += methpm.at(j);</span>
@@ -862,25 +862,25 @@ $(document).ready(initResizable);
 <a name="l00802"></a>00802                                                 type12 = <span class="stringliteral">&quot;*&quot;</span>;
 <a name="l00803"></a>00803                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(argpm.at(j).find(<span class="stringliteral">&quot;&amp;&quot;</span>)!=string::npos)
 <a name="l00804"></a>00804                                                 type12 = <span class="stringliteral">&quot;&amp;&quot;</span>;
-<a name="l00805"></a>00805                                         boost::iter_split(argtn, argpm.at(j), boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
-<a name="l00806"></a>00806                                         boost::replace_all(argtn.at(0),<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00805"></a>00805                                         StringUtil::split(argtn, argpm.at(j), (<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00806"></a>00806                                         StringUtil::replaceAll(argtn.at(0),<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00807"></a>00807                                         <span class="keywordflow">if</span>(meth.find(<span class="stringliteral">&quot; operator&quot;</span>)==string::npos)refDef += (<span class="stringliteral">&quot;argu.push_back(\&quot;&quot;</span>+argtn.at(0)+<span class="stringliteral">&quot;\&quot;);\n&quot;</span>);
 <a name="l00808"></a>00808                                         <span class="keywordflow">if</span>(argtn.at(0).find(<span class="stringliteral">&quot;*&quot;</span>)!=string::npos || type12==<span class="stringliteral">&quot;*&quot;</span>)
 <a name="l00809"></a>00809                                         {
-<a name="l00810"></a>00810                                                 boost::replace_all(argtn.at(0),<span class="stringliteral">&quot;*&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00811"></a>00811                                                 valsd += <span class="stringliteral">&quot;\t\t&quot;</span>+(argtn.at(0) + <span class="stringliteral">&quot; *_&quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot; = (&quot;</span>+argtn.at(0)+<span class="stringliteral">&quot;*)values.at(&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot;);&quot;</span>);
+<a name="l00810"></a>00810                                                 StringUtil::replaceAll(argtn.at(0),<span class="stringliteral">&quot;*&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00811"></a>00811                                                 valsd += <span class="stringliteral">&quot;\t\t&quot;</span>+(argtn.at(0) + <span class="stringliteral">&quot; *_&quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot; = (&quot;</span>+argtn.at(0)+<span class="stringliteral">&quot;*)values.at(&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot;);&quot;</span>);
 <a name="l00812"></a>00812                                         }
 <a name="l00813"></a>00813                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(argtn.at(0).find(<span class="stringliteral">&quot;&amp;&quot;</span>)!=string::npos || type12==<span class="stringliteral">&quot;&amp;&quot;</span>)
 <a name="l00814"></a>00814                                         {
-<a name="l00815"></a>00815                                                 boost::replace_all(argtn.at(0),<span class="stringliteral">&quot;&amp;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00816"></a>00816                                                 valsd += <span class="stringliteral">&quot;\t\t&quot;</span>+(argtn.at(0) + <span class="stringliteral">&quot; *_&quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot; = (&quot;</span>+argtn.at(0)+<span class="stringliteral">&quot;*)values.at(&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot;);&quot;</span>);
+<a name="l00815"></a>00815                                                 StringUtil::replaceAll(argtn.at(0),<span class="stringliteral">&quot;&amp;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00816"></a>00816                                                 valsd += <span class="stringliteral">&quot;\t\t&quot;</span>+(argtn.at(0) + <span class="stringliteral">&quot; *_&quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot; = (&quot;</span>+argtn.at(0)+<span class="stringliteral">&quot;*)values.at(&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot;);&quot;</span>);
 <a name="l00817"></a>00817                                         }
 <a name="l00818"></a>00818                                         <span class="keywordflow">else</span>
-<a name="l00819"></a>00819                                                 valsd += <span class="stringliteral">&quot;\t\t&quot;</span>+(argtn.at(0) + <span class="stringliteral">&quot; *_&quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot; = (&quot;</span>+argtn.at(0)+<span class="stringliteral">&quot;*)values.at(&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot;);&quot;</span>);
+<a name="l00819"></a>00819                                                 valsd += <span class="stringliteral">&quot;\t\t&quot;</span>+(argtn.at(0) + <span class="stringliteral">&quot; *_&quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot; = (&quot;</span>+argtn.at(0)+<span class="stringliteral">&quot;*)values.at(&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j)+<span class="stringliteral">&quot;);&quot;</span>);
 <a name="l00820"></a>00820                                         <span class="keywordflow">if</span>(type12==<span class="stringliteral">&quot;*&quot;</span>)
-<a name="l00821"></a>00821                                                 valsa += <span class="stringliteral">&quot;_&quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j);
+<a name="l00821"></a>00821                                                 valsa += <span class="stringliteral">&quot;_&quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j);
 <a name="l00822"></a>00822                                         <span class="keywordflow">else</span>
-<a name="l00823"></a>00823                                                 valsa += <span class="stringliteral">&quot;*_&quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j);
+<a name="l00823"></a>00823                                                 valsa += <span class="stringliteral">&quot;*_&quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(j);
 <a name="l00824"></a>00824                                         <span class="comment">//if(methpm.at(0)!=this-&gt;classN)</span>
 <a name="l00825"></a>00825                                         <span class="comment">//{</span>
 <a name="l00826"></a>00826                                                 typedefs += argtn.at(0);
@@ -1128,10 +1128,10 @@ $(document).ready(initResizable);
 <a name="l01068"></a>01068                                 }
 <a name="l01069"></a>01069                                 <span class="keywordflow">else</span>
 <a name="l01070"></a>01070                                 {
-<a name="l01071"></a>01071                                         boost::replace_first(methsd,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;ts&quot;</span>);
-<a name="l01072"></a>01072                                         boost::replace_first(methsd,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;te&quot;</span>);
-<a name="l01073"></a>01073                                         <span class="comment">//boost::replace_first(methsd,&quot;*&quot;,&quot;ptr&quot;);</span>
-<a name="l01074"></a>01074                                         <span class="comment">//boost::replace_first(methsd,&quot;&amp;&quot;,&quot;adr&quot;);</span>
+<a name="l01071"></a>01071                                         StringUtil::replaceFirst(methsd,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;ts&quot;</span>);
+<a name="l01072"></a>01072                                         StringUtil::replaceFirst(methsd,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;te&quot;</span>);
+<a name="l01073"></a>01073                                         <span class="comment">//StringUtil::replaceFirst(methsd,&quot;*&quot;,&quot;ptr&quot;);</span>
+<a name="l01074"></a>01074                                         <span class="comment">//StringUtil::replaceFirst(methsd,&quot;&amp;&quot;,&quot;adr&quot;);</span>
 <a name="l01075"></a>01075                                         <span class="keywordflow">if</span>(methpm.at(0)!=this-&gt;classN)
 <a name="l01076"></a>01076                                         {
 <a name="l01077"></a>01077                                                 typedefs += (<span class="stringliteral">&quot;) (&quot;</span>+typdefName+<span class="stringliteral">&quot;);\n&quot;</span>);
@@ -1178,9 +1178,9 @@ $(document).ready(initResizable);
 <a name="l01118"></a>01118                                 refDef += (<span class="stringliteral">&quot;f.clear();\n&quot;</span>);
 <a name="l01119"></a>01119                                 publf += this-&gt;pub.at(i);
 <a name="l01120"></a>01120                                 fld = this-&gt;pub.at(i);
-<a name="l01121"></a>01121                                 boost::replace_first(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01121"></a>01121                                 StringUtil::replaceFirst(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01122"></a>01122                                 strVec fldp;
-<a name="l01123"></a>01123                                 boost::iter_split(fldp, fld, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l01123"></a>01123                                 StringUtil::split(fldp, fld, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l01124"></a>01124                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; fldp.size(); j++)
 <a name="l01125"></a>01125                                 {
 <a name="l01126"></a>01126                                         <span class="keywordflow">if</span>(j==0)
@@ -1237,12 +1237,12 @@ $(document).ready(initResizable);
 <a name="l01177"></a>01177                                 <span class="comment">//refDef += (&quot;me.clear();\n&quot;);</span>
 <a name="l01178"></a>01178                                 privm += this-&gt;pri.at(i);
 <a name="l01179"></a>01179                                 meth = this-&gt;pri.at(i);
-<a name="l01180"></a>01180                                 boost::replace_first(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01181"></a>01181                                 boost::replace_first(meth,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l01182"></a>01182                                 boost::replace_all(meth,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l01183"></a>01183                                 boost::replace_first(meth,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l01180"></a>01180                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01181"></a>01181                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l01182"></a>01182                                 StringUtil::replaceAll(meth,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l01183"></a>01183                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
 <a name="l01184"></a>01184                                 strVec methp;
-<a name="l01185"></a>01185                                 boost::iter_split(methp, meth, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l01185"></a>01185                                 StringUtil::split(methp, meth, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l01186"></a>01186                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; methp.size(); j++)
 <a name="l01187"></a>01187                                 {
 <a name="l01188"></a>01188                                         <span class="keywordflow">if</span>(j==0)
@@ -1274,9 +1274,9 @@ $(document).ready(initResizable);
 <a name="l01214"></a>01214                                 refDef += (<span class="stringliteral">&quot;f.clear();\n&quot;</span>);
 <a name="l01215"></a>01215                                 privf += this-&gt;pri.at(i);
 <a name="l01216"></a>01216                                 fld = this-&gt;pri.at(i);
-<a name="l01217"></a>01217                                 boost::replace_first(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01217"></a>01217                                 StringUtil::replaceFirst(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01218"></a>01218                                 strVec fldp;
-<a name="l01219"></a>01219                                 boost::iter_split(fldp, fld, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l01219"></a>01219                                 StringUtil::split(fldp, fld, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l01220"></a>01220                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; fldp.size(); j++)
 <a name="l01221"></a>01221                                 {
 <a name="l01222"></a>01222                                         <span class="keywordflow">if</span>(j==0)
@@ -1305,12 +1305,12 @@ $(document).ready(initResizable);
 <a name="l01245"></a>01245                                 <span class="comment">//refDef += (&quot;me.clear();\n&quot;);</span>
 <a name="l01246"></a>01246                                 protm += this-&gt;pro.at(i);
 <a name="l01247"></a>01247                                 meth = this-&gt;pro.at(i);
-<a name="l01248"></a>01248                                 boost::replace_first(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01249"></a>01249                                 boost::replace_first(meth,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l01250"></a>01250                                 boost::replace_all(meth,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l01251"></a>01251                                 boost::replace_first(meth,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l01248"></a>01248                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01249"></a>01249                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l01250"></a>01250                                 StringUtil::replaceAll(meth,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l01251"></a>01251                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
 <a name="l01252"></a>01252                                 strVec methp;
-<a name="l01253"></a>01253                                 boost::iter_split(methp, meth, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l01253"></a>01253                                 StringUtil::split(methp, meth, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l01254"></a>01254                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; methp.size(); j++)
 <a name="l01255"></a>01255                                 {
 <a name="l01256"></a>01256                                         <span class="keywordflow">if</span>(j==0)
@@ -1342,9 +1342,9 @@ $(document).ready(initResizable);
 <a name="l01282"></a>01282                                 refDef += (<span class="stringliteral">&quot;f.clear();\n&quot;</span>);
 <a name="l01283"></a>01283                                 protf += this-&gt;pro.at(i);
 <a name="l01284"></a>01284                                 fld = this-&gt;pro.at(i);
-<a name="l01285"></a>01285                                 boost::replace_first(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01285"></a>01285                                 StringUtil::replaceFirst(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01286"></a>01286                                 strVec fldp;
-<a name="l01287"></a>01287                                 boost::iter_split(fldp, fld, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l01287"></a>01287                                 StringUtil::split(fldp, fld, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l01288"></a>01288                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; fldp.size(); j++)
 <a name="l01289"></a>01289                                 {
 <a name="l01290"></a>01290                                         <span class="keywordflow">if</span>(j==0)
@@ -1446,9 +1446,9 @@ $(document).ready(initResizable);
 <a name="l01386"></a>01386                         <span class="keywordflow">if</span>(((tes=this-&gt;pri.at(i).find(<span class="stringliteral">&quot;(&quot;</span>))==string::npos &amp;&amp; (tes=this-&gt;pri.at(i).find(<span class="stringliteral">&quot;)&quot;</span>))==string::npos &amp;&amp; this-&gt;pri.at(i).find(<span class="stringliteral">&quot;~&quot;</span>)==string::npos))
 <a name="l01387"></a>01387                         {
 <a name="l01388"></a>01388                                 fld = this-&gt;pri.at(i);
-<a name="l01389"></a>01389                                 boost::replace_first(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01389"></a>01389                                 StringUtil::replaceFirst(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01390"></a>01390                                 strVec fldp;
-<a name="l01391"></a>01391                                 boost::iter_split(fldp, fld, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l01391"></a>01391                                 StringUtil::split(fldp, fld, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l01392"></a>01392                                 <span class="keywordflow">if</span>(fldp.size()==2)
 <a name="l01393"></a>01393                                 {
 <a name="l01394"></a>01394                                         <span class="keywordtype">string</span> nam = fldp.at(1);
@@ -1465,9 +1465,9 @@ $(document).ready(initResizable);
 <a name="l01405"></a>01405                         <span class="keywordflow">if</span>(((tes=this-&gt;pro.at(i).find(<span class="stringliteral">&quot;(&quot;</span>))==string::npos &amp;&amp; (tes=this-&gt;pro.at(i).find(<span class="stringliteral">&quot;)&quot;</span>))==string::npos &amp;&amp; this-&gt;pro.at(i).find(<span class="stringliteral">&quot;~&quot;</span>)==string::npos))
 <a name="l01406"></a>01406                         {
 <a name="l01407"></a>01407                                 fld = this-&gt;pro.at(i);
-<a name="l01408"></a>01408                                 boost::replace_first(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01408"></a>01408                                 StringUtil::replaceFirst(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01409"></a>01409                                 strVec fldp;
-<a name="l01410"></a>01410                                 boost::iter_split(fldp, fld, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l01410"></a>01410                                 StringUtil::split(fldp, fld, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l01411"></a>01411                                 <span class="keywordflow">if</span>(fldp.size()==2)
 <a name="l01412"></a>01412                                 {
 <a name="l01413"></a>01413                                         <span class="keywordtype">string</span> nam = fldp.at(1);
@@ -1484,18 +1484,18 @@ $(document).ready(initResizable);
 <a name="l01424"></a>01424                         <span class="keywordflow">if</span>(((tes=this-&gt;pub.at(i).find(<span class="stringliteral">&quot;(&quot;</span>))==string::npos &amp;&amp; (tes=this-&gt;pub.at(i).find(<span class="stringliteral">&quot;)&quot;</span>))==string::npos &amp;&amp; this-&gt;pub.at(i).find(<span class="stringliteral">&quot;~&quot;</span>)==string::npos))
 <a name="l01425"></a>01425                         {
 <a name="l01426"></a>01426                                 fld = this-&gt;pub.at(i);
-<a name="l01427"></a>01427                                 boost::replace_first(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01427"></a>01427                                 StringUtil::replaceFirst(fld,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01428"></a>01428                                 strVec fldp;
-<a name="l01429"></a>01429                                 boost::iter_split(fldp, fld, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l01429"></a>01429                                 StringUtil::split(fldp, fld, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l01430"></a>01430                                 <span class="keywordflow">if</span>(fldp.size()==2)
 <a name="l01431"></a>01431                                 {
 <a name="l01432"></a>01432                                         <span class="keywordtype">string</span> nam = fldp.at(1);
 <a name="l01433"></a>01433                                         <span class="keywordflow">if</span>(fldp.at(0)==<span class="stringliteral">&quot;int&quot;</span> || fldp.at(0)==<span class="stringliteral">&quot;float&quot;</span> || fldp.at(0)==<span class="stringliteral">&quot;string&quot;</span> || fldp.at(0)==<span class="stringliteral">&quot;double&quot;</span> || fldp.at(0)==<span class="stringliteral">&quot;bool&quot;</span>)
 <a name="l01434"></a>01434                                         {
-<a name="l01435"></a>01435                                                 methods += (<span class="stringliteral">&quot;objxml += \&quot;&lt;&quot;</span>+fldp.at(1)+<span class="stringliteral">&quot; type=\\\&quot;&quot;</span>+fldp.at(0)+<span class="stringliteral">&quot;\\\&quot;&gt;\&quot;+boost::lexical_cast&lt;string&gt;(__obj-&gt;&quot;</span>+fldp.at(1)+<span class="stringliteral">&quot;)&quot;</span>);
+<a name="l01435"></a>01435                                                 methods += (<span class="stringliteral">&quot;objxml += \&quot;&lt;&quot;</span>+fldp.at(1)+<span class="stringliteral">&quot; type=\\\&quot;&quot;</span>+fldp.at(0)+<span class="stringliteral">&quot;\\\&quot;&gt;\&quot;+CastUtil::lexical_cast&lt;string&gt;(__obj-&gt;&quot;</span>+fldp.at(1)+<span class="stringliteral">&quot;)&quot;</span>);
 <a name="l01436"></a>01436                                                 <span class="keywordtype">string</span> cam = AfcUtil::camelCased(fldp.at(1));
 <a name="l01437"></a>01437                                                 methods += (<span class="stringliteral">&quot;+\&quot;&lt;/&quot;</span>+nam+<span class="stringliteral">&quot;&gt;\&quot;;\n&quot;</span>);
-<a name="l01438"></a>01438                                                 typedefs += <span class="stringliteral">&quot;if(nam==\&quot;&quot;</span>+fldp.at(1)+<span class="stringliteral">&quot;\&quot;)\n__obj-&gt;&quot;</span>+fldp.at(1)+<span class="stringliteral">&quot; = boost::lexical_cast&lt;&quot;</span>+fldp.at(0)+<span class="stringliteral">&quot;&gt;(root.getChildElements().at(i).getText());\n&quot;</span>;
+<a name="l01438"></a>01438                                                 typedefs += <span class="stringliteral">&quot;if(nam==\&quot;&quot;</span>+fldp.at(1)+<span class="stringliteral">&quot;\&quot;)\n__obj-&gt;&quot;</span>+fldp.at(1)+<span class="stringliteral">&quot; = CastUtil::lexical_cast&lt;&quot;</span>+fldp.at(0)+<span class="stringliteral">&quot;&gt;(root.getChildElements().at(i).getText());\n&quot;</span>;
 <a name="l01439"></a>01439                                         }
 <a name="l01440"></a>01440                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(fldp.at(0)==<span class="stringliteral">&quot;Date&quot;</span>)
 <a name="l01441"></a>01441                                         {
@@ -1515,9 +1515,9 @@ $(document).ready(initResizable);
 <a name="l01455"></a>01455                                         {
 <a name="l01456"></a>01456                                                 <span class="keywordtype">string</span> stlcnt = fldp.at(0);
 <a name="l01457"></a>01457                                                 <span class="keywordtype">string</span> stltyp = fldp.at(0);
-<a name="l01458"></a>01458                                                 boost::replace_first(stltyp,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;::&quot;</span>);
-<a name="l01459"></a>01459                                                 boost::replace_first(stltyp,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01460"></a>01460                                                 boost::replace_first(stltyp,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01458"></a>01458                                                 StringUtil::replaceFirst(stltyp,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;::&quot;</span>);
+<a name="l01459"></a>01459                                                 StringUtil::replaceFirst(stltyp,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01460"></a>01460                                                 StringUtil::replaceFirst(stltyp,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01461"></a>01461                                                 <span class="keywordtype">string</span> stlcnttyp = <span class="stringliteral">&quot;&quot;</span>;
 <a name="l01462"></a>01462                                                 <span class="keywordflow">if</span>(fldp.at(0).find(<span class="stringliteral">&quot;vector&quot;</span>)!=string::npos)
 <a name="l01463"></a>01463                                                         stlcnttyp = <span class="stringliteral">&quot;Vec&quot;</span>;
@@ -1529,14 +1529,14 @@ $(document).ready(initResizable);
 <a name="l01469"></a>01469                                                         stlcnttyp = <span class="stringliteral">&quot;Lis&quot;</span>;
 <a name="l01470"></a>01470                                                 <span class="keywordflow">else</span>
 <a name="l01471"></a>01471                                                         stlcnttyp = <span class="stringliteral">&quot;Set&quot;</span>;
-<a name="l01472"></a>01472                                                 boost::replace_first(stlcnt,<span class="stringliteral">&quot;vector&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01473"></a>01473                                                 boost::replace_first(stlcnt,<span class="stringliteral">&quot;queue&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01474"></a>01474                                                 boost::replace_first(stlcnt,<span class="stringliteral">&quot;deque&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01475"></a>01475                                                 boost::replace_first(stlcnt,<span class="stringliteral">&quot;set&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01476"></a>01476                                                 boost::replace_first(stlcnt,<span class="stringliteral">&quot;list&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01477"></a>01477                                                 boost::replace_first(stlcnt,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01478"></a>01478                                                 boost::replace_first(stlcnt,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01479"></a>01479                                                 boost::replace_first(stlcnt,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01472"></a>01472                                                 StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;vector&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01473"></a>01473                                                 StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;queue&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01474"></a>01474                                                 StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;deque&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01475"></a>01475                                                 StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;set&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01476"></a>01476                                                 StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;list&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01477"></a>01477                                                 StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01478"></a>01478                                                 StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01479"></a>01479                                                 StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01480"></a>01480 
 <a name="l01481"></a>01481                                                 methods += (fldp.at(0)+<span class="stringliteral">&quot; __temp_obj_ser = __obj-&gt;&quot;</span>+fldp.at(1)+<span class="stringliteral">&quot;;\n&quot;</span>);
 <a name="l01482"></a>01482                                                 methods += (<span class="stringliteral">&quot;objxml += \&quot;&lt;&quot;</span>+fldp.at(1)+<span class="stringliteral">&quot; type=\\\&quot;&quot;</span>+stltyp+<span class="stringliteral">&quot;\\\&quot;&gt;\&quot;+serialize&quot;</span>+stlcnt+stlcnttyp+<span class="stringliteral">&quot;(&amp;__temp_obj_ser)&quot;</span>);
@@ -1559,11 +1559,11 @@ $(document).ready(initResizable);
 <a name="l01499"></a>01499                                         &amp;&amp; fldnames.size()&gt;0)
 <a name="l01500"></a>01500                         {
 <a name="l01501"></a>01501                                 meth = this-&gt;pub.at(i);
-<a name="l01502"></a>01502                                 boost::replace_first(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01502"></a>01502                                 StringUtil::replaceFirst(meth,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01503"></a>01503 
 <a name="l01504"></a>01504                                 <span class="keywordtype">string</span> argts = meth.substr(meth.find(<span class="stringliteral">&quot;(&quot;</span>),meth.find(<span class="stringliteral">&quot;)&quot;</span>)-meth.find(<span class="stringliteral">&quot;(&quot;</span>));
-<a name="l01505"></a>01505                                 boost::replace_first(argts,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01506"></a>01506                                 boost::replace_all(argts,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01505"></a>01505                                 StringUtil::replaceFirst(argts,<span class="stringliteral">&quot;(&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01506"></a>01506                                 StringUtil::replaceAll(argts,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01507"></a>01507                                 meth = meth.substr(0,meth.find(<span class="stringliteral">&quot;(&quot;</span>));
 <a name="l01508"></a>01508                                 <span class="keywordflow">if</span>(meth.find(<span class="stringliteral">&quot;operator&quot;</span>)!=string::npos)
 <a name="l01509"></a>01509                                 {
@@ -1578,10 +1578,10 @@ $(document).ready(initResizable);
 <a name="l01518"></a>01518                                 }
 <a name="l01519"></a>01519                                 <span class="keywordflow">else</span>
 <a name="l01520"></a>01520                                 {
-<a name="l01521"></a>01521                                         <span class="comment">//boost::replace_first(meth,&quot;)&quot;,&quot; &quot;);</span>
+<a name="l01521"></a>01521                                         <span class="comment">//StringUtil::replaceFirst(meth,&quot;)&quot;,&quot; &quot;);</span>
 <a name="l01522"></a>01522                                         strVec methp,methpm,argp,argpm;
-<a name="l01523"></a>01523                                         boost::iter_split(argp, argts, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
-<a name="l01524"></a>01524                                         boost::iter_split(methp, meth, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l01523"></a>01523                                         StringUtil::split(argp, argts, (<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l01524"></a>01524                                         StringUtil::split(methp, meth, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l01525"></a>01525                                         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> j = 0; j &lt; methp.size(); j++)
 <a name="l01526"></a>01526                                         {
 <a name="l01527"></a>01527                                                 <span class="keywordflow">if</span>(methp.at(j)!=<span class="stringliteral">&quot;&quot;</span>)
@@ -1606,7 +1606,7 @@ $(document).ready(initResizable);
 <a name="l01546"></a>01546                                                         {
 <a name="l01547"></a>01547                                                                 <span class="keywordflow">if</span>(argpm.at(0)==<span class="stringliteral">&quot;int&quot;</span> || argpm.at(0)==<span class="stringliteral">&quot;float&quot;</span> || argpm.at(0)==<span class="stringliteral">&quot;string&quot;</span> || argpm.at(0)==<span class="stringliteral">&quot;double&quot;</span> || argpm.at(0)==<span class="stringliteral">&quot;bool&quot;</span>)
 <a name="l01548"></a>01548                                                                 {
-<a name="l01549"></a>01549                                                                         typedefs += <span class="stringliteral">&quot;if(nam==\&quot;&quot;</span>+fldnames.at(k+1)+<span class="stringliteral">&quot;\&quot;)\n__obj-&gt;&quot;</span>+methpm.at(1)+<span class="stringliteral">&quot;(boost::lexical_cast&lt;&quot;</span>+argpm.at(0)+<span class="stringliteral">&quot;&gt;(root.getChildElements().at(i).getText()));\n&quot;</span>;
+<a name="l01549"></a>01549                                                                         typedefs += <span class="stringliteral">&quot;if(nam==\&quot;&quot;</span>+fldnames.at(k+1)+<span class="stringliteral">&quot;\&quot;)\n__obj-&gt;&quot;</span>+methpm.at(1)+<span class="stringliteral">&quot;(CastUtil::lexical_cast&lt;&quot;</span>+argpm.at(0)+<span class="stringliteral">&quot;&gt;(root.getChildElements().at(i).getText()));\n&quot;</span>;
 <a name="l01550"></a>01550                                                                 }
 <a name="l01551"></a>01551                                                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(argpm.at(0)==<span class="stringliteral">&quot;Date&quot;</span>)
 <a name="l01552"></a>01552                                                                 {
@@ -1625,9 +1625,9 @@ $(document).ready(initResizable);
 <a name="l01565"></a>01565                                                         {
 <a name="l01566"></a>01566                                                                 <span class="keywordflow">if</span>(methpm.at(0)==<span class="stringliteral">&quot;int&quot;</span> || methpm.at(0)==<span class="stringliteral">&quot;float&quot;</span> || methpm.at(0)==<span class="stringliteral">&quot;string&quot;</span> || methpm.at(0)==<span class="stringliteral">&quot;double&quot;</span> || methpm.at(0)==<span class="stringliteral">&quot;bool&quot;</span>)
 <a name="l01567"></a>01567                                                                 {
-<a name="l01568"></a>01568                                                                         methods += (<span class="stringliteral">&quot;objxml += \&quot;&lt;&quot;</span>+fldnames.at(k+1)+<span class="stringliteral">&quot; type=\\\&quot;&quot;</span>+methpm.at(0)+<span class="stringliteral">&quot;\\\&quot;&gt;\&quot;+boost::lexical_cast&lt;string&gt;(__obj-&gt;&quot;</span>+methpm.at(1)+<span class="stringliteral">&quot;())&quot;</span>);
+<a name="l01568"></a>01568                                                                         methods += (<span class="stringliteral">&quot;objxml += \&quot;&lt;&quot;</span>+fldnames.at(k+1)+<span class="stringliteral">&quot; type=\\\&quot;&quot;</span>+methpm.at(0)+<span class="stringliteral">&quot;\\\&quot;&gt;\&quot;+CastUtil::lexical_cast&lt;string&gt;(__obj-&gt;&quot;</span>+methpm.at(1)+<span class="stringliteral">&quot;())&quot;</span>);
 <a name="l01569"></a>01569                                                                         methods += (<span class="stringliteral">&quot;+\&quot;&lt;/&quot;</span>+fldnames.at(k+1)+<span class="stringliteral">&quot;&gt;\&quot;;\n&quot;</span>);
-<a name="l01570"></a>01570                                                                         <span class="keywordflow">if</span>(methsall[this-&gt;classN+<span class="stringliteral">&quot;get&quot;</span>+cam+methpm.at(0)])typedefs += <span class="stringliteral">&quot;if(nam==\&quot;&quot;</span>+fldnames.at(k+1)+<span class="stringliteral">&quot;\&quot;)\n__obj-&gt;set&quot;</span>+cam+<span class="stringliteral">&quot;(boost::lexical_cast&lt;&quot;</span>+methpm.at(0)+<span class="stringliteral">&quot;&gt;(root.getChildElements().at(i).getText()));\n&quot;</span>;
+<a name="l01570"></a>01570                                                                         <span class="keywordflow">if</span>(methsall[this-&gt;classN+<span class="stringliteral">&quot;get&quot;</span>+cam+methpm.at(0)])typedefs += <span class="stringliteral">&quot;if(nam==\&quot;&quot;</span>+fldnames.at(k+1)+<span class="stringliteral">&quot;\&quot;)\n__obj-&gt;set&quot;</span>+cam+<span class="stringliteral">&quot;(CastUtil::lexical_cast&lt;&quot;</span>+methpm.at(0)+<span class="stringliteral">&quot;&gt;(root.getChildElements().at(i).getText()));\n&quot;</span>;
 <a name="l01571"></a>01571                                                                 }
 <a name="l01572"></a>01572                                                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(methpm.at(0)==<span class="stringliteral">&quot;Date&quot;</span>)
 <a name="l01573"></a>01573                                                                 {
@@ -1645,9 +1645,9 @@ $(document).ready(initResizable);
 <a name="l01585"></a>01585                                                                 {
 <a name="l01586"></a>01586                                                                         <span class="keywordtype">string</span> stlcnt = methpm.at(0);
 <a name="l01587"></a>01587                                                                         <span class="keywordtype">string</span> stltyp = methpm.at(0);
-<a name="l01588"></a>01588                                                                         boost::replace_first(stltyp,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;::&quot;</span>);
-<a name="l01589"></a>01589                                                                         boost::replace_first(stltyp,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01590"></a>01590                                                                         boost::replace_first(stltyp,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01588"></a>01588                                                                         StringUtil::replaceFirst(stltyp,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;::&quot;</span>);
+<a name="l01589"></a>01589                                                                         StringUtil::replaceFirst(stltyp,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01590"></a>01590                                                                         StringUtil::replaceFirst(stltyp,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01591"></a>01591                                                                         <span class="keywordtype">string</span> stlcnttyp = <span class="stringliteral">&quot;&quot;</span>;
 <a name="l01592"></a>01592                                                                         <span class="keywordflow">if</span>(methpm.at(0).find(<span class="stringliteral">&quot;vector&quot;</span>)!=string::npos)
 <a name="l01593"></a>01593                                                                                 stlcnttyp = <span class="stringliteral">&quot;Vec&quot;</span>;
@@ -1659,14 +1659,14 @@ $(document).ready(initResizable);
 <a name="l01599"></a>01599                                                                                 stlcnttyp = <span class="stringliteral">&quot;Lis&quot;</span>;
 <a name="l01600"></a>01600                                                                         <span class="keywordflow">else</span>
 <a name="l01601"></a>01601                                                                                 stlcnttyp = <span class="stringliteral">&quot;Set&quot;</span>;
-<a name="l01602"></a>01602                                                                         boost::replace_first(stlcnt,<span class="stringliteral">&quot;vector&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01603"></a>01603                                                                         boost::replace_first(stlcnt,<span class="stringliteral">&quot;queue&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01604"></a>01604                                                                         boost::replace_first(stlcnt,<span class="stringliteral">&quot;deque&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01605"></a>01605                                                                         boost::replace_first(stlcnt,<span class="stringliteral">&quot;set&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01606"></a>01606                                                                         boost::replace_first(stlcnt,<span class="stringliteral">&quot;list&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01607"></a>01607                                                                         boost::replace_first(stlcnt,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01608"></a>01608                                                                         boost::replace_first(stlcnt,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01609"></a>01609                                                                         boost::replace_first(stlcnt,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01602"></a>01602                                                                         StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;vector&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01603"></a>01603                                                                         StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;queue&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01604"></a>01604                                                                         StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;deque&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01605"></a>01605                                                                         StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;set&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01606"></a>01606                                                                         StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;list&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01607"></a>01607                                                                         StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01608"></a>01608                                                                         StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01609"></a>01609                                                                         StringUtil::replaceFirst(stlcnt,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01610"></a>01610 
 <a name="l01611"></a>01611                                                                         methods += (methpm.at(0)+<span class="stringliteral">&quot; __temp_obj_ser = __obj-&gt;&quot;</span>+methpm.at(1)+<span class="stringliteral">&quot;();\n&quot;</span>);
 <a name="l01612"></a>01612                                                                         methods += (<span class="stringliteral">&quot;objxml += \&quot;&lt;&quot;</span>+fldnames.at(k+1)+<span class="stringliteral">&quot; type=\\\&quot;&quot;</span>+stltyp+<span class="stringliteral">&quot;\\\&quot;&gt;\&quot;+serialize&quot;</span>+stlcnt+stlcnttyp+<span class="stringliteral">&quot;(&amp;__temp_obj_ser)&quot;</span>);
@@ -1757,9 +1757,9 @@ $(document).ready(initResizable);
 <a name="l01697"></a>01697 <span class="comment">                        if(((tes=this-&gt;pri.at(i).find(&quot;(&quot;))==string::npos &amp;&amp; (tes=this-&gt;pri.at(i).find(&quot;)&quot;))==string::npos &amp;&amp; this-&gt;pri.at(i).find(&quot;~&quot;)==string::npos))</span>
 <a name="l01698"></a>01698 <span class="comment">                        {</span>
 <a name="l01699"></a>01699 <span class="comment">                                fld = this-&gt;pri.at(i);</span>
-<a name="l01700"></a>01700 <span class="comment">                                boost::replace_first(fld,&quot;;&quot;,&quot;&quot;);</span>
+<a name="l01700"></a>01700 <span class="comment">                                StringUtil::replaceFirst(fld,&quot;;&quot;,&quot;&quot;);</span>
 <a name="l01701"></a>01701 <span class="comment">                                strVec fldp;</span>
-<a name="l01702"></a>01702 <span class="comment">                                boost::iter_split(fldp, fld, boost::first_finder(&quot; &quot;));</span>
+<a name="l01702"></a>01702 <span class="comment">                                StringUtil::split(fldp, fld, (&quot; &quot;));</span>
 <a name="l01703"></a>01703 <span class="comment">                                if(fldp.size()==2)</span>
 <a name="l01704"></a>01704 <span class="comment">                                {</span>
 <a name="l01705"></a>01705 <span class="comment">                                        string nam = fldp.at(1);</span>
@@ -1776,9 +1776,9 @@ $(document).ready(initResizable);
 <a name="l01716"></a>01716 <span class="comment">                        if(((tes=this-&gt;pro.at(i).find(&quot;(&quot;))==string::npos &amp;&amp; (tes=this-&gt;pro.at(i).find(&quot;)&quot;))==string::npos &amp;&amp; this-&gt;pro.at(i).find(&quot;~&quot;)==string::npos))</span>
 <a name="l01717"></a>01717 <span class="comment">                        {</span>
 <a name="l01718"></a>01718 <span class="comment">                                fld = this-&gt;pro.at(i);</span>
-<a name="l01719"></a>01719 <span class="comment">                                boost::replace_first(fld,&quot;;&quot;,&quot;&quot;);</span>
+<a name="l01719"></a>01719 <span class="comment">                                StringUtil::replaceFirst(fld,&quot;;&quot;,&quot;&quot;);</span>
 <a name="l01720"></a>01720 <span class="comment">                                strVec fldp;</span>
-<a name="l01721"></a>01721 <span class="comment">                                boost::iter_split(fldp, fld, boost::first_finder(&quot; &quot;));</span>
+<a name="l01721"></a>01721 <span class="comment">                                StringUtil::split(fldp, fld, (&quot; &quot;));</span>
 <a name="l01722"></a>01722 <span class="comment">                                if(fldp.size()==2)</span>
 <a name="l01723"></a>01723 <span class="comment">                                {</span>
 <a name="l01724"></a>01724 <span class="comment">                                        string nam = fldp.at(1);</span>
@@ -1795,9 +1795,9 @@ $(document).ready(initResizable);
 <a name="l01735"></a>01735 <span class="comment">                        if(((tes=this-&gt;pub.at(i).find(&quot;(&quot;))==string::npos &amp;&amp; (tes=this-&gt;pub.at(i).find(&quot;)&quot;))==string::npos &amp;&amp; this-&gt;pub.at(i).find(&quot;~&quot;)==string::npos))</span>
 <a name="l01736"></a>01736 <span class="comment">                        {</span>
 <a name="l01737"></a>01737 <span class="comment">                                fld = this-&gt;pub.at(i);</span>
-<a name="l01738"></a>01738 <span class="comment">                                boost::replace_first(fld,&quot;;&quot;,&quot;&quot;);</span>
+<a name="l01738"></a>01738 <span class="comment">                                StringUtil::replaceFirst(fld,&quot;;&quot;,&quot;&quot;);</span>
 <a name="l01739"></a>01739 <span class="comment">                                strVec fldp;</span>
-<a name="l01740"></a>01740 <span class="comment">                                boost::iter_split(fldp, fld, boost::first_finder(&quot; &quot;));</span>
+<a name="l01740"></a>01740 <span class="comment">                                StringUtil::split(fldp, fld, (&quot; &quot;));</span>
 <a name="l01741"></a>01741 <span class="comment">                                if(fldp.size()==2)</span>
 <a name="l01742"></a>01742 <span class="comment">                                {</span>
 <a name="l01743"></a>01743 <span class="comment">                                        string nam = fldp.at(1);</span>
@@ -1805,7 +1805,7 @@ $(document).ready(initResizable);
 <a name="l01745"></a>01745 <span class="comment">                                        {</span>
 <a name="l01746"></a>01746 <span class="comment">                                                methods += (&quot;object.addPacket(__obj-&gt;&quot;+fldp.at(1)+&quot;,\\\&quot;&quot;+fldp.at(1)+&quot;\\\&quot;);\n&quot;);</span>
 <a name="l01747"></a>01747 <span class="comment">                                                string cam = AfcUtil::camelCased(fldp.at(1));</span>
-<a name="l01748"></a>01748 <span class="comment">                                                typedefs += &quot;if(nam==\&quot;&quot;+fldp.at(1)+&quot;\&quot;)\n__obj-&gt;&quot;+fldp.at(1)+&quot; = boost::lexical_cast&lt;&quot;+fldp.at(0)+&quot;&gt;(root.getChildElements().at(i).getText());\n&quot;;</span>
+<a name="l01748"></a>01748 <span class="comment">                                                typedefs += &quot;if(nam==\&quot;&quot;+fldp.at(1)+&quot;\&quot;)\n__obj-&gt;&quot;+fldp.at(1)+&quot; = CastUtil::lexical_cast&lt;&quot;+fldp.at(0)+&quot;&gt;(root.getChildElements().at(i).getText());\n&quot;;</span>
 <a name="l01749"></a>01749 <span class="comment">                                        }</span>
 <a name="l01750"></a>01750 <span class="comment">                                        else if(fldp.at(0)==&quot;Date&quot;)</span>
 <a name="l01751"></a>01751 <span class="comment">                                        {</span>
@@ -1825,9 +1825,9 @@ $(document).ready(initResizable);
 <a name="l01765"></a>01765 <span class="comment">                                        {</span>
 <a name="l01766"></a>01766 <span class="comment">                                                string stlcnt = fldp.at(0);</span>
 <a name="l01767"></a>01767 <span class="comment">                                                string stltyp = fldp.at(0);</span>
-<a name="l01768"></a>01768 <span class="comment">                                                boost::replace_first(stltyp,&quot;&lt;&quot;,&quot;::&quot;);</span>
-<a name="l01769"></a>01769 <span class="comment">                                                boost::replace_first(stltyp,&quot;&gt;&quot;,&quot;&quot;);</span>
-<a name="l01770"></a>01770 <span class="comment">                                                boost::replace_first(stltyp,&quot; &quot;,&quot;&quot;);</span>
+<a name="l01768"></a>01768 <span class="comment">                                                StringUtil::replaceFirst(stltyp,&quot;&lt;&quot;,&quot;::&quot;);</span>
+<a name="l01769"></a>01769 <span class="comment">                                                StringUtil::replaceFirst(stltyp,&quot;&gt;&quot;,&quot;&quot;);</span>
+<a name="l01770"></a>01770 <span class="comment">                                                StringUtil::replaceFirst(stltyp,&quot; &quot;,&quot;&quot;);</span>
 <a name="l01771"></a>01771 <span class="comment">                                                string stlcnttyp = &quot;&quot;;</span>
 <a name="l01772"></a>01772 <span class="comment">                                                if(fldp.at(0).find(&quot;vector&quot;)!=string::npos)</span>
 <a name="l01773"></a>01773 <span class="comment">                                                        stlcnttyp = &quot;Vec&quot;;</span>
@@ -1839,14 +1839,14 @@ $(document).ready(initResizable);
 <a name="l01779"></a>01779 <span class="comment">                                                        stlcnttyp = &quot;Lis&quot;;</span>
 <a name="l01780"></a>01780 <span class="comment">                                                else</span>
 <a name="l01781"></a>01781 <span class="comment">                                                        stlcnttyp = &quot;Set&quot;;</span>
-<a name="l01782"></a>01782 <span class="comment">                                                boost::replace_first(stlcnt,&quot;vector&quot;,&quot;&quot;);</span>
-<a name="l01783"></a>01783 <span class="comment">                                                boost::replace_first(stlcnt,&quot;queue&quot;,&quot;&quot;);</span>
-<a name="l01784"></a>01784 <span class="comment">                                                boost::replace_first(stlcnt,&quot;deque&quot;,&quot;&quot;);</span>
-<a name="l01785"></a>01785 <span class="comment">                                                boost::replace_first(stlcnt,&quot;set&quot;,&quot;&quot;);</span>
-<a name="l01786"></a>01786 <span class="comment">                                                boost::replace_first(stlcnt,&quot;list&quot;,&quot;&quot;);</span>
-<a name="l01787"></a>01787 <span class="comment">                                                boost::replace_first(stlcnt,&quot;&lt;&quot;,&quot;&quot;);</span>
-<a name="l01788"></a>01788 <span class="comment">                                                boost::replace_first(stlcnt,&quot;&gt;&quot;,&quot;&quot;);</span>
-<a name="l01789"></a>01789 <span class="comment">                                                boost::replace_first(stlcnt,&quot; &quot;,&quot;&quot;);</span>
+<a name="l01782"></a>01782 <span class="comment">                                                StringUtil::replaceFirst(stlcnt,&quot;vector&quot;,&quot;&quot;);</span>
+<a name="l01783"></a>01783 <span class="comment">                                                StringUtil::replaceFirst(stlcnt,&quot;queue&quot;,&quot;&quot;);</span>
+<a name="l01784"></a>01784 <span class="comment">                                                StringUtil::replaceFirst(stlcnt,&quot;deque&quot;,&quot;&quot;);</span>
+<a name="l01785"></a>01785 <span class="comment">                                                StringUtil::replaceFirst(stlcnt,&quot;set&quot;,&quot;&quot;);</span>
+<a name="l01786"></a>01786 <span class="comment">                                                StringUtil::replaceFirst(stlcnt,&quot;list&quot;,&quot;&quot;);</span>
+<a name="l01787"></a>01787 <span class="comment">                                                StringUtil::replaceFirst(stlcnt,&quot;&lt;&quot;,&quot;&quot;);</span>
+<a name="l01788"></a>01788 <span class="comment">                                                StringUtil::replaceFirst(stlcnt,&quot;&gt;&quot;,&quot;&quot;);</span>
+<a name="l01789"></a>01789 <span class="comment">                                                StringUtil::replaceFirst(stlcnt,&quot; &quot;,&quot;&quot;);</span>
 <a name="l01790"></a>01790 <span class="comment"></span>
 <a name="l01791"></a>01791 <span class="comment">                                                methods += (fldp.at(0)+&quot; __temp_obj_ser = __obj-&gt;&quot;+fldp.at(1)+&quot;;\n&quot;);</span>
 <a name="l01792"></a>01792 <span class="comment">                                                methods += (&quot;object.addPacket(binarySerialize&quot;+stlcnt+stlcnttyp+&quot;(&amp;__temp_obj_ser,\&quot;&quot;+stlcnt+stlcnttyp+this-&gt;classN+&quot;\&quot;));\n&quot;);</span>
@@ -1869,11 +1869,11 @@ $(document).ready(initResizable);
 <a name="l01809"></a>01809 <span class="comment">                                        &amp;&amp; fldnames.size()&gt;0)</span>
 <a name="l01810"></a>01810 <span class="comment">                        {</span>
 <a name="l01811"></a>01811 <span class="comment">                                meth = this-&gt;pub.at(i);</span>
-<a name="l01812"></a>01812 <span class="comment">                                boost::replace_first(meth,&quot;;&quot;,&quot;&quot;);</span>
+<a name="l01812"></a>01812 <span class="comment">                                StringUtil::replaceFirst(meth,&quot;;&quot;,&quot;&quot;);</span>
 <a name="l01813"></a>01813 <span class="comment"></span>
 <a name="l01814"></a>01814 <span class="comment">                                string argts = meth.substr(meth.find(&quot;(&quot;),meth.find(&quot;)&quot;)-meth.find(&quot;(&quot;));</span>
-<a name="l01815"></a>01815 <span class="comment">                                boost::replace_first(argts,&quot;(&quot;,&quot;&quot;);</span>
-<a name="l01816"></a>01816 <span class="comment">                                boost::replace_all(argts,&quot;)&quot;,&quot;&quot;);</span>
+<a name="l01815"></a>01815 <span class="comment">                                StringUtil::replaceFirst(argts,&quot;(&quot;,&quot;&quot;);</span>
+<a name="l01816"></a>01816 <span class="comment">                                StringUtil::replaceAll(argts,&quot;)&quot;,&quot;&quot;);</span>
 <a name="l01817"></a>01817 <span class="comment">                                meth = meth.substr(0,meth.find(&quot;(&quot;));</span>
 <a name="l01818"></a>01818 <span class="comment">                                if(meth.find(&quot;operator&quot;)!=string::npos)</span>
 <a name="l01819"></a>01819 <span class="comment">                                {</span>
@@ -1888,10 +1888,10 @@ $(document).ready(initResizable);
 <a name="l01828"></a>01828 <span class="comment">                                }</span>
 <a name="l01829"></a>01829 <span class="comment">                                else</span>
 <a name="l01830"></a>01830 <span class="comment">                                {</span>
-<a name="l01831"></a>01831 <span class="comment">                                        //boost::replace_first(meth,&quot;)&quot;,&quot; &quot;);</span>
+<a name="l01831"></a>01831 <span class="comment">                                        //StringUtil::replaceFirst(meth,&quot;)&quot;,&quot; &quot;);</span>
 <a name="l01832"></a>01832 <span class="comment">                                        strVec methp,methpm,argp,argpm;</span>
-<a name="l01833"></a>01833 <span class="comment">                                        boost::iter_split(argp, argts, boost::first_finder(&quot;,&quot;));</span>
-<a name="l01834"></a>01834 <span class="comment">                                        boost::iter_split(methp, meth, boost::first_finder(&quot; &quot;));</span>
+<a name="l01833"></a>01833 <span class="comment">                                        StringUtil::split(argp, argts, (&quot;,&quot;));</span>
+<a name="l01834"></a>01834 <span class="comment">                                        StringUtil::split(methp, meth, (&quot; &quot;));</span>
 <a name="l01835"></a>01835 <span class="comment">                                        for(unsigned int j = 0; j &lt; methp.size(); j++)</span>
 <a name="l01836"></a>01836 <span class="comment">                                        {</span>
 <a name="l01837"></a>01837 <span class="comment">                                                if(methp.at(j)!=&quot;&quot;)</span>
@@ -1912,7 +1912,7 @@ $(document).ready(initResizable);
 <a name="l01852"></a>01852 <span class="comment">                                                        {</span>
 <a name="l01853"></a>01853 <span class="comment">                                                                if(argpm.at(0)==&quot;int&quot; || argpm.at(0)==&quot;float&quot; || argpm.at(0)==&quot;string&quot; || argpm.at(0)==&quot;double&quot; || argpm.at(0)==&quot;bool&quot;)</span>
 <a name="l01854"></a>01854 <span class="comment">                                                                {</span>
-<a name="l01855"></a>01855 <span class="comment">                                                                        typedefs += &quot;if(nam==\&quot;&quot;+fldnames.at(k+1)+&quot;\&quot;)\n__obj-&gt;&quot;+methpm.at(1)+&quot;(boost::lexical_cast&lt;&quot;+argpm.at(0)+&quot;&gt;(root.getChildElements().at(i).getText()));\n&quot;;</span>
+<a name="l01855"></a>01855 <span class="comment">                                                                        typedefs += &quot;if(nam==\&quot;&quot;+fldnames.at(k+1)+&quot;\&quot;)\n__obj-&gt;&quot;+methpm.at(1)+&quot;(CastUtil::lexical_cast&lt;&quot;+argpm.at(0)+&quot;&gt;(root.getChildElements().at(i).getText()));\n&quot;;</span>
 <a name="l01856"></a>01856 <span class="comment">                                                                }</span>
 <a name="l01857"></a>01857 <span class="comment">                                                                else if(argpm.at(0)==&quot;Date&quot;)</span>
 <a name="l01858"></a>01858 <span class="comment">                                                                {</span>
@@ -1931,9 +1931,9 @@ $(document).ready(initResizable);
 <a name="l01871"></a>01871 <span class="comment">                                                        {</span>
 <a name="l01872"></a>01872 <span class="comment">                                                                if(methpm.at(0)==&quot;int&quot; || methpm.at(0)==&quot;float&quot; || methpm.at(0)==&quot;string&quot; || methpm.at(0)==&quot;double&quot; || methpm.at(0)==&quot;bool&quot;)</span>
 <a name="l01873"></a>01873 <span class="comment">                                                                {</span>
-<a name="l01874"></a>01874 <span class="comment">                                                                        methods += (&quot;objxml += \&quot;&lt;&quot;+fldnames.at(k+1)+&quot; type=\\\&quot;&quot;+methpm.at(0)+&quot;\\\&quot;&gt;\&quot;+boost::lexical_cast&lt;string&gt;(__obj-&gt;&quot;+methpm.at(1)+&quot;())&quot;);</span>
+<a name="l01874"></a>01874 <span class="comment">                                                                        methods += (&quot;objxml += \&quot;&lt;&quot;+fldnames.at(k+1)+&quot; type=\\\&quot;&quot;+methpm.at(0)+&quot;\\\&quot;&gt;\&quot;+CastUtil::lexical_cast&lt;string&gt;(__obj-&gt;&quot;+methpm.at(1)+&quot;())&quot;);</span>
 <a name="l01875"></a>01875 <span class="comment">                                                                        methods += (&quot;+\&quot;&lt;/&quot;+fldnames.at(k+1)+&quot;&gt;\&quot;;\n&quot;);</span>
-<a name="l01876"></a>01876 <span class="comment">                                                                        if(methsall[this-&gt;classN+&quot;get&quot;+cam+methpm.at(0)])typedefs += &quot;if(nam==\&quot;&quot;+fldnames.at(k+1)+&quot;\&quot;)\n__obj-&gt;set&quot;+cam+&quot;(boost::lexical_cast&lt;&quot;+methpm.at(0)+&quot;&gt;(root.getChildElements().at(i).getText()));\n&quot;;</span>
+<a name="l01876"></a>01876 <span class="comment">                                                                        if(methsall[this-&gt;classN+&quot;get&quot;+cam+methpm.at(0)])typedefs += &quot;if(nam==\&quot;&quot;+fldnames.at(k+1)+&quot;\&quot;)\n__obj-&gt;set&quot;+cam+&quot;(CastUtil::lexical_cast&lt;&quot;+methpm.at(0)+&quot;&gt;(root.getChildElements().at(i).getText()));\n&quot;;</span>
 <a name="l01877"></a>01877 <span class="comment">                                                                }</span>
 <a name="l01878"></a>01878 <span class="comment">                                                                else if(methpm.at(0)==&quot;Date&quot;)</span>
 <a name="l01879"></a>01879 <span class="comment">                                                                {</span>
@@ -1951,9 +1951,9 @@ $(document).ready(initResizable);
 <a name="l01891"></a>01891 <span class="comment">                                                                {</span>
 <a name="l01892"></a>01892 <span class="comment">                                                                        string stlcnt = methpm.at(0);</span>
 <a name="l01893"></a>01893 <span class="comment">                                                                        string stltyp = methpm.at(0);</span>
-<a name="l01894"></a>01894 <span class="comment">                                                                        boost::replace_first(stltyp,&quot;&lt;&quot;,&quot;::&quot;);</span>
-<a name="l01895"></a>01895 <span class="comment">                                                                        boost::replace_first(stltyp,&quot;&gt;&quot;,&quot;&quot;);</span>
-<a name="l01896"></a>01896 <span class="comment">                                                                        boost::replace_first(stltyp,&quot; &quot;,&quot;&quot;);</span>
+<a name="l01894"></a>01894 <span class="comment">                                                                        StringUtil::replaceFirst(stltyp,&quot;&lt;&quot;,&quot;::&quot;);</span>
+<a name="l01895"></a>01895 <span class="comment">                                                                        StringUtil::replaceFirst(stltyp,&quot;&gt;&quot;,&quot;&quot;);</span>
+<a name="l01896"></a>01896 <span class="comment">                                                                        StringUtil::replaceFirst(stltyp,&quot; &quot;,&quot;&quot;);</span>
 <a name="l01897"></a>01897 <span class="comment">                                                                        string stlcnttyp = &quot;&quot;;</span>
 <a name="l01898"></a>01898 <span class="comment">                                                                        if(methpm.at(0).find(&quot;vector&quot;)!=string::npos)</span>
 <a name="l01899"></a>01899 <span class="comment">                                                                                stlcnttyp = &quot;Vec&quot;;</span>
@@ -1965,14 +1965,14 @@ $(document).ready(initResizable);
 <a name="l01905"></a>01905 <span class="comment">                                                                                stlcnttyp = &quot;Lis&quot;;</span>
 <a name="l01906"></a>01906 <span class="comment">                                                                        else</span>
 <a name="l01907"></a>01907 <span class="comment">                                                                                stlcnttyp = &quot;Set&quot;;</span>
-<a name="l01908"></a>01908 <span class="comment">                                                                        boost::replace_first(stlcnt,&quot;vector&quot;,&quot;&quot;);</span>
-<a name="l01909"></a>01909 <span class="comment">                                                                        boost::replace_first(stlcnt,&quot;queue&quot;,&quot;&quot;);</span>
-<a name="l01910"></a>01910 <span class="comment">                                                                        boost::replace_first(stlcnt,&quot;deque&quot;,&quot;&quot;);</span>
-<a name="l01911"></a>01911 <span class="comment">                                                                        boost::replace_first(stlcnt,&quot;set&quot;,&quot;&quot;);</span>
-<a name="l01912"></a>01912 <span class="comment">                                                                        boost::replace_first(stlcnt,&quot;list&quot;,&quot;&quot;);</span>
-<a name="l01913"></a>01913 <span class="comment">                                                                        boost::replace_first(stlcnt,&quot;&lt;&quot;,&quot;&quot;);</span>
-<a name="l01914"></a>01914 <span class="comment">                                                                        boost::replace_first(stlcnt,&quot;&gt;&quot;,&quot;&quot;);</span>
-<a name="l01915"></a>01915 <span class="comment">                                                                        boost::replace_first(stlcnt,&quot; &quot;,&quot;&quot;);</span>
+<a name="l01908"></a>01908 <span class="comment">                                                                        StringUtil::replaceFirst(stlcnt,&quot;vector&quot;,&quot;&quot;);</span>
+<a name="l01909"></a>01909 <span class="comment">                                                                        StringUtil::replaceFirst(stlcnt,&quot;queue&quot;,&quot;&quot;);</span>
+<a name="l01910"></a>01910 <span class="comment">                                                                        StringUtil::replaceFirst(stlcnt,&quot;deque&quot;,&quot;&quot;);</span>
+<a name="l01911"></a>01911 <span class="comment">                                                                        StringUtil::replaceFirst(stlcnt,&quot;set&quot;,&quot;&quot;);</span>
+<a name="l01912"></a>01912 <span class="comment">                                                                        StringUtil::replaceFirst(stlcnt,&quot;list&quot;,&quot;&quot;);</span>
+<a name="l01913"></a>01913 <span class="comment">                                                                        StringUtil::replaceFirst(stlcnt,&quot;&lt;&quot;,&quot;&quot;);</span>
+<a name="l01914"></a>01914 <span class="comment">                                                                        StringUtil::replaceFirst(stlcnt,&quot;&gt;&quot;,&quot;&quot;);</span>
+<a name="l01915"></a>01915 <span class="comment">                                                                        StringUtil::replaceFirst(stlcnt,&quot; &quot;,&quot;&quot;);</span>
 <a name="l01916"></a>01916 <span class="comment"></span>
 <a name="l01917"></a>01917 <span class="comment">                                                                        methods += (methpm.at(0)+&quot; __temp_obj_ser = __obj-&gt;&quot;+methpm.at(1)+&quot;();\n&quot;);</span>
 <a name="l01918"></a>01918 <span class="comment">                                                                        methods += (&quot;objxml += \&quot;&lt;&quot;+fldnames.at(k+1)+&quot; type=\\\&quot;&quot;+stltyp+&quot;\\\&quot;&gt;\&quot;+binarySerialize&quot;+stlcnt+stlcnttyp+&quot;(&amp;__temp_obj_ser)&quot;);</span>

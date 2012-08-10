@@ -22,63 +22,65 @@
 
 #include "Thread.h"
 
-void Thread::run()
+void* Thread::run(void *arg)
 {
 	while (true)
 	{
-		try
+		Thread* ths = (Thread*)arg;
+		Pthread* mthread = ths->mthread;
+		//cout << "started wait" << endl;
+		mthread->wait();
+		//cout << "end wait" << endl;
+		ths = (Thread*)arg;
+		Task* task = ths->task;
+		bool console = ths->console;
+		if (task != NULL)
 		{
-			boost::this_thread::sleep(boost::posix_time::milliseconds(1));
-		}
-		catch (boost::thread_interrupted e)
-		{
-			if (task != NULL)
+			if (task->tunit != -1 && task->type != -1 && task->tunit > 0 && task->type > 0)
 			{
-				if (task->tunit != -1 && task->type != -1 && task->tunit > 0 && task->type > 0)
+				if(console)
 				{
-					if(console)
-					{
-						logger << "Task scheduled for sleep\n" << flush;
-					}
-					if (task->type == TimeUnit::NANOSECONDS)
-						boost::this_thread::sleep(boost::posix_time::microseconds(task->tunit/1000));
-					else if (task->type == TimeUnit::MICROSECONDS)
-						boost::this_thread::sleep(boost::posix_time::microseconds(task->tunit));
-					else if (task->type == TimeUnit::MILLISECONDS)
-						boost::this_thread::sleep(boost::posix_time::milliseconds(task->tunit));
-					else if (task->type == TimeUnit::SECONDS)
-						boost::this_thread::sleep(boost::posix_time::seconds(task->tunit));
-					else if (task->type == TimeUnit::MINUTES)
-						boost::this_thread::sleep(boost::posix_time::seconds(task->tunit * 60));
-					else if (task->type == TimeUnit::HOURS)
-						boost::this_thread::sleep(boost::posix_time::seconds(task->tunit * 60* 60 ));
-					else if(task->type==TimeUnit::DAYS)
-						boost::this_thread::sleep(boost::posix_time::seconds(task->tunit*60*60*24));
+					//logger << "Task scheduled for sleep\n" << flush;
 				}
-				try
-				{
-					task->run();
-				}
-				catch(exception e)
-				{
-					if(console)
-					{
-						logger << e.what() << flush;
-					}
-				}
-				task->~Task();
-				this->task = NULL;
+				if (task->type == TimeUnit::NANOSECONDS)
+					Pthread::nSleep(task->tunit);
+				else if (task->type == TimeUnit::MICROSECONDS)
+					Pthread::uSleep(task->tunit);
+				else if (task->type == TimeUnit::MILLISECONDS)
+					Pthread::mSleep(task->tunit);
+				else if (task->type == TimeUnit::SECONDS)
+					Pthread::sSleep(task->tunit);
+				else if (task->type == TimeUnit::MINUTES)
+					Pthread::nSleep(task->tunit * 60);
+				else if (task->type == TimeUnit::HOURS)
+					Pthread::nSleep(task->tunit * 60 * 60);
+				else if(task->type==TimeUnit::DAYS)
+					Pthread::nSleep(task->tunit * 24 * 60 * 60);
 			}
-			this->idle = true;
+			try
+			{
+				task->run();
+			}
+			catch(exception& e)
+			{
+				if(console)
+				{
+					//logger << e.what() << flush;
+				}
+			}
+			task->~Task();
+			ths->task = NULL;
 		}
+		ths->idle = true;
 	}
+	return NULL;
 }
 
 Thread::Thread() {
-	logger = Logger::getLogger("Thread");
+	//logger = //logger::get//logger("Thread");
 	task = NULL;
 	idle = true;
-	mthread = new boost::thread(boost::bind(&Thread::run, this));
+	mthread = new Pthread(&run, this);
 }
 
 Thread::~Thread() {
@@ -86,6 +88,11 @@ Thread::~Thread() {
 	delete task;
 	if(console)
 	{
-		logger << "Destroyed Thread\n" << flush;
+		//logger << "Destroyed Thread\n" << flush;
 	}
 }
+
+void Thread::execute() {
+	mthread->execute();
+}
+

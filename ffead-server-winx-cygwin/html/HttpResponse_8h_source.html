@@ -99,7 +99,7 @@ $(document).ready(initResizable);
 <a name="l00039"></a>00039     <span class="keywordtype">void</span> setContent_str(<span class="keywordtype">string</span> content_str)
 <a name="l00040"></a>00040     {
 <a name="l00041"></a>00041         this-&gt;content_str = content_str;
-<a name="l00042"></a>00042         <span class="comment">//this-&gt;content_len = boost::lexical_cast&lt;string&gt;(content_str.length());</span>
+<a name="l00042"></a>00042         <span class="comment">//this-&gt;content_len = CastUtil::lexical_cast&lt;string&gt;(content_str.length());</span>
 <a name="l00043"></a>00043     }
 <a name="l00044"></a>00044 
 <a name="l00045"></a>00045     <span class="keywordtype">string</span> getHttpVersion()<span class="keyword"> const</span>
@@ -200,13 +200,13 @@ $(document).ready(initResizable);
 <a name="l00140"></a>00140         <span class="comment">/*void setContent(Cont content)</span>
 <a name="l00141"></a>00141 <span class="comment">        {</span>
 <a name="l00142"></a>00142 <span class="comment">                this-&gt;content_str = content_str;</span>
-<a name="l00143"></a>00143 <span class="comment">                this-&gt;content_len = boost::lexical_cast&lt;string&gt;(content_str.length());</span>
+<a name="l00143"></a>00143 <span class="comment">                this-&gt;content_len = CastUtil::lexical_cast&lt;string&gt;(content_str.length());</span>
 <a name="l00144"></a>00144 <span class="comment">        }*/</span>
 <a name="l00145"></a>00145 
 <a name="l00146"></a>00146         <span class="keywordtype">void</span> setContent(<span class="keywordtype">string</span> content)
 <a name="l00147"></a>00147         {
 <a name="l00148"></a>00148                 this-&gt;content_str = content_str;
-<a name="l00149"></a>00149                 <span class="comment">//this-&gt;content_len = boost::lexical_cast&lt;string&gt;(content_str.length());</span>
+<a name="l00149"></a>00149                 <span class="comment">//this-&gt;content_len = CastUtil::lexical_cast&lt;string&gt;(content_str.length());</span>
 <a name="l00150"></a>00150         }
 <a name="l00151"></a>00151 
 <a name="l00152"></a>00152     <span class="keywordtype">string</span> getLast_modified()<span class="keyword"> const</span>
@@ -252,7 +252,7 @@ $(document).ready(initResizable);
 <a name="l00192"></a>00192         <span class="keywordflow">if</span>(this-&gt;location!=<span class="stringliteral">&quot;&quot;</span>)resp += <span class="stringliteral">&quot;Location: &quot;</span> + this-&gt;location + <span class="stringliteral">&quot;\r\n&quot;</span>;
 <a name="l00193"></a>00193         <span class="keywordflow">if</span>(this-&gt;accept_ranges!=<span class="stringliteral">&quot;&quot;</span>)resp += <span class="stringliteral">&quot;Accept-Ranges: &quot;</span> + this-&gt;accept_ranges + <span class="stringliteral">&quot;\r\n&quot;</span>;
 <a name="l00194"></a>00194         <span class="keywordflow">if</span>(this-&gt;content_type!=<span class="stringliteral">&quot;&quot;</span>)resp += <span class="stringliteral">&quot;Content-Type: &quot;</span> + this-&gt;content_type + <span class="stringliteral">&quot;\r\n&quot;</span>;
-<a name="l00195"></a>00195         <span class="keywordflow">if</span>(this-&gt;content_str!=<span class="stringliteral">&quot;&quot;</span>)resp += <span class="stringliteral">&quot;Content-Length: &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(content_str.length()) + <span class="stringliteral">&quot;\r\n&quot;</span>;
+<a name="l00195"></a>00195         <span class="keywordflow">if</span>(this-&gt;content_str!=<span class="stringliteral">&quot;&quot;</span>)resp += <span class="stringliteral">&quot;Content-Length: &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(content_str.length()) + <span class="stringliteral">&quot;\r\n&quot;</span>;
 <a name="l00196"></a>00196         <span class="keywordflow">if</span>(this-&gt;last_modified!=<span class="stringliteral">&quot;&quot;</span>)resp += <span class="stringliteral">&quot;Last-Modified: &quot;</span> + this-&gt;last_modified + <span class="stringliteral">&quot;\r\n&quot;</span>;
 <a name="l00197"></a>00197         <span class="keywordflow">for</span> (<span class="keywordtype">int</span> var = 0; var &lt; (int)this-&gt;cookies.size(); var++)
 <a name="l00198"></a>00198         {

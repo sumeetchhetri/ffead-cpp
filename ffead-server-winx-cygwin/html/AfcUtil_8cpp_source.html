@@ -144,14 +144,14 @@ $(document).ready(initResizable);
 <a name="l00084"></a>00084         {
 <a name="l00085"></a>00085                 strVec vemp;
 <a name="l00086"></a>00086                 <span class="keywordtype">string</span> data = obj.at(i);
-<a name="l00087"></a>00087                 boost::replace_first(data,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00088"></a>00088                 boost::iter_split(vemp, data, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00087"></a>00087                 StringUtil::replaceFirst(data,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00088"></a>00088                 StringUtil::split(vemp, data, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00089"></a>00089                 test += <span class="stringliteral">&quot;this.&quot;</span> + vemp.at(1) + <span class="stringliteral">&quot;= null;\n&quot;</span>;
 <a name="l00090"></a>00090                 <span class="keywordflow">if</span>(vemp.at(0)==<span class="stringliteral">&quot;float&quot;</span>)
 <a name="l00091"></a>00091                 {
 <a name="l00092"></a>00092                         tes += <span class="stringliteral">&quot;double te_ = find_value( obj, \&quot;&quot;</span>+vemp.at(1)+<span class="stringliteral">&quot;\&quot; ).get_value&lt;double&gt;();\n&quot;</span>;
-<a name="l00093"></a>00093                         <span class="keywordflow">if</span>(!priv)tes += <span class="stringliteral">&quot;_obj.&quot;</span>+vemp.at(1)+<span class="stringliteral">&quot; = boost::lexical_cast&lt;&quot;</span>+vemp.at(0)+<span class="stringliteral">&quot;&gt;(te_);\n&quot;</span>;
-<a name="l00094"></a>00094                         <span class="keywordflow">else</span> tes += <span class="stringliteral">&quot;_obj.set&quot;</span>+camelCased(vemp.at(1))+<span class="stringliteral">&quot;(boost::lexical_cast&lt;&quot;</span>+vemp.at(0)+<span class="stringliteral">&quot;&gt;(te_));\n&quot;</span>;
+<a name="l00093"></a>00093                         <span class="keywordflow">if</span>(!priv)tes += <span class="stringliteral">&quot;_obj.&quot;</span>+vemp.at(1)+<span class="stringliteral">&quot; = CastUtil::lexical_cast&lt;&quot;</span>+vemp.at(0)+<span class="stringliteral">&quot;&gt;(te_);\n&quot;</span>;
+<a name="l00094"></a>00094                         <span class="keywordflow">else</span> tes += <span class="stringliteral">&quot;_obj.set&quot;</span>+camelCased(vemp.at(1))+<span class="stringliteral">&quot;(CastUtil::lexical_cast&lt;&quot;</span>+vemp.at(0)+<span class="stringliteral">&quot;&gt;(te_));\n&quot;</span>;
 <a name="l00095"></a>00095                 }
 <a name="l00096"></a>00096                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(vemp.at(0)==<span class="stringliteral">&quot;int&quot;</span> || vemp.at(0)==<span class="stringliteral">&quot;double&quot;</span> || vemp.at(0)==<span class="stringliteral">&quot;string&quot;</span>)
 <a name="l00097"></a>00097                 {
@@ -172,8 +172,8 @@ $(document).ready(initResizable);
 <a name="l00112"></a>00112                         }
 <a name="l00113"></a>00113                         <span class="keywordflow">else</span>
 <a name="l00114"></a>00114                         {
-<a name="l00115"></a>00115                                 <span class="keywordflow">if</span>(!priv)fres += <span class="stringliteral">&quot;&#39;&quot;</span>+vemp.at(1)+<span class="stringliteral">&quot;&#39; : &#39;\&quot;+boost::lexical_cast&lt;string&gt;(_obj.&quot;</span>+vemp.at(1)+<span class="stringliteral">&quot;)+\&quot;&#39;&quot;</span>;
-<a name="l00116"></a>00116                                 <span class="keywordflow">else</span> fres += <span class="stringliteral">&quot;&#39;&quot;</span>+vemp.at(1)+<span class="stringliteral">&quot;&#39; : &#39;\&quot;+boost::lexical_cast&lt;string&gt;(_obj.get&quot;</span>+camelCased(vemp.at(1))+<span class="stringliteral">&quot;())+\&quot;&#39;&quot;</span>;
+<a name="l00115"></a>00115                                 <span class="keywordflow">if</span>(!priv)fres += <span class="stringliteral">&quot;&#39;&quot;</span>+vemp.at(1)+<span class="stringliteral">&quot;&#39; : &#39;\&quot;+CastUtil::lexical_cast&lt;string&gt;(_obj.&quot;</span>+vemp.at(1)+<span class="stringliteral">&quot;)+\&quot;&#39;&quot;</span>;
+<a name="l00116"></a>00116                                 <span class="keywordflow">else</span> fres += <span class="stringliteral">&quot;&#39;&quot;</span>+vemp.at(1)+<span class="stringliteral">&quot;&#39; : &#39;\&quot;+CastUtil::lexical_cast&lt;string&gt;(_obj.get&quot;</span>+camelCased(vemp.at(1))+<span class="stringliteral">&quot;())+\&quot;&#39;&quot;</span>;
 <a name="l00117"></a>00117                         }
 <a name="l00118"></a>00118                         <span class="keywordflow">if</span>(i!=obj.size()-1)
 <a name="l00119"></a>00119                         {
@@ -207,12 +207,12 @@ $(document).ready(initResizable);
 <a name="l00147"></a>00147 <span class="comment">        {</span>
 <a name="l00148"></a>00148 <span class="comment">                strVec vemp;</span>
 <a name="l00149"></a>00149 <span class="comment">                string data = obj.at(i);</span>
-<a name="l00150"></a>00150 <span class="comment">                boost::replace_first(data,&quot;;&quot;,&quot;&quot;);</span>
-<a name="l00151"></a>00151 <span class="comment">                boost::iter_split(vemp, data, boost::first_finder(&quot; &quot;));</span>
+<a name="l00150"></a>00150 <span class="comment">                StringUtil::replaceFirst(data,&quot;;&quot;,&quot;&quot;);</span>
+<a name="l00151"></a>00151 <span class="comment">                StringUtil::split(vemp, data, (&quot; &quot;));</span>
 <a name="l00152"></a>00152 <span class="comment">                if(vemp.at(0)==&quot;float&quot;)</span>
 <a name="l00153"></a>00153 <span class="comment">                {</span>
 <a name="l00154"></a>00154 <span class="comment">                        test += &quot;double te_ = find_value( obj, \&quot;&quot;+vemp.at(1)+&quot;\&quot; ).get_value&lt;double&gt;();\n&quot;;</span>
-<a name="l00155"></a>00155 <span class="comment">                        test += &quot;_obj.&quot;+vemp.at(1)+&quot; = boost::lexical_cast&lt;&quot;+vemp.at(0)+&quot;&gt;(te_);&quot;;</span>
+<a name="l00155"></a>00155 <span class="comment">                        test += &quot;_obj.&quot;+vemp.at(1)+&quot; = CastUtil::lexical_cast&lt;&quot;+vemp.at(0)+&quot;&gt;(te_);&quot;;</span>
 <a name="l00156"></a>00156 <span class="comment">                }</span>
 <a name="l00157"></a>00157 <span class="comment">                else</span>
 <a name="l00158"></a>00158 <span class="comment">                        test += &quot;_obj.&quot; + vemp.at(1) + &quot;= find_value( obj, \&quot;&quot;+vemp.at(1)+&quot;\&quot; ).get_value&lt;&quot;+vemp.at(0)+&quot;&gt;();\n&quot;;</span>
@@ -236,8 +236,8 @@ $(document).ready(initResizable);
 <a name="l00176"></a>00176         {
 <a name="l00177"></a>00177                 strVec vemp,emp;
 <a name="l00178"></a>00178                 <span class="keywordtype">string</span> data = obj.at(i);
-<a name="l00179"></a>00179                 boost::replace_first(data,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00180"></a>00180                 boost::split(vemp, data, boost::is_any_of(<span class="stringliteral">&quot; ,)(&quot;</span>));
+<a name="l00179"></a>00179                 StringUtil::replaceFirst(data,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00180"></a>00180                 StringUtil::split(vemp, data, boost::is_any_of(<span class="stringliteral">&quot; ,)(&quot;</span>));
 <a name="l00181"></a>00181                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> k=0;k&lt;vemp.size();k++)
 <a name="l00182"></a>00182                 {
 <a name="l00183"></a>00183                         <span class="keywordflow">if</span>(vemp.at(k)!=<span class="stringliteral">&quot;&quot;</span>)
@@ -287,7 +287,7 @@ $(document).ready(initResizable);
 <a name="l00227"></a>00227                                                         getline(st1,h1);
 <a name="l00228"></a>00228                                                         jsonstr += <span class="stringliteral">&quot;_&quot;</span>+h1;
 <a name="l00229"></a>00229                                                         types.append(h1.c_str());
-<a name="l00230"></a>00230                                                         types.append(<span class="stringliteral">&quot;=boost::lexical_cast&lt;&quot;</span>);
+<a name="l00230"></a>00230                                                         types.append(<span class="stringliteral">&quot;=CastUtil::lexical_cast&lt;&quot;</span>);
 <a name="l00231"></a>00231                                                         types.append(emp.at(j).c_str());
 <a name="l00232"></a>00232                                                         types.append(<span class="stringliteral">&quot;&gt;(_inp.at(&quot;</span>);
 <a name="l00233"></a>00233                                                         st2 &lt;&lt; (j-2);
@@ -360,7 +360,7 @@ $(document).ready(initResizable);
 <a name="l00300"></a>00300         }
 <a name="l00301"></a>00301         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(retType==<span class="stringliteral">&quot;int&quot;</span> || retType==<span class="stringliteral">&quot;float&quot;</span> || retType==<span class="stringliteral">&quot;double&quot;</span>)
 <a name="l00302"></a>00302         {
-<a name="l00303"></a>00303                 test += <span class="stringliteral">&quot;string outp = boost::lexical_cast&lt;string&gt;(_obj.&quot;</span>+funcName+<span class="stringliteral">&quot;(&quot;</span>+pars+<span class="stringliteral">&quot;));\nreturn outp;\n}\n&quot;</span>;
+<a name="l00303"></a>00303                 test += <span class="stringliteral">&quot;string outp = CastUtil::lexical_cast&lt;string&gt;(_obj.&quot;</span>+funcName+<span class="stringliteral">&quot;(&quot;</span>+pars+<span class="stringliteral">&quot;));\nreturn outp;\n}\n&quot;</span>;
 <a name="l00304"></a>00304         }
 <a name="l00305"></a>00305         <span class="keywordflow">else</span>
 <a name="l00306"></a>00306                 test += <span class="stringliteral">&quot;return from&quot;</span>+retType+<span class="stringliteral">&quot;ToJSON(_obj.&quot;</span>+funcName+<span class="stringliteral">&quot;(&quot;</span>+pars+<span class="stringliteral">&quot;));\n}\n&quot;</span>;
@@ -376,7 +376,7 @@ $(document).ready(initResizable);
 <a name="l00316"></a>00316         <span class="keywordtype">string</span> methName = req.getRequestParam(<span class="stringliteral">&quot;method&quot;</span>);
 <a name="l00317"></a>00317         <span class="keywordtype">string</span> claz = req.getRequestParam(<span class="stringliteral">&quot;claz&quot;</span>);
 <a name="l00318"></a>00318         <span class="keywordtype">string</span> temp = req.getRequestParam(<span class="stringliteral">&quot;paramsize&quot;</span>);
-<a name="l00319"></a>00319         <span class="keywordtype">int</span> paramSize = boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(temp.c_str());
+<a name="l00319"></a>00319         <span class="keywordtype">int</span> paramSize = CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(temp.c_str());
 <a name="l00320"></a>00320         logger &lt;&lt; <span class="stringliteral">&quot;\nreading params::&quot;</span> &lt;&lt; flush;
 <a name="l00321"></a>00321         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i=0;i&lt;paramSize;i++)
 <a name="l00322"></a>00322         {

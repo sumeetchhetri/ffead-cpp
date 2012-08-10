@@ -128,8 +128,8 @@ $(document).ready(initResizable);
 <a name="l00068"></a>00068         <span class="keywordtype">void</span> service(<span class="keywordtype">int</span>,<span class="keywordtype">string</span>,<span class="keywordtype">string</span>);
 <a name="l00069"></a>00069 <span class="keyword">private</span>:
 <a name="l00070"></a>00070     <span class="keyword">volatile</span> <span class="keywordtype">bool</span> m_stoprequested;
-<a name="l00071"></a>00071     boost::mutex m_mutex;
-<a name="l00072"></a>00072     boost::thread m_thread;
+<a name="l00071"></a>00071     std::mutex m_mutex;
+<a name="l00072"></a>00072     std::thread m_thread;
 <a name="l00073"></a>00073 };
 <a name="l00074"></a>00074 
 <a name="l00075"></a>00075 <span class="preprocessor">#endif </span><span class="comment">/* REQUESTHANDLER_H_ */</span>

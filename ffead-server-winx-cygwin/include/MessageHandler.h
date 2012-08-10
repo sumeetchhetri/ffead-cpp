@@ -34,12 +34,12 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <boost/thread/thread.hpp>
+#include <thread>
 #include "Message.h"
 #include "Exception.h"
 #include <iostream>
 #include <fstream>
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 #include "vector"
 #include "algorithm"
 #include "MQueue.h"

@@ -63,6 +63,21 @@ public:
 			throw "Conversion exception";
 		}
 	}
+	template <typename T> static T lexical_cast(const size_t& val)
+	{
+		T t;
+		stringstream ss;
+		ss << val;
+		ss >> t;
+		if(ss)
+		{
+			return t;
+		}
+		else
+		{
+			throw "Conversion exception";
+		}
+	}
 	template <typename T> static T lexical_cast(const long& val)
 	{
 		T t;
@@ -166,7 +181,7 @@ public:
 				throw "Conversion exception";
 			t = d;
 		}
-		else if(tn=="int" || tn=="short" || tn=="long")
+		else if(tn=="int" || tn=="short" || tn=="long" || tn=="size_t")
 		{
 			long int d = 1;
 			d = strtol(val, &endptr, 10);

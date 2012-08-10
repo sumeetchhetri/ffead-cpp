@@ -105,7 +105,7 @@ $(document).ready(initResizable);
 <a name="l00045"></a>00045         <span class="keywordtype">string</span> filepath;
 <a name="l00046"></a>00046         ofstream out;
 <a name="l00047"></a>00047         <span class="keywordtype">void</span> write(<span class="keywordtype">string</span>,<span class="keywordtype">string</span>);
-<a name="l00048"></a>00048         boost::mutex p_mutex;
+<a name="l00048"></a>00048         std::mutex p_mutex;
 <a name="l00049"></a>00049         <span class="keyword">static</span> <a class="code" href="classDLogger.html">DLogger</a>* m_pInstance;
 <a name="l00050"></a>00050 };
 <a name="l00051"></a>00051 

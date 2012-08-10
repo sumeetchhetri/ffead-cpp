@@ -26,12 +26,12 @@
 #include "queue"
 #include "list"
 #include "Task.h"
-#include <boost/thread/mutex.hpp>
+#include "Pmutex.h"
 
 class TaskPool {
 	queue<Task*> *tasks;
 	list<Task*> *ptasks;
-	boost::mutex *m_mutex;
+	Pmutex *m_mutex;
 	bool console;
 	friend class ThreadPool;
 public:

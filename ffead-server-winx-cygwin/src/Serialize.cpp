@@ -91,7 +91,7 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	}
 	else if(className.find("std::vector<")!=string::npos)
 	{
-		boost::replace_first(className,"std::vector<","");
+		StringUtil::replaceFirst(className,"std::vector<","");
 		string vtyp = className.substr(0,className.find(","));
 		return _servec(t,vtyp);
 	}
@@ -117,7 +117,7 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	}
 	else if(className.find("std::list<")!=string::npos)
 	{
-		boost::replace_first(className,"std::list<","");
+		StringUtil::replaceFirst(className,"std::list<","");
 		string vtyp = className.substr(0,className.find(","));
 		return _serlis(t,vtyp);
 	}
@@ -143,7 +143,7 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	}
 	else if(className.find("std::set<")!=string::npos)
 	{
-		boost::replace_first(className,"std::set<","");
+		StringUtil::replaceFirst(className,"std::set<","");
 		string vtyp = className.substr(0,className.find(","));
 		return _serset(t,vtyp);
 	}
@@ -169,7 +169,7 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	}
 	else if(className.find("std::multiset<")!=string::npos)
 	{
-		boost::replace_first(className,"std::multiset<","");
+		StringUtil::replaceFirst(className,"std::multiset<","");
 		string vtyp = className.substr(0,className.find(","));
 		return _sermultiset(t,vtyp);
 	}
@@ -195,7 +195,7 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	}
 	else if(className.find("std::queue<")!=string::npos)
 	{
-		boost::replace_first(className,"std::queue<","");
+		StringUtil::replaceFirst(className,"std::queue<","");
 		string vtyp = className.substr(0,className.find(","));
 		return _serq(t,vtyp);
 	}
@@ -221,7 +221,7 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 	}
 	else if(className.find("std::deque<")!=string::npos)
 	{
-		boost::replace_first(className,"std::deque<","");
+		StringUtil::replaceFirst(className,"std::deque<","");
 		string vtyp = className.substr(0,className.find(","));
 		return _serdq(t,vtyp);
 	}
@@ -236,27 +236,27 @@ string Serialize::_hanldeAllSerialization(string className,void *t)
 
 string Serialize::serialize(string t)
 {
-	return "<string>"+boost::lexical_cast<string>(t)+"</string>";
+	return "<string>"+CastUtil::lexical_cast<string>(t)+"</string>";
 }
 
 string Serialize::serialize(int t)
 {
-	return "<int>"+boost::lexical_cast<string>(t)+"</int>";
+	return "<int>"+CastUtil::lexical_cast<string>(t)+"</int>";
 }
 
 string Serialize::serialize(float t)
 {
-	return "<float>"+boost::lexical_cast<string>(t)+"</float>";
+	return "<float>"+CastUtil::lexical_cast<string>(t)+"</float>";
 }
 
 string Serialize::serialize(double t)
 {
-	return "<double>"+boost::lexical_cast<string>(t)+"</double>";
+	return "<double>"+CastUtil::lexical_cast<string>(t)+"</double>";
 }
 
 string Serialize::serialize(bool t)
 {
-	return "<bool>"+boost::lexical_cast<string>(t)+"</bool>";
+	return "<bool>"+CastUtil::lexical_cast<string>(t)+"</bool>";
 }
 
 string Serialize::serializesetstring(set<string> *t)
@@ -726,7 +726,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 		if(className=="int")
 		{
 			int *vt = new int;
-			*vt = boost::lexical_cast<int>(message.getText());
+			*vt = CastUtil::lexical_cast<int>(message.getText());
 			return vt;
 		}
 		else if(className=="Date")
@@ -741,25 +741,25 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 		else if(className=="float")
 		{
 			float *vt = new float;
-			*vt = boost::lexical_cast<float>(message.getText());
+			*vt = CastUtil::lexical_cast<float>(message.getText());
 			return vt;
 		}
 		else if(className=="double")
 		{
 			double *vt = new double;
-			*vt = boost::lexical_cast<double>(message.getText());
+			*vt = CastUtil::lexical_cast<double>(message.getText());
 			return vt;
 		}
 		else if(className=="bool")
 		{
 			bool *vt = new bool;
-			*vt = boost::lexical_cast<bool>(message.getText());
+			*vt = CastUtil::lexical_cast<bool>(message.getText());
 			return vt;
 		}
 		else if(className=="std::string" || className=="string")
 		{
 			string *vt = new string;
-			*vt = boost::lexical_cast<string>(message.getText());
+			*vt = CastUtil::lexical_cast<string>(message.getText());
 			return vt;
 		}
 	}
@@ -793,7 +793,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="double")
 				{
-					t->push_back(boost::lexical_cast<double>(ele.getText()));
+					t->push_back(CastUtil::lexical_cast<double>(ele.getText()));
 				}
 			}
 			return t;
@@ -809,7 +809,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="float")
 				{
-					t->push_back(boost::lexical_cast<float>(ele.getText()));
+					t->push_back(CastUtil::lexical_cast<float>(ele.getText()));
 				}
 			}
 			return t;
@@ -825,7 +825,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="int")
 				{
-					t->push_back(boost::lexical_cast<int>(ele.getText()));
+					t->push_back(CastUtil::lexical_cast<int>(ele.getText()));
 				}
 			}
 			return t;
@@ -863,7 +863,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="double")
 				{
-					t->insert(boost::lexical_cast<double>(ele.getText()));
+					t->insert(CastUtil::lexical_cast<double>(ele.getText()));
 				}
 			}
 			return t;
@@ -879,7 +879,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="float")
 				{
-					t->insert(boost::lexical_cast<float>(ele.getText()));
+					t->insert(CastUtil::lexical_cast<float>(ele.getText()));
 				}
 			}
 			return t;
@@ -895,7 +895,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="int")
 				{
-					t->insert(boost::lexical_cast<int>(ele.getText()));
+					t->insert(CastUtil::lexical_cast<int>(ele.getText()));
 				}
 			}
 			return t;
@@ -933,7 +933,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="double")
 				{
-					t->insert(boost::lexical_cast<double>(ele.getText()));
+					t->insert(CastUtil::lexical_cast<double>(ele.getText()));
 				}
 			}
 			return t;
@@ -949,7 +949,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="float")
 				{
-					t->insert(boost::lexical_cast<float>(ele.getText()));
+					t->insert(CastUtil::lexical_cast<float>(ele.getText()));
 				}
 			}
 			return t;
@@ -965,7 +965,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="int")
 				{
-					t->insert(boost::lexical_cast<int>(ele.getText()));
+					t->insert(CastUtil::lexical_cast<int>(ele.getText()));
 				}
 			}
 			return t;
@@ -1003,7 +1003,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="double")
 				{
-					t->push_back(boost::lexical_cast<double>(ele.getText()));
+					t->push_back(CastUtil::lexical_cast<double>(ele.getText()));
 				}
 			}
 			return t;
@@ -1019,7 +1019,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="float")
 				{
-					t->push_back(boost::lexical_cast<float>(ele.getText()));
+					t->push_back(CastUtil::lexical_cast<float>(ele.getText()));
 				}
 			}
 			return t;
@@ -1035,7 +1035,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="int")
 				{
-					t->push_back(boost::lexical_cast<int>(ele.getText()));
+					t->push_back(CastUtil::lexical_cast<int>(ele.getText()));
 				}
 			}
 			return t;
@@ -1073,7 +1073,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="double")
 				{
-					t->push(boost::lexical_cast<double>(ele.getText()));
+					t->push(CastUtil::lexical_cast<double>(ele.getText()));
 				}
 			}
 			return t;
@@ -1089,7 +1089,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="float")
 				{
-					t->push(boost::lexical_cast<float>(ele.getText()));
+					t->push(CastUtil::lexical_cast<float>(ele.getText()));
 				}
 			}
 			return t;
@@ -1105,7 +1105,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="int")
 				{
-					t->push(boost::lexical_cast<int>(ele.getText()));
+					t->push(CastUtil::lexical_cast<int>(ele.getText()));
 				}
 			}
 			return t;
@@ -1143,7 +1143,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="double")
 				{
-					t->push_back(boost::lexical_cast<double>(ele.getText()));
+					t->push_back(CastUtil::lexical_cast<double>(ele.getText()));
 				}
 			}
 			return t;
@@ -1159,7 +1159,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="float")
 				{
-					t->push_back(boost::lexical_cast<float>(ele.getText()));
+					t->push_back(CastUtil::lexical_cast<float>(ele.getText()));
 				}
 			}
 			return t;
@@ -1175,7 +1175,7 @@ void* Serialize::_hanldeAllUnSerialization(string objXml,string className)
 				Element ele = message.getChildElements().at(var);
 				if(ele.getTagName()=="int")
 				{
-					t->push_back(boost::lexical_cast<int>(ele.getText()));
+					t->push_back(CastUtil::lexical_cast<int>(ele.getText()));
 				}
 			}
 			return t;

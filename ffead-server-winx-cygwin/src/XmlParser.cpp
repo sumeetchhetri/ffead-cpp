@@ -64,7 +64,7 @@ void XmlParser::readXML(string xml,string parent,Element *par)
 {
 	if(xml=="")
 		return;
-	boost::trim(xml);
+	StringUtil::trim(xml);
 	int cdt = xml.find("<![CDATA[");
 	if(cdt==0)
 	{
@@ -154,37 +154,37 @@ void XmlParser::readXML(string xml,string parent,Element *par)
     	endTag = xml.find("/>");
     if(xml.find("< ")!=string::npos)
     {
-        string errmsg = ("Invalid Start Tag - at position: " + boost::lexical_cast<string>(xml.find("< ")+1) + "\n");
+        string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<string>(xml.find("< ")+1) + "\n");
         throw new XmlParseException(errmsg);
     }
     else if(xml.find("<\t")!=string::npos)
     {
-        string errmsg = ("Invalid Start Tag - at position: " + boost::lexical_cast<string>(xml.find("<\t")+1) + "\n");
+        string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<string>(xml.find("<\t")+1) + "\n");
         throw new XmlParseException(errmsg);
     }
     else if(xml.find("</ ")!=string::npos)
     {
-        string errmsg = ("Invalid End Tag - at position: " + boost::lexical_cast<string>(xml.find("</ ")+1) + "\n");
+        string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>(xml.find("</ ")+1) + "\n");
         throw new XmlParseException(errmsg);
     }
     else if(xml.find("</\t")!=string::npos)
     {
-        string errmsg = ("Invalid End Tag - at position: " + boost::lexical_cast<string>(xml.find("</\t")+1) + "\n");
+        string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>(xml.find("</\t")+1) + "\n");
         throw new XmlParseException(errmsg);
     }
     else if(xml.find("< /")!=string::npos)
     {
-        string errmsg = ("Invalid End Tag - at position: " + boost::lexical_cast<string>(xml.find("< /")+1) + "\n");
+        string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>(xml.find("< /")+1) + "\n");
         throw new XmlParseException(errmsg);
     }
     else if(xml.find("/ >")!=string::npos)
 	{
-		string errmsg = ("Invalid End Tag - at position: " + boost::lexical_cast<string>(xml.find("/ >")+1) + "\n");
+		string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>(xml.find("/ >")+1) + "\n");
 		throw new XmlParseException(errmsg);
 	}
     else if(xml.find("<\t/")!=string::npos)
     {
-        string errmsg = ("Invalid End Tag - at position: " + boost::lexical_cast<string>(xml.find("<\t/")+1) + "\n");
+        string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>(xml.find("<\t/")+1) + "\n");
         throw new XmlParseException(errmsg);
     }
     else if(xml.find("<"+ta)==string::npos && xml.find("</"+ta)!=string::npos)

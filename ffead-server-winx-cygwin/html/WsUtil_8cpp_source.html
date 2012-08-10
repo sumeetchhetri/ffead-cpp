@@ -139,12 +139,12 @@ $(document).ready(initResizable);
 <a name="l00079"></a>00079                         temp11 = temp.substr(temp.find(<span class="stringliteral">&quot;(&quot;</span>)+1);
 <a name="l00080"></a>00080                         temp = temp.substr(0,temp.find(<span class="stringliteral">&quot;(&quot;</span>));
 <a name="l00081"></a>00081 
-<a name="l00082"></a>00082                         <span class="comment">//boost::replace_first(temp,&quot;(&quot;,&quot; &quot;);</span>
-<a name="l00083"></a>00083                         boost::replace_all(temp11,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00084"></a>00084                         boost::replace_first(temp11,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00082"></a>00082                         <span class="comment">//StringUtil::replaceFirst(temp,&quot;(&quot;,&quot; &quot;);</span>
+<a name="l00083"></a>00083                         StringUtil::replaceAll(temp11,<span class="stringliteral">&quot;;&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00084"></a>00084                         StringUtil::replaceFirst(temp11,<span class="stringliteral">&quot;)&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
 <a name="l00085"></a>00085                         strVec results,results1;
-<a name="l00086"></a>00086                         boost::iter_split(results, temp, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
-<a name="l00087"></a>00087                         boost::iter_split(results1, temp11, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00086"></a>00086                         StringUtil::split(results, temp, (<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00087"></a>00087                         StringUtil::split(results1, temp11, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00088"></a>00088                         <span class="keywordtype">string</span> retType,methName,inp_params;
 <a name="l00089"></a>00089                         <span class="keywordflow">if</span>(results.size()&lt;2)
 <a name="l00090"></a>00090                                 <span class="keywordflow">continue</span>;
@@ -159,9 +159,9 @@ $(document).ready(initResizable);
 <a name="l00099"></a>00099                         <span class="keywordflow">if</span>(results.at(0).find(<span class="stringliteral">&quot;vector&lt;&quot;</span>)!=string::npos)
 <a name="l00100"></a>00100                         {
 <a name="l00101"></a>00101                                 <span class="keywordtype">string</span> vecn = results.at(0);
-<a name="l00102"></a>00102                                 boost::replace_first(vecn,<span class="stringliteral">&quot;vector&lt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00103"></a>00103                                 boost::replace_first(vecn,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00104"></a>00104                                 boost::trim(vecn);
+<a name="l00102"></a>00102                                 StringUtil::replaceFirst(vecn,<span class="stringliteral">&quot;vector&lt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00103"></a>00103                                 StringUtil::replaceFirst(vecn,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00104"></a>00104                                 StringUtil::trim(vecn);
 <a name="l00105"></a>00105                                 <span class="keywordflow">if</span>(vecn==<span class="stringliteral">&quot;int&quot;</span> || vecn==<span class="stringliteral">&quot;double&quot;</span> || vecn==<span class="stringliteral">&quot;float&quot;</span> || vecn==<span class="stringliteral">&quot;string&quot;</span>)
 <a name="l00106"></a>00106                                 {
 <a name="l00107"></a>00107                                         retType = <span class="stringliteral">&quot;\n&lt;xsd:element minOccurs=\&quot;0\&quot; maxOccurs=\&quot;unbounded\&quot; name=\&quot;&quot;</span>+in_out_info[<span class="stringliteral">&quot;RETURN&quot;</span>]+<span class="stringliteral">&quot;\&quot; type=\&quot;xsd:&quot;</span>+vecn+<span class="stringliteral">&quot;\&quot;/&gt;&quot;</span>;
@@ -186,10 +186,10 @@ $(document).ready(initResizable);
 <a name="l00126"></a>00126                         {
 <a name="l00127"></a>00127                                 <span class="keywordtype">string</span> type;
 <a name="l00128"></a>00128                                 strVec results2;
-<a name="l00129"></a>00129                                 boost::iter_split(results2, results1.at(j), boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00129"></a>00129                                 StringUtil::split(results2, results1.at(j), (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00130"></a>00130                                 type = results2.at(0);
 <a name="l00131"></a>00131                                 <span class="keywordtype">int</span> srn = j;
-<a name="l00132"></a>00132                                 <span class="keywordtype">char</span> chr = boost::lexical_cast&lt;<span class="keywordtype">char</span>&gt;(j);
+<a name="l00132"></a>00132                                 <span class="keywordtype">char</span> chr = CastUtil::lexical_cast&lt;<span class="keywordtype">char</span>&gt;(j);
 <a name="l00133"></a>00133                                 stringstream ss;
 <a name="l00134"></a>00134                                 ss &lt;&lt; srn;
 <a name="l00135"></a>00135                                 <span class="keywordtype">string</span> te;
@@ -214,9 +214,9 @@ $(document).ready(initResizable);
 <a name="l00154"></a>00154                                         <span class="keywordflow">if</span>(type.find(<span class="stringliteral">&quot;vector&lt;&quot;</span>)!=string::npos &amp;&amp; results2.size()==2)
 <a name="l00155"></a>00155                                         {
 <a name="l00156"></a>00156                                                 <span class="keywordtype">string</span> vecn = type;
-<a name="l00157"></a>00157                                                 boost::replace_first(vecn,<span class="stringliteral">&quot;vector&lt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00158"></a>00158                                                 boost::replace_first(vecn,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00159"></a>00159                                                 boost::trim(vecn);
+<a name="l00157"></a>00157                                                 StringUtil::replaceFirst(vecn,<span class="stringliteral">&quot;vector&lt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00158"></a>00158                                                 StringUtil::replaceFirst(vecn,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00159"></a>00159                                                 StringUtil::trim(vecn);
 <a name="l00160"></a>00160                                                 headers.append(<span class="stringliteral">&quot;#include \&quot;&quot;</span>+vecn+<span class="stringliteral">&quot;.h\&quot;\n&quot;</span>);
 <a name="l00161"></a>00161                                                 type = vecn;
 <a name="l00162"></a>00162                                                 inp_params.append(<span class="stringliteral">&quot;\n&lt;xsd:element minOccurs=\&quot;0\&quot; maxOccurs=\&quot;unbounded\&quot; name=\&quot;&quot;</span>+results2.at(1)+<span class="stringliteral">&quot;\&quot; type=\&quot;ns0:&quot;</span>+type+<span class="stringliteral">&quot;\&quot;/&gt;&quot;</span>);
@@ -258,7 +258,7 @@ $(document).ready(initResizable);
 <a name="l00198"></a>00198                                                         field = field.substr(0,field.find(<span class="stringliteral">&quot;(&quot;</span>));
 <a name="l00199"></a>00199                                                         type = temp1.substr(e+1,ed-e-1);
 <a name="l00200"></a>00200                                                         strVec results3;
-<a name="l00201"></a>00201                                                         boost::iter_split(results3, type, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00201"></a>00201                                                         StringUtil::split(results3, type, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00202"></a>00202                                                         type = results3.at(0);
 <a name="l00203"></a>00203                                                         logger &lt;&lt; <span class="stringliteral">&quot;\nField--- &quot;</span> &lt;&lt; field &lt;&lt; flush;
 <a name="l00204"></a>00204                                                         logger &lt;&lt; <span class="stringliteral">&quot;\nType--- &quot;</span> &lt;&lt; type &lt;&lt; flush;
@@ -290,7 +290,7 @@ $(document).ready(initResizable);
 <a name="l00230"></a>00230                                                                 retObj_xml.append(<span class="stringliteral">&quot;val = _obj.get&quot;</span>+AfcUtil::camelCased(iter-&gt;second)+<span class="stringliteral">&quot;();\n&quot;</span>);
 <a name="l00231"></a>00231                                                                 obj_binding.append(<span class="stringliteral">&quot;\n&lt;xsd:element minOccurs=\&quot;0\&quot; name=\&quot;&quot;</span>+iter-&gt;second+<span class="stringliteral">&quot;\&quot; type=\&quot;xsd:string\&quot;/&gt;&quot;</span>);
 <a name="l00232"></a>00232                                                         }
-<a name="l00233"></a>00233                                                         obj_mapng.append(<span class="stringliteral">&quot;_obj.set&quot;</span>+AfcUtil::camelCased(iter-&gt;second)+<span class="stringliteral">&quot;(boost::lexical_cast&lt;&quot;</span>+typ+<span class="stringliteral">&quot;&gt;(ele.getElementByName(\&quot;&quot;</span>+iter-&gt;second+<span class="stringliteral">&quot;\&quot;).getText()));\n&quot;</span>);
+<a name="l00233"></a>00233                                                         obj_mapng.append(<span class="stringliteral">&quot;_obj.set&quot;</span>+AfcUtil::camelCased(iter-&gt;second)+<span class="stringliteral">&quot;(CastUtil::lexical_cast&lt;&quot;</span>+typ+<span class="stringliteral">&quot;&gt;(ele.getElementByName(\&quot;&quot;</span>+iter-&gt;second+<span class="stringliteral">&quot;\&quot;).getText()));\n&quot;</span>);
 <a name="l00234"></a>00234                                                         retObj_xml.append(<span class="stringliteral">&quot;_ret.append(\&quot;&lt;\&quot;+namespce+\&quot;:&quot;</span>+iter-&gt;second+<span class="stringliteral">&quot;&gt;\&quot;+val+\&quot;&lt;/\&quot;+namespce+\&quot;:&quot;</span>+iter-&gt;second+<span class="stringliteral">&quot;&gt;\&quot;);\n&quot;</span>);
 <a name="l00235"></a>00235                                                 }
 <a name="l00236"></a>00236                                         }
@@ -354,20 +354,20 @@ $(document).ready(initResizable);
 <a name="l00294"></a>00294                                                         ws_funcs.append(<span class="stringliteral">&quot;ele = _req.getElementByName(\&quot;&quot;</span>+argname+<span class="stringliteral">&quot;\&quot;);\n&quot;</span>);
 <a name="l00295"></a>00295                                                         ws_funcs.append(iter2-&gt;second+<span class="stringliteral">&quot; &quot;</span>+argname+<span class="stringliteral">&quot;;\n&quot;</span>);
 <a name="l00296"></a>00296                                                         ws_funcs.append(<span class="stringliteral">&quot;if(ele.getTagName()!=\&quot;\&quot;)&quot;</span>);
-<a name="l00297"></a>00297                                                         ws_funcs.append(argname+<span class="stringliteral">&quot; = boost::lexical_cast&lt;&quot;</span>+iter2-&gt;second+<span class="stringliteral">&quot;&gt;(ele.getText());\n&quot;</span>);
+<a name="l00297"></a>00297                                                         ws_funcs.append(argname+<span class="stringliteral">&quot; = CastUtil::lexical_cast&lt;&quot;</span>+iter2-&gt;second+<span class="stringliteral">&quot;&gt;(ele.getText());\n&quot;</span>);
 <a name="l00298"></a>00298                                                 }
 <a name="l00299"></a>00299                                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(iter2-&gt;second.find(<span class="stringliteral">&quot;vector&lt;&quot;</span>)!=string::npos)
 <a name="l00300"></a>00300                                                 {
 <a name="l00301"></a>00301                                                         <span class="keywordtype">string</span> vecn = iter2-&gt;second;
-<a name="l00302"></a>00302                                                         boost::replace_first(vecn,<span class="stringliteral">&quot;vector&lt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00303"></a>00303                                                         boost::replace_first(vecn,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00304"></a>00304                                                         boost::trim(vecn);
+<a name="l00302"></a>00302                                                         StringUtil::replaceFirst(vecn,<span class="stringliteral">&quot;vector&lt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00303"></a>00303                                                         StringUtil::replaceFirst(vecn,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00304"></a>00304                                                         StringUtil::trim(vecn);
 <a name="l00305"></a>00305                                                         <span class="keywordflow">if</span>(vecn==<span class="stringliteral">&quot;int&quot;</span> || vecn==<span class="stringliteral">&quot;double&quot;</span> || vecn==<span class="stringliteral">&quot;float&quot;</span> || vecn==<span class="stringliteral">&quot;string&quot;</span>)
 <a name="l00306"></a>00306                                                         {
 <a name="l00307"></a>00307                                                                 ws_funcs.append(<span class="stringliteral">&quot;vector&lt;&quot;</span>+vecn+<span class="stringliteral">&quot;&gt; &quot;</span>+argname+<span class="stringliteral">&quot;;\n&quot;</span>);
 <a name="l00308"></a>00308                                                                 ws_funcs.append(<span class="stringliteral">&quot;ElementList list = _req.getElementsByName(\&quot;&quot;</span>+argname+<span class="stringliteral">&quot;\&quot;);\n&quot;</span>);
 <a name="l00309"></a>00309                                                                 ws_funcs.append(<span class="stringliteral">&quot;for(int i=0;i&lt;list.size();i++)&quot;</span>);
-<a name="l00310"></a>00310                                                                 ws_funcs.append(argname+<span class="stringliteral">&quot;.push_back(boost::lexical_cast&lt;&quot;</span>+vecn+<span class="stringliteral">&quot;&gt;(list.at(i).getText()));\n&quot;</span>);
+<a name="l00310"></a>00310                                                                 ws_funcs.append(argname+<span class="stringliteral">&quot;.push_back(CastUtil::lexical_cast&lt;&quot;</span>+vecn+<span class="stringliteral">&quot;&gt;(list.at(i).getText()));\n&quot;</span>);
 <a name="l00311"></a>00311                                                         }
 <a name="l00312"></a>00312                                                         <span class="keywordflow">else</span>
 <a name="l00313"></a>00313                                                         {
@@ -414,13 +414,13 @@ $(document).ready(initResizable);
 <a name="l00354"></a>00354                                         <span class="keywordflow">if</span>(pars[<span class="stringliteral">&quot;RETURNTYP&quot;</span>].find(<span class="stringliteral">&quot;vector&lt;&quot;</span>)!=string::npos)
 <a name="l00355"></a>00355                                         {
 <a name="l00356"></a>00356                                                 <span class="keywordtype">string</span> vecn = pars[<span class="stringliteral">&quot;RETURNTYP&quot;</span>];
-<a name="l00357"></a>00357                                                 boost::replace_first(vecn,<span class="stringliteral">&quot;vector&lt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00358"></a>00358                                                 boost::replace_first(vecn,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00359"></a>00359                                                 boost::trim(vecn);
+<a name="l00357"></a>00357                                                 StringUtil::replaceFirst(vecn,<span class="stringliteral">&quot;vector&lt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00358"></a>00358                                                 StringUtil::replaceFirst(vecn,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00359"></a>00359                                                 StringUtil::trim(vecn);
 <a name="l00360"></a>00360                                                 <span class="keywordflow">if</span>(vecn==<span class="stringliteral">&quot;int&quot;</span> || vecn==<span class="stringliteral">&quot;double&quot;</span> || vecn==<span class="stringliteral">&quot;float&quot;</span> || vecn==<span class="stringliteral">&quot;string&quot;</span>)
 <a name="l00361"></a>00361                                                 {
 <a name="l00362"></a>00362                                                         ws_funcs.append(<span class="stringliteral">&quot;for(int i=0;i&lt;_retval.size();i++)&quot;</span>);
-<a name="l00363"></a>00363                                                         ws_funcs.append(<span class="stringliteral">&quot;_retStr += \&quot;&lt;\&quot; + _req.getNameSpc() + \&quot;:&quot;</span>+pars[<span class="stringliteral">&quot;RETURN&quot;</span>]+<span class="stringliteral">&quot;&gt;\&quot;+boost::lexical_cast&lt;string&gt;(_retval.at(i))+\&quot;&lt;/\&quot; + _req.getNameSpc() + \&quot;:&quot;</span>+pars[<span class="stringliteral">&quot;RETURN&quot;</span>]+<span class="stringliteral">&quot;&gt;\&quot;;\n&quot;</span>);
+<a name="l00363"></a>00363                                                         ws_funcs.append(<span class="stringliteral">&quot;_retStr += \&quot;&lt;\&quot; + _req.getNameSpc() + \&quot;:&quot;</span>+pars[<span class="stringliteral">&quot;RETURN&quot;</span>]+<span class="stringliteral">&quot;&gt;\&quot;+CastUtil::lexical_cast&lt;string&gt;(_retval.at(i))+\&quot;&lt;/\&quot; + _req.getNameSpc() + \&quot;:&quot;</span>+pars[<span class="stringliteral">&quot;RETURN&quot;</span>]+<span class="stringliteral">&quot;&gt;\&quot;;\n&quot;</span>);
 <a name="l00364"></a>00364                                                 }
 <a name="l00365"></a>00365                                                 <span class="keywordflow">else</span>
 <a name="l00366"></a>00366                                                 {

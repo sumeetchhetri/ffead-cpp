@@ -60,7 +60,7 @@ bool FileAuthController::authenticateSecurity(string username,string password)
 		while(getline(ifs, temp))
 		{
 			vector<string> tempv;
-			boost::iter_split(tempv, temp, boost::first_finder(this->delimiter));
+			StringUtil::split(tempv, temp, (this->delimiter));
 			if(tempv.size()>=2 && tempv.at(0)==username && tempv.at(1)==password)
 			{
 				ifs.close();
@@ -82,7 +82,7 @@ bool FileAuthController::getPassword(string username,string &passwd)
 		while(getline(ifs, temp))
 		{
 			vector<string> tempv;
-			boost::iter_split(tempv, temp, boost::first_finder(this->delimiter));
+			StringUtil::split(tempv, temp, (this->delimiter));
 			if(tempv.size()>=2 && tempv.at(0)==username)
 			{
 				passwdf = true;
@@ -106,7 +106,7 @@ string FileAuthController::getUserRole(string username)
 		while(getline(ifs, temp))
 		{
 			vector<string> tempv;
-			boost::iter_split(tempv, temp, boost::first_finder(this->delimiter));
+			StringUtil::split(tempv, temp, (this->delimiter));
 			if(tempv.size()>=3 && tempv.at(0)==username)
 			{
 				passwdf = true;
@@ -130,7 +130,7 @@ string FileAuthController::get(string username, int pos)
 		while(getline(ifs, temp))
 		{
 			vector<string> tempv;
-			boost::iter_split(tempv, temp, boost::first_finder(this->delimiter));
+			StringUtil::split(tempv, temp, (this->delimiter));
 			if(tempv.size()>pos && tempv.at(0)==username)
 			{
 				passwdf = true;

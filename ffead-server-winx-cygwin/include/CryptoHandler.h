@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 using namespace std;
 class CryptoHandler {
 	CryptoHandler();

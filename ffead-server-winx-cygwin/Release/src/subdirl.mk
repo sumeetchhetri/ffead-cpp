@@ -88,9 +88,6 @@ CPP_SRCS += \
 ../src/WsUtil.cpp \
 ../src/XmlParseException.cpp \
 ../src/XmlParser.cpp \
-../src/json_spirit_reader.cpp \
-../src/json_spirit_value.cpp \
-../src/json_spirit_writer.cpp \
 ../src/AuthController.cpp \
 ../src/FileAuthController.cpp \
 ../src/DBAuthController.cpp \
@@ -189,9 +186,6 @@ OBJS += \
 ./src/WsUtil.o \
 ./src/XmlParseException.o \
 ./src/XmlParser.o \
-./src/json_spirit_reader.o \
-./src/json_spirit_value.o \
-./src/json_spirit_writer.o \
 ./src/AuthController.o \
 ./src/FileAuthController.o \
 ./src/DBAuthController.o \
@@ -290,9 +284,6 @@ CPP_DEPS += \
 ./src/WsUtil.d \
 ./src/XmlParseException.d \
 ./src/XmlParser.d \
-./src/json_spirit_reader.d \
-./src/json_spirit_value.d \
-./src/json_spirit_writer.d \
 ./src/AuthController.d \
 ./src/FileAuthController.d \
 ./src/DBAuthController.d \
@@ -311,7 +302,7 @@ CPP_DEPS += \
 %.o: ../../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -l ../src/ -I../include -O0 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	g++ -std=c++0x -l ../src/ -I../include -O0 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

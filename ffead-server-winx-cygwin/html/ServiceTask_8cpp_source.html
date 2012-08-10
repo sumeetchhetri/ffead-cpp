@@ -120,22 +120,22 @@ $(document).ready(initResizable);
 <a name="l00060"></a>00060         <span class="keywordflow">while</span>(getline(ifs,tem))
 <a name="l00061"></a>00061                 all.append(tem+<span class="stringliteral">&quot;\n&quot;</span>);
 <a name="l00062"></a>00062         strVec results;
-<a name="l00063"></a>00063         boost::iter_split(results, all, boost::first_finder(<span class="stringliteral">&quot;; &quot;</span>));
+<a name="l00063"></a>00063         StringUtil::split(results, all, (<span class="stringliteral">&quot;; &quot;</span>));
 <a name="l00064"></a>00064         <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j=0;j&lt;(int)results.size()-1;j++)
 <a name="l00065"></a>00065         {
 <a name="l00066"></a>00066                 <span class="keywordflow">if</span>(results.at(j)==<span class="stringliteral">&quot;&quot;</span>)<span class="keywordflow">continue</span>;
 <a name="l00067"></a>00067                 strVec results1;
-<a name="l00068"></a>00068                 boost::replace_all(results.at(j),<span class="stringliteral">&quot;%3B%20&quot;</span>,<span class="stringliteral">&quot;; &quot;</span>);
-<a name="l00069"></a>00069                 boost::iter_split(results1, results.at(j), boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00068"></a>00068                 StringUtil::replaceAll(results.at(j),<span class="stringliteral">&quot;%3B%20&quot;</span>,<span class="stringliteral">&quot;; &quot;</span>);
+<a name="l00069"></a>00069                 StringUtil::split(results1, results.at(j), (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00070"></a>00070                 <span class="keywordflow">if</span>(results1.size()==2)
 <a name="l00071"></a>00071                 {
-<a name="l00072"></a>00072                         boost::replace_all(results1.at(0),<span class="stringliteral">&quot;%3D&quot;</span>,<span class="stringliteral">&quot;=&quot;</span>);
-<a name="l00073"></a>00073                         boost::replace_all(results1.at(1),<span class="stringliteral">&quot;%3D&quot;</span>,<span class="stringliteral">&quot;=&quot;</span>);
+<a name="l00072"></a>00072                         StringUtil::replaceAll(results1.at(0),<span class="stringliteral">&quot;%3D&quot;</span>,<span class="stringliteral">&quot;=&quot;</span>);
+<a name="l00073"></a>00073                         StringUtil::replaceAll(results1.at(1),<span class="stringliteral">&quot;%3D&quot;</span>,<span class="stringliteral">&quot;=&quot;</span>);
 <a name="l00074"></a>00074                         valss[results1.at(0)] = results1.at(1);
 <a name="l00075"></a>00075                 }
 <a name="l00076"></a>00076                 <span class="keywordflow">else</span>
 <a name="l00077"></a>00077                 {
-<a name="l00078"></a>00078                         boost::replace_all(results1.at(0),<span class="stringliteral">&quot;%3D&quot;</span>,<span class="stringliteral">&quot;=&quot;</span>);
+<a name="l00078"></a>00078                         StringUtil::replaceAll(results1.at(0),<span class="stringliteral">&quot;%3D&quot;</span>,<span class="stringliteral">&quot;=&quot;</span>);
 <a name="l00079"></a>00079                         valss[results1.at(0)] = <span class="stringliteral">&quot;true&quot;</span>;
 <a name="l00080"></a>00080                 }
 <a name="l00081"></a>00081                 logger &lt;&lt; <span class="stringliteral">&quot;read key/value pair &quot;</span> &lt;&lt; results1.at(0) &lt;&lt; <span class="stringliteral">&quot; = &quot;</span> &lt;&lt; valss[results1.at(0)] &lt;&lt; endl;
@@ -156,7 +156,7 @@ $(document).ready(initResizable);
 <a name="l00096"></a>00096                 <span class="keywordtype">string</span> values;
 <a name="l00097"></a>00097                 logger &lt;&lt; <span class="stringliteral">&quot;session object modified &quot;</span> &lt;&lt; vals.size() &lt;&lt; endl;
 <a name="l00098"></a>00098                 <a class="code" href="classDate.html">Date</a> date;
-<a name="l00099"></a>00099                 <span class="keywordtype">string</span> <span class="keywordtype">id</span> = boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime());
+<a name="l00099"></a>00099                 <span class="keywordtype">string</span> <span class="keywordtype">id</span> = CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime());
 <a name="l00100"></a>00100                 <span class="keywordtype">int</span> seconds = sessionTimeout;
 <a name="l00101"></a>00101                 date = date.addSeconds(sessionTimeout);
 <a name="l00102"></a>00102                 <a class="code" href="classDateFormat.html">DateFormat</a> dformat(<span class="stringliteral">&quot;ddd, dd-mmm-yyyy hh:mi:ss&quot;</span>);
@@ -165,10 +165,10 @@ $(document).ready(initResizable);
 <a name="l00105"></a>00105                 {
 <a name="l00106"></a>00106                         <span class="keywordtype">string</span> key = it-&gt;first;
 <a name="l00107"></a>00107                         <span class="keywordtype">string</span> value = it-&gt;second;
-<a name="l00108"></a>00108                         boost::replace_all(key,<span class="stringliteral">&quot;; &quot;</span>,<span class="stringliteral">&quot;%3B%20&quot;</span>);
-<a name="l00109"></a>00109                         boost::replace_all(key,<span class="stringliteral">&quot;=&quot;</span>,<span class="stringliteral">&quot;%3D&quot;</span>);
-<a name="l00110"></a>00110                         boost::replace_all(value,<span class="stringliteral">&quot;; &quot;</span>,<span class="stringliteral">&quot;%3B%20&quot;</span>);
-<a name="l00111"></a>00111                         boost::replace_all(value,<span class="stringliteral">&quot;=&quot;</span>,<span class="stringliteral">&quot;%3D&quot;</span>);
+<a name="l00108"></a>00108                         StringUtil::replaceAll(key,<span class="stringliteral">&quot;; &quot;</span>,<span class="stringliteral">&quot;%3B%20&quot;</span>);
+<a name="l00109"></a>00109                         StringUtil::replaceAll(key,<span class="stringliteral">&quot;=&quot;</span>,<span class="stringliteral">&quot;%3D&quot;</span>);
+<a name="l00110"></a>00110                         StringUtil::replaceAll(value,<span class="stringliteral">&quot;; &quot;</span>,<span class="stringliteral">&quot;%3B%20&quot;</span>);
+<a name="l00111"></a>00111                         StringUtil::replaceAll(value,<span class="stringliteral">&quot;=&quot;</span>,<span class="stringliteral">&quot;%3D&quot;</span>);
 <a name="l00112"></a>00112                         logger &lt;&lt; it-&gt;first &lt;&lt; <span class="stringliteral">&quot; = &quot;</span> &lt;&lt; it-&gt;second &lt;&lt; endl;
 <a name="l00113"></a>00113                         <span class="keywordflow">if</span>(!sessatserv)
 <a name="l00114"></a>00114                                 res.addCookie(key + <span class="stringliteral">&quot;=&quot;</span> + value + <span class="stringliteral">&quot;; expires=&quot;</span>+dformat.format(date)+<span class="stringliteral">&quot; GMT; path=/; HttpOnly&quot;</span>);
@@ -206,7 +206,7 @@ $(document).ready(initResizable);
 <a name="l00146"></a>00146     <span class="keywordflow">if</span>(locale.find(<span class="stringliteral">&quot;english&quot;</span>)==string::npos &amp;&amp; (ext==<span class="stringliteral">&quot;.html&quot;</span> || ext==<span class="stringliteral">&quot;.htm&quot;</span>))
 <a name="l00147"></a>00147     {
 <a name="l00148"></a>00148             <span class="keywordtype">string</span> fnj = fname;
-<a name="l00149"></a>00149             boost::replace_first(fnj,<span class="stringliteral">&quot;.&quot;</span>,(<span class="stringliteral">&quot;_&quot;</span> + locale+<span class="stringliteral">&quot;.&quot;</span>));
+<a name="l00149"></a>00149             StringUtil::replaceFirst(fnj,<span class="stringliteral">&quot;.&quot;</span>,(<span class="stringliteral">&quot;_&quot;</span> + locale+<span class="stringliteral">&quot;.&quot;</span>));
 <a name="l00150"></a>00150             myfile.open(fnj.c_str(),ios::in | ios::binary);
 <a name="l00151"></a>00151                         <span class="keywordflow">if</span> (myfile.is_open())
 <a name="l00152"></a>00152                         {
@@ -298,7 +298,7 @@ $(document).ready(initResizable);
 <a name="l00238"></a>00238                                         <span class="comment">//logger &lt;&lt; &quot;contne-length=&quot;&lt;&lt;cntle &lt;&lt;endl;</span>
 <a name="l00239"></a>00239                                         <span class="keywordflow">try</span>
 <a name="l00240"></a>00240                                         {
-<a name="l00241"></a>00241                                                 cntlen = boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(cntle);
+<a name="l00241"></a>00241                                                 cntlen = CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(cntle);
 <a name="l00242"></a>00242                                         }
 <a name="l00243"></a>00243                                         <span class="keywordflow">catch</span>(boost::bad_lexical_cast&amp;)
 <a name="l00244"></a>00244                                         {
@@ -339,7 +339,7 @@ $(document).ready(initResizable);
 <a name="l00279"></a>00279                                         <span class="comment">//logger &lt;&lt; &quot;contne-length=&quot;&lt;&lt;cntle &lt;&lt;endl;</span>
 <a name="l00280"></a>00280                                         <span class="keywordflow">try</span>
 <a name="l00281"></a>00281                                         {
-<a name="l00282"></a>00282                                                 cntlen = boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(cntle);
+<a name="l00282"></a>00282                                                 cntlen = CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(cntle);
 <a name="l00283"></a>00283                                         }
 <a name="l00284"></a>00284                                         <span class="keywordflow">catch</span>(boost::bad_lexical_cast&amp;)
 <a name="l00285"></a>00285                                         {
@@ -535,7 +535,7 @@ $(document).ready(initResizable);
 <a name="l00475"></a>00475                         {
 <a name="l00476"></a>00476                                 res.setStatusCode(<span class="stringliteral">&quot;404&quot;</span>);
 <a name="l00477"></a>00477                                 res.setStatusMsg(<span class="stringliteral">&quot;Not Found&quot;</span>);
-<a name="l00478"></a>00478                                 <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(0));</span>
+<a name="l00478"></a>00478                                 <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(0));</span>
 <a name="l00479"></a>00479                         }
 <a name="l00480"></a>00480                         <span class="keywordflow">else</span>
 <a name="l00481"></a>00481                         {
@@ -543,7 +543,7 @@ $(document).ready(initResizable);
 <a name="l00483"></a>00483                                 res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00484"></a>00484                                 <span class="keywordflow">if</span>(res.getContent_type()==<span class="stringliteral">&quot;&quot;</span>)res.setContent_type(configData.props[ext]);
 <a name="l00485"></a>00485                                 res.setContent_str(content);
-<a name="l00486"></a>00486                                 <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00486"></a>00486                                 <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00487"></a>00487                                 <span class="comment">//sess.setAttribute(&quot;CURR&quot;,req-&gt;getUrl());</span>
 <a name="l00488"></a>00488                         }
 <a name="l00489"></a>00489                 }
@@ -770,7 +770,7 @@ $(document).ready(initResizable);
 <a name="l00710"></a>00710                         {
 <a name="l00711"></a>00711                                 res.setStatusCode(<span class="stringliteral">&quot;404&quot;</span>);
 <a name="l00712"></a>00712                                 res.setStatusMsg(<span class="stringliteral">&quot;Not Found&quot;</span>);
-<a name="l00713"></a>00713                                 <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(0));</span>
+<a name="l00713"></a>00713                                 <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(0));</span>
 <a name="l00714"></a>00714                         }
 <a name="l00715"></a>00715                         <span class="keywordflow">else</span>
 <a name="l00716"></a>00716                         {
@@ -778,7 +778,7 @@ $(document).ready(initResizable);
 <a name="l00718"></a>00718                                 res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00719"></a>00719                                 <span class="keywordflow">if</span>(res.getContent_type()==<span class="stringliteral">&quot;&quot;</span>)res.setContent_type(configData.props[ext]);
 <a name="l00720"></a>00720                                 res.setContent_str(content);
-<a name="l00721"></a>00721                                 <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00721"></a>00721                                 <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00722"></a>00722                                 <span class="comment">//sess.setAttribute(&quot;CURR&quot;,req-&gt;getUrl());</span>
 <a name="l00723"></a>00723                         }
 <a name="l00724"></a>00724                 }

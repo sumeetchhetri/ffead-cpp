@@ -83,7 +83,7 @@ bool MessageHandler::tempUnSubscribe(string subs,string fileName)
 	ofstream myfile;
 	myfile.open(fileName.c_str());
 	string rep = subs + ":";
-	boost::replace_first(subscribers,rep,"");
+	StringUtil::replaceFirst(subscribers,rep,"");
 	myfile.write(subscribers.c_str(),subscribers.length());
 	myfile.close();
 	if(subscribers.find(":")!=string::npos)
@@ -173,7 +173,7 @@ void MessageHandler::unSubscribe(string subs,string fileName)
 	ofstream myfile;
 	myfile.open(fileName.c_str());
 	string rep = subs + ":";
-	boost::replace_first(subscribers,rep,"");
+	StringUtil::replaceFirst(subscribers,rep,"");
 	myfile.write(subscribers.c_str(),subscribers.length());
 	myfile.close();
 	fileName += "Temp";
@@ -226,15 +226,15 @@ void MessageHandler::service(int fd)
 		Message msg;
 		if(results.find("Queue")!=string::npos)
 		{
-			boost::replace_first(results,"GET FROM ",_mess_instance->path);
+			StringUtil::replaceFirst(results,"GET FROM ",_mess_instance->path);
 			msg = _mess_instance->readMessageFromQ(results);
 		}
 		else if(results.find("Topic")!=string::npos)
 		{
 			string subs = results.substr(results.find("-")+1);
 			string te = "-" + subs;
-			boost::replace_first(results,te,"");
-			boost::replace_first(results,"GET FROM ",_mess_instance->path);
+			StringUtil::replaceFirst(results,te,"");
+			StringUtil::replaceFirst(results,"GET FROM ",_mess_instance->path);
 			msg = _mess_instance->readMessageFromT(results,subs);
 		}
 		string h;

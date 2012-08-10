@@ -100,7 +100,7 @@ $(document).ready(initResizable);
 <a name="l00040"></a>00040 <span class="keyword">static</span> pid_t parid;
 <a name="l00041"></a>00041 <span class="keywordtype">void</span> *dlib = NULL;
 <a name="l00042"></a>00042 <span class="keyword">typedef</span> map&lt;string,string&gt; sessionMap;
-<a name="l00043"></a>00043 <span class="keyword">static</span> boost::mutex m_mutex,p_mutex;
+<a name="l00043"></a>00043 <span class="keyword">static</span> std::mutex m_mutex,p_mutex;
 <a name="l00044"></a>00044 <a class="code" href="classConfigurationData.html">ConfigurationData</a> configurationData;
 <a name="l00045"></a>00045 
 <a name="l00046"></a>00046 <a class="code" href="classLogger.html">Logger</a> logger;
@@ -152,7 +152,7 @@ $(document).ready(initResizable);
 <a name="l00092"></a>00092         msg.msg_controllen = cmsg-&gt;cmsg_len;
 <a name="l00093"></a>00093 
 <a name="l00094"></a>00094         msg.msg_flags = 0;
-<a name="l00095"></a>00095         <span class="comment">//boost::mutex::scoped_lock lock(p_mutex);</span>
+<a name="l00095"></a>00095         <span class="comment">//std::mutex::scoped_lock lock(p_mutex);</span>
 <a name="l00096"></a>00096         <span class="keywordflow">if</span>((rv= sendmsg(unix_socket_fd, &amp;msg, 0)) &lt; 0 )
 <a name="l00097"></a>00097         {
 <a name="l00098"></a>00098           perror(<span class="stringliteral">&quot;sendmsg()&quot;</span>);
@@ -576,7 +576,7 @@ $(document).ready(initResizable);
 <a name="l00516"></a>00516                                                 }
 <a name="l00517"></a>00517 
 <a name="l00518"></a>00518                                                 <span class="keywordflow">if</span>(isThreadprq)
-<a name="l00519"></a>00519                                                         boost::thread m_thread(boost::bind(&amp;service,n,serverRootDirectory,&amp;params,
+<a name="l00519"></a>00519                                                         std::thread m_thread((&amp;service,n,serverRootDirectory,&amp;params,
 <a name="l00520"></a>00520                                                                         isSSLEnabled, ctx, sSLHandler, configurationData, dlib));
 <a name="l00521"></a>00521                                                 <span class="keywordflow">else</span>
 <a name="l00522"></a>00522                                                 {
@@ -612,7 +612,7 @@ $(document).ready(initResizable);
 <a name="l00552"></a>00552 <span class="comment">                        {</span>
 <a name="l00553"></a>00553 <span class="comment">                                string temp = buf;</span>
 <a name="l00554"></a>00554 <span class="comment">                                strVec tempv;</span>
-<a name="l00555"></a>00555 <span class="comment">                                boost::iter_split(tempv, temp, boost::first_finder(&quot;:&quot;));</span>
+<a name="l00555"></a>00555 <span class="comment">                                StringUtil::split(tempv, temp, (&quot;:&quot;));</span>
 <a name="l00556"></a>00556 <span class="comment">                                if(tempv.size()==2)</span>
 <a name="l00557"></a>00557 <span class="comment">                                {</span>
 <a name="l00558"></a>00558 <span class="comment">                                        if(tempv.at(0)==&quot;R&quot;)</span>
@@ -648,7 +648,7 @@ $(document).ready(initResizable);
 <a name="l00588"></a>00588         }
 <a name="l00589"></a>00589         <span class="keywordflow">while</span>(<span class="keyword">true</span>)
 <a name="l00590"></a>00590         {
-<a name="l00591"></a>00591                 boost::this_thread::sleep(boost::posix_time::seconds(5));
+<a name="l00591"></a>00591                 std::this_thread::sleep_for(std::chrono::seconds(5));
 <a name="l00592"></a>00592                 <span class="keywordtype">bool</span> flag = <span class="keyword">false</span>;
 <a name="l00593"></a>00593                 <span class="keywordflow">if</span>(processgendone)
 <a name="l00594"></a>00594                         <span class="keywordflow">continue</span>;
@@ -748,7 +748,7 @@ $(document).ready(initResizable);
 <a name="l00688"></a>00688     <a class="code" href="classPropFileReader.html">PropFileReader</a> pread;
 <a name="l00689"></a>00689     propMap srprps = pread.getProperties(respath+<span class="stringliteral">&quot;server.prop&quot;</span>);
 <a name="l00690"></a>00690     <span class="keywordflow">if</span>(srprps[<span class="stringliteral">&quot;NUM_PROC&quot;</span>]!=<span class="stringliteral">&quot;&quot;</span>)
-<a name="l00691"></a>00691         preForked = boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(srprps[<span class="stringliteral">&quot;NUM_PROC&quot;</span>]);
+<a name="l00691"></a>00691         preForked = CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(srprps[<span class="stringliteral">&quot;NUM_PROC&quot;</span>]);
 <a name="l00692"></a>00692     <span class="keywordtype">string</span> sslEnabled = srprps[<span class="stringliteral">&quot;SSL_ENAB&quot;</span>];
 <a name="l00693"></a>00693         <span class="keywordflow">if</span>(sslEnabled==<span class="stringliteral">&quot;true&quot;</span> || sslEnabled==<span class="stringliteral">&quot;TRUE&quot;</span>)
 <a name="l00694"></a>00694                 isSSLEnabled = <span class="keyword">true</span>;
@@ -767,7 +767,7 @@ $(document).ready(initResizable);
 <a name="l00707"></a>00707                 {
 <a name="l00708"></a>00708                         <span class="keywordflow">try</span>
 <a name="l00709"></a>00709                         {
-<a name="l00710"></a>00710                                 thrdpsiz = boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(thrdpreq);
+<a name="l00710"></a>00710                                 thrdpsiz = CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(thrdpreq);
 <a name="l00711"></a>00711                         }
 <a name="l00712"></a>00712                         <span class="keywordflow">catch</span>(...)
 <a name="l00713"></a>00713                         {
@@ -781,7 +781,7 @@ $(document).ready(initResizable);
 <a name="l00721"></a>00721         <span class="keywordflow">if</span>(srprps[<span class="stringliteral">&quot;SESS_TIME_OUT&quot;</span>]!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00722"></a>00722         {
 <a name="l00723"></a>00723                 <span class="keywordflow">try</span> {
-<a name="l00724"></a>00724                         sessionTimeout = boost::lexical_cast&lt;<span class="keywordtype">long</span>&gt;(srprps[<span class="stringliteral">&quot;SESS_TIME_OUT&quot;</span>]);
+<a name="l00724"></a>00724                         sessionTimeout = CastUtil::lexical_cast&lt;<span class="keywordtype">long</span>&gt;(srprps[<span class="stringliteral">&quot;SESS_TIME_OUT&quot;</span>]);
 <a name="l00725"></a>00725                 } <span class="keywordflow">catch</span> (...) {
 <a name="l00726"></a>00726                         sessionTimeout = 3600;
 <a name="l00727"></a>00727                         logger &lt;&lt; <span class="stringliteral">&quot;\nInvalid session timeout value defined, defaulting to 1hour/3600sec&quot;</span>;
@@ -900,7 +900,7 @@ $(document).ready(initResizable);
 <a name="l00840"></a>00840         <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> var1 = 0;var1&lt;configurationData.cmpnames.size();var1++)
 <a name="l00841"></a>00841         {
 <a name="l00842"></a>00842                 <span class="keywordtype">string</span> name = configurationData.cmpnames.at(var1);
-<a name="l00843"></a>00843                 boost::replace_first(name,<span class="stringliteral">&quot;Component_&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00843"></a>00843                 StringUtil::replaceFirst(name,<span class="stringliteral">&quot;Component_&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00844"></a>00844                 ComponentHandler::registerComponent(name);
 <a name="l00845"></a>00845                 AppContext::registerComponent(name);
 <a name="l00846"></a>00846         }
@@ -924,7 +924,7 @@ $(document).ready(initResizable);
 <a name="l00864"></a>00864         <span class="comment">//logfile &lt;&lt; &quot;Server: waiting for connections on port &quot; &lt;&lt; PORT &lt;&lt; &quot;\n&quot; &lt;&lt; flush;</span>
 <a name="l00865"></a>00865         logger.info(<span class="stringliteral">&quot;Server: waiting for connections on port &quot;</span>+PORT);
 <a name="l00866"></a>00866 
-<a name="l00867"></a>00867         <span class="keywordflow">if</span>(isCompileEnabled)boost::thread m_thread(boost::bind(&amp;dynamic_page_monitor ,serverRootDirectory));
+<a name="l00867"></a>00867         <span class="keywordflow">if</span>(isCompileEnabled)std::thread m_thread((&amp;dynamic_page_monitor ,serverRootDirectory));
 <a name="l00868"></a>00868 
 <a name="l00869"></a>00869         fd_set master;    <span class="comment">// master file descriptor list</span>
 <a name="l00870"></a>00870         fd_set read_fds;  <span class="comment">// temp file descriptor list for select()</span>
@@ -1044,7 +1044,7 @@ $(document).ready(initResizable);
 <a name="l00984"></a>00984                                         FD_CLR(n, &amp;master); <span class="comment">// remove from master set</span>
 <a name="l00985"></a>00985                                         fcntl(n, F_SETFL,O_SYNC);
 <a name="l00986"></a>00986                                         <span class="keywordflow">if</span>(isThreadprq)
-<a name="l00987"></a>00987                                                 boost::thread m_thread(boost::bind(&amp;service,n,serverRootDirectory,&amp;params,
+<a name="l00987"></a>00987                                                 std::thread m_thread((&amp;service,n,serverRootDirectory,&amp;params,
 <a name="l00988"></a>00988                                                                 isSSLEnabled, ctx, sSLHandler, configurationData, dlib));
 <a name="l00989"></a>00989                                         <span class="keywordflow">else</span>
 <a name="l00990"></a>00990                                         {

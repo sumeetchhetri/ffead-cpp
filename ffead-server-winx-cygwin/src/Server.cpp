@@ -132,7 +132,7 @@ Server::Server(string port,int waiting,Service serv)
 					}
 					else
 					{
-						boost::thread m_thread(boost::bind(serv,n));
+						std::thread m_thread((serv,n));
 					}
 				}
 			}
@@ -209,7 +209,7 @@ Server::Server(string port,bool block,int waiting,Service serv,bool tobefork)
 	}
 	else
 	{
-		boost::thread m_thread(boost::bind(&Server::servicing, this, serv));
+		std::thread m_thread((&Server::servicing, this, serv));
 		//servicing(serv);
 	}
 }
@@ -218,7 +218,7 @@ Server::~Server() {
 	// TODO Auto-generated destructor stub
 }
 
-void Server::servicing(Service serv)
+void* Server::servicing(Service serv)
 {
 	while(1)
 	{
@@ -230,9 +230,10 @@ void Server::servicing(Service serv)
 		}
 		else
 		{
-			boost::thread m_thread(boost::bind(serv,new_fd));
+			std::thread m_thread((serv,new_fd));
 		}
 	}
+	return NULL;
 }
 
 int Server::Accept()

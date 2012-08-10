@@ -289,7 +289,7 @@ $(document).ready(initResizable);
 <a name="l00229"></a>00229                 }
 <a name="l00230"></a>00230                 <span class="keywordtype">string</span> phpcnts = req-&gt;toPHPVariablesString(def);
 <a name="l00231"></a>00231                 <span class="comment">//logger &lt;&lt; phpcnts &lt;&lt; endl;</span>
-<a name="l00232"></a>00232                 filen = boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.php&quot;</span>;
+<a name="l00232"></a>00232                 filen = CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.php&quot;</span>;
 <a name="l00233"></a>00233                 tmpf = req-&gt;getCntxt_root() + tmpf;
 <a name="l00234"></a>00234 
 <a name="l00235"></a>00235                 AfcUtil::writeTofile(tmpf+filen, phpcnts, <span class="keyword">true</span>);
@@ -338,7 +338,7 @@ $(document).ready(initResizable);
 <a name="l00278"></a>00278                         res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00279"></a>00279                         res.setContent_type(props[<span class="stringliteral">&quot;.html&quot;</span>]);
 <a name="l00280"></a>00280                         res.setContent_str(content);
-<a name="l00281"></a>00281                         <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00281"></a>00281                         <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00282"></a>00282                 }
 <a name="l00283"></a>00283         }
 <a name="l00284"></a>00284         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(ext==<span class="stringliteral">&quot;.pl&quot;</span>)
@@ -349,7 +349,7 @@ $(document).ready(initResizable);
 <a name="l00289"></a>00289 
 <a name="l00290"></a>00290                 <span class="keywordtype">string</span> phpcnts = req-&gt;toPerlVariablesString();
 <a name="l00291"></a>00291                 <span class="comment">//logger &lt;&lt; phpcnts &lt;&lt; endl;</span>
-<a name="l00292"></a>00292                 <span class="keywordtype">string</span> tmpf = req-&gt;getCntxt_root() + <span class="stringliteral">&quot;/temp/&quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.pl&quot;</span>;
+<a name="l00292"></a>00292                 <span class="keywordtype">string</span> tmpf = req-&gt;getCntxt_root() + <span class="stringliteral">&quot;/temp/&quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.pl&quot;</span>;
 <a name="l00293"></a>00293                 <span class="comment">//logger &lt;&lt; tmpf &lt;&lt; endl;</span>
 <a name="l00294"></a>00294                 <span class="keywordtype">string</span> plfile = req-&gt;getCntxt_root()+<span class="stringliteral">&quot;/scripts/perl/&quot;</span>+req-&gt;getFile();
 <a name="l00295"></a>00295                 ifstream infile(plfile.c_str());
@@ -408,7 +408,7 @@ $(document).ready(initResizable);
 <a name="l00348"></a>00348                         res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00349"></a>00349                         res.setContent_type(props[<span class="stringliteral">&quot;.html&quot;</span>]);
 <a name="l00350"></a>00350                         res.setContent_str(content);
-<a name="l00351"></a>00351                         <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00351"></a>00351                         <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00352"></a>00352                 }
 <a name="l00353"></a>00353         }
 <a name="l00354"></a>00354         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(ext==<span class="stringliteral">&quot;.rb&quot;</span>)
@@ -419,7 +419,7 @@ $(document).ready(initResizable);
 <a name="l00359"></a>00359 
 <a name="l00360"></a>00360                 <span class="keywordtype">string</span> phpcnts = req-&gt;toRubyVariablesString();
 <a name="l00361"></a>00361                 <span class="comment">//logger &lt;&lt; phpcnts &lt;&lt; endl;</span>
-<a name="l00362"></a>00362                 <span class="keywordtype">string</span> tmpf = req-&gt;getCntxt_root() + <span class="stringliteral">&quot;/temp/&quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.rb&quot;</span>;
+<a name="l00362"></a>00362                 <span class="keywordtype">string</span> tmpf = req-&gt;getCntxt_root() + <span class="stringliteral">&quot;/temp/&quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.rb&quot;</span>;
 <a name="l00363"></a>00363                 <span class="comment">//logger &lt;&lt; tmpf &lt;&lt; endl;</span>
 <a name="l00364"></a>00364                 AfcUtil::writeTofile(tmpf, phpcnts, <span class="keyword">true</span>);
 <a name="l00365"></a>00365                 <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> args[] = {
@@ -468,7 +468,7 @@ $(document).ready(initResizable);
 <a name="l00408"></a>00408                         res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00409"></a>00409                         res.setContent_type(props[<span class="stringliteral">&quot;.html&quot;</span>]);
 <a name="l00410"></a>00410                         res.setContent_str(content);
-<a name="l00411"></a>00411                         <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00411"></a>00411                         <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00412"></a>00412                 }
 <a name="l00413"></a>00413         }
 <a name="l00414"></a>00414         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(ext==<span class="stringliteral">&quot;.py&quot;</span>)
@@ -479,7 +479,7 @@ $(document).ready(initResizable);
 <a name="l00419"></a>00419 
 <a name="l00420"></a>00420                 <span class="keywordtype">string</span> phpcnts = req-&gt;toPythonVariablesString();
 <a name="l00421"></a>00421                 <span class="comment">//logger &lt;&lt; phpcnts &lt;&lt; endl;</span>
-<a name="l00422"></a>00422                 <span class="keywordtype">string</span> tmpf = req-&gt;getCntxt_root() + <span class="stringliteral">&quot;/temp/&quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.py&quot;</span>;
+<a name="l00422"></a>00422                 <span class="keywordtype">string</span> tmpf = req-&gt;getCntxt_root() + <span class="stringliteral">&quot;/temp/&quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.py&quot;</span>;
 <a name="l00423"></a>00423                 <span class="comment">//logger &lt;&lt; tmpf &lt;&lt; endl;</span>
 <a name="l00424"></a>00424                 <span class="keywordtype">string</span> plfile = req-&gt;getCntxt_root()+<span class="stringliteral">&quot;/scripts/python/&quot;</span>+req-&gt;getFile();
 <a name="l00425"></a>00425                 ifstream infile(plfile.c_str());
@@ -539,7 +539,7 @@ $(document).ready(initResizable);
 <a name="l00479"></a>00479                         res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00480"></a>00480                         res.setContent_type(props[<span class="stringliteral">&quot;.html&quot;</span>]);
 <a name="l00481"></a>00481                         res.setContent_str(content);
-<a name="l00482"></a>00482                         <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00482"></a>00482                         <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00483"></a>00483                 }
 <a name="l00484"></a>00484         }
 <a name="l00485"></a>00485         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(ext==<span class="stringliteral">&quot;.lua&quot;</span>)
@@ -550,7 +550,7 @@ $(document).ready(initResizable);
 <a name="l00490"></a>00490 
 <a name="l00491"></a>00491                 <span class="keywordtype">string</span> phpcnts = req-&gt;toLuaVariablesString();
 <a name="l00492"></a>00492                 <span class="comment">//logger &lt;&lt; phpcnts &lt;&lt; endl;</span>
-<a name="l00493"></a>00493                 <span class="keywordtype">string</span> tmpf = req-&gt;getCntxt_root() + <span class="stringliteral">&quot;/temp/&quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.lua&quot;</span>;
+<a name="l00493"></a>00493                 <span class="keywordtype">string</span> tmpf = req-&gt;getCntxt_root() + <span class="stringliteral">&quot;/temp/&quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.lua&quot;</span>;
 <a name="l00494"></a>00494                 <span class="comment">//logger &lt;&lt; tmpf &lt;&lt; endl;</span>
 <a name="l00495"></a>00495                 AfcUtil::writeTofile(tmpf, phpcnts, <span class="keyword">true</span>);
 <a name="l00496"></a>00496                 <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> args[] = {
@@ -599,7 +599,7 @@ $(document).ready(initResizable);
 <a name="l00539"></a>00539                         res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00540"></a>00540                         res.setContent_type(props[<span class="stringliteral">&quot;.html&quot;</span>]);
 <a name="l00541"></a>00541                         res.setContent_str(content);
-<a name="l00542"></a>00542                         <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00542"></a>00542                         <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00543"></a>00543                 }
 <a name="l00544"></a>00544         }
 <a name="l00545"></a>00545         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(ext==<span class="stringliteral">&quot;.njs&quot;</span>)
@@ -610,7 +610,7 @@ $(document).ready(initResizable);
 <a name="l00550"></a>00550 
 <a name="l00551"></a>00551                 <span class="keywordtype">string</span> phpcnts = req-&gt;toNodejsVariablesString();
 <a name="l00552"></a>00552                 <span class="comment">//logger &lt;&lt; phpcnts &lt;&lt; endl;</span>
-<a name="l00553"></a>00553                 <span class="keywordtype">string</span> tmpf = req-&gt;getCntxt_root() + <span class="stringliteral">&quot;/temp/&quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.njs&quot;</span>;
+<a name="l00553"></a>00553                 <span class="keywordtype">string</span> tmpf = req-&gt;getCntxt_root() + <span class="stringliteral">&quot;/temp/&quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(Timer::getCurrentTime()) + <span class="stringliteral">&quot;.njs&quot;</span>;
 <a name="l00554"></a>00554                 <span class="comment">//logger &lt;&lt; tmpf &lt;&lt; endl;</span>
 <a name="l00555"></a>00555                 AfcUtil::writeTofile(tmpf, phpcnts, <span class="keyword">true</span>);
 <a name="l00556"></a>00556                 <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> args[] = {
@@ -659,7 +659,7 @@ $(document).ready(initResizable);
 <a name="l00599"></a>00599                         res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00600"></a>00600                         res.setContent_type(props[<span class="stringliteral">&quot;.html&quot;</span>]);
 <a name="l00601"></a>00601                         res.setContent_str(content);
-<a name="l00602"></a>00602                         <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00602"></a>00602                         <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00603"></a>00603                 }
 <a name="l00604"></a>00604         }
 <a name="l00605"></a>00605         <span class="keywordflow">return</span> skipit;

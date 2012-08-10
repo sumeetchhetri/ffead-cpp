@@ -103,7 +103,7 @@ $(document).ready(initResizable);
 <a name="l00043"></a>00043     <span class="keywordflow">if</span>(locale.find(<span class="stringliteral">&quot;english&quot;</span>)==string::npos &amp;&amp; (ext==<span class="stringliteral">&quot;.html&quot;</span> || ext==<span class="stringliteral">&quot;.htm&quot;</span>))
 <a name="l00044"></a>00044     {
 <a name="l00045"></a>00045             <span class="keywordtype">string</span> fnj = fname;
-<a name="l00046"></a>00046             boost::replace_first(fnj,<span class="stringliteral">&quot;.&quot;</span>,(<span class="stringliteral">&quot;_&quot;</span> + locale+<span class="stringliteral">&quot;.&quot;</span>));
+<a name="l00046"></a>00046             StringUtil::replaceFirst(fnj,<span class="stringliteral">&quot;.&quot;</span>,(<span class="stringliteral">&quot;_&quot;</span> + locale+<span class="stringliteral">&quot;.&quot;</span>));
 <a name="l00047"></a>00047             myfile.open(fnj.c_str(),ios::in | ios::binary);
 <a name="l00048"></a>00048                         <span class="keywordflow">if</span> (myfile.is_open())
 <a name="l00049"></a>00049                         {
@@ -138,7 +138,7 @@ $(document).ready(initResizable);
 <a name="l00078"></a>00078                 res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00079"></a>00079                 res.setContent_type(props[<span class="stringliteral">&quot;.txt&quot;</span>]);
 <a name="l00080"></a>00080                 res.setContent_str(content);
-<a name="l00081"></a>00081                 <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00081"></a>00081                 <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00082"></a>00082         }
 <a name="l00083"></a>00083         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(ext==<span class="stringliteral">&quot;.dcp&quot;</span>)
 <a name="l00084"></a>00084         {
@@ -179,7 +179,7 @@ $(document).ready(initResizable);
 <a name="l00119"></a>00119                         res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00120"></a>00120                         res.setContent_type(props[ext]);
 <a name="l00121"></a>00121                         res.setContent_str(content);
-<a name="l00122"></a>00122                         <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00122"></a>00122                         <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00123"></a>00123                 }
 <a name="l00124"></a>00124         }
 <a name="l00125"></a>00125         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(ext==<span class="stringliteral">&quot;.view&quot;</span> &amp;&amp; vwMap[req-&gt;getCntxt_name()+req-&gt;getFile()]!=<span class="stringliteral">&quot;&quot;</span>)
@@ -220,7 +220,7 @@ $(document).ready(initResizable);
 <a name="l00160"></a>00160                         res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00161"></a>00161                         res.setContent_type(props[ext]);
 <a name="l00162"></a>00162                         res.setContent_str(content);
-<a name="l00163"></a>00163                         <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00163"></a>00163                         <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00164"></a>00164                 }
 <a name="l00165"></a>00165         }
 <a name="l00166"></a>00166         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(ext==<span class="stringliteral">&quot;.tpe&quot;</span> &amp;&amp; tmplMap[req-&gt;getCntxt_name()+req-&gt;getFile()]!=<span class="stringliteral">&quot;&quot;</span>)
@@ -260,7 +260,7 @@ $(document).ready(initResizable);
 <a name="l00200"></a>00200                         res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00201"></a>00201                         res.setContent_type(props[ext]);
 <a name="l00202"></a>00202                         res.setContent_str(content);
-<a name="l00203"></a>00203                         <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00203"></a>00203                         <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00204"></a>00204                 }
 <a name="l00205"></a>00205         }
 <a name="l00206"></a>00206         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(ext==<span class="stringliteral">&quot;.wsdl&quot;</span>)
@@ -278,7 +278,7 @@ $(document).ready(initResizable);
 <a name="l00218"></a>00218                         res.setStatusMsg(<span class="stringliteral">&quot;OK&quot;</span>);
 <a name="l00219"></a>00219                         res.setContent_type(props[ext]);
 <a name="l00220"></a>00220                         res.setContent_str(content);
-<a name="l00221"></a>00221                         <span class="comment">//res.setContent_len(boost::lexical_cast&lt;string&gt;(content.length()));</span>
+<a name="l00221"></a>00221                         <span class="comment">//res.setContent_len(CastUtil::lexical_cast&lt;string&gt;(content.length()));</span>
 <a name="l00222"></a>00222                 }
 <a name="l00223"></a>00223         }
 <a name="l00224"></a>00224         <span class="keywordflow">return</span> cntrlit;

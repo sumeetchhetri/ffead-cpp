@@ -157,25 +157,25 @@ $(document).ready(initResizable);
 <a name="l00097"></a>00097                                 <span class="keywordflow">if</span>(arg.getAttribute(<span class="stringliteral">&quot;type&quot;</span>)==<span class="stringliteral">&quot;int&quot;</span>)
 <a name="l00098"></a>00098                                 {
 <a name="l00099"></a>00099                                         <span class="keywordtype">int</span> *vt = <span class="keyword">new</span> int;
-<a name="l00100"></a>00100                                         *vt = boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(arg.getText());
+<a name="l00100"></a>00100                                         *vt = CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(arg.getText());
 <a name="l00101"></a>00101                                         value = vt;
 <a name="l00102"></a>00102                                 }
 <a name="l00103"></a>00103                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(arg.getAttribute(<span class="stringliteral">&quot;type&quot;</span>)==<span class="stringliteral">&quot;float&quot;</span>)
 <a name="l00104"></a>00104                                 {
 <a name="l00105"></a>00105                                         <span class="keywordtype">float</span> *vt = <span class="keyword">new</span> float;
-<a name="l00106"></a>00106                                         *vt = boost::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(arg.getText());
+<a name="l00106"></a>00106                                         *vt = CastUtil::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(arg.getText());
 <a name="l00107"></a>00107                                         value = vt;
 <a name="l00108"></a>00108                                 }
 <a name="l00109"></a>00109                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(arg.getAttribute(<span class="stringliteral">&quot;type&quot;</span>)==<span class="stringliteral">&quot;double&quot;</span>)
 <a name="l00110"></a>00110                                 {
 <a name="l00111"></a>00111                                         <span class="keywordtype">double</span> *vt = <span class="keyword">new</span> double;
-<a name="l00112"></a>00112                                         *vt = boost::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(arg.getText());
+<a name="l00112"></a>00112                                         *vt = CastUtil::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(arg.getText());
 <a name="l00113"></a>00113                                         value = vt;
 <a name="l00114"></a>00114                                 }
 <a name="l00115"></a>00115                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(arg.getAttribute(<span class="stringliteral">&quot;type&quot;</span>)==<span class="stringliteral">&quot;string&quot;</span>)
 <a name="l00116"></a>00116                                 {
 <a name="l00117"></a>00117                                         <span class="keywordtype">string</span> *vt = <span class="keyword">new</span> string;
-<a name="l00118"></a>00118                                         *vt = boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(arg.getText());
+<a name="l00118"></a>00118                                         *vt = CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(arg.getText());
 <a name="l00119"></a>00119                                         value = vt;
 <a name="l00120"></a>00120                                 }
 <a name="l00121"></a>00121                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(arg.getAttribute(<span class="stringliteral">&quot;type&quot;</span>)!=<span class="stringliteral">&quot;&quot;</span>)
@@ -217,17 +217,17 @@ $(document).ready(initResizable);
 <a name="l00157"></a>00157                                         <span class="keywordflow">if</span>(returnType==<span class="stringliteral">&quot;int&quot;</span>)
 <a name="l00158"></a>00158                                         {
 <a name="l00159"></a>00159                                                 <span class="keywordtype">int</span> retv = reflector.invokeMethod&lt;<span class="keywordtype">int</span>&gt;(_temp,meth,valus);
-<a name="l00160"></a>00160                                                 retValue = (<span class="stringliteral">&quot;&lt;return:int&gt;&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(retv)+<span class="stringliteral">&quot;&lt;/return:int&gt;&quot;</span>);
+<a name="l00160"></a>00160                                                 retValue = (<span class="stringliteral">&quot;&lt;return:int&gt;&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(retv)+<span class="stringliteral">&quot;&lt;/return:int&gt;&quot;</span>);
 <a name="l00161"></a>00161                                         }
 <a name="l00162"></a>00162                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(returnType==<span class="stringliteral">&quot;float&quot;</span>)
 <a name="l00163"></a>00163                                         {
 <a name="l00164"></a>00164                                                 <span class="keywordtype">float</span> retv = reflector.invokeMethod&lt;<span class="keywordtype">float</span>&gt;(_temp,meth,valus);
-<a name="l00165"></a>00165                                                 retValue = (<span class="stringliteral">&quot;&lt;return:float&gt;&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(retv)+<span class="stringliteral">&quot;&lt;/return:float&gt;&quot;</span>);
+<a name="l00165"></a>00165                                                 retValue = (<span class="stringliteral">&quot;&lt;return:float&gt;&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(retv)+<span class="stringliteral">&quot;&lt;/return:float&gt;&quot;</span>);
 <a name="l00166"></a>00166                                         }
 <a name="l00167"></a>00167                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(returnType==<span class="stringliteral">&quot;double&quot;</span>)
 <a name="l00168"></a>00168                                         {
 <a name="l00169"></a>00169                                                 <span class="keywordtype">double</span> retv = reflector.invokeMethod&lt;<span class="keywordtype">double</span>&gt;(_temp,meth,valus);
-<a name="l00170"></a>00170                                                 retValue = (<span class="stringliteral">&quot;&lt;return:double&gt;&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(retv)+<span class="stringliteral">&quot;&lt;/return:double&gt;&quot;</span>);
+<a name="l00170"></a>00170                                                 retValue = (<span class="stringliteral">&quot;&lt;return:double&gt;&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(retv)+<span class="stringliteral">&quot;&lt;/return:double&gt;&quot;</span>);
 <a name="l00171"></a>00171                                         }
 <a name="l00172"></a>00172                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(returnType==<span class="stringliteral">&quot;string&quot;</span>)
 <a name="l00173"></a>00173                                         {

@@ -83,7 +83,7 @@ $(document).ready(initResizable);
 <a name="l00023"></a>00023 <span class="preprocessor">#include &quot;TaskPool.h&quot;</span>
 <a name="l00024"></a>00024 
 <a name="l00025"></a>00025 TaskPool::TaskPool() {
-<a name="l00026"></a>00026         m_mutex = <span class="keyword">new</span> boost::mutex;
+<a name="l00026"></a>00026         m_mutex = <span class="keyword">new</span> std::mutex;
 <a name="l00027"></a>00027         tasks = <span class="keyword">new</span> queue&lt;Task*&gt; ;
 <a name="l00028"></a>00028         ptasks = <span class="keyword">new</span> list&lt;Task*&gt; ;
 <a name="l00029"></a>00029 }

@@ -26,7 +26,7 @@
 #include "fstream"
 #include "sstream"
 #include "iostream"
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 typedef vector<Aspect> asp;
 class AOPEngine {
 	asp aspects;

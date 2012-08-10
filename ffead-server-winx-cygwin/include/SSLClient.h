@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
  #include <openssl/err.h>
-#include <boost/thread/thread.hpp>
+#include <thread>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>

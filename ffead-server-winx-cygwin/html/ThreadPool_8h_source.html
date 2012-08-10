@@ -95,7 +95,7 @@ $(document).ready(initResizable);
 <a name="l00035"></a>00035         <span class="keywordtype">bool</span> console;
 <a name="l00036"></a>00036         vector&lt;Thread*&gt; *tpool;
 <a name="l00037"></a>00037         <a class="code" href="classTaskPool.html">TaskPool</a> *wpool;
-<a name="l00038"></a>00038         boost::thread *poller;
+<a name="l00038"></a>00038         std::thread *poller;
 <a name="l00039"></a>00039         <span class="keywordtype">bool</span> prioritypooling;
 <a name="l00040"></a>00040         <span class="keywordtype">void</span> poll();
 <a name="l00041"></a>00041         <a class="code" href="classThread.html">Thread</a>* getIdleThread();

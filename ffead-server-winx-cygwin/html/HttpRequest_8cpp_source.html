@@ -124,13 +124,13 @@ $(document).ready(initResizable);
 <a name="l00064"></a>00064         logger &lt;&lt; str &lt;&lt; endl;
 <a name="l00065"></a>00065 
 <a name="l00066"></a>00066         strVec tempv;
-<a name="l00067"></a>00067         boost::iter_split(tempv, str, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00067"></a>00067         StringUtil::split(tempv, str, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00068"></a>00068         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i=0;i&lt;tempv.size();i++)
 <a name="l00069"></a>00069         {
 <a name="l00070"></a>00070                 strVec tempvv;
-<a name="l00071"></a>00071                 boost::iter_split(tempvv, tempv.at(i), boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
-<a name="l00072"></a>00072                 boost::replace_first(tempvv.at(0),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00073"></a>00073                 boost::replace_first(tempvv.at(0),<span class="stringliteral">&quot;\n&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00071"></a>00071                 StringUtil::split(tempvv, tempv.at(i), (<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00072"></a>00072                 StringUtil::replaceFirst(tempvv.at(0),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00073"></a>00073                 StringUtil::replaceFirst(tempvv.at(0),<span class="stringliteral">&quot;\n&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00074"></a>00074                 <span class="keywordtype">string</span> temr = tempvv.at(1);
 <a name="l00075"></a>00075                 temr = temr.substr(temr.find(<span class="stringliteral">&quot;\&quot;&quot;</span>)+1);
 <a name="l00076"></a>00076                 temr = temr.substr(0,temr.find(<span class="stringliteral">&quot;\&quot;&quot;</span>));
@@ -162,10 +162,10 @@ $(document).ready(initResizable);
 <a name="l00102"></a>00102                         }
 <a name="l00103"></a>00103                         <span class="comment">//if(!contStarts &amp;&amp; vec.at(i)==&quot;\r&quot;)</span>
 <a name="l00104"></a>00104                         <span class="comment">//      contStarts = true;</span>
-<a name="l00105"></a>00105                         boost::iter_split(temp, vec.at(i), boost::first_finder(<span class="stringliteral">&quot;: &quot;</span>));
+<a name="l00105"></a>00105                         StringUtil::split(temp, vec.at(i), (<span class="stringliteral">&quot;: &quot;</span>));
 <a name="l00106"></a>00106                         <span class="keywordflow">if</span>(!contStarts &amp;&amp; temp.size()&gt;1)
 <a name="l00107"></a>00107                         {
-<a name="l00108"></a>00108                                 boost::replace_first(temp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00108"></a>00108                                 StringUtil::replaceFirst(temp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00109"></a>00109                                 <span class="keywordflow">if</span>(temp.at(0)==<span class="stringliteral">&quot;Host&quot;</span>)
 <a name="l00110"></a>00110                                         this-&gt;setHost(temp.at(1));
 <a name="l00111"></a>00111                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(temp.at(0)==<span class="stringliteral">&quot;User-Agent&quot;</span> || temp.at(0)==<span class="stringliteral">&quot;User-agent&quot;</span>)
@@ -186,7 +186,7 @@ $(document).ready(initResizable);
 <a name="l00126"></a>00126                                 {
 <a name="l00127"></a>00127                                         strVec lemp;
 <a name="l00128"></a>00128                                         this-&gt;setAccept_lang(temp.at(1));
-<a name="l00129"></a>00129                                         boost::iter_split(lemp, temp.at(1), boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00129"></a>00129                                         StringUtil::split(lemp, temp.at(1), (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00130"></a>00130                                         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> li=0;li&lt;lemp.size();li++)
 <a name="l00131"></a>00131                                         {
 <a name="l00132"></a>00132                                                 <span class="keywordflow">if</span>(lemp.at(li).find(<span class="stringliteral">&quot;;&quot;</span>)==string::npos &amp;&amp; lemp.at(li)!=<span class="stringliteral">&quot;&quot;</span>)
@@ -230,7 +230,7 @@ $(document).ready(initResizable);
 <a name="l00170"></a>00170                                                 this-&gt;setContent_type(tempi.substr(0,s));
 <a name="l00171"></a>00171                                                 tempi = tempi.substr(s);
 <a name="l00172"></a>00172                                                 strVec results;
-<a name="l00173"></a>00173                                                 boost::iter_split(results, tempi, boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00173"></a>00173                                                 StringUtil::split(results, tempi, (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00174"></a>00174                                                 <span class="keywordflow">if</span>(results.size()==2)
 <a name="l00175"></a>00175                                                 {
 <a name="l00176"></a>00176                                                         <span class="keywordtype">string</span> bound = <span class="stringliteral">&quot;--&quot;</span> + results.at(1).substr(0,results.at(1).length());
@@ -242,11 +242,11 @@ $(document).ready(initResizable);
 <a name="l00182"></a>00182                                 {
 <a name="l00183"></a>00183                                         this-&gt;cookie = <span class="keyword">true</span>;
 <a name="l00184"></a>00184                                         strVec results;
-<a name="l00185"></a>00185                                         boost::iter_split(results, temp.at(1), boost::first_finder(<span class="stringliteral">&quot;; &quot;</span>));
+<a name="l00185"></a>00185                                         StringUtil::split(results, temp.at(1), (<span class="stringliteral">&quot;; &quot;</span>));
 <a name="l00186"></a>00186                                         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> j=0;j&lt;(int)results.size();j++)
 <a name="l00187"></a>00187                                         {
 <a name="l00188"></a>00188                                                 strVec results1;
-<a name="l00189"></a>00189                                                 boost::iter_split(results1, results.at(j), boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00189"></a>00189                                                 StringUtil::split(results1, results.at(j), (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00190"></a>00190                                                 <span class="keywordflow">if</span>(results1.size()==2)
 <a name="l00191"></a>00191                                                         cookieattrs[results1.at(0)] = results1.at(1);
 <a name="l00192"></a>00192                                                 <span class="keywordflow">else</span>
@@ -266,14 +266,14 @@ $(document).ready(initResizable);
 <a name="l00206"></a>00206                                 <span class="keywordtype">string</span> tem = temp.at(0);
 <a name="l00207"></a>00207                                 <span class="keywordflow">if</span>(!contStarts &amp;&amp; boost::find_first(tem, <span class="stringliteral">&quot;GET&quot;</span>))
 <a name="l00208"></a>00208                                 {
-<a name="l00209"></a>00209                                         boost::replace_first(tem,<span class="stringliteral">&quot;GET &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00209"></a>00209                                         StringUtil::replaceFirst(tem,<span class="stringliteral">&quot;GET &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00210"></a>00210                                         this-&gt;setMethod(<span class="stringliteral">&quot;GET&quot;</span>);
-<a name="l00211"></a>00211                                         boost::iter_split(vemp, tem, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00211"></a>00211                                         StringUtil::split(vemp, tem, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00212"></a>00212                                         <span class="keywordflow">if</span>(vemp.size()==2)
 <a name="l00213"></a>00213                                         {
-<a name="l00214"></a>00214                                                 boost::replace_first(vemp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00214"></a>00214                                                 StringUtil::replaceFirst(vemp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00215"></a>00215                                                 this-&gt;setHttpVersion(vemp.at(1));
-<a name="l00216"></a>00216                                                 boost::replace_first(vemp.at(0),<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00216"></a>00216                                                 StringUtil::replaceFirst(vemp.at(0),<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00217"></a>00217                                                 <span class="keywordflow">if</span>(vemp.at(0).find(<span class="stringliteral">&quot;?&quot;</span>)!=string ::npos)
 <a name="l00218"></a>00218                                                 {
 <a name="l00219"></a>00219                                                         strVec params;
@@ -281,19 +281,19 @@ $(document).ready(initResizable);
 <a name="l00221"></a>00221                                                         vemp[0] = valu.substr(0,vemp.at(0).find(<span class="stringliteral">&quot;?&quot;</span>));
 <a name="l00222"></a>00222                                                         valu = valu.substr(valu.find(<span class="stringliteral">&quot;?&quot;</span>)+1);
 <a name="l00223"></a>00223                                                         <span class="comment">//valu = CryptoHandler::urlDecode(valu);</span>
-<a name="l00224"></a>00224                                                         boost::iter_split(params,valu , boost::first_finder(<span class="stringliteral">&quot;&amp;&quot;</span>));
+<a name="l00224"></a>00224                                                         StringUtil::split(params,valu , (<span class="stringliteral">&quot;&amp;&quot;</span>));
 <a name="l00225"></a>00225                                                         map&lt;string ,int&gt; indices;
 <a name="l00226"></a>00226                                                         map&lt;string,string&gt;::iterator it;
 <a name="l00227"></a>00227                                                         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> j=0;j&lt;params.size();j++)
 <a name="l00228"></a>00228                                                         {
 <a name="l00229"></a>00229                                                                 strVec param;
-<a name="l00230"></a>00230                                                                 boost::iter_split(param, params.at(j), boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00230"></a>00230                                                                 StringUtil::split(param, params.at(j), (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00231"></a>00231                                                                 <span class="keywordflow">if</span>(param.size()==2)
 <a name="l00232"></a>00232                                                                 {
 <a name="l00233"></a>00233                                                                         <span class="keywordtype">string</span> att = param.at(0);
-<a name="l00234"></a>00234                                                                         boost::replace_first(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00235"></a>00235                                                                         boost::replace_first(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00236"></a>00236                                                                         boost::replace_first(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00234"></a>00234                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00235"></a>00235                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00236"></a>00236                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00237"></a>00237                                                                         <span class="comment">//this-&gt;setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));</span>
 <a name="l00238"></a>00238                                                                         <span class="keywordtype">string</span> attN = CryptoHandler::urlDecode(att);
 <a name="l00239"></a>00239                                                                         <span class="keywordflow">if</span>(attN.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; attN.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
@@ -307,10 +307,10 @@ $(document).ready(initResizable);
 <a name="l00247"></a>00247                                                                                         indices[attN] = indices[attN] + 1;
 <a name="l00248"></a>00248                                                                                 }
 <a name="l00249"></a>00249                                                                                 this-&gt;requestParams[attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00250"></a>00250                                                                                                   + boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00250"></a>00250                                                                                                   + CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00251"></a>00251                                                                                                   + <span class="stringliteral">&quot;]&quot;</span>] = CryptoHandler::urlDecode(param.at(1));
 <a name="l00252"></a>00252                                                                                 logger &lt;&lt; <span class="stringliteral">&quot;creating array from similar params&quot;</span> &lt;&lt; attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00253"></a>00253                                                                                                                   + boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00253"></a>00253                                                                                                                   + CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00254"></a>00254                                                                                                                   + <span class="stringliteral">&quot;]&quot;</span>
 <a name="l00255"></a>00255                                                                                                                   &lt;&lt; CryptoHandler::urlDecode(param.at(1)) &lt;&lt; endl;
 <a name="l00256"></a>00256                                                                         }
@@ -322,7 +322,7 @@ $(document).ready(initResizable);
 <a name="l00262"></a>00262                                                         }
 <a name="l00263"></a>00263                                                 }
 <a name="l00264"></a>00264                                                 this-&gt;setActUrl(vemp.at(0));
-<a name="l00265"></a>00265                                                 boost::iter_split(memp, vemp.at(0), boost::first_finder(<span class="stringliteral">&quot;/&quot;</span>));
+<a name="l00265"></a>00265                                                 StringUtil::split(memp, vemp.at(0), (<span class="stringliteral">&quot;/&quot;</span>));
 <a name="l00266"></a>00266                                                 <span class="keywordtype">int</span> fs = vemp.at(0).find_first_of(<span class="stringliteral">&quot;/&quot;</span>);
 <a name="l00267"></a>00267                                                 <span class="keywordtype">int</span> es = vemp.at(0).find_last_of(<span class="stringliteral">&quot;/&quot;</span>);
 <a name="l00268"></a>00268                                                 <span class="keywordflow">if</span>(fs==es)
@@ -347,14 +347,14 @@ $(document).ready(initResizable);
 <a name="l00287"></a>00287                                 }
 <a name="l00288"></a>00288                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!contStarts &amp;&amp; boost::find_first(tem, <span class="stringliteral">&quot;DELETE&quot;</span>))
 <a name="l00289"></a>00289                                 {
-<a name="l00290"></a>00290                                         boost::replace_first(tem,<span class="stringliteral">&quot;DELETE &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00290"></a>00290                                         StringUtil::replaceFirst(tem,<span class="stringliteral">&quot;DELETE &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00291"></a>00291                                         this-&gt;setMethod(<span class="stringliteral">&quot;DELETE&quot;</span>);
-<a name="l00292"></a>00292                                         boost::iter_split(vemp, tem, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00292"></a>00292                                         StringUtil::split(vemp, tem, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00293"></a>00293                                         <span class="keywordflow">if</span>(vemp.size()==2)
 <a name="l00294"></a>00294                                         {
-<a name="l00295"></a>00295                                                 boost::replace_first(vemp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00295"></a>00295                                                 StringUtil::replaceFirst(vemp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00296"></a>00296                                                 this-&gt;setHttpVersion(vemp.at(1));
-<a name="l00297"></a>00297                                                 boost::replace_first(vemp.at(0),<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00297"></a>00297                                                 StringUtil::replaceFirst(vemp.at(0),<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00298"></a>00298                                                 <span class="keywordflow">if</span>(vemp.at(0).find(<span class="stringliteral">&quot;?&quot;</span>)!=string ::npos)
 <a name="l00299"></a>00299                                                 {
 <a name="l00300"></a>00300                                                         strVec params;
@@ -362,19 +362,19 @@ $(document).ready(initResizable);
 <a name="l00302"></a>00302                                                         vemp[0] = valu.substr(0,vemp.at(0).find(<span class="stringliteral">&quot;?&quot;</span>));
 <a name="l00303"></a>00303                                                         valu = valu.substr(valu.find(<span class="stringliteral">&quot;?&quot;</span>)+1);
 <a name="l00304"></a>00304                                                         valu = CryptoHandler::urlDecode(valu);
-<a name="l00305"></a>00305                                                         boost::iter_split(params,valu, boost::first_finder(<span class="stringliteral">&quot;&amp;&quot;</span>));
+<a name="l00305"></a>00305                                                         StringUtil::split(params,valu, (<span class="stringliteral">&quot;&amp;&quot;</span>));
 <a name="l00306"></a>00306                                                         map&lt;string ,int&gt; indices;
 <a name="l00307"></a>00307                                                         map&lt;string,string&gt;::iterator it;
 <a name="l00308"></a>00308                                                         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> j=0;j&lt;params.size();j++)
 <a name="l00309"></a>00309                                                         {
 <a name="l00310"></a>00310                                                                 strVec param;
-<a name="l00311"></a>00311                                                                 boost::iter_split(param, params.at(j), boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00311"></a>00311                                                                 StringUtil::split(param, params.at(j), (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00312"></a>00312                                                                 <span class="keywordflow">if</span>(param.size()==2)
 <a name="l00313"></a>00313                                                                 {
 <a name="l00314"></a>00314                                                                         <span class="keywordtype">string</span> att = param.at(0);
-<a name="l00315"></a>00315                                                                         boost::replace_first(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00316"></a>00316                                                                         boost::replace_first(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00317"></a>00317                                                                         boost::replace_first(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00315"></a>00315                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00316"></a>00316                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00317"></a>00317                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00318"></a>00318                                                                         <span class="keywordtype">string</span> attN = CryptoHandler::urlDecode(att);
 <a name="l00319"></a>00319                                                                         <span class="keywordflow">if</span>(attN.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; attN.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
 <a name="l00320"></a>00320                                                                         {
@@ -387,10 +387,10 @@ $(document).ready(initResizable);
 <a name="l00327"></a>00327                                                                                         indices[attN] = indices[attN] + 1;
 <a name="l00328"></a>00328                                                                                 }
 <a name="l00329"></a>00329                                                                                 this-&gt;requestParams[attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00330"></a>00330                                                                                                   + boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00330"></a>00330                                                                                                   + CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00331"></a>00331                                                                                                   + <span class="stringliteral">&quot;]&quot;</span>] = CryptoHandler::urlDecode(param.at(1));
 <a name="l00332"></a>00332                                                                                 logger &lt;&lt; <span class="stringliteral">&quot;creating array from similar params&quot;</span> &lt;&lt; attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00333"></a>00333                                                                                                                   + boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00333"></a>00333                                                                                                                   + CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00334"></a>00334                                                                                                                   + <span class="stringliteral">&quot;]&quot;</span>
 <a name="l00335"></a>00335                                                                                                                   &lt;&lt; CryptoHandler::urlDecode(param.at(1)) &lt;&lt; endl;
 <a name="l00336"></a>00336                                                                         }
@@ -401,7 +401,7 @@ $(document).ready(initResizable);
 <a name="l00341"></a>00341                                                         }
 <a name="l00342"></a>00342                                                 }
 <a name="l00343"></a>00343                                                 this-&gt;setActUrl(vemp.at(0));
-<a name="l00344"></a>00344                                                 boost::iter_split(memp, vemp.at(0), boost::first_finder(<span class="stringliteral">&quot;/&quot;</span>));
+<a name="l00344"></a>00344                                                 StringUtil::split(memp, vemp.at(0), (<span class="stringliteral">&quot;/&quot;</span>));
 <a name="l00345"></a>00345                                                 <span class="keywordtype">int</span> fs = vemp.at(0).find_first_of(<span class="stringliteral">&quot;/&quot;</span>);
 <a name="l00346"></a>00346                                                 <span class="keywordtype">int</span> es = vemp.at(0).find_last_of(<span class="stringliteral">&quot;/&quot;</span>);
 <a name="l00347"></a>00347                                                 <span class="keywordflow">if</span>(fs==es)
@@ -426,14 +426,14 @@ $(document).ready(initResizable);
 <a name="l00366"></a>00366                                 }
 <a name="l00367"></a>00367                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!contStarts &amp;&amp; boost::find_first(tem, <span class="stringliteral">&quot;PUT&quot;</span>))
 <a name="l00368"></a>00368                                 {
-<a name="l00369"></a>00369                                         boost::replace_first(tem,<span class="stringliteral">&quot;PUT &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00369"></a>00369                                         StringUtil::replaceFirst(tem,<span class="stringliteral">&quot;PUT &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00370"></a>00370                                         this-&gt;setMethod(<span class="stringliteral">&quot;PUT&quot;</span>);
-<a name="l00371"></a>00371                                         boost::iter_split(vemp, tem, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00371"></a>00371                                         StringUtil::split(vemp, tem, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00372"></a>00372                                         <span class="keywordflow">if</span>(vemp.size()==2)
 <a name="l00373"></a>00373                                         {
-<a name="l00374"></a>00374                                                 boost::replace_first(vemp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00374"></a>00374                                                 StringUtil::replaceFirst(vemp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00375"></a>00375                                                 this-&gt;setHttpVersion(vemp.at(1));
-<a name="l00376"></a>00376                                                 boost::replace_first(vemp.at(0),<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00376"></a>00376                                                 StringUtil::replaceFirst(vemp.at(0),<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00377"></a>00377                                                 <span class="keywordflow">if</span>(vemp.at(0).find(<span class="stringliteral">&quot;?&quot;</span>)!=string ::npos)
 <a name="l00378"></a>00378                                                 {
 <a name="l00379"></a>00379                                                         strVec params;
@@ -441,19 +441,19 @@ $(document).ready(initResizable);
 <a name="l00381"></a>00381                                                         vemp[0] = valu.substr(0,vemp.at(0).find(<span class="stringliteral">&quot;?&quot;</span>));
 <a name="l00382"></a>00382                                                         valu = valu.substr(valu.find(<span class="stringliteral">&quot;?&quot;</span>)+1);
 <a name="l00383"></a>00383                                                         valu = CryptoHandler::urlDecode(valu);
-<a name="l00384"></a>00384                                                         boost::iter_split(params,valu, boost::first_finder(<span class="stringliteral">&quot;&amp;&quot;</span>));
+<a name="l00384"></a>00384                                                         StringUtil::split(params,valu, (<span class="stringliteral">&quot;&amp;&quot;</span>));
 <a name="l00385"></a>00385                                                         map&lt;string ,int&gt; indices;
 <a name="l00386"></a>00386                                                         map&lt;string,string&gt;::iterator it;
 <a name="l00387"></a>00387                                                         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> j=0;j&lt;params.size();j++)
 <a name="l00388"></a>00388                                                         {
 <a name="l00389"></a>00389                                                                 strVec param;
-<a name="l00390"></a>00390                                                                 boost::iter_split(param, params.at(j), boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00390"></a>00390                                                                 StringUtil::split(param, params.at(j), (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00391"></a>00391                                                                 <span class="keywordflow">if</span>(param.size()==2)
 <a name="l00392"></a>00392                                                                 {
 <a name="l00393"></a>00393                                                                         <span class="keywordtype">string</span> att = param.at(0);
-<a name="l00394"></a>00394                                                                         boost::replace_first(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00395"></a>00395                                                                         boost::replace_first(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00396"></a>00396                                                                         boost::replace_first(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00394"></a>00394                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00395"></a>00395                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00396"></a>00396                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00397"></a>00397                                                                         <span class="keywordtype">string</span> attN = CryptoHandler::urlDecode(att);
 <a name="l00398"></a>00398                                                                         <span class="keywordflow">if</span>(attN.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; attN.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
 <a name="l00399"></a>00399                                                                         {
@@ -466,10 +466,10 @@ $(document).ready(initResizable);
 <a name="l00406"></a>00406                                                                                         indices[attN] = indices[attN] + 1;
 <a name="l00407"></a>00407                                                                                 }
 <a name="l00408"></a>00408                                                                                 this-&gt;requestParams[attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00409"></a>00409                                                                                                   + boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00409"></a>00409                                                                                                   + CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00410"></a>00410                                                                                                   + <span class="stringliteral">&quot;]&quot;</span>] = CryptoHandler::urlDecode(param.at(1));
 <a name="l00411"></a>00411                                                                                 logger &lt;&lt; <span class="stringliteral">&quot;creating array from similar params&quot;</span> &lt;&lt; attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00412"></a>00412                                                                                                                   + boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00412"></a>00412                                                                                                                   + CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00413"></a>00413                                                                                                                   + <span class="stringliteral">&quot;]&quot;</span>
 <a name="l00414"></a>00414                                                                                                                   &lt;&lt; CryptoHandler::urlDecode(param.at(1)) &lt;&lt; endl;
 <a name="l00415"></a>00415                                                                         }
@@ -480,7 +480,7 @@ $(document).ready(initResizable);
 <a name="l00420"></a>00420                                                         }
 <a name="l00421"></a>00421                                                 }
 <a name="l00422"></a>00422                                                 this-&gt;setActUrl(vemp.at(0));
-<a name="l00423"></a>00423                                                 boost::iter_split(memp, vemp.at(0), boost::first_finder(<span class="stringliteral">&quot;/&quot;</span>));
+<a name="l00423"></a>00423                                                 StringUtil::split(memp, vemp.at(0), (<span class="stringliteral">&quot;/&quot;</span>));
 <a name="l00424"></a>00424                                                 <span class="keywordtype">int</span> fs = vemp.at(0).find_first_of(<span class="stringliteral">&quot;/&quot;</span>);
 <a name="l00425"></a>00425                                                 <span class="keywordtype">int</span> es = vemp.at(0).find_last_of(<span class="stringliteral">&quot;/&quot;</span>);
 <a name="l00426"></a>00426                                                 <span class="keywordflow">if</span>(fs==es)
@@ -505,16 +505,16 @@ $(document).ready(initResizable);
 <a name="l00445"></a>00445                                 }
 <a name="l00446"></a>00446                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!contStarts &amp;&amp; boost::find_first(tem, <span class="stringliteral">&quot;POST&quot;</span>))
 <a name="l00447"></a>00447                                 {
-<a name="l00448"></a>00448                                         boost::replace_first(tem,<span class="stringliteral">&quot;POST &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00448"></a>00448                                         StringUtil::replaceFirst(tem,<span class="stringliteral">&quot;POST &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00449"></a>00449                                         this-&gt;setMethod(<span class="stringliteral">&quot;POST&quot;</span>);
-<a name="l00450"></a>00450                                         boost::iter_split(vemp, tem, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00450"></a>00450                                         StringUtil::split(vemp, tem, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00451"></a>00451                                         <span class="keywordflow">if</span>(vemp.size()==2)
 <a name="l00452"></a>00452                                         {
 <a name="l00453"></a>00453                                                 <span class="comment">//this-&gt;setUrl(vemp.at(0));</span>
 <a name="l00454"></a>00454                                                 <span class="comment">//string pat(vemp.at(0));</span>
-<a name="l00455"></a>00455                                                 boost::replace_first(vemp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00455"></a>00455                                                 StringUtil::replaceFirst(vemp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00456"></a>00456                                                 this-&gt;setHttpVersion(vemp.at(1));
-<a name="l00457"></a>00457                                                 boost::replace_first(vemp.at(0),<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00457"></a>00457                                                 StringUtil::replaceFirst(vemp.at(0),<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00458"></a>00458                                                 <span class="keywordflow">if</span>(vemp.at(0).find(<span class="stringliteral">&quot;?&quot;</span>)!=string ::npos)
 <a name="l00459"></a>00459                                                 {
 <a name="l00460"></a>00460                                                         strVec params;
@@ -522,19 +522,19 @@ $(document).ready(initResizable);
 <a name="l00462"></a>00462                                                         vemp[0] = valu.substr(0,vemp.at(0).find(<span class="stringliteral">&quot;?&quot;</span>));
 <a name="l00463"></a>00463                                                         valu = valu.substr(valu.find(<span class="stringliteral">&quot;?&quot;</span>)+1);
 <a name="l00464"></a>00464                                                         valu = CryptoHandler::urlDecode(valu);
-<a name="l00465"></a>00465                                                         boost::iter_split(params,valu, boost::first_finder(<span class="stringliteral">&quot;&amp;&quot;</span>));
+<a name="l00465"></a>00465                                                         StringUtil::split(params,valu, (<span class="stringliteral">&quot;&amp;&quot;</span>));
 <a name="l00466"></a>00466                                                         map&lt;string ,int&gt; indices;
 <a name="l00467"></a>00467                                                         map&lt;string,string&gt;::iterator it;
 <a name="l00468"></a>00468                                                         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> j=0;j&lt;params.size();j++)
 <a name="l00469"></a>00469                                                         {
 <a name="l00470"></a>00470                                                                 strVec param;
-<a name="l00471"></a>00471                                                                 boost::iter_split(param, params.at(j), boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00471"></a>00471                                                                 StringUtil::split(param, params.at(j), (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00472"></a>00472                                                                 <span class="keywordflow">if</span>(param.size()==2)
 <a name="l00473"></a>00473                                                                 {
 <a name="l00474"></a>00474                                                                         <span class="keywordtype">string</span> att = param.at(0);
-<a name="l00475"></a>00475                                                                         boost::replace_first(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00476"></a>00476                                                                         boost::replace_first(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00477"></a>00477                                                                         boost::replace_first(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00475"></a>00475                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00476"></a>00476                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00477"></a>00477                                                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00478"></a>00478                                                                         <span class="keywordtype">string</span> attN = CryptoHandler::urlDecode(att);
 <a name="l00479"></a>00479                                                                         <span class="keywordflow">if</span>(attN.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; attN.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
 <a name="l00480"></a>00480                                                                         {
@@ -547,10 +547,10 @@ $(document).ready(initResizable);
 <a name="l00487"></a>00487                                                                                         indices[attN] = indices[attN] + 1;
 <a name="l00488"></a>00488                                                                                 }
 <a name="l00489"></a>00489                                                                                 this-&gt;requestParams[attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00490"></a>00490                                                                                                   + boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00490"></a>00490                                                                                                   + CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00491"></a>00491                                                                                                   + <span class="stringliteral">&quot;]&quot;</span>] = CryptoHandler::urlDecode(param.at(1));
 <a name="l00492"></a>00492                                                                                 logger &lt;&lt; <span class="stringliteral">&quot;creating array from similar params&quot;</span> &lt;&lt; attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00493"></a>00493                                                                                                                   + boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00493"></a>00493                                                                                                                   + CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00494"></a>00494                                                                                                                   + <span class="stringliteral">&quot;]&quot;</span>
 <a name="l00495"></a>00495                                                                                                                   &lt;&lt; CryptoHandler::urlDecode(param.at(1)) &lt;&lt; endl;
 <a name="l00496"></a>00496                                                                         }
@@ -561,7 +561,7 @@ $(document).ready(initResizable);
 <a name="l00501"></a>00501                                                         }
 <a name="l00502"></a>00502                                                 }
 <a name="l00503"></a>00503                                                 this-&gt;setActUrl(vemp.at(0));
-<a name="l00504"></a>00504                                                 boost::iter_split(memp, vemp.at(0), boost::first_finder(<span class="stringliteral">&quot;/&quot;</span>));
+<a name="l00504"></a>00504                                                 StringUtil::split(memp, vemp.at(0), (<span class="stringliteral">&quot;/&quot;</span>));
 <a name="l00505"></a>00505                                                 <span class="keywordtype">int</span> fs = vemp.at(0).find_first_of(<span class="stringliteral">&quot;/&quot;</span>);
 <a name="l00506"></a>00506                                                 <span class="keywordtype">int</span> es = vemp.at(0).find_last_of(<span class="stringliteral">&quot;/&quot;</span>);
 <a name="l00507"></a>00507                                                 <span class="keywordflow">if</span>(fs==es)
@@ -606,20 +606,20 @@ $(document).ready(initResizable);
 <a name="l00546"></a>00546 <span class="comment">                        strVec params;</span>
 <a name="l00547"></a>00547 <span class="comment">                        string content = this-&gt;getContent();</span>
 <a name="l00548"></a>00548 <span class="comment">                        //logger &lt;&lt; content &lt;&lt; flush;</span>
-<a name="l00549"></a>00549 <span class="comment">                        boost::iter_split(params, content, boost::first_finder(&quot;&amp;&quot;));</span>
+<a name="l00549"></a>00549 <span class="comment">                        StringUtil::split(params, content, (&quot;&amp;&quot;));</span>
 <a name="l00550"></a>00550 <span class="comment">                        //logger &lt;&lt; &quot;\n\n\nsize: &quot; &lt;&lt; params.size() &lt;&lt; flush;</span>
 <a name="l00551"></a>00551 <span class="comment">                        for(unsigned j=0;j&lt;params.size();j++)</span>
 <a name="l00552"></a>00552 <span class="comment">                        {</span>
 <a name="l00553"></a>00553 <span class="comment">                                strVec param;</span>
 <a name="l00554"></a>00554 <span class="comment">                                //logger &lt;&lt; params.at(j) &lt;&lt; flush;</span>
-<a name="l00555"></a>00555 <span class="comment">                                boost::iter_split(param, params.at(j), boost::first_finder(&quot;=&quot;));</span>
+<a name="l00555"></a>00555 <span class="comment">                                StringUtil::split(param, params.at(j), (&quot;=&quot;));</span>
 <a name="l00556"></a>00556 <span class="comment">                                //logger &lt;&lt; param.size() &lt;&lt; flush;</span>
 <a name="l00557"></a>00557 <span class="comment">                                if(param.size()==2)</span>
 <a name="l00558"></a>00558 <span class="comment">                                {</span>
 <a name="l00559"></a>00559 <span class="comment">                                        string att = param.at(0);</span>
-<a name="l00560"></a>00560 <span class="comment">                                        boost::replace_first(att,&quot;\r&quot;,&quot;&quot;);</span>
-<a name="l00561"></a>00561 <span class="comment">                                        boost::replace_first(att,&quot;\t&quot;,&quot;&quot;);</span>
-<a name="l00562"></a>00562 <span class="comment">                                        boost::replace_first(att,&quot; &quot;,&quot;&quot;);</span>
+<a name="l00560"></a>00560 <span class="comment">                                        StringUtil::replaceFirst(att,&quot;\r&quot;,&quot;&quot;);</span>
+<a name="l00561"></a>00561 <span class="comment">                                        StringUtil::replaceFirst(att,&quot;\t&quot;,&quot;&quot;);</span>
+<a name="l00562"></a>00562 <span class="comment">                                        StringUtil::replaceFirst(att,&quot; &quot;,&quot;&quot;);</span>
 <a name="l00563"></a>00563 <span class="comment">                                        //logger &lt;&lt; &quot;attribute:  &quot; &lt;&lt; param.at(0) &lt;&lt; &quot;\n&quot;&lt;&lt; flush;</span>
 <a name="l00564"></a>00564 <span class="comment">                                        //logger &lt;&lt; &quot;value: &quot; &lt;&lt; param.at(1) &lt;&lt; &quot;\n&quot; &lt;&lt; flush;</span>
 <a name="l00565"></a>00565 <span class="comment">                                        this-&gt;setRequestParam(att,param.at(1));</span>
@@ -633,19 +633,19 @@ $(document).ready(initResizable);
 <a name="l00573"></a>00573                         {
 <a name="l00574"></a>00574                                 strVec params;
 <a name="l00575"></a>00575                                 <span class="keywordtype">string</span> valu(this-&gt;getContent());
-<a name="l00576"></a>00576                                 boost::iter_split(params,valu , boost::first_finder(<span class="stringliteral">&quot;&amp;&quot;</span>));
+<a name="l00576"></a>00576                                 StringUtil::split(params,valu , (<span class="stringliteral">&quot;&amp;&quot;</span>));
 <a name="l00577"></a>00577                                 map&lt;string ,int&gt; indices;
 <a name="l00578"></a>00578                                 map&lt;string,string&gt;::iterator it;
 <a name="l00579"></a>00579                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> j=0;j&lt;params.size();j++)
 <a name="l00580"></a>00580                                 {
 <a name="l00581"></a>00581                                         strVec param;
-<a name="l00582"></a>00582                                         boost::iter_split(param, params.at(j), boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00582"></a>00582                                         StringUtil::split(param, params.at(j), (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00583"></a>00583                                         <span class="keywordflow">if</span>(param.size()==2)
 <a name="l00584"></a>00584                                         {
 <a name="l00585"></a>00585                                                 <span class="keywordtype">string</span> att = param.at(0);
-<a name="l00586"></a>00586                                                 boost::replace_first(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00587"></a>00587                                                 boost::replace_first(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00588"></a>00588                                                 boost::replace_first(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00586"></a>00586                                                 StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00587"></a>00587                                                 StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00588"></a>00588                                                 StringUtil::replaceFirst(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00589"></a>00589                                                 <span class="keywordtype">string</span> attN = CryptoHandler::urlDecode(att);
 <a name="l00590"></a>00590                                                 <span class="keywordflow">if</span>(attN.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; attN.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
 <a name="l00591"></a>00591                                                 {
@@ -658,10 +658,10 @@ $(document).ready(initResizable);
 <a name="l00598"></a>00598                                                                 indices[attN] = indices[attN] + 1;
 <a name="l00599"></a>00599                                                         }
 <a name="l00600"></a>00600                                                         this-&gt;requestParams[attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00601"></a>00601                                                                           + boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00601"></a>00601                                                                           + CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00602"></a>00602                                                                           + <span class="stringliteral">&quot;]&quot;</span>] = CryptoHandler::urlDecode(param.at(1));
 <a name="l00603"></a>00603                                                         logger &lt;&lt; <span class="stringliteral">&quot;creating array from similar params&quot;</span> &lt;&lt; attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00604"></a>00604                                                                                           &lt;&lt; boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00604"></a>00604                                                                                           &lt;&lt; CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00605"></a>00605                                                                                           &lt;&lt; <span class="stringliteral">&quot;]&quot;</span>
 <a name="l00606"></a>00606                                                                                           &lt;&lt; CryptoHandler::urlDecode(param.at(1)) &lt;&lt; endl;
 <a name="l00607"></a>00607                                                 }
@@ -678,10 +678,10 @@ $(document).ready(initResizable);
 <a name="l00618"></a>00618                                 <span class="keywordtype">size_t</span> stb = this-&gt;getContent().find_first_of(delb)+delb.length()+1;
 <a name="l00619"></a>00619                                 <span class="keywordtype">size_t</span> enb = this-&gt;getContent().find_last_not_of(delend);
 <a name="l00620"></a>00620                                 <span class="keywordtype">string</span> param_conts = this-&gt;getContent().substr(stb);
-<a name="l00621"></a>00621                                 boost::replace_first(param_conts,delend,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00621"></a>00621                                 StringUtil::replaceFirst(param_conts,delend,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00622"></a>00622                                 param_conts = param_conts.substr(0,param_conts.length()-1);
 <a name="l00623"></a>00623                                 strVec parameters;
-<a name="l00624"></a>00624                                 boost::iter_split(parameters, param_conts, boost::first_finder(delb));
+<a name="l00624"></a>00624                                 StringUtil::split(parameters, param_conts, (delb));
 <a name="l00625"></a>00625                                 <span class="comment">//logger &lt;&lt; &quot;Boundary: &quot; &lt;&lt; this-&gt;getContent_boundary() &lt;&lt; flush;</span>
 <a name="l00626"></a>00626                                 <span class="comment">//logger &lt;&lt; &quot;\nLength: &quot; &lt;&lt; this-&gt;getContent().length() &lt;&lt; flush;</span>
 <a name="l00627"></a>00627                                 <span class="comment">//logger &lt;&lt; &quot;\nStart End: &quot; &lt;&lt; stb &lt;&lt; &quot; &quot; &lt;&lt; enb &lt;&lt; &quot;\n&quot; &lt;&lt; flush;</span>
@@ -721,13 +721,13 @@ $(document).ready(initResizable);
 <a name="l00661"></a>00661                                                         <span class="comment">//dist = dist-12;</span>
 <a name="l00662"></a>00662                                                 }
 <a name="l00663"></a>00663                                                 cont_disp = parm.substr(dis+21,dist-(dis+21));
-<a name="l00664"></a>00664                                                 boost::replace_first(cont_disp,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00664"></a>00664                                                 StringUtil::replaceFirst(cont_disp,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00665"></a>00665                                                 <span class="comment">//logger &lt;&lt; &quot;\ncdisp = &quot; &lt;&lt; cont_disp &lt;&lt; flush;</span>
 <a name="l00666"></a>00666                                                 <span class="comment">//logger &lt;&lt; &quot;\ndise = &quot; &lt;&lt; dise &lt;&lt; flush;</span>
 <a name="l00667"></a>00667                                                 parm = parm.substr(dise);
 <a name="l00668"></a>00668                                         }
 <a name="l00669"></a>00669                                         strVec parmdef;
-<a name="l00670"></a>00670                                         boost::iter_split(parmdef, cont_disp, boost::first_finder(<span class="stringliteral">&quot;;&quot;</span>));
+<a name="l00670"></a>00670                                         StringUtil::split(parmdef, cont_disp, (<span class="stringliteral">&quot;;&quot;</span>));
 <a name="l00671"></a>00671                                         <span class="keywordtype">string</span> key;
 <a name="l00672"></a>00672                                         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> k=0;k&lt;parmdef.size();k++)
 <a name="l00673"></a>00673                                         {
@@ -739,7 +739,7 @@ $(document).ready(initResizable);
 <a name="l00679"></a>00679                                                         <span class="comment">//logger &lt;&lt; &quot;\nst en = &quot; &lt;&lt; stpd  &lt;&lt; &quot; &quot; &lt;&lt; enpd &lt;&lt; flush;</span>
 <a name="l00680"></a>00680                                                         <span class="keywordtype">string</span> propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
 <a name="l00681"></a>00681                                                         strVec proplr;
-<a name="l00682"></a>00682                                                         boost::iter_split(proplr, propert, boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00682"></a>00682                                                         StringUtil::split(proplr, propert, (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00683"></a>00683                                                         <span class="keywordflow">if</span>(proplr.size()==2)
 <a name="l00684"></a>00684                                                         {
 <a name="l00685"></a>00685                                                                 <span class="keywordflow">if</span>(proplr.at(0)==<span class="stringliteral">&quot;name&quot;</span> &amp;&amp; proplr.at(1)!=<span class="stringliteral">&quot;\&quot;\&quot;&quot;</span>)
@@ -747,7 +747,7 @@ $(document).ready(initResizable);
 <a name="l00687"></a>00687                                                                         key = proplr.at(1);
 <a name="l00688"></a>00688                                                                         key = key.substr(key.find_first_not_of(<span class="stringliteral">&quot;\&quot;&quot;</span>),key.find_last_not_of(<span class="stringliteral">&quot;\&quot;&quot;</span>)-key.find_first_not_of(<span class="stringliteral">&quot;\&quot;&quot;</span>)+1);
 <a name="l00689"></a>00689                                                                         key = CryptoHandler::urlDecode(key);
-<a name="l00690"></a>00690                                                                         boost::replace_first(cont_type,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00690"></a>00690                                                                         StringUtil::replaceFirst(cont_type,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00691"></a>00691                                                                         datf.type = cont_type;
 <a name="l00692"></a>00692                                                                         datf.value = parm;
 <a name="l00693"></a>00693                                                                 }
@@ -775,10 +775,10 @@ $(document).ready(initResizable);
 <a name="l00715"></a>00715                                                                 indices[attN] = indices[attN] + 1;
 <a name="l00716"></a>00716                                                         }
 <a name="l00717"></a>00717                                                         this-&gt;requestParamsF[attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00718"></a>00718                                                                           + boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00718"></a>00718                                                                           + CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00719"></a>00719                                                                           + <span class="stringliteral">&quot;]&quot;</span>] = datf;
 <a name="l00720"></a>00720                                                         logger &lt;&lt; <span class="stringliteral">&quot;creating array from similar params&quot;</span> &lt;&lt; attN.substr(0, attN.find(<span class="stringliteral">&quot;[&quot;</span>)+1)
-<a name="l00721"></a>00721                                                                                           &lt;&lt; boost::lexical_cast&lt;string&gt;(indices[attN])
+<a name="l00721"></a>00721                                                                                           &lt;&lt; CastUtil::lexical_cast&lt;string&gt;(indices[attN])
 <a name="l00722"></a>00722                                                                                           &lt;&lt; <span class="stringliteral">&quot;]&quot;</span>
 <a name="l00723"></a>00723                                                                                           &lt;&lt; datf.fileName &lt;&lt; endl;
 <a name="l00724"></a>00724                                                 }
@@ -821,7 +821,7 @@ $(document).ready(initResizable);
 <a name="l00761"></a>00761         {
 <a name="l00762"></a>00762                 strVec lemp;
 <a name="l00763"></a>00763                 this-&gt;setAccept_lang(value);
-<a name="l00764"></a>00764                 boost::iter_split(lemp, value, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00764"></a>00764                 StringUtil::split(lemp, value, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00765"></a>00765                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> li=0;li&lt;lemp.size();li++)
 <a name="l00766"></a>00766                 {
 <a name="l00767"></a>00767                         <span class="keywordflow">if</span>(lemp.at(li).find(<span class="stringliteral">&quot;;&quot;</span>)==string::npos &amp;&amp; lemp.at(li)!=<span class="stringliteral">&quot;&quot;</span>)
@@ -865,7 +865,7 @@ $(document).ready(initResizable);
 <a name="l00805"></a>00805                         this-&gt;setContent_type(tempi.substr(0,s));
 <a name="l00806"></a>00806                         tempi = tempi.substr(s);
 <a name="l00807"></a>00807                         strVec results;
-<a name="l00808"></a>00808                         boost::iter_split(results, tempi, boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00808"></a>00808                         StringUtil::split(results, tempi, (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00809"></a>00809                         <span class="keywordflow">if</span>(results.size()==2)
 <a name="l00810"></a>00810                         {
 <a name="l00811"></a>00811                                 <span class="keywordtype">string</span> bound = <span class="stringliteral">&quot;--&quot;</span> + results.at(1).substr(0,results.at(1).length());
@@ -887,17 +887,17 @@ $(document).ready(initResizable);
 <a name="l00827"></a>00827                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(this-&gt;getContent_type().find(<span class="stringliteral">&quot;application/x-www-form-urlencoded&quot;</span>)!=string::npos)
 <a name="l00828"></a>00828                 {
 <a name="l00829"></a>00829                         strVec params;
-<a name="l00830"></a>00830                         boost::iter_split(params,value , boost::first_finder(<span class="stringliteral">&quot;&amp;&quot;</span>));
+<a name="l00830"></a>00830                         StringUtil::split(params,value , (<span class="stringliteral">&quot;&amp;&quot;</span>));
 <a name="l00831"></a>00831                         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> j=0;j&lt;params.size();j++)
 <a name="l00832"></a>00832                         {
 <a name="l00833"></a>00833                                 strVec param;
-<a name="l00834"></a>00834                                 boost::iter_split(param, params.at(j), boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00834"></a>00834                                 StringUtil::split(param, params.at(j), (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00835"></a>00835                                 <span class="keywordflow">if</span>(param.size()==2)
 <a name="l00836"></a>00836                                 {
 <a name="l00837"></a>00837                                         <span class="keywordtype">string</span> att = param.at(0);
-<a name="l00838"></a>00838                                         boost::replace_first(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00839"></a>00839                                         boost::replace_first(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00840"></a>00840                                         boost::replace_first(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00838"></a>00838                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00839"></a>00839                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00840"></a>00840                                         StringUtil::replaceFirst(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00841"></a>00841                                         this-&gt;setRequestParam(att,param.at(1));
 <a name="l00842"></a>00842                                 }
 <a name="l00843"></a>00843                         }
@@ -905,7 +905,7 @@ $(document).ready(initResizable);
 <a name="l00845"></a>00845                 <span class="keywordflow">else</span>
 <a name="l00846"></a>00846                 {
 <a name="l00847"></a>00847                         <span class="keywordtype">size_t</span> rn = value.find_first_of(<span class="stringliteral">&quot;\r\n&quot;</span>);
-<a name="l00848"></a>00848                         <span class="keywordtype">string</span> h = boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(rn);
+<a name="l00848"></a>00848                         <span class="keywordtype">string</span> h = CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(rn);
 <a name="l00849"></a>00849 
 <a name="l00850"></a>00850                         <span class="keywordtype">string</span> boundary = this-&gt;getContent_boundary();
 <a name="l00851"></a>00851                         fprintf(stderr,boundary.c_str());
@@ -917,17 +917,17 @@ $(document).ready(initResizable);
 <a name="l00857"></a>00857                         <span class="keywordtype">string</span> delend = boundary+<span class="stringliteral">&quot;--\r\n&quot;</span>;
 <a name="l00858"></a>00858                         <span class="keywordtype">size_t</span> stb = value.find_first_of(delb)+delb.length();
 <a name="l00859"></a>00859                         <span class="keywordtype">size_t</span> enb = value.find_last_not_of(delend);
-<a name="l00860"></a>00860                         h = boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(stb)+<span class="stringliteral">&quot; &quot;</span>+boost::lexical_cast&lt;string&gt;(enb);
+<a name="l00860"></a>00860                         h = CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(stb)+<span class="stringliteral">&quot; &quot;</span>+CastUtil::lexical_cast&lt;string&gt;(enb);
 <a name="l00861"></a>00861 
 <a name="l00862"></a>00862                         <span class="keywordtype">string</span> param_conts = value.substr(stb,enb-stb-2);
 <a name="l00863"></a>00863                         strVec parameters;
-<a name="l00864"></a>00864                         boost::replace_first(value,delb,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00865"></a>00865                         boost::replace_first(value,delend,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00864"></a>00864                         StringUtil::replaceFirst(value,delb,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00865"></a>00865                         StringUtil::replaceFirst(value,delend,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00866"></a>00866                         delb = <span class="stringliteral">&quot;\r\n&quot;</span>+delb;
-<a name="l00867"></a>00867                         boost::iter_split(parameters, value, boost::first_finder(delb));
+<a name="l00867"></a>00867                         StringUtil::split(parameters, value, (delb));
 <a name="l00868"></a>00868                         retval =  <span class="stringliteral">&quot;Boundary: &quot;</span>+ boundary + <span class="stringliteral">&quot;\nLength: &quot;</span> ;
-<a name="l00869"></a>00869                         retval += boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(value.length()) +<span class="stringliteral">&quot;\nStart End: &quot;</span>
-<a name="l00870"></a>00870                         + boost::lexical_cast&lt;string&gt;(stb) + <span class="stringliteral">&quot; &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(enb) +<span class="stringliteral">&quot;\n&quot;</span>;
+<a name="l00869"></a>00869                         retval += CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(value.length()) +<span class="stringliteral">&quot;\nStart End: &quot;</span>
+<a name="l00870"></a>00870                         + CastUtil::lexical_cast&lt;string&gt;(stb) + <span class="stringliteral">&quot; &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(enb) +<span class="stringliteral">&quot;\n&quot;</span>;
 <a name="l00871"></a>00871 
 <a name="l00872"></a>00872                         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> j=0;j&lt;parameters.size();j++)
 <a name="l00873"></a>00873                         {
@@ -960,14 +960,14 @@ $(document).ready(initResizable);
 <a name="l00900"></a>00900                                                 dise = parm.find(<span class="stringliteral">&quot;\r\n\r\n&quot;</span>) + 4;
 <a name="l00901"></a>00901                                         }
 <a name="l00902"></a>00902                                         cont_disp = parm.substr(dis+21,dist-(dis+21));
-<a name="l00903"></a>00903                                         boost::replace_first(cont_disp,<span class="stringliteral">&quot;\r\n&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00903"></a>00903                                         StringUtil::replaceFirst(cont_disp,<span class="stringliteral">&quot;\r\n&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00904"></a>00904                                         retval+=  <span class="stringliteral">&quot;\ncdisp = &quot;</span> + cont_disp;
-<a name="l00905"></a>00905                                         retval+= <span class="stringliteral">&quot;\ndise = &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dise);
+<a name="l00905"></a>00905                                         retval+= <span class="stringliteral">&quot;\ndise = &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dise);
 <a name="l00906"></a>00906                                         parm = parm.substr(dise);
 <a name="l00907"></a>00907                                         parm = parm.substr(0,parm.length()-1);
 <a name="l00908"></a>00908                                 }
 <a name="l00909"></a>00909                                 strVec parmdef;
-<a name="l00910"></a>00910                                 boost::iter_split(parmdef, cont_disp, boost::first_finder(<span class="stringliteral">&quot;;&quot;</span>));
+<a name="l00910"></a>00910                                 StringUtil::split(parmdef, cont_disp, (<span class="stringliteral">&quot;;&quot;</span>));
 <a name="l00911"></a>00911                                 <span class="keywordtype">string</span> key;
 <a name="l00912"></a>00912                                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> k=0;k&lt;parmdef.size();k++)
 <a name="l00913"></a>00913                                 {
@@ -976,10 +976,10 @@ $(document).ready(initResizable);
 <a name="l00916"></a>00916                                                 <span class="keywordtype">size_t</span> stpd = parmdef.at(k).find_first_not_of(<span class="stringliteral">&quot; &quot;</span>);
 <a name="l00917"></a>00917                                                 <span class="keywordtype">size_t</span> enpd = parmdef.at(k).find_last_not_of(<span class="stringliteral">&quot; &quot;</span>);
 <a name="l00918"></a>00918                                                 retval+=  <span class="stringliteral">&quot;\nparmdef = &quot;</span> + parmdef.at(k) ;
-<a name="l00919"></a>00919                                                 retval+=  <span class="stringliteral">&quot;\nst en = &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(stpd)  + <span class="stringliteral">&quot; &quot;</span> + boost::lexical_cast&lt;string&gt;(enpd);
+<a name="l00919"></a>00919                                                 retval+=  <span class="stringliteral">&quot;\nst en = &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(stpd)  + <span class="stringliteral">&quot; &quot;</span> + CastUtil::lexical_cast&lt;string&gt;(enpd);
 <a name="l00920"></a>00920                                                 <span class="keywordtype">string</span> propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
 <a name="l00921"></a>00921                                                 strVec proplr;
-<a name="l00922"></a>00922                                                 boost::iter_split(proplr, propert, boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00922"></a>00922                                                 StringUtil::split(proplr, propert, (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00923"></a>00923                                                 <span class="keywordflow">if</span>(proplr.size()==2)
 <a name="l00924"></a>00924                                                 {
 <a name="l00925"></a>00925                                                         <span class="keywordflow">if</span>(proplr.at(0)==<span class="stringliteral">&quot;name&quot;</span> &amp;&amp; proplr.at(1)!=<span class="stringliteral">&quot;\&quot;\&quot;&quot;</span>)
@@ -1020,17 +1020,17 @@ $(document).ready(initResizable);
 <a name="l00960"></a>00960         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(key==<span class="stringliteral">&quot;GetArguments&quot;</span>)
 <a name="l00961"></a>00961         {
 <a name="l00962"></a>00962                 strVec params;
-<a name="l00963"></a>00963                 boost::iter_split(params, value, boost::first_finder(<span class="stringliteral">&quot;&amp;&quot;</span>));
+<a name="l00963"></a>00963                 StringUtil::split(params, value, (<span class="stringliteral">&quot;&amp;&quot;</span>));
 <a name="l00964"></a>00964                 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> j=0;j&lt;params.size();j++)
 <a name="l00965"></a>00965                 {
 <a name="l00966"></a>00966                         strVec param;
-<a name="l00967"></a>00967                         boost::iter_split(param, params.at(j), boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00967"></a>00967                         StringUtil::split(param, params.at(j), (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00968"></a>00968                         <span class="keywordflow">if</span>(param.size()==2)
 <a name="l00969"></a>00969                         {
 <a name="l00970"></a>00970                                 <span class="keywordtype">string</span> att = param.at(0);
-<a name="l00971"></a>00971                                 boost::replace_first(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00972"></a>00972                                 boost::replace_first(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00973"></a>00973                                 boost::replace_first(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00971"></a>00971                                 StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00972"></a>00972                                 StringUtil::replaceFirst(att,<span class="stringliteral">&quot;\t&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00973"></a>00973                                 StringUtil::replaceFirst(att,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00974"></a>00974                                 this-&gt;setRequestParam(att,param.at(1));
 <a name="l00975"></a>00975                         }
 <a name="l00976"></a>00976                 }
@@ -1038,27 +1038,27 @@ $(document).ready(initResizable);
 <a name="l00978"></a>00978         <span class="comment">/*else if(key==&quot;PostArguments&quot;)</span>
 <a name="l00979"></a>00979 <span class="comment">        {</span>
 <a name="l00980"></a>00980 <span class="comment">                strVec params;</span>
-<a name="l00981"></a>00981 <span class="comment">                boost::iter_split(params, value, boost::first_finder(&quot;&amp;&quot;));</span>
+<a name="l00981"></a>00981 <span class="comment">                StringUtil::split(params, value, (&quot;&amp;&quot;));</span>
 <a name="l00982"></a>00982 <span class="comment">                for(unsigned j=0;j&lt;params.size();j++)</span>
 <a name="l00983"></a>00983 <span class="comment">                {</span>
 <a name="l00984"></a>00984 <span class="comment">                        strVec param;</span>
-<a name="l00985"></a>00985 <span class="comment">                        boost::iter_split(param, params.at(j), boost::first_finder(&quot;=&quot;));</span>
+<a name="l00985"></a>00985 <span class="comment">                        StringUtil::split(param, params.at(j), (&quot;=&quot;));</span>
 <a name="l00986"></a>00986 <span class="comment">                        if(param.size()==2)</span>
 <a name="l00987"></a>00987 <span class="comment">                        {</span>
 <a name="l00988"></a>00988 <span class="comment">                                string att = param.at(0);</span>
-<a name="l00989"></a>00989 <span class="comment">                                boost::replace_first(att,&quot;\r&quot;,&quot;&quot;);</span>
-<a name="l00990"></a>00990 <span class="comment">                                boost::replace_first(att,&quot;\t&quot;,&quot;&quot;);</span>
-<a name="l00991"></a>00991 <span class="comment">                                boost::replace_first(att,&quot; &quot;,&quot;&quot;);</span>
+<a name="l00989"></a>00989 <span class="comment">                                StringUtil::replaceFirst(att,&quot;\r&quot;,&quot;&quot;);</span>
+<a name="l00990"></a>00990 <span class="comment">                                StringUtil::replaceFirst(att,&quot;\t&quot;,&quot;&quot;);</span>
+<a name="l00991"></a>00991 <span class="comment">                                StringUtil::replaceFirst(att,&quot; &quot;,&quot;&quot;);</span>
 <a name="l00992"></a>00992 <span class="comment">                                this-&gt;setRequestParam(att,param.at(1));</span>
 <a name="l00993"></a>00993 <span class="comment">                        }</span>
 <a name="l00994"></a>00994 <span class="comment">                }</span>
 <a name="l00995"></a>00995 <span class="comment">        }*/</span>
 <a name="l00996"></a>00996         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(boost::find_first(key, <span class="stringliteral">&quot;URL&quot;</span>))
 <a name="l00997"></a>00997         {
-<a name="l00998"></a>00998                 boost::replace_first(key,<span class="stringliteral">&quot;URL&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00998"></a>00998                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;URL&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00999"></a>00999                 strVec memp;
 <a name="l01000"></a>01000                 this-&gt;setActUrl(value);
-<a name="l01001"></a>01001                 boost::iter_split(memp, value, boost::first_finder(<span class="stringliteral">&quot;/&quot;</span>));
+<a name="l01001"></a>01001                 StringUtil::split(memp, value, (<span class="stringliteral">&quot;/&quot;</span>));
 <a name="l01002"></a>01002                 <span class="keywordtype">int</span> fs = value.find_first_of(<span class="stringliteral">&quot;/&quot;</span>);
 <a name="l01003"></a>01003                 <span class="keywordtype">int</span> es = value.find_last_of(<span class="stringliteral">&quot;/&quot;</span>);
 <a name="l01004"></a>01004                 <span class="keywordflow">if</span>(fs==es)
@@ -1124,7 +1124,7 @@ $(document).ready(initResizable);
 <a name="l01064"></a>01064                         vals+= (<span class="stringliteral">&quot;\nValue: &quot;</span>+dat.value);
 <a name="l01065"></a>01065                 }
 <a name="l01066"></a>01066         }
-<a name="l01067"></a>01067         ret += <span class="stringliteral">&quot;\nRequest Parameters &quot;</span>+vals;<span class="comment">//boost::lexical_cast&lt;string&gt;(this-&gt;getRequestParams().size());</span>
+<a name="l01067"></a>01067         ret += <span class="stringliteral">&quot;\nRequest Parameters &quot;</span>+vals;<span class="comment">//CastUtil::lexical_cast&lt;string&gt;(this-&gt;getRequestParams().size());</span>
 <a name="l01068"></a>01068         <span class="keywordflow">return</span> ret;
 <a name="l01069"></a>01069 }
 <a name="l01070"></a>01070 
@@ -1461,7 +1461,7 @@ $(document).ready(initResizable);
 <a name="l01401"></a>01401         ret += <span class="stringliteral">&quot;&#39;;\n$_SERVER[&#39;REQUEST_METHOD&#39;] = &#39;&quot;</span>+this-&gt;getMethod();
 <a name="l01402"></a>01402         ret += <span class="stringliteral">&quot;&#39;;\n$_SERVER[&#39;HTTP_USER_AGENT&#39;] = &#39;&quot;</span>+this-&gt;getUser_agent();
 <a name="l01403"></a>01403         <span class="keywordtype">string</span> requri = this-&gt;getActUrl();
-<a name="l01404"></a>01404         boost::replace_first(requri, (<span class="stringliteral">&quot;/&quot;</span>+this-&gt;getCntxt_name()), <span class="stringliteral">&quot;&quot;</span>);
+<a name="l01404"></a>01404         StringUtil::replaceFirst(requri, (<span class="stringliteral">&quot;/&quot;</span>+this-&gt;getCntxt_name()), <span class="stringliteral">&quot;&quot;</span>);
 <a name="l01405"></a>01405         <span class="keywordflow">if</span>(requri==<span class="stringliteral">&quot;&quot;</span>)
 <a name="l01406"></a>01406                 requri = <span class="stringliteral">&quot;/&quot;</span>;
 <a name="l01407"></a>01407         ret += <span class="stringliteral">&quot;&#39;;\n$_SERVER[&#39;REQUEST_URI&#39;] = &#39;&quot;</span>+requri;
@@ -1519,7 +1519,7 @@ $(document).ready(initResizable);
 <a name="l01459"></a>01459                                 ret += <span class="stringliteral">&quot;\n$_FILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
 <a name="l01460"></a>01460                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;type&#39;] = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01461"></a>01461                                 ret += <span class="stringliteral">&quot;\n$_FILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
-<a name="l01462"></a>01462                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;size&#39;] = &quot;</span>+ boost::lexical_cast&lt;string&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
+<a name="l01462"></a>01462                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;size&#39;] = &quot;</span>+ CastUtil::lexical_cast&lt;string&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
 <a name="l01463"></a>01463                                 ret += <span class="stringliteral">&quot;\n$_FILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
 <a name="l01464"></a>01464                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;tmp_name&#39;] = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01465"></a>01465                                 ret += <span class="stringliteral">&quot;\n$_FILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
@@ -1530,7 +1530,7 @@ $(document).ready(initResizable);
 <a name="l01470"></a>01470                                 ret += <span class="stringliteral">&quot;\nif(!isset($_FILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;]))\n{\n$_FILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;]=array();\n}\n&quot;</span>;
 <a name="l01471"></a>01471                                 ret += <span class="stringliteral">&quot;\n$_FILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;name&#39;] = &#39;&quot;</span>+ dat.fileName + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01472"></a>01472                                 ret += <span class="stringliteral">&quot;\n$_FILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;type&#39;] = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;;&quot;</span>;
-<a name="l01473"></a>01473                                 ret += <span class="stringliteral">&quot;\n$_FILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;size&#39;] = &quot;</span>+ boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
+<a name="l01473"></a>01473                                 ret += <span class="stringliteral">&quot;\n$_FILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;size&#39;] = &quot;</span>+ CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
 <a name="l01474"></a>01474                                 ret += <span class="stringliteral">&quot;\n$_FILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;tmp_name&#39;] = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01475"></a>01475                                 ret += <span class="stringliteral">&quot;\n$_FILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;error&#39;] = 0;&quot;</span>;
 <a name="l01476"></a>01476                         }
@@ -1579,8 +1579,8 @@ $(document).ready(initResizable);
 <a name="l01519"></a>01519                         <span class="keywordflow">if</span>(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; iter-&gt;first.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
 <a name="l01520"></a>01520                         {
 <a name="l01521"></a>01521                                 <span class="keywordtype">string</span> key = iter-&gt;first;
-<a name="l01522"></a>01522                                 boost::replace_first(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;{&quot;</span>);
-<a name="l01523"></a>01523                                 boost::replace_first(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;}&quot;</span>);
+<a name="l01522"></a>01522                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;{&quot;</span>);
+<a name="l01523"></a>01523                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;}&quot;</span>);
 <a name="l01524"></a>01524                                 ret += <span class="stringliteral">&quot;\nif(!exists $_GET{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;})\n{\n$_GET{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}={}\n}\n&quot;</span>;
 <a name="l01525"></a>01525                                 ret += (<span class="stringliteral">&quot;\n$_GET{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}&quot;</span> +
 <a name="l01526"></a>01526                                                 key.substr(key.find(<span class="stringliteral">&quot;{&quot;</span>)) + <span class="stringliteral">&quot; = &#39;&quot;</span>+iter-&gt;second + <span class="stringliteral">&quot;&#39;;&quot;</span>);
@@ -1597,8 +1597,8 @@ $(document).ready(initResizable);
 <a name="l01537"></a>01537                         <span class="keywordflow">if</span>(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; iter-&gt;first.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
 <a name="l01538"></a>01538                         {
 <a name="l01539"></a>01539                                 <span class="keywordtype">string</span> key = iter-&gt;first;
-<a name="l01540"></a>01540                                 boost::replace_first(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;{&quot;</span>);
-<a name="l01541"></a>01541                                 boost::replace_first(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;}&quot;</span>);
+<a name="l01540"></a>01540                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;{&quot;</span>);
+<a name="l01541"></a>01541                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;}&quot;</span>);
 <a name="l01542"></a>01542                                 ret += <span class="stringliteral">&quot;\nif(!exists $_POST{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;})\n{\n$_POST{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}={}\n}\n&quot;</span>;
 <a name="l01543"></a>01543                                 ret += (<span class="stringliteral">&quot;\n$_POST{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}&quot;</span> +
 <a name="l01544"></a>01544                                                 key.substr(key.find(<span class="stringliteral">&quot;{&quot;</span>)) + <span class="stringliteral">&quot; = &#39;&quot;</span>+iter-&gt;second + <span class="stringliteral">&quot;&#39;;&quot;</span>);
@@ -1616,8 +1616,8 @@ $(document).ready(initResizable);
 <a name="l01556"></a>01556                         <span class="keywordflow">if</span>(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; iter-&gt;first.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
 <a name="l01557"></a>01557                         {
 <a name="l01558"></a>01558                                 <span class="keywordtype">string</span> key = iter-&gt;first;
-<a name="l01559"></a>01559                                 boost::replace_first(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;{&quot;</span>);
-<a name="l01560"></a>01560                                 boost::replace_first(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;}&quot;</span>);
+<a name="l01559"></a>01559                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;{&quot;</span>);
+<a name="l01560"></a>01560                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;}&quot;</span>);
 <a name="l01561"></a>01561                                 ret += <span class="stringliteral">&quot;\nif(!exists $_FILES{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;})\n{\n$_FILES{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}={}\n}\n&quot;</span>;
 <a name="l01562"></a>01562                                 ret += <span class="stringliteral">&quot;\nif(!exists $_FILES{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}{&#39;&quot;</span>+key.substr(key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;})\n&quot;</span>
 <a name="l01563"></a>01563                                                 + <span class="stringliteral">&quot;{\n$_FILES{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}{&#39;&quot;</span>+key.substr(key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}={}\n}\n&quot;</span>;
@@ -1626,7 +1626,7 @@ $(document).ready(initResizable);
 <a name="l01566"></a>01566                                 ret += <span class="stringliteral">&quot;\n$_FILES{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}&quot;</span> +
 <a name="l01567"></a>01567                                                 key.substr(key.find(<span class="stringliteral">&quot;{&quot;</span>)) + <span class="stringliteral">&quot;{&#39;type&#39;} = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01568"></a>01568                                 ret += <span class="stringliteral">&quot;\n$_FILES{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}&quot;</span> +
-<a name="l01569"></a>01569                                                 key.substr(key.find(<span class="stringliteral">&quot;{&quot;</span>)) + <span class="stringliteral">&quot;{&#39;size&#39;} = &quot;</span>+ boost::lexical_cast&lt;string&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
+<a name="l01569"></a>01569                                                 key.substr(key.find(<span class="stringliteral">&quot;{&quot;</span>)) + <span class="stringliteral">&quot;{&#39;size&#39;} = &quot;</span>+ CastUtil::lexical_cast&lt;string&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
 <a name="l01570"></a>01570                                 ret += <span class="stringliteral">&quot;\n$_FILES{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}&quot;</span> +
 <a name="l01571"></a>01571                                                 key.substr(key.find(<span class="stringliteral">&quot;{&quot;</span>)) + <span class="stringliteral">&quot;{&#39;tmp_name&#39;} = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01572"></a>01572                                 ret += <span class="stringliteral">&quot;\n$_FILES{&#39;&quot;</span>+key.substr(0, key.find(<span class="stringliteral">&quot;{&quot;</span>))+<span class="stringliteral">&quot;&#39;}&quot;</span> +
@@ -1637,7 +1637,7 @@ $(document).ready(initResizable);
 <a name="l01577"></a>01577                                 ret += <span class="stringliteral">&quot;\nif(!exists $_FILES{&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;})\n{\n$_FILES{&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;}={}\n}\n&quot;</span>;
 <a name="l01578"></a>01578                                 ret += <span class="stringliteral">&quot;\n$_FILES{&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;}{&#39;name&#39;} = &#39;&quot;</span>+ dat.fileName + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01579"></a>01579                                 ret += <span class="stringliteral">&quot;\n$_FILES{&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;}{&#39;type&#39;} = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;;&quot;</span>;
-<a name="l01580"></a>01580                                 ret += <span class="stringliteral">&quot;\n$_FILES{&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;}{&#39;size&#39;} = &quot;</span>+ boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
+<a name="l01580"></a>01580                                 ret += <span class="stringliteral">&quot;\n$_FILES{&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;}{&#39;size&#39;} = &quot;</span>+ CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
 <a name="l01581"></a>01581                                 ret += <span class="stringliteral">&quot;\n$_FILES{&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;}{&#39;tmp_name&#39;} = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01582"></a>01582                                 ret += <span class="stringliteral">&quot;\n$_FILES{&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;}{&#39;error&#39;} = 0;&quot;</span>;
 <a name="l01583"></a>01583                         }
@@ -1715,8 +1715,8 @@ $(document).ready(initResizable);
 <a name="l01655"></a>01655                         <span class="keywordflow">if</span>(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; iter-&gt;first.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
 <a name="l01656"></a>01656                         {
 <a name="l01657"></a>01657                                 <span class="keywordtype">string</span> key = iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>));
-<a name="l01658"></a>01658                                 boost::replace_first(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01659"></a>01659                                 boost::replace_first(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01658"></a>01658                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01659"></a>01659                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01660"></a>01660                                 ret += <span class="stringliteral">&quot;\nif(!FILES.has_key?(&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))
 <a name="l01661"></a>01661                                                 +<span class="stringliteral">&quot;&#39;))\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]={}\nend&quot;</span>;
 <a name="l01662"></a>01662                                 ret += <span class="stringliteral">&quot;\nif(!FILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;].has_key?(&#39;&quot;</span>+key+<span class="stringliteral">&quot;&#39;))&quot;</span>
@@ -1726,7 +1726,7 @@ $(document).ready(initResizable);
 <a name="l01666"></a>01666                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
 <a name="l01667"></a>01667                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;type&#39;] = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01668"></a>01668                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
-<a name="l01669"></a>01669                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;size&#39;] = &quot;</span>+ boost::lexical_cast&lt;string&gt;(dat.length);
+<a name="l01669"></a>01669                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;size&#39;] = &quot;</span>+ CastUtil::lexical_cast&lt;string&gt;(dat.length);
 <a name="l01670"></a>01670                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
 <a name="l01671"></a>01671                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;tmp_name&#39;] = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01672"></a>01672                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
@@ -1737,7 +1737,7 @@ $(document).ready(initResizable);
 <a name="l01677"></a>01677                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;] = {}&quot;</span>;
 <a name="l01678"></a>01678                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;name&#39;] = &#39;&quot;</span>+ dat.fileName + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01679"></a>01679                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;type&#39;] = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;&quot;</span>;
-<a name="l01680"></a>01680                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;size&#39;] = &quot;</span>+ boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length);
+<a name="l01680"></a>01680                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;size&#39;] = &quot;</span>+ CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length);
 <a name="l01681"></a>01681                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;tmp_name&#39;] = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01682"></a>01682                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;error&#39;] = 0&quot;</span>;
 <a name="l01683"></a>01683                         }
@@ -1815,8 +1815,8 @@ $(document).ready(initResizable);
 <a name="l01755"></a>01755                         <span class="keywordflow">if</span>(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; iter-&gt;first.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
 <a name="l01756"></a>01756                         {
 <a name="l01757"></a>01757                                 <span class="keywordtype">string</span> key = iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>));
-<a name="l01758"></a>01758                                 boost::replace_first(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01759"></a>01759                                 boost::replace_first(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01758"></a>01758                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01759"></a>01759                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01760"></a>01760                                 ret += <span class="stringliteral">&quot;\nif &#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))
 <a name="l01761"></a>01761                                                 +<span class="stringliteral">&quot;&#39; not in FILES:\n\tFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]={}\n&quot;</span>;
 <a name="l01762"></a>01762                                 ret += <span class="stringliteral">&quot;\nif &#39;&quot;</span>+key+<span class="stringliteral">&quot;&#39; not in FILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]:\n&quot;</span>
@@ -1826,7 +1826,7 @@ $(document).ready(initResizable);
 <a name="l01766"></a>01766                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
 <a name="l01767"></a>01767                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;type&#39;] = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01768"></a>01768                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
-<a name="l01769"></a>01769                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;size&#39;] = &quot;</span>+ boost::lexical_cast&lt;string&gt;(dat.length);
+<a name="l01769"></a>01769                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;size&#39;] = &quot;</span>+ CastUtil::lexical_cast&lt;string&gt;(dat.length);
 <a name="l01770"></a>01770                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
 <a name="l01771"></a>01771                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;tmp_name&#39;] = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01772"></a>01772                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
@@ -1837,7 +1837,7 @@ $(document).ready(initResizable);
 <a name="l01777"></a>01777                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;] = {}&quot;</span>;
 <a name="l01778"></a>01778                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;name&#39;] = &#39;&quot;</span>+ dat.fileName + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01779"></a>01779                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;type&#39;] = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;&quot;</span>;
-<a name="l01780"></a>01780                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;size&#39;] = &quot;</span>+ boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length);
+<a name="l01780"></a>01780                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;size&#39;] = &quot;</span>+ CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length);
 <a name="l01781"></a>01781                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;tmp_name&#39;] = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01782"></a>01782                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;error&#39;] = 0&quot;</span>;
 <a name="l01783"></a>01783                         }
@@ -1915,8 +1915,8 @@ $(document).ready(initResizable);
 <a name="l01855"></a>01855                         <span class="keywordflow">if</span>(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)!=string::npos &amp;&amp; iter-&gt;first.find(<span class="stringliteral">&quot;]&quot;</span>)!=string::npos)
 <a name="l01856"></a>01856                         {
 <a name="l01857"></a>01857                                 <span class="keywordtype">string</span> key = iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>));
-<a name="l01858"></a>01858                                 boost::replace_first(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l01859"></a>01859                                 boost::replace_first(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01858"></a>01858                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;[&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l01859"></a>01859                                 StringUtil::replaceFirst(key,<span class="stringliteral">&quot;]&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l01860"></a>01860                                 ret += <span class="stringliteral">&quot;\nif FILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;] == nil then&quot;</span>
 <a name="l01861"></a>01861                                                 + <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]={}\nend\n&quot;</span>;
 <a name="l01862"></a>01862                                 ret += <span class="stringliteral">&quot;\nif FILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;][&#39;&quot;</span>+key+<span class="stringliteral">&quot;&#39;]  == nil then&quot;</span>
@@ -1926,7 +1926,7 @@ $(document).ready(initResizable);
 <a name="l01866"></a>01866                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
 <a name="l01867"></a>01867                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;type&#39;] = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01868"></a>01868                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
-<a name="l01869"></a>01869                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;size&#39;] = &quot;</span>+ boost::lexical_cast&lt;string&gt;(dat.length);
+<a name="l01869"></a>01869                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;size&#39;] = &quot;</span>+ CastUtil::lexical_cast&lt;string&gt;(dat.length);
 <a name="l01870"></a>01870                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
 <a name="l01871"></a>01871                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;tmp_name&#39;] = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01872"></a>01872                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
@@ -1937,7 +1937,7 @@ $(document).ready(initResizable);
 <a name="l01877"></a>01877                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;] = {}&quot;</span>;
 <a name="l01878"></a>01878                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;name&#39;] = &#39;&quot;</span>+ dat.fileName + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01879"></a>01879                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;type&#39;] = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;&quot;</span>;
-<a name="l01880"></a>01880                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;size&#39;] = &quot;</span>+ boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length);
+<a name="l01880"></a>01880                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;size&#39;] = &quot;</span>+ CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length);
 <a name="l01881"></a>01881                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;tmp_name&#39;] = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;&quot;</span>;
 <a name="l01882"></a>01882                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;error&#39;] = 0&quot;</span>;
 <a name="l01883"></a>01883                         }
@@ -2020,7 +2020,7 @@ $(document).ready(initResizable);
 <a name="l01960"></a>01960                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
 <a name="l01961"></a>01961                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;type&#39;] = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01962"></a>01962                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
-<a name="l01963"></a>01963                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;size&#39;] = &quot;</span>+ boost::lexical_cast&lt;string&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
+<a name="l01963"></a>01963                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;size&#39;] = &quot;</span>+ CastUtil::lexical_cast&lt;string&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
 <a name="l01964"></a>01964                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
 <a name="l01965"></a>01965                                                 iter-&gt;first.substr(iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>)) + <span class="stringliteral">&quot;[&#39;tmp_name&#39;] = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01966"></a>01966                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first.substr(0, iter-&gt;first.find(<span class="stringliteral">&quot;[&quot;</span>))+<span class="stringliteral">&quot;&#39;]&quot;</span> +
@@ -2031,7 +2031,7 @@ $(document).ready(initResizable);
 <a name="l01971"></a>01971                                 ret += <span class="stringliteral">&quot;\nif(!isset(FILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;]))\n{\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;]={};\n}\n&quot;</span>;
 <a name="l01972"></a>01972                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;name&#39;] = &#39;&quot;</span>+ dat.fileName + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01973"></a>01973                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;type&#39;] = &#39;&quot;</span>+ dat.type + <span class="stringliteral">&quot;&#39;;&quot;</span>;
-<a name="l01974"></a>01974                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;size&#39;] = &quot;</span>+ boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
+<a name="l01974"></a>01974                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;size&#39;] = &quot;</span>+ CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(dat.length) + <span class="stringliteral">&quot;;&quot;</span>;
 <a name="l01975"></a>01975                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;tmp_name&#39;] = &#39;&quot;</span>+ dat.tmpFileName + <span class="stringliteral">&quot;&#39;;&quot;</span>;
 <a name="l01976"></a>01976                                 ret += <span class="stringliteral">&quot;\nFILES[&#39;&quot;</span>+iter-&gt;first+<span class="stringliteral">&quot;&#39;][&#39;error&#39;] = 0;&quot;</span>;
 <a name="l01977"></a>01977                         }

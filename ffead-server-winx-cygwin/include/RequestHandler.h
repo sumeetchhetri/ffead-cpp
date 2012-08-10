@@ -22,10 +22,10 @@
 
 #ifndef REQUESTHANDLER_H_
 #define REQUESTHANDLER_H_
-#include <boost/thread/thread.hpp>
+#include <thread>
 #include <dlfcn.h>
 #include "ClassInfo.h"
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 #include "View.h"
 #include "XmlParser.h"
 #include "TemplateHandler.h"
@@ -42,7 +42,7 @@
 #include <signal.h>
 #include "DynamicView.h"
 #include "HttpRequest.h"
-#include <boost/thread/thread.hpp>
+#include <thread>
 #include <boost/date_time.hpp>
 
 
@@ -68,8 +68,8 @@ public:
 	void service(int,string,string);
 private:
     volatile bool m_stoprequested;
-    boost::mutex m_mutex;
-    boost::thread m_thread;
+    std::mutex m_mutex;
+    std::thread m_thread;
 };
 
 #endif /* REQUESTHANDLER_H_ */
