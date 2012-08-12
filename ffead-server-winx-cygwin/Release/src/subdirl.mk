@@ -80,7 +80,7 @@ CPP_SRCS += \
 ../src/TaskPool.cpp \
 ../src/TemplateEngine.cpp \
 ../src/TemplateHandler.cpp \
-../src/Thread.cpp \
+../src/PoolThread.cpp \
 ../src/ThreadPool.cpp \
 ../src/Timer.cpp \
 ../src/Trace.cpp \
@@ -99,7 +99,9 @@ CPP_SRCS += \
 ../src/Filter.cpp \
 ../src/StringUtil.cpp \
 ../src/JSONElement.cpp \
-../src/JSONUtil.cpp
+../src/JSONUtil.cpp \
+../src/Thread.cpp \
+../src/Mutex.cpp
 
 OBJS += \
 ./src/Constants.o \
@@ -178,7 +180,7 @@ OBJS += \
 ./src/TaskPool.o \
 ./src/TemplateEngine.o \
 ./src/TemplateHandler.o \
-./src/Thread.o \
+./src/PoolThread.o \
 ./src/ThreadPool.o \
 ./src/Timer.o \
 ./src/Trace.o \
@@ -197,7 +199,9 @@ OBJS += \
 ./src/Filter.o \
 ./src/StringUtil.o \
 ./src/JSONElement.o \
-./src/JSONUtil.o
+./src/JSONUtil.o \
+./src/Thread.o \
+./src/Mutex.o
 
 CPP_DEPS += \
 ./src/Constants.d \
@@ -276,7 +280,7 @@ CPP_DEPS += \
 ./src/TaskPool.d \
 ./src/TemplateEngine.d \
 ./src/TemplateHandler.d \
-./src/Thread.d \
+./src/PoolThread.d \
 ./src/ThreadPool.d \
 ./src/Timer.d \
 ./src/Trace.d \
@@ -295,14 +299,16 @@ CPP_DEPS += \
 ./src/Filter.d \
 ./src/StringUtil.d \
 ./src/JSONElement.d \
-./src/JSONUtil.d
+./src/JSONUtil.d \
+./src/Thread.d \
+./src/Mutex.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
 %.o: ../../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++0x -l ../src/ -I../include -O0 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	g++ -l ../src -I../include -O0 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

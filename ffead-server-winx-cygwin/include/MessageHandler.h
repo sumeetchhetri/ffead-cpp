@@ -34,7 +34,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <thread>
+#include "Thread.h"
 #include "Message.h"
 #include "Exception.h"
 #include <iostream>
@@ -67,7 +67,7 @@ public:
 private:
 	Server *server;
 	bool running;
-	static void service(int);
+	static void* service(void* arg);
 	static void init(string);
 	Message readMessageFromQ(string fileName);
 	void writeMessageToQ(Message msg,string fileName);

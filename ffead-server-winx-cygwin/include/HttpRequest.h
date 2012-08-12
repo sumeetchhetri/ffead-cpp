@@ -26,7 +26,7 @@
 #include "sstream"
 #include "fstream"
 #include "StringUtil.h"
-#include <boost/foreach.hpp>
+
 #include "CastUtil.h"
 #include "stdio.h"
 #include <openssl/ssl.h>

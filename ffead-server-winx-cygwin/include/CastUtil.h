@@ -10,10 +10,30 @@
 #include "sstream"
 #include <stdlib.h>
 #include "StringUtil.h"
-#include "Object.h"
+#include <cxxabi.h>
 using namespace std;
 
 class CastUtil {
+	static string demangle(const char *mangled)
+	{
+		int status;
+		char *demangled;
+		using namespace abi;
+		demangled = __cxa_demangle(mangled, NULL, 0, &status);
+		stringstream ss;
+		ss << demangled;
+		string s;
+		ss >> s;
+		return s;
+	}
+	template <typename T> static string getClassName(T t)
+	{
+		const char *mangled = typeid(t).name();
+		string tn = demangle(mangled);
+		if(tn[tn.length()-1]=='*')
+			tn = tn.substr(0,tn.length()-1);
+		return tn;
+	}
 public:
 	CastUtil();
 	virtual ~CastUtil();
@@ -155,25 +175,14 @@ public:
 	}
 	template <typename T> static T lexical_cast(const string& val)
 	{
-		T t;
-		stringstream ss;
-		ss << val;
-		ss >> t;
-		if(ss)
-		{
-			return t;
-		}
-		else
-		{
-			throw "Conversion exception";
-		}
+		return lexical_cast<T>(val.c_str());
 	}
 	template <typename T> static T lexical_cast(const char* val)
 	{
 		T t;
-		string tn = Object::getClassName(t);
+		string tn = getClassName(t);
 		char* endptr;
-		if(tn=="double")
+		if(tn=="double" || tn=="float")
 		{
 			double d = 0;
 			d = strtod(val, &endptr);
@@ -209,6 +218,20 @@ public:
 			else
 				throw "Conversion exception";
 			t = d;
+		}
+		else if(tn=="std::string")
+		{
+			stringstream ss;
+			ss << val;
+			ss >> t;
+			if(ss)
+			{
+				return t;
+			}
+			else
+			{
+				throw "Conversion exception";
+			}
 		}
 		else
 		{

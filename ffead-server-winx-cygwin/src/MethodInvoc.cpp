@@ -40,8 +40,9 @@ void MethodInvoc::init()
 		_methinv_instance->running = false;
 	}
 }
-void MethodInvoc::service(int fd)
+void* MethodInvoc::service(void* arg)
 {
+	int fd = *(int*)arg;
 	init();
 	string methInfo,retValue;
 	_methinv_instance->getServer()->Receive(fd,methInfo,1024);

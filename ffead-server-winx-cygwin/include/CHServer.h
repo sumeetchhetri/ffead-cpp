@@ -58,7 +58,6 @@
 #include <signal.h>
 #include "DynamicView.h"
 #include "HttpRequest.h"
-#include <pthread.h>
 #include "ApplicationUtil.h"
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -98,6 +97,7 @@
 #include "ConfigurationHandler.h"
 #include "SSLHandler.h"
 #include "ServiceTask.h"
+#include "Thread.h"
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd

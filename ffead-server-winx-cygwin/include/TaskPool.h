@@ -26,12 +26,12 @@
 #include "queue"
 #include "list"
 #include "Task.h"
-#include "Pmutex.h"
+#include "Mutex.h"
 
 class TaskPool {
 	queue<Task*> *tasks;
 	list<Task*> *ptasks;
-	Pmutex *m_mutex;
+	Mutex *m_mutex;
 	bool console;
 	friend class ThreadPool;
 public:

@@ -23,22 +23,22 @@
 #ifndef THREADPOOL_H_
 #define THREADPOOL_H_
 #include "TaskPool.h"
-#include "Thread.h"
-//#include "Logger.h"
+#include "PoolThread.h"
+#include "Logger.h"
 
 class ThreadPool {
-	//Logger logger;
+	Logger logger;
 	int maxThreads;
 	int initThreads;
 	int lowp;
 	int highp;
 	bool console;
-	vector<Thread*> *tpool;
+	vector<PoolThread*> *tpool;
 	TaskPool *wpool;
-	Pthread *poller;
+	Thread *poller;
 	bool prioritypooling;
 	static void* poll(void *arg);
-	Thread* getIdleThread();
+	PoolThread* getIdleThread();
 	bool started;
 public:
 	ThreadPool(int,int,int,int,bool);

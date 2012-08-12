@@ -27,7 +27,8 @@
 #include <openssl/sha.h>
 #include <openssl/evp.h>
 #include <stdio.h>
-#include <string.h>
+#include "string"
+#include "cstring"
 #include <stdlib.h>
 #include "StringUtil.h"
 using namespace std;

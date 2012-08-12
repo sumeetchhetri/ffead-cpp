@@ -185,31 +185,50 @@ void ServiceTask::run()
 		//int bytes = -1;
 		if(isSSLEnabled)
 		{
-			sbio=BIO_new_socket(fd,BIO_CLOSE);
-			//logger << "\nBefore = " << ssl << flush;
+			sbio=BIO_new_socket(fd,BIO_NOCLOSE);
 			ssl=SSL_new(ctx);
-			//logger << "\nAfter = " << ssl << flush;
 			SSL_set_bio(ssl,sbio,sbio);
-			int r;
-			if((r=SSL_accept(ssl)<=0))
-			{
-				sslHandler.error_occurred((char*)"SSL accept error",fd,ssl);
-				return;
-			}
 
 			io=BIO_new(BIO_f_buffer());
 			ssl_bio=BIO_new(BIO_f_ssl());
 			BIO_set_ssl(ssl_bio,ssl,BIO_CLOSE);
 			BIO_push(io,ssl_bio);
+
+			int r = SSL_accept(ssl);
+			cout << r << endl;
+			int bser = SSL_get_error(ssl,r);
+			cout << bser << endl;
+			if(r<=0)
+			{
+				sslHandler.error_occurred((char*)"SSL accept error",fd,ssl);
+				return;
+			}
+
+
 			int er=-1;
 			bool flag = true;
 			while(flag)
 			{
 				er = BIO_gets(io,buf,BUFSIZZ-1);
-				switch(SSL_get_error(ssl,er))
+				cout << er << endl;
+				int bser = SSL_get_error(ssl,er);
+				cout << bser << endl;
+				switch(bser)
 				{
-					case SSL_ERROR_NONE:
+					case SSL_ERROR_WANT_READ:
+					{
+						logger << "more to read error" << endl;
 						break;
+					}
+					case SSL_ERROR_WANT_WRITE:
+					{
+						logger << "more to write error" << endl;
+						break;
+					}
+					case SSL_ERROR_NONE:
+					{
+						break;
+					}
 					case SSL_ERROR_ZERO_RETURN:
 					{
 						sslHandler.error_occurred((char*)"SSL error problem",fd,ssl);
@@ -228,6 +247,7 @@ void ServiceTask::run()
 				if(!strcmp(buf,"\r\n") || !strcmp(buf,"\n"))
 					break;
 				string temp(buf);
+				if(temp=="")continue;
 				temp = temp.substr(0,temp.length()-1);
 				results.push_back(temp);
 				//logger << temp <<endl;
@@ -350,6 +370,7 @@ void ServiceTask::run()
 		map<string,string> params1 = *params;
 		string webpath = serverRootDirectory + "web/";
 		HttpRequest* req= new HttpRequest(results,webpath);
+		//logger << req->toString() << endl;
 
 		if(req->getFile()=="")
 		{
@@ -755,6 +776,10 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		delete req;
 		logger << alldatlg << "--sent data--DONE" << flush;
 		//sessionMap[sessId] = sess;
+	}
+	catch(const char* ex)
+	{
+		logger << ex << endl;
 	}
 	catch(...)
 	{

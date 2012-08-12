@@ -23,7 +23,7 @@
 #include "TaskPool.h"
 
 TaskPool::TaskPool() {
-	m_mutex = new Pmutex();
+	m_mutex = new Mutex();
 	tasks = new queue<Task*> ;
 	ptasks = new list<Task*> ;
 }

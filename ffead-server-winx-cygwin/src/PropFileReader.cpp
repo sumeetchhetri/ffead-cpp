@@ -46,7 +46,7 @@ propMap PropFileReader::getProperties(string filepath)
 	  {
 		  if(line!="")
 		  {
-			  StringUtil::split(vemp, line, ("="));
+			  vemp = StringUtil::split(line, ("="));
 		  	  if(vemp.size()==2)
 		  	  {
 		  		  string temp = vemp.at(1);

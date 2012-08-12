@@ -120,27 +120,41 @@ vector<string> StringUtil::split(const string& input, const string& delimiter)
 
 }
 
-void StringUtil::split(vector<string> &output, const string& input, const string& delimiter)
+void StringUtil::splitInternal(vector<string> &output, const string& input, const string& delimiter)
 {
 	size_t start = 0;
-	size_t end = 0;
 
-	while (start != string::npos && end != string::npos)
+	string temp = input;
+	start = temp.find(delimiter);
+	while(start!=string::npos)
 	{
-		start = input.find_first_not_of(delimiter, end);
-		if (start != string::npos)
+		if(start!=0)
 		{
-			end = input.find_first_of(delimiter, start);
-			if (end != string::npos)
-			{
-				output.push_back(input.substr(start, end - start));
-			}
-			else
-			{
-				output.push_back(input.substr(start));
-			}
+			output.push_back(temp.substr(0, start));
+		}
+		else
+		{
+			output.push_back("");
+		}
+		if(temp.length()>start+delimiter.length())
+		{
+			temp = temp.substr(start+delimiter.length());
+			start = temp.find(delimiter);
+		}
+		else
+		{
+			temp = temp.substr(start);
+			break;
 		}
 	}
+	replaceFirst(temp, delimiter, "");
+	output.push_back(temp);
+}
+
+void StringUtil::split(vector<string> &output, const string& input, const string& delimiter)
+{
+	output.clear();
+	splitInternal(output, input, delimiter);
 }
 
 vector<string> StringUtil::split(const string& input, vector<string> delimiters)
@@ -152,36 +166,38 @@ vector<string> StringUtil::split(const string& input, vector<string> delimiters)
 
 void StringUtil::split(vector<string>& output, const string& input, vector<string> delimiters)
 {
+	output.clear();
 	output.push_back(input);
 	for (int var = 0; var < (int)delimiters.size(); ++var) {
 		vector<string> output1;
 		for (int var1 = 0; var1 < (int)output.size(); ++var1) {
-			split(output1, output.at(var1), delimiters.at(var));
+			splitInternal(output1, output.at(var1), delimiters.at(var));
 		}
 		output.swap(output1);
 	}
 }
 
-void StringUtil::trimWith(string& str, const string& c = " ")
+void StringUtil::trim(string& str)
 {
+	string c = " ";
 	if(str=="")return;
 	size_t p2 = str.find_last_not_of(c);
+	while(str[p2]==' ' || str[p2]=='\t' || str[p2]=='\n' || str[p2]=='\r')
+	{
+		str = str.substr(0, p2);
+		p2 = str.find_last_not_of(str[p2]);
+	}
 	if (p2 == string::npos)
-		return;
+		p2 = str.length();
 	size_t p1 = str.find_first_not_of(c);
+	while(str[p1]==' ' || str[p1]=='\t' || str[p1]=='\n' || str[p1]=='\r')
+	{
+		str = str.substr(p1);
+		p1 = str.find_first_not_of(str[p1]);
+	}
 	if (p1 == string::npos)
 		p1 = 0;
 	str = str.substr(p1, (p2-p1)+1);
-}
-
-void StringUtil::trim(string& str)
-{
-	trimWith(str, " \t");
-	trimWith(str, "\t ");
-	trimWith(str);
-	trimWith(str, "\t");
-	trimWith(str, "\n");
-	trimWith(str, "\r\n");
 }
 
 string StringUtil::trimCopy(const string& str)

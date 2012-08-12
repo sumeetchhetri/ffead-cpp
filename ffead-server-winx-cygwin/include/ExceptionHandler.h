@@ -27,8 +27,7 @@
 #include "stdlib.h"
 #include <exception>
 #include <iostream>
-#include <thread>
-#include <pthread.h>
+#include "Thread.h"
 
 using namespace std;
 

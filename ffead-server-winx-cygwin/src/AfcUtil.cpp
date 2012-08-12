@@ -174,7 +174,12 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 		strVec vemp,emp;
 		string data = obj.at(i);
 		StringUtil::replaceFirst(data,";","");
-		StringUtil::split(vemp, data, boost::is_any_of(" ,)("));
+		vector<string> delimiters;
+		delimiters.push_back(" ");
+		delimiters.push_back(",");
+		delimiters.push_back(")");
+		delimiters.push_back("(");
+		StringUtil::split(vemp, data, delimiters);
 		for(unsigned int k=0;k<vemp.size();k++)
 		{
 			if(vemp.at(k)!="")

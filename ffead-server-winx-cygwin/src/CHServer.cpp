@@ -40,7 +40,7 @@ map<int,pid_t> pds;
 static pid_t parid;
 void *dlib = NULL;
 typedef map<string,string> sessionMap;
-static std::mutex m_mutex,p_mutex;
+static Mutex m_mutex,p_mutex;
 ConfigurationData configurationData;
 
 Logger logger;
@@ -92,7 +92,7 @@ int send_connection(int fd,int unix_socket_fd)
 	msg.msg_controllen = cmsg->cmsg_len;
 
 	msg.msg_flags = 0;
-	//std::mutex::scoped_lock lock(p_mutex);
+	//Mutex::scoped_lock lock(p_mutex);
 	if((rv= sendmsg(unix_socket_fd, &msg, 0)) < 0 )
 	{
 	  perror("sendmsg()");
@@ -515,10 +515,9 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 						if(isThreadprq)
 						{
 							ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
-										isSSLEnabled, ctx, sslHandler, configurationData, dlib);
-							Pthread pthread(&service, task);
-							pthread->execute();
-							pthread.join();
+										isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+							Thread pthread(&service, task);
+							pthread.execute();
 							delete task;
 						}
 						else
@@ -579,7 +578,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 
 void* dynamic_page_monitor(void* arg)
 {
-	string* serverRootDirectory = (string*)arg;
+	string serverRootDirectory = *(string*)arg;
 	struct stat statbuf;
 	strVec dcpsss = configurationData.dcpsss;
 	map<string,long> statsinf;
@@ -592,7 +591,7 @@ void* dynamic_page_monitor(void* arg)
 	}
 	while(true)
 	{
-		std::this_thread::sleep_for(std::chrono::seconds(5));
+		Thread::sSleep(5);
 		bool flag = false;
 		if(processgendone)
 			continue;
@@ -807,6 +806,10 @@ int main(int argc, char* argv[])
     {
     	logger << p->getMessage() << endl;
     }
+    catch(const char* msg)
+	{
+		logger << msg << endl;
+	}
     configurationData.sessionTimeout = sessionTimeout;
     configurationData.ip_address = IP_ADDRESS;
     configurationData.sessatserv = sessatserv;
@@ -867,8 +870,8 @@ int main(int argc, char* argv[])
 
 	if(isCompileEnabled)
 	{
-		Pthread pthread(&dynamic_page_monitor, &serverRootDirectory);
-		pthread->execute();
+		Thread pthread(&dynamic_page_monitor, &serverRootDirectory);
+		pthread.execute();
 	}
 
 	fd_set master;    // master file descriptor list
@@ -977,13 +980,31 @@ int main(int argc, char* argv[])
 					}
 					else
 					{
-						FD_SET(new_fd, &master); // add to master set
+						/*FD_SET(new_fd, &master); // add to master set
 						if (new_fd > fdmax) {    // keep track of the max
 							fdmax = new_fd;
+						}*/
+
+						logger << "got new connection " << endl;
+						//FD_CLR(n, &master); // remove from master set
+						fcntl(new_fd, F_SETFL,O_SYNC);
+						if(isThreadprq)
+						{
+							ServiceTask *task = new ServiceTask(new_fd,serverRootDirectory,&params,
+										isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+							Thread pthread(&service, task);
+							pthread.execute();
 						}
+						else
+						{
+							ServiceTask *task = new ServiceTask(new_fd,serverRootDirectory,&params,
+									isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+							pool->execute(*task);
+						}
+
 					}
 				}
-				else
+				/*else
 				{
 					logger << "got new connection " << endl;
 					FD_CLR(n, &master); // remove from master set
@@ -991,11 +1012,9 @@ int main(int argc, char* argv[])
 					if(isThreadprq)
 					{
 						ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
-									isSSLEnabled, ctx, sslHandler, configurationData, dlib);
-						Pthread pthread(&service, task);
-						pthread->execute();
-						pthread.join();
-						delete task;
+									isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+						Thread pthread(&service, task);
+						pthread.execute();
 					}
 					else
 					{
@@ -1003,7 +1022,7 @@ int main(int argc, char* argv[])
 								isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
 						pool->execute(*task);
 					}
-				}
+				}*/
 			}
 		}
 	}

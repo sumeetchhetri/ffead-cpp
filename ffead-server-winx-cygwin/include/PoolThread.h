@@ -14,42 +14,31 @@
     limitations under the License.  
 */
 /*
- * Client.h
+ * PoolThread.h
  *
- *  Created on: Mar 27, 2010
+ *  Created on: Mar 23, 2010
  *      Author: sumeet
  */
 
-#ifndef CLIENT_H_
-#define CLIENT_H_
-#include "iostream"
-#include "sstream"
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <netdb.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include "string"
-#include "CastUtil.h"
-#include "cstring"
-using namespace std;
-#define MAXDATASIZE 100
-class Client {
-	bool connected;
-	int sockfd;
+#ifndef POOLTHREAD_H_
+#define POOLTHREAD_H_
+#include "Task.h"
+#include "Thread.h"
+#include "TimeUnit.h"
+#include "Logger.h"
+
+class PoolThread {
+	bool console;
+	static void* run(void *arg);
+	PoolThread();
+	virtual ~PoolThread();
+	Thread *mthread;
+	bool idle;
+	Task *task;
+	Logger logger;
+	friend class ThreadPool;
 public:
-	Client();
-	virtual ~Client();
-	bool connection(string,int);
-	int sendData(string);
-	string getData();
-	void closeConnection();
-	bool isConnected();
+	void execute();
 };
 
-#endif /* CLIENT_H_ */
+#endif /* POOLTHREAD_H_ */

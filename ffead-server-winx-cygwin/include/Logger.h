@@ -24,8 +24,7 @@
 #define LOGGER_H_
 #include "PropFileReader.h"
 #include "DateFormat.h"
-#include <thread>
-#include <mutex>
+#include "Mutex.h"
 class Logger {
 public:
 	static string LEVEL_ERROR;
@@ -57,7 +56,7 @@ private:
 	static string* mode;
 	static string* filepath;
 	static ofstream* out;
-	static std::mutex* _theLogmutex;
+	static Mutex* _theLogmutex;
 	void write(string,string);
 	template <typename T>
 	void write(T tmsg, string mod)

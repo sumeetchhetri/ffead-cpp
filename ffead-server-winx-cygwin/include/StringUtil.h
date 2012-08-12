@@ -15,6 +15,7 @@
 using namespace std;
 
 class StringUtil {
+	static void splitInternal(vector<string> &output, const string& input, const string& delimiter);
 public:
 	StringUtil();
 	virtual ~StringUtil();
@@ -35,7 +36,6 @@ public:
 	static void split(vector<string> &output, const string& input, const string& delimiter);
 	static vector<string> split(const string& input, vector<string> delimiters);
 	static void split(vector<string> &output, const string& input, vector<string> delimiters);
-	static void trimWith(string& str, const string& c);
 	static void trim(string& str);
 	static string trimCopy(const string &str);
 };

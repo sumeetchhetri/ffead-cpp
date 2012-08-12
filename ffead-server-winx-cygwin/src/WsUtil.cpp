@@ -127,6 +127,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 				string type;
 				strVec results2;
 				StringUtil::split(results2, results1.at(j), (" "));
+				if(results2.size()<2)continue;
 				type = results2.at(0);
 				int srn = j;
 				char chr = CastUtil::lexical_cast<char>(j);

@@ -26,7 +26,7 @@
 #include "vector"
 #include "sstream"
 #include "StringUtil.h"
-#include <boost/foreach.hpp>
+
 #include "CastUtil.h"
 #include "stdio.h"
 #include "fstream"

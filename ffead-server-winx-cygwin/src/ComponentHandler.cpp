@@ -43,8 +43,9 @@ void ComponentHandler::init()
 	}
 }
 
-void ComponentHandler::service(int fd)
+void* ComponentHandler::service(void* arg)
 {
+	int fd = *(int*)arg;
 	init();
 	string methInfo,retValue;
 	_cmp_instance->getServer()->Receive(fd,methInfo,1024);

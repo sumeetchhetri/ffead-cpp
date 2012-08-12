@@ -32,7 +32,7 @@ ApplicationUtil::~ApplicationUtil() {
 
 string ApplicationUtil::buildAllApplications(vector<string> files,vector<string> apps,map<string,string> &appMap)
 {
-	string headers = "#include \"fstream\"\n#include \"string\"\n#include \"HttpSession.h\"\n#include "CastUtil.h"\nusing namespace std;\n";
+	string headers = "#include \"fstream\"\n#include \"string\"\n#include \"HttpSession.h\"\n#include \"CastUtil.h\"\nusing namespace std;\n";
 	string code;
 	string meth,methdef,vars;
 	for (unsigned int var = 0; var < files.size(); ++var)

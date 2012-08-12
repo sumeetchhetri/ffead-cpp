@@ -1,21 +1,21 @@
 /*
- * Pmutex.h
+ * Mutex.h
  *
  *  Created on: 10-Aug-2012
  *      Author: sumeetc
  */
 
-#ifndef PMUTEX_H_
-#define PMUTEX_H_
+#ifndef MUTEX_H_
+#define MUTEX_H_
 #include <pthread.h>
 
-class Pmutex {
+class Mutex {
 	pthread_mutex_t mut;
 public:
-	Pmutex();
-	virtual ~Pmutex();
+	Mutex();
+	virtual ~Mutex();
 	void lock();
 	void unlock();
 };
 
-#endif /* PMUTEX_H_ */
+#endif /* MUTEX_H_ */

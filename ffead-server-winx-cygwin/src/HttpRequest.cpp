@@ -262,7 +262,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						StringUtil::split(memp, vemp.at(0), ("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -343,7 +343,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						StringUtil::split(memp, vemp.at(0), ("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -424,7 +424,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						StringUtil::split(memp, vemp.at(0), ("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -458,7 +458,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						this->setHttpVersion(vemp.at(1));
 						StringUtil::replaceFirst(vemp.at(0)," ","");
 						this->setActUrl(vemp.at(0));
-						StringUtil::split(memp, vemp.at(0), ("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -537,7 +537,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						StringUtil::split(memp, vemp.at(0), ("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -616,7 +616,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						StringUtil::split(memp, vemp.at(0), ("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -697,7 +697,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						StringUtil::split(memp, vemp.at(0), ("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)

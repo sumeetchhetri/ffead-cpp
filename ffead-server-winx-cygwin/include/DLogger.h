@@ -24,7 +24,7 @@
 #define DLOGGER_H_
 #include "PropFileReader.h"
 #include "DateFormat.h"
-#include <thread>
+#include "Mutex.h"
 class DLogger {
 public:
 	static DLogger* getDLogger();
@@ -45,7 +45,7 @@ private:
 	string filepath;
 	ofstream out;
 	void write(string,string);
-	std::mutex p_mutex;
+	Mutex p_mutex;
 	static DLogger* m_pInstance;
 };
 

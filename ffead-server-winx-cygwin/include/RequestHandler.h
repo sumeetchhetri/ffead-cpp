@@ -22,7 +22,6 @@
 
 #ifndef REQUESTHANDLER_H_
 #define REQUESTHANDLER_H_
-#include <thread>
 #include <dlfcn.h>
 #include "ClassInfo.h"
 #include "CastUtil.h"
@@ -42,16 +41,12 @@
 #include <signal.h>
 #include "DynamicView.h"
 #include "HttpRequest.h"
-#include <thread>
-#include <boost/date_time.hpp>
-
-
 #include <algorithm>
-
 #include "PropFileReader.h"
 #include "AfcUtil.h"
-
 #include "ServerThread.h"
+#include "Thread.h"
+#include "Mutex.h"
 
 #define MAXBUFLEN 1024
 //extern map<string,HttpSession> sessionMap;
@@ -68,8 +63,8 @@ public:
 	void service(int,string,string);
 private:
     volatile bool m_stoprequested;
-    std::mutex m_mutex;
-    std::thread m_thread;
+    Mutex m_mutex;
+    Thread m_thread;
 };
 
 #endif /* REQUESTHANDLER_H_ */

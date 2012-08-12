@@ -182,8 +182,9 @@ void MessageHandler::unSubscribe(string subs,string fileName)
 	myfile.close();
 }
 
-void MessageHandler::service(int fd)
+void* MessageHandler::service(void* arg)
 {
+	int fd = *(int*)arg;
 	char buf[MAXBUFLEN];
 	string results;
 	//int bytes = recv(fd, buf, sizeof buf, 0);
