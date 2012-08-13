@@ -80,7 +80,7 @@ CPP_SRCS += \
 ../src/TaskPool.cpp \
 ../src/TemplateEngine.cpp \
 ../src/TemplateHandler.cpp \
-../src/Thread.cpp \
+../src/PoolThread.cpp \
 ../src/ThreadPool.cpp \
 ../src/Timer.cpp \
 ../src/Trace.cpp \
@@ -88,9 +88,6 @@ CPP_SRCS += \
 ../src/WsUtil.cpp \
 ../src/XmlParseException.cpp \
 ../src/XmlParser.cpp \
-../src/json_spirit_reader.cpp \
-../src/json_spirit_value.cpp \
-../src/json_spirit_writer.cpp \
 ../src/AuthController.cpp \
 ../src/FileAuthController.cpp \
 ../src/DBAuthController.cpp \
@@ -102,7 +99,13 @@ CPP_SRCS += \
 ../src/Filter.cpp \
 ../src/StringUtil.cpp \
 ../src/JSONElement.cpp \
-../src/JSONUtil.cpp
+../src/JSONUtil.cpp \
+../src/Thread.cpp \
+../src/Mutex.cpp \
+../src/AMEFResources.cpp \
+../src/AMEFEncoder.cpp \
+../src/AMEFDecoder.cpp \
+../src/AMEFObject.cpp
 
 OBJS += \
 ./src/Constants.o \
@@ -181,7 +184,7 @@ OBJS += \
 ./src/TaskPool.o \
 ./src/TemplateEngine.o \
 ./src/TemplateHandler.o \
-./src/Thread.o \
+./src/PoolThread.o \
 ./src/ThreadPool.o \
 ./src/Timer.o \
 ./src/Trace.o \
@@ -189,9 +192,6 @@ OBJS += \
 ./src/WsUtil.o \
 ./src/XmlParseException.o \
 ./src/XmlParser.o \
-./src/json_spirit_reader.o \
-./src/json_spirit_value.o \
-./src/json_spirit_writer.o \
 ./src/AuthController.o \
 ./src/FileAuthController.o \
 ./src/DBAuthController.o \
@@ -203,7 +203,14 @@ OBJS += \
 ./src/Filter.o \
 ./src/StringUtil.o \
 ./src/JSONElement.o \
-./src/JSONUtil.o
+./src/JSONUtil.o \
+./src/Thread.o \
+./src/Mutex.o \
+./src/Mutex.o \
+./src/AMEFResources.o \
+./src/AMEFEncoder.o \
+./src/AMEFDecoder.o \
+./src/AMEFObject.o
 
 CPP_DEPS += \
 ./src/Constants.d \
@@ -282,7 +289,7 @@ CPP_DEPS += \
 ./src/TaskPool.d \
 ./src/TemplateEngine.d \
 ./src/TemplateHandler.d \
-./src/Thread.d \
+./src/PoolThread.d \
 ./src/ThreadPool.d \
 ./src/Timer.d \
 ./src/Trace.d \
@@ -290,9 +297,6 @@ CPP_DEPS += \
 ./src/WsUtil.d \
 ./src/XmlParseException.d \
 ./src/XmlParser.d \
-./src/json_spirit_reader.d \
-./src/json_spirit_value.d \
-./src/json_spirit_writer.d \
 ./src/AuthController.d \
 ./src/FileAuthController.d \
 ./src/DBAuthController.d \
@@ -304,7 +308,13 @@ CPP_DEPS += \
 ./src/Filter.d \
 ./src/StringUtil.d \
 ./src/JSONElement.d \
-./src/JSONUtil.d
+./src/JSONUtil.d \
+./src/Thread.d \
+./src/Mutex.d \
+./src/AMEFResources.d \
+./src/AMEFEncoder.d \
+./src/AMEFDecoder.d \
+./src/AMEFObject.d
 
 
 # Each subdirectory must supply rules for building sources it contributes

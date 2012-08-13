@@ -47,6 +47,7 @@
 #include "string"
 #include "Logger.h"
 #include "Constants.h"
+#include "AMEFResources.h"
 
 
 #define MAXBUFLEN 1024
@@ -69,7 +70,7 @@ private:
 	bool running;
 	static void* service(void* arg);
 	static void init(string);
-	Message readMessageFromQ(string fileName);
+	Message readMessageFromQ(string fileName, bool erase);
 	void writeMessageToQ(Message msg,string fileName);
 	bool tempUnSubscribe(string subs,string fileName);
 	Message readMessageFromT(string fileName,string subs);

@@ -101,7 +101,11 @@ CPP_SRCS += \
 ../src/JSONElement.cpp \
 ../src/JSONUtil.cpp \
 ../src/Thread.cpp \
-../src/Mutex.cpp
+../src/Mutex.cpp \
+../src/AMEFResources.cpp \
+../src/AMEFEncoder.cpp \
+../src/AMEFDecoder.cpp \
+../src/AMEFObject.cpp
 
 OBJS += \
 ./src/Constants.o \
@@ -201,7 +205,12 @@ OBJS += \
 ./src/JSONElement.o \
 ./src/JSONUtil.o \
 ./src/Thread.o \
-./src/Mutex.o
+./src/Mutex.o \
+./src/Mutex.o \
+./src/AMEFResources.o \
+./src/AMEFEncoder.o \
+./src/AMEFDecoder.o \
+./src/AMEFObject.o
 
 CPP_DEPS += \
 ./src/Constants.d \
@@ -301,7 +310,11 @@ CPP_DEPS += \
 ./src/JSONElement.d \
 ./src/JSONUtil.d \
 ./src/Thread.d \
-./src/Mutex.d
+./src/Mutex.d \
+./src/AMEFResources.d \
+./src/AMEFEncoder.d \
+./src/AMEFDecoder.d \
+./src/AMEFObject.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
