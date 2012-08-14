@@ -4,4 +4,4 @@
 
 USER_OBJS :=
 
-LIBS := -lweblib -ldl -lcrypto -lssl -lboost_regex-mt -lrt
+LIBS := -lweblib -ldl -lcrypto -lssl -lrt

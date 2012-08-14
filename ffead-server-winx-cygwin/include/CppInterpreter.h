@@ -29,7 +29,7 @@
 #include "iostream"
 #include "CastUtil.h"
 #include "StringUtil.h"
-#include <boost/regex.hpp>
+#include "RegexUtil.h"
 #include "bitset"
 #include "Logger.h"
 typedef map<string,Object> mapVars;

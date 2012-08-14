@@ -108,7 +108,7 @@ bool Reflection::generateClassInfo(string className)
 	//className = "/home/sumeet/workspace/weblib/" + className;
 	infile.open(className.c_str());
 	string flag = "";
-	boost::regex e1,e2;
+	//boost::regex e1,e2;
 
 	if(infile.is_open())
 	{
@@ -120,11 +120,12 @@ bool Reflection::generateClassInfo(string className)
 		int cnt = 0;
 
 		//e1.assign("\\t+");
-		e2.assign("\\s+");
+		//e2.assign("\\s+");
 		while(getline(infile, data))
 		{
 			//data = boost::regex_replace(data, e1, "", boost::match_default | boost::format_all);
-			data = boost::regex_replace(data, e2, " ", boost::match_default | boost::format_all);
+			RegexUtil::replace(data, "[ ]+", " ");
+			//data = boost::regex_replace(data, e2, " ", boost::match_default | boost::format_all);
 			classset = false;
 			if((tes=data.find("/*"))!=string::npos)
 			{

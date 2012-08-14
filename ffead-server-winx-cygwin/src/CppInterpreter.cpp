@@ -1500,8 +1500,9 @@ void CppInterpreter::eval(string str)
 		logger << "\n" << flush;
 	}
 	logger << str << flush;
-	boost::regex pattern("\\s+",boost::regex_constants::icase|boost::regex_constants::perl);
-	str = boost::regex_replace (str, pattern, " ");
+	//boost::regex pattern("\\s+",boost::regex_constants::icase|boost::regex_constants::perl);
+	//str = boost::regex_replace (str, pattern, " ");
+	RegexUtil::replace(str, "[ ]+", " ");
 	logger << "\n" << flush;
 	logger << str << flush;
 	logger << "\n" << flush;

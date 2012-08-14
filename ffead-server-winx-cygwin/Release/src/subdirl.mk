@@ -105,7 +105,8 @@ CPP_SRCS += \
 ../src/AMEFResources.cpp \
 ../src/AMEFEncoder.cpp \
 ../src/AMEFDecoder.cpp \
-../src/AMEFObject.cpp
+../src/AMEFObject.cpp \
+../src/RegexUtil.cpp
 
 OBJS += \
 ./src/Constants.o \
@@ -210,7 +211,8 @@ OBJS += \
 ./src/AMEFResources.o \
 ./src/AMEFEncoder.o \
 ./src/AMEFDecoder.o \
-./src/AMEFObject.o
+./src/AMEFObject.o \
+./src/RegexUtil.o
 
 CPP_DEPS += \
 ./src/Constants.d \
@@ -314,7 +316,8 @@ CPP_DEPS += \
 ./src/AMEFResources.d \
 ./src/AMEFEncoder.d \
 ./src/AMEFDecoder.d \
-./src/AMEFObject.d
+./src/AMEFObject.d \
+./src/RegexUtil.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
