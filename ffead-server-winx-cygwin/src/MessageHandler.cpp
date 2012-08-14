@@ -73,6 +73,8 @@ Message MessageHandler::readMessageFromQ(string fileName, bool erase)
 	m.setUserId(obj->getPackets().at(3)->getValue());
 	m.setEncoding(obj->getPackets().at(4)->getValue());
 	m.setBody(obj->getPackets().at(5)->getValue());
+	m.getDestination().setName(obj->getPackets().at(5)->getValue());
+	m.getDestination().setType(obj->getPackets().at(5)->getValue());
 	delete[] fileContents;
 	if(erase)
 	{
@@ -95,6 +97,8 @@ void MessageHandler::writeMessageToQ(Message msg,string fileName)
 	ob.addPacket(msg.getUserId());
 	ob.addPacket(msg.getEncoding());
 	ob.addPacket(msg.getBody());
+	ob.addPacket(msg.getDestination().getName());
+	ob.addPacket(msg.getDestination().getType());
 	ofstream myfile;
 	myfile.open(fileName.c_str(), ios::binary | ios::app);
 	myfile << enc.encodeB(&ob, true);
