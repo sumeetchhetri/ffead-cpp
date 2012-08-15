@@ -1317,15 +1317,14 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 	return refDef;
 }
 
-string Reflection::generateSerDefinitionAll(strVec all,string &includeRef)
+string Reflection::generateSerDefinitionAll(strVec all,string &includeRef, bool isBinary)
 {
 	string ret = "#include \"XmlParser.h\"\n#include \"CastUtil.h\"\n#include \"AMEFResources.h\"\n";
 	includeRef = "#include \"Reflector.h\"\n#include \"Trace.h\"\n#include \"vector\"\n#include \"list\"\n#include \"queue\"\n#include \"deque\"\n#include \"set\"\n#include \"DateFormat.h\"\n" ;
 	string typedefs,classes,methods,rert1;
 	for (unsigned int var = 0; var < all.size(); ++var)
 	{
-		rert1 += this->generateSerDefinitions(all.at(var),includeRef,typedefs,classes,methods);
-
+		rert1 += this->generateSerDefinitions(all.at(var),includeRef,typedefs,classes,methods,isBinary);
 	}
 	includeRef += ("extern \"C\"{\n" + classes + typedefs + methods);
 	ret += includeRef;
@@ -1342,14 +1341,15 @@ string Reflection::generateSerDefinitionAll(strVec all,string &includeRef)
 	return ret;
 }
 
-string Reflection::generateSerDefinitions(string includeDir,string &includesDefs,string &typedefs,string &classes,string &methods)
+string Reflection::generateSerDefinitions(string includeDir,string &includesDefs,string &typedefs,string &classes,string &methods,bool isBinary)
 {
 	strVec includes = list(includeDir);
 	string ret;
 	for (unsigned int var = 0; var < includes.size(); ++var)
 	{
 		logger << "\ngenerating Ser for file" << includes.at(var) << "\n" << flush;
-		ret += generateSerDefinition(includes.at(var),includesDefs,typedefs,classes,methods);
+		if(!isBinary)ret += generateSerDefinition(includes.at(var),includesDefs,typedefs,classes,methods);
+		else ret += generateSerDefinitionBinary(includes.at(var),includesDefs,typedefs,classes,methods);
 		logger << "\ndone generating Ser for file" << includes.at(var) << "\n" << flush;
 	}
 	return ret;
@@ -1666,7 +1666,7 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 	return refDef;
 }
 
-/*string generateSerDefinitionBinary(string className,string &includesDefs,string &typedefs,string &classes,string &methods)
+string Reflection::generateSerDefinitionBinary(string className,string &includesDefs,string &typedefs,string &classes,string &methods)
 {
 	string refDef;
 	string opers;
@@ -1683,10 +1683,10 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 	methods += "\nstring binarySerialize" + classN + "(void* obje)\n{\n"+classN+" *__obj=("+classN+"*)obje;\n";
 	methods += "AMEFEncoder enc;\nAMEFObject object;\nobject.setName(\""+classN+"\");\n";
 	typedefs += "\nvoid* binaryUnSerialize" + classN + "(string objXml)\n{\n";
-	typedefs += classN+" *__obj=new "+classN+";\nAMEFDecoder dec;\nAMEFObject* root = dec.decodeB(objXml, false, true);\n";
-	typedefs += "if(root->getName()!=\""+classN+"\")throw \"Invalid Binary Object\";";
+	typedefs += classN+" *__obj=new "+classN+";\nAMEFDecoder dec;\nAMEFObject* root = dec.decodeB(objXml, false, false);\n";
+	typedefs += "if(root->getNameStr()!=\""+classN+"\")throw \"Invalid Binary Object\";";
 	typedefs += "for(unsigned int i=0;i<root->getPackets().size();i++)\n{\n";
-	typedefs += "string nam=root->getPackets().at(i)->getName();\n";
+	typedefs += "string nam=root->getPackets().at(i)->getNameStr();\n";
 
 	string publf, privf, protf ,publm, privm, protm;
 	string meth,fld;
@@ -1752,7 +1752,7 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 					else if(fldp.at(0)=="Date")
 					{
 						methods += ("DateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\n");
-						methods += ("object.addPacket(formt"+fldp.at(1)+".format(__obj->"+fldp.at(1)+")+,\""+fldp.at(1)+"\");\n");
+						methods += ("object.addPacket(formt"+fldp.at(1)+".format(__obj->"+fldp.at(1)+"),\""+fldp.at(1)+"\");\n");
 						//methods += ("DateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\nobjxml += \"<"+fldp.at(1)+" type=\\\""+fldp.at(0)+"\\\">\"+formt"+fldp.at(1)+".format(__obj->"+fldp.at(1)+")");
 						string cam = StringUtil::capitalizedCopy(fldp.at(1));
 						//methods += ("+\"</"+nam+">\";\n");
@@ -1794,18 +1794,18 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 						StringUtil::replaceFirst(stlcnt," ","");
 
 						methods += (fldp.at(0)+" __temp_obj_ser = __obj->"+fldp.at(1)+";\n");
-						methods += ("object.addPacket(binarySerialize"+stlcnt+stlcnttyp+"(&__temp_obj_ser,\""+stlcnt+stlcnttyp+classN+"\"));\n");
+						methods += ("object.addPacket(binarySerialize"+stlcnt+stlcnttyp+"(&__temp_obj_ser),\""+stlcnt+stlcnttyp+classN+"\");\n");
 						string cam = StringUtil::capitalizedCopy(fldp.at(1));
 						//methods += ("+\"</"+nam+">\";\n");
 						typedefs += "if(nam==\""+fldp.at(1)+"\"){";
-						typedefs += "for(unsigned int j=0;i<root->getPackets().at(i)->getPackets().size();j++)\n{\nAMEFEncoder enc;\n";
-						typedefs += "\n__obj->"+fldp.at(1)+" = *("+fldp.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encode(root->getPackets().at(i)->getPackets().at(j), false));\n";
-						typedefs += "}\n}\n";
+						typedefs += "\nAMEFEncoder enc;\n";
+						typedefs += "\n__obj->"+fldp.at(1)+" = *("+fldp.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encode(root->getPackets().at(i), false));\n";
+						typedefs += "\n}\n";
 					}
 					else
 					{
 						methods += (fldp.at(0)+" __temp_obj_ser = __obj->"+fldp.at(1)+";\n");
-						methods += ("object.addPacket(binarySerialize"+fldp.at(0)+"(&__temp_obj_ser,\""+fldp.at(0)+"\"));\n");
+						methods += ("object.addPacket(binarySerialize"+fldp.at(0)+"(&__temp_obj_ser),\""+fldp.at(0)+"\");\n");
 						string cam = StringUtil::capitalizedCopy(fldp.at(1));
 						//methods += ("+\"</"+nam+">\";\n");
 						typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = *("+fldp.at(0)+"*)binaryUnSerialize"+fldp.at(0)+"(root->getPackets().at(i)->getValue());\n";
@@ -1887,7 +1887,7 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 								else if(methpm.at(0)=="Date")
 								{
 									methods += ("DateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\n");
-									methods += ("object.addPacket(formt"+fldnames.at(k+1)+".format(__obj->"+methpm.at(1)+"())+,\""+fldnames.at(k+1)+"\");\n");
+									methods += ("object.addPacket(formt"+fldnames.at(k+1)+".format(__obj->"+methpm.at(1)+"()),\""+fldnames.at(k+1)+"\");\n");
 									//methods += ("DateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\nobjxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+formt"+fldnames.at(k+1)+".format(__obj->"+methpm.at(1)+"())");
 									//methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
 									if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n{\nDateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->set"+cam+"(*(formt"+fldnames.at(k+1)+".parse(root->getPackets().at(i)->getValue())));\n}\n";
@@ -1927,18 +1927,28 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 									StringUtil::replaceFirst(stlcnt," ","");
 
 									methods += (methpm.at(0)+" __temp_obj_ser = __obj->"+methpm.at(1)+"();\n");
-									methods += ("objxml += \"<"+fldnames.at(k+1)+" type=\\\""+stltyp+"\\\">\"+binarySerialize"+stlcnt+stlcnttyp+"(&__temp_obj_ser)");
+									methods += ("object.addPacket(binarySerialize"+stlcnt+stlcnttyp+"(&__temp_obj_ser),\""+stlcnt+stlcnttyp+classN+"\");\n");
 									//string cam = StringUtil::capitalizedCopy(methpm.at(1));
-									methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
+									//methods += ("+\"</"+nam+">\";\n");
+									if(methsall[classN+"get"+cam+methpm.at(0)])
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\"){";
+										typedefs += "\nAMEFEncoder enc;";
+										typedefs += "\n__obj->set"+cam+"(*("+methpm.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encode(root->getPackets().at(i), false)));\n";
+										typedefs += "\n}\n";
+									}
 									//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+methpm.at(1)+"\")\n__obj->set"+cam+"(*("+methpm.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(root.getChildElements().at(i).renderChildren()));\n";
 								}
 								else
 								{
-									methods += (methpm.at(0)+" __temp_obj_ser = __obj->"+methpm.at(1)+"();\n");
-									methods += ("objxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+binarySerialize"+methpm.at(0)+"(&__temp_obj_ser)");
-									methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
 									//string cam = StringUtil::capitalizedCopy(methpm.at(1));
 									//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+methpm.at(1)+"\")\n__obj->set"+cam+"(*("+methpm.at(0)+"*)binaryUnSerialize"+methpm.at(0)+"(root.getChildElements().at(i).renderChildren()));\n";
+									if(methsall[classN+"get"+cam+methpm.at(0)])
+									{
+										methods += (methpm.at(0)+" __temp_obj_ser = __obj->"+methpm.at(1)+";\n");
+										methods += ("object.addPacket(binarySerialize"+methpm.at(0)+"(&__temp_obj_ser),\""+methpm.at(0)+"\");\n");
+										typedefs += "if(nam==\""+methpm.at(1)+"\")\n__obj->"+methpm.at(1)+" = *("+methpm.at(0)+"*)binaryUnSerialize"+methpm.at(0)+"(root->getPackets().at(i)->getValue());\n";
+									}
 								}
 							}
 						}
@@ -1952,33 +1962,50 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 	//refDef += ("\nclassInfo.setMethods(methVec);");
 	//refDef += ("\nclassInfo.setFields(fldVec);");
 	//refDef += "\nreturn classInfo;\n}\n";
-	methods += "objxml = enc.encodeB(&object, false);\nreturn objxml;\n}\n";
-	methods += "\nstring binarySerialize" + classN + "Vec(void* obje)\n{\nvector<"+classN+"> *__obj=(vector<"+classN+">*)obje;\n";
-	methods += "string xml;\nAMEFObject object;AMEFEncoder enc;for(unsigned int i=0;i<__obj->size();i++)\n{\nobject.addPacket(binarySerialize"+classN+"(&(__obj->at(i))));\n}\nreturn enc.encodeB(&object, false);\n";
-	methods += "return xml;}\n";
-	methods += "\nstring binarySerialize"+classN+"Q(void *t){queue<"+classN+"> *_t=(queue<"+classN+">*)t;queue<"+classN+"> *tt = new queue<"+classN+">;	*tt = *_t;	string objXml = \"<queue-"+classN+">\";	for(unsigned int var=0;var<tt->size();var++)	{		objXml += binarySerialize"+classN+"(&(tt->front()));		tt->pop();	}	objXml += \"</queue-"+classN+">\";	return objXml;}";
-	methods += "\nstring binarySerialize"+classN+"Dq(void *_t){deque<"+classN+"> *t=(deque<"+classN+">*)_t;string objXml = \"<deque-"+classN+">\";	for(unsigned int var=0;var<t->size();var++)	{		objXml += binarySerialize"+classN+"(&(t->at(var)));	}	objXml += \"</deque-"+classN+">\";	return objXml;}";
-	methods += "\nstring binarySerialize"+classN+"Lis(void *_t){	list<"+classN+"> *t=(list<"+classN+">*)_t;list<"+classN+">::iterator it;	string objXml = \"<list-"+classN+">\";	for(it=t->begin();it!=t->end();++it)	{"+classN+" _temp=*it;	objXml += binarySerialize"+classN+"(&_temp);	}	objXml += \"</list-"+classN+">\";	return objXml;}";
+	methods += "return enc.encodeB(&object, false);\n}\n";
+	methods += "\nstring binarySerialize" + classN + "Vec(void* obje)\n{\nvector<"+classN+"> *__obj=(vector<"+classN+">*)obje;\n"
+			+"string xml;\nAMEFObject object;AMEFEncoder enc;\nfor(unsigned int i=0;i<__obj->size();i++)\n{\nobject.addPacket(binarySerialize"+classN+"(&(__obj->at(i))));\n}\nreturn enc.encodeB(&object, false);\n}\n";
+	methods += "\nstring binarySerialize"+classN+"Q(void *t){\nqueue<"+classN+"> *_t=(queue<"+classN+">*)t;queue<"+classN+"> *tt = new queue<"+classN+">;	*tt = *_t;"
+			+"\nstring objXml;\nAMEFObject object;AMEFEncoder enc;\nfor(unsigned int var=0;var<tt->size();var++){\nobject.addPacket(binarySerialize"+classN+"(&(tt->front())));tt->pop();}\nreturn enc.encodeB(&object, false);\n}";
+	methods += "\nstring binarySerialize"+classN+"Dq(void *t)\n{\ndeque<"+classN+"> *_t=(deque<"+classN+">*)t;"
+			+"\nstring objXml;\nAMEFObject object;AMEFEncoder enc;\nfor(unsigned int var=0;var<_t->size();var++){\nobject.addPacket(binarySerialize"+classN+"(&(_t->at(var))));}\nreturn enc.encodeB(&object, false);\n}";
+	methods += "\nstring binarySerialize"+classN+"Lis(void *_t)\n{\nlist<"+classN+"> *t=(list<"+classN+">*)_t;list<"+classN+">::iterator it;"
+			+"string objXml;\nAMEFObject object;AMEFEncoder enc;\nfor(it=t->begin();it!=t->end();++it)	{"+classN+" _temp=*it;object.addPacket(binarySerialize"+classN+"(&(_temp)));	}\nreturn  enc.encodeB(&object, false);\n}";
 	classes += "\nstring binarySerialize" + classN + "Vec(void* obje);\nstring binarySerialize"+classN+"Q(void *t);\nstring binarySerialize"+classN+"Dq(void *_t);\nstring binarySerialize"+classN+"Lis(void *_t);";
 	if(prosetser)
 	{
-		methods += "\nstring binarySerialize"+classN+"Set(void *_t){	set<"+classN+"> *t=(set<"+classN+">*)_t;set<"+classN+">::iterator it;	string objXml = \"<set-"+classN+">\";	for(it=t->begin();it!=t->end();++it)	{"+classN+" _temp=*it;	objXml += binarySerialize"+classN+"(&_temp);	}	objXml += \"</set-"+classN+">\";	return objXml;}";
-		methods += "\nstring binarySerialize"+classN+"MulSet(void *_t){	multiset<"+classN+"> *t=(multiset<"+classN+">*)_t;multiset<"+classN+">::iterator it;	string objXml = \"<multiset-"+classN+">\";	for(it=t->begin();it!=t->end();++it)	{"+classN+" _temp=*it;	objXml += binarySerialize"+classN+"(&_temp);	}	objXml += \"</multiset-"+classN+">\";	return objXml;}";
+		methods += "\nstring binarySerialize"+classN+"Set(void *_t)\n{\nset<"+classN+"> *t=(set<"+classN+">*)_t;set<"+classN+">::iterator it;"
+				+"string objXml;\nAMEFObject object;AMEFEncoder enc;\nfor(it=t->begin();it!=t->end();++it)	{"+classN+" _temp=*it;object.addPacket(binarySerialize"+classN+"(&(_temp)));\n}\nreturn  enc.encodeB(&object, false);\n}";
+		methods += "\nstring binarySerialize"+classN+"MulSet(void *_t)\n{\nmultiset<"+classN+"> *t=(multiset<"+classN+">*)_t;multiset<"+classN+">::iterator it;"
+				+"string objXml;\nAMEFObject object;AMEFEncoder enc;\nfor(it=t->begin();it!=t->end();++it)	{"+classN+" _temp=*it;object.addPacket(binarySerialize"+classN+"(&(_temp)));\n}\nreturn  enc.encodeB(&object, false);\n}";
 		classes += "\nstring binarySerialize"+classN+"Set(void *_t);\nstring binarySerialize"+classN+"MulSet(void *_t);";
 	}
 
 	typedefs += "\n}\nreturn __obj;\n}";
-	typedefs += "\nvoid* binaryUnSerialize"+classN+"Dq(string objXml){deque<"+classN+"> *t = new deque<"+classN+">;XmlParser parser(\"Parser\");Document doc = parser.getDocument(objXml);Element message = doc.getRootElement();for (int var = 0; var < (int)message.getChildElements().size(); var++){	Element ele = message.getChildElements().at(var);	if(ele.getTagName()==\""+classN+"\")	{		t->push_back(*("+classN+"*)binaryUnSerialize"+classN+"(ele.renderChildren()));	}}return t;}";
-	typedefs += "\nvoid* binaryUnSerialize"+classN+"Q(string objXml){queue<"+classN+"> *t = new queue<"+classN+">;XmlParser parser(\"Parser\");Document doc = parser.getDocument(objXml);Element message = doc.getRootElement();for (int var = 0; var < (int)message.getChildElements().size(); var++){	Element ele = message.getChildElements().at(var);	if(ele.getTagName()==\""+classN+"\")	{		t->push(*("+classN+"*)binaryUnSerialize"+classN+"(ele.renderChildren()));	}}return t;}";
-	typedefs += "\nvoid* binaryUnSerialize"+classN+"Lis(string objXml){list<"+classN+"> *t = new list<"+classN+">;XmlParser parser(\"Parser\");Document doc = parser.getDocument(objXml);Element message = doc.getRootElement();for (int var = 0; var < (int)message.getChildElements().size(); var++){	Element ele = message.getChildElements().at(var);	if(ele.getTagName()==\""+classN+"\")	{		t->push_back(*("+classN+"*)binaryUnSerialize"+classN+"(ele.renderChildren()));	}}return t;}";
+	typedefs += "\nvoid* binaryUnSerialize"+classN+"Dq(string objXml){deque<"+classN+"> *t = new deque<"+classN+">;"
+			 +"\nAMEFDecoder dec;\nAMEFObject* root = dec.decodeB(objXml, false, false);for (int var = 0; var < (int)root->getPackets().size(); var++){"
+			 +"t->push_back(*("+classN+"*)binaryUnSerialize"+classN+"(root->getPackets().at(var)->getValue()));	}return t;}";
+	typedefs += "\nvoid* binaryUnSerialize"+classN+"Q(string objXml){queue<"+classN+"> *t = new queue<"+classN+">;"
+			 +"\nAMEFDecoder dec;\nAMEFObject* root = dec.decodeB(objXml, false, false);for (int var = 0; var < (int)root->getPackets().size(); var++){"
+			 +"t->push(*("+classN+"*)binaryUnSerialize"+classN+"(root->getPackets().at(var)->getValue()));	}return t;}";
+	typedefs += "\nvoid* binaryUnSerialize"+classN+"Lis(string objXml){list<"+classN+"> *t = new list<"+classN+">;"
+	 	 	 +"\nAMEFDecoder dec;\nAMEFObject* root = dec.decodeB(objXml, false, false);for (int var = 0; var < (int)root->getPackets().size(); var++){"
+	 	 	 +"t->push_back(*("+classN+"*)binaryUnSerialize"+classN+"(root->getPackets().at(var)->getValue()));	}return t;}";
+	typedefs += "\nvoid* binaryUnSerialize"+classN+"Vec(string objXml){vector<"+classN+"> *t = new vector<"+classN+">;"
+			 +"\nAMEFDecoder dec;\nAMEFObject* root = dec.decodeB(objXml, false, false);for (int var = 0; var < (int)root->getPackets().size(); var++){"
+		 	 +"t->push_back(*("+classN+"*)binaryUnSerialize"+classN+"(root->getPackets().at(var)->getValue()));	}return t;}";
 	classes += "\nvoid* binaryUnSerialize"+classN+"Vec(string objXml);\nvoid* binaryUnSerialize"+classN+"Q(string objXml);\nvoid* binaryUnSerialize"+classN+"Dq(string objXml);\nvoid* binaryUnSerialize"+classN+"Lis(string objXml);";
 	if(prosetser)
 	{
-		typedefs += "\nvoid* binaryUnSerialize"+classN+"Set(string objXml){set<"+classN+"> *t = new set<"+classN+">;XmlParser parser(\"Parser\");Document doc = parser.getDocument(objXml);Element message = doc.getRootElement();for (int var = 0; var < (int)message.getChildElements().size(); var++){	Element ele = message.getChildElements().at(var);	if(ele.getTagName()==\""+classN+"\")	{		t->insert(*("+classN+"*)binaryUnSerialize"+classN+"(ele.renderChildren()));	}}return t;}";
-		typedefs += "\nvoid* binaryUnSerialize"+classN+"MulSet(string objXml){multiset<"+classN+"> *t = new multiset<"+classN+">;XmlParser parser(\"Parser\");Document doc = parser.getDocument(objXml);Element message = doc.getRootElement();for (int var = 0; var < (int)message.getChildElements().size(); var++){	Element ele = message.getChildElements().at(var);	if(ele.getTagName()==\""+classN+"\")	{		t->insert(*("+classN+"*)binaryUnSerialize"+classN+"(ele.renderChildren()));	}}return t;}";
+		typedefs += "\nvoid* binaryUnSerialize"+classN+"Set(string objXml){set<"+classN+"> *t = new set<"+classN+">;"
+		 	 	 +"\nAMEFDecoder dec;\nAMEFObject* root = dec.decodeB(objXml, false, false);for (int var = 0; var < (int)root->getPackets().size(); var++){"
+				 +"t->insert(*("+classN+"*)binaryUnSerialize"+classN+"(root->getPackets().at(var)->getValue()));	}return t;}";
+		typedefs += "\nvoid* binaryUnSerialize"+classN+"MulSet(string objXml){multiset<"+classN+"> *t = new multiset<"+classN+">;"
+				 +"\nAMEFDecoder dec;\nAMEFObject* root = dec.decodeB(objXml, false, false);for (int var = 0; var < (int)root->getPackets().size(); var++){"
+				 +"t->insert(*("+classN+"*)binaryUnSerialize"+classN+"(root->getPackets().at(var)->getValue()));	}return t;}";
 		classes += "\nvoid* binaryUnSerialize"+classN+"Set(string objXml);\nvoid* binaryUnSerialize"+classN+"MulSet(string objXml);";
 	}
-	typedefs += "\nvoid* binaryUnSerialize"+classN+"Vec(string objXml){vector<"+classN+"> *t = new vector<"+classN+">;XmlParser parser(\"Parser\");Document doc = parser.getDocument(objXml);Element message = doc.getRootElement();for (int var = 0; var < (int)message.getChildElements().size(); var++){	Element ele = message.getChildElements().at(var);	if(ele.getTagName()==\""+classN+"\")	{		t->push_back(*("+classN+"*)binaryUnSerialize"+classN+"(ele.renderChildren()));	}}return t;}";
+
 	//typedefs = (structinf+"};\n"+typedefs);
 	return refDef;
-}*/
+}

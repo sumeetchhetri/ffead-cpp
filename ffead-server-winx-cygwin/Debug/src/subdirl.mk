@@ -207,7 +207,6 @@ OBJS += \
 ./src/JSONUtil.o \
 ./src/Thread.o \
 ./src/Mutex.o \
-./src/Mutex.o \
 ./src/AMEFResources.o \
 ./src/AMEFEncoder.o \
 ./src/AMEFDecoder.o \

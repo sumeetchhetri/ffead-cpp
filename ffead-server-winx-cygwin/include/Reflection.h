@@ -25,10 +25,10 @@
 #include "PropFileReader.h"
 #include "Method.h"
 #include "Field.h"
-#include <boost/regex.hpp>
 #include "CastUtil.h"
 #include "AfcUtil.h"
 #include "Logger.h"
+#include "RegexUtil.h"
 class Reflection {
 	strVec pub,pri,pro;
 	bool prosetser;
@@ -48,11 +48,13 @@ public:
 	strVec getAfcObjectData(string,bool);
 	propMap getDbTableInfo(string);
 	string generateClassDefinitionsAll(strVec,string &);
-	string generateSerDefinitionAll(strVec,string &);
+	string generateSerDefinitionAll(strVec all,string &includeRef, bool isBinary);
 	string generateClassDefinition(string,string &,string &,string &,string &,string &);
 	string generateSerDefinition(string,string &,string &,string &,string &);
 	string generateClassDefinitions(string,string &,string &,string &,string &,string &);
-	string generateSerDefinitions(string,string &,string &,string &,string &);
+	string generateSerDefinitions(string,string &,string &,string &,string &,bool);
+
+	string generateSerDefinitionBinary(string className,string &includesDefs,string &typedefs,string &classes,string &methods);
 };
 
 #endif /* REFLECTION_H_ */

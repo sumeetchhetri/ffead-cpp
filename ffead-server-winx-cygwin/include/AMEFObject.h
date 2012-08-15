@@ -290,7 +290,7 @@ public:
 	 * @param name
 	 * Add a string property to an Object
 	 */
-	void addPacket(string stringa,string name)
+	void addPacket(const string& stringa,const string& name)
 	{
 		AMEFObject* JDBObjectNew = addPacket(stringa);
 		JDBObjectNew->name = name;
@@ -302,7 +302,7 @@ public:
 	 * @param string
 	 * Add a string property to an Object
 	 */
-	AMEFObject* addPacket(string stringa)
+	AMEFObject* addPacket(const string& stringa)
 	{
 		AMEFObject* JDBObjectNew = new AMEFObject();
 		JDBObjectNew->name = "";
@@ -1032,7 +1032,7 @@ public:
 	{
 		return name;
 	}
-	void setName(string name)
+	void setName(const string& name)
 	{
 		this->name = name;
 	}
@@ -1106,7 +1106,7 @@ public:
 	{
 		this->value.append(value,len);
 	}
-	void setValue(string value)
+	void setValue(const string& value)
 	{
 		this->value = value;
 	}

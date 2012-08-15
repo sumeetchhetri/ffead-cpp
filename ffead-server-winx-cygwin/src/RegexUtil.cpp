@@ -35,6 +35,10 @@ vector<string> RegexUtil::search(const string& text, const string& pattern) {
 		{
 			cout << "Could not compile regex\n" << endl;
 		}
+		else
+		{
+			patterns[pattern] = regex;
+		}
 	}
 	regmatch_t pm;
 	reti = regexec(&regex, ttext.c_str(), 1, &pm, 0);
@@ -73,6 +77,10 @@ string RegexUtil::replace(const string& text, const string& pattern, const strin
 		{
 			cout << "Could not compile regex\n" << endl;
 		}
+		else
+		{
+			patterns[pattern] = regex;
+		}
 	}
 	regmatch_t pm;
 	reti = regexec(&regex, ttext.c_str(), 1, &pm, 0);
@@ -91,7 +99,5 @@ string RegexUtil::replace(const string& text, const string& pattern, const strin
 		pm.rm_so = -1;
 		reti = regexec (&regex, ttext.c_str(), 1, &pm, 0);
 	}
-	return ttext;
+	return rettxt;
 }
-
-

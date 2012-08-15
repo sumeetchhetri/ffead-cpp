@@ -651,7 +651,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	logger << endl<< "done generating compoenent code" <<endl;
 	string ret = ref.generateClassDefinitionsAll(all,includeRef);
 	AfcUtil::writeTofile(rtdcfpath+"ReflectorInterface.cpp",ret,true);
-	ret = ref.generateSerDefinitionAll(all,includeRef);
+	ret = ref.generateSerDefinitionAll(all,includeRef, true);
 	AfcUtil::writeTofile(rtdcfpath+"SerializeInterface.cpp",ret,true);
 	cntxt["RUNTIME_LIBRARIES"] = libs;
 	ret = templ.evaluate(rtdcfpath+"objects.mk.template",cntxt);
