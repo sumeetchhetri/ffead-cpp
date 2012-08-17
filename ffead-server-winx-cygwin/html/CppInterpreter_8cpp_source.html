@@ -1560,229 +1560,230 @@ $(document).ready(initResizable);
 <a name="l01500"></a>01500                 logger &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span> &lt;&lt; flush;
 <a name="l01501"></a>01501         }
 <a name="l01502"></a>01502         logger &lt;&lt; str &lt;&lt; flush;
-<a name="l01503"></a>01503         boost::regex pattern(<span class="stringliteral">&quot;\\s+&quot;</span>,boost::regex_constants::icase|boost::regex_constants::perl);
-<a name="l01504"></a>01504         str = boost::regex_replace (str, pattern, <span class="stringliteral">&quot; &quot;</span>);
-<a name="l01505"></a>01505         logger &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span> &lt;&lt; flush;
-<a name="l01506"></a>01506         logger &lt;&lt; str &lt;&lt; flush;
-<a name="l01507"></a>01507         logger &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span> &lt;&lt; flush;
-<a name="l01508"></a>01508 
-<a name="l01509"></a>01509         <span class="keywordtype">string</span> comm;
-<a name="l01510"></a>01510         vector&lt;string&gt; commands;<span class="comment">//stack of command structure</span>
-<a name="l01511"></a>01511         <span class="keywordtype">bool</span> eqop = <span class="keyword">false</span>;
-<a name="l01512"></a>01512         <span class="keywordtype">string</span> command;
-<a name="l01513"></a>01513         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> l=0;l&lt;str.length();l++)
-<a name="l01514"></a>01514         {
-<a name="l01515"></a>01515                 <span class="keywordflow">if</span>(str.substr(l,1)==<span class="stringliteral">&quot;{&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;}&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;;&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;)&quot;</span>
-<a name="l01516"></a>01516                         || str.substr(l,1)==<span class="stringliteral">&quot;(&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;+&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;-&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;/&quot;</span>
-<a name="l01517"></a>01517                         || str.substr(l,1)==<span class="stringliteral">&quot;*&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;=&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;!&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;|&quot;</span>
-<a name="l01518"></a>01518                         || str.substr(l,1)==<span class="stringliteral">&quot;&amp;&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;&lt;&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;&gt;&quot;</span>)<span class="comment">// || str.substr(l,1)==&quot;.&quot;)</span>
-<a name="l01519"></a>01519                 {
-<a name="l01520"></a>01520                         <span class="keywordflow">if</span>(comm==<span class="stringliteral">&quot;&quot;</span>)
-<a name="l01521"></a>01521                         {
-<a name="l01522"></a>01522                                 <span class="keywordflow">if</span>(eqop)
-<a name="l01523"></a>01523                                 {
-<a name="l01524"></a>01524                                         eqop = <span class="keyword">false</span>;
-<a name="l01525"></a>01525                                 }
-<a name="l01526"></a>01526                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!eqop)
-<a name="l01527"></a>01527                                 {
-<a name="l01528"></a>01528                                         commands.push_back(str.substr(l,1));
-<a name="l01529"></a>01529                                 }
-<a name="l01530"></a>01530                         }
-<a name="l01531"></a>01531                         <span class="keywordflow">else</span>
-<a name="l01532"></a>01532                         {
-<a name="l01533"></a>01533                                 <span class="keywordflow">if</span>(comm.find_first_not_of(<span class="stringliteral">&quot; &quot;</span>)!=string::npos &amp;&amp; comm.find_last_not_of(<span class="stringliteral">&quot; &quot;</span>)!=string::npos)
-<a name="l01534"></a>01534                                 {
-<a name="l01535"></a>01535                                         comm = comm.substr(comm.find_first_not_of(<span class="stringliteral">&quot; &quot;</span>),comm.find_last_not_of(<span class="stringliteral">&quot; &quot;</span>)+1);
-<a name="l01536"></a>01536                                         commands.push_back(comm);
-<a name="l01537"></a>01537                                 }
-<a name="l01538"></a>01538                                 <span class="keywordflow">if</span>(str.substr(l,2)==<span class="stringliteral">&quot;==&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;||&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;&amp;&amp;&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;!=&quot;</span>
-<a name="l01539"></a>01539                                         || str.substr(l,2)==<span class="stringliteral">&quot;&gt;=&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;&lt;=&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;=&gt;&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;=&lt;&quot;</span>
-<a name="l01540"></a>01540                                         || str.substr(l,2)==<span class="stringliteral">&quot;&lt;&lt;&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;&gt;&gt;&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;++&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;--&quot;</span>
-<a name="l01541"></a>01541                                         || str.substr(l,2)==<span class="stringliteral">&quot;+=&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;-=&quot;</span>)
-<a name="l01542"></a>01542                                 {
-<a name="l01543"></a>01543                                         eqop=<span class="keyword">true</span>;
-<a name="l01544"></a>01544                                         commands.push_back(str.substr(l,2));
-<a name="l01545"></a>01545                                 }
-<a name="l01546"></a>01546                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!eqop)
-<a name="l01547"></a>01547                                         commands.push_back(str.substr(l,1));
-<a name="l01548"></a>01548                         }
-<a name="l01549"></a>01549                         comm = <span class="stringliteral">&quot;&quot;</span>;
-<a name="l01550"></a>01550                 }
-<a name="l01551"></a>01551                 <span class="keywordflow">else</span>
-<a name="l01552"></a>01552                 {
-<a name="l01553"></a>01553                         comm += str.substr(l,1);
-<a name="l01554"></a>01554                         <span class="keywordflow">if</span>(comm==<span class="stringliteral">&quot;else &quot;</span>)
-<a name="l01555"></a>01555                         {
-<a name="l01556"></a>01556                                 commands.push_back(<span class="stringliteral">&quot;else&quot;</span>);
-<a name="l01557"></a>01557                                 comm = <span class="stringliteral">&quot;&quot;</span>;
-<a name="l01558"></a>01558                         }
-<a name="l01559"></a>01559                 }
-<a name="l01560"></a>01560         }
-<a name="l01561"></a>01561         <span class="keywordflow">if</span>(comm!=<span class="stringliteral">&quot;&quot;</span>)
-<a name="l01562"></a>01562         {
-<a name="l01563"></a>01563                 comm = comm.substr(comm.find_first_not_of(<span class="stringliteral">&quot; &quot;</span>));
-<a name="l01564"></a>01564                 commands.push_back(comm);
-<a name="l01565"></a>01565         }
-<a name="l01566"></a>01566         vector&lt;string&gt;::iterator iter;
-<a name="l01567"></a>01567         iter = commands.begin();
-<a name="l01568"></a>01568         <span class="keywordtype">string</span> nextToken = *(iter);
-<a name="l01569"></a>01569         <span class="keywordflow">while</span>(iter&lt;commands.end())
-<a name="l01570"></a>01570         {
-<a name="l01571"></a>01571                 <span class="keywordtype">int</span> cucnt = 0;
-<a name="l01572"></a>01572                 <span class="keywordflow">if</span>(nextToken==<span class="stringliteral">&quot;{&quot;</span>)
-<a name="l01573"></a>01573                 {
-<a name="l01574"></a>01574                         <span class="keywordflow">while</span>(1)
-<a name="l01575"></a>01575                         {
-<a name="l01576"></a>01576                                 <span class="keywordflow">if</span>(nextToken==<span class="stringliteral">&quot;{&quot;</span>)
-<a name="l01577"></a>01577                                         cucnt++;
-<a name="l01578"></a>01578                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(nextToken==<span class="stringliteral">&quot;}&quot;</span>)
-<a name="l01579"></a>01579                                 {
-<a name="l01580"></a>01580                                         cucnt--;
-<a name="l01581"></a>01581                                         <span class="keywordflow">if</span>(cucnt==0)
-<a name="l01582"></a>01582                                                 <span class="keywordflow">break</span>;
-<a name="l01583"></a>01583                                 }
-<a name="l01584"></a>01584                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(isCommand(nextToken))
-<a name="l01585"></a>01585                                         hanldeCommand(iter);
-<a name="l01586"></a>01586                                 <span class="keywordflow">else</span>
-<a name="l01587"></a>01587                                         handleStatement(iter);
-<a name="l01588"></a>01588                                 nextToken = *(++iter);
-<a name="l01589"></a>01589                         }
-<a name="l01590"></a>01590                 }
-<a name="l01591"></a>01591                 <span class="keywordflow">else</span>
-<a name="l01592"></a>01592                 {
-<a name="l01593"></a>01593                         <span class="keywordflow">if</span>(isCommand(nextToken))
-<a name="l01594"></a>01594                                 hanldeCommand(iter);
-<a name="l01595"></a>01595                         <span class="keywordflow">else</span>
-<a name="l01596"></a>01596                                 handleStatement(iter);
-<a name="l01597"></a>01597                 }
-<a name="l01598"></a>01598                 ++iter;
-<a name="l01599"></a>01599                 <span class="keywordflow">if</span>(iter&lt;commands.end())
-<a name="l01600"></a>01600                         nextToken = *(iter);
-<a name="l01601"></a>01601         }
-<a name="l01602"></a>01602         <span class="comment">//while(iter!=commands.end())</span>
-<a name="l01603"></a>01603         <span class="comment">//{</span>
-<a name="l01604"></a>01604                 <span class="comment">//logger &lt;&lt; commands.at(k) &lt;&lt; &quot;\n&quot; &lt;&lt; flush;</span>
-<a name="l01605"></a>01605                 <span class="comment">/*string curr = *(iter++);</span>
-<a name="l01606"></a>01606 <span class="comment">                int crcnt = 0;</span>
-<a name="l01607"></a>01607 <span class="comment">                vector&lt;string&gt; state;</span>
-<a name="l01608"></a>01608 <span class="comment">                string cond;</span>
-<a name="l01609"></a>01609 <span class="comment">                string prev;</span>
-<a name="l01610"></a>01610 <span class="comment">                while(curr==&quot;if&quot;)</span>
-<a name="l01611"></a>01611 <span class="comment">                {</span>
-<a name="l01612"></a>01612 <span class="comment">                        string st = *(iter++);</span>
-<a name="l01613"></a>01613 <span class="comment">                        if(st==&quot;(&quot;)</span>
-<a name="l01614"></a>01614 <span class="comment">                        {</span>
-<a name="l01615"></a>01615 <span class="comment">                                crcnt++;</span>
-<a name="l01616"></a>01616 <span class="comment">                                cond = &quot;&quot;;</span>
-<a name="l01617"></a>01617 <span class="comment">                        }</span>
-<a name="l01618"></a>01618 <span class="comment">                        else if(st==&quot;)&quot;)</span>
-<a name="l01619"></a>01619 <span class="comment">                        {</span>
-<a name="l01620"></a>01620 <span class="comment">                                crcnt--;</span>
-<a name="l01621"></a>01621 <span class="comment">                                state.push_back(evaluate(cond,&quot;IF&quot;));</span>
-<a name="l01622"></a>01622 <span class="comment">                                logger &lt;&lt; cond &lt;&lt; flush;</span>
-<a name="l01623"></a>01623 <span class="comment">                                if(crcnt==0)</span>
-<a name="l01624"></a>01624 <span class="comment">                                        break;</span>
-<a name="l01625"></a>01625 <span class="comment">                        }</span>
-<a name="l01626"></a>01626 <span class="comment">                        else if(st==&quot;||&quot;)</span>
-<a name="l01627"></a>01627 <span class="comment">                        {</span>
-<a name="l01628"></a>01628 <span class="comment">                                state.push_back(evaluate(cond,&quot;IF&quot;));</span>
-<a name="l01629"></a>01629 <span class="comment">                                state.push_back(&quot;OR&quot;);</span>
-<a name="l01630"></a>01630 <span class="comment">                                logger &lt;&lt; cond &lt;&lt; flush;</span>
-<a name="l01631"></a>01631 <span class="comment">                                logger &lt;&lt; &quot; OR &quot; &lt;&lt; flush;</span>
-<a name="l01632"></a>01632 <span class="comment">                                cond = &quot;&quot;;</span>
-<a name="l01633"></a>01633 <span class="comment">                                prev = &quot;OR&quot;;</span>
-<a name="l01634"></a>01634 <span class="comment">                        }</span>
-<a name="l01635"></a>01635 <span class="comment">                        else if(st==&quot;&amp;&amp;&quot;)</span>
-<a name="l01636"></a>01636 <span class="comment">                        {</span>
-<a name="l01637"></a>01637 <span class="comment">                                state.push_back(evaluate(cond,&quot;IF&quot;));</span>
-<a name="l01638"></a>01638 <span class="comment">                                state.push_back(&quot;AND&quot;);</span>
-<a name="l01639"></a>01639 <span class="comment">                                logger &lt;&lt; cond &lt;&lt; flush;</span>
-<a name="l01640"></a>01640 <span class="comment">                                logger &lt;&lt; &quot; AND &quot; &lt;&lt; flush;</span>
-<a name="l01641"></a>01641 <span class="comment">                                cond = &quot;&quot;;</span>
-<a name="l01642"></a>01642 <span class="comment">                                prev = &quot;AND&quot;;</span>
-<a name="l01643"></a>01643 <span class="comment">                        }</span>
-<a name="l01644"></a>01644 <span class="comment">                        else</span>
-<a name="l01645"></a>01645 <span class="comment">                                cond += st;</span>
-<a name="l01646"></a>01646 <span class="comment">                }*/</span>
-<a name="l01647"></a>01647                 <span class="comment">/*if(commands.at(k).find(&quot;=&quot;)!=string::npos)//inititialization operation</span>
-<a name="l01648"></a>01648 <span class="comment">                {</span>
-<a name="l01649"></a>01649 <span class="comment">                        vector&lt;string&gt; bs,lhs;</span>
-<a name="l01650"></a>01650 <span class="comment">                        StringUtil::split(bs, commands.at(k), (&quot;=&quot;));</span>
-<a name="l01651"></a>01651 <span class="comment">                        StringUtil::split(lhs, bs.at(0), (&quot; &quot;));</span>
-<a name="l01652"></a>01652 <span class="comment">                        if(lhs.size()==2)</span>
-<a name="l01653"></a>01653 <span class="comment">                        {</span>
-<a name="l01654"></a>01654 <span class="comment">                                if(isInBuiltType(lhs.at(0)))</span>
-<a name="l01655"></a>01655 <span class="comment">                                {</span>
-<a name="l01656"></a>01656 <span class="comment">                                        storeInbuilt(lhs.at(0),lhs.at(1));</span>
-<a name="l01657"></a>01657 <span class="comment">                                        evaluateUpdateInbuilt(lhs.at(0),lhs.at(1),bs.at(1),true);</span>
-<a name="l01658"></a>01658 <span class="comment">                                }</span>
-<a name="l01659"></a>01659 <span class="comment">                                else</span>
-<a name="l01660"></a>01660 <span class="comment">                                {</span>
-<a name="l01661"></a>01661 <span class="comment">                                        storeCustom(lhs.at(0),lhs.at(1));</span>
-<a name="l01662"></a>01662 <span class="comment">                                }</span>
-<a name="l01663"></a>01663 <span class="comment">                        }</span>
-<a name="l01664"></a>01664 <span class="comment">                        else</span>
-<a name="l01665"></a>01665 <span class="comment">                        {</span>
-<a name="l01666"></a>01666 <span class="comment">                                bool local = true;</span>
-<a name="l01667"></a>01667 <span class="comment">                                Object target = localVariables[lhs.at(0)];</span>
-<a name="l01668"></a>01668 <span class="comment">                                if(target.getTypeName()==&quot;&quot;)</span>
-<a name="l01669"></a>01669 <span class="comment">                                {</span>
-<a name="l01670"></a>01670 <span class="comment">                                        target = boundVariables[lhs.at(0)];</span>
-<a name="l01671"></a>01671 <span class="comment">                                        mapVars::iterator it;</span>
-<a name="l01672"></a>01672 <span class="comment">                                        it=localVariables.find(lhs.at(0));</span>
-<a name="l01673"></a>01673 <span class="comment">                                        localVariables.erase (it);</span>
-<a name="l01674"></a>01674 <span class="comment">                                        local = false;</span>
-<a name="l01675"></a>01675 <span class="comment">                                }</span>
-<a name="l01676"></a>01676 <span class="comment">                                if(isInBuiltType(target.getTypeName()))</span>
-<a name="l01677"></a>01677 <span class="comment">                                        evaluateUpdateInbuilt(target.getTypeName(),lhs.at(0),bs.at(1),local);</span>
-<a name="l01678"></a>01678 <span class="comment">                        }</span>
-<a name="l01679"></a>01679 <span class="comment">                }*/</span>
-<a name="l01680"></a>01680                 <span class="comment">/*else if(tokens.size()==4 &amp;&amp; tokens.at(2)==&quot;=&quot;)//assignment and initialization operations</span>
-<a name="l01681"></a>01681 <span class="comment">                {</span>
-<a name="l01682"></a>01682 <span class="comment">                        if(isInBuiltType(tokens.at(0)))</span>
-<a name="l01683"></a>01683 <span class="comment">                        {</span>
-<a name="l01684"></a>01684 <span class="comment">                                storeInbuilt(tokens.at(0),tokens.at(1));</span>
-<a name="l01685"></a>01685 <span class="comment">                        }</span>
-<a name="l01686"></a>01686 <span class="comment">                        else</span>
-<a name="l01687"></a>01687 <span class="comment">                        {</span>
-<a name="l01688"></a>01688 <span class="comment">                                storeCustom(tokens.at(0),tokens.at(1));</span>
-<a name="l01689"></a>01689 <span class="comment">                        }</span>
-<a name="l01690"></a>01690 <span class="comment">                        Object target = localVariables[tokens.at(1)];</span>
-<a name="l01691"></a>01691 <span class="comment">                        if(target.getType()==&quot;&quot;)</span>
-<a name="l01692"></a>01692 <span class="comment">                                target = boundVariables[tokens.at(1)];</span>
-<a name="l01693"></a>01693 <span class="comment">                        Object source = localVariables[tokens.at(1)];</span>
-<a name="l01694"></a>01694 <span class="comment">                        if(source.getType()==&quot;&quot;)</span>
-<a name="l01695"></a>01695 <span class="comment">                                source = boundVariables[tokens.at(1)];</span>
-<a name="l01696"></a>01696 <span class="comment">                        if(target.getType()!=&quot;&quot; &amp;&amp; source.getType()!=&quot;&quot; &amp;&amp; target.getType()==source.getType())</span>
-<a name="l01697"></a>01697 <span class="comment">                                target.setPointer(source.getPointer());</span>
-<a name="l01698"></a>01698 <span class="comment">                        else</span>
-<a name="l01699"></a>01699 <span class="comment">                                logger &lt;&lt; &quot;run time exception&quot; &lt;&lt; flush;</span>
-<a name="l01700"></a>01700 <span class="comment">                }</span>
-<a name="l01701"></a>01701 <span class="comment">                else if(tokens.size()==3 &amp;&amp; tokens.at(1)==&quot;=&quot;)//assignment operation</span>
-<a name="l01702"></a>01702 <span class="comment">                {</span>
-<a name="l01703"></a>01703 <span class="comment">                        Object target = localVariables[tokens.at(0)];</span>
-<a name="l01704"></a>01704 <span class="comment">                        if(target.getType()==&quot;&quot;)</span>
-<a name="l01705"></a>01705 <span class="comment">                                target = boundVariables[tokens.at(0)];</span>
-<a name="l01706"></a>01706 <span class="comment">                        Object source = localVariables[tokens.at(2)];</span>
-<a name="l01707"></a>01707 <span class="comment">                        if(source.getType()==&quot;&quot;)</span>
-<a name="l01708"></a>01708 <span class="comment">                                source = boundVariables[tokens.at(2)];</span>
-<a name="l01709"></a>01709 <span class="comment">                        if(target.getType()!=&quot;&quot; &amp;&amp; source.getType()!=&quot;&quot; &amp;&amp; target.getType()==source.getType())</span>
-<a name="l01710"></a>01710 <span class="comment">                                target.setPointer(source.getPointer());</span>
-<a name="l01711"></a>01711 <span class="comment">                        else</span>
-<a name="l01712"></a>01712 <span class="comment">                                logger &lt;&lt; &quot;run time exception&quot; &lt;&lt; flush;</span>
-<a name="l01713"></a>01713 <span class="comment">                }</span>
-<a name="l01714"></a>01714 <span class="comment">                else if(tokens.size()&gt;=5 &amp;&amp; tokens.at(1)==&quot;=&quot;)//multiple opeartions and final addition on this line</span>
-<a name="l01715"></a>01715 <span class="comment">                {</span>
-<a name="l01716"></a>01716 <span class="comment"></span>
-<a name="l01717"></a>01717 <span class="comment">                }*/</span>
-<a name="l01718"></a>01718         <span class="comment">//}</span>
-<a name="l01719"></a>01719 }
+<a name="l01503"></a>01503         <span class="comment">//boost::regex pattern(&quot;\\s+&quot;,boost::regex_constants::icase|boost::regex_constants::perl);</span>
+<a name="l01504"></a>01504         <span class="comment">//str = boost::regex_replace (str, pattern, &quot; &quot;);</span>
+<a name="l01505"></a>01505         RegexUtil::replace(str, <span class="stringliteral">&quot;[ ]+&quot;</span>, <span class="stringliteral">&quot; &quot;</span>);
+<a name="l01506"></a>01506         logger &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span> &lt;&lt; flush;
+<a name="l01507"></a>01507         logger &lt;&lt; str &lt;&lt; flush;
+<a name="l01508"></a>01508         logger &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span> &lt;&lt; flush;
+<a name="l01509"></a>01509 
+<a name="l01510"></a>01510         <span class="keywordtype">string</span> comm;
+<a name="l01511"></a>01511         vector&lt;string&gt; commands;<span class="comment">//stack of command structure</span>
+<a name="l01512"></a>01512         <span class="keywordtype">bool</span> eqop = <span class="keyword">false</span>;
+<a name="l01513"></a>01513         <span class="keywordtype">string</span> command;
+<a name="l01514"></a>01514         <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> l=0;l&lt;str.length();l++)
+<a name="l01515"></a>01515         {
+<a name="l01516"></a>01516                 <span class="keywordflow">if</span>(str.substr(l,1)==<span class="stringliteral">&quot;{&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;}&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;;&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;)&quot;</span>
+<a name="l01517"></a>01517                         || str.substr(l,1)==<span class="stringliteral">&quot;(&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;+&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;-&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;/&quot;</span>
+<a name="l01518"></a>01518                         || str.substr(l,1)==<span class="stringliteral">&quot;*&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;=&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;!&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;|&quot;</span>
+<a name="l01519"></a>01519                         || str.substr(l,1)==<span class="stringliteral">&quot;&amp;&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;&lt;&quot;</span> || str.substr(l,1)==<span class="stringliteral">&quot;&gt;&quot;</span>)<span class="comment">// || str.substr(l,1)==&quot;.&quot;)</span>
+<a name="l01520"></a>01520                 {
+<a name="l01521"></a>01521                         <span class="keywordflow">if</span>(comm==<span class="stringliteral">&quot;&quot;</span>)
+<a name="l01522"></a>01522                         {
+<a name="l01523"></a>01523                                 <span class="keywordflow">if</span>(eqop)
+<a name="l01524"></a>01524                                 {
+<a name="l01525"></a>01525                                         eqop = <span class="keyword">false</span>;
+<a name="l01526"></a>01526                                 }
+<a name="l01527"></a>01527                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!eqop)
+<a name="l01528"></a>01528                                 {
+<a name="l01529"></a>01529                                         commands.push_back(str.substr(l,1));
+<a name="l01530"></a>01530                                 }
+<a name="l01531"></a>01531                         }
+<a name="l01532"></a>01532                         <span class="keywordflow">else</span>
+<a name="l01533"></a>01533                         {
+<a name="l01534"></a>01534                                 <span class="keywordflow">if</span>(comm.find_first_not_of(<span class="stringliteral">&quot; &quot;</span>)!=string::npos &amp;&amp; comm.find_last_not_of(<span class="stringliteral">&quot; &quot;</span>)!=string::npos)
+<a name="l01535"></a>01535                                 {
+<a name="l01536"></a>01536                                         comm = comm.substr(comm.find_first_not_of(<span class="stringliteral">&quot; &quot;</span>),comm.find_last_not_of(<span class="stringliteral">&quot; &quot;</span>)+1);
+<a name="l01537"></a>01537                                         commands.push_back(comm);
+<a name="l01538"></a>01538                                 }
+<a name="l01539"></a>01539                                 <span class="keywordflow">if</span>(str.substr(l,2)==<span class="stringliteral">&quot;==&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;||&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;&amp;&amp;&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;!=&quot;</span>
+<a name="l01540"></a>01540                                         || str.substr(l,2)==<span class="stringliteral">&quot;&gt;=&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;&lt;=&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;=&gt;&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;=&lt;&quot;</span>
+<a name="l01541"></a>01541                                         || str.substr(l,2)==<span class="stringliteral">&quot;&lt;&lt;&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;&gt;&gt;&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;++&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;--&quot;</span>
+<a name="l01542"></a>01542                                         || str.substr(l,2)==<span class="stringliteral">&quot;+=&quot;</span> || str.substr(l,2)==<span class="stringliteral">&quot;-=&quot;</span>)
+<a name="l01543"></a>01543                                 {
+<a name="l01544"></a>01544                                         eqop=<span class="keyword">true</span>;
+<a name="l01545"></a>01545                                         commands.push_back(str.substr(l,2));
+<a name="l01546"></a>01546                                 }
+<a name="l01547"></a>01547                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!eqop)
+<a name="l01548"></a>01548                                         commands.push_back(str.substr(l,1));
+<a name="l01549"></a>01549                         }
+<a name="l01550"></a>01550                         comm = <span class="stringliteral">&quot;&quot;</span>;
+<a name="l01551"></a>01551                 }
+<a name="l01552"></a>01552                 <span class="keywordflow">else</span>
+<a name="l01553"></a>01553                 {
+<a name="l01554"></a>01554                         comm += str.substr(l,1);
+<a name="l01555"></a>01555                         <span class="keywordflow">if</span>(comm==<span class="stringliteral">&quot;else &quot;</span>)
+<a name="l01556"></a>01556                         {
+<a name="l01557"></a>01557                                 commands.push_back(<span class="stringliteral">&quot;else&quot;</span>);
+<a name="l01558"></a>01558                                 comm = <span class="stringliteral">&quot;&quot;</span>;
+<a name="l01559"></a>01559                         }
+<a name="l01560"></a>01560                 }
+<a name="l01561"></a>01561         }
+<a name="l01562"></a>01562         <span class="keywordflow">if</span>(comm!=<span class="stringliteral">&quot;&quot;</span>)
+<a name="l01563"></a>01563         {
+<a name="l01564"></a>01564                 comm = comm.substr(comm.find_first_not_of(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l01565"></a>01565                 commands.push_back(comm);
+<a name="l01566"></a>01566         }
+<a name="l01567"></a>01567         vector&lt;string&gt;::iterator iter;
+<a name="l01568"></a>01568         iter = commands.begin();
+<a name="l01569"></a>01569         <span class="keywordtype">string</span> nextToken = *(iter);
+<a name="l01570"></a>01570         <span class="keywordflow">while</span>(iter&lt;commands.end())
+<a name="l01571"></a>01571         {
+<a name="l01572"></a>01572                 <span class="keywordtype">int</span> cucnt = 0;
+<a name="l01573"></a>01573                 <span class="keywordflow">if</span>(nextToken==<span class="stringliteral">&quot;{&quot;</span>)
+<a name="l01574"></a>01574                 {
+<a name="l01575"></a>01575                         <span class="keywordflow">while</span>(1)
+<a name="l01576"></a>01576                         {
+<a name="l01577"></a>01577                                 <span class="keywordflow">if</span>(nextToken==<span class="stringliteral">&quot;{&quot;</span>)
+<a name="l01578"></a>01578                                         cucnt++;
+<a name="l01579"></a>01579                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(nextToken==<span class="stringliteral">&quot;}&quot;</span>)
+<a name="l01580"></a>01580                                 {
+<a name="l01581"></a>01581                                         cucnt--;
+<a name="l01582"></a>01582                                         <span class="keywordflow">if</span>(cucnt==0)
+<a name="l01583"></a>01583                                                 <span class="keywordflow">break</span>;
+<a name="l01584"></a>01584                                 }
+<a name="l01585"></a>01585                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(isCommand(nextToken))
+<a name="l01586"></a>01586                                         hanldeCommand(iter);
+<a name="l01587"></a>01587                                 <span class="keywordflow">else</span>
+<a name="l01588"></a>01588                                         handleStatement(iter);
+<a name="l01589"></a>01589                                 nextToken = *(++iter);
+<a name="l01590"></a>01590                         }
+<a name="l01591"></a>01591                 }
+<a name="l01592"></a>01592                 <span class="keywordflow">else</span>
+<a name="l01593"></a>01593                 {
+<a name="l01594"></a>01594                         <span class="keywordflow">if</span>(isCommand(nextToken))
+<a name="l01595"></a>01595                                 hanldeCommand(iter);
+<a name="l01596"></a>01596                         <span class="keywordflow">else</span>
+<a name="l01597"></a>01597                                 handleStatement(iter);
+<a name="l01598"></a>01598                 }
+<a name="l01599"></a>01599                 ++iter;
+<a name="l01600"></a>01600                 <span class="keywordflow">if</span>(iter&lt;commands.end())
+<a name="l01601"></a>01601                         nextToken = *(iter);
+<a name="l01602"></a>01602         }
+<a name="l01603"></a>01603         <span class="comment">//while(iter!=commands.end())</span>
+<a name="l01604"></a>01604         <span class="comment">//{</span>
+<a name="l01605"></a>01605                 <span class="comment">//logger &lt;&lt; commands.at(k) &lt;&lt; &quot;\n&quot; &lt;&lt; flush;</span>
+<a name="l01606"></a>01606                 <span class="comment">/*string curr = *(iter++);</span>
+<a name="l01607"></a>01607 <span class="comment">                int crcnt = 0;</span>
+<a name="l01608"></a>01608 <span class="comment">                vector&lt;string&gt; state;</span>
+<a name="l01609"></a>01609 <span class="comment">                string cond;</span>
+<a name="l01610"></a>01610 <span class="comment">                string prev;</span>
+<a name="l01611"></a>01611 <span class="comment">                while(curr==&quot;if&quot;)</span>
+<a name="l01612"></a>01612 <span class="comment">                {</span>
+<a name="l01613"></a>01613 <span class="comment">                        string st = *(iter++);</span>
+<a name="l01614"></a>01614 <span class="comment">                        if(st==&quot;(&quot;)</span>
+<a name="l01615"></a>01615 <span class="comment">                        {</span>
+<a name="l01616"></a>01616 <span class="comment">                                crcnt++;</span>
+<a name="l01617"></a>01617 <span class="comment">                                cond = &quot;&quot;;</span>
+<a name="l01618"></a>01618 <span class="comment">                        }</span>
+<a name="l01619"></a>01619 <span class="comment">                        else if(st==&quot;)&quot;)</span>
+<a name="l01620"></a>01620 <span class="comment">                        {</span>
+<a name="l01621"></a>01621 <span class="comment">                                crcnt--;</span>
+<a name="l01622"></a>01622 <span class="comment">                                state.push_back(evaluate(cond,&quot;IF&quot;));</span>
+<a name="l01623"></a>01623 <span class="comment">                                logger &lt;&lt; cond &lt;&lt; flush;</span>
+<a name="l01624"></a>01624 <span class="comment">                                if(crcnt==0)</span>
+<a name="l01625"></a>01625 <span class="comment">                                        break;</span>
+<a name="l01626"></a>01626 <span class="comment">                        }</span>
+<a name="l01627"></a>01627 <span class="comment">                        else if(st==&quot;||&quot;)</span>
+<a name="l01628"></a>01628 <span class="comment">                        {</span>
+<a name="l01629"></a>01629 <span class="comment">                                state.push_back(evaluate(cond,&quot;IF&quot;));</span>
+<a name="l01630"></a>01630 <span class="comment">                                state.push_back(&quot;OR&quot;);</span>
+<a name="l01631"></a>01631 <span class="comment">                                logger &lt;&lt; cond &lt;&lt; flush;</span>
+<a name="l01632"></a>01632 <span class="comment">                                logger &lt;&lt; &quot; OR &quot; &lt;&lt; flush;</span>
+<a name="l01633"></a>01633 <span class="comment">                                cond = &quot;&quot;;</span>
+<a name="l01634"></a>01634 <span class="comment">                                prev = &quot;OR&quot;;</span>
+<a name="l01635"></a>01635 <span class="comment">                        }</span>
+<a name="l01636"></a>01636 <span class="comment">                        else if(st==&quot;&amp;&amp;&quot;)</span>
+<a name="l01637"></a>01637 <span class="comment">                        {</span>
+<a name="l01638"></a>01638 <span class="comment">                                state.push_back(evaluate(cond,&quot;IF&quot;));</span>
+<a name="l01639"></a>01639 <span class="comment">                                state.push_back(&quot;AND&quot;);</span>
+<a name="l01640"></a>01640 <span class="comment">                                logger &lt;&lt; cond &lt;&lt; flush;</span>
+<a name="l01641"></a>01641 <span class="comment">                                logger &lt;&lt; &quot; AND &quot; &lt;&lt; flush;</span>
+<a name="l01642"></a>01642 <span class="comment">                                cond = &quot;&quot;;</span>
+<a name="l01643"></a>01643 <span class="comment">                                prev = &quot;AND&quot;;</span>
+<a name="l01644"></a>01644 <span class="comment">                        }</span>
+<a name="l01645"></a>01645 <span class="comment">                        else</span>
+<a name="l01646"></a>01646 <span class="comment">                                cond += st;</span>
+<a name="l01647"></a>01647 <span class="comment">                }*/</span>
+<a name="l01648"></a>01648                 <span class="comment">/*if(commands.at(k).find(&quot;=&quot;)!=string::npos)//inititialization operation</span>
+<a name="l01649"></a>01649 <span class="comment">                {</span>
+<a name="l01650"></a>01650 <span class="comment">                        vector&lt;string&gt; bs,lhs;</span>
+<a name="l01651"></a>01651 <span class="comment">                        StringUtil::split(bs, commands.at(k), (&quot;=&quot;));</span>
+<a name="l01652"></a>01652 <span class="comment">                        StringUtil::split(lhs, bs.at(0), (&quot; &quot;));</span>
+<a name="l01653"></a>01653 <span class="comment">                        if(lhs.size()==2)</span>
+<a name="l01654"></a>01654 <span class="comment">                        {</span>
+<a name="l01655"></a>01655 <span class="comment">                                if(isInBuiltType(lhs.at(0)))</span>
+<a name="l01656"></a>01656 <span class="comment">                                {</span>
+<a name="l01657"></a>01657 <span class="comment">                                        storeInbuilt(lhs.at(0),lhs.at(1));</span>
+<a name="l01658"></a>01658 <span class="comment">                                        evaluateUpdateInbuilt(lhs.at(0),lhs.at(1),bs.at(1),true);</span>
+<a name="l01659"></a>01659 <span class="comment">                                }</span>
+<a name="l01660"></a>01660 <span class="comment">                                else</span>
+<a name="l01661"></a>01661 <span class="comment">                                {</span>
+<a name="l01662"></a>01662 <span class="comment">                                        storeCustom(lhs.at(0),lhs.at(1));</span>
+<a name="l01663"></a>01663 <span class="comment">                                }</span>
+<a name="l01664"></a>01664 <span class="comment">                        }</span>
+<a name="l01665"></a>01665 <span class="comment">                        else</span>
+<a name="l01666"></a>01666 <span class="comment">                        {</span>
+<a name="l01667"></a>01667 <span class="comment">                                bool local = true;</span>
+<a name="l01668"></a>01668 <span class="comment">                                Object target = localVariables[lhs.at(0)];</span>
+<a name="l01669"></a>01669 <span class="comment">                                if(target.getTypeName()==&quot;&quot;)</span>
+<a name="l01670"></a>01670 <span class="comment">                                {</span>
+<a name="l01671"></a>01671 <span class="comment">                                        target = boundVariables[lhs.at(0)];</span>
+<a name="l01672"></a>01672 <span class="comment">                                        mapVars::iterator it;</span>
+<a name="l01673"></a>01673 <span class="comment">                                        it=localVariables.find(lhs.at(0));</span>
+<a name="l01674"></a>01674 <span class="comment">                                        localVariables.erase (it);</span>
+<a name="l01675"></a>01675 <span class="comment">                                        local = false;</span>
+<a name="l01676"></a>01676 <span class="comment">                                }</span>
+<a name="l01677"></a>01677 <span class="comment">                                if(isInBuiltType(target.getTypeName()))</span>
+<a name="l01678"></a>01678 <span class="comment">                                        evaluateUpdateInbuilt(target.getTypeName(),lhs.at(0),bs.at(1),local);</span>
+<a name="l01679"></a>01679 <span class="comment">                        }</span>
+<a name="l01680"></a>01680 <span class="comment">                }*/</span>
+<a name="l01681"></a>01681                 <span class="comment">/*else if(tokens.size()==4 &amp;&amp; tokens.at(2)==&quot;=&quot;)//assignment and initialization operations</span>
+<a name="l01682"></a>01682 <span class="comment">                {</span>
+<a name="l01683"></a>01683 <span class="comment">                        if(isInBuiltType(tokens.at(0)))</span>
+<a name="l01684"></a>01684 <span class="comment">                        {</span>
+<a name="l01685"></a>01685 <span class="comment">                                storeInbuilt(tokens.at(0),tokens.at(1));</span>
+<a name="l01686"></a>01686 <span class="comment">                        }</span>
+<a name="l01687"></a>01687 <span class="comment">                        else</span>
+<a name="l01688"></a>01688 <span class="comment">                        {</span>
+<a name="l01689"></a>01689 <span class="comment">                                storeCustom(tokens.at(0),tokens.at(1));</span>
+<a name="l01690"></a>01690 <span class="comment">                        }</span>
+<a name="l01691"></a>01691 <span class="comment">                        Object target = localVariables[tokens.at(1)];</span>
+<a name="l01692"></a>01692 <span class="comment">                        if(target.getType()==&quot;&quot;)</span>
+<a name="l01693"></a>01693 <span class="comment">                                target = boundVariables[tokens.at(1)];</span>
+<a name="l01694"></a>01694 <span class="comment">                        Object source = localVariables[tokens.at(1)];</span>
+<a name="l01695"></a>01695 <span class="comment">                        if(source.getType()==&quot;&quot;)</span>
+<a name="l01696"></a>01696 <span class="comment">                                source = boundVariables[tokens.at(1)];</span>
+<a name="l01697"></a>01697 <span class="comment">                        if(target.getType()!=&quot;&quot; &amp;&amp; source.getType()!=&quot;&quot; &amp;&amp; target.getType()==source.getType())</span>
+<a name="l01698"></a>01698 <span class="comment">                                target.setPointer(source.getPointer());</span>
+<a name="l01699"></a>01699 <span class="comment">                        else</span>
+<a name="l01700"></a>01700 <span class="comment">                                logger &lt;&lt; &quot;run time exception&quot; &lt;&lt; flush;</span>
+<a name="l01701"></a>01701 <span class="comment">                }</span>
+<a name="l01702"></a>01702 <span class="comment">                else if(tokens.size()==3 &amp;&amp; tokens.at(1)==&quot;=&quot;)//assignment operation</span>
+<a name="l01703"></a>01703 <span class="comment">                {</span>
+<a name="l01704"></a>01704 <span class="comment">                        Object target = localVariables[tokens.at(0)];</span>
+<a name="l01705"></a>01705 <span class="comment">                        if(target.getType()==&quot;&quot;)</span>
+<a name="l01706"></a>01706 <span class="comment">                                target = boundVariables[tokens.at(0)];</span>
+<a name="l01707"></a>01707 <span class="comment">                        Object source = localVariables[tokens.at(2)];</span>
+<a name="l01708"></a>01708 <span class="comment">                        if(source.getType()==&quot;&quot;)</span>
+<a name="l01709"></a>01709 <span class="comment">                                source = boundVariables[tokens.at(2)];</span>
+<a name="l01710"></a>01710 <span class="comment">                        if(target.getType()!=&quot;&quot; &amp;&amp; source.getType()!=&quot;&quot; &amp;&amp; target.getType()==source.getType())</span>
+<a name="l01711"></a>01711 <span class="comment">                                target.setPointer(source.getPointer());</span>
+<a name="l01712"></a>01712 <span class="comment">                        else</span>
+<a name="l01713"></a>01713 <span class="comment">                                logger &lt;&lt; &quot;run time exception&quot; &lt;&lt; flush;</span>
+<a name="l01714"></a>01714 <span class="comment">                }</span>
+<a name="l01715"></a>01715 <span class="comment">                else if(tokens.size()&gt;=5 &amp;&amp; tokens.at(1)==&quot;=&quot;)//multiple opeartions and final addition on this line</span>
+<a name="l01716"></a>01716 <span class="comment">                {</span>
+<a name="l01717"></a>01717 <span class="comment"></span>
+<a name="l01718"></a>01718 <span class="comment">                }*/</span>
+<a name="l01719"></a>01719         <span class="comment">//}</span>
+<a name="l01720"></a>01720 }
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>CppInterpreter.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:59:48 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Fri Aug 17 2012 20:54:30 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

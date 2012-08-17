@@ -106,7 +106,7 @@ $(document).ready(initResizable);
 <a name="l00046"></a>00046           {
 <a name="l00047"></a>00047                   <span class="keywordflow">if</span>(line!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00048"></a>00048                   {
-<a name="l00049"></a>00049                           StringUtil::split(vemp, line, (<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00049"></a>00049                           vemp = StringUtil::split(line, (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00050"></a>00050                           <span class="keywordflow">if</span>(vemp.size()==2)
 <a name="l00051"></a>00051                           {
 <a name="l00052"></a>00052                                   <span class="keywordtype">string</span> temp = vemp.at(1);
@@ -127,7 +127,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>PropFileReader.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:59:50 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Fri Aug 17 2012 20:54:30 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

@@ -87,6 +87,11 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 		string data = obj.at(i);
 		StringUtil::replaceFirst(data,";","");
 		StringUtil::split(vemp, data, (" "));
+		if(vemp.size()<2)
+		{
+			logger << data << " error" <<  endl;
+			continue;
+		}
 		test += "this." + vemp.at(1) + "= null;\n";
 		if(vemp.at(0)=="int" || vemp.at(0)=="double" || vemp.at(0)=="float" || vemp.at(0)=="string")
 		{

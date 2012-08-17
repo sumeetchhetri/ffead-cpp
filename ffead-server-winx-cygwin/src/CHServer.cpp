@@ -370,6 +370,7 @@ void* service(void* arg)
 	logger << "service method " << endl;
 	ServiceTask *task = (ServiceTask*)arg;
 	task->run();
+	delete task;
 	return NULL;
 }
 

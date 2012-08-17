@@ -709,51 +709,61 @@ $(document).ready(initResizable);
 <a name="l00649"></a>00649                 StringUtil::replaceFirst(libs, handoffVec.at(cntn), <span class="stringliteral">&quot;&quot;</span>);
 <a name="l00650"></a>00650         }
 <a name="l00651"></a>00651         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;done generating compoenent code&quot;</span> &lt;&lt;endl;
-<a name="l00652"></a>00652         <span class="keywordtype">string</span> ret = ref.generateClassDefinitionsAll(all,includeRef);
-<a name="l00653"></a>00653         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;ReflectorInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
-<a name="l00654"></a>00654         ret = ref.generateSerDefinitionAll(all,includeRef);
-<a name="l00655"></a>00655         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;SerializeInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
-<a name="l00656"></a>00656         cntxt[<span class="stringliteral">&quot;RUNTIME_LIBRARIES&quot;</span>] = libs;
-<a name="l00657"></a>00657         ret = templ.evaluate(rtdcfpath+<span class="stringliteral">&quot;objects.mk.template&quot;</span>,cntxt);
-<a name="l00658"></a>00658         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;objects.mk&quot;</span>,ret,<span class="keyword">true</span>);
-<a name="l00659"></a>00659         cntxt.clear();
-<a name="l00660"></a>00660         cntxt[<span class="stringliteral">&quot;USER_DEFINED_INC&quot;</span>] = ilibs;
-<a name="l00661"></a>00661         cntxt[<span class="stringliteral">&quot;RUNTIME_COMP_SRCS&quot;</span>] = isrcs;
-<a name="l00662"></a>00662         cntxt[<span class="stringliteral">&quot;RUNTIME_COMP_OBJS&quot;</span>] = iobjs;
-<a name="l00663"></a>00663         cntxt[<span class="stringliteral">&quot;RUNTIME_COMP_DEPS&quot;</span>] = ideps;
-<a name="l00664"></a>00664         ret = templ.evaluate(rtdcfpath+<span class="stringliteral">&quot;subdir.mk.template&quot;</span>,cntxt);
-<a name="l00665"></a>00665         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;subdir.mk&quot;</span>,ret,<span class="keyword">true</span>);
-<a name="l00666"></a>00666         configurationData.dcpsss = dcps;
-<a name="l00667"></a>00667         ret = DCPGenerator::generateDCPAll(dcps);
-<a name="l00668"></a>00668         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;DCPInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
-<a name="l00669"></a>00669         <span class="keywordtype">string</span> headers,objs,infjs;
-<a name="l00670"></a>00670         ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,stat,headers,objs,infjs,pathvec);
-<a name="l00671"></a>00671         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;AjaxInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
-<a name="l00672"></a>00672         AfcUtil::writeTofile(pubpath+<span class="stringliteral">&quot;_afc_Objects.js&quot;</span>,objs,<span class="keyword">true</span>);
-<a name="l00673"></a>00673         AfcUtil::writeTofile(pubpath+<span class="stringliteral">&quot;_afc_Interfaces.js&quot;</span>,infjs,<span class="keyword">true</span>);
-<a name="l00674"></a>00674         AfcUtil::writeTofile(incpath+<span class="stringliteral">&quot;AfcInclude.h&quot;</span>,headers,<span class="keyword">true</span>);
-<a name="l00675"></a>00675         <a class="code" href="classApplicationUtil.html">ApplicationUtil</a> apputil;
-<a name="l00676"></a>00676         webdirs.clear();
-<a name="l00677"></a>00677         ret = apputil.buildAllApplications(appf,webdirs1,configurationData.appMap);
-<a name="l00678"></a>00678         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;ApplicationInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
-<a name="l00679"></a>00679         <a class="code" href="classWsUtil.html">WsUtil</a> wsu;
-<a name="l00680"></a>00680         ret = wsu.generateAllWSDL(wspath,respath,configurationData.wsdlmap);
-<a name="l00681"></a>00681         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;WsInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
-<a name="l00682"></a>00682         <a class="code" href="classTemplateEngine.html">TemplateEngine</a> engine;
-<a name="l00683"></a>00683         cntxt.clear();
-<a name="l00684"></a>00684         cntxt[<span class="stringliteral">&quot;Dynamic_Public_Folder_Copy&quot;</span>] = rundyncontent;
-<a name="l00685"></a>00685         <span class="keywordtype">string</span> cont = engine.evaluate(respath+<span class="stringliteral">&quot;/rundyn_template.sh&quot;</span>, cntxt);
-<a name="l00686"></a>00686         AfcUtil::writeTofile(respath+<span class="stringliteral">&quot;/rundyn.sh&quot;</span>, cont, <span class="keyword">true</span>);
-<a name="l00687"></a>00687         <span class="keywordflow">return</span> configurationData;
-<a name="l00688"></a>00688 }
-<a name="l00689"></a>00689 
-<a name="l00690"></a>00690 
+<a name="l00652"></a>00652         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;started generating reflection/serialization code&quot;</span> &lt;&lt;endl;
+<a name="l00653"></a>00653         <span class="keywordtype">string</span> ret = ref.generateClassDefinitionsAll(all,includeRef);
+<a name="l00654"></a>00654         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;ReflectorInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
+<a name="l00655"></a>00655         ret = ref.generateSerDefinitionAll(all,includeRef, <span class="keyword">true</span>);
+<a name="l00656"></a>00656         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;SerializeInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
+<a name="l00657"></a>00657         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;done generating reflection/serialization code&quot;</span> &lt;&lt;endl;
+<a name="l00658"></a>00658         cntxt[<span class="stringliteral">&quot;RUNTIME_LIBRARIES&quot;</span>] = libs;
+<a name="l00659"></a>00659         ret = templ.evaluate(rtdcfpath+<span class="stringliteral">&quot;objects.mk.template&quot;</span>,cntxt);
+<a name="l00660"></a>00660         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;objects.mk&quot;</span>,ret,<span class="keyword">true</span>);
+<a name="l00661"></a>00661         cntxt.clear();
+<a name="l00662"></a>00662         cntxt[<span class="stringliteral">&quot;USER_DEFINED_INC&quot;</span>] = ilibs;
+<a name="l00663"></a>00663         cntxt[<span class="stringliteral">&quot;RUNTIME_COMP_SRCS&quot;</span>] = isrcs;
+<a name="l00664"></a>00664         cntxt[<span class="stringliteral">&quot;RUNTIME_COMP_OBJS&quot;</span>] = iobjs;
+<a name="l00665"></a>00665         cntxt[<span class="stringliteral">&quot;RUNTIME_COMP_DEPS&quot;</span>] = ideps;
+<a name="l00666"></a>00666         ret = templ.evaluate(rtdcfpath+<span class="stringliteral">&quot;subdir.mk.template&quot;</span>,cntxt);
+<a name="l00667"></a>00667         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;subdir.mk&quot;</span>,ret,<span class="keyword">true</span>);
+<a name="l00668"></a>00668         configurationData.dcpsss = dcps;
+<a name="l00669"></a>00669         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;started generating dcp code&quot;</span> &lt;&lt;endl;
+<a name="l00670"></a>00670         ret = DCPGenerator::generateDCPAll(dcps);
+<a name="l00671"></a>00671         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;DCPInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
+<a name="l00672"></a>00672         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;done generating dcp code&quot;</span> &lt;&lt;endl;
+<a name="l00673"></a>00673         <span class="keywordtype">string</span> headers,objs,infjs;
+<a name="l00674"></a>00674         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;started generating ajax code&quot;</span> &lt;&lt;endl;
+<a name="l00675"></a>00675         ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,stat,headers,objs,infjs,pathvec);
+<a name="l00676"></a>00676         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;AjaxInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
+<a name="l00677"></a>00677         AfcUtil::writeTofile(pubpath+<span class="stringliteral">&quot;_afc_Objects.js&quot;</span>,objs,<span class="keyword">true</span>);
+<a name="l00678"></a>00678         AfcUtil::writeTofile(pubpath+<span class="stringliteral">&quot;_afc_Interfaces.js&quot;</span>,infjs,<span class="keyword">true</span>);
+<a name="l00679"></a>00679         AfcUtil::writeTofile(incpath+<span class="stringliteral">&quot;AfcInclude.h&quot;</span>,headers,<span class="keyword">true</span>);
+<a name="l00680"></a>00680         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;done generating ajax code&quot;</span> &lt;&lt;endl;
+<a name="l00681"></a>00681         <a class="code" href="classApplicationUtil.html">ApplicationUtil</a> apputil;
+<a name="l00682"></a>00682         webdirs.clear();
+<a name="l00683"></a>00683         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;started generating application code&quot;</span> &lt;&lt;endl;
+<a name="l00684"></a>00684         ret = apputil.buildAllApplications(appf,webdirs1,configurationData.appMap);
+<a name="l00685"></a>00685         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;ApplicationInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
+<a name="l00686"></a>00686         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;done generating application code&quot;</span> &lt;&lt;endl;
+<a name="l00687"></a>00687         <a class="code" href="classWsUtil.html">WsUtil</a> wsu;
+<a name="l00688"></a>00688         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;started generating web-service code&quot;</span> &lt;&lt;endl;
+<a name="l00689"></a>00689         ret = wsu.generateAllWSDL(wspath,respath,configurationData.wsdlmap);
+<a name="l00690"></a>00690         AfcUtil::writeTofile(rtdcfpath+<span class="stringliteral">&quot;WsInterface.cpp&quot;</span>,ret,<span class="keyword">true</span>);
+<a name="l00691"></a>00691         logger &lt;&lt; endl&lt;&lt; <span class="stringliteral">&quot;done generating web-service code&quot;</span> &lt;&lt;endl;
+<a name="l00692"></a>00692         <a class="code" href="classTemplateEngine.html">TemplateEngine</a> engine;
+<a name="l00693"></a>00693         cntxt.clear();
+<a name="l00694"></a>00694         cntxt[<span class="stringliteral">&quot;Dynamic_Public_Folder_Copy&quot;</span>] = rundyncontent;
+<a name="l00695"></a>00695         <span class="keywordtype">string</span> cont = engine.evaluate(respath+<span class="stringliteral">&quot;/rundyn_template.sh&quot;</span>, cntxt);
+<a name="l00696"></a>00696         AfcUtil::writeTofile(respath+<span class="stringliteral">&quot;/rundyn.sh&quot;</span>, cont, <span class="keyword">true</span>);
+<a name="l00697"></a>00697         <span class="keywordflow">return</span> configurationData;
+<a name="l00698"></a>00698 }
+<a name="l00699"></a>00699 
+<a name="l00700"></a>00700 
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>ConfigurationHandler.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:59:48 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Fri Aug 17 2012 20:54:30 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

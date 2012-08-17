@@ -38,6 +38,7 @@ class Reflection {
 	void collectInfo(string,string);
 	strVec list(string);
 	map<string,bool> methsall;
+	map<string,bool> invalidcls;
 	Logger logger;
 public:
 	Reflection();

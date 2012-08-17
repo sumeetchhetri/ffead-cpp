@@ -121,12 +121,15 @@ bool Reflection::generateClassInfo(string className)
 
 		//e1.assign("\\t+");
 		//e2.assign("\\s+");
+		bool classcomplete = false;
 		while(getline(infile, data))
 		{
 			//data = boost::regex_replace(data, e1, "", boost::match_default | boost::format_all);
 			RegexUtil::replace(data, "[ ]+", " ");
 			//data = boost::regex_replace(data, e2, " ", boost::match_default | boost::format_all);
 			classset = false;
+			if(classcomplete)
+				continue;
 			if((tes=data.find("/*"))!=string::npos)
 			{
 				commstrts = true;
@@ -143,6 +146,7 @@ bool Reflection::generateClassInfo(string className)
 			}
 			else if(!commstrts)
 			{
+				logger << data << cnt <<endl;
 				if((tes=data.find("template"))!=string::npos)
 					return false;
 				if(data.find("friend")!=string::npos)
@@ -180,17 +184,17 @@ bool Reflection::generateClassInfo(string className)
 					StringUtil::replaceFirst(data,"{","");
 					cnt += 1;
 				}
-				if(start && !classset && data!="")
+				if(start && data!="")
 				{
 					if((tes=data.find("{"))!=string::npos)
 					{
 						cnt += 1;
 					}
-					else if((tes=data.find("}"))!=string::npos)
+					if((tes=data.find("}"))!=string::npos)
 					{
 						cnt -= 1;
 					}
-					else if(cnt==0)
+					if(cnt==0)
 						break;
 					else if(cnt==1)
 					{
@@ -204,6 +208,7 @@ bool Reflection::generateClassInfo(string className)
 						{
 							if(flag=="")
 								flag = "private";
+							StringUtil::trim(data);
 							collectInfo(data,flag);
 						}
 					}
@@ -692,7 +697,21 @@ string Reflection::generateClassDefinitions(string includeDir,string &includesDe
 	for (unsigned int var = 0; var < includes.size(); ++var)
 	{
 		logger << "\ngenerating for file" << includes.at(var) << "\n" << flush;
-		ret += generateClassDefinition(includes.at(var),includesDefs,typedefs,classes,methods,opers);
+		string includesDefs1,typedefs1,classes1,methods1,opers1;
+		string ret1 = generateClassDefinition(includes.at(var),includesDefs1,typedefs1,classes1,methods1,opers1);
+		ret += ret1;
+		if(ret1!="")
+		{
+			includesDefs += includesDefs1;
+			typedefs += typedefs1;
+			classes += classes1;
+			methods += methods1;
+			opers += opers1;
+		}
+		else
+		{
+			invalidcls[includes.at(var)] = true;
+		}
 		logger << "\ndone generating for file" << includes.at(var) << "\n" << flush;
 	}
 	return ret;
@@ -734,7 +753,7 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				StringUtil::replaceAll(argts,")","");
 				meth = meth.substr(0,meth.find("("));
 				//StringUtil::replaceFirst(meth,")"," ");
-				strVec methp,methpm,argp,argpm;
+				strVec methp,methpm,argp,argpm,argpmtemp;
 				StringUtil::split(argp, argts, (","));
 				StringUtil::split(methp, meth, (" "));
 				for(unsigned int j = 0; j < methp.size(); j++)
@@ -753,6 +772,8 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				}
 				string typdefName,methsd,valsd,valsa;
 				//bool ctor = false;
+				if(methpm.size()>0 && methpm.at(0).find("virtual")!=string::npos)
+					return "";
 				for(unsigned int j = 0; j < methpm.size(); j++)
 				{
 					if(j==0)
@@ -795,6 +816,26 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 						}
 					}*/
 				}
+
+				bool tmpltarg = false;
+				for(unsigned int j = 0; j < argpm.size(); j++)
+				{
+					if(tmpltarg && argpm.at(j).find(">")!=string::npos)
+					{
+						string ttt = argpmtemp.at(argpmtemp.size()-1)+","+argpm.at(j);
+						argpmtemp.at(argpmtemp.size()-1) = ttt;
+					}
+					else if(argpm.at(j).find("<")!=string::npos)
+					{
+						argpmtemp.push_back(argpm.at(j));
+						tmpltarg = true;
+					}
+					else
+					{
+						argpmtemp.push_back(argpm.at(j));
+					}
+				}
+				argpm = argpmtemp;
 				for(unsigned int j = 0; j < argpm.size(); j++)
 				{
 					strVec argtn;
@@ -804,6 +845,7 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 					else if(argpm.at(j).find("&")!=string::npos)
 						type12 = "&";
 					StringUtil::split(argtn, argpm.at(j), (" "));
+					logger << "testing::::" << argpm.at(j) << argtn.size();
 					StringUtil::replaceAll(argtn.at(0)," ","");
 					if(meth.find(" operator")==string::npos)refDef += ("argu.push_back(\""+argtn.at(0)+"\");\n");
 					if(argtn.at(0).find("*")!=string::npos || type12=="*")
@@ -1071,6 +1113,7 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				{
 					StringUtil::replaceFirst(methsd,"<","ts");
 					StringUtil::replaceFirst(methsd,">","te");
+					StringUtil::replaceFirst(methsd,",","");
 					//StringUtil::replaceFirst(methsd,"*","ptr");
 					//StringUtil::replaceFirst(methsd,"&","adr");
 					if(methpm.at(0)!=this->classN)
@@ -1122,21 +1165,28 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				StringUtil::replaceFirst(fld,";","");
 				strVec fldp;
 				StringUtil::split(fldp, fld, (" "));
-				for(unsigned int j = 0; j < fldp.size(); j++)
+				if(fldp.size()>1)
 				{
-					if(j==0)
+					for(unsigned int j = 0; j < fldp.size(); j++)
 					{
-						refDef += ("f.setType(\""+fldp.at(j)+"\");\n");
+						if(j==0)
+						{
+							refDef += ("f.setType(\""+fldp.at(j)+"\");\n");
+						}
+						else if(j==1)
+						{
+							refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
+						}
 					}
-					else if(j==1)
-					{
-						refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
-					}
+					//if(fldp.size()==2)
+					//	structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
+					methods += "\n"+fldp.at(0)+" invokeReflectionCIFieldFor"+this->classN+fldp.at(1)+"(void* instance)\n{\n\t"+this->classN+" *_obj = ("+this->classN+"*)instance;\n\treturn _obj->"+fldp.at(1)+";\n}\n";
+					refDef += ("if(f.getFieldName()!=\"\")\n{\nclassInfo.addField(f);\n}\n");
 				}
-				//if(fldp.size()==2)
-				//	structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
-				methods += "\n"+fldp.at(0)+" invokeReflectionCIFieldFor"+this->classN+fldp.at(1)+"(void* instance)\n{\n\t"+this->classN+" *_obj = ("+this->classN+"*)instance;\n\treturn _obj->"+fldp.at(1)+";\n}\n";
-				refDef += ("if(f.getFieldName()!=\"\")\n{\nclassInfo.addField(f);\n}\n");
+				else
+				{
+					logger << fld << " error" << endl;
+				}
 			}
 			else if(this->pub.at(i).find("~")!=string::npos)
 			{
@@ -1218,22 +1268,29 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				StringUtil::replaceFirst(fld,";","");
 				strVec fldp;
 				StringUtil::split(fldp, fld, (" "));
-				for(unsigned int j = 0; j < fldp.size(); j++)
+				if(fldp.size()>1)
 				{
-					if(j==0)
+					for(unsigned int j = 0; j < fldp.size(); j++)
 					{
-						refDef += ("f.setType(\""+fldp.at(j)+"\");\n");
+						if(j==0)
+						{
+							refDef += ("f.setType(\""+fldp.at(j)+"\");\n");
+						}
+						else if(j==1)
+						{
+							refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
+						}
 					}
-					else if(j==1)
-					{
-						refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
-					}
+					//if(fldp.size()==2)
+					//	structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
+					//methods += "\n"+fldp.at(0)+" invokeReflectionCIFieldFor"+this->classN+fldp.at(1)+"(void* instance)\n{\n\t"+this->classN+" *_obj = ("+this->classN+"*)instance;\nstruct"
+					//+this->classN+" *__obj=(struct"+this->classN+"*)_obj;\n\treturn __obj->"+fldp.at(1)+";\n}\n";
+					refDef += ("if(f.getFieldName()!=\"\")\n{\nclassInfo.addField(f);\n}\n");
 				}
-				//if(fldp.size()==2)
-				//	structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
-				//methods += "\n"+fldp.at(0)+" invokeReflectionCIFieldFor"+this->classN+fldp.at(1)+"(void* instance)\n{\n\t"+this->classN+" *_obj = ("+this->classN+"*)instance;\nstruct"
-				//+this->classN+" *__obj=(struct"+this->classN+"*)_obj;\n\treturn __obj->"+fldp.at(1)+";\n}\n";
-				refDef += ("if(f.getFieldName()!=\"\")\n{\nclassInfo.addField(f);\n}\n");
+				else
+				{
+					logger << fld << " error" << endl;
+				}
 			}
 		}
 	}
@@ -1286,22 +1343,29 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				StringUtil::replaceFirst(fld,";","");
 				strVec fldp;
 				StringUtil::split(fldp, fld, (" "));
-				for(unsigned int j = 0; j < fldp.size(); j++)
+				if(fldp.size()>1)
 				{
-					if(j==0)
+					for(unsigned int j = 0; j < fldp.size(); j++)
 					{
-						refDef += ("f.setType(\""+fldp.at(j)+"\");\n");
+						if(j==0)
+						{
+							refDef += ("f.setType(\""+fldp.at(j)+"\");\n");
+						}
+						else if(j==1)
+						{
+							refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
+						}
 					}
-					else if(j==1)
-					{
-						refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
-					}
+					//if(fldp.size()==2)
+					//	structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
+					//methods += "\n"+fldp.at(0)+" invokeReflectionCIFieldFor"+this->classN+fldp.at(1)+"(void* instance)\n{\n\t"+this->classN+" *_obj = ("+this->classN+"*)instance;\nstruct"
+					//+this->classN+" *__obj=(struct"+this->classN+"*)_obj;\n\treturn __obj->"+fldp.at(1)+";\n}\n";
+					refDef += ("if(f.getFieldName()!=\"\")\n{\nclassInfo.addField(f);\n}\n");
 				}
-				//if(fldp.size()==2)
-				//	structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
-				//methods += "\n"+fldp.at(0)+" invokeReflectionCIFieldFor"+this->classN+fldp.at(1)+"(void* instance)\n{\n\t"+this->classN+" *_obj = ("+this->classN+"*)instance;\nstruct"
-				//+this->classN+" *__obj=(struct"+this->classN+"*)_obj;\n\treturn __obj->"+fldp.at(1)+";\n}\n";
-				refDef += ("if(f.getFieldName()!=\"\")\n{\nclassInfo.addField(f);\n}\n");
+				else
+				{
+					logger << fld << " error" << endl;
+				}
 			}
 		}
 	}
@@ -1348,8 +1412,11 @@ string Reflection::generateSerDefinitions(string includeDir,string &includesDefs
 	for (unsigned int var = 0; var < includes.size(); ++var)
 	{
 		logger << "\ngenerating Ser for file" << includes.at(var) << "\n" << flush;
-		if(!isBinary)ret += generateSerDefinition(includes.at(var),includesDefs,typedefs,classes,methods);
-		else ret += generateSerDefinitionBinary(includes.at(var),includesDefs,typedefs,classes,methods);
+		if(invalidcls.find(includes.at(var))==invalidcls.end())
+		{
+			if(!isBinary)ret = generateSerDefinition(includes.at(var),includesDefs,typedefs,classes,methods);
+			else ret = generateSerDefinitionBinary(includes.at(var),includesDefs,typedefs,classes,methods);
+		}
 		logger << "\ndone generating Ser for file" << includes.at(var) << "\n" << flush;
 	}
 	return ret;
@@ -1737,7 +1804,14 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 			if(((tes=pub.at(i).find("("))==string::npos && (tes=pub.at(i).find(")"))==string::npos && pub.at(i).find("~")==string::npos))
 			{
 				fld = pub.at(i);
+				RegexUtil::replace(fld, "[ ]+", " ");
 				StringUtil::replaceFirst(fld,";","");
+				bool ptr = false;
+				if(fld.find("*")!=string::npos)
+				{
+					ptr = true;
+					StringUtil::replaceFirst(fld,"*","");
+				}
 				vector<string> fldp;
 				StringUtil::split(fldp, fld, (" "));
 				if(fldp.size()==2)
@@ -1745,26 +1819,58 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 					string nam = fldp.at(1);
 					if(fldp.at(0)=="int" || fldp.at(0)=="float" || fldp.at(0)=="string" || fldp.at(0)=="double" || fldp.at(0)=="bool")
 					{
-						methods += ("object.addPacket(__obj->"+fldp.at(1)+",\""+fldp.at(1)+"\");\n");
-						string cam = StringUtil::capitalizedCopy(fldp.at(1));
-						typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = CastUtil::lexical_cast<"+fldp.at(0)+">(root->getPackets().at(i)->getValue());\n";
+						if(!ptr)
+						{
+							methods += ("object.addPacket(__obj->"+fldp.at(1)+",\""+fldp.at(1)+"\");\n");
+							string cam = StringUtil::capitalizedCopy(fldp.at(1));
+							typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = CastUtil::lexical_cast<"+fldp.at(0)+">(root->getPackets().at(i)->getValue());\n";
+						}
+						else
+						{
+							methods += ("object.addPacket(*__obj->"+fldp.at(1)+",\""+fldp.at(1)+"\");\n");
+							string cam = StringUtil::capitalizedCopy(fldp.at(1));
+							typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = new "+fldp.at(0)+"(CastUtil::lexical_cast<"+fldp.at(0)+">(root->getPackets().at(i)->getValue()));\n";
+						}
 					}
 					else if(fldp.at(0)=="Date")
 					{
-						methods += ("DateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\n");
-						methods += ("object.addPacket(formt"+fldp.at(1)+".format(__obj->"+fldp.at(1)+"),\""+fldp.at(1)+"\");\n");
-						//methods += ("DateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\nobjxml += \"<"+fldp.at(1)+" type=\\\""+fldp.at(0)+"\\\">\"+formt"+fldp.at(1)+".format(__obj->"+fldp.at(1)+")");
-						string cam = StringUtil::capitalizedCopy(fldp.at(1));
-						//methods += ("+\"</"+nam+">\";\n");
-						typedefs += "if(nam==\""+fldp.at(1)+"\")\n{\nDateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"+fldp.at(1)+" = *(formt"+fldp.at(1)+".parse(root->getPackets().at(i)->getValue()));\n}\n";
+						if(!ptr)
+						{
+							methods += ("DateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\n");
+							methods += ("object.addPacket(formt"+fldp.at(1)+".format(__obj->"+fldp.at(1)+"),\""+fldp.at(1)+"\");\n");
+							//methods += ("DateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\nobjxml += \"<"+fldp.at(1)+" type=\\\""+fldp.at(0)+"\\\">\"+formt"+fldp.at(1)+".format(__obj->"+fldp.at(1)+")");
+							string cam = StringUtil::capitalizedCopy(fldp.at(1));
+							//methods += ("+\"</"+nam+">\";\n");
+							typedefs += "if(nam==\""+fldp.at(1)+"\")\n{\nDateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"+fldp.at(1)+" = *(formt"+fldp.at(1)+".parse(root->getPackets().at(i)->getValue()));\n}\n";
+						}
+						else
+						{
+							methods += ("DateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\n");
+							methods += ("object.addPacket(formt"+fldp.at(1)+".format(*__obj->"+fldp.at(1)+"),\""+fldp.at(1)+"\");\n");
+							//methods += ("DateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\nobjxml += \"<"+fldp.at(1)+" type=\\\""+fldp.at(0)+"\\\">\"+formt"+fldp.at(1)+".format(__obj->"+fldp.at(1)+")");
+							string cam = StringUtil::capitalizedCopy(fldp.at(1));
+							//methods += ("+\"</"+nam+">\";\n");
+							typedefs += "if(nam==\""+fldp.at(1)+"\")\n{\nDateFormat formt"+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"+fldp.at(1)+" = (formt"+fldp.at(1)+".parse(root->getPackets().at(i)->getValue()));\n}\n";
+						}
 					}
 					else if(fldp.at(0)=="BinaryData")
 					{
-						methods += ("object.addPacket(BinaryData::serilaize(__obj->"+fldp.at(1)+"),\""+fldp.at(1)+"\");\n");
-						//methods += ("objxml += \"<"+fldp.at(1)+" type=\\\""+fldp.at(0)+"\\\">\"+BinaryData::serilaize(__obj->"+fldp.at(1)+")");
-						string cam = StringUtil::capitalizedCopy(fldp.at(1));
-						//methods += ("+\"</"+nam+">\";\n");
-						typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = *(BinaryData::unSerilaize(root->getPackets().at(i)->getValue()));\n";
+						if(!ptr)
+						{
+							methods += ("object.addPacket(BinaryData::serilaize(__obj->"+fldp.at(1)+"),\""+fldp.at(1)+"\");\n");
+							//methods += ("objxml += \"<"+fldp.at(1)+" type=\\\""+fldp.at(0)+"\\\">\"+BinaryData::serilaize(__obj->"+fldp.at(1)+")");
+							string cam = StringUtil::capitalizedCopy(fldp.at(1));
+							//methods += ("+\"</"+nam+">\";\n");
+							typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = *(BinaryData::unSerilaize(root->getPackets().at(i)->getValue()));\n";
+						}
+						else
+						{
+							methods += ("object.addPacket(BinaryData::serilaize(*__obj->"+fldp.at(1)+"),\""+fldp.at(1)+"\");\n");
+							//methods += ("objxml += \"<"+fldp.at(1)+" type=\\\""+fldp.at(0)+"\\\">\"+BinaryData::serilaize(__obj->"+fldp.at(1)+")");
+							string cam = StringUtil::capitalizedCopy(fldp.at(1));
+							//methods += ("+\"</"+nam+">\";\n");
+							typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = (BinaryData::unSerilaize(root->getPackets().at(i)->getValue()));\n";
+						}
 					}
 					else if(fldp.at(0).find("vector")!=string::npos || fldp.at(0).find("queue")!=string::npos || fldp.at(0).find("deque")!=string::npos || fldp.at(0).find("set")!=string::npos || fldp.at(0).find("list")!=string::npos)
 					{
@@ -1793,22 +1899,47 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 						StringUtil::replaceFirst(stlcnt,">","");
 						StringUtil::replaceFirst(stlcnt," ","");
 
-						methods += (fldp.at(0)+" __temp_obj_ser = __obj->"+fldp.at(1)+";\n");
-						methods += ("object.addPacket(binarySerialize"+stlcnt+stlcnttyp+"(&__temp_obj_ser),\""+stlcnt+stlcnttyp+classN+"\");\n");
-						string cam = StringUtil::capitalizedCopy(fldp.at(1));
-						//methods += ("+\"</"+nam+">\";\n");
-						typedefs += "if(nam==\""+fldp.at(1)+"\"){";
-						typedefs += "\nAMEFEncoder enc;\n";
-						typedefs += "\n__obj->"+fldp.at(1)+" = *("+fldp.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encode(root->getPackets().at(i), false));\n";
-						typedefs += "\n}\n";
+						if(!ptr)
+						{
+							methods += (fldp.at(0)+" __temp_obj_ser = __obj->"+fldp.at(1)+";\n");
+							methods += ("object.addPacket(binarySerialize"+stlcnt+stlcnttyp+"(&__temp_obj_ser),\""+stlcnt+stlcnttyp+classN+"\");\n");
+							string cam = StringUtil::capitalizedCopy(fldp.at(1));
+							//methods += ("+\"</"+nam+">\";\n");
+							typedefs += "if(nam==\""+fldp.at(1)+"\"){";
+							typedefs += "\nAMEFEncoder enc;\n";
+							typedefs += "\n__obj->"+fldp.at(1)+" = *("+fldp.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encodeB(root->getPackets().at(i), false));\n";
+							typedefs += "\n}\n";
+						}
+						else
+						{
+							methods += (fldp.at(0)+"* __temp_obj_ser = __obj->"+fldp.at(1)+";\n");
+							methods += ("object.addPacket(binarySerialize"+stlcnt+stlcnttyp+"(__temp_obj_ser),\""+stlcnt+stlcnttyp+classN+"\");\n");
+							string cam = StringUtil::capitalizedCopy(fldp.at(1));
+							//methods += ("+\"</"+nam+">\";\n");
+							typedefs += "if(nam==\""+fldp.at(1)+"\"){";
+							typedefs += "\nAMEFEncoder enc;\n";
+							typedefs += "\n__obj->"+fldp.at(1)+" = ("+fldp.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encodeB(root->getPackets().at(i), false));\n";
+							typedefs += "\n}\n";
+						}
 					}
 					else
 					{
-						methods += (fldp.at(0)+" __temp_obj_ser = __obj->"+fldp.at(1)+";\n");
-						methods += ("object.addPacket(binarySerialize"+fldp.at(0)+"(&__temp_obj_ser),\""+fldp.at(0)+"\");\n");
-						string cam = StringUtil::capitalizedCopy(fldp.at(1));
-						//methods += ("+\"</"+nam+">\";\n");
-						typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = *("+fldp.at(0)+"*)binaryUnSerialize"+fldp.at(0)+"(root->getPackets().at(i)->getValue());\n";
+						if(!ptr)
+						{
+							methods += (fldp.at(0)+" __temp_obj_ser = __obj->"+fldp.at(1)+";\n");
+							methods += ("object.addPacket(binarySerialize"+fldp.at(0)+"(&__temp_obj_ser),\""+fldp.at(0)+"\");\n");
+							string cam = StringUtil::capitalizedCopy(fldp.at(1));
+							//methods += ("+\"</"+nam+">\";\n");
+							typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = *("+fldp.at(0)+"*)binaryUnSerialize"+fldp.at(0)+"(root->getPackets().at(i)->getValue());\n";
+						}
+						else
+						{
+							methods += (fldp.at(0)+"* __temp_obj_ser = __obj->"+fldp.at(1)+";\n");
+							methods += ("object.addPacket(binarySerialize"+fldp.at(0)+"(__temp_obj_ser),\""+fldp.at(0)+"\");\n");
+							string cam = StringUtil::capitalizedCopy(fldp.at(1));
+							//methods += ("+\"</"+nam+">\";\n");
+							typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = ("+fldp.at(0)+"*)binaryUnSerialize"+fldp.at(0)+"(root->getPackets().at(i)->getValue());\n";
+						}
 					}
 					//structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
 				}
@@ -1818,6 +1949,13 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 			{
 				meth = pub.at(i);
 				StringUtil::replaceFirst(meth,";","");
+				RegexUtil::replace(meth, "[ ]+", " ");
+				bool ptr = false;
+				if(meth.find("*")!=string::npos)
+				{
+					ptr = true;
+					StringUtil::replaceFirst(meth,"*","");
+				}
 
 				string argts = meth.substr(meth.find("("),meth.find(")")-meth.find("("));
 				StringUtil::replaceFirst(argts,"(","");
@@ -1848,7 +1986,19 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 					for(unsigned int j = 0; j < argp.size(); j++)
 					{
 						if(argp.at(j)!="" && argp.at(j)!="(")
-							argpm.push_back(argp.at(j));
+						{
+							string tty = argp.at(j);
+							StringUtil::trim(tty);
+							if(tty.find(" ")!=string::npos)
+							{
+								vector<string> temargt = StringUtil::split(tty, " ");
+								argpm.push_back(temargt.at(0));
+							}
+							else
+							{
+								argpm.push_back(tty);
+							}
+						}
 					}
 
 					if(methpm.at(0)!=classN)
@@ -1856,48 +2006,158 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 						for(unsigned int k = 0; k < fldnames.size(); k=k+2)
 						{
 							string cam = StringUtil::capitalizedCopy(fldnames.at(k+1));
-							if("set"+cam==methpm.at(1) && argpm.size()==1 && argpm.at(0)==fldnames.at(k) && methpm.at(0)=="void")
+							string fldNamewoptr = StringUtil::replaceFirstCopy(fldnames.at(k), "*", "");
+							logger << "setter check " << fldNamewoptr << " "<<methpm.at(0) << " "<< methpm.at(1) << " "<< cam<< endl;
+							if(argpm.size()==1)
 							{
+								StringUtil::replaceFirst(argpm.at(0), "*", "");
+								logger << argpm.at(0) << " " << argpm.size() << endl;
+							}
+							if("set"+cam==methpm.at(1) && argpm.size()==1 && argpm.at(0)==fldNamewoptr && methpm.at(0)=="void")
+							{
+								logger << " inside setter " << endl;
 								if(argpm.at(0)=="int" || argpm.at(0)=="float" || argpm.at(0)=="string" || argpm.at(0)=="double" || argpm.at(0)=="bool")
 								{
-									typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->"+methpm.at(1)+"(CastUtil::lexical_cast<"+argpm.at(0)+">(root->getPackets().at(i)->getValue()));\n";
+									if(!ptr)
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->"+methpm.at(1)+"(CastUtil::lexical_cast<"+argpm.at(0)+">(root->getPackets().at(i)->getValue()));\n";
+									}
+									else
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->"+methpm.at(1)+"(new "+argpm.at(0)+"(CastUtil::lexical_cast<"+argpm.at(0)+">(root->getPackets().at(i)->getValue())));\n";
+									}
 								}
 								else if(argpm.at(0)=="Date")
 								{
-									typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n{\nDateFormat formt"+cam+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"+methpm.at(1)+"(*(formt"+cam+".parse(root->getPackets().at(i)->getValue())));\n}\n";
+									if(!ptr)
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n{\nDateFormat formt"+cam+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"+methpm.at(1)+"(*(formt"+cam+".parse(root->getPackets().at(i)->getValue())));\n}\n";
+									}
+									else
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n{\nDateFormat formt"+cam+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"+methpm.at(1)+"((formt"+cam+".parse(root->getPackets().at(i)->getValue())));\n}\n";
+									}
 								}
 								else if(argpm.at(0)=="BinaryData")
 								{
-									typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->"+methpm.at(1)+"(*(BinaryData::unSerilaize(root->getPackets().at(i)->getValue())));\n";
+									if(!ptr)
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->"+methpm.at(1)+"(*(BinaryData::unSerilaize(root->getPackets().at(i)->getValue())));\n";
+									}
+									else
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->"+methpm.at(1)+"((BinaryData::unSerilaize(root->getPackets().at(i)->getValue())));\n";
+									}
+								}
+								else if(argpm.at(0).find("vector")!=string::npos || argpm.at(0).find("queue")!=string::npos || argpm.at(0).find("deque")!=string::npos || argpm.at(0).find("set")!=string::npos || argpm.at(0).find("list")!=string::npos)
+								{
+									string stlcnt = argpm.at(0);
+									string stltyp = argpm.at(0);
+									StringUtil::replaceFirst(stltyp,"<","::");
+									StringUtil::replaceFirst(stltyp,">","");
+									StringUtil::replaceFirst(stltyp," ","");
+									string stlcnttyp = "";
+									if(argpm.at(0).find("vector")!=string::npos)
+										stlcnttyp = "Vec";
+									else if(argpm.at(0).find("queue")!=string::npos)
+										stlcnttyp = "Q";
+									else if(argpm.at(0).find("deque")!=string::npos)
+										stlcnttyp = "Dq";
+									else if(argpm.at(0).find("list")!=string::npos)
+										stlcnttyp = "Lis";
+									else
+										stlcnttyp = "Set";
+									StringUtil::replaceFirst(stlcnt,"vector","");
+									StringUtil::replaceFirst(stlcnt,"queue","");
+									StringUtil::replaceFirst(stlcnt,"deque","");
+									StringUtil::replaceFirst(stlcnt,"set","");
+									StringUtil::replaceFirst(stlcnt,"list","");
+									StringUtil::replaceFirst(stlcnt,"<","");
+									StringUtil::replaceFirst(stlcnt,">","");
+									StringUtil::replaceFirst(stlcnt," ","");
+
+									if(!ptr)
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\"){";
+										typedefs += "\nAMEFEncoder enc;";
+										typedefs += "\n__obj->set"+cam+"(*("+argpm.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encodeB(root->getPackets().at(i), false)));\n";
+										typedefs += "\n}\n";
+									}
+									else
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\"){";
+										typedefs += "\nAMEFEncoder enc;";
+										typedefs += "\n__obj->set"+cam+"(("+argpm.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encodeB(root->getPackets().at(i), false)));\n";
+										typedefs += "\n}\n";
+									}
+									//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+methpm.at(1)+"\")\n__obj->set"+cam+"(*("+methpm.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(root.getChildElements().at(i).renderChildren()));\n";
 								}
 								else
 								{
-									typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->"+methpm.at(1)+"(*("+argpm.at(0)+"*)binaryUnSerialize"+argpm.at(0)+"(root.getChildElements().at(i).renderChildren()));\n";
+									if(!ptr)
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n{\nAMEFEncoder enc;\n__obj->"+methpm.at(1)+"(*("+argpm.at(0)+"*)binaryUnSerialize"+argpm.at(0)+"(enc.encodeB(root->getPackets().at(i), false)));}\n";
+									}
+									else
+									{
+										typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n{\nAMEFEncoder enc;\n__obj->"+methpm.at(1)+"(("+argpm.at(0)+"*)binaryUnSerialize"+argpm.at(0)+"(enc.encodeB(root->getPackets().at(i), false)));}\n";
+									}
 								}
 							}
-							else if("get"+cam==methpm.at(1) && argpm.size()==0 && methpm.at(0)==fldnames.at(k))
+							else if("get"+cam==methpm.at(1) && argpm.size()==0 && methpm.at(0)==fldNamewoptr)
 							{
 								if(methpm.at(0)=="int" || methpm.at(0)=="float" || methpm.at(0)=="string" || methpm.at(0)=="double" || methpm.at(0)=="bool")
 								{
-									methods += ("object.addPacket(__obj->"+methpm.at(1)+"(),\""+fldnames.at(k+1)+"\");\n");
-									//methods += ("objxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+CastUtil::lexical_cast<string>(__obj->"+methpm.at(1)+"())");
-									//methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
-									if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->set"+cam+"(CastUtil::lexical_cast<"+methpm.at(0)+">(root->getPackets().at(i)->getValue()));\n";
+									if(!ptr)
+									{
+										methods += ("object.addPacket(__obj->"+methpm.at(1)+"(),\""+fldnames.at(k+1)+"\");\n");
+										//methods += ("objxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+CastUtil::lexical_cast<string>(__obj->"+methpm.at(1)+"())");
+										//methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
+										//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->set"+cam+"(CastUtil::lexical_cast<"+methpm.at(0)+">(root->getPackets().at(i)->getValue()));\n";
+									}
+									else
+									{
+										methods += ("object.addPacket(*__obj->"+methpm.at(1)+"(),\""+fldnames.at(k+1)+"\");\n");
+										//methods += ("objxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+CastUtil::lexical_cast<string>(__obj->"+methpm.at(1)+"())");
+										//methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
+										//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->set"+cam+"(new "+methpm.at(0)+"(CastUtil::lexical_cast<"+methpm.at(0)+">(root->getPackets().at(i)->getValue())));\n";
+									}
 								}
 								else if(methpm.at(0)=="Date")
 								{
-									methods += ("DateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\n");
-									methods += ("object.addPacket(formt"+fldnames.at(k+1)+".format(__obj->"+methpm.at(1)+"()),\""+fldnames.at(k+1)+"\");\n");
-									//methods += ("DateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\nobjxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+formt"+fldnames.at(k+1)+".format(__obj->"+methpm.at(1)+"())");
-									//methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
-									if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n{\nDateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->set"+cam+"(*(formt"+fldnames.at(k+1)+".parse(root->getPackets().at(i)->getValue())));\n}\n";
+									if(!ptr)
+									{
+										methods += ("DateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\n");
+										methods += ("object.addPacket(formt"+fldnames.at(k+1)+".format(__obj->"+methpm.at(1)+"()),\""+fldnames.at(k+1)+"\");\n");
+										//methods += ("DateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\nobjxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+formt"+fldnames.at(k+1)+".format(__obj->"+methpm.at(1)+"())");
+										//methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
+										//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n{\nDateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->set"+cam+"(*(formt"+fldnames.at(k+1)+".parse(root->getPackets().at(i)->getValue())));\n}\n";
+									}
+									else
+									{
+										methods += ("DateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\n");
+										methods += ("object.addPacket(formt"+fldnames.at(k+1)+".format(*__obj->"+methpm.at(1)+"()),\""+fldnames.at(k+1)+"\");\n");
+										//methods += ("DateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\nobjxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+formt"+fldnames.at(k+1)+".format(__obj->"+methpm.at(1)+"())");
+										//methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
+										//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n{\nDateFormat formt"+fldnames.at(k+1)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->set"+cam+"((formt"+fldnames.at(k+1)+".parse(root->getPackets().at(i)->getValue())));\n}\n";
+									}
 								}
 								else if(methpm.at(0)=="BinaryData")
 								{
-									methods += ("object.addPacket(BinaryData::serilaize(__obj->"+methpm.at(1)+"()),\""+fldnames.at(k+1)+"\");\n");
-									//methods += ("objxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+BinaryData::serilaize(__obj->"+methpm.at(1)+"())");
-									//methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
-									if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->set"+cam+"(*(BinaryData::unSerilaize(root->getPackets().at(i)->getValue())));\n";
+									if(!ptr)
+									{
+										methods += ("object.addPacket(BinaryData::serilaize(__obj->"+methpm.at(1)+"()),\""+fldnames.at(k+1)+"\");\n");
+										//methods += ("objxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+BinaryData::serilaize(__obj->"+methpm.at(1)+"())");
+										//methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
+										//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->set"+cam+"(*(BinaryData::unSerilaize(root->getPackets().at(i)->getValue())));\n";
+									}
+									else
+									{
+										methods += ("object.addPacket(BinaryData::serilaize(*__obj->"+methpm.at(1)+"()),\""+fldnames.at(k+1)+"\");\n");
+										//methods += ("objxml += \"<"+fldnames.at(k+1)+" type=\\\""+methpm.at(0)+"\\\">\"+BinaryData::serilaize(__obj->"+methpm.at(1)+"())");
+										//methods += ("+\"</"+fldnames.at(k+1)+">\";\n");
+										//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+fldnames.at(k+1)+"\")\n__obj->set"+cam+"((BinaryData::unSerilaize(root->getPackets().at(i)->getValue())));\n";
+									}
 								}
 								else if(methpm.at(0).find("vector")!=string::npos || methpm.at(0).find("queue")!=string::npos || methpm.at(0).find("deque")!=string::npos || methpm.at(0).find("set")!=string::npos || methpm.at(0).find("list")!=string::npos)
 								{
@@ -1926,16 +2186,33 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 									StringUtil::replaceFirst(stlcnt,">","");
 									StringUtil::replaceFirst(stlcnt," ","");
 
-									methods += (methpm.at(0)+" __temp_obj_ser = __obj->"+methpm.at(1)+"();\n");
-									methods += ("object.addPacket(binarySerialize"+stlcnt+stlcnttyp+"(&__temp_obj_ser),\""+stlcnt+stlcnttyp+classN+"\");\n");
-									//string cam = StringUtil::capitalizedCopy(methpm.at(1));
-									//methods += ("+\"</"+nam+">\";\n");
-									if(methsall[classN+"get"+cam+methpm.at(0)])
+									if(!ptr)
 									{
-										typedefs += "if(nam==\""+fldnames.at(k+1)+"\"){";
-										typedefs += "\nAMEFEncoder enc;";
-										typedefs += "\n__obj->set"+cam+"(*("+methpm.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encode(root->getPackets().at(i), false)));\n";
-										typedefs += "\n}\n";
+										methods += (methpm.at(0)+" __temp_obj_ser = __obj->"+methpm.at(1)+"();\n");
+										methods += ("object.addPacket(binarySerialize"+stlcnt+stlcnttyp+"(&__temp_obj_ser),\""+stlcnt+stlcnttyp+classN+"\");\n");
+										//string cam = StringUtil::capitalizedCopy(methpm.at(1));
+										//methods += ("+\"</"+nam+">\";\n");
+										/*if(methsall[classN+"get"+cam+methpm.at(0)])
+										{
+											typedefs += "if(nam==\""+fldnames.at(k+1)+"\"){";
+											typedefs += "\nAMEFEncoder enc;";
+											typedefs += "\n__obj->set"+cam+"(*("+methpm.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encodeB(root->getPackets().at(i), false)));\n";
+											typedefs += "\n}\n";
+										}*/
+									}
+									else
+									{
+										methods += (methpm.at(0)+"* __temp_obj_ser = __obj->"+methpm.at(1)+"();\n");
+										methods += ("object.addPacket(binarySerialize"+stlcnt+stlcnttyp+"(__temp_obj_ser),\""+stlcnt+stlcnttyp+classN+"\");\n");
+										//string cam = StringUtil::capitalizedCopy(methpm.at(1));
+										//methods += ("+\"</"+nam+">\";\n");
+										/*if(methsall[classN+"get"+cam+methpm.at(0)])
+										{
+											typedefs += "if(nam==\""+fldnames.at(k+1)+"\"){";
+											typedefs += "\nAMEFEncoder enc;";
+											typedefs += "\n__obj->set"+cam+"(("+methpm.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(enc.encodeB(root->getPackets().at(i), false)));\n";
+											typedefs += "\n}\n";
+										}*/
 									}
 									//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+methpm.at(1)+"\")\n__obj->set"+cam+"(*("+methpm.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(root.getChildElements().at(i).renderChildren()));\n";
 								}
@@ -1943,11 +2220,23 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 								{
 									//string cam = StringUtil::capitalizedCopy(methpm.at(1));
 									//if(methsall[classN+"get"+cam+methpm.at(0)])typedefs += "if(nam==\""+methpm.at(1)+"\")\n__obj->set"+cam+"(*("+methpm.at(0)+"*)binaryUnSerialize"+methpm.at(0)+"(root.getChildElements().at(i).renderChildren()));\n";
-									if(methsall[classN+"get"+cam+methpm.at(0)])
+									if(!ptr)
 									{
-										methods += (methpm.at(0)+" __temp_obj_ser = __obj->"+methpm.at(1)+";\n");
-										methods += ("object.addPacket(binarySerialize"+methpm.at(0)+"(&__temp_obj_ser),\""+methpm.at(0)+"\");\n");
-										typedefs += "if(nam==\""+methpm.at(1)+"\")\n__obj->"+methpm.at(1)+" = *("+methpm.at(0)+"*)binaryUnSerialize"+methpm.at(0)+"(root->getPackets().at(i)->getValue());\n";
+										if(methsall[classN+"get"+cam+methpm.at(0)])
+										{
+											methods += (methpm.at(0)+" __temp_obj_ser = __obj->"+methpm.at(1)+";\n");
+											methods += ("object.addPacket(binarySerialize"+methpm.at(0)+"(&__temp_obj_ser),\""+methpm.at(0)+"\");\n");
+											//typedefs += "if(nam==\""+methpm.at(1)+"\")\n__obj->set"+cam+"(*("+methpm.at(0)+"*)binaryUnSerialize"+methpm.at(0)+"(root->getPackets().at(i)->getValue()));\n";
+										}
+									}
+									else
+									{
+										if(methsall[classN+"get"+cam+methpm.at(0)])
+										{
+											methods += (methpm.at(0)+"* __temp_obj_ser = __obj->"+methpm.at(1)+";\n");
+											methods += ("object.addPacket(binarySerialize"+methpm.at(0)+"(&__temp_obj_ser),\""+methpm.at(0)+"\");\n");
+											//typedefs += "if(nam==\""+methpm.at(1)+"\")\n__obj->set"+cam+"(("+methpm.at(0)+"*)binaryUnSerialize"+methpm.at(0)+"(root->getPackets().at(i)->getValue()));\n";
+										}
 									}
 								}
 							}
