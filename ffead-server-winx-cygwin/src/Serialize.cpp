@@ -591,7 +591,7 @@ string Serialize::_servec(void* t,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "serialize"+className+"Vec";
+	string methodname = "binarySerialize"+className+"Vec";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -610,7 +610,7 @@ string Serialize::_serlis(void* t,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "serialize"+className+"Lis";
+	string methodname = "binarySerialize"+className+"Lis";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -628,7 +628,7 @@ string Serialize::_serset(void* t,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "serialize"+className+"Set";
+	string methodname = "binarySerialize"+className+"Set";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -646,7 +646,7 @@ string Serialize::_sermultiset(void* t,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "serialize"+className+"MulSet";
+	string methodname = "binarySerialize"+className+"MulSet";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -664,7 +664,7 @@ string Serialize::_serq(void* t,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "serialize"+className+"Q";
+	string methodname = "binarySerialize"+className+"Q";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -682,7 +682,7 @@ string Serialize::_serdq(void* t,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "serialize"+className+"Dq";
+	string methodname = "binarySerialize"+className+"Dq";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -701,7 +701,7 @@ string Serialize::_ser(void* t,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "serialize"+className;
+	string methodname = "binarySerialize"+className;
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -1196,7 +1196,7 @@ void* Serialize::_unserSet(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"Set";
+	string methodname = "binaryUnSerialize"+className+"Set";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1217,7 +1217,7 @@ void* Serialize::_unserMulSet(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"MulSet";
+	string methodname = "binaryUnSerialize"+className+"MulSet";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1238,7 +1238,7 @@ void* Serialize::_unserQ(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"Q";
+	string methodname = "binaryUnSerialize"+className+"Q";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1259,7 +1259,7 @@ void* Serialize::_unserDq(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"Dq";
+	string methodname = "binaryUnSerialize"+className+"Dq";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1280,7 +1280,7 @@ void* Serialize::_unserLis(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"Lis";
+	string methodname = "binaryUnSerialize"+className+"Lis";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1301,7 +1301,7 @@ void* Serialize::_unserVec(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"Vec";
+	string methodname = "binaryUnSerialize"+className+"Vec";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1323,7 +1323,7 @@ void* Serialize::_unser(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className;
+	string methodname = "binaryUnSerialize"+className;
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;

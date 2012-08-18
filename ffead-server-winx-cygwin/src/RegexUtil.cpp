@@ -92,6 +92,7 @@ string RegexUtil::replace(const string& text, const string& pattern, const strin
 			match = ttext.substr(pm.rm_so, pm.rm_eo-pm.rm_so);
 			rettxt += ttext.substr(0, pm.rm_so) + with;
 		} else {
+			rettxt += ttext;
 			break;
 		}
 		ttext = ttext.substr(pm.rm_eo);
@@ -99,5 +100,6 @@ string RegexUtil::replace(const string& text, const string& pattern, const strin
 		pm.rm_so = -1;
 		reti = regexec (&regex, ttext.c_str(), 1, &pm, 0);
 	}
+	if(ttext!="")rettxt += ttext;
 	return rettxt;
 }

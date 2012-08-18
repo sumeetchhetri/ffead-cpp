@@ -336,7 +336,7 @@ public:
 			JDBObjectNew->namedLength = stringa.length() + 5;
 		}
 		JDBObjectNew->length = stringa.length();
-		JDBObjectNew->value = (char*)stringa.c_str();
+		JDBObjectNew->value = stringa;
 		packets.push_back(JDBObjectNew);
 		return JDBObjectNew;
 	}
@@ -1114,7 +1114,7 @@ public:
 	/**
 	 * @return bool  value of this object if its type is boolean
 	 */
-	bool getBooleanValue()
+	bool getBoolValue()
 	{
 		if(type=='b')
 			return (value[0]=='1'?true:false);
@@ -1141,7 +1141,18 @@ public:
 	double getDoubleValue()
 	{
 		if(type=='u')
-			return (CastUtil::lexical_cast<double>("12312.123"));
+			return (CastUtil::lexical_cast<double>(getValueStr()));
+		else
+			return -1;
+	}
+
+	/**
+	 * @return double value of this object if its type is double
+	 */
+	float getFloatValue()
+	{
+		if(type=='u')
+			return (CastUtil::lexical_cast<float>(getValueStr()));
 		else
 			return -1;
 	}
@@ -1210,7 +1221,7 @@ public:
 			else if(obj->isChar())
 			{
 				if(obj->type=='b')
-					displ += CastUtil::lexical_cast<string>(obj->getBooleanValue()) + "\n";
+					displ += CastUtil::lexical_cast<string>(obj->getBoolValue()) + "\n";
 				else
 					displ += (char)obj->value[0] + "\n";
 			}
