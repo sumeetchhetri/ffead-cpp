@@ -37,7 +37,7 @@ strVec Reflection::list(string cwd)
 	string command;
 	strVec files;
 	command = "ls -F1 "+cwd+"|grep '.h'";
-	logger << "\nCommand:" << command << flush;
+	//logger << "\nCommand:" << command << flush;
 	if ((pipe_fp = popen(command.c_str(), "r")) == NULL)
 	{
 		printf("pipe open error in cmd_list\n");
@@ -61,7 +61,7 @@ strVec Reflection::list(string cwd)
 			if(fileName.find("~")==string::npos)
 			{
 				files.push_back(cwd+"/"+fileName);
-				logger << "\nlist for file" << (cwd+"/"+fileName) << "\n" << flush;
+				//logger << "\nlist for file" << (cwd+"/"+fileName) << "\n" << flush;
 			}
 			fileName = "";
 		}
@@ -104,7 +104,7 @@ bool Reflection::generateClassInfo(string className)
 	string data;
 	//className += ".h";
 	ifstream infile;
-	logger << "Reading from the file" << endl;
+	//logger << "Reading from the file" << endl;
 	//className = "/home/sumeet/workspace/weblib/" + className;
 	infile.open(className.c_str());
 	string flag = "";
@@ -147,7 +147,7 @@ bool Reflection::generateClassInfo(string className)
 			}
 			else if(!commstrts)
 			{
-				logger << data << cnt <<endl;
+				//logger << data << cnt <<endl;
 				if((tes=data.find("template"))!=string::npos)
 					return false;
 				if(data.find("friend")!=string::npos)
@@ -674,7 +674,7 @@ string Reflection::generateClassDefinitionsAll(strVec all,string &includeRef)
 	ret += "extern \"C\"\n{\n";
 	for (unsigned int var = 0; var < all.size(); ++var)
 	{
-		logger << "\nstarting for classes " << all.size() << "\n" << flush;
+		//logger << "\nstarting for classes " << all.size() << "\n" << flush;
 		ret += this->generateClassDefinitions(all.at(var),inc,typedefs,classes,methods,opers);
 
 	}
@@ -697,7 +697,7 @@ string Reflection::generateClassDefinitions(string includeDir,string &includesDe
 	string ret,in,ty,cl,me;
 	for (unsigned int var = 0; var < includes.size(); ++var)
 	{
-		logger << "\ngenerating for file" << includes.at(var) << "\n" << flush;
+		//logger << "\ngenerating for file" << includes.at(var) << "\n" << flush;
 		string includesDefs1,typedefs1,classes1,methods1,opers1;
 		string ret1 = generateClassDefinition(includes.at(var),includesDefs1,typedefs1,classes1,methods1,opers1);
 		ret += ret1;
@@ -713,7 +713,7 @@ string Reflection::generateClassDefinitions(string includeDir,string &includesDe
 		{
 			invalidcls[includes.at(var)] = true;
 		}
-		logger << "\ndone generating for file" << includes.at(var) << "\n" << flush;
+		//logger << "\ndone generating for file" << includes.at(var) << "\n" << flush;
 	}
 	return ret;
 }
@@ -846,7 +846,7 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 					else if(argpm.at(j).find("&")!=string::npos)
 						type12 = "&";
 					StringUtil::split(argtn, argpm.at(j), (" "));
-					logger << "testing::::" << argpm.at(j) << argtn.size();
+					//logger << "testing::::" << argpm.at(j) << argtn.size();
 					StringUtil::replaceAll(argtn.at(0)," ","");
 					if(meth.find(" operator")==string::npos)refDef += ("argu.push_back(\""+argtn.at(0)+"\");\n");
 					if(argtn.at(0).find("*")!=string::npos || type12=="*")
@@ -1186,7 +1186,7 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				}
 				else
 				{
-					logger << fld << " error" << endl;
+					//logger << fld << " error" << endl;
 				}
 			}
 			else if(this->pub.at(i).find("~")!=string::npos)
@@ -1290,7 +1290,7 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				}
 				else
 				{
-					logger << fld << " error" << endl;
+					//logger << fld << " error" << endl;
 				}
 			}
 		}
@@ -1365,7 +1365,7 @@ string Reflection::generateClassDefinition(string className,string &includesDefs
 				}
 				else
 				{
-					logger << fld << " error" << endl;
+					//logger << fld << " error" << endl;
 				}
 			}
 		}
@@ -1412,13 +1412,13 @@ string Reflection::generateSerDefinitions(string includeDir,string &includesDefs
 	string ret;
 	for (unsigned int var = 0; var < includes.size(); ++var)
 	{
-		logger << "\ngenerating Ser for file" << includes.at(var) << "\n" << flush;
+		//logger << "\ngenerating Ser for file" << includes.at(var) << "\n" << flush;
 		if(invalidcls.find(includes.at(var))==invalidcls.end())
 		{
 			if(!isBinary)ret = generateSerDefinition(includes.at(var),includesDefs,typedefs,classes,methods);
 			else ret = generateSerDefinitionBinary(includes.at(var),includesDefs,typedefs,classes,methods);
 		}
-		logger << "\ndone generating Ser for file" << includes.at(var) << "\n" << flush;
+		//logger << "\ndone generating Ser for file" << includes.at(var) << "\n" << flush;
 	}
 	return ret;
 }
@@ -1820,11 +1820,11 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 				if(fldp.size()==2)
 				{
 					string nam = fldp.at(1);
-					if(fldp.at(0)=="int" || fldp.at(0)=="long" || fldp.at(0)=="float" || fldp.at(0)=="string" || fldp.at(0)=="double" || fldp.at(0)=="bool")
+					if(fldp.at(0)=="int" || fldp.at(0)=="long" || fldp.at(0)=="float" || fldp.at(0)=="string" || fldp.at(0)=="std::string" || fldp.at(0)=="double" || fldp.at(0)=="bool")
 					{
 						string argtype = StringUtil::capitalizedCopy(fldp.at(0));
 						string vallu = "root->getPackets().at(i)->get"+argtype+"Value()";
-						if(fldp.at(0)=="string")
+						if(fldp.at(0)=="string" || fldp.at(0)=="std::string")
 						{
 							vallu = "\"\\\"\"+root->getPackets().at(i)->getValueStr()+\"\\\"\"";
 						}
@@ -2018,20 +2018,20 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 						{
 							string cam = StringUtil::capitalizedCopy(fldnames.at(k+1));
 							string fldNamewoptr = StringUtil::replaceFirstCopy(fldnames.at(k), "*", "");
-							logger << "setter check " << fldNamewoptr << " "<<methpm.at(0) << " "<< methpm.at(1) << " "<< cam<< endl;
+							//logger << "setter check " << fldNamewoptr << " "<<methpm.at(0) << " "<< methpm.at(1) << " "<< cam<< endl;
 							if(argpm.size()==1)
 							{
 								StringUtil::replaceFirst(argpm.at(0), "*", "");
-								logger << argpm.at(0) << " " << argpm.size() << endl;
+								//logger << argpm.at(0) << " " << argpm.size() << endl;
 							}
 							if("set"+cam==methpm.at(1) && argpm.size()==1 && argpm.at(0)==fldNamewoptr && methpm.at(0)=="void")
 							{
-								logger << " inside setter " << endl;
-								if(argpm.at(0)=="int" || argpm.at(0)=="long" || argpm.at(0)=="float" || argpm.at(0)=="string" || argpm.at(0)=="double" || argpm.at(0)=="bool")
+								//logger << " inside setter " << endl;
+								if(argpm.at(0)=="int" || argpm.at(0)=="long" || argpm.at(0)=="float" || argpm.at(0)=="string" || argpm.at(0)=="std::string" || argpm.at(0)=="double" || argpm.at(0)=="bool")
 								{
 									string argtype = StringUtil::capitalizedCopy(argpm.at(0));
 									string vallu = "root->getPackets().at(i)->get"+argtype+"Value()";
-									if(argpm.at(0)=="string")
+									if(argpm.at(0)=="string" || argpm.at(0)=="std::string")
 									{
 										vallu = "\"\\\"\"+root->getPackets().at(i)->getValueStr()+\"\\\"\"";
 									}
@@ -2123,7 +2123,7 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 							}
 							else if("get"+cam==methpm.at(1) && argpm.size()==0 && methpm.at(0)==fldNamewoptr)
 							{
-								if(methpm.at(0)=="int" || methpm.at(0)=="long" || methpm.at(0)=="float" || methpm.at(0)=="string" || methpm.at(0)=="double" || methpm.at(0)=="bool")
+								if(methpm.at(0)=="int" || methpm.at(0)=="long" || methpm.at(0)=="float" || methpm.at(0)=="string" || methpm.at(0)=="std::string" || methpm.at(0)=="double" || methpm.at(0)=="bool")
 								{
 									if(!ptr)
 									{
