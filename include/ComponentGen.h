@@ -28,8 +28,7 @@
 #include "vector"
 #include "exception"
 #include "PropFileReader.h"
-#include <boost/lexical_cast.hpp>
-#include "boost/algorithm/string.hpp"
+#include "CastUtil.h"
 #include "Component.h"
 #include "AfcUtil.h"
 #include "Logger.h"

@@ -24,7 +24,7 @@
 #define OBJECT_H_
 #include <stdexcept>
 #include "iostream"
-#include <execinfo.h>
+/*Fix for Windows Cygwin*///#include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #include <stdio.h>
@@ -38,7 +38,7 @@ using namespace std;
 class Object {
 private:
 	Logger logger;
-	string demangle(const char *mangled)
+	static string demangle(const char *mangled)
 	{
 		int status;
 		char *demangled;
@@ -52,14 +52,6 @@ private:
 		return s;
 
 	}
-	template <typename T> string getClassName(T t)
-	{
-		const char *mangled = typeid(t).name();
-		string tn = demangle(mangled);
-		if(tn[tn.length()-1]=='*')
-			tn = tn.substr(0,tn.length()-1);
-		return tn;
-	}
 	string typeName;
 	void* pointer;
 	string serailizedXML;
@@ -67,6 +59,14 @@ public:
 	Object()
 	{
 		logger = Logger::getLogger("Object");
+	}
+	template <typename T> static string getClassName(T t)
+	{
+		const char *mangled = typeid(t).name();
+		string tn = demangle(mangled);
+		if(tn[tn.length()-1]=='*')
+			tn = tn.substr(0,tn.length()-1);
+		return tn;
 	}
 	template <typename T> void operator<<(T &t)
 	{

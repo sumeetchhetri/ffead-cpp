@@ -48,12 +48,12 @@ string ServicePool::registerService(string name,Service service)// will return a
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
 
-	string yr = boost::lexical_cast<string>(timeinfo->tm_year);
-	string mo = boost::lexical_cast<string>(timeinfo->tm_mon);
-	string da = boost::lexical_cast<string>(timeinfo->tm_mday);
-	string hr = boost::lexical_cast<string>(timeinfo->tm_hour);
-	string mm = boost::lexical_cast<string>(timeinfo->tm_min);
-	string ms = boost::lexical_cast<string>(((en.tv_sec * 1000000000) + en.tv_nsec)/1000000);
+	string yr = CastUtil::lexical_cast<string>(timeinfo->tm_year);
+	string mo = CastUtil::lexical_cast<string>(timeinfo->tm_mon);
+	string da = CastUtil::lexical_cast<string>(timeinfo->tm_mday);
+	string hr = CastUtil::lexical_cast<string>(timeinfo->tm_hour);
+	string mm = CastUtil::lexical_cast<string>(timeinfo->tm_min);
+	string ms = CastUtil::lexical_cast<string>(((en.tv_sec * 1000000000) + en.tv_nsec)/1000000);
 
 	string regName = (name+yr+mo+da+hr+mm+ms);
 	servicePool[regName] = service;

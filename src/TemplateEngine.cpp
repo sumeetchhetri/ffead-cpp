@@ -39,7 +39,7 @@ TemplateEngine::~TemplateEngine() {
 	{
 		string rep;
 		rep = "{$"+itr->first+"}";
-		boost::replace_all(ret,rep,itr->second);
+		StringUtil::replaceAll(ret,rep,itr->second);
 	}
 	return ret;
 }*/
@@ -82,7 +82,7 @@ string TemplateEngine::evaluate(string fileName,Context cntxt)
 	{
 		string rep;
 		rep = "${"+itr->first+"}";
-		boost::replace_all(ret,rep,itr->second);
+		StringUtil::replaceAll(ret,rep,itr->second);
 	}
 	return ret;
 }

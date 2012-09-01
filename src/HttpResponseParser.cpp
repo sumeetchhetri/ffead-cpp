@@ -37,7 +37,7 @@ HttpResponseParser::~HttpResponseParser() {
 HttpResponseParser::HttpResponseParser(string vecstr,string path)
 {
 	vector<string> vec;
-	boost::iter_split(vec, vecstr, boost::first_finder("\n"));
+	StringUtil::split(vec, vecstr, ("\n"));
 	if(HttpResponseParser::headernames==NULL)
 	{
 		HttpResponseParser::headernames = new string();
@@ -64,11 +64,11 @@ HttpResponseParser::HttpResponseParser(string vecstr,string path)
 				contStarts = true;
 				continue;
 			}
-			boost::iter_split(temp, vec.at(i), boost::first_finder(": "));
+			StringUtil::split(temp, vec.at(i), (": "));
 			if(temp.size()>1)
 			{
 				logger << "line => " << vec.at(i) << endl;
-				boost::replace_first(temp.at(1),"\r","");
+				StringUtil::replaceFirst(temp.at(1),"\r","");
 				if(HttpResponseParser::headernames->find(temp.at(0)+":")!=string::npos)
 				{
 					//logger << temp.at(0) << " = " << temp.at(1) << endl;
@@ -85,7 +85,7 @@ HttpResponseParser::HttpResponseParser(string vecstr,string path)
 				{
 					logger << "line => " << vec.at(i) << endl;
 					vector<string> httpst;
-					boost::iter_split(httpst, tem, boost::first_finder(" "));
+					StringUtil::split(httpst, tem, (" "));
 					if(httpst.at(0).find("HTTP")==string::npos)
 					{
 
@@ -123,7 +123,7 @@ HttpResponseParser::HttpResponseParser(string vecstr,string path)
 HttpResponseParser::HttpResponseParser(string vecstr)
 {
 	vector<string> vec;
-	boost::iter_split(vec, vecstr, boost::first_finder("\n"));
+	StringUtil::split(vec, vecstr, ("\n"));
 	if(vec.size()!=0)
 	{
 		this->content = "";
@@ -138,11 +138,11 @@ HttpResponseParser::HttpResponseParser(string vecstr)
 				contStarts = true;
 				continue;
 			}
-			boost::iter_split(temp, vec.at(i), boost::first_finder(": "));
+			StringUtil::split(temp, vec.at(i), (": "));
 			if(temp.size()>1 && !contStarts)
 			{
 				logger << temp.at(0) << " => " << temp.at(1) << endl;
-				boost::replace_first(temp.at(1),"\r","");
+				StringUtil::replaceFirst(temp.at(1),"\r","");
 				this->headers[temp.at(0)] = temp.at(1);
 			}
 			else
@@ -151,9 +151,9 @@ HttpResponseParser::HttpResponseParser(string vecstr)
 				if(!contStarts)
 				{
 					logger << "line => " << vec.at(i) << endl;
-					boost::replace_first(tem,"\r","");
+					StringUtil::replaceFirst(tem,"\r","");
 					vector<string> httpst;
-					boost::iter_split(httpst, tem, boost::first_finder(" "));
+					StringUtil::split(httpst, tem, (" "));
 					if(httpst.at(0).find("HTTP")==string::npos)
 					{
 

@@ -27,9 +27,10 @@
 #include <openssl/sha.h>
 #include <openssl/evp.h>
 #include <stdio.h>
-#include <string.h>
+#include "string"
+#include "cstring"
 #include <stdlib.h>
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 using namespace std;
 class CryptoHandler {
 	CryptoHandler();

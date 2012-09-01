@@ -47,10 +47,10 @@ void AOPEngine::execute(string fileName)
 			{
 				if(data.find("@INCLUDE")!=string::npos)
 				{
-					boost::erase_all(data,"@INCLUDE(\"");
-					boost::erase_all(data,"\")");
+					StringUtil::eraseAll(data,"@INCLUDE(\"");
+					StringUtil::eraseAll(data,"\")");
 					args tr;
-					boost::iter_split(tr, data, boost::first_finder(";"));
+					StringUtil::split(tr, data, (";"));
 					for(unsigned int i=0;i<tr.size();i++)
 					{
 						include += ("#include \"" + tr.at(i) + "\"\n");
@@ -62,10 +62,10 @@ void AOPEngine::execute(string fileName)
 				}
 				else if(data.find("@EXECUTION")!=string::npos)
 				{
-					boost::erase_all(data,"@EXECUTION(\"");
-					boost::erase_all(data,"\")");
+					StringUtil::eraseAll(data,"@EXECUTION(\"");
+					StringUtil::eraseAll(data,"\")");
 					args tr;
-					boost::iter_split(tr, data, boost::first_finder(" "));
+					StringUtil::split(tr, data, (" "));
 					for(unsigned int i=0;i<tr.size();i++)
 					{
 						if(i==0)
@@ -76,35 +76,35 @@ void AOPEngine::execute(string fileName)
 				}
 				else if(data.find("@STRICT")!=string::npos)
 				{
-					boost::erase_all(data,"@STRICT(\"");
-					boost::erase_all(data,"\")");
+					StringUtil::eraseAll(data,"@STRICT(\"");
+					StringUtil::eraseAll(data,"\")");
 					aspect.setStrict(data);
 				}
 				else if(data.find("@ARGS")!=string::npos)
 				{
-					boost::erase_all(data,"@ARGS(\"");
-					boost::erase_all(data,"\")");
+					StringUtil::eraseAll(data,"@ARGS(\"");
+					StringUtil::eraseAll(data,"\")");
 					aspect.setArguTypes(data);
 					args tr;
-					boost::iter_split(tr, data, boost::first_finder(";"));
+					StringUtil::split(tr, data, (";"));
 					aspect.setArgumentTypes(tr);
 				}
 				else if(data.find("@RETURN")!=string::npos)
 				{
-					boost::erase_all(data,"@RETURN(\"");
-					boost::erase_all(data,"\")");
+					StringUtil::eraseAll(data,"@RETURN(\"");
+					StringUtil::eraseAll(data,"\")");
 					aspect.setReturnType(data);
 				}
 				else if(data.find("@WHEN")!=string::npos)
 				{
-					boost::erase_all(data,"@WHEN(\"");
-					boost::erase_all(data,"\")");
+					StringUtil::eraseAll(data,"@WHEN(\"");
+					StringUtil::eraseAll(data,"\")");
 					aspect.setWhen(data);
 				}
 				else if(data.find("@CODE")!=string::npos)
 				{
-					boost::erase_all(data,"@CODE(");
-					boost::erase_all(data,")");
+					StringUtil::eraseAll(data,"@CODE(");
+					StringUtil::eraseAll(data,")");
 					aspect.setCode(data);
 				}
 				else if(data.find("@ASPECTEND")!=string::npos)
@@ -155,10 +155,10 @@ void AOPEngine::execute(string fileName)
 					unsigned e = later.find_first_of(")");
 					argus = later.substr(s,e-s);
 					args tr,tc;
-					boost::iter_split(tr, argus, boost::first_finder(","));
+					StringUtil::split(tr, argus, (","));
 					for(unsigned int i=0;i<tr.size();i++)
 					{
-						boost::iter_split(tc, tr.at(i), boost::first_finder(" "));
+						StringUtil::split(tc, tr.at(i), (" "));
 						stringstream ss;
 						ss << (i+1);
 						string te;

@@ -25,9 +25,9 @@
 #include "vector"
 #include "sstream"
 #include "fstream"
-#include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
+#include "StringUtil.h"
+
+#include "CastUtil.h"
 #include "stdio.h"
 #include <openssl/ssl.h>
 #include "CryptoHandler.h"

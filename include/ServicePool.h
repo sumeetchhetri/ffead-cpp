@@ -27,7 +27,7 @@
 #include "vector"
 #include "Service.h"
 #include <time.h>
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 using namespace std;
 class ServicePool {
 private:

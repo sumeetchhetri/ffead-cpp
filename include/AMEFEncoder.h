@@ -711,7 +711,7 @@ public:
 			}
 		}
 
-		for (int i=0;i<packet->getPackets().size();i++)
+		for (int i=0;i<(int)packet->getPackets().size();i++)
 		{
 			AMEFObject *pack = packet->getPackets().at(i);
 			string val = encodeSinglePacketB(pack,ignoreName);

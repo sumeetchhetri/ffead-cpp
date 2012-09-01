@@ -23,15 +23,8 @@
 #ifndef MQUEUE_H_
 #define MQUEUE_H_
 #include "Message.h"
-#include <boost/serialization/vector.hpp>
 typedef vector<Message> msgQ;
 class MQueue {
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive & ar, const unsigned int version)
-	{
-		ar & msgs;
-	}
 public:
 	msgQ msgs;
 	MQueue();
