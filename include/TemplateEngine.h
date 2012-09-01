@@ -24,7 +24,7 @@
 #define TEMPLATEENGINE_H_
 #include "string"
 #include "map"
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 #include <fstream>
 #include <iostream>
 using namespace std;

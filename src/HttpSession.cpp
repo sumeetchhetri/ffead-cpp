@@ -21,7 +21,7 @@
  */
 
 #include "HttpSession.h"
-#include <boost/foreach.hpp>
+
 #include <iostream>
 HttpSession::HttpSession()
 {

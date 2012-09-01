@@ -54,7 +54,7 @@ class MethodInvoc {
 	Server *server;
 	bool running;
 	static void init();
-	static void service(int);
+	static void* service(void* arg);
 
 public:
 	MethodInvoc();

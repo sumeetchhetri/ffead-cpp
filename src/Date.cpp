@@ -23,7 +23,7 @@
 
 string Date::getMon(string mmm)
 {
-	boost::to_upper(mmm);
+	StringUtil::toUpper(mmm);
 	if(mmm=="JAN")return "01";
 	else if(mmm=="FEB")return "02";
 	else if(mmm=="MAR")return "03";
@@ -41,7 +41,7 @@ string Date::getMon(string mmm)
 
 string Date::getMonFd(string mmm)
 {
-	boost::to_upper(mmm);
+	StringUtil::toUpper(mmm);
 	if(mmm=="01" || mmm=="1")return "JAN";
 	else if(mmm=="02" || mmm=="2")return "FEB";
 	else if(mmm=="03" || mmm=="3")return "MAR";
@@ -59,7 +59,7 @@ string Date::getMonFd(string mmm)
 
 int Date::getWeekDayVal(string dayName)
 {
-	boost::to_upper(dayName);
+	StringUtil::toUpper(dayName);
 	if(dayName=="SUN" || dayName=="SUNDAY")
 		return 7;
 	else if(dayName=="MON" || dayName=="MONDAY")
@@ -96,15 +96,15 @@ Date::Date()
 	this->nanoseconds = en.tv_nsec;
 	string tem;
 	tem.append(asctime(timeinfo));
-	boost::replace_all(tem,"\n","");
-	boost::replace_all(tem,"  "," ");
+	StringUtil::replaceAll(tem,"\n","");
+	StringUtil::replaceAll(tem,"  "," ");
 	vector<string> temp,vemp;
-	boost::iter_split(temp,tem,boost::first_finder(" "));
-	this->dayw = boost::to_upper_copy(temp.at(0));
-	this->monthw = boost::to_upper_copy(temp.at(1));
+	StringUtil::split(temp,tem,(" "));
+	this->dayw = StringUtil::toUpperCopy(temp.at(0));
+	this->monthw = StringUtil::toUpperCopy(temp.at(1));
 	this->month = getMon(monthw);
 	this->day = temp.at(2);
-	boost::iter_split(vemp,temp.at(3),boost::first_finder(":"));
+	StringUtil::split(vemp,temp.at(3),(":"));
 	this->hh = vemp.at(0);
 	this->mm = vemp.at(1);
 	this->ss = vemp.at(2);
@@ -119,15 +119,15 @@ Date::~Date() {
 int Date::getMonth()
 {
 	if(this->month!="")
-		return boost::lexical_cast<int>(this->month);
+		return CastUtil::lexical_cast<int>(this->month);
 	else
-		return boost::lexical_cast<int>(this->getMon(this->monthw));
+		return CastUtil::lexical_cast<int>(this->getMon(this->monthw));
 }
 
 void Date::setMonth(int month)
 {
 	string t = (month<=9?"0":"");
-	this->month = t + boost::lexical_cast<string>(month);
+	this->month = t + CastUtil::lexical_cast<string>(month);
 	this->monthw = getMonFd(this->month);
 }
 
@@ -143,7 +143,7 @@ void Date::setMonthw(string monthw)
 
 int Date::getYear() const
 {
-	return boost::lexical_cast<int>(year);
+	return CastUtil::lexical_cast<int>(year);
 }
 
 int Date::getWeekDay() const
@@ -154,45 +154,45 @@ int Date::getWeekDay() const
 void Date::setYear(int year)
 {
 	string t = (year<=9?"0":"");
-	this->year = t + boost::lexical_cast<string>(year);
+	this->year = t + CastUtil::lexical_cast<string>(year);
 }
 
 int Date::getDay() const
 {
-	return boost::lexical_cast<int>(day);
+	return CastUtil::lexical_cast<int>(day);
 }
 
 void Date::setDay(int day)
 {
 	string t = (day<=9?"0":"");
-	this->day = t + boost::lexical_cast<string>(day);
+	this->day = t + CastUtil::lexical_cast<string>(day);
 }
 
 int Date::getHh() const
 {
-	return boost::lexical_cast<int>(hh);
+	return CastUtil::lexical_cast<int>(hh);
 }
 
 void Date::setHh(int hh)
 {
 	string t = (hh<=9?"0":"");
-	this->hh = t + boost::lexical_cast<string>(hh);
+	this->hh = t + CastUtil::lexical_cast<string>(hh);
 }
 
 int Date::getMm() const
 {
-	return boost::lexical_cast<int>(mm);
+	return CastUtil::lexical_cast<int>(mm);
 }
 
 void Date::setMm(int mm)
 {
 	string t = (mm<=9?"0":"");
-	this->mm = t + boost::lexical_cast<string>(mm);
+	this->mm = t + CastUtil::lexical_cast<string>(mm);
 }
 
 int Date::getSs() const
 {
-	return boost::lexical_cast<int>(ss);
+	return CastUtil::lexical_cast<int>(ss);
 }
 
 long long Date::getNanoSeconds() const
@@ -203,7 +203,7 @@ long long Date::getNanoSeconds() const
 void Date::setSs(int ss)
 {
 	string t = (ss<=9?"0":"");
-	this->ss = t + boost::lexical_cast<string>(ss);
+	this->ss = t + CastUtil::lexical_cast<string>(ss);
 }
 
 string Date::getDayw() const
@@ -238,7 +238,7 @@ string Date::getSsStr() const
 
 string Date::getNsStr() const
 {
-	return boost::lexical_cast<string>(nanoseconds);
+	return CastUtil::lexical_cast<string>(nanoseconds);
 }
 
 string Date::getMmStr() const
@@ -253,7 +253,7 @@ string Date::getYearStr() const
 
 string Date::toString()
 {
-	return dayw+" "+year+" "+monthw+" "+day+" "+hh+":"+mm+":"+ss+"."+boost::lexical_cast<string>(nanoseconds);
+	return dayw+" "+year+" "+monthw+" "+day+" "+hh+":"+mm+":"+ss+"."+CastUtil::lexical_cast<string>(nanoseconds);
 }
 
 Date Date::addSeconds(long seconds)
@@ -441,7 +441,7 @@ bool Date::validateDate(int dd, int mm, int yyyy)
 		error = false;
 	string mw31days = ",1,3,5,7,8,10,12,";
 	string mw30oldays =  ",4,6,9,11,";
-	string mtc = "," + boost::lexical_cast<string>(mm) + ",";
+	string mtc = "," + CastUtil::lexical_cast<string>(mm) + ",";
 	if (mm==2)
 	{
 		if (!(yyyy % 4) && ((yyyy % 100) || !(yyyy % 400)))
@@ -506,8 +506,8 @@ Date::Date(int yyyy,string mmm,int dd)
 {
 	string mm = getMon(mmm);
 	if(mm=="-1")throw "Invalid month";
-	if(!validateDate(dd,boost::lexical_cast<int>(mm),yyyy))throw "Invalid date";
-	long g = getDays(yyyy,boost::lexical_cast<long>(mm),dd);
+	if(!validateDate(dd,CastUtil::lexical_cast<int>(mm),yyyy))throw "Invalid date";
+	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
 	*this = getDateFromDays(g);
 	this->nanoseconds = 0;
 }
@@ -523,12 +523,12 @@ Date::Date(int yyyy,int mm,int dd)
 Date::Date(int yy,string mmm,int dd,bool te)
 {
 	Date d;
-	string syyyy = d.year.substr(0,2) + boost::lexical_cast<string>(yy);
-	int yyyy = boost::lexical_cast<int>(syyyy);
+	string syyyy = d.year.substr(0,2) + CastUtil::lexical_cast<string>(yy);
+	int yyyy = CastUtil::lexical_cast<int>(syyyy);
 	string mm = getMon(mmm);
 	if(mm=="-1")throw "Invalid month";
-	if(!validateDate(dd,boost::lexical_cast<int>(mm),yyyy))throw "Invalid date";
-	long g = getDays(yyyy,boost::lexical_cast<long>(mm),dd);
+	if(!validateDate(dd,CastUtil::lexical_cast<int>(mm),yyyy))throw "Invalid date";
+	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
 	*this = getDateFromDays(g);
 	this->nanoseconds = 0;
 }
@@ -536,8 +536,8 @@ Date::Date(int yy,string mmm,int dd,bool te)
 Date::Date(int yy,int mm,int dd,bool te)
 {
 	Date d;
-	string syyyy = d.year.substr(0,2) + boost::lexical_cast<string>(yy);
-	int yyyy = boost::lexical_cast<int>(syyyy);
+	string syyyy = d.year.substr(0,2) + CastUtil::lexical_cast<string>(yy);
+	int yyyy = CastUtil::lexical_cast<int>(syyyy);
 	if(!validateDate(dd,mm,yyyy))throw "Invalid date";
 	long g = getDays(yyyy,mm,dd);
 	*this = getDateFromDays(g);

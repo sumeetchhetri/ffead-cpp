@@ -27,7 +27,7 @@
 #include "sstream"
 #include "map"
 #include "vector"
-#include "boost/algorithm/string.hpp"
+#include "StringUtil.h"
 
 using namespace std;
 typedef vector<string> strVec;

@@ -64,13 +64,13 @@ void HttpRequest::getOauthParams(string str)
 	logger << str << endl;
 
 	strVec tempv;
-	boost::iter_split(tempv, str, boost::first_finder(","));
+	StringUtil::split(tempv, str, (","));
 	for(unsigned int i=0;i<tempv.size();i++)
 	{
 		strVec tempvv;
-		boost::iter_split(tempvv, tempv.at(i), boost::first_finder("="));
-		boost::replace_first(tempvv.at(0),"\r","");
-		boost::replace_first(tempvv.at(0),"\n","");
+		StringUtil::split(tempvv, tempv.at(i), ("="));
+		StringUtil::replaceFirst(tempvv.at(0),"\r","");
+		StringUtil::replaceFirst(tempvv.at(0),"\n","");
 		string temr = tempvv.at(1);
 		temr = temr.substr(temr.find("\"")+1);
 		temr = temr.substr(0,temr.find("\""));
@@ -102,10 +102,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 			}
 			//if(!contStarts && vec.at(i)=="\r")
 			//	contStarts = true;
-			boost::iter_split(temp, vec.at(i), boost::first_finder(": "));
+			StringUtil::split(temp, vec.at(i), (": "));
 			if(!contStarts && temp.size()>1)
 			{
-				boost::replace_first(temp.at(1),"\r","");
+				StringUtil::replaceFirst(temp.at(1),"\r","");
 				if(temp.at(0)=="Host")
 					this->setHost(temp.at(1));
 				else if(temp.at(0)=="User-Agent" || temp.at(0)=="User-agent")
@@ -126,7 +126,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				{
 					strVec lemp;
 					this->setAccept_lang(temp.at(1));
-					boost::iter_split(lemp, temp.at(1), boost::first_finder(","));
+					StringUtil::split(lemp, temp.at(1), (","));
 					for(unsigned int li=0;li<lemp.size();li++)
 					{
 						if(lemp.at(li).find(";")==string::npos && lemp.at(li)!="")
@@ -170,7 +170,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						this->setContent_type(tempi.substr(0,s));
 						tempi = tempi.substr(s);
 						strVec results;
-						boost::iter_split(results, tempi, boost::first_finder("="));
+						StringUtil::split(results, tempi, ("="));
 						if(results.size()==2)
 						{
 							string bound = "--" + results.at(1).substr(0,results.at(1).length());
@@ -182,11 +182,11 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				{
 					this->cookie = true;
 					strVec results;
-					boost::iter_split(results, temp.at(1), boost::first_finder("; "));
+					StringUtil::split(results, temp.at(1), ("; "));
 					for(unsigned j=0;j<(int)results.size();j++)
 					{
 						strVec results1;
-						boost::iter_split(results1, results.at(j), boost::first_finder("="));
+						StringUtil::split(results1, results.at(j), ("="));
 						if(results1.size()==2)
 							cookieattrs[results1.at(0)] = results1.at(1);
 						else
@@ -204,16 +204,16 @@ HttpRequest::HttpRequest(strVec vec,string path)
 			else
 			{
 				string tem = temp.at(0);
-				if(!contStarts && boost::find_first(tem, "GET"))
+				if(!contStarts && tem.find("GET")!=string::npos)
 				{
-					boost::replace_first(tem,"GET ","");
+					StringUtil::replaceFirst(tem,"GET ","");
 					this->setMethod("GET");
-					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					StringUtil::split(vemp, tem, (" "));
 					if(vemp.size()==2)
 					{
-						boost::replace_first(vemp.at(1),"\r","");
+						StringUtil::replaceFirst(vemp.at(1),"\r","");
 						this->setHttpVersion(vemp.at(1));
-						boost::replace_first(vemp.at(0)," ","");
+						StringUtil::replaceFirst(vemp.at(0)," ","");
 						if(vemp.at(0).find("?")!=string ::npos)
 						{
 							strVec params;
@@ -221,19 +221,19 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
 							valu = valu.substr(valu.find("?")+1);
 							//valu = CryptoHandler::urlDecode(valu);
-							boost::iter_split(params,valu , boost::first_finder("&"));
+							StringUtil::split(params,valu , ("&"));
 							map<string ,int> indices;
 							map<string,string>::iterator it;
 							for(unsigned j=0;j<params.size();j++)
 							{
 								strVec param;
-								boost::iter_split(param, params.at(j), boost::first_finder("="));
+								StringUtil::split(param, params.at(j), ("="));
 								if(param.size()==2)
 								{
 									string att = param.at(0);
-									boost::replace_first(att,"\r","");
-									boost::replace_first(att,"\t","");
-									boost::replace_first(att," ","");
+									StringUtil::replaceFirst(att,"\r","");
+									StringUtil::replaceFirst(att,"\t","");
+									StringUtil::replaceFirst(att," ","");
 									//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
 									string attN = CryptoHandler::urlDecode(att);
 									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
@@ -247,10 +247,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 											indices[attN] = indices[attN] + 1;
 										}
 										this->requestParams[attN.substr(0, attN.find("[")+1)
-												  + boost::lexical_cast<string>(indices[attN])
+												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
 										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
-														  + boost::lexical_cast<string>(indices[attN])
+														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
 														  << CryptoHandler::urlDecode(param.at(1)) << endl;
 									}
@@ -262,7 +262,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -285,16 +285,16 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						}
 					}
 				}
-				else if(!contStarts && boost::find_first(tem, "HEAD"))
+				else if(!contStarts && tem.find("HEAD")!=string::npos)
 				{
-					boost::replace_first(tem,"HEAD ","");
+					StringUtil::replaceFirst(tem,"HEAD ","");
 					this->setMethod("HEAD");
-					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					StringUtil::split(vemp, tem, (" "));
 					if(vemp.size()==2)
 					{
-						boost::replace_first(vemp.at(1),"\r","");
+						StringUtil::replaceFirst(vemp.at(1),"\r","");
 						this->setHttpVersion(vemp.at(1));
-						boost::replace_first(vemp.at(0)," ","");
+						StringUtil::replaceFirst(vemp.at(0)," ","");
 						if(vemp.at(0).find("?")!=string ::npos)
 						{
 							strVec params;
@@ -302,19 +302,19 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
 							valu = valu.substr(valu.find("?")+1);
 							//valu = CryptoHandler::urlDecode(valu);
-							boost::iter_split(params,valu , boost::first_finder("&"));
+							StringUtil::split(params,valu , ("&"));
 							map<string ,int> indices;
 							map<string,string>::iterator it;
 							for(unsigned j=0;j<params.size();j++)
 							{
 								strVec param;
-								boost::iter_split(param, params.at(j), boost::first_finder("="));
+								StringUtil::split(param, params.at(j), ("="));
 								if(param.size()==2)
 								{
 									string att = param.at(0);
-									boost::replace_first(att,"\r","");
-									boost::replace_first(att,"\t","");
-									boost::replace_first(att," ","");
+									StringUtil::replaceFirst(att,"\r","");
+									StringUtil::replaceFirst(att,"\t","");
+									StringUtil::replaceFirst(att," ","");
 									//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
 									string attN = CryptoHandler::urlDecode(att);
 									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
@@ -328,10 +328,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 											indices[attN] = indices[attN] + 1;
 										}
 										this->requestParams[attN.substr(0, attN.find("[")+1)
-												  + boost::lexical_cast<string>(indices[attN])
+												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
 										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
-														  + boost::lexical_cast<string>(indices[attN])
+														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
 														  << CryptoHandler::urlDecode(param.at(1)) << endl;
 									}
@@ -343,7 +343,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -366,16 +366,16 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						}
 					}
 				}
-				else if(!contStarts && boost::find_first(tem, "TRACE"))
+				else if(!contStarts && tem.find("TRACE")!=string::npos)
 				{
-					boost::replace_first(tem,"TRACE ","");
+					StringUtil::replaceFirst(tem,"TRACE ","");
 					this->setMethod("TRACE");
-					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					StringUtil::split(vemp, tem, (" "));
 					if(vemp.size()==2)
 					{
-						boost::replace_first(vemp.at(1),"\r","");
+						StringUtil::replaceFirst(vemp.at(1),"\r","");
 						this->setHttpVersion(vemp.at(1));
-						boost::replace_first(vemp.at(0)," ","");
+						StringUtil::replaceFirst(vemp.at(0)," ","");
 						if(vemp.at(0).find("?")!=string ::npos)
 						{
 							strVec params;
@@ -383,19 +383,19 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
 							valu = valu.substr(valu.find("?")+1);
 							//valu = CryptoHandler::urlDecode(valu);
-							boost::iter_split(params,valu , boost::first_finder("&"));
+							StringUtil::split(params,valu , ("&"));
 							map<string ,int> indices;
 							map<string,string>::iterator it;
 							for(unsigned j=0;j<params.size();j++)
 							{
 								strVec param;
-								boost::iter_split(param, params.at(j), boost::first_finder("="));
+								StringUtil::split(param, params.at(j), ("="));
 								if(param.size()==2)
 								{
 									string att = param.at(0);
-									boost::replace_first(att,"\r","");
-									boost::replace_first(att,"\t","");
-									boost::replace_first(att," ","");
+									StringUtil::replaceFirst(att,"\r","");
+									StringUtil::replaceFirst(att,"\t","");
+									StringUtil::replaceFirst(att," ","");
 									//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
 									string attN = CryptoHandler::urlDecode(att);
 									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
@@ -409,10 +409,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 											indices[attN] = indices[attN] + 1;
 										}
 										this->requestParams[attN.substr(0, attN.find("[")+1)
-												  + boost::lexical_cast<string>(indices[attN])
+												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
 										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
-														  + boost::lexical_cast<string>(indices[attN])
+														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
 														  << CryptoHandler::urlDecode(param.at(1)) << endl;
 									}
@@ -424,7 +424,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -447,18 +447,18 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						}
 					}
 				}
-				else if(!contStarts && boost::find_first(tem, "OPTIONS"))
+				else if(!contStarts && tem.find("OPTIONS")!=string::npos)
 				{
-					boost::replace_first(tem,"OPTIONS ","");
+					StringUtil::replaceFirst(tem,"OPTIONS ","");
 					this->setMethod("OPTIONS");
-					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					StringUtil::split(vemp, tem, (" "));
 					if(vemp.size()==2)
 					{
-						boost::replace_first(vemp.at(1),"\r","");
+						StringUtil::replaceFirst(vemp.at(1),"\r","");
 						this->setHttpVersion(vemp.at(1));
-						boost::replace_first(vemp.at(0)," ","");
+						StringUtil::replaceFirst(vemp.at(0)," ","");
 						this->setActUrl(vemp.at(0));
-						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -481,16 +481,16 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						}
 					}
 				}
-				else if(!contStarts && boost::find_first(tem, "DELETE"))
+				else if(!contStarts && tem.find("DELETE")!=string::npos)
 				{
-					boost::replace_first(tem,"DELETE ","");
+					StringUtil::replaceFirst(tem,"DELETE ","");
 					this->setMethod("DELETE");
-					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					StringUtil::split(vemp, tem, (" "));
 					if(vemp.size()==2)
 					{
-						boost::replace_first(vemp.at(1),"\r","");
+						StringUtil::replaceFirst(vemp.at(1),"\r","");
 						this->setHttpVersion(vemp.at(1));
-						boost::replace_first(vemp.at(0)," ","");
+						StringUtil::replaceFirst(vemp.at(0)," ","");
 						if(vemp.at(0).find("?")!=string ::npos)
 						{
 							strVec params;
@@ -498,19 +498,19 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
 							valu = valu.substr(valu.find("?")+1);
 							valu = CryptoHandler::urlDecode(valu);
-							boost::iter_split(params,valu, boost::first_finder("&"));
+							StringUtil::split(params,valu, ("&"));
 							map<string ,int> indices;
 							map<string,string>::iterator it;
 							for(unsigned j=0;j<params.size();j++)
 							{
 								strVec param;
-								boost::iter_split(param, params.at(j), boost::first_finder("="));
+								StringUtil::split(param, params.at(j), ("="));
 								if(param.size()==2)
 								{
 									string att = param.at(0);
-									boost::replace_first(att,"\r","");
-									boost::replace_first(att,"\t","");
-									boost::replace_first(att," ","");
+									StringUtil::replaceFirst(att,"\r","");
+									StringUtil::replaceFirst(att,"\t","");
+									StringUtil::replaceFirst(att," ","");
 									string attN = CryptoHandler::urlDecode(att);
 									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 									{
@@ -523,10 +523,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 											indices[attN] = indices[attN] + 1;
 										}
 										this->requestParams[attN.substr(0, attN.find("[")+1)
-												  + boost::lexical_cast<string>(indices[attN])
+												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
 										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
-														  + boost::lexical_cast<string>(indices[attN])
+														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
 														  << CryptoHandler::urlDecode(param.at(1)) << endl;
 									}
@@ -537,7 +537,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -560,16 +560,16 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						}
 					}
 				}
-				else if(!contStarts && boost::find_first(tem, "PUT"))
+				else if(!contStarts && tem.find("PUT")!=string::npos)
 				{
-					boost::replace_first(tem,"PUT ","");
+					StringUtil::replaceFirst(tem,"PUT ","");
 					this->setMethod("PUT");
-					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					StringUtil::split(vemp, tem, (" "));
 					if(vemp.size()==2)
 					{
-						boost::replace_first(vemp.at(1),"\r","");
+						StringUtil::replaceFirst(vemp.at(1),"\r","");
 						this->setHttpVersion(vemp.at(1));
-						boost::replace_first(vemp.at(0)," ","");
+						StringUtil::replaceFirst(vemp.at(0)," ","");
 						if(vemp.at(0).find("?")!=string ::npos)
 						{
 							strVec params;
@@ -577,19 +577,19 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
 							valu = valu.substr(valu.find("?")+1);
 							valu = CryptoHandler::urlDecode(valu);
-							boost::iter_split(params,valu, boost::first_finder("&"));
+							StringUtil::split(params,valu, ("&"));
 							map<string ,int> indices;
 							map<string,string>::iterator it;
 							for(unsigned j=0;j<params.size();j++)
 							{
 								strVec param;
-								boost::iter_split(param, params.at(j), boost::first_finder("="));
+								StringUtil::split(param, params.at(j), ("="));
 								if(param.size()==2)
 								{
 									string att = param.at(0);
-									boost::replace_first(att,"\r","");
-									boost::replace_first(att,"\t","");
-									boost::replace_first(att," ","");
+									StringUtil::replaceFirst(att,"\r","");
+									StringUtil::replaceFirst(att,"\t","");
+									StringUtil::replaceFirst(att," ","");
 									string attN = CryptoHandler::urlDecode(att);
 									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 									{
@@ -602,10 +602,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 											indices[attN] = indices[attN] + 1;
 										}
 										this->requestParams[attN.substr(0, attN.find("[")+1)
-												  + boost::lexical_cast<string>(indices[attN])
+												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
 										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
-														  + boost::lexical_cast<string>(indices[attN])
+														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
 														  << CryptoHandler::urlDecode(param.at(1)) << endl;
 									}
@@ -616,7 +616,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -639,18 +639,18 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						}
 					}
 				}
-				else if(!contStarts && boost::find_first(tem, "POST"))
+				else if(!contStarts && tem.find("POST")!=string::npos)
 				{
-					boost::replace_first(tem,"POST ","");
+					StringUtil::replaceFirst(tem,"POST ","");
 					this->setMethod("POST");
-					boost::iter_split(vemp, tem, boost::first_finder(" "));
+					StringUtil::split(vemp, tem, (" "));
 					if(vemp.size()==2)
 					{
 						//this->setUrl(vemp.at(0));
 						//string pat(vemp.at(0));
-						boost::replace_first(vemp.at(1),"\r","");
+						StringUtil::replaceFirst(vemp.at(1),"\r","");
 						this->setHttpVersion(vemp.at(1));
-						boost::replace_first(vemp.at(0)," ","");
+						StringUtil::replaceFirst(vemp.at(0)," ","");
 						if(vemp.at(0).find("?")!=string ::npos)
 						{
 							strVec params;
@@ -658,19 +658,19 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
 							valu = valu.substr(valu.find("?")+1);
 							valu = CryptoHandler::urlDecode(valu);
-							boost::iter_split(params,valu, boost::first_finder("&"));
+							StringUtil::split(params,valu, ("&"));
 							map<string ,int> indices;
 							map<string,string>::iterator it;
 							for(unsigned j=0;j<params.size();j++)
 							{
 								strVec param;
-								boost::iter_split(param, params.at(j), boost::first_finder("="));
+								StringUtil::split(param, params.at(j), ("="));
 								if(param.size()==2)
 								{
 									string att = param.at(0);
-									boost::replace_first(att,"\r","");
-									boost::replace_first(att,"\t","");
-									boost::replace_first(att," ","");
+									StringUtil::replaceFirst(att,"\r","");
+									StringUtil::replaceFirst(att,"\t","");
+									StringUtil::replaceFirst(att," ","");
 									string attN = CryptoHandler::urlDecode(att);
 									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 									{
@@ -683,10 +683,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 											indices[attN] = indices[attN] + 1;
 										}
 										this->requestParams[attN.substr(0, attN.find("[")+1)
-												  + boost::lexical_cast<string>(indices[attN])
+												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
 										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
-														  + boost::lexical_cast<string>(indices[attN])
+														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
 														  << CryptoHandler::urlDecode(param.at(1)) << endl;
 									}
@@ -697,7 +697,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							}
 						}
 						this->setActUrl(vemp.at(0));
-						boost::iter_split(memp, vemp.at(0), boost::first_finder("/"));
+						memp = StringUtil::split(vemp.at(0), ("/"));
 						int fs = vemp.at(0).find_first_of("/");
 						int es = vemp.at(0).find_last_of("/");
 						if(fs==es)
@@ -742,20 +742,20 @@ HttpRequest::HttpRequest(strVec vec,string path)
 			strVec params;
 			string content = this->getContent();
 			//logger << content << flush;
-			boost::iter_split(params, content, boost::first_finder("&"));
+			StringUtil::split(params, content, ("&"));
 			//logger << "\n\n\nsize: " << params.size() << flush;
 			for(unsigned j=0;j<params.size();j++)
 			{
 				strVec param;
 				//logger << params.at(j) << flush;
-				boost::iter_split(param, params.at(j), boost::first_finder("="));
+				StringUtil::split(param, params.at(j), ("="));
 				//logger << param.size() << flush;
 				if(param.size()==2)
 				{
 					string att = param.at(0);
-					boost::replace_first(att,"\r","");
-					boost::replace_first(att,"\t","");
-					boost::replace_first(att," ","");
+					StringUtil::replaceFirst(att,"\r","");
+					StringUtil::replaceFirst(att,"\t","");
+					StringUtil::replaceFirst(att," ","");
 					//logger << "attribute:  " << param.at(0) << "\n"<< flush;
 					//logger << "value: " << param.at(1) << "\n" << flush;
 					this->setRequestParam(att,param.at(1));
@@ -769,19 +769,19 @@ HttpRequest::HttpRequest(strVec vec,string path)
 			{
 				strVec params;
 				string valu(this->getContent());
-				boost::iter_split(params,valu , boost::first_finder("&"));
+				StringUtil::split(params,valu , ("&"));
 				map<string ,int> indices;
 				map<string,string>::iterator it;
 				for(unsigned j=0;j<params.size();j++)
 				{
 					strVec param;
-					boost::iter_split(param, params.at(j), boost::first_finder("="));
+					StringUtil::split(param, params.at(j), ("="));
 					if(param.size()==2)
 					{
 						string att = param.at(0);
-						boost::replace_first(att,"\r","");
-						boost::replace_first(att,"\t","");
-						boost::replace_first(att," ","");
+						StringUtil::replaceFirst(att,"\r","");
+						StringUtil::replaceFirst(att,"\t","");
+						StringUtil::replaceFirst(att," ","");
 						string attN = CryptoHandler::urlDecode(att);
 						if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 						{
@@ -794,10 +794,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 								indices[attN] = indices[attN] + 1;
 							}
 							this->requestParams[attN.substr(0, attN.find("[")+1)
-									  + boost::lexical_cast<string>(indices[attN])
+									  + CastUtil::lexical_cast<string>(indices[attN])
 									  + "]"] = CryptoHandler::urlDecode(param.at(1));
 							logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
-											  << boost::lexical_cast<string>(indices[attN])
+											  << CastUtil::lexical_cast<string>(indices[attN])
 											  << "]"
 											  << CryptoHandler::urlDecode(param.at(1)) << endl;
 						}
@@ -814,10 +814,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				size_t stb = this->getContent().find_first_of(delb)+delb.length()+1;
 				size_t enb = this->getContent().find_last_not_of(delend);
 				string param_conts = this->getContent().substr(stb);
-				boost::replace_first(param_conts,delend,"");
+				StringUtil::replaceFirst(param_conts,delend,"");
 				param_conts = param_conts.substr(0,param_conts.length()-1);
 				strVec parameters;
-				boost::iter_split(parameters, param_conts, boost::first_finder(delb));
+				StringUtil::split(parameters, param_conts, (delb));
 				//logger << "Boundary: " << this->getContent_boundary() << flush;
 				//logger << "\nLength: " << this->getContent().length() << flush;
 				//logger << "\nStart End: " << stb << " " << enb << "\n" << flush;
@@ -857,13 +857,13 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							//dist = dist-12;
 						}
 						cont_disp = parm.substr(dis+21,dist-(dis+21));
-						boost::replace_first(cont_disp,"\r","");
+						StringUtil::replaceFirst(cont_disp,"\r","");
 						//logger << "\ncdisp = " << cont_disp << flush;
 						//logger << "\ndise = " << dise << flush;
 						parm = parm.substr(dise);
 					}
 					strVec parmdef;
-					boost::iter_split(parmdef, cont_disp, boost::first_finder(";"));
+					StringUtil::split(parmdef, cont_disp, (";"));
 					string key;
 					for(unsigned k=0;k<parmdef.size();k++)
 					{
@@ -875,7 +875,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							//logger << "\nst en = " << stpd  << " " << enpd << flush;
 							string propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
 							strVec proplr;
-							boost::iter_split(proplr, propert, boost::first_finder("="));
+							StringUtil::split(proplr, propert, ("="));
 							if(proplr.size()==2)
 							{
 								if(proplr.at(0)=="name" && proplr.at(1)!="\"\"")
@@ -883,7 +883,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 									key = proplr.at(1);
 									key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
 									key = CryptoHandler::urlDecode(key);
-									boost::replace_first(cont_type,"\r","");
+									StringUtil::replaceFirst(cont_type,"\r","");
 									datf.type = cont_type;
 									datf.value = parm;
 								}
@@ -911,10 +911,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 								indices[attN] = indices[attN] + 1;
 							}
 							this->requestParamsF[attN.substr(0, attN.find("[")+1)
-									  + boost::lexical_cast<string>(indices[attN])
+									  + CastUtil::lexical_cast<string>(indices[attN])
 									  + "]"] = datf;
 							logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
-											  << boost::lexical_cast<string>(indices[attN])
+											  << CastUtil::lexical_cast<string>(indices[attN])
 											  << "]"
 											  << datf.fileName << endl;
 						}
@@ -957,7 +957,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 	{
 		strVec lemp;
 		this->setAccept_lang(value);
-		boost::iter_split(lemp, value, boost::first_finder(","));
+		StringUtil::split(lemp, value, (","));
 		for(unsigned int li=0;li<lemp.size();li++)
 		{
 			if(lemp.at(li).find(";")==string::npos && lemp.at(li)!="")
@@ -1001,7 +1001,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 			this->setContent_type(tempi.substr(0,s));
 			tempi = tempi.substr(s);
 			strVec results;
-			boost::iter_split(results, tempi, boost::first_finder("="));
+			StringUtil::split(results, tempi, ("="));
 			if(results.size()==2)
 			{
 				string bound = "--" + results.at(1).substr(0,results.at(1).length());
@@ -1023,17 +1023,17 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 		else if(this->getContent_type().find("application/x-www-form-urlencoded")!=string::npos)
 		{
 			strVec params;
-			boost::iter_split(params,value , boost::first_finder("&"));
+			StringUtil::split(params,value , ("&"));
 			for(unsigned j=0;j<params.size();j++)
 			{
 				strVec param;
-				boost::iter_split(param, params.at(j), boost::first_finder("="));
+				StringUtil::split(param, params.at(j), ("="));
 				if(param.size()==2)
 				{
 					string att = param.at(0);
-					boost::replace_first(att,"\r","");
-					boost::replace_first(att,"\t","");
-					boost::replace_first(att," ","");
+					StringUtil::replaceFirst(att,"\r","");
+					StringUtil::replaceFirst(att,"\t","");
+					StringUtil::replaceFirst(att," ","");
 					this->setRequestParam(att,param.at(1));
 				}
 			}
@@ -1041,7 +1041,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 		else
 		{
 			size_t rn = value.find_first_of("\r\n");
-			string h = boost::lexical_cast<string>(rn);
+			string h = CastUtil::lexical_cast<string>(rn);
 
 			string boundary = this->getContent_boundary();
 			fprintf(stderr,boundary.c_str());
@@ -1053,17 +1053,17 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 			string delend = boundary+"--\r\n";
 			size_t stb = value.find_first_of(delb)+delb.length();
 			size_t enb = value.find_last_not_of(delend);
-			h = boost::lexical_cast<string>(stb)+" "+boost::lexical_cast<string>(enb);
+			h = CastUtil::lexical_cast<string>(stb)+" "+CastUtil::lexical_cast<string>(enb);
 
 			string param_conts = value.substr(stb,enb-stb-2);
 			strVec parameters;
-			boost::replace_first(value,delb,"");
-			boost::replace_first(value,delend,"");
+			StringUtil::replaceFirst(value,delb,"");
+			StringUtil::replaceFirst(value,delend,"");
 			delb = "\r\n"+delb;
-			boost::iter_split(parameters, value, boost::first_finder(delb));
+			StringUtil::split(parameters, value, (delb));
 			retval =  "Boundary: "+ boundary + "\nLength: " ;
-			retval += boost::lexical_cast<string>(value.length()) +"\nStart End: "
-			+ boost::lexical_cast<string>(stb) + " " + boost::lexical_cast<string>(enb) +"\n";
+			retval += CastUtil::lexical_cast<string>(value.length()) +"\nStart End: "
+			+ CastUtil::lexical_cast<string>(stb) + " " + CastUtil::lexical_cast<string>(enb) +"\n";
 
 			for(unsigned j=0;j<parameters.size();j++)
 			{
@@ -1096,14 +1096,14 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 						dise = parm.find("\r\n\r\n") + 4;
 					}
 					cont_disp = parm.substr(dis+21,dist-(dis+21));
-					boost::replace_first(cont_disp,"\r\n","");
+					StringUtil::replaceFirst(cont_disp,"\r\n","");
 					retval+=  "\ncdisp = " + cont_disp;
-					retval+= "\ndise = " + boost::lexical_cast<string>(dise);
+					retval+= "\ndise = " + CastUtil::lexical_cast<string>(dise);
 					parm = parm.substr(dise);
 					parm = parm.substr(0,parm.length()-1);
 				}
 				strVec parmdef;
-				boost::iter_split(parmdef, cont_disp, boost::first_finder(";"));
+				StringUtil::split(parmdef, cont_disp, (";"));
 				string key;
 				for(unsigned k=0;k<parmdef.size();k++)
 				{
@@ -1112,10 +1112,10 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 						size_t stpd = parmdef.at(k).find_first_not_of(" ");
 						size_t enpd = parmdef.at(k).find_last_not_of(" ");
 						retval+=  "\nparmdef = " + parmdef.at(k) ;
-						retval+=  "\nst en = " + boost::lexical_cast<string>(stpd)  + " " + boost::lexical_cast<string>(enpd);
+						retval+=  "\nst en = " + CastUtil::lexical_cast<string>(stpd)  + " " + CastUtil::lexical_cast<string>(enpd);
 						string propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
 						strVec proplr;
-						boost::iter_split(proplr, propert, boost::first_finder("="));
+						StringUtil::split(proplr, propert, ("="));
 						if(proplr.size()==2)
 						{
 							if(proplr.at(0)=="name" && proplr.at(1)!="\"\"")
@@ -1156,17 +1156,17 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 	else if(key=="GetArguments")
 	{
 		strVec params;
-		boost::iter_split(params, value, boost::first_finder("&"));
+		StringUtil::split(params, value, ("&"));
 		for(unsigned j=0;j<params.size();j++)
 		{
 			strVec param;
-			boost::iter_split(param, params.at(j), boost::first_finder("="));
+			StringUtil::split(param, params.at(j), ("="));
 			if(param.size()==2)
 			{
 				string att = param.at(0);
-				boost::replace_first(att,"\r","");
-				boost::replace_first(att,"\t","");
-				boost::replace_first(att," ","");
+				StringUtil::replaceFirst(att,"\r","");
+				StringUtil::replaceFirst(att,"\t","");
+				StringUtil::replaceFirst(att," ","");
 				this->setRequestParam(att,param.at(1));
 			}
 		}
@@ -1174,27 +1174,27 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 	/*else if(key=="PostArguments")
 	{
 		strVec params;
-		boost::iter_split(params, value, boost::first_finder("&"));
+		StringUtil::split(params, value, ("&"));
 		for(unsigned j=0;j<params.size();j++)
 		{
 			strVec param;
-			boost::iter_split(param, params.at(j), boost::first_finder("="));
+			StringUtil::split(param, params.at(j), ("="));
 			if(param.size()==2)
 			{
 				string att = param.at(0);
-				boost::replace_first(att,"\r","");
-				boost::replace_first(att,"\t","");
-				boost::replace_first(att," ","");
+				StringUtil::replaceFirst(att,"\r","");
+				StringUtil::replaceFirst(att,"\t","");
+				StringUtil::replaceFirst(att," ","");
 				this->setRequestParam(att,param.at(1));
 			}
 		}
 	}*/
-	else if(boost::find_first(key, "URL"))
+	else if(key.find("URL")!=string::npos)
 	{
-		boost::replace_first(key,"URL","");
+		StringUtil::replaceFirst(key,"URL","");
 		strVec memp;
 		this->setActUrl(value);
-		boost::iter_split(memp, value, boost::first_finder("/"));
+		StringUtil::split(memp, value, ("/"));
 		int fs = value.find_first_of("/");
 		int es = value.find_last_of("/");
 		if(fs==es)
@@ -1260,7 +1260,7 @@ string HttpRequest::toString()
 			vals+= ("\nValue: "+dat.value);
 		}
 	}
-	ret += "\nRequest Parameters "+vals;//boost::lexical_cast<string>(this->getRequestParams().size());
+	ret += "\nRequest Parameters "+vals;//CastUtil::lexical_cast<string>(this->getRequestParams().size());
 	return ret;
 }
 
@@ -1598,7 +1598,7 @@ string HttpRequest::toPHPVariablesString(string def)
 	ret += "';\n$_SERVER['REQUEST_METHOD'] = '"+this->getMethod();
 	ret += "';\n$_SERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
 	string requri = this->getActUrl();
-	boost::replace_first(requri, ("/"+this->getCntxt_name()), "");
+	StringUtil::replaceFirst(requri, ("/"+this->getCntxt_name()), "");
 	if(requri=="")
 		requri = "/";
 	ret += "';\n$_SERVER['REQUEST_URI'] = '"+requri;
@@ -1656,7 +1656,7 @@ string HttpRequest::toPHPVariablesString(string def)
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "';";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ boost::lexical_cast<string>(dat.length) + ";";
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "';";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
@@ -1667,7 +1667,7 @@ string HttpRequest::toPHPVariablesString(string def)
 				ret += "\nif(!isset($_FILES['"+iter->first+"']))\n{\n$_FILES['"+iter->first+"']=array();\n}\n";
 				ret += "\n$_FILES['"+iter->first+"']['name'] = '"+ dat.fileName + "';";
 				ret += "\n$_FILES['"+iter->first+"']['type'] = '"+ dat.type + "';";
-				ret += "\n$_FILES['"+iter->first+"']['size'] = "+ boost::lexical_cast<string>(dat.length) + ";";
+				ret += "\n$_FILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
 				ret += "\n$_FILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "';";
 				ret += "\n$_FILES['"+iter->first+"']['error'] = 0;";
 			}
@@ -1716,8 +1716,8 @@ string HttpRequest::toPerlVariablesString()
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				string key = iter->first;
-				boost::replace_first(key,"[","{");
-				boost::replace_first(key,"]","}");
+				StringUtil::replaceFirst(key,"[","{");
+				StringUtil::replaceFirst(key,"]","}");
 				ret += "\nif(!exists $_GET{'"+key.substr(0, key.find("{"))+"'})\n{\n$_GET{'"+key.substr(0, key.find("{"))+"'}={}\n}\n";
 				ret += ("\n$_GET{'"+key.substr(0, key.find("{"))+"'}" +
 						key.substr(key.find("{")) + " = '"+iter->second + "';");
@@ -1734,8 +1734,8 @@ string HttpRequest::toPerlVariablesString()
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				string key = iter->first;
-				boost::replace_first(key,"[","{");
-				boost::replace_first(key,"]","}");
+				StringUtil::replaceFirst(key,"[","{");
+				StringUtil::replaceFirst(key,"]","}");
 				ret += "\nif(!exists $_POST{'"+key.substr(0, key.find("{"))+"'})\n{\n$_POST{'"+key.substr(0, key.find("{"))+"'}={}\n}\n";
 				ret += ("\n$_POST{'"+key.substr(0, key.find("{"))+"'}" +
 						key.substr(key.find("{")) + " = '"+iter->second + "';");
@@ -1753,8 +1753,8 @@ string HttpRequest::toPerlVariablesString()
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				string key = iter->first;
-				boost::replace_first(key,"[","{");
-				boost::replace_first(key,"]","}");
+				StringUtil::replaceFirst(key,"[","{");
+				StringUtil::replaceFirst(key,"]","}");
 				ret += "\nif(!exists $_FILES{'"+key.substr(0, key.find("{"))+"'})\n{\n$_FILES{'"+key.substr(0, key.find("{"))+"'}={}\n}\n";
 				ret += "\nif(!exists $_FILES{'"+key.substr(0, key.find("{"))+"'}{'"+key.substr(key.find("{"))+"'})\n"
 						+ "{\n$_FILES{'"+key.substr(0, key.find("{"))+"'}{'"+key.substr(key.find("{"))+"'}={}\n}\n";
@@ -1763,7 +1763,7 @@ string HttpRequest::toPerlVariablesString()
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
 						key.substr(key.find("{")) + "{'type'} = '"+ dat.type + "';";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
-						key.substr(key.find("{")) + "{'size'} = "+ boost::lexical_cast<string>(dat.length) + ";";
+						key.substr(key.find("{")) + "{'size'} = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
 						key.substr(key.find("{")) + "{'tmp_name'} = '"+ dat.tmpFileName + "';";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
@@ -1774,7 +1774,7 @@ string HttpRequest::toPerlVariablesString()
 				ret += "\nif(!exists $_FILES{'"+iter->first+"'})\n{\n$_FILES{'"+iter->first+"'}={}\n}\n";
 				ret += "\n$_FILES{'"+iter->first+"'}{'name'} = '"+ dat.fileName + "';";
 				ret += "\n$_FILES{'"+iter->first+"'}{'type'} = '"+ dat.type + "';";
-				ret += "\n$_FILES{'"+iter->first+"'}{'size'} = "+ boost::lexical_cast<string>(dat.length) + ";";
+				ret += "\n$_FILES{'"+iter->first+"'}{'size'} = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
 				ret += "\n$_FILES{'"+iter->first+"'}{'tmp_name'} = '"+ dat.tmpFileName + "';";
 				ret += "\n$_FILES{'"+iter->first+"'}{'error'} = 0;";
 			}
@@ -1852,8 +1852,8 @@ string HttpRequest::toRubyVariablesString()
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				string key = iter->first.substr(iter->first.find("["));
-				boost::replace_first(key,"[","");
-				boost::replace_first(key,"]","");
+				StringUtil::replaceFirst(key,"[","");
+				StringUtil::replaceFirst(key,"]","");
 				ret += "\nif(!FILES.has_key?('"+iter->first.substr(0, iter->first.find("["))
 						+"'))\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']={}\nend";
 				ret += "\nif(!FILES['"+iter->first.substr(0, iter->first.find("["))+"'].has_key?('"+key+"'))"
@@ -1863,7 +1863,7 @@ string HttpRequest::toRubyVariablesString()
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ boost::lexical_cast<string>(dat.length);
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
@@ -1874,7 +1874,7 @@ string HttpRequest::toRubyVariablesString()
 				ret += "\nFILES['"+iter->first+"'] = {}";
 				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "'";
 				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "'";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ boost::lexical_cast<string>(dat.length);
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
 				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "'";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0";
 			}
@@ -1952,8 +1952,8 @@ string HttpRequest::toPythonVariablesString()
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				string key = iter->first.substr(iter->first.find("["));
-				boost::replace_first(key,"[","");
-				boost::replace_first(key,"]","");
+				StringUtil::replaceFirst(key,"[","");
+				StringUtil::replaceFirst(key,"]","");
 				ret += "\nif '"+iter->first.substr(0, iter->first.find("["))
 						+"' not in FILES:\n\tFILES['"+iter->first.substr(0, iter->first.find("["))+"']={}\n";
 				ret += "\nif '"+key+"' not in FILES['"+iter->first.substr(0, iter->first.find("["))+"']:\n"
@@ -1963,7 +1963,7 @@ string HttpRequest::toPythonVariablesString()
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ boost::lexical_cast<string>(dat.length);
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
@@ -1974,7 +1974,7 @@ string HttpRequest::toPythonVariablesString()
 				ret += "\nFILES['"+iter->first+"'] = {}";
 				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "'";
 				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "'";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ boost::lexical_cast<string>(dat.length);
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
 				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "'";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0";
 			}
@@ -2052,8 +2052,8 @@ string HttpRequest::toLuaVariablesString()
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				string key = iter->first.substr(iter->first.find("["));
-				boost::replace_first(key,"[","");
-				boost::replace_first(key,"]","");
+				StringUtil::replaceFirst(key,"[","");
+				StringUtil::replaceFirst(key,"]","");
 				ret += "\nif FILES['"+iter->first.substr(0, iter->first.find("["))+"'] == nil then"
 						+ "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']={}\nend\n";
 				ret += "\nif FILES['"+iter->first.substr(0, iter->first.find("["))+"']['"+key+"']  == nil then"
@@ -2063,7 +2063,7 @@ string HttpRequest::toLuaVariablesString()
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ boost::lexical_cast<string>(dat.length);
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
@@ -2074,7 +2074,7 @@ string HttpRequest::toLuaVariablesString()
 				ret += "\nFILES['"+iter->first+"'] = {}";
 				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "'";
 				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "'";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ boost::lexical_cast<string>(dat.length);
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
 				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "'";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0";
 			}
@@ -2157,7 +2157,7 @@ string HttpRequest::toNodejsVariablesString()
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "';";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ boost::lexical_cast<string>(dat.length) + ";";
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "';";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
@@ -2168,7 +2168,7 @@ string HttpRequest::toNodejsVariablesString()
 				ret += "\nif(!isset(FILES['"+iter->first+"']))\n{\nFILES['"+iter->first+"']={};\n}\n";
 				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "';";
 				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "';";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ boost::lexical_cast<string>(dat.length) + ";";
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
 				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "';";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0;";
 			}

@@ -14,30 +14,31 @@
     limitations under the License.  
 */
 /*
- * ExceptionHandler.cpp
+ * PoolThread.h
  *
- *  Created on: Jun 10, 2010
+ *  Created on: Mar 23, 2010
  *      Author: sumeet
  */
 
-#include "ExceptionHandler.h"
+#ifndef POOLTHREAD_H_
+#define POOLTHREAD_H_
+#include "Task.h"
+#include "Thread.h"
+#include "TimeUnit.h"
+#include "Logger.h"
 
+class PoolThread {
+	bool console;
+	static void* run(void *arg);
+	PoolThread();
+	virtual ~PoolThread();
+	Thread *mthread;
+	bool idle;
+	Task *task;
+	Logger logger;
+	friend class ThreadPool;
+public:
+	void execute();
+};
 
-ExceptionHandler::ExceptionHandler()
-{
-	static SingleTonHandler s_objHandler;
-}
-
-ExceptionTracer::ExceptionTracer()
-{
-	 /*void * array[25];
-	 int nSize = backtrace(array, 25);
-	 char ** symbols = backtrace_symbols(array, nSize);
-
-	 for (int i = 0; i < nSize; i++)
-	 {
-
-	 }
-
-	 free(symbols);*/
-}
+#endif /* POOLTHREAD_H_ */

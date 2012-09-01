@@ -30,7 +30,7 @@
 #include "Field.h"
 #include "vector"
 #include "map"
-#include "boost/algorithm/string.hpp"
+#include "StringUtil.h"
 using namespace std;
 typedef map<string,Constructor> ctorMap;
 typedef map<string,Method> methMap;

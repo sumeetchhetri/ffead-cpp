@@ -43,8 +43,9 @@ void ComponentHandler::init()
 	}
 }
 
-void ComponentHandler::service(int fd)
+void* ComponentHandler::service(void* arg)
 {
+	int fd = *(int*)arg;
 	init();
 	string methInfo,retValue;
 	_cmp_instance->getServer()->Receive(fd,methInfo,1024);
@@ -150,17 +151,17 @@ void ComponentHandler::service(int fd)
 					if(returnType=="int")
 					{
 						int retv = reflector.invokeMethod<int>(_temp,meth,valus);
-						retValue = ("<return:int>"+boost::lexical_cast<string>(retv)+"</return:int>");
+						retValue = ("<return:int>"+CastUtil::lexical_cast<string>(retv)+"</return:int>");
 					}
 					else if(returnType=="float")
 					{
 						float retv = reflector.invokeMethod<float>(_temp,meth,valus);
-						retValue = ("<return:float>"+boost::lexical_cast<string>(retv)+"</return:float>");
+						retValue = ("<return:float>"+CastUtil::lexical_cast<string>(retv)+"</return:float>");
 					}
 					else if(returnType=="double")
 					{
 						double retv = reflector.invokeMethod<double>(_temp,meth,valus);
-						retValue = ("<return:double>"+boost::lexical_cast<string>(retv)+"</return:double>");
+						retValue = ("<return:double>"+CastUtil::lexical_cast<string>(retv)+"</return:double>");
 					}
 					else if(returnType=="string")
 					{

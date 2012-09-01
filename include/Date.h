@@ -25,8 +25,8 @@
 #include <time.h>
 #include "string"
 #include "vector"
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
+#include "CastUtil.h"
+#include "StringUtil.h"
 
 using namespace std;
 

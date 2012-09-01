@@ -25,9 +25,9 @@
 #include "map"
 #include "vector"
 #include "sstream"
-#include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
+#include "StringUtil.h"
+
+#include "CastUtil.h"
 #include "stdio.h"
 #include "fstream"
 #include "iostream"

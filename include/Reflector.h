@@ -24,7 +24,6 @@
 #include <stdexcept>
 /*Fix for Windows Cygwin*///#include <execinfo.h>
 #include <dlfcn.h>
-#include <cxxabi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
@@ -35,23 +34,6 @@ class Reflector
 {
 	vector<string> objectT;
 	vector<void*> objects;
-	string demangle(const char *mangled)
-	{
-		int status;	char *demangled;
-		using namespace abi;
-		demangled = __cxa_demangle(mangled, NULL, 0, &status);
-		printf("\n---------Demanged --%s\n\n", demangled);
-		stringstream ss;
-		ss << demangled;
-		string s;
-		ss >> s;
-		return s;
-	}
-	string getClassName(void* instance)
-	{
-		const char *mangled = typeid(instance).name();
-		return demangle(mangled);
-	}
 	void cleanUp();
 public:
 	Reflector();

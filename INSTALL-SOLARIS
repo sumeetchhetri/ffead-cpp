@@ -12,14 +12,8 @@ SOLARIS based Installation
 			- PATH should now look like /opt/csw/bin:/usr/bin:/usr/share/bin
 	Install GCC/UnixODBC and SSL devel and libraries
 		sudo pkgutil -y -i gcc4core gcc4g++ libstdc++6 unixodbc unixodbc_dev libssl1_0_0 libssl_dev subversion(optional)
-	Install Boost libraries and devel headers
-		wget http://nchc.dl.sourceforge.net/project/boost/boost/1.50.0/boost_1_50_0.tar.bz2
-		tar xvf boost_1_50_0.tar.bz2
-		cd boost_1_50_0
-		sudo ./bootstrap.sh
-		sudo ./bjam address-model=64
-		sudo ./bjam install --prefix=/usr/
-4. JSON-SPIRIT source and header files are already included in the source code distribution
+	Boost libraries no longer required since version 1.7
+4. JSON-SPIRIT libraries no longer required since version 1.7
 5. Also included prototype.js in source for AJAX support
 6. Go to the ffead-server-solaris/Release or ffead-server-solaris/Debug depending on whether you need to debug the server code
 7. Open terminal and type gmake all
