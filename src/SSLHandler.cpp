@@ -142,7 +142,7 @@ void SSLHandler::error_occurred(char *error,int fd,SSL *ssl)
 
 void SSLHandler::closeSSL(int fd,SSL *ssl,BIO* bio)
 {
-	BIO_free(bio);
+	//BIO_free(bio);
 	int r=SSL_shutdown(ssl);
 	if(!r){
 	  /* If we called SSL_shutdown() first then

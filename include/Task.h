@@ -33,7 +33,7 @@ class Task {
 	bool console;
 	Task(int priority);
 	Task(int tunit, int type);
-	friend class Thread;
+	friend class PoolThread;
 	friend class ThreadPool;
 	friend class TaskPool;
 public:

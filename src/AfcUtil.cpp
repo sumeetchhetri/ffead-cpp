@@ -38,9 +38,9 @@ string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool
 {
 	Reflection ref;
 	string ret="#include \"AfcInclude.h\"\n\nextern \"C\"\n{\n";
-	headers = "#include <boost/lexical_cast.hpp>\n#include \"json_spirit.h\"\n#include \"sstream\"\n";
+	headers = "#include \"CastUtil.h\"\n#include \"JSONUtil.h\"\n#include \"sstream\"\n#include \"CastUtil.h\"\n";
 	if(obj.size()==0)return ret + "}";
-	ret += "\nconst mValue& find_value(const mObject& obj, const string& name)\n{\nmObject::const_iterator i = obj.find(name);\nreturn i->second;\n}\n";
+	//ret += "\nconst mValue& find_value(const mObject& obj, const string& name)\n{\nmObject::const_iterator i = obj.find(name);\nreturn i->second;\n}\n";
 	for (unsigned int var = 0; var < obj.size(); ++var)
 	{
 		if(stat.at(var))
@@ -57,7 +57,7 @@ string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool
 			ret += generateJsInterfaces(info,files.at(var),headers,obj.at(var),infjs,pv.at(var));
 		}
 	}
-	headers += "\nusing namespace json_spirit;\n";
+	//headers += "\nusing namespace json_spirit;\n";
 	ret = (ret + "\n}\n");
 	//writeTofile("/home/sumeet/workspace/inter/AfcInclude.h",headers,true);
 	return ret;
@@ -73,6 +73,7 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	Reflection ref;
 	string retu;
 	string test = "function _"+claz+"()\n{\n";
+	tes += "JSONElement* _node;\n";
 	fres = "string json=\"{";
 	bool priv = false;
 	if(obj.size()==0 && pobj.size()>0)
@@ -84,36 +85,37 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	{
 		strVec vemp;
 		string data = obj.at(i);
-		boost::replace_first(data,";","");
-		boost::iter_split(vemp, data, boost::first_finder(" "));
-		test += "this." + vemp.at(1) + "= null;\n";
-		if(vemp.at(0)=="float")
+		StringUtil::replaceFirst(data,";","");
+		StringUtil::split(vemp, data, (" "));
+		if(vemp.size()<2)
 		{
-			tes += "double te_ = find_value( obj, \""+vemp.at(1)+"\" ).get_value<double>();\n";
-			if(!priv)tes += "_obj."+vemp.at(1)+" = boost::lexical_cast<"+vemp.at(0)+">(te_);\n";
-			else tes += "_obj.set"+camelCased(vemp.at(1))+"(boost::lexical_cast<"+vemp.at(0)+">(te_));\n";
+			logger << data << " error" <<  endl;
+			continue;
 		}
-		else if(vemp.at(0)=="int" || vemp.at(0)=="double" || vemp.at(0)=="string")
+		test += "this." + vemp.at(1) + "= null;\n";
+		if(vemp.at(0)=="int" || vemp.at(0)=="double" || vemp.at(0)=="float" || vemp.at(0)=="string")
 		{
-			if(!priv)tes += "_obj." + vemp.at(1) + "= find_value( obj, \""+vemp.at(1)+"\" ).get_value<"+vemp.at(0)+">();\n";
-			else tes += "_obj.set"+camelCased(vemp.at(1))+"(find_value( obj, \""+vemp.at(1)+"\" ).get_value<"+vemp.at(0)+">());\n";
+			tes += "_node = obj.getNode(\""+vemp.at(1)+"\");\n";
+			if(!priv)tes += "if(_node!=NULL)_obj." + vemp.at(1) + "= CastUtil::lexical_cast<"+vemp.at(0)+">(_node->getValue());\n";
+			else tes += "if(_node!=NULL)_obj.set"+camelCased(vemp.at(1))+"(CastUtil::lexical_cast<"+vemp.at(0)+">(_node->getValue()));\n";
 		}
 		else
 		{
-			if(!priv)tes += "_obj." + vemp.at(1) + "= read"+vemp.at(0)+"(find_value( obj, \""+vemp.at(1)+"\" ).get_obj());\n";
-			else tes += "_obj.set"+camelCased(vemp.at(1))+"(read"+vemp.at(0)+"(find_value( obj, \""+vemp.at(1)+"\" ).get_obj()));\n";
+			tes += "_node = obj.getNode(\""+vemp.at(1)+"\");\n";
+			if(!priv)tes += "if(_node!=NULL)_obj." + vemp.at(1) + "= read"+vemp.at(0)+"(*_node);\n";
+			else tes += "if(_node!=NULL)_obj.set"+camelCased(vemp.at(1))+"(read"+vemp.at(0)+"(*_node));\n";
 		}
 		if(vemp.at(0)=="int" || vemp.at(0)=="float" || vemp.at(0)=="double" || vemp.at(0)=="string")
 		{
 			if(vemp.at(0)=="string")
 			{
-				if(!priv)fres += "'"+vemp.at(1)+"' : '\"+_obj."+vemp.at(1)+"+\"'";
-				else fres += "'"+vemp.at(1)+"' : '\"+_obj.get"+camelCased(vemp.at(1))+"()+\"'";
+				if(!priv)fres += "\\\""+vemp.at(1)+"\\\" : \\\"\"+_obj."+vemp.at(1)+"+\"\\\"";
+				else fres += "\\\""+vemp.at(1)+"\\\" : \\\"\"+_obj.get"+camelCased(vemp.at(1))+"()+\"\\\"";
 			}
 			else
 			{
-				if(!priv)fres += "'"+vemp.at(1)+"' : '\"+boost::lexical_cast<string>(_obj."+vemp.at(1)+")+\"'";
-				else fres += "'"+vemp.at(1)+"' : '\"+boost::lexical_cast<string>(_obj.get"+camelCased(vemp.at(1))+"())+\"'";
+				if(!priv)fres += "\\\""+vemp.at(1)+"\\\" : \\\"\"+CastUtil::lexical_cast<string>(_obj."+vemp.at(1)+")+\"\\\"";
+				else fres += "\\\""+vemp.at(1)+"\\\" : \\\"\"+CastUtil::lexical_cast<string>(_obj.get"+camelCased(vemp.at(1))+"())+\"\\\"";
 			}
 			if(i!=obj.size()-1)
 			{
@@ -125,8 +127,8 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 			strVec pppinfo;
 			strVec info = ref.getAfcObjectData(path+vemp.at(0)+".h", true, pppinfo);
 			retu += generateJsObjects(info,vemp.at(0),headers,path,objs,pppinfo);
-			if(!priv)fres += "'"+vemp.at(1)+"' : '\"+from"+vemp.at(0)+"ToJSON(_obj."+vemp.at(1)+")+\"'";
-			else fres += "'"+vemp.at(1)+"' : '\"+from"+vemp.at(0)+"ToJSON(_obj.get."+camelCased(vemp.at(1))+"())+\"'";
+			if(!priv)fres += "\\\""+vemp.at(1)+"\\\" : \\\"\"+from"+vemp.at(0)+"ToJSON(_obj."+vemp.at(1)+")+\"\\\"";
+			else fres += "\\\""+vemp.at(1)+"\\\" : \\\"\"+from"+vemp.at(0)+"ToJSON(_obj.get."+camelCased(vemp.at(1))+"())+\"\\\"";
 			if(i!=obj.size()-1)
 			{
 				fres += ",";
@@ -142,24 +144,24 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	headers += "#include \""+claz+".h\"\n";
 
 	//test = "\nconst mValue& find_value(const mObject& obj, const string& name)\n{\nmObject::const_iterator i = obj.find(name);\nreturn i->second;\n}\n";
-	test = retu+ "\n\n" + claz + " read"+claz+"(const mObject& obj)\n{\n"+claz+" _obj;\n";
+	test = retu+ "\n\n" + claz + " read"+claz+"(JSONElement& obj)\n{\n"+claz+" _obj;\n";
 	/*for(unsigned int i=0;i<obj.size();i++)
 	{
 		strVec vemp;
 		string data = obj.at(i);
-		boost::replace_first(data,";","");
-		boost::iter_split(vemp, data, boost::first_finder(" "));
+		StringUtil::replaceFirst(data,";","");
+		StringUtil::split(vemp, data, (" "));
 		if(vemp.at(0)=="float")
 		{
 			test += "double te_ = find_value( obj, \""+vemp.at(1)+"\" ).get_value<double>();\n";
-			test += "_obj."+vemp.at(1)+" = boost::lexical_cast<"+vemp.at(0)+">(te_);";
+			test += "_obj."+vemp.at(1)+" = CastUtil::lexical_cast<"+vemp.at(0)+">(te_);";
 		}
 		else
 			test += "_obj." + vemp.at(1) + "= find_value( obj, \""+vemp.at(1)+"\" ).get_value<"+vemp.at(0)+">();\n";
 	}*/
 	test += tes + "\nreturn _obj;\n}\n";
-	test += claz + " to"+claz+"(string s)\n{\nmValue value;\nread(s,value);\n"+ claz +" _obj = read"+claz+"(value.get_obj());\nreturn _obj;\n}\n";
-	test += "void* toVoidP"+claz+"(string s)\n{\nmValue value;\nread(s,value);\n"+ claz +" *_obj = new "+claz+";\n*_obj = read"+claz+"(value.get_obj());\nreturn _obj;\n}\n";
+	test += claz + " to"+claz+"(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ claz +" _obj = read"+claz+"(element);\nreturn _obj;\n}\n";
+	test += "void* toVoidP"+claz+"(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ claz +" *_obj = new "+claz+";\n*_obj = read"+claz+"(element);\nreturn _obj;\n}\n";
 	test += "\nstring from"+claz+"ToJSON("+claz+" _obj)\n{\n"+fres+"\nreturn json;\n}\n";
 	return test;
 }
@@ -176,8 +178,13 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 	{
 		strVec vemp,emp;
 		string data = obj.at(i);
-		boost::replace_first(data,";","");
-		boost::split(vemp, data, boost::is_any_of(" ,)("));
+		StringUtil::replaceFirst(data,";","");
+		vector<string> delimiters;
+		delimiters.push_back(" ");
+		delimiters.push_back(",");
+		delimiters.push_back(")");
+		delimiters.push_back("(");
+		StringUtil::split(vemp, data, delimiters);
 		for(unsigned int k=0;k<vemp.size();k++)
 		{
 			if(vemp.at(k)!="")
@@ -227,7 +234,7 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 							getline(st1,h1);
 							jsonstr += "_"+h1;
 							types.append(h1.c_str());
-							types.append("=boost::lexical_cast<");
+							types.append("=CastUtil::lexical_cast<");
 							types.append(emp.at(j).c_str());
 							types.append(">(_inp.at(");
 							st2 << (j-2);
@@ -286,7 +293,7 @@ string AfcUtil::updateAjaxInterface(strVec emp,string claz,string pars,string pa
 	string test;
 	string retType = emp.at(0);
 	string funcName = emp.at(1);
-	//test = "#include \"" + claz + ".h\"\n#include <boost/lexical_cast.hpp>\n\n";
+	//test = "#include \"" + claz + ".h\"\n#include "CastUtil.h"\n\n";
 	test += ("string invokeAjaxMethodFor" + claz + funcName + "(strVec _inp");
 	test += ")\n{\n" + types;
 	test += (claz + " _obj;\n");
@@ -300,7 +307,7 @@ string AfcUtil::updateAjaxInterface(strVec emp,string claz,string pars,string pa
 	}
 	else if(retType=="int" || retType=="float" || retType=="double")
 	{
-		test += "string outp = boost::lexical_cast<string>(_obj."+funcName+"("+pars+"));\nreturn outp;\n}\n";
+		test += "string outp = CastUtil::lexical_cast<string>(_obj."+funcName+"("+pars+"));\nreturn outp;\n}\n";
 	}
 	else
 		test += "return from"+retType+"ToJSON(_obj."+funcName+"("+pars+"));\n}\n";
@@ -316,7 +323,7 @@ string AfcUtil::execute(HttpRequest req)
 	string methName = req.getRequestParam("method");
 	string claz = req.getRequestParam("claz");
 	string temp = req.getRequestParam("paramsize");
-	int paramSize = boost::lexical_cast<int>(temp.c_str());
+	int paramSize = CastUtil::lexical_cast<int>(temp.c_str());
 	logger << "\nreading params::" << flush;
 	for(int i=0;i<paramSize;i++)
 	{

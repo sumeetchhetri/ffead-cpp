@@ -23,8 +23,8 @@
 #include "TaskPool.h"
 
 TaskPool::TaskPool() {
-	m_mutex = new boost::mutex;
-	tasks = new queue<Task*> ;
+	m_mutex = new Mutex();
+	tasks = new std::queue<Task*> ;
 	ptasks = new list<Task*> ;
 }
 void TaskPool::addTask(Task &task) {

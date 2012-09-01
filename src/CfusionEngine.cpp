@@ -39,7 +39,7 @@ void CfusionEngine::execute(string file)
 	Element root = parser.getDocument(file).getRootElement();
 	ElementList eles = root.getChildElements();
 	string className = root.getAttribute("name");
-	boost::to_upper(className);
+	StringUtil::toUpper(className);
 	codeh += ("#ifndef "+className+"_H_\n");
 	codeh += ("#define "+className+"_H_\n");
 	codem += ("#include \""+root.getAttribute("name")+".h\"\n\n");
@@ -49,7 +49,7 @@ void CfusionEngine::execute(string file)
 		{
 			string inc = eles.at(var).getAttribute("names");
 			strVec incs;
-			boost::iter_split(incs, inc, boost::first_finder(";"));
+			StringUtil::split(incs, inc, (";"));
 			for (unsigned int i = 0; i < incs.size(); i++)
 			{
 				codeh += ("#include \"" + incs.at(i) + "\"\n");
@@ -165,7 +165,7 @@ void CfusionEngine::execute(string file)
 				else if(elesc.at(var1).getTagName()=="assign")
 				{
 					string clasprop = elesc.at(var1).getAttribute("name");
-					boost::replace_first(clasprop,"this:","this->");
+					StringUtil::replaceFirst(clasprop,"this:","this->");
 					if(elesc.at(var1).getText()!="")
 					{
 						codem += (clasprop);
@@ -200,7 +200,7 @@ void CfusionEngine::execute(string file)
 						else if(elesc.at(var1).getChildElements().at(0).getTagName()=="var")
 						{
 							clasprop = elesc.at(var1).getChildElements().at(0).getAttribute("name");
-							boost::replace_first(clasprop,"this:","this->");
+							StringUtil::replaceFirst(clasprop,"this:","this->");
 							codem += (clasprop);
 						}
 						codem += ";\n";
@@ -209,7 +209,7 @@ void CfusionEngine::execute(string file)
 				else if(elesc.at(var1).getTagName()=="assignAdd" && elesc.at(var1).getAttribute("name")!="")
 				{
 					string clasprop = elesc.at(var1).getAttribute("name");
-					boost::replace_first(clasprop,"this:","this->");
+					StringUtil::replaceFirst(clasprop,"this:","this->");
 					if(elesc.at(var1).getAttribute("rhs")!="" && elesc.at(var1).getAttribute("lhs")!="")
 					{
 						codem += (clasprop + " = " + elesc.at(var1).getAttribute("rhs") + " + " + elesc.at(var1).getAttribute("lhs") + ";\n");
@@ -241,7 +241,7 @@ void CfusionEngine::execute(string file)
 							else if(elesce.at(var2).getTagName()=="var")
 							{
 								clasprop = elesce.at(var2).getAttribute("name");
-								boost::replace_first(clasprop,"this:","this->");
+								StringUtil::replaceFirst(clasprop,"this:","this->");
 								codem += (clasprop);
 							}
 							if(var2!=elesce.size()-1)
@@ -253,7 +253,7 @@ void CfusionEngine::execute(string file)
 				else if(elesc.at(var1).getTagName()=="return")
 				{
 					string clasprop = elesc.at(var1).getAttribute("name");
-					boost::replace_first(clasprop,"this:","this->");
+					StringUtil::replaceFirst(clasprop,"this:","this->");
 					if(eles.at(var).getAttribute("return")=="string" && elesc.at(var1).getText()!="")
 						codem += "return \""+elesc.at(var1).getText()+"\";\n";
 					else if(clasprop!="")

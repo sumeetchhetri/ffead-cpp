@@ -40,16 +40,16 @@ DateFormat::DateFormat(string format)
 string DateFormat::format(Date date)
 {
 	string temp = this->formatspec;
-	boost::replace_all(temp,"hh",date.getHhStr());
-	boost::replace_all(temp,"mi",date.getMmStr());
-	boost::replace_all(temp,"ss",date.getSsStr());
-	boost::replace_all(temp,"ns",date.getNsStr());
-	boost::replace_all(temp,"ddd",date.getDayw());
-	boost::replace_all(temp,"dd",date.getDayStr());
-	boost::replace_all(temp,"mmm",date.getMonthw());
-	boost::replace_all(temp,"mm",date.getMonthStr());
-	boost::replace_all(temp,"yyyy",date.getYearStr());
-	boost::replace_all(temp,"yy",date.getYearStr().substr(2));
+	StringUtil::replaceAll(temp,"hh",date.getHhStr());
+	StringUtil::replaceAll(temp,"mi",date.getMmStr());
+	StringUtil::replaceAll(temp,"ss",date.getSsStr());
+	StringUtil::replaceAll(temp,"ns",date.getNsStr());
+	StringUtil::replaceAll(temp,"ddd",date.getDayw());
+	StringUtil::replaceAll(temp,"dd",date.getDayStr());
+	StringUtil::replaceAll(temp,"mmm",date.getMonthw());
+	StringUtil::replaceAll(temp,"mm",date.getMonthStr());
+	StringUtil::replaceAll(temp,"yyyy",date.getYearStr());
+	StringUtil::replaceAll(temp,"yy",date.getYearStr().substr(2));
 	return temp;
 }
 
@@ -100,13 +100,13 @@ Date* DateFormat::parse(string strdate)
 		{
 			if(mmm!="")
 			{
-				date = new Date(boost::lexical_cast<int>(yyyy),
-						mmm, boost::lexical_cast<int>(dd));
+				date = new Date(CastUtil::lexical_cast<int>(yyyy),
+						mmm, CastUtil::lexical_cast<int>(dd));
 			}
 			else if(mm!="")
 			{
-				date = new Date(boost::lexical_cast<int>(yyyy),
-						boost::lexical_cast<int>(mm), boost::lexical_cast<int>(dd));
+				date = new Date(CastUtil::lexical_cast<int>(yyyy),
+						CastUtil::lexical_cast<int>(mm), CastUtil::lexical_cast<int>(dd));
 			}
 			else
 			{
@@ -117,13 +117,13 @@ Date* DateFormat::parse(string strdate)
 		{
 			if(mmm!="")
 			{
-				date = new Date(boost::lexical_cast<int>(yy),
-						mmm, boost::lexical_cast<int>(dd));
+				date = new Date(CastUtil::lexical_cast<int>(yy),
+						mmm, CastUtil::lexical_cast<int>(dd));
 			}
 			else if(mm!="")
 			{
-				date = new Date(boost::lexical_cast<int>(yy),
-						boost::lexical_cast<int>(mm), boost::lexical_cast<int>(dd));
+				date = new Date(CastUtil::lexical_cast<int>(yy),
+						CastUtil::lexical_cast<int>(mm), CastUtil::lexical_cast<int>(dd));
 			}
 			else
 			{
@@ -139,7 +139,7 @@ Date* DateFormat::parse(string strdate)
 	} catch (...) {
 		throw "Invalid Date specified";
 	}
-	date->setTime(boost::lexical_cast<int>(hh),
-		boost::lexical_cast<int>(mi), boost::lexical_cast<int>(ss));
+	date->setTime(CastUtil::lexical_cast<int>(hh),
+		CastUtil::lexical_cast<int>(mi), CastUtil::lexical_cast<int>(ss));
 	return date;
 }

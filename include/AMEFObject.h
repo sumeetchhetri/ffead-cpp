@@ -20,7 +20,7 @@
 #include "string"
 #include "cstring"
 #include "vector"
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 using namespace std;
 
 class AMEFObject
@@ -290,7 +290,7 @@ public:
 	 * @param name
 	 * Add a string property to an Object
 	 */
-	void addPacket(string stringa,string name)
+	void addPacket(const string& stringa,const string& name)
 	{
 		AMEFObject* JDBObjectNew = addPacket(stringa);
 		JDBObjectNew->name = name;
@@ -302,7 +302,7 @@ public:
 	 * @param string
 	 * Add a string property to an Object
 	 */
-	AMEFObject* addPacket(string stringa)
+	AMEFObject* addPacket(const string& stringa)
 	{
 		AMEFObject* JDBObjectNew = new AMEFObject();
 		JDBObjectNew->name = "";
@@ -336,7 +336,7 @@ public:
 			JDBObjectNew->namedLength = stringa.length() + 5;
 		}
 		JDBObjectNew->length = stringa.length();
-		JDBObjectNew->value = (char*)stringa.c_str();
+		JDBObjectNew->value = stringa;
 		packets.push_back(JDBObjectNew);
 		return JDBObjectNew;
 	}
@@ -594,7 +594,7 @@ public:
 		AMEFObject* JDBObjectNew = new AMEFObject();
 		JDBObjectNew->type = DOUBLE_FLOAT_TYPE;
 		JDBObjectNew->name = "";
-		JDBObjectNew->value = boost::lexical_cast<string>(doub);
+		JDBObjectNew->value = CastUtil::lexical_cast<string>(doub);
 		JDBObjectNew->length = JDBObjectNew->value.length();
 		length += JDBObjectNew->value.length() + 2;
 		namedLength += JDBObjectNew->value.length() + 4;
@@ -626,7 +626,7 @@ public:
 		AMEFObject* JDBObjectNew = new AMEFObject();
 		JDBObjectNew->type = DOUBLE_FLOAT_TYPE;
 		JDBObjectNew->name = "";
-		JDBObjectNew->value = boost::lexical_cast<string>(doub);
+		JDBObjectNew->value = CastUtil::lexical_cast<string>(doub);
 		JDBObjectNew->length = JDBObjectNew->value.length();
 		length += JDBObjectNew->value.length() + 2;
 		namedLength += JDBObjectNew->value.length() + 4;
@@ -1032,14 +1032,14 @@ public:
 	{
 		return name;
 	}
-	void setName(string name)
+	void setName(const string& name)
 	{
 		this->name = name;
 	}
-	void setName(char name[])
+	/*void setName(char name[])
 	{
 		this->name = name;
-	}
+	}*/
 	vector<AMEFObject*> getPackets()
 	{
 		return packets;
@@ -1106,7 +1106,7 @@ public:
 	{
 		this->value.append(value,len);
 	}
-	void setValue(string value)
+	void setValue(const string& value)
 	{
 		this->value = value;
 	}
@@ -1114,7 +1114,7 @@ public:
 	/**
 	 * @return bool  value of this object if its type is boolean
 	 */
-	bool getBooleanValue()
+	bool getBoolValue()
 	{
 		if(type=='b')
 			return (value[0]=='1'?true:false);
@@ -1141,7 +1141,18 @@ public:
 	double getDoubleValue()
 	{
 		if(type=='u')
-			return (boost::lexical_cast<double>("12312.123"));
+			return (CastUtil::lexical_cast<double>(getValueStr()));
+		else
+			return -1;
+	}
+
+	/**
+	 * @return double value of this object if its type is double
+	 */
+	float getFloatValue()
+	{
+		if(type=='u')
+			return (CastUtil::lexical_cast<float>(getValueStr()));
 		else
 			return -1;
 	}
@@ -1210,13 +1221,13 @@ public:
 			else if(obj->isChar())
 			{
 				if(obj->type=='b')
-					displ += boost::lexical_cast<string>(obj->getBooleanValue()) + "\n";
+					displ += CastUtil::lexical_cast<string>(obj->getBoolValue()) + "\n";
 				else
 					displ += (char)obj->value[0] + "\n";
 			}
 			else if(obj->isNumber())
 			{
-				displ += boost::lexical_cast<string>(obj->getNumericValue()) + "\n";
+				displ += CastUtil::lexical_cast<string>(obj->getNumericValue()) + "\n";
 			}
 			if(obj->type=='o' || obj->type=='p' || obj->type=='q' || obj->type=='m')
 			{
