@@ -32,7 +32,7 @@ ApplicationUtil::~ApplicationUtil() {
 
 string ApplicationUtil::buildAllApplications(vector<string> files,vector<string> apps,map<string,string> &appMap)
 {
-	string headers = "#include \"fstream\"\n#include \"string\"\n#include \"HttpSession.h\"\n#include <boost/lexical_cast.hpp>\nusing namespace std;\n";
+	string headers = "#include \"fstream\"\n#include \"string\"\n#include \"HttpSession.h\"\n#include \"CastUtil.h\"\nusing namespace std;\n";
 	string code;
 	string meth,methdef,vars;
 	for (unsigned int var = 0; var < files.size(); ++var)
@@ -54,7 +54,7 @@ string ApplicationUtil::buildAllApplications(vector<string> files,vector<string>
 				{
 					string inc = eles.at(var).getText();
 					strVec incs;
-					boost::iter_split(incs, inc, boost::first_finder(" "));
+					StringUtil::split(incs, inc, (" "));
 					for (unsigned int i = 0; i < incs.size(); i++)
 					{
 						headers += ("#include \"" + incs.at(i) + "\"\n");
@@ -68,7 +68,7 @@ string ApplicationUtil::buildAllApplications(vector<string> files,vector<string>
 						if(eles.at(var).getAttribute("where").find("FILE:")!=string::npos)
 						{
 							string fileName = eles.at(var).getAttribute("where");
-							boost::replace_first(fileName,"FILE:","");
+							StringUtil::replaceFirst(fileName,"FILE:","");
 							fileName = (path + fileName);
 							meth += "string path;\nif(to=="+eles.at(var).getAttribute("id")+")\n{";
 							meth += "string user = session.getAttribute(\"USER\");\n";
@@ -100,8 +100,8 @@ string ApplicationUtil::buildAllApplications(vector<string> files,vector<string>
 							ElementList elesce = elesc.at(var1).getChildElements();
 							for (unsigned int var2 = 0; var2 < elesce.size(); var2++)
 							{
-								meth += (elesce.at(var2).getTagName() + " _" + boost::lexical_cast<string>(var2+1) + " = boost::lexical_cast<"+elesce.at(var2).getTagName()+">(\""+elesce.at(var2).getText()+"\");\n");
-								args += ("_"+boost::lexical_cast<string>(var2+1));
+								meth += (elesce.at(var2).getTagName() + " _" + CastUtil::lexical_cast<string>(var2+1) + " = CastUtil::lexical_cast<"+elesce.at(var2).getTagName()+">(\""+elesce.at(var2).getText()+"\");\n");
+								args += ("_"+CastUtil::lexical_cast<string>(var2+1));
 								if(var2!=elesce.size()-1)
 									args += ",";
 							}

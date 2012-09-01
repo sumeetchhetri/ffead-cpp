@@ -274,47 +274,47 @@ bool CppInterpreter::retState(string type,Object source,string target)
 		if(source.getTypeName()=="int")
 		{
 			if(type=="==")
-				return (source.getValue<int>()==boost::lexical_cast<int>(target));
+				return (source.getValue<int>()==CastUtil::lexical_cast<int>(target));
 			else if(type=="<=")
-				return (source.getValue<int>()<=boost::lexical_cast<int>(target));
+				return (source.getValue<int>()<=CastUtil::lexical_cast<int>(target));
 			else  if(type==">=")
-				return (source.getValue<int>()>=boost::lexical_cast<int>(target));
+				return (source.getValue<int>()>=CastUtil::lexical_cast<int>(target));
 			else  if(type=="!=")
-				return (source.getValue<int>()!=boost::lexical_cast<int>(target));
+				return (source.getValue<int>()!=CastUtil::lexical_cast<int>(target));
 			else  if(type==">")
-				return (source.getValue<int>()>boost::lexical_cast<int>(target));
+				return (source.getValue<int>()>CastUtil::lexical_cast<int>(target));
 			else  if(type=="<")
-				return (source.getValue<int>()<boost::lexical_cast<int>(target));
+				return (source.getValue<int>()<CastUtil::lexical_cast<int>(target));
 		}
 		else if(source.getTypeName()=="float")
 		{
 			if(type=="==")
-				return (source.getValue<float>()==boost::lexical_cast<float>(target));
+				return (source.getValue<float>()==CastUtil::lexical_cast<float>(target));
 			else if(type=="<=")
-				return (source.getValue<float>()<=boost::lexical_cast<float>(target));
+				return (source.getValue<float>()<=CastUtil::lexical_cast<float>(target));
 			else  if(type==">=")
-				return (source.getValue<float>()>=boost::lexical_cast<float>(target));
+				return (source.getValue<float>()>=CastUtil::lexical_cast<float>(target));
 			else  if(type=="!=")
-				return (source.getValue<float>()!=boost::lexical_cast<float>(target));
+				return (source.getValue<float>()!=CastUtil::lexical_cast<float>(target));
 			else  if(type==">")
-				return (source.getValue<float>()>boost::lexical_cast<float>(target));
+				return (source.getValue<float>()>CastUtil::lexical_cast<float>(target));
 			else  if(type=="<")
-				return (source.getValue<float>()<boost::lexical_cast<float>(target));
+				return (source.getValue<float>()<CastUtil::lexical_cast<float>(target));
 		}
 		else if(source.getTypeName()=="double")
 		{
 			if(type=="==")
-				return (source.getValue<double>()==boost::lexical_cast<double>(target));
+				return (source.getValue<double>()==CastUtil::lexical_cast<double>(target));
 			else if(type=="<=")
-				return (source.getValue<double>()<=boost::lexical_cast<double>(target));
+				return (source.getValue<double>()<=CastUtil::lexical_cast<double>(target));
 			else  if(type==">=")
-				return (source.getValue<double>()>=boost::lexical_cast<double>(target));
+				return (source.getValue<double>()>=CastUtil::lexical_cast<double>(target));
 			else  if(type=="!=")
-				return (source.getValue<double>()!=boost::lexical_cast<double>(target));
+				return (source.getValue<double>()!=CastUtil::lexical_cast<double>(target));
 			else  if(type==">")
-				return (source.getValue<double>()>boost::lexical_cast<double>(target));
+				return (source.getValue<double>()>CastUtil::lexical_cast<double>(target));
 			else  if(type=="<")
-				return (source.getValue<double>()<boost::lexical_cast<double>(target));
+				return (source.getValue<double>()<CastUtil::lexical_cast<double>(target));
 		}
 		else if(source.getTypeName()=="string")
 		{
@@ -366,7 +366,7 @@ bool CppInterpreter::evaluateCondition(string condition)
 	if(token!="")
 	{
 		vector<string> bs;
-		boost::iter_split(bs, condition, boost::first_finder(token));
+		StringUtil::split(bs, condition, (token));
 		if(bs.size()==2 && bs.at(0)!="" && bs.at(1)!="")
 		{
 			Object source,target;
@@ -545,27 +545,27 @@ void CppInterpreter::evaluateUpdateInbuilt(string sep,string type,string name,ve
 			if(containsChar(curr.at(i)))
 			{
 				Object o = localVariables[curr.at(i)];
-				opr.push_back(boost::lexical_cast<string>(o.getValue<int>()));
+				opr.push_back(CastUtil::lexical_cast<string>(o.getValue<int>()));
 			}
 			else
 				opr.push_back(curr.at(i));
 		}
 		if(sep=="=")
-			*_temp = boost::lexical_cast<int>(handleAssignment<int>(opr));
+			*_temp = CastUtil::lexical_cast<int>(handleAssignment<int>(opr));
 		else if(sep=="+=")
-			*_temp = *_temp + boost::lexical_cast<int>(handleAssignment<int>(opr));
+			*_temp = *_temp + CastUtil::lexical_cast<int>(handleAssignment<int>(opr));
 		else if(sep=="-=")
-			*_temp = *_temp - boost::lexical_cast<int>(handleAssignment<int>(opr));
+			*_temp = *_temp - CastUtil::lexical_cast<int>(handleAssignment<int>(opr));
 		else if(sep=="++")
 			*_temp = (*_temp+1);
 		else if(sep=="--")
 			*_temp = (*_temp-1);*/
 		if(sep=="=")
-			*_temp = boost::lexical_cast<int>(res);
+			*_temp = CastUtil::lexical_cast<int>(res);
 		else if(sep=="+=")
-			*_temp = *_temp + boost::lexical_cast<int>(res);
+			*_temp = *_temp + CastUtil::lexical_cast<int>(res);
 		else if(sep=="-=")
-			*_temp = *_temp - boost::lexical_cast<int>(res);
+			*_temp = *_temp - CastUtil::lexical_cast<int>(res);
 		else if(sep=="++")
 			*_temp = (*_temp+1);
 		else if(sep=="--")
@@ -601,7 +601,7 @@ void CppInterpreter::executeStatement(string sep,vector<string> lhs,vector<strin
 		if(lhs.size()>0)//probable declaration
 		{
 			vector<string> bs;
-			boost::iter_split(bs, lhs.at(0), boost::first_finder(" "));
+			StringUtil::split(bs, lhs.at(0), (" "));
 			if(bs.size()==1)
 			{
 				Object source;
@@ -642,7 +642,7 @@ void CppInterpreter::executeStatement(string sep,vector<string> lhs,vector<strin
 	else
 	{
 		vector<string> bs;
-		boost::iter_split(bs, lhs.at(0), boost::first_finder(" "));
+		StringUtil::split(bs, lhs.at(0), (" "));
 		if(isInBuiltType(bs.at(0)))
 		{
 			storeInbuilt(bs.at(0),bs.at(1));
@@ -838,7 +838,7 @@ void CppInterpreter::handleStatement(vector<string>::iterator &itr)
 					Object o;
 					o << obj.getPointer();
 					o.setTypeName(obj.getType());
-					string argname = "_argno"+boost::lexical_cast<string>(argn++);
+					string argname = "_argno"+CastUtil::lexical_cast<string>(argn++);
 					localVariables[argname] = o;
 					//rhs.push_back(argname);
 					token = *(itr);
@@ -889,7 +889,7 @@ void CppInterpreter::handleStatement(vector<string>::iterator &itr)
 		{
 			objmem = true;
 			vector<string> bs;
-			boost::iter_split(bs,token, boost::first_finder("."));
+			StringUtil::split(bs,token, ("."));
 			objname = bs.at(0);
 			methName = bs.at(1);
 		}
@@ -1486,7 +1486,7 @@ void CppInterpreter::eval(string str)
 		string litval;
 		litval = temp.substr(s,e);
 		temp = temp.substr(e+s+1);
-		string varn =  ("_"+ boost::lexical_cast<string>(st++));
+		string varn =  ("_"+ CastUtil::lexical_cast<string>(st++));
 		literals[varn] = litval;
 		string ini = str.substr(0,s-1);
 		str = (ini + varn + temp);
@@ -1500,8 +1500,8 @@ void CppInterpreter::eval(string str)
 		logger << "\n" << flush;
 	}
 	logger << str << flush;
-	boost::regex pattern("\\s+",boost::regex_constants::icase|boost::regex_constants::perl);
-	str = boost::regex_replace (str, pattern, " ");
+	RegexUtil::replace(str, "[\t]+", " ");
+	RegexUtil::replace(str, "[ ]+", " ");
 	logger << "\n" << flush;
 	logger << str << flush;
 	logger << "\n" << flush;
@@ -1647,8 +1647,8 @@ void CppInterpreter::eval(string str)
 		/*if(commands.at(k).find("=")!=string::npos)//inititialization operation
 		{
 			vector<string> bs,lhs;
-			boost::iter_split(bs, commands.at(k), boost::first_finder("="));
-			boost::iter_split(lhs, bs.at(0), boost::first_finder(" "));
+			StringUtil::split(bs, commands.at(k), ("="));
+			StringUtil::split(lhs, bs.at(0), (" "));
 			if(lhs.size()==2)
 			{
 				if(isInBuiltType(lhs.at(0)))

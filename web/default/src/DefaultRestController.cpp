@@ -22,8 +22,8 @@ void DefaultRestController::addNumbers(int a, int b)
 	response->setStatusCode("200");
 	response->setStatusMsg("OK");
 	response->setContent_type("text/plain");
-	response->setContent_str(boost::lexical_cast<string>(a) + " + " + boost::lexical_cast<string>(b) + " = " +
-			boost::lexical_cast<string>(c));
+	response->setContent_str(CastUtil::lexical_cast<string>(a) + " + " + CastUtil::lexical_cast<string>(b) + " = " +
+			CastUtil::lexical_cast<string>(c));
 	cout << "Processed input request inside DefaultRestController..." << endl;
 }
 
@@ -33,7 +33,7 @@ void DefaultRestController::power(int base, int exponent)
 	response->setStatusCode("200");
 	response->setStatusMsg("OK");
 	response->setContent_type("text/plain");
-	response->setContent_str(boost::lexical_cast<string>(base) + " ^ " + boost::lexical_cast<string>(exponent) + " = " +
-			boost::lexical_cast<string>(c));
+	response->setContent_str(CastUtil::lexical_cast<string>(base) + " ^ " + CastUtil::lexical_cast<string>(exponent) + " = " +
+			CastUtil::lexical_cast<string>(c));
 	cout << "Processed input request inside DefaultRestController..." << endl;
 }

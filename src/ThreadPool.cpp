@@ -34,13 +34,14 @@ void ThreadPool::init(int initThreads, int maxThreads,bool console)
 	this->maxThreads = maxThreads;
 	wpool = new TaskPool;
 	wpool->console = console;
-	tpool = new vector<Thread*> ;
+	tpool = new vector<PoolThread*> ;
 	for (int i = 0; i < initThreads; i++) {
-		Thread *thread = new Thread();
+		PoolThread *thread = new PoolThread();
 		thread->console = console;
+		thread->execute();
 		tpool->push_back(thread);
 	}
-	poller = new boost::thread(boost::bind(&ThreadPool::poll, this));
+	poller = new Thread(&ThreadPool::poll, this);
 }
 
 ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp) {
@@ -52,15 +53,16 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp) {
 	this->maxThreads = maxThreads;
 	this->lowp = lowp;
 	this->highp = highp;
-	tpool = new vector<Thread*> ;
+	tpool = new vector<PoolThread*> ;
 	wpool = new TaskPool;
 	wpool->console = console;
 	for (int i = 0; i < initThreads; i++) {
-		Thread *thread = new Thread();
+		PoolThread *thread = new PoolThread();
 		thread->console = console;
+		thread->execute();
 		tpool->push_back(thread);
 	}
-	poller = new boost::thread(boost::bind(&ThreadPool::poll, this));
+	poller = new Thread(&ThreadPool::poll, this);
 	prioritypooling = true;
 }
 ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp,bool console) {
@@ -72,15 +74,16 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp,bool
 	this->maxThreads = maxThreads;
 	this->lowp = lowp;
 	this->highp = highp;
-	tpool = new vector<Thread*> ;
+	tpool = new vector<PoolThread*> ;
 	wpool = new TaskPool;
 	wpool->console = console;
 	for (int i = 0; i < initThreads; i++) {
-		Thread *thread = new Thread();
+		PoolThread *thread = new PoolThread();
 		thread->console = console;
+		thread->execute();
 		tpool->push_back(thread);
 	}
-	poller = new boost::thread(boost::bind(&ThreadPool::poll, this));
+	poller = new Thread(&ThreadPool::poll, this);
 	prioritypooling = true;
 }
 
@@ -93,13 +96,14 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads) {
 	this->maxThreads = maxThreads;
 	wpool = new TaskPool;
 	wpool->console = console;
-	tpool = new vector<Thread*> ;
+	tpool = new vector<PoolThread*> ;
 	for (int i = 0; i < initThreads; i++) {
-		Thread *thread = new Thread();
+		PoolThread *thread = new PoolThread();
 		thread->console = console;
+		thread->execute();
 		tpool->push_back(thread);
 	}
-	poller = new boost::thread(boost::bind(&ThreadPool::poll, this));
+	poller = new Thread(&ThreadPool::poll, this);
 }
 
 ThreadPool::ThreadPool(int initThreads, int maxThreads,bool console) {
@@ -111,59 +115,64 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads,bool console) {
 	this->maxThreads = maxThreads;
 	wpool = new TaskPool;
 	wpool->console = console;
-	tpool = new vector<Thread*> ;
+	tpool = new vector<PoolThread*> ;
 	for (int i = 0; i < initThreads; i++) {
-		Thread *thread = new Thread();
+		PoolThread *thread = new PoolThread();
 		thread->console = console;
+		thread->execute();
 		tpool->push_back(thread);
 	}
-	poller = new boost::thread(boost::bind(&ThreadPool::poll, this));
+	poller = new Thread(&ThreadPool::poll, this);
 }
 
-void ThreadPool::poll() {
+void* ThreadPool::poll(void *arg) {
+	ThreadPool* ths = (ThreadPool*)arg;
 	while (true) {
-		if (!prioritypooling) {
-			if (wpool->tasksPending()) {
-				Task *task = wpool->getTask();
-				Thread *idleThread = getIdleThread();
+		if (!ths->prioritypooling) {
+			if (ths->wpool->tasksPending()) {
+				Task *task = ths->wpool->getTask();
+				PoolThread *idleThread = ths->getIdleThread();
 				idleThread->task = task;
 				idleThread->idle = false;
+				cout << "got task" << endl;
 				idleThread->mthread->interrupt();
 			} else {
-				boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+				Thread::mSleep(1);
 			}
 		} else {
-			if (wpool->tasksPPending()) {
-				Task *task = wpool->getPTask();
-				Thread *idleThread = getIdleThread();
+			if (ths->wpool->tasksPPending()) {
+				Task *task = ths->wpool->getPTask();
+				PoolThread *idleThread = ths->getIdleThread();
 				idleThread->task = task;
 				idleThread->idle = false;
 				idleThread->mthread->interrupt();
 			} else {
-				boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+				Thread::mSleep(1);
 			}
 		}
 	}
+	return NULL;
 }
-Thread* ThreadPool::getIdleThread() {
+PoolThread* ThreadPool::getIdleThread() {
 	while (true) {
 		for (unsigned int var = 0; var < tpool->size(); var++) {
 			if (tpool->at(var)->idle) {
 				return tpool->at(var);
 			}
 		}
-		boost::this_thread::sleep(boost::posix_time::milliseconds(1));
+		Thread::mSleep(1);
 	}
+	return NULL;
 }
 void ThreadPool::joinAll() {
 	while (true) {
 		if (!prioritypooling) {
 			while (wpool->tasksPending()) {
-				boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+				Thread::sSleep(1);
 			}
 		} else {
 			while (wpool->tasksPPending()) {
-				boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+				Thread::sSleep(1);
 			}
 		}
 		int i = 0;
@@ -175,11 +184,12 @@ void ThreadPool::joinAll() {
 		if (i == initThreads) {
 			break;
 		} else {
-			boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+			Thread::sSleep(1);
 		}
 	}
 }
 void ThreadPool::execute(Task &task, int priority) {
+
 	if(console)
 	{
 		logger << "Added task to wpool\n" << flush;
@@ -195,6 +205,7 @@ void ThreadPool::execute(Task &task, int priority) {
 	}
 }
 void ThreadPool::execute(Task &task) {
+
 	if(console)
 	{
 		logger << "Added task to wpool\n" << flush;
@@ -210,6 +221,7 @@ void ThreadPool::execute(Task &task) {
 	}
 }
 void ThreadPool::schedule(Task &task, int tunit, int type) {
+
 	if(console)
 	{
 		logger << "Added task to wpool\n" << flush;
@@ -231,6 +243,11 @@ ThreadPool::~ThreadPool() {
 	delete wpool;
 	if(console)
 	{
-		logger << "Destroyed Thread Pool\n" << flush;
+		logger << "Destroyed PoolThread Pool\n" << flush;
 	}
 }
+
+void ThreadPool::start() {
+	if(!started)poller->execute();
+}
+

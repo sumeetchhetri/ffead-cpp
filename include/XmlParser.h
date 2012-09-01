@@ -28,7 +28,7 @@
 #include "Document.h"
 #include <fstream>
 #include "XmlParseException.h"
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 #include "Logger.h"
 
 class XmlParser {

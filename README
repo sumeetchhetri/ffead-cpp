@@ -38,8 +38,8 @@ FEATURES
 
 
 REQUIREMENTS
-1. Any box that runs linux, BSD or Windows/Cygwin
-2. Boost >v1.4 and development files
+1. Any box that runs linux, BSD, Solaris or Windows/Cygwin
+2. Boost is no longer required as of version 1.7
 3. UnixODBC and development files
 4. OpenSSl and development files
 4. GCC C++ compiler, make, configure etc
@@ -55,6 +55,8 @@ Refer the INSTALL-FREEBSD file for installation directions.
 Windows/Cygwin
 Refer the INSTALL-WINDOWS-CYGWIN file for installation direction on Windows platform having Cygwin installed
 
+Solaris
+Refer the INSTALL-SOLARIS file for installation directions.
 
 UPDATES
 Find latest and older version on 

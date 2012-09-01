@@ -22,7 +22,7 @@
 
 #ifndef BeanContext_H_
 #define BeanContext_H_
-#include "boost/lexical_cast.hpp"
+#include "CastUtil.h"
 #include "Client.h"
 #include "Reflector.h"
 #include "Serialize.h"

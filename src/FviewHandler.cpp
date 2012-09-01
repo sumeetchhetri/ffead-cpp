@@ -37,7 +37,7 @@ string FviewHandler::handle(HttpRequest* req, HttpResponse& res, map<string, str
 	string content;
 	logger << "inside fview " << req->getFile() << endl;
 	string file = req->getFile();
-	boost::replace_first(file,"fview","html");
+	StringUtil::replaceFirst(file,"fview","html");
 	string ffile = req->getCntxt_root()+"/fviews/"+file;
 	logger << ffile << endl;
 	ifstream infile(ffile.c_str());

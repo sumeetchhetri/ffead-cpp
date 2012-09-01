@@ -60,22 +60,22 @@ map<string,string> ServiceTask::readFromSharedMemeory(string sessionId)
 	while(getline(ifs,tem))
 		all.append(tem+"\n");
 	strVec results;
-	boost::iter_split(results, all, boost::first_finder("; "));
+	StringUtil::split(results, all, ("; "));
 	for(int j=0;j<(int)results.size()-1;j++)
 	{
 		if(results.at(j)=="")continue;
 		strVec results1;
-		boost::replace_all(results.at(j),"%3B%20","; ");
-		boost::iter_split(results1, results.at(j), boost::first_finder("="));
+		StringUtil::replaceAll(results.at(j),"%3B%20","; ");
+		StringUtil::split(results1, results.at(j), ("="));
 		if(results1.size()==2)
 		{
-			boost::replace_all(results1.at(0),"%3D","=");
-			boost::replace_all(results1.at(1),"%3D","=");
+			StringUtil::replaceAll(results1.at(0),"%3D","=");
+			StringUtil::replaceAll(results1.at(1),"%3D","=");
 			valss[results1.at(0)] = results1.at(1);
 		}
 		else
 		{
-			boost::replace_all(results1.at(0),"%3D","=");
+			StringUtil::replaceAll(results1.at(0),"%3D","=");
 			valss[results1.at(0)] = "true";
 		}
 		logger << "read key/value pair " << results1.at(0) << " = " << valss[results1.at(0)] << endl;
@@ -96,7 +96,7 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 		string values;
 		logger << "session object modified " << vals.size() << endl;
 		Date date;
-		string id = boost::lexical_cast<string>(Timer::getCurrentTime());
+		string id = CastUtil::lexical_cast<string>(Timer::getCurrentTime());
 		int seconds = sessionTimeout;
 		date = date.addSeconds(sessionTimeout);
 		DateFormat dformat("ddd, dd-mmm-yyyy hh:mi:ss");
@@ -105,10 +105,10 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 		{
 			string key = it->first;
 			string value = it->second;
-			boost::replace_all(key,"; ","%3B%20");
-			boost::replace_all(key,"=","%3D");
-			boost::replace_all(value,"; ","%3B%20");
-			boost::replace_all(value,"=","%3D");
+			StringUtil::replaceAll(key,"; ","%3B%20");
+			StringUtil::replaceAll(key,"=","%3D");
+			StringUtil::replaceAll(value,"; ","%3B%20");
+			StringUtil::replaceAll(value,"=","%3D");
 			logger << it->first << " = " << it->second << endl;
 			if(!sessatserv)
 				res.addCookie(key + "=" + value + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
@@ -146,7 +146,7 @@ string ServiceTask::getContentStr(string url,string locale,string ext)
     if(locale.find("english")==string::npos && (ext==".html" || ext==".htm"))
     {
             string fnj = fname;
-            boost::replace_first(fnj,".",("_" + locale+"."));
+            StringUtil::replaceFirst(fnj,".",("_" + locale+"."));
             myfile.open(fnj.c_str(),ios::in | ios::binary);
 			if (myfile.is_open())
 			{
@@ -185,31 +185,50 @@ void ServiceTask::run()
 		//int bytes = -1;
 		if(isSSLEnabled)
 		{
-			sbio=BIO_new_socket(fd,BIO_CLOSE);
-			//logger << "\nBefore = " << ssl << flush;
+			sbio=BIO_new_socket(fd,BIO_NOCLOSE);
 			ssl=SSL_new(ctx);
-			//logger << "\nAfter = " << ssl << flush;
 			SSL_set_bio(ssl,sbio,sbio);
-			int r;
-			if((r=SSL_accept(ssl)<=0))
-			{
-				sslHandler.error_occurred((char*)"SSL accept error",fd,ssl);
-				return;
-			}
 
 			io=BIO_new(BIO_f_buffer());
 			ssl_bio=BIO_new(BIO_f_ssl());
 			BIO_set_ssl(ssl_bio,ssl,BIO_CLOSE);
 			BIO_push(io,ssl_bio);
+
+			int r = SSL_accept(ssl);
+			cout << r << endl;
+			int bser = SSL_get_error(ssl,r);
+			cout << bser << endl;
+			if(r<=0)
+			{
+				sslHandler.error_occurred((char*)"SSL accept error",fd,ssl);
+				return;
+			}
+
+
 			int er=-1;
 			bool flag = true;
 			while(flag)
 			{
 				er = BIO_gets(io,buf,BUFSIZZ-1);
-				switch(SSL_get_error(ssl,er))
+				cout << er << endl;
+				int bser = SSL_get_error(ssl,er);
+				cout << bser << endl;
+				switch(bser)
 				{
-					case SSL_ERROR_NONE:
+					case SSL_ERROR_WANT_READ:
+					{
+						logger << "more to read error" << endl;
 						break;
+					}
+					case SSL_ERROR_WANT_WRITE:
+					{
+						logger << "more to write error" << endl;
+						break;
+					}
+					case SSL_ERROR_NONE:
+					{
+						break;
+					}
 					case SSL_ERROR_ZERO_RETURN:
 					{
 						sslHandler.error_occurred((char*)"SSL error problem",fd,ssl);
@@ -228,6 +247,7 @@ void ServiceTask::run()
 				if(!strcmp(buf,"\r\n") || !strcmp(buf,"\n"))
 					break;
 				string temp(buf);
+				if(temp=="")continue;
 				temp = temp.substr(0,temp.length()-1);
 				results.push_back(temp);
 				//logger << temp <<endl;
@@ -238,9 +258,9 @@ void ServiceTask::run()
 					//logger << "contne-length="<<cntle <<endl;
 					try
 					{
-						cntlen = boost::lexical_cast<int>(cntle);
+						cntlen = CastUtil::lexical_cast<int>(cntle);
 					}
-					catch(boost::bad_lexical_cast&)
+					catch(const char* ex)
 					{
 						logger << "bad lexical cast" <<endl;
 					}
@@ -279,9 +299,9 @@ void ServiceTask::run()
 					//logger << "contne-length="<<cntle <<endl;
 					try
 					{
-						cntlen = boost::lexical_cast<int>(cntle);
+						cntlen = CastUtil::lexical_cast<int>(cntle);
 					}
-					catch(boost::bad_lexical_cast&)
+					catch(const char* ex)
 					{
 						logger << "bad lexical cast" <<endl;
 					}
@@ -350,6 +370,7 @@ void ServiceTask::run()
 		map<string,string> params1 = *params;
 		string webpath = serverRootDirectory + "web/";
 		HttpRequest* req= new HttpRequest(results,webpath);
+		//logger << req->toString() << endl;
 
 		if(req->getFile()=="")
 		{
@@ -477,7 +498,7 @@ void ServiceTask::run()
 				{
 					res.setStatusCode("404");
 					res.setStatusMsg("Not Found");
-					//res.setContent_len(boost::lexical_cast<string>(0));
+					//res.setContent_len(CastUtil::lexical_cast<string>(0));
 				}
 				else
 				{
@@ -485,7 +506,7 @@ void ServiceTask::run()
 					res.setStatusMsg("OK");
 					if(res.getContent_type()=="")res.setContent_type(configData.props[ext]);
 					res.setContent_str(content);
-					//res.setContent_len(boost::lexical_cast<string>(content.length()));
+					//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 					//sess.setAttribute("CURR",req->getUrl());
 				}
 			}
@@ -729,7 +750,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			{
 				res.setStatusCode("404");
 				res.setStatusMsg("Not Found");
-				//res.setContent_len(boost::lexical_cast<string>(0));
+				//res.setContent_len(CastUtil::lexical_cast<string>(0));
 			}
 			else
 			{
@@ -737,7 +758,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 				res.setStatusMsg("OK");
 				if(res.getContent_type()=="")res.setContent_type(configData.props[ext]);
 				res.setContent_str(content);
-				//res.setContent_len(boost::lexical_cast<string>(content.length()));
+				//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 				//sess.setAttribute("CURR",req->getUrl());
 			}
 		}
@@ -755,6 +776,10 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		delete req;
 		logger << alldatlg << "--sent data--DONE" << flush;
 		//sessionMap[sessId] = sess;
+	}
+	catch(const char* ex)
+	{
+		logger << ex << endl;
 	}
 	catch(...)
 	{

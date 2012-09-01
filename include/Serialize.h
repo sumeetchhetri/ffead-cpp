@@ -16,9 +16,8 @@
 #ifndef SERIALIZABLE_H_
 #define SERIALIZABLE_H_
 #include "XmlParser.h"
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 #include <stdexcept>
-//#include <execinfo.h>
 #include <dlfcn.h>
 #include <cxxabi.h>
 #include <stdio.h>
@@ -32,129 +31,245 @@
 #include "list"
 #include "map"
 #include "set"
+#include "stack"
 #include "DateFormat.h"
 #include "BinaryData.h"
 #include "Constants.h"
+#include "AMEFResources.h"
 
 using namespace std;
 typedef string (*SerPtr) (void*);
 typedef void* (*UnSerPtr) (string);
+
 class Serialize{
-	string demangle(const char *mangled);
-	string getClassName(void* instance);
-	string _hanldeAllSerialization(string className,void *t);
-	void* _hanldeAllUnSerialization(string objXml,string className);
-	string _ser(void* t,string classN);
-	string _servec(void* t,string classN);
-	string _serlis(void* t,string classN);
-	string _serset(void* t,string classN);
-	string _sermultiset(void* t,string classN);
-	string _serq(void* t,string classN);
-	string _serdq(void* t,string classN);
-	string _ser(Object);
-	void* _unser(string objXml,string classN);
+	static string demangle(const char *mangled);
+	static string getClassName(void* instance);
+	static string _hanldeAllSerialization(string className,void *t);
+	static void* _hanldeAllUnSerialization(string objXml,string className);
+	static string _ser(void* t,string classN);
+	static string _servec(void* t,string classN);
+	static string _serlis(void* t,string classN);
+	static string _serset(void* t,string classN);
+	static string _sermultiset(void* t,string classN);
+	static string _serq(void* t,string classN);
+	static string _serdq(void* t,string classN);
+	static string _ser(Object);
+	static void* _unser(string objXml,string classN);
+	static void* unserializevec(AMEFObject* root, string objXml);
+	static void* unserializelist(AMEFObject* root, string objXml);
+	static void* unserializeset(AMEFObject* root, string objXml);
+	static void* unserializemultiset(AMEFObject* root, string objXml);
+	static void* unserializeq(AMEFObject* root, string objXml);
+	static void* unserializedq(AMEFObject* root, string objXml);
 
-	string serializevecstring(vector<string> *t);
-	string serializevecint(vector<int> *t);
-	string serializevecfloat(vector<float> *t);
-	string serializevecdouble(vector<double> *t);
+	static void* _unserVec(string objXml,string className);
+	static void* _unserLis(string objXml,string className);
+	static void* _unserQ(string objXml,string className);
+	static void* _unserDq(string objXml,string className);
+	static void* _unserSet(string objXml,string className);
+	static void* _unserMulSet(string objXml,string className);
 
-	string serializesetstring(set<string> *t);
-	string serializesetint(set<int> *t);
-	string serializesetfloat(set<float> *t);
-	string serializesetdouble(set<double> *t);
-
-	string serializemultisetstring(multiset<string> *t);
-	string serializemultisetint(multiset<int> *t);
-	string serializemultisetfloat(multiset<float> *t);
-	string serializemultisetdouble(multiset<double> *t);
-
-	string serializeliststring(list<string> *t);
-	string serializelistint(list<int> *t);
-	string serializelistfloat(list<float> *t);
-	string serializelistdouble(list<double> *t);
-
-	string serializeqstring(queue<string> *t);
-	string serializeqint(queue<int> *t);
-	string serializeqfloat(queue<float> *t);
-	string serializeqdouble(queue<double> *t);
-
-	string serializedqstring(deque<string> *t);
-	string serializedqint(deque<int> *t);
-	string serializedqfloat(deque<float> *t);
-	string serializedqdouble(deque<double> *t);
-
-	void* _unserVec(string objXml,string className);
-	void* _unserLis(string objXml,string className);
-	void* _unserQ(string objXml,string className);
-	void* _unserDq(string objXml,string className);
-	void* _unserSet(string objXml,string className);
-	void* _unserMulSet(string objXml,string className);
+	template <class T> static string serializeset(set<T> t)
+	{
+		set<T> st = t;
+		T td;
+		const char *mangled = typeid(td).name();
+		string className = demangle(mangled);
+		className = "set<" + className + ">";
+		AMEFEncoder enc;
+		AMEFObject object;
+		object.setName(className);
+		while(st.begin()!=t.end())
+		{
+			object.addPacket(serialize<T>(*st.begin()));
+			st.erase(st.begin());
+		}
+		return enc.encodeB(&object, false);
+	}
+	template <class T> static string serializemultiset(multiset<T> t)
+	{
+		multiset<T> st = t;
+		T td;
+		const char *mangled = typeid(td).name();
+		string className = demangle(mangled);
+		className = "multiset<" + className + ">";
+		AMEFEncoder enc;
+		AMEFObject object;
+		object.setName(className);
+		while(st.begin()!=t.end())
+		{
+			object.addPacket(serialize<T>(*st.begin()));
+			st.erase(st.begin());
+		}
+		return enc.encodeB(&object, false);
+	}
+	template <class T> static string serializevec(vector<T> t)
+	{
+		vector<T> st = t;
+		T td;
+		const char *mangled = typeid(td).name();
+		string className = demangle(mangled);
+		className = "vector<" + className + ">";
+		AMEFEncoder enc;
+		AMEFObject object;
+		object.setName(className);
+		while(st.begin()!=t.end())
+		{
+			object.addPacket(serialize<T>(*st.begin()));
+			st.erase(st.begin());
+		}
+		return enc.encodeB(&object, false);
+	}
+	template <class T> static string serializedq(deque<T> t)
+	{
+		deque<T> st = t;
+		T td;
+		const char *mangled = typeid(td).name();
+		string className = demangle(mangled);
+		className = "deque<" + className + ">";
+		AMEFEncoder enc;
+		AMEFObject object;
+		object.setName(className);
+		while(st.begin()!=t.end())
+		{
+			object.addPacket(serialize<T>(*st.begin()));
+			st.erase(st.begin());
+		}
+		return enc.encodeB(&object, false);
+	}
+	template <class T> static string serializelist(list<T> t)
+	{
+		list<T> st = t;
+		T td;
+		const char *mangled = typeid(td).name();
+		string className = demangle(mangled);
+		className = "lists<" + className + ">";
+		AMEFEncoder enc;
+		AMEFObject object;
+		object.setName(className);
+		while(st.begin()!=t.end())
+		{
+			object.addPacket(serialize<T>(*st.begin()));
+			st.erase(st.begin());
+		}
+		return enc.encodeB(&object, false);
+	}
+	template <class T> static string serializeq(std::queue<T> t)
+	{
+		std::queue<T> tt = t;
+		T td;
+		const char *mangled = typeid(td).name();
+		string className = demangle(mangled);
+		className = "std::queue<" + className + ">";
+		AMEFEncoder enc;
+		AMEFObject object;
+		object.setName(className);
+		if(!tt.empty())
+		{
+			for(int var=0;var<(int)tt.size();var++)
+			{
+				object.addPacket(serialize<T>(tt.front()));
+				tt.pop();
+			}
+		}
+		return enc.encodeB(&object, false);
+	}
+	/*template <class T> static string serializestack(stack<T> t)
+	{
+		stack<T> tt = t;
+		T td;
+		const char *mangled = typeid(td).name();
+		string className = demangle(mangled);
+		className = "stack<" + className + ">";
+		AMEFEncoder enc;
+		AMEFObject object;
+		object.setName(className);
+		if(!tt.empty())
+		{
+			for(int var=0;var<(int)tt.size();var++)
+			{
+				object.addPacket(serialize<T>(tt.front()));
+				tt.pop();
+			}
+		}
+		return enc.encodeB(&object, false);
+	}*/
 public:
 	Serialize(){}
 	~Serialize(){}
-	string serialize(string t);
-	string serialize(int t);
-	string serialize(float t);
-	string serialize(double t);
-	string serialize(bool t);
 
-	template <class K,class V> string serialize(map<K,V> mp)
-	{
-		map<K,V> mpt  = mp;
-		string objXml;
-		objXml = "<map>";
-		while (mpt.begin()!=mpt.end())
-		{
-			objXml += "<pair>";
-			objXml += serialize<K>(mpt.begin()->first);
-			objXml += serialize<V>(mpt.begin()->second);
-			mpt.erase(mpt.begin());
-			objXml += "</pair>";
-		}
-		objXml += "</map>";
-		return objXml;
-	}
-	template <class K,class V> string serialize(multimap<K,V> mp)
-	{
-		multimap<K,V> mpt  = mp;
-		string objXml;
-		objXml = "<multimap>";
-		while (mpt.begin()!=mpt.end())
-		{
-			objXml += "<pair>";
-			objXml += serialize<K>(mpt.begin()->first);
-			objXml += serialize<V>(mpt.begin()->second);
-			mpt.erase(mpt.begin());
-			objXml += "</pair>";
-		}
-		objXml += "</multimap>";
-		return objXml;
-	}
-	template <class T> string serialize(T t)
+	template <class T> static string serialize(T t)
 	{
 		string objXml;
 		const char *mangled = typeid(t).name();
 		string className = demangle(mangled);
 		return _hanldeAllSerialization(className,&t);
 	}
-	string serializeObject(Object t)
+	static string serializeObject(Object t)
 	{
 		return _hanldeAllSerialization(t.getTypeName(),t.getVoidPointer());
 	}
-	string serializeUnknown(void* t,string className)
+
+	static string serializeUnknown(void* t,string className)
 	{
 		return _hanldeAllSerialization(className,t);
 	}
 
-	template <class T> T unserialize(string objXml)
+	template <class K,class V> static string serialize(map<K,V> mp)
+	{
+		map<K,V> mpt  = mp;
+		AMEFEncoder enc;
+		AMEFObject object;
+		K k;
+		const char *mangled = typeid(k).name();
+		string kclassName = demangle(mangled);
+		V v;
+		*mangled = typeid(v).name();
+		string vclassName = demangle(mangled);
+		kclassName = "map<"+kclassName+":"+vclassName+">";
+		object.setName(kclassName);
+		while (mpt.begin()!=mpt.end())
+		{
+			string key = serialize<K>(mpt.begin()->first);
+			string value = serialize<V>(mpt.begin()->second);
+			mpt.erase(mpt.begin());
+			object.addPacket(value, key);
+		}
+		return enc.encodeB(&object, false);
+	}
+
+	template <class K,class V> static string serialize(multimap<K,V> mp)
+	{
+		multimap<K,V> mpt  = mp;
+		AMEFEncoder enc;
+		AMEFObject object;
+		K k;
+		const char *mangled = typeid(k).name();
+		string kclassName = demangle(mangled);
+		V v;
+		*mangled = typeid(v).name();
+		string vclassName = demangle(mangled);
+		kclassName = "multimap<"+kclassName+":"+vclassName+">";
+		object.setName(kclassName);
+		while (mpt.begin()!=mpt.end())
+		{
+			string key = serialize<K>(mpt.begin()->first);
+			string value = serialize<V>(mpt.begin()->second);
+			mpt.erase(mpt.begin());
+			object.addPacket(value, key);
+		}
+		return enc.encodeB(&object, false);
+	}
+
+	template <class T> T static unserialize(string objXml)
 	{
 		T t;
 		const char *mangled = typeid(t).name();
 		string className = demangle(mangled);
 		return *(T*)_hanldeAllUnSerialization(objXml,className);
 	}
-	void* unSerializeUnknown(string objXml,string className)
+
+	static void* unSerializeUnknown(string objXml,string className)
 	{
 		return _hanldeAllUnSerialization(objXml,className);
 	}

@@ -20,38 +20,11 @@
 #include "AMEFEncoder.h"
 #include "AMEFDecoder.h"
 
-class JdbResources
+class AMEFResources
 {
-	JdbResources()
-	{
-		encoder = new AMEFEncoder();
-		decoder = new AMEFDecoder();
-	}
-	static JdbResources *jdbResources;
-
-	AMEFEncoder *encoder;
-
-	AMEFDecoder *decoder;
-
-	static JdbResources* get()
-	{
-		if(jdbResources==NULL)
-		{
-			jdbResources= new JdbResources();
-		}
-		return jdbResources;
-	}
-	~JdbResources();
+	AMEFResources(){}
+	~AMEFResources();
 public:
-	static AMEFEncoder* getEncoder()
-	{
-		return get()->encoder;
-	}
-
-	static AMEFDecoder* getDecoder()
-	{
-		return get()->decoder;
-	}
 
 	static char* longTocharArray(long l,int ind)
 	{

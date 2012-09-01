@@ -52,7 +52,7 @@ MessageUtil::MessageUtil(string file)
 	Element url = msgng.getElementByName("url");
 	vector<string> vec;
 	string h = url.getText();
-	boost::iter_split(vec, h , boost::first_finder(":"));
+	StringUtil::split(vec, h , (":"));
 	this->host = vec.at(0);
 	this->port = vec.at(1);
 	this->destination.setName(dest.getAttribute("name"));

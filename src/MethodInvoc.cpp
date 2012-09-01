@@ -40,8 +40,9 @@ void MethodInvoc::init()
 		_methinv_instance->running = false;
 	}
 }
-void MethodInvoc::service(int fd)
+void* MethodInvoc::service(void* arg)
 {
+	int fd = *(int*)arg;
 	init();
 	string methInfo,retValue;
 	_methinv_instance->getServer()->Receive(fd,methInfo,1024);
@@ -97,25 +98,25 @@ void MethodInvoc::service(int fd)
 				if(arg.getAttribute("type")=="int")
 				{
 					int *vt = new int;
-					*vt = boost::lexical_cast<int>(arg.getText());
+					*vt = CastUtil::lexical_cast<int>(arg.getText());
 					value = vt;
 				}
 				else if(arg.getAttribute("type")=="float")
 				{
 					float *vt = new float;
-					*vt = boost::lexical_cast<float>(arg.getText());
+					*vt = CastUtil::lexical_cast<float>(arg.getText());
 					value = vt;
 				}
 				else if(arg.getAttribute("type")=="double")
 				{
 					double *vt = new double;
-					*vt = boost::lexical_cast<double>(arg.getText());
+					*vt = CastUtil::lexical_cast<double>(arg.getText());
 					value = vt;
 				}
 				else if(arg.getAttribute("type")=="string")
 				{
 					string *vt = new string;
-					*vt = boost::lexical_cast<string>(arg.getText());
+					*vt = CastUtil::lexical_cast<string>(arg.getText());
 					value = vt;
 				}
 				else if(arg.getAttribute("type")!="")
@@ -157,17 +158,17 @@ void MethodInvoc::service(int fd)
 					if(returnType=="int")
 					{
 						int retv = reflector.invokeMethod<int>(_temp,meth,valus);
-						retValue = ("<return:int>"+boost::lexical_cast<string>(retv)+"</return:int>");
+						retValue = ("<return:int>"+CastUtil::lexical_cast<string>(retv)+"</return:int>");
 					}
 					else if(returnType=="float")
 					{
 						float retv = reflector.invokeMethod<float>(_temp,meth,valus);
-						retValue = ("<return:float>"+boost::lexical_cast<string>(retv)+"</return:float>");
+						retValue = ("<return:float>"+CastUtil::lexical_cast<string>(retv)+"</return:float>");
 					}
 					else if(returnType=="double")
 					{
 						double retv = reflector.invokeMethod<double>(_temp,meth,valus);
-						retValue = ("<return:double>"+boost::lexical_cast<string>(retv)+"</return:double>");
+						retValue = ("<return:double>"+CastUtil::lexical_cast<string>(retv)+"</return:double>");
 					}
 					else if(returnType=="string")
 					{

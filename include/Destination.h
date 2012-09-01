@@ -23,20 +23,11 @@
 #ifndef DESTINATION_H_
 #define DESTINATION_H_
 #include "string"
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 using namespace std;
 
 class Destination {
 	string name;
 	string type;
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive & ar, const unsigned int version)
-	{
-		ar & name;
-		ar & type;
-	}
 public:
 	Destination();
 	virtual ~Destination();

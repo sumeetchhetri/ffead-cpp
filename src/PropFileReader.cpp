@@ -46,12 +46,12 @@ propMap PropFileReader::getProperties(string filepath)
 	  {
 		  if(line!="")
 		  {
-			  boost::iter_split(vemp, line, boost::first_finder("="));
+			  vemp = StringUtil::split(line, ("="));
 		  	  if(vemp.size()==2)
 		  	  {
 		  		  string temp = vemp.at(1);
-		  		  boost::replace_all(temp,"\n","");
-		  		  boost::replace_all(temp,"\r","");
+		  		  StringUtil::replaceAll(temp,"\n","");
+		  		  StringUtil::replaceAll(temp,"\r","");
 		  		  if(all[vemp.at(0)]!="")
 		  			temp += ("," + all[vemp.at(0)]);
 		  		  all[vemp.at(0)] = temp;
