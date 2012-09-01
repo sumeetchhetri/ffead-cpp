@@ -24,7 +24,7 @@
 #include "Reflection.h"
 #include "Constants.h"
 #include "HttpRequest.h"
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 #include "Logger.h"
 
 

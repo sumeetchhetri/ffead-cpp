@@ -8,7 +8,6 @@ Installation On Windows with Cygwin
       g++
       autoconf
       automake
-      boost libraries and devel
       openssl libraries and devel (use Cygwin_SSL_UnixOdbc_libs.zip from downloads section for version 1.0)
       unixODBC libraries and devel (not found in Cygwin reposistory, use Cygwin_SSL_UnixOdbc_libs.zip from download section)
       bison,yacc,flex,gdb,readline,binutils (for building and installing openssl and unixODBC)
@@ -18,10 +17,10 @@ and build files, hence had provided the *_libs.zip file.
 5. Copy bin/gcc-3 or bin/gcc-4 and rename it ot gcc (the already existing link file gcc sometimes gives permission errors)
 6. You can build and install openssl and unixodbc and copy the required library files to the cygwin lib folder. The already built libraries are present in the Cygwin_SSL_UnixOdbc_libs.zip file which can be copied to the lib folder directly.
 7. Download the latest release tar file and extract it to the location of your choice under Cygwin installation.
-8. Make sure boost libraries are installed on your system
+8. Boost libraries no longer required since version 1.7
 9. Install Unix-ODBC and required odbc files for MySQL dependency and development files
 10. Install Open-SSL as well and development files
-11. JSON-SPIRIT source and header files are already included in the source code distribution
+11. JSON-SPIRIT libraries no longer required since version 1.7
 12. Also included prototype.js in source for AJAX support
 13. Go to the ffead-server-winx-cygwin/Release or ffead-server-winx-cygwin/Debug depending on whether you need to debug the server code
 14. Open terminal and type make all

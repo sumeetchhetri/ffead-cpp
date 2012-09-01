@@ -84,12 +84,12 @@ HttpResponse OAUTHController::service(HttpRequest req)
 		map<string,string> mapsd;
 		vector<string> temp;
 		string conte = parser.getContent();
-		boost::iter_split(temp, conte, boost::first_finder("&"));
+		StringUtil::split(temp, conte, ("&"));
 		//cout << conte << flush;
 		for(unsigned int i=0;i<temp.size();i++)
 		{
 			vector<string> temp1;
-			boost::iter_split(temp1, temp.at(i), boost::first_finder("="));
+			StringUtil::split(temp1, temp.at(i), ("="));
 			mapsd[temp1.at(0)] = temp1.at(1);
 			cout << temp1.at(0) << " = " << temp1.at(1) << endl;
 		}
@@ -180,12 +180,12 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			map<string,string> mapsd;
 			vector<string> temp;
 			string conte = parser.getContent();
-			boost::iter_split(temp, conte, boost::first_finder("&"));
+			StringUtil::split(temp, conte, ("&"));
 			//cout << conte << flush;
 			for(unsigned int i=0;i<temp.size();i++)
 			{
 				vector<string> temp1;
-				boost::iter_split(temp1, temp.at(i), boost::first_finder("="));
+				StringUtil::split(temp1, temp.at(i), ("="));
 				mapsd[temp1.at(0)] = temp1.at(1);
 				cout << temp1.at(0) << " = " << temp1.at(1) << endl;
 			}

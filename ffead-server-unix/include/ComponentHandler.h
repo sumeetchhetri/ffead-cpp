@@ -30,7 +30,7 @@
 #include "Reflector.h"
 #include "fstream"
 #include "Serialize.h"
-#include <boost/thread/thread.hpp>
+#include "Thread.h"
 #include "map"
 #include "Logger.h"
 #include "Constants.h"
@@ -49,7 +49,7 @@ class ComponentHandlerException: public exception
 };
 class ComponentHandler{
 	Logger logger;
-	static void service(int fd);
+	static void* service(void* arg);
 	Server *server;
 	bool running;
 	map<string,string> components;

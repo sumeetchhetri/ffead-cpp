@@ -35,18 +35,6 @@ class Message {
 	string userId;
 	string encoding;
 	string body;
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive & ar, const unsigned int version)
-	{
-		ar & destination;
-		ar & timestamp;
-		ar & type;
-		ar & priority;
-		ar & userId;
-		ar & encoding;
-		ar & body;
-	}
 public:
 	Message(string);
 	Message(Document);

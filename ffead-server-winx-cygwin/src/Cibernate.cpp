@@ -312,14 +312,14 @@ void Cibernate::procedureCall(string procName) {
 		for (unsigned int var = 0; var < outargs.size(); ++var) {
 			if (revType[outargs.at(var)] == "int") {
 
-				boost::replace_first(outargs.at(var), "@", "");
+				StringUtil::replaceFirst(outargs.at(var), "@", "");
 				SQLGetData(V_OD_hstmt, var + 1, SQL_C_LONG, params[outargs.at(
 						var)]->getVoidPointer(),
 						sizeof(params[outargs.at(var)]->getVoidPointer()), &siz);
 				logger << *(int*) params[outargs.at(var)]->getVoidPointer() << endl;
 			}
 			else if (revType[outargs.at(var)] == "short") {
-				boost::replace_first(outargs.at(var), "@", "");
+				StringUtil::replaceFirst(outargs.at(var), "@", "");
 				SQLGetData(V_OD_hstmt, var + 1, SQL_C_SHORT, params[outargs.at(
 						var)]->getVoidPointer(),
 						sizeof(params[outargs.at(var)]->getVoidPointer()), &siz);

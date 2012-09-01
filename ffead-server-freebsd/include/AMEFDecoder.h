@@ -1272,7 +1272,7 @@ public:
 			int lengthm = charArrayToInt(buffer,position,1);
 			jDBObject->setLength(lengthm);
 			position++;
-			while(position<buffer.length())
+			while(position<(int)buffer.length())
 			{
 				AMEFObject *obj = decodeSinglePacketB(buffer,ignoreName);
 				jDBObject->addPacket(obj);
@@ -1299,7 +1299,7 @@ public:
 			//char* value = new char[lengthm];
 			//System.arraycopy(buffer, 3, value, 0, lengthm);
 			position += 2;
-			while(position<buffer.length())
+			while(position<(int)buffer.length())
 			{
 				AMEFObject* obj = decodeSinglePacketB(buffer,ignoreName);
 				jDBObject->addPacket(obj);
@@ -1324,7 +1324,7 @@ public:
 			int lengthm = charArrayToInt(buffer,position,3);
 			jDBObject->setLength(lengthm);
 			position += 3;
-			while(position<buffer.length())
+			while(position<(int)buffer.length())
 			{
 				AMEFObject* obj = decodeSinglePacketB(buffer,ignoreName);
 				jDBObject->addPacket(obj);
@@ -1349,7 +1349,7 @@ public:
 			int lengthm = charArrayToInt(buffer,position,4);
 			jDBObject->setLength(lengthm);
 			position += 4;
-			while(position<buffer.length())
+			while(position<(int)buffer.length())
 			{
 				AMEFObject* obj = decodeSinglePacketB(buffer,ignoreName);
 				jDBObject->addPacket(obj);

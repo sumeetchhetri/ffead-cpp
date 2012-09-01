@@ -24,7 +24,7 @@
 #define SERVICETASK_H_
 #include "Task.h"
 #include "SSLHandler.h"
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 #include "ConfigurationHandler.h"
 #include "FormController.h"
 #include "RestController.h"

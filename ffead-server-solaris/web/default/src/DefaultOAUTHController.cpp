@@ -20,7 +20,7 @@ DefaultOAUTHController::~DefaultOAUTHController() {
 bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 {
 	string method = req->getMethod();
-	boost::to_upper(method);
+	StringUtil::toUpper(method);
 
 	map<string,string>::iterator it;
 	map<string,string> reqparams = req->getAllParams();
@@ -109,8 +109,8 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			filen = req->getCntxt_root()+"/tokens";
 			ofstream ofs(filen.c_str());
 			string oauthtok,oauthsec;
-			oauthtok = boost::lexical_cast<string>(Timer::getCurrentTime());
-			oauthsec = boost::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + boost::lexical_cast<string>(rand()%1000 + 12353);
+			oauthtok = CastUtil::lexical_cast<string>(Timer::getCurrentTime());
+			oauthsec = CastUtil::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + CastUtil::lexical_cast<string>(rand()%1000 + 12353);
 			string wrf = oauthtok + ":" + key + oauthsec + "\n";
 			ofs.write(wrf.c_str(),wrf.length());
 			ofs.close();
@@ -126,7 +126,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			{
 				filen = req->getCntxt_root()+"/callbacks";
 				ofstream ofs1(filen.c_str());
-				string oauth_ver = oauthtok + boost::lexical_cast<string>(rand()%1000);
+				string oauth_ver = oauthtok + CastUtil::lexical_cast<string>(rand()%1000);
 				wrf = CryptoHandler::urlDecode(reqparams["oauth_callback"])+"?oauth_verifier="+oauth_ver+"&"+parsc;
 				ofs1.write(wrf.c_str(),wrf.length());
 				ofs1.close();
@@ -144,8 +144,8 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			filen = req->getCntxt_root()+"/access_tokens";
 			ofstream ofs(filen.c_str());
 			string oauthtok,oauthsec;
-			oauthtok = boost::lexical_cast<string>(Timer::getCurrentTime());
-			oauthsec = boost::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + boost::lexical_cast<string>(rand()%1000 + 12353);
+			oauthtok = CastUtil::lexical_cast<string>(Timer::getCurrentTime());
+			oauthsec = CastUtil::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + CastUtil::lexical_cast<string>(rand()%1000 + 12353);
 			string wrf = oauthtok + ":" + csec + oauthsec + "\n";
 			ofs.write(wrf.c_str(),wrf.length());
 			ofs.close();

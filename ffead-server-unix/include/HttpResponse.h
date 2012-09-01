@@ -24,7 +24,7 @@
 #define HTTPRESPONSE_H_
 #include "string"
 #include "vector"
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 #include "HttpRequest.h"
 using namespace std;
 typedef vector<unsigned char> Cont;
@@ -40,7 +40,7 @@ public:
     void setContent_str(string content_str)
     {
         this->content_str = content_str;
-        //this->content_len = boost::lexical_cast<string>(content_str.length());
+        //this->content_len = CastUtil::lexical_cast<string>(content_str.length());
     }
 
     string getHttpVersion() const
@@ -141,13 +141,13 @@ public:
 	/*void setContent(Cont content)
 	{
 		this->content_str = content_str;
-		this->content_len = boost::lexical_cast<string>(content_str.length());
+		this->content_len = CastUtil::lexical_cast<string>(content_str.length());
 	}*/
 
 	void setContent(string content)
 	{
 		this->content_str = content_str;
-		//this->content_len = boost::lexical_cast<string>(content_str.length());
+		//this->content_len = CastUtil::lexical_cast<string>(content_str.length());
 	}
 
     string getLast_modified() const
@@ -193,7 +193,7 @@ public:
     	if(this->location!="")resp += "Location: " + this->location + "\r\n";
     	if(this->accept_ranges!="")resp += "Accept-Ranges: " + this->accept_ranges + "\r\n";
     	if(this->content_type!="")resp += "Content-Type: " + this->content_type + "\r\n";
-    	if(this->content_str!="")resp += "Content-Length: " + boost::lexical_cast<string>(content_str.length()) + "\r\n";
+    	if(this->content_str!="")resp += "Content-Length: " + CastUtil::lexical_cast<string>(content_str.length()) + "\r\n";
     	if(this->last_modified!="")resp += "Last-Modified: " + this->last_modified + "\r\n";
     	for (int var = 0; var < (int)this->cookies.size(); var++)
     	{
@@ -214,7 +214,7 @@ public:
 		if(this->location!="")resp += "Location: " + this->location + "\r\n";
 		if(this->accept_ranges!="")resp += "Accept-Ranges: " + this->accept_ranges + "\r\n";
 		if(this->content_type!="")resp += "Content-Type: " + this->content_type + "\r\n";
-		if(this->content_str!="")resp += "Content-Length: " + boost::lexical_cast<string>(content_str.length()) + "\r\n";
+		if(this->content_str!="")resp += "Content-Length: " + CastUtil::lexical_cast<string>(content_str.length()) + "\r\n";
 		if(this->last_modified!="")resp += "Last-Modified: " + this->last_modified + "\r\n";
 		for (int var = 0; var < (int)this->cookies.size(); var++)
 		{
@@ -250,7 +250,7 @@ public:
 		if(this->location!="")resp += "Location: " + this->location + "\r\n";
 		if(this->accept_ranges!="")resp += "Accept-Ranges: " + this->accept_ranges + "\r\n";
 		if(this->content_type!="")resp += "Content-Type: " + this->content_type + "\r\n";
-		if(this->content_str!="")resp += "Content-Length: " + boost::lexical_cast<string>(content_str.length()) + "\r\n";
+		if(this->content_str!="")resp += "Content-Length: " + CastUtil::lexical_cast<string>(content_str.length()) + "\r\n";
 		if(this->last_modified!="")resp += "Last-Modified: " + this->last_modified + "\r\n";
 		for (int var = 0; var < (int)this->cookies.size(); var++)
 		{

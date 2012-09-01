@@ -2,10 +2,10 @@ BSD based Installation
 
 1. Refer INSTALL-WINDOWS-CYGWIN file for directions on how to install on Windows and Cygwin
 2. Download the tar file and extract it to the location of your choice.
-3. Make sure boost >=v1.4 libraries and boost devel packages are installed on your system(install from ports or use pkg_add)
+3. Boost libraries no longer required since version 1.7
 4. Install Unix-ODBC and required odbc files for MySQL dependency alongwith development files
 5. Install Open-SSL and development files
-5. JSON-SPIRIT source and header files are already included in the source code distribution
+5. JSON-SPIRIT libraries no longer required since version 1.7
 5. Also included prototype.js in source for AJAX support
 6. Go to the ffead-server-freebsd/Release or ffead-server-freebsd/Debug depending on whether you need to debug the server code
 7. Open terminal and type gmake all

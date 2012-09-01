@@ -43,7 +43,7 @@ string ExtHandler::getContentStr(string url,string locale,string ext)
     if(locale.find("english")==string::npos && (ext==".html" || ext==".htm"))
     {
             string fnj = fname;
-            boost::replace_first(fnj,".",("_" + locale+"."));
+            StringUtil::replaceFirst(fnj,".",("_" + locale+"."));
             myfile.open(fnj.c_str(),ios::in | ios::binary);
 			if (myfile.is_open())
 			{
@@ -78,7 +78,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string 
 		res.setStatusMsg("OK");
 		res.setContent_type(props[".txt"]);
 		res.setContent_str(content);
-		//res.setContent_len(boost::lexical_cast<string>(content.length()));
+		//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 	}
 	else if(ext==".dcp")
 	{
@@ -119,7 +119,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string 
 			res.setStatusMsg("OK");
 			res.setContent_type(props[ext]);
 			res.setContent_str(content);
-			//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".view" && vwMap[req->getCntxt_name()+req->getFile()]!="")
@@ -160,7 +160,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string 
 			res.setStatusMsg("OK");
 			res.setContent_type(props[ext]);
 			res.setContent_str(content);
-			//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".tpe" && tmplMap[req->getCntxt_name()+req->getFile()]!="")
@@ -200,7 +200,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string 
 			res.setStatusMsg("OK");
 			res.setContent_type(props[ext]);
 			res.setContent_str(content);
-			//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".wsdl")
@@ -219,7 +219,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string 
 			res.setStatusMsg("OK");
 			res.setContent_type(props[ext]);
 			res.setContent_str(content);
-			//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	return cntrlit;

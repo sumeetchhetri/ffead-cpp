@@ -40,7 +40,7 @@ map<int,pid_t> pds;
 static pid_t parid;
 void *dlib = NULL;
 typedef map<string,string> sessionMap;
-static boost::mutex m_mutex,p_mutex;
+static Mutex m_mutex,p_mutex;
 ConfigurationData configurationData;
 
 Logger logger;
@@ -92,7 +92,7 @@ int send_connection(int fd,int unix_socket_fd)
 	msg.msg_controllen = cmsg->cmsg_len;
 
 	msg.msg_flags = 0;
-	//boost::mutex::scoped_lock lock(p_mutex);
+	//Mutex::scoped_lock lock(p_mutex);
 	if((rv= sendmsg(unix_socket_fd, &msg, 0)) < 0 )
 	{
 	  perror("sendmsg()");
@@ -365,15 +365,13 @@ void signalSIGILL(int dummy)
 	logger << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
 	abort();
 }*/
-void service(int fd,string serverRootDirectory,map<string,string> *params,
-		bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib)
+void* service(void* arg)
 {
 	logger << "service method " << endl;
-	ServiceTask *task = new ServiceTask(fd,serverRootDirectory,params,
-			isSSLEnabled, ctx, sslHandler, configurationData, dlib);
+	ServiceTask *task = (ServiceTask*)arg;
 	task->run();
 	delete task;
-	//logger << "\nDestroyed task" << flush;
+	return NULL;
 }
 
 pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
@@ -516,8 +514,13 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 						}
 
 						if(isThreadprq)
-							boost::thread m_thread(boost::bind(&service,n,serverRootDirectory,&params,
-									isSSLEnabled, ctx, sSLHandler, configurationData, dlib));
+						{
+							ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
+										isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+							Thread pthread(&service, task);
+							pthread.execute();
+							delete task;
+						}
 						else
 						{
 							ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
@@ -552,7 +555,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			{
 				string temp = buf;
 				strVec tempv;
-				boost::iter_split(tempv, temp, boost::first_finder(":"));
+				StringUtil::split(tempv, temp, (":"));
 				if(tempv.size()==2)
 				{
 					if(tempv.at(0)=="R")
@@ -574,8 +577,9 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 }*/
 
 
-void dynamic_page_monitor(string serverRootDirectory)
+void* dynamic_page_monitor(void* arg)
 {
+	string serverRootDirectory = *(string*)arg;
 	struct stat statbuf;
 	strVec dcpsss = configurationData.dcpsss;
 	map<string,long> statsinf;
@@ -588,7 +592,7 @@ void dynamic_page_monitor(string serverRootDirectory)
 	}
 	while(true)
 	{
-		boost::this_thread::sleep(boost::posix_time::seconds(5));
+		Thread::sSleep(5);
 		bool flag = false;
 		if(processgendone)
 			continue;
@@ -638,6 +642,7 @@ void dynamic_page_monitor(string serverRootDirectory)
 			}
 		}
 	}
+	return NULL;
 }
 
 
@@ -688,7 +693,7 @@ int main(int argc, char* argv[])
     PropFileReader pread;
     propMap srprps = pread.getProperties(respath+"server.prop");
     if(srprps["NUM_PROC"]!="")
-    	preForked = boost::lexical_cast<int>(srprps["NUM_PROC"]);
+    	preForked = CastUtil::lexical_cast<int>(srprps["NUM_PROC"]);
     string sslEnabled = srprps["SSL_ENAB"];
    	if(sslEnabled=="true" || sslEnabled=="TRUE")
    		isSSLEnabled = true;
@@ -707,7 +712,7 @@ int main(int argc, char* argv[])
    		{
    			try
    			{
-   				thrdpsiz = boost::lexical_cast<int>(thrdpreq);
+   				thrdpsiz = CastUtil::lexical_cast<int>(thrdpreq);
    			}
    			catch(...)
    			{
@@ -725,7 +730,7 @@ int main(int argc, char* argv[])
    	if(srprps["SESS_TIME_OUT"]!="")
    	{
    		try {
-   			sessionTimeout = boost::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
+   			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
 		} catch (...) {
 			sessionTimeout = 3600;
 			logger << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
@@ -802,6 +807,10 @@ int main(int argc, char* argv[])
     {
     	logger << p->getMessage() << endl;
     }
+    catch(const char* msg)
+	{
+		logger << msg << endl;
+	}
     configurationData.sessionTimeout = sessionTimeout;
     configurationData.ip_address = IP_ADDRESS;
     configurationData.sessatserv = sessatserv;
@@ -836,7 +845,7 @@ int main(int argc, char* argv[])
 	for (unsigned int var1 = 0;var1<configurationData.cmpnames.size();var1++)
 	{
 		string name = configurationData.cmpnames.at(var1);
-		boost::replace_first(name,"Component_","");
+		StringUtil::replaceFirst(name,"Component_","");
 		ComponentHandler::registerComponent(name);
 		AppContext::registerComponent(name);
 	}
@@ -860,7 +869,11 @@ int main(int argc, char* argv[])
 	//logfile << "Server: waiting for connections on port " << PORT << "\n" << flush;
 	logger.info("Server: waiting for connections on port "+PORT);
 
-	if(isCompileEnabled)boost::thread m_thread(boost::bind(&dynamic_page_monitor ,serverRootDirectory));
+	if(isCompileEnabled)
+	{
+		Thread pthread(&dynamic_page_monitor, &serverRootDirectory);
+		pthread.execute();
+	}
 
 	fd_set master;    // master file descriptor list
 	fd_set read_fds;  // temp file descriptor list for select()
@@ -968,27 +981,49 @@ int main(int argc, char* argv[])
 					}
 					else
 					{
-						FD_SET(new_fd, &master); // add to master set
+						/*FD_SET(new_fd, &master); // add to master set
 						if (new_fd > fdmax) {    // keep track of the max
 							fdmax = new_fd;
+						}*/
+
+						logger << "got new connection " << endl;
+						//FD_CLR(n, &master); // remove from master set
+						fcntl(new_fd, F_SETFL,O_SYNC);
+						if(isThreadprq)
+						{
+							ServiceTask *task = new ServiceTask(new_fd,serverRootDirectory,&params,
+										isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+							Thread pthread(&service, task);
+							pthread.execute();
 						}
+						else
+						{
+							ServiceTask *task = new ServiceTask(new_fd,serverRootDirectory,&params,
+									isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+							pool->execute(*task);
+						}
+
 					}
 				}
-				else
+				/*else
 				{
 					logger << "got new connection " << endl;
 					FD_CLR(n, &master); // remove from master set
 					fcntl(n, F_SETFL,O_SYNC);
 					if(isThreadprq)
-						boost::thread m_thread(boost::bind(&service,n,serverRootDirectory,&params,
-								isSSLEnabled, ctx, sSLHandler, configurationData, dlib));
+					{
+						ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
+									isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+						Thread pthread(&service, task);
+						pthread.execute();
+					}
 					else
 					{
 						ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
 								isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
 						pool->execute(*task);
 					}
-				}
+				}*/
 			}
 		}
 	}

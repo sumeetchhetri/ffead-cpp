@@ -94,11 +94,11 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 		b = allcontent.find("<DCPF>");
 		e = allcontent.find("</DCPF>") + 7;
 		string temp1 = allcontent.substr(b,e-b);
-		boost::replace_all(allcontent,temp1,"");
+		StringUtil::replaceAll(allcontent,temp1,"");
 
 		//string ter(allcontent.substr(0,b-6));
-		//boost::replace_all(ter,"\n","");
-		//boost::replace_all(ter,"\"","\\\"");
+		//StringUtil::replaceAll(ter,"\n","");
+		//StringUtil::replaceAll(ter,"\"","\\\"");
 		e = temp1.find("</DCPF>");
 		len = e - b;
 		funcs.append(temp1.substr(6,e-6));
@@ -113,8 +113,8 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 	{
 		b = allcontent.find("<DCPB>") + 6;
 		string ter(allcontent.substr(0,b-6));
-		boost::replace_all(ter,"\n","");
-		boost::replace_all(ter,"\"","\\\"");
+		StringUtil::replaceAll(ter,"\n","");
+		StringUtil::replaceAll(ter,"\"","\\\"");
 		bodies.append("screen << \""+ter+"\";");
 		e = allcontent.find("</DCPB>");
 		len = e - b;
@@ -122,8 +122,8 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 		allcontent = allcontent.substr(e+7);
 	}
 	string ter(allcontent.substr(0));
-	boost::replace_all(ter,"\n","");
-	boost::replace_all(ter,"\"","\\\"");
+	StringUtil::replaceAll(ter,"\n","");
+	StringUtil::replaceAll(ter,"\"","\\\"");
 	bodies.append("screen << \""+ter+"\";\nstring scr;\nscr = screen.str();\n");
 	bodies.append("\nAfcUtil::writeTofile(\""+dir+"_"+file+".html\",scr,true);\n");
 	bodies.append("\nreturn scr;\n");

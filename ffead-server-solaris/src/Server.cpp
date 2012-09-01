@@ -31,6 +31,7 @@ void sigchld_handler(int s)
 
 Server::Server(string port,int waiting,Service serv)
 {
+	service = serv;
 	logger = Logger::getLogger("Server");
 	struct addrinfo hints, *servinfo, *p;
 	struct sigaction sa;
@@ -132,7 +133,8 @@ Server::Server(string port,int waiting,Service serv)
 					}
 					else
 					{
-						boost::thread m_thread(boost::bind(serv,n));
+						//Thread pthread(serv, &new_fd);
+						//pthread.execute();
 					}
 				}
 			}
@@ -143,6 +145,7 @@ Server::Server(string port,int waiting,Service serv)
 
 Server::Server(string port,bool block,int waiting,Service serv,bool tobefork)
 {
+	service = serv;
 	struct addrinfo hints, *servinfo, *p;
 	struct sigaction sa;
 	int yes=1;
@@ -204,13 +207,13 @@ Server::Server(string port,bool block,int waiting,Service serv,bool tobefork)
 	{
 		if(fork()==0)
 		{
-			servicing(serv);
+			servicing(this);
 		}
 	}
 	else
 	{
-		boost::thread m_thread(boost::bind(&Server::servicing, this, serv));
-		//servicing(serv);
+		Thread pthread(&servicing, this);
+		pthread.execute();
 	}
 }
 
@@ -218,11 +221,13 @@ Server::~Server() {
 	// TODO Auto-generated destructor stub
 }
 
-void Server::servicing(Service serv)
+void* Server::servicing(void* arg)
 {
+	Server* server = (Server*)arg;
+	Service serv = server->service;
 	while(1)
 	{
-		int new_fd = this->Accept();
+		int new_fd = server->Accept();
 		if (new_fd == -1)
 		{
 			perror("accept");
@@ -230,9 +235,11 @@ void Server::servicing(Service serv)
 		}
 		else
 		{
-			boost::thread m_thread(boost::bind(serv,new_fd));
+			Thread pthread(serv, &new_fd);
+			pthread.execute();
 		}
 	}
+	return NULL;
 }
 
 int Server::Accept()

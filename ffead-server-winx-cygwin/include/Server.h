@@ -42,17 +42,18 @@
 #include <sys/ioctl.h>
 /*Fix for Windows Cygwin*///#include <sys/epoll.h>
 #include <sys/resource.h>
-#include <boost/thread/thread.hpp>
+#include "Thread.h"
 #include "Logger.h"
 #define MAXEPOLLSIZES 10000
 using namespace std;
 
-typedef void (*Service)(int);
+typedef void* (*Service)(void*);
 class Server {
 	Logger logger;
 	int sock;
+	Service service;
 	struct sockaddr_storage their_addr;
-	void servicing(Service serv);
+	static void* servicing(void* arg);
 public:
 	Server(string,bool,int,Service,bool);
 	Server(string port,int waiting,Service serv);

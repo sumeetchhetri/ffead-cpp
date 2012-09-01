@@ -36,7 +36,7 @@
 #include "Reflection.h"
 #include <cstdlib>
 #include <dlfcn.h>
-#include "json_spirit.h"
+
 #include "WsUtil.h"
 #include "sstream"
 
@@ -58,16 +58,13 @@
 #include <signal.h>
 #include "DynamicView.h"
 #include "HttpRequest.h"
-#include <boost/thread/thread.hpp>
-#include <boost/bind.hpp>
-#include <boost/date_time.hpp>
 #include "ApplicationUtil.h"
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/epoll.h>
+#include <execinfo.h>
 #include <sys/resource.h>
 #include <sys/time.h>
-#include <boost/thread/recursive_mutex.hpp>
 #include <queue>
 #include <sys/uio.h>
 #include <sys/un.h>
@@ -78,7 +75,7 @@
 #include "MethodInvoc.h"
 #include "Reflector.h"
 #include "AppContext.h"
-#include "ExceptionHandler.h"
+
 #include "Logger.h"
 #include "ThreadPool.h"
 #include "FileAuthController.h"
@@ -101,6 +98,7 @@
 #include "ConfigurationHandler.h"
 #include "SSLHandler.h"
 #include "ServiceTask.h"
+#include "Thread.h"
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd
@@ -121,7 +119,6 @@
 //#define PASSWORD "password"
 //#define DHFILE "dh1024.pem"
 
-//#include <boost/filesystem.hpp>
 #define MAXEPOLLSIZE 100
 #define BACKLOGM 500
 

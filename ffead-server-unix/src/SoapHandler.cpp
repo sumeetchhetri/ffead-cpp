@@ -168,5 +168,5 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 	res.setStatusMsg("OK");
 	res.setContent_type(xmlcnttype);
 	res.setContent_str(env);
-	//res.setContent_len(boost::lexical_cast<string>(env.length()));
+	//res.setContent_len(CastUtil::lexical_cast<string>(env.length()));
 }

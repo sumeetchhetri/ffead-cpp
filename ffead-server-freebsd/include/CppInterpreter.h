@@ -27,9 +27,9 @@
 #include "Object.h"
 #include "Reflector.h"
 #include "iostream"
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
+#include "CastUtil.h"
+#include "StringUtil.h"
+#include "RegexUtil.h"
 #include "bitset"
 #include "Logger.h"
 typedef map<string,Object> mapVars;
@@ -119,7 +119,7 @@ class CppInterpreter {
 				if(containsChar(token))
 				{
 					Object o = localVariables[token];
-					token = boost::lexical_cast<string>(o.getValue<int>());
+					token = CastUtil::lexical_cast<string>(o.getValue<int>());
 				}
 				if(st)
 					going.push_back(token);
@@ -145,12 +145,12 @@ class CppInterpreter {
 					if(opr.at(i)=="/" && !continu)
 					{
 						T f;
-						f = boost::lexical_cast<T>(opr.at(i-1))/boost::lexical_cast<T>(opr.at(i+1));
+						f = CastUtil::lexical_cast<T>(opr.at(i-1))/CastUtil::lexical_cast<T>(opr.at(i+1));
 						for(int k=0;k<(i-1);k++)
 						{
 							temp.push_back(opr.at(k));
 						}
-						temp.push_back(boost::lexical_cast<string>(f));
+						temp.push_back(CastUtil::lexical_cast<string>(f));
 						for(int k=i+2;k<(int)opr.size();k++)
 						{
 							temp.push_back(opr.at(k));
@@ -182,12 +182,12 @@ class CppInterpreter {
 					if(opr.at(i)=="*" && !continu)
 					{
 						T f;
-						f = boost::lexical_cast<T>(opr.at(i-1))*boost::lexical_cast<T>(opr.at(i+1));
+						f = CastUtil::lexical_cast<T>(opr.at(i-1))*CastUtil::lexical_cast<T>(opr.at(i+1));
 						for(int k=0;k<i-1;k++)
 						{
 							temp.push_back(opr.at(k));
 						}
-						temp.push_back(boost::lexical_cast<string>(f));
+						temp.push_back(CastUtil::lexical_cast<string>(f));
 						for(int k=i+2;k<(int)opr.size();k++)
 						{
 							temp.push_back(opr.at(k));
@@ -219,12 +219,12 @@ class CppInterpreter {
 					if(opr.at(i)=="-" && !continu)
 					{
 						T f;
-						f = boost::lexical_cast<T>(opr.at(i-1))-boost::lexical_cast<T>(opr.at(i+1));
+						f = CastUtil::lexical_cast<T>(opr.at(i-1))-CastUtil::lexical_cast<T>(opr.at(i+1));
 						for(int k=0;k<i-1;k++)
 						{
 							temp.push_back(opr.at(k));
 						}
-						temp.push_back(boost::lexical_cast<string>(f));
+						temp.push_back(CastUtil::lexical_cast<string>(f));
 						for(int k=i+2;k<(int)opr.size();k++)
 						{
 							temp.push_back(opr.at(k));
@@ -252,12 +252,12 @@ class CppInterpreter {
 					if(opr.at(i)=="+" && !continu)
 					{
 						T f;
-						f = boost::lexical_cast<T>(opr.at(i-1))+boost::lexical_cast<T>(opr.at(i+1));
+						f = CastUtil::lexical_cast<T>(opr.at(i-1))+CastUtil::lexical_cast<T>(opr.at(i+1));
 						for(int k=0;k<i-1;k++)
 						{
 							temp.push_back(opr.at(k));
 						}
-						temp.push_back(boost::lexical_cast<string>(f));
+						temp.push_back(CastUtil::lexical_cast<string>(f));
 						for(int k=i+2;k<(int)opr.size();k++)
 						{
 							temp.push_back(opr.at(k));
@@ -268,12 +268,12 @@ class CppInterpreter {
 					else if(opr.at(i)=="-" && !continu)
 					{
 						T f;
-						f = boost::lexical_cast<T>(opr.at(i-1))+boost::lexical_cast<T>(opr.at(i)+opr.at(i+1));
+						f = CastUtil::lexical_cast<T>(opr.at(i-1))+CastUtil::lexical_cast<T>(opr.at(i)+opr.at(i+1));
 						for(int k=0;k<i-1;k++)
 						{
 							temp.push_back(opr.at(k));
 						}
-						temp.push_back(boost::lexical_cast<string>(f));
+						temp.push_back(CastUtil::lexical_cast<string>(f));
 						for(int k=i+2;k<(int)opr.size();k++)
 						{
 							temp.push_back(opr.at(k));

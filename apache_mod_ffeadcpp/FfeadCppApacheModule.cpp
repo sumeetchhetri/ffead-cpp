@@ -51,7 +51,7 @@
 #include "sstream"
 
 #include "ClassInfo.h"
-#include <boost/lexical_cast.hpp>
+#include "StringUtil.h"
 #include "View.h"
 #include "XmlParser.h"
 #include "TemplateHandler.h"
@@ -68,15 +68,11 @@
 #include <signal.h>
 #include "DynamicView.h"
 #include "HttpRequest.h"
-#include <boost/thread/thread.hpp>
-#include <boost/bind.hpp>
-#include <boost/date_time.hpp>
 #include "ApplicationUtil.h"
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/resource.h>
 #include <sys/time.h>
-#include <boost/thread/recursive_mutex.hpp>
 #include <queue>
 #include <sys/uio.h>
 #include <sys/un.h>
@@ -114,8 +110,7 @@ typedef void* (*toVoidP) (string);
 using namespace std;
 
 map<string,HttpSession> sessionMap;
-boost::mutex m_mutex;
-boost::mutex p_mutex;
+
 int nor=0;
 ofstream logfile;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap;
@@ -260,7 +255,7 @@ static apr_bucket* get_file_bucket(request_rec* r, const char* fname)
 
 static int mod_ffeadcpp_method_handler (request_rec *r)
 {
-	string port = boost::lexical_cast<string>(r->server->port);
+	string port = CastUtil::lexical_cast<string>(r->server->port);
 	if(ip_address=="")
 	{
 		ip_address = r->server->server_hostname;
@@ -394,7 +389,7 @@ static void one_time_init()
 	if(srprps["SESS_TIME_OUT"]!="")
 	{
 		try {
-			sessionTimeout = boost::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
+			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
 		} catch (...) {
 			sessionTimeout = 3600;
 			logger << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
@@ -425,10 +420,8 @@ static void one_time_init()
 	string compres = respath+"run.sh";
 	if(!libpresent)
 	{
-		vector<string> argss;
-		string output;
-		bool passed = ScriptHandler::execute(compres, argss, output);
-		logger << "Intermediate code generation pass = " << passed << endl;
+		string output = ScriptHandler::execute(compres, true);
+		logger << "Intermediate code generation " << output << endl;
 	}
 
 	dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW|RTLD_GLOBAL);

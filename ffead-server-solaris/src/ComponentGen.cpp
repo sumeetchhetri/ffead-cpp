@@ -32,14 +32,14 @@ ComponentGen::~ComponentGen() {
 
 string convertfrom(string val)
 {
-	boost::to_upper(val);
+	StringUtil::toUpper(val);
 	if(val=="TRUE")
 		return "true";
 	else if(val=="FALSE")
 		return "false";
 	else
 	{
-		throw new boost::bad_lexical_cast;
+		throw "Conversion exception";
 	}
 }
 
@@ -75,7 +75,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 				throw "Component Name must be specified";
 			file = ("Component_"+name);
 			string cudef(file);
-			boost::to_upper(cudef);
+			StringUtil::toUpper(cudef);
 			initheaders = "#ifndef "+cudef+"_H\n#define "+cudef+"_H\n";
 			cuinithdrs = "#ifndef "+cudef+"_REMOTE_H\n#define "+cudef+"_REMOTE_H\n";
 			initheaders += "#include \"Component.h\"\n";
@@ -127,7 +127,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 
 			string alwd = srprps["@USR_GRP_ALWD"];
 			Cont1 alwdls;
-			boost::iter_split(alwdls, alwd, boost::first_finder(","));
+			StringUtil::split(alwdls, alwd, (","));
 			for (unsigned int var = 0; var < alwdls.size(); var++)
 			{
 				cudata+= ("this->getAllwList().push_back(\""+alwdls.at(var)+"\");\n");
@@ -135,7 +135,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 
 			string blkd = srprps["@BLOCK_USERS"];
 			Cont1 blkls;
-			boost::iter_split(blkls, blkd, boost::first_finder(","));
+			StringUtil::split(blkls, blkd, (","));
 			for (unsigned int var = 0; var < blkls.size(); var++)
 			{
 				cudata+= ("this->getBlkdList().push_back(\""+blkls.at(var)+"\");\n");
@@ -143,7 +143,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 
 			string prots = srprps["@PROTO_ALWD"];
 			Cont1 protls;
-			boost::iter_split(protls, prots, boost::first_finder(","));
+			StringUtil::split(protls, prots, (","));
 			for (unsigned int var = 0; var < protls.size(); var++)
 			{
 				cudata+= ("this->getProtocols().push_back(\""+protls.at(var)+"\");\n");
@@ -166,9 +166,9 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 			cudata+= ("this->setDbconpoolSize("+srprps["@DB_CONN_POOL_NUM"]+");\n");
 
 			int cnt =1;
-			while(srprps["@SERVICE"+boost::lexical_cast<string>(cnt)]!="")
+			while(srprps["@SERVICE"+CastUtil::lexical_cast<string>(cnt)]!="")
 			{
-				string srvc = srprps["@SERVICE"+boost::lexical_cast<string>(cnt++)];
+				string srvc = srprps["@SERVICE"+CastUtil::lexical_cast<string>(cnt++)];
 				ComponentService cmps;
 				if(srvc.find("@USR_GRP_ALWD(")!=string::npos)
 				{
@@ -197,7 +197,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 						else
 						{
 							Cont1 alwd;
-							boost::iter_split(alwd, temtem, boost::first_finder(","));
+							StringUtil::split(alwd, temtem, (","));
 						}
 					}
 				}
@@ -228,7 +228,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 						else
 						{
 							Cont1 alwd;
-							boost::iter_split(alwd, temtem, boost::first_finder(","));
+							StringUtil::split(alwd, temtem, (","));
 						}
 					}
 				}
@@ -259,7 +259,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 						else
 						{
 							Cont1 alwd;
-							boost::iter_split(alwd, temtem, boost::first_finder(","));
+							StringUtil::split(alwd, temtem, (","));
 						}
 					}
 				}
@@ -322,7 +322,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 						else
 						{
 							Cont1 alwd;
-							boost::iter_split(alwd, temtem, boost::first_finder(","));
+							StringUtil::split(alwd, temtem, (","));
 						}
 					}
 				}
@@ -354,7 +354,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 						else
 						{
 							Cont1 alwd;
-							boost::iter_split(alwd, temtem, boost::first_finder("."));
+							StringUtil::split(alwd, temtem, ("."));
 							if(alwd.size()==2)
 							{
 								srvcls = alwd.at(0);
@@ -432,18 +432,18 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 							else
 							{
 								Cont1 alwd;
-								boost::iter_split(alwd, temtem, boost::first_finder(","));
+								StringUtil::split(alwd, temtem, (","));
 								for (unsigned int var = 0; var < alwd.size(); ++var)
 								{
 									if(alwd.at(var)!="" && alwd.at(var).find("*")==string::npos && alwd.at(var).find("&")==string::npos)
 									{
-										//srvargs += alwd.at(var) + "*_"+boost::lexical_cast<string>(var+1)+" = ("+alwd.at(var)+"*)args.at("+boost::lexical_cast<string>(var)+");\n";
-										srvmcarg += "_"+boost::lexical_cast<string>(var+1)+"";
-										srvargs += alwd.at(var)+ " _"+boost::lexical_cast<string>(var+1);
-										srvmcargremote += alwd.at(var)+ " &_"+boost::lexical_cast<string>(var+1);
-										srvmcargremotevec += "Object __"+boost::lexical_cast<string>(var+1)+";\n";
-										srvmcargremotevec += "__"+boost::lexical_cast<string>(var+1)+" << _"+boost::lexical_cast<string>(var+1)+";\n";
-										srvmcargremotevec += "_vec.push_back(__"+boost::lexical_cast<string>(var+1)+");\n";
+										//srvargs += alwd.at(var) + "*_"+CastUtil::lexical_cast<string>(var+1)+" = ("+alwd.at(var)+"*)args.at("+CastUtil::lexical_cast<string>(var)+");\n";
+										srvmcarg += "_"+CastUtil::lexical_cast<string>(var+1)+"";
+										srvargs += alwd.at(var)+ " _"+CastUtil::lexical_cast<string>(var+1);
+										srvmcargremote += alwd.at(var)+ " &_"+CastUtil::lexical_cast<string>(var+1);
+										srvmcargremotevec += "Object __"+CastUtil::lexical_cast<string>(var+1)+";\n";
+										srvmcargremotevec += "__"+CastUtil::lexical_cast<string>(var+1)+" << _"+CastUtil::lexical_cast<string>(var+1)+";\n";
+										srvmcargremotevec += "_vec.push_back(__"+CastUtil::lexical_cast<string>(var+1)+");\n";
 										if(var!=alwd.size()-1)
 										{
 											srvmcarg += ",";
@@ -507,7 +507,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 			logger << curemote << flush;
 
 	    }
-		catch(boost::bad_lexical_cast &)
+		catch(const char* ex)
 		{
 			logger << "exception occurred" << flush;
 		}

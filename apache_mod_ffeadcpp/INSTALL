@@ -2,11 +2,11 @@ Installation Directions
 
 1. Refer INSTALL-{OSTYPE} file for directions on how to install on OS/Platform
 2. Download the tar file and extract it to the location of your choice.
-3. Make sure boost >=v1.4 libraries and boost devel packages are installed on your system
+3. Boost libraries no longer required since version 1.7
 4. Install Unix-ODBC and required odbc files for MySQL dependency alongwith development files
 5. Install Open-SSL and development files
 6. Install apache/httpd and apache-devel/htttpd-devel files
-7. JSON-SPIRIT source and header files are already included in the source code distribution
+7. JSON-SPIRIT libraries no longer required since version 1.7
 8. Go to the ffead-server-unix/Release or ffead-server-unix/Debug depending on whether you need to debug the server code
 9. Open terminal and type make all
 10. This will create the distribution folder named ffead-server-unix inside ffead-server-unix/Release or ffead-server-unix/Debug folders accordingly

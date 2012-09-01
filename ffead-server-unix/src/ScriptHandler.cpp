@@ -210,7 +210,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		}
 		string phpcnts = req->toPHPVariablesString(def);
 		//logger << phpcnts << endl;
-		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".php";
+		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".php";
 		tmpf = req->getCntxt_root() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
@@ -229,7 +229,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".html"]);
 			res.setContent_str(content);
-			//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".pl")
@@ -245,7 +245,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 			def = handoffs[req->getCntxt_name()];
 			tmpf = "/";
 		}
-		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".pl";
+		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".pl";
 		tmpf = req->getCntxt_root() + tmpf;
 		string phpcnts = req->toPerlVariablesString();
 		//logger << tmpf << endl;
@@ -276,7 +276,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".html"]);
 			res.setContent_str(content);
-			//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".rb")
@@ -294,7 +294,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		}
 		string phpcnts = req->toRubyVariablesString();
 		//logger << phpcnts << endl;
-		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".rb";
+		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".rb";
 		tmpf = req->getCntxt_root() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
@@ -313,7 +313,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".html"]);
 			res.setContent_str(content);
-			//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".py")
@@ -329,7 +329,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 			def = handoffs[req->getCntxt_name()];
 			tmpf = "/";
 		}
-		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".py";
+		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".py";
 		tmpf = req->getCntxt_root() + tmpf;
 		string phpcnts = req->toPythonVariablesString();
 		string plfile = req->getUrl();
@@ -359,7 +359,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".html"]);
 			res.setContent_str(content);
-			//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".lua")
@@ -377,7 +377,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		}
 		string phpcnts = req->toLuaVariablesString();
 		//logger << phpcnts << endl;
-		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".lua";
+		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".lua";
 		tmpf = req->getCntxt_root() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
@@ -396,7 +396,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".html"]);
 			res.setContent_str(content);
-			//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".njs")
@@ -414,7 +414,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		}
 		string phpcnts = req->toNodejsVariablesString();
 		//logger << phpcnts << endl;
-		filen = boost::lexical_cast<string>(Timer::getCurrentTime()) + ".njs";
+		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".njs";
 		tmpf = req->getCntxt_root() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
@@ -433,7 +433,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 			res.setStatusMsg("OK");
 			res.setContent_type(props[".html"]);
 			res.setContent_str(content);
-			//res.setContent_len(boost::lexical_cast<string>(content.length()));
+			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	return skipit;

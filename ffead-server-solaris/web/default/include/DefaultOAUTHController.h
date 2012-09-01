@@ -8,7 +8,7 @@
 #ifndef DEFAULTOAUTHCONTROLLER_H_
 #define DEFAULTOAUTHCONTROLLER_H_
 #include "AuthController.h"
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 #include "CryptoHandler.h"
 #include "FileAuthController.h"
 #include "Timer.h"

@@ -57,7 +57,7 @@ void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folde
 		}
 		else if(folderName!="")
 		{
-			boost::replace_first(folderName,"*","");
+			StringUtil::replaceFirst(folderName,"*","");
 			if(folderName.find("~")==string::npos)
 			{
 				logger << "\nlist for file" << (cwd+"/"+folderName) << "\n" << flush;
@@ -107,7 +107,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 			{
 				try
 				{
-					configurationData.client_auth = boost::lexical_cast<int>(tempcl);
+					configurationData.client_auth = CastUtil::lexical_cast<int>(tempcl);
 				}
 				catch(...)
 				{
@@ -128,7 +128,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		//propMap srp = pread.getProperties(defpath+"config/app.prop");
 
 		string name = webdirs1.at(var);
-		boost::replace_all(name,"/","");
+		StringUtil::replaceAll(name,"/","");
 		rundyncontent += "cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/"+name+"/public/\n";
 		configurationData.cntMap[name] = "true";
 		listi(dcppath,".dcp",true,dcps);
@@ -307,7 +307,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 											RestFunctionParams param;
 											/*try
 											{
-												param.pos = boost::lexical_cast<int>(resfuncparams.at(cntn2).getAttribute("pos"));
+												param.pos = CastUtil::lexical_cast<int>(resfuncparams.at(cntn2).getAttribute("pos"));
 											} catch(...) {
 												logger << "CONFIGURATION_ERROR-> Invalid pos attribute specified for function "
 														<< restfunction.name << ",pos value should be an integer." << endl;
@@ -385,7 +385,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							securityObject.loginProvider = provider;
 							securityObject.loginUrl = url;
 							try {
-								securityObject.sessTimeout = boost::lexical_cast<long>(sessionTimeoutV);
+								securityObject.sessTimeout = CastUtil::lexical_cast<long>(sessionTimeoutV);
 							} catch (...) {
 								securityObject.sessTimeout = 3600;
 								logger << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
@@ -468,7 +468,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						else if(confs.at(cns).getTagName()=="pool-size")
 						{
 							if(confs.at(cns).getText()!="")
-								psize = boost::lexical_cast<int>(confs.at(cns).getText());
+								psize = CastUtil::lexical_cast<int>(confs.at(cns).getText());
 						}
 					}
 					CibernateConnPools::addPool(psize,uid,pwd,dsn,name);
@@ -547,7 +547,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		{
 			string objs = afc["PROP"];
 			strVec objv;
-			boost::iter_split(objv, objs, boost::first_finder(","));
+			StringUtil::split(objv, objs, (","));
 			for (unsigned int var1 = 0;var1<objv.size();var1++)
 			{
 				if(objv.at(var1)!="")
@@ -561,7 +561,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 			}
 			objs = afc["INTF"];
 			objv.clear();
-			boost::iter_split(objv, objs, boost::first_finder(","));
+			StringUtil::split(objv, objs, (","));
 			for (unsigned int var1 = 0;var1<objv.size();var1++)
 			{
 				if(objv.at(var1)!="")
@@ -583,7 +583,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 				if(eles.at(apps).getTagName()=="page")
 				{
 					string fvw = eles.at(apps).getAttribute("htm");
-					boost::replace_first(fvw,".html",".fview");
+					StringUtil::replaceFirst(fvw,".html",".fview");
 					configurationData.fviewmap[eles.at(apps).getAttribute("htm")] = eles.at(apps).getAttribute("class");
 					pathvec.push_back(name);
 					vecvp.push_back(usrincludes);
@@ -596,14 +596,14 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 					{
 						if(elese.at(appse).getTagName()=="event")
 						{
-							nsfns += "\n\"_fview_cntxt_global_js_callback"+boost::lexical_cast<string>(appse)+"\" : function(response){" + elese.at(appse).getAttribute("cb") + "},";
+							nsfns += "\n\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<string>(appse)+"\" : function(response){" + elese.at(appse).getAttribute("cb") + "},";
 							js += "\ndocument.getElementById('"+elese.at(appse).getAttribute("eid")+"').";
 							js += elese.at(appse).getAttribute("type") + " = function(){";
 							js += eles.at(apps).getAttribute("class")+"."+elese.at(appse).getAttribute("func")+"(";
 							string args = elese.at(appse).getAttribute("args");
 							if(args!="")
 								args += ",";
-							js += args + "\"_fview_cntxt_global_js_callback"+boost::lexical_cast<string>(appse)+"\",\"/"+name+"/"+fvw+"\",_fview_namespace);}";
+							js += args + "\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<string>(appse)+"\",\"/"+name+"/"+fvw+"\",_fview_namespace);}";
 						}
 						else if(elese.at(appse).getTagName()=="form")
 						{
@@ -646,13 +646,15 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	}
 	for (unsigned int cntn = 0; cntn < handoffVec.size(); cntn++)
 	{
-		boost::replace_first(libs, handoffVec.at(cntn), "");
+		StringUtil::replaceFirst(libs, handoffVec.at(cntn), "");
 	}
 	logger << endl<< "done generating compoenent code" <<endl;
+	logger << endl<< "started generating reflection/serialization code" <<endl;
 	string ret = ref.generateClassDefinitionsAll(all,includeRef);
 	AfcUtil::writeTofile(rtdcfpath+"ReflectorInterface.cpp",ret,true);
-	ret = ref.generateSerDefinitionAll(all,includeRef);
+	ret = ref.generateSerDefinitionAll(all,includeRef, true);
 	AfcUtil::writeTofile(rtdcfpath+"SerializeInterface.cpp",ret,true);
+	logger << endl<< "done generating reflection/serialization code" <<endl;
 	cntxt["RUNTIME_LIBRARIES"] = libs;
 	ret = templ.evaluate(rtdcfpath+"objects.mk.template",cntxt);
 	AfcUtil::writeTofile(rtdcfpath+"objects.mk",ret,true);
@@ -664,21 +666,29 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	ret = templ.evaluate(rtdcfpath+"subdir.mk.template",cntxt);
 	AfcUtil::writeTofile(rtdcfpath+"subdir.mk",ret,true);
 	configurationData.dcpsss = dcps;
+	logger << endl<< "started generating dcp code" <<endl;
 	ret = DCPGenerator::generateDCPAll(dcps);
 	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
+	logger << endl<< "done generating dcp code" <<endl;
 	string headers,objs,infjs;
+	logger << endl<< "started generating ajax code" <<endl;
 	ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,stat,headers,objs,infjs,pathvec);
 	AfcUtil::writeTofile(rtdcfpath+"AjaxInterface.cpp",ret,true);
 	AfcUtil::writeTofile(pubpath+"_afc_Objects.js",objs,true);
 	AfcUtil::writeTofile(pubpath+"_afc_Interfaces.js",infjs,true);
 	AfcUtil::writeTofile(incpath+"AfcInclude.h",headers,true);
+	logger << endl<< "done generating ajax code" <<endl;
 	ApplicationUtil apputil;
 	webdirs.clear();
+	logger << endl<< "started generating application code" <<endl;
 	ret = apputil.buildAllApplications(appf,webdirs1,configurationData.appMap);
 	AfcUtil::writeTofile(rtdcfpath+"ApplicationInterface.cpp",ret,true);
+	logger << endl<< "done generating application code" <<endl;
 	WsUtil wsu;
+	logger << endl<< "started generating web-service code" <<endl;
 	ret = wsu.generateAllWSDL(wspath,respath,configurationData.wsdlmap);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
+	logger << endl<< "done generating web-service code" <<endl;
 	TemplateEngine engine;
 	cntxt.clear();
 	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;

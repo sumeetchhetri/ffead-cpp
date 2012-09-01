@@ -24,7 +24,7 @@
 #define FFEADCONTEXT_H_
 #include "XmlParser.h"
 #include "Reflector.h"
-#include <boost/lexical_cast.hpp>
+#include "CastUtil.h"
 #include "AfcUtil.h"
 
 class Bean

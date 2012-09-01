@@ -20,7 +20,7 @@
 
 #include "map"
 #include "vector"
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 #include "string"
 #include "Renderer.h"
 using namespace std;

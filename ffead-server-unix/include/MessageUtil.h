@@ -25,7 +25,7 @@
 #include "Message.h"
 #include "XmlParser.h"
 #include "MessageHandler.h"
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 #include "Logger.h"
 
 class MessageUtil {

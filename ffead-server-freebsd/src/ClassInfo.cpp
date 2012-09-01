@@ -96,11 +96,11 @@ Method ClassInfo::getMethod(string methodName,args argumentTypes)
 		if(argumentTypes.at(var)!="")
 		{
 			string temp = argumentTypes.at(var);
-			boost::replace_first(temp," ","");
-			boost::replace_first(temp,"<","ts");
-			boost::replace_first(temp,">","te");
-			boost::replace_first(temp,"*","ptr");
-			boost::replace_first(temp,"&","adr");
+			StringUtil::replaceFirst(temp," ","");
+			StringUtil::replaceFirst(temp,"<","ts");
+			StringUtil::replaceFirst(temp,">","te");
+			StringUtil::replaceFirst(temp,"*","ptr");
+			StringUtil::replaceFirst(temp,"&","adr");
 			key += temp;
 		}
 	}

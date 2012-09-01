@@ -118,25 +118,25 @@ void* FFEADContext::getBean(Bean bean)
 		else if(bean.inbuilt=="int")
 		{
 			int *in = new int;
-			*in = boost::lexical_cast<int>(bean.value);
+			*in = CastUtil::lexical_cast<int>(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="flaot")
 		{
 			float *in = new float;
-			*in = boost::lexical_cast<float>(bean.value);
+			*in = CastUtil::lexical_cast<float>(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="double")
 		{
 			double *in = new double;
-			*in = boost::lexical_cast<double>(bean.value);
+			*in = CastUtil::lexical_cast<double>(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="long")
 		{
 			long *in = new long;
-			*in = boost::lexical_cast<long>(bean.value);
+			*in = CastUtil::lexical_cast<long>(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="bool")

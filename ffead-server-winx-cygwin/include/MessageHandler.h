@@ -34,12 +34,12 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <boost/thread/thread.hpp>
+#include "Thread.h"
 #include "Message.h"
 #include "Exception.h"
 #include <iostream>
 #include <fstream>
-#include <boost/algorithm/string.hpp>
+#include "StringUtil.h"
 #include "vector"
 #include "algorithm"
 #include "MQueue.h"
@@ -47,6 +47,7 @@
 #include "string"
 #include "Logger.h"
 #include "Constants.h"
+#include "AMEFResources.h"
 
 
 #define MAXBUFLEN 1024
@@ -67,9 +68,9 @@ public:
 private:
 	Server *server;
 	bool running;
-	static void service(int);
+	static void* service(void* arg);
 	static void init(string);
-	Message readMessageFromQ(string fileName);
+	Message readMessageFromQ(string fileName, bool erase);
 	void writeMessageToQ(Message msg,string fileName);
 	bool tempUnSubscribe(string subs,string fileName);
 	Message readMessageFromT(string fileName,string subs);

@@ -120,7 +120,7 @@ void* BeanContext::invoke(string name,vector<Object> args,string bname,string re
 		if(message.getTagName().find("<return:exception>")==string::npos)
 		{
 			string tag = message.getTagName();
-			boost::replace_first(tag,"return:","");
+			StringUtil::replaceFirst(tag,"return:","");
 			message.setTagName(tag);
 			call = message.render();
 			logger << call << flush;

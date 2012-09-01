@@ -32,7 +32,7 @@ WsUtil::~WsUtil() {
 
 string WsUtil::generateAllWSDL(vector<string> files,string resp,map<string,string> &wsmap)
 {
-	string ret,headers="#include \"Exception.h\"\n#include \"string\"\n#include <sstream>\n#include <boost/lexical_cast.hpp>\n#include \"Element.h\"\ntypedef vector<Element> ElementList;\ntypedef map<string,string> AttributeList;\n";
+	string ret,headers="#include \"Exception.h\"\n#include \"string\"\n#include <sstream>\n#include \"CastUtil.h\"\n#include \"Element.h\"\ntypedef vector<Element> ElementList;\ntypedef map<string,string> AttributeList;\n";
 	for(unsigned int var = 0; var < files.size(); ++var)
 	{
 		string webdir = resp+"../web/"+files.at(var);
@@ -79,12 +79,12 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 			temp11 = temp.substr(temp.find("(")+1);
 			temp = temp.substr(0,temp.find("("));
 
-			//boost::replace_first(temp,"("," ");
-			boost::replace_all(temp11,";","");
-			boost::replace_first(temp11,")"," ");
+			//StringUtil::replaceFirst(temp,"("," ");
+			StringUtil::replaceAll(temp11,";","");
+			StringUtil::replaceFirst(temp11,")"," ");
 			strVec results,results1;
-			boost::iter_split(results, temp, boost::first_finder(" "));
-			boost::iter_split(results1, temp11, boost::first_finder(","));
+			StringUtil::split(results, temp, (" "));
+			StringUtil::split(results1, temp11, (","));
 			string retType,methName,inp_params;
 			if(results.size()<2)
 				continue;
@@ -99,9 +99,9 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 			if(results.at(0).find("vector<")!=string::npos)
 			{
 				string vecn = results.at(0);
-				boost::replace_first(vecn,"vector<"," ");
-				boost::replace_first(vecn,">"," ");
-				boost::trim(vecn);
+				StringUtil::replaceFirst(vecn,"vector<"," ");
+				StringUtil::replaceFirst(vecn,">"," ");
+				StringUtil::trim(vecn);
 				if(vecn=="int" || vecn=="double" || vecn=="float" || vecn=="string")
 				{
 					retType = "\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""+in_out_info["RETURN"]+"\" type=\"xsd:"+vecn+"\"/>";
@@ -126,10 +126,11 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 			{
 				string type;
 				strVec results2;
-				boost::iter_split(results2, results1.at(j), boost::first_finder(" "));
+				StringUtil::split(results2, results1.at(j), (" "));
+				if(results2.size()<2)continue;
 				type = results2.at(0);
 				int srn = j;
-				char chr = boost::lexical_cast<char>(j);
+				char chr = CastUtil::lexical_cast<char>(j);
 				stringstream ss;
 				ss << srn;
 				string te;
@@ -154,9 +155,9 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 					if(type.find("vector<")!=string::npos && results2.size()==2)
 					{
 						string vecn = type;
-						boost::replace_first(vecn,"vector<"," ");
-						boost::replace_first(vecn,">"," ");
-						boost::trim(vecn);
+						StringUtil::replaceFirst(vecn,"vector<"," ");
+						StringUtil::replaceFirst(vecn,">"," ");
+						StringUtil::trim(vecn);
 						headers.append("#include \""+vecn+".h\"\n");
 						type = vecn;
 						inp_params.append("\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""+results2.at(1)+"\" type=\"ns0:"+type+"\"/>");
@@ -198,7 +199,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 							field = field.substr(0,field.find("("));
 							type = temp1.substr(e+1,ed-e-1);
 							strVec results3;
-							boost::iter_split(results3, type, boost::first_finder(" "));
+							StringUtil::split(results3, type, (" "));
 							type = results3.at(0);
 							logger << "\nField--- " << field << flush;
 							logger << "\nType--- " << type << flush;
@@ -230,7 +231,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 								retObj_xml.append("val = _obj.get"+AfcUtil::camelCased(iter->second)+"();\n");
 								obj_binding.append("\n<xsd:element minOccurs=\"0\" name=\""+iter->second+"\" type=\"xsd:string\"/>");
 							}
-							obj_mapng.append("_obj.set"+AfcUtil::camelCased(iter->second)+"(boost::lexical_cast<"+typ+">(ele.getElementByName(\""+iter->second+"\").getText()));\n");
+							obj_mapng.append("_obj.set"+AfcUtil::camelCased(iter->second)+"(CastUtil::lexical_cast<"+typ+">(ele.getElementByName(\""+iter->second+"\").getText()));\n");
 							retObj_xml.append("_ret.append(\"<\"+namespce+\":"+iter->second+">\"+val+\"</\"+namespce+\":"+iter->second+">\");\n");
 						}
 					}
@@ -294,20 +295,20 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 							ws_funcs.append("ele = _req.getElementByName(\""+argname+"\");\n");
 							ws_funcs.append(iter2->second+" "+argname+";\n");
 							ws_funcs.append("if(ele.getTagName()!=\"\")");
-							ws_funcs.append(argname+" = boost::lexical_cast<"+iter2->second+">(ele.getText());\n");
+							ws_funcs.append(argname+" = CastUtil::lexical_cast<"+iter2->second+">(ele.getText());\n");
 						}
 						else if(iter2->second.find("vector<")!=string::npos)
 						{
 							string vecn = iter2->second;
-							boost::replace_first(vecn,"vector<"," ");
-							boost::replace_first(vecn,">"," ");
-							boost::trim(vecn);
+							StringUtil::replaceFirst(vecn,"vector<"," ");
+							StringUtil::replaceFirst(vecn,">"," ");
+							StringUtil::trim(vecn);
 							if(vecn=="int" || vecn=="double" || vecn=="float" || vecn=="string")
 							{
 								ws_funcs.append("vector<"+vecn+"> "+argname+";\n");
 								ws_funcs.append("ElementList list = _req.getElementsByName(\""+argname+"\");\n");
 								ws_funcs.append("for(int i=0;i<list.size();i++)");
-								ws_funcs.append(argname+".push_back(boost::lexical_cast<"+vecn+">(list.at(i).getText()));\n");
+								ws_funcs.append(argname+".push_back(CastUtil::lexical_cast<"+vecn+">(list.at(i).getText()));\n");
 							}
 							else
 							{
@@ -354,13 +355,13 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 					if(pars["RETURNTYP"].find("vector<")!=string::npos)
 					{
 						string vecn = pars["RETURNTYP"];
-						boost::replace_first(vecn,"vector<"," ");
-						boost::replace_first(vecn,">"," ");
-						boost::trim(vecn);
+						StringUtil::replaceFirst(vecn,"vector<"," ");
+						StringUtil::replaceFirst(vecn,">"," ");
+						StringUtil::trim(vecn);
 						if(vecn=="int" || vecn=="double" || vecn=="float" || vecn=="string")
 						{
 							ws_funcs.append("for(int i=0;i<_retval.size();i++)");
-							ws_funcs.append("_retStr += \"<\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\"+boost::lexical_cast<string>(_retval.at(i))+\"</\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\";\n");
+							ws_funcs.append("_retStr += \"<\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\"+CastUtil::lexical_cast<string>(_retval.at(i))+\"</\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\";\n");
 						}
 						else
 						{

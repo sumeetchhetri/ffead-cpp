@@ -128,8 +128,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 							", against url: " << it->first << endl;
 					if(it->first==pthwofiletemp)
 					{
-						string lhs = boost::to_upper_copy(ft.meth);
-						string rhs = boost::to_upper_copy(req->getMethod());
+						string lhs = StringUtil::toUpperCopy(ft.meth);
+						string rhs = StringUtil::toUpperCopy(req->getMethod());
 						logger << lhs << " <> " << rhs << endl;
 						if(prsiz==(int)valss.size() && lhs==rhs)
 						{
@@ -165,11 +165,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 						ss << "}";
 						string param;
 						ss >> param;
-						boost::iter_split(vemp, baseUrl, boost::first_finder(param));
+						StringUtil::split(vemp, baseUrl, (param));
 						if(vemp.size()==2 && pthwofiletemp.find(vemp.at(0))!=string::npos)
 						{
 							string temp = pthwofiletemp;
-							boost::replace_first(temp, vemp.at(0), "");
+							StringUtil::replaceFirst(temp, vemp.at(0), "");
 							if(temp.find("/")!=string::npos)
 							{
 								pthwofiletemp = temp.substr(temp.find("/"));
@@ -187,8 +187,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 							break;
 						}
 					}
-					string lhs = boost::to_upper_copy(ft.meth);
-					string rhs = boost::to_upper_copy(req->getMethod());
+					string lhs = StringUtil::toUpperCopy(ft.meth);
+					string rhs = StringUtil::toUpperCopy(req->getMethod());
 					logger << lhs << " <> " << rhs << endl;
 					if(prsiz==(int)valss.size() && lhs==rhs)
 					{
@@ -245,27 +245,27 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 						argus.push_back(rft.params.at(var).type);
 						if(rft.params.at(var).type=="int")
 						{
-							int* ival = new int(boost::lexical_cast<int>(valss.at(var)));
+							int* ival = new int(CastUtil::lexical_cast<int>(valss.at(var)));
 							valus.push_back(ival);
 						}
 						else if(rft.params.at(var).type=="long")
 						{
-							long* ival = new long(boost::lexical_cast<long>(valss.at(var)));
+							long* ival = new long(CastUtil::lexical_cast<long>(valss.at(var)));
 							valus.push_back(ival);
 						}
 						else if(rft.params.at(var).type=="double")
 						{
-							double* ival = new double(boost::lexical_cast<double>(valss.at(var)));
+							double* ival = new double(CastUtil::lexical_cast<double>(valss.at(var)));
 							valus.push_back(ival);
 						}
 						else if(rft.params.at(var).type=="float")
 						{
-							float* ival = new float(boost::lexical_cast<float>(valss.at(var)));
+							float* ival = new float(CastUtil::lexical_cast<float>(valss.at(var)));
 							valus.push_back(ival);
 						}
 						else if(rft.params.at(var).type=="bool")
 						{
-							bool* ival = new bool(boost::lexical_cast<bool>(valss.at(var)));
+							bool* ival = new bool(CastUtil::lexical_cast<bool>(valss.at(var)));
 							valus.push_back(ival);
 						}
 						else if(rft.params.at(var).type=="string")

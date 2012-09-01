@@ -172,26 +172,26 @@ char* CryptoHandler::hmac_sha512(char* datain,char* keyin,bool base64)
 string CryptoHandler::urlDecode(string str)
 {
 	string strret = str;
-	boost::replace_all(strret,"%25","%");
-	boost::replace_all(strret,"%3D","=");
-	boost::replace_all(strret,"%3A",":");
-	boost::replace_all(strret,"%20"," ");
-	boost::replace_all(strret,"%5E","^");
-	boost::replace_all(strret,"%26","&");
-	boost::replace_all(strret,"%60","`");
-	boost::replace_all(strret,"%7B","{");
-	boost::replace_all(strret,"%7D","}");
-	boost::replace_all(strret,"%7C","|");
-	boost::replace_all(strret,"%5D","]");
-	boost::replace_all(strret,"%5B","[");
-	boost::replace_all(strret,"%22","\"");
-	boost::replace_all(strret,"%3C","<");
-	boost::replace_all(strret,"%3E",">");
-	boost::replace_all(strret,"%5C","\\");
-	boost::replace_all(strret,"%23","#");
-	boost::replace_all(strret,"%3F","?");
-	boost::replace_all(strret,"%2F","/");
-	boost::replace_all(strret,"%2B","+");
+	StringUtil::replaceAll(strret,"%25","%");
+	StringUtil::replaceAll(strret,"%3D","=");
+	StringUtil::replaceAll(strret,"%3A",":");
+	StringUtil::replaceAll(strret,"%20"," ");
+	StringUtil::replaceAll(strret,"%5E","^");
+	StringUtil::replaceAll(strret,"%26","&");
+	StringUtil::replaceAll(strret,"%60","`");
+	StringUtil::replaceAll(strret,"%7B","{");
+	StringUtil::replaceAll(strret,"%7D","}");
+	StringUtil::replaceAll(strret,"%7C","|");
+	StringUtil::replaceAll(strret,"%5D","]");
+	StringUtil::replaceAll(strret,"%5B","[");
+	StringUtil::replaceAll(strret,"%22","\"");
+	StringUtil::replaceAll(strret,"%3C","<");
+	StringUtil::replaceAll(strret,"%3E",">");
+	StringUtil::replaceAll(strret,"%5C","\\");
+	StringUtil::replaceAll(strret,"%23","#");
+	StringUtil::replaceAll(strret,"%3F","?");
+	StringUtil::replaceAll(strret,"%2F","/");
+	StringUtil::replaceAll(strret,"%2B","+");
 	return strret;
 }
 

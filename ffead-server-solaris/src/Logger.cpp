@@ -23,7 +23,7 @@
 #include "Logger.h"
 
 // Global static pointer used to ensure a single instance of the class.
-boost::mutex* Logger::_theLogmutex = NULL;
+Mutex* Logger::_theLogmutex = NULL;
 string* Logger::level = NULL;
 string* Logger::mode = NULL;
 string* Logger::filepath = NULL;
@@ -45,7 +45,7 @@ void Logger::init()
 {
 	if(!_theLogmutex)
 	{
-		_theLogmutex = new boost::mutex();
+		_theLogmutex = new Mutex();
 		level = new string(LEVEL_ERROR);
 		mode = new string("CONSOLE");
 		datFormat = new DateFormat("dd/mm/yyyy hh:mi:ss");
@@ -56,7 +56,7 @@ void Logger::init(string file)
 {
 	if(!_theLogmutex)
 	{
-		_theLogmutex = new boost::mutex();
+		_theLogmutex = new Mutex();
 
 		PropFileReader pf;
 		propMap props = pf.getProperties(file);
@@ -83,7 +83,7 @@ void Logger::init(string llevel,string lmode,string lfilepath)
 {
 	if(!_theLogmutex)
 	{
-		_theLogmutex = new boost::mutex();
+		_theLogmutex = new Mutex();
 
 		level = new string(llevel);
 		mode = new string(lmode);

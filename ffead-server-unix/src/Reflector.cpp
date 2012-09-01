@@ -34,8 +34,7 @@ void Reflector::cleanUp()
 			delete objects.at(var);
 		else
 		{
-			Reflector reflector;
-			reflector.destroy(objects.at(var),objectT.at(var));
+			destroy(objects.at(var),objectT.at(var));
 		}
 	}
 }
