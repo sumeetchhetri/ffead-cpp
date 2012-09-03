@@ -497,21 +497,19 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 					continue;
 				}
 
-						if(isThreadprq)
-						{
-							ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
-										isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
-							Thread pthread(&service, task);
-							pthread.execute();
-							delete task;
-						}
-						else
-						{
-							ServiceTask *task = new ServiceTask(n,serverRootDirectory,&params,
-									isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
-							pool.execute(*task);
-						}
-					}
+				if(isThreadprq)
+				{
+					ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params,
+								isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+					Thread pthread(&service, task);
+					pthread.execute();
+					delete task;
+				}
+				else
+				{
+					ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params,
+							isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+					pool.execute(*task);
 				}
 			}
 		}
