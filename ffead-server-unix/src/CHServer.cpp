@@ -503,7 +503,6 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 								isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
 					Thread pthread(&service, task);
 					pthread.execute();
-					delete task;
 				}
 				else
 				{
