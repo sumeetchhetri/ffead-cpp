@@ -232,26 +232,26 @@ $(document).ready(initResizable);
 <a name="l00172"></a>00172 <span class="keywordtype">string</span> CryptoHandler::urlDecode(<span class="keywordtype">string</span> str)
 <a name="l00173"></a>00173 {
 <a name="l00174"></a>00174         <span class="keywordtype">string</span> strret = str;
-<a name="l00175"></a>00175         boost::replace_all(strret,<span class="stringliteral">&quot;%25&quot;</span>,<span class="stringliteral">&quot;%&quot;</span>);
-<a name="l00176"></a>00176         boost::replace_all(strret,<span class="stringliteral">&quot;%3D&quot;</span>,<span class="stringliteral">&quot;=&quot;</span>);
-<a name="l00177"></a>00177         boost::replace_all(strret,<span class="stringliteral">&quot;%3A&quot;</span>,<span class="stringliteral">&quot;:&quot;</span>);
-<a name="l00178"></a>00178         boost::replace_all(strret,<span class="stringliteral">&quot;%20&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
-<a name="l00179"></a>00179         boost::replace_all(strret,<span class="stringliteral">&quot;%5E&quot;</span>,<span class="stringliteral">&quot;^&quot;</span>);
-<a name="l00180"></a>00180         boost::replace_all(strret,<span class="stringliteral">&quot;%26&quot;</span>,<span class="stringliteral">&quot;&amp;&quot;</span>);
-<a name="l00181"></a>00181         boost::replace_all(strret,<span class="stringliteral">&quot;%60&quot;</span>,<span class="stringliteral">&quot;`&quot;</span>);
-<a name="l00182"></a>00182         boost::replace_all(strret,<span class="stringliteral">&quot;%7B&quot;</span>,<span class="stringliteral">&quot;{&quot;</span>);
-<a name="l00183"></a>00183         boost::replace_all(strret,<span class="stringliteral">&quot;%7D&quot;</span>,<span class="stringliteral">&quot;}&quot;</span>);
-<a name="l00184"></a>00184         boost::replace_all(strret,<span class="stringliteral">&quot;%7C&quot;</span>,<span class="stringliteral">&quot;|&quot;</span>);
-<a name="l00185"></a>00185         boost::replace_all(strret,<span class="stringliteral">&quot;%5D&quot;</span>,<span class="stringliteral">&quot;]&quot;</span>);
-<a name="l00186"></a>00186         boost::replace_all(strret,<span class="stringliteral">&quot;%5B&quot;</span>,<span class="stringliteral">&quot;[&quot;</span>);
-<a name="l00187"></a>00187         boost::replace_all(strret,<span class="stringliteral">&quot;%22&quot;</span>,<span class="stringliteral">&quot;\&quot;&quot;</span>);
-<a name="l00188"></a>00188         boost::replace_all(strret,<span class="stringliteral">&quot;%3C&quot;</span>,<span class="stringliteral">&quot;&lt;&quot;</span>);
-<a name="l00189"></a>00189         boost::replace_all(strret,<span class="stringliteral">&quot;%3E&quot;</span>,<span class="stringliteral">&quot;&gt;&quot;</span>);
-<a name="l00190"></a>00190         boost::replace_all(strret,<span class="stringliteral">&quot;%5C&quot;</span>,<span class="stringliteral">&quot;\\&quot;</span>);
-<a name="l00191"></a>00191         boost::replace_all(strret,<span class="stringliteral">&quot;%23&quot;</span>,<span class="stringliteral">&quot;#&quot;</span>);
-<a name="l00192"></a>00192         boost::replace_all(strret,<span class="stringliteral">&quot;%3F&quot;</span>,<span class="stringliteral">&quot;?&quot;</span>);
-<a name="l00193"></a>00193         boost::replace_all(strret,<span class="stringliteral">&quot;%2F&quot;</span>,<span class="stringliteral">&quot;/&quot;</span>);
-<a name="l00194"></a>00194         boost::replace_all(strret,<span class="stringliteral">&quot;%2B&quot;</span>,<span class="stringliteral">&quot;+&quot;</span>);
+<a name="l00175"></a>00175         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%25&quot;</span>,<span class="stringliteral">&quot;%&quot;</span>);
+<a name="l00176"></a>00176         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%3D&quot;</span>,<span class="stringliteral">&quot;=&quot;</span>);
+<a name="l00177"></a>00177         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%3A&quot;</span>,<span class="stringliteral">&quot;:&quot;</span>);
+<a name="l00178"></a>00178         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%20&quot;</span>,<span class="stringliteral">&quot; &quot;</span>);
+<a name="l00179"></a>00179         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%5E&quot;</span>,<span class="stringliteral">&quot;^&quot;</span>);
+<a name="l00180"></a>00180         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%26&quot;</span>,<span class="stringliteral">&quot;&amp;&quot;</span>);
+<a name="l00181"></a>00181         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%60&quot;</span>,<span class="stringliteral">&quot;`&quot;</span>);
+<a name="l00182"></a>00182         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%7B&quot;</span>,<span class="stringliteral">&quot;{&quot;</span>);
+<a name="l00183"></a>00183         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%7D&quot;</span>,<span class="stringliteral">&quot;}&quot;</span>);
+<a name="l00184"></a>00184         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%7C&quot;</span>,<span class="stringliteral">&quot;|&quot;</span>);
+<a name="l00185"></a>00185         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%5D&quot;</span>,<span class="stringliteral">&quot;]&quot;</span>);
+<a name="l00186"></a>00186         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%5B&quot;</span>,<span class="stringliteral">&quot;[&quot;</span>);
+<a name="l00187"></a>00187         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%22&quot;</span>,<span class="stringliteral">&quot;\&quot;&quot;</span>);
+<a name="l00188"></a>00188         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%3C&quot;</span>,<span class="stringliteral">&quot;&lt;&quot;</span>);
+<a name="l00189"></a>00189         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%3E&quot;</span>,<span class="stringliteral">&quot;&gt;&quot;</span>);
+<a name="l00190"></a>00190         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%5C&quot;</span>,<span class="stringliteral">&quot;\\&quot;</span>);
+<a name="l00191"></a>00191         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%23&quot;</span>,<span class="stringliteral">&quot;#&quot;</span>);
+<a name="l00192"></a>00192         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%3F&quot;</span>,<span class="stringliteral">&quot;?&quot;</span>);
+<a name="l00193"></a>00193         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%2F&quot;</span>,<span class="stringliteral">&quot;/&quot;</span>);
+<a name="l00194"></a>00194         StringUtil::replaceAll(strret,<span class="stringliteral">&quot;%2B&quot;</span>,<span class="stringliteral">&quot;+&quot;</span>);
 <a name="l00195"></a>00195         <span class="keywordflow">return</span> strret;
 <a name="l00196"></a>00196 }
 <a name="l00197"></a>00197 
@@ -335,7 +335,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>CryptoHandler.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:53:50 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:29:10 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>
