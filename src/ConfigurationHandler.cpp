@@ -592,7 +592,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 					ElementList elese = eles.at(apps).getChildElements();
 					string nsfns = "\nvar _fview_namespace = {";
 					string js = "\n\nwindow.onload = function(){";
-					for (unsigned int appse = 0; appse < elese.size(); appse++)
+					for (int appse = 0; appse < (int)elese.size(); appse++)
 					{
 						if(elese.at(appse).getTagName()=="event")
 						{

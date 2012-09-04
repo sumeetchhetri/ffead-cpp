@@ -124,7 +124,7 @@ $(document).ready(initResizable);
 <a name="l00064"></a>00064 {
 <a name="l00065"></a>00065         <span class="keywordflow">if</span>(xml==<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00066"></a>00066                 <span class="keywordflow">return</span>;
-<a name="l00067"></a>00067         boost::trim(xml);
+<a name="l00067"></a>00067         StringUtil::trim(xml);
 <a name="l00068"></a>00068         <span class="keywordtype">int</span> cdt = xml.find(<span class="stringliteral">&quot;&lt;![CDATA[&quot;</span>);
 <a name="l00069"></a>00069         <span class="keywordflow">if</span>(cdt==0)
 <a name="l00070"></a>00070         {
@@ -214,37 +214,37 @@ $(document).ready(initResizable);
 <a name="l00154"></a>00154         endTag = xml.find(<span class="stringliteral">&quot;/&gt;&quot;</span>);
 <a name="l00155"></a>00155     <span class="keywordflow">if</span>(xml.find(<span class="stringliteral">&quot;&lt; &quot;</span>)!=string::npos)
 <a name="l00156"></a>00156     {
-<a name="l00157"></a>00157         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid Start Tag - at position: &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt; &quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
+<a name="l00157"></a>00157         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid Start Tag - at position: &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt; &quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
 <a name="l00158"></a>00158         <span class="keywordflow">throw</span> <span class="keyword">new</span> <a class="code" href="classXmlParseException.html">XmlParseException</a>(errmsg);
 <a name="l00159"></a>00159     }
 <a name="l00160"></a>00160     <span class="keywordflow">else</span> <span class="keywordflow">if</span>(xml.find(<span class="stringliteral">&quot;&lt;\t&quot;</span>)!=string::npos)
 <a name="l00161"></a>00161     {
-<a name="l00162"></a>00162         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid Start Tag - at position: &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt;\t&quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
+<a name="l00162"></a>00162         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid Start Tag - at position: &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt;\t&quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
 <a name="l00163"></a>00163         <span class="keywordflow">throw</span> <span class="keyword">new</span> <a class="code" href="classXmlParseException.html">XmlParseException</a>(errmsg);
 <a name="l00164"></a>00164     }
 <a name="l00165"></a>00165     <span class="keywordflow">else</span> <span class="keywordflow">if</span>(xml.find(<span class="stringliteral">&quot;&lt;/ &quot;</span>)!=string::npos)
 <a name="l00166"></a>00166     {
-<a name="l00167"></a>00167         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid End Tag - at position: &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt;/ &quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
+<a name="l00167"></a>00167         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid End Tag - at position: &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt;/ &quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
 <a name="l00168"></a>00168         <span class="keywordflow">throw</span> <span class="keyword">new</span> <a class="code" href="classXmlParseException.html">XmlParseException</a>(errmsg);
 <a name="l00169"></a>00169     }
 <a name="l00170"></a>00170     <span class="keywordflow">else</span> <span class="keywordflow">if</span>(xml.find(<span class="stringliteral">&quot;&lt;/\t&quot;</span>)!=string::npos)
 <a name="l00171"></a>00171     {
-<a name="l00172"></a>00172         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid End Tag - at position: &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt;/\t&quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
+<a name="l00172"></a>00172         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid End Tag - at position: &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt;/\t&quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
 <a name="l00173"></a>00173         <span class="keywordflow">throw</span> <span class="keyword">new</span> <a class="code" href="classXmlParseException.html">XmlParseException</a>(errmsg);
 <a name="l00174"></a>00174     }
 <a name="l00175"></a>00175     <span class="keywordflow">else</span> <span class="keywordflow">if</span>(xml.find(<span class="stringliteral">&quot;&lt; /&quot;</span>)!=string::npos)
 <a name="l00176"></a>00176     {
-<a name="l00177"></a>00177         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid End Tag - at position: &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt; /&quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
+<a name="l00177"></a>00177         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid End Tag - at position: &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt; /&quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
 <a name="l00178"></a>00178         <span class="keywordflow">throw</span> <span class="keyword">new</span> <a class="code" href="classXmlParseException.html">XmlParseException</a>(errmsg);
 <a name="l00179"></a>00179     }
 <a name="l00180"></a>00180     <span class="keywordflow">else</span> <span class="keywordflow">if</span>(xml.find(<span class="stringliteral">&quot;/ &gt;&quot;</span>)!=string::npos)
 <a name="l00181"></a>00181         {
-<a name="l00182"></a>00182                 <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid End Tag - at position: &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;/ &gt;&quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
+<a name="l00182"></a>00182                 <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid End Tag - at position: &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;/ &gt;&quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
 <a name="l00183"></a>00183                 <span class="keywordflow">throw</span> <span class="keyword">new</span> <a class="code" href="classXmlParseException.html">XmlParseException</a>(errmsg);
 <a name="l00184"></a>00184         }
 <a name="l00185"></a>00185     <span class="keywordflow">else</span> <span class="keywordflow">if</span>(xml.find(<span class="stringliteral">&quot;&lt;\t/&quot;</span>)!=string::npos)
 <a name="l00186"></a>00186     {
-<a name="l00187"></a>00187         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid End Tag - at position: &quot;</span> + boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt;\t/&quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
+<a name="l00187"></a>00187         <span class="keywordtype">string</span> errmsg = (<span class="stringliteral">&quot;Invalid End Tag - at position: &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(xml.find(<span class="stringliteral">&quot;&lt;\t/&quot;</span>)+1) + <span class="stringliteral">&quot;\n&quot;</span>);
 <a name="l00188"></a>00188         <span class="keywordflow">throw</span> <span class="keyword">new</span> <a class="code" href="classXmlParseException.html">XmlParseException</a>(errmsg);
 <a name="l00189"></a>00189     }
 <a name="l00190"></a>00190     <span class="keywordflow">else</span> <span class="keywordflow">if</span>(xml.find(<span class="stringliteral">&quot;&lt;&quot;</span>+ta)==string::npos &amp;&amp; xml.find(<span class="stringliteral">&quot;&lt;/&quot;</span>+ta)!=string::npos)
@@ -331,7 +331,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>XmlParser.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:55:45 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:04 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

@@ -83,7 +83,7 @@ $(document).ready(initResizable);
 <a name="l00023"></a>00023 <span class="preprocessor">#ifndef THREADPOOL_H_</span>
 <a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define THREADPOOL_H_</span>
 <a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#include &quot;TaskPool.h&quot;</span>
-<a name="l00026"></a>00026 <span class="preprocessor">#include &quot;Thread.h&quot;</span>
+<a name="l00026"></a>00026 <span class="preprocessor">#include &quot;PoolThread.h&quot;</span>
 <a name="l00027"></a>00027 <span class="preprocessor">#include &quot;Logger.h&quot;</span>
 <a name="l00028"></a>00028 
 <a name="l00029"></a><a class="code" href="classThreadPool.html">00029</a> <span class="keyword">class </span><a class="code" href="classThreadPool.html">ThreadPool</a> {
@@ -93,32 +93,34 @@ $(document).ready(initResizable);
 <a name="l00033"></a>00033         <span class="keywordtype">int</span> lowp;
 <a name="l00034"></a>00034         <span class="keywordtype">int</span> highp;
 <a name="l00035"></a>00035         <span class="keywordtype">bool</span> console;
-<a name="l00036"></a>00036         vector&lt;Thread*&gt; *tpool;
+<a name="l00036"></a>00036         vector&lt;PoolThread*&gt; *tpool;
 <a name="l00037"></a>00037         <a class="code" href="classTaskPool.html">TaskPool</a> *wpool;
-<a name="l00038"></a>00038         boost::thread *poller;
+<a name="l00038"></a>00038         <a class="code" href="classThread.html">Thread</a> *poller;
 <a name="l00039"></a>00039         <span class="keywordtype">bool</span> prioritypooling;
-<a name="l00040"></a>00040         <span class="keywordtype">void</span> poll();
-<a name="l00041"></a>00041         <a class="code" href="classThread.html">Thread</a>* getIdleThread();
-<a name="l00042"></a>00042 <span class="keyword">public</span>:
-<a name="l00043"></a>00043         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">bool</span>);
-<a name="l00044"></a>00044         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">int</span>);
-<a name="l00045"></a>00045         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">bool</span>);
-<a name="l00046"></a>00046         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>);
-<a name="l00047"></a>00047         <a class="code" href="classThreadPool.html">ThreadPool</a>();
-<a name="l00048"></a>00048         <span class="keywordtype">void</span> init(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">bool</span>);
-<a name="l00049"></a>00049         <span class="keywordtype">void</span> joinAll();
-<a name="l00050"></a>00050         <span class="keywordtype">void</span> execute(<a class="code" href="classTask.html">Task</a> &amp;task, <span class="keywordtype">int</span> priority);
-<a name="l00051"></a>00051         <span class="keywordtype">void</span> execute(<a class="code" href="classTask.html">Task</a> &amp;task) ;
-<a name="l00052"></a>00052         <span class="keywordtype">void</span> schedule(<a class="code" href="classTask.html">Task</a> &amp;task, <span class="keywordtype">int</span> tunit, <span class="keywordtype">int</span> type);
-<a name="l00053"></a>00053         <span class="keyword">virtual</span> ~<a class="code" href="classThreadPool.html">ThreadPool</a>();
-<a name="l00054"></a>00054 };
-<a name="l00055"></a>00055 <span class="preprocessor">#endif </span><span class="comment">/* THREADPOOL_H_ */</span>
+<a name="l00040"></a>00040         <span class="keyword">static</span> <span class="keywordtype">void</span>* poll(<span class="keywordtype">void</span> *arg);
+<a name="l00041"></a>00041         <a class="code" href="classPoolThread.html">PoolThread</a>* getIdleThread();
+<a name="l00042"></a>00042         <span class="keywordtype">bool</span> started;
+<a name="l00043"></a>00043 <span class="keyword">public</span>:
+<a name="l00044"></a>00044         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">bool</span>);
+<a name="l00045"></a>00045         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">int</span>);
+<a name="l00046"></a>00046         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">bool</span>);
+<a name="l00047"></a>00047         <a class="code" href="classThreadPool.html">ThreadPool</a>(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>);
+<a name="l00048"></a>00048         <a class="code" href="classThreadPool.html">ThreadPool</a>();
+<a name="l00049"></a>00049         <span class="keywordtype">void</span> init(<span class="keywordtype">int</span>,<span class="keywordtype">int</span>,<span class="keywordtype">bool</span>);
+<a name="l00050"></a>00050         <span class="keywordtype">void</span> joinAll();
+<a name="l00051"></a>00051         <span class="keywordtype">void</span> execute(<a class="code" href="classTask.html">Task</a> &amp;task, <span class="keywordtype">int</span> priority);
+<a name="l00052"></a>00052         <span class="keywordtype">void</span> execute(<a class="code" href="classTask.html">Task</a> &amp;task) ;
+<a name="l00053"></a>00053         <span class="keywordtype">void</span> schedule(<a class="code" href="classTask.html">Task</a> &amp;task, <span class="keywordtype">int</span> tunit, <span class="keywordtype">int</span> type);
+<a name="l00054"></a>00054         <span class="keyword">virtual</span> ~<a class="code" href="classThreadPool.html">ThreadPool</a>();
+<a name="l00055"></a>00055         <span class="keywordtype">void</span> start();
+<a name="l00056"></a>00056 };
+<a name="l00057"></a>00057 <span class="preprocessor">#endif </span><span class="comment">/* THREADPOOL_H_ */</span>
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>ThreadPool.h</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:55:38 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:02 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

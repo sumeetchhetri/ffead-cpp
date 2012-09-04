@@ -57,7 +57,8 @@ $(document).ready(initResizable);
 <div id="doc-content">
 <div class="header">
   <div class="summary">
-<a href="#friends">Friends</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">Thread Class Reference</div>  </div>
 </div>
@@ -65,10 +66,28 @@ $(document).ready(initResizable);
 <!-- doxytag: class="Thread" -->
 <p><a href="classThread-members.html">List of all members.</a></p>
 <table class="memberdecls">
-<tr><td colspan="2"><h2><a name="friends"></a>
-Friends</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5d97748be7d69dcc44ef551ea35ef20f"></a><!-- doxytag: member="Thread::ThreadPool" ref="a5d97748be7d69dcc44ef551ea35ef20f" args="" -->
-class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classThread.html#a5d97748be7d69dcc44ef551ea35ef20f">ThreadPool</a></td></tr>
+<tr><td colspan="2"><h2><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5a7ed3c41e743ba8872114dce8063864"></a><!-- doxytag: member="Thread::Thread" ref="a5a7ed3c41e743ba8872114dce8063864" args="(ThreadFunc f, void *arg)" -->
+&#160;</td><td class="memItemRight" valign="bottom"><b>Thread</b> (ThreadFunc f, void *arg)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afbb442f2fb941af397f840d6f9ef55a2"></a><!-- doxytag: member="Thread::execute" ref="afbb442f2fb941af397f840d6f9ef55a2" args="()" -->
+void&#160;</td><td class="memItemRight" valign="bottom"><b>execute</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4d9d788e98388a3217831a9046709deb"></a><!-- doxytag: member="Thread::join" ref="a4d9d788e98388a3217831a9046709deb" args="()" -->
+void&#160;</td><td class="memItemRight" valign="bottom"><b>join</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0e8a26ae17743d266df954af945920ad"></a><!-- doxytag: member="Thread::wait" ref="a0e8a26ae17743d266df954af945920ad" args="()" -->
+void&#160;</td><td class="memItemRight" valign="bottom"><b>wait</b> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1da77fcda48cbee7ae54bd47ecc7bcf5"></a><!-- doxytag: member="Thread::interrupt" ref="a1da77fcda48cbee7ae54bd47ecc7bcf5" args="()" -->
+void&#160;</td><td class="memItemRight" valign="bottom"><b>interrupt</b> ()</td></tr>
+<tr><td colspan="2"><h2><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9be601af3a432b26b89a889388c8717e"></a><!-- doxytag: member="Thread::nSleep" ref="a9be601af3a432b26b89a889388c8717e" args="(long nanos)" -->
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>nSleep</b> (long nanos)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ada08bbfbb15140f89e72afedf9c9a049"></a><!-- doxytag: member="Thread::uSleep" ref="ada08bbfbb15140f89e72afedf9c9a049" args="(long nanos)" -->
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>uSleep</b> (long nanos)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad063020ff10f37f2a07a365ce7b07d19"></a><!-- doxytag: member="Thread::mSleep" ref="ad063020ff10f37f2a07a365ce7b07d19" args="(long nanos)" -->
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>mSleep</b> (long nanos)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa2fd1da9011770c41484b717bccae8e5"></a><!-- doxytag: member="Thread::sSleep" ref="aa2fd1da9011770c41484b717bccae8e5" args="(long nanos)" -->
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>sSleep</b> (long nanos)</td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock">
@@ -82,7 +101,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cla
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><a class="el" href="classThread.html">Thread</a>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:55:48 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:07 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>
