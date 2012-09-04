@@ -106,12 +106,12 @@ $(document).ready(initResizable);
 <a name="l00046"></a>00046           {
 <a name="l00047"></a>00047                   <span class="keywordflow">if</span>(line!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00048"></a>00048                   {
-<a name="l00049"></a>00049                           boost::iter_split(vemp, line, boost::first_finder(<span class="stringliteral">&quot;=&quot;</span>));
+<a name="l00049"></a>00049                           vemp = StringUtil::split(line, (<span class="stringliteral">&quot;=&quot;</span>));
 <a name="l00050"></a>00050                           <span class="keywordflow">if</span>(vemp.size()==2)
 <a name="l00051"></a>00051                           {
 <a name="l00052"></a>00052                                   <span class="keywordtype">string</span> temp = vemp.at(1);
-<a name="l00053"></a>00053                                   boost::replace_all(temp,<span class="stringliteral">&quot;\n&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00054"></a>00054                                   boost::replace_all(temp,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00053"></a>00053                                   StringUtil::replaceAll(temp,<span class="stringliteral">&quot;\n&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00054"></a>00054                                   StringUtil::replaceAll(temp,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00055"></a>00055                                   <span class="keywordflow">if</span>(all[vemp.at(0)]!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00056"></a>00056                                         temp += (<span class="stringliteral">&quot;,&quot;</span> + all[vemp.at(0)]);
 <a name="l00057"></a>00057                                   all[vemp.at(0)] = temp;
@@ -127,7 +127,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>PropFileReader.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:52:46 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:28:49 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

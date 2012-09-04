@@ -95,47 +95,35 @@ $(document).ready(initResizable);
 <a name="l00035"></a>00035         <span class="keywordtype">string</span> userId;
 <a name="l00036"></a>00036         <span class="keywordtype">string</span> encoding;
 <a name="l00037"></a>00037         <span class="keywordtype">string</span> body;
-<a name="l00038"></a>00038         <span class="keyword">friend</span> <span class="keyword">class </span>boost::serialization::access;
-<a name="l00039"></a>00039         <span class="keyword">template</span>&lt;<span class="keyword">class</span> Archive&gt;
-<a name="l00040"></a>00040         <span class="keywordtype">void</span> serialize(Archive &amp; ar, <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> version)
-<a name="l00041"></a>00041         {
-<a name="l00042"></a>00042                 ar &amp; destination;
-<a name="l00043"></a>00043                 ar &amp; timestamp;
-<a name="l00044"></a>00044                 ar &amp; type;
-<a name="l00045"></a>00045                 ar &amp; priority;
-<a name="l00046"></a>00046                 ar &amp; userId;
-<a name="l00047"></a>00047                 ar &amp; encoding;
-<a name="l00048"></a>00048                 ar &amp; body;
-<a name="l00049"></a>00049         }
-<a name="l00050"></a>00050 <span class="keyword">public</span>:
-<a name="l00051"></a>00051         <a class="code" href="classMessage.html">Message</a>(<span class="keywordtype">string</span>);
-<a name="l00052"></a>00052         <a class="code" href="classMessage.html">Message</a>(<a class="code" href="classDocument.html">Document</a>);
-<a name="l00053"></a>00053         <a class="code" href="classMessage.html">Message</a>();
-<a name="l00054"></a>00054         <span class="keyword">virtual</span> ~<a class="code" href="classMessage.html">Message</a>();
-<a name="l00055"></a>00055     <a class="code" href="classDestination.html">Destination</a> getDestination() <span class="keyword">const</span>;
-<a name="l00056"></a>00056     <span class="keywordtype">void</span> setDestination(<a class="code" href="classDestination.html">Destination</a>);
-<a name="l00057"></a>00057     <span class="keywordtype">string</span> getTimestamp() <span class="keyword">const</span>;
-<a name="l00058"></a>00058     <span class="keywordtype">void</span> setTimestamp(<span class="keywordtype">string</span>);
-<a name="l00059"></a>00059     <span class="keywordtype">string</span> getType() <span class="keyword">const</span>;
-<a name="l00060"></a>00060     <span class="keywordtype">void</span> setType(<span class="keywordtype">string</span>);
-<a name="l00061"></a>00061     <span class="keywordtype">string</span> getPriority() <span class="keyword">const</span>;
-<a name="l00062"></a>00062     <span class="keywordtype">void</span> setPriority(<span class="keywordtype">string</span>);
-<a name="l00063"></a>00063     <span class="keywordtype">string</span> getUserId() <span class="keyword">const</span>;
-<a name="l00064"></a>00064     <span class="keywordtype">void</span> setUserId(<span class="keywordtype">string</span>);
-<a name="l00065"></a>00065     <span class="keywordtype">string</span> getBody() <span class="keyword">const</span>;
-<a name="l00066"></a>00066     <span class="keywordtype">void</span> setBody(<span class="keywordtype">string</span>);
-<a name="l00067"></a>00067     <span class="keywordtype">string</span> getEncoding() <span class="keyword">const</span>;
-<a name="l00068"></a>00068     <span class="keywordtype">void</span> setEncoding(<span class="keywordtype">string</span>);
-<a name="l00069"></a>00069     <span class="keywordtype">string</span> toXml();
-<a name="l00070"></a>00070 };
-<a name="l00071"></a>00071 
-<a name="l00072"></a>00072 <span class="preprocessor">#endif </span><span class="comment">/* MESSAGE_H_ */</span>
+<a name="l00038"></a>00038 <span class="keyword">public</span>:
+<a name="l00039"></a>00039         <a class="code" href="classMessage.html">Message</a>(<span class="keywordtype">string</span>);
+<a name="l00040"></a>00040         <a class="code" href="classMessage.html">Message</a>(<a class="code" href="classDocument.html">Document</a>);
+<a name="l00041"></a>00041         <a class="code" href="classMessage.html">Message</a>();
+<a name="l00042"></a>00042         <span class="keyword">virtual</span> ~<a class="code" href="classMessage.html">Message</a>();
+<a name="l00043"></a>00043     <a class="code" href="classDestination.html">Destination</a> getDestination() <span class="keyword">const</span>;
+<a name="l00044"></a>00044     <span class="keywordtype">void</span> setDestination(<a class="code" href="classDestination.html">Destination</a>);
+<a name="l00045"></a>00045     <span class="keywordtype">string</span> getTimestamp() <span class="keyword">const</span>;
+<a name="l00046"></a>00046     <span class="keywordtype">void</span> setTimestamp(<span class="keywordtype">string</span>);
+<a name="l00047"></a>00047     <span class="keywordtype">string</span> getType() <span class="keyword">const</span>;
+<a name="l00048"></a>00048     <span class="keywordtype">void</span> setType(<span class="keywordtype">string</span>);
+<a name="l00049"></a>00049     <span class="keywordtype">string</span> getPriority() <span class="keyword">const</span>;
+<a name="l00050"></a>00050     <span class="keywordtype">void</span> setPriority(<span class="keywordtype">string</span>);
+<a name="l00051"></a>00051     <span class="keywordtype">string</span> getUserId() <span class="keyword">const</span>;
+<a name="l00052"></a>00052     <span class="keywordtype">void</span> setUserId(<span class="keywordtype">string</span>);
+<a name="l00053"></a>00053     <span class="keywordtype">string</span> getBody() <span class="keyword">const</span>;
+<a name="l00054"></a>00054     <span class="keywordtype">void</span> setBody(<span class="keywordtype">string</span>);
+<a name="l00055"></a>00055     <span class="keywordtype">string</span> getEncoding() <span class="keyword">const</span>;
+<a name="l00056"></a>00056     <span class="keywordtype">void</span> setEncoding(<span class="keywordtype">string</span>);
+<a name="l00057"></a>00057     <span class="keywordtype">string</span> toXml();
+<a name="l00058"></a>00058 };
+<a name="l00059"></a>00059 
+<a name="l00060"></a>00060 <span class="preprocessor">#endif </span><span class="comment">/* MESSAGE_H_ */</span>
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>Message.h</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:52:43 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:28:48 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

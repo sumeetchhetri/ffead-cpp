@@ -112,7 +112,7 @@ $(document).ready(initResizable);
 <a name="l00052"></a>00052         <a class="code" href="classElement.html">Element</a> url = msgng.getElementByName(<span class="stringliteral">&quot;url&quot;</span>);
 <a name="l00053"></a>00053         vector&lt;string&gt; vec;
 <a name="l00054"></a>00054         <span class="keywordtype">string</span> h = url.getText();
-<a name="l00055"></a>00055         boost::iter_split(vec, h , boost::first_finder(<span class="stringliteral">&quot;:&quot;</span>));
+<a name="l00055"></a>00055         StringUtil::split(vec, h , (<span class="stringliteral">&quot;:&quot;</span>));
 <a name="l00056"></a>00056         this-&gt;host = vec.at(0);
 <a name="l00057"></a>00057         this-&gt;port = vec.at(1);
 <a name="l00058"></a>00058         this-&gt;destination.setName(dest.getAttribute(<span class="stringliteral">&quot;name&quot;</span>));
@@ -425,7 +425,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>MessageUtil.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:52:46 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:28:49 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

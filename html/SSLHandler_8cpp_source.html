@@ -202,7 +202,7 @@ $(document).ready(initResizable);
 <a name="l00142"></a>00142 
 <a name="l00143"></a>00143 <span class="keywordtype">void</span> SSLHandler::closeSSL(<span class="keywordtype">int</span> fd,SSL *ssl,BIO* bio)
 <a name="l00144"></a>00144 {
-<a name="l00145"></a>00145         BIO_free(bio);
+<a name="l00145"></a>00145         <span class="comment">//BIO_free(bio);</span>
 <a name="l00146"></a>00146         <span class="keywordtype">int</span> r=SSL_shutdown(ssl);
 <a name="l00147"></a>00147         <span class="keywordflow">if</span>(!r){
 <a name="l00148"></a>00148           <span class="comment">/* If we called SSL_shutdown() first then</span>
@@ -229,7 +229,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>SSLHandler.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:52:47 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:28:50 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

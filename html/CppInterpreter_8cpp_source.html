@@ -334,47 +334,47 @@ $(document).ready(initResizable);
 <a name="l00274"></a>00274                 <span class="keywordflow">if</span>(source.getTypeName()==<span class="stringliteral">&quot;int&quot;</span>)
 <a name="l00275"></a>00275                 {
 <a name="l00276"></a>00276                         <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;==&quot;</span>)
-<a name="l00277"></a>00277                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()==boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
+<a name="l00277"></a>00277                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()==CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
 <a name="l00278"></a>00278                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&lt;=&quot;</span>)
-<a name="l00279"></a>00279                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()&lt;=boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
+<a name="l00279"></a>00279                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()&lt;=CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
 <a name="l00280"></a>00280                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&gt;=&quot;</span>)
-<a name="l00281"></a>00281                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()&gt;=boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
+<a name="l00281"></a>00281                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()&gt;=CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
 <a name="l00282"></a>00282                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;!=&quot;</span>)
-<a name="l00283"></a>00283                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()!=boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
+<a name="l00283"></a>00283                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()!=CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
 <a name="l00284"></a>00284                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&gt;&quot;</span>)
-<a name="l00285"></a>00285                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()&gt;boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
+<a name="l00285"></a>00285                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()&gt;CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
 <a name="l00286"></a>00286                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&lt;&quot;</span>)
-<a name="l00287"></a>00287                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()&lt;boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
+<a name="l00287"></a>00287                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">int</span>&gt;()&lt;CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(target));
 <a name="l00288"></a>00288                 }
 <a name="l00289"></a>00289                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(source.getTypeName()==<span class="stringliteral">&quot;float&quot;</span>)
 <a name="l00290"></a>00290                 {
 <a name="l00291"></a>00291                         <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;==&quot;</span>)
-<a name="l00292"></a>00292                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()==boost::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
+<a name="l00292"></a>00292                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()==CastUtil::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
 <a name="l00293"></a>00293                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&lt;=&quot;</span>)
-<a name="l00294"></a>00294                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()&lt;=boost::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
+<a name="l00294"></a>00294                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()&lt;=CastUtil::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
 <a name="l00295"></a>00295                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&gt;=&quot;</span>)
-<a name="l00296"></a>00296                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()&gt;=boost::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
+<a name="l00296"></a>00296                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()&gt;=CastUtil::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
 <a name="l00297"></a>00297                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;!=&quot;</span>)
-<a name="l00298"></a>00298                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()!=boost::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
+<a name="l00298"></a>00298                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()!=CastUtil::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
 <a name="l00299"></a>00299                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&gt;&quot;</span>)
-<a name="l00300"></a>00300                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()&gt;boost::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
+<a name="l00300"></a>00300                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()&gt;CastUtil::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
 <a name="l00301"></a>00301                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&lt;&quot;</span>)
-<a name="l00302"></a>00302                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()&lt;boost::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
+<a name="l00302"></a>00302                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">float</span>&gt;()&lt;CastUtil::lexical_cast&lt;<span class="keywordtype">float</span>&gt;(target));
 <a name="l00303"></a>00303                 }
 <a name="l00304"></a>00304                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(source.getTypeName()==<span class="stringliteral">&quot;double&quot;</span>)
 <a name="l00305"></a>00305                 {
 <a name="l00306"></a>00306                         <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;==&quot;</span>)
-<a name="l00307"></a>00307                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()==boost::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
+<a name="l00307"></a>00307                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()==CastUtil::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
 <a name="l00308"></a>00308                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&lt;=&quot;</span>)
-<a name="l00309"></a>00309                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()&lt;=boost::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
+<a name="l00309"></a>00309                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()&lt;=CastUtil::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
 <a name="l00310"></a>00310                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&gt;=&quot;</span>)
-<a name="l00311"></a>00311                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()&gt;=boost::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
+<a name="l00311"></a>00311                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()&gt;=CastUtil::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
 <a name="l00312"></a>00312                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;!=&quot;</span>)
-<a name="l00313"></a>00313                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()!=boost::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
+<a name="l00313"></a>00313                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()!=CastUtil::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
 <a name="l00314"></a>00314                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&gt;&quot;</span>)
-<a name="l00315"></a>00315                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()&gt;boost::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
+<a name="l00315"></a>00315                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()&gt;CastUtil::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
 <a name="l00316"></a>00316                         <span class="keywordflow">else</span>  <span class="keywordflow">if</span>(type==<span class="stringliteral">&quot;&lt;&quot;</span>)
-<a name="l00317"></a>00317                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()&lt;boost::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
+<a name="l00317"></a>00317                                 <span class="keywordflow">return</span> (source.getValue&lt;<span class="keywordtype">double</span>&gt;()&lt;CastUtil::lexical_cast&lt;<span class="keywordtype">double</span>&gt;(target));
 <a name="l00318"></a>00318                 }
 <a name="l00319"></a>00319                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(source.getTypeName()==<span class="stringliteral">&quot;string&quot;</span>)
 <a name="l00320"></a>00320                 {
@@ -426,7 +426,7 @@ $(document).ready(initResizable);
 <a name="l00366"></a>00366         <span class="keywordflow">if</span>(token!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00367"></a>00367         {
 <a name="l00368"></a>00368                 vector&lt;string&gt; bs;
-<a name="l00369"></a>00369                 boost::iter_split(bs, condition, boost::first_finder(token));
+<a name="l00369"></a>00369                 StringUtil::split(bs, condition, (token));
 <a name="l00370"></a>00370                 <span class="keywordflow">if</span>(bs.size()==2 &amp;&amp; bs.at(0)!=<span class="stringliteral">&quot;&quot;</span> &amp;&amp; bs.at(1)!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00371"></a>00371                 {
 <a name="l00372"></a>00372                         <a class="code" href="classObject.html">Object</a> source,target;
@@ -605,27 +605,27 @@ $(document).ready(initResizable);
 <a name="l00545"></a>00545 <span class="comment">                        if(containsChar(curr.at(i)))</span>
 <a name="l00546"></a>00546 <span class="comment">                        {</span>
 <a name="l00547"></a>00547 <span class="comment">                                Object o = localVariables[curr.at(i)];</span>
-<a name="l00548"></a>00548 <span class="comment">                                opr.push_back(boost::lexical_cast&lt;string&gt;(o.getValue&lt;int&gt;()));</span>
+<a name="l00548"></a>00548 <span class="comment">                                opr.push_back(CastUtil::lexical_cast&lt;string&gt;(o.getValue&lt;int&gt;()));</span>
 <a name="l00549"></a>00549 <span class="comment">                        }</span>
 <a name="l00550"></a>00550 <span class="comment">                        else</span>
 <a name="l00551"></a>00551 <span class="comment">                                opr.push_back(curr.at(i));</span>
 <a name="l00552"></a>00552 <span class="comment">                }</span>
 <a name="l00553"></a>00553 <span class="comment">                if(sep==&quot;=&quot;)</span>
-<a name="l00554"></a>00554 <span class="comment">                        *_temp = boost::lexical_cast&lt;int&gt;(handleAssignment&lt;int&gt;(opr));</span>
+<a name="l00554"></a>00554 <span class="comment">                        *_temp = CastUtil::lexical_cast&lt;int&gt;(handleAssignment&lt;int&gt;(opr));</span>
 <a name="l00555"></a>00555 <span class="comment">                else if(sep==&quot;+=&quot;)</span>
-<a name="l00556"></a>00556 <span class="comment">                        *_temp = *_temp + boost::lexical_cast&lt;int&gt;(handleAssignment&lt;int&gt;(opr));</span>
+<a name="l00556"></a>00556 <span class="comment">                        *_temp = *_temp + CastUtil::lexical_cast&lt;int&gt;(handleAssignment&lt;int&gt;(opr));</span>
 <a name="l00557"></a>00557 <span class="comment">                else if(sep==&quot;-=&quot;)</span>
-<a name="l00558"></a>00558 <span class="comment">                        *_temp = *_temp - boost::lexical_cast&lt;int&gt;(handleAssignment&lt;int&gt;(opr));</span>
+<a name="l00558"></a>00558 <span class="comment">                        *_temp = *_temp - CastUtil::lexical_cast&lt;int&gt;(handleAssignment&lt;int&gt;(opr));</span>
 <a name="l00559"></a>00559 <span class="comment">                else if(sep==&quot;++&quot;)</span>
 <a name="l00560"></a>00560 <span class="comment">                        *_temp = (*_temp+1);</span>
 <a name="l00561"></a>00561 <span class="comment">                else if(sep==&quot;--&quot;)</span>
 <a name="l00562"></a>00562 <span class="comment">                        *_temp = (*_temp-1);*/</span>
 <a name="l00563"></a>00563                 <span class="keywordflow">if</span>(sep==<span class="stringliteral">&quot;=&quot;</span>)
-<a name="l00564"></a>00564                         *_temp = boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(res);
+<a name="l00564"></a>00564                         *_temp = CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(res);
 <a name="l00565"></a>00565                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(sep==<span class="stringliteral">&quot;+=&quot;</span>)
-<a name="l00566"></a>00566                         *_temp = *_temp + boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(res);
+<a name="l00566"></a>00566                         *_temp = *_temp + CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(res);
 <a name="l00567"></a>00567                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(sep==<span class="stringliteral">&quot;-=&quot;</span>)
-<a name="l00568"></a>00568                         *_temp = *_temp - boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(res);
+<a name="l00568"></a>00568                         *_temp = *_temp - CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(res);
 <a name="l00569"></a>00569                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(sep==<span class="stringliteral">&quot;++&quot;</span>)
 <a name="l00570"></a>00570                         *_temp = (*_temp+1);
 <a name="l00571"></a>00571                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(sep==<span class="stringliteral">&quot;--&quot;</span>)
@@ -661,7 +661,7 @@ $(document).ready(initResizable);
 <a name="l00601"></a>00601                 <span class="keywordflow">if</span>(lhs.size()&gt;0)<span class="comment">//probable declaration</span>
 <a name="l00602"></a>00602                 {
 <a name="l00603"></a>00603                         vector&lt;string&gt; bs;
-<a name="l00604"></a>00604                         boost::iter_split(bs, lhs.at(0), boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00604"></a>00604                         StringUtil::split(bs, lhs.at(0), (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00605"></a>00605                         <span class="keywordflow">if</span>(bs.size()==1)
 <a name="l00606"></a>00606                         {
 <a name="l00607"></a>00607                                 <a class="code" href="classObject.html">Object</a> source;
@@ -702,7 +702,7 @@ $(document).ready(initResizable);
 <a name="l00642"></a>00642         <span class="keywordflow">else</span>
 <a name="l00643"></a>00643         {
 <a name="l00644"></a>00644                 vector&lt;string&gt; bs;
-<a name="l00645"></a>00645                 boost::iter_split(bs, lhs.at(0), boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00645"></a>00645                 StringUtil::split(bs, lhs.at(0), (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00646"></a>00646                 <span class="keywordflow">if</span>(isInBuiltType(bs.at(0)))
 <a name="l00647"></a>00647                 {
 <a name="l00648"></a>00648                         storeInbuilt(bs.at(0),bs.at(1));
@@ -898,7 +898,7 @@ $(document).ready(initResizable);
 <a name="l00838"></a>00838                                         <a class="code" href="classObject.html">Object</a> o;
 <a name="l00839"></a>00839                                         o &lt;&lt; obj.getPointer();
 <a name="l00840"></a>00840                                         o.setTypeName(obj.getType());
-<a name="l00841"></a>00841                                         <span class="keywordtype">string</span> argname = <span class="stringliteral">&quot;_argno&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(argn++);
+<a name="l00841"></a>00841                                         <span class="keywordtype">string</span> argname = <span class="stringliteral">&quot;_argno&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(argn++);
 <a name="l00842"></a>00842                                         localVariables[argname] = o;
 <a name="l00843"></a>00843                                         <span class="comment">//rhs.push_back(argname);</span>
 <a name="l00844"></a>00844                                         token = *(itr);
@@ -949,7 +949,7 @@ $(document).ready(initResizable);
 <a name="l00889"></a>00889                 {
 <a name="l00890"></a>00890                         objmem = <span class="keyword">true</span>;
 <a name="l00891"></a>00891                         vector&lt;string&gt; bs;
-<a name="l00892"></a>00892                         boost::iter_split(bs,token, boost::first_finder(<span class="stringliteral">&quot;.&quot;</span>));
+<a name="l00892"></a>00892                         StringUtil::split(bs,token, (<span class="stringliteral">&quot;.&quot;</span>));
 <a name="l00893"></a>00893                         objname = bs.at(0);
 <a name="l00894"></a>00894                         methName = bs.at(1);
 <a name="l00895"></a>00895                 }
@@ -1546,7 +1546,7 @@ $(document).ready(initResizable);
 <a name="l01486"></a>01486                 <span class="keywordtype">string</span> litval;
 <a name="l01487"></a>01487                 litval = temp.substr(s,e);
 <a name="l01488"></a>01488                 temp = temp.substr(e+s+1);
-<a name="l01489"></a>01489                 <span class="keywordtype">string</span> varn =  (<span class="stringliteral">&quot;_&quot;</span>+ boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(st++));
+<a name="l01489"></a>01489                 <span class="keywordtype">string</span> varn =  (<span class="stringliteral">&quot;_&quot;</span>+ CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(st++));
 <a name="l01490"></a>01490                 literals[varn] = litval;
 <a name="l01491"></a>01491                 <span class="keywordtype">string</span> ini = str.substr(0,s-1);
 <a name="l01492"></a>01492                 str = (ini + varn + temp);
@@ -1560,8 +1560,8 @@ $(document).ready(initResizable);
 <a name="l01500"></a>01500                 logger &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span> &lt;&lt; flush;
 <a name="l01501"></a>01501         }
 <a name="l01502"></a>01502         logger &lt;&lt; str &lt;&lt; flush;
-<a name="l01503"></a>01503         boost::regex pattern(<span class="stringliteral">&quot;\\s+&quot;</span>,boost::regex_constants::icase|boost::regex_constants::perl);
-<a name="l01504"></a>01504         str = boost::regex_replace (str, pattern, <span class="stringliteral">&quot; &quot;</span>);
+<a name="l01503"></a>01503         RegexUtil::replace(str, <span class="stringliteral">&quot;[\t]+&quot;</span>, <span class="stringliteral">&quot; &quot;</span>);
+<a name="l01504"></a>01504         RegexUtil::replace(str, <span class="stringliteral">&quot;[ ]+&quot;</span>, <span class="stringliteral">&quot; &quot;</span>);
 <a name="l01505"></a>01505         logger &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span> &lt;&lt; flush;
 <a name="l01506"></a>01506         logger &lt;&lt; str &lt;&lt; flush;
 <a name="l01507"></a>01507         logger &lt;&lt; <span class="stringliteral">&quot;\n&quot;</span> &lt;&lt; flush;
@@ -1707,8 +1707,8 @@ $(document).ready(initResizable);
 <a name="l01647"></a>01647                 <span class="comment">/*if(commands.at(k).find(&quot;=&quot;)!=string::npos)//inititialization operation</span>
 <a name="l01648"></a>01648 <span class="comment">                {</span>
 <a name="l01649"></a>01649 <span class="comment">                        vector&lt;string&gt; bs,lhs;</span>
-<a name="l01650"></a>01650 <span class="comment">                        boost::iter_split(bs, commands.at(k), boost::first_finder(&quot;=&quot;));</span>
-<a name="l01651"></a>01651 <span class="comment">                        boost::iter_split(lhs, bs.at(0), boost::first_finder(&quot; &quot;));</span>
+<a name="l01650"></a>01650 <span class="comment">                        StringUtil::split(bs, commands.at(k), (&quot;=&quot;));</span>
+<a name="l01651"></a>01651 <span class="comment">                        StringUtil::split(lhs, bs.at(0), (&quot; &quot;));</span>
 <a name="l01652"></a>01652 <span class="comment">                        if(lhs.size()==2)</span>
 <a name="l01653"></a>01653 <span class="comment">                        {</span>
 <a name="l01654"></a>01654 <span class="comment">                                if(isInBuiltType(lhs.at(0)))</span>
@@ -1782,7 +1782,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>CppInterpreter.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:52:45 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:28:49 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

@@ -83,7 +83,7 @@ $(document).ready(initResizable);
 <a name="l00023"></a>00023 <span class="preprocessor">#include &quot;Logger.h&quot;</span>
 <a name="l00024"></a>00024 
 <a name="l00025"></a>00025 <span class="comment">// Global static pointer used to ensure a single instance of the class.</span>
-<a name="l00026"></a>00026 boost::mutex* Logger::_theLogmutex = NULL;
+<a name="l00026"></a>00026 <a class="code" href="classMutex.html">Mutex</a>* Logger::_theLogmutex = NULL;
 <a name="l00027"></a>00027 <span class="keywordtype">string</span>* Logger::level = NULL;
 <a name="l00028"></a>00028 <span class="keywordtype">string</span>* Logger::mode = NULL;
 <a name="l00029"></a>00029 <span class="keywordtype">string</span>* Logger::filepath = NULL;
@@ -105,7 +105,7 @@ $(document).ready(initResizable);
 <a name="l00045"></a>00045 {
 <a name="l00046"></a>00046         <span class="keywordflow">if</span>(!_theLogmutex)
 <a name="l00047"></a>00047         {
-<a name="l00048"></a>00048                 _theLogmutex = <span class="keyword">new</span> boost::mutex();
+<a name="l00048"></a>00048                 _theLogmutex = <span class="keyword">new</span> <a class="code" href="classMutex.html">Mutex</a>();
 <a name="l00049"></a>00049                 level = <span class="keyword">new</span> string(LEVEL_ERROR);
 <a name="l00050"></a>00050                 mode = <span class="keyword">new</span> string(<span class="stringliteral">&quot;CONSOLE&quot;</span>);
 <a name="l00051"></a>00051                 datFormat = <span class="keyword">new</span> <a class="code" href="classDateFormat.html">DateFormat</a>(<span class="stringliteral">&quot;dd/mm/yyyy hh:mi:ss&quot;</span>);
@@ -116,7 +116,7 @@ $(document).ready(initResizable);
 <a name="l00056"></a>00056 {
 <a name="l00057"></a>00057         <span class="keywordflow">if</span>(!_theLogmutex)
 <a name="l00058"></a>00058         {
-<a name="l00059"></a>00059                 _theLogmutex = <span class="keyword">new</span> boost::mutex();
+<a name="l00059"></a>00059                 _theLogmutex = <span class="keyword">new</span> <a class="code" href="classMutex.html">Mutex</a>();
 <a name="l00060"></a>00060 
 <a name="l00061"></a>00061                 <a class="code" href="classPropFileReader.html">PropFileReader</a> pf;
 <a name="l00062"></a>00062                 propMap props = pf.getProperties(file);
@@ -143,7 +143,7 @@ $(document).ready(initResizable);
 <a name="l00083"></a>00083 {
 <a name="l00084"></a>00084         <span class="keywordflow">if</span>(!_theLogmutex)
 <a name="l00085"></a>00085         {
-<a name="l00086"></a>00086                 _theLogmutex = <span class="keyword">new</span> boost::mutex();
+<a name="l00086"></a>00086                 _theLogmutex = <span class="keyword">new</span> <a class="code" href="classMutex.html">Mutex</a>();
 <a name="l00087"></a>00087 
 <a name="l00088"></a>00088                 level = <span class="keyword">new</span> string(llevel);
 <a name="l00089"></a>00089                 mode = <span class="keyword">new</span> string(lmode);
@@ -250,7 +250,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>Logger.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:52:46 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:28:49 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>
