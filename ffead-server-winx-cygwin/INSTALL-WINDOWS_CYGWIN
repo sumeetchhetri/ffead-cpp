@@ -11,23 +11,21 @@ Installation On Windows with Cygwin
       openssl libraries and devel (use Cygwin_SSL_UnixOdbc_libs.zip from downloads section for version 1.0)
       unixODBC libraries and devel (not found in Cygwin reposistory, use Cygwin_SSL_UnixOdbc_libs.zip from download section)
       bison,yacc,flex,gdb,readline,binutils (for building and installing openssl and unixODBC)
-4a. Using Cygwin v1.7.14-2 and unixODBC v2.3.1.tar.gz, the install (./configure,make,make install) worked, you can copy the /usr/local/lib/libodbc* files to /usr/lib if you are
-confident enough of trying a manual install of unixodbc. Trying to build on prior versions of cygwin and unixodbc, i faced certain issues and wasn't able to successfully compile
-and build files, hence had provided the *_libs.zip file.
-5. Copy bin/gcc-3 or bin/gcc-4 and rename it ot gcc (the already existing link file gcc sometimes gives permission errors)
-6. You can build and install openssl and unixodbc and copy the required library files to the cygwin lib folder. The already built libraries are present in the Cygwin_SSL_UnixOdbc_libs.zip file which can be copied to the lib folder directly.
-7. Download the latest release tar file and extract it to the location of your choice under Cygwin installation.
-8. Boost libraries no longer required since version 1.7
+5. Using Cygwin v1.7.14-2 and unixODBC v2.3.1.tar.gz, the install (./configure,make,make install) worked, you can copy the /usr/local/lib/libodbc* files to /usr/lib if you are
+	confident enough of trying a manual install of unixodbc. Trying to build on prior versions of cygwin and unixodbc, i faced certain issues and wasn't able to successfully compile
+	and build files, hence had provided the *_libs.zip file.
+6. Copy bin/gcc-3 or bin/gcc-4 and rename it ot gcc (the already existing link file gcc sometimes gives permission errors)
+7. You can build and install openssl and unixodbc and copy the required library files to the cygwin lib folder. The already built libraries are present in the Cygwin_SSL_UnixOdbc_libs.zip file which can be copied to the lib folder directly.
+8. Download the latest release tar file and extract it to the location of your choice under Cygwin installation.
 9. Install Unix-ODBC and required odbc files for MySQL dependency and development files
 10. Install Open-SSL as well and development files
-11. JSON-SPIRIT libraries no longer required since version 1.7
-12. Also included prototype.js in source for AJAX support
-13. Go to the ffead-server-winx-cygwin/Release or ffead-server-winx-cygwin/Debug depending on whether you need to debug the server code
-14. Open terminal and type make all
-15. This will create the distribution folder named ffead-server-winx-cygwin inside ffead-server-winx-cygwin/Release or ffead-server-winx-cygwin/Debug folders accordingly
-16. Place your application shared library inside the ffead-server-winx-cygwin/Release/ffead-server or ffead-server-winx-cygwin/Debug/ffead-server folder.
-17. Place your web application specific files inside the ffead-server-winx-cygwin/Release/ffead-server/web folder inside a folder with your application name
-18. Type ./server.sh when inside the ffead-server-winx-cygwin folder to start the application server
-19. A default application is already provided for your reference inside the ffead-server-winx-cygwin/web folder
-20. To compile the default application shared library go to the ffead-server-winx-cygwin/Release/ffead-server/web/default/src/Debug folder and run "make all"
-21. Copy the libdefault library to the ffead-server-winx-cygwin/Release/ffead-server/lib folder
+11. Also included prototype.js in source for AJAX support
+12. Go to the ffead-server-winx-cygwin/Release or ffead-server-winx-cygwin/Debug depending on whether you need to debug the server code
+13. Open terminal and type make all
+14. This will create the distribution folder named ffead-server-winx-cygwin inside ffead-server-winx-cygwin/Release or ffead-server-winx-cygwin/Debug folders accordingly
+15. Place your application shared library inside the ffead-server-winx-cygwin/Release/ffead-server or ffead-server-winx-cygwin/Debug/ffead-server folder.
+16. Place your web application specific files inside the ffead-server-winx-cygwin/Release/ffead-server/web folder inside a folder with your application name
+17. Type ./server.sh when inside the ffead-server-winx-cygwin folder to start the application server
+18. A default application is already provided for your reference inside the ffead-server-winx-cygwin/web folder
+19. To compile the default application shared library go to the ffead-server-winx-cygwin/Release/ffead-server/web/default/src/Debug folder and run "make all"
+20. Copy the libdefault library to the ffead-server-winx-cygwin/Release/ffead-server/lib folder
