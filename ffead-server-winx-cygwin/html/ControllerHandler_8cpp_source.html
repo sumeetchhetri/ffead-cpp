@@ -188,8 +188,8 @@ $(document).ready(initResizable);
 <a name="l00128"></a>00128                                                         <span class="stringliteral">&quot;, against url: &quot;</span> &lt;&lt; it-&gt;first &lt;&lt; endl;
 <a name="l00129"></a>00129                                         <span class="keywordflow">if</span>(it-&gt;first==pthwofiletemp)
 <a name="l00130"></a>00130                                         {
-<a name="l00131"></a>00131                                                 <span class="keywordtype">string</span> lhs = boost::to_upper_copy(ft.meth);
-<a name="l00132"></a>00132                                                 <span class="keywordtype">string</span> rhs = boost::to_upper_copy(req-&gt;getMethod());
+<a name="l00131"></a>00131                                                 <span class="keywordtype">string</span> lhs = StringUtil::toUpperCopy(ft.meth);
+<a name="l00132"></a>00132                                                 <span class="keywordtype">string</span> rhs = StringUtil::toUpperCopy(req-&gt;getMethod());
 <a name="l00133"></a>00133                                                 logger &lt;&lt; lhs &lt;&lt; <span class="stringliteral">&quot; &lt;&gt; &quot;</span> &lt;&lt; rhs &lt;&lt; endl;
 <a name="l00134"></a>00134                                                 <span class="keywordflow">if</span>(prsiz==(<span class="keywordtype">int</span>)valss.size() &amp;&amp; lhs==rhs)
 <a name="l00135"></a>00135                                                 {
@@ -225,11 +225,11 @@ $(document).ready(initResizable);
 <a name="l00165"></a>00165                                                 ss &lt;&lt; <span class="stringliteral">&quot;}&quot;</span>;
 <a name="l00166"></a>00166                                                 <span class="keywordtype">string</span> param;
 <a name="l00167"></a>00167                                                 ss &gt;&gt; param;
-<a name="l00168"></a>00168                                                 boost::iter_split(vemp, baseUrl, boost::first_finder(param));
+<a name="l00168"></a>00168                                                 StringUtil::split(vemp, baseUrl, (param));
 <a name="l00169"></a>00169                                                 <span class="keywordflow">if</span>(vemp.size()==2 &amp;&amp; pthwofiletemp.find(vemp.at(0))!=string::npos)
 <a name="l00170"></a>00170                                                 {
 <a name="l00171"></a>00171                                                         <span class="keywordtype">string</span> temp = pthwofiletemp;
-<a name="l00172"></a>00172                                                         boost::replace_first(temp, vemp.at(0), <span class="stringliteral">&quot;&quot;</span>);
+<a name="l00172"></a>00172                                                         StringUtil::replaceFirst(temp, vemp.at(0), <span class="stringliteral">&quot;&quot;</span>);
 <a name="l00173"></a>00173                                                         <span class="keywordflow">if</span>(temp.find(<span class="stringliteral">&quot;/&quot;</span>)!=string::npos)
 <a name="l00174"></a>00174                                                         {
 <a name="l00175"></a>00175                                                                 pthwofiletemp = temp.substr(temp.find(<span class="stringliteral">&quot;/&quot;</span>));
@@ -247,8 +247,8 @@ $(document).ready(initResizable);
 <a name="l00187"></a>00187                                                         <span class="keywordflow">break</span>;
 <a name="l00188"></a>00188                                                 }
 <a name="l00189"></a>00189                                         }
-<a name="l00190"></a>00190                                         <span class="keywordtype">string</span> lhs = boost::to_upper_copy(ft.meth);
-<a name="l00191"></a>00191                                         <span class="keywordtype">string</span> rhs = boost::to_upper_copy(req-&gt;getMethod());
+<a name="l00190"></a>00190                                         <span class="keywordtype">string</span> lhs = StringUtil::toUpperCopy(ft.meth);
+<a name="l00191"></a>00191                                         <span class="keywordtype">string</span> rhs = StringUtil::toUpperCopy(req-&gt;getMethod());
 <a name="l00192"></a>00192                                         logger &lt;&lt; lhs &lt;&lt; <span class="stringliteral">&quot; &lt;&gt; &quot;</span> &lt;&lt; rhs &lt;&lt; endl;
 <a name="l00193"></a>00193                                         <span class="keywordflow">if</span>(prsiz==(<span class="keywordtype">int</span>)valss.size() &amp;&amp; lhs==rhs)
 <a name="l00194"></a>00194                                         {
@@ -305,27 +305,27 @@ $(document).ready(initResizable);
 <a name="l00245"></a>00245                                                 argus.push_back(rft.params.at(var).type);
 <a name="l00246"></a>00246                                                 <span class="keywordflow">if</span>(rft.params.at(var).type==<span class="stringliteral">&quot;int&quot;</span>)
 <a name="l00247"></a>00247                                                 {
-<a name="l00248"></a>00248                                                         <span class="keywordtype">int</span>* ival = <span class="keyword">new</span> int(boost::lexical_cast&lt;int&gt;(valss.at(var)));
+<a name="l00248"></a>00248                                                         <span class="keywordtype">int</span>* ival = <span class="keyword">new</span> int(CastUtil::lexical_cast&lt;int&gt;(valss.at(var)));
 <a name="l00249"></a>00249                                                         valus.push_back(ival);
 <a name="l00250"></a>00250                                                 }
 <a name="l00251"></a>00251                                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(rft.params.at(var).type==<span class="stringliteral">&quot;long&quot;</span>)
 <a name="l00252"></a>00252                                                 {
-<a name="l00253"></a>00253                                                         <span class="keywordtype">long</span>* ival = <span class="keyword">new</span> long(boost::lexical_cast&lt;long&gt;(valss.at(var)));
+<a name="l00253"></a>00253                                                         <span class="keywordtype">long</span>* ival = <span class="keyword">new</span> long(CastUtil::lexical_cast&lt;long&gt;(valss.at(var)));
 <a name="l00254"></a>00254                                                         valus.push_back(ival);
 <a name="l00255"></a>00255                                                 }
 <a name="l00256"></a>00256                                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(rft.params.at(var).type==<span class="stringliteral">&quot;double&quot;</span>)
 <a name="l00257"></a>00257                                                 {
-<a name="l00258"></a>00258                                                         <span class="keywordtype">double</span>* ival = <span class="keyword">new</span> double(boost::lexical_cast&lt;double&gt;(valss.at(var)));
+<a name="l00258"></a>00258                                                         <span class="keywordtype">double</span>* ival = <span class="keyword">new</span> double(CastUtil::lexical_cast&lt;double&gt;(valss.at(var)));
 <a name="l00259"></a>00259                                                         valus.push_back(ival);
 <a name="l00260"></a>00260                                                 }
 <a name="l00261"></a>00261                                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(rft.params.at(var).type==<span class="stringliteral">&quot;float&quot;</span>)
 <a name="l00262"></a>00262                                                 {
-<a name="l00263"></a>00263                                                         <span class="keywordtype">float</span>* ival = <span class="keyword">new</span> float(boost::lexical_cast&lt;float&gt;(valss.at(var)));
+<a name="l00263"></a>00263                                                         <span class="keywordtype">float</span>* ival = <span class="keyword">new</span> float(CastUtil::lexical_cast&lt;float&gt;(valss.at(var)));
 <a name="l00264"></a>00264                                                         valus.push_back(ival);
 <a name="l00265"></a>00265                                                 }
 <a name="l00266"></a>00266                                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(rft.params.at(var).type==<span class="stringliteral">&quot;bool&quot;</span>)
 <a name="l00267"></a>00267                                                 {
-<a name="l00268"></a>00268                                                         <span class="keywordtype">bool</span>* ival = <span class="keyword">new</span> bool(boost::lexical_cast&lt;bool&gt;(valss.at(var)));
+<a name="l00268"></a>00268                                                         <span class="keywordtype">bool</span>* ival = <span class="keyword">new</span> bool(CastUtil::lexical_cast&lt;bool&gt;(valss.at(var)));
 <a name="l00269"></a>00269                                                         valus.push_back(ival);
 <a name="l00270"></a>00270                                                 }
 <a name="l00271"></a>00271                                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(rft.params.at(var).type==<span class="stringliteral">&quot;string&quot;</span>)
@@ -368,7 +368,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>ControllerHandler.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:59:48 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:32 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

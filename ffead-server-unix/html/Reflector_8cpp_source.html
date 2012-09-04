@@ -94,38 +94,37 @@ $(document).ready(initResizable);
 <a name="l00034"></a>00034                         <span class="keyword">delete</span> objects.at(var);
 <a name="l00035"></a>00035                 <span class="keywordflow">else</span>
 <a name="l00036"></a>00036                 {
-<a name="l00037"></a>00037                         <a class="code" href="classReflector.html">Reflector</a> reflector;
-<a name="l00038"></a>00038                         reflector.destroy(objects.at(var),objectT.at(var));
-<a name="l00039"></a>00039                 }
-<a name="l00040"></a>00040         }
-<a name="l00041"></a>00041 }
-<a name="l00042"></a>00042 
-<a name="l00043"></a>00043 <a class="code" href="classClassInfo.html">ClassInfo</a> Reflector::getClassInfo(<span class="keywordtype">string</span> className)
-<a name="l00044"></a>00044 {
-<a name="l00045"></a>00045         <a class="code" href="classClassInfo.html">ClassInfo</a> info;
-<a name="l00046"></a>00046         <span class="keywordtype">string</span> libName = Constants::INTER_LIB_FILE;
-<a name="l00047"></a>00047         <span class="keywordtype">void</span> *dlib = dlopen(libName.c_str(), RTLD_NOW);
-<a name="l00048"></a>00048         <span class="keywordflow">if</span>(dlib == NULL)
-<a name="l00049"></a>00049         {
-<a name="l00050"></a>00050                 cerr &lt;&lt; dlerror() &lt;&lt; endl;
-<a name="l00051"></a>00051                 exit(-1);
-<a name="l00052"></a>00052         }
-<a name="l00053"></a>00053         <span class="keywordtype">string</span> methodname = <span class="stringliteral">&quot;getReflectionCIFor&quot;</span>+className;
-<a name="l00054"></a>00054         <span class="keywordtype">void</span> *mkr = dlsym(dlib, methodname.c_str());
-<a name="l00055"></a>00055         <span class="keyword">typedef</span> <a class="code" href="classClassInfo.html">ClassInfo</a> (*RfPtr) ();
-<a name="l00056"></a>00056         RfPtr f = (RfPtr)mkr;
-<a name="l00057"></a>00057         <span class="keywordflow">if</span>(f!=NULL)
-<a name="l00058"></a>00058                 <span class="keywordflow">return</span> f();
-<a name="l00059"></a>00059         <span class="keywordflow">else</span>
-<a name="l00060"></a>00060                 <span class="keywordflow">return</span> info;
-<a name="l00061"></a>00061 }
-<a name="l00062"></a>00062 
+<a name="l00037"></a>00037                         destroy(objects.at(var),objectT.at(var));
+<a name="l00038"></a>00038                 }
+<a name="l00039"></a>00039         }
+<a name="l00040"></a>00040 }
+<a name="l00041"></a>00041 
+<a name="l00042"></a>00042 <a class="code" href="classClassInfo.html">ClassInfo</a> Reflector::getClassInfo(<span class="keywordtype">string</span> className)
+<a name="l00043"></a>00043 {
+<a name="l00044"></a>00044         <a class="code" href="classClassInfo.html">ClassInfo</a> info;
+<a name="l00045"></a>00045         <span class="keywordtype">string</span> libName = Constants::INTER_LIB_FILE;
+<a name="l00046"></a>00046         <span class="keywordtype">void</span> *dlib = dlopen(libName.c_str(), RTLD_NOW);
+<a name="l00047"></a>00047         <span class="keywordflow">if</span>(dlib == NULL)
+<a name="l00048"></a>00048         {
+<a name="l00049"></a>00049                 cerr &lt;&lt; dlerror() &lt;&lt; endl;
+<a name="l00050"></a>00050                 exit(-1);
+<a name="l00051"></a>00051         }
+<a name="l00052"></a>00052         <span class="keywordtype">string</span> methodname = <span class="stringliteral">&quot;getReflectionCIFor&quot;</span>+className;
+<a name="l00053"></a>00053         <span class="keywordtype">void</span> *mkr = dlsym(dlib, methodname.c_str());
+<a name="l00054"></a>00054         <span class="keyword">typedef</span> <a class="code" href="classClassInfo.html">ClassInfo</a> (*RfPtr) ();
+<a name="l00055"></a>00055         RfPtr f = (RfPtr)mkr;
+<a name="l00056"></a>00056         <span class="keywordflow">if</span>(f!=NULL)
+<a name="l00057"></a>00057                 <span class="keywordflow">return</span> f();
+<a name="l00058"></a>00058         <span class="keywordflow">else</span>
+<a name="l00059"></a>00059                 <span class="keywordflow">return</span> info;
+<a name="l00060"></a>00060 }
+<a name="l00061"></a>00061 
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>Reflector.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:55:43 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:04 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

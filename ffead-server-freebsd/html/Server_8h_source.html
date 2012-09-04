@@ -102,42 +102,43 @@ $(document).ready(initResizable);
 <a name="l00042"></a>00042 <span class="preprocessor">#include &lt;sys/ioctl.h&gt;</span>
 <a name="l00043"></a>00043 <span class="comment">/*Fix for Windows Cygwin*/</span><span class="comment">//#include &lt;sys/epoll.h&gt;</span>
 <a name="l00044"></a>00044 <span class="preprocessor">#include &lt;sys/resource.h&gt;</span>
-<a name="l00045"></a>00045 <span class="preprocessor">#include &lt;boost/thread/thread.hpp&gt;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;Thread.h&quot;</span>
 <a name="l00046"></a>00046 <span class="preprocessor">#include &quot;Logger.h&quot;</span>
 <a name="l00047"></a>00047 <span class="preprocessor">#define MAXEPOLLSIZES 10000</span>
 <a name="l00048"></a>00048 <span class="preprocessor"></span><span class="keyword">using namespace </span>std;
 <a name="l00049"></a>00049 
-<a name="l00050"></a>00050 <span class="keyword">typedef</span> void (*<a class="code" href="classService.html">Service</a>)(int);
+<a name="l00050"></a>00050 <span class="keyword">typedef</span> <span class="keywordtype">void</span>* (*Service)(<span class="keywordtype">void</span>*);
 <a name="l00051"></a><a class="code" href="classServer.html">00051</a> <span class="keyword">class </span><a class="code" href="classServer.html">Server</a> {
 <a name="l00052"></a>00052         <a class="code" href="classLogger.html">Logger</a> logger;
 <a name="l00053"></a>00053         <span class="keywordtype">int</span> sock;
-<a name="l00054"></a>00054         <span class="keyword">struct </span>sockaddr_storage their_addr;
-<a name="l00055"></a>00055         <span class="keywordtype">void</span> servicing(<a class="code" href="classService.html">Service</a>);
-<a name="l00056"></a>00056 <span class="keyword">public</span>:
-<a name="l00057"></a>00057         <a class="code" href="classServer.html">Server</a>(<span class="keywordtype">string</span>,<span class="keywordtype">bool</span>,<span class="keywordtype">int</span>,<a class="code" href="classService.html">Service</a>,<span class="keywordtype">bool</span>);
-<a name="l00058"></a>00058         <a class="code" href="classServer.html">Server</a>(<span class="keywordtype">string</span> port,<span class="keywordtype">int</span> waiting,<a class="code" href="classService.html">Service</a> serv);
-<a name="l00059"></a>00059         <span class="keyword">virtual</span> ~<a class="code" href="classServer.html">Server</a>();
-<a name="l00060"></a>00060         <span class="keywordtype">int</span> Accept();
-<a name="l00061"></a>00061         <span class="keywordtype">int</span> Send(<span class="keywordtype">int</span>,<span class="keywordtype">string</span>);
-<a name="l00062"></a>00062         <span class="keywordtype">int</span> Send(<span class="keywordtype">int</span>,vector&lt;char&gt;);
-<a name="l00063"></a>00063         <span class="keywordtype">int</span> Send(<span class="keywordtype">int</span>,vector&lt;unsigned char&gt;);
-<a name="l00064"></a>00064         <span class="keywordtype">int</span> Send(<span class="keywordtype">int</span>,<span class="keywordtype">char</span>*);
-<a name="l00065"></a>00065         <span class="keywordtype">int</span> Send(<span class="keywordtype">int</span>,<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>*);
-<a name="l00066"></a>00066         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,<span class="keywordtype">string</span>&amp;,<span class="keywordtype">int</span>);
-<a name="l00067"></a>00067         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,vector&lt;char&gt;&amp;,<span class="keywordtype">int</span>);
-<a name="l00068"></a>00068         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,vector&lt;unsigned char&gt;&amp;,<span class="keywordtype">int</span>);
-<a name="l00069"></a>00069         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,<span class="keywordtype">char</span> *data,<span class="keywordtype">int</span>);
-<a name="l00070"></a>00070         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data,<span class="keywordtype">int</span>);
-<a name="l00071"></a>00071         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,vector&lt;string&gt;&amp;,<span class="keywordtype">int</span>);
-<a name="l00072"></a>00072 };
-<a name="l00073"></a>00073 
-<a name="l00074"></a>00074 <span class="preprocessor">#endif </span><span class="comment">/* SERVER_H_ */</span>
+<a name="l00054"></a>00054         <a class="code" href="classService.html">Service</a> service;
+<a name="l00055"></a>00055         <span class="keyword">struct </span>sockaddr_storage their_addr;
+<a name="l00056"></a>00056         <span class="keyword">static</span> <span class="keywordtype">void</span>* servicing(<span class="keywordtype">void</span>* arg);
+<a name="l00057"></a>00057 <span class="keyword">public</span>:
+<a name="l00058"></a>00058         <a class="code" href="classServer.html">Server</a>(<span class="keywordtype">string</span>,<span class="keywordtype">bool</span>,<span class="keywordtype">int</span>,<a class="code" href="classService.html">Service</a>,<span class="keywordtype">bool</span>);
+<a name="l00059"></a>00059         <a class="code" href="classServer.html">Server</a>(<span class="keywordtype">string</span> port,<span class="keywordtype">int</span> waiting,<a class="code" href="classService.html">Service</a> serv);
+<a name="l00060"></a>00060         <span class="keyword">virtual</span> ~<a class="code" href="classServer.html">Server</a>();
+<a name="l00061"></a>00061         <span class="keywordtype">int</span> Accept();
+<a name="l00062"></a>00062         <span class="keywordtype">int</span> Send(<span class="keywordtype">int</span>,<span class="keywordtype">string</span>);
+<a name="l00063"></a>00063         <span class="keywordtype">int</span> Send(<span class="keywordtype">int</span>,vector&lt;char&gt;);
+<a name="l00064"></a>00064         <span class="keywordtype">int</span> Send(<span class="keywordtype">int</span>,vector&lt;unsigned char&gt;);
+<a name="l00065"></a>00065         <span class="keywordtype">int</span> Send(<span class="keywordtype">int</span>,<span class="keywordtype">char</span>*);
+<a name="l00066"></a>00066         <span class="keywordtype">int</span> Send(<span class="keywordtype">int</span>,<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>*);
+<a name="l00067"></a>00067         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,<span class="keywordtype">string</span>&amp;,<span class="keywordtype">int</span>);
+<a name="l00068"></a>00068         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,vector&lt;char&gt;&amp;,<span class="keywordtype">int</span>);
+<a name="l00069"></a>00069         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,vector&lt;unsigned char&gt;&amp;,<span class="keywordtype">int</span>);
+<a name="l00070"></a>00070         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,<span class="keywordtype">char</span> *data,<span class="keywordtype">int</span>);
+<a name="l00071"></a>00071         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *data,<span class="keywordtype">int</span>);
+<a name="l00072"></a>00072         <span class="keywordtype">int</span> Receive(<span class="keywordtype">int</span>,vector&lt;string&gt;&amp;,<span class="keywordtype">int</span>);
+<a name="l00073"></a>00073 };
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075 <span class="preprocessor">#endif </span><span class="comment">/* SERVER_H_ */</span>
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>Server.h</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:52:43 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:28:48 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

@@ -80,7 +80,7 @@ $(document).ready(initResizable);
 <a name="l00020"></a>00020 <span class="comment">*      Author: sumeet</span>
 <a name="l00021"></a>00021 <span class="comment">*/</span>
 <a name="l00022"></a>00022 <span class="preprocessor">#include &quot;Element.h&quot;</span>
-<a name="l00023"></a>00023 <span class="preprocessor">#include &lt;boost/algorithm/string.hpp&gt;</span>
+<a name="l00023"></a>00023 <span class="preprocessor">#include &quot;StringUtil.h&quot;</span>
 <a name="l00024"></a>00024 <span class="keywordtype">bool</span> Element::operator == (<a class="code" href="classElement.html">Element</a> ele)
 <a name="l00025"></a>00025 {
 <a name="l00026"></a>00026         <span class="keywordflow">if</span>(this-&gt;tagName == ele.tagName
@@ -177,7 +177,7 @@ $(document).ready(initResizable);
 <a name="l00117"></a>00117 <span class="keywordtype">void</span> Element::setTagName(<span class="keywordtype">string</span> tagName)
 <a name="l00118"></a>00118 {
 <a name="l00119"></a>00119         vector&lt;string&gt; vemp;
-<a name="l00120"></a>00120         boost::iter_split(vemp, tagName, boost::first_finder(<span class="stringliteral">&quot;:&quot;</span>));
+<a name="l00120"></a>00120         StringUtil::split(vemp, tagName, (<span class="stringliteral">&quot;:&quot;</span>));
 <a name="l00121"></a>00121         <span class="keywordflow">if</span>(vemp.size()==2)
 <a name="l00122"></a>00122         {
 <a name="l00123"></a>00123                 this-&gt;tagName = vemp.at(1);
@@ -254,7 +254,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>Element.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:59:49 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:32 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

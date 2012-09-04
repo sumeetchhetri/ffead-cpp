@@ -156,11 +156,11 @@ $(document).ready(initResizable);
 <a name="l00096"></a>00096                 <span class="keywordflow">if</span>(argumentTypes.at(var)!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00097"></a>00097                 {
 <a name="l00098"></a>00098                         <span class="keywordtype">string</span> temp = argumentTypes.at(var);
-<a name="l00099"></a>00099                         boost::replace_first(temp,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00100"></a>00100                         boost::replace_first(temp,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;ts&quot;</span>);
-<a name="l00101"></a>00101                         boost::replace_first(temp,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;te&quot;</span>);
-<a name="l00102"></a>00102                         boost::replace_first(temp,<span class="stringliteral">&quot;*&quot;</span>,<span class="stringliteral">&quot;ptr&quot;</span>);
-<a name="l00103"></a>00103                         boost::replace_first(temp,<span class="stringliteral">&quot;&amp;&quot;</span>,<span class="stringliteral">&quot;adr&quot;</span>);
+<a name="l00099"></a>00099                         StringUtil::replaceFirst(temp,<span class="stringliteral">&quot; &quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00100"></a>00100                         StringUtil::replaceFirst(temp,<span class="stringliteral">&quot;&lt;&quot;</span>,<span class="stringliteral">&quot;ts&quot;</span>);
+<a name="l00101"></a>00101                         StringUtil::replaceFirst(temp,<span class="stringliteral">&quot;&gt;&quot;</span>,<span class="stringliteral">&quot;te&quot;</span>);
+<a name="l00102"></a>00102                         StringUtil::replaceFirst(temp,<span class="stringliteral">&quot;*&quot;</span>,<span class="stringliteral">&quot;ptr&quot;</span>);
+<a name="l00103"></a>00103                         StringUtil::replaceFirst(temp,<span class="stringliteral">&quot;&amp;&quot;</span>,<span class="stringliteral">&quot;adr&quot;</span>);
 <a name="l00104"></a>00104                         key += temp;
 <a name="l00105"></a>00105                 }
 <a name="l00106"></a>00106         }
@@ -292,7 +292,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>ClassInfo.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:53:49 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:29:10 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

@@ -185,7 +185,7 @@ $(document).ready(initResizable);
 <a name="l00125"></a>00125     memset(&amp;hints, 0, <span class="keyword">sizeof</span> hints);
 <a name="l00126"></a>00126     hints.ai_family = AF_UNSPEC;
 <a name="l00127"></a>00127     hints.ai_socktype = SOCK_STREAM;
-<a name="l00128"></a>00128     <span class="keywordtype">string</span> sport = boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(port);
+<a name="l00128"></a>00128     <span class="keywordtype">string</span> sport = CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(port);
 <a name="l00129"></a>00129     <span class="keywordflow">if</span> ((rv = getaddrinfo(host.c_str(), sport.c_str(), &amp;hints, &amp;servinfo)) != 0) {
 <a name="l00130"></a>00130         fprintf(stderr, <span class="stringliteral">&quot;getaddrinfo: %s\n&quot;</span>, gai_strerror(rv));
 <a name="l00131"></a>00131         <span class="keywordflow">return</span> <span class="keyword">false</span>;
@@ -303,9 +303,9 @@ $(document).ready(initResizable);
 <a name="l00243"></a>00243                         cntle = cntle.substr(0,cntle.length()-1);
 <a name="l00244"></a>00244                         <span class="keywordflow">try</span>
 <a name="l00245"></a>00245                         {
-<a name="l00246"></a>00246                                 cntlen = boost::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(cntle);
+<a name="l00246"></a>00246                                 cntlen = CastUtil::lexical_cast&lt;<span class="keywordtype">int</span>&gt;(cntle);
 <a name="l00247"></a>00247                         }
-<a name="l00248"></a>00248                         <span class="keywordflow">catch</span>(boost::bad_lexical_cast&amp;)
+<a name="l00248"></a>00248                         <span class="keywordflow">catch</span>(<span class="keyword">const</span> <span class="keywordtype">char</span>* ex)
 <a name="l00249"></a>00249                         {
 <a name="l00250"></a>00250                                 logger &lt;&lt; <span class="stringliteral">&quot;bad lexical cast&quot;</span> &lt;&lt;endl;
 <a name="l00251"></a>00251                         }
@@ -397,7 +397,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>SSLClient.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:59:51 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:33 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

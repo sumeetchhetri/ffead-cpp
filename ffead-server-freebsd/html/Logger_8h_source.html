@@ -84,7 +84,7 @@ $(document).ready(initResizable);
 <a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define LOGGER_H_</span>
 <a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#include &quot;PropFileReader.h&quot;</span>
 <a name="l00026"></a>00026 <span class="preprocessor">#include &quot;DateFormat.h&quot;</span>
-<a name="l00027"></a>00027 <span class="preprocessor">#include &lt;boost/thread/thread.hpp&gt;</span>
+<a name="l00027"></a>00027 <span class="preprocessor">#include &quot;Mutex.h&quot;</span>
 <a name="l00028"></a><a class="code" href="classLogger.html">00028</a> <span class="keyword">class </span><a class="code" href="classLogger.html">Logger</a> {
 <a name="l00029"></a>00029 <span class="keyword">public</span>:
 <a name="l00030"></a>00030         <span class="keyword">static</span> <span class="keywordtype">string</span> LEVEL_ERROR;
@@ -116,7 +116,7 @@ $(document).ready(initResizable);
 <a name="l00056"></a>00056         <span class="keyword">static</span> <span class="keywordtype">string</span>* mode;
 <a name="l00057"></a>00057         <span class="keyword">static</span> <span class="keywordtype">string</span>* filepath;
 <a name="l00058"></a>00058         <span class="keyword">static</span> ofstream* out;
-<a name="l00059"></a>00059         <span class="keyword">static</span> boost::mutex* _theLogmutex;
+<a name="l00059"></a>00059         <span class="keyword">static</span> <a class="code" href="classMutex.html">Mutex</a>* _theLogmutex;
 <a name="l00060"></a>00060         <span class="keywordtype">void</span> write(<span class="keywordtype">string</span>,<span class="keywordtype">string</span>);
 <a name="l00061"></a>00061         <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;
 <a name="l00062"></a>00062         <span class="keywordtype">void</span> write(T tmsg, <span class="keywordtype">string</span> mod)
@@ -145,7 +145,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>Logger.h</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:52:43 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:28:48 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

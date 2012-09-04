@@ -890,7 +890,7 @@ public:
 		return false;
 	}
 
-	bool  isstring()
+	bool  isStringOrNullString()
 	{
 		if(type=='s' || type=='t' || type=='h' || type=='y' || type=='a')
 			return true;
@@ -919,7 +919,7 @@ public:
 		return false;
 	}
 
-	bool  isnumber()
+	bool  isNumberOrNullNumber()
 	{
 		if(type=='n' || type=='w' || type=='r' || type=='i'
 			|| type=='f' || type=='x' || type=='e' || type=='l')
@@ -1216,7 +1216,7 @@ public:
 			displ += obj->type;
 			displ += "\n" + tab + "Object Name = " + obj->name + "\n";
 			displ += tab + "Object Value = ";
-			if(obj->isstring() || obj->isFloatingPoint() || obj->isDate())
+			if(obj->isStringOrNullString() || obj->isFloatingPoint() || obj->isDate())
 				displ += (obj->getValueStr()) + "\n";
 			else if(obj->isChar())
 			{
@@ -1225,7 +1225,7 @@ public:
 				else
 					displ += (char)obj->value[0] + "\n";
 			}
-			else if(obj->isNumber())
+			else if(obj->isNumberOrNullNumber())
 			{
 				displ += CastUtil::lexical_cast<string>(obj->getNumericValue()) + "\n";
 			}

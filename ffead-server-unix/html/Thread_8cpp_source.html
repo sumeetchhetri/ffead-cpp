@@ -59,102 +59,93 @@ $(document).ready(initResizable);
 </div>
 <div class="contents">
 <div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
-<a name="l00002"></a>00002 <span class="comment">        Copyright 2010, Sumeet Chhetri </span>
-<a name="l00003"></a>00003 <span class="comment">  </span>
-<a name="l00004"></a>00004 <span class="comment">    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); </span>
-<a name="l00005"></a>00005 <span class="comment">    you may not use this file except in compliance with the License. </span>
-<a name="l00006"></a>00006 <span class="comment">    You may obtain a copy of the License at </span>
-<a name="l00007"></a>00007 <span class="comment">  </span>
-<a name="l00008"></a>00008 <span class="comment">        http://www.apache.org/licenses/LICENSE-2.0 </span>
-<a name="l00009"></a>00009 <span class="comment">  </span>
-<a name="l00010"></a>00010 <span class="comment">    Unless required by applicable law or agreed to in writing, software </span>
-<a name="l00011"></a>00011 <span class="comment">    distributed under the License is distributed on an &quot;AS IS&quot; BASIS, </span>
-<a name="l00012"></a>00012 <span class="comment">    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. </span>
-<a name="l00013"></a>00013 <span class="comment">    See the License for the specific language governing permissions and </span>
-<a name="l00014"></a>00014 <span class="comment">    limitations under the License.  </span>
+<a name="l00002"></a>00002 <span class="comment">        Copyright 2010, Sumeet Chhetri</span>
+<a name="l00003"></a>00003 <span class="comment"></span>
+<a name="l00004"></a>00004 <span class="comment">    Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<a name="l00005"></a>00005 <span class="comment">    you may not use this file except in compliance with the License.</span>
+<a name="l00006"></a>00006 <span class="comment">    You may obtain a copy of the License at</span>
+<a name="l00007"></a>00007 <span class="comment"></span>
+<a name="l00008"></a>00008 <span class="comment">        http://www.apache.org/licenses/LICENSE-2.0</span>
+<a name="l00009"></a>00009 <span class="comment"></span>
+<a name="l00010"></a>00010 <span class="comment">    Unless required by applicable law or agreed to in writing, software</span>
+<a name="l00011"></a>00011 <span class="comment">    distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<a name="l00012"></a>00012 <span class="comment">    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<a name="l00013"></a>00013 <span class="comment">    See the License for the specific language governing permissions and</span>
+<a name="l00014"></a>00014 <span class="comment">    limitations under the License.</span>
 <a name="l00015"></a>00015 <span class="comment">*/</span>
 <a name="l00016"></a>00016 <span class="comment">/*</span>
 <a name="l00017"></a>00017 <span class="comment"> * Thread.cpp</span>
 <a name="l00018"></a>00018 <span class="comment"> *</span>
-<a name="l00019"></a>00019 <span class="comment"> *  Created on: Mar 23, 2010</span>
-<a name="l00020"></a>00020 <span class="comment"> *      Author: sumeet</span>
+<a name="l00019"></a>00019 <span class="comment"> *  Created on: 10-Aug-2012</span>
+<a name="l00020"></a>00020 <span class="comment"> *      Author: sumeetc</span>
 <a name="l00021"></a>00021 <span class="comment"> */</span>
 <a name="l00022"></a>00022 
 <a name="l00023"></a>00023 <span class="preprocessor">#include &quot;Thread.h&quot;</span>
 <a name="l00024"></a>00024 
-<a name="l00025"></a>00025 <span class="keywordtype">void</span> Thread::run()
-<a name="l00026"></a>00026 {
-<a name="l00027"></a>00027         <span class="keywordflow">while</span> (<span class="keyword">true</span>)
-<a name="l00028"></a>00028         {
-<a name="l00029"></a>00029                 <span class="keywordflow">try</span>
-<a name="l00030"></a>00030                 {
-<a name="l00031"></a>00031                         boost::this_thread::sleep(boost::posix_time::milliseconds(1));
-<a name="l00032"></a>00032                 }
-<a name="l00033"></a>00033                 <span class="keywordflow">catch</span> (boost::thread_interrupted e)
-<a name="l00034"></a>00034                 {
-<a name="l00035"></a>00035                         <span class="keywordflow">if</span> (task != NULL)
-<a name="l00036"></a>00036                         {
-<a name="l00037"></a>00037                                 <span class="keywordflow">if</span> (task-&gt;tunit != -1 &amp;&amp; task-&gt;type != -1 &amp;&amp; task-&gt;tunit &gt; 0 &amp;&amp; task-&gt;type &gt; 0)
-<a name="l00038"></a>00038                                 {
-<a name="l00039"></a>00039                                         <span class="keywordflow">if</span>(console)
-<a name="l00040"></a>00040                                         {
-<a name="l00041"></a>00041                                                 logger &lt;&lt; <span class="stringliteral">&quot;Task scheduled for sleep\n&quot;</span> &lt;&lt; flush;
-<a name="l00042"></a>00042                                         }
-<a name="l00043"></a>00043                                         <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::NANOSECONDS)
-<a name="l00044"></a>00044                                                 boost::this_thread::sleep(boost::posix_time::microseconds(task-&gt;tunit/1000));
-<a name="l00045"></a>00045                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::MICROSECONDS)
-<a name="l00046"></a>00046                                                 boost::this_thread::sleep(boost::posix_time::microseconds(task-&gt;tunit));
-<a name="l00047"></a>00047                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::MILLISECONDS)
-<a name="l00048"></a>00048                                                 boost::this_thread::sleep(boost::posix_time::milliseconds(task-&gt;tunit));
-<a name="l00049"></a>00049                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::SECONDS)
-<a name="l00050"></a>00050                                                 boost::this_thread::sleep(boost::posix_time::seconds(task-&gt;tunit));
-<a name="l00051"></a>00051                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::MINUTES)
-<a name="l00052"></a>00052                                                 boost::this_thread::sleep(boost::posix_time::seconds(task-&gt;tunit * 60));
-<a name="l00053"></a>00053                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (task-&gt;type == TimeUnit::HOURS)
-<a name="l00054"></a>00054                                                 boost::this_thread::sleep(boost::posix_time::seconds(task-&gt;tunit * 60* 60 ));
-<a name="l00055"></a>00055                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(task-&gt;type==TimeUnit::DAYS)
-<a name="l00056"></a>00056                                                 boost::this_thread::sleep(boost::posix_time::seconds(task-&gt;tunit*60*60*24));
-<a name="l00057"></a>00057                                 }
-<a name="l00058"></a>00058                                 <span class="keywordflow">try</span>
-<a name="l00059"></a>00059                                 {
-<a name="l00060"></a>00060                                         task-&gt;run();
-<a name="l00061"></a>00061                                 }
-<a name="l00062"></a>00062                                 <span class="keywordflow">catch</span>(exception e)
-<a name="l00063"></a>00063                                 {
-<a name="l00064"></a>00064                                         <span class="keywordflow">if</span>(console)
-<a name="l00065"></a>00065                                         {
-<a name="l00066"></a>00066                                                 logger &lt;&lt; e.what() &lt;&lt; flush;
-<a name="l00067"></a>00067                                         }
-<a name="l00068"></a>00068                                 }
-<a name="l00069"></a>00069                                 task-&gt;~Task();
-<a name="l00070"></a>00070                                 this-&gt;task = NULL;
-<a name="l00071"></a>00071                         }
-<a name="l00072"></a>00072                         this-&gt;idle = <span class="keyword">true</span>;
-<a name="l00073"></a>00073                 }
-<a name="l00074"></a>00074         }
-<a name="l00075"></a>00075 }
-<a name="l00076"></a>00076 
-<a name="l00077"></a>00077 Thread::Thread() {
-<a name="l00078"></a>00078         logger = Logger::getLogger(<span class="stringliteral">&quot;Thread&quot;</span>);
-<a name="l00079"></a>00079         task = NULL;
-<a name="l00080"></a>00080         idle = <span class="keyword">true</span>;
-<a name="l00081"></a>00081         mthread = <span class="keyword">new</span> boost::thread(boost::bind(&amp;Thread::run, <span class="keyword">this</span>));
+<a name="l00025"></a>00025 Thread::Thread(ThreadFunc f, <span class="keywordtype">void</span>* arg) {
+<a name="l00026"></a>00026         this-&gt;f = f;
+<a name="l00027"></a>00027         this-&gt;arg = arg;
+<a name="l00028"></a>00028         pthread_mutex_init(&amp;mut, NULL);
+<a name="l00029"></a>00029         pthread_cond_init(&amp;cond, NULL);
+<a name="l00030"></a>00030 }
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 Thread::~Thread() {
+<a name="l00033"></a>00033         <span class="comment">// TODO Auto-generated destructor stub</span>
+<a name="l00034"></a>00034 }
+<a name="l00035"></a>00035 
+<a name="l00036"></a>00036 <span class="keywordtype">void</span> Thread::join() {
+<a name="l00037"></a>00037         <span class="keywordflow">if</span>(pthread_join(pthread, NULL)) {
+<a name="l00038"></a>00038                 <span class="keywordflow">throw</span> <span class="stringliteral">&quot;Error in join for pthread&quot;</span>;
+<a name="l00039"></a>00039         }
+<a name="l00040"></a>00040 }
+<a name="l00041"></a>00041 
+<a name="l00042"></a>00042 <span class="keywordtype">void</span> Thread::nSleep(<span class="keywordtype">long</span> nanos) {
+<a name="l00043"></a>00043         <span class="keyword">struct </span>timespec req={0},rem={0};
+<a name="l00044"></a>00044         req.tv_sec = 0;
+<a name="l00045"></a>00045         req.tv_nsec = nanos;
+<a name="l00046"></a>00046         <span class="keywordtype">int</span> ret = nanosleep(&amp;req, &amp;rem);
+<a name="l00047"></a>00047         <span class="keywordflow">if</span>(ret==-1)
+<a name="l00048"></a>00048         {
+<a name="l00049"></a>00049                 <span class="keyword">struct </span>timespec temp_rem;
+<a name="l00050"></a>00050                 ret = nanosleep(&amp;req, &amp;temp_rem);
+<a name="l00051"></a>00051         }
+<a name="l00052"></a>00052 }
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="keywordtype">void</span> Thread::uSleep(<span class="keywordtype">long</span> micros) {
+<a name="l00055"></a>00055         usleep(micros);
+<a name="l00056"></a>00056 }
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058 <span class="keywordtype">void</span> Thread::mSleep(<span class="keywordtype">long</span> milis) {
+<a name="l00059"></a>00059         usleep(milis*1000);
+<a name="l00060"></a>00060 }
+<a name="l00061"></a>00061 
+<a name="l00062"></a>00062 <span class="keywordtype">void</span> Thread::sSleep(<span class="keywordtype">long</span> seconds) {
+<a name="l00063"></a>00063         sleep(seconds);
+<a name="l00064"></a>00064 }
+<a name="l00065"></a>00065 
+<a name="l00066"></a>00066 <span class="keywordtype">void</span> Thread::wait() {
+<a name="l00067"></a>00067         pthread_mutex_lock(&amp;mut);
+<a name="l00068"></a>00068         pthread_cond_wait(&amp;cond, &amp;mut);
+<a name="l00069"></a>00069         pthread_mutex_unlock(&amp;mut);
+<a name="l00070"></a>00070 }
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072 <span class="keywordtype">void</span> Thread::execute() {
+<a name="l00073"></a>00073         <span class="keywordflow">if</span>(pthread_create(&amp;pthread, NULL, f, arg)) {
+<a name="l00074"></a>00074                 <span class="keywordflow">throw</span> <span class="stringliteral">&quot;Error Creating pthread&quot;</span>;
+<a name="l00075"></a>00075         }
+<a name="l00076"></a>00076 }
+<a name="l00077"></a>00077 
+<a name="l00078"></a>00078 <span class="keywordtype">void</span> Thread::interrupt() {
+<a name="l00079"></a>00079         pthread_mutex_lock(&amp;mut);
+<a name="l00080"></a>00080         pthread_cond_broadcast(&amp;cond);
+<a name="l00081"></a>00081         pthread_mutex_unlock(&amp;mut);
 <a name="l00082"></a>00082 }
-<a name="l00083"></a>00083 
-<a name="l00084"></a>00084 Thread::~Thread() {
-<a name="l00085"></a>00085         <span class="keyword">delete</span> mthread;
-<a name="l00086"></a>00086         <span class="keyword">delete</span> task;
-<a name="l00087"></a>00087         <span class="keywordflow">if</span>(console)
-<a name="l00088"></a>00088         {
-<a name="l00089"></a>00089                 logger &lt;&lt; <span class="stringliteral">&quot;Destroyed Thread\n&quot;</span> &lt;&lt; flush;
-<a name="l00090"></a>00090         }
-<a name="l00091"></a>00091 }
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>Thread.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:55:45 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:04 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

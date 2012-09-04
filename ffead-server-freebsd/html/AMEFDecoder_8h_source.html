@@ -1326,10 +1326,10 @@ $(document).ready(initResizable);
 <a name="l01272"></a>01272                         <span class="keywordtype">int</span> lengthm = charArrayToInt(buffer,<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>,1);
 <a name="l01273"></a>01273                         jDBObject-&gt;setLength(lengthm);
 <a name="l01274"></a>01274                         <a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>++;
-<a name="l01275"></a>01275                         <span class="keywordflow">while</span>(<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>&lt;buffer.length())
+<a name="l01275"></a>01275                         <span class="keywordflow">while</span>(<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>&lt;(<span class="keywordtype">int</span>)buffer.length())
 <a name="l01276"></a>01276                         {
 <a name="l01277"></a>01277                                 <a class="code" href="classAMEFObject.html">AMEFObject</a> *obj = decodeSinglePacketB(buffer,ignoreName);
-<a name="l01278"></a>01278                                 jDBObject-&gt;<a class="code" href="classAMEFObject.html#ab819f136587cecc0fa01f8694661297c">addPacket</a>(obj);
+<a name="l01278"></a>01278                                 jDBObject-&gt;<a class="code" href="classAMEFObject.html#ad9067531661a112de4c570ab43e6ef8f">addPacket</a>(obj);
 <a name="l01279"></a>01279                         }
 <a name="l01280"></a>01280                 }
 <a name="l01281"></a>01281                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(type==AMEFObject::S_OBJECT_TYPE)
@@ -1353,10 +1353,10 @@ $(document).ready(initResizable);
 <a name="l01299"></a>01299                         <span class="comment">//char* value = new char[lengthm];</span>
 <a name="l01300"></a>01300                         <span class="comment">//System.arraycopy(buffer, 3, value, 0, lengthm);</span>
 <a name="l01301"></a>01301                         <a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a> += 2;
-<a name="l01302"></a>01302                         <span class="keywordflow">while</span>(<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>&lt;buffer.length())
+<a name="l01302"></a>01302                         <span class="keywordflow">while</span>(<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>&lt;(<span class="keywordtype">int</span>)buffer.length())
 <a name="l01303"></a>01303                         {
 <a name="l01304"></a>01304                                 <a class="code" href="classAMEFObject.html">AMEFObject</a>* obj = decodeSinglePacketB(buffer,ignoreName);
-<a name="l01305"></a>01305                                 jDBObject-&gt;<a class="code" href="classAMEFObject.html#ab819f136587cecc0fa01f8694661297c">addPacket</a>(obj);
+<a name="l01305"></a>01305                                 jDBObject-&gt;<a class="code" href="classAMEFObject.html#ad9067531661a112de4c570ab43e6ef8f">addPacket</a>(obj);
 <a name="l01306"></a>01306                         }
 <a name="l01307"></a>01307                 }
 <a name="l01308"></a>01308                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(type==AMEFObject::B_OBJECT_TYPE)
@@ -1378,10 +1378,10 @@ $(document).ready(initResizable);
 <a name="l01324"></a>01324                         <span class="keywordtype">int</span> lengthm = charArrayToInt(buffer,<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>,3);
 <a name="l01325"></a>01325                         jDBObject-&gt;setLength(lengthm);
 <a name="l01326"></a>01326                         <a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a> += 3;
-<a name="l01327"></a>01327                         <span class="keywordflow">while</span>(<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>&lt;buffer.length())
+<a name="l01327"></a>01327                         <span class="keywordflow">while</span>(<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>&lt;(<span class="keywordtype">int</span>)buffer.length())
 <a name="l01328"></a>01328                         {
 <a name="l01329"></a>01329                                 <a class="code" href="classAMEFObject.html">AMEFObject</a>* obj = decodeSinglePacketB(buffer,ignoreName);
-<a name="l01330"></a>01330                                 jDBObject-&gt;<a class="code" href="classAMEFObject.html#ab819f136587cecc0fa01f8694661297c">addPacket</a>(obj);
+<a name="l01330"></a>01330                                 jDBObject-&gt;<a class="code" href="classAMEFObject.html#ad9067531661a112de4c570ab43e6ef8f">addPacket</a>(obj);
 <a name="l01331"></a>01331                         }
 <a name="l01332"></a>01332                 }
 <a name="l01333"></a>01333                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(type==AMEFObject::OBJECT_TYPE)
@@ -1403,10 +1403,10 @@ $(document).ready(initResizable);
 <a name="l01349"></a>01349                         <span class="keywordtype">int</span> lengthm = charArrayToInt(buffer,<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>,4);
 <a name="l01350"></a>01350                         jDBObject-&gt;setLength(lengthm);
 <a name="l01351"></a>01351                         <a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a> += 4;
-<a name="l01352"></a>01352                         <span class="keywordflow">while</span>(<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>&lt;buffer.length())
+<a name="l01352"></a>01352                         <span class="keywordflow">while</span>(<a class="code" href="classAMEFDecoder.html#a1a2b8f84f30ee837ab6161a49e22d8fd">position</a>&lt;(<span class="keywordtype">int</span>)buffer.length())
 <a name="l01353"></a>01353                         {
 <a name="l01354"></a>01354                                 <a class="code" href="classAMEFObject.html">AMEFObject</a>* obj = decodeSinglePacketB(buffer,ignoreName);
-<a name="l01355"></a>01355                                 jDBObject-&gt;<a class="code" href="classAMEFObject.html#ab819f136587cecc0fa01f8694661297c">addPacket</a>(obj);
+<a name="l01355"></a>01355                                 jDBObject-&gt;<a class="code" href="classAMEFObject.html#ad9067531661a112de4c570ab43e6ef8f">addPacket</a>(obj);
 <a name="l01356"></a>01356                         }
 <a name="l01357"></a>01357                 }
 <a name="l01358"></a>01358                 <span class="keywordflow">return</span> jDBObject;
@@ -1420,7 +1420,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>AMEFDecoder.h</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:52:42 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:28:47 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

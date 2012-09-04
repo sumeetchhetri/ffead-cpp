@@ -99,7 +99,7 @@ $(document).ready(initResizable);
 <a name="l00039"></a>00039         <a class="code" href="classElement.html">Element</a> root = parser.getDocument(file).getRootElement();
 <a name="l00040"></a>00040         ElementList eles = root.getChildElements();
 <a name="l00041"></a>00041         <span class="keywordtype">string</span> className = root.getAttribute(<span class="stringliteral">&quot;name&quot;</span>);
-<a name="l00042"></a>00042         boost::to_upper(className);
+<a name="l00042"></a>00042         StringUtil::toUpper(className);
 <a name="l00043"></a>00043         codeh += (<span class="stringliteral">&quot;#ifndef &quot;</span>+className+<span class="stringliteral">&quot;_H_\n&quot;</span>);
 <a name="l00044"></a>00044         codeh += (<span class="stringliteral">&quot;#define &quot;</span>+className+<span class="stringliteral">&quot;_H_\n&quot;</span>);
 <a name="l00045"></a>00045         codem += (<span class="stringliteral">&quot;#include \&quot;&quot;</span>+root.getAttribute(<span class="stringliteral">&quot;name&quot;</span>)+<span class="stringliteral">&quot;.h\&quot;\n\n&quot;</span>);
@@ -109,7 +109,7 @@ $(document).ready(initResizable);
 <a name="l00049"></a>00049                 {
 <a name="l00050"></a>00050                         <span class="keywordtype">string</span> inc = eles.at(var).getAttribute(<span class="stringliteral">&quot;names&quot;</span>);
 <a name="l00051"></a>00051                         strVec incs;
-<a name="l00052"></a>00052                         boost::iter_split(incs, inc, boost::first_finder(<span class="stringliteral">&quot;;&quot;</span>));
+<a name="l00052"></a>00052                         StringUtil::split(incs, inc, (<span class="stringliteral">&quot;;&quot;</span>));
 <a name="l00053"></a>00053                         <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i &lt; incs.size(); i++)
 <a name="l00054"></a>00054                         {
 <a name="l00055"></a>00055                                 codeh += (<span class="stringliteral">&quot;#include \&quot;&quot;</span> + incs.at(i) + <span class="stringliteral">&quot;\&quot;\n&quot;</span>);
@@ -225,7 +225,7 @@ $(document).ready(initResizable);
 <a name="l00165"></a>00165                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(elesc.at(var1).getTagName()==<span class="stringliteral">&quot;assign&quot;</span>)
 <a name="l00166"></a>00166                                 {
 <a name="l00167"></a>00167                                         <span class="keywordtype">string</span> clasprop = elesc.at(var1).getAttribute(<span class="stringliteral">&quot;name&quot;</span>);
-<a name="l00168"></a>00168                                         boost::replace_first(clasprop,<span class="stringliteral">&quot;this:&quot;</span>,<span class="stringliteral">&quot;this-&gt;&quot;</span>);
+<a name="l00168"></a>00168                                         StringUtil::replaceFirst(clasprop,<span class="stringliteral">&quot;this:&quot;</span>,<span class="stringliteral">&quot;this-&gt;&quot;</span>);
 <a name="l00169"></a>00169                                         <span class="keywordflow">if</span>(elesc.at(var1).getText()!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00170"></a>00170                                         {
 <a name="l00171"></a>00171                                                 codem += (clasprop);
@@ -260,7 +260,7 @@ $(document).ready(initResizable);
 <a name="l00200"></a>00200                                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(elesc.at(var1).getChildElements().at(0).getTagName()==<span class="stringliteral">&quot;var&quot;</span>)
 <a name="l00201"></a>00201                                                 {
 <a name="l00202"></a>00202                                                         clasprop = elesc.at(var1).getChildElements().at(0).getAttribute(<span class="stringliteral">&quot;name&quot;</span>);
-<a name="l00203"></a>00203                                                         boost::replace_first(clasprop,<span class="stringliteral">&quot;this:&quot;</span>,<span class="stringliteral">&quot;this-&gt;&quot;</span>);
+<a name="l00203"></a>00203                                                         StringUtil::replaceFirst(clasprop,<span class="stringliteral">&quot;this:&quot;</span>,<span class="stringliteral">&quot;this-&gt;&quot;</span>);
 <a name="l00204"></a>00204                                                         codem += (clasprop);
 <a name="l00205"></a>00205                                                 }
 <a name="l00206"></a>00206                                                 codem += <span class="stringliteral">&quot;;\n&quot;</span>;
@@ -269,7 +269,7 @@ $(document).ready(initResizable);
 <a name="l00209"></a>00209                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(elesc.at(var1).getTagName()==<span class="stringliteral">&quot;assignAdd&quot;</span> &amp;&amp; elesc.at(var1).getAttribute(<span class="stringliteral">&quot;name&quot;</span>)!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00210"></a>00210                                 {
 <a name="l00211"></a>00211                                         <span class="keywordtype">string</span> clasprop = elesc.at(var1).getAttribute(<span class="stringliteral">&quot;name&quot;</span>);
-<a name="l00212"></a>00212                                         boost::replace_first(clasprop,<span class="stringliteral">&quot;this:&quot;</span>,<span class="stringliteral">&quot;this-&gt;&quot;</span>);
+<a name="l00212"></a>00212                                         StringUtil::replaceFirst(clasprop,<span class="stringliteral">&quot;this:&quot;</span>,<span class="stringliteral">&quot;this-&gt;&quot;</span>);
 <a name="l00213"></a>00213                                         <span class="keywordflow">if</span>(elesc.at(var1).getAttribute(<span class="stringliteral">&quot;rhs&quot;</span>)!=<span class="stringliteral">&quot;&quot;</span> &amp;&amp; elesc.at(var1).getAttribute(<span class="stringliteral">&quot;lhs&quot;</span>)!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00214"></a>00214                                         {
 <a name="l00215"></a>00215                                                 codem += (clasprop + <span class="stringliteral">&quot; = &quot;</span> + elesc.at(var1).getAttribute(<span class="stringliteral">&quot;rhs&quot;</span>) + <span class="stringliteral">&quot; + &quot;</span> + elesc.at(var1).getAttribute(<span class="stringliteral">&quot;lhs&quot;</span>) + <span class="stringliteral">&quot;;\n&quot;</span>);
@@ -301,7 +301,7 @@ $(document).ready(initResizable);
 <a name="l00241"></a>00241                                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(elesce.at(var2).getTagName()==<span class="stringliteral">&quot;var&quot;</span>)
 <a name="l00242"></a>00242                                                         {
 <a name="l00243"></a>00243                                                                 clasprop = elesce.at(var2).getAttribute(<span class="stringliteral">&quot;name&quot;</span>);
-<a name="l00244"></a>00244                                                                 boost::replace_first(clasprop,<span class="stringliteral">&quot;this:&quot;</span>,<span class="stringliteral">&quot;this-&gt;&quot;</span>);
+<a name="l00244"></a>00244                                                                 StringUtil::replaceFirst(clasprop,<span class="stringliteral">&quot;this:&quot;</span>,<span class="stringliteral">&quot;this-&gt;&quot;</span>);
 <a name="l00245"></a>00245                                                                 codem += (clasprop);
 <a name="l00246"></a>00246                                                         }
 <a name="l00247"></a>00247                                                         <span class="keywordflow">if</span>(var2!=elesce.size()-1)
@@ -313,7 +313,7 @@ $(document).ready(initResizable);
 <a name="l00253"></a>00253                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span>(elesc.at(var1).getTagName()==<span class="stringliteral">&quot;return&quot;</span>)
 <a name="l00254"></a>00254                                 {
 <a name="l00255"></a>00255                                         <span class="keywordtype">string</span> clasprop = elesc.at(var1).getAttribute(<span class="stringliteral">&quot;name&quot;</span>);
-<a name="l00256"></a>00256                                         boost::replace_first(clasprop,<span class="stringliteral">&quot;this:&quot;</span>,<span class="stringliteral">&quot;this-&gt;&quot;</span>);
+<a name="l00256"></a>00256                                         StringUtil::replaceFirst(clasprop,<span class="stringliteral">&quot;this:&quot;</span>,<span class="stringliteral">&quot;this-&gt;&quot;</span>);
 <a name="l00257"></a>00257                                         <span class="keywordflow">if</span>(eles.at(var).getAttribute(<span class="stringliteral">&quot;return&quot;</span>)==<span class="stringliteral">&quot;string&quot;</span> &amp;&amp; elesc.at(var1).getText()!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00258"></a>00258                                                 codem += <span class="stringliteral">&quot;return \&quot;&quot;</span>+elesc.at(var1).getText()+<span class="stringliteral">&quot;\&quot;;\n&quot;</span>;
 <a name="l00259"></a>00259                                         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(clasprop!=<span class="stringliteral">&quot;&quot;</span>)
@@ -335,7 +335,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>CfusionEngine.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:52:44 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:28:48 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

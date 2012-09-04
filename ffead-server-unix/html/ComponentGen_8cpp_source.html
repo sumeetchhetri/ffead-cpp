@@ -92,14 +92,14 @@ $(document).ready(initResizable);
 <a name="l00032"></a>00032 
 <a name="l00033"></a>00033 <span class="keywordtype">string</span> convertfrom(<span class="keywordtype">string</span> val)
 <a name="l00034"></a>00034 {
-<a name="l00035"></a>00035         boost::to_upper(val);
+<a name="l00035"></a>00035         StringUtil::toUpper(val);
 <a name="l00036"></a>00036         <span class="keywordflow">if</span>(val==<span class="stringliteral">&quot;TRUE&quot;</span>)
 <a name="l00037"></a>00037                 <span class="keywordflow">return</span> <span class="stringliteral">&quot;true&quot;</span>;
 <a name="l00038"></a>00038         <span class="keywordflow">else</span> <span class="keywordflow">if</span>(val==<span class="stringliteral">&quot;FALSE&quot;</span>)
 <a name="l00039"></a>00039                 <span class="keywordflow">return</span> <span class="stringliteral">&quot;false&quot;</span>;
 <a name="l00040"></a>00040         <span class="keywordflow">else</span>
 <a name="l00041"></a>00041         {
-<a name="l00042"></a>00042                 <span class="keywordflow">throw</span> <span class="keyword">new</span> boost::bad_lexical_cast;
+<a name="l00042"></a>00042                 <span class="keywordflow">throw</span> <span class="stringliteral">&quot;Conversion exception&quot;</span>;
 <a name="l00043"></a>00043         }
 <a name="l00044"></a>00044 }
 <a name="l00045"></a>00045 
@@ -135,7 +135,7 @@ $(document).ready(initResizable);
 <a name="l00075"></a>00075                                 <span class="keywordflow">throw</span> <span class="stringliteral">&quot;Component Name must be specified&quot;</span>;
 <a name="l00076"></a>00076                         file = (<span class="stringliteral">&quot;Component_&quot;</span>+name);
 <a name="l00077"></a>00077                         <span class="keywordtype">string</span> cudef(file);
-<a name="l00078"></a>00078                         boost::to_upper(cudef);
+<a name="l00078"></a>00078                         StringUtil::toUpper(cudef);
 <a name="l00079"></a>00079                         initheaders = <span class="stringliteral">&quot;#ifndef &quot;</span>+cudef+<span class="stringliteral">&quot;_H\n#define &quot;</span>+cudef+<span class="stringliteral">&quot;_H\n&quot;</span>;
 <a name="l00080"></a>00080                         cuinithdrs = <span class="stringliteral">&quot;#ifndef &quot;</span>+cudef+<span class="stringliteral">&quot;_REMOTE_H\n#define &quot;</span>+cudef+<span class="stringliteral">&quot;_REMOTE_H\n&quot;</span>;
 <a name="l00081"></a>00081                         initheaders += <span class="stringliteral">&quot;#include \&quot;Component.h\&quot;\n&quot;</span>;
@@ -187,7 +187,7 @@ $(document).ready(initResizable);
 <a name="l00127"></a>00127 
 <a name="l00128"></a>00128                         <span class="keywordtype">string</span> alwd = srprps[<span class="stringliteral">&quot;@USR_GRP_ALWD&quot;</span>];
 <a name="l00129"></a>00129                         Cont1 alwdls;
-<a name="l00130"></a>00130                         boost::iter_split(alwdls, alwd, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00130"></a>00130                         StringUtil::split(alwdls, alwd, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00131"></a>00131                         <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> var = 0; var &lt; alwdls.size(); var++)
 <a name="l00132"></a>00132                         {
 <a name="l00133"></a>00133                                 cudata+= (<span class="stringliteral">&quot;this-&gt;getAllwList().push_back(\&quot;&quot;</span>+alwdls.at(var)+<span class="stringliteral">&quot;\&quot;);\n&quot;</span>);
@@ -195,7 +195,7 @@ $(document).ready(initResizable);
 <a name="l00135"></a>00135 
 <a name="l00136"></a>00136                         <span class="keywordtype">string</span> blkd = srprps[<span class="stringliteral">&quot;@BLOCK_USERS&quot;</span>];
 <a name="l00137"></a>00137                         Cont1 blkls;
-<a name="l00138"></a>00138                         boost::iter_split(blkls, blkd, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00138"></a>00138                         StringUtil::split(blkls, blkd, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00139"></a>00139                         <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> var = 0; var &lt; blkls.size(); var++)
 <a name="l00140"></a>00140                         {
 <a name="l00141"></a>00141                                 cudata+= (<span class="stringliteral">&quot;this-&gt;getBlkdList().push_back(\&quot;&quot;</span>+blkls.at(var)+<span class="stringliteral">&quot;\&quot;);\n&quot;</span>);
@@ -203,7 +203,7 @@ $(document).ready(initResizable);
 <a name="l00143"></a>00143 
 <a name="l00144"></a>00144                         <span class="keywordtype">string</span> prots = srprps[<span class="stringliteral">&quot;@PROTO_ALWD&quot;</span>];
 <a name="l00145"></a>00145                         Cont1 protls;
-<a name="l00146"></a>00146                         boost::iter_split(protls, prots, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00146"></a>00146                         StringUtil::split(protls, prots, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00147"></a>00147                         <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> var = 0; var &lt; protls.size(); var++)
 <a name="l00148"></a>00148                         {
 <a name="l00149"></a>00149                                 cudata+= (<span class="stringliteral">&quot;this-&gt;getProtocols().push_back(\&quot;&quot;</span>+protls.at(var)+<span class="stringliteral">&quot;\&quot;);\n&quot;</span>);
@@ -226,9 +226,9 @@ $(document).ready(initResizable);
 <a name="l00166"></a>00166                         cudata+= (<span class="stringliteral">&quot;this-&gt;setDbconpoolSize(&quot;</span>+srprps[<span class="stringliteral">&quot;@DB_CONN_POOL_NUM&quot;</span>]+<span class="stringliteral">&quot;);\n&quot;</span>);
 <a name="l00167"></a>00167 
 <a name="l00168"></a>00168                         <span class="keywordtype">int</span> cnt =1;
-<a name="l00169"></a>00169                         <span class="keywordflow">while</span>(srprps[<span class="stringliteral">&quot;@SERVICE&quot;</span>+boost::lexical_cast&lt;string&gt;(cnt)]!=<span class="stringliteral">&quot;&quot;</span>)
+<a name="l00169"></a>00169                         <span class="keywordflow">while</span>(srprps[<span class="stringliteral">&quot;@SERVICE&quot;</span>+CastUtil::lexical_cast&lt;string&gt;(cnt)]!=<span class="stringliteral">&quot;&quot;</span>)
 <a name="l00170"></a>00170                         {
-<a name="l00171"></a>00171                                 <span class="keywordtype">string</span> srvc = srprps[<span class="stringliteral">&quot;@SERVICE&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(cnt++)];
+<a name="l00171"></a>00171                                 <span class="keywordtype">string</span> srvc = srprps[<span class="stringliteral">&quot;@SERVICE&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(cnt++)];
 <a name="l00172"></a>00172                                 <a class="code" href="classComponentService.html">ComponentService</a> cmps;
 <a name="l00173"></a>00173                                 <span class="keywordflow">if</span>(srvc.find(<span class="stringliteral">&quot;@USR_GRP_ALWD(&quot;</span>)!=string::npos)
 <a name="l00174"></a>00174                                 {
@@ -257,7 +257,7 @@ $(document).ready(initResizable);
 <a name="l00197"></a>00197                                                 <span class="keywordflow">else</span>
 <a name="l00198"></a>00198                                                 {
 <a name="l00199"></a>00199                                                         Cont1 alwd;
-<a name="l00200"></a>00200                                                         boost::iter_split(alwd, temtem, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00200"></a>00200                                                         StringUtil::split(alwd, temtem, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00201"></a>00201                                                 }
 <a name="l00202"></a>00202                                         }
 <a name="l00203"></a>00203                                 }
@@ -288,7 +288,7 @@ $(document).ready(initResizable);
 <a name="l00228"></a>00228                                                 <span class="keywordflow">else</span>
 <a name="l00229"></a>00229                                                 {
 <a name="l00230"></a>00230                                                         Cont1 alwd;
-<a name="l00231"></a>00231                                                         boost::iter_split(alwd, temtem, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00231"></a>00231                                                         StringUtil::split(alwd, temtem, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00232"></a>00232                                                 }
 <a name="l00233"></a>00233                                         }
 <a name="l00234"></a>00234                                 }
@@ -319,7 +319,7 @@ $(document).ready(initResizable);
 <a name="l00259"></a>00259                                                 <span class="keywordflow">else</span>
 <a name="l00260"></a>00260                                                 {
 <a name="l00261"></a>00261                                                         Cont1 alwd;
-<a name="l00262"></a>00262                                                         boost::iter_split(alwd, temtem, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00262"></a>00262                                                         StringUtil::split(alwd, temtem, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00263"></a>00263                                                 }
 <a name="l00264"></a>00264                                         }
 <a name="l00265"></a>00265                                 }
@@ -382,7 +382,7 @@ $(document).ready(initResizable);
 <a name="l00322"></a>00322                                                 <span class="keywordflow">else</span>
 <a name="l00323"></a>00323                                                 {
 <a name="l00324"></a>00324                                                         Cont1 alwd;
-<a name="l00325"></a>00325                                                         boost::iter_split(alwd, temtem, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00325"></a>00325                                                         StringUtil::split(alwd, temtem, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00326"></a>00326                                                 }
 <a name="l00327"></a>00327                                         }
 <a name="l00328"></a>00328                                 }
@@ -414,7 +414,7 @@ $(document).ready(initResizable);
 <a name="l00354"></a>00354                                                 <span class="keywordflow">else</span>
 <a name="l00355"></a>00355                                                 {
 <a name="l00356"></a>00356                                                         Cont1 alwd;
-<a name="l00357"></a>00357                                                         boost::iter_split(alwd, temtem, boost::first_finder(<span class="stringliteral">&quot;.&quot;</span>));
+<a name="l00357"></a>00357                                                         StringUtil::split(alwd, temtem, (<span class="stringliteral">&quot;.&quot;</span>));
 <a name="l00358"></a>00358                                                         <span class="keywordflow">if</span>(alwd.size()==2)
 <a name="l00359"></a>00359                                                         {
 <a name="l00360"></a>00360                                                                 srvcls = alwd.at(0);
@@ -492,18 +492,18 @@ $(document).ready(initResizable);
 <a name="l00432"></a>00432                                                         <span class="keywordflow">else</span>
 <a name="l00433"></a>00433                                                         {
 <a name="l00434"></a>00434                                                                 Cont1 alwd;
-<a name="l00435"></a>00435                                                                 boost::iter_split(alwd, temtem, boost::first_finder(<span class="stringliteral">&quot;,&quot;</span>));
+<a name="l00435"></a>00435                                                                 StringUtil::split(alwd, temtem, (<span class="stringliteral">&quot;,&quot;</span>));
 <a name="l00436"></a>00436                                                                 <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> var = 0; var &lt; alwd.size(); ++var)
 <a name="l00437"></a>00437                                                                 {
 <a name="l00438"></a>00438                                                                         <span class="keywordflow">if</span>(alwd.at(var)!=<span class="stringliteral">&quot;&quot;</span> &amp;&amp; alwd.at(var).find(<span class="stringliteral">&quot;*&quot;</span>)==string::npos &amp;&amp; alwd.at(var).find(<span class="stringliteral">&quot;&amp;&quot;</span>)==string::npos)
 <a name="l00439"></a>00439                                                                         {
-<a name="l00440"></a>00440                                                                                 <span class="comment">//srvargs += alwd.at(var) + &quot;*_&quot;+boost::lexical_cast&lt;string&gt;(var+1)+&quot; = (&quot;+alwd.at(var)+&quot;*)args.at(&quot;+boost::lexical_cast&lt;string&gt;(var)+&quot;);\n&quot;;</span>
-<a name="l00441"></a>00441                                                                                 srvmcarg += <span class="stringliteral">&quot;_&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1)+<span class="stringliteral">&quot;&quot;</span>;
-<a name="l00442"></a>00442                                                                                 srvargs += alwd.at(var)+ <span class="stringliteral">&quot; _&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1);
-<a name="l00443"></a>00443                                                                                 srvmcargremote += alwd.at(var)+ <span class="stringliteral">&quot; &amp;_&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1);
-<a name="l00444"></a>00444                                                                                 srvmcargremotevec += <span class="stringliteral">&quot;Object __&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1)+<span class="stringliteral">&quot;;\n&quot;</span>;
-<a name="l00445"></a>00445                                                                                 srvmcargremotevec += <span class="stringliteral">&quot;__&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1)+<span class="stringliteral">&quot; &lt;&lt; _&quot;</span>+boost::lexical_cast&lt;string&gt;(var+1)+<span class="stringliteral">&quot;;\n&quot;</span>;
-<a name="l00446"></a>00446                                                                                 srvmcargremotevec += <span class="stringliteral">&quot;_vec.push_back(__&quot;</span>+boost::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1)+<span class="stringliteral">&quot;);\n&quot;</span>;
+<a name="l00440"></a>00440                                                                                 <span class="comment">//srvargs += alwd.at(var) + &quot;*_&quot;+CastUtil::lexical_cast&lt;string&gt;(var+1)+&quot; = (&quot;+alwd.at(var)+&quot;*)args.at(&quot;+CastUtil::lexical_cast&lt;string&gt;(var)+&quot;);\n&quot;;</span>
+<a name="l00441"></a>00441                                                                                 srvmcarg += <span class="stringliteral">&quot;_&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1)+<span class="stringliteral">&quot;&quot;</span>;
+<a name="l00442"></a>00442                                                                                 srvargs += alwd.at(var)+ <span class="stringliteral">&quot; _&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1);
+<a name="l00443"></a>00443                                                                                 srvmcargremote += alwd.at(var)+ <span class="stringliteral">&quot; &amp;_&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1);
+<a name="l00444"></a>00444                                                                                 srvmcargremotevec += <span class="stringliteral">&quot;Object __&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1)+<span class="stringliteral">&quot;;\n&quot;</span>;
+<a name="l00445"></a>00445                                                                                 srvmcargremotevec += <span class="stringliteral">&quot;__&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1)+<span class="stringliteral">&quot; &lt;&lt; _&quot;</span>+CastUtil::lexical_cast&lt;string&gt;(var+1)+<span class="stringliteral">&quot;;\n&quot;</span>;
+<a name="l00446"></a>00446                                                                                 srvmcargremotevec += <span class="stringliteral">&quot;_vec.push_back(__&quot;</span>+CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(var+1)+<span class="stringliteral">&quot;);\n&quot;</span>;
 <a name="l00447"></a>00447                                                                                 <span class="keywordflow">if</span>(var!=alwd.size()-1)
 <a name="l00448"></a>00448                                                                                 {
 <a name="l00449"></a>00449                                                                                         srvmcarg += <span class="stringliteral">&quot;,&quot;</span>;
@@ -567,7 +567,7 @@ $(document).ready(initResizable);
 <a name="l00507"></a>00507                         logger &lt;&lt; curemote &lt;&lt; flush;
 <a name="l00508"></a>00508 
 <a name="l00509"></a>00509             }
-<a name="l00510"></a>00510                 <span class="keywordflow">catch</span>(boost::bad_lexical_cast &amp;)
+<a name="l00510"></a>00510                 <span class="keywordflow">catch</span>(<span class="keyword">const</span> <span class="keywordtype">char</span>* ex)
 <a name="l00511"></a>00511                 {
 <a name="l00512"></a>00512                         logger &lt;&lt; <span class="stringliteral">&quot;exception occurred&quot;</span> &lt;&lt; flush;
 <a name="l00513"></a>00513                 }
@@ -582,7 +582,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>ComponentGen.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:55:39 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:03 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

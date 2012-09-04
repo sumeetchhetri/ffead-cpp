@@ -97,7 +97,7 @@ $(document).ready(initResizable);
 <a name="l00037"></a>00037         <span class="keywordtype">string</span> content;
 <a name="l00038"></a>00038         logger &lt;&lt; <span class="stringliteral">&quot;inside fview &quot;</span> &lt;&lt; req-&gt;getFile() &lt;&lt; endl;
 <a name="l00039"></a>00039         <span class="keywordtype">string</span> file = req-&gt;getFile();
-<a name="l00040"></a>00040         boost::replace_first(file,<span class="stringliteral">&quot;fview&quot;</span>,<span class="stringliteral">&quot;html&quot;</span>);
+<a name="l00040"></a>00040         StringUtil::replaceFirst(file,<span class="stringliteral">&quot;fview&quot;</span>,<span class="stringliteral">&quot;html&quot;</span>);
 <a name="l00041"></a>00041         <span class="keywordtype">string</span> ffile = req-&gt;getCntxt_root()+<span class="stringliteral">&quot;/fviews/&quot;</span>+file;
 <a name="l00042"></a>00042         logger &lt;&lt; ffile &lt;&lt; endl;
 <a name="l00043"></a>00043         ifstream infile(ffile.c_str());
@@ -148,7 +148,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>FviewHandler.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:53:51 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:29:10 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

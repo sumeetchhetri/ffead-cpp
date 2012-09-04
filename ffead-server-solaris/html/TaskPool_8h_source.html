@@ -86,12 +86,12 @@ $(document).ready(initResizable);
 <a name="l00026"></a>00026 <span class="preprocessor">#include &quot;queue&quot;</span>
 <a name="l00027"></a>00027 <span class="preprocessor">#include &quot;list&quot;</span>
 <a name="l00028"></a>00028 <span class="preprocessor">#include &quot;Task.h&quot;</span>
-<a name="l00029"></a>00029 <span class="preprocessor">#include &lt;boost/thread/mutex.hpp&gt;</span>
+<a name="l00029"></a>00029 <span class="preprocessor">#include &quot;Mutex.h&quot;</span>
 <a name="l00030"></a>00030 
 <a name="l00031"></a><a class="code" href="classTaskPool.html">00031</a> <span class="keyword">class </span><a class="code" href="classTaskPool.html">TaskPool</a> {
 <a name="l00032"></a>00032         std::queue&lt;Task*&gt; *tasks;
 <a name="l00033"></a>00033         list&lt;Task*&gt; *ptasks;
-<a name="l00034"></a>00034         boost::mutex *m_mutex;
+<a name="l00034"></a>00034         <a class="code" href="classMutex.html">Mutex</a> *m_mutex;
 <a name="l00035"></a>00035         <span class="keywordtype">bool</span> console;
 <a name="l00036"></a>00036         <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classThreadPool.html">ThreadPool</a>;
 <a name="l00037"></a>00037 <span class="keyword">public</span>:
@@ -114,7 +114,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>TaskPool.h</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:53:47 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:29:10 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>
