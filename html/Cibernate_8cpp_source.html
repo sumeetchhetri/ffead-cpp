@@ -372,14 +372,14 @@ $(document).ready(initResizable);
 <a name="l00312"></a>00312                 <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> var = 0; var &lt; outargs.size(); ++var) {
 <a name="l00313"></a>00313                         <span class="keywordflow">if</span> (revType[outargs.at(var)] == <span class="stringliteral">&quot;int&quot;</span>) {
 <a name="l00314"></a>00314 
-<a name="l00315"></a>00315                                 boost::replace_first(outargs.at(var), <span class="stringliteral">&quot;@&quot;</span>, <span class="stringliteral">&quot;&quot;</span>);
+<a name="l00315"></a>00315                                 StringUtil::replaceFirst(outargs.at(var), <span class="stringliteral">&quot;@&quot;</span>, <span class="stringliteral">&quot;&quot;</span>);
 <a name="l00316"></a>00316                                 SQLGetData(V_OD_hstmt, var + 1, SQL_C_LONG, params[outargs.at(
 <a name="l00317"></a>00317                                                 var)]-&gt;getVoidPointer(),
 <a name="l00318"></a>00318                                                 <span class="keyword">sizeof</span>(params[outargs.at(var)]-&gt;getVoidPointer()), &amp;siz);
 <a name="l00319"></a>00319                                 logger &lt;&lt; *(<span class="keywordtype">int</span>*) params[outargs.at(var)]-&gt;getVoidPointer() &lt;&lt; endl;
 <a name="l00320"></a>00320                         }
 <a name="l00321"></a>00321                         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (revType[outargs.at(var)] == <span class="stringliteral">&quot;short&quot;</span>) {
-<a name="l00322"></a>00322                                 boost::replace_first(outargs.at(var), <span class="stringliteral">&quot;@&quot;</span>, <span class="stringliteral">&quot;&quot;</span>);
+<a name="l00322"></a>00322                                 StringUtil::replaceFirst(outargs.at(var), <span class="stringliteral">&quot;@&quot;</span>, <span class="stringliteral">&quot;&quot;</span>);
 <a name="l00323"></a>00323                                 SQLGetData(V_OD_hstmt, var + 1, SQL_C_SHORT, params[outargs.at(
 <a name="l00324"></a>00324                                                 var)]-&gt;getVoidPointer(),
 <a name="l00325"></a>00325                                                 <span class="keyword">sizeof</span>(params[outargs.at(var)]-&gt;getVoidPointer()), &amp;siz);
@@ -1741,7 +1741,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>Cibernate.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:59:47 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:32 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

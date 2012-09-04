@@ -97,7 +97,7 @@ $(document).ready(initResizable);
 <a name="l00037"></a>00037 HttpResponseParser::HttpResponseParser(<span class="keywordtype">string</span> vecstr,<span class="keywordtype">string</span> path)
 <a name="l00038"></a>00038 {
 <a name="l00039"></a>00039         vector&lt;string&gt; vec;
-<a name="l00040"></a>00040         boost::iter_split(vec, vecstr, boost::first_finder(<span class="stringliteral">&quot;\n&quot;</span>));
+<a name="l00040"></a>00040         StringUtil::split(vec, vecstr, (<span class="stringliteral">&quot;\n&quot;</span>));
 <a name="l00041"></a>00041         <span class="keywordflow">if</span>(HttpResponseParser::headernames==NULL)
 <a name="l00042"></a>00042         {
 <a name="l00043"></a>00043                 HttpResponseParser::headernames = <span class="keyword">new</span> string();
@@ -124,11 +124,11 @@ $(document).ready(initResizable);
 <a name="l00064"></a>00064                                 contStarts = <span class="keyword">true</span>;
 <a name="l00065"></a>00065                                 <span class="keywordflow">continue</span>;
 <a name="l00066"></a>00066                         }
-<a name="l00067"></a>00067                         boost::iter_split(temp, vec.at(i), boost::first_finder(<span class="stringliteral">&quot;: &quot;</span>));
+<a name="l00067"></a>00067                         StringUtil::split(temp, vec.at(i), (<span class="stringliteral">&quot;: &quot;</span>));
 <a name="l00068"></a>00068                         <span class="keywordflow">if</span>(temp.size()&gt;1)
 <a name="l00069"></a>00069                         {
 <a name="l00070"></a>00070                                 logger &lt;&lt; <span class="stringliteral">&quot;line =&gt; &quot;</span> &lt;&lt; vec.at(i) &lt;&lt; endl;
-<a name="l00071"></a>00071                                 boost::replace_first(temp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00071"></a>00071                                 StringUtil::replaceFirst(temp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00072"></a>00072                                 <span class="keywordflow">if</span>(HttpResponseParser::headernames-&gt;find(temp.at(0)+<span class="stringliteral">&quot;:&quot;</span>)!=string::npos)
 <a name="l00073"></a>00073                                 {
 <a name="l00074"></a>00074                                         <span class="comment">//logger &lt;&lt; temp.at(0) &lt;&lt; &quot; = &quot; &lt;&lt; temp.at(1) &lt;&lt; endl;</span>
@@ -145,7 +145,7 @@ $(document).ready(initResizable);
 <a name="l00085"></a>00085                                 {
 <a name="l00086"></a>00086                                         logger &lt;&lt; <span class="stringliteral">&quot;line =&gt; &quot;</span> &lt;&lt; vec.at(i) &lt;&lt; endl;
 <a name="l00087"></a>00087                                         vector&lt;string&gt; httpst;
-<a name="l00088"></a>00088                                         boost::iter_split(httpst, tem, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00088"></a>00088                                         StringUtil::split(httpst, tem, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00089"></a>00089                                         <span class="keywordflow">if</span>(httpst.at(0).find(<span class="stringliteral">&quot;HTTP&quot;</span>)==string::npos)
 <a name="l00090"></a>00090                                         {
 <a name="l00091"></a>00091 
@@ -183,7 +183,7 @@ $(document).ready(initResizable);
 <a name="l00123"></a>00123 HttpResponseParser::HttpResponseParser(<span class="keywordtype">string</span> vecstr)
 <a name="l00124"></a>00124 {
 <a name="l00125"></a>00125         vector&lt;string&gt; vec;
-<a name="l00126"></a>00126         boost::iter_split(vec, vecstr, boost::first_finder(<span class="stringliteral">&quot;\n&quot;</span>));
+<a name="l00126"></a>00126         StringUtil::split(vec, vecstr, (<span class="stringliteral">&quot;\n&quot;</span>));
 <a name="l00127"></a>00127         <span class="keywordflow">if</span>(vec.size()!=0)
 <a name="l00128"></a>00128         {
 <a name="l00129"></a>00129                 this-&gt;content = <span class="stringliteral">&quot;&quot;</span>;
@@ -198,11 +198,11 @@ $(document).ready(initResizable);
 <a name="l00138"></a>00138                                 contStarts = <span class="keyword">true</span>;
 <a name="l00139"></a>00139                                 <span class="keywordflow">continue</span>;
 <a name="l00140"></a>00140                         }
-<a name="l00141"></a>00141                         boost::iter_split(temp, vec.at(i), boost::first_finder(<span class="stringliteral">&quot;: &quot;</span>));
+<a name="l00141"></a>00141                         StringUtil::split(temp, vec.at(i), (<span class="stringliteral">&quot;: &quot;</span>));
 <a name="l00142"></a>00142                         <span class="keywordflow">if</span>(temp.size()&gt;1 &amp;&amp; !contStarts)
 <a name="l00143"></a>00143                         {
 <a name="l00144"></a>00144                                 logger &lt;&lt; temp.at(0) &lt;&lt; <span class="stringliteral">&quot; =&gt; &quot;</span> &lt;&lt; temp.at(1) &lt;&lt; endl;
-<a name="l00145"></a>00145                                 boost::replace_first(temp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00145"></a>00145                                 StringUtil::replaceFirst(temp.at(1),<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00146"></a>00146                                 this-&gt;headers[temp.at(0)] = temp.at(1);
 <a name="l00147"></a>00147                         }
 <a name="l00148"></a>00148                         <span class="keywordflow">else</span>
@@ -211,9 +211,9 @@ $(document).ready(initResizable);
 <a name="l00151"></a>00151                                 <span class="keywordflow">if</span>(!contStarts)
 <a name="l00152"></a>00152                                 {
 <a name="l00153"></a>00153                                         logger &lt;&lt; <span class="stringliteral">&quot;line =&gt; &quot;</span> &lt;&lt; vec.at(i) &lt;&lt; endl;
-<a name="l00154"></a>00154                                         boost::replace_first(tem,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00154"></a>00154                                         StringUtil::replaceFirst(tem,<span class="stringliteral">&quot;\r&quot;</span>,<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00155"></a>00155                                         vector&lt;string&gt; httpst;
-<a name="l00156"></a>00156                                         boost::iter_split(httpst, tem, boost::first_finder(<span class="stringliteral">&quot; &quot;</span>));
+<a name="l00156"></a>00156                                         StringUtil::split(httpst, tem, (<span class="stringliteral">&quot; &quot;</span>));
 <a name="l00157"></a>00157                                         <span class="keywordflow">if</span>(httpst.at(0).find(<span class="stringliteral">&quot;HTTP&quot;</span>)==string::npos)
 <a name="l00158"></a>00158                                         {
 <a name="l00159"></a>00159 
@@ -245,7 +245,7 @@ $(document).ready(initResizable);
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>HttpResponseParser.cpp</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:59:50 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:33 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>

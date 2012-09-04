@@ -82,63 +82,58 @@ $(document).ready(initResizable);
 <a name="l00022"></a>00022 
 <a name="l00023"></a>00023 <span class="preprocessor">#ifndef REQUESTHANDLER_H_</span>
 <a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define REQUESTHANDLER_H_</span>
-<a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#include &lt;boost/thread/thread.hpp&gt;</span>
-<a name="l00026"></a>00026 <span class="preprocessor">#include &lt;dlfcn.h&gt;</span>
-<a name="l00027"></a>00027 <span class="preprocessor">#include &quot;ClassInfo.h&quot;</span>
-<a name="l00028"></a>00028 <span class="preprocessor">#include &lt;boost/lexical_cast.hpp&gt;</span>
-<a name="l00029"></a>00029 <span class="preprocessor">#include &quot;View.h&quot;</span>
-<a name="l00030"></a>00030 <span class="preprocessor">#include &quot;XmlParser.h&quot;</span>
-<a name="l00031"></a>00031 <span class="preprocessor">#include &quot;TemplateHandler.h&quot;</span>
-<a name="l00032"></a>00032 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
-<a name="l00033"></a>00033 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
-<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
-<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;errno.h&gt;</span>
-<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
-<a name="l00037"></a>00037 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
-<a name="l00038"></a>00038 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
-<a name="l00039"></a>00039 <span class="preprocessor">#include &lt;netdb.h&gt;</span>
-<a name="l00040"></a>00040 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
-<a name="l00041"></a>00041 <span class="preprocessor">#include &lt;sys/wait.h&gt;</span>
-<a name="l00042"></a>00042 <span class="preprocessor">#include &lt;signal.h&gt;</span>
-<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;DynamicView.h&quot;</span>
-<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;HttpRequest.h&quot;</span>
-<a name="l00045"></a>00045 <span class="preprocessor">#include &lt;boost/thread/thread.hpp&gt;</span>
-<a name="l00046"></a>00046 <span class="preprocessor">#include &lt;boost/date_time.hpp&gt;</span>
-<a name="l00047"></a>00047 
-<a name="l00048"></a>00048 
-<a name="l00049"></a>00049 <span class="preprocessor">#include &lt;algorithm&gt;</span>
+<a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#include &lt;dlfcn.h&gt;</span>
+<a name="l00026"></a>00026 <span class="preprocessor">#include &quot;ClassInfo.h&quot;</span>
+<a name="l00027"></a>00027 <span class="preprocessor">#include &quot;CastUtil.h&quot;</span>
+<a name="l00028"></a>00028 <span class="preprocessor">#include &quot;View.h&quot;</span>
+<a name="l00029"></a>00029 <span class="preprocessor">#include &quot;XmlParser.h&quot;</span>
+<a name="l00030"></a>00030 <span class="preprocessor">#include &quot;TemplateHandler.h&quot;</span>
+<a name="l00031"></a>00031 <span class="preprocessor">#include &lt;stdio.h&gt;</span>
+<a name="l00032"></a>00032 <span class="preprocessor">#include &lt;stdlib.h&gt;</span>
+<a name="l00033"></a>00033 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;errno.h&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;sys/socket.h&gt;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &lt;netinet/in.h&gt;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &lt;netdb.h&gt;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &lt;arpa/inet.h&gt;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &lt;sys/wait.h&gt;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &lt;signal.h&gt;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;DynamicView.h&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;HttpRequest.h&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &lt;algorithm&gt;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;PropFileReader.h&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;AfcUtil.h&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;ServerThread.h&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;Thread.h&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;Mutex.h&quot;</span>
 <a name="l00050"></a>00050 
-<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;PropFileReader.h&quot;</span>
-<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;AfcUtil.h&quot;</span>
-<a name="l00053"></a>00053 
-<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;ServerThread.h&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#define MAXBUFLEN 1024</span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span><span class="comment">//extern map&lt;string,HttpSession&gt; sessionMap;</span>
+<a name="l00053"></a><a class="code" href="classRequestHandler.html">00053</a> <span class="keyword">class </span><a class="code" href="classRequestHandler.html">RequestHandler</a> {
+<a name="l00054"></a>00054 <span class="keyword">public</span>:
 <a name="l00055"></a>00055 
-<a name="l00056"></a>00056 <span class="preprocessor">#define MAXBUFLEN 1024</span>
-<a name="l00057"></a>00057 <span class="preprocessor"></span><span class="comment">//extern map&lt;string,HttpSession&gt; sessionMap;</span>
-<a name="l00058"></a><a class="code" href="classRequestHandler.html">00058</a> <span class="keyword">class </span><a class="code" href="classRequestHandler.html">RequestHandler</a> {
-<a name="l00059"></a>00059 <span class="keyword">public</span>:
-<a name="l00060"></a>00060 
-<a name="l00061"></a>00061         <a class="code" href="classRequestHandler.html">RequestHandler</a>(<span class="keywordtype">int</span>,<span class="keywordtype">string</span>,<span class="keywordtype">string</span>);
-<a name="l00062"></a>00062 
-<a name="l00063"></a>00063         ~<a class="code" href="classRequestHandler.html">RequestHandler</a>()
-<a name="l00064"></a>00064         {
-<a name="l00065"></a>00065                 m_stoprequested = <span class="keyword">true</span>;
-<a name="l00066"></a>00066                 m_thread.join(); <span class="comment">//Note 2</span>
-<a name="l00067"></a>00067         }
-<a name="l00068"></a>00068         <span class="keywordtype">void</span> service(<span class="keywordtype">int</span>,<span class="keywordtype">string</span>,<span class="keywordtype">string</span>);
-<a name="l00069"></a>00069 <span class="keyword">private</span>:
-<a name="l00070"></a>00070     <span class="keyword">volatile</span> <span class="keywordtype">bool</span> m_stoprequested;
-<a name="l00071"></a>00071     boost::mutex m_mutex;
-<a name="l00072"></a>00072     boost::thread m_thread;
-<a name="l00073"></a>00073 };
-<a name="l00074"></a>00074 
-<a name="l00075"></a>00075 <span class="preprocessor">#endif </span><span class="comment">/* REQUESTHANDLER_H_ */</span>
+<a name="l00056"></a>00056         <a class="code" href="classRequestHandler.html">RequestHandler</a>(<span class="keywordtype">int</span>,<span class="keywordtype">string</span>,<span class="keywordtype">string</span>);
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058         ~<a class="code" href="classRequestHandler.html">RequestHandler</a>()
+<a name="l00059"></a>00059         {
+<a name="l00060"></a>00060                 m_stoprequested = <span class="keyword">true</span>;
+<a name="l00061"></a>00061                 m_thread.join(); <span class="comment">//Note 2</span>
+<a name="l00062"></a>00062         }
+<a name="l00063"></a>00063         <span class="keywordtype">void</span> service(<span class="keywordtype">int</span>,<span class="keywordtype">string</span>,<span class="keywordtype">string</span>);
+<a name="l00064"></a>00064 <span class="keyword">private</span>:
+<a name="l00065"></a>00065     <span class="keyword">volatile</span> <span class="keywordtype">bool</span> m_stoprequested;
+<a name="l00066"></a>00066     <a class="code" href="classMutex.html">Mutex</a> m_mutex;
+<a name="l00067"></a>00067     <a class="code" href="classThread.html">Thread</a> m_thread;
+<a name="l00068"></a>00068 };
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070 <span class="preprocessor">#endif </span><span class="comment">/* REQUESTHANDLER_H_ */</span>
 </pre></div></div>
 </div>
   <div id="nav-path" class="navpath">
     <ul>
       <li class="navelem"><b>RequestHandler.h</b>      </li>
-      <li class="footer">Generated on Mon Jul 30 2012 14:59:46 for ffead.server.doc by&#160;
+      <li class="footer">Generated on Tue Sep 4 2012 16:30:31 for ffead.server.doc by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </li>
     </ul>
