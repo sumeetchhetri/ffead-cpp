@@ -413,7 +413,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			}
 			if(configurationData.client_auth==2)
 				SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
-			else
+			else if(configurationData.client_auth==1)
 				SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);
 		}
 		servd = serverRootDirectory;
@@ -927,7 +927,7 @@ int main(int argc, char* argv[])
 		}
 		if(configurationData.client_auth==2)
 			SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
-		else
+		else if(configurationData.client_auth==1)
 			SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);
 	}
 	while(1)
