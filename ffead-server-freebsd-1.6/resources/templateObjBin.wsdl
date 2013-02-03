@@ -1,5 +1,0 @@
-<xsd:complexType name="${OBJ}">
-<xsd:sequence>
-    ${OBJ_MEMBERS}
-</xsd:sequence>
-</xsd:complexType>

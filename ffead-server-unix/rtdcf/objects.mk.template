@@ -1,3 +1,0 @@
-USER_OBJS :=
-
-LIBS := -lweblib ${RUNTIME_LIBRARIES}
