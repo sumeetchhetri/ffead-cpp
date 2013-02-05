@@ -1,15 +1,15 @@
 ENABLED,SHOW_CONTENT,REQUEST,RESP_STATUS,MATCH_FILE,RESP_CONT_LEN,REQ_CONT_TYPE,REQ_CONTENT,HEADERS,RESP_CONT_TYPE
-Y,N,GET /,200,/cygdrive/c/Users/sumeetc/workspace-cpp/ffead-cpp-svn/ffead-server/web/default/index.html,
-Y,N,GET /index.yourext,200,/cygdrive/c/Users/sumeetc/workspace-cpp/ffead-cpp-svn/ffead-server/web/default/index.html,
-Y,N,GET /flexApp/,200,/cygdrive/c/Users/sumeetc/workspace-cpp/ffead-cpp-svn/ffead-server/web/flexApp/index.html,
-Y,N,GET /oauthApp/,200,/cygdrive/c/Users/sumeetc/workspace-cpp/ffead-cpp-svn/ffead-server/web/oauthApp/index.html,
-Y,N,GET /indexmain.html,200,/cygdrive/c/Users/sumeetc/workspace-cpp/ffead-cpp-svn/ffead-server/web/default/indexmain.html,
+Y,N,GET /,200,../web/default/index.html,
+Y,N,GET /index.yourext,200,../web/default/index.html,
+Y,N,GET /flexApp/,200,../web/flexApp/index.html,
+Y,N,GET /oauthApp/,200,../web/oauthApp/index.html,
+Y,N,GET /indexmain.html,200,../web/default/indexmain.html,
 Y,N,GET /test.tpe,200,,110
 Y,N,GET /test.view,200,,138
 Y,N,GET /test.dcp,200,,194
-Y,N,GET /Testing.wsdl,200,/cygdrive/c/Users/sumeetc/workspace-cpp/ffead-cpp-svn/ffead-server/Debug/ffead-server/resources/Testing.wsdl,
-Y,N,GET /bg.jpg,200,/cygdrive/c/Users/sumeetc/workspace-cpp/ffead-cpp-svn/ffead-server/web/default/bg.jpg,
-Y,N,GET /login.html,200,/cygdrive/c/Users/sumeetc/workspace-cpp/ffead-cpp-svn/ffead-server/web/default/login.html,
+Y,N,GET /Testing.wsdl,200,,5880
+Y,N,GET /bg.jpg,200,../web/default/bg.jpg,
+Y,N,GET /login.html,200,../web/default/login.html,
 Y,N,POST /login.html,307,,,application/x-www-form-urlencoded,_ffead_security_cntxt_username=sumeet&_ffead_security_cntxt_password=sumeet
 Y,Y,GET /test.form?txtField=asd&numField=123&selField=1,200,,4
 Y,Y,GET /rest/path/rest1/add/1/2,200,,9

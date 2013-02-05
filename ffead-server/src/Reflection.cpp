@@ -1600,23 +1600,42 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 					{
 						string stlcnt = fldp.at(0);
 						string stltyp = fldp.at(0);
+						string contType;
 						StringUtil::replaceFirst(stltyp,"std::","");
 						StringUtil::replaceFirst(stltyp,"<","::");
 						StringUtil::replaceFirst(stltyp,">","");
 						StringUtil::replaceFirst(stltyp," ","");
 						string stlcnttyp = "";
 						if(fldp.at(0).find("vector")!=string::npos)
+						{
+							contType = "std::vector<";
 							stlcnttyp = "Vec";
+						}
 						else if(fldp.at(0).find("queue")!=string::npos)
+						{
+							contType = "std::queue<";
 							stlcnttyp = "Q";
+						}
 						else if(fldp.at(0).find("deque")!=string::npos)
+						{
+							contType = "std::deque<";
 							stlcnttyp = "Dq";
+						}
 						else if(fldp.at(0).find("list")!=string::npos)
+						{
+							contType = "std::list<";
 							stlcnttyp = "Lis";
+						}
 						else if(fldp.at(0).find("multiset")!=string::npos)
+						{
+							contType = "std::multiset<";
 							stlcnttyp = "MulSet";
+						}
 						else
+						{
+							contType = "std::set<";
 							stlcnttyp = "Set";
+						}
 						StringUtil::replaceFirst(stlcnt,"std::","");
 						StringUtil::replaceFirst(stlcnt,"vector","");
 						StringUtil::replaceFirst(stlcnt,"queue","");
@@ -1627,6 +1646,8 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 						StringUtil::replaceFirst(stlcnt,"<","");
 						StringUtil::replaceFirst(stlcnt,">","");
 						StringUtil::replaceFirst(stlcnt," ","");
+
+						contType += stlcnt + ",";
 
 						if(!ptr)
 						{
@@ -1652,7 +1673,7 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 							string cam = AfcUtil::camelCased(fldp.at(1));
 							methods += ("+\"</"+nam+">\";\n");
 							if(stlcnt=="int" || stlcnt=="short" || stlcnt=="long" || stlcnt=="float" || stlcnt=="string" || stlcnt=="std::string" || stlcnt=="double" || stlcnt=="bool")
-								typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = &XMLSerialize::unserialize<"+fldp.at(0)+" >(root.getChildElements().at(i).renderChildren());\n";
+								typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = ("+fldp.at(0)+"*)XMLSerialize::unSerializeUnknown(root.getChildElements().at(i).renderChildren(),\""+contType+"\");\n";
 							else
 								typedefs += "if(nam==\""+fldp.at(1)+"\")\n__obj->"+fldp.at(1)+" = ("+fldp.at(0)+"*)unSerialize"+stlcnt+stlcnttyp+"(root.getChildElements().at(i).renderChildren());\n";
 						}
@@ -1774,23 +1795,42 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 								{
 									string stlcnt = argpm.at(0);
 									string stltyp = argpm.at(0);
+									string contType;
 									StringUtil::replaceFirst(stltyp,"std::","");
 									StringUtil::replaceFirst(stltyp,"<","::");
 									StringUtil::replaceFirst(stltyp,">","");
 									StringUtil::replaceFirst(stltyp," ","");
 									string stlcnttyp = "";
 									if(argpm.at(0).find("vector")!=string::npos)
+									{
+										contType = "std::vector<";
 										stlcnttyp = "Vec";
+									}
 									else if(argpm.at(0).find("queue")!=string::npos)
+									{
+										contType = "std::queue<";
 										stlcnttyp = "Q";
+									}
 									else if(argpm.at(0).find("deque")!=string::npos)
+									{
+										contType = "std::deque<";
 										stlcnttyp = "Dq";
+									}
 									else if(argpm.at(0).find("list")!=string::npos)
+									{
+										contType = "std::list<";
 										stlcnttyp = "Lis";
+									}
 									else if(argpm.at(0).find("multiset")!=string::npos)
+									{
+										contType = "std::multiset<";
 										stlcnttyp = "MulSet";
+									}
 									else
+									{
+										contType = "std::set<";
 										stlcnttyp = "Set";
+									}
 									StringUtil::replaceFirst(stlcnt,"std::","");
 									StringUtil::replaceFirst(stlcnt,"vector","");
 									StringUtil::replaceFirst(stlcnt,"queue","");
@@ -1801,6 +1841,8 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 									StringUtil::replaceFirst(stlcnt,"<","");
 									StringUtil::replaceFirst(stlcnt,">","");
 									StringUtil::replaceFirst(stlcnt," ","");
+
+									contType += stlcnt + ",";
 
 									if(!ptr)
 									{
@@ -1817,7 +1859,7 @@ string Reflection::generateSerDefinition(string className,string &includesDefs,s
 										typedefs += "if(nam==\""+fldnames.at(k+1)+"\"){";
 										if(stlcnt=="int" || stlcnt=="short" || stlcnt=="long" || stlcnt=="float" || stlcnt=="string" ||
 												stlcnt=="std::string" || stlcnt=="double" || stlcnt=="bool")
-											typedefs += "\n__obj->set"+cam+"(&(XMLSerialize::unserialize<"+argpm.at(0)+" >(root.getChildElements().at(i).renderChildren())));\n";
+											typedefs += "\n__obj->set"+cam+"(("+argpm.at(0)+"*)XMLSerialize::unSerializeUnknown(root.getChildElements().at(i).renderChildren(),\""+contType+"\"));\n";
 										else
 											typedefs += "\n__obj->set"+cam+"(("+argpm.at(0)+"*)unSerialize"+stlcnt+stlcnttyp+"(root.getChildElements().at(i).renderChildren()));\n";
 										typedefs += "\n}\n";
@@ -2154,23 +2196,42 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 					{
 						string stlcnt = fldp.at(0);
 						string stltyp = fldp.at(0);
+						string contType;
 						StringUtil::replaceFirst(stltyp,"std::","");
 						StringUtil::replaceFirst(stltyp,"<","::");
 						StringUtil::replaceFirst(stltyp,">","");
 						StringUtil::replaceFirst(stltyp," ","");
 						string stlcnttyp = "";
 						if(fldp.at(0).find("vector")!=string::npos)
+						{
+							contType = "std::vector<";
 							stlcnttyp = "Vec";
+						}
 						else if(fldp.at(0).find("queue")!=string::npos)
+						{
+							contType = "std::queue<";
 							stlcnttyp = "Q";
+						}
 						else if(fldp.at(0).find("deque")!=string::npos)
+						{
+							contType = "std::deque<";
 							stlcnttyp = "Dq";
+						}
 						else if(fldp.at(0).find("list")!=string::npos)
+						{
+							contType = "std::list<";
 							stlcnttyp = "Lis";
+						}
 						else if(fldp.at(0).find("multiset")!=string::npos)
+						{
+							contType = "std::multiset<";
 							stlcnttyp = "MulSet";
+						}
 						else
+						{
+							contType = "std::set<";
 							stlcnttyp = "Set";
+						}
 						StringUtil::replaceFirst(stlcnt,"std::","");
 						StringUtil::replaceFirst(stlcnt,"vector","");
 						StringUtil::replaceFirst(stlcnt,"queue","");
@@ -2181,6 +2242,8 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 						StringUtil::replaceFirst(stlcnt,"<","");
 						StringUtil::replaceFirst(stlcnt,">","");
 						StringUtil::replaceFirst(stlcnt," ","");
+
+						contType += stlcnt + ",";
 
 						if(!ptr)
 						{
@@ -2214,7 +2277,7 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 							typedefs += "\nAMEFEncoder enc;\n";
 							//@TODO Is a concern if pointer is used, the address reference might lead to data issues
 							if(stlcnt=="int" || stlcnt=="short" || stlcnt=="long" || stlcnt=="float" || stlcnt=="string" || stlcnt=="std::string" || stlcnt=="double" || stlcnt=="bool")
-								typedefs += "\n__obj->"+fldp.at(1)+" = &(Serialize::unserialize<"+fldp.at(0)+" >(root->getPackets().at(i)->getValue()));\n";
+								typedefs += "\n__obj->"+fldp.at(1)+" = ("+fldp.at(0)+"*)Serialize::unSerializeUnknown(root->getPackets().at(i)->getValue(),\""+contType+"\");\n";
 							else
 								typedefs += "\n__obj->"+fldp.at(1)+" = ("+fldp.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(root->getPackets().at(i)->getValue());\n";
 							typedefs += "\n}\n";
@@ -2362,23 +2425,42 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 								{
 									string stlcnt = argpm.at(0);
 									string stltyp = argpm.at(0);
+									string contType;
 									StringUtil::replaceFirst(stltyp,"std::","");
 									StringUtil::replaceFirst(stltyp,"<","::");
 									StringUtil::replaceFirst(stltyp,">","");
 									StringUtil::replaceFirst(stltyp," ","");
 									string stlcnttyp = "";
 									if(argpm.at(0).find("vector")!=string::npos)
+									{
+										contType = "std::vector<";
 										stlcnttyp = "Vec";
+									}
 									else if(argpm.at(0).find("queue")!=string::npos)
+									{
+										contType = "std::queue<";
 										stlcnttyp = "Q";
+									}
 									else if(argpm.at(0).find("deque")!=string::npos)
+									{
+										contType = "std::deque<";
 										stlcnttyp = "Dq";
+									}
 									else if(argpm.at(0).find("list")!=string::npos)
+									{
+										contType = "std::list<";
 										stlcnttyp = "Lis";
+									}
 									else if(argpm.at(0).find("multiset")!=string::npos)
+									{
+										contType = "std::multiset<";
 										stlcnttyp = "MulSet";
+									}
 									else
+									{
+										contType = "std::set<";
 										stlcnttyp = "Set";
+									}
 									StringUtil::replaceFirst(stlcnt,"std::","");
 									StringUtil::replaceFirst(stlcnt,"vector","");
 									StringUtil::replaceFirst(stlcnt,"queue","");
@@ -2389,6 +2471,8 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 									StringUtil::replaceFirst(stlcnt,"<","");
 									StringUtil::replaceFirst(stlcnt,">","");
 									StringUtil::replaceFirst(stlcnt," ","");
+
+									contType += stlcnt + ",";
 
 									if(!ptr)
 									{
@@ -2407,7 +2491,7 @@ string Reflection::generateSerDefinitionBinary(string className,string &includes
 										typedefs += "\nAMEFEncoder enc;";
 										if(stlcnt=="int" || stlcnt=="short" || stlcnt=="long" || stlcnt=="float" || stlcnt=="string" ||
 												stlcnt=="std::string" || stlcnt=="double" || stlcnt=="bool")
-											typedefs += "\n__obj->set"+cam+"(&(Serialize::unserialize<"+argpm.at(0)+" >(root->getPackets().at(i)->getValue())));\n";
+											typedefs += "\n__obj->set"+cam+"(("+argpm.at(0)+"*)Serialize::unSerializeUnknown(root->getPackets().at(i)->getValue(),\""+contType+"\"));\n";
 										else
 											typedefs += "\n__obj->set"+cam+"(("+argpm.at(0)+"*)binaryUnSerialize"+stlcnt+stlcnttyp+"(root->getPackets().at(i)->getValue()));\n";
 										typedefs += "\n}\n";

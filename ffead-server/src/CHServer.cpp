@@ -31,7 +31,7 @@ CHServer::~CHServer() {
 }
 //SharedData* SharedData::shared_instance = NULL;
 string servd;
-static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone,sessatserv,isCompileEnabled;
+static bool isSSLEnabled = false,isThreadprq = false,processforcekilled = false,processgendone = false,sessatserv = false,isCompileEnabled = false;
 static long sessionTimeout;
 static int thrdpsiz/*,shmid*/;
 static SSL_CTX *ctx;
@@ -748,9 +748,9 @@ int main(int argc, char* argv[])
     {
     	configurationData = ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, pubpath, respath, isSSLEnabled);
     }
-    catch(XmlParseException *p)
+    catch(XmlParseException p)
     {
-    	logger << p->getMessage() << endl;
+    	logger << p.getMessage() << endl;
     }
     catch(const char* msg)
 	{
@@ -890,7 +890,6 @@ int main(int argc, char* argv[])
 
 	}*/
 
-	int curfds = 1;
 	ifstream cntrlfile;
 	while(1)
 	{
@@ -908,6 +907,8 @@ int main(int argc, char* argv[])
 				logger << "\nThe memory area pointed to by events is not accessible" <<flush;
 			else if(errno==EINTR)
 				logger << "\ncall was interrupted by a signal handler before any of the requested events occurred" <<flush;
+			else if(errno==EINVAL)
+				logger << "not a poll file descriptor, or maxevents is less than or equal to zero" << endl;
 			else
 				logger << "\nnot an epoll file descriptor" <<flush;
 		}
@@ -962,10 +963,10 @@ int main(int argc, char* argv[])
 			}
 			else if (descriptor != -1)
 			{
-				logger << "got new connection " << endl;
+				logger << "got new connection "<< descriptor << endl;
+				selEpolKqEvPrtHandler.unRegisterForEvent(descriptor);
 				if(Constants::IS_FILE_DESC_PASSING_AVAIL)
 				{
-					curfds--;
 					cntrlfile.open(files.at(childNo).c_str());
 					if(cntrlfile.is_open())
 					{
@@ -1021,7 +1022,6 @@ int main(int argc, char* argv[])
 						pool->execute(*task);
 					}
 				}
-				selEpolKqEvPrtHandler.unRegisterForEvent(descriptor);
 			}
 		}
 	}

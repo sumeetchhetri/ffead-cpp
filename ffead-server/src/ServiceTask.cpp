@@ -574,7 +574,7 @@ void ServiceTask::run()
 				  return;
 			  }
 			}
-			if((r=BIO_puts(io,h1.c_str()))<=0)
+			if((r=BIO_write(io,h1.c_str(),h1.length()))<=0)
 			{
 				  sslHandler.error_occurred((char*)"send failed",fd,ssl);
 				  if(io!=NULL)BIO_free(io);

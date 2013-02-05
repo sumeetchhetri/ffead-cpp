@@ -86,7 +86,7 @@
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" name="restobj">
-			<restfunction name="testObject" alias="tstobj" meth="POST" icontentType="application/json">
+			<restfunction name="testObject" alias="tstobj" meth="POST" icontentType="application/json" ocontentType="application/json">
 				<param type="TestMany" from="body"/>
 			</restfunction>
 		</restcontroller>

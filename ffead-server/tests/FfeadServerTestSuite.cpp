@@ -21,13 +21,13 @@
  */
 
 
-#include "Client.h"
 #include "HttpResponseParser.h"
 #include "CsvFileReader.h"
 #include "PropFileReader.h"
 #include "Timer.h"
 #include "sstream"
-
+#include "Client.h"
+#include "SSLClient.h"
 int main()
 {
 	PropFileReader propFileReader;
@@ -42,10 +42,39 @@ int main()
 
 	total = (int)testCases.size();
 
+	string ip = props["SERVER_IP_ADDRESS"];
+	if(ip=="")
+		ip = "localhost";
+	int port = 8080;
+	if(props["SERVER_PORT"]!="")
+	{
+		try{
+			port = CastUtil::lexical_cast<int>(props["SERVER_PORT"]);
+		} catch(...) {
+		}
+
+	}
+	bool sslEnabled = false;
+	if(props["SERVER_SSL_ENABLED"]!="")
+	{
+		try{
+			sslEnabled = CastUtil::lexical_cast<bool>(props["SERVER_SSL_ENABLED"]);
+		} catch(...) {
+		}
+	}
+
+	cout << "Server IP - " << ip <<endl;
+	cout << "Server Port - " << port <<endl;
+	cout << "Server SSL Enabled - " << CastUtil::lexical_cast<string>(sslEnabled) <<endl;
+
 	timerc.start();
 	for (int var = 0; var < total; ++var)
 	{
-		Client client;
+		ClientInterface* client;
+		if(sslEnabled)
+			client = new SSLClient;
+		else
+			client = new Client;
 		if(testCases[var].size()>=4)
 		{
 			if(testCases[var][0]=="ENABLED")
@@ -111,7 +140,7 @@ int main()
 			}
 
 			string data = request;
-			data += " HTTP/1.1\r\nHost: localhost:8080\r\nUser-Agent: Program\r\n";
+			data += " HTTP/1.1\r\nHost: "+ip+":"+CastUtil::lexical_cast<string>(port)+"\r\nUser-Agent: Program\r\n";
 
 			if(content!="" && content.find("TSTVALUES_")!=string::npos)
 				content = props[content];
@@ -122,7 +151,7 @@ int main()
 			}
 			if(content.length()>0)
 			{
-				data += "Content-Length: " + CastUtil::lexical_cast<string>(content.length()) + "\r\n";
+				data += "Content-Length: " + CastUtil::lexical_cast<string>((int)content.length()) + "\r\n";
 			}
 			if(cookies!="")
 			{
@@ -140,9 +169,9 @@ int main()
 			}
 
 			timer.start();
-			client.connectionUnresolv("localhost",8080);
-			int bytes = client.sendData(data);
-			string tot = client.getTextData("\r\n","Content-Length");
+			client->connectionUnresolv(ip,port);
+			int bytes = client->sendData(data);
+			string tot = client->getTextData("\r\n","Content-Length");
 			long long millis = timer.elapsedMilliSeconds();
 
 			HttpResponseParser parser(tot);
@@ -225,7 +254,8 @@ int main()
 				passed++;
 			else
 				failed++;
-			client.closeConnection();
+			client->closeConnection();
+			delete client;
 		}
 		else
 		{

@@ -18,6 +18,10 @@ elif [ "$IS_OS_CYGWIN" != "" ]; then
 RES_LIB_EXT=a
 fi
 
+cd ../tests
+$MAKE_EXE clean all
+mkdir ../Debug/ffead-server/tests
+cp -f tests test.csv testValues.prop runTests.sh *.pem ../Debug/ffead-server/tests
 cd ../web/default/src/Debug
 $MAKE_EXE clean all
 cp -f libdefault.$RES_LIB_EXT ../../../../Debug/ffead-server/lib

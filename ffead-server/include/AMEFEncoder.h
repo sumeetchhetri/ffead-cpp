@@ -567,53 +567,177 @@ public:
 		return arr;
 	}
 
-	string getPacketValue(long lon)
-	{
-		char type;
-		int ind = 1;
-		if(lon<256)
-			type = AMEFObject::VERY_SMALL_INT_TYPE;
-		else if(lon<65536)
+	#ifdef IS_64_BIT
+		string getPacketValue(unsigned long long lon)
 		{
-			type = AMEFObject::SMALL_INT_TYPE;
-			ind = 2;
+			char type;
+			int ind = 1;
+			if(lon<256)
+				type = AMEFObject::VERY_SMALL_INT_TYPE;
+			else if(lon<65536)
+			{
+				type = AMEFObject::SMALL_INT_TYPE;
+				ind = 2;
+			}
+			else if(lon<16777216)
+			{
+				type = AMEFObject::BIG_INT_TYPE;
+				ind = 3;
+			}
+			else if(lon<4294967296ULL)
+			{
+				type = AMEFObject::INT_TYPE;
+				ind = 4;
+			}
+			else if(lon<1099511627776ULL)
+			{
+				type = AMEFObject::VS_LONG_INT_TYPE;
+				ind = 5;
+			}
+			else if(lon<281474976710656ULL)
+			{
+				type = AMEFObject::S_LONG_INT_TYPE;
+				ind = 6;
+			}
+			else if(lon<72057594037927936ULL)
+			{
+				type = AMEFObject::B_LONG_INT_TYPE;
+				ind = 7;
+			}
+			else
+			{
+				type = AMEFObject::LONG_INT_TYPE;
+				ind = 8;
+			}
+			string arr;
+			arr.push_back((char)type);
+			char* len = longTocharArray(lon, ind);
+			arr.append(len);
+			return arr;
 		}
-		else if(lon<16777216)
+		string getPacketValue(long lon)
 		{
-			type = AMEFObject::BIG_INT_TYPE;
-			ind = 3;
+			char type;
+			int ind = 1;
+			if(lon<256)
+				type = AMEFObject::VERY_SMALL_INT_TYPE;
+			else if(lon<65536)
+			{
+				type = AMEFObject::SMALL_INT_TYPE;
+				ind = 2;
+			}
+			else if(lon<16777216)
+			{
+				type = AMEFObject::BIG_INT_TYPE;
+				ind = 3;
+			}
+			else if(lon<4294967296ULL)
+			{
+				type = AMEFObject::INT_TYPE;
+				ind = 4;
+			}
+			else if(lon<1099511627776ULL)
+			{
+				type = AMEFObject::VS_LONG_INT_TYPE;
+				ind = 5;
+			}
+			else if(lon<281474976710656ULL)
+			{
+				type = AMEFObject::S_LONG_INT_TYPE;
+				ind = 6;
+			}
+			else if(lon<72057594037927936ULL)
+			{
+				type = AMEFObject::B_LONG_INT_TYPE;
+				ind = 7;
+			}
+			else
+			{
+				type = AMEFObject::LONG_INT_TYPE;
+				ind = 8;
+			}
+			string arr;
+			arr.push_back((char)type);
+			char* len = longTocharArray(lon, ind);
+			arr.append(len);
+			return arr;
 		}
-		else if(lon<4294967296L)
+	#else
+		string getPacketValue(unsigned long long lon)
 		{
-			type = AMEFObject::INT_TYPE;
-			ind = 4;
+			char type;
+			int ind = 1;
+			if(lon<256)
+				type = AMEFObject::VERY_SMALL_INT_TYPE;
+			else if(lon<65536)
+			{
+				type = AMEFObject::SMALL_INT_TYPE;
+				ind = 2;
+			}
+			else if(lon<16777216)
+			{
+				type = AMEFObject::BIG_INT_TYPE;
+				ind = 3;
+			}
+			else if(lon<4294967296ULL)
+			{
+				type = AMEFObject::INT_TYPE;
+				ind = 4;
+			}
+			else if(lon<1099511627776ULL)
+			{
+				type = AMEFObject::VS_LONG_INT_TYPE;
+				ind = 5;
+			}
+			else if(lon<281474976710656ULL)
+			{
+				type = AMEFObject::S_LONG_INT_TYPE;
+				ind = 6;
+			}
+			else if(lon<72057594037927936ULL)
+			{
+				type = AMEFObject::B_LONG_INT_TYPE;
+				ind = 7;
+			}
+			else
+			{
+				type = AMEFObject::LONG_INT_TYPE;
+				ind = 8;
+			}
+			string arr;
+			arr.push_back((char)type);
+			char* len = longTocharArray(lon, ind);
+			arr.append(len);
+			return arr;
 		}
-		else if(lon<1099511627776L)
+		string getPacketValue(long lon)
 		{
-			type = AMEFObject::VS_LONG_INT_TYPE;
-			ind = 5;
+			char type;
+			int ind = 1;
+			if(lon<256)
+				type = AMEFObject::VERY_SMALL_INT_TYPE;
+			else if(lon<65536)
+			{
+				type = AMEFObject::SMALL_INT_TYPE;
+				ind = 2;
+			}
+			else if(lon<16777216)
+			{
+				type = AMEFObject::BIG_INT_TYPE;
+				ind = 3;
+			}
+			else
+			{
+				type = AMEFObject::INT_TYPE;
+				ind = 4;
+			}
+			string arr;
+			arr.push_back((char)type);
+			char* len = longTocharArray(lon, ind);
+			arr.append(len);
+			return arr;
 		}
-		else if(lon<281474976710656L)
-		{
-			type = AMEFObject::S_LONG_INT_TYPE;
-			ind = 6;
-		}
-		else if(lon<72057594037927936L)
-		{
-			type = AMEFObject::B_LONG_INT_TYPE;
-			ind = 7;
-		}
-		else
-		{
-			type = AMEFObject::LONG_INT_TYPE;
-			ind = 8;
-		}
-		string arr;
-		arr.push_back((char)type);
-		char* len = longTocharArray(lon, ind);
-		arr.append(len);
-		return arr;
-	}
+	#endif
 
 	string getPacketValue(double lon)
 	{

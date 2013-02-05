@@ -16,7 +16,7 @@ Winx/Cygwin based Installation
    and build files, hence had provided the *_libs.zip file.
 6. Copy bin/gcc-3 or bin/gcc-4 and rename it ot gcc (the already existing link file gcc sometimes gives permission errors)
 7. You can build and install openssl and unixodbc and copy the required library files to the cygwin lib folder. The already built libraries are present in the Cygwin_SSL_UnixOdbc_libs.zip file which can be copied to the lib folder directly.
-8. Download the latest release tar file and extract it to the location of your choice under Cygwin installation.
+8. Download the latest release zip file and extract it to the location of your choice under Cygwin installation.
 9. Install Unix-ODBC and required odbc files for MySQL dependency and development files
 10. Install Open-SSL as well and development files
 11. Also included prototype.js in source for AJAX support

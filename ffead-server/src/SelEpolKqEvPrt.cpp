@@ -215,9 +215,9 @@ bool SelEpolKqEvPrt::registerForEvent(int descriptor)
 	return true;
 }
 
-bool SelEpolKqEvPrt::unRegisterForEvent(int index)
+bool SelEpolKqEvPrt::unRegisterForEvent(int descriptor)
 {
-	int descriptor = getDescriptor(index);
+	if(descriptor<=0)return false;
 	curfds--;
 	#ifdef USE_SELECT
 		FD_CLR(descriptor, &master);

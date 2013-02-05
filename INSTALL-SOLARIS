@@ -1,7 +1,7 @@
 SOLARIS based Installation
 
 1. Refer INSTALL-WINDOWS-CYGWIN file for directions on how to install on Windows and Cygwin
-2. Download the tar file and extract it to the location of your choice.
+2. Download the zip file and extract it to the location of your choice.
 3. Install the following using the commands mentioned below
 	System Header files
 		sudo pkg install system/header

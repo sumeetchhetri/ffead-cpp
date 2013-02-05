@@ -146,35 +146,109 @@ public:
 		string tem(result);
         return tem;
     }
-
-	static string longTocharArrayWI(long l)
-	{
-		int ind = 1;
-		if(l<256)
-			ind =1;
-		else if(l<65536)
-			ind = 2;
-		else if(l<16777216)
-			ind =3;
-		else if(l<4294967296L)
-			ind =4;
-		else if(l<1099511627776L)
-			ind =5;
-		else if(l<281474976710656L)
-			ind =6;
-		else if(l<72057594037927936L)
-			ind =7;
-		else
-			ind =8;
-		string result;
-		for (int i = 0; i<ind; i++)
+	#ifdef IS_64_BIT
+		static string longTocharArrayWI(unsigned long long l)
 		{
-			int offset = (ind - 1 - i) * 8;
-			result.push_back((char) ((l >> offset) & 0xFF));
+			int ind = 1;
+			if(l<256)
+				ind =1;
+			else if(l<65536)
+				ind = 2;
+			else if(l<16777216)
+				ind =3;
+			else if(l<4294967296ULL)
+				ind =4;
+			else if(l<1099511627776ULL)
+				ind =5;
+			else if(l<281474976710656ULL)
+				ind =6;
+			else if(l<72057594037927936ULL)
+				ind =7;
+			else
+				ind =8;
+			string result;
+			for (int i = 0; i<ind; i++)
+			{
+				int offset = (ind - 1 - i) * 8;
+				result.push_back((char) ((l >> offset) & 0xFF));
+			}
+			return result;
 		}
-		return result;
-	}
-
+		static string longTocharArrayWI(long l)
+		{
+			int ind = 1;
+			if(l<256)
+				ind =1;
+			else if(l<65536)
+				ind = 2;
+			else if(l<16777216)
+				ind =3;
+			else if(l<4294967296ULL)
+				ind =4;
+			else if(l<1099511627776ULL)
+				ind =5;
+			else if(l<281474976710656ULL)
+				ind =6;
+			else if(l<72057594037927936ULL)
+				ind =7;
+			else
+				ind =8;
+			string result;
+			for (int i = 0; i<ind; i++)
+			{
+				int offset = (ind - 1 - i) * 8;
+				result.push_back((char) ((l >> offset) & 0xFF));
+			}
+			return result;
+		}
+	#else
+		static string longTocharArrayWI(unsigned long long l)
+		{
+			int ind = 1;
+			if(l<256)
+				ind =1;
+			else if(l<65536)
+				ind = 2;
+			else if(l<16777216)
+				ind =3;
+			else if(l<4294967296ULL)
+				ind =4;
+			else if(l<1099511627776ULL)
+				ind =5;
+			else if(l<281474976710656ULL)
+				ind =6;
+			else if(l<72057594037927936ULL)
+				ind =7;
+			else
+				ind =8;
+			string result;
+			for (int i = 0; i<ind; i++)
+			{
+				int offset = (ind - 1 - i) * 8;
+				result.push_back((char) ((l >> offset) & 0xFF));
+			}
+			return result;
+		}
+		static string longTocharArrayWI(long l)
+		{
+			int ind = 1;
+			if(l<256)
+				ind =1;
+			else if(l<65536)
+				ind = 2;
+			else if(l<16777216)
+				ind =3;
+			else
+				ind =4;
+			string result;
+			for (int i = 0; i<ind; i++)
+			{
+				int offset = (ind - 1 - i) * 8;
+				result.push_back((char) ((l >> offset) & 0xFF));
+			}
+			return result;
+		}
+	#endif
 };
 
 #endif /* AMEFRESOURCES_H_ */

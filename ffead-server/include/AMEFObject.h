@@ -21,6 +21,7 @@
 #include "cstring"
 #include "vector"
 #include "CastUtil.h"
+#include "Constants.h"
 using namespace std;
 
 class AMEFObject
@@ -492,86 +493,289 @@ public:
 	 * @param lon
 	 * Add a long property to an Object
 	 */
-	AMEFObject* addPacket(long lon)
-	{
-		AMEFObject* JDBObjectNew = new AMEFObject();
-		if(lon<256)
+	#ifdef IS_64_BIT
+		AMEFObject* addPacket(unsigned long long lon)
 		{
-			JDBObjectNew->type = VERY_SMALL_INT_TYPE;
-			JDBObjectNew->value = longTocharArray(lon, 1);
-			length += 2;
-			namedLength += 4;
-			JDBObjectNew->namedLength  = 2;
-			JDBObjectNew->length = 1;
+			AMEFObject* JDBObjectNew = new AMEFObject();
+			if(lon<256)
+			{
+				JDBObjectNew->type = VERY_SMALL_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 1);
+				length += 2;
+				namedLength += 4;
+				JDBObjectNew->namedLength  = 2;
+				JDBObjectNew->length = 1;
+			}
+			else if(lon<65536)
+			{
+				JDBObjectNew->type = SMALL_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 2);
+				length += 3;
+				namedLength += 5;
+				JDBObjectNew->namedLength  = 3;
+				JDBObjectNew->length = 2;
+			}
+			else if(lon<16777216)
+			{
+				JDBObjectNew->type = BIG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 3);
+				length += 4;
+				namedLength += 6;
+				JDBObjectNew->namedLength  = 4;
+				JDBObjectNew->length = 3;
+			}
+			else if(lon<4294967296ULL)
+			{
+				JDBObjectNew->type = INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 4);
+				length += 5;
+				namedLength += 7;
+				JDBObjectNew->namedLength  = 5;
+				JDBObjectNew->length = 4;
+			}
+			else if(lon<1099511627776ULL)
+			{
+				JDBObjectNew->type = VS_LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 5);
+				length += 6;
+				namedLength += 8;
+				JDBObjectNew->namedLength  = 6;
+				JDBObjectNew->length = 5;
+			}
+			else if(lon<281474976710656ULL)
+			{
+				JDBObjectNew->type = S_LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 6);
+				length += 7;
+				namedLength += 9;
+				JDBObjectNew->namedLength  = 7;
+				JDBObjectNew->length = 6;
+			}
+			else if(lon<72057594037927936ULL)
+			{
+				JDBObjectNew->type = B_LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 7);
+				length += 8;
+				namedLength += 10;
+				JDBObjectNew->namedLength  = 8;
+				JDBObjectNew->length = 7;
+			}
+			else
+			{
+				JDBObjectNew->type = LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 8);
+				length += 9;
+				namedLength += 11;
+				JDBObjectNew->namedLength  = 9;
+				JDBObjectNew->length = 8;
+			}
+			JDBObjectNew->name = "";
+			packets.push_back(JDBObjectNew);
+			return JDBObjectNew;
 		}
-		else if(lon<65536)
+		AMEFObject* addPacket(long lon)
 		{
-			JDBObjectNew->type = SMALL_INT_TYPE;
-			JDBObjectNew->value = longTocharArray(lon, 2);
-			length += 3;
-			namedLength += 5;
-			JDBObjectNew->namedLength  = 3;
-			JDBObjectNew->length = 2;
+			AMEFObject* JDBObjectNew = new AMEFObject();
+			if(lon<256)
+			{
+				JDBObjectNew->type = VERY_SMALL_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 1);
+				length += 2;
+				namedLength += 4;
+				JDBObjectNew->namedLength  = 2;
+				JDBObjectNew->length = 1;
+			}
+			else if(lon<65536)
+			{
+				JDBObjectNew->type = SMALL_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 2);
+				length += 3;
+				namedLength += 5;
+				JDBObjectNew->namedLength  = 3;
+				JDBObjectNew->length = 2;
+			}
+			else if(lon<16777216)
+			{
+				JDBObjectNew->type = BIG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 3);
+				length += 4;
+				namedLength += 6;
+				JDBObjectNew->namedLength  = 4;
+				JDBObjectNew->length = 3;
+			}
+			else if(lon<4294967296ULL)
+			{
+				JDBObjectNew->type = INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 4);
+				length += 5;
+				namedLength += 7;
+				JDBObjectNew->namedLength  = 5;
+				JDBObjectNew->length = 4;
+			}
+			else if(lon<1099511627776ULL)
+			{
+				JDBObjectNew->type = VS_LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 5);
+				length += 6;
+				namedLength += 8;
+				JDBObjectNew->namedLength  = 6;
+				JDBObjectNew->length = 5;
+			}
+			else if(lon<281474976710656ULL)
+			{
+				JDBObjectNew->type = S_LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 6);
+				length += 7;
+				namedLength += 9;
+				JDBObjectNew->namedLength  = 7;
+				JDBObjectNew->length = 6;
+			}
+			else if(lon<72057594037927936ULL)
+			{
+				JDBObjectNew->type = B_LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 7);
+				length += 8;
+				namedLength += 10;
+				JDBObjectNew->namedLength  = 8;
+				JDBObjectNew->length = 7;
+			}
+			else
+			{
+				JDBObjectNew->type = LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 8);
+				length += 9;
+				namedLength += 11;
+				JDBObjectNew->namedLength  = 9;
+				JDBObjectNew->length = 8;
+			}
+			JDBObjectNew->name = "";
+			packets.push_back(JDBObjectNew);
+			return JDBObjectNew;
 		}
-		else if(lon<16777216)
+	#else
+		AMEFObject* addPacket(unsigned long long lon)
 		{
-			JDBObjectNew->type = BIG_INT_TYPE;
-			JDBObjectNew->value = longTocharArray(lon, 3);
-			length += 4;
-			namedLength += 6;
-			JDBObjectNew->namedLength  = 4;
-			JDBObjectNew->length = 3;
+			AMEFObject* JDBObjectNew = new AMEFObject();
+			if(lon<256)
+			{
+				JDBObjectNew->type = VERY_SMALL_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 1);
+				length += 2;
+				namedLength += 4;
+				JDBObjectNew->namedLength  = 2;
+				JDBObjectNew->length = 1;
+			}
+			else if(lon<65536)
+			{
+				JDBObjectNew->type = SMALL_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 2);
+				length += 3;
+				namedLength += 5;
+				JDBObjectNew->namedLength  = 3;
+				JDBObjectNew->length = 2;
+			}
+			else if(lon<16777216)
+			{
+				JDBObjectNew->type = BIG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 3);
+				length += 4;
+				namedLength += 6;
+				JDBObjectNew->namedLength  = 4;
+				JDBObjectNew->length = 3;
+			}
+			else if(lon<4294967296ULL)
+			{
+				JDBObjectNew->type = INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 4);
+				length += 5;
+				namedLength += 7;
+				JDBObjectNew->namedLength  = 5;
+				JDBObjectNew->length = 4;
+			}
+			else if(lon<1099511627776ULL)
+			{
+				JDBObjectNew->type = VS_LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 5);
+				length += 6;
+				namedLength += 8;
+				JDBObjectNew->namedLength  = 6;
+				JDBObjectNew->length = 5;
+			}
+			else if(lon<281474976710656ULL)
+			{
+				JDBObjectNew->type = S_LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 6);
+				length += 7;
+				namedLength += 9;
+				JDBObjectNew->namedLength  = 7;
+				JDBObjectNew->length = 6;
+			}
+			else if(lon<72057594037927936ULL)
+			{
+				JDBObjectNew->type = B_LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 7);
+				length += 8;
+				namedLength += 10;
+				JDBObjectNew->namedLength  = 8;
+				JDBObjectNew->length = 7;
+			}
+			else
+			{
+				JDBObjectNew->type = LONG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 8);
+				length += 9;
+				namedLength += 11;
+				JDBObjectNew->namedLength  = 9;
+				JDBObjectNew->length = 8;
+			}
+			JDBObjectNew->name = "";
+			packets.push_back(JDBObjectNew);
+			return JDBObjectNew;
 		}
-		else if(lon<4294967296L)
+		AMEFObject* addPacket(long lon)
 		{
-			JDBObjectNew->type = INT_TYPE;
-			JDBObjectNew->value = longTocharArray(lon, 4);
-			length += 5;
-			namedLength += 7;
-			JDBObjectNew->namedLength  = 5;
-			JDBObjectNew->length = 4;
+			AMEFObject* JDBObjectNew = new AMEFObject();
+			if(lon<256)
+			{
+				JDBObjectNew->type = VERY_SMALL_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 1);
+				length += 2;
+				namedLength += 4;
+				JDBObjectNew->namedLength  = 2;
+				JDBObjectNew->length = 1;
+			}
+			else if(lon<65536)
+			{
+				JDBObjectNew->type = SMALL_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 2);
+				length += 3;
+				namedLength += 5;
+				JDBObjectNew->namedLength  = 3;
+				JDBObjectNew->length = 2;
+			}
+			else if(lon<16777216)
+			{
+				JDBObjectNew->type = BIG_INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 3);
+				length += 4;
+				namedLength += 6;
+				JDBObjectNew->namedLength  = 4;
+				JDBObjectNew->length = 3;
+			}
+			else
+			{
+				JDBObjectNew->type = INT_TYPE;
+				JDBObjectNew->value = longTocharArray(lon, 4);
+				length += 5;
+				namedLength += 7;
+				JDBObjectNew->namedLength  = 5;
+				JDBObjectNew->length = 4;
+			}
+			JDBObjectNew->name = "";
+			packets.push_back(JDBObjectNew);
+			return JDBObjectNew;
 		}
-		else if(lon<1099511627776L)
-		{
-			JDBObjectNew->type = VS_LONG_INT_TYPE;
-			JDBObjectNew->value = longTocharArray(lon, 5);
-			length += 6;
-			namedLength += 8;
-			JDBObjectNew->namedLength  = 6;
-			JDBObjectNew->length = 5;
-		}
-		else if(lon<281474976710656L)
-		{
-			JDBObjectNew->type = S_LONG_INT_TYPE;
-			JDBObjectNew->value = longTocharArray(lon, 6);
-			length += 7;
-			namedLength += 9;
-			JDBObjectNew->namedLength  = 7;
-			JDBObjectNew->length = 6;
-		}
-		else if(lon<72057594037927936L)
-		{
-			JDBObjectNew->type = B_LONG_INT_TYPE;
-			JDBObjectNew->value = longTocharArray(lon, 7);
-			length += 8;
-			namedLength += 10;
-			JDBObjectNew->namedLength  = 8;
-			JDBObjectNew->length = 7;
-		}
-		else
-		{
-			JDBObjectNew->type = LONG_INT_TYPE;
-			JDBObjectNew->value = longTocharArray(lon, 8);
-			length += 9;
-			namedLength += 11;
-			JDBObjectNew->namedLength  = 9;
-			JDBObjectNew->length = 8;
-		}
-		JDBObjectNew->name = "";
-		packets.push_back(JDBObjectNew);
-		return JDBObjectNew;
-	}
-
+	#endif
 	/**
 	 * @param doub
 	 * @param name
