@@ -1,0 +1,71 @@
+# The default Application name
+DEF_PATH=default
+
+#The Server listening port number
+PORT_NO=8080
+
+#The Component Invoker listeneing port number
+CMP_PORT=
+
+#The Messaging Daemon listening port number
+MESS_PORT=
+
+#The Method Invoker listening port number
+MI_PORT=
+
+#Enable SSL?
+SSL_ENAB=false
+
+#The mime types supported
+SUPP_MIMES=*
+
+#Is Streaming supported?
+STREAM_ENAB=false
+
+#Is Authorization required
+AUTH_ENAB=false
+
+#Number of Server processes
+NUM_PROC=4
+
+#Is AJAX available?
+AJAX_ENAB=true
+
+#Are Controllers enabled?
+CONT_ENAB=true
+
+#Support Dynamic C++ Pages
+DCP_ENAB=true
+
+#Is Template Engine enabled?
+TPE_ENAB=true
+
+#Are Dynamic Views enabled?
+DVIW_ENAB=true
+
+#The type of Threading strategy
+THRD_PREQ=true
+
+#The Thread Pool size for Pooled implementations
+THRD_PSIZ=30
+
+#The DB connection Pool Size
+DB_CONN_POOL_SIZE=
+
+#Where to store the session state Browser cookies/Server side file
+SESS_STATE=server
+
+#When to timeout the session
+SESS_TIME_OUT=3600
+
+#Compilers are generally disabled on production deployments
+#Start server with DEV_MODE=true on Development servers
+#and move the code to Production changing the flag DEV_MODE=false
+#The code would not be generated at run-time on server restart now
+DEV_MODE=true
+
+#If you want to bind the server to a particulat IP
+IP_ADDR=
+
+
+SCRIPT_ERRS=true

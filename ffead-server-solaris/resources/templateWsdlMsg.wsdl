@@ -1,8 +1,0 @@
-<wsdl:message name="${METH_NAME}">
-    <wsdl:part element="tns:${METH_NAME}" name="parameters">
-    </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="${METH_NAME}Response">
-    <wsdl:part element="tns:${METH_NAME}Response" name="parameters">
-    </wsdl:part>
- </wsdl:message>

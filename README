@@ -7,18 +7,18 @@ Sumeet Chhetri
 FEATURES
 1. Easy to use View Framework
 2. SSL Support available
-3. Web Server (Multi process, Multi Threaded – EPOLL based)
+3. Web Server (Multi process, Multi Threaded EPOLL/Kqueue/Event Ports/Devpoll/Poll/Select based)
 4. Inbuilt Authentication handlers and OAUTH support
 5. Configuration driven URL mapping
 6. Dependency Injection (constructor and setter injection)
-7. ORM library (currently implemented for MySQL, Integrated with STL, Table mappings through configuration files –> One – Many, Many – Many ,One – One. The ORM Can be easily extended to other Databases).
-8. SOAP Integration (Web Service implementation through configuration file –> Methods in a C++ header file exposed as Web-Services)
-9. REST Controller framework (pretty URL's)
-10. AJAX Integration (Using property based configuration - On the lines of DWR for Java –> Just define C++ header files and Methods will be exposed as AJAX calls)
+7. ORM library (currently implemented for MySQL, Integrated with STL, Table mappings through configuration files, One - Many, Many - Many ,One - One. The ORM Can be easily extended to other Databases).
+8. SOAP Integration (Web Service implementation through configuration file - Methods in a C++ header file exposed as Web-Services)
+9. REST Controller framework (pretty URL's) and RESTFULL acceptance test framework
+10. AJAX Integration (Using property based configuration - On the lines of DWR for Java - Just define C++ header files and Methods will be exposed as AJAX calls)
 11. EJB styled Beans (Remote and Local Interfaces exposed -> C++ files have the services, and the methods to be exposed are defined in a configuration file)
-12. Universal Object type for C++ (intelligent pointer - no need of extending any class – identifies the object type)
-13. XML based Serialization (Limited -> only for single level /no nesting of objects - header files required)
-14. Reflection (Limited –> header files required)
+12. Universal Object type for C++ (intelligent pointer - no need of extending any class - identifies the object type)
+13. Binary, XML and JSON based Serialization
+14. Reflection (Limited - header files required)
 15. Dynamic C++ Pages (Mix HTML and C++ code to produce run time views without web server restart)
 16. Template Engine and Dynamic Views generated from C++ objects.
 17. Controller Pattern (Implement controllers mapped with URL patterns to define custom behaviors)
@@ -38,8 +38,8 @@ FEATURES
 
 
 REQUIREMENTS
-1. Any box that runs linux, BSD or Windows/Cygwin
-2. Boost >v1.4 and development files
+1. Any box that runs linux, BSD, Solaris or Windows/Cygwin
+2. Boost is no longer required as of version 1.7
 3. UnixODBC and development files
 4. OpenSSl and development files
 4. GCC C++ compiler, make, configure etc
@@ -55,6 +55,8 @@ Refer the INSTALL-FREEBSD file for installation directions.
 Windows/Cygwin
 Refer the INSTALL-WINDOWS-CYGWIN file for installation direction on Windows platform having Cygwin installed
 
+Solaris
+Refer the INSTALL-SOLARIS file for installation directions.
 
 UPDATES
 Find latest and older version on 
@@ -62,5 +64,4 @@ Google Code - http://code.google.com/p/ffead-cpp
 Github - https://github.com/sumeetchhetri/ffead-cpp
 
 
-Copyright © 2012 Sumeet Chhetri
-
+Copyright � 2012 Sumeet Chhetri
