@@ -11,6 +11,9 @@ Winx/Cygwin based Installation
       openssl libraries and devel (use Cygwin_SSL_UnixOdbc_libs.zip from downloads section for version 1.0)
       unixODBC libraries and devel (not found in Cygwin reposistory, use Cygwin_SSL_UnixOdbc_libs.zip from download section)
       bison,yacc,flex,gdb,readline,binutils (for building and installing openssl and unixODBC)
+      cmake
+      mysql-odbc
+      /usr/bin/cmake.exe -G "Unix Makefiles" -DCMAKE_LEGACY_CYGWIN_WIN32=1
 5. Using Cygwin v1.7.14-2 and unixODBC v2.3.1.tar.gz, the install (./configure,make,make install) worked, you can copy the /usr/local/lib/libodbc* files to /usr/lib if you are
    confident enough of trying a manual install of unixodbc. Trying to build on prior versions of cygwin and unixodbc, i faced certain issues and wasn't able to successfully compile
    and build files, hence had provided the *_libs.zip file.
