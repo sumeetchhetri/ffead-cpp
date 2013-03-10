@@ -30,6 +30,12 @@ CibernateConnPools* CibernateConnPools::get()
 	return instance;
 }
 
+void CibernateConnPools::destroy()
+{
+	if(instance!=NULL)
+		instance->~CibernateConnPools();
+}
+
 CibernateConnPools::CibernateConnPools()
 {
 	logger = Logger::getLogger("CibernateConnPools");

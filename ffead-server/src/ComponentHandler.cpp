@@ -48,13 +48,13 @@ void* ComponentHandler::service(void* arg)
 	int fd = *(int*)arg;
 	init();
 	string methInfo,retValue;
-	_cmp_instance->getServer()->Receive(fd,methInfo,1024);
+	_cmp_instance->getServer().Receive(fd,methInfo,1024);
 	methInfo =methInfo.substr(0,methInfo.find_last_of(">")+1);
-	_cmp_instance->logger << methInfo << flush;
+	_cmp_instance->logger << ("Component method " +  methInfo) << endl;
 	try
 	{
 		XmlParser parser("Parser");
-		_cmp_instance->logger << "\nBean call parsed successfully\n" << flush;
+		_cmp_instance->logger << "Bean call parsed successfully" << endl;
 		if(methInfo.find("lang=\"c++\"")!=string::npos || methInfo.find("lang='c++'")!=string::npos)
 		{
 			Document doc = parser.getDocument(methInfo);
@@ -117,12 +117,12 @@ void* ComponentHandler::service(void* arg)
 				valus.push_back(value);
 			}
 			string className = "Component_"+message.getAttribute("beanName");
-			_cmp_instance->logger << "\nBean class = " << className << "\n" << flush;
+			_cmp_instance->logger << ("Bean class = " + className) << endl;
 			string returnType = message.getAttribute("returnType");
 			string lang = message.getAttribute("lang");
 			ClassInfo clas = reflector.getClassInfo(className);
 			string methodName = message.getAttribute("name");
-			_cmp_instance->logger << "\nBean service = " << methodName << "\n" << flush;
+			_cmp_instance->logger << ("Bean service = " + methodName) << endl;
 			if(clas.getClassName()=="")
 			{
 				throw new ComponentHandlerException("bean does not exist or is not regsitered\n",retValue);
@@ -134,20 +134,20 @@ void* ComponentHandler::service(void* arg)
 			}
 			else
 			{
-				_cmp_instance->logger << "\nGot Bean service " << methodName << "\n" << flush;
+				_cmp_instance->logger << ("Got Bean service " + methodName) << endl;
 				args argus;
 				Constructor ctor = clas.getConstructor(argus);
 				void *_temp = reflector.newInstanceGVP(ctor);
-				_cmp_instance->logger << "\nGot Bean " << _temp << "\n" << flush;
+				_cmp_instance->logger << ("Got Bean") << endl;
 				if(returnType=="void" || returnType=="")
 				{
-					_cmp_instance->logger << "\nVoid return " << "\n" << flush;
+					_cmp_instance->logger << "Void return" << endl;
 					reflector.invokeMethod<void*>(_temp,meth,valus);
 					retValue = ("<return:void></return:void>");
 				}
 				else
 				{
-					_cmp_instance->logger << "\nReturn type = "<< returnType << "\n" << flush;
+					_cmp_instance->logger << ("Return type = " + returnType) << endl;
 					if(returnType=="int")
 					{
 						int retv = reflector.invokeMethod<int>(_temp,meth,valus);
@@ -182,24 +182,25 @@ void* ComponentHandler::service(void* arg)
 		{
 			retValue = "<return:exception>This is a C++ daemon</return:exception>";
 		}
-		_cmp_instance->logger << "\nSending data = "<< retValue << "\n" << flush;
+		//_cmp_instance->logger << "\nSending data = "<< retValue << "\n" << endl;
 		if(retValue!="")
-			_cmp_instance->getServer()->Send(fd,retValue);
+			_cmp_instance->getServer().Send(fd,retValue);
 		//close(fd);
 	}
 	catch(ComponentHandlerException *e)
 	{
-		_cmp_instance->logger << e->getMessage() << flush;
-		_cmp_instance->getServer()->Send(fd,retValue);
+		_cmp_instance->logger << e->getMessage() << endl;
+		_cmp_instance->getServer().Send(fd,retValue);
 		close(fd);
 	}
 	catch(...)
 	{
-		_cmp_instance->logger << "exception occurred" << flush;
+		_cmp_instance->logger << "Component exception occurred" << endl;
 		retValue = ("<return:exception>XmlParseException occurred</return:exception>");
-		_cmp_instance->getServer()->Send(fd,retValue);
+		_cmp_instance->getServer().Send(fd,retValue);
 		close(fd);
 	}
+	return NULL;
 }
 
 void ComponentHandler::initComponent()
@@ -240,9 +241,14 @@ void ComponentHandler::trigger(string port)
 	init();
 	if(_cmp_instance->running)
 		return;
-	_cmp_instance->setServer(new Server(port,false,500,&service,2));
+	Server serv(port,false,500,&service,2);
+	_cmp_instance->server = serv;
 	//_cmp_instance->getServer() = new Server(port,500,&service);
 	_cmp_instance->running = true;
 	return;
 }
 
+void ComponentHandler::stop()
+{
+	_cmp_instance->server.stop();
+}

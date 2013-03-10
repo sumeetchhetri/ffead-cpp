@@ -47,10 +47,9 @@ void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, map<string, ve
 		{
 			string clasz = tempp.at(var);
 			clasz = "getReflectionCIFor" + clasz;
-			logger << "filter handled by class " << clasz << " " << dlib << endl;
+			logger << ("Input Filter handled by class " + clasz) << endl;
 			if(dlib == NULL)
 			{
-				logger << "error" << endl;
 				cerr << dlerror() << endl;
 				exit(-1);
 			}
@@ -65,8 +64,8 @@ void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, map<string, ve
 				void *_temp = ref.newInstanceGVP(ctor);
 				Filter *filter = (Filter*)_temp;
 				filter->doInputFilter(req);
-				logger << "filter called" << endl;
-				delete _temp;
+				logger << "Filter called" << endl;
+				delete filter;
 			}
 		}
 	}
@@ -88,7 +87,7 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, map<string, v
 		{
 			string clasz = tempp.at(var);
 			clasz = "getReflectionCIFor" + clasz;
-			logger << "filter handled by class " << clasz << endl;
+			logger << ("Output Filter handled by class " + clasz) << endl;
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -105,8 +104,8 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, map<string, v
 				void *_temp = ref.newInstanceGVP(ctor);
 				Filter *filter = (Filter*)_temp;
 				filter->doOutputFilter(&res);
-				logger << "filter called" << endl;
-				delete _temp;
+				logger << "Filter called" << endl;
+				delete filter;
 			}
 		}
 	}

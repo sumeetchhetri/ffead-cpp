@@ -4,7 +4,7 @@ Y,N,GET /index.yourext,200,../web/default/index.html,
 Y,N,GET /flexApp/,200,../web/flexApp/index.html,
 Y,N,GET /oauthApp/,200,../web/oauthApp/index.html,
 Y,N,GET /indexmain.html,200,../web/default/indexmain.html,
-Y,N,GET /test.tpe,200,,110
+Y,N,GET /test.tpe,200,,396
 Y,N,GET /test.view,200,,138
 Y,N,GET /test.dcp,200,,194
 Y,N,GET /Testing.wsdl,200,,5880
@@ -24,6 +24,6 @@ Y,Y,POST /restobj/tstobj.xml,200,,164,application/xml,TSTVALUES_POSTXMLOBJ_VALUE
 Y,Y,POST /restvecobj/tstvecobj.xml,200,,166,application/xml,TSTVALUES_POSTXMLVECOBJ_VALUES,,application/json
 Y,N,POST /restvecobj/tstvecobj,415,,,application/xml,TSTVALUES_POSTJSONVECOBJ_VALUES,,
 Y,N,GET /restvecobj/tstvecobj,405,,,,
-Y,Y,POST /default,200,,,application/x-www-form-urlencoded,TSTVALUES_POSTAFCTST_VALUES
+Y,Y,POST /expose,200,,,application/x-www-form-urlencoded,TSTVALUES_POSTAFCTST_VALUES
 Y,Y,POST /Testing,200,,,application/soap+xml,TSTVALUES_POSTSOAP_VALUES
 Y,Y,GET /flexApp/getJSON.json,200,,,,

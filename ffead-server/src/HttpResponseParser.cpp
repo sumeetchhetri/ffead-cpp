@@ -47,7 +47,7 @@ HttpResponseParser::HttpResponseParser(string vecstr,string path)
 		{
 			HttpResponseParser::headernames->append(tempios);
 		}
-		logger << endl << "done reading header types" << endl;
+		logger  << "Done reading header types" << endl;
 	}
 	if(vec.size()!=0)
 	{
@@ -75,7 +75,7 @@ HttpResponseParser::HttpResponseParser(string vecstr,string path)
 					this->headers[temp.at(0)] = temp.at(1);
 				}
 				else
-					logger << "\nnot a valid header" << temp.at(0) << endl;
+					logger << ("Not a valid header" + temp.at(0)) << endl;
 			}
 			else
 			{

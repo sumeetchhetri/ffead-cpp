@@ -55,7 +55,9 @@ class Server {
 	Service service;
 	struct sockaddr_storage their_addr;
 	static void* servicing(void* arg);
+	bool runn;
 public:
+	Server();
 	Server(string,bool,int,Service,int);
 	Server(string port,int waiting,Service serv);
 	virtual ~Server();
@@ -71,7 +73,12 @@ public:
 	int Receive(int,char *data,int);
 	int Receive(int,unsigned char *data,int);
 	int Receive(int,vector<string>&,int);
+	void stop()
+	{
+		runn = false;
+	}
 	static int createListener(string port,bool block);
+	static int createListener(string ipAddress,string port,bool block);
 };
 
 #endif /* SERVER_H_ */

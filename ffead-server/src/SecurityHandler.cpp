@@ -45,19 +45,18 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 	{
 		userRole = "ROLE_ANONYMOUS";
 	}
-	logger << actUrl << endl;
 	string claz;
 	Security securityObject = securityObjectMap[req->getCntxt_name()];
-	long sessionTimeoutVar = sessionTimeout;
+	//long sessionTimeoutVar = sessionTimeout;
 	if(securityObject.isLoginConfigured())
 	{
-		sessionTimeoutVar = securityObject.sessTimeout;
+		//sessionTimeoutVar = securityObject.sessTimeout;
 	}
 	SecureAspect aspect = securityObject.matchesPath(req->getActUrl());
 	if(securityObject.isLoginConfigured() && ((aspect.path!="" && aspect.role!="ROLE_ANONYMOUS")
 			|| (securityObject.isLoginPage(serverUrl, actUrl) && req->getRequestParam("_ffead_security_cntxt_username")!="")))
 	{
-		logger << "matched secure path " << aspect.path << ", which requires role " << aspect.role << endl;
+		logger << ("Matched secure path " + aspect.path + ", which requires role " + aspect.role) << endl;
 		if(!securityObject.isLoginPage(serverUrl, actUrl) && aspect.role!=userRole)
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
@@ -71,7 +70,7 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 			if(claz.find("file:")!=string::npos)
 			{
 				claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
-				logger << "auth handled by file " << claz << endl;
+				logger << ("Auth handled by file " + claz) << endl;
 				FileAuthController* authc = new FileAuthController(claz,":");
 				if(authc->isInitialized())
 				{
@@ -79,20 +78,20 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 							req->getRequestParam("_ffead_security_cntxt_password")))
 					{
 						userRole = authc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
-						logger << "valid user " << req->getRequestParam("_ffead_security_cntxt_username")
-								<< ", role is "  << userRole << endl;
+						logger << ("Valid user " + req->getRequestParam("_ffead_security_cntxt_username")
+								+ ", role is "  + userRole) << endl;
 						validUser = true;
 					}
 					else
 					{
-						logger << "invalid user" << endl;
+						logger << "Invalid user" << endl;
 						res.setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
 						isContrl = true;
 					}
 				}
 				else
 				{
-					logger << "invalid user repo defined" << endl;
+					logger << "Invalid user repo defined" << endl;
 				}
 				delete authc;
 			}
@@ -100,7 +99,7 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 			{
 				claz = claz.substr(claz.find(":")+1);
 				claz = "getReflectionCIFor" + claz;
-				logger << "auth handled by class " << claz << endl;
+				logger << ("Auth handled by class " + claz) << endl;
 				if(dlib == NULL)
 				{
 					cerr << dlerror() << endl;
@@ -120,17 +119,17 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 						req->getRequestParam("_ffead_security_cntxt_password")))
 					{
 						userRole = loginc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
-						logger << "valid user " << req->getRequestParam("_ffead_security_cntxt_username")
-								<< ", role is "  << userRole << endl;
+						logger << ("Valid user " + req->getRequestParam("_ffead_security_cntxt_username")
+								+ ", role is "  + userRole) << endl;
 						validUser = true;
 					}
 					else
 					{
-						logger << "invalid user" << endl;
+						logger << "Invalid user" << endl;
 						res.setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
 						isContrl = true;
 					}
-					logger << "login controller called" << endl;
+					logger << "Login controller called" << endl;
 					delete loginc;
 				}
 			}
@@ -139,7 +138,7 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 				req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", userRole);
 				res.setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
 				res.setLocation(serverUrl+"/"+securityObject.welocmeFile);
-				logger << "valid role " << userRole << " for path " << req->getActUrl();
+				logger << ("Valid role " + userRole + " for path " + req->getActUrl()) << endl;
 				isContrl = true;
 			}
 			else if(!validUser)
@@ -167,10 +166,10 @@ SecureAspect Security::matchesPath(string url)
 {
 	bool pathval = false;
 	SecureAspect aspect;
-	for (int var = 0; var < secures.size(); ++var) {
+	for (int var = 0; var < (int)secures.size(); ++var) {
 		SecureAspect secureAspect = secures.at(var);
 		string pathurl = secureAspect.path;
-		logger << "checking security path " << pathurl << " against url " << url << endl;
+		logger << ("Checking security path " + pathurl + " against url " + url) << endl;
 		if(pathurl=="*")
 		{
 			aspect = secureAspect;

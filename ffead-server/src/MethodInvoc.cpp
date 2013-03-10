@@ -45,7 +45,7 @@ void* MethodInvoc::service(void* arg)
 	int fd = *(int*)arg;
 	init();
 	string methInfo,retValue;
-	_methinv_instance->getServer()->Receive(fd,methInfo,1024);
+	_methinv_instance->getServer().Receive(fd,methInfo,1024);
 	methInfo =methInfo.substr(0,methInfo.find_last_of(">")+1);
 	try
 	{
@@ -190,20 +190,21 @@ void* MethodInvoc::service(void* arg)
 			retValue = "<return:exception>This is a C++ daemon</return:exception>";
 		}
 		if(retValue!="")
-			_methinv_instance->getServer()->Send(fd,retValue);
+			_methinv_instance->getServer().Send(fd,retValue);
 		close(fd);
 	}
 	catch(MethodInvokerException *e)
 	{
-		_methinv_instance->getServer()->Send(fd,retValue);
+		_methinv_instance->getServer().Send(fd,retValue);
 		close(fd);
 	}
 	catch(...)
 	{
 		retValue = ("<return:exception>XmlParseException occurred</return:exception>");
-		_methinv_instance->getServer()->Send(fd,retValue);
+		_methinv_instance->getServer().Send(fd,retValue);
 		close(fd);
 	}
+	return NULL;
 }
 
 
@@ -212,7 +213,13 @@ void MethodInvoc::trigger(string port)
 	init();
 	if(_methinv_instance->running)
 		return;
-	_methinv_instance->setServer(new Server(port,false,500,&service,2));
+	Server serv(port,false,500,&service,2);
+	_methinv_instance->server = serv;
 	_methinv_instance->running = true;
 	return;
+}
+
+void MethodInvoc::stop()
+{
+	_methinv_instance->server.stop();
 }

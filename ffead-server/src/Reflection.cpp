@@ -39,8 +39,11 @@ strVec Reflection::list(string cwd)
 	FILE *pipe_fp;
 	string command;
 	strVec files;
-	command = "ls -F1 "+cwd+"|grep '.h'";
-	//logger << "\nCommand:" << command << flush;
+	if(chdir(cwd.c_str())!=0)
+		return files;
+	command = ("find . \\( ! -name . -prune \\) \\( -type f -o -type l \\) -name '*.h' 2>/dev/null");
+	//command = "ls -F1 "+cwd+"|grep '.h'";
+	logger << ("Searching directory " + cwd + " for pattern .h") << endl;
 	if ((pipe_fp = popen(command.c_str(), "r")) == NULL)
 	{
 		printf("pipe open error in cmd_list\n");
@@ -61,10 +64,12 @@ strVec Reflection::list(string cwd)
 		else if(fileName!="")
 		{
 			StringUtil::replaceFirst(fileName,"*","");
+			StringUtil::replaceFirst(fileName,"./","");
 			if(fileName.find("~")==string::npos)
 			{
-				files.push_back(cwd+"/"+fileName);
-				//logger << "\nlist for file" << (cwd+"/"+fileName) << "\n" << flush;
+				fileName = cwd+"/"+fileName;
+				StringUtil::replaceFirst(fileName,"//","/");
+				files.push_back(fileName);
 			}
 			fileName = "";
 		}
@@ -116,7 +121,7 @@ bool Reflection::generateClassInfo(string className)
 	{
 		bool classdone = false;
 		bool start = false;
-		bool classset = false;
+		//bool classset = false;
 		bool commstrts = false;
 		size_t tes;
 		int cnt = 0;
@@ -128,7 +133,7 @@ bool Reflection::generateClassInfo(string className)
 		{
 			RegexUtil::replace(data, "[\t]+", " ");
 			RegexUtil::replace(data, "[ ]+", " ");
-			classset = false;
+			//classset = false;
 			if(classcomplete)
 				continue;
 			if((tes=data.find("/*"))!=string::npos)
@@ -176,7 +181,7 @@ bool Reflection::generateClassInfo(string className)
 						//logger << results.size() << flush;
 					}
 					classdone = true;
-					classset = true;
+					//classset = true;
 					//StringUtil::split(results, data, (": "));
 				}
 				else if((tes=data.find("{"))!=string::npos && !start)
@@ -1422,14 +1427,6 @@ string Reflection::generateSerDefinitionAll(strVec all,string &includeRef, bool 
 	}
 	includeRef += ("extern \"C\"{\n" + classes + typedefs + methods);
 	ret += includeRef;
-	/*ret += "\npublic:\ntemplate <class T> string serialize(T t)\n{\nstring objXml;\n";
-	ret += "string className;\nint status;\nconst char *mangled = typeid(t).name();\nusing namespace abi;\nmangled = __cxa_demangle(mangled, NULL, 0, &status);\nstringstream ss;\nss << mangled;\nss >> className;";
-	ret += classes;
-	ret += "\n\treturn objXml;\n}\n";
-	ret += "template <class T> T unSerialize(string objXml)\n{\nT t;\nstring className;\nint status;\nconst char *mangled = typeid(t).name();\nusing namespace abi;\nmangled = __cxa_demangle(mangled, NULL, 0, &status);\nstringstream ss;\nss << mangled;\nss >> className;\n";
-	ret += rert1;
-	ret += "\n\treturn t;\n}\n";
-	ret += "}\n";*/
 	ret += "}\n";
 	includeRef += typedefs;
 	return ret;

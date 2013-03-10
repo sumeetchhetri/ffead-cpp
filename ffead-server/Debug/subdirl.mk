@@ -111,7 +111,11 @@ CPP_SRCS += \
 ../ContentTypes.cpp \
 ../XMLSerialize.cpp \
 ../JSONSerialize.cpp \
-../CsvFileReader.cpp
+../CsvFileReader.cpp \
+../TemplateGenerator.cpp \
+../CibernateQuery.cpp \
+../Bigint.cpp \
+../Bigdecimal.cpp
 
 OBJS += \
 ./Constants.o \
@@ -221,7 +225,11 @@ OBJS += \
 ./ContentTypes.o \
 ./XMLSerialize.o \
 ./JSONSerialize.o \
-./CsvFileReader.o
+./CsvFileReader.o \
+./TemplateGenerator.o \
+./CibernateQuery.o \
+./Bigint.o \
+./Bigdecimal.o
 
 CPP_DEPS += \
 ./Constants.d \
@@ -331,7 +339,11 @@ CPP_DEPS += \
 ./ContentTypes.d \
 ./XMLSerialize.d \
 ./JSONSerialize.d \
-./CsvFileReader.d
+./CsvFileReader.d \
+./TemplateGenerator.d \
+./CibernateQuery.d \
+./Bigint.d \
+./Bigdecimal.d
 
 
 # Each subdirectory must supply rules for building sources it contributes

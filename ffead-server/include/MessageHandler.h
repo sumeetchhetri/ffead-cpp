@@ -63,10 +63,11 @@ public:
 	{
 	}
 	static void trigger(string,string);
-	Server* getServer(){return this->server;}
-	void setServer(Server *server){this->server = server;}
+	static void stop();
+	Server getServer(){return this->server;}
+	void setServer(Server server){this->server = server;}
 private:
-	Server *server;
+	Server server;
 	bool running;
 	static void* service(void* arg);
 	static void init(string);

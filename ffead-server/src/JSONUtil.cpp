@@ -181,7 +181,7 @@ void JSONUtil::readJSON(string& json,bool isarray,JSONElement *par)
 	}
 	else
 	{
-		if(obs!=string::npos && env==0 && (obs<ars || ars==(int)string::npos))
+		if(obs!=string::npos && env==0 && (obs<ars || ars==string::npos))
 		{
 			size_t sss = json.find("{", obs+1);
 			size_t eee = json.find("}", obs);
@@ -205,7 +205,7 @@ void JSONUtil::readJSON(string& json,bool isarray,JSONElement *par)
 			json = json.substr(obe+1);
 			element->setType(JSONElement::JSON_OBJECT);
 		}
-		else if(ars!=string::npos && env==0 && (ars<obs || obs==(int)string::npos))
+		else if(ars!=string::npos && env==0 && (ars<obs || obs==string::npos))
 		{
 			size_t sss = json.find("[", ars+1);
 			size_t eee = json.find("]", ars);
@@ -229,7 +229,7 @@ void JSONUtil::readJSON(string& json,bool isarray,JSONElement *par)
 			json = json.substr(are+1);
 			element->setType(JSONElement::JSON_ARRAY);
 		}
-		else if(obs!=string::npos && obs<env && (obs<ars || ars==(int)string::npos))
+		else if(obs!=string::npos && obs<env && (obs<ars || ars==string::npos))
 		{
 			size_t sss = json.find("{", obs+1);
 			size_t eee = json.find("}", obs);
@@ -253,7 +253,7 @@ void JSONUtil::readJSON(string& json,bool isarray,JSONElement *par)
 			json = json.substr(obe+1);
 			element->setType(JSONElement::JSON_OBJECT);
 		}
-		else if(ars!=string::npos && ars<env && (ars<obs || obs==(int)string::npos))
+		else if(ars!=string::npos && ars<env && (ars<obs || obs==string::npos))
 		{
 			size_t sss = json.find("[", ars+1);
 			size_t eee = json.find("]", ars);

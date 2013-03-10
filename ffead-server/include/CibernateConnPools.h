@@ -41,24 +41,66 @@ typedef map<string,vector<DBRel> > relMap;
 class Mapping
 {
 	smstrMap appTableColMapping;
+	smstrMap tableAppColMapping;
 	strMap appTableClassMapping;
 	relMap appTableRelMapping;
 public:
-    string getAppTableColMapping(string table,string column)
+    string getAppTableColMapping(string table,string propertyName)
     {
     	if(this->appTableColMapping.find(table)!=this->appTableColMapping.end())
     	{
-    		if(this->appTableColMapping[table].find(column)!=this->appTableColMapping[table].end())
-    			return this->appTableColMapping[table][column];
+    		if(this->appTableColMapping[table].find(propertyName)!=this->appTableColMapping[table].end())
+    			return this->appTableColMapping[table][propertyName];
     		else
     			return "";
     	}
     	return "";
     }
 
+    string getTableAppColMapping(string table,string columnName)
+	{
+		if(this->tableAppColMapping.find(table)!=this->tableAppColMapping.end())
+		{
+			if(this->tableAppColMapping[table].find(columnName)!=this->tableAppColMapping[table].end())
+				return this->tableAppColMapping[table][columnName];
+			else
+				return "";
+		}
+		return "";
+	}
+
+    strMap getAppTableColMapping(string table)
+	{
+		if(this->appTableColMapping.find(table)!=this->appTableColMapping.end())
+		{
+			return this->appTableColMapping[table];
+		}
+		strMap tem;
+		return tem;
+	}
+
+    strMap getTableAppColMapping(string table)
+	{
+		if(this->tableAppColMapping.find(table)!=this->tableAppColMapping.end())
+		{
+			return this->tableAppColMapping[table];
+		}
+		strMap tem;
+		return tem;
+	}
+
     void setAppTableColMapping(smstrMap appTableColMapping)
     {
         this->appTableColMapping = appTableColMapping;
+        smstrMap::iterator it;
+        for(it=appTableColMapping.begin();it!=appTableColMapping.end();it++) {
+        	strMap tempo;
+        	strMap::iterator ite;
+        	for(ite=it->second.begin();ite!=it->second.end();ite++) {
+        		tempo[ite->second] = ite->first;
+        	}
+        	this->tableAppColMapping[appTableClassMapping[it->first]] = tempo;
+		}
     }
 
     string getAppTableClassMapping(string claz)
@@ -72,6 +114,15 @@ public:
     void setAppTableClassMapping(strMap appTableClassMapping)
     {
         this->appTableClassMapping = appTableClassMapping;
+        smstrMap::iterator it;
+		for(it=appTableColMapping.begin();it!=appTableColMapping.end();it++) {
+			strMap tempo;
+			strMap::iterator ite;
+			for(ite=it->second.begin();ite!=it->second.end();ite++) {
+				tempo[ite->second] = ite->first;
+			}
+			this->tableAppColMapping[appTableClassMapping[it->first]] = tempo;
+		}
     }
 
     vector<DBRel> getAppTablerelMapping(string claz)
@@ -105,6 +156,14 @@ public:
 	static bool isInitialized();
 	static CibernateConnectionPool* getPool(string);
 	static Mapping* getMapping(string);
+	static map<string,Mapping*> getMappings()
+	{
+		map<string,Mapping*> temp;
+		if(get()!=NULL)
+			return get()->mappings;
+		return temp;
+	}
+	static void destroy();
 };
 
 #endif /* CIBERNATECONNPOOLS_H_ */

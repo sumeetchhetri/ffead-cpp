@@ -118,7 +118,7 @@ Field Class::getField(string name)
 void Class::addMethod(Method meth)
 {
 	string key = meth.getMethodName();
-	for (int var = 0; var < meth.getArgumentTypes().size(); ++var)
+	for (int var = 0; var < (int)meth.getArgumentTypes().size(); ++var)
 	{
 		key += (meth.getArgumentTypes().at(var));
 	}

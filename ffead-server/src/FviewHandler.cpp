@@ -35,11 +35,11 @@ string FviewHandler::handle(HttpRequest* req, HttpResponse& res, map<string, str
 {
 	Logger logger = Logger::getLogger("FviewHandler");
 	string content;
-	logger << "inside fview " << req->getFile() << endl;
+	logger << ("Inside fview " + req->getFile()) << endl;
 	string file = req->getFile();
 	StringUtil::replaceFirst(file,"fview","html");
 	string ffile = req->getCntxt_root()+"/fviews/"+file;
-	logger << ffile << endl;
+	//logger << ffile << endl;
 	ifstream infile(ffile.c_str());
 	string temp;
 	if(infile.is_open())
@@ -52,7 +52,7 @@ string FviewHandler::handle(HttpRequest* req, HttpResponse& res, map<string, str
 		}
 		int h = content.find("</head>");
 		int ht = content.find("<html>");
-		if(h!=string::npos)
+		if(h!=(int)string::npos)
 		{
 			string st = content.substr(0,h-1);
 			string en = content.substr(h);
@@ -65,7 +65,7 @@ string FviewHandler::handle(HttpRequest* req, HttpResponse& res, map<string, str
 		}
 		else
 		{
-			if(ht!=string::npos)
+			if(ht!=(int)string::npos)
 			{
 				string st = content.substr(0,ht+6);
 				string en = content.substr(ht+6);

@@ -81,7 +81,7 @@ class Serialize {
 		AMEFEncoder enc;
 		AMEFObject object;
 		object.setName(className);
-		while(cnt++<t.size())
+		while(cnt++<(int)t.size())
 		{
 			object.addPacket(serialize<T>(*st.begin()));
 			st.erase(st.begin());
@@ -99,7 +99,7 @@ class Serialize {
 		AMEFEncoder enc;
 		AMEFObject object;
 		object.setName(className);
-		while(cnt++<t.size())
+		while(cnt++<(int)t.size())
 		{
 			object.addPacket(serialize<T>(*st.begin()));
 			st.erase(st.begin());
@@ -117,7 +117,7 @@ class Serialize {
 		AMEFEncoder enc;
 		AMEFObject object;
 		object.setName(className);
-		while(cnt++<t.size())
+		while(cnt++<(int)t.size())
 		{
 			object.addPacket(serialize<T>(*st.begin()));
 			st.erase(st.begin());
@@ -135,7 +135,7 @@ class Serialize {
 		AMEFEncoder enc;
 		AMEFObject object;
 		object.setName(className);
-		while(cnt++<t.size())
+		while(cnt++<(int)t.size())
 		{
 			object.addPacket(serialize<T>(*st.begin()));
 			st.erase(st.begin());
@@ -153,7 +153,7 @@ class Serialize {
 		AMEFEncoder enc;
 		AMEFObject object;
 		object.setName(className);
-		while(cnt++<t.size())
+		while(cnt++<(int)t.size())
 		{
 			object.addPacket(serialize<T>(*st.begin()));
 			st.erase(st.begin());
@@ -164,7 +164,6 @@ class Serialize {
 	{
 		std::queue<T> tt = t;
 		T td;
-		int cnt = 0;
 		const char *mangled = typeid(td).name();
 		string className = demangle(mangled);
 		className = "queue<" + className + ">";

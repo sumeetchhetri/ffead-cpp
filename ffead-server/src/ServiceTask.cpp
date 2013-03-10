@@ -23,7 +23,7 @@
 #include "ServiceTask.h"
 
 ServiceTask::ServiceTask(int fd,string serverRootDirectory,map<string,string> *params,
-		bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib) {
+		bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib, void* ddlib) {
 	this->fd=fd;this->serverRootDirectory=serverRootDirectory;
 	this->params= params;
 	this->isSSLEnabled = isSSLEnabled;
@@ -31,6 +31,7 @@ ServiceTask::ServiceTask(int fd,string serverRootDirectory,map<string,string> *p
 	this->sslHandler = sslHandler;
 	this->configData = configData;
 	this->dlib = dlib;
+	this->ddlib = ddlib;
 	logger = Logger::getLogger("ServiceTask");
 }
 
@@ -41,7 +42,7 @@ ServiceTask::~ServiceTask() {
 void ServiceTask::writeToSharedMemeory(string sessionId, string value,bool napp)
 {
 	string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
-	logger << "saving session to file " << filen << endl;
+	logger << ("Saving session to file " + filen) << endl;
 	ofstream ofs;
 	if(napp)
 		ofs.open(filen.c_str());
@@ -78,7 +79,7 @@ map<string,string> ServiceTask::readFromSharedMemeory(string sessionId)
 			StringUtil::replaceAll(results1.at(0),"%3D","=");
 			valss[results1.at(0)] = "true";
 		}
-		logger << "read key/value pair " << results1.at(0) << " = " << valss[results1.at(0)] << endl;
+		logger << ("Read key/value pair " + results1.at(0) + " = " + valss[results1.at(0)]) << endl;
 	}
 	return valss;
 }
@@ -97,7 +98,7 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 		//logger << "session object modified " << vals.size() << endl;
 		Date date;
 		string id = CastUtil::lexical_cast<string>(Timer::getCurrentTime());
-		int seconds = sessionTimeout;
+		//int seconds = sessionTimeout;
 		date = date.addSeconds(sessionTimeout);
 		DateFormat dformat("ddd, dd-mmm-yyyy hh:mi:ss");
 		map<string,string>::iterator it;
@@ -109,7 +110,7 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 			StringUtil::replaceAll(key,"=","%3D");
 			StringUtil::replaceAll(value,"; ","%3B%20");
 			StringUtil::replaceAll(value,"=","%3D");
-			logger << it->first << " = " << it->second << endl;
+			//logger << it->first << " = " << it->second << endl;
 			if(!sessatserv)
 				res.addCookie(key + "=" + value + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
 			else
@@ -135,7 +136,7 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 
 string ServiceTask::getContentStr(string url,string locale,string ext)
 {
-	logger << "content request for -- " << url << " " << ext << endl;
+	logger << ("Content request for " + url + " " + ext) << endl;
 	string all;
     string fname = url;
 	if (url=="/")
@@ -186,6 +187,7 @@ void ServiceTask::run()
 		stringstream ss;
 		string temp;
 		//int bytes = -1;
+		logger << "Into Http Service method" << endl;
 		if(isSSLEnabled)
 		{
 			sbio=BIO_new_socket(fd,BIO_NOCLOSE);
@@ -220,12 +222,12 @@ void ServiceTask::run()
 				{
 					case SSL_ERROR_WANT_READ:
 					{
-						logger << "more to read error" << endl;
+						logger << "ssl more to read error" << endl;
 						break;
 					}
 					case SSL_ERROR_WANT_WRITE:
 					{
-						logger << "more to write error" << endl;
+						logger << "ssl more to write error" << endl;
 						break;
 					}
 					case SSL_ERROR_NONE:
@@ -265,7 +267,7 @@ void ServiceTask::run()
 					}
 					catch(const char* ex)
 					{
-						logger << "bad lexical cast" <<endl;
+						logger << "Bad lexical cast exception while reading http Content-Length" << endl;
 					}
 				}
 				memset(&buf[0], 0, sizeof(buf));
@@ -278,14 +280,13 @@ void ServiceTask::run()
 			sbio=BIO_new_socket(fd,BIO_CLOSE);
 			io=BIO_new(BIO_f_buffer());
 			BIO_push(io,sbio);
-			logger << "into run method" << endl;
 			while(flag)
 			{
 				er = BIO_gets(io,buf,BUFSIZZ-1);
 				if(er==0)
 				{
 					close(fd);
-					logger << "\nsocket closed before being serviced" <<flush;
+					logger << "Socket closed before being serviced" << endl;
 					return;
 				}
 				ss << buf;
@@ -306,7 +307,7 @@ void ServiceTask::run()
 					}
 					catch(const char* ex)
 					{
-						logger << "bad lexical cast" <<endl;
+						logger << "Bad lexical cast exception while reading http Content-Length" <<endl;
 					}
 				}
 				memset(&buf[0], 0, sizeof(buf));
@@ -356,7 +357,7 @@ void ServiceTask::run()
 				if(er==0)
 				{
 					close(fd);
-					logger << "\nsocket closed before being serviced" <<flush;
+					logger << "Socket closed before being serviced" << endl;
 					return;
 				}
 				else if(er>0)
@@ -377,12 +378,11 @@ void ServiceTask::run()
 
 		if(req->getFile()=="")
 		{
-			logger << req->getFile() << endl;
+			logger << ("File requested -> " + req->getFile()) << endl;
 			req->setFile("index.html");
 		}
 		if(req->hasCookie())
 		{
-			logger << "has the session id" << endl;
 			if(!configData.sessatserv)
 				req->getSession()->setSessionAttributes(req->getCookieInfo());
 			else
@@ -434,7 +434,7 @@ void ServiceTask::run()
 		vector<unsigned char> test;
 		string content;
 		string claz;
-		bool isoAuthRes = false;
+		//bool isoAuthRes = false;
 		long sessionTimeoutVar = configData.sessionTimeout;
 		bool isContrl = securityHandler.handle(configData.ip_address, req, res, configData.securityObjectMap, sessionTimeoutVar, dlib, configData.cntMap);
 
@@ -477,14 +477,14 @@ void ServiceTask::run()
 			else
 			{
 				bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, dlib, ext, configData.props);
-				logger << "html page requested" <<endl;
 				if(cntrlit)
 				{
 
 				}
 				else
 				{
-					cntrlit = extHandler.handle(req, res, dlib, configData.resourcePath, configData.tmplMap, configData.vwMap, ext, configData.props);
+					cntrlit = extHandler.handle(req, res, dlib, ddlib, configData.resourcePath, configData.tmplMap, configData.vwMap, ext, configData.props,
+							configData.ajaxIntfMap);
 				}
 				if(!cntrlit && ext==".fview")
 				{
@@ -592,12 +592,12 @@ void ServiceTask::run()
 		{
 			int size;
 			if ((size=send(fd,&h1[0] , h1.length(), 0)) == -1)
-				logger << "send failed" << flush;
+				logger << "Socket send failed" << endl;
 			else if(size==0)
 			{
 				close(fd);
 				memset(&buf[0], 0, sizeof(buf));
-				logger << "socket closed for writing" << flush;
+				logger << "Socket closed for writing" << endl;
 				return;
 			}
 
@@ -609,12 +609,12 @@ void ServiceTask::run()
 
 		//Logger::info("got new connection to process\n"+req->getFile()+" :: " + res.getStatusCode() + "\n"+req->getCntxt_name() + "\n"+req->getCntxt_root() + "\n"+req->getUrl());
 		delete req;
-		logger << alldatlg << "--sent data--DONE" << flush;
+		//logger << (alldatlg + "--sent data--DONE") << endl;
 		//sessionMap[sessId] = sess;
 	}
 	catch(...)
 	{
-		logger << "Standard exception: " << endl;
+		logger << "Standard exception occurred while processing ServiceTask request " << endl;
 	}
 }
 
@@ -635,13 +635,11 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		}
 		if(req->hasCookie())
 		{
-			logger << "has the session id" << endl;
 			if(!configData.sessatserv)
 				req->getSession()->setSessionAttributes(req->getCookieInfo());
 			else
 			{
 				string id = req->getCookieInfoAttribute("FFEADID");
-				logger << id << endl;
 				map<string,string> values = readFromSharedMemeory(id);
 				req->getSession()->setSessionAttributes(values);
 			}
@@ -686,7 +684,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		vector<unsigned char> test;
 		string content;
 		string claz;
-		bool isoAuthRes = false;
+		//bool isoAuthRes = false;
 		long sessionTimeoutVar = configData.sessionTimeout;
 		bool isContrl = securityHandler.handle(configData.ip_address, req, res, configData.securityObjectMap, sessionTimeoutVar, dlib, configData.cntMap);
 
@@ -727,14 +725,14 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		else
 		{
 			bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, dlib, ext, configData.props);
-			logger << "html page requested" <<endl;
 			if(cntrlit)
 			{
 
 			}
 			else
 			{
-				cntrlit = extHandler.handle(req, res, dlib, configData.resourcePath, configData.tmplMap, configData.vwMap, ext, configData.props);
+				cntrlit = extHandler.handle(req, res, dlib, ddlib, configData.resourcePath, configData.tmplMap, configData.vwMap, ext, configData.props,
+						configData.ajaxIntfMap);
 			}
 			if(!cntrlit && ext==".fview")
 			{
@@ -773,7 +771,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfoAttribute("FFEADID"), sessionTimeoutVar, configData.sessatserv);
 		//h1 = res.generateResponse();
 		delete req;
-		logger << alldatlg << "--sent data--DONE" << flush;
+		//logger << (alldatlg + "--sent data--DONE") << endl;
 		//sessionMap[sessId] = sess;
 	}
 	catch(const char* ex)
@@ -782,7 +780,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 	}
 	catch(...)
 	{
-		logger << "Standard exception: " << endl;
+		logger << "Standard exception occurred while processing ServiceTask request " << endl;
 	}
 	return res;
 }

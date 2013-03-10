@@ -78,7 +78,7 @@ void XmlParser::readXML(string xml,string parent,Element *par)
 	if(cdt==0)
 	{
 		int ecdt = xml.find("]]>");
-		if(ecdt==string::npos)
+		if(ecdt==(int)string::npos)
 		{
 			string errmsg = ("Incomplete CDATA tag\n");
 			XmlParseException exception(errmsg);
@@ -92,10 +92,10 @@ void XmlParser::readXML(string xml,string parent,Element *par)
 		}
 	}
 	int cmt =  xml.find("<!--");
-	if(cmt!=string::npos)
+	if(cmt!=(int)string::npos)
 	{
 		int ecmt = xml.find("-->");
-		if(ecmt==string::npos)
+		if(ecmt==(int)string::npos)
 		{
 			string errmsg = ("Incomplete Comment tag\n");
 			XmlParseException exception(errmsg);

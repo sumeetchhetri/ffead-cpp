@@ -27,8 +27,8 @@ string Serialize::demangle(const char *mangled)
 	int status;	char *demangled;
 	using namespace abi;
 	demangled = __cxa_demangle(mangled, NULL, 0, &status);
-	//printf("\n---------Demanged --%s\n\n", demangled);
 	string s(demangled);
+	delete demangled;
 	return s;
 }
 string Serialize::getClassName(void* instance)

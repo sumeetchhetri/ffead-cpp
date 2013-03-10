@@ -33,9 +33,11 @@ SOAPUtil::~SOAPUtil() {
 
 SOAPRequest SOAPUtil::getSOAPRequest(HttpRequest hrequest)
 {
-
+	SOAPRequest req;
+	return req;
 }
 SOAPResponse SOAPUtil::invoke(SOAPRequest srequest)
 {
-
+	SOAPResponse res;
+	return res;
 }

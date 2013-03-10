@@ -2,6 +2,7 @@ var classConfigurationData =
 [
     [ "ConfigurationData", "classConfigurationData.html#a8cb8af69711def4253a59956e7b33c15", null ],
     [ "~ConfigurationData", "classConfigurationData.html#a13ea48f607cf9c56f3023386f04af98a", null ],
+    [ "ajaxIntfMap", "classConfigurationData.html#a1625081f9c4289965e5187efdb5506f9", null ],
     [ "appMap", "classConfigurationData.html#ade0608a5d3c9ad50b58a156b53faa1ea", null ],
     [ "autMap", "classConfigurationData.html#a9d9b4e5d21bd058a44ecc943f3fd9ba4", null ],
     [ "autpattMap", "classConfigurationData.html#a1a02591e5837790d399c5e7a430df658", null ],
@@ -33,6 +34,7 @@ var classConfigurationData =
     [ "srv_auth_mode", "classConfigurationData.html#aa0f50302b1d3fc65b2156c4835a42453", null ],
     [ "srv_auth_prvd", "classConfigurationData.html#a0de19bbbd8f0694e69b8cc4c644c3535", null ],
     [ "tmplMap", "classConfigurationData.html#ada9337abd1c115eeaf492f2137f7f861", null ],
+    [ "tpes", "classConfigurationData.html#a920b0730a39d60db59ba1f97f4872957", null ],
     [ "urlMap", "classConfigurationData.html#a0868245fbc1a1b7763a7756e9673f0c1", null ],
     [ "urlpattMap", "classConfigurationData.html#a403084b7270f7c84c5dd153465fa581c", null ],
     [ "vwMap", "classConfigurationData.html#a5532aa1f545760f0cadaa9c7a914b157", null ],

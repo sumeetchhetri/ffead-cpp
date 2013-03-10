@@ -44,7 +44,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 		XmlParser parser("Parser");
 		Document doc = parser.getDocument(req->getContent());
 		soapenv = doc.getRootElement();
-		logger << soapenv.getTagName() << "----\n" << flush;
+		//logger << soapenv.getTagName() << "----\n" << flush;
 
 		if(soapenv.getChildElements().size()==1
 				&& soapenv.getChildElements().at(0).getTagName()=="Body")
@@ -52,12 +52,12 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 		else if(soapenv.getChildElements().size()==2
 				&& soapenv.getChildElements().at(1).getTagName()=="Body")
 			soapbody = soapenv.getChildElements().at(1);
-		logger << soapbody.getTagName() << "----\n" << flush;
+		//logger << soapbody.getTagName() << "----\n" << flush;
 		Element method = soapbody.getChildElements().at(0);
-		logger << method.getTagName() << "----\n" << flush;
+		//logger << method.getTagName() << "----\n" << flush;
 		meth = method.getTagName();
 		string methodname = meth + ws_name;
-		logger << methodname << "----\n" << flush;
+		//ogger << methodname << "----\n" << flush;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		if(mkr!=NULL)
 		{
@@ -122,7 +122,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
-		logger << fault << flush;
+		logger << ("Soap fault - " + fault) << flush;
 	}
 	catch(Exception *e)
 	{
@@ -142,7 +142,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
-		logger << e->what() << flush;
+		logger << ("Soap fault - " + e->what()) << flush;
 	}
 	catch(...)
 	{
@@ -162,7 +162,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
-		logger << "Standard Exception" << flush;
+		logger << "Soap Standard Exception" << flush;
 	}
 	res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	res.setContent_type(xmlcnttype);

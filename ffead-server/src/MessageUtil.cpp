@@ -176,11 +176,11 @@ Message MessageUtil::receiveMessage()
 	string h = "GET FROM "+this->destination.getName()+":"+this->destination.getType();
 	if(this->destination.getType()=="Topic")
 		h += ("-" + this->getSubscriber());
-	bool flag = true;
+	//bool flag = true;
 	if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 	{
 		logger << "send failed" << flush;
-		flag = false;
+		//flag = false;
 	}
 	logger << h << flush;
 
@@ -258,11 +258,11 @@ void MessageUtil::subscribe(string subs)
 		freeaddrinfo(servinfo); // all done with this structure
 
 		string h = "SUBSCRIBE "+subs+" TO "+this->destination.getName()+":"+this->destination.getType();
-		bool flag = true;
+		//bool flag = true;
 		if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 		{
 			logger << "send failed" << flush;
-			flag = false;
+			//flag = false;
 		}
 		logger << h << flush;
 
@@ -332,11 +332,11 @@ void MessageUtil::unSubscribe(string subs)
 		freeaddrinfo(servinfo); // all done with this structure
 
 		string h = "UNSUBSCRIBE "+subs+" TO "+this->destination.getName()+":"+this->destination.getType();
-		bool flag = true;
+		//bool flag = true;
 		if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 		{
 			logger << "send failed" << flush;
-			flag = false;
+			//flag = false;
 		}
 		logger << h << flush;
 

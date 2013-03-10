@@ -183,13 +183,13 @@ public:
 				ind = 2;
 			else if(l<16777216)
 				ind =3;
-			else if(l<4294967296ULL)
+			else if(l<(long)4294967296ULL)
 				ind =4;
-			else if(l<1099511627776ULL)
+			else if(l<(long)1099511627776ULL)
 				ind =5;
-			else if(l<281474976710656ULL)
+			else if(l<(long)281474976710656ULL)
 				ind =6;
-			else if(l<72057594037927936ULL)
+			else if(l<(long)72057594037927936ULL)
 				ind =7;
 			else
 				ind =8;

@@ -64,59 +64,60 @@ string ExtHandler::getContentStr(string url,string locale,string ext)
     return all;
 }
 
-bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string resourcePath,
-		map<string, string> tmplMap, map<string, string> vwMap,string ext, map<string, string> props)
+bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib, string resourcePath,
+		map<string, string> tmplMap, map<string, string> vwMap,string ext, map<string, string> props, map<string, string> ajaxIntfMap)
 {
 	Logger logger = Logger::getLogger("ExtHandler");
 	bool cntrlit = false;
 	string content, claz;
-	if(req->getMethod()=="POST" && req->getRequestParam("claz")!="" && req->getRequestParam("method")!="")
+	string acurl = req->getActUrl();
+	StringUtil::replaceFirst(acurl,"//","/");
+	if(acurl.length()>1)
+		acurl = acurl.substr(1);
+	if(acurl.find(req->getCntxt_name())!=0)
+		acurl = req->getCntxt_name() + "/" + acurl;
+
+	if(ajaxIntfMap[acurl]!="" && req->getMethod()=="POST" && req->getRequestParam("method")!="")
 	{
 		cntrlit = true;
-		content = AfcUtil::execute(*req);
-		res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-		res.setContent_type(props[".txt"]);
-		res.setContent_str(content);
-		//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
+		AfcUtil::execute(*req, &res, ajaxIntfMap[acurl]);
 	}
 	else if(ext==".dcp")
 	{
-		cntrlit = true;
 		string libName = Constants::INTER_LIB_FILE;
-		if(dlib == NULL)
+		if(ddlib != NULL)
 		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
-		int s = req->getUrl().find_last_of("/")+1;
-		int en = req->getUrl().find_last_of(".");
-		string meth,file;
-		file = req->getUrl().substr(s,en-s);
-		meth = "_" + file + "emittHTML";
+			cntrlit = true;
+			int s = req->getUrl().find_last_of("/")+1;
+			int en = req->getUrl().find_last_of(".");
+			string meth,file;
+			file = req->getUrl().substr(s,en-s);
+			meth = "_" + file + "emittHTML";
 
-		void *mkr = dlsym(dlib, meth.c_str());
-		if(mkr!=NULL)
-		{
-			logger << endl << "inside dcp " << meth << endl;
-			DCPPtr f =  (DCPPtr)mkr;
-			content = f();
-			//string patf;
-			//patf = req->getCntxt_root() + "/dcp_" + file + ".html";
-			//content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);
-			//delete mkr;
-		}
-		ext = ".html";
-		if(ext!="" && content.length()==0)
-		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-			//res.setContent_len("0");
-		}
-		else
-		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[ext]);
-			res.setContent_str(content);
-			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
+			void *mkr = dlsym(ddlib, meth.c_str());
+			if(mkr!=NULL)
+			{
+				//logger << endl << "inside dcp " << meth << endl;
+				DCPPtr f =  (DCPPtr)mkr;
+				content = f();
+				//string patf;
+				//patf = req->getCntxt_root() + "/dcp_" + file + ".html";
+				//content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);
+				//delete mkr;
+			}
+			ext = ".html";
+			if(ext!="" && content.length()==0)
+			{
+				res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+				//res.setContent_len("0");
+			}
+			else
+			{
+				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
+				res.setContent_type(props[ext]);
+				res.setContent_str(content);
+				//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
+			}
 		}
 	}
 	else if(ext==".view" && vwMap[req->getCntxt_name()+req->getFile()]!="")
@@ -160,40 +161,69 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string 
 	}
 	else if(ext==".tpe" && tmplMap[req->getCntxt_name()+req->getFile()]!="")
 	{
-		cntrlit = true;
 		TemplateEngine te;
 		ext = ".html";
-		if(dlib == NULL)
+		if(ddlib != NULL)
 		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
-		claz = "getReflectionCIFor" + tmplMap[req->getCntxt_name()+req->getFile()];
-		void *mkr = dlsym(dlib, claz.c_str());
-		if(mkr!=NULL)
-		{
-			FunPtr f =  (FunPtr)mkr;
-			ClassInfo srv = f();
-			args argus;
-			Constructor ctor = srv.getConstructor(argus);
-			Reflector ref;
-			void *_temp = ref.newInstanceGVP(ctor);
-			TemplateHandler *thrd = (TemplateHandler *)_temp;
-			Context cnt = thrd->getContext();
-			string t = te.evaluate(req->getUrl(),cnt);
-			content = t;
-		}
-		if(ext!="" && (content.length()==0))
-		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-			//res.setContent_len("0");
-		}
-		else
-		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[ext]);
-			res.setContent_str(content);
-			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
+			if(dlib == NULL)
+			{
+				cerr << dlerror() << endl;
+				exit(-1);
+			}
+			cntrlit = true;
+			claz = "getReflectionCIFor" + tmplMap[req->getCntxt_name()+req->getFile()];
+			void *mkr = dlsym(dlib, claz.c_str());
+			if(mkr!=NULL)
+			{
+				FunPtr f =  (FunPtr)mkr;
+				ClassInfo srv = f();
+				args argus;
+				Constructor ctor = srv.getConstructor(argus);
+				Reflector ref;
+				void *_temp = ref.newInstanceGVP(ctor);
+				TemplateHandler *thrd = (TemplateHandler *)_temp;
+				Context cnt = thrd->getContext();
+
+				logger << "Done with Template Context fetch" << endl;
+				map<string, void*> args;
+				Context::iterator it;
+				for (it=cnt.begin();it!=cnt.end();it++) {
+					string key = it->first;
+					Object o = it->second;
+					logger << ("Template key=" + key + " Value = ") << o.getVoidPointer()<< endl;
+					args[key] = o.getVoidPointer();
+				}
+
+				int s = req->getUrl().find_last_of("/")+1;
+				int en = req->getUrl().find_last_of(".");
+				string meth,file;
+				file = req->getUrl().substr(s,en-s);
+				meth = "_" + file + "emittTemplateHTML";
+
+				mkr = dlsym(ddlib, meth.c_str());
+				if(mkr!=NULL)
+				{
+					//logger << endl << "inside dcp " << meth << endl;
+					TemplatePtr f =  (TemplatePtr)mkr;
+					content = f(args);
+					//string patf;
+					//patf = req->getCntxt_root() + "/dcp_" + file + ".html";
+					//content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);
+					//delete mkr;
+				}
+			}
+			if(ext!="" && (content.length()==0))
+			{
+				res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+				//res.setContent_len("0");
+			}
+			else
+			{
+				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
+				res.setContent_type(props[ext]);
+				res.setContent_str(content);
+				//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
+			}
 		}
 	}
 	else if(ext==".wsdl")

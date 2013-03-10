@@ -40,10 +40,12 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 	if((urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!=""))
 	{
 		//logger << "Controller requested for " << req->getCntxt_name() << " name " << urlMap[req->getCntxt_name()+ext] << endl;
+		string controller;
 		if(urlpattMap[req->getCntxt_name()+"*.*"]!="")
-			claz = "getReflectionCIFor" + urlpattMap[req->getCntxt_name()+"*.*"];
+			controller = urlpattMap[req->getCntxt_name()+"*.*"];
 		else
-			claz = "getReflectionCIFor" + urlMap[req->getCntxt_name()+ext];
+			controller = urlMap[req->getCntxt_name()+ext];
+		claz = "getReflectionCIFor" + controller;
 		string libName = Constants::INTER_LIB_FILE;
 		if(dlib == NULL)
 		{
@@ -61,17 +63,19 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 			void *_temp = ref.newInstanceGVP(ctor);
 			Controller *thrd = (Controller *)_temp;
 			try{
-				 logger << "Controller called" << endl;
+				 logger << ("Controller " + controller + " called") << endl;
 				 res = thrd->service(*req);
-				 logger << res.getStatusCode() << endl;
+				 /*logger << res.getStatusCode() << endl;
 				 logger << res.getContent_type() << endl;
-				 logger << res.getContent_len() << endl;
+				 logger << res.getContent_len() << endl;*/
 				 if(res.getStatusCode()!="")
 					 isContrl = true;
 				 ext = AuthHandler::getFileExtension(req->getUrl());
 				 //delete mkr;
-			}catch(...){ logger << "Controller exception" << endl;}
-			logger << "Controller called\n" << flush;
+			}catch(...){
+				logger << "Controller Exception occurred" << endl;
+			}
+			logger << "Controller call complete" << endl;
 		}
 	}
 	else if((mappattMap[req->getCntxt_name()+"*.*"]!="" || mapMap[req->getCntxt_name()+ext]!=""))
@@ -81,12 +85,12 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 		if(mappattMap[req->getCntxt_name()+"*.*"]!="")
 		{
 			req->setFile(fili+mappattMap[req->getCntxt_name()+"*.*"]);
-			logger << "URL mapped from * to " << mappattMap[req->getCntxt_name()+"*.*"] << endl;
+			logger << ("URL mapped from * to " + mappattMap[req->getCntxt_name()+"*.*"]) << endl;
 		}
 		else
 		{
 			req->setFile(fili+mapMap[req->getCntxt_name()+ext]);
-			logger << "URL mapped from " << ext << " to " << mapMap[req->getCntxt_name()+ext] << endl;
+			logger << ("URL mapped from " + ext + " to " + mapMap[req->getCntxt_name()+ext]) << endl;
 		}
 	}
 	else
@@ -108,61 +112,28 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 				prsiz = ft.params.size();
 				string pthwofiletemp(pthwofile);
 
-				/*if(ft.baseUrl=="")
-				{
-					logger << "checking url : " << pthwofiletemp << ",param size: " << prsiz <<
-							", against url: " << it->first << endl;
-					for (int var = 0; var < prsiz; var++)
-					{
-						//logger << "loop - " << pthwofiletemp << endl;
-						string valsvv(pthwofiletemp.substr(pthwofiletemp.find_last_of("/")+1));
-						pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.find_last_of("/"));
-						valss.push_back(valsvv);
-					}
-					reverse(valss.begin(),valss.end());
-					//logger << "after - " << pthwofiletemp << endl;
+				string baseUrl(it->first);
+				strVec resturlparts;
+				StringUtil::split(resturlparts, baseUrl, "/");
 
-					//logger << "after - " << pthwofiletemp << endl;
-					logger << "checking url : " << pthwofiletemp << ",param size: " << prsiz << ",vals: " << valss.size() <<
-							", against url: " << it->first << endl;
-					if(it->first==pthwofiletemp)
-					{
-						string lhs = StringUtil::toUpperCopy(ft.meth);
-						string rhs = StringUtil::toUpperCopy(req->getMethod());
-						logger << lhs << " <> " << rhs << endl;
-						if(prsiz==(int)valss.size() && lhs==rhs)
-						{
-							logger << "got correct url -- restcontroller " << endl;
-							rft = ft;
-							flag = true;
-						}
-						else
-						{
-							res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-							//res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-							logger << "Rest Controller Param/Method Error" << endl;
-						}
-						break;
-					}
+				strVec urlparts;
+				StringUtil::split(urlparts, pthwofiletemp, "/");
+
+				if(urlparts.size()!=resturlparts.size())
+				{
+					flag = false;
+					//break;
 				}
-				else*/
+				else
 				{
-					string baseUrl(it->first);
-					strVec resturlparts;
-					StringUtil::split(resturlparts, baseUrl, "/");
-
-					strVec urlparts;
-					StringUtil::split(urlparts, pthwofiletemp, "/");
-
-					if(urlparts.size()!=resturlparts.size())
-					{
-						flag = false;
-						//break;
-					}
+					flag = true;
+				}
+				if(flag)
+				{
 					bool fflag = true;
-					for (int var = 0; var < resturlparts.size(); var++)
+					for (int var = 0; var < (int)resturlparts.size(); var++)
 					{
-						logger << "resturlparts.at(var) = " << resturlparts.at(var) << endl;
+						//logger << "resturlparts.at(var) = " << resturlparts.at(var) << endl;
 						if(resturlparts.at(var).find("{")!=string::npos && resturlparts.at(var).find("}")!=string::npos
 								&& resturlparts.at(var).length()>2)
 						{
@@ -181,76 +152,44 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 								paramvalue = paramvalue.substr(stpre, len);
 							}
 							mapOfValues[paramname] = paramvalue;
-							logger << "mapOfValues(" << paramname << ") = "<< paramvalue << endl;
+							//logger << "mapOfValues(" << paramname << ") = "<< paramvalue << endl;
+							logger << ("Restcontroller matched url : " + pthwofiletemp + ",param size: " + CastUtil::lexical_cast<string>(prsiz) +
+										", against url: " + baseUrl) << endl;
 						}
 						else if(urlparts.at(var)!=resturlparts.at(var))
 						{
 							fflag = false;
 							break;
 						}
-
 					}
 					flag = fflag;
-					logger << "checking url : " << pthwofiletemp << ",param size: " << prsiz <<
-							", against url: " << baseUrl << endl;
-					/*for (int var = 1; var <= prsiz; var++)
-					{
-						strVec vemp;
-						stringstream ss;
-						ss << "{";
-						ss << var;
-						ss << "}";
-						string param;
-						ss >> param;
-						StringUtil::split(vemp, baseUrl, (param));
-						if(vemp.size()==2 && pthwofiletemp.find(vemp.at(0))!=string::npos)
-						{
-							string temp = pthwofiletemp;
-							StringUtil::replaceFirst(temp, vemp.at(0), "");
-							if(temp.find("/")!=string::npos)
-							{
-								pthwofiletemp = temp.substr(temp.find("/"));
-								temp = temp.substr(0, temp.find("/"));
-							}
-							valss.push_back(temp);
-							baseUrl = vemp.at(1);
-							logger << "variable at " << param << " mapped to " << temp << " from URL" << endl;
-							logger << baseUrl << endl;
-							logger << pthwofiletemp << endl;
-						}
-						else
-						{
-							flag = false;
-							break;
-						}
-					}*/
-					string lhs = StringUtil::toUpperCopy(ft.meth);
-					string rhs = StringUtil::toUpperCopy(req->getMethod());
-					logger << lhs << " <> " << rhs << endl;
-					//if(prsiz==(int)valss.size() && lhs==rhs)
-					if(flag && lhs==rhs)
-					{
+				}
 
-						logger << "got correct url -- restcontroller " << endl;
-						rft = ft;
-						flag = true;
-						break;
-					}
-					else if(flag)
-					{
-						res.setHTTPResponseStatus(HTTPResponseStatus::InvalidMethod);
-						return true;
-					}
+				string lhs = StringUtil::toUpperCopy(ft.meth);
+				string rhs = StringUtil::toUpperCopy(req->getMethod());
+				//if(prsiz==(int)valss.size() && lhs==rhs)
+				if(flag && lhs==rhs)
+				{
+
+					logger << "Encountered rest controller url/method match" << endl;
+					rft = ft;
+					flag = true;
+					break;
+				}
+				else if(flag)
+				{
+					res.setHTTPResponseStatus(HTTPResponseStatus::InvalidMethod);
+					return true;
+				}
+				else
+				{
+					res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+					//res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+					/*if(prsiz==valss.size())
+						res.setContent_str("Invalid number of arguments");
 					else
-					{
-						res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-						//res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-						/*if(prsiz==valss.size())
-							res.setContent_str("Invalid number of arguments");
-						else
-							res.setContent_str("Invalid HTTPMethod used");*/
-						//logger << "Rest Controller Param/Method Error" << endl;
-					}
+						res.setContent_str("Invalid HTTPMethod used");*/
+					//logger << "Rest Controller Param/Method Error" << endl;
 				}
 			}
 		}
@@ -313,9 +252,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 						else
 							pmvalue = req->getContent();
 
-						logger << "pmvalue = "  << pmvalue << endl;
-						logger << icont << " " << ocont << endl;
-						logger << rft.params.at(var).type << endl;
+						logger << ("Restcontroller parameter type/value = "  + rft.params.at(var).type + "/" + pmvalue) << endl;
+						logger << ("Restcontroller content types input/output = " + icont + "/" + ocont) << endl;
 
 						if(rft.params.at(var).type=="int")
 						{
@@ -361,12 +299,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 						}
 						else if(rft.params.at(var).type.find("vector&lt;")==0)
 						{
-							logger << " is param body vector " << endl;
 							string stlcnt = rft.params.at(var).type;
 							StringUtil::replaceFirst(stlcnt,"vector&lt;","");
 							StringUtil::replaceFirst(stlcnt,"&gt;","");
 							StringUtil::replaceFirst(stlcnt," ","");
-							logger << " is param body vector of type "  << stlcnt << endl;
+							logger << ("Restcontroller param body holds vector of type "  + stlcnt) << endl;
 							string typp = "vector<" + stlcnt + ">";
 							argus.push_back(typp);
 							void* voidPvect = NULL;
@@ -402,16 +339,16 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 								res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 								return true;
 							}
-							logger << voidPvect << endl;
 							valus.push_back(voidPvect);
 						}
 					} catch (const char* ex) {
+						logger << "Restcontroller exception occurred" << endl;
 						logger << ex << endl;
 						invValue= true;
 						res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 						return true;
 					} catch (...) {
-						logger << "exception occurred" << endl;
+						logger << "Restcontroller exception occurred" << endl;
 						invValue= true;
 						res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 						return true;
@@ -422,7 +359,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 				if(meth.getMethodName()!="" && !invValue)
 				{
 					ref.invokeMethodUnknownReturn(_temp,meth,valus);
-					logger << "successfully called restcontroller" << endl;
+					logger << "Successfully called restcontroller" << endl;
 					//return;
 				}
 				else

@@ -32,6 +32,7 @@ class Task {
 	int type;
 	int priority;
 	bool console;
+	bool cleanUp;
 	Task(int priority);
 	Task(int tunit, int type);
 	friend class PoolThread;
@@ -39,6 +40,7 @@ class Task {
 	friend class TaskPool;
 	bool isWaitOver(Timer *timer);
 public:
+	void setCleanUp(bool);
 	Task();
 	virtual ~Task();
 	virtual void run()=0;

@@ -78,7 +78,7 @@ class XMLSerialize {
 		const char *mangled = typeid(td).name();
 		string className = demangle(mangled);
 		string objXml = "<set-"+className+">";
-		while(cnt++<t.size())
+		while(cnt++<(int)t.size())
 		{
 			objXml += serialize<T>(*st.begin());
 			st.erase(st.begin());
@@ -95,7 +95,7 @@ class XMLSerialize {
 		const char *mangled = typeid(td).name();
 		string className = demangle(mangled);
 		string objXml = "<multiset-"+className+">";
-		while(cnt++<t.size())
+		while(cnt++<(int)t.size())
 		{
 			objXml += serialize<T>(*st.begin());
 			st.erase(st.begin());
@@ -112,7 +112,7 @@ class XMLSerialize {
 		const char *mangled = typeid(td).name();
 		string className = demangle(mangled);
 		string objXml = "<vector-"+className+">";
-		while(cnt++<t.size())
+		while(cnt++<(int)t.size())
 		{
 			objXml += serialize<T>(*st.begin());
 			st.erase(st.begin());
@@ -128,7 +128,7 @@ class XMLSerialize {
 		const char *mangled = typeid(td).name();
 		string className = demangle(mangled);
 		string objXml = "<deque-"+className+">";
-		while(cnt++<t.size())
+		while(cnt++<(int)t.size())
 		{
 			objXml += serialize<T>(*st.begin());
 			st.erase(st.begin());
@@ -145,7 +145,7 @@ class XMLSerialize {
 		string className = demangle(mangled);
 		list<string>::iterator it;
 		string objXml = "<list-"+className+">";
-		while(cnt++<t.size())
+		while(cnt++<(int)t.size())
 		{
 			objXml += serialize<T>(*st.begin());
 			st.erase(st.begin());
@@ -157,7 +157,6 @@ class XMLSerialize {
 	{
 		std::queue<T> tt = t;
 		T td;
-		int cnt = 0;
 		const char *mangled = typeid(td).name();
 		string className = demangle(mangled);
 		string objXml = "<queue-"+className+">";

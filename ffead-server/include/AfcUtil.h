@@ -26,6 +26,8 @@
 #include "HttpRequest.h"
 #include "CastUtil.h"
 #include "Logger.h"
+#include "HttpResponse.h"
+#include "HTTPResponseStatus.h"
 
 
 #ifndef AFCUTIL_H_
@@ -37,13 +39,13 @@ public:
 	AfcUtil();
 	virtual ~AfcUtil();
 	static string generateJsObjects(strVec,string,string&,string,string &,strVec,bool,string&,strVec);
-	static string generateJsInterfaces(strVec,string,string&,string,string &,string);
+	static string generateJsInterfaces(strVec,string,string&,string,string &,string,map<string, string>);
 	static string updateAjaxInterface(strVec,string,string,string,string);
 	static void writeTofile(string,string,bool);
-	static string execute(HttpRequest);
+	static void execute(HttpRequest,HttpResponse*,string);
 	static string camelCased(const string&);
 	static string reverseCamelCased(const string&);
-	static string generateJsObjectsAll(vector<string>,strVec,vector<bool>,string &,string &,string &,vector<string>,string&,string&);
+	static string generateJsObjectsAll(vector<string>,strVec,vector<bool>,string &,string &,string &,vector<string>,string&,string&,map<string, string>);
 	static string generateReadObjects(string type, string name, bool priv, bool ptr, string typ);
 	static string generateReadVectorObjects(string type, string name, bool priv, bool ptr, string typ, string conttype);
 	static string generateToJSONObjects(string type, string name, bool priv, strVec obj, int i, string &retu, string &headers, string path, string &objs, string typ, bool ptr);

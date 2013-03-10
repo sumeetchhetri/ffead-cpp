@@ -155,7 +155,7 @@ Element Element::getElementByName(string name)
 ElementList Element::getElementsByName(string name)
 {
 	ElementList list;
-	for(int i=0;i<this->elements.size();i++)
+	for(int i=0;i<(int)this->elements.size();i++)
 	{
 		if(this->elements.at(i).getTagName()==name)
 			list.push_back(this->elements.at(i));

@@ -105,7 +105,7 @@ int SelEpolKqEvPrt::getEvents()
 	#endif
 	#ifdef USE_EVPORT
 		uint_t nevents, wevents = 0;
-		uint_t num = 0;
+		//uint_t num = 0;
 		if (port_getn(port, evlist, 0, &wevents, NULL) < 0) return 0;
 		if (0 == wevents) wevents = 1;
 		nevents = wevents;
@@ -137,7 +137,7 @@ int SelEpolKqEvPrt::getDescriptor(int index)
 		}
 	#endif
 	#ifdef USE_KQUEUE
-		if(index>-1 && index<sizeof evlist)
+		if(index>-1 && index<(int)(sizeof evlist))
 		{
 			return evlist[index].ident;
 		}
@@ -182,7 +182,7 @@ bool SelEpolKqEvPrt::registerForEvent(int descriptor)
 		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, descriptor, &ev) < 0)
 		{
 			perror("epoll");
-			logger << "\nerror adding to epoll cntl list" << flush;
+			logger << "Error adding to epoll cntl list" << endl;
 			return false;
 		}
 	#endif

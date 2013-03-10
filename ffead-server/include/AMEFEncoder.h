@@ -631,22 +631,22 @@ public:
 				type = AMEFObject::BIG_INT_TYPE;
 				ind = 3;
 			}
-			else if(lon<4294967296ULL)
+			else if(lon<(long)4294967296ULL)
 			{
 				type = AMEFObject::INT_TYPE;
 				ind = 4;
 			}
-			else if(lon<1099511627776ULL)
+			else if(lon<(long)1099511627776ULL)
 			{
 				type = AMEFObject::VS_LONG_INT_TYPE;
 				ind = 5;
 			}
-			else if(lon<281474976710656ULL)
+			else if(lon<(long)281474976710656ULL)
 			{
 				type = AMEFObject::S_LONG_INT_TYPE;
 				ind = 6;
 			}
-			else if(lon<72057594037927936ULL)
+			else if(lon<(long)72057594037927936ULL)
 			{
 				type = AMEFObject::B_LONG_INT_TYPE;
 				ind = 7;

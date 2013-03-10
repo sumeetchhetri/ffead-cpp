@@ -23,14 +23,14 @@
 #include "Task.h"
 
 Task::Task() :
-	tunit(-1), type(-1) {
+	tunit(-1), type(-1), cleanUp(false) {
 }
 Task::Task(int priority) :
-	tunit(-1), type(-1) {
+	tunit(-1), type(-1), cleanUp(false) {
 	this->priority = priority;
 }
 Task::Task(int tunit, int type) :
-	tunit(-1), type(-1) {
+	tunit(-1), type(-1), cleanUp(false) {
 	this->tunit = tunit;
 	this->type = type;
 }
@@ -101,4 +101,9 @@ bool Task::isWaitOver(Timer *timer)
 		}
 	}
 	return flag;
+}
+
+void Task::setCleanUp(bool cleanUp)
+{
+	this->cleanUp = cleanUp;
 }

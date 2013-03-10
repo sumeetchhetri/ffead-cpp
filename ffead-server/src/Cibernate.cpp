@@ -33,10 +33,15 @@ Cibernate::Cibernate(string appName) {
 	if (this->appName != "" && CibernateConnPools::isInitialized()
 			&& CibernateConnPools::getPool(this->appName) != NULL) {
 		this->init = true;
+		this->conn = NULL;
 		this->pool = CibernateConnPools::getPool(this->appName);
 		this->mapping = CibernateConnPools::getMapping(this->appName);
-		logger << "\ngot pool " << this->pool << " mapping " << this->mapping
-				<< " for application " << appName << "\n" << flush;
+		if(this->mapping==NULL)
+			throw ("No mapping found for appname " + appName);
+		if(this->pool!=NULL && this->mapping!=NULL)
+		{
+			logger << ("Got pool for application " + appName) << endl;
+		}
 	}
 	else
 		throw "Error connecting to Database server";
@@ -48,10 +53,15 @@ Cibernate::Cibernate() {
 	if (this->appName != "" && CibernateConnPools::isInitialized()
 			&& CibernateConnPools::getPool(this->appName) != NULL) {
 		this->init = true;
+		this->conn = NULL;
 		this->pool = CibernateConnPools::getPool(this->appName);
 		this->mapping = CibernateConnPools::getMapping(this->appName);
-		logger << "\ngot pool " << this->pool << " mapping " << this->mapping
-				<< " for application " << appName << "\n" << flush;
+		if(this->mapping==NULL)
+			throw ("No mapping found for appname " + appName);
+		if(this->pool!=NULL && this->mapping!=NULL)
+		{
+			logger << ("Got pool for application " + appName) << endl;
+		}
 	}
 	else
 		throw "Error connecting to Database server";
@@ -62,19 +72,28 @@ string Cibernate::demangle(const char *mangled)
 	int status;	char *demangled;
 	using namespace abi;
 	demangled = __cxa_demangle(mangled, NULL, 0, &status);
-	stringstream ss;
-	ss << demangled;
-	string s;
-	ss >> s;
+	string s(demangled);
+	delete demangled;
 	return s;
 }
 
-Cibernate::Cibernate(string dbName, string uname, string pass) {
-	this->pool = new CibernateConnectionPool(5, dbName, uname, pass);
-	this->init = true;
+Cibernate::Cibernate(string dbName, string uname, string pass, int psize) {
+	CibernateConnPools::addPool(psize,uname,pass,dbName,"default");
 	if(!CibernateConnPools::isInitialized())
 		throw "Error connecting to Database server";
+	this->pool = CibernateConnPools::getPool("default");
+	this->mapping = CibernateConnPools::getMapping("default");
+	if(this->mapping==NULL)
+		throw ("No mapping found for appname " + appName);
+	this->init = true;
+	this->conn = NULL;
+	if(this->pool!=NULL && this->mapping!=NULL)
+	{
+		logger << ("Got pool for application default") << endl;
+	}
 }
+
+
 bool Cibernate::allocateStmt(bool read) {
 	if(!this->init)
 	{
@@ -101,13 +120,15 @@ bool Cibernate::allocateStmt(bool read) {
 	}
 	return true;
 }
+
+
 void Cibernate::procedureCall(string procName) {
 	bool flagc = allocateStmt(true);
 	if(!flagc)throw "Error getting Database connection";
 	int V_OD_erg;// result of functions
 	char V_OD_stat[10];
-	SQLSMALLINT V_OD_mlen, V_OD_colanz;
-	SQLINTEGER V_OD_err, V_OD_rowanz;
+	SQLSMALLINT V_OD_mlen;
+	SQLINTEGER V_OD_err;
 	SQLCHAR V_OD_msg[200], *query;
 	string quer = "{call " + procName + "(";
 	map<string, string>::iterator it;
@@ -245,7 +266,7 @@ void Cibernate::procedureCall(string procName) {
 			}
 			else if (params[it->first]->getTypeName() == "std::string") {
 				string *parm = (string*)params[it->first]->getVoidPointer();
-				char *parmv = (char*)parm->c_str();
+				//char *parmv = (char*)parm->c_str();
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par , SQL_PARAM_INPUT,
 						SQL_C_CHAR,SQL_VARCHAR, 0, 0, (SQLPOINTER)parm->c_str() ,parm->length(), &hotelInd);
 				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
@@ -333,6 +354,7 @@ void Cibernate::procedureCall(string procName) {
 	close();
 }
 
+
 void Cibernate::close() {
 	this->pool->closeConnection(conn);
 	this->pool = NULL;
@@ -341,91 +363,8 @@ void Cibernate::close() {
 	SQLFreeHandle(SQL_HANDLE_STMT, V_OD_hstmt);
 	V_OD_hstmt = NULL;
 }
-/*void Cibernate::closeONEXITOFSERVER()
- {
- SQLFreeHandle(SQL_HANDLE_STMT,V_OD_hstmt);
- SQLDisconnect(V_OD_hdbc);
- SQLFreeHandle(SQL_HANDLE_DBC,V_OD_hdbc);
- SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
- printf("Disconnected !\n");
- }*/
-void Cibernate::delAll(string clasName) {
-	empty(clasName);
-}
-
-void Cibernate::binPrams(string &query)
-{
-	char V_OD_stat[10];
-	SQLSMALLINT V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
-	int V_OD_erg;// result of functions
-	unsigned var=0,par=1;
-	Params::iterator ite;
-	if(!igPaWC)
-	{
-		query += " where ";
-		for(ite=params.begin();ite!=params.end();++ite)
-		{
-			if(params[ite->first]->getTypeName()=="int")
-			{
-				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_LONG,SQL_INTEGER, 0, 0, params[ite->first]->getVoidPointer() , 20, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-				{
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
-			}
-			else if(params[ite->first]->getTypeName()=="std::string")
-			{
-				string parm = *(string*)(params[ite->first]->getVoidPointer());
-				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_CHAR,SQL_VARCHAR, 0, 0, &parm[0] ,parm.length(), NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-				{
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
-			}
-			query += (ite->first + " = ?");
-			if(var++!=params.size()-1)
-				query += (" and ");
-		}
-	}
-}
 
 
-void Cibernate::delW(string clasName) {
-	bool flagc = allocateStmt(true);
-		if(!flagc)return;
-	if (params.size() == 0)
-		return;
-	string tableName = this->mapping->getAppTableClassMapping(clasName);
-	int V_OD_erg;// result of functions
-	//SQLINTEGER V_OD_id;
-	char V_OD_stat[10];
-	SQLSMALLINT V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
-	string query = "delete from "+tableName;
-	binPrams(query);
-	logger << query << flush;
-	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		logger << "Error in Delete " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
-	}
-
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-	return;
-}
 void Cibernate::empty(string clasName) {
 	bool flagc = allocateStmt(true);
 		if(!flagc)return;
@@ -450,11 +389,14 @@ void Cibernate::empty(string clasName) {
 	clearMaps();
 	return;
 }
+
+
 void* Cibernate::getElements(string clasName)
 {
 	vector<string> cols;
 	return getElements(cols,clasName);
 }
+
 void* Cibernate::getElements(vector<string> cols,string clasName)
 {
 	int V_OD_erg;// result of functions
@@ -465,6 +407,9 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 	fldMap fields = clas.getFields();
 	fldMap::iterator it;
 	void *vecT = reflector.getNewVector(clasName);
+	SQLCHAR colName[256];
+	SQLSMALLINT	V_OD_colanz, colNameLen, dataType, numDecimalDigits, allowsNullValues;
+	SQLUINTEGER columnSize;
 
 	void *col = NULL;
 	V_OD_erg=SQLFetch(V_OD_hstmt);
@@ -472,424 +417,86 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 	{
 		unsigned int var = 0;
 		args argus1;
+		map<string, void*> instances;
 		Constructor ctor = clas.getConstructor(argus1);
 		void *t = reflector.newInstanceGVP(ctor);
-		if(cols.size()<=0)
+		//if(cols.size()<=0)
+		//{
+		V_OD_erg = SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
+		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 		{
-			//for(it=fields.begin();it!=fields.end();++it)
-			for(int ii=0;ii<(int)clas.getFieldVec().size();ii++)
+			close();
+		}
+		//logger << "Number of Columns " << V_OD_colanz << endl;
+		for(int i=1;i<=V_OD_colanz;i++)
+		{
+			V_OD_erg = SQLDescribeCol(V_OD_hstmt, i, colName, 255, &colNameLen, &dataType, &columnSize, &numDecimalDigits, &allowsNullValues);
+			string columnName((char*)colName);
+
+			string thisTableName = tableName;
+
+			if(columnName.find(".")!=string::npos)
 			{
-				col = NULL;
-				SQLRETURN ret;
-				SQLLEN indicator;
-				Field fe = clas.getFieldVec().at(ii);
-				string te = fe.getType();
-				if(te=="int")
-				{
-					col = new int;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG,col, sizeof(col), &indicator);
-				}
-				else if(te=="long")
-				{
-					col = new long;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG,col, sizeof(col), &indicator);
-				}
-				else if(te=="short")
-				{
-					col = new short;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_SMALLINT,col, sizeof(col), &indicator);
-				}
-				else if(te=="double")
-				{
-					col = new double;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE,col, sizeof(col), &indicator);
-				}
-				else if(te=="float")
-				{
-					col = new float;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE,col, sizeof(col), &indicator);
-				}
-				else if(te=="bool")
-				{
-					col = new bool;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT,col, sizeof(col), &indicator);
-				}
-				else if(te=="string")
-				{
-					/*col = new string;
-					SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-					char buf[24];
-					string *temp = new string;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
-					temp->append(buf);
-					//logger << indicator << flush;
-					if(indicator > (long)24)
-					{
-						int len = indicator-24;
-						char buf1[len];
-						ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
-						temp->append(buf1);
-						//logger << buf1 << flush;
-					}
-					col = temp;
-					logger << *temp << "\n" << flush;
-				}
-				else if(te=="binary")
-				{
-					col = new bool;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY,col, sizeof(col), &indicator);
-				}
-				else if(te=="Date")
-				{
-					//col = new Date;
-					//ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DATE,col, sizeof(col), &indicator);
-					/*col = new string;
-					SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-					char buf[24];
+				thisTableName = columnName.substr(0, columnName.find("."));
+				columnName = columnName.substr(columnName.find(".")+1);
+			}
 
-					string temp;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
-					temp.append(buf);
-					//logger << indicator << flush;
-					if(indicator > (long)24)
-					{
-						int len = indicator-24;
-						char buf1[len];
-						ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
-						temp.append(buf1);
-						//logger << buf1 << flush;
-					}
-					DateFormat datf("yyyy-mm-dd");
-					if(temp.length()>10)
-						datf.setFormatspec("yyyy-mm-dd hh:mi:ss");
-					Date *date = datf.parse(temp);
-					col = date;
-					logger << temp << "\n" << flush;
-				}
-				else if(te=="BinaryData")
-				{
-					/*col = new string;
-					SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-					unsigned char buf[24];
-					BinaryData *temp = new BinaryData;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
-					//temp->append(buf,indicator);
-					//logger << indicator << flush;
+			StringUtil::toLower(columnName);
 
-					if(indicator > (long)24)
-					{
-						int len = indicator-24;
-						unsigned char buf1[len];
-						ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf1, sizeof(buf1), &indicator);
-						temp->append(buf,24);
-						temp->append(buf1,len);
-					}
-					else
-						temp->append(buf,indicator);
-					col = temp;
-					logger << buf << "\n" << flush;
-				}
-				else//if its not a vector means its a one-to-one relationship
-				{
+			void* instance = NULL;
+			ClassInfo instanceClas;
+			DBRel instanceRelation;
 
-				}
-				if(col!=NULL)
+			string fieldName = this->mapping->getTableAppColMapping(thisTableName, columnName);
+
+			if(thisTableName==tableName && fieldName!="")
+			{
+				instanceClas = clas;
+				instance = t;
+			}
+			else
+			{
+				for (int var1 = 0; var1 < (int)relv.size(); ++var1)
 				{
-					args argus;
-					argus.push_back(te);
-					vals valus;
-					//valus.push_back(columns.at(var));
-					valus.push_back(col);
-					string methname = "set"+AfcUtil::camelCased(fe.getFieldName());
-					Method meth = clas.getMethod(methname,argus);
-					reflector.invokeMethod<void*>(t,meth,valus);
-					var++;
+					DBRel relation = relv.at(var1);
+					if(relation.type==1)
+					{
+						string tableName1 = this->mapping->getAppTableClassMapping(relation.clsName);
+						fieldName = this->mapping->getTableAppColMapping(tableName1, columnName);
+						if(fieldName!="" || tableName1==thisTableName)
+						{
+							thisTableName = tableName1;
+							args argus1;
+							ClassInfo clas1 = reflector.getClassInfo(relation.clsName);
+							if(instances.find(thisTableName)==instances.end())
+							{
+								Constructor ctor = clas1.getConstructor(argus1);
+								void *tt = reflector.newInstanceGVP(ctor);
+								instances[tableName1] = tt;
+							}
+							instanceClas = clas1;
+							instance = instances[thisTableName];
+							instanceRelation = relation;
+							break;
+						}
+					}
 				}
 			}
-		}
-		else
-		{
-			for(unsigned int u=0;u<cols.size();u++)
+
+			var = storeProperty(instanceClas, instance, var, fieldName);
+			if(thisTableName!=tableName)
 			{
-				SQLRETURN ret;
-				SQLLEN indicator;
-				Field fe = fields[cols.at(u)];
-				string te = fe.getType();
-				if(te=="int")
-				{
-					col = new int;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG,
-														 col, sizeof(col), &indicator);
-				}
-				else if(te=="long")
-				{
-					col = new long;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG,col, sizeof(col), &indicator);
-				}
-				else if(te=="short")
-				{
-					col = new short;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_SMALLINT,col, sizeof(col), &indicator);
-				}
-				else if(te=="double")
-				{
-					col = new double;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE,col, sizeof(col), &indicator);
-				}
-				else if(te=="float")
-				{
-					col = new float;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE,col, sizeof(col), &indicator);
-				}
-				else if(te=="bool")
-				{
-					col = new bool;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT,col, sizeof(col), &indicator);
-				}
-				else if(te=="string")
-				{
-					/*col = new string;
-					SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-					char buf[24];
-					string *temp = new string;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
-					temp->append(buf);
-					//logger << indicator << flush;
-					if(indicator > (long)24)
-					{
-						int len = indicator-24;
-						char buf1[len];
-						ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
-						temp->append(buf1);
-						//logger << buf1 << flush;
-					}
-					col = temp;
-					logger << *temp << "\n" << flush;
-				}
-				else if(te=="binary")
-				{
-					col = new bool;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY,col, sizeof(col), &indicator);
-				}
-				else if(te=="Date")
-				{
-					//col = new Date;
-					//ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DATE,col, sizeof(col), &indicator);
-					/*col = new string;
-					SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-					char buf[24];
-
-					string temp;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
-					temp.append(buf);
-					//logger << indicator << flush;
-					if(indicator > (long)24)
-					{
-						int len = indicator-24;
-						char buf1[len];
-						ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
-						temp.append(buf1);
-						//logger << buf1 << flush;
-					}
-					DateFormat datf("yyyy-mm-dd");
-					if(temp.length()>10)
-						datf.setFormatspec("yyyy-mm-dd hh:mi:ss");
-					Date *date = datf.parse(temp);
-					col = date;
-					logger << temp << "\n" << flush;
-				}
-				else if(te=="BinaryData")
-				{
-					/*col = new string;
-					SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-					unsigned char buf[24];
-					BinaryData *temp = new BinaryData;
-					ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
-					//temp->append(buf,indicator);
-					//logger << indicator << flush;
-
-					if(indicator > (long)24)
-					{
-						int len = indicator-24;
-						unsigned char buf1[len];
-						ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf1, sizeof(buf1), &indicator);
-						temp->append(buf,24);
-						temp->append(buf1,len);
-					}
-					else
-						temp->append(buf,indicator);
-					col = temp;
-					logger << buf << "\n" << flush;
-				}
-				if(col!=NULL)
-				{
-					args argus;
-					argus.push_back(te);
-					vals valus;
-					valus.push_back(col);
-					string methname = "set"+AfcUtil::camelCased(fe.getFieldName());
-					Method meth = clas.getMethod(methname,argus);
-					reflector.invokeMethod<void*>(t,meth,valus);
-					var++;
-				}
-			}
-		}
-		for (int var1 = 0; var1 < (int)relv.size(); ++var1)
-		{
-			DBRel relation = relv.at(var1);
-			if(relation.type==1)
-			{
-				string tableName1 = this->mapping->getAppTableClassMapping(relation.clsName);
-				if(tableName1!="")
-				{
-					args argus1;
-					ClassInfo clas1 = reflector.getClassInfo(relation.clsName);
-					fldMap fields1 = clas1.getFields();
-					Constructor ctor = clas1.getConstructor(argus1);
-					void *tt = reflector.newInstanceGVP(ctor);
-					//for(it=fields1.begin();it!=fields1.end();++it)
-					for(int ii=0;ii<(int)clas.getFieldVec().size();ii++)
-					{
-						col = NULL;
-						SQLRETURN ret;
-						SQLLEN indicator;
-						Field fe = clas.getFieldVec().at(ii);
-						string te = fe.getType();
-						if(te=="int")
-						{
-							col = new int;
-							//SQLBindCol(V_OD_hstmt,var,SQL_C_LONG, col,10,sizes);
-							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG,
-																 col, sizeof(col), &indicator);
-						}
-						else if(te=="long")
-						{
-							col = new long;
-							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG,col, sizeof(col), &indicator);
-						}
-						else if(te=="short")
-						{
-							col = new short;
-							ret = SQLGetData(V_OD_hstmt, var+1, SQL_SMALLINT,col, sizeof(col), &indicator);
-						}
-						else if(te=="double")
-						{
-							col = new double;
-							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE,col, sizeof(col), &indicator);
-						}
-						else if(te=="float")
-						{
-							col = new float;
-							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE,col, sizeof(col), &indicator);
-						}
-						else if(te=="bool")
-						{
-							col = new bool;
-							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT,col, sizeof(col), &indicator);
-						}
-						else if(te=="string")
-						{
-							/*col = new string;
-							SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-							char buf[24];
-							string *temp = new string;
-							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
-							temp->append(buf);
-							//logger << indicator << flush;
-							if(indicator > (long)24)
-							{
-								int len = indicator-24;
-								char buf1[len];
-								ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
-								temp->append(buf1);
-								//logger << buf1 << flush;
-							}
-							col = temp;
-							logger << *temp << "\n" << flush;
-						}
-						else if(te=="binary")
-						{
-							col = new bool;
-							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY,col, sizeof(col), &indicator);
-						}
-						else if(te=="Date")
-						{
-							//col = new Date;
-							//ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DATE,col, sizeof(col), &indicator);
-							/*col = new string;
-							SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-							char buf[24];
-
-							string temp;
-							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
-							temp.append(buf);
-							//logger << indicator << flush;
-							if(indicator > (long)24)
-							{
-								int len = indicator-24;
-								char buf1[len];
-								ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
-								temp.append(buf1);
-								//logger << buf1 << flush;
-							}
-							DateFormat datf("yyyy-mm-dd");
-							if(temp.length()>10)
-								datf.setFormatspec("yyyy-mm-dd hh:mi:ss");
-							Date *date = datf.parse(temp);
-							col = date;
-							logger << temp << "\n" << flush;
-						}
-						else if(te=="BinaryData")
-						{
-							/*col = new string;
-							SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-							unsigned char buf[24];
-							BinaryData *temp = new BinaryData;
-							ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
-							//temp->append(buf,indicator);
-							//logger << indicator << flush;
-
-							if(indicator > (long)24)
-							{
-								int len = indicator-24;
-								unsigned char buf1[len];
-								ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf1, sizeof(buf1), &indicator);
-								temp->append(buf,24);
-								temp->append(buf1,len);
-							}
-							else
-								temp->append(buf,indicator);
-							col = temp;
-							logger << buf << "\n" << flush;
-						}
-						else//if its not a vector means its a one-to-one relationship
-						{
-
-						}
-						if(col!=NULL)
-						{
-							args argus;
-							argus.push_back(te);
-							vals valus;
-							//valus.push_back(columns.at(var));
-							valus.push_back(col);
-							string methname = "set"+AfcUtil::camelCased(fe.getFieldName());
-							Method meth = clas1.getMethod(methname,argus);
-							reflector.invokeMethod<void*>(tt,meth,valus);
-							var++;
-						}
-					}
-					args argus;
-					vals valus;
-					valus.push_back(tt);
-					argus.push_back(relation.clsName);
-					string methname = "set"+AfcUtil::camelCased(relation.clsName);
-					Method meth = clas.getMethod(methname,argus);
-					reflector.invokeMethodGVP(t,meth,valus);
-				}
+				args argus;
+				vals valus;
+				valus.push_back(instance);
+				argus.push_back(instanceRelation.clsName);
+				string methname = "set"+AfcUtil::camelCased(instanceRelation.field);
+				Method meth = clas.getMethod(methname,argus);
+				reflector.invokeMethodGVP(t,meth,valus);
 			}
 		}
 		reflector.vectorPushBack(vecT,t,clasName);
+		delete t;
 		V_OD_erg=SQLFetch(V_OD_hstmt);
 	}
 	SQLCloseCursor(V_OD_hstmt);
@@ -913,7 +520,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 				on.setTypeName(meth.getReturnType());
 				addParam(relation.fk,on);
 				igPaWC = false;
-				col = getARACW(relation.clsName);
+				//col = getARACW(relation.clsName);
 				valus.push_back(col);
 				argus.push_back("vector<"+relation.clsName+">");
 				methname = "set"+AfcUtil::camelCased(relation.field);
@@ -927,30 +534,470 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 }
 
 
-string Cibernate::selectQuery(string clasName)
+void* Cibernate::getElements()
 {
-	vector<string> cols;
-	return selectQuery(cols,clasName);
+	int V_OD_erg;// result of functions
+	SQLCHAR colName[256];
+	SQLSMALLINT	V_OD_colanz, colNameLen, dataType, numDecimalDigits, allowsNullValues;
+	SQLUINTEGER columnSize;
+
+	vector<map<string, void*> >* vecT = new vector<map<string, void*> >;
+
+	V_OD_erg=SQLFetch(V_OD_hstmt);
+	while(V_OD_erg != SQL_NO_DATA)
+	{
+		unsigned int var = 0;
+
+		V_OD_erg = SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
+		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+		{
+			close();
+		}
+
+		//logger << "Number of Columns " << V_OD_colanz << endl;
+
+		map<string, void*> colValMap;
+
+		for(int i=1;i<=V_OD_colanz;i++)
+		{
+			V_OD_erg = SQLDescribeCol(V_OD_hstmt, i, colName, 255, &colNameLen, &dataType, &columnSize, &numDecimalDigits, &allowsNullValues);
+			string columnName((char*)colName, colNameLen);
+
+			//string thisTableName = tableName;
+
+			/*if(columnName.find(".")!=string::npos)
+			{
+				thisTableName = columnName.substr(0, columnName.find("."));
+				columnName = columnName.substr(columnName.find(".")+1);
+			}*/
+
+			StringUtil::toLower(columnName);
+
+			var = getProperty(dataType, columnSize, colValMap, columnName, var);
+		}
+		V_OD_erg=SQLFetch(V_OD_hstmt);
+		vecT->push_back(colValMap);
+	}
+	SQLCloseCursor(V_OD_hstmt);
+	return vecT;
 }
-string Cibernate::selectQuery(vector<string> cols,string clasName)
+
+
+int Cibernate::storeProperty(ClassInfo clas, void* t, int var, string fieldName)
+{
+	void* col = NULL;
+	SQLRETURN ret;
+	SQLLEN indicator;
+	Field fe = clas.getField(fieldName);
+	string te = fe.getType();
+	if(te=="int")
+	{
+		col = new int;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, col, sizeof(col), &indicator);
+	}
+	else if(te=="unsigned int")
+	{
+		col = new unsigned int;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_ULONG,col, sizeof(col), &indicator);
+	}
+	else if(te=="long")
+	{
+		col = new long;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG,col, sizeof(col), &indicator);
+	}
+	else if(te=="unsigned long")
+	{
+		col = new unsigned long;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_ULONG,col, sizeof(col), &indicator);
+	}
+	else if(te=="long long")
+	{
+		col = new long long;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_SBIGINT, col, sizeof(col), &indicator);
+	}
+	else if(te=="unsigned long long")
+	{
+		col = new unsigned long long;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_UBIGINT, col, sizeof(col), &indicator);
+	}
+	else if(te=="short")
+	{
+		col = new short;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_SHORT,col, sizeof(col), &indicator);
+	}
+	else if(te=="unsigned short")
+	{
+		col = new unsigned short;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_USHORT,col, sizeof(col), &indicator);
+	}
+	else if(te=="double")
+	{
+		col = new double;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE, col, sizeof(col), &indicator);
+	}
+	else if(te=="float")
+	{
+		col = new float;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_FLOAT, col, sizeof(col), &indicator);
+	}
+	else if(te=="bool")
+	{
+		col = new bool;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT, col, sizeof(col), &indicator);
+	}
+	else if(te=="string")
+	{
+		/*col = new string;
+		SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
+		char buf[24];
+		string *temp = new string;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+		temp->append(buf);
+		//logger << indicator << flush;
+		if(indicator > (long)24)
+		{
+			int len = indicator-24;
+			char buf1[len];
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+			temp->append(buf1);
+			//logger << buf1 << flush;
+		}
+		col = temp;
+		//logger << *temp << "\n" << flush;
+	}
+	else if(te=="Date")
+	{
+		//col = new Date;
+		//ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DATE,col, sizeof(col), &indicator);
+		/*col = new string;
+		SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
+		char buf[24];
+
+		string temp;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+		temp.append(buf);
+		//logger << indicator << flush;
+		if(indicator > (long)24)
+		{
+			int len = indicator-24;
+			char buf1[len];
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+			temp.append(buf1);
+			//logger << buf1 << flush;
+		}
+		DateFormat datf("yyyy-mm-dd");
+		if(temp.length()>10)
+			datf.setFormatspec("yyyy-mm-dd hh:mi:ss");
+		Date *date = datf.parse(temp);
+		col = date;
+		//logger << temp << "\n" << flush;
+	}
+	else if(te=="BinaryData")
+	{
+		/*col = new string;
+		SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
+		unsigned char buf[24];
+		BinaryData *temp = new BinaryData;
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
+		//temp->append(buf,indicator);
+		//logger << indicator << flush;
+
+		if(indicator > (long)24)
+		{
+			int len = indicator-24;
+			unsigned char buf1[len];
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf1, sizeof(buf1), &indicator);
+			temp->append(buf,24);
+			temp->append(buf1,len);
+		}
+		else
+			temp->append(buf,indicator);
+		col = temp;
+		//logger << buf << "\n" << flush;
+	}
+	else//if its not a vector means its a one-to-one relationship
+	{
+
+	}
+	if(col!=NULL)
+	{
+		Reflector reflector;
+		args argus;
+		argus.push_back(te);
+		vals valus;
+		//valus.push_back(columns.at(var));
+		valus.push_back(col);
+		string methname = "set"+AfcUtil::camelCased(fe.getFieldName());
+		Method meth = clas.getMethod(methname,argus);
+		reflector.invokeMethod<void*>(t,meth,valus);
+		var++;
+	}
+	return var;
+}
+
+
+int Cibernate::getProperty(int dataType, int columnSize, map<string, void*>& colValMap, string colName, int var)
+{
+	void* col = NULL;
+	SQLRETURN ret;
+	SQLLEN indicator;
+	switch (dataType) {
+		case SQL_BIT:
+		{
+			col = new bool;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT, col, sizeof(col), &indicator);
+			colValMap[colName] = col;
+		}
+		case SQL_REAL:
+		{
+			col = new float;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_FLOAT, col, sizeof(col), &indicator);
+			colValMap[colName] = col;
+		}
+		case SQL_DECIMAL:
+		case SQL_DOUBLE:
+		{
+			col = new double;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE, col, sizeof(col), &indicator);
+			colValMap[colName] = col;
+		}
+		case SQL_VARCHAR:
+		case SQL_CHAR:
+		default:
+		{
+			char buf[24];
+			string *temp = new string;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+			temp->append(buf);
+			if(indicator > (long)24)
+			{
+				int len = indicator-24;
+				char buf1[len];
+				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+				temp->append(buf1);
+			}
+			col = temp;
+			colValMap[colName] = col;
+			break;
+		}
+		case SQL_BINARY:
+		{
+			unsigned char buf[24];
+			BinaryData *temp = new BinaryData;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
+			if(indicator > (long)24)
+			{
+				int len = indicator-24;
+				unsigned char buf1[len];
+				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf1, sizeof(buf1), &indicator);
+				temp->append(buf,24);
+				temp->append(buf1,len);
+			}
+			else
+				temp->append(buf,indicator);
+			col = temp;
+			colValMap[colName] = col;
+			break;
+		}
+		case SQL_INTEGER:
+		{
+			if(columnSize>10)
+			{
+				col = new long;
+				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, col, sizeof(col), &indicator);
+				colValMap[colName] = col;
+			}
+			else
+			{
+				col = new int;
+				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, col, sizeof(col), &indicator);
+				colValMap[colName] = col;
+			}
+			break;
+		}
+		case SQL_BIGINT:
+		{
+			char buf[24];
+			string temp;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+			temp.append(buf);
+			if(indicator > (long)24)
+			{
+				int len = indicator-24;
+				char buf1[len];
+				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+				temp.append(buf1);
+			}
+			long long *number = new long long(CastUtil::lexical_cast<long long>(temp));
+			colValMap[colName] = number;
+			break;
+		}
+		case SQL_DATE:
+		case SQL_TIME:
+		case SQL_TIMESTAMP:
+		{
+			char buf[24];
+			string temp;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+			temp.append(buf);
+			if(indicator > (long)24)
+			{
+				int len = indicator-24;
+				char buf1[len];
+				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+				temp.append(buf1);
+			}
+			string fmstr;
+			if(dataType==SQL_DATE)
+				fmstr = "yyyy-mm-dd";
+			else if(dataType==SQL_TIME)
+				fmstr = "hh:mm:ss.nnnnnn";
+			else if(dataType==SQL_TIMESTAMP)
+				fmstr = "yyyy-mm-dd hh:mm:ss.nnnnnn";
+			DateFormat datf(fmstr);
+			Date *date = datf.parse(temp);
+			col = date;
+			colValMap[colName] = col;
+			break;
+		}
+	}
+	return var+1;
+}
+
+
+void* Cibernate::sqlfuncs(string type,string clasName)
 {
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
+	string query = "select "+type+" from "+tableName;
+	CibernateQuery cquery(query);
+	vector<map<string, void*> > vec = execute(cquery);
+	if(vec.size()>0 && vec.at(0).size()>0)
+	{
+		return vec.at(0).begin()->second;
+	}
+	return NULL;
+}
+
+bool Cibernate::startTransaction()
+{
+	bool flagc = allocateStmt(true);
+		if(!flagc)return false;
+	int V_OD_erg;// result of functions
+	//SQLINTEGER V_OD_id;
+	char V_OD_stat[10];
+	SQLSMALLINT	V_OD_mlen;
+	SQLINTEGER V_OD_err;
+	SQLCHAR V_OD_msg[200];
+	string vals;
+	string query = "start transaction";
+	logger << query << flush;
+	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
+	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+	{
+		logger << "Error in Start transaction " << V_OD_erg << endl;
+		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+		close();
+		SQLCloseCursor(V_OD_hstmt);
+		return false;
+	}
+	SQLCloseCursor(V_OD_hstmt);
+	clearMaps();
+	return true;
+}
+
+bool Cibernate::commit()
+{
+	bool flagc = allocateStmt(true);
+	if(!flagc)return false;
+	int V_OD_erg;// result of functions
+	//SQLINTEGER V_OD_id;
+	char V_OD_stat[10];
+	SQLSMALLINT	V_OD_mlen;
+	SQLINTEGER V_OD_err;
+	SQLCHAR V_OD_msg[200];
+	string vals;
+	string query = "commit";
+	logger << query << flush;
+	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
+	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+	{
+		logger << "Error in commit " << V_OD_erg << endl;
+		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+		close();
+		SQLCloseCursor(V_OD_hstmt);
+		return false;
+	}
+	SQLCloseCursor(V_OD_hstmt);
+	clearMaps();
+	return true;
+}
+
+bool Cibernate::rollback()
+{
+	bool flagc = allocateStmt(true);
+	if(!flagc)return false;
+	int V_OD_erg;// result of functions
+	//SQLINTEGER V_OD_id;
+	char V_OD_stat[10];
+	SQLSMALLINT	V_OD_mlen;
+	SQLINTEGER V_OD_err;
+	SQLCHAR V_OD_msg[200];
+	string vals;
+	string query = "rollback";
+	logger << query << flush;
+	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
+	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+	{
+		logger << "Error in rollback " << V_OD_erg << endl;
+		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+		close();
+		SQLCloseCursor(V_OD_hstmt);
+		return false;
+	}
+	SQLCloseCursor(V_OD_hstmt);
+	clearMaps();
+	return true;
+}
+
+
+void* Cibernate::executeQuery(CibernateQuery cquery, vector<string> cols)
+{
+	Reflector reflector;
+	string clasName = cquery.className;
+	string tableName = this->mapping->getAppTableClassMapping(clasName);
+	ClassInfo clas = reflector.getClassInfo(clasName);
 	vector<DBRel> relv = this->mapping->getAppTablerelMapping(clasName);
 	string query = "select ";
 	if(cols.size()>0)
 	{
 		for (unsigned int var = 0; var < cols.size(); var++)
 		{
-			string columnName = cols.at(var);
-			if(this->mapping->getAppTableColMapping(tableName,columnName)!="")
-				columnName = this->mapping->getAppTableColMapping(tableName,columnName);
+			string propertyName = cols.at(var);
+			string columnName = propertyName;
+			if(this->mapping->getAppTableColMapping(clasName,propertyName)!="")
+				columnName = this->mapping->getAppTableColMapping(clasName,propertyName);
 			query += (clasName + "_Alias."  + columnName);
 			if(var!=cols.size()-1)
 				query += ",";
 		}
 	}
 	else
-		query += clasName + "_Alias.*";
+	{
+		strMap tabcolmap = this->mapping->getAppTableColMapping(clasName);
+		strMap::iterator it;
+		int fldsiz = (int)tabcolmap.size();
+		int var = 1;
+		for(it=tabcolmap.begin();it!=tabcolmap.end();it++)
+		{
+			string columnName = it->first;
+			query += (clasName + "_Alias."  + columnName);
+			if(var++!=fldsiz)
+				query += ",";
+		}
+	}
 	string reltabs = " from ";
 	for (int var1 = 0; var1 < (int)relv.size(); var1++)
 	{
@@ -960,84 +1007,116 @@ string Cibernate::selectQuery(vector<string> cols,string clasName)
 			string tableName1 = this->mapping->getAppTableClassMapping(relation.clsName);
 			if(tableName1!="")
 			{
-				query += ","+relation.clsName+"_Alias.*";
+				query += ",";
+				strMap tabcolmap = this->mapping->getAppTableColMapping(relation.clsName);
+				strMap::iterator it;
+				int fldsiz = (int)tabcolmap.size();
+				int var = 1;
+				for(it=tabcolmap.begin();it!=tabcolmap.end();it++)
+				{
+					string columnName = it->first;
+					query += (relation.clsName + "_Alias."  + columnName);
+					if(var++!=fldsiz)
+						query += ",";
+				}
 				reltabs += tableName1 + " " + relation.clsName +"_Alias,";
 			}
 		}
 	}
 	query += (reltabs + tableName + " " + clasName + "_Alias");
-	binPrams(query);
-	for (int var1 = 0; var1 < (int)relv.size(); var1++)
-	{
-		DBRel relation = relv.at(var1);
-		if(relation.type==1)
-		{
-			string tableName1 = this->mapping->getAppTableClassMapping(relation.clsName);
-			if(tableName1!="")
-			{
-				if(query.find("where")==string::npos)
-					query += " where ";
-				else
-					query += " and ";
-				query += clasName + "_Alias"+"."+relation.pk+"="+relation.clsName +"_Alias."+relation.fk;
-			}
-		}
-	}
-	logger << query << flush;
-	return query;
+	//logger << query << flush;
+	cquery.query = query;
+	return executeQuery(cquery);
 }
 
-string Cibernate::insertQuery(vector<string> cols,string clasName,void *t)
+
+bool Cibernate::executeInsert(CibernateQuery cquery, vector<string> cols, void* t)
 {
-	int V_OD_erg;// result of functions
-	char V_OD_stat[10];
-	SQLSMALLINT V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
+	string clasName = cquery.className;
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
 	vector<DBRel> relv = this->mapping->getAppTablerelMapping(clasName);
 	string query = "insert into "+tableName+"(";
+	unsigned var=0;
 	Reflector reflector;
 	string vals;
 	ClassInfo clas = reflector.getClassInfo(clasName);
 	fldMap fields = clas.getFields();
-	unsigned par = 1,var=0;
+	unsigned par = 1;
 	if(cols.size()>0)
 	{
 		for (unsigned int var = 0; var < cols.size(); var++)
 		{
-			string columnName = cols.at(var);
-			if(this->mapping->getAppTableColMapping(tableName,columnName)!="")
-				columnName = this->mapping->getAppTableColMapping(tableName,columnName);
+			string propertyName = cols.at(var);
+			string columnName = propertyName;
+			if(this->mapping->getAppTableColMapping(clasName,propertyName)!="")
+				columnName = this->mapping->getAppTableColMapping(clasName,propertyName);
 			args argus;
 			vector<void *> valus;
 			Field fld = fields[cols.at(var)];
 			string methname = "get"+AfcUtil::camelCased(cols.at(var));
 			Method meth = clas.getMethod(methname,argus);
-			if(fld.getType()=="int")
+			if(fld.getType()=="short")
+			{
+				short temp = reflector.invokeMethod<short>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned short")
+			{
+				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="int")
 			{
 				int temp = reflector.invokeMethod<int>(t,meth,valus);
-				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_LONG,SQL_INTEGER, 0, 0, &temp , 0, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-				{
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned int")
+			{
+				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="long")
+			{
+				long temp = reflector.invokeMethod<long>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned long")
+			{
+				unsigned long temp = reflector.invokeMethod<unsigned long>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="double")
+			{
+				double temp = reflector.invokeMethod<double>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="float")
+			{
+				float temp = reflector.invokeMethod<float>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="string")
 			{
-				string str = reflector.invokeMethod<string>(t,meth,valus);
-				char *parm = (char*)str.c_str();
-				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_CHAR,SQL_CHAR, 0, 0, parm ,0, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-				{
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
+				string temp = reflector.invokeMethod<string>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
 			}
 
 			query += (columnName);
@@ -1059,30 +1138,68 @@ string Cibernate::insertQuery(vector<string> cols,string clasName,void *t)
 			Field fld = it->second;
 			string methname = "get"+AfcUtil::camelCased(it->first);
 			Method meth = clas.getMethod(methname,argus);
-			if(fld.getType()=="int")
+			if(fld.getType()=="short")
+			{
+				short temp = reflector.invokeMethod<short>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned short")
+			{
+				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="int")
 			{
 				int temp = reflector.invokeMethod<int>(t,meth,valus);
-				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_LONG,SQL_INTEGER, 0, 0, &temp , 0, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-				{
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned int")
+			{
+				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="long")
+			{
+				long temp = reflector.invokeMethod<long>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned long")
+			{
+				unsigned long temp = reflector.invokeMethod<unsigned long>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="double")
+			{
+				double temp = reflector.invokeMethod<double>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="float")
+			{
+				float temp = reflector.invokeMethod<float>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="string")
 			{
-				string str = reflector.invokeMethod<string>(t,meth,valus);
-				char *parm = (char*)str.c_str();
-				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_CHAR,SQL_CHAR, 0, 0, parm ,0, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-				{
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
+				string temp = reflector.invokeMethod<string>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
 			}
 			query += (it->first);
 			vals += "?";
@@ -1094,23 +1211,24 @@ string Cibernate::insertQuery(vector<string> cols,string clasName,void *t)
 		}
 	}
 	query += (") values("+vals+")");
-	binPrams(query);
-	logger << query << flush;
-	return query;
+	cquery.query = query;
+	//logger << query << flush;
+
+	bool* flag = (bool*)executeQuery(cquery);
+	bool ffl = *flag;
+	delete flag;
+	return ffl;
 }
 
 
-string Cibernate::updateQuery(vector<string> cols,string clasName,void *t)
+bool Cibernate::executeUpdate(CibernateQuery cquery, vector<string> cols, void* t)
 {
-	int V_OD_erg;// result of functions
-	char V_OD_stat[10];
-	SQLSMALLINT V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
+	string clasName = cquery.className;
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
 	vector<DBRel> relv = this->mapping->getAppTablerelMapping(clasName);
 	string query = "update "+tableName+" set ";
 	Reflector reflector;
+	string vals;
 	ClassInfo clas = reflector.getClassInfo(clasName);
 	fldMap fields = clas.getFields();
 	unsigned par = 1,var=0;
@@ -1118,38 +1236,77 @@ string Cibernate::updateQuery(vector<string> cols,string clasName,void *t)
 	{
 		for (unsigned int var = 0; var < cols.size(); var++)
 		{
-			string columnName = cols.at(var);
-			if(this->mapping->getAppTableColMapping(tableName,columnName)!="")
-				columnName = this->mapping->getAppTableColMapping(tableName,columnName);
+			string propertyName = cols.at(var);
+			string columnName = propertyName;
+			if(this->mapping->getAppTableColMapping(clasName,propertyName)!="")
+				columnName = this->mapping->getAppTableColMapping(clasName,propertyName);
 			args argus;
 			vector<void *> valus;
 			Field fld = fields[cols.at(var)];
 			string methname = "get"+AfcUtil::camelCased(cols.at(var));
 			Method meth = clas.getMethod(methname,argus);
-			if(fld.getType()=="int")
+			if(fld.getType()=="short")
+			{
+				short temp = reflector.invokeMethod<short>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned short")
+			{
+				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="int")
 			{
 				int temp = reflector.invokeMethod<int>(t,meth,valus);
-				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_LONG,SQL_INTEGER, 0, 0, &temp , 0, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-				{
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned int")
+			{
+				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="long")
+			{
+				long temp = reflector.invokeMethod<long>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned long")
+			{
+				unsigned long temp = reflector.invokeMethod<unsigned long>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="double")
+			{
+				double temp = reflector.invokeMethod<double>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="float")
+			{
+				float temp = reflector.invokeMethod<float>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="string")
 			{
-				string str = reflector.invokeMethod<string>(t,meth,valus);
-				char *parm = (char*)str.c_str();
-				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_CHAR,SQL_CHAR, 0, 0, parm ,0, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-				{
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
+				string temp = reflector.invokeMethod<string>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
 			}
 
 			query += (columnName+" = ?");
@@ -1169,31 +1326,70 @@ string Cibernate::updateQuery(vector<string> cols,string clasName,void *t)
 			Field fld = it->second;
 			string methname = "get"+AfcUtil::camelCased(it->first);
 			Method meth = clas.getMethod(methname,argus);
-			if(fld.getType()=="int")
+			if(fld.getType()=="short")
+			{
+				short temp = reflector.invokeMethod<short>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned short")
+			{
+				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="int")
 			{
 				int temp = reflector.invokeMethod<int>(t,meth,valus);
-				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_LONG,SQL_INTEGER, 0, 0, &temp , 0, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-				{
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned int")
+			{
+				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="long")
+			{
+				long temp = reflector.invokeMethod<long>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="unsigned long")
+			{
+				unsigned long temp = reflector.invokeMethod<unsigned long>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="double")
+			{
+				double temp = reflector.invokeMethod<double>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
+			}
+			else if(fld.getType()=="float")
+			{
+				float temp = reflector.invokeMethod<float>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="string")
 			{
-				string str = reflector.invokeMethod<string>(t,meth,valus);
-				char *parm = (char*)str.c_str();
-				V_OD_erg= SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT, SQL_C_CHAR,SQL_CHAR, 0, 0, parm ,0, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-				{
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
+				string temp = reflector.invokeMethod<string>(t,meth,valus);
+				Object o;
+				o << temp;
+				cquery.propPosVaues[var+1] = o;
 			}
+
 			query += (it->first+" = ?");
 			if(var++!=fields.size()-1)
 			{
@@ -1201,478 +1397,284 @@ string Cibernate::updateQuery(vector<string> cols,string clasName,void *t)
 			}
 		}
 	}
-	binPrams(query);
-	logger << query << flush;
-	return query;
+	cquery.query = query;
+	//logger << query << flush;
+
+	bool* flag = (bool*)executeQuery(cquery);
+	bool ffl = *flag;
+	delete flag;
+	return ffl;
 }
 
-vector<map<string, void*> > Cibernate::getARSCW(string tableName,
-		vector<string> cols, vector<string> coltypes)
-{
-	vector<map<string, void*> > retValueVec;
-	bool flagc = allocateStmt(true);
-		if(!flagc)return retValueVec;
-
-	if (tableName == "" || (params.size() == 0 || cols.size() == 0
-			|| coltypes.size() == 0) || igPaWC || (coltypes.size()
-			!= cols.size()))
-		return retValueVec;
-
-	int V_OD_erg;// result of functions
-	//SQLINTEGER V_OD_id;
-	char V_OD_stat[10];
-	SQLSMALLINT V_OD_mlen, V_OD_colanz;
-	SQLINTEGER V_OD_err;
-	SQLLEN V_OD_rowanz;
-	SQLCHAR V_OD_msg[200];
-
-	string query = "select ";
-	for (unsigned int var = 0; var < cols.size(); var++) {
-		string columnName = cols.at(var);
-		if (this->mapping->getAppTableColMapping(tableName, columnName) != "")
-			columnName = this->mapping->getAppTableColMapping(tableName, columnName);
-		query += (tableName + "_Alias." + columnName);
-		if (var != cols.size() - 1)
-			query += ",";
-	}
-	query += (" from " + tableName + " " + tableName + "_Alias");
-	//fldMap fields = clas.getFields();
-	//fldMap::iterator it;
-	Params::iterator ite;
-	if (!igPaWC) {
-		query += " where ";
-		unsigned int var = 0, par = 1;
-		for (ite = params.begin(); ite != params.end(); ++ite) {
-			if (params[ite->first]->getTypeName() == "int") {
-				V_OD_erg = SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT,
-						SQL_C_LONG, SQL_INTEGER, 0, 0,
-						params[ite->first]->getVoidPointer(), 20, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
-						!= SQL_SUCCESS_WITH_INFO)) {
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1,
-							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
-							&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
-			} else if (params[ite->first]->getTypeName() == "std::string") {
-				string *str = params[ite->first]->getPointer<string> ();
-				char *parm = (char*) str->c_str();
-				V_OD_erg = SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT,
-						SQL_C_CHAR, SQL_VARCHAR, 0, 0, parm, 0, NULL);
-				if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg
-						!= SQL_SUCCESS_WITH_INFO)) {
-					logger << "Error in binding parameter " << V_OD_erg << endl;
-					SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1,
-							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
-							&V_OD_mlen);
-					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
-				}
-			}
-			query += (ite->first + " = ?");
-			if (var++ != params.size() - 1)
-				query += (" and ");
-		}
-	}
-	logger << query << flush;
-	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		logger << "Error in Select " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
-				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
-	}
-	V_OD_erg = SQLNumResultCols(V_OD_hstmt, &V_OD_colanz);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		close();
-	}
-	logger << "Number of Columns " << V_OD_colanz << endl;
-	V_OD_erg = SQLRowCount(V_OD_hstmt, &V_OD_rowanz);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		logger << "Number of RowCount " << V_OD_erg << endl;
-		close();
-	}
-	logger << "Number of Rows " << (int)V_OD_rowanz << endl;
-	V_OD_erg = SQLFetch(V_OD_hstmt);
-	while (V_OD_erg != SQL_NO_DATA) {
-		map<string, void*> retValue;
-		for (unsigned int u = 0; u < cols.size(); u++) {
-			void* col = NULL;
-			SQLRETURN ret;
-			SQLLEN indicator;
-			string columnName = cols.at(u);
-			if (this->mapping->getAppTableColMapping(tableName, columnName) != "")
-				columnName = this->mapping->getAppTableColMapping(tableName,
-						columnName);
-			if (coltypes.at(u) == "int") {
-				col = new int;
-				ret = SQLGetData(V_OD_hstmt, u + 1, SQL_C_LONG, col,
-						sizeof(col), &indicator);
-			} else if (coltypes.at(u) == "string" || coltypes.at(u)
-					== "std::string") {
-				char buf[24];
-				string *temp = new string;
-				ret = SQLGetData(V_OD_hstmt, u + 1, SQL_C_CHAR, buf,
-						sizeof(buf), &indicator);
-				temp->append(buf);
-				logger << indicator << flush;
-				if (indicator > (long) 24) {
-					char buf1[indicator - 22];
-					ret = SQLGetData(V_OD_hstmt, u + 1, SQL_C_CHAR, buf1,
-							sizeof(buf1), &indicator);
-					temp->append(buf1);
-				}
-				col = temp;
-				logger << *temp << "\n" << flush;
-			}
-			retValue[columnName] = col;
-		}
-		retValueVec.push_back(retValue);
-		V_OD_erg = SQLFetch(V_OD_hstmt);
-	}
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-	return retValueVec;
-}
-
-void* Cibernate::getORW(string clasName)
+void* Cibernate::executeQuery(CibernateQuery query)
 {
 	void *vecT = NULL;
 	bool flagc = allocateStmt(true);
-			if(!flagc)return vecT;
-
-	if(params.size()==0 && !igPaWC)
-		return vecT;
-	int V_OD_erg;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err;
-	SQLLEN V_OD_rowanz;
-	SQLCHAR V_OD_msg[200];
-	string query = selectQuery(clasName);
-	query += " LIMIT 1";
-	V_OD_erg=SQLExecDirect(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+	if(!flagc)
 	{
-	   logger << "Error in Select " << V_OD_erg << endl;
-	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-	   close();
-	}
-	V_OD_erg=SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		close();
-	}
-	logger << "Number of Columns " << V_OD_colanz << endl;
-	V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-	  logger << "Number of RowCount " << V_OD_erg << endl;
-	  close();
-	}
-	logger << "Number of Rows " << (int)V_OD_rowanz << endl;
-	return getElements(clasName);
-}
-
-void* Cibernate::getARACW(string clasName)
-{
-	void *vecT = NULL;
-	bool flagc = allocateStmt(true);
-			if(!flagc)return vecT;
-
-	if(params.size()==0 && !igPaWC)
-		return vecT;
-	int V_OD_erg;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err;
-	SQLLEN V_OD_rowanz;
-	SQLCHAR V_OD_msg[200];
-	string query = selectQuery(clasName);
-	V_OD_erg=SQLExecDirect(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-	   logger << "Error in Select " << V_OD_erg << endl;
-	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-	   close();
-	}
-	V_OD_erg=SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		close();
-	}
-	logger << "Number of Columns " << V_OD_colanz << endl;
-	V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-	  logger << "Number of RowCount " << V_OD_erg << endl;
-	  close();
-	}
-	logger << "Number of Rows " << (int)V_OD_rowanz << endl;
-	return getElements(clasName);
-}
-
-void* Cibernate::getARSCW(string clasName,vector<string> cols)
-{
-	bool flagc = allocateStmt(true);
-			if(!flagc)return NULL;
-	void *vecT = NULL;
-	if((params.size()==0 || cols.size()==0) && !igPaWC)
-		return vecT;
-	int V_OD_erg;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err;
-	SQLLEN V_OD_rowanz;
-	SQLCHAR V_OD_msg[200];
-	string query = selectQuery(cols,clasName);
-	V_OD_erg=SQLExecDirect(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		logger << "Error in Select " << V_OD_erg << endl;
-	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-	   close();
-	}
-	V_OD_erg=SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		close();
-	}
-	logger << "Number of Columns " << V_OD_colanz << endl;
-	V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-	  logger << "Number of RowCount " << V_OD_erg << endl;
-	  close();
-	}
-	logger << "Number of Rows " << (int)V_OD_rowanz << endl;
-	return getElements(clasName);
-}
-
-void Cibernate::insertORSC(void* t,vector<string> cols,string className)
-{
-	bool flagc = allocateStmt(false);
-		if(!flagc)return;
-	Reflector reflector;
-	int V_OD_erg;// result of functions
-	//SQLINTEGER V_OD_id;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
-	string vals;
-	string query = insertQuery(cols,className,t);
-	V_OD_erg = SQLPrepare(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
-	if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		logger << "Error in prepare statement " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
-	}
-	V_OD_erg=SQLExecute(V_OD_hstmt);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-	   logger << "Error in Insert " << V_OD_erg << endl;
-	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-	   close();
-	}
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-}
-
-void Cibernate::updateORSC(void* t,vector<string> cols,string className)
-{
-	bool flagc = allocateStmt(false);
-		if(!flagc)return;
-	Reflector reflector;
-	int V_OD_erg;// result of functions
-	//SQLINTEGER V_OD_id;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
-	string vals;
-	string query = updateQuery(cols,className,t);
-	V_OD_erg = SQLPrepare(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
-	if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		logger << "Error in prepare statement " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
-	}
-	V_OD_erg=SQLExecute(V_OD_hstmt);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-	   logger << "Error in Update " << V_OD_erg << endl;
-	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-	   close();
-	}
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-}
-
-void* Cibernate::sqlfuncs(string type,string clasName)
-{
-	bool flagc = allocateStmt(true);
-		if(!flagc)return NULL;
-	void *vecT = NULL;
-	if(params.size()==0 && !igPaWC)
-		return vecT;
-	int V_OD_erg;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
-	SQLINTEGER V_OD_err;
-	SQLLEN V_OD_rowanz;
-	SQLCHAR V_OD_msg[200];
-	string tableName = this->mapping->getAppTableClassMapping(clasName);
-	string query = "select "+type+" from "+tableName;
-	binPrams(query);
-	V_OD_erg = SQLPrepare(V_OD_hstmt,(SQLCHAR*)query.c_str(),SQL_NTS);
-	if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		logger << "Error in prepare statement " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
-	}
-	V_OD_erg=SQLExecute(V_OD_hstmt);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-	   logger << "Error in Function " << type.c_str() << ", " << V_OD_erg << endl;
-	   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-	   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-	   close();
-	}
-	V_OD_erg=SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		close();
-	}
-	logger << "Number of Columns " << V_OD_colanz << endl;
-	V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-	  logger << "Number of RowCount " << V_OD_erg << endl;
-	  close();
-	}
-	logger << "Number of Rows " << (int)V_OD_rowanz << endl;
-	V_OD_erg = SQLFetch(V_OD_hstmt);
-	void* col = NULL;
-	while (V_OD_erg != SQL_NO_DATA)
-	{
-		SQLRETURN ret;
-		SQLLEN indicator;
-		if (clasName == "int")
+		if(query.isUpdate())
 		{
-			col = new int;
-			ret = SQLGetData(V_OD_hstmt, 1, SQL_C_LONG, col,sizeof(col), &indicator);
+			bool* flag = new bool(false);
+			return flag;
 		}
-		else if (clasName == "string" || clasName== "std::string")
+		else
+			return vecT;
+	}
+
+	int V_OD_erg;
+	char V_OD_stat[10];
+	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
+	SQLINTEGER V_OD_err;
+	SQLLEN V_OD_rowanz;
+	SQLCHAR V_OD_msg[200];
+
+	if(query.propPosVaues.size()>0 && query.propNameVaues.size()>0)
+	{
+		throw "Cannot mix positional and named parameters";
+	}
+
+	SQLFreeStmt(V_OD_hstmt, SQL_RESET_PARAMS);
+	bindQueryParams(query);
+	if(query.isUpdate())
+	{
+		bool* flag = new bool(true);
+		V_OD_erg = SQLPrepare(V_OD_hstmt,(SQLCHAR*)query.query.c_str(),SQL_NTS);
+		if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 		{
-			char buf[24];
-			string *temp = new string;
-			ret = SQLGetData(V_OD_hstmt, 1, SQL_C_CHAR, buf,sizeof(buf), &indicator);
-			temp->append(buf);
-			logger << indicator << flush;
-			if (indicator > (long) 24)
+			*flag = false;
+			logger << "Error in prepare statement " << V_OD_erg << endl;
+			SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+			logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+			close();
+			return flag;
+		}
+		V_OD_erg=SQLExecute(V_OD_hstmt);
+		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+		{
+		   *flag = false;
+		   logger << "Error in Insert " << V_OD_erg << endl;
+		   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+		   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+		   close();
+		}
+		SQLCloseCursor(V_OD_hstmt);
+		return flag;
+	}
+	else
+	{
+		V_OD_erg = SQLPrepare(V_OD_hstmt,(SQLCHAR*)query.query.c_str(),SQL_NTS);
+		if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+		{
+			logger << "Error in prepare statement " << V_OD_erg << endl;
+			SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+			logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+			close();
+			return vecT;
+		}
+		V_OD_erg=SQLExecute(V_OD_hstmt);
+		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+		{
+		   logger << "Error in Select " << V_OD_erg << endl;
+		   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+		   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+		   close();
+		   return vecT;
+		}
+		V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
+		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+		{
+		  logger << "Number of RowCount " << V_OD_erg << endl;
+		  close();
+		  return vecT;
+		}
+		logger << "Number of Rows " << (int)V_OD_rowanz << endl;
+		if(query.className!="")
+			return getElements(query.className);
+		else
+			return getElements();
+	}
+}
+
+
+void Cibernate::bindQueryParams(CibernateQuery& query)
+{
+	char V_OD_stat[10];
+	SQLSMALLINT V_OD_mlen;
+	SQLINTEGER V_OD_err;
+	SQLCHAR V_OD_msg[200];
+	int V_OD_erg;// result of functions
+	unsigned par = 1;
+	Parameters qparams = query.propNameVaues;
+	Parameters columnBindings = query.columnBindings;
+	PosParameters propPosVaues;
+	Parameters::iterator ite;
+	string queryString = query.query;
+	int posst = 1;
+	if(qparams.size()>0)
+	{
+		PosParameters propPosVaues;
+		vector<string> tst = RegexUtil::search(queryString, ":");
+		int counter = tst.size();
+		while(counter-->0 && queryString.find(":")!=string::npos)
+		{
+			for(ite=qparams.begin();ite!=qparams.end();++ite)
 			{
-				char buf1[indicator - 22];
-				ret = SQLGetData(V_OD_hstmt, 1, SQL_C_CHAR, buf1,sizeof(buf1), &indicator);
-				temp->append(buf1);
+				if(queryString.find(":")!=string::npos &&  queryString.find(":"+ite->first)!=queryString.find(":"))
+				{
+					propPosVaues[posst++] = ite->second;
+					queryString = queryString.substr(0, queryString.find(":")) + "?" +
+							queryString.substr(queryString.find(":"+ite->first)+ite->first.length()+1);
+				}
 			}
-			col = temp;
-			logger << *temp << "\n" << flush;
+		}
+		query.query = queryString;
+	}
+	else
+	{
+		propPosVaues = query.propPosVaues;
+	}
+
+	if(StringUtil::toLowerCopy(query.query).find(" where ")==string::npos && columnBindings.size()>0)
+	{
+		query.query += " where ";
+		int position = 1;
+		for(ite=columnBindings.begin();ite!=columnBindings.end();++ite)
+		{
+			propPosVaues[position] = ite->second;
+			query.query += (ite->first + " = ? ");
+			if(position++!=columnBindings.size())
+			{
+				query.query += " AND ";
+			}
 		}
 	}
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-	return col;
+
+	if(query.orderByDescCols.size()>0 || query.orderByAscCols.size()>0)
+	{
+		map<string, bool>::iterator iter;
+		int position = 1;
+		for(iter=query.orderByDescCols.begin();iter!=query.orderByDescCols.end();++iter)
+		{
+			query.query += (iter->first + " DESC ");
+			if(position++!=query.orderByDescCols.size())
+			{
+				query.query += ",";
+			}
+		}
+		if(query.orderByDescCols.size()>0 && query.orderByAscCols.size()>0)
+			query.query += ",";
+
+		position = 1;
+		for(iter=query.orderByAscCols.begin();iter!=query.orderByAscCols.end();++iter)
+		{
+			query.query += (iter->first + " ASC ");
+			if(position++!=query.orderByAscCols.size())
+			{
+				query.query += ",";
+			}
+		}
+	}
+
+	logger << query.query << endl;
+
+	int totalParams = propPosVaues.size();
+	while(totalParams-->0)
+	{
+		if(propPosVaues.find(par)==propPosVaues.end())
+			throw ("No parameter value found for position " + CastUtil::lexical_cast<string>(par));
+		Object paramValue = propPosVaues[par];
+		if(paramValue.getTypeName()=="short")
+		{
+			V_OD_erg= SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT, SQL_C_SHORT, SQL_SMALLINT, 0, 0, paramValue.getVoidPointer() , 20, NULL);
+			if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+			{
+				logger << "Error in binding parameter " << V_OD_erg << endl;
+				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+				close();
+			}
+		}
+		else if(paramValue.getTypeName()=="unsigned short")
+		{
+			V_OD_erg= SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT, SQL_C_USHORT, SQL_SMALLINT, 0, 0, paramValue.getVoidPointer() , 20, NULL);
+			if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+			{
+				logger << "Error in binding parameter " << V_OD_erg << endl;
+				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+				close();
+			}
+		}
+		else if(paramValue.getTypeName()=="int" || paramValue.getTypeName()=="long")
+		{
+			V_OD_erg= SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, paramValue.getVoidPointer() , 20, NULL);
+			if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+			{
+				logger << "Error in binding parameter " << V_OD_erg << endl;
+				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+				close();
+			}
+		}
+		else if(paramValue.getTypeName()=="unsigned int" || paramValue.getTypeName()=="unsigned long")
+		{
+			V_OD_erg= SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT, SQL_C_ULONG, SQL_INTEGER, 0, 0, paramValue.getVoidPointer() , 20, NULL);
+			if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+			{
+				logger << "Error in binding parameter " << V_OD_erg << endl;
+				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+				close();
+			}
+		}
+		else if(paramValue.getTypeName()=="double")
+		{
+			V_OD_erg= SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT, SQL_C_DOUBLE, SQL_DOUBLE, 0, 0, paramValue.getVoidPointer() , 20, NULL);
+			if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+			{
+				logger << "Error in binding parameter " << V_OD_erg << endl;
+				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+				close();
+			}
+		}
+		else if(paramValue.getTypeName()=="float")
+		{
+			V_OD_erg= SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT, SQL_C_FLOAT, SQL_REAL, 0, 0, paramValue.getVoidPointer() , 20, NULL);
+			if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+			{
+				logger << "Error in binding parameter " << V_OD_erg << endl;
+				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+				close();
+			}
+		}
+		else if(paramValue.getTypeName()=="std::string")
+		{
+			string parm = *(string*)(paramValue.getVoidPointer());
+			V_OD_erg= SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_LONGVARCHAR, 0, 0, &parm[0] ,parm.length(), NULL);
+			if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+			{
+				logger << "Error in binding parameter " << V_OD_erg << endl;
+				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
+				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
+				close();
+			}
+		}
+		else
+			throw "Cannot bind value";
+		par++;
+	}
 }
 
-void Cibernate::startTransaction()
+vector<map<string, void*> > Cibernate::execute(CibernateQuery query)
 {
-	bool flagc = allocateStmt(true);
-		if(!flagc)return;
-	int V_OD_erg;// result of functions
-	//SQLINTEGER V_OD_id;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
-	string vals;
-	string query = "start transaction";
-	logger << query << flush;
-	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+	vector<map<string, void*> > tv;
+	void* temp = executeQuery(query);
+	if(temp!=NULL)
 	{
-		logger << "Error in Start transaction " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
+		tv = *(vector<map<string, void*> >*)temp;
+		delete temp;
 	}
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-	return;
-}
-
-void Cibernate::commit()
-{
-	bool flagc = allocateStmt(true);
-		if(!flagc)return;
-	int V_OD_erg;// result of functions
-	//SQLINTEGER V_OD_id;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
-	string vals;
-	string query = "commit";
-	logger << query << flush;
-	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		logger << "Error in commit " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
-	}
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-	return;
-}
-
-void Cibernate::rollback()
-{
-	bool flagc = allocateStmt(true);
-		if(!flagc)return;
-	int V_OD_erg;// result of functions
-	//SQLINTEGER V_OD_id;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
-	string vals;
-	string query = "rollback";
-	logger << query << flush;
-	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		logger << "Error in rollback " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
-	}
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-	return;
+	return tv;
 }

@@ -113,6 +113,11 @@ void SSLClient::closeSSL()
 
 bool SSLClient::connection(string host,int port)
 {
+	if(host=="localhost")
+	{
+		return connectionUnresolv(host, port);
+	}
+
 	struct sockaddr_in *remote;
 	int tmpres;
 	char *ip;

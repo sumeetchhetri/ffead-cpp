@@ -4,7 +4,7 @@ DEF_PATH=default
 #The Server listening port number
 PORT_NO=8080
 
-#The Component Invoker listeneing port number
+#The Component Invoker listening port number
 CMP_PORT=
 
 #The Messaging Daemon listening port number
@@ -64,8 +64,9 @@ SESS_TIME_OUT=3600
 #The code would not be generated at run-time on server restart now
 DEV_MODE=true
 
-#If you want to bind the server to a particulat IP
+#If you want to bind the server to a particular IP
 IP_ADDR=
 
-
-SCRIPT_ERRS=true
+#If this property is set to TRUE/true the invocation of php, perl, python, ruby, lua and nodejs scripts
+#will generate Warning/Error messages if any caused by the script while generating the HTML by the script
+SCRIPT_ERRS=false

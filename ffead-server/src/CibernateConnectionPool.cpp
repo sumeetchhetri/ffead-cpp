@@ -37,10 +37,10 @@ CibernateConnectionPool::CibernateConnectionPool(int size,string dbName,string u
 
 CibernateConnectionPool::~CibernateConnectionPool()
 {
-	for (int var = 0; var < readConnections.size(); ++var) {
+	for (int var = 0; var < (int)readConnections.size(); ++var) {
 		delete readConnections.at(var);
 	}
-	for (int var = 0; var < writeConnections.size(); ++var) {
+	for (int var = 0; var < (int)writeConnections.size(); ++var) {
 		delete writeConnections.at(var);
 	}
 	SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
@@ -71,9 +71,9 @@ void  CibernateConnectionPool::newConnection(bool read)
 	}
 	SQLSetConnectAttr(connection->conn, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
 	// 3. Connect to the datasource "MySQL-test"
-	V_OD_erg = SQLConnect(connection->conn, (SQLCHAR*) this->dbName.c_str(), SQL_NTS,
-									 (SQLCHAR*) this->uname.c_str(), SQL_NTS,
-									 (SQLCHAR*) this->pass.c_str(), SQL_NTS);
+	V_OD_erg = SQLConnect(connection->conn, (SQLCHAR*) this->dbName.c_str(), this->dbName.length(),
+									 (SQLCHAR*) this->uname.c_str(), this->uname.length(),
+									 (SQLCHAR*) this->pass.c_str(), this->pass.length());
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
 		logger << "Error SQLConnect " << V_OD_erg << endl;

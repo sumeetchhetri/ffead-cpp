@@ -53,13 +53,13 @@ void SSLHandler::load_dh_params(SSL_CTX *ctx,char *file)
     BIO *bio;
 
     if ((bio=BIO_new_file(file,"r")) == NULL)
-    	logger << "Couldn't open DH file" << flush;
+    	logger << "Couldn't open DH file" << endl;
 
     ret=PEM_read_bio_DHparams(bio,NULL,NULL,
       NULL);
     BIO_free(bio);
     if(SSL_CTX_set_tmp_dh(ctx,ret)<0)
-    	logger << "Couldn't set DH parameters" << flush;
+    	logger << "Couldn't set DH parameters" << endl;
   }
 
 void SSLHandler::sigpipe_handle(int x){
@@ -89,19 +89,19 @@ SSL_CTX *SSLHandler::initialize_ctx(char *keyfile,char *password, string ca_list
     /* Load our keys and certificates*/
     if(!(SSL_CTX_use_certificate_chain_file(ctx,
       keyfile)))
-    	logger << "Can't read certificate file" << flush;
+    	logger << "Can't read certificate file" << endl;
 
     pass=password;
     SSL_CTX_set_default_passwd_cb(ctx,
       password_cb);
     if(!(SSL_CTX_use_PrivateKey_file(ctx,
       keyfile,SSL_FILETYPE_PEM)))
-    	logger << "Can't read key file" << flush;
+    	logger << "Can't read key file" << endl;
 
     /* Load the CAs we trust*/
     if(!(SSL_CTX_load_verify_locations(ctx,
       ca_list.c_str(),0)))
-    	logger << "Can't read CA list" << flush;
+    	logger << "Can't read CA list" << endl;
 #if (OPENSSL_VERSION_NUMBER < 0x00905100L)
     SSL_CTX_set_verify_depth(ctx,1);
 #endif
@@ -116,7 +116,7 @@ void SSLHandler::destroy_ctx(SSL_CTX *ctx)
 
 void SSLHandler::error_occurred(char *error,int fd,SSL *ssl)
 {
-	logger << error << flush;
+	//logger << error << endl;
 	close(fd);
 	int r=SSL_shutdown(ssl);
 	if(!r){
@@ -134,7 +134,7 @@ void SSLHandler::error_occurred(char *error,int fd,SSL *ssl)
 	  case 0:
 	  case -1:
 	  default:
-		  logger << "shutdown failed" << flush;
+		  logger << "Socket shutdown failed" << endl;
 		  break;
 	}
 	SSL_free(ssl);
@@ -159,7 +159,7 @@ void SSLHandler::closeSSL(int fd,SSL *ssl,BIO* bio)
 	  case 0:
 	  case -1:
 	  default:
-		  logger << "shutdown failed" << flush;
+		  logger << "Socket shutdown failed" << endl;
 		  break;
 	}
 	SSL_free(ssl);

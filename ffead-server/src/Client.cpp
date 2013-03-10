@@ -28,10 +28,16 @@ Client::Client() {
 }
 
 Client::~Client() {
+	closeConnection();
 }
 
 bool Client::connection(string host,int port)
 {
+	if(host=="localhost")
+	{
+		return connectionUnresolv(host, port);
+	}
+
 	struct sockaddr_in *remote;
 	int tmpres;
 	char *ip;
@@ -102,6 +108,7 @@ bool Client::connectionUnresolv(string host,int port)
     }
 
     if (p == NULL) {
+    	connected = false;
         fprintf(stderr, "client: failed to connect\n");
         return false;
     }

@@ -113,7 +113,7 @@ void* BeanContext::invoke(string name,vector<Object> args,string bname,string re
 		while((call=client.getData())=="")
 		{
 		}
-		logger << call << flush;
+		//logger << call << flush;
 		XmlParser parser("Parser");
 		Document doc = parser.getDocument(call);
 		Element message = doc.getRootElement();
@@ -123,14 +123,14 @@ void* BeanContext::invoke(string name,vector<Object> args,string bname,string re
 			StringUtil::replaceFirst(tag,"return:","");
 			message.setTagName(tag);
 			call = message.render();
-			logger << call << flush;
+			//logger << call << flush;
 			retval = ser.unSerializeUnknown(call,tag);
 		}
 		else
 		{
 			throw "Exception occurred";
 		}
-		logger << retval << flush;
+		//logger << retval << flush;
 	}
 	else
 	{

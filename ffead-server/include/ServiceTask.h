@@ -61,13 +61,14 @@ class ServiceTask : public Task
 	SSLHandler sslHandler;
 	ConfigurationData configData;
 	void* dlib;
+	void* ddlib;
 	void writeToSharedMemeory(string sessionId, string value,bool napp);
 	map<string,string> readFromSharedMemeory(string sessionId);
 	void createResponse(HttpResponse &res,bool flag,map<string,string> vals,string prevcookid, long sessionTimeout, bool sessatserv);
 	string getContentStr(string url,string locale,string ext);
 public:
 	ServiceTask(int fd,string serverRootDirectory,map<string,string> *params,
-			bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib);
+			bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib, void* ddlib);
 	virtual ~ServiceTask();
 	void run();
 	HttpResponse apacheRun(HttpRequest* req);

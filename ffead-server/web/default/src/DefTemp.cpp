@@ -34,6 +34,28 @@ DefTemp::~DefTemp() {
 Context DefTemp::getContext()
 {
 	Context cnt;
-	cnt["dat"] = "1.js";
+	string* dat = new string("1.js");
+	Object dato;
+	dato << dat;
+	cnt["dat"] = dato;
+
+	Test* t = new Test;
+	t->setId(1);
+	t->setName("name");
+	Object to;
+	to << t;
+	cnt["test"] = to;
+
+	vector<string>* vect = new vector<string>;
+	vect->push_back("vec1");
+	vect->push_back("vec2");
+	Object vecto;
+	vecto << vect;
+	cnt["vect"] = vecto;
+
+	int* num = new int(5);
+	Object numo;
+	numo << num;
+	cnt["number"] = numo;
 	return cnt;
 }

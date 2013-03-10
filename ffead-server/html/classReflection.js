@@ -12,7 +12,6 @@ var classReflection =
     [ "getAfcObjectData", "classReflection.html#a3d780e1a34b2a050cad71278b6c110ee", null ],
     [ "getAfcObjectData", "classReflection.html#a09c39fc2142c9224f4cd6a271bf67b4b", null ],
     [ "getDbTableInfo", "classReflection.html#a3d62a69f5ef275c8a36f4ec06e7568bd", null ],
-    [ "isValidClass", "classReflection.html#affbed16e33ff46388a7be793760fa29d", null ],
     [ "updateClassDefinition", "classReflection.html#acf6ff1c8cd30f8d9e3e6ff3991670737", null ],
     [ "updateTemplateContextDefinition", "classReflection.html#a0d95922fee63560fe3e1d3cda504747b", null ]
 ];

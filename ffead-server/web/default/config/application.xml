@@ -14,6 +14,9 @@
 	<dviews>
 		<dview class="Dview" path="test.view"/>
 	</dviews>
+	<ajax-interfaces>
+		<ajax-interface url="/expose" class="Expose"/>
+	</ajax-interfaces>
 	<filters>
 		<filter class="DefaultIOFilter" type="in"/>
 		<filter class="DefaultIOFilter" type="out"/>

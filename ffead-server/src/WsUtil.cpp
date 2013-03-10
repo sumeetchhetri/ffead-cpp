@@ -61,13 +61,13 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 	for(unsigned int i=0;i<wsvcs.size();i++)
 	{
 		meth_Map meth_info;
-		Context gcntxt;
+		StringContext gcntxt;
 		string ws_name,reqr_res_bind,wsdl_msgs,wsdl_ops,wsdl_bind,wsdl,wsdl_obj_bind;
 		Element ws = wsvcs.at(i);
 		ws_name = ws.getAttribute("class");
 		gcntxt["WS_NAME"] = ws_name;
 		wsmap[ws_name] = appname;
-		logger << "Web service " << ws_name << " found for appname " << appname << endl;
+		logger << ("Web service " + ws_name + " found for appname " + appname) << endl;
 		strVec info = ref.getAfcObjectData(usrinc+ws.getAttribute("class")+".h", false);
 		headers.append("#include \""+ws.getAttribute("class")+".h\"\n");
 
@@ -94,7 +94,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 			methName = results.at(1);
 
 			in_out_info["RETURN"] = ws.getElementByName(methName).getAttribute("outname");
-			logger << in_out_info["RETURN"] << flush;
+			//logger << in_out_info["RETURN"] << flush;
 			in_out_info["RETURNTYP"] = results.at(0);
 			if(results.at(0).find("vector<")!=string::npos)
 			{
@@ -150,7 +150,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 					if(results2.size()>=2)
 						in_out_info[chr+results2.at(1)] = type;
 					else
-						logger << "invalid thing happenin " << results1.at(j) << endl;
+						logger << ("Invalid thing happening " + results1.at(j)) << endl;
 					strMap allfs,tyfs;
 					if(type.find("vector<")!=string::npos && results2.size()==2)
 					{
@@ -187,7 +187,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 							field = temp1.substr(s+3,e-s+3);
 							field = AfcUtil::reverseCamelCased(field);
 							field = field.substr(0,field.find("("));
-							logger << "\nField--- " << field << flush;
+							//logger << "\nField--- " << field << flush;
 							allfs[field] = "";
 						}
 						else if(s1!=string::npos)
@@ -201,8 +201,8 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 							strVec results3;
 							StringUtil::split(results3, type, (" "));
 							type = results3.at(0);
-							logger << "\nField--- " << field << flush;
-							logger << "\nType--- " << type << flush;
+							//logger << "\nField--- " << field << flush;
+							//logger << "\nType--- " << type << flush;
 							allfs[field] = field;
 							tyfs[field] = type;
 						}
@@ -239,7 +239,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 					retObj_xml.append("return _ret;\n}\n");
 					if(flag)
 					{
-						Context cntxt1;
+						StringContext cntxt1;
 						cntxt1["OBJ"] = type;
 						cntxt1["OBJ_MEMBERS"] = obj_binding;
 						wsdl_obj_bind.append(templ.evaluate(resp+"templateObjBin.wsdl",cntxt1));
@@ -247,7 +247,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 				}
 			}
 			meth_info[methName] = in_out_info;
-			Context cntxt;
+			StringContext cntxt;
 			cntxt["METH_NAME"] = methName;
 			cntxt["RET_TYPE"] = retType;
 			cntxt["INP_PARAMS"] = inp_params;
@@ -284,7 +284,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 				strMap::iterator iter2;
 				string args;
 				unsigned int ter = 1;
-				logger << me_n << ws_n << pars.size() << endl;
+				//logger << me_n << ws_n << pars.size() << endl;
 				for(iter2=pars.begin();iter2!=pars.end();iter2++)
 				{
 					if(iter2->first!="RETURN" && iter2->first!="RETURNTYP")

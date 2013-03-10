@@ -44,11 +44,8 @@ private:
 		char *demangled;
 		using namespace abi;
 		demangled = __cxa_demangle(mangled, NULL, 0, &status);
-		//printf("\n---------Demanged --%s\n\n", demangled);
-		stringstream ss;
-		ss << demangled;
-		string s;
-		ss >> s;
+		string s(demangled);
+		delete demangled;
 		return s;
 
 	}
@@ -81,8 +78,8 @@ public:
 			this->typeName = getClassName(t);
 			this->pointer = &t;
 		}
-		logger << " " << this->pointer << " " << flush;
-		logger << this->typeName << "\n" << flush;
+		//logger << " " << this->pointer << " " << flush;
+		//logger << this->typeName << "\n" << flush;
 	}
 	template <typename T> void operator<<(T *t)
 	{
@@ -97,8 +94,8 @@ public:
 			this->typeName = getClassName(t);
 			this->pointer = t;
 		}
-		logger << " " << this->pointer << " " << flush;
-		logger << this->typeName << "\n" << flush;
+		//logger << " " << this->pointer << " " << flush;
+		//logger << this->typeName << "\n" << flush;
 	}
 	~Object() {
 		// TODO Auto-generated destructor stub
@@ -166,10 +163,8 @@ public:
 		const char *mangled = typeid(instance).name();
 		using namespace abi;
 		mangled = __cxa_demangle(mangled, NULL, 0, &status);
-		stringstream ss;
-		ss << mangled;
-		string cls;
-		ss >> cls;
+		string cls(mangled);
+		delete mangled;
 		if(cls==className || cls==(className+"*")) return true;
 		else return false;
 	}

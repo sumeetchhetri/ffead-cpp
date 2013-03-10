@@ -66,7 +66,7 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 			claz = autMap[req->getCntxt_name()+ext];
 		}
 		AuthController *authc;
-		logger << "OAUTH/HTTP Authorization requested " <<  claz << endl;
+		logger << ("OAUTH/HTTP Authorization requested " +  claz) << endl;
 		map<string,string>::iterator it;
 		map<string,string> tempmap = req->getAuthinfo();
 		for(it=tempmap.begin();it!=tempmap.end();it++)
@@ -81,32 +81,32 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 		if(claz.find("file:")!=string::npos)
 		{
 			claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
-			logger << "auth handled by file " << claz << endl;
+			logger << ("Auth handled by file " + claz) << endl;
 			authc = new FileAuthController(claz,":");
 			if(authc->isInitialized())
 			{
 				if(authc->authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
 				{
-					logger << "valid user" << endl;
+					logger << "Valid user" << endl;
 				}
 				else
 				{
-					logger << "invalid user" << endl;
+					logger << "Invalid user" << endl;
 					res.setHTTPResponseStatus(HTTPResponseStatus::AccessDenied);
 					isContrl = true;
-					logger << "verified request token signature is invalid" << endl;
+					logger << "Verified request token signature is invalid" << endl;
 				}
 			}
 			else
 			{
-				logger << "invalid user repo defined" << endl;
+				logger << "Invalid user repo defined" << endl;
 			}
 		}
 		else if(claz.find("class:")!=string::npos)
 		{
 			claz = claz.substr(claz.find(":")+1);
 			claz = "getReflectionCIFor" + claz;
-			logger << "auth handled by class " << claz << endl;
+			logger << ("Auth handled by class " + claz) << endl;
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -122,10 +122,10 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 				Reflector ref;
 				void *_temp = ref.newInstanceGVP(ctor);
 				authc = (AuthController*)_temp;
-				bool isoAuthRes = authc->handle(req,&res);
+				authc->handle(req,&res);
 				if(res.getStatusCode()!="")
 					isContrl = true;
-				logger << "authhandler called" << endl;
+				logger << "Authhandler called" << endl;
 				ext = getFileExtension(req->getUrl());
 				delete authc;
 			}

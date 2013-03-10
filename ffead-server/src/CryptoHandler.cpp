@@ -75,8 +75,8 @@ char* CryptoHandler::hmac_sha1(char* datain,char* keyin,bool base64)
 {
 	unsigned char* key = (unsigned char*) keyin;
 	unsigned char* data = (unsigned char*) datain;
-	unsigned char* result,*result1;
-	unsigned int result_len = 20,result1_len;
+	unsigned char* result;
+	unsigned int result_len = 20;
 
 	HMAC_CTX ctx;
 	result = (unsigned char*) malloc(sizeof(char) * result_len);

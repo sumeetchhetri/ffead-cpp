@@ -38,8 +38,8 @@ public:
 	map<string, string> handoffs;
 	map<string, Security> securityObjectMap;
 	map<string, Element> formMap;
-	strVec dcpsss,cmpnames;
-	propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap;
+	strVec dcpsss,cmpnames,tpes;
+	propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap,ajaxIntfMap;
 	long sessionTimeout;
 	bool sessatserv;
 	ConfigurationData();

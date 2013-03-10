@@ -25,10 +25,10 @@ using namespace std;
 
 void HttpRequest::unbase64(string str)
 {
-	logger << "before " << str << endl;
+	//logger << "before " << str << endl;
 	authinfo["Method"] = (str.substr(0,str.find(" ")));
 	str = str.substr(str.find(" ")+1);
-	logger << "bafter " << str << endl;
+	//logger << "after " << str << endl;
 
 	/*unsigned char *input = (unsigned char *)str.c_str();
 	int length = str.length();
@@ -50,7 +50,7 @@ void HttpRequest::unbase64(string str)
 	unsigned char *input = (unsigned char *)str.c_str();
 	int length = str.length();
 	string temp = CryptoHandler::base64decode(input,length);
-	logger << "after " << temp << endl;
+	//logger << "after " << temp << endl;
 
 	authinfo["Username"] = (temp.substr(0,temp.find(":")));
 	temp = temp.substr(temp.find(":")+1);
@@ -61,7 +61,7 @@ void HttpRequest::getOauthParams(string str)
 {
 	authinfo["Method"] = str.substr(0,str.find(" "));
 	str = str.substr(str.find(" ")+1);
-	logger << str << endl;
+	//logger << str << endl;
 
 	strVec tempv;
 	StringUtil::split(tempv, str, (","));
@@ -114,7 +114,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 					this->setAccept(temp.at(1));
 				else if(temp.at(0)=="Authorization")
 				{
-					logger << "found auth" <<endl;
+					//logger << "found auth" <<endl;
 					if(temp.at(1).find("oauth_")!=string::npos)
 					{
 						this->getOauthParams(temp.at(1));
@@ -251,10 +251,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 										this->queryParams[attN.substr(0, attN.find("[")+1)
 												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
 														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
-														  << CryptoHandler::urlDecode(param.at(1)) << endl;
+														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
@@ -332,10 +332,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 										this->queryParams[attN.substr(0, attN.find("[")+1)
 												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
 														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
-														  << CryptoHandler::urlDecode(param.at(1)) << endl;
+														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
@@ -413,10 +413,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 										this->queryParams[attN.substr(0, attN.find("[")+1)
 												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
 														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
-														  << CryptoHandler::urlDecode(param.at(1)) << endl;
+														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
@@ -527,10 +527,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 										this->queryParams[attN.substr(0, attN.find("[")+1)
 												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
 														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
-														  << CryptoHandler::urlDecode(param.at(1)) << endl;
+														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
@@ -606,10 +606,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 										this->queryParams[attN.substr(0, attN.find("[")+1)
 												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
 														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
-														  << CryptoHandler::urlDecode(param.at(1)) << endl;
+														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
@@ -687,10 +687,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 										this->queryParams[attN.substr(0, attN.find("[")+1)
 												  + CastUtil::lexical_cast<string>(indices[attN])
 												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
+										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
 														  + CastUtil::lexical_cast<string>(indices[attN])
 														  + "]"
-														  << CryptoHandler::urlDecode(param.at(1)) << endl;
+														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
@@ -766,7 +766,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 		}*/
 		if(this->getContent()!="")
 		{
-			logger << this->getContent() << flush;
+			//logger << this->getContent() << flush;
 			if(this->getContent_type().find("application/x-www-form-urlencoded")!=string::npos)
 			{
 				strVec params;
@@ -798,10 +798,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							this->requestParams[attN.substr(0, attN.find("[")+1)
 									  + CastUtil::lexical_cast<string>(indices[attN])
 									  + "]"] = CryptoHandler::urlDecode(param.at(1));
-							logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
-											  << CastUtil::lexical_cast<string>(indices[attN])
-											  << "]"
-											  << CryptoHandler::urlDecode(param.at(1)) << endl;
+							logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]"
+											  + CryptoHandler::urlDecode(param.at(1))) << endl;
 						}
 						else
 							this->setRequestParam(attN,CryptoHandler::urlDecode(param.at(1)));
@@ -814,7 +814,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				string delb = "\r"+this->getContent_boundary();
 				string delend = "\r"+this->getContent_boundary()+"--";
 				size_t stb = this->getContent().find_first_of(delb)+delb.length()+1;
-				size_t enb = this->getContent().find_last_not_of(delend);
+				//size_t enb = this->getContent().find_last_not_of(delend);
 				string param_conts = this->getContent().substr(stb);
 				StringUtil::replaceFirst(param_conts,delend,"");
 				param_conts = param_conts.substr(0,param_conts.length()-1);
@@ -915,10 +915,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							this->requestParamsF[attN.substr(0, attN.find("[")+1)
 									  + CastUtil::lexical_cast<string>(indices[attN])
 									  + "]"] = datf;
-							logger << "creating array from similar params" << attN.substr(0, attN.find("[")+1)
-											  << CastUtil::lexical_cast<string>(indices[attN])
-											  << "]"
-											  << datf.fileName << endl;
+							logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]"
+											  + datf.fileName) << endl;
 						}
 						this->setRequestParamF(attN,datf);
 						if(datf.fileName!="")
@@ -1403,6 +1403,7 @@ void HttpRequest::setHost(string host)
 
 void HttpRequest::setUrl(string url)
 {
+	StringUtil::replaceFirst(url,"//","/");
 	this->url = url;
 }
 
@@ -1551,7 +1552,7 @@ string HttpRequest::getFile() const
 
 void HttpRequest::setFile(string file)
 {
-	logger << "file is " << this->file << endl;
+	//logger << "file is " << this->file << endl;
 	if(this->file!="" && this->url.find(this->file)!=string::npos
 			&& this->url.find("/")!=string::npos)
 	{

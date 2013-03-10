@@ -27,6 +27,7 @@
 #include "StringUtil.h"
 #include <cxxabi.h>
 #include "cstring"
+#include <stdio.h>
 using namespace std;
 
 class CastUtil {
@@ -36,10 +37,8 @@ class CastUtil {
 		char *demangled;
 		using namespace abi;
 		demangled = __cxa_demangle(mangled, NULL, 0, &status);
-		stringstream ss;
-		ss << demangled;
-		string s;
-		ss >> s;
+		string s(demangled);
+		delete demangled;
 		return s;
 	}
 	template <typename T> static string getClassName(T t)
@@ -55,18 +54,7 @@ public:
 	virtual ~CastUtil();
 	template <typename T, typename R> static R cast(const T& val)
 	{
-		R t;
-		stringstream ss;
-		ss << val;
-		ss >> t;
-		if(ss)
-		{
-			return t;
-		}
-		else
-		{
-			throw "Conversion exception";
-		}
+		return lexical_cast<R>(val);
 	}
 
 	template <typename T> static T lexical_cast(const short& val)
@@ -81,7 +69,24 @@ public:
 		}
 		else
 		{
-			throw "Conversion exception";
+			string tn = getClassName(t);
+			throw ("Conversion exception - short to " + tn);
+		}
+	}
+	template <typename T> static T lexical_cast(const unsigned short& val)
+	{
+		T t;
+		stringstream ss;
+		ss << val;
+		ss >> t;
+		if(ss)
+		{
+			return t;
+		}
+		else
+		{
+			string tn = getClassName(t);
+			throw ("Conversion exception - unsigned short to " + tn);
 		}
 	}
 	template <typename T> static T lexical_cast(const int& val)
@@ -96,7 +101,8 @@ public:
 		}
 		else
 		{
-			throw "Conversion exception";
+			string tn = getClassName(t);
+			throw ("Conversion exception - int to " + tn);
 		}
 	}
 	template <typename T> static T lexical_cast(const unsigned int& val)
@@ -111,7 +117,8 @@ public:
 		}
 		else
 		{
-			throw "Conversion exception";
+			string tn = getClassName(t);
+			throw ("Conversion exception - unsigned int to " + tn);
 		}
 	}
 	template <typename T> static T lexical_cast(const long& val)
@@ -126,7 +133,24 @@ public:
 		}
 		else
 		{
-			throw "Conversion exception";
+			string tn = getClassName(t);
+			throw ("Conversion exception - long to " + tn);
+		}
+	}
+	template <typename T> static T lexical_cast(const unsigned long& val)
+	{
+		T t;
+		stringstream ss;
+		ss << val;
+		ss >> t;
+		if(ss)
+		{
+			return t;
+		}
+		else
+		{
+			string tn = getClassName(t);
+			throw ("Conversion exception - unsigned long to " + tn);
 		}
 	}
 	template <typename T> static T lexical_cast(const long long& val)
@@ -141,7 +165,24 @@ public:
 		}
 		else
 		{
-			throw "Conversion exception";
+			string tn = getClassName(t);
+			throw ("Conversion exception - long long to " + tn);
+		}
+	}
+	template <typename T> static T lexical_cast(const unsigned long long& val)
+	{
+		T t;
+		stringstream ss;
+		ss << val;
+		ss >> t;
+		if(ss)
+		{
+			return t;
+		}
+		else
+		{
+			string tn = getClassName(t);
+			throw ("Conversion exception - unsigned long long to " + tn);
 		}
 	}
 	template <typename T> static T lexical_cast(const double& val)
@@ -156,7 +197,8 @@ public:
 		}
 		else
 		{
-			throw "Conversion exception";
+			string tn = getClassName(t);
+			throw ("Conversion exception - double to " + tn);
 		}
 	}
 	template <typename T> static T lexical_cast(const float& val)
@@ -171,7 +213,8 @@ public:
 		}
 		else
 		{
-			throw "Conversion exception";
+			string tn = getClassName(t);
+			throw ("Conversion exception - float to " + tn);
 		}
 	}
 	template <typename T> static T lexical_cast(const bool& val)
@@ -186,7 +229,8 @@ public:
 		}
 		else
 		{
-			throw "Conversion exception";
+			string tn = getClassName(t);
+			throw ("Conversion exception - bool to " + tn);
 		}
 	}
 	template <typename T> static T lexical_cast(const string& val)
@@ -203,26 +247,100 @@ public:
 			double d = 0;
 			d = strtod(val, &endptr);
 			if(*endptr)
-				throw "Conversion exception";
+			{
+				throw "Conversion exception - string to double";
+			}
 			t = d;
 		}
-		else if(tn=="int" || tn=="short" || tn=="long" || tn=="size_t")
+		else if(tn=="int")
+		{
+			int d = 1;
+			d = strtol(val, &endptr, 10);
+			if(*endptr)
+			{
+				throw "Conversion exception - string to int";
+			}
+			t = d;
+		}
+		else if(tn=="short")
+		{
+			short d = 1;
+			d = strtol(val, &endptr, 10);
+			if(*endptr)
+			{
+				throw "Conversion exception - string to short";
+			}
+			t = d;
+		}
+		else if(tn=="long")
+		{
+			long d = 1;
+			d = strtol(val, &endptr, 10);
+			if(*endptr)
+			{
+				throw "Conversion exception - string to long";
+			}
+			t = d;
+		}
+		else if(tn=="size_t")
 		{
 			long int d = 1;
 			d = strtol(val, &endptr, 10);
 			if(*endptr)
-				throw "Conversion exception";
+			{
+				throw "Conversion exception - string to size_t";
+			}
+			t = (size_t)d;
+		}
+		else if(tn=="unsigned short")
+		{
+			unsigned short d = 1;
+			d = strtoul(val, &endptr, 10);
+			if(*endptr)
+			{
+				throw "Conversion exception - string to unsigned short";
+			}
+			t = d;
+		}
+		else if(tn=="unsigned int")
+		{
+			unsigned int d = 1;
+			d = strtoul(val, &endptr, 10);
+			if(*endptr)
+			{
+				throw "Conversion exception - string to unsigned int";
+			}
+			t = d;
+		}
+		else if(tn=="unsigned long")
+		{
+			unsigned long d = 1;
+			d = strtoul(val, &endptr, 10);
+			if(*endptr)
+			{
+				throw "Conversion exception - string to unsigned long";
+			}
 			t = d;
 		}
 		else if(tn=="long long")
 		{
-			#if _GLIBCXX_USE_C99
-				long long d = 1L;
-				d = strtoll(val, &endptr, 10);
-				if(*endptr)
-					throw "Conversion exception";
+			long long d = -1;
+			if(sscanf(val, "%lld", &d)==1)
 				t = d;
-			#endif
+			else
+			{
+				throw "Conversion exception - string to long long";
+			}
+		}
+		else if(tn=="unsigned long long")
+		{
+			unsigned long long d = -1;
+			if(sscanf(val, "%llu", &d)==1)
+				t = d;
+			else
+			{
+				throw "Conversion exception - string to unsigned long long";
+			}
 		}
 		else if(tn=="bool")
 		{
@@ -232,7 +350,9 @@ public:
 			else if(StringUtil::toLowerCopy(val)=="false" || StringUtil::toLowerCopy(val)=="0")
 				d = false;
 			else
-				throw "Conversion exception";
+			{
+				throw "Conversion exception - string to bool";
+			}
 			t = d;
 		}
 		else if(tn=="std::string" || tn=="string")
@@ -247,12 +367,12 @@ public:
 			}
 			else
 			{
-				throw "Conversion exception";
+				throw "Conversion exception - string to string";
 			}
 		}
 		else
 		{
-			throw "Conversion exception";
+			throw "Generic Conversion exception";
 		}
 		return t;
 	}

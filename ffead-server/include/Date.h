@@ -41,6 +41,7 @@ class Date {
 	string ss;
 	string dayw;
 	long long nanoseconds;
+	float timeZoneOffset;
 	string getMon(string);
 	string getMonFd(string);
 	long getDaysInt();
@@ -95,6 +96,8 @@ public:
 	Date addYears(long years);
 	static bool validateDate(int dd, int mm, int yyyy);
 	static string getDayName(int dd, int mm, int yyyy);
+	float getTimeZoneOffset();
+	void setTimeZoneOffset(float tzVal);
 	int test();
 };
 

@@ -38,6 +38,10 @@ void* PoolThread::run(void *arg)
 			try
 			{
 				task->run();
+				if(task->cleanUp)
+				{
+					delete task;
+				}
 			}
 			catch(exception& e)
 			{

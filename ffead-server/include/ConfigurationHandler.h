@@ -30,6 +30,7 @@
 #include "DCPGenerator.h"
 #include "ConfigurationData.h"
 #include "Logger.h"
+#include "TemplateGenerator.h"
 
 class ConfigurationHandler {
 public:
@@ -37,6 +38,8 @@ public:
 	virtual ~ConfigurationHandler();
 	static ConfigurationData handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string pubpath,string respath,bool isSSLEnabled);
 	static void listi(string cwd,string type,bool apDir,strVec &folders);
+	static void configureCibernate(string, string);
+	static void destroyCibernate();
 };
 
 #endif /* CONFIGURATIONHANDLER_H_ */

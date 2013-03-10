@@ -110,6 +110,7 @@ Date::Date()
 	this->ss = vemp.at(2);
 	this->year = temp.at(4);
 	this->weekday = getWeekDayVal(this->dayw);
+	this->timeZoneOffset = 0;
 }
 
 Date::~Date() {
@@ -251,9 +252,19 @@ string Date::getYearStr() const
 	return year;
 }
 
+void Date::setTimeZoneOffset(float tzVal)
+{
+	timeZoneOffset = tzVal;
+}
+
+float Date::getTimeZoneOffset()
+{
+	return timeZoneOffset;
+}
+
 string Date::toString()
 {
-	return dayw+" "+year+" "+monthw+" "+day+" "+hh+":"+mm+":"+ss+"."+CastUtil::lexical_cast<string>(nanoseconds);
+	return dayw+" "+year+" "+monthw+" "+day+" "+hh+":"+mm+":"+ss+"."+CastUtil::lexical_cast<string>(nanoseconds)+CastUtil::lexical_cast<string>(timeZoneOffset);
 }
 
 Date Date::addSeconds(long seconds)
@@ -373,7 +384,7 @@ Date Date::getDateFromDays(long days)
 
 void Date::getDateFromHours(long hours)
 {
-	long days = hours/24;
+	/*long days = hours/24;
 	hours = hours%24;
 	long y = (10000*days + 14780)/3652425;
 	long ddd = days - (365*y + y/4 - y/100 + y/400);
@@ -385,13 +396,13 @@ void Date::getDateFromHours(long hours)
 	long mi = (100*ddd + 52)/3060;
 	long mm = (mi + 2)%12 + 1;
 	y = y + (mi + 2)/12 + 1900;
-	long dd = ddd - (mi*306 + 5)/10 + 1;
+	long dd = ddd - (mi*306 + 5)/10 + 1;*/
 	////logger << y << " " << mm << " " << dd << " " << hours;
 }
 
 void Date::getDateFromMinutes(long long minutes)
 {
-	long hours = minutes/60;
+	/*long hours = minutes/60;
 	minutes = minutes%60;
 	long days = hours/24;
 	hours = hours%24;
@@ -405,13 +416,13 @@ void Date::getDateFromMinutes(long long minutes)
 	long mi = (100*ddd + 52)/3060;
 	long mm = (mi + 2)%12 + 1;
 	y = y + (mi + 2)/12 + 1900;
-	long dd = ddd - (mi*306 + 5)/10 + 1;
+	long dd = ddd - (mi*306 + 5)/10 + 1;*/
 	////logger << y << " " << mm << " " << dd << " " << hours << ":" << minutes;
 }
 
 void Date::getDateFromSeconds(long long seconds)
 {
-	long long minutes = seconds/60;
+	/*long long minutes = seconds/60;
 	seconds = seconds%60;
 	long hours = minutes/60;
 	minutes = minutes%60;
@@ -427,7 +438,7 @@ void Date::getDateFromSeconds(long long seconds)
 	long mi = (100*ddd + 52)/3060;
 	long mm = (mi + 2)%12 + 1;
 	y = y + (mi + 2)/12 + 1900;
-	long dd = ddd - (mi*306 + 5)/10 + 1;
+	long dd = ddd - (mi*306 + 5)/10 + 1;*/
 	////logger << y << " " << mm << " " << dd << " " << hours << ":" << minutes << ":" << seconds <<  "\n" << endl << flush;
 }
 
@@ -510,6 +521,7 @@ Date::Date(int yyyy,string mmm,int dd)
 	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
 	*this = getDateFromDays(g);
 	this->nanoseconds = 0;
+	this->timeZoneOffset = 0;
 }
 
 Date::Date(int yyyy,int mm,int dd)
@@ -518,6 +530,7 @@ Date::Date(int yyyy,int mm,int dd)
 	long g = getDays(yyyy,mm,dd);
 	*this = getDateFromDays(g);
 	this->nanoseconds = 0;
+	this->timeZoneOffset = 0;
 }
 
 Date::Date(int yy,string mmm,int dd,bool te)
@@ -531,6 +544,7 @@ Date::Date(int yy,string mmm,int dd,bool te)
 	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
 	*this = getDateFromDays(g);
 	this->nanoseconds = 0;
+	this->timeZoneOffset = 0;
 }
 
 Date::Date(int yy,int mm,int dd,bool te)
@@ -542,6 +556,7 @@ Date::Date(int yy,int mm,int dd,bool te)
 	long g = getDays(yyyy,mm,dd);
 	*this = getDateFromDays(g);
 	this->nanoseconds = 0;
+	this->timeZoneOffset = 0;
 }
 
 void Date::setTime(int hh,int mi,int ss)

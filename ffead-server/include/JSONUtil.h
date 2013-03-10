@@ -43,7 +43,7 @@ public:
 	template <typename T> static vector<T>* toVectorP(JSONElement root)
 	{
 		vector<T>* vec = new vector<T>;
-		for(int i=0;i<root.getChildren().size();i++)
+		for(int i=0;i<(int)root.getChildren().size();i++)
 		{
 			JSONElement* element = root.getChildren().at(i);
 			if(element!=NULL)

@@ -36,6 +36,8 @@
 #include "DateFormat.h"
 #include "BinaryData.h"
 #include "Logger.h"
+#include "CibernateQuery.h"
+#include "RegexUtil.h"
 
 typedef map<string,Object*> Params;
 class Cibernate {
@@ -51,27 +53,30 @@ private:
 	SQLHSTMT V_OD_hstmt;//statement
 	Params params,params1;
 	bool igPaWC;
+	bool allocateStmt(bool);
 	map<string,string> ntmap,ntmap1;
 	void clearMaps(){ntmap.clear();params.clear();ntmap1.clear();params1.clear();}
-	void binPrams(string &query);
-	string selectQuery(string clasName);
-	string selectQuery(vector<string> cols,string clasName);
-	string insertQuery(vector<string> cols,string clasName,void *);
-	string updateQuery(vector<string> cols,string clasName,void *t);
+	void* getElements();
 	void* getElements(string clasName);
 	void* getElements(vector<string> cols,string clasName);
+	void* executeQuery(CibernateQuery query);
+	void bindQueryParams(CibernateQuery& query);
+	void* executeQuery(CibernateQuery query, vector<string> cols);
+	bool executeInsert(CibernateQuery cquery, vector<string> cols, void* t);
+	bool executeUpdate(CibernateQuery cquery, vector<string> cols, void* t);
+	int storeProperty(ClassInfo clas, void* t, int var, string fieldName);
+	int getProperty(int dataType, int columnSize, map<string, void*>& colValMap, string colName, int var);
+	void* sqlfuncs(string type,string clasName);
 	bool init;
 public:
 	Cibernate();
 	Cibernate(string);
-	Cibernate(string,string,string);
+	Cibernate(string,string,string,int);
 	virtual ~Cibernate();
-	bool allocateStmt(bool);
 	void close();
-	void startTransaction();
-	void commit();
-	void rollback();
-	//void execute();
+	bool startTransaction();
+	bool commit();
+	bool rollback();
 	void procedureCall(string);
 	void addParam(string name,string type,Object &obj){ntmap[name]=type;params[name]=&obj;}
 	void addParam(string name,Object &obj){params[name]=&obj;}
@@ -80,254 +85,250 @@ public:
 	void addParam1(string name,Object &obj){params1[name]=&obj;}
 	Object getParam1(string name){return *params1[name];}
 	vector<map<string,void*> > getARSCW(string tableName,vector<string> cols,vector<string> coltypes);
-	void* getARACW(string clasName);
-	void* getORW(string clasName);
-	void* getARSCW(string clasName,vector<string> cols);
-	void insertORSC(void* t,vector<string> cols,string className);
-	void updateORSC(void* t,vector<string> cols,string className);
-	void* sqlfuncs(string type,string clasName);
+	void truncate(string clasName);
+	void empty(string clasName);
 
-	/**********SELECT QUERIES ONE ROW/ALL COLS/SOME COLS(WHR),ALL ROWS/ALL COLS/SOME COLS(WHR),ALL ROWS/ONE COL(WHR) START********/
-	template<class T> vector<T> getARAC()
+
+	vector<map<string, void*> > execute(CibernateQuery query);
+	template<class T> vector<T> getList(CibernateQuery query)
 	{
-		igPaWC = true;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
-		vector<T> *vecT = new vector<T>;
-		void* vect = getARACW(clasName);
+		if(clasName!=query.className)
+		{
+			vector<T> vecT;
+			return vecT;
+		}
+		vector<T> vecT;
+		void* vect = executeQuery(query);
 		if(vect!=NULL)
-			vecT = (vector<T>*)vect;
-		igPaWC = false;
-		return *vecT;
+		{
+			vecT = *(vector<T>*)vect;
+		}
+		return vecT;
 	}
-	template<class T> vector<T> getARACW()
+
+	template<class T> T get(CibernateQuery query)
 	{
-		igPaWC = false;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
-		vector<T> *vecT = new vector<T>;
-		void* vect = getARACW(clasName);
+		if(clasName!=query.className)
+		{
+			vector<T> vecT;
+			return vecT;
+		}
+		vector<T> vecT;
+		void* vect = executeQuery(query);
 		if(vect!=NULL)
-			vecT = (vector<T>*)vect;
-		igPaWC = true;
-		return *vecT;
+		{
+			vecT = *(vector<T>*)vect;
+			if(vecT.size()>0)
+			{
+				t = vecT.at(0);
+			}
+			delete vect;
+		}
+		return t;
 	}
-	template<class T> vector<T> getARSCW(vector<string> cols)
+
+	template<class T> bool executeUpdate(CibernateQuery query)
 	{
-		igPaWC = false;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
-		vector<T> *vecT = new vector<T>;
-		void* vect = getARSCW(clasName,cols);
+		if(clasName!=query.className)
+		{
+			return false;
+		}
+		void* vect = executeQuery(query);
 		if(vect!=NULL)
-			vecT = (vector<T>*)vect;
-		igPaWC = true;
-		return *vecT;
+		{
+			bool* flag = (bool*)vect;
+			bool ffl = *flag;
+			delete flag;
+			return ffl;
+		}
+		return false;
 	}
-	template<class T> vector<T> getARSC(vector<string> cols)
+
+	template<class T> vector<T> getAll()
 	{
-		igPaWC = true;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
-		vector<T> *vecT = new vector<T>;
-		void* vect = getARSCW(clasName,cols);
+		vector<string> cols;
+		CibernateQuery query("", clasName);
+		vector<T> vecT;
+		void* vect = executeQuery(query, cols);
 		if(vect!=NULL)
-			vecT = (vector<T>*)vect;
-		igPaWC = false;
-		return *vecT;
+		{
+			vecT = *(vector<T>*)vect;
+			delete vect;
+		}
+		return vecT;
 	}
-	template<class T> T getOR(int id)
+
+	template<class T> T get(int id)
 	{
-		igPaWC = false;
-		clearMaps();
-		Object on;
-		on << id;
-		addParam("id",on);
+		Object oid;
+		oid << id;
 		vector<string> cols;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
-		vector<T> *vecT = new vector<T>;
-		void* vect = getORW(clasName);
+		CibernateQuery query("", clasName);
+		query.addColumnBinding("id", oid);
+		vector<T> vecT;
+		void* vect = executeQuery(query, cols);
 		if(vect!=NULL)
-			vecT = (vector<T>*)vect;
-		igPaWC = true;
-		return vecT->at(0);
+		{
+			vecT = *(vector<T>*)vect;
+			if(vecT.size()>0)
+			{
+				t = vecT.at(0);
+			}
+			delete vect;
+		}
+		return t;
 	}
-	template<class T> T getORW()
+
+	template<class T, class R> vector<R> getColumnValues(string name)
 	{
-		igPaWC = false;
-		T t;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		vector<T> *vecT = new vector<T>;
-		void* vect = getORW(clasName);
-		if(vect!=NULL)
-			vecT = (vector<T>*)vect;
-		igPaWC = true;
-		return vecT->at(0);
-	}
-	template<class T> vector<T> getAROC(string name)
-	{
-		igPaWC = true;
 		vector<string> cols;
 		cols.push_back(name);
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
-		vector<T> *vecT = new vector<T>;
-		void* vect = getARSCW(clasName,cols);
+		CibernateQuery query("", clasName);
+		vector<T> vecT;
+		void* vect = executeQuery(query, cols);
+		vector<R> vecR;
 		if(vect!=NULL)
-			vecT = (vector<T>*)vect;
-		igPaWC = false;
-		return *vecT;
+		{
+			vecT = *(vector<T>*)vect;
+			delete vect;
+			if(vecT.size()>0)
+			{
+				Reflector reflector;
+				ClassInfo clas = reflector.getClassInfo(clasName);
+				args argus;
+				string methname = "get"+AfcUtil::camelCased(name);
+				Method meth = clas.getMethod(methname,argus);
+				vals valus;
+				for (int var = 0; var < (int)vecT.size(); ++var) {
+					void *ns = reflector.invokeMethodGVP(&(vecT.at(var)),meth,valus);
+					vecR.push_back(*(R*)ns);
+					delete ns;
+				}
+			}
+		}
+		return vecR;
 	}
-	template<class T> vector<T> getAROCW(string name)
+	template<class T, class R> vector<R> getColumnValues(string name, PosParameters propPosVaues)
 	{
-		igPaWC = false;
 		vector<string> cols;
 		cols.push_back(name);
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
-		vector<T> *vecT = new vector<T>;
-		void* vect = getARSCW(clasName,cols);
+		CibernateQuery query("", clasName);
+		query.propPosVaues = propPosVaues;
+		vector<T> vecT;
+		void* vect = executeQuery(query, cols);
+		vector<R> vecR;
 		if(vect!=NULL)
-			vecT = (vector<T>*)vect;
-		igPaWC = true;
-		return *vecT;
+		{
+			vecT = *(vector<T>*)vect;
+			delete vect;
+			if(vecT.size()>0)
+			{
+				Reflector reflector;
+				ClassInfo clas = reflector.getClassInfo(clasName);
+				args argus;
+				string methname = "get"+AfcUtil::camelCased(name);
+				Method meth = clas.getMethod(methname,argus);
+				vals valus;
+				for (int var = 0; var < (int)vecT.size(); ++var) {
+					void *ns = reflector.invokeMethodGVP(&(vecT.at(var)),meth,valus);
+					vecR.push_back(*(R*)ns);
+					delete ns;
+				}
+			}
+		}
+		return vecR;
 	}
-	/**********SELECT QUERIES ONE ROW/ALL COLS/SOME COLS(WHR),ALL ROWS/ALL COLS/SOME COLS(WHR),ALL ROWS/ONE COL(WHR) END********/
-
-
-	/**********INSERT QUERIES ONE ROW/ALL COLS/SOME COLS(WHR),BULK INSERTS START**********/
-	template<class T> void insertORSC(T t,vector<string> cols)
+	template<class T, class R> vector<R> getColumnValues(string name, Parameters propNameVaues)
 	{
-		igPaWC = true;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		insertORSC(&t,cols,clasName);
-		igPaWC = false;
-	}
-	template<class T> void insertORSCW(T t,vector<string> cols)
-	{
-		igPaWC = false;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		insertORSC(&t,cols,clasName);
-		igPaWC = true;
-	}
-	template<class T> void insertORAC(T t)
-	{
-		igPaWC = true;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
 		vector<string> cols;
-		insertORSC(&t,cols,clasName);
-		igPaWC = false;
-	}
-	template<class T> void insertORACW(T t,vector<string> cols)
-	{
-		igPaWC = false;
+		cols.push_back(name);
+		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
-		insertORSC(&t,cols,clasName);
-		igPaWC = true;
-	}
-	template<class T> void bulkInsertRAC(vector<T> vecT)
-	{
-		allocateStmt(true);
-		for(unsigned int k=0;k<vecT.size();k++)
+		CibernateQuery query("", clasName);
+		query.propNameVaues = propNameVaues;
+		vector<T> vecT;
+		void* vect = executeQuery(query, cols);
+		vector<R> vecR;
+		if(vect!=NULL)
 		{
-			T t = vecT.at(k);
-			insertORAC<T>(t);
+			vecT = *(vector<T>*)vect;
+			delete vect;
+			if(vecT.size()>0)
+			{
+				Reflector reflector;
+				ClassInfo clas = reflector.getClassInfo(clasName);
+				args argus;
+				string methname = "get"+AfcUtil::camelCased(name);
+				Method meth = clas.getMethod(methname,argus);
+				vals valus;
+				for (int var = 0; var < (int)vecT.size(); ++var) {
+					void *ns = reflector.invokeMethodGVP(&(vecT.at(var)),meth,valus);
+					vecR->push_back(*(R*)ns);
+					delete ns;
+				}
+				delete vecT;
+			}
 		}
+		return vecR;
 	}
-	template<class T> void bulkInsertRACW(vector<T> vecT)
-	{
-		allocateStmt(true);
-		for(unsigned int k=0;k<vecT.size();k++)
-		{
-			T t = vecT.at(k);
-			insertORACW<T>(t);
-		}
-	}
-	template<class T> void bulkInsertRSC(vector<T> vecT,vector<string> cols)
-	{
-		allocateStmt(true);
-		for(unsigned int k=0;k<vecT.size();k++)
-		{
-			T t = vecT.at(k);
-			insertORSC<T>(t,cols);
-		}
-	}
-	template<class T> void bulkInsertRSCW(vector<T> vecT,vector<string> cols)
-	{
-		allocateStmt(true);
-		for(unsigned int k=0;k<vecT.size();k++)
-		{
-			T t = vecT.at(k);
-			insertORSCW<T>(t,cols);
-		}
-	}
-	/**********INSERT QUERIES ONE ROW/ALL COLS/SOME COLS(WHR),BULK INSERTS END**********/
 
-
-	/**********UPDATE QUERIES ROWS/ALL COLS/SOME COLS(WHR) START**********/
-	template<class T> void updateRsAC(T t)
+	template<class T> void insert(T t)
 	{
-		igPaWC = true;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
+		CibernateQuery cquery("", clasName);
 		vector<string> cols;
-		updateORSC(&t,cols,clasName);
-		igPaWC = false;
+		executeInsert(cquery, cols, &t);
 	}
-	template<class T> void updateRsACW(T t)
-	{
-		igPaWC = false;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		vector<string> cols;
-		updateORSC(&t,cols,clasName);
-		igPaWC = true;
-	}
-	template<class T> void updateRsSC(T t,vector<string> cols)
-	{
-		igPaWC = true;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		updateORSC(&t,cols,clasName);
-		igPaWC = false;
-	}
-	template<class T> void updateRsSCW(T t,vector<string> cols)
-	{
-		igPaWC = false;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		updateORSC(&t,cols,clasName);
-		igPaWC = true;
-	}
-	/**********UPDATE QUERIES ROWS/ALL COLS/SOME COLS(WHR) END**********/
 
-	template<class T> void delAll()
+	template<class T> void bulkInsert(vector<T> vecT)
+	{
+		for(unsigned int k=0;k<vecT.size();k++)
+		{
+			T t = vecT.at(k);
+			insert<T>(t);
+		}
+	}
+
+	template<class T> void update(T t)
+	{
+		const char *mangled = typeid(t).name();
+		string clasName = demangle(mangled);
+		CibernateQuery cquery("", clasName);
+		vector<string> cols;
+		executeUpdate(cquery, cols, &t);
+	}
+
+	template<class T> void truncate()
 	{
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
-		delAll(clasName);
+		empty(clasName);
 	}
-	template<class T> void delW()
-	{
-		T t;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		delW(clasName);
-	}
+
 	template<class T> void empty()
 	{
 		T t;
@@ -335,38 +336,13 @@ public:
 		string clasName = demangle(mangled);
 		empty(clasName);
 	}
-	void delAll(string clasName);
-	void delW(string clasName);
-	void empty(string clasName);
 
-	template<class T> int getNumRows()
+	template<class T> long getNumRows()
 	{
-		igPaWC = true;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
-		int size = *(int*)sqlfuncs("COUNT(*)","int");
-		igPaWC = false;
-		return size;
-	}
-	template<class T> int getNumRowsW()
-	{
-		igPaWC = false;
-		T t;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		int size = *(int*)sqlfuncs("COUNT(*)","int");
-		igPaWC = true;
-		return size;
-	}
-	template<class T> int getNumRowsCW(string col)
-	{
-		igPaWC = false;
-		T t;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		int size = *(int*)sqlfuncs("COUNT("+col+")","int");
-		igPaWC = true;
+		long size = *(long*)sqlfuncs("COUNT(*)",clasName);
 		return size;
 	}
 
@@ -380,16 +356,6 @@ public:
 		igPaWC = false;
 		return size;
 	}
-	template<class T> int getSumValueW(string col)
-	{
-		igPaWC = false;
-		T t;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		int size = *(int*)sqlfuncs("SUM("+col+")","int");
-		igPaWC = true;
-		return size;
-	}
 
 	template<class T> int getAvgValue(string col)
 	{
@@ -399,16 +365,6 @@ public:
 		string clasName = demangle(mangled);
 		int size = *(int*)sqlfuncs("AVG("+col+")","int");
 		igPaWC = false;
-		return size;
-	}
-	template<class T> int getAvgValueW(string col)
-	{
-		igPaWC = false;
-		T t;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		int size = *(int*)sqlfuncs("AVG("+col+")","int");
-		igPaWC = true;
 		return size;
 	}
 
@@ -422,16 +378,6 @@ public:
 		igPaWC = false;
 		return t;
 	}
-	template<class T> T getFirstValueW(string col)
-	{
-		igPaWC = false;
-		T t;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		t = *(T*)sqlfuncs("first("+col+")",clasName);
-		igPaWC = true;
-		return t;
-	}
 
 	template<class T> T getLastValue(string col)
 	{
@@ -441,16 +387,6 @@ public:
 		string clasName = demangle(mangled);
 		t = *(T*)sqlfuncs("last("+col+")",clasName);
 		igPaWC = false;
-		return t;
-	}
-	template<class T> T getLastValueW(string col)
-	{
-		igPaWC = false;
-		T t;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		t = *(T*)sqlfuncs("last("+col+")",clasName);
-		igPaWC = true;
 		return t;
 	}
 
@@ -464,16 +400,6 @@ public:
 		igPaWC = false;
 		return t;
 	}
-	template<class T> T getMinValueW(string col)
-	{
-		igPaWC = false;
-		T t;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		t = *(T*)sqlfuncs("min("+col+")",clasName);
-		igPaWC = true;
-		return t;
-	}
 
 	template<class T> T getMaxValue(string col)
 	{
@@ -483,16 +409,6 @@ public:
 		string clasName = demangle(mangled);
 		t = *(T*)sqlfuncs("max("+col+")",clasName);
 		igPaWC = false;
-		return t;
-	}
-	template<class T> T getMaxValueW(string col)
-	{
-		igPaWC = false;
-		T t;
-		const char *mangled = typeid(t).name();
-		string clasName = demangle(mangled);
-		t = *(T*)sqlfuncs("max("+col+")",clasName);
-		igPaWC = true;
 		return t;
 	}
 };

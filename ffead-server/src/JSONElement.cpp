@@ -82,7 +82,7 @@ string JSONElement::toString()
 	string txt = "[name=" + name;
 	txt += ", value=" + value;
 	txt += ", children={";
-	for (int var = 0; var < children.size(); ++var) {
+	for (int var = 0; var < (int)children.size(); ++var) {
 		txt += children.at(var)->toString();
 	}
 	txt += "}]";

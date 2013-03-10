@@ -37,8 +37,14 @@ void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folde
 	Logger logger = Logger::getLogger("ConfigurationHandler");
 	FILE *pipe_fp;
 	string command;
-	command = ("ls -F1 "+cwd+"|grep '"+type+"'");
-	logger << "\nCommand:" << command << flush;
+	if(chdir(cwd.c_str())!=0)
+		return;
+	if(type=="/")
+		command = ("find . \\( ! -name . -prune \\) \\( -type d -o -type l \\) 2>/dev/null");
+	else
+		command = ("find . \\( ! -name . -prune \\) \\( -type f -o -type l \\) -name '*"+type+"' 2>/dev/null");
+	//command = ("ls -F1 "+cwd+"|grep '"+type+"'");
+	logger << ("Searching directory " + cwd + " for pattern " + type) << endl;
 	if ((pipe_fp = popen(command.c_str(), "r")) == NULL)
 	{
 		printf("pipe open error in cmd_list\n");
@@ -58,11 +64,24 @@ void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folde
 		else if(folderName!="")
 		{
 			StringUtil::replaceFirst(folderName,"*","");
+			StringUtil::replaceFirst(folderName,"./","");
 			if(folderName.find("~")==string::npos)
 			{
-				logger << "\nlist for file" << (cwd+"/"+folderName) << "\n" << flush;
 				if(apDir)
-					folders.push_back(cwd+folderName);
+				{
+					if(type=="/")
+					{
+						folderName = cwd+"/"+folderName+"/";
+						StringUtil::replaceFirst(folderName,"//","/");
+						folders.push_back(folderName);
+					}
+					else
+					{
+						folderName = cwd+"/"+folderName;
+						StringUtil::replaceFirst(folderName,"//","/");
+						folders.push_back(folderName);
+					}
+				}
 				else
 					folders.push_back(folderName);
 			}
@@ -77,14 +96,15 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	Logger logger = Logger::getLogger("ConfigurationHandler");
 	ConfigurationData configurationData;
 	configurationData.resourcePath = respath;
-	strVec all,dcps,afcd,appf,wspath,compnts,handoffVec;
+	strVec all,dcps,afcd,appf,wspath,compnts,handoffVec,tpes;
 	string includeRef;
 	TemplateEngine templ;
-	Context cntxt;
+	StringContext cntxt;
 	string libs,ilibs,isrcs,iobjs,ideps;
 	Reflection ref;
 	vector<bool> stat;
 	strVec vecvp,pathvec;
+	map<string, string> ajintpthMap;
 	propMap srp;
 	PropFileReader pread;
 	XmlParser parser("Parser");
@@ -123,6 +143,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		//logger <<  webdirs.at(0) << flush;
 		string defpath = webdirs.at(var);
 		string dcppath = defpath + "dcp/";
+		string tmplpath = defpath + "tpe/";
 		string cmppath = defpath + "components/";
 		string usrincludes = defpath + "include/";
 		//propMap srp = pread.getProperties(defpath+"config/app.prop");
@@ -132,6 +153,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		rundyncontent += "cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/"+name+"/public/\n";
 		configurationData.cntMap[name] = "true";
 		listi(dcppath,".dcp",true,dcps);
+		listi(tmplpath,".tpe",true,tpes);
 		listi(cmppath,".cmp",true,compnts);
 		all.push_back(usrincludes);
 		appf.push_back(defpath+"app.xml");
@@ -140,6 +162,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		ilibs += ("-I" + usrincludes+" ");
 		wspath.push_back(name);
 
+		logger << "started reading application.xml " << endl;
 		Element root = parser.getDocument(defpath+"config/application.xml").getRootElement();
 		if(root.getTagName()=="app" && root.getChildElements().size()>0)
 		{
@@ -169,7 +192,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								}
 								else if(clas!="")
 									configurationData.urlMap[name+url] = clas;
-								logger << "adding controller => " << name << url << " :: " << clas << endl;
+								logger << ("Adding Controller for " + (name + url) + " :: " + clas) << endl;
 							}
 							else
 							{
@@ -191,7 +214,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								{
 									configurationData.mapMap[name+from] = to;
 								}
-								logger << "adding mapping => " << name << from << " :: " << to << endl;
+								logger << ("Adding Mapping for " + (name + from) + " :: " + to) << endl;
 							}
 						}
 					}
@@ -219,7 +242,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								}
 								else if(provider!="")
 									configurationData.autMap[name+url] = provider;
-								logger << "adding authhandler => " << name << url << " :: " << provider << endl;
+								logger << ("Adding Authhandler for " + (name + url) + " :: " + provider) << endl;
 							}
 						}
 					}
@@ -249,7 +272,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 										configurationData.filterMap[name+url+type].push_back(clas);
 									}
 								}
-								logger << "adding filter => " << name << url << type << " :: " << clas << endl;
+								logger << ("Adding Filter for " + (name + url + type) + " :: " + clas) << endl;
 							}
 						}
 					}
@@ -262,7 +285,8 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						if(tmplts.at(tmpn).getTagName()=="template")
 						{
 							configurationData.tmplMap[name+tmplts.at(tmpn).getAttribute("file")] = tmplts.at(tmpn).getAttribute("class");
-							//logger << tmplts.at(tmpn).getAttribute("file") << " :: " << tmplts.at(tmpn).getAttribute("class") << flush;
+							tpes.push_back(defpath+tmplts.at(tmpn).getAttribute("file"));
+							logger << ("Adding Template for " + (name+tmplts.at(tmpn).getAttribute("file")) + " :: " + tmplts.at(tmpn).getAttribute("class")) << endl;
 						}
 					}
 				}
@@ -274,7 +298,32 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						if(dvs.at(dn).getTagName()=="dview")
 						{
 							configurationData.vwMap[name+dvs.at(dn).getAttribute("path")] = dvs.at(dn).getAttribute("class");
-							//logger << dvs.at(dn).getAttribute("path") << " :: " << dvs.at(dn).getAttribute("class") << flush;
+							logger << ("Adding Dynamic View for " + (name+dvs.at(dn).getAttribute("path")) + " :: " + dvs.at(dn).getAttribute("class")) << endl;
+						}
+					}
+				}
+				else if(eles.at(apps).getTagName()=="ajax-interfaces")
+				{
+					ElementList ajintfs = eles.at(apps).getChildElements();
+					for (unsigned int dn = 0; dn < ajintfs.size(); dn++)
+					{
+						if(ajintfs.at(dn).getTagName()=="ajax-interface")
+						{
+							string url = ajintfs.at(dn).getAttribute("url");
+							if(url.find("*")==string::npos)
+							{
+								if(url=="")
+									url = "/";
+								else if(url.at(0)!='/')
+									url = "/" + url;
+								configurationData.ajaxIntfMap[name+url] = ajintfs.at(dn).getAttribute("class");
+								pathvec.push_back(name);
+								vecvp.push_back(usrincludes);
+								stat.push_back(false);
+								ajintpthMap[ajintfs.at(dn).getAttribute("class")] = "/" + name+url;
+								afcd.push_back(ajintfs.at(dn).getAttribute("class"));
+								logger << ("Adding Ajax Interface for " + (name+url) + " :: " + ajintfs.at(dn).getAttribute("class")) << endl;
+							}
 						}
 					}
 				}
@@ -299,6 +348,11 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 									restfunction.clas = clas;
 									restfunction.meth = resfuncs.at(cntn1).getAttribute("meth");
 									restfunction.baseUrl = resfuncs.at(cntn1).getAttribute("baseUrl");
+									if(restfunction.baseUrl!="")
+									{
+										if(restfunction.baseUrl.at(0)!='/')
+											restfunction.baseUrl = "/" + restfunction.baseUrl;
+									}
 									restfunction.icontentType = resfuncs.at(cntn1).getAttribute("icontentType");
 									restfunction.ocontentType = resfuncs.at(cntn1).getAttribute("ocontentType");
 									ElementList resfuncparams = resfuncs.at(cntn1).getChildElements();
@@ -308,13 +362,6 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 										if(resfuncparams.at(cntn2).getTagName()=="param")
 										{
 											RestFunctionParams param;
-											/*try
-											{
-												param.pos = CastUtil::lexical_cast<int>(resfuncparams.at(cntn2).getAttribute("pos"));
-											} catch(...) {
-												logger << "CONFIGURATION_ERROR-> Invalid pos attribute specified for function "
-														<< restfunction.name << ",pos value should be an integer." << endl;
-											}*/
 											param.type = resfuncparams.at(cntn2).getAttribute("type");
 											param.from = resfuncparams.at(cntn2).getAttribute("from");
 											param.name = resfuncparams.at(cntn2).getAttribute("name");
@@ -336,19 +383,19 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 													|| restfunction.meth=="HEAD"))
 											{
 												invalidParam = true;
-												logger << "skipping param " << param.type << ", from is body and method is " << restfunction.meth << endl;
+												logger << ("skipping param " + param.type + ", from is body and method is " + restfunction.meth) << endl;
 											}
 											else if(!(param.type=="int" || param.type=="short" || param.type=="long" || param.type=="float" || param.type=="string"
 													|| param.type=="std::string" || param.type=="double" || param.type=="bool") && param.from!="body")
 											{
 												invalidParam = true;
-												logger << "skipping param " << param.type << ", from is body input is complex type" << endl;
+												logger << ("skipping param " + param.type + ", from is body input is complex type") << endl;
 											}
 											else if(param.from=="postparam" && (restfunction.meth=="GET" || restfunction.meth=="OPTIONS" || restfunction.meth=="TRACE"
 													|| restfunction.meth=="HEAD"))
 											{
 												invalidParam = true;
-												logger << "skipping param " << param.type << ", from is postparam and method is " << restfunction.meth << endl;
+												logger << ("skipping param " + param.type + ", from is postparam and method is " + restfunction.meth) << endl;
 											}
 											else
 												restfunction.params.push_back(param);
@@ -368,6 +415,8 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 										{
 											if(url=="")
 												url = "/";
+											else if(url.at(0)!='/')
+												url = "/" + url;
 											string urlmpp;
 											if(rname!="")
 											{
@@ -377,6 +426,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 														urlmpp = name+url+rname+"/"+restfunction.alias;
 													else
 														urlmpp = name+restfunction.baseUrl;
+													StringUtil::replaceFirst(urlmpp,"//","/");
 													configurationData.rstCntMap[urlmpp] = restfunction;
 												}
 												else
@@ -385,7 +435,8 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 														urlmpp = name+url+rname+"/"+restfunction.name;
 													else
 														urlmpp = name+restfunction.baseUrl;
-													configurationData.rstCntMap[name+url+rname+"/"+restfunction.name] = restfunction;
+													StringUtil::replaceFirst(urlmpp,"//","/");
+													configurationData.rstCntMap[urlmpp] = restfunction;
 												}
 											}
 											else
@@ -396,6 +447,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 														urlmpp = name+url+clas+"/"+restfunction.alias;
 													else
 														urlmpp = name+restfunction.baseUrl;
+													StringUtil::replaceFirst(urlmpp,"//","/");
 													configurationData.rstCntMap[urlmpp] = restfunction;
 												}
 												else
@@ -404,10 +456,11 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 														urlmpp = name+url+clas+"/"+restfunction.name;
 													else
 														urlmpp = name+restfunction.baseUrl;
+													StringUtil::replaceFirst(urlmpp,"//","/");
 													configurationData.rstCntMap[urlmpp] = restfunction;
 												}
 											}
-											logger << "adding rest-controller => " << urlmpp  << " , class => " << clas << endl;
+											logger << ("Adding rest-controller => " + urlmpp  + " , class => " + clas) << endl;
 										}
 									}
 								}
@@ -427,12 +480,15 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							string sessionTimeoutV = cntrls.at(cntn).getAttribute("sessionTimeout");
 							Security securityObject;
 							securityObject.loginProvider = provider;
+							StringUtil::replaceFirst(url,"//","/");
+							if(url.at(0)=='/' && url.length()>1)
+								url = url.substr(1);
 							securityObject.loginUrl = url;
 							try {
 								securityObject.sessTimeout = CastUtil::lexical_cast<long>(sessionTimeoutV);
 							} catch (...) {
 								securityObject.sessTimeout = 3600;
-								logger << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
+								logger << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec" << endl;
 							}
 							configurationData.securityObjectMap[name] = securityObject;
 						}
@@ -480,6 +536,9 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 				}
 			}
 		}
+		logger << "done reading application.xml " << endl;
+
+		/*logger << "started reading cibernate.xml " << endl;
 		Mapping* mapping = new Mapping;
 		smstrMap appTableColMapping;
 		strMap maptc,maptcl;
@@ -525,16 +584,6 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						if(tabs.at(dn).getTagName()=="table")
 						{
 							vector<DBRel> relv;
-							/*DBRel relation;
-							relation.type = (tabs.at(dn).getAttribute("hasOne")!="")?1:((tabs.at(dn).getAttribute("hasMany")!="")?2:((tabs.at(dn).getAttribute("many")!="")?3:0));
-							if(relation.type==1)
-								relation.clsName = tabs.at(dn).getAttribute("hasOne");
-							else if(relation.type==2)
-								relation.clsName = tabs.at(dn).getAttribute("hasMany");
-							else if(relation.type==3)
-								relation.clsName = tabs.at(dn).getAttribute("many");
-							relation.fk = tabs.at(dn).getAttribute("fk");
-							relation.pk_rel = tabs.at(dn).getAttribute("pk");*/
 							maptcl[tabs.at(dn).getAttribute("class")] = tabs.at(dn).getAttribute("name");
 							ElementList cols = tabs.at(dn).getChildElements();
 							for (unsigned int cn = 0; cn < cols.size(); cn++)
@@ -583,9 +632,11 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		mapping->setAppTableClassMapping(maptcl);
 		mapping->setAppTableRelMapping(appTableRelMapping);
 		CibernateConnPools::addMapping(name,mapping);
-		//logger << (defpath+"config/app.prop") << flush;
-		propMap afc = pread.getProperties(defpath+"config/afc.prop");
+		logger << "done reading cibernate.xml " << endl;*/
+		configureCibernate(name, defpath+"config/cibernate.xml");
 
+		/*logger << "started reading afc.prop " << endl;
+		propMap afc = pread.getProperties(defpath+"config/afc.prop");
 		string filepath;
 		if(afc.size()>0)
 		{
@@ -618,6 +669,9 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 				}
 			}
 		}
+		logger << "done reading afc.prop " << endl;*/
+
+		logger << "started reading fviews.xml " << endl;
 		root = parser.getDocument(defpath+"config/fviews.xml").getRootElement();
 		if(root.getTagName()=="fview" && root.getChildElements().size()>0)
 		{
@@ -672,34 +726,41 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 				}
 			}
 		}
+		logger << "done reading fviews.xml " << endl;
 	}
-	logger << endl<< "started generating compoenent code" <<endl;
+	logger << "started generating component code" <<endl;
 	for (unsigned int var1 = 0;var1<compnts.size();var1++)
 	{
 		string cudata,cuheader,curemote,curemoteheaders;
-		string file = gen.generateComponentCU(compnts.at(var1),cudata,cuheader,curemote,curemoteheaders);
-		AfcUtil::writeTofile(rtdcfpath+file+".h",cuheader,true);
-		AfcUtil::writeTofile(rtdcfpath+file+".cpp",cudata,true);
-		AfcUtil::writeTofile(rtdcfpath+file+"_Remote.h",curemoteheaders,true);
-		AfcUtil::writeTofile(rtdcfpath+file+"_Remote.cpp",curemote,true);
-		isrcs += "./"+file+".cpp \\\n"+"./"+file+"_Remote.cpp \\\n";
-		iobjs += "./"+file+".o \\\n"+"./"+file+"_Remote.o \\\n";
-		ideps += "./"+file+".d \\\n"+"./"+file+"_Remote.d \\\n";
-		configurationData.cmpnames.push_back(file);
-		logger << endl<< compnts.at(var1) <<endl;
+		try
+		{
+			string file = gen.generateComponentCU(compnts.at(var1),cudata,cuheader,curemote,curemoteheaders);
+			AfcUtil::writeTofile(rtdcfpath+file+".h",cuheader,true);
+			AfcUtil::writeTofile(rtdcfpath+file+".cpp",cudata,true);
+			AfcUtil::writeTofile(rtdcfpath+file+"_Remote.h",curemoteheaders,true);
+			AfcUtil::writeTofile(rtdcfpath+file+"_Remote.cpp",curemote,true);
+			isrcs += "./"+file+".cpp \\\n"+"./"+file+"_Remote.cpp \\\n";
+			iobjs += "./"+file+".o \\\n"+"./"+file+"_Remote.o \\\n";
+			ideps += "./"+file+".d \\\n"+"./"+file+"_Remote.d \\\n";
+			configurationData.cmpnames.push_back(file);
+		}
+		catch(const char* ex)
+		{
+			logger << ("Exception occurred during component code generation : ") << ex << endl;
+		}
 	}
 	for (unsigned int cntn = 0; cntn < handoffVec.size(); cntn++)
 	{
 		StringUtil::replaceFirst(libs, handoffVec.at(cntn), "");
 	}
-	logger << endl<< "done generating compoenent code" <<endl;
-	logger << endl<< "started generating reflection/serialization code" <<endl;
+	logger << "done generating component code" <<endl;
+	logger << "started generating reflection/serialization code" <<endl;
 	string ret = ref.generateClassDefinitionsAll(all,includeRef);
 	string objs, ajaxret, headers,typerefs;
 	AfcUtil::writeTofile(rtdcfpath+"ReflectorInterface.cpp",ret,true);
 	ret = ref.generateSerDefinitionAll(all,includeRef, true, objs, ajaxret, headers,typerefs);
 	AfcUtil::writeTofile(rtdcfpath+"SerializeInterface.cpp",ret,true);
-	logger << endl<< "done generating reflection/serialization code" <<endl;
+	logger << "done generating reflection/serialization code" <<endl;
 	cntxt["RUNTIME_LIBRARIES"] = libs;
 	ret = templ.evaluate(rtdcfpath+"objects.mk.template",cntxt);
 	AfcUtil::writeTofile(rtdcfpath+"objects.mk",ret,true);
@@ -711,35 +772,161 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	ret = templ.evaluate(rtdcfpath+"subdir.mk.template",cntxt);
 	AfcUtil::writeTofile(rtdcfpath+"subdir.mk",ret,true);
 	configurationData.dcpsss = dcps;
-	logger << endl<< "started generating dcp code" <<endl;
+	logger << "started generating dcp code" <<endl;
 	ret = DCPGenerator::generateDCPAll(dcps);
 	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
-	logger << endl<< "done generating dcp code" <<endl;
+	logger << "done generating dcp code" <<endl;
+	configurationData.tpes = tpes;
+	logger << "started generating template code" <<endl;
+	ret = TemplateGenerator::generateTempCdAll(tpes);
+	//logger << ret << endl;
+	AfcUtil::writeTofile(rtdcfpath+"TemplateInterface.cpp",ret,true);
+	logger << "done generating template code" <<endl;
 	string infjs;
 	logger << endl<< "started generating ajax code" <<endl;
-	ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,stat,headers,objs,infjs,pathvec,ajaxret,typerefs);
+	string ajaxHeaders;
+	ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,stat,ajaxHeaders,objs,infjs,pathvec,ajaxret,typerefs,ajintpthMap);
 	AfcUtil::writeTofile(rtdcfpath+"AjaxInterface.cpp",ret,true);
 	AfcUtil::writeTofile(pubpath+"_afc_Objects.js",objs,true);
 	AfcUtil::writeTofile(pubpath+"_afc_Interfaces.js",infjs,true);
-	AfcUtil::writeTofile(incpath+"AfcInclude.h",headers,true);
-	logger << endl<< "done generating ajax code" <<endl;
+	AfcUtil::writeTofile(incpath+"AfcInclude.h",(ajaxHeaders+headers),true);
+	logger << "done generating ajax code" <<endl;
 	ApplicationUtil apputil;
 	webdirs.clear();
-	logger << endl<< "started generating application code" <<endl;
+	logger << "started generating application code" <<endl;
 	ret = apputil.buildAllApplications(appf,webdirs1,configurationData.appMap);
 	AfcUtil::writeTofile(rtdcfpath+"ApplicationInterface.cpp",ret,true);
-	logger << endl<< "done generating application code" <<endl;
+	logger <<  "done generating application code" <<endl;
 	WsUtil wsu;
-	logger << endl<< "started generating web-service code" <<endl;
+	logger <<  "started generating web-service code" <<endl;
 	ret = wsu.generateAllWSDL(wspath,respath,configurationData.wsdlmap);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
-	logger << endl<< "done generating web-service code" <<endl;
+	logger <<  "done generating web-service code" <<endl;
 	TemplateEngine engine;
 	cntxt.clear();
+	cntxt["TARGET_LIB"] = "all";
 	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
 	string cont = engine.evaluate(respath+"/rundyn_template.sh", cntxt);
 	AfcUtil::writeTofile(respath+"/rundyn.sh", cont, true);
+	cntxt.clear();
+	cntxt["TARGET_LIB"] = "libdinter";
+	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
+	cont = engine.evaluate(respath+"/rundyn_template.sh", cntxt);
+	AfcUtil::writeTofile(respath+"/rundyn_dinter.sh", cont, true);
 	return configurationData;
 }
 
+void ConfigurationHandler::configureCibernate(string name, string configFile)
+{
+	Logger logger = Logger::getLogger("ConfigurationHandler");
+	XmlParser parser("Parser");
+	logger << ("started reading cibernate config file " + configFile) << endl;
+	Mapping* mapping = new Mapping;
+	smstrMap appTableColMapping;
+	strMap maptc,maptcl;
+	relMap appTableRelMapping;
+	Element dbroot = parser.getDocument(configFile).getRootElement();
+	if(dbroot.getTagName()=="cibernate")
+	{
+		ElementList dbeles = dbroot.getChildElements();
+		for (unsigned int dbs = 0; dbs < dbeles.size(); dbs++)
+		{
+			if(dbeles.at(dbs).getTagName()=="config")
+			{
+				ElementList confs = dbeles.at(dbs).getChildElements();
+				string uid,pwd,dsn;
+				int psize= 2;
+				for (unsigned int cns = 0; cns < confs.size(); cns++)
+				{
+					if(confs.at(cns).getTagName()=="uid")
+					{
+						uid = confs.at(cns).getText();
+					}
+					else if(confs.at(cns).getTagName()=="pwd")
+					{
+						pwd = confs.at(cns).getText();
+					}
+					else if(confs.at(cns).getTagName()=="dsn")
+					{
+						dsn = confs.at(cns).getText();
+					}
+					else if(confs.at(cns).getTagName()=="pool-size")
+					{
+						if(confs.at(cns).getText()!="")
+							psize = CastUtil::lexical_cast<int>(confs.at(cns).getText());
+					}
+				}
+				CibernateConnPools::addPool(psize,uid,pwd,dsn,name);
+			}
+			else if(dbeles.at(dbs).getTagName()=="tables")
+			{
+				ElementList tabs = dbeles.at(dbs).getChildElements();
+				for (unsigned int dn = 0; dn < tabs.size(); dn++)
+				{
+					if(tabs.at(dn).getTagName()=="table")
+					{
+						vector<DBRel> relv;
+						maptcl[tabs.at(dn).getAttribute("class")] = tabs.at(dn).getAttribute("name");
+						ElementList cols = tabs.at(dn).getChildElements();
+						for (unsigned int cn = 0; cn < cols.size(); cn++)
+						{
+							if(cols.at(cn).getTagName()=="hasOne")
+							{
+								DBRel relation;
+								relation.clsName = cols.at(cn).getText();
+								relation.type = 1;
+								relation.fk = cols.at(cn).getAttribute("fk");
+								relation.pk = cols.at(cn).getAttribute("pk");
+								relation.field = cols.at(cn).getAttribute("field");
+								relv.push_back(relation);
+							}
+							else if(cols.at(cn).getTagName()=="hasMany")
+							{
+								DBRel relation;
+								relation.clsName = cols.at(cn).getText();
+								relation.type = 2;
+								relation.fk = cols.at(cn).getAttribute("fk");
+								relation.pk = cols.at(cn).getAttribute("pk");
+								relation.field = cols.at(cn).getAttribute("field");
+								relv.push_back(relation);
+							}
+							else if(cols.at(cn).getTagName()=="many")
+							{
+								DBRel relation;
+								relation.clsName = cols.at(cn).getText();
+								relation.type = 3;
+								relation.fk = cols.at(cn).getAttribute("fk");
+								relation.pk = cols.at(cn).getAttribute("pk");
+								relv.push_back(relation);
+							}
+							else if(cols.at(cn).getTagName()=="col")
+							{
+								maptc[cols.at(cn).getAttribute("obf")] = StringUtil::toLowerCopy(cols.at(cn).getAttribute("dbf"));
+							}
+						}
+						appTableColMapping[tabs.at(dn).getAttribute("class")] = maptc;
+						appTableRelMapping[tabs.at(dn).getAttribute("class")] = relv;
+					}
+				}
+			}
+		}
+	}
+	mapping->setAppTableColMapping(appTableColMapping);
+	mapping->setAppTableClassMapping(maptcl);
+	mapping->setAppTableRelMapping(appTableRelMapping);
+	CibernateConnPools::addMapping(name,mapping);
+	logger << "done reading cibernate config file " + configFile << endl;
+}
 
+
+void ConfigurationHandler::destroyCibernate()
+{
+	map<string,Mapping*> mappings = CibernateConnPools::getMappings();
+	map<string,Mapping*>::iterator it;
+	for(it=mappings.begin();it!=mappings.end();it++)
+	{
+		CibernateConnectionPool* pool = CibernateConnPools::getPool(it->first);
+		delete pool;
+		delete it->second;
+	}
+}

@@ -26,7 +26,7 @@ Reflector::~Reflector()
 }
 void Reflector::cleanUp()
 {
-	for (int var=0;var<objectT.size();var++)
+	for (int var=0;var<(int)objectT.size();var++)
 	{
 		if(objectT.at(var)=="string" || objectT.at(var)=="int" || objectT.at(var)=="long"
 			|| objectT.at(var)=="double" || objectT.at(var)=="float" || objectT.at(var)=="bool"

@@ -25,16 +25,18 @@
 #include "string"
 #include "map"
 #include "StringUtil.h"
+#include "Object.h"
 #include <fstream>
 #include <iostream>
 using namespace std;
 
-typedef map<string,string> Context;
+typedef map<string,Object> Context;
+typedef map<string,string> StringContext;
 class TemplateEngine {
 public:
 	TemplateEngine();
 	virtual ~TemplateEngine();
-	string evaluate(string,Context);
+	string evaluate(string,StringContext);
 	//string evaluateTemplate(string,Context);
 };
 

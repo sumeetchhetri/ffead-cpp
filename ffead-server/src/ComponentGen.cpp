@@ -46,11 +46,11 @@ string convertfrom(string val)
 
 string ComponentGen::generateComponentCU(string fileName,string &cudata,string &cuheader,string &curemote,string &curemoteheaders)
 {
-	string file,dir;
-	int s,en;
+	string file;
+	/*int s,en;
 	s = fileName.find_last_of("/")+1;
 	dir = fileName.substr(0,s-1);
-	en = fileName.find_last_of(".");
+	en = fileName.find_last_of(".");*/
 	string initheaders,cuinithdrs,name;
 	/*file = fileName.substr(s,en-s);
 	file = ("Component_"+file);
@@ -498,18 +498,19 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 			cuheader += servsh + "};\n";
 			cuheader = initheaders + cuheader+"#endif";
 			curemoteheaders = cuinithdrs + curemoteheaders+"#endif";
-			logger << cuheader << flush;
+			/*logger << cuheader << flush;
 			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
 			logger << cudata << flush;
 			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
 			logger << curemoteheaders << flush;
 			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
-			logger << curemote << flush;
+			logger << curemote << flush;*/
 
 	    }
 		catch(const char* ex)
 		{
-			logger << "exception occurred" << flush;
+			throw ex;
+			logger << "Exception occurred" << flush;
 		}
 
 	}

@@ -33,17 +33,20 @@
 #include <dlfcn.h>
 #include "Constants.h"
 #include "Logger.h"
+#include "map"
 
 typedef string (*DCPPtr) ();
 typedef ClassInfo (*FunPtr) ();
+typedef string (*TemplatePtr) (map<string, void*>);
 
 class ExtHandler {
 public:
 	ExtHandler();
 	virtual ~ExtHandler();
 	static string getContentStr(string url,string locale,string ext);
-	static bool handle(HttpRequest* req, HttpResponse& res, void* dlib, string resourcePath,
-			map<string, string> tmplMap, map<string, string> vwMap,string ext, map<string, string> props);
+	static bool handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib, string resourcePath,
+			map<string, string> tmplMap, map<string, string> vwMap,string ext, map<string, string> props,
+			map<string, string> ajaxIntfMap);
 };
 
 #endif /* EXTHANDLER_H_ */

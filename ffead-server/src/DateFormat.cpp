@@ -50,6 +50,14 @@ string DateFormat::format(Date date)
 	StringUtil::replaceAll(temp,"mm",date.getMonthStr());
 	StringUtil::replaceAll(temp,"yyyy",date.getYearStr());
 	StringUtil::replaceAll(temp,"yy",date.getYearStr().substr(2));
+	if(date.getTimeZoneOffset()>0)
+	{
+		temp += ("+" + CastUtil::lexical_cast<string>(date.getTimeZoneOffset()));
+	}
+	else if(date.getTimeZoneOffset()<0)
+	{
+		temp += ("-" + CastUtil::lexical_cast<string>(date.getTimeZoneOffset()));
+	}
 	return temp;
 }
 
@@ -57,7 +65,7 @@ Date* DateFormat::parse(string strdate)
 {
 	string temp = this->formatspec;
 	Date* date = NULL;
-	string yyyy,yy,ddd,dd,mmm,mm,hh,mi,ss;
+	string yyyy,yy,ddd,dd,mmm,mm,hh,mi,ss,tzv;
 	if(temp.find("yyyy")!=string::npos)
 	{
 		yyyy = strdate.substr(temp.find("yyyy"),4);
@@ -93,6 +101,14 @@ Date* DateFormat::parse(string strdate)
 	if(temp.find("ss")!=string::npos)
 	{
 		ss = strdate.substr(temp.find("ss"),2);
+	}
+	if(strdate.find("+")!=string::npos)
+	{
+		tzv = strdate.substr(temp.find("+")+1);
+	}
+	else if(strdate.find("-")!=string::npos)
+	{
+		tzv = strdate.substr(temp.find("-"));
 	}
 	try
 	{
@@ -133,6 +149,14 @@ Date* DateFormat::parse(string strdate)
 		else
 		{
 			throw "Invalid Date year specified";
+		}
+		if(tzv!="")
+		{
+			try {
+				date->setTimeZoneOffset(CastUtil::lexical_cast<float>(tzv));
+			} catch (...) {
+				throw "Invalid Timezone specified";
+			}
 		}
 	} catch (const char* s) {
 		throw s;

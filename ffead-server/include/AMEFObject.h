@@ -603,7 +603,7 @@ public:
 				JDBObjectNew->namedLength  = 4;
 				JDBObjectNew->length = 3;
 			}
-			else if(lon<4294967296ULL)
+			else if(lon<(long)4294967296ULL)
 			{
 				JDBObjectNew->type = INT_TYPE;
 				JDBObjectNew->value = longTocharArray(lon, 4);
@@ -612,7 +612,7 @@ public:
 				JDBObjectNew->namedLength  = 5;
 				JDBObjectNew->length = 4;
 			}
-			else if(lon<1099511627776ULL)
+			else if(lon<(long)1099511627776ULL)
 			{
 				JDBObjectNew->type = VS_LONG_INT_TYPE;
 				JDBObjectNew->value = longTocharArray(lon, 5);
@@ -621,7 +621,7 @@ public:
 				JDBObjectNew->namedLength  = 6;
 				JDBObjectNew->length = 5;
 			}
-			else if(lon<281474976710656ULL)
+			else if(lon<(long)281474976710656ULL)
 			{
 				JDBObjectNew->type = S_LONG_INT_TYPE;
 				JDBObjectNew->value = longTocharArray(lon, 6);
@@ -630,7 +630,7 @@ public:
 				JDBObjectNew->namedLength  = 7;
 				JDBObjectNew->length = 6;
 			}
-			else if(lon<72057594037927936ULL)
+			else if(lon<(long)72057594037927936ULL)
 			{
 				JDBObjectNew->type = B_LONG_INT_TYPE;
 				JDBObjectNew->value = longTocharArray(lon, 7);

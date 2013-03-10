@@ -34,7 +34,8 @@ AfcUtil::~AfcUtil() {
 	// TODO Auto-generated destructor stub
 }
 static map<string,string> doneMap;
-string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool> stat,string &headers,string &objs,string &infjs,vector<string> pv, string& ajaxret, string& typrefs)
+string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool> stat,string &headers,string &objs,string &infjs,vector<string> pv,
+		string& ajaxret, string& typrefs,map<string, string> ajintpthMap)
 {
 	Reflection ref;
 	string ttem = "Date readDate(JSONElement& obj){DateFormat formt(\"yyyy-mm-dd hh:mi:ss\");\nreturn *formt.parse(obj.getValue());}";
@@ -47,8 +48,8 @@ string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool
 	ttem += "\nstring fromBinaryDataVPToJSON(BinaryData *d){return \"\";}";
 	ajaxret = ttem + typrefs + ajaxret;
 	string ret ="#include \"AfcInclude.h\"\n\nextern \"C\"\n{\n" + ajaxret;
-	headers += "#include \"CastUtil.h\"\n#include \"JSONUtil.h\"\n#include \"sstream\"\n#include \"CastUtil.h\"\n#include <algorithm>\n#include \"JSONSerialize.h\"";
-	headers += "#include \"set\"\n#include \"list\"\n#include \"queue\"\n#include \"deque\"\n#include \"DateFormat.h\"\nusing namespace std;\n";
+	headers += "#include \"CastUtil.h\"\n#include \"JSONUtil.h\"\n#include \"sstream\"\n#include <algorithm>\n#include \"JSONSerialize.h\"\n";
+	headers += "#include \"set\"\n#include \"list\"\n#include \"queue\"\n#include \"deque\"\n#include \"DateFormat.h\"\n";
 	if(obj.size()==0)return ret + "}";
 	//ret += "\nconst mValue& find_value(const mObject& obj, const string& name)\n{\nmObject::const_iterator i = obj.find(name);\nreturn i->second;\n}\n";
 	for (unsigned int var = 0; var < obj.size(); ++var)
@@ -67,7 +68,7 @@ string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool
 			strVec pinfo;
 			bool isOpForSet = false;
 			strVec info = ref.getAfcObjectData(obj.at(var)+files.at(var)+".h", false,pinfo,isOpForSet);
-			ret += generateJsInterfaces(info,files.at(var),headers,obj.at(var),infjs,pv.at(var));
+			ret += generateJsInterfaces(info,files.at(var),headers,obj.at(var),infjs,pv.at(var),ajintpthMap);
 		}
 	}
 	//headers += "\nusing namespace json_spirit;\n";
@@ -124,10 +125,10 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 			RegexUtil::replace(meth, "[\t]+", " ");
 			RegexUtil::replace(meth, "[ ]+", " ");
 			RegexUtil::replace(meth, "[ ?, ?]+", ",");
-			bool ptr = false;
+			//bool ptr = false;
 			if(meth.find("*")!=string::npos)
 			{
-				ptr = true;
+				//ptr = true;
 				StringUtil::replaceFirst(meth,"*","");
 			}
 
@@ -191,7 +192,7 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 		if(fldstat[fldnames.at(k+1)]==2)
 		{
 			string data = fldnames.at(k) + " " + fldnames.at(k+1) + ";";
-			cout << "===========> " << data << endl;
+			//logger << "===========> " << data << endl;
 			pobj.push_back(data);
 		}
 	}
@@ -204,17 +205,17 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	{
 		strVec vemp;
 		string data = obj.at(i);
-		bool ptr = false;
+		//bool ptr = false;
 		if(data.find("*")!=string::npos)
 		{
-			ptr = true;
+			//ptr = true;
 			StringUtil::replaceFirst(data,"*","");
 		}
 		StringUtil::replaceFirst(data,";","");
 		StringUtil::split(vemp, data, (" "));
 		if(vemp.size()<2)
 		{
-			logger << data << " error" <<  endl;
+			//logger << data << " error" <<  endl;
 		}
 		else
 		{
@@ -236,7 +237,7 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 		StringUtil::split(vemp, data, (" "));
 		if(vemp.size()<2)
 		{
-			logger << data << " error" <<  endl;
+			//logger << data << " error" <<  endl;
 			continue;
 		}
 
@@ -276,9 +277,9 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	}*/
 	fres += "\njson += \"}\";";
 	fres1 += "\njson += \"}\";";
-	logger << fres << flush;
+	//logger << fres << flush;
 	test += "}";
-	logger << test << flush;
+	//logger << test << flush;
 	objs += test;
 	headers += "#include \""+claz+".h\"\n";
 
@@ -310,7 +311,7 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	test += tes1 + "\nreturn _obj;\n}\n";
 	test += claz + " to"+claz+"(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ claz +" _obj = read"+claz+"(element);\nreturn _obj;\n}\n";
 	test += "vector<"+claz+"> to"+claz+"Vec(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n" +
-			"vector<"+claz+"> vec;\nfor(int i=0;i<element.getChildren().size();i++){\n" +
+			"vector<"+claz+"> vec;\nfor(int i=0;i<(int)element.getChildren().size();i++){\n" +
 			claz +" _obj = read"+claz+"(*element.getChildren().at(i));\nvec.push_back(_obj);\n" +
 			"}\nreturn vec;\n}\n";
 	test += "list<"+claz+"> to"+claz+"Lis(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
@@ -356,73 +357,73 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	test += "void* toVoidP"+claz+"(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ claz +" *_obj = new "+claz+";\n*_obj = read"+claz+"(element);\nreturn _obj;\n}\n";
 	test += "\nstring from"+claz+"ToJSON("+claz+" _obj)\n{\n"+fres+"\nreturn json;\n}\n";
 	test += "\nstring from"+claz+"VPToJSON("+claz+"* _obj)\n{\n"+fres1+"\nreturn json;\n}\n";
-	test += "\nstring from"+claz+"VecToJSON(vector<"+claz+"> _vecobj)\n{\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+	test += "\nstring from"+claz+"VecToJSON(vector<"+claz+"> _vecobj)\n{\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-			"if(i!=_vecobj.size()-1)json += \",\";\n" +
+			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	test += "\nstring from"+claz+"LisToJSON(list<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
-			"\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-			"if(i!=_vecobj.size()-1)json += \",\";\n" +
+			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	if(isOpForSet)
 	{
 		test += "\nstring from"+claz+"SetToJSON(set<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
-				"\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 				"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-				"if(i!=_vecobj.size()-1)json += \",\";\n" +
+				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
 		test += "\nstring from"+claz+"MulSetToJSON(multiset<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
-				"\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 				"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-				"if(i!=_vecobj.size()-1)json += \",\";\n" +
+				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
 	}
 	test += "\nstring from"+claz+"DqToJSON(deque<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
-			"\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-			"if(i!=_vecobj.size()-1)json += \",\";\n" +
+			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	test += "\nstring from"+claz+"QToJSON(std::queue<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;" +
 			"std::queue<"+claz+"> qq = _lisobj;\nfor (int var = 0; var < (int)qq.size(); ++var)\n{" +
 			"_vecobj.push_back(qq.front());\nqq.pop();\n}\n" +
-			"\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-			"if(i!=_vecobj.size()-1)json += \",\";\n" +
+			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	test += "\nstring from"+claz+"VecVPToJSON(vector<"+claz+">* _vecobj)\n{\nstring json = \"[\";\nfor(int i=0;i<_vecobj->size();i++){\n" +
 			"json += from"+claz+"ToJSON(_vecobj->at(i));\n" +
 			"if(i!=_vecobj->size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	test += "\nstring from"+claz+"LisVPToJSON(list<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
-			"\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-			"if(i!=_vecobj.size()-1)json += \",\";\n" +
+			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	if(isOpForSet)
 	{
 		test += "\nstring from"+claz+"SetVPToJSON(set<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
-				"\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 				"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-				"if(i!=_vecobj.size()-1)json += \",\";\n" +
+				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
 		test += "\nstring from"+claz+"MulSetVPToJSON(multiset<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
-				"\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 				"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-				"if(i!=_vecobj.size()-1)json += \",\";\n" +
+				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
 	}
 	test += "\nstring from"+claz+"DqVPToJSON(deque<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
-			"\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-			"if(i!=_vecobj.size()-1)json += \",\";\n" +
+			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	test += "\nstring from"+claz+"QVPToJSON(std::queue<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\n" +
 			"std::queue<"+claz+"> qq = *_lisobj;\nfor (int var = 0; var < (int)qq.size(); ++var)\n{" +
 			"_vecobj.push_back(qq.front());\nqq.pop();\n}\n" +
-			"\nstring json = \"[\";\nfor(int i=0;i<_vecobj.size();i++){\n" +
+			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
-			"if(i!=_vecobj.size()-1)json += \",\";\n" +
+			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	return test;
 }
@@ -563,7 +564,7 @@ string AfcUtil::generateToJSONObjects(string type, string name, bool priv, strVe
 			}
 		}
 
-		if(i!=obj.size()-1)
+		if(i!=((int)obj.size()-1))
 		{
 			fres += "\njson += \",\";\n";
 		}
@@ -632,7 +633,7 @@ string AfcUtil::generateToJSONObjects(string type, string name, bool priv, strVe
 				else fres += "if(_obj"+typ+"get"+camelCased(name)+"()!=NULL)json += \"\\\""+name+"\\\" : \"+from"+type+"ToJSON(*_obj"+typ+"get"+camelCased(name)+"());\nelse json += \"null\";\n";
 			}
 		}
-		if(i!=obj.size()-1)
+		if(i!=((int)obj.size()-1))
 		{
 			fres += "json += \",\";\n";
 		}
@@ -841,13 +842,13 @@ string AfcUtil::generateToJSONVectorObjects(string type, string name, bool priv,
 	return fres;
 }
 
-string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,string path,string &infjs,string pv)
+string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,string path,string &infjs,string pv,map<string, string> ajintpthMap)
 {
 	string test,intf,intff,inc;
 	headers += "#include \"" + claz + ".h\"\n";
 	//writeTofile("/home/sumeet/workspace/inter/AfcInclude.h",inc,false);
 	//inc = "\nextern \"C\"{\n";//string executeAFC(string fn,strVec _inp){\nstring ret;\n";
-	bool fl = false;
+	//bool fl = false;
 	test = ("var " + claz + "= {\n");
 	for(unsigned int i=0;i<obj.size();i++)
 	{
@@ -876,7 +877,7 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 				if(emp.size()==2)
 				{
 					test += emp.at(1) + ": function(_cb,_url,_cntxt){\n";
-					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"),_cb,(_url==null?\""+pv+"\":_url),_cntxt);\n";
+					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"),_cb,(_url==null?\""+ajintpthMap[claz]+"\":_url),_cntxt);\n";
 				}
 				else
 				{
@@ -939,7 +940,7 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 						//types += (emp.at(j).c_str() + " __" + (j-1));
 						//logger << vemp.at(i) << "\n" << flush;
 					}
-					fl = true;
+					//fl = true;
 					test += ",_cb,_url,_cntxt){\n";
 					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"),_cb,(_url==null?\""+pv+"\":_url),_cntxt);\n";
 				}
@@ -986,20 +987,33 @@ string AfcUtil::updateAjaxInterface(strVec emp,string claz,string pars,string pa
 	}
 	else
 		test += "return from"+retType+"ToJSON(_obj."+funcName+"("+pars+"));\n}\n";
-	logger << test << flush;
+	//logger << test << flush;
 
 	return test;
 }
 
-string AfcUtil::execute(HttpRequest req)
+void AfcUtil::execute(HttpRequest req, HttpResponse* res, string claz)
 {
-	logger << "\ninside executeAFC::" << flush;
+	logger << "Inside Ajax Interface Execute" << endl;
 	strVec vemp;
 	string methName = req.getRequestParam("method");
-	string claz = req.getRequestParam("claz");
+	if(methName=="")
+	{
+		res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+		return;
+	}
 	string temp = req.getRequestParam("paramsize");
-	int paramSize = CastUtil::lexical_cast<int>(temp.c_str());
-	logger << "\nreading params::" << flush;
+	int paramSize = 0;
+	if(temp!="")
+	{
+		try {
+			paramSize = CastUtil::lexical_cast<int>(temp.c_str());
+		} catch(...) {
+			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+			return;
+		}
+	}
+	logger << "Reading Ajax params" << endl;
 	for(int i=0;i<paramSize;i++)
 	{
 		stringstream s;
@@ -1007,7 +1021,7 @@ string AfcUtil::execute(HttpRequest req)
 		s << (i+1);
 		s >> ss;
 		ss = "param_" + ss;
-		logger << ss << flush;
+		//logger << ss << flush;
 		string tem = req.getRequestParam(ss);
 		vemp.push_back(tem);
 	}
@@ -1025,11 +1039,19 @@ string AfcUtil::execute(HttpRequest req)
 	{
 		typedef string (*Funptr2) (strVec);
 		Funptr2 f2 = (Funptr2)mkr;
-		logger << "\ncalling method: " << metn << flush;
+		logger << ("Calling method " + metn) << endl;
 		re = f2(vemp);
-		logger << "\nend of executeAFC::" << re << flush;
+		logger << "Completed method call" << endl;
+		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+		res->setContent_type("text/plain");
+		res->setContent_str(re);
+		return;
 	}
-	return re;
+	else
+	{
+		res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+		return;
+	}
 }
 
 

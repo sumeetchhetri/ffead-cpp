@@ -497,8 +497,8 @@ void CppInterpreter::evaluateUpdateInbuilt(string sep,string type,string name,ve
 			o = boundVariables[name];
 		int *_temp = (int*)o.getVoidPointer();
 		vector<string> curr,going,temp;
-		int scnt = 0,ecnt = 0,bcnt = 0;
-		bool gost= false;
+		//int scnt = 0,ecnt = 0,bcnt = 0;
+		//bool gost= false;
 		if(sep=="++" || sep=="--")
 			opr.clear();
 		/*for(unsigned int i=0;i<opr.size();i++)
@@ -1244,7 +1244,7 @@ void CppInterpreter::hanldeWHILE(vector<string>::iterator &itr)
 	string nextToken = *(++itr);
 	vector<string> stmt;
 	bool blk = false;
-	bool whd = false;
+	//bool whd = false;
 	if(nextToken=="{")
 	{
 		int cucnt = 0;
@@ -1276,7 +1276,7 @@ void CppInterpreter::hanldeWHILE(vector<string>::iterator &itr)
 	}
 	while(evalCond(whlstr))
 	{
-		whd = true;
+		//whd = true;
 		vector<string>::iterator tok = stmt.begin();
 		string stok = *(tok);
 		int cucnt = 0;
@@ -1361,7 +1361,7 @@ void CppInterpreter::hanldeFOR(vector<string>::iterator &itr)
 	string nextToken = *(++itr);
 	vector<string> stmt;
 	bool blk = false;
-	bool whd = false;
+	//bool whd = false;
 	if(nextToken=="{")
 	{
 		int cucnt = 0;
@@ -1410,7 +1410,7 @@ void CppInterpreter::hanldeFOR(vector<string>::iterator &itr)
 	}
 	while(evalCond(whlstr))
 	{
-		whd = true;
+		//whd = true;
 		vector<string>::iterator tok = stmt.begin();
 		string stok = *(tok);
 		int cucnt = 0;

@@ -45,7 +45,6 @@ public:
     {
         this->formatspec = formatspec;
     }
-
 };
 
 #endif /* DATEFORMAT_H_ */
