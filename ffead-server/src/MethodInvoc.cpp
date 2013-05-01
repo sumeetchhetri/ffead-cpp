@@ -56,31 +56,31 @@ void* MethodInvoc::service(void* arg)
 			Element message = doc.getRootElement();
 			if(message.getTagName()!="method")
 			{
-				throw new MethodInvokerException("No method Tag\n",retValue);
+				throw MethodInvokerException("No method Tag\n",retValue);
 			}
 			if(message.getAttributes().size()<3)
 			{
-				throw new MethodInvokerException("name,class and lang are mandatory attributes\n",retValue);
+				throw MethodInvokerException("name,class and lang are mandatory attributes\n",retValue);
 			}
 			else if(message.getAttribute("name")=="")
 			{
-				throw new MethodInvokerException("name attribute missing\n",retValue);
+				throw MethodInvokerException("name attribute missing\n",retValue);
 			}
 			else if(message.getAttribute("className")=="")
 			{
-				throw new MethodInvokerException("class attribute missing\n",retValue);
+				throw MethodInvokerException("class attribute missing\n",retValue);
 			}
 			else if(message.getAttribute("lang")=="")
 			{
-				throw new MethodInvokerException("lang attribute missing\n",retValue);
+				throw MethodInvokerException("lang attribute missing\n",retValue);
 			}
 			if(message.getChildElements().size()!=1)
 			{
-				throw new MethodInvokerException("message tag should have only one child tag\n",retValue);
+				throw MethodInvokerException("message tag should have only one child tag\n",retValue);
 			}
 			else if(message.getChildElements().at(0).getTagName()!="args")
 			{
-				throw new MethodInvokerException("message tag should have an args child tag\n",retValue);
+				throw MethodInvokerException("message tag should have an args child tag\n",retValue);
 			}
 			Serialize ser;
 			Reflector reflector;
@@ -92,9 +92,9 @@ void* MethodInvoc::service(void* arg)
 				void *value = NULL;
 				Element arg = argts.at(var);
 				if(arg.getTagName()!="argument" || arg.getAttribute("type")=="")
-					throw new MethodInvokerException("every argument tag should have a name and type attribute\n",retValue);
+					throw MethodInvokerException("every argument tag should have a name and type attribute\n",retValue);
 				if(arg.getText()=="" && arg.getChildElements().size()==0)
-					throw new MethodInvokerException("argument value missing\n",retValue);
+					throw MethodInvokerException("argument value missing\n",retValue);
 				if(arg.getAttribute("type")=="int")
 				{
 					int *vt = new int;
@@ -136,12 +136,12 @@ void* MethodInvoc::service(void* arg)
 			string methodName = message.getAttribute("name");;
 			if(clas.getClassName()=="")
 			{
-				throw new MethodInvokerException("class does not exist or is not in the library path\n",retValue);
+				throw MethodInvokerException("class does not exist or is not in the library path\n",retValue);
 			}
 			Method meth = clas.getMethod(methodName,argus);
 			if(meth.getMethodName()=="")
 			{
-				throw new MethodInvokerException("method does not exist for the class or the class does not exist in the library path\n",retValue);
+				throw MethodInvokerException("method does not exist for the class or the class does not exist in the library path\n",retValue);
 			}
 			else
 			{
@@ -215,6 +215,7 @@ void MethodInvoc::trigger(string port)
 		return;
 	Server serv(port,false,500,&service,2);
 	_methinv_instance->server = serv;
+	_methinv_instance->server.start();
 	_methinv_instance->running = true;
 	return;
 }

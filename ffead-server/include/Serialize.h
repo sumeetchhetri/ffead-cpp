@@ -15,7 +15,6 @@
 */
 #ifndef SERIALIZABLE_H_
 #define SERIALIZABLE_H_
-#include "XmlParser.h"
 #include "CastUtil.h"
 #include <stdexcept>
 #include <dlfcn.h>
@@ -36,7 +35,6 @@
 #include "BinaryData.h"
 #include "Constants.h"
 #include "AMEFResources.h"
-#include "JSONUtil.h"
 
 using namespace std;
 typedef string (*SerPtr) (void*);

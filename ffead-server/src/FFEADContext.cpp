@@ -22,8 +22,14 @@
 
 #include "FFEADContext.h"
 
+FFEADContext::FFEADContext()
+{
+	logger = Logger::getLogger("FFEADContext");
+}
+
 FFEADContext::FFEADContext(string depFile)
 {
+	logger = Logger::getLogger("FFEADContext");
 	XmlParser parser("Parser");
 	Element root = parser.getDocument(depFile).getRootElement();
 	ElementList eles = root.getChildElements();
@@ -45,6 +51,7 @@ FFEADContext::FFEADContext(string depFile)
 				bean.clas = ele.getAttribute("class");
 				bean.intfType = ele.getAttribute("intfType");
 				bean.injectAs = ele.getAttribute("injectAs");
+				bean.scope = ele.getAttribute("scope");
 				bean.realbean = true;
 				ElementList eleeles = ele.getChildElements();
 				if(eleeles.size()==0)
@@ -76,6 +83,7 @@ FFEADContext::FFEADContext(string depFile)
 								beanc.inbuilt = ele1.getAttribute("inbuilt");
 								beanc.clas = ele1.getAttribute("class");
 								beanc.intfType = ele1.getAttribute("intfType");
+								bean.scope = ele1.getAttribute("scope");
 								beanc.realbean = false;
 								injbns[beanc.name] = beanc;
 								bean.injs.push_back(beanc.name);
@@ -110,6 +118,24 @@ void* FFEADContext::getBean(Bean bean)
 	if(bean.inbuilt!="" && bean.value!="")
 	{
 		type = bean.inbuilt;
+	}
+	else if(bean.inbuilt!="" && bean.value=="")
+	{
+		throw "Invalid value for inbuilt type";
+	}
+	else
+	{
+		type = bean.clas;
+	}
+	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
+	{
+		if(objects.find(type)!=objects.end())
+		{
+			return objects[type];
+		}
+	}
+	if(bean.inbuilt!="" && bean.value!="")
+	{
 		if(bean.inbuilt=="string")
 		{
 			string *in = new string(bean.value);
@@ -155,10 +181,6 @@ void* FFEADContext::getBean(Bean bean)
 			_temp = in;
 		}
 	}
-	else if(bean.inbuilt!="" && bean.value=="")
-	{
-		throw "Invalid value for inbuilt type";
-	}
 	else if(bean.injectAs=="" || bean.injs.size()==0)
 	{
 		Reflector reflector;
@@ -166,11 +188,9 @@ void* FFEADContext::getBean(Bean bean)
 		ClassInfo clas = reflector.getClassInfo(bean.clas);
 		Constructor ctor = clas.getConstructor(argus);
 		_temp = reflector.newInstanceGVP(ctor);
-		type = bean.clas;
 	}
 	else if(bean.injectAs=="prop")
 	{
-		type = bean.clas;
 		Reflector reflector;
 		args argus;
 		vals valus;
@@ -200,7 +220,6 @@ void* FFEADContext::getBean(Bean bean)
 	}
 	else if(bean.injectAs=="cons")
 	{
-		type = bean.clas;
 		Reflector reflector;
 		args argus;
 		vals valus;
@@ -224,7 +243,6 @@ void* FFEADContext::getBean(Bean bean)
 	}
 	else if(bean.injectAs=="intf")
 	{
-		type = bean.clas;
 		Reflector reflector;
 		args argus;
 		vals valus;
@@ -279,4 +297,55 @@ void FFEADContext::clear()
 		}
 	}
 	cleared = true;
+}
+
+void FFEADContext::addBean(Bean bean)
+{
+	if(bean.name!="" && beans.find(bean.name)==beans.end())
+		beans[bean.name] = bean;
+}
+
+void FFEADContext::initializeAllSingletonBeans()
+{
+	map<string,Bean>::iterator beanIter;
+	logger << "Initializing singleton beans..." << endl;
+	for (beanIter=beans.begin();beanIter!=beans.end();beanIter++)
+	{
+		Bean bean = beanIter->second;
+		string type;
+		if(bean.inbuilt!="" && bean.value!="")
+		{
+			type = bean.inbuilt;
+		}
+		else
+		{
+			type = bean.clas;
+		}
+		if(StringUtil::toLowerCopy(bean.scope)!="prototype" && objects.find(type)==objects.end())
+		{
+			logger << ("Initializing Bean [name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)getBean(bean))) << endl;
+		}
+	}
+}
+
+Bean::Bean(string name,string value,string type,string scope,bool isInbuilt)
+{
+	this->name = name;
+	this->value = value;
+	if(isInbuilt)
+		this->inbuilt = type;
+	else
+		this->clas = type;
+	this->scope = scope;
+	this->realbean = true;
+}
+
+Bean::Bean()
+{
+
+}
+
+Bean::~Bean()
+{
+
 }

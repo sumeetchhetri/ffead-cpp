@@ -97,6 +97,7 @@
 #include "SSLHandler.h"
 #include "ServiceTask.h"
 #include "Thread.h"
+#include "FFEADContext.h"
 #include "SelEpolKqEvPrt.h"
 #ifdef WINDOWS
     #include <direct.h>

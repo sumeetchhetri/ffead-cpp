@@ -94,6 +94,32 @@ Date::Date()
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
 	this->nanoseconds = en.tv_nsec;
+	this->timeZoneOffset = timeinfo->tm_isdst;
+	string tem;
+	tem.append(asctime(timeinfo));
+	StringUtil::replaceAll(tem,"\n","");
+	StringUtil::replaceAll(tem,"  "," ");
+	vector<string> temp,vemp;
+	StringUtil::split(temp,tem,(" "));
+	this->dayw = StringUtil::toUpperCopy(temp.at(0));
+	this->monthw = StringUtil::toUpperCopy(temp.at(1));
+	this->month = getMon(monthw);
+	this->day = temp.at(2);
+	StringUtil::split(vemp,temp.at(3),(":"));
+	this->hh = vemp.at(0);
+	this->mm = vemp.at(1);
+	this->ss = vemp.at(2);
+	this->year = temp.at(4);
+	this->weekday = getWeekDayVal(this->dayw);
+	this->timeZoneOffset = 0;
+}
+
+Date::Date(struct tm* timeinfo)
+{
+	timespec en;
+	clock_gettime(CLOCK_REALTIME, &en);
+	this->nanoseconds = en.tv_nsec;
+	this->timeZoneOffset = timeinfo->tm_isdst;
 	string tem;
 	tem.append(asctime(timeinfo));
 	StringUtil::replaceAll(tem,"\n","");
@@ -567,6 +593,13 @@ void Date::setTime(int hh,int mi,int ss)
 	setMm(mi);
 	setSs(ss);
 	this->nanoseconds = 0;
+}
+
+Date Date::toGMT()
+{
+	Date d = *this;
+	d.addHours(timeZoneOffset);
+	return d;
 }
 
 int Date::test()

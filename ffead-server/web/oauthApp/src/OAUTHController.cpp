@@ -36,7 +36,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 {
 	HttpResponse res;
 	map<string,string> reqParams = req.getAllParams();
-	string hostp = req.getHost();
+	string hostp = req.getHeader(HttpRequest::Host);
 	if(req.getFile()=="login.auth")
 	{
 		if(reqParams["username"]!="" && reqParams["password"]!="")
@@ -47,13 +47,13 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			if(flag)
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 				res.setContent_str("Valid Login");
 			}
 			else
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 				res.setContent_str("InValid Login");
 			}
 			cout << "inside oauth controller non empty credentials" << endl;
@@ -61,7 +61,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res.setContent_str("Username and Password cannot be blank");
 			cout << "inside oauth controller empty credentials" << endl;
 		}
@@ -113,13 +113,13 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			ofs.write(wrf.c_str(),wrf.length());
 			ofs.close();
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res.setContent_str("Acquired request token");
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res.setContent_str("Could not get request token");
 		}
 	}
@@ -138,13 +138,13 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			cout << data << endl;
 
 			res.setHTTPResponseStatus(HTTPResponseStatus::MovedPermanently);
-			res.setLocation(data);
+			res.addHeaderValue(HttpResponse::Location, data);
 			cout << "redirecting to third party url" << endl;
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res.setContent_str("Invalid user");
 
 		}
@@ -206,7 +206,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 				ofs.write(wrf.c_str(),wrf.length());
 				ofs.close();
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 				string conte = "<html><head><script type='text/javascript' src='public/json2.js'></script><script type='text/javascript' src='public/prototype.js'></script><script type='text/javascript' src='public/oauth.js'></script></head>";
 				conte += "File Name: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+reqParams["tusername"]+"\")'/></body>";
 				conte += "</html>";
@@ -215,14 +215,14 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			else
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 				res.setContent_str("Could not get access token");
 			}
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res.setContent_str("Invalid user");
 		}
 	}
@@ -268,13 +268,13 @@ HttpResponse OAUTHController::service(HttpRequest req)
 
 			res.setStatusCode(parser.getHeaderValue("StatusCode"));
 			res.setStatusMsg(parser.getHeaderValue("StatusMsg"));
-			res.setContent_type(parser.getHeaderValue("Content-Type"));
+			res.addHeaderValue(HttpResponse::ContentType, parser.getHeaderValue("Content-Type"));
 			res.setContent_str(parser.getContent());
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res.setContent_str("Access denied");
 		}
 	}

@@ -328,7 +328,8 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	fflush(stderr);
 	fprintf(stderr, respo.generateResponse().c_str());
 	fflush(stderr);
-
+	delete hreq;
+	delete req;
     if(respo.getContent_type()!="")
 	{
     	r->content_type = respo.getContent_type().c_str();
@@ -380,7 +381,7 @@ static void one_time_init()
 	{
 		configurationData = ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, pubpath, respath, isSSLEnabled);
 	}
-	catch(XmlParseException *p)
+	catch(const XmlParseException &p)
 	{
 		logger << p->getMessage() << endl;
 	}

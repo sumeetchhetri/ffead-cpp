@@ -30,6 +30,7 @@ public:
 	Filter();
 	virtual ~Filter();
 	virtual void doInputFilter(HttpRequest *req){}
+	virtual bool doHandle(HttpRequest *req, HttpResponse* res){return true;}
 	virtual void doOutputFilter(HttpResponse *res){}
 };
 

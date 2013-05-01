@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri 
+	Copyright 2009-2013, Sumeet Chhetri
   
     Licensed under the Apache License, Version 2.0 (the "License"); 
     you may not use this file except in compliance with the License. 
@@ -46,8 +46,7 @@ string Serialize::_handleAllSerialization(string className,void *t)
 	if(className=="std::string" || className=="string")
 	{
 		string tem = *(string*)t;
-		object.setName(className);
-		object.addPacket(tem);
+		object.addPacket(tem, className);
 		objXml = enc.encodeB(&object, false);
 		//objXml = CastUtil::lexical_cast<string>(tem);
 	}
@@ -498,87 +497,90 @@ void* Serialize::_handleAllUnSerialization(string objXml,string className)
 {
 	AMEFDecoder dec;
 	AMEFObject* root = dec.decodeB(objXml, true, false);
-	if(root==NULL || root->getNameStr()=="")
+	if(root==NULL)
 		return NULL;
-	if(root->getNameStr()==className &&
-			(className=="std::string" || className=="string" || className=="int" || className=="short" ||
-					className=="bool" || className=="long" || className=="float" || className=="double"))
+	if(className=="std::string" || className=="string" || className=="int" || className=="short" ||
+					className=="bool" || className=="long" || className=="float" || className=="double")
 	{
-		if(className=="int")
+		root = root->getPackets().at(0);
+		if(className=="int" && className==root->getNameStr())
 		{
 			int *vt = new int;
 			*vt = root->getIntValue();
 			return vt;
 		}
-		else if(className=="short")
+		else if(className=="short" && className==root->getNameStr())
 		{
 			short *vt = new short;
 			*vt = root->getShortValue();
 			return vt;
 		}
-		else if(className=="long")
+		else if(className=="long" && className==root->getNameStr())
 		{
 			long *vt = new long;
 			*vt = root->getLongValue();
 			return vt;
 		}
-		else if(className=="Date")
+		else if(className=="Date" && className==root->getNameStr())
 		{
 			DateFormat formt("yyyy-mm-dd hh:mi:ss");
 			return formt.parse(root->getValueStr());
 		}
-		else if(className=="BinaryData")
+		else if(className=="BinaryData" && className==root->getNameStr())
 		{
 			return BinaryData::unSerilaize(root->getValueStr());
 		}
-		else if(className=="float")
+		else if(className=="float" && className==root->getNameStr())
 		{
 			float *vt = new float;
 			*vt = root->getFloatValue();
 			return vt;
 		}
-		else if(className=="double")
+		else if(className=="double" && className==root->getNameStr())
 		{
 			double *vt = new double;
 			*vt = root->getDoubleValue();
 			return vt;
 		}
-		else if(className=="bool")
+		else if(className=="bool" && className==root->getNameStr())
 		{
 			bool *vt = new bool;
 			*vt = root->getBoolValue();
 			return vt;
 		}
-		else if(className=="std::string" || className=="string")
+		else if((className=="std::string" || className=="string") && className==root->getNameStr())
 		{
 			string *vt = new string;
 			*vt = root->getValueStr();
 			return vt;
 		}
 	}
-	if(root->getNameStr().find("vector<")==0)
+	else if(root->getNameStr()!="")
 	{
-		return unserializevec(root, objXml);
-	}
-	else if(root->getNameStr().find("set<")==0)
-	{
-		return unserializeset(root, objXml);
-	}
-	else if(root->getNameStr().find("multiset<")==0)
-	{
-		return unserializemultiset(root, objXml);
-	}
-	else if(root->getNameStr().find("list<")==0)
-	{
-		return unserializelist(root, objXml);
-	}
-	else if(root->getNameStr().find("std::queue<")==0 || root->getNameStr().find("queue<")==0)
-	{
-		return unserializeq(root, objXml);
-	}
-	else if(root->getNameStr().find("deque<")==0)
-	{
-		return unserializedq(root, objXml);
+		if(root->getNameStr().find("vector<")==0)
+		{
+			return unserializevec(root, objXml);
+		}
+		else if(root->getNameStr().find("set<")==0)
+		{
+			return unserializeset(root, objXml);
+		}
+		else if(root->getNameStr().find("multiset<")==0)
+		{
+			return unserializemultiset(root, objXml);
+		}
+		else if(root->getNameStr().find("list<")==0)
+		{
+			return unserializelist(root, objXml);
+		}
+		else if(root->getNameStr().find("std::queue<")==0 || root->getNameStr().find("queue<")==0)
+		{
+			return unserializeq(root, objXml);
+		}
+		else if(root->getNameStr().find("deque<")==0)
+		{
+			return unserializedq(root, objXml);
+		}
 	}
 	return _unser(objXml,className);
 }

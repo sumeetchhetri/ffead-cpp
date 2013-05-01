@@ -27,6 +27,8 @@
 #include <sstream>
 #include <iterator>
 #include "vector"
+#include <stdio.h>
+#include "cstring"
 using namespace std;
 
 class StringUtil {
@@ -53,6 +55,19 @@ public:
 	static void split(vector<string> &output, const string& input, vector<string> delimiters);
 	static void trim(string& str);
 	static string trimCopy(const string &str);
+	static string toHEX(int);
+	static string toHEX(unsigned int);
+	static string toHEX(long);
+	static string toHEX(unsigned long);
+	static string toHEX(long long);
+	static string toHEX(unsigned long long);
+	static string toOCTAL(int);
+	static string toOCTAL(unsigned int);
+	static string toOCTAL(long);
+	static string toOCTAL(unsigned long);
+	static string toOCTAL(long long);
+	static string toOCTAL(unsigned long long);
+	static long int fromHEX(string hexVal);
 };
 
 #endif /* STRINGUTIL_H_ */

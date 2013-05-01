@@ -22,6 +22,9 @@
 
 #ifndef SERVICETASK_H_
 #define SERVICETASK_H_
+#include <sys/stat.h>
+#include <math.h>
+#include "DateFormat.h"
 #include "Task.h"
 #include "SSLHandler.h"
 #include "StringUtil.h"
@@ -37,7 +40,10 @@
 #include "ScriptHandler.h"
 #include "FviewHandler.h"
 #include "ExtHandler.h"
+#include "CORSHandler.h"
 #include "Logger.h"
+#include "Timer.h"
+#include <fcntl.h>
 #define MAXBUFLENM 32768
 #define BUFSIZZ 1024
 
@@ -65,7 +71,14 @@ class ServiceTask : public Task
 	void writeToSharedMemeory(string sessionId, string value,bool napp);
 	map<string,string> readFromSharedMemeory(string sessionId);
 	void createResponse(HttpResponse &res,bool flag,map<string,string> vals,string prevcookid, long sessionTimeout, bool sessatserv);
-	string getContentStr(string url,string locale,string ext);
+	void updateContent(HttpRequest* req, HttpResponse *res, ConfigurationData configData, string ext, int);
+	unsigned int getFileSize(const char *fileName);
+	string getFileContents(const char *fileName, int start = -1, int end = -1);
+	bool checkSocketWaitForTimeout(int sock_fd, int writing, int seconds, int micros = 0);
+	void sendData(bool isSSLEnabled, ConfigurationData configData, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, string h1);
+	void closeSocket(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd);
+	bool readLine(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, string& line);
+	bool readData(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, int cntlen, string& content);
 public:
 	ServiceTask(int fd,string serverRootDirectory,map<string,string> *params,
 			bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib, void* ddlib);

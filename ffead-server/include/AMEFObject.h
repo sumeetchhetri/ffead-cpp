@@ -347,7 +347,7 @@ public:
 	 * @param name
 	 * Add a string property to an Object
 	 */
-	void addPacket(char stringa[],string name)
+	void addPacket(char* stringa,string name)
 	{
 		AMEFObject* JDBObjectNew = addPacket(stringa);
 		JDBObjectNew->name = name;
@@ -359,7 +359,7 @@ public:
 	 * @param string
 	 * Add a string property to an Object
 	 */
-	AMEFObject* addPacket(char stringa[])
+	AMEFObject* addPacket(char* stringa)
 	{
 		AMEFObject* JDBObjectNew = new AMEFObject();
 		JDBObjectNew->name = "";
@@ -964,7 +964,7 @@ public:
 	 * @param packet
 	 * Add a JDBObjectNew property to an Object
 	 */
-	void addPacket(char packet[],char type)
+	void addPacket(char* packet,char type)
 	{
 		if(type=='s' || type=='d' || type=='t' || type=='h' || type=='y')
 		{
@@ -1240,7 +1240,7 @@ public:
 	{
 		this->name = name;
 	}
-	/*void setName(char name[])
+	/*void setName(char* name)
 	{
 		this->name = name;
 	}*/
@@ -1298,13 +1298,12 @@ public:
 	{
 		this->value.push_back(v);
 	}
-	void setValue(char value[])
+	void setValue(char* value)
 	{
 		int len = strlen(value);
 		for (int var = 0; var < len; var++) {
 			this->value.push_back(value[var]);
 		}
-		delete[] value;
 	}
 	void setValue(char *value,int len)
 	{

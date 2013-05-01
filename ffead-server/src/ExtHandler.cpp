@@ -64,9 +64,14 @@ string ExtHandler::getContentStr(string url,string locale,string ext)
     return all;
 }
 
-bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib, string resourcePath,
-		map<string, string> tmplMap, map<string, string> vwMap,string ext, map<string, string> props, map<string, string> ajaxIntfMap)
+bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib, ConfigurationData configData ,string ext)
 {
+	string resourcePath = configData.resourcePath;
+	map<string, string> tmplMap = configData.tmplMap;
+	map<string, string> vwMap = configData.vwMap;
+	map<string, string> props = configData.props;
+	map<string, string> ajaxIntfMap = configData.ajaxIntfMap;
+
 	Logger logger = Logger::getLogger("ExtHandler");
 	bool cntrlit = false;
 	string content, claz;
@@ -80,7 +85,75 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 	if(ajaxIntfMap[acurl]!="" && req->getMethod()=="POST" && req->getRequestParam("method")!="")
 	{
 		cntrlit = true;
-		AfcUtil::execute(*req, &res, ajaxIntfMap[acurl]);
+		string claz = ajaxIntfMap[acurl];
+
+		logger << "Inside Ajax Interface Execute" << endl;
+		strVec vemp;
+		string methName = req->getRequestParam("method");
+		if(methName=="")
+		{
+			res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+		}
+		else
+		{
+			string temp = req->getRequestParam("paramsize");
+			int paramSize = 0;
+			if(temp!="")
+			{
+				try {
+					paramSize = CastUtil::lexical_cast<int>(temp.c_str());
+				} catch(...) {
+					res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+					paramSize = -1;
+				}
+			}
+			if(paramSize>=0)
+			{
+				logger << "Reading Ajax params" << endl;
+				for(int i=0;i<paramSize;i++)
+				{
+					stringstream s;
+					string ss;
+					s << (i+1);
+					s >> ss;
+					ss = "param_" + ss;
+					//logger << ss << flush;
+					string tem = req->getRequestParam(ss);
+					vemp.push_back(tem);
+				}
+				string libName = Constants::INTER_LIB_FILE;
+				void *dlib = dlopen(libName.c_str(), RTLD_NOW);
+				if(dlib == NULL){
+				 cerr << dlerror() << endl;
+				 exit(-1);
+				}
+				string funcName;
+				string metn,re;
+				metn = "invokeAjaxMethodFor"+claz+methName;
+				void *mkr = dlsym(dlib, metn.c_str());
+				if(mkr!=NULL)
+				{
+					typedef string (*Funptr2) (strVec);
+					Funptr2 f2 = (Funptr2)mkr;
+					logger << ("Calling method " + metn) << endl;
+					re = f2(vemp);
+					logger << "Completed method call" << endl;
+					res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
+					res.addHeaderValue(HttpResponse::ContentType, "text/plain");
+					res.setContent_str(re);
+				}
+				else
+				{
+					res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+				}
+			}
+			else
+			{
+				res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+			}
+		}
+
+		//AfcUtil::execute(*req, &res, ajaxIntfMap[acurl]);
 	}
 	else if(ext==".dcp")
 	{
@@ -114,7 +187,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 			else
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.setContent_type(props[ext]);
+				res.addHeaderValue(HttpResponse::ContentType, props[ext]);
 				res.setContent_str(content);
 				//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 			}
@@ -123,7 +196,22 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 	else if(ext==".view" && vwMap[req->getCntxt_name()+req->getFile()]!="")
 	{
 		cntrlit = true;
-		string libName = Constants::INTER_LIB_FILE;
+
+		void *_temp = configData.ffeadContext->getBean("dview_"+req->getCntxt_name()+vwMap[req->getCntxt_name()+req->getFile()]);
+		if(_temp!=NULL)
+		{
+			DynamicView *thrd = (DynamicView*)_temp;
+			Document doc = thrd->getDocument();
+			View view;
+			string t = view.generateDocument(doc);
+			content = t;
+		}
+		else
+		{
+			logger << "Invalid Dynamic View handler" << endl;
+		}
+
+		/*string libName = Constants::INTER_LIB_FILE;
 		if(dlib == NULL)
 		{
 			cerr << dlerror() << endl;
@@ -144,7 +232,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 			View view;
 			string t = view.generateDocument(doc);
 			content = t;
-		}
+		}*/
 		ext = ".html";
 		if(ext!="" && (content.length()==0))
 		{
@@ -154,18 +242,17 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[ext]);
+			res.addHeaderValue(HttpResponse::ContentType, props[ext]);
 			res.setContent_str(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".tpe" && tmplMap[req->getCntxt_name()+req->getFile()]!="")
 	{
-		TemplateEngine te;
 		ext = ".html";
 		if(ddlib != NULL)
 		{
-			if(dlib == NULL)
+			/*if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
 				exit(-1);
@@ -198,18 +285,47 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 				int en = req->getUrl().find_last_of(".");
 				string meth,file;
 				file = req->getUrl().substr(s,en-s);
-				meth = "_" + file + "emittTemplateHTML";
+				meth = "_" + file + "emittTemplateHTML";*/
 
-				mkr = dlsym(ddlib, meth.c_str());
-				if(mkr!=NULL)
+			void *_temp = configData.ffeadContext->getBean("template_"+req->getCntxt_name()+tmplMap[req->getCntxt_name()+req->getFile()]);
+			if(_temp!=NULL)
+			{
+				TemplateHandler *thrd = static_cast<TemplateHandler*>(_temp);
+				if(thrd!=NULL)
 				{
-					//logger << endl << "inside dcp " << meth << endl;
-					TemplatePtr f =  (TemplatePtr)mkr;
-					content = f(args);
-					//string patf;
-					//patf = req->getCntxt_root() + "/dcp_" + file + ".html";
-					//content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);
-					//delete mkr;
+					Context cnt = thrd->getContext();
+
+					logger << "Done with Template Context fetch" << endl;
+					map<string, void*> args;
+					Context::iterator it;
+					for (it=cnt.begin();it!=cnt.end();it++) {
+						string key = it->first;
+						Object o = it->second;
+						logger << ("Template key=" + key + " Value = ") << o.getVoidPointer()<< endl;
+						args[key] = o.getVoidPointer();
+					}
+
+					int s = req->getUrl().find_last_of("/")+1;
+					int en = req->getUrl().find_last_of(".");
+					string meth,file;
+					file = req->getUrl().substr(s,en-s);
+					meth = "_" + file + "emittTemplateHTML";
+
+					void* mkr = dlsym(ddlib, meth.c_str());
+					if(mkr!=NULL)
+					{
+						//logger << endl << "inside dcp " << meth << endl;
+						TemplatePtr f =  (TemplatePtr)mkr;
+						content = f(args);
+						//string patf;
+						//patf = req->getCntxt_root() + "/dcp_" + file + ".html";
+						//content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);
+						//delete mkr;
+					}
+				}
+				else
+				{
+					logger << "Invalid TemplateHandler" << endl;
 				}
 			}
 			if(ext!="" && (content.length()==0))
@@ -220,7 +336,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 			else
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.setContent_type(props[ext]);
+				res.addHeaderValue(HttpResponse::ContentType, props[ext]);
 				res.setContent_str(content);
 				//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 			}
@@ -238,7 +354,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[ext]);
+			res.addHeaderValue(HttpResponse::ContentType, props[ext]);
 			res.setContent_str(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}

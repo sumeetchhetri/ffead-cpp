@@ -44,7 +44,7 @@ string convertfrom(string val)
 }
 
 
-string ComponentGen::generateComponentCU(string fileName,string &cudata,string &cuheader,string &curemote,string &curemoteheaders)
+string ComponentGen::generateComponentCU(string fileName,string &cudata,string &cuheader,string &curemote,string &curemoteheaders,string appName)
 {
 	string file;
 	/*int s,en;
@@ -73,7 +73,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 			name = srprps["@CMP_NAME"];
 			if(name=="")
 				throw "Component Name must be specified";
-			file = ("Component_"+name);
+			file = (StringUtil::capitalizedCopy(appName)+"_Component_"+name);
 			string cudef(file);
 			StringUtil::toUpper(cudef);
 			initheaders = "#ifndef "+cudef+"_H\n#define "+cudef+"_H\n";

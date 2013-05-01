@@ -70,3 +70,10 @@ IP_ADDR=
 #If this property is set to TRUE/true the invocation of php, perl, python, ruby, lua and nodejs scripts
 #will generate Warning/Error messages if any caused by the script while generating the HTML by the script
 SCRIPT_ERRS=false
+
+KEEP_ALIVE_SECONDS=10
+
+TRANSFER_ENCODING_CHUNK_SIZE=8192
+
+#gzip or deflate
+CONTENT_ENCODING=gzip

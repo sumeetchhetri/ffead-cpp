@@ -35,15 +35,15 @@ RestController::~RestController() {
 void RestController::buildResponse(HTTPResponseStatus status, string className, void* entity)
 {
 	string content;
-	if(response->getContent_type()==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+	if(response->getHeader(HttpResponse::ContentType)==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 	{
 		content = JSONSerialize::serializeUnknown(entity, className);
-		response->setContent_type(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 	}
 	else
 	{
 		content = XMLSerialize::serializeUnknown(entity, className);
-		response->setContent_type(ContentTypes::CONTENT_TYPE_APPLICATION_XML);
+		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
 	}
 	if(content!="")
 	{
@@ -60,15 +60,15 @@ void RestController::buildResponse(HTTPResponseStatus status, string className, 
 void RestController::buildResponseVector(HTTPResponseStatus status, string className, void* entity)
 {
 	string content;
-	if(response->getContent_type()==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+	if(response->getHeader(HttpResponse::ContentType)==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 	{
 		content = JSONSerialize::serializeUnknown(entity, "std::vector<"+className+",");
-		response->setContent_type(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 	}
 	else
 	{
 		content = XMLSerialize::serializeUnknown(entity, "std::vector<"+className+",");
-		response->setContent_type(ContentTypes::CONTENT_TYPE_APPLICATION_XML);
+		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
 	}
 	if(content!="")
 	{

@@ -16,7 +16,7 @@ TemplateGenerator::~TemplateGenerator() {
 	// TODO Auto-generated destructor stub
 }
 
-string TemplateGenerator::generateTempCd(string fileName,string &headersb,string &funcdefs)
+string TemplateGenerator::generateTempCd(string fileName,string &headersb,string &funcdefs,string app)
 {
 	ifstream infile;
 	string data;
@@ -36,8 +36,8 @@ string TemplateGenerator::generateTempCd(string fileName,string &headersb,string
 		}
 	}
 	string header,bodies,funcs,declars;
-	funcdefs.append("string _"+file+"emittTemplateHTML(map<string, void*> args);\n");
-	declars.append("string _"+file+"emittTemplateHTML(map<string, void*> args)\n{\nstring screen;\n");
+	funcdefs.append("string _"+app+file+"emittTemplateHTML(map<string, void*> args);\n");
+	declars.append("string _"+app+file+"emittTemplateHTML(map<string, void*> args)\n{\nstring screen;\n");
 	string tempo;
 	map<string,string> uselocVars;
 	vector<string> inplaceVarValues;
@@ -189,12 +189,13 @@ string TemplateGenerator::generateTempCd(string fileName,string &headersb,string
 	return declars;
 }
 
-string TemplateGenerator::generateTempCdAll(vector<string> fileNames)
+string TemplateGenerator::generateTempCdAll(map<string, string> fileNames)
 {
 	string bodies,headersb="#include \"AfcInclude.h\"",funcdefs;
-	for (unsigned int var = 0; var < fileNames.size(); ++var)
+	map<string, string>::iterator it;
+	for (it=fileNames.begin();it!=fileNames.end();++it)
 	{
-		bodies += generateTempCd(fileNames.at(var),headersb,funcdefs);
+		bodies += generateTempCd(it->first,headersb,funcdefs,it->second);
 	}
 	bodies = (headersb+"\nextern \"C\"\n{\n"+funcdefs+bodies+"}\n");
 	return bodies;

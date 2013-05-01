@@ -42,6 +42,7 @@ void *dlib = NULL, *ddlib = NULL;
 typedef map<string,string> sessionMap;
 static Mutex m_mutex,p_mutex;
 ConfigurationData configurationData;
+FFEADContext ffeadContext;
 
 Logger logger;
 
@@ -398,28 +399,35 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	}
 	if((pid=fork())==0)
 	{
+		char pidStr[10];
+		sprintf(pidStr, "%ld", (long)pid);
+		string proclabel = "CHServer-";
+		proclabel.append(pidStr);
+
+		Logger plogger = Logger::getLogger(proclabel);
+
 		SSLHandler sSLHandler;
 		dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
 		//logger << endl <<dlib << endl;
 		if(dlib==NULL)
 		{
-			logger << dlerror() << endl;
-			logger.info("Could not load Library");
+			plogger << dlerror() << endl;
+			plogger.info("Could not load Library");
 			exit(0);
 		}
 		else
-			logger.info("Library loaded successfully");
+			plogger.info("Library loaded successfully");
 
 		ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
 		//logger << endl <<dlib << endl;
 		if(ddlib==NULL)
 		{
-			logger << dlerror() << endl;
-			logger.info("Could not load dynamic Library");
+			plogger << dlerror() << endl;
+			plogger.info("Could not load dynamic Library");
 			exit(0);
 		}
 		else
-			logger.info("Dynamic Library loaded successfully");
+			plogger.info("Dynamic Library loaded successfully");
 		if(isSSLEnabled)
 		{
 			/*HTTPS related*/
@@ -449,7 +457,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		ss << getpid();
 		ss >> filename;
 		filename.append(".cntrl");
-		logger << ("generated file " + filename) << endl;
+		plogger << ("generated file " + filename) << endl;
 		ofstream cntrlfile;
 		cntrlfile.open(filename.c_str());
 		cntrlfile << "Process Running" << endl;
@@ -479,7 +487,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			if (nfds == -1)
 			{
 				perror("poller wait child process");
-				logger << "\n----------poller child process----" << endl;
+				plogger << "\n----------poller child process----" << endl;
 			}
 			else
 			{
@@ -492,7 +500,8 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				if((err=recv(fd,buf,10,MSG_PEEK))==0)
 				{
 					close(fd);
-					logger << "Socket conn closed before being serviced" << endl;
+					plogger << "Socket conn closed before being serviced" << endl;
+					serverCntrlFile.open(serverCntrlFileNm.c_str());
 					continue;
 				}
 
@@ -508,7 +517,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 					ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params,
 							isSSLEnabled, ctx, sSLHandler, configurationData, dlib, ddlib);
 					task->setCleanUp(true);
-					pool.execute(*task);
+					pool.submit(task);
 				}
 			}
 			serverCntrlFile.open(serverCntrlFileNm.c_str());
@@ -563,17 +572,18 @@ void* dynamic_page_monitor(void* arg)
 {
 	string serverRootDirectory = *(string*)arg;
 	struct stat statbuf;
-	strVec dcpsss = configurationData.dcpsss;
-	strVec tpes = configurationData.tpes;
-	strVec dcspstpes = dcpsss;
-	dcspstpes.insert(dcspstpes.end(), tpes.begin(), tpes.end());
+	map<string, string> dcpsss = configurationData.dcpsss;
+	map<string, string> tpes = configurationData.tpes;
+	map<string, string> dcspstpes = dcpsss;
+	dcspstpes.insert(tpes.begin(), tpes.end());
 	map<string,long> statsinf;
-	for(int i=0;i<(int)dcspstpes.size();i++)
+	map<string, string>::iterator it;
+	for(it=dcspstpes.begin();it!=dcspstpes.end();++it)
 	{
-		stat(dcspstpes.at(i).c_str(), &statbuf);
+		stat(it->first.c_str(), &statbuf);
 		time_t tm = statbuf.st_mtime;
 		long tim = (uintmax_t)tm;
-		statsinf[dcspstpes.at(i)] = tim;
+		statsinf[it->first] = tim;
 	}
 	while(true)
 	{
@@ -581,12 +591,12 @@ void* dynamic_page_monitor(void* arg)
 		bool flag = false;
 		if(processgendone)
 			continue;
-		for(int i=0;i<(int)dcspstpes.size();i++)
+		for(it=dcspstpes.begin();it!=dcspstpes.end();++it)
 		{
-			stat(dcspstpes.at(i).c_str(), &statbuf);
+			stat(it->first.c_str(), &statbuf);
 			time_t tm = statbuf.st_mtime;
 			long tim = (uintmax_t)tm;
-			if(tim!=statsinf[dcspstpes.at(i)])
+			if(tim!=statsinf[it->first])
 			{
 				string rtdcfpath = serverRootDirectory + "rtdcf/";
 				string respath = serverRootDirectory + "resources/";
@@ -644,12 +654,12 @@ void* dynamic_page_monitor(void* arg)
 		}
 		if(flag)
 		{
-			for(int ii=0;ii<(int)dcspstpes.size();ii++)
+			for(it=dcspstpes.begin();it!=dcspstpes.end();++it)
 			{
-				stat(dcspstpes.at(ii).c_str(), &statbuf);
+				stat(it->first.c_str(), &statbuf);
 				time_t tm = statbuf.st_mtime;
 				long tim = (uintmax_t)tm;
-				statsinf[dcspstpes.at(ii)] = tim;
+				statsinf[it->first] = tim;
 			}
 		}
 	}
@@ -767,9 +777,9 @@ int main(int argc, char* argv[])
     strVec cmpnames;
     try
     {
-    	configurationData = ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, pubpath, respath, isSSLEnabled);
+    	configurationData = ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, pubpath, respath, isSSLEnabled, &ffeadContext);
     }
-    catch(XmlParseException p)
+    catch(const XmlParseException& p)
     {
     	logger << p.getMessage() << endl;
     }
@@ -777,6 +787,7 @@ int main(int argc, char* argv[])
 	{
 		logger << msg << endl;
 	}
+    configurationData.sprops = srprps;
     configurationData.sessionTimeout = sessionTimeout;
     configurationData.ip_address = IP_ADDRESS;
     configurationData.sessatserv = sessatserv;
@@ -820,6 +831,10 @@ int main(int argc, char* argv[])
 		dlclose(checkdlib);
 		logger.info("Library generated successfully");
 	}
+
+	//Load all the FFEADContext beans so that the same copy is shared by all process
+	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
+	configurationData.ffeadContext->initializeAllSingletonBeans();
 
 	for (unsigned int var1 = 0;var1<configurationData.cmpnames.size();var1++)
 	{
@@ -1004,6 +1019,7 @@ int main(int argc, char* argv[])
 				if (new_fd == -1)
 				{
 					perror("accept");
+					serverCntrlFile.open(serverCntrlFileNm.c_str());
 					continue;
 				}
 				else
@@ -1074,7 +1090,7 @@ int main(int argc, char* argv[])
 						ServiceTask *task = new ServiceTask(descriptor,serverRootDirectory,&params,
 								isSSLEnabled, ctx, sSLHandler, configurationData, dlib, ddlib);
 						task->setCleanUp(true);
-						pool->execute(*task);
+						pool->submit(task);
 					}
 				}
 			}

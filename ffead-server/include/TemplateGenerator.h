@@ -19,8 +19,8 @@ class TemplateGenerator {
 public:
 	TemplateGenerator();
 	virtual ~TemplateGenerator();
-	static string generateTempCd(string,string &,string &);
-	static string generateTempCdAll(vector<string>);
+	static string generateTempCd(string,string &,string &,string app);
+	static string generateTempCdAll(map<string, string> fileNames);
 };
 
 #endif /* TEMPLATEGENERATOR_H_ */

@@ -35,7 +35,7 @@ void DefaultRestController::addNumbers(int a, int b)
 {
 	int c = a + b;
 	response->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-	response->setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+	response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 	response->setContent_str(CastUtil::lexical_cast<string>(a) + " + " + CastUtil::lexical_cast<string>(b) + " = " +
 			CastUtil::lexical_cast<string>(c));
 	cout << "Processed input request inside DefaultRestController..." << endl;
@@ -45,7 +45,7 @@ void DefaultRestController::power(int base, int exponent)
 {
 	int c = pow((double)base, (double)exponent);
 	response->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-	response->setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+	response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 	response->setContent_str(CastUtil::lexical_cast<string>(base) + " ^ " + CastUtil::lexical_cast<string>(exponent) + " = " +
 			CastUtil::lexical_cast<string>(c));
 	cout << "Processed input request inside DefaultRestController..." << endl;
@@ -61,7 +61,7 @@ void DefaultRestController::testVector(vector<int> param)
 	}
 	temvec += "]";
 	response->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-	response->setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+	response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 	response->setContent_str(temvec);
 	cout << "Processed input request inside DefaultRestController..." << endl;
 }

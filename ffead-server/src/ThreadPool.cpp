@@ -133,13 +133,13 @@ void* ThreadPool::poll(void *arg) {
 			Task *task = ths->wpool->getTask();
 			if(task!=NULL)
 			{
-				ths->submit(task);
+				ths->submitInternal(task);
 			}
 		} else if (ths->prioritypooling && ths->wpool->tasksPPending()) {
 			Task *task = ths->wpool->getPTask();
 			if(task!=NULL)
 			{
-				ths->submit(task);
+				ths->submitInternal(task);
 			}
 		}
 		Thread::mSleep(1);
@@ -153,7 +153,7 @@ void* ThreadPool::poll(void *arg) {
 	return NULL;
 }
 
-void ThreadPool::submit(Task *task) {
+void ThreadPool::submitInternal(Task *task) {
 	bool flag = true;
 	while (flag) {
 		for (unsigned int var = 0; var < tpool->size(); var++) {
@@ -192,8 +192,11 @@ void ThreadPool::joinAll() {
 		}
 	}
 }
-void ThreadPool::execute(Task &task, int priority) {
 
+void ThreadPool::submit(Task* task, int priority) {
+	submit(*task, priority);
+}
+void ThreadPool::submit(Task &task, int priority) {
 	if(console)
 	{
 		logger << "Adding task to wpool\n" << flush;
@@ -208,8 +211,10 @@ void ThreadPool::execute(Task &task, int priority) {
 		wpool->addPTask(task);
 	}
 }
-void ThreadPool::execute(Task &task) {
-
+void ThreadPool::submit (Task* task) {
+	submit(*task);
+}
+void ThreadPool::submit (Task &task) {
 	if(console)
 	{
 		logger << "Adding task to wpool\n" << flush;
@@ -224,8 +229,10 @@ void ThreadPool::execute(Task &task) {
 		wpool->addPTask(task);
 	}
 }
+void ThreadPool::schedule(Task* task, long long tunit, int type) {
+	schedule(*task, tunit, type);
+}
 void ThreadPool::schedule(Task &task, long long tunit, int type) {
-
 	if(console)
 	{
 		logger << "Added task to wpool\n" << flush;
@@ -239,6 +246,64 @@ void ThreadPool::schedule(Task &task, long long tunit, int type) {
 	} else {
 		wpool->addPTask(task);
 	}
+}
+
+void ThreadPool::submit(FutureTask *task, int priority) {
+	submit(*task, priority);
+}
+void ThreadPool::submit(FutureTask &task, int priority) {
+	if(console)
+	{
+		logger << "Adding task to wpool\n" << flush;
+	}
+	task.tunit = -1;
+	task.type = -1;
+	task.priority = priority;
+	task.console = console;
+	if (!prioritypooling) {
+		wpool->addTask(&task);
+	} else {
+		wpool->addPTask(&task);
+	}
+	task.isFuture = true;
+}
+void ThreadPool::submit(FutureTask *task) {
+	submit(*task);
+}
+void ThreadPool::submit(FutureTask &task) {
+	if(console)
+	{
+		logger << "Adding task to wpool\n" << flush;
+	}
+	task.tunit = -1;
+	task.type = -1;
+	task.priority = -1;
+	task.console = console;
+	if (!prioritypooling) {
+		wpool->addTask(&task);
+	} else {
+		wpool->addPTask(&task);
+	}
+	task.isFuture = true;
+}
+void ThreadPool::schedule(FutureTask *task, long long tunit, int type) {
+	schedule(*task, tunit, type);
+}
+void ThreadPool::schedule(FutureTask &task, long long tunit, int type) {
+	if(console)
+	{
+		logger << "Added task to wpool\n" << flush;
+	}
+	task.tunit = tunit;
+	task.type = type;
+	task.priority = -1;
+	task.console = console;
+	if (!prioritypooling) {
+		wpool->addTask(&task);
+	} else {
+		wpool->addPTask(&task);
+	}
+	task.isFuture = true;
 }
 
 ThreadPool::~ThreadPool() {

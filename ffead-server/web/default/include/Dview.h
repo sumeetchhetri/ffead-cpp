@@ -24,7 +24,7 @@
 #define DVIEW_H_
 #include "DynamicView.h"
 
-class Dview : public DynamicView{
+class Dview : public DynamicView {
 public:
 	Dview();
 	virtual ~Dview();

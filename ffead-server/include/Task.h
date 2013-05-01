@@ -28,6 +28,7 @@
 using namespace std;
 
 class Task {
+	bool isFuture;
 	int tunit;
 	int type;
 	int priority;
@@ -38,12 +39,17 @@ class Task {
 	friend class PoolThread;
 	friend class ThreadPool;
 	friend class TaskPool;
+	friend class FutureTask;
 	bool isWaitOver(Timer *timer);
 public:
 	void setCleanUp(bool);
 	Task();
 	virtual ~Task();
 	virtual void run()=0;
+protected:
+	void init();
+	void setPriority(int priority);
+	void setTunitType(int tunit, int type);
 };
 
 #endif /* TASK_H_ */

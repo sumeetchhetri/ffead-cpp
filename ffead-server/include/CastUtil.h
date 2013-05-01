@@ -284,13 +284,13 @@ public:
 		}
 		else if(tn=="size_t")
 		{
-			long int d = 1;
-			d = strtol(val, &endptr, 10);
+			size_t d = 1;
+			d = strtoul(val, &endptr, 10);
 			if(*endptr)
 			{
 				throw "Conversion exception - string to size_t";
 			}
-			t = (size_t)d;
+			t = d;
 		}
 		else if(tn=="unsigned short")
 		{

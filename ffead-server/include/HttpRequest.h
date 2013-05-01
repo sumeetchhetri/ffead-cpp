@@ -26,55 +26,35 @@
 #include "sstream"
 #include "fstream"
 #include "StringUtil.h"
-
+#include "RegexUtil.h"
 #include "CastUtil.h"
 #include "stdio.h"
 #include <openssl/ssl.h>
 #include "CryptoHandler.h"
 #include "Logger.h"
+#include "MultipartContent.h"
+#include "Timer.h"
 
 typedef vector<string> strVec;
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 using namespace std;
 typedef map<string, string> RMap;
+typedef map<string, MultipartContent> FMap;
 
-
-class FormData
-{
-public:
-	string type;
-	string value;
-	string fileName;
-	int length;
-	string tmpFileName;
-};
-typedef map<string, FormData> FMap;
 class HttpRequest {
+	static string VALID_REQUEST_HEADERS;
 	Logger logger;
-	//friend class HttpSession;
 	string host;
 	string url;
 	string cntxt_root;
 	string cntxt_name;
 	string httpVersion;
 	string method;
-	string user_agent;
-	string accept;
-	string accept_lang;
-	string accept_encod;
-	string accept_chars;
-	string keep_alive;
-	string connection;
-	string cache_ctrl;
 	string content;
-	string content_type;
 	string content_boundary;
-	string content_len;
-	string referer;
-	string pragma;
+	string content_tfile;
 	string file;
-	Map attributes;
 	RMap requestParams;
 	FMap requestParamsF;
 	RMap queryParams;
@@ -83,63 +63,49 @@ class HttpRequest {
 	string actUrl;
 	string sessionID;
 	bool cookie;
+	string ranges;
 	map<string,string> cookieattrs;
 	map<string,string> authinfo;
 	map<int,string> reqorderinf;
 	map<int,string> authorderinf;
-	map<string,string> xtraHeaders;
-	void unbase64(string);
+	map<string,string> headers;
+	vector<MultipartContent> contentList;
+	string preamble;
+	string epilogue;
+
+	void getAuthParams(string);
 	void getOauthParams(string);
+	enum CORSRequestType {
+		PREFLIGHT, CORS, OTHER
+	};
+	void updateFromContentStr();
+	void updateFromContentFile();
 public:
+	static string Accept,AcceptCharset,AcceptEncoding,AcceptLanguage,AcceptDatetime,
+				  AccessControlRequestHeaders,AccessControlRequestMethod,Authorization,
+				  CacheControl,Connection,Cookie,ContentLength,ContentMD5,ContentType,
+				  Date,Expect,From,Host,IfMatch,IfModifiedSince,IfNoneMatch,IfRange,
+				  IfUnmodifiedSince,MaxForwards,Origin,Pragma,ProxyAuthorization,Range,
+				  Referer,TE,Upgrade,UserAgent,Via,Warning;
 	HttpRequest();
 	HttpRequest(strVec,string);
+	void updateContent();
 	virtual ~HttpRequest();
-    Map getAttributes() const;
-    void setAttributes(Map attributes);
-    string getAttribute(string key);
-    void setAttribute(string key,string value);
     void setSession(HttpSession session);
     HttpSession* getSession();
     string getMethod() const;
 	void setMethod(string method);
-	string getUser_agent() const;
-	void setUser_agent(string user_agent);
-	string getAccept() const;
-	void setAccept(string accept);
-	string getAccept_lang() const;
-	void setAccept_lang(string accept_lang);
-	string getAccept_encod() const;
-	void setAccept_encod(string accept_encod);
-	string getAccept_chars() const;
-	void setAccept_chars(string accept_chars);
-	string getKeep_alive() const;
-	void setKeep_alive(string keep_alive);
-	string getConnection() const;
-	void setConnection(string connection);
-	string getCache_ctrl() const;
-	void setCache_ctrl(string cache_ctrl);
-	string getHost() const;
-	void setHost(string host);
 	void setUrl(string);
 	string getUrl();
 	void setHttpVersion(string);
 	string getHttpVersion();
-	string getContent_type() const;
-	void setContent_type(string);
 	string getContent_boundary() const;
 	void setContent_boundary(string);
-	string getContent_len() const;
-	void setContent_len(string);
 	string getContent() const;
 	void setContent(string);
-    string getReferer() const;
-    void setReferer(string);
-    string getPragma() const;
-    void setPragma(string);
     RMap getRequestParams() const;
     void setRequestParams(RMap);
     void setRequestParam(string,string);
-    void setRequestParamF(string,FormData);
     string getRequestParam(string);
     string getRequestParamType(string key);
     string getCntxt_root() const;
@@ -163,49 +129,32 @@ public:
 	string toPythonVariablesString();
 	string toLuaVariablesString();
 	string toNodejsVariablesString();
-	RMap getQueryParams() const {
-		return queryParams;
-	}
-
-	void setQueryParams(RMap queryParams) {
-		this->queryParams = queryParams;
-	}
-	void setQueryParam(string name,string value){this->queryParams[name] = value;}
-	string getQueryParam(string key)
-	{
-		if(this->queryParams.find(key)!=this->queryParams.end())
-			return this->queryParams[key];
-		return "";
-	}
+	RMap getQueryParams() const;
+	void setQueryParams(RMap queryParams);
+	void setQueryParam(string name,string value);
+	string getQueryParam(string key);
 	RMap getAllParams();
-    bool hasCookie() const{return this->cookie;}
-    map<int,string> getAuthOrderinfo() const{return authorderinf;}
-	map<int,string> getReqOrderinfo() const{return reqorderinf;}
-	map<string,string> getCookieInfo() const{return cookieattrs;}
-    string getAuthOrderinfoAttribute(int key)
-    {
-    	if(authorderinf.find(key)!=authorderinf.end())
-			return authorderinf[key];
-		else return "";
-    }
-    string getReqOrderinfoAttribute(int key)
-    {
-    	if(reqorderinf.find(key)!=reqorderinf.end())
-			return reqorderinf[key];
-		else return "";
-    }
-    string getCookieInfoAttribute(string key)
-    {
-    	if(cookieattrs.find(key)!=cookieattrs.end())
-    		return cookieattrs[key];
-    	else return "";
-    }
-    string getXtraHeader(string key)
-	{
-		if(this->xtraHeaders.find(key)!=this->xtraHeaders.end())
-			return this->xtraHeaders[key];
-		return "";
-	}
+    bool hasCookie() const;
+    map<int,string> getAuthOrderinfo() const;
+	map<int,string> getReqOrderinfo() const;
+	map<string,string> getCookieInfo() const;
+    string getAuthOrderinfoAttribute(int key);
+    string getReqOrderinfoAttribute(int key);
+    string getCookieInfoAttribute(string key);
+    string getHeader(string key);
+    map<string,string> getHeaders();
+    int getCORSRequestType();
+    void addHeaderValue(string header, string value);
+    vector<string> parseHeaderValue(string headerValue);
+    bool isValidHttpMethod(string method);
+    bool isAgentAcceptsCE();
+    bool isHeaderValue(string header, string value, bool ignoreCase = true);
+    vector<vector<int> > getRanges(vector<string> &rangesVec);
+    void setContent_tfile(string tfile);
+    string getContent_tfile();
+    void addMultipartFormContent(string key, MultipartContent content);
+    void addContent(MultipartContent content);
+    bool isNonBinary(string mimeType);
 };
 
 #endif /* HTTPREQUEST_H_ */

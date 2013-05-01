@@ -38,6 +38,7 @@
 #include "Logger.h"
 #include "CibernateQuery.h"
 #include "RegexUtil.h"
+#include "DialectHelper.h"
 
 typedef map<string,Object*> Params;
 class Cibernate {
@@ -46,16 +47,17 @@ private:
 	string demangle(const char *mangled);
 	CibernateConnectionPool* pool;
 	Mapping* mapping;
-	string appName;
+	string appName,dialect;
 	Connection *conn;
 	SQLHENV	V_OD_Env;// Handle ODBC environment
 	SQLHDBC	V_OD_hdbc;// Handle connection
 	SQLHSTMT V_OD_hstmt;//statement
-	Params params,params1;
-	bool igPaWC;
+	Params params;
+	bool isTransaction;
 	bool allocateStmt(bool);
-	map<string,string> ntmap,ntmap1;
-	void clearMaps(){ntmap.clear();params.clear();ntmap1.clear();params1.clear();}
+	void refreshStmt();
+	map<string,string> ntmap;
+	void clearMaps(){ntmap.clear();params.clear();}
 	void* getElements();
 	void* getElements(string clasName);
 	void* getElements(vector<string> cols,string clasName);
@@ -71,23 +73,16 @@ private:
 public:
 	Cibernate();
 	Cibernate(string);
-	Cibernate(string,string,string,int);
+	Cibernate(string,string,string,int,string);
 	virtual ~Cibernate();
-	void close();
+	void close(bool clos);
 	bool startTransaction();
 	bool commit();
 	bool rollback();
 	void procedureCall(string);
 	void addParam(string name,string type,Object &obj){ntmap[name]=type;params[name]=&obj;}
-	void addParam(string name,Object &obj){params[name]=&obj;}
-	Object getParam(string name){return *params[name];}
-	void addParam1(string name,string type,Object &obj){ntmap1[name]=type;params1[name]=&obj;}
-	void addParam1(string name,Object &obj){params1[name]=&obj;}
-	Object getParam1(string name){return *params1[name];}
-	vector<map<string,void*> > getARSCW(string tableName,vector<string> cols,vector<string> coltypes);
 	void truncate(string clasName);
 	void empty(string clasName);
-
 
 	vector<map<string, void*> > execute(CibernateQuery query);
 	template<class T> vector<T> getList(CibernateQuery query)
@@ -120,6 +115,7 @@ public:
 			return vecT;
 		}
 		vector<T> vecT;
+		query.count = 1;
 		void* vect = executeQuery(query);
 		if(vect!=NULL)
 		{
@@ -348,67 +344,55 @@ public:
 
 	template<class T> int getSumValue(string col)
 	{
-		igPaWC = true;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
 		int size = *(int*)sqlfuncs("SUM("+col+")","int");
-		igPaWC = false;
 		return size;
 	}
 
 	template<class T> int getAvgValue(string col)
 	{
-		igPaWC = true;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
 		int size = *(int*)sqlfuncs("AVG("+col+")","int");
-		igPaWC = false;
 		return size;
 	}
 
 	template<class T> T getFirstValue(string col)
 	{
-		igPaWC = true;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
 		t = *(T*)sqlfuncs("first("+col+")",clasName);
-		igPaWC = false;
 		return t;
 	}
 
 	template<class T> T getLastValue(string col)
 	{
-		igPaWC = true;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
 		t = *(T*)sqlfuncs("last("+col+")",clasName);
-		igPaWC = false;
 		return t;
 	}
 
 	template<class T> T getMinValue(string col)
 	{
-		igPaWC = true;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
 		t = *(T*)sqlfuncs("min("+col+")",clasName);
-		igPaWC = false;
 		return t;
 	}
 
 	template<class T> T getMaxValue(string col)
 	{
-		igPaWC = true;
 		T t;
 		const char *mangled = typeid(t).name();
 		string clasName = demangle(mangled);
 		t = *(T*)sqlfuncs("max("+col+")",clasName);
-		igPaWC = false;
 		return t;
 	}
 };

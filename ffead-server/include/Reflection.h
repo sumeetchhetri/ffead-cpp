@@ -52,14 +52,14 @@ public:
 	strVec getAfcObjectData(string className,bool object,strVec& privf, bool &isOpForSet);
 	strVec getAfcObjectData(string,bool);
 	propMap getDbTableInfo(string);
-	string generateClassDefinitionsAll(strVec,string &);
-	string generateSerDefinitionAll(strVec all,string &includeRef, bool isBinary,string&,string&,string&,string&);
-	string generateClassDefinition(string,string &,string &,string &,string &,string &);
-	string generateSerDefinition(string,string &,string &,string &,string &);
-	string generateClassDefinitions(string,string &,string &,string &,string &,string &);
-	string generateSerDefinitions(string,string &,string &,string &,string &,bool,string&,string &,string&,string&);
+	string generateClassDefinitionsAll(strVec,string &,strVec);
+	string generateSerDefinitionAll(strVec all,string &includeRef, bool isBinary,string&,string&,string&,string&,strVec);
+	string generateClassDefinition(string,string &,string &,string &,string &,string &,string app);
+	string generateSerDefinition(string,string &,string &,string &,string &,string app);
+	string generateClassDefinitions(string,string &,string &,string &,string &,string &,string app);
+	string generateSerDefinitions(string,string &,string &,string &,string &,bool,string&,string &,string&,string&,string app);
 
-	string generateSerDefinitionBinary(string className,string &includesDefs,string &typedefs,string &classes,string &methods);
+	string generateSerDefinitionBinary(string className,string &includesDefs,string &typedefs,string &classes,string &methods,string app);
 };
 
 #endif /* REFLECTION_H_ */

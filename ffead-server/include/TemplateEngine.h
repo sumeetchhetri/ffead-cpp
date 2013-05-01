@@ -33,10 +33,10 @@ using namespace std;
 typedef map<string,Object> Context;
 typedef map<string,string> StringContext;
 class TemplateEngine {
-public:
 	TemplateEngine();
+public:
 	virtual ~TemplateEngine();
-	string evaluate(string,StringContext);
+	static string evaluate(string,StringContext);
 	//string evaluateTemplate(string,Context);
 };
 

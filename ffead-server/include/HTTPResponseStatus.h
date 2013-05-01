@@ -31,6 +31,8 @@ class HTTPResponseStatus {
 	string msg;
 public:
 	HTTPResponseStatus();
+	HTTPResponseStatus(const HTTPResponseStatus& status) ;
+	HTTPResponseStatus(const HTTPResponseStatus& status, string msg);
 	virtual ~HTTPResponseStatus();
 	int getCode();
 	string getMsg();

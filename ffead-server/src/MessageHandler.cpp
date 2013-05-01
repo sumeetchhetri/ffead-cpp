@@ -44,7 +44,7 @@ Message MessageHandler::readMessageFromQ(string fileName, bool erase)
 		{
 			_mess_instance->logger << "Failed to readMessageFromQ" << endl;
 		}
-		int len = AMEFResources::charArrayToInt(fileContents);
+		int len = (int)AMEFResources::charArrayToLong(fileContents, 4);
 		fileContents = new char[len];
 		file.seekg(4, ios::beg);
 		if(!file.read(fileContents, len))
@@ -225,9 +225,9 @@ void* MessageHandler::service(void* arg)
 			else if(msg.getDestination().getType()=="Topic")
 				_mess_instance->writeMessageToT(msg,fileName);
 		}
-		catch(Exception *e)
+		catch(const Exception& e)
 		{
-			_mess_instance->logger << e->what() << flush;
+			_mess_instance->logger << e.getMessage() << flush;
 		}
 		_mess_instance->getServer().Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
@@ -308,6 +308,7 @@ void MessageHandler::trigger(string port,string path)
 		return;
 	Server serv(port,false,500,&service,2);
 	_mess_instance->server = serv;
+	_mess_instance->server.start();
 	_mess_instance->running = true;
 	return;
 }

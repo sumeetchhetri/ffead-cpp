@@ -4,6 +4,7 @@
 		<pwd>sumeet</pwd>
 		<dsn>MySQL-test</dsn>
 		<pool-size>5</pool-size>
+		<dialect>MySQLDialect</dialect>
 	</config>
 	<tables>
 		<table name="test4" class="Test4">
@@ -26,7 +27,4 @@
 			<col dbf="test_id" obf="test_id"></col>
 		</table>
 	</tables>
-	<transaction-managed>
-	
-	</transaction-managed>
 </cibernate>

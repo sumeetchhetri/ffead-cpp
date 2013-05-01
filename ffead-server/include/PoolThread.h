@@ -27,6 +27,7 @@
 #include "Mutex.h"
 #include "TimeUnit.h"
 #include "Logger.h"
+#include "FutureTask.h"
 
 class PoolThread {
 	bool console;

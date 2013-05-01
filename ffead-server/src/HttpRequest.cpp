@@ -23,7 +23,45 @@
 #include "HttpRequest.h"
 using namespace std;
 
-void HttpRequest::unbase64(string str)
+string HttpRequest::VALID_REQUEST_HEADERS = ",accept,accept-charset,accept-encoding,accept-language,accept-datetime,access-control-request-headers,access-control-request-method,authorization,cache-control,connection,cookie,content-length,content-md5,content-type,date,expect,from,host,if-match,if-modified-since,if-none-match,if-range,if-unmodified-since,max-forwards,origin,pragma,proxy-authorization,range,referer,te,upgrade,user-agent,via,warning,";
+
+string HttpRequest::Accept =			 "Accept";
+string HttpRequest::AcceptCharset = 		 "Accept-Charset";
+string HttpRequest::AcceptEncoding = 		 "Accept-Encoding";
+string HttpRequest::AcceptLanguage = 		 "Accept-Language";
+string HttpRequest::AcceptDatetime = 		 "Accept-Datetime";
+string HttpRequest::AccessControlRequestHeaders = "Access-Control-Request-Headers";
+string HttpRequest::AccessControlRequestMethod =  "Access-Control-Request-Method";
+string HttpRequest::Authorization = 		 "Authorization";
+string HttpRequest::CacheControl = 		 "Cache-Control";
+string HttpRequest::Connection = 			 "Connection";
+string HttpRequest::Cookie = 			 "Cookie";
+string HttpRequest::ContentLength = 		 "Content-Length";
+string HttpRequest::ContentMD5 = 			 "Content-MD5";
+string HttpRequest::ContentType = 			 "Content-Type";
+string HttpRequest::Date = 				 "Date";
+string HttpRequest::Expect = 			 "Expect";
+string HttpRequest::From = 				 "From";
+string HttpRequest::Host = 				 "Host";
+string HttpRequest::IfMatch = 			 "If-Match";
+string HttpRequest::IfModifiedSince = 		 "If-Modified-Since";
+string HttpRequest::IfNoneMatch = 		 "If-None-Match";
+string HttpRequest::IfRange = 			 "If-Range";
+string HttpRequest::IfUnmodifiedSince = 		 "If-Unmodified-Since";
+string HttpRequest::MaxForwards = 			 "Max-Forwards";
+string HttpRequest::Origin = 			 "Origin";
+string HttpRequest::Pragma = 			 "Pragma";
+string HttpRequest::ProxyAuthorization = 		 "Proxy-Authorization";
+string HttpRequest::Range = 			 "Range";
+string HttpRequest::Referer = 			 "Referer";
+string HttpRequest::TE = 				 "TE";
+string HttpRequest::Upgrade = 			 "Upgrade";
+string HttpRequest::UserAgent = 			 "User-Agent";
+string HttpRequest::Via = 				 "Via";
+string HttpRequest::Warning = 			 "Warning";
+
+
+void HttpRequest::getAuthParams(string str)
 {
 	//logger << "before " << str << endl;
 	authinfo["Method"] = (str.substr(0,str.find(" ")));
@@ -87,7 +125,9 @@ HttpRequest::HttpRequest()
 
 HttpRequest::HttpRequest(strVec vec,string path)
 {
-	if(vec.size()!=0){
+	logger = Logger::getLogger("HttpRequest");
+	if(vec.size()!=0)
+	{
 		this->setContent("");
 		string conten;
 		bool contStarts = false;
@@ -106,26 +146,21 @@ HttpRequest::HttpRequest(strVec vec,string path)
 			if(!contStarts && temp.size()>1)
 			{
 				StringUtil::replaceFirst(temp.at(1),"\r","");
-				if(temp.at(0)=="Host")
-					this->setHost(temp.at(1));
-				else if(temp.at(0)=="User-Agent" || temp.at(0)=="User-agent")
-					this->setUser_agent(temp.at(1));
-				else if(temp.at(0)=="Accept")
-					this->setAccept(temp.at(1));
-				else if(temp.at(0)=="Authorization")
+				if(temp.at(0)=="Authorization")
 				{
-					//logger << "found auth" <<endl;
 					if(temp.at(1).find("oauth_")!=string::npos)
 					{
 						this->getOauthParams(temp.at(1));
 					}
 					else
-						this->unbase64(temp.at(1));
+					{
+						this->getAuthParams(temp.at(1));
+					}
+					addHeaderValue(temp.at(0), temp.at(1));
 				}
 				else if(temp.at(0)=="Accept-Language" || temp.at(0)=="Accept-language")
 				{
 					strVec lemp;
-					this->setAccept_lang(temp.at(1));
 					StringUtil::split(lemp, temp.at(1), (","));
 					for(unsigned int li=0;li<lemp.size();li++)
 					{
@@ -148,26 +183,15 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							this->localeInfo.push_back(t);
 						}
 					}
-					//logger << temp.at(1) << flush;
+					addHeaderValue(temp.at(0), temp.at(1));
 				}
-				else if(temp.at(0)=="Accept-Encoding" || temp.at(0)=="Accept-encoding")
-					this->setAccept_encod(temp.at(1));
-				else if(temp.at(0)=="Accept-Charset" || temp.at(0)=="Accept-charset")
-					this->setAccept_lang(temp.at(1));
-				else if(temp.at(0)=="Keep-Alive" || temp.at(0)=="Keep-alive")
-					this->setKeep_alive(temp.at(1));
-				else if(temp.at(0)=="Connection")
-					this->setConnection(temp.at(1));
-				else if(temp.at(0)=="Cache-Control" || temp.at(0)=="Cache-control")
-					this->setCache_ctrl(temp.at(1));
 				else if(temp.at(0)=="Content-Type" || temp.at(0)=="Content-type")
 				{
-					this->setContent_type(temp.at(1));
 					string tempi(temp.at(1));
 					size_t s = tempi.find("boundary");
 					if(s!=string::npos)
 					{
-						this->setContent_type(tempi.substr(0,s));
+						addHeaderValue(temp.at(0), tempi.substr(0,s));
 						tempi = tempi.substr(s);
 						strVec results;
 						StringUtil::split(results, tempi, ("="));
@@ -176,6 +200,10 @@ HttpRequest::HttpRequest(strVec vec,string path)
 							string bound = "--" + results.at(1).substr(0,results.at(1).length());
 							this->setContent_boundary(bound);
 						}
+					}
+					else
+					{
+						addHeaderValue(temp.at(0), temp.at(1));
 					}
 				}
 				else if(temp.at(0)=="Cookie")
@@ -192,16 +220,12 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						else
 							cookieattrs[results1.at(0)] = "true";
 					}
+					addHeaderValue(temp.at(0), temp.at(1));
 				}
-				else if(temp.at(0)=="Content-Length" || temp.at(0)=="Content-length")
-					this->setContent_len(temp.at(1));
-				else if(temp.at(0)=="Referer")
-					this->setReferer(temp.at(1));
-				else if(temp.at(0)=="Pragma")
-					this->setPragma(temp.at(1));
 				else
-					xtraHeaders[temp.at(0)] = temp.at(1);
-				//logger << temp.at(0) <<  "---" << temp.at(1) << flush;
+				{
+					addHeaderValue(temp.at(0), temp.at(1));
+				}
 			}
 			else
 			{
@@ -257,8 +281,9 @@ HttpRequest::HttpRequest(strVec vec,string path)
 														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
+									{
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
-									//logger << att << " = " << param.at(1) << endl;
+									}
 									reqorderinf[reqorderinf.size()+1] = att;
 								}
 							}
@@ -338,8 +363,9 @@ HttpRequest::HttpRequest(strVec vec,string path)
 														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
+									{
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
-									//logger << att << " = " << param.at(1) << endl;
+									}
 									reqorderinf[reqorderinf.size()+1] = att;
 								}
 							}
@@ -419,8 +445,9 @@ HttpRequest::HttpRequest(strVec vec,string path)
 														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
+									{
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
-									//logger << att << " = " << param.at(1) << endl;
+									}
 									reqorderinf[reqorderinf.size()+1] = att;
 								}
 							}
@@ -533,7 +560,9 @@ HttpRequest::HttpRequest(strVec vec,string path)
 														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
+									{
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+									}
 									reqorderinf[reqorderinf.size()+1] = att;
 								}
 							}
@@ -612,7 +641,9 @@ HttpRequest::HttpRequest(strVec vec,string path)
 														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
+									{
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+									}
 									reqorderinf[reqorderinf.size()+1] = att;
 								}
 							}
@@ -693,7 +724,9 @@ HttpRequest::HttpRequest(strVec vec,string path)
 														  + CryptoHandler::urlDecode(param.at(1))) << endl;
 									}
 									else
+									{
 										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+									}
 									reqorderinf[reqorderinf.size()+1] = att;
 								}
 							}
@@ -764,7 +797,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				}
 			}
 		}*/
-		if(this->getContent()!="")
+		/*if(this->getContent()!="")
 		{
 			//logger << this->getContent() << flush;
 			if(this->getContent_type().find("application/x-www-form-urlencoded")!=string::npos)
@@ -842,7 +875,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 					{
 						size_t dist = parm.find("Content-Type: ");
 						if(dist==string::npos)
-							dist = parm.find("Content-yype: ");
+							dist = parm.find("Content-type: ");
 						size_t dise;
 						if(dist==string::npos)
 						{
@@ -937,9 +970,321 @@ HttpRequest::HttpRequest(strVec vec,string path)
 				}
 			}
 
-		}
+		}*/
 	}
 	//logger << this->toString() << flush;
+}
+
+void HttpRequest::updateContent()
+{
+	if(this->content!="")
+	{
+		updateFromContentStr();
+	}
+	else
+	{
+		updateFromContentFile();
+	}
+}
+
+void HttpRequest::updateFromContentStr()
+{
+	//logger << this->getContent() << flush;
+	if(this->getHeader(ContentType).find("application/x-www-form-urlencoded")!=string::npos)
+	{
+		strVec params;
+		string valu(this->getContent());
+		StringUtil::split(params,valu , ("&"));
+		map<string ,int> indices;
+		map<string,string>::iterator it;
+		for(unsigned j=0;j<params.size();j++)
+		{
+			strVec param;
+			StringUtil::split(param, params.at(j), ("="));
+			if(param.size()==2)
+			{
+				string att = param.at(0);
+				StringUtil::replaceFirst(att,"\r","");
+				StringUtil::replaceFirst(att,"\t","");
+				StringUtil::replaceFirst(att," ","");
+				string attN = CryptoHandler::urlDecode(att);
+				if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+				{
+					if(indices.find(attN)==indices.end())
+					{
+						indices[attN] = 0;
+					}
+					else
+					{
+						indices[attN] = indices[attN] + 1;
+					}
+					this->requestParams[attN.substr(0, attN.find("[")+1)
+							  + CastUtil::lexical_cast<string>(indices[attN])
+							  + "]"] = CryptoHandler::urlDecode(param.at(1));
+					logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+									  + CastUtil::lexical_cast<string>(indices[attN])
+									  + "]"
+									  + CryptoHandler::urlDecode(param.at(1))) << endl;
+				}
+				else
+				{
+					this->setRequestParam(attN,CryptoHandler::urlDecode(param.at(1)));
+				}
+				reqorderinf[reqorderinf.size()+1] = attN;
+			}
+		}
+	}
+	else if(this->getContent()!="" && this->getContent_boundary()!="")
+	{
+		string delb = "\r"+this->getContent_boundary();
+		string delend = "\r"+this->getContent_boundary()+"--";
+		size_t stb = this->getContent().find_first_of(delb)+delb.length()+1;
+		//size_t enb = this->getContent().find_last_not_of(delend);
+		string param_conts = this->getContent().substr(stb);
+		StringUtil::replaceFirst(param_conts,delend,"");
+		param_conts = param_conts.substr(0,param_conts.length()-1);
+		strVec parameters;
+		StringUtil::split(parameters, param_conts, (delb));
+		//logger << "Boundary: " << this->getContent_boundary() << flush;
+		//logger << "\nLength: " << this->getContent().length() << flush;
+		//logger << "\nStart End: " << stb << " " << enb << "\n" << flush;
+		//logger << "\nContent: " << param_conts << "\n" << flush;
+		map<string ,int> indices;
+		map<string,string>::iterator it;
+		for(unsigned j=0;j<parameters.size();j++)
+		{
+			if(parameters.at(j)=="" || parameters.at(j).find_first_not_of(" ")==string::npos
+					|| parameters.at(j).find_first_not_of("\r")==string::npos)
+				continue;
+			MultipartContent datf;
+			string parm = parameters.at(j);
+			//logger << parm << "\nparm" << flush;
+			size_t dis = parm.find("Content-Disposition: ");
+			if(dis==string::npos)
+				dis = parm.find("Content-disposition: ");
+			string cont_disp,cont_type;
+			if(dis!=string::npos)
+			{
+				size_t dist = parm.find("Content-Type: ");
+				if(dist==string::npos)
+					dist = parm.find("Content-type: ");
+				size_t dise;
+				if(dist==string::npos)
+				{
+					dist = parm.find("\r\r");
+					dise = dist + 2;
+					//logger << "\ndist = npos" << flush;
+				}
+				else
+				{
+					//parm = parm.substr(dist+14);
+					cont_type = parm.substr(dist+14,parm.find("\r\r")-(dist+14));
+					dise = parm.find("\r\r") + 2;
+					//logger << "\nctype = " << cont_type << flush;
+					//dist = dist-12;
+				}
+				cont_disp = parm.substr(dis+21,dist-(dis+21));
+				StringUtil::replaceFirst(cont_disp,"\r","");
+				//logger << "\ncdisp = " << cont_disp << flush;
+				//logger << "\ndise = " << dise << flush;
+				parm = parm.substr(dise);
+			}
+			strVec parmdef;
+			StringUtil::split(parmdef, cont_disp, (";"));
+			string key;
+			for(unsigned k=0;k<parmdef.size();k++)
+			{
+				if(parmdef.at(k)!="" && parmdef.at(k).find("=")!=string::npos)
+				{
+					size_t stpd = parmdef.at(k).find_first_not_of(" ");
+					size_t enpd = parmdef.at(k).find_last_not_of(" ");
+					//logger << "\nparmdef = " << parmdef.at(k) << flush;
+					//logger << "\nst en = " << stpd  << " " << enpd << flush;
+					string propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
+					strVec proplr;
+					StringUtil::split(proplr, propert, ("="));
+					if(proplr.size()==2)
+					{
+						if(proplr.at(0)=="name" && proplr.at(1)!="\"\"")
+						{
+							key = proplr.at(1);
+							key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
+							key = CryptoHandler::urlDecode(key);
+							StringUtil::replaceFirst(cont_type,"\r","");
+							datf.addHeaderValue("Content-Type", cont_type);
+							datf.setContent(parm);
+						}
+						else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")
+						{
+							string fna = proplr.at(1);
+							fna = fna.substr(fna.find_first_not_of("\""),fna.find_last_not_of("\"")-fna.find_first_not_of("\"")+1);
+							fna = CryptoHandler::urlDecode(fna);
+							datf.setFileName(fna);
+						}
+					}
+				}
+			}
+			if(key!="")
+			{
+				string attN = CryptoHandler::urlDecode(key);
+				if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+				{
+					if(indices.find(attN)==indices.end())
+					{
+						indices[attN] = 0;
+					}
+					else
+					{
+						indices[attN] = indices[attN] + 1;
+					}
+					this->requestParamsF[attN.substr(0, attN.find("[")+1)
+							  + CastUtil::lexical_cast<string>(indices[attN])
+							  + "]"] = datf;
+					logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+									  + CastUtil::lexical_cast<string>(indices[attN])
+									  + "]"
+									  + datf.getFileName()) << endl;
+				}
+				else
+				{
+					this->addMultipartFormContent(attN, datf);
+				}
+				reqorderinf[reqorderinf.size()+1] = attN;
+				if(datf.getFileName()!="")
+				{
+					string tmpfile = this->getCntxt_root() + "/temp/"+ this->getContent_boundary() + datf.getContent();
+					ofstream os;
+					os.open(tmpfile.c_str());
+					os.write(datf.getContent().c_str(), datf.getContent().length());
+					os.close();
+					datf.setTempFileName(tmpfile);
+					//datf.length = datf.value.length();
+				}
+				string hr = (key + " " + datf.getHeader("Content-Type") + " "+ datf.getFileName() +" "+ datf.getContent());
+				//logger << hr << flush;
+			}
+		}
+	}
+}
+
+void HttpRequest::updateFromContentFile()
+{
+	ifstream infile(this->content_tfile.c_str());
+	if(infile.is_open())
+	{
+		if(this->getContent_boundary()!="")
+		{
+			bool bcontstarts = false, bhdrstarts = false, bcontends = false;
+			string filen;
+			ofstream ofile;
+			string temp;
+			string delb = "\r"+this->getContent_boundary();
+			string delend = "\r"+this->getContent_boundary()+"--";
+			string cont;
+			vector<string> hdrs;
+			map<string ,int> indices;
+			while(getline(infile, temp))
+			{
+				if(bcontends)
+				{
+					epilogue.append(temp);
+				}
+				else if(temp.find_first_of(delb)!=string::npos)
+				{
+					bhdrstarts = true;
+					bcontstarts = false;
+					MultipartContent content(hdrs);
+					if(ofile.is_open())
+					{
+						content.setTempFileName(filen);
+						ofile.close();
+					}
+					else
+					{
+						content.setContent(cont);
+					}
+					if(content.getName()=="")
+					{
+						addContent(content);
+					}
+					else
+					{
+						string attN = CryptoHandler::urlDecode(content.getName());
+						if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+						{
+							if(indices.find(attN)==indices.end())
+							{
+								indices[attN] = 0;
+							}
+							else
+							{
+								indices[attN] = indices[attN] + 1;
+							}
+							addMultipartFormContent(attN.substr(0, attN.find("[")+1)
+									  + CastUtil::lexical_cast<string>(indices[attN])
+									  + "]", content);
+							logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]") << endl;
+						}
+						else
+						{
+							addMultipartFormContent(attN, content);
+						}
+						reqorderinf[reqorderinf.size()+1] = attN;
+					}
+					hdrs.clear();
+					cont = "";
+				}
+				else if(temp.find_first_of(delend)!=string::npos)
+				{
+					bcontends = true;
+				}
+				else if(bhdrstarts)
+				{
+					if(temp=="\r")
+					{
+						bcontstarts = true;
+						bhdrstarts = false;
+					}
+					else
+					{
+						hdrs.push_back(temp);
+						if(StringUtil::toLowerCopy(temp).find("Content-Disposition: ")!=string::npos
+								&& StringUtil::toLowerCopy(temp).find("filename")!=string::npos)
+						{
+							filen = this->getCntxt_root() + "/temp/"+ this->getContent_boundary() + CastUtil::lexical_cast<string>(Timer::getCurrentTime());
+							ofile.open(filen.c_str(), ios::binary | ios::app);
+						}
+					}
+				}
+				else if(bcontstarts)
+				{
+					if(ofile.is_open())
+					{
+						ofile.write(temp.c_str(), temp.length());
+					}
+					else
+					{
+						cont.append(temp);
+					}
+				}
+				else
+				{
+					preamble.append(temp);
+				}
+			}
+		}
+		else
+		{
+			string temp;
+			while(getline(infile, temp))
+			{
+				content.append(temp);
+			}
+		}
+		infile.close();
+	}
 }
 
 string HttpRequest::buildRequest(const char *keyc,const char *valuec)
@@ -949,16 +1294,9 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 	string key,value;
 	key = keyc;
 	value = valuec;
-	if(key=="Host")
-		this->setHost(value);
-	else if(key=="User-Agent" || key=="User-agent")
-		this->setUser_agent(value);
-	else if(key=="Accept")
-		this->setAccept(value);
-	else if(key=="Accept-Language" || key=="Accept-language")
+	if(key=="Accept-Language" || key=="Accept-language")
 	{
 		strVec lemp;
-		this->setAccept_lang(value);
 		StringUtil::split(lemp, value, (","));
 		for(unsigned int li=0;li<lemp.size();li++)
 		{
@@ -981,26 +1319,15 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 				this->localeInfo.push_back(t);
 			}
 		}
-		//logger << temp.at(1) << flush;
+		addHeaderValue(key, value);
 	}
-	else if(key=="Accept-Encoding" || key=="Accept-encoding")
-		this->setAccept_encod(value);
-	else if(key=="Accept-Charset" || key=="Accept-charset")
-		this->setAccept_lang(value);
-	else if(key=="Keep-Alive" || key=="Keep-alive")
-		this->setKeep_alive(value);
-	else if(key=="Connection")
-		this->setConnection(value);
-	else if(key=="Cache-Control" || key=="Cache-control")
-		this->setCache_ctrl(value);
 	else if(key=="Content-Type" || key=="Content-type")
 	{
-		this->setContent_type(value);
 		string tempi(value);
 		size_t s = tempi.find("boundary");
 		if(s!=string::npos)
 		{
-			this->setContent_type(tempi.substr(0,s));
+			addHeaderValue(key, tempi.substr(0,s));
 			tempi = tempi.substr(s);
 			strVec results;
 			StringUtil::split(results, tempi, ("="));
@@ -1010,10 +1337,14 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 				this->setContent_boundary(bound);
 			}
 		}
+		else
+		{
+			addHeaderValue(key, value);
+		}
 	}
 	else if(key=="Content" && value!="")
 	{
-		if((this->getContent_type().find("application/soap+xml")!=string::npos || this->getContent_type().find("text/xml")!=string::npos))
+		if((this->getHeader(ContentType).find("application/soap+xml")!=string::npos || this->getHeader(ContentType).find("text/xml")!=string::npos))
 		{
 			value = value.substr(0,value.find_last_of(">")+1);
 			if(value.find("<?")!=string::npos && value.find("?>")!=string::npos)
@@ -1022,7 +1353,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 			}
 			this->setContent(value);
 		}
-		else if(this->getContent_type().find("application/x-www-form-urlencoded")!=string::npos)
+		else if(this->getHeader(ContentType).find("application/x-www-form-urlencoded")!=string::npos)
 		{
 			strVec params;
 			StringUtil::split(params,value , ("&"));
@@ -1074,7 +1405,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 					continue;
 				fprintf(stderr,parameters.at(j).c_str());
 				fflush(stderr);
-				FormData datf;
+				MultipartContent datf;
 				string parm = parameters.at(j);
 				retval+= parm + "\nparm";
 				size_t dis = parm.find("Content-Disposition: ");
@@ -1124,33 +1455,27 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 							{
 								key = proplr.at(1);
 								key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
-								datf.type = cont_type;
-								datf.value = parm;
+								datf.addHeaderValue("Content-Type", cont_type);
+								datf.setContent(parm);
 							}
 							else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")
 							{
 								string fna = proplr.at(1);
 								fna = fna.substr(fna.find_first_not_of("\""),fna.find_last_not_of("\"")-fna.find_first_not_of("\"")+1);
-								datf.fileName = fna;
+								datf.setFileName(fna);
 							}
 						}
 					}
 				}
 				if(key!="")
 				{
-					this->setRequestParamF(key,datf);
-					retval+= (key + " " + datf.type + " "+ datf.fileName+" "+ datf.value);
+					this->addMultipartFormContent(key, datf);
+					retval+= (key + " " + datf.getHeader("Content-Type") + " "+ datf.getFileName() +" "+ datf.getContent());
 				}
 			}
 		}
 
 	}
-	else if(key=="Content-Length" || key=="Content-length")
-		this->setContent_len(value);
-	else if(key=="Referer")
-		this->setReferer(value);
-	else if(key=="Pragma")
-		this->setPragma(value);
 	else if(key=="Method")
 		this->setMethod(value);
 	else if(key=="HttpVersion")
@@ -1219,26 +1544,23 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 		}
 	}
 	else
-		xtraHeaders[key] = value;
+	{
+		addHeaderValue(key, value);
+	}
 	return retval;
 }
 
 string HttpRequest::toString()
 {
 	string ret;
-	ret = "\nHost: "+this->getHost();
-	ret += "\nAccept: "+this->getAccept();
-	ret += "\nAccept Chars: "+this->getAccept_chars();
-	ret += "\nAccept Encoding: "+this->getAccept_encod();
-	ret += "\nAccept Language: "+this->getAccept_lang();
-	ret += "\nCache Ctrl: "+this->getCache_ctrl();
-	ret += "\nConnection: "+this->getConnection();
+	map<string,string>::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		ret += "\n" + it->first + ": " + it->second;
+	}
 	ret += "\nContent: "+this->getContent();
-	ret += "\nContent Length: "+this->getContent_len();
-	ret += "\nContent Type: "+this->getContent_type();
 	ret += "\nHttp Version: "+this->getHttpVersion();
 	ret += "\nMethod: "+this->getMethod();
-	ret += "\nUser agent: "+this->getUser_agent();
 	ret += "\nUrl: "+this->getUrl();
 	ret += "\nFile: "+this->getFile();
 	ret += "\nContext Name: "+this->getCntxt_name();
@@ -1259,9 +1581,9 @@ string HttpRequest::toString()
 		FMap::iterator iter;
 		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
 		{
-			FormData dat = iter->second;
-			vals+= ("\nKey: "+iter->first + " Type: "+dat.type + " FileName: "+dat.fileName);
-			vals+= ("\nValue: "+dat.value);
+			MultipartContent dat = iter->second;
+			vals+= ("\nKey: "+iter->first + " Type: "+dat.getHeader("Content-Type") + " FileName: "+dat.getFileName());
+			vals+= ("\nValue: "+dat.getContent());
 		}
 	}
 	ret += "\nRequest Parameters "+vals;//CastUtil::lexical_cast<string>(this->getRequestParams().size());
@@ -1283,122 +1605,14 @@ void HttpRequest::setMethod(string method)
 	this->method = method;
 }
 
-string HttpRequest::getUser_agent() const
-{
-	return user_agent;
-}
-
-void HttpRequest::setUser_agent(string user_agent)
-{
-	this->user_agent = user_agent;
-}
-
-string HttpRequest::getAccept() const
-{
-	return accept;
-}
-
-void HttpRequest::setAccept(string accept)
-{
-	this->accept = accept;
-}
-
-string HttpRequest::getAccept_lang() const
-{
-	return accept_lang;
-}
-
-void HttpRequest::setAccept_lang(string accept_lang)
-{
-	this->accept_lang = accept_lang;
-}
-
-string HttpRequest::getAccept_encod() const
-{
-	return accept_encod;
-}
-
-void HttpRequest::setAccept_encod(string accept_encod)
-{
-	this->accept_encod = accept_encod;
-}
-
-string HttpRequest::getAccept_chars() const
-{
-	return accept_chars;
-}
-
-void HttpRequest::setAccept_chars(string accept_chars)
-{
-	this->accept_chars = accept_chars;
-}
-
-string HttpRequest::getKeep_alive() const
-{
-	return keep_alive;
-}
-
-void HttpRequest::setKeep_alive(string keep_alive)
-{
-	this->keep_alive = keep_alive;
-}
-
-string HttpRequest::getConnection() const
-{
-	return connection;
-}
-
-void HttpRequest::setConnection(string connection)
-{
-	this->connection = connection;
-}
-
-string HttpRequest::getCache_ctrl() const
-{
-	return cache_ctrl;
-}
-
-void HttpRequest::setCache_ctrl(string cache_ctrl)
-{
-	this->cache_ctrl = cache_ctrl;
-}
-
-Map HttpRequest::getAttributes() const
-{
-	return attributes;
-}
-
-void HttpRequest::setAttributes(Map attributes)
-{
-	this->attributes = attributes;
-}
-
-string HttpRequest::getAttribute(string key)
-{
-	return attributes[key];
-}
-
-void HttpRequest::setAttribute(string key,string value)
-{
-	this->attributes[key] = value;
-}
-
 HttpSession* HttpRequest::getSession()
 {
 	return &(this->session);
 }
+
 void HttpRequest::setSession(HttpSession session)
 {
 	this->session = session;
-}
-
-string HttpRequest::getHost() const
-{
-	return this->host;
-}
-void HttpRequest::setHost(string host)
-{
-	this->host = host;
 }
 
 void HttpRequest::setUrl(string url)
@@ -1421,16 +1635,6 @@ string HttpRequest::getHttpVersion()
 	return this->httpVersion;
 }
 
-string HttpRequest::getContent_type() const
-{
-	return content_type;
-}
-
-void HttpRequest::setContent_type(string content_type)
-{
-	this->content_type = content_type;
-}
-
 string HttpRequest::getContent_boundary() const
 {
 	return content_boundary;
@@ -1441,16 +1645,6 @@ void HttpRequest::setContent_boundary(string content_boundary)
 	this->content_boundary = content_boundary;
 }
 
-string HttpRequest::getContent_len() const
-{
-	return content_len;
-}
-
-void HttpRequest::setContent_len(string content_len)
-{
-	this->content_len = content_len;
-}
-
 string HttpRequest::getContent() const
 {
 	return content;
@@ -1459,26 +1653,6 @@ string HttpRequest::getContent() const
 void HttpRequest::setContent(string content)
 {
 	this->content = content;
-}
-
-string HttpRequest::getReferer() const
-{
-	return referer;
-}
-
-void HttpRequest::setReferer(string referer)
-{
-	this->referer = referer;
-}
-
-string HttpRequest::getPragma() const
-{
-	return pragma;
-}
-
-void HttpRequest::setPragma(string pragma)
-{
-	this->pragma = pragma;
 }
 
 RMap HttpRequest::getRequestParams() const
@@ -1496,7 +1670,7 @@ string HttpRequest::getRequestParam(string key)
 	if(this->requestParams.find(key)!=this->requestParams.end())
 		return this->requestParams[key];
 	else if(this->requestParamsF.find(key)!=this->requestParamsF.end())
-		return this->requestParamsF[key].value;
+		return this->requestParamsF[key].getContent();
 	else
 		return "";
 }
@@ -1504,7 +1678,7 @@ string HttpRequest::getRequestParam(string key)
 string HttpRequest::getRequestParamType(string key)
 {
 	if(this->requestParamsF.find(key)!=this->requestParamsF.end())
-		return this->requestParamsF[key].type;
+		return this->requestParamsF[key].getHeader("Content-Type");
 	else
 		return "";
 }
@@ -1512,11 +1686,6 @@ string HttpRequest::getRequestParamType(string key)
 void HttpRequest::setRequestParam(string key,string value)
 {
 	this->requestParams[key] = value;
-}
-
-void HttpRequest::setRequestParamF(string key,FormData value)
-{
-	this->requestParamsF[key] = value;
 }
 
 string HttpRequest::getCntxt_root() const
@@ -1589,19 +1758,17 @@ void HttpRequest::setAuthinfo(map<string,string> authinfo)
 string HttpRequest::toPHPVariablesString(string def)
 {
 	string ret;
-	ret = "<?php\n$_SERVER['HTTP_HOST'] = '"+this->getHost();
-	ret += "';\n$_SERVER['HTTP_ACCEPT'] = '"+this->getAccept();
-	ret += "';\n$_SERVER['HTTP_ACCEPT_CHARSET'] = '"+this->getAccept_chars();
-	ret += "';\n$_SERVER['HTTP_ACCEPT_ENCODING'] = '"+this->getAccept_encod();
-	ret += "';\n$_SERVER['HTTP_ACCEPT_LANGUAGE'] = '"+this->getAccept_lang();
-	ret += "';\n$_SERVER_EX['CACHE_CNTRL'] = '"+this->getCache_ctrl();
-	ret += "';\n$_SERVER['HTTP_CONNECTION'] = '"+this->getConnection();
-	ret += "';\n$_SERVER_EX['HTTP_CONTENT'] = '"+this->getContent();
-	ret += "';\n$_SERVER_EX['HTTP_CNTENT_LENGTH'] = '"+this->getContent_len();
-	ret += "';\n$_SERVER_EX['HTTP_CNTENT_TYPE'] = '"+this->getContent_type();
+	ret = "<?php";
+	map<string,string>::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		string header = StringUtil::toUpperCopy(it->first);
+		StringUtil::replaceAll(header, "-", "_");
+		ret += "$_SERVER['HTTP_"+header+"'] = '"+it->second + "';\n";
+	}
+	ret += "$HTTP_RAW_POST_DATA = '"+this->getContent();
 	ret += "';\n$_SERVER_EX['HTTP_VERSION'] = '"+this->getHttpVersion();
 	ret += "';\n$_SERVER['REQUEST_METHOD'] = '"+this->getMethod();
-	ret += "';\n$_SERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
 	string requri = this->getActUrl();
 	StringUtil::replaceFirst(requri, ("/"+this->getCntxt_name()), "");
 	if(requri=="")
@@ -1614,7 +1781,7 @@ string HttpRequest::toPHPVariablesString(string def)
 	else
 		ret += "';\n$_SERVER['DOCUMENT_ROOT'] = '/"+this->getCntxt_name();
 	ret += "';\n$_SERVER_EX['DEFAULT_LOCALE'] = '"+this->getDefaultLocale();
-	ret += "';\n$_SERVER['HTTP_HOST'] = '"+this->getContent_boundary() + "';\n";
+	ret += "';\n$_SERVER['HTTP_CONTENT_BOUNDARY'] = '"+this->getContent_boundary() + "';\n";
 	if(this->queryParams.size()>0)
 	{
 		RMap::iterator iter;
@@ -1650,30 +1817,30 @@ string HttpRequest::toPHPVariablesString(string def)
 		FMap::iterator iter;
 		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
 		{
-			FormData dat = iter->second;
+			MultipartContent dat = iter->second;
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				ret += "\nif(!isset($_FILES['"+iter->first.substr(0, iter->first.find("["))+"']))\n{\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']=array()\n}\n";
 				ret += "\nif(!isset($_FILES['"+iter->first.substr(0, iter->first.find("["))+"']"+iter->first.substr(iter->first.find("["))+"))\n"
 						+ "{\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']"+iter->first.substr(iter->first.find("["))+"=array();\n}\n";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.fileName + "';";
+						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.getFileName() + "';";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "';";
+						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.getHeader("Content-Type") + "';";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.getContent().length()) + ";";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "';";
+						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.getTempFileName() + "';";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['error'] = 0;";
 			}
 			else
 			{
 				ret += "\nif(!isset($_FILES['"+iter->first+"']))\n{\n$_FILES['"+iter->first+"']=array();\n}\n";
-				ret += "\n$_FILES['"+iter->first+"']['name'] = '"+ dat.fileName + "';";
-				ret += "\n$_FILES['"+iter->first+"']['type'] = '"+ dat.type + "';";
-				ret += "\n$_FILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
-				ret += "\n$_FILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "';";
+				ret += "\n$_FILES['"+iter->first+"']['name'] = '"+ dat.getFileName() + "';";
+				ret += "\n$_FILES['"+iter->first+"']['type'] = '"+ dat.getHeader("Content-Type") + "';";
+				ret += "\n$_FILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.getContent().length()) + ";";
+				ret += "\n$_FILES['"+iter->first+"']['tmp_name'] = '"+ dat.getTempFileName() + "';";
 				ret += "\n$_FILES['"+iter->first+"']['error'] = 0;";
 			}
 		}
@@ -1693,26 +1860,23 @@ string HttpRequest::toPerlVariablesString()
 	ret += "\n$_SERVER_EX = {};";
 	ret += "\n$_GET = {};";
 	ret += "\n$_POST = {};";
-	ret += "\n$_FILES = {};";
-	ret += "\n$_SERVER{'HTTP_HOST'} = '"+this->getHost();
-	ret += "';\n$_SERVER{'HTTP_ACCEPT'} = '"+this->getAccept();
-	ret += "';\n$_SERVER{'HTTP_ACCEPT_CHARSET'} = '"+this->getAccept_chars();
-	ret += "';\n$_SERVER{'HTTP_ACCEPT_ENCODING'} = '"+this->getAccept_encod();
-	ret += "';\n$_SERVER{'HTTP_ACCEPT_LANGUAGE'} = '"+this->getAccept_lang();
-	ret += "';\n$_SERVER_EX{'CACHE_CNTRL'} = '"+this->getCache_ctrl();
-	ret += "';\n$_SERVER{'HTTP_CONNECTION'} = '"+this->getConnection();
-	ret += "';\n$_SERVER_EX{'HTTP_CONTENT'} = '"+this->getContent();
-	ret += "';\n$_SERVER_EX{'HTTP_CNTENT_LENGTH'} = '"+this->getContent_len();
-	ret += "';\n$_SERVER_EX{'HTTP_CNTENT_TYPE'} = '"+this->getContent_type();
+	ret += "\n$_FILES = {};\n";
+	map<string,string>::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		string header = StringUtil::toUpperCopy(it->first);
+		StringUtil::replaceAll(header, "-", "_");
+		ret += "$_SERVER['HTTP_"+header+"'] = '"+it->second + "';\n";
+	}
+	ret += "';\n$HTTP_RAW_POST_DATA = '"+this->getContent();
 	ret += "';\n$_SERVER_EX{'HTTP_VERSION'} = '"+this->getHttpVersion();
 	ret += "';\n$_SERVER{'REQUEST_METHOD'} = '"+this->getMethod();
-	ret += "';\n$_SERVER{'HTTP_USER_AGENT'} = '"+this->getUser_agent();
 	ret += "';\n$_SERVER{'REQUEST_URI'} = '"+this->getUrl();
 	ret += "';\n$_SERVER_EX{'HTTP_REQ_FILE'} = '"+this->getFile();
 	ret += "';\n$_SERVER_EX{'CONTEXT_NAME'} = '"+this->getCntxt_name();
 	ret += "';\n$_SERVER{'DOCUMENT_ROOT'} = '"+this->getCntxt_root();
 	ret += "';\n$_SERVER_EX{'DEFAULT_LOCALE'} = '"+this->getDefaultLocale();
-	ret += "';\n$_SERVER{'HTTP_HOST'} = '"+this->getContent_boundary() + "';\n";
+	ret += "';\n$_SERVER{'HTTP_CONTENT_BOUNDARY'} = '"+this->getContent_boundary() + "';\n";
 	if(this->queryParams.size()>0)
 	{
 		RMap::iterator iter;
@@ -1754,7 +1918,7 @@ string HttpRequest::toPerlVariablesString()
 		FMap::iterator iter;
 		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
 		{
-			FormData dat = iter->second;
+			MultipartContent dat = iter->second;
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				string key = iter->first;
@@ -1764,23 +1928,23 @@ string HttpRequest::toPerlVariablesString()
 				ret += "\nif(!exists $_FILES{'"+key.substr(0, key.find("{"))+"'}{'"+key.substr(key.find("{"))+"'})\n"
 						+ "{\n$_FILES{'"+key.substr(0, key.find("{"))+"'}{'"+key.substr(key.find("{"))+"'}={}\n}\n";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
-						key.substr(key.find("{")) + "{'name'} = '"+ dat.fileName + "';";
+						key.substr(key.find("{")) + "{'name'} = '"+ dat.getFileName() + "';";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
-						key.substr(key.find("{")) + "{'type'} = '"+ dat.type + "';";
+						key.substr(key.find("{")) + "{'type'} = '"+ dat.getHeader("Content-Type") + "';";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
-						key.substr(key.find("{")) + "{'size'} = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
+						key.substr(key.find("{")) + "{'size'} = "+ CastUtil::lexical_cast<string>(dat.getContent().length()) + ";";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
-						key.substr(key.find("{")) + "{'tmp_name'} = '"+ dat.tmpFileName + "';";
+						key.substr(key.find("{")) + "{'tmp_name'} = '"+ dat.getTempFileName() + "';";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
 						key.substr(key.find("{")) + "{'error'} = 0;";
 			}
 			else
 			{
 				ret += "\nif(!exists $_FILES{'"+iter->first+"'})\n{\n$_FILES{'"+iter->first+"'}={}\n}\n";
-				ret += "\n$_FILES{'"+iter->first+"'}{'name'} = '"+ dat.fileName + "';";
-				ret += "\n$_FILES{'"+iter->first+"'}{'type'} = '"+ dat.type + "';";
-				ret += "\n$_FILES{'"+iter->first+"'}{'size'} = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
-				ret += "\n$_FILES{'"+iter->first+"'}{'tmp_name'} = '"+ dat.tmpFileName + "';";
+				ret += "\n$_FILES{'"+iter->first+"'}{'name'} = '"+ dat.getFileName() + "';";
+				ret += "\n$_FILES{'"+iter->first+"'}{'type'} = '"+ dat.getHeader("Content-Type") + "';";
+				ret += "\n$_FILES{'"+iter->first+"'}{'size'} = "+ CastUtil::lexical_cast<string>(dat.getContent().length()) + ";";
+				ret += "\n$_FILES{'"+iter->first+"'}{'tmp_name'} = '"+ dat.getTempFileName() + "';";
 				ret += "\n$_FILES{'"+iter->first+"'}{'error'} = 0;";
 			}
 		}
@@ -1796,26 +1960,23 @@ string HttpRequest::toRubyVariablesString()
 	ret += "\nSERVER_EX = {}";
 	ret += "\nGET = {}";
 	ret += "\nPOST = {}";
-	ret += "\nFILES = {}";
-	ret += "\nSERVER['HTTP_HOST'] = '"+this->getHost();
-	ret += "'\nSERVER['HTTP_ACCEPT'] = '"+this->getAccept();
-	ret += "'\nSERVER['HTTP_ACCEPT_CHARSET'] = '"+this->getAccept_chars();
-	ret += "'\nSERVER['HTTP_ACCEPT_ENCODING'] = '"+this->getAccept_encod();
-	ret += "'\nSERVER['HTTP_ACCEPT_LANGUAGE'] = '"+this->getAccept_lang();
-	ret += "'\nSERVER_EX['CACHE_CNTRL'] = '"+this->getCache_ctrl();
-	ret += "'\nSERVER['HTTP_CONNECTION'] = '"+this->getConnection();
-	ret += "'\nSERVER_EX['HTTP_CONTENT'] = '"+this->getContent();
-	ret += "'\nSERVER_EX['HTTP_CNTENT_LENGTH'] = '"+this->getContent_len();
-	ret += "'\nSERVER_EX['HTTP_CNTENT_TYPE'] = '"+this->getContent_type();
+	ret += "\nFILES = {}\n";
+	map<string,string>::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		string header = StringUtil::toUpperCopy(it->first);
+		StringUtil::replaceAll(header, "-", "_");
+		ret += "SERVER['HTTP_"+header+"'] = '"+it->second + "';\n";
+	}
+	ret += "'\nHTTP_RAW_POST_DATA = '"+this->getContent();
 	ret += "'\nSERVER_EX['HTTP_VERSION'] = '"+this->getHttpVersion();
 	ret += "'\nSERVER['REQUEST_METHOD'] = '"+this->getMethod();
-	ret += "'\nSERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
 	ret += "'\nSERVER['REQUEST_URI'] = '"+this->getUrl();
 	ret += "'\nSERVER_EX['HTTP_REQ_FILE'] = '"+this->getFile();
 	ret += "'\nSERVER_EX['CONTEXT_NAME'] = '"+this->getCntxt_name();
 	ret += "'\nSERVER['DOCUMENT_ROOT'] = '"+this->getCntxt_root();
 	ret += "'\nSERVER_EX['DEFAULT_LOCALE'] = '"+this->getDefaultLocale();
-	ret += "'\nSERVER['HTTP_HOST'] = '"+this->getContent_boundary() + "'\n";
+	ret += "'\nSERVER['HTTP_CONTENT_BOUNDARY'] = '"+this->getContent_boundary() + "'\n";
 	if(this->queryParams.size()>0)
 	{
 		RMap::iterator iter;
@@ -1853,7 +2014,7 @@ string HttpRequest::toRubyVariablesString()
 		FMap::iterator iter;
 		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
 		{
-			FormData dat = iter->second;
+			MultipartContent dat = iter->second;
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				string key = iter->first.substr(iter->first.find("["));
@@ -1864,23 +2025,23 @@ string HttpRequest::toRubyVariablesString()
 				ret += "\nif(!FILES['"+iter->first.substr(0, iter->first.find("["))+"'].has_key?('"+key+"'))"
 						+ "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']['"+key+"']={}\nend";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.fileName + "'";
+						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.getFileName() + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "'";
+						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.getHeader("Content-Type") + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.getContent().length());
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "'";
+						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['error'] = 0;";
 			}
 			else
 			{
 				ret += "\nFILES['"+iter->first+"'] = {}";
-				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "'";
-				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "'";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
-				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "'";
+				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.getFileName() + "'";
+				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.getHeader("Content-Type") + "'";
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.getContent().length());
+				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0";
 			}
 		}
@@ -1896,26 +2057,23 @@ string HttpRequest::toPythonVariablesString()
 	ret += "\nSERVER_EX = {}";
 	ret += "\nGET = {}";
 	ret += "\nPOST = {}";
-	ret += "\nFILES = {}";
-	ret += "\nSERVER['HTTP_HOST'] = '"+this->getHost();
-	ret += "'\nSERVER['HTTP_ACCEPT'] = '"+this->getAccept();
-	ret += "'\nSERVER['HTTP_ACCEPT_CHARSET'] = '"+this->getAccept_chars();
-	ret += "'\nSERVER['HTTP_ACCEPT_ENCODING'] = '"+this->getAccept_encod();
-	ret += "'\nSERVER['HTTP_ACCEPT_LANGUAGE'] = '"+this->getAccept_lang();
-	ret += "'\nSERVER_EX['CACHE_CNTRL'] = '"+this->getCache_ctrl();
-	ret += "'\nSERVER['HTTP_CONNECTION'] = '"+this->getConnection();
-	ret += "'\nSERVER_EX['HTTP_CONTENT'] = '"+this->getContent();
-	ret += "'\nSERVER_EX['HTTP_CNTENT_LENGTH'] = '"+this->getContent_len();
-	ret += "'\nSERVER_EX['HTTP_CNTENT_TYPE'] = '"+this->getContent_type();
+	ret += "\nFILES = {}\n";
+	map<string,string>::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		string header = StringUtil::toUpperCopy(it->first);
+		StringUtil::replaceAll(header, "-", "_");
+		ret += "SERVER['HTTP_"+header+"'] = '"+it->second + "';\n";
+	}
+	ret += "'\nHTTP_RAW_POST_DATA = '"+this->getContent();
 	ret += "'\nSERVER_EX['HTTP_VERSION'] = '"+this->getHttpVersion();
 	ret += "'\nSERVER['REQUEST_METHOD'] = '"+this->getMethod();
-	ret += "'\nSERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
 	ret += "'\nSERVER['REQUEST_URI'] = '"+this->getUrl();
 	ret += "'\nSERVER_EX['HTTP_REQ_FILE'] = '"+this->getFile();
 	ret += "'\nSERVER_EX['CONTEXT_NAME'] = '"+this->getCntxt_name();
 	ret += "'\nSERVER['DOCUMENT_ROOT'] = '"+this->getCntxt_root();
 	ret += "'\nSERVER_EX['DEFAULT_LOCALE'] = '"+this->getDefaultLocale();
-	ret += "'\nSERVER['HTTP_HOST'] = '"+this->getContent_boundary() + "'\n";
+	ret += "'\nSERVER['HTTP_CONTENT_BOUNDARY'] = '"+this->getContent_boundary() + "'\n";
 	if(this->queryParams.size()>0)
 	{
 		RMap::iterator iter;
@@ -1953,7 +2111,7 @@ string HttpRequest::toPythonVariablesString()
 		FMap::iterator iter;
 		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
 		{
-			FormData dat = iter->second;
+			MultipartContent dat = iter->second;
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				string key = iter->first.substr(iter->first.find("["));
@@ -1964,23 +2122,23 @@ string HttpRequest::toPythonVariablesString()
 				ret += "\nif '"+key+"' not in FILES['"+iter->first.substr(0, iter->first.find("["))+"']:\n"
 						+ "\n\tFILES['"+iter->first.substr(0, iter->first.find("["))+"']['"+key+"']={}\n";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.fileName + "'";
+						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.getFileName() + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "'";
+						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.getHeader("Content-Type") + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.getContent().length());
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "'";
+						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['error'] = 0;";
 			}
 			else
 			{
 				ret += "\nFILES['"+iter->first+"'] = {}";
-				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "'";
-				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "'";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
-				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "'";
+				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.getFileName() + "'";
+				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.getHeader("Content-Type") + "'";
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.getContent().length());
+				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0";
 			}
 		}
@@ -1996,26 +2154,23 @@ string HttpRequest::toLuaVariablesString()
 	ret += "\nSERVER_EX = {}";
 	ret += "\nGET = {}";
 	ret += "\nPOST = {}";
-	ret += "\nFILES = {}";
-	ret += "\nSERVER['HTTP_HOST'] = '"+this->getHost();
-	ret += "'\nSERVER['HTTP_ACCEPT'] = '"+this->getAccept();
-	ret += "'\nSERVER['HTTP_ACCEPT_CHARSET'] = '"+this->getAccept_chars();
-	ret += "'\nSERVER['HTTP_ACCEPT_ENCODING'] = '"+this->getAccept_encod();
-	ret += "'\nSERVER['HTTP_ACCEPT_LANGUAGE'] = '"+this->getAccept_lang();
-	ret += "'\nSERVER_EX['CACHE_CNTRL'] = '"+this->getCache_ctrl();
-	ret += "'\nSERVER['HTTP_CONNECTION'] = '"+this->getConnection();
-	ret += "'\nSERVER_EX['HTTP_CONTENT'] = '"+this->getContent();
-	ret += "'\nSERVER_EX['HTTP_CNTENT_LENGTH'] = '"+this->getContent_len();
-	ret += "'\nSERVER_EX['HTTP_CNTENT_TYPE'] = '"+this->getContent_type();
+	ret += "\nFILES = {}\n";
+	map<string,string>::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		string header = StringUtil::toUpperCopy(it->first);
+		StringUtil::replaceAll(header, "-", "_");
+		ret += "SERVER['HTTP_"+header+"'] = '"+it->second + "';\n";
+	}
+	ret += "'\nHTTP_RAW_POST_DATA = '"+this->getContent();
 	ret += "'\nSERVER_EX['HTTP_VERSION'] = '"+this->getHttpVersion();
 	ret += "'\nSERVER['REQUEST_METHOD'] = '"+this->getMethod();
-	ret += "'\nSERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
 	ret += "'\nSERVER['REQUEST_URI'] = '"+this->getUrl();
 	ret += "'\nSERVER_EX['HTTP_REQ_FILE'] = '"+this->getFile();
 	ret += "'\nSERVER_EX['CONTEXT_NAME'] = '"+this->getCntxt_name();
 	ret += "'\nSERVER['DOCUMENT_ROOT'] = '"+this->getCntxt_root();
 	ret += "'\nSERVER_EX['DEFAULT_LOCALE'] = '"+this->getDefaultLocale();
-	ret += "'\nSERVER['HTTP_HOST'] = '"+this->getContent_boundary() + "'\n";
+	ret += "'\nSERVER['HTTP_CONTENT_BOUNDARY'] = '"+this->getContent_boundary() + "'\n";
 	if(this->queryParams.size()>0)
 	{
 		RMap::iterator iter;
@@ -2053,7 +2208,7 @@ string HttpRequest::toLuaVariablesString()
 		FMap::iterator iter;
 		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
 		{
-			FormData dat = iter->second;
+			MultipartContent dat = iter->second;
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				string key = iter->first.substr(iter->first.find("["));
@@ -2064,23 +2219,23 @@ string HttpRequest::toLuaVariablesString()
 				ret += "\nif FILES['"+iter->first.substr(0, iter->first.find("["))+"']['"+key+"']  == nil then"
 						+ "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']['"+key+"']={}\nend\n";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.fileName + "'";
+						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.getFileName() + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "'";
+						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.getHeader("Content-Type") + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.getContent().length());
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "'";
+						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['error'] = 0;";
 			}
 			else
 			{
 				ret += "\nFILES['"+iter->first+"'] = {}";
-				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "'";
-				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "'";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.length);
-				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "'";
+				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.getFileName() + "'";
+				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.getHeader("Content-Type") + "'";
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.getContent().length());
+				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0";
 			}
 		}
@@ -2096,26 +2251,23 @@ string HttpRequest::toNodejsVariablesString()
 	ret += "\nSERVER_EX = {};";
 	ret += "\nGET = {};";
 	ret += "\nPOST = {};";
-	ret += "\nFILES = {};";
-	ret += "\nSERVER['HTTP_HOST'] = '"+this->getHost();
-	ret += "';\nSERVER['HTTP_ACCEPT'] = '"+this->getAccept();
-	ret += "';\nSERVER['HTTP_ACCEPT_CHARSET'] = '"+this->getAccept_chars();
-	ret += "';\nSERVER['HTTP_ACCEPT_ENCODING'] = '"+this->getAccept_encod();
-	ret += "';\nSERVER['HTTP_ACCEPT_LANGUAGE'] = '"+this->getAccept_lang();
-	ret += "';\nSERVER_EX['CACHE_CNTRL'] = '"+this->getCache_ctrl();
-	ret += "';\nSERVER['HTTP_CONNECTION'] = '"+this->getConnection();
-	ret += "';\nSERVER_EX['HTTP_CONTENT'] = '"+this->getContent();
-	ret += "';\nSERVER_EX['HTTP_CNTENT_LENGTH'] = '"+this->getContent_len();
-	ret += "';\nSERVER_EX['HTTP_CNTENT_TYPE'] = '"+this->getContent_type();
+	ret += "\nFILES = {};\n";
+	map<string,string>::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		string header = StringUtil::toUpperCopy(it->first);
+		StringUtil::replaceAll(header, "-", "_");
+		ret += "SERVER['HTTP_"+header+"'] = '"+it->second + "';\n";
+	}
+	ret += "';\nHTTP_RAW_POST_DATA = '"+this->getContent();
 	ret += "';\nSERVER_EX['HTTP_VERSION'] = '"+this->getHttpVersion();
 	ret += "';\nSERVER['REQUEST_METHOD'] = '"+this->getMethod();
-	ret += "';\nSERVER['HTTP_USER_AGENT'] = '"+this->getUser_agent();
 	ret += "';\nSERVER['REQUEST_URI'] = '"+this->getUrl();
 	ret += "';\nSERVER_EX['HTTP_REQ_FILE'] = '"+this->getFile();
 	ret += "';\nSERVER_EX['CONTEXT_NAME'] = '"+this->getCntxt_name();
 	ret += "';\nSERVER['DOCUMENT_ROOT'] = '"+this->getCntxt_root();
 	ret += "';\nSERVER_EX['DEFAULT_LOCALE'] = '"+this->getDefaultLocale();
-	ret += "';\nSERVER['HTTP_HOST'] = '"+this->getContent_boundary() + "';\n";
+	ret += "';\nSERVER['HTTP_CONTENT_BOUNDARY'] = '"+this->getContent_boundary() + "';\n";
 	if(this->queryParams.size()>0)
 	{
 		RMap::iterator iter;
@@ -2151,30 +2303,30 @@ string HttpRequest::toNodejsVariablesString()
 		FMap::iterator iter;
 		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
 		{
-			FormData dat = iter->second;
+			MultipartContent dat = iter->second;
 			if(iter->first.find("[")!=string::npos && iter->first.find("]")!=string::npos)
 			{
 				ret += "\nif((FILES['"+iter->first.substr(0, iter->first.find("["))+"'])==undefined)\n{\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']={};\n}\n";
 				ret += "\nif((FILES['"+iter->first.substr(0, iter->first.find("["))+"']"+iter->first.substr(iter->first.find("["))+")==undefined)\n"
 						+ "{\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']"+iter->first.substr(iter->first.find("["))+"={};\n}\n";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.fileName + "';";
+						iter->first.substr(iter->first.find("[")) + "['name'] = '"+ dat.getFileName() + "';";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.type + "';";
+						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.getHeader("Content-Type") + "';";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<string>(dat.getContent().length()) + ";";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.tmpFileName + "';";
+						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.getTempFileName() + "';";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['error'] = 0;";
 			}
 			else
 			{
 				ret += "\nif(!isset(FILES['"+iter->first+"']))\n{\nFILES['"+iter->first+"']={};\n}\n";
-				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.fileName + "';";
-				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.type + "';";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.length) + ";";
-				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.tmpFileName + "';";
+				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.getFileName() + "';";
+				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.getHeader("Content-Type") + "';";
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<string>(dat.getContent().length()) + ";";
+				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.getTempFileName() + "';";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0;";
 			}
 		}
@@ -2193,4 +2345,241 @@ RMap HttpRequest::getAllParams()
 		reqparams[it->first] = it->second;
 	}
 	return reqparams;
+}
+
+RMap HttpRequest::getQueryParams() const {
+	return queryParams;
+}
+
+void HttpRequest::setQueryParams(RMap queryParams) {
+	this->queryParams = queryParams;
+}
+
+void HttpRequest::setQueryParam(string name,string value)
+{
+	this->queryParams[name] = value;
+}
+
+string HttpRequest::getQueryParam(string key)
+{
+	if(this->queryParams.find(key)!=this->queryParams.end())
+		return this->queryParams[key];
+	return "";
+}
+
+bool HttpRequest::hasCookie() const
+{
+	return this->cookie;
+}
+
+map<int,string> HttpRequest::getAuthOrderinfo() const
+{
+	return authorderinf;
+}
+
+map<int,string> HttpRequest::getReqOrderinfo() const
+{
+	return reqorderinf;
+}
+
+map<string,string> HttpRequest::getCookieInfo() const
+{
+	return cookieattrs;
+}
+
+string HttpRequest::getAuthOrderinfoAttribute(int key)
+{
+	if(authorderinf.find(key)!=authorderinf.end())
+		return authorderinf[key];
+	else return "";
+}
+
+string HttpRequest::getReqOrderinfoAttribute(int key)
+{
+	if(reqorderinf.find(key)!=reqorderinf.end())
+		return reqorderinf[key];
+	else return "";
+}
+
+string HttpRequest::getCookieInfoAttribute(string key)
+{
+	if(cookieattrs.find(key)!=cookieattrs.end())
+		return cookieattrs[key];
+	else return "";
+}
+
+string HttpRequest::getHeader(string key)
+{
+	if(this->headers.find(key)!=this->headers.end())
+		return this->headers[key];
+	return "";
+}
+
+map<string,string> HttpRequest::getHeaders()
+{
+	return headers;
+}
+
+int HttpRequest::getCORSRequestType()
+{
+	if(getHeader(Origin)=="")
+	{
+		//Not a CORS request
+		return OTHER;
+	}
+	else if(getHeader(AccessControlRequestMethod)!="" && StringUtil::toLowerCopy(method)=="options")
+	{
+		//CORS Preflight request
+		return PREFLIGHT;
+	}
+	else
+	{
+		//Actual CORS request
+		return CORS;
+	}
+}
+
+void HttpRequest::addHeaderValue(string header, string value)
+{
+	if(header!="")
+	{
+		if(VALID_REQUEST_HEADERS.find(","+StringUtil::toLowerCopy(header)+",")!=string::npos)
+		{
+			headers[header] = value;
+		}
+		else
+		{
+			logger << ("Non standard Header string " + header) << endl;
+			vector<string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z][a-zA-Z]*[a-zA-Z]$");
+			if(matres.size()==0)
+			{
+				logger << ("Invalid Header string " + header) << endl;
+				return;
+			}
+			headers[header] = value;
+		}
+	}
+}
+
+vector<string> HttpRequest::parseHeaderValue(string headerValue)
+{
+	RegexUtil::replace(headerValue, "\\s*,\\s*|\\s+", ",");
+	return StringUtil::split(headerValue, ",");
+}
+
+bool HttpRequest::isValidHttpMethod(string method)
+{
+	string lmeth = StringUtil::toLowerCopy(method);
+	return lmeth=="get" || lmeth=="post" || lmeth=="options" || lmeth=="head" || lmeth=="put" || lmeth=="delete" || lmeth=="trace";
+}
+
+bool HttpRequest::isAgentAcceptsCE()
+{
+	string lmeth = StringUtil::toLowerCopy(getHeader(AcceptEncoding));
+	return lmeth.find("gzip")!=string::npos || lmeth.find("deflate")!=string::npos;
+}
+
+bool HttpRequest::isHeaderValue(string header, string value, bool ignoreCase)
+{
+	return header!="" && headers.find(header)!=headers.end()
+			&& (headers[header]==value ||
+					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
+}
+
+vector<vector<int> > HttpRequest::getRanges(vector<string> &rangesVec)
+{
+	vector<vector<int> > rangeValuesLst;
+	string ranges = getHeader(Range);
+	if(ranges.find("bytes=")!=0)
+	{
+		return rangeValuesLst;
+	}
+	StringUtil::replaceFirst(ranges, "bytes=", "");
+	StringUtil::split(rangesVec, ranges, (","));
+	for (int var = 0; var <(int)rangesVec.size(); ++var) {
+		string range = rangesVec.at(var);
+		StringUtil::trim(range);
+		vector<string> rangeVals;
+		StringUtil::split(rangeVals, range, ("-"));
+		if(rangeVals.size()>2)
+		{
+			//error
+		}
+		else
+		{
+			if(rangeVals.at(0)!="" && rangeVals.at(1)!="")
+			{
+				try {
+					int start = CastUtil::lexical_cast<int>(rangeVals.at(0));
+					int end = CastUtil::lexical_cast<int>(rangeVals.at(1));
+
+					if(start<0 || start>end)
+						throw 1;
+					vector<int> values;
+					values.push_back(start);
+					values.push_back(end - start);
+					rangeValuesLst.push_back(values);
+				} catch(...) {
+					//error
+				}
+			}
+			else if(rangeVals.at(0)!="")
+			{
+				try {
+					int start = CastUtil::lexical_cast<int>(rangeVals.at(0));
+					if(start<0)
+						throw 1;
+					vector<int> values;
+					values.push_back(start);
+					values.push_back(-1);
+					rangeValuesLst.push_back(values);
+				} catch(...) {
+					//error
+				}
+			}
+			else if(rangeVals.at(1)!="")
+			{
+				try {
+					int end = CastUtil::lexical_cast<int>(rangeVals.at(1));
+					if(end<0)
+						throw 1;
+					vector<int> values;
+					values.push_back(-1);
+					values.push_back(end);
+					rangeValuesLst.push_back(values);
+				} catch(...) {
+					//error
+				}
+			}
+		}
+	}
+	return rangeValuesLst;
+}
+
+void HttpRequest::setContent_tfile(string tfile)
+{
+	content_tfile = tfile;
+}
+
+string HttpRequest::getContent_tfile()
+{
+	return content_tfile;
+}
+
+void HttpRequest::addMultipartFormContent(string key, MultipartContent content)
+{
+	requestParamsF[key] = content;
+}
+
+void HttpRequest::addContent(MultipartContent content)
+{
+	contentList.push_back(content);
+}
+
+bool HttpRequest::isNonBinary(string mimeType)
+{
+	string contType = StringUtil::toLowerCopy(mimeType);
+	return (contType.find("text")!=string::npos || contType.find("css")!=string::npos
+			|| contType.find("x-javascript")!=string::npos || contType.find("json")!=string::npos
+			|| contType.find("xml")!=string::npos || contType.find("html")!=string::npos);
 }

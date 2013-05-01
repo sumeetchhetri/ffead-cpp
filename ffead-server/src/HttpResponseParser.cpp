@@ -29,7 +29,10 @@ HttpResponseParser::HttpResponseParser() {
 }
 
 HttpResponseParser::~HttpResponseParser() {
-	// TODO Auto-generated destructor stub
+	if(HttpResponseParser::headernames!=NULL)
+	{
+		delete HttpResponseParser::headernames;
+	}
 }
 
 

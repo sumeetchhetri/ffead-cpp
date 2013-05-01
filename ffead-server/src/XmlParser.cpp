@@ -46,6 +46,7 @@ Document XmlParser::getDocument(string xml)
 			if(temp.find("<?")==string::npos && temp.find("?>")==string::npos)
 				xml.append(temp+"\n");
 		}
+		infile.close();
 	}
 
 	Element root;
@@ -62,8 +63,8 @@ Document XmlParser::getDocument(string xml)
 	{
 		logger << "Invalid XML Document" << endl;
 		string errmsg = ("Invalid XML Document");
-		XmlParseException exception(errmsg);
-		throw exception;
+		throw XmlParseException(errmsg);
+
 	}*/
 	doc.setRootElement(root);
 	return doc;
@@ -81,8 +82,8 @@ void XmlParser::readXML(string xml,string parent,Element *par)
 		if(ecdt==(int)string::npos)
 		{
 			string errmsg = ("Incomplete CDATA tag\n");
-			XmlParseException exception(errmsg);
-			throw exception;
+			throw XmlParseException(errmsg);
+
 		}
 		else
 		{
@@ -98,8 +99,8 @@ void XmlParser::readXML(string xml,string parent,Element *par)
 		if(ecmt==(int)string::npos)
 		{
 			string errmsg = ("Incomplete Comment tag\n");
-			XmlParseException exception(errmsg);
-			throw exception;
+			throw XmlParseException(errmsg);
+
 		}
 		else
 		{
@@ -166,56 +167,56 @@ void XmlParser::readXML(string xml,string parent,Element *par)
     if(xml.find("< ")!=string::npos)
     {
         string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("< ")+1) + "\n");
-        XmlParseException exception(errmsg);
-        throw exception;
+        throw XmlParseException(errmsg);
+
     }
     else if(xml.find("<\t")!=string::npos)
     {
         string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("<\t")+1) + "\n");
-        XmlParseException exception(errmsg);
-        throw exception;
+        throw XmlParseException(errmsg);
+
     }
     else if(xml.find("</ ")!=string::npos)
     {
         string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("</ ")+1) + "\n");
-        XmlParseException exception(errmsg);
-        throw exception;
+        throw XmlParseException(errmsg);
+
     }
     else if(xml.find("</\t")!=string::npos)
     {
         string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("</\t")+1) + "\n");
-        XmlParseException exception(errmsg);
-        throw exception;
+        throw XmlParseException(errmsg);
+
     }
     else if(xml.find("< /")!=string::npos)
     {
         string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("< /")+1) + "\n");
-        XmlParseException exception(errmsg);
-        throw exception;
+        throw XmlParseException(errmsg);
+
     }
     else if(xml.find("/ >")!=string::npos)
 	{
 		string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("/ >")+1) + "\n");
-		XmlParseException exception(errmsg);
-		throw exception;
+		throw XmlParseException(errmsg);
+
 	}
     else if(xml.find("<\t/")!=string::npos)
     {
         string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("<\t/")+1) + "\n");
-        XmlParseException exception(errmsg);
-        throw exception;
+        throw XmlParseException(errmsg);
+
     }
     else if(xml.find("<"+ta)==string::npos && xml.find("</"+ta)!=string::npos)
     {
         string errmsg = ("No Start Tag - for : " + ta + "\n");
-        XmlParseException exception(errmsg);
-        throw exception;
+        throw XmlParseException(errmsg);
+
     }
     else if(xml.find("<"+ta)!=string::npos && pndTag==0 && endTag==0)
     {
         string errmsg = ("No End Tag - for : " + ta + "\n");
-        XmlParseException exception(errmsg);
-        throw exception;
+        throw XmlParseException(errmsg);
+
     }
     if(xml.find("<"+ta)!=string::npos && (xml.find("</"+ta)!=string::npos || xml.find("/>")!=string::npos))
     {
@@ -277,14 +278,14 @@ void XmlParser::readXML(string xml,string parent,Element *par)
     else if(xml.find("<")!=string::npos && (xml.find("</")==string::npos || xml.find("/>")==string::npos))
     {
     	string errmsg = ("Invalid Start Tag\n");
-    	XmlParseException exception(errmsg);
-    	throw exception;
+    	throw XmlParseException(errmsg);
+
     }
     else if(xml.find("<")==string::npos && (xml.find("</")!=string::npos || xml.find("/>")!=string::npos))
 	{
 		string errmsg = ("Invalid End Tag\n");
-		XmlParseException exception(errmsg);
-		throw exception;
+		throw XmlParseException(errmsg);
+
 	}
 }
 

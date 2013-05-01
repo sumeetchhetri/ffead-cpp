@@ -54,9 +54,9 @@ CibernateConnPools::~CibernateConnPools() {
 	logger << "\nDestructed CibernateConnPools" << flush;
 }
 
-void CibernateConnPools::addPool(int size,string uid,string pwd,string dsn,string appName)
+void CibernateConnPools::addPool(int size,string uid,string pwd,string dsn,string appName,string dialect)
 {
-	get()->cpools[appName] = new CibernateConnectionPool(size,dsn,uid,pwd);
+	get()->cpools[appName] = new CibernateConnectionPool(size,dsn,uid,pwd,dialect);
 	instance->initialized = get()->cpools[appName]->initialized;
 }
 

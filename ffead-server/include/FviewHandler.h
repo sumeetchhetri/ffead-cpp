@@ -30,7 +30,7 @@ class FviewHandler {
 public:
 	FviewHandler();
 	virtual ~FviewHandler();
-	static string handle(HttpRequest* req, HttpResponse& res, map<string, string> fviewmap);
+	static void handle(HttpRequest* req, HttpResponse& res, map<string, string> fviewmap);
 };
 
 #endif /* FVIEWHANDLER_H_ */

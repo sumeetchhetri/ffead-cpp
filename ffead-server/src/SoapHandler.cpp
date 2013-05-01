@@ -31,8 +31,9 @@ SoapHandler::~SoapHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string xmlcnttype)
+void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, ConfigurationData configData)
 {
+	string xmlcnttype = configData.props[".xml"];
 	Logger logger = Logger::getLogger("SoapHandler");
 	string meth,ws_name,env;
 	ws_name = req->getFile();
@@ -124,7 +125,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 		env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
 		logger << ("Soap fault - " + fault) << flush;
 	}
-	catch(Exception *e)
+	catch(const Exception& e)
 	{
 		typedef map<string,string> AttributeList;
 		AttributeList attl = soapbody.getAttributes();
@@ -134,7 +135,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 		{
 			bod.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
-		bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>"+e->what()+"</faultstring><detail></detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+		bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>"+e.getMessage()+"</faultstring><detail></detail><soap-fault></" + soapbody.getTagNameSpc()+">");
 		attl = soapenv.getAttributes();
 		env = "<" + soapenv.getTagNameSpc();
 		for(it=attl.begin();it!=attl.end();it++)
@@ -142,7 +143,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
-		logger << ("Soap fault - " + e->what()) << flush;
+		logger << ("Soap fault - " + e.getMessage()) << flush;
 	}
 	catch(...)
 	{
@@ -165,7 +166,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, string
 		logger << "Soap Standard Exception" << flush;
 	}
 	res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-	res.setContent_type(xmlcnttype);
+	res.addHeaderValue(HttpResponse::ContentType, xmlcnttype);
 	res.setContent_str(env);
 	//res.setContent_len(CastUtil::lexical_cast<string>(env.length()));
 }

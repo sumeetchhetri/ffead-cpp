@@ -32,6 +32,7 @@ public:
 	virtual ~DefaultIOFilter();
 	void doInputFilter(HttpRequest *req);
 	void doOutputFilter(HttpResponse *res);
+	bool doHandle(HttpRequest *req, HttpResponse* res);
 };
 
 #endif /* DEFAULTIOFILTER_H_ */

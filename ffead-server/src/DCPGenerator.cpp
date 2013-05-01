@@ -31,17 +31,19 @@ DCPGenerator::DCPGenerator() {
 DCPGenerator::~DCPGenerator() {
 	// TODO Auto-generated destructor stub
 }
-string DCPGenerator::generateDCPAll(strVec fileNames)
+string DCPGenerator::generateDCPAll(map<string,string> fileNames)
 {
 	string bodies,headersb="#include \"AfcUtil.h\"",funcdefs;
-	for (unsigned int var = 0; var < fileNames.size(); ++var)
+	map<string, string>::iterator it;
+	for (it=fileNames.begin();it!=fileNames.end();++it)
 	{
-		bodies += generateDCP(fileNames.at(var),headersb,funcdefs);
+		bodies += generateDCP(it->first,headersb,funcdefs,it->second);
 	}
 	bodies = (headersb+"\nextern \"C\"\n{\n"+funcdefs+bodies+"}\n");
 	return bodies;
 }
-string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcdefs)
+
+string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcdefs,string app)
 {
 	ifstream infile;
 	string data,allcontent;
@@ -64,7 +66,7 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 				s = data.find_last_of("/")+1;
 				en = data.find_last_of(".");
 				string file1 = data.substr(s,en-s);
-				allcontent.append("<DCPB>screen << _"+file1+"emittHTML();\n</DCPB>");
+				allcontent.append("<DCPB>screen << _"+app+file1+"emittHTML();\n</DCPB>");
 				/*ifstream inf(data.c_str());
 				if(inf)
 				{
@@ -106,8 +108,8 @@ string DCPGenerator::generateDCP(string fileName,string &headersb,string &funcde
 	}
 	bodies.append(funcs);
 	//bodies.append();
-	funcdefs.append("string _"+file+"emittHTML();\n");
-	bodies.append("string _"+file+"emittHTML()\n{\n");
+	funcdefs.append("string _"+app+file+"emittHTML();\n");
+	bodies.append("string _"+app+file+"emittHTML()\n{\n");
 	bodies.append("stringstream screen;\n");
 	while(allcontent.find("<DCPB>")!=string::npos)
 	{

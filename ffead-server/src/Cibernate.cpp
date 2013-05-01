@@ -23,7 +23,7 @@
 #include "Cibernate.h"
 
 Cibernate::~Cibernate() {
-	close();
+	close(true);
 	logger << "\nDestructed Cibernate" << flush;
 }
 Cibernate::Cibernate(string appName) {
@@ -40,6 +40,7 @@ Cibernate::Cibernate(string appName) {
 			throw ("No mapping found for appname " + appName);
 		if(this->pool!=NULL && this->mapping!=NULL)
 		{
+			this->dialect = this->pool->getDialect();
 			logger << ("Got pool for application " + appName) << endl;
 		}
 	}
@@ -60,6 +61,7 @@ Cibernate::Cibernate() {
 			throw ("No mapping found for appname " + appName);
 		if(this->pool!=NULL && this->mapping!=NULL)
 		{
+			this->dialect = this->pool->getDialect();
 			logger << ("Got pool for application " + appName) << endl;
 		}
 	}
@@ -77,8 +79,8 @@ string Cibernate::demangle(const char *mangled)
 	return s;
 }
 
-Cibernate::Cibernate(string dbName, string uname, string pass, int psize) {
-	CibernateConnPools::addPool(psize,uname,pass,dbName,"default");
+Cibernate::Cibernate(string dbName, string uname, string pass, int psize, string dialect) {
+	CibernateConnPools::addPool(psize,uname,pass,dbName,"default",dialect);
 	if(!CibernateConnPools::isInitialized())
 		throw "Error connecting to Database server";
 	this->pool = CibernateConnPools::getPool("default");
@@ -101,7 +103,7 @@ bool Cibernate::allocateStmt(bool read) {
 	}
 	if (this->pool != NULL && this->conn != NULL && this->conn->type == read
 			&& V_OD_hstmt != NULL) {
-		SQLCloseCursor(V_OD_hstmt);
+		refreshStmt();
 		//return false;
 	}
 	int V_OD_erg;// result of functions
@@ -119,6 +121,10 @@ bool Cibernate::allocateStmt(bool read) {
 		return false;
 	}
 	return true;
+}
+
+void Cibernate::refreshStmt() {
+	SQLCloseCursor(V_OD_hstmt);
 }
 
 
@@ -191,7 +197,7 @@ void Cibernate::procedureCall(string procName) {
 							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
 							&V_OD_mlen);
 					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
+					close(true);
 					throw "Error in call to stored procedure";
 				}
 			}
@@ -207,10 +213,10 @@ void Cibernate::procedureCall(string procName) {
 			SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 					&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
 			logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-			close();
+			close(true);
 			throw "Error in call to stored procedure";
 		}
-		SQLCloseCursor(V_OD_hstmt);
+		refreshStmt();
 	}
 
 	logger << quer << flush;
@@ -221,7 +227,7 @@ void Cibernate::procedureCall(string procName) {
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
 		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
+		close(true);
 	}*/
 	par = 1;
 	for (it = ntmap.begin(); it != ntmap.end(); ++it) {
@@ -244,7 +250,7 @@ void Cibernate::procedureCall(string procName) {
 							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
 							&V_OD_mlen);
 					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
+					close(true);
 					throw "Error Binding parameter";
 				}
 			}
@@ -260,7 +266,7 @@ void Cibernate::procedureCall(string procName) {
 							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
 							&V_OD_mlen);
 					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
+					close(true);
 					throw "Error Binding parameter";
 				}
 			}
@@ -276,7 +282,7 @@ void Cibernate::procedureCall(string procName) {
 							(SQLCHAR*) V_OD_stat, &V_OD_err, V_OD_msg, 100,
 							&V_OD_mlen);
 					logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-					close();
+					close(true);
 					throw "Error Binding parameter";
 				}
 			}
@@ -289,22 +295,22 @@ void Cibernate::procedureCall(string procName) {
 		SQLGetDiagRec(SQL_HANDLE_STMT, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
 		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
+		close(true);
 		throw "Error in call to stored procedure";
 	}
 
 	/*V_OD_erg = SQLNumResultCols(V_OD_hstmt, &V_OD_colanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		close();
+		close(true);
 	}
 	logger << "Number of Columns " << V_OD_colanz << endl;
 	V_OD_erg = SQLRowCount(V_OD_hstmt, &V_OD_rowanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		logger << "Number of RowCount " << V_OD_erg << endl;
-		close();
+		close(true);
 	}
 	logger << "Number of Rows " << (int)V_OD_rowanz << endl;*/
-	//SQLCloseCursor(V_OD_hstmt);
+	//refreshStmt();
 
 	logger << outQuery << flush;
 	SQLLEN siz;
@@ -314,18 +320,18 @@ void Cibernate::procedureCall(string procName) {
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc, 1, (SQLCHAR*) V_OD_stat,
 				&V_OD_err, V_OD_msg, 100, &V_OD_mlen);
 		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
+		close(true);
 		throw "Error in call to stored procedure";
 	}
 	/*V_OD_erg = SQLNumResultCols(V_OD_hstmt, &V_OD_colanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
-		close();
+		close(true);
 	}
 	logger << "Number of Columns " << V_OD_colanz << endl;
 	V_OD_erg = SQLRowCount(V_OD_hstmt, &V_OD_rowanz);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO)) {
 		logger << "Number of RowCount " << V_OD_erg << endl;
-		close();
+		close(true);
 	}
 	logger << "Number of Rows " << (int)V_OD_rowanz << endl;*/
 	V_OD_erg = SQLFetch(V_OD_hstmt);
@@ -349,19 +355,22 @@ void Cibernate::procedureCall(string procName) {
 		}
 		V_OD_erg = SQLFetch(V_OD_hstmt);
 	}
-	SQLCloseCursor(V_OD_hstmt);
+	refreshStmt();
 	clearMaps();
-	close();
+	close(!isTransaction);
 }
 
 
-void Cibernate::close() {
-	this->pool->closeConnection(conn);
-	this->pool = NULL;
-	this->mapping = NULL;
-	V_OD_hdbc = NULL;
-	SQLFreeHandle(SQL_HANDLE_STMT, V_OD_hstmt);
-	V_OD_hstmt = NULL;
+void Cibernate::close(bool clos) {
+	if(clos)
+	{
+		this->pool->closeConnection(conn);
+		this->pool = NULL;
+		this->mapping = NULL;
+		V_OD_hdbc = NULL;
+		SQLFreeHandle(SQL_HANDLE_STMT, V_OD_hstmt);
+		V_OD_hstmt = NULL;
+	}
 }
 
 
@@ -383,10 +392,11 @@ void Cibernate::empty(string clasName) {
 		logger << "Error in Truncate " << V_OD_erg << endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
+		close(true);
 	}
-	SQLCloseCursor(V_OD_hstmt);
+	refreshStmt();
 	clearMaps();
+	close(!isTransaction);
 	return;
 }
 
@@ -425,7 +435,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 		V_OD_erg = SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
 		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 		{
-			close();
+			close(true);
 		}
 		//logger << "Number of Columns " << V_OD_colanz << endl;
 		for(int i=1;i<=V_OD_colanz;i++)
@@ -499,7 +509,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 		delete t;
 		V_OD_erg=SQLFetch(V_OD_hstmt);
 	}
-	SQLCloseCursor(V_OD_hstmt);
+	refreshStmt();
 	int vecsiz = reflector.getVectorSize(vecT,clasName);
 	for (int var = 0; var < vecsiz; ++var)
 	{
@@ -518,8 +528,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 				Object on;
 				on << ns;
 				on.setTypeName(meth.getReturnType());
-				addParam(relation.fk,on);
-				igPaWC = false;
+				//addParam(relation.fk,on);
 				//col = getARACW(relation.clsName);
 				valus.push_back(col);
 				argus.push_back("vector<"+relation.clsName+">");
@@ -529,6 +538,8 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 			}
 		}
 	}
+	refreshStmt();
+	close(!isTransaction);
 	clearMaps();
 	return vecT;
 }
@@ -551,7 +562,7 @@ void* Cibernate::getElements()
 		V_OD_erg = SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
 		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 		{
-			close();
+			close(true);
 		}
 
 		//logger << "Number of Columns " << V_OD_colanz << endl;
@@ -578,7 +589,8 @@ void* Cibernate::getElements()
 		V_OD_erg=SQLFetch(V_OD_hstmt);
 		vecT->push_back(colValMap);
 	}
-	SQLCloseCursor(V_OD_hstmt);
+	refreshStmt();
+	close(!isTransaction);
 	return vecT;
 }
 
@@ -688,6 +700,8 @@ int Cibernate::storeProperty(ClassInfo clas, void* t, int var, string fieldName)
 		DateFormat datf("yyyy-mm-dd");
 		if(temp.length()>10)
 			datf.setFormatspec("yyyy-mm-dd hh:mi:ss");
+		else
+			datf.setFormatspec("yyyy-mm-dd hh:mm:ss.nnnnnn");
 		Date *date = datf.parse(temp);
 		col = date;
 		//logger << temp << "\n" << flush;
@@ -881,85 +895,69 @@ void* Cibernate::sqlfuncs(string type,string clasName)
 bool Cibernate::startTransaction()
 {
 	bool flagc = allocateStmt(true);
-		if(!flagc)return false;
-	int V_OD_erg;// result of functions
-	//SQLINTEGER V_OD_id;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
-	string vals;
-	string query = "start transaction";
-	logger << query << flush;
-	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+	if(!flagc)
 	{
-		logger << "Error in Start transaction " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
-		SQLCloseCursor(V_OD_hstmt);
 		return false;
 	}
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-	return true;
+
+	isTransaction = true;
+
+	flagc = false;
+	//Set autocommit to false on the connection, start the transaction
+	SQLRETURN sqlreturn = SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_OFF,NULL);
+	if (sqlreturn == SQL_SUCCESS || sqlreturn == SQL_SUCCESS_WITH_INFO)
+	{
+		flagc = true;
+	}
+	return flagc;
 }
 
 bool Cibernate::commit()
 {
 	bool flagc = allocateStmt(true);
-	if(!flagc)return false;
-	int V_OD_erg;// result of functions
-	//SQLINTEGER V_OD_id;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
-	string vals;
-	string query = "commit";
-	logger << query << flush;
-	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+	if(!flagc)
 	{
-		logger << "Error in commit " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
-		SQLCloseCursor(V_OD_hstmt);
 		return false;
 	}
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-	return true;
+
+	isTransaction = false;
+
+	flagc = false;
+
+	//Commit the transaction
+	SQLRETURN sqlreturn = SQLEndTran(SQL_HANDLE_DBC, V_OD_hdbc, SQL_COMMIT);
+	if (sqlreturn == SQL_SUCCESS || sqlreturn == SQL_SUCCESS_WITH_INFO)
+	{
+		flagc = true;
+	}
+	//Turn autocommit to true
+	SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_ON,NULL);
+	close(true);
+	return flagc;
 }
 
 bool Cibernate::rollback()
 {
 	bool flagc = allocateStmt(true);
-	if(!flagc)return false;
-	int V_OD_erg;// result of functions
-	//SQLINTEGER V_OD_id;
-	char V_OD_stat[10];
-	SQLSMALLINT	V_OD_mlen;
-	SQLINTEGER V_OD_err;
-	SQLCHAR V_OD_msg[200];
-	string vals;
-	string query = "rollback";
-	logger << query << flush;
-	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
-	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+	if(!flagc)
 	{
-		logger << "Error in rollback " << V_OD_erg << endl;
-		SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		close();
-		SQLCloseCursor(V_OD_hstmt);
 		return false;
 	}
-	SQLCloseCursor(V_OD_hstmt);
-	clearMaps();
-	return true;
+
+	isTransaction = false;
+
+	flagc = false;
+
+	//Rollback the transaction
+	SQLRETURN sqlreturn = SQLEndTran(SQL_HANDLE_DBC, V_OD_hdbc, SQL_ROLLBACK);
+	if (sqlreturn == SQL_SUCCESS || sqlreturn == SQL_SUCCESS_WITH_INFO)
+	{
+		flagc = true;
+	}
+	//Turn autocommit to true
+	SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_ON,NULL);
+	close(true);
+	return flagc;
 }
 
 
@@ -1421,6 +1419,23 @@ void* Cibernate::executeQuery(CibernateQuery query)
 			return vecT;
 	}
 
+	if(!query.isUpdate())
+	{
+		if(query.start>0 && query.count>0)
+		{
+			StringContext params;
+			params["start"] = query.start;
+			params["count"] = query.count;
+			query.query = DialectHelper::getSQLString(dialect, DialectHelper::PAGINATION_OFFSET_SQL, query.query, params);
+		}
+		else if(query.count>0)
+		{
+			StringContext params;
+			params["count"] = query.count;
+			query.query = DialectHelper::getSQLString(dialect, DialectHelper::PAGINATION_NO_OFFSET_SQL, query.query, params);
+		}
+	}
+
 	int V_OD_erg;
 	char V_OD_stat[10];
 	SQLSMALLINT	V_OD_mlen,V_OD_colanz;
@@ -1445,7 +1460,7 @@ void* Cibernate::executeQuery(CibernateQuery query)
 			logger << "Error in prepare statement " << V_OD_erg << endl;
 			SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 			logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-			close();
+			close(true);
 			return flag;
 		}
 		V_OD_erg=SQLExecute(V_OD_hstmt);
@@ -1455,9 +1470,10 @@ void* Cibernate::executeQuery(CibernateQuery query)
 		   logger << "Error in Insert " << V_OD_erg << endl;
 		   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 		   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		   close();
+		   close(true);
 		}
-		SQLCloseCursor(V_OD_hstmt);
+		refreshStmt();
+		close(!isTransaction);
 		return flag;
 	}
 	else
@@ -1468,7 +1484,7 @@ void* Cibernate::executeQuery(CibernateQuery query)
 			logger << "Error in prepare statement " << V_OD_erg << endl;
 			SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 			logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-			close();
+			close(true);
 			return vecT;
 		}
 		V_OD_erg=SQLExecute(V_OD_hstmt);
@@ -1477,14 +1493,14 @@ void* Cibernate::executeQuery(CibernateQuery query)
 		   logger << "Error in Select " << V_OD_erg << endl;
 		   SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 		   logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-		   close();
+		   close(true);
 		   return vecT;
 		}
 		V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
 		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 		{
 		  logger << "Number of RowCount " << V_OD_erg << endl;
-		  close();
+		  close(true);
 		  return vecT;
 		}
 		logger << "Number of Rows " << (int)V_OD_rowanz << endl;
@@ -1591,7 +1607,7 @@ void Cibernate::bindQueryParams(CibernateQuery& query)
 				logger << "Error in binding parameter " << V_OD_erg << endl;
 				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-				close();
+				close(true);
 			}
 		}
 		else if(paramValue.getTypeName()=="unsigned short")
@@ -1602,7 +1618,7 @@ void Cibernate::bindQueryParams(CibernateQuery& query)
 				logger << "Error in binding parameter " << V_OD_erg << endl;
 				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-				close();
+				close(true);
 			}
 		}
 		else if(paramValue.getTypeName()=="int" || paramValue.getTypeName()=="long")
@@ -1613,7 +1629,7 @@ void Cibernate::bindQueryParams(CibernateQuery& query)
 				logger << "Error in binding parameter " << V_OD_erg << endl;
 				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-				close();
+				close(true);
 			}
 		}
 		else if(paramValue.getTypeName()=="unsigned int" || paramValue.getTypeName()=="unsigned long")
@@ -1624,7 +1640,7 @@ void Cibernate::bindQueryParams(CibernateQuery& query)
 				logger << "Error in binding parameter " << V_OD_erg << endl;
 				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-				close();
+				close(true);
 			}
 		}
 		else if(paramValue.getTypeName()=="double")
@@ -1635,7 +1651,7 @@ void Cibernate::bindQueryParams(CibernateQuery& query)
 				logger << "Error in binding parameter " << V_OD_erg << endl;
 				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-				close();
+				close(true);
 			}
 		}
 		else if(paramValue.getTypeName()=="float")
@@ -1646,7 +1662,7 @@ void Cibernate::bindQueryParams(CibernateQuery& query)
 				logger << "Error in binding parameter " << V_OD_erg << endl;
 				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-				close();
+				close(true);
 			}
 		}
 		else if(paramValue.getTypeName()=="std::string")
@@ -1658,7 +1674,7 @@ void Cibernate::bindQueryParams(CibernateQuery& query)
 				logger << "Error in binding parameter " << V_OD_erg << endl;
 				SQLGetDiagRec(SQL_HANDLE_DBC, V_OD_hdbc,1, (SQLCHAR*)V_OD_stat,&V_OD_err,V_OD_msg,100,&V_OD_mlen);
 				logger << V_OD_msg << " (" << (int) V_OD_err << ")" << endl;
-				close();
+				close(true);
 			}
 		}
 		else

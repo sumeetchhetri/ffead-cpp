@@ -1,4 +1,19 @@
 <app>
+	<cors-config>
+		<allow-origins>*</allow-origins>
+		<allow-methods>GET, POST, HEAD, PUT, DELETE</allow-methods>
+		<allow-headers>content-type, origin</allow-headers>
+		<expose-headers>content-type, origin</expose-headers>
+		<allow-credentials>true</allow-credentials>
+		<max-age>1023</max-age>
+	</cors-config>
+	<cache-control>
+		<control ext="png,css,js,jpeg,jpg,gif" header="Cache-Control" value="max-age=290304000, public"/>
+		<control ext="txt,xml,json" header="Cache-Control" value="max-age=172800, public, must-revalidate"/>
+		<control ext="html,html" header="Cache-Control" value="max-age=7200, must-revalidate"/>
+		<control file="video.mov" header="Expires" value="Thu, 15 Apr 2020 20:00:00 GMT"/>
+		<control header="Last-Modified" remove="true"/>
+	</cache-control>
 	<controllers>
 		<controller class="DefaultController" url="*.action"/>
 		<controller class="DefaultController" url="*.do"/>
@@ -20,6 +35,7 @@
 	<filters>
 		<filter class="DefaultIOFilter" type="in"/>
 		<filter class="DefaultIOFilter" type="out"/>
+		<filter class="DefaultIOFilter" type="handle" url="*.filter"/>
 	</filters>
 	<security>
 		<login-handler provider="file:users" url="login.html"/>

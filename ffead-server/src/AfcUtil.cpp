@@ -77,7 +77,7 @@ string AfcUtil::generateJsObjectsAll(vector<string> obj,strVec files,vector<bool
 	return ret;
 }
 
-string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string path,string &objs,strVec pobj, bool isOpForSet, string& typrefs,strVec minfo)
+string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string path,string &objs,strVec pobj, bool isOpForSet, string& typrefs,strVec minfo,string app)
 {
 	if(doneMap.find(claz)==doneMap.end())
 		doneMap[claz] = "done";
@@ -244,10 +244,10 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 		priv = (fldstat[vemp.at(1)]==2?true:false);
 
 		test += "this." + vemp.at(1) + "= null;\n";
-		tes += generateReadObjects(vemp.at(0), vemp.at(1), priv, ptr, ".");
-		tes1 += generateReadObjects(vemp.at(0), vemp.at(1), priv, ptr, "->");
-		fres += generateToJSONObjects(vemp.at(0), vemp.at(1), priv, obj, i, retu, headers, path, objs, ".", ptr);
-		fres1 += generateToJSONObjects(vemp.at(0), vemp.at(1), priv, obj, i, retu, headers, path, objs, "->", ptr);
+		tes += generateReadObjects(vemp.at(0), vemp.at(1), priv, ptr, ".", app);
+		tes1 += generateReadObjects(vemp.at(0), vemp.at(1), priv, ptr, "->", app);
+		fres += generateToJSONObjects(vemp.at(0), vemp.at(1), priv, obj, i, retu, headers, path, objs, ".", ptr, app);
+		fres1 += generateToJSONObjects(vemp.at(0), vemp.at(1), priv, obj, i, retu, headers, path, objs, "->", ptr, app);
 	}
 
 	/*for(unsigned int i=0;i<pobj.size();i++)
@@ -283,153 +283,153 @@ string AfcUtil::generateJsObjects(strVec obj,string claz,string &headers,string 
 	objs += test;
 	headers += "#include \""+claz+".h\"\n";
 
-	typrefs += claz + " read"+claz+"(JSONElement& obj);\n" + claz + "* read"+claz+"P(JSONElement& obj);\n";
-	typrefs += "\nstring from"+claz+"ToJSON("+claz+" _obj);\nstring from"+claz+"VPToJSON("+claz+"* _obj);\n";
-	typrefs	+= claz + " to"+claz+"(string s);\n" + claz + "* to"+claz+"P(string s);\n";
-	typrefs	+= "vector<"+claz + "> to"+claz+"Vec(string s);\nvector<" + claz + ">* to"+claz+"VecVP(string s);\n";
-	typrefs	+= "list<"+claz + "> to"+claz+"Lis(string s);\nlist<" + claz + ">* to"+claz+"LisVP(string s);\n";
-	typrefs	+= "deque<"+claz + "> to"+claz+"Dq(string s);\ndeque<" + claz + ">* to"+claz+"DqVP(string s);\n";
-	typrefs	+= "std::queue<"+claz + "> to"+claz+"Q(string s);\nstd::queue<" + claz + ">* to"+claz+"QVP(string s);\n";
+	typrefs += claz + " " + app + "read"+claz+"(JSONElement& obj);\n" + claz + "* "+app+"read"+claz+"P(JSONElement& obj);\n";
+	typrefs += "\nstring " + app + "from"+claz+"ToJSON("+claz+" _obj);\nstring " + app + "from"+claz+"VPToJSON("+claz+"* _obj);\n";
+	typrefs	+= claz + " " + app + "to"+claz+"(string s);\n" + claz + "* " + app + "to"+claz+"P(string s);\n";
+	typrefs	+= "vector<"+claz + "> " + app + "to"+claz+"Vec(string s);\nvector<" + claz + ">* " + app + "to"+claz+"VecVP(string s);\n";
+	typrefs	+= "list<"+claz + "> " + app + "to"+claz+"Lis(string s);\nlist<" + claz + ">* " + app + "to"+claz+"LisVP(string s);\n";
+	typrefs	+= "deque<"+claz + "> " + app + "to"+claz+"Dq(string s);\ndeque<" + claz + ">* " + app + "to"+claz+"DqVP(string s);\n";
+	typrefs	+= "std::queue<"+claz + "> " + app + "to"+claz+"Q(string s);\nstd::queue<" + claz + ">* " + app + "to"+claz+"QVP(string s);\n";
 	if(isOpForSet)
 	{
-		typrefs	+= "set<"+claz + "> to"+claz+"Set(string s);\nset<" + claz + ">* to"+claz+"SetVP(string s);\n";
-		typrefs	+= "multiset<"+claz + "> to"+claz+"MulSet(string s);\nmultiset<" + claz + ">* to"+claz+"MulSetVP(string s);\n";
+		typrefs	+= "set<"+claz + "> " + app + "to"+claz+"Set(string s);\nset<" + claz + ">* " + app + "to"+claz+"SetVP(string s);\n";
+		typrefs	+= "multiset<"+claz + "> " + app + "to"+claz+"MulSet(string s);\nmultiset<" + claz + ">* " + app + "to"+claz+"MulSetVP(string s);\n";
 	}
-	typrefs += "\nstring from"+claz+"VecToJSON(vector<"+claz+"> _obj);\nstring from"+claz+"VecVPToJSON(vector<"+claz+">* _obj);\n";
-	typrefs += "\nstring from"+claz+"LisToJSON(list<"+claz+"> _obj);\nstring from"+claz+"LisVPToJSON(list<"+claz+">* _obj);\n";
-	typrefs += "\nstring from"+claz+"DqToJSON(deque<"+claz+"> _obj);\nstring from"+claz+"DqVPToJSON(deque<"+claz+">* _obj);\n";
-	typrefs += "\nstring from"+claz+"QToJSON(std::queue<"+claz+"> _obj);\nstring from"+claz+"QVPToJSON(std::queue<"+claz+">* _obj);\n";
+	typrefs += "\nstring " + app + "from"+claz+"VecToJSON(vector<"+claz+"> _obj);\nstring " + app + "from"+claz+"VecVPToJSON(vector<"+claz+">* _obj);\n";
+	typrefs += "\nstring " + app + "from"+claz+"LisToJSON(list<"+claz+"> _obj);\nstring " + app + "from"+claz+"LisVPToJSON(list<"+claz+">* _obj);\n";
+	typrefs += "\nstring " + app + "from"+claz+"DqToJSON(deque<"+claz+"> _obj);\nstring " + app + "from"+claz+"DqVPToJSON(deque<"+claz+">* _obj);\n";
+	typrefs += "\nstring " + app + "from"+claz+"QToJSON(std::queue<"+claz+"> _obj);\nstring " + app + "from"+claz+"QVPToJSON(std::queue<"+claz+">* _obj);\n";
 	if(isOpForSet)
 	{
-		typrefs += "\nstring from"+claz+"SetToJSON(set<"+claz+"> _obj);\nstring from"+claz+"SetVPToJSON(set<"+claz+">* _obj);\n";
-		typrefs += "\nstring from"+claz+"MulSetToJSON(multiset<"+claz+"> _obj);\nstring from"+claz+"MulSetVPToJSON(multiset<"+claz+">* _obj);\n";
+		typrefs += "\nstring " + app + "from"+claz+"SetToJSON(set<"+claz+"> _obj);\nstring " + app + "from"+claz+"SetVPToJSON(set<"+claz+">* _obj);\n";
+		typrefs += "\nstring " + app + "from"+claz+"MulSetToJSON(multiset<"+claz+"> _obj);\nstring " + app + "from"+claz+"MulSetVPToJSON(multiset<"+claz+">* _obj);\n";
 	}
 
-	test = retu+ "\n\n" + claz + " read"+claz+"(JSONElement& obj)\n{\n"+claz+" _obj;\n";
+	test = retu+ "\n\n" + claz + " " + app + "read"+claz+"(JSONElement& obj)\n{\n"+claz+" _obj;\n";
 	test += tes + "\nreturn _obj;\n}\n";
-	test += "\n\n" + claz + "* read"+claz+"P(JSONElement& obj)\n{\n"+claz+"* _obj = new "+claz+";\n";
+	test += "\n\n" + claz + "* "+app+"read"+claz+"P(JSONElement& obj)\n{\n"+claz+"* _obj = new "+claz+";\n";
 	test += tes1 + "\nreturn _obj;\n}\n";
-	test += claz + " to"+claz+"(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ claz +" _obj = read"+claz+"(element);\nreturn _obj;\n}\n";
-	test += "vector<"+claz+"> to"+claz+"Vec(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n" +
+	test += claz + " " + app + "to"+claz+"(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ claz +" _obj = " + app + "read"+claz+"(element);\nreturn _obj;\n}\n";
+	test += "vector<"+claz+"> " + app + "to"+claz+"Vec(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n" +
 			"vector<"+claz+"> vec;\nfor(int i=0;i<(int)element.getChildren().size();i++){\n" +
-			claz +" _obj = read"+claz+"(*element.getChildren().at(i));\nvec.push_back(_obj);\n" +
+			claz +" _obj = " + app + "read"+claz+"(*element.getChildren().at(i));\nvec.push_back(_obj);\n" +
 			"}\nreturn vec;\n}\n";
-	test += "list<"+claz+"> to"+claz+"Lis(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
+	test += "list<"+claz+"> " + app + "to"+claz+"Lis(string s)\n{\nvector<"+claz+"> vec = " + app + "to"+claz+"Vec(s);\n" +
 			"list<"+claz+"> tt;\nstd::copy(vec.begin(), vec.end(), std::back_inserter(tt));\n" +
 			"return tt;\n}\n";
 	if(isOpForSet)
 	{
-		test += "set<"+claz+"> to"+claz+"Set(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
+		test += "set<"+claz+"> " + app + "to"+claz+"Set(string s)\n{\nvector<"+claz+"> vec = " + app + "to"+claz+"Vec(s);\n" +
 				"set<"+claz+"> tt;\nstd::copy(vec.begin(), vec.end(), std::inserter(tt, tt.begin()));\n" +
 				"return tt;\n}\n";
-		test += "multiset<"+claz+"> to"+claz+"MulSet(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
+		test += "multiset<"+claz+"> " + app + "to"+claz+"MulSet(string s)\n{\nvector<"+claz+"> vec = " + app + "to"+claz+"Vec(s);\n" +
 				"multiset<"+claz+"> tt;\nstd::copy(vec.begin(), vec.end(), std::inserter(tt, tt.begin()));\n" +
 				"return tt;\n}\n";
 	}
-	test += "deque<"+claz+"> to"+claz+"Dq(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
+	test += "deque<"+claz+"> " + app + "to"+claz+"Dq(string s)\n{\nvector<"+claz+"> vec = " + app + "to"+claz+"Vec(s);\n" +
 			"deque<"+claz+"> tt;\nstd::copy(vec.begin(), vec.end(), std::inserter(tt, tt.begin()));\n" +
 			"return tt;\n}\n";
-	test += "std::queue<"+claz+"> to"+claz+"Q(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
+	test += "std::queue<"+claz+"> " + app + "to"+claz+"Q(string s)\n{\nvector<"+claz+"> vec = " + app + "to"+claz+"Vec(s);\n" +
 			"std::queue<"+claz+"> tt;for (int var = 0; var < (int)vec.size(); ++var) {\ntt.push(vec.at(var));\n}\n" +
 			"return tt;\n}\n";
-	test += "vector<"+claz+">* to"+claz+"VecVP(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n" +
+	test += "vector<"+claz+">* " + app + "to"+claz+"VecVP(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n" +
 			"vector<"+claz+">* vec = new vector<"+claz+">;\nfor(int i=0;i<element.getChildren().size();i++){\n" +
-			claz +" _obj = read"+claz+"(*element.getChildren().at(i));\nvec->push_back(_obj);\n" +
+			claz +" _obj = " + app + "read"+claz+"(*element.getChildren().at(i));\nvec->push_back(_obj);\n" +
 			"}\nreturn vec;\n}\n";
-	test += "list<"+claz+">* to"+claz+"LisVP(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
+	test += "list<"+claz+">* " + app + "to"+claz+"LisVP(string s)\n{\nvector<"+claz+"> vec = " + app + "to"+claz+"Vec(s);\n" +
 			"list<"+claz+">* tt = new list<"+claz+">;\nstd::copy(vec.begin(), vec.end(), std::back_inserter(*tt));\n" +
 			"return tt;\n}\n";
 	if(isOpForSet)
 	{
-		test += "set<"+claz+">* to"+claz+"SetVP(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
+		test += "set<"+claz+">* " + app + "to"+claz+"SetVP(string s)\n{\nvector<"+claz+"> vec = " + app + "to"+claz+"Vec(s);\n" +
 			"set<"+claz+">* tt = new set<"+claz+">;\nstd::copy(vec.begin(), vec.end(), std::inserter(*tt, tt->begin()));\n" +
 			"return tt;\n}\n";
-		test += "multiset<"+claz+">* to"+claz+"MulSetVP(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
+		test += "multiset<"+claz+">* " + app + "to"+claz+"MulSetVP(string s)\n{\nvector<"+claz+"> vec = " + app + "to"+claz+"Vec(s);\n" +
 				"multiset<"+claz+">* tt = new multiset<"+claz+">;\nstd::copy(vec.begin(), vec.end(), std::inserter(*tt, tt->begin()));\n" +
 				"return tt;\n}\n";
 	}
-	test += "deque<"+claz+">* to"+claz+"DqVP(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
+	test += "deque<"+claz+">* " + app + "to"+claz+"DqVP(string s)\n{\nvector<"+claz+"> vec = " + app + "to"+claz+"Vec(s);\n" +
 			"deque<"+claz+">* tt = new deque<"+claz+">;\nstd::copy(vec.begin(), vec.end(), std::inserter(*tt, tt->begin()));\n" +
 			"return tt;\n}\n";
-	test += "std::queue<"+claz+">* to"+claz+"QVP(string s)\n{\nvector<"+claz+"> vec = to"+claz+"Vec(s);\n" +
+	test += "std::queue<"+claz+">* " + app + "to"+claz+"QVP(string s)\n{\nvector<"+claz+"> vec = " + app + "to"+claz+"Vec(s);\n" +
 			"std::queue<"+claz+">* tt = new std::queue<"+claz+">;for (int var = 0; var < (int)vec.size(); ++var) {\ntt->push(vec.at(var));\n}\n" +
 			"return tt;\n}\n";
-	test += "void* toVoidP"+claz+"(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ claz +" *_obj = new "+claz+";\n*_obj = read"+claz+"(element);\nreturn _obj;\n}\n";
-	test += "\nstring from"+claz+"ToJSON("+claz+" _obj)\n{\n"+fres+"\nreturn json;\n}\n";
-	test += "\nstring from"+claz+"VPToJSON("+claz+"* _obj)\n{\n"+fres1+"\nreturn json;\n}\n";
-	test += "\nstring from"+claz+"VecToJSON(vector<"+claz+"> _vecobj)\n{\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+	test += "void* toVoidP"+claz+"(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ claz +" *_obj = new "+claz+";\n*_obj = " + app + "read"+claz+"(element);\nreturn _obj;\n}\n";
+	test += "\nstring " + app + "from"+claz+"ToJSON("+claz+" _obj)\n{\n"+fres+"\nreturn json;\n}\n";
+	test += "\nstring " + app + "from"+claz+"VPToJSON("+claz+"* _obj)\n{\n"+fres1+"\nreturn json;\n}\n";
+	test += "\nstring " + app + "from"+claz+"VecToJSON(vector<"+claz+"> _vecobj)\n{\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+			"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
-	test += "\nstring from"+claz+"LisToJSON(list<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
+	test += "\nstring " + app + "from"+claz+"LisToJSON(list<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
 			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+			"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	if(isOpForSet)
 	{
-		test += "\nstring from"+claz+"SetToJSON(set<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
+		test += "\nstring " + app + "from"+claz+"SetToJSON(set<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
 				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-				"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+				"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
-		test += "\nstring from"+claz+"MulSetToJSON(multiset<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
+		test += "\nstring " + app + "from"+claz+"MulSetToJSON(multiset<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
 				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-				"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+				"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
 	}
-	test += "\nstring from"+claz+"DqToJSON(deque<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
+	test += "\nstring " + app + "from"+claz+"DqToJSON(deque<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
 			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+			"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
-	test += "\nstring from"+claz+"QToJSON(std::queue<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;" +
+	test += "\nstring " + app + "from"+claz+"QToJSON(std::queue<"+claz+"> _lisobj)\n{\nvector<"+claz+"> _vecobj;" +
 			"std::queue<"+claz+"> qq = _lisobj;\nfor (int var = 0; var < (int)qq.size(); ++var)\n{" +
 			"_vecobj.push_back(qq.front());\nqq.pop();\n}\n" +
 			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+			"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
-	test += "\nstring from"+claz+"VecVPToJSON(vector<"+claz+">* _vecobj)\n{\nstring json = \"[\";\nfor(int i=0;i<_vecobj->size();i++){\n" +
-			"json += from"+claz+"ToJSON(_vecobj->at(i));\n" +
+	test += "\nstring " + app + "from"+claz+"VecVPToJSON(vector<"+claz+">* _vecobj)\n{\nstring json = \"[\";\nfor(int i=0;i<_vecobj->size();i++){\n" +
+			"json += " + app + "from"+claz+"ToJSON(_vecobj->at(i));\n" +
 			"if(i!=_vecobj->size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
-	test += "\nstring from"+claz+"LisVPToJSON(list<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
+	test += "\nstring " + app + "from"+claz+"LisVPToJSON(list<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
 			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+			"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	if(isOpForSet)
 	{
-		test += "\nstring from"+claz+"SetVPToJSON(set<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
+		test += "\nstring " + app + "from"+claz+"SetVPToJSON(set<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
 				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-				"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+				"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
-		test += "\nstring from"+claz+"MulSetVPToJSON(multiset<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
+		test += "\nstring " + app + "from"+claz+"MulSetVPToJSON(multiset<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
 				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-				"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+				"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
 	}
-	test += "\nstring from"+claz+"DqVPToJSON(deque<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
+	test += "\nstring " + app + "from"+claz+"DqVPToJSON(deque<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
 			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+			"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
-	test += "\nstring from"+claz+"QVPToJSON(std::queue<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\n" +
+	test += "\nstring " + app + "from"+claz+"QVPToJSON(std::queue<"+claz+">* _lisobj)\n{\nvector<"+claz+"> _vecobj;\n" +
 			"std::queue<"+claz+"> qq = *_lisobj;\nfor (int var = 0; var < (int)qq.size(); ++var)\n{" +
 			"_vecobj.push_back(qq.front());\nqq.pop();\n}\n" +
 			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
-			"json += from"+claz+"ToJSON(_vecobj.at(i));\n" +
+			"json += " + app + "from"+claz+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	return test;
 }
 
 
-string AfcUtil::generateReadObjects(string type, string name, bool priv, bool ptr, string typ)
+string AfcUtil::generateReadObjects(string type, string name, bool priv, bool ptr, string typ, string app)
 {
 	string tes;
 	if(type=="int" || type=="short" || type=="long" || type=="double" || type=="float" || type=="string" || type=="bool")
@@ -477,21 +477,26 @@ string AfcUtil::generateReadObjects(string type, string name, bool priv, bool pt
 			tes += "if(_node!=NULL){\n";
 			tes += "for(int i=0;i<_node->getChildren().size();i++)\n{\n";
 			tes += "JSONElement* __node = _node->getChildren().at(i);\n";
-			tes += generateReadVectorObjects(tempp, name, priv, ptr, typ, stlcnttyp);
+			tes += generateReadVectorObjects(tempp, name, priv, ptr, typ, stlcnttyp, app);
 			tes += "}\n}\n";
 
 		}
 		else if(Reflection::isValidClass(tempp))
 		{
+			string tapp = app;
+			if(tempp=="Date" || tempp=="BinaryData")
+			{
+				tapp = "";
+			}
 			if(!ptr)
 			{
-				if(!priv)tes += "if(_node!=NULL)_obj"+typ + name + "= read"+tempp+"(*_node);\n";
-				else tes += "if(_node!=NULL)_obj"+typ+"set"+camelCased(name)+"(read"+tempp+"(*_node));\n";
+				if(!priv)tes += "if(_node!=NULL)_obj"+typ + name + "= "+tapp+"read"+tempp+"(*_node);\n";
+				else tes += "if(_node!=NULL)_obj"+typ+"set"+camelCased(name)+"("+tapp+"read"+tempp+"(*_node));\n";
 			}
 			else
 			{
-				if(!priv)tes += "if(_node!=NULL)_obj"+typ + name + "= read"+tempp+"P(*_node);\n";
-				else tes += "if(_node!=NULL)_obj"+typ+"set"+camelCased(name)+"(read"+tempp+"P(*_node));\n";
+				if(!priv)tes += "if(_node!=NULL)_obj"+typ + name + "= "+tapp+"read"+tempp+"P(*_node);\n";
+				else tes += "if(_node!=NULL)_obj"+typ+"set"+camelCased(name)+"("+tapp+"read"+tempp+"P(*_node));\n";
 			}
 		}
 	}
@@ -499,7 +504,7 @@ string AfcUtil::generateReadObjects(string type, string name, bool priv, bool pt
 }
 
 
-string AfcUtil::generateReadVectorObjects(string type, string name, bool priv, bool ptr, string typ, string conttype)
+string AfcUtil::generateReadVectorObjects(string type, string name, bool priv, bool ptr, string typ, string conttype,string app)
 {
 	string tes;
 	string act = ((conttype=="set" || conttype=="multiset")?"insert":(conttype=="std::queue"?"push":"push_back"));
@@ -518,21 +523,26 @@ string AfcUtil::generateReadVectorObjects(string type, string name, bool priv, b
 	}
 	else if(Reflection::isValidClass(type))
 	{
+		string tapp = app;
+		if(type=="Date" || type=="BinaryData")
+		{
+			tapp = "";
+		}
 		if(!ptr)
 		{
-			if(!priv)tes += "if(__node!=NULL)_obj"+typ + name + "."+act+"(read"+type+"(*__node));\n";
-			else tes += "if(__node!=NULL)_obj"+typ+"get"+camelCased(name)+"()."+act+"(read"+type+"(*__node));\n";
+			if(!priv)tes += "if(__node!=NULL)_obj"+typ + name + "."+act+"("+tapp+"read"+type+"(*__node));\n";
+			else tes += "if(__node!=NULL)_obj"+typ+"get"+camelCased(name)+"()."+act+"("+tapp+"read"+type+"(*__node));\n";
 		}
 		else
 		{
-			if(!priv)tes += "if(__node!=NULL){_obj"+typ + name + " = new "+conttype+"<"+type+">;\n_obj"+typ + name + "->"+act+"(read"+type+"(*__node));\n}\n";
-			else tes += "if(__node!=NULL){_obj"+typ +"set"+camelCased(name)+"(new "+conttype+"<"+type+">);\n_obj"+typ+"get"+camelCased(name)+"()->"+act+"(read"+type+"(*__node));\n}\n";
+			if(!priv)tes += "if(__node!=NULL){_obj"+typ + name + " = new "+conttype+"<"+type+">;\n_obj"+typ + name + "->"+act+"("+tapp+"read"+type+"(*__node));\n}\n";
+			else tes += "if(__node!=NULL){_obj"+typ +"set"+camelCased(name)+"(new "+conttype+"<"+type+">);\n_obj"+typ+"get"+camelCased(name)+"()->"+act+"("+tapp+"read"+type+"(*__node));\n}\n";
 		}
 	}
 	return tes;
 }
 
-string AfcUtil::generateToJSONObjects(string type, string name, bool priv, strVec obj, int i, string &retu, string &headers, string path, string &objs, string typ, bool ptr)
+string AfcUtil::generateToJSONObjects(string type, string name, bool priv, strVec obj, int i, string &retu, string &headers, string path, string &objs, string typ, bool ptr,string app)
 {
 	string fres;
 	if(type=="int" || type=="short" || type=="long" || type=="double" || type=="float" || type=="string" || type=="bool")
@@ -622,15 +632,20 @@ string AfcUtil::generateToJSONObjects(string type, string name, bool priv, strVe
 		}
 		else if(Reflection::isValidClass(type))
 		{
+			string tapp = app;
+			if(type=="Date" || type=="BinaryData")
+			{
+				tapp = "";
+			}
 			if(!ptr)
 			{
-				if(!priv)fres += "json += \"\\\""+name+"\\\" : \"+from"+type+"ToJSON(_obj"+typ+name+");";
-				else fres += "json += \"\\\""+name+"\\\" : \"+from"+type+"ToJSON(_obj"+typ+"get"+camelCased(name)+"());";
+				if(!priv)fres += "json += \"\\\""+name+"\\\" : \"+"+tapp+"from"+type+"ToJSON(_obj"+typ+name+");";
+				else fres += "json += \"\\\""+name+"\\\" : \"+"+tapp+"from"+type+"ToJSON(_obj"+typ+"get"+camelCased(name)+"());";
 			}
 			else
 			{
-				if(!priv)fres += "if(_obj"+typ+name+"!=NULL)json += \"\\\""+name+"\\\" : \"+from"+type+"ToJSON(*_obj"+typ+name+");\nelse json += \"null\";\n";
-				else fres += "if(_obj"+typ+"get"+camelCased(name)+"()!=NULL)json += \"\\\""+name+"\\\" : \"+from"+type+"ToJSON(*_obj"+typ+"get"+camelCased(name)+"());\nelse json += \"null\";\n";
+				if(!priv)fres += "if(_obj"+typ+name+"!=NULL)json += \"\\\""+name+"\\\" : \"+"+app+"from"+type+"ToJSON(*_obj"+typ+name+");\nelse json += \"null\";\n";
+				else fres += "if(_obj"+typ+"get"+camelCased(name)+"()!=NULL)json += \"\\\""+name+"\\\" : \"+"+app+"from"+type+"ToJSON(*_obj"+typ+"get"+camelCased(name)+"());\nelse json += \"null\";\n";
 			}
 		}
 		if(i!=((int)obj.size()-1))
@@ -641,7 +656,7 @@ string AfcUtil::generateToJSONObjects(string type, string name, bool priv, strVe
 	return fres;
 }
 
-string AfcUtil::generateToJSONVectorObjects(string type, string name, bool priv, string &retu, string &headers, string path, string &objs, string typ, bool ptr, string stlcnttyp)
+string AfcUtil::generateToJSONVectorObjects(string type, string name, bool priv, string &retu, string &headers, string path, string &objs, string typ, bool ptr, string stlcnttyp,string app)
 {
 	string fres = "json += \"\\\""+name+"\\\" : [\";\n";
 	string vtyp = ".";
@@ -769,29 +784,34 @@ string AfcUtil::generateToJSONVectorObjects(string type, string name, bool priv,
 	}
 	else if(Reflection::isValidClass(type))
 	{
+		string tapp = app;
+		if(type=="Date" || type=="BinaryData")
+		{
+			tapp = "";
+		}
 		if(!ptr)
 		{
 			if(stlcnttyp=="vector")
 			{
-				if(!priv)fres += "json += from"+type+"ToJSON(_obj"+typ+name+".at(j));";
-				else fres += "json += from"+type+"ToJSON(_obj"+typ+"get"+camelCased(name)+"().at(j));";
+				if(!priv)fres += "json += "+tapp+"from"+type+"ToJSON(_obj"+typ+name+".at(j));";
+				else fres += "json += "+tapp+"from"+type+"ToJSON(_obj"+typ+"get"+camelCased(name)+"().at(j));";
 			}
 			else if(stlcnttyp=="list" || stlcnttyp=="set" || stlcnttyp=="multiset" || stlcnttyp=="deque")
 			{
-				if(!priv)fres += "json += from"+type+"ToJSON(*it"+name+");";
-				else fres += "json += from"+type+"ToJSON(*it"+name+");";
+				if(!priv)fres += "json += "+tapp+"from"+type+"ToJSON(*it"+name+");";
+				else fres += "json += "+tapp+"from"+type+"ToJSON(*it"+name+");";
 			}
 			else
 			{
 				if(!ptr)
 				{
-					if(!priv)fres += "json += from"+type+"ToJSON(tt"+name+".front());\ntt"+name+".pop();\n";
-					else fres += "json += from"+type+"ToJSON(tt"+name+".front());\ntt"+name+".pop();\n";
+					if(!priv)fres += "json += "+tapp+"from"+type+"ToJSON(tt"+name+".front());\ntt"+name+".pop();\n";
+					else fres += "json += "+tapp+"from"+type+"ToJSON(tt"+name+".front());\ntt"+name+".pop();\n";
 				}
 				else
 				{
-					if(!priv)fres += "json += from"+type+"ToJSON(tt"+name+"->front());\ntt"+name+"->pop();\n";
-					else fres += "json += from"+type+"ToJSON(tt"+name+"->front());\ntt"+name+"->pop();\n";
+					if(!priv)fres += "json += "+tapp+"from"+type+"ToJSON(tt"+name+"->front());\ntt"+name+"->pop();\n";
+					else fres += "json += "+tapp+"from"+type+"ToJSON(tt"+name+"->front());\ntt"+name+"->pop();\n";
 				}
 			}
 		}
@@ -799,25 +819,25 @@ string AfcUtil::generateToJSONVectorObjects(string type, string name, bool priv,
 		{
 			if(stlcnttyp=="vector")
 			{
-				if(!priv)fres += "json += from"+type+"ToJSON(_obj"+typ+name+"->at(j));";
-				else fres += "json += from"+type+"ToJSON(_obj"+typ+"get"+camelCased(name)+"()->at(j));";
+				if(!priv)fres += "json += "+app+"from"+type+"ToJSON(_obj"+typ+name+"->at(j));";
+				else fres += "json += "+app+"from"+type+"ToJSON(_obj"+typ+"get"+camelCased(name)+"()->at(j));";
 			}
 			else if(stlcnttyp=="list" || stlcnttyp=="set" || stlcnttyp=="multiset" || stlcnttyp=="deque")
 			{
-				if(!priv)fres += "json += from"+type+"ToJSON(*it"+name+");";
-				else fres += "json += from"+type+"ToJSON(*it"+name+");";
+				if(!priv)fres += "json += "+app+"from"+type+"ToJSON(*it"+name+");";
+				else fres += "json += "+app+"from"+type+"ToJSON(*it"+name+");";
 			}
 			else
 			{
 				if(!ptr)
 				{
-					if(!priv)fres += "json += from"+type+"ToJSON(tt"+name+".front());\ntt"+name+".pop();\n";
-					else fres += "json += from"+type+"ToJSON(tt"+name+".front());\ntt"+name+".pop();\n";
+					if(!priv)fres += "json += "+app+"from"+type+"ToJSON(tt"+name+".front());\ntt"+name+".pop();\n";
+					else fres += "json += "+app+"from"+type+"ToJSON(tt"+name+".front());\ntt"+name+".pop();\n";
 				}
 				else
 				{
-					if(!priv)fres += "json += from"+type+"ToJSON(tt"+name+"->front());\ntt"+name+"->pop();\n";
-					else fres += "json += from"+type+"ToJSON(tt"+name+"->front());\ntt"+name+"->pop();\n";
+					if(!priv)fres += "json += "+app+"from"+type+"ToJSON(tt"+name+"->front());\ntt"+name+"->pop();\n";
+					else fres += "json += "+app+"from"+type+"ToJSON(tt"+name+"->front());\ntt"+name+"->pop();\n";
 				}
 			}
 		}
@@ -944,7 +964,7 @@ string AfcUtil::generateJsInterfaces(strVec obj,string claz,string &headers,stri
 					test += ",_cb,_url,_cntxt){\n";
 					test += "AfcCall(\""+claz+"\",\""+emp.at(1)+"\",new Array("+jsonstr+"),_cb,(_url==null?\""+pv+"\":_url),_cntxt);\n";
 				}
-				inc += updateAjaxInterface(emp,claz,pars,parswt,types);
+				//inc += updateAjaxInterface(emp,claz,pars,parswt,types);
 				test += "}\n";
 				if(i!=obj.size()-1)
 					test += ",";
@@ -992,7 +1012,7 @@ string AfcUtil::updateAjaxInterface(strVec emp,string claz,string pars,string pa
 	return test;
 }
 
-void AfcUtil::execute(HttpRequest req, HttpResponse* res, string claz)
+/*void AfcUtil::execute(HttpRequest req, HttpResponse* res, string claz)
 {
 	logger << "Inside Ajax Interface Execute" << endl;
 	strVec vemp;
@@ -1043,7 +1063,7 @@ void AfcUtil::execute(HttpRequest req, HttpResponse* res, string claz)
 		re = f2(vemp);
 		logger << "Completed method call" << endl;
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-		res->setContent_type("text/plain");
+		res->addHeaderValue(HttpResponse::ContentType, "text/plain");
 		res->setContent_str(re);
 		return;
 	}
@@ -1052,7 +1072,7 @@ void AfcUtil::execute(HttpRequest req, HttpResponse* res, string claz)
 		res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 		return;
 	}
-}
+}*/
 
 
 void AfcUtil::writeTofile(string fileName,string data,bool trunc)

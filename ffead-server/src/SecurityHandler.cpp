@@ -32,9 +32,11 @@ SecurityHandler::~SecurityHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res, map<string, Security> securityObjectMap,
-		long sessionTimeout, void* dlib, map<string, string> cntMap)
+bool SecurityHandler::handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, long sessionTimeout, void* dlib)
 {
+	string ip_addr = configData.ip_address;
+	map<string, Security> securityObjectMap = configData.securityObjectMap;
+	map<string, string> cntMap = configData.cntMap;
 	bool isContrl = false;
 	string serverUrl = "";//"http://" + ip_addr;
 	if(req->getCntxt_name()!="default" && cntMap[req->getCntxt_name()]!="true")
@@ -60,7 +62,7 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 		if(!securityObject.isLoginPage(serverUrl, actUrl) && aspect.role!=userRole)
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
-			res.setLocation(serverUrl+"/"+securityObject.loginUrl);
+			res.addHeaderValue(HttpResponse::Location, serverUrl+"/"+securityObject.loginUrl);
 			isContrl = true;
 		}
 		else if(securityObject.isLoginPage(serverUrl, actUrl) && req->getRequestParam("_ffead_security_cntxt_username")!="")
@@ -98,8 +100,33 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 			else if(claz.find("class:")!=string::npos)
 			{
 				claz = claz.substr(claz.find(":")+1);
-				claz = "getReflectionCIFor" + claz;
 				logger << ("Auth handled by class " + claz) << endl;
+
+				void *_temp = configData.ffeadContext->getBean("login-handler_"+req->getCntxt_name()+claz);
+				AuthController* loginc = static_cast<AuthController*>(_temp);
+				if(loginc!=NULL && loginc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
+					req->getRequestParam("_ffead_security_cntxt_password")))
+				{
+					userRole = loginc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
+					logger << ("Valid user " + req->getRequestParam("_ffead_security_cntxt_username")
+							+ ", role is "  + userRole) << endl;
+					validUser = true;
+				}
+				else if(loginc!=NULL)
+				{
+					logger << "Invalid user" << endl;
+					res.setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
+					isContrl = true;
+				}
+				else
+				{
+					logger << "Invalid Login handler" << endl;
+					res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+					isContrl = true;
+				}
+				logger << "Login controller called" << endl;
+
+				/*claz = "getReflectionCIFor" + claz;
 				if(dlib == NULL)
 				{
 					cerr << dlerror() << endl;
@@ -131,13 +158,14 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 					}
 					logger << "Login controller called" << endl;
 					delete loginc;
-				}
+				}*/
+
 			}
 			if(validUser && (aspect.role==userRole || securityObject.isLoginPage(serverUrl, actUrl)))
 			{
 				req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", userRole);
 				res.setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
-				res.setLocation(serverUrl+"/"+securityObject.welocmeFile);
+				res.addHeaderValue(HttpResponse::Location, serverUrl+"/"+securityObject.welocmeFile);
 				logger << ("Valid role " + userRole + " for path " + req->getActUrl()) << endl;
 				isContrl = true;
 			}
@@ -150,44 +178,4 @@ bool SecurityHandler::handle(string ip_addr, HttpRequest* req, HttpResponse& res
 		}
 	}
 	return isContrl;
-}
-
-Security::Security()
-{
-	logger = Logger::getLogger("Security");
-}
-
-Security::~Security()
-{
-
-}
-
-SecureAspect Security::matchesPath(string url)
-{
-	bool pathval = false;
-	SecureAspect aspect;
-	for (int var = 0; var < (int)secures.size(); ++var) {
-		SecureAspect secureAspect = secures.at(var);
-		string pathurl = secureAspect.path;
-		logger << ("Checking security path " + pathurl + " against url " + url) << endl;
-		if(pathurl=="*")
-		{
-			aspect = secureAspect;
-			continue;
-		}
-		if(pathurl.find("*")==pathurl.length()-1)
-		{
-			pathurl = pathurl.substr(0, pathurl.length()-1);
-			pathval = true;
-		}
-		if(pathval && url.find(pathurl)!=string::npos)
-		{
-			aspect = secureAspect;
-		}
-		else if(!pathval && pathurl==url)
-		{
-			aspect = secureAspect;
-		}
-	}
-	return aspect;
 }

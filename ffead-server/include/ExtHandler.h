@@ -22,7 +22,6 @@
 
 #ifndef EXTHANDLER_H_
 #define EXTHANDLER_H_
-#include "AfcUtil.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "TemplateHandler.h"
@@ -34,6 +33,7 @@
 #include "Constants.h"
 #include "Logger.h"
 #include "map"
+#include "ConfigurationData.h"
 
 typedef string (*DCPPtr) ();
 typedef ClassInfo (*FunPtr) ();
@@ -44,9 +44,7 @@ public:
 	ExtHandler();
 	virtual ~ExtHandler();
 	static string getContentStr(string url,string locale,string ext);
-	static bool handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib, string resourcePath,
-			map<string, string> tmplMap, map<string, string> vwMap,string ext, map<string, string> props,
-			map<string, string> ajaxIntfMap);
+	static bool handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib, ConfigurationData configData ,string ext);
 };
 
 #endif /* EXTHANDLER_H_ */

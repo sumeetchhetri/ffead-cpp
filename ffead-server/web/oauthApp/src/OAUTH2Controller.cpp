@@ -46,13 +46,13 @@ HttpResponse OAUTH2Controller::service(HttpRequest req)
 			if(flag)
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 				res.setContent_str("Valid Login");
 			}
 			else
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 				res.setContent_str("InValid Login");
 			}
 			cout << "inside oauth controller non empty credentials" << endl;
@@ -60,7 +60,7 @@ HttpResponse OAUTH2Controller::service(HttpRequest req)
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res.setContent_str("Username and Password cannot be blank");
 			cout << "inside oauth controller empty credentials" << endl;
 		}
@@ -72,7 +72,7 @@ HttpResponse OAUTH2Controller::service(HttpRequest req)
 		cout << data << endl;
 
 		res.setHTTPResponseStatus(HTTPResponseStatus::MovedPermanently);
-		res.setLocation(data);
+		res.addHeaderValue(HttpResponse::Location, data);
 		cout << "redirecting to third party url" << endl;
 	}
 	else if(req.getFile()=="calledback.auth2")
@@ -86,7 +86,7 @@ HttpResponse OAUTH2Controller::service(HttpRequest req)
 			ofs.close();
 
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 			string conte = "<html><head><script type='text/javascript' src='public/json2.js'></script><script type='text/javascript' src='public/prototype.js'></script><script type='text/javascript' src='public/oauth2.js'></script></head>";
 			conte += "Resource: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+req.getRequestParams()["tusername"]+"\")'/></body>";
 			conte += "</html>";
@@ -95,7 +95,7 @@ HttpResponse OAUTH2Controller::service(HttpRequest req)
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res.setContent_str("Invalid user");
 		}
 	}
@@ -122,13 +122,13 @@ HttpResponse OAUTH2Controller::service(HttpRequest req)
 
 			res.setStatusCode(parser.getHeaderValue("StatusCode"));
 			res.setStatusMsg(parser.getHeaderValue("StatusMsg"));
-			res.setContent_type(parser.getHeaderValue("Content-Type"));
+			res.addHeaderValue(HttpResponse::ContentType, parser.getHeaderValue("Content-Type"));
 			res.setContent_str(parser.getContent());
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res.setContent_str("Access denied");
 		}
 	}

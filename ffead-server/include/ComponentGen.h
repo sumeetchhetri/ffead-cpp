@@ -39,7 +39,7 @@ class ComponentGen {
 public:
 	ComponentGen();
 	virtual ~ComponentGen();
-	string generateComponentCU(string,string &,string &,string &,string &);
+	string generateComponentCU(string,string &,string &,string &,string &,string);
 };
 
 #endif /* COMPONENTGEN_H_ */

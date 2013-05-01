@@ -29,6 +29,8 @@
 #include <dlfcn.h>
 #include "Constants.h"
 #include "Logger.h"
+#include "ConfigurationData.h"
+#include "FormController.h"
 
 typedef void* (*toVoidP) (string);
 
@@ -36,7 +38,7 @@ class FormHandler {
 public:
 	FormHandler();
 	virtual ~FormHandler();
-	static string handle(HttpRequest* req, HttpResponse& res, map<string, Element> formMap, void* dlib);
+	static string handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData, void* dlib);
 };
 
 #endif /* FORMHANDLER_H_ */

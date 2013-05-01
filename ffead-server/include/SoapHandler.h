@@ -29,12 +29,13 @@
 #include "Document.h"
 #include "Logger.h"
 #include "XmlParser.h"
+#include "ConfigurationData.h"
 
 class SoapHandler {
 public:
 	SoapHandler();
 	virtual ~SoapHandler();
-	static void handle(HttpRequest* req, HttpResponse& res, void* dlib, string xmlcnttype);
+	static void handle(HttpRequest* req, HttpResponse& res, void* dlib, ConfigurationData configData);
 };
 
 #endif /* SOAPHANDLER_H_ */

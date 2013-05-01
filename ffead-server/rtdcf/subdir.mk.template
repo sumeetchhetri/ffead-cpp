@@ -18,8 +18,7 @@ OBJS += \
 ./WsInterface.o \
 ./DCPInterface.o \
 ./TemplateInterface.o \
-./Component_TEST_BEAN.o \
-./Component_TEST_BEAN_Remote.o \
+${RUNTIME_COMP_OBJS}
 
 
 POBJS += \
@@ -28,8 +27,7 @@ POBJS += \
 ./ReflectorInterface.o \
 ./SerializeInterface.o \
 ./WsInterface.o \
-./Component_TEST_BEAN.o \
-./Component_TEST_BEAN_Remote.o \
+${RUNTIME_COMP_OBJS}
 
 
 PDOBJS += \

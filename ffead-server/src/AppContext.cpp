@@ -81,9 +81,11 @@ bool AppContext::unregisterComponent(string name)
 void AppContext::lookup(string name)
 {
 	if(_instance==NULL)
-		throw new Exception("Bean Container Not Running");
+	{
+		throw Exception("Bean Container Not Running");
+	}
 	if(_instance->components.find(name)==_instance->components.end())
 	{
-		throw new BeanException("Bean Not Deployed");
+		throw Exception("Bean Not Deployed");
 	}
 }

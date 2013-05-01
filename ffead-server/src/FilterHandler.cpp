@@ -31,9 +31,10 @@ FilterHandler::~FilterHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, map<string, vector<string> > filterMap, void* dlib,
+void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, ConfigurationData configData, void* dlib,
 		string ext)
 {
+	map<string, vector<string> > filterMap = configData.filterMap;
 	Logger logger = Logger::getLogger("FilterHandler");
 	if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"in")!=filterMap.end())
 	{
@@ -45,35 +46,46 @@ void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, map<string, ve
 
 		for (int var = 0; var < (int)tempp.size(); ++var)
 		{
-			string clasz = tempp.at(var);
-			clasz = "getReflectionCIFor" + clasz;
-			logger << ("Input Filter handled by class " + clasz) << endl;
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
-			void *mkr = dlsym(dlib, clasz.c_str());
-			if(mkr!=NULL)
-			{
-				FunPtr f =  (FunPtr)mkr;
-				ClassInfo srv = f();
-				args argus;
-				Constructor ctor = srv.getConstructor(argus);
-				Reflector ref;
-				void *_temp = ref.newInstanceGVP(ctor);
-				Filter *filter = (Filter*)_temp;
-				filter->doInputFilter(req);
-				logger << "Filter called" << endl;
-				delete filter;
-			}
+			string claz = tempp.at(var);
+			void *_temp = configData.ffeadContext->getBean("filter_"+req->getCntxt_name()+claz);
+			Filter *filter = static_cast<Filter*>(_temp);
+			filter->doInputFilter(req);
+			logger << "Input Filter called" << endl;
 		}
 	}
 }
 
-void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, map<string, vector<string> > filterMap, void* dlib,
+
+bool FilterHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData, void* dlib,
 		string ext)
 {
+	bool continue_proc_request = true;
+	map<string, vector<string> > filterMap = configData.filterMap;
+	Logger logger = Logger::getLogger("FilterHandler");
+	if(filterMap.find(req->getCntxt_name()+"*.*handle")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"handle")!=filterMap.end())
+	{
+		vector<string> tempp;
+		if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end())
+			tempp = filterMap[req->getCntxt_name()+"*.*handle"];
+		else
+			tempp = filterMap[req->getCntxt_name()+ext+"handle"];
+
+		for (int var = 0; var < (int)tempp.size(); ++var)
+		{
+			string claz = tempp.at(var);
+			void *_temp = configData.ffeadContext->getBean("filter_"+req->getCntxt_name()+claz);
+			Filter *filter = static_cast<Filter*>(_temp);
+			continue_proc_request = filter->doHandle(req, &res);
+			logger << "Handler Filter called" << endl;
+		}
+	}
+	return continue_proc_request;
+}
+
+void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, ConfigurationData configData, void* dlib,
+		string ext)
+{
+	map<string, vector<string> > filterMap = configData.filterMap;
 	Logger logger = Logger::getLogger("FilterHandler");
 	if(filterMap.find(req->getCntxt_name()+"*.*out")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"out")!=filterMap.end())
 	{
@@ -85,28 +97,11 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, map<string, v
 
 		for (int var = 0; var < (int)tempp.size(); ++var)
 		{
-			string clasz = tempp.at(var);
-			clasz = "getReflectionCIFor" + clasz;
-			logger << ("Output Filter handled by class " + clasz) << endl;
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
-			void *mkr = dlsym(dlib, clasz.c_str());
-			if(mkr!=NULL)
-			{
-				FunPtr f =  (FunPtr)mkr;
-				ClassInfo srv = f();
-				args argus;
-				Constructor ctor = srv.getConstructor(argus);
-				Reflector ref;
-				void *_temp = ref.newInstanceGVP(ctor);
-				Filter *filter = (Filter*)_temp;
-				filter->doOutputFilter(&res);
-				logger << "Filter called" << endl;
-				delete filter;
-			}
+			string claz = tempp.at(var);
+			void *_temp = configData.ffeadContext->getBean("filter_"+req->getCntxt_name()+claz);
+			Filter *filter = static_cast<Filter*>(_temp);
+			filter->doOutputFilter(&res);
+			logger << "Output Filter called" << endl;
 		}
 	}
 }

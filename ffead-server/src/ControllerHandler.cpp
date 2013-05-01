@@ -31,11 +31,16 @@ ControllerHandler::~ControllerHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> urlpattMap, map<string, string> mappattMap, void* dlib,
-		string ext, resFuncMap rstCntMap, map<string, string> mapMap, map<string, string> urlMap, string pthwofile)
+bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData, void* dlib,
+		string ext, string pthwofile)
 {
+	map<string, string> urlpattMap = configData.urlpattMap;
+	map<string, string> mappattMap = configData.mappattMap;
+	resFuncMap rstCntMap = configData.rstCntMap;
+	map<string, string> mapMap = configData.mapMap;
+	map<string, string> urlMap = configData.urlMap;
+
 	Logger logger = Logger::getLogger("ControllerHandler");
-	string claz;
 	bool isContrl = false;
 	if((urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!=""))
 	{
@@ -45,7 +50,31 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 			controller = urlpattMap[req->getCntxt_name()+"*.*"];
 		else
 			controller = urlMap[req->getCntxt_name()+ext];
-		claz = "getReflectionCIFor" + controller;
+
+		void *_temp = configData.ffeadContext->getBean("controller_"+req->getCntxt_name()+controller);
+		Controller* thrd = static_cast<Controller*>(_temp);
+		if(thrd!=NULL)
+		{
+			try{
+				 logger << ("Controller " + controller + " called") << endl;
+				 res = thrd->service(*req);
+				 if(res.getStatusCode()!="")
+					 isContrl = true;
+				 ext = AuthHandler::getFileExtension(req->getUrl());
+				 //delete mkr;
+			}catch(...){
+				logger << "Controller Exception occurred" << endl;
+			}
+			logger << "Controller call complete" << endl;
+		}
+		else
+		{
+			logger << "Invalid Controller" << endl;
+			res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+			isContrl = true;
+		}
+
+		/*claz = "getReflectionCIFor" + controller;
 		string libName = Constants::INTER_LIB_FILE;
 		if(dlib == NULL)
 		{
@@ -65,9 +94,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 			try{
 				 logger << ("Controller " + controller + " called") << endl;
 				 res = thrd->service(*req);
-				 /*logger << res.getStatusCode() << endl;
-				 logger << res.getContent_type() << endl;
-				 logger << res.getContent_len() << endl;*/
 				 if(res.getStatusCode()!="")
 					 isContrl = true;
 				 ext = AuthHandler::getFileExtension(req->getUrl());
@@ -76,7 +102,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 				logger << "Controller Exception occurred" << endl;
 			}
 			logger << "Controller call complete" << endl;
-		}
+		}*/
 	}
 	else if((mappattMap[req->getCntxt_name()+"*.*"]!="" || mapMap[req->getCntxt_name()+ext]!=""))
 	{
@@ -184,7 +210,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 				else
 				{
 					res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-					//res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+					//res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 					/*if(prsiz==valss.size())
 						res.setContent_str("Invalid number of arguments");
 					else
@@ -196,7 +222,175 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 		if(flag)
 		{
 			//logger << "inside restcontroller logic ..." << endl;
-			string libName = Constants::INTER_LIB_FILE;
+			Reflector ref;
+			ClassInfo srv = ref.getClassInfo(rft.clas);
+			void *_temp = configData.ffeadContext->getBean("restcontroller_"+req->getCntxt_name()+rft.clas);
+			RestController* rstcnt = (RestController*)_temp;
+			if(rstcnt==NULL)
+			{
+				logger << "Invalid Rest Controller" << endl;
+				res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+				return true;
+			}
+
+			rstcnt->request = req;
+			rstcnt->response = &res;
+
+			args argus;
+			vals valus;
+			bool invValue = false;
+			for (int var = 0; var < prsiz; var++)
+			{
+				try
+				{
+					string icont = rft.icontentType;
+					string ocont = rft.ocontentType;
+
+					if(icont=="")
+						icont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
+					else if(icont!=req->getHeader(HttpRequest::ContentType))
+					{
+						res.setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
+						return true;
+					}
+
+					if(ocont=="")
+						ocont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
+
+					req->addHeaderValue(HttpRequest::ContentType, icont);
+					res.addHeaderValue(HttpResponse::ContentType, ocont);
+
+					string pmvalue;
+					if(rft.params.at(var).from=="path")
+						pmvalue = mapOfValues[rft.params.at(var).name];
+					else if(rft.params.at(var).from=="reqparam")
+						pmvalue = req->getQueryParam(rft.params.at(var).name);
+					else if(rft.params.at(var).from=="postparam")
+						pmvalue = req->getRequestParam(rft.params.at(var).name);
+					else if(rft.params.at(var).from=="header")
+						pmvalue = req->getHeader(rft.params.at(var).name);
+					else
+						pmvalue = req->getContent();
+
+					logger << ("Restcontroller parameter type/value = "  + rft.params.at(var).type + "/" + pmvalue) << endl;
+					logger << ("Restcontroller content types input/output = " + icont + "/" + ocont) << endl;
+
+					if(rft.params.at(var).type=="int")
+					{
+						argus.push_back(rft.params.at(var).type);
+						int* ival = new int(CastUtil::lexical_cast<int>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="short")
+					{
+						argus.push_back(rft.params.at(var).type);
+						short* ival = new short(CastUtil::lexical_cast<short>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="long")
+					{
+						argus.push_back(rft.params.at(var).type);
+						long* ival = new long(CastUtil::lexical_cast<long>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="double")
+					{
+						argus.push_back(rft.params.at(var).type);
+						double* ival = new double(CastUtil::lexical_cast<double>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="float")
+					{
+						argus.push_back(rft.params.at(var).type);
+						float* ival = new float(CastUtil::lexical_cast<float>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="bool")
+					{
+						argus.push_back(rft.params.at(var).type);
+						bool* ival = new bool(CastUtil::lexical_cast<bool>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="string" || rft.params.at(var).type=="std::string")
+					{
+						argus.push_back(rft.params.at(var).type);
+						string* sval = new string(pmvalue);
+						valus.push_back(sval);
+					}
+					else if(rft.params.at(var).type.find("vector&lt;")==0)
+					{
+						string stlcnt = rft.params.at(var).type;
+						StringUtil::replaceFirst(stlcnt,"vector&lt;","");
+						StringUtil::replaceFirst(stlcnt,"&gt;","");
+						StringUtil::replaceFirst(stlcnt," ","");
+						logger << ("Restcontroller param body holds vector of type "  + stlcnt) << endl;
+						string typp = "vector<" + stlcnt + ">";
+						argus.push_back(typp);
+						void* voidPvect = NULL;
+						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+						{
+							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+">");
+						}
+						else
+						{
+							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+",");
+						}
+						if(voidPvect==NULL)
+						{
+							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+							return true;
+						}
+						valus.push_back(voidPvect);
+					}
+					else
+					{
+						argus.push_back(rft.params.at(var).type);
+						void* voidPvect = NULL;
+						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+						{
+							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type);
+						}
+						else
+						{
+							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type);
+						}
+						if(voidPvect==NULL)
+						{
+							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+							return true;
+						}
+						valus.push_back(voidPvect);
+					}
+				} catch (const char* ex) {
+					logger << "Restcontroller exception occurred" << endl;
+					logger << ex << endl;
+					invValue= true;
+					res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+					return true;
+				} catch (...) {
+					logger << "Restcontroller exception occurred" << endl;
+					invValue= true;
+					res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+					return true;
+				}
+			}
+
+			Method meth = srv.getMethod(rft.name, argus);
+			if(meth.getMethodName()!="" && !invValue)
+			{
+				ref.invokeMethodUnknownReturn(_temp,meth,valus);
+				logger << "Successfully called restcontroller" << endl;
+				//return;
+			}
+			else
+			{
+				res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+				//res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				logger << "Rest Controller Method Not Found" << endl;
+				//return;
+			}
+
+			/*string libName = Constants::INTER_LIB_FILE;
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -228,7 +422,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 
 						if(icont=="")
 							icont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
-						else if(icont!=req->getContent_type())
+						else if(icont!=req->getHeader(HttpRequest::ContentType))
 						{
 							res.setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
 							return true;
@@ -237,8 +431,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 						if(ocont=="")
 							ocont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
 
-						req->setContent_type(icont);
-						res.setContent_type(ocont);
+						req->addHeaderValue(HttpRequest::ContentType, icont);
+						res.addHeaderValue(HttpResponse::ContentType, ocont);
 
 						string pmvalue;
 						if(rft.params.at(var).from=="path")
@@ -365,15 +559,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 				else
 				{
 					res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-					//res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-					/*if(invValue)
-						res.setContent_str("Invalid value passed as URL param");
-					else
-						res.setContent_str("Rest Controller Method Not Found");*/
+					//res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 					logger << "Rest Controller Method Not Found" << endl;
 					//return;
 				}
-			}
+			}*/
 		}
 	}
 	return isContrl;

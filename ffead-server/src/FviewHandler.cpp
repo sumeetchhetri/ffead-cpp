@@ -31,7 +31,7 @@ FviewHandler::~FviewHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-string FviewHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> fviewmap)
+void FviewHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> fviewmap)
 {
 	Logger logger = Logger::getLogger("FviewHandler");
 	string content;
@@ -77,9 +77,13 @@ string FviewHandler::handle(HttpRequest* req, HttpResponse& res, map<string, str
 				content += "<script type=\"text/javascript\" src=\"public/"+fviewmap[file]+".js\"></script>" + en;
 			}
 		}
+		res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+		res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
+		res.setContent_str(content);
+		infile.close();
 	}
-	infile.close();
-	res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_SHTML);
-	//logger << content << flush;
-	return content;
+	else
+	{
+		res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+	}
 }

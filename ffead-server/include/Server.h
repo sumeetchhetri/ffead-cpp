@@ -51,15 +51,16 @@ using namespace std;
 typedef void* (*Service)(void*);
 class Server {
 	Logger logger;
-	int sock;
+	int sock, mode;
 	Service service;
+	Mutex lock;
 	struct sockaddr_storage their_addr;
 	static void* servicing(void* arg);
-	bool runn;
+	bool runn, started;
 public:
 	Server();
 	Server(string,bool,int,Service,int);
-	Server(string port,int waiting,Service serv);
+	//Server(string port,int waiting,Service serv);
 	virtual ~Server();
 	int Accept();
 	int Send(int,string);
@@ -73,10 +74,8 @@ public:
 	int Receive(int,char *data,int);
 	int Receive(int,unsigned char *data,int);
 	int Receive(int,vector<string>&,int);
-	void stop()
-	{
-		runn = false;
-	}
+	void start();
+	void stop();
 	static int createListener(string port,bool block);
 	static int createListener(string ipAddress,string port,bool block);
 };

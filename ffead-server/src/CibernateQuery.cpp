@@ -8,10 +8,14 @@
 #include "CibernateQuery.h"
 
 CibernateQuery::CibernateQuery(string query) {
+	this->start = -1;
+	this->count = -1;
 	this->query = query;
 }
 
 CibernateQuery::CibernateQuery(string query, string className) {
+	this->start = -1;
+	this->count = -1;
 	this->query = query;
 	this->className = className;
 }

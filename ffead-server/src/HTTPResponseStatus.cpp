@@ -66,6 +66,16 @@ HTTPResponseStatus::HTTPResponseStatus(int code, string msg) {
 	this->msg = msg;
 }
 
+HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status) {
+	this->code = status.code;
+	this->msg = status.msg;
+}
+
+HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status, string msg) {
+	this->code = status.code;
+	this->msg = msg;
+}
+
 HTTPResponseStatus::~HTTPResponseStatus() {
 	// TODO Auto-generated destructor stub
 }

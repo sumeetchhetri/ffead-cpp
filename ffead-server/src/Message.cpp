@@ -36,21 +36,21 @@ Message::Message(string xml)
 		Element message = doc.getRootElement();
 		if(message.getTagName()!="message")
 		{
-			throw new InvalidMessageException("No message Tag\n");
+			throw InvalidMessageException("No message Tag\n");
 		}
 		else if(message.getChildElements().size()!=2)
 		{
-			throw new InvalidMessageException("Every message should have a headers and body tag\n");
+			throw InvalidMessageException("Every message should have a headers and body tag\n");
 		}
 		Element headers = message.getChildElements().at(0);
 		Element body = message.getChildElements().at(1);
 		if(headers.getTagName()!="headers")
 		{
-			throw new InvalidMessageException("No headers Tag\n");
+			throw InvalidMessageException("No headers Tag\n");
 		}
 		else if(body.getTagName()!="body")
 		{
-			throw new InvalidMessageException("No body Tag\n");
+			throw InvalidMessageException("No body Tag\n");
 		}
 		Element destination = headers.getElementByName("destination");
 		Element encoding = headers.getElementByName("encoding");
@@ -60,19 +60,19 @@ Message::Message(string xml)
 		Element userid = headers.getElementByName("userid");
 		if(destination.getTagName()!="destination")
 		{
-			throw new InvalidMessageException("Destination Header is mandatory\n");
+			throw InvalidMessageException("Destination Header is mandatory\n");
 		}
 		else if (destination.getAttributes().size()!=2)
 		{
-			throw new InvalidMessageException("Type and Name Attributes should be speciifes for a Destination\n");
+			throw InvalidMessageException("Type and Name Attributes should be speciifes for a Destination\n");
 		}
 		else if (destination.getAttribute("name")=="" || destination.getAttribute("type")=="")
 		{
-			throw new InvalidMessageException("Type and Name Attributes cannot be blank for a Destination\n");
+			throw InvalidMessageException("Type and Name Attributes cannot be blank for a Destination\n");
 		}
 		else if(type.getTagName()!="type")
 		{
-			throw new InvalidMessageException("Type Header is mandatory\n");
+			throw InvalidMessageException("Type Header is mandatory\n");
 		}
 		Destination des;
 		des.setName(destination.getAttribute("name"));
@@ -96,21 +96,21 @@ Message::Message(Document doc)
 	Element message = doc.getRootElement();
 	if(message.getTagName()!="message")
 	{
-		throw new InvalidMessageException("No message Tag\n");
+		throw InvalidMessageException("No message Tag\n");
 	}
 	else if(message.getChildElements().size()!=2)
 	{
-		throw new InvalidMessageException("Every message should have a headers and body tag\n");
+		throw InvalidMessageException("Every message should have a headers and body tag\n");
 	}
 	Element headers = message.getChildElements().at(0);
 	Element body = message.getChildElements().at(1);
 	if(headers.getTagName()!="headers")
 	{
-		throw new InvalidMessageException("No headers Tag\n");
+		throw InvalidMessageException("No headers Tag\n");
 	}
 	else if(body.getTagName()!="body")
 	{
-		throw new InvalidMessageException("No body Tag\n");
+		throw InvalidMessageException("No body Tag\n");
 	}
 	Element destination = headers.getElementByName("destination");
 	Element encoding = headers.getElementByName("encoding");
@@ -120,19 +120,19 @@ Message::Message(Document doc)
 	Element userid = headers.getElementByName("userid");
 	if(destination.getTagName()!="destination")
 	{
-		throw new InvalidMessageException("Destination Header is mandatory\n");
+		throw InvalidMessageException("Destination Header is mandatory\n");
 	}
 	else if (destination.getAttributes().size()!=2)
 	{
-		throw new InvalidMessageException("Type and Name Attributes should be speciifes for a Destination\n");
+		throw InvalidMessageException("Type and Name Attributes should be speciifes for a Destination\n");
 	}
 	else if (destination.getAttribute("name")=="" || destination.getAttribute("type")=="")
 	{
-		throw new InvalidMessageException("Type and Name Attributes cannot be blank for a Destination\n");
+		throw InvalidMessageException("Type and Name Attributes cannot be blank for a Destination\n");
 	}
 	else if(type.getTagName()!="type")
 	{
-		throw new InvalidMessageException("Type Header is mandatory\n");
+		throw InvalidMessageException("Type Header is mandatory\n");
 	}
 	Destination des;
 	des.setName(destination.getAttribute("name"));

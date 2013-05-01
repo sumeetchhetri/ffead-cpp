@@ -31,8 +31,9 @@ void sigchld_handler(int s)
 Server::Server()
 {
 	runn = false;
+	started = false;
 }
-
+/*
 Server::Server(string port,int waiting,Service serv)
 {
 	runn = true;
@@ -146,10 +147,11 @@ Server::Server(string port,int waiting,Service serv)
 		}
 	}
 
-}
+}*/
 
 Server::Server(string port,bool block,int waiting,Service serv,int mode)
 {
+	started = false;
 	runn = true;
 
 	logger = Logger::getLogger("Server");
@@ -215,20 +217,7 @@ Server::Server(string port,bool block,int waiting,Service serv,int mode)
 		exit(1);
 	}
 	logger << ("waiting for connections on " + port + ".....") << endl;
-	if(mode==1)
-	{
-		if(fork()==0)
-		{
-			servicing(this);
-		}
-	}
-	else if(mode==2)
-	{
-		Thread servicing_thread(&servicing, this);
-		servicing_thread.execute();
-	}
-	else if(mode==3)
-		servicing(this);
+	this->mode = mode;
 }
 
 Server::~Server() {
@@ -239,7 +228,10 @@ void* Server::servicing(void* arg)
 {
 	Server* server = (Server*)arg;
 	Service serv = server->service;
-	while(server->runn)
+	server->lock.lock();
+	bool flag = server->runn;
+	server->lock.unlock();
+	while(flag)
 	{
 		int new_fd = server->Accept();
 		if (new_fd == -1)
@@ -507,4 +499,37 @@ int Server::createListener(string ipAddress,string port,bool block)
 		fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
 	}
 	return sockfd;
+}
+
+void Server::start()
+{
+	lock.lock();
+	if(!started && runn)
+	{
+		started = true;
+		if(mode==1)
+		{
+			if(fork()==0)
+			{
+				servicing(this);
+			}
+		}
+		else if(mode==2)
+		{
+			Thread servicing_thread(&servicing, this);
+			servicing_thread.execute();
+		}
+		else if(mode==3)
+		{
+			servicing(this);
+		}
+	}
+	lock.unlock();
+}
+
+void Server::stop()
+{
+	lock.lock();
+	runn = false;
+	lock.unlock();
 }

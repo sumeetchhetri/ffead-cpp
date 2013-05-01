@@ -55,7 +55,6 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 	if(wsvcs.size()==0)
 		return "";
 	Reflection ref;
-	TemplateEngine templ;
 	ws_inp_out_Map ws_info;
 	string ws_funcs,obj_mapng,retObj_xml;
 	for(unsigned int i=0;i<wsvcs.size();i++)
@@ -170,9 +169,9 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 					strVec onjinf = ref.getAfcObjectData(usrinc+type+".h", false);
 					if(type=="int" || type=="float" || type=="double" || type=="string")
 						continue;
-					obj_mapng.append(type+" _getObj"+type+"(Element ele)\n{\n");
+					obj_mapng.append(type+" _" + appname + "getObj"+type+"(Element ele)\n{\n");
 					obj_mapng.append(type+" _obj;\n");
-					retObj_xml.append("string _getRetXmlFor"+type+"("+type+" _obj,string namespce)\n{\n");
+					retObj_xml.append("string _" + appname + "getRetXmlFor"+type+"("+type+" _obj,string namespce)\n{\n");
 					for(unsigned int k=0;k<onjinf.size();k++)
 					{
 						string temp1,field,type;
@@ -242,7 +241,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 						StringContext cntxt1;
 						cntxt1["OBJ"] = type;
 						cntxt1["OBJ_MEMBERS"] = obj_binding;
-						wsdl_obj_bind.append(templ.evaluate(resp+"templateObjBin.wsdl",cntxt1));
+						wsdl_obj_bind.append(TemplateEngine::evaluate(resp+"templateObjBin.wsdl",cntxt1));
 					}
 				}
 			}
@@ -251,10 +250,10 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 			cntxt["METH_NAME"] = methName;
 			cntxt["RET_TYPE"] = retType;
 			cntxt["INP_PARAMS"] = inp_params;
-			reqr_res_bind.append("\n"+templ.evaluate(resp+"templateReqRes.wsdl",cntxt));
-			wsdl_msgs.append("\n"+templ.evaluate(resp+"templateWsdlMsg.wsdl",cntxt));
-			wsdl_ops.append("\n"+templ.evaluate(resp+"templateWsdlOpe.wsdl",cntxt));
-			wsdl_bind.append("\n"+templ.evaluate(resp+"templateWsdlBind.wsdl",cntxt));
+			reqr_res_bind.append("\n"+TemplateEngine::evaluate(resp+"templateReqRes.wsdl",cntxt));
+			wsdl_msgs.append("\n"+TemplateEngine::evaluate(resp+"templateWsdlMsg.wsdl",cntxt));
+			wsdl_ops.append("\n"+TemplateEngine::evaluate(resp+"templateWsdlOpe.wsdl",cntxt));
+			wsdl_bind.append("\n"+TemplateEngine::evaluate(resp+"templateWsdlBind.wsdl",cntxt));
 		}
 		ws_info[ws_name] = meth_info;
 		gcntxt["REQ_RES_BINDING"] = reqr_res_bind;
@@ -262,9 +261,9 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 		gcntxt["WSDL_OPERATIONS"] = wsdl_ops;
 		gcntxt["WSDL_BINDING"] = wsdl_bind;
 		gcntxt["OBJ_BINDING"] = wsdl_obj_bind;
-		gcntxt["URL"] = "http://localhost:8080";
-		wsdl = templ.evaluate(resp+"template.wsdl",gcntxt);
-		AfcUtil::writeTofile(resp+ws_name+".wsdl",wsdl,true);
+		gcntxt["URL"] = "http://localhost:8080" + appname;
+		wsdl = TemplateEngine::evaluate(resp+"template.wsdl",gcntxt);
+		AfcUtil::writeTofile(resp+"../web/"+appname+"/public/"+ws_name+".wsdl",wsdl,true);
 		ws_funcs.append(obj_mapng);
 		ws_funcs.append(retObj_xml);
 		ws_funcs.append("extern \"C\"\n{\n");
@@ -278,7 +277,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 			{
 				string me_n = iter1->first;
 				strMap pars = iter1->second;
-				ws_funcs.append("string "+me_n+ws_n+"(Element _req)\n{\nElement ele;\n");
+				ws_funcs.append("string "+appname+me_n+ws_n+"(Element _req)\n{\nElement ele;\n");
 				ws_funcs.append("string _retStr;\n");
 				ws_funcs.append("try{\n");
 				strMap::iterator iter2;
@@ -315,7 +314,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 								ws_funcs.append("vector<"+vecn+"> "+argname+";\n");
 								ws_funcs.append("ElementList list = _req.getElementsByName(\""+argname+"\");\n");
 								ws_funcs.append("for(int i=0;i<list.size();i++)");
-								ws_funcs.append(argname+".push_back(_getObjTest(list.at(i)));\n");
+								ws_funcs.append(argname+".push_back(_" + appname + "getObjTest(list.at(i)));\n");
 							}
 						}
 						else
@@ -323,7 +322,7 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 							ws_funcs.append("ele = _req.getElementByName(\""+argname+"\");\n");
 							ws_funcs.append(iter2->second+" "+argname+";\n");
 							ws_funcs.append("if(ele.getTagName()!=\"\")");
-							ws_funcs.append(argname+" = _getObj"+iter2->second+"(ele);\n");
+							ws_funcs.append(argname+" = _" + appname + "getObj"+iter2->second+"(ele);\n");
 						}
 						args.append(argname);
 						if(ter++<pars.size()-2)
@@ -366,14 +365,14 @@ string WsUtil::generateWSDL(string file,string usrinc,string resp,string &header
 						else
 						{
 							ws_funcs.append("for(int i=0;i<_retval.size();i++)");
-							ws_funcs.append("_retStr += \"<\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\"+_getRetXmlFor"+vecn+"(_retval.at(i),_req.getNameSpc())+\"</\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\";\n");
+							ws_funcs.append("_retStr += \"<\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\"+_" + appname + "getRetXmlFor"+vecn+"(_retval.at(i),_req.getNameSpc())+\"</\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\";\n");
 						}
 					}
 					else
-						ws_funcs.append("_retStr += \"<\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\"+_getRetXmlFor"+pars["RETURNTYP"]+"(_retval,_req.getNameSpc())+\"</\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\";\n");
+						ws_funcs.append("_retStr += \"<\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\"+_" + appname + "getRetXmlFor"+pars["RETURNTYP"]+"(_retval,_req.getNameSpc())+\"</\" + _req.getNameSpc() + \":"+pars["RETURN"]+">\";\n");
 				}
 				ws_funcs.append("_retStr += \"</\" + _req.getTagNameSpc() + \"Response>\";\n");
-				ws_funcs.append("}catch(Exception e){\n");
+				ws_funcs.append("}catch(const Exception& e){\n");
 				ws_funcs.append("return e.getMessage();\n}\n");
 				ws_funcs.append("catch(...){\n");
 				ws_funcs.append("return \"<soap:Fault><faultcode>soap:Server</faultcode><faultstring>Exception occurred</faultstring></soap:Fault>\";\n}\n");

@@ -196,7 +196,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		string ext, map<string, string> props)
 {
 	bool skipit = false;
-	string referer = req->getReferer();
+	string referer = req->getHeader(HttpRequest::Referer);
 	if(referer.find("http://")!=string::npos)
 	{
 		string appl = referer.substr(referer.find("http://")+7);
@@ -239,7 +239,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
 			res.setContent_str(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
@@ -284,7 +284,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
 			res.setContent_str(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
@@ -319,7 +319,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
 			res.setContent_str(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
@@ -363,7 +363,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
 			res.setContent_str(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
@@ -398,7 +398,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
 			res.setContent_str(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
@@ -433,7 +433,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
 			res.setContent_str(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}

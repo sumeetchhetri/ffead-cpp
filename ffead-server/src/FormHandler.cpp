@@ -31,8 +31,9 @@ FormHandler::~FormHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Element> formMap, void* dlib)
+string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData, void* dlib)
 {
+	map<string, Element> formMap = configData.formMap;
 	Logger logger = Logger::getLogger("FormHandler");
 	Reflector ref;
 	Element ele = formMap[req->getFile()];
@@ -81,7 +82,46 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Elem
 	}
 	json += "}";
 	//logger << json << endl;
-	string libName = Constants::INTER_LIB_FILE;
+
+	void *_temp = configData.ffeadContext->getBean("form_"+req->getCntxt_name()+ele.getAttribute("controller"));
+	logger << ("Fetching Formcontroller for " + ele.getAttribute("bean")) << endl;
+	if(_temp!=NULL)
+	{
+		if(dlib == NULL)
+		{
+			cerr << dlerror() << endl;
+			exit(-1);
+		}
+		string meth = "toVoidP" + ele.getAttribute("bean");
+		void *mkr = dlsym(dlib, meth.c_str());
+		if(mkr!=NULL)
+		{
+			toVoidP f1 = (toVoidP)mkr;
+			void *_beaninst = f1(json);
+
+			FormController* formController = static_cast<FormController*>(_temp);
+			if(formController!=NULL)
+			{
+				formController->onSubmit(_beaninst,&res);
+				logger << "Successfully called Formcontroller" << endl;
+			}
+			else
+			{
+				res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res.setContent_str("Formcontroller Method Not Found");
+				logger << "Formcontroller Method Not Found" << endl;
+			}
+		}
+		else
+		{
+			res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+			res.setContent_str("Invalid Form Bean configured");
+			logger << "Formcontroller Method Not Found" << endl;
+		}
+	}
+
+	/*string libName = Constants::INTER_LIB_FILE;
 	if(dlib == NULL)
 	{
 		cerr << dlerror() << endl;
@@ -113,10 +153,10 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Elem
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res.setContent_str("Formcontroller Method Not Found");
 			logger << "Formcontroller Method Not Found" << endl;
 		}
-	}
+	}*/
 	return json;
 }

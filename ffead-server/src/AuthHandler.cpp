@@ -49,9 +49,12 @@ string AuthHandler::getFileExtension(const string& file)
 	return ext;
 }
 
-bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpattMap, HttpRequest* req, HttpResponse& res, map<string, vector<string> > filterMap, void* dlib,
-		string ext)
+bool AuthHandler::handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, void* dlib, string ext)
 {
+	map<string, string> autMap = configData.autMap;
+	map<string, string> autpattMap = configData.autpattMap;
+	map<string, vector<string> > filterMap = configData.filterMap;
+
 	Logger logger = Logger::getLogger("AuthHandler");
 	bool isContrl = false;
 	string claz;
@@ -65,7 +68,7 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 		{
 			claz = autMap[req->getCntxt_name()+ext];
 		}
-		AuthController *authc;
+
 		logger << ("OAUTH/HTTP Authorization requested " +  claz) << endl;
 		map<string,string>::iterator it;
 		map<string,string> tempmap = req->getAuthinfo();
@@ -82,10 +85,10 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 		{
 			claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
 			logger << ("Auth handled by file " + claz) << endl;
-			authc = new FileAuthController(claz,":");
-			if(authc->isInitialized())
+			FileAuthController authc(claz,":");
+			if(authc.isInitialized())
 			{
-				if(authc->authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
+				if(authc.authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
 				{
 					logger << "Valid user" << endl;
 				}
@@ -105,7 +108,22 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 		else if(claz.find("class:")!=string::npos)
 		{
 			claz = claz.substr(claz.find(":")+1);
-			claz = "getReflectionCIFor" + claz;
+			void *_temp = configData.ffeadContext->getBean("authhandler_"+req->getCntxt_name()+claz);
+			AuthController *authc = static_cast<AuthController*>(_temp);
+			if(authc!=NULL)
+			{
+				authc->handle(req,&res);
+				if(res.getStatusCode()!="")
+					isContrl = true;
+				logger << "Authhandler called" << endl;
+			}
+			else
+			{
+				logger << "Invalid Auth handler" << endl;
+				res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+				isContrl = true;
+			}
+			/*claz = "getReflectionCIFor" + claz;
 			logger << ("Auth handled by class " + claz) << endl;
 			if(dlib == NULL)
 			{
@@ -128,7 +146,7 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 				logger << "Authhandler called" << endl;
 				ext = getFileExtension(req->getUrl());
 				delete authc;
-			}
+			}*/
 		}
 	}
 	return isContrl;

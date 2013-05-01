@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2013, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ Mutex::Mutex() {
 }
 
 Mutex::~Mutex() {
-	// TODO Auto-generated destructor stub
+	pthread_mutex_destroy(&mut);
 }
 
 void Mutex::lock() {

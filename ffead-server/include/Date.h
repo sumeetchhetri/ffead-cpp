@@ -22,6 +22,8 @@
 
 #ifndef DATE_H_
 #define DATE_H_
+#include <unistd.h>
+#include <time.h>
 #include <time.h>
 #include "string"
 #include "vector"
@@ -64,6 +66,7 @@ class Date {
 	void setMonth(int month);
 public:
 	Date();
+	Date(struct tm* tim);
 	Date(int yyyy,string mmm,int dd);
 	Date(int yyyy,int mm,int dd);
 	Date(int yy,string mmm,int dd,bool);
@@ -98,6 +101,7 @@ public:
 	static string getDayName(int dd, int mm, int yyyy);
 	float getTimeZoneOffset();
 	void setTimeZoneOffset(float tzVal);
+	Date toGMT();
 	int test();
 };
 

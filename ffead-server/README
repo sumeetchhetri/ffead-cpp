@@ -23,18 +23,19 @@ FEATURES
 16. Template Engine and Dynamic Views generated from C++ objects.
 17. Controller Pattern (Implement controllers mapped with URL patterns to define custom behaviors)
 18. Request/Response Filters (Implement a chain of custom Filters for Pre/Post processing of request/response)
-19. Thread Pool Implementation
-20. C++ Interpreter (Limited support)
-21. Rule based WEB Behavior(idea can be expanded to other areas application wide)
-22. XML Parser (DOM Styled)
-23. Database Connection Pooling
-24. Internationalization support
-25. Utilities such as Timer, Logging, Property Files etc.
-26. File Upload
-27. FTP Server
-28. Security features for Method access (Web Services, AJAX calls, C++ Bean service calls, Server URL’s)
-29. Module for Integration of the framework with Apache Web Server
-30. Method Invoker Server for cross platform Method Invocation (A daemon per language/platform approach – XML based Serialization/De- Serialization)
+19. Thread Pool Implementation with Futures
+20. Bigint and Bigdecimal classes for arithmetic operations on big numbers
+21. C++ Interpreter (Limited support)
+22. Rule based WEB Behavior(idea can be expanded to other areas application wide)
+23. XML Parser (DOM Styled)
+24. Database Connection Pooling
+25. Internationalization support
+26. Utilities such as Timer, Logging, Property Files etc.
+27. File Upload
+28. FTP Server
+29. Security features for Method access (Web Services, AJAX calls, C++ Bean service calls, Server URL’s)
+30. Module for Integration of the framework with Apache Web Server
+31. Method Invoker Server for cross platform Method Invocation (A daemon per language/platform approach – XML based Serialization/De- Serialization)
 
 
 REQUIREMENTS

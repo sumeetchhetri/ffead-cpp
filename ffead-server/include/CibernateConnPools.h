@@ -151,7 +151,7 @@ class CibernateConnPools {
 public:
 	CibernateConnPools();
 	virtual ~CibernateConnPools();
-	static void addPool(int,string,string,string,string);
+	static void addPool(int,string,string,string,string,string);
 	static void addMapping(string,Mapping*);
 	static bool isInitialized();
 	static CibernateConnectionPool* getPool(string);

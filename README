@@ -42,7 +42,7 @@ REQUIREMENTS
 2. Boost is no longer required as of version 1.7
 3. UnixODBC and development files
 4. OpenSSl and development files
-4. GCC C++ compiler, make, configure etc
+5. GCC C++ compiler, make, configure etc
 
 
 INSTALL
@@ -64,4 +64,4 @@ Google Code - http://code.google.com/p/ffead-cpp
 Github - https://github.com/sumeetchhetri/ffead-cpp
 
 
-Copyright © 2012 Sumeet Chhetri
+Copyright © 2013 Sumeet Chhetri

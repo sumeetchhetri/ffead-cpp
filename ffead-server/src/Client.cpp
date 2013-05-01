@@ -239,13 +239,13 @@ string Client::getBinaryData(int len, bool isLengthIncluded)
 {
 	//logger << len;
 	string alldat;
-	char *buf1 = new char[len+1];
+	char *buf1 = new char[len];
 	memset(buf1, 0, len);
 	recv(sockfd, buf1, len, 0);
 	for (int var = 0; var < len; ++var) {
 		alldat.push_back(buf1[var]);
 	}
-	memset(buf1, 0, len);
+	delete[] buf1;
 
 	int leng = getLengthCl(alldat, len);
 	if(isLengthIncluded)
@@ -253,13 +253,13 @@ string Client::getBinaryData(int len, bool isLengthIncluded)
 		leng -= len;
 	}
 	//logger << "done reading header length " << leng;
-	char *buf = new char[leng+1];
+	char *buf = new char[leng];
 	memset(buf, 0, sizeof(buf));
 	recv(sockfd, buf, leng, 0);
 	for (int var = 0; var < leng; ++var) {
 		alldat.push_back(buf[var]);
 	}
-	memset(buf, 0, sizeof(buf));
+	delete[] buf1;
 	//logger << alldat.length();
 	return alldat;
 }

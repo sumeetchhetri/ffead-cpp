@@ -61,35 +61,36 @@ void* ComponentHandler::service(void* arg)
 			Element message = doc.getRootElement();
 			if(message.getTagName()!="service")
 			{
-				throw new ComponentHandlerException("No service Tag\n",retValue);
+				throw ComponentHandlerException("No service Tag\n",retValue);
 			}
 			if(message.getAttributes().size()<4)
 			{
-				throw new ComponentHandlerException("name,beanName,returnType and lang are mandatory attributes\n",retValue);
+				throw ComponentHandlerException("name,beanName,returnType and lang are mandatory attributes\n",retValue);
+
 			}
 			else if(message.getAttribute("name")=="")
 			{
-				throw new ComponentHandlerException("name attribute missing\n",retValue);
+				throw ComponentHandlerException("name attribute missing\n",retValue);
 			}
 			else if(message.getAttribute("returnType")=="")
 			{
-				throw new ComponentHandlerException("returnType attribute missing\n",retValue);
+				throw ComponentHandlerException("returnType attribute missing\n",retValue);
 			}
 			else if(message.getAttribute("beanName")=="")
 			{
-				throw new ComponentHandlerException("beanName attribute missing\n",retValue);
+				throw ComponentHandlerException("beanName attribute missing\n",retValue);
 			}
 			else if(message.getAttribute("lang")=="")
 			{
-				throw new ComponentHandlerException("lang attribute missing\n",retValue);
+				throw ComponentHandlerException("lang attribute missing\n",retValue);
 			}
 			if(message.getChildElements().size()!=1)
 			{
-				throw new ComponentHandlerException("message tag should have only one child tag\n",retValue);
+				throw ComponentHandlerException("message tag should have only one child tag\n",retValue);
 			}
 			else if(message.getChildElements().at(0).getTagName()!="args")
 			{
-				throw new ComponentHandlerException("message tag should have an args child tag\n",retValue);
+				throw ComponentHandlerException("message tag should have an args child tag\n",retValue);
 			}
 			Serialize ser;
 			Reflector reflector;
@@ -101,11 +102,20 @@ void* ComponentHandler::service(void* arg)
 				void *value = NULL;
 				Element arg = argts.at(var);
 				if(arg.getTagName()!="argument")
-					throw new ComponentHandlerException("Invalid Tag, only argument tag allowed\n",retValue);
+				{
+					throw ComponentHandlerException("Invalid Tag, only argument tag allowed\n",retValue);
+
+				}
 				else if(arg.getAttribute("type")=="")
-					throw new ComponentHandlerException("every argument tag should have a type attribute\n",retValue);
+				{
+					throw ComponentHandlerException("every argument tag should have a type attribute\n",retValue);
+
+				}
 				if(arg.getText()=="" && arg.getChildElements().size()==0)
-					throw new ComponentHandlerException("argument value missing\n",retValue);
+				{
+					throw ComponentHandlerException("argument value missing\n",retValue);
+
+				}
 				if(arg.getAttribute("type")!="")
 				{
 					Element obj = arg.getChildElements().at(0);
@@ -125,12 +135,13 @@ void* ComponentHandler::service(void* arg)
 			_cmp_instance->logger << ("Bean service = " + methodName) << endl;
 			if(clas.getClassName()=="")
 			{
-				throw new ComponentHandlerException("bean does not exist or is not regsitered\n",retValue);
+				throw ComponentHandlerException("bean does not exist or is not regsitered\n",retValue);
 			}
 			Method meth = clas.getMethod(methodName,argus);
 			if(meth.getMethodName()=="")
 			{
-				throw new ComponentHandlerException("service does not exist for the bean or the bean does not exist or is not regsitered\n\n",retValue);
+				throw ComponentHandlerException("service does not exist for the bean or the bean does not exist or is not regsitered\n\n",retValue);
+
 			}
 			else
 			{
@@ -187,9 +198,9 @@ void* ComponentHandler::service(void* arg)
 			_cmp_instance->getServer().Send(fd,retValue);
 		//close(fd);
 	}
-	catch(ComponentHandlerException *e)
+	catch(const ComponentHandlerException& e)
 	{
-		_cmp_instance->logger << e->getMessage() << endl;
+		_cmp_instance->logger << e.getMessage() << endl;
 		_cmp_instance->getServer().Send(fd,retValue);
 		close(fd);
 	}
@@ -243,7 +254,7 @@ void ComponentHandler::trigger(string port)
 		return;
 	Server serv(port,false,500,&service,2);
 	_cmp_instance->server = serv;
-	//_cmp_instance->getServer() = new Server(port,500,&service);
+	_cmp_instance->server.start();
 	_cmp_instance->running = true;
 	return;
 }

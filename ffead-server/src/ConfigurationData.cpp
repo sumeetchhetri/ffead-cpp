@@ -31,3 +31,42 @@ ConfigurationData::~ConfigurationData() {
 	// TODO Auto-generated destructor stub
 }
 
+Security::Security()
+{
+	logger = Logger::getLogger("Security");
+}
+
+Security::~Security()
+{
+
+}
+
+SecureAspect Security::matchesPath(string url)
+{
+	bool pathval = false;
+	SecureAspect aspect;
+	for (int var = 0; var < (int)secures.size(); ++var) {
+		SecureAspect secureAspect = secures.at(var);
+		string pathurl = secureAspect.path;
+		logger << ("Checking security path " + pathurl + " against url " + url) << endl;
+		if(pathurl=="*")
+		{
+			aspect = secureAspect;
+			continue;
+		}
+		if(pathurl.find("*")==pathurl.length()-1)
+		{
+			pathurl = pathurl.substr(0, pathurl.length()-1);
+			pathval = true;
+		}
+		if(pathval && url.find(pathurl)!=string::npos)
+		{
+			aspect = secureAspect;
+		}
+		else if(!pathval && pathurl==url)
+		{
+			aspect = secureAspect;
+		}
+	}
+	return aspect;
+}

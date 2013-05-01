@@ -29,10 +29,10 @@ CibernateConnectionPool* CibernateConnectionPool::getinstance()
 		instance = new CibernateConnectionPool;
 	return instance;
 }*/
-CibernateConnectionPool::CibernateConnectionPool(int size,string dbName,string uname,string pass)
+CibernateConnectionPool::CibernateConnectionPool(int size,string dbName,string uname,string pass,string dialect)
 {
 	logger = Logger::getLogger("CibernateConnectionPool");
-	createPool(size,dbName,uname,pass);
+	createPool(size,dbName,uname,pass,dialect);
 }
 
 CibernateConnectionPool::~CibernateConnectionPool()
@@ -52,7 +52,7 @@ void CibernateConnectionPool::closeConnection(Connection *conn)
 	conn->busy = false;
 }
 
-void  CibernateConnectionPool::newConnection(bool read)
+Connection* CibernateConnectionPool::newConnection(bool read)
 {
 	int V_OD_erg;// result of functions
 	SQLCHAR V_OD_msg[200],V_OD_stat[10];		// Status SQL;
@@ -66,7 +66,7 @@ void  CibernateConnectionPool::newConnection(bool read)
 		logger << "Error AllocHDB " << V_OD_erg << endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		this->initialized = false;
-		return;
+		return NULL;
 		//exit(0);
 	}
 	SQLSetConnectAttr(connection->conn, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
@@ -82,24 +82,21 @@ void  CibernateConnectionPool::newConnection(bool read)
 		logger << V_OD_msg << " (" << (int)V_OD_err_s <<  ")" << endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		this->initialized = false;
-		return;
+		return NULL;
 		//exit(0);
 	}
 	connection->busy = false;
 	connection->type = read;
-	if(read)
-		this->readConnections.push_back(connection);
-	else
-		this->writeConnections.push_back(connection);
-
+	return connection;
 }
 
-void CibernateConnectionPool::createPool(int size,string dbName,string uname,string pass)
+void CibernateConnectionPool::createPool(int size,string dbName,string uname,string pass,string dialect)
 {
 	this->dbName = dbName;
 	this->uname = uname;
 	this->pass = pass;
 	this->readNumber = 0;
+	this->dialect = dialect;
 	int reads = round(size/5);
 	if(reads<1)
 		reads = 1;
@@ -121,13 +118,19 @@ void CibernateConnectionPool::createPool(int size,string dbName,string uname,str
 	}
 	for(int i=0;i<reads;i++)
 	{
-		this->newConnection(true);
+		Connection* connection = this->newConnection(true);
+		mutex.lock();
+		this->readConnections.push_back(connection);
+		mutex.unlock();
 		if(!this->initialized)
 			break;
 	}
 	for(int i=0;i<size-reads;i++)
 	{
-		this->newConnection(false);
+		Connection* connection = this->newConnection(false);
+		mutex.lock();
+		this->writeConnections.push_back(connection);
+		mutex.unlock();
 		if(!this->initialized)
 			break;
 	}
@@ -143,9 +146,12 @@ void CibernateConnectionPool::createPool(int size,string dbName,string uname,str
 
 Connection* CibernateConnectionPool::getReadConnection()
 {
+	mutex.lock();
 	if(this->readNumber==(int)this->readConnections.size())
 		this->readNumber = 0;
-	return this->readConnections.at(this->readNumber++);
+	Connection* conn = this->readConnections.at(this->readNumber++);
+	mutex.unlock();
+	return conn;
 }
 Connection* CibernateConnectionPool::getWriteConnection()
 {
@@ -156,12 +162,21 @@ Connection* CibernateConnectionPool::getWriteConnection()
 		for(unsigned int i=0;i<this->writeConnections.size();i++)
 		{
 			if(!this->writeConnections.at(i)->busy)
-				return this->writeConnections.at(i);
+			{
+				Connection* conn =  this->writeConnections.at(i);
+				return conn;
+			}
 		}
 		if(t.elapsedMilliSeconds()>500)
 		{
-			newConnection(false);
-			return this->writeConnections.at(this->writeConnections.size()-1);
+			Connection* connection = this->newConnection(false);
+			mutex.lock();
+			if(read)
+				this->readConnections.push_back(connection);
+			else
+				this->writeConnections.push_back(connection);
+			mutex.unlock();
+			return connection;
 		}
 
 	}

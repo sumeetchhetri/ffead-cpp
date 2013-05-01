@@ -80,18 +80,6 @@ public:
         return result;
     }
 
-	static int charArrayToInt(char l[])
-	{
-		int t = 0;
-		int ind = sizeof l;
-        for (int i = 0; i < ind; i++)
-		{
-        	int offset = (ind -1 - i) * 8;
-        	t += (l[i] & 0x000000FF) << offset;
-		}
-        return t;
-    }
-
 	static int charArrayToInt(char* l,int off,int ind)
 	{
 		int t = 0;
@@ -103,17 +91,6 @@ public:
         return t;
     }
 
-	static long charArrayToLong(char l[])
-	{
-		long t = 0;
-		int ind = sizeof l;
-        for (int i = 0; i < ind; i++)
-		{
-        	int offset = (ind -1 - i) * 8;
-        	t += (l[i] & 0x000000FF) << offset;
-		}
-        return t;
-    }
 	static long charArrayToLong(char* l,int off,int ind)
 	{
 		long t = 0;
@@ -124,6 +101,7 @@ public:
 		}
         return t;
     }
+
 	static long charArrayToLong(char* l,int ind)
 	{
 		long t = 0;

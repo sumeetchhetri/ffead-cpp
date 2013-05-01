@@ -25,18 +25,6 @@ class AMEFEncoder
 	/*The default delimiter for single object representation*/
 	//string delim = ",";
 
-	/**
-	 * @param packet
-	 * @return char*
-	 * @throws AMEFEncodeException
-	 * encode the AMEFObject to the charstream for wire transmission
-	 */
-	/*char* encode(AMEFObject packet,boolean ignoreName) throws AMEFEncodeException
-	{
-		string dat = encodeSinglePacket(packet,ignoreName);
-		int l = dat.length();
-		return (intTocharArrayS(l, 4) + dat).getchars();
-	}	*/
 public:
 	AMEFEncoder();
 	~AMEFEncoder();
@@ -94,18 +82,6 @@ public:
 	        return result;
 	    }
 
-		static int charArrayToInt(char l[])
-		{
-			int t = 0;
-			int ind = sizeof l;
-	        for (int i = 0; i < ind; i++)
-			{
-	        	int offset = (ind -1 - i) * 8;
-	        	t += (l[i] & 0x000000FF) << offset;
-			}
-	        return t;
-	    }
-
 		static int charArrayToInt(char* l,int off,int ind)
 		{
 			int t = 0;
@@ -117,17 +93,6 @@ public:
 	        return t;
 	    }
 
-		static long charArrayToLong(char l[])
-		{
-			long t = 0;
-			int ind = sizeof l;
-	        for (int i = 0; i < ind; i++)
-			{
-	        	int offset = (ind -1 - i) * 8;
-	        	t += (l[i] & 0x000000FF) << offset;
-			}
-	        return t;
-	    }
 		static long charArrayToLong(char* l,int off,int ind)
 		{
 			long t = 0;
@@ -138,6 +103,7 @@ public:
 			}
 	        return t;
 	    }
+
 		static long charArrayToLong(char* l,int ind)
 		{
 			long t = 0;
@@ -166,7 +132,6 @@ public:
 
 	string encodeB(AMEFObject* packet,bool ignoreName)
 	{
-		//char* dat = new char[packet->getNamedLength(ignoreName) + 4];
 		string enc = encodeSinglePacketB(packet, ignoreName);
 		string len = intTocharArray(enc.length(), 4);
 		string temp;
@@ -177,52 +142,9 @@ public:
 
 	string encodeWL(AMEFObject* packet,bool ignoreName)
 	{
-		//char* dat = new char[packet->getNamedLength(ignoreName)];
 		string enc = encodeSinglePacketB(packet, ignoreName);
 		return enc;
 	}
-
-	/*char* encodeWL(AMEFObject packet,boolean ignoreName) throws AMEFEncodeException
-	{
-		string dat = encodeSinglePacket(packet,ignoreName);
-		int l = dat.length();
-		return dat.getchars();
-	}
-
-	*//**
-	 * @param packet
-	 * @return char*
-	 * @throws AMEFEncodeException
-	 * encode the AMEFObject to the charstream for wire transmission
-	 *//*
-	string encodeS(AMEFObject packet,boolean ignoreName) throws AMEFEncodeException
-	{
-		string dat = null;
-		if(ignoreName)
-			dat = encodeJDBObject(packet);
-		else
-			dat = encodeSinglePacket(packet,ignoreName);
-		int l = dat.length();
-		return (intTocharArrayS(l, 4) + dat);
-	}
-
-	string encodeJDBObject(AMEFObject packet) throws AMEFEncodeException
-	{
-		string dat = encodeSingleJDBPacket(packet);
-		int l = dat.length();
-		return (dat);
-		//return dat;
-	}
-
-	string getValue(int val,int ind)
-	{
-		char* buf = new char[ind];
-		for (int i = 0; i < buf.length; i++)
-		{
-
-		}
-	}*/
-
 
 	void getValue(string value,char type,string buffer)
 	{
@@ -334,131 +256,8 @@ public:
 		{
 			retval = AMEFObject::B_OBJECT_TYPE + delim + name + delim + intTocharArrayS(length, 3) + buffer;
 		}
-		//else
-		//{
-		//	throw new AMEFEncodeException("Not a valid AMEF Object type,only types string,number,boolean,character,date allowed");
-		//}
 		return retval;
 	}
-
-	/*string encodeSingleJDBPacket(AMEFObject packet) throws AMEFEncodeException
-	{
-		stringBuilder buffer = new stringBuilder();
-		if(packet==null)
-		{
-			throw new AMEFEncodeException("Objcet to be encoded is null");
-		}
-		int length = packet->getLength();
-		for (AMEFObject pack : packet->getPackets())
-		{
-			buffer.append(encodeSingleJDBPacket(pack));
-		}
-		if(packet->getPackets().size()==0)
-			getValue(new string(packet->getValue()),packet->getType(), buffer);
-		if(bufferlength()>0)
-		{
-			length = bufferlength();
-		}
-		return getFinalVal(packet->getType(), buffer, length, "","");
-	}
-
-	*//**
-	 * @param packet
-	 * @return string
-	 * @throws AMEFEncodeException
-	 * encode a given AMEF Object to its transmission form
-	 *//*
-	string encodeSinglePacket(AMEFObject packet,boolean ignoreName) throws AMEFEncodeException
-	{
-		stringBuilder buffer = new stringBuilder();
-		if(packet==null)
-		{
-			throw new AMEFEncodeException("Objcet to be encoded is null");
-		}
-		int length = packet->getLength();
-		for (AMEFObject pack : packet->getPackets())
-		{
-			buffer.append(encodeSinglePacket(pack,ignoreName));
-		}
-		if(packet->getPackets().size()==0)
-			getValue(new string(packet->getValue()),packet->getType(), buffer);
-		if(bufferlength()>0)
-		{
-			length = bufferlength();
-		}
-		string retval = "";
-		if(!ignoreName)
-			retval +=  packet->getName();
-		return getFinalVal(packet->getType(), buffer, length, delim, retval);
-	}
-
-
-	char* encodeSinglePacketB(AMEFObject packet,boolean ignoreName) throws AMEFEncodeException
-	{
-		charArrayOutputStream buffer = new charArrayOutputStream();
-		if(packet==null)
-		{
-			throw new AMEFEncodeException("Objcet to be encoded is null");
-		}
-		int length = packet->getLength();
-		for (AMEFObject pack : packet->getPackets())
-		{
-			buffer.write(encodeSinglePacketB(pack,ignoreName));
-		}
-		if(packet->getPackets().size()==0)
-		{
-			buffer.write(packet->getValue().getchars());
-		}
-		string retval = "";
-		if(!ignoreName)
-			retval +=  packet->getName();
-		char type = packet->getType();
-		if(type==AMEFObject::DATE_TYPE || type==AMEFObject::STRING_256_TYPE
-				|| type==AMEFObject::DOUBLE_FLOAT_TYPE)
-		{
-			buffer.write(intTocharArray(length, 1));
-		}
-		else if(type==AMEFObject::STRING_65536_TYPE)
-		{
-			buffer.write(intTocharArray(length, 2));
-		}
-		else if(type==AMEFObject::STRING_16777216_TYPE)
-		{
-			buffer.write(intTocharArray(length, 3));
-		}
-		else if(type==AMEFObject::STRING_TYPE)
-		{
-			buffer.write(intTocharArray(length, 4));
-		}
-		else if(type==AMEFObject::BOOLEAN_TYPE || type==AMEFObject::CHAR_TYPE
-				|| type==AMEFObject::SMALL_INT_TYPE || type==AMEFObject::VERY_SMALL_INT_TYPE
-				|| type==AMEFObject::BIG_INT_TYPE || type==AMEFObject::INT_TYPE
-				|| type==AMEFObject::VS_LONG_INT_TYPE || type==AMEFObject::S_LONG_INT_TYPE
-				|| type==AMEFObject::B_LONG_INT_TYPE || type==AMEFObject::LONG_INT_TYPE)
-		{
-			retval += buffer;
-		}
-		else if(type==AMEFObject::OBJECT_TYPE)
-		{
-			if(length<256)
-			{
-				retval = AMEFObject::VS_OBJECT_TYPE + delim + name + delim + intTocharArrayS(length, 1) + buffer;
-			}
-			else if(length<65536)
-			{
-				retval = AMEFObject::S_OBJECT_TYPE + delim + name + delim + intTocharArrayS(length, 2) + buffer;
-			}
-			else if(length<16777216)
-			{
-				retval = AMEFObject::B_OBJECT_TYPE + delim + name + delim + intTocharArrayS(length, 3) + buffer;
-			}
-			else
-			{
-				retval = AMEFObject::OBJECT_TYPE + delim + name + delim + intTocharArrayS(length, 4) + buffer;
-			}
-		}
-		return getFinalVal(packet->getType(), buffer, length, delim, retval);
-	}*/
 
 
 	string getPacketValue(string value)

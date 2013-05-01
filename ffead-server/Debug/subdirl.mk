@@ -115,7 +115,12 @@ CPP_SRCS += \
 ../TemplateGenerator.cpp \
 ../CibernateQuery.cpp \
 ../Bigint.cpp \
-../Bigdecimal.cpp
+../Bigdecimal.cpp \
+../FutureTask.cpp \
+../CORSHandler.cpp \
+../DialectHelper.cpp \
+../CompressionUtil.cpp \
+../MultipartContent.cpp
 
 OBJS += \
 ./Constants.o \
@@ -229,7 +234,12 @@ OBJS += \
 ./TemplateGenerator.o \
 ./CibernateQuery.o \
 ./Bigint.o \
-./Bigdecimal.o
+./Bigdecimal.o \
+./FutureTask.o \
+./CORSHandler.o \
+./DialectHelper.o \
+./CompressionUtil.o \
+./MultipartContent.o
 
 CPP_DEPS += \
 ./Constants.d \
@@ -343,7 +353,12 @@ CPP_DEPS += \
 ./TemplateGenerator.d \
 ./CibernateQuery.d \
 ./Bigint.d \
-./Bigdecimal.d
+./Bigdecimal.d \
+./FutureTask.d \
+./CORSHandler.d \
+./DialectHelper.d \
+./CompressionUtil.d \
+./MultipartContent.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
