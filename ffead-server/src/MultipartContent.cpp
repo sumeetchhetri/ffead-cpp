@@ -9,6 +9,15 @@
 
 string MultipartContent::VALID_HEADERS = ",content-id,content-type,content-disposition,content-transfer-encoding,content-location,content-base,";
 
+string MultipartContent::ContentId = "Content-Id";
+string MultipartContent::ContentDisposition = "Content-Disposition";
+string MultipartContent::ContentTransferEncoding = "Content-Transfer-Encoding";
+string MultipartContent::ContentLocation = "Content-Location";
+string MultipartContent::ContentBase = "Content-Base";
+string MultipartContent::ContentLength = "Content-Length";
+string MultipartContent::ContentMD5 = "Content-MD5";
+string MultipartContent::ContentType =	"Content-Type";
+
 MultipartContent::MultipartContent() {
 	logger = Logger::getLogger("MultipartContent");
 }
@@ -101,6 +110,7 @@ void MultipartContent::setTempFileName(string tempFileName) {
 
 void MultipartContent::addHeaderValue(string header, string value)
 {
+	header = StringUtil::camelCasedCopy(header, "-");
 	if(header!="")
 	{
 		if(VALID_HEADERS.find(","+StringUtil::toLowerCopy(header)+",")!=string::npos)
@@ -109,7 +119,7 @@ void MultipartContent::addHeaderValue(string header, string value)
 		}
 		else
 		{
-			vector<string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z][a-zA-Z]*[a-zA-Z]$");
+			vector<string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
 			if(matres.size()==0)
 			{
 				cout << ("Invalid Header string " + header) << endl;
@@ -122,6 +132,7 @@ void MultipartContent::addHeaderValue(string header, string value)
 
 bool MultipartContent::isHeaderValue(string header, string value, bool ignoreCase)
 {
+	header = StringUtil::camelCasedCopy(header, "-");
 	return header!="" && headers.find(header)!=headers.end()
 			&& (headers[header]==value ||
 					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));

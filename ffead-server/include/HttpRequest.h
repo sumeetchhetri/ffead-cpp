@@ -34,6 +34,7 @@
 #include "Logger.h"
 #include "MultipartContent.h"
 #include "Timer.h"
+#include "HTTPResponseStatus.h"
 
 typedef vector<string> strVec;
 #ifndef HTTPREQUEST_H_
@@ -50,6 +51,7 @@ class HttpRequest {
 	string cntxt_root;
 	string cntxt_name;
 	string httpVersion;
+	float httpVers;
 	string method;
 	string content;
 	string content_boundary;
@@ -72,15 +74,16 @@ class HttpRequest {
 	vector<MultipartContent> contentList;
 	string preamble;
 	string epilogue;
+	HTTPResponseStatus status;
 
 	void getAuthParams(string);
 	void getOauthParams(string);
-	enum CORSRequestType {
-		PREFLIGHT, CORS, OTHER
-	};
 	void updateFromContentStr();
 	void updateFromContentFile();
 public:
+	enum {
+		PREFLIGHT, CORS, OTHER
+	};
 	static string Accept,AcceptCharset,AcceptEncoding,AcceptLanguage,AcceptDatetime,
 				  AccessControlRequestHeaders,AccessControlRequestMethod,Authorization,
 				  CacheControl,Connection,Cookie,ContentLength,ContentMD5,ContentType,
@@ -97,8 +100,8 @@ public:
 	void setMethod(string method);
 	void setUrl(string);
 	string getUrl();
-	void setHttpVersion(string);
 	string getHttpVersion();
+	float getHttpVers();
 	string getContent_boundary() const;
 	void setContent_boundary(string);
 	string getContent() const;
@@ -146,7 +149,8 @@ public:
     int getCORSRequestType();
     void addHeaderValue(string header, string value);
     vector<string> parseHeaderValue(string headerValue);
-    bool isValidHttpMethod(string method);
+    static bool isValidHttpMethod(string method);
+    bool isValidHttpMethod();
     bool isAgentAcceptsCE();
     bool isHeaderValue(string header, string value, bool ignoreCase = true);
     vector<vector<int> > getRanges(vector<string> &rangesVec);
@@ -155,6 +159,8 @@ public:
     void addMultipartFormContent(string key, MultipartContent content);
     void addContent(MultipartContent content);
     bool isNonBinary(string mimeType);
+    string getParamValue(string);
+    HTTPResponseStatus getRequestParseStatus() const;
 };
 
 #endif /* HTTPREQUEST_H_ */

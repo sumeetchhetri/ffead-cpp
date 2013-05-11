@@ -111,6 +111,26 @@ string StringUtil::capitalizedCopy(const string& str)
 	return strn;
 }
 
+void StringUtil::camelCased(string& str, const string& delim)
+{
+	vector<string> vec = StringUtil::split(str, delim);
+	str = "";
+	for (int var = 0; var < (int)vec.size(); ++var) {
+		str += StringUtil::capitalizedCopy(vec.at(var));
+		if(var!=(int)vec.size()-1)
+		{
+			str += delim;
+		}
+	}
+}
+
+string StringUtil::camelCasedCopy(const string& str, const string& delim)
+{
+	string strn(str);
+	camelCased(strn, delim);
+	return strn;
+}
+
 void StringUtil::replaceLast(string& str, const string& ths, const string& with)
 {
 	size_t start_pos = str.find_last_of(ths);
@@ -170,6 +190,13 @@ void StringUtil::split(vector<string> &output, const string& input, const string
 {
 	output.clear();
 	splitInternal(output, input, delimiter);
+}
+
+int StringUtil::countOccurrences(const string& input, const string& delimiter)
+{
+	vector<string> output;
+	splitInternal(output, input, delimiter);
+	return output.size();
 }
 
 vector<string> StringUtil::split(const string& input, vector<string> delimiters)

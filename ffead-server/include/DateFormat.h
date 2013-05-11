@@ -36,15 +36,8 @@ public:
 	DateFormat(string);
 	string format(Date);
 	Date* parse(string);
-    string getFormatspec() const
-    {
-        return formatspec;
-    }
-
-    void setFormatspec(string formatspec)
-    {
-        this->formatspec = formatspec;
-    }
+    string getFormatspec() const;
+    void setFormatspec(string formatspec);
 };
 
 #endif /* DATEFORMAT_H_ */

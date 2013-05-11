@@ -34,9 +34,10 @@ class Bean
 	string name,inbuilt,value,clas,bean,intfType,injectAs,scope;
 	bool realbean;
 	vector<string> injs,names,types;
+	string appName;
 public:
 	Bean();
-	Bean(string name,string value,string clas,string scope,bool isInbuilt);
+	Bean(string name,string value,string clas,string scope,bool isInbuilt,string appName = "default");
 	~Bean();
 };
 typedef map<string,Bean> beanMap;
@@ -46,12 +47,12 @@ class FFEADContext {
 	map<string,void*> objects;
 	bool cleared;
 public:
-	FFEADContext(string);
+	FFEADContext(string,string appName = "default");
 	FFEADContext();
 	virtual ~FFEADContext();
-	void* getBean(string);
+	void* getBean(string, string appName = "default");
 	void* getBean(Bean);
-	void clear();
+	void clear(string appName = "default");
 	void addBean(Bean bean);
 	void initializeAllSingletonBeans();
 };

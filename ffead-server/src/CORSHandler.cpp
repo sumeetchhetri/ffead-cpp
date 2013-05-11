@@ -43,7 +43,7 @@ bool CORSHandler::handle(HttpRequest *req, HttpResponse *res, ConfigurationData 
 			}
 			else
 			{
-				if(!req->isValidHttpMethod(req->getHeader(HttpResponse::AccessControlAllowMethods)))
+				if(!HttpRequest::isValidHttpMethod(req->getHeader(HttpResponse::AccessControlAllowMethods)))
 				{
 					HTTPResponseStatus status(HTTPResponseStatus::InvalidMethod, "Unsupported HTTP method: " + req->getHeader(HttpResponse::AccessControlAllowMethods));
 					throw status;
@@ -53,14 +53,14 @@ bool CORSHandler::handle(HttpRequest *req, HttpResponse *res, ConfigurationData 
 
 				if(!configData.corsConfig.isMethodAllowed(req->getHeader(HttpResponse::AccessControlAllowMethods)))
 				{
-					HTTPResponseStatus status(HTTPResponseStatus::InvalidMethod, "Unsupported HTTP method" + req->getHeader(HttpResponse::AccessControlAllowMethods));
+					HTTPResponseStatus status(HTTPResponseStatus::InvalidMethod, "Unsupported HTTP method: " + req->getHeader(HttpResponse::AccessControlAllowMethods));
 					throw status;
 				}
 
 				string erheadr;
 				if(!configData.corsConfig.isHeaderAllowed(reqHdrLst, erheadr))
 				{
-					HTTPResponseStatus status(HTTPResponseStatus::Forbidden, "Unsupported HTTP request header" + erheadr);
+					HTTPResponseStatus status(HTTPResponseStatus::Forbidden, "Unsupported HTTP request header: " + erheadr);
 					throw status;
 				}
 
@@ -102,7 +102,7 @@ bool CORSHandler::handle(HttpRequest *req, HttpResponse *res, ConfigurationData 
 		{
 			if(!configData.corsConfig.isMethodAllowed(req->getMethod()))
 			{
-				HTTPResponseStatus status(HTTPResponseStatus::InvalidMethod, "Unsupported HTTP method" + req->getMethod());
+				HTTPResponseStatus status(HTTPResponseStatus::InvalidMethod, "Unsupported HTTP method: " + req->getMethod());
 				throw status;
 			}
 

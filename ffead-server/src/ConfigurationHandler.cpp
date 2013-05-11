@@ -91,10 +91,10 @@ void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folde
 	pclose(pipe_fp);
 }
 
-ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string pubpath,string respath,bool isSSLEnabled,FFEADContext* ffeadContext)
+ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string pubpath,
+		string respath,bool isSSLEnabled,FFEADContext* ffeadContext,ConfigurationData& configurationData)
 {
 	Logger logger = Logger::getLogger("ConfigurationHandler");
-	ConfigurationData configurationData;
 	configurationData.resourcePath = respath;
 	strVec all,afcd,appf,wspath,handoffVec;
 	string includeRef;
@@ -137,11 +137,13 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		}
 	}
 	string rundyncontent;
+	string ajrt;
 	for(unsigned int var=0;var<webdirs.size();var++)
 	{
 		//logger <<  webdirs.at(0) << flush;
 		string defpath = webdirs.at(var);
 		string dcppath = defpath + "dcp/";
+		string webpubpath = defpath + "public/";
 		string tmplpath = defpath + "tpe/";
 		string cmppath = defpath + "components/";
 		string usrincludes = defpath + "include/";
@@ -208,7 +210,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 									configurationData.urlMap[name+url] = clas;
 								if(clas!="")
 								{
-									Bean bean("controller_"+name+clas,"",clas,scope,false);
+									Bean bean("controller_"+name+clas,"",clas,scope,false,name);
 									ffeadContext->addBean(bean);
 								}
 								logger << ("Adding Controller for " + (name + url) + " :: " + clas) << endl;
@@ -265,7 +267,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								if(provider!="" && provider.find("class:")!=string::npos)
 								{
 									string clas = provider.substr(provider.find(":")+1);
-									Bean bean("authhandler_"+name+clas,"",clas,scope,false);
+									Bean bean("authhandler_"+name+clas,"",clas,scope,false,name);
 									ffeadContext->addBean(bean);
 								}
 								logger << ("Adding Authhandler for " + (name + url) + " :: " + provider) << endl;
@@ -301,7 +303,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								}
 								if(clas!="")
 								{
-									Bean bean("filter_"+name+clas,"",clas,scope,false);
+									Bean bean("filter_"+name+clas,"",clas,scope,false,name);
 									ffeadContext->addBean(bean);
 								}
 								logger << ("Adding Filter for " + (name + url + type) + " :: " + clas) << endl;
@@ -323,7 +325,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							string scope = tmplts.at(tmpn).getAttribute("scope");
 							if(clas!="")
 							{
-								Bean bean("template_"+name+clas,"",clas,scope,false);
+								Bean bean("template_"+name+clas,"",clas,scope,false,name);
 								ffeadContext->addBean(bean);
 							}
 							logger << ("Adding Template for " + (name+tmplts.at(tmpn).getAttribute("file")) + " :: " + clas) << endl;
@@ -342,7 +344,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							string scope = dvs.at(dn).getAttribute("scope");
 							if(clas!="")
 							{
-								Bean bean("dview_"+name+clas,"",clas,scope,false);
+								Bean bean("dview_"+name+clas,"",clas,scope,false,name);
 								ffeadContext->addBean(bean);
 							}
 							logger << ("Adding Dynamic View for " + (name+dvs.at(dn).getAttribute("path")) + " :: " + clas) << endl;
@@ -489,7 +491,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 												}
 												if(clas!="")
 												{
-													Bean bean("restcontroller_"+name+clas,"",clas,scope,false);
+													Bean bean("restcontroller_"+name+clas,"",clas,scope,false,name);
 													ffeadContext->addBean(bean);
 												}
 											}
@@ -515,7 +517,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 												}
 												if(clas!="")
 												{
-													Bean bean("restcontroller_"+name+clas,"",clas,scope,false);
+													Bean bean("restcontroller_"+name+clas,"",clas,scope,false,name);
 													ffeadContext->addBean(bean);
 												}
 											}
@@ -554,7 +556,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							if(provider!="" && provider.find("class:")!=string::npos)
 							{
 								string clas = provider.substr(provider.find(":")+1);
-								Bean bean("login-handler_"+name+clas,"",clas,scope,false);
+								Bean bean("login-handler_"+name+clas,"",clas,scope,false,name);
 								ffeadContext->addBean(bean);
 							}
 							logger << ("Security: Adding Login Handler => " + url  + " , provider => " + provider) << endl;
@@ -666,6 +668,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 					pathvec.push_back(name);
 					vecvp.push_back(usrincludes);
 					stat.push_back(false);
+					configurationData.ajaxIntfMap[name+"/"+fvw] = eles.at(apps).getAttribute("class");
 					afcd.push_back(eles.at(apps).getAttribute("class"));
 					ElementList elese = eles.at(apps).getChildElements();
 					string nsfns = "\nvar _fview_namespace = {";
@@ -685,16 +688,12 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						}
 						else if(elese.at(appse).getTagName()=="form")
 						{
-							pathvec.push_back(name);
-							vecvp.push_back(usrincludes);
-							stat.push_back(true);
-							afcd.push_back(elese.at(appse).getAttribute("bean"));
 							configurationData.formMap[elese.at(appse).getAttribute("name")] = elese.at(appse);
 							string clas = elese.at(appse).getAttribute("controller");
 							string scope = elese.at(appse).getAttribute("scope");
 							if(clas!="")
 							{
-								Bean bean("form_"+name+clas,"",clas,scope,false);
+								Bean bean("form_"+name+clas,"",clas,scope,false,name);
 								ffeadContext->addBean(bean);
 							}
 							logger << ("Fview: Adding form => " + elese.at(appse).getAttribute("name")
@@ -712,7 +711,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							js += elese.at(appse).getText();
 						}
 					}
-					AfcUtil::writeTofile(pubpath+eles.at(apps).getAttribute("class")+".js",js,true);
+					AfcUtil::writeTofile(webpubpath+eles.at(apps).getAttribute("class")+".js",js,true);
 
 					logger << ("Fview: Adding fview page class => " + eles.at(apps).getAttribute("class")
 							+ " , html => " + eles.at(apps).getAttribute("htm")) << endl;
@@ -720,6 +719,17 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 			}
 		}
 		logger << "done reading fviews.xml " << endl;
+
+		string infjs;
+		ajrt += AfcUtil::generateJsInterfacessAll(vecvp,afcd,infjs,pathvec,ajintpthMap);
+		string objs = AfcUtil::generateJsObjectsAll(usrincludes);
+		vecvp.clear();
+		afcd.clear();
+		pathvec.clear();
+		ajintpthMap.clear();
+
+		AfcUtil::writeTofile(webpubpath+"_afc_Objects.js",objs,true);
+		AfcUtil::writeTofile(webpubpath+"_afc_Interfaces.js",infjs,true);
 	}
 	logger << "started generating component code" <<endl;
 	map<string, string>::iterator cmpit;
@@ -779,10 +789,11 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	string infjs;
 	logger << endl<< "started generating ajax code" <<endl;
 	string ajaxHeaders;
-	ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,stat,ajaxHeaders,objs,infjs,pathvec,ajaxret,typerefs,ajintpthMap);
+	//ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,infjs,pathvec,ajintpthMap);
+	ret = ajaxret + ajrt + "\n}\n";
 	AfcUtil::writeTofile(rtdcfpath+"AjaxInterface.cpp",ret,true);
-	AfcUtil::writeTofile(pubpath+"_afc_Objects.js",objs,true);
-	AfcUtil::writeTofile(pubpath+"_afc_Interfaces.js",infjs,true);
+	//AfcUtil::writeTofile(pubpath+"_afc_Objects.js",objs,true);
+	//AfcUtil::writeTofile(pubpath+"_afc_Interfaces.js",infjs,true);
 	AfcUtil::writeTofile(incpath+"AfcInclude.h",(ajaxHeaders+headers),true);
 	logger << "done generating ajax code" <<endl;
 	ApplicationUtil apputil;
@@ -793,7 +804,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	logger <<  "done generating application code" <<endl;
 	WsUtil wsu;
 	logger <<  "started generating web-service code" <<endl;
-	ret = wsu.generateAllWSDL(wspath,respath,configurationData.wsdlmap);
+	ret = wsu.generateAllWSDL(wspath,respath,configurationData.wsdlmap,configurationData.ip_address);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
 	logger <<  "done generating web-service code" <<endl;
 	cntxt.clear();

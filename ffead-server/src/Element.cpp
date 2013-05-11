@@ -43,9 +43,12 @@ bool Element::operator == (Element *ele)
 
 void Element::addElement(Element element)
 {
+	element.parent = this;
 	this->elements.push_back(element);
-	if(&(this->mapOfEle[element.getTagName()])!=NULL)
+	if(mapOfEle.find(element.getTagName())!=mapOfEle.end())
+	{
 		this->mapOfEle[element.getTagName()] = element;
+	}
 }
 void Element::removeElement(Element element)
 {
@@ -60,9 +63,22 @@ void Element::removeElement(Element element)
 	}
 }
 
-void Element::addAttribute(string key,string value)
+void Element::addAttribute(string key,string value,bool validate)
 {
-	this->attributes[key] = value;
+	if(StringUtil::trimCopy(value)=="")return;
+	if(StringUtil::trimCopy(key).find("xmlns:")==0)
+	{
+		key = key.substr(5);
+		if(validate && this->namespaces.find(key)!=this->namespaces.end())
+		{
+			throw ("Duplicate namespace found - xmlns:" + key);
+		}
+		this->namespaces[key] = value;
+	}
+	else
+	{
+		this->attributes[key] = value;
+	}
 }
 void Element::removeAttribute(string key)
 {
@@ -76,7 +92,6 @@ bool Element::isNull()
 	else
 		return false;
 }
-//void updateAttribute(string,string) = &addAttribute;
 typedef map<string,string> AttributeList;
 typedef vector<Element> ElementList;
 AttributeList Element::getAttributes()
@@ -98,13 +113,6 @@ string Element::getTagName()
 string Element::getNameSpc()
 {
 	return this->nameSpace;
-}
-string Element::getNewTagNameSpc(string tag)
-{
-	if(this->nameSpace!="")
-		return (this->nameSpace + ":" + tag);
-	else
-		return tag;
 }
 
 string Element::getTagNameSpc()
@@ -149,7 +157,12 @@ void Element::setCdata(bool cdata)
 
 Element Element::getElementByName(string name)
 {
-	return this->mapOfEle[name];
+	Element ele;
+	if(mapOfEle.find(name)!=mapOfEle.end())
+	{
+		return this->mapOfEle[name];
+	}
+	return ele;
 }
 
 ElementList Element::getElementsByName(string name)
@@ -188,4 +201,26 @@ string Element::renderChildren()
 		rend.append(elements.at(i).render());
 	}
 	return rend;
+}
+
+void Element::validateNs()
+{
+	if(nameSpace=="")
+	{
+		return;
+	}
+	Element* thisele = this;
+	while(thisele->parent!=NULL)
+	{
+		if(parent->namespaces.find(nameSpace)!=parent->namespaces.end())
+		{
+			return;
+		}
+	}
+	ElementList elements = this->getChildElements();
+	for(unsigned int i=0;i<elements.size();i++)
+	{
+		elements.at(i).validateNs();
+	}
+	throw ("No namespace definition found - xmlns:" + nameSpace);
 }

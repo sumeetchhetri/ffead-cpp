@@ -35,16 +35,14 @@ class Element : public Renderer
 		void addElement(Element element);
 		void removeElement(Element element);
 		void updateElement(Element);
-		void addAttribute(string key,string value);
+		void addAttribute(string key,string value,bool validate = false);
 		void removeAttribute(string key);
-		//void updateAttribute(string,string) = &addAttribute;
 		AttributeList getAttributes();
 		string getAttribute(string);
 		ElementList getChildElements();
 		bool isNull();
 		string getTagName();
 		string getTagNameSpc();
-		string getNewTagNameSpc(string);
 		string getNameSpc();
 		void setTagName(string tagName);
 		bool operator == (Element);
@@ -57,8 +55,11 @@ class Element : public Renderer
 		ElementList getElementsByName(string name);
 		string render();
 		string renderChildren();
-private:
+		void validateNs();
+	private:
+		Element* parent;
 		AttributeList attributes;
+		AttributeList namespaces;
 		ElementList elements;
 		string tagName;
 		string nameSpace;

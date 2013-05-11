@@ -49,17 +49,17 @@
 class JSONSerialize {
 	static string demangle(const char *mangled);
 	static string getClassName(void* instance);
-	static string _handleAllSerialization(string className,void *t);
-	static void* _handleAllUnSerialization(string json,string className);
-	static string _ser(void* t,string classN);
-	static string _serContainers(void* t,string classN,string type);
-	static string _ser(Object);
-	static void* _unser(string json,string classN);
-	static void* unserializeConatiner(string json, string className,string type);
+	static string _handleAllSerialization(string className,void *t, string appName);
+	static void* _handleAllUnSerialization(string json,string className, string appName);
+	static string _ser(void* t,string classN, string appName);
+	static string _serContainers(void* t,string classN,string type, string appName);
+	static string _ser(Object, string appName);
+	static void* _unser(string json,string classN, string appName);
+	static void* unserializeConatiner(string json, string className,string type, string appName);
 
-	static void* _unserCont(string json,string className,string type);
+	static void* _unserCont(string json,string className,string type, string appName);
 
-	template <class T> static string serializevec(vector<T> t)
+	template <class T> static string serializevec(vector<T> t, string appName)
 	{
 		vector<T> st = t;
 		T td;
@@ -78,7 +78,7 @@ class JSONSerialize {
 		return json;
 	}
 
-	template <class T> static string serializelist(list<T> t)
+	template <class T> static string serializelist(list<T> t, string appName)
 	{
 		list<T> st = t;
 		T td;
@@ -97,7 +97,7 @@ class JSONSerialize {
 		return json;
 	}
 
-	template <class T> static string serializeset(set<T> t)
+	template <class T> static string serializeset(set<T> t, string appName)
 	{
 		set<T> st = t;
 		T td;
@@ -116,7 +116,7 @@ class JSONSerialize {
 		return json;
 	}
 
-	template <class T> static string serializemultiset(multiset<T> t)
+	template <class T> static string serializemultiset(multiset<T> t, string appName)
 	{
 		multiset<T> st = t;
 		T td;
@@ -135,7 +135,7 @@ class JSONSerialize {
 		return json;
 	}
 
-	template <class T> static string serializeq(std::queue<T> t)
+	template <class T> static string serializeq(std::queue<T> t, string appName)
 	{
 		std::queue<T> st = t;
 		T td;
@@ -145,7 +145,7 @@ class JSONSerialize {
 		string json = "[";
 		while(cnt++<(int)t.size())
 		{
-			json += serialize<T>(st.front());
+			json += serialize<T>(st.front(),appName);
 			if(cnt!=(int)t.size())
 				json += ",";
 			st.pop();
@@ -154,7 +154,7 @@ class JSONSerialize {
 		return json;
 	}
 
-	template <class T> static string serializedq(deque<T> t)
+	template <class T> static string serializedq(deque<T> t, string appName)
 	{
 		deque<T> st = t;
 		T td;
@@ -164,7 +164,7 @@ class JSONSerialize {
 		string json = "[";
 		while(cnt++<(int)t.size())
 		{
-			json += serialize<T>(*st.begin());
+			json += serialize<T>(*st.begin(),appName);
 			if(cnt!=(int)t.size())
 				json += ",";
 			st.erase(st.begin());
@@ -173,7 +173,7 @@ class JSONSerialize {
 		return json;
 	}
 
-	template <class T> static void* unserContainer(vector<T> &t, string type)
+	template <class T> static void* unserContainer(vector<T> &t, string type, string appName)
 	{
 		if(type=="Lis")
 		{
@@ -215,24 +215,24 @@ public:
 	JSONSerialize(){}
 	~JSONSerialize(){}
 
-	template <class T> static string serialize(T t)
+	template <class T> static string serialize(T t, string appName = "default")
 	{
 		string json;
 		const char *mangled = typeid(t).name();
 		string className = demangle(mangled);
-		return _handleAllSerialization(className,&t);
+		return _handleAllSerialization(className,&t,appName);
 	}
 
-	static string serializeObject(Object t)
+	static string serializeObject(Object t, string appName = "default")
 	{
-		return _handleAllSerialization(t.getTypeName(),t.getVoidPointer());
+		return _handleAllSerialization(t.getTypeName(),t.getVoidPointer(),appName);
 	}
-	static string serializeUnknown(void* t,string className)
+	static string serializeUnknown(void* t,string className, string appName = "default")
 	{
-		return _handleAllSerialization(className,t);
+		return _handleAllSerialization(className,t,appName);
 	}
 
-	template <class K,class V> static string serialize(map<K,V> mp)
+	template <class K,class V> static string serialize(map<K,V> mp, string appName = "default")
 	{
 		map<K,V> mpt  = mp;
 		string json;
@@ -241,9 +241,9 @@ public:
 		while (cnt++<mp.size())
 		{
 			json += "{\"key\":";
-			json += serialize<K>(mpt.begin()->first);
+			json += serialize<K>(mpt.begin()->first,appName);
 			json += ",\"value\":";
-			json += serialize<V>(mpt.begin()->second);
+			json += serialize<V>(mpt.begin()->second,appName);
 			mpt.erase(mpt.begin());
 			json += "}";
 			if(cnt!=(int)mp.size())
@@ -252,7 +252,7 @@ public:
 		json += "]";
 		return json;
 	}
-	template <class K,class V> static string serialize(multimap<K,V> mp)
+	template <class K,class V> static string serialize(multimap<K,V> mp, string appName = "default")
 	{
 		multimap<K,V> mpt  = mp;
 		string json;
@@ -261,9 +261,9 @@ public:
 		while (cnt++<mp.size())
 		{
 			json += "{\"key\":";
-			json += serialize<K>(mpt.begin()->first);
+			json += serialize<K>(mpt.begin()->first,appName);
 			json += ",\"value\":";
-			json += serialize<V>(mpt.begin()->second);
+			json += serialize<V>(mpt.begin()->second,appName);
 			mpt.erase(mpt.begin());
 			json += "}";
 			if(cnt!=(int)mp.size())
@@ -273,16 +273,16 @@ public:
 		return json;
 	}
 
-	template <class T> static T unserialize(string json)
+	template <class T> static T unserialize(string json, string appName = "default")
 	{
 		T t;
 		const char *mangled = typeid(t).name();
 		string className = demangle(mangled);
-		return *(T*)_handleAllUnSerialization(json,className);
+		return *(T*)_handleAllUnSerialization(json,className,appName);
 	}
-	static void* unSerializeUnknown(string json,string className)
+	static void* unSerializeUnknown(string json,string className, string appName = "default")
 	{
-		return _handleAllUnSerialization(json,className);
+		return _handleAllUnSerialization(json,className,appName);
 	}
 };
 

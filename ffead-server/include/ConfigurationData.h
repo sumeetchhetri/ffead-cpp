@@ -69,22 +69,10 @@ public:
 	string loginUrl;
 	string welocmeFile;
 	long sessTimeout;
-	bool isLoginConfigured()
-	{
-		return (loginProvider!="" && loginUrl!="");
-	}
-	bool isSecureConfigured()
-	{
-		return secures.size()!=0;
-	}
-	bool isLoginUrl(string url, string actUrl)
-	{
-		return (actUrl==(url+"/_ffead_security_cntxt_login_url"));
-	}
-	bool isLoginPage(string url, string actUrl)
-	{
-		return (actUrl==(url+"/"+loginUrl));
-	}
+	bool isLoginConfigured();
+	bool isSecureConfigured();
+	bool isLoginUrl(string url, string actUrl);
+	bool isLoginPage(string url, string actUrl);
 	SecureAspect matchesPath(string url);
 };
 
@@ -97,63 +85,9 @@ public:
 	bool allwdCredentials;
 	string exposedHeaders;
 	long maxAge;
-	bool isOriginAllowed(strVec reqOrgLst)
-	{
-		strVec orgLst;
-		StringUtil::trim(allwdOrigins);
-		if(allwdOrigins=="*")
-		{
-			return true;
-		}
-		StringUtil::split(orgLst, allwdOrigins, (","));
-		for (int var = 0; var < (int)reqOrgLst.size(); ++var) {
-			for (int var1 = 0; var1 < (int)orgLst.size(); ++var1) {
-				if(StringUtil::toLowerCopy(orgLst.at(var1))==StringUtil::toLowerCopy(reqOrgLst.at(var)))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	bool isMethodAllowed(string method)
-	{
-		if(method=="")
-		{
-			return false;
-		}
-		strVec methLst;
-		StringUtil::trim(allwdMethods);
-		StringUtil::split(methLst, allwdMethods, (","));
-		for (int var = 0; var < (int)methLst.size(); ++var) {
-			if(StringUtil::toLowerCopy(method)==StringUtil::toLowerCopy(methLst.at(var)))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	bool isHeaderAllowed(strVec reqHdrLst, string& erheadr)
-	{
-		strVec hdrLst;
-		StringUtil::trim(allwdHeaders);
-		if(allwdHeaders=="*")
-		{
-			return true;
-		}
-		StringUtil::split(hdrLst, allwdHeaders, (","));
-		for (int var = 0; var < (int)reqHdrLst.size(); ++var) {
-			for (int var1 = 0; var1 < (int)hdrLst.size(); ++var1) {
-				if(StringUtil::toLowerCopy(hdrLst.at(var1))==StringUtil::toLowerCopy(reqHdrLst.at(var)))
-				{
-					return true;
-				}
-			}
-			erheadr = StringUtil::toUpperCopy(reqHdrLst.at(var));
-			break;
-		}
-		return false;
-	}
+	bool isOriginAllowed(strVec reqOrgLst);
+	bool isMethodAllowed(string method);
+	bool isHeaderAllowed(strVec reqHdrLst, string& erheadr);
 };
 
 class ConfigurationData {

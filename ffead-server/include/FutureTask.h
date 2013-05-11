@@ -32,20 +32,8 @@ class FutureTask : Task {
 	void* result;
 	bool isComplete;
 	Mutex m_mutex;
-	void taskComplete()
-	{
-		m_mutex.lock();
-		isComplete = true;
-		m_mutex.unlock();
-	}
-	bool isTaskComplete()
-	{
-		bool flag = false;
-		m_mutex.lock();
-		flag = isComplete;
-		m_mutex.unlock();
-		return flag;
-	}
+	void taskComplete();
+	bool isTaskComplete();
 public:
 	FutureTask();
 	FutureTask(int priority);

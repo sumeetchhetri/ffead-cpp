@@ -32,7 +32,7 @@ SecurityHandler::~SecurityHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-bool SecurityHandler::handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, long sessionTimeout, void* dlib)
+bool SecurityHandler::handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, long sessionTimeout)
 {
 	string ip_addr = configData.ip_address;
 	map<string, Security> securityObjectMap = configData.securityObjectMap;
@@ -102,7 +102,7 @@ bool SecurityHandler::handle(ConfigurationData configData, HttpRequest* req, Htt
 				claz = claz.substr(claz.find(":")+1);
 				logger << ("Auth handled by class " + claz) << endl;
 
-				void *_temp = configData.ffeadContext->getBean("login-handler_"+req->getCntxt_name()+claz);
+				void *_temp = configData.ffeadContext->getBean("login-handler_"+req->getCntxt_name()+claz, req->getCntxt_name());
 				AuthController* loginc = static_cast<AuthController*>(_temp);
 				if(loginc!=NULL && loginc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
 					req->getRequestParam("_ffead_security_cntxt_password")))
@@ -125,40 +125,6 @@ bool SecurityHandler::handle(ConfigurationData configData, HttpRequest* req, Htt
 					isContrl = true;
 				}
 				logger << "Login controller called" << endl;
-
-				/*claz = "getReflectionCIFor" + claz;
-				if(dlib == NULL)
-				{
-					cerr << dlerror() << endl;
-					exit(-1);
-				}
-				void *mkr = dlsym(dlib, claz.c_str());
-				if(mkr!=NULL)
-				{
-					FunPtr f =  (FunPtr)mkr;
-					ClassInfo srv = f();
-					args argus;
-					Constructor ctor = srv.getConstructor(argus);
-					Reflector ref;
-					void *_temp = ref.newInstanceGVP(ctor);
-					AuthController* loginc = (AuthController*)_temp;
-					if(loginc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
-						req->getRequestParam("_ffead_security_cntxt_password")))
-					{
-						userRole = loginc->getUserRole(req->getRequestParam("_ffead_security_cntxt_username"));
-						logger << ("Valid user " + req->getRequestParam("_ffead_security_cntxt_username")
-								+ ", role is "  + userRole) << endl;
-						validUser = true;
-					}
-					else
-					{
-						logger << "Invalid user" << endl;
-						res.setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-						isContrl = true;
-					}
-					logger << "Login controller called" << endl;
-					delete loginc;
-				}*/
 
 			}
 			if(validUser && (aspect.role==userRole || securityObject.isLoginPage(serverUrl, actUrl)))

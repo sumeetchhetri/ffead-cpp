@@ -167,3 +167,13 @@ Date* DateFormat::parse(string strdate)
 		CastUtil::lexical_cast<int>(mi), CastUtil::lexical_cast<int>(ss));
 	return date;
 }
+
+string DateFormat::getFormatspec() const
+{
+	return formatspec;
+}
+
+void DateFormat::setFormatspec(string formatspec)
+{
+	this->formatspec = formatspec;
+}

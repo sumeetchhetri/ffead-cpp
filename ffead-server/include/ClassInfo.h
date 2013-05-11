@@ -47,6 +47,8 @@ public:
     void setClassName(string);
     string getBase() const;
     void setBase(string);
+    void setNamespace(string);
+    string getNamespace();
     /*string getPublic_fields() const;
     void setPublic_fields(string);
     string getPrivate_fields() const;
@@ -78,6 +80,7 @@ private:
 	void* instance;
 	string className;
 	string base;
+	string namespc;
 	/*string public_fields;
 	string private_fields;
 	string protected_fields;

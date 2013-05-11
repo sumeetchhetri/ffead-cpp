@@ -43,7 +43,6 @@ class ExtHandler {
 public:
 	ExtHandler();
 	virtual ~ExtHandler();
-	static string getContentStr(string url,string locale,string ext);
 	static bool handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib, ConfigurationData configData ,string ext);
 };
 

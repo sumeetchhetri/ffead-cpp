@@ -64,6 +64,8 @@ string HttpResponse::Warning				 = "Warning";
 string HttpResponse::WWWAuthenticate			 = "WWW-Authenticate";
 
 HttpResponse::HttpResponse() {
+	httpVersion = "HTTP/1.1";
+	compressed = false;
 	logger = Logger::getLogger("HttpResponse");
 }
 
@@ -71,6 +73,13 @@ HttpResponse::~HttpResponse() {
 }
 
 string HttpResponse::generateResponse()
+{
+	string resp = generateHeadResponse();
+	resp += this->content_str;
+	return resp;
+}
+
+string HttpResponse::generateHeadResponse()
 {
 	addHeaderValue("Server", "FFEAD 1.1");
 	bool isTE = isHeaderValue("Transfer-Encoding", "chunked");
@@ -87,9 +96,9 @@ string HttpResponse::generateResponse()
 			map<string,string>::iterator it;
 			for(it=headers.begin();it!=headers.end();++it)
 			{
-				resp += it->first + ": " + it->second + "\r\n";
+				content_str += it->first + ": " + it->second + "\r\n";
 			}
-			resp += "\r\n";
+			content_str += "\r\n";
 			content_str += contentList.at(var).getContent();
 			content_str += "\r\n";
 		}
@@ -110,14 +119,14 @@ string HttpResponse::generateResponse()
 		{
 			if(this->content_str!="")
 			{
-				this->content_str = CompressionUtil::gzipCompress(this->content_str);
+				this->content_str = CompressionUtil::gzipCompress(this->content_str, true);
 			}
 		}
 		if(isCEDef)
 		{
 			if(this->content_str!="")
 			{
-				this->content_str = CompressionUtil::zlibCompress(this->content_str);
+				this->content_str = CompressionUtil::zlibCompress(this->content_str, true);
 			}
 		}
 	}
@@ -125,25 +134,6 @@ string HttpResponse::generateResponse()
 	{
 		headers["Content-Length"] = CastUtil::lexical_cast<string>((int)content_str.length());
 	}
-	map<string,string>::iterator it;
-	for(it=headers.begin();it!=headers.end();++it)
-	{
-		resp += it->first + ": " + it->second + "\r\n";
-	}
-	for (int var = 0; var < (int)this->cookies.size(); var++)
-	{
-		resp += "Set-Cookie: " + this->cookies.at(var) + "\r\n";
-	}
-	resp += "\r\n";
-	resp += this->content_str;
-	return resp;
-}
-
-string HttpResponse::generateHeadResponse()
-{
-	addHeaderValue("Server", "FFEAD 1.1");
-	string resp;
-	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
 	map<string,string>::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
@@ -219,9 +209,9 @@ string HttpResponse::getHttpVersion() const
 	return httpVersion;
 }
 
-void HttpResponse::setHttpVersion(string httpVersion)
+void HttpResponse::update(HttpRequest* req)
 {
-	this->httpVersion = httpVersion;
+	this->httpVersion = req->getHttpVersion();
 }
 
 void HttpResponse::setHTTPResponseStatus(HTTPResponseStatus status)
@@ -279,6 +269,7 @@ void HttpResponse::addContent(MultipartContent content)
 
 void HttpResponse::addHeaderValue(string header, string value)
 {
+	header = StringUtil::camelCasedCopy(header, "-");
 	if(header!="")
 	{
 		if(VALID_RESPONSE_HEADERS.find(","+StringUtil::toLowerCopy(header)+",")!=string::npos)
@@ -288,7 +279,7 @@ void HttpResponse::addHeaderValue(string header, string value)
 		else
 		{
 			logger << ("Non standard Header string " + header) << endl;
-			vector<string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z][a-zA-Z]*[a-zA-Z]$");
+			vector<string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
 			if(matres.size()==0)
 			{
 				logger << ("Invalid Header string " + header) << endl;
@@ -301,6 +292,7 @@ void HttpResponse::addHeaderValue(string header, string value)
 
 bool HttpResponse::isHeaderValue(string header, string value, bool ignoreCase)
 {
+	header = StringUtil::camelCasedCopy(header, "-");
 	return header!="" && headers.find(header)!=headers.end()
 			&& (headers[header]==value ||
 					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
@@ -308,6 +300,7 @@ bool HttpResponse::isHeaderValue(string header, string value, bool ignoreCase)
 
 string HttpResponse::getHeader(string header)
 {
+	header = StringUtil::camelCasedCopy(header, "-");
 	if(header!="" && headers.find(header)!=headers.end())
 		return headers[header];
 	return "";
@@ -315,7 +308,7 @@ string HttpResponse::getHeader(string header)
 
 bool HttpResponse::isNonBinary()
 {
-	string contType = StringUtil::toLowerCopy(getHeader("Content-Type"));
+	string contType = StringUtil::toLowerCopy(getHeader(ContentType));
 	return (contType.find("text")!=string::npos || contType.find("css")!=string::npos
 			|| contType.find("x-javascript")!=string::npos || contType.find("json")!=string::npos
 			|| contType.find("xml")!=string::npos || contType.find("html")!=string::npos);

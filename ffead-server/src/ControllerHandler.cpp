@@ -31,7 +31,7 @@ ControllerHandler::~ControllerHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData, void* dlib,
+bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
 		string ext, string pthwofile)
 {
 	map<string, string> urlpattMap = configData.urlpattMap;
@@ -51,7 +51,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 		else
 			controller = urlMap[req->getCntxt_name()+ext];
 
-		void *_temp = configData.ffeadContext->getBean("controller_"+req->getCntxt_name()+controller);
+		void *_temp = configData.ffeadContext->getBean("controller_"+req->getCntxt_name()+controller, req->getCntxt_name());
 		Controller* thrd = static_cast<Controller*>(_temp);
 		if(thrd!=NULL)
 		{
@@ -74,35 +74,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 			isContrl = true;
 		}
 
-		/*claz = "getReflectionCIFor" + controller;
-		string libName = Constants::INTER_LIB_FILE;
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
-		void *mkr = dlsym(dlib, claz.c_str());
-		if(mkr!=NULL)
-		{
-			FunPtr f =  (FunPtr)mkr;
-			ClassInfo srv = f();
-			args argus;
-			Constructor ctor = srv.getConstructor(argus);
-			Reflector ref;
-			void *_temp = ref.newInstanceGVP(ctor);
-			Controller *thrd = (Controller *)_temp;
-			try{
-				 logger << ("Controller " + controller + " called") << endl;
-				 res = thrd->service(*req);
-				 if(res.getStatusCode()!="")
-					 isContrl = true;
-				 ext = AuthHandler::getFileExtension(req->getUrl());
-				 //delete mkr;
-			}catch(...){
-				logger << "Controller Exception occurred" << endl;
-			}
-			logger << "Controller call complete" << endl;
-		}*/
 	}
 	else if((mappattMap[req->getCntxt_name()+"*.*"]!="" || mapMap[req->getCntxt_name()+ext]!=""))
 	{
@@ -223,8 +194,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 		{
 			//logger << "inside restcontroller logic ..." << endl;
 			Reflector ref;
-			ClassInfo srv = ref.getClassInfo(rft.clas);
-			void *_temp = configData.ffeadContext->getBean("restcontroller_"+req->getCntxt_name()+rft.clas);
+			ClassInfo srv = ref.getClassInfo(rft.clas, req->getCntxt_name());
+			void *_temp = configData.ffeadContext->getBean("restcontroller_"+req->getCntxt_name()+rft.clas, req->getCntxt_name());
 			RestController* rstcnt = (RestController*)_temp;
 			if(rstcnt==NULL)
 			{
@@ -329,11 +300,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 						void* voidPvect = NULL;
 						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 						{
-							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+">");
+							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+">",req->getCntxt_name());
 						}
 						else
 						{
-							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+",");
+							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+",",req->getCntxt_name());
 						}
 						if(voidPvect==NULL)
 						{
@@ -348,11 +319,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 						void* voidPvect = NULL;
 						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 						{
-							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type);
+							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type,req->getCntxt_name());
 						}
 						else
 						{
-							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type);
+							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type,req->getCntxt_name());
 						}
 						if(voidPvect==NULL)
 						{
@@ -389,181 +360,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 				logger << "Rest Controller Method Not Found" << endl;
 				//return;
 			}
-
-			/*string libName = Constants::INTER_LIB_FILE;
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
-			string clasnam("getReflectionCIFor"+rft.clas);
-			void *mkr = dlsym(dlib, clasnam.c_str());
-			logger << mkr << endl;
-			if(mkr!=NULL)
-			{
-				FunPtr f =  (FunPtr)mkr;
-				ClassInfo srv = f();
-				args argus;
-				Constructor ctor = srv.getConstructor(argus);
-				Reflector ref;
-				void *_temp = ref.newInstanceGVP(ctor);
-				RestController* rstcnt = (RestController*)_temp;
-				rstcnt->request = req;
-				rstcnt->response = &res;
-
-				vals valus;
-				bool invValue = false;
-				for (int var = 0; var < prsiz; var++)
-				{
-					try
-					{
-						string icont = rft.icontentType;
-						string ocont = rft.ocontentType;
-
-						if(icont=="")
-							icont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
-						else if(icont!=req->getHeader(HttpRequest::ContentType))
-						{
-							res.setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
-							return true;
-						}
-
-						if(ocont=="")
-							ocont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
-
-						req->addHeaderValue(HttpRequest::ContentType, icont);
-						res.addHeaderValue(HttpResponse::ContentType, ocont);
-
-						string pmvalue;
-						if(rft.params.at(var).from=="path")
-							pmvalue = mapOfValues[rft.params.at(var).name];
-						else if(rft.params.at(var).from=="reqparam")
-							pmvalue = req->getQueryParam(rft.params.at(var).name);
-						else if(rft.params.at(var).from=="postparam")
-							pmvalue = req->getRequestParam(rft.params.at(var).name);
-						else if(rft.params.at(var).from=="header")
-							pmvalue = req->getXtraHeader(rft.params.at(var).name);
-						else
-							pmvalue = req->getContent();
-
-						logger << ("Restcontroller parameter type/value = "  + rft.params.at(var).type + "/" + pmvalue) << endl;
-						logger << ("Restcontroller content types input/output = " + icont + "/" + ocont) << endl;
-
-						if(rft.params.at(var).type=="int")
-						{
-							argus.push_back(rft.params.at(var).type);
-							int* ival = new int(CastUtil::lexical_cast<int>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="short")
-						{
-							argus.push_back(rft.params.at(var).type);
-							short* ival = new short(CastUtil::lexical_cast<short>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="long")
-						{
-							argus.push_back(rft.params.at(var).type);
-							long* ival = new long(CastUtil::lexical_cast<long>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="double")
-						{
-							argus.push_back(rft.params.at(var).type);
-							double* ival = new double(CastUtil::lexical_cast<double>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="float")
-						{
-							argus.push_back(rft.params.at(var).type);
-							float* ival = new float(CastUtil::lexical_cast<float>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="bool")
-						{
-							argus.push_back(rft.params.at(var).type);
-							bool* ival = new bool(CastUtil::lexical_cast<bool>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="string" || rft.params.at(var).type=="std::string")
-						{
-							argus.push_back(rft.params.at(var).type);
-							string* sval = new string(pmvalue);
-							valus.push_back(sval);
-						}
-						else if(rft.params.at(var).type.find("vector&lt;")==0)
-						{
-							string stlcnt = rft.params.at(var).type;
-							StringUtil::replaceFirst(stlcnt,"vector&lt;","");
-							StringUtil::replaceFirst(stlcnt,"&gt;","");
-							StringUtil::replaceFirst(stlcnt," ","");
-							logger << ("Restcontroller param body holds vector of type "  + stlcnt) << endl;
-							string typp = "vector<" + stlcnt + ">";
-							argus.push_back(typp);
-							void* voidPvect = NULL;
-							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
-							{
-								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+">");
-							}
-							else
-							{
-								voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+",");
-							}
-							if(voidPvect==NULL)
-							{
-								res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-								return true;
-							}
-							valus.push_back(voidPvect);
-						}
-						else
-						{
-							argus.push_back(rft.params.at(var).type);
-							void* voidPvect = NULL;
-							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
-							{
-								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type);
-							}
-							else
-							{
-								voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type);
-							}
-							if(voidPvect==NULL)
-							{
-								res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-								return true;
-							}
-							valus.push_back(voidPvect);
-						}
-					} catch (const char* ex) {
-						logger << "Restcontroller exception occurred" << endl;
-						logger << ex << endl;
-						invValue= true;
-						res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-						return true;
-					} catch (...) {
-						logger << "Restcontroller exception occurred" << endl;
-						invValue= true;
-						res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-						return true;
-					}
-				}
-
-				Method meth = srv.getMethod(rft.name, argus);
-				if(meth.getMethodName()!="" && !invValue)
-				{
-					ref.invokeMethodUnknownReturn(_temp,meth,valus);
-					logger << "Successfully called restcontroller" << endl;
-					//return;
-				}
-				else
-				{
-					res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-					//res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-					logger << "Rest Controller Method Not Found" << endl;
-					//return;
-				}
-			}*/
 		}
 	}
 	return isContrl;

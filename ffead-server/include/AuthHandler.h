@@ -36,7 +36,7 @@ public:
 	AuthHandler();
 	virtual ~AuthHandler();
 	static string getFileExtension(const string& file);
-	static bool handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, void* dlib, string ext);
+	static bool handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, string ext);
 };
 
 #endif /* AUTHHANDLER_H_ */

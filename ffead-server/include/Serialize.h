@@ -43,32 +43,32 @@ typedef void* (*UnSerPtr) (string);
 class Serialize {
 	static string demangle(const char *mangled);
 	static string getClassName(void* instance);
-	static string _handleAllSerialization(string className,void *t);
-	static void* _handleAllUnSerialization(string objXml,string className);
-	static string _ser(void* t,string classN);
-	static string _servec(void* t,string classN);
-	static string _serlis(void* t,string classN);
-	static string _serset(void* t,string classN);
-	static string _sermultiset(void* t,string classN);
-	static string _serq(void* t,string classN);
-	static string _serdq(void* t,string classN);
-	static string _ser(Object);
-	static void* _unser(string objXml,string classN);
-	static void* unserializevec(AMEFObject* root, string objXml);
-	static void* unserializelist(AMEFObject* root, string objXml);
-	static void* unserializeset(AMEFObject* root, string objXml);
-	static void* unserializemultiset(AMEFObject* root, string objXml);
-	static void* unserializeq(AMEFObject* root, string objXml);
-	static void* unserializedq(AMEFObject* root, string objXml);
+	static string _handleAllSerialization(string className,void *t, string appName);
+	static void* _handleAllUnSerialization(string objXml,string className, string appName);
+	static string _ser(void* t,string classN, string appName);
+	static string _servec(void* t,string classN, string appName);
+	static string _serlis(void* t,string classN, string appName);
+	static string _serset(void* t,string classN, string appName);
+	static string _sermultiset(void* t,string classN, string appName);
+	static string _serq(void* t,string classN, string appName);
+	static string _serdq(void* t,string classN, string appName);
+	static string _ser(Object, string appName);
+	static void* _unser(string objXml,string classN, string appName);
+	static void* unserializevec(AMEFObject* root, string objXml, string appName);
+	static void* unserializelist(AMEFObject* root, string objXml, string appName);
+	static void* unserializeset(AMEFObject* root, string objXml, string appName);
+	static void* unserializemultiset(AMEFObject* root, string objXml, string appName);
+	static void* unserializeq(AMEFObject* root, string objXml, string appName);
+	static void* unserializedq(AMEFObject* root, string objXml, string appName);
 
-	static void* _unserVec(string objXml,string className);
-	static void* _unserLis(string objXml,string className);
-	static void* _unserQ(string objXml,string className);
-	static void* _unserDq(string objXml,string className);
-	static void* _unserSet(string objXml,string className);
-	static void* _unserMulSet(string objXml,string className);
+	static void* _unserVec(string objXml,string className, string appName);
+	static void* _unserLis(string objXml,string className, string appName);
+	static void* _unserQ(string objXml,string className, string appName);
+	static void* _unserDq(string objXml,string className, string appName);
+	static void* _unserSet(string objXml,string className, string appName);
+	static void* _unserMulSet(string objXml,string className, string appName);
 
-	template <class T> static string serializeset(set<T> t)
+	template <class T> static string serializeset(set<T> t, string appName)
 	{
 		set<T> st = t;
 		T td;
@@ -81,12 +81,12 @@ class Serialize {
 		object.setName(className);
 		while(cnt++<(int)t.size())
 		{
-			object.addPacket(serialize<T>(*st.begin()));
+			object.addPacket(serialize<T>(*st.begin(),appName));
 			st.erase(st.begin());
 		}
 		return enc.encodeB(&object, false);
 	}
-	template <class T> static string serializemultiset(multiset<T> t)
+	template <class T> static string serializemultiset(multiset<T> t, string appName)
 	{
 		multiset<T> st = t;
 		T td;
@@ -99,12 +99,12 @@ class Serialize {
 		object.setName(className);
 		while(cnt++<(int)t.size())
 		{
-			object.addPacket(serialize<T>(*st.begin()));
+			object.addPacket(serialize<T>(*st.begin(),appName));
 			st.erase(st.begin());
 		}
 		return enc.encodeB(&object, false);
 	}
-	template <class T> static string serializevec(vector<T> t)
+	template <class T> static string serializevec(vector<T> t, string appName)
 	{
 		vector<T> st = t;
 		T td;
@@ -117,12 +117,12 @@ class Serialize {
 		object.setName(className);
 		while(cnt++<(int)t.size())
 		{
-			object.addPacket(serialize<T>(*st.begin()));
+			object.addPacket(serialize<T>(*st.begin(),appName));
 			st.erase(st.begin());
 		}
 		return enc.encodeB(&object, false);
 	}
-	template <class T> static string serializedq(deque<T> t)
+	template <class T> static string serializedq(deque<T> t, string appName)
 	{
 		deque<T> st = t;
 		T td;
@@ -135,12 +135,12 @@ class Serialize {
 		object.setName(className);
 		while(cnt++<(int)t.size())
 		{
-			object.addPacket(serialize<T>(*st.begin()));
+			object.addPacket(serialize<T>(*st.begin(),appName));
 			st.erase(st.begin());
 		}
 		return enc.encodeB(&object, false);
 	}
-	template <class T> static string serializelist(list<T> t)
+	template <class T> static string serializelist(list<T> t, string appName)
 	{
 		list<T> st = t;
 		T td;
@@ -153,12 +153,12 @@ class Serialize {
 		object.setName(className);
 		while(cnt++<(int)t.size())
 		{
-			object.addPacket(serialize<T>(*st.begin()));
+			object.addPacket(serialize<T>(*st.begin(),appName));
 			st.erase(st.begin());
 		}
 		return enc.encodeB(&object, false);
 	}
-	template <class T> static string serializeq(std::queue<T> t)
+	template <class T> static string serializeq(std::queue<T> t, string appName)
 	{
 		std::queue<T> tt = t;
 		T td;
@@ -172,13 +172,13 @@ class Serialize {
 		{
 			for(int var=0;var<(int)tt.size();var++)
 			{
-				object.addPacket(serialize<T>(tt.front()));
+				object.addPacket(serialize<T>(tt.front(),appName));
 				tt.pop();
 			}
 		}
 		return enc.encodeB(&object, false);
 	}
-	/*template <class T> static string serializestack(stack<T> t)
+	/*template <class T> static string serializestack(stack<T> t, string appName)
 	{
 		stack<T> tt = t;
 		T td;
@@ -192,7 +192,7 @@ class Serialize {
 		{
 			for(int var=0;var<(int)tt.size();var++)
 			{
-				object.addPacket(serialize<T>(tt.front()));
+				object.addPacket(serialize<T>(tt.front(),appName));
 				tt.pop();
 			}
 		}
@@ -202,24 +202,24 @@ public:
 	Serialize(){}
 	~Serialize(){}
 
-	template <class T> static string serialize(T t)
+	template <class T> static string serialize(T t, string appName = "default")
 	{
 		string objXml;
 		const char *mangled = typeid(t).name();
 		string className = demangle(mangled);
-		return _handleAllSerialization(className,&t);
+		return _handleAllSerialization(className,&t,appName);
 	}
-	static string serializeObject(Object t)
+	static string serializeObject(Object t, string appName = "default")
 	{
-		return _handleAllSerialization(t.getTypeName(),t.getVoidPointer());
+		return _handleAllSerialization(t.getTypeName(),t.getVoidPointer(),appName);
 	}
 
-	static string serializeUnknown(void* t,string className)
+	static string serializeUnknown(void* t,string className, string appName = "default")
 	{
-		return _handleAllSerialization(className,t);
+		return _handleAllSerialization(className,t,appName);
 	}
 
-	template <class K,class V> static string serialize(map<K,V> mp)
+	template <class K,class V> static string serialize(map<K,V> mp, string appName = "default")
 	{
 		map<K,V> mpt  = mp;
 		AMEFEncoder enc;
@@ -234,15 +234,15 @@ public:
 		object.setName(kclassName);
 		while (mpt.begin()!=mpt.end())
 		{
-			string key = serialize<K>(mpt.begin()->first);
-			string value = serialize<V>(mpt.begin()->second);
+			string key = serialize<K>(mpt.begin()->first,appName);
+			string value = serialize<V>(mpt.begin()->second,appName);
 			mpt.erase(mpt.begin());
 			object.addPacket(value, key);
 		}
 		return enc.encodeB(&object, false);
 	}
 
-	template <class K,class V> static string serialize(multimap<K,V> mp)
+	template <class K,class V> static string serialize(multimap<K,V> mp, string appName = "default")
 	{
 		multimap<K,V> mpt  = mp;
 		AMEFEncoder enc;
@@ -257,25 +257,25 @@ public:
 		object.setName(kclassName);
 		while (mpt.begin()!=mpt.end())
 		{
-			string key = serialize<K>(mpt.begin()->first);
-			string value = serialize<V>(mpt.begin()->second);
+			string key = serialize<K>(mpt.begin()->first,appName);
+			string value = serialize<V>(mpt.begin()->second,appName);
 			mpt.erase(mpt.begin());
 			object.addPacket(value, key);
 		}
 		return enc.encodeB(&object, false);
 	}
 
-	template <class T> T static unserialize(string objXml)
+	template <class T> T static unserialize(string objXml, string appName = "default")
 	{
 		T t;
 		const char *mangled = typeid(t).name();
 		string className = demangle(mangled);
-		return *(T*)_handleAllUnSerialization(objXml,className);
+		return *(T*)_handleAllUnSerialization(objXml,className,appName);
 	}
 
-	static void* unSerializeUnknown(string objXml,string className)
+	static void* unSerializeUnknown(string objXml,string className, string appName = "default")
 	{
-		return _handleAllUnSerialization(objXml,className);
+		return _handleAllUnSerialization(objXml,className,appName);
 	}
 };
 #endif

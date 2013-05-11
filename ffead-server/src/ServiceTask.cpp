@@ -227,7 +227,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 			return;
 		}
 
-		if(res->isHeaderValue("Content-Encoding", "gzip"))
+		if(res->isHeaderValue(HttpResponse::ContentEncoding, "gzip"))
 		{
 			string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".gz";
 			ifstream gzipdfile(ofname.c_str());
@@ -241,8 +241,9 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 			}
 			fname = ofname;
 			res->setCompressed(true);
+			req->setUrl(fname);
 		}
-		else if(res->isHeaderValue("Content-Encoding", "deflate"))
+		else if(res->isHeaderValue(HttpResponse::ContentEncoding, "deflate"))
 		{
 			string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".z";
 			ifstream gzipdfile(ofname.c_str());
@@ -256,6 +257,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 			}
 			fname = ofname;
 			res->setCompressed(true);
+			req->setUrl(fname);
 		}
 
 		logger << ("Content request for " + url + " " + ext + " actual file " + fname) << endl;
@@ -269,13 +271,18 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 		string lastmodDate = df.format(fdate.toGMT());
 		res->addHeaderValue(HttpResponse::LastModified, lastmodDate);
 
-		if(res->isHeaderValue("If-Modified-Since", lastmodDate))
+		if(req->isHeaderValue(HttpRequest::IfModifiedSince, lastmodDate))
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
 			return;
 		}
 
-		if(rangeValuesLst.size()>0)
+		if(req->getHttpVers()<1.1 && rangeValuesLst.size()>0)
+		{
+			res->setHTTPResponseStatus(HTTPResponseStatus::InvalidReqRange);
+			return;
+		}
+		else if(rangeValuesLst.size()>0)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::PartialContent);
 			res->addHeaderValue(HttpResponse::ContentType, "multipart/byteranges");
@@ -299,8 +306,8 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 					string cont = getFileContents(fname.c_str(), start, end);
 					MultipartContent conte;
 					conte.setContent(cont);
-					conte.addHeaderValue("Content-Type", type);
-					conte.addHeaderValue("Content-Ranges", "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<string>(totlen));
+					conte.addHeaderValue(MultipartContent::ContentType, type);
+					conte.addHeaderValue(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<string>(totlen));
 					res->addContent(conte);
 				}
 			}
@@ -313,7 +320,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 
 			if(parts>1)
 			{
-				res->addHeaderValue("Transfer-Encoding", "chunked");
+				res->addHeaderValue(HttpResponse::TransferEncoding, "chunked");
 				all = StringUtil::toHEX(techunkSiz) + "\r\n";
 				all += getFileContents(fname.c_str(), 0, techunkSiz);
 				all += "\r\n";
@@ -381,7 +388,7 @@ void ServiceTask::run()
 	BIO *io=NULL,*ssl_bio=NULL;
 	Timer timer;
 	timer.start();
-	int connKeepAlive = 10, techunkSiz = 8192;
+	int connKeepAlive = 10, techunkSiz = 8192, maxReqHdrCnt = 100, maxEntitySize = 2147483648;
 	string cntEnc = "";
 	try {
 		connKeepAlive = CastUtil::lexical_cast<int>(configData.sprops["KEEP_ALIVE_SECONDS"]);
@@ -389,6 +396,14 @@ void ServiceTask::run()
 	}
 	try {
 		techunkSiz = CastUtil::lexical_cast<int>(configData.sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);
+	} catch (...) {
+	}
+	try {
+		maxReqHdrCnt = CastUtil::lexical_cast<int>(configData.sprops["MAX_REQUEST_HEADERS_COUNT"]);
+	} catch (...) {
+	}
+	try {
+		maxEntitySize = CastUtil::lexical_cast<int>(configData.sprops["MAX_REQUEST_ENTITY_SIZE"]);
 	} catch (...) {
 	}
 	cntEnc = StringUtil::toLowerCopy(configData.sprops["CONTENT_ENCODING"]);
@@ -427,6 +442,8 @@ void ServiceTask::run()
 	{
 		try
 		{
+			HttpResponse res;
+
 			//Close the connection after inactivity period of connKeepAlive seconds
 			if(!checkSocketWaitForTimeout(fd, 0, connKeepAlive))
 			{
@@ -452,6 +469,15 @@ void ServiceTask::run()
 				headerCount++;
 				string temp;
 				bool fl = readLine(isSSLEnabled, ssl, sslHandler, io, fd, temp);
+				if(temp.length()>32765)
+				{
+					res.setHTTPResponseStatus(HTTPResponseStatus::ReqUrlLarge);
+					res.addHeaderValue(HttpResponse::Connection, "close");
+					sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
+					logger << "Closing connection..." << endl;
+					closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+					return;
+				}
 				if(!fl)
 				{
 					return;
@@ -463,9 +489,9 @@ void ServiceTask::run()
 				if(temp=="")continue;
 				temp = temp.substr(0,temp.length()-1);
 				results.push_back(temp);
-				if(headerCount>=50)
+				if(headerCount>=maxReqHdrCnt)
 				{
-					sslHandler.error_occurred((char*)"Cannot accept more than 50 headers",fd,ssl);
+					sslHandler.error_occurred((char*)("Cannot accept more than "+CastUtil::lexical_cast<string>(maxReqHdrCnt)+" headers").c_str(),fd,ssl);
 					if(io!=NULL)BIO_free(io);
 					break;
 				}
@@ -475,10 +501,30 @@ void ServiceTask::run()
 			string webpath = serverRootDirectory + "web/";
 			//Parse the HTTP headers
 			HttpRequest* req= new HttpRequest(results, webpath);
-			string cntle = req->getHeader("Content-Length");
+
+			if(req->getRequestParseStatus().getCode()>0)
+			{
+				res.setHTTPResponseStatus(req->getRequestParseStatus());
+				res.addHeaderValue(HttpResponse::Connection, "close");
+				sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
+				logger << "Closing connection..." << endl;
+				closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+				return;
+			}
+
+			string cntle = req->getHeader(HttpRequest::ContentLength);
 			try
 			{
 				cntlen = CastUtil::lexical_cast<int>(cntle);
+				if(cntlen>maxEntitySize)
+				{
+					res.setHTTPResponseStatus(HTTPResponseStatus::ReqEntityLarge);
+					res.addHeaderValue(HttpResponse::Connection, "close");
+					sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
+					logger << "Closing connection..." << endl;
+					closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+					return;
+				}
 			}
 			catch(const char* ex)
 			{
@@ -488,7 +534,12 @@ void ServiceTask::run()
 			if(req->getHeader(HttpRequest::ContentType).find("application/x-www-form-urlencoded")!=string::npos)
 			{
 				string content;
-				if(req->isHeaderValue("Transfer-Encoding", "chunked"))
+				/*
+				 * Clients can not send chunked requests, due to a requirement of pre-negotiation
+				 * in terms of how the request should be sent, this may be required in the future
+				 */
+				/*
+				if(req->isHeaderValue(HttpRequest::TransferEncoding, "chunked"))
 				{
 					while(true)
 					{
@@ -512,7 +563,8 @@ void ServiceTask::run()
 						}
 					}
 				}
-				else if(cntlen>0)
+				else */
+				if(cntlen>0)
 				{
 					if(!readData(isSSLEnabled, ssl, sslHandler, io, fd, cntlen, content))
 					{
@@ -523,7 +575,12 @@ void ServiceTask::run()
 			}
 			else
 			{
-				if(req->isHeaderValue("Transfer-Encoding", "chunked"))
+				/*
+				 * Clients can not send chunked requests, due to a requirement of pre-negotiation
+				 * in terms of how the request should be sent, this may be required in the future
+				 */
+				/*
+				if(req->isHeaderValue(HttpRequest::TransferEncoding, "chunked"))
 				{
 					string content;
 					ofstream filei;
@@ -575,7 +632,8 @@ void ServiceTask::run()
 						req->setContent(content);
 					}
 				}
-				else if(cntlen>0)
+				else */
+				if(cntlen>0)
 				{
 					bool fmode = cntlen > 2*102400;
 					string tfilen;
@@ -621,8 +679,13 @@ void ServiceTask::run()
 				}
 			}
 
-			bool isCEGzip = req->isHeaderValue("Content-Encoding", "gzip");
-			bool isCEDef = req->isHeaderValue("Content-Encoding", "deflate");
+			/*
+			 * Clients can not send compressed requests, due to a requirement of pre-negotiation
+			 * in terms of how the request should be sent, this may be required in the future
+			 */
+			/*
+			bool isCEGzip = req->isHeaderValue(HttpRequest::ContentEncoding, "gzip");
+			bool isCEDef = req->isHeaderValue(HttpRequest::ContentEncoding, "deflate");
 			if(isCEGzip || isCEDef)
 			{
 				if(req->getContent()!="")
@@ -663,6 +726,7 @@ void ServiceTask::run()
 					}
 				}
 			}
+			*/
 
 			//logger << req->toString() << endl;
 			req->updateContent();
@@ -731,7 +795,6 @@ void ServiceTask::run()
 				}
 			}
 
-			HttpResponse res;
 			string ext = getFileExtension(req->getUrl());
 			vector<unsigned char> test;
 			string content;
@@ -748,19 +811,31 @@ void ServiceTask::run()
 
 			if(!isContrl)
 			{
-				isContrl = securityHandler.handle(configData, req, res, sessionTimeoutVar, dlib);
+				isContrl = securityHandler.handle(configData, req, res, sessionTimeoutVar);
+				if(isContrl)
+				{
+					logger << ("Request handled by SecurityHandler") << endl;
+				}
 			}
 
 			if(!isContrl)
 			{
-				filterHandler.handleIn(req, res, configData, dlib, ext);
+				filterHandler.handleIn(req, res, configData, ext);
 
-				isContrl = !filterHandler.handle(req, res, configData, dlib, ext);
+				isContrl = !filterHandler.handle(req, res, configData, ext);
+				if(isContrl)
+				{
+					logger << ("Request handled by FilterHandler") << endl;
+				}
 			}
 
 			if(!isContrl)
 			{
-				isContrl = authHandler.handle(configData, req, res, dlib, ext);
+				isContrl = authHandler.handle(configData, req, res, ext);
+				if(isContrl)
+				{
+					logger << ("Request handled by AuthHandler") << endl;
+				}
 			}
 
 			string pthwofile = req->getCntxt_name()+req->getActUrl();
@@ -770,46 +845,66 @@ void ServiceTask::run()
 			}
 			if(!isContrl)
 			{
-				isContrl = controllerHandler.handle(req, res, configData, dlib, ext, pthwofile);
+				isContrl = controllerHandler.handle(req, res, configData, ext, pthwofile);
+				if(isContrl)
+				{
+					logger << ("Request handled by ControllerHandler") << endl;
+				}
 			}
 
 			/*After going through the controller the response might be blank, just set the HTTP version*/
-			res.setHttpVersion(req->getHttpVersion());
+			res.update(req);
 			res.addHeaderValue(HttpResponse::AcceptRanges, "none");
 			//logger << req->toString() << endl;
 			if(req->getMethod()!="TRACE")
 			{
+				string wsUrl = "http://" + configData.ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
 				if(isContrl)
 				{
 
 				}
 				else if(ext==".form")
 				{
-					formHandler.handle(req, res, configData, dlib);
+					formHandler.handle(req, res, configData);
+					logger << ("Request handled by FormHandler") << endl;
 				}
-				else if((req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos)
-						&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos)
-						&& configData.wsdlmap[req->getFile()]==req->getCntxt_name())
+				else if(configData.wsdlmap[wsUrl]!="")
 				{
-					soapHandler.handle(req, res, dlib, configData);
+					if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos
+							|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=string::npos)
+					{
+						soapHandler.handle(req, res, dlib, configData);
+					}
+					else
+					{
+						logger << ("Invalid Content type for soap request") << endl;
+						res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+					}
+					logger << ("Request handled by SoapHandler for Url "+wsUrl) << endl;
 				}
 				else
 				{
-					bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, dlib, ext, configData.props);
+					bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, ext, configData.props);
 					if(cntrlit)
 					{
-
+						logger << ("Request handled by ScriptHandler") << endl;
 					}
 					else
 					{
 						cntrlit = extHandler.handle(req, res, dlib, ddlib, configData, ext);
+						if(cntrlit)
+						{
+							logger << ("Request handled by ExtHandler") << endl;
+						}
 					}
 					if(!cntrlit && ext==".fview")
 					{
 						fviewHandler.handle(req, res, configData.fviewmap);
+						logger << ("Request handled by FviewHandler") << endl;
 					}
 					else
 					{
+						logger << ("Request for static resource/file") << endl;
 						if(req->isAgentAcceptsCE() && (cntEnc=="gzip" || cntEnc=="deflate") && req->isNonBinary(configData.props[ext]))
 						{
 							res.addHeaderValue(HttpResponse::ContentEncoding, cntEnc);
@@ -837,10 +932,10 @@ void ServiceTask::run()
 					}
 				}
 
-				filterHandler.handleOut(req, res, configData, dlib, ext);
+				filterHandler.handleOut(req, res, configData, ext);
 			}
 
-			bool isTE = res.isHeaderValue("Transfer-Encoding", "chunked");
+			bool isTE = res.isHeaderValue(HttpResponse::TransferEncoding, "chunked");
 			if(!isTE && req->isAgentAcceptsCE() && (cntEnc=="gzip" || cntEnc=="deflate") && res.isNonBinary())
 			{
 				res.addHeaderValue(HttpResponse::ContentEncoding, cntEnc);
@@ -860,7 +955,7 @@ void ServiceTask::run()
 
 			//An errored request/response phase will close the connection
 			if(StringUtil::toLowerCopy(req->getHeader(HttpRequest::Connection))!="keep-alive" || CastUtil::lexical_cast<int>(res.getStatusCode())>307
-					/* || (connKeepAlive>0 && timer.elapsedSeconds()>connKeepAlive)*/)
+					 || req->getHttpVers()<1.1)
 			{
 				res.addHeaderValue(HttpResponse::Connection, "close");
 				cont = false;
@@ -888,7 +983,7 @@ void ServiceTask::run()
 				h1 = res.generateResponse();
 			}
 
-			if(res.isHeaderValue("Transfer-Encoding", "chunked"))
+			if(res.isHeaderValue(HttpResponse::TransferEncoding, "chunked"))
 			{
 				sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, h1);
 
@@ -1204,13 +1299,13 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		string claz;
 		//bool isoAuthRes = false;
 		long sessionTimeoutVar = configData.sessionTimeout;
-		bool isContrl = securityHandler.handle(configData, req, res, sessionTimeoutVar, dlib);
+		bool isContrl = securityHandler.handle(configData, req, res, sessionTimeoutVar);
 
-		filterHandler.handleIn(req, res, configData, dlib, ext);
+		filterHandler.handleIn(req, res, configData, ext);
 
 		if(!isContrl)
 		{
-			isContrl = authHandler.handle(configData, req, res, dlib, ext);
+			isContrl = authHandler.handle(configData, req, res, ext);
 		}
 		string pthwofile = req->getCntxt_name()+req->getActUrl();
 		if(req->getCntxt_name()!="default" && configData.cntMap[req->getCntxt_name()]=="true")
@@ -1219,11 +1314,11 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		}
 		if(!isContrl)
 		{
-			isContrl = controllerHandler.handle(req, res, configData, dlib, ext, pthwofile);
+			isContrl = controllerHandler.handle(req, res, configData, ext, pthwofile);
 		}
 
 		/*After going through the controller the response might be blank, just set the HTTP version*/
-		res.setHttpVersion(req->getHttpVersion());
+		res.update(req);
 		//logger << req->toString() << endl;
 		if(req->getMethod()!="TRACE")
 		{
@@ -1233,7 +1328,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			}
 			else if(ext==".form")
 			{
-				formHandler.handle(req, res, configData, dlib);
+				formHandler.handle(req, res, configData);
 			}
 			else if((req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos)
 					&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos)
@@ -1243,7 +1338,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			}
 			else
 			{
-				bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, dlib, ext, configData.props);
+				bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, ext, configData.props);
 				if(cntrlit)
 				{
 
@@ -1280,7 +1375,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 				}
 			}
 
-			filterHandler.handleOut(req, res, configData, dlib, ext);
+			filterHandler.handleOut(req, res, configData, ext);
 		}
 
 		Date cdate;

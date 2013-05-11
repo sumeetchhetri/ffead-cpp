@@ -22,44 +22,126 @@
 
 #ifndef REFLECTION_H_
 #define REFLECTION_H_
-#include "PropFileReader.h"
-#include "Method.h"
-#include "Field.h"
 #include "CastUtil.h"
 #include "AfcUtil.h"
 #include "Logger.h"
 #include "RegexUtil.h"
-class Reflection {
-	strVec pub,pri,pro;
+
+class ClassStructure
+{
 	bool prosetser;
-	string classN,baseClassN,bcvisib;
-	bool generateClassInfoFromDD(string);
-	bool generateClassInfo(string);
-	void collectInfo(string,string);
-	strVec list(string);
-	map<string,bool> methsall;
-	static map<string,bool> invalidcls;
-	Logger logger;
+	strVec pub,pri,pro;
+	string classN,baseClassN,bcvisib,nmSpc;
+	vector<string> namespaces;
+	friend class Reflection;
 public:
-	static bool isValidClass(string claz)
+	string appName;
+	void toString()
+	{
+		cout << classN << " " << baseClassN << " " << bcvisib << " " << nmSpc << endl;
+		for (int var = 0; var < (int)namespaces.size(); ++var) {
+			cout << "using => " << namespaces.at(var) << endl;
+		}
+		for (int var = 0; var < (int)pub.size(); ++var) {
+			cout << "public => " << pub.at(var) << endl;
+		}
+		for (int var = 0; var < (int)pri.size(); ++var) {
+			cout << "private => "<< pri.at(var) << endl;
+		}
+		for (int var = 0; var < (int)pro.size(); ++var) {
+			cout << "protected => "<< pro.at(var) << endl;
+		}
+	}
+	string getTreatedClassName(bool flag)
+	{
+		if(flag)
+		{
+			string nm = nmSpc;
+			StringUtil::replaceAll(nm, "::", "_");
+			return nm+classN;
+		}
+		else
+		{
+			return classN;
+		}
+	}
+	string getFullyQualifiedClassName()
+	{
+		return nmSpc+classN;
+	}
+};
+
+class Reflection {
+	//bool generateClassInfoFromDD(string);
+	//bool generateClassInfo(string);
+	//void collectInfo(string,string);
+	map<string,bool> methsall;
+	map<string,bool> invalidcls;
+	map<string,string> clspaths;
+	map<string,string> classNamespaces;
+	map<string,int> nmspcIds;
+	Logger logger;
+	void handleNamespace(string data, string namepsc, map<string, ClassStructure>& clsvec, map<string, vector<string> >& glbnmspcs);
+	int findless(int a, int b, int c);
+	void collectInfo(string data, string flag, ClassStructure& cls);
+public:
+	map<string, ClassStructure> getClassStructures(string className);
+	strVec list(string);
+	bool isValidClass(string claz)
 	{
 		return invalidcls.find(claz)==invalidcls.end();
 	}
+	string getClassPath(string claz)
+	{
+		if(clspaths.find(claz)!=clspaths.end())
+		{
+			return clspaths[claz];
+		}
+		return "";
+	}
+	/*string getWsTreatedClassName()
+	{
+		if(nmSpc!="" && nmspcIds.find(nmSpc)!=nmspcIds.end())
+		{
+			return "ns" + CastUtil::lexical_cast<string>(nmspcIds[nmSpc]) + ":" + classN;
+		}
+		return classN;
+	}*/
+	string getFullyQualifiedClassName(string classN, vector<string> namespaces)
+	{
+		for (int var = 0; var < (int)namespaces.size(); ++var) {
+			string tempfqnmclz = namespaces.at(var)+classN;
+			if(classNamespaces.find(tempfqnmclz)!=classNamespaces.end())
+			{
+				return tempfqnmclz;
+			}
+		}
+		return classN;
+	}
+	string getTreatedFullyQualifiedClassName(string classN, vector<string> namespaces)
+	{
+		for (int var = 0; var < (int)namespaces.size(); ++var) {
+			string tempfqnmclz = namespaces.at(var)+classN;
+			if(classNamespaces.find(tempfqnmclz)!=classNamespaces.end())
+			{
+				StringUtil::replaceAll(tempfqnmclz, "::", "");
+				return tempfqnmclz;
+			}
+		}
+		return classN;
+	}
 	Reflection();
 	virtual ~Reflection();
-	string updateClassDefinition(string, bool);
-	string updateTemplateContextDefinition(string, bool);
-	strVec getAfcObjectData(string className,bool object,strVec& privf, bool &isOpForSet);
-	strVec getAfcObjectData(string,bool);
+	strVec getAfcObjectData(ClassStructure classStructure,bool object,vector<string>& privf, bool &isOpForSet);
+	//strVec getAfcObjectData(string,bool);
 	propMap getDbTableInfo(string);
 	string generateClassDefinitionsAll(strVec,string &,strVec);
 	string generateSerDefinitionAll(strVec all,string &includeRef, bool isBinary,string&,string&,string&,string&,strVec);
-	string generateClassDefinition(string,string &,string &,string &,string &,string &,string app);
-	string generateSerDefinition(string,string &,string &,string &,string &,string app);
+	string generateClassDefinition(map<string, ClassStructure> allclsmap,string &includesDefs,string &typedefs,string &classes,string &methods,string &opers,string app);
+	string generateSerDefinition(map<string, ClassStructure> allclsmap,string &includesDefs,string &typedefs,string &classes,string &methods,string app);
 	string generateClassDefinitions(string,string &,string &,string &,string &,string &,string app);
 	string generateSerDefinitions(string,string &,string &,string &,string &,bool,string&,string &,string&,string&,string app);
-
-	string generateSerDefinitionBinary(string className,string &includesDefs,string &typedefs,string &classes,string &methods,string app);
+	string generateSerDefinitionBinary(map<string, ClassStructure> allclsmap,string &includesDefs,string &typedefs,string &classes,string &methods,string app);
 };
 
 #endif /* REFLECTION_H_ */

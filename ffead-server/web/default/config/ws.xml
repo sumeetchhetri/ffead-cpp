@@ -1,5 +1,5 @@
 <web-services>
-	<web-service name="testing" class="Testing">
+	<web-service location="testing" class="Testing" namespace="ws.testing.service">
 		<test1 outname="result"/>
 		<test2 outname="result"/>
 		<test3 outname="result"/>

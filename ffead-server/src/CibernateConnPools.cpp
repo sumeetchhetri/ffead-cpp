@@ -82,3 +82,107 @@ void CibernateConnPools::addMapping(string appName,Mapping* mapping)
 {
 	get()->mappings[appName] = mapping;
 }
+
+string Mapping::getAppTableColMapping(string table,string propertyName)
+{
+	if(this->appTableColMapping.find(table)!=this->appTableColMapping.end())
+	{
+		if(this->appTableColMapping[table].find(propertyName)!=this->appTableColMapping[table].end())
+			return this->appTableColMapping[table][propertyName];
+		else
+			return "";
+	}
+	return "";
+}
+
+string Mapping::getTableAppColMapping(string table,string columnName)
+{
+	if(this->tableAppColMapping.find(table)!=this->tableAppColMapping.end())
+	{
+		if(this->tableAppColMapping[table].find(columnName)!=this->tableAppColMapping[table].end())
+			return this->tableAppColMapping[table][columnName];
+		else
+			return "";
+	}
+	return "";
+}
+
+strMap Mapping::getAppTableColMapping(string table)
+{
+	if(this->appTableColMapping.find(table)!=this->appTableColMapping.end())
+	{
+		return this->appTableColMapping[table];
+	}
+	strMap tem;
+	return tem;
+}
+
+strMap Mapping::getTableAppColMapping(string table)
+{
+	if(this->tableAppColMapping.find(table)!=this->tableAppColMapping.end())
+	{
+		return this->tableAppColMapping[table];
+	}
+	strMap tem;
+	return tem;
+}
+
+void Mapping::setAppTableColMapping(smstrMap appTableColMapping)
+{
+	this->appTableColMapping = appTableColMapping;
+	smstrMap::iterator it;
+	for(it=appTableColMapping.begin();it!=appTableColMapping.end();it++) {
+		strMap tempo;
+		strMap::iterator ite;
+		for(ite=it->second.begin();ite!=it->second.end();ite++) {
+			tempo[ite->second] = ite->first;
+		}
+		this->tableAppColMapping[appTableClassMapping[it->first]] = tempo;
+	}
+}
+
+string Mapping::getAppTableClassMapping(string claz)
+{
+	if(this->appTableClassMapping.find(claz)!=this->appTableClassMapping.end())
+		return this->appTableClassMapping[claz];
+	else
+		return "";
+}
+
+void Mapping::setAppTableClassMapping(strMap appTableClassMapping)
+{
+	this->appTableClassMapping = appTableClassMapping;
+	smstrMap::iterator it;
+	for(it=appTableColMapping.begin();it!=appTableColMapping.end();it++) {
+		strMap tempo;
+		strMap::iterator ite;
+		for(ite=it->second.begin();ite!=it->second.end();ite++) {
+			tempo[ite->second] = ite->first;
+		}
+		this->tableAppColMapping[appTableClassMapping[it->first]] = tempo;
+	}
+}
+
+vector<DBRel> Mapping::getAppTablerelMapping(string claz)
+{
+	if(this->appTableRelMapping.find(claz)!=this->appTableRelMapping.end())
+		return this->appTableRelMapping[claz];
+	else
+	{
+		vector<DBRel> rel;
+		return rel;
+	}
+}
+
+void Mapping::setAppTableRelMapping(relMap appTableRelMapping)
+{
+	this->appTableRelMapping = appTableRelMapping;
+}
+
+map<string,Mapping*> CibernateConnPools::getMappings()
+{
+	map<string,Mapping*> temp;
+	if(get()!=NULL)
+		return get()->mappings;
+	return temp;
+}

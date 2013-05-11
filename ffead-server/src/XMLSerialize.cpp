@@ -37,7 +37,7 @@ string XMLSerialize::getClassName(void* instance)
 	return demangle(mangled);
 }
 
-string XMLSerialize::_handleAllSerialization(string className,void *t)
+string XMLSerialize::_handleAllSerialization(string className,void *t, string appName)
 {
 	string objXml;
 	if(className=="std::string" || className=="string")
@@ -87,258 +87,259 @@ string XMLSerialize::_handleAllSerialization(string className,void *t)
 	else if(className.find("std::vector<std::string,")!=string::npos || className.find("std::vector<string,")!=string::npos)
 	{
 		vector<string> *tt = (vector<string>*)t;
-		objXml = serializevec<string>(*tt);
+		objXml = serializevec<string>(*tt,appName);
 	}
 	else if(className.find("std::vector<int,")!=string::npos)
 	{
 		vector<int> *tt = (vector<int>*)t;
-		objXml = serializevec<int>(*tt);
+		objXml = serializevec<int>(*tt,appName);
 	}
 	else if(className.find("std::vector<short,")!=string::npos)
 	{
 		vector<short> *tt = (vector<short>*)t;
-		objXml = serializevec<short>(*tt);
+		objXml = serializevec<short>(*tt,appName);
 	}
 	else if(className.find("std::vector<long,")!=string::npos)
 	{
 		vector<long> *tt = (vector<long>*)t;
-		objXml = serializevec<long>(*tt);
+		objXml = serializevec<long>(*tt,appName);
 	}
 	else if(className.find("std::vector<double,")!=string::npos)
 	{
 		vector<double> *tt = (vector<double>*)t;
-		objXml = serializevec<double>(*tt);
+		objXml = serializevec<double>(*tt,appName);
 	}
 	else if(className.find("std::vector<float,")!=string::npos)
 	{
 		vector<float> *tt = (vector<float>*)t;
-		objXml = serializevec<float>(*tt);
+		objXml = serializevec<float>(*tt,appName);
 	}
 	else if(className.find("std::vector<bool,")!=string::npos)
 	{
 		vector<bool> *tt = (vector<bool>*)t;
-		objXml = serializevec<bool>(*tt);
+		objXml = serializevec<bool>(*tt,appName);
 	}
 	else if(className.find("std::vector<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::vector<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _servec(t,vtyp);
+		return _servec(t,vtyp,appName);
 	}
 	else if(className.find("std::list<std::string,")!=string::npos || className.find("std::list<string,")!=string::npos)
 	{
 		list<string> *tt = (list<string>*)t;
-		objXml = serializelist<string>(*tt);
+		objXml = serializelist<string>(*tt,appName);
 	}
 	else if(className.find("std::list<int,")!=string::npos)
 	{
 		list<int> *tt = (list<int>*)t;
-		objXml = serializelist<int>(*tt);
+		objXml = serializelist<int>(*tt,appName);
 	}
 	else if(className.find("std::list<long,")!=string::npos)
 	{
 		list<long> *tt = (list<long>*)t;
-		objXml = serializelist<long>(*tt);
+		objXml = serializelist<long>(*tt,appName);
 	}
 	else if(className.find("std::list<short,")!=string::npos)
 	{
 		list<short> *tt = (list<short>*)t;
-		objXml = serializelist<short>(*tt);
+		objXml = serializelist<short>(*tt,appName);
 	}
 	else if(className.find("std::list<double,")!=string::npos)
 	{
 		list<double> *tt = (list<double>*)t;
-		objXml = serializelist<double>(*tt);
+		objXml = serializelist<double>(*tt,appName);
 	}
 	else if(className.find("std::list<float,")!=string::npos)
 	{
 		list<float> *tt = (list<float>*)t;
-		objXml = serializelist<float>(*tt);
+		objXml = serializelist<float>(*tt,appName);
 	}
 	else if(className.find("std::list<bool,")!=string::npos)
 	{
 		list<bool> *tt = (list<bool>*)t;
-		objXml = serializelist<bool>(*tt);
+		objXml = serializelist<bool>(*tt,appName);
 	}
 	else if(className.find("std::list<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::list<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _serlis(t,vtyp);
+		return _serlis(t,vtyp,appName);
 	}
 	else if(className.find("std::set<std::string,")!=string::npos || className.find("std::set<string,")!=string::npos)
 	{
 		set<string> *tt = (set<string>*)t;
-		objXml = serializeset<string>(*tt);
+		objXml = serializeset<string>(*tt,appName);
 	}
 	else if(className.find("std::set<int,")!=string::npos)
 	{
 		set<int> *tt = (set<int>*)t;
-		objXml = serializeset<int>(*tt);
+		objXml = serializeset<int>(*tt,appName);
 	}
 	else if(className.find("std::set<short,")!=string::npos)
 	{
 		set<short> *tt = (set<short>*)t;
-		objXml = serializeset<short>(*tt);
+		objXml = serializeset<short>(*tt,appName);
 	}
 	else if(className.find("std::set<long,")!=string::npos)
 	{
 		set<long> *tt = (set<long>*)t;
-		objXml = serializeset<long>(*tt);
+		objXml = serializeset<long>(*tt,appName);
 	}
 	else if(className.find("std::set<double,")!=string::npos)
 	{
 		set<double> *tt = (set<double>*)t;
-		objXml = serializeset<double>(*tt);
+		objXml = serializeset<double>(*tt,appName);
 	}
 	else if(className.find("std::set<float,")!=string::npos)
 	{
 		set<float> *tt = (set<float>*)&t;
-		objXml = serializeset<float>(*tt);
+		objXml = serializeset<float>(*tt,appName);
 	}
 	else if(className.find("std::set<bool,")!=string::npos)
 	{
 		set<bool> *tt = (set<bool>*)&t;
-		objXml = serializeset<bool>(*tt);
+		objXml = serializeset<bool>(*tt,appName);
 	}
 	else if(className.find("std::set<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::set<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _serset(t,vtyp);
+		return _serset(t,vtyp,appName);
 	}
 	else if(className.find("std::multiset<std::string,")!=string::npos || className.find("std::multiset<string,")!=string::npos)
 	{
 		multiset<string> *tt = (multiset<string>*)t;
-		objXml = serializemultiset<string>(*tt);
+		objXml = serializemultiset<string>(*tt,appName);
 	}
 	else if(className.find("std::multiset<int,")!=string::npos)
 	{
 		multiset<int> *tt = (multiset<int>*)t;
-		objXml = serializemultiset<int>(*tt);
+		objXml = serializemultiset<int>(*tt,appName);
 	}
 	else if(className.find("std::multiset<long,")!=string::npos)
 	{
 		multiset<long> *tt = (multiset<long>*)t;
-		objXml = serializemultiset<long>(*tt);
+		objXml = serializemultiset<long>(*tt,appName);
 	}
 	else if(className.find("std::multiset<short,")!=string::npos)
 	{
 		multiset<short> *tt = (multiset<short>*)t;
-		objXml = serializemultiset<short>(*tt);
+		objXml = serializemultiset<short>(*tt,appName);
 	}
 	else if(className.find("std::multiset<double,")!=string::npos)
 	{
 		multiset<double> *tt = (multiset<double>*)t;
-		objXml = serializemultiset<double>(*tt);
+		objXml = serializemultiset<double>(*tt,appName);
 	}
 	else if(className.find("std::multiset<float,")!=string::npos)
 	{
 		multiset<float> *tt = (multiset<float>*)t;
-		objXml = serializemultiset<float>(*tt);
+		objXml = serializemultiset<float>(*tt,appName);
 	}
 	else if(className.find("std::multiset<bool,")!=string::npos)
 	{
 		multiset<bool> *tt = (multiset<bool>*)t;
-		objXml = serializemultiset<bool>(*tt);
+		objXml = serializemultiset<bool>(*tt,appName);
 	}
 	else if(className.find("std::multiset<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::multiset<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _sermultiset(t,vtyp);
+		return _sermultiset(t,vtyp,appName);
 	}
 	else if(className.find("std::queue<std::string,")!=string::npos || className.find("std::queue<string,")!=string::npos)
 	{
 		std::queue<string> *tt = (std::queue<string>*)t;
-		objXml = serializeq<string>(*tt);
+		objXml = serializeq<string>(*tt,appName);
 	}
 	else if(className.find("std::queue<int,")!=string::npos)
 	{
 		std::queue<int> *tt = (std::queue<int>*)t;
-		objXml = serializeq<int>(*tt);
+		objXml = serializeq<int>(*tt,appName);
 	}
 	else if(className.find("std::queue<short,")!=string::npos)
 	{
 		std::queue<short> *tt = (std::queue<short>*)t;
-		objXml = serializeq<short>(*tt);
+		objXml = serializeq<short>(*tt,appName);
 	}
 	else if(className.find("std::queue<long,")!=string::npos)
 	{
 		std::queue<long> *tt = (std::queue<long>*)t;
-		objXml = serializeq<long>(*tt);
+		objXml = serializeq<long>(*tt,appName);
 	}
 	else if(className.find("std::queue<double,")!=string::npos)
 	{
 		std::queue<double> *tt = (std::queue<double>*)t;
-		objXml = serializeq<double>(*tt);
+		objXml = serializeq<double>(*tt,appName);
 	}
 	else if(className.find("std::queue<float,")!=string::npos)
 	{
 		std::queue<float> *tt = (std::queue<float>*)t;
-		objXml = serializeq<float>(*tt);
+		objXml = serializeq<float>(*tt,appName);
 	}
 	else if(className.find("std::queue<bool,")!=string::npos)
 	{
 		std::queue<bool> *tt = (std::queue<bool>*)t;
-		objXml = serializeq<bool>(*tt);
+		objXml = serializeq<bool>(*tt,appName);
 	}
 	else if(className.find("std::queue<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::queue<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _serq(t,vtyp);
+		return _serq(t,vtyp,appName);
 	}
 	else if(className.find("std::deque<std::string,")!=string::npos || className.find("std::deque<string,")!=string::npos)
 	{
 		deque<string> *tt = (deque<string>*)t;
-		objXml = serializedq<string>(*tt);
+		objXml = serializedq<string>(*tt,appName);
 	}
 	else if(className.find("std::deque<int,")!=string::npos)
 	{
 		deque<int> *tt = (deque<int>*)t;
-		objXml = serializedq<int>(*tt);
+		objXml = serializedq<int>(*tt,appName);
 	}
 	else if(className.find("std::deque<long,")!=string::npos)
 	{
 		deque<long> *tt = (deque<long>*)t;
-		objXml = serializedq<long>(*tt);
+		objXml = serializedq<long>(*tt,appName);
 	}
 	else if(className.find("std::deque<short,")!=string::npos)
 	{
 		deque<short> *tt = (deque<short>*)t;
-		objXml = serializedq<short>(*tt);
+		objXml = serializedq<short>(*tt,appName);
 	}
 	else if(className.find("std::deque<double,")!=string::npos)
 	{
 		deque<double> *tt = (deque<double>*)t;
-		objXml = serializedq<double>(*tt);
+		objXml = serializedq<double>(*tt,appName);
 	}
 	else if(className.find("std::deque<float,")!=string::npos)
 	{
 		deque<float> *tt = (deque<float>*)t;
-		objXml = serializedq<float>(*tt);
+		objXml = serializedq<float>(*tt,appName);
 	}
 	else if(className.find("std::deque<bool,")!=string::npos)
 	{
 		deque<bool> *tt = (deque<bool>*)t;
-		objXml = serializedq<bool>(*tt);
+		objXml = serializedq<bool>(*tt,appName);
 	}
 	else if(className.find("std::deque<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::deque<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _serdq(t,vtyp);
+		return _serdq(t,vtyp,appName);
 	}
 	else
 	{
-		return _ser(t,className);
+		return _ser(t,className,appName);
 	}
 	return objXml;
 }
 
-string XMLSerialize::_servec(void* t,string className)
+string XMLSerialize::_servec(void* t,string className, string appName)
 {
+	StringUtil::replaceAll(className, "::", "_");
 	string objXml;
 	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
@@ -347,98 +348,7 @@ string XMLSerialize::_servec(void* t,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "serialize"+className+"Vec";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
-}
-
-string XMLSerialize::_serlis(void* t,string className)
-{
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = "serialize"+className+"Lis";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
-}
-string XMLSerialize::_serset(void* t,string className)
-{
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = "serialize"+className+"Set";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
-}
-string XMLSerialize::_sermultiset(void* t,string className)
-{
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = "serialize"+className+"MulSet";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
-}
-string XMLSerialize::_serq(void* t,string className)
-{
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = "serialize"+className+"Q";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
-}
-string XMLSerialize::_serdq(void* t,string className)
-{
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = "serialize"+className+"Dq";
+	string methodname = appName + "serialize"+className+"Vec";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -447,8 +357,9 @@ string XMLSerialize::_serdq(void* t,string className)
 	return objXml;
 }
 
-string XMLSerialize::_ser(void* t,string className)
+string XMLSerialize::_serlis(void* t,string className, string appName)
 {
+	StringUtil::replaceAll(className, "::", "_");
 	string objXml;
 	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
@@ -457,7 +368,83 @@ string XMLSerialize::_ser(void* t,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "serialize"+className;
+	string methodname = appName + "serialize"+className+"Lis";
+	void *mkr = dlsym(dlib, methodname.c_str());
+	typedef string (*RfPtr) (void*);
+	RfPtr f = (RfPtr)mkr;
+	if(f!=NULL)
+		objXml = f(t);
+	return objXml;
+}
+string XMLSerialize::_serset(void* t,string className, string appName)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	string objXml;
+	string libName = Constants::INTER_LIB_FILE;
+	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
+	if(dlib == NULL)
+	{
+		cerr << dlerror() << endl;
+		exit(-1);
+	}
+	string methodname = appName + "serialize"+className+"Set";
+	void *mkr = dlsym(dlib, methodname.c_str());
+	typedef string (*RfPtr) (void*);
+	RfPtr f = (RfPtr)mkr;
+	if(f!=NULL)
+		objXml = f(t);
+	return objXml;
+}
+string XMLSerialize::_sermultiset(void* t,string className, string appName)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	string objXml;
+	string libName = Constants::INTER_LIB_FILE;
+	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
+	if(dlib == NULL)
+	{
+		cerr << dlerror() << endl;
+		exit(-1);
+	}
+	string methodname = appName + "serialize"+className+"MulSet";
+	void *mkr = dlsym(dlib, methodname.c_str());
+	typedef string (*RfPtr) (void*);
+	RfPtr f = (RfPtr)mkr;
+	if(f!=NULL)
+		objXml = f(t);
+	return objXml;
+}
+string XMLSerialize::_serq(void* t,string className, string appName)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	string objXml;
+	string libName = Constants::INTER_LIB_FILE;
+	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
+	if(dlib == NULL)
+	{
+		cerr << dlerror() << endl;
+		exit(-1);
+	}
+	string methodname = appName + "serialize"+className+"Q";
+	void *mkr = dlsym(dlib, methodname.c_str());
+	typedef string (*RfPtr) (void*);
+	RfPtr f = (RfPtr)mkr;
+	if(f!=NULL)
+		objXml = f(t);
+	return objXml;
+}
+string XMLSerialize::_serdq(void* t,string className, string appName)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	string objXml;
+	string libName = Constants::INTER_LIB_FILE;
+	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
+	if(dlib == NULL)
+	{
+		cerr << dlerror() << endl;
+		exit(-1);
+	}
+	string methodname = appName + "serialize"+className+"Dq";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -466,13 +453,33 @@ string XMLSerialize::_ser(void* t,string className)
 	return objXml;
 }
 
-string XMLSerialize::_ser(Object t)
+string XMLSerialize::_ser(void* t,string className, string appName)
 {
-	return _ser(t.getVoidPointer(),t.getTypeName());
+	StringUtil::replaceAll(className, "::", "_");
+	string objXml;
+	string libName = Constants::INTER_LIB_FILE;
+	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
+	if(dlib == NULL)
+	{
+		cerr << dlerror() << endl;
+		exit(-1);
+	}
+	string methodname = appName + "serialize"+className;
+	void *mkr = dlsym(dlib, methodname.c_str());
+	typedef string (*RfPtr) (void*);
+	RfPtr f = (RfPtr)mkr;
+	if(f!=NULL)
+		objXml = f(t);
+	return objXml;
+}
+
+string XMLSerialize::_ser(Object t, string appName)
+{
+	return _ser(t.getVoidPointer(),t.getTypeName(),appName);
 }
 
 
-void* XMLSerialize::_handleAllUnSerialization(string objXml,string className)
+void* XMLSerialize::_handleAllUnSerialization(string objXml,string className, string appName)
 {
 	if(className=="std::string" || className=="string" || className=="int" || className=="short" || className=="float" || className=="double"
 			|| className=="long" || className=="bool")
@@ -534,32 +541,32 @@ void* XMLSerialize::_handleAllUnSerialization(string objXml,string className)
 	}
 	else if(objXml.find("<vector-")==0)
 	{
-		return unserializevec(objXml);
+		return unserializevec(objXml,appName);
 	}
 	else if(objXml.find("<set-")==0)
 	{
-		return unserializeset(objXml);
+		return unserializeset(objXml,appName);
 	}
 	else if(objXml.find("<multiset-")==0)
 	{
-		return unserializemultiset(objXml);
+		return unserializemultiset(objXml,appName);
 	}
 	else if(objXml.find("<list-")==0)
 	{
-		return unserializelist(objXml);
+		return unserializelist(objXml,appName);
 	}
 	else if(objXml.find("<queue-")==0)
 	{
-		return unserializeq(objXml);
+		return unserializeq(objXml,appName);
 	}
 	else if(objXml.find("<deque-")==0)
 	{
-		return unserializedq(objXml);
+		return unserializedq(objXml,appName);
 	}
-	return _unser(objXml,className);
+	return _unser(objXml,className,appName);
 }
 
-void* XMLSerialize::unserializevec(string objXml)
+void* XMLSerialize::unserializevec(string objXml, string appName)
 {
 	string cls = objXml.substr(8,objXml.find(">")-8);
 	if(cls=="string" || cls=="std::string")
@@ -675,11 +682,11 @@ void* XMLSerialize::unserializevec(string objXml)
 		return t;
 	}
 	else
-		return _unserVec(objXml,cls);
+		return _unserVec(objXml,cls,appName);
 
 }
 
-void* XMLSerialize::unserializelist(string objXml)
+void* XMLSerialize::unserializelist(string objXml, string appName)
 {
 	string cls = objXml.substr(6,objXml.find(">")-6);
 	if(cls=="string" || cls=="std::string")
@@ -795,10 +802,10 @@ void* XMLSerialize::unserializelist(string objXml)
 		return t;
 	}
 	else
-		return _unserLis(objXml,cls);
+		return _unserLis(objXml,cls,appName);
 }
 
-void* XMLSerialize::unserializeset(string objXml)
+void* XMLSerialize::unserializeset(string objXml, string appName)
 {
 	string cls = objXml.substr(5,objXml.find(">")-5);
 	if(cls=="string" || cls=="std::string")
@@ -914,10 +921,10 @@ void* XMLSerialize::unserializeset(string objXml)
 		return t;
 	}
 	else
-		return _unserSet(objXml,cls);
+		return _unserSet(objXml,cls,appName);
 }
 
-void* XMLSerialize::unserializemultiset(string objXml)
+void* XMLSerialize::unserializemultiset(string objXml, string appName)
 {
 	string cls = objXml.substr(10,objXml.find(">")-10);
 	if(cls=="string" || cls=="std::string")
@@ -1033,10 +1040,10 @@ void* XMLSerialize::unserializemultiset(string objXml)
 		return t;
 	}
 	else
-		return _unserMulSet(objXml,cls);
+		return _unserMulSet(objXml,cls,appName);
 }
 
-void* XMLSerialize::unserializeq(string objXml)
+void* XMLSerialize::unserializeq(string objXml, string appName)
 {
 	string cls = objXml.substr(7,objXml.find(">")-7);
 	if(cls=="string" || cls=="std::string")
@@ -1152,10 +1159,10 @@ void* XMLSerialize::unserializeq(string objXml)
 		return t;
 	}
 	else
-		return _unserQ(objXml,cls);
+		return _unserQ(objXml,cls,appName);
 }
 
-void* XMLSerialize::unserializedq(string objXml)
+void* XMLSerialize::unserializedq(string objXml, string appName)
 {
 	string cls = objXml.substr(7,objXml.find(">")-7);
 	if(cls=="string" || cls=="std::string")
@@ -1271,11 +1278,12 @@ void* XMLSerialize::unserializedq(string objXml)
 		return t;
 	}
 	else
-		return _unserDq(objXml,cls);
+		return _unserDq(objXml,cls,appName);
 }
 
-void* XMLSerialize::_unserSet(string objXml,string className)
+void* XMLSerialize::_unserSet(string objXml,string className, string appName)
 {
+	StringUtil::replaceAll(className, "::", "_");
 	void* obj = NULL;
 	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
@@ -1284,7 +1292,7 @@ void* XMLSerialize::_unserSet(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"Set";
+	string methodname = appName + "unSerialize"+className+"Set";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1295,8 +1303,9 @@ void* XMLSerialize::_unserSet(string objXml,string className)
 	return obj;
 }
 
-void* XMLSerialize::_unserMulSet(string objXml,string className)
+void* XMLSerialize::_unserMulSet(string objXml,string className, string appName)
 {
+	StringUtil::replaceAll(className, "::", "_");
 	void* obj = NULL;
 	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
@@ -1305,7 +1314,7 @@ void* XMLSerialize::_unserMulSet(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"MulSet";
+	string methodname = appName + "unSerialize"+className+"MulSet";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1316,8 +1325,9 @@ void* XMLSerialize::_unserMulSet(string objXml,string className)
 	return obj;
 }
 
-void* XMLSerialize::_unserQ(string objXml,string className)
+void* XMLSerialize::_unserQ(string objXml,string className, string appName)
 {
+	StringUtil::replaceAll(className, "::", "_");
 	void* obj = NULL;
 	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
@@ -1326,7 +1336,7 @@ void* XMLSerialize::_unserQ(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"Q";
+	string methodname = appName + "unSerialize"+className+"Q";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1337,8 +1347,9 @@ void* XMLSerialize::_unserQ(string objXml,string className)
 	return obj;
 }
 
-void* XMLSerialize::_unserDq(string objXml,string className)
+void* XMLSerialize::_unserDq(string objXml,string className, string appName)
 {
+	StringUtil::replaceAll(className, "::", "_");
 	void* obj = NULL;
 	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
@@ -1347,7 +1358,7 @@ void* XMLSerialize::_unserDq(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"Dq";
+	string methodname = appName + "unSerialize"+className+"Dq";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1358,8 +1369,9 @@ void* XMLSerialize::_unserDq(string objXml,string className)
 	return obj;
 }
 
-void* XMLSerialize::_unserLis(string objXml,string className)
+void* XMLSerialize::_unserLis(string objXml,string className, string appName)
 {
+	StringUtil::replaceAll(className, "::", "_");
 	void* obj = NULL;
 	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
@@ -1368,7 +1380,7 @@ void* XMLSerialize::_unserLis(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"Lis";
+	string methodname = appName + "unSerialize"+className+"Lis";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1379,8 +1391,9 @@ void* XMLSerialize::_unserLis(string objXml,string className)
 	return obj;
 }
 
-void* XMLSerialize::_unserVec(string objXml,string className)
+void* XMLSerialize::_unserVec(string objXml,string className, string appName)
 {
+	StringUtil::replaceAll(className, "::", "_");
 	void* obj = NULL;
 	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
@@ -1389,7 +1402,7 @@ void* XMLSerialize::_unserVec(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className+"Vec";
+	string methodname = appName + "unSerialize"+className+"Vec";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -1401,8 +1414,9 @@ void* XMLSerialize::_unserVec(string objXml,string className)
 }
 
 
-void* XMLSerialize::_unser(string objXml,string className)
+void* XMLSerialize::_unser(string objXml,string className, string appName)
 {
+	StringUtil::replaceAll(className, "::", "_");
 	void* obj = NULL;
 	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
@@ -1411,7 +1425,7 @@ void* XMLSerialize::_unser(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "unSerialize"+className;
+	string methodname = appName + "unSerialize"+className;
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;

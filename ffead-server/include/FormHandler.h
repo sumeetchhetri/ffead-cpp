@@ -31,6 +31,7 @@
 #include "Logger.h"
 #include "ConfigurationData.h"
 #include "FormController.h"
+#include "JSONSerialize.h"
 
 typedef void* (*toVoidP) (string);
 
@@ -38,7 +39,7 @@ class FormHandler {
 public:
 	FormHandler();
 	virtual ~FormHandler();
-	static string handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData, void* dlib);
+	static string handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData);
 };
 
 #endif /* FORMHANDLER_H_ */

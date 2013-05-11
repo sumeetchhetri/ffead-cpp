@@ -58,7 +58,7 @@ HTTPResponseStatus HTTPResponseStatus::GatewayTimeout(504, "Gateway timeout");
 HTTPResponseStatus HTTPResponseStatus::HttpVersionNotSupported(505, "HTTP version not supported");
 
 HTTPResponseStatus::HTTPResponseStatus() {
-
+	this->code = 0;
 }
 
 HTTPResponseStatus::HTTPResponseStatus(int code, string msg) {

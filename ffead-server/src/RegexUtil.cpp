@@ -33,6 +33,72 @@ RegexUtil::~RegexUtil() {
 	// TODO Auto-generated destructor stub
 }
 
+void RegexUtil::find(const string& text, const string& pattern, int &spos, int &epos)
+{
+	string ttext(text);
+	regex_t regex;
+	int reti;
+	if(patterns.find(pattern)!=patterns.end())
+	{
+		regex = patterns[pattern];
+	}
+	else
+	{
+		/* Compile regular expression */
+		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
+		if(reti)
+		{
+			cout << "Could not compile regex\n" << endl;
+		}
+		else
+		{
+			patterns[pattern] = regex;
+		}
+	}
+	spos = -1;
+	epos = -1;
+	regmatch_t pm;
+	reti = regexec(&regex, ttext.c_str(), 1, &pm, 0);
+	if (reti == 0) {    /* while matches found */
+		/* substring found between pm.rm_so and pm.rm_eo */
+		/* This call to regexec() finds the next match */
+		spos = pm.rm_so;
+		epos = pm.rm_eo;
+	}
+}
+
+int RegexUtil::find(const string& text, const string& pattern)
+{
+	string ttext(text);
+	regex_t regex;
+	int reti;
+	if(patterns.find(pattern)!=patterns.end())
+	{
+		regex = patterns[pattern];
+	}
+	else
+	{
+		/* Compile regular expression */
+		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
+		if(reti)
+		{
+			cout << "Could not compile regex\n" << endl;
+		}
+		else
+		{
+			patterns[pattern] = regex;
+		}
+	}
+	regmatch_t pm;
+	reti = regexec(&regex, ttext.c_str(), 1, &pm, 0);
+	if (reti == 0) {    /* while matches found */
+		/* substring found between pm.rm_so and pm.rm_eo */
+		/* This call to regexec() finds the next match */
+		return pm.rm_so;
+	}
+	return -1;
+}
+
 vector<string> RegexUtil::search(const string& text, const string& pattern) {
 	vector<string> vec;
 	string ttext(text);
@@ -75,7 +141,7 @@ vector<string> RegexUtil::search(const string& text, const string& pattern) {
 	return vec;
 }
 
-string RegexUtil::replace(const string& text, const string& pattern, const string& with) {
+string RegexUtil::replaceCopy(const string& text, const string& pattern, const string& with) {
 	string ttext(text);
 	string rettxt;
 	regex_t regex;
@@ -117,4 +183,48 @@ string RegexUtil::replace(const string& text, const string& pattern, const strin
 	}
 	if(ttext!="")rettxt += ttext;
 	return rettxt;
+}
+
+void RegexUtil::replace(string& text, const string& pattern, const string& with) {
+	string ttext(text);
+	string rettxt;
+	regex_t regex;
+	int reti;
+	if(patterns.find(pattern)!=patterns.end())
+	{
+		regex = patterns[pattern];
+	}
+	else
+	{
+		/* Compile regular expression */
+		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
+		if(reti)
+		{
+			cout << "Could not compile regex\n" << endl;
+		}
+		else
+		{
+			patterns[pattern] = regex;
+		}
+	}
+	regmatch_t pm;
+	reti = regexec(&regex, ttext.c_str(), 1, &pm, 0);
+	while (reti == 0) {    /* while matches found */
+		/* substring found between pm.rm_so and pm.rm_eo */
+		/* This call to regexec() finds the next match */
+		if(!reti) {
+			string match;
+			match = ttext.substr(pm.rm_so, pm.rm_eo-pm.rm_so);
+			rettxt += ttext.substr(0, pm.rm_so) + with;
+		} else {
+			rettxt += ttext;
+			break;
+		}
+		ttext = ttext.substr(pm.rm_eo);
+		pm.rm_eo = -1;
+		pm.rm_so = -1;
+		reti = regexec (&regex, ttext.c_str(), 1, &pm, 0);
+	}
+	if(ttext!="")rettxt += ttext;
+	text = rettxt;
 }

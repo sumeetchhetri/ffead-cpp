@@ -37,7 +37,7 @@ string JSONSerialize::getClassName(void* instance)
 	return demangle(mangled);
 }
 
-string JSONSerialize::_handleAllSerialization(string className,void *t)
+string JSONSerialize::_handleAllSerialization(string className,void *t, string appName)
 {
 	string objXml;
 	if(className=="std::string" || className=="string")
@@ -87,258 +87,258 @@ string JSONSerialize::_handleAllSerialization(string className,void *t)
 	else if(className.find("std::vector<std::string,")!=string::npos || className.find("std::vector<string,")!=string::npos)
 	{
 		vector<string> *tt = (vector<string>*)t;
-		objXml = serializevec<string>(*tt);
+		objXml = serializevec<string>(*tt,appName);
 	}
 	else if(className.find("std::vector<int,")!=string::npos)
 	{
 		vector<int> *tt = (vector<int>*)t;
-		objXml = serializevec<int>(*tt);
+		objXml = serializevec<int>(*tt,appName);
 	}
 	else if(className.find("std::vector<short,")!=string::npos)
 	{
 		vector<short> *tt = (vector<short>*)t;
-		objXml = serializevec<short>(*tt);
+		objXml = serializevec<short>(*tt,appName);
 	}
 	else if(className.find("std::vector<long,")!=string::npos)
 	{
 		vector<long> *tt = (vector<long>*)t;
-		objXml = serializevec<long>(*tt);
+		objXml = serializevec<long>(*tt,appName);
 	}
 	else if(className.find("std::vector<double,")!=string::npos)
 	{
 		vector<double> *tt = (vector<double>*)t;
-		objXml = serializevec<double>(*tt);
+		objXml = serializevec<double>(*tt,appName);
 	}
 	else if(className.find("std::vector<float,")!=string::npos)
 	{
 		vector<float> *tt = (vector<float>*)t;
-		objXml = serializevec<float>(*tt);
+		objXml = serializevec<float>(*tt,appName);
 	}
 	else if(className.find("std::vector<bool,")!=string::npos)
 	{
 		vector<bool> *tt = (vector<bool>*)t;
-		objXml = serializevec<bool>(*tt);
+		objXml = serializevec<bool>(*tt,appName);
 	}
 	else if(className.find("std::vector<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::vector<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"Vec");
+		return _serContainers(t,vtyp,"Vec",appName);
 	}
 	else if(className.find("std::list<std::string,")!=string::npos || className.find("std::list<string,")!=string::npos)
 	{
 		list<string> *tt = (list<string>*)t;
-		objXml = serializelist<string>(*tt);
+		objXml = serializelist<string>(*tt,appName);
 	}
 	else if(className.find("std::list<int,")!=string::npos)
 	{
 		list<int> *tt = (list<int>*)t;
-		objXml = serializelist<int>(*tt);
+		objXml = serializelist<int>(*tt,appName);
 	}
 	else if(className.find("std::list<long,")!=string::npos)
 	{
 		list<long> *tt = (list<long>*)t;
-		objXml = serializelist<long>(*tt);
+		objXml = serializelist<long>(*tt,appName);
 	}
 	else if(className.find("std::list<short,")!=string::npos)
 	{
 		list<short> *tt = (list<short>*)t;
-		objXml = serializelist<short>(*tt);
+		objXml = serializelist<short>(*tt,appName);
 	}
 	else if(className.find("std::list<double,")!=string::npos)
 	{
 		list<double> *tt = (list<double>*)t;
-		objXml = serializelist<double>(*tt);
+		objXml = serializelist<double>(*tt,appName);
 	}
 	else if(className.find("std::list<float,")!=string::npos)
 	{
 		list<float> *tt = (list<float>*)t;
-		objXml = serializelist<float>(*tt);
+		objXml = serializelist<float>(*tt,appName);
 	}
 	else if(className.find("std::list<bool,")!=string::npos)
 	{
 		list<bool> *tt = (list<bool>*)t;
-		objXml = serializelist<bool>(*tt);
+		objXml = serializelist<bool>(*tt,appName);
 	}
 	else if(className.find("std::list<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::list<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"Lis");
+		return _serContainers(t,vtyp,"Lis",appName);
 	}
 	else if(className.find("std::set<std::string,")!=string::npos || className.find("std::set<string,")!=string::npos)
 	{
 		set<string> *tt = (set<string>*)t;
-		objXml = serializeset<string>(*tt);
+		objXml = serializeset<string>(*tt,appName);
 	}
 	else if(className.find("std::set<int,")!=string::npos)
 	{
 		set<int> *tt = (set<int>*)t;
-		objXml = serializeset<int>(*tt);
+		objXml = serializeset<int>(*tt,appName);
 	}
 	else if(className.find("std::set<short,")!=string::npos)
 	{
 		set<short> *tt = (set<short>*)t;
-		objXml = serializeset<short>(*tt);
+		objXml = serializeset<short>(*tt,appName);
 	}
 	else if(className.find("std::set<long,")!=string::npos)
 	{
 		set<long> *tt = (set<long>*)t;
-		objXml = serializeset<long>(*tt);
+		objXml = serializeset<long>(*tt,appName);
 	}
 	else if(className.find("std::set<double,")!=string::npos)
 	{
 		set<double> *tt = (set<double>*)t;
-		objXml = serializeset<double>(*tt);
+		objXml = serializeset<double>(*tt,appName);
 	}
 	else if(className.find("std::set<float,")!=string::npos)
 	{
 		set<float> *tt = (set<float>*)&t;
-		objXml = serializeset<float>(*tt);
+		objXml = serializeset<float>(*tt,appName);
 	}
 	else if(className.find("std::set<bool,")!=string::npos)
 	{
 		set<bool> *tt = (set<bool>*)&t;
-		objXml = serializeset<bool>(*tt);
+		objXml = serializeset<bool>(*tt,appName);
 	}
 	else if(className.find("std::set<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::set<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"Set");
+		return _serContainers(t,vtyp,"Set",appName);
 	}
 	else if(className.find("std::multiset<std::string,")!=string::npos || className.find("std::multiset<string,")!=string::npos)
 	{
 		multiset<string> *tt = (multiset<string>*)t;
-		objXml = serializemultiset<string>(*tt);
+		objXml = serializemultiset<string>(*tt,appName);
 	}
 	else if(className.find("std::multiset<int,")!=string::npos)
 	{
 		multiset<int> *tt = (multiset<int>*)t;
-		objXml = serializemultiset<int>(*tt);
+		objXml = serializemultiset<int>(*tt,appName);
 	}
 	else if(className.find("std::multiset<long,")!=string::npos)
 	{
 		multiset<long> *tt = (multiset<long>*)t;
-		objXml = serializemultiset<long>(*tt);
+		objXml = serializemultiset<long>(*tt,appName);
 	}
 	else if(className.find("std::multiset<short,")!=string::npos)
 	{
 		multiset<short> *tt = (multiset<short>*)t;
-		objXml = serializemultiset<short>(*tt);
+		objXml = serializemultiset<short>(*tt,appName);
 	}
 	else if(className.find("std::multiset<double,")!=string::npos)
 	{
 		multiset<double> *tt = (multiset<double>*)t;
-		objXml = serializemultiset<double>(*tt);
+		objXml = serializemultiset<double>(*tt,appName);
 	}
 	else if(className.find("std::multiset<float,")!=string::npos)
 	{
 		multiset<float> *tt = (multiset<float>*)t;
-		objXml = serializemultiset<float>(*tt);
+		objXml = serializemultiset<float>(*tt,appName);
 	}
 	else if(className.find("std::multiset<bool,")!=string::npos)
 	{
 		multiset<bool> *tt = (multiset<bool>*)t;
-		objXml = serializemultiset<bool>(*tt);
+		objXml = serializemultiset<bool>(*tt,appName);
 	}
 	else if(className.find("std::multiset<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::multiset<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"MulSet");
+		return _serContainers(t,vtyp,"MulSet",appName);
 	}
 	else if(className.find("std::queue<std::string,")!=string::npos || className.find("std::queue<string,")!=string::npos)
 	{
 		std::queue<string> *tt = (std::queue<string>*)t;
-		objXml = serializeq<string>(*tt);
+		objXml = serializeq<string>(*tt,appName);
 	}
 	else if(className.find("std::queue<int,")!=string::npos)
 	{
 		std::queue<int> *tt = (std::queue<int>*)t;
-		objXml = serializeq<int>(*tt);
+		objXml = serializeq<int>(*tt,appName);
 	}
 	else if(className.find("std::queue<short,")!=string::npos)
 	{
 		std::queue<short> *tt = (std::queue<short>*)t;
-		objXml = serializeq<short>(*tt);
+		objXml = serializeq<short>(*tt,appName);
 	}
 	else if(className.find("std::queue<long,")!=string::npos)
 	{
 		std::queue<long> *tt = (std::queue<long>*)t;
-		objXml = serializeq<long>(*tt);
+		objXml = serializeq<long>(*tt,appName);
 	}
 	else if(className.find("std::queue<double,")!=string::npos)
 	{
 		std::queue<double> *tt = (std::queue<double>*)t;
-		objXml = serializeq<double>(*tt);
+		objXml = serializeq<double>(*tt,appName);
 	}
 	else if(className.find("std::queue<float,")!=string::npos)
 	{
 		std::queue<float> *tt = (std::queue<float>*)t;
-		objXml = serializeq<float>(*tt);
+		objXml = serializeq<float>(*tt,appName);
 	}
 	else if(className.find("std::queue<bool,")!=string::npos)
 	{
 		std::queue<bool> *tt = (std::queue<bool>*)t;
-		objXml = serializeq<bool>(*tt);
+		objXml = serializeq<bool>(*tt,appName);
 	}
 	else if(className.find("std::queue<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::queue<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"Q");
+		return _serContainers(t,vtyp,"Q",appName);
 	}
 	else if(className.find("std::deque<std::string,")!=string::npos || className.find("std::deque<string,")!=string::npos)
 	{
 		deque<string> *tt = (deque<string>*)t;
-		objXml = serializedq<string>(*tt);
+		objXml = serializedq<string>(*tt,appName);
 	}
 	else if(className.find("std::deque<int,")!=string::npos)
 	{
 		deque<int> *tt = (deque<int>*)t;
-		objXml = serializedq<int>(*tt);
+		objXml = serializedq<int>(*tt,appName);
 	}
 	else if(className.find("std::deque<long,")!=string::npos)
 	{
 		deque<long> *tt = (deque<long>*)t;
-		objXml = serializedq<long>(*tt);
+		objXml = serializedq<long>(*tt,appName);
 	}
 	else if(className.find("std::deque<short,")!=string::npos)
 	{
 		deque<short> *tt = (deque<short>*)t;
-		objXml = serializedq<short>(*tt);
+		objXml = serializedq<short>(*tt,appName);
 	}
 	else if(className.find("std::deque<double,")!=string::npos)
 	{
 		deque<double> *tt = (deque<double>*)t;
-		objXml = serializedq<double>(*tt);
+		objXml = serializedq<double>(*tt,appName);
 	}
 	else if(className.find("std::deque<float,")!=string::npos)
 	{
 		deque<float> *tt = (deque<float>*)t;
-		objXml = serializedq<float>(*tt);
+		objXml = serializedq<float>(*tt,appName);
 	}
 	else if(className.find("std::deque<bool,")!=string::npos)
 	{
 		deque<bool> *tt = (deque<bool>*)t;
-		objXml = serializedq<bool>(*tt);
+		objXml = serializedq<bool>(*tt,appName);
 	}
 	else if(className.find("std::deque<")!=string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::deque<","");
 		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"Dq");
+		return _serContainers(t,vtyp,"Dq",appName);
 	}
 	else
 	{
-		return _ser(t,className);
+		return _ser(t,className,appName);
 	}
 	return objXml;
 }
 
 
-string JSONSerialize::_serContainers(void* t,string className, string type)
+string JSONSerialize::_serContainers(void* t,string className, string type, string appName)
 {
 	string json;
 	string libName = Constants::INTER_LIB_FILE;
@@ -348,7 +348,7 @@ string JSONSerialize::_serContainers(void* t,string className, string type)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "from"+className+type+"VPToJSON";
+	string methodname = appName + "from"+className+type+"VPToJSON";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -357,7 +357,7 @@ string JSONSerialize::_serContainers(void* t,string className, string type)
 	return json;
 }
 
-string JSONSerialize::_ser(void* t,string className)
+string JSONSerialize::_ser(void* t,string className, string appName)
 {
 	string json;
 	string libName = Constants::INTER_LIB_FILE;
@@ -367,7 +367,7 @@ string JSONSerialize::_ser(void* t,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "from"+className+"VPToJSON";
+	string methodname = appName + "from"+className+"VPToJSON";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef string (*RfPtr) (void*);
 	RfPtr f = (RfPtr)mkr;
@@ -376,13 +376,13 @@ string JSONSerialize::_ser(void* t,string className)
 	return json;
 }
 
-string JSONSerialize::_ser(Object t)
+string JSONSerialize::_ser(Object t, string appName)
 {
-	return _ser(t.getVoidPointer(),t.getTypeName());
+	return _ser(t.getVoidPointer(),t.getTypeName(), appName);
 }
 
 
-void* JSONSerialize::_handleAllUnSerialization(string json,string className)
+void* JSONSerialize::_handleAllUnSerialization(string json,string className, string appName)
 {
 	if(className=="std::string" || className=="string" || className=="int" || className=="short" || className=="float" || className=="double"
 			|| className=="long" || className=="bool")
@@ -452,91 +452,91 @@ void* JSONSerialize::_handleAllUnSerialization(string json,string className)
 	{
 		StringUtil::replaceFirst(className,"std::vector<","");
 		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className, "Vec");
+		return unserializeConatiner(json, className, "Vec", appName);
 	}
 	else if(className.find("std::list<")==0)
 	{
 		StringUtil::replaceFirst(className,"std::vector<","");
 		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className,"Lis");
+		return unserializeConatiner(json, className,"Lis", appName);
 	}
 	else if(className.find("std::set<")==0)
 	{
 		StringUtil::replaceFirst(className,"std::vector<","");
 		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className,"Set");
+		return unserializeConatiner(json, className,"Set", appName);
 	}
 	else if(className.find("std::multiset<")==0)
 	{
 		StringUtil::replaceFirst(className,"std::vector<","");
 		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className, "MulSet");
+		return unserializeConatiner(json, className, "MulSet", appName);
 	}
 	else if(className.find("std::queue<")==0)
 	{
 		StringUtil::replaceFirst(className,"std::vector<","");
 		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className,"Q");
+		return unserializeConatiner(json, className,"Q", appName);
 	}
 	else if(className.find("std::deque<")==0)
 	{
 		StringUtil::replaceFirst(className,"std::vector<","");
 		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className, "Dq");
+		return unserializeConatiner(json, className, "Dq", appName);
 	}
-	return _unser(json,className);
+	return _unser(json,className, appName);
 }
 
-void* JSONSerialize::unserializeConatiner(string json, string className, string type)
+void* JSONSerialize::unserializeConatiner(string json, string className, string type, string appName)
 {
 	if(className=="string" || className=="std::string")
 	{
 		JSONElement root = JSONUtil::getDocument(json);
 		vector<string> *t = JSONUtil::toVectorP<string>(root);
-		return unserContainer<string>(*t, type);
+		return unserContainer<string>(*t, type, appName);
 	}
 	else if(className=="double")
 	{
 		JSONElement root = JSONUtil::getDocument(json);
 		vector<double> *t = JSONUtil::toVectorP<double>(root);
-		return unserContainer<double>(*t, type);
+		return unserContainer<double>(*t, type, appName);
 	}
 	else if(className=="float")
 	{
 		JSONElement root = JSONUtil::getDocument(json);
 		vector<float> *t = JSONUtil::toVectorP<float>(root);
-		return unserContainer<float>(*t, type);
+		return unserContainer<float>(*t, type, appName);
 	}
 	else if(className=="int")
 	{
 		JSONElement root = JSONUtil::getDocument(json);
 		vector<int> *t = JSONUtil::toVectorP<int>(root);
-		return unserContainer<int>(*t, type);
+		return unserContainer<int>(*t, type, appName);
 	}
 	else if(className=="short")
 	{
 		JSONElement root = JSONUtil::getDocument(json);
 		vector<short> *t = JSONUtil::toVectorP<short>(root);
-		return unserContainer<short>(*t, type);
+		return unserContainer<short>(*t, type, appName);
 	}
 	else if(className=="long")
 	{
 		JSONElement root = JSONUtil::getDocument(json);
 		vector<long> *t = JSONUtil::toVectorP<long>(root);
-		return unserContainer<long>(*t, type);
+		return unserContainer<long>(*t, type, appName);
 	}
 	else if(className=="bool")
 	{
 		JSONElement root = JSONUtil::getDocument(json);
 		vector<bool> *t = JSONUtil::toVectorP<bool>(root);
-		return unserContainer<bool>(*t, type);
+		return unserContainer<bool>(*t, type, appName);
 	}
 	else
-		return _unserCont(json,className, type);
+		return _unserCont(json,className, type, appName);
 
 }
 
-void* JSONSerialize::_unserCont(string objXml,string className,string type)
+void* JSONSerialize::_unserCont(string objXml,string className,string type, string appName)
 {
 	void* obj = NULL;
 	string libName = Constants::INTER_LIB_FILE;
@@ -546,7 +546,7 @@ void* JSONSerialize::_unserCont(string objXml,string className,string type)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "to"+className+type+"VP";
+	string methodname = appName + "to"+className+type+"VP";
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;
@@ -558,7 +558,7 @@ void* JSONSerialize::_unserCont(string objXml,string className,string type)
 }
 
 
-void* JSONSerialize::_unser(string objXml,string className)
+void* JSONSerialize::_unser(string objXml,string className, string appName)
 {
 	void* obj = NULL;
 	string libName = Constants::INTER_LIB_FILE;
@@ -568,7 +568,7 @@ void* JSONSerialize::_unser(string objXml,string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "toVoidP"+className;
+	string methodname = appName + "toVoidP"+className;
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef void* (*RfPtr) (string);
 	RfPtr f = (RfPtr)mkr;

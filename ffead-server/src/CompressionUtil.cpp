@@ -69,7 +69,6 @@ string CompressionUtil::_compress(char* infile, bool isGz, bool retu, char* toFi
 			ret = deflate(&strm, flush);    /* no bad return value */
 			assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
 			have = chunkSize - strm.avail_out;
-			string temp((char*)&out[0], have);
 			if(ofs!=NULL)
 			{
 				if (fwrite(out, 1, have, ofs) != have || ferror(ofs)) {
@@ -78,12 +77,12 @@ string CompressionUtil::_compress(char* infile, bool isGz, bool retu, char* toFi
 				}
 				if(retu)
 				{
-					s.append(temp);
+					s.append((char*)&out[0], have);
 				}
 			}
 			else
 			{
-				s.append(temp);
+				s.append((char*)&out[0], have);
 			}
 		} while (strm.avail_out == 0);
 		assert(strm.avail_in == 0);     /* all input will be used */
@@ -177,7 +176,6 @@ string CompressionUtil::_uncompress(char* infile, bool isGz, bool retu, char* to
 				return s;
 			}
 			have = chunkSize - strm.avail_out;
-			string temp((char*)&out[0], have);
 			if(ofs!=NULL)
 			{
 				if (fwrite(out, 1, have, ofs) != have || ferror(ofs)) {
@@ -186,12 +184,12 @@ string CompressionUtil::_uncompress(char* infile, bool isGz, bool retu, char* to
 				}
 				if(retu)
 				{
-					s.append(temp);
+					s.append((char*)&out[0], have);
 				}
 			}
 			else
 			{
-				s.append(temp);
+				s.append((char*)&out[0], have);
 			}
 		} while (strm.avail_out == 0);
 
@@ -274,18 +272,17 @@ string CompressionUtil::_compress(char* datain, size_t insize, bool eostream, bo
 			ret = deflate(&strm, flush);    /* no bad return value */
 			assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
 			have = chunkSize - strm.avail_out;
-			string temp((char*)&out[0], have);
 			if(ofs.is_open())
 			{
-				ofs.write(temp.c_str(), temp.length());
+				ofs.write((char*)&out[0], have);
 				if(retu)
 				{
-					s.append(temp);
+					s.append((char*)&out[0], have);
 				}
 			}
 			else
 			{
-				s.append(temp);
+				s.append((char*)&out[0], have);
 			}
 		} while (strm.avail_out == 0);
 		assert(strm.avail_in == 0);
@@ -344,18 +341,17 @@ string CompressionUtil::_compress(char* datain, size_t insize, bool eostream, bo
 				ret = deflate(&strm, flush);    /* no bad return value */
 				assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
 				have = chunkSize - strm.avail_out;
-				string temp((char*)&out[0], have);
 				if(ofs.is_open())
 				{
-					ofs.write(temp.c_str(), temp.length());
+					ofs.write((char*)&out[0], have);
 					if(retu)
 					{
-						s.append(temp);
+						s.append((char*)&out[0], have);
 					}
 				}
 				else
 				{
-					s.append(temp);
+					s.append((char*)&out[0], have);
 				}
 			} while (strm.avail_out == 0);
 			assert(strm.avail_in == 0);
@@ -437,18 +433,17 @@ string CompressionUtil::_uncompress(char* datain, size_t insize, bool isGz, bool
 				return s;
 			}
 			have = CHUNK - strm.avail_out;
-			string temp((char*)&out[0], have);
 			if(ofs.is_open())
 			{
-				ofs.write(temp.c_str(), temp.length());
+				ofs.write((char*)&out[0], have);
 				if(retu)
 				{
-					s.append(temp);
+					s.append((char*)&out[0], have);
 				}
 			}
 			else
 			{
-				s.append(temp);
+				s.append((char*)&out[0], have);
 			}
 		} while (strm.avail_out == 0);
 
@@ -503,18 +498,17 @@ string CompressionUtil::_uncompress(char* datain, size_t insize, bool isGz, bool
 					return s;
 				}
 				have = CHUNK - strm.avail_out;
-				string temp((char*)&out[0], have);
 				if(ofs.is_open())
 				{
-					ofs.write(temp.c_str(), temp.length());
+					ofs.write((char*)&out[0], have);
 					if(retu)
 					{
-						s.append(temp);
+						s.append((char*)&out[0], have);
 					}
 				}
 				else
 				{
-					s.append(temp);
+					s.append((char*)&out[0], have);
 				}
 			} while (strm.avail_out == 0);
 		}
@@ -532,7 +526,7 @@ string CompressionUtil::_uncompress(char* datain, size_t insize, bool isGz, bool
 }
 
 
-string CompressionUtil::zlibCompress(char* input, size_t siz, int chunkSize, bool eostream, bool ret, char* toFile) {
+string CompressionUtil::zlibCompress(char* input, size_t siz, bool eostream, int chunkSize,  bool ret, char* toFile) {
 	string compData = _compress(input, siz, eostream, false, chunkSize, ret, toFile);
 	if(toFile==NULL)
 	{
@@ -540,12 +534,6 @@ string CompressionUtil::zlibCompress(char* input, size_t siz, int chunkSize, boo
 	}
 	else
 	{
-		ofstream fos(toFile, ios::binary);
-		if(fos.is_open())
-		{
-			fos.write(compData.c_str(), compData.length());
-			fos.close();
-		}
 		if(ret)
 		{
 			return compData;
@@ -557,11 +545,11 @@ string CompressionUtil::zlibCompress(char* input, size_t siz, int chunkSize, boo
 	}
 }
 
-string CompressionUtil::zlibCompress(const string& input, int chunkSize, bool eostream, bool ret, char* toFile) {
-	return zlibCompress((char*)input.c_str(), input.length(), chunkSize, eostream, ret, toFile);
+string CompressionUtil::zlibCompress(const string& input, bool eostream, int chunkSize,  bool ret, char* toFile) {
+	return zlibCompress((char*)input.c_str(), input.length(), eostream, chunkSize, ret, toFile);
 }
 
-string CompressionUtil::gzipCompress(char* input, size_t siz, int chunkSize, bool eostream, bool ret, char* toFile) {
+string CompressionUtil::gzipCompress(char* input, size_t siz, bool eostream, int chunkSize,  bool ret, char* toFile) {
 	string compData = _compress(input, siz, eostream, true, chunkSize, ret, toFile);
 	if(toFile==NULL)
 	{
@@ -569,12 +557,6 @@ string CompressionUtil::gzipCompress(char* input, size_t siz, int chunkSize, boo
 	}
 	else
 	{
-		ofstream fos(toFile, ios::binary);
-		if(fos.is_open())
-		{
-			fos.write(compData.c_str(), compData.length());
-			fos.close();
-		}
 		if(ret)
 		{
 			return compData;
@@ -586,8 +568,8 @@ string CompressionUtil::gzipCompress(char* input, size_t siz, int chunkSize, boo
 	}
 }
 
-string CompressionUtil::gzipCompress(const string& input, int chunkSize, bool eostream, bool ret, char* toFile) {
-	return gzipCompress((char*)input.c_str(), input.length(), chunkSize, eostream, ret, toFile);
+string CompressionUtil::gzipCompress(const string& input, bool eostream, int chunkSize,  bool ret, char* toFile) {
+	return gzipCompress((char*)input.c_str(), input.length(), eostream, chunkSize, ret, toFile);
 }
 
 string CompressionUtil::zlibUnCompress(char* input, size_t siz, bool ret, char* toFile) {
@@ -598,12 +580,6 @@ string CompressionUtil::zlibUnCompress(char* input, size_t siz, bool ret, char* 
 	}
 	else
 	{
-		ofstream fos(toFile, ios::binary);
-		if(fos.is_open())
-		{
-			fos.write(compData.c_str(), compData.length());
-			fos.close();
-		}
 		if(ret)
 		{
 			return compData;
@@ -627,12 +603,6 @@ string CompressionUtil::gzipUnCompress(char* input, size_t siz, bool ret, char* 
 	}
 	else
 	{
-		ofstream fos(toFile, ios::binary);
-		if(fos.is_open())
-		{
-			fos.write(compData.c_str(), compData.length());
-			fos.close();
-		}
 		if(ret)
 		{
 			return compData;

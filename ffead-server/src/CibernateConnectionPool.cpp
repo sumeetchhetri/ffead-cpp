@@ -182,6 +182,11 @@ Connection* CibernateConnectionPool::getWriteConnection()
 	}
 }
 
+string CibernateConnectionPool::getDialect() const
+{
+	return dialect;
+}
+
 Connection::Connection()
 {
 	logger = Logger::getLogger("Connection");

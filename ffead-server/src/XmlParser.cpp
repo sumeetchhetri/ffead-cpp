@@ -66,6 +66,15 @@ Document XmlParser::getDocument(string xml)
 		throw XmlParseException(errmsg);
 
 	}*/
+	if(StringUtil::toLowerCopy(mode)=="validator")
+	{
+		try {
+			root.validateNs();
+		} catch (const char* ex) {
+			string errmsg(ex);
+			throw XmlParseException(errmsg);
+		}
+	}
 	doc.setRootElement(root);
 	return doc;
 }
@@ -144,14 +153,22 @@ void XmlParser::readXML(string xml,string parent,Element *par)
             tag = tag.substr(ds);
             string atvalue = tag.substr(0,tag.find_first_of("\""));
             tag = tag.substr(tag.find_first_of("\"")+1);
-            if(parent!="")
-			{
-            	element.addAttribute(atname,atvalue);
-			}
-			else
-			{
-				par->addAttribute(atname,atvalue);
-			}
+            try {
+				if(parent!="")
+				{
+					element.addAttribute(atname,atvalue,true);
+				}
+				else
+				{
+					par->addAttribute(atname,atvalue,true);
+				}
+            } catch(const char* ex) {
+            	if(StringUtil::toLowerCopy(mode)=="validator")
+            	{
+            		string errmsg(ex);
+            		throw XmlParseException(errmsg);
+            	}
+            }
             //logger << "attname = " << atname << "   attvalue = " << atvalue << "\n" << flush;
         }
     }
@@ -168,7 +185,6 @@ void XmlParser::readXML(string xml,string parent,Element *par)
     {
         string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("< ")+1) + "\n");
         throw XmlParseException(errmsg);
-
     }
     else if(xml.find("<\t")!=string::npos)
     {

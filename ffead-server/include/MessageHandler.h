@@ -64,8 +64,6 @@ public:
 	}
 	static void trigger(string,string);
 	static void stop();
-	Server getServer(){return this->server;}
-	void setServer(Server server){this->server = server;}
 private:
 	Server server;
 	bool running;

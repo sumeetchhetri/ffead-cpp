@@ -411,12 +411,12 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 {
 	int V_OD_erg;// result of functions
 	Reflector reflector;
-	ClassInfo clas = reflector.getClassInfo(clasName);
+	ClassInfo clas = reflector.getClassInfo(clasName, appName);
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
 	vector<DBRel> relv = this->mapping->getAppTablerelMapping(clasName);
 	fldMap fields = clas.getFields();
 	fldMap::iterator it;
-	void *vecT = reflector.getNewVector(clasName);
+	void *vecT = reflector.getNewVector(clasName,appName);
 	SQLCHAR colName[256];
 	SQLSMALLINT	V_OD_colanz, colNameLen, dataType, numDecimalDigits, allowsNullValues;
 	SQLUINTEGER columnSize;
@@ -429,7 +429,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 		args argus1;
 		map<string, void*> instances;
 		Constructor ctor = clas.getConstructor(argus1);
-		void *t = reflector.newInstanceGVP(ctor);
+		void *t = reflector.newInstanceGVP(ctor,appName);
 		//if(cols.size()<=0)
 		//{
 		V_OD_erg = SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
@@ -477,11 +477,11 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 						{
 							thisTableName = tableName1;
 							args argus1;
-							ClassInfo clas1 = reflector.getClassInfo(relation.clsName);
+							ClassInfo clas1 = reflector.getClassInfo(relation.clsName,appName);
 							if(instances.find(thisTableName)==instances.end())
 							{
 								Constructor ctor = clas1.getConstructor(argus1);
-								void *tt = reflector.newInstanceGVP(ctor);
+								void *tt = reflector.newInstanceGVP(ctor,appName);
 								instances[tableName1] = tt;
 							}
 							instanceClas = clas1;
@@ -502,15 +502,15 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 				argus.push_back(instanceRelation.clsName);
 				string methname = "set"+AfcUtil::camelCased(instanceRelation.field);
 				Method meth = clas.getMethod(methname,argus);
-				reflector.invokeMethodGVP(t,meth,valus);
+				reflector.invokeMethodGVP(t,meth,valus,appName);
 			}
 		}
-		reflector.vectorPushBack(vecT,t,clasName);
+		reflector.vectorPushBack(vecT,t,clasName,appName);
 		delete t;
 		V_OD_erg=SQLFetch(V_OD_hstmt);
 	}
 	refreshStmt();
-	int vecsiz = reflector.getVectorSize(vecT,clasName);
+	int vecsiz = reflector.getVectorSize(vecT,clasName,appName);
 	for (int var = 0; var < vecsiz; ++var)
 	{
 		for (int var1 = 0; var1 < (int)relv.size(); ++var1)
@@ -523,8 +523,8 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 				string methname = "get"+AfcUtil::camelCased(relation.pk);
 				Method meth = clas.getMethod(methname,argus);
 				vals valus;
-				void *tt = reflector.getVectorElement(vecT,var,clasName);
-				void *ns = reflector.invokeMethodGVP(tt,meth,valus);
+				void *tt = reflector.getVectorElement(vecT,var,clasName,appName);
+				void *ns = reflector.invokeMethodGVP(tt,meth,valus,appName);
 				Object on;
 				on << ns;
 				on.setTypeName(meth.getReturnType());
@@ -534,7 +534,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 				argus.push_back("vector<"+relation.clsName+">");
 				methname = "set"+AfcUtil::camelCased(relation.field);
 				meth = clas.getMethod(methname,argus);
-				reflector.invokeMethodGVP(tt,meth,valus);
+				reflector.invokeMethodGVP(tt,meth,valus,appName);
 			}
 		}
 	}
@@ -743,7 +743,7 @@ int Cibernate::storeProperty(ClassInfo clas, void* t, int var, string fieldName)
 		valus.push_back(col);
 		string methname = "set"+AfcUtil::camelCased(fe.getFieldName());
 		Method meth = clas.getMethod(methname,argus);
-		reflector.invokeMethod<void*>(t,meth,valus);
+		reflector.invokeMethod<void*>(t,meth,valus,appName);
 		var++;
 	}
 	return var;
@@ -966,7 +966,7 @@ void* Cibernate::executeQuery(CibernateQuery cquery, vector<string> cols)
 	Reflector reflector;
 	string clasName = cquery.className;
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
-	ClassInfo clas = reflector.getClassInfo(clasName);
+	ClassInfo clas = reflector.getClassInfo(clasName,appName);
 	vector<DBRel> relv = this->mapping->getAppTablerelMapping(clasName);
 	string query = "select ";
 	if(cols.size()>0)
@@ -1037,7 +1037,7 @@ bool Cibernate::executeInsert(CibernateQuery cquery, vector<string> cols, void* 
 	unsigned var=0;
 	Reflector reflector;
 	string vals;
-	ClassInfo clas = reflector.getClassInfo(clasName);
+	ClassInfo clas = reflector.getClassInfo(clasName,appName);
 	fldMap fields = clas.getFields();
 	unsigned par = 1;
 	if(cols.size()>0)
@@ -1055,35 +1055,35 @@ bool Cibernate::executeInsert(CibernateQuery cquery, vector<string> cols, void* 
 			Method meth = clas.getMethod(methname,argus);
 			if(fld.getType()=="short")
 			{
-				short temp = reflector.invokeMethod<short>(t,meth,valus);
+				short temp = reflector.invokeMethod<short>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned short")
 			{
-				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus);
+				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="int")
 			{
-				int temp = reflector.invokeMethod<int>(t,meth,valus);
+				int temp = reflector.invokeMethod<int>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned int")
 			{
-				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus);
+				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="long")
 			{
-				long temp = reflector.invokeMethod<long>(t,meth,valus);
+				long temp = reflector.invokeMethod<long>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
@@ -1097,21 +1097,21 @@ bool Cibernate::executeInsert(CibernateQuery cquery, vector<string> cols, void* 
 			}
 			else if(fld.getType()=="double")
 			{
-				double temp = reflector.invokeMethod<double>(t,meth,valus);
+				double temp = reflector.invokeMethod<double>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="float")
 			{
-				float temp = reflector.invokeMethod<float>(t,meth,valus);
+				float temp = reflector.invokeMethod<float>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="string")
 			{
-				string temp = reflector.invokeMethod<string>(t,meth,valus);
+				string temp = reflector.invokeMethod<string>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
@@ -1138,63 +1138,63 @@ bool Cibernate::executeInsert(CibernateQuery cquery, vector<string> cols, void* 
 			Method meth = clas.getMethod(methname,argus);
 			if(fld.getType()=="short")
 			{
-				short temp = reflector.invokeMethod<short>(t,meth,valus);
+				short temp = reflector.invokeMethod<short>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned short")
 			{
-				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus);
+				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="int")
 			{
-				int temp = reflector.invokeMethod<int>(t,meth,valus);
+				int temp = reflector.invokeMethod<int>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned int")
 			{
-				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus);
+				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="long")
 			{
-				long temp = reflector.invokeMethod<long>(t,meth,valus);
+				long temp = reflector.invokeMethod<long>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned long")
 			{
-				unsigned long temp = reflector.invokeMethod<unsigned long>(t,meth,valus);
+				unsigned long temp = reflector.invokeMethod<unsigned long>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="double")
 			{
-				double temp = reflector.invokeMethod<double>(t,meth,valus);
+				double temp = reflector.invokeMethod<double>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="float")
 			{
-				float temp = reflector.invokeMethod<float>(t,meth,valus);
+				float temp = reflector.invokeMethod<float>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="string")
 			{
-				string temp = reflector.invokeMethod<string>(t,meth,valus);
+				string temp = reflector.invokeMethod<string>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
@@ -1227,7 +1227,7 @@ bool Cibernate::executeUpdate(CibernateQuery cquery, vector<string> cols, void* 
 	string query = "update "+tableName+" set ";
 	Reflector reflector;
 	string vals;
-	ClassInfo clas = reflector.getClassInfo(clasName);
+	ClassInfo clas = reflector.getClassInfo(clasName,appName);
 	fldMap fields = clas.getFields();
 	unsigned par = 1,var=0;
 	if(cols.size()>0)
@@ -1245,63 +1245,63 @@ bool Cibernate::executeUpdate(CibernateQuery cquery, vector<string> cols, void* 
 			Method meth = clas.getMethod(methname,argus);
 			if(fld.getType()=="short")
 			{
-				short temp = reflector.invokeMethod<short>(t,meth,valus);
+				short temp = reflector.invokeMethod<short>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned short")
 			{
-				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus);
+				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="int")
 			{
-				int temp = reflector.invokeMethod<int>(t,meth,valus);
+				int temp = reflector.invokeMethod<int>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned int")
 			{
-				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus);
+				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="long")
 			{
-				long temp = reflector.invokeMethod<long>(t,meth,valus);
+				long temp = reflector.invokeMethod<long>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned long")
 			{
-				unsigned long temp = reflector.invokeMethod<unsigned long>(t,meth,valus);
+				unsigned long temp = reflector.invokeMethod<unsigned long>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="double")
 			{
-				double temp = reflector.invokeMethod<double>(t,meth,valus);
+				double temp = reflector.invokeMethod<double>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="float")
 			{
-				float temp = reflector.invokeMethod<float>(t,meth,valus);
+				float temp = reflector.invokeMethod<float>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="string")
 			{
-				string temp = reflector.invokeMethod<string>(t,meth,valus);
+				string temp = reflector.invokeMethod<string>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
@@ -1326,63 +1326,63 @@ bool Cibernate::executeUpdate(CibernateQuery cquery, vector<string> cols, void* 
 			Method meth = clas.getMethod(methname,argus);
 			if(fld.getType()=="short")
 			{
-				short temp = reflector.invokeMethod<short>(t,meth,valus);
+				short temp = reflector.invokeMethod<short>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned short")
 			{
-				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus);
+				unsigned short temp = reflector.invokeMethod<unsigned short>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="int")
 			{
-				int temp = reflector.invokeMethod<int>(t,meth,valus);
+				int temp = reflector.invokeMethod<int>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned int")
 			{
-				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus);
+				unsigned int temp = reflector.invokeMethod<unsigned int>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="long")
 			{
-				long temp = reflector.invokeMethod<long>(t,meth,valus);
+				long temp = reflector.invokeMethod<long>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="unsigned long")
 			{
-				unsigned long temp = reflector.invokeMethod<unsigned long>(t,meth,valus);
+				unsigned long temp = reflector.invokeMethod<unsigned long>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="double")
 			{
-				double temp = reflector.invokeMethod<double>(t,meth,valus);
+				double temp = reflector.invokeMethod<double>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="float")
 			{
-				float temp = reflector.invokeMethod<float>(t,meth,valus);
+				float temp = reflector.invokeMethod<float>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;
 			}
 			else if(fld.getType()=="string")
 			{
-				string temp = reflector.invokeMethod<string>(t,meth,valus);
+				string temp = reflector.invokeMethod<string>(t,meth,valus,appName);
 				Object o;
 				o << temp;
 				cquery.propPosVaues[var+1] = o;

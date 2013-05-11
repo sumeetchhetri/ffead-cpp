@@ -33,32 +33,42 @@ SoapHandler::~SoapHandler() {
 
 void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, ConfigurationData configData)
 {
-	string xmlcnttype = configData.props[".xml"];
 	Logger logger = Logger::getLogger("SoapHandler");
+	string wsUrl = "http://" + configData.ip_address + "/";
+	string acurl = req->getActUrl();
+	StringUtil::replaceFirst(acurl,"//","/");
+	if(acurl.length()>1)
+		acurl = acurl.substr(1);
+	if(acurl.find(req->getCntxt_name())!=0)
+		acurl = req->getCntxt_name() + "/" + acurl;
+	wsUrl += acurl;
+	logger << ("WsUrl is " + wsUrl) << endl;
+
+	string xmlcnttype = configData.props[".xml"];
 	string meth,ws_name,env;
-	ws_name = req->getFile();
+	ws_name = configData.wsdlmap[wsUrl];
 	Element soapenv;
 	logger.info("request => "+req->getContent());
 	Element soapbody;
 	try
 	{
-		XmlParser parser("Parser");
+		XmlParser parser("Validator");
 		Document doc = parser.getDocument(req->getContent());
 		soapenv = doc.getRootElement();
 		//logger << soapenv.getTagName() << "----\n" << flush;
 
 		if(soapenv.getChildElements().size()==1
-				&& soapenv.getChildElements().at(0).getTagName()=="Body")
+				&& StringUtil::toLowerCopy(soapenv.getChildElements().at(0).getTagName())=="body")
 			soapbody = soapenv.getChildElements().at(0);
 		else if(soapenv.getChildElements().size()==2
-				&& soapenv.getChildElements().at(1).getTagName()=="Body")
+				&& StringUtil::toLowerCopy(soapenv.getChildElements().at(1).getTagName())=="body")
 			soapbody = soapenv.getChildElements().at(1);
 		//logger << soapbody.getTagName() << "----\n" << flush;
 		Element method = soapbody.getChildElements().at(0);
 		//logger << method.getTagName() << "----\n" << flush;
 		meth = method.getTagName();
-		string methodname = meth + ws_name;
-		//ogger << methodname << "----\n" << flush;
+		string methodname = req->getCntxt_name() + meth + ws_name;
+		logger << methodname << "----\n" << flush;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		if(mkr!=NULL)
 		{
@@ -105,7 +115,28 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, Config
 		logger << "\n----------------------------------------------------------------------------\n" << flush;
 		logger << env << "\n----------------------------------------------------------------------------\n" << flush;
 	}
-	catch(string &fault)
+	catch(const char* faultc)
+	{
+		string fault(faultc);
+		typedef map<string,string> AttributeList;
+		AttributeList attl = soapbody.getAttributes();
+		AttributeList::iterator it;
+		string bod = "<" + soapbody.getTagNameSpc();
+		for(it=attl.begin();it!=attl.end();it++)
+		{
+			bod.append(" " + it->first + "=\"" + it->second + "\" ");
+		}
+		bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>"+fault+"</faultstring><detail></detail><soap-fault></" + soapbody.getTagNameSpc()+">");
+		attl = soapenv.getAttributes();
+		env = "<" + soapenv.getTagNameSpc();
+		for(it=attl.begin();it!=attl.end();it++)
+		{
+			env.append(" " + it->first + "=\"" + it->second + "\" ");
+		}
+		env.append(">"+bod + "</" + soapenv.getTagNameSpc()+">");
+		logger << ("Soap fault - " + fault) << flush;
+	}
+	catch(const string &fault)
 	{
 		typedef map<string,string> AttributeList;
 		AttributeList attl = soapbody.getAttributes();
@@ -168,5 +199,4 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, Config
 	res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	res.addHeaderValue(HttpResponse::ContentType, xmlcnttype);
 	res.setContent_str(env);
-	//res.setContent_len(CastUtil::lexical_cast<string>(env.length()));
 }

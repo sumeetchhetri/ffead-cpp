@@ -26,11 +26,11 @@ class CompressionUtil {
 	static string _uncompress(char* infile, bool isGz, bool retu, char* toFile);
 	CompressionUtil();
 public:
-	static string zlibCompress(char* input, size_t siz, int chunkSize = 8192, bool eostream = false, bool retu = true, char* toFile = NULL);
-	static string zlibCompress(const string& input, int chunkSize = 8192, bool eostream = false, bool retu = true, char* toFile = NULL);
+	static string zlibCompress(char* input, size_t siz, bool eostream = false, int chunkSize = 8192,  bool retu = true, char* toFile = NULL);
+	static string zlibCompress(const string& input, bool eostream = false, int chunkSize = 8192,  bool retu = true, char* toFile = NULL);
 	static string zlibCompressFile(char* infile, bool retu = true, char* toFile = NULL);
-	static string gzipCompress(char* input, size_t siz, int chunkSize = 8192, bool eostream = false, bool retu = true, char* toFile = NULL);
-	static string gzipCompress(const string& input, int chunkSize = 8192, bool eostream = false, bool retu = true, char* toFile = NULL);
+	static string gzipCompress(char* input, size_t siz, bool eostream = false, int chunkSize = 8192,  bool retu = true, char* toFile = NULL);
+	static string gzipCompress(const string& input, bool eostream = false, int chunkSize = 8192,  bool retu = true, char* toFile = NULL);
 	static string gzipCompressFile(char* infile, bool retu = true, char* toFile = NULL);
 	static string zlibUnCompress(char* input, size_t siz, bool retu = true, char* toFile = NULL);
 	static string zlibUnCompress(const string& input, bool retu = true, char* toFile = NULL);

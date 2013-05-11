@@ -192,7 +192,7 @@ int ScriptHandler::pcloseRWE(int pid, int *rwepipe)
 	return status;
 }
 
-bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs, void* dlib,
+bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs,
 		string ext, map<string, string> props)
 {
 	bool skipit = false;

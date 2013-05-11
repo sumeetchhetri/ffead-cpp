@@ -21,7 +21,6 @@
  */
 
 #include "HttpRequest.h"
-using namespace std;
 
 string HttpRequest::VALID_REQUEST_HEADERS = ",accept,accept-charset,accept-encoding,accept-language,accept-datetime,access-control-request-headers,access-control-request-method,authorization,cache-control,connection,cookie,content-length,content-md5,content-type,date,expect,from,host,if-match,if-modified-since,if-none-match,if-range,if-unmodified-since,max-forwards,origin,pragma,proxy-authorization,range,referer,te,upgrade,user-agent,via,warning,";
 
@@ -146,7 +145,8 @@ HttpRequest::HttpRequest(strVec vec,string path)
 			if(!contStarts && temp.size()>1)
 			{
 				StringUtil::replaceFirst(temp.at(1),"\r","");
-				if(temp.at(0)=="Authorization")
+				StringUtil::camelCased(temp.at(0), "-");
+				if(temp.at(0)==HttpRequest::Authorization)
 				{
 					if(temp.at(1).find("oauth_")!=string::npos)
 					{
@@ -158,7 +158,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 					}
 					addHeaderValue(temp.at(0), temp.at(1));
 				}
-				else if(temp.at(0)=="Accept-Language" || temp.at(0)=="Accept-language")
+				else if(temp.at(0)==HttpRequest::AcceptLanguage)
 				{
 					strVec lemp;
 					StringUtil::split(lemp, temp.at(1), (","));
@@ -185,7 +185,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 					}
 					addHeaderValue(temp.at(0), temp.at(1));
 				}
-				else if(temp.at(0)=="Content-Type" || temp.at(0)=="Content-type")
+				else if(temp.at(0)==HttpRequest::ContentType)
 				{
 					string tempi(temp.at(1));
 					size_t s = tempi.find("boundary");
@@ -206,7 +206,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						addHeaderValue(temp.at(0), temp.at(1));
 					}
 				}
-				else if(temp.at(0)=="Cookie")
+				else if(temp.at(0)==HttpRequest::Cookie)
 				{
 					this->cookie = true;
 					strVec results;
@@ -230,544 +230,565 @@ HttpRequest::HttpRequest(strVec vec,string path)
 			else
 			{
 				string tem = temp.at(0);
-				if(!contStarts && tem.find("GET")!=string::npos)
+				if(!contStarts)
 				{
-					StringUtil::replaceFirst(tem,"GET ","");
+					StringUtil::split(vemp, tem, (" "));
+					if(vemp.size()<3)
+					{
+						status = HTTPResponseStatus::BadRequest;
+						return;
+					}
+					else if(!isValidHttpMethod(vemp.at(0)))
+					{
+						status = HTTPResponseStatus::InvalidMethod;
+						return;
+					}
+					else
+					{
+						string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(vemp.at(2)), "http/", "");
+						StringUtil::trim(versionStr);
+						float version = -1;
+						try {
+							version = CastUtil::lexical_cast<float>(versionStr);
+							this->httpVers = version;
+						} catch(...) {
+							status = HTTPResponseStatus::HttpVersionNotSupported;
+							return;
+						}
+						if(version<1.0 && version>1.1)
+						{
+							status = HTTPResponseStatus::HttpVersionNotSupported;
+							return;
+						}
+						if(version<1.1 && StringUtil::toLowerCopy(vemp.at(0))=="options")
+						{
+							status = HTTPResponseStatus::InvalidMethod;
+							return;
+						}
+					}
+				}
+				if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="get")
+				{
+					//StringUtil::replaceFirst(tem,"GET ","");
+					vemp.erase(vemp.begin());
 					this->setMethod("GET");
-					StringUtil::split(vemp, tem, (" "));
-					if(vemp.size()==2)
+					//StringUtil::split(vemp, tem, (" "));
+					StringUtil::replaceFirst(vemp.at(1),"\r","");
+					this->httpVersion = vemp.at(1);
+					StringUtil::replaceFirst(vemp.at(0)," ","");
+					if(vemp.at(0).find("?")!=string ::npos)
 					{
-						StringUtil::replaceFirst(vemp.at(1),"\r","");
-						this->setHttpVersion(vemp.at(1));
-						StringUtil::replaceFirst(vemp.at(0)," ","");
-						if(vemp.at(0).find("?")!=string ::npos)
+						strVec params;
+						string valu(vemp.at(0));
+						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+						valu = valu.substr(valu.find("?")+1);
+						//valu = CryptoHandler::urlDecode(valu);
+						StringUtil::split(params,valu , ("&"));
+						map<string ,int> indices;
+						map<string,string>::iterator it;
+						for(unsigned j=0;j<params.size();j++)
 						{
-							strVec params;
-							string valu(vemp.at(0));
-							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-							valu = valu.substr(valu.find("?")+1);
-							//valu = CryptoHandler::urlDecode(valu);
-							StringUtil::split(params,valu , ("&"));
-							map<string ,int> indices;
-							map<string,string>::iterator it;
-							for(unsigned j=0;j<params.size();j++)
+							strVec param;
+							StringUtil::split(param, params.at(j), ("="));
+							if(param.size()==2)
 							{
-								strVec param;
-								StringUtil::split(param, params.at(j), ("="));
-								if(param.size()==2)
+								string att = param.at(0);
+								StringUtil::replaceFirst(att,"\r","");
+								StringUtil::replaceFirst(att,"\t","");
+								StringUtil::replaceFirst(att," ","");
+								//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
+								string attN = CryptoHandler::urlDecode(att);
+								if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 								{
-									string att = param.at(0);
-									StringUtil::replaceFirst(att,"\r","");
-									StringUtil::replaceFirst(att,"\t","");
-									StringUtil::replaceFirst(att," ","");
-									//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
-									string attN = CryptoHandler::urlDecode(att);
-									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+									if(indices.find(attN)==indices.end())
 									{
-										if(indices.find(attN)==indices.end())
-										{
-											indices[attN] = 0;
-										}
-										else
-										{
-											indices[attN] = indices[attN] + 1;
-										}
-										this->queryParams[attN.substr(0, attN.find("[")+1)
-												  + CastUtil::lexical_cast<string>(indices[attN])
-												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-														  + CastUtil::lexical_cast<string>(indices[attN])
-														  + "]"
-														  + CryptoHandler::urlDecode(param.at(1))) << endl;
+										indices[attN] = 0;
 									}
 									else
 									{
-										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+										indices[attN] = indices[attN] + 1;
 									}
-									reqorderinf[reqorderinf.size()+1] = att;
+									this->queryParams[attN.substr(0, attN.find("[")+1)
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]"] = CryptoHandler::urlDecode(param.at(1));
+									logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+													  + CastUtil::lexical_cast<string>(indices[attN])
+													  + "]"
+													  + CryptoHandler::urlDecode(param.at(1))) << endl;
 								}
-							}
-						}
-						this->setActUrl(vemp.at(0));
-						memp = StringUtil::split(vemp.at(0), ("/"));
-						int fs = vemp.at(0).find_first_of("/");
-						int es = vemp.at(0).find_last_of("/");
-						if(fs==es)
-						{
-							this->setCntxt_root(path+"default");
-							this->setCntxt_name("default");
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+"default/"+vemp.at(0));
-						}
-						else
-						{
-							int ss = vemp.at(0).substr(fs+1).find("/");
-							if(ss>fs)
-							{
-								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-								this->setCntxt_root(path+this->getCntxt_name());
-								this->setFile(vemp.at(0).substr(es+1));
-								this->setUrl(path+vemp.at(0));
+								else
+								{
+									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+								}
+								reqorderinf[reqorderinf.size()+1] = att;
 							}
 						}
 					}
+					this->setActUrl(vemp.at(0));
+					memp = StringUtil::split(vemp.at(0), ("/"));
+					int fs = vemp.at(0).find_first_of("/");
+					int es = vemp.at(0).find_last_of("/");
+					if(fs==es)
+					{
+						this->setCntxt_root(path+"default");
+						this->setCntxt_name("default");
+						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
+					}
+					else
+					{
+						int ss = vemp.at(0).substr(fs+1).find("/");
+						if(ss>fs)
+						{
+							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+							this->setCntxt_root(path+this->getCntxt_name());
+							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+vemp.at(0));
+						}
+					}
 				}
-				else if(!contStarts && tem.find("HEAD")!=string::npos)
+				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="head")
 				{
-					StringUtil::replaceFirst(tem,"HEAD ","");
+					//StringUtil::replaceFirst(tem,"HEAD ","");
+					vemp.erase(vemp.begin());
 					this->setMethod("HEAD");
-					StringUtil::split(vemp, tem, (" "));
-					if(vemp.size()==2)
+					//StringUtil::split(vemp, tem, (" "));
+					StringUtil::replaceFirst(vemp.at(1),"\r","");
+					this->httpVersion = vemp.at(1);
+					StringUtil::replaceFirst(vemp.at(0)," ","");
+					if(vemp.at(0).find("?")!=string ::npos)
 					{
-						StringUtil::replaceFirst(vemp.at(1),"\r","");
-						this->setHttpVersion(vemp.at(1));
-						StringUtil::replaceFirst(vemp.at(0)," ","");
-						if(vemp.at(0).find("?")!=string ::npos)
+						strVec params;
+						string valu(vemp.at(0));
+						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+						valu = valu.substr(valu.find("?")+1);
+						//valu = CryptoHandler::urlDecode(valu);
+						StringUtil::split(params,valu , ("&"));
+						map<string ,int> indices;
+						map<string,string>::iterator it;
+						for(unsigned j=0;j<params.size();j++)
 						{
-							strVec params;
-							string valu(vemp.at(0));
-							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-							valu = valu.substr(valu.find("?")+1);
-							//valu = CryptoHandler::urlDecode(valu);
-							StringUtil::split(params,valu , ("&"));
-							map<string ,int> indices;
-							map<string,string>::iterator it;
-							for(unsigned j=0;j<params.size();j++)
+							strVec param;
+							StringUtil::split(param, params.at(j), ("="));
+							if(param.size()==2)
 							{
-								strVec param;
-								StringUtil::split(param, params.at(j), ("="));
-								if(param.size()==2)
+								string att = param.at(0);
+								StringUtil::replaceFirst(att,"\r","");
+								StringUtil::replaceFirst(att,"\t","");
+								StringUtil::replaceFirst(att," ","");
+								//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
+								string attN = CryptoHandler::urlDecode(att);
+								if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 								{
-									string att = param.at(0);
-									StringUtil::replaceFirst(att,"\r","");
-									StringUtil::replaceFirst(att,"\t","");
-									StringUtil::replaceFirst(att," ","");
-									//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
-									string attN = CryptoHandler::urlDecode(att);
-									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+									if(indices.find(attN)==indices.end())
 									{
-										if(indices.find(attN)==indices.end())
-										{
-											indices[attN] = 0;
-										}
-										else
-										{
-											indices[attN] = indices[attN] + 1;
-										}
-										this->queryParams[attN.substr(0, attN.find("[")+1)
-												  + CastUtil::lexical_cast<string>(indices[attN])
-												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-														  + CastUtil::lexical_cast<string>(indices[attN])
-														  + "]"
-														  + CryptoHandler::urlDecode(param.at(1))) << endl;
+										indices[attN] = 0;
 									}
 									else
 									{
-										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+										indices[attN] = indices[attN] + 1;
 									}
-									reqorderinf[reqorderinf.size()+1] = att;
+									this->queryParams[attN.substr(0, attN.find("[")+1)
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]"] = CryptoHandler::urlDecode(param.at(1));
+									logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+													  + CastUtil::lexical_cast<string>(indices[attN])
+													  + "]"
+													  + CryptoHandler::urlDecode(param.at(1))) << endl;
 								}
-							}
-						}
-						this->setActUrl(vemp.at(0));
-						memp = StringUtil::split(vemp.at(0), ("/"));
-						int fs = vemp.at(0).find_first_of("/");
-						int es = vemp.at(0).find_last_of("/");
-						if(fs==es)
-						{
-							this->setCntxt_root(path+"default");
-							this->setCntxt_name("default");
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+"default/"+vemp.at(0));
-						}
-						else
-						{
-							int ss = vemp.at(0).substr(fs+1).find("/");
-							if(ss>fs)
-							{
-								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-								this->setCntxt_root(path+this->getCntxt_name());
-								this->setFile(vemp.at(0).substr(es+1));
-								this->setUrl(path+vemp.at(0));
+								else
+								{
+									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+								}
+								reqorderinf[reqorderinf.size()+1] = att;
 							}
 						}
 					}
+					this->setActUrl(vemp.at(0));
+					memp = StringUtil::split(vemp.at(0), ("/"));
+					int fs = vemp.at(0).find_first_of("/");
+					int es = vemp.at(0).find_last_of("/");
+					if(fs==es)
+					{
+						this->setCntxt_root(path+"default");
+						this->setCntxt_name("default");
+						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
+					}
+					else
+					{
+						int ss = vemp.at(0).substr(fs+1).find("/");
+						if(ss>fs)
+						{
+							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+							this->setCntxt_root(path+this->getCntxt_name());
+							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+vemp.at(0));
+						}
+					}
 				}
-				else if(!contStarts && tem.find("TRACE")!=string::npos)
+				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="trace")
 				{
-					StringUtil::replaceFirst(tem,"TRACE ","");
+					//StringUtil::replaceFirst(tem,"TRACE ","");
+					vemp.erase(vemp.begin());
 					this->setMethod("TRACE");
-					StringUtil::split(vemp, tem, (" "));
-					if(vemp.size()==2)
+					//StringUtil::split(vemp, tem, (" "));
+					StringUtil::replaceFirst(vemp.at(1),"\r","");
+					this->httpVersion = vemp.at(1);
+					StringUtil::replaceFirst(vemp.at(0)," ","");
+					if(vemp.at(0).find("?")!=string ::npos)
 					{
-						StringUtil::replaceFirst(vemp.at(1),"\r","");
-						this->setHttpVersion(vemp.at(1));
-						StringUtil::replaceFirst(vemp.at(0)," ","");
-						if(vemp.at(0).find("?")!=string ::npos)
+						strVec params;
+						string valu(vemp.at(0));
+						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+						valu = valu.substr(valu.find("?")+1);
+						//valu = CryptoHandler::urlDecode(valu);
+						StringUtil::split(params,valu , ("&"));
+						map<string ,int> indices;
+						map<string,string>::iterator it;
+						for(unsigned j=0;j<params.size();j++)
 						{
-							strVec params;
-							string valu(vemp.at(0));
-							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-							valu = valu.substr(valu.find("?")+1);
-							//valu = CryptoHandler::urlDecode(valu);
-							StringUtil::split(params,valu , ("&"));
-							map<string ,int> indices;
-							map<string,string>::iterator it;
-							for(unsigned j=0;j<params.size();j++)
+							strVec param;
+							StringUtil::split(param, params.at(j), ("="));
+							if(param.size()==2)
 							{
-								strVec param;
-								StringUtil::split(param, params.at(j), ("="));
-								if(param.size()==2)
+								string att = param.at(0);
+								StringUtil::replaceFirst(att,"\r","");
+								StringUtil::replaceFirst(att,"\t","");
+								StringUtil::replaceFirst(att," ","");
+								//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
+								string attN = CryptoHandler::urlDecode(att);
+								if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 								{
-									string att = param.at(0);
-									StringUtil::replaceFirst(att,"\r","");
-									StringUtil::replaceFirst(att,"\t","");
-									StringUtil::replaceFirst(att," ","");
-									//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
-									string attN = CryptoHandler::urlDecode(att);
-									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+									if(indices.find(attN)==indices.end())
 									{
-										if(indices.find(attN)==indices.end())
-										{
-											indices[attN] = 0;
-										}
-										else
-										{
-											indices[attN] = indices[attN] + 1;
-										}
-										this->queryParams[attN.substr(0, attN.find("[")+1)
-												  + CastUtil::lexical_cast<string>(indices[attN])
-												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-														  + CastUtil::lexical_cast<string>(indices[attN])
-														  + "]"
-														  + CryptoHandler::urlDecode(param.at(1))) << endl;
+										indices[attN] = 0;
 									}
 									else
 									{
-										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+										indices[attN] = indices[attN] + 1;
 									}
-									reqorderinf[reqorderinf.size()+1] = att;
+									this->queryParams[attN.substr(0, attN.find("[")+1)
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]"] = CryptoHandler::urlDecode(param.at(1));
+									logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+													  + CastUtil::lexical_cast<string>(indices[attN])
+													  + "]"
+													  + CryptoHandler::urlDecode(param.at(1))) << endl;
 								}
-							}
-						}
-						this->setActUrl(vemp.at(0));
-						memp = StringUtil::split(vemp.at(0), ("/"));
-						int fs = vemp.at(0).find_first_of("/");
-						int es = vemp.at(0).find_last_of("/");
-						if(fs==es)
-						{
-							this->setCntxt_root(path+"default");
-							this->setCntxt_name("default");
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+"default/"+vemp.at(0));
-						}
-						else
-						{
-							int ss = vemp.at(0).substr(fs+1).find("/");
-							if(ss>fs)
-							{
-								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-								this->setCntxt_root(path+this->getCntxt_name());
-								this->setFile(vemp.at(0).substr(es+1));
-								this->setUrl(path+vemp.at(0));
+								else
+								{
+									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+								}
+								reqorderinf[reqorderinf.size()+1] = att;
 							}
 						}
 					}
+					this->setActUrl(vemp.at(0));
+					memp = StringUtil::split(vemp.at(0), ("/"));
+					int fs = vemp.at(0).find_first_of("/");
+					int es = vemp.at(0).find_last_of("/");
+					if(fs==es)
+					{
+						this->setCntxt_root(path+"default");
+						this->setCntxt_name("default");
+						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
+					}
+					else
+					{
+						int ss = vemp.at(0).substr(fs+1).find("/");
+						if(ss>fs)
+						{
+							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+							this->setCntxt_root(path+this->getCntxt_name());
+							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+vemp.at(0));
+						}
+					}
 				}
-				else if(!contStarts && tem.find("OPTIONS")!=string::npos)
+				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="options")
 				{
-					StringUtil::replaceFirst(tem,"OPTIONS ","");
+					//StringUtil::replaceFirst(tem,"OPTIONS ","");
 					this->setMethod("OPTIONS");
-					StringUtil::split(vemp, tem, (" "));
-					if(vemp.size()==2)
+					vemp.erase(vemp.begin());
+					//StringUtil::split(vemp, tem, (" "));
+					StringUtil::replaceFirst(vemp.at(1),"\r","");
+					this->httpVersion = vemp.at(1);
+					StringUtil::replaceFirst(vemp.at(0)," ","");
+					this->setActUrl(vemp.at(0));
+					memp = StringUtil::split(vemp.at(0), ("/"));
+					int fs = vemp.at(0).find_first_of("/");
+					int es = vemp.at(0).find_last_of("/");
+					if(fs==es)
 					{
-						StringUtil::replaceFirst(vemp.at(1),"\r","");
-						this->setHttpVersion(vemp.at(1));
-						StringUtil::replaceFirst(vemp.at(0)," ","");
-						this->setActUrl(vemp.at(0));
-						memp = StringUtil::split(vemp.at(0), ("/"));
-						int fs = vemp.at(0).find_first_of("/");
-						int es = vemp.at(0).find_last_of("/");
-						if(fs==es)
+						this->setCntxt_root(path+"default");
+						this->setCntxt_name("default");
+						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
+					}
+					else
+					{
+						int ss = vemp.at(0).substr(fs+1).find("/");
+						if(ss>fs)
 						{
-							this->setCntxt_root(path+"default");
-							this->setCntxt_name("default");
+							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+							this->setCntxt_root(path+this->getCntxt_name());
 							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+"default/"+vemp.at(0));
-						}
-						else
-						{
-							int ss = vemp.at(0).substr(fs+1).find("/");
-							if(ss>fs)
-							{
-								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-								this->setCntxt_root(path+this->getCntxt_name());
-								this->setFile(vemp.at(0).substr(es+1));
-								this->setUrl(path+vemp.at(0));
-							}
+							this->setUrl(path+vemp.at(0));
 						}
 					}
 				}
-				else if(!contStarts && tem.find("DELETE")!=string::npos)
+				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="delete")
 				{
-					StringUtil::replaceFirst(tem,"DELETE ","");
+					//StringUtil::replaceFirst(tem,"DELETE ","");
 					this->setMethod("DELETE");
-					StringUtil::split(vemp, tem, (" "));
-					if(vemp.size()==2)
+					vemp.erase(vemp.begin());
+					//StringUtil::split(vemp, tem, (" "));
+					StringUtil::replaceFirst(vemp.at(1),"\r","");
+					this->httpVersion = vemp.at(1);
+					StringUtil::replaceFirst(vemp.at(0)," ","");
+					if(vemp.at(0).find("?")!=string ::npos)
 					{
-						StringUtil::replaceFirst(vemp.at(1),"\r","");
-						this->setHttpVersion(vemp.at(1));
-						StringUtil::replaceFirst(vemp.at(0)," ","");
-						if(vemp.at(0).find("?")!=string ::npos)
+						strVec params;
+						string valu(vemp.at(0));
+						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+						valu = valu.substr(valu.find("?")+1);
+						valu = CryptoHandler::urlDecode(valu);
+						StringUtil::split(params,valu, ("&"));
+						map<string ,int> indices;
+						map<string,string>::iterator it;
+						for(unsigned j=0;j<params.size();j++)
 						{
-							strVec params;
-							string valu(vemp.at(0));
-							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-							valu = valu.substr(valu.find("?")+1);
-							valu = CryptoHandler::urlDecode(valu);
-							StringUtil::split(params,valu, ("&"));
-							map<string ,int> indices;
-							map<string,string>::iterator it;
-							for(unsigned j=0;j<params.size();j++)
+							strVec param;
+							StringUtil::split(param, params.at(j), ("="));
+							if(param.size()==2)
 							{
-								strVec param;
-								StringUtil::split(param, params.at(j), ("="));
-								if(param.size()==2)
+								string att = param.at(0);
+								StringUtil::replaceFirst(att,"\r","");
+								StringUtil::replaceFirst(att,"\t","");
+								StringUtil::replaceFirst(att," ","");
+								string attN = CryptoHandler::urlDecode(att);
+								if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 								{
-									string att = param.at(0);
-									StringUtil::replaceFirst(att,"\r","");
-									StringUtil::replaceFirst(att,"\t","");
-									StringUtil::replaceFirst(att," ","");
-									string attN = CryptoHandler::urlDecode(att);
-									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+									if(indices.find(attN)==indices.end())
 									{
-										if(indices.find(attN)==indices.end())
-										{
-											indices[attN] = 0;
-										}
-										else
-										{
-											indices[attN] = indices[attN] + 1;
-										}
-										this->queryParams[attN.substr(0, attN.find("[")+1)
-												  + CastUtil::lexical_cast<string>(indices[attN])
-												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-														  + CastUtil::lexical_cast<string>(indices[attN])
-														  + "]"
-														  + CryptoHandler::urlDecode(param.at(1))) << endl;
+										indices[attN] = 0;
 									}
 									else
 									{
-										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+										indices[attN] = indices[attN] + 1;
 									}
-									reqorderinf[reqorderinf.size()+1] = att;
+									this->queryParams[attN.substr(0, attN.find("[")+1)
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]"] = CryptoHandler::urlDecode(param.at(1));
+									logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+													  + CastUtil::lexical_cast<string>(indices[attN])
+													  + "]"
+													  + CryptoHandler::urlDecode(param.at(1))) << endl;
 								}
-							}
-						}
-						this->setActUrl(vemp.at(0));
-						memp = StringUtil::split(vemp.at(0), ("/"));
-						int fs = vemp.at(0).find_first_of("/");
-						int es = vemp.at(0).find_last_of("/");
-						if(fs==es)
-						{
-							this->setCntxt_root(path+"default");
-							this->setCntxt_name("default");
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+"default/"+vemp.at(0));
-						}
-						else
-						{
-							int ss = vemp.at(0).substr(fs+1).find("/");
-							if(ss>fs)
-							{
-								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-								this->setCntxt_root(path+this->getCntxt_name());
-								this->setFile(vemp.at(0).substr(es+1));
-								this->setUrl(path+vemp.at(0));
+								else
+								{
+									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+								}
+								reqorderinf[reqorderinf.size()+1] = att;
 							}
 						}
 					}
+					this->setActUrl(vemp.at(0));
+					memp = StringUtil::split(vemp.at(0), ("/"));
+					int fs = vemp.at(0).find_first_of("/");
+					int es = vemp.at(0).find_last_of("/");
+					if(fs==es)
+					{
+						this->setCntxt_root(path+"default");
+						this->setCntxt_name("default");
+						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
+					}
+					else
+					{
+						int ss = vemp.at(0).substr(fs+1).find("/");
+						if(ss>fs)
+						{
+							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+							this->setCntxt_root(path+this->getCntxt_name());
+							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+vemp.at(0));
+						}
+					}
 				}
-				else if(!contStarts && tem.find("PUT")!=string::npos)
+				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="put")
 				{
-					StringUtil::replaceFirst(tem,"PUT ","");
+					//StringUtil::replaceFirst(tem,"PUT ","");
 					this->setMethod("PUT");
-					StringUtil::split(vemp, tem, (" "));
-					if(vemp.size()==2)
+					vemp.erase(vemp.begin());
+					//StringUtil::split(vemp, tem, (" "));
+					StringUtil::replaceFirst(vemp.at(1),"\r","");
+					this->httpVersion = vemp.at(1);
+					StringUtil::replaceFirst(vemp.at(0)," ","");
+					if(vemp.at(0).find("?")!=string ::npos)
 					{
-						StringUtil::replaceFirst(vemp.at(1),"\r","");
-						this->setHttpVersion(vemp.at(1));
-						StringUtil::replaceFirst(vemp.at(0)," ","");
-						if(vemp.at(0).find("?")!=string ::npos)
+						strVec params;
+						string valu(vemp.at(0));
+						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+						valu = valu.substr(valu.find("?")+1);
+						valu = CryptoHandler::urlDecode(valu);
+						StringUtil::split(params,valu, ("&"));
+						map<string ,int> indices;
+						map<string,string>::iterator it;
+						for(unsigned j=0;j<params.size();j++)
 						{
-							strVec params;
-							string valu(vemp.at(0));
-							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-							valu = valu.substr(valu.find("?")+1);
-							valu = CryptoHandler::urlDecode(valu);
-							StringUtil::split(params,valu, ("&"));
-							map<string ,int> indices;
-							map<string,string>::iterator it;
-							for(unsigned j=0;j<params.size();j++)
+							strVec param;
+							StringUtil::split(param, params.at(j), ("="));
+							if(param.size()==2)
 							{
-								strVec param;
-								StringUtil::split(param, params.at(j), ("="));
-								if(param.size()==2)
+								string att = param.at(0);
+								StringUtil::replaceFirst(att,"\r","");
+								StringUtil::replaceFirst(att,"\t","");
+								StringUtil::replaceFirst(att," ","");
+								string attN = CryptoHandler::urlDecode(att);
+								if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 								{
-									string att = param.at(0);
-									StringUtil::replaceFirst(att,"\r","");
-									StringUtil::replaceFirst(att,"\t","");
-									StringUtil::replaceFirst(att," ","");
-									string attN = CryptoHandler::urlDecode(att);
-									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+									if(indices.find(attN)==indices.end())
 									{
-										if(indices.find(attN)==indices.end())
-										{
-											indices[attN] = 0;
-										}
-										else
-										{
-											indices[attN] = indices[attN] + 1;
-										}
-										this->queryParams[attN.substr(0, attN.find("[")+1)
-												  + CastUtil::lexical_cast<string>(indices[attN])
-												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-														  + CastUtil::lexical_cast<string>(indices[attN])
-														  + "]"
-														  + CryptoHandler::urlDecode(param.at(1))) << endl;
+										indices[attN] = 0;
 									}
 									else
 									{
-										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+										indices[attN] = indices[attN] + 1;
 									}
-									reqorderinf[reqorderinf.size()+1] = att;
+									this->queryParams[attN.substr(0, attN.find("[")+1)
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]"] = CryptoHandler::urlDecode(param.at(1));
+									logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+													  + CastUtil::lexical_cast<string>(indices[attN])
+													  + "]"
+													  + CryptoHandler::urlDecode(param.at(1))) << endl;
 								}
-							}
-						}
-						this->setActUrl(vemp.at(0));
-						memp = StringUtil::split(vemp.at(0), ("/"));
-						int fs = vemp.at(0).find_first_of("/");
-						int es = vemp.at(0).find_last_of("/");
-						if(fs==es)
-						{
-							this->setCntxt_root(path+"default");
-							this->setCntxt_name("default");
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+"default/"+vemp.at(0));
-						}
-						else
-						{
-							int ss = vemp.at(0).substr(fs+1).find("/");
-							if(ss>fs)
-							{
-								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-								this->setCntxt_root(path+this->getCntxt_name());
-								this->setFile(vemp.at(0).substr(es+1));
-								this->setUrl(path+vemp.at(0));
+								else
+								{
+									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+								}
+								reqorderinf[reqorderinf.size()+1] = att;
 							}
 						}
 					}
-				}
-				else if(!contStarts && tem.find("POST")!=string::npos)
-				{
-					StringUtil::replaceFirst(tem,"POST ","");
-					this->setMethod("POST");
-					StringUtil::split(vemp, tem, (" "));
-					if(vemp.size()==2)
+					this->setActUrl(vemp.at(0));
+					memp = StringUtil::split(vemp.at(0), ("/"));
+					int fs = vemp.at(0).find_first_of("/");
+					int es = vemp.at(0).find_last_of("/");
+					if(fs==es)
 					{
-						//this->setUrl(vemp.at(0));
-						//string pat(vemp.at(0));
-						StringUtil::replaceFirst(vemp.at(1),"\r","");
-						this->setHttpVersion(vemp.at(1));
-						StringUtil::replaceFirst(vemp.at(0)," ","");
-						if(vemp.at(0).find("?")!=string ::npos)
+						this->setCntxt_root(path+"default");
+						this->setCntxt_name("default");
+						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
+					}
+					else
+					{
+						int ss = vemp.at(0).substr(fs+1).find("/");
+						if(ss>fs)
 						{
-							strVec params;
-							string valu(vemp.at(0));
-							vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-							valu = valu.substr(valu.find("?")+1);
-							valu = CryptoHandler::urlDecode(valu);
-							StringUtil::split(params,valu, ("&"));
-							map<string ,int> indices;
-							map<string,string>::iterator it;
-							for(unsigned j=0;j<params.size();j++)
+							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+							this->setCntxt_root(path+this->getCntxt_name());
+							this->setFile(vemp.at(0).substr(es+1));
+							this->setUrl(path+vemp.at(0));
+						}
+					}
+				}
+				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="post")
+				{
+					//StringUtil::replaceFirst(tem,"POST ","");
+					this->setMethod("POST");
+					vemp.erase(vemp.begin());
+					//StringUtil::split(vemp, tem, (" "));
+					//this->setUrl(vemp.at(0));
+					//string pat(vemp.at(0));
+					StringUtil::replaceFirst(vemp.at(1),"\r","");
+					this->httpVersion = vemp.at(1);
+					StringUtil::replaceFirst(vemp.at(0)," ","");
+					if(vemp.at(0).find("?")!=string ::npos)
+					{
+						strVec params;
+						string valu(vemp.at(0));
+						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+						valu = valu.substr(valu.find("?")+1);
+						valu = CryptoHandler::urlDecode(valu);
+						StringUtil::split(params,valu, ("&"));
+						map<string ,int> indices;
+						map<string,string>::iterator it;
+						for(unsigned j=0;j<params.size();j++)
+						{
+							strVec param;
+							StringUtil::split(param, params.at(j), ("="));
+							if(param.size()==2)
 							{
-								strVec param;
-								StringUtil::split(param, params.at(j), ("="));
-								if(param.size()==2)
+								string att = param.at(0);
+								StringUtil::replaceFirst(att,"\r","");
+								StringUtil::replaceFirst(att,"\t","");
+								StringUtil::replaceFirst(att," ","");
+								string attN = CryptoHandler::urlDecode(att);
+								if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
 								{
-									string att = param.at(0);
-									StringUtil::replaceFirst(att,"\r","");
-									StringUtil::replaceFirst(att,"\t","");
-									StringUtil::replaceFirst(att," ","");
-									string attN = CryptoHandler::urlDecode(att);
-									if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+									if(indices.find(attN)==indices.end())
 									{
-										if(indices.find(attN)==indices.end())
-										{
-											indices[attN] = 0;
-										}
-										else
-										{
-											indices[attN] = indices[attN] + 1;
-										}
-										this->queryParams[attN.substr(0, attN.find("[")+1)
-												  + CastUtil::lexical_cast<string>(indices[attN])
-												  + "]"] = CryptoHandler::urlDecode(param.at(1));
-										logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-														  + CastUtil::lexical_cast<string>(indices[attN])
-														  + "]"
-														  + CryptoHandler::urlDecode(param.at(1))) << endl;
+										indices[attN] = 0;
 									}
 									else
 									{
-										this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+										indices[attN] = indices[attN] + 1;
 									}
-									reqorderinf[reqorderinf.size()+1] = att;
+									this->queryParams[attN.substr(0, attN.find("[")+1)
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]"] = CryptoHandler::urlDecode(param.at(1));
+									logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+													  + CastUtil::lexical_cast<string>(indices[attN])
+													  + "]"
+													  + CryptoHandler::urlDecode(param.at(1))) << endl;
 								}
+								else
+								{
+									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
+								}
+								reqorderinf[reqorderinf.size()+1] = att;
 							}
 						}
-						this->setActUrl(vemp.at(0));
-						memp = StringUtil::split(vemp.at(0), ("/"));
-						int fs = vemp.at(0).find_first_of("/");
-						int es = vemp.at(0).find_last_of("/");
-						if(fs==es)
+					}
+					this->setActUrl(vemp.at(0));
+					memp = StringUtil::split(vemp.at(0), ("/"));
+					int fs = vemp.at(0).find_first_of("/");
+					int es = vemp.at(0).find_last_of("/");
+					if(fs==es)
+					{
+						this->setCntxt_root(path+"default");
+						this->setCntxt_name("default");
+						this->setFile(vemp.at(0).substr(es+1));
+						this->setUrl(path+"default/"+vemp.at(0));
+					}
+					else
+					{
+						int ss = vemp.at(0).substr(fs+1).find("/");
+						if(ss>fs)
 						{
-							this->setCntxt_root(path+"default");
-							this->setCntxt_name("default");
+							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
+							this->setCntxt_root(path+this->getCntxt_name());
 							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+"default/"+vemp.at(0));
-						}
-						else
-						{
-							int ss = vemp.at(0).substr(fs+1).find("/");
-							if(ss>fs)
-							{
-								this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-								this->setCntxt_root(path+this->getCntxt_name());
-								this->setFile(vemp.at(0).substr(es+1));
-								this->setUrl(path+vemp.at(0));
-							}
+							this->setUrl(path+vemp.at(0));
 						}
 					}
 				}
 				else if(contStarts)
 				{
-					/*string temp;
-					if(vec.at(i).find("<?")!=string::npos && vec.at(i).find("?>")!=string::npos)
-					{
-						temp = vec.at(i).substr(vec.at(i).find("?>")+2);
-						conten.append(temp);
-					}
-					else*/
 					conten.append(vec.at(i));
 					if(i!=vec.size()-1)
+					{
 						conten.append("\n");
-					//this->content=con;
+					}
+				}
+				else
+				{
+					logger << ("Bad Request line - " + vec.at(i)) << endl;
 				}
 			}
 		}
@@ -1111,7 +1132,7 @@ void HttpRequest::updateFromContentStr()
 							key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
 							key = CryptoHandler::urlDecode(key);
 							StringUtil::replaceFirst(cont_type,"\r","");
-							datf.addHeaderValue("Content-Type", cont_type);
+							datf.addHeaderValue(MultipartContent::ContentType, cont_type);
 							datf.setContent(parm);
 						}
 						else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")
@@ -1294,7 +1315,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 	string key,value;
 	key = keyc;
 	value = valuec;
-	if(key=="Accept-Language" || key=="Accept-language")
+	if(StringUtil::toLowerCopy(key)=="accept-language")
 	{
 		strVec lemp;
 		StringUtil::split(lemp, value, (","));
@@ -1321,7 +1342,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 		}
 		addHeaderValue(key, value);
 	}
-	else if(key=="Content-Type" || key=="Content-type")
+	else if(StringUtil::toLowerCopy(key)=="content-type")
 	{
 		string tempi(value);
 		size_t s = tempi.find("boundary");
@@ -1455,7 +1476,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 							{
 								key = proplr.at(1);
 								key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
-								datf.addHeaderValue("Content-Type", cont_type);
+								datf.addHeaderValue(MultipartContent::ContentType, cont_type);
 								datf.setContent(parm);
 							}
 							else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")
@@ -1479,7 +1500,17 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 	else if(key=="Method")
 		this->setMethod(value);
 	else if(key=="HttpVersion")
-		this->setHttpVersion(value);
+	{
+		this->httpVersion = value;
+		string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(value), "http/", "");
+		StringUtil::trim(versionStr);
+		float version = -1;
+		try {
+			version = CastUtil::lexical_cast<float>(versionStr);
+			this->httpVers = version;
+		} catch(...) {
+		}
+	}
 	else if(key=="GetArguments")
 	{
 		strVec params;
@@ -1626,10 +1657,11 @@ string HttpRequest::getUrl()
 	return this->url;
 }
 
-void HttpRequest::setHttpVersion(string httpVersion)
+float HttpRequest::getHttpVers()
 {
-	this->httpVersion = httpVersion;
+	return this->httpVers;
 }
+
 string HttpRequest::getHttpVersion()
 {
 	return this->httpVersion;
@@ -2422,25 +2454,29 @@ map<string,string> HttpRequest::getHeaders()
 
 int HttpRequest::getCORSRequestType()
 {
-	if(getHeader(Origin)=="")
+	if(getHeader(Origin)=="" || getHeader(Origin)==("http://"+getHeader(Host)) || getHeader(Origin)==("https://"+getHeader(Host)))
 	{
 		//Not a CORS request
+		logger << ("Not a CORS request") << endl;
 		return OTHER;
 	}
 	else if(getHeader(AccessControlRequestMethod)!="" && StringUtil::toLowerCopy(method)=="options")
 	{
 		//CORS Preflight request
+		logger << ("CORS Preflight request") << endl;
 		return PREFLIGHT;
 	}
 	else
 	{
 		//Actual CORS request
+		logger << ("Actual CORS request") << endl;
 		return CORS;
 	}
 }
 
 void HttpRequest::addHeaderValue(string header, string value)
 {
+	header = StringUtil::camelCasedCopy(header, "-");
 	if(header!="")
 	{
 		if(VALID_REQUEST_HEADERS.find(","+StringUtil::toLowerCopy(header)+",")!=string::npos)
@@ -2450,7 +2486,7 @@ void HttpRequest::addHeaderValue(string header, string value)
 		else
 		{
 			logger << ("Non standard Header string " + header) << endl;
-			vector<string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z][a-zA-Z]*[a-zA-Z]$");
+			vector<string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
 			if(matres.size()==0)
 			{
 				logger << ("Invalid Header string " + header) << endl;
@@ -2473,6 +2509,11 @@ bool HttpRequest::isValidHttpMethod(string method)
 	return lmeth=="get" || lmeth=="post" || lmeth=="options" || lmeth=="head" || lmeth=="put" || lmeth=="delete" || lmeth=="trace";
 }
 
+bool HttpRequest::isValidHttpMethod()
+{
+	return isValidHttpMethod(method);
+}
+
 bool HttpRequest::isAgentAcceptsCE()
 {
 	string lmeth = StringUtil::toLowerCopy(getHeader(AcceptEncoding));
@@ -2481,6 +2522,7 @@ bool HttpRequest::isAgentAcceptsCE()
 
 bool HttpRequest::isHeaderValue(string header, string value, bool ignoreCase)
 {
+	header = StringUtil::camelCasedCopy(header, "-");
 	return header!="" && headers.find(header)!=headers.end()
 			&& (headers[header]==value ||
 					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
@@ -2582,4 +2624,21 @@ bool HttpRequest::isNonBinary(string mimeType)
 	return (contType.find("text")!=string::npos || contType.find("css")!=string::npos
 			|| contType.find("x-javascript")!=string::npos || contType.find("json")!=string::npos
 			|| contType.find("xml")!=string::npos || contType.find("html")!=string::npos);
+}
+
+string HttpRequest::getParamValue(string key)
+{
+	if(this->queryParams.find(key)!=this->queryParams.end())
+		return this->queryParams[key];
+	else if(this->requestParams.find(key)!=this->requestParams.end())
+		return this->requestParams[key];
+	else if(this->requestParamsF.find(key)!=this->requestParamsF.end())
+		return this->requestParamsF[key].getContent();
+	else
+		return "";
+}
+
+HTTPResponseStatus HttpRequest::getRequestParseStatus() const
+{
+	return status;
 }

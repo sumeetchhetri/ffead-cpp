@@ -49,7 +49,7 @@ string AuthHandler::getFileExtension(const string& file)
 	return ext;
 }
 
-bool AuthHandler::handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, void* dlib, string ext)
+bool AuthHandler::handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, string ext)
 {
 	map<string, string> autMap = configData.autMap;
 	map<string, string> autpattMap = configData.autpattMap;
@@ -108,7 +108,7 @@ bool AuthHandler::handle(ConfigurationData configData, HttpRequest* req, HttpRes
 		else if(claz.find("class:")!=string::npos)
 		{
 			claz = claz.substr(claz.find(":")+1);
-			void *_temp = configData.ffeadContext->getBean("authhandler_"+req->getCntxt_name()+claz);
+			void *_temp = configData.ffeadContext->getBean("authhandler_"+req->getCntxt_name()+claz, req->getCntxt_name());
 			AuthController *authc = static_cast<AuthController*>(_temp);
 			if(authc!=NULL)
 			{
@@ -123,30 +123,6 @@ bool AuthHandler::handle(ConfigurationData configData, HttpRequest* req, HttpRes
 				res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				isContrl = true;
 			}
-			/*claz = "getReflectionCIFor" + claz;
-			logger << ("Auth handled by class " + claz) << endl;
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
-			void *mkr = dlsym(dlib, claz.c_str());
-			if(mkr!=NULL)
-			{
-				FunPtr f =  (FunPtr)mkr;
-				ClassInfo srv = f();
-				args argus;
-				Constructor ctor = srv.getConstructor(argus);
-				Reflector ref;
-				void *_temp = ref.newInstanceGVP(ctor);
-				authc = (AuthController*)_temp;
-				authc->handle(req,&res);
-				if(res.getStatusCode()!="")
-					isContrl = true;
-				logger << "Authhandler called" << endl;
-				ext = getFileExtension(req->getUrl());
-				delete authc;
-			}*/
 		}
 	}
 	return isContrl;

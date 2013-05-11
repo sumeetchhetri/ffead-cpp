@@ -48,7 +48,7 @@ void* ComponentHandler::service(void* arg)
 	int fd = *(int*)arg;
 	init();
 	string methInfo,retValue;
-	_cmp_instance->getServer().Receive(fd,methInfo,1024);
+	_cmp_instance->server.Receive(fd,methInfo,1024);
 	methInfo =methInfo.substr(0,methInfo.find_last_of(">")+1);
 	_cmp_instance->logger << ("Component method " +  methInfo) << endl;
 	try
@@ -195,20 +195,20 @@ void* ComponentHandler::service(void* arg)
 		}
 		//_cmp_instance->logger << "\nSending data = "<< retValue << "\n" << endl;
 		if(retValue!="")
-			_cmp_instance->getServer().Send(fd,retValue);
+			_cmp_instance->server.Send(fd,retValue);
 		//close(fd);
 	}
 	catch(const ComponentHandlerException& e)
 	{
 		_cmp_instance->logger << e.getMessage() << endl;
-		_cmp_instance->getServer().Send(fd,retValue);
+		_cmp_instance->server.Send(fd,retValue);
 		close(fd);
 	}
 	catch(...)
 	{
 		_cmp_instance->logger << "Component exception occurred" << endl;
 		retValue = ("<return:exception>XmlParseException occurred</return:exception>");
-		_cmp_instance->getServer().Send(fd,retValue);
+		_cmp_instance->server.Send(fd,retValue);
 		close(fd);
 	}
 	return NULL;

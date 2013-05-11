@@ -29,11 +29,11 @@
 using namespace std;
 
 class CORSHandler {
-	enum CORSRequestType {
-		PREFLIGHT, CORS, OTHER
-	};
 	CORSHandler();
 public:
+	enum {
+		PREFLIGHT, CORS, OTHER
+	};
 	virtual ~CORSHandler();
 	static bool handle(HttpRequest *req, HttpResponse *res, ConfigurationData configData);
 };

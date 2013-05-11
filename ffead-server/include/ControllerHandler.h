@@ -35,7 +35,7 @@ class ControllerHandler {
 public:
 	ControllerHandler();
 	virtual ~ControllerHandler();
-	static bool handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData, void* dlib,
+	static bool handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
 			string ext, string pthwofile);
 };
 

@@ -25,6 +25,8 @@ class MultipartContent {
 	friend class HttpResponse;
 	friend class HttpRequest;
 public:
+	static string ContentId,ContentDisposition,ContentTransferEncoding,
+				  ContentLocation,ContentBase,ContentLength,ContentMD5,ContentType;
 	MultipartContent();
 	MultipartContent(vector<string> headers);
 	virtual ~MultipartContent();

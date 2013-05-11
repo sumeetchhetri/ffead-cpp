@@ -72,3 +72,11 @@ CibernateQuery::~CibernateQuery() {
 	// TODO Auto-generated destructor stub
 }
 
+bool CibernateQuery::isUpdate()
+{
+	if(StringUtil::toLowerCopy(query).find("select")==0)
+	{
+		return false;
+	}
+	return true;
+}

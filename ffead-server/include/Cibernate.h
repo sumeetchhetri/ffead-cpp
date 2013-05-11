@@ -208,13 +208,13 @@ public:
 			if(vecT.size()>0)
 			{
 				Reflector reflector;
-				ClassInfo clas = reflector.getClassInfo(clasName);
+				ClassInfo clas = reflector.getClassInfo(clasName,appName);
 				args argus;
 				string methname = "get"+AfcUtil::camelCased(name);
 				Method meth = clas.getMethod(methname,argus);
 				vals valus;
 				for (int var = 0; var < (int)vecT.size(); ++var) {
-					void *ns = reflector.invokeMethodGVP(&(vecT.at(var)),meth,valus);
+					void *ns = reflector.invokeMethodGVP(&(vecT.at(var)),meth,valus,appName);
 					vecR.push_back(*(R*)ns);
 					delete ns;
 				}
@@ -241,13 +241,13 @@ public:
 			if(vecT.size()>0)
 			{
 				Reflector reflector;
-				ClassInfo clas = reflector.getClassInfo(clasName);
+				ClassInfo clas = reflector.getClassInfo(clasName,appName);
 				args argus;
 				string methname = "get"+AfcUtil::camelCased(name);
 				Method meth = clas.getMethod(methname,argus);
 				vals valus;
 				for (int var = 0; var < (int)vecT.size(); ++var) {
-					void *ns = reflector.invokeMethodGVP(&(vecT.at(var)),meth,valus);
+					void *ns = reflector.invokeMethodGVP(&(vecT.at(var)),meth,valus,appName);
 					vecR.push_back(*(R*)ns);
 					delete ns;
 				}
@@ -274,13 +274,13 @@ public:
 			if(vecT.size()>0)
 			{
 				Reflector reflector;
-				ClassInfo clas = reflector.getClassInfo(clasName);
+				ClassInfo clas = reflector.getClassInfo(clasName,appName);
 				args argus;
 				string methname = "get"+AfcUtil::camelCased(name);
 				Method meth = clas.getMethod(methname,argus);
 				vals valus;
 				for (int var = 0; var < (int)vecT.size(); ++var) {
-					void *ns = reflector.invokeMethodGVP(&(vecT.at(var)),meth,valus);
+					void *ns = reflector.invokeMethodGVP(&(vecT.at(var)),meth,valus,appName);
 					vecR->push_back(*(R*)ns);
 					delete ns;
 				}

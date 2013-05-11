@@ -62,8 +62,6 @@ public:
 	static bool unregisterComponent(string);
 	static void trigger(string);
 	static void stop();
-	Server getServer(){return this->server;}
-	void setServer(Server server){this->server = server;}
 };
 
 #endif /* COMPONENTHANDLER_H_ */

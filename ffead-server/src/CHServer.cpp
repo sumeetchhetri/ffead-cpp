@@ -766,6 +766,11 @@ int main(int argc, char* argv[])
 	else
 		IP_ADDRESS = "localhost:" + PORT;
 
+	configurationData.ip_address = IP_ADDRESS;
+	configurationData.sprops = srprps;
+	configurationData.sessionTimeout = sessionTimeout;
+	configurationData.sessatserv = sessatserv;
+
 	sockfd = Server::createListener(IP_ADDRES, PORT, false);
 
     strVec webdirs,webdirs1,pubfiles;
@@ -773,11 +778,18 @@ int main(int argc, char* argv[])
     ConfigurationHandler::listi(webpath,"/",false,webdirs1);
     ConfigurationHandler::listi(pubpath,".js",false,pubfiles);
 
+    for(unsigned int var=0;var<pubfiles.size();var++)
+	{
+		configurationData.pubMap[pubfiles.at(var)] = "true";
+	}
+
+    configurationData.props = pread.getProperties(respath+"mime-types.prop");
+    configurationData.lprops = pread.getProperties(respath+"locale.prop");
 
     strVec cmpnames;
     try
     {
-    	configurationData = ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, pubpath, respath, isSSLEnabled, &ffeadContext);
+    	ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, pubpath, respath, isSSLEnabled, &ffeadContext, configurationData);
     }
     catch(const XmlParseException& p)
     {
@@ -787,14 +799,7 @@ int main(int argc, char* argv[])
 	{
 		logger << msg << endl;
 	}
-    configurationData.sprops = srprps;
-    configurationData.sessionTimeout = sessionTimeout;
-    configurationData.ip_address = IP_ADDRESS;
-    configurationData.sessatserv = sessatserv;
-    for(unsigned int var=0;var<pubfiles.size();var++)
-	{
-    	configurationData.pubMap[pubfiles.at(var)] = "true";
-	}
+
     bool libpresent = true;
     void *dlibtemp = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
 	//logger << endl <<dlibtemp << endl;
@@ -809,8 +814,6 @@ int main(int argc, char* argv[])
     if(isCompileEnabled)
     	libpresent = false;
 
-    configurationData.props = pread.getProperties(respath+"mime-types.prop");
-    configurationData.lprops = pread.getProperties(respath+"locale.prop");
 	string compres = respath+"rundyn.sh";
 	if(!libpresent)
 	{
@@ -843,24 +846,48 @@ int main(int argc, char* argv[])
 		ComponentHandler::registerComponent(name);
 		AppContext::registerComponent(name);
 	}
-	if(srprps["CMP_PORT"]=="")
-	{
-		srprps["CMP_PORT"] = "7001";
+
+	try {
+		if(srprps["CMP_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["CMP_PORT"]);
+			if(port>0)
+			{
+				ComponentHandler::trigger(srprps["CMP_PORT"]);
+			}
+		}
+	} catch(...) {
+		logger << ("Component Handler Services are disabled") << endl;
 	}
-	ComponentHandler::trigger(srprps["CMP_PORT"]);
-	if(srprps["MESS_PORT"]=="")
-	{
-		srprps["MESS_PORT"] = "7002";
+
+	try {
+		if(srprps["MESS_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["MESS_PORT"]);
+			if(port>0)
+			{
+				MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
+			}
+		}
+	} catch(...) {
+		logger << ("Messaging Handler Services are disabled") << endl;
 	}
-	MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
-	if(srprps["MI_PORT"]=="")
-	{
-		srprps["MI_PORT"] = "7003";
+
+	try {
+		if(srprps["MI_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["MI_PORT"]);
+			if(port>0)
+			{
+				MethodInvoc::trigger(srprps["MI_PORT"]);
+			}
+		}
+	} catch(...) {
+		logger << ("Method Invoker Services are disabled") << endl;
 	}
-	MethodInvoc::trigger(srprps["MI_PORT"]);
 
 	//printf("server: waiting for connections...\n");
-	logger.info("Server: waiting for connections on port "+PORT);
+	logger.info("Server: waiting for connections on " + configurationData.ip_address);
 
 	ofstream serverCntrlFile;
 	serverCntrlFile.open(serverCntrlFileNm.c_str());

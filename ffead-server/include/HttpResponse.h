@@ -48,7 +48,7 @@ public:
     string getContent_str() const;
     void setContent_str(string content_str);
     string getHttpVersion() const;
-    void setHttpVersion(string httpVersion);
+    void update(HttpRequest* req);
     void setHTTPResponseStatus(HTTPResponseStatus status);
     string getStatusCode() const;
     void setStatusCode(string statusCode);

@@ -31,7 +31,7 @@ FormHandler::~FormHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData, void* dlib)
+string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData)
 {
 	map<string, Element> formMap = configData.formMap;
 	Logger logger = Logger::getLogger("FormHandler");
@@ -39,7 +39,7 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationDat
 	Element ele = formMap[req->getFile()];
 	//logger << ele.getTagName() << endl;
 	//logger << ele.render() << endl;
-	ClassInfo binfo = ref.getClassInfo(ele.getAttribute("bean"));
+	ClassInfo binfo = ref.getClassInfo(ele.getAttribute("bean"), req->getCntxt_name());
 	ElementList eles = ele.getChildElements();
 	string json = "{";
 	for (unsigned int apps = 0; apps < eles.size(); apps++)
@@ -49,7 +49,7 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationDat
 			string name = eles.at(apps).getAttribute("name");
 			Field fld = binfo.getField(eles.at(apps).getAttribute("prop"));
 			if(fld.getType()=="string")
-				json += "\""+eles.at(apps).getAttribute("prop")+"\": \"" + req->getQueryParam(name) + "\",";
+				json += "\""+eles.at(apps).getAttribute("prop")+"\": \"" + req->getParamValue(name) + "\",";
 			else
 			{
 				if(fld.getType()=="int" || fld.getType()=="long")
@@ -57,21 +57,21 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationDat
 					if(req->getQueryParam(name)=="")
 						json += "\""+eles.at(apps).getAttribute("prop")+"\": 0,";
 					else
-						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getQueryParam(name) + ",";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
 				}
 				else if(fld.getType()=="double" || fld.getType()=="float")
 				{
 					if(req->getQueryParam(name)=="")
 						json += "\""+eles.at(apps).getAttribute("prop")+"\": 0.0,";
 					else
-						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getQueryParam(name) + ",";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
 				}
 				else if(fld.getType()=="bool")
 				{
 					if(req->getQueryParam(name)=="")
 						json += "\""+eles.at(apps).getAttribute("prop")+"\": false,";
 					else
-						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getQueryParam(name) + ",";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
 				}
 			}
 		}
@@ -81,73 +81,18 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationDat
 		json = json.substr(0,json.length()-1);
 	}
 	json += "}";
-	//logger << json << endl;
+	logger << json << endl;
 
-	void *_temp = configData.ffeadContext->getBean("form_"+req->getCntxt_name()+ele.getAttribute("controller"));
+	void *_temp = configData.ffeadContext->getBean("form_"+req->getCntxt_name()+ele.getAttribute("controller"), req->getCntxt_name());
 	logger << ("Fetching Formcontroller for " + ele.getAttribute("bean")) << endl;
 	if(_temp!=NULL)
 	{
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
-		string meth = "toVoidP" + ele.getAttribute("bean");
-		void *mkr = dlsym(dlib, meth.c_str());
-		if(mkr!=NULL)
-		{
-			toVoidP f1 = (toVoidP)mkr;
-			void *_beaninst = f1(json);
+		void *_beaninst = JSONSerialize::unSerializeUnknown(json, ele.getAttribute("bean"), req->getCntxt_name());
 
-			FormController* formController = static_cast<FormController*>(_temp);
-			if(formController!=NULL)
-			{
-				formController->onSubmit(_beaninst,&res);
-				logger << "Successfully called Formcontroller" << endl;
-			}
-			else
-			{
-				res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent_str("Formcontroller Method Not Found");
-				logger << "Formcontroller Method Not Found" << endl;
-			}
-		}
-		else
+		FormController* formController = static_cast<FormController*>(_temp);
+		if(formController!=NULL)
 		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-			res.setContent_str("Invalid Form Bean configured");
-			logger << "Formcontroller Method Not Found" << endl;
-		}
-	}
-
-	/*string libName = Constants::INTER_LIB_FILE;
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string meth = "toVoidP" + ele.getAttribute("bean");
-	logger << ("Fetching Formcontroller for " + ele.getAttribute("bean")) << endl;
-	void *mkr = dlsym(dlib, meth.c_str());
-	if(mkr!=NULL)
-	{
-		toVoidP f1 = (toVoidP)mkr;
-		void *_beaninst = f1(json);
-		//FunPtr f =  (FunPtr)mkr;
-		ClassInfo srv = ref.getClassInfo(ele.getAttribute("controller"));
-		args argus;
-		vals valus;
-		Constructor ctor = srv.getConstructor(argus);
-		void *_temp = ref.newInstanceGVP(ctor);
-		argus.push_back("void*");
-		argus.push_back("HttpResponse*");
-		valus.push_back(_beaninst);
-		valus.push_back(&res);
-		Method meth = srv.getMethod("onSubmit",argus);
-		if(meth.getMethodName()!="")
-		{
-			ref.invokeMethodUnknownReturn(_temp,meth,valus);
+			formController->onSubmit(_beaninst,&res);
 			logger << "Successfully called Formcontroller" << endl;
 		}
 		else
@@ -157,6 +102,6 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationDat
 			res.setContent_str("Formcontroller Method Not Found");
 			logger << "Formcontroller Method Not Found" << endl;
 		}
-	}*/
+	}
 	return json;
 }

@@ -45,14 +45,7 @@ public:
 	CibernateQuery orderByDesc(string column);
 	CibernateQuery paginate(int,int);
 	virtual ~CibernateQuery();
-	bool isUpdate()
-	{
-		if(StringUtil::toLowerCopy(query).find("select")==0)
-		{
-			return false;
-		}
-		return true;
-	}
+	bool isUpdate();
 };
 
 #endif /* CIBERNATEQUERY_H_ */

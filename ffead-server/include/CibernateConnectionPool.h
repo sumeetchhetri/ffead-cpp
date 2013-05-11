@@ -58,10 +58,7 @@ class CibernateConnectionPool {
 	Connection* newConnection(bool);
 	void createPool(int,string,string,string,string);
 public:
-	string getDialect() const
-	{
-		return dialect;
-	}
+	string getDialect() const;
 	CibernateConnectionPool(int,string,string,string,string);
 	virtual ~CibernateConnectionPool();
 	//static CibernateConnectionPool* getInstance();

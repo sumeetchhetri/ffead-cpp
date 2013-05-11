@@ -4,13 +4,13 @@ DEF_PATH=default
 #The Server listening port number
 PORT_NO=8080
 
-#The Component Invoker listening port number
+#The Component Invoker listening port number, feature disabled if not specified
 CMP_PORT=
 
-#The Messaging Daemon listening port number
+#The Messaging Daemon listening port number, feature disabled if not specified
 MESS_PORT=
 
-#The Method Invoker listening port number
+#The Method Invoker listening port number, feature disabled if not specified
 MI_PORT=
 
 #Enable SSL?
@@ -71,9 +71,16 @@ IP_ADDR=
 #will generate Warning/Error messages if any caused by the script while generating the HTML by the script
 SCRIPT_ERRS=false
 
-KEEP_ALIVE_SECONDS=10
+#Number of seconds the connection should be kep-alive, keep it low for better overall performance
+KEEP_ALIVE_SECONDS=2
 
 TRANSFER_ENCODING_CHUNK_SIZE=8192
 
 #gzip or deflate
 CONTENT_ENCODING=gzip
+
+#Maximum number of request headers allowed
+MAX_REQUEST_HEADERS_COUNT=100
+
+#Maximum Request Entity size, 2GB
+MAX_REQUEST_ENTITY_SIZE=2147483648

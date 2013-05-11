@@ -46,3 +46,19 @@ void* FutureTask::getResult()
 	}
 	return result;
 }
+
+void FutureTask::taskComplete()
+{
+	m_mutex.lock();
+	isComplete = true;
+	m_mutex.unlock();
+}
+
+bool FutureTask::isTaskComplete()
+{
+	bool flag = false;
+	m_mutex.lock();
+	flag = isComplete;
+	m_mutex.unlock();
+	return flag;
+}

@@ -42,7 +42,7 @@ public:
 	ScriptHandler();
 	static string execute(string exe, bool retErrs);
 	static string chdirExecute(string exe, string tmpf, bool retErrs);
-	static bool handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs, void* dlib,
+	static bool handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs,
 			string ext, map<string, string> props);
 	virtual ~ScriptHandler();
 };

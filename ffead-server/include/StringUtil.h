@@ -39,6 +39,8 @@ public:
 	static void eraseAll(string &str, const string& ths);
 	static void capitalized(string &str);
 	static string capitalizedCopy(const string &str);
+	static void camelCased(string& str, const string& delim);
+	static string camelCasedCopy(const string& str, const string& delim);
 	static void toUpper(string &str);
 	static string toUpperCopy(const string& str);
 	static void toLower(string& str);
@@ -53,6 +55,7 @@ public:
 	static void split(vector<string> &output, const string& input, const string& delimiter);
 	static vector<string> split(const string& input, vector<string> delimiters);
 	static void split(vector<string> &output, const string& input, vector<string> delimiters);
+	static int countOccurrences(const string& input, const string& delimiter);
 	static void trim(string& str);
 	static string trimCopy(const string &str);
 	static string toHEX(int);

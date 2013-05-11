@@ -200,7 +200,7 @@ void* MessageHandler::service(void* arg)
 	char buf[MAXBUFLEN];
 	string results;
 	//int bytes = recv(fd, buf, sizeof buf, 0);
-	_mess_instance->getServer().Receive(fd,results,1024);
+	_mess_instance->server.Receive(fd,results,1024);
 	//string temp,results;
 	/*stringstream ss;
 	ss << buf;
@@ -229,7 +229,7 @@ void* MessageHandler::service(void* arg)
 		{
 			_mess_instance->logger << e.getMessage() << flush;
 		}
-		_mess_instance->getServer().Send(fd,h);
+		_mess_instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
 		//	_mess_instance->logger << "send failed" << flush;
 		_mess_instance->logger << h << flush;
@@ -258,7 +258,7 @@ void* MessageHandler::service(void* arg)
 		}
 		else
 			h = "Improper Destination";
-		_mess_instance->getServer().Send(fd,h);
+		_mess_instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
 		//	_mess_instance->logger << "send failed" << flush;
 	}
@@ -270,7 +270,7 @@ void* MessageHandler::service(void* arg)
 		results = (_mess_instance->path+results+":Subslist");
 		_mess_instance->subscribe(subs,results);
 		string h = "Subscribed";
-		_mess_instance->getServer().Send(fd,h);
+		_mess_instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
 		//	_mess_instance->logger << "send failed" << flush;
 	}
@@ -282,7 +282,7 @@ void* MessageHandler::service(void* arg)
 		results = (_mess_instance->path+results+":Subslist");
 		_mess_instance->subscribe(subs,results);
 		string h = "Unsubscribed";
-		_mess_instance->getServer().Send(fd,h);
+		_mess_instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
 		//	_mess_instance->logger << "send failed" << flush;
 	}

@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<wsdl:definitions name="${WS_NAME}ImplService" targetNamespace="http://webservice.bd/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://webservice.bd/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<wsdl:definitions name="${WS_NAME}ImplService" targetNamespace="${WS_NMSPC}/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="${WS_NMSPC}/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<wsdl:types>
-		<xsd:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://webservice.bd" xmlns:tns="http://webservice.bd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+		<xsd:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="${WS_NMSPC}" xmlns:tns="${WS_NMSPC}" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 			${OBJ_BINDING}    
 		</xsd:schema>
-		<xsd:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="http://webservice.bd/" xmlns:ns0="http://webservice.bd" xmlns:tns="http://webservice.bd/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-			<xsd:import namespace="http://webservice.bd" />
+		<xsd:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="${WS_NMSPC}/" xmlns:ns0="${WS_NMSPC}" xmlns:tns="${WS_NMSPC}/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			<xsd:import namespace="${WS_NMSPC}" />
 			${REQ_RES_BINDING}
 		</xsd:schema>
 	</wsdl:types>
@@ -19,7 +19,7 @@
 	</wsdl:binding>
 	<wsdl:service name="${WS_NAME}ImplService">
 		<wsdl:port binding="tns:${WS_NAME}ImplServiceSoapBinding" name="${WS_NAME}ImplPort">
-		<soap:address location="${URL}/${WS_NAME}" />
+		<soap:address location="${URL}/${WS_PATH}" />
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>
