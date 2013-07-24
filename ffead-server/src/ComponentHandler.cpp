@@ -26,7 +26,7 @@ ComponentHandler* _cmp_instance = NULL;
 
 ComponentHandler::ComponentHandler()
 {
-	logger = Logger::getLogger("ComponentHandler");
+	logger = LoggerFactory::getLogger("ComponentHandler");
 }
 
 ComponentHandler::~ComponentHandler()
@@ -92,7 +92,7 @@ void* ComponentHandler::service(void* arg)
 			{
 				throw ComponentHandlerException("message tag should have an args child tag\n",retValue);
 			}
-			Serialize ser;
+			XMLSerialize ser;
 			Reflector reflector;
 			args argus;
 			vals valus;

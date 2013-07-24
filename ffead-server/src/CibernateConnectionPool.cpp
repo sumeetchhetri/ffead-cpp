@@ -31,7 +31,7 @@ CibernateConnectionPool* CibernateConnectionPool::getinstance()
 }*/
 CibernateConnectionPool::CibernateConnectionPool(int size,string dbName,string uname,string pass,string dialect)
 {
-	logger = Logger::getLogger("CibernateConnectionPool");
+	logger = LoggerFactory::getLogger("CibernateConnectionPool");
 	createPool(size,dbName,uname,pass,dialect);
 }
 
@@ -189,7 +189,7 @@ string CibernateConnectionPool::getDialect() const
 
 Connection::Connection()
 {
-	logger = Logger::getLogger("Connection");
+	logger = LoggerFactory::getLogger("Connection");
 	logger << "\nCreated Connection" << flush;
 }
 

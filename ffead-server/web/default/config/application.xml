@@ -96,12 +96,12 @@
 		</restcontroller>
 		<restcontroller class="DefaultRestController" name="restvec">
 			<restfunction name="testVector" alias="tstvec" meth="POST">
-				<param type="vector&lt;int&gt;" from="body"/>
+				<param type="vector-of-int" from="body"/>
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" name="restvecobj">
 			<restfunction name="testVectorObject" alias="tstvecobj" meth="POST" icontentType="application/json">
-				<param type="vector&lt;TestMany&gt;" from="body"/>
+				<param type="vector-of-TestMany" from="body"/>
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" name="restobj">
@@ -111,7 +111,7 @@
 		</restcontroller>
 		<restcontroller class="DefaultRestController" name="restvecobj">
 			<restfunction name="testVectorObject" alias="tstvecobj.xml" meth="POST" icontentType="application/xml">
-				<param type="vector&lt;TestMany&gt;" from="body"/>
+				<param type="vector-of-TestMany" from="body"/>
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" name="restobj">
@@ -119,5 +119,28 @@
 				<param type="TestMany" from="body"/>
 			</restfunction>
 		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restupload">
+			<restfunction name="testUploadFile" alias="uploadFile" meth="POST" icontentType="multipart/form-data">
+				<param type="filestream" name="file" from="multipart-content"/>
+				<param type="string" name="field" from="multipart-content"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restupload">
+			<restfunction name="testUploadFileMulti1" alias="uploadFileMulti1" meth="POST" icontentType="multipart/form-data">
+				<param type="filestream" name="file1" from="multipart-content"/>
+				<param type="filestream" name="file2" from="multipart-content"/>
+				<param type="filestream" name="file3" from="multipart-content"/>
+				<param type="string" name="field" from="multipart-content"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restupload">
+			<restfunction name="testUploadFileMulti2" alias="uploadFileMulti2" meth="POST" icontentType="multipart/form-data">
+				<param type="vector-of-filestream" name="files" from="multipart-content"/>
+				<param type="string" name="field" from="multipart-content"/>
+			</restfunction>
+		</restcontroller>
 	</restcontrollers>
+	<job-procs>
+		<job-proc cron="* * * * *" name="testCronJob" class="TestCronBasedJob" method="runJob"/>
+	</job-procs>	
 </app>

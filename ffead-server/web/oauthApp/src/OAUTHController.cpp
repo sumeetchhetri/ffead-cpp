@@ -48,13 +48,13 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent_str("Valid Login");
+				res.setContent("Valid Login");
 			}
 			else
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent_str("InValid Login");
+				res.setContent("InValid Login");
 			}
 			cout << "inside oauth controller non empty credentials" << endl;
 		}
@@ -62,7 +62,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Username and Password cannot be blank");
+			res.setContent("Username and Password cannot be blank");
 			cout << "inside oauth controller empty credentials" << endl;
 		}
 	}
@@ -90,7 +90,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 		string call,tot;
 		while((call=client.getData())!="")
 			tot.append(call);
-		HttpResponseParser parser(tot);
+		HttpResponseParser parser(tot, res);
 		client.closeConnection();
 
 		map<string,string> mapsd;
@@ -114,13 +114,13 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			ofs.close();
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Acquired request token");
+			res.setContent("Acquired request token");
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Could not get request token");
+			res.setContent("Could not get request token");
 		}
 	}
 	else if(req.getFile()=="authorizeUser.auth")
@@ -145,7 +145,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Invalid user");
+			res.setContent("Invalid user");
 
 		}
 
@@ -183,7 +183,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			string call,tot;
 			while((call=client.getData())!="")
 				tot.append(call);
-			HttpResponseParser parser(tot);
+			HttpResponseParser parser(tot, res);
 			client.closeConnection();
 
 			map<string,string> mapsd;
@@ -210,20 +210,20 @@ HttpResponse OAUTHController::service(HttpRequest req)
 				string conte = "<html><head><script type='text/javascript' src='public/json2.js'></script><script type='text/javascript' src='public/prototype.js'></script><script type='text/javascript' src='public/oauth.js'></script></head>";
 				conte += "File Name: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+reqParams["tusername"]+"\")'/></body>";
 				conte += "</html>";
-				res.setContent_str(conte);
+				res.setContent(conte);
 			}
 			else
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent_str("Could not get access token");
+				res.setContent("Could not get access token");
 			}
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Invalid user");
+			res.setContent("Invalid user");
 		}
 	}
 	else if(req.getFile()=="accessToken.auth")
@@ -263,19 +263,16 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			string call,tot;
 			while((call=client.getData())!="")
 				tot.append(call);
-			HttpResponseParser parser(tot);
+			HttpResponseParser parser(tot, res);
 			client.closeConnection();
 
-			res.setStatusCode(parser.getHeaderValue("StatusCode"));
-			res.setStatusMsg(parser.getHeaderValue("StatusMsg"));
-			res.addHeaderValue(HttpResponse::ContentType, parser.getHeaderValue("Content-Type"));
-			res.setContent_str(parser.getContent());
+			res.setContent(parser.getContent());
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Access denied");
+			res.setContent("Access denied");
 		}
 	}
 	return res;

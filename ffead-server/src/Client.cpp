@@ -23,7 +23,7 @@
 #include "Client.h"
 
 Client::Client() {
-	logger = Logger::getLogger("Client");
+	logger = LoggerFactory::getLogger("Client");
 	connected = false;
 }
 

@@ -30,7 +30,7 @@
 #include <sys/wait.h>
 #include "Timer.h"
 #include <unistd.h>
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "Constants.h"
 
 class ScriptHandler {

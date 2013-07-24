@@ -26,7 +26,7 @@
 #include "Reflector.h"
 #include "CastUtil.h"
 #include "AfcUtil.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 
 class Bean
 {

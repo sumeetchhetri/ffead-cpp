@@ -30,15 +30,15 @@ typedef void* (*toObjectFromJson) (string);
 
 class RestFunctionParams
 {
-public:
 	string name;
 	string type;
 	string from;
+	friend class ConfigurationHandler;
+	friend class ControllerHandler;
 };
 
 class RestFunction
 {
-public:
 	string name;
 	string alias;
 	string clas;
@@ -47,23 +47,25 @@ public:
 	string icontentType;
 	string ocontentType;
 	vector<RestFunctionParams> params;
+	friend class ConfigurationHandler;
+	friend class ControllerHandler;
 };
 
 typedef map<string, RestFunction> resFuncMap;
 
 class SecureAspect
 {
-public:
 	string path;
 	string role;
+	friend class ConfigurationHandler;
+	friend class ConfigurationData;
+	friend class Security;
+	friend class SecurityHandler;
 };
 
 class Security
 {
 	Logger logger;
-public:
-	Security();
-	~Security();
 	vector<SecureAspect> secures;
 	string loginProvider;
 	string loginUrl;
@@ -74,11 +76,16 @@ public:
 	bool isLoginUrl(string url, string actUrl);
 	bool isLoginPage(string url, string actUrl);
 	SecureAspect matchesPath(string url);
+	friend class ConfigurationData;
+	friend class ConfigurationHandler;
+	friend class SecurityHandler;
+public:
+	Security();
+	~Security();
 };
 
 
 class CorsConfig {
-public:
 	string allwdOrigins;
 	string allwdMethods;
 	string allwdHeaders;
@@ -88,6 +95,18 @@ public:
 	bool isOriginAllowed(strVec reqOrgLst);
 	bool isMethodAllowed(string method);
 	bool isHeaderAllowed(strVec reqHdrLst, string& erheadr);
+	friend class ConfigurationHandler;
+	friend class CORSHandler;
+};
+
+class JobConfig
+{
+	string name;
+	string cron;
+	string clas;
+	string meth;
+	string app;
+	friend class JobScheduler;
 };
 
 class ConfigurationData {

@@ -41,7 +41,7 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include "CastUtil.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "cstring"
 using namespace std;
 

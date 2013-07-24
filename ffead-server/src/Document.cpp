@@ -28,7 +28,6 @@ Document::Document() {
 }
 
 Document::~Document() {
-	// TODO Auto-generated destructor stub
 }
 
 Element Document::getRootElement()

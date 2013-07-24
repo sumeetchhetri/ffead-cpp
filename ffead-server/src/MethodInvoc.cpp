@@ -82,7 +82,7 @@ void* MethodInvoc::service(void* arg)
 			{
 				throw MethodInvokerException("message tag should have an args child tag\n",retValue);
 			}
-			Serialize ser;
+			XMLSerialize ser;
 			Reflector reflector;
 			args argus;
 			vals valus;

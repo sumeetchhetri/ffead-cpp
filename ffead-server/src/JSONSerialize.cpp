@@ -16,38 +16,51 @@
 /*
  * JSONSerialize.cpp
  *
- *  Created on: Jan 27, 2013
- *      Author: sumeet
+ *  Created on: 12-Jun-2013
+ *      Author: sumeetc
  */
 
 #include "JSONSerialize.h"
 
-string JSONSerialize::demangle(const char *mangled)
-{
-	int status;	char *demangled;
-	using namespace abi;
-	demangled = __cxa_demangle(mangled, NULL, 0, &status);
-	string s(demangled);
-	delete demangled;
-	return s;
-}
-string JSONSerialize::getClassName(void* instance)
-{
-	const char *mangled = typeid(instance).name();
-	return demangle(mangled);
+JSONSerialize::JSONSerialize() {
+	// TODO Auto-generated constructor stub
+
 }
 
-string JSONSerialize::_handleAllSerialization(string className,void *t, string appName)
+JSONSerialize::~JSONSerialize() {
+	// TODO Auto-generated destructor stub
+}
+
+string JSONSerialize::serializePrimitive(string className, void* t)
 {
 	string objXml;
 	if(className=="std::string" || className=="string")
 	{
 		string tem = *(string*)t;
-		objXml = "\""+CastUtil::lexical_cast<string>(tem)+"\"";
+		objXml = "\""+tem+"\"";
+	}
+	else if(className=="char")
+	{
+		char tem = *(char*)t;
+		string temp;
+		temp.push_back(tem);
+		objXml = "\""+temp+"\"";
+	}
+	else if(className=="unsigned char")
+	{
+		unsigned char tem = *(char*)t;
+		string temp;
+		temp.push_back(tem);
+		objXml = "\""+temp+"\"";
 	}
 	else if(className=="int")
 	{
 		int tem = *(int*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned int")
+	{
+		unsigned int tem = *(unsigned int*)t;
 		objXml = CastUtil::lexical_cast<string>(tem);
 	}
 	else if(className=="short")
@@ -55,9 +68,29 @@ string JSONSerialize::_handleAllSerialization(string className,void *t, string a
 		short tem = *(short*)t;
 		objXml = CastUtil::lexical_cast<string>(tem);
 	}
+	else if(className=="unsigned short")
+	{
+		unsigned short tem = *(unsigned short*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
 	else if(className=="long")
 	{
 		long tem = *(long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned long")
+	{
+		unsigned long tem = *(unsigned long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="long long")
+	{
+		long long tem = *(long long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned long long")
+	{
+		unsigned long long tem = *(unsigned long long*)t;
 		objXml = CastUtil::lexical_cast<string>(tem);
 	}
 	else if(className=="float")
@@ -68,6 +101,11 @@ string JSONSerialize::_handleAllSerialization(string className,void *t, string a
 	else if(className=="double")
 	{
 		double tem = *(double*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="long double")
+	{
+		long double tem = *(long double*)t;
 		objXml = CastUtil::lexical_cast<string>(tem);
 	}
 	else if(className=="bool")
@@ -84,497 +122,584 @@ string JSONSerialize::_handleAllSerialization(string className,void *t, string a
 	{
 		objXml = "\""+BinaryData::serilaize(*(BinaryData*)t)+"\"";
 	}
-	else if(className.find("std::vector<std::string,")!=string::npos || className.find("std::vector<string,")!=string::npos)
-	{
-		vector<string> *tt = (vector<string>*)t;
-		objXml = serializevec<string>(*tt,appName);
-	}
-	else if(className.find("std::vector<int,")!=string::npos)
-	{
-		vector<int> *tt = (vector<int>*)t;
-		objXml = serializevec<int>(*tt,appName);
-	}
-	else if(className.find("std::vector<short,")!=string::npos)
-	{
-		vector<short> *tt = (vector<short>*)t;
-		objXml = serializevec<short>(*tt,appName);
-	}
-	else if(className.find("std::vector<long,")!=string::npos)
-	{
-		vector<long> *tt = (vector<long>*)t;
-		objXml = serializevec<long>(*tt,appName);
-	}
-	else if(className.find("std::vector<double,")!=string::npos)
-	{
-		vector<double> *tt = (vector<double>*)t;
-		objXml = serializevec<double>(*tt,appName);
-	}
-	else if(className.find("std::vector<float,")!=string::npos)
-	{
-		vector<float> *tt = (vector<float>*)t;
-		objXml = serializevec<float>(*tt,appName);
-	}
-	else if(className.find("std::vector<bool,")!=string::npos)
-	{
-		vector<bool> *tt = (vector<bool>*)t;
-		objXml = serializevec<bool>(*tt,appName);
-	}
-	else if(className.find("std::vector<")!=string::npos)
-	{
-		StringUtil::replaceFirst(className,"std::vector<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"Vec",appName);
-	}
-	else if(className.find("std::list<std::string,")!=string::npos || className.find("std::list<string,")!=string::npos)
-	{
-		list<string> *tt = (list<string>*)t;
-		objXml = serializelist<string>(*tt,appName);
-	}
-	else if(className.find("std::list<int,")!=string::npos)
-	{
-		list<int> *tt = (list<int>*)t;
-		objXml = serializelist<int>(*tt,appName);
-	}
-	else if(className.find("std::list<long,")!=string::npos)
-	{
-		list<long> *tt = (list<long>*)t;
-		objXml = serializelist<long>(*tt,appName);
-	}
-	else if(className.find("std::list<short,")!=string::npos)
-	{
-		list<short> *tt = (list<short>*)t;
-		objXml = serializelist<short>(*tt,appName);
-	}
-	else if(className.find("std::list<double,")!=string::npos)
-	{
-		list<double> *tt = (list<double>*)t;
-		objXml = serializelist<double>(*tt,appName);
-	}
-	else if(className.find("std::list<float,")!=string::npos)
-	{
-		list<float> *tt = (list<float>*)t;
-		objXml = serializelist<float>(*tt,appName);
-	}
-	else if(className.find("std::list<bool,")!=string::npos)
-	{
-		list<bool> *tt = (list<bool>*)t;
-		objXml = serializelist<bool>(*tt,appName);
-	}
-	else if(className.find("std::list<")!=string::npos)
-	{
-		StringUtil::replaceFirst(className,"std::list<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"Lis",appName);
-	}
-	else if(className.find("std::set<std::string,")!=string::npos || className.find("std::set<string,")!=string::npos)
-	{
-		set<string> *tt = (set<string>*)t;
-		objXml = serializeset<string>(*tt,appName);
-	}
-	else if(className.find("std::set<int,")!=string::npos)
-	{
-		set<int> *tt = (set<int>*)t;
-		objXml = serializeset<int>(*tt,appName);
-	}
-	else if(className.find("std::set<short,")!=string::npos)
-	{
-		set<short> *tt = (set<short>*)t;
-		objXml = serializeset<short>(*tt,appName);
-	}
-	else if(className.find("std::set<long,")!=string::npos)
-	{
-		set<long> *tt = (set<long>*)t;
-		objXml = serializeset<long>(*tt,appName);
-	}
-	else if(className.find("std::set<double,")!=string::npos)
-	{
-		set<double> *tt = (set<double>*)t;
-		objXml = serializeset<double>(*tt,appName);
-	}
-	else if(className.find("std::set<float,")!=string::npos)
-	{
-		set<float> *tt = (set<float>*)&t;
-		objXml = serializeset<float>(*tt,appName);
-	}
-	else if(className.find("std::set<bool,")!=string::npos)
-	{
-		set<bool> *tt = (set<bool>*)&t;
-		objXml = serializeset<bool>(*tt,appName);
-	}
-	else if(className.find("std::set<")!=string::npos)
-	{
-		StringUtil::replaceFirst(className,"std::set<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"Set",appName);
-	}
-	else if(className.find("std::multiset<std::string,")!=string::npos || className.find("std::multiset<string,")!=string::npos)
-	{
-		multiset<string> *tt = (multiset<string>*)t;
-		objXml = serializemultiset<string>(*tt,appName);
-	}
-	else if(className.find("std::multiset<int,")!=string::npos)
-	{
-		multiset<int> *tt = (multiset<int>*)t;
-		objXml = serializemultiset<int>(*tt,appName);
-	}
-	else if(className.find("std::multiset<long,")!=string::npos)
-	{
-		multiset<long> *tt = (multiset<long>*)t;
-		objXml = serializemultiset<long>(*tt,appName);
-	}
-	else if(className.find("std::multiset<short,")!=string::npos)
-	{
-		multiset<short> *tt = (multiset<short>*)t;
-		objXml = serializemultiset<short>(*tt,appName);
-	}
-	else if(className.find("std::multiset<double,")!=string::npos)
-	{
-		multiset<double> *tt = (multiset<double>*)t;
-		objXml = serializemultiset<double>(*tt,appName);
-	}
-	else if(className.find("std::multiset<float,")!=string::npos)
-	{
-		multiset<float> *tt = (multiset<float>*)t;
-		objXml = serializemultiset<float>(*tt,appName);
-	}
-	else if(className.find("std::multiset<bool,")!=string::npos)
-	{
-		multiset<bool> *tt = (multiset<bool>*)t;
-		objXml = serializemultiset<bool>(*tt,appName);
-	}
-	else if(className.find("std::multiset<")!=string::npos)
-	{
-		StringUtil::replaceFirst(className,"std::multiset<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"MulSet",appName);
-	}
-	else if(className.find("std::queue<std::string,")!=string::npos || className.find("std::queue<string,")!=string::npos)
-	{
-		std::queue<string> *tt = (std::queue<string>*)t;
-		objXml = serializeq<string>(*tt,appName);
-	}
-	else if(className.find("std::queue<int,")!=string::npos)
-	{
-		std::queue<int> *tt = (std::queue<int>*)t;
-		objXml = serializeq<int>(*tt,appName);
-	}
-	else if(className.find("std::queue<short,")!=string::npos)
-	{
-		std::queue<short> *tt = (std::queue<short>*)t;
-		objXml = serializeq<short>(*tt,appName);
-	}
-	else if(className.find("std::queue<long,")!=string::npos)
-	{
-		std::queue<long> *tt = (std::queue<long>*)t;
-		objXml = serializeq<long>(*tt,appName);
-	}
-	else if(className.find("std::queue<double,")!=string::npos)
-	{
-		std::queue<double> *tt = (std::queue<double>*)t;
-		objXml = serializeq<double>(*tt,appName);
-	}
-	else if(className.find("std::queue<float,")!=string::npos)
-	{
-		std::queue<float> *tt = (std::queue<float>*)t;
-		objXml = serializeq<float>(*tt,appName);
-	}
-	else if(className.find("std::queue<bool,")!=string::npos)
-	{
-		std::queue<bool> *tt = (std::queue<bool>*)t;
-		objXml = serializeq<bool>(*tt,appName);
-	}
-	else if(className.find("std::queue<")!=string::npos)
-	{
-		StringUtil::replaceFirst(className,"std::queue<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"Q",appName);
-	}
-	else if(className.find("std::deque<std::string,")!=string::npos || className.find("std::deque<string,")!=string::npos)
-	{
-		deque<string> *tt = (deque<string>*)t;
-		objXml = serializedq<string>(*tt,appName);
-	}
-	else if(className.find("std::deque<int,")!=string::npos)
-	{
-		deque<int> *tt = (deque<int>*)t;
-		objXml = serializedq<int>(*tt,appName);
-	}
-	else if(className.find("std::deque<long,")!=string::npos)
-	{
-		deque<long> *tt = (deque<long>*)t;
-		objXml = serializedq<long>(*tt,appName);
-	}
-	else if(className.find("std::deque<short,")!=string::npos)
-	{
-		deque<short> *tt = (deque<short>*)t;
-		objXml = serializedq<short>(*tt,appName);
-	}
-	else if(className.find("std::deque<double,")!=string::npos)
-	{
-		deque<double> *tt = (deque<double>*)t;
-		objXml = serializedq<double>(*tt,appName);
-	}
-	else if(className.find("std::deque<float,")!=string::npos)
-	{
-		deque<float> *tt = (deque<float>*)t;
-		objXml = serializedq<float>(*tt,appName);
-	}
-	else if(className.find("std::deque<bool,")!=string::npos)
-	{
-		deque<bool> *tt = (deque<bool>*)t;
-		objXml = serializedq<bool>(*tt,appName);
-	}
-	else if(className.find("std::deque<")!=string::npos)
-	{
-		StringUtil::replaceFirst(className,"std::deque<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _serContainers(t,vtyp,"Dq",appName);
-	}
-	else
-	{
-		return _ser(t,className,appName);
-	}
 	return objXml;
 }
 
-
-string JSONSerialize::_serContainers(void* t,string className, string type, string appName)
+void* JSONSerialize::getSerializableObject()
 {
-	string json;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "from"+className+type+"VPToJSON";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		json = f(t);
-	return json;
+	return new string;
 }
 
-string JSONSerialize::_ser(void* t,string className, string appName)
+void JSONSerialize::cleanSerializableObject(void* _1)
 {
-	string json;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "from"+className+"VPToJSON";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		json = f(t);
-	return json;
+	string* object = (string*)_1;
+	delete object;
 }
 
-string JSONSerialize::_ser(Object t, string appName)
+void JSONSerialize::startContainerSerialization(void* _1, string className, string container)
 {
-	return _ser(t.getVoidPointer(),t.getTypeName(), appName);
+	string* object = (string*)_1;
+	*object = "[";
 }
 
-
-void* JSONSerialize::_handleAllUnSerialization(string json,string className, string appName)
+void JSONSerialize::endContainerSerialization(void* _1, string className, string container)
 {
-	if(className=="std::string" || className=="string" || className=="int" || className=="short" || className=="float" || className=="double"
-			|| className=="long" || className=="bool")
-	{
-		if(className=="int")
-		{
-			int *vt = new int;
-			*vt = CastUtil::lexical_cast<int>(json);
-			return vt;
-		}
-		else if(className=="long")
-		{
-			long *vt = new long;
-			*vt = CastUtil::lexical_cast<long>(json);
-			return vt;
-		}
-		else if(className=="short")
-		{
-			short *vt = new short;
-			*vt = CastUtil::lexical_cast<short>(json);
-			return vt;
-		}
-		else if(className=="Date")
-		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
-			if(json.length()>2)
-				return formt.parse(json.substr(1, json.length()-1));
-			else
-			{
-				return new Date;
-			}
-		}
-		else if(className=="BinaryData")
-		{
-			if(json.length()>2)
-				return BinaryData::unSerilaize(json.substr(1, json.length()-1));
-			else
-				return new BinaryData;
-		}
-		else if(className=="float")
-		{
-			float *vt = new float;
-			*vt = CastUtil::lexical_cast<float>(json);
-			return vt;
-		}
-		else if(className=="double")
-		{
-			double *vt = new double;
-			*vt = CastUtil::lexical_cast<double>(json);
-			return vt;
-		}
-		else if(className=="bool")
-		{
-			bool *vt = new bool;
-			*vt = CastUtil::lexical_cast<bool>(json);
-			return vt;
-		}
-		else if(className=="std::string" || className=="string")
-		{
-			string *vt = new string;
-			if(json.length()>2)
-				*vt = CastUtil::lexical_cast<string>(json.substr(1, json.length()-1));
-			return vt;
-		}
-	}
-	else if(className.find("std::vector<")==0)
-	{
-		StringUtil::replaceFirst(className,"std::vector<","");
-		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className, "Vec", appName);
-	}
-	else if(className.find("std::list<")==0)
-	{
-		StringUtil::replaceFirst(className,"std::vector<","");
-		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className,"Lis", appName);
-	}
-	else if(className.find("std::set<")==0)
-	{
-		StringUtil::replaceFirst(className,"std::vector<","");
-		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className,"Set", appName);
-	}
-	else if(className.find("std::multiset<")==0)
-	{
-		StringUtil::replaceFirst(className,"std::vector<","");
-		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className, "MulSet", appName);
-	}
-	else if(className.find("std::queue<")==0)
-	{
-		StringUtil::replaceFirst(className,"std::vector<","");
-		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className,"Q", appName);
-	}
-	else if(className.find("std::deque<")==0)
-	{
-		StringUtil::replaceFirst(className,"std::vector<","");
-		StringUtil::replaceFirst(className,">","");
-		return unserializeConatiner(json, className, "Dq", appName);
-	}
-	return _unser(json,className, appName);
+	string* object = (string*)_1;
+	if(object->at(object->length()-1)==',')
+		*object = object->substr(0, object->length()-1);
+	*object += "]";
 }
 
-void* JSONSerialize::unserializeConatiner(string json, string className, string type, string appName)
+void JSONSerialize::afterAddContainerSerializableElement(void* _1, int counter, int size)
 {
-	if(className=="string" || className=="std::string")
+	string* object = (string*)_1;
+	//if(counter!=size)
+		*object += ",";
+}
+
+void JSONSerialize::addContainerSerializableElement(void* _1, string tem)
+{
+	string* object = (string*)_1;
+	*object += tem;
+}
+
+void JSONSerialize::addContainerSerializableElementMulti(void* _1, string tem)
+{
+	string* object = (string*)_1;
+	*object += tem;
+}
+
+string JSONSerialize::fromSerializableObjectToString(void* _1)
+{
+	string* object = (string*)_1;
+	return *object;
+}
+
+string JSONSerialize::elementToSerializedString(void* _1, int counter)
+{
+	JSONElement* root = (JSONElement*)_1;
+	if((int)root->getChildren().size()<counter)
+		return NULL;
+	JSONElement* ele = root->getChildren().at(counter);
+	return ele->toString();
+}
+
+string JSONSerialize::getConatinerElementClassName(void* _1, string className)
+{
+	string stlclassName = className;
+	if(stlclassName.find(">")!=string::npos)
 	{
-		JSONElement root = JSONUtil::getDocument(json);
-		vector<string> *t = JSONUtil::toVectorP<string>(root);
-		return unserContainer<string>(*t, type, appName);
+		className = stlclassName.substr(stlclassName.find("<")+1);
+		className = className.substr(0, className.find(">"));
 	}
-	else if(className=="double")
+	else
 	{
-		JSONElement root = JSONUtil::getDocument(json);
-		vector<double> *t = JSONUtil::toVectorP<double>(root);
-		return unserContainer<double>(*t, type, appName);
+		className = stlclassName.substr(stlclassName.find("<")+1);
+		if(className.find(",")!=string::npos)
+		{
+			className = className.substr(0, className.find_last_of(','));
+		}
 	}
-	else if(className=="float")
+	StringUtil::trim(className);
+	return className;
+}
+
+void* JSONSerialize::getContainerElement(void* _1, int counter, int counter1)
+{
+	JSONElement* root = (JSONElement*)_1;
+	if((int)root->getChildren().size()<counter)
+		return NULL;
+	JSONElement* ele = root->getChildren().at(counter);
+	return ele;
+}
+
+void JSONSerialize::addPrimitiveElementToContainer(void* _1, int counter, string className, void* cont, string container)
+{
+	JSONElement* root = (JSONElement*)_1;
+	JSONElement ele = *(root->getChildren().at(counter));
+	if(className=="std::string" || className=="string")
 	{
-		JSONElement root = JSONUtil::getDocument(json);
-		vector<float> *t = JSONUtil::toVectorP<float>(root);
-		return unserContainer<float>(*t, type, appName);
+		string retVal = ele.getValue();
+		addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="int")
 	{
-		JSONElement root = JSONUtil::getDocument(json);
-		vector<int> *t = JSONUtil::toVectorP<int>(root);
-		return unserContainer<int>(*t, type, appName);
+		int retVal = CastUtil::lexical_cast<int>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="short")
 	{
-		JSONElement root = JSONUtil::getDocument(json);
-		vector<short> *t = JSONUtil::toVectorP<short>(root);
-		return unserContainer<short>(*t, type, appName);
+		short retVal = CastUtil::lexical_cast<short>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="long")
 	{
-		JSONElement root = JSONUtil::getDocument(json);
-		vector<long> *t = JSONUtil::toVectorP<long>(root);
-		return unserContainer<long>(*t, type, appName);
+		long retVal = CastUtil::lexical_cast<long>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="long long")
+	{
+		long long retVal = CastUtil::lexical_cast<long long>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="long double")
+	{
+		long double retVal = CastUtil::lexical_cast<long double>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="unsigned int")
+	{
+		unsigned int retVal = CastUtil::lexical_cast<unsigned int>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="unsigned short")
+	{
+		unsigned short retVal = CastUtil::lexical_cast<unsigned short>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="unsigned long")
+	{
+		unsigned long retVal = CastUtil::lexical_cast<unsigned long>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="unsigned long long")
+	{
+		unsigned long long retVal = CastUtil::lexical_cast<unsigned long long>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="float")
+	{
+		float retVal = CastUtil::lexical_cast<float>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="double")
+	{
+		double retVal = CastUtil::lexical_cast<double>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="bool")
 	{
-		JSONElement root = JSONUtil::getDocument(json);
-		vector<bool> *t = JSONUtil::toVectorP<bool>(root);
-		return unserContainer<bool>(*t, type, appName);
+		bool retVal = CastUtil::lexical_cast<bool>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
 	}
+	else if(className=="char")
+	{
+		char retVal = CastUtil::lexical_cast<char>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="unsigned char")
+	{
+		unsigned char retVal = CastUtil::lexical_cast<unsigned char>(ele.getValue());
+		addValueToNestedContainer(container, retVal, cont);
+	}
+}
+
+void* JSONSerialize::getUnserializableObject(string _1)
+{
+	string* tem = new string(_1);
+	return tem;
+}
+
+void JSONSerialize::cleanUnserializableObject(void* _1)
+{
+	string* object = (string*)_1;
+	delete object;
+}
+
+void JSONSerialize::cleanValidUnserializableObject(void* _1)
+{
+	JSONElement* object = (JSONElement*)_1;
+	delete object;
+}
+
+void* JSONSerialize::getValidUnserializableObject(string _1)
+{
+	JSONElement root = JSONUtil::getDocument(_1);
+	JSONElement* nroot = new JSONElement;
+	*nroot = root;
+	return nroot;
+}
+
+int JSONSerialize::getContainerSize(void* _1)
+{
+	JSONElement* root = (JSONElement*)_1;
+	return root->getChildren().size();
+}
+
+string JSONSerialize::getUnserializableClassName(void* _1, string className)
+{
+	return className;
+}
+
+void* JSONSerialize::getPrimitiveValue(void* _1, string className)
+{
+	string* root = (string*)_1;
+	if((className=="signed" || className=="int" || className=="signed int"))
+	{
+		int *vt = new int;
+		*vt = CastUtil::lexical_cast<int>(*root);
+		return vt;
+	}
+	else if((className=="unsigned" || className=="unsigned int"))
+	{
+		unsigned int *vt = new unsigned int;
+		*vt = CastUtil::lexical_cast<unsigned int>(*root);
+		return vt;
+	}
+	else if((className=="short" || className=="short int" || className=="signed short" || className=="signed short int"))
+	{
+		short *vt = new short;
+		*vt = CastUtil::lexical_cast<short>(*root);
+		return vt;
+	}
+	else if((className=="unsigned short" || className=="unsigned short int"))
+	{
+		unsigned short *vt = new unsigned short;
+		*vt = CastUtil::lexical_cast<unsigned short>(*root);
+		return vt;
+	}
+	else if((className=="long int" || className=="signed long" || className=="signed long int" || className=="signed long long int"))
+	{
+		long *vt = new long;
+		*vt = CastUtil::lexical_cast<long>(*root);
+		return vt;
+	}
+	else if((className=="unsigned long long" || className=="unsigned long long int"))
+	{
+		unsigned long long *vt = new unsigned long long;
+		*vt = CastUtil::lexical_cast<unsigned long long>(*root);
+		return vt;
+	}
+	else if((className=="char" || className=="signed char"))
+	{
+		char *vt = new char;
+		*vt = root->at(0);
+		return vt;
+	}
+	else if(className=="unsigned char")
+	{
+		unsigned char *vt = new unsigned char;
+		*vt = root->at(0);
+		return vt;
+	}
+	else if(className=="Date")
+	{
+		DateFormat formt("yyyy-mm-dd hh:mi:ss");
+		return formt.parse(*root);
+	}
+	else if(className=="BinaryData")
+	{
+		return BinaryData::unSerilaize(*root);
+	}
+	else if(className=="float")
+	{
+		float *vt = new float;
+		*vt = CastUtil::lexical_cast<float>(*root);
+		return vt;
+	}
+	else if(className=="double")
+	{
+		double *vt = new double;
+		*vt = CastUtil::lexical_cast<double>(*root);
+		return vt;
+	}
+	else if(className=="long double")
+	{
+		long double *vt = new long double;
+		*vt = CastUtil::lexical_cast<long double>(*root);
+		return vt;
+	}
+	else if(className=="bool")
+	{
+		bool *vt = new bool;
+		*vt = CastUtil::lexical_cast<bool>(*root);
+		return vt;
+	}
+	else if(className=="std::string" || className=="string")
+	{
+		string *vt = new string;
+		*vt = *root;
+		return vt;
+	}
+	return NULL;
+}
+
+string JSONSerialize::getSerializationMethodName(string className, string appName, bool which, string type)
+{
+	string methodname;
+	if(which)
+		methodname = appName + "serialize" + className + type;
 	else
-		return _unserCont(json,className, type, appName);
-
+		methodname = appName + "unSerialize" + className + type;
+	return methodname;
 }
 
-void* JSONSerialize::_unserCont(string objXml,string className,string type, string appName)
+string JSONSerialize::serializeUnknown(void* t,string className, string appName)
 {
-	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "to"+className+type+"VP";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (string);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-	{
-		obj = f(objXml);
-	}
-	return obj;
+	JSONSerialize serialize;
+	return _handleAllSerialization(className,t,appName, &serialize);
 }
 
-
-void* JSONSerialize::_unser(string objXml,string className, string appName)
+void* JSONSerialize::unSerializeUnknown(string objXml,string className, string appName)
 {
-	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
+	JSONSerialize serialize;
+	return _handleAllUnSerialization(objXml,className,appName,&serialize,true,NULL);
+}
+
+bool JSONSerialize::isValidClassNamespace(void* _1, string classname, string namespc, bool iscontainer)
+{
+	JSONElement* node = (JSONElement*)_1;
+	if(iscontainer && node->getChildren().size()==0)
+		return false;
+	return true;
+}
+
+bool JSONSerialize::isValidObjectProperty(void* _1, string propname, int counter)
+{
+	JSONElement* node = (JSONElement*)_1;
+	if((int)node->getChildren().size()>counter && node->getChildren().at(counter)->getName()==propname)
+		return true;
+	return false;
+}
+
+void* JSONSerialize::getObjectProperty(void* _1, int counter)
+{
+	JSONElement* elel = (JSONElement*)_1;
+	return elel->getChildren().at(counter);
+}
+
+void JSONSerialize::startObjectSerialization(void* _1, string className)
+{
+	string* object = (string*)_1;
+	*object = "{";
+}
+
+void JSONSerialize::endObjectSerialization(void* _1, string className)
+{
+	string* object = (string*)_1;
+	if(object->at(object->length()-1)==',')
+		*object = object->substr(0, object->length()-1);
+	*object += "}";
+}
+
+void JSONSerialize::afterAddObjectProperty(void* _1)
+{
+	string* object = (string*)_1;
+	*object += ",";
+}
+
+void JSONSerialize::addObjectPrimitiveProperty(void* _1, string propName, string className, void* t)
+{
+	string* object = (string*)_1;
+
+	string objXml;
+	if(className=="std::string" || className=="string")
 	{
-		cerr << dlerror() << endl;
-		exit(-1);
+		string tem = *(string*)t;
+		objXml = "\""+tem+"\"";
 	}
-	string methodname = appName + "toVoidP"+className;
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (string);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
+	else if(className=="char")
 	{
-		obj = f(objXml);
+		char tem = *(char*)t;
+		string temp;
+		temp.push_back(tem);
+		objXml = "\""+temp+"\"";
 	}
-	return obj;
+	else if(className=="unsigned char")
+	{
+		unsigned char tem = *(char*)t;
+		string temp;
+		temp.push_back(tem);
+		objXml = "\""+temp+"\"";
+	}
+	else if(className=="int")
+	{
+		int tem = *(int*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned int")
+	{
+		unsigned int tem = *(unsigned int*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="short")
+	{
+		short tem = *(short*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned short")
+	{
+		unsigned short tem = *(unsigned short*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="long")
+	{
+		long tem = *(long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned long")
+	{
+		unsigned long tem = *(unsigned long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="long long")
+	{
+		long long tem = *(long long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned long long")
+	{
+		unsigned long long tem = *(unsigned long long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="float")
+	{
+		float tem = *(float*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="double")
+	{
+		double tem = *(double*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="long double")
+	{
+		long double tem = *(long double*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="bool")
+	{
+		bool tem = *(bool*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="Date")
+	{
+		DateFormat formt("yyyy-mm-dd hh:mi:ss");
+		objXml = "\""+formt.format(*(Date*)t)+"\"";
+	}
+	else if(className=="BinaryData")
+	{
+		objXml = "\""+BinaryData::serilaize(*(BinaryData*)t)+"\"";
+	}
+	*object += "\"" + propName + "\" : " + objXml;
+}
+
+void JSONSerialize::addObjectProperty(void* _1, string propName, string className, string t)
+{
+	string* object = (string*)_1;
+	*object += "\"" + propName + "\" : " + t;
+}
+
+void* JSONSerialize::getObjectPrimitiveValue(void* _1, string className, string propName)
+{
+	JSONElement* root = (JSONElement*)_1;
+	if((className=="signed" || className=="int" || className=="signed int"))
+	{
+		int *vt = new int;
+		*vt = CastUtil::lexical_cast<int>(root->getValue());
+		return vt;
+	}
+	else if((className=="unsigned" || className=="unsigned int"))
+	{
+		unsigned int *vt = new unsigned int;
+		*vt = CastUtil::lexical_cast<unsigned int>(root->getValue());
+		return vt;
+	}
+	else if((className=="short" || className=="short int" || className=="signed short" || className=="signed short int"))
+	{
+		short *vt = new short;
+		*vt = CastUtil::lexical_cast<short>(root->getValue());
+		return vt;
+	}
+	else if((className=="unsigned short" || className=="unsigned short int"))
+	{
+		unsigned short *vt = new unsigned short;
+		*vt = CastUtil::lexical_cast<unsigned short>(root->getValue());
+		return vt;
+	}
+	else if((className=="long" || className=="long int" || className=="signed long" || className=="signed long int"))
+	{
+		long *vt = new long;
+		*vt = CastUtil::lexical_cast<long>(root->getValue());
+		return vt;
+	}
+	else if((className=="unsigned long" || className=="unsigned long int"))
+	{
+		unsigned long *vt = new unsigned long;
+		*vt = CastUtil::lexical_cast<unsigned long>(root->getValue());
+		return vt;
+	}
+	else if((className=="long long" || className=="long long int" || className=="signed long long int"))
+	{
+		long long *vt = new long long;
+		*vt = CastUtil::lexical_cast<long long>(root->getValue());
+		return vt;
+	}
+	else if((className=="unsigned long long" || className=="unsigned long long int"))
+	{
+		unsigned long long *vt = new unsigned long long;
+		*vt = CastUtil::lexical_cast<unsigned long long>(root->getValue());
+		return vt;
+	}
+	else if((className=="char" || className=="signed char"))
+	{
+		char *vt = new char;
+		*vt = root->getValue().at(0);
+		return vt;
+	}
+	else if(className=="unsigned char")
+	{
+		unsigned char *vt = new unsigned char;
+		*vt = root->getValue().at(0);
+		return vt;
+	}
+	else if(className=="Date")
+	{
+		DateFormat formt("yyyy-mm-dd hh:mi:ss");
+		return formt.parse(root->getValue());
+	}
+	else if(className=="BinaryData")
+	{
+		return BinaryData::unSerilaize(root->getValue());
+	}
+	else if(className=="float")
+	{
+		float *vt = new float;
+		*vt = CastUtil::lexical_cast<float>(root->getValue());
+		return vt;
+	}
+	else if(className=="double")
+	{
+		double *vt = new double;
+		*vt = CastUtil::lexical_cast<double>(root->getValue());
+		return vt;
+	}
+	else if(className=="long double")
+	{
+		long double *vt = new long double;
+		*vt = CastUtil::lexical_cast<long double>(root->getValue());
+		return vt;
+	}
+	else if(className=="bool")
+	{
+		bool *vt = new bool;
+		*vt = CastUtil::lexical_cast<bool>(root->getValue());
+		return vt;
+	}
+	else if(className=="std::string" || className=="string")
+	{
+		string *vt = new string;
+		*vt = root->getValue();
+		return vt;
+	}
+	return NULL;
+}
+
+string JSONSerialize::serializeUnknownBase(void* t,string className, string appName)
+{
+	return _handleAllSerialization(className,t,appName, this);
+}
+void* JSONSerialize::unSerializeUnknownBase(void* unserObj,string className, string appName)
+{
+	return _handleAllUnSerialization("",className,appName,this,true,unserObj);
 }

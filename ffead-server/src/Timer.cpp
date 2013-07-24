@@ -23,7 +23,7 @@
 #include "Timer.h"
 
 Timer::Timer() {
-	logger = Logger::getLogger("Timer");
+	logger = LoggerFactory::getLogger("Timer");
 }
 
 Timer::~Timer() {

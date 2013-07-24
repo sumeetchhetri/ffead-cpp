@@ -35,7 +35,7 @@ void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, ConfigurationD
 		string ext)
 {
 	map<string, vector<string> > filterMap = configData.filterMap;
-	Logger logger = Logger::getLogger("FilterHandler");
+	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"in")!=filterMap.end())
 	{
 		vector<string> tempp;
@@ -61,7 +61,7 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationDat
 {
 	bool continue_proc_request = true;
 	map<string, vector<string> > filterMap = configData.filterMap;
-	Logger logger = Logger::getLogger("FilterHandler");
+	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	if(filterMap.find(req->getCntxt_name()+"*.*handle")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"handle")!=filterMap.end())
 	{
 		vector<string> tempp;
@@ -86,7 +86,7 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, Configuration
 		string ext)
 {
 	map<string, vector<string> > filterMap = configData.filterMap;
-	Logger logger = Logger::getLogger("FilterHandler");
+	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	if(filterMap.find(req->getCntxt_name()+"*.*out")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"out")!=filterMap.end())
 	{
 		vector<string> tempp;

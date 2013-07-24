@@ -55,7 +55,7 @@ bool AuthHandler::handle(ConfigurationData configData, HttpRequest* req, HttpRes
 	map<string, string> autpattMap = configData.autpattMap;
 	map<string, vector<string> > filterMap = configData.filterMap;
 
-	Logger logger = Logger::getLogger("AuthHandler");
+	Logger logger = LoggerFactory::getLogger("AuthHandler");
 	bool isContrl = false;
 	string claz;
 	if(autpattMap[req->getCntxt_name()+"*.*"]!="" || autMap[req->getCntxt_name()+ext]!="")
@@ -112,8 +112,8 @@ bool AuthHandler::handle(ConfigurationData configData, HttpRequest* req, HttpRes
 			AuthController *authc = static_cast<AuthController*>(_temp);
 			if(authc!=NULL)
 			{
-				authc->handle(req,&res);
-				if(res.getStatusCode()!="")
+				isContrl = authc->handle(req,&res);
+				if(isContrl && res.getStatusCode()!="")
 					isContrl = true;
 				logger << "Authhandler called" << endl;
 			}

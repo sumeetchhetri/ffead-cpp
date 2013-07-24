@@ -1,43 +1,21 @@
 /*
-	Copyright 2010, Sumeet Chhetri
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-*/
-/*
- * Serialize.cpp
+ * XMLSerialize.cpp
  *
- *  Created on: Apr 2, 2010
- *      Author: sumeet
+ *  Created on: 12-Jun-2013
+ *      Author: sumeetc
  */
 
 #include "XMLSerialize.h"
 
-string XMLSerialize::demangle(const char *mangled)
-{
-	int status;	char *demangled;
-	using namespace abi;
-	demangled = __cxa_demangle(mangled, NULL, 0, &status);
-	string s(demangled);
-	delete demangled;
-	return s;
-}
-string XMLSerialize::getClassName(void* instance)
-{
-	const char *mangled = typeid(instance).name();
-	return demangle(mangled);
+XMLSerialize::XMLSerialize() {
+	// TODO Auto-generated constructor stub
 }
 
-string XMLSerialize::_handleAllSerialization(string className,void *t, string appName)
+XMLSerialize::~XMLSerialize() {
+	// TODO Auto-generated destructor stub
+}
+
+string XMLSerialize::serializePrimitive(string className, void* t)
 {
 	string objXml;
 	if(className=="std::string" || className=="string")
@@ -45,20 +23,59 @@ string XMLSerialize::_handleAllSerialization(string className,void *t, string ap
 		string tem = *(string*)t;
 		objXml = "<string>"+CastUtil::lexical_cast<string>(tem)+"</string>";
 	}
+	else if(className=="char")
+	{
+		char tem = *(char*)t;
+		string temp;
+		temp.push_back(tem);
+		objXml = "<char>"+temp+"</char>";
+	}
+	else if(className=="unsigned char")
+	{
+		unsigned char tem = *(char*)t;
+		string temp;
+		temp.push_back(tem);
+		objXml = "<uchar>"+temp+"</uchar>";
+	}
 	else if(className=="int")
 	{
 		int tem = *(int*)t;
 		objXml = "<int>"+CastUtil::lexical_cast<string>(tem)+"</int>";
+	}
+	else if(className=="unsigned int")
+	{
+		unsigned int tem = *(unsigned int*)t;
+		objXml = "<uint>"+CastUtil::lexical_cast<string>(tem)+"</uint>";
+	}
+	else if(className=="short")
+	{
+		short tem = *(short*)t;
+		objXml = "<short>"+CastUtil::lexical_cast<string>(tem)+"</short>";
+	}
+	else if(className=="unsigned short")
+	{
+		unsigned short tem = *(unsigned short*)t;
+		objXml = "<ushort>"+CastUtil::lexical_cast<string>(tem)+"</ushort>";
 	}
 	else if(className=="long")
 	{
 		long tem = *(long*)t;
 		objXml = "<long>"+CastUtil::lexical_cast<string>(tem)+"</long>";
 	}
-	else if(className=="short")
+	else if(className=="unsigned long")
 	{
-		short tem = *(short*)t;
-		objXml = "<short>"+CastUtil::lexical_cast<string>(tem)+"</short>";
+		unsigned long tem = *(unsigned long*)t;
+		objXml = "<ulong>"+CastUtil::lexical_cast<string>(tem)+"</ulong>";
+	}
+	else if(className=="long long")
+	{
+		long long tem = *(long long*)t;
+		objXml = "<llong>"+CastUtil::lexical_cast<string>(tem)+"</llong>";
+	}
+	else if(className=="unsigned long long")
+	{
+		unsigned long long tem = *(unsigned long long*)t;
+		objXml = "<ullong>"+CastUtil::lexical_cast<string>(tem)+"</ullong>";
 	}
 	else if(className=="float")
 	{
@@ -69,6 +86,11 @@ string XMLSerialize::_handleAllSerialization(string className,void *t, string ap
 	{
 		double tem = *(double*)t;
 		objXml = "<double>"+CastUtil::lexical_cast<string>(tem)+"</double>";
+	}
+	else if(className=="long double")
+	{
+		long double tem = *(long double*)t;
+		objXml = "<ldouble>"+CastUtil::lexical_cast<string>(tem)+"</ldouble>";
 	}
 	else if(className=="bool")
 	{
@@ -84,1354 +106,638 @@ string XMLSerialize::_handleAllSerialization(string className,void *t, string ap
 	{
 		objXml = BinaryData::serilaize(*(BinaryData*)t);
 	}
-	else if(className.find("std::vector<std::string,")!=string::npos || className.find("std::vector<string,")!=string::npos)
+	return objXml;
+}
+
+void* XMLSerialize::getSerializableObject()
+{
+	return new string;
+}
+
+void XMLSerialize::cleanSerializableObject(void* _1)
+{
+	string* object = (string*)_1;
+	delete object;
+}
+
+void XMLSerialize::startContainerSerialization(void* _1, string className, string container)
+{
+	StringUtil::replaceAll(container, "std::", "");
+	StringUtil::replaceAll(container, "::", "_");
+	StringUtil::replaceAll(className, "std::", "");
+	StringUtil::replaceAll(className, "::", "_");
+	StringUtil::replaceAll(className, "<", "-");
+	StringUtil::replaceAll(className, ">", "-");
+	StringUtil::replaceAll(className, " ", "-");
+	StringUtil::replaceAll(className, ",", "-");
+	if(className.at(className.length()-1)=='-')
+		className = className.substr(0, className.length()-1);
+	string* object = (string*)_1;
+	*object = "<"+container+"-"+className+">";
+}
+
+void XMLSerialize::endContainerSerialization(void* _1, string className, string container)
+{
+	StringUtil::replaceAll(container, "std::", "");
+	StringUtil::replaceAll(container, "::", "_");
+	StringUtil::replaceAll(className, "std::", "");
+	StringUtil::replaceAll(className, "::", "_");
+	StringUtil::replaceAll(className, "<", "-");
+	StringUtil::replaceAll(className, ">", "-");
+	StringUtil::replaceAll(className, " ", "-");
+	StringUtil::replaceAll(className, ",", "-");
+	if(className.at(className.length()-1)=='-')
+		className = className.substr(0, className.length()-1);
+	string* object = (string*)_1;
+	*object += "</"+container+"-"+className+">";
+}
+
+void XMLSerialize::afterAddContainerSerializableElement(void* _1, int counter, int size){}
+
+void XMLSerialize::addContainerSerializableElement(void* _1, string tem)
+{
+	string* object = (string*)_1;
+	*object += tem;
+}
+
+void XMLSerialize::addContainerSerializableElementMulti(void* _1, string tem)
+{
+	string* object = (string*)_1;
+	*object += tem;
+}
+
+string XMLSerialize::fromSerializableObjectToString(void* _1)
+{
+	string* object = (string*)_1;
+	return *object;
+}
+
+string XMLSerialize::elementToSerializedString(void* _1, int counter)
+{
+	Element* object = (Element*)_1;
+	return object->getChildElements().at(counter).renderChildren();
+}
+
+string XMLSerialize::getConatinerElementClassName(void* _1, string className)
+{
+	Element* root = (Element*)_1;
+	string stlclassName = root->getTagName();
+	if(stlclassName.find("-")!=string::npos)
 	{
-		vector<string> *tt = (vector<string>*)t;
-		objXml = serializevec<string>(*tt,appName);
+		className = stlclassName.substr(stlclassName.find_last_of("-")+1);
 	}
-	else if(className.find("std::vector<int,")!=string::npos)
+	StringUtil::trim(className);
+	return className;
+}
+
+void* XMLSerialize::getContainerElement(void* _1, int counter, int counter1)
+{
+	Element* root = (Element*)_1;
+	if((int)root->getChildElements().size()<counter)
+		return NULL;
+	Element ele = root->getChildElements().at(counter);
+	if(counter1!=-1)
 	{
-		vector<int> *tt = (vector<int>*)t;
-		objXml = serializevec<int>(*tt,appName);
+		if((int)ele.getChildElements().size()<counter1)
+			return NULL;
+		ele = ele.getChildElements().at(counter1);
 	}
-	else if(className.find("std::vector<short,")!=string::npos)
+	Element* root1 = new Element;
+	*root1 = ele;
+	return root1;
+}
+
+void XMLSerialize::addPrimitiveElementToContainer(void* _1, int counter, string className, void* cont, string container)
+{
+	Element* root = (Element*)_1;
+	Element ele = root->getChildElements().at(counter);
+	if(className=="std::string" || className=="string")
 	{
-		vector<short> *tt = (vector<short>*)t;
-		objXml = serializevec<short>(*tt,appName);
+		string retVal = ele.getText();
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::vector<long,")!=string::npos)
+	else if(className=="int")
 	{
-		vector<long> *tt = (vector<long>*)t;
-		objXml = serializevec<long>(*tt,appName);
+		int retVal = CastUtil::lexical_cast<int>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::vector<double,")!=string::npos)
+	else if(className=="short")
 	{
-		vector<double> *tt = (vector<double>*)t;
-		objXml = serializevec<double>(*tt,appName);
+		short retVal = CastUtil::lexical_cast<short>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::vector<float,")!=string::npos)
+	else if(className=="long")
 	{
-		vector<float> *tt = (vector<float>*)t;
-		objXml = serializevec<float>(*tt,appName);
+		long retVal = CastUtil::lexical_cast<long>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::vector<bool,")!=string::npos)
+	else if(className=="long long")
 	{
-		vector<bool> *tt = (vector<bool>*)t;
-		objXml = serializevec<bool>(*tt,appName);
+		long long retVal = CastUtil::lexical_cast<long long>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::vector<")!=string::npos)
+	else if(className=="long double")
 	{
-		StringUtil::replaceFirst(className,"std::vector<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _servec(t,vtyp,appName);
+		long double retVal = CastUtil::lexical_cast<long double>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::list<std::string,")!=string::npos || className.find("std::list<string,")!=string::npos)
+	else if(className=="unsigned int")
 	{
-		list<string> *tt = (list<string>*)t;
-		objXml = serializelist<string>(*tt,appName);
+		unsigned int retVal = CastUtil::lexical_cast<unsigned int>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::list<int,")!=string::npos)
+	else if(className=="unsigned short")
 	{
-		list<int> *tt = (list<int>*)t;
-		objXml = serializelist<int>(*tt,appName);
+		unsigned short retVal = CastUtil::lexical_cast<unsigned short>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::list<long,")!=string::npos)
+	else if(className=="unsigned long")
 	{
-		list<long> *tt = (list<long>*)t;
-		objXml = serializelist<long>(*tt,appName);
+		unsigned long retVal = CastUtil::lexical_cast<unsigned long>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::list<short,")!=string::npos)
+	else if(className=="unsigned long long")
 	{
-		list<short> *tt = (list<short>*)t;
-		objXml = serializelist<short>(*tt,appName);
+		unsigned long long retVal = CastUtil::lexical_cast<unsigned long long>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::list<double,")!=string::npos)
+	else if(className=="float")
 	{
-		list<double> *tt = (list<double>*)t;
-		objXml = serializelist<double>(*tt,appName);
+		float retVal = CastUtil::lexical_cast<float>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::list<float,")!=string::npos)
+	else if(className=="double")
 	{
-		list<float> *tt = (list<float>*)t;
-		objXml = serializelist<float>(*tt,appName);
+		double retVal = CastUtil::lexical_cast<double>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::list<bool,")!=string::npos)
+	else if(className=="bool")
 	{
-		list<bool> *tt = (list<bool>*)t;
-		objXml = serializelist<bool>(*tt,appName);
+		bool retVal = CastUtil::lexical_cast<bool>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::list<")!=string::npos)
+	else if(className=="char")
 	{
-		StringUtil::replaceFirst(className,"std::list<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _serlis(t,vtyp,appName);
+		char retVal = CastUtil::lexical_cast<char>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::set<std::string,")!=string::npos || className.find("std::set<string,")!=string::npos)
+	else if(className=="unsigned char")
 	{
-		set<string> *tt = (set<string>*)t;
-		objXml = serializeset<string>(*tt,appName);
+		unsigned char retVal = CastUtil::lexical_cast<unsigned char>(ele.getText());
+		addValueToNestedContainer(container, retVal, cont);
 	}
-	else if(className.find("std::set<int,")!=string::npos)
+}
+
+void* XMLSerialize::getUnserializableObject(string _1)
+{
+	XmlParser parser("Parser");
+	try
 	{
-		set<int> *tt = (set<int>*)t;
-		objXml = serializeset<int>(*tt,appName);
+		Document doc = parser.getDocument(_1);
+		Element message = doc.getRootElement();
+		Element* root = new Element;
+		*root = message;
+		return root;
+	} catch(const XmlParseException& str) {
+		cout << str.getMessage() << endl;
+	} catch(...) {
+		cout << "XML Parse Error" << endl;
 	}
-	else if(className.find("std::set<short,")!=string::npos)
+	return NULL;
+}
+
+void XMLSerialize::cleanUnserializableObject(void* _1)
+{
+	Element* object = (Element*)_1;
+	delete object;
+}
+
+void XMLSerialize::cleanValidUnserializableObject(void* _1)
+{
+	Element* object = (Element*)_1;
+	delete object;
+}
+
+void* XMLSerialize::getValidUnserializableObject(string _1){return NULL;}
+
+int XMLSerialize::getContainerSize(void* _1)
+{
+	Element* root = (Element*)_1;
+	return root->getChildElements().size();
+}
+
+string XMLSerialize::getUnserializableClassName(void* _1, string className)
+{
+	Element* root = (Element*)_1;
+	return root->getTagName();
+}
+
+void* XMLSerialize::getPrimitiveValue(void* _1, string className)
+{
+	Element* root = (Element*)_1;
+	if((className=="signed" || className=="int" || className=="signed int"))
 	{
-		set<short> *tt = (set<short>*)t;
-		objXml = serializeset<short>(*tt,appName);
+		int *vt = new int;
+		*vt = CastUtil::lexical_cast<int>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::set<long,")!=string::npos)
+	else if((className=="unsigned" || className=="unsigned int"))
 	{
-		set<long> *tt = (set<long>*)t;
-		objXml = serializeset<long>(*tt,appName);
+		unsigned int *vt = new unsigned int;
+		*vt = CastUtil::lexical_cast<unsigned int>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::set<double,")!=string::npos)
+	else if((className=="short" || className=="short int" || className=="signed short" || className=="signed short int"))
 	{
-		set<double> *tt = (set<double>*)t;
-		objXml = serializeset<double>(*tt,appName);
+		short *vt = new short;
+		*vt = CastUtil::lexical_cast<short>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::set<float,")!=string::npos)
+	else if((className=="unsigned short" || className=="unsigned short int"))
 	{
-		set<float> *tt = (set<float>*)&t;
-		objXml = serializeset<float>(*tt,appName);
+		unsigned short *vt = new unsigned short;
+		*vt = CastUtil::lexical_cast<unsigned short>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::set<bool,")!=string::npos)
+	else if((className=="long" || className=="long int" || className=="signed long" || className=="signed long int"))
 	{
-		set<bool> *tt = (set<bool>*)&t;
-		objXml = serializeset<bool>(*tt,appName);
+		long *vt = new long;
+		*vt = CastUtil::lexical_cast<long>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::set<")!=string::npos)
+	else if((className=="unsigned long long" || className=="unsigned long long int"))
 	{
-		StringUtil::replaceFirst(className,"std::set<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _serset(t,vtyp,appName);
+		unsigned long long *vt = new unsigned long long;
+		*vt = CastUtil::lexical_cast<unsigned long long>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::multiset<std::string,")!=string::npos || className.find("std::multiset<string,")!=string::npos)
+	else if((className=="unsigned long" || className=="unsigned long int"))
 	{
-		multiset<string> *tt = (multiset<string>*)t;
-		objXml = serializemultiset<string>(*tt,appName);
+		unsigned long *vt = new unsigned long;
+		*vt = CastUtil::lexical_cast<unsigned long>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::multiset<int,")!=string::npos)
+	else if((className=="char" || className=="signed char"))
 	{
-		multiset<int> *tt = (multiset<int>*)t;
-		objXml = serializemultiset<int>(*tt,appName);
+		char *vt = new char;
+		*vt = root->getText().at(0);
+		return vt;
 	}
-	else if(className.find("std::multiset<long,")!=string::npos)
+	else if(className=="unsigned char")
 	{
-		multiset<long> *tt = (multiset<long>*)t;
-		objXml = serializemultiset<long>(*tt,appName);
+		unsigned char *vt = new unsigned char;
+		*vt = root->getText().at(0);
+		return vt;
 	}
-	else if(className.find("std::multiset<short,")!=string::npos)
+	else if(className=="Date")
 	{
-		multiset<short> *tt = (multiset<short>*)t;
-		objXml = serializemultiset<short>(*tt,appName);
+		DateFormat formt("yyyy-mm-dd hh:mi:ss");
+		return formt.parse(root->getText());
 	}
-	else if(className.find("std::multiset<double,")!=string::npos)
+	else if(className=="BinaryData")
 	{
-		multiset<double> *tt = (multiset<double>*)t;
-		objXml = serializemultiset<double>(*tt,appName);
+		return BinaryData::unSerilaize(root->getText());
 	}
-	else if(className.find("std::multiset<float,")!=string::npos)
+	else if(className=="float")
 	{
-		multiset<float> *tt = (multiset<float>*)t;
-		objXml = serializemultiset<float>(*tt,appName);
+		float *vt = new float;
+		*vt = CastUtil::lexical_cast<float>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::multiset<bool,")!=string::npos)
+	else if(className=="double")
 	{
-		multiset<bool> *tt = (multiset<bool>*)t;
-		objXml = serializemultiset<bool>(*tt,appName);
+		double *vt = new double;
+		*vt = CastUtil::lexical_cast<double>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::multiset<")!=string::npos)
+	else if(className=="long double")
 	{
-		StringUtil::replaceFirst(className,"std::multiset<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _sermultiset(t,vtyp,appName);
+		long double *vt = new long double;
+		*vt = CastUtil::lexical_cast<long double>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::queue<std::string,")!=string::npos || className.find("std::queue<string,")!=string::npos)
+	else if(className=="bool")
 	{
-		std::queue<string> *tt = (std::queue<string>*)t;
-		objXml = serializeq<string>(*tt,appName);
+		bool *vt = new bool;
+		*vt = CastUtil::lexical_cast<bool>(root->getText());
+		return vt;
 	}
-	else if(className.find("std::queue<int,")!=string::npos)
+	else if((className=="std::string" || className=="string"))
 	{
-		std::queue<int> *tt = (std::queue<int>*)t;
-		objXml = serializeq<int>(*tt,appName);
+		string *vt = new string;
+		*vt = root->getText();
+		return vt;
 	}
-	else if(className.find("std::queue<short,")!=string::npos)
+	return NULL;
+}
+
+string XMLSerialize::getSerializationMethodName(string className, string appName, bool which, string type)
+{
+	string methodname;
+	if(which)
+		methodname = appName + "serialize" + className + type;
+	else
+		methodname = appName + "unSerialize" + className + type;
+	return methodname;
+}
+
+string XMLSerialize::serializeUnknown(void* t,string className, string appName)
+{
+	XMLSerialize serialize;
+	return _handleAllSerialization(className,t,appName, &serialize);
+}
+
+void* XMLSerialize::unSerializeUnknown(string objXml,string className, string appName)
+{
+	XMLSerialize serialize;
+	return _handleAllUnSerialization(objXml,className,appName,&serialize,false,NULL);
+}
+
+bool XMLSerialize::isValidClassNamespace(void* _1, string className, string namespc, bool iscontainer)
+{
+	string tnmspc = namespc;
+	StringUtil::replaceAll(tnmspc, "::", "_");
+	StringUtil::replaceAll(className, "std::", "");
+	StringUtil::replaceAll(className, "::", "_");
+	StringUtil::replaceAll(className, "<", "-");
+	StringUtil::replaceAll(className, ">", "-");
+	if(className.at(className.length()-1)=='-')
+		className = className.substr(0, className.length()-1);
+	if(className.find('-')!=string::npos)
 	{
-		std::queue<short> *tt = (std::queue<short>*)t;
-		objXml = serializeq<short>(*tt,appName);
-	}
-	else if(className.find("std::queue<long,")!=string::npos)
-	{
-		std::queue<long> *tt = (std::queue<long>*)t;
-		objXml = serializeq<long>(*tt,appName);
-	}
-	else if(className.find("std::queue<double,")!=string::npos)
-	{
-		std::queue<double> *tt = (std::queue<double>*)t;
-		objXml = serializeq<double>(*tt,appName);
-	}
-	else if(className.find("std::queue<float,")!=string::npos)
-	{
-		std::queue<float> *tt = (std::queue<float>*)t;
-		objXml = serializeq<float>(*tt,appName);
-	}
-	else if(className.find("std::queue<bool,")!=string::npos)
-	{
-		std::queue<bool> *tt = (std::queue<bool>*)t;
-		objXml = serializeq<bool>(*tt,appName);
-	}
-	else if(className.find("std::queue<")!=string::npos)
-	{
-		StringUtil::replaceFirst(className,"std::queue<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _serq(t,vtyp,appName);
-	}
-	else if(className.find("std::deque<std::string,")!=string::npos || className.find("std::deque<string,")!=string::npos)
-	{
-		deque<string> *tt = (deque<string>*)t;
-		objXml = serializedq<string>(*tt,appName);
-	}
-	else if(className.find("std::deque<int,")!=string::npos)
-	{
-		deque<int> *tt = (deque<int>*)t;
-		objXml = serializedq<int>(*tt,appName);
-	}
-	else if(className.find("std::deque<long,")!=string::npos)
-	{
-		deque<long> *tt = (deque<long>*)t;
-		objXml = serializedq<long>(*tt,appName);
-	}
-	else if(className.find("std::deque<short,")!=string::npos)
-	{
-		deque<short> *tt = (deque<short>*)t;
-		objXml = serializedq<short>(*tt,appName);
-	}
-	else if(className.find("std::deque<double,")!=string::npos)
-	{
-		deque<double> *tt = (deque<double>*)t;
-		objXml = serializedq<double>(*tt,appName);
-	}
-	else if(className.find("std::deque<float,")!=string::npos)
-	{
-		deque<float> *tt = (deque<float>*)t;
-		objXml = serializedq<float>(*tt,appName);
-	}
-	else if(className.find("std::deque<bool,")!=string::npos)
-	{
-		deque<bool> *tt = (deque<bool>*)t;
-		objXml = serializedq<bool>(*tt,appName);
-	}
-	else if(className.find("std::deque<")!=string::npos)
-	{
-		StringUtil::replaceFirst(className,"std::deque<","");
-		string vtyp = className.substr(0,className.find(","));
-		return _serdq(t,vtyp,appName);
+		string pre = className.substr(0, className.find_last_of("-")+1);
+		className = className.substr(className.find_last_of("-")+1);
+		className = pre + tnmspc + className;
 	}
 	else
-	{
-		return _ser(t,className,appName);
-	}
-	return objXml;
+		className = tnmspc + className;
+	Element* element = (Element*)_1;
+	if(element->getTagName()!=className || (iscontainer &&  element->getChildElements().size()==0))
+		return false;
+	return true;
 }
 
-string XMLSerialize::_servec(void* t,string className, string appName)
+bool XMLSerialize::isValidObjectProperty(void* _1, string propname, int counter)
 {
-	StringUtil::replaceAll(className, "::", "_");
+	Element* element = (Element*)_1;
+	if((int)element->getChildElements().size()>counter && element->getChildElements().at(counter).getTagName()==propname)
+		return true;
+	return false;
+}
+
+void* XMLSerialize::getObjectProperty(void* _1, int counter)
+{
+	Element* elel = (Element*)_1;
+	Element* ele = new Element;
+	*ele = elel->getChildElements().at(counter);
+	return ele;
+}
+
+void XMLSerialize::startObjectSerialization(void* _1, string className)
+{
+	string* object = (string*)_1;
+	*object = "<"+className+">";
+}
+
+void XMLSerialize::endObjectSerialization(void* _1, string className)
+{
+	string* object = (string*)_1;
+	*object += "</"+className+">";
+}
+
+void XMLSerialize::afterAddObjectProperty(void* _1){}
+
+void XMLSerialize::addObjectPrimitiveProperty(void* _1, string propName, string className, void* t)
+{
+	string* object = (string*)_1;
 	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
+	if(className=="std::string" || className=="string")
 	{
-		cerr << dlerror() << endl;
-		exit(-1);
+		string tem = *(string*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
 	}
-	string methodname = appName + "serialize"+className+"Vec";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
-}
+	else if(className=="char")
+	{
+		char tem = *(char*)t;
+		string temp;
+		temp.push_back(tem);
+		objXml = temp;
+	}
+	else if(className=="unsigned char")
+	{
+		unsigned char tem = *(char*)t;
+		string temp;
+		temp.push_back(tem);
+		objXml = temp;
+	}
+	else if(className=="int")
+	{
+		int tem = *(int*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned int")
+	{
+		unsigned int tem = *(unsigned int*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="short")
+	{
+		short tem = *(short*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned short")
+	{
+		unsigned short tem = *(unsigned short*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="long")
+	{
+		long tem = *(long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned long")
+	{
+		unsigned long tem = *(unsigned long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="long long")
+	{
+		long long tem = *(long long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="unsigned long long")
+	{
+		unsigned long long tem = *(unsigned long long*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="float")
+	{
+		float tem = *(float*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="double")
+	{
+		double tem = *(double*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="long double")
+	{
+		long double tem = *(long double*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="bool")
+	{
+		bool tem = *(bool*)t;
+		objXml = CastUtil::lexical_cast<string>(tem);
+	}
+	else if(className=="Date")
+	{
+		DateFormat formt("yyyy-mm-dd hh:mi:ss");
+		objXml = formt.format(*(Date*)t);
+	}
+	else if(className=="BinaryData")
+	{
+		objXml = BinaryData::serilaize(*(BinaryData*)t);
+	}
 
-string XMLSerialize::_serlis(void* t,string className, string appName)
-{
+	StringUtil::replaceAll(className, "std::", "");
 	StringUtil::replaceAll(className, "::", "_");
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "serialize"+className+"Lis";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
+	StringUtil::replaceAll(className, "<", "-");
+	StringUtil::replaceAll(className, ">", "-");
+	if(className.at(className.length()-1)=='-')
+		className = className.substr(0, className.length()-1);
+	//TODO - any side effects??
+	//*object += "<" + propName + " type=\"" + className + "\">" + objXml + "</" + propName + ">";
+	*object += "<" + propName + ">" + objXml + "</" + propName + ">";
 }
-string XMLSerialize::_serset(void* t,string className, string appName)
+
+void XMLSerialize::addObjectProperty(void* _1, string propName, string className, string t)
 {
+	string* object = (string*)_1;
+
+	StringUtil::replaceAll(className, "std::", "");
 	StringUtil::replaceAll(className, "::", "_");
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "serialize"+className+"Set";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
-}
-string XMLSerialize::_sermultiset(void* t,string className, string appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "serialize"+className+"MulSet";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
-}
-string XMLSerialize::_serq(void* t,string className, string appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "serialize"+className+"Q";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
-}
-string XMLSerialize::_serdq(void* t,string className, string appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "serialize"+className+"Dq";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
+	StringUtil::replaceAll(className, "<", "-");
+	StringUtil::replaceAll(className, ">", "-");
+	if(className.at(className.length()-1)=='-')
+		className = className.substr(0, className.length()-1);
+	//TODO - any side effects??
+	//*object += "<" + propName + " type=\"" + className + "\">" + t + "</" + propName + ">";
+	*object += "<" + propName + ">" + t + "</" + propName + ">";
 }
 
-string XMLSerialize::_ser(void* t,string className, string appName)
+void* XMLSerialize::getObjectPrimitiveValue(void* _1, string className, string propName)
 {
-	StringUtil::replaceAll(className, "::", "_");
-	string objXml;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
+	Element* root = (Element*)_1;
+	if(root->getTagName()!=propName)
+		return NULL;
+	if((className=="signed" || className=="int" || className=="signed int"))
 	{
-		cerr << dlerror() << endl;
-		exit(-1);
+		int *vt = new int;
+		*vt = CastUtil::lexical_cast<int>(root->getText());
+		return vt;
 	}
-	string methodname = appName + "serialize"+className;
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef string (*RfPtr) (void*);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-		objXml = f(t);
-	return objXml;
+	else if((className=="unsigned" || className=="unsigned int"))
+	{
+		unsigned int *vt = new unsigned int;
+		*vt = CastUtil::lexical_cast<unsigned int>(root->getText());
+		return vt;
+	}
+	else if((className=="short" || className=="short int" || className=="signed short" || className=="signed short int"))
+	{
+		short *vt = new short;
+		*vt = CastUtil::lexical_cast<short>(root->getText());
+		return vt;
+	}
+	else if((className=="unsigned short" || className=="unsigned short int"))
+	{
+		unsigned short *vt = new unsigned short;
+		*vt = CastUtil::lexical_cast<unsigned short>(root->getText());
+		return vt;
+	}
+	else if((className=="long" || className=="long int" || className=="signed long" || className=="signed long int"))
+	{
+		long *vt = new long;
+		*vt = CastUtil::lexical_cast<long>(root->getText());
+		return vt;
+	}
+	else if((className=="long long" || className=="long long int" || className=="signed long long int"))
+	{
+		long long *vt = new long long;
+		*vt = CastUtil::lexical_cast<long long>(root->getText());
+		return vt;
+	}
+	else if((className=="unsigned long" || className=="unsigned long int"))
+	{
+		unsigned long *vt = new unsigned long;
+		*vt = CastUtil::lexical_cast<unsigned long>(root->getText());
+		return vt;
+	}
+	else if((className=="unsigned long long" || className=="unsigned long long int"))
+	{
+		unsigned long long *vt = new unsigned long long;
+		*vt = CastUtil::lexical_cast<unsigned long long>(root->getText());
+		return vt;
+	}
+	else if((className=="char" || className=="signed char"))
+	{
+		char *vt = new char;
+		*vt = root->getText().at(0);
+		return vt;
+	}
+	else if(className=="unsigned char")
+	{
+		unsigned char *vt = new unsigned char;
+		*vt = root->getText().at(0);
+		return vt;
+	}
+	else if(className=="Date")
+	{
+		DateFormat formt("yyyy-mm-dd hh:mi:ss");
+		return formt.parse(root->getText());
+	}
+	else if(className=="BinaryData")
+	{
+		return BinaryData::unSerilaize(root->getText());
+	}
+	else if(className=="float")
+	{
+		float *vt = new float;
+		*vt = CastUtil::lexical_cast<float>(root->getText());
+		return vt;
+	}
+	else if(className=="double")
+	{
+		double *vt = new double;
+		*vt = CastUtil::lexical_cast<double>(root->getText());
+		return vt;
+	}
+	else if(className=="long double")
+	{
+		long double *vt = new long double;
+		*vt = CastUtil::lexical_cast<long double>(root->getText());
+		return vt;
+	}
+	else if(className=="bool")
+	{
+		bool *vt = new bool;
+		*vt = CastUtil::lexical_cast<bool>(root->getText());
+		return vt;
+	}
+	else if((className=="std::string" || className=="string"))
+	{
+		string *vt = new string;
+		*vt = root->getText();
+		return vt;
+	}
+	return NULL;
 }
 
-string XMLSerialize::_ser(Object t, string appName)
+string XMLSerialize::serializeUnknownBase(void* t,string className, string appName)
 {
-	return _ser(t.getVoidPointer(),t.getTypeName(),appName);
+	return _handleAllSerialization(className,t,appName, this);
 }
-
-
-void* XMLSerialize::_handleAllUnSerialization(string objXml,string className, string appName)
+void* XMLSerialize::unSerializeUnknownBase(void* unserObj,string className, string appName)
 {
-	if(className=="std::string" || className=="string" || className=="int" || className=="short" || className=="float" || className=="double"
-			|| className=="long" || className=="bool")
-	{
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		if(className=="int")
-		{
-			int *vt = new int;
-			*vt = CastUtil::lexical_cast<int>(message.getText());
-			return vt;
-		}
-		else if(className=="short")
-		{
-			short *vt = new short;
-			*vt = CastUtil::lexical_cast<short>(message.getText());
-			return vt;
-		}
-		else if(className=="long")
-		{
-			long *vt = new long;
-			*vt = CastUtil::lexical_cast<long>(message.getText());
-			return vt;
-		}
-		else if(className=="Date")
-		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
-			return formt.parse(message.getText());
-		}
-		else if(className=="BinaryData")
-		{
-			return BinaryData::unSerilaize(message.getText());
-		}
-		else if(className=="float")
-		{
-			float *vt = new float;
-			*vt = CastUtil::lexical_cast<float>(message.getText());
-			return vt;
-		}
-		else if(className=="double")
-		{
-			double *vt = new double;
-			*vt = CastUtil::lexical_cast<double>(message.getText());
-			return vt;
-		}
-		else if(className=="bool")
-		{
-			bool *vt = new bool;
-			*vt = CastUtil::lexical_cast<bool>(message.getText());
-			return vt;
-		}
-		else if(className=="std::string" || className=="string")
-		{
-			string *vt = new string;
-			*vt = CastUtil::lexical_cast<string>(message.getText());
-			return vt;
-		}
-	}
-	else if(objXml.find("<vector-")==0)
-	{
-		return unserializevec(objXml,appName);
-	}
-	else if(objXml.find("<set-")==0)
-	{
-		return unserializeset(objXml,appName);
-	}
-	else if(objXml.find("<multiset-")==0)
-	{
-		return unserializemultiset(objXml,appName);
-	}
-	else if(objXml.find("<list-")==0)
-	{
-		return unserializelist(objXml,appName);
-	}
-	else if(objXml.find("<queue-")==0)
-	{
-		return unserializeq(objXml,appName);
-	}
-	else if(objXml.find("<deque-")==0)
-	{
-		return unserializedq(objXml,appName);
-	}
-	return _unser(objXml,className,appName);
-}
-
-void* XMLSerialize::unserializevec(string objXml, string appName)
-{
-	string cls = objXml.substr(8,objXml.find(">")-8);
-	if(cls=="string" || cls=="std::string")
-	{
-		vector<string> *t = new vector<string>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="string" || ele.getTagName()=="std::string")
-			{
-				t->push_back(ele.getText());
-			}
-		}
-		return t;
-	}
-	else if(cls=="double")
-	{
-		vector<double> *t = new vector<double>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="double")
-			{
-				t->push_back(CastUtil::lexical_cast<double>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="float")
-	{
-		vector<float> *t = new vector<float>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="float")
-			{
-				t->push_back(CastUtil::lexical_cast<float>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="int")
-	{
-		vector<int> *t = new vector<int>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="int")
-			{
-				t->push_back(CastUtil::lexical_cast<int>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="short")
-	{
-		vector<short> *t = new vector<short>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="short")
-			{
-				t->push_back(CastUtil::lexical_cast<short>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="long")
-	{
-		vector<long> *t = new vector<long>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="long")
-			{
-				t->push_back(CastUtil::lexical_cast<long>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="bool")
-	{
-		vector<bool> *t = new vector<bool>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="bool")
-			{
-				t->push_back(CastUtil::lexical_cast<bool>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else
-		return _unserVec(objXml,cls,appName);
-
-}
-
-void* XMLSerialize::unserializelist(string objXml, string appName)
-{
-	string cls = objXml.substr(6,objXml.find(">")-6);
-	if(cls=="string" || cls=="std::string")
-	{
-		list<string> *t = new list<string>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="string" || ele.getTagName()=="std::string")
-			{
-				t->push_back(ele.getText());
-			}
-		}
-		return t;
-	}
-	else if(cls=="double")
-	{
-		list<double> *t = new list<double>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="double")
-			{
-				t->push_back(CastUtil::lexical_cast<double>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="float")
-	{
-		list<float> *t = new list<float>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="float")
-			{
-				t->push_back(CastUtil::lexical_cast<float>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="int")
-	{
-		list<int> *t = new list<int>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="int")
-			{
-				t->push_back(CastUtil::lexical_cast<int>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="short")
-	{
-		list<short> *t = new list<short>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="short")
-			{
-				t->push_back(CastUtil::lexical_cast<short>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="long")
-	{
-		list<long> *t = new list<long>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="long")
-			{
-				t->push_back(CastUtil::lexical_cast<long>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="bool")
-	{
-		list<bool> *t = new list<bool>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="bool")
-			{
-				t->push_back(CastUtil::lexical_cast<bool>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else
-		return _unserLis(objXml,cls,appName);
-}
-
-void* XMLSerialize::unserializeset(string objXml, string appName)
-{
-	string cls = objXml.substr(5,objXml.find(">")-5);
-	if(cls=="string" || cls=="std::string")
-	{
-		set<string> *t = new set<string>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="string" || ele.getTagName()=="std::string")
-			{
-				t->insert(ele.getText());
-			}
-		}
-		return t;
-	}
-	else if(cls=="double")
-	{
-		set<double> *t = new set<double>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="double")
-			{
-				t->insert(CastUtil::lexical_cast<double>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="float")
-	{
-		set<float> *t = new set<float>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="float")
-			{
-				t->insert(CastUtil::lexical_cast<float>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="int")
-	{
-		set<int> *t = new set<int>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="int")
-			{
-				t->insert(CastUtil::lexical_cast<int>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="short")
-	{
-		set<short> *t = new set<short>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="short")
-			{
-				t->insert(CastUtil::lexical_cast<short>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="long")
-	{
-		set<long> *t = new set<long>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="long")
-			{
-				t->insert(CastUtil::lexical_cast<long>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="bool")
-	{
-		set<bool> *t = new set<bool>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="bool")
-			{
-				t->insert(CastUtil::lexical_cast<bool>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else
-		return _unserSet(objXml,cls,appName);
-}
-
-void* XMLSerialize::unserializemultiset(string objXml, string appName)
-{
-	string cls = objXml.substr(10,objXml.find(">")-10);
-	if(cls=="string" || cls=="std::string")
-	{
-		multiset<string> *t = new multiset<string>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="string" || ele.getTagName()=="std::string")
-			{
-				t->insert(ele.getText());
-			}
-		}
-		return t;
-	}
-	else if(cls=="double")
-	{
-		multiset<double> *t = new multiset<double>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="double")
-			{
-				t->insert(CastUtil::lexical_cast<double>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="float")
-	{
-		multiset<float> *t = new multiset<float>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="float")
-			{
-				t->insert(CastUtil::lexical_cast<float>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="int")
-	{
-		multiset<int> *t = new multiset<int>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="int")
-			{
-				t->insert(CastUtil::lexical_cast<int>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="short")
-	{
-		multiset<short> *t = new multiset<short>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="short")
-			{
-				t->insert(CastUtil::lexical_cast<short>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="long")
-	{
-		multiset<long> *t = new multiset<long>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="long")
-			{
-				t->insert(CastUtil::lexical_cast<long>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="bool")
-	{
-		multiset<bool> *t = new multiset<bool>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="bool")
-			{
-				t->insert(CastUtil::lexical_cast<bool>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else
-		return _unserMulSet(objXml,cls,appName);
-}
-
-void* XMLSerialize::unserializeq(string objXml, string appName)
-{
-	string cls = objXml.substr(7,objXml.find(">")-7);
-	if(cls=="string" || cls=="std::string")
-	{
-		queue<string> *t = new queue<string>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="string" || ele.getTagName()=="std::string")
-			{
-				t->push(ele.getText());
-			}
-		}
-		return t;
-	}
-	else if(cls=="double")
-	{
-		queue<double> *t = new queue<double>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="double")
-			{
-				t->push(CastUtil::lexical_cast<double>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="float")
-	{
-		queue<float> *t = new queue<float>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="float")
-			{
-				t->push(CastUtil::lexical_cast<float>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="int")
-	{
-		queue<int> *t = new queue<int>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="int")
-			{
-				t->push(CastUtil::lexical_cast<int>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="short")
-	{
-		queue<short> *t = new queue<short>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="short")
-			{
-				t->push(CastUtil::lexical_cast<short>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="long")
-	{
-		std::queue<long> *t = new queue<long>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="long")
-			{
-				t->push(CastUtil::lexical_cast<long>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="bool")
-	{
-		std::queue<bool> *t = new queue<bool>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="bool")
-			{
-				t->push(CastUtil::lexical_cast<bool>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else
-		return _unserQ(objXml,cls,appName);
-}
-
-void* XMLSerialize::unserializedq(string objXml, string appName)
-{
-	string cls = objXml.substr(7,objXml.find(">")-7);
-	if(cls=="string" || cls=="std::string")
-	{
-		deque<string> *t = new deque<string>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="string" || ele.getTagName()=="std::string")
-			{
-				t->push_back(ele.getText());
-			}
-		}
-		return t;
-	}
-	else if(cls=="double")
-	{
-		deque<double> *t = new deque<double>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="double")
-			{
-				t->push_back(CastUtil::lexical_cast<double>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="float")
-	{
-		deque<float> *t = new deque<float>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="float")
-			{
-				t->push_back(CastUtil::lexical_cast<float>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="int")
-	{
-		deque<int> *t = new deque<int>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="int")
-			{
-				t->push_back(CastUtil::lexical_cast<int>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="short")
-	{
-		deque<short> *t = new deque<short>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="short")
-			{
-				t->push_back(CastUtil::lexical_cast<short>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="long")
-	{
-		deque<long> *t = new deque<long>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="long")
-			{
-				t->push_back(CastUtil::lexical_cast<long>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else if(cls=="bool")
-	{
-		deque<bool> *t = new deque<bool>;
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(objXml);
-		Element message = doc.getRootElement();
-		for (int var = 0; var < (int)message.getChildElements().size(); var++)
-		{
-			Element ele = message.getChildElements().at(var);
-			if(ele.getTagName()=="bool")
-			{
-				t->push_back(CastUtil::lexical_cast<bool>(ele.getText()));
-			}
-		}
-		return t;
-	}
-	else
-		return _unserDq(objXml,cls,appName);
-}
-
-void* XMLSerialize::_unserSet(string objXml,string className, string appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "unSerialize"+className+"Set";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (string);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-	{
-		obj = f(objXml);
-	}
-	return obj;
-}
-
-void* XMLSerialize::_unserMulSet(string objXml,string className, string appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "unSerialize"+className+"MulSet";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (string);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-	{
-		obj = f(objXml);
-	}
-	return obj;
-}
-
-void* XMLSerialize::_unserQ(string objXml,string className, string appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "unSerialize"+className+"Q";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (string);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-	{
-		obj = f(objXml);
-	}
-	return obj;
-}
-
-void* XMLSerialize::_unserDq(string objXml,string className, string appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "unSerialize"+className+"Dq";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (string);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-	{
-		obj = f(objXml);
-	}
-	return obj;
-}
-
-void* XMLSerialize::_unserLis(string objXml,string className, string appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "unSerialize"+className+"Lis";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (string);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-	{
-		obj = f(objXml);
-	}
-	return obj;
-}
-
-void* XMLSerialize::_unserVec(string objXml,string className, string appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "unSerialize"+className+"Vec";
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (string);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-	{
-		obj = f(objXml);
-	}
-	return obj;
-}
-
-
-void* XMLSerialize::_unser(string objXml,string className, string appName)
-{
-	StringUtil::replaceAll(className, "::", "_");
-	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string methodname = appName + "unSerialize"+className;
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (string);
-	RfPtr f = (RfPtr)mkr;
-	if(f!=NULL)
-	{
-		obj = f(objXml);
-	}
-	return obj;
+	return _handleAllUnSerialization("",className,appName,this,false,unserObj);
 }

@@ -24,7 +24,7 @@
 #define THREADPOOL_H_
 #include "TaskPool.h"
 #include "PoolThread.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "FutureTask.h"
 
 class ThreadPool {
@@ -44,6 +44,7 @@ class ThreadPool {
 	void initializeThreads();
 	Mutex *m_mutex;
 	bool joinComplete;
+	void initPointers();
 public:
 	ThreadPool(int,int,int,int,bool);
 	ThreadPool(int,int,int,int);

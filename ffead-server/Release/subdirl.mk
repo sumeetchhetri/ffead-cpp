@@ -70,7 +70,7 @@ CPP_SRCS += \
 ../src/SOAPRequest.cpp \
 ../src/SOAPResponse.cpp \
 ../src/SOAPUtil.cpp \
-../src/Serialize.cpp \
+../src/SerializeBase.cpp \
 ../src/Server.cpp \
 ../src/Service.cpp \
 ../src/ServiceInt.cpp \
@@ -106,21 +106,26 @@ CPP_SRCS += \
 ../src/AMEFObject.cpp \
 ../src/RegexUtil.cpp \
 ../src/SelEpolKqEvPrt.cpp \
-../ClientInterface.cpp \
-../HTTPResponseStatus.cpp \
-../ContentTypes.cpp \
-../XMLSerialize.cpp \
-../JSONSerialize.cpp \
-../CsvFileReader.cpp \
-../TemplateGenerator.cpp \
-../CibernateQuery.cpp \
-../Bigint.cpp \
-../Bigdecimal.cpp \
-../FutureTask.cpp \
-../CORSHandler.cpp \
-../DialectHelper.cpp \
-../CompressionUtil.cpp \
-../MultipartContent.cpp
+../src/ClientInterface.cpp \
+../src/HTTPResponseStatus.cpp \
+../src/ContentTypes.cpp \
+../src/XMLSerialize.cpp \
+../src/JSONSerialize.cpp \
+../src/CsvFileReader.cpp \
+../src/TemplateGenerator.cpp \
+../src/CibernateQuery.cpp \
+../src/Bigint.cpp \
+../src/Bigdecimal.cpp \
+../src/FutureTask.cpp \
+../src/CORSHandler.cpp \
+../src/DialectHelper.cpp \
+../src/CompressionUtil.cpp \
+../src/MultipartContent.cpp \
+../src/CronTimer.cpp \
+../src/BinarySerialize.cpp \
+../JobScheduler.cpp \
+../LoggerFactory.cpp
+
 
 OBJS += \
 ./Constants.o \
@@ -189,7 +194,7 @@ OBJS += \
 ./SOAPRequest.o \
 ./SOAPResponse.o \
 ./SOAPUtil.o \
-./Serialize.o \
+./SerializeBase.o \
 ./Server.o \
 ./Service.o \
 ./ServiceInt.o \
@@ -239,7 +244,11 @@ OBJS += \
 ./CORSHandler.o \
 ./DialectHelper.o \
 ./CompressionUtil.o \
-./MultipartContent.o
+./MultipartContent.o \
+./CronTimer.o \
+./BinarySerialize.o \
+./JobScheduler.o \
+./LoggerFactory.o
 
 CPP_DEPS += \
 ./Constants.d \
@@ -308,7 +317,7 @@ CPP_DEPS += \
 ./SOAPRequest.d \
 ./SOAPResponse.d \
 ./SOAPUtil.d \
-./Serialize.d \
+./SerializeBase.d \
 ./Server.d \
 ./Service.d \
 ./ServiceInt.d \
@@ -358,7 +367,11 @@ CPP_DEPS += \
 ./CORSHandler.d \
 ./DialectHelper.d \
 ./CompressionUtil.d \
-./MultipartContent.d
+./MultipartContent.d \
+./CronTimer.d \
+./BinarySerialize.d \
+./JobScheduler.d \
+./LoggerFactory.d
 
 
 # Each subdirectory must supply rules for building sources it contributes

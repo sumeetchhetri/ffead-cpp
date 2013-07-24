@@ -1,10 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<wsdl:definitions name="${WS_NAME}ImplService" targetNamespace="${WS_NMSPC}/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="${WS_NMSPC}/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<wsdl:definitions name="${WS_NAME}ImplService" targetNamespace="${WS_NMSPC}" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="${WS_NMSPC}" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ${EXTR_NMSPCS}>
 	<wsdl:types>
-		<xsd:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="${WS_NMSPC}" xmlns:tns="${WS_NMSPC}" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-			${OBJ_BINDING}    
-		</xsd:schema>
-		<xsd:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="${WS_NMSPC}/" xmlns:ns0="${WS_NMSPC}" xmlns:tns="${WS_NMSPC}/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+		${OBJ_BINDING}
+		<xsd:schema attributeFormDefault="unqualified" elementFormDefault="unqualified" targetNamespace="${WS_NMSPC}" xmlns:tns="${WS_NMSPC}" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 			<xsd:import namespace="${WS_NMSPC}" />
 			${REQ_RES_BINDING}
 		</xsd:schema>

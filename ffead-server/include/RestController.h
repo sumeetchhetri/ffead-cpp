@@ -26,7 +26,7 @@
 #include "HttpRequest.h"
 #include "Constants.h"
 #include <dlfcn.h>
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "XMLSerialize.h"
 #include "JSONSerialize.h"
 

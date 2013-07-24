@@ -23,7 +23,7 @@
 #include "ComponentGen.h"
 
 ComponentGen::ComponentGen() {
-	logger = Logger::getLogger("ComponentGen");
+	logger = LoggerFactory::getLogger("ComponentGen");
 }
 
 ComponentGen::~ComponentGen() {

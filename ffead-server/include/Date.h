@@ -23,12 +23,14 @@
 #ifndef DATE_H_
 #define DATE_H_
 #include <unistd.h>
-#include <time.h>
+#include <sys/types.h>
 #include <time.h>
 #include "string"
 #include "vector"
 #include "CastUtil.h"
 #include "StringUtil.h"
+#include <math.h>
+#include <iostream>
 
 using namespace std;
 
@@ -44,13 +46,13 @@ class Date {
 	string dayw;
 	long long nanoseconds;
 	float timeZoneOffset;
-	string getMon(string);
+	string getMon(string) const;
 	string getMonFd(string);
 	long getDaysInt();
-	long getDays(long y,long m,long d);
-	long getHours(long y,long m,long d, long hh);
-	long getMinutes(long y,long m,long d, long hh, long mi);
-	unsigned long long getSeconds(long y,long m,long d, long hh, long mi, long ss);
+	long getDays(long y,long m,long d) const;
+	long getHours(long y,long m,long d, long hh) const;
+	long getMinutes(long y,long m,long d, long hh, long mi) const;
+	unsigned long long getSeconds(long y,long m,long d, long hh, long mi, long ss) const;
 	Date getDateFromDays(long days);
 	void getDateFromHours(long hours);
 	void getDateFromMinutes(long long minutes);
@@ -64,8 +66,10 @@ class Date {
 	void setDay(int day);
 	void setYear(int year);
 	void setMonth(int month);
+	void setDayName();
+	void compare(Date d, unsigned long long &thisss, unsigned long long &thtsss) const;
 public:
-	Date();
+	Date(bool utc = false);
 	Date(struct tm* tim);
 	Date(int yyyy,string mmm,int dd);
 	Date(int yyyy,int mm,int dd);
@@ -73,7 +77,7 @@ public:
 	Date(int yy,int mm,int dd,bool);
 	void setTime(int hh,int mi,int ss);
 	virtual ~Date();
-    int getMonth();
+    int getMonth() const;
     string getMonthw() const;
     int getYear() const;
     int getDay() const;
@@ -91,18 +95,30 @@ public:
     string getMmStr() const;
     string getYearStr() const;
     int getWeekDay() const;
-    Date addSeconds(long seconds);
-	Date addMinutes(long minutes);
-	Date addHours(long hours);
-	Date addDays(long days);
-	Date addMonths(long months);
-	Date addYears(long years);
+    Date addSecondsGet(double seconds);
+	Date addMinutesGet(double minutes);
+	Date addHoursGet(double hours);
+	Date addDaysGet(long days);
+	Date addMonthsGet(long months);
+	Date addYearsGet(long years);
+	void updateSeconds(double dseconds);
+	void updateMinutes(double dminutes);
+	void updateHours(double dhours);
+	void updateDays(long days);
+	void updateMonths(long months);
+	void updateYears(long years);
 	static bool validateDate(int dd, int mm, int yyyy);
 	static string getDayName(int dd, int mm, int yyyy);
 	float getTimeZoneOffset();
 	void setTimeZoneOffset(float tzVal);
 	Date toGMT();
 	int test();
+	bool operator<(Date d) const;
+	bool operator>(Date d) const;
+	bool operator==(Date d) const;
+	bool operator<=(Date d) const;
+	bool operator>=(Date d) const;
+	bool operator!=(Date d) const;
 };
 
 #endif /* DATE_H_ */

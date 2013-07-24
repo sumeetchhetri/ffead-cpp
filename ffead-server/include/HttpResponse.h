@@ -45,8 +45,7 @@ public:
 				  StrictTransportSecurity,Trailer,TransferEncoding,Vary,Via,Warning,WWWAuthenticate;
 	HttpResponse();
 	virtual ~HttpResponse();
-    string getContent_str() const;
-    void setContent_str(string content_str);
+    void setCompressed(bool compressed);
     string getHttpVersion() const;
     void update(HttpRequest* req);
     void setHTTPResponseStatus(HTTPResponseStatus status);
@@ -58,6 +57,7 @@ public:
 	//void setContent(Cont content);
 	void setContent(string content);
 	void addCookie(string cookie);
+	string generateResponse(string httpMethod, HttpRequest *req);
     string generateResponse();
     string generateHeadResponse();
     string generateOptionsResponse();
@@ -67,8 +67,9 @@ public:
     bool isHeaderValue(string header, string value, bool ignoreCase = true);
     bool isNonBinary();
     string getHeader(string);
-    void setCompressed(bool compressed);
     bool getCompressed();
+    friend class ServiceTask;
+    friend class HttpResponseParser;
 private:
     Logger logger;
     static string VALID_RESPONSE_HEADERS;
@@ -79,7 +80,7 @@ private:
 	string epilogue;
 	bool compressed;
 	vector<MultipartContent> contentList;
-	string content_str;
+	string content;
 	vector<string> cookies;
 	map<string,string> headers;
 };

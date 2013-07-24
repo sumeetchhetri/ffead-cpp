@@ -22,41 +22,12 @@
 
 class AMEFEncoder
 {
-	/*The default delimiter for single object representation*/
-	//string delim = ",";
-
 public:
 	AMEFEncoder();
 	~AMEFEncoder();
-	static char* longTocharArray(long l,int ind);
-	static string longTocharArrayS(long l,int ind);
-	static string intTocharArray(int l,int ind);
-	static string intTocharArrayWI(int l);
-	static int charArrayToInt(char* l,int off,int ind);
-	static long charArrayToLong(char* l,int off,int ind);
-	static long charArrayToLong(char* l,int ind);
-	static string intTocharArrayS(int l, int ind);
 	string encodeB(AMEFObject* packet,bool ignoreName);
 	string encodeWL(AMEFObject* packet,bool ignoreName);
-	void getValue(string value,char type,string buffer);
-	string getFinalVal(char type,string buffer,int length,string delim, string name);
-	string getPacketValue(string value);
-	string getPacketValue(int integer);
-
-	#ifdef IS_64_BIT
-		string getPacketValue(unsigned long long lon);
-		string getPacketValue(long lon);
-	#else
-		string getPacketValue(unsigned long long lon);
-		string getPacketValue(long lon);
-	#endif
-
-	string getPacketValue(double lon);
-	string getPacketValue(float lon);
-	string getPacketValue(bool lon);
-	string getPacketValue(char lon);
 	string encodeSinglePacketB(AMEFObject *packet,bool ignoreName);
-}
-;
+};
 
 #endif /* AMEFENCODER_H_ */

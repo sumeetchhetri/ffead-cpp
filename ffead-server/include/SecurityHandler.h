@@ -26,7 +26,7 @@
 #include "Reflector.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "ConfigurationData.h"
 
 typedef ClassInfo (*FunPtr) ();

@@ -71,7 +71,7 @@ IP_ADDR=
 #will generate Warning/Error messages if any caused by the script while generating the HTML by the script
 SCRIPT_ERRS=false
 
-#Number of seconds the connection should be kep-alive, keep it low for better overall performance
+#Number of seconds the connection should be kept-alive, keep it low for better overall performance
 KEEP_ALIVE_SECONDS=2
 
 TRANSFER_ENCODING_CHUNK_SIZE=8192
@@ -83,4 +83,4 @@ CONTENT_ENCODING=gzip
 MAX_REQUEST_HEADERS_COUNT=100
 
 #Maximum Request Entity size, 2GB
-MAX_REQUEST_ENTITY_SIZE=2147483648
+MAX_REQUEST_ENTITY_SIZE=2147483647

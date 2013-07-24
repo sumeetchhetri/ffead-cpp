@@ -29,10 +29,10 @@
 #include "XmlParser.h"
 #include "Reflector.h"
 #include "fstream"
-#include "Serialize.h"
+#include "XMLSerialize.h"
 #include "Thread.h"
 #include "map"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "Constants.h"
 
 #define BACKLOG1 500

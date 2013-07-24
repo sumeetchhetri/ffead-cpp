@@ -33,7 +33,7 @@ FviewHandler::~FviewHandler() {
 
 void FviewHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> fviewmap)
 {
-	Logger logger = Logger::getLogger("FviewHandler");
+	Logger logger = LoggerFactory::getLogger("FviewHandler");
 	string content;
 	logger << ("Inside fview " + req->getFile()) << endl;
 	string file = req->getFile();
@@ -79,7 +79,7 @@ void FviewHandler::handle(HttpRequest* req, HttpResponse& res, map<string, strin
 		}
 		res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 		res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-		res.setContent_str(content);
+		res.setContent(content);
 		infile.close();
 	}
 	else

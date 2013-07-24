@@ -31,7 +31,7 @@
 #include "StringUtil.h"
 #include "RegexUtil.h"
 #include "bitset"
-#include "Logger.h"
+#include "LoggerFactory.h"
 typedef map<string,Object> mapVars;
 typedef map<string,string> mapStrs;
 using namespace std;

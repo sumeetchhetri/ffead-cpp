@@ -28,6 +28,7 @@
 #include <iostream>
 #include "vector"
 #include "TestMany.h"
+#include <fstream>
 
 class DefaultRestController: public RestController {
 public:
@@ -38,6 +39,9 @@ public:
 	void testVector(vector<int>);
 	void testObject(TestMany);
 	void testVectorObject(vector<TestMany> param);
+	void testUploadFile(ifstream* ifs, string param);
+	void testUploadFileMulti1(ifstream* ifs1, ifstream* ifs2, ifstream* ifs3, string param);
+	void testUploadFileMulti2(vector<ifstream*> vifs, string param);
 };
 
 #endif /* DEFAULTRESTCONTROLLER_H_ */

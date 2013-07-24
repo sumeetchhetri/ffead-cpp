@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Timer.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "Mutex.h"
 using namespace std;
 

@@ -23,49 +23,58 @@
 #include "StringUtil.h"
 #include "string"
 #include "Renderer.h"
+#include <iostream>
 using namespace std;
 
 
 class Element : public Renderer
 {
-	public:
-		typedef map<string,string> AttributeList;
-		typedef map<string,Element> ElementMap;
-		typedef vector<Element> ElementList;
-		void addElement(Element element);
-		void removeElement(Element element);
-		void updateElement(Element);
-		void addAttribute(string key,string value,bool validate = false);
-		void removeAttribute(string key);
-		AttributeList getAttributes();
-		string getAttribute(string);
-		ElementList getChildElements();
-		bool isNull();
-		string getTagName();
-		string getTagNameSpc();
-		string getNameSpc();
-		void setTagName(string tagName);
-		bool operator == (Element);
-		bool operator == (Element *);
-		bool getCdata() const;
-		void setCdata(bool);
-		string getText() const;
-		void setText(string);
-		Element getElementByName(string);
-		ElementList getElementsByName(string name);
-		string render();
-		string renderChildren();
-		void validateNs();
-	private:
-		Element* parent;
-		AttributeList attributes;
-		AttributeList namespaces;
-		ElementList elements;
-		string tagName;
-		string nameSpace;
-		string text;
-		bool cdata;
-		ElementMap mapOfEle;
+public:
+	Element();
+	~Element();
+	typedef map<string,string> AttributeList;
+	typedef map<string,Element> ElementMap;
+	typedef vector<Element> ElementList;
+	void addElement(Element element);
+	void removeElement(Element element);
+	void updateElement(Element);
+	void addAttribute(string key,string value,bool validate = false);
+	void removeAttribute(string key);
+	AttributeList getAttributes();
+	string getAttribute(string);
+	ElementList getChildElements();
+	bool isNull();
+	string getTagName();
+	string getTagNameSpc();
+	string getNameSpc();
+	void setTagName(string tagName);
+	bool operator == (Element);
+	bool operator == (Element *);
+	bool getCdata() const;
+	void setCdata(bool);
+	string getText() const;
+	void setText(string);
+	Element getElementByName(string);
+	ElementList getElementsByName(string name);
+	string render();
+	string renderSerialization();
+	string renderChildren();
+	void validateNs();
+	string getNameSpcValue();
+private:
+	bool isValidNamespace(Element* ele, string nameSpace);
+	string getNmspc(Element* ele, string nameSpace);
+	Element* parent;
+	AttributeList attributes;
+	AttributeList namespaces;
+	AttributeList allnmspcs;
+	ElementList elements;
+	string tagName;
+	string nameSpace;
+	string text;
+	bool cdata;
+	ElementMap mapOfEle;
+	friend class Document;
 };
 #endif
 

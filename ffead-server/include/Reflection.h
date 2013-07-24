@@ -24,10 +24,21 @@
 #define REFLECTION_H_
 #include "CastUtil.h"
 #include "AfcUtil.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "RegexUtil.h"
+#include "iostream"
+#include "fstream"
+#include "sstream"
+#include "map"
+#include "vector"
+#include "set"
+#include "StringUtil.h"
+#include "ClassStructure.h"
+#include "TemplateEngine.h"
 
-class ClassStructure
+using namespace std;
+
+/*class ClassStructure
 {
 	bool prosetser;
 	strVec pub,pri,pro;
@@ -35,22 +46,58 @@ class ClassStructure
 	vector<string> namespaces;
 	friend class Reflection;
 public:
-	string appName;
-	void toString()
+	string appName, incfile;
+	string toString()
 	{
-		cout << classN << " " << baseClassN << " " << bcvisib << " " << nmSpc << endl;
+		string out;
+		string tab;
 		for (int var = 0; var < (int)namespaces.size(); ++var) {
-			cout << "using => " << namespaces.at(var) << endl;
+			out.append("using namespace " + namespaces.at(var) + "\n");
 		}
-		for (int var = 0; var < (int)pub.size(); ++var) {
-			cout << "public => " << pub.at(var) << endl;
+		vector<string> clnms = StringUtil::split(nmSpc, "::");
+		if(clnms.size()!=0)
+		{
+			for (int var = 0; var < (int)clnms.size(); ++var) {
+				out.append(tab + "namespace " + clnms.at(var) + " {\n");
+				tab += "\t";
+			}
+		}
+
+		out.append(tab + "class " + classN);
+		if(baseClassN!="")
+		{
+			out.append(" : " + bcvisib + " " + baseClassN + " {\n");
 		}
 		for (int var = 0; var < (int)pri.size(); ++var) {
-			cout << "private => "<< pri.at(var) << endl;
+			out.append(tab + "\t" + pri.at(var) + "\n");
+		}
+		if(pro.size()>0)
+		{
+			out.append(tab + "protected:\n");
 		}
 		for (int var = 0; var < (int)pro.size(); ++var) {
-			cout << "protected => "<< pro.at(var) << endl;
+			out.append(tab + "\t" + pro.at(var) + "\n");
 		}
+		if(pub.size()>0)
+		{
+			out.append(tab + "public:\n");
+		}
+		for (int var = 0; var < (int)pub.size(); ++var) {
+			out.append(tab + "\t" + pub.at(var) + "\n");
+		}
+
+		out.append(tab + "}\n");
+
+		if(clnms.size()!=0)
+		{
+			for (int var = 0; var < (int)clnms.size(); ++var) {
+				for (int va1r = 0; va1r < var; ++va1r) {
+					out.append("\t");
+				}
+				out.append("}\n");
+			}
+		}
+		return out;
 	}
 	string getTreatedClassName(bool flag)
 	{
@@ -67,35 +114,64 @@ public:
 	}
 	string getFullyQualifiedClassName()
 	{
+		if(nmSpc!="")
+		{
+			return nmSpc+"::"+classN;
+		}
 		return nmSpc+classN;
 	}
-};
+	vector<string> getNamespaces()
+	{
+		return namespaces;
+	}
+	string getNamespace()
+	{
+		return nmSpc;
+	}
+};*/
 
 class Reflection {
 	//bool generateClassInfoFromDD(string);
 	//bool generateClassInfo(string);
 	//void collectInfo(string,string);
 	map<string,bool> methsall;
-	map<string,bool> invalidcls;
+	static map<string,bool> validcls;
 	map<string,string> clspaths;
 	map<string,string> classNamespaces;
-	map<string,int> nmspcIds;
+	static map<string,int> nmspcIds;
+	static map<string,string> nmspcIdVals;
 	Logger logger;
 	void handleNamespace(string data, string namepsc, map<string, ClassStructure>& clsvec, map<string, vector<string> >& glbnmspcs);
 	int findless(int a, int b, int c);
 	void collectInfo(string data, string flag, ClassStructure& cls);
 public:
-	map<string, ClassStructure> getClassStructures(string className);
+	map<string, ClassStructure> getClassStructures(string className,string);
 	strVec list(string);
-	bool isValidClass(string claz)
+	static bool isValidClass(string claz, string app)
 	{
-		return invalidcls.find(claz)==invalidcls.end();
+		return validcls.find(app+claz)!=validcls.end();
 	}
 	string getClassPath(string claz)
 	{
 		if(clspaths.find(claz)!=clspaths.end())
 		{
 			return clspaths[claz];
+		}
+		return "";
+	}
+	static string getNameSpaceId(string nmsp, string app)
+	{
+		if(nmspcIds.find(app+nmsp)!=nmspcIds.end())
+		{
+			return "ns" + CastUtil::lexical_cast<string>(nmspcIds[app+nmsp]);
+		}
+		return "";
+	}
+	static string getNameSpaceIdValue(string nmspid)
+	{
+		if(nmspcIdVals.find(nmspid)!=nmspcIdVals.end())
+		{
+			return nmspcIdVals[nmspid];
 		}
 		return "";
 	}
@@ -118,13 +194,16 @@ public:
 		}
 		return classN;
 	}
-	string getTreatedFullyQualifiedClassName(string classN, vector<string> namespaces)
+	string getTreatedFullyQualifiedClassName(string classN, vector<string> namespaces, bool stripns = true)
 	{
 		for (int var = 0; var < (int)namespaces.size(); ++var) {
 			string tempfqnmclz = namespaces.at(var)+classN;
 			if(classNamespaces.find(tempfqnmclz)!=classNamespaces.end())
 			{
-				StringUtil::replaceAll(tempfqnmclz, "::", "");
+				if(stripns)
+				{
+					StringUtil::replaceAll(tempfqnmclz, "::", "");
+				}
 				return tempfqnmclz;
 			}
 		}
@@ -132,16 +211,22 @@ public:
 	}
 	Reflection();
 	virtual ~Reflection();
+	string getXSDDefinitions(map<string, ClassStructure> allclsmap, string fqcn, Reflection ref, string appname, string &trgnmspc,
+			set<string> &allnmspcs, string dfnmspc, string resp);
 	strVec getAfcObjectData(ClassStructure classStructure,bool object,vector<string>& privf, bool &isOpForSet);
 	//strVec getAfcObjectData(string,bool);
 	propMap getDbTableInfo(string);
-	string generateClassDefinitionsAll(strVec,string &,strVec);
-	string generateSerDefinitionAll(strVec all,string &includeRef, bool isBinary,string&,string&,string&,string&,strVec);
+	string generateClassDefinitionsAll(map<string, map<string, ClassStructure> > clsstrucMaps,string &includeRef,vector<string> apps);
+	string generateSerDefinitionAll(map<string, map<string, ClassStructure> > clsstrucMaps,string &includeRef, bool isBinary,string& objs, string& ajaxret, string& headers, string& typerefs,vector<string> apps);
 	string generateClassDefinition(map<string, ClassStructure> allclsmap,string &includesDefs,string &typedefs,string &classes,string &methods,string &opers,string app);
 	string generateSerDefinition(map<string, ClassStructure> allclsmap,string &includesDefs,string &typedefs,string &classes,string &methods,string app);
-	string generateClassDefinitions(string,string &,string &,string &,string &,string &,string app);
-	string generateSerDefinitions(string,string &,string &,string &,string &,bool,string&,string &,string&,string&,string app);
+	string generateClassDefinitions(map<string, ClassStructure> allclsmap,string &includesDefs,string &typedefs,string &classes,string &methods,string &opers,string app);
+	string generateSerDefinitions(map<string, ClassStructure> allclsmap,string &includesDefs,string &typedefs,string &classes,string &methods,bool isBinary,
+			string& objs, string &ajaxret, string& headers, string& typerefs,string app);
 	string generateSerDefinitionBinary(map<string, ClassStructure> allclsmap,string &includesDefs,string &typedefs,string &classes,string &methods,string app);
+	string generateAllSerDefinition(map<string, ClassStructure> allclsmap,string &includesDefs,string &typedefs,string &classes,string &methods,string app);
+	static string getTypeName(string type);
+	static bool isPrimitiveDataType(string& type);
 };
 
 #endif /* REFLECTION_H_ */

@@ -1,0 +1,6 @@
+<loggers>
+	<logger name="DEFAULT" mode="CONSOLE" level="INFO"/>
+	<logger name="JOB" mode="FILE" level="INFO">
+		<file>jobs.log</file>
+	</logger>
+</loggers>

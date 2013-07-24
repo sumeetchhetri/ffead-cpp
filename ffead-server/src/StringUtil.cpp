@@ -196,7 +196,7 @@ int StringUtil::countOccurrences(const string& input, const string& delimiter)
 {
 	vector<string> output;
 	splitInternal(output, input, delimiter);
-	return output.size();
+	return output.size()==0?0:output.size()-1;
 }
 
 vector<string> StringUtil::split(const string& input, vector<string> delimiters)

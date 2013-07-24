@@ -28,7 +28,7 @@
 #include "Document.h"
 #include <dlfcn.h>
 #include "Constants.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "ConfigurationData.h"
 #include "FormController.h"
 #include "JSONSerialize.h"

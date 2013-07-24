@@ -33,7 +33,7 @@ ServiceTask::ServiceTask(int fd,string serverRootDirectory,map<string,string> *p
 	this->configData = configData;
 	this->dlib = dlib;
 	this->ddlib = ddlib;
-	logger = Logger::getLogger("ServiceTask");
+	logger = LoggerFactory::getLogger("ServiceTask");
 }
 
 ServiceTask::~ServiceTask() {
@@ -100,7 +100,7 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 		Date date;
 		string id = CastUtil::lexical_cast<string>(Timer::getCurrentTime());
 		//int seconds = sessionTimeout;
-		date = date.addSeconds(sessionTimeout);
+		date.updateSeconds(sessionTimeout);
 		DateFormat dformat("ddd, dd-mmm-yyyy hh:mi:ss");
 		map<string,string>::iterator it;
 		for(it=vals.begin();it!=vals.end();it++)
@@ -227,15 +227,69 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 			return;
 		}
 
+		struct tm tim;
+		struct stat attrib;
+		stat(fname.c_str(), &attrib);
+		//as per suggestion at http://stackoverflow.com/questions/10446526/get-last-modified-time-of-file-in-linux
+		gmtime_r(&(attrib.st_mtime), &tim);
+
+		Date filemodifieddate(&tim);
+		DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
+		string lastmodDate = df.format(filemodifieddate);
+
+		bool isifmodsincvalid = false;
+
+		string ifmodsincehdr = req->getHeader(HttpRequest::IfModifiedSince);
+
+		bool forceLoadFile = false;
+		if(ifmodsincehdr!="")
+		{
+			Date* ifmodsince = NULL;
+			try {
+				ifmodsince = df.parse(ifmodsincehdr);
+				isifmodsincvalid = true;
+				logger << "Parsed date success" << endl;
+			} catch(...) {
+				isifmodsincvalid = false;
+			}
+
+			if(ifmodsince!=NULL)
+			{
+				logger << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << endl;
+				logger << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << endl;
+				logger << "Date Comparisons = " +CastUtil::lexical_cast<string>(*ifmodsince>=filemodifieddate)  << endl;
+
+				if(isifmodsincvalid && *ifmodsince>=filemodifieddate)
+				{
+					res->addHeaderValue(HttpResponse::LastModified, ifmodsincehdr);
+					logger << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << endl;
+					res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
+					return;
+				}
+				else if(isifmodsincvalid && *ifmodsince<filemodifieddate)
+				{
+					logger << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << endl;
+					forceLoadFile = true;
+				}
+			}
+		}
+
+		res->addHeaderValue(HttpResponse::LastModified, lastmodDate);
+
 		if(res->isHeaderValue(HttpResponse::ContentEncoding, "gzip"))
 		{
+			bool gengzipfile = true;
 			string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".gz";
-			ifstream gzipdfile(ofname.c_str());
-			if(gzipdfile.good())
+			if(!forceLoadFile)
 			{
-				gzipdfile.close();
+				ifstream gzipdfile(ofname.c_str());
+				if(gzipdfile.good())
+				{
+					gzipdfile.close();
+					gengzipfile = false;
+				}
 			}
-			else
+			if(gengzipfile)
 			{
 				CompressionUtil::gzipCompressFile((char*)fname.c_str(), false, (char*)ofname.c_str());
 			}
@@ -245,13 +299,18 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 		}
 		else if(res->isHeaderValue(HttpResponse::ContentEncoding, "deflate"))
 		{
+			bool genzlibfile = true;
 			string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".z";
-			ifstream gzipdfile(ofname.c_str());
-			if(gzipdfile.good())
+			if(!forceLoadFile)
 			{
-				gzipdfile.close();
+				ifstream gzipdfile(ofname.c_str());
+				if(gzipdfile.good())
+				{
+					gzipdfile.close();
+					genzlibfile = false;
+				}
 			}
-			else
+			if(genzlibfile)
 			{
 				CompressionUtil::zlibCompressFile((char*)fname.c_str(), false, (char*)ofname.c_str());
 			}
@@ -261,21 +320,6 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 		}
 
 		logger << ("Content request for " + url + " " + ext + " actual file " + fname) << endl;
-
-		struct tm* tim;
-		struct stat attrib;
-		stat(fname.c_str(), &attrib);
-		tim = gmtime(&(attrib.st_mtime));
-		Date fdate(tim);
-		DateFormat df("ddd, dd mmm yyyy hh:mm:ss GMT");
-		string lastmodDate = df.format(fdate.toGMT());
-		res->addHeaderValue(HttpResponse::LastModified, lastmodDate);
-
-		if(req->isHeaderValue(HttpRequest::IfModifiedSince, lastmodDate))
-		{
-			res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
-			return;
-		}
 
 		if(req->getHttpVers()<1.1 && rangeValuesLst.size()>0)
 		{
@@ -304,8 +348,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 					else
 						end += 1;
 					string cont = getFileContents(fname.c_str(), start, end);
-					MultipartContent conte;
-					conte.setContent(cont);
+					MultipartContent conte(cont);
 					conte.addHeaderValue(MultipartContent::ContentType, type);
 					conte.addHeaderValue(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<string>(totlen));
 					res->addContent(conte);
@@ -332,7 +375,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 			}
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeaderValue(HttpResponse::ContentType, configData.props[ext]);
-			res->setContent_str(all);
+			res->setContent(all);
 		}
 	}
 }
@@ -531,6 +574,24 @@ void ServiceTask::run()
 				logger << "Bad lexical cast exception while reading http Content-Length" << endl;
 			}
 
+			if(configData.cntMap[req->getCntxt_name()]!="true")
+			{
+				req->setCntxt_name("default");
+				req->setCntxt_root(webpath+"default");
+
+				string folder = webpath+req->getCntxt_name();
+				struct stat attrib;
+				int rv = stat(folder.c_str(), &attrib);
+				if(rv>=0)
+				{
+					req->setUrl(folder+req->getActUrl());
+				}
+				else
+				{
+					req->setUrl(webpath+"default"+req->getActUrl());
+				}
+			}
+
 			if(req->getHeader(HttpRequest::ContentType).find("application/x-www-form-urlencoded")!=string::npos)
 			{
 				string content;
@@ -644,19 +705,9 @@ void ServiceTask::run()
 						filei.open(tfilen.c_str(), ios::app | ios::binary);
 					}
 					string content;
-					int length = 0;
-					while(cntlen>0)
+					if(cntlen>0)
 					{
-						if(cntlen>102400)
-						{
-							length = 102400;
-						}
-						else
-						{
-							length = cntlen;
-						}
-						cntlen -= length;
-						if(!readData(isSSLEnabled, ssl, sslHandler, io, fd, length, content))
+						if(!readData(isSSLEnabled, ssl, sslHandler, io, fd, cntlen, content))
 						{
 							return;
 						}
@@ -728,7 +779,6 @@ void ServiceTask::run()
 			}
 			*/
 
-			//logger << req->toString() << endl;
 			req->updateContent();
 
 			if(req->getFile()=="")
@@ -749,23 +799,6 @@ void ServiceTask::run()
 				}
 			}
 
-			if(configData.cntMap[req->getCntxt_name()]!="true")
-			{
-				req->setCntxt_name("default");
-				req->setCntxt_root(webpath+"default");
-
-				string folder = webpath+req->getCntxt_name();
-				struct stat attrib;
-				int rv = stat(folder.c_str(), &attrib);
-				if(rv>=0)
-				{
-					req->setUrl(folder+req->getActUrl());
-				}
-				else
-				{
-					req->setUrl(webpath+"default"+req->getActUrl());
-				}
-			}
 			//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
 
 			if(configData.appMap[req->getCntxt_name()]!="false")
@@ -818,6 +851,8 @@ void ServiceTask::run()
 				}
 			}
 
+			ext = getFileExtension(req->getUrl());
+
 			if(!isContrl)
 			{
 				filterHandler.handleIn(req, res, configData, ext);
@@ -829,6 +864,8 @@ void ServiceTask::run()
 				}
 			}
 
+			ext = getFileExtension(req->getUrl());
+
 			if(!isContrl)
 			{
 				isContrl = authHandler.handle(configData, req, res, ext);
@@ -837,6 +874,8 @@ void ServiceTask::run()
 					logger << ("Request handled by AuthHandler") << endl;
 				}
 			}
+
+			ext = getFileExtension(req->getUrl());
 
 			string pthwofile = req->getCntxt_name()+req->getActUrl();
 			if(req->getCntxt_name()!="default" && configData.cntMap[req->getCntxt_name()]=="true")
@@ -851,6 +890,8 @@ void ServiceTask::run()
 					logger << ("Request handled by ControllerHandler") << endl;
 				}
 			}
+
+			ext = getFileExtension(req->getUrl());
 
 			/*After going through the controller the response might be blank, just set the HTTP version*/
 			res.update(req);
@@ -910,11 +951,11 @@ void ServiceTask::run()
 							res.addHeaderValue(HttpResponse::ContentEncoding, cntEnc);
 						}
 
-						if(res.getContent_str()=="")
+						if(res.getContent()=="")
 							updateContent(req, &res, configData, ext, techunkSiz);
 						else
 						{
-							content = res.getContent_str();
+							content = res.getContent();
 							if(content.length()==0 && res.getHeader(HttpResponse::ContentLength)!="")
 							{
 								res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -926,7 +967,7 @@ void ServiceTask::run()
 								{
 									res.addHeaderValue(HttpResponse::ContentType, configData.props[ext]);
 								}
-								res.setContent_str(content);
+								res.setContent(content);
 							}
 						}
 					}
@@ -941,9 +982,9 @@ void ServiceTask::run()
 				res.addHeaderValue(HttpResponse::ContentEncoding, cntEnc);
 			}
 
-			Date cdate;
-			DateFormat df("ddd, dd mmm yyyy hh:mm:ss GMT");
-			res.addHeaderValue(HttpResponse::Date, df.format(cdate.toGMT()));
+			Date cdate(true);
+			DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
+			res.addHeaderValue(HttpResponse::Date, df.format(cdate));
 
 			alldatlg += "--processed data";
 			string h1;
@@ -966,7 +1007,8 @@ void ServiceTask::run()
 			}
 
 			//Head should behave exactly as Get but there should be no entity body
-			if(req->getMethod()=="HEAD")
+			h1 = res.generateResponse(req->getMethod(), req);
+			/*if(req->getMethod()=="HEAD")
 			{
 				h1 = res.generateHeadResponse();
 			}
@@ -981,7 +1023,7 @@ void ServiceTask::run()
 			else
 			{
 				h1 = res.generateResponse();
-			}
+			}*/
 
 			if(res.isHeaderValue(HttpResponse::TransferEncoding, "chunked"))
 			{
@@ -1016,12 +1058,17 @@ void ServiceTask::run()
 			{
 				logger << "Closing connection..." << endl;
 				closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+				return;
 			}
 
 			//Logger::info("got new connection to process\n"+req->getFile()+" :: " + res.getStatusCode() + "\n"+req->getCntxt_name() + "\n"+req->getCntxt_root() + "\n"+req->getUrl());
 			delete req;
 			//logger << (alldatlg + "--sent data--DONE") << endl;
 			//sessionMap[sessId] = sess;
+		}
+		catch(const char* err)
+		{
+			logger << "Exception occurred while processing ServiceTask request - " << err << endl;
 		}
 		catch(...)
 		{
@@ -1067,7 +1114,7 @@ void ServiceTask::sendData(bool isSSLEnabled, ConfigurationData configData, SSL*
 			  return;
 		  }
 		}
-		if((r=BIO_write(io,h1.c_str(),h1.length()))<=0)
+		if((r=BIO_write(io, h1.c_str(),h1.length()))<=0)
 		{
 			  logger << "Send failed" << endl;
 			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
@@ -1085,11 +1132,14 @@ void ServiceTask::sendData(bool isSSLEnabled, ConfigurationData configData, SSL*
 	{
 		int size;
 		if ((size=send(fd,&h1[0] , h1.length(), 0)) == -1)
-			logger << "Socket send failed" << endl;
+		{
+			logger << "send failed" << flush;
+			closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+		}
 		else if(size==0)
 		{
 			closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			logger << "Socket closed for writing" << endl;
+			logger << "socket closed for writing" << flush;
 			return;
 		}
 
@@ -1184,9 +1234,12 @@ bool ServiceTask::readData(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, B
 	if(isSSLEnabled && cntlen>0)
 	{
 		int er=-1;
-		if(cntlen>0)
+		while(cntlen>0)
 		{
-			er = BIO_read(io,buf,cntlen);
+			int readLen = MAXBUFLENM;
+			if(cntlen<MAXBUFLENM)
+				readLen = cntlen;
+			er = BIO_read(io,buf,readLen);
 			switch(SSL_get_error(ssl,er))
 			{
 				case SSL_ERROR_NONE:
@@ -1204,6 +1257,7 @@ bool ServiceTask::readData(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, B
 					return false;
 				}
 			}
+			cntlen -= er;
 			content.append(buf, er);
 			memset(&buf[0], 0, sizeof(buf));
 		}
@@ -1211,9 +1265,14 @@ bool ServiceTask::readData(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, B
 	else if(cntlen>0)
 	{
 		int er=-1;
-		if(cntlen>0)
+		while(cntlen>0)
 		{
-			er = BIO_read(io,buf,cntlen);
+			logger << "Length is " + CastUtil::lexical_cast<string>(cntlen) << endl;
+			int readLen = MAXBUFLENM;
+			if(cntlen<MAXBUFLENM)
+				readLen = cntlen;
+			er = BIO_read(io,buf,readLen);
+			logger << "Done reading" << endl;
 			if(er==0)
 			{
 				closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
@@ -1222,6 +1281,7 @@ bool ServiceTask::readData(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, B
 			}
 			else if(er>0)
 			{
+				cntlen -= er;
 				content.append(buf, er);
 				memset(&buf[0], 0, sizeof(buf));
 			}
@@ -1353,11 +1413,11 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 				}
 				else
 				{
-					if(res.getContent_str()=="")
+					if(res.getContent()=="")
 						updateContent(req, &res, configData, ext, 8192);
 					else
 					{
-						content = res.getContent_str();
+						content = res.getContent();
 						if(content.length()==0)
 						{
 							res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -1369,7 +1429,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 							{
 								res.addHeaderValue(HttpResponse::ContentType, configData.props[ext]);
 							}
-							res.setContent_str(content);
+							res.setContent(content);
 						}
 					}
 				}
@@ -1378,9 +1438,9 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			filterHandler.handleOut(req, res, configData, ext);
 		}
 
-		Date cdate;
-		DateFormat df("ddd, dd mmm yyyy hh:mm:ss GMT");
-		res.addHeaderValue(HttpResponse::Date, df.format(cdate.toGMT()));
+		Date cdate(true);
+		DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
+		res.addHeaderValue(HttpResponse::Date, df.format(cdate));
 
 		alldatlg += "--processed data";
 		string h1;

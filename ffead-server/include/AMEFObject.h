@@ -32,28 +32,28 @@ class AMEFObject
 	/*The name of the Object if required can be used to represent object properties*/
 	string name;
 
-	/*The Length of the Object value*/
-	int length;
-
-	/*The Length of the Object value*/
-	int namedLength;
-
 	/*The Object value in string format*/
 	string value;
 
 	/*The properties of a complex object*/
 	vector<AMEFObject*> packets;
 
-	static string longTocharArray(long l,int ind);
-	static string intTocharArray(int l,int ind);
-	static char* intTocharArrayWI(int l);
-	static int charArrayToInt(string l);
-	static int charArrayToInt(string l,int off,int ind);
-	static long charArrayToLong(string l);
-	static long charArrayToLong(string l,int off,int ind);
-	static long charArrayToLong(string l,int ind);
-	static string intTocharArrayS(int l, int ind);
+	AMEFObject* addStringPacket(string stringa);
+	AMEFObject* addCharStringPacket(char* stringa);
+	AMEFObject* addBoolPacket(bool boole);
+	AMEFObject* addCharPacket(char chr);
+	AMEFObject* addULLPacket(unsigned long long lon);
+	AMEFObject* addFloatPacket(float doub);
+	AMEFObject* addDoublePacket(double doub);
+	AMEFObject* addLDoublePacket(long double doub);
 public:
+	static int charArrayToInt(string l,int off,int ind);
+	static string intTocharArray(int l, int ind);
+	static string ulonglongTocharArray(unsigned long long lon);
+	static unsigned long long charArrayToULongLong(string l);
+	static unsigned long long charArrayToULongLong(string l, int);
+	static string ulonglongTocharArrayWithLI(unsigned long long lon);
+
 	static const char NULL_STRING = 'a';
 
 	static const char NULL_NUMBER = 'g';
@@ -117,185 +117,54 @@ public:
 	/*The Object type*/
 	static const char OBJECT_TYPE = 'o';
 
-	bool isNull();
-
-	/**
-	 * @return Array of JDBObjectNew
-	 *
-	 */
-
-	static char getEqvNullType(char type);
-	void clear();
 	/*Create a new AMEF object which will initilaize the values*/
 	AMEFObject();
+
 	~AMEFObject();
 
+	bool isNull();
+
 	void addNullPacket(char type);
+
 	void addNullPacket(char type,string name);
-	/**
-	 * @param string
-	 * @param name
-	 * Add a string property to an Object
-	 */
-	void addPacket(const string& stringa,const string& name);
-	/**
-	 * @param string
-	 * Add a string property to an Object
-	 */
-	AMEFObject* addPacket(const string& stringa);
 
-	/**
-	 * @param string
-	 * @param name
-	 * Add a string property to an Object
-	 */
-	void addPacket(char* stringa,string name);
-	/**
-	 * @param string
-	 * Add a string property to an Object
-	 */
-	AMEFObject* addPacket(char* stringa);
+	void addPacket(string stringa, const string name = "");
 
-	/**
-	 * @param bool
-	 * @param name
-	 * Add a bool  property to an Object
-	 */
-	void addPacket(bool boole,string name);
-	/**
-	 * @param bool
-	 * Add a bool  property to an Object
-	 */
-	AMEFObject* addPacket(bool boole);
+	void addPacket(char* stringa, const string name = "");
 
-	void addPacket(char chr,string name);
-	/**
-	 * @param bool
-	 * Add a bool  property to an Object
-	 */
-	AMEFObject* addPacket(char chr);
+	void addPacket(bool boole, const string name = "");
 
-	AMEFObject* addPacket(char value, char type);
-	/**
-	 * @param lon
-	 * @param name
-	 * Add a long property to an Object
-	 */
-	void addPacket(long lon,string name);
-	/**
-	 * @param lon
-	 * Add a long property to an Object
-	 */
-	#ifdef IS_64_BIT
-		AMEFObject* addPacket(unsigned long long lon);
-		AMEFObject* addPacket(long lon);
-	#else
-		AMEFObject* addPacket(unsigned long long lon);
-		AMEFObject* addPacket(long lon);
-	#endif
-	/**
-	 * @param doub
-	 * @param name
-	 * Add a double property to an Object
-	 */
-	void addPacket(float doub,string name);
-	/**
-	 * @param doub
-	 * Add a double property to an Object
-	 */
-	AMEFObject* addPacket(float doub);
+	void addPacket(char chr, const string name = "");
 
+	void addPacket(unsigned char chr, const string name = "");
 
-	/**
-	 * @param doub
-	 * @param name
-	 * Add a double property to an Object
-	 */
-	void addPacket(double doub,string name);
-	/**
-	 * @param doub
-	 * Add a double property to an Object
-	 */
-	AMEFObject* addPacket(double doub);
+	void addPacket(short integer, const string name = "");
 
-	/**
-	 * @param integer
-	 * @param name
-	 * Add an integer property to an Object
-	 */
-	void addPacket(int integer,string name);
-	/**
-	 * @param integer
-	 * Add an integer property to an Object
-	 */
-	AMEFObject* addPacket(int integer);
+	void addPacket(unsigned short integer, const string name = "");
 
-	/**
-	 * @param date
-	 * @param name
-	 * Add a Date property to an Object
-	 */
-	/*void addPacket(Date date,string name)
-	{
-		AMEFObject* JDBObjectNew = addPacket(date);
-		JDBObjectNew->name = name;
-		namedLength += name.length();
-		JDBObjectNew->namedLength += name.length();
-	}*/
-	/**
-	 * @param date
-	 * Add a Date property to an Object
-	 */
-	/*AMEFObject* addPacket(Date date)
-	{
-		AMEFObject* JDBObjectNew = new AMEFObject();
-		JDBObjectNew->type = DATE_TYPE;
-		JDBObjectNew->name = "";
-		SimpleDateFormat format = new SimpleDateFormat("ddMMyyyy HHmmss");
-		JDBObjectNew->length = 15;
-		JDBObjectNew->value = format.format(date).getchars();
-		JDBObjectNew->namedLength += JDBObjectNew->value.length;
-		length += JDBObjectNew->value.length + 2;
-		namedLength += JDBObjectNew->value.length + 4;
-		JDBObjectNew->namedLength  = JDBObjectNew->value.length + 2;
-		JDBObjectNew->length = JDBObjectNew->value.length;
-		packets.push_back(JDBObjectNew);
-		return JDBObjectNew;
-	}*/
+	void addPacket(int integer, const string name = "");
 
-	/**
-	 * @param packet
-	 * Add a JDBObjectNew property to an Object
-	 */
+	void addPacket(unsigned int integer, const string name = "");
+
+	void addPacket(long lon, const string name = "");
+
+	void addPacket(unsigned long lon, const string name = "");
+
+	void addPacket(long long lon, const string name = "");
+
+	void addPacket(unsigned long long lon, const string name = "");
+
+	void addPacket(float doub, const string name = "");
+
+	void addPacket(double doub, const string name = "");
+
+	void addPacket(long double doub, const string name = "");
+
 	void addPacket(AMEFObject *packet);
 
-	/*void set(int i,AMEFObject jdbo)
-	{
-		packets.set(i,jdbo);
-	}*/
+	static char getEqvNullType(char type);
 
-	/**
-	 * @param packet
-	 * Add a JDBObjectNew property to an Object
-	 */
-	void addPacket(char* packet,char type);
-
-	/*void addPacket(Object obj)
-	{
-		if(obj instanceof Long)
-			addPacket(((Long)obj).longValue());
-		else if(obj instanceof Double)
-			addPacket(((Double)obj).doubleValue());
-		else if(obj instanceof string)
-			addPacket((string)obj);
-		else if(obj instanceof char)
-			addPacket(((char)obj).charValue());
-	}*/
-
-	int getlength();
-
-	int getLength();
-
+	void clear();
 
 	static bool isstring(char type);
 
@@ -327,106 +196,149 @@ public:
 
 	bool  isDate();
 
-	int getNamedLength(bool  ignoreName);
-
-	void setLength(int length);
-
 	char* getName();
+
 	string getNameStr();
+
 	void setName(const string& name);
-	/*void setName(char* name)
-	{
-		this->name = name;
-	}*/
+
 	vector<AMEFObject*> getPackets();
+
 	void setPackets(vector<AMEFObject*> packets);
 
 	char getType();
+
 	void setType(char type);
 
 	string getValue();
-	/*Object getTValue()
-	{
-		if(type=='s' || type=='t' || type=='d' || type=='h' || type=='y' || type=='u')
-			return value;
-		else if(getType()!='n' && getType()!='w' && getType()!='r'
-				&& getType()!='i')
-		{
-			return getIntValue();
-		}
-		else if(getType()!='f' && getType()!='x'
-					&& getType()!='e' && getType()!='l')
-		{
-			return getLongValue();
-		}
-		else if(getType()!='b')
-		{
-			return getBooleanValue();
-		}
-		else if(getType()!='c')
-		{
-			return (char)value[0];
-		}
-		return this;
-	}*/
+
 	string getValueStr();
+
 	void pushChar(char v);
+
 	void setValue(char* value);
+
 	void setValue(char *value,int len);
+
 	void setValue(const string& value);
 
-	/**
-	 * @return bool  value of this object if its type is boolean
-	 */
+	char getCharValue();
+
+	unsigned char getUCharValue();
+
 	bool getBoolValue();
 
-	/**
-	 * @return integer value of this object if its type is integer
-	 */
 	int getIntValue();
 
-	/**
-	 * @return integer value of this object if its type is integer
-	 */
+	unsigned int getUIntValue();
+
 	short getShortValue();
 
-	/**
-	 * @return double value of this object if its type is double
-	 */
+	unsigned short getUShortValue();
+
+	long getLongValue();
+
+	unsigned long getULongValue();
+
+	unsigned long long getNumericValue();
+
+	long long getLongLongValue();
+
+	unsigned long long getULongLongValue();
+
 	double getDoubleValue();
 
-	/**
-	 * @return double value of this object if its type is double
-	 */
+	long double getLongDoubleValue();
+
 	float getFloatValue();
-	/**
-	 * @return long value of this object if its type is long
-	 */
-	long getLongValue();
-	long getNumericValue();
-	/**
-	 * @return Date value of this object if its type is Date
-	 */
-	/*Date getDateValue()
-	{
-		if(type=='b')
-		{
-			try
-			{
-				return new SimpleDateFormat("ddMMyyyy HHmmss").parse(new string(value));
-			}
-			catch (ParseException e)
-			{
-				return new Date();
-			}
-		}
-		else
-			return new Date();
-	}*/
 
 	string tostring();
+
 	string displayObject(string tab);
+
 	void addStaticPacket(AMEFObject *obj);
+
+	/*template<class T> T getObjectValue()
+	{
+		T t;
+
+		string desiredType = CastUtil::getTypeName<T>();
+		if(!CastUtil::isPrimitiveDataType<T>())
+		{
+			throw "Invalid Object value requested";
+		}
+
+		if(desiredType=="short" || desiredType=="short int" || desiredType=="signed short" || desiredType=="signed short int"
+				|| desiredType=="unsigned short" || desiredType=="unsigned short int"
+				|| desiredType=="signed" || desiredType=="int" || desiredType=="signed int"
+				|| desiredType=="unsigned" || desiredType=="unsigned int" || desiredType=="long"
+				|| desiredType=="long int" || desiredType=="signed long" || desiredType=="signed long int"
+				|| desiredType=="unsigned long" || desiredType=="unsigned long int"
+				|| desiredType=="long long" || desiredType=="long long int" || desiredType=="signed long long"
+				|| desiredType=="signed long long int" || desiredType=="unsigned long long"
+				|| desiredType=="unsigned long long int")
+		{
+			if((type=='f' || type=='x' || type=='e' || type=='l'
+						|| type=='n' || type=='w' || type=='r' || type=='i') && value.length()<=8)
+			{
+			}
+			else
+			{
+				throw "Invalid Object value requested";
+			}
+			if(desiredType=="short")
+			{
+				short v = (short)charArrayToULongLong(value);
+				t = v;
+			}
+			else if(desiredType=="unsigned short")
+			{
+				unsigned short v = (unsigned short)charArrayToULongLong(value);
+				t = v;
+			}
+			else if(desiredType=="int")
+			{
+				int v = (int)charArrayToULongLong(value);
+				t = v;
+			}
+			else if(desiredType=="unsigned int")
+			{
+				unsigned int v = (unsigned int)charArrayToULongLong(value);
+				t = v;
+			}
+			else if(desiredType=="long")
+			{
+				long v = (long)charArrayToULongLong(value);
+				t = v;
+			}
+			else if(desiredType=="unsigned long")
+			{
+				unsigned long v = (unsigned long)charArrayToULongLong(value);
+				t = v;
+			}
+			else if(desiredType=="long long")
+			{
+				long long v = (long long)charArrayToULongLong(value);
+				t = v;
+			}
+			else if(desiredType=="unsigned long long")
+			{
+				unsigned long long v = (unsigned long long)charArrayToULongLong(value);
+				t = v;
+			}
+		}
+		else if(desiredType=="long double" || desiredType=="float" || desiredType=="double"
+				|| desiredType=="string" || desiredType=="std::string")
+		{
+			t = CastUtil::lexical_cast<T>(getValue());
+		}
+		else if(desiredType=="bool")
+		{
+			bool v = getBoolValue();
+			t = v;
+		}
+		return t;
+	}*/
 };
 
 

@@ -24,12 +24,12 @@
 
 FFEADContext::FFEADContext()
 {
-	logger = Logger::getLogger("FFEADContext");
+	logger = LoggerFactory::getLogger("FFEADContext");
 }
 
 FFEADContext::FFEADContext(string depFile, string appName)
 {
-	logger = Logger::getLogger("FFEADContext");
+	logger = LoggerFactory::getLogger("FFEADContext");
 	XmlParser parser("Parser");
 	Element root = parser.getDocument(depFile).getRootElement();
 	ElementList eles = root.getChildElements();

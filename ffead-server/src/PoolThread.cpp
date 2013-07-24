@@ -100,7 +100,7 @@ void* PoolThread::run(void *arg)
 }
 
 PoolThread::PoolThread(bool console) {
-	logger = Logger::getLogger("PoolThread");
+	logger = LoggerFactory::getLogger("PoolThread");
 	this->task = NULL;
 	this->idle = true;
 	this->console = console;
@@ -112,7 +112,7 @@ PoolThread::PoolThread(bool console) {
 }
 
 PoolThread::PoolThread() {
-	logger = Logger::getLogger("PoolThread");
+	logger = LoggerFactory::getLogger("PoolThread");
 	this->task = NULL;
 	this->idle = true;
 	this->console = false;

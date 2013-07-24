@@ -42,7 +42,7 @@ BeanContext RemoteComponentInt::getContext()
 
 
 BeanContext::BeanContext() {
-	logger = Logger::getLogger("BeanContext");
+	logger = LoggerFactory::getLogger("BeanContext");
 }
 
 BeanContext::BeanContext(string host,int port) {
@@ -98,7 +98,7 @@ void* BeanContext::invoke(string name,vector<Object> args,string bname,string re
 	void* retval = NULL;
 	if(client.isConnected())
 	{
-		Serialize ser;
+		XMLSerialize ser;
 		string argus;
 		if(args.size()>0)
 		{

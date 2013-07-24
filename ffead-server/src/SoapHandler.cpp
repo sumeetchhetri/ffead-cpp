@@ -33,7 +33,7 @@ SoapHandler::~SoapHandler() {
 
 void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, ConfigurationData configData)
 {
-	Logger logger = Logger::getLogger("SoapHandler");
+	Logger logger = LoggerFactory::getLogger("SoapHandler");
 	string wsUrl = "http://" + configData.ip_address + "/";
 	string acurl = req->getActUrl();
 	StringUtil::replaceFirst(acurl,"//","/");
@@ -72,9 +72,9 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, Config
 		void *mkr = dlsym(dlib, methodname.c_str());
 		if(mkr!=NULL)
 		{
-			typedef string (*WsPtr) (Element);
+			typedef string (*WsPtr) (Element*);
 			WsPtr f =  (WsPtr)mkr;
-			string outpt = f(method);
+			string outpt = f(&method);
 			typedef map<string,string> AttributeList;
 			AttributeList attl = soapbody.getAttributes();
 			AttributeList::iterator it;
@@ -198,5 +198,5 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, Config
 	}
 	res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	res.addHeaderValue(HttpResponse::ContentType, xmlcnttype);
-	res.setContent_str(env);
+	res.setContent(env);
 }

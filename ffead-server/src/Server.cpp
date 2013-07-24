@@ -38,7 +38,7 @@ Server::Server(string port,int waiting,Service serv)
 {
 	runn = true;
 	service = serv;
-	logger = Logger::getLogger("Server");
+	logger = LoggerFactory::getLogger("Server");
 	struct addrinfo hints, *servinfo, *p;
 	struct sigaction sa;
 	int yes=1;
@@ -154,7 +154,7 @@ Server::Server(string port,bool block,int waiting,Service serv,int mode)
 	started = false;
 	runn = true;
 
-	logger = Logger::getLogger("Server");
+	logger = LoggerFactory::getLogger("Server");
 
 	service = serv;
 	struct addrinfo hints, *servinfo, *p;

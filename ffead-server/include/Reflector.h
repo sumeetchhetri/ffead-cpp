@@ -39,6 +39,25 @@ public:
 	Reflector();
 	virtual ~Reflector();
 	ClassInfo getClassInfo(string,string appName = "default");
+	void* getMethodInstance(Method method,string appName = "default")
+	{
+		string libName = Constants::INTER_LIB_FILE;
+		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
+		if(dlib == NULL)
+		{
+			cerr << dlerror() << endl;
+			exit(-1);
+		}
+		string methodname = appName + "invokeReflectionCIMethodFor"+method.getMethodName();
+		void *mkr = dlsym(dlib, methodname.c_str());
+		typedef void* (*RfPtr) (void*,vals);
+		RfPtr f = (RfPtr)mkr;
+		if(f!=NULL)
+		{
+			return mkr;
+		}
+		return NULL;
+	}
 	template <class T> T invokeMethod(void* instance,Method method,vals values,string appName = "default")
 	{
 		T *obj;

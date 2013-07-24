@@ -27,7 +27,7 @@ Cibernate::~Cibernate() {
 	logger << "\nDestructed Cibernate" << flush;
 }
 Cibernate::Cibernate(string appName) {
-	logger = Logger::getLogger("Cibernate");
+	logger = LoggerFactory::getLogger("Cibernate");
 	this->init = false;
 	this->appName = appName;
 	if (this->appName != "" && CibernateConnPools::isInitialized()
@@ -701,7 +701,7 @@ int Cibernate::storeProperty(ClassInfo clas, void* t, int var, string fieldName)
 		if(temp.length()>10)
 			datf.setFormatspec("yyyy-mm-dd hh:mi:ss");
 		else
-			datf.setFormatspec("yyyy-mm-dd hh:mm:ss.nnnnnn");
+			datf.setFormatspec("yyyy-mm-dd hh:mi:ss.nnnnnn");
 		Date *date = datf.parse(temp);
 		col = date;
 		//logger << temp << "\n" << flush;
@@ -865,9 +865,9 @@ int Cibernate::getProperty(int dataType, int columnSize, map<string, void*>& col
 			if(dataType==SQL_DATE)
 				fmstr = "yyyy-mm-dd";
 			else if(dataType==SQL_TIME)
-				fmstr = "hh:mm:ss.nnnnnn";
+				fmstr = "hh:mi:ss.nnnnnn";
 			else if(dataType==SQL_TIMESTAMP)
-				fmstr = "yyyy-mm-dd hh:mm:ss.nnnnnn";
+				fmstr = "yyyy-mm-dd hh:mi:ss.nnnnnn";
 			DateFormat datf(fmstr);
 			Date *date = datf.parse(temp);
 			col = date;

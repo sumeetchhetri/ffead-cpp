@@ -37,6 +37,6 @@ void TestFormController::onSubmit(void* vform,HttpResponse* res)
 	TestForm* form = (TestForm*)vform;
 	res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-	res->setContent_str(form->getTxt()+form->getChe());
+	res->setContent(form->getTxt()+form->getChe());
 	cout << form->getTxt()+form->getChe() << "inside TestFormController" << endl;
 }

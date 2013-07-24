@@ -46,7 +46,7 @@ void DefaultIOFilter::doOutputFilter(HttpResponse *res)
 bool DefaultIOFilter::doHandle(HttpRequest *req, HttpResponse* res)
 {
 	bool continue_proc_request = false;
-	res->setContent_str("Listener handled your request as you visited a *.filter location");
+	res->setContent("Listener handled your request as you visited a *.filter location");
 	res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	return continue_proc_request;
 }

@@ -59,6 +59,7 @@ CHS: init $(OBJS) $(USER_OBJS)
 	mkdir ffead-server/rtdcf
 	mkdir ffead-server/web
 	mkdir ffead-server/tmp
+	mkdir ffead-server/logs
 	cp -Rf ../resources/* ffead-server/resources/
 	cp -Rf ../lib/* ffead-server/lib/
 	cp -Rf ../public/* ffead-server/public/

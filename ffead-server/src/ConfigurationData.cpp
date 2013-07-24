@@ -33,7 +33,7 @@ ConfigurationData::~ConfigurationData() {
 
 Security::Security()
 {
-	logger = Logger::getLogger("Security");
+	logger = LoggerFactory::getLogger("Security");
 }
 
 Security::~Security()

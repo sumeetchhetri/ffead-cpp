@@ -66,16 +66,36 @@ string HttpResponse::WWWAuthenticate			 = "WWW-Authenticate";
 HttpResponse::HttpResponse() {
 	httpVersion = "HTTP/1.1";
 	compressed = false;
-	logger = Logger::getLogger("HttpResponse");
+	logger = LoggerFactory::getLogger("HttpResponse");
 }
 
 HttpResponse::~HttpResponse() {
 }
 
+string HttpResponse::generateResponse(string httpMethod, HttpRequest *req)
+{
+	if(httpMethod=="HEAD")
+	{
+		return generateHeadResponse();
+	}
+	else if(httpMethod=="OPTIONS")
+	{
+		return generateOptionsResponse();
+	}
+	else if(httpMethod=="TRACE")
+	{
+		return generateTraceResponse(req);
+	}
+	else
+	{
+		return generateResponse();
+	}
+}
+
 string HttpResponse::generateResponse()
 {
 	string resp = generateHeadResponse();
-	resp += this->content_str;
+	resp += this->content;
 	return resp;
 }
 
@@ -88,21 +108,21 @@ string HttpResponse::generateHeadResponse()
 	string resp, boundary;
 	if(this->contentList.size()>0)
 	{
-		content_str = "";
+		content = "";
 		boundary = "FFEAD_SERVER_" + CastUtil::lexical_cast<string>(Timer::getCurrentTime());
 		for (int var = 0; var < (int)contentList.size(); ++var) {
-			content_str += "--" + boundary + "\r\n";
+			content += "--" + boundary + "\r\n";
 			map<string,string> headers = contentList.at(var).getHeaders();
 			map<string,string>::iterator it;
 			for(it=headers.begin();it!=headers.end();++it)
 			{
-				content_str += it->first + ": " + it->second + "\r\n";
+				content += it->first + ": " + it->second + "\r\n";
 			}
-			content_str += "\r\n";
-			content_str += contentList.at(var).getContent();
-			content_str += "\r\n";
+			content += "\r\n";
+			content += contentList.at(var).getContent();
+			content += "\r\n";
 		}
-		content_str += "--" + boundary + "--\r\n";
+		content += "--" + boundary + "--\r\n";
 	}
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
 	if(this->getHeader("Content-Type")=="" && this->contentList.size()>0)
@@ -117,22 +137,22 @@ string HttpResponse::generateHeadResponse()
 	{
 		if(isCEGzip)
 		{
-			if(this->content_str!="")
+			if(this->content!="")
 			{
-				this->content_str = CompressionUtil::gzipCompress(this->content_str, true);
+				this->content = CompressionUtil::gzipCompress(this->content, true);
 			}
 		}
 		if(isCEDef)
 		{
-			if(this->content_str!="")
+			if(this->content!="")
 			{
-				this->content_str = CompressionUtil::zlibCompress(this->content_str, true);
+				this->content = CompressionUtil::zlibCompress(this->content, true);
 			}
 		}
 	}
-	if(!isTE && this->content_str!="")
+	if(!isTE && this->content!="")
 	{
-		headers["Content-Length"] = CastUtil::lexical_cast<string>((int)content_str.length());
+		headers["Content-Length"] = CastUtil::lexical_cast<string>((int)content.length());
 	}
 	map<string,string>::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
@@ -193,17 +213,6 @@ string HttpResponse::generateTraceResponse(HttpRequest* req)
 }
 
 
-string HttpResponse::getContent_str() const
-{
-	return content_str;
-}
-
-void HttpResponse::setContent_str(string content_str)
-{
-	this->content_str = content_str;
-	//this->content_len = CastUtil::lexical_cast<string>(content_str.length());
-}
-
 string HttpResponse::getHttpVersion() const
 {
 	return httpVersion;
@@ -242,19 +251,12 @@ void HttpResponse::setStatusMsg(string statusMsg)
 
 string HttpResponse::getContent() const
 {
-	return content_str;
+	return content;
 }
-
-/*void HttpResponse::setContent(Cont content)
-{
-	this->content_str = content_str;
-	this->content_len = CastUtil::lexical_cast<string>(content_str.length());
-}*/
 
 void HttpResponse::setContent(string content)
 {
-	this->content_str = content_str;
-	//this->content_len = CastUtil::lexical_cast<string>(content_str.length());
+	this->content = content;
 }
 
 void HttpResponse::addCookie(string cookie)

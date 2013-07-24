@@ -25,7 +25,7 @@
 Logger ScriptHandler::logger;
 
 ScriptHandler::ScriptHandler() {
-	logger = Logger::getLogger("ScriptHandler");
+	logger = LoggerFactory::getLogger("ScriptHandler");
 }
 
 ScriptHandler::~ScriptHandler() {
@@ -240,7 +240,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
-			res.setContent_str(content);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
@@ -285,7 +285,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
-			res.setContent_str(content);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
@@ -320,7 +320,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
-			res.setContent_str(content);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
@@ -364,7 +364,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
-			res.setContent_str(content);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
@@ -399,7 +399,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
-			res.setContent_str(content);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
@@ -434,7 +434,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
-			res.setContent_str(content);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}

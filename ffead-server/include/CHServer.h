@@ -74,7 +74,7 @@
 #include "Reflector.h"
 #include "AppContext.h"
 
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "ThreadPool.h"
 #include "FileAuthController.h"
 #include <sys/stat.h>

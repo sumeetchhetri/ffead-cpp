@@ -25,7 +25,7 @@
 Logger SecurityHandler::logger;
 
 SecurityHandler::SecurityHandler() {
-	logger = Logger::getLogger("SecurityHandler");
+	logger = LoggerFactory::getLogger("SecurityHandler");
 }
 
 SecurityHandler::~SecurityHandler() {

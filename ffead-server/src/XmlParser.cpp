@@ -25,7 +25,7 @@
 
 XmlParser::XmlParser(string mode)
 {
-	logger = Logger::getLogger("XmlParser");
+	logger = LoggerFactory::getLogger("XmlParser");
 	this->mode = mode;
 }
 

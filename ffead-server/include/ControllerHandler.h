@@ -26,7 +26,7 @@
 #include "RestController.h"
 #include "AuthHandler.h"
 #include "Constants.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "XMLSerialize.h"
 #include "JSONSerialize.h"
 #include "ConfigurationData.h"

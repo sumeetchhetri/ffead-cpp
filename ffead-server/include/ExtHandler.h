@@ -31,7 +31,7 @@
 #include "View.h"
 #include <dlfcn.h>
 #include "Constants.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "map"
 #include "ConfigurationData.h"
 

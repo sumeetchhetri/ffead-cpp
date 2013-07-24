@@ -76,11 +76,14 @@ public:
     void addField(Field);
     fldMap getFields();
     fldVec getFieldVec();
+    void setSize(int);
+    int getSize();
 private:
 	void* instance;
 	string className;
 	string base;
 	string namespc;
+	int size;
 	/*string public_fields;
 	string private_fields;
 	string protected_fields;

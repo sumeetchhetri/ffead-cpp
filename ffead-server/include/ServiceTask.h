@@ -41,7 +41,7 @@
 #include "FviewHandler.h"
 #include "ExtHandler.h"
 #include "CORSHandler.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "Timer.h"
 #include <fcntl.h>
 #define MAXBUFLENM 32768

@@ -188,6 +188,34 @@ public:
 	template <typename T> static T lexical_cast(const double& val)
 	{
 		T t;
+		if(getClassName(t)=="std::string")
+		{
+			char ty[1056];
+			snprintf(ty, 1056, "%f", val);
+			return string(ty);
+		}
+		stringstream ss;
+		ss << val;
+		ss >> t;
+		if(ss)
+		{
+			return t;
+		}
+		else
+		{
+			string tn = getClassName(t);
+			throw ("Conversion exception - double to " + tn);
+		}
+	}
+	template <typename T> static T lexical_cast(const long double& val)
+	{
+		T t;
+		if(getClassName(t)=="std::string")
+		{
+			char ty[1056];
+			snprintf(ty, 1056, "%Lf", val);
+			return string(ty);
+		}
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -204,6 +232,12 @@ public:
 	template <typename T> static T lexical_cast(const float& val)
 	{
 		T t;
+		if(getClassName(t)=="std::string")
+		{
+			char ty[1056];
+			snprintf(ty, 1056, "%f", val);
+			return string(ty);
+		}
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -219,7 +253,7 @@ public:
 	}
 	template <typename T> static T lexical_cast(const bool& val)
 	{
-		T t;
+		/*T t;
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -231,7 +265,14 @@ public:
 		{
 			string tn = getClassName(t);
 			throw ("Conversion exception - bool to " + tn);
-		}
+		}*/
+		T t;
+		string tn = getClassName(t);
+		if(tn=="std::string")
+			t = val?"true":"false";
+		else
+			t = val?1:0;
+		return t;
 	}
 	template <typename T> static T lexical_cast(const string& val)
 	{
@@ -249,6 +290,17 @@ public:
 			if(*endptr)
 			{
 				throw "Conversion exception - string to double";
+			}
+			t = d;
+		}
+		else if(tn=="long double")
+		{
+			long double d = 0;
+			if(sscanf(val, "%Lf", &d)==1)
+				t = d;
+			else
+			{
+				throw "Conversion exception - string to long double";
 			}
 			t = d;
 		}
@@ -279,16 +331,6 @@ public:
 			if(*endptr)
 			{
 				throw "Conversion exception - string to long";
-			}
-			t = d;
-		}
-		else if(tn=="size_t")
-		{
-			size_t d = 1;
-			d = strtoul(val, &endptr, 10);
-			if(*endptr)
-			{
-				throw "Conversion exception - string to size_t";
 			}
 			t = d;
 		}
@@ -375,6 +417,79 @@ public:
 			throw "Generic Conversion exception";
 		}
 		return t;
+	}
+	template <typename T> static bool isPrimitiveDataType()
+	{
+		T t;
+		const char *mangled = typeid(t).name();
+		string type = demangle(mangled);
+		if(type[type.length()-1]=='*')
+			type = type.substr(0,type.length()-1);
+
+		StringUtil::trim(type);
+		if(type=="short" || type=="short int" || type=="signed short" || type=="signed short int"
+				|| type=="unsigned short" || type=="unsigned short int"
+				|| type=="signed" || type=="int" || type=="signed int"
+				|| type=="unsigned" || type=="unsigned int" || type=="long"
+				|| type=="long int" || type=="signed long" || type=="signed long int"
+				|| type=="unsigned long" || type=="unsigned long int"
+				|| type=="long long" || type=="long long int" || type=="signed long long"
+				|| type=="signed long long int" || type=="unsigned long long"
+				|| type=="unsigned long long int" || type=="long double" || type=="bool"
+				|| type=="float" || type=="double" || type=="string" || type=="std::string"
+				|| type=="char" || type=="signed char" || type=="unsigned char"
+				|| type=="wchar_t" ||  type=="char16_t" ||type=="char32_t")
+		{
+			return true;
+		}
+		return false;
+	}
+	template <typename T> static string getTypeName()
+	{
+		T t;
+		const char *mangled = typeid(t).name();
+		string type = demangle(mangled);
+		if(type[type.length()-1]=='*')
+			type = type.substr(0,type.length()-1);
+
+		StringUtil::trim(type);
+		if(type=="short" || type=="short int" || type=="signed short" || type=="signed short int")
+		{
+			return "short";
+		}
+		else if(type=="unsigned short" || type=="unsigned short int")
+		{
+			return "unsigned short";
+		}
+		else if(type=="signed" || type=="int" || type=="signed int")
+		{
+			return "int";
+		}
+		else if(type=="unsigned" || type=="unsigned int")
+		{
+			return "unsigned int";
+		}
+		else if(type=="long" || type=="long int" || type=="signed long" || type=="signed long int")
+		{
+			return "long";
+		}
+		else if(type=="unsigned long" || type=="unsigned long int")
+		{
+			return "unsigned long";
+		}
+		else if(type=="long long" || type=="long long int" || type=="signed long long" || type=="signed long long int")
+		{
+			return "long long";
+		}
+		else if(type=="unsigned long long" || type=="unsigned long long int")
+		{
+			return "unsigned long long";
+		}
+		else if(type=="long double")
+		{
+			return "long double";
+		}
+		return type;
 	}
 };
 

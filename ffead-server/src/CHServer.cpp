@@ -404,7 +404,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		string proclabel = "CHServer-";
 		proclabel.append(pidStr);
 
-		Logger plogger = Logger::getLogger(proclabel);
+		Logger plogger = LoggerFactory::getLogger(proclabel);
 
 		SSLHandler sSLHandler;
 		dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
@@ -689,15 +689,16 @@ int main(int argc, char* argv[])
 	string pubpath = serverRootDirectory + "public/";
 	string respath = serverRootDirectory + "resources/";
 	string webpath = serverRootDirectory + "web/";
+	string logpath = serverRootDirectory + "logs/";
 	string resourcePath = respath;
 
 	servd = serverRootDirectory;
-	string logp = respath+"/log.prop";
-	Logger::init(logp);
+	string logp = respath+"/logging.xml";
+	LoggerFactory::init(logp, serverRootDirectory);
 
 	serverCntrlFileNm = serverRootDirectory + "ffead.cntrl";
 
-	logger = Logger::getLogger("CHServer");
+	logger = LoggerFactory::getLogger("CHServer");
 
     PropFileReader pread;
     propMap srprps = pread.getProperties(respath+"server.prop");
@@ -885,6 +886,8 @@ int main(int argc, char* argv[])
 	} catch(...) {
 		logger << ("Method Invoker Services are disabled") << endl;
 	}
+
+	JobScheduler::start();
 
 	//printf("server: waiting for connections...\n");
 	logger.info("Server: waiting for connections on " + configurationData.ip_address);
@@ -1104,7 +1107,7 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
-					fcntl(descriptor, F_SETFL,O_SYNC);
+					fcntl(descriptor, F_SETFL, O_SYNC);
 					if(isThreadprq)
 					{
 						ServiceTask *task = new ServiceTask(descriptor,serverRootDirectory,&params,

@@ -31,7 +31,7 @@
 #include "CastUtil.h"
 #include "Component.h"
 #include "AfcUtil.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 using namespace std;
 typedef vector<string> Cont1;
 class ComponentGen {

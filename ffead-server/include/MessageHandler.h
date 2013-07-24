@@ -45,7 +45,7 @@
 #include "MQueue.h"
 #include "Server.h"
 #include "string"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "Constants.h"
 #include "AMEFResources.h"
 

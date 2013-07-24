@@ -1,4 +1,19 @@
 /*
+	Copyright 2010, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * MultipartContent.cpp
  *
  *  Created on: 28-Apr-2013
@@ -19,12 +34,19 @@ string MultipartContent::ContentMD5 = "Content-MD5";
 string MultipartContent::ContentType =	"Content-Type";
 
 MultipartContent::MultipartContent() {
-	logger = Logger::getLogger("MultipartContent");
+	logger = LoggerFactory::getLogger("MultipartContent");
 }
 
-MultipartContent::MultipartContent(vector<string> headers)
+MultipartContent::MultipartContent(string content)
 {
-	logger = Logger::getLogger("MultipartContent");
+	logger = LoggerFactory::getLogger("MultipartContent");
+	setContent(content);
+}
+
+MultipartContent::MultipartContent(vector<string> headers, string content)
+{
+	logger = LoggerFactory::getLogger("MultipartContent");
+	setContent(content);
 	if(headers.size()!=0)
 	{
 		for(unsigned int i=0;i<headers.size();i++)
@@ -74,6 +96,9 @@ MultipartContent::MultipartContent(vector<string> headers)
 				addHeaderValue(temp.at(0), temp.at(1));
 			}
 		}
+		if(this->headers.find(MultipartContent::ContentType)==this->headers.end()) {
+			addHeaderValue(MultipartContent::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+		}
 	}
 }
 
@@ -96,8 +121,9 @@ void MultipartContent::setFileName(string fileName) {
 	this->fileName = fileName;
 }
 
-map<string, string> MultipartContent::getHeaders() const {
-	return headers;
+map<string, string> MultipartContent::getHeaders() {
+	map<string, string> htemp = headers;
+	return htemp;
 }
 
 string MultipartContent::getTempFileName() const {
@@ -153,4 +179,14 @@ string MultipartContent::getHeader(string header)
 		return headers[header];
 	}
 	return "";
+}
+
+bool MultipartContent::isAFile()
+{
+	return tempFileName==""?false:true;
+}
+
+bool MultipartContent::isValid()
+{
+	return headers.size()>0 || content!="" || tempFileName!="" || name!="";
 }

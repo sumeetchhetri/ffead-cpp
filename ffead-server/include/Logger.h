@@ -25,19 +25,25 @@
 #include "PropFileReader.h"
 #include "DateFormat.h"
 #include "Mutex.h"
+
+class LoggerConfig
+{
+	string name, mode, level, file, logdirtype;
+	Mutex lock;
+	ostream* out;
+	DateFormat datFormat;
+	friend class LoggerFactory;
+	friend class Logger;
+};
+
 class Logger {
 public:
 	static string LEVEL_ERROR;
 	static string LEVEL_DEBUG;
 	static string LEVEL_INFO;
-	static Logger getLogger(string className);
 	void info(string);
 	void debug(string);
 	void error(string);
-	static void init();
-	static void destroy();
-	static void init(string file);
-	static void init(string level,string mode,string file);
 	Logger();
 	virtual ~Logger();
 	template <typename T>
@@ -48,42 +54,38 @@ public:
 	}
 	friend Logger& operator<< (Logger& logger, ostream& (*pf) (ostream&));
 private:
-	Logger(string);
-	Logger(string,string,string);
-	string className;
-	static DateFormat* datFormat;
-	static string* level;
-	static string* mode;
-	static string* filepath;
-	static ofstream* out;
-	static Mutex* _theLogmutex;
+	friend class LoggerFactory;
+	Logger(LoggerConfig *config, string className);
+	Logger(LoggerConfig *config, string className, string level);
+	string className, level;
+	LoggerConfig *config;
 	void write(string msg,string mod,bool newline);
 	template <typename T>
 	void write(T tmsg, string mod,bool newline)
 	{
 		Date dat;
-		string te = datFormat->format(dat);
+		string te = config->datFormat.format(dat);
 		string msg = "[" + te + "] ("+this->className + ") <"+mod+"> :";
-		if(*mode=="FILE")
+		//if(mode=="FILE")
 		{
-			_theLogmutex->lock();
-			*out << msg << tmsg;
+			config->lock.lock();
+			*config->out << msg << tmsg;
 			if(newline)
-				*out << endl;
+				*config->out << endl;
 			else
-				*out << flush;
-			_theLogmutex->unlock();
+				*config->out << flush;
+			config->lock.unlock();
 		}
-		else
+		/*else
 		{
-			_theLogmutex->lock();
-			cout << msg << tmsg;
+			config->lock.lock();
+			*config->out << msg << tmsg;
 			if(newline)
-				cout << endl;
+				*config->out << endl;
 			else
-				cout << flush;
-			_theLogmutex->unlock();
-		}
+				*config->out << flush;
+			config->lock.unlock();
+		}*/
 	}
 	void write(ostream& (*pf) (ostream&), string mod);
 };

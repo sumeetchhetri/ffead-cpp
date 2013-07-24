@@ -29,10 +29,11 @@
 #include "ApplicationUtil.h"
 #include "DCPGenerator.h"
 #include "ConfigurationData.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "TemplateGenerator.h"
 #include "FFEADContext.h"
 #include "WsUtil.h"
+#include "JobScheduler.h"
 
 class ConfigurationHandler {
 public:

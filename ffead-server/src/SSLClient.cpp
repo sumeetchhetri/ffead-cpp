@@ -23,7 +23,7 @@
 #include "SSLClient.h"
 
 SSLClient::SSLClient() {
-	logger = Logger::getLogger("SSLClient");
+	logger = LoggerFactory::getLogger("SSLClient");
 }
 
 SSLClient::~SSLClient() {

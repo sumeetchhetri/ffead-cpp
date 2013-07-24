@@ -35,7 +35,7 @@
 #include "CibernateConnPools.h"
 #include "DateFormat.h"
 #include "BinaryData.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "CibernateQuery.h"
 #include "RegexUtil.h"
 #include "DialectHelper.h"

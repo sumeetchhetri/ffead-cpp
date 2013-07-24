@@ -43,7 +43,7 @@
 /*Fix for Windows Cygwin*///#include <sys/epoll.h>
 #include <sys/resource.h>
 #include "Thread.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #define MAXEPOLLSIZES 10000
 #define BACKLOGM 500
 using namespace std;

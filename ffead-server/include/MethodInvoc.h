@@ -27,7 +27,7 @@
 #include "XmlParser.h"
 #include "Reflector.h"
 #include "fstream"
-#include "Serialize.h"
+#include "XMLSerialize.h"
 
 #define BACKLOGMI 500
 #define MAXBUFLEN 1024

@@ -23,7 +23,7 @@
 #include "SelEpolKqEvPrt.h"
 
 SelEpolKqEvPrt::SelEpolKqEvPrt() {
-	logger = Logger::getLogger("SelEpolKqEvPrt");
+	logger = LoggerFactory::getLogger("SelEpolKqEvPrt");
 }
 
 SelEpolKqEvPrt::~SelEpolKqEvPrt() {

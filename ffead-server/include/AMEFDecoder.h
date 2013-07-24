@@ -22,17 +22,10 @@
 class AMEFDecoder
 {
 	int position;
+	void decodeObjectName(string buffer, AMEFObject *jDBObject);
 public:
 	~AMEFDecoder();
 	AMEFDecoder();
-	static char* longTocharArray(long l,int ind);
-	static string longTocharArrayS(long l,int ind);
-	static char* intTocharArray(int l,int ind);
-	static char* intTocharArrayWI(int l);
-	static int charArrayToInt(string l,int off,int ind);
-	static long charArrayToLong(char* l,int off,int ind);
-	static long charArrayToLong(char* l,int ind);
-	static string intTocharArrayS(int l, int ind);
 	AMEFObject* decodeB(string buffer,bool considerLength,bool ignoreName);
 	AMEFObject* decodeSinglePacketB(string buffer,bool ignoreName);
 };

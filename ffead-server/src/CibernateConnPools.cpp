@@ -38,7 +38,7 @@ void CibernateConnPools::destroy()
 
 CibernateConnPools::CibernateConnPools()
 {
-	logger = Logger::getLogger("CibernateConnPools");
+	logger = LoggerFactory::getLogger("CibernateConnPools");
 }
 
 CibernateConnPools::~CibernateConnPools() {

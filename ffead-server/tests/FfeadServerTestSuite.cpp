@@ -174,11 +174,12 @@ int main()
 			string tot = client->getTextData("\r\n","Content-Length");
 			long long millis = timer.elapsedMilliSeconds();
 
-			HttpResponseParser parser(tot);
+			HttpResponse res;
+			HttpResponseParser parser(tot, res);
 
-			if(parser.getHeaderValue("Set-Cookie")!="")
+			if(res.getHeader("Set-Cookie")!="")
 			{
-				cookies = parser.getHeaderValue("Set-Cookie");
+				cookies = res.getHeader("Set-Cookie");
 				cookies = cookies.substr(0, cookies.find(";"));
 			}
 
@@ -190,11 +191,11 @@ int main()
 
 			string ss;
 			bool passedFlag = false, done = false;
-			if(parser.getHeaderValue("StatusCode")==responseCode)
+			if(res.getStatusCode()==responseCode)
 			{
 				if(respCntType!="")
 				{
-					if(parser.getHeaderValue("Content-Type")==respCntType)
+					if(res.getHeader("Content-Type")==respCntType)
 					{
 						ss.clear();
 						ss = "Test " + CastUtil::lexical_cast<string>(counter) + " " + request + " was Successfull, Response Time = " + CastUtil::lexical_cast<string>(millis) + "ms" + debugContentValue;
@@ -204,14 +205,14 @@ int main()
 					{
 						ss.clear();
 						ss = "Test " + CastUtil::lexical_cast<string>(counter) + " " + request + " Failed, Response Time = " + CastUtil::lexical_cast<string>(millis) + "ms"
-								+ ", Expected ContentType = " + respCntType + ", Actual ContentType = "  + parser.getHeaderValue("Content-Type");
+								+ ", Expected ContentType = " + respCntType + ", Actual ContentType = "  + res.getHeader("Content-Type");
 						passedFlag = false;
 					}
 					done = true;
 				}
 				if(!done)
 				{
-					string cntlen = parser.getHeaderValue("Content-Length");
+					string cntlen = res.getHeader("Content-Length");
 					if(file!="")
 					{
 						ifstream myfile (&file[0], ios::binary | ios::ate);
@@ -246,7 +247,7 @@ int main()
 			{
 				ss.clear();
 				ss = "Test " + CastUtil::lexical_cast<string>(counter) + " " + request + " Failed, Response Time = " + CastUtil::lexical_cast<string>(millis) + "ms" + ", Expected Status = " +
-						responseCode + ", Actual Status = "  + parser.getHeaderValue("StatusCode");
+						responseCode + ", Actual Status = "  + res.getStatusCode();
 				passedFlag = false;
 			}
 			cout << ss << endl;

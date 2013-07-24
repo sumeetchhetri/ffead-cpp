@@ -27,7 +27,7 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "Document.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "XmlParser.h"
 #include "ConfigurationData.h"
 

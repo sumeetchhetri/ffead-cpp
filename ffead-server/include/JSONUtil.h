@@ -33,6 +33,7 @@ class JSONUtil {
 	static void array(string& json, JSONElement* element);
 	static void object(string& json, JSONElement* element);
 	static void arrayOrObject(string& json, JSONElement* element);
+	static void readBalancedJSON(string& value, string& json, bool isarray, size_t obs);
 	static void readJSON(string& json,bool isarray,JSONElement *par);
 	static void validateSetValue(JSONElement* element, string value);
 public:

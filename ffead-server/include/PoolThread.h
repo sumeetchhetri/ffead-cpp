@@ -26,7 +26,7 @@
 #include "Thread.h"
 #include "Mutex.h"
 #include "TimeUnit.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "FutureTask.h"
 
 class PoolThread {

@@ -24,7 +24,7 @@
 #define AUTHHANDLER_H_
 #include "FileAuthController.h"
 #include "Reflector.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "ConfigurationData.h"
 
 #include <dlfcn.h>

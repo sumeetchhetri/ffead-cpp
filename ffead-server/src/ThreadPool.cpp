@@ -21,11 +21,20 @@
  */
 #include "ThreadPool.h"
 
-ThreadPool::ThreadPool()
+void ThreadPool::initPointers()
 {
+	m_mutex = NULL;
+	poller = NULL;
+	tpool = NULL;
+	wpool = NULL;
 	this->runFlag = false;
 	joinComplete = false;
-	logger = Logger::getLogger("ThreadPool");
+	logger = LoggerFactory::getLogger("ThreadPool");
+}
+
+ThreadPool::ThreadPool()
+{
+	initPointers();
 }
 
 void ThreadPool::init(int initThreads, int maxThreads,bool console)
@@ -38,6 +47,7 @@ void ThreadPool::init(int initThreads, int maxThreads,bool console)
 	this->maxThreads = maxThreads;
 	joinComplete = false;
 	prioritypooling = false;
+	initPointers();
 	initializeThreads();
 	start();
 }
@@ -45,7 +55,6 @@ void ThreadPool::init(int initThreads, int maxThreads,bool console)
 ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp) {
 	if (lowp > highp)
 		throw "Low Priority should be less than Highest Priority";
-	logger = Logger::getLogger("ThreadPool");
 	this->console = false;
 	this->initThreads = initThreads;
 	this->maxThreads = maxThreads;
@@ -54,13 +63,13 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp) {
 	this->runFlag = false;
 	joinComplete = false;
 	prioritypooling = true;
+	initPointers();
 	initializeThreads();
 }
 ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp,bool console) {
 	this->console = console;
 	if (lowp > highp)
 		throw "Low Priority should be less than Highest Priority";
-	logger = Logger::getLogger("ThreadPool");
 	this->initThreads = initThreads;
 	this->maxThreads = maxThreads;
 	this->lowp = lowp;
@@ -68,11 +77,11 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp,bool
 	this->runFlag = false;
 	joinComplete = false;
 	prioritypooling = true;
+	initPointers();
 	initializeThreads();
 }
 
 ThreadPool::ThreadPool(int initThreads, int maxThreads) {
-	logger = Logger::getLogger("ThreadPool");
 	this->lowp = -1;
 	this->highp = -1;
 	this->console = false;
@@ -81,11 +90,11 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads) {
 	this->runFlag = false;
 	joinComplete = false;
 	prioritypooling = false;
+	initPointers();
 	initializeThreads();
 }
 
 ThreadPool::ThreadPool(int initThreads, int maxThreads,bool console) {
-	logger = Logger::getLogger("ThreadPool");
 	this->console = console;
 	this->lowp = -1;
 	this->highp = -1;
@@ -94,6 +103,7 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads,bool console) {
 	this->runFlag = false;
 	joinComplete = false;
 	prioritypooling = false;
+	initPointers();
 	initializeThreads();
 }
 

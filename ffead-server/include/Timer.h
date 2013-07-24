@@ -24,7 +24,7 @@
 #define TIMER_H_
 #include <stdlib.h>
 #include <time.h>
-#include "Logger.h"
+#include "LoggerFactory.h"
 using namespace std;
 class Timer {
 	timespec st;

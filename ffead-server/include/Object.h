@@ -32,7 +32,7 @@
 #include "string"
 #include <sstream>
 #include <typeinfo>
-#include "Logger.h"
+#include "LoggerFactory.h"
 using namespace std;
 
 class Object {
@@ -55,7 +55,7 @@ private:
 public:
 	Object()
 	{
-		logger = Logger::getLogger("Object");
+		logger = LoggerFactory::getLogger("Object");
 	}
 	template <typename T> static string getClassName(T t)
 	{

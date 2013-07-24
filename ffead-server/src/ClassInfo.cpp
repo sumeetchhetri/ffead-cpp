@@ -106,6 +106,7 @@ Method ClassInfo::getMethod(string methodName,args argumentTypes)
 			key += temp;
 		}
 	}
+	cout << "Mrthodname = " << key << endl;
 	return meths[key];
 }
 void ClassInfo::addMethod(Method meth)
@@ -154,6 +155,16 @@ void ClassInfo::setNamespace(string namespc)
 string ClassInfo::getNamespace()
 {
 	return namespc;
+}
+
+void ClassInfo::setSize(int size)
+{
+	this->size = size;
+}
+
+int ClassInfo::getSize()
+{
+	return this->size;
 }
 
 /*

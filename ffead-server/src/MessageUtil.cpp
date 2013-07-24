@@ -44,7 +44,7 @@ void MessageUtil::setSubscriber(string subscriber)
 
 MessageUtil::MessageUtil(string file)
 {
-	logger = Logger::getLogger("MessageUtil");
+	logger = LoggerFactory::getLogger("MessageUtil");
 	XmlParser parser("Parser");
 	Document doc = parser.getDocument(file);
 	Element msgng = doc.getRootElement();

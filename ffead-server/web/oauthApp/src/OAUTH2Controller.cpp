@@ -47,13 +47,13 @@ HttpResponse OAUTH2Controller::service(HttpRequest req)
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent_str("Valid Login");
+				res.setContent("Valid Login");
 			}
 			else
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent_str("InValid Login");
+				res.setContent("InValid Login");
 			}
 			cout << "inside oauth controller non empty credentials" << endl;
 		}
@@ -61,7 +61,7 @@ HttpResponse OAUTH2Controller::service(HttpRequest req)
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Username and Password cannot be blank");
+			res.setContent("Username and Password cannot be blank");
 			cout << "inside oauth controller empty credentials" << endl;
 		}
 	}
@@ -90,13 +90,13 @@ HttpResponse OAUTH2Controller::service(HttpRequest req)
 			string conte = "<html><head><script type='text/javascript' src='public/json2.js'></script><script type='text/javascript' src='public/prototype.js'></script><script type='text/javascript' src='public/oauth2.js'></script></head>";
 			conte += "Resource: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+req.getRequestParams()["tusername"]+"\")'/></body>";
 			conte += "</html>";
-			res.setContent_str(conte);
+			res.setContent(conte);
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Invalid user");
+			res.setContent("Invalid user");
 		}
 	}
 	else if(req.getFile()=="getResource.auth2")
@@ -117,19 +117,16 @@ HttpResponse OAUTH2Controller::service(HttpRequest req)
 
 			int bytes = client.sendData(data);
 			string call=client.getData("\r\n","Content-Length: ");
-			HttpResponseParser parser(call);
+			HttpResponseParser parser(call, res);
 			client.closeConnection();
 
-			res.setStatusCode(parser.getHeaderValue("StatusCode"));
-			res.setStatusMsg(parser.getHeaderValue("StatusMsg"));
-			res.addHeaderValue(HttpResponse::ContentType, parser.getHeaderValue("Content-Type"));
-			res.setContent_str(parser.getContent());
+			res.setContent(parser.getContent());
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Access denied");
+			res.setContent("Access denied");
 		}
 	}
 	return res;

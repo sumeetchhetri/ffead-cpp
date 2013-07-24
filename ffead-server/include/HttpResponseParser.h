@@ -26,31 +26,23 @@
 #include "vector"
 #include "sstream"
 #include "StringUtil.h"
-
+#include "HttpResponse.h"
 #include "CastUtil.h"
 #include "stdio.h"
 #include "fstream"
 #include "iostream"
-#include "Logger.h"
+#include "LoggerFactory.h"
 
 using namespace std;
 class HttpResponseParser {
-	map<string,string> headers;
-	static string *headernames;
+	//TODO - Need to move this content to a MultipartContent List object in the
+	//HttpResponse class itself
 	string content;
 	Logger logger;
 public:
+	string getContent();
 	HttpResponseParser();
-	string getHeaderValue(string head)
-	{
-		return headers[head];
-	}
-	string getContent() const
-	{
-		return this->content;
-	}
-	HttpResponseParser(string,string);
-	HttpResponseParser(string vecstr);
+	HttpResponseParser(string vecstr, HttpResponse &response);
 	virtual ~HttpResponseParser();
 };
 

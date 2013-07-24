@@ -39,7 +39,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 	map<string, string> props = configData.props;
 	map<string, string> ajaxIntfMap = configData.ajaxIntfMap;
 
-	Logger logger = Logger::getLogger("ExtHandler");
+	Logger logger = LoggerFactory::getLogger("ExtHandler");
 	bool cntrlit = false;
 	string content, claz;
 	string acurl = req->getActUrl();
@@ -108,7 +108,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 					logger << "Completed method call" << endl;
 					res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 					res.addHeaderValue(HttpResponse::ContentType, "text/plain");
-					res.setContent_str(re);
+					res.setContent(re);
 				}
 				else
 				{
@@ -160,7 +160,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 				res.addHeaderValue(HttpResponse::ContentType, props[ext]);
-				res.setContent_str(content);
+				res.setContent(content);
 				//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 			}
 		}
@@ -193,7 +193,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res.addHeaderValue(HttpResponse::ContentType, props[ext]);
-			res.setContent_str(content);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
@@ -257,7 +257,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 			{
 				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 				res.addHeaderValue(HttpResponse::ContentType, props[ext]);
-				res.setContent_str(content);
+				res.setContent(content);
 				//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 			}
 		}

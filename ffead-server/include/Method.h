@@ -34,6 +34,7 @@ class Method {
 	string methodName;
 	string returnType;
 	args argumentTypes;
+	bool isstat;
 	void addField(Field);
 	/*args methCalls;
 	args methCalls;*/
@@ -50,6 +51,8 @@ public:
     void setArgumentTypes(args);
     int getArgNum() const;
     void clear();
+    bool isStatic();
+    void setIsStatic(bool isStatic);
     //string getKey();
 };
 

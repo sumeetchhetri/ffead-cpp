@@ -34,7 +34,7 @@ ConfigurationHandler::~ConfigurationHandler() {
 
 void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folders)
 {
-	Logger logger = Logger::getLogger("ConfigurationHandler");
+	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	FILE *pipe_fp;
 	string command;
 	if(chdir(cwd.c_str())!=0)
@@ -94,7 +94,7 @@ void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folde
 ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string pubpath,
 		string respath,bool isSSLEnabled,FFEADContext* ffeadContext,ConfigurationData& configurationData)
 {
-	Logger logger = Logger::getLogger("ConfigurationHandler");
+	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	configurationData.resourcePath = respath;
 	strVec all,afcd,appf,wspath,handoffVec;
 	string includeRef;
@@ -138,6 +138,9 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	}
 	string rundyncontent;
 	string ajrt;
+
+	map<string, map<string, ClassStructure> > clsstrucMaps;
+
 	for(unsigned int var=0;var<webdirs.size();var++)
 	{
 		//logger <<  webdirs.at(0) << flush;
@@ -175,7 +178,17 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 
 		libs += ("-l"+ name+" ");
 		ilibs += ("-I" + usrincludes+" ");
-		wspath.push_back(name);
+
+		vector<string> includes;
+		listi(usrincludes, ".h",true,includes);
+		map<string, ClassStructure> allclsmap;
+		for (unsigned int ind = 0; ind < includes.size(); ++ind)
+		{
+			map<string, ClassStructure> clsmap = ref.getClassStructures(includes.at(ind), name);
+			map<string, ClassStructure>::iterator it;
+			allclsmap.insert(clsmap.begin(), clsmap.end());
+		}
+		clsstrucMaps[name] = allclsmap;
 
 		logger << "started reading application.xml " << endl;
 		Element root = parser.getDocument(defpath+"config/application.xml").getRootElement();
@@ -425,6 +438,15 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 												invalidParam = true;
 												logger << "Rest: no type specified for param" << endl;
 											}
+											else if((param.type=="filestream" || param.type=="vector-of-filestream") && param.from!="multipart-content")
+											{
+
+											}
+											else if(param.type=="vector-of-filestream" && param.from=="multipart-content"
+													&& StringUtil::trimCopy(param.name)=="")
+											{
+
+											}
 											else if(param.from!="body" && StringUtil::trimCopy(param.name)=="")
 											{
 												invalidParam = true;
@@ -437,10 +459,11 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 												logger << ("Rest: skipping param " + param.type + ", from is body and method is " + restfunction.meth) << endl;
 											}
 											else if(!(param.type=="int" || param.type=="short" || param.type=="long" || param.type=="float" || param.type=="string"
-													|| param.type=="std::string" || param.type=="double" || param.type=="bool") && param.from!="body")
+													|| param.type=="std::string" || param.type=="double" || param.type=="bool"
+															|| param.type=="filestream" || param.type=="vector-of-filestream") && param.from!="body")
 											{
 												invalidParam = true;
-												logger << ("Rest: skipping param " + param.type + ", from is body input is complex type") << endl;
+												logger << ("Rest: skipping param " + param.type + ", from is not body and input is a complex type") << endl;
 											}
 											else if(param.from=="postparam" && (restfunction.meth=="GET" || restfunction.meth=="OPTIONS" || restfunction.meth=="TRACE"
 													|| restfunction.meth=="HEAD"))
@@ -448,8 +471,10 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 												invalidParam = true;
 												logger << ("Rest: skipping param " + param.type + ", from is postparam and method is " + restfunction.meth) << endl;
 											}
-											else
+											if(!invalidParam)
+											{
 												restfunction.params.push_back(param);
+											}
 										}
 									}
 									if(hasBodyParam && restfunction.params.size()>1)
@@ -647,6 +672,11 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							+ " , expose-headers => " + configurationData.corsConfig.exposedHeaders
 							+ " , max-age => " + CastUtil::lexical_cast<string>(configurationData.corsConfig.maxAge)) << endl;
 				}
+				else if(eles.at(apps).getTagName()=="job-procs")
+				{
+					ElementList cntrls = eles.at(apps).getChildElements();
+					JobScheduler::init(cntrls, name);
+				}
 			}
 		}
 		logger << "done reading application.xml " << endl;
@@ -721,8 +751,8 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		logger << "done reading fviews.xml " << endl;
 
 		string infjs;
-		ajrt += AfcUtil::generateJsInterfacessAll(vecvp,afcd,infjs,pathvec,ajintpthMap);
-		string objs = AfcUtil::generateJsObjectsAll(usrincludes);
+		ajrt += AfcUtil::generateJsInterfacessAll(allclsmap,infjs,ajintpthMap,afcd,ref);
+		string objs = AfcUtil::generateJsObjectsAll(allclsmap);
 		vecvp.clear();
 		afcd.clear();
 		pathvec.clear();
@@ -759,10 +789,10 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	}
 	logger << "done generating component code" <<endl;
 	logger << "started generating reflection/serialization code" <<endl;
-	string ret = ref.generateClassDefinitionsAll(all,includeRef,webdirs1);
+	string ret = ref.generateClassDefinitionsAll(clsstrucMaps,includeRef,webdirs1);
 	string objs, ajaxret, headers,typerefs;
 	AfcUtil::writeTofile(rtdcfpath+"ReflectorInterface.cpp",ret,true);
-	ret = ref.generateSerDefinitionAll(all,includeRef, true, objs, ajaxret, headers,typerefs,webdirs1);
+	ret = ref.generateSerDefinitionAll(clsstrucMaps,includeRef, true, objs, ajaxret, headers,typerefs,webdirs1);
 	AfcUtil::writeTofile(rtdcfpath+"SerializeInterface.cpp",ret,true);
 	logger << "done generating reflection/serialization code" <<endl;
 	cntxt["RUNTIME_LIBRARIES"] = libs;
@@ -804,7 +834,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	logger <<  "done generating application code" <<endl;
 	WsUtil wsu;
 	logger <<  "started generating web-service code" <<endl;
-	ret = wsu.generateAllWSDL(wspath,respath,configurationData.wsdlmap,configurationData.ip_address);
+	ret = wsu.generateAllWSDL(webdirs1,respath,configurationData.wsdlmap,configurationData.ip_address,ref,clsstrucMaps);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
 	logger <<  "done generating web-service code" <<endl;
 	cntxt.clear();
@@ -825,7 +855,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 
 void ConfigurationHandler::configureCibernate(string name, string configFile)
 {
-	Logger logger = Logger::getLogger("ConfigurationHandler");
+	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	XmlParser parser("Parser");
 	logger << ("started reading cibernate config file " + configFile) << endl;
 	Mapping* mapping = new Mapping;

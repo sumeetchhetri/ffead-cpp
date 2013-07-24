@@ -119,12 +119,12 @@ void HttpRequest::getOauthParams(string str)
 
 HttpRequest::HttpRequest()
 {
-	logger = Logger::getLogger("HttpRequest");
+	logger = LoggerFactory::getLogger("HttpRequest");
 }
 
 HttpRequest::HttpRequest(strVec vec,string path)
 {
-	logger = Logger::getLogger("HttpRequest");
+	logger = LoggerFactory::getLogger("HttpRequest");
 	if(vec.size()!=0)
 	{
 		this->setContent("");
@@ -867,7 +867,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 			{
 				string delb = "\r"+this->getContent_boundary();
 				string delend = "\r"+this->getContent_boundary()+"--";
-				size_t stb = this->getContent().find_first_of(delb)+delb.length()+1;
+				size_t stb = this->getContent().find(delb)+delb.length()+1;
 				//size_t enb = this->getContent().find_last_not_of(delend);
 				string param_conts = this->getContent().substr(stb);
 				StringUtil::replaceFirst(param_conts,delend,"");
@@ -1000,7 +1000,7 @@ void HttpRequest::updateContent()
 {
 	if(this->content!="")
 	{
-		updateFromContentStr();
+		updateFromContentStrTemp();
 	}
 	else
 	{
@@ -1057,9 +1057,9 @@ void HttpRequest::updateFromContentStr()
 	}
 	else if(this->getContent()!="" && this->getContent_boundary()!="")
 	{
-		string delb = "\r"+this->getContent_boundary();
-		string delend = "\r"+this->getContent_boundary()+"--";
-		size_t stb = this->getContent().find_first_of(delb)+delb.length()+1;
+		string delb = this->getContent_boundary();
+		string delend = this->getContent_boundary()+"--";
+		size_t stb = this->getContent().find(delb)+delb.length()+1;
 		//size_t enb = this->getContent().find_last_not_of(delend);
 		string param_conts = this->getContent().substr(stb);
 		StringUtil::replaceFirst(param_conts,delend,"");
@@ -1188,6 +1188,221 @@ void HttpRequest::updateFromContentStr()
 	}
 }
 
+//@TODO -- need to change this only for one pass of reading request body
+void HttpRequest::updateFromContentStrTemp()
+{
+	//logger << this->getContent() << flush;
+	if(this->getHeader(ContentType).find("application/x-www-form-urlencoded")!=string::npos)
+	{
+		strVec params;
+		string valu(this->getContent());
+		StringUtil::split(params,valu , ("&"));
+		map<string ,int> indices;
+		map<string,string>::iterator it;
+		for(unsigned j=0;j<params.size();j++)
+		{
+			strVec param;
+			StringUtil::split(param, params.at(j), ("="));
+			if(param.size()==2)
+			{
+				string att = param.at(0);
+				StringUtil::replaceFirst(att,"\r","");
+				StringUtil::replaceFirst(att,"\t","");
+				StringUtil::replaceFirst(att," ","");
+				string attN = CryptoHandler::urlDecode(att);
+				if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+				{
+					if(indices.find(attN)==indices.end())
+					{
+						indices[attN] = 0;
+					}
+					else
+					{
+						indices[attN] = indices[attN] + 1;
+					}
+					this->requestParams[attN.substr(0, attN.find("[")+1)
+							  + CastUtil::lexical_cast<string>(indices[attN])
+							  + "]"] = CryptoHandler::urlDecode(param.at(1));
+					logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+									  + CastUtil::lexical_cast<string>(indices[attN])
+									  + "]"
+									  + CryptoHandler::urlDecode(param.at(1))) << endl;
+				}
+				else
+				{
+					this->setRequestParam(attN,CryptoHandler::urlDecode(param.at(1)));
+				}
+				reqorderinf[reqorderinf.size()+1] = attN;
+			}
+		}
+	}
+	else if(this->getContent()!="" && this->getContent_boundary()!="")
+	{
+		string contemp = this->getContent();
+
+		bool bcontstarts = false, bhdrstarts = false, bcontends = false;
+		string filen;
+		ofstream ofile;
+		string temp;
+		string delb = this->getContent_boundary();
+		string delend = this->getContent_boundary()+"--";
+		string cont;
+		vector<string> hdrs;
+		map<string ,int> indices;
+		logger << delb << endl;
+		logger << delend << endl;
+		while(contemp!="")
+		{
+			if(contemp.find("\n")!=string::npos)
+			{
+				temp = contemp.substr(0, contemp.find("\n"));
+				contemp = contemp.substr(contemp.find("\n")+1);
+			}
+			else
+			{
+				temp = contemp;
+				contemp = "";
+			}
+			if(bcontends)
+			{
+				epilogue.append(temp+"\n");
+			}
+			else if(hdrs.size()>0 && temp.find(delb)==0)
+			{
+				bcontstarts = false;
+				bhdrstarts = true;
+				MultipartContent content(hdrs);
+				if(ofile.is_open())
+				{
+					content.setTempFileName(filen);
+					ofile.close();
+					ofile.clear();
+				}
+				else
+				{
+					content.setContent(cont);
+				}
+				if(content.getName()=="")
+				{
+					addContent(content);
+				}
+				else
+				{
+					string attN = CryptoHandler::urlDecode(content.getName());
+					if(attN.find("[")!=string::npos && attN.find("]")!=string::npos)
+					{
+						if(indices.find(attN)==indices.end())
+						{
+							indices[attN] = 0;
+						}
+						else
+						{
+							indices[attN] = indices[attN] + 1;
+						}
+						addMultipartFormContent(attN.substr(0, attN.find("[")+1)
+								  + CastUtil::lexical_cast<string>(indices[attN])
+								  + "]", content);
+						logger << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
+										  + CastUtil::lexical_cast<string>(indices[attN])
+										  + "]") << endl;
+					}
+					else if(indices.find(attN)!=indices.end())
+					{
+						if(requestParamsF.find(attN)!=requestParamsF.end())
+						{
+							MultipartContent content = requestParamsF[attN];
+							requestParamsF.erase(attN);
+
+							if(indices.find(attN)==indices.end())
+							{
+								indices[attN] = 0;
+							}
+							else
+							{
+								indices[attN] = indices[attN] + 1;
+							}
+							addMultipartFormContent(attN+"["
+									  + CastUtil::lexical_cast<string>(indices[attN])
+									  + "]", content);
+							logger << ("for existing ---- creating array from similar params" + attN+"["
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]") << endl;
+						}
+
+						if(indices.find(attN)==indices.end())
+						{
+							indices[attN] = 0;
+						}
+						else
+						{
+							indices[attN] = indices[attN] + 1;
+						}
+						addMultipartFormContent(attN+"["
+								  + CastUtil::lexical_cast<string>(indices[attN])
+								  + "]", content);
+						logger << ("creating array from similar params" + attN+"["
+										  + CastUtil::lexical_cast<string>(indices[attN])
+										  + "]") << endl;
+
+					}
+					else
+					{
+						addMultipartFormContent(attN, content);
+					}
+					reqorderinf[reqorderinf.size()+1] = attN;
+				}
+				hdrs.clear();
+				cont = "";
+			}
+			else if(temp.find(delend)==0)
+			{
+				bcontends = true;
+			}
+			else if(bhdrstarts)
+			{
+				if(temp=="\r")
+				{
+					bcontstarts = true;
+					bhdrstarts = false;
+				}
+				else
+				{
+					hdrs.push_back(temp);
+					if(StringUtil::toLowerCopy(temp).find("content-disposition: ")!=string::npos
+							&& StringUtil::toLowerCopy(temp).find("filename")!=string::npos)
+					{
+						filen = this->getContent_boundary();
+						StringUtil::replaceAll(filen, "-", "");
+						filen = this->getCntxt_root() + "/temp/"+ filen + CastUtil::lexical_cast<string>(Timer::getCurrentTime());
+						ofile.open(filen.c_str(), ios::binary | ios::app);
+					}
+				}
+			}
+			else if(hdrs.size()==0 && temp.find(delb)==0)
+			{
+				bhdrstarts = true;
+			}
+			else if(bcontstarts)
+			{
+				temp += "\n";
+				if(ofile.is_open())
+				{
+					ofile.write(temp.c_str(), temp.length());
+				}
+				else
+				{
+					cont.append(temp);
+				}
+			}
+			else
+			{
+				preamble.append(temp+"\n");
+			}
+		}
+		content = "";
+	}
+}
+
 void HttpRequest::updateFromContentFile()
 {
 	ifstream infile(this->content_tfile.c_str());
@@ -1199,26 +1414,29 @@ void HttpRequest::updateFromContentFile()
 			string filen;
 			ofstream ofile;
 			string temp;
-			string delb = "\r"+this->getContent_boundary();
-			string delend = "\r"+this->getContent_boundary()+"--";
+			string delb = this->getContent_boundary();
+			string delend = this->getContent_boundary()+"--";
 			string cont;
 			vector<string> hdrs;
 			map<string ,int> indices;
+			logger << delb << endl;
+			logger << delend << endl;
 			while(getline(infile, temp))
 			{
 				if(bcontends)
 				{
-					epilogue.append(temp);
+					epilogue.append(temp+"\n");
 				}
-				else if(temp.find_first_of(delb)!=string::npos)
+				else if(hdrs.size()>0 && temp.find(delb)==0)
 				{
-					bhdrstarts = true;
 					bcontstarts = false;
+					bhdrstarts = true;
 					MultipartContent content(hdrs);
 					if(ofile.is_open())
 					{
 						content.setTempFileName(filen);
 						ofile.close();
+						ofile.clear();
 					}
 					else
 					{
@@ -1248,6 +1466,45 @@ void HttpRequest::updateFromContentFile()
 											  + CastUtil::lexical_cast<string>(indices[attN])
 											  + "]") << endl;
 						}
+						else if(indices.find(attN)!=indices.end() || requestParamsF.find(attN)!=requestParamsF.end())
+						{
+							if(requestParamsF.find(attN)!=requestParamsF.end())
+							{
+								MultipartContent content = requestParamsF[attN];
+								requestParamsF.erase(attN);
+
+								if(indices.find(attN)==indices.end())
+								{
+									indices[attN] = 0;
+								}
+								else
+								{
+									indices[attN] = indices[attN] + 1;
+								}
+								addMultipartFormContent(attN+"["
+										  + CastUtil::lexical_cast<string>(indices[attN])
+										  + "]", content);
+								logger << ("for existing ---- creating array from similar params" + attN+"["
+												  + CastUtil::lexical_cast<string>(indices[attN])
+												  + "]") << endl;
+							}
+
+							if(indices.find(attN)==indices.end())
+							{
+								indices[attN] = 0;
+							}
+							else
+							{
+								indices[attN] = indices[attN] + 1;
+							}
+							addMultipartFormContent(attN+"["
+									  + CastUtil::lexical_cast<string>(indices[attN])
+									  + "]", content);
+							logger << ("creating array from similar params" + attN+"["
+											  + CastUtil::lexical_cast<string>(indices[attN])
+											  + "]") << endl;
+
+						}
 						else
 						{
 							addMultipartFormContent(attN, content);
@@ -1257,7 +1514,7 @@ void HttpRequest::updateFromContentFile()
 					hdrs.clear();
 					cont = "";
 				}
-				else if(temp.find_first_of(delend)!=string::npos)
+				else if(temp.find(delend)==0)
 				{
 					bcontends = true;
 				}
@@ -1271,16 +1528,23 @@ void HttpRequest::updateFromContentFile()
 					else
 					{
 						hdrs.push_back(temp);
-						if(StringUtil::toLowerCopy(temp).find("Content-Disposition: ")!=string::npos
+						if(StringUtil::toLowerCopy(temp).find("content-disposition: ")!=string::npos
 								&& StringUtil::toLowerCopy(temp).find("filename")!=string::npos)
 						{
-							filen = this->getCntxt_root() + "/temp/"+ this->getContent_boundary() + CastUtil::lexical_cast<string>(Timer::getCurrentTime());
+							filen = this->getContent_boundary();
+							StringUtil::replaceAll(filen, "-", "");
+							filen = this->getCntxt_root() + "/temp/"+ filen + CastUtil::lexical_cast<string>(Timer::getCurrentTime());
 							ofile.open(filen.c_str(), ios::binary | ios::app);
 						}
 					}
 				}
+				else if(hdrs.size()==0 && temp.find(delb)==0)
+				{
+					bhdrstarts = true;
+				}
 				else if(bcontstarts)
 				{
+					temp += "\n";
 					if(ofile.is_open())
 					{
 						ofile.write(temp.c_str(), temp.length());
@@ -1292,7 +1556,7 @@ void HttpRequest::updateFromContentFile()
 				}
 				else
 				{
-					preamble.append(temp);
+					preamble.append(temp+"\n");
 				}
 			}
 		}
@@ -1394,7 +1658,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 		}
 		else
 		{
-			size_t rn = value.find_first_of("\r\n");
+			size_t rn = value.find("\r\n");
 			string h = CastUtil::lexical_cast<string>((int)rn);
 
 			string boundary = this->getContent_boundary();
@@ -1405,7 +1669,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 			string retval;
 			string delb = boundary+"\r\n";
 			string delend = boundary+"--\r\n";
-			size_t stb = value.find_first_of(delb)+delb.length();
+			size_t stb = value.find(delb)+delb.length();
 			size_t enb = value.find_last_not_of(delend);
 			h = CastUtil::lexical_cast<string>((int)stb)+" "+CastUtil::lexical_cast<string>((int)enb);
 
@@ -1599,6 +1863,7 @@ string HttpRequest::toString()
 	ret += "\nDefault Locale: "+this->getDefaultLocale();
 	ret += "\nContent Boundary: "+this->getContent_boundary();
 	string vals;
+	logger << "logging request data " << endl;
 	if(this->requestParams.size()>0)
 	{
 		RMap::iterator iter;
@@ -1607,14 +1872,21 @@ string HttpRequest::toString()
 			vals+= ("\nKey: "+iter->first + " Value: "+iter->second);
 		}
 	}
+	logger << "logging multipart data " << endl;
 	if(this->requestParamsF.size()>0)
 	{
 		FMap::iterator iter;
-		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();iter++)
+		for (iter=this->requestParamsF.begin();iter!=this->requestParamsF.end();++iter)
 		{
 			MultipartContent dat = iter->second;
-			vals+= ("\nKey: "+iter->first + " Type: "+dat.getHeader("Content-Type") + " FileName: "+dat.getFileName());
-			vals+= ("\nValue: "+dat.getContent());
+			vals+= ("\nKey: "+iter->first);
+			logger << dat.getHeaders().size() << endl;
+			for(it=dat.headers.begin();it!=dat.headers.end();++it)
+			{
+				vals += "\n\t" + it->first + ": " + it->second;
+			}
+			vals+= ("\n\tFileName: "+dat.fileName);
+			vals+= ("\n\tTempFileName: "+dat.tempFileName);
 		}
 	}
 	ret += "\nRequest Parameters "+vals;//CastUtil::lexical_cast<string>(this->getRequestParams().size());
@@ -1639,11 +1911,6 @@ void HttpRequest::setMethod(string method)
 HttpSession* HttpRequest::getSession()
 {
 	return &(this->session);
-}
-
-void HttpRequest::setSession(HttpSession session)
-{
-	this->session = session;
 }
 
 void HttpRequest::setUrl(string url)
@@ -1706,6 +1973,16 @@ string HttpRequest::getRequestParam(string key)
 	else
 		return "";
 }
+
+MultipartContent HttpRequest::getMultipartContent(string key)
+{
+	MultipartContent cont;
+	if(this->requestParamsF.find(key)!=this->requestParamsF.end())
+		return this->requestParamsF[key];
+	else
+		return cont;
+}
+
 
 string HttpRequest::getRequestParamType(string key)
 {
@@ -2641,4 +2918,34 @@ string HttpRequest::getParamValue(string key)
 HTTPResponseStatus HttpRequest::getRequestParseStatus() const
 {
 	return status;
+}
+
+void HttpRequest::setSessionID(string sessionID)
+{
+	this->sessionID = sessionID;
+}
+
+string HttpRequest::getSessionID() const
+{
+	return sessionID;
+}
+
+vector<MultipartContent> HttpRequest::getMultiPartFileList(string name)
+{
+	vector<MultipartContent> filevec;
+	FMap::iterator it;
+	if(name!="")
+	{
+		for (it=this->requestParamsF.begin();it!=this->requestParamsF.end();++it) {
+			if(it->second.getTempFileName()!="" && (it->second.getName()==name || it->second.getName().find(name+"[")==0))
+			{
+				filevec.push_back(it->second);
+			}
+		}
+	}
+	else
+	{
+		filevec.insert(filevec.end(), contentList.begin(), contentList.end());
+	}
+	return filevec;
 }

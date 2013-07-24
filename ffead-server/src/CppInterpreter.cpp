@@ -23,7 +23,7 @@
 #include "CppInterpreter.h"
 
 CppInterpreter::CppInterpreter() {
-	logger = Logger::getLogger("CppInterpreter");
+	logger = LoggerFactory::getLogger("CppInterpreter");
 }
 
 CppInterpreter::~CppInterpreter() {

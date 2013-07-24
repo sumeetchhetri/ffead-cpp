@@ -23,7 +23,7 @@
 #include "SSLHandler.h"
 
 SSLHandler::SSLHandler() {
-	logger = Logger::getLogger("SSLHandler");
+	logger = LoggerFactory::getLogger("SSLHandler");
 }
 
 SSLHandler::~SSLHandler() {

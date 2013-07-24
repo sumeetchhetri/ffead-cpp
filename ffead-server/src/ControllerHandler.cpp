@@ -40,7 +40,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 	map<string, string> mapMap = configData.mapMap;
 	map<string, string> urlMap = configData.urlMap;
 
-	Logger logger = Logger::getLogger("ControllerHandler");
+	Logger logger = LoggerFactory::getLogger("ControllerHandler");
 	bool isContrl = false;
 	if((urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!=""))
 	{
@@ -183,9 +183,9 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 					res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 					//res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 					/*if(prsiz==valss.size())
-						res.setContent_str("Invalid number of arguments");
+						res.setContent("Invalid number of arguments");
 					else
-						res.setContent_str("Invalid HTTPMethod used");*/
+						res.setContent("Invalid HTTPMethod used");*/
 					//logger << "Rest Controller Param/Method Error" << endl;
 				}
 			}
@@ -210,6 +210,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 			args argus;
 			vals valus;
 			bool invValue = false;
+			vector<ifstream*> allStreams;
+			map<string, vector<ifstream*>* > mpvecstreams;
 			for (int var = 0; var < prsiz; var++)
 			{
 				try
@@ -219,7 +221,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 
 					if(icont=="")
 						icont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
-					else if(icont!=req->getHeader(HttpRequest::ContentType))
+					else if(icont!=req->getHeader(HttpRequest::ContentType) && req->getHeader(HttpRequest::ContentType).find(icont)!=0)
 					{
 						res.setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
 						return true;
@@ -240,8 +242,46 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 						pmvalue = req->getRequestParam(rft.params.at(var).name);
 					else if(rft.params.at(var).from=="header")
 						pmvalue = req->getHeader(rft.params.at(var).name);
+					else if(rft.params.at(var).from=="multipart-content")
+					{
+						MultipartContent mcont = req->getMultipartContent(rft.params.at(var).name);
+						if(mcont.isValid())
+						{
+							if(mcont.isAFile())
+							{
+								if(rft.params.at(var).type=="filestream")
+								{
+									pmvalue = rft.params.at(var).name;
+								}
+								else if(rft.params.at(var).type!="vector-of-filestream")
+								{
+									logger << "File can only be mapped to ifstream" << endl;
+									res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+									return true;
+								}
+							}
+							else
+							{
+								pmvalue = mcont.getContent();
+							}
+						}
+						else if(rft.params.at(var).type!="vector-of-filestream")
+						{
+							logger << "Invalid mapping specified in config, no multipart content found with name " + rft.params.at(var).name << endl;
+							res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+							return true;
+						}
+					}
 					else
+					{
+						if(prsiz>1)
+						{
+							logger << "Request Body cannot be mapped to more than one argument..." << endl;
+							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+							return true;
+						}
 						pmvalue = req->getContent();
+					}
 
 					logger << ("Restcontroller parameter type/value = "  + rft.params.at(var).type + "/" + pmvalue) << endl;
 					logger << ("Restcontroller content types input/output = " + icont + "/" + ocont) << endl;
@@ -288,23 +328,99 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 						string* sval = new string(pmvalue);
 						valus.push_back(sval);
 					}
-					else if(rft.params.at(var).type.find("vector&lt;")==0)
+					else if(rft.params.at(var).type=="filestream")
+					{
+						argus.push_back("ifstream*");
+						MultipartContent mcont = req->getMultipartContent(pmvalue);
+						if(mcont.isValid() && mcont.isAFile())
+						{
+							ifstream* ifs = new ifstream;
+							ifs->open(mcont.getTempFileName().c_str());
+							valus.push_back(ifs);
+							allStreams.push_back(ifs);
+						}
+					}
+					else if(rft.params.at(var).type=="vector-of-filestream")
+					{
+						vector<ifstream*> *vifs = NULL;
+						if(mpvecstreams.find(rft.params.at(var).name)==mpvecstreams.end())
+						{
+							argus.push_back("vector<ifstream*>");
+							vifs = new vector<ifstream*>;
+							vector<MultipartContent> mcontvec = req->getMultiPartFileList(rft.params.at(var).name);
+							for(int mci=0;mci<(int)mcontvec.size();mci++) {
+								MultipartContent mcont = mcontvec.at(mci);
+								if(mcont.isValid() && mcont.isAFile())
+								{
+									ifstream* ifs = new ifstream;
+									ifs->open(mcont.getTempFileName().c_str());
+									vifs->push_back(ifs);
+									allStreams.push_back(ifs);
+								}
+							}
+							mpvecstreams[rft.params.at(var).name] = vifs;
+						}
+						else
+						{
+							vifs = mpvecstreams[rft.params.at(var).name];
+						}
+						valus.push_back(vifs);
+					}
+					else if(rft.params.at(var).type.find("vector-of-")==0 || rft.params.at(var).type.find("list-of-")==0
+							|| rft.params.at(var).type.find("deque-of-")==0 || rft.params.at(var).type.find("set-of-")==0
+							|| rft.params.at(var).type.find("multiset-of-")==0 || rft.params.at(var).type.find("queue-of-")==0)
 					{
 						string stlcnt = rft.params.at(var).type;
-						StringUtil::replaceFirst(stlcnt,"vector&lt;","");
-						StringUtil::replaceFirst(stlcnt,"&gt;","");
+						string stltype;
+						string typp;
+						if(rft.params.at(var).type.find("vector-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"vector-of-","");
+							stltype = "std::vector";
+							typp = "vector<" + stlcnt + ">";
+						}
+						else if(rft.params.at(var).type.find("list-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"list-of-","");
+							stltype = "std::list";
+							typp = "list<" + stlcnt + ">";
+						}
+						else if(rft.params.at(var).type.find("deque-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"deque-of-","");
+							stltype = "std::deque";
+							typp = "deque<" + stlcnt + ">";
+						}
+						else if(rft.params.at(var).type.find("set-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"set-of-","");
+							stltype = "std::set";
+							typp = "set<" + stlcnt + ">";
+						}
+						else if(rft.params.at(var).type.find("multiset-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"multiset-of-","");
+							stltype = "std::multiset";
+							typp = "multiset<" + stlcnt + ">";
+						}
+						else if(rft.params.at(var).type.find("queue-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"queue-of-","");
+							stltype = "std::queue";
+							typp = "queue<" + stlcnt + ">";
+						}
 						StringUtil::replaceFirst(stlcnt," ","");
-						logger << ("Restcontroller param body holds vector of type "  + stlcnt) << endl;
-						string typp = "vector<" + stlcnt + ">";
+						logger << ("Restcontroller param body holds "+stltype+" of type "  + stlcnt) << endl;
+
 						argus.push_back(typp);
 						void* voidPvect = NULL;
 						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 						{
-							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+">",req->getCntxt_name());
+							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, stltype+"<"+stlcnt+">",req->getCntxt_name());
 						}
 						else
 						{
-							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+",",req->getCntxt_name());
+							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, stltype+"<"+stlcnt+",",req->getCntxt_name());
 						}
 						if(voidPvect==NULL)
 						{
@@ -352,6 +468,21 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 				ref.invokeMethodUnknownReturn(_temp,meth,valus);
 				logger << "Successfully called restcontroller" << endl;
 				//return;
+
+				for(int i=0;i<(int)allStreams.size();++i) {
+					if(allStreams.at(i)!=NULL) {
+						if(allStreams.at(i)->is_open()) {
+							allStreams.at(i)->close();
+							allStreams.at(i)->clear();
+						}
+						delete allStreams.at(i);
+					}
+				}
+
+				map<string, vector<ifstream*>* >::iterator it;
+				for(it=mpvecstreams.begin();it!=mpvecstreams.end();++it) {
+					delete it->second;
+				}
 			}
 			else
 			{

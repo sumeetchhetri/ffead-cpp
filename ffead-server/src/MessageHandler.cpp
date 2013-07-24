@@ -25,7 +25,7 @@
 using namespace std;
 MessageHandler::MessageHandler(string path)
 {
-	logger = Logger::getLogger("MessageHandler");
+	logger = LoggerFactory::getLogger("MessageHandler");
 	this->path = path;
 }
 MessageHandler* _mess_instance = NULL;

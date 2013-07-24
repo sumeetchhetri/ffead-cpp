@@ -148,7 +148,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			string cont = ("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec+"&")+parsc;
 			if(cont[cont.length()-1]=='&')
 				cont = cont.substr(0,cont.length()-1);
-			res->setContent_str(cont);
+			res->setContent(cont);
 			cout << "verified initial request signature is valid" << endl;
 			cout << "provided a request token" << endl;
 		}
@@ -173,7 +173,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			}
 			if(cont[cont.length()-1]=='&')
 				cont = cont.substr(0,cont.length()-1);
-			res->setContent_str(cont);
+			res->setContent(cont);
 			cout << "verified request token signature is valid" << endl;
 			cout << "provided an access token" << endl;
 		}
@@ -207,10 +207,11 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			}
 			else
 			{
-				res->setContent_str(reqparams["oauthparms"]+"&access=true");
+				res->setContent(reqparams["oauthparms"]+"&access=true");
 				cout << "no callback url specified sending access info in content" << endl;
 			}
 		}
+		return true;
 	}
 	else if(req->getFile()=="login.oauth")
 	{
@@ -229,8 +230,9 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 		html += "</form></body></html>";
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
-		res->setContent_str(html);
+		res->setContent(html);
 		cout << "Login page display" << endl;
+		return true;
 	}
 	else
 	{

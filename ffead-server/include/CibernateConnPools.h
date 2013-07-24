@@ -24,7 +24,7 @@
 #define CIBERNATECONNPOOLS_H_
 #include "CibernateConnectionPool.h"
 #include "map"
-#include "Logger.h"
+#include "LoggerFactory.h"
 typedef map<string,string> strMap;
 typedef map<string,strMap> smstrMap;
 

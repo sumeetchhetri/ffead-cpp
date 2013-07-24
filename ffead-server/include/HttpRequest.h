@@ -31,7 +31,7 @@
 #include "stdio.h"
 #include <openssl/ssl.h>
 #include "CryptoHandler.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "MultipartContent.h"
 #include "Timer.h"
 #include "HTTPResponseStatus.h"
@@ -79,7 +79,23 @@ class HttpRequest {
 	void getAuthParams(string);
 	void getOauthParams(string);
 	void updateFromContentStr();
+	void updateFromContentStrTemp();
 	void updateFromContentFile();
+	void setMethod(string method);
+	void setRequestParams(RMap);
+	void setRequestParam(string,string);
+	void setContent_tfile(string tfile);
+	void setQueryParams(RMap queryParams);
+	void setAuthinfo(map<string,string>);
+	void setActUrl(string);
+	void setCntxt_name(string);
+	void setCntxt_root(string);
+	void setContent_boundary(string);
+	void setQueryParam(string name,string value);
+	void setSessionID(string sessionID);
+
+	friend class ServiceTask;
+	friend class ControllerHandler;
 public:
 	enum {
 		PREFLIGHT, CORS, OTHER
@@ -94,36 +110,27 @@ public:
 	HttpRequest(strVec,string);
 	void updateContent();
 	virtual ~HttpRequest();
-    void setSession(HttpSession session);
+    void setUrl(string);
     HttpSession* getSession();
     string getMethod() const;
-	void setMethod(string method);
-	void setUrl(string);
 	string getUrl();
 	string getHttpVersion();
 	float getHttpVers();
 	string getContent_boundary() const;
-	void setContent_boundary(string);
 	string getContent() const;
 	void setContent(string);
     RMap getRequestParams() const;
-    void setRequestParams(RMap);
-    void setRequestParam(string,string);
     string getRequestParam(string);
+    MultipartContent getMultipartContent(string key);
     string getRequestParamType(string key);
     string getCntxt_root() const;
-    void setCntxt_root(string);
     string getDefaultLocale();
     string getCntxt_name() const;
-    void setCntxt_name(string);
     string getFile() const;
     void setFile(string);
     string getActUrl() const;
-    void setActUrl(string);
-    string getSessionID() const{return sessionID;}
-    void setSessionID(string sessionID){this->sessionID = sessionID;}
+    string getSessionID() const;
     map<string,string> getAuthinfo() const;
-    void setAuthinfo(map<string,string>);
     string buildRequest(const char* key,const char* value);
     string toString();
     string toPHPVariablesString(string);
@@ -133,8 +140,6 @@ public:
 	string toLuaVariablesString();
 	string toNodejsVariablesString();
 	RMap getQueryParams() const;
-	void setQueryParams(RMap queryParams);
-	void setQueryParam(string name,string value);
 	string getQueryParam(string key);
 	RMap getAllParams();
     bool hasCookie() const;
@@ -154,13 +159,13 @@ public:
     bool isAgentAcceptsCE();
     bool isHeaderValue(string header, string value, bool ignoreCase = true);
     vector<vector<int> > getRanges(vector<string> &rangesVec);
-    void setContent_tfile(string tfile);
     string getContent_tfile();
     void addMultipartFormContent(string key, MultipartContent content);
     void addContent(MultipartContent content);
     bool isNonBinary(string mimeType);
     string getParamValue(string);
     HTTPResponseStatus getRequestParseStatus() const;
+    vector<MultipartContent> getMultiPartFileList(string name);
 };
 
 #endif /* HTTPREQUEST_H_ */

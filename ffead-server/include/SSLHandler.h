@@ -28,7 +28,7 @@
 /*HTTPS related*/
 #include <openssl/ssl.h>
 #include <signal.h>
-#include "Logger.h"
+#include "LoggerFactory.h"
 #define CLIENT_AUTH_REQUEST 1
 #define CLIENT_AUTH_REQUIRE 2
 #define CLIENT_AUTH_REHANDSHAKE 3

@@ -25,7 +25,7 @@
 Logger RestController::logger;
 
 RestController::RestController() {
-	logger = Logger::getLogger("RestController");
+	logger = LoggerFactory::getLogger("RestController");
 }
 
 RestController::~RestController() {
@@ -48,12 +48,12 @@ void RestController::buildResponse(HTTPResponseStatus status, string className, 
 	if(content!="")
 	{
 		response->setHTTPResponseStatus(status);
-		response->setContent_str(content);
+		response->setContent(content);
 	}
 	else
 	{
 		response->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-		response->setContent_str(content);
+		response->setContent(content);
 	}
 }
 
@@ -73,11 +73,11 @@ void RestController::buildResponseVector(HTTPResponseStatus status, string class
 	if(content!="")
 	{
 		response->setHTTPResponseStatus(status);
-		response->setContent_str(content);
+		response->setContent(content);
 	}
 	else
 	{
 		response->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-		response->setContent_str(content);
+		response->setContent(content);
 	}
 }

@@ -34,7 +34,7 @@ FormHandler::~FormHandler() {
 string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData)
 {
 	map<string, Element> formMap = configData.formMap;
-	Logger logger = Logger::getLogger("FormHandler");
+	Logger logger = LoggerFactory::getLogger("FormHandler");
 	Reflector ref;
 	Element ele = formMap[req->getFile()];
 	//logger << ele.getTagName() << endl;
@@ -99,7 +99,7 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationDat
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Formcontroller Method Not Found");
+			res.setContent("Formcontroller Method Not Found");
 			logger << "Formcontroller Method Not Found" << endl;
 		}
 	}

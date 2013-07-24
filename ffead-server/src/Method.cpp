@@ -84,6 +84,16 @@ void Method::clear()
 	argumentTypes.clear();
 }
 
+bool Method::isStatic()
+{
+	return isstat;
+}
+
+void Method::setIsStatic(bool isStatic)
+{
+	this->isstat = isStatic;
+}
+
 /*string Method::getKey()
 {
 	string key = getMethodName();
