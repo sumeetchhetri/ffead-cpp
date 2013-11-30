@@ -43,7 +43,7 @@
 /*Fix for Windows Cygwin*///#include <sys/epoll.h>
 #include <sys/resource.h>
 #include "Thread.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #define MAXEPOLLSIZES 10000
 #define BACKLOGM 500
 using namespace std;
@@ -51,13 +51,17 @@ using namespace std;
 typedef void* (*Service)(void*);
 class Server {
 	Logger logger;
-	int sock;
+	int sock, mode;
 	Service service;
+	Mutex lock;
 	struct sockaddr_storage their_addr;
 	static void* servicing(void* arg);
+	bool runn, started;
 public:
+	int getSocket();
+	Server();
 	Server(string,bool,int,Service,int);
-	Server(string port,int waiting,Service serv);
+	//Server(string port,int waiting,Service serv);
 	virtual ~Server();
 	int Accept();
 	int Send(int,string);
@@ -71,7 +75,10 @@ public:
 	int Receive(int,char *data,int);
 	int Receive(int,unsigned char *data,int);
 	int Receive(int,vector<string>&,int);
+	void start();
+	void stop();
 	static int createListener(string port,bool block);
+	static int createListener(string ipAddress,string port,bool block);
 };
 
 #endif /* SERVER_H_ */

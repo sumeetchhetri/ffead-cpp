@@ -31,7 +31,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Timer.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
+#include "Mutex.h"
 using namespace std;
 
 class Connection
@@ -49,14 +50,16 @@ typedef vector<Connection*> connVec;
 class CibernateConnectionPool {
 	Logger logger;
 	int readNumber;
-	string dbName,uname,pass;
+	string dbName,uname,pass,dialect;
 	SQLHENV	V_OD_Env;// Handle ODBC environment
 	connVec readConnections;
 	connVec writeConnections;
-	void newConnection(bool);
-	void createPool(int,string,string,string);
+	Mutex mutex;
+	Connection* newConnection(bool);
+	void createPool(int,string,string,string,string);
 public:
-	CibernateConnectionPool(int,string,string,string);
+	string getDialect() const;
+	CibernateConnectionPool(int,string,string,string,string);
 	virtual ~CibernateConnectionPool();
 	//static CibernateConnectionPool* getInstance();
 	Connection* getReadConnection();

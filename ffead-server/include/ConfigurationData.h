@@ -23,11 +23,91 @@
 #ifndef CONFIGURATIONDATA_H_
 #define CONFIGURATIONDATA_H_
 #include "string"
-#include "ControllerHandler.h"
-#include "PropFileReader.h"
-#include "SecurityHandler.h"
-#include "WsUtil.h"
+#include "FFEADContext.h"
 using namespace std;
+
+typedef void* (*toObjectFromJson) (string);
+
+class RestFunctionParams
+{
+	string name;
+	string type;
+	string from;
+	friend class ConfigurationHandler;
+	friend class ControllerHandler;
+};
+
+class RestFunction
+{
+	string name;
+	string alias;
+	string clas;
+	string meth;
+	string baseUrl;
+	string icontentType;
+	string ocontentType;
+	vector<RestFunctionParams> params;
+	friend class ConfigurationHandler;
+	friend class ControllerHandler;
+};
+
+typedef map<string, RestFunction> resFuncMap;
+
+class SecureAspect
+{
+	string path;
+	string role;
+	friend class ConfigurationHandler;
+	friend class ConfigurationData;
+	friend class Security;
+	friend class SecurityHandler;
+};
+
+class Security
+{
+	Logger logger;
+	vector<SecureAspect> secures;
+	string loginProvider;
+	string loginUrl;
+	string welocmeFile;
+	long sessTimeout;
+	bool isLoginConfigured();
+	bool isSecureConfigured();
+	bool isLoginUrl(string url, string actUrl);
+	bool isLoginPage(string url, string actUrl);
+	SecureAspect matchesPath(string url);
+	friend class ConfigurationData;
+	friend class ConfigurationHandler;
+	friend class SecurityHandler;
+public:
+	Security();
+	~Security();
+};
+
+
+class CorsConfig {
+	string allwdOrigins;
+	string allwdMethods;
+	string allwdHeaders;
+	bool allwdCredentials;
+	string exposedHeaders;
+	long maxAge;
+	bool isOriginAllowed(strVec reqOrgLst);
+	bool isMethodAllowed(string method);
+	bool isHeaderAllowed(strVec reqHdrLst, string& erheadr);
+	friend class ConfigurationHandler;
+	friend class CORSHandler;
+};
+
+class JobConfig
+{
+	string name;
+	string cron;
+	string clas;
+	string meth;
+	string app;
+	friend class JobScheduler;
+};
 
 class ConfigurationData {
 public:
@@ -38,10 +118,12 @@ public:
 	map<string, string> handoffs;
 	map<string, Security> securityObjectMap;
 	map<string, Element> formMap;
-	strVec dcpsss,cmpnames;
-	propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap;
-	long sessionTimeout;
-	bool sessatserv;
+	strVec cmpnames;
+	map<string, string> sprops,props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap,ajaxIntfMap,dcpsss, tpes;
+	long sessionTimeout, sessionFileLockTimeout;
+	bool sessatserv, sessservdistocache;
+	FFEADContext* ffeadContext;
+	CorsConfig corsConfig;
 	ConfigurationData();
 	virtual ~ConfigurationData();
 };

@@ -22,48 +22,143 @@
 
 #include "HttpResponse.h"
 
+string HttpResponse::VALID_RESPONSE_HEADERS = ",access-control-allow-origin,access-control-allow-headers,access-control-allow-credentials,access-control-allow-methods,access-control-max-age,accept-ranges,age,allow,cache-control,connection,content-encoding,content-language,content-length,content-location,content-md5,content-disposition,content-range,content-type,date,etag,expires,last-modified,link,location,p3p,pragma,proxy-authenticate,refresh,retry-after,server,set-cookie,status,strict-transport-security,trailer,transfer-encoding,vary,via,warning,www-authenticate,";
+string HttpResponse::AccessControlAllowOrigin		 = "Access-Control-Allow-Origin";
+string HttpResponse::AccessControlAllowHeaders		 = "Access-Control-Allow-Headers";
+string HttpResponse::AccessControlAllowCredentials	 = "Access-Control-Allow-Credentials";
+string HttpResponse::AccessControlAllowMethods		 = "Access-Control-Allow-Methods";
+string HttpResponse::AccessControlMaxAge		 = "Access-Control-Max-Age";
+string HttpResponse::AcceptRanges			 = "Accept-Ranges";
+string HttpResponse::Age				 = "Age";
+string HttpResponse::Allow				 = "Allow";
+string HttpResponse::CacheControl			 = "Cache-Control";
+string HttpResponse::Connection				 = "Connection";
+string HttpResponse::ContentEncoding			 = "Content-Encoding";
+string HttpResponse::ContentLanguage			 = "Content-Language";
+string HttpResponse::ContentLength			 = "Content-Length";
+string HttpResponse::ContentLocation			 = "Content-Location";
+string HttpResponse::ContentMD5				 = "Content-MD5";
+string HttpResponse::ContentDisposition			 = "Content-Disposition";
+string HttpResponse::ContentRange			 = "Content-Range";
+string HttpResponse::ContentType			 = "Content-Type";
+string HttpResponse::Date				 = "Date";
+string HttpResponse::ETag				 = "ETag";
+string HttpResponse::Expires				 = "Expires";
+string HttpResponse::LastModified			 = "Last-Modified";
+string HttpResponse::Link				 = "Link";
+string HttpResponse::Location				 = "Location";
+string HttpResponse::P3P				 = "P3P";
+string HttpResponse::Pragma				 = "Pragma";
+string HttpResponse::ProxyAuthenticate			 = "Proxy-Authenticate";
+string HttpResponse::Refresh				 = "Refresh";
+string HttpResponse::RetryAfter				 = "Retry-After";
+string HttpResponse::Server				 = "Server";
+string HttpResponse::SetCookie				 = "Set-Cookie";
+string HttpResponse::Status				 = "Status";
+string HttpResponse::StrictTransportSecurity		 = "Strict-Transport-Security";
+string HttpResponse::Trailer				 = "Trailer";
+string HttpResponse::TransferEncoding			 = "Transfer-Encoding";
+string HttpResponse::Vary				 = "Vary";
+string HttpResponse::Via				 = "Via";
+string HttpResponse::Warning				 = "Warning";
+string HttpResponse::WWWAuthenticate			 = "WWW-Authenticate";
+
 HttpResponse::HttpResponse() {
-	// TODO Auto-generated constructor stub
-	this->server = "FFEAD 1.1";
+	httpVersion = "HTTP/1.1";
+	compressed = false;
+	logger = LoggerFactory::getLogger("HttpResponse");
 }
 
 HttpResponse::~HttpResponse() {
-	// TODO Auto-generated destructor stub
+}
+
+string HttpResponse::generateResponse(string httpMethod, HttpRequest *req)
+{
+	if(httpMethod=="HEAD")
+	{
+		return generateHeadResponse();
+	}
+	else if(httpMethod=="OPTIONS")
+	{
+		return generateOptionsResponse();
+	}
+	else if(httpMethod=="TRACE")
+	{
+		return generateTraceResponse(req);
+	}
+	else
+	{
+		return generateResponse();
+	}
 }
 
 string HttpResponse::generateResponse()
 {
-	string resp;
-	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
-	if(this->server!="")resp += "Server: " + this->server + "\r\n";
-	if(this->date!="")resp += "Date: " + this->date + "\r\n";
-	if(this->connection!="")resp += "Connection: " + this->connection + "\r\n";
-	if(this->location!="")resp += "Location: " + this->location + "\r\n";
-	if(this->accept_ranges!="")resp += "Accept-Ranges: " + this->accept_ranges + "\r\n";
-	if(this->content_type!="")resp += "Content-Type: " + this->content_type + "\r\n";
-	if(this->content_str!="")resp += "Content-Length: " + CastUtil::lexical_cast<string>((int)content_str.length()) + "\r\n";
-	if(this->last_modified!="")resp += "Last-Modified: " + this->last_modified + "\r\n";
-	for (int var = 0; var < (int)this->cookies.size(); var++)
-	{
-		resp += "Set-Cookie: " + this->cookies.at(var) + "\r\n";
-	}
-	resp += "\r\n";
-	resp += this->content_str;
+	string resp = generateHeadResponse();
+	resp += this->content;
 	return resp;
 }
 
 string HttpResponse::generateHeadResponse()
 {
-	string resp;
+	addHeaderValue("Server", "FFEAD 1.1");
+	bool isTE = isHeaderValue("Transfer-Encoding", "chunked");
+	bool isCEGzip = isHeaderValue("Content-Encoding", "gzip");
+	bool isCEDef = isHeaderValue("Content-Encoding", "deflate");
+	string resp, boundary;
+	if(this->contentList.size()>0)
+	{
+		content = "";
+		boundary = "FFEAD_SERVER_" + CastUtil::lexical_cast<string>(Timer::getCurrentTime());
+		for (int var = 0; var < (int)contentList.size(); ++var) {
+			content += "--" + boundary + "\r\n";
+			map<string,string> headers = contentList.at(var).getHeaders();
+			map<string,string>::iterator it;
+			for(it=headers.begin();it!=headers.end();++it)
+			{
+				content += it->first + ": " + it->second + "\r\n";
+			}
+			content += "\r\n";
+			content += contentList.at(var).getContent();
+			content += "\r\n";
+		}
+		content += "--" + boundary + "--\r\n";
+	}
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
-	if(this->server!="")resp += "Server: " + this->server + "\r\n";
-	if(this->date!="")resp += "Date: " + this->date + "\r\n";
-	if(this->connection!="")resp += "Connection: " + this->connection + "\r\n";
-	if(this->location!="")resp += "Location: " + this->location + "\r\n";
-	if(this->accept_ranges!="")resp += "Accept-Ranges: " + this->accept_ranges + "\r\n";
-	if(this->content_type!="")resp += "Content-Type: " + this->content_type + "\r\n";
-	if(this->content_str!="")resp += "Content-Length: " + CastUtil::lexical_cast<string>((int)content_str.length()) + "\r\n";
-	if(this->last_modified!="")resp += "Last-Modified: " + this->last_modified + "\r\n";
+	if(this->getHeader("Content-Type")=="" && this->contentList.size()>0)
+	{
+		this->addHeaderValue("Content-Type", "multipart/mixed");
+	}
+	if(this->getHeader("Content-Type")!="" && boundary!="")
+	{
+		headers["Content-Type"] += "; boundary=" + boundary;
+	}
+	if(!isTE && !compressed)
+	{
+		if(isCEGzip)
+		{
+			if(this->content!="")
+			{
+				this->content = CompressionUtil::gzipCompress(this->content, true);
+			}
+		}
+		if(isCEDef)
+		{
+			if(this->content!="")
+			{
+				this->content = CompressionUtil::zlibCompress(this->content, true);
+			}
+		}
+	}
+	if(!isTE && this->content!="")
+	{
+		headers["Content-Length"] = CastUtil::lexical_cast<string>((int)content.length());
+	}
+	map<string,string>::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		resp += it->first + ": " + it->second + "\r\n";
+	}
 	for (int var = 0; var < (int)this->cookies.size(); var++)
 	{
 		resp += "Set-Cookie: " + this->cookies.at(var) + "\r\n";
@@ -74,11 +169,14 @@ string HttpResponse::generateHeadResponse()
 
 string HttpResponse::generateOptionsResponse()
 {
+	addHeaderValue("Server", "FFEAD 1.1");
 	string resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
-	if(this->server!="")resp += "Server: " + this->server + "\r\n";
-	if(this->date!="")resp += "Date: " + this->date + "\r\n";
-	if(this->connection!="")resp += "Connection: " + this->connection + "\r\n";
+	map<string,string>::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		resp += it->first + ": " + it->second + "\r\n";
+	}
 	for (int var = 0; var < (int)this->cookies.size(); var++)
 	{
 		resp += "Set-Cookie: " + this->cookies.at(var) + "\r\n";
@@ -90,16 +188,14 @@ string HttpResponse::generateOptionsResponse()
 
 string HttpResponse::generateTraceResponse(HttpRequest* req)
 {
+	addHeaderValue("Server", "FFEAD 1.1");
 	string resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
-	if(this->server!="")resp += "Server: " + this->server + "\r\n";
-	if(this->date!="")resp += "Date: " + this->date + "\r\n";
-	if(this->connection!="")resp += "Connection: " + this->connection + "\r\n";
-	if(this->location!="")resp += "Location: " + this->location + "\r\n";
-	if(this->accept_ranges!="")resp += "Accept-Ranges: " + this->accept_ranges + "\r\n";
-	if(this->content_type!="")resp += "Content-Type: " + this->content_type + "\r\n";
-	if(this->content_str!="")resp += "Content-Length: " + CastUtil::lexical_cast<string>((int)content_str.length()) + "\r\n";
-	if(this->last_modified!="")resp += "Last-Modified: " + this->last_modified + "\r\n";
+	map<string,string>::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		resp += it->first + ": " + it->second + "\r\n";
+	}
 	for (int var = 0; var < (int)this->cookies.size(); var++)
 	{
 		resp += "Set-Cookie: " + this->cookies.at(var) + "\r\n";
@@ -107,19 +203,125 @@ string HttpResponse::generateTraceResponse(HttpRequest* req)
 	resp += "\r\n";
 	if(req!=NULL)
 	{
-		if(req->getHost()!="")resp += "Host: " + req->getHost() + "\r\n";
-		if(req->getUser_agent()!="")resp += "User-Agent: " + req->getUser_agent() + "\r\n";
-		if(req->getAccept()!="")resp += "Accept: " + req->getAccept() + "\r\n";
-		if(req->getAccept_lang()!="")resp += "Accept-Language: " + req->getAccept_lang() + "\r\n";
-		if(req->getAccept_encod()!="")resp += "Accept-Encoding: " + req->getAccept_encod() + "\r\n";
-		if(req->getAccept_chars()!="")resp += "Accept-Charset: " + req->getAccept_chars() + "\r\n";
-		if(req->getKeep_alive()!="")resp += "Keep-Alive: " + req->getKeep_alive() + "\r\n";
-		if(req->getConnection()!="")resp += "Connection: " + req->getConnection() + "\r\n";
-		if(req->getCache_ctrl()!="")resp += "Cache-Control: " + req->getCache_ctrl() + "\r\n";
-		if(req->getContent_type()!="")resp += "Content-Type: " + req->getContent_type() + "\r\n";
-		if(req->getContent_len()!="")resp += "Content-Length: " + req->getContent_len() + "\r\n";
-		if(req->getReferer()!="")resp += "Referer: " + req->getReferer() + "\r\n";
-		if(req->getPragma()!="")resp += "Pragma: " + req->getPragma() + "\r\n";
+		map<string,string>::iterator it;
+		for(it=headers.begin();it!=req->getHeaders().end();++it)
+		{
+			resp += it->first + ": " + it->second + "\r\n";
+		}
 	}
 	return resp;
+}
+
+
+string HttpResponse::getHttpVersion() const
+{
+	return httpVersion;
+}
+
+void HttpResponse::update(HttpRequest* req)
+{
+	this->httpVersion = req->getHttpVersion();
+}
+
+void HttpResponse::setHTTPResponseStatus(HTTPResponseStatus status)
+{
+	this->statusCode = CastUtil::lexical_cast<string>(status.getCode());
+	this->statusMsg = status.getMsg();
+}
+
+string HttpResponse::getStatusCode() const
+{
+	return statusCode;
+}
+
+void HttpResponse::setStatusCode(string statusCode)
+{
+	this->statusCode = statusCode;
+}
+
+string HttpResponse::getStatusMsg() const
+{
+	return statusMsg;
+}
+
+void HttpResponse::setStatusMsg(string statusMsg)
+{
+	this->statusMsg = statusMsg;
+}
+
+string HttpResponse::getContent() const
+{
+	return content;
+}
+
+void HttpResponse::setContent(string content)
+{
+	this->content = content;
+}
+
+void HttpResponse::addCookie(string cookie)
+{
+	this->cookies.push_back(cookie);
+}
+
+void HttpResponse::addContent(MultipartContent content)
+{
+	contentList.push_back(content);
+}
+
+void HttpResponse::addHeaderValue(string header, string value)
+{
+	header = StringUtil::camelCasedCopy(header, "-");
+	if(header!="")
+	{
+		if(VALID_RESPONSE_HEADERS.find(","+StringUtil::toLowerCopy(header)+",")!=string::npos)
+		{
+			headers[header] = value;
+		}
+		else
+		{
+			logger << ("Non standard Header string " + header) << endl;
+			vector<string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
+			if(matres.size()==0)
+			{
+				logger << ("Invalid Header string " + header) << endl;
+				return;
+			}
+			headers[header] = value;
+		}
+	}
+}
+
+bool HttpResponse::isHeaderValue(string header, string value, bool ignoreCase)
+{
+	header = StringUtil::camelCasedCopy(header, "-");
+	return header!="" && headers.find(header)!=headers.end()
+			&& (headers[header]==value ||
+					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
+}
+
+string HttpResponse::getHeader(string header)
+{
+	header = StringUtil::camelCasedCopy(header, "-");
+	if(header!="" && headers.find(header)!=headers.end())
+		return headers[header];
+	return "";
+}
+
+bool HttpResponse::isNonBinary()
+{
+	string contType = StringUtil::toLowerCopy(getHeader(ContentType));
+	return (contType.find("text")!=string::npos || contType.find("css")!=string::npos
+			|| contType.find("x-javascript")!=string::npos || contType.find("json")!=string::npos
+			|| contType.find("xml")!=string::npos || contType.find("html")!=string::npos);
+}
+
+void HttpResponse::setCompressed(bool compressed)
+{
+	this->compressed = compressed;
+}
+
+bool HttpResponse::getCompressed()
+{
+	return this->compressed;
 }

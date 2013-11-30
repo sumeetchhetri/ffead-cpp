@@ -145,6 +145,27 @@ methMap ClassInfo::getMethods()
 {
 	return meths;
 }
+
+void ClassInfo::setNamespace(string namespc)
+{
+	this->namespc = namespc;
+}
+
+string ClassInfo::getNamespace()
+{
+	return namespc;
+}
+
+void ClassInfo::setSize(int size)
+{
+	this->size = size;
+}
+
+int ClassInfo::getSize()
+{
+	return this->size;
+}
+
 /*
 string ClassInfo::getPublic_fields() const
 {

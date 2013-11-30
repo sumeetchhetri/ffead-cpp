@@ -22,7 +22,15 @@
 
 #ifndef TEMPLATEHANDLER_H_
 #define TEMPLATEHANDLER_H_
+#include "string"
+#include "map"
+#include "StringUtil.h"
+#include "Object.h"
+#include <fstream>
+using namespace std;
 #include "TemplateEngine.h"
+
+typedef map<string,Object> Context;
 
 class TemplateHandler {
 public:

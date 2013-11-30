@@ -1,13 +1,13 @@
-APXS=apxs
-APACHECTL=apachectl
+APXS=apxs2
+APACHECTL=apachectl2
 
 # Get all of apxs's internal values.
 APXS_CC=`$(APXS) -q CC`   
-APXS_TARGET=`$(APXS) -q TARGET`   
-APXS_CFLAGS=`$(APXS) -q CFLAGS`   
-APXS_SBINDIR=`$(APXS) -q SBINDIR`   
-APXS_CFLAGS_SHLIB=`$(APXS) -q CFLAGS_SHLIB`   
-APXS_INCLUDEDIR=`$(APXS) -q INCLUDEDIR`   
+APXS_TARGET=`$(APXS) -q TARGET`
+APXS_CFLAGS=`$(APXS) -q CFLAGS`
+APXS_SBINDIR=`$(APXS) -q SBINDIR`  
+APXS_CFLAGS_SHLIB=`$(APXS) -q CFLAGS_SHLIB`  
+APXS_INCLUDEDIR=`$(APXS) -q INCLUDEDIR`
 APXS_LD_SHLIB=`$(APXS) -q LD_SHLIB`
 APXS_LIBEXECDIR=`$(APXS) -q LIBEXECDIR`
 APXS_LDFLAGS_SHLIB=`$(APXS) -q LDFLAGS_SHLIB`
@@ -19,11 +19,11 @@ all: mod_ffeadcpp.so
 
 # compile
 mod_ffeadcpp.o: FfeadCppApacheModule.cpp
-	g++ -c -fPIC -I$(APXS_INCLUDEDIR) -I/usr/include/apr-1 -I"${FFEAD_CPP_PATH}/include" -I. $(APXS_CFLAGS) $(APXS_CFLAGS_SHLIB) -Wall -o $@ $< 
+	g++ -c -fPIC -I"$(APXS_INCLUDEDIR)" -I"/usr/include/apr-1" -I"${FFEAD_CPP_PATH}/include" -I"." $(APXS_CFLAGS) $(APXS_CFLAGS_SHLIB) -Wall -o $@ $< 
 
 # link
 mod_ffeadcpp.so: mod_ffeadcpp.o 
-	g++ -fPIC -L"${FFEAD_CPP_PATH}/lib" -shared -o $@ $< $(APXS_LIBS_SHLIB) -lweblib -ldl -lboost_serialization -lcrypto -lssl -lboost_regex
+	g++ -fPIC -L"${FFEAD_CPP_PATH}/lib" -shared -o $@ $< $(APXS_LIBS_SHLIB) -lweblib -ldl -lcrypto -lssl -lapr-1 -lhttpd -laprutil-1
 
 # install the shared object file into Apache 
 install: all

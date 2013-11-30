@@ -38,7 +38,10 @@ public:
 	RegexUtil();
 	virtual ~RegexUtil();
 	static vector<string> search(const string& text, const string& pattern);
-	static string replace(const string& text, const string& pattern, const string& with);
+	static void find(const string& text, const string& pattern, int &spos, int &epos);
+	static int find(const string& text, const string& pattern);
+	static string replaceCopy(const string& text, const string& pattern, const string& with);
+	static void replace(string& text, const string& pattern, const string& with);
 };
 
 #endif /* REGEXUTIL_H_ */

@@ -23,7 +23,6 @@
 #ifndef CLASSINFO_H_
 #define CLASSINFO_H_
 #include "string"
-#include <iostream>
 #include <typeinfo>
 #include "Constructor.h"
 #include "Method.h"
@@ -47,6 +46,8 @@ public:
     void setClassName(string);
     string getBase() const;
     void setBase(string);
+    void setNamespace(string);
+    string getNamespace();
     /*string getPublic_fields() const;
     void setPublic_fields(string);
     string getPrivate_fields() const;
@@ -74,10 +75,14 @@ public:
     void addField(Field);
     fldMap getFields();
     fldVec getFieldVec();
+    void setSize(int);
+    int getSize();
 private:
 	void* instance;
 	string className;
 	string base;
+	string namespc;
+	int size;
 	/*string public_fields;
 	string private_fields;
 	string protected_fields;

@@ -267,22 +267,22 @@ public:
 	string toString()
 	{
 		string str;
-		for (int var = 0; var < vvi.size(); ++var) {
+		for (int var = 0; var < (int)vvi.size(); ++var) {
 			str += CastUtil::lexical_cast<string>(vvi.at(var));
 		}
-		for (int var = 0; var < vvsh.size(); ++var) {
+		for (int var = 0; var < (int)vvsh.size(); ++var) {
 			str += CastUtil::lexical_cast<string>(vvsh.at(var));
 		}
-		for (int var = 0; var < vvl.size(); ++var) {
+		for (int var = 0; var < (int)vvl.size(); ++var) {
 			str += CastUtil::lexical_cast<string>(vvl.at(var));
 		}
-		for (int var = 0; var < vvd.size(); ++var) {
+		for (int var = 0; var < (int)vvd.size(); ++var) {
 			str += CastUtil::lexical_cast<string>(vvd.at(var));
 		}
-		for (int var = 0; var < vvb.size(); ++var) {
+		for (int var = 0; var < (int)vvb.size(); ++var) {
 			str += CastUtil::lexical_cast<string>(vvb.at(var));
 		}
-		for (int var = 0; var < vvs.size(); ++var) {
+		for (int var = 0; var < (int)vvs.size(); ++var) {
 			str += CastUtil::lexical_cast<string>(vvs.at(var));
 		}
 

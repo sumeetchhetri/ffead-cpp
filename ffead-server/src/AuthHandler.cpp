@@ -49,10 +49,13 @@ string AuthHandler::getFileExtension(const string& file)
 	return ext;
 }
 
-bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpattMap, HttpRequest* req, HttpResponse& res, map<string, vector<string> > filterMap, void* dlib,
-		string ext)
+bool AuthHandler::handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, string ext)
 {
-	Logger logger = Logger::getLogger("AuthHandler");
+	map<string, string> autMap = configData.autMap;
+	map<string, string> autpattMap = configData.autpattMap;
+	map<string, vector<string> > filterMap = configData.filterMap;
+
+	Logger logger = LoggerFactory::getLogger("AuthHandler");
 	bool isContrl = false;
 	string claz;
 	if(autpattMap[req->getCntxt_name()+"*.*"]!="" || autMap[req->getCntxt_name()+ext]!="")
@@ -65,8 +68,8 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 		{
 			claz = autMap[req->getCntxt_name()+ext];
 		}
-		AuthController *authc;
-		logger << "OAUTH/HTTP Authorization requested " <<  claz << endl;
+
+		logger << ("OAUTH/HTTP Authorization requested " +  claz) << endl;
 		map<string,string>::iterator it;
 		map<string,string> tempmap = req->getAuthinfo();
 		for(it=tempmap.begin();it!=tempmap.end();it++)
@@ -81,53 +84,44 @@ bool AuthHandler::handle(map<string, string> autMap, map<string, string> autpatt
 		if(claz.find("file:")!=string::npos)
 		{
 			claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
-			logger << "auth handled by file " << claz << endl;
-			authc = new FileAuthController(claz,":");
-			if(authc->isInitialized())
+			logger << ("Auth handled by file " + claz) << endl;
+			FileAuthController authc(claz,":");
+			if(authc.isInitialized())
 			{
-				if(authc->authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
+				if(authc.authenticate(req->getAuthinfo()["Username"],req->getAuthinfo()["Password"]))
 				{
-					logger << "valid user" << endl;
+					logger << "Valid user" << endl;
 				}
 				else
 				{
-					logger << "invalid user" << endl;
+					logger << "Invalid user" << endl;
 					res.setHTTPResponseStatus(HTTPResponseStatus::AccessDenied);
 					isContrl = true;
-					logger << "verified request token signature is invalid" << endl;
+					logger << "Verified request token signature is invalid" << endl;
 				}
 			}
 			else
 			{
-				logger << "invalid user repo defined" << endl;
+				logger << "Invalid user repo defined" << endl;
 			}
 		}
 		else if(claz.find("class:")!=string::npos)
 		{
 			claz = claz.substr(claz.find(":")+1);
-			claz = "getReflectionCIFor" + claz;
-			logger << "auth handled by class " << claz << endl;
-			if(dlib == NULL)
+			void *_temp = configData.ffeadContext->getBean("authhandler_"+req->getCntxt_name()+claz, req->getCntxt_name());
+			AuthController *authc = static_cast<AuthController*>(_temp);
+			if(authc!=NULL)
 			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
-			void *mkr = dlsym(dlib, claz.c_str());
-			if(mkr!=NULL)
-			{
-				FunPtr f =  (FunPtr)mkr;
-				ClassInfo srv = f();
-				args argus;
-				Constructor ctor = srv.getConstructor(argus);
-				Reflector ref;
-				void *_temp = ref.newInstanceGVP(ctor);
-				authc = (AuthController*)_temp;
-				bool isoAuthRes = authc->handle(req,&res);
-				if(res.getStatusCode()!="")
+				isContrl = authc->handle(req,&res);
+				if(isContrl && res.getStatusCode()!="")
 					isContrl = true;
-				logger << "authhandler called" << endl;
-				ext = getFileExtension(req->getUrl());
-				delete authc;
+				logger << "Authhandler called" << endl;
+			}
+			else
+			{
+				logger << "Invalid Auth handler" << endl;
+				res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+				isContrl = true;
 			}
 		}
 	}

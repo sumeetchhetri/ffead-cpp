@@ -41,7 +41,8 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include "CastUtil.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
+#include "cstring"
 using namespace std;
 
 #define MAXBUFLE 32768
@@ -60,6 +61,7 @@ public:
 	int create_tcp_socket();
 	static char* get_ip(char *host);
 	static bool isConnected(int fd);
+	virtual ~ClientInterface(){}
 };
 
 #endif /* CLIENT_INTERFACE_H_ */

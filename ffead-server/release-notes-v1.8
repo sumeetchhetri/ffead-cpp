@@ -1,0 +1,29 @@
+Release Notes version 1.8
+==================================
+
+	:- CORS Filter support for corss origin resource sharing
+	:- Changes to XML/JSON/Binary Serialization
+	:- Moved common code to a new SerializeBase? class
+	:- Modified the AMEF Protocol classes for better binary serialization support
+	:- Added support for handling namespaces and nested classes in Reflection
+	:- Fixed the Date/DateFormat? classes for all issues related to parsing/formatting/updating dates
+	:- Added new Multipartcontent object for handling multipart requests
+	:- Added gzip/deflate compression for responses
+	:- Added chunked transfer encoding support
+	:- Added Last Modified/If-Modified-Since header based cache support
+	:- Moved request/response headers to a map instead of properties
+	:- Fixed the HttpResponseParser? class
+	:- Fixed the JSONUtil class for error in json parsing
+	:- Introduced a new LoggerFactory? class to handle multiple loggers, fixed the Logger class
+	:- Introduced Futures based Thread pooling support
+	:- Fixed various web service issues/problems
+	:- Introduced JobScheduler? class for job scheduling
+	:- Added a new CronTimer? class for handling cron times
+	:- Introduced stream based single/multi File upload support in Rest Controllers
+	:- Added a few new html pages for testing/sanity
+	:- Fixed the accpetance test related files
+	:- Added a couple of new classes in the default app for testing new features
+	:- Fixed the afc.js file to resolve existing issues
+	:- Fixed an existing issue with namespace handling within the Element class
+	:- Introduced new properties for connection keep-alive, transfer encoding chunk size, default content encoding method, max number of input headers and max file upload size to the server.prop config file
+	:- Changed the web-service related template files for better web service support

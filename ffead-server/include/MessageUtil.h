@@ -26,7 +26,7 @@
 #include "XmlParser.h"
 #include "MessageHandler.h"
 #include "StringUtil.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 
 class MessageUtil {
 public:

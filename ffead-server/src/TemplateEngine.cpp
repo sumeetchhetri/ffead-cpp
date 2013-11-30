@@ -44,7 +44,7 @@ TemplateEngine::~TemplateEngine() {
 	return ret;
 }*/
 
-string TemplateEngine::evaluate(string fileName,Context cntxt)
+string TemplateEngine::evaluate(string fileName,StringContext cntxt)
 {
 	string ret,data;
 	ifstream infile;
@@ -77,7 +77,7 @@ string TemplateEngine::evaluate(string fileName,Context cntxt)
 	}
 	else
 		ret = fileName;
-	Context::iterator itr;
+	StringContext::iterator itr;
 	for(itr = cntxt.begin();itr!=cntxt.end();itr++)
 	{
 		string rep;

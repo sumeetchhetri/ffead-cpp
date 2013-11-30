@@ -23,15 +23,21 @@
 #include "Client.h"
 
 Client::Client() {
-	logger = Logger::getLogger("Client");
+	logger = LoggerFactory::getLogger("Client");
 	connected = false;
 }
 
 Client::~Client() {
+	closeConnection();
 }
 
 bool Client::connection(string host,int port)
 {
+	if(host=="localhost")
+	{
+		return connectionUnresolv(host, port);
+	}
+
 	struct sockaddr_in *remote;
 	int tmpres;
 	char *ip;
@@ -102,6 +108,7 @@ bool Client::connectionUnresolv(string host,int port)
     }
 
     if (p == NULL) {
+    	connected = false;
         fprintf(stderr, "client: failed to connect\n");
         return false;
     }
@@ -232,28 +239,26 @@ string Client::getBinaryData(int len, bool isLengthIncluded)
 {
 	//logger << len;
 	string alldat;
-	char *buf1 = new char[len+1];
+	char *buf1 = new char[len];
 	memset(buf1, 0, len);
 	recv(sockfd, buf1, len, 0);
 	for (int var = 0; var < len; ++var) {
 		alldat.push_back(buf1[var]);
 	}
-	memset(buf1, 0, len);
+	delete[] buf1;
 
 	int leng = getLengthCl(alldat, len);
 	if(isLengthIncluded)
 	{
 		leng -= len;
 	}
-	//logger << "done reading header length " << leng;
-	char *buf = new char[leng+1];
-	memset(buf, 0, sizeof(buf));
+	char *buf = new char[leng];
+	memset(buf, 0, leng);
 	recv(sockfd, buf, leng, 0);
 	for (int var = 0; var < leng; ++var) {
 		alldat.push_back(buf[var]);
 	}
-	memset(buf, 0, sizeof(buf));
-	//logger << alldat.length();
+	delete[] buf;
 	return alldat;
 }
 

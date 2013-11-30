@@ -23,7 +23,7 @@
 #include "SSLClient.h"
 
 SSLClient::SSLClient() {
-	logger = Logger::getLogger("SSLClient");
+	logger = LoggerFactory::getLogger("SSLClient");
 }
 
 SSLClient::~SSLClient() {
@@ -113,6 +113,11 @@ void SSLClient::closeSSL()
 
 bool SSLClient::connection(string host,int port)
 {
+	if(host=="localhost")
+	{
+		return connectionUnresolv(host, port);
+	}
+
 	struct sockaddr_in *remote;
 	int tmpres;
 	char *ip;

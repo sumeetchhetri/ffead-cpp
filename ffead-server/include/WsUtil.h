@@ -26,15 +26,15 @@
 #include "Reflection.h"
 #include "TemplateEngine.h"
 #include "AfcUtil.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 
 class WsUtil {
 	Logger logger;
 public:
 	WsUtil();
 	virtual ~WsUtil();
-	string generateWSDL(string file,string usrinc,string resp,string &headers,map<string,string> &wsmap,string appname);
-	string generateAllWSDL(vector<string> files,string resp,map<string,string> &wsmap);
+	string generateWSDL(string file,map<string, ClassStructure> allclsmap,string resp,string &headers,map<string,string> &wsmap,string appname,string ip_address, Reflection ref);
+	string generateAllWSDL(vector<string> apps,string resp,map<string,string> &wsmap,string ip_address, Reflection ref, map<string, map<string, ClassStructure> > clsstrucMaps);
 };
 
 #endif /* WSUTIL_H_ */

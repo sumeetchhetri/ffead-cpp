@@ -30,7 +30,7 @@
 #include <sys/wait.h>
 #include "Timer.h"
 #include <unistd.h>
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "Constants.h"
 
 class ScriptHandler {
@@ -42,8 +42,10 @@ public:
 	ScriptHandler();
 	static string execute(string exe, bool retErrs);
 	static string chdirExecute(string exe, string tmpf, bool retErrs);
-	static bool handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs, void* dlib,
+#ifdef INC_SCRH
+	static bool handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs,
 			string ext, map<string, string> props);
+#endif
 	virtual ~ScriptHandler();
 };
 

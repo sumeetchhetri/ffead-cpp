@@ -37,13 +37,54 @@ void* PoolThread::run(void *arg)
 		{
 			try
 			{
-				task->run();
+				if(!task->isFuture)
+					task->run();
+				else
+				{
+					FutureTask* ftask = static_cast<FutureTask*>(task);
+					if(ftask!=NULL)
+					{
+						ftask->result = ftask->call();
+						ftask->taskComplete();
+					}
+					else
+					{
+						task->run();
+					}
+				}
+				if(task->cleanUp)
+				{
+					delete task;
+				}
 			}
-			catch(exception& e)
+			catch(const exception& e)
 			{
 				if(console)
 				{
 					ths->logger << e.what() << flush;
+				}
+				if(task->isFuture)
+				{
+					FutureTask* ftask = static_cast<FutureTask*>(task);
+					if(ftask!=NULL)
+					{
+						ftask->taskComplete();
+					}
+				}
+			}
+			catch(...)
+			{
+				if(console)
+				{
+					ths->logger << "Error Occurred while executing task" << flush;
+				}
+				if(task->isFuture)
+				{
+					FutureTask* ftask = static_cast<FutureTask*>(task);
+					if(ftask!=NULL)
+					{
+						ftask->taskComplete();
+					}
 				}
 			}
 			ths->release();
@@ -59,7 +100,7 @@ void* PoolThread::run(void *arg)
 }
 
 PoolThread::PoolThread(bool console) {
-	logger = Logger::getLogger("PoolThread");
+	logger = LoggerFactory::getLogger("PoolThread");
 	this->task = NULL;
 	this->idle = true;
 	this->console = console;
@@ -71,7 +112,7 @@ PoolThread::PoolThread(bool console) {
 }
 
 PoolThread::PoolThread() {
-	logger = Logger::getLogger("PoolThread");
+	logger = LoggerFactory::getLogger("PoolThread");
 	this->task = NULL;
 	this->idle = true;
 	this->console = false;

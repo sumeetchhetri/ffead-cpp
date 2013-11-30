@@ -22,105 +22,15 @@
 
 #include "HttpResponseParser.h"
 
-string* HttpResponseParser::headernames = NULL;
-
 HttpResponseParser::HttpResponseParser() {
-	logger = Logger::getLogger("HttpResponseParser");
+	logger = LoggerFactory::getLogger("HttpResponseParser");
 }
 
 HttpResponseParser::~HttpResponseParser() {
-	// TODO Auto-generated destructor stub
 }
 
 
-
-HttpResponseParser::HttpResponseParser(string vecstr,string path)
-{
-	vector<string> vec;
-	StringUtil::split(vec, vecstr, ("\n"));
-	if(HttpResponseParser::headernames==NULL)
-	{
-		HttpResponseParser::headernames = new string();
-		ifstream ifs((path+"http-res-headers").c_str(),ifstream::in);
-		string tempios;
-		while(getline(ifs,tempios,'\n'))
-		{
-			HttpResponseParser::headernames->append(tempios);
-		}
-		logger << endl << "done reading header types" << endl;
-	}
-	if(vec.size()!=0)
-	{
-		this->content = "";
-		string conten;
-		bool contStarts = false;
-		for(unsigned int i=0;i<vec.size();i++)
-		{
-			//logger << endl << "Reading line " << vec.at(i) << endl << flush;
-			vector<string> temp,vemp,memp;
-
-			if(vec.at(i)=="\r" || vec.at(i)==""|| vec.at(i)=="\r\n")
-			{
-				contStarts = true;
-				continue;
-			}
-			StringUtil::split(temp, vec.at(i), (": "));
-			if(temp.size()>1)
-			{
-				//logger << "line => " << vec.at(i) << endl;
-				StringUtil::replaceFirst(temp.at(1),"\r","");
-				if(HttpResponseParser::headernames->find(temp.at(0)+":")!=string::npos)
-				{
-					//logger << temp.at(0) << " = " << temp.at(1) << endl;
-					this->headers[temp.at(0)] = temp.at(1);
-				}
-				else
-					logger << "\nnot a valid header" << temp.at(0) << endl;
-			}
-			else
-			{
-
-				string tem = vec.at(i);
-				if(!contStarts)
-				{
-					//logger << "line => " << vec.at(i) << endl;
-					vector<string> httpst;
-					StringUtil::split(httpst, tem, (" "));
-					if(httpst.at(0).find("HTTP")==string::npos)
-					{
-
-					}
-					else
-					{
-						this->headers["Version"] = httpst.at(0);
-						this->headers["StatusCode"] = httpst.at(1);
-						this->headers["StatusMsg"] = httpst.at(2);
-					}
-				}
-				else
-				{
-					string temp;
-					if(vec.at(i).find("<?")!=string::npos && vec.at(i).find("?>")!=string::npos)
-					{
-						temp = vec.at(i).substr(vec.at(i).find("?>")+2);
-						conten.append(temp);
-					}
-					else
-						conten.append(vec.at(i));
-					if(i!=vec.size()-1)
-						conten.append("\n");
-				}
-			}
-		}
-		this->content = conten;
-		if(this->content!="")
-		{
-			//logger << this->content << flush;
-		}
-	}
-}
-
-HttpResponseParser::HttpResponseParser(string vecstr)
+HttpResponseParser::HttpResponseParser(string vecstr, HttpResponse &response)
 {
 	vector<string> vec;
 	StringUtil::split(vec, vecstr, ("\n"));
@@ -143,7 +53,7 @@ HttpResponseParser::HttpResponseParser(string vecstr)
 			{
 				//logger << temp.at(0) << " => " << temp.at(1) << endl;
 				StringUtil::replaceFirst(temp.at(1),"\r","");
-				this->headers[temp.at(0)] = temp.at(1);
+				response.addHeaderValue(temp.at(0), temp.at(1));
 			}
 			else
 			{
@@ -160,9 +70,9 @@ HttpResponseParser::HttpResponseParser(string vecstr)
 					}
 					else
 					{
-						this->headers["Version"] = httpst.at(0);
-						this->headers["StatusCode"] = httpst.at(1);
-						this->headers["StatusMsg"] = httpst.at(2);
+						response.httpVersion = httpst.at(0);
+						response.setStatusCode(httpst.at(1));
+						response.setStatusMsg(httpst.at(2));
 					}
 				}
 				else
@@ -174,9 +84,10 @@ HttpResponseParser::HttpResponseParser(string vecstr)
 			}
 		}
 		this->content = conten;
-		if(this->content!="")
-		{
-			//logger << this->content << flush;
-		}
 	}
+}
+
+string HttpResponseParser::getContent()
+{
+	return content;
 }

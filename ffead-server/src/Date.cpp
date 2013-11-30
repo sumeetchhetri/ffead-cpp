@@ -21,7 +21,7 @@
  */
 #include "Date.h"
 
-string Date::getMon(string mmm)
+string Date::getMon(string mmm) const
 {
 	StringUtil::toUpper(mmm);
 	if(mmm=="JAN")return "01";
@@ -84,16 +84,44 @@ string getHalfDayName(string dayName)
 	return dayName;
 }
 
-Date::Date()
+Date::Date(bool utc)
 {
 	//logger = //logger::get//logger("Date");
 	time_t rawtime;
 	struct tm * timeinfo;
 	time (&rawtime);
-	timeinfo = localtime(&rawtime);
+	if(utc)
+		timeinfo = gmtime(&rawtime);
+	else
+		timeinfo = localtime(&rawtime);
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
 	this->nanoseconds = en.tv_nsec;
+	this->timeZoneOffset = timeinfo->tm_isdst;
+	string tem;
+	tem.append(asctime(timeinfo));
+	StringUtil::replaceAll(tem,"\n","");
+	StringUtil::replaceAll(tem,"  "," ");
+	vector<string> temp,vemp;
+	StringUtil::split(temp,tem,(" "));
+	this->dayw = StringUtil::toUpperCopy(temp.at(0));
+	this->monthw = StringUtil::toUpperCopy(temp.at(1));
+	this->month = getMon(monthw);
+	this->day = temp.at(2);
+	StringUtil::split(vemp,temp.at(3),(":"));
+	this->hh = vemp.at(0);
+	this->mm = vemp.at(1);
+	this->ss = vemp.at(2);
+	this->year = temp.at(4);
+	this->weekday = getWeekDayVal(this->dayw);
+}
+
+Date::Date(struct tm* timeinfo)
+{
+	timespec en;
+	clock_gettime(CLOCK_REALTIME, &en);
+	this->nanoseconds = en.tv_nsec;
+	this->timeZoneOffset = timeinfo->tm_isdst;
 	string tem;
 	tem.append(asctime(timeinfo));
 	StringUtil::replaceAll(tem,"\n","");
@@ -116,7 +144,7 @@ Date::~Date() {
 	// TODO Auto-generated destructor stub
 }
 
-int Date::getMonth()
+int Date::getMonth() const
 {
 	if(this->month!="")
 		return CastUtil::lexical_cast<int>(this->month);
@@ -251,39 +279,43 @@ string Date::getYearStr() const
 	return year;
 }
 
+void Date::setTimeZoneOffset(float tzVal)
+{
+	timeZoneOffset = tzVal;
+}
+
+float Date::getTimeZoneOffset()
+{
+	return timeZoneOffset;
+}
+
 string Date::toString()
 {
-	return dayw+" "+year+" "+monthw+" "+day+" "+hh+":"+mm+":"+ss+"."+CastUtil::lexical_cast<string>(nanoseconds);
+	return dayw+" "+year+" "+monthw+" "+day+" "+hh+":"+mm+":"+ss+"."+CastUtil::lexical_cast<string>(nanoseconds)+" "+CastUtil::lexical_cast<string>(timeZoneOffset);
 }
 
-Date Date::addSeconds(long seconds)
+Date Date::addSecondsGet(double seconds)
 {
-	long minutes = (getSs()+seconds)/60;
-	seconds = (getSs()+seconds)%60;
-	Date d = addMinutes(minutes);
-	d.setSs(seconds);
+	Date d = *this;
+	d.updateSeconds(seconds);
 	return d;
 }
 
-Date Date::addMinutes(long minutes)
+Date Date::addMinutesGet(double minutes)
 {
-	long hours = (getMm()+minutes)/60;
-	minutes = (getMm()+minutes)%60;
-	Date d = addHours(hours);
-	d.setMm(minutes);
+	Date d = *this;
+	d.updateMinutes(minutes);
 	return d;
 }
 
-Date Date::addHours(long hours)
+Date Date::addHoursGet(double hours)
 {
-	long days = (getHh()+hours)/24;
-	hours = (getHh()+hours)%24;
-	Date d = addDays(days);
-	d.setHh(hours);
+	Date d = *this;
+	d.updateHours(hours);
 	return d;
 }
 
-Date Date::addDays(long days)
+Date Date::addDaysGet(long days)
 {
 	long months = getMonth();
 	long year = getYear() + months/12;
@@ -292,7 +324,7 @@ Date Date::addDays(long days)
 	return getDateFromDays(g);
 }
 
-Date Date::addMonths(long months)
+Date Date::addMonthsGet(long months)
 {
 	months = getMonth() + months;
 	long year = getYear() + months/12;
@@ -301,7 +333,7 @@ Date Date::addMonths(long months)
 	return getDateFromDays(g);
 }
 
-Date Date::addYears(long years)
+Date Date::addYearsGet(long years)
 {
 	long g = getDays(getYear()+years,getMonth(),getDay());
 	return getDateFromDays(g);
@@ -317,7 +349,7 @@ long Date::getDaysInt()
 	y = y - m/10;
 	return 365*y + y/4 - y/100 + y/400 + (m*306 + 5)/10 + ( d - 1 );
 }
-long Date::getDays(long y,long m,long d)
+long Date::getDays(long y,long m,long d) const
 {
 	y = y -1900;
 	m = (m + 9) % 12;
@@ -325,7 +357,7 @@ long Date::getDays(long y,long m,long d)
 	return 365*y + y/4 - y/100 + y/400 + (m*306 + 5)/10 + ( d - 1 );
 }
 
-long Date::getHours(long y,long m,long d, long hh)
+long Date::getHours(long y,long m,long d, long hh) const
 {
 	long g = getDays(y,m,d);
 	int hfd = hh/24;
@@ -333,7 +365,7 @@ long Date::getHours(long y,long m,long d, long hh)
 	return (g+hfd)*24 + hh;
 }
 
-long Date::getMinutes(long y,long m,long d, long hh, long mi)
+long Date::getMinutes(long y,long m,long d, long hh, long mi) const
 {
 	long g = getHours(y,m,d,hh);
 	int mfh = mi/60;
@@ -341,7 +373,7 @@ long Date::getMinutes(long y,long m,long d, long hh, long mi)
 	return (g+mfh)*60 + mi;
 }
 
-unsigned long long Date::getSeconds(long y,long m,long d, long hh, long mi, long ss)
+unsigned long long Date::getSeconds(long y,long m,long d, long hh, long mi, long ss) const
 {
 	long g = getMinutes(y,m,d,hh,mi);
 	int sfm = ss/60;
@@ -373,7 +405,7 @@ Date Date::getDateFromDays(long days)
 
 void Date::getDateFromHours(long hours)
 {
-	long days = hours/24;
+	/*long days = hours/24;
 	hours = hours%24;
 	long y = (10000*days + 14780)/3652425;
 	long ddd = days - (365*y + y/4 - y/100 + y/400);
@@ -385,13 +417,13 @@ void Date::getDateFromHours(long hours)
 	long mi = (100*ddd + 52)/3060;
 	long mm = (mi + 2)%12 + 1;
 	y = y + (mi + 2)/12 + 1900;
-	long dd = ddd - (mi*306 + 5)/10 + 1;
+	long dd = ddd - (mi*306 + 5)/10 + 1;*/
 	////logger << y << " " << mm << " " << dd << " " << hours;
 }
 
 void Date::getDateFromMinutes(long long minutes)
 {
-	long hours = minutes/60;
+	/*long hours = minutes/60;
 	minutes = minutes%60;
 	long days = hours/24;
 	hours = hours%24;
@@ -405,13 +437,13 @@ void Date::getDateFromMinutes(long long minutes)
 	long mi = (100*ddd + 52)/3060;
 	long mm = (mi + 2)%12 + 1;
 	y = y + (mi + 2)/12 + 1900;
-	long dd = ddd - (mi*306 + 5)/10 + 1;
+	long dd = ddd - (mi*306 + 5)/10 + 1;*/
 	////logger << y << " " << mm << " " << dd << " " << hours << ":" << minutes;
 }
 
 void Date::getDateFromSeconds(long long seconds)
 {
-	long long minutes = seconds/60;
+	/*long long minutes = seconds/60;
 	seconds = seconds%60;
 	long hours = minutes/60;
 	minutes = minutes%60;
@@ -427,7 +459,7 @@ void Date::getDateFromSeconds(long long seconds)
 	long mi = (100*ddd + 52)/3060;
 	long mm = (mi + 2)%12 + 1;
 	y = y + (mi + 2)/12 + 1900;
-	long dd = ddd - (mi*306 + 5)/10 + 1;
+	long dd = ddd - (mi*306 + 5)/10 + 1;*/
 	////logger << y << " " << mm << " " << dd << " " << hours << ":" << minutes << ":" << seconds <<  "\n" << endl << flush;
 }
 
@@ -473,17 +505,17 @@ string Date::getDayName(int dd, int mm, int yyyy)
 	int days = ((yyyy-1)*365 + (yyyy-1)/4 - (yyyy-1)/100 + (yyyy-1)/400) % 7;//Daycode for prev year 31st Dec
 	switch(mm)
 	{
-		case 12:dd += 30;
-		case 11:dd += 31;
-		case 10:dd += 30;
-		case 9:dd += 31;
-		case 8:dd += 31;
-		case 7:dd += 30;
-		case 6:dd += 31;
-		case 5:dd += 30;
-		case 4:dd += 31;
-		case 3:dd += 28;
-		case 2:dd += 31;
+		case 12:dd += 30;break;
+		case 11:dd += 31;break;
+		case 10:dd += 30;break;
+		case 9:dd += 31;break;
+		case 8:dd += 31;break;
+		case 7:dd += 30;break;
+		case 6:dd += 31;break;
+		case 5:dd += 30;break;
+		case 4:dd += 31;break;
+		case 3:dd += 28;break;
+		case 2:dd += 31;break;
 	}
 	days += dd;
 	if ((!(yyyy % 4) && ((yyyy % 100) || !(yyyy % 400)))&& mm > 2)
@@ -502,6 +534,44 @@ string Date::getDayName(int dd, int mm, int yyyy)
 	return dayName;
 }
 
+
+void Date::setDayName()
+{
+	string dayName;
+	int yyyy = getYear();
+	int mm = getMonth();
+	int dd = getDay();
+	dd += ((yyyy-1)*365 + (yyyy-1)/4 - (yyyy-1)/100 + (yyyy-1)/400) % 7;//Daycode for prev year 31st Dec
+	switch(mm)
+	{
+		case 12:dd += 334;break;
+		case 11:dd += 304;break;
+		case 10:dd += 273;break;
+		case 9:dd += 243;break;
+		case 8:dd += 212;break;
+		case 7:dd += 181;break;
+		case 6:dd += 151;break;
+		case 5:dd += 120;break;
+		case 4:dd += 90;break;
+		case 3:dd += 59;break;
+		case 2:dd += 31;break;
+	}
+	if ((!(yyyy % 4) && ((yyyy % 100) || !(yyyy % 400)))&& mm > 2)
+		dd++;
+	dd = dd%7;
+	switch(dd)
+	{
+		case 0:dayName = "SUNDAY";break;
+		case 1:dayName = "MONDAY";break;
+		case 2:dayName = "TUESDAY";break;
+		case 3:dayName = "WEDNESDAY";break;
+		case 4:dayName = "THURSDAY";break;
+		case 5:dayName = "FRIDAY";break;
+		case 6:dayName = "SATURDAY";break;
+	}
+	setDayw(getHalfDayName(dayName));
+}
+
 Date::Date(int yyyy,string mmm,int dd)
 {
 	string mm = getMon(mmm);
@@ -510,6 +580,9 @@ Date::Date(int yyyy,string mmm,int dd)
 	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
 	*this = getDateFromDays(g);
 	this->nanoseconds = 0;
+	this->timeZoneOffset = 0;
+	setDayName();
+
 }
 
 Date::Date(int yyyy,int mm,int dd)
@@ -518,6 +591,8 @@ Date::Date(int yyyy,int mm,int dd)
 	long g = getDays(yyyy,mm,dd);
 	*this = getDateFromDays(g);
 	this->nanoseconds = 0;
+	this->timeZoneOffset = 0;
+	setDayName();
 }
 
 Date::Date(int yy,string mmm,int dd,bool te)
@@ -531,6 +606,8 @@ Date::Date(int yy,string mmm,int dd,bool te)
 	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
 	*this = getDateFromDays(g);
 	this->nanoseconds = 0;
+	this->timeZoneOffset = 0;
+	setDayName();
 }
 
 Date::Date(int yy,int mm,int dd,bool te)
@@ -542,6 +619,8 @@ Date::Date(int yy,int mm,int dd,bool te)
 	long g = getDays(yyyy,mm,dd);
 	*this = getDateFromDays(g);
 	this->nanoseconds = 0;
+	this->timeZoneOffset = 0;
+	setDayName();
 }
 
 void Date::setTime(int hh,int mi,int ss)
@@ -552,6 +631,13 @@ void Date::setTime(int hh,int mi,int ss)
 	setMm(mi);
 	setSs(ss);
 	this->nanoseconds = 0;
+}
+
+Date Date::toGMT()
+{
+	Date d = *this;
+	d.updateHours(timeZoneOffset);
+	return d;
 }
 
 int Date::test()
@@ -566,17 +652,163 @@ int Date::test()
 	getDateFromSeconds(gg);
 	Date d;
 	//logger << d.toString() << endl;
-	Date d1 = d.addYears(1);
+	Date d1 = addYearsGet(1);
 	//logger << d1.toString() << endl;
-	Date d2 = d.addMonths(23);
+	Date d2 = addMonthsGet(23);
 	//logger << d2.toString() << endl;
-	Date d3 = d.addDays(17);
+	Date d3 = addDaysGet(17);
 	//logger << d3.toString() << endl;
-	Date d4 = d.addHours(25);
+	Date d4 = addHoursGet(25);
 	//logger << d4.toString() << endl;
-	Date d5 = d.addMinutes(61);
+	Date d5 = addMinutesGet(61);
 	//logger << d5.toString() << endl;
-	Date d6 = d.addSeconds(61);
+	Date d6 = addSecondsGet(61);
 	//logger << d6.toString() << endl;
 	return 0;
+}
+
+void Date::updateSeconds(double dseconds)
+{
+	long seconds = floor(dseconds);
+	double fraction = dseconds - (double)seconds;
+	long minutes = (getSs()+seconds)/60;
+	seconds = (getSs()+seconds)%60;
+	if(minutes>0)
+	{
+		updateMinutes(minutes);
+	}
+	setSs(seconds);
+	nanoseconds = fraction * 1E9;
+}
+
+
+void Date::updateMinutes(double dminutes)
+{
+	long minutes = floor(dminutes);
+	double fraction = dminutes - (double)minutes;
+	long extseconds = fraction*60 + getSs();
+	minutes += extseconds/60;
+	extseconds = extseconds%60;
+	long hours = (getMm()+minutes)/60;
+	minutes = (getMm()+minutes)%60;
+	if(hours>0)
+	{
+		updateHours(hours);
+	}
+	setMm(minutes);
+	setSs(extseconds);
+}
+
+
+void Date::updateHours(double dhours)
+{
+	long hours = floor(dhours);
+	double fraction = dhours - (double)hours;
+	long extminutes = fraction*60 + getMm();
+	hours += extminutes/60;
+	extminutes = extminutes%60;
+	long days = (getHh()+hours)/24;
+	hours = (getHh()+hours)%24;
+	if(days>0)
+	{
+		updateDays(days);
+	}
+	setHh(hours);
+	setMm(extminutes);
+}
+
+
+void Date::updateDays(long days)
+{
+	long months = getMonth();
+	long year = getYear() + months/12;
+	months = months%12;
+	long g = getDays(year,months,getDay()+days);
+	Date d = getDateFromDays(g);
+	setDay(d.getDay());
+	setMonth(d.getMm());
+	setYear(d.getYear());
+	setDayw(d.getDayw());
+}
+
+
+void Date::updateMonths(long months)
+{
+	months = getMonth() + months;
+	long year = getYear() + months/12;
+	months = months%12;
+	long g = getDays(year,months,getDay());
+	Date d = getDateFromDays(g);
+	setDay(d.getDay());
+	setMonth(d.getMm());
+	setYear(d.getYear());
+	setDayw(d.getDayw());
+}
+
+
+void Date::updateYears(long years)
+{
+	long g = getDays(getYear()+years,getMonth(),getDay());
+	Date d = getDateFromDays(g);
+	setDay(d.getDay());
+	setMonth(d.getMm());
+	setYear(d.getYear());
+	setDayw(d.getDayw());
+}
+
+void Date::compare(Date d, unsigned long long &thisss, unsigned long long &thtsss) const
+{
+	thisss = getSeconds(this->getYear(),this->getMonth(),this->getDay(),this->getHh(),this->getMm(),this->getSs());
+	thtsss = getSeconds(d.getYear(),d.getMonth(),d.getDay(),d.getHh(),d.getMm(),d.getSs());
+
+	thisss %= 9223372036854775807LL;
+	thtsss %= 9223372036854775807LL;
+}
+
+bool Date::operator<(Date d) const
+{
+	unsigned long long thisss = -1;
+	unsigned long long thtsss = -1;
+	this->compare(d, thisss, thtsss);
+	return thisss<thtsss;
+}
+
+bool Date::operator>(Date d) const
+{
+	unsigned long long thisss = -1;
+	unsigned long long thtsss = -1;
+	this->compare(d, thisss, thtsss);
+	return thisss>thtsss;
+}
+
+bool Date::operator==(Date d) const
+{
+	unsigned long long thisss = -1;
+	unsigned long long thtsss = -1;
+	this->compare(d, thisss, thtsss);
+	return thisss==thtsss;
+}
+
+bool Date::operator<=(Date d) const
+{
+	unsigned long long thisss = -1;
+	unsigned long long thtsss = -1;
+	this->compare(d, thisss, thtsss);
+	return thisss<=thtsss;
+}
+
+bool Date::operator>=(Date d) const
+{
+	unsigned long long thisss = -1;
+	unsigned long long thtsss = -1;
+	this->compare(d, thisss, thtsss);
+	return thisss>=thtsss;
+}
+
+bool Date::operator!=(Date d) const
+{
+	unsigned long long thisss = -1;
+	unsigned long long thtsss = -1;
+	this->compare(d, thisss, thtsss);
+	return thisss!=thtsss;
 }

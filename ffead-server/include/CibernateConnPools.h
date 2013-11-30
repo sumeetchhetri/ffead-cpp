@@ -24,7 +24,7 @@
 #define CIBERNATECONNPOOLS_H_
 #include "CibernateConnectionPool.h"
 #include "map"
-#include "Logger.h"
+#include "LoggerFactory.h"
 typedef map<string,string> strMap;
 typedef map<string,strMap> smstrMap;
 
@@ -41,55 +41,19 @@ typedef map<string,vector<DBRel> > relMap;
 class Mapping
 {
 	smstrMap appTableColMapping;
+	smstrMap tableAppColMapping;
 	strMap appTableClassMapping;
 	relMap appTableRelMapping;
 public:
-    string getAppTableColMapping(string table,string column)
-    {
-    	if(this->appTableColMapping.find(table)!=this->appTableColMapping.end())
-    	{
-    		if(this->appTableColMapping[table].find(column)!=this->appTableColMapping[table].end())
-    			return this->appTableColMapping[table][column];
-    		else
-    			return "";
-    	}
-    	return "";
-    }
-
-    void setAppTableColMapping(smstrMap appTableColMapping)
-    {
-        this->appTableColMapping = appTableColMapping;
-    }
-
-    string getAppTableClassMapping(string claz)
-    {
-    	if(this->appTableClassMapping.find(claz)!=this->appTableClassMapping.end())
-    		return this->appTableClassMapping[claz];
-    	else
-    		return "";
-    }
-
-    void setAppTableClassMapping(strMap appTableClassMapping)
-    {
-        this->appTableClassMapping = appTableClassMapping;
-    }
-
-    vector<DBRel> getAppTablerelMapping(string claz)
-	{
-		if(this->appTableRelMapping.find(claz)!=this->appTableRelMapping.end())
-			return this->appTableRelMapping[claz];
-		else
-		{
-			vector<DBRel> rel;
-			return rel;
-		}
-	}
-
-    void setAppTableRelMapping(relMap appTableRelMapping)
-    {
-	    this->appTableRelMapping = appTableRelMapping;
-    }
-
+    string getAppTableColMapping(string table,string propertyName);
+    string getTableAppColMapping(string table,string columnName);
+    strMap getAppTableColMapping(string table);
+    strMap getTableAppColMapping(string table);
+    void setAppTableColMapping(smstrMap appTableColMapping);
+    string getAppTableClassMapping(string claz);
+    void setAppTableClassMapping(strMap appTableClassMapping);
+    vector<DBRel> getAppTablerelMapping(string claz);
+    void setAppTableRelMapping(relMap appTableRelMapping);
 };
 class CibernateConnPools {
 	Logger logger;
@@ -100,11 +64,13 @@ class CibernateConnPools {
 public:
 	CibernateConnPools();
 	virtual ~CibernateConnPools();
-	static void addPool(int,string,string,string,string);
+	static void addPool(int,string,string,string,string,string);
 	static void addMapping(string,Mapping*);
 	static bool isInitialized();
 	static CibernateConnectionPool* getPool(string);
 	static Mapping* getMapping(string);
+	static map<string,Mapping*> getMappings();
+	static void destroy();
 };
 
 #endif /* CIBERNATECONNPOOLS_H_ */

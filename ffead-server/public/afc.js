@@ -194,11 +194,11 @@ function _afc_fview_call_any_function (func){
 function testWsCall()
 {       
         var form = prepForm(null);
-        alert("ASDSADASD");
+        alert("Testing Web service Call");
         alert(form);
         var obj = new Array();
         var postdata = "";
-        postdata += '<?xml version="1.0"?><soap:Envelope xmlns:soap="http://www.w3.org/2001/12/soap-envelope" soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding"><soap:Body xmlns:tns="http://www.example.org/stock"><tns:test4><arg0>IBM</arg0></tns:test4></soap:Body></soap:Envelope>';
+        postdata += '<?xml version="1.0"?><soap:Envelope xmlns:soap="http://www.w3.org/2001/12/soap-envelope" soap:encodingStyle="http://www.w3.org/2001/12/soap-encoding"><soap:Body xmlns:tns="http://www.example.org/stock"><tns:test4><in>IBM</in></tns:test4></soap:Body></soap:Envelope>';
         var opt = {
             method: 'post',
             postBody: postdata,
@@ -209,7 +209,7 @@ function testWsCall()
                         alert(msg);
                 }
         }
-        new Ajax.Request('/Testing', opt);
+        new Ajax.Request('/testing', opt);
         //alert(postdata);
         document.body.removeChild(form);
 }

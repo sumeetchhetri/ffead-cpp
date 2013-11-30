@@ -29,7 +29,7 @@
 #include <fstream>
 #include "XmlParseException.h"
 #include "CastUtil.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "StringUtil.h"
 
 class XmlParser {

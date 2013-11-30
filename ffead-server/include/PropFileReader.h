@@ -22,7 +22,6 @@
 
 #ifndef PROPFILEREADER_H_
 #define PROPFILEREADER_H_
-#include "iostream"
 #include "fstream"
 #include "sstream"
 #include "map"

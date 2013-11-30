@@ -20,7 +20,14 @@
 *      Author: sumeet
 */
 #include "Element.h"
-#include "StringUtil.h"
+
+Element::Element() {
+	parent = NULL;
+}
+
+Element::~Element() {
+}
+
 bool Element::operator == (Element ele)
 {
 	if(this->tagName == ele.tagName
@@ -43,9 +50,12 @@ bool Element::operator == (Element *ele)
 
 void Element::addElement(Element element)
 {
+	element.parent = NULL;
 	this->elements.push_back(element);
-	if(&(this->mapOfEle[element.getTagName()])!=NULL)
+	if(mapOfEle.find(element.getTagName())==mapOfEle.end())
+	{
 		this->mapOfEle[element.getTagName()] = element;
+	}
 }
 void Element::removeElement(Element element)
 {
@@ -60,9 +70,27 @@ void Element::removeElement(Element element)
 	}
 }
 
-void Element::addAttribute(string key,string value)
+void Element::addAttribute(string key,string value,bool validate)
 {
-	this->attributes[key] = value;
+	if(StringUtil::trimCopy(value)=="")return;
+	if(StringUtil::trimCopy(key).find("xmlns:")==0)
+	{
+		key = key.substr(6);
+		cout << "Adding namespace - " + key << " = " << value << endl;
+		if(validate && this->namespaces.find(key)!=this->namespaces.end())
+		{
+			//throw ("Duplicate namespace found - xmlns:" + key);
+		}
+		else
+		{
+			this->namespaces[key] = value;
+		}
+		this->attributes["xmlns:"+key] = value;
+	}
+	else
+	{
+		this->attributes[key] = value;
+	}
 }
 void Element::removeAttribute(string key)
 {
@@ -76,9 +104,9 @@ bool Element::isNull()
 	else
 		return false;
 }
-//void updateAttribute(string,string) = &addAttribute;
 typedef map<string,string> AttributeList;
 typedef vector<Element> ElementList;
+typedef vector<Element> ElementListP;
 AttributeList Element::getAttributes()
 {
 	return this->attributes;
@@ -89,7 +117,7 @@ string Element::getAttribute(string key)
 }
 ElementList Element::getChildElements()
 {
-	return this->elements;
+	return elements;
 }
 string Element::getTagName()
 {
@@ -98,13 +126,6 @@ string Element::getTagName()
 string Element::getNameSpc()
 {
 	return this->nameSpace;
-}
-string Element::getNewTagNameSpc(string tag)
-{
-	if(this->nameSpace!="")
-		return (this->nameSpace + ":" + tag);
-	else
-		return tag;
 }
 
 string Element::getTagNameSpc()
@@ -149,13 +170,18 @@ void Element::setCdata(bool cdata)
 
 Element Element::getElementByName(string name)
 {
-	return this->mapOfEle[name];
+	Element ele;
+	if(mapOfEle.find(name)!=mapOfEle.end())
+	{
+		return this->mapOfEle[name];
+	}
+	return ele;
 }
 
 ElementList Element::getElementsByName(string name)
 {
 	ElementList list;
-	for(int i=0;i<this->elements.size();i++)
+	for(int i=0;i<(int)this->elements.size();i++)
 	{
 		if(this->elements.at(i).getTagName()==name)
 			list.push_back(this->elements.at(i));
@@ -168,12 +194,31 @@ string Element::render()
 	string rend;
 	rend.append(generateStartOpenTag(this->getTagName()));
 	rend.append(generateAttributes(this->getAttributes()));
+	//rend.append(generateAttributes(this->namespaces));
 	rend.append(generateEndOpenTag());
 	rend.append(this->getText());
 	ElementList elements = this->getChildElements();
 	for(unsigned int i=0;i<elements.size();i++)
 	{
 		rend.append(elements.at(i).render());
+	}
+	rend.append(generateCloseTag(this->getTagName()));
+	return rend;
+}
+
+string Element::renderSerialization()
+{
+	cout << " inside renderSerialization" << endl;
+	string rend;
+	rend.append(generateStartOpenTag(this->getTagName()));
+	rend.append(generateAttributes(this->getAttributes()));
+	//rend.append(" namespace=\""+getNameSpcValue()+"\"");
+	rend.append(generateEndOpenTag());
+	rend.append(this->getText());
+	ElementList elements = this->getChildElements();
+	for(unsigned int i=0;i<elements.size();i++)
+	{
+		rend.append(elements.at(i).renderSerialization());
 	}
 	rend.append(generateCloseTag(this->getTagName()));
 	return rend;
@@ -188,4 +233,70 @@ string Element::renderChildren()
 		rend.append(elements.at(i).render());
 	}
 	return rend;
+}
+
+bool Element::isValidNamespace(Element* ele, string nameSpace)
+{
+	bool valid = false;
+	if(ele==NULL)
+	{
+		return false;
+	}
+
+	if(ele->namespaces.find(nameSpace)!=ele->namespaces.end())
+	{
+		cout << "searching self for namespace - " + nameSpace << endl;
+		if(ele->namespaces.find(nameSpace)!=ele->namespaces.end())
+		{
+			cout << "found namespace self - " + nameSpace << endl;
+			valid = true;
+		}
+	}
+	if(!valid) {
+		valid = isValidNamespace(ele->parent, nameSpace);
+	}
+	return valid;
+}
+
+void Element::validateNs()
+{
+	if(nameSpace=="" || isValidNamespace(this, nameSpace))
+	{
+		ElementList elements = this->getChildElements();
+		for(unsigned int i=0;i<elements.size();i++)
+		{
+			elements.at(i).parent = this;
+			elements.at(i).validateNs();
+		}
+	}
+	else
+	{
+		throw ("No namespace definition found - xmlns:" + nameSpace);
+	}
+}
+
+
+string Element::getNmspc(Element* ele, string nameSpace)
+{
+	string Nmspc;
+	if(ele==NULL)
+	{
+		return "";
+	}
+
+	if(ele->namespaces.find(nameSpace)!=ele->namespaces.end())
+	{
+		cout << "searching self for namespace - " + nameSpace << endl;
+		if(ele->namespaces.find(nameSpace)!=ele->namespaces.end())
+		{
+			cout << "found namespace self - " + nameSpace << endl;
+			return ele->namespaces[nameSpace];
+		}
+	}
+	return getNmspc(ele->parent, nameSpace);
+}
+
+string Element::getNameSpcValue()
+{
+	return getNmspc(this, nameSpace);
 }

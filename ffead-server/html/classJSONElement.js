@@ -18,6 +18,5 @@ var classJSONElement =
     [ "setName", "classJSONElement.html#a0441510756b114f930fb7b9e7e6a1e11", null ],
     [ "setType", "classJSONElement.html#adea7cf3fa1f155a7dc3c59f5d38590fa", null ],
     [ "setValue", "classJSONElement.html#afd4967c2a98f0acb0c3d02147e903287", null ],
-    [ "toString", "classJSONElement.html#af7e5caf572d46ba2777d9889a9fc8649", null ],
-    [ "JSON_TYPE", "classJSONElement.html#a2f25b0b64f6b02979a7246a9542b82c8", null ]
+    [ "toString", "classJSONElement.html#af7e5caf572d46ba2777d9889a9fc8649", null ]
 ];

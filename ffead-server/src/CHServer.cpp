@@ -30,7 +30,7 @@ CHServer::~CHServer() {
 	// TODO Auto-generated destructor stub
 }
 //SharedData* SharedData::shared_instance = NULL;
-string servd;
+string servd, serverCntrlFileNm;
 static bool isSSLEnabled = false,isThreadprq = false,processforcekilled = false,processgendone = false,sessatserv = false,isCompileEnabled = false;
 static long sessionTimeout;
 static int thrdpsiz/*,shmid*/;
@@ -38,10 +38,11 @@ static SSL_CTX *ctx;
 static char *ciphers=0;
 map<int,pid_t> pds;
 static pid_t parid;
-void *dlib = NULL;
+void *dlib = NULL, *ddlib = NULL;
 typedef map<string,string> sessionMap;
 static Mutex m_mutex,p_mutex;
 ConfigurationData configurationData;
+FFEADContext ffeadContext;
 
 Logger logger;
 
@@ -179,7 +180,7 @@ void signalSIGSEGV(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);*/
-	logger << "Segmentation fault occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Segmentation fault occurred for process" << getpid() << "\n" << tempo << endl;
 	abort();
 }
 void signalSIGCHLD(int dummy)
@@ -203,8 +204,8 @@ void signalSIGCHLD(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);*/
-	logger << "Child process got killed " << getpid() << "\n" << tempo << flush;
-	abort();
+	logger << "Child process got killed " << getpid() << "\n" << tempo << endl;
+	//abort();
 }
 void signalSIGABRT(int dummy)
 {
@@ -227,7 +228,7 @@ void signalSIGABRT(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);*/
-	logger << "Abort signal occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Abort signal occurred for process" << getpid() << "\n" << tempo << endl;
 	abort();
 }
 void signalSIGTERM(int dummy)
@@ -251,7 +252,7 @@ void signalSIGTERM(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);*/
-	logger << "Termination signal occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Termination signal occurred for process" << getpid() << "\n" << tempo << endl;
 	abort();
 }
 
@@ -276,7 +277,7 @@ void signalSIGKILL(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);*/
-	logger << "Kill signal occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Kill signal occurred for process" << getpid() << "\n" << tempo << endl;
 	abort();
 }
 
@@ -301,8 +302,8 @@ void signalSIGINT(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);*/
-	logger << "Interrupt signal occurred for process" << getpid() << "\n" << tempo << flush;
-	abort();
+	logger << "Interrupt signal occurred for process" << getpid() << "\n" << tempo << endl;
+	//abort();
 }
 
 void signalSIGFPE(int dummy)
@@ -326,7 +327,7 @@ void signalSIGFPE(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);*/
-	logger << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << endl;
 	abort();
 }
 void signalSIGPIPE(int dummy)
@@ -350,7 +351,7 @@ void signalSIGPIPE(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);*/
-	logger << "Broken pipe ignore it" << getpid() << "\n" << tempo << flush;
+	logger << "Broken pipe ignore it" << getpid() << "\n" << tempo << endl;
 	//abort();
 }
 
@@ -375,7 +376,7 @@ void signalSIGILL(int dummy)
 		tempo += "\n";
 	}
 	free(symbols);*/
-	logger << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << flush;
+	logger << "Floating point Exception occurred for process" << getpid() << "\n" << tempo << endl;
 	abort();
 }
 
@@ -398,16 +399,35 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	}
 	if((pid=fork())==0)
 	{
+		char pidStr[10];
+		sprintf(pidStr, "%ld", (long)pid);
+		string proclabel = "CHServer-";
+		proclabel.append(pidStr);
+
+		Logger plogger = LoggerFactory::getLogger(proclabel);
+
 		SSLHandler sSLHandler;
 		dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
-		logger << endl <<dlib << endl;
+		//logger << endl <<dlib << endl;
 		if(dlib==NULL)
 		{
-			logger << dlerror() << endl;
-			logger.info("Could not load Library");
+			plogger << dlerror() << endl;
+			plogger.info("Could not load Library");
+			exit(0);
 		}
 		else
-			logger.info("Library loaded successfully");
+			plogger.info("Library loaded successfully");
+
+		ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
+		//logger << endl <<dlib << endl;
+		if(ddlib==NULL)
+		{
+			plogger << dlerror() << endl;
+			plogger.info("Could not load dynamic Library");
+			exit(0);
+		}
+		else
+			plogger.info("Dynamic Library loaded successfully");
 		if(isSSLEnabled)
 		{
 			/*HTTPS related*/
@@ -437,10 +457,10 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		ss << getpid();
 		ss >> filename;
 		filename.append(".cntrl");
-		logger << "generated file " << filename << flush;
+		plogger << ("generated file " + filename) << endl;
 		ofstream cntrlfile;
 		cntrlfile.open(filename.c_str());
-		cntrlfile << "Process Running" << flush;
+		cntrlfile << "Process Running" << endl;
 		cntrlfile.close();
 
 		close(sockfd);
@@ -455,14 +475,19 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		PropFileReader pread;
 		propMap params = pread.getProperties(serverRootDirectory+"resources/security.prop");
 
-		logger << params.size() <<endl;
-		while(1)
+		//logger << params.size() <<endl;
+
+		ofstream serverCntrlFile;
+		serverCntrlFile.open(serverCntrlFileNm.c_str());
+		while(serverCntrlFile.is_open())
 		{
+			serverCntrlFile.close();
+
 			int nfds = selEpolKqEvPrtHandler.getEvents();
 			if (nfds == -1)
 			{
 				perror("poller wait child process");
-				logger << "\n----------poller child process----" << flush;
+				plogger << "\n----------poller child process----" << endl;
 			}
 			else
 			{
@@ -475,24 +500,27 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				if((err=recv(fd,buf,10,MSG_PEEK))==0)
 				{
 					close(fd);
-					logger << "\nsocket conn closed before being serviced" << flush;
+					plogger << "Socket conn closed before being serviced" << endl;
+					serverCntrlFile.open(serverCntrlFileNm.c_str());
 					continue;
 				}
 
 				if(isThreadprq)
 				{
 					ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params,
-								isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+								isSSLEnabled, ctx, sSLHandler, configurationData, dlib, ddlib);
 					Thread pthread(&service, task);
 					pthread.execute();
 				}
 				else
 				{
 					ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params,
-							isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
-					pool.execute(*task);
+							isSSLEnabled, ctx, sSLHandler, configurationData, dlib, ddlib);
+					task->setCleanUp(true);
+					pool.submit(task);
 				}
 			}
+			serverCntrlFile.open(serverCntrlFileNm.c_str());
 		}
 	}
 	return pid;
@@ -539,19 +567,23 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	return pid;
 }*/
 
-
+#ifdef INC_DCP
 void* dynamic_page_monitor(void* arg)
 {
 	string serverRootDirectory = *(string*)arg;
 	struct stat statbuf;
-	strVec dcpsss = configurationData.dcpsss;
+	map<string, string> dcpsss = configurationData.dcpsss;
+	map<string, string> tpes = configurationData.tpes;
+	map<string, string> dcspstpes = dcpsss;
+	dcspstpes.insert(tpes.begin(), tpes.end());
 	map<string,long> statsinf;
-	for(int i=0;i<(int)dcpsss.size();i++)
+	map<string, string>::iterator it;
+	for(it=dcspstpes.begin();it!=dcspstpes.end();++it)
 	{
-		stat(dcpsss.at(i).c_str(), &statbuf);
+		stat(it->first.c_str(), &statbuf);
 		time_t tm = statbuf.st_mtime;
 		long tim = (uintmax_t)tm;
-		statsinf[dcpsss.at(i)] = tim;
+		statsinf[it->first] = tim;
 	}
 	while(true)
 	{
@@ -559,29 +591,60 @@ void* dynamic_page_monitor(void* arg)
 		bool flag = false;
 		if(processgendone)
 			continue;
-		for(int i=0;i<(int)dcpsss.size();i++)
+		for(it=dcspstpes.begin();it!=dcspstpes.end();++it)
 		{
-			stat(dcpsss.at(i).c_str(), &statbuf);
+			stat(it->first.c_str(), &statbuf);
 			time_t tm = statbuf.st_mtime;
 			long tim = (uintmax_t)tm;
-			if(tim!=statsinf[dcpsss.at(i)])
+			if(tim!=statsinf[it->first])
 			{
 				string rtdcfpath = serverRootDirectory + "rtdcf/";
 				string respath = serverRootDirectory + "resources/";
+
+				logger << "started generating dcp code" <<endl;
 				string ret = DCPGenerator::generateDCPAll(dcpsss);
 				AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
-				string compres = respath+"rundyn.sh";
+				logger << "done generating dcp code" <<endl;
+				logger << "started generating template code" <<endl;
+				ret = TemplateGenerator::generateTempCdAll(tpes);
+				AfcUtil::writeTofile(rtdcfpath+"TemplateInterface.cpp",ret,true);
+				logger << "done generating template code" <<endl;
+
+				string compres = respath+"rundyn_dinter.sh";
 				int i=system(compres.c_str());
 				if(!i)
 				{
-					logger << "regenarting intermediate code-----Done" << endl;
+					logger << "regenerating intermediate code-----Done" << endl;
 					logger.info("Done generating intermediate code");
 				}
 				m_mutex.lock();
-				map<int,pid_t>::iterator it;
-				for(it=pds.begin();it!=pds.end();it++)
+				if(Constants::IS_FILE_DESC_PASSING_AVAIL)
 				{
-					kill(it->second,9);
+					map<int,pid_t>::iterator it;
+					for(it=pds.begin();it!=pds.end();it++)
+					{
+						kill(it->second,9);
+					}
+				}
+				else
+				{
+					if(ddlib!=NULL)
+					{
+						for (int var = 0; var < 100; ++var) {
+							if(dlclose(ddlib)!=0)
+								break;
+						}
+					}
+
+					ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
+					//logger << endl <<dlib << endl;
+					if(ddlib==NULL)
+					{
+						logger << dlerror() << endl;
+						logger.info("Could not re-load Dynamic Library");
+					}
+					else
+						logger.info("Dynamic Library re-loaded successfully");
 				}
 				m_mutex.unlock();
 				processforcekilled = true;
@@ -591,18 +654,18 @@ void* dynamic_page_monitor(void* arg)
 		}
 		if(flag)
 		{
-			for(int ii=0;ii<(int)dcpsss.size();ii++)
+			for(it=dcspstpes.begin();it!=dcspstpes.end();++it)
 			{
-				stat(dcpsss.at(ii).c_str(), &statbuf);
+				stat(it->first.c_str(), &statbuf);
 				time_t tm = statbuf.st_mtime;
 				long tim = (uintmax_t)tm;
-				statsinf[dcpsss.at(ii)] = tim;
+				statsinf[it->first] = tim;
 			}
 		}
 	}
 	return NULL;
 }
-
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -613,12 +676,11 @@ int main(int argc, char* argv[])
 	//signal(SIGILL,signalSIGILL);
 	signal(SIGPIPE,signalSIGPIPE);
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
-    struct addrinfo hints, *servinfo, *p;
-    struct sockaddr_storage their_addr; // connector's address information
-    socklen_t sin_size;
-    struct sigaction sa;
-    int yes=1;
-    int rv,nfds,preForked=5;
+	struct sockaddr_storage their_addr; // connector's address information
+	socklen_t sin_size;
+
+    //int yes=1,rv;
+    int nfds,preForked=5;
     string serverRootDirectory = argv[1];
 
 	serverRootDirectory += "/";//serverRootDirectory = "/home/sumeet/server/";
@@ -627,18 +689,31 @@ int main(int argc, char* argv[])
 	string pubpath = serverRootDirectory + "public/";
 	string respath = serverRootDirectory + "resources/";
 	string webpath = serverRootDirectory + "web/";
+	string logpath = serverRootDirectory + "logs/";
 	string resourcePath = respath;
 
 	servd = serverRootDirectory;
-	string logp = respath+"/log.prop";
-	Logger::init(logp);
+	string logp = respath+"/logging.xml";
+	LoggerFactory::init(logp, serverRootDirectory);
 
-	logger = Logger::getLogger("CHServer");
+	serverCntrlFileNm = serverRootDirectory + "ffead.cntrl";
+
+	logger = LoggerFactory::getLogger("CHServer");
 
     PropFileReader pread;
     propMap srprps = pread.getProperties(respath+"server.prop");
     if(srprps["NUM_PROC"]!="")
-    	preForked = CastUtil::lexical_cast<int>(srprps["NUM_PROC"]);
+    {
+    	try
+		{
+    		preForked = CastUtil::lexical_cast<int>(srprps["NUM_PROC"]);
+		}
+		catch(...)
+		{
+			logger << "\nInvalid number for worker processes defined" << endl;
+			preForked = 5;
+		}
+    }
     string sslEnabled = srprps["SSL_ENAB"];
    	if(sslEnabled=="true" || sslEnabled=="TRUE")
    		isSSLEnabled = true;
@@ -658,7 +733,7 @@ int main(int argc, char* argv[])
 			}
 			catch(...)
 			{
-				logger << "\nInvalid thread pool size defined" << flush;
+				logger << "\nInvalid thread pool size defined" << endl;
 				thrdpsiz = 30;
 			}
 		}
@@ -679,76 +754,45 @@ int main(int argc, char* argv[])
    			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
 		} catch (...) {
 			sessionTimeout = 3600;
-			logger << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
+			logger << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec" << endl;
 		}
    	}
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE; // use my IP
-    string PORT = srprps["PORT_NO"];
-    string IP_ADDRES = srprps["IP_ADDR"];
-    string IP_ADDRESS;
-    const char *ip_addr = NULL;
-	if(IP_ADDRES!="")
-		ip_addr = IP_ADDRES.c_str();
-    if ((rv = getaddrinfo(ip_addr, &PORT[0], &hints, &servinfo)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        return 1;
-    }
-    if(IP_ADDRES!="")
-    	IP_ADDRESS = IP_ADDRES + ":" + PORT;
-    else
-    	IP_ADDRESS = "localhost:" + PORT;
-    // loop through all the results and bind to the first we can
-    for(p = servinfo; p != NULL; p = p->ai_next) {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype,
-                p->ai_protocol)) == -1) {
-            perror("server: socket");
-            continue;
-        }
-        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-                sizeof(int)) == -1) {
-            perror("setsockopt");
-            exit(1);
-        }
-        if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-			close(sockfd);
-            perror("server: bind");
-            continue;
-        }
-        break;
-    }
 
-    if (p == NULL)  {
-        fprintf(stderr, "server: failed to bind\n");
-        return 2;
-    }
-    freeaddrinfo(servinfo); // all done with this structure
-    if (listen(sockfd, BACKLOGM) == -1) {
-        perror("listen");
-        exit(1);
-    }
-    fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
-    sa.sa_handler = sigchld_handler; // reap all dead processes
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    if (sigaction(SIGCHLD, &sa, NULL) == -1) {
-        perror("sigaction");
-        exit(1);
-    }
+   	string PORT = srprps["PORT_NO"];
+	string IP_ADDRES = srprps["IP_ADDR"];
+	string IP_ADDRESS;
+
+	if(IP_ADDRES!="")
+		IP_ADDRESS = IP_ADDRES + ":" + PORT;
+	else
+		IP_ADDRESS = "localhost:" + PORT;
+
+	configurationData.ip_address = IP_ADDRESS;
+	configurationData.sprops = srprps;
+	configurationData.sessionTimeout = sessionTimeout;
+	configurationData.sessatserv = sessatserv;
+
+	sockfd = Server::createListener(IP_ADDRES, PORT, false);
+
     strVec webdirs,webdirs1,pubfiles;
     ConfigurationHandler::listi(webpath,"/",true,webdirs);
     ConfigurationHandler::listi(webpath,"/",false,webdirs1);
     ConfigurationHandler::listi(pubpath,".js",false,pubfiles);
 
+    for(unsigned int var=0;var<pubfiles.size();var++)
+	{
+		configurationData.pubMap[pubfiles.at(var)] = "true";
+	}
+
+    configurationData.props = pread.getProperties(respath+"mime-types.prop");
+    configurationData.lprops = pread.getProperties(respath+"locale.prop");
 
     strVec cmpnames;
     try
     {
-    	configurationData = ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, pubpath, respath, isSSLEnabled);
+    	ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, pubpath, respath, isSSLEnabled, &ffeadContext, configurationData);
     }
-    catch(XmlParseException p)
+    catch(const XmlParseException& p)
     {
     	logger << p.getMessage() << endl;
     }
@@ -756,16 +800,10 @@ int main(int argc, char* argv[])
 	{
 		logger << msg << endl;
 	}
-    configurationData.sessionTimeout = sessionTimeout;
-    configurationData.ip_address = IP_ADDRESS;
-    configurationData.sessatserv = sessatserv;
-    for(unsigned int var=0;var<pubfiles.size();var++)
-	{
-    	configurationData.pubMap[pubfiles.at(var)] = "true";
-	}
+
     bool libpresent = true;
     void *dlibtemp = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
-	logger << endl <<dlibtemp << endl;
+	//logger << endl <<dlibtemp << endl;
 	if(dlibtemp==NULL)
 	{
 		libpresent = false;
@@ -777,16 +815,32 @@ int main(int argc, char* argv[])
     if(isCompileEnabled)
     	libpresent = false;
 
-    configurationData.props = pread.getProperties(respath+"mime-types.prop");
-    configurationData.lprops = pread.getProperties(respath+"locale.prop");
 	string compres = respath+"rundyn.sh";
 	if(!libpresent)
 	{
 		string output = ScriptHandler::execute(compres, true);
-		logger << "Intermediate code generation task " << endl;
+		logger << "Intermediate code generation task\n\n" << endl;
 		logger << output << endl;
 	}
 
+	void* checkdlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+	if(checkdlib==NULL)
+	{
+		logger << dlerror() << endl;
+		logger.info("Could not load Library");
+		exit(0);
+	}
+	else
+	{
+		dlclose(checkdlib);
+		logger.info("Library generated successfully");
+	}
+
+	//Load all the FFEADContext beans so that the same copy is shared by all process
+	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
+	configurationData.ffeadContext->initializeAllSingletonBeans();
+
+#ifdef INC_COMP
 	for (unsigned int var1 = 0;var1<configurationData.cmpnames.size();var1++)
 	{
 		string name = configurationData.cmpnames.at(var1);
@@ -794,24 +848,95 @@ int main(int argc, char* argv[])
 		ComponentHandler::registerComponent(name);
 		AppContext::registerComponent(name);
 	}
-	if(srprps["CMP_PORT"]=="")
-	{
-		srprps["CMP_PORT"] = "7001";
-	}
-	ComponentHandler::trigger(srprps["CMP_PORT"]);
-	if(srprps["MESS_PORT"]=="")
-	{
-		srprps["MESS_PORT"] = "7002";
-	}
-	MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
-	if(srprps["MI_PORT"]=="")
-	{
-		srprps["MI_PORT"] = "7003";
-	}
-	MethodInvoc::trigger(srprps["MI_PORT"]);
+#endif
 
-	printf("server: waiting for connections...\n");
-	logger.info("Server: waiting for connections on port "+PORT);
+	bool distocache = false;
+#ifdef INC_DSTC
+	int distocachepoolsize = 20;
+	try {
+		if(srprps["DISTOCACHE_POOL_SIZE"]!="")
+		{
+			distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
+		}
+	} catch(...) {
+		logger << ("Invalid poolsize specified for distocache") << endl;
+	}
+
+	try {
+		if(srprps["DISTOCACHE_PORT_NO"]!="")
+		{
+			CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
+			DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
+			logger << ("Session store is set to distocache store") << endl;
+			distocache = true;
+		}
+	} catch(...) {
+		logger << ("Invalid port specified for distocache") << endl;
+	}
+
+	if(!distocache) {
+		logger << ("Session store is set to file store") << endl;
+	}
+#endif
+
+	configurationData.sessservdistocache = distocache;
+
+#ifdef INC_COMP
+	try {
+		if(srprps["CMP_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["CMP_PORT"]);
+			if(port>0)
+			{
+				ComponentHandler::trigger(srprps["CMP_PORT"]);
+			}
+		}
+	} catch(...) {
+		logger << ("Component Handler Services are disabled") << endl;
+	}
+#endif
+
+#ifdef INC_MSGH
+	try {
+		if(srprps["MESS_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["MESS_PORT"]);
+			if(port>0)
+			{
+				MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
+			}
+		}
+	} catch(...) {
+		logger << ("Messaging Handler Services are disabled") << endl;
+	}
+#endif
+
+#ifdef INC_MI
+	try {
+		if(srprps["MI_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["MI_PORT"]);
+			if(port>0)
+			{
+				MethodInvoc::trigger(srprps["MI_PORT"]);
+			}
+		}
+	} catch(...) {
+		logger << ("Method Invoker Services are disabled") << endl;
+	}
+#endif
+
+#ifdef INC_JOBS
+	JobScheduler::start();
+#endif
+
+	//printf("server: waiting for connections...\n");
+	logger.info("Server: waiting for connections on " + configurationData.ip_address);
+
+	ofstream serverCntrlFile;
+	serverCntrlFile.open(serverCntrlFileNm.c_str());
+	serverCntrlFile << "Server Running" << endl;
+	serverCntrlFile.close();
 
 	vector<string> files;
 	int sp[preForked][2];
@@ -860,14 +985,25 @@ int main(int argc, char* argv[])
 				SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);*/
 		}
 		dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
-		logger << endl <<dlib << endl;
+		//logger << endl <<dlib << endl;
 		if(dlib==NULL)
 		{
 			logger << dlerror() << endl;
 			logger.info("Could not load Library");
+			exit(0);
 		}
 		else
 			logger.info("Library loaded successfully");
+		ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
+		//logger << endl <<dlib << endl;
+		if(ddlib==NULL)
+		{
+			logger << dlerror() << endl;
+			logger.info("Could not load dynamic Library");
+			exit(0);
+		}
+		else
+			logger.info("Dynamic Library loaded successfully");
 		if(!isThreadprq)
 		{
 			pool = new ThreadPool(thrdpsiz,thrdpsiz+30,true);
@@ -875,11 +1011,13 @@ int main(int argc, char* argv[])
 		}
 	}
 
+#ifdef INC_DCP
 	if(isCompileEnabled)
 	{
 		Thread pthread(&dynamic_page_monitor, &serverRootDirectory);
 		pthread.execute();
 	}
+#endif
 
 	SelEpolKqEvPrt selEpolKqEvPrtHandler;
 	selEpolKqEvPrtHandler.initialize(sockfd);
@@ -890,27 +1028,28 @@ int main(int argc, char* argv[])
 
 	}*/
 
-	ifstream cntrlfile;
-	while(1)
+	serverCntrlFile.open(serverCntrlFileNm.c_str());
+	while(serverCntrlFile.is_open())
 	{
+		serverCntrlFile.close();
+
 		if(childNo>=preForked)
 			childNo = 0;
 		nfds = selEpolKqEvPrtHandler.getEvents();
-		logger << "in while " << nfds <<flush;
 		if (nfds == -1)
 		{
 			perror("poll_wait main process");
 			logger.info("Interruption Signal Received\n");
 			if(errno==EBADF)
-				logger << "\nInavlid fd" <<flush;
+				logger << "\nInavlid fd" <<endl;
 			else if(errno==EFAULT)
-				logger << "\nThe memory area pointed to by events is not accessible" <<flush;
+				logger << "\nThe memory area pointed to by events is not accessible" <<endl;
 			else if(errno==EINTR)
-				logger << "\ncall was interrupted by a signal handler before any of the requested events occurred" <<flush;
+				logger << "\ncall was interrupted by a signal handler before any of the requested events occurred" <<endl;
 			else if(errno==EINVAL)
 				logger << "not a poll file descriptor, or maxevents is less than or equal to zero" << endl;
 			else
-				logger << "\nnot an epoll file descriptor" <<flush;
+				logger << "\nnot an epoll file descriptor" <<endl;
 		}
 		processgendone = false;
 		if(processforcekilled)
@@ -953,6 +1092,7 @@ int main(int argc, char* argv[])
 				if (new_fd == -1)
 				{
 					perror("accept");
+					serverCntrlFile.open(serverCntrlFileNm.c_str());
 					continue;
 				}
 				else
@@ -963,10 +1103,11 @@ int main(int argc, char* argv[])
 			}
 			else if (descriptor != -1)
 			{
-				logger << "got new connection "<< descriptor << endl;
+				logger << ("got new connection " + CastUtil::lexical_cast<string>(descriptor)) << endl;
 				selEpolKqEvPrtHandler.unRegisterForEvent(descriptor);
 				if(Constants::IS_FILE_DESC_PASSING_AVAIL)
 				{
+					ifstream cntrlfile;
 					cntrlfile.open(files.at(childNo).c_str());
 					if(cntrlfile.is_open())
 					{
@@ -979,18 +1120,20 @@ int main(int argc, char* argv[])
 						int tcn = childNo;
 						for(int o=0;o<preForked;o++)
 						{
-							cntrlfile.open(files.at(o).c_str());
-							if(cntrlfile.is_open())
+							ifstream cntrlfileT;
+							cntrlfileT.open(files.at(o).c_str());
+							if(cntrlfileT.is_open())
 							{
 								send_connection(sp[childNo][0], descriptor);
 								string cno = CastUtil::lexical_cast<string>(o);
 								childNo = o+1;
+								cntrlfileT.close();
 								break;
 							}
 						}
 						close(sp[tcn][0]);
 						close(sp[tcn][1]);
-						logger << "Process got killed" << flush;
+						logger << "Process got killed" << endl;
 						pid_t pid = createChildProcess(serverRootDirectory,sp[tcn],sockfd);
 						pds[tcn] = pid;
 						stringstream ss;
@@ -1000,31 +1143,50 @@ int main(int argc, char* argv[])
 						ss >> filename;
 						filename.append(".cntrl");
 						files[tcn] = filename;
-						logger << "created a new Process" << flush;
+						logger << "created a new Process" << endl;
 						logger.info("Process got killed hence created a new Process\n");
 					}
 					cntrlfile.close();
 				}
 				else
 				{
-					fcntl(descriptor, F_SETFL,O_SYNC);
+					fcntl(descriptor, F_SETFL, O_SYNC);
 					if(isThreadprq)
 					{
 						ServiceTask *task = new ServiceTask(descriptor,serverRootDirectory,&params,
-									isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
+									isSSLEnabled, ctx, sSLHandler, configurationData, dlib, ddlib);
 						Thread pthread(&service, task);
 						pthread.execute();
 					}
 					else
 					{
 						ServiceTask *task = new ServiceTask(descriptor,serverRootDirectory,&params,
-								isSSLEnabled, ctx, sSLHandler, configurationData, dlib);
-						pool->execute(*task);
+								isSSLEnabled, ctx, sSLHandler, configurationData, dlib, ddlib);
+						task->setCleanUp(true);
+						pool->submit(task);
 					}
 				}
 			}
 		}
+		serverCntrlFile.open(serverCntrlFileNm.c_str());
 	}
+
+#ifdef INC_COMP
+	ComponentHandler::stop();
+#endif
+
+#ifdef INC_MSGH
+	MessageHandler::stop();
+#endif
+
+#ifdef INC_MI
+	MethodInvoc::stop();
+#endif
+
+#ifdef INC_CIB
+	ConfigurationHandler::destroyCibernate();
+#endif
+
 	return 0;
 }
 

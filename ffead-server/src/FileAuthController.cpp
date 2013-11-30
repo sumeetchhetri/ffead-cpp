@@ -98,7 +98,7 @@ bool FileAuthController::getPassword(string username,string &passwd)
 
 string FileAuthController::getUserRole(string username)
 {
-	bool passwdf = false;
+	//bool passwdf = false;
 	ifstream ifs(this->filename.c_str());
 	if(ifs.is_open() && username!="")
 	{
@@ -109,7 +109,7 @@ string FileAuthController::getUserRole(string username)
 			StringUtil::split(tempv, temp, (this->delimiter));
 			if(tempv.size()>=3 && tempv.at(0)==username)
 			{
-				passwdf = true;
+				//passwdf = true;
 				ifs.close();
 				return tempv.at(2);
 			}
@@ -122,7 +122,7 @@ string FileAuthController::getUserRole(string username)
 
 string FileAuthController::get(string username, int pos)
 {
-	bool passwdf = false;
+	//bool passwdf = false;
 	ifstream ifs(this->filename.c_str());
 	if(ifs.is_open() && username!="")
 	{
@@ -131,9 +131,9 @@ string FileAuthController::get(string username, int pos)
 		{
 			vector<string> tempv;
 			StringUtil::split(tempv, temp, (this->delimiter));
-			if(tempv.size()>pos && tempv.at(0)==username)
+			if((int)tempv.size()>pos && tempv.at(0)==username)
 			{
-				passwdf = true;
+				//passwdf = true;
 				ifs.close();
 				return tempv.at(pos);
 			}

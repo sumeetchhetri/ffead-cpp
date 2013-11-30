@@ -25,7 +25,7 @@
 Logger ScriptHandler::logger;
 
 ScriptHandler::ScriptHandler() {
-	logger = Logger::getLogger("ScriptHandler");
+	logger = LoggerFactory::getLogger("ScriptHandler");
 }
 
 ScriptHandler::~ScriptHandler() {
@@ -34,8 +34,9 @@ ScriptHandler::~ScriptHandler() {
 
 string ScriptHandler::chdirExecute(string exe, string tmpf, bool retErrs)
 {
-	chdir(tmpf.c_str());
-	return execute(exe, retErrs);
+	if(chdir(tmpf.c_str())==0)
+		return execute(exe, retErrs);
+	return "";
 }
 
 string ScriptHandler::execute(string exe, bool retErrs)
@@ -100,7 +101,7 @@ int ScriptHandler::popenRWE(int *rwepipe, const char *exe, const char *const arg
 		dup(out[1]);
 		close(2);
 		dup(err[1]);
-		logger << tmpf << endl;
+		//logger << tmpf << endl;
 		chdir(tmpf.c_str());
 		execvp(exe, (char**)argv);
 		exit(1);
@@ -151,7 +152,7 @@ int ScriptHandler::popenRWEN(int *rwepipe, const char *exe, const char** argv)
 		rwepipe[2] = err[0];
 		return pid;
 	} else if (pid == 0) { // child
-		logger << pid << endl;
+		//logger << pid << endl;
 		close(in[1]);
 		close(out[0]);
 		close(err[0]);
@@ -183,23 +184,37 @@ error_in:
 
 int ScriptHandler::pcloseRWE(int pid, int *rwepipe)
 {
-	int rc, status;
+	int status;
 	close(rwepipe[0]);
 	close(rwepipe[1]);
 	close(rwepipe[2]);
-	rc = waitpid(pid, &status, 0);
+	waitpid(pid, &status, 0);
 	return status;
 }
 
-bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs, void* dlib,
+#ifdef INC_SCRH
+bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs,
 		string ext, map<string, string> props)
 {
 	bool skipit = false;
+	string referer = req->getHeader(HttpRequest::Referer);
+	if(referer.find("http://")!=string::npos)
+	{
+		string appl = referer.substr(referer.find("http://")+7);
+		appl = appl.substr(referer.find("/")+1);
+		if(appl.find(req->getCntxt_name())==0 && handoffs.find(req->getCntxt_name())!=handoffs.end())
+		{
+			if(appl==req->getCntxt_name()+"/"+handoffs[req->getCntxt_name()])
+			{
+
+			}
+		}
+	}
 	if(ext==".php")
 	{
 		skipit = true;
-		int pipe[3];
-		int pid;
+		//int pipe[3];
+		//int pid;
 		string def;
 		string tmpf = "/temp/";
 		string filen;
@@ -225,16 +240,16 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
-			res.setContent_str(content);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".pl")
 	{
 		skipit = true;
-		int pipe[3];
-		int pid;
+		//int pipe[3];
+		//int pid;
 		string def;
 		string tmpf = "/temp/";
 		string filen;
@@ -270,16 +285,16 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
-			res.setContent_str(content);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".rb")
 	{
 		skipit = true;
-		int pipe[3];
-		int pid;
+		//int pipe[3];
+		//int pid;
 		string def;
 		string tmpf = "/temp/";
 		string filen;
@@ -305,16 +320,16 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
-			res.setContent_str(content);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".py")
 	{
 		skipit = true;
-		int pipe[3];
-		int pid;
+		//int pipe[3];
+		//int pid;
 		string def;
 		string tmpf = "/temp/";
 		string filen;
@@ -349,16 +364,16 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
-			res.setContent_str(content);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".lua")
 	{
 		skipit = true;
-		int pipe[3];
-		int pid;
+		//int pipe[3];
+		//int pid;
 		string def;
 		string tmpf = "/temp/";
 		string filen;
@@ -384,16 +399,16 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
-			res.setContent_str(content);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	else if(ext==".njs")
 	{
 		skipit = true;
-		int pipe[3];
-		int pid;
+		//int pipe[3];
+		//int pid;
 		string def;
 		string tmpf = "/temp/";
 		string filen;
@@ -419,10 +434,11 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.setContent_type(props[".html"]);
-			res.setContent_str(content);
+			res.addHeaderValue(HttpResponse::ContentType, props[".html"]);
+			res.setContent(content);
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
 	return skipit;
 }
+#endif

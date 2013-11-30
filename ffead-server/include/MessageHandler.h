@@ -45,7 +45,7 @@
 #include "MQueue.h"
 #include "Server.h"
 #include "string"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "Constants.h"
 #include "AMEFResources.h"
 
@@ -63,10 +63,9 @@ public:
 	{
 	}
 	static void trigger(string,string);
-	Server* getServer(){return this->server;}
-	void setServer(Server *server){this->server = server;}
+	static void stop();
 private:
-	Server *server;
+	Server server;
 	bool running;
 	static void* service(void* arg);
 	static void init(string);

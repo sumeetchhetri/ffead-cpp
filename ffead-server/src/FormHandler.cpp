@@ -31,14 +31,15 @@ FormHandler::~FormHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Element> formMap, void* dlib)
+string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData)
 {
-	Logger logger = Logger::getLogger("FormHandler");
+	map<string, Element> formMap = configData.formMap;
+	Logger logger = LoggerFactory::getLogger("FormHandler");
 	Reflector ref;
 	Element ele = formMap[req->getFile()];
-	logger << ele.getTagName() << endl;
-	logger << ele.render() << endl;
-	ClassInfo binfo = ref.getClassInfo(ele.getAttribute("bean"));
+	//logger << ele.getTagName() << endl;
+	//logger << ele.render() << endl;
+	ClassInfo binfo = ref.getClassInfo(ele.getAttribute("bean"), req->getCntxt_name());
 	ElementList eles = ele.getChildElements();
 	string json = "{";
 	for (unsigned int apps = 0; apps < eles.size(); apps++)
@@ -48,7 +49,7 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Elem
 			string name = eles.at(apps).getAttribute("name");
 			Field fld = binfo.getField(eles.at(apps).getAttribute("prop"));
 			if(fld.getType()=="string")
-				json += "\""+eles.at(apps).getAttribute("prop")+"\": \"" + req->getQueryParam(name) + "\",";
+				json += "\""+eles.at(apps).getAttribute("prop")+"\": \"" + req->getParamValue(name) + "\",";
 			else
 			{
 				if(fld.getType()=="int" || fld.getType()=="long")
@@ -56,21 +57,21 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Elem
 					if(req->getQueryParam(name)=="")
 						json += "\""+eles.at(apps).getAttribute("prop")+"\": 0,";
 					else
-						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getQueryParam(name) + ",";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
 				}
 				else if(fld.getType()=="double" || fld.getType()=="float")
 				{
 					if(req->getQueryParam(name)=="")
 						json += "\""+eles.at(apps).getAttribute("prop")+"\": 0.0,";
 					else
-						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getQueryParam(name) + ",";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
 				}
 				else if(fld.getType()=="bool")
 				{
 					if(req->getQueryParam(name)=="")
 						json += "\""+eles.at(apps).getAttribute("prop")+"\": false,";
 					else
-						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getQueryParam(name) + ",";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
 				}
 			}
 		}
@@ -81,41 +82,25 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, map<string, Elem
 	}
 	json += "}";
 	logger << json << endl;
-	string libName = Constants::INTER_LIB_FILE;
-	if(dlib == NULL)
+
+	void *_temp = configData.ffeadContext->getBean("form_"+req->getCntxt_name()+ele.getAttribute("controller"), req->getCntxt_name());
+	logger << ("Fetching Formcontroller for " + ele.getAttribute("bean")) << endl;
+	if(_temp!=NULL)
 	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
-	string meth = "toVoidP" + ele.getAttribute("bean");
-	logger << meth << endl;
-	void *mkr = dlsym(dlib, meth.c_str());
-	if(mkr!=NULL)
-	{
-		toVoidP f1 = (toVoidP)mkr;
-		void *_beaninst = f1(json);
-		//FunPtr f =  (FunPtr)mkr;
-		ClassInfo srv = ref.getClassInfo(ele.getAttribute("controller"));
-		args argus;
-		vals valus;
-		Constructor ctor = srv.getConstructor(argus);
-		void *_temp = ref.newInstanceGVP(ctor);
-		argus.push_back("void*");
-		argus.push_back("HttpResponse*");
-		valus.push_back(_beaninst);
-		valus.push_back(&res);
-		Method meth = srv.getMethod("onSubmit",argus);
-		if(meth.getMethodName()!="")
+		void *_beaninst = JSONSerialize::unSerializeUnknown(json, ele.getAttribute("bean"), req->getCntxt_name());
+
+		FormController* formController = static_cast<FormController*>(_temp);
+		if(formController!=NULL)
 		{
-			ref.invokeMethodUnknownReturn(_temp,meth,valus);
-			logger << "successfully called formcontroller" << endl;
+			formController->onSubmit(_beaninst,&res);
+			logger << "Successfully called Formcontroller" << endl;
 		}
 		else
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-			res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent_str("Controller Method Not Found");
-			logger << "Controller Method Not Found" << endl;
+			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res.setContent("Formcontroller Method Not Found");
+			logger << "Formcontroller Method Not Found" << endl;
 		}
 	}
 	return json;

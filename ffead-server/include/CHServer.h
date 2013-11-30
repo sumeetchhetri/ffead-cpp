@@ -22,17 +22,18 @@
 
 #ifndef CHSERVER_H_
 #define CHSERVER_H_
-#include "Cibernate.h"
 #include <algorithm>
 #include "Client.h"
 #include "PropFileReader.h"
 #include "AfcUtil.h"
 #include "string"
 #include "Controller.h"
-
+#include "Server.h"
 #include "PropFileReader.h"
 #include "TemplateEngine.h"
+#ifdef INC_DCP
 #include "DCPGenerator.h"
+#endif
 #include "Reflection.h"
 #include <cstdlib>
 #include <dlfcn.h>
@@ -56,9 +57,13 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#ifdef INC_DVIEW
 #include "DynamicView.h"
+#endif
 #include "HttpRequest.h"
+#ifdef INC_APPFLOW
 #include "ApplicationUtil.h"
+#endif
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/resource.h>
@@ -66,15 +71,23 @@
 #include <queue>
 #include <sys/uio.h>
 #include <sys/un.h>
+#ifdef INC_CIB
 #include "Cibernate.h"
+#endif
+#ifdef INC_COMP
 #include "ComponentGen.h"
 #include "ComponentHandler.h"
+#endif
+#ifdef INC_MSGH
 #include "MessageHandler.h"
+#endif
+#ifdef INC_MI
 #include "MethodInvoc.h"
+#endif
 #include "Reflector.h"
 #include "AppContext.h"
 
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "ThreadPool.h"
 #include "FileAuthController.h"
 #include <sys/stat.h>
@@ -97,7 +110,11 @@
 #include "SSLHandler.h"
 #include "ServiceTask.h"
 #include "Thread.h"
+#include "FFEADContext.h"
 #include "SelEpolKqEvPrt.h"
+#ifdef INC_DSTC
+#include "DistoCacheHandler.h"
+#endif
 #ifdef WINDOWS
     #include <direct.h>
     #define pwd _getcwd
@@ -105,8 +122,6 @@
     #include <unistd.h>
     #define pwd getcwd
  #endif
-
-
 
 
 //#define CA_LIST "root.pem"

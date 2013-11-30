@@ -25,18 +25,37 @@
 #include "TemplateEngine.h"
 #include "Reflection.h"
 #include "XmlParser.h"
+#ifdef INC_COMP
 #include "ComponentGen.h"
+#endif
+#ifdef INC_APPFLOW
 #include "ApplicationUtil.h"
+#endif
+#ifdef INC_DCP
 #include "DCPGenerator.h"
+#endif
 #include "ConfigurationData.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
+#ifdef INC_TPE
+#include "TemplateGenerator.h"
+#endif
+#include "FFEADContext.h"
+#ifdef INC_WEBSVC
+#include "WsUtil.h"
+#endif
+#ifdef INC_JOBS
+#include "JobScheduler.h"
+#endif
 
 class ConfigurationHandler {
 public:
 	ConfigurationHandler();
 	virtual ~ConfigurationHandler();
-	static ConfigurationData handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string pubpath,string respath,bool isSSLEnabled);
+	static ConfigurationData handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,
+			string pubpath,string respath,bool isSSLEnabled,FFEADContext* ffeadContext,ConfigurationData& configurationData);
 	static void listi(string cwd,string type,bool apDir,strVec &folders);
+	static void configureCibernate(string, string);
+	static void destroyCibernate();
 };
 
 #endif /* CONFIGURATIONHANDLER_H_ */

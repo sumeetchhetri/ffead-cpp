@@ -31,7 +31,7 @@
 #include "CastUtil.h"
 #include "Component.h"
 #include "AfcUtil.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 using namespace std;
 typedef vector<string> Cont1;
 class ComponentGen {
@@ -39,7 +39,7 @@ class ComponentGen {
 public:
 	ComponentGen();
 	virtual ~ComponentGen();
-	string generateComponentCU(string,string &,string &,string &,string &);
+	string generateComponentCU(string,string &,string &,string &,string &,string);
 };
 
 #endif /* COMPONENTGEN_H_ */

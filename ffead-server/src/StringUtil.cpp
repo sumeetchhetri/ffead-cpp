@@ -111,6 +111,26 @@ string StringUtil::capitalizedCopy(const string& str)
 	return strn;
 }
 
+void StringUtil::camelCased(string& str, const string& delim)
+{
+	vector<string> vec = StringUtil::split(str, delim);
+	str = "";
+	for (int var = 0; var < (int)vec.size(); ++var) {
+		str += StringUtil::capitalizedCopy(vec.at(var));
+		if(var!=(int)vec.size()-1)
+		{
+			str += delim;
+		}
+	}
+}
+
+string StringUtil::camelCasedCopy(const string& str, const string& delim)
+{
+	string strn(str);
+	camelCased(strn, delim);
+	return strn;
+}
+
 void StringUtil::replaceLast(string& str, const string& ths, const string& with)
 {
 	size_t start_pos = str.find_last_of(ths);
@@ -172,6 +192,13 @@ void StringUtil::split(vector<string> &output, const string& input, const string
 	splitInternal(output, input, delimiter);
 }
 
+int StringUtil::countOccurrences(const string& input, const string& delimiter)
+{
+	vector<string> output;
+	splitInternal(output, input, delimiter);
+	return output.size()==0?0:output.size()-1;
+}
+
 vector<string> StringUtil::split(const string& input, vector<string> delimiters)
 {
 	vector<string> output;
@@ -220,4 +247,95 @@ string StringUtil::trimCopy(const string& str)
 	string strn(str);
 	trim(strn);
 	return strn;
+}
+
+string StringUtil::toHEX(int number)
+{
+	return toHEX((unsigned int)number);
+}
+
+string StringUtil::toHEX(unsigned int number)
+{
+	char hexVal[20];
+	sprintf(hexVal, "%x", number);
+	string hexstr(hexVal);
+	return hexstr;
+}
+
+string StringUtil::toHEX(long number)
+{
+	return toHEX((unsigned long)number);
+}
+
+string StringUtil::toHEX(unsigned long number)
+{
+	char hexVal[20];
+	sprintf(hexVal, "%lx", number);
+	string hexstr(hexVal);
+	return hexstr;
+}
+
+
+string StringUtil::toHEX(long long number)
+{
+	return toHEX((unsigned long long)number);
+}
+
+string StringUtil::toHEX(unsigned long long number)
+{
+	char hexVal[20];
+	sprintf(hexVal, "%llx", number);
+	string hexstr(hexVal);
+	return hexstr;
+}
+
+string StringUtil::toOCTAL(int number)
+{
+	return toOCTAL((unsigned int)number);
+}
+
+string StringUtil::toOCTAL(unsigned int number)
+{
+	char hexVal[20];
+	sprintf(hexVal, "%o", number);
+	string hexstr(hexVal);
+	return hexstr;
+}
+
+string StringUtil::toOCTAL(long number)
+{
+	return toOCTAL((unsigned long)number);
+}
+
+string StringUtil::toOCTAL(unsigned long number)
+{
+	char hexVal[20];
+	sprintf(hexVal, "%lo", number);
+	string hexstr(hexVal);
+	return hexstr;
+}
+
+
+string StringUtil::toOCTAL(long long number)
+{
+	return toOCTAL((unsigned long long)number);
+}
+
+string StringUtil::toOCTAL(unsigned long long number)
+{
+	char hexVal[20];
+	sprintf(hexVal, "%llo", number);
+	string hexstr(hexVal);
+	return hexstr;
+}
+
+long int StringUtil::fromHEX(string hexVal)
+{
+	if(hexVal.find("0x")==string::npos)
+	{
+		hexVal = "0x" + hexVal;
+	}
+	long int li;
+	li = strtol(hexVal.c_str(), NULL, 10);
+	return li;
 }

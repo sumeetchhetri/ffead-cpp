@@ -178,8 +178,6 @@ bool TaskPool::tasksPPending() {
 TaskPool::~TaskPool() {
 	m_mutex->lock();
 	runFlag = false;
-	m_mutex->unlock();
-	m_mutex->lock();
 	bool fl = this->complete;
 	m_mutex->unlock();
 	while(!fl)

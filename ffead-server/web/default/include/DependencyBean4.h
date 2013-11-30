@@ -23,6 +23,7 @@
 #ifndef DEPENDENCYBEAN4_H_
 #define DEPENDENCYBEAN4_H_
 #include "iostream"
+using namespace std;
 class DependencyBean4
 {
 public:

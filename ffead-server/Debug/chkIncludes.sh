@@ -105,6 +105,7 @@ if [ "$IS_OS_LINUX" != "" ]; then
 cat <<EOM> $CONSTANTS_FILE
 #include "Constants.h"
 
+string Constants::DINTER_LIB_FILE = "libdinter.so";
 string Constants::INTER_LIB_FILE = "libinter.so";
 bool Constants::SYS_FORK_AVAIL = true;
 bool Constants::SCRIPT_EXEC_SHOW_ERRS = true;
@@ -116,6 +117,7 @@ elif [ "$IS_OS_BSD" != "" ]; then
 cat <<EOM> $CONSTANTS_FILE
 #include "Constants.h"
 
+string Constants::DINTER_LIB_FILE = "libdinter.so";
 string Constants::INTER_LIB_FILE = "libinter.so";
 bool Constants::SYS_FORK_AVAIL = true;
 bool Constants::SCRIPT_EXEC_SHOW_ERRS = false;
@@ -127,6 +129,7 @@ elif [ "$IS_OS_SOLARIS" != "" ]; then
 cat <<EOM> $CONSTANTS_FILE
 #include "Constants.h"
 
+string Constants::DINTER_LIB_FILE = "libdinter.so";
 string Constants::INTER_LIB_FILE = "libinter.so";
 bool Constants::SYS_FORK_AVAIL = true;
 bool Constants::SCRIPT_EXEC_SHOW_ERRS = false;
@@ -138,6 +141,7 @@ elif [ "$IS_OS_CYGWIN" != "" ]; then
 cat <<EOM> $CONSTANTS_FILE
 #include "Constants.h"
 
+string Constants::DINTER_LIB_FILE = "libdinter.a";
 string Constants::INTER_LIB_FILE = "libinter.a";
 bool Constants::SYS_FORK_AVAIL = false;
 bool Constants::SCRIPT_EXEC_SHOW_ERRS = false;

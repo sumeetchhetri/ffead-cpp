@@ -20,135 +20,75 @@
  *      Author: sumeet
  */
 
-#include "Logger.h"
+#include "LoggerFactory.h"
 
 // Global static pointer used to ensure a single instance of the class.
-Mutex* Logger::_theLogmutex = NULL;
-string* Logger::level = NULL;
-string* Logger::mode = NULL;
-string* Logger::filepath = NULL;
-DateFormat* Logger::datFormat = NULL;
-ofstream* Logger::out = NULL;
-
 string Logger::LEVEL_ERROR = "ERROR";
 string Logger::LEVEL_DEBUG = "DEBUG";
 string Logger::LEVEL_INFO = "INFO";
 
-Logger Logger::getLogger(string className)
+Logger::Logger(LoggerConfig *config, string className)
 {
-	init();
-	Logger logger(className);
-	return logger;
+	this->className = className;
+	this->config = config;
+	this->level = level;
 }
 
-void Logger::init()
+Logger::Logger(LoggerConfig *config, string className, string level)
 {
-	if(!_theLogmutex)
-	{
-		_theLogmutex = new Mutex();
-		level = new string(LEVEL_ERROR);
-		mode = new string("CONSOLE");
-		datFormat = new DateFormat("dd/mm/yyyy hh:mi:ss");
-	}
-}
-
-void Logger::init(string file)
-{
-	if(!_theLogmutex)
-	{
-		_theLogmutex = new Mutex();
-
-		PropFileReader pf;
-		propMap props = pf.getProperties(file);
-		if(props.size()==0)
-		{
-			level = new string(LEVEL_ERROR);
-			mode = new string("CONSOLE");
-			datFormat = new DateFormat("dd/mm/yyyy hh:mi:ss");
-			return;
-		}
-		level = new string(props["LEVEL"]);
-		mode = new string(props["MODE"]);
-		filepath = new string(props["FILEPATH"]);
-		datFormat = new DateFormat(props["DATEFMT"]);
-		if(*mode=="FILE")
-		{
-			out = new ofstream();
-			out->open(filepath->c_str(),ios::app | ios::binary);
-		}
-	}
-}
-
-void Logger::init(string llevel,string lmode,string lfilepath)
-{
-	if(!_theLogmutex)
-	{
-		_theLogmutex = new Mutex();
-
-		level = new string(llevel);
-		mode = new string(lmode);
-		filepath = new string(lfilepath);
-		datFormat = new DateFormat("dd/mm/yyyy hh:mi:ss");
-		if(*mode=="FILE")
-		{
-			out = new ofstream();
-			out->open(filepath->c_str(),ios::app | ios::binary);
-		}
-	}
+	this->className = className;
+	this->config = config;
+	this->level = level;
 }
 
 Logger::Logger()
-{}
-
-Logger::Logger(string className)
 {
-	this->className = className;
+	this->config = NULL;
 }
 
 Logger::~Logger()
 {
-
 }
 
 void Logger::write(string msg,string mod,bool newline)
 {
 	Date dat;
-	string te = datFormat->format(dat);
+	string te = config->datFormat.format(dat);
 	msg = "[" + te + "] ("+this->className + ") <"+mod+"> :"+msg+(newline?"\n":"");
-	if(*mode=="FILE")
+	//if(config->mode=="FILE")
 	{
-		_theLogmutex->lock();
-		out->write(msg.c_str(),msg.length());
-		*out << flush;
-		_theLogmutex->unlock();
+		config->lock.lock();
+		config->out->write(msg.c_str(),msg.length());
+		*config->out << flush;
+		config->lock.unlock();
 	}
-	else
+	/*else
 	{
-		_theLogmutex->lock();
-		cout << msg << flush;
-		_theLogmutex->unlock();
-	}
+		config->lock.lock();
+		*config->out << msg << flush;
+		config->lock.unlock();
+	}*/
 }
 
 void Logger::write(ostream& (*pf) (ostream&), string mod)
 {
-	if(*mode=="FILE")
+	//if(config->mode=="FILE")
 	{
-		_theLogmutex->lock();
-		*out << pf;
-		_theLogmutex->unlock();
+		config->lock.lock();
+		*config->out << pf;
+		config->lock.unlock();
 	}
-	else
+	/*else
 	{
-		_theLogmutex->lock();
-		cout << pf;
-		_theLogmutex->unlock();
-	}
+		config->lock.lock();
+		*config->out << pf;
+		config->lock.unlock();
+	}*/
 }
 
 void Logger::info(string msg)
 {
-	if(*level!=LEVEL_DEBUG)
+	if(level!=LEVEL_DEBUG)
 	{
 		write(msg,"info",true);
 	}
@@ -156,7 +96,7 @@ void Logger::info(string msg)
 
 void Logger::debug(string msg)
 {
-	if(*level==LEVEL_DEBUG)
+	if(level==LEVEL_DEBUG)
 	{
 		write(msg,"debug",true);
 	}
@@ -171,17 +111,4 @@ Logger& operator<< (Logger& logger, ostream& (*pf) (ostream&))
 {
 	logger.write(pf,"info");
 	return logger;
-}
-
-void Logger::destroy()
-{
-	if(_theLogmutex)
-	{
-		delete _theLogmutex;
-		delete level;
-		delete mode;
-		delete datFormat;
-		if(filepath!=NULL)delete filepath;
-		if(out!=NULL)delete out;
-	}
 }

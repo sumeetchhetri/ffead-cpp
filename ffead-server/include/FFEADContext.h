@@ -26,25 +26,35 @@
 #include "Reflector.h"
 #include "CastUtil.h"
 #include "AfcUtil.h"
+#include "LoggerFactory.h"
 
 class Bean
 {
 	friend class FFEADContext;
-	string name,inbuilt,value,clas,bean,intfType,injectAs;
+	string name,inbuilt,value,clas,bean,intfType,injectAs,scope;
 	bool realbean;
 	vector<string> injs,names,types;
+	string appName;
+public:
+	Bean();
+	Bean(string name,string value,string clas,string scope,bool isInbuilt,string appName = "default");
+	~Bean();
 };
 typedef map<string,Bean> beanMap;
 class FFEADContext {
+	Logger logger;
 	beanMap beans,injbns;
 	map<string,void*> objects;
 	bool cleared;
 public:
-	FFEADContext(string);
+	FFEADContext(string,string appName = "default");
+	FFEADContext();
 	virtual ~FFEADContext();
-	void* getBean(string);
+	void* getBean(string, string appName = "default");
 	void* getBean(Bean);
-	void clear();
+	void clear(string appName = "default");
+	void addBean(Bean bean);
+	void initializeAllSingletonBeans();
 };
 
 #endif /* FFEADCONTEXT_H_ */

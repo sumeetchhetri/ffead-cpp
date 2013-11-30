@@ -26,41 +26,19 @@
 #include "RestController.h"
 #include "AuthHandler.h"
 #include "Constants.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
+#ifdef INC_XMLSER
 #include "XMLSerialize.h"
+#endif
 #include "JSONSerialize.h"
-
-typedef void* (*toObjectFromJson) (string);
-
-class RestFunctionParams
-{
-public:
-	string name;
-	string type;
-	string from;
-};
-
-class RestFunction
-{
-public:
-	string name;
-	string alias;
-	string clas;
-	string meth;
-	string baseUrl;
-	string icontentType;
-	string ocontentType;
-	vector<RestFunctionParams> params;
-};
-
-typedef map<string, RestFunction> resFuncMap;
+#include "ConfigurationData.h"
 
 class ControllerHandler {
 public:
 	ControllerHandler();
 	virtual ~ControllerHandler();
-	static bool handle(HttpRequest* req, HttpResponse& res, map<string, string> urlpattMap, map<string, string> mappattMap, void* dlib,
-			string ext, resFuncMap rstCntMap, map<string, string> mapMap, map<string, string> urlMap, string pthwofile);
+	static bool handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
+			string ext, string pthwofile);
 };
 
 #endif /* CONTROLLERHANDLER_H_ */

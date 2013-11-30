@@ -24,7 +24,8 @@
 #define THREADPOOL_H_
 #include "TaskPool.h"
 #include "PoolThread.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
+#include "FutureTask.h"
 
 class ThreadPool {
 	Logger logger;
@@ -38,11 +39,12 @@ class ThreadPool {
 	Thread *poller;
 	bool prioritypooling;
 	static void* poll(void *arg);
-	void submit(Task *task);
+	void submitInternal(Task *task);
 	bool runFlag, complete, pollerStarted;
 	void initializeThreads();
 	Mutex *m_mutex;
 	bool joinComplete;
+	void initPointers();
 public:
 	ThreadPool(int,int,int,int,bool);
 	ThreadPool(int,int,int,int);
@@ -52,9 +54,19 @@ public:
 	void start();
 	void init(int,int,bool);
 	void joinAll();
-	void execute(Task &task, int priority);
-	void execute(Task &task) ;
+	void submit(Task &task, int priority);
+	void submit(Task &task);
 	void schedule(Task &task, long long tunit, int type);
+	void submit(Task *task, int priority);
+	void submit(Task *task);
+	void schedule(Task *task, long long tunit, int type);
+
+	void submit(FutureTask &task, int priority);
+	void submit(FutureTask &task);
+	void schedule(FutureTask &task, long long tunit, int type);
+	void submit(FutureTask *task, int priority);
+	void submit(FutureTask *task);
+	void schedule(FutureTask *task, long long tunit, int type);
 	virtual ~ThreadPool();
 };
 #endif /* THREADPOOL_H_ */

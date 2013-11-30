@@ -24,13 +24,13 @@
 #define FVIEWHANDLER_H_
 #include "HttpResponse.h"
 #include "HttpRequest.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 
 class FviewHandler {
 public:
 	FviewHandler();
 	virtual ~FviewHandler();
-	static string handle(HttpRequest* req, HttpResponse& res, map<string, string> fviewmap);
+	static void handle(HttpRequest* req, HttpResponse& res, map<string, string> fviewmap);
 };
 
 #endif /* FVIEWHANDLER_H_ */

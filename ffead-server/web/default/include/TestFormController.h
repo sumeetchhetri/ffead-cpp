@@ -23,10 +23,11 @@
 #ifndef TESTFORMCONTROLLER_H_
 #define TESTFORMCONTROLLER_H_
 #include "HttpResponse.h"
+#include "FormController.h"
 #include "TestForm.h"
 #include "iostream"
 
-class TestFormController {
+class TestFormController : FormController {
 public:
 	TestFormController();
 	virtual ~TestFormController();

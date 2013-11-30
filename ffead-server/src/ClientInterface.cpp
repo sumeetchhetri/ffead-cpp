@@ -58,7 +58,7 @@ char* ClientInterface::get_ip(char *host)
 	if((hent = gethostbyname(host)) == NULL)
 	{
 		perror("Can't get IP");
-		return NULL;
+		return ip;
 	}
 	if(inet_ntop(AF_INET, (void *)hent->h_addr_list[0], ip, iplen) == NULL)
 	{

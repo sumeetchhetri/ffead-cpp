@@ -22,6 +22,9 @@
 
 #ifndef SERVICETASK_H_
 #define SERVICETASK_H_
+#include <sys/stat.h>
+#include <math.h>
+#include "DateFormat.h"
 #include "Task.h"
 #include "SSLHandler.h"
 #include "StringUtil.h"
@@ -33,11 +36,22 @@
 #include "AuthHandler.h"
 #include "ControllerHandler.h"
 #include "FormHandler.h"
+#include "Thread.h"
+#ifdef INC_WEBSVC
 #include "SoapHandler.h"
+#endif
 #include "ScriptHandler.h"
 #include "FviewHandler.h"
 #include "ExtHandler.h"
-#include "Logger.h"
+#include "CORSHandler.h"
+#include "LoggerFactory.h"
+#include "Timer.h"
+#include <fcntl.h>
+#ifdef INC_DSTC
+#include "DistGlobalCache.h"
+#endif
+#include <stdio.h>
+
 #define MAXBUFLENM 32768
 #define BUFSIZZ 1024
 
@@ -49,8 +63,12 @@ class ServiceTask : public Task
 	AuthHandler authHandler;
 	ControllerHandler controllerHandler;
 	FormHandler formHandler;
+#ifdef INC_WEBSVC
 	SoapHandler soapHandler;
+#endif
+#ifdef INC_WEBSVC
 	ScriptHandler scriptHandler;
+#endif
 	FviewHandler fviewHandler;
 	ExtHandler extHandler;
 	int fd;
@@ -61,13 +79,23 @@ class ServiceTask : public Task
 	SSLHandler sslHandler;
 	ConfigurationData configData;
 	void* dlib;
-	void writeToSharedMemeory(string sessionId, string value,bool napp);
-	map<string,string> readFromSharedMemeory(string sessionId);
-	void createResponse(HttpResponse &res,bool flag,map<string,string> vals,string prevcookid, long sessionTimeout, bool sessatserv);
-	string getContentStr(string url,string locale,string ext);
+	void* ddlib;
+	void saveSessionDataToFile(string sessionId, string value);
+	map<string,string> getSessionDataFromFile(string sessionId);
+	void saveSessionDataToDistocache(string sessionId, map<string,string> sessAttrs);
+	map<string,string> getSessionDataFromDistocache(string sessionId);
+	void storeSessionAttributes(HttpResponse &res,HttpRequest* req, long sessionTimeout, bool sessatserv);
+	void updateContent(HttpRequest* req, HttpResponse *res, ConfigurationData configData, string ext, int);
+	unsigned int getFileSize(const char *fileName);
+	string getFileContents(const char *fileName, int start = -1, int end = -1);
+	bool checkSocketWaitForTimeout(int sock_fd, int writing, int seconds, int micros = 0);
+	bool sendData(bool isSSLEnabled, ConfigurationData configData, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, string h1);
+	void closeSocket(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd);
+	bool readLine(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, string& line);
+	bool readData(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, int cntlen, string& content);
 public:
 	ServiceTask(int fd,string serverRootDirectory,map<string,string> *params,
-			bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib);
+			bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib, void* ddlib);
 	virtual ~ServiceTask();
 	void run();
 	HttpResponse apacheRun(HttpRequest* req);

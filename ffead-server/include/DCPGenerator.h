@@ -30,8 +30,8 @@ class DCPGenerator {
 public:
 	DCPGenerator();
 	virtual ~DCPGenerator();
-	static string generateDCP(string,string &,string &);
-	static string generateDCPAll(strVec);
+	static string generateDCP(string,string &,string &,string);
+	static string generateDCPAll(map<string,string>);
 };
 
 #endif /* DCPGENERATOR_H_ */

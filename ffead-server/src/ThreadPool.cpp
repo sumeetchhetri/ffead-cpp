@@ -21,11 +21,20 @@
  */
 #include "ThreadPool.h"
 
-ThreadPool::ThreadPool()
+void ThreadPool::initPointers()
 {
+	m_mutex = NULL;
+	poller = NULL;
+	tpool = NULL;
+	wpool = NULL;
 	this->runFlag = false;
 	joinComplete = false;
-	logger = Logger::getLogger("ThreadPool");
+	logger = LoggerFactory::getLogger("ThreadPool");
+}
+
+ThreadPool::ThreadPool()
+{
+	initPointers();
 }
 
 void ThreadPool::init(int initThreads, int maxThreads,bool console)
@@ -38,6 +47,7 @@ void ThreadPool::init(int initThreads, int maxThreads,bool console)
 	this->maxThreads = maxThreads;
 	joinComplete = false;
 	prioritypooling = false;
+	initPointers();
 	initializeThreads();
 	start();
 }
@@ -45,7 +55,6 @@ void ThreadPool::init(int initThreads, int maxThreads,bool console)
 ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp) {
 	if (lowp > highp)
 		throw "Low Priority should be less than Highest Priority";
-	logger = Logger::getLogger("ThreadPool");
 	this->console = false;
 	this->initThreads = initThreads;
 	this->maxThreads = maxThreads;
@@ -54,13 +63,13 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp) {
 	this->runFlag = false;
 	joinComplete = false;
 	prioritypooling = true;
+	initPointers();
 	initializeThreads();
 }
 ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp,bool console) {
 	this->console = console;
 	if (lowp > highp)
 		throw "Low Priority should be less than Highest Priority";
-	logger = Logger::getLogger("ThreadPool");
 	this->initThreads = initThreads;
 	this->maxThreads = maxThreads;
 	this->lowp = lowp;
@@ -68,11 +77,11 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads, int lowp, int highp,bool
 	this->runFlag = false;
 	joinComplete = false;
 	prioritypooling = true;
+	initPointers();
 	initializeThreads();
 }
 
 ThreadPool::ThreadPool(int initThreads, int maxThreads) {
-	logger = Logger::getLogger("ThreadPool");
 	this->lowp = -1;
 	this->highp = -1;
 	this->console = false;
@@ -81,11 +90,11 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads) {
 	this->runFlag = false;
 	joinComplete = false;
 	prioritypooling = false;
+	initPointers();
 	initializeThreads();
 }
 
 ThreadPool::ThreadPool(int initThreads, int maxThreads,bool console) {
-	logger = Logger::getLogger("ThreadPool");
 	this->console = console;
 	this->lowp = -1;
 	this->highp = -1;
@@ -94,6 +103,7 @@ ThreadPool::ThreadPool(int initThreads, int maxThreads,bool console) {
 	this->runFlag = false;
 	joinComplete = false;
 	prioritypooling = false;
+	initPointers();
 	initializeThreads();
 }
 
@@ -133,13 +143,13 @@ void* ThreadPool::poll(void *arg) {
 			Task *task = ths->wpool->getTask();
 			if(task!=NULL)
 			{
-				ths->submit(task);
+				ths->submitInternal(task);
 			}
 		} else if (ths->prioritypooling && ths->wpool->tasksPPending()) {
 			Task *task = ths->wpool->getPTask();
 			if(task!=NULL)
 			{
-				ths->submit(task);
+				ths->submitInternal(task);
 			}
 		}
 		Thread::mSleep(1);
@@ -153,7 +163,7 @@ void* ThreadPool::poll(void *arg) {
 	return NULL;
 }
 
-void ThreadPool::submit(Task *task) {
+void ThreadPool::submitInternal(Task *task) {
 	bool flag = true;
 	while (flag) {
 		for (unsigned int var = 0; var < tpool->size(); var++) {
@@ -192,8 +202,11 @@ void ThreadPool::joinAll() {
 		}
 	}
 }
-void ThreadPool::execute(Task &task, int priority) {
 
+void ThreadPool::submit(Task* task, int priority) {
+	submit(*task, priority);
+}
+void ThreadPool::submit(Task &task, int priority) {
 	if(console)
 	{
 		logger << "Adding task to wpool\n" << flush;
@@ -208,8 +221,10 @@ void ThreadPool::execute(Task &task, int priority) {
 		wpool->addPTask(task);
 	}
 }
-void ThreadPool::execute(Task &task) {
-
+void ThreadPool::submit (Task* task) {
+	submit(*task);
+}
+void ThreadPool::submit (Task &task) {
 	if(console)
 	{
 		logger << "Adding task to wpool\n" << flush;
@@ -224,8 +239,10 @@ void ThreadPool::execute(Task &task) {
 		wpool->addPTask(task);
 	}
 }
+void ThreadPool::schedule(Task* task, long long tunit, int type) {
+	schedule(*task, tunit, type);
+}
 void ThreadPool::schedule(Task &task, long long tunit, int type) {
-
 	if(console)
 	{
 		logger << "Added task to wpool\n" << flush;
@@ -239,6 +256,64 @@ void ThreadPool::schedule(Task &task, long long tunit, int type) {
 	} else {
 		wpool->addPTask(task);
 	}
+}
+
+void ThreadPool::submit(FutureTask *task, int priority) {
+	submit(*task, priority);
+}
+void ThreadPool::submit(FutureTask &task, int priority) {
+	if(console)
+	{
+		logger << "Adding task to wpool\n" << flush;
+	}
+	task.tunit = -1;
+	task.type = -1;
+	task.priority = priority;
+	task.console = console;
+	if (!prioritypooling) {
+		wpool->addTask(&task);
+	} else {
+		wpool->addPTask(&task);
+	}
+	task.isFuture = true;
+}
+void ThreadPool::submit(FutureTask *task) {
+	submit(*task);
+}
+void ThreadPool::submit(FutureTask &task) {
+	if(console)
+	{
+		logger << "Adding task to wpool\n" << flush;
+	}
+	task.tunit = -1;
+	task.type = -1;
+	task.priority = -1;
+	task.console = console;
+	if (!prioritypooling) {
+		wpool->addTask(&task);
+	} else {
+		wpool->addPTask(&task);
+	}
+	task.isFuture = true;
+}
+void ThreadPool::schedule(FutureTask *task, long long tunit, int type) {
+	schedule(*task, tunit, type);
+}
+void ThreadPool::schedule(FutureTask &task, long long tunit, int type) {
+	if(console)
+	{
+		logger << "Added task to wpool\n" << flush;
+	}
+	task.tunit = tunit;
+	task.type = type;
+	task.priority = -1;
+	task.console = console;
+	if (!prioritypooling) {
+		wpool->addTask(&task);
+	} else {
+		wpool->addPTask(&task);
+	}
+	task.isFuture = true;
 }
 
 ThreadPool::~ThreadPool() {

@@ -31,48 +31,49 @@ ControllerHandler::~ControllerHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> urlpattMap, map<string, string> mappattMap, void* dlib,
-		string ext, resFuncMap rstCntMap, map<string, string> mapMap, map<string, string> urlMap, string pthwofile)
+bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
+		string ext, string pthwofile)
 {
-	Logger logger = Logger::getLogger("ControllerHandler");
-	string claz;
+	map<string, string> urlpattMap = configData.urlpattMap;
+	map<string, string> mappattMap = configData.mappattMap;
+	resFuncMap rstCntMap = configData.rstCntMap;
+	map<string, string> mapMap = configData.mapMap;
+	map<string, string> urlMap = configData.urlMap;
+
+	Logger logger = LoggerFactory::getLogger("ControllerHandler");
 	bool isContrl = false;
 	if((urlpattMap[req->getCntxt_name()+"*.*"]!="" || urlMap[req->getCntxt_name()+ext]!=""))
 	{
 		//logger << "Controller requested for " << req->getCntxt_name() << " name " << urlMap[req->getCntxt_name()+ext] << endl;
+		string controller;
 		if(urlpattMap[req->getCntxt_name()+"*.*"]!="")
-			claz = "getReflectionCIFor" + urlpattMap[req->getCntxt_name()+"*.*"];
+			controller = urlpattMap[req->getCntxt_name()+"*.*"];
 		else
-			claz = "getReflectionCIFor" + urlMap[req->getCntxt_name()+ext];
-		string libName = Constants::INTER_LIB_FILE;
-		if(dlib == NULL)
+			controller = urlMap[req->getCntxt_name()+ext];
+
+		void *_temp = configData.ffeadContext->getBean("controller_"+req->getCntxt_name()+controller, req->getCntxt_name());
+		Controller* thrd = static_cast<Controller*>(_temp);
+		if(thrd!=NULL)
 		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
-		void *mkr = dlsym(dlib, claz.c_str());
-		if(mkr!=NULL)
-		{
-			FunPtr f =  (FunPtr)mkr;
-			ClassInfo srv = f();
-			args argus;
-			Constructor ctor = srv.getConstructor(argus);
-			Reflector ref;
-			void *_temp = ref.newInstanceGVP(ctor);
-			Controller *thrd = (Controller *)_temp;
 			try{
-				 logger << "Controller called" << endl;
+				 logger << ("Controller " + controller + " called") << endl;
 				 res = thrd->service(*req);
-				 logger << res.getStatusCode() << endl;
-				 logger << res.getContent_type() << endl;
-				 logger << res.getContent_len() << endl;
 				 if(res.getStatusCode()!="")
 					 isContrl = true;
 				 ext = AuthHandler::getFileExtension(req->getUrl());
 				 //delete mkr;
-			}catch(...){ logger << "Controller exception" << endl;}
-			logger << "Controller called\n" << flush;
+			}catch(...){
+				logger << "Controller Exception occurred" << endl;
+			}
+			logger << "Controller call complete" << endl;
 		}
+		else
+		{
+			logger << "Invalid Controller" << endl;
+			res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+			isContrl = true;
+		}
+
 	}
 	else if((mappattMap[req->getCntxt_name()+"*.*"]!="" || mapMap[req->getCntxt_name()+ext]!=""))
 	{
@@ -81,12 +82,12 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 		if(mappattMap[req->getCntxt_name()+"*.*"]!="")
 		{
 			req->setFile(fili+mappattMap[req->getCntxt_name()+"*.*"]);
-			logger << "URL mapped from * to " << mappattMap[req->getCntxt_name()+"*.*"] << endl;
+			logger << ("URL mapped from * to " + mappattMap[req->getCntxt_name()+"*.*"]) << endl;
 		}
 		else
 		{
 			req->setFile(fili+mapMap[req->getCntxt_name()+ext]);
-			logger << "URL mapped from " << ext << " to " << mapMap[req->getCntxt_name()+ext] << endl;
+			logger << ("URL mapped from " + ext + " to " + mapMap[req->getCntxt_name()+ext]) << endl;
 		}
 	}
 	else
@@ -108,61 +109,28 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 				prsiz = ft.params.size();
 				string pthwofiletemp(pthwofile);
 
-				/*if(ft.baseUrl=="")
-				{
-					logger << "checking url : " << pthwofiletemp << ",param size: " << prsiz <<
-							", against url: " << it->first << endl;
-					for (int var = 0; var < prsiz; var++)
-					{
-						//logger << "loop - " << pthwofiletemp << endl;
-						string valsvv(pthwofiletemp.substr(pthwofiletemp.find_last_of("/")+1));
-						pthwofiletemp = pthwofiletemp.substr(0, pthwofiletemp.find_last_of("/"));
-						valss.push_back(valsvv);
-					}
-					reverse(valss.begin(),valss.end());
-					//logger << "after - " << pthwofiletemp << endl;
+				string baseUrl(it->first);
+				strVec resturlparts;
+				StringUtil::split(resturlparts, baseUrl, "/");
 
-					//logger << "after - " << pthwofiletemp << endl;
-					logger << "checking url : " << pthwofiletemp << ",param size: " << prsiz << ",vals: " << valss.size() <<
-							", against url: " << it->first << endl;
-					if(it->first==pthwofiletemp)
-					{
-						string lhs = StringUtil::toUpperCopy(ft.meth);
-						string rhs = StringUtil::toUpperCopy(req->getMethod());
-						logger << lhs << " <> " << rhs << endl;
-						if(prsiz==(int)valss.size() && lhs==rhs)
-						{
-							logger << "got correct url -- restcontroller " << endl;
-							rft = ft;
-							flag = true;
-						}
-						else
-						{
-							res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-							//res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-							logger << "Rest Controller Param/Method Error" << endl;
-						}
-						break;
-					}
+				strVec urlparts;
+				StringUtil::split(urlparts, pthwofiletemp, "/");
+
+				if(urlparts.size()!=resturlparts.size())
+				{
+					flag = false;
+					//break;
 				}
-				else*/
+				else
 				{
-					string baseUrl(it->first);
-					strVec resturlparts;
-					StringUtil::split(resturlparts, baseUrl, "/");
-
-					strVec urlparts;
-					StringUtil::split(urlparts, pthwofiletemp, "/");
-
-					if(urlparts.size()!=resturlparts.size())
-					{
-						flag = false;
-						//break;
-					}
+					flag = true;
+				}
+				if(flag)
+				{
 					bool fflag = true;
-					for (int var = 0; var < resturlparts.size(); var++)
+					for (int var = 0; var < (int)resturlparts.size(); var++)
 					{
-						logger << "resturlparts.at(var) = " << resturlparts.at(var) << endl;
+						//logger << "resturlparts.at(var) = " << resturlparts.at(var) << endl;
 						if(resturlparts.at(var).find("{")!=string::npos && resturlparts.at(var).find("}")!=string::npos
 								&& resturlparts.at(var).length()>2)
 						{
@@ -181,261 +149,351 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, map<string, 
 								paramvalue = paramvalue.substr(stpre, len);
 							}
 							mapOfValues[paramname] = paramvalue;
-							logger << "mapOfValues(" << paramname << ") = "<< paramvalue << endl;
+							//logger << "mapOfValues(" << paramname << ") = "<< paramvalue << endl;
+							logger << ("Restcontroller matched url : " + pthwofiletemp + ",param size: " + CastUtil::lexical_cast<string>(prsiz) +
+										", against url: " + baseUrl) << endl;
 						}
 						else if(urlparts.at(var)!=resturlparts.at(var))
 						{
 							fflag = false;
 							break;
 						}
-
 					}
 					flag = fflag;
-					logger << "checking url : " << pthwofiletemp << ",param size: " << prsiz <<
-							", against url: " << baseUrl << endl;
-					/*for (int var = 1; var <= prsiz; var++)
-					{
-						strVec vemp;
-						stringstream ss;
-						ss << "{";
-						ss << var;
-						ss << "}";
-						string param;
-						ss >> param;
-						StringUtil::split(vemp, baseUrl, (param));
-						if(vemp.size()==2 && pthwofiletemp.find(vemp.at(0))!=string::npos)
-						{
-							string temp = pthwofiletemp;
-							StringUtil::replaceFirst(temp, vemp.at(0), "");
-							if(temp.find("/")!=string::npos)
-							{
-								pthwofiletemp = temp.substr(temp.find("/"));
-								temp = temp.substr(0, temp.find("/"));
-							}
-							valss.push_back(temp);
-							baseUrl = vemp.at(1);
-							logger << "variable at " << param << " mapped to " << temp << " from URL" << endl;
-							logger << baseUrl << endl;
-							logger << pthwofiletemp << endl;
-						}
-						else
-						{
-							flag = false;
-							break;
-						}
-					}*/
-					string lhs = StringUtil::toUpperCopy(ft.meth);
-					string rhs = StringUtil::toUpperCopy(req->getMethod());
-					logger << lhs << " <> " << rhs << endl;
-					//if(prsiz==(int)valss.size() && lhs==rhs)
-					if(flag && lhs==rhs)
-					{
+				}
 
-						logger << "got correct url -- restcontroller " << endl;
-						rft = ft;
-						flag = true;
-						break;
-					}
-					else if(flag)
-					{
-						res.setHTTPResponseStatus(HTTPResponseStatus::InvalidMethod);
-						return true;
-					}
+				string lhs = StringUtil::toUpperCopy(ft.meth);
+				string rhs = StringUtil::toUpperCopy(req->getMethod());
+				//if(prsiz==(int)valss.size() && lhs==rhs)
+				if(flag && lhs==rhs)
+				{
+
+					logger << "Encountered rest controller url/method match" << endl;
+					rft = ft;
+					flag = true;
+					break;
+				}
+				else if(flag)
+				{
+					res.setHTTPResponseStatus(HTTPResponseStatus::InvalidMethod);
+					return true;
+				}
+				else
+				{
+					res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+					//res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+					/*if(prsiz==valss.size())
+						res.setContent("Invalid number of arguments");
 					else
-					{
-						res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-						//res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-						/*if(prsiz==valss.size())
-							res.setContent_str("Invalid number of arguments");
-						else
-							res.setContent_str("Invalid HTTPMethod used");*/
-						//logger << "Rest Controller Param/Method Error" << endl;
-					}
+						res.setContent("Invalid HTTPMethod used");*/
+					//logger << "Rest Controller Param/Method Error" << endl;
 				}
 			}
 		}
 		if(flag)
 		{
 			//logger << "inside restcontroller logic ..." << endl;
-			string libName = Constants::INTER_LIB_FILE;
-			if(dlib == NULL)
+			Reflector ref;
+			ClassInfo srv = ref.getClassInfo(rft.clas, req->getCntxt_name());
+			void *_temp = configData.ffeadContext->getBean("restcontroller_"+req->getCntxt_name()+rft.clas, req->getCntxt_name());
+			RestController* rstcnt = (RestController*)_temp;
+			if(rstcnt==NULL)
 			{
-				cerr << dlerror() << endl;
-				exit(-1);
+				logger << "Invalid Rest Controller" << endl;
+				res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+				return true;
 			}
-			string clasnam("getReflectionCIFor"+rft.clas);
-			void *mkr = dlsym(dlib, clasnam.c_str());
-			logger << mkr << endl;
-			if(mkr!=NULL)
+
+			rstcnt->request = req;
+			rstcnt->response = &res;
+
+			args argus;
+			vals valus;
+			bool invValue = false;
+			vector<ifstream*> allStreams;
+			map<string, vector<ifstream*>* > mpvecstreams;
+			for (int var = 0; var < prsiz; var++)
 			{
-				FunPtr f =  (FunPtr)mkr;
-				ClassInfo srv = f();
-				args argus;
-				Constructor ctor = srv.getConstructor(argus);
-				Reflector ref;
-				void *_temp = ref.newInstanceGVP(ctor);
-				RestController* rstcnt = (RestController*)_temp;
-				rstcnt->request = req;
-				rstcnt->response = &res;
-
-				vals valus;
-				bool invValue = false;
-				for (int var = 0; var < prsiz; var++)
+				try
 				{
-					try
-					{
-						string icont = rft.icontentType;
-						string ocont = rft.ocontentType;
+					string icont = rft.icontentType;
+					string ocont = rft.ocontentType;
 
-						if(icont=="")
-							icont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
-						else if(icont!=req->getContent_type())
+					if(icont=="")
+						icont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
+					else if(icont!=req->getHeader(HttpRequest::ContentType) && req->getHeader(HttpRequest::ContentType).find(icont)!=0)
+					{
+						res.setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
+						return true;
+					}
+
+					if(ocont=="")
+						ocont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
+
+					req->addHeaderValue(HttpRequest::ContentType, icont);
+					res.addHeaderValue(HttpResponse::ContentType, ocont);
+
+					string pmvalue;
+					if(rft.params.at(var).from=="path")
+						pmvalue = mapOfValues[rft.params.at(var).name];
+					else if(rft.params.at(var).from=="reqparam")
+						pmvalue = req->getQueryParam(rft.params.at(var).name);
+					else if(rft.params.at(var).from=="postparam")
+						pmvalue = req->getRequestParam(rft.params.at(var).name);
+					else if(rft.params.at(var).from=="header")
+						pmvalue = req->getHeader(rft.params.at(var).name);
+					else if(rft.params.at(var).from=="multipart-content")
+					{
+						MultipartContent mcont = req->getMultipartContent(rft.params.at(var).name);
+						if(mcont.isValid())
 						{
-							res.setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
+							if(mcont.isAFile())
+							{
+								if(rft.params.at(var).type=="filestream")
+								{
+									pmvalue = rft.params.at(var).name;
+								}
+								else if(rft.params.at(var).type!="vector-of-filestream")
+								{
+									logger << "File can only be mapped to ifstream" << endl;
+									res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+									return true;
+								}
+							}
+							else
+							{
+								pmvalue = mcont.getContent();
+							}
+						}
+						else if(rft.params.at(var).type!="vector-of-filestream")
+						{
+							logger << "Invalid mapping specified in config, no multipart content found with name " + rft.params.at(var).name << endl;
+							res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 							return true;
 						}
+					}
+					else
+					{
+						if(prsiz>1)
+						{
+							logger << "Request Body cannot be mapped to more than one argument..." << endl;
+							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+							return true;
+						}
+						pmvalue = req->getContent();
+					}
 
-						if(ocont=="")
-							ocont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
+					logger << ("Restcontroller parameter type/value = "  + rft.params.at(var).type + "/" + pmvalue) << endl;
+					logger << ("Restcontroller content types input/output = " + icont + "/" + ocont) << endl;
 
-						req->setContent_type(icont);
-						res.setContent_type(ocont);
-
-						string pmvalue;
-						if(rft.params.at(var).from=="path")
-							pmvalue = mapOfValues[rft.params.at(var).name];
-						else if(rft.params.at(var).from=="reqparam")
-							pmvalue = req->getQueryParam(rft.params.at(var).name);
-						else if(rft.params.at(var).from=="postparam")
-							pmvalue = req->getRequestParam(rft.params.at(var).name);
-						else if(rft.params.at(var).from=="header")
-							pmvalue = req->getXtraHeader(rft.params.at(var).name);
-						else
-							pmvalue = req->getContent();
-
-						logger << "pmvalue = "  << pmvalue << endl;
-						logger << icont << " " << ocont << endl;
-						logger << rft.params.at(var).type << endl;
-
-						if(rft.params.at(var).type=="int")
+					if(rft.params.at(var).type=="int")
+					{
+						argus.push_back(rft.params.at(var).type);
+						int* ival = new int(CastUtil::lexical_cast<int>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="short")
+					{
+						argus.push_back(rft.params.at(var).type);
+						short* ival = new short(CastUtil::lexical_cast<short>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="long")
+					{
+						argus.push_back(rft.params.at(var).type);
+						long* ival = new long(CastUtil::lexical_cast<long>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="double")
+					{
+						argus.push_back(rft.params.at(var).type);
+						double* ival = new double(CastUtil::lexical_cast<double>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="float")
+					{
+						argus.push_back(rft.params.at(var).type);
+						float* ival = new float(CastUtil::lexical_cast<float>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="bool")
+					{
+						argus.push_back(rft.params.at(var).type);
+						bool* ival = new bool(CastUtil::lexical_cast<bool>(pmvalue));
+						valus.push_back(ival);
+					}
+					else if(rft.params.at(var).type=="string" || rft.params.at(var).type=="std::string")
+					{
+						argus.push_back(rft.params.at(var).type);
+						string* sval = new string(pmvalue);
+						valus.push_back(sval);
+					}
+					else if(rft.params.at(var).type=="filestream")
+					{
+						argus.push_back("ifstream*");
+						MultipartContent mcont = req->getMultipartContent(pmvalue);
+						if(mcont.isValid() && mcont.isAFile())
 						{
-							argus.push_back(rft.params.at(var).type);
-							int* ival = new int(CastUtil::lexical_cast<int>(pmvalue));
-							valus.push_back(ival);
+							ifstream* ifs = new ifstream;
+							ifs->open(mcont.getTempFileName().c_str());
+							valus.push_back(ifs);
+							allStreams.push_back(ifs);
 						}
-						else if(rft.params.at(var).type=="short")
+					}
+					else if(rft.params.at(var).type=="vector-of-filestream")
+					{
+						vector<ifstream*> *vifs = NULL;
+						if(mpvecstreams.find(rft.params.at(var).name)==mpvecstreams.end())
 						{
-							argus.push_back(rft.params.at(var).type);
-							short* ival = new short(CastUtil::lexical_cast<short>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="long")
-						{
-							argus.push_back(rft.params.at(var).type);
-							long* ival = new long(CastUtil::lexical_cast<long>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="double")
-						{
-							argus.push_back(rft.params.at(var).type);
-							double* ival = new double(CastUtil::lexical_cast<double>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="float")
-						{
-							argus.push_back(rft.params.at(var).type);
-							float* ival = new float(CastUtil::lexical_cast<float>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="bool")
-						{
-							argus.push_back(rft.params.at(var).type);
-							bool* ival = new bool(CastUtil::lexical_cast<bool>(pmvalue));
-							valus.push_back(ival);
-						}
-						else if(rft.params.at(var).type=="string" || rft.params.at(var).type=="std::string")
-						{
-							argus.push_back(rft.params.at(var).type);
-							string* sval = new string(pmvalue);
-							valus.push_back(sval);
-						}
-						else if(rft.params.at(var).type.find("vector&lt;")==0)
-						{
-							logger << " is param body vector " << endl;
-							string stlcnt = rft.params.at(var).type;
-							StringUtil::replaceFirst(stlcnt,"vector&lt;","");
-							StringUtil::replaceFirst(stlcnt,"&gt;","");
-							StringUtil::replaceFirst(stlcnt," ","");
-							logger << " is param body vector of type "  << stlcnt << endl;
-							string typp = "vector<" + stlcnt + ">";
-							argus.push_back(typp);
-							void* voidPvect = NULL;
-							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
-							{
-								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+">");
+							argus.push_back("vector<ifstream*>");
+							vifs = new vector<ifstream*>;
+							vector<MultipartContent> mcontvec = req->getMultiPartFileList(rft.params.at(var).name);
+							for(int mci=0;mci<(int)mcontvec.size();mci++) {
+								MultipartContent mcont = mcontvec.at(mci);
+								if(mcont.isValid() && mcont.isAFile())
+								{
+									ifstream* ifs = new ifstream;
+									ifs->open(mcont.getTempFileName().c_str());
+									vifs->push_back(ifs);
+									allStreams.push_back(ifs);
+								}
 							}
-							else
-							{
-								voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, "std::vector<"+stlcnt+",");
-							}
-							if(voidPvect==NULL)
-							{
-								res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-								return true;
-							}
-							valus.push_back(voidPvect);
+							mpvecstreams[rft.params.at(var).name] = vifs;
 						}
 						else
 						{
-							argus.push_back(rft.params.at(var).type);
-							void* voidPvect = NULL;
-							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
-							{
-								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type);
-							}
-							else
-							{
-								voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type);
-							}
-							if(voidPvect==NULL)
-							{
-								res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-								return true;
-							}
-							logger << voidPvect << endl;
-							valus.push_back(voidPvect);
+							vifs = mpvecstreams[rft.params.at(var).name];
 						}
-					} catch (const char* ex) {
-						logger << ex << endl;
-						invValue= true;
-						res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-						return true;
-					} catch (...) {
-						logger << "exception occurred" << endl;
-						invValue= true;
-						res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-						return true;
+						valus.push_back(vifs);
+					}
+					else if(rft.params.at(var).type.find("vector-of-")==0 || rft.params.at(var).type.find("list-of-")==0
+							|| rft.params.at(var).type.find("deque-of-")==0 || rft.params.at(var).type.find("set-of-")==0
+							|| rft.params.at(var).type.find("multiset-of-")==0 || rft.params.at(var).type.find("queue-of-")==0)
+					{
+						string stlcnt = rft.params.at(var).type;
+						string stltype;
+						string typp;
+						if(rft.params.at(var).type.find("vector-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"vector-of-","");
+							stltype = "std::vector";
+							typp = "vector<" + stlcnt + ">";
+						}
+						else if(rft.params.at(var).type.find("list-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"list-of-","");
+							stltype = "std::list";
+							typp = "list<" + stlcnt + ">";
+						}
+						else if(rft.params.at(var).type.find("deque-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"deque-of-","");
+							stltype = "std::deque";
+							typp = "deque<" + stlcnt + ">";
+						}
+						else if(rft.params.at(var).type.find("set-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"set-of-","");
+							stltype = "std::set";
+							typp = "set<" + stlcnt + ">";
+						}
+						else if(rft.params.at(var).type.find("multiset-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"multiset-of-","");
+							stltype = "std::multiset";
+							typp = "multiset<" + stlcnt + ">";
+						}
+						else if(rft.params.at(var).type.find("queue-of-")==0)
+						{
+							StringUtil::replaceFirst(stlcnt,"queue-of-","");
+							stltype = "std::queue";
+							typp = "queue<" + stlcnt + ">";
+						}
+						StringUtil::replaceFirst(stlcnt," ","");
+						logger << ("Restcontroller param body holds "+stltype+" of type "  + stlcnt) << endl;
+
+						argus.push_back(typp);
+						void* voidPvect = NULL;
+						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+						{
+							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, stltype+"<"+stlcnt+">",req->getCntxt_name());
+						}
+#ifdef INC_XMLSER
+						else
+						{
+							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, stltype+"<"+stlcnt+",",req->getCntxt_name());
+						}
+#endif
+						if(voidPvect==NULL)
+						{
+							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+							return true;
+						}
+						valus.push_back(voidPvect);
+					}
+					else
+					{
+						argus.push_back(rft.params.at(var).type);
+						void* voidPvect = NULL;
+						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+						{
+							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type,req->getCntxt_name());
+						}
+#ifdef INC_XMLSER
+						else
+						{
+							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type,req->getCntxt_name());
+						}
+#endif
+						if(voidPvect==NULL)
+						{
+							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+							return true;
+						}
+						valus.push_back(voidPvect);
+					}
+				} catch (const char* ex) {
+					logger << "Restcontroller exception occurred" << endl;
+					logger << ex << endl;
+					invValue= true;
+					res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+					return true;
+				} catch (...) {
+					logger << "Restcontroller exception occurred" << endl;
+					invValue= true;
+					res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+					return true;
+				}
+			}
+
+			Method meth = srv.getMethod(rft.name, argus);
+			if(meth.getMethodName()!="" && !invValue)
+			{
+				ref.invokeMethodUnknownReturn(_temp,meth,valus);
+				logger << "Successfully called restcontroller" << endl;
+				//return;
+
+				for(int i=0;i<(int)allStreams.size();++i) {
+					if(allStreams.at(i)!=NULL) {
+						if(allStreams.at(i)->is_open()) {
+							allStreams.at(i)->close();
+							allStreams.at(i)->clear();
+						}
+						delete allStreams.at(i);
 					}
 				}
 
-				Method meth = srv.getMethod(rft.name, argus);
-				if(meth.getMethodName()!="" && !invValue)
-				{
-					ref.invokeMethodUnknownReturn(_temp,meth,valus);
-					logger << "successfully called restcontroller" << endl;
-					//return;
+				map<string, vector<ifstream*>* >::iterator it;
+				for(it=mpvecstreams.begin();it!=mpvecstreams.end();++it) {
+					delete it->second;
 				}
-				else
-				{
-					res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-					//res.setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-					/*if(invValue)
-						res.setContent_str("Invalid value passed as URL param");
-					else
-						res.setContent_str("Rest Controller Method Not Found");*/
-					logger << "Rest Controller Method Not Found" << endl;
-					//return;
-				}
+			}
+			else
+			{
+				res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+				//res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				logger << "Rest Controller Method Not Found" << endl;
+				//return;
 			}
 		}
 	}

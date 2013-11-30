@@ -28,20 +28,28 @@
 using namespace std;
 
 class Task {
+	bool isFuture;
 	int tunit;
 	int type;
 	int priority;
 	bool console;
+	bool cleanUp;
 	Task(int priority);
 	Task(int tunit, int type);
 	friend class PoolThread;
 	friend class ThreadPool;
 	friend class TaskPool;
+	friend class FutureTask;
 	bool isWaitOver(Timer *timer);
 public:
+	void setCleanUp(bool);
 	Task();
 	virtual ~Task();
 	virtual void run()=0;
+protected:
+	void init();
+	void setPriority(int priority);
+	void setTunitType(int tunit, int type);
 };
 
 #endif /* TASK_H_ */

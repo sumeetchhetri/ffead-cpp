@@ -6,16 +6,34 @@ CPP_SRCS += \
 ./ReflectorInterface.cpp \
 ./DCPInterface.cpp \
 ./WsInterface.cpp \
+./TemplateInterface.cpp \
 ${RUNTIME_COMP_SRCS}
+
 
 OBJS += \
 ./AjaxInterface.o \
 ./ApplicationInterface.o \
 ./ReflectorInterface.o \
 ./SerializeInterface.o \
+./WsInterface.o \
 ./DCPInterface.o \
+./TemplateInterface.o \
+${RUNTIME_COMP_OBJS}
+
+
+POBJS += \
+./AjaxInterface.o \
+./ApplicationInterface.o \
+./ReflectorInterface.o \
+./SerializeInterface.o \
 ./WsInterface.o \
 ${RUNTIME_COMP_OBJS}
+
+
+PDOBJS += \
+./DCPInterface.o \
+./TemplateInterface.o \
+
 
 CPP_DEPS += \
 ./AjaxInterface.d \
@@ -23,8 +41,10 @@ CPP_DEPS += \
 ./ReflectorInterface.d \
 ./SerializeInterface.d \
 ./DCPInterface.d \
-./WsInterface.d \
+./WsInterface.d \ \
+./TemplateInterface.d \
 ${RUNTIME_COMP_DEPS}
+
 
 # Each subdirectory must supply rules for building sources it contributes
 ./%.o: ./%.cpp

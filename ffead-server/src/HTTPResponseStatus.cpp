@@ -58,11 +58,21 @@ HTTPResponseStatus HTTPResponseStatus::GatewayTimeout(504, "Gateway timeout");
 HTTPResponseStatus HTTPResponseStatus::HttpVersionNotSupported(505, "HTTP version not supported");
 
 HTTPResponseStatus::HTTPResponseStatus() {
-
+	this->code = 0;
 }
 
 HTTPResponseStatus::HTTPResponseStatus(int code, string msg) {
 	this->code = code;
+	this->msg = msg;
+}
+
+HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status) {
+	this->code = status.code;
+	this->msg = status.msg;
+}
+
+HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status, string msg) {
+	this->code = status.code;
 	this->msg = msg;
 }
 

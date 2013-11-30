@@ -47,7 +47,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 
 	string url = reqparams["realm"];
 	if(url=="")
-		url = "http://" + req->getHost() + req->getActUrl();
+		url = "http://" + req->getHeader(HttpRequest::Host) + req->getActUrl();
 
 	string allpars = (method + "&" + CryptoHandler::urlEncode(url) + "&");
 	string allparst;
@@ -116,7 +116,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 	if(flag && resu==signature && signature!="" && resu!="")
 	{
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-		res->setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+		res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 		string filen;
 		if(tokk=="" && req->getFile()=="request.oauth")
 		{
@@ -148,7 +148,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			string cont = ("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec+"&")+parsc;
 			if(cont[cont.length()-1]=='&')
 				cont = cont.substr(0,cont.length()-1);
-			res->setContent_str(cont);
+			res->setContent(cont);
 			cout << "verified initial request signature is valid" << endl;
 			cout << "provided a request token" << endl;
 		}
@@ -173,7 +173,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			}
 			if(cont[cont.length()-1]=='&')
 				cont = cont.substr(0,cont.length()-1);
-			res->setContent_str(cont);
+			res->setContent(cont);
 			cout << "verified request token signature is valid" << endl;
 			cout << "provided an access token" << endl;
 		}
@@ -181,7 +181,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 		{
 			cout << "resource access granted for " << reqparams["file"] << endl;
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			req->setFile(reqparams["file"]);
 			return false;
 		}
@@ -193,7 +193,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 		if(!flag)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			res->setContent_type(ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			cout << "invalid username/password" << endl;
 		}
 		else if(key==reqparams["password"])
@@ -202,15 +202,16 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			if(reqparams["oauthparms"]!="")
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::MovedPermanently);
-				res->setLocation(CryptoHandler::urlDecode(reqparams["oauthparms"])+"&access=true");
+				res->addHeaderValue(HttpResponse::Location, CryptoHandler::urlDecode(reqparams["oauthparms"])+"&access=true");
 				cout << "redirecting to callback url" << endl;
 			}
 			else
 			{
-				res->setContent_str(reqparams["oauthparms"]+"&access=true");
+				res->setContent(reqparams["oauthparms"]+"&access=true");
 				cout << "no callback url specified sending access info in content" << endl;
 			}
 		}
+		return true;
 	}
 	else if(req->getFile()=="login.oauth")
 	{
@@ -228,9 +229,10 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 		html += "<input type='submit' value='Submit'/>";
 		html += "</form></body></html>";
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-		res->setContent_type(ContentTypes::CONTENT_TYPE_TEXT_SHTML);
-		res->setContent_str(html);
+		res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+		res->setContent(html);
 		cout << "Login page display" << endl;
+		return true;
 	}
 	else
 	{

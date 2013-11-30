@@ -31,20 +31,28 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: libinter
+all: libinter libdinter
 
 # Tool invocations
 libinter: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ $(PTHREADS) -L"/usr/local/lib" -L"../lib" -shared -o"libinter.$(RES_LIB_EXT)" $(OBJS) $(USER_OBJS) $(LIBS) $(EX_LIBS)
+	g++ $(PTHREADS) -L"/usr/local/lib" -L"../lib" -shared -o"libinter.$(RES_LIB_EXT)" $(POBJS) $(USER_OBJS) $(LIBS) $(EX_LIBS)
 	@echo 'Finished building target: $@'
 	cp -f libinter.$(RES_LIB_EXT) ../lib/
+	@echo ' '
+	
+libdinter: $(OBJS) $(USER_OBJS)
+	@echo 'Building target: $@'
+	@echo 'Invoking: GCC C++ Linker'
+	g++ $(PTHREADS) -L"/usr/local/lib" -L"../lib" -shared -o"libdinter.$(RES_LIB_EXT)" $(PDOBJS) $(LIBS) $(EX_LIBS)
+	@echo 'Finished building target: $@'
+	cp -f libdinter.$(RES_LIB_EXT) ../lib/
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS) $(C++_DEPS) $(C_DEPS) $(CC_DEPS) $(CPP_DEPS) $(EXECUTABLES) $(CXX_DEPS) $(C_UPPER_DEPS) libinter.$(RES_LIB_EXT)
+	-$(RM) $(OBJS) $(C++_DEPS) $(C_DEPS) $(CC_DEPS) $(CPP_DEPS) $(EXECUTABLES) $(CXX_DEPS) $(C_UPPER_DEPS) libinter.$(RES_LIB_EXT) libdinter.$(RES_LIB_EXT)
 	-@echo ' '
 
 .PHONY: all clean dependents

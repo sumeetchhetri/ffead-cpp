@@ -26,55 +26,17 @@
 #include "Reflector.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
+#include "ConfigurationData.h"
 
 typedef ClassInfo (*FunPtr) ();
-
-class SecureAspect
-{
-public:
-	string path;
-	string role;
-};
-
-class Security
-{
-	Logger logger;
-public:
-	Security();
-	~Security();
-	vector<SecureAspect> secures;
-	string loginProvider;
-	string loginUrl;
-	string welocmeFile;
-	long sessTimeout;
-	bool isLoginConfigured()
-	{
-		return (loginProvider!="" && loginUrl!="");
-	}
-	bool isSecureConfigured()
-	{
-		return secures.size()!=0;
-	}
-	bool isLoginUrl(string url, string actUrl)
-	{
-		return (actUrl==(url+"/_ffead_security_cntxt_login_url"));
-	}
-	bool isLoginPage(string url, string actUrl)
-	{
-		return (actUrl==(url+"/"+loginUrl));
-	}
-	SecureAspect matchesPath(string url);
-};
-
 
 class SecurityHandler {
 	static Logger logger;
 public:
 	SecurityHandler();
 	virtual ~SecurityHandler();
-	static bool handle(string ip_addr, HttpRequest* req, HttpResponse& res, map<string, Security> securityObjectMap,
-			long sessionTimeout, void* dlib, map<string, string> cntMap);
+	static bool handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, long sessionTimeout);
 };
 
 #endif /* SECURITYHANDLER_H_ */

@@ -25,7 +25,7 @@
 Logger RestController::logger;
 
 RestController::RestController() {
-	logger = Logger::getLogger("RestController");
+	logger = LoggerFactory::getLogger("RestController");
 }
 
 RestController::~RestController() {
@@ -35,49 +35,53 @@ RestController::~RestController() {
 void RestController::buildResponse(HTTPResponseStatus status, string className, void* entity)
 {
 	string content;
-	if(response->getContent_type()==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+	if(response->getHeader(HttpResponse::ContentType)==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 	{
-		content = JSONSerialize::serializeUnknown(entity, className);
-		response->setContent_type(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+		content = JSONSerialize::serializeUnknown(entity, className, request->getCntxt_name());
+		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 	}
+#ifdef INC_XMLSER
 	else
 	{
-		content = XMLSerialize::serializeUnknown(entity, className);
-		response->setContent_type(ContentTypes::CONTENT_TYPE_APPLICATION_XML);
+		content = XMLSerialize::serializeUnknown(entity, className, request->getCntxt_name());
+		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
 	}
+#endif
 	if(content!="")
 	{
 		response->setHTTPResponseStatus(status);
-		response->setContent_str(content);
+		response->setContent(content);
 	}
 	else
 	{
 		response->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-		response->setContent_str(content);
+		response->setContent(content);
 	}
 }
 
 void RestController::buildResponseVector(HTTPResponseStatus status, string className, void* entity)
 {
 	string content;
-	if(response->getContent_type()==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+	if(response->getHeader(HttpResponse::ContentType)==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 	{
-		content = JSONSerialize::serializeUnknown(entity, "std::vector<"+className+",");
-		response->setContent_type(ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+		content = JSONSerialize::serializeUnknown(entity, "std::vector<"+className+",", request->getCntxt_name());
+		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 	}
+#ifdef INC_XMLSER
 	else
 	{
-		content = XMLSerialize::serializeUnknown(entity, "std::vector<"+className+",");
-		response->setContent_type(ContentTypes::CONTENT_TYPE_APPLICATION_XML);
+		content = XMLSerialize::serializeUnknown(entity, "std::vector<"+className+",", request->getCntxt_name());
+		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
 	}
+#endif
 	if(content!="")
 	{
 		response->setHTTPResponseStatus(status);
-		response->setContent_str(content);
+		response->setContent(content);
 	}
 	else
 	{
 		response->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-		response->setContent_str(content);
+		response->setContent(content);
 	}
 }

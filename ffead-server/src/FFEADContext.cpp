@@ -22,12 +22,17 @@
 
 #include "FFEADContext.h"
 
-FFEADContext::FFEADContext(string depFile)
+FFEADContext::FFEADContext()
 {
+	logger = LoggerFactory::getLogger("FFEADContext");
+}
+
+FFEADContext::FFEADContext(string depFile, string appName)
+{
+	logger = LoggerFactory::getLogger("FFEADContext");
 	XmlParser parser("Parser");
 	Element root = parser.getDocument(depFile).getRootElement();
 	ElementList eles = root.getChildElements();
-	vector<string> beanchk;
 	if(eles.size()>0 && root.getTagName()=="beans")
 	{
 		for (unsigned int var = 0; var < eles.size(); var++)
@@ -36,6 +41,7 @@ FFEADContext::FFEADContext(string depFile)
 			if(ele.getTagName()=="bean")
 			{
 				Bean bean;
+				bean.appName = appName;
 				bean.name = ele.getAttribute("name");
 				bean.value = ele.getAttribute("value");
 				bean.inbuilt = ele.getAttribute("inbuilt");
@@ -45,6 +51,7 @@ FFEADContext::FFEADContext(string depFile)
 				bean.clas = ele.getAttribute("class");
 				bean.intfType = ele.getAttribute("intfType");
 				bean.injectAs = ele.getAttribute("injectAs");
+				bean.scope = ele.getAttribute("scope");
 				bean.realbean = true;
 				ElementList eleeles = ele.getChildElements();
 				if(eleeles.size()==0)
@@ -60,26 +67,27 @@ FFEADContext::FFEADContext(string depFile)
 						{
 							if(ele1.getAttribute("bean")!="")
 							{
-								beanchk.push_back(ele1.getAttribute("bean"));
-								bean.injs.push_back(ele1.getAttribute("bean"));
+								bean.injs.push_back(appName+ele1.getAttribute("bean"));
 								if(ele1.getAttribute("name")!="")
-									bean.names.push_back(ele1.getAttribute("name"));
+									bean.names.push_back(appName+ele1.getAttribute("name"));
 								else
-									bean.names.push_back(ele1.getAttribute("bean"));
+									bean.names.push_back(appName+ele1.getAttribute("bean"));
 								bean.types.push_back(ele1.getAttribute("intfType"));
 							}
 							else
 							{
 								Bean beanc;
+								beanc.appName = appName;
 								beanc.name = ele1.getAttribute("name");
 								beanc.value = ele1.getAttribute("value");
 								beanc.inbuilt = ele1.getAttribute("inbuilt");
 								beanc.clas = ele1.getAttribute("class");
 								beanc.intfType = ele1.getAttribute("intfType");
+								bean.scope = ele1.getAttribute("scope");
 								beanc.realbean = false;
-								injbns[beanc.name] = beanc;
-								bean.injs.push_back(beanc.name);
-								bean.names.push_back(beanc.name);
+								injbns[beanc.appName+beanc.name] = beanc;
+								bean.injs.push_back(beanc.appName+beanc.name);
+								bean.names.push_back(beanc.appName+beanc.name);
 							}
 						}
 						else
@@ -88,7 +96,7 @@ FFEADContext::FFEADContext(string depFile)
 						}
 					}
 				}
-				beans[bean.name] = bean;
+				beans[bean.appName+bean.name] = bean;
 			}
 			else
 			{
@@ -110,6 +118,24 @@ void* FFEADContext::getBean(Bean bean)
 	if(bean.inbuilt!="" && bean.value!="")
 	{
 		type = bean.inbuilt;
+	}
+	else if(bean.inbuilt!="" && bean.value=="")
+	{
+		throw "Invalid value for inbuilt type";
+	}
+	else
+	{
+		type = bean.clas;
+	}
+	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
+	{
+		if(objects.find(bean.appName+type)!=objects.end())
+		{
+			return objects[bean.appName+type];
+		}
+	}
+	if(bean.inbuilt!="" && bean.value!="")
+	{
 		if(bean.inbuilt=="string")
 		{
 			string *in = new string(bean.value);
@@ -155,28 +181,22 @@ void* FFEADContext::getBean(Bean bean)
 			_temp = in;
 		}
 	}
-	else if(bean.inbuilt!="" && bean.value=="")
-	{
-		throw "Invalid value for inbuilt type";
-	}
 	else if(bean.injectAs=="" || bean.injs.size()==0)
 	{
 		Reflector reflector;
 		args argus;
-		ClassInfo clas = reflector.getClassInfo(bean.clas);
+		ClassInfo clas = reflector.getClassInfo(bean.clas, bean.appName);
 		Constructor ctor = clas.getConstructor(argus);
-		_temp = reflector.newInstanceGVP(ctor);
-		type = bean.clas;
+		_temp = reflector.newInstanceGVP(ctor, bean.appName);
 	}
 	else if(bean.injectAs=="prop")
 	{
-		type = bean.clas;
 		Reflector reflector;
 		args argus;
 		vals valus;
-		ClassInfo clas = reflector.getClassInfo(bean.clas);
+		ClassInfo clas = reflector.getClassInfo(bean.clas, bean.appName);
 		Constructor ctor = clas.getConstructor(argus);
-		_temp = reflector.newInstanceGVP(ctor);
+		_temp = reflector.newInstanceGVP(ctor, bean.appName);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
 		{
 			Bean beanc = injbns[bean.injs.at(var)];
@@ -193,18 +213,17 @@ void* FFEADContext::getBean(Bean bean)
 			Method meth = clas.getMethod(methodName,argus);
 			void *value = getBean(beanc);
 			valus.push_back(value);
-			reflector.invokeMethod<void*>(_temp,meth,valus);
+			reflector.invokeMethod<void*>(_temp,meth,valus,bean.appName);
 			valus.clear();
 			argus.clear();
 		}
 	}
 	else if(bean.injectAs=="cons")
 	{
-		type = bean.clas;
 		Reflector reflector;
 		args argus;
 		vals valus;
-		ClassInfo clas = reflector.getClassInfo(bean.clas);
+		ClassInfo clas = reflector.getClassInfo(bean.clas, bean.appName);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
 		{
 			Bean beanc = injbns[bean.injs.at(var)];
@@ -220,17 +239,16 @@ void* FFEADContext::getBean(Bean bean)
 			valus.push_back(value);
 		}
 		Constructor ctor = clas.getConstructor(argus);
-		_temp = reflector.newInstanceGVP(ctor,valus);
+		_temp = reflector.newInstanceGVP(ctor,valus, bean.appName);
 	}
 	else if(bean.injectAs=="intf")
 	{
-		type = bean.clas;
 		Reflector reflector;
 		args argus;
 		vals valus;
-		ClassInfo clas = reflector.getClassInfo(bean.clas);
+		ClassInfo clas = reflector.getClassInfo(bean.clas, bean.appName);
 		Constructor ctor = clas.getConstructor(argus);
-		_temp = reflector.newInstanceGVP(ctor);
+		_temp = reflector.newInstanceGVP(ctor, bean.appName);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
 		{
 			Bean beanc = injbns[bean.injs.at(var)];
@@ -245,23 +263,30 @@ void* FFEADContext::getBean(Bean bean)
 			Method meth = clas.getMethod(methodName,argus);
 			void *value = getBean(beanc);
 			valus.push_back(value);
-			reflector.invokeMethod<void*>(_temp,meth,valus);
+			reflector.invokeMethod<void*>(_temp,meth,valus, bean.appName);
 			valus.clear();
 			argus.clear();
 		}
 	}
-	objects[type] = _temp;
+	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
+	{
+		objects[bean.appName+type] = _temp;
+	}
 	return _temp;
 }
 
-void* FFEADContext::getBean(string beanName)
+void* FFEADContext::getBean(string beanName, string appName)
 {
-	Bean bean = beans[beanName];
-	return getBean(bean);
+	if(beanName!="" && beans.find(appName+beanName)!=beans.end())
+	{
+		Bean bean = beans[appName+beanName];
+		return getBean(bean);
+	}
+	return NULL;
 }
 
 
-void FFEADContext::clear()
+void FFEADContext::clear(string appName)
 {
 	if(cleared)
 		return;
@@ -275,8 +300,60 @@ void FFEADContext::clear()
 		else
 		{
 			Reflector reflector;
-			reflector.destroy(objectsIter->second,objectsIter->first);
+			reflector.destroy(objectsIter->second,objectsIter->first, appName);
 		}
 	}
 	cleared = true;
+}
+
+void FFEADContext::addBean(Bean bean)
+{
+	if(bean.name!="" && beans.find(bean.appName+bean.name)==beans.end())
+		beans[bean.appName+bean.name] = bean;
+}
+
+void FFEADContext::initializeAllSingletonBeans()
+{
+	map<string,Bean>::iterator beanIter;
+	logger << "Initializing singleton beans..." << endl;
+	for (beanIter=beans.begin();beanIter!=beans.end();beanIter++)
+	{
+		Bean bean = beanIter->second;
+		string type;
+		if(bean.inbuilt!="" && bean.value!="")
+		{
+			type = bean.inbuilt;
+		}
+		else
+		{
+			type = bean.clas;
+		}
+		if(StringUtil::toLowerCopy(bean.scope)!="prototype" && objects.find(type)==objects.end())
+		{
+			logger << ("Initializing Bean [appName = "+bean.appName+", name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)getBean(bean))) << endl;
+		}
+	}
+}
+
+Bean::Bean(string name,string value,string type,string scope,bool isInbuilt,string appName)
+{
+	this->name = name;
+	this->value = value;
+	if(isInbuilt)
+		this->inbuilt = type;
+	else
+		this->clas = type;
+	this->scope = scope;
+	this->realbean = true;
+	this->appName = appName;
+}
+
+Bean::Bean()
+{
+	this->appName = "default";
+}
+
+Bean::~Bean()
+{
+
 }

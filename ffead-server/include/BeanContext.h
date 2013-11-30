@@ -25,10 +25,10 @@
 #include "CastUtil.h"
 #include "Client.h"
 #include "Reflector.h"
-#include "Serialize.h"
+#include "XMLSerialize.h"
 #include "Object.h"
 #include "XmlParser.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 
 class BeanContext {
 	string host;

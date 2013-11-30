@@ -22,7 +22,11 @@ CPP_SRCS += \
 ../TestPage.cpp \
 ../TestForm.cpp \
 ../DefaultRestController.cpp \
-../TestFormController.cpp
+../TestFormController.cpp \
+../TestingWS.cpp \
+../TestObject.cpp \
+../TestObject1.cpp \
+../TestCronBasedJob.cpp
 
 OBJS += \
 ./DefTemp.o \
@@ -43,7 +47,11 @@ OBJS += \
 ./TestPage.o \
 ./TestForm.o \
 ./DefaultRestController.o \
-./TestFormController.o
+./TestFormController.o \
+./TestingWS.o \
+./TestObject.o \
+./TestObject1.o \
+./TestCronBasedJob.o
 
 CPP_DEPS += \
 ./DefTemp.d \
@@ -64,7 +72,11 @@ CPP_DEPS += \
 ./TestPage.d \
 ./TestForm.d \
 ./DefaultRestController.d \
-./TestFormController.d
+./TestFormController.d \
+./TestingWS.d \
+./TestObject.d \
+./TestObject1.d \
+./TestCronBasedJob.d
 
 
 # Each subdirectory must supply rules for building sources it contributes

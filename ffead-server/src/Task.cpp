@@ -23,19 +23,38 @@
 #include "Task.h"
 
 Task::Task() :
-	tunit(-1), type(-1) {
+	tunit(-1), type(-1), cleanUp(false), isFuture(false) {
 }
 Task::Task(int priority) :
-	tunit(-1), type(-1) {
+	tunit(-1), type(-1), cleanUp(false), isFuture(false) {
 	this->priority = priority;
 }
 Task::Task(int tunit, int type) :
-	tunit(-1), type(-1) {
+	tunit(-1), type(-1), cleanUp(false), isFuture(false) {
 	this->tunit = tunit;
 	this->type = type;
 }
 Task::~Task()
 {
+}
+
+void Task::init()
+{
+	tunit = -1;
+	type = -1;
+	cleanUp = false;
+}
+
+void Task::setPriority(int priority)
+{
+	this->priority = priority;
+	init();
+}
+void Task::setTunitType(int tunit, int type)
+{
+	this->tunit = tunit;
+	this->type = type;
+	cleanUp = false;
 }
 
 bool Task::isWaitOver(Timer *timer)
@@ -101,4 +120,9 @@ bool Task::isWaitOver(Timer *timer)
 		}
 	}
 	return flag;
+}
+
+void Task::setCleanUp(bool cleanUp)
+{
+	this->cleanUp = cleanUp;
 }

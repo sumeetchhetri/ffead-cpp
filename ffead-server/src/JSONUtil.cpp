@@ -77,6 +77,43 @@ void JSONUtil::arrayOrObject(string& json, JSONElement* element)
 	}
 }
 
+void JSONUtil::readBalancedJSON(string& value, string& json, bool isarray, size_t obs)
+{
+	string typest = "{";
+	string typeen = "}";
+	if(isarray)
+	{
+		typest = "[";
+		typeen = "]";
+	}
+	size_t eee = json.find(typeen, obs);
+	if(eee==string::npos)
+	{
+		string ex = "invalid json - unbalanced " + typest + " found at " + CastUtil::lexical_cast<string>(obs);
+		throw (ex.c_str());
+	}
+	string test = json.substr(obs, eee-obs+1);
+	int stcnt = StringUtil::countOccurrences(test, typest);
+	int encnt = StringUtil::countOccurrences(test, typeen);
+	while(stcnt!=encnt)
+	{
+		eee = json.find(typeen, eee+1);
+		if(eee==string::npos)
+		{
+			string ex = "invalid json - balancing " + typeen + " not found after " + CastUtil::lexical_cast<string>(eee);
+			throw (ex.c_str());
+		}
+		test = json.substr(obs, eee-obs+1);
+		stcnt = StringUtil::countOccurrences(test, typest);
+		encnt = StringUtil::countOccurrences(test, typeen);
+	}
+	value = json.substr(obs, eee-obs+1);
+	if(eee+1<json.length())
+		json = json.substr(eee+1);
+	else
+		json = "";
+}
+
 void JSONUtil::readJSON(string& json,bool isarray,JSONElement *par)
 {
 	if(json=="")
@@ -127,50 +164,12 @@ void JSONUtil::readJSON(string& json,bool isarray,JSONElement *par)
 	size_t ars = json.find("[");
 	if(obs==0)
 	{
-		size_t sss = json.find("{", obs+1);
-		size_t eee = json.find("}", obs);
-		size_t obe = eee;
-		if(sss<eee)
-		{
-			while(sss<eee)
-			{
-				sss = json.find("{", sss+1);
-				if(sss!=string::npos)
-				{
-					eee = json.find("}", sss);
-				}
-				if(eee!=string::npos)
-					obe = eee;
-			}
-			if(eee!=string::npos && json.find("}", eee+1)!=string::npos)
-				obe = json.find("}", eee+1);
-		}
-		value = json.substr(obs, obe-obs+1);
-		json = json.substr(obe+1);
+		readBalancedJSON(value, json, false, obs);
 		element->setType(JSONElement::JSON_OBJECT);
 	}
 	else if(ars==0)
 	{
-		size_t sss = json.find("[", ars+1);
-		size_t eee = json.find("]", ars);
-		size_t are = eee;
-		if(sss<eee)
-		{
-			while(sss<eee)
-			{
-				sss = json.find("[", sss+1);
-				if(sss!=string::npos)
-				{
-					eee = json.find("]", sss);
-				}
-				if(eee!=string::npos)
-					are = eee;
-			}
-			if(eee!=string::npos && json.find("]", eee+1)!=string::npos)
-				are = json.find("]", eee+1);
-		}
-		value = json.substr(ars, are-ars+1);
-		json = json.substr(are+1);
+		readBalancedJSON(value, json, true, ars);
 		element->setType(JSONElement::JSON_ARRAY);
 	}
 	else if(env==string::npos)
@@ -181,100 +180,24 @@ void JSONUtil::readJSON(string& json,bool isarray,JSONElement *par)
 	}
 	else
 	{
-		if(obs!=string::npos && env==0 && (obs<ars || ars==(int)string::npos))
+		if(obs!=string::npos && env==0 && (obs<ars || ars==string::npos))
 		{
-			size_t sss = json.find("{", obs+1);
-			size_t eee = json.find("}", obs);
-			size_t obe = eee;
-			if(sss<eee)
-			{
-				while(sss<eee)
-				{
-					sss = json.find("{", sss+1);
-					if(sss!=string::npos)
-					{
-						eee = json.find("}", sss);
-					}
-					if(eee!=string::npos)
-						obe = eee;
-				}
-				if(eee!=string::npos && json.find("}", eee+1)!=string::npos)
-					obe = json.find("}", eee+1);
-			}
-			value = json.substr(obs, obe-obs+1);
-			json = json.substr(obe+1);
+			readBalancedJSON(value, json, false, obs);
 			element->setType(JSONElement::JSON_OBJECT);
 		}
-		else if(ars!=string::npos && env==0 && (ars<obs || obs==(int)string::npos))
+		else if(ars!=string::npos && env==0 && (ars<obs || obs==string::npos))
 		{
-			size_t sss = json.find("[", ars+1);
-			size_t eee = json.find("]", ars);
-			size_t are = eee;
-			if(sss<eee)
-			{
-				while(sss<eee)
-				{
-					sss = json.find("[", sss+1);
-					if(sss!=string::npos)
-					{
-						eee = json.find("]", sss);
-					}
-					if(eee!=string::npos)
-						are = eee;
-				}
-				if(eee!=string::npos && json.find("]", eee+1)!=string::npos)
-					are = json.find("]", eee+1);
-			}
-			value = json.substr(ars, are-ars+1);
-			json = json.substr(are+1);
+			readBalancedJSON(value, json, true, ars);
 			element->setType(JSONElement::JSON_ARRAY);
 		}
-		else if(obs!=string::npos && obs<env && (obs<ars || ars==(int)string::npos))
+		else if(obs!=string::npos && obs<env && (obs<ars || ars==string::npos))
 		{
-			size_t sss = json.find("{", obs+1);
-			size_t eee = json.find("}", obs);
-			size_t obe = eee;
-			if(sss<eee)
-			{
-				while(sss<eee)
-				{
-					sss = json.find("{", sss+1);
-					if(sss!=string::npos)
-					{
-						eee = json.find("}", sss);
-					}
-					if(eee!=string::npos)
-						obe = eee;
-				}
-				if(eee!=string::npos && json.find("}", eee+1)!=string::npos)
-					obe = json.find("}", eee+1);
-			}
-			value = json.substr(obs, obe-obs+1);
-			json = json.substr(obe+1);
+			readBalancedJSON(value, json, false, obs);
 			element->setType(JSONElement::JSON_OBJECT);
 		}
-		else if(ars!=string::npos && ars<env && (ars<obs || obs==(int)string::npos))
+		else if(ars!=string::npos && ars<env && (ars<obs || obs==string::npos))
 		{
-			size_t sss = json.find("[", ars+1);
-			size_t eee = json.find("]", ars);
-			size_t are = eee;
-			if(sss<eee)
-			{
-				while(sss<eee)
-				{
-					sss = json.find("[", sss+1);
-					if(sss!=string::npos)
-					{
-						eee = json.find("]", sss);
-					}
-					if(eee!=string::npos)
-						are = eee;
-				}
-				if(eee!=string::npos && json.find("]", eee+1)!=string::npos)
-					are = json.find("]", eee+1);
-			}
-			value = json.substr(ars, are-ars+1);
-			json = json.substr(are+1);
+			readBalancedJSON(value, json, true, ars);
 			element->setType(JSONElement::JSON_ARRAY);
 		}
 		else
@@ -364,20 +287,10 @@ void JSONUtil::validateSetValue(JSONElement* element, string value)
 	{
 		try
 		{
-			CastUtil::lexical_cast<int>(value);
+			CastUtil::lexical_cast<unsigned long long>(value);
 		} catch (const char* ex) {
-			try
-			{
-				CastUtil::lexical_cast<long>(value);
-			} catch (const char* ex) {
-				try
-				{
-					CastUtil::lexical_cast<long long>(value);
-				} catch (const char* ex) {
-					string exp = "invalid json - invalid numeric value "+value+" found for name "+ element->getName();
-					throw (exp.c_str());
-				}
-			}
+			string exp = "invalid json - invalid numeric value "+value+" found for name "+ element->getName();
+			throw (exp.c_str());
 		}
 		element->setType(JSONElement::JSON_NUMBER);
 	}

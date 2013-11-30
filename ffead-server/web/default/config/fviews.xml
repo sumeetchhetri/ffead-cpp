@@ -15,5 +15,5 @@
 			<field name="numField" prop="num"/>
 			<field name="selField" prop="che"/>
 		</form>
-	</page>	
+	</page>
 </fview>

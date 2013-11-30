@@ -23,7 +23,7 @@
 #include "Timer.h"
 
 Timer::Timer() {
-	logger = Logger::getLogger("Timer");
+	logger = LoggerFactory::getLogger("Timer");
 }
 
 Timer::~Timer() {
@@ -53,7 +53,7 @@ void Timer::end()
 {
 	timespec en;
 	clock_gettime(CLOCK_MONOTONIC, &en);
-	long long elap = (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec))/1E3;
+	//long long elap = (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec))/1E3;
 	//logger << "\n--------------------------end Timer-------------------------::" << ((en.tv_sec*1E9 + en.tv_nsec)/1000) << "\n"<< flush;
 	//logger << "\n" << elap << "\n"<< flush;
 }

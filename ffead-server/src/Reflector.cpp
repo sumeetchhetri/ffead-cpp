@@ -26,7 +26,7 @@ Reflector::~Reflector()
 }
 void Reflector::cleanUp()
 {
-	for (int var=0;var<objectT.size();var++)
+	for (int var=0;var<(int)objectT.size();var++)
 	{
 		if(objectT.at(var)=="string" || objectT.at(var)=="int" || objectT.at(var)=="long"
 			|| objectT.at(var)=="double" || objectT.at(var)=="float" || objectT.at(var)=="bool"
@@ -39,8 +39,9 @@ void Reflector::cleanUp()
 	}
 }
 
-ClassInfo Reflector::getClassInfo(string className)
+ClassInfo Reflector::getClassInfo(string className,string appName)
 {
+	StringUtil::replaceAll(className, "::", "_");
 	ClassInfo info;
 	string libName = Constants::INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
@@ -49,7 +50,7 @@ ClassInfo Reflector::getClassInfo(string className)
 		cerr << dlerror() << endl;
 		exit(-1);
 	}
-	string methodname = "getReflectionCIFor"+className;
+	string methodname = appName + "getReflectionCIFor"+className;
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef ClassInfo (*RfPtr) ();
 	RfPtr f = (RfPtr)mkr;

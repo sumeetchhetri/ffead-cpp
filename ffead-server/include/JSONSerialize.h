@@ -16,274 +16,186 @@
 /*
  * JSONSerialize.h
  *
- *  Created on: 27-Jan-2013
+ *  Created on: 12-Jun-2013
  *      Author: sumeetc
  */
 
 #ifndef JSONSERIALIZE_H_
 #define JSONSERIALIZE_H_
-#include "XmlParser.h"
-#include "CastUtil.h"
-#include <stdexcept>
-#include <dlfcn.h>
-#include <cxxabi.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "string"
-#include <sstream>
-#include <typeinfo>
-#include "Object.h"
-#include "queue"
-#include "deque"
-#include "list"
-#include "map"
-#include "set"
-#include "stack"
-#include <algorithm>
-#include "DateFormat.h"
-#include "BinaryData.h"
-#include "Constants.h"
-#include "AMEFResources.h"
+#include "SerializeBase.h"
 #include "JSONUtil.h"
 
-class JSONSerialize {
-	static string demangle(const char *mangled);
-	static string getClassName(void* instance);
-	static string _handleAllSerialization(string className,void *t);
-	static void* _handleAllUnSerialization(string json,string className);
-	static string _ser(void* t,string classN);
-	static string _serContainers(void* t,string classN,string type);
-	static string _ser(Object);
-	static void* _unser(string json,string classN);
-	static void* unserializeConatiner(string json, string className,string type);
+class JSONSerialize : public SerializeBase {
 
-	static void* _unserCont(string json,string className,string type);
-
-	template <class T> static string serializevec(vector<T> t)
-	{
-		vector<T> st = t;
-		T td;
-		int cnt = 0;
-		const char *mangled = typeid(td).name();
-		string className = demangle(mangled);
-		string json = "[";
-		while(cnt++<(int)t.size())
-		{
-			json += serialize<T>(*st.begin());
-			if(cnt!=(int)t.size())
-				json += ",";
-			st.erase(st.begin());
-		}
-		json += "]";
-		return json;
-	}
-
-	template <class T> static string serializelist(list<T> t)
-	{
-		list<T> st = t;
-		T td;
-		int cnt = 0;
-		const char *mangled = typeid(td).name();
-		string className = demangle(mangled);
-		string json = "[";
-		while(cnt++<(int)t.size())
-		{
-			json += serialize<T>(*st.begin());
-			if(cnt!=(int)t.size())
-				json += ",";
-			st.erase(st.begin());
-		}
-		json += "]";
-		return json;
-	}
-
-	template <class T> static string serializeset(set<T> t)
-	{
-		set<T> st = t;
-		T td;
-		int cnt = 0;
-		const char *mangled = typeid(td).name();
-		string className = demangle(mangled);
-		string json = "[";
-		while(cnt++<(int)t.size())
-		{
-			json += serialize<T>(*st.begin());
-			if(cnt!=(int)t.size())
-				json += ",";
-			st.erase(st.begin());
-		}
-		json += "]";
-		return json;
-	}
-
-	template <class T> static string serializemultiset(multiset<T> t)
-	{
-		multiset<T> st = t;
-		T td;
-		int cnt = 0;
-		const char *mangled = typeid(td).name();
-		string className = demangle(mangled);
-		string json = "[";
-		while(cnt++<(int)t.size())
-		{
-			json += serialize<T>(*st.begin());
-			if(cnt!=(int)t.size())
-				json += ",";
-			st.erase(st.begin());
-		}
-		json += "]";
-		return json;
-	}
-
-	template <class T> static string serializeq(std::queue<T> t)
-	{
-		std::queue<T> st = t;
-		T td;
-		int cnt = 0;
-		const char *mangled = typeid(td).name();
-		string className = demangle(mangled);
-		string json = "[";
-		while(cnt++<(int)t.size())
-		{
-			json += serialize<T>(st.front());
-			if(cnt!=(int)t.size())
-				json += ",";
-			st.pop();
-		}
-		json += "]";
-		return json;
-	}
-
-	template <class T> static string serializedq(deque<T> t)
-	{
-		deque<T> st = t;
-		T td;
-		int cnt = 0;
-		const char *mangled = typeid(td).name();
-		string className = demangle(mangled);
-		string json = "[";
-		while(cnt++<(int)t.size())
-		{
-			json += serialize<T>(*st.begin());
-			if(cnt!=(int)t.size())
-				json += ",";
-			st.erase(st.begin());
-		}
-		json += "]";
-		return json;
-	}
-
-	template <class T> static void* unserContainer(vector<T> &t, string type)
-	{
-		if(type=="Lis")
-		{
-			list<T>* tt = new list<T>;
-			std::copy(t.begin(), t.end(), std::back_inserter(*tt));
-			return tt;
-		}
-		else if(type=="Set")
-		{
-			set<T>* tt = new set<T>;
-			std::copy(t.begin(), t.end(), std::inserter(*tt, tt->begin()));
-			return tt;
-		}
-		else if(type=="MulSet")
-		{
-			multiset<T>* tt = new multiset<T>;
-			std::copy(t.begin(), t.end(), std::inserter(*tt, tt->begin()));
-			return tt;
-		}
-		else if(type=="Dq")
-		{
-			deque<T>* tt = new deque<T>;
-			std::copy(t.begin(), t.end(), std::inserter(*tt, tt->begin()));
-			return tt;
-		}
-		else if(type=="Q")
-		{
-			std::queue<T>* qq = new std::queue<T>;
-			for (int var = 0; var < (int)t.size(); ++var) {
-				qq->push(t.at(var));
-			}
-			return qq;
-		}
-		else
-			return &t;
-	}
-
+	string serializePrimitive(string className, void* t);
+	void* getSerializableObject();
+	void cleanSerializableObject(void* _1);
+	void startContainerSerialization(void* _1, string className, string container);
+	void endContainerSerialization(void* _1, string className, string container);
+	void afterAddContainerSerializableElement(void* _1, int counter, int size);
+	void addContainerSerializableElement(void* _1, string tem);
+	void addContainerSerializableElementMulti(void* _1, string tem);
+	string fromSerializableObjectToString(void* _1);
+	string elementToSerializedString(void* _1, int counter);
+	string getConatinerElementClassName(void* _1, string className);
+	void* getContainerElement(void* _1, int counter, int counter1 = -1);
+	void addPrimitiveElementToContainer(void* _1, int counter, string className, void* cont, string container);
+	void* getUnserializableObject(string _1);
+	void cleanUnserializableObject(void* _1);
+	void cleanValidUnserializableObject(void* _1);
+	void* getValidUnserializableObject(string _1);
+	int getContainerSize(void* _1);
+	string getUnserializableClassName(void* _1, string className);
+	void* getPrimitiveValue(void* _1, string className);
+	string getSerializationMethodName(string className, string appName, bool which, string type);
 public:
-	JSONSerialize(){}
-	~JSONSerialize(){}
+	JSONSerialize();
+	~JSONSerialize();
 
-	template <class T> static string serialize(T t)
+	template <class T> static string serialize(T t, string appName = "default")
 	{
-		string json;
+		JSONSerialize serialize;
+		string objXml;
 		const char *mangled = typeid(t).name();
 		string className = demangle(mangled);
-		return _handleAllSerialization(className,&t);
+		if(className.find(",")!=string::npos)
+		{
+			className = className.substr(0, className.find(",")+1);
+		}
+		return _handleAllSerialization(className,&t,appName,&serialize);
 	}
-
-	static string serializeObject(Object t)
+	template <class T> static string serializePointer(T* t, string appName = "default")
 	{
-		return _handleAllSerialization(t.getTypeName(),t.getVoidPointer());
+		JSONSerialize serialize;
+		string objXml;
+		const char *mangled = typeid(t).name();
+		string className = demangle(mangled);
+		if(className.find(",")!=string::npos)
+		{
+			className = className.substr(0, className.find(",")+1);
+		}
+		return _handleAllSerialization(className,t,appName,&serialize);
 	}
-	static string serializeUnknown(void* t,string className)
-	{
-		return _handleAllSerialization(className,t);
-	}
+	static string serializeUnknown(void* t,string className, string appName = "default");
 
-	template <class K,class V> static string serialize(map<K,V> mp)
+	/*template <class K,class V> static string serialize(map<K,V> mp, string appName = "default")
 	{
 		map<K,V> mpt  = mp;
-		string json;
-		json = "[";
-		int cnt = 0;
-		while (cnt++<mp.size())
+		AMEFEncoder enc;
+		AMEFObject object;
+		K k;
+		const char *mangled = typeid(k).name();
+		string kclassName = demangle(mangled);
+		V v;
+		*mangled = typeid(v).name();
+		string vclassName = demangle(mangled);
+		kclassName = "map<"+kclassName+":"+vclassName+">";
+		object.setName(kclassName);
+		while (mpt.begin()!=mpt.end())
 		{
-			json += "{\"key\":";
-			json += serialize<K>(mpt.begin()->first);
-			json += ",\"value\":";
-			json += serialize<V>(mpt.begin()->second);
+			string key = serialize<K>(mpt.begin()->first,appName);
+			string value = serialize<V>(mpt.begin()->second,appName);
 			mpt.erase(mpt.begin());
-			json += "}";
-			if(cnt!=(int)mp.size())
-				json += ",";
+			object.addPacket(value, key);
 		}
-		json += "]";
-		return json;
-	}
-	template <class K,class V> static string serialize(multimap<K,V> mp)
-	{
-		multimap<K,V> mpt  = mp;
-		string json;
-		json = "[";
-		int cnt = 0;
-		while (cnt++<mp.size())
-		{
-			json += "{\"key\":";
-			json += serialize<K>(mpt.begin()->first);
-			json += ",\"value\":";
-			json += serialize<V>(mpt.begin()->second);
-			mpt.erase(mpt.begin());
-			json += "}";
-			if(cnt!=(int)mp.size())
-				json += ",";
-		}
-		json += "]";
-		return json;
+		return enc.encodeB(&object, false);
 	}
 
-	template <class T> static T unserialize(string json)
+	template <class K,class V> static string serialize(multimap<K,V> mp, string appName = "default")
 	{
+		multimap<K,V> mpt  = mp;
+		AMEFEncoder enc;
+		AMEFObject object;
+		K k;
+		const char *mangled = typeid(k).name();
+		string kclassName = demangle(mangled);
+		V v;
+		*mangled = typeid(v).name();
+		string vclassName = demangle(mangled);
+		kclassName = "multimap<"+kclassName+":"+vclassName+">";
+		object.setName(kclassName);
+		while (mpt.begin()!=mpt.end())
+		{
+			string key = serialize<K>(mpt.begin()->first,appName);
+			string value = serialize<V>(mpt.begin()->second,appName);
+			mpt.erase(mpt.begin());
+			object.addPacket(value, key);
+		}
+		return enc.encodeB(&object, false);
+	}*/
+	template <class T> static T unserialize(string objXml, string appName = "default")
+	{
+		JSONSerialize serialize;
 		T t;
 		const char *mangled = typeid(t).name();
 		string className = demangle(mangled);
-		return *(T*)_handleAllUnSerialization(json,className);
+		if(className.find(",")!=string::npos)
+		{
+			className = className.substr(0, className.find(",")+1);
+		}
+		T* tp = (T*)_handleAllUnSerialization(objXml,className,appName,&serialize,true,NULL);
+		if(tp!=NULL)
+		{
+			t = *(T*)tp;
+			delete ((T*)tp);
+		}
+		return t;
 	}
-	static void* unSerializeUnknown(string json,string className)
+	template <class T> static T unserialize(JSONElement* element, string appName = "default")
 	{
-		return _handleAllUnSerialization(json,className);
+		JSONSerialize serialize;
+		T t;
+		const char *mangled = typeid(t).name();
+		string className = demangle(mangled);
+		if(className.find(",")!=string::npos)
+		{
+			className = className.substr(0, className.find(",")+1);
+		}
+		T* tp = (T*)_handleAllUnSerialization("",className,appName,&serialize,true,element);
+		if(tp!=NULL)
+		{
+			t = *(T*)tp;
+			delete ((T*)tp);
+		}
+		return t;
 	}
+	template <class T> static T* unserializeToPointer(string objXml, string appName = "default")
+	{
+		JSONSerialize serialize;
+		T* t;
+		const char *mangled = typeid(t).name();
+		string className = demangle(mangled);
+		if(className.find(",")!=string::npos)
+		{
+			className = className.substr(0, className.find(",")+1);
+		}
+		return (T*)_handleAllUnSerialization(objXml,className,appName,&serialize,true,NULL);
+	}
+	template <class T> static T* unserializeToPointer(JSONElement* element, string appName = "default")
+	{
+		JSONSerialize serialize;
+		T* t;
+		const char *mangled = typeid(t).name();
+		string className = demangle(mangled);
+		if(className.find(",")!=string::npos)
+		{
+			className = className.substr(0, className.find(",")+1);
+		}
+		return (T*)_handleAllUnSerialization("",className,appName,&serialize,true,element);
+	}
+
+	bool isValidClassNamespace(void* _1, string className, string namespc, bool iscontainer = false);
+	bool isValidObjectProperty(void* _1, string propname, int counter);
+	void* getObjectProperty(void* _1, int counter);
+	void startObjectSerialization(void* _1, string className);
+	void endObjectSerialization(void* _1, string className);
+	void afterAddObjectProperty(void* _1);
+	void addObjectPrimitiveProperty(void* _1, string propName, string className, void* t);
+	void addObjectProperty(void* _1, string propName, string className, string t);
+	void* getObjectPrimitiveValue(void* _1, string className, string propName);
+	static void* unSerializeUnknown(string objXml,string className, string appName = "default");
+	string serializeUnknownBase(void* t,string className, string appName);
+	void* unSerializeUnknownBase(void* unserObj,string className, string appName);
 };
 
 #endif /* JSONSERIALIZE_H_ */

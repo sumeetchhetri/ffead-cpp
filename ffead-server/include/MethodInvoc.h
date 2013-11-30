@@ -27,7 +27,7 @@
 #include "XmlParser.h"
 #include "Reflector.h"
 #include "fstream"
-#include "Serialize.h"
+#include "XMLSerialize.h"
 
 #define BACKLOGMI 500
 #define MAXBUFLEN 1024
@@ -51,7 +51,7 @@ class MethodInvoc {
 	map<string,string> arguments;
 	bool startTranx;
 	bool endTranx;
-	Server *server;
+	Server server;
 	bool running;
 	static void init();
 	static void* service(void* arg);
@@ -60,8 +60,9 @@ public:
 	MethodInvoc();
 	virtual ~MethodInvoc();
 	static void trigger(string);
-	Server* getServer(){return this->server;}
-	void setServer(Server *server){this->server = server;}
+	static void stop();
+	Server getServer(){return this->server;}
+	void setServer(Server server){this->server = server;}
 };
 
 #endif /* METHODINVOC_H_ */

@@ -29,10 +29,10 @@
 #include "XmlParser.h"
 #include "Reflector.h"
 #include "fstream"
-#include "Serialize.h"
+#include "XMLSerialize.h"
 #include "Thread.h"
 #include "map"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "Constants.h"
 
 #define BACKLOG1 500
@@ -50,7 +50,7 @@ class ComponentHandlerException: public exception
 class ComponentHandler{
 	Logger logger;
 	static void* service(void* arg);
-	Server *server;
+	Server server;
 	bool running;
 	map<string,string> components;
 	static void initComponent();
@@ -61,8 +61,7 @@ public:
 	static bool registerComponent(string);
 	static bool unregisterComponent(string);
 	static void trigger(string);
-	Server* getServer(){return this->server;}
-	void setServer(Server *server){this->server = server;}
+	static void stop();
 };
 
 #endif /* COMPONENTHANDLER_H_ */

@@ -2,6 +2,91 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
+DEFCOMP :=
+DEFMI :=
+DEFMSGH :=
+DEFWEBSVC :=
+DEFCIB :=
+DEFDSTC :=
+DEFBINSER :=
+DEFXMLSER :=
+DEFDCP :=
+DEFDVIEW :=
+DEFTPE :=
+DEFINTP :=
+DEFAPPF :=
+DEFJOBS :=
+DEFSCRH :=
+modules := all
+
+ifneq (,$(findstring component,$(modules)))
+DEFCOMP := -DINC_COMP
+DEFXMLSER := -DDINC_XMLSER
+DEFCIB := -DINC_CIB
+endif
+ifneq (,$(findstring methinvoker,$(modules)))
+DEFMI := -DINC_MI
+DEFXMLSER := -DDINC_XMLSER
+endif
+ifneq (,$(findstring msghandler,$(modules)))
+DEFMSGH := -DINC_MSGH
+DEFBINSER := -DDINC_BINSER
+endif
+ifneq (,$(findstring webservice,$(modules)))
+DEFWEBSVC := -DINC_WEBSVC
+endif
+ifneq (,$(findstring cibernate,$(modules)))
+DEFCIB := -DINC_CIB
+endif
+ifneq (,$(findstring distocache,$(modules)))
+DEFDIST := -DINC_DSTC
+DEFBINSER := -DDINC_BINSER
+endif
+ifneq (,$(findstring xmlserialize,$(modules)))
+DEFXMLSER := -DDINC_XMLSER
+endif
+ifneq (,$(findstring binserialize,$(modules)))
+DEFBINSER := -DDINC_BINSER
+endif
+ifneq (,$(findstring dcp,$(modules)))
+DEFDCP := -DDINC_DCP
+endif
+ifneq (,$(findstring dview,$(modules)))
+DEFDVIEW := -DDINC_DVIEW
+endif
+ifneq (,$(findstring tpe,$(modules)))
+DEFTPE := -DDINC_TPE
+endif
+ifneq (,$(findstring interpreter,$(modules)))
+DEFINTP := -DDINC_INTP
+endif
+ifneq (,$(findstring appflow,$(modules)))
+DEFAPPF := -DDINC_APPFLOW
+endif
+ifneq (,$(findstring jobs,$(modules)))
+DEFJOBS := -DDINC_JOBS
+endif
+ifneq (,$(findstring scripthandler,$(modules)))
+DEFSCRH := -DDINC_SCRH
+endif
+ifneq (,$(findstring all,$(modules)))
+DEFCOMP := -DINC_COMP
+DEFMI := -DINC_MI
+DEFMSGH := -DINC_MSGH
+DEFWEBSVC := -DINC_WEBSVC
+DEFCIB := -DINC_CIB
+DEFDSTC := -DINC_DSTC
+DEFXMLSER := -DDINC_XMLSER
+DEFBINSER := -DDINC_BINSER
+DEFDCP := -DDINC_DCP
+DEFDVIEW := -DDINC_DVIEW
+DEFINTP := -DDINC_INTP
+DEFAPPF := -DDINC_APPFLOW
+DEFJOBS := -DDINC_JOBS
+DEFSCRH := -DDINC_SCRH
+endif
+
+
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/Constants.cpp \
@@ -11,8 +96,6 @@ CPP_SRCS += \
 ../src/ConfigurationData.cpp \
 ../src/ExtHandler.cpp \
 ../src/FviewHandler.cpp \
-../src/ScriptHandler.cpp \
-../src/SoapHandler.cpp \
 ../src/FormHandler.cpp \
 ../src/ControllerHandler.cpp \
 ../src/AuthHandler.cpp \
@@ -20,32 +103,19 @@ CPP_SRCS += \
 ../src/SecurityHandler.cpp \
 ../src/AOPEngine.cpp \
 ../src/AfcUtil.cpp \
-../src/AppContext.cpp \
-../src/ApplicationUtil.cpp \
 ../src/Aspect.cpp \
-../src/BeanContext.cpp \
 ../src/BinaryData.cpp \
 ../src/Block.cpp \
 ../src/Cache.cpp \
 ../src/CfusionEngine.cpp \
-../src/Cibernate.cpp \
-../src/CibernateConnPools.cpp \
-../src/CibernateConnectionPool.cpp \
 ../src/Class.cpp \
 ../src/ClassInfo.cpp \
 ../src/Client.cpp \
-../src/Component.cpp \
-../src/ComponentGen.cpp \
-../src/ComponentHandler.cpp \
 ../src/ConnectionSettings.cpp \
 ../src/Constructor.cpp \
-../src/CppInterpreter.cpp \
-../src/DCPGenerator.cpp \
 ../src/Date.cpp \
 ../src/DateFormat.cpp \
-../src/Destination.cpp \
 ../src/Document.cpp \
-../src/DynamicView.cpp \
 ../src/Element.cpp \
 ../src/Exception.cpp \
 ../src/FFEADContext.cpp \
@@ -54,36 +124,24 @@ CPP_SRCS += \
 ../src/HttpResponse.cpp \
 ../src/HttpSession.cpp \
 ../src/IMAPHandler.cpp \
-../src/InvalidMessageException.cpp \
 ../src/Logger.cpp \
-../src/Message.cpp \
-../src/MessageHandler.cpp \
-../src/MessageUtil.cpp \
 ../src/Method.cpp \
-../src/MethodInvoc.cpp \
 ../src/PropFileReader.cpp \
 ../src/MQueue.cpp \
 ../src/Reflection.cpp \
 ../src/Reflector.cpp \
-../src/RemoteComponent.cpp \
 ../src/Renderer.cpp \
-../src/SOAPRequest.cpp \
-../src/SOAPResponse.cpp \
-../src/SOAPUtil.cpp \
-../src/Serialize.cpp \
+../src/SerializeBase.cpp \
 ../src/Server.cpp \
 ../src/Service.cpp \
-../src/ServiceInt.cpp \
 ../src/ServicePool.cpp \
 ../src/Task.cpp \
 ../src/TaskPool.cpp \
 ../src/TemplateEngine.cpp \
-../src/TemplateHandler.cpp \
 ../src/PoolThread.cpp \
 ../src/ThreadPool.cpp \
 ../src/Timer.cpp \
 ../src/View.cpp \
-../src/WsUtil.cpp \
 ../src/XmlParseException.cpp \
 ../src/XmlParser.cpp \
 ../src/AuthController.cpp \
@@ -100,18 +158,24 @@ CPP_SRCS += \
 ../src/JSONUtil.cpp \
 ../src/Thread.cpp \
 ../src/Mutex.cpp \
-../src/AMEFResources.cpp \
-../src/AMEFEncoder.cpp \
-../src/AMEFDecoder.cpp \
-../src/AMEFObject.cpp \
 ../src/RegexUtil.cpp \
 ../src/SelEpolKqEvPrt.cpp \
-../ClientInterface.cpp \
-../HTTPResponseStatus.cpp \
-../ContentTypes.cpp \
-../XMLSerialize.cpp \
-../JSONSerialize.cpp \
-../CsvFileReader.cpp
+../src/ClientInterface.cpp \
+../src/HTTPResponseStatus.cpp \
+../src/ContentTypes.cpp \
+../src/JSONSerialize.cpp \
+../src/CsvFileReader.cpp \
+../src/Bigint.cpp \
+../src/Bigdecimal.cpp \
+../src/FutureTask.cpp \
+../src/CORSHandler.cpp \
+../src/CompressionUtil.cpp \
+../src/MultipartContent.cpp \
+../src/LoggerFactory.cpp \
+../src/NBServer.cpp \
+../src/ScriptHandler.cpp
+
+
 
 OBJS += \
 ./Constants.o \
@@ -121,8 +185,6 @@ OBJS += \
 ./ConfigurationData.o \
 ./ExtHandler.o \
 ./FviewHandler.o \
-./ScriptHandler.o \
-./SoapHandler.o \
 ./FormHandler.o \
 ./ControllerHandler.o \
 ./AuthHandler.o \
@@ -130,32 +192,19 @@ OBJS += \
 ./SecurityHandler.o \
 ./AOPEngine.o \
 ./AfcUtil.o \
-./AppContext.o \
-./ApplicationUtil.o \
 ./Aspect.o \
-./BeanContext.o \
 ./BinaryData.o \
 ./Block.o \
 ./Cache.o \
 ./CfusionEngine.o \
-./Cibernate.o \
-./CibernateConnPools.o \
-./CibernateConnectionPool.o \
 ./Class.o \
 ./ClassInfo.o \
 ./Client.o \
-./Component.o \
-./ComponentGen.o \
-./ComponentHandler.o \
 ./ConnectionSettings.o \
 ./Constructor.o \
-./CppInterpreter.o \
-./DCPGenerator.o \
 ./Date.o \
 ./DateFormat.o \
-./Destination.o \
 ./Document.o \
-./DynamicView.o \
 ./Element.o \
 ./Exception.o \
 ./FFEADContext.o \
@@ -164,36 +213,24 @@ OBJS += \
 ./HttpResponse.o \
 ./HttpSession.o \
 ./IMAPHandler.o \
-./InvalidMessageException.o \
 ./Logger.o \
-./Message.o \
-./MessageHandler.o \
-./MessageUtil.o \
 ./Method.o \
-./MethodInvoc.o \
 ./PropFileReader.o \
 ./MQueue.o \
 ./Reflection.o \
 ./Reflector.o \
-./RemoteComponent.o \
 ./Renderer.o \
-./SOAPRequest.o \
-./SOAPResponse.o \
-./SOAPUtil.o \
-./Serialize.o \
+./SerializeBase.o \
 ./Server.o \
 ./Service.o \
-./ServiceInt.o \
 ./ServicePool.o \
 ./Task.o \
 ./TaskPool.o \
 ./TemplateEngine.o \
-./TemplateHandler.o \
 ./PoolThread.o \
 ./ThreadPool.o \
 ./Timer.o \
 ./View.o \
-./WsUtil.o \
 ./XmlParseException.o \
 ./XmlParser.o \
 ./AuthController.o \
@@ -210,18 +247,24 @@ OBJS += \
 ./JSONUtil.o \
 ./Thread.o \
 ./Mutex.o \
-./AMEFResources.o \
-./AMEFEncoder.o \
-./AMEFDecoder.o \
-./AMEFObject.o \
 ./RegexUtil.o \
 ./SelEpolKqEvPrt.o \
 ./ClientInterface.o \
 ./HTTPResponseStatus.o \
 ./ContentTypes.o \
-./XMLSerialize.o \
 ./JSONSerialize.o \
-./CsvFileReader.o
+./CsvFileReader.o \
+./Bigint.o \
+./Bigdecimal.o \
+./FutureTask.o \
+./CORSHandler.o \
+./CompressionUtil.o \
+./MultipartContent.o \
+./LoggerFactory.o \
+./NBServer.o \
+./ScriptHandler.o
+
+
 
 CPP_DEPS += \
 ./Constants.d \
@@ -231,8 +274,6 @@ CPP_DEPS += \
 ./ConfigurationData.d \
 ./ExtHandler.d \
 ./FviewHandler.d \
-./ScriptHandler.d \
-./SoapHandler.d \
 ./FormHandler.d \
 ./ControllerHandler.d \
 ./AuthHandler.d \
@@ -240,32 +281,20 @@ CPP_DEPS += \
 ./SecurityHandler.d \
 ./AOPEngine.d \
 ./AfcUtil.d \
-./AppContext.d \
-./ApplicationUtil.d \
 ./Aspect.d \
 ./BeanContext.d \
 ./BinaryData.d \
 ./Block.d \
 ./Cache.d \
 ./CfusionEngine.d \
-./Cibernate.d \
-./CibernateConnPools.d \
-./CibernateConnectionPool.d \
 ./Class.d \
 ./ClassInfo.d \
 ./Client.d \
-./Component.d \
-./ComponentGen.d \
-./ComponentHandler.d \
 ./ConnectionSettings.d \
 ./Constructor.d \
-./CppInterpreter.d \
-./DCPGenerator.d \
 ./Date.d \
 ./DateFormat.d \
-./Destination.d \
 ./Document.d \
-./DynamicView.d \
 ./Element.d \
 ./Exception.d \
 ./FFEADContext.d \
@@ -274,36 +303,24 @@ CPP_DEPS += \
 ./HttpResponse.d \
 ./HttpSession.d \
 ./IMAPHandler.d \
-./InvalidMessageException.d \
 ./Logger.d \
-./Message.d \
-./MessageHandler.d \
-./MessageUtil.d \
 ./Method.d \
-./MethodInvoc.d \
 ./PropFileReader.d \
 ./MQueue.d \
 ./Reflection.d \
 ./Reflector.d \
-./RemoteComponent.d \
 ./Renderer.d \
-./SOAPRequest.d \
-./SOAPResponse.d \
-./SOAPUtil.d \
-./Serialize.d \
+./SerializeBase.d \
 ./Server.d \
 ./Service.d \
-./ServiceInt.d \
 ./ServicePool.d \
 ./Task.d \
 ./TaskPool.d \
 ./TemplateEngine.d \
-./TemplateHandler.d \
 ./PoolThread.d \
 ./ThreadPool.d \
 ./Timer.d \
 ./View.d \
-./WsUtil.d \
 ./XmlParseException.d \
 ./XmlParser.d \
 ./AuthController.d \
@@ -320,25 +337,31 @@ CPP_DEPS += \
 ./JSONUtil.d \
 ./Thread.d \
 ./Mutex.d \
-./AMEFResources.d \
-./AMEFEncoder.d \
-./AMEFDecoder.d \
-./AMEFObject.d \
 ./RegexUtil.d \
 ./SelEpolKqEvPrt.d \
 ./ClientInterface.d \
 ./HTTPResponseStatus.d \
 ./ContentTypes.d \
-./XMLSerialize.d \
 ./JSONSerialize.d \
-./CsvFileReader.d
+./CsvFileReader.d \
+./Bigint.d \
+./Bigdecimal.d \
+./FutureTask.d \
+./CORSHandler.d \
+./CompressionUtil.d \
+./MultipartContent.d \
+./LoggerFactory.d \
+./NBServer.d \
+./ScriptHandler.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
 %.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ $(PTHREADS) -l ../src/ -I../include -I/usr/local/include -O0 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	g++ $(PTHREADS) -l ../src/ -I../include -I/usr/local/include -O0 -Wall \
+		$(DEFCOMP) $(DEFMI) $(DEFMSGH) $(DEFWEBSVC) $(DEFDSTC) $(DEFCIB) $(DEFBINSER) $(DEFXMLSER) \
+		$(DEFDCP) $(DEFDVIEW) $(DEFTPE) $(DEFINTP) $(DEFAPPF) $(DEFJOBS) $(DEFSCRH) -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

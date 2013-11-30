@@ -31,7 +31,7 @@
 #include "StringUtil.h"
 #include "RegexUtil.h"
 #include "bitset"
-#include "Logger.h"
+#include "LoggerFactory.h"
 typedef map<string,Object> mapVars;
 typedef map<string,string> mapStrs;
 using namespace std;
@@ -139,7 +139,7 @@ class CppInterpreter {
 			temp.clear();
 			while(1)
 			{
-				unsigned int found = -1;
+				//unsigned int found = -1;
 				for(int i=0;i<(int)opr.size();i++)
 				{
 					if(opr.at(i)=="/" && !continu)
@@ -156,7 +156,7 @@ class CppInterpreter {
 							temp.push_back(opr.at(k));
 						}
 						continu = true;
-						found = i;
+						//found = i;
 					}
 					/*else if((opr.size()>(i+2) && opr.at(i+2)!='/') && i!=found && i!=found+1 && i!=found-1)
 					{
@@ -176,7 +176,7 @@ class CppInterpreter {
 			temp.clear();
 			while(1)
 			{
-				unsigned int found = -1;
+				//unsigned int found = -1;
 				for(int i=0;i<(int)opr.size();i++)
 				{
 					if(opr.at(i)=="*" && !continu)
@@ -193,7 +193,7 @@ class CppInterpreter {
 							temp.push_back(opr.at(k));
 						}
 						continu = true;
-						found = i;
+						//found = i;
 					}
 					/*else if(i!=found && i!=found+1 && i!=found-1)
 					{
@@ -246,7 +246,7 @@ class CppInterpreter {
 			temp.clear();*/
 			while(1)
 			{
-				unsigned int found = -1;
+				//unsigned int found = -1;
 				for(int i=0;i<(int)opr.size();i++)
 				{
 					if(opr.at(i)=="+" && !continu)
@@ -263,7 +263,7 @@ class CppInterpreter {
 							temp.push_back(opr.at(k));
 						}
 						continu = true;
-						found = i;
+						//found = i;
 					}
 					else if(opr.at(i)=="-" && !continu)
 					{
@@ -279,7 +279,7 @@ class CppInterpreter {
 							temp.push_back(opr.at(k));
 						}
 						continu = true;
-						found = i;
+						//found = i;
 					}
 					/*else if(i!=found && i!=found+1 && i!=found-1)
 					{

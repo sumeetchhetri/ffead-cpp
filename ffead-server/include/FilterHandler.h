@@ -25,7 +25,8 @@
 #include "Filter.h"
 #include "Reflector.h"
 #include <dlfcn.h>
-#include "Logger.h"
+#include "LoggerFactory.h"
+#include "ConfigurationData.h"
 
 typedef ClassInfo (*FunPtr) ();
 
@@ -33,9 +34,11 @@ class FilterHandler {
 public:
 	FilterHandler();
 	virtual ~FilterHandler();
-	static void handleIn(HttpRequest* req, HttpResponse& res, map<string, vector<string> > filterMap, void* dlib,
+	static void handleIn(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
 			string ext);
-	static void handleOut(HttpRequest* req, HttpResponse& res, map<string, vector<string> > filterMap, void* dlib,
+	static bool handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
+			string ext);
+	static void handleOut(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
 			string ext);
 };
 

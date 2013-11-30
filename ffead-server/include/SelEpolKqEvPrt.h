@@ -24,7 +24,7 @@
 #define SELEPOLKQEVPRT_H_
 #include <sys/types.h>
 #include "AppDefines.h"
-#include "Logger.h"
+#include "LoggerFactory.h"
 #include "cstring"
 #include <fcntl.h>
 #include <sys/time.h>
