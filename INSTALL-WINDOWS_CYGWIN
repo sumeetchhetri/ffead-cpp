@@ -11,20 +11,18 @@ Winx/Cygwin based Installation
       openssl libraries and devel (use Cygwin_SSL_UnixOdbc_libs.zip from downloads section for version 1.0)
       unixODBC libraries and devel (not found in Cygwin reposistory, use Cygwin_SSL_UnixOdbc_libs.zip from download section)
       bison,yacc,flex,gdb,readline,binutils (for building and installing openssl and unixODBC)
-      cmake
-      mysql-odbc
-      /usr/bin/cmake.exe -G "Unix Makefiles" -DCMAKE_LEGACY_CYGWIN_WIN32=1
 5. Using Cygwin v1.7.14-2 and unixODBC v2.3.1.tar.gz, the install (./configure,make,make install) worked, you can copy the /usr/local/lib/libodbc* files to /usr/lib if you are
    confident enough of trying a manual install of unixodbc. Trying to build on prior versions of cygwin and unixodbc, i faced certain issues and wasn't able to successfully compile
    and build files, hence had provided the *_libs.zip file.
 6. Copy bin/gcc-3 or bin/gcc-4 and rename it ot gcc (the already existing link file gcc sometimes gives permission errors)
 7. You can build and install openssl and unixodbc and copy the required library files to the cygwin lib folder. The already built libraries are present in the Cygwin_SSL_UnixOdbc_libs.zip file which can be copied to the lib folder directly.
-8. Download the latest release zip file and extract it to the location of your choice under Cygwin installation.
+8. Download the latest release tar file and extract it to the location of your choice under Cygwin installation.
 9. Install Unix-ODBC and required odbc files for MySQL dependency and development files
 10. Install Open-SSL as well and development files
 11. Also included prototype.js in source for AJAX support
 12. Go to the ffead-server/Release or ffead-server/Debug depending on whether you need to debug the server code
-13. Open terminal and type "make all" and "make build-apps" to build the server and the default applications provided
+13. Open terminal and type "make all" and "make build-apps" to build the server and the default applications provided ("make all" will build ffead with all modules enabled)
+13a. From version 1.8 onwards you can also select modules to build within ffead using the make modules={comma separated module list} all command, for a complete list of modules names please refer Modules, for e.g, to only build modules webservice,binserialize and distocache use the command "make modules=webservice,binserialize,distocache all"
 14. This will create the distribution folder named ffead-server inside ffead-server/Release or ffead-server/Debug folders accordingly
 15. Type ./server.sh when inside the ffead-server folder to start the application server
 16. A default application is already provided for your reference inside the ffead-server/web folder, this application is served at urlpath /

@@ -1,7 +1,7 @@
 SOLARIS based Installation
 
 1. Refer INSTALL-WINDOWS-CYGWIN file for directions on how to install on Windows and Cygwin
-2. Download the zip file and extract it to the location of your choice.
+2. Download the tar file and extract it to the location of your choice.
 3. Install the following using the commands mentioned below
 	System Header files
 		sudo pkg install system/header
@@ -14,7 +14,8 @@ SOLARIS based Installation
 		sudo pkgutil -y -i gcc4core gcc4g++ libstdc++6 unixodbc unixodbc_dev libssl1_0_0 libssl_dev subversion(optional)
 4. Also included prototype.js in source for AJAX support
 5. Go to the ffead-server/Release or ffead-server/Debug depending on whether you need to debug the server code
-6. Open terminal and type "gmake all" and "gmake build-apps" to build the server and the default applications provided
+6. Open terminal and type "gmake all" and "gmake build-apps" to build the server and the default applications provided ("gmake all" will build ffead with all modules enabled)
+6a. From version 1.8 onwards you can also select modules to build within ffead using the gmake modules={comma separated module list} all command, for a complete list of modules names please refer Modules, for e.g, to only build modules webservice,binserialize and distocache use the command "gmake modules=webservice,binserialize,distocache all"
 7. This will create the distribution folder named ffead-server inside ffead-server/Release or ffead-server/Debug folders accordingly
 8. Type ./server.sh when inside the ffead-server folder to start the application server
 9. A default application is already provided for your reference inside the ffead-server/web folder, this application is served at urlpath /
