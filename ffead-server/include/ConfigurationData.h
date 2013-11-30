@@ -120,8 +120,8 @@ public:
 	map<string, Element> formMap;
 	strVec cmpnames;
 	map<string, string> sprops,props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap,ajaxIntfMap,dcpsss, tpes;
-	long sessionTimeout;
-	bool sessatserv;
+	long sessionTimeout, sessionFileLockTimeout;
+	bool sessatserv, sessservdistocache;
 	FFEADContext* ffeadContext;
 	CorsConfig corsConfig;
 	ConfigurationData();

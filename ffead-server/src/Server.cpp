@@ -533,3 +533,8 @@ void Server::stop()
 	runn = false;
 	lock.unlock();
 }
+
+int Server::getSocket()
+{
+	return sock;
+}

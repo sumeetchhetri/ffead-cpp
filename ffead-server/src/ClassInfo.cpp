@@ -106,7 +106,6 @@ Method ClassInfo::getMethod(string methodName,args argumentTypes)
 			key += temp;
 		}
 	}
-	cout << "Mrthodname = " << key << endl;
 	return meths[key];
 }
 void ClassInfo::addMethod(Method meth)

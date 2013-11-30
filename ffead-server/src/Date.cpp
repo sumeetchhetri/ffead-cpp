@@ -763,9 +763,6 @@ void Date::compare(Date d, unsigned long long &thisss, unsigned long long &thtss
 
 	thisss %= 9223372036854775807LL;
 	thtsss %= 9223372036854775807LL;
-
-	cout << thisss << endl;
-	cout << thtsss << endl;
 }
 
 bool Date::operator<(Date d) const

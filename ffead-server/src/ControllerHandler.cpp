@@ -418,10 +418,12 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 						{
 							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, stltype+"<"+stlcnt+">",req->getCntxt_name());
 						}
+#ifdef INC_XMLSER
 						else
 						{
 							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, stltype+"<"+stlcnt+",",req->getCntxt_name());
 						}
+#endif
 						if(voidPvect==NULL)
 						{
 							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
@@ -437,10 +439,12 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 						{
 							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type,req->getCntxt_name());
 						}
+#ifdef INC_XMLSER
 						else
 						{
 							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type,req->getCntxt_name());
 						}
+#endif
 						if(voidPvect==NULL)
 						{
 							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);

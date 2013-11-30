@@ -51,7 +51,6 @@ propMap PropFileReader::getProperties(string filepath)
 		  		  StringUtil::trim(line);
 		  		  if(line.find("=")!=line.length()-1)
 		  		  {
-		  			  //cout << line.substr(0, line.find("=")) << " = " << line.substr(line.find("=")+1) << endl;
 		  			  all[line.substr(0, line.find("="))] = StringUtil::trimCopy(line.substr(line.find("=")+1));
 		  		  }
 		  	  }

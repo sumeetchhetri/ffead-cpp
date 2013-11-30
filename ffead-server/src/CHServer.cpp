@@ -205,7 +205,7 @@ void signalSIGCHLD(int dummy)
 	}
 	free(symbols);*/
 	logger << "Child process got killed " << getpid() << "\n" << tempo << endl;
-	abort();
+	//abort();
 }
 void signalSIGABRT(int dummy)
 {
@@ -303,7 +303,7 @@ void signalSIGINT(int dummy)
 	}
 	free(symbols);*/
 	logger << "Interrupt signal occurred for process" << getpid() << "\n" << tempo << endl;
-	abort();
+	//abort();
 }
 
 void signalSIGFPE(int dummy)
@@ -352,7 +352,7 @@ void signalSIGPIPE(int dummy)
 	}
 	free(symbols);*/
 	logger << "Broken pipe ignore it" << getpid() << "\n" << tempo << endl;
-	abort();
+	//abort();
 }
 
 void signalSIGILL(int dummy)
@@ -567,7 +567,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	return pid;
 }*/
 
-
+#ifdef INC_DCP
 void* dynamic_page_monitor(void* arg)
 {
 	string serverRootDirectory = *(string*)arg;
@@ -665,7 +665,7 @@ void* dynamic_page_monitor(void* arg)
 	}
 	return NULL;
 }
-
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -840,6 +840,7 @@ int main(int argc, char* argv[])
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
 	configurationData.ffeadContext->initializeAllSingletonBeans();
 
+#ifdef INC_COMP
 	for (unsigned int var1 = 0;var1<configurationData.cmpnames.size();var1++)
 	{
 		string name = configurationData.cmpnames.at(var1);
@@ -847,7 +848,40 @@ int main(int argc, char* argv[])
 		ComponentHandler::registerComponent(name);
 		AppContext::registerComponent(name);
 	}
+#endif
 
+	bool distocache = false;
+#ifdef INC_DSTC
+	int distocachepoolsize = 20;
+	try {
+		if(srprps["DISTOCACHE_POOL_SIZE"]!="")
+		{
+			distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
+		}
+	} catch(...) {
+		logger << ("Invalid poolsize specified for distocache") << endl;
+	}
+
+	try {
+		if(srprps["DISTOCACHE_PORT_NO"]!="")
+		{
+			CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
+			DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
+			logger << ("Session store is set to distocache store") << endl;
+			distocache = true;
+		}
+	} catch(...) {
+		logger << ("Invalid port specified for distocache") << endl;
+	}
+
+	if(!distocache) {
+		logger << ("Session store is set to file store") << endl;
+	}
+#endif
+
+	configurationData.sessservdistocache = distocache;
+
+#ifdef INC_COMP
 	try {
 		if(srprps["CMP_PORT"]!="")
 		{
@@ -860,7 +894,9 @@ int main(int argc, char* argv[])
 	} catch(...) {
 		logger << ("Component Handler Services are disabled") << endl;
 	}
+#endif
 
+#ifdef INC_MSGH
 	try {
 		if(srprps["MESS_PORT"]!="")
 		{
@@ -873,7 +909,9 @@ int main(int argc, char* argv[])
 	} catch(...) {
 		logger << ("Messaging Handler Services are disabled") << endl;
 	}
+#endif
 
+#ifdef INC_MI
 	try {
 		if(srprps["MI_PORT"]!="")
 		{
@@ -886,8 +924,11 @@ int main(int argc, char* argv[])
 	} catch(...) {
 		logger << ("Method Invoker Services are disabled") << endl;
 	}
+#endif
 
+#ifdef INC_JOBS
 	JobScheduler::start();
+#endif
 
 	//printf("server: waiting for connections...\n");
 	logger.info("Server: waiting for connections on " + configurationData.ip_address);
@@ -970,11 +1011,13 @@ int main(int argc, char* argv[])
 		}
 	}
 
+#ifdef INC_DCP
 	if(isCompileEnabled)
 	{
 		Thread pthread(&dynamic_page_monitor, &serverRootDirectory);
 		pthread.execute();
 	}
+#endif
 
 	SelEpolKqEvPrt selEpolKqEvPrtHandler;
 	selEpolKqEvPrtHandler.initialize(sockfd);
@@ -1127,11 +1170,23 @@ int main(int argc, char* argv[])
 		}
 		serverCntrlFile.open(serverCntrlFileNm.c_str());
 	}
-	ComponentHandler::stop();
-	MessageHandler::stop();
-	MethodInvoc::stop();
 
+#ifdef INC_COMP
+	ComponentHandler::stop();
+#endif
+
+#ifdef INC_MSGH
+	MessageHandler::stop();
+#endif
+
+#ifdef INC_MI
+	MethodInvoc::stop();
+#endif
+
+#ifdef INC_CIB
 	ConfigurationHandler::destroyCibernate();
+#endif
+
 	return 0;
 }
 

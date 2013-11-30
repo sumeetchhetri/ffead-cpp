@@ -133,12 +133,14 @@ public:
     map<string,string> getAuthinfo() const;
     string buildRequest(const char* key,const char* value);
     string toString();
+#ifdef INC_SCRH
     string toPHPVariablesString(string);
 	string toPerlVariablesString();
 	string toRubyVariablesString();
 	string toPythonVariablesString();
 	string toLuaVariablesString();
 	string toNodejsVariablesString();
+#endif
 	RMap getQueryParams() const;
 	string getQueryParam(string key);
 	RMap getAllParams();

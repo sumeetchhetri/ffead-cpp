@@ -27,7 +27,9 @@
 #include "Constants.h"
 #include <dlfcn.h>
 #include "LoggerFactory.h"
+#ifdef INC_XMLSER
 #include "XMLSerialize.h"
+#endif
 #include "JSONSerialize.h"
 
 class RestController {

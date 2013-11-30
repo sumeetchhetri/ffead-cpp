@@ -2064,6 +2064,7 @@ void HttpRequest::setAuthinfo(map<string,string> authinfo)
 	this->authinfo = authinfo;
 }
 
+#ifdef INC_SCRH
 string HttpRequest::toPHPVariablesString(string def)
 {
 	string ret;
@@ -2643,6 +2644,7 @@ string HttpRequest::toNodejsVariablesString()
 	ret += "\nrequire('"+this->getUrl()+"');";
 	return ret;
 }
+#endif
 
 RMap HttpRequest::getAllParams()
 {

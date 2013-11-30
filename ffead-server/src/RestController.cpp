@@ -40,11 +40,13 @@ void RestController::buildResponse(HTTPResponseStatus status, string className, 
 		content = JSONSerialize::serializeUnknown(entity, className, request->getCntxt_name());
 		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 	}
+#ifdef INC_XMLSER
 	else
 	{
 		content = XMLSerialize::serializeUnknown(entity, className, request->getCntxt_name());
 		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
 	}
+#endif
 	if(content!="")
 	{
 		response->setHTTPResponseStatus(status);
@@ -65,11 +67,13 @@ void RestController::buildResponseVector(HTTPResponseStatus status, string class
 		content = JSONSerialize::serializeUnknown(entity, "std::vector<"+className+",", request->getCntxt_name());
 		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 	}
+#ifdef INC_XMLSER
 	else
 	{
 		content = XMLSerialize::serializeUnknown(entity, "std::vector<"+className+",", request->getCntxt_name());
 		response->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
 	}
+#endif
 	if(content!="")
 	{
 		response->setHTTPResponseStatus(status);

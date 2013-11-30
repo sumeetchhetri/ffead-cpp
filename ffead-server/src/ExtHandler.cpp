@@ -123,6 +123,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 
 		//AfcUtil::execute(*req, &res, ajaxIntfMap[acurl]);
 	}
+#ifdef INC_DCP
 	else if(ext==".dcp")
 	{
 		string libName = Constants::INTER_LIB_FILE;
@@ -165,6 +166,8 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 			}
 		}
 	}
+#endif
+#ifdef INC_DVIEW
 	else if(ext==".view" && vwMap[req->getCntxt_name()+req->getFile()]!="")
 	{
 		cntrlit = true;
@@ -197,6 +200,8 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 			//res.setContent_len(CastUtil::lexical_cast<string>(content.length()));
 		}
 	}
+#endif
+#ifdef INC_TPE
 	else if(ext==".tpe" && tmplMap[req->getCntxt_name()+req->getFile()]!="")
 	{
 		ext = ".html";
@@ -262,5 +267,6 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 			}
 		}
 	}
+#endif
 	return cntrlit;
 }

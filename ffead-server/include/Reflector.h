@@ -29,6 +29,7 @@
 #include <sstream>
 #include <typeinfo>
 #include "Constants.h"
+#include<iostream>
 
 class Reflector
 {

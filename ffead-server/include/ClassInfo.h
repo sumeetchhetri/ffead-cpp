@@ -23,7 +23,6 @@
 #ifndef CLASSINFO_H_
 #define CLASSINFO_H_
 #include "string"
-#include <iostream>
 #include <typeinfo>
 #include "Constructor.h"
 #include "Method.h"

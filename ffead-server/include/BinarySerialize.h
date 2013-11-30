@@ -83,49 +83,85 @@ public:
 
 	template <class K,class V> static string serialize(map<K,V> mp, string appName = "default")
 	{
-		map<K,V> mpt  = mp;
+		typedef typename map<K,V>::iterator kvmapiter;
 		AMEFEncoder enc;
 		AMEFObject object;
 		K k;
 		const char *mangled = typeid(k).name();
 		string kclassName = demangle(mangled);
 		V v;
-		*mangled = typeid(v).name();
+		mangled = typeid(v).name();
 		string vclassName = demangle(mangled);
 		kclassName = "map<"+kclassName+":"+vclassName+">";
 		object.setName(kclassName);
-		while (mpt.begin()!=mpt.end())
+		kvmapiter it;
+		for (it=mp.begin();it!=mp.end();++it)
 		{
-			string key = serialize<K>(mpt.begin()->first,appName);
-			string value = serialize<V>(mpt.begin()->second,appName);
-			mpt.erase(mpt.begin());
-			object.addPacket(value, key);
+			//string key = serialize<K>(it->first,appName);
+			string value = serialize<V>(it->second,appName);
+			object.addPacket(value, CastUtil::lexical_cast<string>(it->first));
 		}
 		return enc.encodeB(&object, false);
+	}
+	template <class K,class V> static map<K,V> unSerializeToMap(string serStr, string appName = "default")
+	{
+		map<K,V> mp;
+		AMEFDecoder dec;
+		AMEFObject object;
+		AMEFObject* root = dec.decodeB(serStr, true, false);
+		if(root!=NULL)
+		{
+			for (int var = 0; var < (int)root->getPackets().size(); var++)
+			{
+				V val = unserialize<V>(root->getPackets().at(var)->getValueStr());
+				K key = CastUtil::lexical_cast<K>(root->getPackets().at(var)->getNameStr());
+				mp[key] = val;
+			}
+		}
+		return mp;
 	}
 
 	template <class K,class V> static string serialize(multimap<K,V> mp, string appName = "default")
 	{
-		multimap<K,V> mpt  = mp;
+		typedef typename multimap<K,V>::iterator kvmapiter;
 		AMEFEncoder enc;
 		AMEFObject object;
 		K k;
 		const char *mangled = typeid(k).name();
 		string kclassName = demangle(mangled);
 		V v;
-		*mangled = typeid(v).name();
+		mangled = typeid(v).name();
 		string vclassName = demangle(mangled);
 		kclassName = "multimap<"+kclassName+":"+vclassName+">";
 		object.setName(kclassName);
-		while (mpt.begin()!=mpt.end())
+		kvmapiter it;
+		for (it=mp.begin();it!=mp.end();++it)
 		{
-			string key = serialize<K>(mpt.begin()->first,appName);
-			string value = serialize<V>(mpt.begin()->second,appName);
-			mpt.erase(mpt.begin());
-			object.addPacket(value, key);
+			//string key = serialize<K>(it->first,appName);
+			string value = serialize<V>(it->second,appName);
+			object.addPacket(value, CastUtil::lexical_cast<string>(it->first));
 		}
 		return enc.encodeB(&object, false);
 	}
+	template <class K,class V> static multimap<K,V> unSerializeToMultimap(string serStr, string appName = "default")
+	{
+		multimap<K,V> mp;
+		AMEFDecoder dec;
+		AMEFObject object;
+		AMEFObject* root = dec.decodeB(serStr, true, false);
+		if(root!=NULL)
+		{
+			for (int var = 0; var < (int)root->getPackets().size(); var++)
+			{
+				V val = unserialize<V>(root->getPackets().at(var)->getValueStr());
+				K key = CastUtil::lexical_cast<K>(root->getPackets().at(var)->getNameStr());
+				mp[key] = val;
+			}
+		}
+		return mp;
+	}
+
+
 	template <class T> static T unserialize(string objXml, string appName = "default")
 	{
 		BinarySerialize serialize;

@@ -25,15 +25,27 @@
 #include "TemplateEngine.h"
 #include "Reflection.h"
 #include "XmlParser.h"
+#ifdef INC_COMP
 #include "ComponentGen.h"
+#endif
+#ifdef INC_APPFLOW
 #include "ApplicationUtil.h"
+#endif
+#ifdef INC_DCP
 #include "DCPGenerator.h"
+#endif
 #include "ConfigurationData.h"
 #include "LoggerFactory.h"
+#ifdef INC_TPE
 #include "TemplateGenerator.h"
+#endif
 #include "FFEADContext.h"
+#ifdef INC_WEBSVC
 #include "WsUtil.h"
+#endif
+#ifdef INC_JOBS
 #include "JobScheduler.h"
+#endif
 
 class ConfigurationHandler {
 public:

@@ -27,7 +27,9 @@
 #include "AuthHandler.h"
 #include "Constants.h"
 #include "LoggerFactory.h"
+#ifdef INC_XMLSER
 #include "XMLSerialize.h"
+#endif
 #include "JSONSerialize.h"
 #include "ConfigurationData.h"
 

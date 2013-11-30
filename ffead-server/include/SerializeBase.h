@@ -383,6 +383,7 @@ public:
 	static string getTypeName(string type);
 	static bool isPrimitiveDataType(string type);
 	static string demangle(const char *mangled);
+	static string getTemplateArg(string s, string& tem);
 	static string getClassName(void* instance);
 	static void addToNestedContainer(void* roott, string className, string appName, int& lsiz, string container, void* cont, int var, SerializeBase* base);
 	static void* getNestedContainer(string& className);

@@ -40,20 +40,28 @@ ServiceTask::~ServiceTask() {
 	// TODO Auto-generated destructor stub
 }
 
-void ServiceTask::writeToSharedMemeory(string sessionId, string value,bool napp)
+void ServiceTask::saveSessionDataToFile(string sessionId, string value)
 {
+	string lockfil = serverRootDirectory+"/tmp/"+sessionId+".lck";
+	ifstream ifs(lockfil.c_str());
+	int counter = 5000/100;
+	while(ifs.is_open()) {
+		Thread::mSleep(100);
+		ifs.close();
+		ifs.open(lockfil.c_str());
+		if(counter--<=0)break;
+	}
+
 	string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
 	logger << ("Saving session to file " + filen) << endl;
-	ofstream ofs;
-	if(napp)
-		ofs.open(filen.c_str());
-	else
-		ofs.open(filen.c_str(),ios::app);
+	ofstream ofs(filen.c_str());
 	ofs.write(value.c_str(),value.length());
 	ofs.close();
+
+	remove(lockfil.c_str());
 }
 
-map<string,string> ServiceTask::readFromSharedMemeory(string sessionId)
+map<string,string> ServiceTask::getSessionDataFromFile(string sessionId)
 {
 	map<string,string> valss;
 	string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
@@ -85,16 +93,43 @@ map<string,string> ServiceTask::readFromSharedMemeory(string sessionId)
 	return valss;
 }
 
+#ifdef INC_DSTC
+void ServiceTask::saveSessionDataToDistocache(string sessionId, map<string,string> sessAttrs)
+{
+	DistGlobalCache globalMap;
+	globalMap.addMap(sessionId, sessAttrs);
+}
+
+
+map<string,string> ServiceTask::getSessionDataFromDistocache(string sessionId)
+{
+	map<string,string> mp;
+	DistGlobalCache globalMap;
+	try {
+		mp = globalMap.getMap<string,string>(sessionId);
+	} catch (...) {
+		logger << "error readin map value"<< endl;
+	}
+	return mp;
+}
+#endif
+
 string ServiceTask::getFileExtension(string file)
 {
 	if(file.find_last_of(".")!=string::npos)return file.substr(file.find_last_of("."));
 	return file;
 }
 
-void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> vals,string prevcookid, long sessionTimeout, bool sessatserv)
+void ServiceTask::storeSessionAttributes(HttpResponse &res,HttpRequest* req, long sessionTimeout, bool sessatserv)
 {
-	if(flag)
+	bool sessionchanged = !req->hasCookie();
+	sessionchanged |= req->getSession()->isDirty();
+
+	if(sessionchanged)
 	{
+		map<string,string> vals = req->getSession()->getSessionAttributes();
+		string prevcookid = req->getCookieInfoAttribute("FFEADID");
+
 		string values;
 		//logger << "session object modified " << vals.size() << endl;
 		Date date;
@@ -103,34 +138,45 @@ void ServiceTask::createResponse(HttpResponse &res,bool flag,map<string,string> 
 		date.updateSeconds(sessionTimeout);
 		DateFormat dformat("ddd, dd-mmm-yyyy hh:mi:ss");
 		map<string,string>::iterator it;
-		for(it=vals.begin();it!=vals.end();it++)
-		{
-			string key = it->first;
-			string value = it->second;
-			StringUtil::replaceAll(key,"; ","%3B%20");
-			StringUtil::replaceAll(key,"=","%3D");
-			StringUtil::replaceAll(value,"; ","%3B%20");
-			StringUtil::replaceAll(value,"=","%3D");
-			//logger << it->first << " = " << it->second << endl;
-			if(!sessatserv)
-				res.addCookie(key + "=" + value + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
-			else
-			{
-				values += key + "=" + value + "; ";
-			}
-		}
+
 		if(sessatserv)
 		{
-			if(values!="")
+			if(prevcookid=="")
 			{
-				if(prevcookid!="")
-					writeToSharedMemeory(prevcookid,values,true);
+				res.addCookie("FFEADID=" + id + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
+			}
+			else
+			{
+				id = prevcookid;
+			}
+		}
+		if(!sessatserv || (sessatserv && !configData.sessservdistocache))
+		{
+			for(it=vals.begin();it!=vals.end();it++)
+			{
+				string key = it->first;
+				string value = it->second;
+				StringUtil::replaceAll(key,"; ","%3B%20");
+				StringUtil::replaceAll(key,"=","%3D");
+				StringUtil::replaceAll(value,"; ","%3B%20");
+				StringUtil::replaceAll(value,"=","%3D");
+				//logger << it->first << " = " << it->second << endl;
+				if(!sessatserv)
+					res.addCookie(key + "=" + value + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
 				else
 				{
-					writeToSharedMemeory(id,values,false);
-					res.addCookie("FFEADID=" + id + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
+					values += key + "=" + value + "; ";
 				}
 			}
+		}
+		if(req->getSession()->isDirty())
+		{
+#ifdef INC_DSTC
+			if(configData.sessservdistocache)
+				saveSessionDataToDistocache(id, vals);
+			else
+#endif
+				saveSessionDataToFile(id, values);
 		}
 	}
 }
@@ -465,9 +511,7 @@ void ServiceTask::run()
 		BIO_push(io,ssl_bio);
 
 		int r = SSL_accept(ssl);
-		cout << r << endl;
 		int bser = SSL_get_error(ssl,r);
-		cout << bser << endl;
 		if(r<=0)
 		{
 			sslHandler.error_occurred((char*)"SSL accept error",fd,ssl);
@@ -516,9 +560,9 @@ void ServiceTask::run()
 				{
 					res.setHTTPResponseStatus(HTTPResponseStatus::ReqUrlLarge);
 					res.addHeaderValue(HttpResponse::Connection, "close");
-					sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
+					bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
 					logger << "Closing connection..." << endl;
-					closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+					if(sendSuccess)closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
 					return;
 				}
 				if(!fl)
@@ -549,9 +593,9 @@ void ServiceTask::run()
 			{
 				res.setHTTPResponseStatus(req->getRequestParseStatus());
 				res.addHeaderValue(HttpResponse::Connection, "close");
-				sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
+				bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
 				logger << "Closing connection..." << endl;
-				closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+				if(sendSuccess)closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
 				return;
 			}
 
@@ -563,9 +607,9 @@ void ServiceTask::run()
 				{
 					res.setHTTPResponseStatus(HTTPResponseStatus::ReqEntityLarge);
 					res.addHeaderValue(HttpResponse::Connection, "close");
-					sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
+					bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
 					logger << "Closing connection..." << endl;
-					closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+					if(sendSuccess)closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
 					return;
 				}
 			}
@@ -794,13 +838,19 @@ void ServiceTask::run()
 				{
 					string id = req->getCookieInfoAttribute("FFEADID");
 					logger << id << endl;
-					map<string,string> values = readFromSharedMemeory(id);
+					map<string,string> values;
+#ifdef INC_DSTC
+					if(configData.sessservdistocache)
+						values = getSessionDataFromDistocache(id);
+					else
+#endif
+						values = getSessionDataFromFile(id);
 					req->getSession()->setSessionAttributes(values);
 				}
 			}
 
 			//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
-
+#ifdef INC_APPFLOW
 			if(configData.appMap[req->getCntxt_name()]!="false")
 			{
 				if(dlib == NULL)
@@ -827,6 +877,7 @@ void ServiceTask::run()
 					}
 				}
 			}
+#endif
 
 			string ext = getFileExtension(req->getUrl());
 			vector<unsigned char> test;
@@ -909,6 +960,7 @@ void ServiceTask::run()
 					formHandler.handle(req, res, configData);
 					logger << ("Request handled by FormHandler") << endl;
 				}
+#ifdef INC_WEBSVC
 				else if(configData.wsdlmap[wsUrl]!="")
 				{
 					if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos
@@ -923,9 +975,13 @@ void ServiceTask::run()
 					}
 					logger << ("Request handled by SoapHandler for Url "+wsUrl) << endl;
 				}
+#endif
 				else
 				{
-					bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, ext, configData.props);
+					bool cntrlit = false;
+#ifdef INC_SCRH
+					cntrlit = scriptHandler.handle(req, res, configData.handoffs, ext, configData.props);
+#endif
 					if(cntrlit)
 					{
 						logger << ("Request handled by ScriptHandler") << endl;
@@ -988,11 +1044,10 @@ void ServiceTask::run()
 
 			alldatlg += "--processed data";
 			string h1;
-			bool sessionchanged = !req->hasCookie();
-			sessionchanged |= req->getSession()->isDirty();
+
 			//if(req->getConnection()!="")
 			//	res.setConnection("close");
-			createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfoAttribute("FFEADID"), sessionTimeoutVar, configData.sessatserv);
+			storeSessionAttributes(res, req, sessionTimeoutVar, configData.sessatserv);
 
 			//An errored request/response phase will close the connection
 			if(StringUtil::toLowerCopy(req->getHeader(HttpRequest::Connection))!="keep-alive" || CastUtil::lexical_cast<int>(res.getStatusCode())>307
@@ -1027,8 +1082,8 @@ void ServiceTask::run()
 
 			if(res.isHeaderValue(HttpResponse::TransferEncoding, "chunked"))
 			{
-				sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, h1);
-
+				bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, h1);
+				if(!sendSuccess)return;
 				unsigned int totlen = getFileSize(req->getUrl().c_str());
 				float parts = (float)totlen/techunkSiz;
 				parts = (floor(parts)<parts?floor(parts)+1:floor(parts)) - 1;
@@ -1044,14 +1099,17 @@ void ServiceTask::run()
 						h1 = StringUtil::toHEX(len) + "\r\n";
 						h1 += getFileContents(req->getUrl().c_str(), techunkSiz*var, len);
 						h1 += "\r\n";
-						sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, h1);
+						bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, h1);
+						if(!sendSuccess)return;
 					}
-					sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, "0\r\n\r\n");
+					bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, "0\r\n\r\n");
+					if(!sendSuccess)return;
 				}
 			}
 			else
 			{
-				sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, h1);
+				bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, h1);
+				if(!sendSuccess)return;
 			}
 
 			if(!cont)
@@ -1078,7 +1136,7 @@ void ServiceTask::run()
 }
 
 
-void ServiceTask::sendData(bool isSSLEnabled, ConfigurationData configData, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, string h1)
+bool ServiceTask::sendData(bool isSSLEnabled, ConfigurationData configData, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, string h1)
 {
 	if(isSSLEnabled)
 	{
@@ -1098,53 +1156,48 @@ void ServiceTask::sendData(bool isSSLEnabled, ConfigurationData configData, SSL*
 		  {
 			  logger << "SSL renegotiation error" << endl;
 			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			  return;
+			  return false;
 		  }
 		  if(SSL_do_handshake(ssl)<=0)
 		  {
 			  logger << "SSL renegotiation error" << endl;
 			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			  return;
+			  return false;;
 		  }
 		  ssl->state=SSL_ST_ACCEPT;
 		  if(SSL_do_handshake(ssl)<=0)
 		  {
 			  logger << "SSL handshake error" << endl;
 			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			  return;
+			  return false;;
 		  }
 		}
 		if((r=BIO_write(io, h1.c_str(),h1.length()))<=0)
 		{
 			  logger << "Send failed" << endl;
 			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			  return;
+			  return false;;
 		}
 		if((r=BIO_flush(io))<0)
 		{
 			  logger << "Error flushing BIO" << endl;
 			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			  return;
+			  return false;;
 		}
 		//sslHandler.closeSSL(fd,ssl,io);
 	}
 	else
 	{
 		int size;
-		if ((size=send(fd,&h1[0] , h1.length(), 0)) == -1)
+		if ((size=send(fd,&h1[0] , h1.length(), 0)) <= 0)
 		{
 			logger << "send failed" << flush;
 			closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+			return false;
 		}
-		else if(size==0)
-		{
-			closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			logger << "socket closed for writing" << flush;
-			return;
-		}
-
 		//if(io!=NULL)BIO_free_all(io);
 	}
+	return true;
 }
 
 void ServiceTask::closeSocket(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd)
@@ -1313,7 +1366,13 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			else
 			{
 				string id = req->getCookieInfoAttribute("FFEADID");
-				map<string,string> values = readFromSharedMemeory(id);
+				map<string,string> values;
+#ifdef INC_DSTC
+				if(configData.sessservdistocache)
+					values = getSessionDataFromDistocache(id);
+				else
+#endif
+					values = getSessionDataFromFile(id);
 				req->getSession()->setSessionAttributes(values);
 			}
 		}
@@ -1326,6 +1385,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		}
 		//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
 
+#ifdef INC_APPFLOW
 		if(configData.appMap[req->getCntxt_name()]!="false")
 		{
 			if(dlib == NULL)
@@ -1352,6 +1412,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 				}
 			}
 		}
+#endif
 
 		string ext = getFileExtension(req->getUrl());
 		vector<unsigned char> test;
@@ -1390,15 +1451,20 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			{
 				formHandler.handle(req, res, configData);
 			}
+#ifdef INC_WEBSVC
 			else if((req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos)
 					&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos)
 					&& configData.wsdlmap[req->getFile()]==req->getCntxt_name())
 			{
 				soapHandler.handle(req, res, dlib, configData);
 			}
+#endif
 			else
 			{
-				bool cntrlit = scriptHandler.handle(req, res, configData.handoffs, ext, configData.props);
+				bool cntrlit = false;
+#ifdef INC_SCRH
+				cntrlit = scriptHandler.handle(req, res, configData.handoffs, ext, configData.props);
+#endif
 				if(cntrlit)
 				{
 
@@ -1444,11 +1510,9 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 
 		alldatlg += "--processed data";
 		string h1;
-		bool sessionchanged = !req->hasCookie();
-		sessionchanged |= req->getSession()->isDirty();
 		if(req->getHeader("Connection")!="")
 			res.addHeaderValue(HttpResponse::Connection, "close");
-		createResponse(res,sessionchanged,req->getSession()->getSessionAttributes(),req->getCookieInfoAttribute("FFEADID"), sessionTimeoutVar, configData.sessatserv);
+		storeSessionAttributes(res, req, sessionTimeoutVar, configData.sessatserv);
 		//h1 = res.generateResponse();
 		delete req;
 		//logger << (alldatlg + "--sent data--DONE") << endl;

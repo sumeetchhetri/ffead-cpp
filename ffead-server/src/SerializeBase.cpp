@@ -1609,3 +1609,30 @@ void* SerializeBase::_unser(void* unserableObject, string className, string appN
 	}
 	return obj;
 }
+
+string SerializeBase::getTemplateArg(string s, string& tem)
+{
+	tem = s;
+	bool flag = false;
+	int comm = 0;
+	do {
+		comm = s.find(",", comm+1);
+		tem = s.substr(0, comm);
+		int to = StringUtil::countOccurrences(tem, "<");
+		int tc = StringUtil::countOccurrences(tem, ">");
+		flag = tc+1==to || (tc==to && tc==0);
+	} while(!flag);
+
+	string tfrst;
+	if(tem.find("<")!=string::npos)
+		tfrst = tem.substr(tem.find("<")+1, tem.length());
+	else
+		tfrst = tem.substr(0, tem.length());
+	if(tem.find(",")!=string::npos)
+		tfrst = tfrst.substr(0, tfrst.find(",")+1);
+	StringUtil::trim(tfrst);
+
+	tem = s.substr(tem.length());
+	tem = tem.substr(tem.find(",")+1);
+	return tfrst;
+}

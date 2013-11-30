@@ -192,6 +192,7 @@ int ScriptHandler::pcloseRWE(int pid, int *rwepipe)
 	return status;
 }
 
+#ifdef INC_SCRH
 bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs,
 		string ext, map<string, string> props)
 {
@@ -440,3 +441,4 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 	}
 	return skipit;
 }
+#endif

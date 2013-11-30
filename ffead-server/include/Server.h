@@ -58,6 +58,7 @@ class Server {
 	static void* servicing(void* arg);
 	bool runn, started;
 public:
+	int getSocket();
 	Server();
 	Server(string,bool,int,Service,int);
 	//Server(string port,int waiting,Service serv);

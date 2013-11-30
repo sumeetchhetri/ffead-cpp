@@ -107,7 +107,9 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	propMap srp;
 	PropFileReader pread;
 	XmlParser parser("Parser");
+#ifdef INC_COMP
 	ComponentGen gen;
+#endif
 	if(isSSLEnabled)
 	{
 		propMap sslsec = pread.getProperties(respath+"/security.prop");
@@ -345,6 +347,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						}
 					}
 				}
+#ifdef INC_DVIEW
 				else if(eles.at(apps).getTagName()=="dviews")
 				{
 					ElementList dvs = eles.at(apps).getChildElements();
@@ -364,6 +367,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						}
 					}
 				}
+#endif
 				else if(eles.at(apps).getTagName()=="ajax-interfaces")
 				{
 					ElementList ajintfs = eles.at(apps).getChildElements();
@@ -672,16 +676,20 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							+ " , expose-headers => " + configurationData.corsConfig.exposedHeaders
 							+ " , max-age => " + CastUtil::lexical_cast<string>(configurationData.corsConfig.maxAge)) << endl;
 				}
+#ifdef INC_JOBS
 				else if(eles.at(apps).getTagName()=="job-procs")
 				{
 					ElementList cntrls = eles.at(apps).getChildElements();
 					JobScheduler::init(cntrls, name);
 				}
+#endif
 			}
 		}
 		logger << "done reading application.xml " << endl;
 
+#ifdef INC_APPFLOW
 		configureCibernate(name, defpath+"config/cibernate.xml");
+#endif
 
 		logger << "started reading fviews.xml " << endl;
 		root = parser.getDocument(defpath+"config/fviews.xml").getRootElement();
@@ -761,6 +769,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		AfcUtil::writeTofile(webpubpath+"_afc_Objects.js",objs,true);
 		AfcUtil::writeTofile(webpubpath+"_afc_Interfaces.js",infjs,true);
 	}
+#ifdef INC_COMP
 	logger << "started generating component code" <<endl;
 	map<string, string>::iterator cmpit;
 	for (cmpit=compnts.begin();cmpit!=compnts.end();++cmpit)
@@ -783,11 +792,12 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 			logger << ("Exception occurred during component code generation : ") << ex << endl;
 		}
 	}
+	logger << "done generating component code" <<endl;
+#endif
 	for (unsigned int cntn = 0; cntn < handoffVec.size(); cntn++)
 	{
 		StringUtil::replaceFirst(libs, handoffVec.at(cntn), "");
 	}
-	logger << "done generating component code" <<endl;
 	logger << "started generating reflection/serialization code" <<endl;
 	string ret = ref.generateClassDefinitionsAll(clsstrucMaps,includeRef,webdirs1);
 	string objs, ajaxret, headers,typerefs;
@@ -805,17 +815,21 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	cntxt["RUNTIME_COMP_DEPS"] = ideps;
 	ret = TemplateEngine::evaluate(rtdcfpath+"subdir.mk.template",cntxt);
 	AfcUtil::writeTofile(rtdcfpath+"subdir.mk",ret,true);
+#ifdef INC_DCP
 	configurationData.dcpsss = dcps;
 	logger << "started generating dcp code" <<endl;
 	ret = DCPGenerator::generateDCPAll(dcps);
 	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
 	logger << "done generating dcp code" <<endl;
+#endif
 	configurationData.tpes = tpes;
+#ifdef INC_TPE
 	logger << "started generating template code" <<endl;
 	ret = TemplateGenerator::generateTempCdAll(tpes);
 	//logger << ret << endl;
 	AfcUtil::writeTofile(rtdcfpath+"TemplateInterface.cpp",ret,true);
 	logger << "done generating template code" <<endl;
+#endif
 	string infjs;
 	logger << endl<< "started generating ajax code" <<endl;
 	string ajaxHeaders;
@@ -826,17 +840,21 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	//AfcUtil::writeTofile(pubpath+"_afc_Interfaces.js",infjs,true);
 	AfcUtil::writeTofile(incpath+"AfcInclude.h",(ajaxHeaders+headers),true);
 	logger << "done generating ajax code" <<endl;
-	ApplicationUtil apputil;
 	webdirs.clear();
+#ifdef INC_APPFLOW
+	ApplicationUtil apputil;
 	logger << "started generating application code" <<endl;
 	ret = apputil.buildAllApplications(appf,webdirs1,configurationData.appMap);
 	AfcUtil::writeTofile(rtdcfpath+"ApplicationInterface.cpp",ret,true);
 	logger <<  "done generating application code" <<endl;
+#endif
+#ifdef INC_WEBSVC
 	WsUtil wsu;
 	logger <<  "started generating web-service code" <<endl;
 	ret = wsu.generateAllWSDL(webdirs1,respath,configurationData.wsdlmap,configurationData.ip_address,ref,clsstrucMaps);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
 	logger <<  "done generating web-service code" <<endl;
+#endif
 	cntxt.clear();
 	cntxt["TARGET_LIB"] = "all";
 	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
@@ -853,6 +871,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	return configurationData;
 }
 
+#ifdef INC_APPFLOW
 void ConfigurationHandler::configureCibernate(string name, string configFile)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
@@ -971,3 +990,4 @@ void ConfigurationHandler::destroyCibernate()
 		delete it->second;
 	}
 }
+#endif
