@@ -31,10 +31,10 @@ SoapHandler::~SoapHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, ConfigurationData configData)
+void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib)
 {
 	Logger logger = LoggerFactory::getLogger("SoapHandler");
-	string wsUrl = "http://" + configData.ip_address + "/";
+	string wsUrl = "http://" + ConfigurationData::getInstance()->ip_address + "/";
 	string acurl = req->getActUrl();
 	StringUtil::replaceFirst(acurl,"//","/");
 	if(acurl.length()>1)
@@ -44,9 +44,9 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, Config
 	wsUrl += acurl;
 	logger << ("WsUrl is " + wsUrl) << endl;
 
-	string xmlcnttype = configData.props[".xml"];
+	string xmlcnttype = ConfigurationData::getInstance()->props[".xml"];
 	string meth,ws_name,env;
-	ws_name = configData.wsdlmap[wsUrl];
+	ws_name = ConfigurationData::getInstance()->wsdlmap[wsUrl];
 	Element soapenv;
 	logger.info("request => "+req->getContent());
 	Element soapbody;

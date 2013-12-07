@@ -22,9 +22,17 @@
 
 #include "ConfigurationData.h"
 
+ConfigurationData* ConfigurationData::instance = NULL;
+
 ConfigurationData::ConfigurationData() {
 	// TODO Auto-generated constructor stub
+}
 
+ConfigurationData* ConfigurationData::getInstance() {
+	if(instance==NULL) {
+		instance = new ConfigurationData;
+	}
+	return instance;
 }
 
 ConfigurationData::~ConfigurationData() {

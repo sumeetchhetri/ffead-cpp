@@ -23,12 +23,29 @@
 #include "JSONSerialize.h"
 
 JSONSerialize::JSONSerialize() {
-	// TODO Auto-generated constructor stub
+	dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+	if(dlib == NULL)
+	{
+		cerr << dlerror() << endl;
+		throw "Cannot load serialization shared library";
+	}
+	dlibinstantiated = true;
+}
 
+JSONSerialize::JSONSerialize(void* dlib) {
+	if(dlib == NULL)
+	{
+		throw "Cannot load serialization shared library";
+	}
+	this->dlib = dlib;
+	dlibinstantiated = false;
 }
 
 JSONSerialize::~JSONSerialize() {
-	// TODO Auto-generated destructor stub
+	if(dlibinstantiated)
+	{
+		dlclose(dlib);
+	}
 }
 
 string JSONSerialize::serializePrimitive(string className, void* t)

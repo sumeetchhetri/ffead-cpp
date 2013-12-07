@@ -34,7 +34,7 @@ endif
 all: libinter libdinter
 
 # Tool invocations
-libinter: $(OBJS) $(USER_OBJS)
+libinter: $(POBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
 	g++ $(PTHREADS) -L"/usr/local/lib" -L"../lib" -shared -o"libinter.$(RES_LIB_EXT)" $(POBJS) $(USER_OBJS) $(LIBS) $(EX_LIBS)
@@ -42,7 +42,7 @@ libinter: $(OBJS) $(USER_OBJS)
 	cp -f libinter.$(RES_LIB_EXT) ../lib/
 	@echo ' '
 	
-libdinter: $(OBJS) $(USER_OBJS)
+libdinter: $(PDOBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
 	g++ $(PTHREADS) -L"/usr/local/lib" -L"../lib" -shared -o"libdinter.$(RES_LIB_EXT)" $(PDOBJS) $(LIBS) $(EX_LIBS)
@@ -52,9 +52,9 @@ libdinter: $(OBJS) $(USER_OBJS)
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS) $(C++_DEPS) $(C_DEPS) $(CC_DEPS) $(CPP_DEPS) $(EXECUTABLES) $(CXX_DEPS) $(C_UPPER_DEPS) libinter.$(RES_LIB_EXT) libdinter.$(RES_LIB_EXT)
+	-$(RM) *.o $(C++_DEPS) $(C_DEPS) $(CC_DEPS) *.d $(EXECUTABLES) $(CXX_DEPS) $(C_UPPER_DEPS) libinter.$(RES_LIB_EXT) libdinter.$(RES_LIB_EXT)
 	-@echo ' '
 
 .PHONY: all clean dependents
 .SECONDARY:
-libweblib:
+libinter:

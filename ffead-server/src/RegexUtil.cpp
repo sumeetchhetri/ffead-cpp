@@ -22,7 +22,7 @@
 
 #include "RegexUtil.h"
 
-map<string, regex_t> RegexUtil::patterns;
+//map<string, regex_t> RegexUtil::patterns;
 
 RegexUtil::RegexUtil() {
 	// TODO Auto-generated constructor stub
@@ -38,27 +38,28 @@ void RegexUtil::find(const string& text, const string& pattern, int &spos, int &
 	string ttext(text);
 	regex_t regex;
 	int reti;
-	if(patterns.find(pattern)!=patterns.end())
+	/*if(patterns.find(pattern)!=patterns.end())
 	{
 		regex = patterns[pattern];
 	}
-	else
+	else*/
 	{
 		/* Compile regular expression */
 		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
 		if(reti)
 		{
-			cout << "Could not compile regex\n" << endl;
+			cout << ("Could not compile regex - "+pattern) << endl;
 		}
 		else
 		{
-			patterns[pattern] = regex;
+			//patterns[pattern] = regex;
 		}
 	}
 	spos = -1;
 	epos = -1;
 	regmatch_t pm;
 	reti = regexec(&regex, ttext.c_str(), 1, &pm, 0);
+	regfree(&regex);
 	if (reti == 0) {    /* while matches found */
 		/* substring found between pm.rm_so and pm.rm_eo */
 		/* This call to regexec() finds the next match */
@@ -72,25 +73,26 @@ int RegexUtil::find(const string& text, const string& pattern)
 	string ttext(text);
 	regex_t regex;
 	int reti;
-	if(patterns.find(pattern)!=patterns.end())
+	/*if(patterns.find(pattern)!=patterns.end())
 	{
 		regex = patterns[pattern];
 	}
-	else
+	else*/
 	{
 		/* Compile regular expression */
 		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
 		if(reti)
 		{
-			cout << "Could not compile regex\n" << endl;
+			cout << ("Could not compile regex - "+pattern) << endl;
 		}
 		else
 		{
-			patterns[pattern] = regex;
+			//patterns[pattern] = regex;
 		}
 	}
 	regmatch_t pm;
 	reti = regexec(&regex, ttext.c_str(), 1, &pm, 0);
+	regfree(&regex);
 	if (reti == 0) {    /* while matches found */
 		/* substring found between pm.rm_so and pm.rm_eo */
 		/* This call to regexec() finds the next match */
@@ -104,21 +106,21 @@ vector<string> RegexUtil::search(const string& text, const string& pattern) {
 	string ttext(text);
 	regex_t regex;
 	int reti;
-	if(patterns.find(pattern)!=patterns.end())
+	/*if(patterns.find(pattern)!=patterns.end())
 	{
 		regex = patterns[pattern];
 	}
-	else
+	else*/
 	{
 		/* Compile regular expression */
 		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
 		if(reti)
 		{
-			cout << "Could not compile regex\n" << endl;
+			cout << ("Could not compile regex - "+pattern) << endl;
 		}
 		else
 		{
-			patterns[pattern] = regex;
+			//patterns[pattern] = regex;
 		}
 	}
 	regmatch_t pm;
@@ -138,6 +140,7 @@ vector<string> RegexUtil::search(const string& text, const string& pattern) {
 		pm.rm_so = -1;
 		reti = regexec (&regex, ttext.c_str(), 1, &pm, 0);
 	}
+	regfree(&regex);
 	return vec;
 }
 
@@ -146,21 +149,21 @@ string RegexUtil::replaceCopy(const string& text, const string& pattern, const s
 	string rettxt;
 	regex_t regex;
 	int reti;
-	if(patterns.find(pattern)!=patterns.end())
+	/*if(patterns.find(pattern)!=patterns.end())
 	{
 		regex = patterns[pattern];
 	}
-	else
+	else*/
 	{
 		/* Compile regular expression */
 		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
 		if(reti)
 		{
-			cout << "Could not compile regex\n" << endl;
+			cout << ("Could not compile regex - "+pattern) << endl;
 		}
 		else
 		{
-			patterns[pattern] = regex;
+			//patterns[pattern] = regex;
 		}
 	}
 	regmatch_t pm;
@@ -181,6 +184,7 @@ string RegexUtil::replaceCopy(const string& text, const string& pattern, const s
 		pm.rm_so = -1;
 		reti = regexec (&regex, ttext.c_str(), 1, &pm, 0);
 	}
+	regfree(&regex);
 	if(ttext!="")rettxt += ttext;
 	return rettxt;
 }
@@ -190,21 +194,21 @@ void RegexUtil::replace(string& text, const string& pattern, const string& with)
 	string rettxt;
 	regex_t regex;
 	int reti;
-	if(patterns.find(pattern)!=patterns.end())
+	/*if(patterns.find(pattern)!=patterns.end())
 	{
 		regex = patterns[pattern];
 	}
-	else
+	else*/
 	{
 		/* Compile regular expression */
 		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
 		if(reti)
 		{
-			cout << "Could not compile regex\n" << endl;
+			cout << ("Could not compile regex - "+pattern) << endl;
 		}
 		else
 		{
-			patterns[pattern] = regex;
+			//patterns[pattern] = regex;
 		}
 	}
 	regmatch_t pm;
@@ -225,6 +229,7 @@ void RegexUtil::replace(string& text, const string& pattern, const string& with)
 		pm.rm_so = -1;
 		reti = regexec (&regex, ttext.c_str(), 1, &pm, 0);
 	}
+	regfree(&regex);
 	if(ttext!="")rettxt += ttext;
 	text = rettxt;
 }

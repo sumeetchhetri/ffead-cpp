@@ -29,12 +29,12 @@ CORSHandler::CORSHandler() {
 CORSHandler::~CORSHandler() {
 }
 
-bool CORSHandler::handle(HttpRequest *req, HttpResponse *res, ConfigurationData configData) {
+bool CORSHandler::handle(HttpRequest *req, HttpResponse *res) {
 	int reqType = req->getCORSRequestType();
 	if(reqType == PREFLIGHT)
 	{
 		strVec reqOrgLst = req->parseHeaderValue(req->getHeader(HttpRequest::Origin));
-		if(configData.corsConfig.isOriginAllowed(reqOrgLst))
+		if(ConfigurationData::getInstance()->corsConfig.isOriginAllowed(reqOrgLst))
 		{
 			if(req->getHeader(HttpResponse::AccessControlAllowMethods)=="")
 			{
@@ -51,24 +51,24 @@ bool CORSHandler::handle(HttpRequest *req, HttpResponse *res, ConfigurationData 
 
 				strVec reqHdrLst = req->parseHeaderValue(req->getHeader(HttpResponse::AccessControlAllowHeaders));
 
-				if(!configData.corsConfig.isMethodAllowed(req->getHeader(HttpResponse::AccessControlAllowMethods)))
+				if(!ConfigurationData::getInstance()->corsConfig.isMethodAllowed(req->getHeader(HttpResponse::AccessControlAllowMethods)))
 				{
 					HTTPResponseStatus status(HTTPResponseStatus::InvalidMethod, "Unsupported HTTP method: " + req->getHeader(HttpResponse::AccessControlAllowMethods));
 					throw status;
 				}
 
 				string erheadr;
-				if(!configData.corsConfig.isHeaderAllowed(reqHdrLst, erheadr))
+				if(!ConfigurationData::getInstance()->corsConfig.isHeaderAllowed(reqHdrLst, erheadr))
 				{
 					HTTPResponseStatus status(HTTPResponseStatus::Forbidden, "Unsupported HTTP request header: " + erheadr);
 					throw status;
 				}
 
-				if(configData.corsConfig.allwdCredentials)
+				if(ConfigurationData::getInstance()->corsConfig.allwdCredentials)
 				{
 					res->addHeaderValue(HttpResponse::AccessControlAllowCredentials, "true");
 				}
-				if(configData.corsConfig.allwdOrigins=="*")
+				if(ConfigurationData::getInstance()->corsConfig.allwdOrigins=="*")
 				{
 					res->addHeaderValue(HttpResponse::AccessControlAllowOrigin, "*");
 				}
@@ -77,13 +77,13 @@ bool CORSHandler::handle(HttpRequest *req, HttpResponse *res, ConfigurationData 
 					res->addHeaderValue(HttpResponse::AccessControlAllowOrigin, req->getHeader(HttpRequest::Origin));
 				}
 
-				if(configData.corsConfig.maxAge>0)
+				if(ConfigurationData::getInstance()->corsConfig.maxAge>0)
 				{
-					res->addHeaderValue(HttpResponse::AccessControlAllowMethods, CastUtil::lexical_cast<string>(configData.corsConfig.maxAge));
+					res->addHeaderValue(HttpResponse::AccessControlAllowMethods, CastUtil::lexical_cast<string>(ConfigurationData::getInstance()->corsConfig.maxAge));
 				}
 
-				res->addHeaderValue(HttpResponse::AccessControlAllowMethods, configData.corsConfig.allwdMethods);
-				res->addHeaderValue(HttpResponse::AccessControlMaxAge, configData.corsConfig.allwdHeaders);
+				res->addHeaderValue(HttpResponse::AccessControlAllowMethods, ConfigurationData::getInstance()->corsConfig.allwdMethods);
+				res->addHeaderValue(HttpResponse::AccessControlMaxAge, ConfigurationData::getInstance()->corsConfig.allwdHeaders);
 
 			}
 		}
@@ -98,21 +98,21 @@ bool CORSHandler::handle(HttpRequest *req, HttpResponse *res, ConfigurationData 
 	else if(reqType == CORS)
 	{
 		strVec reqOrgLst = req->parseHeaderValue(req->getHeader(HttpRequest::Origin));
-		if(configData.corsConfig.isOriginAllowed(reqOrgLst))
+		if(ConfigurationData::getInstance()->corsConfig.isOriginAllowed(reqOrgLst))
 		{
-			if(!configData.corsConfig.isMethodAllowed(req->getMethod()))
+			if(!ConfigurationData::getInstance()->corsConfig.isMethodAllowed(req->getMethod()))
 			{
 				HTTPResponseStatus status(HTTPResponseStatus::InvalidMethod, "Unsupported HTTP method: " + req->getMethod());
 				throw status;
 			}
 
-			if(configData.corsConfig.allwdCredentials)
+			if(ConfigurationData::getInstance()->corsConfig.allwdCredentials)
 			{
 				res->addHeaderValue(HttpResponse::AccessControlAllowCredentials, "true");
 			}
 
 			res->addHeaderValue(HttpResponse::AccessControlAllowOrigin, req->getHeader(HttpRequest::Origin));
-			res->addHeaderValue(HttpResponse::AccessControlAllowHeaders, configData.corsConfig.exposedHeaders);
+			res->addHeaderValue(HttpResponse::AccessControlAllowHeaders, ConfigurationData::getInstance()->corsConfig.exposedHeaders);
 		}
 		else
 		{

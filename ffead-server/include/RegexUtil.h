@@ -33,7 +33,7 @@
 using namespace std;
 
 class RegexUtil {
-	static map<string, regex_t> patterns;
+	//static map<string, regex_t> patterns;
 public:
 	RegexUtil();
 	virtual ~RegexUtil();

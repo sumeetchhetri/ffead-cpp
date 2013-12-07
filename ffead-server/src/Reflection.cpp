@@ -160,6 +160,27 @@ int Reflection::findless(int a, int b, int c)
 	return -1;
 }
 
+
+void Reflection::emptyBlocks(string& data, size_t start)
+{
+	if(data.find("{")!=string::npos) {
+			size_t nstart = data.find("{", start+1);
+			if(nstart!=string::npos)
+			{
+				start = nstart;
+			}
+			else
+			{
+				string temp = data.substr(0, start);
+				string temp1 = data.substr(start);
+				RegexUtil::replace(temp1, "\\{[^}]*\\}", ";");
+				data = temp + temp1;
+				start = 0;
+			}
+			emptyBlocks(data, start);
+		}
+}
+
 void Reflection::handleNamespace(string data, string namepsc, map<string, ClassStructure>& clsvec, map<string, vector<string> >& glbnmspcs)
 {
 	StringUtil::trim(data);
@@ -328,10 +349,7 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 	}
 	else if(clsvec.find(namepsc)!=clsvec.end())
 	{
-		while(data.find("{")!=string::npos)
-		{
-			RegexUtil::replace(data, "{[^{}]*}", ";");
-		}
+		emptyBlocks(data, 0);
 		RegexUtil::replace(data, "\"[^\"]+\"", "\"\"");
 		vector<string> parts = StringUtil::split(data, ";");
 		if(parts.size()>0)
@@ -1489,6 +1507,11 @@ string Reflection::generateClassDefinition(map<string, ClassStructure> allclsmap
 					publf += classStructure.pub.at(i);
 
 					fld = classStructure.pub.at(i);
+
+					StringUtil::replaceAll(fld, "{", "");
+					StringUtil::replaceAll(fld, "}", "");
+					StringUtil::trim(fld);
+					if(fld.length()==0)continue;
 
 					bool fldstatic = false;
 					if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)

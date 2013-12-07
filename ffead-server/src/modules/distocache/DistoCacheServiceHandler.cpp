@@ -22,11 +22,10 @@
 
 #include "DistoCacheServiceHandler.h"
 
-DistoCacheServiceHandler::DistoCacheServiceHandler(int fd, bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler) {
+DistoCacheServiceHandler::DistoCacheServiceHandler(int fd, bool isSSLEnabled, SSL_CTX *ctx) {
 	this->fd = fd;
 	this->isSSLEnabled = isSSLEnabled;
 	this->ctx = ctx;
-	this->sslHandler = sslHandler;
 	logger = LoggerFactory::getLogger("DistoCacheServiceHandler");
 }
 
@@ -88,7 +87,7 @@ void DistoCacheServiceHandler::run()
 		SSL_get_error(ssl,r);
 		if(r<=0)
 		{
-			sslHandler.error_occurred((char*)"SSL accept error",fd,ssl);
+			SSLHandler::getInstance()->error_occurred((char*)"SSL accept error",fd,ssl);
 			return;
 		}
 	}
@@ -112,7 +111,7 @@ void DistoCacheServiceHandler::run()
 				case SSL_ERROR_ZERO_RETURN:
 				default:
 				{
-					sslHandler.error_occurred((char*)"SSL read problem",fd,ssl);
+					SSLHandler::getInstance()->error_occurred((char*)"SSL read problem",fd,ssl);
 					return;
 				}
 			}
@@ -142,7 +141,7 @@ void DistoCacheServiceHandler::run()
 		{
 			if(isSSLEnabled)
 			{
-				sslHandler.closeSSL(fd, ssl, io);
+				SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 			}
 			else
 			{
@@ -168,7 +167,7 @@ void DistoCacheServiceHandler::run()
 					case SSL_ERROR_ZERO_RETURN:
 					default:
 					{
-						sslHandler.error_occurred((char*)"SSL error problem",fd,ssl);
+						SSLHandler::getInstance()->error_occurred((char*)"SSL error problem",fd,ssl);
 						return;
 					}
 				}
@@ -584,7 +583,7 @@ void DistoCacheServiceHandler::run()
 				case SSL_ERROR_ZERO_RETURN:
 				default:
 				{
-					sslHandler.error_occurred((char*)"SSL error problem",fd,ssl);
+					SSLHandler::getInstance()->error_occurred((char*)"SSL error problem",fd,ssl);
 					return;
 				}
 			}

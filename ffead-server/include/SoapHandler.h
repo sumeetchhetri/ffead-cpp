@@ -35,7 +35,7 @@ class SoapHandler {
 public:
 	SoapHandler();
 	virtual ~SoapHandler();
-	static void handle(HttpRequest* req, HttpResponse& res, void* dlib, ConfigurationData configData);
+	static void handle(HttpRequest* req, HttpResponse& res, void* dlib);
 };
 
 #endif /* SOAPHANDLER_H_ */

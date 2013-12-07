@@ -36,7 +36,7 @@ class SecurityHandler {
 public:
 	SecurityHandler();
 	virtual ~SecurityHandler();
-	static bool handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, long sessionTimeout);
+	static bool handle(HttpRequest* req, HttpResponse& res, long sessionTimeout);
 };
 
 #endif /* SECURITYHANDLER_H_ */

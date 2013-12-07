@@ -33,12 +33,11 @@ class DistoCacheServiceHandler {
 	int fd;
 	bool isSSLEnabled;
 	SSL_CTX *ctx;
-	SSLHandler sslHandler;
 	Logger logger;
 	int getLength(string header,int size);
 	bool validQuery(vector<string> parts, int size, string cmd1="", string cmd2="");
 public:
-	DistoCacheServiceHandler(int fd, bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler);
+	DistoCacheServiceHandler(int fd, bool isSSLEnabled, SSL_CTX *ctx);
 	DistoCacheServiceHandler(int fd);
 	virtual ~DistoCacheServiceHandler();
 	void run();

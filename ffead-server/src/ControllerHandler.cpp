@@ -31,14 +31,13 @@ ControllerHandler::~ControllerHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
-		string ext, string pthwofile)
+bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, string pthwofile)
 {
-	map<string, string> urlpattMap = configData.urlpattMap;
-	map<string, string> mappattMap = configData.mappattMap;
-	resFuncMap rstCntMap = configData.rstCntMap;
-	map<string, string> mapMap = configData.mapMap;
-	map<string, string> urlMap = configData.urlMap;
+	map<string, string> urlpattMap = ConfigurationData::getInstance()->urlpattMap;
+	map<string, string> mappattMap = ConfigurationData::getInstance()->mappattMap;
+	resFuncMap rstCntMap = ConfigurationData::getInstance()->rstCntMap;
+	map<string, string> mapMap = ConfigurationData::getInstance()->mapMap;
+	map<string, string> urlMap = ConfigurationData::getInstance()->urlMap;
 
 	Logger logger = LoggerFactory::getLogger("ControllerHandler");
 	bool isContrl = false;
@@ -51,7 +50,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 		else
 			controller = urlMap[req->getCntxt_name()+ext];
 
-		void *_temp = configData.ffeadContext->getBean("controller_"+req->getCntxt_name()+controller, req->getCntxt_name());
+		void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("controller_"+req->getCntxt_name()+controller, req->getCntxt_name());
 		Controller* thrd = static_cast<Controller*>(_temp);
 		if(thrd!=NULL)
 		{
@@ -195,7 +194,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, Configuratio
 			//logger << "inside restcontroller logic ..." << endl;
 			Reflector ref;
 			ClassInfo srv = ref.getClassInfo(rft.clas, req->getCntxt_name());
-			void *_temp = configData.ffeadContext->getBean("restcontroller_"+req->getCntxt_name()+rft.clas, req->getCntxt_name());
+			void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("restcontroller_"+req->getCntxt_name()+rft.clas, req->getCntxt_name());
 			RestController* rstcnt = (RestController*)_temp;
 			if(rstcnt==NULL)
 			{

@@ -35,6 +35,7 @@ class XMLSerialize : public SerializeBase {
 	string getSerializationMethodName(string className, string appName, bool which, string type);
 public:
 	XMLSerialize();
+	XMLSerialize(void*);
 	~XMLSerialize();
 
 	template <class T> static string serialize(T t, string appName = "default")

@@ -32,7 +32,6 @@ JobScheduler::~JobScheduler() {
 }
 
 void JobScheduler::init(ElementList tabs, string appName) {
-	Reflector ref;
 	if(instance!=NULL)
 		return;
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");

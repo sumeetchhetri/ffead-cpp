@@ -23,12 +23,29 @@
 #include "BinarySerialize.h"
 
 BinarySerialize::BinarySerialize() {
-	// TODO Auto-generated constructor stub
+	dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+	if(dlib == NULL)
+	{
+		cerr << dlerror() << endl;
+		throw "Cannot load serialization shared library";
+	}
+	dlibinstantiated = true;
+}
 
+BinarySerialize::BinarySerialize(void* dlib) {
+	if(dlib == NULL)
+	{
+		throw "Cannot load serialization shared library";
+	}
+	this->dlib = dlib;
+	dlibinstantiated = false;
 }
 
 BinarySerialize::~BinarySerialize() {
-	// TODO Auto-generated destructor stub
+	if(dlibinstantiated)
+	{
+		dlclose(dlib);
+	}
 }
 
 string BinarySerialize::serializePrimitive(string className, void* t)

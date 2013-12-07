@@ -75,7 +75,7 @@ string Cibernate::demangle(const char *mangled)
 	using namespace abi;
 	demangled = __cxa_demangle(mangled, NULL, 0, &status);
 	string s(demangled);
-	delete demangled;
+	free(demangled);
 	return s;
 }
 
@@ -419,7 +419,7 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 	void *vecT = reflector.getNewVector(clasName,appName);
 	SQLCHAR colName[256];
 	SQLSMALLINT	V_OD_colanz, colNameLen, dataType, numDecimalDigits, allowsNullValues;
-	SQLUINTEGER columnSize;
+	SQLULEN columnSize;
 
 	void *col = NULL;
 	V_OD_erg=SQLFetch(V_OD_hstmt);
@@ -550,7 +550,7 @@ void* Cibernate::getElements()
 	int V_OD_erg;// result of functions
 	SQLCHAR colName[256];
 	SQLSMALLINT	V_OD_colanz, colNameLen, dataType, numDecimalDigits, allowsNullValues;
-	SQLUINTEGER columnSize;
+	SQLULEN columnSize;
 
 	vector<map<string, void*> >* vecT = new vector<map<string, void*> >;
 

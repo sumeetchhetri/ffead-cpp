@@ -45,7 +45,7 @@ private:
 		using namespace abi;
 		demangled = __cxa_demangle(mangled, NULL, 0, &status);
 		string s(demangled);
-		delete demangled;
+		free(demangled);
 		return s;
 
 	}

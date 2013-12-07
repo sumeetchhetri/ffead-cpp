@@ -32,11 +32,11 @@ SecurityHandler::~SecurityHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-bool SecurityHandler::handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, long sessionTimeout)
+bool SecurityHandler::handle(HttpRequest* req, HttpResponse& res, long sessionTimeout)
 {
-	string ip_addr = configData.ip_address;
-	map<string, Security> securityObjectMap = configData.securityObjectMap;
-	map<string, string> cntMap = configData.cntMap;
+	string ip_addr = ConfigurationData::getInstance()->ip_address;
+	map<string, Security> securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
+	map<string, string> cntMap = ConfigurationData::getInstance()->cntMap;
 	bool isContrl = false;
 	string serverUrl = "";//"http://" + ip_addr;
 	if(req->getCntxt_name()!="default" && cntMap[req->getCntxt_name()]!="true")
@@ -102,7 +102,7 @@ bool SecurityHandler::handle(ConfigurationData configData, HttpRequest* req, Htt
 				claz = claz.substr(claz.find(":")+1);
 				logger << ("Auth handled by class " + claz) << endl;
 
-				void *_temp = configData.ffeadContext->getBean("login-handler_"+req->getCntxt_name()+claz, req->getCntxt_name());
+				void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("login-handler_"+req->getCntxt_name()+claz, req->getCntxt_name());
 				AuthController* loginc = static_cast<AuthController*>(_temp);
 				if(loginc!=NULL && loginc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
 					req->getRequestParam("_ffead_security_cntxt_password")))

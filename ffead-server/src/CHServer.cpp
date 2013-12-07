@@ -34,15 +34,11 @@ string servd, serverCntrlFileNm;
 static bool isSSLEnabled = false,isThreadprq = false,processforcekilled = false,processgendone = false,sessatserv = false,isCompileEnabled = false;
 static long sessionTimeout;
 static int thrdpsiz/*,shmid*/;
-static SSL_CTX *ctx;
-static char *ciphers=0;
 map<int,pid_t> pds;
 static pid_t parid;
-void *dlib = NULL, *ddlib = NULL;
 typedef map<string,string> sessionMap;
 static Mutex m_mutex,p_mutex;
-ConfigurationData configurationData;
-FFEADContext ffeadContext;
+FFEADContext* ffeadContext;
 
 Logger logger;
 
@@ -400,56 +396,12 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	if((pid=fork())==0)
 	{
 		char pidStr[10];
-		sprintf(pidStr, "%ld", (long)pid);
+		sprintf(pidStr, "%ld", (long)getpid());
 		string proclabel = "CHServer-";
 		proclabel.append(pidStr);
 
 		Logger plogger = LoggerFactory::getLogger(proclabel);
 
-		SSLHandler sSLHandler;
-		dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
-		//logger << endl <<dlib << endl;
-		if(dlib==NULL)
-		{
-			plogger << dlerror() << endl;
-			plogger.info("Could not load Library");
-			exit(0);
-		}
-		else
-			plogger.info("Library loaded successfully");
-
-		ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
-		//logger << endl <<dlib << endl;
-		if(ddlib==NULL)
-		{
-			plogger << dlerror() << endl;
-			plogger.info("Could not load dynamic Library");
-			exit(0);
-		}
-		else
-			plogger.info("Dynamic Library loaded successfully");
-		if(isSSLEnabled)
-		{
-			/*HTTPS related*/
-			//client_auth=CLIENT_AUTH_REQUIRE;
-			/* Build our SSL context*/
-			ctx = sSLHandler.initialize_ctx((char*)configurationData.key_file.c_str(),(char*)configurationData.sec_password.c_str(),
-					configurationData.ca_list);
-			sSLHandler.load_dh_params(ctx,(char*)configurationData.dh_file.c_str());
-
-			SSL_CTX_set_session_id_context(ctx,
-			  (const unsigned char*)&SSLHandler::s_server_session_id_context,
-			  sizeof SSLHandler::s_server_session_id_context);
-
-			/* Set our cipher list */
-			if(ciphers){
-			  SSL_CTX_set_cipher_list(ctx,ciphers);
-			}
-			/*if(configurationData.client_auth==2)
-				SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
-			else if(configurationData.client_auth==1)
-				SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);*/
-		}
 		servd = serverRootDirectory;
 		string filename;
 		stringstream ss;
@@ -472,10 +424,6 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		{
 			pool.init(thrdpsiz,30,true);
 		}
-		PropFileReader pread;
-		propMap params = pread.getProperties(serverRootDirectory+"resources/security.prop");
-
-		//logger << params.size() <<endl;
 
 		ofstream serverCntrlFile;
 		serverCntrlFile.open(serverCntrlFileNm.c_str());
@@ -507,15 +455,13 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 
 				if(isThreadprq)
 				{
-					ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params,
-								isSSLEnabled, ctx, sSLHandler, configurationData, dlib, ddlib);
+					ServiceTask *task = new ServiceTask(fd,serverRootDirectory);
 					Thread pthread(&service, task);
 					pthread.execute();
 				}
 				else
 				{
-					ServiceTask *task = new ServiceTask(fd,serverRootDirectory,&params,
-							isSSLEnabled, ctx, sSLHandler, configurationData, dlib, ddlib);
+					ServiceTask *task = new ServiceTask(fd,serverRootDirectory);
 					task->setCleanUp(true);
 					pool.submit(task);
 				}
@@ -572,8 +518,8 @@ void* dynamic_page_monitor(void* arg)
 {
 	string serverRootDirectory = *(string*)arg;
 	struct stat statbuf;
-	map<string, string> dcpsss = configurationData.dcpsss;
-	map<string, string> tpes = configurationData.tpes;
+	map<string, string> dcpsss = ConfigurationData::getInstance()->dcpsss;
+	map<string, string> tpes = ConfigurationData::getInstance()->tpes;
 	map<string, string> dcspstpes = dcpsss;
 	dcspstpes.insert(tpes.begin(), tpes.end());
 	map<string,long> statsinf;
@@ -625,26 +571,6 @@ void* dynamic_page_monitor(void* arg)
 					{
 						kill(it->second,9);
 					}
-				}
-				else
-				{
-					if(ddlib!=NULL)
-					{
-						for (int var = 0; var < 100; ++var) {
-							if(dlclose(ddlib)!=0)
-								break;
-						}
-					}
-
-					ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
-					//logger << endl <<dlib << endl;
-					if(ddlib==NULL)
-					{
-						logger << dlerror() << endl;
-						logger.info("Could not re-load Dynamic Library");
-					}
-					else
-						logger.info("Dynamic Library re-loaded successfully");
 				}
 				m_mutex.unlock();
 				processforcekilled = true;
@@ -767,10 +693,13 @@ int main(int argc, char* argv[])
 	else
 		IP_ADDRESS = "localhost:" + PORT;
 
-	configurationData.ip_address = IP_ADDRESS;
-	configurationData.sprops = srprps;
-	configurationData.sessionTimeout = sessionTimeout;
-	configurationData.sessatserv = sessatserv;
+	ConfigurationData::getInstance();
+	SSLHandler::setIsSSL(isSSLEnabled);
+
+	ConfigurationData::getInstance()->ip_address = IP_ADDRESS;
+	ConfigurationData::getInstance()->sprops = srprps;
+	ConfigurationData::getInstance()->sessionTimeout = sessionTimeout;
+	ConfigurationData::getInstance()->sessatserv = sessatserv;
 
 	sockfd = Server::createListener(IP_ADDRES, PORT, false);
 
@@ -781,16 +710,18 @@ int main(int argc, char* argv[])
 
     for(unsigned int var=0;var<pubfiles.size();var++)
 	{
-		configurationData.pubMap[pubfiles.at(var)] = "true";
+		ConfigurationData::getInstance()->pubMap[pubfiles.at(var)] = "true";
 	}
 
-    configurationData.props = pread.getProperties(respath+"mime-types.prop");
-    configurationData.lprops = pread.getProperties(respath+"locale.prop");
+    ConfigurationData::getInstance()->props = pread.getProperties(respath+"mime-types.prop");
+    ConfigurationData::getInstance()->lprops = pread.getProperties(respath+"locale.prop");
+
+    ffeadContext = new FFEADContext;
 
     strVec cmpnames;
     try
     {
-    	ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, pubpath, respath, isSSLEnabled, &ffeadContext, configurationData);
+    	ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, serverRootDirectory, respath, ffeadContext);
     }
     catch(const XmlParseException& p)
     {
@@ -800,6 +731,8 @@ int main(int argc, char* argv[])
 	{
 		logger << msg << endl;
 	}
+
+    SSLHandler::initInstance();
 
     bool libpresent = true;
     void *dlibtemp = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
@@ -838,12 +771,12 @@ int main(int argc, char* argv[])
 
 	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
-	configurationData.ffeadContext->initializeAllSingletonBeans();
+	ConfigurationData::getInstance()->ffeadContext->initializeAllSingletonBeans();
 
 #ifdef INC_COMP
-	for (unsigned int var1 = 0;var1<configurationData.cmpnames.size();var1++)
+	for (unsigned int var1 = 0;var1<ConfigurationData::getInstance()->cmpnames.size();var1++)
 	{
-		string name = configurationData.cmpnames.at(var1);
+		string name = ConfigurationData::getInstance()->cmpnames.at(var1);
 		StringUtil::replaceFirst(name,"Component_","");
 		ComponentHandler::registerComponent(name);
 		AppContext::registerComponent(name);
@@ -879,7 +812,7 @@ int main(int argc, char* argv[])
 	}
 #endif
 
-	configurationData.sessservdistocache = distocache;
+	ConfigurationData::getInstance()->sessservdistocache = distocache;
 
 #ifdef INC_COMP
 	try {
@@ -931,7 +864,7 @@ int main(int argc, char* argv[])
 #endif
 
 	//printf("server: waiting for connections...\n");
-	logger.info("Server: waiting for connections on " + configurationData.ip_address);
+	logger.info("Server: waiting for connections on " + ConfigurationData::getInstance()->ip_address);
 
 	ofstream serverCntrlFile;
 	serverCntrlFile.open(serverCntrlFileNm.c_str());
@@ -941,8 +874,7 @@ int main(int argc, char* argv[])
 	vector<string> files;
 	int sp[preForked][2];
 	ThreadPool *pool;
-	propMap params;
-	SSLHandler sSLHandler;
+
 	if(Constants::IS_FILE_DESC_PASSING_AVAIL)
 	{
 		for(int j=0;j<preForked;j++)
@@ -960,31 +892,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		propMap params = pread.getProperties(serverRootDirectory+"resources/security.prop");
-		SSLHandler sSLHandler;
-		if(isSSLEnabled)
-		{
-			/*HTTPS related*/
-			//client_auth=CLIENT_AUTH_REQUIRE;
-			/* Build our SSL context*/
-			ctx = sSLHandler.initialize_ctx((char*)configurationData.key_file.c_str(),(char*)configurationData.sec_password.c_str(),
-					configurationData.ca_list);
-			sSLHandler.load_dh_params(ctx,(char*)configurationData.dh_file.c_str());
-
-			SSL_CTX_set_session_id_context(ctx,
-			  (const unsigned char*)&SSLHandler::s_server_session_id_context,
-			  sizeof SSLHandler::s_server_session_id_context);
-
-			/* Set our cipher list */
-			if(ciphers){
-			  SSL_CTX_set_cipher_list(ctx,ciphers);
-			}
-			/*if(configurationData.client_auth==2)
-				SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
-			else if(configurationData.client_auth==1)
-				SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);*/
-		}
-		dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+		void* dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
 		//logger << endl <<dlib << endl;
 		if(dlib==NULL)
 		{
@@ -993,8 +901,12 @@ int main(int argc, char* argv[])
 			exit(0);
 		}
 		else
+		{
 			logger.info("Library loaded successfully");
-		ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
+			dlclose(dlib);
+		}
+
+		void* ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
 		//logger << endl <<dlib << endl;
 		if(ddlib==NULL)
 		{
@@ -1003,7 +915,11 @@ int main(int argc, char* argv[])
 			exit(0);
 		}
 		else
+		{
 			logger.info("Dynamic Library loaded successfully");
+			dlclose(ddlib);
+		}
+
 		if(!isThreadprq)
 		{
 			pool = new ThreadPool(thrdpsiz,thrdpsiz+30,true);
@@ -1153,15 +1069,13 @@ int main(int argc, char* argv[])
 					fcntl(descriptor, F_SETFL, O_SYNC);
 					if(isThreadprq)
 					{
-						ServiceTask *task = new ServiceTask(descriptor,serverRootDirectory,&params,
-									isSSLEnabled, ctx, sSLHandler, configurationData, dlib, ddlib);
+						ServiceTask *task = new ServiceTask(descriptor,serverRootDirectory);
 						Thread pthread(&service, task);
 						pthread.execute();
 					}
 					else
 					{
-						ServiceTask *task = new ServiceTask(descriptor,serverRootDirectory,&params,
-								isSSLEnabled, ctx, sSLHandler, configurationData, dlib, ddlib);
+						ServiceTask *task = new ServiceTask(descriptor,serverRootDirectory);
 						task->setCleanUp(true);
 						pool->submit(task);
 					}

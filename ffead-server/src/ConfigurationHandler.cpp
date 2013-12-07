@@ -91,15 +91,15 @@ void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folde
 	pclose(pipe_fp);
 }
 
-ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string pubpath,
-		string respath,bool isSSLEnabled,FFEADContext* ffeadContext,ConfigurationData& configurationData)
+void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string serverRootDirectory,
+		string respath,FFEADContext* ffeadContext)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
-	configurationData.resourcePath = respath;
+	ConfigurationData::getInstance()->resourcePath = respath;
 	strVec all,afcd,appf,wspath,handoffVec;
 	string includeRef;
 	StringContext cntxt;
-	string libs,ilibs,isrcs,iobjs,ideps;
+	string libs,ilibs,isrcs,iobjs,ideps,ipdobjs;
 	Reflection ref;
 	vector<bool> stat;
 	strVec vecvp,pathvec;
@@ -110,30 +110,30 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 #ifdef INC_COMP
 	ComponentGen gen;
 #endif
-	if(isSSLEnabled)
+	if(SSLHandler::getInstance()->getIsSSL())
 	{
 		propMap sslsec = pread.getProperties(respath+"/security.prop");
 		if(sslsec.size()>0)
 		{
-			configurationData.key_file = sslsec["KEYFILE"];
-			configurationData.dh_file = sslsec["DHFILE"];
-			configurationData.ca_list = sslsec["CA_LIST"];
-			configurationData.rand_file = sslsec["RANDOM"];
-			configurationData.sec_password = sslsec["PASSWORD"];
+			ConfigurationData::getInstance()->key_file = serverRootDirectory + sslsec["KEYFILE"];
+			ConfigurationData::getInstance()->dh_file = serverRootDirectory + sslsec["DHFILE"];
+			ConfigurationData::getInstance()->ca_list = serverRootDirectory + sslsec["CA_LIST"];
+			ConfigurationData::getInstance()->rand_file = serverRootDirectory + sslsec["RANDOM"];
+			ConfigurationData::getInstance()->sec_password = sslsec["PASSWORD"];
 			string tempcl = sslsec["CLIENT_SEC_LEVEL"];
-			configurationData.srv_auth_prvd = sslsec["SRV_AUTH_PRVD"];
-			configurationData.srv_auth_mode = sslsec["SRV_AUTH_MODE"];
-			configurationData.srv_auth_file = sslsec["SRV_AUTH_FILE"];
+			ConfigurationData::getInstance()->srv_auth_prvd = sslsec["SRV_AUTH_PRVD"];
+			ConfigurationData::getInstance()->srv_auth_mode = sslsec["SRV_AUTH_MODE"];
+			ConfigurationData::getInstance()->srv_auth_file = serverRootDirectory + sslsec["SRV_AUTH_FILE"];
 			if(tempcl!="")
 			{
 				try
 				{
-					configurationData.client_auth = CastUtil::lexical_cast<int>(tempcl);
+					ConfigurationData::getInstance()->client_auth = CastUtil::lexical_cast<int>(tempcl);
 				}
 				catch(...)
 				{
 					logger << "\nInvalid client auth level defined" << flush;
-					configurationData.client_auth = 1;
+					ConfigurationData::getInstance()->client_auth = 1;
 				}
 			}
 		}
@@ -157,7 +157,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		string name = webdirs1.at(var);
 		StringUtil::replaceAll(name,"/","");
 		rundyncontent += "cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/"+name+"/public/\n";
-		configurationData.cntMap[name] = "true";
+		ConfigurationData::getInstance()->cntMap[name] = "true";
 		vector<string> adcps;
 		listi(dcppath,".dcp",true,adcps);
 		for (int var = 0; var < (int)adcps.size(); ++var) {
@@ -214,15 +214,15 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								if(cntrls.at(cntn).getAttribute("url").find("*")!=string::npos)
 								{
 									if(url=="*.*")
-										configurationData.urlpattMap[name+url] = clas;
+										ConfigurationData::getInstance()->urlpattMap[name+url] = clas;
 									else
 									{
 										url = url.substr(url.find("*")+1);
-										configurationData.urlMap[name+url] = clas;
+										ConfigurationData::getInstance()->urlMap[name+url] = clas;
 									}
 								}
 								else if(clas!="")
-									configurationData.urlMap[name+url] = clas;
+									ConfigurationData::getInstance()->urlMap[name+url] = clas;
 								if(clas!="")
 								{
 									Bean bean("controller_"+name+clas,"",clas,scope,false,name);
@@ -239,16 +239,16 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								if(from.find("*")!=string::npos && to!="")
 								{
 									if(from=="*.*")
-										configurationData.mappattMap[name+from] = to;
+										ConfigurationData::getInstance()->mappattMap[name+from] = to;
 									else
 									{
 										from = from.substr(from.find("*")+1);
-										configurationData.mapMap[name+from] = to;
+										ConfigurationData::getInstance()->mapMap[name+from] = to;
 									}
 								}
 								else if(to!="")
 								{
-									configurationData.mapMap[name+from] = to;
+									ConfigurationData::getInstance()->mapMap[name+from] = to;
 								}
 								logger << ("Adding Mapping for " + (name + from) + " :: " + to) << endl;
 							}
@@ -270,15 +270,15 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								if(url.find("*")!=string::npos)
 								{
 									if(url=="*.*")
-										configurationData.autpattMap[name+url] = provider;
+										ConfigurationData::getInstance()->autpattMap[name+url] = provider;
 									else
 									{
 										url = url.substr(url.find("*")+1);
-										configurationData.autMap[name+url] = provider;
+										ConfigurationData::getInstance()->autMap[name+url] = provider;
 									}
 								}
 								else if(provider!="")
-									configurationData.autMap[name+url] = provider;
+									ConfigurationData::getInstance()->autMap[name+url] = provider;
 								if(provider!="" && provider.find("class:")!=string::npos)
 								{
 									string clas = provider.substr(provider.find(":")+1);
@@ -308,12 +308,12 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								{
 									if(url=="*.*")
 									{
-										configurationData.filterMap[name+url+type].push_back(clas);
+										ConfigurationData::getInstance()->filterMap[name+url+type].push_back(clas);
 									}
 									else
 									{
 										url = url.substr(url.find("*")+1);
-										configurationData.filterMap[name+url+type].push_back(clas);
+										ConfigurationData::getInstance()->filterMap[name+url+type].push_back(clas);
 									}
 								}
 								if(clas!="")
@@ -334,7 +334,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						if(tmplts.at(tmpn).getTagName()=="template")
 						{
 							string clas = tmplts.at(tmpn).getAttribute("class");
-							configurationData.tmplMap[name+tmplts.at(tmpn).getAttribute("file")] = clas;
+							ConfigurationData::getInstance()->tmplMap[name+tmplts.at(tmpn).getAttribute("file")] = clas;
 							tpes[defpath+tmplts.at(tmpn).getAttribute("file")] = name;
 							//tpes.push_back(defpath+tmplts.at(tmpn).getAttribute("file"));
 							string scope = tmplts.at(tmpn).getAttribute("scope");
@@ -356,7 +356,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						if(dvs.at(dn).getTagName()=="dview")
 						{
 							string clas = dvs.at(dn).getAttribute("class");
-							configurationData.vwMap[name+dvs.at(dn).getAttribute("path")] = clas;
+							ConfigurationData::getInstance()->vwMap[name+dvs.at(dn).getAttribute("path")] = clas;
 							string scope = dvs.at(dn).getAttribute("scope");
 							if(clas!="")
 							{
@@ -383,7 +383,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								else if(url.at(0)!='/')
 									url = "/" + url;
 								string clas = ajintfs.at(dn).getAttribute("class");
-								configurationData.ajaxIntfMap[name+url] = clas;
+								ConfigurationData::getInstance()->ajaxIntfMap[name+url] = clas;
 								pathvec.push_back(name);
 								vecvp.push_back(usrincludes);
 								stat.push_back(false);
@@ -507,7 +507,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 													else
 														urlmpp = name+restfunction.baseUrl;
 													StringUtil::replaceFirst(urlmpp,"//","/");
-													configurationData.rstCntMap[urlmpp] = restfunction;
+													ConfigurationData::getInstance()->rstCntMap[urlmpp] = restfunction;
 												}
 												else
 												{
@@ -516,7 +516,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 													else
 														urlmpp = name+restfunction.baseUrl;
 													StringUtil::replaceFirst(urlmpp,"//","/");
-													configurationData.rstCntMap[urlmpp] = restfunction;
+													ConfigurationData::getInstance()->rstCntMap[urlmpp] = restfunction;
 												}
 												if(clas!="")
 												{
@@ -533,7 +533,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 													else
 														urlmpp = name+restfunction.baseUrl;
 													StringUtil::replaceFirst(urlmpp,"//","/");
-													configurationData.rstCntMap[urlmpp] = restfunction;
+													ConfigurationData::getInstance()->rstCntMap[urlmpp] = restfunction;
 												}
 												else
 												{
@@ -542,7 +542,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 													else
 														urlmpp = name+restfunction.baseUrl;
 													StringUtil::replaceFirst(urlmpp,"//","/");
-													configurationData.rstCntMap[urlmpp] = restfunction;
+													ConfigurationData::getInstance()->rstCntMap[urlmpp] = restfunction;
 												}
 												if(clas!="")
 												{
@@ -581,7 +581,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 								securityObject.sessTimeout = 3600;
 								logger << ("Security: Invalid session timeout value defined, defaulting to 1hour/3600sec") << endl;
 							}
-							configurationData.securityObjectMap[name] = securityObject;
+							ConfigurationData::getInstance()->securityObjectMap[name] = securityObject;
 							if(provider!="" && provider.find("class:")!=string::npos)
 							{
 								string clas = provider.substr(provider.find(":")+1);
@@ -592,27 +592,27 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						}
 						else if(cntrls.at(cntn).getTagName()=="secure")
 						{
-							if(configurationData.securityObjectMap.find(name)!=configurationData.securityObjectMap.end())
+							if(ConfigurationData::getInstance()->securityObjectMap.find(name)!=ConfigurationData::getInstance()->securityObjectMap.end())
 							{
-								Security securityObject = configurationData.securityObjectMap[name];
+								Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name];
 								string path = cntrls.at(cntn).getAttribute("path");
 								string role = cntrls.at(cntn).getAttribute("role");
 								SecureAspect secureAspect;
 								secureAspect.path = path;
 								secureAspect.role = role;
 								securityObject.secures.push_back(secureAspect);
-								configurationData.securityObjectMap[name] = securityObject;
+								ConfigurationData::getInstance()->securityObjectMap[name] = securityObject;
 								logger << ("Security: Adding Secure Path => " + path  + " , role => " + role) << endl;
 							}
 						}
 						else if(cntrls.at(cntn).getTagName()=="welcome")
 						{
 							string welcomeFile = cntrls.at(cntn).getAttribute("file");
-							if(configurationData.securityObjectMap.find(name)!=configurationData.securityObjectMap.end())
+							if(ConfigurationData::getInstance()->securityObjectMap.find(name)!=ConfigurationData::getInstance()->securityObjectMap.end())
 							{
-								Security securityObject = configurationData.securityObjectMap[name];
+								Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name];
 								securityObject.welocmeFile = welcomeFile;
-								configurationData.securityObjectMap[name] = securityObject;
+								ConfigurationData::getInstance()->securityObjectMap[name] = securityObject;
 								logger << ("Security: Adding Welcome file => " + welcomeFile) << endl;
 							}
 						}
@@ -628,8 +628,8 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 							string app = cntrls.at(cntn).getAttribute("app");
 							string def = cntrls.at(cntn).getAttribute("default");
 							string ext = cntrls.at(cntn).getAttribute("ext");
-							configurationData.handoffs[app] = def;
-							configurationData.handoffs[app+"extension"] = ext;
+							ConfigurationData::getInstance()->handoffs[app] = def;
+							ConfigurationData::getInstance()->handoffs[app+"extension"] = ext;
 							handoffVec.push_back("-l"+ app+" ");
 							logger << ("Adding Handoff for app => " + app  + " , ext => " + ext  + " , default url => " + def) << endl;
 						}
@@ -642,39 +642,39 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 					{
 						if(cntrls.at(cntn).getTagName()=="allow-origins")
 						{
-							configurationData.corsConfig.allwdOrigins = cntrls.at(cntn).getText();
+							ConfigurationData::getInstance()->corsConfig.allwdOrigins = cntrls.at(cntn).getText();
 						}
 						else if(cntrls.at(cntn).getTagName()=="allow-methods")
 						{
-							configurationData.corsConfig.allwdMethods = cntrls.at(cntn).getText();
+							ConfigurationData::getInstance()->corsConfig.allwdMethods = cntrls.at(cntn).getText();
 						}
 						else if(cntrls.at(cntn).getTagName()=="allow-headers")
 						{
-							configurationData.corsConfig.allwdHeaders = cntrls.at(cntn).getText();
+							ConfigurationData::getInstance()->corsConfig.allwdHeaders = cntrls.at(cntn).getText();
 						}
 						else if(cntrls.at(cntn).getTagName()=="allow-credentials")
 						{
 							try {
-								configurationData.corsConfig.allwdCredentials = CastUtil::lexical_cast<bool>(cntrls.at(cntn).getText());
+								ConfigurationData::getInstance()->corsConfig.allwdCredentials = CastUtil::lexical_cast<bool>(cntrls.at(cntn).getText());
 							} catch(...) {}
 						}
 						else if(cntrls.at(cntn).getTagName()=="expose-headers")
 						{
-							configurationData.corsConfig.exposedHeaders = cntrls.at(cntn).getText();
+							ConfigurationData::getInstance()->corsConfig.exposedHeaders = cntrls.at(cntn).getText();
 						}
 						else if(cntrls.at(cntn).getTagName()=="max-age")
 						{
 							try {
-								configurationData.corsConfig.maxAge = CastUtil::lexical_cast<long>(cntrls.at(cntn).getText());
+								ConfigurationData::getInstance()->corsConfig.maxAge = CastUtil::lexical_cast<long>(cntrls.at(cntn).getText());
 							} catch(...) {}
 						}
 					}
-					logger << ("CORS Configuartion allow-origins => " + configurationData.corsConfig.allwdOrigins
-							+ " , allow-methods => " + configurationData.corsConfig.allwdMethods
-							+ " , allow-headers => " + configurationData.corsConfig.allwdHeaders
-							+ " , allow-credentials => " + CastUtil::lexical_cast<string>(configurationData.corsConfig.allwdCredentials)
-							+ " , expose-headers => " + configurationData.corsConfig.exposedHeaders
-							+ " , max-age => " + CastUtil::lexical_cast<string>(configurationData.corsConfig.maxAge)) << endl;
+					logger << ("CORS Configuartion allow-origins => " + ConfigurationData::getInstance()->corsConfig.allwdOrigins
+							+ " , allow-methods => " + ConfigurationData::getInstance()->corsConfig.allwdMethods
+							+ " , allow-headers => " + ConfigurationData::getInstance()->corsConfig.allwdHeaders
+							+ " , allow-credentials => " + CastUtil::lexical_cast<string>(ConfigurationData::getInstance()->corsConfig.allwdCredentials)
+							+ " , expose-headers => " + ConfigurationData::getInstance()->corsConfig.exposedHeaders
+							+ " , max-age => " + CastUtil::lexical_cast<string>(ConfigurationData::getInstance()->corsConfig.maxAge)) << endl;
 				}
 #ifdef INC_JOBS
 				else if(eles.at(apps).getTagName()=="job-procs")
@@ -687,7 +687,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 		}
 		logger << "done reading application.xml " << endl;
 
-#ifdef INC_APPFLOW
+#ifdef INC_CIB
 		configureCibernate(name, defpath+"config/cibernate.xml");
 #endif
 
@@ -702,11 +702,11 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 				{
 					string fvw = eles.at(apps).getAttribute("htm");
 					StringUtil::replaceFirst(fvw,".html",".fview");
-					configurationData.fviewmap[eles.at(apps).getAttribute("htm")] = eles.at(apps).getAttribute("class");
+					ConfigurationData::getInstance()->fviewmap[eles.at(apps).getAttribute("htm")] = eles.at(apps).getAttribute("class");
 					pathvec.push_back(name);
 					vecvp.push_back(usrincludes);
 					stat.push_back(false);
-					configurationData.ajaxIntfMap[name+"/"+fvw] = eles.at(apps).getAttribute("class");
+					ConfigurationData::getInstance()->ajaxIntfMap[name+"/"+fvw] = eles.at(apps).getAttribute("class");
 					afcd.push_back(eles.at(apps).getAttribute("class"));
 					ElementList elese = eles.at(apps).getChildElements();
 					string nsfns = "\nvar _fview_namespace = {";
@@ -726,7 +726,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 						}
 						else if(elese.at(appse).getTagName()=="form")
 						{
-							configurationData.formMap[elese.at(appse).getAttribute("name")] = elese.at(appse);
+							ConfigurationData::getInstance()->formMap[elese.at(appse).getAttribute("name")] = elese.at(appse);
 							string clas = elese.at(appse).getAttribute("controller");
 							string scope = elese.at(appse).getAttribute("scope");
 							if(clas!="")
@@ -785,7 +785,7 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 			isrcs += "./"+file+".cpp \\\n"+"./"+file+"_Remote.cpp \\\n";
 			iobjs += "./"+file+".o \\\n"+"./"+file+"_Remote.o \\\n";
 			ideps += "./"+file+".d \\\n"+"./"+file+"_Remote.d \\\n";
-			configurationData.cmpnames.push_back(file);
+			ConfigurationData::getInstance()->cmpnames.push_back(file);
 		}
 		catch(const char* ex)
 		{
@@ -810,25 +810,26 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	AfcUtil::writeTofile(rtdcfpath+"objects.mk",ret,true);
 	cntxt.clear();
 	cntxt["USER_DEFINED_INC"] = ilibs;
-	cntxt["RUNTIME_COMP_SRCS"] = isrcs;
-	cntxt["RUNTIME_COMP_OBJS"] = iobjs;
-	cntxt["RUNTIME_COMP_DEPS"] = ideps;
-	ret = TemplateEngine::evaluate(rtdcfpath+"subdir.mk.template",cntxt);
-	AfcUtil::writeTofile(rtdcfpath+"subdir.mk",ret,true);
+	//cntxt["RUNTIME_COMP_SRCS"] = isrcs;
+	//cntxt["RUNTIME_COMP_OBJS"] = iobjs;
+	//cntxt["RUNTIME_COMP_DEPS"] = ideps;
+	ipdobjs = "";
 #ifdef INC_DCP
-	configurationData.dcpsss = dcps;
+	ConfigurationData::getInstance()->dcpsss = dcps;
 	logger << "started generating dcp code" <<endl;
 	ret = DCPGenerator::generateDCPAll(dcps);
 	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
 	logger << "done generating dcp code" <<endl;
+	ipdobjs += "./DCPInterface.o \\\n";
 #endif
-	configurationData.tpes = tpes;
+	ConfigurationData::getInstance()->tpes = tpes;
 #ifdef INC_TPE
 	logger << "started generating template code" <<endl;
 	ret = TemplateGenerator::generateTempCdAll(tpes);
 	//logger << ret << endl;
 	AfcUtil::writeTofile(rtdcfpath+"TemplateInterface.cpp",ret,true);
 	logger << "done generating template code" <<endl;
+	ipdobjs += "./TemplateInterface.o \\\n";
 #endif
 	string infjs;
 	logger << endl<< "started generating ajax code" <<endl;
@@ -844,19 +845,31 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 #ifdef INC_APPFLOW
 	ApplicationUtil apputil;
 	logger << "started generating application code" <<endl;
-	ret = apputil.buildAllApplications(appf,webdirs1,configurationData.appMap);
+	ret = apputil.buildAllApplications(appf,webdirs1,ConfigurationData::getInstance()->appMap);
 	AfcUtil::writeTofile(rtdcfpath+"ApplicationInterface.cpp",ret,true);
 	logger <<  "done generating application code" <<endl;
+	iobjs += "./ApplicationInterface.o \\\n";
 #endif
 #ifdef INC_WEBSVC
 	WsUtil wsu;
 	logger <<  "started generating web-service code" <<endl;
-	ret = wsu.generateAllWSDL(webdirs1,respath,configurationData.wsdlmap,configurationData.ip_address,ref,clsstrucMaps);
+	ret = wsu.generateAllWSDL(webdirs1,respath,ConfigurationData::getInstance()->wsdlmap,ConfigurationData::getInstance()->ip_address,ref,clsstrucMaps);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
 	logger <<  "done generating web-service code" <<endl;
+	iobjs += "./WsInterface.o \\\n";
 #endif
+
+	cntxt["RUNTIME_COMP_POBJS"] = iobjs;
+	cntxt["RUNTIME_COMP_PDOBJS"] = ipdobjs;
+
+	ret = TemplateEngine::evaluate(rtdcfpath+"subdir.mk.template",cntxt);
+	AfcUtil::writeTofile(rtdcfpath+"subdir.mk",ret,true);
+
 	cntxt.clear();
-	cntxt["TARGET_LIB"] = "all";
+	if(ipdobjs=="")
+		cntxt["TARGET_LIB"] = "libinter";
+	else
+		cntxt["TARGET_LIB"] = "all";
 	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
 	string cont = TemplateEngine::evaluate(respath+"/rundyn_template.sh", cntxt);
 	AfcUtil::writeTofile(respath+"/rundyn.sh", cont, true);
@@ -866,12 +879,10 @@ ConfigurationData ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,st
 	cont = TemplateEngine::evaluate(respath+"/rundyn_template.sh", cntxt);
 	AfcUtil::writeTofile(respath+"/rundyn_dinter.sh", cont, true);
 
-	configurationData.ffeadContext = ffeadContext;
-
-	return configurationData;
+	ConfigurationData::getInstance()->ffeadContext = ffeadContext;
 }
 
-#ifdef INC_APPFLOW
+#ifdef INC_CIB
 void ConfigurationHandler::configureCibernate(string name, string configFile)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");

@@ -22,8 +22,58 @@
 
 #include "SSLHandler.h"
 
+SSLHandler* SSLHandler::instance = NULL;
+
 SSLHandler::SSLHandler() {
 	logger = LoggerFactory::getLogger("SSLHandler");
+}
+
+void SSLHandler::initInstance() {
+	getInstance()->init();
+}
+
+void SSLHandler::setIsSSL(bool isSSLEnabled) {
+	getInstance()->isSSLEnabled = isSSLEnabled;
+}
+
+SSLHandler* SSLHandler::getInstance() {
+	if(instance==NULL) {
+		instance = new SSLHandler;
+	}
+	return instance;
+}
+
+bool SSLHandler::getIsSSL() const {
+	return isSSLEnabled;
+}
+
+SSL_CTX* SSLHandler::getCtx() const {
+	return ctx;
+}
+
+void SSLHandler::init() {
+	if(isSSLEnabled)
+	{
+		/*HTTPS related*/
+		//client_auth=CLIENT_AUTH_REQUIRE;
+		/* Build our SSL context*/
+		ctx = initialize_ctx((char*)ConfigurationData::getInstance()->key_file.c_str(),
+				(char*)ConfigurationData::getInstance()->sec_password.c_str(), ConfigurationData::getInstance()->ca_list);
+		load_dh_params(ctx,(char*)ConfigurationData::getInstance()->dh_file.c_str());
+
+		SSL_CTX_set_session_id_context(ctx,
+		  (const unsigned char*)&s_server_session_id_context,
+		  sizeof s_server_session_id_context);
+
+		/* Set our cipher list */
+		if(ciphers){
+		  SSL_CTX_set_cipher_list(ctx,ciphers);
+		}
+		/*if(ConfigurationData::getInstance()->client_auth==2)
+			SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
+		else if(ConfigurationData::getInstance()->client_auth==1)
+			SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);*/
+	}
 }
 
 SSLHandler::~SSLHandler() {
@@ -31,11 +81,11 @@ SSLHandler::~SSLHandler() {
 }
 
 char* SSLHandler::pass = NULL;
+char* SSLHandler::ciphers = 0;
 BIO* SSLHandler::bio_err = NULL;
 
 int SSLHandler::s_server_session_id_context = 1;
 int SSLHandler::s_server_auth_session_id_context = 2;
-Logger SSLHandler::logger;
 
 /*The password code is not thread safe*/
 int SSLHandler::password_cb(char *buf,int num, int rwflag,void *userdata)

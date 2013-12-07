@@ -162,6 +162,9 @@ public:
 };
 
 class SerializeBase {
+protected:
+	bool dlibinstantiated;
+	void* dlib;
 public:
 	template <class T> static string serializeset(set<T> t, string appName, SerializeBase* base)
 	{

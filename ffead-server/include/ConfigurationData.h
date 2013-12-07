@@ -110,6 +110,8 @@ class JobConfig
 };
 
 class ConfigurationData {
+	ConfigurationData();
+	static ConfigurationData* instance;
 public:
 	string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_auth_mode,srv_auth_file,ip_address,resourcePath;
 	int client_auth;
@@ -124,7 +126,7 @@ public:
 	bool sessatserv, sessservdistocache;
 	FFEADContext* ffeadContext;
 	CorsConfig corsConfig;
-	ConfigurationData();
+	static ConfigurationData* getInstance();
 	virtual ~ConfigurationData();
 };
 
