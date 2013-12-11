@@ -146,13 +146,13 @@ void AOPEngine::execute(string fileName)
 						signature += (aspect.getReturnType()+" "+aspect.getMethodName()+"(");
 				}
 				string prior,later,temp,argus,arginit,argsig;
-				unsigned int f = content.find(signature);
+				size_t f = content.find(signature);
 				if(f!=string::npos)
 				{
 					prior = content.substr(0,f);
 					later = content.substr(f);
-					unsigned s = later.find_first_of("(")+1;
-					unsigned e = later.find_first_of(")");
+					size_t s = later.find_first_of("(")+1;
+					size_t e = later.find_first_of(")");
 					argus = later.substr(s,e-s);
 					args tr,tc;
 					StringUtil::split(tr, argus, (","));

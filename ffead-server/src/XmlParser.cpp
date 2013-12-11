@@ -175,7 +175,7 @@ void XmlParser::readXML(string xml,string parent,Element *par)
     else
     	ta = tag;
     int initcheck = xml.find_first_of("<");
-    unsigned int someTag = (xml.substr(initcheck+1)).find("<");
+    size_t someTag = (xml.substr(initcheck+1)).find("<");
     int pndTag=0,endTag=0;
     if(xml.find("</"+ta)!=string::npos)
     	pndTag = xml.find("</"+ta);

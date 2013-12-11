@@ -186,7 +186,7 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 	StringUtil::trim(data);
 	if(data=="")return;
 	string nmspc;
-	unsigned int nmspcst = RegexUtil::find(data, "[ \t]*using[ \t]*namespace[ \t]*[^;]+;");
+	int nmspcst = RegexUtil::find(data, "[ \t]*using[ \t]*namespace[ \t]*[^;]+;");
 	if(nmspcst!=-1)
 	{
 		string temp = data.substr(nmspcst);
@@ -1000,15 +1000,15 @@ string Reflection::generateClassDefinition(map<string, ClassStructure> allclsmap
 							string argpmtemp = argp.at(j);
 							StringUtil::trim(argpmtemp);
 							string typ;
-							unsigned int spindx = argpmtemp.find_last_of(" ");
-							unsigned int ptindx = argpmtemp.find_last_of("*");
-							unsigned int rfindx = argpmtemp.find_last_of("&");
-							unsigned int teindx = argpmtemp.find_last_of(">");
+							size_t spindx = argpmtemp.find_last_of(" ");
+							size_t ptindx = argpmtemp.find_last_of("*");
+							size_t rfindx = argpmtemp.find_last_of("&");
+							size_t teindx = argpmtemp.find_last_of(">");
 							if(ptindx==argpmtemp.length()-1 ||
 									(ptindx!=string::npos && teindx!=string::npos && ptindx>teindx) ||
 									(teindx==string::npos && ptindx!=string::npos && spindx!=string::npos && ptindx>spindx))
 							{	typ = "*";
-								StringUtil::replaceLast(argpmtemp,"*","");
+								argpmtemp = argpmtemp.substr(0, ptindex);
 							}
 							else if(rfindx==argpmtemp.length()-1 ||
 									(rfindx!=string::npos && teindx!=string::npos && rfindx>teindx) ||
@@ -1099,8 +1099,8 @@ string Reflection::generateClassDefinition(map<string, ClassStructure> allclsmap
 					{
 						vector<string> argtn;
 						string type12 = "";
-						unsigned int ptindx = argpm.at(j).find_last_of("*");
-						unsigned int rfindx = argpm.at(j).find_last_of("&");
+						size_t ptindx = argpm.at(j).find_last_of("*");
+						size_t rfindx = argpm.at(j).find_last_of("&");
 						if(ptindx==argpm.at(j).length()-1)
 							type12 = "*";
 						else if(rfindx==argpm.at(j).length()-1)
