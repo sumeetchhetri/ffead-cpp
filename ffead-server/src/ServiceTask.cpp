@@ -60,7 +60,10 @@ map<string,string> ServiceTask::getSessionDataFromFile(string sessionId)
 	ifstream ifs(filen.c_str());
 	string tem,all;
 	while(getline(ifs,tem))
+	{
 		all.append(tem+"\n");
+	}
+	ifs.close();
 	strVec results;
 	StringUtil::split(results, all, ("; "));
 	for(int j=0;j<(int)results.size()-1;j++)
@@ -841,6 +844,8 @@ void ServiceTask::run()
 				}
 			}
 
+			logger << ("Done with request initialization/session setup") << endl;
+
 			void* dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
 			if(dlib == NULL)
 			{
@@ -853,6 +858,8 @@ void ServiceTask::run()
 				cerr << dlerror() << endl;
 				throw "Cannot load application shared library";
 			}
+
+			logger << ("Done with loading libraries") << endl;
 
 			//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
 #ifdef INC_APPFLOW
@@ -884,6 +891,8 @@ void ServiceTask::run()
 			}
 #endif
 
+			logger << ("Done with handling appflow") << endl;
+
 			string ext = getFileExtension(req->getUrl());
 			vector<unsigned char> test;
 			string content;
@@ -898,6 +907,8 @@ void ServiceTask::run()
 				isContrl = true;
 			}
 
+			logger << ("Done with handling cors") << endl;
+
 			if(!isContrl)
 			{
 				isContrl = securityHandler.handle(req, res, sessionTimeoutVar);
@@ -906,6 +917,8 @@ void ServiceTask::run()
 					logger << ("Request handled by SecurityHandler") << endl;
 				}
 			}
+
+			logger << ("Done with handling security") << endl;
 
 			ext = getFileExtension(req->getUrl());
 
@@ -920,6 +933,8 @@ void ServiceTask::run()
 				}
 			}
 
+			logger << ("Done with handling filters") << endl;
+
 			ext = getFileExtension(req->getUrl());
 
 			if(!isContrl)
@@ -930,6 +945,8 @@ void ServiceTask::run()
 					logger << ("Request handled by AuthHandler") << endl;
 				}
 			}
+
+			logger << ("Done with handling auth") << endl;
 
 			ext = getFileExtension(req->getUrl());
 
@@ -947,6 +964,8 @@ void ServiceTask::run()
 				}
 			}
 
+			logger << ("Done with handling controllers") << endl;
+
 			ext = getFileExtension(req->getUrl());
 
 			/*After going through the controller the response might be blank, just set the HTTP version*/
@@ -955,6 +974,8 @@ void ServiceTask::run()
 			//logger << req->toString() << endl;
 			if(req->getMethod()!="TRACE")
 			{
+				logger << ("Started processing request - phase II") << endl;
+
 				string wsUrl = "http://" + ConfigurationData::getInstance()->ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
 				if(isContrl)
 				{
@@ -987,6 +1008,9 @@ void ServiceTask::run()
 #ifdef INC_SCRH
 					cntrlit = scriptHandler.handle(req, res, ConfigurationData::getInstance()->handoffs, ext, ConfigurationData::getInstance()->props);
 #endif
+
+					logger << ("Done handling scripts") << endl;
+
 					if(cntrlit)
 					{
 						logger << ("Request handled by ScriptHandler") << endl;
@@ -998,6 +1022,7 @@ void ServiceTask::run()
 						{
 							logger << ("Request handled by ExtHandler") << endl;
 						}
+						logger << ("Done handling extra flows") << endl;
 					}
 					if(!cntrlit && ext==".fview")
 					{
@@ -1043,6 +1068,8 @@ void ServiceTask::run()
 				res.addHeaderValue(HttpResponse::ContentEncoding, cntEnc);
 			}
 
+			logger << ("Done setting compression headers") << endl;
+
 			Date cdate(true);
 			DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
 			res.addHeaderValue(HttpResponse::Date, df.format(cdate));
@@ -1053,6 +1080,8 @@ void ServiceTask::run()
 			//if(req->getConnection()!="")
 			//	res.setConnection("close");
 			storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->sessatserv);
+
+			logger << ("Done storing session attributes") << endl;
 
 			//An errored request/response phase will close the connection
 			if(StringUtil::toLowerCopy(req->getHeader(HttpRequest::Connection))!="keep-alive" || CastUtil::lexical_cast<int>(res.getStatusCode())>307
@@ -1068,6 +1097,9 @@ void ServiceTask::run()
 
 			//Head should behave exactly as Get but there should be no entity body
 			h1 = res.generateResponse(req->getMethod(), req);
+
+			logger << ("Done generating response content") << endl;
+
 			/*if(req->getMethod()=="HEAD")
 			{
 				h1 = res.generateHeadResponse();

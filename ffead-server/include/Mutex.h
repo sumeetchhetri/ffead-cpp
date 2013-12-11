@@ -33,4 +33,16 @@ public:
 	void unlock();
 };
 
+class ConditionMutex {
+	pthread_cond_t cond;
+	pthread_mutex_t mut;
+public:
+	ConditionMutex();
+	virtual ~ConditionMutex();
+	void lock();
+	void unlock();
+	void wait();
+	void interrupt();
+};
+
 #endif /* MUTEX_H_ */

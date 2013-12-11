@@ -74,8 +74,9 @@ string ApplicationUtil::buildAllApplications(vector<string> files,vector<string>
 							meth += "string user = session.getAttribute(\"USER\");\n";
 							meth += "string pass = session.getAttribute(\"PASS\");\n";
 							meth += "ifstream f(\""+fileName+"\");\n";
-							meth += "if(f.is_open())\n{\nstring temp;\nwhile(getline(f,temp,'\\n'))\n{";
-							meth += "if(temp==(user+\" \"+pass)){f.close();path = "+eles.at(var).getAttribute("id")+";break;}\n}}\nif(path==\"\")\npath=\"FAILED\";\n}";
+							meth += "if(f.is_open())\n{\nstring temp;\nwhile(getline(f,temp,'\\n'))\n{\n";
+							meth += "if(temp==(user+\" \"+pass))\n{\nf.close();path = "+eles.at(var).getAttribute("id");
+							meth += ";break;}\n}\nf.close();\n}\nif(path==\"\")\npath=\"FAILED\";\n}\n";
 						}
 					}
 					else if(eles.at(var).getAttribute("onsuccess")!="" && eles.at(var).getAttribute("onfail")!="")

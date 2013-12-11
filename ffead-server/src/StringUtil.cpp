@@ -101,7 +101,8 @@ void StringUtil::eraseAll(string& str, const string& ths)
 
 void StringUtil::capitalized(string& str)
 {
-	str[0] = toupper(str[0]);
+	if(str.length()>0)
+		str[0] = toupper(str[0]);
 }
 
 string StringUtil::capitalizedCopy(const string& str)
@@ -222,20 +223,25 @@ void StringUtil::split(vector<string>& output, const string& input, vector<strin
 void StringUtil::trim(string& str)
 {
 	string c = " ";
-	if(str=="")return;
 	size_t p2 = str.find_last_not_of(c);
-	while(str[p2]==' ' || str[p2]=='\t' || str[p2]=='\n' || str[p2]=='\r')
+	if(p2 != string::npos)
 	{
-		str = str.substr(0, p2);
-		p2 = str.find_last_not_of(str[p2]);
+		while(str[p2]==' ' || str[p2]=='\t' || str[p2]=='\n' || str[p2]=='\r')
+		{
+			str = str.substr(0, p2);
+			p2 = str.find_last_not_of(str[p2]);
+		}
 	}
 	if (p2 == string::npos)
 		p2 = str.length();
 	size_t p1 = str.find_first_not_of(c);
-	while(str[p1]==' ' || str[p1]=='\t' || str[p1]=='\n' || str[p1]=='\r')
+	if(p1 != string::npos)
 	{
-		str = str.substr(p1);
-		p1 = str.find_first_not_of(str[p1]);
+		while(str[p1]==' ' || str[p1]=='\t' || str[p1]=='\n' || str[p1]=='\r')
+		{
+			str = str.substr(p1);
+			p1 = str.find_first_not_of(str[p1]);
+		}
 	}
 	if (p1 == string::npos)
 		p1 = 0;

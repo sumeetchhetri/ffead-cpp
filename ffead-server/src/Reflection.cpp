@@ -187,7 +187,7 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 	if(data=="")return;
 	string nmspc;
 	unsigned int nmspcst = RegexUtil::find(data, "[ \t]*using[ \t]*namespace[ \t]*[^;]+;");
-	if(nmspcst!=string::npos)
+	if(nmspcst!=-1)
 	{
 		string temp = data.substr(nmspcst);
 		nmspcst += temp.find(" namespace");

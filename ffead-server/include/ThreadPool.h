@@ -42,7 +42,7 @@ class ThreadPool {
 	void submitInternal(Task *task);
 	bool runFlag, complete, pollerStarted;
 	void initializeThreads();
-	Mutex *m_mutex;
+	ConditionMutex *m_mutex;
 	bool joinComplete;
 	void initPointers();
 public:

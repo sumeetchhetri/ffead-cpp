@@ -144,7 +144,7 @@ public:
 	RMap getQueryParams() const;
 	string getQueryParam(string key);
 	RMap getAllParams();
-    bool hasCookie() const;
+    bool hasCookie();
     map<int,string> getAuthOrderinfo() const;
 	map<int,string> getReqOrderinfo() const;
 	map<string,string> getCookieInfo() const;
