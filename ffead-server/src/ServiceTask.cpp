@@ -507,10 +507,24 @@ void ServiceTask::run()
 
 		int r = SSL_accept(ssl);
 		int bser = SSL_get_error(ssl,r);
-		if(r<=0)
+		switch(bser)
 		{
-			SSLHandler::getInstance()->error_occurred((char*)"SSL accept error",fd,ssl);
-			return;
+			case SSL_ERROR_NONE:
+			{
+				break;
+			}
+			case SSL_ERROR_ZERO_RETURN:
+			{
+				logger << "SSL socket closed" << endl;
+				closeSocket(ssl, io, fd);
+				return;
+			}
+			default:
+			{
+				logger << "SSL accept error" << endl;
+				SSLHandler::getInstance()->error_occurred((char*)"SSL accept error",fd,ssl);
+				return;
+			}
 		}
 	}
 	else

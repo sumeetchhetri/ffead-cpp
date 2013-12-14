@@ -42,6 +42,14 @@ void DLogger::init()
 	}
 }
 
+void DLogger::clear()
+{
+	if(m_pInstance!=NULL)
+	{
+		delete m_pInstance;
+	}
+}
+
 void DLogger::init(string file)
 {
 	if(m_pInstance==NULL)

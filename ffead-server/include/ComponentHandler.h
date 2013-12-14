@@ -47,7 +47,8 @@ class ComponentHandlerException: public exception
 	private:
 		string message;
 };
-class ComponentHandler{
+class ComponentHandler {
+	static ComponentHandler* instance;
 	Logger logger;
 	static void* service(void* arg);
 	Server server;

@@ -22,13 +22,25 @@
 
 #include "LoggerFactory.h"
 
-map<string, LoggerConfig> LoggerFactory::configs;
-map<string, LoggerConfig> LoggerFactory::dupLogNames;
+map<string, LoggerConfig*> LoggerFactory::configs;
+map<string, string> LoggerFactory::dupLogNames;
 
 LoggerFactory::LoggerFactory() {
 }
 
 LoggerFactory::~LoggerFactory() {
+}
+
+void LoggerFactory::clear() {
+	map<string, LoggerConfig*>::iterator it;
+	for(it=configs.begin();it!=configs.end();++it) {
+		cout << ("Clearing logger config for " + it->second->name) << endl;
+		if(it->second->mode=="FILE" && it->second->file!="" && it->second->out!=NULL) {
+			delete it->second->out;
+		}
+		delete it->second;
+	}
+	cout << ("Destructed LoggerFactory") << endl;
 }
 
 void LoggerFactory::init(string configFile, string serverRootDirectory) {
@@ -115,14 +127,11 @@ void LoggerFactory::init(string configFile, string serverRootDirectory) {
 					continue;
 				} else {
 					bool foundDup = false;
-					map<string, LoggerConfig>::iterator it;
+					map<string, LoggerConfig*>::iterator it;
 					for(it=configs.begin();it!=configs.end();++it) {
-						if((mode=="FILE" && file!="" && it->second.file==file && it->second.logdirtype==logdirtype)
+						if((mode=="FILE" && file!="" && it->second->file==file && it->second->logdirtype==logdirtype)
 								|| (mode=="CONSOLE" && name!="DEFAULT")) {
-							LoggerConfig config;
-							config.name = it->second.name;
-							config.level = level;
-							dupLogNames[name] = config;
+							dupLogNames[name] = level;
 
 							logger << "Found duplicate logger configuration for name " + name << endl;
 
@@ -134,31 +143,31 @@ void LoggerFactory::init(string configFile, string serverRootDirectory) {
 					}
 				}
 
-				LoggerConfig config;
-				config.name = name;
-				config.level = level;
-				config.mode = mode;
-				config.file = file;
-				config.logdirtype = logdirtype;
+				LoggerConfig* config = new LoggerConfig;
+				config->name = name;
+				config->level = level;
+				config->mode = mode;
+				config->file = file;
+				config->logdirtype = logdirtype;
 
 				DateFormat df("dd/mm/yyyy hh:mi:ss");
-				config.datFormat = df;
+				config->datFormat = df;
 
-				config.lock.lock();
+				config->lock.lock();
 				if(mode=="FILE")
 				{
 					string logfilepath = logDirPath + file;
 					ofstream* strm = new ofstream();
 					strm->open(logfilepath.c_str(), ios::app | ios::binary);
-					config.out = strm;
+					config->out = strm;
 				}
 				else
 				{
-					config.out = &cout;
+					config->out = &cout;
 				}
-				config.lock.unlock();
+				config->lock.unlock();
 
-				configs[config.name] = config;
+				configs[config->name] = config;
 			}
 		}
 		logger << "Done configuring loggers..." << endl;
@@ -167,30 +176,30 @@ void LoggerFactory::init(string configFile, string serverRootDirectory) {
 
 Logger LoggerFactory::getLogger(string className) {
 	if(configs.find("DEFAULT")==configs.end()) {
-		LoggerConfig config;
-		config.name = "DEFAULT";
-		config.level = "INFO";
-		config.mode = "CONSOLE";
-		config.file = "";
+		LoggerConfig* config = new LoggerConfig;
+		config->name = "DEFAULT";
+		config->level = "INFO";
+		config->mode = "CONSOLE";
+		config->file = "";
 		DateFormat df("dd/mm/yyyy hh:mi:ss");
-		config.datFormat = df;
-		config.out = &cout;
-		config.lock.lock();
-		config.lock.unlock();
+		config->datFormat = df;
+		config->out = &cout;
+		config->lock.lock();
+		config->lock.unlock();
 
-		configs[config.name] = config;
+		configs[config->name] = config;
 	}
-	return Logger(&configs["DEFAULT"], className);
+	return Logger(configs["DEFAULT"], className);
 }
 
 Logger LoggerFactory::getLogger(string loggerName, string className) {
 	if(configs.find(loggerName)==configs.end()) {
 		if(dupLogNames.find(loggerName)!=dupLogNames.end()) {
-			return Logger(&configs[dupLogNames[loggerName].name], className, dupLogNames[loggerName].level);
+			return Logger(configs[loggerName], className, dupLogNames[loggerName]);
 		}
 		return getLogger(className);
 	} else {
-		return Logger(&configs[loggerName], className);
+		return Logger(configs[loggerName], className);
 	}
 }
 

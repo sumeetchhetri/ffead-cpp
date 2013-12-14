@@ -61,7 +61,6 @@ public:
 	string getDialect() const;
 	CibernateConnectionPool(int,string,string,string,string);
 	virtual ~CibernateConnectionPool();
-	//static CibernateConnectionPool* getInstance();
 	Connection* getReadConnection();
 	Connection* getWriteConnection();
 	void closeConnection(Connection*);

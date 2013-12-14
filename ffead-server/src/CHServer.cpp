@@ -229,7 +229,7 @@ void signalSIGABRT(int dummy)
 }
 void signalSIGTERM(int dummy)
 {
-	signal(SIGKILL,signalSIGTERM);
+	signal(SIGTERM,signalSIGTERM);
 	string filename;
 	stringstream ss;
 	ss << servd;
@@ -425,12 +425,9 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			pool.init(thrdpsiz,30,true);
 		}
 
-		ofstream serverCntrlFile;
-		serverCntrlFile.open(serverCntrlFileNm.c_str());
-		while(serverCntrlFile.is_open())
+		struct stat buffer;
+		while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 		{
-			serverCntrlFile.close();
-
 			int nfds = selEpolKqEvPrtHandler.getEvents();
 			if (nfds == -1)
 			{
@@ -449,7 +446,6 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				{
 					close(fd);
 					plogger << "Socket conn closed before being serviced" << endl;
-					serverCntrlFile.open(serverCntrlFileNm.c_str());
 					continue;
 				}
 
@@ -466,7 +462,6 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 					pool.submit(task);
 				}
 			}
-			serverCntrlFile.open(serverCntrlFileNm.c_str());
 		}
 	}
 	return pid;
@@ -513,6 +508,26 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	return pid;
 }*/
 
+void* gracefullShutdown_monitor(void* args)
+{
+	string* ipaddr = (string*)args;
+	struct stat buffer;
+	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
+	{
+		Thread::sSleep(1);
+	}
+	string ip = ipaddr->substr(0, ipaddr->find(":"));
+	string port = ipaddr->substr(ipaddr->find(":")+1);
+	ClientInterface* client;
+	if(isSSLEnabled)
+		client = new SSLClient;
+	else
+		client = new Client;
+	client->connectionUnresolv(ip,CastUtil::lexical_cast<int>(port));
+	client->closeConnection();
+	delete client;
+}
+
 #ifdef INC_DCP
 void* dynamic_page_monitor(void* arg)
 {
@@ -531,7 +546,8 @@ void* dynamic_page_monitor(void* arg)
 		long tim = (uintmax_t)tm;
 		statsinf[it->first] = tim;
 	}
-	while(true)
+	struct stat buffer;
+	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
 		Thread::sSleep(5);
 		bool flag = false;
@@ -866,14 +882,14 @@ int main(int argc, char* argv[])
 	//printf("server: waiting for connections...\n");
 	logger.info("Server: waiting for connections on " + ConfigurationData::getInstance()->ip_address);
 
-	ofstream serverCntrlFile;
-	serverCntrlFile.open(serverCntrlFileNm.c_str());
-	serverCntrlFile << "Server Running" << endl;
-	serverCntrlFile.close();
+	ofstream serverCntrlFileo;
+	serverCntrlFileo.open(serverCntrlFileNm.c_str());
+	serverCntrlFileo << "Server Running" << endl;
+	serverCntrlFileo.close();
 
 	vector<string> files;
 	int sp[preForked][2];
-	ThreadPool *pool;
+	ThreadPool *pool = NULL;
 
 	if(Constants::IS_FILE_DESC_PASSING_AVAIL)
 	{
@@ -935,6 +951,9 @@ int main(int argc, char* argv[])
 	}
 #endif
 
+	Thread gsthread(&gracefullShutdown_monitor, &IP_ADDRESS);
+	gsthread.execute();
+
 	SelEpolKqEvPrt selEpolKqEvPrtHandler;
 	selEpolKqEvPrtHandler.initialize(sockfd);
 	int childNo = 0;
@@ -944,11 +963,9 @@ int main(int argc, char* argv[])
 
 	}*/
 
-	serverCntrlFile.open(serverCntrlFileNm.c_str());
-	while(serverCntrlFile.is_open())
+	struct stat buffer;
+	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
-		serverCntrlFile.close();
-
 		if(childNo>=preForked)
 			childNo = 0;
 		nfds = selEpolKqEvPrtHandler.getEvents();
@@ -1008,7 +1025,6 @@ int main(int argc, char* argv[])
 				if (new_fd == -1)
 				{
 					perror("accept");
-					serverCntrlFile.open(serverCntrlFileNm.c_str());
 					continue;
 				}
 				else
@@ -1082,8 +1098,9 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
-		serverCntrlFile.open(serverCntrlFileNm.c_str());
 	}
+
+	close(sockfd);
 
 #ifdef INC_COMP
 	ComponentHandler::stop();
@@ -1100,6 +1117,31 @@ int main(int argc, char* argv[])
 #ifdef INC_CIB
 	ConfigurationHandler::destroyCibernate();
 #endif
+
+#ifdef INC_JOBS
+	JobScheduler::stop();
+#endif
+	SSLHandler::clear();
+
+	logger << "Destructed SSLHandler" << endl;
+
+	if(pool!=NULL) {
+		delete pool;
+		logger << "Destructed Thread pool" << endl;
+	}
+
+	if(Constants::IS_FILE_DESC_PASSING_AVAIL)
+	{
+		map<int,pid_t>::iterator it;
+		for(it=pds.begin();it!=pds.end();++it)
+		{
+			kill(it->second, SIGKILL);
+			logger << ("Killed child process ") << it->second << endl;
+		}
+		logger << "Destructed child processes" << endl;
+	}
+
+	LoggerFactory::clear();
 
 	return 0;
 }

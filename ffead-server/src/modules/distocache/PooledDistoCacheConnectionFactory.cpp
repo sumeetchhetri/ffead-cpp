@@ -59,6 +59,7 @@ void PooledDistoCacheConnectionFactory::destroy() {
 			DistoCacheClientUtils* clientUtil = instance->pool.at(var);
 			delete clientUtil;
 		}
+		delete instance;
 	}
 }
 

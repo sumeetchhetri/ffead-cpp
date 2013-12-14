@@ -27,10 +27,11 @@
 
 class LoggerFactory {
 	LoggerFactory();
-	static map<string, LoggerConfig> configs;
-	static map<string, LoggerConfig> dupLogNames;
+	static map<string, LoggerConfig*> configs;
+	static map<string, string> dupLogNames;
 public:
 	virtual ~LoggerFactory();
+	static void clear();
 	static void init(string configFile, string serverRootDirectory);
 	static Logger getLogger(string className);
 	static Logger getLogger(string loggerName, string className);

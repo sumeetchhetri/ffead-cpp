@@ -22,10 +22,7 @@
 
 #include "SecurityHandler.h"
 
-Logger SecurityHandler::logger;
-
 SecurityHandler::SecurityHandler() {
-	logger = LoggerFactory::getLogger("SecurityHandler");
 }
 
 SecurityHandler::~SecurityHandler() {
@@ -34,6 +31,7 @@ SecurityHandler::~SecurityHandler() {
 
 bool SecurityHandler::handle(HttpRequest* req, HttpResponse& res, long sessionTimeout)
 {
+	Logger logger = LoggerFactory::getLogger("SecurityHandler");
 	string ip_addr = ConfigurationData::getInstance()->ip_address;
 	map<string, Security> securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
 	map<string, string> cntMap = ConfigurationData::getInstance()->cntMap;

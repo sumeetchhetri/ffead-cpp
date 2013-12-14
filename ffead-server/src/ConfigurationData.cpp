@@ -35,6 +35,14 @@ ConfigurationData* ConfigurationData::getInstance() {
 	return instance;
 }
 
+void ConfigurationData::clearInstance() {
+	if(instance!=NULL) {
+		instance->ffeadContext->clear();
+		delete instance->ffeadContext;
+		delete instance;
+	}
+}
+
 ConfigurationData::~ConfigurationData() {
 	// TODO Auto-generated destructor stub
 }

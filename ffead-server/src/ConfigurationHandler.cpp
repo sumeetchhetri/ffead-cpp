@@ -992,13 +992,6 @@ void ConfigurationHandler::configureCibernate(string name, string configFile)
 
 void ConfigurationHandler::destroyCibernate()
 {
-	map<string,Mapping*> mappings = CibernateConnPools::getMappings();
-	map<string,Mapping*>::iterator it;
-	for(it=mappings.begin();it!=mappings.end();it++)
-	{
-		CibernateConnectionPool* pool = CibernateConnPools::getPool(it->first);
-		delete pool;
-		delete it->second;
-	}
+	CibernateConnPools::destroy();
 }
 #endif

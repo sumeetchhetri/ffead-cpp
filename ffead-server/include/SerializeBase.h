@@ -424,7 +424,7 @@ public:
 		}
 		else if(container=="std::queue")
 		{
-			return new queue<T>;
+			return new std::queue<T>;
 		}
 		return NULL;
 	}
@@ -453,7 +453,7 @@ public:
 		}
 		else if(container.find("std::queue")==0)
 		{
-			((queue<T>*)cont)->push(t);
+			((std::queue<T>*)cont)->push(t);
 		}
 	}
 
@@ -481,7 +481,7 @@ public:
 		}
 		else if(container.find("std::queue")==0)
 		{
-			return ((queue<T>*)cont)->size();
+			return ((std::queue<T>*)cont)->size();
 		}
 		return -1;
 	}
@@ -522,7 +522,7 @@ public:
 		}
 		else if(container.find("std::queue")==0)
 		{
-			//((queue<T>*)cont)->push(t);
+			//((std::queue<T>*)cont)->push(t);
 		}
 		T t;
 		return t;

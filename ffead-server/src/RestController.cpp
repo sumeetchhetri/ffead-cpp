@@ -22,8 +22,6 @@
 
 #include "RestController.h"
 
-Logger RestController::logger;
-
 RestController::RestController() {
 	logger = LoggerFactory::getLogger("RestController");
 }

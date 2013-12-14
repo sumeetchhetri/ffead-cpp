@@ -22,7 +22,7 @@
 
 #include "DistoCacheHandler.h"
 
-DistoCacheHandler* _dstcache_instance = NULL;
+DistoCacheHandler* DistoCacheHandler::instance = NULL;
 
 DistoCacheHandler::DistoCacheHandler()
 {
@@ -36,10 +36,10 @@ DistoCacheHandler::~DistoCacheHandler()
 
 void DistoCacheHandler::init()
 {
-	if(_dstcache_instance==NULL)
+	if(instance==NULL)
 	{
-		_dstcache_instance = new DistoCacheHandler();
-		_dstcache_instance->running = false;
+		instance = new DistoCacheHandler();
+		instance->running = false;
 	}
 }
 
@@ -55,20 +55,23 @@ void* DistoCacheHandler::service(void* arg)
 void DistoCacheHandler::trigger(string port, int poolSize)
 {
 	init();
-	if(_dstcache_instance->running)
+	if(instance->running)
 		return;
 	NBServer serv(port,500,&service);
-	_dstcache_instance->server = serv;
-	_dstcache_instance->server.start();
-	_dstcache_instance->running = true;
+	instance->server = serv;
+	instance->server.start();
+	instance->running = true;
 	CacheMap::init();
 	PooledDistoCacheConnectionFactory::init("localhost", CastUtil::lexical_cast<int>(port), poolSize);
-	_dstcache_instance->logger << ("Distocache running on port" + port) << endl;
+	instance->logger << ("Distocache running on port" + port) << endl;
 	return;
 }
 
 void DistoCacheHandler::stop()
 {
-	_dstcache_instance->server.stop();
-	PooledDistoCacheConnectionFactory::destroy();
+	if(instance!=NULL) {
+		instance->server.stop();
+		PooledDistoCacheConnectionFactory::destroy();
+		delete instance;
+	}
 }

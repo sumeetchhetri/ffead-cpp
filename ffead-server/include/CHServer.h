@@ -112,6 +112,7 @@
 #include "Thread.h"
 #include "FFEADContext.h"
 #include "SelEpolKqEvPrt.h"
+#include <stdint.h>
 #ifdef INC_DSTC
 #include "DistoCacheHandler.h"
 #endif
@@ -143,38 +144,6 @@ typedef string (*DCPPtr) ();
 typedef void (*ReceiveTask1)(int);
 
 using namespace std;
-/*class SharedData
-{
-private:
-	static SharedData* shared_instance;
-	void *dlib;
-public:
-	static void init()
-	{
-		if(shared_instance==NULL)
-		{
-			shared_instance = new SharedData();
-			shared_instance->dlib = NULL;
-			logger << "\nInitialised Shared data" << endl;
-		}
-	}
-	static void setDLIB(void *dlib)
-	{
-		shared_instance->dlib = dlib;
-	}
-	static void* getDLIB()
-	{
-		return shared_instance->dlib;
-	}
-	static void deinit()
-	{
-		if(shared_instance->dlib!=NULL)dlclose(shared_instance->dlib);
-		shared_instance->~SharedData();
-		shared_instance = NULL;
-		logger << "\nclosed handle" << endl;
-	}
-};*/
-
 
 class CHServer {
 public:

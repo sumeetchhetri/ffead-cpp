@@ -150,6 +150,7 @@ void JobScheduler::stop() {
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
 	logger << "Waiting 10 seconds for all Job Processes to shutdown....";
 	sleep(10);
+	delete instance;
 }
 
 void* JobScheduler::service(void* arg)

@@ -127,6 +127,7 @@ public:
 	FFEADContext* ffeadContext;
 	CorsConfig corsConfig;
 	static ConfigurationData* getInstance();
+	static void clearInstance();
 	virtual ~ConfigurationData();
 };
 

@@ -26,6 +26,7 @@ SSLHandler* SSLHandler::instance = NULL;
 
 SSLHandler::SSLHandler() {
 	logger = LoggerFactory::getLogger("SSLHandler");
+	ctx = NULL;
 }
 
 void SSLHandler::initInstance() {
@@ -73,6 +74,29 @@ void SSLHandler::init() {
 			SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
 		else if(ConfigurationData::getInstance()->client_auth==1)
 			SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);*/
+	}
+}
+
+void SSLHandler::clear() {
+	if(instance!=NULL)
+	{
+		if(instance->ctx!=NULL)
+		{
+			SSL_CTX_free(instance->ctx);
+		}
+		if(pass!=NULL)
+		{
+			delete SSLHandler::pass;
+		}
+		if(bio_err!=NULL)
+		{
+			delete SSLHandler::bio_err;
+		}
+		if(ciphers!=NULL)
+		{
+			delete SSLHandler::ciphers;
+		}
+		delete instance;
 	}
 }
 
@@ -157,11 +181,6 @@ SSL_CTX *SSLHandler::initialize_ctx(char *keyfile,char *password, string ca_list
 #endif
 
     return ctx;
-  }
-
-void SSLHandler::destroy_ctx(SSL_CTX *ctx)
-  {
-    SSL_CTX_free(ctx);
   }
 
 void SSLHandler::error_occurred(char *error,int fd,SSL *ssl)

@@ -58,6 +58,7 @@ public:
 				  ERR_POSNOTNUM, ERR_NEGATIVEREP, ERR_REPNOTNUM;
 
 	static void init();
+	static void destroy();
 	static void allocate(string,string);
 	static void deallocate(string);
 

@@ -1008,7 +1008,7 @@ string Reflection::generateClassDefinition(map<string, ClassStructure> allclsmap
 									(ptindx!=string::npos && teindx!=string::npos && ptindx>teindx) ||
 									(teindx==string::npos && ptindx!=string::npos && spindx!=string::npos && ptindx>spindx))
 							{	typ = "*";
-								argpmtemp = argpmtemp.substr(0, ptindex);
+								argpmtemp = argpmtemp.substr(0, ptindx);
 							}
 							else if(rfindx==argpmtemp.length()-1 ||
 									(rfindx!=string::npos && teindx!=string::npos && rfindx>teindx) ||

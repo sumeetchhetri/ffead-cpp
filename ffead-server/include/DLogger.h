@@ -31,6 +31,7 @@ public:
 	static void info(string);
 	static void debug(string);
 	static void error(string);
+	static void clear();
 	static void init();
 	static void init(string file);
 	static void init(string level,string mode,string file);

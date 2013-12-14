@@ -34,7 +34,6 @@
 #include "Constants.h"
 
 class ScriptHandler {
-	static Logger logger;
 	static int pcloseRWE(int pid, int *rwepipe);
 	static int popenRWE(int *rwepipe, const char *exe, const char *const argv[],string tmpf);
 	static int popenRWEN(int *rwepipe, const char *exe, const char** argv);

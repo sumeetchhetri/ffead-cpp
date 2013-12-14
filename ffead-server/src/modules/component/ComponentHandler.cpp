@@ -22,7 +22,7 @@
 
 #include "ComponentHandler.h"
 
-ComponentHandler* _cmp_instance = NULL;
+ComponentHandler* ComponentHandler::instance = NULL;
 
 ComponentHandler::ComponentHandler()
 {
@@ -36,10 +36,10 @@ ComponentHandler::~ComponentHandler()
 
 void ComponentHandler::init()
 {
-	if(_cmp_instance==NULL)
+	if(instance==NULL)
 	{
-		_cmp_instance = new ComponentHandler();
-		_cmp_instance->running = false;
+		instance = new ComponentHandler();
+		instance->running = false;
 	}
 }
 
@@ -48,13 +48,13 @@ void* ComponentHandler::service(void* arg)
 	int fd = *(int*)arg;
 	init();
 	string methInfo,retValue;
-	_cmp_instance->server.Receive(fd,methInfo,1024);
+	instance->server.Receive(fd,methInfo,1024);
 	methInfo =methInfo.substr(0,methInfo.find_last_of(">")+1);
-	_cmp_instance->logger << ("Component method " +  methInfo) << endl;
+	instance->logger << ("Component method " +  methInfo) << endl;
 	try
 	{
 		XmlParser parser("Parser");
-		_cmp_instance->logger << "Bean call parsed successfully" << endl;
+		instance->logger << "Bean call parsed successfully" << endl;
 		if(methInfo.find("lang=\"c++\"")!=string::npos || methInfo.find("lang='c++'")!=string::npos)
 		{
 			Document doc = parser.getDocument(methInfo);
@@ -127,12 +127,12 @@ void* ComponentHandler::service(void* arg)
 				valus.push_back(value);
 			}
 			string className = "Component_"+message.getAttribute("beanName");
-			_cmp_instance->logger << ("Bean class = " + className) << endl;
+			instance->logger << ("Bean class = " + className) << endl;
 			string returnType = message.getAttribute("returnType");
 			string lang = message.getAttribute("lang");
 			ClassInfo clas = reflector.getClassInfo(className);
 			string methodName = message.getAttribute("name");
-			_cmp_instance->logger << ("Bean service = " + methodName) << endl;
+			instance->logger << ("Bean service = " + methodName) << endl;
 			if(clas.getClassName()=="")
 			{
 				throw ComponentHandlerException("bean does not exist or is not regsitered\n",retValue);
@@ -145,20 +145,20 @@ void* ComponentHandler::service(void* arg)
 			}
 			else
 			{
-				_cmp_instance->logger << ("Got Bean service " + methodName) << endl;
+				instance->logger << ("Got Bean service " + methodName) << endl;
 				args argus;
 				Constructor ctor = clas.getConstructor(argus);
 				void *_temp = reflector.newInstanceGVP(ctor);
-				_cmp_instance->logger << ("Got Bean") << endl;
+				instance->logger << ("Got Bean") << endl;
 				if(returnType=="void" || returnType=="")
 				{
-					_cmp_instance->logger << "Void return" << endl;
+					instance->logger << "Void return" << endl;
 					reflector.invokeMethod<void*>(_temp,meth,valus);
 					retValue = ("<return:void></return:void>");
 				}
 				else
 				{
-					_cmp_instance->logger << ("Return type = " + returnType) << endl;
+					instance->logger << ("Return type = " + returnType) << endl;
 					if(returnType=="int")
 					{
 						int retv = reflector.invokeMethod<int>(_temp,meth,valus);
@@ -193,22 +193,22 @@ void* ComponentHandler::service(void* arg)
 		{
 			retValue = "<return:exception>This is a C++ daemon</return:exception>";
 		}
-		//_cmp_instance->logger << "\nSending data = "<< retValue << "\n" << endl;
+		//instance->logger << "\nSending data = "<< retValue << "\n" << endl;
 		if(retValue!="")
-			_cmp_instance->server.Send(fd,retValue);
+			instance->server.Send(fd,retValue);
 		//close(fd);
 	}
 	catch(const ComponentHandlerException& e)
 	{
-		_cmp_instance->logger << e.getMessage() << endl;
-		_cmp_instance->server.Send(fd,retValue);
+		instance->logger << e.getMessage() << endl;
+		instance->server.Send(fd,retValue);
 		close(fd);
 	}
 	catch(...)
 	{
-		_cmp_instance->logger << "Component exception occurred" << endl;
+		instance->logger << "Component exception occurred" << endl;
 		retValue = ("<return:exception>XmlParseException occurred</return:exception>");
-		_cmp_instance->server.Send(fd,retValue);
+		instance->server.Send(fd,retValue);
 		close(fd);
 	}
 	return NULL;
@@ -222,13 +222,13 @@ void ComponentHandler::initComponent()
 bool ComponentHandler::registerComponent(string name)
 {
 	init();
-	if(_cmp_instance->components.find(name)!=_cmp_instance->components.end())
+	if(instance->components.find(name)!=instance->components.end())
 	{
 		return false;
 	}
 	else
 	{
-		_cmp_instance->components[name] = "";
+		instance->components[name] = "";
 		return true;
 	}
 }
@@ -236,10 +236,10 @@ bool ComponentHandler::registerComponent(string name)
 bool ComponentHandler::unregisterComponent(string name)
 {
 	init();
-	map<string,string>::iterator it = _cmp_instance->components.find(name);
-	if(it!=_cmp_instance->components.end())
+	map<string,string>::iterator it = instance->components.find(name);
+	if(it!=instance->components.end())
 	{
-		_cmp_instance->components.erase(it);
+		instance->components.erase(it);
 		return true;
 	}
 	else
@@ -250,16 +250,19 @@ bool ComponentHandler::unregisterComponent(string name)
 void ComponentHandler::trigger(string port)
 {
 	init();
-	if(_cmp_instance->running)
+	if(instance->running)
 		return;
 	Server serv(port,false,500,&service,2);
-	_cmp_instance->server = serv;
-	_cmp_instance->server.start();
-	_cmp_instance->running = true;
+	instance->server = serv;
+	instance->server.start();
+	instance->running = true;
 	return;
 }
 
 void ComponentHandler::stop()
 {
-	_cmp_instance->server.stop();
+	if(instance!=NULL) {
+		instance->server.stop();
+		delete instance;
+	}
 }

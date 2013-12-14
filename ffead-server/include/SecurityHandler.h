@@ -32,7 +32,6 @@
 typedef ClassInfo (*FunPtr) ();
 
 class SecurityHandler {
-	static Logger logger;
 public:
 	SecurityHandler();
 	virtual ~SecurityHandler();

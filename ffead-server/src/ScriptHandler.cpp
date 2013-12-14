@@ -22,10 +22,7 @@
 
 #include "ScriptHandler.h"
 
-Logger ScriptHandler::logger;
-
 ScriptHandler::ScriptHandler() {
-	logger = LoggerFactory::getLogger("ScriptHandler");
 }
 
 ScriptHandler::~ScriptHandler() {

@@ -52,6 +52,7 @@ public:
 	static int s_server_session_id_context;
 	static int s_server_auth_session_id_context;
 	static void initInstance();
+	static void clear();
 	static void setIsSSL(bool isSSLEnabled);
 	static SSLHandler* getInstance();
 	virtual ~SSLHandler();
@@ -59,7 +60,6 @@ public:
 	void load_dh_params(SSL_CTX *ctx,char *file);
 	static void sigpipe_handle(int x);
 	SSL_CTX *initialize_ctx(char *keyfile,char *password, string ca_list);
-	void destroy_ctx(SSL_CTX *ctx);
 	void error_occurred(char *error,int fd,SSL *ssl);
 	void closeSSL(int fd,SSL *ssl,BIO* bio);
 };

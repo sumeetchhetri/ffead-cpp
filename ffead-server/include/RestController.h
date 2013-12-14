@@ -33,7 +33,7 @@
 #include "JSONSerialize.h"
 
 class RestController {
-	static Logger logger;
+	Logger logger;
 public:
 	HttpRequest* request;
 	HttpResponse* response;

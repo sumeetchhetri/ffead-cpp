@@ -21,14 +21,7 @@
  */
 
 #include "CibernateConnectionPool.h"
-/*static CibernateConnectionPool *instance = NULL;
 
-CibernateConnectionPool* CibernateConnectionPool::getinstance()
-{
-	if(this==NULL)
-		instance = new CibernateConnectionPool;
-	return instance;
-}*/
 CibernateConnectionPool::CibernateConnectionPool(int size,string dbName,string uname,string pass,string dialect)
 {
 	logger = LoggerFactory::getLogger("CibernateConnectionPool");
