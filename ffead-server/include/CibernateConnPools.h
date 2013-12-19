@@ -61,6 +61,7 @@ class CibernateConnPools {
 	map<string,Mapping*> mappings;
 	static CibernateConnPools* get();
 	bool initialized;
+	static CibernateConnPools* instance;
 public:
 	CibernateConnPools();
 	virtual ~CibernateConnPools();

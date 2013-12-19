@@ -1,6 +1,7 @@
 SERVER_IP_ADDRESS=
 SERVER_PORT=
 SERVER_SSL_ENABLED=false
+SERVER_SSL_FILE=security.prop
 TSTVALUES_POSTRSTVEC_VALUES=[1,2,3,4,5]
 TSTVALUES_POSTJSONOBJ_VALUES={"t" : {"id" : 1,"name" : "test"},"y" : 2,"vi" : [1,2,3,4,5],"vs" : ["a","b","c",""],"vd" : [1.200000,2.300000,4.500000,6.000000],"vl" : [2147483647,123,12345],"vb" : [],"vsh" : [],"vyo" : [{"i" : 123,"j" : "string","c" : 1.234500},{"i" : 124,"j" : "string1","c" : 1.234600},{"i" : 124,"j" : "string1","c" : 1.234600}],"li" : [],"qsh" : [],"vpi" : []}
 TSTVALUES_POSTJSONVECOBJ_VALUES=[{     "t": {         "id": "1",         "name": "test"     },     "y": "2",     "vi": [1,2,3,4,5],     "vs": ["a","b","c",""],     "vd": [1.2,2.3,4.5,6],     "vl": [2147483647,123,12345],     "vyo": [     	{         	"i": 123,             "j": "string",             "c": 1.2345         },         {         	"i": 124,             "j": "string1",             "c": 1.2346         },         {         	"i": 124,             "j": "string1",             "c": 1.2346         }     ] }]

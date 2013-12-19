@@ -35,7 +35,8 @@
 #define BACKLOG1 500
 #define MAXBUFLEN1 1024
 using namespace std;
-class DistoCacheHandler{
+class DistoCacheHandler {
+	static DistoCacheHandler* instance;
 	Logger logger;
 	static void* service(void* arg);
 	NBServer server;

@@ -36,7 +36,7 @@ class TaskPool {
 	list<Task*> *ptasks;
 	vector<Task*> *scheduledtasks;
 	vector<Timer*> *scheduledTimers;
-	Mutex *m_mutex;
+	ConditionMutex *m_mutex;
 	bool console;
 	Thread *mthread;
 	static void* run(void *arg);

@@ -32,7 +32,6 @@ JobScheduler::~JobScheduler() {
 }
 
 void JobScheduler::init(ElementList tabs, string appName) {
-	Reflector ref;
 	if(instance!=NULL)
 		return;
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
@@ -73,11 +72,6 @@ void JobScheduler::start() {
 	if(instance!=NULL && instance->isStarted)
 		return;
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
-	if(instance->configs.size()>0)
-	{
-		instance->pool.init(instance->configs.size(),instance->configs.size(),true);
-	}
-	logger << "Initialized JobScheduler ThreadPool done..." << endl;
 	instance->isStarted = true;
 	for (unsigned int dn = 0; dn < (int)instance->configs.size(); dn++)
 	{
@@ -108,14 +102,15 @@ void JobScheduler::start() {
 					if(objIns!=NULL && f!=NULL)
 					{
 						JobTask* task = new JobTask;
-						task->func = f;
 						task->objIns = objIns;
 						task->cron = cron;
 						task->name = name;
+						task->meth = meth;
+						task->appName = appName;
 						task->doRun = true;
 
-						task->setCleanUp(true);
-						instance->pool.submit(task);
+						Thread pthread(&JobScheduler::service, task);
+						pthread.execute();
 
 						instance->tasks.push_back(task);
 						logger << "Added Job Process successfully" << endl;
@@ -155,59 +150,69 @@ void JobScheduler::stop() {
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
 	logger << "Waiting 10 seconds for all Job Processes to shutdown....";
 	sleep(10);
+	delete instance;
 }
+
+void* JobScheduler::service(void* arg)
+{
+	JobTask *task = (JobTask*)arg;
+	task->run();
+	delete task;
+	return NULL;
+}
+
 
 void JobScheduler::JobTask::run() {
 	Logger logger = LoggerFactory::getLogger("JOB", "JobTask");
-	JobTask* task = (JobTask*)this;
 	try {
-		CronTimer timer(task->cron);
+		CronTimer timer(cron);
 		vals values;
-		if(task!=NULL)
+		timer.nextRunDate = new Date;
+		bool toRun;
+		//task->mutex.lock();
+		toRun = doRun;
+		//task->mutex.unlock();
+
+		Reflector ref;
+		JobFunction f = (JobFunction)ref.getMethodInstance(meth, appName);
+
+		while(toRun)
 		{
-			timer.nextRunDate = new Date;
-			bool toRun;
-			//task->mutex.lock();
-			toRun = task->doRun;
-			//task->mutex.unlock();
-			while(toRun)
+			sleep(1);
+			Date d2;
+			if(timer.isValid(5, d2.getYearStr(), timer.nextRunDate->getYearStr()))
 			{
-				sleep(1);
-				Date d2;
-				if(timer.isValid(5, d2.getYearStr(), timer.nextRunDate->getYearStr()))
+				if(timer.isValid(3, d2.getMonthStr(), timer.nextRunDate->getMonthStr()))
 				{
-					if(timer.isValid(3, d2.getMonthStr(), timer.nextRunDate->getMonthStr()))
+					if(timer.isValid(2, d2.getDayStr(), timer.nextRunDate->getDayStr()))
 					{
-						if(timer.isValid(2, d2.getDayStr(), timer.nextRunDate->getDayStr()))
+						if(timer.isValid(1, d2.getHhStr(), timer.nextRunDate->getHhStr()))
 						{
-							if(timer.isValid(1, d2.getHhStr(), timer.nextRunDate->getHhStr()))
+							if(timer.isValid(0, d2.getMmStr(), timer.nextRunDate->getMmStr()))
 							{
-								if(timer.isValid(0, d2.getMmStr(), timer.nextRunDate->getMmStr()))
-								{
-									logger << "Running Job Process " + task->name << endl;
+								logger << "Running Job Process " + name << endl;
 
-									task->func(task->objIns, values);
+								f(objIns, values);
 
-									bool incrementDone = false;
+								bool incrementDone = false;
 
-									incrementDone = timer.tryIncrement(0, timer.nextRunDate->getMmStr());
-									if(!incrementDone) {
-										incrementDone = timer.tryIncrement(1, timer.nextRunDate->getHhStr());
-									}
-
-									if(!incrementDone) {
-										incrementDone = timer.tryIncrement(2, timer.nextRunDate->getDayStr());
-									}
-
-									if(!incrementDone) {
-										incrementDone = timer.tryIncrement(3, timer.nextRunDate->getMonthStr());
-									}
-									if(!incrementDone) {
-										incrementDone = timer.tryIncrement(5, timer.nextRunDate->getYearStr());
-									}
-
-									logger << "Running Job Process " + task->name + " complete" << endl;
+								incrementDone = timer.tryIncrement(0, timer.nextRunDate->getMmStr());
+								if(!incrementDone) {
+									incrementDone = timer.tryIncrement(1, timer.nextRunDate->getHhStr());
 								}
+
+								if(!incrementDone) {
+									incrementDone = timer.tryIncrement(2, timer.nextRunDate->getDayStr());
+								}
+
+								if(!incrementDone) {
+									incrementDone = timer.tryIncrement(3, timer.nextRunDate->getMonthStr());
+								}
+								if(!incrementDone) {
+									incrementDone = timer.tryIncrement(5, timer.nextRunDate->getYearStr());
+								}
+
+								logger << "Running Job Process " + name + " complete" << endl;
 							}
 						}
 					}

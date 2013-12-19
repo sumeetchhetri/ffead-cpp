@@ -38,4 +38,32 @@ void Mutex::unlock() {
 	pthread_mutex_unlock(&mut);
 }
 
+ConditionMutex::ConditionMutex() {
+	pthread_mutex_init(&mut, NULL);
+	pthread_cond_init(&cond, NULL);
+}
 
+ConditionMutex::~ConditionMutex() {
+	pthread_mutex_destroy(&mut);
+	pthread_cond_destroy(&cond);
+}
+
+void ConditionMutex::lock() {
+	pthread_mutex_lock(&mut);
+}
+
+void ConditionMutex::unlock() {
+	pthread_mutex_unlock(&mut);
+}
+
+void ConditionMutex::wait() {
+	pthread_mutex_lock(&mut);
+	pthread_cond_wait(&cond, &mut);
+	pthread_mutex_unlock(&mut);
+}
+
+void ConditionMutex::interrupt() {
+	pthread_mutex_lock(&mut);
+	pthread_cond_broadcast(&cond);
+	pthread_mutex_unlock(&mut);
+}

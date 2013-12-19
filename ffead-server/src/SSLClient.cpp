@@ -12,7 +12,7 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-*/
+ */
 /*
  * SSLClient.cpp
  *
@@ -24,91 +24,100 @@
 
 SSLClient::SSLClient() {
 	logger = LoggerFactory::getLogger("SSLClient");
+	ca_list = "root.pem";
+	isDHParams = true;
+	client_auth = 0;
+}
+
+SSLClient::SSLClient(string secFile) {
+	logger = LoggerFactory::getLogger("SSLClient");
+	PropFileReader pread;
+	propMap sslsec = pread.getProperties(secFile);
+	if(sslsec.size()>0)
+	{
+		cert_file = sslsec["CERTFILE"];
+		key_file = sslsec["KEYFILE"];
+		dh_file = sslsec["DHFILE"];
+		ca_list = sslsec["CA_LIST"];
+		rand_file = sslsec["RANDOM"];
+		sec_password = sslsec["PASSWORD"];
+		string tempcl = sslsec["CLIENT_SEC_LEVEL"];
+		if(tempcl!="")
+		{
+			try
+			{
+				client_auth = CastUtil::lexical_cast<int>(tempcl);
+			}
+			catch(...)
+			{
+				logger << "\nInvalid client auth level defined" << flush;
+				client_auth = 0;
+			}
+		}
+		isDHParams = true;
+		try
+		{
+			isDHParams = CastUtil::lexical_cast<bool>(sslsec["ISDH_PARAMS"]);
+		}
+		catch(...)
+		{
+			logger << "\nInvalid boolean value for isDHParams defined" << flush;
+		}
+	}
 }
 
 SSLClient::~SSLClient() {
 }
-static char *pass;
 
-static void sigpipe_handle(int x){
+char* SSLClient::pass;
+
+int SSLClient::password_cb(char *buf,int num, int rwflag,void *userdata)
+{
+	if(num<(int)(strlen(pass)+1))
+		return(0);
+
+	strcpy(buf,pass);
+	return(strlen(pass));
 }
 
-static int password_cb(char *buf,int num,
-  int rwflag,void *userdata)
-  {
-    if(num<(int)(strlen(pass)+1))
-      return(0);
+void SSLClient::init()
+{
+	/* Build our SSL context*/
+	ctx = SSLCommon::initialize_ctx(logger, false);
 
-    strcpy(buf,pass);
-    return(strlen(pass));
-  }
+	bool loadAll = false;
+	if(client_auth==1)
+	{
+		loadAll = true;
+	}
 
-SSL_CTX *SSLClient::initialize_ctx(char *keyfile,char *password)
-  {
-    SSL_METHOD *meth;
-    SSL_CTX *ctx;
+	pass = (char*)sec_password.c_str();
+	SSL_CTX_set_default_passwd_cb(ctx, SSLClient::password_cb);
 
-    /* Global system initialization*/
-    SSL_library_init();
-    SSL_load_error_strings();
+	SSLCommon::loadCerts(ctx, (char*)cert_file.c_str(),
+			(char*)key_file.c_str(),
+			ca_list, logger, loadAll);
 
-    /* Set up a SIGPIPE handler */
-    signal(SIGPIPE,sigpipe_handle);
+	if(isDHParams)
+	{
+		SSLCommon::load_dh_params(ctx,(char*)dh_file.c_str(), logger);
+	}
+	else
+	{
+		SSLCommon::load_ecdh_params(ctx, logger);
+	}
 
-    /* Create our context*/
-    meth=(SSL_METHOD*)SSLv23_method();
-    ctx=SSL_CTX_new(meth);
+	/* Set our cipher list */
+	if(SSLCommon::ciphers){
+		SSL_CTX_set_cipher_list(ctx,SSLCommon::ciphers);
+	}
 
-    /* Load our keys and certificates*/
-    if(!(SSL_CTX_use_certificate_chain_file(ctx,
-      keyfile)))
-    	logger << "Can't read certificate file" << flush;
-
-    pass=password;
-    SSL_CTX_set_default_passwd_cb(ctx,
-      password_cb);
-    if(!(SSL_CTX_use_PrivateKey_file(ctx,
-      keyfile,SSL_FILETYPE_PEM)))
-    	logger << "Can't read key file" << flush;
-
-    /* Load the CAs we trust*/
-    if(!(SSL_CTX_load_verify_locations(ctx,
-    		CA_LIST,0)))
-    	logger << "Can't read CA list" << flush;
-#if (OPENSSL_VERSION_NUMBER < 0x00905100L)
-    SSL_CTX_set_verify_depth(ctx,1);
-#endif
-
-    return ctx;
+	//SSL_CTX_set_verify (ctx, SSL_VERIFY_PEER, NULL);
 }
 
 void SSLClient::destroy_ctx(SSL_CTX *ctx)
 {
 	SSL_CTX_free(ctx);
-}
-
-void SSLClient::closeSSL()
-{
-	int r=SSL_shutdown(ssl);
-	if(!r){
-	  /*If we called SSL_shutdown() first then
-	  we always get return value of '0'. In
-	  this case, try again, but first send a
-	  TCP FIN to trigger the other side's
-	  close_notify*/
-	  shutdown(sockfd,1);
-	  r=SSL_shutdown(ssl);
-	}
-	switch(r){
-	  case 1:
-		break; /* Success */
-	  case 0:
-	  case -1:
-	  default:
-		  logger << "shutdown failed" << flush;
-	}
-	BIO_free_all(io);
-	SSL_free(ssl);
 }
 
 bool SSLClient::connection(string host,int port)
@@ -150,10 +159,10 @@ bool SSLClient::connection(string host,int port)
 	free(remote);
 	free(ip);
 
-    /* Build our SSL context*/
-    ctx=initialize_ctx((char*)KEYFILE,(char*)PASSWORD);
+	/* Build our SSL context*/
+	init();
 
-    /* Connect the SSL socket */
+	/* Connect the SSL socket */
 	ssl=SSL_new(ctx);
 	sbio=BIO_new_socket(sockfd,BIO_CLOSE);
 	SSL_set_bio(ssl,sbio,sbio);
@@ -168,74 +177,74 @@ bool SSLClient::connection(string host,int port)
 		return false;
 	}
 	ERR_clear_error();
-    connected = true;
-    return true;
+	connected = true;
+	return true;
 }
 
 bool SSLClient::connectionUnresolv(string host,int port)
 {
-    struct addrinfo hints, *servinfo, *p;
-    int rv;
-    char s[INET6_ADDRSTRLEN];
+	struct addrinfo hints, *servinfo, *p;
+	int rv;
+	char s[INET6_ADDRSTRLEN];
+	memset(s, 0, sizeof(s));
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	string sport = CastUtil::lexical_cast<string>(port);
+	if ((rv = getaddrinfo(host.c_str(), sport.c_str(), &hints, &servinfo)) != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+		return false;
+	}
 
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    string sport = CastUtil::lexical_cast<string>(port);
-    if ((rv = getaddrinfo(host.c_str(), sport.c_str(), &hints, &servinfo)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        return false;
-    }
+	// loop through all the results and connect to the first we can
+	for(p = servinfo; p != NULL; p = p->ai_next) {
+		if ((sockfd = socket(p->ai_family, p->ai_socktype,
+				p->ai_protocol)) == -1) {
+			perror("client: socket");
+			continue;
+		}
 
-    // loop through all the results and connect to the first we can
-    for(p = servinfo; p != NULL; p = p->ai_next) {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype,
-                p->ai_protocol)) == -1) {
-            perror("client: socket");
-            continue;
-        }
+		if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+			close(sockfd);
+			perror("client: connect");
+			connected = false;
+			continue;
+		} else {
+			connected = true;
+		}
+		break;
+	}
 
-        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-            close(sockfd);
-            perror("client: connect");
-            connected = false;
-            continue;
-        } else {
-        	connected = true;
-        }
-        break;
-    }
+	if (p == NULL) {
+		fprintf(stderr, "client: failed to connect\n");
+		return false;
+	}
 
-    if (p == NULL) {
-        fprintf(stderr, "client: failed to connect\n");
-        return false;
-    }
+	inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
+			s, sizeof s);
+	//printf("client: connecting to %s\n", s);
 
-    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
-            s, sizeof s);
-    //printf("client: connecting to %s\n", s);
+	freeaddrinfo(servinfo); // all done with this structure
 
-    freeaddrinfo(servinfo); // all done with this structure
+	/* Build our SSL context*/
+	init();
 
-    /* Build our SSL context*/
-    ctx=initialize_ctx((char*)KEYFILE,(char*)PASSWORD);
+	/* Connect the SSL socket */
+	ssl=SSL_new(ctx);
+	sbio=BIO_new_socket(sockfd,BIO_CLOSE);
+	SSL_set_bio(ssl,sbio,sbio);
+	io=BIO_new(BIO_f_buffer());
+	ssl_bio=BIO_new(BIO_f_ssl());
+	BIO_set_ssl(ssl_bio,ssl,BIO_NOCLOSE);
+	BIO_push(io,ssl_bio);
 
-       /* Connect the SSL socket */
-   	ssl=SSL_new(ctx);
-   	sbio=BIO_new_socket(sockfd,BIO_CLOSE);
-   	SSL_set_bio(ssl,sbio,sbio);
-   	io=BIO_new(BIO_f_buffer());
-   	ssl_bio=BIO_new(BIO_f_ssl());
-   	BIO_set_ssl(ssl_bio,ssl,BIO_NOCLOSE);
-   	BIO_push(io,ssl_bio);
-
-   	if(SSL_connect(ssl)<=0)
-   	{
-   		logger << "SSL connect error";
-   		return false;
-   	}
-   	ERR_clear_error();
-    return connected;
+	if(SSL_connect(ssl)<=0)
+	{
+		logger << "SSL connect error";
+		return false;
+	}
+	ERR_clear_error();
+	return connected;
 }
 
 int SSLClient::sendData(string data)
@@ -245,11 +254,11 @@ int SSLClient::sendData(string data)
 	{
 		int bytes = SSL_write(ssl, data.c_str(), data.length());
 		switch(SSL_get_error(ssl,bytes)){
-			case SSL_ERROR_NONE:
-				break;
-			default:
-				logger << "SSL write problem" ;
-				return 0;
+		case SSL_ERROR_NONE:
+			break;
+		default:
+			logger << "SSL write problem" ;
+			return 0;
 		}
 		data = data.substr(bytes);
 	}
@@ -268,23 +277,24 @@ string SSLClient::getTextData(string hdrdelm,string cntlnhdr)
 	string alldat;
 	int cntlen;
 	char buf[MAXBUFLE];
+	memset(buf, 0, sizeof(buf));
 	while(flag)
 	{
 		er = BIO_gets(io,buf,MAXBUFLE-1);
 		switch(SSL_get_error(ssl,er))
 		{
-			case SSL_ERROR_NONE:
-				break;
-			case SSL_ERROR_ZERO_RETURN:
-			{
-				logger << "SSL - Connection closed\n";
-				return alldat;
-			}
-			default:
-			{
-				logger << "SSL read problem";
-				return alldat;
-			}
+		case SSL_ERROR_NONE:
+			break;
+		case SSL_ERROR_ZERO_RETURN:
+		{
+			logger << "SSL - Connection closed\n";
+			return alldat;
+		}
+		default:
+		{
+			logger << "SSL read problem";
+			return alldat;
+		}
 		}
 		if(!strcmp(buf,hdrdelm.c_str()))
 		{
@@ -319,19 +329,19 @@ string SSLClient::getTextData(string hdrdelm,string cntlnhdr)
 		er = BIO_read(io,buf,toRead);
 		switch(SSL_get_error(ssl,er))
 		{
-			case SSL_ERROR_NONE:
-				cntlen -= er;
-				break;
-			case SSL_ERROR_ZERO_RETURN:
-			{
-				logger << "SSL - Connection closed\n";
-				return alldat;
-			}
-			default:
-			{
-				logger << "SSL read problem";
-				return alldat;
-			}
+		case SSL_ERROR_NONE:
+			cntlen -= er;
+			break;
+		case SSL_ERROR_ZERO_RETURN:
+		{
+			logger << "SSL - Connection closed\n";
+			return alldat;
+		}
+		default:
+		{
+			logger << "SSL read problem";
+			return alldat;
+		}
 		}
 		string temp(buf, er);
 		alldat += temp;
@@ -344,6 +354,7 @@ string SSLClient::getData(int cntlen)
 {
 	string alldat;
 	char buf[MAXBUFLE];
+	memset(buf, 0, sizeof(buf));
 	int er;
 	while(cntlen>0)
 	{
@@ -351,19 +362,19 @@ string SSLClient::getData(int cntlen)
 		er = BIO_read(io,buf,cntlen);
 		switch(SSL_get_error(ssl,er))
 		{
-			case SSL_ERROR_NONE:
-				cntlen -= er;
-				break;
-			case SSL_ERROR_ZERO_RETURN:
-			{
-				logger << "SSL - Connection closed\n";
-				return alldat;
-			}
-			default:
-			{
-				logger << "SSL read problem\n";
-				return alldat;
-			}
+		case SSL_ERROR_NONE:
+			cntlen -= er;
+			break;
+		case SSL_ERROR_ZERO_RETURN:
+		{
+			logger << "SSL - Connection closed\n";
+			return alldat;
+		}
+		default:
+		{
+			logger << "SSL read problem\n";
+			return alldat;
+		}
 		}
 		alldat += (buf);
 		memset(&buf[0], 0, sizeof(buf));
@@ -391,7 +402,7 @@ void SSLClient::closeConnection()
 {
 	connected = false;
 	destroy_ctx(ctx);
-	closeSSL();
+	SSLCommon::closeSSL(sockfd, ssl, io);
 }
 
 bool SSLClient::isConnected()

@@ -31,9 +31,9 @@ FormHandler::~FormHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData)
+string FormHandler::handle(HttpRequest* req, HttpResponse& res)
 {
-	map<string, Element> formMap = configData.formMap;
+	map<string, Element> formMap = ConfigurationData::getInstance()->formMap;
 	Logger logger = LoggerFactory::getLogger("FormHandler");
 	Reflector ref;
 	Element ele = formMap[req->getFile()];
@@ -83,13 +83,13 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationDat
 	json += "}";
 	logger << json << endl;
 
-	void *_temp = configData.ffeadContext->getBean("form_"+req->getCntxt_name()+ele.getAttribute("controller"), req->getCntxt_name());
+	void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("form_"+req->getCntxt_name()+ele.getAttribute("controller"), req->getCntxt_name());
 	logger << ("Fetching Formcontroller for " + ele.getAttribute("bean")) << endl;
 	if(_temp!=NULL)
 	{
 		void *_beaninst = JSONSerialize::unSerializeUnknown(json, ele.getAttribute("bean"), req->getCntxt_name());
 
-		FormController* formController = static_cast<FormController*>(_temp);
+		FormController* formController = (FormController*)_temp;
 		if(formController!=NULL)
 		{
 			formController->onSubmit(_beaninst,&res);

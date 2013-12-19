@@ -23,10 +23,7 @@
 #include "AfcUtil.h"
 typedef map<string,strVec> mapofvec;
 
-Logger AfcUtil::logger;
-
 AfcUtil::AfcUtil() {
-	logger = LoggerFactory::getLogger("AfcUtil");
 }
 
 AfcUtil::~AfcUtil() {

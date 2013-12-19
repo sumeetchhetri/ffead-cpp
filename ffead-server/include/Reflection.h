@@ -144,6 +144,7 @@ class Reflection {
 	void handleNamespace(string data, string namepsc, map<string, ClassStructure>& clsvec, map<string, vector<string> >& glbnmspcs);
 	int findless(int a, int b, int c);
 	void collectInfo(string data, string flag, ClassStructure& cls);
+	void emptyBlocks(string& data, size_t);
 public:
 	map<string, ClassStructure> getClassStructures(string className,string);
 	strVec list(string);

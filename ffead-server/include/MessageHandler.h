@@ -64,6 +64,7 @@ public:
 	}
 	static void trigger(string,string);
 	static void stop();
+	static MessageHandler* instance;
 private:
 	Server server;
 	bool running;

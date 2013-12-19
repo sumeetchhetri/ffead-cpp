@@ -42,6 +42,14 @@ void AppContext::init()
 	}
 }
 
+void AppContext::clear()
+{
+	if(_instance!=NULL)
+	{
+		delete _instance;
+	}
+}
+
 AppContext::AppContext() {
 	// TODO Auto-generated constructor stub
 

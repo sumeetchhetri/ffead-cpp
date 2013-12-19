@@ -21,16 +21,16 @@ modules := all
 
 ifneq (,$(findstring component,$(modules)))
 DEFCOMP := -DINC_COMP
-DEFXMLSER := -DDINC_XMLSER
+DEFXMLSER := -DINC_XMLSER
 DEFCIB := -DINC_CIB
 endif
 ifneq (,$(findstring methinvoker,$(modules)))
 DEFMI := -DINC_MI
-DEFXMLSER := -DDINC_XMLSER
+DEFXMLSER := -DINC_XMLSER
 endif
 ifneq (,$(findstring msghandler,$(modules)))
 DEFMSGH := -DINC_MSGH
-DEFBINSER := -DDINC_BINSER
+DEFBINSER := -DINC_BINSER
 endif
 ifneq (,$(findstring webservice,$(modules)))
 DEFWEBSVC := -DINC_WEBSVC
@@ -40,34 +40,34 @@ DEFCIB := -DINC_CIB
 endif
 ifneq (,$(findstring distocache,$(modules)))
 DEFDIST := -DINC_DSTC
-DEFBINSER := -DDINC_BINSER
+DEFBINSER := -DINC_BINSER
 endif
 ifneq (,$(findstring xmlserialize,$(modules)))
-DEFXMLSER := -DDINC_XMLSER
+DEFXMLSER := -DINC_XMLSER
 endif
 ifneq (,$(findstring binserialize,$(modules)))
-DEFBINSER := -DDINC_BINSER
+DEFBINSER := -DINC_BINSER
 endif
 ifneq (,$(findstring dcp,$(modules)))
-DEFDCP := -DDINC_DCP
+DEFDCP := -DINC_DCP
 endif
 ifneq (,$(findstring dview,$(modules)))
-DEFDVIEW := -DDINC_DVIEW
+DEFDVIEW := -DINC_DVIEW
 endif
 ifneq (,$(findstring tpe,$(modules)))
-DEFTPE := -DDINC_TPE
+DEFTPE := -DINC_TPE
 endif
 ifneq (,$(findstring interpreter,$(modules)))
-DEFINTP := -DDINC_INTP
+DEFINTP := -DINC_INTP
 endif
 ifneq (,$(findstring appflow,$(modules)))
-DEFAPPF := -DDINC_APPFLOW
+DEFAPPF := -DINC_APPFLOW
 endif
 ifneq (,$(findstring jobs,$(modules)))
-DEFJOBS := -DDINC_JOBS
+DEFJOBS := -DINC_JOBS
 endif
 ifneq (,$(findstring scripthandler,$(modules)))
-DEFSCRH := -DDINC_SCRH
+DEFSCRH := -DINC_SCRH
 endif
 ifneq (,$(findstring all,$(modules)))
 DEFCOMP := -DINC_COMP
@@ -76,14 +76,15 @@ DEFMSGH := -DINC_MSGH
 DEFWEBSVC := -DINC_WEBSVC
 DEFCIB := -DINC_CIB
 DEFDSTC := -DINC_DSTC
-DEFXMLSER := -DDINC_XMLSER
-DEFBINSER := -DDINC_BINSER
-DEFDCP := -DDINC_DCP
-DEFDVIEW := -DDINC_DVIEW
-DEFINTP := -DDINC_INTP
-DEFAPPF := -DDINC_APPFLOW
-DEFJOBS := -DDINC_JOBS
-DEFSCRH := -DDINC_SCRH
+DEFXMLSER := -DINC_XMLSER
+DEFBINSER := -DINC_BINSER
+DEFDCP := -DINC_DCP
+DEFDVIEW := -DINC_DVIEW
+DEFINTP := -DINC_INTP
+DEFAPPF := -DINC_APPFLOW
+DEFJOBS := -DINC_JOBS
+DEFSCRH := -DINC_SCRH
+DEFTPE := -DINC_TPE
 endif
 
 
@@ -173,7 +174,8 @@ CPP_SRCS += \
 ../src/MultipartContent.cpp \
 ../src/LoggerFactory.cpp \
 ../src/NBServer.cpp \
-../src/ScriptHandler.cpp
+../src/ScriptHandler.cpp \
+../src/SSLCommon.cpp
 
 
 
@@ -262,7 +264,8 @@ OBJS += \
 ./MultipartContent.o \
 ./LoggerFactory.o \
 ./NBServer.o \
-./ScriptHandler.o
+./ScriptHandler.o \
+./SSLCommon.o
 
 
 
@@ -352,7 +355,8 @@ CPP_DEPS += \
 ./MultipartContent.d \
 ./LoggerFactory.d \
 ./NBServer.d \
-./ScriptHandler.d
+./ScriptHandler.d \
+./SSLCommon.d
 
 
 # Each subdirectory must supply rules for building sources it contributes

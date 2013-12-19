@@ -238,7 +238,15 @@ void CacheMap::addCollectionEntry(string cacheKey, string value) {
 }
 
 void CacheMap::init() {
-	instance = new CacheMap;
+	if(instance==NULL) {
+		instance = new CacheMap;
+	}
+}
+
+void CacheMap::destroy() {
+	if(instance!=NULL) {
+		delete instance;
+	}
 }
 
 string CacheMap::getMapEntryValue(string cacheKey, string key) {

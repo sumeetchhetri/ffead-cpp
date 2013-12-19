@@ -101,7 +101,8 @@ void StringUtil::eraseAll(string& str, const string& ths)
 
 void StringUtil::capitalized(string& str)
 {
-	str[0] = toupper(str[0]);
+	if(str.length()>0)
+		str[0] = toupper(str[0]);
 }
 
 string StringUtil::capitalizedCopy(const string& str)
@@ -222,20 +223,25 @@ void StringUtil::split(vector<string>& output, const string& input, vector<strin
 void StringUtil::trim(string& str)
 {
 	string c = " ";
-	if(str=="")return;
 	size_t p2 = str.find_last_not_of(c);
-	while(str[p2]==' ' || str[p2]=='\t' || str[p2]=='\n' || str[p2]=='\r')
+	if(p2 != string::npos)
 	{
-		str = str.substr(0, p2);
-		p2 = str.find_last_not_of(str[p2]);
+		while(str[p2]==' ' || str[p2]=='\t' || str[p2]=='\n' || str[p2]=='\r')
+		{
+			str = str.substr(0, p2);
+			p2 = str.find_last_not_of(str[p2]);
+		}
 	}
 	if (p2 == string::npos)
 		p2 = str.length();
 	size_t p1 = str.find_first_not_of(c);
-	while(str[p1]==' ' || str[p1]=='\t' || str[p1]=='\n' || str[p1]=='\r')
+	if(p1 != string::npos)
 	{
-		str = str.substr(p1);
-		p1 = str.find_first_not_of(str[p1]);
+		while(str[p1]==' ' || str[p1]=='\t' || str[p1]=='\n' || str[p1]=='\r')
+		{
+			str = str.substr(p1);
+			p1 = str.find_first_not_of(str[p1]);
+		}
 	}
 	if (p1 == string::npos)
 		p1 = 0;
@@ -257,6 +263,7 @@ string StringUtil::toHEX(int number)
 string StringUtil::toHEX(unsigned int number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%x", number);
 	string hexstr(hexVal);
 	return hexstr;
@@ -270,6 +277,7 @@ string StringUtil::toHEX(long number)
 string StringUtil::toHEX(unsigned long number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%lx", number);
 	string hexstr(hexVal);
 	return hexstr;
@@ -284,6 +292,7 @@ string StringUtil::toHEX(long long number)
 string StringUtil::toHEX(unsigned long long number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%llx", number);
 	string hexstr(hexVal);
 	return hexstr;
@@ -297,6 +306,7 @@ string StringUtil::toOCTAL(int number)
 string StringUtil::toOCTAL(unsigned int number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%o", number);
 	string hexstr(hexVal);
 	return hexstr;
@@ -310,6 +320,7 @@ string StringUtil::toOCTAL(long number)
 string StringUtil::toOCTAL(unsigned long number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%lo", number);
 	string hexstr(hexVal);
 	return hexstr;
@@ -324,6 +335,7 @@ string StringUtil::toOCTAL(long long number)
 string StringUtil::toOCTAL(unsigned long long number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%llo", number);
 	string hexstr(hexVal);
 	return hexstr;

@@ -66,7 +66,7 @@ class ServiceTask : public Task
 #ifdef INC_WEBSVC
 	SoapHandler soapHandler;
 #endif
-#ifdef INC_WEBSVC
+#ifdef INC_SCRH
 	ScriptHandler scriptHandler;
 #endif
 	FviewHandler fviewHandler;
@@ -76,26 +76,21 @@ class ServiceTask : public Task
 	map<string,string> *params;
 	bool isSSLEnabled;
 	SSL_CTX *ctx;
-	SSLHandler sslHandler;
-	ConfigurationData configData;
-	void* dlib;
-	void* ddlib;
 	void saveSessionDataToFile(string sessionId, string value);
 	map<string,string> getSessionDataFromFile(string sessionId);
 	void saveSessionDataToDistocache(string sessionId, map<string,string> sessAttrs);
 	map<string,string> getSessionDataFromDistocache(string sessionId);
 	void storeSessionAttributes(HttpResponse &res,HttpRequest* req, long sessionTimeout, bool sessatserv);
-	void updateContent(HttpRequest* req, HttpResponse *res, ConfigurationData configData, string ext, int);
+	void updateContent(HttpRequest* req, HttpResponse *res, string ext, int);
 	unsigned int getFileSize(const char *fileName);
 	string getFileContents(const char *fileName, int start = -1, int end = -1);
 	bool checkSocketWaitForTimeout(int sock_fd, int writing, int seconds, int micros = 0);
-	bool sendData(bool isSSLEnabled, ConfigurationData configData, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, string h1);
-	void closeSocket(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd);
-	bool readLine(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, string& line);
-	bool readData(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, int cntlen, string& content);
+	bool sendData(SSL* ssl, BIO* io, int fd, string h1);
+	void closeSocket(SSL* ssl, BIO* io, int fd);
+	bool readLine(SSL* ssl, BIO* io, int fd, string& line);
+	bool readData(SSL* ssl, BIO* io, int fd, int cntlen, string& content);
 public:
-	ServiceTask(int fd,string serverRootDirectory,map<string,string> *params,
-			bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib, void* ddlib);
+	ServiceTask(int fd,string serverRootDirectory);
 	virtual ~ServiceTask();
 	void run();
 	HttpResponse apacheRun(HttpRequest* req);

@@ -45,7 +45,7 @@ private:
 		using namespace abi;
 		demangled = __cxa_demangle(mangled, NULL, 0, &status);
 		string s(demangled);
-		delete demangled;
+		free(demangled);
 		return s;
 
 	}
@@ -164,7 +164,6 @@ public:
 		using namespace abi;
 		mangled = __cxa_demangle(mangled, NULL, 0, &status);
 		string cls(mangled);
-		delete mangled;
 		if(cls==className || cls==(className+"*")) return true;
 		else return false;
 	}

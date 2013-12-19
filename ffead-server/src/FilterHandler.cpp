@@ -31,10 +31,9 @@ FilterHandler::~FilterHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
-		string ext)
+void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, string ext)
 {
-	map<string, vector<string> > filterMap = configData.filterMap;
+	map<string, vector<string> > filterMap = ConfigurationData::getInstance()->filterMap;
 	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	if(filterMap.find(req->getCntxt_name()+"*.*in")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"in")!=filterMap.end())
 	{
@@ -47,8 +46,8 @@ void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, ConfigurationD
 		for (int var = 0; var < (int)tempp.size(); ++var)
 		{
 			string claz = tempp.at(var);
-			void *_temp = configData.ffeadContext->getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
-			Filter *filter = static_cast<Filter*>(_temp);
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
+			Filter *filter = (Filter*)_temp;
 			filter->doInputFilter(req);
 			logger << "Input Filter called" << endl;
 		}
@@ -56,11 +55,10 @@ void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, ConfigurationD
 }
 
 
-bool FilterHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
-		string ext)
+bool FilterHandler::handle(HttpRequest* req, HttpResponse& res, string ext)
 {
 	bool continue_proc_request = true;
-	map<string, vector<string> > filterMap = configData.filterMap;
+	map<string, vector<string> > filterMap = ConfigurationData::getInstance()->filterMap;
 	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	if(filterMap.find(req->getCntxt_name()+"*.*handle")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"handle")!=filterMap.end())
 	{
@@ -73,8 +71,8 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationDat
 		for (int var = 0; var < (int)tempp.size(); ++var)
 		{
 			string claz = tempp.at(var);
-			void *_temp = configData.ffeadContext->getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
-			Filter *filter = static_cast<Filter*>(_temp);
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
+			Filter *filter = (Filter*)_temp;
 			continue_proc_request = filter->doHandle(req, &res);
 			logger << "Handler Filter called" << endl;
 		}
@@ -82,10 +80,9 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse& res, ConfigurationDat
 	return continue_proc_request;
 }
 
-void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
-		string ext)
+void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, string ext)
 {
-	map<string, vector<string> > filterMap = configData.filterMap;
+	map<string, vector<string> > filterMap = ConfigurationData::getInstance()->filterMap;
 	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	if(filterMap.find(req->getCntxt_name()+"*.*out")!=filterMap.end() || filterMap.find(req->getCntxt_name()+ext+"out")!=filterMap.end())
 	{
@@ -98,8 +95,8 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, Configuration
 		for (int var = 0; var < (int)tempp.size(); ++var)
 		{
 			string claz = tempp.at(var);
-			void *_temp = configData.ffeadContext->getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
-			Filter *filter = static_cast<Filter*>(_temp);
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
+			Filter *filter = (Filter*)_temp;
 			filter->doOutputFilter(&res);
 			logger << "Output Filter called" << endl;
 		}

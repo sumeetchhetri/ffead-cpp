@@ -22,13 +22,9 @@
 
 #ifndef SSLHANDLER_H_
 #define SSLHANDLER_H_
-#include <string>
-#include <sys/socket.h>
-#include <iostream>
-/*HTTPS related*/
-#include <openssl/ssl.h>
-#include <signal.h>
+#include "SSLCommon.h"
 #include "LoggerFactory.h"
+#include "ConfigurationData.h"
 #define CLIENT_AUTH_REQUEST 1
 #define CLIENT_AUTH_REQUIRE 2
 #define CLIENT_AUTH_REHANDSHAKE 3
@@ -37,20 +33,24 @@ using namespace std;
 
 class SSLHandler {
 	static char *pass;
-	static BIO *bio_err;
-	static Logger logger;
+	SSL_CTX *ctx;
+	Logger logger;
+	bool isSSLEnabled;
+	static SSLHandler* instance;
+	SSLHandler();
+	void init();
 public:
+	bool getIsSSL() const;
+	SSL_CTX* getCtx() const;
 	static int s_server_session_id_context;
 	static int s_server_auth_session_id_context;
-	SSLHandler();
+	static void initInstance();
+	static void clear();
+	static void setIsSSL(bool isSSLEnabled);
+	static SSLHandler* getInstance();
 	virtual ~SSLHandler();
-	static int password_cb(char *buf,int num, int rwflag,void *userdata);
-	void load_dh_params(SSL_CTX *ctx,char *file);
-	static void sigpipe_handle(int x);
-	SSL_CTX *initialize_ctx(char *keyfile,char *password, string ca_list);
-	void destroy_ctx(SSL_CTX *ctx);
-	void error_occurred(char *error,int fd,SSL *ssl);
-	void closeSSL(int fd,SSL *ssl,BIO* bio);
+	static int password_cb(char *buf, int num, int rwflag, void *userdata);
+	void closeSSL(int fd, SSL *ssl, BIO* bio);
 };
 
 #endif /* SSLHANDLER_H_ */

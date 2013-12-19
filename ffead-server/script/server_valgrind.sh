@@ -12,4 +12,4 @@ rm -f $FEAD_CPP_PATH/tmp/*.sess
 chmod 700 $FEAD_CPP_PATH/resources/run.sh
 chmod 700 $FEAD_CPP_PATH/resources/rundyn.sh
 #/usr/sbin/setenforce 0
-./CHS $FEAD_CPP_PATH > ffead.log 2>&1
+valgrind --leak-check=yes --track-origins=yes ./CHS $FEAD_CPP_PATH > ffead.log 2>&1

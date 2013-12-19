@@ -41,6 +41,7 @@ class AppContext {
 	AppContext();
 	virtual ~AppContext();
 	static void init();
+	static void clear();
 public:
 	static bool registerComponent(string);
 	static bool unregisterComponent(string);

@@ -26,9 +26,10 @@
 #include "CronTimer.h"
 #include "Document.h"
 #include "Reflector.h"
-#include "ThreadPool.h"
+#include "Thread.h"
 #include "ConfigurationData.h"
 #include "LoggerFactory.h"
+#include "Task.h"
 
 typedef void* (*JobFunction) (void*,vals);
 
@@ -37,9 +38,9 @@ class JobScheduler {
 	class JobTask : public Task
 	{
 		void* objIns;
-		JobFunction func;
 		string cron;
-		string name;
+		string name, appName;
+		Method meth;
 		bool doRun;
 		//Mutex mutex;
 		void run();
@@ -48,10 +49,10 @@ class JobScheduler {
 	bool isStarted;
 	vector<JobConfig> configs;
 	vector<JobTask*> tasks;
-	ThreadPool pool;
 	static JobScheduler* instance;
 	JobScheduler();
 	virtual ~JobScheduler();
+	static void* service(void* arg);
 	static void init(ElementList tabs, string appName = "default");
 	friend class ConfigurationHandler;
 public:

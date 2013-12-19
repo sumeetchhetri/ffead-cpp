@@ -8,11 +8,29 @@
 #include "XMLSerialize.h"
 
 XMLSerialize::XMLSerialize() {
-	// TODO Auto-generated constructor stub
+	dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+	if(dlib == NULL)
+	{
+		cerr << dlerror() << endl;
+		throw "Cannot load serialization shared library";
+	}
+	dlibinstantiated = true;
+}
+
+XMLSerialize::XMLSerialize(void* dlib) {
+	if(dlib == NULL)
+	{
+		throw "Cannot load serialization shared library";
+	}
+	this->dlib = dlib;
+	dlibinstantiated = false;
 }
 
 XMLSerialize::~XMLSerialize() {
-	// TODO Auto-generated destructor stub
+	if(dlibinstantiated)
+	{
+		dlclose(dlib);
+	}
 }
 
 string XMLSerialize::serializePrimitive(string className, void* t)

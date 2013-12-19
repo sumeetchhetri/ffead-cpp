@@ -33,22 +33,18 @@
 
 class Reflector
 {
+	bool dlibinstantiated;
+	void* dlib;
 	vector<string> objectT;
 	vector<void*> objects;
 	void cleanUp();
 public:
 	Reflector();
+	Reflector(void*);
 	virtual ~Reflector();
 	ClassInfo getClassInfo(string,string appName = "default");
 	void* getMethodInstance(Method method,string appName = "default")
 	{
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeReflectionCIMethodFor"+method.getMethodName();
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef void* (*RfPtr) (void*,vals);
@@ -62,13 +58,6 @@ public:
 	template <class T> T invokeMethod(void* instance,Method method,vals values,string appName = "default")
 	{
 		T *obj;
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeReflectionCIMethodFor"+method.getMethodName();
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef void* (*RfPtr) (void*,vals);
@@ -85,13 +74,6 @@ public:
 	void destroy(void* instance,string classn,string appName = "default")
 	{
 		StringUtil::replaceAll(classn, "::", "_");
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeReflectionCIDtorFor"+classn;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef void (*RfPtr) (void*);
@@ -104,13 +86,6 @@ public:
 	void* invokeMethodGVP(void* instance,Method method,vals values,string appName = "default")
 	{
 		void *obj = NULL;
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeReflectionCIMethodFor"+method.getMethodName();
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef void* (*RfPtr) (void*,vals);
@@ -128,13 +103,6 @@ public:
 	template <class T> T newInstance(Constructor ctor,vals values,string appName = "default")
 	{
 		T *obj;
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeReflectionCICtorFor"+ctor.getName();
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef void* (*RfPtr) (vals);
@@ -156,13 +124,6 @@ public:
 	void* newInstanceGVP(Constructor ctor,vals values,string appName = "default")
 	{
 		void *obj = NULL;
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeReflectionCICtorFor"+ctor.getName();
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef void* (*RfPtr) (vals);
@@ -184,13 +145,6 @@ public:
 	void* invokeMethodUnknownReturn(void* instance,Method method,vals values,string appName = "default")
 	{
 		void* obj = NULL;
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeReflectionCIMethodFor"+method.getMethodName();
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef void* (*RfPtr) (void*,vals);
@@ -208,13 +162,6 @@ public:
 	template <class T> T getField(void* instance,Field field,string appName = "default")
 	{
 		T t;
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string fldname = appName + "invokeReflectionCIFieldFor"+field.getFieldName();
 		void *mkr = dlsym(dlib, fldname.c_str());
 		typedef T (*RfPtr) (void*);
@@ -231,13 +178,6 @@ public:
 		void *resul = NULL;
 		if(operato=="<")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"LT";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -249,13 +189,6 @@ public:
 		}
 		else if(operato==">")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"GT";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -267,13 +200,6 @@ public:
 		}
 		else if(operato=="==")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"EQ";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -285,13 +211,6 @@ public:
 		}
 		else if(operato=="!=")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"NE";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -303,13 +222,6 @@ public:
 		}
 		else if(operato=="<=")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"LE";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -321,13 +233,6 @@ public:
 		}
 		else if(operato==">=")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"GE";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -339,13 +244,6 @@ public:
 		}
 		else if(operato=="!")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"NT";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -365,13 +263,6 @@ public:
 		}
 		else if(operato=="+")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"AD";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -383,13 +274,6 @@ public:
 		}
 		else if(operato=="-")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"SU";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -401,13 +285,6 @@ public:
 		}
 		else if(operato=="/")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"DI";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -419,13 +296,6 @@ public:
 		}
 		else if(operato=="*")
 		{
-			string libName = Constants::INTER_LIB_FILE;
-			void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-			if(dlib == NULL)
-			{
-				cerr << dlerror() << endl;
-				exit(-1);
-			}
 			string opname = appName + "operator"+classn+"MU";
 			void *mkr = dlsym(dlib, opname.c_str());
 			typedef void* (*RfPtr) (void*,vals);
@@ -465,13 +335,6 @@ public:
 	void vectorPushBack(void* vec,void* instance,string classN,string appName = "default")
 	{
 		StringUtil::replaceAll(classN, "::", "_");
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeAdToVecFor"+classN;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef void* (*RfPtr) (void*,void*);
@@ -485,13 +348,6 @@ public:
 	{
 		StringUtil::replaceAll(classN, "::", "_");
 		void *obj = NULL;
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeGetNewVecFor"+classN;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef void* (*RfPtr) ();
@@ -506,13 +362,6 @@ public:
 	{
 		StringUtil::replaceAll(classN, "::", "_");
 		int obj = 0;
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeGetVecSizeFor"+classN;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef int (*RfPtr) (void*);
@@ -527,13 +376,6 @@ public:
 	{
 		StringUtil::replaceAll(classN, "::", "_");
 		void *obj = NULL;
-		string libName = Constants::INTER_LIB_FILE;
-		void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-		if(dlib == NULL)
-		{
-			cerr << dlerror() << endl;
-			exit(-1);
-		}
 		string methodname = appName + "invokeGetVecElementFor"+classN;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		typedef void* (*RfPtr) (void*,int);

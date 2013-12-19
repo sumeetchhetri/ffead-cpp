@@ -50,6 +50,7 @@ class JSONSerialize : public SerializeBase {
 	string getSerializationMethodName(string className, string appName, bool which, string type);
 public:
 	JSONSerialize();
+	JSONSerialize(void*);
 	~JSONSerialize();
 
 	template <class T> static string serialize(T t, string appName = "default")

@@ -1,7 +1,7 @@
 GNU/Linux based Installation
 
 1. Refer INSTALL-WINDOWS-CYGWIN file for directions on how to install on Windows and Cygwin
-2. Download the zip file and extract it to the location of your choice.
+2. Download the tar file and extract it to the location of your choice.
 3. Install Unix-ODBC and required odbc files for MySQL dependency alongwith development files
 4. Install Open-SSL and development files
 5. Also included prototype.js in source for AJAX support

@@ -35,7 +35,7 @@ public:
 		PREFLIGHT, CORS, OTHER
 	};
 	virtual ~CORSHandler();
-	static bool handle(HttpRequest *req, HttpResponse *res, ConfigurationData configData);
+	static bool handle(HttpRequest *req, HttpResponse *res);
 };
 
 #endif /* CORSHANDLER_H_ */

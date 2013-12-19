@@ -55,7 +55,7 @@ class MethodInvoc {
 	bool running;
 	static void init();
 	static void* service(void* arg);
-
+	static MethodInvoc* instance;
 public:
 	MethodInvoc();
 	virtual ~MethodInvoc();

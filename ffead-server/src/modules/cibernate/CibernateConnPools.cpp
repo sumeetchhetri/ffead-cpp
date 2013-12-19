@@ -21,7 +21,7 @@
  */
 
 #include "CibernateConnPools.h"
-static CibernateConnPools *instance = NULL;
+CibernateConnPools *CibernateConnPools::instance = NULL;
 
 CibernateConnPools* CibernateConnPools::get()
 {
@@ -33,7 +33,9 @@ CibernateConnPools* CibernateConnPools::get()
 void CibernateConnPools::destroy()
 {
 	if(instance!=NULL)
-		instance->~CibernateConnPools();
+	{
+		delete instance;
+	}
 }
 
 CibernateConnPools::CibernateConnPools()
@@ -50,7 +52,6 @@ CibernateConnPools::~CibernateConnPools() {
 	for (it2=mappings.begin();it2!=mappings.end();it2++) {
 		delete it2->second;
 	}
-	instance=NULL;
 	logger << "\nDestructed CibernateConnPools" << flush;
 }
 

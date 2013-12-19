@@ -1,49 +1,14 @@
 # Add inputs and outputs from these tool invocations to the build variables 
-CPP_SRCS += \
-./AjaxInterface.cpp \
-./ApplicationInterface.cpp \
-./SerializeInterface.cpp \
-./ReflectorInterface.cpp \
-./DCPInterface.cpp \
-./WsInterface.cpp \
-./TemplateInterface.cpp \
-${RUNTIME_COMP_SRCS}
-
-
-OBJS += \
-./AjaxInterface.o \
-./ApplicationInterface.o \
-./ReflectorInterface.o \
-./SerializeInterface.o \
-./WsInterface.o \
-./DCPInterface.o \
-./TemplateInterface.o \
-${RUNTIME_COMP_OBJS}
-
 
 POBJS += \
 ./AjaxInterface.o \
-./ApplicationInterface.o \
 ./ReflectorInterface.o \
 ./SerializeInterface.o \
-./WsInterface.o \
-${RUNTIME_COMP_OBJS}
+${RUNTIME_COMP_POBJS}
 
 
 PDOBJS += \
-./DCPInterface.o \
-./TemplateInterface.o \
-
-
-CPP_DEPS += \
-./AjaxInterface.d \
-./ApplicationInterface.d \
-./ReflectorInterface.d \
-./SerializeInterface.d \
-./DCPInterface.d \
-./WsInterface.d \ \
-./TemplateInterface.d \
-${RUNTIME_COMP_DEPS}
+${RUNTIME_COMP_PDOBJS}
 
 
 # Each subdirectory must supply rules for building sources it contributes

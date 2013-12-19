@@ -22,17 +22,9 @@
 
 #include "ServiceTask.h"
 
-ServiceTask::ServiceTask(int fd,string serverRootDirectory,map<string,string> *params,
-		bool isSSLEnabled, SSL_CTX *ctx, SSLHandler sslHandler, ConfigurationData configData, void* dlib, void* ddlib) {
+ServiceTask::ServiceTask(int fd,string serverRootDirectory) {
 	this->fd=fd;
 	this->serverRootDirectory=serverRootDirectory;
-	this->params= params;
-	this->isSSLEnabled = isSSLEnabled;
-	this->ctx = ctx;
-	this->sslHandler = sslHandler;
-	this->configData = configData;
-	this->dlib = dlib;
-	this->ddlib = ddlib;
 	logger = LoggerFactory::getLogger("ServiceTask");
 }
 
@@ -68,7 +60,10 @@ map<string,string> ServiceTask::getSessionDataFromFile(string sessionId)
 	ifstream ifs(filen.c_str());
 	string tem,all;
 	while(getline(ifs,tem))
+	{
 		all.append(tem+"\n");
+	}
+	ifs.close();
 	strVec results;
 	StringUtil::split(results, all, ("; "));
 	for(int j=0;j<(int)results.size()-1;j++)
@@ -150,7 +145,7 @@ void ServiceTask::storeSessionAttributes(HttpResponse &res,HttpRequest* req, lon
 				id = prevcookid;
 			}
 		}
-		if(!sessatserv || (sessatserv && !configData.sessservdistocache))
+		if(!sessatserv || (sessatserv && !ConfigurationData::getInstance()->sessservdistocache))
 		{
 			for(it=vals.begin();it!=vals.end();it++)
 			{
@@ -172,7 +167,7 @@ void ServiceTask::storeSessionAttributes(HttpResponse &res,HttpRequest* req, lon
 		if(req->getSession()->isDirty())
 		{
 #ifdef INC_DSTC
-			if(configData.sessservdistocache)
+			if(ConfigurationData::getInstance()->sessservdistocache)
 				saveSessionDataToDistocache(id, vals);
 			else
 #endif
@@ -219,14 +214,14 @@ string ServiceTask::getFileContents(const char *fileName, int start, int end)
 	return all;
 }
 
-void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, ConfigurationData configData, string ext, int techunkSiz)
+void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, string ext, int techunkSiz)
 {
 	vector<string> rangesVec;
 	vector<vector<int> > rangeValuesLst = req->getRanges(rangesVec);
 
 	string url = req->getUrl();
-	string locale = configData.lprops[StringUtil::toLowerCopy(req->getDefaultLocale())];
-	string type = configData.props[ext];
+	string locale = ConfigurationData::getInstance()->lprops[StringUtil::toLowerCopy(req->getDefaultLocale())];
+	string type = ConfigurationData::getInstance()->props[ext];
 
 	string all;
     string fname = url;
@@ -254,7 +249,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 		res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<string>(getFileSize(fname.c_str())));
 		res->addHeaderValue(HttpResponse::AcceptRanges, "bytes");
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-		res->addHeaderValue(HttpResponse::ContentType, configData.props[ext]);
+		res->addHeaderValue(HttpResponse::ContentType, ConfigurationData::getInstance()->props[ext]);
 	}
 	else if(req->getMethod()=="OPTIONS" || req->getMethod()=="TRACE")
 	{
@@ -317,6 +312,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 					logger << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << endl;
 					forceLoadFile = true;
 				}
+				delete ifmodsince;
 			}
 		}
 
@@ -420,7 +416,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, Configurati
 				all = getFileContents(fname.c_str());
 			}
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeaderValue(HttpResponse::ContentType, configData.props[ext]);
+			res->addHeaderValue(HttpResponse::ContentType, ConfigurationData::getInstance()->props[ext]);
 			res->setContent(all);
 		}
 	}
@@ -458,51 +454,53 @@ bool ServiceTask::checkSocketWaitForTimeout(int sock_fd, int writing, int second
 			rc = select(sock_fd+1, &rset, &wset, NULL, &tv);
 			break;
 	}
+	FD_CLR(sock_fd, &rset);
 	fcntl(sock_fd, F_SETFL, O_SYNC);
 
+	FD_ZERO(&rset);
+	FD_ZERO(&wset);
 	/* Return SOCKET_TIMED_OUT on timeout, SOCKET_OPERATION_OK
 	otherwise
 	(when we are able to write or when there's something to
 	read) */
-	return rc == 0 ? false : true;
+	return rc <= 0 ? false : true;
 }
 
 void ServiceTask::run()
 {
-	//logger << dlib << endl;
 	string ip = "invalid session";
 	string alldatlg = "\ngot fd from parent";
-	SSL *ssl=NULL;
-	BIO *sbio=NULL;
-	BIO *io=NULL,*ssl_bio=NULL;
+	SSL *ssl = NULL;
+	BIO *sbio = NULL;
+	BIO *io = NULL,*ssl_bio = NULL;
 	Timer timer;
 	timer.start();
 	int connKeepAlive = 10, techunkSiz = 8192, maxReqHdrCnt = 100, maxEntitySize = 2147483648;
 	string cntEnc = "";
 	try {
-		connKeepAlive = CastUtil::lexical_cast<int>(configData.sprops["KEEP_ALIVE_SECONDS"]);
+		connKeepAlive = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->sprops["KEEP_ALIVE_SECONDS"]);
 	} catch (...) {
 	}
 	try {
-		techunkSiz = CastUtil::lexical_cast<int>(configData.sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);
+		techunkSiz = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);
 	} catch (...) {
 	}
 	try {
-		maxReqHdrCnt = CastUtil::lexical_cast<int>(configData.sprops["MAX_REQUEST_HEADERS_COUNT"]);
+		maxReqHdrCnt = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->sprops["MAX_REQUEST_HEADERS_COUNT"]);
 	} catch (...) {
 	}
 	try {
-		maxEntitySize = CastUtil::lexical_cast<int>(configData.sprops["MAX_REQUEST_ENTITY_SIZE"]);
+		maxEntitySize = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->sprops["MAX_REQUEST_ENTITY_SIZE"]);
 	} catch (...) {
 	}
-	cntEnc = StringUtil::toLowerCopy(configData.sprops["CONTENT_ENCODING"]);
+	cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->sprops["CONTENT_ENCODING"]);
 
 	bool cont = true;
 
-	if(isSSLEnabled)
+	if(SSLHandler::getInstance()->getIsSSL())
 	{
 		sbio=BIO_new_socket(fd,BIO_NOCLOSE);
-		ssl=SSL_new(ctx);
+		ssl=SSL_new(SSLHandler::getInstance()->getCtx());
 		SSL_set_bio(ssl,sbio,sbio);
 
 		io=BIO_new(BIO_f_buffer());
@@ -511,11 +509,43 @@ void ServiceTask::run()
 		BIO_push(io,ssl_bio);
 
 		int r = SSL_accept(ssl);
-		int bser = SSL_get_error(ssl,r);
 		if(r<=0)
 		{
-			sslHandler.error_occurred((char*)"SSL accept error",fd,ssl);
+			logger << "SSL accept error" << endl;
+			SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 			return;
+		}
+
+		if (ConfigurationData::getInstance()->client_auth==2 || ConfigurationData::getInstance()->client_auth==1)
+		{
+			X509* client_cert = NULL;
+			/* Get the client's certificate (optional) */
+			client_cert = SSL_get_peer_certificate(ssl);
+			if (client_cert != NULL)
+			{
+				printf ("Client certificate:\n");
+				char* str = X509_NAME_oneline(X509_get_subject_name(client_cert), 0, 0);
+				if(str == NULL)
+				{
+					logger << "Could not get client certificate subject name" << endl;
+					SSLHandler::getInstance()->closeSSL(fd, ssl, io);
+				}
+				printf ("\t subject: %s\n", str);
+				free (str);
+				str = X509_NAME_oneline(X509_get_issuer_name(client_cert), 0, 0);
+				if(str == NULL)
+				{
+					logger << "Could not get client certificate issuer name" << endl;
+					SSLHandler::getInstance()->closeSSL(fd, ssl, io);
+				}
+				printf ("\t issuer: %s\n", str);
+				free (str);
+				X509_free(client_cert);
+			}
+			else
+			{
+				logger << ("The SSL client does not have certificate.\n") << endl;
+			}
 		}
 	}
 	else
@@ -535,9 +565,9 @@ void ServiceTask::run()
 			if(!checkSocketWaitForTimeout(fd, 0, connKeepAlive))
 			{
 				logger << "Closing connection as read operation timed out..." << endl;
-				if(isSSLEnabled)
+				if(SSLHandler::getInstance()->getIsSSL())
 				{
-					sslHandler.closeSSL(fd,ssl,io);
+					SSLHandler::getInstance()->closeSSL(fd,ssl,io);
 				}
 				else
 				{
@@ -555,14 +585,14 @@ void ServiceTask::run()
 			{
 				headerCount++;
 				string temp;
-				bool fl = readLine(isSSLEnabled, ssl, sslHandler, io, fd, temp);
+				bool fl = readLine(ssl, io, fd, temp);
 				if(temp.length()>32765)
 				{
 					res.setHTTPResponseStatus(HTTPResponseStatus::ReqUrlLarge);
 					res.addHeaderValue(HttpResponse::Connection, "close");
-					bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
+					bool sendSuccess = sendData(ssl, io, fd, res.generateResponse());
 					logger << "Closing connection..." << endl;
-					if(sendSuccess)closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+					if(sendSuccess)closeSocket(ssl, io, fd);
 					return;
 				}
 				if(!fl)
@@ -578,8 +608,8 @@ void ServiceTask::run()
 				results.push_back(temp);
 				if(headerCount>=maxReqHdrCnt)
 				{
-					sslHandler.error_occurred((char*)("Cannot accept more than "+CastUtil::lexical_cast<string>(maxReqHdrCnt)+" headers").c_str(),fd,ssl);
-					if(io!=NULL)BIO_free(io);
+					logger << ("Cannot accept more than "+CastUtil::lexical_cast<string>(maxReqHdrCnt)+" headers") << endl;
+					SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 					break;
 				}
 			}
@@ -593,9 +623,9 @@ void ServiceTask::run()
 			{
 				res.setHTTPResponseStatus(req->getRequestParseStatus());
 				res.addHeaderValue(HttpResponse::Connection, "close");
-				bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
+				bool sendSuccess = sendData(ssl, io, fd, res.generateResponse());
 				logger << "Closing connection..." << endl;
-				if(sendSuccess)closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+				if(sendSuccess)closeSocket(ssl, io, fd);
 				return;
 			}
 
@@ -607,9 +637,9 @@ void ServiceTask::run()
 				{
 					res.setHTTPResponseStatus(HTTPResponseStatus::ReqEntityLarge);
 					res.addHeaderValue(HttpResponse::Connection, "close");
-					bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, res.generateResponse());
+					bool sendSuccess = sendData(ssl, io, fd, res.generateResponse());
 					logger << "Closing connection..." << endl;
-					if(sendSuccess)closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+					if(sendSuccess)closeSocket(ssl, io, fd);
 					return;
 				}
 			}
@@ -618,7 +648,7 @@ void ServiceTask::run()
 				logger << "Bad lexical cast exception while reading http Content-Length" << endl;
 			}
 
-			if(configData.cntMap[req->getCntxt_name()]!="true")
+			if(ConfigurationData::getInstance()->cntMap[req->getCntxt_name()]!="true")
 			{
 				req->setCntxt_name("default");
 				req->setCntxt_root(webpath+"default");
@@ -649,7 +679,7 @@ void ServiceTask::run()
 					while(true)
 					{
 						string chunksizstr;
-						bool fl = readLine(isSSLEnabled, ssl, sslHandler, io, fd, chunksizstr);
+						bool fl = readLine(ssl, io, fd, chunksizstr);
 						if(!fl)
 						{
 							return;
@@ -657,11 +687,11 @@ void ServiceTask::run()
 						chunksizstr = chunksizstr.substr(0, chunksizstr.length()-1);
 						if(chunksizstr=="0")
 						{
-							closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+							closeSocket(ssl, io, fd);
 							break;
 						}
 						long techunkSiz = StringUtil::fromHEX(chunksizstr) + 2;//2 - \r\n
-						fl = readData(isSSLEnabled, ssl, sslHandler, io, fd, (int)techunkSiz, content);
+						fl = readData(ssl, io, fd, (int)techunkSiz, content);
 						if(!fl)
 						{
 							return;
@@ -671,7 +701,7 @@ void ServiceTask::run()
 				else */
 				if(cntlen>0)
 				{
-					if(!readData(isSSLEnabled, ssl, sslHandler, io, fd, cntlen, content))
+					if(!readData(ssl, io, fd, cntlen, content))
 					{
 						return;
 					}
@@ -693,7 +723,7 @@ void ServiceTask::run()
 					while(true)
 					{
 						string chunksizstr;
-						bool fl = readLine(isSSLEnabled, ssl, sslHandler, io, fd, chunksizstr);
+						bool fl = readLine(ssl, io, fd, chunksizstr);
 						if(!fl)
 						{
 							return;
@@ -701,11 +731,11 @@ void ServiceTask::run()
 						chunksizstr = chunksizstr.substr(0, chunksizstr.length()-1);
 						if(chunksizstr=="0")
 						{
-							closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+							closeSocket(ssl, io, fd);
 							break;
 						}
 						long techunkSiz = StringUtil::fromHEX(chunksizstr) + 2;//2 - \r\n
-						fl = readData(isSSLEnabled, ssl, sslHandler, io, fd, (int)techunkSiz, content);
+						fl = readData(ssl, io, fd, (int)techunkSiz, content);
 						if(!fl)
 						{
 							return;
@@ -751,7 +781,7 @@ void ServiceTask::run()
 					string content;
 					if(cntlen>0)
 					{
-						if(!readData(isSSLEnabled, ssl, sslHandler, io, fd, cntlen, content))
+						if(!readData(ssl, io, fd, cntlen, content))
 						{
 							return;
 						}
@@ -832,7 +862,7 @@ void ServiceTask::run()
 			}
 			if(req->hasCookie())
 			{
-				if(!configData.sessatserv)
+				if(!ConfigurationData::getInstance()->sessatserv)
 					req->getSession()->setSessionAttributes(req->getCookieInfo());
 				else
 				{
@@ -840,7 +870,7 @@ void ServiceTask::run()
 					logger << id << endl;
 					map<string,string> values;
 #ifdef INC_DSTC
-					if(configData.sessservdistocache)
+					if(ConfigurationData::getInstance()->sessservdistocache)
 						values = getSessionDataFromDistocache(id);
 					else
 #endif
@@ -849,9 +879,26 @@ void ServiceTask::run()
 				}
 			}
 
+			logger << ("Done with request initialization/session setup") << endl;
+
+			void* dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+			if(dlib == NULL)
+			{
+				cerr << dlerror() << endl;
+				throw "Cannot load application shared library";
+			}
+			void* ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
+			if(ddlib == NULL)
+			{
+				cerr << dlerror() << endl;
+				throw "Cannot load application shared library";
+			}
+
+			logger << ("Done with loading libraries") << endl;
+
 			//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
 #ifdef INC_APPFLOW
-			if(configData.appMap[req->getCntxt_name()]!="false")
+			if(ConfigurationData::getInstance()->appMap[req->getCntxt_name()]!="false")
 			{
 				if(dlib == NULL)
 				{
@@ -879,68 +926,80 @@ void ServiceTask::run()
 			}
 #endif
 
+			logger << ("Done with handling appflow") << endl;
+
 			string ext = getFileExtension(req->getUrl());
 			vector<unsigned char> test;
 			string content;
 			string claz;
-			long sessionTimeoutVar = configData.sessionTimeout;
+			long sessionTimeoutVar = ConfigurationData::getInstance()->sessionTimeout;
 
 			bool isContrl = false;
 			try {
-				isContrl = CORSHandler::handle(req, &res, configData);
+				isContrl = CORSHandler::handle(req, &res);
 			} catch(const HTTPResponseStatus& status) {
 				res.setHTTPResponseStatus(status);
 				isContrl = true;
 			}
 
+			logger << ("Done with handling cors") << endl;
+
 			if(!isContrl)
 			{
-				isContrl = securityHandler.handle(configData, req, res, sessionTimeoutVar);
+				isContrl = securityHandler.handle(req, res, sessionTimeoutVar);
 				if(isContrl)
 				{
 					logger << ("Request handled by SecurityHandler") << endl;
 				}
 			}
 
+			logger << ("Done with handling security") << endl;
+
 			ext = getFileExtension(req->getUrl());
 
 			if(!isContrl)
 			{
-				filterHandler.handleIn(req, res, configData, ext);
+				filterHandler.handleIn(req, res, ext);
 
-				isContrl = !filterHandler.handle(req, res, configData, ext);
+				isContrl = !filterHandler.handle(req, res, ext);
 				if(isContrl)
 				{
 					logger << ("Request handled by FilterHandler") << endl;
 				}
 			}
 
+			logger << ("Done with handling filters") << endl;
+
 			ext = getFileExtension(req->getUrl());
 
 			if(!isContrl)
 			{
-				isContrl = authHandler.handle(configData, req, res, ext);
+				isContrl = authHandler.handle(req, res, ext);
 				if(isContrl)
 				{
 					logger << ("Request handled by AuthHandler") << endl;
 				}
 			}
 
+			logger << ("Done with handling auth") << endl;
+
 			ext = getFileExtension(req->getUrl());
 
 			string pthwofile = req->getCntxt_name()+req->getActUrl();
-			if(req->getCntxt_name()!="default" && configData.cntMap[req->getCntxt_name()]=="true")
+			if(req->getCntxt_name()!="default" && ConfigurationData::getInstance()->cntMap[req->getCntxt_name()]=="true")
 			{
 				pthwofile = req->getActUrl();
 			}
 			if(!isContrl)
 			{
-				isContrl = controllerHandler.handle(req, res, configData, ext, pthwofile);
+				isContrl = controllerHandler.handle(req, res, ext, pthwofile);
 				if(isContrl)
 				{
 					logger << ("Request handled by ControllerHandler") << endl;
 				}
 			}
+
+			logger << ("Done with handling controllers") << endl;
 
 			ext = getFileExtension(req->getUrl());
 
@@ -950,23 +1009,25 @@ void ServiceTask::run()
 			//logger << req->toString() << endl;
 			if(req->getMethod()!="TRACE")
 			{
-				string wsUrl = "http://" + configData.ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
+				logger << ("Started processing request - phase II") << endl;
+
+				string wsUrl = "http://" + ConfigurationData::getInstance()->ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
 				if(isContrl)
 				{
 
 				}
 				else if(ext==".form")
 				{
-					formHandler.handle(req, res, configData);
+					formHandler.handle(req, res);
 					logger << ("Request handled by FormHandler") << endl;
 				}
 #ifdef INC_WEBSVC
-				else if(configData.wsdlmap[wsUrl]!="")
+				else if(ConfigurationData::getInstance()->wsdlmap[wsUrl]!="")
 				{
 					if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos
 							|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=string::npos)
 					{
-						soapHandler.handle(req, res, dlib, configData);
+						soapHandler.handle(req, res, dlib);
 					}
 					else
 					{
@@ -980,35 +1041,39 @@ void ServiceTask::run()
 				{
 					bool cntrlit = false;
 #ifdef INC_SCRH
-					cntrlit = scriptHandler.handle(req, res, configData.handoffs, ext, configData.props);
+					cntrlit = scriptHandler.handle(req, res, ConfigurationData::getInstance()->handoffs, ext, ConfigurationData::getInstance()->props);
 #endif
+
+					logger << ("Done handling scripts") << endl;
+
 					if(cntrlit)
 					{
 						logger << ("Request handled by ScriptHandler") << endl;
 					}
 					else
 					{
-						cntrlit = extHandler.handle(req, res, dlib, ddlib, configData, ext);
+						cntrlit = extHandler.handle(req, res, dlib, ddlib, ext);
 						if(cntrlit)
 						{
 							logger << ("Request handled by ExtHandler") << endl;
 						}
+						logger << ("Done handling extra flows") << endl;
 					}
 					if(!cntrlit && ext==".fview")
 					{
-						fviewHandler.handle(req, res, configData.fviewmap);
+						fviewHandler.handle(req, res, ConfigurationData::getInstance()->fviewmap);
 						logger << ("Request handled by FviewHandler") << endl;
 					}
 					else
 					{
 						logger << ("Request for static resource/file") << endl;
-						if(req->isAgentAcceptsCE() && (cntEnc=="gzip" || cntEnc=="deflate") && req->isNonBinary(configData.props[ext]))
+						if(req->isAgentAcceptsCE() && (cntEnc=="gzip" || cntEnc=="deflate") && req->isNonBinary(ConfigurationData::getInstance()->props[ext]))
 						{
 							res.addHeaderValue(HttpResponse::ContentEncoding, cntEnc);
 						}
 
 						if(res.getContent()=="")
-							updateContent(req, &res, configData, ext, techunkSiz);
+							updateContent(req, &res, ext, techunkSiz);
 						else
 						{
 							content = res.getContent();
@@ -1021,7 +1086,7 @@ void ServiceTask::run()
 								res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 								if(res.getHeader(HttpResponse::ContentType)=="")
 								{
-									res.addHeaderValue(HttpResponse::ContentType, configData.props[ext]);
+									res.addHeaderValue(HttpResponse::ContentType, ConfigurationData::getInstance()->props[ext]);
 								}
 								res.setContent(content);
 							}
@@ -1029,7 +1094,7 @@ void ServiceTask::run()
 					}
 				}
 
-				filterHandler.handleOut(req, res, configData, ext);
+				filterHandler.handleOut(req, res, ext);
 			}
 
 			bool isTE = res.isHeaderValue(HttpResponse::TransferEncoding, "chunked");
@@ -1037,6 +1102,8 @@ void ServiceTask::run()
 			{
 				res.addHeaderValue(HttpResponse::ContentEncoding, cntEnc);
 			}
+
+			logger << ("Done setting compression headers") << endl;
 
 			Date cdate(true);
 			DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
@@ -1047,7 +1114,9 @@ void ServiceTask::run()
 
 			//if(req->getConnection()!="")
 			//	res.setConnection("close");
-			storeSessionAttributes(res, req, sessionTimeoutVar, configData.sessatserv);
+			storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->sessatserv);
+
+			logger << ("Done storing session attributes") << endl;
 
 			//An errored request/response phase will close the connection
 			if(StringUtil::toLowerCopy(req->getHeader(HttpRequest::Connection))!="keep-alive" || CastUtil::lexical_cast<int>(res.getStatusCode())>307
@@ -1063,6 +1132,9 @@ void ServiceTask::run()
 
 			//Head should behave exactly as Get but there should be no entity body
 			h1 = res.generateResponse(req->getMethod(), req);
+
+			logger << ("Done generating response content") << endl;
+
 			/*if(req->getMethod()=="HEAD")
 			{
 				h1 = res.generateHeadResponse();
@@ -1082,7 +1154,7 @@ void ServiceTask::run()
 
 			if(res.isHeaderValue(HttpResponse::TransferEncoding, "chunked"))
 			{
-				bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, h1);
+				bool sendSuccess = sendData(ssl, io, fd, h1);
 				if(!sendSuccess)return;
 				unsigned int totlen = getFileSize(req->getUrl().c_str());
 				float parts = (float)totlen/techunkSiz;
@@ -1099,28 +1171,31 @@ void ServiceTask::run()
 						h1 = StringUtil::toHEX(len) + "\r\n";
 						h1 += getFileContents(req->getUrl().c_str(), techunkSiz*var, len);
 						h1 += "\r\n";
-						bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, h1);
+						bool sendSuccess = sendData(ssl, io, fd, h1);
 						if(!sendSuccess)return;
 					}
-					bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, "0\r\n\r\n");
+					bool sendSuccess = sendData(ssl, io, fd, "0\r\n\r\n");
 					if(!sendSuccess)return;
 				}
 			}
 			else
 			{
-				bool sendSuccess = sendData(isSSLEnabled, configData, ssl, sslHandler, io, fd, h1);
+				bool sendSuccess = sendData(ssl, io, fd, h1);
 				if(!sendSuccess)return;
 			}
 
 			if(!cont)
 			{
 				logger << "Closing connection..." << endl;
-				closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+				closeSocket(ssl, io, fd);
 				return;
 			}
 
 			//Logger::info("got new connection to process\n"+req->getFile()+" :: " + res.getStatusCode() + "\n"+req->getCntxt_name() + "\n"+req->getCntxt_root() + "\n"+req->getUrl());
 			delete req;
+
+			dlclose(dlib);
+			dlclose(ddlib);
 			//logger << (alldatlg + "--sent data--DONE") << endl;
 			//sessionMap[sessId] = sess;
 		}
@@ -1136,76 +1211,80 @@ void ServiceTask::run()
 }
 
 
-bool ServiceTask::sendData(bool isSSLEnabled, ConfigurationData configData, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, string h1)
+bool ServiceTask::sendData(SSL* ssl, BIO* io, int fd, string h1)
 {
-	if(isSSLEnabled)
+	if(SSLHandler::getInstance()->getIsSSL())
 	{
 		int r;
 		/* Now perform renegotiation if requested */
-		if(configData.client_auth==CLIENT_AUTH_REHANDSHAKE){
-		  SSL_set_verify(ssl,SSL_VERIFY_PEER |
-			SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
-
-		  /* Stop the client from just resuming the
-			 un-authenticated session */
-		  SSL_set_session_id_context(ssl,
-			(const unsigned char*)&SSLHandler::s_server_auth_session_id_context,
-			sizeof(SSLHandler::s_server_auth_session_id_context));
-
-		  if(SSL_renegotiate(ssl)<=0)
-		  {
-			  logger << "SSL renegotiation error" << endl;
-			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			  return false;
-		  }
-		  if(SSL_do_handshake(ssl)<=0)
-		  {
-			  logger << "SSL renegotiation error" << endl;
-			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			  return false;;
-		  }
-		  ssl->state=SSL_ST_ACCEPT;
-		  if(SSL_do_handshake(ssl)<=0)
-		  {
-			  logger << "SSL handshake error" << endl;
-			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			  return false;;
-		  }
-		}
-		if((r=BIO_write(io, h1.c_str(),h1.length()))<=0)
+		if(ConfigurationData::getInstance()->client_auth==CLIENT_AUTH_REHANDSHAKE)
 		{
-			  logger << "Send failed" << endl;
-			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			  return false;;
+			SSL_set_verify(ssl,SSL_VERIFY_PEER |
+					SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
+
+			/* Stop the client from just resuming the
+				 un-authenticated session */
+			SSL_set_session_id_context(ssl,
+					(const unsigned char*)&SSLHandler::s_server_auth_session_id_context,
+					sizeof(SSLHandler::s_server_auth_session_id_context));
+
+			if(SSL_renegotiate(ssl)<=0)
+			{
+				logger << "SSL renegotiation error" << endl;
+				closeSocket(ssl, io, fd);
+				return false;
+			}
+			if(SSL_do_handshake(ssl)<=0)
+			{
+				logger << "SSL renegotiation error" << endl;
+				closeSocket(ssl, io, fd);
+				return false;;
+			}
+			ssl->state = SSL_ST_ACCEPT;
+			if(SSL_do_handshake(ssl)<=0)
+			{
+				logger << "SSL handshake error" << endl;
+				closeSocket(ssl, io, fd);
+				return false;;
+			}
+		}
+		if((r=BIO_write(io, h1.c_str(), h1.length()))<=0)
+		{
+			logger << "Send failed" << endl;
+			closeSocket(ssl, io, fd);
+			return false;;
 		}
 		if((r=BIO_flush(io))<0)
 		{
-			  logger << "Error flushing BIO" << endl;
-			  closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
-			  return false;;
+			logger << "Error flushing BIO" << endl;
+			closeSocket(ssl, io, fd);
+			return false;;
 		}
-		//sslHandler.closeSSL(fd,ssl,io);
 	}
 	else
 	{
-		int size;
-		if ((size=send(fd,&h1[0] , h1.length(), 0)) <= 0)
+		int r;
+		if ((r=BIO_write(io, h1.c_str() , h1.length())) <= 0)
 		{
 			logger << "send failed" << flush;
-			closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+			closeSocket(ssl, io, fd);
 			return false;
 		}
-		//if(io!=NULL)BIO_free_all(io);
+		if((r=BIO_flush(io))<0)
+		{
+			logger << "Error flushing BIO" << endl;
+			closeSocket(ssl, io, fd);
+			return false;;
+		}
 	}
 	return true;
 }
 
-void ServiceTask::closeSocket(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd)
+void ServiceTask::closeSocket(SSL* ssl, BIO* io, int fd)
 {
-	if(isSSLEnabled)
+	if(SSLHandler::getInstance()->getIsSSL())
 	{
-		sslHandler.closeSSL(fd,ssl,io);
-		if(io!=NULL)BIO_free(io);
+		SSLHandler::getInstance()->closeSSL(fd,ssl,io);
 	}
 	else
 	{
@@ -1214,16 +1293,17 @@ void ServiceTask::closeSocket(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler
 	}
 }
 
-bool ServiceTask::readLine(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, string& line)
+bool ServiceTask::readLine(SSL* ssl, BIO* io, int fd, string& line)
 {
 	/*if(!checkSocketWaitForTimeout(fd, 0, 0, 10))
 	{
 		logger << "Closing connection as there was no data to read in 10us..." << endl;
-		closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+		closeSocket(ssl, io, fd);
 		return false;
 	}*/
 	char buf[MAXBUFLENM];
-	if(isSSLEnabled)
+	memset(buf, 0, sizeof(buf));
+	if(SSLHandler::getInstance()->getIsSSL())
 	{
 		int er=-1;
 		er = BIO_gets(io,buf,BUFSIZZ-1);
@@ -1246,13 +1326,13 @@ bool ServiceTask::readLine(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, B
 			}
 			case SSL_ERROR_ZERO_RETURN:
 			{
-				closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+				closeSocket(ssl, io, fd);
 				return false;
 			}
 			default:
 			{
 				logger << "SSL read problem" << endl;
-				closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+				closeSocket(ssl, io, fd);
 				return false;
 			}
 		}
@@ -1265,7 +1345,7 @@ bool ServiceTask::readLine(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, B
 		er = BIO_gets(io,buf,BUFSIZZ-1);
 		if(er==0)
 		{
-			closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+			closeSocket(ssl, io, fd);
 			logger << "Socket closed before being serviced" << endl;
 			return false;
 		}
@@ -1275,16 +1355,17 @@ bool ServiceTask::readLine(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, B
 	return true;
 }
 
-bool ServiceTask::readData(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, BIO* io, int fd, int cntlen, string& content)
+bool ServiceTask::readData(SSL* ssl, BIO* io, int fd, int cntlen, string& content)
 {
 	/*if(!checkSocketWaitForTimeout(fd, 0, 0, 10))
 	{
 		logger << "Closing connection as there was no data to read in 10us..." << endl;
-		closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+		closeSocket(ssl, io, fd);
 		return false;
 	}*/
 	char buf[MAXBUFLENM];
-	if(isSSLEnabled && cntlen>0)
+	memset(buf, 0, sizeof(buf));
+	if(SSLHandler::getInstance()->getIsSSL() && cntlen>0)
 	{
 		int er=-1;
 		while(cntlen>0)
@@ -1300,13 +1381,13 @@ bool ServiceTask::readData(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, B
 					break;
 				case SSL_ERROR_ZERO_RETURN:
 				{
-					closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+					closeSocket(ssl, io, fd);
 					return false;
 				}
 				default:
 				{
 					logger << "SSL read problem" << endl;
-					closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+					closeSocket(ssl, io, fd);
 					return false;
 				}
 			}
@@ -1328,7 +1409,7 @@ bool ServiceTask::readData(bool isSSLEnabled, SSL* ssl, SSLHandler sslHandler, B
 			logger << "Done reading" << endl;
 			if(er==0)
 			{
-				closeSocket(isSSLEnabled, ssl, sslHandler, io, fd);
+				closeSocket(ssl, io, fd);
 				logger << "Socket closed before being serviced" << endl;
 				return false;
 			}
@@ -1361,14 +1442,14 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		}
 		if(req->hasCookie())
 		{
-			if(!configData.sessatserv)
+			if(!ConfigurationData::getInstance()->sessatserv)
 				req->getSession()->setSessionAttributes(req->getCookieInfo());
 			else
 			{
 				string id = req->getCookieInfoAttribute("FFEADID");
 				map<string,string> values;
 #ifdef INC_DSTC
-				if(configData.sessservdistocache)
+				if(ConfigurationData::getInstance()->sessservdistocache)
 					values = getSessionDataFromDistocache(id);
 				else
 #endif
@@ -1377,7 +1458,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			}
 		}
 
-		if(configData.cntMap[req->getCntxt_name()]!="true")
+		if(ConfigurationData::getInstance()->cntMap[req->getCntxt_name()]!="true")
 		{
 			req->setCntxt_name("default");
 			req->setCntxt_root(webpath+"default");
@@ -1385,8 +1466,21 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		}
 		//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
 
+		void* dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+		if(dlib == NULL)
+		{
+			cerr << dlerror() << endl;
+			throw "Cannot load application shared library";
+		}
+		void* ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
+		if(ddlib == NULL)
+		{
+			cerr << dlerror() << endl;
+			throw "Cannot load application shared library";
+		}
+
 #ifdef INC_APPFLOW
-		if(configData.appMap[req->getCntxt_name()]!="false")
+		if(ConfigurationData::getInstance()->appMap[req->getCntxt_name()]!="false")
 		{
 			if(dlib == NULL)
 			{
@@ -1419,23 +1513,23 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		string content;
 		string claz;
 		//bool isoAuthRes = false;
-		long sessionTimeoutVar = configData.sessionTimeout;
-		bool isContrl = securityHandler.handle(configData, req, res, sessionTimeoutVar);
+		long sessionTimeoutVar = ConfigurationData::getInstance()->sessionTimeout;
+		bool isContrl = securityHandler.handle(req, res, sessionTimeoutVar);
 
-		filterHandler.handleIn(req, res, configData, ext);
+		filterHandler.handleIn(req, res, ext);
 
 		if(!isContrl)
 		{
-			isContrl = authHandler.handle(configData, req, res, ext);
+			isContrl = authHandler.handle(req, res, ext);
 		}
 		string pthwofile = req->getCntxt_name()+req->getActUrl();
-		if(req->getCntxt_name()!="default" && configData.cntMap[req->getCntxt_name()]=="true")
+		if(req->getCntxt_name()!="default" && ConfigurationData::getInstance()->cntMap[req->getCntxt_name()]=="true")
 		{
 			pthwofile = req->getActUrl();
 		}
 		if(!isContrl)
 		{
-			isContrl = controllerHandler.handle(req, res, configData, ext, pthwofile);
+			isContrl = controllerHandler.handle(req, res, ext, pthwofile);
 		}
 
 		/*After going through the controller the response might be blank, just set the HTTP version*/
@@ -1449,21 +1543,21 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			}
 			else if(ext==".form")
 			{
-				formHandler.handle(req, res, configData);
+				formHandler.handle(req, res);
 			}
 #ifdef INC_WEBSVC
 			else if((req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos)
 					&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos)
-					&& configData.wsdlmap[req->getFile()]==req->getCntxt_name())
+					&& ConfigurationData::getInstance()->wsdlmap[req->getFile()]==req->getCntxt_name())
 			{
-				soapHandler.handle(req, res, dlib, configData);
+				soapHandler.handle(req, res, dlib);
 			}
 #endif
 			else
 			{
 				bool cntrlit = false;
 #ifdef INC_SCRH
-				cntrlit = scriptHandler.handle(req, res, configData.handoffs, ext, configData.props);
+				cntrlit = scriptHandler.handle(req, res, ConfigurationData::getInstance()->handoffs, ext, ConfigurationData::getInstance()->props);
 #endif
 				if(cntrlit)
 				{
@@ -1471,16 +1565,16 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 				}
 				else
 				{
-					cntrlit = extHandler.handle(req, res, dlib, ddlib, configData, ext);
+					cntrlit = extHandler.handle(req, res, dlib, ddlib, ext);
 				}
 				if(!cntrlit && ext==".fview")
 				{
-					fviewHandler.handle(req, res, configData.fviewmap);
+					fviewHandler.handle(req, res, ConfigurationData::getInstance()->fviewmap);
 				}
 				else
 				{
 					if(res.getContent()=="")
-						updateContent(req, &res, configData, ext, 8192);
+						updateContent(req, &res, ext, 8192);
 					else
 					{
 						content = res.getContent();
@@ -1493,7 +1587,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 							res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
 							if(res.getHeader(HttpResponse::ContentType)=="")
 							{
-								res.addHeaderValue(HttpResponse::ContentType, configData.props[ext]);
+								res.addHeaderValue(HttpResponse::ContentType, ConfigurationData::getInstance()->props[ext]);
 							}
 							res.setContent(content);
 						}
@@ -1501,7 +1595,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 				}
 			}
 
-			filterHandler.handleOut(req, res, configData, ext);
+			filterHandler.handleOut(req, res, ext);
 		}
 
 		Date cdate(true);
@@ -1512,9 +1606,12 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		string h1;
 		if(req->getHeader("Connection")!="")
 			res.addHeaderValue(HttpResponse::Connection, "close");
-		storeSessionAttributes(res, req, sessionTimeoutVar, configData.sessatserv);
+		storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->sessatserv);
 		//h1 = res.generateResponse();
 		delete req;
+
+		dlclose(dlib);
+		dlclose(ddlib);
 		//logger << (alldatlg + "--sent data--DONE") << endl;
 		//sessionMap[sessId] = sess;
 	}

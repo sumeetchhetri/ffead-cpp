@@ -39,7 +39,7 @@ class FormHandler {
 public:
 	FormHandler();
 	virtual ~FormHandler();
-	static string handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData);
+	static string handle(HttpRequest* req, HttpResponse& res);
 };
 
 #endif /* FORMHANDLER_H_ */

@@ -46,13 +46,14 @@
 #ifdef INC_JOBS
 #include "JobScheduler.h"
 #endif
+#include "SSLHandler.h"
 
 class ConfigurationHandler {
 public:
 	ConfigurationHandler();
 	virtual ~ConfigurationHandler();
-	static ConfigurationData handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,
-			string pubpath,string respath,bool isSSLEnabled,FFEADContext* ffeadContext,ConfigurationData& configurationData);
+	static void handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,
+			string serverRootDirectory,string respath);
 	static void listi(string cwd,string type,bool apDir,strVec &folders);
 	static void configureCibernate(string, string);
 	static void destroyCibernate();

@@ -53,6 +53,7 @@ class BinarySerialize : public SerializeBase {
 	string getSerializationMethodName(string className, string appName, bool which, string type);
 public:
 	BinarySerialize();
+	BinarySerialize(void*);
 	~BinarySerialize();
 
 	template <class T> static string serialize(T t, string appName = "default")

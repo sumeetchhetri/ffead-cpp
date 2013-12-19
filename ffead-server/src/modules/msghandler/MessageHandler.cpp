@@ -28,7 +28,7 @@ MessageHandler::MessageHandler(string path)
 	logger = LoggerFactory::getLogger("MessageHandler");
 	this->path = path;
 }
-MessageHandler* _mess_instance = NULL;
+MessageHandler* MessageHandler::instance = NULL;
 
 Message MessageHandler::readMessageFromQ(string fileName, bool erase)
 {
@@ -42,14 +42,14 @@ Message MessageHandler::readMessageFromQ(string fileName, bool erase)
 		file.seekg(0, ios::beg);
 		if(!file.read(fileContents, 4))
 		{
-			_mess_instance->logger << "Failed to readMessageFromQ" << endl;
+			instance->logger << "Failed to readMessageFromQ" << endl;
 		}
 		int len = (int)AMEFResources::charArrayToLong(fileContents, 4);
 		fileContents = new char[len];
 		file.seekg(4, ios::beg);
 		if(!file.read(fileContents, len))
 		{
-			_mess_instance->logger << "Failed to readMessageFromQ" << endl;
+			instance->logger << "Failed to readMessageFromQ" << endl;
 		}
 		if(erase)
 		{
@@ -58,7 +58,7 @@ Message MessageHandler::readMessageFromQ(string fileName, bool erase)
 			file.seekg(4+len, ios::beg);
 			if(!file.read(remcontents, fileSize))
 			{
-				_mess_instance->logger << "Failed to readMessageFromQ" << endl;
+				instance->logger << "Failed to readMessageFromQ" << endl;
 			}
 		}
 		file.close();
@@ -114,7 +114,7 @@ bool MessageHandler::tempUnSubscribe(string subs,string fileName)
 	{
 		while(getline(myfile1,subscribers))
 		{
-			//_mess_instance->logger << subscribers << flush;
+			//instance->logger << subscribers << flush;
 			break;
 		}
 	}
@@ -152,7 +152,7 @@ void MessageHandler::subscribe(string subs,string fileName)
 	{
 		while(getline(myfile1,subscribers))
 		{
-			//_mess_instance->logger << subscribers << flush;
+			//instance->logger << subscribers << flush;
 			break;
 		}
 	}
@@ -177,7 +177,7 @@ void MessageHandler::unSubscribe(string subs,string fileName)
 	{
 		while(getline(myfile1,subscribers))
 		{
-			//_mess_instance->logger << subscribers << flush;
+			//instance->logger << subscribers << flush;
 			break;
 		}
 	}
@@ -200,17 +200,17 @@ void* MessageHandler::service(void* arg)
 	char buf[MAXBUFLEN];
 	string results;
 	//int bytes = recv(fd, buf, sizeof buf, 0);
-	_mess_instance->server.Receive(fd,results,1024);
+	instance->server.Receive(fd,results,1024);
 	//string temp,results;
 	/*stringstream ss;
 	ss << buf;
 	while(getline(ss,temp))
 	{
-		_mess_instance->logger << temp << flush;
+		instance->logger << temp << flush;
 		results.append(temp);
 	}*/
 	results = results.substr(0,results.find_last_of(">")+1);
-	_mess_instance->logger << results << flush;
+	instance->logger << results << flush;
 
 	if(results.find("<")!=string::npos && results.find(">")!=string::npos)
 	{
@@ -219,72 +219,72 @@ void* MessageHandler::service(void* arg)
 		try
 		{
 			Message msg(results);
-			string fileName = _mess_instance->path+msg.getDestination().getName()+":"+msg.getDestination().getType();
+			string fileName = instance->path+msg.getDestination().getName()+":"+msg.getDestination().getType();
 			if(msg.getDestination().getType()=="Queue")
-				_mess_instance->writeMessageToQ(msg,fileName);
+				instance->writeMessageToQ(msg,fileName);
 			else if(msg.getDestination().getType()=="Topic")
-				_mess_instance->writeMessageToT(msg,fileName);
+				instance->writeMessageToT(msg,fileName);
 		}
 		catch(const Exception& e)
 		{
-			_mess_instance->logger << e.getMessage() << flush;
+			instance->logger << e.getMessage() << flush;
 		}
-		_mess_instance->server.Send(fd,h);
+		instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	_mess_instance->logger << "send failed" << flush;
-		_mess_instance->logger << h << flush;
+		//	instance->logger << "send failed" << flush;
+		instance->logger << h << flush;
 	}
 	else if(results.find("GET FROM ")!=string::npos)
 	{
 		Message msg;
 		if(results.find("Queue")!=string::npos)
 		{
-			StringUtil::replaceFirst(results,"GET FROM ",_mess_instance->path);
-			msg = _mess_instance->readMessageFromQ(results, true);
+			StringUtil::replaceFirst(results,"GET FROM ",instance->path);
+			msg = instance->readMessageFromQ(results, true);
 		}
 		else if(results.find("Topic")!=string::npos)
 		{
 			string subs = results.substr(results.find("-")+1);
 			string te = "-" + subs;
 			StringUtil::replaceFirst(results,te,"");
-			StringUtil::replaceFirst(results,"GET FROM ",_mess_instance->path);
-			msg = _mess_instance->readMessageFromT(results,subs);
+			StringUtil::replaceFirst(results,"GET FROM ",instance->path);
+			msg = instance->readMessageFromT(results,subs);
 		}
 		string h;
 		if(results.find("Queue")!=string::npos || results.find("Topic")!=string::npos)
 		{
 			h = msg.toXml();
-			_mess_instance->logger << h << flush;
+			instance->logger << h << flush;
 		}
 		else
 			h = "Improper Destination";
-		_mess_instance->server.Send(fd,h);
+		instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	_mess_instance->logger << "send failed" << flush;
+		//	instance->logger << "send failed" << flush;
 	}
 	else if(results.find("SUBSCRIBE ")!=string::npos)
 	{
 		int len = results.find("TO") - results.find("SUBSCRIBE ") - 11;
 		string subs  = results.substr(results.find("SUBSCRIBE ")+10,len);
 		results = results.substr(results.find("TO ")+3);
-		results = (_mess_instance->path+results+":Subslist");
-		_mess_instance->subscribe(subs,results);
+		results = (instance->path+results+":Subslist");
+		instance->subscribe(subs,results);
 		string h = "Subscribed";
-		_mess_instance->server.Send(fd,h);
+		instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	_mess_instance->logger << "send failed" << flush;
+		//	instance->logger << "send failed" << flush;
 	}
 	else if(results.find("UNSUBSCRIBE ")!=string::npos)
 	{
 		int len = results.find("TO") - results.find("UNSUBSCRIBE ") - 12;
 		string subs  = results.substr(results.find("UNSUBSCRIBE ")+11,len);
 		results = results.substr(results.find("TO ")+3);
-		results = (_mess_instance->path+results+":Subslist");
-		_mess_instance->subscribe(subs,results);
+		results = (instance->path+results+":Subslist");
+		instance->subscribe(subs,results);
 		string h = "Unsubscribed";
-		_mess_instance->server.Send(fd,h);
+		instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	_mess_instance->logger << "send failed" << flush;
+		//	instance->logger << "send failed" << flush;
 	}
 	memset(&buf[0], 0, sizeof(buf));
 	close(fd);
@@ -294,27 +294,30 @@ void* MessageHandler::service(void* arg)
 
 void MessageHandler::init(string path)
 {
-	if(_mess_instance==NULL)
+	if(instance==NULL)
 	{
-		_mess_instance = new MessageHandler(path);
-		_mess_instance->running = false;
+		instance = new MessageHandler(path);
+		instance->running = false;
 	}
 }
 
 void MessageHandler::trigger(string port,string path)
 {
 	init(path);
-	if(_mess_instance->running)
+	if(instance->running)
 		return;
 	Server serv(port,false,500,&service,2);
-	_mess_instance->server = serv;
-	_mess_instance->server.start();
-	_mess_instance->running = true;
+	instance->server = serv;
+	instance->server.start();
+	instance->running = true;
 	return;
 }
 
 void MessageHandler::stop()
 {
-	_mess_instance->server.stop();
+	if(instance!=NULL) {
+		instance->server.stop();
+		delete instance;
+	}
 }
 

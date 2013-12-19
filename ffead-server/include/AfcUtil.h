@@ -43,7 +43,6 @@ class ClassStructure;
 class Reflection;
 
 class AfcUtil {
-	static Logger logger;
 public:
 	AfcUtil();
 	virtual ~AfcUtil();

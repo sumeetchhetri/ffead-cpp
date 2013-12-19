@@ -32,11 +32,10 @@
 typedef ClassInfo (*FunPtr) ();
 
 class SecurityHandler {
-	static Logger logger;
 public:
 	SecurityHandler();
 	virtual ~SecurityHandler();
-	static bool handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, long sessionTimeout);
+	static bool handle(HttpRequest* req, HttpResponse& res, long sessionTimeout);
 };
 
 #endif /* SECURITYHANDLER_H_ */

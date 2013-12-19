@@ -31,13 +31,13 @@ ExtHandler::~ExtHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib, ConfigurationData configData ,string ext)
+bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib,string ext)
 {
-	string resourcePath = configData.resourcePath;
-	map<string, string> tmplMap = configData.tmplMap;
-	map<string, string> vwMap = configData.vwMap;
-	map<string, string> props = configData.props;
-	map<string, string> ajaxIntfMap = configData.ajaxIntfMap;
+	string resourcePath = ConfigurationData::getInstance()->resourcePath;
+	map<string, string> tmplMap = ConfigurationData::getInstance()->tmplMap;
+	map<string, string> vwMap = ConfigurationData::getInstance()->vwMap;
+	map<string, string> props = ConfigurationData::getInstance()->props;
+	map<string, string> ajaxIntfMap = ConfigurationData::getInstance()->ajaxIntfMap;
 
 	Logger logger = LoggerFactory::getLogger("ExtHandler");
 	bool cntrlit = false;
@@ -89,11 +89,6 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 					vemp.push_back(tem);
 				}
 				string libName = Constants::INTER_LIB_FILE;
-				void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-				if(dlib == NULL){
-				 cerr << dlerror() << endl;
-				 exit(-1);
-				}
 				string funcName;
 				string metn,re;
 				StringUtil::replaceAll(claz, "::", "_");
@@ -172,7 +167,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 	{
 		cntrlit = true;
 
-		void *_temp = configData.ffeadContext->getBean("dview_"+req->getCntxt_name()+vwMap[req->getCntxt_name()+req->getFile()], req->getCntxt_name());
+		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("dview_"+req->getCntxt_name()+vwMap[req->getCntxt_name()+req->getFile()], req->getCntxt_name());
 		if(_temp!=NULL)
 		{
 			DynamicView *thrd = (DynamicView*)_temp;
@@ -208,10 +203,10 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 		if(ddlib != NULL)
 		{
 
-			void *_temp = configData.ffeadContext->getBean("template_"+req->getCntxt_name()+tmplMap[req->getCntxt_name()+req->getFile()], req->getCntxt_name());
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("template_"+req->getCntxt_name()+tmplMap[req->getCntxt_name()+req->getFile()], req->getCntxt_name());
 			if(_temp!=NULL)
 			{
-				TemplateHandler *thrd = static_cast<TemplateHandler*>(_temp);
+				TemplateHandler *thrd = (TemplateHandler*)_temp;
 				if(thrd!=NULL)
 				{
 					Context cnt = thrd->getContext();
@@ -238,6 +233,11 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 						//logger << endl << "inside dcp " << meth << endl;
 						TemplatePtr f =  (TemplatePtr)mkr;
 						content = f(args);
+
+						for (it=cnt.begin();it!=cnt.end();it++) {
+							Object o = it->second;
+							delete o.getVoidPointer();
+						}
 						//string patf;
 						//patf = req->getCntxt_root() + "/dcp_" + file + ".html";
 						//content = getContentStr(patf,lprops[req->getDefaultLocale()],ext);

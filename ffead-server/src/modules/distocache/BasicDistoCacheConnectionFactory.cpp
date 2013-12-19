@@ -42,7 +42,7 @@ void BasicDistoCacheConnectionFactory::init(string host, int port, bool isSSL) {
 
 
 void BasicDistoCacheConnectionFactory::destroy() {
-	if(instance==NULL)
+	if(instance!=NULL)
 	{
 		delete instance;
 	}

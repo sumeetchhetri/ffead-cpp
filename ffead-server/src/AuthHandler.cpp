@@ -49,11 +49,11 @@ string AuthHandler::getFileExtension(const string& file)
 	return ext;
 }
 
-bool AuthHandler::handle(ConfigurationData configData, HttpRequest* req, HttpResponse& res, string ext)
+bool AuthHandler::handle(HttpRequest* req, HttpResponse& res, string ext)
 {
-	map<string, string> autMap = configData.autMap;
-	map<string, string> autpattMap = configData.autpattMap;
-	map<string, vector<string> > filterMap = configData.filterMap;
+	map<string, string> autMap = ConfigurationData::getInstance()->autMap;
+	map<string, string> autpattMap = ConfigurationData::getInstance()->autpattMap;
+	map<string, vector<string> > filterMap = ConfigurationData::getInstance()->filterMap;
 
 	Logger logger = LoggerFactory::getLogger("AuthHandler");
 	bool isContrl = false;
@@ -108,8 +108,8 @@ bool AuthHandler::handle(ConfigurationData configData, HttpRequest* req, HttpRes
 		else if(claz.find("class:")!=string::npos)
 		{
 			claz = claz.substr(claz.find(":")+1);
-			void *_temp = configData.ffeadContext->getBean("authhandler_"+req->getCntxt_name()+claz, req->getCntxt_name());
-			AuthController *authc = static_cast<AuthController*>(_temp);
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("authhandler_"+req->getCntxt_name()+claz, req->getCntxt_name());
+			AuthController *authc = (AuthController*)_temp;
 			if(authc!=NULL)
 			{
 				isContrl = authc->handle(req,&res);

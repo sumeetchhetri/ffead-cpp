@@ -17,12 +17,31 @@
 
 Reflector::Reflector()
 {
+	dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+	if(dlib == NULL)
+	{
+		cerr << dlerror() << endl;
+		throw "Cannot load reflection shared library";
+	}
+	dlibinstantiated = true;
+}
 
+Reflector::Reflector(void* dlib)
+{
+	if(dlib == NULL)
+	{
+		throw "Cannot load reflection shared library";
+	}
+	this->dlib = dlib;
+	dlibinstantiated = false;
 }
 
 Reflector::~Reflector()
 {
-
+	if(dlibinstantiated)
+	{
+		dlclose(dlib);
+	}
 }
 void Reflector::cleanUp()
 {
@@ -43,13 +62,6 @@ ClassInfo Reflector::getClassInfo(string className,string appName)
 {
 	StringUtil::replaceAll(className, "::", "_");
 	ClassInfo info;
-	string libName = Constants::INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		cerr << dlerror() << endl;
-		exit(-1);
-	}
 	string methodname = appName + "getReflectionCIFor"+className;
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef ClassInfo (*RfPtr) ();

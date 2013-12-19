@@ -43,7 +43,7 @@ class ExtHandler {
 public:
 	ExtHandler();
 	virtual ~ExtHandler();
-	static bool handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib, ConfigurationData configData ,string ext);
+	static bool handle(HttpRequest* req, HttpResponse& res, void* dlib, void* ddlib, string ext);
 };
 
 #endif /* EXTHANDLER_H_ */

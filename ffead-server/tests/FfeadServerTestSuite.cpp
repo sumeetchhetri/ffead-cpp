@@ -63,16 +63,27 @@ int main()
 		}
 	}
 
+	string sslFile = props["SERVER_SSL_FILE"];
+
 	cout << "Server IP - " << ip <<endl;
 	cout << "Server Port - " << port <<endl;
 	cout << "Server SSL Enabled - " << CastUtil::lexical_cast<string>(sslEnabled) <<endl;
+	if(sslEnabled)
+	{
+		cout << "Server SSL File - " << sslFile <<endl;
+	}
 
 	timerc.start();
 	for (int var = 0; var < total; ++var)
 	{
 		ClientInterface* client;
 		if(sslEnabled)
-			client = new SSLClient;
+		{
+			if(sslFile!="")
+				client = new SSLClient(sslFile);
+			else
+				client = new SSLClient;
+		}
 		else
 			client = new Client;
 		if(testCases[var].size()>=4)

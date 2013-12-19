@@ -123,7 +123,7 @@ void ThreadPool::initializeThreads()
 	wpool->start();
 	pollerStarted = false;
 	complete = false;
-	m_mutex = new Mutex;
+	m_mutex = new ConditionMutex ;
 }
 
 void ThreadPool::start()
@@ -139,17 +139,25 @@ void* ThreadPool::poll(void *arg) {
 	bool fl = ths->runFlag;
 	ths->m_mutex->unlock();
 	while (fl) {
-		if (!ths->prioritypooling && ths->wpool->tasksPending()) {
-			Task *task = ths->wpool->getTask();
-			if(task!=NULL)
+		//ths->m_mutex->wait();
+		if (!ths->prioritypooling) {
+			while(ths->wpool->tasksPending())
 			{
-				ths->submitInternal(task);
+				Task *task = ths->wpool->getTask();
+				if(task!=NULL)
+				{
+					ths->submitInternal(task);
+				}
+				Thread::mSleep(1);
 			}
-		} else if (ths->prioritypooling && ths->wpool->tasksPPending()) {
-			Task *task = ths->wpool->getPTask();
-			if(task!=NULL)
-			{
-				ths->submitInternal(task);
+		} else if (ths->prioritypooling) {
+			while(ths->wpool->tasksPPending()) {
+				Task *task = ths->wpool->getPTask();
+				if(task!=NULL)
+				{
+					ths->submitInternal(task);
+				}
+				Thread::mSleep(1);
 			}
 		}
 		Thread::mSleep(1);
@@ -220,6 +228,7 @@ void ThreadPool::submit(Task &task, int priority) {
 	} else {
 		wpool->addPTask(task);
 	}
+	//m_mutex->interrupt();
 }
 void ThreadPool::submit (Task* task) {
 	submit(*task);
@@ -238,6 +247,7 @@ void ThreadPool::submit (Task &task) {
 	} else {
 		wpool->addPTask(task);
 	}
+	//m_mutex->interrupt();
 }
 void ThreadPool::schedule(Task* task, long long tunit, int type) {
 	schedule(*task, tunit, type);
@@ -256,6 +266,7 @@ void ThreadPool::schedule(Task &task, long long tunit, int type) {
 	} else {
 		wpool->addPTask(task);
 	}
+	//m_mutex->interrupt();
 }
 
 void ThreadPool::submit(FutureTask *task, int priority) {
@@ -276,6 +287,7 @@ void ThreadPool::submit(FutureTask &task, int priority) {
 		wpool->addPTask(&task);
 	}
 	task.isFuture = true;
+	//m_mutex->interrupt();
 }
 void ThreadPool::submit(FutureTask *task) {
 	submit(*task);
@@ -295,6 +307,7 @@ void ThreadPool::submit(FutureTask &task) {
 		wpool->addPTask(&task);
 	}
 	task.isFuture = true;
+	//m_mutex->interrupt();
 }
 void ThreadPool::schedule(FutureTask *task, long long tunit, int type) {
 	schedule(*task, tunit, type);
@@ -314,6 +327,7 @@ void ThreadPool::schedule(FutureTask &task, long long tunit, int type) {
 		wpool->addPTask(&task);
 	}
 	task.isFuture = true;
+	//m_mutex->interrupt();
 }
 
 ThreadPool::~ThreadPool() {
@@ -333,7 +347,7 @@ ThreadPool::~ThreadPool() {
 		m_mutex->lock();
 		fl = this->complete;
 		m_mutex->unlock();
-		Thread::mSleep(1);
+		Thread::sSleep(1);
 	}
 	delete poller;
 	delete wpool;

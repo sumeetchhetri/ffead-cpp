@@ -41,6 +41,7 @@ void SelEpolKqEvPrt::initialize(int sockfd)
 	#endif
 	#ifdef USE_EPOLL
 		epoll_handle = epoll_create(MAXDESCRIPTORS);
+		memset(&ev, 0, sizeof(ev));
 	#endif
 	#ifdef USE_KQUEUE
 		kq = kqueue();

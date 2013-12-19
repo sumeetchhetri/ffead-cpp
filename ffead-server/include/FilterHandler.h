@@ -34,12 +34,9 @@ class FilterHandler {
 public:
 	FilterHandler();
 	virtual ~FilterHandler();
-	static void handleIn(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
-			string ext);
-	static bool handle(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
-			string ext);
-	static void handleOut(HttpRequest* req, HttpResponse& res, ConfigurationData configData,
-			string ext);
+	static void handleIn(HttpRequest* req, HttpResponse& res, string ext);
+	static bool handle(HttpRequest* req, HttpResponse& res, string ext);
+	static void handleOut(HttpRequest* req, HttpResponse& res, string ext);
 };
 
 #endif /* FILTERHANDLER_H_ */

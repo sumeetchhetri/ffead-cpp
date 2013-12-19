@@ -78,7 +78,7 @@ bool Client::connectionUnresolv(string host,int port)
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
-
+    memset(s, 0, INET6_ADDRSTRLEN);
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -153,6 +153,7 @@ string Client::getTextData(string hdrdelm,string cntlnhdr)
 	string alldat;
 	int cntlen;
 	char buf[MAXBUFLE];
+	memset(buf, 0, MAXBUFLE);
 	BIO* sbio=BIO_new_socket(sockfd,BIO_NOCLOSE);
 	BIO* io=BIO_new(BIO_f_buffer());
 	BIO_push(io,sbio);
@@ -277,6 +278,7 @@ string Client::getData()
 {
 	int numbytes;
 	char buf[MAXBUFLE];
+	memset(buf, 0, sizeof(buf));
 	while ((numbytes = recv(sockfd, buf, MAXBUFLE-1, 0)) == -1)
 	{
 		//perror("recv");

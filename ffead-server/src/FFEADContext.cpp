@@ -113,6 +113,7 @@ FFEADContext::~FFEADContext()
 
 void* FFEADContext::getBean(Bean bean)
 {
+	Reflector reflector;
 	void *_temp = NULL;
 	string type;
 	if(bean.inbuilt!="" && bean.value!="")
@@ -183,7 +184,6 @@ void* FFEADContext::getBean(Bean bean)
 	}
 	else if(bean.injectAs=="" || bean.injs.size()==0)
 	{
-		Reflector reflector;
 		args argus;
 		ClassInfo clas = reflector.getClassInfo(bean.clas, bean.appName);
 		Constructor ctor = clas.getConstructor(argus);
@@ -191,7 +191,6 @@ void* FFEADContext::getBean(Bean bean)
 	}
 	else if(bean.injectAs=="prop")
 	{
-		Reflector reflector;
 		args argus;
 		vals valus;
 		ClassInfo clas = reflector.getClassInfo(bean.clas, bean.appName);
@@ -220,7 +219,6 @@ void* FFEADContext::getBean(Bean bean)
 	}
 	else if(bean.injectAs=="cons")
 	{
-		Reflector reflector;
 		args argus;
 		vals valus;
 		ClassInfo clas = reflector.getClassInfo(bean.clas, bean.appName);
@@ -243,7 +241,6 @@ void* FFEADContext::getBean(Bean bean)
 	}
 	else if(bean.injectAs=="intf")
 	{
-		Reflector reflector;
 		args argus;
 		vals valus;
 		ClassInfo clas = reflector.getClassInfo(bean.clas, bean.appName);

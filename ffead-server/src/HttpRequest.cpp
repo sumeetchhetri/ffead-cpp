@@ -1662,9 +1662,9 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 			string h = CastUtil::lexical_cast<string>((int)rn);
 
 			string boundary = this->getContent_boundary();
-			fprintf(stderr,boundary.c_str());
-			fprintf(stderr,value.c_str());
-			fflush(stderr);
+			//fprintf(stderr,boundary.c_str());
+			//fprintf(stderr,value.c_str());
+			//fflush(stderr);
 
 			string retval;
 			string delb = boundary+"\r\n";
@@ -1688,8 +1688,8 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 				if(parameters.at(j)=="" || parameters.at(j).find_first_not_of(" ")==string::npos
 						|| parameters.at(j).find_first_not_of("\r\n")==string::npos)
 					continue;
-				fprintf(stderr,parameters.at(j).c_str());
-				fflush(stderr);
+				//fprintf(stderr,parameters.at(j).c_str());
+				//fflush(stderr);
 				MultipartContent datf;
 				string parm = parameters.at(j);
 				retval+= parm + "\nparm";
@@ -2678,9 +2678,13 @@ string HttpRequest::getQueryParam(string key)
 	return "";
 }
 
-bool HttpRequest::hasCookie() const
+bool HttpRequest::hasCookie()
 {
-	return this->cookie;
+	string ffeadid;
+	if(cookieattrs.find("FFEADID")!=cookieattrs.end())
+		ffeadid = cookieattrs["FFEADID"];
+	StringUtil::trim(ffeadid);
+	return this->cookie && ffeadid!="";
 }
 
 map<int,string> HttpRequest::getAuthOrderinfo() const

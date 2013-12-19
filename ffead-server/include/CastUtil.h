@@ -28,6 +28,7 @@
 #include <cxxabi.h>
 #include "cstring"
 #include <stdio.h>
+#include <assert.h>
 using namespace std;
 
 class CastUtil {
@@ -38,7 +39,7 @@ class CastUtil {
 		using namespace abi;
 		demangled = __cxa_demangle(mangled, NULL, 0, &status);
 		string s(demangled);
-		delete demangled;
+		free(demangled);
 		return s;
 	}
 	template <typename T> static string getClassName(T t)
@@ -60,6 +61,16 @@ public:
 	template <typename T> static T lexical_cast(const short& val)
 	{
 		T t;
+		if(getClassName(t)=="std::string")
+		{
+			const int n = snprintf(NULL, 0, "%d", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%d", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
+			return string(ty);
+		}
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -76,6 +87,16 @@ public:
 	template <typename T> static T lexical_cast(const unsigned short& val)
 	{
 		T t;
+		if(getClassName(t)=="std::string")
+		{
+			const int n = snprintf(NULL, 0, "%d", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%d", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
+			return string(ty);
+		}
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -92,6 +113,16 @@ public:
 	template <typename T> static T lexical_cast(const int& val)
 	{
 		T t;
+		if(getClassName(t)=="std::string")
+		{
+			const int n = snprintf(NULL, 0, "%d", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%d", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
+			return string(ty);
+		}
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -108,6 +139,16 @@ public:
 	template <typename T> static T lexical_cast(const unsigned int& val)
 	{
 		T t;
+		if(getClassName(t)=="std::string")
+		{
+			const int n = snprintf(NULL, 0, "%u", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%u", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
+			return string(ty);
+		}
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -124,6 +165,16 @@ public:
 	template <typename T> static T lexical_cast(const long& val)
 	{
 		T t;
+		if(getClassName(t)=="std::string")
+		{
+			const int n = snprintf(NULL, 0, "%ld", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%ld", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
+			return string(ty);
+		}
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -140,6 +191,16 @@ public:
 	template <typename T> static T lexical_cast(const unsigned long& val)
 	{
 		T t;
+		if(getClassName(t)=="std::string")
+		{
+			const int n = snprintf(NULL, 0, "%lu", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%lu", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
+			return string(ty);
+		}
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -156,6 +217,16 @@ public:
 	template <typename T> static T lexical_cast(const long long& val)
 	{
 		T t;
+		if(getClassName(t)=="std::string")
+		{
+			const int n = snprintf(NULL, 0, "%lld", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%lld", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
+			return string(ty);
+		}
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -172,6 +243,16 @@ public:
 	template <typename T> static T lexical_cast(const unsigned long long& val)
 	{
 		T t;
+		if(getClassName(t)=="std::string")
+		{
+			const int n = snprintf(NULL, 0, "%llu", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%llu", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
+			return string(ty);
+		}
 		stringstream ss;
 		ss << val;
 		ss >> t;
@@ -190,8 +271,12 @@ public:
 		T t;
 		if(getClassName(t)=="std::string")
 		{
-			char ty[1056];
-			snprintf(ty, 1056, "%f", val);
+			const int n = snprintf(NULL, 0, "%f", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%f", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
 			return string(ty);
 		}
 		stringstream ss;
@@ -212,8 +297,12 @@ public:
 		T t;
 		if(getClassName(t)=="std::string")
 		{
-			char ty[1056];
-			snprintf(ty, 1056, "%Lf", val);
+			const int n = snprintf(NULL, 0, "%Lf", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%Lf", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
 			return string(ty);
 		}
 		stringstream ss;
@@ -234,8 +323,12 @@ public:
 		T t;
 		if(getClassName(t)=="std::string")
 		{
-			char ty[1056];
-			snprintf(ty, 1056, "%f", val);
+			const int n = snprintf(NULL, 0, "%f", val);
+			char ty[n+1];
+			memset (ty,0,n+1);
+			int c = snprintf(ty, n+1, "%f", val);
+			assert(ty[n] == '\0');
+			assert(c == n);
 			return string(ty);
 		}
 		stringstream ss;
