@@ -17,6 +17,8 @@ string CompressionUtil::_compress(char* infile, bool isGz, bool retu, char* toFi
 
 	unsigned char in[chunkSize];
 	unsigned char out[chunkSize];
+	memset(in, 0, sizeof(in));
+	memset(out, 0, sizeof(out));
 
     int ret, flush;
     unsigned int have;
@@ -112,6 +114,8 @@ string CompressionUtil::_uncompress(char* infile, bool isGz, bool retu, char* to
 
 	unsigned char in[chunkSize];
 	unsigned char out[chunkSize];
+	memset(in, 0, sizeof(in));
+	memset(out, 0, sizeof(out));
 
     int ret, flush;
     unsigned int have;
@@ -221,6 +225,7 @@ string CompressionUtil::_uncompress(char* infile, bool isGz, bool retu, char* to
 string CompressionUtil::_compress(char* datain, size_t insize, bool eostream, bool isGz, int chunkSize, bool retu, char* toFile)
 {
 	unsigned char out[chunkSize];
+	memset(out, 0, sizeof(out));
 
     int ret, flush;
     unsigned int have;
@@ -381,6 +386,7 @@ string CompressionUtil::_uncompress(char* datain, size_t insize, bool isGz, bool
     unsigned have;
     z_stream strm;
     unsigned char out[CHUNK];
+	memset(out, 0, sizeof(out));
 
     string s;
     ofstream ofs;

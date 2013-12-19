@@ -174,7 +174,8 @@ CPP_SRCS += \
 ../src/MultipartContent.cpp \
 ../src/LoggerFactory.cpp \
 ../src/NBServer.cpp \
-../src/ScriptHandler.cpp
+../src/ScriptHandler.cpp \
+../src/SSLCommon.cpp
 
 
 
@@ -263,7 +264,8 @@ OBJS += \
 ./MultipartContent.o \
 ./LoggerFactory.o \
 ./NBServer.o \
-./ScriptHandler.o
+./ScriptHandler.o \
+./SSLCommon.o
 
 
 
@@ -353,7 +355,8 @@ CPP_DEPS += \
 ./MultipartContent.d \
 ./LoggerFactory.d \
 ./NBServer.d \
-./ScriptHandler.d
+./ScriptHandler.d \
+./SSLCommon.d
 
 
 # Each subdirectory must supply rules for building sources it contributes

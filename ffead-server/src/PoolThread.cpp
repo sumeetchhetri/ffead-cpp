@@ -41,7 +41,7 @@ void* PoolThread::run(void *arg)
 					task->run();
 				else
 				{
-					FutureTask* ftask = static_cast<FutureTask*>(task);
+					FutureTask* ftask = dynamic_cast<FutureTask*>(task);
 					if(ftask!=NULL)
 					{
 						ftask->result = ftask->call();
@@ -65,7 +65,7 @@ void* PoolThread::run(void *arg)
 				}
 				if(task->isFuture)
 				{
-					FutureTask* ftask = static_cast<FutureTask*>(task);
+					FutureTask* ftask = dynamic_cast<FutureTask*>(task);
 					if(ftask!=NULL)
 					{
 						ftask->taskComplete();
@@ -80,15 +80,15 @@ void* PoolThread::run(void *arg)
 				}
 				if(task->isFuture)
 				{
-					FutureTask* ftask = static_cast<FutureTask*>(task);
+					FutureTask* ftask = dynamic_cast<FutureTask*>(task);
 					if(ftask!=NULL)
 					{
 						ftask->taskComplete();
 					}
 				}
 			}
-			ths->release();
 		}
+		ths->release();
 		ths->m_mutex->lock();
 		fl = ths->runFlag;
 		ths->m_mutex->unlock();

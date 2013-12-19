@@ -113,7 +113,7 @@ class ConfigurationData {
 	ConfigurationData();
 	static ConfigurationData* instance;
 public:
-	string key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_auth_mode,srv_auth_file,ip_address,resourcePath;
+	string cert_file,key_file,dh_file,ca_list,rand_file,sec_password,srv_auth_prvd,srv_auth_mode,srv_auth_file,ip_address,resourcePath;
 	int client_auth;
 	map<string, vector<string> > filterMap;
 	resFuncMap rstCntMap;
@@ -122,9 +122,9 @@ public:
 	map<string, Element> formMap;
 	strVec cmpnames;
 	map<string, string> sprops,props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap,ajaxIntfMap,dcpsss, tpes;
-	long sessionTimeout, sessionFileLockTimeout;
+	long sessionTimeout, sessionFileLockTimeout, isDHParams;
 	bool sessatserv, sessservdistocache;
-	FFEADContext* ffeadContext;
+	FFEADContext ffeadContext;
 	CorsConfig corsConfig;
 	static ConfigurationData* getInstance();
 	static void clearInstance();

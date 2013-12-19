@@ -53,7 +53,7 @@ public:
 	ConfigurationHandler();
 	virtual ~ConfigurationHandler();
 	static void handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,
-			string serverRootDirectory,string respath,FFEADContext* ffeadContext);
+			string serverRootDirectory,string respath);
 	static void listi(string cwd,string type,bool apDir,strVec &folders);
 	static void configureCibernate(string, string);
 	static void destroyCibernate();

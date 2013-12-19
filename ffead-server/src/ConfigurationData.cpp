@@ -37,8 +37,6 @@ ConfigurationData* ConfigurationData::getInstance() {
 
 void ConfigurationData::clearInstance() {
 	if(instance!=NULL) {
-		instance->ffeadContext->clear();
-		delete instance->ffeadContext;
 		delete instance;
 	}
 }

@@ -1,9 +1,11 @@
+CERTFILE=server.pem
 KEYFILE=server.pem
 PASSWORD=password
 DHFILE=dh1024.pem
 CA_LIST=root.pem
 RANDOM=random.pem
-CLIENT_SEC_LEVEL=
+ISDH_PARAMS=true
+CLIENT_SEC_LEVEL=0
 
 SRV_AUTH_PRVD=true
 SRV_AUTH_MODE=file

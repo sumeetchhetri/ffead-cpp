@@ -50,8 +50,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 		else
 			controller = urlMap[req->getCntxt_name()+ext];
 
-		void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("controller_"+req->getCntxt_name()+controller, req->getCntxt_name());
-		Controller* thrd = static_cast<Controller*>(_temp);
+		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("controller_"+req->getCntxt_name()+controller, req->getCntxt_name());
+		Controller* thrd = (Controller*)_temp;
 		if(thrd!=NULL)
 		{
 			try{
@@ -194,7 +194,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 			//logger << "inside restcontroller logic ..." << endl;
 			Reflector ref;
 			ClassInfo srv = ref.getClassInfo(rft.clas, req->getCntxt_name());
-			void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("restcontroller_"+req->getCntxt_name()+rft.clas, req->getCntxt_name());
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+req->getCntxt_name()+rft.clas, req->getCntxt_name());
 			RestController* rstcnt = (RestController*)_temp;
 			if(rstcnt==NULL)
 			{

@@ -123,6 +123,9 @@
     #include <unistd.h>
     #define pwd getcwd
  #endif
+#if defined(OS_LINUX) || defined(OS_SOLARIS)
+#include <execinfo.h>
+#endif
 
 
 //#define CA_LIST "root.pem"

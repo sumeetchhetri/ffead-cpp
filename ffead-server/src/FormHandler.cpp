@@ -83,13 +83,13 @@ string FormHandler::handle(HttpRequest* req, HttpResponse& res)
 	json += "}";
 	logger << json << endl;
 
-	void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("form_"+req->getCntxt_name()+ele.getAttribute("controller"), req->getCntxt_name());
+	void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("form_"+req->getCntxt_name()+ele.getAttribute("controller"), req->getCntxt_name());
 	logger << ("Fetching Formcontroller for " + ele.getAttribute("bean")) << endl;
 	if(_temp!=NULL)
 	{
 		void *_beaninst = JSONSerialize::unSerializeUnknown(json, ele.getAttribute("bean"), req->getCntxt_name());
 
-		FormController* formController = static_cast<FormController*>(_temp);
+		FormController* formController = (FormController*)_temp;
 		if(formController!=NULL)
 		{
 			formController->onSubmit(_beaninst,&res);

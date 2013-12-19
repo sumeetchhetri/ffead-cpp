@@ -49,6 +49,7 @@ string ScriptHandler::execute(string exe, bool retErrs)
 		while (1) {
 		  char *line;
 		  char buf[1000];
+		  memset(buf, 0, sizeof(buf));
 		  line = fgets(buf, sizeof buf, pp);
 		  if (line == NULL) break;
 		  data.append(line);

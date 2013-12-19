@@ -108,8 +108,8 @@ bool AuthHandler::handle(HttpRequest* req, HttpResponse& res, string ext)
 		else if(claz.find("class:")!=string::npos)
 		{
 			claz = claz.substr(claz.find(":")+1);
-			void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("authhandler_"+req->getCntxt_name()+claz, req->getCntxt_name());
-			AuthController *authc = static_cast<AuthController*>(_temp);
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("authhandler_"+req->getCntxt_name()+claz, req->getCntxt_name());
+			AuthController *authc = (AuthController*)_temp;
 			if(authc!=NULL)
 			{
 				isContrl = authc->handle(req,&res);

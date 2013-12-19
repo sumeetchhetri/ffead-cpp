@@ -164,7 +164,6 @@ public:
 		using namespace abi;
 		mangled = __cxa_demangle(mangled, NULL, 0, &status);
 		string cls(mangled);
-		delete mangled;
 		if(cls==className || cls==(className+"*")) return true;
 		else return false;
 	}

@@ -87,7 +87,7 @@ void DistoCacheServiceHandler::run()
 		SSL_get_error(ssl,r);
 		if(r<=0)
 		{
-			SSLHandler::getInstance()->error_occurred((char*)"SSL accept error",fd,ssl);
+			SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 			return;
 		}
 	}
@@ -111,7 +111,7 @@ void DistoCacheServiceHandler::run()
 				case SSL_ERROR_ZERO_RETURN:
 				default:
 				{
-					SSLHandler::getInstance()->error_occurred((char*)"SSL read problem",fd,ssl);
+					SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 					return;
 				}
 			}
@@ -167,7 +167,7 @@ void DistoCacheServiceHandler::run()
 					case SSL_ERROR_ZERO_RETURN:
 					default:
 					{
-						SSLHandler::getInstance()->error_occurred((char*)"SSL error problem",fd,ssl);
+						SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 						return;
 					}
 				}
@@ -583,7 +583,7 @@ void DistoCacheServiceHandler::run()
 				case SSL_ERROR_ZERO_RETURN:
 				default:
 				{
-					SSLHandler::getInstance()->error_occurred((char*)"SSL error problem",fd,ssl);
+					SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 					return;
 				}
 			}

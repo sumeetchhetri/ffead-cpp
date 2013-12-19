@@ -22,12 +22,7 @@
 
 #ifndef SSLHANDLER_H_
 #define SSLHANDLER_H_
-#include <string>
-#include <sys/socket.h>
-#include <iostream>
-/*HTTPS related*/
-#include <openssl/ssl.h>
-#include <signal.h>
+#include "SSLCommon.h"
 #include "LoggerFactory.h"
 #include "ConfigurationData.h"
 #define CLIENT_AUTH_REQUEST 1
@@ -38,8 +33,6 @@ using namespace std;
 
 class SSLHandler {
 	static char *pass;
-	static BIO *bio_err;
-	static char *ciphers;
 	SSL_CTX *ctx;
 	Logger logger;
 	bool isSSLEnabled;
@@ -56,12 +49,8 @@ public:
 	static void setIsSSL(bool isSSLEnabled);
 	static SSLHandler* getInstance();
 	virtual ~SSLHandler();
-	static int password_cb(char *buf,int num, int rwflag,void *userdata);
-	void load_dh_params(SSL_CTX *ctx,char *file);
-	static void sigpipe_handle(int x);
-	SSL_CTX *initialize_ctx(char *keyfile,char *password, string ca_list);
-	void error_occurred(char *error,int fd,SSL *ssl);
-	void closeSSL(int fd,SSL *ssl,BIO* bio);
+	static int password_cb(char *buf, int num, int rwflag, void *userdata);
+	void closeSSL(int fd, SSL *ssl, BIO* bio);
 };
 
 #endif /* SSLHANDLER_H_ */

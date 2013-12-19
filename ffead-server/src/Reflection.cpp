@@ -335,7 +335,7 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 			cout << "error" << endl;
 		}
 	}
-	else if(data.find(" namespace ")!=string::npos && nmspcst!=data.find(" namespace "))
+	else if(data.find(" namespace ")!=string::npos && nmspcst!=(int)data.find(" namespace "))
 	{
 		string sdata = data.substr(0, data.find(" namespace "));
 		handleNamespace(sdata, namepsc, clsvec, glbnmspcs);

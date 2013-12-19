@@ -100,8 +100,8 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse& res, long sessionTi
 				claz = claz.substr(claz.find(":")+1);
 				logger << ("Auth handled by class " + claz) << endl;
 
-				void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("login-handler_"+req->getCntxt_name()+claz, req->getCntxt_name());
-				AuthController* loginc = static_cast<AuthController*>(_temp);
+				void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("login-handler_"+req->getCntxt_name()+claz, req->getCntxt_name());
+				AuthController* loginc = (AuthController*)_temp;
 				if(loginc!=NULL && loginc->authenticateSecurity(req->getRequestParam("_ffead_security_cntxt_username"),
 					req->getRequestParam("_ffead_security_cntxt_password")))
 				{

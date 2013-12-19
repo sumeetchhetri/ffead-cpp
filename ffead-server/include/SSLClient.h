@@ -22,27 +22,28 @@
 
 #ifndef SSLCLIENT_H_
 #define SSLCLIENT_H_
+#include "SSLCommon.h"
 #include "ClientInterface.h"
+#include "PropFileReader.h"
 using namespace std;
-#define KEYFILE "client.pem"
-#define PASSWORD "password"
-#define DHFILE "dh1024.pem"
-#define CA_LIST "root.pem"
 
 class SSLClient : public ClientInterface {
 	SSL *ssl;
 	SSL_CTX *ctx;
 	BIO *sbio,*io,*ssl_bio;
 	int sockfd;
-	bool connected;
+	static char *pass;
+	bool connected, isDHParams;
+	string cert_file,key_file,dh_file,ca_list,rand_file,sec_password;
+	int client_auth;
 	void *get_in_addr1(struct sockaddr *sa);
-	SSL_CTX *initialize_ctx(char *keyfile,char *password);
+	void init();
 	void destroy_ctx(SSL_CTX *ctx);
-	void error_occurred(char *error);
-	void closeSSL();
+	static int password_cb(char *buf,int num, int rwflag,void *userdata);
 	Logger logger;
 public:
 	SSLClient();
+	SSLClient(string secFile);
 	virtual ~SSLClient();
 	bool connection(string,int);
 	bool connectionUnresolv(string host,int port);

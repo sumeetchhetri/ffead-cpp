@@ -263,6 +263,7 @@ string StringUtil::toHEX(int number)
 string StringUtil::toHEX(unsigned int number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%x", number);
 	string hexstr(hexVal);
 	return hexstr;
@@ -276,6 +277,7 @@ string StringUtil::toHEX(long number)
 string StringUtil::toHEX(unsigned long number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%lx", number);
 	string hexstr(hexVal);
 	return hexstr;
@@ -290,6 +292,7 @@ string StringUtil::toHEX(long long number)
 string StringUtil::toHEX(unsigned long long number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%llx", number);
 	string hexstr(hexVal);
 	return hexstr;
@@ -303,6 +306,7 @@ string StringUtil::toOCTAL(int number)
 string StringUtil::toOCTAL(unsigned int number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%o", number);
 	string hexstr(hexVal);
 	return hexstr;
@@ -316,6 +320,7 @@ string StringUtil::toOCTAL(long number)
 string StringUtil::toOCTAL(unsigned long number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%lo", number);
 	string hexstr(hexVal);
 	return hexstr;
@@ -330,6 +335,7 @@ string StringUtil::toOCTAL(long long number)
 string StringUtil::toOCTAL(unsigned long long number)
 {
 	char hexVal[20];
+	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%llo", number);
 	string hexstr(hexVal);
 	return hexstr;

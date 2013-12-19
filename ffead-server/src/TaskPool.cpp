@@ -31,6 +31,7 @@ void* TaskPool::run(void *arg)
 	pool->m_mutex->unlock();
 	while(fl)
 	{
+		pool->m_mutex->wait();
 		pool->m_mutex->lock();
 		int total = pool->scheduledtasks->size();
 		pool->m_mutex->unlock();
@@ -63,7 +64,7 @@ void* TaskPool::run(void *arg)
 			delete timer;
 			pool->m_mutex->unlock();
 		}
-		Thread::nSleep(1);
+		Thread::mSleep(1);
 		pool->m_mutex->lock();
 		fl = pool->runFlag;
 		pool->m_mutex->unlock();
@@ -75,7 +76,7 @@ void* TaskPool::run(void *arg)
 }
 
 TaskPool::TaskPool() {
-	m_mutex = new Mutex();
+	m_mutex = new ConditionMutex();
 	tasks = new std::queue<Task*>;
 	ptasks = new list<Task*>;
 	scheduledtasks = new vector<Task*>;
@@ -93,46 +94,79 @@ void TaskPool::start() {
 }
 
 void TaskPool::addTask(Task &task) {
-	m_mutex->lock();
 	if (task.type >= 0 && task.type <= 6 && task.tunit > 0)
 	{
+		m_mutex->lock();
 		Timer* t = new Timer;
 		t->start();
 		scheduledTimers->push_back(t);
 		scheduledtasks->push_back(&task);
+		m_mutex->unlock();
+		m_mutex->interrupt();
 	}
 	else
 	{
+		m_mutex->lock();
 		tasks->push(&task);
+		m_mutex->unlock();
 	}
-	m_mutex->unlock();
+
 }
 
 void TaskPool::addTask(Task *task) {
-	m_mutex->lock();
 	if (task->type >= 0 && task->type <= 6 && task->tunit > 0)
 	{
+		m_mutex->lock();
 		Timer* t = new Timer;
 		t->start();
 		scheduledTimers->push_back(t);
 		scheduledtasks->push_back(task);
+		m_mutex->unlock();
+		m_mutex->interrupt();
 	}
 	else
 	{
+		m_mutex->lock();
 		tasks->push(task);
+		m_mutex->unlock();
 	}
-	m_mutex->unlock();
 }
 
 void TaskPool::addPTask(Task &task) {
-	m_mutex->lock();
-	ptasks->push_back(&task);
-	m_mutex->unlock();
+	if (task.type >= 0 && task.type <= 6 && task.tunit > 0)
+	{
+		m_mutex->lock();
+		Timer* t = new Timer;
+		t->start();
+		scheduledTimers->push_back(t);
+		scheduledtasks->push_back(&task);
+		m_mutex->unlock();
+		m_mutex->interrupt();
+	}
+	else
+	{
+		m_mutex->lock();
+		ptasks->push_back(&task);
+		m_mutex->unlock();
+	}
 }
 void TaskPool::addPTask(Task *task) {
-	m_mutex->lock();
-	ptasks->push_back(task);
-	m_mutex->unlock();
+	if (task->type >= 0 && task->type <= 6 && task->tunit > 0)
+	{
+		m_mutex->lock();
+		Timer* t = new Timer;
+		t->start();
+		scheduledTimers->push_back(t);
+		scheduledtasks->push_back(task);
+		m_mutex->unlock();
+		m_mutex->interrupt();
+	}
+	else
+	{
+		m_mutex->lock();
+		ptasks->push_back(task);
+		m_mutex->unlock();
+	}
 }
 Task* TaskPool::getTask() {
 	Task *task = NULL;
@@ -185,7 +219,7 @@ TaskPool::~TaskPool() {
 		m_mutex->lock();
 		fl = this->complete;
 		m_mutex->unlock();
-		Thread::mSleep(1);
+		Thread::sSleep(1);
 	}
 	delete mthread;
 	delete tasks;

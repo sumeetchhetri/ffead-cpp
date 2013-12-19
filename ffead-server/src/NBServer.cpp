@@ -158,6 +158,7 @@ void* NBServer::servicing(void* arg)
 			{
 				server->selEpolKqEvPrtHandler.unRegisterForEvent(descriptor);
 				char buf[10];
+				memset(buf, 0, sizeof(buf));
 				int err;
 				if((err=recv(descriptor,buf,10,MSG_PEEK))==0)
 				{
@@ -230,6 +231,7 @@ int NBServer::Receive(int fd,string &data,int bytes)
 	if(bytes==0)
 		return -1;
 	char buf[bytes];
+	memset(buf, 0, sizeof(buf));
 	int bytesr = recv(fd, buf, bytes, 0);
 	/*string temp;
 	stringstream ss;
@@ -248,6 +250,7 @@ int NBServer::Receive(int fd,vector<char> &data,int bytes)
 	if(bytes==0)
 		return -1;
 	char te[bytes];
+	memset(te, 0, sizeof(te));
 	int bytesr = Receive(fd,te,bytes);
 	data.resize(bytes);
 	copy(te,te+bytes,data.begin());
@@ -282,6 +285,7 @@ int NBServer::Receive(int fd,vector<string>& data,int bytes)
 	if(bytes==0)
 		return -1;
 	char te[bytes];
+	memset(te, 0, sizeof(te));
 	string temp;
 	int bytesr = Receive(fd,te,bytes);
 	stringstream ss;

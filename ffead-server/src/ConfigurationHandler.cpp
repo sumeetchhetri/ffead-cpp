@@ -92,7 +92,7 @@ void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folde
 }
 
 void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,string serverRootDirectory,
-		string respath,FFEADContext* ffeadContext)
+		string respath)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	ConfigurationData::getInstance()->resourcePath = respath;
@@ -115,6 +115,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 		propMap sslsec = pread.getProperties(respath+"/security.prop");
 		if(sslsec.size()>0)
 		{
+			ConfigurationData::getInstance()->cert_file = serverRootDirectory + sslsec["CERTFILE"];
 			ConfigurationData::getInstance()->key_file = serverRootDirectory + sslsec["KEYFILE"];
 			ConfigurationData::getInstance()->dh_file = serverRootDirectory + sslsec["DHFILE"];
 			ConfigurationData::getInstance()->ca_list = serverRootDirectory + sslsec["CA_LIST"];
@@ -133,8 +134,17 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 				catch(...)
 				{
 					logger << "\nInvalid client auth level defined" << flush;
-					ConfigurationData::getInstance()->client_auth = 1;
+					ConfigurationData::getInstance()->client_auth = 0;
 				}
+			}
+			ConfigurationData::getInstance()->isDHParams = true;
+			try
+			{
+				ConfigurationData::getInstance()->isDHParams = CastUtil::lexical_cast<bool>(sslsec["ISDH_PARAMS"]);
+			}
+			catch(...)
+			{
+				logger << "\nInvalid boolean value for isDHParams defined" << flush;
 			}
 		}
 	}
@@ -226,7 +236,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 								if(clas!="")
 								{
 									Bean bean("controller_"+name+clas,"",clas,scope,false,name);
-									ffeadContext->addBean(bean);
+									ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								}
 								logger << ("Adding Controller for " + (name + url) + " :: " + clas) << endl;
 							}
@@ -283,7 +293,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 								{
 									string clas = provider.substr(provider.find(":")+1);
 									Bean bean("authhandler_"+name+clas,"",clas,scope,false,name);
-									ffeadContext->addBean(bean);
+									ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								}
 								logger << ("Adding Authhandler for " + (name + url) + " :: " + provider) << endl;
 							}
@@ -319,7 +329,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 								if(clas!="")
 								{
 									Bean bean("filter_"+name+clas,"",clas,scope,false,name);
-									ffeadContext->addBean(bean);
+									ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								}
 								logger << ("Adding Filter for " + (name + url + type) + " :: " + clas) << endl;
 							}
@@ -341,7 +351,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 							if(clas!="")
 							{
 								Bean bean("template_"+name+clas,"",clas,scope,false,name);
-								ffeadContext->addBean(bean);
+								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 							}
 							logger << ("Adding Template for " + (name+tmplts.at(tmpn).getAttribute("file")) + " :: " + clas) << endl;
 						}
@@ -361,7 +371,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 							if(clas!="")
 							{
 								Bean bean("dview_"+name+clas,"",clas,scope,false,name);
-								ffeadContext->addBean(bean);
+								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 							}
 							logger << ("Adding Dynamic View for " + (name+dvs.at(dn).getAttribute("path")) + " :: " + clas) << endl;
 						}
@@ -521,7 +531,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 												if(clas!="")
 												{
 													Bean bean("restcontroller_"+name+clas,"",clas,scope,false,name);
-													ffeadContext->addBean(bean);
+													ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 												}
 											}
 											else
@@ -547,7 +557,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 												if(clas!="")
 												{
 													Bean bean("restcontroller_"+name+clas,"",clas,scope,false,name);
-													ffeadContext->addBean(bean);
+													ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 												}
 											}
 											logger << ("Rest: Adding rest-controller => " + urlmpp  + " , class => " + clas) << endl;
@@ -586,7 +596,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 							{
 								string clas = provider.substr(provider.find(":")+1);
 								Bean bean("login-handler_"+name+clas,"",clas,scope,false,name);
-								ffeadContext->addBean(bean);
+								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 							}
 							logger << ("Security: Adding Login Handler => " + url  + " , provider => " + provider) << endl;
 						}
@@ -732,7 +742,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 							if(clas!="")
 							{
 								Bean bean("form_"+name+clas,"",clas,scope,false,name);
-								ffeadContext->addBean(bean);
+								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 							}
 							logger << ("Fview: Adding form => " + elese.at(appse).getAttribute("name")
 								+ " , form class => " + elese.at(appse).getAttribute("bean")
@@ -879,7 +889,6 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	cont = TemplateEngine::evaluate(respath+"/rundyn_template.sh", cntxt);
 	AfcUtil::writeTofile(respath+"/rundyn_dinter.sh", cont, true);
 
-	ConfigurationData::getInstance()->ffeadContext = ffeadContext;
 }
 
 #ifdef INC_CIB

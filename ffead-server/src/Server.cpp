@@ -305,6 +305,7 @@ int Server::Receive(int fd,string &data,int bytes)
 	if(bytes==0)
 		return -1;
 	char buf[bytes];
+	memset(buf, 0, sizeof(buf));
 	int bytesr = recv(fd, buf, bytes, 0);
 	/*string temp;
 	stringstream ss;
@@ -323,6 +324,7 @@ int Server::Receive(int fd,vector<char> &data,int bytes)
 	if(bytes==0)
 		return -1;
 	char te[bytes];
+	memset(te, 0, sizeof(te));
 	int bytesr = Receive(fd,te,bytes);
 	data.resize(bytes);
 	copy(te,te+bytes,data.begin());
@@ -333,6 +335,7 @@ int Server::Receive(int fd,vector<unsigned char>& data,int bytes)
 	if(bytes==0)
 		return -1;
 	char te[bytes];
+	memset(te, 0, sizeof(te));
 	int bytesr = Receive(fd,te,bytes);
 	data.resize(bytes);
 	copy(te,te+bytes,data.begin());
@@ -357,6 +360,7 @@ int Server::Receive(int fd,vector<string>& data,int bytes)
 	if(bytes==0)
 		return -1;
 	char te[bytes];
+	memset(te, 0, sizeof(te));
 	string temp;
 	int bytesr = Receive(fd,te,bytes);
 	stringstream ss;

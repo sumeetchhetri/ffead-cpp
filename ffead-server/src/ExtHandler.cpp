@@ -167,7 +167,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 	{
 		cntrlit = true;
 
-		void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("dview_"+req->getCntxt_name()+vwMap[req->getCntxt_name()+req->getFile()], req->getCntxt_name());
+		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("dview_"+req->getCntxt_name()+vwMap[req->getCntxt_name()+req->getFile()], req->getCntxt_name());
 		if(_temp!=NULL)
 		{
 			DynamicView *thrd = (DynamicView*)_temp;
@@ -203,10 +203,10 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 		if(ddlib != NULL)
 		{
 
-			void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("template_"+req->getCntxt_name()+tmplMap[req->getCntxt_name()+req->getFile()], req->getCntxt_name());
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("template_"+req->getCntxt_name()+tmplMap[req->getCntxt_name()+req->getFile()], req->getCntxt_name());
 			if(_temp!=NULL)
 			{
-				TemplateHandler *thrd = static_cast<TemplateHandler*>(_temp);
+				TemplateHandler *thrd = (TemplateHandler*)_temp;
 				if(thrd!=NULL)
 				{
 					Context cnt = thrd->getContext();

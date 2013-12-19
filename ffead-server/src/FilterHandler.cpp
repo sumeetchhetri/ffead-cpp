@@ -46,8 +46,8 @@ void FilterHandler::handleIn(HttpRequest* req, HttpResponse& res, string ext)
 		for (int var = 0; var < (int)tempp.size(); ++var)
 		{
 			string claz = tempp.at(var);
-			void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
-			Filter *filter = static_cast<Filter*>(_temp);
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
+			Filter *filter = (Filter*)_temp;
 			filter->doInputFilter(req);
 			logger << "Input Filter called" << endl;
 		}
@@ -71,8 +71,8 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse& res, string ext)
 		for (int var = 0; var < (int)tempp.size(); ++var)
 		{
 			string claz = tempp.at(var);
-			void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
-			Filter *filter = static_cast<Filter*>(_temp);
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
+			Filter *filter = (Filter*)_temp;
 			continue_proc_request = filter->doHandle(req, &res);
 			logger << "Handler Filter called" << endl;
 		}
@@ -95,8 +95,8 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse& res, string ext)
 		for (int var = 0; var < (int)tempp.size(); ++var)
 		{
 			string claz = tempp.at(var);
-			void *_temp = ConfigurationData::getInstance()->ffeadContext->getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
-			Filter *filter = static_cast<Filter*>(_temp);
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("filter_"+req->getCntxt_name()+claz, req->getCntxt_name());
+			Filter *filter = (Filter*)_temp;
 			filter->doOutputFilter(&res);
 			logger << "Output Filter called" << endl;
 		}

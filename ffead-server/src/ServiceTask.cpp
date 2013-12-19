@@ -454,8 +454,11 @@ bool ServiceTask::checkSocketWaitForTimeout(int sock_fd, int writing, int second
 			rc = select(sock_fd+1, &rset, &wset, NULL, &tv);
 			break;
 	}
+	FD_CLR(sock_fd, &rset);
 	fcntl(sock_fd, F_SETFL, O_SYNC);
 
+	FD_ZERO(&rset);
+	FD_ZERO(&wset);
 	/* Return SOCKET_TIMED_OUT on timeout, SOCKET_OPERATION_OK
 	otherwise
 	(when we are able to write or when there's something to
@@ -467,9 +470,9 @@ void ServiceTask::run()
 {
 	string ip = "invalid session";
 	string alldatlg = "\ngot fd from parent";
-	SSL *ssl=NULL;
-	BIO *sbio=NULL;
-	BIO *io=NULL,*ssl_bio=NULL;
+	SSL *ssl = NULL;
+	BIO *sbio = NULL;
+	BIO *io = NULL,*ssl_bio = NULL;
 	Timer timer;
 	timer.start();
 	int connKeepAlive = 10, techunkSiz = 8192, maxReqHdrCnt = 100, maxEntitySize = 2147483648;
@@ -506,24 +509,42 @@ void ServiceTask::run()
 		BIO_push(io,ssl_bio);
 
 		int r = SSL_accept(ssl);
-		int bser = SSL_get_error(ssl,r);
-		switch(bser)
+		if(r<=0)
 		{
-			case SSL_ERROR_NONE:
+			logger << "SSL accept error" << endl;
+			SSLHandler::getInstance()->closeSSL(fd, ssl, io);
+			return;
+		}
+
+		if (ConfigurationData::getInstance()->client_auth==2 || ConfigurationData::getInstance()->client_auth==1)
+		{
+			X509* client_cert = NULL;
+			/* Get the client's certificate (optional) */
+			client_cert = SSL_get_peer_certificate(ssl);
+			if (client_cert != NULL)
 			{
-				break;
+				printf ("Client certificate:\n");
+				char* str = X509_NAME_oneline(X509_get_subject_name(client_cert), 0, 0);
+				if(str == NULL)
+				{
+					logger << "Could not get client certificate subject name" << endl;
+					SSLHandler::getInstance()->closeSSL(fd, ssl, io);
+				}
+				printf ("\t subject: %s\n", str);
+				free (str);
+				str = X509_NAME_oneline(X509_get_issuer_name(client_cert), 0, 0);
+				if(str == NULL)
+				{
+					logger << "Could not get client certificate issuer name" << endl;
+					SSLHandler::getInstance()->closeSSL(fd, ssl, io);
+				}
+				printf ("\t issuer: %s\n", str);
+				free (str);
+				X509_free(client_cert);
 			}
-			case SSL_ERROR_ZERO_RETURN:
+			else
 			{
-				logger << "SSL socket closed" << endl;
-				closeSocket(ssl, io, fd);
-				return;
-			}
-			default:
-			{
-				logger << "SSL accept error" << endl;
-				SSLHandler::getInstance()->error_occurred((char*)"SSL accept error",fd,ssl);
-				return;
+				logger << ("The SSL client does not have certificate.\n") << endl;
 			}
 		}
 	}
@@ -587,8 +608,8 @@ void ServiceTask::run()
 				results.push_back(temp);
 				if(headerCount>=maxReqHdrCnt)
 				{
-					SSLHandler::getInstance()->error_occurred((char*)("Cannot accept more than "+CastUtil::lexical_cast<string>(maxReqHdrCnt)+" headers").c_str(),fd,ssl);
-					if(io!=NULL)BIO_free(io);
+					logger << ("Cannot accept more than "+CastUtil::lexical_cast<string>(maxReqHdrCnt)+" headers") << endl;
+					SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 					break;
 				}
 			}
@@ -1196,49 +1217,49 @@ bool ServiceTask::sendData(SSL* ssl, BIO* io, int fd, string h1)
 	{
 		int r;
 		/* Now perform renegotiation if requested */
-		if(ConfigurationData::getInstance()->client_auth==CLIENT_AUTH_REHANDSHAKE){
-		  SSL_set_verify(ssl,SSL_VERIFY_PEER |
-			SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
+		if(ConfigurationData::getInstance()->client_auth==CLIENT_AUTH_REHANDSHAKE)
+		{
+			SSL_set_verify(ssl,SSL_VERIFY_PEER |
+					SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
 
-		  /* Stop the client from just resuming the
-			 un-authenticated session */
-		  SSL_set_session_id_context(ssl,
-			(const unsigned char*)&SSLHandler::s_server_auth_session_id_context,
-			sizeof(SSLHandler::s_server_auth_session_id_context));
+			/* Stop the client from just resuming the
+				 un-authenticated session */
+			SSL_set_session_id_context(ssl,
+					(const unsigned char*)&SSLHandler::s_server_auth_session_id_context,
+					sizeof(SSLHandler::s_server_auth_session_id_context));
 
-		  if(SSL_renegotiate(ssl)<=0)
-		  {
-			  logger << "SSL renegotiation error" << endl;
-			  closeSocket(ssl, io, fd);
-			  return false;
-		  }
-		  if(SSL_do_handshake(ssl)<=0)
-		  {
-			  logger << "SSL renegotiation error" << endl;
-			  closeSocket(ssl, io, fd);
-			  return false;;
-		  }
-		  ssl->state=SSL_ST_ACCEPT;
-		  if(SSL_do_handshake(ssl)<=0)
-		  {
-			  logger << "SSL handshake error" << endl;
-			  closeSocket(ssl, io, fd);
-			  return false;;
-		  }
+			if(SSL_renegotiate(ssl)<=0)
+			{
+				logger << "SSL renegotiation error" << endl;
+				closeSocket(ssl, io, fd);
+				return false;
+			}
+			if(SSL_do_handshake(ssl)<=0)
+			{
+				logger << "SSL renegotiation error" << endl;
+				closeSocket(ssl, io, fd);
+				return false;;
+			}
+			ssl->state = SSL_ST_ACCEPT;
+			if(SSL_do_handshake(ssl)<=0)
+			{
+				logger << "SSL handshake error" << endl;
+				closeSocket(ssl, io, fd);
+				return false;;
+			}
 		}
 		if((r=BIO_write(io, h1.c_str(), h1.length()))<=0)
 		{
-			  logger << "Send failed" << endl;
-			  closeSocket(ssl, io, fd);
-			  return false;;
+			logger << "Send failed" << endl;
+			closeSocket(ssl, io, fd);
+			return false;;
 		}
 		if((r=BIO_flush(io))<0)
 		{
-			  logger << "Error flushing BIO" << endl;
-			  closeSocket(ssl, io, fd);
-			  return false;;
+			logger << "Error flushing BIO" << endl;
+			closeSocket(ssl, io, fd);
+			return false;;
 		}
-		//SSLHandler::getInstance()->closeSSL(fd,ssl,io);
 	}
 	else
 	{
@@ -1251,11 +1272,10 @@ bool ServiceTask::sendData(SSL* ssl, BIO* io, int fd, string h1)
 		}
 		if((r=BIO_flush(io))<0)
 		{
-			  logger << "Error flushing BIO" << endl;
-			  closeSocket(ssl, io, fd);
-			  return false;;
+			logger << "Error flushing BIO" << endl;
+			closeSocket(ssl, io, fd);
+			return false;;
 		}
-		//if(io!=NULL)BIO_free_all(io);
 	}
 	return true;
 }
@@ -1265,7 +1285,6 @@ void ServiceTask::closeSocket(SSL* ssl, BIO* io, int fd)
 	if(SSLHandler::getInstance()->getIsSSL())
 	{
 		SSLHandler::getInstance()->closeSSL(fd,ssl,io);
-		if(io!=NULL)BIO_free(io);
 	}
 	else
 	{
@@ -1283,6 +1302,7 @@ bool ServiceTask::readLine(SSL* ssl, BIO* io, int fd, string& line)
 		return false;
 	}*/
 	char buf[MAXBUFLENM];
+	memset(buf, 0, sizeof(buf));
 	if(SSLHandler::getInstance()->getIsSSL())
 	{
 		int er=-1;
@@ -1344,6 +1364,7 @@ bool ServiceTask::readData(SSL* ssl, BIO* io, int fd, int cntlen, string& conten
 		return false;
 	}*/
 	char buf[MAXBUFLENM];
+	memset(buf, 0, sizeof(buf));
 	if(SSLHandler::getInstance()->getIsSSL() && cntlen>0)
 	{
 		int er=-1;

@@ -24,6 +24,7 @@
 
 map<string, LoggerConfig*> LoggerFactory::configs;
 map<string, string> LoggerFactory::dupLogNames;
+bool LoggerFactory::inited = false;
 
 LoggerFactory::LoggerFactory() {
 }
@@ -32,6 +33,7 @@ LoggerFactory::~LoggerFactory() {
 }
 
 void LoggerFactory::clear() {
+	if(!inited)return;
 	map<string, LoggerConfig*>::iterator it;
 	for(it=configs.begin();it!=configs.end();++it) {
 		cout << ("Clearing logger config for " + it->second->name) << endl;
@@ -44,6 +46,8 @@ void LoggerFactory::clear() {
 }
 
 void LoggerFactory::init(string configFile, string serverRootDirectory) {
+	if(inited)return;
+	inited = true;
 	Logger logger = LoggerFactory::getLogger("LoggerFactory");
 	XmlParser parser("Parser");
 	Element root = parser.getDocument(configFile).getRootElement();

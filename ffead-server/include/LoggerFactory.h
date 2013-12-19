@@ -29,6 +29,7 @@ class LoggerFactory {
 	LoggerFactory();
 	static map<string, LoggerConfig*> configs;
 	static map<string, string> dupLogNames;
+	static bool inited;
 public:
 	virtual ~LoggerFactory();
 	static void clear();

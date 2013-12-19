@@ -63,7 +63,6 @@ void ConditionMutex::wait() {
 }
 
 void ConditionMutex::interrupt() {
-	pthread_mutex_unlock(&mut);
 	pthread_mutex_lock(&mut);
 	pthread_cond_broadcast(&cond);
 	pthread_mutex_unlock(&mut);
