@@ -37,8 +37,9 @@ class SelEpolKqEvPrt {
 	int curfds;
 	#ifdef USE_SELECT
 		fd_set master;    // master file descriptor list
-		fd_set read_fds;  // temp file descriptor list for select()
+		fd_set* read_fds;  // temp file descriptor list for select()
 		int fdmax;
+		size_t fd_set_size;
 	#endif
 	#ifdef USE_EPOLL
 		struct epoll_event ev;

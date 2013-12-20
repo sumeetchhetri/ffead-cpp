@@ -1000,7 +1000,7 @@ void HttpRequest::updateContent()
 {
 	if(this->content!="")
 	{
-		updateFromContentStrTemp();
+		updateFromContentStr();
 	}
 	else
 	{
@@ -1008,7 +1008,7 @@ void HttpRequest::updateContent()
 	}
 }
 
-void HttpRequest::updateFromContentStr()
+void HttpRequest::updateFromContentStr_Old()
 {
 	//logger << this->getContent() << flush;
 	if(this->getHeader(ContentType).find("application/x-www-form-urlencoded")!=string::npos)
@@ -1189,7 +1189,7 @@ void HttpRequest::updateFromContentStr()
 }
 
 //@TODO -- need to change this only for one pass of reading request body
-void HttpRequest::updateFromContentStrTemp()
+void HttpRequest::updateFromContentStr()
 {
 	//logger << this->getContent() << flush;
 	if(this->getHeader(ContentType).find("application/x-www-form-urlencoded")!=string::npos)
@@ -1629,137 +1629,7 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 	}
 	else if(key=="Content" && value!="")
 	{
-		if((this->getHeader(ContentType).find("application/soap+xml")!=string::npos || this->getHeader(ContentType).find("text/xml")!=string::npos))
-		{
-			value = value.substr(0,value.find_last_of(">")+1);
-			if(value.find("<?")!=string::npos && value.find("?>")!=string::npos)
-			{
-				value = value.substr(value.find("?>")+2);
-			}
-			this->setContent(value);
-		}
-		else if(this->getHeader(ContentType).find("application/x-www-form-urlencoded")!=string::npos)
-		{
-			strVec params;
-			StringUtil::split(params,value , ("&"));
-			for(unsigned j=0;j<params.size();j++)
-			{
-				strVec param;
-				StringUtil::split(param, params.at(j), ("="));
-				if(param.size()==2)
-				{
-					string att = param.at(0);
-					StringUtil::replaceFirst(att,"\r","");
-					StringUtil::replaceFirst(att,"\t","");
-					StringUtil::replaceFirst(att," ","");
-					this->setRequestParam(att,param.at(1));
-				}
-			}
-		}
-		else
-		{
-			size_t rn = value.find("\r\n");
-			string h = CastUtil::lexical_cast<string>((int)rn);
-
-			string boundary = this->getContent_boundary();
-			//fprintf(stderr,boundary.c_str());
-			//fprintf(stderr,value.c_str());
-			//fflush(stderr);
-
-			string retval;
-			string delb = boundary+"\r\n";
-			string delend = boundary+"--\r\n";
-			size_t stb = value.find(delb)+delb.length();
-			size_t enb = value.find_last_not_of(delend);
-			h = CastUtil::lexical_cast<string>((int)stb)+" "+CastUtil::lexical_cast<string>((int)enb);
-
-			string param_conts = value.substr(stb,enb-stb-2);
-			strVec parameters;
-			StringUtil::replaceFirst(value,delb,"");
-			StringUtil::replaceFirst(value,delend,"");
-			delb = "\r\n"+delb;
-			StringUtil::split(parameters, value, (delb));
-			retval =  "Boundary: "+ boundary + "\nLength: " ;
-			retval += CastUtil::lexical_cast<string>((int)value.length()) +"\nStart End: "
-			+ CastUtil::lexical_cast<string>((int)stb) + " " + CastUtil::lexical_cast<string>((int)enb) +"\n";
-
-			for(unsigned j=0;j<parameters.size();j++)
-			{
-				if(parameters.at(j)=="" || parameters.at(j).find_first_not_of(" ")==string::npos
-						|| parameters.at(j).find_first_not_of("\r\n")==string::npos)
-					continue;
-				//fprintf(stderr,parameters.at(j).c_str());
-				//fflush(stderr);
-				MultipartContent datf;
-				string parm = parameters.at(j);
-				retval+= parm + "\nparm";
-				size_t dis = parm.find("Content-Disposition: ");
-				if(dis==string::npos)
-					dis = parm.find("Content-disposition: ");
-				string cont_disp,cont_type;
-				if(dis!=string::npos)
-				{
-					size_t dist = parm.find("Content-Type: ");
-					if(dist==string::npos)
-						dist = parm.find("Content-type: ");
-					size_t dise;
-					if(dist==string::npos)
-					{
-						dist = parm.find("\r\n\r\n");
-						dise = dist + 4;
-					}
-					else
-					{
-						cont_type = parm.substr(dist+14,parm.find("\r\n\r\n")-(dist+14));
-						dise = parm.find("\r\n\r\n") + 4;
-					}
-					cont_disp = parm.substr(dis+21,dist-(dis+21));
-					StringUtil::replaceFirst(cont_disp,"\r\n","");
-					retval+=  "\ncdisp = " + cont_disp;
-					retval+= "\ndise = " + CastUtil::lexical_cast<string>((int)dise);
-					parm = parm.substr(dise);
-					parm = parm.substr(0,parm.length()-1);
-				}
-				strVec parmdef;
-				StringUtil::split(parmdef, cont_disp, (";"));
-				string key;
-				for(unsigned k=0;k<parmdef.size();k++)
-				{
-					if(parmdef.at(k)!="" && parmdef.at(k).find("=")!=string::npos)
-					{
-						size_t stpd = parmdef.at(k).find_first_not_of(" ");
-						size_t enpd = parmdef.at(k).find_last_not_of(" ");
-						retval+=  "\nparmdef = " + parmdef.at(k) ;
-						retval+=  "\nst en = " + CastUtil::lexical_cast<string>((int)stpd)  + " " + CastUtil::lexical_cast<string>((int)enpd);
-						string propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
-						strVec proplr;
-						StringUtil::split(proplr, propert, ("="));
-						if(proplr.size()==2)
-						{
-							if(proplr.at(0)=="name" && proplr.at(1)!="\"\"")
-							{
-								key = proplr.at(1);
-								key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
-								datf.addHeaderValue(MultipartContent::ContentType, cont_type);
-								datf.setContent(parm);
-							}
-							else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")
-							{
-								string fna = proplr.at(1);
-								fna = fna.substr(fna.find_first_not_of("\""),fna.find_last_not_of("\"")-fna.find_first_not_of("\"")+1);
-								datf.setFileName(fna);
-							}
-						}
-					}
-				}
-				if(key!="")
-				{
-					this->addMultipartFormContent(key, datf);
-					retval+= (key + " " + datf.getHeader("Content-Type") + " "+ datf.getFileName() +" "+ datf.getContent());
-				}
-			}
-		}
-
+		content.append(value);
 	}
 	else if(key=="Method")
 		this->setMethod(value);
@@ -1793,24 +1663,6 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 			}
 		}
 	}
-	/*else if(key=="PostArguments")
-	{
-		strVec params;
-		StringUtil::split(params, value, ("&"));
-		for(unsigned j=0;j<params.size();j++)
-		{
-			strVec param;
-			StringUtil::split(param, params.at(j), ("="));
-			if(param.size()==2)
-			{
-				string att = param.at(0);
-				StringUtil::replaceFirst(att,"\r","");
-				StringUtil::replaceFirst(att,"\t","");
-				StringUtil::replaceFirst(att," ","");
-				this->setRequestParam(att,param.at(1));
-			}
-		}
-	}*/
 	else if(key.find("URL")!=string::npos)
 	{
 		StringUtil::replaceFirst(key,"URL","");

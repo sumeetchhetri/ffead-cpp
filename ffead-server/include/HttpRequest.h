@@ -78,8 +78,8 @@ class HttpRequest {
 
 	void getAuthParams(string);
 	void getOauthParams(string);
+	void updateFromContentStr_Old();
 	void updateFromContentStr();
-	void updateFromContentStrTemp();
 	void updateFromContentFile();
 	void setMethod(string method);
 	void setRequestParams(RMap);

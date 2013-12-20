@@ -37,7 +37,14 @@ void SelEpolKqEvPrt::initialize(int sockfd)
 		fdmax = sockfd;        // maximum file descriptor number
 
 		FD_ZERO(&master);    // clear the master and temp sets
-		FD_ZERO(&read_fds);
+		// find out how many fd's there is space for in svc_fdset
+		int size = getdtablesize();
+		// calculate how many bytes that is the same as.
+		fd_set_size = howmany(size, NFDBITS);
+		// allocate an fd_set of the same size
+		read_fds = (fd_set *) malloc (fd_set_size);
+
+		FD_ZERO(read_fds);
 	#endif
 	#ifdef USE_EPOLL
 		epoll_handle = epoll_create(MAXDESCRIPTORS);
@@ -80,8 +87,9 @@ int SelEpolKqEvPrt::getEvents()
 {
 	int numEvents = -1;
 	#ifdef USE_SELECT
-		read_fds = master;
-		numEvents = select(fdmax+1, &read_fds, NULL, NULL, NULL);
+		// copy the entire contents across
+		memcpy (read_fds, &master, fd_set_size);
+		numEvents = select(fdmax+1, read_fds, NULL, NULL, NULL);
 		if(numEvents==-1)
 		{
 			perror("select()");
@@ -126,7 +134,7 @@ int SelEpolKqEvPrt::getEvents()
 int SelEpolKqEvPrt::getDescriptor(int index)
 {
 	#ifdef USE_SELECT
-		if(FD_ISSET(index, &read_fds))
+		if(FD_ISSET(index, read_fds))
 		{
 			return index;
 		}

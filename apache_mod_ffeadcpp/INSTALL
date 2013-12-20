@@ -16,7 +16,7 @@ Installation Directions
 14. Copy the libdefault library to the ffead-server-unix/Release/ffead-server/lib folder
 15. Copy the ffead-server-unix/Release/ffead-server folder to the apache web folder eg, /var/www/html or any other location of your choice
 16. Download the apache_mod_ffeadcpp folder/zip file
-17. Change the FFEAD_CPP_PATH variable in run.sh to point to the ffead-server-unix/Release/ffead-server folder, change the APXS and APACHECTL in the MAkefile accordingly
+17. Change the FFEAD_CPP_PATH variable in run.sh to point to the ffead-server-unix/Release/ffead-server folder, change the APXS and APACHECTL in the Makefile accordingly
 18. cd apache_mod_ffeadcpp and chmod 755 run.sh
 19. This will install the mod_ffeadcpp module to apache http modules and update config as well
 20. Modify the Document path in httpd.conf to value stored in $FFEAD_CPP_PATH variable

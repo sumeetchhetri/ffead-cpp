@@ -656,7 +656,7 @@ void ServiceTask::run()
 				string folder = webpath+req->getCntxt_name();
 				struct stat attrib;
 				int rv = stat(folder.c_str(), &attrib);
-				if(rv>=0)
+				if(rv==0)
 				{
 					req->setUrl(folder+req->getActUrl());
 				}
@@ -1252,7 +1252,7 @@ bool ServiceTask::sendData(SSL* ssl, BIO* io, int fd, string h1)
 		{
 			logger << "Send failed" << endl;
 			closeSocket(ssl, io, fd);
-			return false;;
+			return false;
 		}
 		if((r=BIO_flush(io))<0)
 		{
@@ -1274,7 +1274,7 @@ bool ServiceTask::sendData(SSL* ssl, BIO* io, int fd, string h1)
 		{
 			logger << "Error flushing BIO" << endl;
 			closeSocket(ssl, io, fd);
-			return false;;
+			return false;
 		}
 	}
 	return true;
@@ -1435,9 +1435,11 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 	{
 		string webpath = serverRootDirectory + "web/";
 
+		req->updateContent();
+
 		if(req->getFile()=="")
 		{
-			logger << req->getFile() << endl;
+			cout << ("File requested -> " + req->getFile()) << endl;
 			req->setFile("index.html");
 		}
 		if(req->hasCookie())
@@ -1462,7 +1464,18 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		{
 			req->setCntxt_name("default");
 			req->setCntxt_root(webpath+"default");
-			req->setUrl(webpath+"default"+req->getActUrl());
+
+			string folder = webpath+req->getCntxt_name();
+			struct stat attrib;
+			int rv = stat(folder.c_str(), &attrib);
+			if(rv==0)
+			{
+				req->setUrl(folder+req->getActUrl());
+			}
+			else
+			{
+				req->setUrl(webpath+"default"+req->getActUrl());
+			}
 		}
 		//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
 
@@ -1512,16 +1525,59 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		vector<unsigned char> test;
 		string content;
 		string claz;
-		//bool isoAuthRes = false;
 		long sessionTimeoutVar = ConfigurationData::getInstance()->sessionTimeout;
-		bool isContrl = securityHandler.handle(req, res, sessionTimeoutVar);
 
-		filterHandler.handleIn(req, res, ext);
+		bool isContrl = false;
+		try {
+			isContrl = CORSHandler::handle(req, &res);
+		} catch(const HTTPResponseStatus& status) {
+			res.setHTTPResponseStatus(status);
+			isContrl = true;
+		}
+
+		cout << ("Done with handling cors") << endl;
+
+		if(!isContrl)
+		{
+			isContrl = securityHandler.handle(req, res, sessionTimeoutVar);
+			if(isContrl)
+			{
+				cout << ("Request handled by SecurityHandler") << endl;
+			}
+		}
+
+		cout << ("Done with handling security") << endl;
+
+		ext = getFileExtension(req->getUrl());
+
+		if(!isContrl)
+		{
+			filterHandler.handleIn(req, res, ext);
+
+			isContrl = !filterHandler.handle(req, res, ext);
+			if(isContrl)
+			{
+				cout << ("Request handled by FilterHandler") << endl;
+			}
+		}
+
+		cout << ("Done with handling filters") << endl;
+
+		ext = getFileExtension(req->getUrl());
 
 		if(!isContrl)
 		{
 			isContrl = authHandler.handle(req, res, ext);
+			if(isContrl)
+			{
+				cout << ("Request handled by AuthHandler") << endl;
+			}
 		}
+
+		cout << ("Done with handling auth") << endl;
+
+		ext = getFileExtension(req->getUrl());
+
 		string pthwofile = req->getCntxt_name()+req->getActUrl();
 		if(req->getCntxt_name()!="default" && ConfigurationData::getInstance()->cntMap[req->getCntxt_name()]=="true")
 		{
@@ -1530,13 +1586,24 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		if(!isContrl)
 		{
 			isContrl = controllerHandler.handle(req, res, ext, pthwofile);
+			if(isContrl)
+			{
+				cout << ("Request handled by ControllerHandler") << endl;
+			}
 		}
+
+		cout << ("Done with handling controllers") << endl;
+
+		ext = getFileExtension(req->getUrl());
 
 		/*After going through the controller the response might be blank, just set the HTTP version*/
 		res.update(req);
 		//logger << req->toString() << endl;
 		if(req->getMethod()!="TRACE")
 		{
+			cout << ("Started processing request - phase II") << endl;
+
+			string wsUrl = "http://" + ConfigurationData::getInstance()->ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
 			if(isContrl)
 			{
 
@@ -1544,13 +1611,22 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			else if(ext==".form")
 			{
 				formHandler.handle(req, res);
+				cout << ("Request handled by FormHandler") << endl;
 			}
 #ifdef INC_WEBSVC
-			else if((req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos)
-					&& (req->getContent().find("<soap:Envelope")!=string::npos || req->getContent().find("<soapenv:Envelope")!=string::npos)
-					&& ConfigurationData::getInstance()->wsdlmap[req->getFile()]==req->getCntxt_name())
+			else if(ConfigurationData::getInstance()->wsdlmap[wsUrl]!="")
 			{
-				soapHandler.handle(req, res, dlib);
+				if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos
+						|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=string::npos)
+				{
+					soapHandler.handle(req, res, dlib);
+				}
+				else
+				{
+					cout << ("Invalid Content type for soap request") << endl;
+					res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+				}
+				cout << ("Request handled by SoapHandler for Url "+wsUrl) << endl;
 			}
 #endif
 			else
@@ -1559,26 +1635,37 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 #ifdef INC_SCRH
 				cntrlit = scriptHandler.handle(req, res, ConfigurationData::getInstance()->handoffs, ext, ConfigurationData::getInstance()->props);
 #endif
+
+				cout << ("Done handling scripts") << endl;
+
 				if(cntrlit)
 				{
-
+					cout << ("Request handled by ScriptHandler") << endl;
 				}
 				else
 				{
 					cntrlit = extHandler.handle(req, res, dlib, ddlib, ext);
+					if(cntrlit)
+					{
+						cout << ("Request handled by ExtHandler") << endl;
+					}
+					cout << ("Done handling extra flows") << endl;
 				}
 				if(!cntrlit && ext==".fview")
 				{
 					fviewHandler.handle(req, res, ConfigurationData::getInstance()->fviewmap);
+					cout << ("Request handled by FviewHandler") << endl;
 				}
 				else
 				{
+					cout << ("Request for static resource/file") << endl;
+
 					if(res.getContent()=="")
 						updateContent(req, &res, ext, 8192);
 					else
 					{
 						content = res.getContent();
-						if(content.length()==0)
+						if(content.length()==0 && res.getHeader(HttpResponse::ContentLength)!="")
 						{
 							res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 						}
@@ -1604,8 +1691,8 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 
 		alldatlg += "--processed data";
 		string h1;
-		if(req->getHeader("Connection")!="")
-			res.addHeaderValue(HttpResponse::Connection, "close");
+		//if(req->getHeader("Connection")!="")
+		//	res.addHeaderValue(HttpResponse::Connection, "close");
 		storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->sessatserv);
 		//h1 = res.generateResponse();
 		delete req;

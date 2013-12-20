@@ -116,11 +116,9 @@ ofstream logfile;
 static propMap props,lprops,urlpattMap,urlMap,tmplMap,vwMap,appMap,cntMap,pubMap,mapMap,mappattMap,autMap,autpattMap,wsdlmap,fviewmap;
 static strVec dcpsss;
 static propMap params;
-static bool isSSLEnabled,isThreadprq,processforcekilled,processgendone,sessatserv,isCompileEnabled;
+static bool sessatserv,isCompileEnabled;
 void* dlib;
 static Logger logger;
-ConfigurationData configurationData;
-SSLHandler sSLHandler;
 static long sessionTimeout;
 static string ip_address;
 
@@ -146,8 +144,7 @@ string get_env_var(string key) {
 HttpResponse service(HttpRequest* req)
 {
 	logger << "service method " << endl;
-	ServiceTask *task = new ServiceTask(0,serverRootDirectory,NULL,
-			isSSLEnabled, NULL, sSLHandler, configurationData, dlib);
+	ServiceTask *task = new ServiceTask(0, serverRootDirectory);
 	HttpResponse res = task->apacheRun(req);
 	delete task;
 	return res;
@@ -194,19 +191,40 @@ int iterate_func(void *req, const char *key, const char *value)
 
 static void getRequestStructure(request_rec *r,HttpRequest* req)
 {
-	//string host = "" + apr_table_get(r->headers_in, "Host");
-	apr_table_get((const apr_table_t *)r->headers_in, "User-Agent");
 	apr_table_get((const apr_table_t *)r->headers_in, "Accept");
-	apr_table_get((const apr_table_t *)r->headers_in, "Accept-Language");
-	apr_table_get((const apr_table_t *)r->headers_in, "Accept-Encoding");
 	apr_table_get((const apr_table_t *)r->headers_in, "Accept-Charset");
-	apr_table_get((const apr_table_t *)r->headers_in, "Keep-Alive");
-	apr_table_get((const apr_table_t *)r->headers_in, "Connection");
+	apr_table_get((const apr_table_t *)r->headers_in, "Accept-Encoding");
+	apr_table_get((const apr_table_t *)r->headers_in, "Accept-Language");
+	apr_table_get((const apr_table_t *)r->headers_in, "Accept-Datetime");
+	apr_table_get((const apr_table_t *)r->headers_in, "Access-Control-Request-Headers");
+	apr_table_get((const apr_table_t *)r->headers_in, "Access-Control-Request-Method");
+	apr_table_get((const apr_table_t *)r->headers_in, "Authorization");
 	apr_table_get((const apr_table_t *)r->headers_in, "Cache-Control");
-	apr_table_get((const apr_table_t *)r->headers_in, "Content-Type");
+	apr_table_get((const apr_table_t *)r->headers_in, "Connection");
+	apr_table_get((const apr_table_t *)r->headers_in, "Cookie");
 	apr_table_get((const apr_table_t *)r->headers_in, "Content-Length");
-	apr_table_get((const apr_table_t *)r->headers_in, "Referer");
+	apr_table_get((const apr_table_t *)r->headers_in, "Content-MD5");
+	apr_table_get((const apr_table_t *)r->headers_in, "Content-Type");
+	apr_table_get((const apr_table_t *)r->headers_in, "Date");
+	apr_table_get((const apr_table_t *)r->headers_in, "Expect");
+	apr_table_get((const apr_table_t *)r->headers_in, "From");
+	apr_table_get((const apr_table_t *)r->headers_in, "Host");
+	apr_table_get((const apr_table_t *)r->headers_in, "If-Match");
+	apr_table_get((const apr_table_t *)r->headers_in, "If-Modified-Since");
+	apr_table_get((const apr_table_t *)r->headers_in, "If-None-Match");
+	apr_table_get((const apr_table_t *)r->headers_in, "If-Range");
+	apr_table_get((const apr_table_t *)r->headers_in, "If-Unmodified-Since");
+	apr_table_get((const apr_table_t *)r->headers_in, "Max-Forwards");
+	apr_table_get((const apr_table_t *)r->headers_in, "Origin");
 	apr_table_get((const apr_table_t *)r->headers_in, "Pragma");
+	apr_table_get((const apr_table_t *)r->headers_in, "Proxy-Authorization");
+	apr_table_get((const apr_table_t *)r->headers_in, "Range");
+	apr_table_get((const apr_table_t *)r->headers_in, "Referer");
+	apr_table_get((const apr_table_t *)r->headers_in, "TE");
+	apr_table_get((const apr_table_t *)r->headers_in, "Upgrade");
+	apr_table_get((const apr_table_t *)r->headers_in, "User-Agent");
+	apr_table_get((const apr_table_t *)r->headers_in, "Via");
+	apr_table_get((const apr_table_t *)r->headers_in, "Warning");
 }
 
 void signalSIGSEGV(int dummy)
@@ -261,7 +279,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 		ip_address = r->server->server_hostname;
 		ip_address += ":";
 		ip_address += port;
-		configurationData.ip_address = ip_address;
+		ConfigurationData::getInstance()->ip_address = ip_address;
 	}
 	signal(SIGSEGV,signalSIGSEGV);
 	apr_bucket_brigade *bb = apr_brigade_create(r->pool, r->connection->bucket_alloc);
@@ -313,9 +331,10 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 		ap_rprintf (r, r->args);*/
 		hreq->buildRequest("GetArguments",r->args);
 	}
-	hreq->setHttpVersion(r->protocol);
+	//hreq->setHttpVersion(r->protocol);
 
 	HttpResponse respo = service(hreq);
+	string h1 = respo.generateResponse(hreq->getMethod(), hreq);
 	fprintf(stderr,"\n\n\n\n--------------------------------------------\n");
 	fprintf(stderr,hreq->getUrl().c_str());
 	fprintf(stderr,"\n");
@@ -326,17 +345,17 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	fflush(stderr);
 	fprintf(stderr,"\n\n");
 	fflush(stderr);
-	fprintf(stderr, respo.generateResponse().c_str());
+	fprintf(stderr, h1.c_str());
 	fflush(stderr);
 	delete hreq;
 	delete req;
-    if(respo.getContent_type()!="")
+    if(respo.getHeader(HttpResponse::ContentType)!="")
 	{
-    	r->content_type = respo.getContent_type().c_str();
+    	r->content_type = respo.getHeader(HttpResponse::ContentType).c_str();
 	}
-    if(respo.getContent_str()!="")
+    if(h1!="")
     {
-    	ap_rprintf (r, respo.getContent_str().c_str());
+    	ap_rprintf (r, h1.c_str());
     	return OK;
     }
 	return OK;
@@ -364,10 +383,12 @@ static void one_time_init()
 	string webpath = serverRootDirectory + "web/";
 	resourcePath = respath;
 
+	ConfigurationData::getInstance();
+
 	string logf = serverRootDirectory+"/server.log";
 	string logp = respath+"/log.prop";
-	Logger::init(logp);
-	logger = Logger::getLogger("FfeadCppApacheModule");
+	LoggerFactory::init(logp, serverRootDirectory);
+	logger = LoggerFactory::getLogger("FfeadCppApacheModule");
 
 	propMap srprps = pread.getProperties(respath+"server.prop");
 
@@ -379,12 +400,17 @@ static void one_time_init()
 	strVec cmpnames;
 	try
 	{
-		configurationData = ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, pubpath, respath, isSSLEnabled);
+		ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, serverRootDirectory, respath);
 	}
 	catch(const XmlParseException &p)
 	{
-		logger << p->getMessage() << endl;
+		logger << p.getMessage() << endl;
 	}
+    catch(const char* msg)
+	{
+		logger << msg << endl;
+	}
+
 	if(srprps["SESS_STATE"]=="server")
 		sessatserv = true;
 	if(srprps["SESS_TIME_OUT"]!="")
@@ -396,11 +422,11 @@ static void one_time_init()
 			logger << "\nInvalid session timeout value defined, defaulting to 1hour/3600sec";
 		}
 	}
-	configurationData.sessionTimeout = sessionTimeout;
-	configurationData.sessatserv = sessatserv;
+	ConfigurationData::getInstance()->sessionTimeout = sessionTimeout;
+	ConfigurationData::getInstance()->sessatserv = sessatserv;
 	for(unsigned int var=0;var<pubfiles.size();var++)
 	{
-		configurationData.pubMap[pubfiles.at(var)] = "true";
+		ConfigurationData::getInstance()->pubMap[pubfiles.at(var)] = "true";
 	}
 	bool libpresent = true;
 	void *dlibtemp = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
@@ -416,8 +442,8 @@ static void one_time_init()
 	if(isCompileEnabled)
 		libpresent = false;
 
-	configurationData.props = pread.getProperties(respath+"mime-types.prop");
-	configurationData.lprops = pread.getProperties(respath+"locale.prop");
+	ConfigurationData::getInstance()->props = pread.getProperties(respath+"mime-types.prop");
+	ConfigurationData::getInstance()->lprops = pread.getProperties(respath+"locale.prop");
 	string compres = respath+"run.sh";
 	if(!libpresent)
 	{
@@ -433,6 +459,100 @@ static void one_time_init()
 	}
 	else
 		logger.info("Library loaded successfully");
+
+#ifdef INC_COMP
+	for (unsigned int var1 = 0;var1<ConfigurationData::getInstance()->cmpnames.size();var1++)
+	{
+		string name = ConfigurationData::getInstance()->cmpnames.at(var1);
+		StringUtil::replaceFirst(name,"Component_","");
+		ComponentHandler::registerComponent(name);
+		AppContext::registerComponent(name);
+	}
+#endif
+
+	bool distocache = false;
+#ifdef INC_DSTC
+	int distocachepoolsize = 20;
+	try {
+		if(srprps["DISTOCACHE_POOL_SIZE"]!="")
+		{
+			distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
+		}
+	} catch(...) {
+		logger << ("Invalid poolsize specified for distocache") << endl;
+	}
+
+	try {
+		if(srprps["DISTOCACHE_PORT_NO"]!="")
+		{
+			CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
+			DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
+			logger << ("Session store is set to distocache store") << endl;
+			distocache = true;
+		}
+	} catch(...) {
+		logger << ("Invalid port specified for distocache") << endl;
+	}
+
+	if(!distocache) {
+		logger << ("Session store is set to file store") << endl;
+	}
+#endif
+
+	ConfigurationData::getInstance()->sessservdistocache = distocache;
+
+#ifdef INC_COMP
+	try {
+		if(srprps["CMP_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["CMP_PORT"]);
+			if(port>0)
+			{
+				ComponentHandler::trigger(srprps["CMP_PORT"]);
+			}
+		}
+	} catch(...) {
+		logger << ("Component Handler Services are disabled") << endl;
+	}
+#endif
+
+#ifdef INC_MSGH
+	try {
+		if(srprps["MESS_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["MESS_PORT"]);
+			if(port>0)
+			{
+				MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
+			}
+		}
+	} catch(...) {
+		logger << ("Messaging Handler Services are disabled") << endl;
+	}
+#endif
+
+#ifdef INC_MI
+	try {
+		if(srprps["MI_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["MI_PORT"]);
+			if(port>0)
+			{
+				MethodInvoc::trigger(srprps["MI_PORT"]);
+			}
+		}
+	} catch(...) {
+		logger << ("Method Invoker Services are disabled") << endl;
+	}
+#endif
+
+#ifdef INC_JOBS
+	JobScheduler::start();
+#endif
+
+	//Load all the FFEADContext beans so that the same copy is shared by all process
+	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
+	ConfigurationData::getInstance()->ffeadContext.initializeAllSingletonBeans();
 }
 
 
