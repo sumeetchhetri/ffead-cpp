@@ -22,6 +22,7 @@
 
 #ifndef CONFIGURATIONHANDLER_H_
 #define CONFIGURATIONHANDLER_H_
+#include "AppDefines.h"
 #include "TemplateEngine.h"
 #include "Reflection.h"
 #include "XmlParser.h"
@@ -54,7 +55,7 @@ public:
 	virtual ~ConfigurationHandler();
 	static void handle(strVec webdirs,strVec webdirs1,string incpath,string rtdcfpath,
 			string serverRootDirectory,string respath);
-	static void listi(string cwd,string type,bool apDir,strVec &folders);
+	static void listi(string cwd,string type,bool apDir,strVec &folders,bool showHidden);
 	static void configureCibernate(string, string);
 	static void destroyCibernate();
 };

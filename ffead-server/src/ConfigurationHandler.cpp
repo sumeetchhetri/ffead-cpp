@@ -32,7 +32,7 @@ ConfigurationHandler::~ConfigurationHandler() {
 }
 
 
-void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folders)
+void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folders,bool showHidden)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	FILE *pipe_fp;
@@ -65,7 +65,7 @@ void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folde
 		{
 			StringUtil::replaceFirst(folderName,"*","");
 			StringUtil::replaceFirst(folderName,"./","");
-			if(folderName.find("~")==string::npos)
+			if(folderName.find("~")==string::npos && (showHidden || (!showHidden && folderName.find(".")!=0)))
 			{
 				if(apDir)
 				{
@@ -107,6 +107,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	propMap srp;
 	PropFileReader pread;
 	XmlParser parser("Parser");
+	string rtdcfConf = serverRootDirectory + "rtdcf-conf/";
 #ifdef INC_COMP
 	ComponentGen gen;
 #endif
@@ -169,18 +170,18 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 		rundyncontent += "cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/"+name+"/public/\n";
 		ConfigurationData::getInstance()->cntMap[name] = "true";
 		vector<string> adcps;
-		listi(dcppath,".dcp",true,adcps);
+		listi(dcppath,".dcp",true,adcps,false);
 		for (int var = 0; var < (int)adcps.size(); ++var) {
 			dcps[adcps.at(var)] = name;
 		}
 		vector<string> atpes;
-		listi(tmplpath,".tpe",true,atpes);
+		listi(tmplpath,".tpe",true,atpes,false);
 		for (int var = 0; var < (int)atpes.size(); ++var) {
 			tpes[atpes.at(var)] = name;
 		}
 
 		vector<string> acompnts;
-		listi(cmppath,".cmp",true,acompnts);
+		listi(cmppath,".cmp",true,acompnts,false);
 		for (int var = 0; var < (int)acompnts.size(); ++var) {
 			compnts[acompnts.at(var)] = name;
 		}
@@ -192,7 +193,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 		ilibs += ("-I" + usrincludes+" ");
 
 		vector<string> includes;
-		listi(usrincludes, ".h",true,includes);
+		listi(usrincludes, ".h",true,includes,false);
 		map<string, ClassStructure> allclsmap;
 		for (unsigned int ind = 0; ind < includes.size(); ++ind)
 		{
@@ -779,6 +780,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 		AfcUtil::writeTofile(webpubpath+"_afc_Objects.js",objs,true);
 		AfcUtil::writeTofile(webpubpath+"_afc_Interfaces.js",infjs,true);
 	}
+	string confsrcFiles = "", confsrcFilesDinter = "";
 #ifdef INC_COMP
 	logger << "started generating component code" <<endl;
 	map<string, string>::iterator cmpit;
@@ -792,6 +794,8 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 			AfcUtil::writeTofile(rtdcfpath+file+".cpp",cudata,true);
 			AfcUtil::writeTofile(rtdcfpath+file+"_Remote.h",curemoteheaders,true);
 			AfcUtil::writeTofile(rtdcfpath+file+"_Remote.cpp",curemote,true);
+			confsrcFiles = file+".h \\ " + file+".cpp \\ ";
+			confsrcFiles += file+"_Remote.h \\ " + file+"_Remote.cpp \\ ";
 			isrcs += "./"+file+".cpp \\\n"+"./"+file+"_Remote.cpp \\\n";
 			iobjs += "./"+file+".o \\\n"+"./"+file+"_Remote.o \\\n";
 			ideps += "./"+file+".d \\\n"+"./"+file+"_Remote.d \\\n";
@@ -812,8 +816,10 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	string ret = ref.generateClassDefinitionsAll(clsstrucMaps,includeRef,webdirs1);
 	string objs, ajaxret, headers,typerefs;
 	AfcUtil::writeTofile(rtdcfpath+"ReflectorInterface.cpp",ret,true);
+	confsrcFiles += "ReflectorInterface.cpp \\ ";
 	ret = ref.generateSerDefinitionAll(clsstrucMaps,includeRef, true, objs, ajaxret, headers,typerefs,webdirs1);
 	AfcUtil::writeTofile(rtdcfpath+"SerializeInterface.cpp",ret,true);
+	confsrcFiles += "SerializeInterface.cpp \\ ";
 	logger << "done generating reflection/serialization code" <<endl;
 	cntxt["RUNTIME_LIBRARIES"] = libs;
 	ret = TemplateEngine::evaluate(rtdcfpath+"objects.mk.template",cntxt);
@@ -829,6 +835,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	logger << "started generating dcp code" <<endl;
 	ret = DCPGenerator::generateDCPAll(dcps);
 	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
+	confsrcFilesDinter = "DCPInterface.cpp \\ ";
 	logger << "done generating dcp code" <<endl;
 	ipdobjs += "./DCPInterface.o \\\n";
 #endif
@@ -838,6 +845,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	ret = TemplateGenerator::generateTempCdAll(tpes);
 	//logger << ret << endl;
 	AfcUtil::writeTofile(rtdcfpath+"TemplateInterface.cpp",ret,true);
+	confsrcFilesDinter += "TemplateInterface.cpp \\ ";
 	logger << "done generating template code" <<endl;
 	ipdobjs += "./TemplateInterface.o \\\n";
 #endif
@@ -847,6 +855,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	//ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,infjs,pathvec,ajintpthMap);
 	ret = ajaxret + ajrt + "\n}\n";
 	AfcUtil::writeTofile(rtdcfpath+"AjaxInterface.cpp",ret,true);
+	confsrcFiles += "AjaxInterface.cpp \\ ";
 	//AfcUtil::writeTofile(pubpath+"_afc_Objects.js",objs,true);
 	//AfcUtil::writeTofile(pubpath+"_afc_Interfaces.js",infjs,true);
 	AfcUtil::writeTofile(incpath+"AfcInclude.h",(ajaxHeaders+headers),true);
@@ -857,6 +866,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	logger << "started generating application code" <<endl;
 	ret = apputil.buildAllApplications(appf,webdirs1,ConfigurationData::getInstance()->appMap);
 	AfcUtil::writeTofile(rtdcfpath+"ApplicationInterface.cpp",ret,true);
+	confsrcFiles += "ApplicationInterface.cpp \\ ";
 	logger <<  "done generating application code" <<endl;
 	iobjs += "./ApplicationInterface.o \\\n";
 #endif
@@ -865,16 +875,15 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	logger <<  "started generating web-service code" <<endl;
 	ret = wsu.generateAllWSDL(webdirs1,respath,ConfigurationData::getInstance()->wsdlmap,ConfigurationData::getInstance()->ip_address,ref,clsstrucMaps);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
+	confsrcFiles += "WsInterface.cpp \\ ";
 	logger <<  "done generating web-service code" <<endl;
 	iobjs += "./WsInterface.o \\\n";
 #endif
 
 	cntxt["RUNTIME_COMP_POBJS"] = iobjs;
 	cntxt["RUNTIME_COMP_PDOBJS"] = ipdobjs;
-
 	ret = TemplateEngine::evaluate(rtdcfpath+"subdir.mk.template",cntxt);
 	AfcUtil::writeTofile(rtdcfpath+"subdir.mk",ret,true);
-
 	cntxt.clear();
 	if(ipdobjs=="")
 		cntxt["TARGET_LIB"] = "libinter";
@@ -888,7 +897,6 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
 	cont = TemplateEngine::evaluate(respath+"/rundyn_template.sh", cntxt);
 	AfcUtil::writeTofile(respath+"/rundyn_dinter.sh", cont, true);
-
 }
 
 #ifdef INC_CIB

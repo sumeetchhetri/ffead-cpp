@@ -31,12 +31,16 @@
 using namespace std;
 
 class DistoCacheClientUtils {
+	static string SUCCESS, ERR_NOELEMENTS, ERR_NOKEYCACHEMAP, ERR_INVCONTAINER,
+					  ERR_OPNOTSUPP, ERR_INDGRTCONTSIZ, ERR_NOVALUEFOUND, ERR_NOTAMAPCONT,
+					  ERR_ALLOCENTEXISTS, ERR_NOVALUESPEC, ERR_NEGATIVEPOS,
+					  ERR_POSNOTNUM, ERR_NEGATIVEREP, ERR_REPNOTNUM;
 	ClientInterface* client;
 	Mutex lock;
 	bool inUse;
 	friend class BasicDistoCacheConnectionFactory;
 	friend class PooledDistoCacheConnectionFactory;
-	string readValueOrThrowExp(AMEFObject* object);
+	string readValueOrThrowExp(AMEFObject* object, vector<string> ignoreErrors);
 public:
 	DistoCacheClientUtils(string host, int port, bool isSSL = false);
 	virtual ~DistoCacheClientUtils();

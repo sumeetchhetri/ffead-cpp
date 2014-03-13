@@ -265,6 +265,7 @@ string Client::getBinaryData(int len, bool isLengthIncluded)
 
 void Client::closeConnection()
 {
+	if(!connected)return;
 	connected = false;
 	close(sockfd);
 }

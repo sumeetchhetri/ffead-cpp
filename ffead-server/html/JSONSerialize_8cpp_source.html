@@ -408,7 +408,7 @@ $(document).ready(function(){initNavTree('JSONSerialize_8cpp_source.html','');})
 <div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;<span class="keywordtype">string</span> JSONSerialize::_serContainers(<span class="keywordtype">void</span>* t,<span class="keywordtype">string</span> className, <span class="keywordtype">string</span> type)</div>
 <div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;{</div>
 <div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;        <span class="keywordtype">string</span> json;</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;        <span class="keywordtype">string</span> libName = Constants::INTER_LIB_FILE;</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;        <span class="keywordtype">string</span> libName = INTER_LIB_FILE;</div>
 <div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;        <span class="keywordtype">void</span> *dlib = dlopen(libName.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;        <span class="keywordflow">if</span>(dlib == NULL)</div>
 <div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;        {</div>
@@ -427,7 +427,7 @@ $(document).ready(function(){initNavTree('JSONSerialize_8cpp_source.html','');})
 <div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;<span class="keywordtype">string</span> JSONSerialize::_ser(<span class="keywordtype">void</span>* t,<span class="keywordtype">string</span> className)</div>
 <div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;{</div>
 <div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;        <span class="keywordtype">string</span> json;</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;        <span class="keywordtype">string</span> libName = Constants::INTER_LIB_FILE;</div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;        <span class="keywordtype">string</span> libName = INTER_LIB_FILE;</div>
 <div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;        <span class="keywordtype">void</span> *dlib = dlopen(libName.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;        <span class="keywordflow">if</span>(dlib == NULL)</div>
 <div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;        {</div>
@@ -606,7 +606,7 @@ $(document).ready(function(){initNavTree('JSONSerialize_8cpp_source.html','');})
 <div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;<span class="keywordtype">void</span>* JSONSerialize::_unserCont(<span class="keywordtype">string</span> objXml,<span class="keywordtype">string</span> className,<span class="keywordtype">string</span> type)</div>
 <div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;{</div>
 <div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;        <span class="keywordtype">void</span>* obj = NULL;</div>
-<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;        <span class="keywordtype">string</span> libName = Constants::INTER_LIB_FILE;</div>
+<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;        <span class="keywordtype">string</span> libName = INTER_LIB_FILE;</div>
 <div class="line"><a name="l00543"></a><span class="lineno">  543</span>&#160;        <span class="keywordtype">void</span> *dlib = dlopen(libName.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00544"></a><span class="lineno">  544</span>&#160;        <span class="keywordflow">if</span>(dlib == NULL)</div>
 <div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;        {</div>
@@ -628,7 +628,7 @@ $(document).ready(function(){initNavTree('JSONSerialize_8cpp_source.html','');})
 <div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;<span class="keywordtype">void</span>* JSONSerialize::_unser(<span class="keywordtype">string</span> objXml,<span class="keywordtype">string</span> className)</div>
 <div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;{</div>
 <div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;        <span class="keywordtype">void</span>* obj = NULL;</div>
-<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;        <span class="keywordtype">string</span> libName = Constants::INTER_LIB_FILE;</div>
+<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;        <span class="keywordtype">string</span> libName = INTER_LIB_FILE;</div>
 <div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160;        <span class="keywordtype">void</span> *dlib = dlopen(libName.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00566"></a><span class="lineno">  566</span>&#160;        <span class="keywordflow">if</span>(dlib == NULL)</div>
 <div class="line"><a name="l00567"></a><span class="lineno">  567</span>&#160;        {</div>

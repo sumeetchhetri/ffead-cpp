@@ -22,21 +22,25 @@
 
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
-#include "string"
-using namespace std;
+#include "AppDefines.h"
 
-#define METHOD "method";
-#define CLAZ "claz";
-#define PARAMSIZE "paramsize";
-#define PARAM "param_";
+#define METHOD "method"
+#define CLAZ "claz"
+#define PARAMSIZE "paramsize"
+#define PARAM "param_"
 
-class Constants {
-public:
-	static string INTER_LIB_FILE;
-	static string DINTER_LIB_FILE;
-	static bool SYS_FORK_AVAIL;
-	static bool SCRIPT_EXEC_SHOW_ERRS;
-	static bool IS_FILE_DESC_PASSING_AVAIL;
-};
+#if !defined(OS_CYGWIN)
+	#define INTER_LIB_FILE "libinter.so"
+	#define DINTER_LIB_FILE "libdinter.so"
+	#define SYS_FORK_AVAIL true
+	#define SCRIPT_EXEC_SHOW_ERRS true
+	#define IS_FILE_DESC_PASSING_AVAIL true
+#else
+	#define INTER_LIB_FILE "libinter.a"
+	#define DINTER_LIB_FILE "libdinter.a"
+	#define SYS_FORK_AVAIL false
+	#define SCRIPT_EXEC_SHOW_ERRS false
+	#define IS_FILE_DESC_PASSING_AVAIL false
+#endif
 
 #endif /* CONSTANTS_H_ */

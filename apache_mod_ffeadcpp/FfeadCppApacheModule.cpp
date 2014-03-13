@@ -393,9 +393,9 @@ static void one_time_init()
 	propMap srprps = pread.getProperties(respath+"server.prop");
 
 	strVec webdirs,webdirs1,pubfiles;
-	ConfigurationHandler::listi(webpath,"/",true,webdirs);
-	ConfigurationHandler::listi(webpath,"/",false,webdirs1);
-	ConfigurationHandler::listi(pubpath,".js",false,pubfiles);
+	ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
+	ConfigurationHandler::listi(webpath,"/",false,webdirs1,false);
+	ConfigurationHandler::listi(pubpath,".js",false,pubfiles,false);
 
 	strVec cmpnames;
 	try
@@ -429,7 +429,7 @@ static void one_time_init()
 		ConfigurationData::getInstance()->pubMap[pubfiles.at(var)] = "true";
 	}
 	bool libpresent = true;
-	void *dlibtemp = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+	void *dlibtemp = dlopen(INTER_LIB_FILE.c_str(), RTLD_NOW);
 	logger << endl <<dlibtemp << endl;
 	if(dlibtemp==NULL)
 	{
@@ -451,7 +451,7 @@ static void one_time_init()
 		logger << "Intermediate code generation " << output << endl;
 	}
 
-	dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW|RTLD_GLOBAL);
+	dlib = dlopen(INTER_LIB_FILE.c_str(), RTLD_NOW|RTLD_GLOBAL);
 	if(dlib==NULL)
 	{
 		cout << dlerror() << endl;

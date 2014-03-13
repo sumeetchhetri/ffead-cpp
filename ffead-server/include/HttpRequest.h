@@ -20,6 +20,7 @@
  *      Author: sumeet
  */
 
+#include "AppDefines.h"
 #include "map"
 #include "HttpSession.h"
 #include "vector"

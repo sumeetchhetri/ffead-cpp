@@ -229,7 +229,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
 		string command = "php " + filen;
-		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
+		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -274,7 +274,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
 		string command = "perl " + filen;
-		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
+		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -309,7 +309,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
 		string command = "ruby " + filen;
-		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
+		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -353,7 +353,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
 		string command = "python " + filen;
-		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
+		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -388,7 +388,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
 		string command = "lua " + filen;
-		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
+		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -423,7 +423,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
 		string command = "node " + filen;
-		string content = chdirExecute(command, tmpf, Constants::SCRIPT_EXEC_SHOW_ERRS);
+		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);

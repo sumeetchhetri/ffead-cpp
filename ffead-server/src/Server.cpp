@@ -377,49 +377,36 @@ int Server::Receive(int fd,vector<string>& data,int bytes)
 int Server::createListener(string port,bool block)
 {
 	int sockfd;
-	struct addrinfo hints, *servinfo, *p;
 	struct sigaction sa;
 	int yes=1;
 	int rv;
+	bool bound = false;
 
-	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE; // use my IP
-	if ((rv = getaddrinfo(NULL, port.c_str(), &hints, &servinfo)) != 0) {
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-		exit(0);
-	}
-	// loop through all the results and bind to the first we can
-	for(p = servinfo; p != NULL; p = p->ai_next)
+	struct sockaddr_in self;
+	memset(&self, 0, sizeof(self));
+	self.sin_family = AF_INET;
+	self.sin_port = htons(CastUtil::lexical_cast<int>(port));
+	self.sin_addr.s_addr = INADDR_ANY;
+
+	/*---Create streaming socket---*/
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
-		if ((sockfd = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == -1)
-		{
-			perror("server: socket");
-			continue;
-		}
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-				sizeof(int)) == -1) {
-			perror("setsockopt");
-			exit(1);
-		}
-		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-			close(sockfd);
-			perror("server: bind");
-			continue;
-		}
-		break;
+		perror("Socket");
+		return -1;
 	}
-	if (p == NULL)
-	{
-		fprintf(stderr, "server: failed to bind\n");
-		exit(0);
+	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+		perror("setsockopt");
+		return -1;
 	}
-	freeaddrinfo(servinfo); // all done with this structure
+	if (bind(sockfd, (struct sockaddr*)&self, sizeof(self)) != 0) {
+		close(sockfd);
+		perror("server: bind");
+		return -1;
+	}
 	if (listen(sockfd, BACKLOGM) == -1)
 	{
 		perror("listen");
-		exit(1);
+		return -1;
 	}
 	sa.sa_handler = sigchld_handler; // reap all dead processes
 	sigemptyset(&sa.sa_mask);
@@ -427,7 +414,7 @@ int Server::createListener(string port,bool block)
 	if (sigaction(SIGCHLD, &sa, NULL) == -1)
 	{
 		perror("sigaction");
-		exit(1);
+		return -1;
 	}
 
 	if(!block)
@@ -444,6 +431,7 @@ int Server::createListener(string ipAddress,string port,bool block)
 	struct sigaction sa;
 	int yes=1;
 	int rv;
+	bool bound = false;
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
@@ -453,10 +441,12 @@ int Server::createListener(string ipAddress,string port,bool block)
 	const char *ip_addr = NULL;
 	if(ipAddress!="")
 		ip_addr = ipAddress.c_str();
+	else
+		return createListener(port, block);
 
 	if ((rv = getaddrinfo(ip_addr, port.c_str(), &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-		exit(0);
+		return -1;
 	}
 	// loop through all the results and bind to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next)
@@ -469,25 +459,27 @@ int Server::createListener(string ipAddress,string port,bool block)
 		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
 				sizeof(int)) == -1) {
 			perror("setsockopt");
-			exit(1);
+			return -1;
 		}
 		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
 			close(sockfd);
 			perror("server: bind");
 			continue;
+		} else {
+			bound = true;
+			break;
 		}
-		break;
 	}
-	if (p == NULL)
+	if (!bound)
 	{
 		fprintf(stderr, "server: failed to bind\n");
-		exit(0);
+		return -1;
 	}
 	freeaddrinfo(servinfo); // all done with this structure
 	if (listen(sockfd, BACKLOGM) == -1)
 	{
 		perror("listen");
-		exit(1);
+		return -1;
 	}
 	sa.sa_handler = sigchld_handler; // reap all dead processes
 	sigemptyset(&sa.sa_mask);
@@ -495,7 +487,7 @@ int Server::createListener(string ipAddress,string port,bool block)
 	if (sigaction(SIGCHLD, &sa, NULL) == -1)
 	{
 		perror("sigaction");
-		exit(1);
+		return -1;
 	}
 
 	if(!block)

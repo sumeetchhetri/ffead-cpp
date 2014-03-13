@@ -41,7 +41,7 @@ static Mutex m_mutex,p_mutex;
 
 Logger logger;
 
-void sigchld_handler(int s)
+void sigchld_handler_server(int s)
 {
 	while(waitpid(-1, NULL, WNOHANG) > 0);
 }
@@ -521,7 +521,8 @@ void* dynamic_page_monitor(void* arg)
 				AfcUtil::writeTofile(rtdcfpath+"TemplateInterface.cpp",ret,true);
 				logger << "done generating template code" <<endl;
 
-				string compres = respath+"rundyn_dinter.sh";
+				string compres;
+				compres = respath+"rundyn_dinter.sh";
 				int i=system(compres.c_str());
 				if(!i)
 				{
@@ -529,7 +530,7 @@ void* dynamic_page_monitor(void* arg)
 					logger.info("Done generating intermediate code");
 				}
 				m_mutex.lock();
-				if(Constants::IS_FILE_DESC_PASSING_AVAIL)
+				if(IS_FILE_DESC_PASSING_AVAIL)
 				{
 					map<int,pid_t>::iterator it;
 					for(it=pds.begin();it!=pds.end();it++)
@@ -641,10 +642,10 @@ int main(int argc, char* argv[])
 	if(compileEnabled=="true" || compileEnabled=="TRUE")
 		isCompileEnabled = true;
 
-	if(srprps["SCRIPT_ERRS"]=="true" || srprps["SCRIPT_ERRS"]=="TRUE")
+	/*if(srprps["SCRIPT_ERRS"]=="true" || srprps["SCRIPT_ERRS"]=="TRUE")
 	{
-		Constants::SCRIPT_EXEC_SHOW_ERRS = true;
-	}
+		SCRIPT_EXEC_SHOW_ERRS = true;
+	}*/
    	if(srprps["SESS_STATE"]=="server")
    		sessatserv = true;
    	if(srprps["SESS_TIME_OUT"]!="")
@@ -677,9 +678,9 @@ int main(int argc, char* argv[])
 	sockfd = Server::createListener(IP_ADDRES, PORT, false);
 
     strVec webdirs,webdirs1,pubfiles;
-    ConfigurationHandler::listi(webpath,"/",true,webdirs);
-    ConfigurationHandler::listi(webpath,"/",false,webdirs1);
-    ConfigurationHandler::listi(pubpath,".js",false,pubfiles);
+    ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
+    ConfigurationHandler::listi(webpath,"/",false,webdirs1,false);
+    ConfigurationHandler::listi(pubpath,".js",false,pubfiles,false);
 
     for(unsigned int var=0;var<pubfiles.size();var++)
 	{
@@ -705,8 +706,10 @@ int main(int argc, char* argv[])
 
     SSLHandler::initInstance();
 
+    cout << INTER_LIB_FILE << endl;
+
     bool libpresent = true;
-    void *dlibtemp = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+    void *dlibtemp = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	//logger << endl <<dlibtemp << endl;
 	if(dlibtemp==NULL)
 	{
@@ -719,15 +722,15 @@ int main(int argc, char* argv[])
     if(isCompileEnabled)
     	libpresent = false;
 
-	string compres = respath+"rundyn.sh";
+    string compres;
+	compres = respath+"rundyn.sh";
 	if(!libpresent)
 	{
 		string output = ScriptHandler::execute(compres, true);
 		logger << "Intermediate code generation task\n\n" << endl;
 		logger << output << endl;
 	}
-
-	void* checkdlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+	void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(checkdlib==NULL)
 	{
 		logger << dlerror() << endl;
@@ -846,7 +849,7 @@ int main(int argc, char* argv[])
 	int sp[preForked][2];
 	ThreadPool *pool = NULL;
 
-	if(Constants::IS_FILE_DESC_PASSING_AVAIL)
+	if(IS_FILE_DESC_PASSING_AVAIL)
 	{
 		for(int j=0;j<preForked;j++)
 		{
@@ -863,7 +866,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		void* dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+		void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 		//logger << endl <<dlib << endl;
 		if(dlib==NULL)
 		{
@@ -877,7 +880,7 @@ int main(int argc, char* argv[])
 			dlclose(dlib);
 		}
 
-		void* ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
+		void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 		//logger << endl <<dlib << endl;
 		if(ddlib==NULL)
 		{
@@ -946,7 +949,7 @@ int main(int argc, char* argv[])
 		processgendone = false;
 		if(processforcekilled)
 		{
-			if(Constants::IS_FILE_DESC_PASSING_AVAIL)
+			if(IS_FILE_DESC_PASSING_AVAIL)
 			{
 				files.clear();
 				for(int j=0;j<preForked;j++)
@@ -996,7 +999,7 @@ int main(int argc, char* argv[])
 			{
 				logger << ("got new connection " + CastUtil::lexical_cast<string>(descriptor)) << endl;
 				selEpolKqEvPrtHandler.unRegisterForEvent(descriptor);
-				if(Constants::IS_FILE_DESC_PASSING_AVAIL)
+				if(IS_FILE_DESC_PASSING_AVAIL)
 				{
 					errno = 0;
 					ifstream cntrlfile;
@@ -1107,7 +1110,7 @@ int main(int argc, char* argv[])
 		logger << "Destructed Thread pool" << endl;
 	}
 
-	if(Constants::IS_FILE_DESC_PASSING_AVAIL)
+	if(IS_FILE_DESC_PASSING_AVAIL)
 	{
 		map<int,pid_t>::iterator it;
 		for(it=pds.begin();it!=pds.end();++it)

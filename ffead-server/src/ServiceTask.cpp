@@ -881,13 +881,13 @@ void ServiceTask::run()
 
 			logger << ("Done with request initialization/session setup") << endl;
 
-			void* dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+			void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
 				throw "Cannot load application shared library";
 			}
-			void* ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
+			void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 			if(ddlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -1479,13 +1479,13 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		}
 		//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
 
-		void* dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+		void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 		if(dlib == NULL)
 		{
 			cerr << dlerror() << endl;
 			throw "Cannot load application shared library";
 		}
-		void* ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);
+		void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 		if(ddlib == NULL)
 		{
 			cerr << dlerror() << endl;

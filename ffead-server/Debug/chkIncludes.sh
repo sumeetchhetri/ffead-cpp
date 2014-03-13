@@ -1,7 +1,6 @@
 #!/bin/sh
 
 APP_DEFINE_FILE=../include/AppDefines.h
-CONSTANTS_FILE=../src/Constants.cpp
 FLAG=0
 
 IS_OS_CYGWIN=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"cygwin") != 0 {print "cygwin"}'`
@@ -102,51 +101,15 @@ if [ "$FLAG" = "0" ]; then
 fi
 
 if [ "$IS_OS_LINUX" != "" ]; then
-cat <<EOM> $CONSTANTS_FILE
-#include "Constants.h"
-
-string Constants::DINTER_LIB_FILE = "libdinter.so";
-string Constants::INTER_LIB_FILE = "libinter.so";
-bool Constants::SYS_FORK_AVAIL = true;
-bool Constants::SCRIPT_EXEC_SHOW_ERRS = true;
-bool Constants::IS_FILE_DESC_PASSING_AVAIL = true;
-EOM
 echo '#define OS_LINUX 1' >> $APP_DEFINE_FILE
 echo $IS_64_BIT >> $APP_DEFINE_FILE
 elif [ "$IS_OS_BSD" != "" ]; then
-cat <<EOM> $CONSTANTS_FILE
-#include "Constants.h"
-
-string Constants::DINTER_LIB_FILE = "libdinter.so";
-string Constants::INTER_LIB_FILE = "libinter.so";
-bool Constants::SYS_FORK_AVAIL = true;
-bool Constants::SCRIPT_EXEC_SHOW_ERRS = false;
-bool Constants::IS_FILE_DESC_PASSING_AVAIL = true;
-EOM
 echo '#define OS_BSD 1' >> $APP_DEFINE_FILE
 echo $IS_64_BIT >> $APP_DEFINE_FILE
 elif [ "$IS_OS_SOLARIS" != "" ]; then
-cat <<EOM> $CONSTANTS_FILE
-#include "Constants.h"
-
-string Constants::DINTER_LIB_FILE = "libdinter.so";
-string Constants::INTER_LIB_FILE = "libinter.so";
-bool Constants::SYS_FORK_AVAIL = true;
-bool Constants::SCRIPT_EXEC_SHOW_ERRS = false;
-bool Constants::IS_FILE_DESC_PASSING_AVAIL = true;
-EOM
 echo '#define OS_SOLARIS 1' >> $APP_DEFINE_FILE
 echo $IS_64_BIT >> $APP_DEFINE_FILE
 elif [ "$IS_OS_CYGWIN" != "" ]; then
-cat <<EOM> $CONSTANTS_FILE
-#include "Constants.h"
-
-string Constants::DINTER_LIB_FILE = "libdinter.a";
-string Constants::INTER_LIB_FILE = "libinter.a";
-bool Constants::SYS_FORK_AVAIL = false;
-bool Constants::SCRIPT_EXEC_SHOW_ERRS = false;
-bool Constants::IS_FILE_DESC_PASSING_AVAIL = false;
-EOM
 echo '#define OS_CYGWIN 1' >> $APP_DEFINE_FILE
 echo $IS_64_BIT >> $APP_DEFINE_FILE
 fi

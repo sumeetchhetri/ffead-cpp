@@ -22,6 +22,14 @@
 
 #include "DistoCacheClientUtils.h"
 
+string DistoCacheClientUtils::ERR_NOELEMENTS = "No Elements in container", DistoCacheClientUtils::ERR_NOKEYCACHEMAP = "Unable to find value for Key specified",
+	   DistoCacheClientUtils::ERR_INVCONTAINER = "Invalid container specified", DistoCacheClientUtils::ERR_OPNOTSUPP = "Operation not supported on container",
+	   DistoCacheClientUtils::ERR_INDGRTCONTSIZ = "Index greater than container size", DistoCacheClientUtils::ERR_NOTAMAPCONT = "Not a map container",
+	   DistoCacheClientUtils::ERR_NOVALUEFOUND = "No value found for key", DistoCacheClientUtils::ERR_ALLOCENTEXISTS = "Entry already exists",
+	   DistoCacheClientUtils::ERR_NOVALUESPEC = "No value specified", DistoCacheClientUtils::ERR_NEGATIVEPOS = "Position value is less than 0",
+	   DistoCacheClientUtils::ERR_POSNOTNUM = "Position value is not a number", DistoCacheClientUtils::ERR_NEGATIVEREP = "Repetition value is less than 0",
+	   DistoCacheClientUtils::ERR_REPNOTNUM = "Repetition value is not a number", DistoCacheClientUtils::SUCCESS = "SUCCESS";
+
 DistoCacheClientUtils::DistoCacheClientUtils(string host, int port, bool isSSL) {
 	if(isSSL)
 	{
@@ -57,7 +65,7 @@ void DistoCacheClientUtils::allocate(string cacheKey, string type) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::deallocate(string cacheKey) {
@@ -72,7 +80,7 @@ void DistoCacheClientUtils::deallocate(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::addObjectEntry(string key, string value) {
@@ -88,7 +96,7 @@ void DistoCacheClientUtils::addObjectEntry(string key, string value) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::removeObjectEntry(string key) {
@@ -103,7 +111,7 @@ void DistoCacheClientUtils::removeObjectEntry(string key) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 string DistoCacheClientUtils::getObjectEntryValue(string key) {
@@ -118,7 +126,7 @@ string DistoCacheClientUtils::getObjectEntryValue(string key) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
@@ -135,7 +143,7 @@ void DistoCacheClientUtils::addMapEntry(string cacheKey, string key, string valu
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::removeMapEntry(string cacheKey, string key) {
@@ -150,7 +158,7 @@ void DistoCacheClientUtils::removeMapEntry(string cacheKey, string key) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 string DistoCacheClientUtils::getMapEntryValue(string cacheKey, string key) {
@@ -165,7 +173,7 @@ string DistoCacheClientUtils::getMapEntryValue(string cacheKey, string key) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
@@ -181,7 +189,7 @@ string DistoCacheClientUtils::getMapEntryValueByPosition(string cacheKey, int po
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
@@ -198,7 +206,7 @@ void DistoCacheClientUtils::setMapEntryValueByPosition(string cacheKey, int posi
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::setCollectionEntryAt(string cacheKey, int position, string value) {
@@ -214,7 +222,7 @@ void DistoCacheClientUtils::setCollectionEntryAt(string cacheKey, int position, 
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::addCollectionEntry(string cacheKey, string value) {
@@ -230,7 +238,7 @@ void DistoCacheClientUtils::addCollectionEntry(string cacheKey, string value) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::removeCollectionEntryAt(string cacheKey, int position) {
@@ -245,7 +253,7 @@ void DistoCacheClientUtils::removeCollectionEntryAt(string cacheKey, int positio
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 string DistoCacheClientUtils::getCollectionEntryAt(string cacheKey, int position) {
@@ -260,7 +268,7 @@ string DistoCacheClientUtils::getCollectionEntryAt(string cacheKey, int position
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
@@ -277,7 +285,7 @@ size_t DistoCacheClientUtils::size(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	if(resp!="")
 	{
 		try
@@ -303,7 +311,7 @@ bool DistoCacheClientUtils::isEmpty(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	if(resp!="")
 	{
 		try
@@ -328,7 +336,7 @@ void DistoCacheClientUtils::clear(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::insert(string cacheKey, string value, int position) {
@@ -344,7 +352,7 @@ void DistoCacheClientUtils::insert(string cacheKey, string value, int position) 
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::insert(string cacheKey, string value, int position, int repetition) {
@@ -360,7 +368,7 @@ void DistoCacheClientUtils::insert(string cacheKey, string value, int position, 
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::popValueQueue(string cacheKey) {
@@ -375,7 +383,7 @@ void DistoCacheClientUtils::popValueQueue(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 string DistoCacheClientUtils::popGetValueQueue(string cacheKey) {
@@ -390,7 +398,7 @@ string DistoCacheClientUtils::popGetValueQueue(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
@@ -407,7 +415,7 @@ void DistoCacheClientUtils::pushBackValue(string cacheKey, string value) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::pushFrontValue(string cacheKey, string value) {
@@ -423,7 +431,7 @@ void DistoCacheClientUtils::pushFrontValue(string cacheKey, string value) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::popFrontValue(string cacheKey) {
@@ -438,7 +446,7 @@ void DistoCacheClientUtils::popFrontValue(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 void DistoCacheClientUtils::popBackValue(string cacheKey) {
@@ -453,7 +461,7 @@ void DistoCacheClientUtils::popBackValue(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	readValueOrThrowExp(object);
+	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
 string DistoCacheClientUtils::popGetFrontValue(string cacheKey) {
@@ -468,7 +476,7 @@ string DistoCacheClientUtils::popGetFrontValue(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
@@ -484,7 +492,7 @@ string DistoCacheClientUtils::popGetBackValue(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
@@ -500,7 +508,7 @@ string DistoCacheClientUtils::getFrontValue(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
@@ -516,11 +524,11 @@ string DistoCacheClientUtils::getBackValue(string cacheKey) {
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true, false);
-	resp = readValueOrThrowExp(object);
+	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
-string DistoCacheClientUtils::readValueOrThrowExp(AMEFObject* object)
+string DistoCacheClientUtils::readValueOrThrowExp(AMEFObject* object, vector<string> ignoreErrors)
 {
 	string exp, resp;
 	if(object!=NULL)
@@ -536,6 +544,15 @@ string DistoCacheClientUtils::readValueOrThrowExp(AMEFObject* object)
 		delete object;
 	}
 	if(exp!="") {
+		if(ignoreErrors.size()==0)
+			throw exp;
+		else
+		{
+			for(size_t i=0;i<ignoreErrors.size();i++) {
+				if(string(exp)==ignoreErrors.at(i))
+					return "";
+			}
+		}
 		throw exp;
 	} else {
 		return resp;

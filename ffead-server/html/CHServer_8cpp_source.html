@@ -466,7 +466,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;        <span class="keywordflow">if</span>((pid=fork())==0)</div>
 <div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;        {</div>
 <div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                <a class="code" href="classSSLHandler.html">SSLHandler</a> sSLHandler;</div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                dlib = dlopen(INTER_LIB_FILE.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;                <span class="comment">//logger &lt;&lt; endl &lt;&lt;dlib &lt;&lt; endl;</span></div>
 <div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;                <span class="keywordflow">if</span>(dlib==NULL)</div>
 <div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;                {</div>
@@ -477,7 +477,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;                <span class="keywordflow">else</span></div>
 <div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;                        logger.info(<span class="stringliteral">&quot;Library loaded successfully&quot;</span>);</div>
 <div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;                ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;                ddlib = dlopen(DINTER_LIB_FILE.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;                <span class="comment">//logger &lt;&lt; endl &lt;&lt;dlib &lt;&lt; endl;</span></div>
 <div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;                <span class="keywordflow">if</span>(ddlib==NULL)</div>
 <div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;                {</div>
@@ -675,7 +675,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;                                        logger.info(<span class="stringliteral">&quot;Done generating intermediate code&quot;</span>);</div>
 <div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;                                }</div>
 <div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;                                m_mutex.lock();</div>
-<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;                                <span class="keywordflow">if</span>(Constants::IS_FILE_DESC_PASSING_AVAIL)</div>
+<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;                                <span class="keywordflow">if</span>(IS_FILE_DESC_PASSING_AVAIL)</div>
 <div class="line"><a name="l00612"></a><span class="lineno">  612</span>&#160;                                {</div>
 <div class="line"><a name="l00613"></a><span class="lineno">  613</span>&#160;                                        map&lt;int,pid_t&gt;::iterator it;</div>
 <div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;                                        <span class="keywordflow">for</span>(it=pds.begin();it!=pds.end();it++)</div>
@@ -693,7 +693,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;                                                }</div>
 <div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;                                        }</div>
 <div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;</div>
-<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;                                        ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);</div>
+<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;                                        ddlib = dlopen(DINTER_LIB_FILE.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160;                                        <span class="comment">//logger &lt;&lt; endl &lt;&lt;dlib &lt;&lt; endl;</span></div>
 <div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;                                        <span class="keywordflow">if</span>(ddlib==NULL)</div>
 <div class="line"><a name="l00632"></a><span class="lineno">  632</span>&#160;                                        {</div>
@@ -800,7 +800,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00733"></a><span class="lineno">  733</span>&#160;</div>
 <div class="line"><a name="l00734"></a><span class="lineno">  734</span>&#160;        <span class="keywordflow">if</span>(srprps[<span class="stringliteral">&quot;SCRIPT_ERRS&quot;</span>]==<span class="stringliteral">&quot;true&quot;</span> || srprps[<span class="stringliteral">&quot;SCRIPT_ERRS&quot;</span>]==<span class="stringliteral">&quot;TRUE&quot;</span>)</div>
 <div class="line"><a name="l00735"></a><span class="lineno">  735</span>&#160;        {</div>
-<div class="line"><a name="l00736"></a><span class="lineno">  736</span>&#160;                Constants::SCRIPT_EXEC_SHOW_ERRS = <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00736"></a><span class="lineno">  736</span>&#160;                SCRIPT_EXEC_SHOW_ERRS = <span class="keyword">true</span>;</div>
 <div class="line"><a name="l00737"></a><span class="lineno">  737</span>&#160;        }</div>
 <div class="line"><a name="l00738"></a><span class="lineno">  738</span>&#160;        <span class="keywordflow">if</span>(srprps[<span class="stringliteral">&quot;SESS_STATE&quot;</span>]==<span class="stringliteral">&quot;server&quot;</span>)</div>
 <div class="line"><a name="l00739"></a><span class="lineno">  739</span>&#160;                sessatserv = <span class="keyword">true</span>;</div>
@@ -852,7 +852,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00785"></a><span class="lineno">  785</span>&#160;        configurationData.pubMap[pubfiles.at(var)] = <span class="stringliteral">&quot;true&quot;</span>;</div>
 <div class="line"><a name="l00786"></a><span class="lineno">  786</span>&#160;        }</div>
 <div class="line"><a name="l00787"></a><span class="lineno">  787</span>&#160;    <span class="keywordtype">bool</span> libpresent = <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00788"></a><span class="lineno">  788</span>&#160;    <span class="keywordtype">void</span> *dlibtemp = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);</div>
+<div class="line"><a name="l00788"></a><span class="lineno">  788</span>&#160;    <span class="keywordtype">void</span> *dlibtemp = dlopen(INTER_LIB_FILE.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00789"></a><span class="lineno">  789</span>&#160;        <span class="comment">//logger &lt;&lt; endl &lt;&lt;dlibtemp &lt;&lt; endl;</span></div>
 <div class="line"><a name="l00790"></a><span class="lineno">  790</span>&#160;        <span class="keywordflow">if</span>(dlibtemp==NULL)</div>
 <div class="line"><a name="l00791"></a><span class="lineno">  791</span>&#160;        {</div>
@@ -875,7 +875,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00808"></a><span class="lineno">  808</span>&#160;                logger &lt;&lt; output &lt;&lt; endl;</div>
 <div class="line"><a name="l00809"></a><span class="lineno">  809</span>&#160;        }</div>
 <div class="line"><a name="l00810"></a><span class="lineno">  810</span>&#160;</div>
-<div class="line"><a name="l00811"></a><span class="lineno">  811</span>&#160;        <span class="keywordtype">void</span>* checkdlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);</div>
+<div class="line"><a name="l00811"></a><span class="lineno">  811</span>&#160;        <span class="keywordtype">void</span>* checkdlib = dlopen(INTER_LIB_FILE.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00812"></a><span class="lineno">  812</span>&#160;        <span class="keywordflow">if</span>(checkdlib==NULL)</div>
 <div class="line"><a name="l00813"></a><span class="lineno">  813</span>&#160;        {</div>
 <div class="line"><a name="l00814"></a><span class="lineno">  814</span>&#160;                logger &lt;&lt; dlerror() &lt;&lt; endl;</div>
@@ -924,7 +924,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00857"></a><span class="lineno">  857</span>&#160;        <a class="code" href="classThreadPool.html">ThreadPool</a> *pool;</div>
 <div class="line"><a name="l00858"></a><span class="lineno">  858</span>&#160;        propMap params;</div>
 <div class="line"><a name="l00859"></a><span class="lineno">  859</span>&#160;        <a class="code" href="classSSLHandler.html">SSLHandler</a> sSLHandler;</div>
-<div class="line"><a name="l00860"></a><span class="lineno">  860</span>&#160;        <span class="keywordflow">if</span>(Constants::IS_FILE_DESC_PASSING_AVAIL)</div>
+<div class="line"><a name="l00860"></a><span class="lineno">  860</span>&#160;        <span class="keywordflow">if</span>(IS_FILE_DESC_PASSING_AVAIL)</div>
 <div class="line"><a name="l00861"></a><span class="lineno">  861</span>&#160;        {</div>
 <div class="line"><a name="l00862"></a><span class="lineno">  862</span>&#160;                <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j=0;j&lt;preForked;j++)</div>
 <div class="line"><a name="l00863"></a><span class="lineno">  863</span>&#160;                {</div>
@@ -965,7 +965,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00898"></a><span class="lineno">  898</span>&#160;<span class="comment">                        else if(configurationData.client_auth==1)</span></div>
 <div class="line"><a name="l00899"></a><span class="lineno">  899</span>&#160;<span class="comment">                                SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,0);*/</span></div>
 <div class="line"><a name="l00900"></a><span class="lineno">  900</span>&#160;                }</div>
-<div class="line"><a name="l00901"></a><span class="lineno">  901</span>&#160;                dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);</div>
+<div class="line"><a name="l00901"></a><span class="lineno">  901</span>&#160;                dlib = dlopen(INTER_LIB_FILE.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00902"></a><span class="lineno">  902</span>&#160;                <span class="comment">//logger &lt;&lt; endl &lt;&lt;dlib &lt;&lt; endl;</span></div>
 <div class="line"><a name="l00903"></a><span class="lineno">  903</span>&#160;                <span class="keywordflow">if</span>(dlib==NULL)</div>
 <div class="line"><a name="l00904"></a><span class="lineno">  904</span>&#160;                {</div>
@@ -975,7 +975,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00908"></a><span class="lineno">  908</span>&#160;                }</div>
 <div class="line"><a name="l00909"></a><span class="lineno">  909</span>&#160;                <span class="keywordflow">else</span></div>
 <div class="line"><a name="l00910"></a><span class="lineno">  910</span>&#160;                        logger.info(<span class="stringliteral">&quot;Library loaded successfully&quot;</span>);</div>
-<div class="line"><a name="l00911"></a><span class="lineno">  911</span>&#160;                ddlib = dlopen(Constants::DINTER_LIB_FILE.c_str(), RTLD_NOW);</div>
+<div class="line"><a name="l00911"></a><span class="lineno">  911</span>&#160;                ddlib = dlopen(DINTER_LIB_FILE.c_str(), RTLD_NOW);</div>
 <div class="line"><a name="l00912"></a><span class="lineno">  912</span>&#160;                <span class="comment">//logger &lt;&lt; endl &lt;&lt;dlib &lt;&lt; endl;</span></div>
 <div class="line"><a name="l00913"></a><span class="lineno">  913</span>&#160;                <span class="keywordflow">if</span>(ddlib==NULL)</div>
 <div class="line"><a name="l00914"></a><span class="lineno">  914</span>&#160;                {</div>
@@ -1033,7 +1033,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l00966"></a><span class="lineno">  966</span>&#160;                processgendone = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00967"></a><span class="lineno">  967</span>&#160;                <span class="keywordflow">if</span>(processforcekilled)</div>
 <div class="line"><a name="l00968"></a><span class="lineno">  968</span>&#160;                {</div>
-<div class="line"><a name="l00969"></a><span class="lineno">  969</span>&#160;                        <span class="keywordflow">if</span>(Constants::IS_FILE_DESC_PASSING_AVAIL)</div>
+<div class="line"><a name="l00969"></a><span class="lineno">  969</span>&#160;                        <span class="keywordflow">if</span>(IS_FILE_DESC_PASSING_AVAIL)</div>
 <div class="line"><a name="l00970"></a><span class="lineno">  970</span>&#160;                        {</div>
 <div class="line"><a name="l00971"></a><span class="lineno">  971</span>&#160;                                files.clear();</div>
 <div class="line"><a name="l00972"></a><span class="lineno">  972</span>&#160;                                <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j=0;j&lt;preForked;j++)</div>
@@ -1083,7 +1083,7 @@ $(document).ready(function(){initNavTree('CHServer_8cpp_source.html','');});
 <div class="line"><a name="l01016"></a><span class="lineno"> 1016</span>&#160;                        {</div>
 <div class="line"><a name="l01017"></a><span class="lineno"> 1017</span>&#160;                                logger &lt;&lt; (<span class="stringliteral">&quot;got new connection &quot;</span> + CastUtil::lexical_cast&lt;<span class="keywordtype">string</span>&gt;(descriptor)) &lt;&lt; endl;</div>
 <div class="line"><a name="l01018"></a><span class="lineno"> 1018</span>&#160;                                selEpolKqEvPrtHandler.unRegisterForEvent(descriptor);</div>
-<div class="line"><a name="l01019"></a><span class="lineno"> 1019</span>&#160;                                <span class="keywordflow">if</span>(Constants::IS_FILE_DESC_PASSING_AVAIL)</div>
+<div class="line"><a name="l01019"></a><span class="lineno"> 1019</span>&#160;                                <span class="keywordflow">if</span>(IS_FILE_DESC_PASSING_AVAIL)</div>
 <div class="line"><a name="l01020"></a><span class="lineno"> 1020</span>&#160;                                {</div>
 <div class="line"><a name="l01021"></a><span class="lineno"> 1021</span>&#160;                                        ifstream cntrlfile;</div>
 <div class="line"><a name="l01022"></a><span class="lineno"> 1022</span>&#160;                                        cntrlfile.open(files.at(childNo).c_str());</div>

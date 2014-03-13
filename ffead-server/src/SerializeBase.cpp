@@ -982,7 +982,7 @@ string SerializeBase::_serContainer(void* t, string className, string appName, s
 {
 	StringUtil::replaceAll(className, "::", "_");
 	string serVal;
-	string libName = Constants::INTER_LIB_FILE;
+	string libName = INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -1002,7 +1002,7 @@ string SerializeBase::_ser(void* t, string className, string appName, SerializeB
 {
 	StringUtil::replaceAll(className, "::", "_");
 	string serVal;
-	string libName = Constants::INTER_LIB_FILE;
+	string libName = INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -1570,7 +1570,7 @@ void* SerializeBase::_unserContainer(void* unserableObject, string className, st
 {
 	StringUtil::replaceAll(className, "::", "_");
 	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
+	string libName = INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -1592,7 +1592,7 @@ void* SerializeBase::_unser(void* unserableObject, string className, string appN
 {
 	StringUtil::replaceAll(className, "::", "_");
 	void* obj = NULL;
-	string libName = Constants::INTER_LIB_FILE;
+	string libName = INTER_LIB_FILE;
 	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
 	if(dlib == NULL)
 	{

@@ -22,6 +22,7 @@
 
 #ifndef SERVICETASK_H_
 #define SERVICETASK_H_
+#include "AppDefines.h"
 #include <sys/stat.h>
 #include <math.h>
 #include "DateFormat.h"

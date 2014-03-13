@@ -22,6 +22,7 @@
 
 #ifndef CHSERVER_H_
 #define CHSERVER_H_
+#include "AppDefines.h"
 #include <algorithm>
 #include "Client.h"
 #include "PropFileReader.h"
@@ -108,6 +109,8 @@
 #include "ServiceTask.h"
 #include "ConfigurationHandler.h"
 #include "SSLHandler.h"
+#include "SSLClient.h"
+#include "Client.h"
 #include "ServiceTask.h"
 #include "Thread.h"
 #include "FFEADContext.h"

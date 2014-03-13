@@ -22,6 +22,7 @@
 
 #ifndef CONTROLLERHANDLER_H_
 #define CONTROLLERHANDLER_H_
+#include "AppDefines.h"
 #include "Controller.h"
 #include "RestController.h"
 #include "AuthHandler.h"

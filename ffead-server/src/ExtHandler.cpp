@@ -88,7 +88,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 					string tem = req->getRequestParam(ss);
 					vemp.push_back(tem);
 				}
-				string libName = Constants::INTER_LIB_FILE;
+				string libName = INTER_LIB_FILE;
 				string funcName;
 				string metn,re;
 				StringUtil::replaceAll(claz, "::", "_");
@@ -121,7 +121,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse& res, void* dlib, void* d
 #ifdef INC_DCP
 	else if(ext==".dcp")
 	{
-		string libName = Constants::INTER_LIB_FILE;
+		string libName = INTER_LIB_FILE;
 		if(ddlib != NULL)
 		{
 			cntrlit = true;

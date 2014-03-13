@@ -5,7 +5,7 @@
 -include ../makefile.init
 -include envvars.mk
 
-RM := rm -rf
+RM := rm -f
 
 # All of the sources participating in the build are defined here
 -include sources.mk
@@ -44,7 +44,7 @@ all: tests
 tests: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ $(PTHREADS) -L/usr/local/lib -L../lib -o"tests" $(OBJS) $(USER_OBJS) $(LIBS) $(EX_LIBS)
+	g++ $(PTHREADS) -L/usr/local/lib -L../.libs -o"tests" $(OBJS) $(USER_OBJS) $(LIBS) $(EX_LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

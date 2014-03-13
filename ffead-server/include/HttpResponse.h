@@ -26,7 +26,6 @@
 #include "vector"
 #include "CastUtil.h"
 #include "HttpRequest.h"
-#include "AppDefines.h"
 #include "HTTPResponseStatus.h"
 #include "ContentTypes.h"
 #include "Timer.h"

@@ -23,7 +23,7 @@
 #include "BinarySerialize.h"
 
 BinarySerialize::BinarySerialize() {
-	dlib = dlopen(Constants::INTER_LIB_FILE.c_str(), RTLD_NOW);
+	dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(dlib == NULL)
 	{
 		cerr << dlerror() << endl;
