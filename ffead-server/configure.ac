@@ -16,14 +16,10 @@ AS_HELP_STRING([--enable-debug],
 )
 if test "x$support_debug" = "xyes"; then
     AC_DEFINE(DEBUG, [], [set DEBUG mode])
-    CFLAGS=''
-    CPPFLAGS='-g -O2'
-    CXXFLAGS='-g -O2'
+    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Werror -Wno-uninitialized -O0"
 else
     AC_DEFINE(NDEBUG, [], [unset DEBUG mode])
-    CFLAGS=''
-    CPPFLAGS='-O2'
-    CXXFLAGS='-O2'
+    AM_CXXFLAGS="$AM_CXXFLAGS -O0"
     support_debug=no
 fi
 
@@ -354,14 +350,23 @@ if test "x$mod_all" = "xtrue"; then
     AC_DEFINE(INC_BINSER, [], [set DEBUG mode])
 fi
 
+# store current user given compiler flags to avoid default setup via AC_PROG_CXX
+OLD_CXXFLAGS=$CXXFLAGS
+
 dnl# Checks for programs.
 AC_PROG_AWK
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
+
+# reset compiler flags to initial flags
+CXXFLAGS=$OLD_CXXFLAGS
+
 AC_PROG_MAKE_SET
 
 dnl# Checks for libraries.
+AC_DEFINE(BUILT_WITH_CONFGURE, [1], [set configure mode])
+AM_CONDITIONAL(BUILT_WITH_CONFGURE, test x"1" = x"1")
 
 dnl# Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
@@ -416,6 +421,10 @@ AC_CHECK_LIB(ssl, SSL_read, [], [AC_MSG_ERROR([ssl library not found])])
 AC_CHECK_LIB([crypto], [SHA1_Init], [], [AC_MSG_ERROR([libcrypto not found])])
 AC_CHECK_LIB(z, compress,,AC_MSG_ERROR([no zlib; please install zlib or equivalent]))
 AC_CHECK_LIB(rt, clock_gettime,,[AC_MSG_ERROR([librt required but not found])])
+    
+# distribute additional compiler and linker flags among Makefiles
+# --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
+AC_SUBST([AM_CXXFLAGS])    
     
 AC_CONFIG_FILES([Makefile
 				src/autotools/Makefile

@@ -723,6 +723,15 @@ int main(int argc, char* argv[])
     	libpresent = false;
 
     string compres;
+#if BUILT_WITH_CONFGURE == 1
+    compres = respath+"rundyn-automake.sh";
+	if(!libpresent)
+	{
+		string output = ScriptHandler::execute(compres, true);
+		logger << "Intermediate code generation task\n\n" << endl;
+		logger << output << endl;
+	}
+#else
 	compres = respath+"rundyn.sh";
 	if(!libpresent)
 	{
@@ -730,6 +739,7 @@ int main(int argc, char* argv[])
 		logger << "Intermediate code generation task\n\n" << endl;
 		logger << output << endl;
 	}
+#endif
 	void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(checkdlib==NULL)
 	{

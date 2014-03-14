@@ -1,9 +1,9 @@
 
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
-AM_CXXFLAGS = -I"../../include"
+AM_CPPFLAGS = -I"../../include"
 
-prefix=${abs_builddir}/src/autotools
+prefix=${abs_builddir}
 
 lib_LTLIBRARIES = libweblib.la
 libweblib_la_SOURCES = ../ServiceTask.cpp \
@@ -229,7 +229,7 @@ endif
 
 libweblib_la_LDFLAGS = -shared -no-undefined -module
 
-bin_PROGRAMS = CHS
+noinst_PROGRAMS = CHS
 CHS_SOURCES = ../CHServer.cpp
 CHS_LDADD = -L".libs/" -lweblib
 

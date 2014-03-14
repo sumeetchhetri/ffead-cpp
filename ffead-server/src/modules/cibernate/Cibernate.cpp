@@ -904,7 +904,7 @@ bool Cibernate::startTransaction()
 
 	flagc = false;
 	//Set autocommit to false on the connection, start the transaction
-	SQLRETURN sqlreturn = SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_OFF,NULL);
+	SQLRETURN sqlreturn = SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_OFF,0);
 	if (sqlreturn == SQL_SUCCESS || sqlreturn == SQL_SUCCESS_WITH_INFO)
 	{
 		flagc = true;
@@ -931,7 +931,7 @@ bool Cibernate::commit()
 		flagc = true;
 	}
 	//Turn autocommit to true
-	SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_ON,NULL);
+	SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_ON,0);
 	close(true);
 	return flagc;
 }
@@ -955,7 +955,7 @@ bool Cibernate::rollback()
 		flagc = true;
 	}
 	//Turn autocommit to true
-	SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_ON,NULL);
+	SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_ON,0);
 	close(true);
 	return flagc;
 }

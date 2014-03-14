@@ -48,6 +48,7 @@
 #include "JobScheduler.h"
 #endif
 #include "SSLHandler.h"
+#include "ScriptHandler.h"
 
 class ConfigurationHandler {
 public:

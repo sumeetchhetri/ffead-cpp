@@ -74,19 +74,18 @@ int main()
 	}
 
 	timerc.start();
-	ClientInterface* client;
-	if(sslEnabled)
-	{
-		if(sslFile!="")
-			client = new SSLClient(sslFile);
-		else
-			client = new SSLClient;
-	}
-	else
-		client = new Client;
-	client->connectionUnresolv(ip,port);
 	for (int var = 0; var < total; ++var)
 	{
+		ClientInterface* client;
+		if(sslEnabled)
+		{
+			if(sslFile!="")
+				client = new SSLClient(sslFile);
+			else
+				client = new SSLClient;
+		}
+		else
+			client = new Client;
 		if(testCases[var].size()>=4)
 		{
 			if(testCases[var][0]=="ENABLED")
@@ -182,6 +181,7 @@ int main()
 
 			timer.start();
 
+			client->connectionUnresolv(ip,port);
 			int bytes = client->sendData(data);
 			string tot = client->getTextData("\r\n","Content-Length");
 			long long millis = timer.elapsedMilliSeconds();
@@ -272,11 +272,11 @@ int main()
 		{
 			skipped++;
 		}
-	}
-	if(client!=NULL)
-	{
-		client->closeConnection();
-		delete client;
+		if(client!=NULL)
+		{
+			client->closeConnection();
+			delete client;
+		}
 	}
 
 	cout << "Total Tests = " << total-1 << ", Passed = " << passed << ", Failed = " << failed

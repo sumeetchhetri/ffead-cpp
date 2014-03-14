@@ -5,8 +5,6 @@ AM_CPPFLAGS=-I"../../include"
 
 prefix=${abs_builddir}
 
-bin_PROGRAMS = tests
+noinst_PROGRAMS = tests
 tests_SOURCES = ../FfeadServerTestSuite.cpp
-tests_LDADD = -L"../../src/autotools/.libs/" -lweblib
-
-#dist_noinst_SCRIPTS = autogen.sh
+tests_LDADD = -L"../../src/autotools/" -lweblib

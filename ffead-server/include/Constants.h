@@ -35,6 +35,12 @@
 	#define SYS_FORK_AVAIL true
 	#define SCRIPT_EXEC_SHOW_ERRS true
 	#define IS_FILE_DESC_PASSING_AVAIL true
+#elif BUILT_WITH_CONFGURE == 1
+	#define INTER_LIB_FILE "libinter.dll.a"
+	#define DINTER_LIB_FILE "libdinter.dll.a"
+	#define SYS_FORK_AVAIL false
+	#define SCRIPT_EXEC_SHOW_ERRS false
+	#define IS_FILE_DESC_PASSING_AVAIL false
 #else
 	#define INTER_LIB_FILE "libinter.a"
 	#define DINTER_LIB_FILE "libdinter.a"
