@@ -1,11 +1,11 @@
 Installation Directions
 
-1. Refer INSTALL-{OSTYPE} file for directions on how to install on OS/Platform
+1. If using autotools based installtaion for ffead-cpp then please refere to the INSTALL-WITH-AUTOTOOLS-ANY-OS (Apache Module Section) for directions on install, older installation method uses run.sh(Unix/Others) and run_cygwin.sh(windows-cygwin)
 2. Download the tar file and extract it to the location of your choice.
 3. Install Unix-ODBC and required odbc files for MySQL dependency alongwith development files
 4. Install Open-SSL and development files
 5. Install apache/httpd and apache-devel/htttpd-devel files
-6. Go to the ffead-server-unix/Release or ffead-server-unix/Debug depending on whether you need to debug the server code
+6. Go to the ffead-server-src/Release or ffead-server-src/Debug depending on whether you need to debug the server code
 7. Open terminal and type make all
 8. This will create the distribution folder named ffead-server-unix inside ffead-server-unix/Release or ffead-server-unix/Debug folders accordingly
 9. Place your application shared library inside the ffead-server-unix/Release/ffead-server/lib or ffead-server-unix/Debug/ffead-server/lib folder.
@@ -15,9 +15,9 @@ Installation Directions
 13. To compile the default application shared library go to the ffead-server-unix/Release/ffead-server/web/default/src/Debug folder and run "make all"
 14. Copy the libdefault library to the ffead-server-unix/Release/ffead-server/lib folder
 15. Copy the ffead-server-unix/Release/ffead-server folder to the apache web folder eg, /var/www/html or any other location of your choice
-16. Download the apache_mod_ffeadcpp folder/zip file
-17. Change the FFEAD_CPP_PATH variable in run.sh to point to the ffead-server-unix/Release/ffead-server folder, change the APXS and APACHECTL in the MAkefile accordingly
-18. cd apache_mod_ffeadcpp and chmod 755 run.sh
-19. This will install the mod_ffeadcpp module to apache http modules and update config as well
-20. Modify the Document path in httpd.conf to value stored in $FFEAD_CPP_PATH variable
-21. It will also restart apache server, check the url http://localhost/index.html on your browser
+16. Got to the apache_mod_ffeadcpp folder
+17. Change the FFEAD_CPP_PATH variable in run.sh to point to the ffead-server-unix/Release/ffead-server folder
+18. cd apache_mod_ffeadcpp and chmod 755 run.sh/run_cygwin.sh
+19. This will install the mod_ffeadcpp module to apache http modules and update http config as well
+20. Add the ffead-server path property FFEAD_CPP_PATH in httpd.conf to the value stored in $FFEAD_CPP_PATH variable
+21. Restart apache server, check the url http://localhost/index.html on your browser

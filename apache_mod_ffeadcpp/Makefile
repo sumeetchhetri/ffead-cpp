@@ -18,17 +18,17 @@ APXS_LIBS_SHLIB=`$(APXS) -q LIBS_SHLIB`
 all: mod_ffeadcpp.so
 
 # compile
-mod_ffeadcpp.o: FfeadCppApacheModule.cpp
-	g++ -c -fPIC -I"$(APXS_INCLUDEDIR)" -I"/usr/include/apr-1" -I"${FFEAD_CPP_PATH}/include" -I"." $(APXS_CFLAGS) $(APXS_CFLAGS_SHLIB) -Wall -o $@ $< 
+mod_ffeadcpp.o: mod_ffeadcpp.cpp
+	g++ -c -fPIC -I"$(APXS_INCLUDEDIR)" -I"/usr/include/apr-1" -I"/usr/include/apr-1.0" -I"${FFEAD_CPP_PATH}/include" -I"." $(APXS_CFLAGS) $(APXS_CFLAGS_SHLIB) -fpermissive -w -o $@ $< 
 
 # link
 mod_ffeadcpp.so: mod_ffeadcpp.o 
-	g++ -fPIC -L"${FFEAD_CPP_PATH}/lib" -shared -o $@ $< $(APXS_LIBS_SHLIB) -lweblib -ldl -lcrypto -lssl -lapr-1 -lhttpd -laprutil-1
+	g++ -fPIC -L"${FFEAD_CPP_PATH}/lib" -shared -o $@ $< $(APXS_LIBS_SHLIB) -lweblib -ldl -lcrypto -lssl -lapr-1 -laprutil-1 ${HTTPD_LIB}
 
 # install the shared object file into Apache 
 install: all
 	$(APXS) -i -n 'ffeadcpp_module' mod_ffeadcpp.so
-
+	
 # display the apxs variables
 check_apxs_vars:
 	@echo APXS_CC $(APXS_CC);\
