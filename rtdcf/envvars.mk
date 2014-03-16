@@ -1,0 +1,4 @@
+MAKE_EXE := make
+PTHREADS :=
+EX_LIBS :=
+RES_LIB_EXT := a

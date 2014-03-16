@@ -23,45 +23,83 @@ FEATURES
 16. Template Engine and Dynamic Views generated from C++ objects.
 17. Controller Pattern (Implement controllers mapped with URL patterns to define custom behaviors)
 18. Request/Response Filters (Implement a chain of custom Filters for Pre/Post processing of request/response)
-19. Thread Pool Implementation
-20. C++ Interpreter (Limited support)
-21. Rule based WEB Behavior(idea can be expanded to other areas application wide)
-22. XML Parser (DOM Styled)
-23. Database Connection Pooling
-24. Internationalization support
-25. Utilities such as Timer, Logging, Property Files etc.
-26. File Upload
-27. FTP Server
-28. Security features for Method access (Web Services, AJAX calls, C++ Bean service calls, Server URL’s)
-29. Module for Integration of the framework with Apache Web Server
-30. Method Invoker Server for cross platform Method Invocation (A daemon per language/platform approach – XML based Serialization/De- Serialization)
+19. Thread Pool Implementation with Futures
+20. Bigint and Bigdecimal classes for arithmetic operations on big numbers
+21. C++ Interpreter (Limited support)
+22. Rule based WEB Behavior(idea can be expanded to other areas application wide)
+23. XML Parser (DOM Styled)
+24. Database Connection Pooling
+25. Internationalization support
+26. Utilities such as Timer, Logging, Property Files etc.
+27. File Upload
+28. FTP Server
+29. Security features for Method access (Web Services, AJAX calls, C++ Bean service calls, Server URL’s)
+30. Module for Integration of the framework with Apache Web Server
+31. Method Invoker Server for cross platform Method Invocation (A daemon per language/platform approach – XML based Serialization/De- Serialization)
 
+Release Notes version 1.9
+==================================
+	:- Fix for the socket select issue (when number of connections increases 64)
+	:- Added support for autotools build system
+	:- The intermediate libraries (libinter/libdinter) can also be built at run-time using ./configure/make
+
+Release Notes version 1.8
+==================================
+	:- CORS Filter support for corss origin resource sharing
+	:- Changes to XML/JSON/Binary Serialization
+	:- Moved common code to a new SerializeBase? class
+	:- Modified the AMEF Protocol classes for better binary serialization support
+	:- Added support for handling namespaces and nested classes in Reflection
+	:- Fixed the Date/DateFormat? classes for all issues related to parsing/formatting/updating dates
+	:- Added new Multipartcontent object for handling multipart requests
+	:- Added gzip/deflate compression for responses
+	:- Added chunked transfer encoding support
+	:- Added Last Modified/If-Modified-Since header based cache support
+	:- Moved request/response headers to a map instead of properties
+	:- Fixed the HttpResponseParser? class
+	:- Fixed the JSONUtil class for error in json parsing
+	:- Introduced a new LoggerFactory? class to handle multiple loggers, fixed the Logger class
+	:- Introduced Futures based Thread pooling support
+	:- Fixed various web service issues/problems
+	:- Introduced JobScheduler? class for job scheduling
+	:- Added a new CronTimer? class for handling cron times
+	:- Introduced stream based single/multi File upload support in Rest Controllers
+	:- Added a few new html pages for testing/sanity
+	:- Fixed the accpetance test related files
+	:- Added a couple of new classes in the default app for testing new features
+	:- Fixed the afc.js file to resolve existing issues
+	:- Fixed an existing issue with namespace handling within the Element class
+	:- Introduced new properties for connection keep-alive, transfer encoding chunk size, default content encoding method, max number of input headers and max file upload size to the server.prop config file
+	:- Changed the web-service related template files for better web service support
 
 REQUIREMENTS
-1. Any box that runs linux, BSD, Solaris or Windows/Cygwin
+1. Any box that runs linux, BSD, Solaris or Windows/Cygwin or any other OS(using autotools)
 2. Boost is no longer required as of version 1.7
 3. UnixODBC and development files
 4. OpenSSl and development files
-5. GCC C++ compiler, make, configure etc
+5. (GNU C++ compiler, GNU make) or Autotools(autoconf/automake/libtool/c++ compiler)
 
 
 INSTALL
+Autotools/Any OS
+Refer to the INSTALL-WITH-AUTOTOOLS-ANY-OS for generic installation directions.
+
 Unix
-Refer the INSTALL-UNIX file for installation directions.
+Refer the INSTALL-WITH-GNU-MAKE-ON-UNIX file for installation directions.
 
 BSD
-Refer the INSTALL-FREEBSD file for installation directions.
+Refer the INSTALL-WITH-GNU-MAKE-ON-FREEBSD file for installation directions.
 
 Windows/Cygwin
-Refer the INSTALL-WINDOWS-CYGWIN file for installation direction on Windows platform having Cygwin installed
+Refer the INSTALL-WITH-GNU-MAKE-ON-WINDOWS-CYGWIN file for installation direction on Windows platform having Cygwin installed
 
 Solaris
-Refer the INSTALL-SOLARIS file for installation directions.
+Refer the INSTALL-WITH-GNU-MAKE-ON-SOLARIS file for installation directions.
 
 UPDATES
-Find latest and older version on 
+Find latest and older versions on 
 Google Code - http://code.google.com/p/ffead-cpp
 Github - https://github.com/sumeetchhetri/ffead-cpp
 
 
-Copyright � 2013 Sumeet Chhetri
+Copyright � 2014 Sumeet Chhetri

@@ -1,0 +1,146 @@
+<app>
+	<cors-config>
+		<allow-origins>*</allow-origins>
+		<allow-methods>GET, POST, HEAD, PUT, DELETE</allow-methods>
+		<allow-headers>content-type, origin</allow-headers>
+		<expose-headers>content-type, origin</expose-headers>
+		<allow-credentials>true</allow-credentials>
+		<max-age>1023</max-age>
+	</cors-config>
+	<cache-control>
+		<control ext="png,css,js,jpeg,jpg,gif" header="Cache-Control" value="max-age=290304000, public"/>
+		<control ext="txt,xml,json" header="Cache-Control" value="max-age=172800, public, must-revalidate"/>
+		<control ext="html,html" header="Cache-Control" value="max-age=7200, must-revalidate"/>
+		<control file="video.mov" header="Expires" value="Thu, 15 Apr 2020 20:00:00 GMT"/>
+		<control header="Last-Modified" remove="true"/>
+	</cache-control>
+	<controllers>
+		<controller class="DefaultController" url="*.action"/>
+		<controller class="DefaultController" url="*.do"/>
+		<controller from="*.yourext" to="*.html"/>
+	</controllers>
+	<authhandlers>
+		<authhandler provider="file:users" url="*.authenticate"/>
+		<authhandler provider="class:DefaultOAUTHController" url="*.oauth"/>
+	</authhandlers>
+	<templates>
+		<template class="DefTemp" file="test.tpe"/>
+	</templates>
+	<dviews>
+		<dview class="Dview" path="test.view"/>
+	</dviews>
+	<ajax-interfaces>
+		<ajax-interface url="/expose" class="Expose"/>
+	</ajax-interfaces>
+	<filters>
+		<filter class="DefaultIOFilter" type="in"/>
+		<filter class="DefaultIOFilter" type="out"/>
+		<filter class="DefaultIOFilter" type="handle" url="*.filter"/>
+	</filters>
+	<security>
+		<login-handler provider="file:users" url="login.html"/>
+		<welcome file="index.html"/>
+		<!--login-handler provider="class:DefaultLoginHandler"/-->
+		<!--login-handler provider="db:DefaultLoginHandler"/-->
+		<secure path="*" role="ROLE_ANONYMOUS"/>
+		<secure path="/rest/*" role="ROLE_USER"/>
+	</security>
+	<restcontrollers>
+		<restcontroller class="DefaultRestController" urlpath="/rest/path/" name="rest1">
+			<restfunction name="addNumbers" alias="add/{1}/{2}" meth="GET">
+				<param type="int" name="1" from="path"/>
+				<param type="int" name="2" from="path"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" urlpath="/rest/reqparam/" name="rest1">
+			<restfunction name="addNumbers" alias="add" meth="GET">
+				<param type="int" name="1" from="reqparam"/>
+				<param type="int" name="2" from="reqparam"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" urlpath="/rest/postparam/" name="rest1">
+			<restfunction name="addNumbers" alias="add" meth="POST">
+				<param type="int" name="1" from="postparam"/>
+				<param type="int" name="2" from="postparam"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" urlpath="/rest/header/" name="rest1">
+			<restfunction name="addNumbers" alias="add" meth="GET">
+				<param type="int" name="1" from="header"/>
+				<param type="int" name="2" from="header"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" urlpath="/rest/path1/" name="rest2">
+			<restfunction name="addNumbers" alias="+/{1}/{2}" meth="GET">
+				<param type="int" name="1" from="path"/>
+				<param type="int" name="2" from="path"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="rest3">
+			<restfunction name="addNumbers" alias="ad/{1}/{2}" meth="GET">
+				<param type="int" name="1" from="path"/>
+				<param type="int" name="2" from="path"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController">
+			<restfunction name="power" meth="GET" baseUrl="/rest/controller/base{1}/power/exp{2}">
+				<param type="int" name="1" from="path"/>
+				<param type="int" name="2" from="path"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController">
+			<restfunction name="addNumbers" meth="GET" alias="addNumbers/{1}/{2}">
+				<param type="int" name="1" from="path"/>
+				<param type="int" name="2" from="path"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restvec">
+			<restfunction name="testVector" alias="tstvec" meth="POST">
+				<param type="vector-of-int" from="body"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restvecobj">
+			<restfunction name="testVectorObject" alias="tstvecobj" meth="POST" icontentType="application/json">
+				<param type="vector-of-TestMany" from="body"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restobj">
+			<restfunction name="testObject" alias="tstobj" meth="POST" icontentType="application/json" ocontentType="application/json">
+				<param type="TestMany" from="body"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restvecobj">
+			<restfunction name="testVectorObject" alias="tstvecobj.xml" meth="POST" icontentType="application/xml">
+				<param type="vector-of-TestMany" from="body"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restobj">
+			<restfunction name="testObject" alias="tstobj.xml" meth="POST" icontentType="application/xml">
+				<param type="TestMany" from="body"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restupload">
+			<restfunction name="testUploadFile" alias="uploadFile" meth="POST" icontentType="multipart/form-data">
+				<param type="filestream" name="file" from="multipart-content"/>
+				<param type="string" name="field" from="multipart-content"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restupload">
+			<restfunction name="testUploadFileMulti1" alias="uploadFileMulti1" meth="POST" icontentType="multipart/form-data">
+				<param type="filestream" name="file1" from="multipart-content"/>
+				<param type="filestream" name="file2" from="multipart-content"/>
+				<param type="filestream" name="file3" from="multipart-content"/>
+				<param type="string" name="field" from="multipart-content"/>
+			</restfunction>
+		</restcontroller>
+		<restcontroller class="DefaultRestController" name="restupload">
+			<restfunction name="testUploadFileMulti2" alias="uploadFileMulti2" meth="POST" icontentType="multipart/form-data">
+				<param type="vector-of-filestream" name="files" from="multipart-content"/>
+				<param type="string" name="field" from="multipart-content"/>
+			</restfunction>
+		</restcontroller>
+	</restcontrollers>
+	<job-procs>
+		<job-proc cron="* * * * *" name="testCronJob" class="TestCronBasedJob" method="runJob"/>
+	</job-procs>	
+</app>
