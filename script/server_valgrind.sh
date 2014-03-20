@@ -9,6 +9,11 @@ echo $PATH
 rm -f $FEAD_CPP_PATH/rtdcf/*.d $FEAD_CPP_PATH/rtdcf/*.o 
 rm -f $FEAD_CPP_PATH/*.cntrl
 rm -f $FEAD_CPP_PATH/tmp/*.sess
+mkdir tmp
 chmod 700 $FEAD_CPP_PATH/resources/*.sh
+chmod 700 $FEAD_CPP_PATH/tests/*
+chmod 700 $FEAD_CPP_PATH/tests/autotools/*
+chmod 700 $FEAD_CPP_PATH/rtdcf/*
+chmod 700 $FEAD_CPP_PATH/rtdcf/autotools/*
 #/usr/sbin/setenforce 0
 valgrind --leak-check=yes --track-origins=yes ./CHS $FEAD_CPP_PATH > ffead.log 2>&1
