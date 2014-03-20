@@ -1,0 +1,29 @@
+Winx/Cygwin based Installation
+
+1. Download Cygwin setup.exe and follow instruction to install Cygwin, proceed with default settings.
+2. After Cygwin is successfully installed, you can open a cygwin terminal to check whether Cygwin works.
+3. Run the setup.exe to install further dependencies whenever required.
+4. Following are the dependencies,
+      gcc-g++
+      GNU make
+      openssl libraries and devel (use Cygwin_SSL_UnixOdbc_libs.zip from downloads section for version 1.0)
+      unixODBC libraries and devel (not found in Cygwin reposistory, use Cygwin_SSL_UnixOdbc_libs.zip from download section)
+      bison,yacc,flex,gdb,readline,binutils (for building and installing openssl and unixODBC)
+5. Using Cygwin v1.7.14-2 and unixODBC v2.3.1.tar.gz, the install (./configure,make,make install) worked, you can copy the /usr/local/lib/libodbc* files to /usr/lib if you are
+   confident enough of trying a manual install of unixodbc. Trying to build on prior versions of cygwin and unixodbc, i faced certain issues and wasn't able to successfully compile
+   and build files, hence had provided the *_libs.zip file.
+6. Copy bin/gcc-3 or bin/gcc-4 and rename it to gcc (the already existing link file gcc sometimes gives permission errors)
+7. You can build and install openssl and unixodbc and copy the required library files to the cygwin lib folder. The already built libraries are present in the Cygwin_SSL_UnixOdbc_libs.zip file which can be copied to the lib folder directly.
+8. Download the latest release tar file and extract it to the location of your choice under Cygwin installation.
+9. Install Unix-ODBC and required odbc files for MySQL dependency and development files
+10. Install Open-SSL as well and development files
+11. Also included prototype.js in source for AJAX support
+12. Go to the ffead-server/Release or ffead-server/Debug depending on whether you need to debug the server code
+13. Open terminal and type "make all" and "make build-apps" to build the server and the default applications provided ("make all" will build ffead with all modules enabled)
+14. From version 1.8 onwards you can also select modules to build within ffead using the make modules={comma separated module list} all command, for a complete list of modules names please refer Modules, for e.g, to only build modules webservice,binserialize and distocache use the command "make modules=webservice,binserialize,distocache all"
+15. This will create the distribution folder named ffead-server inside ffead-server/Release or ffead-server/Debug folders accordingly
+16. Type ./server.sh when inside the ffead-server folder to start the application server
+17. Some sample default applications are already provided for your reference inside the ffead-server/web folder, the default application is served at urlpath /, the flexApp application at /flexApp and the oauthApp at /oauthApp
+18. If you did not already perform "make build-apps", then to compile a given web application shared library go to the ffead-server/web/{default/flexApp/oauthApp/(your_custom_app)}/src/Debug folder and run "make all"
+19. Place the generated application shared library inside the ffead-server/Release/ffead-server/lib or ffead-server/Debug/ffead-server/lib folder.
+20. Place your custom web applications inside the ffead-server/Release/ffead-server/web folder (Note the application folder name will also be the URL path - application name)

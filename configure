@@ -575,7 +575,7 @@ PACKAGE_STRING='ffead-cpp 1.9'
 PACKAGE_BUGREPORT='sumeet.chhetri@gmail.com'
 PACKAGE_URL=''
 
-ac_unique_file="../AjaxInterface.cpp"
+ac_unique_file="include/ConfigurationData.h"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -620,6 +620,9 @@ POW_LIB
 LIBOBJS
 BUILT_WITH_CONFGURE_FALSE
 BUILT_WITH_CONFGURE_TRUE
+APXS
+APACHE_HTTPD_LIB
+GENERATE_APACHEMOD
 CXXCPP
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
@@ -627,6 +630,38 @@ CXXDEPMODE
 ac_ct_CXX
 CXXFLAGS
 CXX
+MOD_ALL_FALSE
+MOD_ALL_TRUE
+MOD_SCRH_FALSE
+MOD_SCRH_TRUE
+MOD_JOBS_FALSE
+MOD_JOBS_TRUE
+MOD_APPFLOW_FALSE
+MOD_APPFLOW_TRUE
+MOD_INTERPRETER_FALSE
+MOD_INTERPRETER_TRUE
+MOD_TPE_FALSE
+MOD_TPE_TRUE
+MOD_DVIEW_FALSE
+MOD_DVIEW_TRUE
+MOD_DCP_FALSE
+MOD_DCP_TRUE
+MOD_BINSERIALIZE_FALSE
+MOD_BINSERIALIZE_TRUE
+MOD_XMLSERIALIZE_FALSE
+MOD_XMLSERIALIZE_TRUE
+MOD_DISTOCACHE_FALSE
+MOD_DISTOCACHE_TRUE
+MOD_CIBERNATE_FALSE
+MOD_CIBERNATE_TRUE
+MOD_WEBSERVICE_FALSE
+MOD_WEBSERVICE_TRUE
+MOD_MSGHANDLER_FALSE
+MOD_MSGHANDLER_TRUE
+MOD_METHINVOKER_FALSE
+MOD_METHINVOKER_TRUE
+MOD_COMPONENT_FALSE
+MOD_COMPONENT_TRUE
 CPP
 OTOOL64
 OTOOL
@@ -747,6 +782,23 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 enable_debug
+enable_apachemod
+enable_mod_comp
+enable_mod_methinvoker
+enable_mod_msghandler
+enable_mod_webservice
+enable_mod_cibernate
+enable_mod_distocache
+enable_mod_xmlserialize
+enable_mod_binserialize
+enable_mod_dcp
+enable_mod_dview
+enable_mod_tpe
+enable_mod_interpreter
+enable_mod_appflow
+enable_mod_jobs
+enable_mod_script
+enable_mod_all
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1389,6 +1441,23 @@ Optional Features:
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-debug          enable debug, default: no
+  --enable-apachemod      enable apachemod, default: no
+  --mod-component         enable mod_comp, default: no
+  --mod-methinvoker       enable mod_methinvoker, default: no
+  --mod-msghandler        enable mod_msghandler, default: no
+  --mod-webservice        enable mod_webservice, default: no
+  --mod-cibernate         enable mod_cibernate, default: no
+  --mod-distocache        enable mod_distocache, default: no
+  --mod-xmlserialize      enable mod_xmlserialize, default: no
+  --mod-binserialize      enable mod_binserialize, default: no
+  --mod-dcp               enable mod_dcp, default: no
+  --mod-dview             enable mod_dview, default: no
+  --mod-tpe               enable mod_tpe, default: no
+  --mod-interpreter       enable mod_interpreter, default: no
+  --mod-appflow           enable mod_appflow, default: no
+  --mod-jobs              enable mod_jobs, default: no
+  --mod-script            enable mod_script, default: no
+  --mod-all               enable mod_all, default: yes
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1874,6 +1943,97 @@ fi
 
 } # ac_fn_cxx_try_link
 
+# ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
+# -------------------------------------------------------
+# Tests whether HEADER exists, giving a warning if it cannot be compiled using
+# the include files in INCLUDES and setting the cache variable VAR
+# accordingly.
+ac_fn_c_check_header_mongrel ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  if eval \${$3+:} false; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 usability" >&5
+$as_echo_n "checking $2 usability... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+#include <$2>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_header_compiler=yes
+else
+  ac_header_compiler=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 presence" >&5
+$as_echo_n "checking $2 presence... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <$2>
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"; then :
+  ac_header_preproc=yes
+else
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in #((
+  yes:no: )
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: $2: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: $2:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: $2: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
+( $as_echo "## --------------------------------------- ##
+## Report this to sumeet.chhetri@gmail.com ##
+## --------------------------------------- ##"
+     ) | sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  eval "$3=\$ac_header_compiler"
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+fi
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_c_check_header_mongrel
+
 # ac_fn_c_check_type LINENO TYPE VAR INCLUDES
 # -------------------------------------------
 # Tests whether TYPE exists after having included INCLUDES, setting cache
@@ -2105,97 +2265,6 @@ rm -f conftest.val
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_compute_int
-
-# ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
-# -------------------------------------------------------
-# Tests whether HEADER exists, giving a warning if it cannot be compiled using
-# the include files in INCLUDES and setting the cache variable VAR
-# accordingly.
-ac_fn_c_check_header_mongrel ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  if eval \${$3+:} false; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
-$as_echo_n "checking for $2... " >&6; }
-if eval \${$3+:} false; then :
-  $as_echo_n "(cached) " >&6
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-else
-  # Is the header compilable?
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 usability" >&5
-$as_echo_n "checking $2 usability... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-#include <$2>
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_header_compiler=yes
-else
-  ac_header_compiler=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_compiler" >&5
-$as_echo "$ac_header_compiler" >&6; }
-
-# Is the header present?
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 presence" >&5
-$as_echo_n "checking $2 presence... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <$2>
-_ACEOF
-if ac_fn_c_try_cpp "$LINENO"; then :
-  ac_header_preproc=yes
-else
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.i conftest.$ac_ext
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_preproc" >&5
-$as_echo "$ac_header_preproc" >&6; }
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in #((
-  yes:no: )
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&5
-$as_echo "$as_me: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
-$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
-    ;;
-  no:yes:* )
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: present but cannot be compiled" >&5
-$as_echo "$as_me: WARNING: $2: present but cannot be compiled" >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     check for missing prerequisite headers?" >&5
-$as_echo "$as_me: WARNING: $2:     check for missing prerequisite headers?" >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: see the Autoconf documentation" >&5
-$as_echo "$as_me: WARNING: $2: see the Autoconf documentation" >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&5
-$as_echo "$as_me: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
-$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
-( $as_echo "## --------------------------------------- ##
-## Report this to sumeet.chhetri@gmail.com ##
-## --------------------------------------- ##"
-     ) | sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
-$as_echo_n "checking for $2... " >&6; }
-if eval \${$3+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  eval "$3=\$ac_header_compiler"
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-fi
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-
-} # ac_fn_c_check_header_mongrel
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -3046,6 +3115,8 @@ am__tar='$${TAR-tar} chof - "$$tardir"' am__untar='$${TAR-tar} xf -'
 
 
 
+
+ac_config_headers="$ac_config_headers include/AppDefines.h"
 
 
 case `pwd` in
@@ -11634,7 +11705,7 @@ if test "x$support_debug" = "xyes"; then
 
 $as_echo "#define DEBUG /**/" >>confdefs.h
 
-    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Werror -Wno-uninitialized -O0"
+    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Wno-uninitialized -O0"
 else
 
 $as_echo "#define NDEBUG /**/" >>confdefs.h
@@ -11642,6 +11713,14 @@ $as_echo "#define NDEBUG /**/" >>confdefs.h
     AM_CXXFLAGS="$AM_CXXFLAGS -O0"
     support_debug=no
 fi
+
+generate_apache_module=no
+# Check whether --enable-apachemod was given.
+if test "${enable_apachemod+set}" = set; then :
+  enableval=$enable_apachemod; generate_apache_module=$enableval
+
+fi
+
 
 
 local_os_type="unknown"
@@ -11673,15 +11752,15 @@ $as_echo "#define OS_IRIX /**/" >>confdefs.h
 $as_echo "#define OS_SUNOS /**/" >>confdefs.h
 
     local_os_type="sunos"
-    CFLAGS="$CFLAGS -pthreads"
-    LDFLAGS="$LDFLAGS -lsocket -lnsl"
+    AM_CXXFLAGS="$AM_CXXFLAGS -pthreads"
+    LDFLAGS="$LDFLAGS -lsocket -lnsl -lresolv"
     ;;
 *-solaris*)
 
 $as_echo "#define OS_SOLARIS /**/" >>confdefs.h
 
     local_os_type="solaris"
-    CFLAGS="$CFLAGS -pthreads"
+    AM_CXXFLAGS="$AM_CXXFLAGS -pthreads"
     LDFLAGS="$LDFLAGS -lsocket -lnsl"
     ;;
 *-aix*)
@@ -11705,8 +11784,8 @@ $as_echo "#define OS_FREEBSD /**/" >>confdefs.h
 
     local_os_type="freebsd"
 
-        CFLAGS="$CFLAGS -I/usr/local/include"
-    LIBS="$LIBS -L/usr/local/lib"
+        AM_CXXFLAGS="$AM_CXXFLAGS -pthread -I/usr/local/include"
+    LDFLAGS="$LDFLAGS -L/usr/local/lib -L/usr/local/v6/lib"
     ;;
 *-netbsd*)
 
@@ -11718,8 +11797,8 @@ $as_echo "#define OS_NETBSD /**/" >>confdefs.h
     local_os_type="netbsd"
 
     #our hack for netbsd system
-    CFLAGS="$CFLAGS -I/usr/local/include"
-    LIBS="$LIBS -L/usr/local/lib"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
+    LDFLAGS="$LDFLAGS -L/usr/local/lib -L/usr/local/v6/lib"
     ;;
 *-openbsd*)
 
@@ -11739,7 +11818,7 @@ _ACEOF
 
 
     #our hack for openbsd system
-    CFLAGS="$CFLAGS -I/usr/local/include"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
     LIBS="$LIBS -L/usr/local/lib"
     ;;
 *-osf*)
@@ -11767,6 +11846,463 @@ $as_echo "#define OS_SVR4 /**/" >>confdefs.h
     local_os_type="sco"
     as_fn_error $? "We do not support SCO's products!" "$LINENO" 5
 esac
+
+# Check whether --enable-mod_comp was given.
+if test "${enable_mod_comp+set}" = set; then :
+  enableval=$enable_mod_comp; case "${enableval}" in
+             yes) mod_comp=true ;;
+             no)  mod_comp=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-component" "$LINENO" 5 ;;
+esac
+else
+  mod_comp=false
+fi
+
+ if test x"$mod_comp" = x"true"; then
+  MOD_COMPONENT_TRUE=
+  MOD_COMPONENT_FALSE='#'
+else
+  MOD_COMPONENT_TRUE='#'
+  MOD_COMPONENT_FALSE=
+fi
+
+if test "x$mod_comp" = "xtrue"; then
+
+$as_echo "#define INC_CMP /**/" >>confdefs.h
+
+
+$as_echo "#define INC_XMLSER /**/" >>confdefs.h
+
+
+$as_echo "#define INC_CIB /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_methinvoker was given.
+if test "${enable_mod_methinvoker+set}" = set; then :
+  enableval=$enable_mod_methinvoker; case "${enableval}" in
+             yes) mod_methinvoker=true ;;
+             no)  mod_methinvoker=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-methinvoker" "$LINENO" 5 ;;
+esac
+else
+  mod_methinvoker=false
+fi
+
+ if test x"$mod_methinvoker" = x"true"; then
+  MOD_METHINVOKER_TRUE=
+  MOD_METHINVOKER_FALSE='#'
+else
+  MOD_METHINVOKER_TRUE='#'
+  MOD_METHINVOKER_FALSE=
+fi
+
+if test "x$mod_methinvoker" = "xtrue"; then
+
+$as_echo "#define INC_MI /**/" >>confdefs.h
+
+
+$as_echo "#define INC_XMLSER /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_msghandler was given.
+if test "${enable_mod_msghandler+set}" = set; then :
+  enableval=$enable_mod_msghandler; case "${enableval}" in
+             yes) mod_msghandler=true ;;
+             no)  mod_msghandler=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-msghandler" "$LINENO" 5 ;;
+esac
+else
+  mod_msghandler=false
+fi
+
+ if test x"$mod_msghandler" = x"true"; then
+  MOD_MSGHANDLER_TRUE=
+  MOD_MSGHANDLER_FALSE='#'
+else
+  MOD_MSGHANDLER_TRUE='#'
+  MOD_MSGHANDLER_FALSE=
+fi
+
+if test "x$mod_msghandler" = "xtrue"; then
+
+$as_echo "#define INC_MSGH /**/" >>confdefs.h
+
+
+$as_echo "#define INC_BINSER /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_webservice was given.
+if test "${enable_mod_webservice+set}" = set; then :
+  enableval=$enable_mod_webservice; case "${enableval}" in
+             yes) mod_webservice=true ;;
+             no)  mod_webservice=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-webservice" "$LINENO" 5 ;;
+esac
+else
+  mod_webservice=false
+fi
+
+ if test x"$mod_webservice" = x"true"; then
+  MOD_WEBSERVICE_TRUE=
+  MOD_WEBSERVICE_FALSE='#'
+else
+  MOD_WEBSERVICE_TRUE='#'
+  MOD_WEBSERVICE_FALSE=
+fi
+
+if test "x$mod_webservice" = "xtrue"; then
+
+$as_echo "#define INC_WEBSVC /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_cibernate was given.
+if test "${enable_mod_cibernate+set}" = set; then :
+  enableval=$enable_mod_cibernate; case "${enableval}" in
+             yes) mod_cibernate=true ;;
+             no)  mod_cibernate=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-cibernate" "$LINENO" 5 ;;
+esac
+else
+  mod_cibernate=false
+fi
+
+ if test x"$mod_cibernate" = x"true"; then
+  MOD_CIBERNATE_TRUE=
+  MOD_CIBERNATE_FALSE='#'
+else
+  MOD_CIBERNATE_TRUE='#'
+  MOD_CIBERNATE_FALSE=
+fi
+
+if test "x$mod_cibernate" = "xtrue"; then
+
+$as_echo "#define INC_CIB /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_distocache was given.
+if test "${enable_mod_distocache+set}" = set; then :
+  enableval=$enable_mod_distocache; case "${enableval}" in
+             yes) mod_distocache=true ;;
+             no)  mod_distocache=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-distocache" "$LINENO" 5 ;;
+esac
+else
+  mod_distocache=false
+fi
+
+ if test x"$mod_distocache" = x"true"; then
+  MOD_DISTOCACHE_TRUE=
+  MOD_DISTOCACHE_FALSE='#'
+else
+  MOD_DISTOCACHE_TRUE='#'
+  MOD_DISTOCACHE_FALSE=
+fi
+
+if test "x$mod_distocache" = "xtrue"; then
+
+$as_echo "#define INC_DSTC /**/" >>confdefs.h
+
+
+$as_echo "#define INC_BINSER /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_xmlserialize was given.
+if test "${enable_mod_xmlserialize+set}" = set; then :
+  enableval=$enable_mod_xmlserialize; case "${enableval}" in
+             yes) mod_xmlserialize=true ;;
+             no)  mod_xmlserialize=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-xmlserialize" "$LINENO" 5 ;;
+esac
+else
+  mod_xmlserialize=false
+fi
+
+ if test x"$mod_xmlserialize" = x"true"; then
+  MOD_XMLSERIALIZE_TRUE=
+  MOD_XMLSERIALIZE_FALSE='#'
+else
+  MOD_XMLSERIALIZE_TRUE='#'
+  MOD_XMLSERIALIZE_FALSE=
+fi
+
+if test "x$mod_xmlserialize" = "xtrue"; then
+
+$as_echo "#define INC_XMLSER /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_binserialize was given.
+if test "${enable_mod_binserialize+set}" = set; then :
+  enableval=$enable_mod_binserialize; case "${enableval}" in
+             yes) mod_binserialize=true ;;
+             no)  mod_binserialize=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-binserialize" "$LINENO" 5 ;;
+esac
+else
+  mod_binserialize=false
+fi
+
+ if test x"$mod_binserialize" = x"true"; then
+  MOD_BINSERIALIZE_TRUE=
+  MOD_BINSERIALIZE_FALSE='#'
+else
+  MOD_BINSERIALIZE_TRUE='#'
+  MOD_BINSERIALIZE_FALSE=
+fi
+
+if test "x$mod_binserialize" = "xtrue"; then
+
+$as_echo "#define INC_BINSER /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_dcp was given.
+if test "${enable_mod_dcp+set}" = set; then :
+  enableval=$enable_mod_dcp; case "${enableval}" in
+             yes) mod_dcp=true ;;
+             no)  mod_dcp=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-dcp" "$LINENO" 5 ;;
+esac
+else
+  mod_dcp=false
+fi
+
+ if test x"$mod_dcp" = x"true"; then
+  MOD_DCP_TRUE=
+  MOD_DCP_FALSE='#'
+else
+  MOD_DCP_TRUE='#'
+  MOD_DCP_FALSE=
+fi
+
+if test "x$mod_dcp" = "xtrue"; then
+
+$as_echo "#define INC_DCP /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_dview was given.
+if test "${enable_mod_dview+set}" = set; then :
+  enableval=$enable_mod_dview; case "${enableval}" in
+             yes) mod_dview=true ;;
+             no)  mod_dview=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-dview" "$LINENO" 5 ;;
+esac
+else
+  mod_dview=false
+fi
+
+ if test x"$mod_dview" = x"true"; then
+  MOD_DVIEW_TRUE=
+  MOD_DVIEW_FALSE='#'
+else
+  MOD_DVIEW_TRUE='#'
+  MOD_DVIEW_FALSE=
+fi
+
+if test "x$mod_dview" = "xtrue"; then
+
+$as_echo "#define INC_DVIEW /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_tpe was given.
+if test "${enable_mod_tpe+set}" = set; then :
+  enableval=$enable_mod_tpe; case "${enableval}" in
+             yes) mod_tpe=true ;;
+             no)  mod_tpe=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-tpe" "$LINENO" 5 ;;
+esac
+else
+  mod_tpe=false
+fi
+
+ if test x"$mod_tpe" = x"true"; then
+  MOD_TPE_TRUE=
+  MOD_TPE_FALSE='#'
+else
+  MOD_TPE_TRUE='#'
+  MOD_TPE_FALSE=
+fi
+
+if test "x$mod_tpe" = "xtrue"; then
+
+$as_echo "#define INC_TPE /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_interpreter was given.
+if test "${enable_mod_interpreter+set}" = set; then :
+  enableval=$enable_mod_interpreter; case "${enableval}" in
+             yes) mod_interpreter=true ;;
+             no)  mod_interpreter=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-interpreter" "$LINENO" 5 ;;
+esac
+else
+  mod_interpreter=false
+fi
+
+ if test x"$mod_interpreter" = x"true"; then
+  MOD_INTERPRETER_TRUE=
+  MOD_INTERPRETER_FALSE='#'
+else
+  MOD_INTERPRETER_TRUE='#'
+  MOD_INTERPRETER_FALSE=
+fi
+
+if test "x$mod_interpreter" = "xtrue"; then
+
+$as_echo "#define INC_INTP /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_appflow was given.
+if test "${enable_mod_appflow+set}" = set; then :
+  enableval=$enable_mod_appflow; case "${enableval}" in
+             yes) mod_appflow=true ;;
+             no)  mod_appflow=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-appflow" "$LINENO" 5 ;;
+esac
+else
+  mod_appflow=false
+fi
+
+ if test x"$mod_appflow" = x"true"; then
+  MOD_APPFLOW_TRUE=
+  MOD_APPFLOW_FALSE='#'
+else
+  MOD_APPFLOW_TRUE='#'
+  MOD_APPFLOW_FALSE=
+fi
+
+if test "x$mod_appflow" = "xtrue"; then
+
+$as_echo "#define INC_APPFLOW /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_jobs was given.
+if test "${enable_mod_jobs+set}" = set; then :
+  enableval=$enable_mod_jobs; case "${enableval}" in
+             yes) mod_jobs=true ;;
+             no)  mod_jobs=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-jobs" "$LINENO" 5 ;;
+esac
+else
+  mod_jobs=false
+fi
+
+ if test x"$mod_jobs" = x"true"; then
+  MOD_JOBS_TRUE=
+  MOD_JOBS_FALSE='#'
+else
+  MOD_JOBS_TRUE='#'
+  MOD_JOBS_FALSE=
+fi
+
+if test "x$mod_jobs" = "xtrue"; then
+
+$as_echo "#define INC_JOBS /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_script was given.
+if test "${enable_mod_script+set}" = set; then :
+  enableval=$enable_mod_script; case "${enableval}" in
+             yes) mod_script=true ;;
+             no)  mod_script=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-script" "$LINENO" 5 ;;
+esac
+else
+  mod_script=false
+fi
+
+ if test x"$mod_script" = x"true"; then
+  MOD_SCRH_TRUE=
+  MOD_SCRH_FALSE='#'
+else
+  MOD_SCRH_TRUE='#'
+  MOD_SCRH_FALSE=
+fi
+
+if test "x$mod_script" = "xtrue"; then
+
+$as_echo "#define INC_SCRH /**/" >>confdefs.h
+
+fi
+
+# Check whether --enable-mod_all was given.
+if test "${enable_mod_all+set}" = set; then :
+  enableval=$enable_mod_all; case "${enableval}" in
+             yes) mod_all=true ;;
+             no)  mod_all=false ;;
+             *)   as_fn_error $? "bad value ${enableval} for --mod-all" "$LINENO" 5 ;;
+esac
+else
+  mod_all=true
+fi
+
+ if test x"$mod_all" = x"true"; then
+  MOD_ALL_TRUE=
+  MOD_ALL_FALSE='#'
+else
+  MOD_ALL_TRUE='#'
+  MOD_ALL_FALSE=
+fi
+
+if test "x$mod_all" = "xtrue"; then
+
+$as_echo "#define INC_COMP /**/" >>confdefs.h
+
+
+$as_echo "#define INC_DCP /**/" >>confdefs.h
+
+
+$as_echo "#define INC_DVIEW /**/" >>confdefs.h
+
+
+$as_echo "#define INC_TPE /**/" >>confdefs.h
+
+
+$as_echo "#define INC_SCRH /**/" >>confdefs.h
+
+
+$as_echo "#define INC_INTP /**/" >>confdefs.h
+
+
+$as_echo "#define INC_APPFLOW /**/" >>confdefs.h
+
+
+$as_echo "#define INC_JOBS /**/" >>confdefs.h
+
+
+$as_echo "#define INC_CIB /**/" >>confdefs.h
+
+
+$as_echo "#define INC_MSGH /**/" >>confdefs.h
+
+
+$as_echo "#define INC_MI /**/" >>confdefs.h
+
+
+$as_echo "#define INC_WEBSVC /**/" >>confdefs.h
+
+
+$as_echo "#define INC_DSTC /**/" >>confdefs.h
+
+
+$as_echo "#define INC_XMLSER /**/" >>confdefs.h
+
+
+$as_echo "#define INC_BINSER /**/" >>confdefs.h
+
+fi
 
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
@@ -16218,6 +16754,221 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+if test "x$generate_apache_module" = "xyes"; then
+	GENERATE_APACHEMOD=apache_mod_ffeadcpp/autotools
+
+	if test "x$local_os_type" = "xcygwin"; then
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for AP_INIT_TAKE1 in -lhttpd2core" >&5
+$as_echo_n "checking for AP_INIT_TAKE1 in -lhttpd2core... " >&6; }
+if ${ac_cv_lib_httpd2core_AP_INIT_TAKE1+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lhttpd2core  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char AP_INIT_TAKE1 ();
+int
+main ()
+{
+return AP_INIT_TAKE1 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_httpd2core_AP_INIT_TAKE1=yes
+else
+  ac_cv_lib_httpd2core_AP_INIT_TAKE1=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_httpd2core_AP_INIT_TAKE1" >&5
+$as_echo "$ac_cv_lib_httpd2core_AP_INIT_TAKE1" >&6; }
+if test "x$ac_cv_lib_httpd2core_AP_INIT_TAKE1" = xyes; then :
+  APACHE_HTTPD_LIB=-lhttpd2core
+
+fi
+
+		if test -f /usr/sbin/apxs2; then
+			echo 'apxs2,apachectl2 found..'
+			# Extract the first word of "apxs2", so it can be a program name with args.
+set dummy apxs2; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_APXS+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$APXS"; then
+  ac_cv_prog_APXS="$APXS" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_APXS="/usr/sbin/apxs2"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_APXS" && ac_cv_prog_APXS="apxs2 not found"
+fi
+fi
+APXS=$ac_cv_prog_APXS
+if test -n "$APXS"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $APXS" >&5
+$as_echo "$APXS" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+		elif test -f /usr/local/bin/apxs2; then
+			echo 'apxs2,apachectl2 found..'
+			# Extract the first word of "apxs2", so it can be a program name with args.
+set dummy apxs2; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_APXS+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$APXS"; then
+  ac_cv_prog_APXS="$APXS" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_APXS="/usr/local/bin/apxs2"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_APXS" && ac_cv_prog_APXS="apxs2 not found"
+fi
+fi
+APXS=$ac_cv_prog_APXS
+if test -n "$APXS"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $APXS" >&5
+$as_echo "$APXS" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+		else
+			# Extract the first word of "apxs2", so it can be a program name with args.
+set dummy apxs2; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_APXS+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$APXS"; then
+  ac_cv_prog_APXS="$APXS" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_APXS="apxs2"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_APXS" && ac_cv_prog_APXS="apxs2 not found"
+fi
+fi
+APXS=$ac_cv_prog_APXS
+if test -n "$APXS"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $APXS" >&5
+$as_echo "$APXS" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+		fi
+	else
+		APACHE_HTTPD_LIB=
+
+		# Extract the first word of "apxs2", so it can be a program name with args.
+set dummy apxs2; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_APXS+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$APXS"; then
+  ac_cv_prog_APXS="$APXS" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_APXS="apxs2"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_APXS" && ac_cv_prog_APXS="apxs2 not found"
+fi
+fi
+APXS=$ac_cv_prog_APXS
+if test -n "$APXS"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $APXS" >&5
+$as_echo "$APXS" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+	fi
+else
+	GENERATE_APACHEMOD=
+
+	APACHE_HTTPD_LIB=
+
+fi
+
+
 # reset compiler flags to initial flags
 CXXFLAGS=$OLD_CXXFLAGS
 
@@ -16253,6 +17004,139 @@ $as_echo "no" >&6; }
 fi
 
 
+
+$as_echo "#define BUILT_WITH_CONFGURE 1" >>confdefs.h
+
+ if test x"1" = x"1"; then
+  BUILT_WITH_CONFGURE_TRUE=
+  BUILT_WITH_CONFGURE_FALSE='#'
+else
+  BUILT_WITH_CONFGURE_TRUE='#'
+  BUILT_WITH_CONFGURE_FALSE=
+fi
+
+
+for ac_header in arpa/inet.h fcntl.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+ac_fn_c_check_header_mongrel "$LINENO" "sys/epoll.h" "ac_cv_header_sys_epoll_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_epoll_h" = xyes; then :
+
+$as_echo "#define USE_EPOLL 1" >>confdefs.h
+
+else
+
+$as_echo "#define USE_EPOLL 0" >>confdefs.h
+
+fi
+
+
+ac_fn_c_check_header_mongrel "$LINENO" "sys/event.h" "ac_cv_header_sys_event_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_event_h" = xyes; then :
+
+$as_echo "#define USE_KQUEUE 1" >>confdefs.h
+
+else
+
+$as_echo "#define USE_KQUEUE 0" >>confdefs.h
+
+fi
+
+
+ac_fn_c_check_header_mongrel "$LINENO" "port.h" "ac_cv_header_port_h" "$ac_includes_default"
+if test "x$ac_cv_header_port_h" = xyes; then :
+
+$as_echo "#define USE_EVPORT 1" >>confdefs.h
+
+else
+
+$as_echo "#define USE_EVPORT 0" >>confdefs.h
+
+fi
+
+
+ac_fn_c_check_header_mongrel "$LINENO" "sys/devpoll.h" "ac_cv_header_sys_devpoll_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_devpoll_h" = xyes; then :
+
+$as_echo "#define USE_DEVPOLL 1" >>confdefs.h
+
+else
+
+$as_echo "#define USE_DEVPOLL 0" >>confdefs.h
+
+fi
+
+
+ac_fn_c_check_header_mongrel "$LINENO" "sys/poll.h" "ac_cv_header_sys_poll_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_poll_h" = xyes; then :
+
+$as_echo "#define USE_POLL 1" >>confdefs.h
+
+else
+
+$as_echo "#define USE_POLL 0" >>confdefs.h
+
+fi
+
+
+ac_fn_c_check_header_mongrel "$LINENO" "sys/select.h" "ac_cv_header_sys_select_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_select_h" = xyes; then :
+
+$as_echo "#define USE_SELECT 1" >>confdefs.h
+
+else
+
+$as_echo "#define USE_SELECT 0" >>confdefs.h
+
+fi
+
+
+
+if test -d /usr/local/include; then
+     if test -f /usr/local/include/openssl/ssl.h; then
+     	echo 'ssl headers found..'
+     else
+     	ac_fn_c_check_header_mongrel "$LINENO" "openssl/ssl.h" "ac_cv_header_openssl_ssl_h" "$ac_includes_default"
+if test "x$ac_cv_header_openssl_ssl_h" = xyes; then :
+
+else
+  as_fn_error $? "ssl header not found" "$LINENO" 5
+fi
+
+
+     fi
+     if test -f /usr/local/include/sql.h; then
+     	echo 'unixODBC sql.h header found..'
+     else
+     	ac_fn_c_check_header_mongrel "$LINENO" "sql.h" "ac_cv_header_sql_h" "$ac_includes_default"
+if test "x$ac_cv_header_sql_h" = xyes; then :
+
+else
+  as_fn_error $? "unixODBC sql.h header not found" "$LINENO" 5
+fi
+
+
+     fi
+fi
+
+#AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([unixODBC sql.h header not found])])
+#AC_CHECK_HEADER([sqlext.h],,[AC_MSG_ERROR([unixODBC sqlext.h header not found])])
+#AC_CHECK_HEADER([sqltypes.h],,[AC_MSG_ERROR([unixODBC sqltypes.h header not found])])
+
+#if test "x$local_os_type" = "xcygwin"; then
+#	[AC_DEFINE(USE_POLL, [0], [Define to 0 if you have <sys/poll.h> on cygwin])],
+#fi
+
 ac_fn_c_check_type "$LINENO" "pid_t" "ac_cv_type_pid_t" "$ac_includes_default"
 if test "x$ac_cv_type_pid_t" = xyes; then :
 
@@ -16273,18 +17157,6 @@ cat >>confdefs.h <<_ACEOF
 #define size_t unsigned int
 _ACEOF
 
-fi
-
-
-
-$as_echo "#define BUILT_WITH_CONFGURE 1" >>confdefs.h
-
- if test x"1" = x"1"; then
-  BUILT_WITH_CONFGURE_TRUE=
-  BUILT_WITH_CONFGURE_FALSE='#'
-else
-  BUILT_WITH_CONFGURE_TRUE='#'
-  BUILT_WITH_CONFGURE_FALSE=
 fi
 
 
@@ -16803,6 +17675,18 @@ fi
 
 fi
 
+for ac_func in clock_gettime floor gethostbyname memset pow regcomp select socket strcasecmp strtol strtoul
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lodbc" >&5
 $as_echo_n "checking for main in -lodbc... " >&6; }
 if ${ac_cv_lib_odbc_main+:} false; then :
@@ -17186,7 +18070,7 @@ fi
 # --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
 
 
-ac_config_files="$ac_config_files Makefile"
+ac_config_files="$ac_config_files Makefile src/autotools/Makefile tests/autotools/Makefile apache_mod_ffeadcpp/autotools/Makefile web/default/src/autotools/Makefile web/flexApp/src/autotools/Makefile web/oauthApp/src/autotools/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -17278,43 +18162,7 @@ test "x$prefix" = xNONE && prefix=$ac_default_prefix
 # Let make expand exec_prefix.
 test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
 
-# Transform confdefs.h into DEFS.
-# Protect against shell expansion while executing Makefile rules.
-# Protect against Makefile macro expansion.
-#
-# If the first sed substitution is executed (which looks for macros that
-# take arguments), then branch to the quote section.  Otherwise,
-# look for a macro that doesn't take arguments.
-ac_script='
-:mline
-/\\$/{
- N
- s,\\\n,,
- b mline
-}
-t clear
-:clear
-s/^[	 ]*#[	 ]*define[	 ][	 ]*\([^	 (][^	 (]*([^)]*)\)[	 ]*\(.*\)/-D\1=\2/g
-t quote
-s/^[	 ]*#[	 ]*define[	 ][	 ]*\([^	 ][^	 ]*\)[	 ]*\(.*\)/-D\1=\2/g
-t quote
-b any
-:quote
-s/[	 `~#$^&*(){}\\|;'\''"<>?]/\\&/g
-s/\[/\\&/g
-s/\]/\\&/g
-s/\$/$$/g
-H
-:any
-${
-	g
-	s/^\n//
-	s/\n/ /g
-	p
-}
-'
-DEFS=`sed -n "$ac_script" confdefs.h`
-
+DEFS=-DHAVE_CONFIG_H
 
 ac_libobjs=
 ac_ltlibobjs=
@@ -17347,6 +18195,70 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_COMPONENT_TRUE}" && test -z "${MOD_COMPONENT_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_COMPONENT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_METHINVOKER_TRUE}" && test -z "${MOD_METHINVOKER_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_METHINVOKER\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_MSGHANDLER_TRUE}" && test -z "${MOD_MSGHANDLER_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_MSGHANDLER\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_WEBSERVICE_TRUE}" && test -z "${MOD_WEBSERVICE_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_WEBSERVICE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_CIBERNATE_TRUE}" && test -z "${MOD_CIBERNATE_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_CIBERNATE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_DISTOCACHE_TRUE}" && test -z "${MOD_DISTOCACHE_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_DISTOCACHE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_XMLSERIALIZE_TRUE}" && test -z "${MOD_XMLSERIALIZE_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_XMLSERIALIZE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_BINSERIALIZE_TRUE}" && test -z "${MOD_BINSERIALIZE_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_BINSERIALIZE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_DCP_TRUE}" && test -z "${MOD_DCP_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_DCP\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_DVIEW_TRUE}" && test -z "${MOD_DVIEW_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_DVIEW\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_TPE_TRUE}" && test -z "${MOD_TPE_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_TPE\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_INTERPRETER_TRUE}" && test -z "${MOD_INTERPRETER_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_INTERPRETER\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_APPFLOW_TRUE}" && test -z "${MOD_APPFLOW_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_APPFLOW\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_JOBS_TRUE}" && test -z "${MOD_JOBS_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_JOBS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_SCRH_TRUE}" && test -z "${MOD_SCRH_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_SCRH\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MOD_ALL_TRUE}" && test -z "${MOD_ALL_FALSE}"; then
+  as_fn_error $? "conditional \"MOD_ALL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
@@ -17788,11 +18700,15 @@ case $ac_config_files in *"
 "*) set x $ac_config_files; shift; ac_config_files=$*;;
 esac
 
+case $ac_config_headers in *"
+"*) set x $ac_config_headers; shift; ac_config_headers=$*;;
+esac
 
 
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 # Files that config.status was made for.
 config_files="$ac_config_files"
+config_headers="$ac_config_headers"
 config_commands="$ac_config_commands"
 
 _ACEOF
@@ -17814,9 +18730,14 @@ Usage: $0 [OPTION]... [TAG]...
       --recheck    update $as_me by reconfiguring in the same conditions
       --file=FILE[:TEMPLATE]
                    instantiate the configuration file FILE
+      --header=FILE[:TEMPLATE]
+                   instantiate the configuration header FILE
 
 Configuration files:
 $config_files
+
+Configuration headers:
+$config_headers
 
 Configuration commands:
 $config_commands
@@ -17884,7 +18805,18 @@ do
     esac
     as_fn_append CONFIG_FILES " '$ac_optarg'"
     ac_need_defaults=false;;
-  --he | --h |  --help | --hel | -h )
+  --header | --heade | --head | --hea )
+    $ac_shift
+    case $ac_optarg in
+    *\'*) ac_optarg=`$as_echo "$ac_optarg" | sed "s/'/'\\\\\\\\''/g"` ;;
+    esac
+    as_fn_append CONFIG_HEADERS " '$ac_optarg'"
+    ac_need_defaults=false;;
+  --he | --h)
+    # Conflict between --help and --header
+    as_fn_error $? "ambiguous option: \`$1'
+Try \`$0 --help' for more information.";;
+  --help | --hel | -h )
     $as_echo "$ac_cs_usage"; exit ;;
   -q | -quiet | --quiet | --quie | --qui | --qu | --q \
   | -silent | --silent | --silen | --sile | --sil | --si | --s)
@@ -18320,9 +19252,16 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
+    "include/AppDefines.h") CONFIG_HEADERS="$CONFIG_HEADERS include/AppDefines.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "src/autotools/Makefile") CONFIG_FILES="$CONFIG_FILES src/autotools/Makefile" ;;
+    "tests/autotools/Makefile") CONFIG_FILES="$CONFIG_FILES tests/autotools/Makefile" ;;
+    "apache_mod_ffeadcpp/autotools/Makefile") CONFIG_FILES="$CONFIG_FILES apache_mod_ffeadcpp/autotools/Makefile" ;;
+    "web/default/src/autotools/Makefile") CONFIG_FILES="$CONFIG_FILES web/default/src/autotools/Makefile" ;;
+    "web/flexApp/src/autotools/Makefile") CONFIG_FILES="$CONFIG_FILES web/flexApp/src/autotools/Makefile" ;;
+    "web/oauthApp/src/autotools/Makefile") CONFIG_FILES="$CONFIG_FILES web/oauthApp/src/autotools/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -18335,6 +19274,7 @@ done
 # bizarre bug on SunOS 4.1.3.
 if $ac_need_defaults; then
   test "${CONFIG_FILES+set}" = set || CONFIG_FILES=$config_files
+  test "${CONFIG_HEADERS+set}" = set || CONFIG_HEADERS=$config_headers
   test "${CONFIG_COMMANDS+set}" = set || CONFIG_COMMANDS=$config_commands
 fi
 
@@ -18523,8 +19463,116 @@ fi
 cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 fi # test -n "$CONFIG_FILES"
 
+# Set up the scripts for CONFIG_HEADERS section.
+# No need to generate them if there are no CONFIG_HEADERS.
+# This happens for instance with `./config.status Makefile'.
+if test -n "$CONFIG_HEADERS"; then
+cat >"$ac_tmp/defines.awk" <<\_ACAWK ||
+BEGIN {
+_ACEOF
 
-eval set X "  :F $CONFIG_FILES      :C $CONFIG_COMMANDS"
+# Transform confdefs.h into an awk script `defines.awk', embedded as
+# here-document in config.status, that substitutes the proper values into
+# config.h.in to produce config.h.
+
+# Create a delimiter string that does not exist in confdefs.h, to ease
+# handling of long lines.
+ac_delim='%!_!# '
+for ac_last_try in false false :; do
+  ac_tt=`sed -n "/$ac_delim/p" confdefs.h`
+  if test -z "$ac_tt"; then
+    break
+  elif $ac_last_try; then
+    as_fn_error $? "could not make $CONFIG_HEADERS" "$LINENO" 5
+  else
+    ac_delim="$ac_delim!$ac_delim _$ac_delim!! "
+  fi
+done
+
+# For the awk script, D is an array of macro values keyed by name,
+# likewise P contains macro parameters if any.  Preserve backslash
+# newline sequences.
+
+ac_word_re=[_$as_cr_Letters][_$as_cr_alnum]*
+sed -n '
+s/.\{148\}/&'"$ac_delim"'/g
+t rset
+:rset
+s/^[	 ]*#[	 ]*define[	 ][	 ]*/ /
+t def
+d
+:def
+s/\\$//
+t bsnl
+s/["\\]/\\&/g
+s/^ \('"$ac_word_re"'\)\(([^()]*)\)[	 ]*\(.*\)/P["\1"]="\2"\
+D["\1"]=" \3"/p
+s/^ \('"$ac_word_re"'\)[	 ]*\(.*\)/D["\1"]=" \2"/p
+d
+:bsnl
+s/["\\]/\\&/g
+s/^ \('"$ac_word_re"'\)\(([^()]*)\)[	 ]*\(.*\)/P["\1"]="\2"\
+D["\1"]=" \3\\\\\\n"\\/p
+t cont
+s/^ \('"$ac_word_re"'\)[	 ]*\(.*\)/D["\1"]=" \2\\\\\\n"\\/p
+t cont
+d
+:cont
+n
+s/.\{148\}/&'"$ac_delim"'/g
+t clear
+:clear
+s/\\$//
+t bsnlc
+s/["\\]/\\&/g; s/^/"/; s/$/"/p
+d
+:bsnlc
+s/["\\]/\\&/g; s/^/"/; s/$/\\\\\\n"\\/p
+b cont
+' <confdefs.h | sed '
+s/'"$ac_delim"'/"\\\
+"/g' >>$CONFIG_STATUS || ac_write_fail=1
+
+cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
+  for (key in D) D_is_set[key] = 1
+  FS = ""
+}
+/^[\t ]*#[\t ]*(define|undef)[\t ]+$ac_word_re([\t (]|\$)/ {
+  line = \$ 0
+  split(line, arg, " ")
+  if (arg[1] == "#") {
+    defundef = arg[2]
+    mac1 = arg[3]
+  } else {
+    defundef = substr(arg[1], 2)
+    mac1 = arg[2]
+  }
+  split(mac1, mac2, "(") #)
+  macro = mac2[1]
+  prefix = substr(line, 1, index(line, defundef) - 1)
+  if (D_is_set[macro]) {
+    # Preserve the white space surrounding the "#".
+    print prefix "define", macro P[macro] D[macro]
+    next
+  } else {
+    # Replace #undef with comments.  This is necessary, for example,
+    # in the case of _POSIX_SOURCE, which is predefined and required
+    # on some systems where configure will not decide to define it.
+    if (defundef == "undef") {
+      print "/*", prefix defundef, macro, "*/"
+      next
+    }
+  }
+}
+{ print }
+_ACAWK
+_ACEOF
+cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
+  as_fn_error $? "could not setup config headers machinery" "$LINENO" 5
+fi # test -n "$CONFIG_HEADERS"
+
+
+eval set X "  :F $CONFIG_FILES  :H $CONFIG_HEADERS    :C $CONFIG_COMMANDS"
 shift
 for ac_tag
 do
@@ -18743,7 +19791,64 @@ which seems to be undefined.  Please make sure it is defined" >&2;}
   esac \
   || as_fn_error $? "could not create $ac_file" "$LINENO" 5
  ;;
-
+  :H)
+  #
+  # CONFIG_HEADER
+  #
+  if test x"$ac_file" != x-; then
+    {
+      $as_echo "/* $configure_input  */" \
+      && eval '$AWK -f "$ac_tmp/defines.awk"' "$ac_file_inputs"
+    } >"$ac_tmp/config.h" \
+      || as_fn_error $? "could not create $ac_file" "$LINENO" 5
+    if diff "$ac_file" "$ac_tmp/config.h" >/dev/null 2>&1; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: $ac_file is unchanged" >&5
+$as_echo "$as_me: $ac_file is unchanged" >&6;}
+    else
+      rm -f "$ac_file"
+      mv "$ac_tmp/config.h" "$ac_file" \
+	|| as_fn_error $? "could not create $ac_file" "$LINENO" 5
+    fi
+  else
+    $as_echo "/* $configure_input  */" \
+      && eval '$AWK -f "$ac_tmp/defines.awk"' "$ac_file_inputs" \
+      || as_fn_error $? "could not create -" "$LINENO" 5
+  fi
+# Compute "$ac_file"'s index in $config_headers.
+_am_arg="$ac_file"
+_am_stamp_count=1
+for _am_header in $config_headers :; do
+  case $_am_header in
+    $_am_arg | $_am_arg:* )
+      break ;;
+    * )
+      _am_stamp_count=`expr $_am_stamp_count + 1` ;;
+  esac
+done
+echo "timestamp for $_am_arg" >`$as_dirname -- "$_am_arg" ||
+$as_expr X"$_am_arg" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$_am_arg" : 'X\(//\)[^/]' \| \
+	 X"$_am_arg" : 'X\(//\)$' \| \
+	 X"$_am_arg" : 'X\(/\)' \| . 2>/dev/null ||
+$as_echo X"$_am_arg" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q'`/stamp-h$_am_stamp_count
+ ;;
 
   :C)  { $as_echo "$as_me:${as_lineno-$LINENO}: executing $ac_file commands" >&5
 $as_echo "$as_me: executing $ac_file commands" >&6;}
@@ -19682,3 +20787,9 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
+
+echo "AM_CXXFLAGS: $AM_CXXFLAGS"
+echo "LDFLAGS: $LDFLAGS"
+echo "Debug mode: $support_debug"
+echo "Make Executable: $MAKE"
+echo "Generate Apache Module: $generate_apache_module"

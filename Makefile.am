@@ -34,7 +34,7 @@ dist-hook: clean
 	rm -rf `find $(distdir)/apache_mod_ffeadcpp -type d -name .git`
 	cp include/* $(distdir)/include
 	cp release-notes* $(distdir)
-	cp INSTALL-* $(distdir)
+	cp *INSTALL-* $(distdir)
 	-rm -rf $(distdir)/tests/autotools/.libs $(distdir)/tests/*.o $(distdir)/tests/*.lo \
 		$(distdir)/tests/.deps/*.Plo
 	-rm -rf $(distdir)/web/default/src/*.o $(distdir)/web/default/src/*.lo \
