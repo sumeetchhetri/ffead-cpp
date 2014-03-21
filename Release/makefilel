@@ -1,0 +1,128 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+-include ../makefile.init
+
+RM := rm -rf
+modules := all
+
+# All of the sources participating in the build are defined here
+-include subdirl.mk
+-include objectsl.mk
+-include envvars.mk
+
+##################################
+ifneq (,$(findstring component,$(modules)))
+-include modules/subdir-component.mk
+-include modules/subdir-xmlserialize.mk
+-include modules/subdir-cibernate.mk
+endif
+ifneq (,$(findstring methinvoker,$(modules)))
+-include modules/subdir-methinvoker.mk
+-include modules/subdir-xmlserialize.mk
+endif
+ifneq (,$(findstring msghandler,$(modules)))
+-include modules/subdir-msghandler.mk
+-include modules/subdir-binserialize.mk
+endif
+ifneq (,$(findstring webservice,$(modules)))
+-include modules/subdir-webservice.mk
+endif
+ifneq (,$(findstring cibernate,$(modules)))
+-include modules/subdir-cibernate.mk
+endif
+ifneq (,$(findstring distocache,$(modules)))
+-include modules/subdir-distocache.mk
+-include modules/subdir-binserialize.mk
+endif
+ifneq (,$(findstring xmlserialize,$(modules)))
+-include modules/subdir-xmlserialize.mk
+endif
+ifneq (,$(findstring binserialize,$(modules)))
+-include modules/subdir-binserialize.mk
+endif
+ifneq (,$(findstring dcp,$(modules)))
+-include modules/subdir-dcp.mk
+endif
+ifneq (,$(findstring dview,$(modules)))
+-include modules/subdir-dview.mk
+endif
+ifneq (,$(findstring tpe,$(modules)))
+-include modules/subdir-tpe.mk
+endif
+ifneq (,$(findstring interpreter,$(modules)))
+-include modules/subdir-interpreter.mk
+endif
+ifneq (,$(findstring appflow,$(modules)))
+-include modules/subdir-appflow.mk
+endif
+ifneq (,$(findstring jobs,$(modules)))
+-include modules/subdir-jobs.mk
+endif
+ifneq (,$(findstring all,$(modules)))
+-include modules/subdir-component.mk
+-include modules/subdir-methinvoker.mk
+-include modules/subdir-msghandler.mk
+-include modules/subdir-webservice.mk
+-include modules/subdir-cibernate.mk
+-include modules/subdir-distocache.mk
+-include modules/subdir-xmlserialize.mk
+-include modules/subdir-binserialize.mk
+-include modules/subdir-dcp.mk
+-include modules/subdir-dview.mk
+-include modules/subdir-tpe.mk
+-include modules/subdir-interpreter.mk
+-include modules/subdir-appflow.mk
+-include modules/subdir-jobs.mk
+endif
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(strip $(C++_DEPS)),)
+-include $(C++_DEPS)
+endif
+ifneq ($(strip $(C_DEPS)),)
+-include $(C_DEPS)
+endif
+ifneq ($(strip $(CC_DEPS)),)
+-include $(CC_DEPS)
+endif
+ifneq ($(strip $(CPP_DEPS)),)
+-include $(CPP_DEPS)
+endif
+ifneq ($(strip $(CXX_DEPS)),)
+-include $(CXX_DEPS)
+endif
+ifneq ($(strip $(C_UPPER_DEPS)),)
+-include $(C_UPPER_DEPS)
+endif
+endif
+
+-include ../makefile.defs
+
+# Add inputs and outputs from these tool invocations to the build variables 
+
+# All Target
+all: libweblib
+
+# Tool invocations
+libweblib: $(OBJS) $(COMP_OBJS) $(MI_OBJS) $(MSGH_OBJS) $(WEBSVCS_OBJS) $(CIB_OBJS) \
+			$(DSTC_OBJS) $(XMLSER_OBJS) $(BINSER_OBJS) $(USER_OBJS)
+	@echo 'Building target: $@'
+	@echo 'Invoking: GCC C++ Linker'
+	g++ $(PTHREADS) -L/usr/local/lib -shared -o"libweblib.$(RES_LIB_EXT)" $(OBJS) $(COMP_OBJS) \
+			$(MI_OBJS) $(MSGH_OBJS) $(WEBSVCS_OBJS) $(CIB_OBJS) $(DSTC_OBJS) $(XMLSER_OBJS) \
+			$(BINSER_OBJS) $(USER_OBJS) $(LIBS) $(EX_LIBS)
+	@echo 'Finished building target: $@'
+	cp -f libweblib.$(RES_LIB_EXT) ../lib/
+	@echo ' '
+
+# Other Targets
+clean:
+	-$(RM) *.o $(C++_DEPS) $(C_DEPS) $(CC_DEPS) $(LIBRARIES) *.d \
+			$(CXX_DEPS) $(C_UPPER_DEPS) libweblib.$(RES_LIB_EXT)
+	-@echo ' '
+
+.PHONY: all clean dependents
+.SECONDARY:
+
+-include ../makefile.targets

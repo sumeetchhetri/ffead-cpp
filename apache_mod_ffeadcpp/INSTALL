@@ -1,0 +1,15 @@
+Installation Directions
+
+1. If using autotools based installtaion for ffead-cpp then please refere to the INSTALL-WITH-AUTOTOOLS-ANY-OS (Apache Module Section) for directions on install.
+2. This method describes the installation of the module as a standalone module and not as a part of the ffead-cpp build, using run.sh/run_cygwin.sh accordingly
+3. Install Unix-ODBC and required odbc files for MySQL dependency alongwith development files
+4. Install Open-SSL and development files
+5. Install apache/httpd and apache-devel/htttpd-devel files
+6. Go to the ffead-cpp binary folder installed using the autotools method or the earlier method (using Debug/Release folders)
+7. Copy the binary ffead-cpp folder to the apache web folder eg, /var/www/html or any other location of your choice
+8. Got to the apache_mod_ffeadcpp folder
+9. Change the FFEAD_CPP_PATH variable in run.sh to point to the path according to point 7
+10. cd apache_mod_ffeadcpp and run.sh/run_cygwin.sh
+11. This will install the mod_ffeadcpp module to apache http modules and update http config as well, execution of the script may require sudo access for copying the module to /usr/lib
+12. Add the ffead-server path property FFEAD_CPP_PATH in httpd.conf and set the value to the path according to point 7
+13. Restart apache server, check the url http://localhost/index.html on your browser

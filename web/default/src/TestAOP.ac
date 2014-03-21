@@ -1,0 +1,10 @@
+@INCLUDE("string.h;map.h;iostream.h")
+
+@ASPECTBEGIN
+@EXECUTION("Testing test1")
+@STRICT("false")
+@ARGS("string")
+@RETURN("*")
+@WHEN("BEFORE")
+@CODE(cout << _1 << flush;)
+@ASPECTEND

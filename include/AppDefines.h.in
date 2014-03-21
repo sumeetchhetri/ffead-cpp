@@ -1,0 +1,300 @@
+/* include/AppDefines.h.in.  Generated from configure.ac by autoheader.  */
+
+/* set configure mode */
+#undef BUILT_WITH_CONFGURE
+
+/* set DEBUG mode */
+#undef DEBUG
+
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+#undef HAVE_ARPA_INET_H
+
+/* Define to 1 if you have the `clock_gettime' function. */
+#undef HAVE_CLOCK_GETTIME
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the `floor' function. */
+#undef HAVE_FLOOR
+
+/* Define to 1 if you have the `fork' function. */
+#undef HAVE_FORK
+
+/* Define to 1 if you have the `gethostbyname' function. */
+#undef HAVE_GETHOSTBYNAME
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `crypto' library (-lcrypto). */
+#undef HAVE_LIBCRYPTO
+
+/* Define to 1 if you have the `odbc' library (-lodbc). */
+#undef HAVE_LIBODBC
+
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#undef HAVE_LIBPTHREAD
+
+/* Define to 1 if you have the `pthreads' library (-lpthreads). */
+#undef HAVE_LIBPTHREADS
+
+/* Define to 1 if you have the `rt' library (-lrt). */
+#undef HAVE_LIBRT
+
+/* Define to 1 if you have the `ssl' library (-lssl). */
+#undef HAVE_LIBSSL
+
+/* Define to 1 if you have the `z' library (-lz). */
+#undef HAVE_LIBZ
+
+/* Define to 1 if the system has the type `long long'. */
+#undef HAVE_LONG_LONG
+
+/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
+   to 0 otherwise. */
+#undef HAVE_MALLOC
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `memset' function. */
+#undef HAVE_MEMSET
+
+/* Define to 1 if you have the <netdb.h> header file. */
+#undef HAVE_NETDB_H
+
+/* Define to 1 if you have the <netinet/in.h> header file. */
+#undef HAVE_NETINET_IN_H
+
+/* Define to 1 if you have the `pow' function. */
+#undef HAVE_POW
+
+/* Define to 1 if you have the `regcomp' function. */
+#undef HAVE_REGCOMP
+
+/* Define to 1 if you have the `select' function. */
+#undef HAVE_SELECT
+
+/* Define to 1 if the system has the type `signed char'. */
+#undef HAVE_SIGNED_CHAR
+
+/* Define to 1 if you have the `socket' function. */
+#undef HAVE_SOCKET
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strcasecmp' function. */
+#undef HAVE_STRCASECMP
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the `strtol' function. */
+#undef HAVE_STRTOL
+
+/* Define to 1 if you have the `strtoul' function. */
+#undef HAVE_STRTOUL
+
+/* Define to 1 if you have the <sys/ioctl.h> header file. */
+#undef HAVE_SYS_IOCTL_H
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#undef HAVE_SYS_SOCKET_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the `vfork' function. */
+#undef HAVE_VFORK
+
+/* Define to 1 if you have the <vfork.h> header file. */
+#undef HAVE_VFORK_H
+
+/* Define to 1 if `fork' works. */
+#undef HAVE_WORKING_FORK
+
+/* Define to 1 if `vfork' works. */
+#undef HAVE_WORKING_VFORK
+
+/* set DEBUG mode */
+#undef INC_APPFLOW
+
+/* set DEBUG mode */
+#undef INC_BINSER
+
+/* set DEBUG mode */
+#undef INC_CIB
+
+/* set DEBUG mode */
+#undef INC_CMP
+
+/* set DEBUG mode */
+#undef INC_COMP
+
+/* set DEBUG mode */
+#undef INC_DCP
+
+/* set DEBUG mode */
+#undef INC_DSTC
+
+/* set DEBUG mode */
+#undef INC_DVIEW
+
+/* set DEBUG mode */
+#undef INC_INTP
+
+/* set DEBUG mode */
+#undef INC_JOBS
+
+/* set DEBUG mode */
+#undef INC_MI
+
+/* set DEBUG mode */
+#undef INC_MSGH
+
+/* set DEBUG mode */
+#undef INC_SCRH
+
+/* set DEBUG mode */
+#undef INC_TPE
+
+/* set DEBUG mode */
+#undef INC_WEBSVC
+
+/* set DEBUG mode */
+#undef INC_XMLSER
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
+/* unset DEBUG mode */
+#undef NDEBUG
+
+/* set OS to aix */
+#undef OS_AIX
+
+/* set OS to bsd */
+#undef OS_BSD
+
+/* set OS to cygwin */
+#undef OS_CYGWIN
+
+/* set OS to darwin */
+#undef OS_DARWIN
+
+/* set OS to freebsd */
+#undef OS_FREEBSD
+
+/* set OS to hp-ux */
+#undef OS_HPUX
+
+/* set OS to irix */
+#undef OS_IRIX
+
+/* set OS to linux */
+#undef OS_LINUX
+
+/* set OS to netbsd */
+#undef OS_NETBSD
+
+/* set OS to openbsd */
+#undef OS_OPENBSD
+
+/* set openbsd release number */
+#undef OS_OPENBSD_REL
+
+/* set OS to osf */
+#undef OS_OSF
+
+/* set OS to sco */
+#undef OS_SCO
+
+/* set OS to solaris */
+#undef OS_SOLARIS
+
+/* set OS to sunos */
+#undef OS_SUNOS
+
+/* set OS to svr4 */
+#undef OS_SVR4
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* The size of `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of `void *', as computed by sizeof. */
+#undef SIZEOF_VOID_P
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* devpoll support not found */
+#undef USE_DEVPOLL
+
+/* epoll support not found */
+#undef USE_EPOLL
+
+/* event port support not found */
+#undef USE_EVPORT
+
+/* kqueue support not found */
+#undef USE_KQUEUE
+
+/* poll support not found */
+#undef USE_POLL
+
+/* select support not found */
+#undef USE_SELECT
+
+/* set GNU source flag for linux */
+#undef _GNU_SOURCE
+
+/* Define to rpl_malloc if the replacement function should be used. */
+#undef malloc
+
+/* Define to `int' if <sys/types.h> does not define. */
+#undef pid_t
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define as `fork' if `vfork' does not work. */
+#undef vfork

@@ -1,0 +1,105 @@
+README
+
+Framework for Enterprise application development in C++ 
+Sumeet Chhetri
+21-04-2012
+
+FEATURES
+1. Easy to use View Framework
+2. SSL Support available
+3. Web Server (Multi process, Multi Threaded EPOLL/Kqueue/Event Ports/Devpoll/Poll/Select based)
+4. Inbuilt Authentication handlers and OAUTH support
+5. Configuration driven URL mapping
+6. Dependency Injection (constructor and setter injection)
+7. ORM library (currently implemented for MySQL, Integrated with STL, Table mappings through configuration files, One - Many, Many - Many ,One - One. The ORM Can be easily extended to other Databases).
+8. SOAP Integration (Web Service implementation through configuration file - Methods in a C++ header file exposed as Web-Services)
+9. REST Controller framework (pretty URL's)
+10. AJAX Integration (Using property based configuration - On the lines of DWR for Java - Just define C++ header files and Methods will be exposed as AJAX calls)
+11. EJB styled Beans (Remote and Local Interfaces exposed -> C++ files have the services, and the methods to be exposed are defined in a configuration file)
+12. Universal Object type for C++ (intelligent pointer - no need of extending any class - identifies the object type)
+13. Binary, XML and JSON based Serialization
+14. Reflection (Limited - header files required)
+15. Dynamic C++ Pages (Mix HTML and C++ code to produce run time views without web server restart)
+16. Template Engine and Dynamic Views generated from C++ objects.
+17. Controller Pattern (Implement controllers mapped with URL patterns to define custom behaviors)
+18. Request/Response Filters (Implement a chain of custom Filters for Pre/Post processing of request/response)
+19. Thread Pool Implementation with Futures
+20. Bigint and Bigdecimal classes for arithmetic operations on big numbers
+21. C++ Interpreter (Limited support)
+22. Rule based WEB Behavior(idea can be expanded to other areas application wide)
+23. XML Parser (DOM Styled)
+24. Database Connection Pooling
+25. Internationalization support
+26. Utilities such as Timer, Logging, Property Files etc.
+27. File Upload
+28. FTP Server
+29. Security features for Method access (Web Services, AJAX calls, C++ Bean service calls, Server URL’s)
+30. Module for Integration of the framework with Apache Web Server
+31. Method Invoker Server for cross platform Method Invocation (A daemon per language/platform approach – XML based Serialization/De- Serialization)
+
+Release Notes version 1.9
+==================================
+	:- Fix for the socket select issue (when number of connections increases 64)
+	:- Added support for autotools build system
+	:- The intermediate libraries (libinter/libdinter) can also be built at run-time using ./configure/make
+
+Release Notes version 1.8
+==================================
+	:- CORS Filter support for corss origin resource sharing
+	:- Changes to XML/JSON/Binary Serialization
+	:- Moved common code to a new SerializeBase? class
+	:- Modified the AMEF Protocol classes for better binary serialization support
+	:- Added support for handling namespaces and nested classes in Reflection
+	:- Fixed the Date/DateFormat? classes for all issues related to parsing/formatting/updating dates
+	:- Added new Multipartcontent object for handling multipart requests
+	:- Added gzip/deflate compression for responses
+	:- Added chunked transfer encoding support
+	:- Added Last Modified/If-Modified-Since header based cache support
+	:- Moved request/response headers to a map instead of properties
+	:- Fixed the HttpResponseParser? class
+	:- Fixed the JSONUtil class for error in json parsing
+	:- Introduced a new LoggerFactory? class to handle multiple loggers, fixed the Logger class
+	:- Introduced Futures based Thread pooling support
+	:- Fixed various web service issues/problems
+	:- Introduced JobScheduler? class for job scheduling
+	:- Added a new CronTimer? class for handling cron times
+	:- Introduced stream based single/multi File upload support in Rest Controllers
+	:- Added a few new html pages for testing/sanity
+	:- Fixed the accpetance test related files
+	:- Added a couple of new classes in the default app for testing new features
+	:- Fixed the afc.js file to resolve existing issues
+	:- Fixed an existing issue with namespace handling within the Element class
+	:- Introduced new properties for connection keep-alive, transfer encoding chunk size, default content encoding method, max number of input headers and max file upload size to the server.prop config file
+	:- Changed the web-service related template files for better web service support
+
+REQUIREMENTS
+1. Any box that runs linux, BSD, Solaris or Windows/Cygwin or any other OS(using autotools)
+2. Boost is no longer required as of version 1.7
+3. UnixODBC and development files
+4. OpenSSl and development files
+5. (GNU C++ compiler, GNU make) or Autotools(autoconf/automake/libtool/c++ compiler)
+
+
+INSTALL
+Autotools/Any OS
+Refer to the AUTOTOOLS-ANY-OS-INSTALL for generic installation directions.
+
+Unix
+Refer the UNIX-INSTALL-WITH-GNU-MAKE file for installation directions.
+
+BSD
+Refer the FREEBSD-INSTALL-WITH-GNU-MAKE file for installation directions.
+
+Windows/Cygwin
+Refer the WINDOWS-CYGWIN-INSTALL-WITH-GNU-MAKE file for installation direction on Windows platform having Cygwin installed
+
+Solaris
+Refer the SOLARIS-INSTALL-WITH-GNU-MAKE file for installation directions.
+
+UPDATES
+Find latest and older versions on 
+Google Code - http://code.google.com/p/ffead-cpp
+Github - https://github.com/sumeetchhetri/ffead-cpp
+
+
+Copyright � 2014 Sumeet Chhetri

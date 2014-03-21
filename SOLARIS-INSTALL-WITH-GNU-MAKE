@@ -1,0 +1,24 @@
+SOLARIS based Installation
+
+1. Refer INSTALL-WINDOWS-CYGWIN file for directions on how to install on Windows and Cygwin
+2. Download the tar file and extract it to the location of your choice.
+3. Install the following using the commands mentioned below
+	System Header files
+		sudo pkg install system/header
+	Install OpenCSW and edit PATH variable for CSW
+		sudo pkgadd -d http://get.opencsw.org/now
+		vi ~/.profile
+			- change the PATH to add /opt/csw/bin before the /usr/bin part
+			- PATH should now look like /opt/csw/bin:/usr/bin:/usr/share/bin
+	Install GCC/UnixODBC and SSL devel and libraries
+		sudo pkgutil -y -i gcc4core gcc4g++ libstdc++6 unixodbc unixodbc_dev libssl1_0_0 libssl_dev subversion(optional)
+4. Also included prototype.js in source for AJAX support
+6. Go to the ffead-server/Release or ffead-server/Debug depending on whether you need to debug the server code
+7. Open terminal and type "gmake all" and "gmake build-apps" to build the server and the default applications provided ("gmake all" will build ffead with all modules enabled)
+8. From version 1.8 onwards you can also select modules to build within ffead using the gmake modules={comma separated module list} all command, for a complete list of modules names please refer Modules, for e.g, to only build modules webservice,binserialize and distocache use the command "gmake modules=webservice,binserialize,distocache all"
+9. This will create the distribution folder named ffead-server inside ffead-server/Release or ffead-server/Debug folders accordingly
+10. Type ./server.sh when inside the ffead-server folder to start the application server
+11. Some sample default applications are already provided for your reference inside the ffead-server/web folder, the default application is served at urlpath /, the flexApp application at /flexApp and the oauthApp at /oauthApp
+12. If you did not already perform "gmake build-apps", then to compile a given web application shared library go to the ffead-server/web/{default/flexApp/oauthApp/(your_custom_app)}/src/Debug folder and run "gmake all"
+13. Place the generated application shared library inside the ffead-server/Release/ffead-server/lib or ffead-server/Debug/ffead-server/lib folder.
+14. Place your custom web applications inside the ffead-server/Release/ffead-server/web folder (Note the application folder name will also be the URL path - application name)
