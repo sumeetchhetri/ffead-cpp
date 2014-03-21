@@ -522,7 +522,7 @@ void* dynamic_page_monitor(void* arg)
 				logger << "done generating template code" <<endl;
 
 				string compres;
-#if BUILT_WITH_CONFGURE == 1
+#if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
 				compres = respath+"rundyn-automake_dinter.sh";
 #else
 				compres = respath+"rundyn_dinter.sh";
@@ -729,7 +729,7 @@ int main(int argc, char* argv[])
     	libpresent = false;
 
     string compres;
-#if BUILT_WITH_CONFGURE == 1
+#if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
     compres = respath+"rundyn-automake.sh";
 #else
 	compres = respath+"rundyn.sh";
@@ -741,7 +741,7 @@ int main(int argc, char* argv[])
 		logger << output << endl;
 	}
 	void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-#if BUILT_WITH_CONFGURE == 1
+#if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
 	if(checkdlib==NULL)
 	{
 		compres = respath+"rundyn-configure.sh reconf";

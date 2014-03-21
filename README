@@ -82,19 +82,19 @@ REQUIREMENTS
 
 INSTALL
 Autotools/Any OS
-Refer to the INSTALL-WITH-AUTOTOOLS-ANY-OS for generic installation directions.
+Refer to the AUTOTOOLS-ANY-OS-INSTALL for generic installation directions.
 
 Unix
-Refer the INSTALL-WITH-GNU-MAKE-ON-UNIX file for installation directions.
+Refer the UNIX-INSTALL-WITH-GNU-MAKE file for installation directions.
 
 BSD
-Refer the INSTALL-WITH-GNU-MAKE-ON-FREEBSD file for installation directions.
+Refer the FREEBSD-INSTALL-WITH-GNU-MAKE file for installation directions.
 
 Windows/Cygwin
-Refer the INSTALL-WITH-GNU-MAKE-ON-WINDOWS-CYGWIN file for installation direction on Windows platform having Cygwin installed
+Refer the WINDOWS-CYGWIN-INSTALL-WITH-GNU-MAKE file for installation direction on Windows platform having Cygwin installed
 
 Solaris
-Refer the INSTALL-WITH-GNU-MAKE-ON-SOLARIS file for installation directions.
+Refer the SOLARIS-INSTALL-WITH-GNU-MAKE file for installation directions.
 
 UPDATES
 Find latest and older versions on 

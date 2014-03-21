@@ -898,7 +898,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
 	cont = TemplateEngine::evaluate(respath+"/rundyn_template.sh", cntxt);
 	AfcUtil::writeTofile(respath+"/rundyn_dinter.sh", cont, true);
-#if BUILT_WITH_CONFGURE == 1
+#if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
 	cntxt.clear();
 	cntxt["INTER_DINTER_LIBRARIES"] = libs;
 	cntxt["INTER_DINTER_INCLUDES"] = ilibs;
