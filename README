@@ -37,6 +37,10 @@ FEATURES
 30. Module for Integration of the framework with Apache Web Server
 31. Method Invoker Server for cross platform Method Invocation (A daemon per language/platform approach â€“ XML based Serialization/De- Serialization)
 
+Testing Frameworks
+====================
+You can use the [https://github.com/sumeetchhetri/gatf GATF] framework for API test executions of all you REST/SOAP endpoints.
+
 Release Notes version 1.9
 ==================================
 	:- Fix for the socket select issue (when number of connections increases 64)
@@ -102,4 +106,4 @@ Google Code - http://code.google.com/p/ffead-cpp
 Github - https://github.com/sumeetchhetri/ffead-cpp
 
 
-Copyright © 2014 Sumeet Chhetri
+Copyright ï¿½ 2014 Sumeet Chhetri
