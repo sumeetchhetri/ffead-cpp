@@ -7,7 +7,7 @@ AC_CONFIG_SRCDIR([include/ConfigurationData.h])
 AC_CONFIG_HEADERS([include/AppDefines.h])
 
 LT_INIT([dlopen])
-
+LTDL_INIT
 support_debug=no
 AC_ARG_ENABLE(debug,
 AS_HELP_STRING([--enable-debug],
@@ -40,7 +40,8 @@ case "$host" in
 *-linux*)
     AC_DEFINE(OS_LINUX, [], [set OS to linux])
 	#hack for some 64-bit systems
-	AC_DEFINE(_GNU_SOURCE, [], [set GNU source flag for linux])
+        # dont need this on linux
+        #	AC_DEFINE(_GNU_SOURCE, [], [set GNU source flag for linux])
     local_os_type="linux"
     ;;
 *-irix*)
@@ -425,11 +426,11 @@ if test -d /usr/local/include; then
      else
      	AC_CHECK_HEADER([openssl/ssl.h],,[AC_MSG_ERROR([ssl header not found])])	
      fi
-     if test -f /usr/local/include/sql.h; then
-     	echo 'unixODBC sql.h header found..'
-     else
-     	AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([unixODBC sql.h header not found])])	
-     fi
+     dnl if test -f /usr/local/include/sql.h; then
+     dnl 	echo 'unixODBC sql.h header found..'
+     dnl else
+     dnl 	AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([unixODBC sql.h header not found])])	
+     dnl fi
 fi
 
 #AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([unixODBC sql.h header not found])])
@@ -456,14 +457,46 @@ AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([clock_gettime floor gethostbyname memset pow regcomp select socket strcasecmp strtol strtoul])
-AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
-AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
+
+
+AC_ARG_WITH([odbc],
+            [AS_HELP_STRING([--with-odbc],
+              [support database])],
+            [],
+            [with_odbc=yes])
+          
+LIBODBC=
+AS_IF([test "x$with_odbc" != xno],
+              [
+              AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
+              ],
+        )
+
+AS_IF([test "x$with_odbc" != xno],
+              [
+              AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
+              ],
+        )
+
+if test -d /usr/local/include; then
+   if test -f /usr/local/include/sql.h; then
+      echo 'unixODBC sql.h header found..'
+   else
+      AS_IF([test "x$with_odbc" != xno],
+            [
+                 AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([unixODBC sql.h header not found])])
+            ])
+   fi
+fi
+
 AC_CHECK_LIB(pthreads, pthread_create,[], [AC_CHECK_LIB(pthread, pthread_create)])
 AC_CHECK_LIB(ssl, SSL_read, [], [AC_MSG_ERROR([ssl library not found])])
 AC_CHECK_LIB([crypto], [SHA1_Init], [], [AC_MSG_ERROR([libcrypto not found])])
 AC_CHECK_LIB(z, compress,,AC_MSG_ERROR([no zlib; please install zlib or equivalent]))
 AC_CHECK_LIB(rt, clock_gettime,,[AC_MSG_ERROR([librt required but not found])])
-    
+AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
+
+   
 # distribute additional compiler and linker flags among Makefiles
 # --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
 AC_SUBST([AM_CXXFLAGS])    

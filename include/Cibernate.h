@@ -24,9 +24,11 @@
 #define CIBERNATE_H_
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef HAVE_LIBODBC
 #include <sql.h>
 #include <sqlext.h>
 #include <sqltypes.h>
+#endif
 #include "Reflector.h"
 #include "AfcUtil.h"
 #include <iostream>
@@ -49,9 +51,11 @@ private:
 	Mapping* mapping;
 	string appName,dialect;
 	Connection *conn;
+#ifdef HAVE_LIBODBC
 	SQLHENV	V_OD_Env;// Handle ODBC environment
 	SQLHDBC	V_OD_hdbc;// Handle connection
 	SQLHSTMT V_OD_hstmt;//statement
+#endif
 	Params params;
 	bool isTransaction;
 	bool allocateStmt(bool);
