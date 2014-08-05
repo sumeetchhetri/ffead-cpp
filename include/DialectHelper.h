@@ -42,7 +42,7 @@ class DialectHelper {
 public:
 	static string ORACLE_DIALECT, MYSQL_DIALECT, POSTGRES_DIALECT,
 				  SQLSERVER_DIALECT, SQLSERVER12_DIALECT, TIMESTEN_DIALECT,
-				  DB2_DIALECT;
+				  DB2_DIALECT, SQLLITE_DIALECT;
 	static int PAGINATION_OFFSET_SQL, PAGINATION_NO_OFFSET_SQL, VALIDDB_FUNCTIONS;
 	static string getSQLString(string dialect, int type, string query, StringContext params);
 	static void load();

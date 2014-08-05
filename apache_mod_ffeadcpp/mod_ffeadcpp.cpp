@@ -481,9 +481,9 @@ void one_time_init(ffead_ccp_module_config *s_cf)
 
 	string compres;
 #if BUILT_WITH_CONFGURE == 1
-	compres = respath+"rundyn-automake.sh";
+	compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 #else
-	compres = respath+"rundyn.sh";
+	compres = respath+"rundyn.sh "+serverRootDirectory;
 #endif
 	if(!libpresent)
 	{
@@ -495,11 +495,11 @@ void one_time_init(ffead_ccp_module_config *s_cf)
 #if BUILT_WITH_CONFGURE == 1
 	if(checkdlib==NULL)
 	{
-		compres = respath+"rundyn-configure.sh reconf";
+		compres = respath+"rundyn-configure.sh reconf "+serverRootDirectory;
 		string output = ScriptHandler::execute(compres, true);
 		logger << output << endl;
 
-		compres = respath+"rundyn-automake.sh";
+		compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 		if(!libpresent)
 		{
 			string output = ScriptHandler::execute(compres, true);

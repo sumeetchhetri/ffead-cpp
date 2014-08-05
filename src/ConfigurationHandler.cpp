@@ -166,7 +166,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 
 		string name = webdirs1.at(var);
 		StringUtil::replaceAll(name,"/","");
-		rundyncontent += "cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/"+name+"/public/\n";
+		rundyncontent += "cp -Rf $FFEAD_CPP_PATH/public/* $FFEAD_CPP_PATH/web/"+name+"/public/\n";
 		ConfigurationData::getInstance()->cntMap[name] = "true";
 		vector<string> adcps;
 		listi(dcppath,".dcp",true,adcps,false);
@@ -528,11 +528,11 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 													StringUtil::replaceFirst(urlmpp,"//","/");
 													ConfigurationData::getInstance()->rstCntMap[urlmpp] = restfunction;
 												}
-												if(clas!="")
+												/*if(clas!="")
 												{
 													Bean bean("restcontroller_"+name+clas,"",clas,scope,false,name);
 													ConfigurationData::getInstance()->ffeadContext.addBean(bean);
-												}
+												}*/
 											}
 											else
 											{
@@ -554,11 +554,11 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 													StringUtil::replaceFirst(urlmpp,"//","/");
 													ConfigurationData::getInstance()->rstCntMap[urlmpp] = restfunction;
 												}
-												if(clas!="")
+												/*if(clas!="")
 												{
 													Bean bean("restcontroller_"+name+clas,"",clas,scope,false,name);
 													ConfigurationData::getInstance()->ffeadContext.addBean(bean);
-												}
+												}*/
 											}
 											logger << ("Rest: Adding rest-controller => " + urlmpp  + " , class => " + clas) << endl;
 										}
@@ -909,7 +909,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	string mkfileamloc = rtdcfpath+"/autotools/Makefile.am";
 	ret = TemplateEngine::evaluate(mkfileloc,cntxt);
 	AfcUtil::writeTofile(mkfileamloc,ret,true);
-	string compres = respath+"rundyn-configure.sh";
+	string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
 	string output = ScriptHandler::execute(compres, true);
 	logger << "Set up configure for intermediate libraries\n\n" << endl;
 	logger << output << endl;

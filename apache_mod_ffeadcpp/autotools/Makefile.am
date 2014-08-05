@@ -13,6 +13,7 @@ mod_ffeadcpp_la_LDFLAGS = -shared -module -rpath ${prefix}/lib -no-undefined -L"
 
 # install the shared object file into Apache 
 install-data-hook:
-	$(APXS) -i -n 'ffeadcpp_module' ${prefix}/.libs/mod_ffeadcpp.so.0.0.0
+	mv ${prefix}/.libs/mod_ffeadcpp.so.0.0.0 ${prefix}/.libs/mod_ffeadcpplib.so
+	$(APXS) -i -n 'ffead_cpp_module' ${prefix}/.libs/mod_ffeadcpplib.so
 
 #dist_noinst_SCRIPTS = autogen.sh

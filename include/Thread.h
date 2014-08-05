@@ -25,6 +25,8 @@
 #include <pthread.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdio.h>
+
 typedef void* (*ThreadFunc)(void*);
 
 class Thread;
@@ -41,9 +43,10 @@ class Thread {
 	pthread_t pthread;
 	pthread_cond_t cond;
 	pthread_mutex_t mut;
+	bool isDetached;
 	static void* _service(void* arg);
 public:
-	Thread(ThreadFunc f, void* arg);
+	Thread(ThreadFunc f, void* arg, bool isDetached = true);
 	virtual ~Thread();
 	void execute();
 	void join();

@@ -31,7 +31,9 @@ void* Thread::_service(void* arg)
 	return ret;
 }
 
-Thread::Thread(ThreadFunc f, void* arg) {
+Thread::Thread(ThreadFunc f, void* arg, bool isDetached /*= true*/) {
+	this->pthread = NULL;
+	this->isDetached = isDetached;
 	this->threadFunctor = new ThreadFunctor();
 	this->threadFunctor->f = f;
 	this->threadFunctor->arg = arg;
@@ -46,7 +48,8 @@ Thread::~Thread() {
 }
 
 void Thread::join() {
-	if(pthread_join(pthread, NULL)) {
+	if(!isDetached && pthread_join(pthread, NULL)) {
+		perror("pthread_join");
 		throw "Error in join for pthread";
 	}
 }
@@ -83,7 +86,11 @@ void Thread::wait() {
 
 void Thread::execute() {
 	if(pthread_create(&pthread, NULL, _service, this->threadFunctor)) {
+		perror("pthread_create");
 		throw "Error Creating pthread";
+	}
+	if(isDetached) {
+		pthread_detach(pthread);
 	}
 }
 

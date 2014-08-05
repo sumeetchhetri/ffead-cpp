@@ -28,7 +28,7 @@ bool DialectHelper::init = false;
 string DialectHelper::ORACLE_DIALECT = "OracleDialect", DialectHelper::MYSQL_DIALECT = "MySQLDialect",
 	   DialectHelper::POSTGRES_DIALECT = "PostgresDialect", DialectHelper::SQLSERVER_DIALECT = "SQLServerDialect",
 	   DialectHelper::SQLSERVER12_DIALECT = "SQLServer12Dialect", DialectHelper::TIMESTEN_DIALECT = "TimestenDialect",
-	   DialectHelper::DB2_DIALECT = "DB2Dialect";
+	   DialectHelper::DB2_DIALECT = "DB2Dialect", DialectHelper::SQLLITE_DIALECT = "SQLLiteDialect";
 
 DialectHelper::DialectHelper() {
 }
@@ -121,6 +121,9 @@ void DialectHelper::loadMySQLDialectStrings() {
 	dialectStrMap[MYSQL_DIALECT][PAGINATION_OFFSET_SQL] = PAGINATION_OFFSET;
 	dialectStrMap[MYSQL_DIALECT][PAGINATION_NO_OFFSET_SQL] = PAGINATION_NO_OFFSET;
 	dialectStrMap[MYSQL_DIALECT][VALIDDB_FUNCTIONS] = VALID_DBFUNCS;
+
+	dialectStrMap[SQLLITE_DIALECT][PAGINATION_OFFSET_SQL] = PAGINATION_OFFSET;
+	dialectStrMap[SQLLITE_DIALECT][PAGINATION_NO_OFFSET_SQL] = PAGINATION_NO_OFFSET;
 }
 
 void DialectHelper::loadPostgresDialectStrings() {
@@ -171,14 +174,19 @@ void DialectHelper::loadDB22DialectStrings() {
 
 void DialectHelper::getPaginationSQL(string dialect, string& query, StringContext params)
 {
+	string count = StringUtil::trimCopy(params["count"]);
+	if(count!="")return;
 	if(dialect == SQLSERVER_DIALECT)
 	{
 		StringUtil::trim(query);
-		query.insert(6, " TOP " + params["count"]);
+		int selectIndex = StringUtil::toLowerCopy(query).find( "select" );
+		int selectDistinctIndex = StringUtil::toLowerCopy(query).find( "select distinct" );
+		int insertionPoint = selectIndex + (selectDistinctIndex == selectIndex ? 15 : 6);
+		query.insert(insertionPoint, " TOP " + count);
 	}
 	else if(dialect == TIMESTEN_DIALECT)
 	{
 		StringUtil::trim(query);
-		query.insert(6, " FIRST " + params["count"]);
+		query.insert(6, " FIRST " + count);
 	}
 }

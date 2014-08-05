@@ -1,6 +1,12 @@
 #!/bin/sh
 
-ENVVARS_FILE=$FEAD_CPP_PATH/rtdcf/envvars.mk
+if [ "$#" -gt 0 -a -n "$1" ]
+then
+	FFEAD_CPPPTH=$1
+	export FFEAD_CPP_PATH=${FFEAD_CPPPTH}
+fi
+
+ENVVARS_FILE=$FFEAD_CPP_PATH/rtdcf/envvars.mk
 
 IS_OS_CYGWIN=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"cygwin") != 0 {print "cygwin"}'`
 IS_OS_BSD=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"bsd") != 0 {print "bsd"}'`
@@ -43,11 +49,11 @@ RES_LIB_EXT := a
 EOM
 fi
 
-cd $FEAD_CPP_PATH/rtdcf
-rm -f $FEAD_CPP_PATH/*.cntrl
+cd $FFEAD_CPP_PATH/rtdcf
+rm -f $FFEAD_CPP_PATH/*.cntrl
 $MAKE_EXE all
-cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/default/public/
-cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/default/public/
-cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/flexApp/public/
-cp -Rf $FEAD_CPP_PATH/public/* $FEAD_CPP_PATH/web/oauthApp/public/
+cp -Rf $FFEAD_CPP_PATH/public/* $FFEAD_CPP_PATH/web/default/public/
+cp -Rf $FFEAD_CPP_PATH/public/* $FFEAD_CPP_PATH/web/default/public/
+cp -Rf $FFEAD_CPP_PATH/public/* $FFEAD_CPP_PATH/web/flexApp/public/
+cp -Rf $FFEAD_CPP_PATH/public/* $FFEAD_CPP_PATH/web/oauthApp/public/
 

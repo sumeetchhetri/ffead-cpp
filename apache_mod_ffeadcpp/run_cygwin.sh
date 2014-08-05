@@ -4,7 +4,7 @@ FFEAD_CPPPTH=${USER_HOME}/ffead-server
 HTTPD_LIB=-lhttpd2core
 if [ "$#" -gt 0 -a -n "$1" ]
 then
-	FFEAD_CPPPTH=$1
+	FFEAD_CPP_PATH=$1
 fi
 #the path of the ffead-cpp server folder inside apache web folder
 export FFEAD_CPP_PATH=${FFEAD_CPPPTH}

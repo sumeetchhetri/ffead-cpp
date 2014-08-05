@@ -191,10 +191,14 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 		}
 		if(flag)
 		{
+			args argus;
+			vals valus;
+
 			//logger << "inside restcontroller logic ..." << endl;
 			Reflector ref;
 			ClassInfo srv = ref.getClassInfo(rft.clas, req->getCntxt_name());
-			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+req->getCntxt_name()+rft.clas, req->getCntxt_name());
+			Constructor cons = srv.getConstructor(argus);
+			void *_temp = ref.newInstanceGVP(cons, valus, req->getCntxt_name());
 			RestController* rstcnt = (RestController*)_temp;
 			if(rstcnt==NULL)
 			{
@@ -206,8 +210,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 			rstcnt->request = req;
 			rstcnt->response = &res;
 
-			args argus;
-			vals valus;
 			bool invValue = false;
 			vector<ifstream*> allStreams;
 			map<string, vector<ifstream*>* > mpvecstreams;

@@ -523,9 +523,9 @@ void* dynamic_page_monitor(void* arg)
 
 				string compres;
 #if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
-				compres = respath+"rundyn-automake_dinter.sh";
+				compres = respath+"rundyn-automake_dinter.sh "+serverRootDirectory;
 #else
-				compres = respath+"rundyn_dinter.sh";
+				compres = respath+"rundyn_dinter.sh "+serverRootDirectory;
 #endif
 				int i=system(compres.c_str());
 				if(!i)
@@ -730,9 +730,9 @@ int main(int argc, char* argv[])
 
     string compres;
 #if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
-    compres = respath+"rundyn-automake.sh";
+    compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 #else
-	compres = respath+"rundyn.sh";
+	compres = respath+"rundyn.sh "+serverRootDirectory;
 #endif
 	if(!libpresent)
 	{
@@ -744,11 +744,11 @@ int main(int argc, char* argv[])
 #if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
 	if(checkdlib==NULL)
 	{
-		compres = respath+"rundyn-configure.sh reconf";
+		compres = respath+"rundyn-configure.sh reconf "+serverRootDirectory;
 		string output = ScriptHandler::execute(compres, true);
 		logger << output << endl;
 
-		compres = respath+"rundyn-automake.sh";
+		compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 		if(!libpresent)
 		{
 			string output = ScriptHandler::execute(compres, true);
