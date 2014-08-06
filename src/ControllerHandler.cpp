@@ -204,6 +204,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 			{
 				logger << "Invalid Rest Controller" << endl;
 				res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+				delete _temp;
 				return true;
 			}
 
@@ -225,6 +226,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 					else if(icont!=req->getHeader(HttpRequest::ContentType) && req->getHeader(HttpRequest::ContentType).find(icont)!=0)
 					{
 						res.setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
+						delete _temp;
 						return true;
 					}
 
@@ -258,6 +260,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 								{
 									logger << "File can only be mapped to ifstream" << endl;
 									res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+									delete _temp;
 									return true;
 								}
 							}
@@ -270,6 +273,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 						{
 							logger << "Invalid mapping specified in config, no multipart content found with name " + rft.params.at(var).name << endl;
 							res.setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+							delete _temp;
 							return true;
 						}
 					}
@@ -279,6 +283,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 						{
 							logger << "Request Body cannot be mapped to more than one argument..." << endl;
 							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+							delete _temp;
 							return true;
 						}
 						pmvalue = req->getContent();
@@ -428,6 +433,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 						if(voidPvect==NULL)
 						{
 							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+							delete _temp;
 							return true;
 						}
 						valus.push_back(voidPvect);
@@ -449,6 +455,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 						if(voidPvect==NULL)
 						{
 							res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+							delete _temp;
 							return true;
 						}
 						valus.push_back(voidPvect);
@@ -458,11 +465,13 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 					logger << ex << endl;
 					invValue= true;
 					res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+					delete _temp;
 					return true;
 				} catch (...) {
 					logger << "Restcontroller exception occurred" << endl;
 					invValue= true;
 					res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+					delete _temp;
 					return true;
 				}
 			}
@@ -472,7 +481,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 			{
 				ref.invokeMethodUnknownReturn(_temp,meth,valus);
 				logger << "Successfully called restcontroller" << endl;
-				//return;
+				delete _temp;
 
 				for(int i=0;i<(int)allStreams.size();++i) {
 					if(allStreams.at(i)!=NULL) {
@@ -494,7 +503,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse& res, string ext, 
 				res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 				//res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 				logger << "Rest Controller Method Not Found" << endl;
-				//return;
+				if(_temp!=NULL)delete _temp;
 			}
 		}
 	}
