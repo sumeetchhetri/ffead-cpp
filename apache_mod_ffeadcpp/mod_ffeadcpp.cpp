@@ -100,7 +100,7 @@ static map<string, vector<string> > filterMap;
 static string resourcePath, serverRootDirectory;
 
 extern "C" module AP_MODULE_DECLARE_DATA ffead_ccp_module;
-static bool doneOnce;
+static bool doneOnce = false;
 
 typedef struct {
 	char *path;
@@ -303,42 +303,50 @@ static apr_bucket* get_file_bucket(request_rec* r, const char* fname)
 static int mod_ffeadcpp_method_handler (request_rec *r)
 {
 	string port = CastUtil::lexical_cast<string>(r->server->port);
-	if(ip_address=="")
-	{
-		ip_address = r->server->server_hostname;
-		ip_address += ":";
-		ip_address += port;
-		ConfigurationData::getInstance()->ip_address = ip_address;
-	}
-	signal(SIGSEGV,signalSIGSEGV);
-	apr_bucket_brigade *bb = apr_brigade_create(r->pool, r->connection->bucket_alloc);
-	apr_status_t status = ap_get_brigade(r->input_filters, bb,AP_MODE_READBYTES, APR_BLOCK_READ,HUGE_STRING_LEN);
-	if (status != APR_SUCCESS) {
-		return status;
-	}
-	apr_bucket* b ;
+
+	//signal(SIGSEGV,signalSIGSEGV);
 	string content;
-	stringstream ss;
-	string temp;
-	for ( b = APR_BRIGADE_FIRST(bb);b != APR_BRIGADE_SENTINEL(bb);b = APR_BUCKET_NEXT(b) )
-	{
-		size_t bytes ;
-		const char* buf = "\0";
-		if ( APR_BUCKET_IS_EOS(b) )
+
+	apr_bucket_brigade *bb = apr_brigade_create(r->pool, r->connection->bucket_alloc);
+	for ( ; ; ) {
+		apr_bucket* b ;
+		bool done = false;
+		ap_get_brigade(r->input_filters, bb, AP_MODE_READBYTES, APR_BLOCK_READ, HUGE_STRING_LEN);
+		for ( b = APR_BRIGADE_FIRST(bb);b != APR_BRIGADE_SENTINEL(bb);b = APR_BUCKET_NEXT(b) )
 		{
+			size_t bytes ;
+			const char* buf = "\0";
+			if ( APR_BUCKET_IS_EOS(b) )
+			{
+				done = true;
+			}
+			else if (apr_bucket_read(b, &buf, &bytes, APR_BLOCK_READ)== APR_SUCCESS )
+			{
+				content += string(buf, 0, bytes);
+			}
 		}
-		else if (apr_bucket_read(b, &buf, &bytes, APR_BLOCK_READ)== APR_SUCCESS )
-		{
-			content += buf;
-		}
+
+		if (done)
+		  break;
+		else
+		  apr_brigade_cleanup(bb) ;
 	}
+	apr_brigade_destroy(bb) ;
+
 	HttpRequest* hreq= new HttpRequest();
-	string webpath = "URL" + serverRootDirectory + "web/";
+	string cntpath = serverRootDirectory + "web/";
+	string webpath = "URL" + cntpath;
 	MyReq* req = new MyReq();
 	req->r = r;
 	req->htreq = hreq;
 
 	apr_table_do(iterate_func, req, r->headers_in, NULL);
+
+	ip_address = hreq->getHeader(HttpRequest::Host);
+	string tipaddr = ip_address;
+	if(port!="80")
+		tipaddr += (":" + port);
+	ConfigurationData::getInstance()->ip_address = tipaddr;
 
 	string contret;
 	if(content!="")
@@ -347,44 +355,52 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 		fprintf(stderr,contret.c_str());
 		fflush(stderr);
 	}
-	/*if(r->boundary != NULL && r->boundary[0] != '\0')
-	{
-		hreq->buildRequest("Boundary",r->boundary);
-	}*/
-	//hreq->buildRequest(webpath.c_str(),r->the_request);
 	hreq->buildRequest(webpath.c_str(),r->uri);
 	hreq->buildRequest("Method",r->method);
 	if(r->args != NULL && r->args[0] != '\0')
 	{
-		/*ap_rprintf (r, "<br/>Args");
-		ap_rprintf (r, r->args);*/
 		hreq->buildRequest("GetArguments",r->args);
 	}
-	//hreq->setHttpVersion(r->protocol);
+	hreq->buildRequest("HttpVersion", r->protocol);
 
 	HttpResponse respo = service(hreq);
-	string h1 = respo.generateResponse(hreq->getMethod(), hreq);
+	string h1 = respo.generateResponse(hreq->getMethod(), hreq, false);
+
+	for (int var = 0; var < (int)respo.getCookies().size(); var++)
+	{
+		apr_table_add(r->headers_out, "Set-cookie", respo.getCookies().at(var).c_str());
+	}
+
+	r->status_line = respo.getStatusLine().c_str();
+	if(respo.getHeader(HttpResponse::ContentType)!="")
+	{
+		r->content_type = respo.getHeader(HttpResponse::ContentType).c_str();
+	}
+	r->clength = h1.length();
+
 	fprintf(stderr,"\n\n\n\n--------------------------------------------\n");
 	fprintf(stderr,hreq->getUrl().c_str());
 	fprintf(stderr,"\n");
 	string star =  hreq->toString();
 	fprintf(stderr,star.c_str());
-	fprintf(stderr,"\n--------------------------------------------\n\n\n\n");
+	fprintf(stderr,"\n--------------------------------------------\n");
 	fprintf(stderr,contret.c_str());
 	fflush(stderr);
 	fprintf(stderr,"\n\n");
+	fprintf(stderr,content.c_str());
+	fprintf(stderr,"\n");
+	fprintf(stderr,"ip_address = %s", tipaddr.c_str());
+	fprintf(stderr,"\n");
+	fprintf(stderr,"\n--------------------------------------------\n\n\n\n");
 	fflush(stderr);
 	fprintf(stderr, h1.c_str());
 	fflush(stderr);
 	delete hreq;
 	delete req;
-	if(respo.getHeader(HttpResponse::ContentType)!="")
-	{
-		r->content_type = respo.getHeader(HttpResponse::ContentType).c_str();
-	}
+
 	if(h1!="")
 	{
-		ap_rprintf (r, h1.c_str());
+		ap_rwrite (h1.c_str(), h1.length(), r);
 		return OK;
 	}
 	return OK;
@@ -442,6 +458,10 @@ void one_time_init(ffead_ccp_module_config *s_cf)
 	{
 		logger << msg << endl;
 	}
+
+	ip_address = srprps["IP_ADDR"];
+	if(ip_address=="")
+		ip_address = "localhost";
 
 	if(srprps["SESS_STATE"]=="server")
 		sessatserv = true;
@@ -630,7 +650,10 @@ static int mod_ffeadcp_post_config_hanlder(apr_pool_t *pconf, apr_pool_t *plog,
 	// Get the module configuration
 	ffead_ccp_module_config *s_cfg = (ffead_ccp_module_config*)
 			ap_get_module_config(s->module_config, &ffead_ccp_module);
-	one_time_init(s_cfg);
+	if(!doneOnce)
+	{
+		one_time_init(s_cfg);
+	}
 	doneOnce = true;
     return OK;
 }

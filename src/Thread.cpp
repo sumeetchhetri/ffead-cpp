@@ -28,6 +28,7 @@ void* Thread::_service(void* arg)
 	ThreadFunctor* threadFunctor = (ThreadFunctor*)arg;
 	void* ret = threadFunctor->f(threadFunctor->arg);
 	pthread_exit(NULL);
+	delete threadFunctor;
 	return ret;
 }
 

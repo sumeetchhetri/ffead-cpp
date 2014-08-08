@@ -72,30 +72,33 @@ HttpResponse::HttpResponse() {
 HttpResponse::~HttpResponse() {
 }
 
-string HttpResponse::generateResponse(string httpMethod, HttpRequest *req)
+string HttpResponse::generateResponse(string httpMethod, HttpRequest *req, bool appendHeaders /*= true*/)
 {
-	if(httpMethod=="HEAD")
+	if(httpMethod=="HEAD" && appendHeaders)
 	{
 		return generateHeadResponse();
 	}
-	else if(httpMethod=="OPTIONS")
+	else if(httpMethod=="OPTIONS" && appendHeaders)
 	{
 		return generateOptionsResponse();
 	}
-	else if(httpMethod=="TRACE")
+	else if(httpMethod=="TRACE" && appendHeaders)
 	{
 		return generateTraceResponse(req);
 	}
 	else
 	{
-		return generateResponse();
+		return generateResponse(appendHeaders);
 	}
 }
 
-string HttpResponse::generateResponse()
+string HttpResponse::generateResponse(bool appendHeaders /*= true*/)
 {
-	string resp = generateHeadResponse();
-	resp += this->content;
+	string resp = this->content;
+	if(appendHeaders)
+		resp = generateHeadResponse() + resp;
+	else
+		generateHeadResponse();
 	return resp;
 }
 
@@ -324,4 +327,12 @@ void HttpResponse::setCompressed(bool compressed)
 bool HttpResponse::getCompressed()
 {
 	return this->compressed;
+}
+
+vector<string> HttpResponse::getCookies() const {
+	return cookies;
+}
+
+string HttpResponse::getStatusLine() const {
+	return (httpVersion + " " + statusCode + " " + statusMsg);
 }

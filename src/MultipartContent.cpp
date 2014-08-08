@@ -183,7 +183,7 @@ string MultipartContent::getHeader(string header)
 
 bool MultipartContent::isAFile()
 {
-	return tempFileName==""?false:true;
+	return tempFileName=="" && fileName==""?false:true;
 }
 
 bool MultipartContent::isValid()

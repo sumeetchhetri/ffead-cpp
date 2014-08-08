@@ -1306,7 +1306,7 @@ void HttpRequest::updateFromContentStr()
 										  + CastUtil::lexical_cast<string>(indices[attN])
 										  + "]") << endl;
 					}
-					else if(indices.find(attN)!=indices.end())
+					else if(indices.find(attN)!=indices.end() || requestParamsF.find(attN)!=requestParamsF.end())
 					{
 						if(requestParamsF.find(attN)!=requestParamsF.end())
 						{
@@ -1360,7 +1360,7 @@ void HttpRequest::updateFromContentStr()
 			}
 			else if(bhdrstarts)
 			{
-				if(temp=="\r")
+				if(temp=="\r" || temp=="")
 				{
 					bcontstarts = true;
 					bhdrstarts = false;
@@ -1520,7 +1520,7 @@ void HttpRequest::updateFromContentFile()
 				}
 				else if(bhdrstarts)
 				{
-					if(temp=="\r")
+					if(temp=="\r" || temp=="")
 					{
 						bcontstarts = true;
 						bhdrstarts = false;
@@ -1603,6 +1603,34 @@ string HttpRequest::buildRequest(const char *keyc,const char *valuec)
 				t = t.substr(0,e);
 				this->localeInfo.push_back(t);
 			}
+		}
+		addHeaderValue(key, value);
+	}
+	else if(StringUtil::toLowerCopy(key)=="authorization")
+	{
+		if(value.find("oauth_")!=string::npos)
+		{
+			this->getOauthParams(value);
+		}
+		else
+		{
+			this->getAuthParams(value);
+		}
+		addHeaderValue(key, value);
+	}
+	else if(StringUtil::toLowerCopy(key)=="cookie")
+	{
+		this->cookie = true;
+		strVec results;
+		StringUtil::split(results, value, ("; "));
+		for(unsigned j=0;j<(int)results.size();j++)
+		{
+			strVec results1;
+			StringUtil::split(results1, results.at(j), ("="));
+			if(results1.size()==2)
+				cookieattrs[results1.at(0)] = results1.at(1);
+			else
+				cookieattrs[results1.at(0)] = "true";
 		}
 		addHeaderValue(key, value);
 	}
@@ -1771,17 +1799,17 @@ void HttpRequest::setUrl(string url)
 	this->url = url;
 }
 
-string HttpRequest::getUrl()
+string HttpRequest::getUrl() const
 {
 	return this->url;
 }
 
-float HttpRequest::getHttpVers()
+float HttpRequest::getHttpVers() const
 {
 	return this->httpVers;
 }
 
-string HttpRequest::getHttpVersion()
+string HttpRequest::getHttpVersion() const
 {
 	return this->httpVersion;
 }
@@ -1858,7 +1886,7 @@ void HttpRequest::setCntxt_root(string cntxt_root)
 {
 	this->cntxt_root = cntxt_root;
 }
-string HttpRequest::getDefaultLocale()
+string HttpRequest::getDefaultLocale() const
 {
 	if(this->localeInfo.size()>0)
 		return this->localeInfo.at(0);

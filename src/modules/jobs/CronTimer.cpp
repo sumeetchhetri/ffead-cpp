@@ -392,6 +392,6 @@ CronTimer::CronTimer(string cronExpression)
 }
 
 CronTimer::~CronTimer() {
-	// TODO Auto-generated destructor stub
+	delete nextRunDate;
 }
 

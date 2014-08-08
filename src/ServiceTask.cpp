@@ -400,10 +400,10 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, string ext,
 		else
 		{
 			unsigned int totlen = getFileSize(fname.c_str());
-			float parts = (float)totlen/techunkSiz;
+			float parts = techunkSiz!=0?(float)totlen/techunkSiz:0;
 			parts = (floor(parts)<parts?floor(parts)+1:floor(parts));
 
-			if(parts>1)
+			if(parts>1 && techunkSiz>0)
 			{
 				res->addHeaderValue(HttpResponse::TransferEncoding, "chunked");
 				all = StringUtil::toHEX(techunkSiz) + "\r\n";
@@ -1011,7 +1011,7 @@ void ServiceTask::run()
 			{
 				logger << ("Started processing request - phase II") << endl;
 
-				string wsUrl = "http://" + ConfigurationData::getInstance()->ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
+				string wsUrl = req->getCntxt_name() + "/" + req->getFile();
 				if(isContrl)
 				{
 
@@ -1435,6 +1435,24 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 	{
 		string webpath = serverRootDirectory + "web/";
 
+		if(ConfigurationData::getInstance()->cntMap[req->getCntxt_name()]!="true")
+		{
+			req->setCntxt_name("default");
+			req->setCntxt_root(webpath+"default");
+
+			string folder = webpath+req->getCntxt_name();
+			struct stat attrib;
+			int rv = stat(folder.c_str(), &attrib);
+			if(rv==0)
+			{
+				req->setUrl(folder+req->getActUrl());
+			}
+			else
+			{
+				req->setUrl(webpath+"default"+req->getActUrl());
+			}
+		}
+
 		req->updateContent();
 
 		if(req->getFile()=="")
@@ -1603,7 +1621,8 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		{
 			cout << ("Started processing request - phase II") << endl;
 
-			string wsUrl = "http://" + ConfigurationData::getInstance()->ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
+			string wsUrl = req->getCntxt_name() + "/" + req->getFile();
+			cout << wsUrl << endl;
 			if(isContrl)
 			{
 
@@ -1661,7 +1680,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 					cout << ("Request for static resource/file") << endl;
 
 					if(res.getContent()=="")
-						updateContent(req, &res, ext, 8192);
+						updateContent(req, &res, ext, 0);
 					else
 					{
 						content = res.getContent();
@@ -1695,7 +1714,6 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		//	res.addHeaderValue(HttpResponse::Connection, "close");
 		storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->sessatserv);
 		//h1 = res.generateResponse();
-		delete req;
 
 		dlclose(dlib);
 		dlclose(ddlib);
@@ -1712,3 +1730,4 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 	}
 	return res;
 }
+

@@ -114,9 +114,9 @@ public:
     void setUrl(string);
     HttpSession* getSession();
     string getMethod() const;
-	string getUrl();
-	string getHttpVersion();
-	float getHttpVers();
+	string getUrl() const;
+	string getHttpVersion() const;
+	float getHttpVers() const;
 	string getContent_boundary() const;
 	string getContent() const;
 	void setContent(string);
@@ -125,7 +125,7 @@ public:
     MultipartContent getMultipartContent(string key);
     string getRequestParamType(string key);
     string getCntxt_root() const;
-    string getDefaultLocale();
+    string getDefaultLocale() const;
     string getCntxt_name() const;
     string getFile() const;
     void setFile(string);

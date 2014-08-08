@@ -56,8 +56,8 @@ public:
 	//void setContent(Cont content);
 	void setContent(string content);
 	void addCookie(string cookie);
-	string generateResponse(string httpMethod, HttpRequest *req);
-    string generateResponse();
+	string generateResponse(string httpMethod, HttpRequest *req, bool appendHeaders = true);
+    string generateResponse(bool appendHeaders = true);
     string generateHeadResponse();
     string generateOptionsResponse();
     string generateTraceResponse(HttpRequest* req);
@@ -67,7 +67,9 @@ public:
     bool isNonBinary();
     string getHeader(string);
     bool getCompressed();
-    friend class ServiceTask;
+	vector<string> getCookies() const;
+	string getStatusLine() const;
+	friend class ServiceTask;
     friend class HttpResponseParser;
 private:
     Logger logger;

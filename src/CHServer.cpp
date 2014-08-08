@@ -667,9 +667,19 @@ int main(int argc, char* argv[])
 	string IP_ADDRESS;
 
 	if(IP_ADDRES!="")
-		IP_ADDRESS = IP_ADDRES + ":" + PORT;
+	{
+		if(PORT=="80")
+			IP_ADDRESS = IP_ADDRES;
+		else
+			IP_ADDRESS = IP_ADDRES + ":" + PORT;
+	}
 	else
-		IP_ADDRESS = "localhost:" + PORT;
+	{
+		if(PORT=="80")
+			IP_ADDRESS = "localhost";
+		else
+			IP_ADDRESS = "localhost:" + PORT;
+	}
 
 	ConfigurationData::getInstance();
 	SSLHandler::setIsSSL(isSSLEnabled);
