@@ -227,9 +227,9 @@ else
 endif
 
 
-libweblib_la_LDFLAGS = -shared -no-undefined -module
+libweblib_la_LDFLAGS = -shared -no-undefined -module $(LIBDL)
 
 noinst_PROGRAMS = CHS
 CHS_SOURCES = ../CHServer.cpp
-CHS_LDADD = -L".libs/" -lweblib
+CHS_LDADD = -L".libs/" -lweblib $(LIBDL)
 
