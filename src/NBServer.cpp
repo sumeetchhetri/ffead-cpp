@@ -22,11 +22,12 @@
 
 #include "NBServer.h"
 
-
+#if !defined(OS_MINGW)
 void sigchld_handlernb(int s)
 {
     while(waitpid(-1, NULL, WNOHANG) > 0);
 }
+#endif
 
 NBServer::NBServer()
 {
@@ -43,7 +44,7 @@ NBServer::NBServer(string port,int waiting,Service serv)
 
 	service = serv;
 	struct addrinfo hints, *servinfo, *p;
-	struct sigaction sa;
+	
 	int yes=1;
 	int rv;
 
@@ -63,20 +64,32 @@ NBServer::NBServer(string port,int waiting,Service serv)
 			perror("server: socket");
 			continue;
 		}
-		if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &yes,
-				sizeof(int)) == -1) {
-			perror("setsockopt");
-			exit(1);
-		}
+		#ifdef OS_MINGW
+			BOOL bOptVal = FALSE;
+			if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
+				perror("setsockopt");
+				exit(1);
+			}
+		#else
+			if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+				perror("setsockopt");
+				exit(1);
+			}
+		#endif
 		if (bind(this->sock, p->ai_addr, p->ai_addrlen) == -1) {
-			close(this->sock);
+			closesocket(this->sock);
 			perror("server: bind");
 			continue;
 		}
 		break;
 	}
 
-	fcntl (this->sock, F_SETFL, fcntl(this->sock, F_GETFD, 0) | O_NONBLOCK);
+	#ifdef OS_MINGW
+		u_long iMode = 1;
+		ioctlsocket(this->sock, FIONBIO, &iMode);
+	#else
+		fcntl(this->sock, F_SETFL, fcntl(this->sock, F_GETFD, 0) | O_NONBLOCK);
+	#endif
 
 	if (p == NULL)
 	{
@@ -89,6 +102,8 @@ NBServer::NBServer(string port,int waiting,Service serv)
 		perror("listen");
 		exit(1);
 	}
+	#if !defined(OS_MINGW)
+	struct sigaction sa;
 	sa.sa_handler = sigchld_handlernb; // reap all dead processes
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
@@ -97,6 +112,7 @@ NBServer::NBServer(string port,int waiting,Service serv)
 		perror("sigaction");
 		exit(1);
 	}
+	#endif
 	logger << ("waiting for connections on " + port + ".....") << endl;
 }
 
@@ -114,8 +130,13 @@ void* NBServer::servicing(void* arg)
 
 	server->selEpolKqEvPrtHandler.initialize(server->sock);
 
-	int new_fd, nfds;  // listen on sock_fd, new connection on new_fd
-	struct sockaddr_storage their_addr; // connector's address information
+	SOCKET new_fd;
+	int nfds;  // listen on sock_fd, new connection on new_fd
+	#ifdef OS_MINGW
+		struct sockaddr_in their_addr;
+	#else
+		struct sockaddr_storage their_addr;
+	#endif
 	socklen_t sin_size;
 
 	while(flag)
@@ -137,7 +158,7 @@ void* NBServer::servicing(void* arg)
 		}
 		for(int n=0;n<nfds;n++)
 		{
-			int descriptor = server->selEpolKqEvPrtHandler.getDescriptor(n);
+			SOCKET descriptor = server->selEpolKqEvPrtHandler.getDescriptor(n);
 			if (descriptor == server->sock)
 			{
 				new_fd = -1;
@@ -162,11 +183,16 @@ void* NBServer::servicing(void* arg)
 				int err;
 				if((err=recv(descriptor,buf,10,MSG_PEEK))==0)
 				{
-					close(descriptor);
+					closesocket(descriptor);
 					continue;
 				}
 
-				fcntl(descriptor, F_SETFL, O_SYNC);
+				#ifdef OS_MINGW
+					u_long bMode = 0;
+					ioctlsocket(descriptor, FIONBIO, &bMode);
+				#else
+					fcntl(descriptor, F_SETFL, O_SYNC);
+				#endif
 
 				Thread pthread(serv, &descriptor);
 				pthread.execute();
@@ -180,7 +206,7 @@ int NBServer::Accept()
 {
 	return selEpolKqEvPrtHandler.getEvents();
 }
-int NBServer::Send(int fd,string data)
+int NBServer::Send(SOCKET fd,string data)
 {
 	int bytes = send(fd,data.c_str(),data.length(),0);
 	if(bytes == -1)
@@ -189,7 +215,7 @@ int NBServer::Send(int fd,string data)
 	}
 	return bytes;
 }
-int NBServer::Send(int fd,vector<char> data)
+int NBServer::Send(SOCKET fd,vector<char> data)
 {
 	int bytes = send(fd,&data[0],data.size(),0);
 	if(bytes == -1)
@@ -198,16 +224,16 @@ int NBServer::Send(int fd,vector<char> data)
 	}
 	return bytes;
 }
-int NBServer::Send(int fd,vector<unsigned char> data)
+int NBServer::Send(SOCKET fd,vector<unsigned char> data)
 {
-	int bytes = send(fd,&data[0],data.size(),0);
+	int bytes = send(fd,(const char*)&data[0],data.size(),0);
 	if(bytes == -1)
 	{
 		logger << "send failed" << endl;
 	}
 	return bytes;
 }
-int NBServer::Send(int fd,char *data)
+int NBServer::Send(SOCKET fd,char *data)
 {
 	int bytes = send(fd,data,sizeof data,0);
 	if(bytes == -1)
@@ -216,9 +242,9 @@ int NBServer::Send(int fd,char *data)
 	}
 	return bytes;
 }
-int NBServer::Send(int fd,unsigned char *data)
+int NBServer::Send(SOCKET fd,unsigned char *data)
 {
-	int bytes = send(fd,data,sizeof data,0);
+	int bytes = send(fd,(const char*)data,sizeof data,0);
 	if(bytes == -1)
 	{
 		logger << "send failed" << endl;
@@ -226,7 +252,7 @@ int NBServer::Send(int fd,unsigned char *data)
 	return bytes;
 }
 
-int NBServer::Receive(int fd,string &data,int bytes)
+int NBServer::Receive(SOCKET fd,string &data,int bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -245,7 +271,7 @@ int NBServer::Receive(int fd,string &data,int bytes)
 	memset(&buf[0], 0, sizeof(buf));
 	return bytesr;
 }
-int NBServer::Receive(int fd,vector<char> &data,int bytes)
+int NBServer::Receive(SOCKET fd,vector<char> &data,int bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -256,7 +282,7 @@ int NBServer::Receive(int fd,vector<char> &data,int bytes)
 	copy(te,te+bytes,data.begin());
 	return bytesr;
 }
-int NBServer::Receive(int fd,vector<unsigned char>& data,int bytes)
+int NBServer::Receive(SOCKET fd,vector<unsigned char>& data,int bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -266,21 +292,21 @@ int NBServer::Receive(int fd,vector<unsigned char>& data,int bytes)
 	copy(te,te+bytes,data.begin());
 	return bytesr;
 }
-int NBServer::Receive(int fd,char data[],int bytes)
+int NBServer::Receive(SOCKET fd,char data[],int bytes)
 {
 	if(bytes==0)
 		return -1;
 	int bytesr = recv(fd, data, bytes, 0);
 	return bytesr;
 }
-int NBServer::Receive(int fd,unsigned char data[],int bytes)
+int NBServer::Receive(SOCKET fd,unsigned char data[],int bytes)
 {
 	if(bytes==0)
 		return -1;
-	int bytesr = recv(fd, data, bytes, 0);
+	int bytesr = recv(fd, (char*)data, bytes, 0);
 	return bytesr;
 }
-int NBServer::Receive(int fd,vector<string>& data,int bytes)
+int NBServer::Receive(SOCKET fd,vector<string>& data,int bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -318,7 +344,7 @@ void NBServer::stop()
 	lock.unlock();
 }
 
-int NBServer::getSocket()
+SOCKET NBServer::getSocket()
 {
 	return sock;
 }

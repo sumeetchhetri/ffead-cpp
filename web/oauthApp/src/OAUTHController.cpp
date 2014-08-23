@@ -36,7 +36,12 @@ HttpResponse OAUTHController::service(HttpRequest req)
 {
 	HttpResponse res;
 	map<string,string> reqParams = req.getAllParams();
+
 	string hostp = req.getHeader(HttpRequest::Host);
+	int port = 8080;
+	if(hostp.find(":")!=string::npos)
+		port = CastUtil::lexical_cast<int>(hostp.substr(hostp.find(":")+1));
+
 	if(req.getFile()=="login.auth")
 	{
 		if(reqParams["username"]!="" && reqParams["password"]!="")
@@ -69,7 +74,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 	else if(req.getFile()=="requestToken.auth")
 	{
 		Client client;
-		client.connection("localhost",8080);
+		client.connection("localhost",port);
 		string data = "GET /request.oauth?";
 		data += "oauth_callback=http://"+hostp+"/oauthApp/calledback.auth&oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token=&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+reqParams["tusername"]+"&";
 		string sig = "GET&" + CryptoHandler::urlEncode("http://"+hostp+"/request.oauth") + "&";
@@ -162,7 +167,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			key = key1 + key;
 
 			Client client;
-			client.connection("localhost",8080);
+			client.connection("localhost",port);
 			string data = "GET /access.oauth?";
 			data += "oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token="+tok+"&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+reqParams["tusername"]+"&";
 			string sig = "GET&" + CryptoHandler::urlEncode("http://"+hostp+"/access.oauth") + "&";
@@ -242,7 +247,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			key = key1 + key;
 
 			Client client;
-			client.connection("localhost",8080);
+			client.connection("localhost",port);
 			string data = "GET /getResource.oauth?file="+reqParams["file"];
 			data += "&oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token="+tok+"&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+reqParams["tusername"]+"&";
 			string sig = "GET&" + CryptoHandler::urlEncode("http://"+hostp+"/getResource.oauth") + "&";

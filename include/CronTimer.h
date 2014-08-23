@@ -22,6 +22,8 @@
 
 #ifndef CRONTIMER_H_
 #define CRONTIMER_H_
+#include "AppDefines.h"
+#include "mingw.h"
 #include <algorithm>
 #include <iostream>
 #include "vector"

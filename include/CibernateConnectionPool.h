@@ -22,9 +22,13 @@
 
 #ifndef CIBERNATECONNECTIONPOOL_H_
 #define CIBERNATECONNECTIONPOOL_H_
-#include <sqltypes.h>
+#include "AppDefines.h"
+#include "mingw.h"
+#ifdef HAVE_LIBODBC
 #include <sql.h>
 #include <sqlext.h>
+#include <sqltypes.h>
+#endif
 #include "vector"
 #include "string"
 #include "math.h"
@@ -43,7 +47,9 @@ class Connection
 public:
 	bool busy;
 	bool type;
+#ifdef HAVE_LIBODBC
 	SQLHDBC conn;
+#endif
 	~Connection();
 };
 typedef vector<Connection*> connVec;
@@ -51,7 +57,9 @@ class CibernateConnectionPool {
 	Logger logger;
 	int readNumber;
 	string dbName,uname,pass,dialect;
+#ifdef HAVE_LIBODBC
 	SQLHENV	V_OD_Env;// Handle ODBC environment
+#endif
 	connVec readConnections;
 	connVec writeConnections;
 	Mutex mutex;

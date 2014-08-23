@@ -28,6 +28,7 @@
 #include "cstring"
 #include <fcntl.h>
 #include <sys/time.h>
+#include "mingw.h"
 #define MAXDESCRIPTORS 1024
 
 #if USE_EVPORT == 1
@@ -74,6 +75,13 @@
 	#undef USE_DEVPOLL
 	#undef USE_POLL
 #include <sys/select.h>
+#elif USE_MINGW_SELECT == 1
+	#undef USE_EPOLL
+	#undef USE_KQUEUE
+	#undef USE_EVPORT
+	#undef USE_DEVPOLL
+	#undef USE_POLL
+	#undef USE_SELECT
 #elif USE_SELECT == 1
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
@@ -86,9 +94,14 @@
 class SelEpolKqEvPrt {
 	Logger logger;
 	int mode;
-	int sockfd;
-	int curfds;
-	#ifdef USE_SELECT
+	SOCKET sockfd;
+	SOCKET curfds;
+	#ifdef USE_MINGW_SELECT
+		SOCKET fdMax;
+		int fdsetSize;
+		fd_set readfds;  // temp file descriptor list for select()
+		fd_set master;
+	#elif USE_SELECT
 		int fdMax, fdsetSize;
 		fd_set readfds[MAXDESCRIPTORS/FD_SETSIZE];  // temp file descriptor list for select()
 		fd_set master[MAXDESCRIPTORS/FD_SETSIZE];
@@ -113,14 +126,14 @@ class SelEpolKqEvPrt {
 public:
 	SelEpolKqEvPrt();
 	virtual ~SelEpolKqEvPrt();
-	void initialize(int sockfd);
+	void initialize(SOCKET sockfd);
 	int getEvents();
-	int getDescriptor(int index);
-	bool isListeningDescriptor(int descriptor);
-	bool registerForEvent(int descriptor);
-	bool unRegisterForEvent(int descriptor);
+	SOCKET getDescriptor(SOCKET index);
+	bool isListeningDescriptor(SOCKET descriptor);
+	bool registerForEvent(SOCKET descriptor);
+	bool unRegisterForEvent(SOCKET descriptor);
 	void reRegisterServerSock();
-	bool isInvalidDescriptor(int index);
+	bool isInvalidDescriptor(SOCKET index);
 };
 
 #endif /* SELEPOLKQEVPRT_H_ */

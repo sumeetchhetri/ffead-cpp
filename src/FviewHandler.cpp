@@ -40,7 +40,7 @@ void FviewHandler::handle(HttpRequest* req, HttpResponse& res, map<string, strin
 	StringUtil::replaceFirst(file,"fview","html");
 	string ffile = req->getCntxt_root()+"/fviews/"+file;
 	//logger << ffile << endl;
-	ifstream infile(ffile.c_str());
+	ifstream infile(ffile.c_str(), ios::binary);
 	string temp;
 	if(infile.is_open())
 	{

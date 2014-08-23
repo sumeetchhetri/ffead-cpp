@@ -21,6 +21,7 @@
  */
 
 #include "AppDefines.h"
+#include "mingw.h"  // WinSock subsystem
 #include "map"
 #include "HttpSession.h"
 #include "vector"

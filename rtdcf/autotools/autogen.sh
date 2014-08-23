@@ -77,6 +77,26 @@
 #
 ######################################################################
 
+if [ "$#" -gt 1 -a -n "$2" ]
+then
+	FFEAD_CPPPTH=$2
+	export FFEAD_CPP_PATH=${FFEAD_CPPPTH}
+	cd $FFEAD_CPP_PATH/rtdcf/autotools
+elif [ "$#" -gt 0 -a -n "$1" ]
+then
+	FFEAD_CPPPTH=$1
+	export FFEAD_CPP_PATH=${FFEAD_CPPPTH}
+	cd $FFEAD_CPP_PATH/rtdcf/autotools
+fi
+
+#rm -f $FFEAD_CPP_PATH/lib/*inter.*
+rm -f Makefile
+
+if [ "$#" -gt 0 -a -n "$1" ] && [ "$1" = "reconf" ]; then
+	echo "Reconfigure requested..."
+	rm -f configure config.* aclocal* depcomp install-sh ltmain.sh libtool Makefile Makefile.in missing
+fi
+
 # set to minimum acceptable version of autoconf
 if [ "x$AUTOCONF_VERSION" = "x" ] ; then
     AUTOCONF_VERSION=2.52
@@ -90,9 +110,13 @@ if [ "x$LIBTOOL_VERSION" = "x" ] ; then
     LIBTOOL_VERSION=1.4.2
 fi
 
-set -e
-autoreconf -i --force
 rm -rf autom4te.cache
+rm -rf $FFEAD_CPP_PATH/rtdcf/.deps
+
+set -e
+libtoolize
+autoreconf -i --force
+
 
 ##################
 # ident function #

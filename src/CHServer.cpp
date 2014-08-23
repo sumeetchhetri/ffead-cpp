@@ -55,7 +55,7 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-
+#ifndef OS_MINGW
 int send_connection(int fd,int descriptor)
 {
 	struct msghdr msg;
@@ -153,6 +153,7 @@ int receive_fd(int fd)
 	}
 	return -1;
 }
+#endif
 
 void handler(int sig)
 {
@@ -319,6 +320,7 @@ void* service(void* arg)
 	return NULL;
 }
 
+#ifndef OS_MINGW
 pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 {
 	pid_t pid;
@@ -372,7 +374,12 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			{
 				int fd = receive_fd(sp[1]);
 				//selEpolKqEvPrtHandler.reRegisterServerSock();
-				fcntl(fd, F_SETFL,O_SYNC);
+				#ifdef OS_MINGW
+					u_long bMode = 0;
+					ioctlsocket(fd, FIONBIO, &bMode);
+				#else
+					fcntl(fd, F_SETFL, O_SYNC);
+				#endif
 
 				char buf[10];
 				memset(buf, 0, 10);
@@ -412,7 +419,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	}
 	return pid;
 }
-
+#endif
 
 
 /*pid_t createChildMonitProcess(int sp[])
@@ -522,18 +529,21 @@ void* dynamic_page_monitor(void* arg)
 				logger << "done generating template code" <<endl;
 
 				string compres;
-#if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
+#if BUILT_WITH_CONFGURE == 1
 				compres = respath+"rundyn-automake_dinter.sh "+serverRootDirectory;
 #else
 				compres = respath+"rundyn_dinter.sh "+serverRootDirectory;
 #endif
-				int i=system(compres.c_str());
-				if(!i)
+				string output = ScriptHandler::execute(compres, true);
+				//int i=system(compres.c_str()); 
+				//if(!i)
 				{
+					logger << output << endl;
 					logger << "regenerating intermediate code-----Done" << endl;
 					logger.info("Done generating intermediate code");
 				}
 				m_mutex.lock();
+				#if !defined(OS_MINGW)
 				if(IS_FILE_DESC_PASSING_AVAIL)
 				{
 					map<int,pid_t>::iterator it;
@@ -542,6 +552,7 @@ void* dynamic_page_monitor(void* arg)
 						kill(it->second,9);
 					}
 				}
+				#endif
 				m_mutex.unlock();
 				processforcekilled = true;
 				flag = true;
@@ -567,6 +578,7 @@ int main(int argc, char* argv[])
 {
 	parid = getpid();
 
+	#ifndef OS_MINGW
 	struct sigaction act;
 	memset (&act, '\0', sizeof(act));
 	act.sa_handler = siginthandler;
@@ -575,17 +587,32 @@ int main(int argc, char* argv[])
 		perror ("sigaction");
 		return 1;
 	}
-
 	//signal(SIGSEGV,signalSIGSEGV);
 	//signal(SIGFPE,signalSIGFPE);
 	(void) sigignore(SIGPIPE);
+	#else
+		// startup WinSock in Windows
+		WSADATA wsa_data;
+		WSAStartup(MAKEWORD(1,1), &wsa_data);
+	#endif
+	
+	#ifdef OS_MINGW
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
+	#else
+	SOCKET sockfd, new_fd; 
+	#endif
+	
 	struct sockaddr_storage their_addr; // connector's address information
 	socklen_t sin_size;
 
     //int yes=1,rv;
     int nfds,preForked=5;
     string serverRootDirectory = argv[1];
+
+	if(serverRootDirectory.find("//")==0)
+	{
+		StringUtil::replaceAll(serverRootDirectory,"//","/");
+	}
 
 	serverRootDirectory += "/";//serverRootDirectory = "/home/sumeet/server/";
 	string incpath = serverRootDirectory + "include/";
@@ -691,8 +718,14 @@ int main(int argc, char* argv[])
 
 	sockfd = Server::createListener(IP_ADDRES, PORT, false);
 
-    strVec webdirs,webdirs1,pubfiles;
-    ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
+	if(sockfd==-1)
+	{
+		logger << "Unable to start the server on the specified ip/port..." << endl;
+		return -1;
+	}
+
+	strVec webdirs,webdirs1,pubfiles;
+	ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
     ConfigurationHandler::listi(webpath,"/",false,webdirs1,false);
     ConfigurationHandler::listi(pubpath,".js",false,pubfiles,false);
 
@@ -739,7 +772,7 @@ int main(int argc, char* argv[])
     	libpresent = false;
 
     string compres;
-#if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
+#if BUILT_WITH_CONFGURE == 1
     compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 #else
 	compres = respath+"rundyn.sh "+serverRootDirectory;
@@ -751,11 +784,15 @@ int main(int argc, char* argv[])
 		logger << output << endl;
 	}
 	void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-#if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
+#if BUILT_WITH_CONFGURE == 1
 	if(checkdlib==NULL)
 	{
-		compres = respath+"rundyn-configure.sh reconf "+serverRootDirectory;
+		compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
 		string output = ScriptHandler::execute(compres, true);
+		logger << "Set up configure for intermediate libraries\n\n" << endl;
+
+		compres = respath+"rundyn-configure.sh reconf "+serverRootDirectory;
+		output = ScriptHandler::execute(compres, true);
 		logger << output << endl;
 
 		compres = respath+"rundyn-automake.sh "+serverRootDirectory;
@@ -888,6 +925,7 @@ int main(int argc, char* argv[])
 
 	if(IS_FILE_DESC_PASSING_AVAIL)
 	{
+		#if !defined(OS_MINGW)
 		for(int j=0;j<preForked;j++)
 		{
 			pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
@@ -900,6 +938,7 @@ int main(int argc, char* argv[])
 			filename.append(".cntrl");
 			files.push_back(filename);
 		}
+		#endif
 	}
 	else
 	{
@@ -988,6 +1027,7 @@ int main(int argc, char* argv[])
 		{
 			if(IS_FILE_DESC_PASSING_AVAIL)
 			{
+				#if !defined(OS_MINGW)
 				files.clear();
 				for(int j=0;j<preForked;j++)
 				{
@@ -1001,6 +1041,7 @@ int main(int argc, char* argv[])
 					filename.append(".cntrl");
 					files.push_back(filename);
 				}
+				#endif
 			}
 			else
 			{
@@ -1015,7 +1056,7 @@ int main(int argc, char* argv[])
 		{
 			if(childNo>=preForked)
 				childNo = 0;
-			int descriptor = selEpolKqEvPrtHandler.getDescriptor(n);
+			SOCKET descriptor = selEpolKqEvPrtHandler.getDescriptor(n);
 			if (descriptor == sockfd)
 			{
 				new_fd = -1;
@@ -1043,9 +1084,11 @@ int main(int argc, char* argv[])
 					cntrlfile.open(files.at(childNo).c_str());
 					if(cntrlfile.is_open())
 					{
+						#if !defined(OS_MINGW)
 						send_connection(sp[childNo][0], descriptor);
 						string cno = CastUtil::lexical_cast<string>(childNo);
 						childNo++;
+						#endif
 					}
 					else
 					{
@@ -1086,7 +1129,12 @@ int main(int argc, char* argv[])
 				}
 				else
 				{
-					fcntl(descriptor, F_SETFL, O_SYNC);
+					#ifdef OS_MINGW
+						u_long bMode = 0;
+						ioctlsocket(descriptor, FIONBIO, &bMode);
+					#else
+						fcntl(descriptor, F_SETFL, O_SYNC);
+					#endif
 					try
 					{
 						if(isThreadprq)
@@ -1147,6 +1195,7 @@ int main(int argc, char* argv[])
 		logger << "Destructed Thread pool" << endl;
 	}
 
+	#if !defined(OS_MINGW)
 	if(IS_FILE_DESC_PASSING_AVAIL)
 	{
 		map<int,pid_t>::iterator it;
@@ -1157,9 +1206,13 @@ int main(int argc, char* argv[])
 		}
 		logger << "Destructed child processes" << endl;
 	}
+	#endif
 
 	LoggerFactory::clear();
 
+	#ifdef OS_MINGW
+		WSACleanup();
+	#endif
 	return 0;
 }
 

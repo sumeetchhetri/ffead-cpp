@@ -23,7 +23,15 @@
 #ifndef SSLCOMMON_H_
 #define SSLCOMMON_H_
 #include <string>
+#include "AppDefines.h"
+#include "mingw.h"  // WinSock subsystem
+#ifndef OS_MINGW
+#include <unistd.h>
+#include <netdb.h>
+#include <sys/types.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
+#endif
 #include <iostream>
 /*HTTPS related*/
 #include <openssl/ssl.h>

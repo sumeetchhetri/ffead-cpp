@@ -22,6 +22,8 @@
 
 #ifndef CASTUTIL_H_
 #define CASTUTIL_H_
+#include "AppDefines.h"
+#include "mingw.h"
 #include "sstream"
 #include <stdlib.h>
 #include "StringUtil.h"

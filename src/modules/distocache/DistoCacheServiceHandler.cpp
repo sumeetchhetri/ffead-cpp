@@ -121,7 +121,11 @@ void DistoCacheServiceHandler::run()
 		}
 		else
 		{
+			#if !defined(OS_MINGW)
 			int er = recv(fd, buf, 4, MSG_WAITALL);
+			#else
+			int er = recv(fd, buf, 4, 0);
+			#endif
 			if(er==0)
 			{
 				close(fd);

@@ -33,7 +33,7 @@ RegexUtil::~RegexUtil() {
 	// TODO Auto-generated destructor stub
 }
 
-void RegexUtil::find(const string& text, const string& pattern, int &spos, int &epos)
+void RegexUtil::find(const string& text, const string& pattern, int &spos, int &epos, bool matchNewLine/* = false*/)
 {
 	string ttext(text);
 	regex_t regex;
@@ -45,7 +45,11 @@ void RegexUtil::find(const string& text, const string& pattern, int &spos, int &
 	else*/
 	{
 		/* Compile regular expression */
-		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
+		int cflags = REG_EXTENDED;
+		if(matchNewLine)
+			cflags = REG_NEWLINE | REG_EXTENDED;
+
+		reti = regcomp(&regex, pattern.c_str(), cflags);
 		if(reti)
 		{
 			cout << ("Could not compile regex - "+pattern) << endl;
@@ -68,7 +72,7 @@ void RegexUtil::find(const string& text, const string& pattern, int &spos, int &
 	}
 }
 
-int RegexUtil::find(const string& text, const string& pattern)
+int RegexUtil::find(const string& text, const string& pattern, bool matchNewLine/* = false*/)
 {
 	string ttext(text);
 	regex_t regex;
@@ -80,7 +84,11 @@ int RegexUtil::find(const string& text, const string& pattern)
 	else*/
 	{
 		/* Compile regular expression */
-		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
+		int cflags = REG_EXTENDED;
+		if(matchNewLine)
+			cflags = REG_NEWLINE | REG_EXTENDED;
+
+		reti = regcomp(&regex, pattern.c_str(), cflags);
 		if(reti)
 		{
 			cout << ("Could not compile regex - "+pattern) << endl;
@@ -101,7 +109,7 @@ int RegexUtil::find(const string& text, const string& pattern)
 	return -1;
 }
 
-vector<string> RegexUtil::search(const string& text, const string& pattern) {
+vector<string> RegexUtil::search(const string& text, const string& pattern, bool matchNewLine/* = false*/) {
 	vector<string> vec;
 	string ttext(text);
 	regex_t regex;
@@ -113,7 +121,11 @@ vector<string> RegexUtil::search(const string& text, const string& pattern) {
 	else*/
 	{
 		/* Compile regular expression */
-		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
+		int cflags = REG_EXTENDED;
+		if(matchNewLine)
+			cflags = REG_NEWLINE | REG_EXTENDED;
+
+		reti = regcomp(&regex, pattern.c_str(), cflags);
 		if(reti)
 		{
 			cout << ("Could not compile regex - "+pattern) << endl;
@@ -144,7 +156,7 @@ vector<string> RegexUtil::search(const string& text, const string& pattern) {
 	return vec;
 }
 
-string RegexUtil::replaceCopy(const string& text, const string& pattern, const string& with) {
+string RegexUtil::replaceCopy(const string& text, const string& pattern, const string& with, bool matchNewLine/* = false*/) {
 	string ttext(text);
 	string rettxt;
 	regex_t regex;
@@ -156,7 +168,11 @@ string RegexUtil::replaceCopy(const string& text, const string& pattern, const s
 	else*/
 	{
 		/* Compile regular expression */
-		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
+		int cflags = REG_EXTENDED;
+		if(matchNewLine)
+			cflags = REG_NEWLINE | REG_EXTENDED;
+
+		reti = regcomp(&regex, pattern.c_str(), cflags);
 		if(reti)
 		{
 			cout << ("Could not compile regex - "+pattern) << endl;
@@ -186,10 +202,15 @@ string RegexUtil::replaceCopy(const string& text, const string& pattern, const s
 	}
 	regfree(&regex);
 	if(ttext!="")rettxt += ttext;
+
+	if(text!=rettxt)
+	{
+		while(replace(rettxt, pattern, with, matchNewLine)) {}
+	}
 	return rettxt;
 }
 
-void RegexUtil::replace(string& text, const string& pattern, const string& with) {
+bool RegexUtil::replace(string& text, const string& pattern, const string& with, bool matchNewLine/* = false*/) {
 	string ttext(text);
 	string rettxt;
 	regex_t regex;
@@ -201,7 +222,11 @@ void RegexUtil::replace(string& text, const string& pattern, const string& with)
 	else*/
 	{
 		/* Compile regular expression */
-		reti = regcomp(&regex, pattern.c_str(), REG_EXTENDED);
+		int cflags = REG_EXTENDED;
+		if(matchNewLine)
+			cflags = REG_NEWLINE | REG_EXTENDED;
+
+		reti = regcomp(&regex, pattern.c_str(), cflags);
 		if(reti)
 		{
 			cout << ("Could not compile regex - "+pattern) << endl;
@@ -231,5 +256,9 @@ void RegexUtil::replace(string& text, const string& pattern, const string& with)
 	}
 	regfree(&regex);
 	if(ttext!="")rettxt += ttext;
+	if(text==rettxt)
+		return false;
 	text = rettxt;
+	while(replace(text, pattern, with, matchNewLine)) {}
+	return true;
 }

@@ -7,6 +7,7 @@ prefix=${abs_builddir}
 
 lib_LTLIBRARIES = libflexApp.la
 libflexApp_la_SOURCES = ../FlexAppController.cpp
-libflexApp_la_LDFLAGS = -shared -no-undefined -L"../../../../src/autotools/.libs" -lweblib
+libflexApp_la_LDFLAGS = -no-undefined
+libflexApp_la_LIBADD = -L"../../../../src/autotools/.libs" -lweblib
 
 #dist_noinst_SCRIPTS = autogen.sh

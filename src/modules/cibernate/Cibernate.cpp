@@ -101,6 +101,7 @@ bool Cibernate::allocateStmt(bool read) {
 	{
 		return false;
 	}
+#ifdef HAVE_LIBODBC
 	if (this->pool != NULL && this->conn != NULL && this->conn->type == read
 			&& V_OD_hstmt != NULL) {
 		refreshStmt();
@@ -121,14 +122,20 @@ bool Cibernate::allocateStmt(bool read) {
 		return false;
 	}
 	return true;
+#else
+	return false;
+#endif
 }
 
 void Cibernate::refreshStmt() {
+#ifdef HAVE_LIBODBC
 	SQLCloseCursor(V_OD_hstmt);
+#endif
 }
 
 
 void Cibernate::procedureCall(string procName) {
+#ifdef HAVE_LIBODBC
 	bool flagc = allocateStmt(true);
 	if(!flagc)throw "Error getting Database connection";
 	int V_OD_erg;// result of functions
@@ -358,10 +365,14 @@ void Cibernate::procedureCall(string procName) {
 	refreshStmt();
 	clearMaps();
 	close(!isTransaction);
+#else
+	logger << "Skipping Procedure Call " << procName << endl;
+#endif
 }
 
 
 void Cibernate::close(bool clos) {
+#ifdef HAVE_LIBODBC
 	if(clos)
 	{
 		this->pool->closeConnection(conn);
@@ -371,10 +382,12 @@ void Cibernate::close(bool clos) {
 		SQLFreeHandle(SQL_HANDLE_STMT, V_OD_hstmt);
 		V_OD_hstmt = NULL;
 	}
+#endif
 }
 
 
 void Cibernate::empty(string clasName) {
+#ifdef HAVE_LIBODBC
 	bool flagc = allocateStmt(true);
 		if(!flagc)return;
 	int V_OD_erg;// result of functions
@@ -398,6 +411,7 @@ void Cibernate::empty(string clasName) {
 	clearMaps();
 	close(!isTransaction);
 	return;
+#endif
 }
 
 
@@ -409,6 +423,7 @@ void* Cibernate::getElements(string clasName)
 
 void* Cibernate::getElements(vector<string> cols,string clasName)
 {
+#ifdef HAVE_LIBODBC
 	int V_OD_erg;// result of functions
 	Reflector reflector;
 	ClassInfo clas = reflector.getClassInfo(clasName, appName);
@@ -542,11 +557,15 @@ void* Cibernate::getElements(vector<string> cols,string clasName)
 	close(!isTransaction);
 	clearMaps();
 	return vecT;
+#else
+	return NULL;
+#endif
 }
 
 
 void* Cibernate::getElements()
 {
+#ifdef HAVE_LIBODBC
 	int V_OD_erg;// result of functions
 	SQLCHAR colName[256];
 	SQLSMALLINT	V_OD_colanz, colNameLen, dataType, numDecimalDigits, allowsNullValues;
@@ -592,11 +611,15 @@ void* Cibernate::getElements()
 	refreshStmt();
 	close(!isTransaction);
 	return vecT;
+#else
+	return NULL;
+#endif
 }
 
 
 int Cibernate::storeProperty(ClassInfo clas, void* t, int var, string fieldName)
 {
+#ifdef HAVE_LIBODBC
 	void* col = NULL;
 	SQLRETURN ret;
 	SQLLEN indicator;
@@ -747,11 +770,15 @@ int Cibernate::storeProperty(ClassInfo clas, void* t, int var, string fieldName)
 		var++;
 	}
 	return var;
+#else
+	return -1;
+#endif
 }
 
 
 int Cibernate::getProperty(int dataType, int columnSize, map<string, void*>& colValMap, string colName, int var)
 {
+#ifdef HAVE_LIBODBC
 	void* col = NULL;
 	SQLRETURN ret;
 	SQLLEN indicator;
@@ -876,11 +903,15 @@ int Cibernate::getProperty(int dataType, int columnSize, map<string, void*>& col
 		}
 	}
 	return var+1;
+#else
+	return -1;
+#endif
 }
 
 
 void* Cibernate::sqlfuncs(string type,string clasName)
 {
+#ifdef HAVE_LIBODBC
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
 	string query = "select "+type+" from "+tableName;
 	CibernateQuery cquery(query);
@@ -890,10 +921,14 @@ void* Cibernate::sqlfuncs(string type,string clasName)
 		return vec.at(0).begin()->second;
 	}
 	return NULL;
+#else
+	return NULL;
+#endif
 }
 
 bool Cibernate::startTransaction()
 {
+#ifdef HAVE_LIBODBC
 	bool flagc = allocateStmt(true);
 	if(!flagc)
 	{
@@ -910,10 +945,14 @@ bool Cibernate::startTransaction()
 		flagc = true;
 	}
 	return flagc;
+#else
+	return false;
+#endif
 }
 
 bool Cibernate::commit()
 {
+#ifdef HAVE_LIBODBC
 	bool flagc = allocateStmt(true);
 	if(!flagc)
 	{
@@ -934,10 +973,14 @@ bool Cibernate::commit()
 	SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_ON,0);
 	close(true);
 	return flagc;
+#else
+	return false;
+#endif
 }
 
 bool Cibernate::rollback()
 {
+#ifdef HAVE_LIBODBC
 	bool flagc = allocateStmt(true);
 	if(!flagc)
 	{
@@ -958,11 +1001,15 @@ bool Cibernate::rollback()
 	SQLSetConnectAttr(V_OD_hdbc,SQL_ATTR_AUTOCOMMIT,(void*)SQL_AUTOCOMMIT_ON,0);
 	close(true);
 	return flagc;
+#else
+	return false;
+#endif
 }
 
 
 void* Cibernate::executeQuery(CibernateQuery cquery, vector<string> cols)
 {
+#ifdef HAVE_LIBODBC
 	Reflector reflector;
 	string clasName = cquery.className;
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
@@ -1025,11 +1072,15 @@ void* Cibernate::executeQuery(CibernateQuery cquery, vector<string> cols)
 	//logger << query << flush;
 	cquery.query = query;
 	return executeQuery(cquery);
+#else
+	return NULL;
+#endif
 }
 
 
 bool Cibernate::executeInsert(CibernateQuery cquery, vector<string> cols, void* t)
 {
+#ifdef HAVE_LIBODBC
 	string clasName = cquery.className;
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
 	vector<DBRel> relv = this->mapping->getAppTablerelMapping(clasName);
@@ -1216,11 +1267,15 @@ bool Cibernate::executeInsert(CibernateQuery cquery, vector<string> cols, void* 
 	bool ffl = *flag;
 	delete flag;
 	return ffl;
+#else
+	return false;
+#endif
 }
 
 
 bool Cibernate::executeUpdate(CibernateQuery cquery, vector<string> cols, void* t)
 {
+#ifdef HAVE_LIBODBC
 	string clasName = cquery.className;
 	string tableName = this->mapping->getAppTableClassMapping(clasName);
 	vector<DBRel> relv = this->mapping->getAppTablerelMapping(clasName);
@@ -1402,10 +1457,14 @@ bool Cibernate::executeUpdate(CibernateQuery cquery, vector<string> cols, void* 
 	bool ffl = *flag;
 	delete flag;
 	return ffl;
+#else
+	return false;
+#endif
 }
 
 void* Cibernate::executeQuery(CibernateQuery query)
 {
+#ifdef HAVE_LIBODBC
 	void *vecT = NULL;
 	bool flagc = allocateStmt(true);
 	if(!flagc)
@@ -1509,11 +1568,15 @@ void* Cibernate::executeQuery(CibernateQuery query)
 		else
 			return getElements();
 	}
+#else
+	return NULL;
+#endif
 }
 
 
 void Cibernate::bindQueryParams(CibernateQuery& query)
 {
+#ifdef HAVE_LIBODBC
 	char V_OD_stat[10];
 	SQLSMALLINT V_OD_mlen;
 	SQLINTEGER V_OD_err;
@@ -1681,16 +1744,19 @@ void Cibernate::bindQueryParams(CibernateQuery& query)
 			throw "Cannot bind value";
 		par++;
 	}
+#endif
 }
 
 vector<map<string, void*> > Cibernate::execute(CibernateQuery query)
 {
 	vector<map<string, void*> > tv;
+#ifdef HAVE_LIBODBC
 	void* temp = executeQuery(query);
 	if(temp!=NULL)
 	{
 		tv = *(vector<map<string, void*> >*)temp;
 		delete temp;
 	}
+#endif
 	return tv;
 }

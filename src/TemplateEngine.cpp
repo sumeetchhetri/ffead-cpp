@@ -48,7 +48,7 @@ string TemplateEngine::evaluate(string fileName,StringContext cntxt)
 {
 	string ret,data;
 	ifstream infile;
-	infile.open(fileName.c_str());
+	infile.open(fileName.c_str(), ios::binary);
 	if(infile.is_open())
 	{
 		string file;
@@ -63,7 +63,7 @@ string TemplateEngine::evaluate(string fileName,StringContext cntxt)
 				int s = data.find("<import>")+8;
 				int e = data.find("</import>");
 				data=data.substr(s,e-s);
-				ifstream inf(data.c_str());
+				ifstream inf(data.c_str(), ios::binary);
 				if(inf)
 				{
 					while(getline(inf, data))

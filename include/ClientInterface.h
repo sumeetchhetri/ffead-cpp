@@ -22,6 +22,17 @@
 
 #ifndef CLIENT_INTERFACE_H_
 #define CLIENT_INTERFACE_H_
+#include "AppDefines.h"
+
+#include "mingw.h"
+#if !defined(OS_MINGW)
+#include <unistd.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#endif
 #include "iostream"
 #include "sstream"
 #include <fcntl.h>
@@ -30,11 +41,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
-#include <netdb.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+
 #include "string"
 #include "cstring"
 #include <signal.h>
@@ -43,6 +50,7 @@
 #include "CastUtil.h"
 #include "LoggerFactory.h"
 #include "cstring"
+
 using namespace std;
 
 #define MAXBUFLE 32768
@@ -58,9 +66,9 @@ public:
 	virtual string getTextData(string hdrdelm,string cntlnhdr)=0;
 	int getLengthCl(string header,int size);
 	void *get_in_addr(struct sockaddr *sa);
-	int create_tcp_socket();
+	SOCKET create_tcp_socket();
 	static char* get_ip(char *host);
-	static bool isConnected(int fd);
+	static bool isConnected(SOCKET fd);
 	virtual ~ClientInterface(){}
 };
 

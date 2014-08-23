@@ -73,7 +73,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-liboauthApp_la_LIBADD =
+am__DEPENDENCIES_1 =
+liboauthApp_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_liboauthApp_la_OBJECTS = ../OAUTHController.lo \
 	../OAUTH2Controller.lo
@@ -82,7 +83,7 @@ liboauthApp_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(liboauthApp_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
-depcomp = $(SHELL) $(top_srcdir)/depcomp
+depcomp = $(SHELL) $(top_srcdir)/libltdl/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -105,6 +106,7 @@ AM_CXXFLAGS = @AM_CXXFLAGS@
 APACHE_HTTPD_LIB = @APACHE_HTTPD_LIB@
 APXS = @APXS@
 AR = @AR@
+ARGZ_H = @ARGZ_H@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -132,6 +134,7 @@ EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GENERATE_APACHEMOD = @GENERATE_APACHEMOD@
 GREP = @GREP@
+INCLTDL = @INCLTDL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -139,12 +142,25 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBADD_DL = @LIBADD_DL@
+LIBADD_DLD_LINK = @LIBADD_DLD_LINK@
+LIBADD_DLOPEN = @LIBADD_DLOPEN@
+LIBADD_SHL_LOAD = @LIBADD_SHL_LOAD@
+LIBLTDL = @LIBLTDL@
 LIBOBJS = @LIBOBJS@
+LIBRARY_EXTENSION = @LIBRARY_EXTENSION@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIB_TYPE = @LIB_TYPE@
 LIPO = @LIPO@
 LN_S = @LN_S@
+LTDLDEPS = @LTDLDEPS@
+LTDLINCL = @LTDLINCL@
+LTDLOPEN = @LTDLOPEN@
 LTLIBOBJS = @LTLIBOBJS@
+LT_CONFIG_H = @LT_CONFIG_H@
+LT_DLLOADERS = @LT_DLLOADERS@
+LT_DLPREOPEN = @LT_DLPREOPEN@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
@@ -207,6 +223,8 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
+ltdl_LIBOBJS = @ltdl_LIBOBJS@
+ltdl_LTLIBOBJS = @ltdl_LTLIBOBJS@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -217,6 +235,8 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
+subdirs = @subdirs@
+sys_symbol_underscore = @sys_symbol_underscore@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
@@ -229,7 +249,8 @@ lib_LTLIBRARIES = liboauthApp.la
 liboauthApp_la_SOURCES = ../OAUTHController.cpp \
 		../OAUTH2Controller.cpp
 
-liboauthApp_la_LDFLAGS = -shared -no-undefined -L"../../../../src/autotools/.libs" -lweblib
+liboauthApp_la_LDFLAGS = -no-undefined
+liboauthApp_la_LIBADD = -L"../../../../src/autotools/.libs" -lweblib
 all: all-am
 
 .SUFFIXES:

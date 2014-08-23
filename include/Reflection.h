@@ -141,7 +141,7 @@ class Reflection {
 	static map<string,int> nmspcIds;
 	static map<string,string> nmspcIdVals;
 	Logger logger;
-	void handleNamespace(string data, string namepsc, map<string, ClassStructure>& clsvec, map<string, vector<string> >& glbnmspcs);
+	void handleNamespace(string data, string namepsc, map<string, ClassStructure>& clsvec, map<string, vector<string> >& glbnmspcs, vector<string> pragmas);
 	int findless(int a, int b, int c);
 	void collectInfo(string data, string flag, ClassStructure& cls);
 	void emptyBlocks(string& data, size_t);

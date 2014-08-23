@@ -29,11 +29,11 @@ string CompressionUtil::_compress(char* infile, bool isGz, bool retu, char* toFi
     FILE* ifs;
     if(infile!=NULL)
     {
-    	ifs = fopen(infile, "r");
+    	ifs = fopen(infile, "rb");
     }
     if(toFile!=NULL)
     {
-    	ofs = fopen(toFile, "w");
+    	ofs = fopen(toFile, "wb");
     }
 
     /* allocate deflate state */
@@ -126,11 +126,11 @@ string CompressionUtil::_uncompress(char* infile, bool isGz, bool retu, char* to
     FILE* ifs;
     if(infile!=NULL)
     {
-    	ifs = fopen(infile, "r");
+    	ifs = fopen(infile, "rb");
     }
     if(toFile!=NULL)
     {
-    	ofs = fopen(toFile, "w");
+    	ofs = fopen(toFile, "wb");
     }
 
     /* allocate deflate state */
@@ -235,7 +235,7 @@ string CompressionUtil::_compress(char* datain, size_t insize, bool eostream, bo
     ofstream ofs;
     if(toFile!=NULL)
     {
-    	ofs.open(toFile);
+    	ofs.open(toFile, ios::binary);
     }
 
     float parts = (float)insize/chunkSize;
@@ -392,7 +392,7 @@ string CompressionUtil::_uncompress(char* datain, size_t insize, bool isGz, bool
     ofstream ofs;
     if(toFile!=NULL)
     {
-    	ofs.open(toFile);
+    	ofs.open(toFile, ios::binary);
     }
 
 	float parts = (float)insize/CHUNK;

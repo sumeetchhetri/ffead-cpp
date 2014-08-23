@@ -1,0 +1,39 @@
+Winx/Mingw based Installation
+
+1. Download Mingw setup.exe and follow instruction to install Mingw, proceed with default settings.
+2. After Mingw is successfully installed, you can open a mingw msys terminal to check whether mingw works.
+3. Run the MinGW installation Manager to install further dependencies whenever required.
+4. Following are the dependencies,
+      mingw-get install mingw-developer-toolkit(command line)
+	  Make sure you have autotools, autoconf, automake, libtool, libltdl, gcc, gcc-c++ installed
+	  mingw-get install msys-base(command line)
+	  mingw-get install mingw32-libpthreadgc(command line)
+	  mingw-get install mingw32-libz(command line)
+	  mingw-get install mingw32-zlib(command line)
+5. Download ftp://ftp.unixodbc.org/pub/unixODBC/unixODBC-2.3.2.tar.gz
+	and make the following changes to the following files in the uniODBC distribution
+		- uodbc_extras.h (comment line 76 - extern int strncasecmp (const char *s1, const char *s2, int n );)
+		- include/ini.h (add the below lines before the last #endif
+							#define EOVERFLOW 139
+							#define EWOULDBLOCK EAGAIN
+						 )
+		then "./configure" and "make install" as usual
+6. Download the latest source ditsribution from https://code.google.com/p/dlfcn-win32
+		then "./configure --enable-static=yes --enable-shared=yes" and "make  install"
+7. Follow instructions at http://go.kblog.us/2009/07/mingw-porting-gnu-regex-to-windows.html
+		to install libregex in mingw
+8. Follow instructions at https://qt-project.org/wiki/Compiling-OpenSSL-with-MinGW
+		to install openssl libraries and development files in mingw
+9. Warning - installing msys regex/openssl libraries would not be useful here as we will be natively building 
+		ffead-cpp on mingw and hence we need mingw compiled libraries
+10. Download the latest release tar file and extract it to the location of your choice under msys user home folder.
+11. Also included prototype.js in source for AJAX support
+12. Go to the ffead-server/Release or ffead-server/Debug depending on whether you need to debug the server code
+13. Open terminal and type "make all" and "make build-apps" to build the server and the default applications provided ("make all" will build ffead with all modules enabled)
+14. From version 1.8 onwards you can also select modules to build within ffead using the make modules={comma separated module list} all command, for a complete list of modules names please refer Modules, for e.g, to only build modules webservice,binserialize and distocache use the command "make modules=webservice,binserialize,distocache all"
+15. This will create the distribution folder named ffead-server inside ffead-server/Release or ffead-server/Debug folders accordingly
+16. Type ./server.sh when inside the ffead-server folder to start the application server
+17. Some sample default applications are already provided for your reference inside the ffead-server/web folder, the default application is served at urlpath /, the flexApp application at /flexApp and the oauthApp at /oauthApp
+18. If you did not already perform "make build-apps", then to compile a given web application shared library go to the ffead-server/web/{default/flexApp/oauthApp/(your_custom_app)}/src/Debug folder and run "make all"
+19. Place the generated application shared library inside the ffead-server/Release/ffead-server/lib or ffead-server/Debug/ffead-server/lib folder.
+20. Place your custom web applications inside the ffead-server/Release/ffead-server/web folder (Note the application folder name will also be the URL path - application name)

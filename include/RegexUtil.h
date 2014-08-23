@@ -22,8 +22,11 @@
 
 #ifndef REGEXUTIL_H_
 #define REGEXUTIL_H_
-#include <regex.h>
+#include "AppDefines.h"
+#if !defined(OS_MINGW)
 #include <sys/types.h>
+#endif
+#include <regex.h>
 #include "vector"
 #include "map"
 #include "string"
@@ -37,11 +40,11 @@ class RegexUtil {
 public:
 	RegexUtil();
 	virtual ~RegexUtil();
-	static vector<string> search(const string& text, const string& pattern);
-	static void find(const string& text, const string& pattern, int &spos, int &epos);
-	static int find(const string& text, const string& pattern);
-	static string replaceCopy(const string& text, const string& pattern, const string& with);
-	static void replace(string& text, const string& pattern, const string& with);
+	static vector<string> search(const string& text, const string& pattern, bool matchNewLine = false);
+	static void find(const string& text, const string& pattern, int &spos, int &epos, bool matchNewLine = false);
+	static int find(const string& text, const string& pattern, bool matchNewLine = false);
+	static string replaceCopy(const string& text, const string& pattern, const string& with, bool matchNewLine = false);
+	static bool replace(string& text, const string& pattern, const string& with, bool matchNewLine = false);
 };
 
 #endif /* REGEXUTIL_H_ */

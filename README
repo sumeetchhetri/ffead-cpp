@@ -77,7 +77,7 @@ Release Notes version 1.8
 	:- Changed the web-service related template files for better web service support
 
 REQUIREMENTS
-1. Any box that runs linux, BSD, Solaris or Windows/Cygwin or any other OS(using autotools)
+1. Any box that runs linux, BSD, Solaris or Windows(Cygwin/Mingw-Msys) or any other OS(using autotools)
 2. Boost is no longer required as of version 1.7
 3. UnixODBC and development files
 4. OpenSSl and development files
@@ -96,6 +96,9 @@ Refer the FREEBSD-INSTALL-WITH-GNU-MAKE file for installation directions.
 
 Windows/Cygwin
 Refer the WINDOWS-CYGWIN-INSTALL-WITH-GNU-MAKE file for installation direction on Windows platform having Cygwin installed
+
+Windows/Mingw
+Refer the WINDOWS-MINGW-INSTALL-WITH-GNU-MAKE file for installation direction on Windows platform having Mingw/Msys installed
 
 Solaris
 Refer the SOLARIS-INSTALL-WITH-GNU-MAKE file for installation directions.

@@ -397,10 +397,9 @@ string WsUtil::generateWSDL(string file,map<string, ClassStructure> allclsmap,st
 			}
 		}
 		gcntxt["EXTR_NMSPCS"] = extranmspcs;
-		gcntxt["URL"] = appname;
+		gcntxt["URL"] = "http://" + ip_address + "/" + appname;
 		string wspath = gcntxt["URL"] + "/" + gcntxt["WS_PATH"];
 		wsmap[wspath] = ws_name;
-		gcntxt["URL"] = "http://" + ip_address + "/" + appname;
 		wsdl = TemplateEngine::evaluate(resp+"template.wsdl",gcntxt);
 		AfcUtil::writeTofile(resp+"../web/"+appname+"/public/"+ws_name+".wsdl",wsdl,true);
 		//ws_funcs.append(obj_mapng);

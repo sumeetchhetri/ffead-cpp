@@ -22,6 +22,8 @@
 
 #ifndef THREAD_H_
 #define THREAD_H_
+#include "AppDefines.h"
+#include "mingw.h"
 #include <pthread.h>
 #include <time.h>
 #include <unistd.h>

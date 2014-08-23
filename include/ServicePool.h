@@ -22,6 +22,8 @@
 
 #ifndef SERVICEPOOL_H_
 #define SERVICEPOOL_H_
+#include "AppDefines.h"
+#include "mingw.h"
 #include "string"
 #include "map"
 #include "vector"

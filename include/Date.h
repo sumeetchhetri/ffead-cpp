@@ -22,6 +22,8 @@
 
 #ifndef DATE_H_
 #define DATE_H_
+#include "AppDefines.h"
+#include "mingw.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <time.h>

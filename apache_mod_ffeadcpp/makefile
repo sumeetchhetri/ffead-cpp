@@ -13,21 +13,22 @@ APXS_LIBEXECDIR=`$(APXS) -q LIBEXECDIR`
 APXS_LDFLAGS_SHLIB=`$(APXS) -q LDFLAGS_SHLIB`
 APXS_SYSCONFDIR=`$(APXS) -q SYSCONFDIR`
 APXS_LIBS_SHLIB=`$(APXS) -q LIBS_SHLIB`
+APR_INCLUDEDIR=`$(APXS) -q APR_INCLUDEDIR`
 
 #the default target
-all: mod_ffeadcpp.so
+all: mod_ffeadcpplib.so
 
 # compile
 mod_ffeadcpp.o: mod_ffeadcpp.cpp
-	g++ -c -fPIC -I"$(APXS_INCLUDEDIR)" -I"/usr/include/apr-1" -I"/usr/include/apr-1.0" -I"${FFEAD_CPP_PATH}/include" -I"." $(APXS_CFLAGS) $(APXS_CFLAGS_SHLIB) -fpermissive -w -o $@ $< 
+	g++ -c -fPIC -I"$(APXS_INCLUDEDIR)" -I"$(APR_INCLUDEDIR)" -I"${FFEAD_CPP_PATH}/include" -I"." $(APXS_CFLAGS) $(APXS_CFLAGS_SHLIB) -fpermissive -w -o $@ $< 
 
 # link
-mod_ffeadcpp.so: mod_ffeadcpp.o 
+mod_ffeadcpplib.so: mod_ffeadcpp.o 
 	g++ -fPIC -L"${FFEAD_CPP_PATH}/lib" -shared -o $@ $< $(APXS_LIBS_SHLIB) -lweblib -ldl -lcrypto -lssl -lapr-1 -laprutil-1 ${HTTPD_LIB}
 
 # install the shared object file into Apache 
 install: all
-	$(APXS) -i -n 'ffeadcpp_module' mod_ffeadcpp.so
+	$(APXS) -i -n 'ffeadcpp_module' mod_ffeadcpplib.so
 	
 # display the apxs variables
 check_apxs_vars:

@@ -22,6 +22,8 @@
 
 #ifndef CIBERNATECONNPOOLS_H_
 #define CIBERNATECONNPOOLS_H_
+#include "AppDefines.h"
+#include "mingw.h"
 #include "CibernateConnectionPool.h"
 #include "map"
 #include "LoggerFactory.h"

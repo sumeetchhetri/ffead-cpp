@@ -29,11 +29,15 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 SelEpolKqEvPrt::~SelEpolKqEvPrt() {
 }
 
-void SelEpolKqEvPrt::initialize(int sockfd)
+void SelEpolKqEvPrt::initialize(SOCKET sockfd)
 {
 	this->sockfd = sockfd;
 	curfds = 1;
-	#ifdef USE_SELECT
+	#if defined(USE_MINGW_SELECT)
+		fdMax = sockfd;
+		FD_ZERO(&readfds);
+		FD_ZERO(&master);
+	#elif defined(USE_SELECT)
 		fdsetSize = MAXDESCRIPTORS/FD_SETSIZE;
 		fdMax = sockfd;
 		for (int var = 0; var < fdsetSize; ++var) {
@@ -76,7 +80,18 @@ void SelEpolKqEvPrt::initialize(int sockfd)
 int SelEpolKqEvPrt::getEvents()
 {
 	int numEvents = -1;
-	#ifdef USE_SELECT
+	#if defined(USE_MINGW_SELECT)
+		readfds = master;
+		numEvents = select(fdMax+1, &readfds, NULL, NULL, NULL);
+		if(numEvents==-1)
+		{
+			perror("select()");
+		}
+		else
+		{
+			return fdMax+1;
+		}
+	#elif defined(USE_SELECT)
 		for (int var = 0; var < fdsetSize; ++var) {
 			readfds[var] = master[var];
 		}
@@ -117,9 +132,14 @@ int SelEpolKqEvPrt::getEvents()
 	return numEvents;
 }
 
-int SelEpolKqEvPrt::getDescriptor(int index)
+SOCKET SelEpolKqEvPrt::getDescriptor(SOCKET index)
 {
-	#ifdef USE_SELECT
+	#if defined(USE_MINGW_SELECT)
+		if(FD_ISSET(index, &readfds))
+		{
+			return index;
+		}
+	#elif defined(USE_SELECT)
 		if(FD_ISSET(index%FD_SETSIZE, &readfds[index/FD_SETSIZE]))
 		{
 			return index;
@@ -147,7 +167,7 @@ int SelEpolKqEvPrt::getDescriptor(int index)
 	return -1;
 }
 
-bool SelEpolKqEvPrt::isListeningDescriptor(int descriptor)
+bool SelEpolKqEvPrt::isListeningDescriptor(SOCKET descriptor)
 {
 	if(descriptor==sockfd)
 	{
@@ -156,11 +176,21 @@ bool SelEpolKqEvPrt::isListeningDescriptor(int descriptor)
 	return false;
 }
 
-bool SelEpolKqEvPrt::registerForEvent(int descriptor)
+bool SelEpolKqEvPrt::registerForEvent(SOCKET descriptor)
 {
 	curfds++;
-	fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
-	#ifdef USE_SELECT
+	#ifdef OS_MINGW
+		u_long iMode = 1;
+		ioctlsocket(descriptor, FIONBIO, &iMode);
+	#else
+		fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
+	#endif
+	//fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
+	#if defined(USE_MINGW_SELECT)
+		FD_SET(descriptor, &master);
+		if(descriptor > fdMax)
+			fdMax = descriptor;
+	#elif defined(USE_SELECT)
 		FD_SET(descriptor%FD_SETSIZE, &master[descriptor/FD_SETSIZE]);
 		if(descriptor > fdMax)
 			fdMax = descriptor;
@@ -199,11 +229,13 @@ bool SelEpolKqEvPrt::registerForEvent(int descriptor)
 	return true;
 }
 
-bool SelEpolKqEvPrt::unRegisterForEvent(int descriptor)
+bool SelEpolKqEvPrt::unRegisterForEvent(SOCKET descriptor)
 {
 	if(descriptor<=0)return false;
 	curfds--;
-	#ifdef USE_SELECT
+	#if defined(USE_MINGW_SELECT)
+		FD_CLR(descriptor, &master);
+	#elif defined(USE_SELECT)
 		FD_CLR(descriptor%FD_SETSIZE, &master[descriptor/FD_SETSIZE]);
 	#elif defined USE_EPOLL
 		epoll_ctl(epoll_handle, EPOLL_CTL_DEL, descriptor, &ev);

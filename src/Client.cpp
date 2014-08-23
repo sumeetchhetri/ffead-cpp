@@ -97,7 +97,7 @@ bool Client::connectionUnresolv(string host,int port)
         }
 
         if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-            close(sockfd);
+        	closesocket(sockfd);
             perror("client: connect");
             connected = false;
             continue;
@@ -113,8 +113,8 @@ bool Client::connectionUnresolv(string host,int port)
         return false;
     }
 
-    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
-            s, sizeof s);
+    //inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
+    //        s, sizeof s);
     //printf("client: connecting to %s\n", s);
 
     freeaddrinfo(servinfo); // all done with this structure
@@ -124,12 +124,22 @@ bool Client::connectionUnresolv(string host,int port)
 
 void Client::setSocketBlocking()
 {
-	fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
+	#ifdef OS_MINGW
+		u_long bMode = 0;
+		ioctlsocket(sockfd, FIONBIO, &bMode);
+	#else
+		fcntl(sockfd, F_SETFL, O_SYNC);
+	#endif
 }
 
 void Client::setSocketNonBlocking()
 {
-	fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_SYNC);
+	#ifdef OS_MINGW
+		u_long iMode = 1;
+		ioctlsocket(sockfd, FIONBIO, &iMode);
+	#else
+		fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
+	#endif
 }
 
 int Client::sendData(string data)
@@ -267,7 +277,7 @@ void Client::closeConnection()
 {
 	if(!connected)return;
 	connected = false;
-	close(sockfd);
+	closesocket(sockfd);
 }
 
 bool Client::isConnected()
@@ -290,7 +300,7 @@ string Client::getData()
 	if(numbytes==0)
 	{
 		connected = false;
-		close(sockfd);
+		closesocket(sockfd);
 		return "";
 	}
 	string data(buf,buf+numbytes);

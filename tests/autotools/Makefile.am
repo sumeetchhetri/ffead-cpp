@@ -7,4 +7,5 @@ prefix=${abs_builddir}
 
 noinst_PROGRAMS = tests
 tests_SOURCES = ../FfeadServerTestSuite.cpp
+tests_LDFLAGS= -no-undefined
 tests_LDADD = -L"../../src/autotools/" -lweblib

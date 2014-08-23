@@ -22,11 +22,12 @@
 
 #ifndef CLIENT_H_
 #define CLIENT_H_
+#include "AppDefines.h"
 #include "ClientInterface.h"
 using namespace std;
 class Client : public ClientInterface {
 	bool connected;
-	int sockfd;
+	SOCKET sockfd;
 	Logger logger;
 public:
 	Client();

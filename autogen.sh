@@ -91,8 +91,17 @@ if [ "x$LIBTOOL_VERSION" = "x" ] ; then
 fi
 
 set -e
-autoreconf -i --force
 rm -rf autom4te.cache
+rm -rf src/.deps
+rm -rf tests/.deps
+rm -rf apache_mod_ffeadcpp/.deps
+rm -rf web/default/src/.deps
+rm -rf web/flexApp/src/.deps
+rm -rf web/oauthApp/src/.deps
+find . -type d -name '.deps' -print -exec rm -rf {} \;
+
+libtoolize
+autoreconf -i --force
 
 ##################
 # ident function #

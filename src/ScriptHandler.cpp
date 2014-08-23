@@ -44,7 +44,12 @@ string ScriptHandler::execute(string exe, bool retErrs)
 		exe += " 2>&1";
 	}
 	FILE *pp;
+	#ifndef OS_MINGW
 	pp = popen(exe.c_str(), "r");
+	#else
+	exe = "sh -c \"" + exe + "\"";
+	pp = popen(exe.c_str(), "r");
+	#endif
 	if (pp != NULL) {
 		while (1) {
 		  char *line;
@@ -60,6 +65,7 @@ string ScriptHandler::execute(string exe, bool retErrs)
 	return data;
 }
 
+#if !defined(OS_MINGW)
 int ScriptHandler::popenRWE(int *rwepipe, const char *exe, const char *const argv[],string tmpf)
 {
 	int in[2];
@@ -189,6 +195,7 @@ int ScriptHandler::pcloseRWE(int pid, int *rwepipe)
 	waitpid(pid, &status, 0);
 	return status;
 }
+#endif
 
 #ifdef INC_SCRH
 bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, string> handoffs,
@@ -261,7 +268,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		string phpcnts = req->toPerlVariablesString();
 		//logger << tmpf << endl;
 		string plfile = req->getUrl();
-		ifstream infile(plfile.c_str());
+		ifstream infile(plfile.c_str(), ios::binary);
 		string xml;
 		if(infile.is_open())
 		{
@@ -340,7 +347,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse& res, map<string, stri
 		tmpf = req->getCntxt_root() + tmpf;
 		string phpcnts = req->toPythonVariablesString();
 		string plfile = req->getUrl();
-		ifstream infile(plfile.c_str());
+		ifstream infile(plfile.c_str(), ios::binary);
 		string xml;
 		if(infile.is_open())
 		{

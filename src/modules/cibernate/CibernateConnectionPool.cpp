@@ -30,6 +30,7 @@ CibernateConnectionPool::CibernateConnectionPool(int size,string dbName,string u
 
 CibernateConnectionPool::~CibernateConnectionPool()
 {
+#ifdef HAVE_LIBODBC
 	for (int var = 0; var < (int)readConnections.size(); ++var) {
 		delete readConnections.at(var);
 	}
@@ -37,6 +38,7 @@ CibernateConnectionPool::~CibernateConnectionPool()
 		delete writeConnections.at(var);
 	}
 	SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
+#endif
 	logger << "\nDestructed CibernateConnectionPool" << flush;
 }
 
@@ -47,6 +49,7 @@ void CibernateConnectionPool::closeConnection(Connection *conn)
 
 Connection* CibernateConnectionPool::newConnection(bool read)
 {
+#ifdef HAVE_LIBODBC
 	int V_OD_erg;// result of functions
 	SQLCHAR V_OD_msg[200],V_OD_stat[10];		// Status SQL;
 	SQLSMALLINT	V_OD_mlen;
@@ -81,10 +84,14 @@ Connection* CibernateConnectionPool::newConnection(bool read)
 	connection->busy = false;
 	connection->type = read;
 	return connection;
+#else
+	return NULL;
+#endif
 }
 
 void CibernateConnectionPool::createPool(int size,string dbName,string uname,string pass,string dialect)
 {
+#ifdef HAVE_LIBODBC
 	this->dbName = dbName;
 	this->uname = uname;
 	this->pass = pass;
@@ -135,11 +142,17 @@ void CibernateConnectionPool::createPool(int size,string dbName,string uname,str
 	{
 		logger << "Created pool successfully !" << endl;
 	}
+#endif
 }
 
 Connection* CibernateConnectionPool::getReadConnection()
 {
 	mutex.lock();
+	if((int)this->readConnections.size()==0)
+	{
+		logger << "No connections found, error.." << endl;
+		return NULL;
+	}
 	if(this->readNumber==(int)this->readConnections.size())
 		this->readNumber = 0;
 	Connection* conn = this->readConnections.at(this->readNumber++);
@@ -148,6 +161,7 @@ Connection* CibernateConnectionPool::getReadConnection()
 }
 Connection* CibernateConnectionPool::getWriteConnection()
 {
+#ifdef HAVE_LIBODBC
 	Timer t;
 	t.start();
 	while(true)
@@ -171,8 +185,10 @@ Connection* CibernateConnectionPool::getWriteConnection()
 			mutex.unlock();
 			return connection;
 		}
-
 	}
+#else
+	return NULL;
+#endif
 }
 
 string CibernateConnectionPool::getDialect() const
@@ -188,7 +204,9 @@ Connection::Connection()
 
 Connection::~Connection()
 {
+#ifdef HAVE_LIBODBC
 	SQLDisconnect(conn);
 	SQLFreeHandle(SQL_HANDLE_DBC,conn);
 	logger << "\nDestructed Connection" << flush;
+#endif
 }

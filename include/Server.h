@@ -22,15 +22,23 @@
 
 #ifndef SERVER_H_
 #define SERVER_H_
+#include "AppDefines.h"
+#include "mingw.h"
+#if !defined(OS_MINGW)
+#include <unistd.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <sys/ioctl.h>
+#include <sys/resource.h>
+#endif
 #include "iostream"
 #include <unistd.h>
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <sys/wait.h>
 #include <signal.h>
 #include "string"
 #include "cstring"
@@ -39,9 +47,9 @@
 #include "vector"
 #include "sstream"
 #include <fcntl.h>
-#include <sys/ioctl.h>
+
 /*Fix for Windows Cygwin*///#include <sys/epoll.h>
-#include <sys/resource.h>
+
 #include "Thread.h"
 #include "LoggerFactory.h"
 #define MAXEPOLLSIZES 10000
@@ -51,34 +59,41 @@ using namespace std;
 typedef void* (*Service)(void*);
 class Server {
 	Logger logger;
-	int sock, mode;
+	SOCKET sock;
+	int mode;
 	Service service;
 	Mutex lock;
-	struct sockaddr_storage their_addr;
+	#ifdef OS_MINGW
+		struct sockaddr_in their_addr;
+	#else
+		struct sockaddr_storage their_addr;
+	#endif
+	
 	static void* servicing(void* arg);
 	bool runn, started;
 public:
-	int getSocket();
+	SOCKET getSocket();
 	Server();
 	Server(string,bool,int,Service,int);
 	//Server(string port,int waiting,Service serv);
 	virtual ~Server();
-	int Accept();
-	int Send(int,string);
-	int Send(int,vector<char>);
-	int Send(int,vector<unsigned char>);
-	int Send(int,char*);
-	int Send(int,unsigned char*);
-	int Receive(int,string&,int);
-	int Receive(int,vector<char>&,int);
-	int Receive(int,vector<unsigned char>&,int);
-	int Receive(int,char *data,int);
-	int Receive(int,unsigned char *data,int);
-	int Receive(int,vector<string>&,int);
+	SOCKET Accept();
+	int Send(SOCKET,string);
+	int Send(SOCKET,vector<char>);
+	int Send(SOCKET,vector<unsigned char>);
+	int Send(SOCKET,char*);
+	int Send(SOCKET,unsigned char*);
+	int Receive(SOCKET,string&,int);
+	int Receive(SOCKET,vector<char>&,int);
+	int Receive(SOCKET,vector<unsigned char>&,int);
+	int Receive(SOCKET,char *data,int);
+	int Receive(SOCKET,unsigned char *data,int);
+	int Receive(SOCKET,vector<string>&,int);
 	void start();
 	void stop();
-	static int createListener(string port,bool block);
-	static int createListener(string ipAddress,string port,bool block);
+	
+	static SOCKET createListener(string ipAddress,string port,bool block);
+	static SOCKET createListener(string port,bool block);
 };
 
 #endif /* SERVER_H_ */

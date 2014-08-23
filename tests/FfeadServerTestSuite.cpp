@@ -20,7 +20,8 @@
  *      Author: sumeetc
  */
 
-
+#include "AppDefines.h"
+#include "mingw.h"
 #include "HttpResponseParser.h"
 #include "CsvFileReader.h"
 #include "PropFileReader.h"
@@ -30,6 +31,12 @@
 #include "SSLClient.h"
 int main()
 {
+	#ifdef OS_MINGW
+		// startup WinSock in Windows
+		WSADATA wsa_data;
+		WSAStartup(MAKEWORD(1,1), &wsa_data);
+	#endif
+	
 	PropFileReader propFileReader;
 	propMap props = propFileReader.getProperties("testValues.prop");
 
@@ -281,6 +288,10 @@ int main()
 
 	cout << "Total Tests = " << total-1 << ", Passed = " << passed << ", Failed = " << failed
 			<< ", Skipped = " << skipped << ", Time taken = " << timerc.elapsedMilliSeconds() << "ms" << endl;
+	
+	#ifdef OS_MINGW
+		WSACleanup();
+	#endif
 
 	return 0;
 }

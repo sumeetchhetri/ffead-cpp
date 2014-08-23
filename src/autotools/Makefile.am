@@ -89,7 +89,8 @@ libweblib_la_SOURCES = ../ServiceTask.cpp \
 		../LoggerFactory.cpp \
 		../NBServer.cpp \
 		../ScriptHandler.cpp \
-		../SSLCommon.cpp
+		../SSLCommon.cpp \
+		../mingw.cpp
 
 if MOD_ALL
 libweblib_la_SOURCES += ../modules/component/Component.cpp \
@@ -226,10 +227,10 @@ else
 	endif
 endif
 
-
-libweblib_la_LDFLAGS = -shared -no-undefined -module
+libweblib_la_LDFLAGS = -no-undefined
 
 noinst_PROGRAMS = CHS
 CHS_SOURCES = ../CHServer.cpp
-CHS_LDADD = -L".libs/" -lweblib
+CHS_LDFLAGS= -no-undefined
+CHS_LDADD = -lweblib
 

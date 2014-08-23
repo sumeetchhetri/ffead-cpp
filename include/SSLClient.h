@@ -31,7 +31,7 @@ class SSLClient : public ClientInterface {
 	SSL *ssl;
 	SSL_CTX *ctx;
 	BIO *sbio,*io,*ssl_bio;
-	int sockfd;
+	SOCKET sockfd;
 	static char *pass;
 	bool connected, isDHParams;
 	string cert_file,key_file,dh_file,ca_list,rand_file,sec_password;

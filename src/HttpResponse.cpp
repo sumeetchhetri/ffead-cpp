@@ -94,12 +94,15 @@ string HttpResponse::generateResponse(string httpMethod, HttpRequest *req, bool 
 
 string HttpResponse::generateResponse(bool appendHeaders /*= true*/)
 {
-	string resp = this->content;
 	if(appendHeaders)
-		resp = generateHeadResponse() + resp;
+	{
+		return generateHeadResponse() + this->content;
+	}
 	else
+	{	
 		generateHeadResponse();
-	return resp;
+		return this->content;
+	}
 }
 
 string HttpResponse::generateHeadResponse()

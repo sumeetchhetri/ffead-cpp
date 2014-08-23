@@ -22,15 +22,24 @@
 
 #ifndef NBSERVER_H_
 #define NBSERVER_H_
+#include "AppDefines.h"
 #include "iostream"
 #include <unistd.h>
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+#include "mingw.h"
+#if !defined(OS_MINGW)
+#include <unistd.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 #include <arpa/inet.h>
 #include <sys/wait.h>
+#include <sys/ioctl.h>
+#include <sys/resource.h>
+#endif
+
 #include <signal.h>
 #include "string"
 #include "cstring"
@@ -39,9 +48,9 @@
 #include "vector"
 #include "sstream"
 #include <fcntl.h>
-#include <sys/ioctl.h>
+
 /*Fix for Windows Cygwin*///#include <sys/epoll.h>
-#include <sys/resource.h>
+
 #include "Thread.h"
 #include "LoggerFactory.h"
 #include "SelEpolKqEvPrt.h"
@@ -52,30 +61,35 @@ using namespace std;
 typedef void* (*Service)(void*);
 class NBServer {
 	Logger logger;
-	int sock, mode;
+	SOCKET sock;
+	int mode;
 	Service service;
 	Mutex lock;
-	struct sockaddr_storage their_addr;
+	#ifdef OS_MINGW
+		struct sockaddr_in their_addr;
+	#else
+		struct sockaddr_storage their_addr;
+	#endif
 	static void* servicing(void* arg);
 	bool runn, started;
 	SelEpolKqEvPrt selEpolKqEvPrtHandler;
 public:
-	int getSocket();
+	SOCKET getSocket();
 	NBServer();
 	NBServer(string,int,Service);
 	virtual ~NBServer();
 	int Accept();
-	int Send(int,string);
-	int Send(int,vector<char>);
-	int Send(int,vector<unsigned char>);
-	int Send(int,char*);
-	int Send(int,unsigned char*);
-	int Receive(int,string&,int);
-	int Receive(int,vector<char>&,int);
-	int Receive(int,vector<unsigned char>&,int);
-	int Receive(int,char *data,int);
-	int Receive(int,unsigned char *data,int);
-	int Receive(int,vector<string>&,int);
+	int Send(SOCKET,string);
+	int Send(SOCKET,vector<char>);
+	int Send(SOCKET,vector<unsigned char>);
+	int Send(SOCKET,char*);
+	int Send(SOCKET,unsigned char*);
+	int Receive(SOCKET,string&,int);
+	int Receive(SOCKET,vector<char>&,int);
+	int Receive(SOCKET,vector<unsigned char>&,int);
+	int Receive(SOCKET,char *data,int);
+	int Receive(SOCKET,unsigned char *data,int);
+	int Receive(SOCKET,vector<string>&,int);
 	void start();
 	void stop();
 };

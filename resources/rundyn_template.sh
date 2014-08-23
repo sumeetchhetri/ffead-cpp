@@ -12,6 +12,7 @@ IS_OS_CYGWIN=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"cygwin") != 0 {print "cygw
 IS_OS_BSD=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"bsd") != 0 {print "bsd"}'`
 IS_OS_SOLARIS=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"sunos") != 0 {print "sunos"}'`
 IS_OS_LINUX=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"linux") != 0 {print "linux"}'`
+IS_OS_MINGW=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"mingw") != 0 {print "mingw"}'`
 
 MAKE_EXE=make
 RES_LIB_EXT=so
@@ -51,6 +52,8 @@ fi
 
 cd $FFEAD_CPP_PATH/rtdcf
 rm -f $FFEAD_CPP_PATH/*.cntrl
+
 $MAKE_EXE ${TARGET_LIB}
+
 cp -Rf $FFEAD_CPP_PATH/public/* $FFEAD_CPP_PATH/web/default/public/
 ${Dynamic_Public_Folder_Copy}

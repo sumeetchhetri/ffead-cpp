@@ -43,7 +43,35 @@ CYGWIN(x86) - To install dependencies on cygwin use the cygwin setup.exe/setup-x
 	openssl (>=1.0) libraries and devel (use Cygwin_SSL_UnixOdbc_libs.zip from downloads section for version 1.0)
     unixODBC libraries and devel (not found in Cygwin reposistory, use Cygwin_SSL_UnixOdbc_libs.zip from download section)
     bison,yacc,flex,gdb,readline,binutils (for building and installing openssl and unixODBC)
+    libtool, libltdl
     You can even downloand and build/install openssl/unixODBC yourself	
+
+MINGW(x86)
+	install mingw and msys
+	mingw-get update(command line)
+	Then using the MinGW installation Manager or command line install the beloe mentioned packages
+	mingw-get install mingw-developer-toolkit(command line)
+	Make sure you have autotools, autoconf, automake, libtool, libltdl, gcc, gcc-c++ installed
+	mingw-get install msys-base(command line)
+	mingw-get install mingw32-libpthreadgc(command line)
+	mingw-get install mingw32-libz(command line)
+	mingw-get install mingw32-zlib(command line)
+	Download ftp://ftp.unixodbc.org/pub/unixODBC/unixODBC-2.3.2.tar.gz
+	and make the following changes to the following files in the uniODBC distribution
+		- uodbc_extras.h (comment line 76 - extern int strncasecmp (const char *s1, const char *s2, int n );)
+		- include/ini.h (add the below lines before the last #endif
+							#define EOVERFLOW 139
+							#define EWOULDBLOCK EAGAIN
+						 )
+		then "./configure" and "make install" as usual
+	Download the latest source ditsribution from https://code.google.com/p/dlfcn-win32
+		then "./configure --enable-static=yes --enable-shared=yes" and "make  install"
+	Follow instructions at http://go.kblog.us/2009/07/mingw-porting-gnu-regex-to-windows.html
+		to install libregex in mingw
+	Follow instructions at https://qt-project.org/wiki/Compiling-OpenSSL-with-MinGW
+		to install openssl libraries and development files in mingw
+	Warning - installing msys regex/openssl libraries would not be useful here as we will be natively building 
+		ffead-cpp on mingw and hence we need mingw compiled libraries
 
 OTHERS - haven't tested on any other platform/os yet
 
@@ -68,8 +96,8 @@ diffs or instructions to the address given in the `README' so they can
 be considered for the next release.  If at some point `config.cache'
 contains results you don't want to keep, you may remove or edit it.
 
-   The file `configure.in' is used to create `configure' by a program
-called `autoconf'.  You only need `configure.in' if you want to change
+   The file `configure.ac' is used to create `configure' by a program
+called `autoconf'.  You only need `configure.ac' if you want to change
 it or regenerate `configure' using a newer version of `autoconf'.
 
 The simplest way to compile this package is:
@@ -86,6 +114,19 @@ The simplest way to compile this package is:
      If ./configure fails or gives errors, make sure you have all packages installed 
      and run ./autogen.sh, this will clear all the generated files and recreate all 
      as per your system
+
+     On some BSD variants ./autogen.sh may fail, in such cases please try the below 
+     sequence of commands to regenerate a valid configure file
+	
+		libtoolize --force
+		aclocal
+		autoconf -I m4
+		autoheader
+		automake --add-missing
+	
+	All these command are present in the ./autogen-noreconf.sh script, you can use the 
+	same to regenerate configure files.
+
 
   2. Type `make' to compile the package.
 
@@ -153,6 +194,25 @@ Optional Features
 =================
 	To create a binary for debugging purposes use 
 	`./configure --enable-debug=yes'
+	
+Modules (Features)
+==================
+	--enable-mod_comp=yes/no (To enable/disable Component module)
+	--enable-mod_dcp=yes/no (To enable/disable Dynamic C++ Pages module)
+	--enable-mod_dview=yes/no (To enable/disable Dynamic Views module)
+	--enable-mod_tpe=yes/no (To enable/disable Templates module)
+	--enable-mod_script=yes/no (To enable/disable Scripting Support module)
+	--enable-mod_interpreter=yes/no (To enable/disable C++ Interpreter module)
+	--enable-mod_appflow=yes/no (To enable/disable Application Flow module)
+	--enable-mod_jobs=yes/no (To enable/disable Batch/CRON jobs module)
+	--enable-mod_dsorm=yes/no (To enable/disable Data Source ORM module)
+	--enable-mod_msghandler=yes/no (To enable/disable Message Handler module)
+	--enable-mod_methinvoker=yes/no (To enable/disable Method Invoker module)
+	--enable-mod_webservice=yes/no (To enable/disable Web Service module)
+	--enable-mod_distocache=yes/no (To enable/disable Distocache module)
+	--enable-mod_xmlserialize=yes/no (To enable/disable XML Serialization module)
+	--enable-mod_binserialize=yes/no (To enable/disable Binary Serialization module)
+
 	
    Some packages pay attention to `--enable-FEATURE' options to
 `configure', where FEATURE indicates an optional part of the package.

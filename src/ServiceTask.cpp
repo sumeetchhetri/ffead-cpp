@@ -35,7 +35,7 @@ ServiceTask::~ServiceTask() {
 void ServiceTask::saveSessionDataToFile(string sessionId, string value)
 {
 	string lockfil = serverRootDirectory+"/tmp/"+sessionId+".lck";
-	ifstream ifs(lockfil.c_str());
+	ifstream ifs(lockfil.c_str(), ios::binary);
 	int counter = 5000/100;
 	while(ifs.is_open()) {
 		Thread::mSleep(100);
@@ -46,7 +46,7 @@ void ServiceTask::saveSessionDataToFile(string sessionId, string value)
 
 	string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
 	logger << ("Saving session to file " + filen) << endl;
-	ofstream ofs(filen.c_str());
+	ofstream ofs(filen.c_str(), ios::binary);
 	ofs.write(value.c_str(),value.length());
 	ofs.close();
 
@@ -57,7 +57,7 @@ map<string,string> ServiceTask::getSessionDataFromFile(string sessionId)
 {
 	map<string,string> valss;
 	string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
-	ifstream ifs(filen.c_str());
+	ifstream ifs(filen.c_str(), ios::binary);
 	string tem,all;
 	while(getline(ifs,tem))
 	{
@@ -236,7 +236,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, string ext,
     {
     	string tfname = fname;
     	StringUtil::replaceFirst(tfname, "." , ("_" + locale+"."));
-    	ifstream gzipdfile(tfname.c_str());
+    	ifstream gzipdfile(tfname.c_str(), ios::binary);
 		if(gzipdfile.good())
 		{
 			fname = tfname;
@@ -257,7 +257,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, string ext,
 	}
 	else
 	{
-		ifstream infile(fname.c_str());
+		ifstream infile(fname.c_str(), ios::binary);
 		if(infile.good())
 		{
 			infile.close();
@@ -273,7 +273,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, string ext,
 		stat(fname.c_str(), &attrib);
 		//as per suggestion at http://stackoverflow.com/questions/10446526/get-last-modified-time-of-file-in-linux
 		gmtime_r(&(attrib.st_mtime), &tim);
-
+		
 		Date filemodifieddate(&tim);
 		DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
 		string lastmodDate = df.format(filemodifieddate);
@@ -324,7 +324,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, string ext,
 			string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".gz";
 			if(!forceLoadFile)
 			{
-				ifstream gzipdfile(ofname.c_str());
+				ifstream gzipdfile(ofname.c_str(), ios::binary);
 				if(gzipdfile.good())
 				{
 					gzipdfile.close();
@@ -345,7 +345,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, string ext,
 			string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".z";
 			if(!forceLoadFile)
 			{
-				ifstream gzipdfile(ofname.c_str());
+				ifstream gzipdfile(ofname.c_str(), ios::binary);
 				if(gzipdfile.good())
 				{
 					gzipdfile.close();
@@ -424,7 +424,12 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, string ext,
 
 bool ServiceTask::checkSocketWaitForTimeout(int sock_fd, int writing, int seconds, int micros)
 {
-	fcntl(sock_fd, F_SETFL, fcntl(sock_fd, F_GETFD, 0) | O_NONBLOCK);
+	#ifdef OS_MINGW
+		u_long iMode = 1;
+		ioctlsocket(sock_fd, FIONBIO, &iMode);
+	#else
+		fcntl(sock_fd, F_SETFL, fcntl(sock_fd, F_GETFD, 0) | O_NONBLOCK);
+	#endif
 
 	fd_set rset, wset;
 	struct timeval tv = {seconds, micros};
@@ -455,7 +460,12 @@ bool ServiceTask::checkSocketWaitForTimeout(int sock_fd, int writing, int second
 			break;
 	}
 	FD_CLR(sock_fd, &rset);
-	fcntl(sock_fd, F_SETFL, O_SYNC);
+	#ifdef OS_MINGW
+		u_long bMode = 0;
+		ioctlsocket(sock_fd, FIONBIO, &bMode);
+	#else
+		fcntl(sock_fd, F_SETFL, O_SYNC);
+	#endif	
 
 	FD_ZERO(&rset);
 	FD_ZERO(&wset);
@@ -557,6 +567,8 @@ void ServiceTask::run()
 
 	while(cont)
 	{
+		void *dlib = NULL, *ddlib = NULL;
+		HttpRequest* req = NULL;
 		try
 		{
 			HttpResponse res;
@@ -572,7 +584,7 @@ void ServiceTask::run()
 				else
 				{
 					if(io!=NULL)BIO_free_all(io);
-					close(fd);
+					closesocket(fd);
 				}
 				return;
 			}
@@ -593,10 +605,12 @@ void ServiceTask::run()
 					bool sendSuccess = sendData(ssl, io, fd, res.generateResponse());
 					logger << "Closing connection..." << endl;
 					if(sendSuccess)closeSocket(ssl, io, fd);
+					delete req;
 					return;
 				}
 				if(!fl)
 				{
+					delete req;
 					return;
 				}
 				if(temp=="\r" || temp=="\r\n" || temp=="\n")
@@ -617,7 +631,7 @@ void ServiceTask::run()
 			alldatlg += "--read data";
 			string webpath = serverRootDirectory + "web/";
 			//Parse the HTTP headers
-			HttpRequest* req= new HttpRequest(results, webpath);
+			req = new HttpRequest(results, webpath);
 
 			if(req->getRequestParseStatus().getCode()>0)
 			{
@@ -626,6 +640,7 @@ void ServiceTask::run()
 				bool sendSuccess = sendData(ssl, io, fd, res.generateResponse());
 				logger << "Closing connection..." << endl;
 				if(sendSuccess)closeSocket(ssl, io, fd);
+				delete req;
 				return;
 			}
 
@@ -640,6 +655,7 @@ void ServiceTask::run()
 					bool sendSuccess = sendData(ssl, io, fd, res.generateResponse());
 					logger << "Closing connection..." << endl;
 					if(sendSuccess)closeSocket(ssl, io, fd);
+					delete req;
 					return;
 				}
 			}
@@ -703,6 +719,7 @@ void ServiceTask::run()
 				{
 					if(!readData(ssl, io, fd, cntlen, content))
 					{
+						delete req;
 						return;
 					}
 				}
@@ -783,6 +800,7 @@ void ServiceTask::run()
 					{
 						if(!readData(ssl, io, fd, cntlen, content))
 						{
+							delete req;
 							return;
 						}
 						if(fmode && filei.is_open())
@@ -881,13 +899,13 @@ void ServiceTask::run()
 
 			logger << ("Done with request initialization/session setup") << endl;
 
-			void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+			dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 			if(dlib == NULL)
 			{
 				cerr << dlerror() << endl;
 				throw "Cannot load application shared library";
 			}
-			void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
+			ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 			if(ddlib == NULL)
 			{
 				cerr << dlerror() << endl;
@@ -1011,7 +1029,7 @@ void ServiceTask::run()
 			{
 				logger << ("Started processing request - phase II") << endl;
 
-				string wsUrl = req->getCntxt_name() + "/" + req->getFile();
+				string wsUrl = "http://" + ConfigurationData::getInstance()->ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
 				if(isContrl)
 				{
 
@@ -1132,7 +1150,7 @@ void ServiceTask::run()
 
 			//Head should behave exactly as Get but there should be no entity body
 			h1 = res.generateResponse(req->getMethod(), req);
-
+			
 			logger << ("Done generating response content") << endl;
 
 			/*if(req->getMethod()=="HEAD")
@@ -1155,7 +1173,13 @@ void ServiceTask::run()
 			if(res.isHeaderValue(HttpResponse::TransferEncoding, "chunked"))
 			{
 				bool sendSuccess = sendData(ssl, io, fd, h1);
-				if(!sendSuccess)return;
+				if(!sendSuccess)
+				{
+					delete req;
+					dlclose(dlib);
+					dlclose(ddlib);
+					return;
+				}
 				unsigned int totlen = getFileSize(req->getUrl().c_str());
 				float parts = (float)totlen/techunkSiz;
 				parts = (floor(parts)<parts?floor(parts)+1:floor(parts)) - 1;
@@ -1172,28 +1196,48 @@ void ServiceTask::run()
 						h1 += getFileContents(req->getUrl().c_str(), techunkSiz*var, len);
 						h1 += "\r\n";
 						bool sendSuccess = sendData(ssl, io, fd, h1);
-						if(!sendSuccess)return;
+						if(!sendSuccess)
+						{
+							delete req;
+							dlclose(dlib);
+							dlclose(ddlib);
+							return;
+						}
 					}
 					bool sendSuccess = sendData(ssl, io, fd, "0\r\n\r\n");
-					if(!sendSuccess)return;
+					if(!sendSuccess)
+					{
+						delete req;
+						dlclose(dlib);
+						dlclose(ddlib);
+						return;
+					}
 				}
 			}
 			else
 			{
 				bool sendSuccess = sendData(ssl, io, fd, h1);
-				if(!sendSuccess)return;
+				if(!sendSuccess)
+				{
+					delete req;
+					dlclose(dlib);
+					dlclose(ddlib);
+					return;
+				}
 			}
 
 			if(!cont)
 			{
 				logger << "Closing connection..." << endl;
 				closeSocket(ssl, io, fd);
+				delete req;
+				dlclose(dlib);
+				dlclose(ddlib);
 				return;
 			}
 
 			//Logger::info("got new connection to process\n"+req->getFile()+" :: " + res.getStatusCode() + "\n"+req->getCntxt_name() + "\n"+req->getCntxt_root() + "\n"+req->getUrl());
 			delete req;
-
 			dlclose(dlib);
 			dlclose(ddlib);
 			//logger << (alldatlg + "--sent data--DONE") << endl;
@@ -1201,10 +1245,22 @@ void ServiceTask::run()
 		}
 		catch(const char* err)
 		{
+			if(req!=NULL)
+				delete req;
+			if(dlib!=NULL)
+				dlclose(dlib);
+			if(ddlib!=NULL)
+				dlclose(ddlib);
 			logger << "Exception occurred while processing ServiceTask request - " << err << endl;
 		}
 		catch(...)
 		{
+			if(req!=NULL)
+				delete req;
+			if(dlib!=NULL)
+				dlclose(dlib);
+			if(ddlib!=NULL)
+				dlclose(ddlib);
 			logger << "Standard exception occurred while processing ServiceTask request " << endl;
 		}
 	}
@@ -1289,7 +1345,7 @@ void ServiceTask::closeSocket(SSL* ssl, BIO* io, int fd)
 	else
 	{
 		if(io!=NULL)BIO_free_all(io);
-		close(fd);
+		closesocket(fd);
 	}
 }
 
@@ -1431,6 +1487,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 	HttpResponse res;
 	string ip;
 	string alldatlg = "\ngot fd from parent";
+	void *dlib = NULL, *ddlib = NULL;
 	try
 	{
 		string webpath = serverRootDirectory + "web/";
@@ -1497,13 +1554,13 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		}
 		//logger << req->getCntxt_name() << req->getCntxt_root() << req->getUrl() << endl;
 
-		void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+		dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 		if(dlib == NULL)
 		{
 			cerr << dlerror() << endl;
 			throw "Cannot load application shared library";
 		}
-		void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
+		ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 		if(ddlib == NULL)
 		{
 			cerr << dlerror() << endl;
@@ -1621,7 +1678,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		{
 			cout << ("Started processing request - phase II") << endl;
 
-			string wsUrl = req->getCntxt_name() + "/" + req->getFile();
+			string wsUrl = "http://" + ConfigurationData::getInstance()->ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
 			cout << wsUrl << endl;
 			if(isContrl)
 			{
@@ -1722,12 +1779,19 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 	}
 	catch(const char* ex)
 	{
+		if(dlib!=NULL)
+			dlclose(dlib);
+		if(ddlib!=NULL)
+			dlclose(ddlib);
 		logger << ex << endl;
 	}
 	catch(...)
 	{
+		if(dlib!=NULL)
+			dlclose(dlib);
+		if(ddlib!=NULL)
+			dlclose(ddlib);
 		logger << "Standard exception occurred while processing ServiceTask request " << endl;
 	}
 	return res;
 }
-

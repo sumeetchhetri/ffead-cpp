@@ -22,10 +22,13 @@
 
 #ifndef SERIALIZEBASE_H_
 #define SERIALIZEBASE_H_
+#include "AppDefines.h"
 #include "CastUtil.h"
 #include <stdexcept>
-#include <dlfcn.h>
+#if !defined(OS_MINGW)
 #include <cxxabi.h>
+#endif
+#include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "string"

@@ -33,7 +33,9 @@ void* Thread::_service(void* arg)
 }
 
 Thread::Thread(ThreadFunc f, void* arg, bool isDetached /*= true*/) {
-	this->pthread = NULL;
+	#ifndef OS_MINGW
+		this->pthread = NULL;
+	#endif
 	this->isDetached = isDetached;
 	this->threadFunctor = new ThreadFunctor();
 	this->threadFunctor->f = f;

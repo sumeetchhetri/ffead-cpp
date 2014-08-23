@@ -15,15 +15,19 @@
 */
 #ifndef REFLECTOR_H_
 #define REFLECTOR_H_
+#include "AppDefines.h"
 #include "ClassInfo.h"
 #include "string"
 #include "Method.h"
 #include "Field.h"
 #include <stdio.h>
+#if !defined(OS_MINGW)
 #include <sys/wait.h>
+#endif
+#include <dlfcn.h>
 #include <stdexcept>
 /*Fix for Windows Cygwin*///#include <execinfo.h>
-#include <dlfcn.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>

@@ -212,5 +212,5 @@ void SSLCommon::closeSSL(int fd, SSL *ssl, BIO* bio)
 	{
 		SSL_free(ssl);
 	}
-	close(fd);
+	closesocket(fd);
 }

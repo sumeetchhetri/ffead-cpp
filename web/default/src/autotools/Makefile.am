@@ -29,6 +29,7 @@ libdefault_la_SOURCES = ../DefTemp.cpp \
 				../TestObject.cpp \
 				../TestObject1.cpp \
 				../TestCronBasedJob.cpp
-libdefault_la_LDFLAGS = -shared -no-undefined -L"../../../../src/autotools/.libs" -lweblib
+libdefault_la_LDFLAGS = -no-undefined 
+libdefault_la_LIBADD = -L"../../../../src/autotools/.libs" -lweblib
 
 #dist_noinst_SCRIPTS = autogen.sh

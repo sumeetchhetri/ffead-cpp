@@ -205,7 +205,7 @@ bool SSLClient::connectionUnresolv(string host,int port)
 		}
 
 		if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-			close(sockfd);
+			closesocket(sockfd);
 			perror("client: connect");
 			connected = false;
 			continue;

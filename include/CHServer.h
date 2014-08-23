@@ -23,6 +23,21 @@
 #ifndef CHSERVER_H_
 #define CHSERVER_H_
 #include "AppDefines.h"
+#include "mingw.h"
+#if !defined(OS_MINGW)
+#include <unistd.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <sys/ioctl.h>
+#include <sys/resource.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#endif
 #include <algorithm>
 #include "Client.h"
 #include "PropFileReader.h"
@@ -49,14 +64,7 @@
 #include "TemplateHandler.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <errno.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <sys/wait.h>
 #include <signal.h>
 #ifdef INC_DVIEW
 #include "DynamicView.h"
@@ -66,12 +74,10 @@
 #include "ApplicationUtil.h"
 #endif
 #include <fcntl.h>
-#include <sys/ioctl.h>
-#include <sys/resource.h>
 #include <sys/time.h>
 #include <queue>
-#include <sys/uio.h>
-#include <sys/un.h>
+
+
 #ifdef INC_CIB
 #include "Cibernate.h"
 #endif
@@ -148,6 +154,17 @@ typedef ClassInfo (*FunPtr) ();
 typedef void* (*toVoidP) (string);
 typedef string (*DCPPtr) ();
 typedef void (*ReceiveTask1)(int);
+
+#if defined(OS_MINGW)
+#define WNOHANG 1
+static inline int waitpid(pid_t pid, int *status, unsigned options)
+{
+	if (options == 0)
+		return _cwait(status, pid, 0);
+	errno = EINVAL;
+	return -1;
+}
+#endif
 
 using namespace std;
 

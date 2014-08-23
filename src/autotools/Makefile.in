@@ -119,7 +119,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libweblib_la_LIBADD =
+am__DEPENDENCIES_1 =
+libweblib_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__libweblib_la_SOURCES_DIST = ../ServiceTask.cpp ../SSLHandler.cpp \
 	../ConfigurationHandler.cpp ../ConfigurationData.cpp \
 	../ExtHandler.cpp ../FviewHandler.cpp ../FormHandler.cpp \
@@ -150,7 +151,8 @@ am__libweblib_la_SOURCES_DIST = ../ServiceTask.cpp ../SSLHandler.cpp \
 	../Bigdecimal.cpp ../FutureTask.cpp ../CORSHandler.cpp \
 	../CompressionUtil.cpp ../MultipartContent.cpp \
 	../LoggerFactory.cpp ../NBServer.cpp ../ScriptHandler.cpp \
-	../SSLCommon.cpp ../modules/component/Component.cpp \
+	../SSLCommon.cpp ../mingw.cpp \
+	../modules/component/Component.cpp \
 	../modules/component/ComponentHandler.cpp \
 	../modules/component/RemoteComponent.cpp \
 	../modules/component/ComponentGen.cpp \
@@ -263,7 +265,7 @@ am_libweblib_la_OBJECTS = ../ServiceTask.lo ../SSLHandler.lo \
 	../Bigint.lo ../Bigdecimal.lo ../FutureTask.lo \
 	../CORSHandler.lo ../CompressionUtil.lo ../MultipartContent.lo \
 	../LoggerFactory.lo ../NBServer.lo ../ScriptHandler.lo \
-	../SSLCommon.lo $(am__objects_1)
+	../SSLCommon.lo ../mingw.lo $(am__objects_1)
 libweblib_la_OBJECTS = $(am_libweblib_la_OBJECTS)
 libweblib_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -271,9 +273,12 @@ libweblib_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 PROGRAMS = $(noinst_PROGRAMS)
 am_CHS_OBJECTS = ../CHServer.$(OBJEXT)
 CHS_OBJECTS = $(am_CHS_OBJECTS)
-CHS_DEPENDENCIES =
+CHS_DEPENDENCIES = $(am__DEPENDENCIES_1)
+CHS_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(CHS_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/include
-depcomp = $(SHELL) $(top_srcdir)/depcomp
+depcomp = $(SHELL) $(top_srcdir)/libltdl/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -296,6 +301,7 @@ AM_CXXFLAGS = @AM_CXXFLAGS@
 APACHE_HTTPD_LIB = @APACHE_HTTPD_LIB@
 APXS = @APXS@
 AR = @AR@
+ARGZ_H = @ARGZ_H@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -323,6 +329,7 @@ EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GENERATE_APACHEMOD = @GENERATE_APACHEMOD@
 GREP = @GREP@
+INCLTDL = @INCLTDL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -330,12 +337,25 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBADD_DL = @LIBADD_DL@
+LIBADD_DLD_LINK = @LIBADD_DLD_LINK@
+LIBADD_DLOPEN = @LIBADD_DLOPEN@
+LIBADD_SHL_LOAD = @LIBADD_SHL_LOAD@
+LIBLTDL = @LIBLTDL@
 LIBOBJS = @LIBOBJS@
+LIBRARY_EXTENSION = @LIBRARY_EXTENSION@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIB_TYPE = @LIB_TYPE@
 LIPO = @LIPO@
 LN_S = @LN_S@
+LTDLDEPS = @LTDLDEPS@
+LTDLINCL = @LTDLINCL@
+LTDLOPEN = @LTDLOPEN@
 LTLIBOBJS = @LTLIBOBJS@
+LT_CONFIG_H = @LT_CONFIG_H@
+LT_DLLOADERS = @LT_DLLOADERS@
+LT_DLPREOPEN = @LT_DLPREOPEN@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
@@ -398,6 +418,8 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
+ltdl_LIBOBJS = @ltdl_LIBOBJS@
+ltdl_LTLIBOBJS = @ltdl_LTLIBOBJS@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -408,6 +430,8 @@ psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
+subdirs = @subdirs@
+sys_symbol_underscore = @sys_symbol_underscore@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
@@ -447,10 +471,11 @@ libweblib_la_SOURCES = ../ServiceTask.cpp ../SSLHandler.cpp \
 	../Bigdecimal.cpp ../FutureTask.cpp ../CORSHandler.cpp \
 	../CompressionUtil.cpp ../MultipartContent.cpp \
 	../LoggerFactory.cpp ../NBServer.cpp ../ScriptHandler.cpp \
-	../SSLCommon.cpp $(am__append_1)
-libweblib_la_LDFLAGS = -shared -no-undefined -module
+	../SSLCommon.cpp ../mingw.cpp $(am__append_1)
+libweblib_la_LDFLAGS = -no-undefined
 CHS_SOURCES = ../CHServer.cpp
-CHS_LDADD = -L".libs/" -lweblib
+CHS_LDFLAGS = -no-undefined
+CHS_LDADD = -lweblib
 all: all-am
 
 .SUFFIXES:
@@ -617,6 +642,7 @@ clean-libLTLIBRARIES:
 ../NBServer.lo: ../$(am__dirstamp) ../$(DEPDIR)/$(am__dirstamp)
 ../ScriptHandler.lo: ../$(am__dirstamp) ../$(DEPDIR)/$(am__dirstamp)
 ../SSLCommon.lo: ../$(am__dirstamp) ../$(DEPDIR)/$(am__dirstamp)
+../mingw.lo: ../$(am__dirstamp) ../$(DEPDIR)/$(am__dirstamp)
 ../modules/component/$(am__dirstamp):
 	@$(MKDIR_P) ../modules/component
 	@: > ../modules/component/$(am__dirstamp)
@@ -838,7 +864,7 @@ clean-noinstPROGRAMS:
 ../CHServer.$(OBJEXT): ../$(am__dirstamp) ../$(DEPDIR)/$(am__dirstamp)
 CHS$(EXEEXT): $(CHS_OBJECTS) $(CHS_DEPENDENCIES) $(EXTRA_CHS_DEPENDENCIES) 
 	@rm -f CHS$(EXEEXT)
-	$(CXXLINK) $(CHS_OBJECTS) $(CHS_LDADD) $(LIBS)
+	$(CHS_LINK) $(CHS_OBJECTS) $(CHS_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1011,6 +1037,8 @@ mostlyclean-compile:
 	-rm -f ../XmlParseException.lo
 	-rm -f ../XmlParser.$(OBJEXT)
 	-rm -f ../XmlParser.lo
+	-rm -f ../mingw.$(OBJEXT)
+	-rm -f ../mingw.lo
 	-rm -f ../modules/appflow/ApplicationUtil.$(OBJEXT)
 	-rm -f ../modules/appflow/ApplicationUtil.lo
 	-rm -f ../modules/binserialize/AMEFDecoder.$(OBJEXT)
@@ -1186,6 +1214,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@../$(DEPDIR)/View.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@../$(DEPDIR)/XmlParseException.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@../$(DEPDIR)/XmlParser.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@../$(DEPDIR)/mingw.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@../modules/appflow/$(DEPDIR)/ApplicationUtil.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@../modules/binserialize/$(DEPDIR)/AMEFDecoder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@../modules/binserialize/$(DEPDIR)/AMEFEncoder.Plo@am__quote@

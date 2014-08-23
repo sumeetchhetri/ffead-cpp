@@ -181,7 +181,7 @@ void Reflection::emptyBlocks(string& data, size_t start)
 		}
 }
 
-void Reflection::handleNamespace(string data, string namepsc, map<string, ClassStructure>& clsvec, map<string, vector<string> >& glbnmspcs)
+void Reflection::handleNamespace(string data, string namepsc, map<string, ClassStructure>& clsvec, map<string, vector<string> >& glbnmspcs, vector<string> pragmas)
 {
 	StringUtil::trim(data);
 	if(data=="")return;
@@ -192,7 +192,14 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 		string temp = data.substr(nmspcst);
 		nmspcst += temp.find(" namespace");
 	}
-	if(RegexUtil::find(data, "^[ \t]*using[ \t]*namespace[ \t]*[^;]+;")==0)
+	if(RegexUtil::find(data, "^[ \t]*#[ \t]*pragma[ \t]*.*")==0)
+	{
+		int spos, epos;
+		RegexUtil::find(data, "^[ \t]*#[ \t]*pragma[ \t]*.*", spos, epos);
+		pragmas.push_back(data.substr(spos, epos));
+		data = data.substr(data.find("\n")+1);
+	}
+	else if(RegexUtil::find(data, "^[ \t]*using[ \t]*namespace[ \t]*[^;]+;")==0)
 	{
 		string nmspace = data.substr(0, data.find(";"));
 		nmspace = nmspace.substr(nmspace.find_last_of(" ")+1);
@@ -209,10 +216,11 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 				glbnmspcs[namepsc].push_back(nmspace);
 			}
 		}
-		handleNamespace(data, namepsc, clsvec, glbnmspcs);
+		handleNamespace(data, namepsc, clsvec, glbnmspcs, pragmas);
 	}
 	else if(data.find("namespace ")==0)
 	{
+		pragmas.clear();
 		string temp = data.substr(0, data.find("{"));
 		StringUtil::trim(temp);
 		StringUtil::replaceFirst(temp,"namespace ","");
@@ -255,8 +263,8 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 			cout << "nmspc = " << nmspc << endl;
 			cout << data << endl;
 			cout << tdata << endl;
-			handleNamespace(data, nmspc, clsvec, glbnmspcs);
-			handleNamespace(tdata, namepsc, clsvec, glbnmspcs);
+			handleNamespace(data, nmspc, clsvec, glbnmspcs, pragmas);
+			handleNamespace(tdata, namepsc, clsvec, glbnmspcs, pragmas);
 		}
 		else
 		{
@@ -327,25 +335,39 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 			cout << "classnmpsc = " << nmspc << endl;
 			cout << data << endl;
 			cout << tdata << endl;
-			handleNamespace(data, nmspc, clsvec, glbnmspcs);
-			handleNamespace(tdata, namepsc, clsvec, glbnmspcs);
+			pragmas.clear();
+			handleNamespace(data, nmspc, clsvec, glbnmspcs, pragmas);
+			handleNamespace(tdata, namepsc, clsvec, glbnmspcs, pragmas);
 		}
 		else
 		{
 			cout << "error" << endl;
 		}
+		pragmas.clear();
 	}
 	else if(data.find(" namespace ")!=string::npos && nmspcst!=(int)data.find(" namespace "))
 	{
 		string sdata = data.substr(0, data.find(" namespace "));
-		handleNamespace(sdata, namepsc, clsvec, glbnmspcs);
-		handleNamespace(data.substr(data.find(" namespace ")), namepsc, clsvec, glbnmspcs);
+		pragmas.clear();
+		handleNamespace(sdata, namepsc, clsvec, glbnmspcs, pragmas);
+		handleNamespace(data.substr(data.find(" namespace ")), namepsc, clsvec, glbnmspcs, pragmas);
 	}
 	else if(data.find(" class ")!=string::npos)
 	{
 		string sdata = data.substr(0, data.find(" class "));
-		handleNamespace(sdata, namepsc, clsvec, glbnmspcs);
-		handleNamespace(data.substr(data.find(" class ")), namepsc, clsvec, glbnmspcs);
+		if(pragmas.size()>0)
+		{
+			string ssdata = sdata;
+			RegexUtil::replace(ssdata, "[ \t]+", "");
+			RegexUtil::replace(ssdata, "\n", "");
+			if(ssdata!="")
+			{
+				pragmas.clear();
+			}
+		}
+		handleNamespace(sdata, namepsc, clsvec, glbnmspcs, pragmas);
+		handleNamespace(data.substr(data.find(" class ")), namepsc, clsvec, glbnmspcs, pragmas);
+		pragmas.clear();
 	}
 	else if(clsvec.find(namepsc)!=clsvec.end())
 	{
@@ -542,13 +564,31 @@ map<string, ClassStructure> Reflection::getClassStructures(string className, str
 	map<string, ClassStructure> clsvec;
 	string data;
 	ifstream infile;
-	infile.open(className.c_str());
+	infile.open(className.c_str(), ios::binary);
 	string allcont;
+	vector<string> pragmas;
 	if(infile.is_open())
 	{
 		bool commstrts = false;
 		while(getline(infile, data))
 		{
+			RegexUtil::replace(data, "[\t]+", " ");
+			RegexUtil::replace(data, "[ ]+", " ");
+			RegexUtil::replace(data, "\"[^\"]+\"", "\"\"");
+			RegexUtil::replace(data, "\"[\"]+\"", "\"\"");
+			RegexUtil::replace(data, "[ \t]*#[ \t]*include[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*define[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*undef[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*if[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*ifdef[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*ifndef[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*error[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*line[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*using[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*elif[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*import[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*else[ \t]*.*", " ", true);
+			RegexUtil::replace(data, "[ \t]*#[ \t]*endif[ \t]*.*", " ", true);
 			RegexUtil::replace(data, "[\t]+", " ");
 			RegexUtil::replace(data, "[ ]+", " ");
 			StringUtil::trim(data);
@@ -593,12 +633,13 @@ map<string, ClassStructure> Reflection::getClassStructures(string className, str
 		infile.close();
 
 		data = allcont;
+		/*
 		RegexUtil::replace(data, "[ \t]*#include[ \t]*\"[^\"]+\"", " ");
 		RegexUtil::replace(data, "[ \t]*#include[ \t]*<[^<>]+>", " ");
 		RegexUtil::replace(data, "[ \t]*#define[ \t]*[a-zA-Z0-9_]*[ \t]*[0-9]*", " ");
 		RegexUtil::replace(data, "[ \t]*#define[ \t]*[a-zA-Z0-9_]*[ \t]*\"[^\"]+\"", " ");
 		RegexUtil::replace(data, "[ \t]*#ifndef[ \t]*[a-zA-Z0-9_]*[ \t]*", " ");
-		RegexUtil::replace(data, "[ \t]*#endif[ \t]*", " ");
+		RegexUtil::replace(data, "[ \t]*#endif[ \t]*", " ");*/
 
 		vector<string> typedefs = RegexUtil::search(data, "[ \t]*typedef[ \t]*[^;]+;");
 		RegexUtil::replace(data, "[ \t]*typedef[ \t]*[^;]+;", " ");
@@ -606,7 +647,7 @@ map<string, ClassStructure> Reflection::getClassStructures(string className, str
 		string file = className.substr(className.find_last_of("/")+1);
 
 		map<string, vector<string> > glbnmspcs;
-		handleNamespace(data, "", clsvec, glbnmspcs);
+		handleNamespace(data, "", clsvec, glbnmspcs, pragmas);
 		map<string, ClassStructure>::iterator it;
 		vector<string> remnmspcs;
 		for (it=clsvec.begin();it!=clsvec.end();++it) {
@@ -707,7 +748,7 @@ propMap Reflection::getDbTableInfo(string file)
 	string temp;
 	vector<string> all;
 	ifstream infile;
-	infile.open(file.c_str());
+	infile.open(file.c_str(), ios::binary);
 	if(infile)
 	{
 		while(getline(infile,temp))

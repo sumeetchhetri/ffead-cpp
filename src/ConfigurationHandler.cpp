@@ -40,9 +40,22 @@ void ConfigurationHandler::listi(string cwd,string type,bool apDir,strVec &folde
 	if(chdir(cwd.c_str())!=0)
 		return;
 	if(type=="/")
+	{
+		#ifndef OS_MINGW
 		command = ("find . \\( ! -name . -prune \\) \\( -type d -o -type l \\) 2>/dev/null");
+		#else
+		command = ("sh -c \"find . \\( ! -name . -prune \\) \\( -type d -o -type l \\) 2>/dev/null\"");
+		#endif
+	}
 	else
+	{
+		#ifndef OS_MINGW
 		command = ("find . \\( ! -name . -prune \\) \\( -type f -o -type l \\) -name '*"+type+"' 2>/dev/null");
+		#else
+		command = ("sh -c \"find . \\( ! -name . -prune \\) \\( -type f -o -type l \\) -name '*"+type+"' 2>/dev/null\"");
+		#endif
+	}
+	//cout << command << endl;
 	//command = ("ls -F1 "+cwd+"|grep '"+type+"'");
 	logger << ("Searching directory " + cwd + " for pattern " + type) << endl;
 	if ((pipe_fp = popen(command.c_str(), "r")) == NULL)
@@ -898,7 +911,7 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
 	cont = TemplateEngine::evaluate(respath+"/rundyn_template.sh", cntxt);
 	AfcUtil::writeTofile(respath+"/rundyn_dinter.sh", cont, true);
-#if BUILT_WITH_CONFGURE == 1 && !defined(OS_CYGWIN)
+#if BUILT_WITH_CONFGURE == 1
 	cntxt.clear();
 	cntxt["INTER_DINTER_LIBRARIES"] = libs;
 	cntxt["INTER_DINTER_INCLUDES"] = ilibs;
@@ -909,9 +922,30 @@ void ConfigurationHandler::handle(strVec webdirs,strVec webdirs1,string incpath,
 	string mkfileamloc = rtdcfpath+"/autotools/Makefile.am";
 	ret = TemplateEngine::evaluate(mkfileloc,cntxt);
 	AfcUtil::writeTofile(mkfileamloc,ret,true);
+
+	cntxt.clear();
+#ifdef INC_CIB
+	cntxt["MOD_DSORM"] = "true";
+#else
+	cntxt["MOD_DSORM"] = "false";
+#endif
+
+	string cffileloc = rtdcfpath+"/autotools/configure.ac.template";
+	string cffileamloc = rtdcfpath+"/autotools/configure.ac";
+	ret = TemplateEngine::evaluate(cffileloc,cntxt);
+	AfcUtil::writeTofile(cffileamloc,ret,true);
+
+	string configureFilePath = rtdcfpath+"/autotools/configure";
+    if (access( configureFilePath.c_str(), F_OK ) == -1 )
+	{
+		string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
+		string output = ScriptHandler::execute(compres, true);
+		logger << "Set up configure for intermediate libraries\n\n" << endl;
+	}
+
 	string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
 	string output = ScriptHandler::execute(compres, true);
-	logger << "Set up configure for intermediate libraries\n\n" << endl;
+	logger << "Set up makefiles for intermediate libraries\n\n" << endl;
 	logger << output << endl;
 #endif
 }

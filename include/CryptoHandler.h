@@ -22,6 +22,8 @@
 
 #ifndef CRYPTOHANDLER_H_
 #define CRYPTOHANDLER_H_
+#include "AppDefines.h"
+#include "mingw.h"  // WinSock subsystem
 #include <openssl/engine.h>
 #include <openssl/hmac.h>
 #include <openssl/sha.h>

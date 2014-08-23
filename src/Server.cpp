@@ -22,11 +22,12 @@
 
 #include "Server.h"
 
-
+#if !defined(OS_MINGW)
 void sigchld_handler(int s)
 {
     while(waitpid(-1, NULL, WNOHANG) > 0);
 }
+#endif
 
 Server::Server()
 {
@@ -66,7 +67,7 @@ Server::Server(string port,int waiting,Service serv)
 			exit(1);
 		}
 		if (bind(this->sock, p->ai_addr, p->ai_addrlen) == -1) {
-			close(this->sock);
+			closesocket(this->sock);
 			perror("server: bind");
 			continue;
 		}
@@ -158,7 +159,7 @@ Server::Server(string port,bool block,int waiting,Service serv,int mode)
 
 	service = serv;
 	struct addrinfo hints, *servinfo, *p;
-	struct sigaction sa;
+	
 	int yes=1;
 	int rv;
 
@@ -176,18 +177,32 @@ Server::Server(string port,bool block,int waiting,Service serv,int mode)
 	// loop through all the results and bind to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next)
 	{
+		#ifdef OS_MINGW
+		if ((this->sock = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == INVALID_SOCKET)
+		#else
 		if ((this->sock = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == -1)
+		#endif
 		{
 			perror("server: socket");
 			continue;
 		}
-		if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &yes,
-				sizeof(int)) == -1) {
-			perror("setsockopt");
-			exit(1);
-		}
+		#ifdef OS_MINGW
+			BOOL bOptVal = FALSE;
+			if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
+				perror("setsockopt");
+			}
+		#else
+			if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+				perror("setsockopt");
+			}
+		#endif
+		
+		#ifdef OS_MINGW
+		if (bind(this->sock, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
+		#else
 		if (bind(this->sock, p->ai_addr, p->ai_addrlen) == -1) {
-			close(this->sock);
+		#endif
+			closesocket(this->sock);
 			perror("server: bind");
 			continue;
 		}
@@ -208,6 +223,8 @@ Server::Server(string port,bool block,int waiting,Service serv,int mode)
 		perror("listen");
 		exit(1);
 	}
+	#if !defined(OS_MINGW)
+	struct sigaction sa;
 	sa.sa_handler = sigchld_handler; // reap all dead processes
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
@@ -216,6 +233,7 @@ Server::Server(string port,bool block,int waiting,Service serv,int mode)
 		perror("sigaction");
 		exit(1);
 	}
+	#endif
 	logger << ("waiting for connections on " + port + ".....") << endl;
 	this->mode = mode;
 }
@@ -248,13 +266,13 @@ void* Server::servicing(void* arg)
 	return NULL;
 }
 
-int Server::Accept()
+SOCKET Server::Accept()
 {
 	socklen_t sin_size = sizeof their_addr;
-	int new_fd = accept(this->sock, (struct sockaddr *)&(this->their_addr), &sin_size);
+	SOCKET new_fd = accept(this->sock, (struct sockaddr *)&(this->their_addr), &sin_size);
 	return new_fd;
 }
-int Server::Send(int fd,string data)
+int Server::Send(SOCKET fd,string data)
 {
 	int bytes = send(fd,data.c_str(),data.length(),0);
 	if(bytes == -1)
@@ -263,7 +281,7 @@ int Server::Send(int fd,string data)
 	}
 	return bytes;
 }
-int Server::Send(int fd,vector<char> data)
+int Server::Send(SOCKET fd,vector<char> data)
 {
 	int bytes = send(fd,&data[0],data.size(),0);
 	if(bytes == -1)
@@ -272,16 +290,16 @@ int Server::Send(int fd,vector<char> data)
 	}
 	return bytes;
 }
-int Server::Send(int fd,vector<unsigned char> data)
+int Server::Send(SOCKET fd,vector<unsigned char> data)
 {
-	int bytes = send(fd,&data[0],data.size(),0);
+	int bytes = send(fd,(const char*)&data[0],data.size(),0);
 	if(bytes == -1)
 	{
 		logger << "send failed" << endl;
 	}
 	return bytes;
 }
-int Server::Send(int fd,char *data)
+int Server::Send(SOCKET fd,char *data)
 {
 	int bytes = send(fd,data,sizeof data,0);
 	if(bytes == -1)
@@ -290,9 +308,9 @@ int Server::Send(int fd,char *data)
 	}
 	return bytes;
 }
-int Server::Send(int fd,unsigned char *data)
+int Server::Send(SOCKET fd,unsigned char *data)
 {
-	int bytes = send(fd,data,sizeof data,0);
+	int bytes = send(fd,(const char*)data,sizeof data,0);
 	if(bytes == -1)
 	{
 		logger << "send failed" << endl;
@@ -300,7 +318,7 @@ int Server::Send(int fd,unsigned char *data)
 	return bytes;
 }
 
-int Server::Receive(int fd,string &data,int bytes)
+int Server::Receive(SOCKET fd,string &data,int bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -319,7 +337,7 @@ int Server::Receive(int fd,string &data,int bytes)
 	memset(&buf[0], 0, sizeof(buf));
 	return bytesr;
 }
-int Server::Receive(int fd,vector<char> &data,int bytes)
+int Server::Receive(SOCKET fd,vector<char> &data,int bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -330,7 +348,7 @@ int Server::Receive(int fd,vector<char> &data,int bytes)
 	copy(te,te+bytes,data.begin());
 	return bytesr;
 }
-int Server::Receive(int fd,vector<unsigned char>& data,int bytes)
+int Server::Receive(SOCKET fd,vector<unsigned char>& data,int bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -341,21 +359,21 @@ int Server::Receive(int fd,vector<unsigned char>& data,int bytes)
 	copy(te,te+bytes,data.begin());
 	return bytesr;
 }
-int Server::Receive(int fd,char data[],int bytes)
+int Server::Receive(SOCKET fd,char data[],int bytes)
 {
 	if(bytes==0)
 		return -1;
 	int bytesr = recv(fd, data, bytes, 0);
 	return bytesr;
 }
-int Server::Receive(int fd,unsigned char data[],int bytes)
+int Server::Receive(SOCKET fd,unsigned char data[],int bytes)
 {
 	if(bytes==0)
 		return -1;
-	int bytesr = recv(fd, data, bytes, 0);
+	int bytesr = recv(fd, (char*)data, bytes, 0);
 	return bytesr;
 }
-int Server::Receive(int fd,vector<string>& data,int bytes)
+int Server::Receive(SOCKET fd,vector<string>& data,int bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -374,10 +392,9 @@ int Server::Receive(int fd,vector<string>& data,int bytes)
 	return bytesr;
 }
 
-int Server::createListener(string port,bool block)
+SOCKET Server::createListener(string port,bool block)
 {
-	int sockfd;
-	struct sigaction sa;
+	SOCKET    sockfd;
 	int yes=1;
 	int rv;
 	bool bound = false;
@@ -389,46 +406,76 @@ int Server::createListener(string port,bool block)
 	self.sin_addr.s_addr = INADDR_ANY;
 
 	/*---Create streaming socket---*/
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	#ifdef OS_MINGW
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
+	#else
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+	#endif
 	{
-		perror("Socket");
+		perror("server: socket");
 		return -1;
 	}
-	if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
-		perror("setsockopt");
-		return -1;
-	}
-	if (bind(sockfd, (struct sockaddr*)&self, sizeof(self)) != 0) {
-		close(sockfd);
+
+	#ifdef OS_MINGW
+		BOOL bOptVal = FALSE;
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
+			perror("setsockopt");
+			return -1;
+		}
+	#else
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+			perror("setsockopt");
+			return -1;
+		}
+	#endif
+	
+	#ifdef OS_MINGW
+	if (bind(sockfd, (struct sockaddr*)&self, sizeof(self)) == SOCKET_ERROR) {
+	#else
+	if (bind(sockfd, (struct sockaddr*)&self, sizeof(self)) == -1) {
+	#endif
+		closesocket(sockfd);
 		perror("server: bind");
 		return -1;
 	}
+
+	#ifdef OS_MINGW
+	if (listen(sockfd, BACKLOGM) == SOCKET_ERROR)
+	#else
 	if (listen(sockfd, BACKLOGM) == -1)
+	#endif
 	{
 		perror("listen");
 		return -1;
 	}
+	#if !defined(OS_MINGW)
+	struct sigaction sa;
 	sa.sa_handler = sigchld_handler; // reap all dead processes
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	if (sigaction(SIGCHLD, &sa, NULL) == -1)
 	{
 		perror("sigaction");
-		return -1;
+		exit(1);
 	}
+	#endif
 
 	if(!block)
 	{
-		fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
+		#ifdef OS_MINGW
+			u_long iMode = 1;
+			ioctlsocket(sockfd, FIONBIO, &iMode);
+		#else
+			fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
+		#endif
 	}
 	return sockfd;
 }
 
-int Server::createListener(string ipAddress,string port,bool block)
+SOCKET Server::createListener(string ipAddress,string port,bool block)
 {
-	int sockfd;
+	SOCKET    sockfd;
 	struct addrinfo hints, *servinfo, *p;
-	struct sigaction sa;
 	int yes=1;
 	int rv;
 	bool bound = false;
@@ -451,18 +498,34 @@ int Server::createListener(string ipAddress,string port,bool block)
 	// loop through all the results and bind to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next)
 	{
+		#ifdef OS_MINGW
+		if ((sockfd = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == INVALID_SOCKET)
+		#else
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == -1)
+		#endif
 		{
 			perror("server: socket");
 			continue;
 		}
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-				sizeof(int)) == -1) {
-			perror("setsockopt");
-			return -1;
-		}
+		#ifdef OS_MINGW
+			BOOL bOptVal = FALSE;
+			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
+				perror("setsockopt");
+				return -1;
+			}
+		#else
+			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+				perror("setsockopt");
+				return -1;
+			}
+		#endif
+		
+		#ifdef OS_MINGW
+		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
+		#else
 		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-			close(sockfd);
+		#endif
+			closesocket(sockfd);
 			perror("server: bind");
 			continue;
 		} else {
@@ -476,23 +539,35 @@ int Server::createListener(string ipAddress,string port,bool block)
 		return -1;
 	}
 	freeaddrinfo(servinfo); // all done with this structure
+	#ifdef OS_MINGW
+	if (listen(sockfd, BACKLOGM) == SOCKET_ERROR)
+	#else
 	if (listen(sockfd, BACKLOGM) == -1)
+	#endif
 	{
 		perror("listen");
 		return -1;
 	}
+	#if !defined(OS_MINGW)
+	struct sigaction sa;
 	sa.sa_handler = sigchld_handler; // reap all dead processes
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
 	if (sigaction(SIGCHLD, &sa, NULL) == -1)
 	{
 		perror("sigaction");
-		return -1;
+		exit(1);
 	}
+	#endif
 
 	if(!block)
 	{
-		fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
+		#ifdef OS_MINGW
+			u_long iMode = 1;
+			ioctlsocket(sockfd, FIONBIO, &iMode);
+		#else
+			fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
+		#endif
 	}
 	return sockfd;
 }
@@ -505,10 +580,12 @@ void Server::start()
 		started = true;
 		if(mode==1)
 		{
+			#ifndef OS_MINGW
 			if(fork()==0)
 			{
 				servicing(this);
 			}
+			#endif
 		}
 		else if(mode==2)
 		{
@@ -530,7 +607,7 @@ void Server::stop()
 	lock.unlock();
 }
 
-int Server::getSocket()
+SOCKET Server::getSocket()
 {
 	return sock;
 }

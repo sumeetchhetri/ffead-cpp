@@ -22,11 +22,14 @@
 
 #ifndef OBJECT_H_
 #define OBJECT_H_
+#include "AppDefines.h"
+#if !defined(OS_MINGW)
+#include <cxxabi.h>
+#endif
 #include <stdexcept>
 #include "iostream"
 /*Fix for Windows Cygwin*///#include <execinfo.h>
 #include <dlfcn.h>
-#include <cxxabi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "string"

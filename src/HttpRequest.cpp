@@ -979,7 +979,7 @@ HttpRequest::HttpRequest(strVec vec,string path)
 						{
 							string tmpfile = this->getCntxt_root() + "/temp/"+ this->getContent_boundary() +datf.value;
 							ofstream os;
-							os.open(tmpfile.c_str());
+							os.open(tmpfile.c_str(), ios::binary);
 							os.write(datf.value.c_str(), datf.value.length());
 							os.close();
 							datf.tmpFileName = tmpfile;
@@ -1175,7 +1175,7 @@ void HttpRequest::updateFromContentStr_Old()
 				{
 					string tmpfile = this->getCntxt_root() + "/temp/"+ this->getContent_boundary() + datf.getContent();
 					ofstream os;
-					os.open(tmpfile.c_str());
+					os.open(tmpfile.c_str(), ios::binary);
 					os.write(datf.getContent().c_str(), datf.getContent().length());
 					os.close();
 					datf.setTempFileName(tmpfile);
@@ -1405,7 +1405,7 @@ void HttpRequest::updateFromContentStr()
 
 void HttpRequest::updateFromContentFile()
 {
-	ifstream infile(this->content_tfile.c_str());
+	ifstream infile(this->content_tfile.c_str(), ios::binary);
 	if(infile.is_open())
 	{
 		if(this->getContent_boundary()!="")

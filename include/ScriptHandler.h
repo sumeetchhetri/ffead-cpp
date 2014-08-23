@@ -22,21 +22,27 @@
 
 #ifndef SCRIPTHANDLER_H_
 #define SCRIPTHANDLER_H_
+#include "AppDefines.h"
 #include <stdlib.h>
 #include "AfcUtil.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
-#include <sys/types.h>
+#if !defined(OS_MINGW)
 #include <sys/wait.h>
-#include "Timer.h"
+#include <sys/types.h>
 #include <unistd.h>
+#endif
+#include "Timer.h"
+
 #include "LoggerFactory.h"
 #include "Constants.h"
 
 class ScriptHandler {
+	#if !defined(OS_MINGW)
 	static int pcloseRWE(int pid, int *rwepipe);
 	static int popenRWE(int *rwepipe, const char *exe, const char *const argv[],string tmpf);
 	static int popenRWEN(int *rwepipe, const char *exe, const char** argv);
+	#endif
 public:
 	ScriptHandler();
 	static string execute(string exe, bool retErrs);
