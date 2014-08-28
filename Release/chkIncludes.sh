@@ -7,6 +7,8 @@ IS_OS_CYGWIN=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"cygwin") != 0 {print "cygw
 IS_OS_BSD=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"bsd") != 0 {print "bsd"}'`
 IS_OS_SOLARIS=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"sunos") != 0 {print "sunos"}'`
 IS_OS_LINUX=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"linux") != 0 {print "linux"}'`
+IS_OS_MINGW=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"mingw") != 0 {print "mingw"}'`
+IS_OS_DARWIN=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"darwin") != 0 {print "darwin"}'`
 
 IS_64_BIT=`uname -m|tr '[A-Z]' '[a-z]'|awk '($0 == "x86_64" || $0 == "ia64" || $0 == "amd64" || index($0,"64") != 0) {print "#define IS_64_BIT 1"}'`
 if [ "$IS_OS_SOLARIS" != "" ]; then
@@ -113,5 +115,11 @@ echo '#define OS_SOLARIS 1' >> $APP_DEFINE_FILE
 echo $IS_64_BIT >> $APP_DEFINE_FILE
 elif [ "$IS_OS_CYGWIN" != "" ]; then
 echo '#define OS_CYGWIN 1' >> $APP_DEFINE_FILE
+echo $IS_64_BIT >> $APP_DEFINE_FILE
+elif [ "$IS_OS_MINGW" != "" ]; then
+echo '#define OS_MINGW 1' >> $APP_DEFINE_FILE
+echo $IS_64_BIT >> $APP_DEFINE_FILE
+elif [ "$IS_OS_DARWIN" != "" ]; then
+echo '#define OS_DARWIN 1' >> $APP_DEFINE_FILE
 echo $IS_64_BIT >> $APP_DEFINE_FILE
 fi

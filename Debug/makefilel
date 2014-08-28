@@ -6,11 +6,23 @@
 
 RM := rm -rf
 modules := all
+librt := -lrt
+libodbc := -lodbc
 
 # All of the sources participating in the build are defined here
 -include subdirl.mk
 -include objectsl.mk
 -include envvars.mk
+
+ifneq (,$(findstring darwin,$(IS_OS_DARWIN)))
+librt := 
+libodbc := 
+endif
+
+ifneq (,$(findstring darwin,$(IS_OS_MINGW)))
+librt := 
+libodbc := 
+endif
 
 ##################################
 ifneq (,$(findstring component,$(modules)))
@@ -29,7 +41,7 @@ endif
 ifneq (,$(findstring webservice,$(modules)))
 -include modules/subdir-webservice.mk
 endif
-ifneq (,$(findstring cibernate,$(modules)))
+ifneq (,$(findstring dsorm,$(modules)))
 -include modules/subdir-cibernate.mk
 endif
 ifneq (,$(findstring distocache,$(modules)))
@@ -111,7 +123,7 @@ libweblib: $(OBJS) $(COMP_OBJS) $(MI_OBJS) $(MSGH_OBJS) $(WEBSVCS_OBJS) $(CIB_OB
 	@echo 'Invoking: GCC C++ Linker'
 	g++ $(PTHREADS) -L/usr/local/lib -shared -o"libweblib.$(RES_LIB_EXT)" $(OBJS) $(COMP_OBJS) \
 			$(MI_OBJS) $(MSGH_OBJS) $(WEBSVCS_OBJS) $(CIB_OBJS) $(DSTC_OBJS) $(XMLSER_OBJS) \
-			$(BINSER_OBJS) $(USER_OBJS) $(LIBS) $(EX_LIBS)
+			$(BINSER_OBJS) $(USER_OBJS) $(LIBS) $(EX_LIBS) $(librt) $(libodbc)
 	@echo 'Finished building target: $@'
 	cp -f libweblib.$(RES_LIB_EXT) ../lib/
 	@echo ' '

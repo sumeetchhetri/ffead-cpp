@@ -6,11 +6,23 @@
 
 RM := rm -rf
 modules := all
+librt := -lrt
+libodbc := -lodbc
 
 # All of the sources participating in the build are defined here
 -include subdir.mk
 -include objects.mk
 -include envvars.mk
+
+ifneq (,$(findstring darwin,$(IS_OS_DARWIN)))
+librt := 
+libodbc := 
+endif
+
+ifneq (,$(findstring darwin,$(IS_OS_MINGW)))
+librt := 
+libodbc := 
+endif
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(C++_DEPS)),)
@@ -49,7 +61,7 @@ CHS: init $(OBJS) $(USER_OBJS)
 	$(MAKE_EXE) modules=$(modules) -f makefilel all
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ $(PTHREADS) -L../lib -L/usr/local/lib -rdynamic -o"CHS" $(OBJS) $(USER_OBJS) $(LIBS) $(EX_LIBS)
+	g++ $(PTHREADS) -L../lib -L/usr/local/lib -rdynamic -o"CHS" $(OBJS) $(USER_OBJS) $(LIBS) $(EX_LIBS) $(librt) $(libodbc)
 	@echo 'Finished building target: $@'	
 	rm -Rf ffead-server
 	mkdir ffead-server

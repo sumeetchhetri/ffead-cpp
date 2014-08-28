@@ -43,6 +43,7 @@ AS_HELP_STRING([--enable-apachemod],
 
 AC_CANONICAL_HOST
 local_os_type="unknown"
+is_librt_available="yes"
 case "$host" in
 *-cygwin*)
     AC_DEFINE(OS_CYGWIN, [], [set OS to cygwin])
@@ -51,6 +52,7 @@ case "$host" in
 *mingw*)
     AC_DEFINE(OS_MINGW, [], [set OS to mingw])
     local_os_type="mingw"
+    is_librt_available="no"
     CPPFLAGS="$CPPFLAGS -I/mingw/include -L/mingw/lib -D__USE_MINGW_ANSI_STDIO=1"
     AM_CXXFLAGS="$AM_CXXFLAGS -I/mingw/include -L/mingw/lib"
     LDFLAGS="$LDFLAGS -L/mingw/lib"
@@ -121,6 +123,7 @@ case "$host" in
     local_os_type="osf"
     ;;
 *-darwin*)
+	is_librt_available="no"
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
     AC_DEFINE(OS_DARWIN, [], [set OS to darwin])
     local_os_type="darwin"
@@ -529,9 +532,11 @@ if test "x$mod_dsorm" = "xtrue"; then
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
 fi
 
-if test "x$local_os_type" != "xmingw"; then	
+if test "x$is_librt_available" = "xyes"; then	
 	AC_CHECK_LIB(rt, clock_gettime,,[AC_MSG_ERROR([librt required but not found])])
-else
+fi
+
+if test "x$local_os_type" = "xmingw"; then
 	AC_CHECK_LIB(wsock32, main, , [AC_MSG_ERROR([Not found libwsock32 library])])
 	AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
 	AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])

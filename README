@@ -33,9 +33,9 @@ FEATURES
 26. Utilities such as Timer, Logging, Property Files etc.
 27. File Upload
 28. FTP Server
-29. Security features for Method access (Web Services, AJAX calls, C++ Bean service calls, Server URL’s)
+29. Security features for Method access (Web Services, AJAX calls, C++ Bean service calls, Server URLÃ¢â‚¬â„¢s)
 30. Module for Integration of the framework with Apache Web Server
-31. Method Invoker Server for cross platform Method Invocation (A daemon per language/platform approach – XML based Serialization/De- Serialization)
+31. Method Invoker Server for cross platform Method Invocation (A daemon per language/platform approach Ã¢â‚¬â€œ XML based Serialization/De- Serialization)
 
 Testing Frameworks
 ====================
@@ -77,22 +77,21 @@ Release Notes version 1.8
 	:- Changed the web-service related template files for better web service support
 
 REQUIREMENTS
-1. Any box that runs linux, BSD, Solaris or Windows(Cygwin/Mingw-Msys) or any other OS(using autotools)
-2. Boost is no longer required as of version 1.7
-3. UnixODBC and development files
-4. OpenSSl and development files
-5. (GNU C++ compiler, GNU make) or Autotools(autoconf/automake/libtool/c++ compiler)
+1. Any box that runs Linux, BSD, Solaris, MAC OS X or Windows(Cygwin/Mingw-Msys) or any other OS(using autotools)
+2. UnixODBC and development files
+3. OpenSSl and development files
+4. (GNU C++ compiler, GNU make) or Autotools(autoconf/automake/libtool/c++ compiler)
 
 
 INSTALL
 Autotools/Any OS
-Refer to the AUTOTOOLS-ANY-OS-INSTALL for generic installation directions.
+Refer to the AUTOTOOLS-ANY-OS-INSTALL for generic installation directions for all Operating Systems
 
 Unix
-Refer the UNIX-INSTALL-WITH-GNU-MAKE file for installation directions.
+Refer the UNIX-INSTALL-WITH-GNU-MAKE file for installation directions on Unix
 
 BSD
-Refer the FREEBSD-INSTALL-WITH-GNU-MAKE file for installation directions.
+Refer the FREEBSD-INSTALL-WITH-GNU-MAKE file for installation directions on BSD
 
 Windows/Cygwin
 Refer the WINDOWS-CYGWIN-INSTALL-WITH-GNU-MAKE file for installation direction on Windows platform having Cygwin installed
@@ -101,7 +100,10 @@ Windows/Mingw
 Refer the WINDOWS-MINGW-INSTALL-WITH-GNU-MAKE file for installation direction on Windows platform having Mingw/Msys installed
 
 Solaris
-Refer the SOLARIS-INSTALL-WITH-GNU-MAKE file for installation directions.
+Refer the SOLARIS-INSTALL-WITH-GNU-MAKE file for installation directions on Solaris
+
+MAC OS X
+Refer the MACOSX-INSTALL-WITH-GNU-MAKE file for installation directions on MAC OS X
 
 UPDATES
 Find latest and older versions on 
@@ -109,4 +111,4 @@ Google Code - http://code.google.com/p/ffead-cpp
 Github - https://github.com/sumeetchhetri/ffead-cpp
 
 
-Copyright � 2014 Sumeet Chhetri
+Copyright © 2014 Sumeet Chhetri

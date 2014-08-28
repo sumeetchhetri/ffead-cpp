@@ -14,14 +14,26 @@ following software packages:
 
     o autotools package (autoconf,automake,libtool)
     o c++ compiler
-    o ssl libraries (including ssl-devel/ssl-dev)
-    o unixodbc (including unixodbc-devel/unixodbc-dev)
+    o ssl libraries (including ssl-devel/ssl-dev/openssl-devel/openssl-dev/libssl-dev)
+    o unixodbc (including unixodbc-devel/unixodbc-dev/unixodbc)
 
 The code will build with native unix compilers on platforms such as HPUX
 AIX and Solaris.
 
 Dependencies
 ============
+MAC OS X - To install all dependencies on MAC OS X use,
+	Make sure Xcode is installed or at-least the Command line tools are present
+	Install homebrew first using,
+		ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
+	Install openssl
+		brew install openssl
+	Install unixodbc
+		brew install unixodbc
+	Run ./configure
+		Note - If configure fails then try executing the ./autogen-noreconf.sh script to recreate configure
+	
+
 SOLARIS - To install all dependencies on solaris(OpenCSW) use,
 	`pkgutil -y -i autoconf automake libtool unixodbc unixodbc_dev libssl1_0_0 libssl_dev`
 	

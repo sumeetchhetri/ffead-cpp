@@ -25,7 +25,6 @@
 #include "AppDefines.h"
 #include "mingw.h"
 #include <pthread.h>
-#include <time.h>
 #include <unistd.h>
 #include <stdio.h>
 

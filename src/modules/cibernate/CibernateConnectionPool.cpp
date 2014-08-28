@@ -62,6 +62,7 @@ Connection* CibernateConnectionPool::newConnection(bool read)
 		logger << "Error AllocHDB " << V_OD_erg << endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		this->initialized = false;
+		delete connection;
 		return NULL;
 		//exit(0);
 	}
@@ -78,6 +79,7 @@ Connection* CibernateConnectionPool::newConnection(bool read)
 		logger << V_OD_msg << " (" << (int)V_OD_err_s <<  ")" << endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		this->initialized = false;
+		delete connection;
 		return NULL;
 		//exit(0);
 	}
@@ -120,19 +122,24 @@ void CibernateConnectionPool::createPool(int size,string dbName,string uname,str
 	{
 		Connection* connection = this->newConnection(true);
 		mutex.lock();
-		this->readConnections.push_back(connection);
+		if(connection!=NULL)
+				this->readConnections.push_back(connection);
 		mutex.unlock();
 		if(!this->initialized)
-			break;
+				break;
 	}
-	for(int i=0;i<size-reads;i++)
+	if(this->initialized)
 	{
-		Connection* connection = this->newConnection(false);
-		mutex.lock();
-		this->writeConnections.push_back(connection);
-		mutex.unlock();
-		if(!this->initialized)
-			break;
+		for(int i=0;i<size-reads;i++)
+		{
+			Connection* connection = this->newConnection(false);
+			mutex.lock();
+			if(connection!=NULL)
+					this->writeConnections.push_back(connection);
+			mutex.unlock();
+			if(!this->initialized)
+					break;
+		}
 	}
 	if(!this->initialized)
 	{
@@ -198,15 +205,22 @@ string CibernateConnectionPool::getDialect() const
 
 Connection::Connection()
 {
+	conn = NULL;
+	valid = false;
+	busy = false;
+	type = false;
 	logger = LoggerFactory::getLogger("Connection");
-	logger << "\nCreated Connection" << flush;
+	//logger << "\nCreated Connection" << flush;
 }
 
 Connection::~Connection()
 {
 #ifdef HAVE_LIBODBC
-	SQLDisconnect(conn);
-	SQLFreeHandle(SQL_HANDLE_DBC,conn);
-	logger << "\nDestructed Connection" << flush;
+	if(valid)
+	{
+		logger << "\nDestructed Connection" << flush;
+		SQLDisconnect(conn);
+		SQLFreeHandle(SQL_HANDLE_DBC,conn);
+	}
 #endif
 }

@@ -18,7 +18,12 @@ rm -f configure config.* aclocal* depcomp install-sh ltmain.sh libtool Makefile 
 rm -rf autom4te.cache
 rm -rf $FFEAD_CPP_PATH/rtdcf/.deps
 
-libtoolize --force
+IS_OS_DARWIN=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"darwin") != 0 {print "darwin"}'`
+if [ "$IS_OS_DARWIN" == "" ]; then
+	libtoolize --force
+else
+	glibtoolize --force
+fi
 aclocal
 autoconf -I m4
 automake --add-missing

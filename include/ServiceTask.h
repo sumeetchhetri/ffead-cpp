@@ -52,7 +52,6 @@
 #include "DistGlobalCache.h"
 #endif
 #include <stdio.h>
-#include <time.h>
 
 #define MAXBUFLENM 32768
 #define BUFSIZZ 1024

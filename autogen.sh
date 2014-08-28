@@ -98,9 +98,14 @@ rm -rf apache_mod_ffeadcpp/.deps
 rm -rf web/default/src/.deps
 rm -rf web/flexApp/src/.deps
 rm -rf web/oauthApp/src/.deps
-find . -type d -name '.deps' -print -exec rm -rf {} \;
 
-libtoolize
+IS_OS_DARWIN=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"darwin") != 0 {print "darwin"}'`
+if [ "$IS_OS_DARWIN" == "" ]; then
+	libtoolize
+else
+	glibtoolize
+fi
+
 autoreconf -i --force
 
 ##################

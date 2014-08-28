@@ -12,7 +12,6 @@
 
 #include <ws2tcpip.h>
 #include <winsock2.h>
-//#include <ws2tcpip.h>
 #include <sys/time.h>
 #include <errno.h>
 #include <stdio.h>
@@ -111,6 +110,34 @@ static int inet_pton4(const char *src, unsigned char *dst);
 static int inet_pton6(const char *src, unsigned char *dst);
 typedef DWORD NUMEVENTS;
 #else
+#include <time.h>
+#include <sys/time.h>
+
+#if defined(OS_DARWIN)
+#include <mach/clock.h>
+#include <mach/mach.h>
+
+#ifndef CLOCK_REALTIME
+#define CLOCK_REALTIME  0
+#endif
+
+#ifndef CLOCK_MONOTONIC
+#define CLOCK_MONOTONIC 1
+#endif
+
+static inline int clock_gettime (int clockid, struct timespec *ts)
+{
+	clock_serv_t cclock;
+	mach_timespec_t mts;
+	host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+	clock_get_time(cclock, &mts);
+	mach_port_deallocate(mach_task_self(), cclock);
+	ts->tv_sec = mts.tv_sec;
+	ts->tv_nsec = mts.tv_nsec;
+	return 0;
+}
+#endif
+
 typedef int SOCKET;
 typedef int NUMEVENTS;
 #define INVALID_SOCKET -1  // WinSock invalid socket

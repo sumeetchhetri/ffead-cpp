@@ -47,6 +47,7 @@ class Connection
 public:
 	bool busy;
 	bool type;
+	bool valid;
 #ifdef HAVE_LIBODBC
 	SQLHDBC conn;
 #endif

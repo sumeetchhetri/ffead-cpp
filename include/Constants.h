@@ -41,6 +41,12 @@
 	#define SYS_FORK_AVAIL false
 	#define SCRIPT_EXEC_SHOW_ERRS false
 	#define IS_FILE_DESC_PASSING_AVAIL false
+#elif defined(OS_DARWIN)
+	#define INTER_LIB_FILE "libinter.dylib"
+	#define DINTER_LIB_FILE "libdinter.dylib"
+	#define SYS_FORK_AVAIL true
+	#define SCRIPT_EXEC_SHOW_ERRS true
+	#define IS_FILE_DESC_PASSING_AVAIL false
 #else
 	#define INTER_LIB_FILE "libinter.so"
 	#define DINTER_LIB_FILE "libdinter.so"

@@ -55,7 +55,7 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-#ifndef OS_MINGW
+#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 int send_connection(int fd,int descriptor)
 {
 	struct msghdr msg;
@@ -320,7 +320,7 @@ void* service(void* arg)
 	return NULL;
 }
 
-#ifndef OS_MINGW
+#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 {
 	pid_t pid;
@@ -543,7 +543,7 @@ void* dynamic_page_monitor(void* arg)
 					logger.info("Done generating intermediate code");
 				}
 				m_mutex.lock();
-				#if !defined(OS_MINGW)
+				#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 				if(IS_FILE_DESC_PASSING_AVAIL)
 				{
 					map<int,pid_t>::iterator it;
@@ -925,7 +925,7 @@ int main(int argc, char* argv[])
 
 	if(IS_FILE_DESC_PASSING_AVAIL)
 	{
-		#if !defined(OS_MINGW)
+		#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 		for(int j=0;j<preForked;j++)
 		{
 			pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
@@ -1027,7 +1027,7 @@ int main(int argc, char* argv[])
 		{
 			if(IS_FILE_DESC_PASSING_AVAIL)
 			{
-				#if !defined(OS_MINGW)
+				#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 				files.clear();
 				for(int j=0;j<preForked;j++)
 				{
@@ -1084,7 +1084,7 @@ int main(int argc, char* argv[])
 					cntrlfile.open(files.at(childNo).c_str());
 					if(cntrlfile.is_open())
 					{
-						#if !defined(OS_MINGW)
+						#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 						send_connection(sp[childNo][0], descriptor);
 						string cno = CastUtil::lexical_cast<string>(childNo);
 						childNo++;
@@ -1195,7 +1195,7 @@ int main(int argc, char* argv[])
 		logger << "Destructed Thread pool" << endl;
 	}
 
-	#if !defined(OS_MINGW)
+	#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 	if(IS_FILE_DESC_PASSING_AVAIL)
 	{
 		map<int,pid_t>::iterator it;

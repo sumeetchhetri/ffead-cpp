@@ -26,7 +26,6 @@
 #include "mingw.h"
 #include <unistd.h>
 #include <sys/types.h>
-#include <time.h>
 #include "string"
 #include "vector"
 #include "CastUtil.h"

@@ -23,9 +23,8 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 #include "AppDefines.h"
-#include <stdlib.h>
 #include "mingw.h"
-#include <time.h>
+#include <stdlib.h>
 #include "LoggerFactory.h"
 using namespace std;
 class Timer {
