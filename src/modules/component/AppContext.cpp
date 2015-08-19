@@ -22,7 +22,7 @@
 
 #include "AppContext.h"
 
-BeanException::BeanException(string message)
+BeanException::BeanException(const string& message)
 {
 	this->setMessage(message);
 }
@@ -59,7 +59,7 @@ AppContext::~AppContext() {
 	// TODO Auto-generated destructor stub
 }
 
-bool AppContext::registerComponent(string name)
+bool AppContext::registerComponent(const string& name)
 {
 	init();
 	if(_instance->components.find(name)!=_instance->components.end())
@@ -73,7 +73,7 @@ bool AppContext::registerComponent(string name)
 	}
 }
 
-bool AppContext::unregisterComponent(string name)
+bool AppContext::unregisterComponent(const string& name)
 {
 	init();
 	map<string,string>::iterator it = _instance->components.find(name);
@@ -86,7 +86,7 @@ bool AppContext::unregisterComponent(string name)
 		return false;
 }
 
-void AppContext::lookup(string name)
+void AppContext::lookup(const string& name)
 {
 	if(_instance==NULL)
 	{

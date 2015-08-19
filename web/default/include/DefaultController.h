@@ -29,7 +29,7 @@ class DefaultController : public Controller{
 public:
 	DefaultController();
 	virtual ~DefaultController();
-	HttpResponse service(HttpRequest);
+	bool service(HttpRequest* req, HttpResponse* res);
 };
 
 #endif /* DEFAULTCONTROLLER_H_ */

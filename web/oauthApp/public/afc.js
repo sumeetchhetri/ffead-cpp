@@ -52,7 +52,7 @@ function afcPrototypeAjaxOAUTHCall()
                         var msg = response.responseText;
                         alert(msg);
                 }
-        }
+        };
         document.body.removeChild(form);
         new Ajax.Request('/request.oauth', opt);
 }
@@ -93,13 +93,13 @@ function AfcCall(claz,meth,param,cb,url,_cntxt)
             onSuccess: function(response) 
                 {
                         var msg = response.responseText;
-                        if(cb==null){alert("No callback specified.");alert(msg)}
+                        if(cb==null){alert("No callback specified.");alert(msg);}
                         else
                         {
                                 _afc_fview_call_any_function.call(cb, response);
                         }
                 }
-        }
+        };
         new Ajax.Request((url==null?"/":url), opt);
         //alert(postdata);
         document.body.removeChild(form);

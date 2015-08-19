@@ -23,7 +23,7 @@
 #include "Component.h"
 
 Component::Component() {
-	chib = new Cibernate("default");
+	//chib = new DataSourceInterface("default");
 }
 
 Component::~Component() {
@@ -33,22 +33,22 @@ Component::~Component() {
 
 void Component::startTransaction()
 {
-	getCibernate()->startTransaction();
+	getDataSource()->startTransaction();
 }
 
 void Component::endTransaction()
 {
-	getCibernate()->commit();
+	getDataSource()->commit();
 }
 
 void Component::commit()
 {
-	getCibernate()->commit();
+	getDataSource()->commit();
 }
 
 void Component::rollback()
 {
-	getCibernate()->rollback();
+	getDataSource()->rollback();
 }
 
 void Component::execute()
@@ -56,7 +56,7 @@ void Component::execute()
 
 }
 
-Cibernate* Component::getCibernate()
+DataSourceInterface* Component::getDataSource()
 {
 	return chib;
 }

@@ -52,8 +52,9 @@ void* MethodInvoc::service(void* arg)
 		XmlParser parser("Parser");
 		if(methInfo.find("lang=\"c++\"")!=string::npos || methInfo.find("lang='c++'")!=string::npos)
 		{
-			Document doc = parser.getDocument(methInfo);
-			Element message = doc.getRootElement();
+			Document doc;
+			parser.parse(methInfo, doc);
+			const Element& message = doc.getRootElement();
 			if(message.getTagName()!="method")
 			{
 				throw MethodInvokerException("No method Tag\n",retValue);
@@ -78,7 +79,7 @@ void* MethodInvoc::service(void* arg)
 			{
 				throw MethodInvokerException("message tag should have only one child tag\n",retValue);
 			}
-			else if(message.getChildElements().at(0).getTagName()!="args")
+			else if(message.getChildElements().at(0)->getTagName()!="args")
 			{
 				throw MethodInvokerException("message tag should have an args child tag\n",retValue);
 			}
@@ -86,47 +87,47 @@ void* MethodInvoc::service(void* arg)
 			Reflector reflector;
 			args argus;
 			vals valus;
-			ElementList argts = message.getChildElements().at(0).getChildElements();
+			ElementList argts = message.getChildElements().at(0)->getChildElements();
 			for (unsigned var = 0; var < argts.size();  var++)
 			{
 				void *value = NULL;
-				Element arg = argts.at(var);
-				if(arg.getTagName()!="argument" || arg.getAttribute("type")=="")
+				Element* arg = argts.at(var);
+				if(arg->getTagName()!="argument" || arg->getAttribute("type")=="")
 					throw MethodInvokerException("every argument tag should have a name and type attribute\n",retValue);
-				if(arg.getText()=="" && arg.getChildElements().size()==0)
+				if(arg->getText()=="" && arg->getChildElements().size()==0)
 					throw MethodInvokerException("argument value missing\n",retValue);
-				if(arg.getAttribute("type")=="int")
+				if(arg->getAttribute("type")=="int")
 				{
 					int *vt = new int;
-					*vt = CastUtil::lexical_cast<int>(arg.getText());
+					*vt = CastUtil::lexical_cast<int>(arg->getText());
 					value = vt;
 				}
-				else if(arg.getAttribute("type")=="float")
+				else if(arg->getAttribute("type")=="float")
 				{
 					float *vt = new float;
-					*vt = CastUtil::lexical_cast<float>(arg.getText());
+					*vt = CastUtil::lexical_cast<float>(arg->getText());
 					value = vt;
 				}
-				else if(arg.getAttribute("type")=="double")
+				else if(arg->getAttribute("type")=="double")
 				{
 					double *vt = new double;
-					*vt = CastUtil::lexical_cast<double>(arg.getText());
+					*vt = CastUtil::lexical_cast<double>(arg->getText());
 					value = vt;
 				}
-				else if(arg.getAttribute("type")=="string")
+				else if(arg->getAttribute("type")=="string")
 				{
 					string *vt = new string;
-					*vt = CastUtil::lexical_cast<string>(arg.getText());
+					*vt = CastUtil::lexical_cast<string>(arg->getText());
 					value = vt;
 				}
-				else if(arg.getAttribute("type")!="")
+				else if(arg->getAttribute("type")!="")
 				{
-					Element obj = arg.getChildElements().at(0);
-					string objxml = obj.render();
-					string objClassName = obj.getTagName();
-					value = ser.unSerializeUnknown(objxml,arg.getAttribute("type"));
+					Element* obj = arg->getChildElements().at(0);
+					string objxml = obj->render();
+					string objClassName = obj->getTagName();
+					value = ser.unSerializeUnknown(objxml,arg->getAttribute("type"));
 				}
-				argus.push_back(arg.getAttribute("type"));
+				argus.push_back(arg->getAttribute("type"));
 				valus.push_back(value);
 			}
 			string className = message.getAttribute("className");
@@ -208,7 +209,7 @@ void* MethodInvoc::service(void* arg)
 }
 
 
-void MethodInvoc::trigger(string port)
+void MethodInvoc::trigger(const string& port)
 {
 	init();
 	if(instance->running)

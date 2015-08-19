@@ -77,25 +77,13 @@
 #
 ######################################################################
 
-if [ "$#" -gt 1 -a -n "$2" ]
-then
-	FFEAD_CPPPTH=$2
-	export FFEAD_CPP_PATH=${FFEAD_CPPPTH}
-	cd $FFEAD_CPP_PATH/rtdcf/autotools
-elif [ "$#" -gt 0 -a -n "$1" ]
-then
-	FFEAD_CPPPTH=$1
-	export FFEAD_CPP_PATH=${FFEAD_CPPPTH}
-	cd $FFEAD_CPP_PATH/rtdcf/autotools
-fi
+FFEAD_CPPPTH=$1
+shift;
+export FFEAD_CPP_PATH=${FFEAD_CPPPTH}
+cd $FFEAD_CPP_PATH/rtdcf/autotools
 
 #rm -f $FFEAD_CPP_PATH/lib/*inter.*
 rm -f Makefile
-
-if [ "$#" -gt 0 -a -n "$1" ] && [ "$1" = "reconf" ]; then
-	echo "Reconfigure requested..."
-	rm -f configure config.* aclocal* depcomp install-sh ltmain.sh libtool Makefile Makefile.in missing
-fi
 
 # set to minimum acceptable version of autoconf
 if [ "x$AUTOCONF_VERSION" = "x" ] ; then
@@ -115,7 +103,7 @@ rm -rf $FFEAD_CPP_PATH/rtdcf/.deps
 
 set -e
 IS_OS_DARWIN=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"darwin") != 0 {print "darwin"}'`
-if [ "$IS_OS_DARWIN" == "" ]; then
+if [ -z "$IS_OS_DARWIN" ]; then
 	libtoolize
 else
 	glibtoolize

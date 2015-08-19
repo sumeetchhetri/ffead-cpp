@@ -21,7 +21,6 @@
  */
 
 #include "Dview.h"
-#include "XmlParser.h"
 
 Dview::Dview() {
 	// TODO Auto-generated constructor stub
@@ -32,9 +31,9 @@ Dview::~Dview() {
 	// TODO Auto-generated destructor stub
 }
 
-Document Dview::getDocument()
+void Dview::getDocument(Document* doc)
 {
 	string xml = "<html><head><script src=\"1.js\"></script></head><body><input type=\"text\"/><input type=\"submit\"/></body></html>";
 	XmlParser parser("Parser");
-	return parser.getDocument(xml);
+	parser.parse(xml, *doc);
 }

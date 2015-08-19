@@ -1,10 +1,7 @@
 #!/bin/sh
 
-if [ "$#" -gt 0 -a -n "$1" ]
-then
-	FFEAD_CPPPTH=$1
-	export FFEAD_CPP_PATH=${FFEAD_CPPPTH}
-fi
+FFEAD_CPPPTH=$1
+export FFEAD_CPP_PATH=${FFEAD_CPPPTH}
 
 cd $FFEAD_CPP_PATH/rtdcf/autotools
 make clean

@@ -1,0 +1,172 @@
+/*
+ * Http11Handler.cpp
+ *
+ *  Created on: 02-Jan-2015
+ *      Author: sumeetc
+ */
+
+#include "Http11Handler.h"
+
+void* Http11Handler::readRequest(void*& context, int& pending) {
+	if(read())return NULL;
+	if(!isHeadersDone && buffer.find("\r\n\r\n")!=string::npos)
+	{
+		bytesToRead = 0;
+		string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
+		buffer = buffer.substr(buffer.find("\r\n\r\n")+4);
+		vector<string> lines = StringUtil::splitAndReturn<vector<string> >(headers, "\r\n");
+		request = new HttpRequest(webpath);
+		request->buildRequest("httpline", lines.at(0));
+		int hdrc = 0;
+		for (int var = 0; var < (int)lines.size(); ++var) {
+			size_t kind = string::npos;
+			if(var>0 && (kind = lines.at(var).find(":"))!=string::npos) {
+				string key = lines.at(var).substr(0, kind);
+				string value = lines.at(var).substr(kind+1);
+				request->buildRequest(key, value);
+				if(hdrc++>maxReqHdrCnt) {
+					close();
+					delete request;
+					return NULL;
+				}
+			} else if(var!=0) {
+				//TODO stop processing request some invalid http line
+			}
+		}
+		string bytesstr = request->getHeader(HttpRequest::ContentLength);
+		if(bytesstr!="") {
+			bytesToRead = CastUtil::lexical_cast<int>(bytesstr);
+			if(bytesToRead>maxEntitySize) {
+				close();
+				delete request;
+				return NULL;
+			}
+		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find("\r\n")!=string::npos) {
+			bytesstr = buffer.substr(0, buffer.find("\r\n"));
+			buffer = buffer.substr(buffer.find("\r\n")+2);
+			if(bytesstr!="") {
+				isTeRequest = true;
+				bytesToRead = (int)StringUtil::fromHEX(bytesstr);
+				if(bytesToRead==0) {
+					isTeRequest = false;
+				} else if((int)buffer.length()>=bytesToRead) {
+					request->content = buffer.substr(0, bytesToRead);
+					buffer = buffer.substr(bytesToRead);
+				}
+			}
+		}
+		isHeadersDone = true;
+	}
+
+	if(request!=NULL && isHeadersDone)
+	{
+		if(isTeRequest && bytesToRead==0 && buffer.find("\r\n")!=string::npos) {
+			string bytesstr = buffer.substr(0, buffer.find("\r\n"));
+			buffer = buffer.substr(buffer.find("\r\n")+2);
+			if(bytesstr!="") {
+				bytesToRead = (int)StringUtil::fromHEX(bytesstr);
+				if(bytesToRead==0) {
+					isTeRequest = false;
+				}
+			}
+		}
+		if(bytesToRead>0 && (int)buffer.length()>=bytesToRead) {
+			request->content = buffer.substr(0, bytesToRead);
+			buffer = buffer.substr(bytesToRead);
+			bytesToRead = 0;
+		}
+	}
+
+	if(pending==(int)buffer.length())
+	{
+		pending = 0;
+	}
+	else
+	{
+		pending = buffer.length();
+	}
+
+	if(!isTeRequest && bytesToRead==0 && request!=NULL)
+	{
+		isHeadersDone = false;
+		void* temp = request;
+		request = NULL;
+		return temp;
+	}
+	return NULL;
+}
+
+int Http11Handler::getTimeout() {
+	return connKeepAlive;
+}
+
+Http11Handler::Http11Handler(SocketUtil* sockUtil, const string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
+	isHeadersDone = false;
+	bytesToRead = 0;
+	this->sockUtil = sockUtil;
+	request = NULL;
+	this->webpath = webpath;
+	this->chunkSize = chunkSize<=0?0:chunkSize;
+	this->isTeRequest = false;
+	this->connKeepAlive = connKeepAlive;
+	this->maxReqHdrCnt = maxReqHdrCnt;
+	this->maxEntitySize = maxEntitySize;
+}
+
+Http11Handler::~Http11Handler() {
+	if(request!=NULL) {
+		delete request;
+	}
+}
+
+string Http11Handler::getProtocol(void* context) {
+	return "HTTP1.1";
+}
+
+bool Http11Handler::writeResponse(void* req, void* res, void* context) {
+	HttpRequest* request = (HttpRequest*)req;
+	HttpResponse* response = (HttpResponse*)res;
+
+	if(isClosed()) {
+		if(request!=NULL) {
+			delete request;
+		}
+		delete response;
+		return true;
+	}
+
+	if(!response->isDone()) {
+		response->updateContent(request, chunkSize);
+	}
+
+	if(response->getHeader(HttpRequest::Connection)=="")
+	{
+		if(StringUtil::toLowerCopy(request->getHeader(HttpRequest::Connection))!="keep-alive"
+				|| CastUtil::lexical_cast<int>(response->getStatusCode())>307 || request->getHttpVers()<1.1)
+		{
+			response->addHeaderValue(HttpResponse::Connection, "close");
+		}
+		else
+		{
+			response->addHeaderValue(HttpResponse::Connection, "keep-alive");
+		}
+	}
+
+	string data = response->generateOnlyHeaderResponse(request);
+	if(!write(data)) {
+		bool isFirst = true;
+		while(response->hasContent && (data = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
+			isFirst = false;
+			if(write(data)) {
+				break;
+			}
+		}
+	}
+	if(request!=NULL) {
+		delete request;
+	}
+	delete response;
+	return true;
+}
+void Http11Handler::onOpen(){}
+void Http11Handler::onClose(){}

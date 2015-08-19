@@ -29,7 +29,7 @@ class FlexAppController : public Controller{
 public:
 	FlexAppController();
 	virtual ~FlexAppController();
-	HttpResponse service(HttpRequest);
+	bool service(HttpRequest* req, HttpResponse* res);
 };
 
 #endif /* FLEXAPPCONTROLLER_H_ */

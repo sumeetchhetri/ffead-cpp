@@ -2,23 +2,15 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_INIT([ffead-cpp], [1.9], [sumeet.chhetri@gmail.com])
-AC_CONFIG_AUX_DIR([libltdl/config])
 AM_INIT_AUTOMAKE([1.9 no-define foreign])
 AC_CONFIG_SRCDIR([../AjaxInterface.cpp])
-AC_CONFIG_MACRO_DIR([libltdl/m4])
-LT_CONFIG_LTDL_DIR([libltdl])
-
-INCLTDL=""
-LIBLTDL=""
+m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
+AC_CONFIG_MACRO_DIR([m4])
 
 LT_INIT([static shared dlopen])
-LTDL_INIT
 
-dnl Substitute INCLTDL and LIBLTDL in the Makefiles
-AC_SUBST(LTDLINCL)
-AC_SUBST(LIBLTDL)
-
-mod_dsorm=${MOD_DSORM}
+mod_sdormsql=${MOD_SDORM_SQL}
+mod_sdormmongo=${MOD_SDORM_MONGO}
 
 support_debug=no
 AC_ARG_ENABLE(debug,
@@ -28,16 +20,18 @@ AS_HELP_STRING([--enable-debug],
 )
 if test "x$support_debug" = "xyes"; then
     AC_DEFINE(DEBUG, [], [set DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Wno-uninitialized -O0"
+    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Wno-uninitialized -O2"
 else
     AC_DEFINE(NDEBUG, [], [unset DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -O0"
+    AM_CXXFLAGS="$AM_CXXFLAGS -O2"
     support_debug=no
 fi
 
 AC_CANONICAL_HOST
 local_os_type="unknown"
 is_librt_available="yes"
+AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
+LDFLAGS="$LDFLAGS -L/usr/local/lib"
 case "$host" in
 *-cygwin*)
     AC_DEFINE(OS_CYGWIN, [], [set OS to cygwin])
@@ -45,6 +39,7 @@ case "$host" in
     ;;
 *mingw*)
     AC_DEFINE(OS_MINGW, [], [set OS to mingw])
+    AC_DEFINE(USE_WIN_IOCP, [], [use io completion ports on windows])
     local_os_type="mingw"
     is_librt_available="no"
     CPPFLAGS="$CPPFLAGS -I/mingw/include -L/mingw/lib -D__USE_MINGW_ANSI_STDIO=1"
@@ -54,7 +49,7 @@ case "$host" in
 *-linux*)
     AC_DEFINE(OS_LINUX, [], [set OS to linux])
 	#hack for some 64-bit systems
-	AC_DEFINE(_GNU_SOURCE, [], [set GNU source flag for linux])
+	#AC_DEFINE(_GNU_SOURCE, [], [set GNU source flag for linux])
     local_os_type="linux"
     ;;
 *-irix*)
@@ -87,8 +82,8 @@ case "$host" in
     local_os_type="freebsd"
 
     dnl our hack for freebsd system
-    AM_CXXFLAGS="$AM_CXXFLAGS -pthread -I/usr/local/include"
-    LDFLAGS="$LDFLAGS -L/usr/local/lib -L/usr/local/v6/lib"
+    AM_CXXFLAGS="$AM_CXXFLAGS -pthread"
+    LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-netbsd*)
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
@@ -96,8 +91,7 @@ case "$host" in
     local_os_type="netbsd"
 
     #our hack for netbsd system
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
-    LDFLAGS="$LDFLAGS -L/usr/local/lib -L/usr/local/v6/lib"
+    LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-openbsd*)
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
@@ -109,7 +103,6 @@ case "$host" in
 	AC_DEFINE_UNQUOTED(OS_OPENBSD_REL, ${OBSD_REL}, [set openbsd release number])
 
     #our hack for openbsd system
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
     LIBS="$LIBS -L/usr/local/lib"
     ;;
 *-osf*)
@@ -117,10 +110,10 @@ case "$host" in
     local_os_type="osf"
     ;;
 *-darwin*)
+	is_librt_available="no"
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
     AC_DEFINE(OS_DARWIN, [], [set OS to darwin])
     local_os_type="darwin"
-    is_librt_available="no"
     ;;
 *-sco*)
     AC_DEFINE(OS_SCO, [], [set OS to sco])
@@ -129,14 +122,21 @@ case "$host" in
     AC_MSG_ERROR([We do not support SCO's products!])
 esac
 
+if test "x$mod_sdormmongo" = "xtrue"; then
+	AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+fi
+
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
 
+STDCXX_11_SWITCH=
+
 dnl# Checks for programs.
 AC_PROG_AWK
-AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
+AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_11(,mandatory)
 
 # reset compiler flags to initial flags
 CXXFLAGS=$OLD_CXXFLAGS
@@ -168,10 +168,16 @@ AC_CHECK_LIB(ssl, SSL_read, [], [AC_MSG_ERROR([ssl library not found])])
 AC_CHECK_LIB([crypto], [SHA1_Init], [], [AC_MSG_ERROR([libcrypto not found])])
 AC_CHECK_LIB(z, compress,,AC_MSG_ERROR([no zlib; please install zlib or equivalent]))
 AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
+AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
 
-if test "x$mod_dsorm" = "xtrue"; then
+if test "x$mod_sdormsql" = "xtrue"; then
     AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
+fi
+
+if test "x$mod_sdormmongo" = "xtrue"; then
+    AC_CHECK_LIB(mongoc-1.0, mongoc_init, , [AC_MSG_ERROR([Not found libmongo library])])
+    AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
 fi
 
 if test "x$is_librt_available" = "xyes"; then	
@@ -183,10 +189,18 @@ if test "x$local_os_type" = "xmingw"; then
 	AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
 	AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
 fi
-    
+
+AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"    
 # distribute additional compiler and linker flags among Makefiles
 # --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
 AC_SUBST([AM_CXXFLAGS])    
     
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
+
+echo "Host: $host"
+echo "CPPFLAGS: $CPPFLAGS"
+echo "AM_CXXFLAGS: $AM_CXXFLAGS"
+echo "LDFLAGS: $LDFLAGS"
+echo "Debug mode: $support_debug"
+echo "Make Executable: $MAKE"

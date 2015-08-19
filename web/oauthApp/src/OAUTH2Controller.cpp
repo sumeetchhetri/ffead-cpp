@@ -32,103 +32,101 @@ OAUTH2Controller::~OAUTH2Controller() {
 	// TODO Auto-generated destructor stub
 }
 
-HttpResponse OAUTH2Controller::service(HttpRequest req)
+bool OAUTH2Controller::service(HttpRequest* req, HttpResponse* res)
 {
-	HttpResponse res;
-
-	if(req.getFile()=="login.auth2")
+	if(req->getFile()=="login.auth2")
 	{
-		if(req.getRequestParams()["username"]!="" && req.getRequestParams()["password"]!="")
+		if(req->getRequestParams()["username"]!="" && req->getRequestParams()["password"]!="")
 		{
-			FileAuthController fauthu(req.getCntxt_root()+"/users",":");
+			FileAuthController fauthu(req->getContextHome()+"/users",":");
 			string key;
-			bool flag = fauthu.getPassword(req.getRequestParams()["username"],key);
+			bool flag = fauthu.getPassword(req->getRequestParams()["username"],key);
 			if(flag)
 			{
-				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent("Valid Login");
+				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+				res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res->setContent("Valid Login");
 			}
 			else
 			{
-				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent("InValid Login");
+				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+				res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res->setContent("InValid Login");
 			}
 			cout << "inside oauth controller non empty credentials" << endl;
 		}
 		else
 		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent("Username and Password cannot be blank");
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->setContent("Username and Password cannot be blank");
 			cout << "inside oauth controller empty credentials" << endl;
 		}
 	}
-	else if(req.getFile()=="authorizeUser.auth2")
+	else if(req->getFile()=="authorizeUser.auth2")
 	{
 		string data = "http://graph.facebook.com/oauth/authorize?";
 		data += "response_type=token&client_id=174968395858505&redirect_uri="+CryptoHandler::urlEncode("http://public_ip:port/oauthApp/calledback.auth2");
 		cout << data << endl;
 
-		res.setHTTPResponseStatus(HTTPResponseStatus::MovedPermanently);
-		res.addHeaderValue(HttpResponse::Location, data);
+		res->setHTTPResponseStatus(HTTPResponseStatus::MovedPermanently);
+		res->addHeaderValue(HttpResponse::Location, data);
 		cout << "redirecting to third party url" << endl;
 	}
-	else if(req.getFile()=="calledback.auth2")
+	else if(req->getFile()=="calledback.auth2")
 	{
-		if(req.getRequestParams()["access_token"]!="")
+		if(req->getRequestParams()["access_token"]!="")
 		{
-			string filen = req.getCntxt_root()+"/access2-tokens";
+			string filen = req->getContextHome()+"/access2-tokens";
 			ofstream ofs(filen.c_str());
-			string wrf = req.getRequestParams()["access_token"];
+			string wrf = req->getRequestParams()["access_token"];
 			ofs.write(wrf.c_str(),wrf.length());
 			ofs.close();
 
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 			string conte = "<html><head><script type='text/javascript' src='public/json2.js'></script><script type='text/javascript' src='public/prototype.js'></script><script type='text/javascript' src='public/oauth2.js'></script></head>";
-			conte += "Resource: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+req.getRequestParams()["tusername"]+"\")'/></body>";
+			conte += "Resource: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+req->getRequestParams()["tusername"]+"\")'/></body>";
 			conte += "</html>";
-			res.setContent(conte);
+			res->setContent(conte);
 		}
 		else
 		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent("Invalid user");
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->setContent("Invalid user");
 		}
 	}
-	else if(req.getFile()=="getResource.auth2")
+	else if(req->getFile()=="getResource.auth2")
 	{
-		string filen = req.getCntxt_root()+"/access2-tokens";
+		string filen = req->getContextHome()+"/access2-tokens";
 		ifstream ifs(filen.c_str());
 		string tokse;
 		getline(ifs,tokse);
 		ifs.close();
 
-		if(tokse!="" && req.getRequestParams()["error_status"]=="")
+		if(tokse!="" && req->getRequestParams()["error_status"]=="")
 		{
 			SSLClient client;
 			client.connection("graph.facebook.com",443);
-			string data = "GET /me/"+req.getRequestParams()["resource"]+"?access_token="+tokse;
+			string data = "GET /me/"+req->getRequestParams()["resource"]+"?access_token="+tokse;
 			data += " HTTP/1.1\r\nHost: graph.facebook.com\r\nUser-Agent: Program\r\n\r\n";
 			cout << data << endl;
 
 			int bytes = client.sendData(data);
 			string call=client.getData("\r\n","Content-Length: ");
-			HttpResponseParser parser(call, res);
+			HttpResponseParser parser(call, *res);
 			client.closeConnection();
 
-			res.setContent(parser.getContent());
+			res->setContent(parser.getContent());
 		}
 		else
 		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent("Access denied");
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->setContent("Access denied");
 		}
 	}
-	return res;
+	return true;
 }
 

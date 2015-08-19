@@ -23,12 +23,13 @@
 #ifndef DVIEW_H_
 #define DVIEW_H_
 #include "DynamicView.h"
+#include "XmlParser.h"
 
 class Dview : public DynamicView {
 public:
 	Dview();
 	virtual ~Dview();
-	Document getDocument();
+	void getDocument(Document*);
 };
 
 #endif /* DVIEW_H_ */

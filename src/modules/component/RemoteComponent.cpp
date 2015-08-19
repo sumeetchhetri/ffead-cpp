@@ -31,7 +31,7 @@ RemoteComponent::~RemoteComponent() {
 	// TODO Auto-generated destructor stub
 }
 
-void* RemoteComponent::invoke(string name,vector<Object> args,string rettyp)
+void* RemoteComponent::invoke(const string& name, const vector<GenericObject>& args, const string& rettyp)
 {
 	return getContext().invoke(name,args,this->name,rettyp);
 }

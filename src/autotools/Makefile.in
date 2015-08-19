@@ -1600,7 +1600,7 @@ uninstall-am: uninstall-libLTLIBRARIES
 @MOD_ALL_FALSE@							../modules/webservice/SOAPUtil.cpp \
 @MOD_ALL_FALSE@							../modules/webservice/WsUtil.cpp
 @MOD_ALL_FALSE@	endif
-@MOD_ALL_FALSE@	if MOD_CIBERNATE
+@MOD_ALL_FALSE@	if MOD_SDORM
 @MOD_ALL_FALSE@	libweblib_la_SOURCES += ../modules/cibernate/Cibernate.cpp \
 @MOD_ALL_FALSE@							../modules/cibernate/CibernateConnPools.cpp \
 @MOD_ALL_FALSE@							../modules/cibernate/CibernateConnectionPool.cpp \

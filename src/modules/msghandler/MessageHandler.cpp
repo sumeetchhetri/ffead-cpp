@@ -23,14 +23,14 @@
 #include "MessageHandler.h"
 
 using namespace std;
-MessageHandler::MessageHandler(string path)
+MessageHandler::MessageHandler(const string& path)
 {
 	logger = LoggerFactory::getLogger("MessageHandler");
 	this->path = path;
 }
 MessageHandler* MessageHandler::instance = NULL;
 
-Message MessageHandler::readMessageFromQ(string fileName, bool erase)
+Message MessageHandler::readMessageFromQ(const string& fileName, const bool& erase)
 {
 	ifstream file;
 	ifstream::pos_type fileSize;
@@ -65,7 +65,7 @@ Message MessageHandler::readMessageFromQ(string fileName, bool erase)
 	}
 	string f(fileContents);
 	AMEFDecoder dec;
-	AMEFObject* obj = dec.decodeB(f, false, true);
+	AMEFObject* obj = dec.decodeB(f, false);
 	Message m;
 	m.setTimestamp(obj->getPackets().at(0)->getValue());
 	m.setType(obj->getPackets().at(1)->getValue());
@@ -87,7 +87,7 @@ Message MessageHandler::readMessageFromQ(string fileName, bool erase)
 	return m;
 }
 
-void MessageHandler::writeMessageToQ(Message msg,string fileName)
+void MessageHandler::writeMessageToQ(const Message& msg, const string& fileName)
 {
 	AMEFEncoder enc;
 	AMEFObject ob;
@@ -101,11 +101,11 @@ void MessageHandler::writeMessageToQ(Message msg,string fileName)
 	ob.addPacket(msg.getDestination().getType());
 	ofstream myfile;
 	myfile.open(fileName.c_str(), ios::binary | ios::app);
-	myfile << enc.encodeB(&ob, true);
+	myfile << enc.encodeB(&ob);
 	myfile.close();
 }
 
-bool MessageHandler::tempUnSubscribe(string subs,string fileName)
+bool MessageHandler::tempUnSubscribe(const string& subs, const string& fileName)
 {
 	string subscribers;
 	ifstream myfile1;
@@ -131,19 +131,19 @@ bool MessageHandler::tempUnSubscribe(string subs,string fileName)
 		return true;
 }
 
-Message MessageHandler::readMessageFromT(string fileName,string subs)
+Message MessageHandler::readMessageFromT(const string& fileName, const string& subs)
 {
 	bool done = tempUnSubscribe(subs,fileName+":SubslistTemp");
 	Message msg = readMessageFromQ(fileName, done);
 	return msg;
 }
 
-void MessageHandler::writeMessageToT(Message msg,string fileName)
+void MessageHandler::writeMessageToT(const Message& msg, const string& fileName)
 {
 	writeMessageToQ(msg ,fileName);
 }
 
-void MessageHandler::subscribe(string subs,string fileName)
+void MessageHandler::subscribe(const string& subs, string fileName)
 {
 	ifstream myfile1;
 	myfile1.open(fileName.c_str());
@@ -168,7 +168,7 @@ void MessageHandler::subscribe(string subs,string fileName)
 	myfile.close();
 }
 
-void MessageHandler::unSubscribe(string subs,string fileName)
+void MessageHandler::unSubscribe(const string& subs, string fileName)
 {
 	string subscribers;
 	ifstream myfile1;
@@ -292,7 +292,7 @@ void* MessageHandler::service(void* arg)
 }
 
 
-void MessageHandler::init(string path)
+void MessageHandler::init(const string& path)
 {
 	if(instance==NULL)
 	{
@@ -301,7 +301,7 @@ void MessageHandler::init(string path)
 	}
 }
 
-void MessageHandler::trigger(string port,string path)
+void MessageHandler::trigger(const string& port, const string& path)
 {
 	init(path);
 	if(instance->running)

@@ -52,7 +52,7 @@ void* DistoCacheHandler::service(void* arg)
 	return NULL;
 }
 
-void DistoCacheHandler::trigger(string port, int poolSize)
+void DistoCacheHandler::trigger(const string& port, const int& poolSize)
 {
 	init();
 	if(instance->running)

@@ -35,7 +35,7 @@ mapVars CppInterpreter::getLocalVariables() const
 	return localVariables;
 }
 
-void CppInterpreter::setLocalVariables(mapVars localVariables)
+void CppInterpreter::setLocalVariables(const mapVars& localVariables)
 {
 	this->localVariables = localVariables;
 }
@@ -45,12 +45,12 @@ mapVars CppInterpreter::getBoundVariables() const
 	return boundVariables;
 }
 
-void CppInterpreter::setBoundVariables(mapVars boundVariables)
+void CppInterpreter::setBoundVariables(const mapVars& boundVariables)
 {
 	this->boundVariables = boundVariables;
 }
 
-bool CppInterpreter::isInBuiltType(string type)
+bool CppInterpreter::isInBuiltType(const string& type)
 {
     return (type=="int" || type=="float" || type=="double" || type=="string" || type=="std::string");
 }
@@ -132,52 +132,44 @@ vector<string> splitPattern(string str)
 	return commands;
 }
 */
-void CppInterpreter::storeInbuilt(string type,string name)
+void CppInterpreter::storeInbuilt(const string& type, const string& name)
 {
     if(type=="int")
     {
-        int *_temp = new int;
-        Object o;
-        o << *_temp;
-        localVariables[name] = o;
+        int _temp = -1;
+        localVariables[name] << _temp;
     }
     else if(type=="float")
     {
-        float *_temp = new float;
-        Object o;
-        o << *_temp;
-        localVariables[name] = o;
+        float _temp = 0.0;
+        localVariables[name] << _temp;
     }
     else if(type=="double")
     {
-        double *_temp = new double;
-        Object o;
-        o << *_temp;
-        localVariables[name] = o;
+        double _temp = 0.0;
+        localVariables[name] << _temp;
     }
     else if(type=="string")
     {
-        string *_temp = new string;
-        Object o;
-        o << *_temp;
-        localVariables[name] = o;
+        string _temp = "";
+        localVariables[name] << _temp;
     }
 }
 
-void CppInterpreter::storeCustom(string type,string name)
+void CppInterpreter::storeCustom(const string& type, const string& name)
 {
     Reflector ref;
     ClassInfo clas = ref.getClassInfo(type);
     args argus;
 	Constructor ctor = clas.getConstructor(argus);
 	void *_temp = ref.newInstanceGVP(ctor);
-    Object o;
-    o << _temp;
-    o.setTypeName(type);
+	GenericObject o;
+    o.set(_temp, type);
+    delete _temp;
     localVariables[name] = o;
 }
 
-bool CppInterpreter::containsChar(string varname)
+bool CppInterpreter::containsChar(const string& varname)
 {
 	string allchars = "abcdefghijklmnopqrstuvwxyz_$";
 	for(unsigned int l=0;l<varname.length();l++)
@@ -194,148 +186,176 @@ bool CppInterpreter::containsChar(string varname)
 }
 
 
-bool CppInterpreter::isCommand(string test)
+bool CppInterpreter::isCommand(const string& test)
 {
 	return (test=="if" || test=="else" || test=="elseif" || test=="while" || test=="for");
 }
 
-bool CppInterpreter::retState(string type,Object source,Object target)
+bool CppInterpreter::retState(const string& type, GenericObject& source, GenericObject& target)
 {
 	if(isInBuiltType(source.getTypeName()))
 	{
 		if(source.getTypeName()=="int")
 		{
+			int s = 0;
+			source.get<int>(s);
+			int t = 0;
+			target.get<int>(t);
 			if(type=="==")
-				return (source.getValue<int>()==target.getValue<int>());
+				return (s==t);
 			else if(type=="<=")
-				return (source.getValue<int>()<=target.getValue<int>());
+				return (s<=t);
 			else  if(type==">=")
-				return (source.getValue<int>()>=target.getValue<int>());
+				return (s>=t);
 			else  if(type=="!=")
-				return (source.getValue<int>()!=target.getValue<int>());
+				return (s!=t);
 			else  if(type==">")
-				return (source.getValue<int>()>target.getValue<int>());
+				return (s>t);
 			else  if(type=="<")
-				return (source.getValue<int>()<target.getValue<int>());
+				return (s<t);
 		}
 		else if(source.getTypeName()=="float")
 		{
+			float s = 0.0;
+			source.get<float>(s);
+			float t = 0.0;
+			target.get<float>(t);
 			if(type=="==")
-				return (source.getValue<float>()==target.getValue<float>());
+				return (s==t);
 			else if(type=="<=")
-				return (source.getValue<float>()<=target.getValue<float>());
+				return (s<=t);
 			else  if(type==">=")
-				return (source.getValue<float>()>=target.getValue<float>());
+				return (s>=t);
 			else  if(type=="!=")
-				return (source.getValue<float>()!=target.getValue<float>());
+				return (s!=t);
 			else  if(type==">")
-				return (source.getValue<float>()>target.getValue<float>());
+				return (s>t);
 			else  if(type=="<")
-				return (source.getValue<float>()<target.getValue<float>());
+				return (s<t);
 		}
 		else if(source.getTypeName()=="double")
 		{
+			double s = 0.0;
+			source.get<double>(s);
+			double t = 0.0;
+			target.get<double>(t);
 			if(type=="==")
-				return (source.getValue<double>()==target.getValue<double>());
+				return (s==t);
 			else if(type=="<=")
-				return (source.getValue<double>()<=target.getValue<double>());
+				return (s<=t);
 			else  if(type==">=")
-				return (source.getValue<double>()>=target.getValue<double>());
+				return (s>=t);
 			else  if(type=="!=")
-				return (source.getValue<double>()!=target.getValue<double>());
+				return (s!=t);
 			else  if(type==">")
-				return (source.getValue<double>()>target.getValue<double>());
+				return (s>t);
 			else  if(type=="<")
-				return (source.getValue<double>()<target.getValue<double>());
+				return (s<t);
 		}
 		else if(source.getTypeName()=="string")
 		{
+			string s;
+			source.get<string>(s);
+			string t;
+			source.get<string>(t);
 			if(type=="==")
-				return (source.getValue<string>()==target.getValue<string>());
+				return (s==t);
 			else if(type=="<=")
-				return (source.getValue<string>()<=target.getValue<string>());
+				return (s<=t);
 			else  if(type==">=")
-				return (source.getValue<string>()>=target.getValue<string>());
+				return (s>=t);
 			else  if(type=="!=")
-				return (source.getValue<string>()!=target.getValue<string>());
+				return (s!=t);
 			else  if(type==">")
-				return (source.getValue<string>()>target.getValue<string>());
+				return (s>t);
 			else  if(type=="<")
-				return (source.getValue<string>()<target.getValue<string>());
+				return (s<t);
 		}
 	}
 	return false;
 }
 
-bool CppInterpreter::retState(string type,Object source,string target)
+bool CppInterpreter::retState(const string& type, GenericObject& source, const string& target)
 {
 	if(isInBuiltType(source.getTypeName()))
 	{
 		if(source.getTypeName()=="int")
 		{
+			int s = 0;
+			source.get<int>(s);
+			int t = CastUtil::lexical_cast<int>(target);
 			if(type=="==")
-				return (source.getValue<int>()==CastUtil::lexical_cast<int>(target));
+				return (s==t);
 			else if(type=="<=")
-				return (source.getValue<int>()<=CastUtil::lexical_cast<int>(target));
+				return (s<=t);
 			else  if(type==">=")
-				return (source.getValue<int>()>=CastUtil::lexical_cast<int>(target));
+				return (s>=t);
 			else  if(type=="!=")
-				return (source.getValue<int>()!=CastUtil::lexical_cast<int>(target));
+				return (s!=t);
 			else  if(type==">")
-				return (source.getValue<int>()>CastUtil::lexical_cast<int>(target));
+				return (s>t);
 			else  if(type=="<")
-				return (source.getValue<int>()<CastUtil::lexical_cast<int>(target));
+				return (s<t);
 		}
 		else if(source.getTypeName()=="float")
 		{
+			float s = 0;
+			source.get<float>(s);
+			float t = CastUtil::lexical_cast<float>(target);
 			if(type=="==")
-				return (source.getValue<float>()==CastUtil::lexical_cast<float>(target));
+				return (s==t);
 			else if(type=="<=")
-				return (source.getValue<float>()<=CastUtil::lexical_cast<float>(target));
+				return (s<=t);
 			else  if(type==">=")
-				return (source.getValue<float>()>=CastUtil::lexical_cast<float>(target));
+				return (s>=t);
 			else  if(type=="!=")
-				return (source.getValue<float>()!=CastUtil::lexical_cast<float>(target));
+				return (s!=t);
 			else  if(type==">")
-				return (source.getValue<float>()>CastUtil::lexical_cast<float>(target));
+				return (s>t);
 			else  if(type=="<")
-				return (source.getValue<float>()<CastUtil::lexical_cast<float>(target));
+				return (s<t);
 		}
 		else if(source.getTypeName()=="double")
 		{
+			double s = 0;
+			source.get<double>(s);
+			double t = CastUtil::lexical_cast<double>(target);
 			if(type=="==")
-				return (source.getValue<double>()==CastUtil::lexical_cast<double>(target));
+				return (s==t);
 			else if(type=="<=")
-				return (source.getValue<double>()<=CastUtil::lexical_cast<double>(target));
+				return (s<=t);
 			else  if(type==">=")
-				return (source.getValue<double>()>=CastUtil::lexical_cast<double>(target));
+				return (s>=t);
 			else  if(type=="!=")
-				return (source.getValue<double>()!=CastUtil::lexical_cast<double>(target));
+				return (s!=t);
 			else  if(type==">")
-				return (source.getValue<double>()>CastUtil::lexical_cast<double>(target));
+				return (s>t);
 			else  if(type=="<")
-				return (source.getValue<double>()<CastUtil::lexical_cast<double>(target));
+				return (s<t);
 		}
 		else if(source.getTypeName()=="string")
 		{
+			string s;
+			source.get<string>(s);
+			string t = target;
 			if(type=="==")
-				return (source.getValue<string>()==target);
+				return (s==t);
 			else if(type=="<=")
-				return (source.getValue<string>()<=target);
+				return (s<=t);
 			else  if(type==">=")
-				return (source.getValue<string>()>=target);
+				return (s>=t);
 			else  if(type=="!=")
-				return (source.getValue<string>()!=target);
+				return (s!=t);
 			else  if(type==">")
-				return (source.getValue<string>()>target);
+				return (s>t);
 			else  if(type=="<")
-				return (source.getValue<string>()<target);
+				return (s<t);
 		}
 	}
 	return false;
 }
 
-bool CppInterpreter::evaluateCondition(string condition)
+bool CppInterpreter::evaluateCondition(const string& condition)
 {
 	bool state = false;
 	string token;
@@ -369,7 +389,7 @@ bool CppInterpreter::evaluateCondition(string condition)
 		StringUtil::split(bs, condition, (token));
 		if(bs.size()==2 && bs.at(0)!="" && bs.at(1)!="")
 		{
-			Object source,target;
+			GenericObject source, target;
 			if(localVariables.find(bs.at(0))!=localVariables.end())
 			{
 				source = localVariables[bs.at(0)];
@@ -455,14 +475,14 @@ void CppInterpreter::skipCommand(vector<string>::iterator &itr)
 	}
 }
 
-void CppInterpreter::evaluateUpdateCustom(string sep,string type,string name,vector<string> opr,bool local)
+void CppInterpreter::evaluateUpdateCustom(const string& sep, const string& type, const string& name, const vector<string>& opr, const bool& local)
 {
-	Object o;
+	GenericObject o;
 	if(local)
 		o = localVariables[name];
 	else
 		o = boundVariables[name];
-	Object i;
+	GenericObject i;
 	if(localVariables.find(opr.at(0))!=localVariables.end())
 	{
 		i = localVariables[opr.at(0)];
@@ -481,21 +501,21 @@ void CppInterpreter::evaluateUpdateCustom(string sep,string type,string name,vec
 		argus.push_back("void*");
 		Method meth = clas.getMethod(name,argus);
 		vals valus;
-		valus.push_back(o.getVoidPointer());
-		reflector.invokeMethod<void*>(i.getVoidPointer(),meth,valus);
+		valus.push_back(o.getPointer());
+		reflector.invokeMethod<void*>(i.getPointer(),meth,valus);
 	}
 }
 
-void CppInterpreter::evaluateUpdateInbuilt(string sep,string type,string name,vector<string> opr,bool local)
+void CppInterpreter::evaluateUpdateInbuilt(const string& sep, const string& type, const string& name, vector<string> opr, const bool& local)
 {
 	if(type=="int")
 	{
-		Object o;
+		GenericObject o;
 		if(local)
 			o = localVariables[name];
 		else
 			o = boundVariables[name];
-		int *_temp = (int*)o.getVoidPointer();
+		int *_temp = (int*)o.getPointer();
 		vector<string> curr,going,temp;
 		//int scnt = 0,ecnt = 0,bcnt = 0;
 		//bool gost= false;
@@ -544,7 +564,7 @@ void CppInterpreter::evaluateUpdateInbuilt(string sep,string type,string name,ve
 		{
 			if(containsChar(curr.at(i)))
 			{
-				Object o = localVariables[curr.at(i)];
+				GenericObject o = localVariables[curr.at(i)];
 				opr.push_back(CastUtil::lexical_cast<string>(o.getValue<int>()));
 			}
 			else
@@ -574,27 +594,27 @@ void CppInterpreter::evaluateUpdateInbuilt(string sep,string type,string name,ve
 	/*else if(type=="float")
 	{
 		float *_temp = new float;
-		Object o;
+		GenericObject o;
 		o << *_temp;
 		localVariables[name] = o;
 	}
 	else if(type=="double")
 	{
 		double *_temp = new double;
-		Object o;
+		GenericObject o;
 		o << *_temp;
 		localVariables[name] = o;
 	}
 	else if(type=="string" || type=="std::string")
 	{
 		string *_temp = new string;
-		Object o;
+		GenericObject o;
 		o << *_temp;
 		localVariables[name] = o;
 	}*/
 }
 
-void CppInterpreter::executeStatement(string sep,vector<string> lhs,vector<string> rhs)
+void CppInterpreter::executeStatement(const string& sep, const vector<string>& lhs, const vector<string>& rhs)
 {
 	if(sep!="")
 	{
@@ -604,7 +624,7 @@ void CppInterpreter::executeStatement(string sep,vector<string> lhs,vector<strin
 			StringUtil::split(bs, lhs.at(0), (" "));
 			if(bs.size()==1)
 			{
-				Object source;
+				GenericObject source;
 				bool local = false;
 				if(localVariables.find(bs.at(0))!=localVariables.end())
 				{
@@ -656,7 +676,7 @@ void CppInterpreter::executeStatement(string sep,vector<string> lhs,vector<strin
 	}
 }
 
-Obj CppInterpreter::handleObjectMethodInvocation(string objn,string methn,vector<string>::iterator &itr)
+Obj CppInterpreter::handleObjectMethodInvocation(const string& objn,const string& methn,vector<string>::iterator &itr)
 {
 	string token = *(++itr);
 	int crcnt = 1;
@@ -692,7 +712,7 @@ Obj CppInterpreter::handleObjectMethodInvocation(string objn,string methn,vector
 				}
 				else if(statement!="")
 				{
-					Object src;
+					GenericObject src;
 					if(localVariables.find(statement)!=localVariables.end())
 					{
 						src = localVariables[statement];
@@ -704,7 +724,7 @@ Obj CppInterpreter::handleObjectMethodInvocation(string objn,string methn,vector
 					if(src.getTypeName()!="")
 					{
 						argus.push_back(src.getTypeName());
-						valus.push_back(src.getVoidPointer());
+						valus.push_back(src.getPointer());
 					}
 				}
 				break;
@@ -726,7 +746,7 @@ Obj CppInterpreter::handleObjectMethodInvocation(string objn,string methn,vector
 			}
 			else if(statement!="")
 			{
-				Object src;
+				GenericObject src;
 				if(localVariables.find(statement)!=localVariables.end())
 				{
 					src = localVariables[statement];
@@ -746,7 +766,7 @@ Obj CppInterpreter::handleObjectMethodInvocation(string objn,string methn,vector
 		token = *(++itr);
 	}
 
-	Object source;
+	GenericObject source;
 	if(localVariables.find(objn)!=localVariables.end())
 	{
 		source = localVariables[objn];
@@ -760,7 +780,7 @@ Obj CppInterpreter::handleObjectMethodInvocation(string objn,string methn,vector
 		Reflector reflector;
 		ClassInfo clas = reflector.getClassInfo(source.getTypeName());
 		Method meth = clas.getMethod(methn,argus);
-		void *po = reflector.invokeMethodGVP(source.getVoidPointer(),meth,valus);
+		void *po = reflector.invokeMethodGVP(source.getPointer(),meth,valus);
 		obj.setPointer(po);
 		obj.setType(meth.getReturnType());
 	}
@@ -835,9 +855,8 @@ void CppInterpreter::handleStatement(vector<string>::iterator &itr)
 				Obj obj = handleObjectMethodInvocation(objname,methName,itr);
 				if(obj.getType()!="" && sep!="")
 				{
-					Object o;
-					o << obj.getPointer();
-					o.setTypeName(obj.getType());
+					GenericObject o;
+					o.set(obj.getPointer(), obj.getType());
 					string argname = "_argno"+CastUtil::lexical_cast<string>(argn++);
 					localVariables[argname] = o;
 					//rhs.push_back(argname);
@@ -869,13 +888,6 @@ void CppInterpreter::handleStatement(vector<string>::iterator &itr)
 			//rhs.push_back(statement);
 			statement = "";
 			sep = "++";
-			//rhs.push_back("=");
-		}
-		else if(token=="--")
-		{
-			//rhs.push_back(statement);
-			statement = "";
-			sep = "--";
 			//rhs.push_back("=");
 		}
 		else if(token=="--")
@@ -1664,7 +1676,7 @@ void CppInterpreter::eval(string str)
 			else
 			{
 				bool local = true;
-				Object target = localVariables[lhs.at(0)];
+				GenericObject target = localVariables[lhs.at(0)];
 				if(target.getTypeName()=="")
 				{
 					target = boundVariables[lhs.at(0)];
@@ -1687,10 +1699,10 @@ void CppInterpreter::eval(string str)
 			{
 				storeCustom(tokens.at(0),tokens.at(1));
 			}
-			Object target = localVariables[tokens.at(1)];
+			GenericObject target = localVariables[tokens.at(1)];
 			if(target.getType()=="")
 				target = boundVariables[tokens.at(1)];
-			Object source = localVariables[tokens.at(1)];
+			GenericObject source = localVariables[tokens.at(1)];
 			if(source.getType()=="")
 				source = boundVariables[tokens.at(1)];
 			if(target.getType()!="" && source.getType()!="" && target.getType()==source.getType())
@@ -1700,10 +1712,10 @@ void CppInterpreter::eval(string str)
 		}
 		else if(tokens.size()==3 && tokens.at(1)=="=")//assignment operation
 		{
-			Object target = localVariables[tokens.at(0)];
+			GenericObject target = localVariables[tokens.at(0)];
 			if(target.getType()=="")
 				target = boundVariables[tokens.at(0)];
-			Object source = localVariables[tokens.at(2)];
+			GenericObject source = localVariables[tokens.at(2)];
 			if(source.getType()=="")
 				source = boundVariables[tokens.at(2)];
 			if(target.getType()!="" && source.getType()!="" && target.getType()==source.getType())

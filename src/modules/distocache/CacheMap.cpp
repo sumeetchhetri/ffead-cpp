@@ -44,7 +44,7 @@ string CacheMap::ERR_NOELEMENTS = "No Elements in container", CacheMap::ERR_NOKE
 CacheMap::CacheMap() {
 }
 
-void CacheMap::allocate(string cacheKey, string type) {
+void CacheMap::allocate(const string& cacheKey, const string& type) {
 	if(checkExistance(cacheKey))
 	{
 		throw ERR_ALLOCENTEXISTS;
@@ -89,7 +89,7 @@ void CacheMap::allocate(string cacheKey, string type) {
 	}
 }
 
-void CacheMap::deallocate(string cacheKey) {
+void CacheMap::deallocate(const string& cacheKey) {
 	if(checkExistance(cacheKey))
 	{
 		instance->mutex.lock();
@@ -106,19 +106,19 @@ void CacheMap::deallocate(string cacheKey) {
 	}
 }
 
-void CacheMap::addObjectEntry(string key, string value) {
+void CacheMap::addObjectEntry(const string& key, const string& value) {
 	instance->objMapMutex.lock();
 	instance->objCacheMap[key] = value;
 	instance->objMapMutex.unlock();
 }
 
-void CacheMap::removeObjectEntry(string key) {
+void CacheMap::removeObjectEntry(const string& key) {
 	instance->objMapMutex.lock();
 	instance->objCacheMap.erase(key);
 	instance->objMapMutex.unlock();
 }
 
-string CacheMap::getObjectEntryValue(string key) {
+string CacheMap::getObjectEntryValue(const string& key) {
 	string value;
 	bool error = false;
 	instance->objMapMutex.lock();
@@ -138,7 +138,7 @@ string CacheMap::getObjectEntryValue(string key) {
 	return value;
 }
 
-void CacheMap::addMapEntry(string cacheKey, string key, string value) {
+void CacheMap::addMapEntry(const string& cacheKey, const string& key, const string& value) {
 	if(checkExistance(cacheKey, MAP))
 	{
 		instance->mutex.lock();
@@ -155,7 +155,7 @@ void CacheMap::addMapEntry(string cacheKey, string key, string value) {
 	}
 }
 
-void CacheMap::removeMapEntry(string cacheKey, string key) {
+void CacheMap::removeMapEntry(const string& cacheKey, const string& key) {
 	if(checkExistance(cacheKey, MAP))
 	{
 		instance->mutex.lock();
@@ -172,7 +172,7 @@ void CacheMap::removeMapEntry(string cacheKey, string key) {
 	}
 }
 
-void CacheMap::addCollectionEntry(string cacheKey, string value) {
+void CacheMap::addCollectionEntry(const string& cacheKey, const string& value) {
 	string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
@@ -249,7 +249,7 @@ void CacheMap::destroy() {
 	}
 }
 
-string CacheMap::getMapEntryValue(string cacheKey, string key) {
+string CacheMap::getMapEntryValue(const string& cacheKey, const string& key) {
 	string value;
 	if(checkExistance(cacheKey, MAP))
 	{
@@ -275,7 +275,7 @@ string CacheMap::getMapEntryValue(string cacheKey, string key) {
 	return value;
 }
 
-string CacheMap::getMapEntryValueByPosition(string cacheKey, int position) {
+string CacheMap::getMapEntryValueByPosition(const string& cacheKey, const int& position) {
 	string value;
 	if(checkExistance(cacheKey, MAP))
 	{
@@ -303,7 +303,7 @@ string CacheMap::getMapEntryValueByPosition(string cacheKey, int position) {
 	return value;
 }
 
-void CacheMap::setMapEntryValueByPosition(string cacheKey, int position, string value) {
+void CacheMap::setMapEntryValueByPosition(const string& cacheKey, const int& position, const string& value) {
 	if(checkExistance(cacheKey, MAP))
 	{
 		instance->mutex.lock();
@@ -329,7 +329,7 @@ void CacheMap::setMapEntryValueByPosition(string cacheKey, int position, string 
 	}
 }
 
-void CacheMap::setCollectionEntryAt(string cacheKey, int position, string value) {
+void CacheMap::setCollectionEntryAt(const string& cacheKey, const int& position, const string& value) {
 	bool error = false;
 	string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
@@ -408,7 +408,7 @@ void CacheMap::setCollectionEntryAt(string cacheKey, int position, string value)
 	}
 }
 
-string CacheMap::getCollectionEntryAt(string cacheKey, int position) {
+string CacheMap::getCollectionEntryAt(const string& cacheKey, const int& position) {
 	string value;
 	bool error = false;
 	string type = checkExistanceAndGetType(cacheKey);
@@ -508,7 +508,7 @@ string CacheMap::getCollectionEntryAt(string cacheKey, int position) {
 	return value;
 }
 
-long CacheMap::size(string cacheKey) {
+long CacheMap::size(const string& cacheKey) {
 	long value = -1;
 	string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
@@ -586,7 +586,7 @@ long CacheMap::size(string cacheKey) {
 }
 
 
-void CacheMap::removeCollectionEntryAt(string cacheKey, int position) {
+void CacheMap::removeCollectionEntryAt(const string& cacheKey, const int& position) {
 	string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
@@ -682,7 +682,7 @@ void CacheMap::removeCollectionEntryAt(string cacheKey, int position) {
 	}
 }
 
-bool CacheMap::isEmpty(string cacheKey) {
+bool CacheMap::isEmpty(const string& cacheKey) {
 	bool value = false;
 	string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
@@ -759,7 +759,7 @@ bool CacheMap::isEmpty(string cacheKey) {
 	return value;
 }
 
-void CacheMap::clear(string cacheKey) {
+void CacheMap::clear(const string& cacheKey) {
 	string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
@@ -824,7 +824,7 @@ void CacheMap::clear(string cacheKey) {
 	}
 }
 
-void CacheMap::insert(string cacheKey, string value, int position) {
+void CacheMap::insert(const string& cacheKey, const string& value, const int& position) {
 	string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
@@ -920,7 +920,7 @@ void CacheMap::insert(string cacheKey, string value, int position) {
 	}
 }
 
-void CacheMap::insert(string cacheKey, string value, int position, int repeat) {
+void CacheMap::insert(const string& cacheKey, const string& value, const int& position, const int& repeat) {
 	string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
@@ -997,7 +997,7 @@ void CacheMap::insert(string cacheKey, string value, int position, int repeat) {
 	}
 }
 
-void CacheMap::popValueQueue(string cacheKey) {
+void CacheMap::popValueQueue(const string& cacheKey) {
 	string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
@@ -1038,7 +1038,7 @@ void CacheMap::popValueQueue(string cacheKey) {
 	}
 }
 
-string CacheMap::popGetValueQueue(string cacheKey) {
+string CacheMap::popGetValueQueue(const string& cacheKey) {
 	string resp;
 	string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
@@ -1082,7 +1082,7 @@ string CacheMap::popGetValueQueue(string cacheKey) {
 	return resp;
 }
 
-void CacheMap::pushBackValue(string cacheKey, string value) {
+void CacheMap::pushBackValue(const string& cacheKey, const string& value) {
 	string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
@@ -1121,7 +1121,7 @@ void CacheMap::pushBackValue(string cacheKey, string value) {
 	}
 }
 
-void CacheMap::pushFrontValue(string cacheKey, string value) {
+void CacheMap::pushFrontValue(const string& cacheKey, const string& value) {
 	string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
@@ -1160,7 +1160,7 @@ void CacheMap::pushFrontValue(string cacheKey, string value) {
 	}
 }
 
-void CacheMap::popFrontValue(string cacheKey) {
+void CacheMap::popFrontValue(const string& cacheKey) {
 	string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
@@ -1218,7 +1218,7 @@ void CacheMap::popFrontValue(string cacheKey) {
 	}
 }
 
-void CacheMap::popBackValue(string cacheKey) {
+void CacheMap::popBackValue(const string& cacheKey) {
 	string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
@@ -1276,7 +1276,7 @@ void CacheMap::popBackValue(string cacheKey) {
 	}
 }
 
-string CacheMap::popGetFrontValue(string cacheKey) {
+string CacheMap::popGetFrontValue(const string& cacheKey) {
 	string resp;
 	string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
@@ -1338,7 +1338,7 @@ string CacheMap::popGetFrontValue(string cacheKey) {
 	return resp;
 }
 
-string CacheMap::popGetBackValue(string cacheKey) {
+string CacheMap::popGetBackValue(const string& cacheKey) {
 	string resp;
 	string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
@@ -1399,7 +1399,7 @@ string CacheMap::popGetBackValue(string cacheKey) {
 	}
 }
 
-string CacheMap::getFrontValue(string cacheKey) {
+string CacheMap::getFrontValue(const string& cacheKey) {
 	string value;
 	string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
@@ -1493,7 +1493,7 @@ string CacheMap::getFrontValue(string cacheKey) {
 	return value;
 }
 
-string CacheMap::getBackValue(string cacheKey) {
+string CacheMap::getBackValue(const string& cacheKey) {
 	string value;
 	string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
@@ -1590,7 +1590,7 @@ string CacheMap::getBackValue(string cacheKey) {
 CacheMap::~CacheMap() {
 }
 
-bool CacheMap::checkObjectExistance(string key)
+bool CacheMap::checkObjectExistance(const string& key)
 {
 	bool flag = false;
 	instance->objMapMutex.lock();
@@ -1599,7 +1599,7 @@ bool CacheMap::checkObjectExistance(string key)
 	return flag;
 }
 
-bool CacheMap::checkExistance(string cacheKey, string type)
+bool CacheMap::checkExistance(const string& cacheKey, const string& type)
 {
 	bool flag = false;
 	instance->mutex.lock();
@@ -1611,7 +1611,7 @@ bool CacheMap::checkExistance(string cacheKey, string type)
 }
 
 
-string CacheMap::checkExistanceAndGetType(string cacheKey)
+string CacheMap::checkExistanceAndGetType(const string& cacheKey)
 {
 	string type;
 	instance->mutex.lock();

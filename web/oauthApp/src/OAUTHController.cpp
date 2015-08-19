@@ -32,46 +32,45 @@ OAUTHController::~OAUTHController() {
 	// TODO Auto-generated destructor stub
 }
 
-HttpResponse OAUTHController::service(HttpRequest req)
+bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 {
-	HttpResponse res;
-	map<string,string> reqParams = req.getAllParams();
+	map<string,string> reqParams = req->getAllParams();
 
-	string hostp = req.getHeader(HttpRequest::Host);
+	string hostp = req->getHeader(HttpRequest::Host);
 	int port = 8080;
 	if(hostp.find(":")!=string::npos)
 		port = CastUtil::lexical_cast<int>(hostp.substr(hostp.find(":")+1));
 
-	if(req.getFile()=="login.auth")
+	if(req->getFile()=="login.auth")
 	{
 		if(reqParams["username"]!="" && reqParams["password"]!="")
 		{
-			FileAuthController fauthu(req.getCntxt_root()+"/users",":");
+			FileAuthController fauthu(req->getContextHome()+"/users",":");
 			string key;
 			bool flag = fauthu.getPassword(reqParams["username"],key);
 			if(flag)
 			{
-				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent("Valid Login");
+				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+				res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res->setContent("Valid Login");
 			}
 			else
 			{
-				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent("InValid Login");
+				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+				res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res->setContent("InValid Login");
 			}
 			cout << "inside oauth controller non empty credentials" << endl;
 		}
 		else
 		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent("Username and Password cannot be blank");
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->setContent("Username and Password cannot be blank");
 			cout << "inside oauth controller empty credentials" << endl;
 		}
 	}
-	else if(req.getFile()=="requestToken.auth")
+	else if(req->getFile()=="requestToken.auth")
 	{
 		Client client;
 		client.connection("localhost",port);
@@ -95,7 +94,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 		string call,tot;
 		while((call=client.getData())!="")
 			tot.append(call);
-		HttpResponseParser parser(tot, res);
+		HttpResponseParser parser(tot, *res);
 		client.closeConnection();
 
 		map<string,string> mapsd;
@@ -112,25 +111,25 @@ HttpResponse OAUTHController::service(HttpRequest req)
 		}
 		if(mapsd["oauth_token"]!="" && mapsd["oauth_token_secret"]!="" && mapsd["tusername"]!="")
 		{
-			string filen = req.getCntxt_root()+"/"+reqParams["tusername"]+"-tokens-secrets";
+			string filen = req->getContextHome()+"/"+reqParams["tusername"]+"-tokens-secrets";
 			ofstream ofs(filen.c_str());
 			string wrf = mapsd["tusername"] + ":" + mapsd["oauth_token"] + ":" + mapsd["oauth_token_secret"]+"\n";
 			ofs.write(wrf.c_str(),wrf.length());
 			ofs.close();
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent("Acquired request token");
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->setContent("Acquired request token");
 		}
 		else
 		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent("Could not get request token");
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->setContent("Could not get request token");
 		}
 	}
-	else if(req.getFile()=="authorizeUser.auth")
+	else if(req->getFile()=="authorizeUser.auth")
 	{
-		FileAuthController fauthu(req.getCntxt_root()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
+		FileAuthController fauthu(req->getContextHome()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
 		string key1 = "sumeet&",key;
 		bool flag = fauthu.getPassword(reqParams["tusername"],key);
 		if(reqParams["tusername"]!="" && flag)
@@ -142,22 +141,20 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			data += "oauth_token="+tok+"&username="+reqParams["tusername"];
 			cout << data << endl;
 
-			res.setHTTPResponseStatus(HTTPResponseStatus::MovedPermanently);
-			res.addHeaderValue(HttpResponse::Location, data);
+			res->setHTTPResponseStatus(HTTPResponseStatus::MovedPermanently);
+			res->addHeaderValue(HttpResponse::Location, data);
 			cout << "redirecting to third party url" << endl;
 		}
 		else
 		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent("Invalid user");
-
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->setContent("Invalid user");
 		}
-
 	}
-	else if(req.getFile()=="calledback.auth")
+	else if(req->getFile()=="calledback.auth")
 	{
-		FileAuthController fauthu(req.getCntxt_root()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
+		FileAuthController fauthu(req->getContextHome()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
 		string key1 = "sumeet&",key;
 		key = fauthu.get(reqParams["tusername"],2);
 		string tok = fauthu.get(reqParams["tusername"],1);
@@ -188,7 +185,7 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			string call,tot;
 			while((call=client.getData())!="")
 				tot.append(call);
-			HttpResponseParser parser(tot, res);
+			HttpResponseParser parser(tot, *res);
 			client.closeConnection();
 
 			map<string,string> mapsd;
@@ -205,39 +202,39 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			}
 			if(mapsd["oauth_token"]!="" && mapsd["oauth_token_secret"]!="" && mapsd["tusername"]!="")
 			{
-				string filen = req.getCntxt_root()+"/"+reqParams["tusername"]+"-access-secrets";
+				string filen = req->getContextHome()+"/"+reqParams["tusername"]+"-access-secrets";
 				ofstream ofs(filen.c_str());
 				string wrf = mapsd["tusername"] + ":" + mapsd["oauth_token"] + ":" + mapsd["oauth_token_secret"]+"\n";
 				ofs.write(wrf.c_str(),wrf.length());
 				ofs.close();
-				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+				res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 				string conte = "<html><head><script type='text/javascript' src='public/json2.js'></script><script type='text/javascript' src='public/prototype.js'></script><script type='text/javascript' src='public/oauth.js'></script></head>";
 				conte += "File Name: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+reqParams["tusername"]+"\")'/></body>";
 				conte += "</html>";
-				res.setContent(conte);
+				res->setContent(conte);
 			}
 			else
 			{
-				res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-				res.setContent("Could not get access token");
+				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+				res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+				res->setContent("Could not get access token");
 			}
 		}
 		else
 		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent("Invalid user");
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->setContent("Invalid user");
 		}
 	}
-	else if(req.getFile()=="accessToken.auth")
+	else if(req->getFile()=="accessToken.auth")
 	{
 
 	}
-	else if(req.getFile()=="getResource.auth")
+	else if(req->getFile()=="getResource.auth")
 	{
-		FileAuthController fauthu(req.getCntxt_root()+"/"+reqParams["tusername"]+"-access-secrets",":");
+		FileAuthController fauthu(req->getContextHome()+"/"+reqParams["tusername"]+"-access-secrets",":");
 		string key1 = "sumeet&",key;
 		key = fauthu.get(reqParams["tusername"],2);
 		string tok = fauthu.get(reqParams["tusername"],1);
@@ -268,18 +265,18 @@ HttpResponse OAUTHController::service(HttpRequest req)
 			string call,tot;
 			while((call=client.getData())!="")
 				tot.append(call);
-			HttpResponseParser parser(tot, res);
+			HttpResponseParser parser(tot, *res);
 			client.closeConnection();
 
-			res.setContent(parser.getContent());
+			res->setContent(parser.getContent());
 		}
 		else
 		{
-			res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			res.setContent("Access denied");
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			res->setContent("Access denied");
 		}
 	}
-	return res;
+	return true;
 }
 

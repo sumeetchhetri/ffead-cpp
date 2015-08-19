@@ -1,236 +1,535 @@
 
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
-AM_CPPFLAGS = -I"../../include"
+
+AM_CPPFLAGS = -I"../modules/common"
 
 prefix=${abs_builddir}
 
-lib_LTLIBRARIES = libweblib.la
-libweblib_la_SOURCES = ../ServiceTask.cpp \
-		../SSLHandler.cpp \
-		../ConfigurationHandler.cpp \
-		../ConfigurationData.cpp \
-		../ExtHandler.cpp \
-		../FviewHandler.cpp \
-		../FormHandler.cpp \
-		../ControllerHandler.cpp \
-		../AuthHandler.cpp \
-		../FilterHandler.cpp \
-		../SecurityHandler.cpp \
-		../AOPEngine.cpp \
-		../AfcUtil.cpp \
-		../Aspect.cpp \
-		../BinaryData.cpp \
-		../Block.cpp \
-		../Cache.cpp \
-		../CfusionEngine.cpp \
-		../Class.cpp \
-		../ClassInfo.cpp \
-		../Client.cpp \
-		../ConnectionSettings.cpp \
-		../Constructor.cpp \
-		../Date.cpp \
-		../DateFormat.cpp \
-		../Document.cpp \
-		../Element.cpp \
-		../Exception.cpp \
-		../FFEADContext.cpp \
-		../Field.cpp \
-		../HttpRequest.cpp \
-		../HttpResponse.cpp \
-		../HttpSession.cpp \
-		../Logger.cpp \
-		../Method.cpp \
-		../PropFileReader.cpp \
-		../MQueue.cpp \
-		../Reflection.cpp \
-		../Reflector.cpp \
-		../Renderer.cpp \
-		../SerializeBase.cpp \
-		../Server.cpp \
-		../Service.cpp \
-		../ServicePool.cpp \
-		../Task.cpp \
-		../TaskPool.cpp \
-		../TemplateEngine.cpp \
-		../PoolThread.cpp \
-		../ThreadPool.cpp \
-		../Timer.cpp \
-		../View.cpp \
-		../XmlParseException.cpp \
-		../XmlParser.cpp \
-		../AuthController.cpp \
-		../FileAuthController.cpp \
-		../DBAuthController.cpp \
-		../LDAPAuthController.cpp \
-		../CryptoHandler.cpp \
-		../HttpResponseParser.cpp \
-		../SSLClient.cpp \
-		../RestController.cpp \
-		../Filter.cpp \
-		../StringUtil.cpp \
-		../JSONElement.cpp \
-		../JSONUtil.cpp \
-		../Thread.cpp \
-		../Mutex.cpp \
-		../RegexUtil.cpp \
-		../SelEpolKqEvPrt.cpp \
-		../ClientInterface.cpp \
-		../HTTPResponseStatus.cpp \
-		../ContentTypes.cpp \
-		../JSONSerialize.cpp \
-		../CsvFileReader.cpp \
-		../Bigint.cpp \
-		../Bigdecimal.cpp \
-		../FutureTask.cpp \
-		../CORSHandler.cpp \
-		../CompressionUtil.cpp \
-		../MultipartContent.cpp \
-		../LoggerFactory.cpp \
-		../NBServer.cpp \
-		../ScriptHandler.cpp \
-		../SSLCommon.cpp \
-		../mingw.cpp
+lib_LTLIBRARIES = libffead_common.la
+libffead_common_la_SOURCES =  ../modules/common/Bigdecimal.cpp \
+						../modules/common/Bigint.cpp \
+						../modules/common/BinaryData.cpp \
+						../modules/common/CommonUtils.cpp \
+						../modules/common/Compatibility.cpp \
+						../modules/common/CompressionUtil.cpp \
+						../modules/common/Connection.cpp \
+						../modules/common/ConnectionPooler.cpp \
+						../modules/common/CryptoHandler.cpp \
+						../modules/common/CsvFileReader.cpp \
+						../modules/common/Date.cpp \
+						../modules/common/DateFormat.cpp \
+						../modules/common/DLogger.cpp \
+						../modules/common/Document.cpp \
+						../modules/common/Element.cpp \
+						../modules/common/Exception.cpp \
+						../modules/common/JSONElement.cpp \
+						../modules/common/JSONUtil.cpp \
+						../modules/common/Logger.cpp \
+						../modules/common/LoggerFactory.cpp \
+						../modules/common/PropFileReader.cpp \
+						../modules/common/RegexUtil.cpp \
+						../modules/common/Renderer.cpp \
+						../modules/common/StringUtil.cpp \
+						../modules/common/Timer.cpp \
+						../modules/common/View.cpp \
+						../modules/common/XmlParseException.cpp \
+						../modules/common/XmlParser.cpp \
+						../modules/common/MarkerHandler.cpp \
+						../modules/common/TemplateEngine.cpp \
+						../modules/common/CastUtil.cpp
 
 if MOD_ALL
-libweblib_la_SOURCES += ../modules/component/Component.cpp \
+lib_LTLIBRARIES +=  libffead_framework.la
+AM_CPPFLAGS +=  -I"../framework" \
+			    -I"../modules/cache" \
+				-I"../modules/cache/memcached" \
+				-I"../modules/cache/memory" \
+				-I"../modules/cache/redis" \
+				-I"../modules/client-util" \
+				-I"../modules/component" \
+				-I"../modules/distocache" \
+				-I"../modules/http" \
+				-I"../modules/http/http11" \
+				-I"../modules/http/http20" \
+				-I"../modules/interpreter" \
+				-I"../modules/ioc" \
+				-I"../modules/jobs" \
+				-I"../modules/methinvoker" \
+				-I"../modules/msghandler" \
+				-I"../modules/reflection" \
+				-I"../modules/sdorm" \
+				-I"../modules/sdorm/gtm" \
+				-I"../modules/sdorm/mongo" \
+				-I"../modules/sdorm/sql" \
+				-I"../modules/serialization" \
+				-I"../modules/serialization/binary" \
+				-I"../modules/serialization/json" \
+				-I"../modules/serialization/xml" \
+				-I"../modules/server-util" \
+				-I"../modules/ssl" \
+				-I"../modules/threads"
+libffead_framework_la_SOURCES = \
+				../framework/AfcUtil.cpp \
+				../framework/ApplicationUtil.cpp \
+				../framework/AuthController.cpp \
+				../framework/ConfigurationData.cpp \
+				../framework/ConfigurationHandler.cpp \
+				../framework/ConnectionSettings.cpp \
+				../framework/ControllerHandler.cpp \
+				../framework/DBAuthController.cpp \
+				../framework/DCPGenerator.cpp \
+				../framework/ExtHandler.cpp \
+				../framework/FileAuthController.cpp \
+				../framework/FilterHandler.cpp \
+				../framework/FormHandler.cpp \
+				../framework/FviewHandler.cpp \
+				../framework/LDAPAuthController.cpp \
+				../framework/ScriptHandler.cpp \
+				../framework/SecurityHandler.cpp \
+				../framework/ServiceTask.cpp \
+				../framework/SoapHandler.cpp \
+				../framework/TemplateGenerator.cpp \
+				../framework/WsUtil.cpp
+libffead_common_la_SOURCES += \
+						../modules/cache/CacheInterface.cpp \
+						../modules/cache/CacheManager.cpp \
+						../modules/cache/memcached/MemcachedImpl.cpp \
+						../modules/cache/memory/MemoryCacheImpl.cpp \
+						../modules/cache/redis/RedisCacheImpl.cpp \
+						../modules/client-util/Client.cpp \
+						../modules/client-util/ClientInterface.cpp \
+						../modules/client-util/SSLClient.cpp \
+						../modules/component/AppContext.cpp \
+						../modules/component/BeanContext.cpp \
+						../modules/component/Component.cpp \
+						../modules/component/ComponentGen.cpp \
 						../modules/component/ComponentHandler.cpp \
 						../modules/component/RemoteComponent.cpp \
-						../modules/component/ComponentGen.cpp \
-						../modules/component/BeanContext.cpp \
+						../modules/component/Service.cpp \
 						../modules/component/ServiceInt.cpp \
-						../modules/component/AppContext.cpp \
-						../modules/xmlserialize/XMLSerialize.cpp \
-						../modules/cibernate/Cibernate.cpp \
-						../modules/cibernate/CibernateConnPools.cpp \
-						../modules/cibernate/CibernateConnectionPool.cpp \
-						../modules/cibernate/CibernateQuery.cpp \
-						../modules/cibernate/DialectHelper.cpp \
+						../modules/component/ServicePool.cpp \
+						../modules/distocache/BasicDistoCacheConnectionFactory.cpp \
+						../modules/distocache/CacheMap.cpp \
+						../modules/distocache/DistoCacheClientUtils.cpp \
+						../modules/distocache/DistoCacheHandler.cpp \
+						../modules/distocache/DistoCacheServiceHandler.cpp \
+						../modules/distocache/PooledDistoCacheConnectionFactory.cpp \
+						../modules/http/ContentTypes.cpp \
+						../modules/http/CORSHandler.cpp \
+						../modules/http/http11/Http11Handler.cpp \
+						../modules/http/http11/Http11WebSocketDataFrame.cpp \
+						../modules/http/http11/Http11WebSocketHandler.cpp \
+						../modules/http/http20/Http2AlternativeServicesFrame.cpp \
+						../modules/http/http20/Http2ContinuationFrame.cpp \
+						../modules/http/http20/Http2DataFrame.cpp \
+						../modules/http/http20/Http2Frame.cpp \
+						../modules/http/http20/Http2FrameHeader.cpp \
+						../modules/http/http20/Http2GoAwayFrame.cpp \
+						../modules/http/http20/Http2Handler.cpp \
+						../modules/http/http20/Http2HeadersFrame.cpp \
+						../modules/http/http20/Http2HPACKContext.cpp \
+						../modules/http/http20/Http2PingFrame.cpp \
+						../modules/http/http20/Http2PriorityFrame.cpp \
+						../modules/http/http20/Http2PushPromiseFrame.cpp \
+						../modules/http/http20/Http2ReadWriteUtil.cpp \
+						../modules/http/http20/Http2ResetStreamFrame.cpp \
+						../modules/http/http20/Http2SettingsFrame.cpp \
+						../modules/http/http20/Http2StreamHandler.cpp \
+						../modules/http/http20/Http2WindowUpdateFrame.cpp \
+						../modules/http/HttpRequest.cpp \
+						../modules/http/HttpResponse.cpp \
+						../modules/http/HttpResponseParser.cpp \
+						../modules/http/HTTPResponseStatus.cpp \
+						../modules/http/HttpServiceHandler.cpp \
+						../modules/http/HttpSession.cpp \
+						../modules/http/MultipartContent.cpp \
+						../modules/interpreter/CppInterpreter.cpp \
+						../modules/ioc/FFEADContext.cpp \
+						../modules/jobs/CronTimer.cpp \
+						../modules/jobs/JobScheduler.cpp \
 						../modules/methinvoker/MethodInvoc.cpp \
+						../modules/msghandler/Destination.cpp \
 						../modules/msghandler/InvalidMessageException.cpp \
 						../modules/msghandler/Message.cpp \
 						../modules/msghandler/MessageHandler.cpp \
 						../modules/msghandler/MessageUtil.cpp \
+						../modules/msghandler/MQueue.cpp \
+						../modules/reflection/Class.cpp \
+						../modules/reflection/ClassInfo.cpp \
+						../modules/reflection/Constructor.cpp \
+						../modules/reflection/Field.cpp \
+						../modules/reflection/Method.cpp \
+						../modules/reflection/Reflection.cpp \
+						../modules/reflection/Reflector.cpp \
+						../modules/sdorm/DataSourceInterface.cpp \
+						../modules/sdorm/DataSourceManager.cpp \
+						../modules/sdorm/DataSourceMapping.cpp \
+						../modules/sdorm/gtm/GTM.cpp \
+						../modules/sdorm/HiloIdGenerator.cpp \
+						../modules/sdorm/IDGenerator.cpp \
+						../modules/sdorm/mongo/MongoDBConnectionPool.cpp \
+						../modules/sdorm/mongo/MongoDBDataSourceImpl.cpp \
+						../modules/sdorm/Query.cpp \
+						../modules/sdorm/QueryBuilder.cpp \
+						../modules/sdorm/sql/DialectHelper.cpp \
+						../modules/sdorm/sql/SQLConnectionPool.cpp \
+						../modules/sdorm/sql/SQLDataSourceImpl.cpp \
+						../modules/serialization/binary/AMEFDecoder.cpp \
+						../modules/serialization/binary/AMEFEncoder.cpp \
+						../modules/serialization/binary/AMEFObject.cpp \
+						../modules/serialization/binary/AMEFResources.cpp \
+						../modules/serialization/binary/BinarySerialize.cpp \
+						../modules/serialization/json/JSONSerialize.cpp \
+						../modules/serialization/SerializeBase.cpp \
+						../modules/serialization/xml/XMLSerialize.cpp \
+						../modules/server-util/NBServer.cpp \
+						../modules/server-util/RequestReaderHandler.cpp \
+						../modules/server-util/SelEpolKqEvPrt.cpp \
+						../modules/server-util/Server.cpp \
+						../modules/server-util/ServiceHandler.cpp \
+						../modules/server-util/SocketUtil.cpp \
+						../modules/ssl/SSLCommon.cpp \
+						../modules/ssl/SSLHandler.cpp \
+						../modules/threads/FutureTask.cpp \
+						../modules/threads/Mutex.cpp \
+						../modules/threads/PoolThread.cpp \
+						../modules/threads/Task.cpp \
+						../modules/threads/TaskPool.cpp \
+						../modules/threads/Thread.cpp \
+						../modules/threads/ThreadLocal.cpp \
+						../modules/threads/ThreadPool.cpp
+else
+if MOD_DEFAULT
+lib_LTLIBRARIES +=  libffead_framework.la
+AM_CPPFLAGS +=  -I"../framework" \
+	    -I"../modules/cache" \
+		-I"../modules/cache/memory" \
+		-I"../modules/client-util" \
+		-I"../modules/http" \
+		-I"../modules/http/http11" \
+		-I"../modules/http/http20" \
+		-I"../modules/interpreter" \
+		-I"../modules/ioc" \
+		-I"../modules/jobs" \
+		-I"../modules/reflection" \
+		-I"../modules/sdorm" \
+		-I"../modules/serialization" \
+		-I"../modules/serialization/binary" \
+		-I"../modules/serialization/json" \
+		-I"../modules/serialization/xml" \
+		-I"../modules/server-util" \
+		-I"../modules/ssl" \
+		-I"../modules/threads"
+libffead_framework_la_SOURCES = \
+		../framework/AfcUtil.cpp \
+		../framework/ApplicationUtil.cpp \
+		../framework/AuthController.cpp \
+		../framework/ConfigurationData.cpp \
+		../framework/ConfigurationHandler.cpp \
+		../framework/ConnectionSettings.cpp \
+		../framework/ControllerHandler.cpp \
+		../framework/DBAuthController.cpp \
+		../framework/DCPGenerator.cpp \
+		../framework/ExtHandler.cpp \
+		../framework/FileAuthController.cpp \
+		../framework/FilterHandler.cpp \
+		../framework/FormHandler.cpp \
+		../framework/FviewHandler.cpp \
+		../framework/LDAPAuthController.cpp \
+		../framework/ScriptHandler.cpp \
+		../framework/SecurityHandler.cpp \
+		../framework/ServiceTask.cpp \
+		../framework/SoapHandler.cpp \
+		../framework/TemplateGenerator.cpp \
+		../framework/WsUtil.cpp
+libffead_common_la_SOURCES += \
+				../modules/cache/CacheInterface.cpp \
+				../modules/cache/CacheManager.cpp \
+				../modules/cache/memory/MemoryCacheImpl.cpp \
+				../modules/client-util/Client.cpp \
+				../modules/client-util/ClientInterface.cpp \
+				../modules/client-util/SSLClient.cpp \
+				../modules/http/ContentTypes.cpp \
+				../modules/http/CORSHandler.cpp \
+				../modules/http/http11/Http11Handler.cpp \
+				../modules/http/http11/Http11WebSocketDataFrame.cpp \
+				../modules/http/http11/Http11WebSocketHandler.cpp \
+				../modules/http/http20/Http2AlternativeServicesFrame.cpp \
+				../modules/http/http20/Http2ContinuationFrame.cpp \
+				../modules/http/http20/Http2DataFrame.cpp \
+				../modules/http/http20/Http2Frame.cpp \
+				../modules/http/http20/Http2FrameHeader.cpp \
+				../modules/http/http20/Http2GoAwayFrame.cpp \
+				../modules/http/http20/Http2Handler.cpp \
+				../modules/http/http20/Http2HeadersFrame.cpp \
+				../modules/http/http20/Http2HPACKContext.cpp \
+				../modules/http/http20/Http2PingFrame.cpp \
+				../modules/http/http20/Http2PriorityFrame.cpp \
+				../modules/http/http20/Http2PushPromiseFrame.cpp \
+				../modules/http/http20/Http2ReadWriteUtil.cpp \
+				../modules/http/http20/Http2ResetStreamFrame.cpp \
+				../modules/http/http20/Http2SettingsFrame.cpp \
+				../modules/http/http20/Http2StreamHandler.cpp \
+				../modules/http/http20/Http2WindowUpdateFrame.cpp \
+				../modules/http/HttpRequest.cpp \
+				../modules/http/HttpResponse.cpp \
+				../modules/http/HttpResponseParser.cpp \
+				../modules/http/HTTPResponseStatus.cpp \
+				../modules/http/HttpServiceHandler.cpp \
+				../modules/http/HttpSession.cpp \
+				../modules/http/MultipartContent.cpp \
+				../modules/interpreter/CppInterpreter.cpp \
+				../modules/ioc/FFEADContext.cpp \
+				../modules/jobs/CronTimer.cpp \
+				../modules/jobs/JobScheduler.cpp \
+				../modules/reflection/Class.cpp \
+				../modules/reflection/ClassInfo.cpp \
+				../modules/reflection/Constructor.cpp \
+				../modules/reflection/Field.cpp \
+				../modules/reflection/Method.cpp \
+				../modules/reflection/Reflection.cpp \
+				../modules/reflection/Reflector.cpp \
+				../modules/sdorm/DataSourceInterface.cpp \
+				../modules/sdorm/DataSourceManager.cpp \
+				../modules/sdorm/DataSourceMapping.cpp \
+				../modules/sdorm/HiloIdGenerator.cpp \
+				../modules/sdorm/IDGenerator.cpp \
+				../modules/sdorm/Query.cpp \
+				../modules/sdorm/QueryBuilder.cpp \
+				../modules/serialization/binary/AMEFDecoder.cpp \
+				../modules/serialization/binary/AMEFEncoder.cpp \
+				../modules/serialization/binary/AMEFObject.cpp \
+				../modules/serialization/binary/AMEFResources.cpp \
+				../modules/serialization/binary/BinarySerialize.cpp \
+				../modules/serialization/json/JSONSerialize.cpp \
+				../modules/serialization/SerializeBase.cpp \
+				../modules/serialization/xml/XMLSerialize.cpp \
+				../modules/server-util/NBServer.cpp \
+				../modules/server-util/RequestReaderHandler.cpp \
+				../modules/server-util/SelEpolKqEvPrt.cpp \
+				../modules/server-util/Server.cpp \
+				../modules/server-util/ServiceHandler.cpp \
+				../modules/server-util/SocketUtil.cpp \
+				../modules/ssl/SSLCommon.cpp \
+				../modules/ssl/SSLHandler.cpp \
+				../modules/threads/FutureTask.cpp \
+				../modules/threads/Mutex.cpp \
+				../modules/threads/PoolThread.cpp \
+				../modules/threads/Task.cpp \
+				../modules/threads/TaskPool.cpp \
+				../modules/threads/Thread.cpp \
+				../modules/threads/ThreadLocal.cpp \
+				../modules/threads/ThreadPool.cpp
+else
+if MOD_COMPONENT
+AM_CPPFLAGS += \
+				-I"../modules/component"
+libffead_common_la_SOURCES += \
+						../modules/component/AppContext.cpp \
+						../modules/component/BeanContext.cpp \
+						../modules/component/Component.cpp \
+						../modules/component/ComponentGen.cpp \
+						../modules/component/ComponentHandler.cpp \
+						../modules/component/RemoteComponent.cpp \
+						../modules/component/Service.cpp \
+						../modules/component/ServiceInt.cpp \
+						../modules/component/ServicePool.cpp \
+						../modules/serialization/xml/XMLSerialize.cpp \
+						../modules/sdorm/sql/DialectHelper.cpp \
+						../modules/sdorm/sql/SQLConnectionPool.cpp \
+						../modules/sdorm/sql/SQLDataSourceImpl.cpp
+endif
+if MOD_METHINVOKER
+AM_CPPFLAGS += \
+				-I"../modules/serialization/xml" \
+				-I"../modules/methinvoker"
+libffead_common_la_SOURCES += \
+						../modules/serialization/xml/XMLSerialize.cpp \
+						../modules/methinvoker/MethodInvoc.cpp
+endif
+if MOD_MSGHANDLER
+AM_CPPFLAGS += \
+				-I"../modules/serialization/binary" \
+				-I"../modules/msghandler"
+libffead_common_la_SOURCES += \
 						../modules/msghandler/Destination.cpp \
-						../modules/binserialize/BinarySerialize.cpp \
-						../modules/binserialize/AMEFResources.cpp \
-						../modules/binserialize/AMEFEncoder.cpp \
-						../modules/binserialize/AMEFDecoder.cpp \
-						../modules/binserialize/AMEFObject.cpp \
-						../modules/webservice/SoapHandler.cpp \
-						../modules/webservice/SOAPRequest.cpp \
-						../modules/webservice/SOAPResponse.cpp \
-						../modules/webservice/SOAPUtil.cpp \
-						../modules/webservice/WsUtil.cpp \
+						../modules/msghandler/InvalidMessageException.cpp \
+						../modules/msghandler/Message.cpp \
+						../modules/msghandler/MessageHandler.cpp \
+						../modules/msghandler/MessageUtil.cpp \
+						../modules/msghandler/MQueue.cpp \
+						../modules/serialization/binary/AMEFDecoder.cpp \
+						../modules/serialization/binary/AMEFEncoder.cpp \
+						../modules/serialization/binary/AMEFObject.cpp \
+						../modules/serialization/binary/AMEFResources.cpp \
+						../modules/serialization/binary/BinarySerialize.cpp
+endif
+if MOD_SDORM_SQL
+AM_CPPFLAGS += \
+				-I"../modules/sdorm/sql"
+libffead_common_la_SOURCES += \
+						../modules/sdorm/sql/DialectHelper.cpp \
+						../modules/sdorm/sql/SQLConnectionPool.cpp \
+						../modules/sdorm/sql/SQLDataSourceImpl.cpp
+endif
+if MOD_SDORM_MONGO
+AM_CPPFLAGS += \
+				-I"../modules/sdorm/mongo"
+libffead_common_la_SOURCES += \
+						../modules/sdorm/mongo/MongoDBDataSourceImpl.cpp \
+						../modules/sdorm/mongo/MongoDBConnectionPool.cpp
+endif
+if MOD_DISTOCACHE
+AM_CPPFLAGS += \
+				-I"../modules/serialization/binary" \
+				-I"../modules/distocache"
+libffead_common_la_SOURCES += \
+						../modules/serialization/binary/AMEFDecoder.cpp \
+						../modules/serialization/binary/AMEFEncoder.cpp \
+						../modules/serialization/binary/AMEFObject.cpp \
+						../modules/serialization/binary/AMEFResources.cpp \
+						../modules/serialization/binary/BinarySerialize.cpp \
 						../modules/distocache/DistoCacheHandler.cpp \
 						../modules/distocache/DistoCacheServiceHandler.cpp \
 						../modules/distocache/CacheMap.cpp \
 						../modules/distocache/DistoCacheClientUtils.cpp \
 						../modules/distocache/BasicDistoCacheConnectionFactory.cpp \
-						../modules/distocache/PooledDistoCacheConnectionFactory.cpp \
-						../modules/dcp/DCPGenerator.cpp \
-						../modules/dview/DynamicView.cpp \
-						../modules/tpe/TemplateHandler.cpp \
-						../modules/tpe/TemplateGenerator.cpp \
-						../modules/interpreter/CppInterpreter.cpp \
-						../modules/appflow/ApplicationUtil.cpp \
+						../modules/distocache/PooledDistoCacheConnectionFactory.cpp
+endif
+if MOD_XMLSERIALIZE
+AM_CPPFLAGS += \
+				-I"../modules/serialization/xml"
+libffead_common_la_SOURCES += \
+						../modules/serialization/xml/XMLSerialize.cpp
+endif
+if MOD_BINSERIALIZE
+AM_CPPFLAGS += \
+				-I"../modules/serialization/binary"
+libffead_common_la_SOURCES += \
+						../modules/serialization/binary/AMEFDecoder.cpp \
+						../modules/serialization/binary/AMEFEncoder.cpp \
+						../modules/serialization/binary/AMEFObject.cpp \
+						../modules/serialization/binary/AMEFResources.cpp \
+						../modules/serialization/binary/BinarySerialize.cpp
+endif
+if MOD_INTERPRETER
+AM_CPPFLAGS += \
+				-I"../modules/interpreter"
+libffead_common_la_SOURCES += \
+						../modules/interpreter/CppInterpreter.cpp
+endif
+if MOD_JOBS
+AM_CPPFLAGS += \
+				-I"../modules/jobs"
+libffead_common_la_SOURCES += \
 						../modules/jobs/JobScheduler.cpp \
 						../modules/jobs/CronTimer.cpp
-else
-	if MOD_COMPONENT
-	libweblib_la_SOURCES += ../modules/component/Component.cpp \
-							../modules/component/ComponentHandler.cpp \
-							../modules/component/RemoteComponent.cpp \
-							../modules/component/ComponentGen.cpp \
-							../modules/component/BeanContext.cpp \
-							../modules/component/ServiceInt.cpp \
-							../modules/component/AppContext.cpp \
-							../modules/xmlserialize/XMLSerialize.cpp \
-							../modules/cibernate/Cibernate.cpp \
-							../modules/cibernate/CibernateConnPools.cpp \
-							../modules/cibernate/CibernateConnectionPool.cpp \
-							../modules/cibernate/CibernateQuery.cpp \
-							../modules/cibernate/DialectHelper.cpp
-	endif
-	if MOD_METHINVOKER
-	libweblib_la_SOURCES += ../modules/xmlserialize/XMLSerialize.cpp \
-							../modules/methinvoker/MethodInvoc.cpp
-	endif
-	if MOD_MSGHANDLER
-	libweblib_la_SOURCES += ../modules/msghandler/InvalidMessageException.cpp \
-							../modules/msghandler/Message.cpp \
-							../modules/msghandler/MessageHandler.cpp \
-							../modules/msghandler/MessageUtil.cpp \
-							../modules/msghandler/Destination.cpp \
-							../modules/binserialize/BinarySerialize.cpp \
-							../modules/binserialize/AMEFResources.cpp \
-							../modules/binserialize/AMEFEncoder.cpp \
-							../modules/binserialize/AMEFDecoder.cpp \
-							../modules/binserialize/AMEFObject.cpp
-	endif
-	if MOD_WEBSERVICE
-	libweblib_la_SOURCES += ../modules/webservice/SoapHandler.cpp \
-							../modules/webservice/SOAPRequest.cpp \
-							../modules/webservice/SOAPResponse.cpp \
-							../modules/webservice/SOAPUtil.cpp \
-							../modules/webservice/WsUtil.cpp
-	endif
-	if MOD_CIBERNATE
-	libweblib_la_SOURCES += ../modules/cibernate/Cibernate.cpp \
-							../modules/cibernate/CibernateConnPools.cpp \
-							../modules/cibernate/CibernateConnectionPool.cpp \
-							../modules/cibernate/CibernateQuery.cpp \
-							../modules/cibernate/DialectHelper.cpp
-	endif
-	if MOD_DISTOCACHE
-	libweblib_la_SOURCES += ../modules/binserialize/BinarySerialize.cpp \
-							../modules/binserialize/AMEFResources.cpp \
-							../modules/binserialize/AMEFEncoder.cpp \
-							../modules/binserialize/AMEFDecoder.cpp \
-							../modules/binserialize/AMEFObject.cpp \
-							../modules/distocache/DistoCacheHandler.cpp \
-							../modules/distocache/DistoCacheServiceHandler.cpp \
-							../modules/distocache/CacheMap.cpp \
-							../modules/distocache/DistoCacheClientUtils.cpp \
-							../modules/distocache/BasicDistoCacheConnectionFactory.cpp \
-							../modules/distocache/PooledDistoCacheConnectionFactory.cpp
-	endif
-	if MOD_XMLSERIALIZE
-	libweblib_la_SOURCES += ../modules/xmlserialize/XMLSerialize.cpp
-	endif
-	if MOD_BINSERIALIZE
-	libweblib_la_SOURCES += ../modules/binserialize/BinarySerialize.cpp \
-							../modules/binserialize/AMEFResources.cpp \
-							../modules/binserialize/AMEFEncoder.cpp \
-							../modules/binserialize/AMEFDecoder.cpp \
-							../modules/binserialize/AMEFObject.cpp
-	endif
-	if MOD_DCP
-	libweblib_la_SOURCES += ../modules/dcp/DCPGenerator.cpp
-	endif
-	if MOD_DVIEW
-	libweblib_la_SOURCES += ../modules/dview/DynamicView.cpp
-	endif
-	if MOD_TPE
-	libweblib_la_SOURCES += ../modules/tpe/TemplateHandler.cpp \
-							../modules/tpe/TemplateGenerator.cpp
-	endif
-	if MOD_INTERPRETER
-	libweblib_la_SOURCES += ../modules/interpreter/CppInterpreter.cpp
-	endif
-	if MOD_APPFLOW
-	libweblib_la_SOURCES += ../modules/appflow/ApplicationUtil.cpp
-	endif
-	if MOD_JOBS
-	libweblib_la_SOURCES += ../modules/jobs/JobScheduler.cpp \
-							../modules/jobs/CronTimer.cpp
-	endif
+endif
+if MOD_MEMCACHED
+AM_CPPFLAGS += \
+				-I"../modules/cache/memcached"
+libffead_common_la_SOURCES += \
+						../modules/cache/memcached/MemcachedImpl.cpp
+endif
+if MOD_REDISCACHE
+AM_CPPFLAGS += \
+				-I"../modules/cache/redis"
+libffead_common_la_SOURCES += \
+						../modules/cache/redis/RedisCacheImpl.cpp
+endif
+if MOD_GTM
+AM_CPPFLAGS += \
+				-I"../modules/sdorm/gtm"
+libffead_common_la_SOURCES += \
+						../modules/sdorm/gtm/GTM.cpp
+endif
+if MOD_HTTPSERVER
+lib_LTLIBRARIES +=  libffead_framework.la
+AM_CPPFLAGS += \
+				-I"../framework"
+libffead_framework_la_SOURCES = \
+		../framework/AfcUtil.cpp \
+		../framework/AuthController.cpp \
+		../framework/ConfigurationData.cpp \
+		../framework/ConfigurationHandler.cpp \
+		../framework/ConnectionSettings.cpp \
+		../framework/ControllerHandler.cpp \
+		../framework/DBAuthController.cpp \
+		../framework/ExtHandler.cpp \
+		../framework/FileAuthController.cpp \
+		../framework/FilterHandler.cpp \
+		../framework/FormHandler.cpp \
+		../framework/FviewHandler.cpp \
+		../framework/LDAPAuthController.cpp \
+		../framework/ScriptHandler.cpp \
+		../framework/SecurityHandler.cpp \
+		../framework/ServiceTask.cpp
+
+if MOD_DCP
+libffead_common_la_SOURCES += \
+						../framework/DCPGenerator.cpp
+endif
+if MOD_TPE
+libffead_common_la_SOURCES += \
+						../framework/TemplateGenerator.cpp
+endif
+if MOD_APPFLOW
+libffead_common_la_SOURCES += \
+						../framework/ApplicationUtil.cpp
+endif
+if MOD_WEBSERVICE
+libffead_common_la_SOURCES += \
+						../framework/SoapHandler.cpp \
+						../framework/WsUtil.cpp
+endif
+endif
+endif
 endif
 
-libweblib_la_LDFLAGS = -no-undefined
+if MOD_SDORM_SQL
+AM_CPPFLAGS += \
+				-I"../modules/sdorm/sql"
+libffead_common_la_SOURCES += \
+						../modules/sdorm/sql/DialectHelper.cpp \
+						../modules/sdorm/sql/SQLConnectionPool.cpp \
+						../modules/sdorm/sql/SQLDataSourceImpl.cpp
+endif
+
+if MOD_SDORM_MONGO
+AM_CPPFLAGS += \
+				-I"../modules/sdorm/mongo"
+libffead_common_la_SOURCES += \
+						../modules/sdorm/mongo/MongoDBDataSourceImpl.cpp \
+						../modules/sdorm/mongo/MongoDBConnectionPool.cpp
+endif
+if MOD_MEMCACHED
+AM_CPPFLAGS += \
+				-I"../modules/cache/memcached"
+libffead_common_la_SOURCES += \
+						../modules/cache/memcached/MemcachedImpl.cpp
+endif
+if MOD_REDISCACHE
+AM_CPPFLAGS += \
+				-I"../modules/cache/redis"
+libffead_common_la_SOURCES += \
+						../modules/cache/redis/RedisCacheImpl.cpp
+endif
+if MOD_GTM
+AM_CPPFLAGS += \
+				-I"../modules/sdorm/gtm"
+libffead_common_la_SOURCES += \
+						../modules/sdorm/gtm/GTM.cpp
+endif
+
+libffead_common_la_SOURCES += \
+						../modules/common/GenericObject.cpp
+
+libffead_common_la_LDFLAGS = -no-undefined
+libffead_framework_la_LDFLAGS = -lffead_common -no-undefined
 
 noinst_PROGRAMS = CHS
-CHS_SOURCES = ../CHServer.cpp
+CHS_SOURCES = ../server/CHServer.cpp
 CHS_LDFLAGS= -no-undefined
-CHS_LDADD = -lweblib
+CHS_LDADD = -lffead_common -lffead_framework
 

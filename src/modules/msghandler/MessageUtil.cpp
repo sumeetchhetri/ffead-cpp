@@ -23,7 +23,7 @@
 #include "MessageUtil.h"
 
 
-void *get_in_addr(struct sockaddr *sa)
+void* MessageUtil::get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
@@ -40,26 +40,26 @@ string MessageUtil::getSubscriber() const
 	return this->subscriber;
 }
 
-void MessageUtil::setSubscriber(string subscriber)
+void MessageUtil::setSubscriber(const string& subscriber)
 {
 	this->subscriber = subscriber;
 }
 
-MessageUtil::MessageUtil(string file)
+MessageUtil::MessageUtil(const string& file)
 {
 	logger = LoggerFactory::getLogger("MessageUtil");
 	XmlParser parser("Parser");
-	Document doc = parser.getDocument(file);
-	Element msgng = doc.getRootElement();
-	Element dest = msgng.getElementByName("destination");
-	Element url = msgng.getElementByName("url");
+	Document doc ;
+	parser.readDocument(file, doc);
+	Element* dest = doc.getRootElement().getElementByName("destination");
+	Element* url = doc.getRootElement().getElementByName("url");
 	vector<string> vec;
-	string h = url.getText();
+	string h = url->getText();
 	StringUtil::split(vec, h , (":"));
 	this->host = vec.at(0);
 	this->port = vec.at(1);
-	this->destination.setName(dest.getAttribute("name"));
-	this->destination.setType(dest.getAttribute("type"));
+	this->destination.setName(dest->getAttribute("name"));
+	this->destination.setType(dest->getAttribute("type"));
 }
 
 MessageUtil::~MessageUtil()
@@ -67,7 +67,7 @@ MessageUtil::~MessageUtil()
 
 }
 
-bool MessageUtil::sendMessage(Message msg)
+bool MessageUtil::sendMessage(const Message& msg)
 {
 	int sockfd, numbytes;
 	char buf[100];
@@ -215,7 +215,7 @@ Destination MessageUtil::getDestination()
 }
 
 
-void MessageUtil::subscribe(string subs)
+void MessageUtil::subscribe(const string& subs)
 {
 	if(this->destination.getType()=="Topic")
 	{
@@ -289,7 +289,7 @@ void MessageUtil::subscribe(string subs)
 	}
 }
 
-void MessageUtil::unSubscribe(string subs)
+void MessageUtil::unSubscribe(const string& subs)
 {
 	if(this->destination.getType()=="Topic")
 	{

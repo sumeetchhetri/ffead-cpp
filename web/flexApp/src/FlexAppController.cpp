@@ -32,12 +32,11 @@ FlexAppController::~FlexAppController() {
 	// TODO Auto-generated destructor stub
 }
 
-HttpResponse FlexAppController::service(HttpRequest req)
+bool FlexAppController::service(HttpRequest* req, HttpResponse* res)
 {
-	HttpResponse res;
-	res.setHTTPResponseStatus(HTTPResponseStatus::Ok);
-	res.addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-	res.setContent("[{\"num\": 1,\"name\": \"Sumeet\", \"role\": \"Developer\"},{\"num\": 2,\"name\": \"Ravi\", \"role\": \"Quality Analyst\"},{\"num\": 3,\"name\": \"Amit\", \"role\": \"Web Designer\"}]");
-	return res;
+	res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+	res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+	res->setContent("[{\"num\": 1,\"name\": \"Sumeet\", \"role\": \"Developer\"},{\"num\": 2,\"name\": \"Ravi\", \"role\": \"Quality Analyst\"},{\"num\": 3,\"name\": \"Amit\", \"role\": \"Web Designer\"}]");
+	return true;
 }
 

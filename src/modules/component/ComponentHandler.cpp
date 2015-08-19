@@ -57,8 +57,9 @@ void* ComponentHandler::service(void* arg)
 		instance->logger << "Bean call parsed successfully" << endl;
 		if(methInfo.find("lang=\"c++\"")!=string::npos || methInfo.find("lang='c++'")!=string::npos)
 		{
-			Document doc = parser.getDocument(methInfo);
-			Element message = doc.getRootElement();
+			Document doc;
+			parser.parse(methInfo, doc);
+			const Element& message = doc.getRootElement();
 			if(message.getTagName()!="service")
 			{
 				throw ComponentHandlerException("No service Tag\n",retValue);
@@ -88,7 +89,7 @@ void* ComponentHandler::service(void* arg)
 			{
 				throw ComponentHandlerException("message tag should have only one child tag\n",retValue);
 			}
-			else if(message.getChildElements().at(0).getTagName()!="args")
+			else if(message.getChildElements().at(0)->getTagName()!="args")
 			{
 				throw ComponentHandlerException("message tag should have an args child tag\n",retValue);
 			}
@@ -96,34 +97,32 @@ void* ComponentHandler::service(void* arg)
 			Reflector reflector;
 			args argus;
 			vals valus;
-			ElementList argts = message.getChildElements().at(0).getChildElements();
+			ElementList argts = message.getChildElements().at(0)->getChildElements();
 			for (unsigned var = 0; var < argts.size();  var++)
 			{
 				void *value = NULL;
-				Element arg = argts.at(var);
-				if(arg.getTagName()!="argument")
+				if(argts.at(var)->getTagName()!="argument")
 				{
 					throw ComponentHandlerException("Invalid Tag, only argument tag allowed\n",retValue);
 
 				}
-				else if(arg.getAttribute("type")=="")
+				else if(argts.at(var)->getAttribute("type")=="")
 				{
 					throw ComponentHandlerException("every argument tag should have a type attribute\n",retValue);
 
 				}
-				if(arg.getText()=="" && arg.getChildElements().size()==0)
+				if(argts.at(var)->getText()=="" && argts.at(var)->getChildElements().size()==0)
 				{
 					throw ComponentHandlerException("argument value missing\n",retValue);
 
 				}
-				if(arg.getAttribute("type")!="")
+				if(argts.at(var)->getAttribute("type")!="")
 				{
-					Element obj = arg.getChildElements().at(0);
-					string objxml = obj.render();
-					string objClassName = obj.getTagName();
-					value = ser.unSerializeUnknown(objxml,arg.getAttribute("type"));
+					string objxml = argts.at(var)->getChildElements().at(0)->render();
+					string objClassName = argts.at(var)->getChildElements().at(0)->getTagName();
+					value = ser.unSerializeUnknown(objxml, argts.at(var)->getAttribute("type"));
 				}
-				argus.push_back(arg.getAttribute("type"));
+				argus.push_back(argts.at(var)->getAttribute("type"));
 				valus.push_back(value);
 			}
 			string className = "Component_"+message.getAttribute("beanName");
@@ -219,7 +218,7 @@ void ComponentHandler::initComponent()
 
 }
 
-bool ComponentHandler::registerComponent(string name)
+bool ComponentHandler::registerComponent(const string& name)
 {
 	init();
 	if(instance->components.find(name)!=instance->components.end())
@@ -233,7 +232,7 @@ bool ComponentHandler::registerComponent(string name)
 	}
 }
 
-bool ComponentHandler::unregisterComponent(string name)
+bool ComponentHandler::unregisterComponent(const string& name)
 {
 	init();
 	map<string,string>::iterator it = instance->components.find(name);
@@ -247,7 +246,7 @@ bool ComponentHandler::unregisterComponent(string name)
 }
 
 
-void ComponentHandler::trigger(string port)
+void ComponentHandler::trigger(const string& port)
 {
 	init();
 	if(instance->running)

@@ -23,25 +23,25 @@
 #ifndef DEFAULTRESTCONTROLLER_H_
 #define DEFAULTRESTCONTROLLER_H_
 
-#include "RestController.h"
 #include <math.h>
 #include <iostream>
 #include "vector"
 #include "TestMany.h"
 #include <fstream>
+#include "CastUtil.h"
 
-class DefaultRestController: public RestController {
+class DefaultRestController {
 public:
 	DefaultRestController();
 	virtual ~DefaultRestController();
-	void addNumbers(int,int);
-	void power(int,int);
-	void testVector(vector<int>);
-	void testObject(TestMany);
-	void testVectorObject(vector<TestMany> param);
-	void testUploadFile(ifstream* ifs, string param);
-	void testUploadFileMulti1(ifstream* ifs1, ifstream* ifs2, ifstream* ifs3, string param);
-	void testUploadFileMulti2(vector<ifstream*> vifs, string param);
+	int addNumbers(int,int);
+	double power(int,int);
+	vector<int> testVector(vector<int>);
+	TestMany testObject(TestMany);
+	vector<TestMany> testVectorObject(vector<TestMany> param);
+	string testUploadFile(ifstream* ifs, string param);
+	string testUploadFileMulti1(ifstream* ifs1, ifstream* ifs2, ifstream* ifs3, string param);
+	string testUploadFileMulti2(vector<ifstream*> vifs, string param);
 };
 
 #endif /* DEFAULTRESTCONTROLLER_H_ */

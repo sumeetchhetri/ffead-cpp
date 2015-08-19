@@ -31,7 +31,19 @@ JobScheduler::JobScheduler() {
 JobScheduler::~JobScheduler() {
 }
 
-void JobScheduler::init(ElementList tabs, string appName) {
+void JobScheduler::init(const string& fileName, const string& appName) {
+	XmlParser parser("Parser");
+	Document doc;
+	parser.readDocument(fileName, doc);
+	const Element& root = doc.getRootElement();
+	if(root.getTagName()=="job-procs" && root.getChildElements().size()>0)
+	{
+		const ElementList& eles = root.getChildElements();
+		init(eles, appName);
+	}
+}
+
+void JobScheduler::init(const ElementList& tabs, const string& appName) {
 	if(instance!=NULL)
 		return;
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
@@ -39,15 +51,15 @@ void JobScheduler::init(ElementList tabs, string appName) {
 	logger << "Initialized JobScheduler" << endl;
 	for (unsigned int dn = 0; dn < tabs.size(); dn++)
 	{
-		if(tabs.at(dn).getTagName()!="job-proc")
+		if(tabs.at(dn)->getTagName()!="job-proc")
 		{
 			logger << "Invalid Element Tag found inside job-procs, should be job-proc..." << endl;
 			continue;
 		}
-		string clas = tabs.at(dn).getAttribute("class");
-		string cron = tabs.at(dn).getAttribute("cron");
-		string meth = tabs.at(dn).getAttribute("method");
-		string name = tabs.at(dn).getAttribute("name");
+		string clas = tabs.at(dn)->getAttribute("class");
+		string cron = tabs.at(dn)->getAttribute("cron");
+		string meth = tabs.at(dn)->getAttribute("method");
+		string name = tabs.at(dn)->getAttribute("name");
 		if(clas!="" && meth!="" && cron!="" && name!="")
 		{
 			JobConfig config;
@@ -73,7 +85,7 @@ void JobScheduler::start() {
 		return;
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
 	instance->isStarted = true;
-	for (unsigned int dn = 0; dn < (int)instance->configs.size(); dn++)
+	for (int dn = 0; dn < (int)instance->configs.size(); dn++)
 	{
 		string clas = instance->configs.at(dn).clas;
 		string cron = instance->configs.at(dn).cron;
@@ -94,8 +106,8 @@ void JobScheduler::start() {
 
 				if(meth.getMethodName()!="" && ctor.getName()!="")
 				{
-					void* objIns = ref.newInstanceGVP(ctor, appName);
-					JobFunction f = (JobFunction)ref.getMethodInstance(meth, appName);
+					void* objIns = ref.newInstanceGVP(ctor);
+					JobFunction f = (JobFunction)ref.getMethodInstance(meth);
 
 					logger << "JobScheduler - Got objins,func " << objIns << "," << f << endl;
 
@@ -155,7 +167,7 @@ void JobScheduler::stop() {
 
 void* JobScheduler::service(void* arg)
 {
-	JobTask *task = (JobTask*)arg;
+	JobTask *task  = static_cast<JobTask*>(arg);
 	task->run();
 	delete task;
 	return NULL;
@@ -174,21 +186,21 @@ void JobScheduler::JobTask::run() {
 		//task->mutex.unlock();
 
 		Reflector ref;
-		JobFunction f = (JobFunction)ref.getMethodInstance(meth, appName);
+		JobFunction f = (JobFunction)ref.getMethodInstance(meth);
 
 		while(toRun)
 		{
 			sleep(1);
 			Date d2;
-			if(timer.isValid(5, d2.getYearStr(), timer.nextRunDate->getYearStr()))
+			if(timer.isValid(5, d2.getYear(), timer.nextRunDate->getYear()))
 			{
-				if(timer.isValid(3, d2.getMonthStr(), timer.nextRunDate->getMonthStr()))
+				if(timer.isValid(3, d2.getMonth(), timer.nextRunDate->getMonth()))
 				{
-					if(timer.isValid(2, d2.getDayStr(), timer.nextRunDate->getDayStr()))
+					if(timer.isValid(2, d2.getDay(), timer.nextRunDate->getDay()))
 					{
-						if(timer.isValid(1, d2.getHhStr(), timer.nextRunDate->getHhStr()))
+						if(timer.isValid(1, d2.getHours(), timer.nextRunDate->getHours()))
 						{
-							if(timer.isValid(0, d2.getMmStr(), timer.nextRunDate->getMmStr()))
+							if(timer.isValid(0, d2.getMinutes(), timer.nextRunDate->getMinutes()))
 							{
 								logger << "Running Job Process " + name << endl;
 
@@ -196,20 +208,20 @@ void JobScheduler::JobTask::run() {
 
 								bool incrementDone = false;
 
-								incrementDone = timer.tryIncrement(0, timer.nextRunDate->getMmStr());
+								incrementDone = timer.tryIncrement(0, timer.nextRunDate->getMinutes());
 								if(!incrementDone) {
-									incrementDone = timer.tryIncrement(1, timer.nextRunDate->getHhStr());
+									incrementDone = timer.tryIncrement(1, timer.nextRunDate->getHours());
 								}
 
 								if(!incrementDone) {
-									incrementDone = timer.tryIncrement(2, timer.nextRunDate->getDayStr());
+									incrementDone = timer.tryIncrement(2, timer.nextRunDate->getDay());
 								}
 
 								if(!incrementDone) {
-									incrementDone = timer.tryIncrement(3, timer.nextRunDate->getMonthStr());
+									incrementDone = timer.tryIncrement(3, timer.nextRunDate->getMonth());
 								}
 								if(!incrementDone) {
-									incrementDone = timer.tryIncrement(5, timer.nextRunDate->getYearStr());
+									incrementDone = timer.tryIncrement(5, timer.nextRunDate->getYear());
 								}
 
 								logger << "Running Job Process " + name + " complete" << endl;

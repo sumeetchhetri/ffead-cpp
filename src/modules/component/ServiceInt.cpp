@@ -47,7 +47,7 @@ void ServiceInt::execute()
 {
 	this->_comp->execute();
 }
-Cibernate* ServiceInt::getCibernate()
+DataSourceInterface* ServiceInt::getDataSource()
 {
-	return this->_comp->getCibernate();
+	return this->_comp->getDataSource();
 }

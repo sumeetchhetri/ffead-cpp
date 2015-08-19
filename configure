@@ -13065,7 +13065,7 @@ $as_echo "#define INC_CMP /**/" >>confdefs.h
 $as_echo "#define INC_XMLSER /**/" >>confdefs.h
 
 
-$as_echo "#define INC_CIB /**/" >>confdefs.h
+$as_echo "#define INC_SDORM /**/" >>confdefs.h
 
 fi
 
@@ -13171,7 +13171,7 @@ fi
 
 if test "x$mod_dsorm" = "xtrue"; then
 
-$as_echo "#define INC_CIB /**/" >>confdefs.h
+$as_echo "#define INC_SDORM /**/" >>confdefs.h
 
 fi
 
@@ -13490,7 +13490,7 @@ $as_echo "#define INC_JOBS /**/" >>confdefs.h
     fi
     if test "x$mod_dsorm" = "xtrue"; then
 
-$as_echo "#define INC_CIB /**/" >>confdefs.h
+$as_echo "#define INC_SDORM /**/" >>confdefs.h
 
     fi
     if test "x$mod_msghandler" = "xtrue"; then
@@ -19717,7 +19717,7 @@ if test -z "${MOD_WEBSERVICE_TRUE}" && test -z "${MOD_WEBSERVICE_FALSE}"; then
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${MOD_CIBERNATE_TRUE}" && test -z "${MOD_CIBERNATE_FALSE}"; then
-  as_fn_error $? "conditional \"MOD_CIBERNATE\" was never defined.
+  as_fn_error $? "conditional \"MOD_SDORM\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${MOD_DISTOCACHE_TRUE}" && test -z "${MOD_DISTOCACHE_FALSE}"; then

@@ -32,7 +32,7 @@ DefaultOAUTHController::~DefaultOAUTHController() {
 }
 
 
-bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
+bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 {
 	string method = req->getMethod();
 	StringUtil::toUpper(method);
@@ -69,9 +69,9 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 	}
 	cout << "req and oauth params" <<endl;
 
-	FileAuthController fauthu(req->getCntxt_root()+"/users",":");
-	FileAuthController fautht(req->getCntxt_root()+"/tokens",":");
-	FileAuthController fauthta(req->getCntxt_root()+"/access_tokens",":");
+	FileAuthController fauthu(req->getContextHome()+"/users",":");
+	FileAuthController fautht(req->getContextHome()+"/tokens",":");
+	FileAuthController fauthta(req->getContextHome()+"/access_tokens",":");
 
 	string key,tokk,resu,csec;
 	bool isreqtype = false;
@@ -120,7 +120,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 		string filen;
 		if(tokk=="" && req->getFile()=="request.oauth")
 		{
-			filen = req->getCntxt_root()+"/tokens";
+			filen = req->getContextHome()+"/tokens";
 			ofstream ofs(filen.c_str());
 			string oauthtok,oauthsec;
 			oauthtok = CastUtil::lexical_cast<string>(Timer::getCurrentTime());
@@ -138,7 +138,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 			}
 			if(reqparams["oauth_callback"]!="")
 			{
-				filen = req->getCntxt_root()+"/callbacks";
+				filen = req->getContextHome()+"/callbacks";
 				ofstream ofs1(filen.c_str());
 				string oauth_ver = oauthtok + CastUtil::lexical_cast<string>(rand()%1000);
 				wrf = CryptoHandler::urlDecode(reqparams["oauth_callback"])+"?oauth_verifier="+oauth_ver+"&"+parsc;
@@ -155,7 +155,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 		else if(isreqtype && reqparams["oauth_token"]!="" && reqparams["oauth_consumer_key"]!=""
 				&& req->getFile()=="access.oauth")
 		{
-			filen = req->getCntxt_root()+"/access_tokens";
+			filen = req->getContextHome()+"/access_tokens";
 			ofstream ofs(filen.c_str());
 			string oauthtok,oauthsec;
 			oauthtok = CastUtil::lexical_cast<string>(Timer::getCurrentTime());
@@ -215,7 +215,7 @@ bool DefaultOAUTHController::handle(HttpRequest* req,HttpResponse* res)
 	}
 	else if(req->getFile()=="login.oauth")
 	{
-		string filen = req->getCntxt_root()+"/callbacks";
+		string filen = req->getContextHome()+"/callbacks";
 		ifstream ifs(filen.c_str());
 		string wrf;
 		getline(ifs,wrf);

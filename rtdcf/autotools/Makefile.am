@@ -7,14 +7,14 @@ prefix=${abs_builddir}
 
 lib_LTLIBRARIES = libinter.la
 libinter_la_SOURCES = ${INTER_SOURCES}
-libinter_la_LIBADD = -L"../../lib" -lweblib ${INTER_DINTER_LIBRARIES}
+libinter_la_LIBADD = -L"../../lib" -lffead_common -lffead_framework ${INTER_DINTER_LIBRARIES}
 libinter_la_LDFLAGS = -avoid-version -shared -no-undefined -module -export-dynamic
 
-if BUILT_WITH_CONFGURE
+#if BUILT_WITH_CONFGURE
 lib_LTLIBRARIES += libdinter.la
 libdinter_la_SOURCES = ${DINTER_SOURCES}
-libdinter_la_LIBADD = -L"../../lib" -lweblib ${INTER_DINTER_LIBRARIES}
+libdinter_la_LIBADD = -L"../../lib" -lffead_common -lffead_framework ${INTER_DINTER_LIBRARIES}
 libdinter_la_LDFLAGS = -avoid-version -shared -no-undefined -module -export-dynamic
-endif
+#endif
 
 dist_noinst_SCRIPTS = autogen.sh

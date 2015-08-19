@@ -2,22 +2,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_INIT([ffead-cpp], [1.9], [sumeet.chhetri@gmail.com])
-AC_CONFIG_AUX_DIR([libltdl/config])
 AM_INIT_AUTOMAKE([1.9 no-define foreign])
-AC_CONFIG_SRCDIR([include/ConfigurationData.h])
-AC_CONFIG_HEADERS([include/AppDefines.h])
-AC_CONFIG_MACRO_DIR([libltdl/m4])
-LT_CONFIG_LTDL_DIR([libltdl])
-
-INCLTDL=""
-LIBLTDL=""
+AC_CONFIG_SRCDIR([src/framework/ConfigurationData.h])
+AC_CONFIG_HEADERS([src/modules/common/AppDefines.h])
+m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
+AC_CONFIG_MACRO_DIR([m4])
 
 LT_INIT([static shared dlopen])
-LTDL_INIT
-
-dnl Substitute INCLTDL and LIBLTDL in the Makefiles
-AC_SUBST(LTDLINCL)
-AC_SUBST(LIBLTDL)
 
 support_debug=no
 AC_ARG_ENABLE(debug,
@@ -27,10 +18,10 @@ AS_HELP_STRING([--enable-debug],
 )
 if test "x$support_debug" = "xyes"; then
     AC_DEFINE(DEBUG, [], [set DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Wno-uninitialized -O0"
+    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Wno-uninitialized -O2"
 else
     AC_DEFINE(NDEBUG, [], [unset DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -O0"
+    AM_CXXFLAGS="$AM_CXXFLAGS -O2"
     support_debug=no
 fi
 
@@ -44,6 +35,8 @@ AS_HELP_STRING([--enable-apachemod],
 AC_CANONICAL_HOST
 local_os_type="unknown"
 is_librt_available="yes"
+AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
+LDFLAGS="$LDFLAGS -L/usr/local/lib"
 case "$host" in
 *-cygwin*)
     AC_DEFINE(OS_CYGWIN, [], [set OS to cygwin])
@@ -51,6 +44,7 @@ case "$host" in
     ;;
 *mingw*)
     AC_DEFINE(OS_MINGW, [], [set OS to mingw])
+    AC_DEFINE(USE_WIN_IOCP, [], [use io completion ports on windows])
     local_os_type="mingw"
     is_librt_available="no"
     CPPFLAGS="$CPPFLAGS -I/mingw/include -L/mingw/lib -D__USE_MINGW_ANSI_STDIO=1"
@@ -60,7 +54,7 @@ case "$host" in
 *-linux*)
     AC_DEFINE(OS_LINUX, [], [set OS to linux])
 	#hack for some 64-bit systems
-	AC_DEFINE(_GNU_SOURCE, [], [set GNU source flag for linux])
+	#AC_DEFINE(_GNU_SOURCE, [], [set GNU source flag for linux])
     local_os_type="linux"
     ;;
 *-irix*)
@@ -93,8 +87,8 @@ case "$host" in
     local_os_type="freebsd"
 
     dnl our hack for freebsd system
-    AM_CXXFLAGS="$AM_CXXFLAGS -pthread -I/usr/local/include"
-    LDFLAGS="$LDFLAGS -L/usr/local/lib -L/usr/local/v6/lib"
+    AM_CXXFLAGS="$AM_CXXFLAGS -pthread"
+    LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-netbsd*)
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
@@ -102,8 +96,7 @@ case "$host" in
     local_os_type="netbsd"
 
     #our hack for netbsd system
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
-    LDFLAGS="$LDFLAGS -L/usr/local/lib -L/usr/local/v6/lib"
+    LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-openbsd*)
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
@@ -115,7 +108,6 @@ case "$host" in
 	AC_DEFINE_UNQUOTED(OS_OPENBSD_REL, ${OBSD_REL}, [set openbsd release number])
 
     #our hack for openbsd system
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
     LIBS="$LIBS -L/usr/local/lib"
     ;;
 *-osf*)
@@ -135,106 +127,224 @@ case "$host" in
     AC_MSG_ERROR([We do not support SCO's products!])
 esac
 
+
+########################################################################################################
+########################## CACHE MODULES, Memory, Redis, Memcached #####################################
+
+AC_ARG_ENABLE(mod_memorycache,
+AS_HELP_STRING([--enable-mod_memorycache],
+               [enable mod_memorycache, default: yes]),
+[case "${enableval}" in
+             yes) mod_memorycache=yes ;;
+             no)  mod_memorycache=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_memorycache]) ;;
+esac],
+[mod_memorycache=yes])
+AM_CONDITIONAL(MOD_MEMORYCACHE, test "x$mod_memorycache" = "xyes")
+AM_CONDITIONAL(MOD_CACHE, test "x$mod_memorycache" = "xyes")
+if test "x$mod_memorycache" = "xyes"; then
+    AC_DEFINE(INC_MEMORYCACHE, [], [enable memory cache module])
+fi
+
+AC_ARG_ENABLE(mod_rediscache,
+AS_HELP_STRING([--enable-mod_rediscache],
+               [enable mod_rediscache, default: no]),
+[case "${enableval}" in
+             yes) mod_rediscache=yes ;;
+             no)  mod_rediscache=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_rediscache]) ;;
+esac],
+[mod_rediscache=no])
+AM_CONDITIONAL(MOD_REDISCACHE, test "x$mod_rediscache" = "xyes")
+AM_CONDITIONAL(MOD_CACHE, test "x$mod_rediscache" = "xyes")
+if test "x$mod_rediscache" = "xyes"; then
+    AC_DEFINE(INC_REDISCACHE, [], [enable redis cache module])
+fi
+
+AC_ARG_ENABLE(mod_memcached,
+AS_HELP_STRING([--enable-mod_memcached],
+               [enable mod_memcached, default: no]),
+[case "${enableval}" in
+             yes) mod_memcached=yes ;;
+             no)  mod_memcached=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_memcached]) ;;
+esac],
+[mod_memcached=no])
+AM_CONDITIONAL(MOD_MEMCACHED, test "x$mod_memcached" = "xyes")
+AM_CONDITIONAL(MOD_CACHE, test "x$mod_memcached" = "xyes")
+if test "x$mod_memcached" = "xyes"; then
+    AC_DEFINE(INC_MEMCACHED, [], [enable memcached cache module])
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+########################## Component Module ############################################################
+
 AC_ARG_ENABLE(mod_comp,
 AS_HELP_STRING([--enable-mod_comp],
-               [enable mod_comp, default: yes]),
+               [enable mod_comp, default: no]),
 [case "${enableval}" in
-             yes) mod_comp=true ;;
-             no)  mod_comp=false ;;
+             yes) mod_comp=yes ;;
+             no)  mod_comp=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_comp]) ;;
 esac],
-[mod_comp=true])
-AM_CONDITIONAL(MOD_COMPONENT, test x"$mod_comp" = x"true")
-if test "x$mod_comp" = "xtrue"; then
+[mod_comp=no])
+AM_CONDITIONAL(MOD_COMPONENT, test "x$mod_comp" = "xyes")
+AM_CONDITIONAL(MOD_XMLSERIALIZE, test "x$mod_comp" = "xyes")
+AM_CONDITIONAL(MOD_SDORM, test "x$mod_comp" = "xyes")
+if test "x$mod_comp" = "xyes"; then
     AC_DEFINE(INC_CMP, [], [enable component module])
     AC_DEFINE(INC_XMLSER, [], [enable xml serialization module])
-    AC_DEFINE(INC_CIB, [], [enable data-source-orm module])
+    AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
 fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+########################## MethInvoker Module ##########################################################
 
 AC_ARG_ENABLE(mod_methinvoker,
 AS_HELP_STRING([--enable-mod_methinvoker],
-               [enable mod_methinvoker, default: yes]),
+               [enable mod_methinvoker, default: no]),
 [case "${enableval}" in
-             yes) mod_methinvoker=true ;;
-             no)  mod_methinvoker=false ;;
+             yes) mod_methinvoker=yes ;;
+             no)  mod_methinvoker=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_methinvoker]) ;;
 esac],
-[mod_methinvoker=true])
-AM_CONDITIONAL(MOD_METHINVOKER, test x"$mod_methinvoker" = x"true")
-if test "x$mod_methinvoker" = "xtrue"; then
+[mod_methinvoker=no])
+AM_CONDITIONAL(MOD_METHINVOKER, test "x$mod_methinvoker" = "xyes")
+AM_CONDITIONAL(MOD_XMLSERIALIZE, test "x$mod_methinvoker" = "xyes")
+if test "x$mod_methinvoker" = "xyes"; then
     AC_DEFINE(INC_MI, [], [enable method invoker module])
     AC_DEFINE(INC_XMLSER, [], [enable xml serialization module])
 fi
 
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+########################## MsgHandler Module ###########################################################
+
 AC_ARG_ENABLE(mod_msghandler,
 AS_HELP_STRING([--enable-mod_msghandler],
-               [enable mod_msghandler, default: yes]),
+               [enable mod_msghandler, default: no]),
 [case "${enableval}" in
-             yes) mod_msghandler=true ;;
-             no)  mod_msghandler=false ;;
+             yes) mod_msghandler=yes ;;
+             no)  mod_msghandler=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_msghandler]) ;;
 esac],
-[mod_msghandler=true])
-AM_CONDITIONAL(MOD_MSGHANDLER, test x"$mod_msghandler" = x"true")
-if test "x$mod_msghandler" = "xtrue"; then
+[mod_msghandler=no])
+AM_CONDITIONAL(MOD_MSGHANDLER, test "x$mod_msghandler" = "xyes")
+AM_CONDITIONAL(MOD_BINSERIALIZE, test "x$mod_msghandler" = "xyes")
+if test "x$mod_msghandler" = "xyes"; then
     AC_DEFINE(INC_MSGH, [], [enable message handler module])
     AC_DEFINE(INC_BINSER, [], [enable binary serialization module])
 fi
 
-AC_ARG_ENABLE(mod_webservice,
-AS_HELP_STRING([--enable-mod_webservice],
-               [enable mod_webservice, default: yes]),
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+########################## SDORM MODULES, SQL, Mongo ###################################################
+
+AC_ARG_ENABLE(mod_sdormsql,
+AS_HELP_STRING([--enable-mod_sdormsql],
+               [enable mod_sdormsql, default: no]),
 [case "${enableval}" in
-             yes) mod_webservice=true ;;
-             no)  mod_webservice=false ;;
-             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_webservice]) ;;
+             yes) mod_sdormsql=yes ;;
+             no)  mod_sdormsql=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_sdormsql]) ;;
 esac],
-[mod_webservice=true])
-AM_CONDITIONAL(MOD_WEBSERVICE, test x"$mod_webservice" = x"true")
-if test "x$mod_webservice" = "xtrue"; then
-    AC_DEFINE(INC_WEBSVC, [], [enable web-services module])
+[mod_sdormsql=no])
+AM_CONDITIONAL(MOD_SDORM_SQL, test "x$mod_sdormsql" = "xyes")
+AM_CONDITIONAL(MOD_SDORM, test "x$mod_sdormsql" = "xyes")
+if test "x$mod_sdormsql" = "xyes"; then
+    AC_DEFINE(INC_SDORM_SQL, [], [enable data-source-orm-sql module])
+    AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
 fi
 
-AC_ARG_ENABLE(mod_dsorm,
-AS_HELP_STRING([--enable-mod_dsorm],
-               [enable mod_dsorm, default: yes]),
+AC_ARG_ENABLE(mod_sdormmongo,
+AS_HELP_STRING([--enable-mod_sdormmongo],
+               [enable mod_sdormmongo, default: no]),
 [case "${enableval}" in
-             yes) mod_dsorm=true ;;
-             no)  mod_dsorm=false ;;
-             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_dsorm]) ;;
+             yes) mod_sdormmongo=yes ;;
+             no)  mod_sdormmongo=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_sdormmongo]) ;;
 esac],
-[mod_dsorm=true])
-AM_CONDITIONAL(MOD_CIBERNATE, test x"$mod_dsorm" = x"true")
-if test "x$mod_dsorm" = "xtrue"; then
-    AC_DEFINE(INC_CIB, [], [enable data-source-orm module])
+[mod_sdormmongo=no])
+AM_CONDITIONAL(MOD_SDORM_MONGO, test "x$mod_sdormmongo" = "xyes")
+AM_CONDITIONAL(MOD_SDORM, test "x$mod_sdormmongo" = "xyes")
+if test "x$mod_sdormmongo" = "xyes"; then
+	AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+    CPPFLAGS="$CPPFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+    AC_DEFINE(INC_SDORM_MONGO, [], [enable data-source-orm-mongo module])
+    AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
 fi
+
+AC_ARG_ENABLE(mod_gtm,
+AS_HELP_STRING([--enable-mod_gtm],
+               [enable mod_gtm, default: no]),
+[case "${enableval}" in
+             yes) mod_gtm=yes ;;
+             no)  mod_gtm=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_gtm]) ;;
+esac],
+[mod_gtm=no])
+AM_CONDITIONAL(MOD_GTM, test "x$mod_gtm" = "xyes")
+if test "x$mod_gtm" = "xyes"; then
+    AC_DEFINE(INC_GTM, [], [enable scripting support module])
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+########################## Distocache module ###########################################################
 
 AC_ARG_ENABLE(mod_distocache,
 AS_HELP_STRING([--enable-mod_distocache],
-               [enable mod_distocache, default: yes]),
+               [enable mod_distocache, default: no]),
 [case "${enableval}" in
-             yes) mod_distocache=true ;;
-             no)  mod_distocache=false ;;
+             yes) mod_distocache=yes ;;
+             no)  mod_distocache=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_distocache]) ;;
 esac],
-[mod_distocache=true])
-AM_CONDITIONAL(MOD_DISTOCACHE, test x"$mod_distocache" = x"true")
-if test "x$mod_distocache" = "xtrue"; then
+[mod_distocache=no])
+AM_CONDITIONAL(MOD_DISTOCACHE, test "x$mod_distocache" = "xyes")
+AM_CONDITIONAL(MOD_BINSERIALIZE, test "x$mod_distocache" = "xyes")
+AM_CONDITIONAL(MOD_THREADS, test "x$mod_distocache" = "xyes")
+if test "x$mod_distocache" = "xyes"; then
     AC_DEFINE(INC_DSTC, [], [enable distocache module])
     AC_DEFINE(INC_BINSER, [], [enable binary serialization module])
+    AC_DEFINE(INC_THREADS, [], [enable threads module])
 fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## Serializer Module XML,JSON,Binary #######################################
 
 AC_ARG_ENABLE(mod_xmlserialize,
 AS_HELP_STRING([--enable-mod_xmlserialize],
                [enable mod_xmlserialize, default: yes]),
 [case "${enableval}" in
-             yes) mod_xmlserialize=true ;;
-             no)  mod_xmlserialize=false ;;
+             yes) mod_xmlserialize=yes ;;
+             no)  mod_xmlserialize=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_xmlserialize]) ;;
 esac],
-[mod_xmlserialize=true])
-AM_CONDITIONAL(MOD_XMLSERIALIZE, test x"$mod_xmlserialize" = x"true")
-if test "x$mod_xmlserialize" = "xtrue"; then
+[mod_xmlserialize=yes])
+AM_CONDITIONAL(MOD_XMLSERIALIZE, test "x$mod_xmlserialize" = "xyes")
+if test "x$mod_xmlserialize" = "xyes"; then
     AC_DEFINE(INC_XMLSER, [], [enable xml serialization module])
 fi
 
@@ -242,180 +352,396 @@ AC_ARG_ENABLE(mod_binserialize,
 AS_HELP_STRING([--enable-mod_binserialize],
                [enable mod_binserialize, default: yes]),
 [case "${enableval}" in
-             yes) mod_binserialize=true ;;
-             no)  mod_binserialize=false ;;
+             yes) mod_binserialize=yes ;;
+             no)  mod_binserialize=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_binserialize]) ;;
 esac],
-[mod_binserialize=true])
-AM_CONDITIONAL(MOD_BINSERIALIZE, test x"$mod_binserialize" = x"true")
-if test "x$mod_binserialize" = "xtrue"; then
+[mod_binserialize=yes])
+AM_CONDITIONAL(MOD_BINSERIALIZE, test "x$mod_binserialize" = "xyes")
+if test "x$mod_binserialize" = "xyes"; then
     AC_DEFINE(INC_BINSER, [], [enable binary serilaization module])
 fi
 
-AC_ARG_ENABLE(mod_dcp,
-AS_HELP_STRING([--enable-mod_dcp],
-               [enable mod_dcp, default: yes]),
+AC_ARG_ENABLE(mod_jsonserialize,
+AS_HELP_STRING([--enable-mod_jsonserialize],
+               [enable mod_jsonserialize, default: yes]),
 [case "${enableval}" in
-             yes) mod_dcp=true ;;
-             no)  mod_dcp=false ;;
-             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_dcp]) ;;
+             yes) mod_jsonserialize=yes ;;
+             no)  mod_jsonserialize=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_jsonserialize]) ;;
 esac],
-[mod_dcp=true])
-AM_CONDITIONAL(MOD_DCP, test x"$mod_dcp" = x"true")
-if test "x$mod_dcp" = "xtrue"; then
-    AC_DEFINE(INC_DCP, [], [enable dynamic c++ pages module])
+[mod_jsonserialize=yes])
+AM_CONDITIONAL(MOD_JSONSERIALIZE, test "x$mod_jsonserialize" = "xyes")
+if test "x$mod_jsonserialize" = "xyes"; then
+    AC_DEFINE(INC_JSONSER, [], [enable json serilaization module])
 fi
 
-AC_ARG_ENABLE(mod_dview,
-AS_HELP_STRING([--enable-mod_dview],
-               [enable mod_dview, default: yes]),
-[case "${enableval}" in
-             yes) mod_dview=true ;;
-             no)  mod_dview=false ;;
-             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_dview]) ;;
-esac],
-[mod_dview=true])
-AM_CONDITIONAL(MOD_DVIEW, test x"$mod_dview" = x"true")
-if test "x$mod_dview" = "xtrue"; then
-    AC_DEFINE(INC_DVIEW, [], [enable dynamic views module])
-fi
+########################################################################################################
+########################################################################################################
 
-AC_ARG_ENABLE(mod_tpe,
-AS_HELP_STRING([--enable-mod_tpe],
-               [enable mod_tpe, default: yes]),
-[case "${enableval}" in
-             yes) mod_tpe=true ;;
-             no)  mod_tpe=false ;;
-             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_tpe]) ;;
-esac],
-[mod_tpe=true])
-AM_CONDITIONAL(MOD_TPE, test x"$mod_tpe" = x"true")
-if test "x$mod_tpe" = "xtrue"; then
-    AC_DEFINE(INC_TPE, [], [enable templates module])
-fi
+
+########################################################################################################
+############################## C++ Interpreter #########################################################
 
 AC_ARG_ENABLE(mod_interpreter,
 AS_HELP_STRING([--enable-mod_interpreter],
                [enable mod_interpreter, default: yes]),
 [case "${enableval}" in
-             yes) mod_interpreter=true ;;
-             no)  mod_interpreter=false ;;
+             yes) mod_interpreter=yes ;;
+             no)  mod_interpreter=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_interpreter]) ;;
 esac],
-[mod_interpreter=true])
-AM_CONDITIONAL(MOD_INTERPRETER, test x"$mod_interpreter" = x"true")
-if test "x$mod_interpreter" = "xtrue"; then
+[mod_interpreter=yes])
+AM_CONDITIONAL(MOD_INTERPRETER, test "x$mod_interpreter" = "xyes")
+AM_CONDITIONAL(MOD_REFLECTION, test "x$mod_interpreter" = "xyes")
+if test "x$mod_interpreter" = "xyes"; then
     AC_DEFINE(INC_INTP, [], [enable c++ interpreter module])
+    AC_DEFINE(INC_REFLECTION, [], [enable reflection module])
 fi
 
-AC_ARG_ENABLE(mod_appflow,
-AS_HELP_STRING([--enable-mod_appflow],
-               [enable mod_appflow, default: yes]),
-[case "${enableval}" in
-             yes) mod_appflow=true ;;
-             no)  mod_appflow=false ;;
-             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_appflow]) ;;
-esac],
-[mod_appflow=true])
-AM_CONDITIONAL(MOD_APPFLOW, test x"$mod_appflow" = x"true")
-if test "x$mod_appflow" = "xtrue"; then
-    AC_DEFINE(INC_APPFLOW, [], [enable application flow module])
-fi
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## Job Scheduler ###########################################################
 
 AC_ARG_ENABLE(mod_jobs,
 AS_HELP_STRING([--enable-mod_jobs],
                [enable mod_jobs, default: yes]),
 [case "${enableval}" in
-             yes) mod_jobs=true ;;
-             no)  mod_jobs=false ;;
+             yes) mod_jobs=yes ;;
+             no)  mod_jobs=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_jobs]) ;;
 esac],
-[mod_jobs=true])
-AM_CONDITIONAL(MOD_JOBS, test x"$mod_jobs" = x"true")
-if test "x$mod_jobs" = "xtrue"; then
+[mod_jobs=yes])
+AM_CONDITIONAL(MOD_JOBS, test "x$mod_jobs" = "xyes")
+AM_CONDITIONAL(MOD_REFLECTION, test "x$mod_jobs" = "xyes")
+AM_CONDITIONAL(MOD_THREADS, test "x$mod_jobs" = "xyes")
+if test "x$mod_jobs" = "xyes"; then
     AC_DEFINE(INC_JOBS, [], [enable cron/batch jobs module])
+    AC_DEFINE(INC_REFLECTION, [], [enable reflection module])
+    AC_DEFINE(INC_THREADS, [], [enable threads module])
 fi
 
-AC_ARG_ENABLE(mod_script,
-AS_HELP_STRING([--enable-mod_script],
-               [enable mod_script, default: yes]),
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## Client Utility ##########################################################
+
+AC_ARG_ENABLE(mod_clientutil,
+AS_HELP_STRING([--enable-mod_clientutil],
+               [enable mod_clientutil, default: yes]),
 [case "${enableval}" in
-             yes) mod_script=true ;;
-             no)  mod_script=false ;;
-             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_script]) ;;
+             yes) mod_clientutil=yes ;;
+             no)  mod_clientutil=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_clientutil]) ;;
 esac],
-[mod_script=true])
-AM_CONDITIONAL(MOD_SCRH, test x"$mod_script" = x"true")
-if test "x$mod_script" = "xtrue"; then
-    AC_DEFINE(INC_SCRH, [], [enable scripting support module])
+[mod_clientutil=yes])
+AM_CONDITIONAL(MOD_CLIENTUTIL, test "x$mod_clientutil" = "xyes")
+if test "x$mod_clientutil" = "xyes"; then
+    AC_DEFINE(INC_CLIENTUTIL, [], [enable client-utility module])
 fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## IOC Utility #############################################################
+
+AC_ARG_ENABLE(mod_ioc,
+AS_HELP_STRING([--enable-mod_ioc],
+               [enable mod_ioc, default: yes]),
+[case "${enableval}" in
+             yes) mod_ioc=yes ;;
+             no)  mod_ioc=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_ioc]) ;;
+esac],
+[mod_ioc=yes])
+AM_CONDITIONAL(MOD_IOC, test "x$mod_ioc" = "xyes")
+AM_CONDITIONAL(MOD_REFLECTION, test "x$mod_ioc" = "xyes")
+if test "x$mod_ioc" = "xyes"; then
+    AC_DEFINE(INC_IOC, [], [enable ioc module])
+    AC_DEFINE(INC_REFLECTION, [], [enable reflection module])
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## Reflection Utility ######################################################
+
+AC_ARG_ENABLE(mod_reflection,
+AS_HELP_STRING([--enable-mod_reflection],
+               [enable mod_reflection, default: yes]),
+[case "${enableval}" in
+             yes) mod_reflection=yes ;;
+             no)  mod_reflection=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_reflection]) ;;
+esac],
+[mod_reflection=yes])
+AM_CONDITIONAL(MOD_REFLECTION, test "x$mod_reflection" = "xyes")
+if test "x$mod_reflection" = "xyes"; then
+    AC_DEFINE(INC_REFLECTION, [], [enable reflection module])
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## HTTP Utility ############################################################
+
+AC_ARG_ENABLE(mod_http,
+AS_HELP_STRING([--enable-mod_http],
+               [enable mod_http, default: yes]),
+[case "${enableval}" in
+             yes) mod_http=yes ;;
+             no)  mod_http=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_http]) ;;
+esac],
+[mod_http=yes])
+AM_CONDITIONAL(MOD_HTTP, test "x$mod_http" = "xyes")
+AM_CONDITIONAL(MOD_THREADS, test "x$mod_http" = "xyes")
+if test "x$mod_http" = "xyes"; then
+    AC_DEFINE(INC_HTTP, [], [enable http module])
+    AC_DEFINE(INC_THREADS, [], [enable threads module])
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## Server Utility ##########################################################
+
+AC_ARG_ENABLE(mod_serverutil,
+AS_HELP_STRING([--enable-mod_serverutil],
+               [enable mod_serverutil, default: yes]),
+[case "${enableval}" in
+             yes) mod_serverutil=yes ;;
+             no)  mod_serverutil=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_serverutil]) ;;
+esac],
+[mod_serverutil=yes])
+AM_CONDITIONAL(MOD_SERVERUTIL, test "x$mod_serverutil" = "xyes")
+AM_CONDITIONAL(MOD_THREADS, test "x$mod_serverutil" = "xyes")
+if test "x$mod_serverutil" = "xyes"; then
+    AC_DEFINE(INC_SERVERUTIL, [], [enable server-utility module])
+    AC_DEFINE(INC_THREADS, [], [enable threads module])
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## SSL Utility #############################################################
+
+AC_ARG_ENABLE(mod_sslutil,
+AS_HELP_STRING([--enable-mod_sslutil],
+               [enable mod_sslutil, default: yes]),
+[case "${enableval}" in
+             yes) mod_sslutil=yes ;;
+             no)  mod_sslutil=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_sslutil]) ;;
+esac],
+[mod_sslutil=yes])
+AM_CONDITIONAL(MOD_SSLUTIL, test "x$mod_sslutil" = "xyes")
+if test "x$mod_sslutil" = "xyes"; then
+    AC_DEFINE(INC_SSLUTIL, [], [enable ssl-utility module])
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## Threads Utility #########################################################
+
+AC_ARG_ENABLE(mod_threads,
+AS_HELP_STRING([--enable-mod_threads],
+               [enable mod_threads, default: yes]),
+[case "${enableval}" in
+             yes) mod_threads=yes ;;
+             no)  mod_threads=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_threads]) ;;
+esac],
+[mod_threads=yes])
+AM_CONDITIONAL(MOD_THREADS, test "x$mod_threads" = "xyes")
+if test "x$mod_threads" = "xyes"; then
+    AC_DEFINE(INC_THREADS, [], [enable threads module])
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## HTTP Server & Framework #################################################
+
+AM_CONDITIONAL(MOD_HTTPSERVER, test "x$yes" = "xyes")
+AM_CONDITIONAL(MOD_SCRIPT, test "x$yes" = "xno")
+AM_CONDITIONAL(MOD_DCP, test "x$yes" = "xno")
+AM_CONDITIONAL(MOD_DVIEW, test "x$yes" = "xno")
+AM_CONDITIONAL(MOD_DCP, test "x$yes" = "xno")
+AM_CONDITIONAL(MOD_TPE, test "x$yes" = "xno")
+AM_CONDITIONAL(MOD_APPFLOW, test "x$yes" = "xno")
+AM_CONDITIONAL(MOD_WEBSERVICE, test "x$yes" = "xno")
+
+AC_ARG_ENABLE(mod_httpframework,
+AS_HELP_STRING([--enable-mod_httpframework],
+               [enable mod_httpframework, default: yes]),
+[case "${enableval}" in
+             yes) mod_httpframework=yes ;;
+             no)  mod_httpframework=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_httpframework]) ;;
+esac],
+[mod_httpframework=yes])
+AM_CONDITIONAL(MOD_HTTPFRAMEWORK, test "x$mod_httpframework" = "xyes")
+if test "x$mod_httpframework" = "xyes"; then
+    AC_DEFINE(INC_HTTPFRAMEWORK, [], [enable http framework module])
+    
+    AC_ARG_ENABLE(mod_dcp,
+	AS_HELP_STRING([--enable-mod_dcp],
+	               [enable mod_dcp, default: yes]),
+	[case "${enableval}" in
+	             yes) mod_dcp=yes ;;
+	             no)  mod_dcp=no ;;
+	             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_dcp]) ;;
+	esac],
+	[mod_dcp=yes])
+	AM_CONDITIONAL(MOD_DCP, test "x$mod_dcp" = "xyes")
+	if test "x$mod_dcp" = "xyes"; then
+	    AC_DEFINE(INC_DCP, [], [enable http framework dynamic c++ pages module])
+	fi
+	
+	AC_ARG_ENABLE(mod_dview,
+	AS_HELP_STRING([--enable-mod_dview],
+	               [enable mod_dview, default: yes]),
+	[case "${enableval}" in
+	             yes) mod_dview=yes ;;
+	             no)  mod_dview=no ;;
+	             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_dview]) ;;
+	esac],
+	[mod_dview=yes])
+	AM_CONDITIONAL(MOD_DVIEW, test "x$mod_dview" = "xyes")
+	if test "x$mod_dview" = "xyes"; then
+	    AC_DEFINE(INC_DVIEW, [], [enable http framework dynamic views module])
+	fi
+	
+	AC_ARG_ENABLE(mod_tpe,
+	AS_HELP_STRING([--enable-mod_tpe],
+	               [enable mod_tpe, default: yes]),
+	[case "${enableval}" in
+	             yes) mod_tpe=yes ;;
+	             no)  mod_tpe=no ;;
+	             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_tpe]) ;;
+	esac],
+	[mod_tpe=yes])
+	AM_CONDITIONAL(MOD_TPE, test "x$mod_tpe" = "xyes")
+	if test "x$mod_tpe" = "xyes"; then
+	    AC_DEFINE(INC_TPE, [], [enable http framework templates module])
+	fi
+	
+	AC_ARG_ENABLE(mod_appflow,
+	AS_HELP_STRING([--enable-mod_appflow],
+	               [enable mod_appflow, default: yes]),
+	[case "${enableval}" in
+	             yes) mod_appflow=yes ;;
+	             no)  mod_appflow=no ;;
+	             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_appflow]) ;;
+	esac],
+	[mod_appflow=yes])
+	AM_CONDITIONAL(MOD_APPFLOW, test "x$mod_appflow" = "xyes")
+	if test "x$mod_appflow" = "xyes"; then
+	    AC_DEFINE(INC_APPFLOW, [], [enable http framework application flow module])
+	fi
+	
+	AC_ARG_ENABLE(mod_webservice,
+	AS_HELP_STRING([--enable-mod_webservice],
+	               [enable mod_webservice, default: yes]),
+	[case "${enableval}" in
+	             yes) mod_webservice=yes ;;
+	             no)  mod_webservice=no ;;
+	             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_webservice]) ;;
+	esac],
+	[mod_webservice=yes])
+	AM_CONDITIONAL(MOD_WEBSERVICE, test "x$mod_webservice" = "xyes")
+	if test "x$mod_webservice" = "xyes"; then
+	    AC_DEFINE(INC_WEBSVC, [], [enable http framework web-service module])
+	fi
+	
+	AC_ARG_ENABLE(mod_script,
+	AS_HELP_STRING([--enable-mod_script],
+	               [enable mod_script, default: yes]),
+	[case "${enableval}" in
+	             yes) mod_script=yes ;;
+	             no)  mod_script=no ;;
+	             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_script]) ;;
+	esac],
+	[mod_script=yes])
+	AM_CONDITIONAL(MOD_SCRH, test "x$mod_script" = "xyes")
+	if test "x$mod_script" = "xyes"; then
+	    AC_DEFINE(INC_SCRH, [], [enable http framework scripting support module])
+	fi
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## Default modules #########################################################
+
+AC_ARG_ENABLE(mod_default,
+AS_HELP_STRING([--enable-mod_default],
+               [enable mod_default, default: yes]),
+[case "${enableval}" in
+             yes) mod_default=yes ;;
+             no)  mod_default=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_default]) ;;
+esac],
+[mod_default=yes])
+AM_CONDITIONAL(MOD_DEFAULT, test "x$mod_default" = "xyes")
+
+########################################################################################################
+########################################################################################################
+
+
+########################################################################################################
+############################## All the modules #########################################################
 
 AC_ARG_ENABLE(mod_all,
 AS_HELP_STRING([--enable-mod_all],
-               [enable mod_all, default: yes]),
+               [enable mod_all, default: no]),
 [case "${enableval}" in
-             yes) mod_all=true ;;
-             no)  mod_all=false ;;
+             yes) mod_all=yes ;;
+             no)  mod_all=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_all]) ;;
 esac],
-[mod_all=true])
-AM_CONDITIONAL(MOD_ALL, test x"$mod_all" = x"true")
-if test "x$mod_all" = "xtrue"; then
-	if test "x$mod_comp" = "xtrue"; then
-    	AC_DEFINE(INC_COMP, [], [enable component module])
-    fi
-    if test "x$mod_dcp" = "xtrue"; then
-    	AC_DEFINE(INC_DCP, [], [enable dynamic c++ pages module])
-    fi
-    if test "x$mod_dview" = "xtrue"; then
-    	AC_DEFINE(INC_DVIEW, [], [enable dynamic views module])
-    fi
-    if test "x$mod_tpe" = "xtrue"; then
-    	AC_DEFINE(INC_TPE, [], [enable templates module])
-    fi
-    if test "x$mod_script" = "xtrue"; then
-    	AC_DEFINE(INC_SCRH, [], [enable component module])
-    fi
-    if test "x$mod_interpreter" = "xtrue"; then
-    	AC_DEFINE(INC_INTP, [], [enable c++ interpreter module])
-    fi
-    if test "x$mod_appflow" = "xtrue"; then
-    	AC_DEFINE(INC_APPFLOW, [], [enable application flow module])
-    fi
-    if test "x$mod_jobs" = "xtrue"; then
-    	AC_DEFINE(INC_JOBS, [], [enable cron/batch jobs module])
-    fi
-    if test "x$mod_dsorm" = "xtrue"; then
-    	AC_DEFINE(INC_CIB, [], [enable data-source-orm module])
-    fi
-    if test "x$mod_msghandler" = "xtrue"; then
-    	AC_DEFINE(INC_MSGH, [], [enable message handler module])
-    fi
-    if test "x$mod_methinvoker" = "xtrue"; then
-    	AC_DEFINE(INC_MI, [], [enable method invoker module])
-    fi
-    if test "x$mod_webservice" = "xtrue"; then
-    	AC_DEFINE(INC_WEBSVC, [], [enable web-services module])
-    fi
-    if test "x$mod_distocache" = "xtrue"; then
-    	AC_DEFINE(INC_DSTC, [], [enable distocache module])
-    fi
-    if test "x$mod_xmlserialize" = "xtrue"; then
-    	AC_DEFINE(INC_XMLSER, [], [enable xml serialization module])
-    fi
-    if test "x$mod_binserialize" = "xtrue"; then
-    	AC_DEFINE(INC_BINSER, [], [enable binary serialization module])
-    fi
-fi
+[mod_all=no])
+AM_CONDITIONAL(MOD_ALL, test "x$mod_all" = "xyes")
+
+########################################################################################################
+########################################################################################################
+
 
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
 
+STDCXX_11_SWITCH=
+
 dnl# Checks for programs.
 AC_PROG_AWK
-AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
+AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX_11(,mandatory)
 
 if test "x$generate_apache_module" = "xyes"; then
 	AC_SUBST(GENERATE_APACHEMOD,[apache_mod_ffeadcpp/autotools])
@@ -432,7 +758,7 @@ if test "x$generate_apache_module" = "xyes"; then
 		else
 			AC_CHECK_PROG(APXS, apxs2, [apxs2], [no],[])
 		fi
-		if test x"$APXS" = x"no" ; then
+		if test "x$APXS" = "xno" ; then
 		    AC_MSG_ERROR([Please install apache development tools (apxs/apxs2) to continue.])
 		fi
 	elif test "x$local_os_type" = "xmingw"; then
@@ -440,7 +766,7 @@ if test "x$generate_apache_module" = "xyes"; then
 		AC_SUBST(LIBRARY_EXTENSION,[dll])
 		AC_SUBST(APACHE_HTTPD_LIB,[ ])
 		AC_CHECK_PROG(APXS, apxs.pl, [apxs.pl], [no],[])
-		if test x"$APXS" = x"no" ; then
+		if test "x$APXS" = "xno" ; then
 		    AC_MSG_ERROR([Please install apache development tools (apxs/apxs2) to continue, apxs.pl not found, make sure you have your Apache directory in the path and apxs is installed correctly])
 		fi
 	else
@@ -448,7 +774,7 @@ if test "x$generate_apache_module" = "xyes"; then
 		AC_SUBST(LIBRARY_EXTENSION,[so])
 		AC_SUBST(APACHE_HTTPD_LIB,[ ])
 		AC_CHECK_PROG(APXS, apxs2, [apxs2], [apxs2 not found],[])
-		if test x"$APXS" = x"no" ; then
+		if test "x$APXS" = "xno" ; then
 		    AC_MSG_ERROR([Please install apache development tools (apxs/apxs2) to continue.])
 		fi
 	fi
@@ -466,7 +792,11 @@ AC_PROG_MAKE_SET
 
 dnl# Checks for libraries.
 AC_DEFINE(BUILT_WITH_CONFGURE, [1], [set configure mode])
-AM_CONDITIONAL(BUILT_WITH_CONFGURE, test x"1" = x"1")
+AM_CONDITIONAL(BUILT_WITH_CONFGURE, test "x1" = "x1")
+
+AC_CHECK_HEADER([_mingw_mac.h], 
+					 [AC_DEFINE(OS_MINGW_W64, [1], [Define to 1 if you have _mingw_mac.h])], 
+					 [AC_DEFINE(OS_MINGW_W64, [0], [Define to 0 if you don't have _mingw_mac.h])])
 
 dnl# Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
@@ -489,19 +819,16 @@ AC_CHECK_HEADER([sys/select.h],
                      [AC_DEFINE(USE_SELECT, [1], [Define to 1 if you have <sys/select.h>.])],
                      [AC_DEFINE(USE_SELECT, [0], [select support not found])])
 
-if test -d /usr/local/include; then
-     if test -f /usr/local/include/openssl/ssl.h; then
-		echo 'ssl headers found..'
-     else
-		AC_CHECK_HEADER([openssl/ssl.h],,[AC_MSG_ERROR([ssl header not found])])	
-     fi
-fi
+AC_CHECK_HEADER([openssl/ssl.h],,[AC_MSG_ERROR([ssl header not found])])
+AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([unixODBC sql.h header not found])])
+AC_CHECK_HEADER([mongoc.h],,[AC_MSG_ERROR([mongodb mongoc.h header not found])])
+AC_CHECK_HEADER([bson.h],,[AC_MSG_ERROR([mongodb bson.h header not found])])
 
-if test "x$mod_dsorm" = "xtrue"; then
-     if test -f /usr/local/include/sql.h; then
-		echo 'unixODBC sql.h header found..'
+if test "x$mod_gtm" = "xyes"; then
+     if test -f /usr/local/include/gtmxc_types.h; then
+		echo 'gtm gtmxc_types.h header found..'
      else
-		AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([unixODBC sql.h header not found])])	
+		AC_CHECK_HEADER([gtmxc_types.h],,[AC_MSG_ERROR([gtm gtmxc_types.h header not found])])	
      fi
 fi
 
@@ -526,10 +853,16 @@ AC_CHECK_LIB(ssl, SSL_read, [], [AC_MSG_ERROR([ssl library not found])])
 AC_CHECK_LIB([crypto], [SHA1_Init], [], [AC_MSG_ERROR([libcrypto not found])])
 AC_CHECK_LIB(z, compress,,AC_MSG_ERROR([no zlib; please install zlib or equivalent]))
 AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
+AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
 
-if test "x$mod_dsorm" = "xtrue"; then
+if test "x$mod_sdormsql" = "xyes"; then
     AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
+fi
+
+if test "x$mod_sdormmongo" = "xyes"; then
+    AC_CHECK_LIB(mongoc-1.0, mongoc_init, , [AC_MSG_ERROR([Not found libmongo library])])
+    AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
 fi
 
 if test "x$is_librt_available" = "xyes"; then	
@@ -539,10 +872,15 @@ fi
 if test "x$local_os_type" = "xmingw"; then
 	AC_CHECK_LIB(wsock32, main, , [AC_MSG_ERROR([Not found libwsock32 library])])
 	AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
+	AC_CHECK_LIB(kernel32, main, , [AC_MSG_ERROR([Not found libkernel32 library])])
 	AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
 fi
 
-    
+if test "x$mod_gtm" = "xyes"; then
+    AC_CHECK_LIB(gtmshr, main, , [AC_MSG_ERROR([Not found libgtmshr library])])
+fi
+ 
+AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"  
 # distribute additional compiler and linker flags among Makefiles
 # --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
 AC_SUBST([AM_CXXFLAGS])    
@@ -550,10 +888,12 @@ AC_SUBST([AM_CXXFLAGS])
 AC_CONFIG_FILES([Makefile
 				src/autotools/Makefile
 				tests/autotools/Makefile
-				apache_mod_ffeadcpp/autotools/Makefile
+				src/apache_mod_ffeadcpp/autotools/Makefile
 				web/default/src/autotools/Makefile
 				web/flexApp/src/autotools/Makefile
-				web/oauthApp/src/autotools/Makefile])
+				web/oauthApp/src/autotools/Makefile
+				web/markers/src/autotools/Makefile
+				web/te-benchmark/src/autotools/Makefile])
 AC_OUTPUT
 
 echo "Host: $host"

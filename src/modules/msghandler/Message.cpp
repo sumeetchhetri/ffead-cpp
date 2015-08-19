@@ -27,73 +27,12 @@ Message::Message()
 
 }
 
-Message::Message(string xml)
+Message::Message(const string& xml)
 {
-	try
-	{
-		XmlParser parser("Parser");
-		Document doc = parser.getDocument(xml);
-		Element message = doc.getRootElement();
-		if(message.getTagName()!="message")
-		{
-			throw InvalidMessageException("No message Tag\n");
-		}
-		else if(message.getChildElements().size()!=2)
-		{
-			throw InvalidMessageException("Every message should have a headers and body tag\n");
-		}
-		Element headers = message.getChildElements().at(0);
-		Element body = message.getChildElements().at(1);
-		if(headers.getTagName()!="headers")
-		{
-			throw InvalidMessageException("No headers Tag\n");
-		}
-		else if(body.getTagName()!="body")
-		{
-			throw InvalidMessageException("No body Tag\n");
-		}
-		Element destination = headers.getElementByName("destination");
-		Element encoding = headers.getElementByName("encoding");
-		Element timestamp = headers.getElementByName("timestamp");
-		Element priority = headers.getElementByName("priority");
-		Element type = headers.getElementByName("type");
-		Element userid = headers.getElementByName("userid");
-		if(destination.getTagName()!="destination")
-		{
-			throw InvalidMessageException("Destination Header is mandatory\n");
-		}
-		else if (destination.getAttributes().size()!=2)
-		{
-			throw InvalidMessageException("Type and Name Attributes should be speciifes for a Destination\n");
-		}
-		else if (destination.getAttribute("name")=="" || destination.getAttribute("type")=="")
-		{
-			throw InvalidMessageException("Type and Name Attributes cannot be blank for a Destination\n");
-		}
-		else if(type.getTagName()!="type")
-		{
-			throw InvalidMessageException("Type Header is mandatory\n");
-		}
-		Destination des;
-		des.setName(destination.getAttribute("name"));
-		des.setType(destination.getAttribute("type"));
-		this->destination = des;
-		this->body = body.getText();
-		this->timestamp = timestamp.getText();
-		this->type = type.getText();
-		this->priority = priority.getText();
-		this->userId = userid.getText();
-		this->encoding = encoding.getText();
-	}
-	catch(Exception *e)
-	{
-		throw e;
-	}
-}
-
-Message::Message(Document doc)
-{
-	Element message = doc.getRootElement();
+	XmlParser parser("Parser");
+	Document doc;
+	parser.parse(xml, doc);
+	const Element& message = doc.getRootElement();
 	if(message.getTagName()!="message")
 	{
 		throw InvalidMessageException("No message Tag\n");
@@ -102,51 +41,106 @@ Message::Message(Document doc)
 	{
 		throw InvalidMessageException("Every message should have a headers and body tag\n");
 	}
-	Element headers = message.getChildElements().at(0);
-	Element body = message.getChildElements().at(1);
-	if(headers.getTagName()!="headers")
+	Element* headers = message.getChildElements().at(0);
+	Element* body = message.getChildElements().at(1);
+	if(headers->getTagName()!="headers")
 	{
 		throw InvalidMessageException("No headers Tag\n");
 	}
-	else if(body.getTagName()!="body")
+	else if(body->getTagName()!="body")
 	{
 		throw InvalidMessageException("No body Tag\n");
 	}
-	Element destination = headers.getElementByName("destination");
-	Element encoding = headers.getElementByName("encoding");
-	Element timestamp = headers.getElementByName("timestamp");
-	Element priority = headers.getElementByName("priority");
-	Element type = headers.getElementByName("type");
-	Element userid = headers.getElementByName("userid");
-	if(destination.getTagName()!="destination")
+	Element* destination = headers->getElementByName("destination");
+	Element* encoding = headers->getElementByName("encoding");
+	Element* timestamp = headers->getElementByName("timestamp");
+	Element* priority = headers->getElementByName("priority");
+	Element* type = headers->getElementByName("type");
+	Element* userid = headers->getElementByName("userid");
+	if(destination->getTagName()!="destination")
 	{
 		throw InvalidMessageException("Destination Header is mandatory\n");
 	}
-	else if (destination.getAttributes().size()!=2)
+	else if (destination->getAttributes().size()!=2)
 	{
 		throw InvalidMessageException("Type and Name Attributes should be speciifes for a Destination\n");
 	}
-	else if (destination.getAttribute("name")=="" || destination.getAttribute("type")=="")
+	else if (destination->getAttribute("name")=="" || destination->getAttribute("type")=="")
 	{
 		throw InvalidMessageException("Type and Name Attributes cannot be blank for a Destination\n");
 	}
-	else if(type.getTagName()!="type")
+	else if(type->getTagName()!="type")
 	{
 		throw InvalidMessageException("Type Header is mandatory\n");
 	}
 	Destination des;
-	des.setName(destination.getAttribute("name"));
-	des.setType(destination.getAttribute("type"));
+	des.setName(destination->getAttribute("name"));
+	des.setType(destination->getAttribute("type"));
 	this->destination = des;
-	this->body = body.getText();
-	this->timestamp = timestamp.getText();
-	this->type = type.getText();
-	this->priority = priority.getText();
-	this->userId = userid.getText();
-	this->encoding = encoding.getText();
+	this->body = body->getText();
+	this->timestamp = timestamp->getText();
+	this->type = type->getText();
+	this->priority = priority->getText();
+	this->userId = userid->getText();
+	this->encoding = encoding->getText();
 }
 
-string Message::toXml()
+Message::Message(Document& doc)
+{
+	const Element& message = doc.getRootElement();
+	if(message.getTagName()!="message")
+	{
+		throw InvalidMessageException("No message Tag\n");
+	}
+	else if(message.getChildElements().size()!=2)
+	{
+		throw InvalidMessageException("Every message should have a headers and body tag\n");
+	}
+	Element* headers = message.getChildElements().at(0);
+	Element* body = message.getChildElements().at(1);
+	if(headers->getTagName()!="headers")
+	{
+		throw InvalidMessageException("No headers Tag\n");
+	}
+	else if(body->getTagName()!="body")
+	{
+		throw InvalidMessageException("No body Tag\n");
+	}
+	Element* destination = headers->getElementByName("destination");
+	Element* encoding = headers->getElementByName("encoding");
+	Element* timestamp = headers->getElementByName("timestamp");
+	Element* priority = headers->getElementByName("priority");
+	Element* type = headers->getElementByName("type");
+	Element* userid = headers->getElementByName("userid");
+	if(destination->getTagName()!="destination")
+	{
+		throw InvalidMessageException("Destination Header is mandatory\n");
+	}
+	else if (destination->getAttributes().size()!=2)
+	{
+		throw InvalidMessageException("Type and Name Attributes should be speciifes for a Destination\n");
+	}
+	else if (destination->getAttribute("name")=="" || destination->getAttribute("type")=="")
+	{
+		throw InvalidMessageException("Type and Name Attributes cannot be blank for a Destination\n");
+	}
+	else if(type->getTagName()!="type")
+	{
+		throw InvalidMessageException("Type Header is mandatory\n");
+	}
+	Destination des;
+	des.setName(destination->getAttribute("name"));
+	des.setType(destination->getAttribute("type"));
+	this->destination = des;
+	this->body = body->getText();
+	this->timestamp = timestamp->getText();
+	this->type = type->getText();
+	this->priority = priority->getText();
+	this->userId = userid->getText();
+	this->encoding = encoding->getText();
+}
+
+string Message::toXml() const
 {
 	string xml;
 	xml = "<message>\n<headers>\n<destination ";
@@ -185,7 +179,7 @@ Destination Message::getDestination() const
 	return this->destination;
 }
 
-void Message::setDestination(Destination destination)
+void Message::setDestination(const Destination& destination)
 {
 	this->destination = destination;
 }
@@ -195,7 +189,7 @@ string Message::getTimestamp() const
 	return this->timestamp;
 }
 
-void Message::setTimestamp(string timestamp)
+void Message::setTimestamp(const string& timestamp)
 {
 	this->timestamp = timestamp;
 }
@@ -205,7 +199,7 @@ string Message::getType() const
 	return this->type;
 }
 
-void Message::setType(string type)
+void Message::setType(const string& type)
 {
 	this->type = type;
 }
@@ -215,7 +209,7 @@ string Message::getPriority() const
 	return this->priority;
 }
 
-void Message::setPriority(string priority)
+void Message::setPriority(const string& priority)
 {
 	this->priority = priority;
 }
@@ -225,7 +219,7 @@ string Message::getUserId() const
 	return this->userId;
 }
 
-void Message::setUserId(string userId)
+void Message::setUserId(const string& userId)
 {
 	this->userId = userId;
 }
@@ -235,7 +229,7 @@ string Message::getBody() const
 	return this->body;
 }
 
-void Message::setBody(string body)
+void Message::setBody(const string& body)
 {
 	this->body = body;
 }
@@ -245,7 +239,7 @@ string Message::getEncoding() const
 	return this->encoding;
 }
 
-void Message::setEncoding(string encoding)
+void Message::setEncoding(const string& encoding)
 {
 	this->encoding = encoding;
 }

@@ -21,8 +21,7 @@
  */
 
 #include "DefaultController.h"
-#include "Cibernate.h"
-#include "Object.h"
+#include "DataSourceManager.h"
 #include "Test.h"
 #include "Test2.h"
 #include "Test3.h"
@@ -38,16 +37,16 @@ DefaultController::~DefaultController() {
 	// TODO Auto-generated destructor stub
 }
 
-HttpResponse DefaultController::service(HttpRequest req)
+bool DefaultController::service(HttpRequest* req, HttpResponse* res)
 {
-	HttpResponse res;
-	Cibernate chib("default");
-	vector<Test2> tec = chib.getAll<Test2>();
-	cout << "\n Cibernate Query fetched " << tec.size() << " rows\n" << flush;
-	vector<Test3> tec1 = chib.getAll<Test3>();
-	cout << "\n Cibernate Query fetched " << tec1.size() << " rows\n" << flush;
-	vector<Test4> tec2 = chib.getAll<Test4>();
-	cout << "\n Cibernate Query fetched " << tec2.size() << " rows\n" << flush;
-	return res;
+	DataSourceInterface* sqli = DataSourceManager::getImpl();
+	vector<Test2> tec = sqli->getAll<Test2>();
+	cout << "\n Sdorm Query fetched " << tec.size() << " rows\n" << flush;
+	vector<Test3> tec1 = sqli->getAll<Test3>();
+	cout << "\n Sdorm Query fetched " << tec1.size() << " rows\n" << flush;
+	vector<Test4> tec2 = sqli->getAll<Test4>();
+	cout << "\n Sprint Query fetched " << tec2.size() << " rows\n" << flush;
+	delete sqli;
+	return true;
 }
 

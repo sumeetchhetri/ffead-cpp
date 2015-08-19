@@ -21,7 +21,7 @@
  */
 
 #include "AppDefines.h"
-#include "mingw.h"
+#include "Compatibility.h"
 #include "HttpResponseParser.h"
 #include "CsvFileReader.h"
 #include "PropFileReader.h"
@@ -72,8 +72,14 @@ int main()
 
 	string sslFile = props["SERVER_SSL_FILE"];
 
+	bool isDebug = false;
+	if(StringUtil::toLowerCopy(props["DEBUG"])=="true") {
+		isDebug = true;
+	}
+
 	cout << "Server IP - " << ip <<endl;
 	cout << "Server Port - " << port <<endl;
+	cout << "Debug Mode - " << isDebug <<endl;
 	cout << "Server SSL Enabled - " << CastUtil::lexical_cast<string>(sslEnabled) <<endl;
 	if(sslEnabled)
 	{
@@ -188,10 +194,18 @@ int main()
 
 			timer.start();
 
+			if(isDebug) {
+				cout << "HTTP Request Is=>\n" << data << "\n\n" << endl;
+			}
+
 			client->connectionUnresolv(ip,port);
 			int bytes = client->sendData(data);
-			string tot = client->getTextData("\r\n","Content-Length");
+			string tot = client->getTextData("\r\n","content-length");
 			long long millis = timer.elapsedMilliSeconds();
+
+			if(isDebug) {
+				cout << "HTTP Response Is=>\n" << tot << "\n\n" << endl;
+			}
 
 			HttpResponse res;
 			HttpResponseParser parser(tot, res);

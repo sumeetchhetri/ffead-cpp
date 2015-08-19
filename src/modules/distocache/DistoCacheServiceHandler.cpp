@@ -22,14 +22,14 @@
 
 #include "DistoCacheServiceHandler.h"
 
-DistoCacheServiceHandler::DistoCacheServiceHandler(int fd, bool isSSLEnabled, SSL_CTX *ctx) {
+DistoCacheServiceHandler::DistoCacheServiceHandler(const int& fd, const bool& isSSLEnabled, SSL_CTX *ctx) {
 	this->fd = fd;
 	this->isSSLEnabled = isSSLEnabled;
 	this->ctx = ctx;
 	logger = LoggerFactory::getLogger("DistoCacheServiceHandler");
 }
 
-DistoCacheServiceHandler::DistoCacheServiceHandler(int fd) {
+DistoCacheServiceHandler::DistoCacheServiceHandler(const int& fd) {
 	this->fd = fd;
 	this->isSSLEnabled = false;
 	logger = LoggerFactory::getLogger("DistoCacheServiceHandler");
@@ -38,7 +38,7 @@ DistoCacheServiceHandler::DistoCacheServiceHandler(int fd) {
 DistoCacheServiceHandler::~DistoCacheServiceHandler() {
 }
 
-int DistoCacheServiceHandler::getLength(string header,int size)
+int DistoCacheServiceHandler::getLength(const string& header, const int& size)
 {
 	int totsize = header[size-1] & 0xff;
 	for (int var = 0; var < size-1; var++)
@@ -48,7 +48,7 @@ int DistoCacheServiceHandler::getLength(string header,int size)
 	return totsize;
 }
 
-bool DistoCacheServiceHandler::validQuery(vector<string> parts, int size, string cmd1, string cmd2)
+bool DistoCacheServiceHandler::validQuery(const vector<string>& parts, const int& size, const string& cmd1, const string& cmd2)
 {
 	bool flag = true;
 	flag = (int)parts.size()==size;
@@ -209,7 +209,7 @@ void DistoCacheServiceHandler::run()
 
 		try {
 			AMEFDecoder decoder;
-			AMEFObject* query = decoder.decodeB(alldat,true,false);
+			AMEFObject* query = decoder.decodeB(alldat,true);
 			if(query!=NULL && query->getPackets().size()>0)
 			{
 				string quer = query->getPackets().at(0)->getValue();
@@ -572,7 +572,7 @@ void DistoCacheServiceHandler::run()
 		}
 		AMEFEncoder encoder;
 
-		string response = encoder.encodeB(&responseObject, false);
+		string response = encoder.encodeB(&responseObject);
 
 		int toto = response.length();
 		if(isSSLEnabled)

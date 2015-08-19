@@ -31,31 +31,34 @@ DefTemp::~DefTemp() {
 	// TODO Auto-generated destructor stub
 }
 
-Context DefTemp::getContext()
+Context DefTemp::getContext(HttpRequest* request)
 {
 	Context cnt;
-	string* dat = new string("1.js");
-	Object dato;
+	string dat = "1.js";
+	GenericObject dato;
 	dato << dat;
 	cnt["dat"] = dato;
 
 	Test* t = new Test;
 	t->setId(1);
 	t->setName("name");
-	Object to;
+	GenericObject to;
 	to << t;
+	delete t;
 	cnt["test"] = to;
 
 	vector<string>* vect = new vector<string>;
 	vect->push_back("vec1");
 	vect->push_back("vec2");
-	Object vecto;
+	GenericObject vecto;
 	vecto << vect;
+	delete vect;
 	cnt["vect"] = vecto;
 
 	int* num = new int(5);
-	Object numo;
+	GenericObject numo;
 	numo << num;
+	delete num;
 	cnt["number"] = numo;
 	return cnt;
 }

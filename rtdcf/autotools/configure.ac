@@ -2,21 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_INIT([ffead-cpp], [1.9], [sumeet.chhetri@gmail.com])
-AC_CONFIG_AUX_DIR([libltdl/config])
 AM_INIT_AUTOMAKE([1.9 no-define foreign])
 AC_CONFIG_SRCDIR([../AjaxInterface.cpp])
-AC_CONFIG_MACRO_DIR([libltdl/m4])
-LT_CONFIG_LTDL_DIR([libltdl])
-
-INCLTDL=""
-LIBLTDL=""
+AC_CONFIG_MACRO_DIR([m4])
 
 LT_INIT([static shared dlopen])
-LTDL_INIT
-
-dnl Substitute INCLTDL and LIBLTDL in the Makefiles
-AC_SUBST(LTDLINCL)
-AC_SUBST(LIBLTDL)
 
 mod_dsorm=${MOD_DSORM}
 
@@ -42,13 +32,14 @@ case "$host" in
 *-cygwin*)
     AC_DEFINE(OS_CYGWIN, [], [set OS to cygwin])
     local_os_type="cygwin"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
     ;;
 *mingw*)
     AC_DEFINE(OS_MINGW, [], [set OS to mingw])
     local_os_type="mingw"
     is_librt_available="no"
     CPPFLAGS="$CPPFLAGS -I/mingw/include -L/mingw/lib -D__USE_MINGW_ANSI_STDIO=1"
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/mingw/include -L/mingw/lib"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include -I/mingw/include -L/mingw/lib"
     LDFLAGS="$LDFLAGS -L/mingw/lib"
     ;;
 *-linux*)
@@ -56,6 +47,7 @@ case "$host" in
 	#hack for some 64-bit systems
 	AC_DEFINE(_GNU_SOURCE, [], [set GNU source flag for linux])
     local_os_type="linux"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
     ;;
 *-irix*)
     AC_DEFINE(OS_IRIX, [], [set OS to irix])
@@ -64,13 +56,13 @@ case "$host" in
 *-sunos*)
     AC_DEFINE(OS_SUNOS, [], [set OS to sunos])
     local_os_type="sunos"
-    AM_CXXFLAGS="$AM_CXXFLAGS -pthreads"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include -pthreads"
     LDFLAGS="$LDFLAGS -lsocket -lnsl -lresolv"
     ;;
 *-solaris*)
     AC_DEFINE(OS_SOLARIS, [], [set OS to solaris])
     local_os_type="solaris"
-    AM_CXXFLAGS="$AM_CXXFLAGS -pthreads"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include -pthreads"
     LDFLAGS="$LDFLAGS -lsocket -lnsl"
     ;;
 *-aix*)
@@ -121,6 +113,7 @@ case "$host" in
     AC_DEFINE(OS_DARWIN, [], [set OS to darwin])
     local_os_type="darwin"
     is_librt_available="no"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
     ;;
 *-sco*)
     AC_DEFINE(OS_SCO, [], [set OS to sco])

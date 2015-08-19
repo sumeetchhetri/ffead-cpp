@@ -34,7 +34,7 @@ class OAUTHController : public Controller{
 public:
 	OAUTHController();
 	virtual ~OAUTHController();
-	HttpResponse service(HttpRequest);
+	bool service(HttpRequest* req, HttpResponse* res);
 };
 
 #endif /* OAUTHCONTROLLER_H */

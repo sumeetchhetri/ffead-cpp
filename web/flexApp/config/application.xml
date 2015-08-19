@@ -1,5 +1,5 @@
 <app>
 	<controllers>
-		<controller class="FlexAppController" url="*.json"/>
+		<controller class="FlexAppController" path="*.json" />
 	</controllers>
 </app>

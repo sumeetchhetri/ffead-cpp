@@ -22,6 +22,6 @@ chmod 700 $FFEAD_CPP_PATH/CHS*
 chmod 700 $FFEAD_CPP_PATH/resources/*.sh
 chmod 700 $FFEAD_CPP_PATH/tests/*
 chmod 700 $FFEAD_CPP_PATH/rtdcf/*
-chmod 700 $FFEAD_CPP_PATH/rtdcf/autotools/*
+#chmod 700 $FFEAD_CPP_PATH/rtdcf/autotools/*
 #/usr/sbin/setenforce 0
 valgrind --leak-check=yes --track-origins=yes ./CHS $FFEAD_CPP_PATH > ffead.log 2>&1

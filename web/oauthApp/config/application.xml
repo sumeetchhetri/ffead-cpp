@@ -1,7 +1,7 @@
 <app>
 	<controllers>
-		<controller class="OAUTHController" url="*.auth"/>
-		<controller class="OAUTH2Controller" url="*.auth2"/>
-		<controller from="*.lgn" to="*.html"/>
+		<controller class="OAUTHController" path="*.auth" />
+		<controller class="OAUTH2Controller" path="*.auth2" />
+		<controller fromext="lgn" toext="html" />
 	</controllers>
 </app>

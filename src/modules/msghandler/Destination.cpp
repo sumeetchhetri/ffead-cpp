@@ -36,7 +36,7 @@ string Destination::getName() const
 	return this->name;
 }
 
-void Destination::setName(string name)
+void Destination::setName(const string& name)
 {
 	this->name = name;
 }
@@ -46,7 +46,7 @@ string Destination::getType() const
 	return this->type;
 }
 
-void Destination::setType(string type)
+void Destination::setType(const string& type)
 {
 	this->type = type;
 }

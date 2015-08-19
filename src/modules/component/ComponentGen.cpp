@@ -44,7 +44,7 @@ string convertfrom(string val)
 }
 
 
-string ComponentGen::generateComponentCU(string fileName,string &cudata,string &cuheader,string &curemote,string &curemoteheaders,string appName)
+string ComponentGen::generateComponentCU(const string& fileName, string &cudata, string &cuheader, string &curemote, string &curemoteheaders, const string& appName)
 {
 	string file;
 	/*int s,en;
@@ -400,7 +400,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 						}
 					}
 				}
-				string srvargs,srvmcarg,srvmcargremote,srvmcargremotevec="vector<Object> _vec;\n";
+				string srvargs,srvmcarg,srvmcargremote,srvmcargremotevec="vector<GenericObject> _vec;\n";
 				if(srvc.find("@ARGS(")!=string::npos)
 				{
 					int st = srvc.find("@ARGS(");
@@ -441,7 +441,7 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 										srvmcarg += "_"+CastUtil::lexical_cast<string>(var+1)+"";
 										srvargs += alwd.at(var)+ " _"+CastUtil::lexical_cast<string>(var+1);
 										srvmcargremote += alwd.at(var)+ " &_"+CastUtil::lexical_cast<string>(var+1);
-										srvmcargremotevec += "Object __"+CastUtil::lexical_cast<string>(var+1)+";\n";
+										srvmcargremotevec += "GenericObject __"+CastUtil::lexical_cast<string>(var+1)+";\n";
 										srvmcargremotevec += "__"+CastUtil::lexical_cast<string>(var+1)+" << _"+CastUtil::lexical_cast<string>(var+1)+";\n";
 										srvmcargremotevec += "_vec.push_back(__"+CastUtil::lexical_cast<string>(var+1)+");\n";
 										if(var!=alwd.size()-1)
@@ -509,8 +509,8 @@ string ComponentGen::generateComponentCU(string fileName,string &cudata,string &
 	    }
 		catch(const char* ex)
 		{
-			throw ex;
 			logger << "Exception occurred" << flush;
+			throw;
 		}
 
 	}

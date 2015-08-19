@@ -14,7 +14,7 @@
     limitations under the License.  
 */
 /*
- * Object.h
+ * YObject.h
  *
  *  Created on: Aug 27, 2009
  *      Author: sumeet

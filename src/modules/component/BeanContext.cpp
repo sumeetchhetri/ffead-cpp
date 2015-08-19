@@ -31,7 +31,7 @@ RemoteComponentInt::~RemoteComponentInt() {
 	// TODO Auto-generated destructor stub
 }
 
-void RemoteComponentInt::setBeanContext(BeanContext cntxt)
+void RemoteComponentInt::setBeanContext(const BeanContext& cntxt)
 {
 	this->cntxt = cntxt;;
 }
@@ -45,7 +45,7 @@ BeanContext::BeanContext() {
 	logger = LoggerFactory::getLogger("BeanContext");
 }
 
-BeanContext::BeanContext(string host,int port) {
+BeanContext::BeanContext(const string& host, const int& port) {
 	this->setHost(host);
 	this->setPort(port);
 }
@@ -58,7 +58,7 @@ string BeanContext::getHost() const
 	return host;
 }
 
-void BeanContext::setHost(string host)
+void BeanContext::setHost(const string& host)
 {
 	this->host = host;
 }
@@ -68,12 +68,12 @@ int BeanContext::getPort() const
 	return port;
 }
 
-void BeanContext::setPort(int port)
+void BeanContext::setPort(const int& port)
 {
 	this->port = port;
 }
 
-void* BeanContext::lookup(string cmpName)
+void* BeanContext::lookup(const string& cmpName)
 {
 	void *_temp = NULL;
 	if(!client.isConnected())
@@ -87,13 +87,13 @@ void* BeanContext::lookup(string cmpName)
 		args argus;
 		Constructor ctor = clas.getConstructor(argus);
 		_temp = ref.newInstanceGVP(ctor);
-		RemoteComponentInt* intf = (RemoteComponentInt*)_temp;
+		RemoteComponentInt* intf  = static_cast<RemoteComponentInt*>(_temp);
 		intf->setBeanContext(*this);
 	}
 	return _temp;
 }
 
-void* BeanContext::invoke(string name,vector<Object> args,string bname,string rettyp)
+void* BeanContext::invoke(const string& name, vector<GenericObject> args, const string& bname, const string& rettyp)
 {
 	void* retval = NULL;
 	if(client.isConnected())
@@ -104,7 +104,7 @@ void* BeanContext::invoke(string name,vector<Object> args,string bname,string re
 		{
 			for (unsigned int var = 0; var < args.size(); ++var)
 			{
-				argus += "<argument type=\""+rettyp+"\">"+ser.serializeUnknown(args.at(var).getVoidPointer(),rettyp)+"</argument>";
+				argus += "<argument type=\""+rettyp+"\">"+ser.serializeUnknown(args.at(var).getPointer(),rettyp)+"</argument>";
 			}
 		}
 		string call = "<service name=\""+name+"\" beanName=\""+bname+"\" lang=\"c++\" returnType=\""+rettyp+"\"><args>"+argus+"</args></service>";
@@ -115,7 +115,8 @@ void* BeanContext::invoke(string name,vector<Object> args,string bname,string re
 		}
 		//logger << call << flush;
 		XmlParser parser("Parser");
-		Document doc = parser.getDocument(call);
+		Document doc;
+		parser.parse(call, doc);
 		Element message = doc.getRootElement();
 		if(message.getTagName().find("<return:exception>")==string::npos)
 		{

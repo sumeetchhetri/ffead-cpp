@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
-AM_CPPFLAGS=-I"../../include"
+AM_CPPFLAGS=-I"../../../../include" -I"../../include"
 
 prefix=${abs_builddir}
 
@@ -10,8 +10,6 @@ libdefault_la_SOURCES = ../DefTemp.cpp \
 				../DefaultController.cpp \
 				../Dview.cpp \
 				../Expose.cpp \
-				../Service1.cpp \
-				../Service2.cpp \
 				../Tempo.cpp \
 				../Test.cpp \
 				../Test2.cpp \
@@ -28,8 +26,11 @@ libdefault_la_SOURCES = ../DefTemp.cpp \
 				../TestingWS.cpp \
 				../TestObject.cpp \
 				../TestObject1.cpp \
-				../TestCronBasedJob.cpp
+				../TestCronBasedJob.cpp \
+				../DefaultWebSocketHandler.cpp \
+				../GtmAccesController.cpp
+
 libdefault_la_LDFLAGS = -no-undefined 
-libdefault_la_LIBADD = -L"../../../../src/autotools/.libs" -lweblib
+libdefault_la_LIBADD = -L"../../../../src/autotools/.libs" -lffead_common -lffead_framework
 
 #dist_noinst_SCRIPTS = autogen.sh

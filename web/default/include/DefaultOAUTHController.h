@@ -22,23 +22,18 @@
 
 #ifndef DEFAULTOAUTHCONTROLLER_H_
 #define DEFAULTOAUTHCONTROLLER_H_
-#include "AuthController.h"
+#include "Controller.h"
 #include "StringUtil.h"
 #include "CryptoHandler.h"
 #include "FileAuthController.h"
 #include "Timer.h"
 
-class DefaultOAUTHController : public AuthController
+class DefaultOAUTHController : public Controller
 {
 public:
 	DefaultOAUTHController();
 	virtual ~DefaultOAUTHController();
-	bool handle(HttpRequest* req,HttpResponse* res);
-	bool authenticate(string,string){return false;}
-	bool authenticateSecurity(string user,string password){return false;};
-	bool isInitialized(){return false;}
-	bool authenticate(map<string,string>){return false;}
-	string getUserRole(string username){return "ROLE_ANONYMOUS";}
+	bool service(HttpRequest* req, HttpResponse* res);
 };
 
 #endif /* DEFAULTOAUTHCONTROLLER_H_ */
