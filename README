@@ -1,6 +1,6 @@
 v2.0 is here and is definitely the beginning of a new era!!
 
-Updates
+Features
 - Introduction of modules
 - Advanced ORM - SDORM (sql/monogo)
 - Better Event loop
@@ -17,6 +17,17 @@ Updates
 - Fixed issues related to Date/Time
 - Better Logging support
 - Faster server engine
+
+Quickstart
+- ./autogen.sh (Setup configure for your platform)
+- ./configure (Setup makefiles)
+- Stretch a bit :-)
+- make all (Build ffead-cpp)
+- Sip some coffee
+- make build-apps (Build the sample applications present in the web directory and generate ffead-cpp binary)
+- cd ffead-cpp-2.0-bin/ (Navigate to the ffead-cpp binary folder)
+- ./server.sh (Startup ffead-cpp Njoy!!)
+
 
 v2.0 will bring better documentation to the world of ffead-cpp
 v2.0 also outlines interfacing support for multiple platforms!
