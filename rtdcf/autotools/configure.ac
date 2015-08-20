@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([ffead-cpp], [1.9], [sumeet.chhetri@gmail.com])
-AM_INIT_AUTOMAKE([1.9 no-define foreign])
+AC_INIT([ffead-cpp], [2.0], [sumeet.chhetri@gmail.com])
+AM_INIT_AUTOMAKE([2.0 no-define foreign])
 AC_CONFIG_SRCDIR([../AjaxInterface.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 

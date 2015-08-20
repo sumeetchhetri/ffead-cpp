@@ -17,12 +17,12 @@ Installation Directions
 
 12. Add the following lines to httpd.conf, the FFEAD_CPP_PATH value should be as per point 7,
     LoadModule ffead_cpp_module /usr/lib/apache2/modules/mod_ffeadcpplib.so
-    FFEAD_CPP_PATH "/var/www/ffead-cpp-1.9-bin"
+    FFEAD_CPP_PATH "/var/www/ffead-cpp-2.0-bin"
 13. Add the LD_LIBRARY_PATH variable to your apache envvars file, 
 	export LD_LIBRARY_PATH=$FFEAD_CPP_PATH:$LD_LIBRARY_PATH
 14. Add a virtual host section to your enabled sites in apache2 configuration,
 	<VirtualHost *:8080>
-		DocumentRoot /var/www/ffead-cpp-1.9-bin
+		DocumentRoot /var/www/ffead-cpp-2.0-bin
 		SetHandler ffead_cpp_module
 	</VirtualHost>
 14. Restart apache server, check the url http://localhost/index.html on your browser
