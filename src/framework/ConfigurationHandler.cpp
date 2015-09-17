@@ -32,7 +32,7 @@ ConfigurationHandler::~ConfigurationHandler() {
 }
 
 
-void ConfigurationHandler::listi(const string& cwd, const string& type, const bool& apDir, strVec &folders, const bool& showHidden)
+/*void ConfigurationHandler::listi(const string& cwd, const string& type, const bool& apDir, strVec &folders, const bool& showHidden)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	FILE *pipe_fp;
@@ -101,7 +101,7 @@ void ConfigurationHandler::listi(const string& cwd, const string& type, const bo
 		}
 	}
 	pclose(pipe_fp);
-}
+}*/
 
 void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const string& incpath, const string& rtdcfpath, const string& serverRootDirectory, const string& respath)
 {
@@ -255,18 +255,21 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		ConfigurationData::getInstance()->servingContexts[name] = true;
 
 		vector<string> adcps;
-		listi(dcppath,".dcp",true,adcps,false);
+		CommonUtils::listFiles(adcps, dcppath, ".dcp");
+		//listi(dcppath,".dcp",true,adcps,false);
 		for (int var = 0; var < (int)adcps.size(); ++var) {
 			dcps[adcps.at(var)] = name;
 		}
 		vector<string> atpes;
-		listi(tmplpath,".tpe",true,atpes,false);
+		CommonUtils::listFiles(atpes, tmplpath, ".tpe");
+		//listi(tmplpath,".tpe",true,atpes,false);
 		for (int var = 0; var < (int)atpes.size(); ++var) {
 			tpes[atpes.at(var)] = name;
 		}
 
 		vector<string> acompnts;
-		listi(cmppath,".cmp",true,acompnts,false);
+		CommonUtils::listFiles(acompnts, cmppath, ".cmp");
+		//listi(cmppath,".cmp",true,acompnts,false);
 		for (int var = 0; var < (int)acompnts.size(); ++var) {
 			compnts[acompnts.at(var)] = name;
 		}
@@ -277,7 +280,8 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		ilibs += ("-I" + usrincludes+" ");
 
 		vector<string> includes;
-		listi(usrincludes, ".h",true,includes,false);
+		CommonUtils::listFiles(includes, usrincludes, ".h");
+		//listi(usrincludes, ".h",true,includes,false);
 		map<string, ClassStructure> allclsmap;
 		for (unsigned int ind = 0; ind < includes.size(); ++ind)
 		{
@@ -1168,6 +1172,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	cntxt["MOD_SDORM_MONGO"] = "true";
 #else
 	cntxt["MOD_SDORM_MONGO"] = "false";
+#endif
+#ifdef INC_SCRH
+	cntxt["MOD_SCRIPT"] = "true";
+#else
+	cntxt["MOD_SCRIPT"] = "false";
 #endif
 
 	string cffileloc = rtdcfpath+"/autotools/configure.ac.template";

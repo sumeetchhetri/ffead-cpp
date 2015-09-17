@@ -135,7 +135,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX_11], [dnl
          if test "$GCC_VERSION_MAJOR" -ge 4; then
            if test "$GCC_VERSION_MINOR" -ge 6; then
              ac_success=yes
-             CXXFLAGS="-std=c++0x"
+             CXXFLAGS="$CXXFLAGS -std=c++0x"
              STDCXX_11_SWITCH="-std=c++0x"
              HAVE_CXX11=1
            fi

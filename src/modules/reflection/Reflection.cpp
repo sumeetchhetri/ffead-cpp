@@ -41,7 +41,7 @@ void Reflection::addMarker(const Marker& m) {
 	handler.addMarker(m);
 }
 
-vector<string> Reflection::list(const string& cwd)
+/*vector<string> Reflection::list(const string& cwd)
 {
 	FILE *pipe_fp;
 	string command;
@@ -83,8 +83,7 @@ vector<string> Reflection::list(const string& cwd)
 	}
 	pclose(pipe_fp);
 	return files;
-}
-
+}*/
 
 void Reflection::collectInfo(string data, const string& flag, ClassStructure& cls, const vector<string>& mrktxt)
 {
@@ -1082,7 +1081,8 @@ string Reflection::generateClassDefinitionsAll(map<string, map<string, ClassStru
 
 string Reflection::generateClassDefinitions(map<string, ClassStructure>& allclsmap, string &includesDefs, string &typedefs, string &classes, string &methods, string &opers, const string& app)
 {
-	//vector<string> includes = list(includeDir);
+	//vector<string> includes;
+	//CommonUtils::listFiles(includes, includeDir, ".h");
 	string ret,in,ty,cl,me;
 	/*map<string, ClassStructure> allclsmap;
 	for (unsigned int var = 0; var < includes.size(); ++var)
@@ -3414,7 +3414,8 @@ string Reflection::generateSerDefinitionAll(map<string, map<string, ClassStructu
 
 string Reflection::generateSerDefinitions(map<string, ClassStructure>& allclsmap, string &includesDefs, string &typedefs, string &classes, string &methods, const bool& isBinary, string& objs, string &ajaxret, string& headers, string& typerefs, const string& app)
 {
-	//vector<string> includes = list(includeDir);
+	//vector<string> includes;
+	//CommonUtils::listFiles(includes, includeDir, ".h");
 	string ret;
 	/*map<string, ClassStructure> allclsmap;
 	for (unsigned int var = 0; var < includes.size(); ++var)

@@ -430,9 +430,12 @@ void one_time_init(ffead_ccp_module_config *s_cf)
 	propMap srprps = pread.getProperties(respath+"server.prop");
 
 	strVec webdirs,webdirs1,pubfiles;
-	ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
-	ConfigurationHandler::listi(webpath,"/",false,webdirs1,false);
-	ConfigurationHandler::listi(pubpath,".js",false,pubfiles,false);
+	CommonUtils::listFiles(webdirs, webpath, "/");
+	CommonUtils::listFiles(webdirs1, webpath, "/", false);
+	CommonUtils::listFiles(pubfiles, pubpath, ".js", false);
+	//ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
+	//ConfigurationHandler::listi(webpath,"/",false,webdirs1,false);
+	//ConfigurationHandler::listi(pubpath,".js",false,pubfiles,false);
 
 	strVec cmpnames;
 	try

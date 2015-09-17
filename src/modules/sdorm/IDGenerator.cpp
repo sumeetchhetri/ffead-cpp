@@ -87,6 +87,7 @@ void IDGenerator::next(DataSourceEntityMapping& dsemp, GenericObject& id) {
 	{
 		executeSequence(dsemp, id);
 	}
+#ifdef HAVE_LIBUUID
 	else if(dsemp.getIdgendbEntityType()=="uuid")
 	{
 		uuid_t idt;
@@ -97,6 +98,7 @@ void IDGenerator::next(DataSourceEntityMapping& dsemp, GenericObject& id) {
 		}
 		id.set(ids);
 	}
+#endif
 	else if(dsemp.getIdgendbEntityType().find("custom:")==0)
 	{
 		string custMethod = dsemp.getIdgendbEntityType().substr(7);

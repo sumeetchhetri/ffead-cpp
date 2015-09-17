@@ -7,6 +7,8 @@
 
 #include "Connection.h"
 
+string ConnectionProperties::BLANK = "";
+
 void* Connection::getConn() {
 	return _conn;
 }
@@ -141,7 +143,7 @@ const string& ConnectionProperties::getProperty(const string& name) const {
 	if(properties.find(name)!=properties.end()) {
 		return properties.find(name)->second;
 	}
-	return "";
+	return BLANK;
 }
 
 void ConnectionProperties::setProperties(

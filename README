@@ -24,7 +24,7 @@ Quickstart
 - Stretch a bit :-)
 - make all (Build ffead-cpp)
 - Sip some coffee
-- make build-apps (Build the sample applications present in the web directory and generate ffead-cpp binary)
+- make build-apps (Build the sample applications in web + generate ffead-cpp binary)
 - cd ffead-cpp-2.0-bin/ (Navigate to the ffead-cpp binary folder)
 - ./server.sh (Startup ffead-cpp Njoy!!)
 

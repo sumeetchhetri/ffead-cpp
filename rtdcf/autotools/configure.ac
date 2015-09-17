@@ -2,13 +2,15 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_INIT([ffead-cpp], [2.0], [sumeet.chhetri@gmail.com])
-AM_INIT_AUTOMAKE([2.0 no-define foreign])
+AM_INIT_AUTOMAKE([no-define foreign])
 AC_CONFIG_SRCDIR([../AjaxInterface.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 
 LT_INIT([static shared dlopen])
 
-mod_dsorm=${MOD_DSORM}
+mod_sdormsql=${MOD_SDORM_SQL}
+mod_sdormmongo=${MOD_SDORM_MONGO}
+mod_script=${MOD_SCRIPT}
 
 support_debug=no
 AC_ARG_ENABLE(debug,
@@ -122,6 +124,14 @@ case "$host" in
     AC_MSG_ERROR([We do not support SCO's products!])
 esac
 
+if test "x$mod_script" = "xtrue"; then
+	AM_CXXFLAGS="$AM_CXXFLAGS -U__STRICT_ANSI__"
+fi
+
+if test "x$mod_sdormmongo" = "xtrue"; then
+	AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+fi
+
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
 
@@ -163,11 +173,18 @@ AC_CHECK_LIB(z, compress,,AC_MSG_ERROR([no zlib; please install zlib or equivale
 AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
 
 if test "x$mod_dsorm" = "xtrue"; then
-    AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
+	AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+	AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
 fi
 
-if test "x$is_librt_available" = "xyes"; then	
+if test "x$mod_sdormmongo" = "xtrue"; then
+	AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+	AC_CHECK_LIB(mongoc-1.0, mongoc_init, , [AC_MSG_ERROR([Not found libmongo library])])
+	AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
+fi
+
+if test "x$is_librt_available" = "xyes"; then
 	AC_CHECK_LIB(rt, clock_gettime,,[AC_MSG_ERROR([librt required but not found])])
 fi
 

@@ -235,3 +235,30 @@ string CommonUtils::xorEncryptDecrypt(const string& toEncrypt, const uint32_t& m
     }
     return output;
 }
+
+void CommonUtils::listFiles(vector<string>& files, const string& cwd, const string& suffix, const bool& isAbs)
+{
+	files.clear();
+	struct dirent *entry;
+	DIR *dir;
+	dir = opendir(cwd.c_str());
+
+	while ((entry = readdir (dir)) != NULL) {
+		string file = cwd+"/";
+		file.append(entry->d_name);
+		struct stat sb;
+		stat (file.c_str(), &sb);
+		if(S_ISREG(sb.st_mode) && StringUtil::endsWith(file, suffix)) {
+			files.push_back(file);
+		} else if(S_ISDIR(sb.st_mode) && suffix=="/") {
+			files.push_back(file);
+		}
+	}
+}
+
+vector<string> CommonUtils::getFiles(const string& cwd, const string& suffix, const bool& isAbs)
+{
+	vector<string> files;
+	listFiles(files, cwd, suffix, isAbs);
+	return files;
+}

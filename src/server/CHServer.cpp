@@ -790,8 +790,10 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 	SSLHandler::setIsSSL(isSSLEnabled);
 
 	strVec webdirs,webdirs1,pubfiles;
-	ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
-    ConfigurationHandler::listi(webpath,"/",false,webdirs1,false);
+	//ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
+	CommonUtils::listFiles(webdirs, webpath, "/");
+    //ConfigurationHandler::listi(webpath,"/",false,webdirs1,false);
+	CommonUtils::listFiles(webdirs1, webpath, "/", false);
 
     CommonUtils::loadMimeTypes(respath+"mime-types.prop");
 	CommonUtils::loadLocales(respath+"locale.prop");

@@ -896,14 +896,10 @@ AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"
 AC_SUBST([AM_CXXFLAGS])    
     
 AC_CONFIG_FILES([Makefile
-				src/autotools/Makefile
-				tests/autotools/Makefile
-				src/apache_mod_ffeadcpp/autotools/Makefile
-				web/default/src/autotools/Makefile
-				web/flexApp/src/autotools/Makefile
-				web/oauthApp/src/autotools/Makefile
-				web/markers/src/autotools/Makefile
-				web/te-benchmark/src/autotools/Makefile])
+	src/autotools/Makefile
+	tests/autotools/Makefile
+	src/apache_mod_ffeadcpp/autotools/Makefile
+WEB_APPS])
 AC_OUTPUT
 
 echo "Host: $host"

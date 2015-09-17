@@ -1,0 +1,11 @@
+echo "*****************************************************************************"
+ffead-cpp Automated application generator utility
+This Utility helps create sample application skeleton for ffead-cpp framework
+Usage:
+	./ffead_gen.sh
+	Enter Application Name: test
+	Enter Library dependencies: -llib1 -llib2 -llib3
+	(Or alternatively lib1 lib2 lib3)
+	The generator will now create application directories and makefile, 
+		configure.ac will also be modified, Do you want to proceed (y/n): y
+echo "*****************************************************************************"
