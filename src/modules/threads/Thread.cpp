@@ -69,7 +69,11 @@ void Thread::nSleep(const long& nanos) {
 		deadline.tv_nsec -= 1000000000;
 		deadline.tv_sec++;
 	}
+#ifdef HAVE_CLOCK_NANOSLEEP
 	clock_nanosleep(CLOCK_REALTIME, 0, &deadline, NULL);
+#else
+	pselect(0, NULL, NULL, NULL, &deadline, NULL);
+#endif
 }
 
 void Thread::uSleep(const long& micros) {

@@ -169,17 +169,18 @@ void SSLHandler::init(const SecurityProperties& securityProperties) {
 			SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
 		}
 
+#if OPENSSL_VERSION_NUMBER >= 0x10002000L
 		if(securityProperties.alpnEnabled)
 		{
 			for (int var = 0; var < (int)advertisedProtos.size(); ++var) {
 				SSL_CTX_set_next_protos_advertised_cb(ctx, SSLHandler::next_proto_cb, &(advertisedProtos.at(var)));
 			}
 
-			#if OPENSSL_VERSION_NUMBER >= 0x10002000L
-				// ALPN selection callback
-				SSL_CTX_set_alpn_select_cb(ctx, SSLHandler::alpn_select_proto_cb, NULL);
-			#endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
+
+			// ALPN selection callback
+			SSL_CTX_set_alpn_select_cb(ctx, SSLHandler::alpn_select_proto_cb, NULL);
 		}
+#endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
 	}
 }
 

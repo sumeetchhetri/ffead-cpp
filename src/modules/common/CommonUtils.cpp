@@ -65,6 +65,7 @@ string CommonUtils::getAppName(const string& appName)
 	{
 		appn = *(string*)contextName.get();
 	}
+	StringUtil::replaceAll(appn, "-", "_");
 	RegexUtil::replace(appn, "[^a-zA-Z0-9_]+", "");
 	return appn;
 }
@@ -242,16 +243,21 @@ void CommonUtils::listFiles(vector<string>& files, const string& cwd, const stri
 	struct dirent *entry;
 	DIR *dir;
 	dir = opendir(cwd.c_str());
+	if(dir==NULL)return;
 
 	while ((entry = readdir (dir)) != NULL) {
-		string file = cwd+"/";
+		string file = isAbs?(cwd+"/"):"";
 		file.append(entry->d_name);
 		struct stat sb;
 		stat (file.c_str(), &sb);
 		if(S_ISREG(sb.st_mode) && StringUtil::endsWith(file, suffix)) {
 			files.push_back(file);
 		} else if(S_ISDIR(sb.st_mode) && suffix=="/") {
-			files.push_back(file);
+			if(isAbs && !StringUtil::endsWith(file, "/.") && !StringUtil::endsWith(file, "/..")) {
+				files.push_back(file+"/");
+			} else if(!isAbs && file!="." && file!="..") {
+				files.push_back(file);
+			}
 		}
 	}
 }

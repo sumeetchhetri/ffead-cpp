@@ -38,8 +38,7 @@ void JobScheduler::init(const string& fileName, const string& appName) {
 	const Element& root = doc.getRootElement();
 	if(root.getTagName()=="job-procs" && root.getChildElements().size()>0)
 	{
-		const ElementList& eles = root.getChildElements();
-		init(eles, appName);
+		init(root.getChildElements(), appName);
 	}
 }
 
@@ -81,7 +80,7 @@ void JobScheduler::init(const ElementList& tabs, const string& appName) {
 
 void JobScheduler::start() {
 	Reflector ref;
-	if(instance!=NULL && instance->isStarted)
+	if(instance==NULL || (instance!=NULL && instance->isStarted))
 		return;
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
 	instance->isStarted = true;

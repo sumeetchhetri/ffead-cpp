@@ -56,8 +56,13 @@ public:
 	DummyList(){}
 	struct _List_node_base
 	{
+#ifdef __clang__
+		_List_node_base* _M_prev;
+		_List_node_base* _M_next;
+#else
 		_List_node_base* _M_next;
 		_List_node_base* _M_prev;
+#endif
 	};
 	struct _List_impl
 	{
@@ -83,10 +88,16 @@ class DummyDeque
 	};
 	struct _Deque_impl
 	{
+#ifdef __clang__
+		void** _M_map;
+		size_t _M_start;
+		size_t _M_map_size;
+#else
 		void** _M_map;
 		size_t _M_map_size;
 		Dummy_Deque_iterator _M_start;
 		Dummy_Deque_iterator _M_finish;
+#endif
 	};
 	_Deque_impl _M_impl;
 	friend class SerializeBase;
@@ -114,10 +125,17 @@ class DummySet
 	struct _Rb_tree_node_base
 	{
 	    typedef _Rb_tree_node_base* _Base_ptr;
+#ifdef __clang__
+	    _Base_ptr		_M_left;
+	    _Base_ptr		_M_right;
+	    _Base_ptr		_M_parent;
+	    bool	_M_color;
+#else
 	    _Rb_tree_color	_M_color;
 	    _Base_ptr		_M_parent;
 	    _Base_ptr		_M_left;
 	    _Base_ptr		_M_right;
+#endif
 	};
 	struct less
 	{

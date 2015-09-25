@@ -149,13 +149,17 @@ int SelEpolKqEvPrt::getEvents()
 		#endif
 	#elif defined(USE_MINGW_SELECT)
 		readfds = master;
-		struct timeval tv = NULL;
 		if(timeoutMilis>1)
 		{
+			struct timeval tv;
 			tv.tv_sec = (timeoutMilis/1000);
 			tv.tv_usec = (timeoutMilis%1000)*1000;
+			numEvents = select(fdMax+1, &readfds, NULL, NULL, &tv);
 		}
-		numEvents = select(fdMax+1, &readfds, NULL, NULL, &tv);
+		else
+		{
+			numEvents = select(fdMax+1, &readfds, NULL, NULL, NULL);
+		}
 		if(numEvents==-1)
 		{
 			perror("select()");
@@ -169,13 +173,17 @@ int SelEpolKqEvPrt::getEvents()
 		for (int var = 0; var < fdsetSize; ++var) {
 			readfds[var] = master[var];
 		}
-		struct timeval tv;
 		if(timeoutMilis>1)
 		{
+			struct timeval tv;
 			tv.tv_sec = (timeoutMilis/1000);
 			tv.tv_usec = (timeoutMilis%1000)*1000;
+			numEvents = select(fdMax+1, readfds, NULL, NULL, &tv);
 		}
-		numEvents = select(fdMax+1, readfds, NULL, NULL, &tv);
+		else
+		{
+			numEvents = select(fdMax+1, readfds, NULL, NULL, NULL);
+		}
 		if(numEvents==-1)
 		{
 			perror("select()");
@@ -192,13 +200,17 @@ int SelEpolKqEvPrt::getEvents()
 		}
 		numEvents = epoll_wait(epoll_handle, events, ccfds+1, timeoutMilis);
 	#elif defined USE_KQUEUE
-		struct timespec tv = NULL;
 		if(timeoutMilis>1)
 		{
+			struct timespec tv;
 			tv.tv_sec = (timeoutMilis/1000);
 			tv.tv_nsec = (timeoutMilis%1000)*1000000;
+			numEvents = kevent(kq, NULL, 0, evlist, MAXDESCRIPTORS, &tv);
 		}
-		numEvents = kevent(kq, NULL, 0, evlist, MAXDESCRIPTORS, &tv);
+		else
+		{
+			numEvents = kevent(kq, NULL, 0, evlist, MAXDESCRIPTORS, NULL);
+		}
 	#elif defined USE_DEVPOLL
 		struct dvpoll pollit;
 		pollit.dp_timeout = timeoutMilis;
@@ -207,26 +219,38 @@ int SelEpolKqEvPrt::getEvents()
 		numEvents = ioctl(dev_poll_fd, DP_POLL, &pollit);
 	#elif defined USE_EVPORT
 		uint_t nevents, wevents = 0;
-		struct timespec tv = NULL;
 		if(timeoutMilis>1)
 		{
+			struct timespec tv
 			tv.tv_sec = (timeoutMilis/1000);
 			tv.tv_nsec = (timeoutMilis%1000)*1000000;
+			//uint_t num = 0;
+			if (port_getn(port, evlist, 0, &wevents, &tv) < 0) return 0;
+			if (0 == wevents) wevents = 1;
+			nevents = wevents;
+			if (port_getn(port, evlist, (uint_t) MAXDESCRIPTORS, &nevents, &tv) < 0) return 0;
 		}
-		//uint_t num = 0;
-		if (port_getn(port, evlist, 0, &wevents, &tv) < 0) return 0;
-		if (0 == wevents) wevents = 1;
-		nevents = wevents;
-		if (port_getn(port, evlist, (uint_t) MAXDESCRIPTORS, &nevents, &tv) < 0) return 0;
+		else
+		{
+			//uint_t num = 0;
+			if (port_getn(port, evlist, 0, &wevents, NULL) < 0) return 0;
+			if (0 == wevents) wevents = 1;
+			nevents = wevents;
+			if (port_getn(port, evlist, (uint_t) MAXDESCRIPTORS, &nevents, NULL) < 0) return 0;
+		}
 		numEvents = (int)nevents;
 	#elif defined USE_POLL
-		struct timespec tv = NULL;
 		if(timeoutMilis>1)
 		{
+			struct timespec tv;
 			tv.tv_sec = (timeoutMilis/1000);
 			tv.tv_nsec = (timeoutMilis%1000)*1000000;
+			numEvents = poll(polled_fds, nfds, &tv);
 		}
-		numEvents = poll(polled_fds, nfds, &tv);
+		else
+		{
+			numEvents = poll(polled_fds, nfds, NULL);
+		}
 		if (numEvents == -1){
 			perror ("poll");
 			exit(0);

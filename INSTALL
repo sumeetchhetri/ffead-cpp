@@ -38,6 +38,7 @@ SOLARIS - To install all dependencies on solaris(OpenCSW) use,
 	`pkgutil -y -i autoconf automake libtool unixodbc unixodbc_dev libssl1_0_0 libssl_dev`
 	
 BSD(x86/x86_64) - To install all dependencies on bsd systems use,
+	(portsnap fetch extract/portsnap fetch update)
 	cd /usr/ports/security/openssl && make install
 	cd /usr/ports/databases/unixODBC && make install
 	cd /usr/ports/devel/autoconf && make install

@@ -591,7 +591,7 @@ int main(int argc, char* argv[])
 
 	std::ofstream local("/dev/null");
 	if(StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])!="true") {
-		auto cout_buff = std::cout.rdbuf();
+		streambuf* cout_buff = std::cout.rdbuf();
 		std::cout.rdbuf(local.rdbuf());
 	}
 
@@ -1532,7 +1532,7 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 
 int CHServer::techunkSiz = 0;
 int CHServer::connKeepAlive = 10;
-int CHServer::maxReqHdrCnt = 100, CHServer::maxEntitySize = 2147483648;
+int CHServer::maxReqHdrCnt = 100, CHServer::maxEntitySize = 2147483647;
 
 SocketInterface* CHServer::createSocketInterface(SocketUtil* sockUtil) {
 	SocketInterface* sockIntf = NULL;

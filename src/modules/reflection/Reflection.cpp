@@ -1062,6 +1062,7 @@ string Reflection::generateClassDefinitionsAll(map<string, map<string, ClassStru
 	{
 		////logger << "\nstarting for classes " << all.size() << "\n" << flush;
 		string app = StringUtil::trimCopy(apps.at(var));
+		StringUtil::replaceAll(app, "-", "_");
 		RegexUtil::replace(app, "[^a-zA-Z0-9_]+", "");
 		ret += this->generateClassDefinition(clsstrucMaps[StringUtil::trimCopy(apps.at(var))],inc,typedefs,classes,methods,opers,app);
 
@@ -3456,6 +3457,7 @@ string Reflection::generateSerDefinitions(map<string, ClassStructure>& allclsmap
 string Reflection::generateAllSerDefinition(map<string, ClassStructure>& allclsmap, string &includesDefs, string &typedefs, string &classes, string &methods, const string& app)
 {
 	string ttapp = StringUtil::trimCopy(app);
+	StringUtil::replaceAll(ttapp, "-", "_");
 	RegexUtil::replace(ttapp, "[^a-zA-Z0-9_]+", "");
 	string refDef;
 	map<string, ClassStructure>::iterator it;

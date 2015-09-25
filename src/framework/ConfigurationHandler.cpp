@@ -264,7 +264,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		CommonUtils::listFiles(atpes, tmplpath, ".tpe");
 		//listi(tmplpath,".tpe",true,atpes,false);
 		for (int var = 0; var < (int)atpes.size(); ++var) {
-			tpes[atpes.at(var)] = name;
+			//tpes[atpes.at(var)] = name;
 		}
 
 		vector<string> acompnts;
@@ -294,6 +294,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		ref.generateClassDefinition(allclsmap,tinc,ttypedefs,tclasses,tmethods,topers,name);
 
 		string applibname = name;
+		StringUtil::replaceAll(applibname, "-", "_");
 		RegexUtil::replace(applibname, "[^a-zA-Z0-9_]+", "");
 
 		logger << "started reading application.xml " << endl;
