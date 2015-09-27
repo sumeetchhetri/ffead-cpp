@@ -7,8 +7,6 @@
 
 #include "GenericObject.h"
 
-map<string, string> GenericObject::_mangledClassNameMap;
-
 GenericObject::GenericObject() {
 	objVal = NULL;
 }

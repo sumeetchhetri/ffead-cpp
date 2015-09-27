@@ -45,7 +45,7 @@ void Exception::setMessage(const string& message)
    this->message = message;
 }
 
-const string& Exception::what() throw()
+const char* Exception::what() throw()
 {
-	return this->getMessage();
+	return this->getMessage().c_str();
 }

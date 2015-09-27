@@ -256,8 +256,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 				{
 					logger << "AuthController not initialized" << endl;
 				}
-				//if(_temp!=NULL)
-				//	delete _temp;
+				ConfigurationData::getInstance()->ffeadContext.release("login-handler_"+claz, req->getCntxt_name());
 			}
 			if(validUser && (aspect.role==userRole || securityObject.isLoginPage(req->getCntxt_name(), actUrl)))
 			{

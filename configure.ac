@@ -744,6 +744,10 @@ AC_PROG_CPP
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11(,mandatory)
 
+#if test "x$GCC" = "xno"; then
+#	AC_MSG_ERROR([Please install GNU GCC/G++ to continue.])
+#fi
+
 if test "x$generate_apache_module" = "xyes"; then
 	AC_SUBST(GENERATE_APACHEMOD,[apache_mod_ffeadcpp/autotools])
 	if test "x$local_os_type" = "xcygwin"; then

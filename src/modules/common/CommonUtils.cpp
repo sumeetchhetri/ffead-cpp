@@ -251,10 +251,13 @@ void CommonUtils::listFiles(vector<string>& files, const string& cwd, const stri
 		struct stat sb;
 		stat (file.c_str(), &sb);
 		if(S_ISREG(sb.st_mode) && StringUtil::endsWith(file, suffix)) {
+			RegexUtil::replace(file,"[/]+","/");
 			files.push_back(file);
 		} else if(S_ISDIR(sb.st_mode) && suffix=="/") {
 			if(isAbs && !StringUtil::endsWith(file, "/.") && !StringUtil::endsWith(file, "/..")) {
-				files.push_back(file+"/");
+				file += "/";
+				RegexUtil::replace(file,"[/]+","/");
+				files.push_back(file);
 			} else if(!isAbs && file!="." && file!="..") {
 				files.push_back(file);
 			}

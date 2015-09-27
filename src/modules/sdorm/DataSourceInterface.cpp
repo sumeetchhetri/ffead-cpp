@@ -86,18 +86,24 @@ void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo& cl
 bool DataSourceInterface::startSession(void* details) {
 	if(context==NULL) {
 		context = getContext(details);
+		return true;
 	}
+	return false;
 }
 
 bool DataSourceInterface::startSession() {
 	if(context==NULL) {
 		context = getContext(NULL);
+		return true;
 	}
+	return false;
 }
 
 bool DataSourceInterface::endSession() {
 	if(context!=NULL) {
 		destroyContext(context);
 		context = NULL;
+		return true;
 	}
+	return false;
 }

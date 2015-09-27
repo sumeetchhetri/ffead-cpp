@@ -89,7 +89,9 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 		valus.push_back(res);
 		reflector.invokeMethod<void*>(_temp,meth,valus);
 		logger << "Successfully called Formcontroller" << endl;
+		ConfigurationData::getInstance()->ffeadContext.release("form_"+ele->getAttribute("controller"), req->getCntxt_name());
 		return true;
 	}
+	ConfigurationData::getInstance()->ffeadContext.release("form_"+ele->getAttribute("controller"), req->getCntxt_name());
 	return false;
 }

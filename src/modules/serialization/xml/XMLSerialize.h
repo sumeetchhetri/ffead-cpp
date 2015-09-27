@@ -40,7 +40,7 @@ public:
 	template <class T> static string serialize(T& t, const string& appName = "")
 	{
 		XMLSerialize serialize;
-		string className = getClassName(t);
+		string className = CastUtil::getClassName(t);
 		return _handleAllSerialization(className,&t,appName, &serialize);
 	}
 	template <class T> static string serialize(void* t, const string& className, const string& appName = "")
@@ -51,7 +51,7 @@ public:
 	template <class T> static string serializePointer(T* t, const string& appName = "")
 	{
 		XMLSerialize serialize;
-		string className = getClassName(t);
+		string className = CastUtil::getClassName(t);
 		return _handleAllSerialization(className,t,appName, &serialize);
 	}
 	static string serializeUnknown(void* t, const string& className, const string& appName = "");
@@ -60,10 +60,10 @@ public:
 	{
 		map<K,V> mpt  = mp;
 		K k;
-		string kclassName = getClassName(k);
+		string kclassName = CastUtil::getClassName(k);
 		V v;
 		string serval;
-		string vclassName = getClassName(v);
+		string vclassName = CastUtil::getClassName(v);
 		kclassName = "map-"+kclassName+"-"+vclassName;
 		serval = "<" + kclassName + ">";
 		while (mpt.begin()!=mpt.end())
@@ -127,10 +127,10 @@ public:
 	{
 		multimap<K,V> mpt  = mp;
 		K k;
-		string kclassName = getClassName(k);
+		string kclassName = CastUtil::getClassName(k);
 		V v;
 		string serval;
-		string vclassName = getClassName(k);
+		string vclassName = CastUtil::getClassName(k);
 		kclassName = "multimap-"+kclassName+"-"+vclassName;
 		serval = "<" + kclassName + ">";
 		while (mpt.begin()!=mpt.end())
@@ -193,7 +193,7 @@ public:
 	{
 		XMLSerialize serialize;
 		T t;
-		string className = getClassName(t);
+		string className = CastUtil::getClassName(t);
 		T* tp = (T*)_handleAllUnSerialization(objXml,className,appName,&serialize,false,NULL);
 		if(tp!=NULL)
 		{
@@ -206,7 +206,7 @@ public:
 	{
 		XMLSerialize serialize;
 		T t;
-		string className = getClassName(t);
+		string className = CastUtil::getClassName(t);
 		T* tp = (T*)_handleAllUnSerialization("",className,appName,&serialize,false,element);
 		if(tp!=NULL)
 		{
@@ -231,14 +231,14 @@ public:
 	{
 		XMLSerialize serialize;
 		T* t;
-		string className = getClassName(t);
+		string className = CastUtil::getClassName(t);
 		return (T*)_handleAllUnSerialization(objXml,className,appName,&serialize,false,NULL);
 	}
 	template <class T> static T* unserializeToPointer(Element* element, const string& appName = "")
 	{
 		XMLSerialize serialize;
 		T* t;
-		string className = getClassName(t);
+		string className = CastUtil::getClassName(t);
 		return (T*)_handleAllUnSerialization("",className,appName,&serialize,false,element);
 	}
 

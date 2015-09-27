@@ -68,6 +68,7 @@ void FilterHandler::handleIn(HttpRequest* req, const string& ext, Reflector& ref
 				reflector.invokeMethod<void*>(_temp,meth,valus);
 				logger << "Input Filter called" << endl;
 			}
+			ConfigurationData::getInstance()->ffeadContext.release("filter_"+claz, req->getCntxt_name());
 		}
 	}
 }
@@ -103,6 +104,7 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const string& ex
 				continue_proc_request = reflector.invokeMethod<bool>(_temp,meth,valus);
 				logger << "Handler Filter called" << endl;
 			}
+			ConfigurationData::getInstance()->ffeadContext.release("filter_"+claz, req->getCntxt_name());
 		}
 	}
 	return continue_proc_request;
@@ -135,6 +137,7 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse* res, const string&
 				reflector.invokeMethod<void*>(_temp,meth,valus);
 				logger << "Output Filter called" << endl;
 			}
+			ConfigurationData::getInstance()->ffeadContext.release("filter_"+claz, req->getCntxt_name());
 		}
 	}
 }

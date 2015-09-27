@@ -2267,11 +2267,11 @@ string Reflection::generateClassDefinition(map<string, ClassStructure>& allclsma
 
 		methods += "\nvoid* " +app+ "_"+classStructure.getTreatedClassName(true)+"co(void* _vec,void* _instance,int pos,string contType,int t){"
 				+ "\nif(t==1)return Reflector::getNewNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType);\n"
-				+ "\nif(t==2){int* _obj = new int;\n*_obj = Reflector::getNestedContainerSize<"+classStructure.getFullyQualifiedClassName()+">(contType,_vec);return _obj;}\n"
-				+ "\nif(t==3){Reflector::addValueToNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, *(("+classStructure.getFullyQualifiedClassName()+"*)_instance),_vec);return NULL;}\n"
-				+ "\nif(t==4){"+classStructure.getFullyQualifiedClassName()+" *_obj = new "+classStructure.getFullyQualifiedClassName()+";\n*_obj = Reflector::getValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\nreturn _obj;\n}\n"
-				+ "\nif(t==5)return Reflector::getPValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\n"
-				+ "}";
+				+ "\nelse if(t==2){int* _obj = new int;\n*_obj = Reflector::getNestedContainerSize<"+classStructure.getFullyQualifiedClassName()+">(contType,_vec);return _obj;}\n"
+				+ "\nelse if(t==3){Reflector::addValueToNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, *(("+classStructure.getFullyQualifiedClassName()+"*)_instance),_vec);return NULL;}\n"
+				+ "\nelse if(t==4){"+classStructure.getFullyQualifiedClassName()+" *_obj = new "+classStructure.getFullyQualifiedClassName()+";\n*_obj = Reflector::getValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\nreturn _obj;\n}\n"
+				+ "\nelse if(t==5)return Reflector::getPValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\n"
+				+ "return NULL;\n}";
 
 		/*methods += "\nvoid* " +app+ "_"+classStructure.getTreatedClassName(true)+"c1(string contType){\nreturn "
 				+ "Reflector::getNewNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType);\n}";

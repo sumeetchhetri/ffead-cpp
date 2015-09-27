@@ -22,8 +22,6 @@
 
 #include "SerializeBase.h"
 
-map<string, string> SerializeBase::_mangledClassNameMap;
-
 SerializeBase::~SerializeBase() {
 }
 
