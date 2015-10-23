@@ -248,8 +248,9 @@ void CommonUtils::listFiles(vector<string>& files, const string& cwd, const stri
 	while ((entry = readdir (dir)) != NULL) {
 		string file = isAbs?(cwd+"/"):"";
 		file.append(entry->d_name);
+		string f = cwd + "/" + string(entry->d_name);
 		struct stat sb;
-		stat (file.c_str(), &sb);
+		stat (f.c_str(), &sb);
 		if(S_ISREG(sb.st_mode) && StringUtil::endsWith(file, suffix)) {
 			RegexUtil::replace(file,"[/]+","/");
 			files.push_back(file);
@@ -263,6 +264,7 @@ void CommonUtils::listFiles(vector<string>& files, const string& cwd, const stri
 			}
 		}
 	}
+	closedir(dir);
 }
 
 vector<string> CommonUtils::getFiles(const string& cwd, const string& suffix, const bool& isAbs)
