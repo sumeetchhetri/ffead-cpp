@@ -185,7 +185,7 @@ void SSLHandler::init(const SecurityProperties& securityProperties) {
 }
 
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L
-int SSLHandler::alpn_select_proto_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen, const unsigned char *in, const unsigned int& inlen, void *arg) {
+int SSLHandler::alpn_select_proto_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen, const unsigned char *in, unsigned int inlen, void *arg) {
 	instance->logger << "[ALPN] client offers:" << std::endl;
 	for (unsigned int i = 0; i < inlen; i += in [i] + 1) {
 		instance->logger << " * ";

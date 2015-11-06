@@ -72,6 +72,11 @@ public:
 			if(tn.find("std::basic_string<char, std::char_traits<char>, std::allocator<char> >")!=string::npos) {
 				StringUtil::replaceAll(tn, "std::basic_string<char, std::char_traits<char>, std::allocator<char> >", "std::string");
 			}
+		} else if(tn.find("std::__cxx11::")!=string::npos) {
+			StringUtil::replaceAll(tn, "std::__cxx11::", "std::");
+			if(tn.find("std::basic_string<char, std::char_traits<char>, std::allocator<char> >")!=string::npos) {
+				StringUtil::replaceAll(tn, "std::basic_string<char, std::char_traits<char>, std::allocator<char> >", "std::string");
+			}
 		}
 		_mangledClassNameMap[sm] = tn;
 		if(tn[tn.length()-1]=='*')

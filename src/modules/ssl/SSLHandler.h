@@ -68,7 +68,7 @@ class SSLHandler {
 	vector<unsigned char> getDefaultALPN();
 	static vector<vector<unsigned char> > advertisedProtos;
 	static int next_proto_cb(SSL *s, const unsigned char **data, unsigned int *len, void *arg);
-	static int alpn_select_proto_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen, const unsigned char *in, const unsigned int& inlen, void *arg);
+	static int alpn_select_proto_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen, const unsigned char *in, unsigned int inlen, void *arg);
 	static int select_next_protocol(unsigned char **out, unsigned char *outlen, const unsigned char *in, const unsigned int& inlen);
 	static string getAlpnProto(const int& fd);
 	static void removeAlpnProtoSocket(const int& fd);
