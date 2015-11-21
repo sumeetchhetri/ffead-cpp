@@ -1,0 +1,8 @@
+<app>
+	<controllers>@CONTOLLER_CONF@
+	</controllers>
+	<filters>@FILTER_CONF@
+	</filters>
+	<restcontrollers>@RESTAPI_CONF@
+	</restcontrollers>
+</app>
