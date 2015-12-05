@@ -855,6 +855,8 @@ AC_CHECK_SIZEOF(void *)
 AC_CHECK_TYPES(long long)
 AC_CHECK_TYPES(signed char)
 
+ADD_LIBDL=
+
 dnl# Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_FORK
@@ -865,7 +867,8 @@ AC_CHECK_LIB(pthreads, pthread_create,[], [AC_CHECK_LIB(pthread, pthread_create)
 AC_CHECK_LIB(ssl, SSL_read, [], [AC_MSG_ERROR([ssl library not found])])
 AC_CHECK_LIB([crypto], [SHA1_Init], [], [AC_MSG_ERROR([libcrypto not found])])
 AC_CHECK_LIB(z, compress,,AC_MSG_ERROR([no zlib; please install zlib or equivalent]))
-AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
+#AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
+AC_CHECK_LIB(c, dlopen, ADD_LIBDL="", [AC_CHECK_LIB(dl, dlopen, ADD_LIBDL="-ldl")])
 AC_CHECK_LIB(rt, clock_nanosleep, [AC_DEFINE(HAVE_CLOCK_NANOSLEEP, 1, [Define if you have clock_nanosleep()])], [])
 
 if test "x$mod_sdormsql" = "xyes"; then
@@ -895,16 +898,21 @@ if test "x$mod_gtm" = "xyes"; then
     AC_CHECK_LIB(gtmshr, main, , [AC_MSG_ERROR([Not found libgtmshr library])])
 fi
  
-AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"  
+AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"
 # distribute additional compiler and linker flags among Makefiles
 # --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
 AC_SUBST([AM_CXXFLAGS])    
-    
+AC_SUBST([ADD_LIBDL])
+
 AC_CONFIG_FILES([Makefile
-	src/autotools/Makefile
-	tests/autotools/Makefile
-	src/apache_mod_ffeadcpp/autotools/Makefile
-	web/default/src/autotools/Makefile	web/flexApp/src/autotools/Makefile	web/hello/src/autotools/Makefile	web/markers/src/autotools/Makefile	web/oauthApp/src/autotools/Makefile	web/te-benchmark/src/autotools/Makefile])
+				src/autotools/Makefile
+				tests/autotools/Makefile
+				src/apache_mod_ffeadcpp/autotools/Makefile
+				web/default/src/autotools/Makefile
+				web/flexApp/src/autotools/Makefile
+				web/oauthApp/src/autotools/Makefile
+				web/markers/src/autotools/Makefile
+				web/te-benchmark/src/autotools/Makefile])
 AC_OUTPUT
 
 echo "Host: $host"

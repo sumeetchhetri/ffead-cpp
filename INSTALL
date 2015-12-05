@@ -86,6 +86,17 @@ MINGW(x86)
 	Warning - installing msys regex/openssl libraries would not be useful here as we will be natively building 
 		ffead-cpp on mingw and hence we need mingw compiled libraries
 
+MINGW-W64
+	Setup autoconf, automake and libtool, Download
+	    http://ftp.gnu.org/gnu/autoconf/autoconf-2.65.tar.gz
+	    http://ftp.gnu.org/gnu/automake/automake-1.11.1.tar.gz
+	    http://ftp.gnu.org/gnu/libtool/libtool-2.4.tar.gz
+		extract each and run './configure --prefix=/mingw && make install'
+	Setup OpenSSL, Download and extract 
+		https://github.com/openssl/openssl/releases
+		./Configure -—prefix=/mingw no-idea no-mdc2 no-rc5 shared mingw64
+		make depend && make && make install
+
 OTHERS - haven't tested on any other platform/os yet
 
 Basic Installation
