@@ -436,7 +436,7 @@ public:
 		else if(tn=="int")
 		{
 			int d = 0;
-			if(vval=="0" || (vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
 			} else {
@@ -456,7 +456,7 @@ public:
 		else if(tn=="short")
 		{
 			short d = 0;
-			if(vval=="0" || (vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
 			} else {
@@ -476,7 +476,7 @@ public:
 		else if(tn=="long")
 		{
 			long d = 0;
-			if(vval=="0" || (vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
 			} else {
@@ -496,7 +496,7 @@ public:
 		else if(tn=="unsigned short")
 		{
 			unsigned short d = 0;
-			if(vval=="0" || (vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
 			} else {
@@ -516,7 +516,7 @@ public:
 		else if(tn=="unsigned int")
 		{
 			unsigned int d = 0;
-			if(vval=="0" || (vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
 			} else {
@@ -536,7 +536,7 @@ public:
 		else if(tn=="unsigned long")
 		{
 			unsigned long d = 0;
-			if(vval=="0" || (vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
 			} else {
