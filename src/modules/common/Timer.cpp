@@ -28,6 +28,7 @@ Timer::Timer(bool threadsafe) {
 	} else {
 		m = new DummyMutex;
 	}
+	started = false;
 }
 
 Timer::~Timer() {
@@ -39,6 +40,7 @@ void Timer::start()
 	m->lock();
 	clock_gettime(CLOCK_MONOTONIC, &st);
 	m->unlock();
+	started = true;
 }
 
 long long Timer::getCurrentTime()
@@ -63,6 +65,7 @@ void Timer::end()
 }
 long long Timer::elapsedMicroSeconds()
 {
+	if(!started)return 0;
 	timespec en;
 	clock_gettime(CLOCK_MONOTONIC, &en);
 	m->lock();
@@ -72,6 +75,7 @@ long long Timer::elapsedMicroSeconds()
 }
 long long Timer::elapsedMilliSeconds()
 {
+	if(!started)return 0;
 	timespec en;
 	clock_gettime(CLOCK_MONOTONIC, &en);
 	m->lock();
@@ -81,6 +85,7 @@ long long Timer::elapsedMilliSeconds()
 }
 long long Timer::elapsedNanoSeconds()
 {
+	if(!started)return 0;
 	timespec en;
 	clock_gettime(CLOCK_MONOTONIC, &en);
 	m->lock();
@@ -90,6 +95,7 @@ long long Timer::elapsedNanoSeconds()
 }
 long long Timer::elapsedSeconds()
 {
+	if(!started)return 0;
 	timespec en;
 	clock_gettime(CLOCK_MONOTONIC, &en);
 	m->lock();
@@ -99,6 +105,7 @@ long long Timer::elapsedSeconds()
 }
 
 long long Timer::timerMicroSeconds() {
+	if(!started)return 0;
 	m->lock();
 	long long v = (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec))/1E3;
 	m->unlock();
@@ -106,6 +113,7 @@ long long Timer::timerMicroSeconds() {
 }
 
 long long Timer::timerMilliSeconds() {
+	if(!started)return 0;
 	m->lock();
 	long long v = (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec))/1E6;
 	m->unlock();
@@ -113,6 +121,7 @@ long long Timer::timerMilliSeconds() {
 }
 
 long long Timer::timerNanoSeconds() {
+	if(!started)return 0;
 	m->lock();
 	long long v = (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec));
 	m->unlock();
@@ -120,6 +129,7 @@ long long Timer::timerNanoSeconds() {
 }
 
 long long Timer::timerSeconds() {
+	if(!started)return 0;
 	m->lock();
 	long long v = (en.tv_sec - st.tv_sec);
 	m->unlock();

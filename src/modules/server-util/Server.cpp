@@ -453,7 +453,7 @@ SOCKET Server::createListener(const int& port, const bool& block)
 		return INVALID_SOCKET;
 	}
 	#if !defined(OS_MINGW)
-	struct sigaction sa;
+	/*struct sigaction sa;
 	sa.sa_handler = sigchld_handler; // reap all dead processes
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
@@ -461,7 +461,7 @@ SOCKET Server::createListener(const int& port, const bool& block)
 	{
 		perror("sigaction");
 		exit(1);
-	}
+	}*/
 	#endif
 
 	if(!block)

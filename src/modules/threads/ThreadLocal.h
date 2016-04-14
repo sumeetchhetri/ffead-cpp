@@ -10,7 +10,6 @@
 #include "pthread.h"
 
 class ThreadLocal {
-	void* _value;
 	pthread_key_t _key;
 	void init();
 	friend class CommonUtils;
@@ -31,9 +30,8 @@ inline ThreadLocal::ThreadLocal(const T& t) {
 	init();
 	T* tt = new T;
 	*tt = t;
-	_value = tt;
 	if (pthread_getspecific(_key) == NULL) {
-		pthread_setspecific(_key, _value);
+		pthread_setspecific(_key, tt);
 	}
 }
 
@@ -42,17 +40,17 @@ inline ThreadLocal::ThreadLocal(T* t) {
 	init();
 	T* tt = new T;
 	*tt = *t;
-	_value = tt;
 	if (pthread_getspecific(_key) == NULL) {
-		pthread_setspecific(_key, _value);
+		pthread_setspecific(_key, tt);
 	}
 }
 
 template<typename T>
 inline T ThreadLocal::get() {
-	if(_value)
+	void* tem = this->get();
+	if(tem)
 	{
-		T* t = (T*)_value;
+		T* t = (T*)tem;
 		return *t;
 	}
 	T t;
@@ -61,7 +59,7 @@ inline T ThreadLocal::get() {
 
 template<typename T>
 inline T* ThreadLocal::getPointer() {
-	return (T*)_value;
+	return (T*)this->get();
 }
 
 #endif /* THREADLOCAL_H_ */

@@ -241,8 +241,12 @@ int SocketUtil::readData(int cntlen, string& content)
 				{
 					if(!BIO_should_retry(io))
 					{
+#if !defined(USE_EPOLL_ET)
 						closeSocket(false);
 						er = 0;
+#else
+						er = -1;
+#endif
 					}
 					else
 					{

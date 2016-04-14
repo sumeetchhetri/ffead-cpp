@@ -24,7 +24,7 @@
 
 map<string, regex_t> RegexUtil::patterns;
 map<string, regex_t> RegexUtil::nlpatterns;
-bool RegexUtil::cacheRegexes = false;
+bool RegexUtil::cacheRegexes = true;
 
 void RegexUtil::flushCache() {
 	if(patterns.size()>0) {
@@ -44,13 +44,17 @@ void RegexUtil::flushCache() {
 }
 
 void RegexUtil::getRegex(regex_t& regex, const string& pattern, const bool& matchNewLine) {
+	bool found = false;
 	if(cacheRegexes) {
 		if(!matchNewLine && patterns.find(pattern)!=patterns.end()) {
 			regex = patterns[pattern];
+			found = true;
 		} else if(nlpatterns.find(pattern)!=nlpatterns.end()) {
 			regex = nlpatterns[pattern];
+			found = true;
 		}
-	} else {
+	}
+	if(!found) {
 		int cflags = REG_EXTENDED;
 		if(matchNewLine)
 			cflags = REG_NEWLINE | REG_EXTENDED;

@@ -10,6 +10,9 @@
 #include "SocketUtil.h"
 #include "Timer.h"
 #include "Mutex.h"
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/sendfile.h>
 
 class SocketInterface {
 	friend class RequestReaderHandler;
@@ -39,6 +42,17 @@ protected:
 			}
 		}
 		return isClosed();
+	}public:
+	bool writeFile(int fdes, int remain_data)
+	{
+		off_t offset = 0;
+		int sent_bytes = 0;
+		/* Sending file data */
+		while (((sent_bytes = sendfile(fd, fdes, &offset, BUFSIZ)) > 0) && (remain_data > 0))
+		{
+			remain_data -= sent_bytes;
+		}
+		return isClosed();
 	}
 	bool read()
 	{
@@ -52,19 +66,10 @@ protected:
 				t.start();
 				buffer.append(temp);
 			}
-			else if (count == -1 && (errno == EAGAIN || errno == EINTR))
+			else if (count == -1 && errno == EAGAIN)
 			{
 				/* If errno == EAGAIN, that means we have read all
 				 data. So go back to the main loop. */
-				//if (errno == EAGAIN)
-				//{
-					break;
-				//}
-			}
-			else if (count == 0)
-			{
-				/* End of file. The remote has closed the
-				 connection. */
 				break;
 			}
 			else
@@ -77,7 +82,7 @@ protected:
 	}
 	void close() {
 		sockUtil->closeSocket();
-	}public:
+	}
 	int getDescriptor() {
 		return fd;
 	}

@@ -8,7 +8,7 @@
 #include "Http11WebSocketHandler.h"
 
 Http11WebSocketHandler::Http11WebSocketHandler(const string& url, const bool& isServer, SocketUtil* sockUtil) {
-	//logger = LoggerFactory::getLogger("WebSocket");
+	logger = LoggerFactory::getLogger("Http11WebSocketHandler");
 	this->sockUtil = sockUtil;
 	this->url = url;
 }
@@ -93,7 +93,7 @@ void Http11WebSocketHandler::replyPong() {
 	while(true)
 	{
 		Http11WebSocketDataFrame frame = readFrame();
-		cout << "read new websocket frame " << frame.opcode << endl;
+		logger << "read new websocket frame " << frame.opcode << endl;
 		if(frame.opcode==8) {
 			return frame.opcode;
 		}
@@ -260,7 +260,7 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, void*
 			wsd->data = dataframes[it->first];
 			wsd->dataType = frame->opcode;
 			request = wsd;
-			cout << "Message is " << wsd->data << endl;
+			logger << "Message is " << wsd->data << endl;
 			dataframes[it->first].clear();
 			dataframesComplete[it->first] = false;
 			break;

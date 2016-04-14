@@ -69,7 +69,6 @@ void RequestReaderHandler::addSf(SocketInterface* psi) {
 	{
 		addToTimeoutSocks.push(psi);
 	}
-	cout << "added connection " << psi->getDescriptor() << " " << psi->identifier << endl;
 	selector.registerForEvent(psi->getDescriptor());
 	shi->addOpenRequest(psi);
 	psi->onOpen();
@@ -80,6 +79,7 @@ RequestReaderHandler::~RequestReaderHandler() {
 }
 
 void* RequestReaderHandler::handleTimeouts(void* inp) {
+	Logger logger = LoggerFactory::getLogger("RequestReaderHandler");
 	RequestReaderHandler* ins  = static_cast<RequestReaderHandler*>(inp);
 	map<int, SocketInterface*>::iterator it;
 	while(ins->isActive())
@@ -106,7 +106,7 @@ void* RequestReaderHandler::handleTimeouts(void* inp) {
 			{
 				if(it->second->t.elapsedMilliSeconds()>=it->second->getTimeout())
 				{
-					cout << "timedout connection " << it->second->getDescriptor() << " " << it->second->identifier << endl;
+					logger << "timedout connection " << it->second->getDescriptor() << " " << it->second->identifier << endl;
 					ins->timedoutSocks.push(it->second);
 					ins->connectionsWithTimeouts.erase(it++);
 				}
@@ -122,6 +122,7 @@ void* RequestReaderHandler::handleTimeouts(void* inp) {
 }
 
 void* RequestReaderHandler::handle(void* inp) {
+	Logger logger = LoggerFactory::getLogger("RequestReaderHandler");
 	RequestReaderHandler* ins  = static_cast<RequestReaderHandler*>(inp);
 	struct sockaddr_storage their_addr; // connector's address information
 	socklen_t sin_size;
@@ -144,7 +145,7 @@ void* RequestReaderHandler::handle(void* inp) {
 			}
 			for (int var = 0; var < (int)pds.size(); ++var) {
 				ins->pendingSocks.push(pds.at(var));
-				cout << "existing connection " << pds.at(var)->getDescriptor() << endl;
+				logger << "existing connection " << pds.at(var)->getDescriptor() << endl;
 			}
 		}
 
@@ -162,7 +163,7 @@ void* RequestReaderHandler::handle(void* inp) {
 		SocketInterface* rsi = NULL;
 		while(ins->readerSwitchedSocks.pop(rsi) && cdt.elapsedMilliSeconds()<100)
 		{
-			cout << "Swicthing protocols.." << endl;
+			logger << "Swicthing protocols.." << endl;
 			if(ins->connections[rsi->getDescriptor()]->getTimeout()>0)
 			{
 				ins->remFromTimeoutSocks.push(rsi);
@@ -191,29 +192,47 @@ void* RequestReaderHandler::handle(void* inp) {
 			{
 				if(ins->selector.isListeningDescriptor(descriptor))
 				{
+#if defined USE_EPOLL && defined(USE_EPOLL_ET)
+					while (true) {
+						sin_size = sizeof their_addr;
+						SOCKET newSocket = accept(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size);
+						if (newSocket == -1)
+						{
+						  if ((errno == EAGAIN) ||
+							  (errno == EWOULDBLOCK))
+							{
+							  /* We have processed all incoming
+								 connections. */
+							  break;
+							}
+						}
+						logger << "TARGET-REQUEST BEGINS AT " << Timer::getCurrentTime() <<  endl;
+						SocketUtil* sockUtil = new SocketUtil(newSocket);
+						SocketInterface* sockIntf = ins->sf(sockUtil);
+						ins->addSf(sockIntf);
+					}
+#else
 					sin_size = sizeof their_addr;
 					SOCKET newSocket = accept(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size);
 					SocketUtil* sockUtil = new SocketUtil(newSocket);
 					SocketInterface* sockIntf = ins->sf(sockUtil);
 					ins->addSf(sockIntf);
+#endif
 				}
 				else
 				{
 					if(ins->connections.find(descriptor)==ins->connections.end()) {
-						cout << "IDHAR KAISE AAYA@@@@@@@@" << endl;
+						logger << "IDHAR KAISE AAYA@@@@@@@@" << endl;
 						continue;
 					}
 					SocketInterface* si = ins->connections[descriptor];
 					int pending = 1;
-					//cout << "looping select " << endl;
-					while(pending>0 && ins->shi->isAvailable(si))
+					while(/*pending>0 && */ins->shi->isAvailable(si))
 					{
 						void* context = NULL;
-						//cout << "reading request " << si->getDescriptor() << " " << si->identifier << endl;
 						void* request = si->readRequest(context, pending);
 						if(si->isClosed()) {
 							si->onClose();
-							//cout << "Close requested " << descriptor << " " << si->identifier << endl;
 							ins->selector.unRegisterForEvent(si->getDescriptor());
 							ins->connections.erase(si->getDescriptor());
 							ins->remFromTimeoutSocks.push(si);
@@ -221,7 +240,7 @@ void* RequestReaderHandler::handle(void* inp) {
 							pending = 0;
 							break;
 						} else if(request!=NULL) {
-							//cout << "Got new request " << si->getDescriptor() << " " << si->identifier << endl;
+							logger << "TARGET-REQUEST GOT AT " << Timer::getCurrentTime() <<  endl;
 							ins->shi->registerRequest(request, si, context, ins);
 						}
 					}

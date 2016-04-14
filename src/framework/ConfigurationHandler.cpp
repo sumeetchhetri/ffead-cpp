@@ -121,7 +121,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	ref.addMarker(Marker("@QueryParam", Marker::TYPE_ARG, MarkerHandler::collectStr(1, "name")));
 	ref.addMarker(Marker("@FormParam", Marker::TYPE_ARG, MarkerHandler::collectStr(1, "name")));
 	ref.addMarker(Marker("@HeaderParam", Marker::TYPE_ARG, MarkerHandler::collectStr(1, "name")));
-	ref.addMarker(Marker("@MultipartContent", Marker::TYPE_ARG, MarkerHandler::collectStr(1, "value")));
+	ref.addMarker(Marker("@MultipartContent", Marker::TYPE_ARG, MarkerHandler::collectStr(1, "name")));
 	ref.addMarker(Marker("@Body", Marker::TYPE_ARG));
 	ref.addMarker(Marker("@DefaultValue", Marker::TYPE_ARG, MarkerHandler::collectStr(1, "value")));
 
@@ -2201,13 +2201,13 @@ Marker ConfigurationHandler::getRestFunctionParamMarker(map<string, vector<Marke
 		}
 		return markers["@HeaderParam"].at(markers["@HeaderParam"].size()-1);
 	}
-	else if(markers.find("@RequestBody")!=markers.end())
+	else if(markers.find("@Body")!=markers.end())
 	{
-		if(markers["@RequestBody"].size()>1)
+		if(markers["@Body"].size()>1)
 		{
-			logger << ("Found more than one @RequestBody marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @Body marker, only the last defined marker will be considered, ignoring others..") << endl;
 		}
-		return markers["@RequestBody"].at(markers["@RequestBody"].size()-1);
+		return markers["@Body"].at(markers["@Body"].size()-1);
 	}
 	else if(markers.find("@MultipartContent")!=markers.end())
 	{

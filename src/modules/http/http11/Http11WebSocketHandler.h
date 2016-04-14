@@ -26,12 +26,13 @@
 #include "CommonUtils.h"
 #include "SocketUtil.h"
 #include "SocketInterface.h"
+#include "LoggerFactory.h"
 #define MAXBUFLENMWS 32768
 using namespace std;
 
 
 class Http11WebSocketHandler : public SocketInterface {
-	//Logger logger;
+	Logger logger;
 	string url;
 	map<int, string> dataframes;
 	map<int, bool> dataframesComplete;

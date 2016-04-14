@@ -31,6 +31,7 @@ class Timer {
 	timespec st;
 	timespec en;
 	Mutex* m;
+	bool started;
 public:
 	Timer(bool threadsafe = true);
 	virtual ~Timer();

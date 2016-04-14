@@ -20,10 +20,10 @@ SUPP_MIMES=*
 AUTH_ENAB=false
 
 #Number of Server processes
-NUM_PROC=4
+NUM_PROC=1
 
 #The type of Threading strategy
-THRD_PREQ=true
+THRD_PREQ=false
 
 #The Thread Pool size for Pooled implementations
 THRD_PSIZ=10

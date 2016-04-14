@@ -40,13 +40,17 @@ using namespace std;
 #include <port.h>
 #include <poll.h>
 #elif USE_EPOLL == 1
+	#define USE_EPOLL_LT
 	#undef USE_EVPORT
 	#undef USE_KQUEUE
 	#undef USE_DEVPOLL
 	#undef USE_POLL
 	#undef USE_SELECT
 	#undef USE_WIN_IOCP
-#undef USE_WIN_IOCP
+	#ifdef USE_EPOLL_ET
+		#undef USE_EPOLL_LT
+	#endif
+	#undef USE_WIN_IOCP
 #include <sys/epoll.h>
 #elif USE_KQUEUE == 1
 	#undef USE_EVPORT

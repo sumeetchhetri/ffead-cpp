@@ -318,8 +318,9 @@ operates.
 #!/usr/bin/env bash
 
 sudo apt-get install gcc dpkg-dev cdbs automake autoconf libtool make libssl-dev libsasl2-dev git python-lxml pkg-config
-git clone git://github.com/mongodb/mongo-c-driver.git
-cd mongo-c-driver
-./build/mci.sh --notest
-cd ..
-sudo dpkg --install libmongoc-*.deb libbson-*.deb
+$ git clone https://github.com/mongodb/mongo-c-driver.git
+$ cd mongo-c-driver
+$ git checkout x.y.z  # To build a particular release
+$ ./autogen.sh --with-libbson=bundled
+$ make
+$ sudo make install

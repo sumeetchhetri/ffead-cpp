@@ -26,8 +26,10 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "queue"
+#include "LoggerFactory.h"
 
 class Http2Handler : public Http2ReadWriteUtil, public SocketInterface {
+	Logger logger;
 	int highestStreamIdentifier;
 	int highestPushPromiseStreamIdentifier;
 	Http2HPACKContext context;

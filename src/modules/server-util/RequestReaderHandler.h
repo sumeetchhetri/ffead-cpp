@@ -17,6 +17,7 @@
 #include "ReaderSwitchInterface.h"
 #include "ServiceHandler.h"
 #include "ConcurrentQueue.h"
+#include "LoggerFactory.h"
 using namespace std;
 
 typedef SocketInterface* (*SocketInterfaceFactory) (SocketUtil*);

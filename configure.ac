@@ -650,13 +650,13 @@ if test "x$mod_httpframework" = "xyes"; then
 	
 	AC_ARG_ENABLE(mod_appflow,
 	AS_HELP_STRING([--enable-mod_appflow],
-	               [enable mod_appflow, default: yes]),
+	               [enable mod_appflow, default: no]),
 	[case "${enableval}" in
 	             yes) mod_appflow=yes ;;
 	             no)  mod_appflow=no ;;
 	             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_appflow]) ;;
 	esac],
-	[mod_appflow=yes])
+	[mod_appflow=no])
 	AM_CONDITIONAL(MOD_APPFLOW, test "x$mod_appflow" = "xyes")
 	if test "x$mod_appflow" = "xyes"; then
 	    AC_DEFINE(INC_APPFLOW, [], [enable http framework application flow module])
@@ -678,13 +678,13 @@ if test "x$mod_httpframework" = "xyes"; then
 	
 	AC_ARG_ENABLE(mod_script,
 	AS_HELP_STRING([--enable-mod_script],
-	               [enable mod_script, default: yes]),
+	               [enable mod_script, default: no]),
 	[case "${enableval}" in
 	             yes) mod_script=yes ;;
 	             no)  mod_script=no ;;
 	             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_script]) ;;
 	esac],
-	[mod_script=yes])
+	[mod_script=no])
 	AM_CONDITIONAL(MOD_SCRH, test "x$mod_script" = "xyes")
 	if test "x$mod_script" = "xyes"; then
 	    AC_DEFINE(INC_SCRH, [], [enable http framework scripting support module])

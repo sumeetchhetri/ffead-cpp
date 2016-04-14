@@ -118,6 +118,7 @@ Http2Frame* Http2Handler::getFrameByType(const string& data, Http2FrameHeader& h
 }
 
 Http2Handler::Http2Handler(const bool& isServer, SocketUtil* sockUtil, const string& webpath) {
+	logger = LoggerFactory::getLogger("Http2Handler");
 	this->sockUtil = sockUtil;
 	this->highestStreamIdentifier = 0;
 	this->context.huffmanEncoding = true;
@@ -230,7 +231,7 @@ bool Http2Handler::processFrame(Http2Frame* frame, void*& request) {
 		precedingstreamId = frame->getHeader().getStreamIdentifier();
 	}
 
-	cout << "read new Http2Frame " << (int)frame->header.type << endl;
+	logger << "read new Http2Frame " << (int)frame->header.type << endl;
 	if(streams.find(frame->header.streamIdentifier)==streams.end()) {
 		streams.insert(pair<int, Http2StreamHandler>(frame->header.streamIdentifier,
 				Http2StreamHandler(&context, frame->header.streamIdentifier, webpath)));
@@ -424,7 +425,7 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si) {
 			if(write(serialize(&dframe))) {
 				return true;
 			}
-			cout << "write data frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << endl;
+			logger << "write data frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << endl;
 
 			//Handle flow control for data frames
 			senderFlowControlWindow -= dframe.header.payloadLength;
@@ -442,7 +443,7 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si) {
 			dframe.header.streamIdentifier = streamIdentifier;
 			dframe.data = data.substr(0, minreslen);
 			//No end of stream set for this incomplete data frame
-			cout << "write partial data frame " << dframe.header.streamIdentifier << endl;
+			logger << "write partial data frame " << dframe.header.streamIdentifier << endl;
 			if(write(serialize(&dframe))) {
 				streams[streamIdentifier].pendingSendData.reset();
 				return true;
@@ -487,8 +488,8 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 	if(write(serialize(&hframe))) {
 		return true;
 	}
-	cout << response->generateOnlyHeaderResponse(request) << endl;
-	cout << "write header frame " << hframe.header.streamIdentifier << endl;
+	logger << response->generateOnlyHeaderResponse(request) << endl;
+	logger << "write header frame " << hframe.header.streamIdentifier << endl;
 
 	bool completedSend = true;
 	bool isFirst = true;
@@ -508,7 +509,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 			if(write(serialize(&dframe))) {
 				return true;
 			}
-			cout << "write data frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << endl;
+			logger << "write data frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << endl;
 
 			//Handle flow control for data frames
 			senderFlowControlWindow -= dframe.header.payloadLength;
@@ -526,7 +527,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 			dframe.header.streamIdentifier = streamIdentifier;
 			dframe.data = data.substr(0, minreslen);
 			//No end of stream set for this incomplete data frame
-			cout << "write partial data frame " << dframe.header.streamIdentifier << endl;
+			logger << "write partial data frame " << dframe.header.streamIdentifier << endl;
 			if(write(serialize(&dframe))) {
 				streams[streamIdentifier].pendingSendData.reset();
 				return true;

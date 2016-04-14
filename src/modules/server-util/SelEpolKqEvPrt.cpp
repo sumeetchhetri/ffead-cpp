@@ -287,6 +287,12 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index)
 	#elif defined USE_EPOLL
 		if(index>-1 && index<sizeof events)
 		{
+			if ((events[index].events & EPOLLERR) ||
+				  (events[index].events & EPOLLHUP) ||
+				  (!(events[index].events & EPOLLIN)))
+			{
+				return -1;
+			}
 			return events[index].data.fd;
 		}
 	#elif defined USE_KQUEUE
@@ -353,7 +359,11 @@ bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor)
 		if(descriptor > fdMax)
 			fdMax = descriptor;
 	#elif defined USE_EPOLL
-		ev.events = EPOLLIN | EPOLLPRI;
+		#ifdef USE_EPOLL_LT
+			ev.events = EPOLLIN | EPOLLPRI;
+		#else
+			ev.events = EPOLLIN | EPOLLET;
+		#endif
 		ev.data.fd = descriptor;
 		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, descriptor, &ev) < 0)
 		{
