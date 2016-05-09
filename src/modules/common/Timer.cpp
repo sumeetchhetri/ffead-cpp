@@ -39,8 +39,8 @@ void Timer::start()
 {
 	m->lock();
 	clock_gettime(CLOCK_MONOTONIC, &st);
-	m->unlock();
 	started = true;
+	m->unlock();
 }
 
 long long Timer::getCurrentTime()
@@ -65,7 +65,12 @@ void Timer::end()
 }
 long long Timer::elapsedMicroSeconds()
 {
-	if(!started)return 0;
+	m->lock();
+	if(!started) {
+		m->unlock();
+		return 0;
+	}
+	m->unlock();
 	timespec en;
 	clock_gettime(CLOCK_MONOTONIC, &en);
 	m->lock();
@@ -75,7 +80,12 @@ long long Timer::elapsedMicroSeconds()
 }
 long long Timer::elapsedMilliSeconds()
 {
-	if(!started)return 0;
+	m->lock();
+	if(!started) {
+		m->unlock();
+		return 0;
+	}
+	m->unlock();
 	timespec en;
 	clock_gettime(CLOCK_MONOTONIC, &en);
 	m->lock();
@@ -85,7 +95,12 @@ long long Timer::elapsedMilliSeconds()
 }
 long long Timer::elapsedNanoSeconds()
 {
-	if(!started)return 0;
+	m->lock();
+	if(!started) {
+		m->unlock();
+		return 0;
+	}
+	m->unlock();
 	timespec en;
 	clock_gettime(CLOCK_MONOTONIC, &en);
 	m->lock();
@@ -95,7 +110,12 @@ long long Timer::elapsedNanoSeconds()
 }
 long long Timer::elapsedSeconds()
 {
-	if(!started)return 0;
+	m->lock();
+	if(!started) {
+		m->unlock();
+		return 0;
+	}
+	m->unlock();
 	timespec en;
 	clock_gettime(CLOCK_MONOTONIC, &en);
 	m->lock();
@@ -104,33 +124,49 @@ long long Timer::elapsedSeconds()
 	return v;
 }
 
-long long Timer::timerMicroSeconds() {
-	if(!started)return 0;
+long long Timer::timerMicroSeconds()
+{
 	m->lock();
+	if(!started) {
+		m->unlock();
+		return 0;
+	}
 	long long v = (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec))/1E3;
 	m->unlock();
 	return v;
 }
 
-long long Timer::timerMilliSeconds() {
-	if(!started)return 0;
+long long Timer::timerMilliSeconds()
+{
 	m->lock();
+	if(!started) {
+		m->unlock();
+		return 0;
+	}
 	long long v = (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec))/1E6;
 	m->unlock();
 	return v;
 }
 
-long long Timer::timerNanoSeconds() {
-	if(!started)return 0;
+long long Timer::timerNanoSeconds()
+{
 	m->lock();
+	if(!started) {
+		m->unlock();
+		return 0;
+	}
 	long long v = (((en.tv_sec - st.tv_sec) * 1E9) + (en.tv_nsec - st.tv_nsec));
 	m->unlock();
 	return v;
 }
 
-long long Timer::timerSeconds() {
-	if(!started)return 0;
+long long Timer::timerSeconds()
+{
 	m->lock();
+	if(!started) {
+		m->unlock();
+		return 0;
+	}
 	long long v = (en.tv_sec - st.tv_sec);
 	m->unlock();
 	return v;

@@ -22,7 +22,7 @@
 
 #include "ContentTypes.h"
 
-string ContentTypes::CONTENT_TYPE_TEXT_PLAIN = "text/plain";
-string ContentTypes::CONTENT_TYPE_TEXT_SHTML = "text/html";
+string ContentTypes::CONTENT_TYPE_TEXT_PLAIN = "text/plain; charset=UTF-8";
+string ContentTypes::CONTENT_TYPE_TEXT_SHTML = "text/html; charset=UTF-8";
 string ContentTypes::CONTENT_TYPE_APPLICATION_JSON = "application/json";
 string ContentTypes::CONTENT_TYPE_APPLICATION_XML = "application/xml";
