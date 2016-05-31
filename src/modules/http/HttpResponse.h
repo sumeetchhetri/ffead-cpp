@@ -66,17 +66,16 @@ public:
     string getHeader(string);
     bool getCompressed();
 	vector<string> getCookies() const;
+	map<string,string> getHeaders() const {
+		return headers;
+	}
 	string getStatusLine() const;
 	string toPluginString();
 	bool isDone() const;
 	void setDone(const bool& done);
-
-	friend class ServiceTask;
-    friend class HttpResponseParser;
-    friend class Http11Handler;
-    friend class Http2Handler;
-    friend class Http2RequestResponseData;
-    friend class HttpServiceHandler;
+	string generateResponse(const string& httpMethod, HttpRequest *req, const bool& appendHeaders= true);
+	string generateResponse(const bool& appendHeaders= true);
+	string generateOnlyHeaderResponse(HttpRequest *req);
 private:
     bool done;
     float httpVers;
@@ -100,9 +99,6 @@ private:
 	bool hasContent;
 	void setCompressed(const bool& compressed);
 	void update(HttpRequest* req);
-	string generateResponse(const string& httpMethod, HttpRequest *req, const bool& appendHeaders= true);
-	string generateResponse(const bool& appendHeaders= true);
-	string generateOnlyHeaderResponse(HttpRequest *req);
 	string generateHeadResponse();
 	string generateOptionsResponse();
 	string generateTraceResponse(HttpRequest* req);
@@ -112,6 +108,12 @@ private:
 	bool isContentRemains();
 	string getRemainingContent(const string& fname, const bool& isFirst);
 	static string getFileExtension(const string& file);
+	friend class ServiceTask;
+	friend class HttpResponseParser;
+	friend class Http11Handler;
+	friend class Http2Handler;
+	friend class Http2RequestResponseData;
+	friend class HttpServiceHandler;
 };
 
 #endif /* HTTPRESPONSE_H_ */

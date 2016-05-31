@@ -1501,6 +1501,8 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 
 	ConfigurationHandler::destroyCaches();
 
+	ConfigurationData::getInstance()->clearAllSingletonBeans();
+
 	ConfigurationData::clearInstance();
 
 	logger << "Destructed SSLHandler" << endl;

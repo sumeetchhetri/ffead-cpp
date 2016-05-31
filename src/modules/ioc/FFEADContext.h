@@ -63,6 +63,7 @@ public:
 	void clear(const string& appName= "default");
 	void addBean(const Bean& bean);
 	void initializeAllSingletonBeans(const map<string, bool>& servingContexts);
+	void clearAllSingletonBeans(const map<string, bool>& servingContexts);
 	Reflector& getReflector();
 	void release(const string& beanName, const string& appName);
 };

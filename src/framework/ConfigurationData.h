@@ -138,6 +138,18 @@ class CoreServerProperties {
 	friend class WsUtil;
 	friend class DCPGenerator;
 	friend class TemplateGenerator;
+public:
+	CoreServerProperties(){}
+	CoreServerProperties(string serverRootDirectory, string resourcePath, string webPath, propMap sprops, long sessionTimeout, bool sessatserv) {
+		isMainServerProcess = false;
+		sessservdistocache = false;
+		this->serverRootDirectory = serverRootDirectory;
+		this->resourcePath = resourcePath;
+		this->webPath = webPath;
+		this->sprops = sprops;
+		this->sessionTimeout = sessionTimeout;
+		this->sessatserv = sessatserv;
+	}
 };
 
 class ConfigurationData {
@@ -204,6 +216,15 @@ public:
 	static CoreServerProperties const& getCoreServerProperties();
 	static HttpRequest* getHttpRequest();
 	static HttpResponse* getHttpResponse();
+	static void initializeAllSingletonBeans() {
+		getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts);
+	}
+	static void clearAllSingletonBeans() {
+		getInstance()->ffeadContext.clearAllSingletonBeans(getInstance()->servingContexts);
+	}
+	static void setCoreServerProperties(CoreServerProperties coreServerProperties) {
+		getInstance()->coreServerProperties = coreServerProperties;
+	}
 	virtual ~ConfigurationData();
 };
 

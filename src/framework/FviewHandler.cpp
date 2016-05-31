@@ -48,12 +48,12 @@ bool FviewHandler::handle(HttpRequest* req, HttpResponse* res)
 		{
 			string st = content.substr(0,h-1);
 			string en = content.substr(h);
-			content = st + "<script type=\"text/javascript\" src=\"public/json2.js\"></script>";
-			content += "<script type=\"text/javascript\" src=\"public/prototype.js\"></script>";
-			content += "<script type=\"text/javascript\" src=\"public/afc.js\"></script>";
-			content += "<script type=\"text/javascript\" src=\"public/_afc_Objects.js\"></script>";
-			content += "<script type=\"text/javascript\" src=\"public/_afc_Interfaces.js\"></script>";
-			content += "<script type=\"text/javascript\" src=\"public/"+fviewmap[file]+".js\"></script>" + en;
+			content = st + "<script type=\"text/javascript\" src=\"json2.js\"></script>";
+			content += "<script type=\"text/javascript\" src=\"prototype.js\"></script>";
+			content += "<script type=\"text/javascript\" src=\"afc.js\"></script>";
+			content += "<script type=\"text/javascript\" src=\"_afc_Objects.js\"></script>";
+			content += "<script type=\"text/javascript\" src=\"_afc_Interfaces.js\"></script>";
+			content += "<script type=\"text/javascript\" src=\""+fviewmap[file]+".js\"></script>" + en;
 		}
 		else
 		{
@@ -61,12 +61,12 @@ bool FviewHandler::handle(HttpRequest* req, HttpResponse* res)
 			{
 				string st = content.substr(0,ht+6);
 				string en = content.substr(ht+6);
-				content = st + "<script type=\"text/javascript\" src=\"public/json2.js\"></script>";
-				content += "<script type=\"text/javascript\" src=\"public/prototype.js\"></script>";
-				content += "<script type=\"text/javascript\" src=\"public/afc.js\"></script>";
-				content += "<script type=\"text/javascript\" src=\"public/_afc_Objects.js\"></script>";
-				content += "<script type=\"text/javascript\" src=\"public/_afc_Interfaces.js\"></script>";
-				content += "<script type=\"text/javascript\" src=\"public/"+fviewmap[file]+".js\"></script>" + en;
+				content = st + "<script type=\"text/javascript\" src=\"json2.js\"></script>";
+				content += "<script type=\"text/javascript\" src=\"prototype.js\"></script>";
+				content += "<script type=\"text/javascript\" src=\"afc.js\"></script>";
+				content += "<script type=\"text/javascript\" src=\"_afc_Objects.js\"></script>";
+				content += "<script type=\"text/javascript\" src=\"_afc_Interfaces.js\"></script>";
+				content += "<script type=\"text/javascript\" src=\""+fviewmap[file]+".js\"></script>" + en;
 			}
 		}
 		res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);

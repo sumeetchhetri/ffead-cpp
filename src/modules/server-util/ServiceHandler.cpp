@@ -103,6 +103,27 @@ void* ServiceHandler::cleanSifs(void* inp) {
 	return NULL;
 }
 
+void ServiceHandler::cleanSif(map<int, SocketInterface*> connectionsWithTimeouts) {
+	SocketInterface* si = NULL;
+	while(tbcSifQ.pop(si))
+	{
+		int val;
+		if(requestNumMap.find(si->identifier, val) && val<=0)
+		{
+			cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << endl;
+			connectionsWithTimeouts.erase(si->getDescriptor());
+			delete si->sockUtil;
+			delete si;
+			requestNumMap.erase(si->identifier);
+		}
+		else
+		{
+			tbcSifQ.push(si);
+		}
+		Thread::mSleep(1);
+	}
+}
+
 void ServiceHandler::start() {
 	if(!run) {
 		mutex.lock();
@@ -111,8 +132,8 @@ void ServiceHandler::start() {
 			return;
 		}
 		run = true;
-		Thread csifthr(&cleanSifs, this);
-		csifthr.execute();
+		//Thread csifthr(&cleanSifs, this);
+		//csifthr.execute();
 		mutex.unlock();
 	}
 }

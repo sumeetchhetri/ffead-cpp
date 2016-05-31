@@ -59,6 +59,7 @@ class ServiceHandler {
 	static void* taskService(void* inp);
 	static void* cleanSifs(void* inp);
 	void flagDone(SocketInterface* si);
+	void cleanSif(map<int, SocketInterface*> connectionsWithTimeouts);
 	friend class RequestReaderHandler;
 	friend class HandlerRequest;
 protected:

@@ -294,7 +294,7 @@ void FFEADContext::release(const string& beanName, const string& appName)
 	if(beanName!="" && beans.find(appName+beanName)!=beans.end())
 	{
 		Bean& bean = beans[appName+beanName];
-		if(StringUtil::toLowerCopy(bean.scope)!="prototype")
+		if(StringUtil::toLowerCopy(bean.scope)=="prototype")
 		{
 			if(objects.find(bean.appName+bean.clas)!=objects.end() && objects[bean.appName+bean.clas]!=NULL)
 			{
@@ -328,6 +328,15 @@ void FFEADContext::addBean(const Bean& bean)
 {
 	if(bean.name!="" && beans.find(bean.appName+bean.name)==beans.end())
 		beans[bean.appName+bean.name] = bean;
+}
+
+void FFEADContext::clearAllSingletonBeans(const map<string, bool>& servingContexts)
+{
+	map<string, bool>::const_iterator it;
+	for (it=servingContexts.begin();it!=servingContexts.end();it++)
+	{
+		clear(it->first);
+	}
 }
 
 void FFEADContext::initializeAllSingletonBeans(const map<string, bool>& servingContexts)

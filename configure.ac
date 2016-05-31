@@ -749,7 +749,7 @@ AX_CXX_COMPILE_STDCXX_11(,mandatory)
 #fi
 
 if test "x$generate_apache_module" = "xyes"; then
-	AC_SUBST(GENERATE_APACHEMOD,[apache_mod_ffeadcpp/autotools])
+	AC_SUBST(GENERATE_APACHEMOD,[modules/apache_mod_ffeadcpp/autotools])
 	if test "x$local_os_type" = "xcygwin"; then
 		AC_SUBST(LIB_TYPE,[-l])
 		AC_SUBST(LIBRARY_EXTENSION,[dll])
@@ -907,7 +907,7 @@ AC_SUBST([ADD_LIBDL])
 AC_CONFIG_FILES([Makefile
 				src/autotools/Makefile
 				tests/autotools/Makefile
-				src/apache_mod_ffeadcpp/autotools/Makefile
+				modules/apache_mod_ffeadcpp/autotools/Makefile
 				web/default/src/autotools/Makefile
 				web/flexApp/src/autotools/Makefile
 				web/oauthApp/src/autotools/Makefile

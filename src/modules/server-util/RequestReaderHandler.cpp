@@ -100,6 +100,8 @@ void* RequestReaderHandler::handleTimeouts(void* inp) {
 			ins->connectionsWithTimeouts[asi->getDescriptor()] = asi;
 		}
 
+		ins->shi->cleanSif(ins->connectionsWithTimeouts);
+
 		if(!ins->connectionsWithTimeouts.empty())
 		{
 			for(it=ins->connectionsWithTimeouts.begin();it!=ins->connectionsWithTimeouts.end();)
@@ -227,7 +229,7 @@ void* RequestReaderHandler::handle(void* inp) {
 					}
 					SocketInterface* si = ins->connections[descriptor];
 					int pending = 1;
-					while(/*pending>0 && */ins->shi->isAvailable(si))
+					while(pending>0 && ins->shi->isAvailable(si))
 					{
 						void* context = NULL;
 						void* request = si->readRequest(context, pending);

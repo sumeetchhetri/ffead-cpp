@@ -24,7 +24,9 @@ void HttpServiceHandler::service(HandlerRequest* handlerRequest)
 	submitTask(task);
 }
 
-HttpServiceTask::HttpServiceTask() {}
+HttpServiceTask::HttpServiceTask() {
+	this->handlerRequest = NULL;
+}
 
 HttpServiceTask::HttpServiceTask(HandlerRequest* handlerRequest, HttpServiceHandler* service) {
 	this->handlerRequest = handlerRequest;
