@@ -568,6 +568,18 @@ static int mod_ffeadcp_post_config_hanlder(apr_pool_t *pconf, apr_pool_t *plog, 
     return OK;
 }
 
+static void mod_ffeadcp_child_uninit()
+{
+#ifdef INC_SDORM
+	ConfigurationHandler::destroyDataSources();
+#endif
+
+	ConfigurationHandler::destroyCaches();
+
+	ConfigurationData::getInstance()->clearAllSingletonBeans();
+	return APR_SUCCESS;
+}
+
 static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 {
 	apr_pool_cleanup_register(p, NULL, mod_ffeadcp_child_uninit, apr_pool_cleanup_null);
@@ -632,18 +644,6 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 	logger << ("Initializing ffeadContext....") << endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
 	logger << ("Initializing ffeadContext done....") << endl;
-}
-
-static void mod_ffeadcp_child_uninit()
-{
-#ifdef INC_SDORM
-	ConfigurationHandler::destroyDataSources();
-#endif
-
-	ConfigurationHandler::destroyCaches();
-
-	ConfigurationData::getInstance()->clearAllSingletonBeans();
-	return APR_SUCCESS;
 }
 
 static void mod_ffeadcpp_register_hooks (apr_pool_t *p)
