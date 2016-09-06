@@ -27,11 +27,3 @@ TeBkWorld::~TeBkWorld() {
 	// TODO Auto-generated destructor stub
 }
 
-int TeBkWorld::getAnotherId() const {
-	return anotherId;
-}
-
-void TeBkWorld::setAnotherId(int anotherId) {
-	this->anotherId = anotherId;
-}
-

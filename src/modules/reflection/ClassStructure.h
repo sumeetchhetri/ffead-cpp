@@ -69,6 +69,16 @@ class ClassStructure
 		a.insert(a.end(), pubps.begin(), pubps.end());
 		return a;
 	}
+	PropStructure getPs(string name) {
+		PropStructure t;
+		vector<PropStructure> aps = getAllProps();
+		for (int var = 0; var < (int)aps.size(); ++var) {
+			if(aps.at(var).name == name) {
+				return aps.at(var);
+			}
+		}
+		return t;
+	}
 	friend class Reflection;
 	friend class ConfigurationHandler;
 public:

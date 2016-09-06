@@ -265,6 +265,10 @@ void Reflection::emptyBlocks(string& data, size_t start)
 void Reflection::handleNamespace(string data, string namepsc, map<string, ClassStructure>& clsvec, map<string, vector<string> >& glbnmspcs, vector<string> pragmas)
 {
 	StringUtil::trim(data);
+	if(data.length()>0 && data.at(0)==';') {
+		data = data.substr(1);
+	}
+	StringUtil::trim(data);
 	if(data=="")return;
 	string nmspc;
 	int nmspcst = RegexUtil::find(data, "[ \t]*using[ \t]*namespace[ \t]*[^;]+;");
@@ -273,7 +277,7 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 		string temp = data.substr(nmspcst);
 		nmspcst += temp.find(" namespace");
 	}
-	cout << data << endl;
+	cout << namepsc << "||" << data << endl;
 	if(clsvec.find(namepsc)==clsvec.end() && RegexUtil::find(data, "^[ \t]*#[ \t]*pragma[ \t]*[^`]+`", true)==0)
 	{
 		int spos, epos;
@@ -310,7 +314,7 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 		StringUtil::trim(temp);
 		StringUtil::replaceFirst(temp,"namespace ","");
 		nmspc = namepsc + temp+"::";
-		namepsc += temp+"::";
+		//namepsc += temp+"::";
 		data = data.substr(data.find("{"));
 		string nmdata = data;
 		size_t cbst = nmdata.find("{", 1);
@@ -376,7 +380,7 @@ void Reflection::handleNamespace(string data, string namepsc, map<string, ClassS
 			StringUtil::replaceAll(baseClassN," ","");
 		}
 		nmspc = namepsc + classN+"::";
-		namepsc += temp+"::";
+		//namepsc += temp+"::";
 		data = data.substr(data.find("{"));
 		string nmdata = data;
 		size_t cbst = nmdata.find("{", 1);
@@ -802,6 +806,7 @@ map<string, ClassStructure> Reflection::getClassStructures(const string& classNa
 
 		vector<string> typedefs = RegexUtil::search(data, "[ \t]*typedef[ \t]*[^;]+;");
 		RegexUtil::replace(data, "[ \t]*typedef[ \t]*[^;]+;", " ");
+		RegexUtil::replace(data, "[ \t]*friend[ \t]*[^;]+;", " ");
 
 		string file = className.substr(className.find_last_of("/")+1);
 
@@ -1056,7 +1061,7 @@ string Reflection::generateClassDefinitionsAll(map<string, map<string, ClassStru
 	//includeRef = "#ifndef REFLECTOR_H_\n#define REFLECTOR_H_\n#include \"ClassInfo.h\"\n#include \"string\"\n#include \"Method.h\"\n#include \"Field.h\"\n";
 	//includeRef += "#include \"XmlParser.h\"\n#include <stdio.h>\n#include <sys/wait.h>\n#include <stdexcept>\n#include <execinfo.h>\n#include <dlfcn.h>\n#include <cxxabi.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include \"string\"\n#include <sstream>\n#include <typeinfo>\n";
 	string typedefs,classes,methods,opers;
-	string inc = "#include \"Reflector.h\"\n#include \"string\"\n#include \"Method.h\"\n#include \"Field.h\"\n";
+	string inc = "#include \"AppDefines.h\"\n#include \"Reflector.h\"\n#include \"string\"\n#include \"Method.h\"\n#include \"Field.h\"\n";
 	ret += "extern \"C\"\n{\n";
 	for (unsigned int var = 0; var < apps.size(); ++var)
 	{
@@ -1810,12 +1815,10 @@ string Reflection::generateClassDefinition(map<string, ClassStructure>& allclsma
 				}
 				classStructure.pubms.at(i) = ms;
 			}
+			vector<PropStructure> extpubps;
 			for (unsigned int i = 0; i < classStructure.pubps.size(); i++) {
 				PropStructure ms = classStructure.pubps.at(i);
 				string pubdecl = ms.decl;
-
-				refDef += ("f.clear();\n");
-				testStr += ("f.clear();\n");
 
 				publf += pubdecl;
 
@@ -1849,44 +1852,64 @@ string Reflection::generateClassDefinition(map<string, ClassStructure>& allclsma
 				}
 
 				vector<string> fldp;
-				fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
-				fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
+				if(fld.find(",")!=string::npos) {
+					string fldsbc = fld.substr(0, fld.find(","));
+					string fldss = fld.substr(fld.find(",")+1);
+					fldp = StringUtil::splitAndReturn<vector<string> >(fldss, ",");
+					fldp.insert(fldp.begin(), fldsbc.substr(0, fldsbc.find_last_of(" ")));
+					fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
+				} else {
+					fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
+					fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
+				}
+				for(unsigned int j = 1; j < fldp.size(); j++)
+				{
+					StringUtil::trim(fldp.at(j));
+				}
 
 				if(fldp.size()>1)
 				{
-					for(unsigned int j = 0; j < fldp.size(); j++)
-					{
-						if(j==0)
-						{
-							refDef += ("f.setType(\""+fldp.at(j)+"\");\n");
-							testStr += "assert(f.getType()==\""+fldp.at(j)+"\");\n";
-							ms.type = fldp.at(j);
-						}
-						else if(j==1)
-						{
-							refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
-							testStr += "assert(f.getFieldName()==\""+fldp.at(j)+"\");\n";
-							ms.name = fldp.at(j);
-						}
-					}
-					//if(fldp.size()==2)
-					//	structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
 					string fqcn = getFullyQualifiedClassName(fldp.at(0), classStructure.namespaces);
 					if(ptr)
 					{
 						fqcn += "*";
 					}
 
-					string fmn = app+ "_" + classStructure.getTreatedClassName(true) + "_f" +
-							CastUtil::lexical_cast<string>(fldcounter++);
-					methods += "\n"+fqcn+" " +fmn+"(void* instance)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n\treturn _obj->"+fldp.at(1)+";\n}\n";
-					refDef += ("if(f.getFieldName()!=\"\")\n{f.setRefName(\""+fmn+"\");\n\nci.addField(f);\n}\n");
+					for(unsigned int j = 1; j < fldp.size(); j++)
+					{
+						PropStructure tms;
+						tms.type = ms.type;
+						tms.name = ms.name;
+						tms.decl = ms.decl;
+						tms.markers = ms.markers;
+
+						refDef += ("f.clear();\n");
+						testStr += ("f.clear();\n");
+
+						refDef += ("f.setType(\""+fldp.at(0)+"\");\n");
+						testStr += "assert(f.getType()==\""+fldp.at(0)+"\");\n";
+						tms.type = fldp.at(0);
+
+						refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
+						testStr += "assert(f.getFieldName()==\""+fldp.at(j)+"\");\n";
+						tms.name = fldp.at(j);
+
+						string fmn = app+ "_" + classStructure.getTreatedClassName(true) + "_f" +
+								CastUtil::lexical_cast<string>(fldcounter++);
+						methods += "\n"+fqcn+" " +fmn+"(void* instance)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n\treturn _obj->"+fldp.at(j)+";\n}\n";
+						refDef += ("if(f.getFieldName()!=\"\")\n{f.setRefName(\""+fmn+"\");\n\nci.addField(f);\n}\n");
+
+						if(j>1) {
+							extpubps.push_back(tms);
+						} else {
+							classStructure.pubps.at(i) = tms;
+						}
+					}
 				}
-				else
-				{
-					////logger << fld << " error" << endl;
-				}
-				classStructure.pubps.at(i) = ms;
+			}
+			for(unsigned int j = 0; j < extpubps.size(); j++)
+			{
+				classStructure.pubps.push_back(extpubps.at(j));
 			}
 		}
 		if (classStructure.prips.size() > 0 || classStructure.prims.size() > 0)
@@ -1989,13 +2012,11 @@ string Reflection::generateClassDefinition(map<string, ClassStructure>& allclsma
 				}
 				classStructure.prims.at(i) = ms;
 			}
-
+			vector<PropStructure> extprips;
 			for (unsigned int i = 0; i < classStructure.prips.size(); i++) {
 				PropStructure ms = classStructure.prips.at(i);
 				string pubdecl = ms.decl;
 
-				refDef += ("f.clear();\n");
-				testStr += ("f.clear();\n");
 				privf += pubdecl;
 
 				fld = pubdecl;
@@ -2023,37 +2044,55 @@ string Reflection::generateClassDefinition(map<string, ClassStructure>& allclsma
 				}
 
 				vector<string> fldp;
-				fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
-				fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
+				if(fld.find(",")!=string::npos) {
+					string fldsbc = fld.substr(0, fld.find(","));
+					string fldss = fld.substr(fld.find(",")+1);
+					fldp = StringUtil::splitAndReturn<vector<string> >(fldss, ",");
+					fldp.insert(fldp.begin(), fldsbc.substr(0, fldsbc.find_last_of(" ")));
+					fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
+				} else {
+					fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
+					fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
+				}
+				for(unsigned int j = 1; j < fldp.size(); j++)
+				{
+					StringUtil::trim(fldp.at(j));
+				}
 
 				if(fldp.size()>1)
 				{
-					for(unsigned int j = 0; j < fldp.size(); j++)
+					for(unsigned int j = 1; j < fldp.size(); j++)
 					{
-						if(j==0)
-						{
-							refDef += ("f.setType(\""+fldp.at(j)+"\");\n");
-							testStr += "assert(f.getType()==\""+fldp.at(j)+"\");\n";
-							ms.type = fldp.at(j);
-						}
-						else if(j==1)
-						{
-							refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
-							testStr += "assert(f.getFieldName()==\""+fldp.at(j)+"\");\n";
-							ms.name = fldp.at(j);
+						PropStructure tms;
+						tms.type = ms.type;
+						tms.name = ms.name;
+						tms.decl = ms.decl;
+						tms.markers = ms.markers;
+
+						refDef += ("f.clear();\n");
+						testStr += ("f.clear();\n");
+
+						refDef += ("f.setType(\""+fldp.at(0)+"\");\n");
+						testStr += "assert(f.getType()==\""+fldp.at(0)+"\");\n";
+						tms.type = fldp.at(0);
+
+						refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
+						testStr += "assert(f.getFieldName()==\""+fldp.at(j)+"\");\n";
+						tms.name = fldp.at(j);
+						refDef += ("if(f.getFieldName()!=\"\")\n{\nci.addField(f);\n}\n");
+
+						if(j>1) {
+							extprips.push_back(tms);
+						} else {
+							classStructure.prips.at(i) = tms;
 						}
 					}
-					//if(fldp.size()==2)
-					//	structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
-					//methods += "\n"+fldp.at(0)+" " +app+ "_fcrciff_"+classStructure.getTreatedClassName(true)+fldp.at(1)+"(void* instance)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\nstruct"
-					//+classStructure.getFullyQualifiedClassName()+" *__obj=(struct"+classStructure.getFullyQualifiedClassName()+"*)_obj;\n\treturn __obj->"+fldp.at(1)+";\n}\n";
-					refDef += ("if(f.getFieldName()!=\"\")\n{\nci.addField(f);\n}\n");
+
 				}
-				else
-				{
-					////logger << fld << " error" << endl;
-				}
-				classStructure.prips.at(i) = ms;
+			}
+			for(unsigned int j = 0; j < extprips.size(); j++)
+			{
+				classStructure.prips.push_back(extprips.at(j));
 			}
 		}
 		if (classStructure.props.size() > 0 || classStructure.proms.size() > 0)
@@ -2156,12 +2195,10 @@ string Reflection::generateClassDefinition(map<string, ClassStructure>& allclsma
 				}
 				classStructure.proms.at(i) = ms;
 			}
+			vector<PropStructure> extprops;
 			for (unsigned int i = 0; i < classStructure.props.size(); i++) {
 				PropStructure ms = classStructure.props.at(i);
 				string pubdecl = ms.decl;
-
-				refDef += ("f.clear();\n");
-				testStr += ("f.clear();\n");
 
 				protf += pubdecl;
 
@@ -2190,37 +2227,55 @@ string Reflection::generateClassDefinition(map<string, ClassStructure>& allclsma
 				}
 
 				vector<string> fldp;
-				fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
-				fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
+				if(fld.find(",")!=string::npos) {
+					string fldsbc = fld.substr(0, fld.find(","));
+					string fldss = fld.substr(fld.find(",")+1);
+					fldp = StringUtil::splitAndReturn<vector<string> >(fldss, ",");
+					fldp.insert(fldp.begin(), fldsbc.substr(0, fldsbc.find_last_of(" ")));
+					fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
+				} else {
+					fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
+					fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
+				}
+				for(unsigned int j = 1; j < fldp.size(); j++)
+				{
+					StringUtil::trim(fldp.at(j));
+				}
 
 				if(fldp.size()>1)
 				{
-					for(unsigned int j = 0; j < fldp.size(); j++)
+					for(unsigned int j = 1; j < fldp.size(); j++)
 					{
-						if(j==0)
-						{
-							refDef += ("f.setType(\""+fldp.at(j)+"\");\n");
-							testStr += "assert(f.getType()==\""+fldp.at(j)+"\");\n";
-							ms.type = fldp.at(j);
-						}
-						else if(j==1)
-						{
-							refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
-							testStr += "assert(f.getFieldName()==\""+fldp.at(j)+"\");\n";
-							ms.name = fldp.at(j);
+						PropStructure tms;
+						tms.type = ms.type;
+						tms.name = ms.name;
+						tms.decl = ms.decl;
+						tms.markers = ms.markers;
+
+						refDef += ("f.clear();\n");
+						testStr += ("f.clear();\n");
+
+						refDef += ("f.setType(\""+fldp.at(0)+"\");\n");
+						testStr += "assert(f.getType()==\""+fldp.at(0)+"\");\n";
+						tms.type = fldp.at(0);
+
+						refDef += ("f.setFieldName(\""+fldp.at(j)+"\");\n");
+						testStr += "assert(f.getFieldName()==\""+fldp.at(j)+"\");\n";
+						tms.name = fldp.at(j);
+						refDef += ("if(f.getFieldName()!=\"\")\n{\nci.addField(f);\n}\n");
+
+						if(j>1) {
+							extprops.push_back(tms);
+						} else {
+							classStructure.props.at(i) = tms;
 						}
 					}
-					//if(fldp.size()==2)
-					//	structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
-					//methods += "\n"+fldp.at(0)+" " +app+ "_fcrciff_"+classStructure.getTreatedClassName(true)+fldp.at(1)+"(void* instance)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\nstruct"
-					//+classStructure.getFullyQualifiedClassName()+" *__obj=(struct"+classStructure.getFullyQualifiedClassName()+"*)_obj;\n\treturn __obj->"+fldp.at(1)+";\n}\n";
-					refDef += ("if(f.getFieldName()!=\"\")\n{\nci.addField(f);\n}\n");
+
 				}
-				else
-				{
-					////logger << fld << " error" << endl;
-				}
-				classStructure.props.at(i) = ms;
+			}
+			for(unsigned int j = 0; j < extprops.size(); j++)
+			{
+				classStructure.props.push_back(extprops.at(j));
 			}
 		}
 		if(!ctorisp)
@@ -3385,7 +3440,7 @@ string Reflection::generateClassDefinition_Old(map<string, ClassStructure>& allc
 string Reflection::generateSerDefinitionAll(map<string, map<string, ClassStructure> >& clsstrucMaps, string &includeRef, const bool& isBinary, string& objs, string& ajaxret, string& headers, string& typerefs, const vector<string>& apps)
 {
 	string ret = "";
-	includeRef = "\n#include \"vector\"\n#include \"list\"\n#include \"queue\"\n#include \"deque\"\n#include \"set\"\n#include \"DateFormat.h\"\n" ;
+	includeRef = "\n#include \"AppDefines.h\"\n#include \"vector\"\n#include \"list\"\n#include \"queue\"\n#include \"deque\"\n#include \"set\"\n#include \"DateFormat.h\"\n" ;
 	includeRef += "#include \"SerializeBase.h\"\n#include \"sstream\"\n#include \"CastUtil.h\"\n#include <algorithm>\n";
 	string typedefs,classes,methods,rert1;
 	for (unsigned int var = 0; var < apps.size(); ++var)
@@ -3516,12 +3571,24 @@ string Reflection::generateAllSerDefinition(map<string, ClassStructure>& allclsm
 					}
 
 					vector<string> fldp;
-					fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
-					fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
-
-					if(fldp.size()==2)
+					if(fld.find(",")!=string::npos) {
+						string fldsbc = fld.substr(0, fld.find(","));
+						string fldss = fld.substr(fld.find(",")+1);
+						fldp = StringUtil::splitAndReturn<vector<string> >(fldss, ",");
+						fldp.insert(fldp.begin(), fldsbc.substr(0, fldsbc.find_last_of(" ")));
+						fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
+					} else {
+						fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
+						fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
+					}
+					for(unsigned int j = 1; j < fldp.size(); j++)
 					{
-						string nam = fldp.at(1);
+						StringUtil::trim(fldp.at(j));
+					}
+
+					for(unsigned int j = 1; j < fldp.size(); j++)
+					{
+						string nam = fldp.at(j);
 						fldnames.push_back(fldp.at(0));
 						fldnames.push_back(nam);
 						if(ptr)
@@ -3569,12 +3636,24 @@ string Reflection::generateAllSerDefinition(map<string, ClassStructure>& allclsm
 					}
 
 					vector<string> fldp;
-					fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
-					fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
-
-					if(fldp.size()==2)
+					if(fld.find(",")!=string::npos) {
+						string fldsbc = fld.substr(0, fld.find(","));
+						string fldss = fld.substr(fld.find(",")+1);
+						fldp = StringUtil::splitAndReturn<vector<string> >(fldss, ",");
+						fldp.insert(fldp.begin(), fldsbc.substr(0, fldsbc.find_last_of(" ")));
+						fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
+					} else {
+						fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
+						fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
+					}
+					for(unsigned int j = 1; j < fldp.size(); j++)
 					{
-						string nam = fldp.at(1);
+						StringUtil::trim(fldp.at(j));
+					}
+
+					for(unsigned int j = 1; j < fldp.size(); j++)
+					{
+						string nam = fldp.at(j);
 						fldnames.push_back(fldp.at(0));
 						fldnames.push_back(nam);
 						if(ptr)
@@ -3740,32 +3819,44 @@ string Reflection::generateAllSerDefinition(map<string, ClassStructure>& allclsm
 					}
 
 					vector<string> fldp;
-					fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
-					fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
-
-					if(fldp.size()==2)
+					if(fld.find(",")!=string::npos) {
+						string fldsbc = fld.substr(0, fld.find(","));
+						string fldss = fld.substr(fld.find(",")+1);
+						fldp = StringUtil::splitAndReturn<vector<string> >(fldss, ",");
+						fldp.insert(fldp.begin(), fldsbc.substr(0, fldsbc.find_last_of(" ")));
+						fldp.insert(fldp.begin(), fldsbc.substr(fldsbc.find_last_of(" ")+1));
+					} else {
+						fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
+						fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
+					}
+					for(unsigned int j = 1; j < fldp.size(); j++)
 					{
-						string nam = fldp.at(1);
+						StringUtil::trim(fldp.at(j));
+					}
+
+					for(unsigned int j = 1; j < fldp.size(); j++)
+					{
+						string nam = fldp.at(j);
 						if(isPrimitiveDataType(fldp.at(0)))
 						{
-							fldp.at(0) = getTypeName(fldp.at(0));
+							string typ = getTypeName(fldp.at(0));
 							if(!ptr)
 							{
-								methods += fldp.at(0) + " _objProp" + fldp.at(1) + " = " + "__obj->"+fldp.at(1) + ";\n";
-								methods += "base->addObjectPrimitiveProperty(serobject, \""+fldp.at(1)+"\", \""+fldp.at(0)+"\", &_objProp"+fldp.at(1)+");\n"
+								methods += typ + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
+								methods += "base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""+typ+"\", &_objProp"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n";
-								string cam = StringUtil::capitalizedCopy(fldp.at(1));
-								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(1)+"\", i))\n{\n"
-										+fldp.at(0)+"* _val = ("+fldp.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""+fldp.at(0)+"\", \""+fldp.at(1)+"\");__obj->"+fldp.at(1)
+								string cam = StringUtil::capitalizedCopy(fldp.at(j));
+								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
+										+typ+"* _val = ("+typ+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""+typ+"\", \""+fldp.at(j)+"\");__obj->"+fldp.at(j)
 										+" = *_val;\ndelete _val;\n}\n";
 							}
 							else
 							{
-								methods += "base->addObjectPrimitiveProperty(serobject, \""+fldp.at(1)+"\", \""+fldp.at(0)+"\", __obj->"+fldp.at(1)+");\n"
+								methods += "base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""+typ+"\", __obj->"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n";
-								string cam = StringUtil::capitalizedCopy(fldp.at(1));
-								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(1)+"\", i))\n{\n"
-										+fldp.at(0)+"* _val = ("+fldp.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""+fldp.at(0)+"\", \""+fldp.at(1)+"\");__obj->"+fldp.at(1)
+								string cam = StringUtil::capitalizedCopy(fldp.at(j));
+								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
+										+typ+"* _val = ("+typ+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""+typ+"\", \""+fldp.at(j)+"\");__obj->"+fldp.at(j)
 										+" = _val;\n}\n";
 							}
 						}
@@ -3773,50 +3864,50 @@ string Reflection::generateAllSerDefinition(map<string, ClassStructure>& allclsm
 						{
 							if(!ptr)
 							{
-								methods += fldp.at(0) + " _objProp" + fldp.at(1) + " = " + "__obj->"+fldp.at(1) + ";\n";
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(1)+"\", \""
-										+fldp.at(0)+"\", &_objProp"+fldp.at(1)+");\n"
+								methods += fldp.at(0) + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
+								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+										+fldp.at(0)+"\", &_objProp"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
-								string cam = StringUtil::capitalizedCopy(fldp.at(1));
-								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(1)+"\", i))\n{\n"
-										+"string* _val = (string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(1)+"\");\nDateFormat formt"
-										+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
-										+fldp.at(1)+" = *(formt"+fldp.at(1)+".parse(*_val));\ndelete _val;\n}\n";
+								string cam = StringUtil::capitalizedCopy(fldp.at(j));
+								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
+										+"string* _val = (string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
+										+fldp.at(j)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
+										+fldp.at(j)+" = *(formt"+fldp.at(j)+".parse(*_val));\ndelete _val;\n}\n";
 							}
 							else
 							{
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(1)+"\", \""
-										+fldp.at(0)+"\", __obj->"+fldp.at(1)+");\n"
+								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+										+fldp.at(0)+"\", __obj->"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
-								string cam = StringUtil::capitalizedCopy(fldp.at(1));
-								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(1)+"\", i))\n{\n"
-										+"string* _val = (string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(1)+"\");\nDateFormat formt"
-										+fldp.at(1)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
-										+fldp.at(1)+" = (formt"+fldp.at(1)+".parse(*_val));\ndelete _val;\n}\n";
+								string cam = StringUtil::capitalizedCopy(fldp.at(j));
+								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
+										+"string* _val = (string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
+										+fldp.at(j)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
+										+fldp.at(j)+" = (formt"+fldp.at(j)+".parse(*_val));\ndelete _val;\n}\n";
 							}
 						}
 						else if(fldp.at(0)=="BinaryData")
 						{
 							if(!ptr)
 							{
-								methods += fldp.at(0) + " _objProp" + fldp.at(1) + " = " + "__obj->"+fldp.at(1) + ";\n";
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(1)+"\", \""
-										+fldp.at(0)+"\", &_objProp"+fldp.at(1)+");\n"
+								methods += fldp.at(0) + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
+								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+										+fldp.at(0)+"\", &_objProp"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
-								string cam = StringUtil::capitalizedCopy(fldp.at(1));
-								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(1)+"\", i))\n{\n"
-										+"string* _val = (string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(1)+"\");"
-										+ "\n__obj->"+fldp.at(1)+" = *(BinaryData::unSerilaize(*_val));\ndelete _val;\n}\n";
+								string cam = StringUtil::capitalizedCopy(fldp.at(j));
+								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
+										+"string* _val = (string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");"
+										+ "\n__obj->"+fldp.at(j)+" = *(BinaryData::unSerilaize(*_val));\ndelete _val;\n}\n";
 							}
 							else
 							{
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(1)+"\", \""
-										+fldp.at(0)+"\", __obj->"+fldp.at(1)+");\n"
+								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+										+fldp.at(0)+"\", __obj->"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
-								string cam = StringUtil::capitalizedCopy(fldp.at(1));
-								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(1)+"\", i))\n{\n"
-										+"string* _val = (string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(1)+"\");"
-										+ "\n__obj->"+fldp.at(1)+" = (BinaryData::unSerilaize(*_val));\ndelete _val;\n}\n";
+								string cam = StringUtil::capitalizedCopy(fldp.at(j));
+								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
+										+"string* _val = (string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");"
+										+ "\n__obj->"+fldp.at(j)+" = (BinaryData::unSerilaize(*_val));\ndelete _val;\n}\n";
 							}
 						}
 						else if(fldp.at(0).find("vector")!=string::npos || fldp.at(0).find("queue")!=string::npos || fldp.at(0).find("deque")!=string::npos || fldp.at(0).find("set")!=string::npos || fldp.at(0).find("list")!=string::npos)
@@ -3880,23 +3971,23 @@ string Reflection::generateAllSerDefinition(map<string, ClassStructure>& allclsm
 
 							if(!ptr)
 							{
-								methods += (fqcn+" __temp_obj_ser"+fldp.at(1)+" = __obj->"+fldp.at(1)+";\n");
-								methods += ("base->addObjectProperty(serobject, \""+fldp.at(1)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(&__temp_obj_ser"+fldp.at(1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+								methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
+								methods += ("base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
+										+ "SerializeBase::serializeUnknown(&__temp_obj_ser"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
-								string cam = StringUtil::capitalizedCopy(fldp.at(1));
-								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(1)+"\", i))\n__obj->"+fldp.at(1)+" = "
+								string cam = StringUtil::capitalizedCopy(fldp.at(j));
+								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnown<"+fqcn+" >(base->getContainerElement("
 										 + "intermediateObject, i, 0),\""+contType+"\",\""+app+"\", base);\n";
 							}
 							else
 							{
-								methods += (fqcn+"* __temp_obj_ser"+fldp.at(1)+" = __obj->"+fldp.at(1)+";\n");
-								methods += ("if(__obj->"+fldp.at(1)+"!=NULL)base->addObjectProperty(serobject, \""+fldp.at(1)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(__temp_obj_ser"+fldp.at(1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+								methods += (fqcn+"* __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
+								methods += ("if(__obj->"+fldp.at(j)+"!=NULL)base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
+										+ "SerializeBase::serializeUnknown(__temp_obj_ser"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
-								string cam = StringUtil::capitalizedCopy(fldp.at(1));
-								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(1)+"\", i))\n__obj->"+fldp.at(1)+" = "
+								string cam = StringUtil::capitalizedCopy(fldp.at(j));
+								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnownToPointer<"+fqcn+" >(base->getContainerElement("
 										 +"intermediateObject, i, 0),\""+contType+"\",\""+app+"\", base);\n";
 							}
@@ -3906,28 +3997,28 @@ string Reflection::generateAllSerDefinition(map<string, ClassStructure>& allclsm
 							string fqcn = getFullyQualifiedClassName(fldp.at(0), classStructure.namespaces);
 							if(!ptr)
 							{
-								methods += (fqcn+" __temp_obj_ser"+fldp.at(1)+" = __obj->"+fldp.at(1)+";\n");
-								methods += ("base->addObjectProperty(serobject, \""+fldp.at(1)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(&__temp_obj_ser"+fldp.at(1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+								methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
+								methods += ("base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
+										+ "SerializeBase::serializeUnknown(&__temp_obj_ser"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
-								string cam = StringUtil::capitalizedCopy(fldp.at(1));
-								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(1)+"\", i))\n__obj->"+fldp.at(1)+" = "
+								string cam = StringUtil::capitalizedCopy(fldp.at(j));
+								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnown<"+fqcn+" >(base->getContainerElement("
 										 +"intermediateObject, i, 0),\""+fqcn+"\",\""+app+"\", base);\n";
 							}
 							else
 							{
-								methods += (fldp.at(0)+"* __temp_obj_ser"+fldp.at(1)+" = __obj->"+fldp.at(1)+";\n");
-								methods += ("if(__obj->"+fldp.at(1)+"!=NULL)base->addObjectProperty(serobject, \""+fldp.at(1)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(__temp_obj_ser"+fldp.at(1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+								methods += (fldp.at(0)+"* __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
+								methods += ("if(__obj->"+fldp.at(j)+"!=NULL)base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
+										+ "SerializeBase::serializeUnknown(__temp_obj_ser"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
-								string cam = StringUtil::capitalizedCopy(fldp.at(1));
-								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(1)+"\", i))\n__obj->"+fldp.at(1)+" = "
+								string cam = StringUtil::capitalizedCopy(fldp.at(j));
+								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnownToPointer<"+fqcn+" >(base->getContainerElement("
 										 +"intermediateObject, i, 0),\""+fqcn+"\",\""+app+"\", base);\n";
 							}
 						}
-						//structinf += (fldp.at(0)+" "+fldp.at(1)+";\n");
+						//structinf += (fldp.at(0)+" "+fldp.at(j)+";\n");
 					}
 				}
 				if((tes=classStructure.pub.at(i).find("("))!=string::npos && (tes=classStructure.pub.at(i).find(")"))!=string::npos && classStructure.pub.at(i).find("~")==string::npos
@@ -4024,6 +4115,10 @@ string Reflection::generateAllSerDefinition(map<string, ClassStructure>& allclsm
 									continue;
 								ptr = fldptr[fldnames.at(k+1)];
 								string cam = StringUtil::capitalizedCopy(fldnames.at(k+1));
+								PropStructure cps = classStructure.getPs(fldnames.at(k+1));
+								if(cps.markers.find("@IgnoreSer")!=cps.markers.end()) {
+									continue;
+								}
 								if(argpm.size()==1)
 									StringUtil::replaceFirst(argpm.at(0), "&", "");
 								StringUtil::replaceFirst(methpm.at(0), "&", "");

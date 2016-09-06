@@ -1,28 +1,73 @@
+extern "C" {
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_http.h>
+}
+#include "HttpRequest.h"
+#include "PropFileReader.h"
+#include "cstdlib"
+#include "dlfcn.h"
+#include "WsUtil.h"
+#include "sstream"
+#include "StringUtil.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <queue>
+#include "ComponentHandler.h"
+#include "AppContext.h"
+#include "Logger.h"
+#include "ConfigurationHandler.h"
+#include "ServiceTask.h"
+#include "PropFileReader.h"
+#include "XmlParseException.h"
+#include "MessageHandler.h"
+#include "MethodInvoc.h"
+#undef strtoul
+#ifdef WINDOWS
+#include <direct.h>
+#define pwd _getcwd
+#else
+#include <unistd.h>
+#define pwd getcwd
+#endif
+#define MAXEPOLLSIZE 100
+#define BACKLOG 500
+#define MAXBUFLEN 1024
 
+using namespace std;
 
-static char *ngx_ffead_cpp(ngx_conf_t *cf, void *post, void *data);
+static Logger logger;
+static bool doneOnce = false;
 
-static ngx_conf_post_handler_pt ngx_ffead_cpp_p = ngx_ffead_cpp;
-
+extern "C" {
+static char *ngx_http_ffeadcpp(ngx_conf_t *cf, void *post, void *data);
+static ngx_conf_post_handler_pt ngx_http_ffeadcpp_module_p = ngx_http_ffeadcpp;
+static ngx_int_t exit_process(ngx_cycle_t *cycle);
+static ngx_int_t init_worker_process(ngx_cycle_t *cycle);
+static ngx_int_t init_module(ngx_cycle_t *cycle);
+static ngx_int_t ngx_http_ffeadcpp_module_handler(ngx_http_request_t *r);
+static ngx_str_t ffeadcpp_path;
 /*
  * The structure will holds the value of the
  * module directive hello
  */
 typedef struct {
     ngx_str_t   name;
-} ngx_ffead_cpp_main_conf_t;
+} ngx_http_ffeadcpp_module_loc_conf_t;
 
 /* The function which initializes memory for the module configuration structure
  */
 static void *
-ngx_ffead_cpp_create_main_conf(ngx_conf_t *cf)
+ngx_http_ffeadcpp_module_create_loc_conf(ngx_conf_t *cf)
 {
-    ngx_ffead_cpp_main_conf_t  *conf;
+    ngx_http_ffeadcpp_module_loc_conf_t  *conf;
 
-    conf = ngx_pcalloc(cf->pool, sizeof(ngx_ffead_cpp_main_conf_t));
+    conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_ffeadcpp_module_loc_conf_t));
     if (conf == NULL) {
         return NULL;
     }
@@ -35,35 +80,33 @@ ngx_ffead_cpp_create_main_conf(ngx_conf_t *cf)
  * directive along with a function which validates the value of the
  * directive and also initializes the main handler of this module
  */
-static ngx_command_t ngx_ffead_cpp_commands[] = {
-    { ngx_string("FFEAD_CPP_PATH"),
-      NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE1,
+static ngx_command_t ngx_http_ffeadcpp_module_commands[] = {
+    { ngx_string("ffeadcpp_path"),
+      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
-	  NGX_HTTP_MAIN_CONF_OFFSET,
-      offsetof(ngx_ffead_cpp_main_conf_t, name),
-      &ngx_ffead_cpp_p },
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_ffeadcpp_module_loc_conf_t, name),
+      &ngx_http_ffeadcpp_module_p },
 
     ngx_null_command
 };
 
 
-static ngx_str_t hello_string;
-
 /*
  * The module context has hooks , here we have a hook for creating
  * location configuration
  */
-static ngx_http_module_t ngx_ffead_cpp_module_ctx = {
+static ngx_http_module_t ngx_http_ffeadcpp_module_module_ctx = {
     NULL,                          /* preconfiguration */
     NULL,                          /* postconfiguration */
 
     NULL,                          /* create main configuration */
     NULL,                          /* init main configuration */
 
-	ngx_ffead_cpp_create_main_conf,/* create server configuration */
+    NULL,                          /* create server configuration */
     NULL,                          /* merge server configuration */
 
-    NULL, 						   /* create location configuration */
+    ngx_http_ffeadcpp_module_create_loc_conf, /* create location configuration */
     NULL                           /* merge location configuration */
 };
 
@@ -72,29 +115,48 @@ static ngx_http_module_t ngx_ffead_cpp_module_ctx = {
  * The module which binds the context and commands
  *
  */
-ngx_module_t ngx_ffead_cpp_module = {
+ngx_module_t ngx_http_ffeadcpp_module = {
     NGX_MODULE_V1,
-    &ngx_ffead_cpp_module_ctx,    /* module context */
-    ngx_ffead_cpp_commands,       /* module directives */
+    &ngx_http_ffeadcpp_module_module_ctx,    /* module context */
+    ngx_http_ffeadcpp_module_commands,       /* module directives */
     NGX_HTTP_MODULE,               /* module type */
     NULL,                          /* init master */
-    NULL,                          /* init module */
-    NULL,                          /* init process */
+	&init_module,                  /* init module */
+    &init_worker_process,          /* init process */
     NULL,                          /* init thread */
     NULL,                          /* exit thread */
-    NULL,                          /* exit process */
+    &exit_process,                /* exit process */
     NULL,                          /* exit master */
     NGX_MODULE_V1_PADDING
 };
 
+static char * ngx_http_ffeadcpp(ngx_conf_t *cf, void *post, void *data)
+{
+    ngx_http_core_loc_conf_t *clcf;
+
+    clcf = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
+    clcf->handler = ngx_http_ffeadcpp_module_handler;
+
+    ngx_str_t  *name = data; // i.e., first field of ngx_http_ffeadcpp_module_loc_conf_t
+
+    if (ngx_strcmp(name->data, "") == 0) {
+        return NGX_CONF_ERROR;
+    }
+    ffeadcpp_path.data = name->data;
+    ffeadcpp_path.len = ngx_strlen(ffeadcpp_path.data);
+	
+	cerr << "FFEAD in ngx_http_ffeadcpp " << name->data << endl;
+
+    return NGX_CONF_OK;
+}
+}
 /*
  * Main handler function of the module.
  */
-static ngx_int_t
-ngx_ffead_cpp_handler(ngx_http_request_t *r)
-{
-	ngx_ffead_cpp_main_conf_t *circle_gif_config = ngx_http_get_module_main_conf(r, ngx_ffead_cpp_main_conf_t);
 
+static ngx_int_t ngx_http_ffeadcpp_module_handler(ngx_http_request_t *r)
+{
+	cerr << "FFEAD in ngx_http_ffeadcpp_module_handler" << endl;
     ngx_int_t    rc;
     ngx_buf_t   *b;
     ngx_chain_t  out;
@@ -119,7 +181,7 @@ ngx_ffead_cpp_handler(ngx_http_request_t *r)
     /* send the header only, if the request type is http 'HEAD' */
     if (r->method == NGX_HTTP_HEAD) {
         r->headers_out.status = NGX_HTTP_OK;
-        r->headers_out.content_length_n = hello_string.len;
+        r->headers_out.content_length_n = ffeadcpp_path.len;
 
         return ngx_http_send_header(r);
     }
@@ -135,14 +197,14 @@ ngx_ffead_cpp_handler(ngx_http_request_t *r)
     out.next = NULL;
 
     /* adjust the pointers of the buffer */
-    b->pos = hello_string.data;
-    b->last = hello_string.data + hello_string.len;
+    b->pos = ffeadcpp_path.data;
+    b->last = ffeadcpp_path.data + ffeadcpp_path.len;
     b->memory = 1;    /* this buffer is in memory */
     b->last_buf = 1;  /* this is the last buffer in the buffer chain */
 
     /* set the status line */
     r->headers_out.status = NGX_HTTP_OK;
-    r->headers_out.content_length_n = hello_string.len;
+    r->headers_out.content_length_n = ffeadcpp_path.len;
 
     /* send the headers of your response */
     rc = ngx_http_send_header(r);
@@ -159,21 +221,329 @@ ngx_ffead_cpp_handler(ngx_http_request_t *r)
  * Function for the directive hello , it validates its value
  * and copies it to a static variable to be printed later
  */
-static char *
-ngx_ffead_cpp(ngx_conf_t *cf, void *post, void *data)
+
+static ngx_int_t init_module(ngx_cycle_t *cycle)
 {
-    ngx_http_core_main_conf_t *clcf;
+	string serverRootDirectory;
+	serverRootDirectory.append(ffeadcpp_path.data, ffeadcpp_path.len);
+	
+	cerr << "FFEAD in init_module " << serverRootDirectory << endl;
+	//if(serverRootDirectory=="") {
+	//	serverRootDirectory = fconfig.defpath;
+	//}
 
-    clcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
-    clcf->handler = ngx_ffead_cpp_handler;
+    serverRootDirectory += "/";
+	if(serverRootDirectory.find("//")==0)
+	{
+		RegexUtil::replace(serverRootDirectory,"[/]+","/");
+	}
 
-    ngx_str_t  *name = data; // i.e., first field of ngx_ffead_cpp_main_conf_t
+	string incpath = serverRootDirectory + "include/";
+	string rtdcfpath = serverRootDirectory + "rtdcf/";
+	string pubpath = serverRootDirectory + "public/";
+	string respath = serverRootDirectory + "resources/";
+	string webpath = serverRootDirectory + "web/";
+	string logpath = serverRootDirectory + "logs/";
+	string resourcePath = respath;
 
-    if (ngx_strcmp(name->data, "") == 0) {
-        return NGX_CONF_ERROR;
+	PropFileReader pread;
+	propMap srprps = pread.getProperties(respath+"server.prop");
+
+	string servd = serverRootDirectory;
+	string logp = respath+"/logging.xml";
+	LoggerFactory::init(logp, serverRootDirectory, "", StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true");
+
+	logger = LoggerFactory::getLogger("MOD_FFEADCPP");
+
+	bool isCompileEnabled = false;
+   	string compileEnabled = srprps["DEV_MODE"];
+	if(compileEnabled=="true" || compileEnabled=="TRUE")
+		isCompileEnabled = true;
+
+	/*if(srprps["SCRIPT_ERRS"]=="true" || srprps["SCRIPT_ERRS"]=="TRUE")
+	{
+		SCRIPT_EXEC_SHOW_ERRS = true;
+	}*/
+	bool sessatserv = true;
+   	if(srprps["SESS_STATE"]=="server")
+   		sessatserv = true;
+   	long sessionTimeout = 3600;
+   	if(srprps["SESS_TIME_OUT"]!="")
+   	{
+   		try {
+   			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
+		} catch (...) {
+			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << endl;
+		}
+   	}
+
+	ConfigurationData::getInstance();
+	SSLHandler::setIsSSL(false);
+
+	strVec webdirs,webdirs1,pubfiles;
+	//ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
+	CommonUtils::listFiles(webdirs, webpath, "/");
+    //ConfigurationHandler::listi(webpath,"/",false,webdirs1,false);
+	CommonUtils::listFiles(webdirs1, webpath, "/", false);
+
+    CommonUtils::loadMimeTypes(respath+"mime-types.prop");
+	CommonUtils::loadLocales(respath+"locale.prop");
+
+	RegexUtil::replace(serverRootDirectory,"[/]+","/");
+	RegexUtil::replace(webpath,"[/]+","/");
+
+	CoreServerProperties csp(serverRootDirectory, respath, webpath, srprps, sessionTimeout, sessatserv);
+	ConfigurationData::getInstance()->setCoreServerProperties(csp);
+
+    strVec cmpnames;
+    try
+    {
+    	ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, serverRootDirectory, respath);
     }
-    hello_string.data = name->data;
-    hello_string.len = ngx_strlen(hello_string.data);
+    catch(const XmlParseException& p)
+    {
+    	logger << p.getMessage() << endl;
+    }
+    catch(const char* msg)
+	{
+		logger << msg << endl;
+	}
 
-    return NGX_CONF_OK;
+    logger << INTER_LIB_FILE << endl;
+
+    bool libpresent = true;
+    void *dlibtemp = dlopen(INTER_LIB_FILE, RTLD_NOW);
+	//logger << endl <<dlibtemp << endl;
+	if(dlibtemp==NULL)
+	{
+		libpresent = false;
+		logger << dlerror() << endl;
+		logger.info("Could not load Library");
+	}
+	else
+		dlclose(dlibtemp);
+
+	//Generate library if dev mode = true or the library is not found in prod mode
+	if(isCompileEnabled || !libpresent)
+		libpresent = false;
+
+	if(!libpresent)
+	{
+		string configureFilePath = rtdcfpath+"/autotools/configure";
+		if (access( configureFilePath.c_str(), F_OK ) == -1 )
+		{
+			string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
+			string output = ScriptHandler::execute(compres, true);
+			logger << "Set up configure for intermediate libraries\n\n" << endl;
+		}
+
+		if (access( configureFilePath.c_str(), F_OK ) != -1 )
+		{
+			string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+		#ifdef DEBUG
+			compres += " --enable-debug=yes";
+		#endif
+			string output = ScriptHandler::execute(compres, true);
+			logger << "Set up makefiles for intermediate libraries\n\n" << endl;
+			logger << output << endl;
+
+			compres = respath+"rundyn-automake.sh "+serverRootDirectory;
+			output = ScriptHandler::execute(compres, true);
+			logger << "Intermediate code generation task\n\n" << endl;
+			logger << output << endl;
+		}
+	}
+
+	void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+	if(checkdlib==NULL)
+	{
+		string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
+		string output = ScriptHandler::execute(compres, true);
+		logger << "Set up configure for intermediate libraries\n\n" << endl;
+
+		compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+		#ifdef DEBUG
+			compres += " --enable-debug=yes";
+		#endif
+		output = ScriptHandler::execute(compres, true);
+		logger << "Set up makefiles for intermediate libraries\n\n" << endl;
+		logger << output << endl;
+
+		compres = respath+"rundyn-automake.sh "+serverRootDirectory;
+		if(!libpresent)
+		{
+			string output = ScriptHandler::execute(compres, true);
+			logger << "Rerunning Intermediate code generation task\n\n" << endl;
+			logger << output << endl;
+		}
+		checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+	}
+
+	if(checkdlib==NULL)
+	{
+		logger << dlerror() << endl;
+		logger.info("Could not load Library");
+		exit(0);
+	}
+	else
+	{
+		dlclose(checkdlib);
+		logger.info("Library generated successfully");
+	}
+
+#ifdef INC_COMP
+	for (unsigned int var1 = 0;var1<ConfigurationData::getInstance()->componentNames.size();var1++)
+	{
+		string name = ConfigurationData::getInstance()->componentNames.at(var1);
+		StringUtil::replaceFirst(name,"Component_","");
+		ComponentHandler::registerComponent(name);
+		AppContext::registerComponent(name);
+	}
+#endif
+
+	bool distocache = false;
+/*#ifdef INC_DSTC
+	int distocachepoolsize = 20;
+	try {
+		if(srprps["DISTOCACHE_POOL_SIZE"]!="")
+		{
+			distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
+		}
+	} catch(...) {
+		logger << ("Invalid poolsize specified for distocache") << endl;
+	}
+
+	try {
+		if(srprps["DISTOCACHE_PORT_NO"]!="")
+		{
+			CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
+			DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
+			logger << ("Session store is set to distocache store") << endl;
+			distocache = true;
+		}
+	} catch(...) {
+		logger << ("Invalid port specified for distocache") << endl;
+	}
+
+	if(!distocache) {
+		logger << ("Session store is set to file store") << endl;
+	}
+#endif*/
+
+
+#ifdef INC_JOBS
+	JobScheduler::start();
+#endif
+
+	logger << ("Initializing WSDL files....") << endl;
+	ConfigurationHandler::initializeWsdls();
+	logger << ("Initializing WSDL files done....") << endl;
+
+	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+	//logger << endl <<dlib << endl;
+	if(dlib==NULL)
+	{
+		logger << dlerror() << endl;
+		logger.info("Could not load Library");
+		exit(0);
+	}
+	else
+	{
+		logger.info("Library loaded successfully");
+		dlclose(dlib);
+	}
+
+	void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
+	//logger << endl <<dlib << endl;
+	if(ddlib==NULL)
+	{
+		logger << dlerror() << endl;
+		logger.info("Could not load dynamic Library");
+		exit(0);
+	}
+	else
+	{
+		logger.info("Dynamic Library loaded successfully");
+		dlclose(ddlib);
+	}
+	return NGX_OK;
 }
+
+static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
+{
+	cerr << "FFEAD in init_worker_process" << endl;
+	cerr << "Initializing ffead-cpp....." << endl;
+#ifdef INC_COMP
+	try {
+		if(srprps["CMP_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["CMP_PORT"]);
+			if(port>0)
+			{
+				ComponentHandler::trigger(srprps["CMP_PORT"]);
+			}
+		}
+	} catch(...) {
+		logger << ("Component Handler Services are disabled") << endl;
+	}
+#endif
+
+#ifdef INC_MSGH
+	try {
+		if(srprps["MESS_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["MESS_PORT"]);
+			if(port>0)
+			{
+				MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
+			}
+		}
+	} catch(...) {
+		logger << ("Messaging Handler Services are disabled") << endl;
+	}
+#endif
+
+#ifdef INC_MI
+	try {
+		if(srprps["MI_PORT"]!="")
+		{
+			int port = CastUtil::lexical_cast<int>(srprps["MI_PORT"]);
+			if(port>0)
+			{
+				MethodInvoc::trigger(srprps["MI_PORT"]);
+			}
+		}
+	} catch(...) {
+		logger << ("Method Invoker Services are disabled") << endl;
+	}
+#endif
+
+#ifdef INC_SDORM
+	logger << ("Initializing DataSources....") << endl;
+	ConfigurationHandler::initializeDataSources();
+	logger << ("Initializing DataSources done....") << endl;
+#endif
+
+	logger << ("Initializing Caches....") << endl;
+	ConfigurationHandler::initializeCaches();
+	logger << ("Initializing Caches done....") << endl;
+
+	//Load all the FFEADContext beans so that the same copy is shared by all process
+	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
+	logger << ("Initializing ffeadContext....") << endl;
+	ConfigurationData::getInstance()->initializeAllSingletonBeans();
+	logger << ("Initializing ffeadContext done....") << endl;
+}
+
+static ngx_int_t exit_process(ngx_cycle_t *cycle)
+{
+#ifdef INC_SDORM
+	ConfigurationHandler::destroyDataSources();
+#endif
+
+	ConfigurationHandler::destroyCaches();
+
+	ConfigurationData::getInstance()->clearAllSingletonBeans();
+	return NGX_OK;
+}
+

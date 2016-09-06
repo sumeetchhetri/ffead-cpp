@@ -32,7 +32,7 @@ WsUtil::~WsUtil() {
 
 string WsUtil::generateAllWSDL(const vector<WsDetails>& wsdvec, const string& resp, Reflection& ref, map<string, map<string, ClassStructure> >& clsstrucMaps)
 {
-	string ret, headers="#include \"Exception.h\"\n#include \"string\"\n#include <sstream>\n#include \"CastUtil.h\"\n#include \"XmlParser.h\"\n#include \"Reflection.h\"\n#include \"XMLSerialize.h\"\n";
+	string ret, headers="#include \"AppDefines.h\"\n#include \"Exception.h\"\n#include \"string\"\n#include <sstream>\n#include \"CastUtil.h\"\n#include \"XmlParser.h\"\n#include \"Reflection.h\"\n#include \"XMLSerialize.h\"\n";
 	for(unsigned int var = 0; var < wsdvec.size(); ++var)
 	{
 		handleWebService(ret, wsdvec.at(var), clsstrucMaps, resp, headers, ref);

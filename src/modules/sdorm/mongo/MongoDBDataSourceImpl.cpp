@@ -1440,7 +1440,7 @@ bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, vector<void*> entiti
 
 	bool fl = true;
 	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
-	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation (collection, true, NULL);
+	//mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation (collection, true, NULL);
 	for (int k = 0; k < (int)dbEntities.size(); k++) {
 		bson_error_t er;
 		fl &= mongoc_collection_save(collection, (bson_t*)dbEntities.at(k), NULL, &er);

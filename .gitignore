@@ -1,0 +1,5 @@
+*.lo
+*.so
+*.la
+*.o
+*.dirstamp

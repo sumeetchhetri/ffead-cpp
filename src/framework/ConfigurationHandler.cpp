@@ -153,6 +153,8 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	ref.addMarker(Marker("@WebSocketHandler", Marker::TYPE_CLASS, MarkerHandler::collectStr(2, "path", "scope,singleton"),
 			MarkerHandler::collectBool(2, true, false)));
 
+	ref.addMarker(Marker("@IgnoreSer", Marker::TYPE_PROP));
+
 	PropFileReader pread;
 	propMap srprps = pread.getProperties(respath+"/server.prop");
 

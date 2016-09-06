@@ -27,11 +27,14 @@ Connection* ConnectionPooler::checkoutInternal(connVec& conns, const bool& isWri
 			{
 				conn =  conns.at(i);
 				conn->setBusy(true);
+				break;
 			}
 		}
 		mutex.unlock();
 		counter++;
-		usleep(100*1000);
+		if(conn==NULL) {
+			usleep(1*1000);
+		}
 	} while(counter<5 && conn==NULL);
 	if(conn==NULL) {
 		vector<ConnectionNode> nodes = properties.getNodes();

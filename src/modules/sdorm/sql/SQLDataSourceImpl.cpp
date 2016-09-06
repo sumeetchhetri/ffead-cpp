@@ -722,7 +722,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 	else if(te=="unsigned long")
 	{
 		col = new unsigned long;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_ULONG,col, sizeof(col), &indicator);
+		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_ULONG, col, sizeof(col), &indicator);
 		fldVal = CastUtil::lexical_cast<string>(*(unsigned long*)col);
 	}
 	else if(te=="long long")
@@ -1140,7 +1140,7 @@ void SQLDataSourceImpl::bindQueryParams(Query& query)
 				close();
 			}
 		}
-		else if(paramValue->getTypeName()=="long long")
+		else if(paramValue->getTypeName()=="long long" || paramValue->getTypeName()=="unsigned long long")
 		{
 			long long* sv;
 			paramValue->get(sv);
@@ -1577,7 +1577,9 @@ bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
 		Method meth = clas.getMethod(methname,argus);
 		if(fld.getType()=="short" || fld.getType()=="unsigned short" || fld.getType()=="int"
 				|| fld.getType()=="unsigned int" || fld.getType()=="long" || fld.getType()=="unsigned long"
-				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string")
+				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string"
+				|| fld.getType()=="bool" || fld.getType()=="long long" || fld.getType()=="unsigned long long"
+				|| fld.getType()=="Date")
 		{
 			void* temp = reflector->invokeMethodGVP(entity,meth,valus);
 			cquery.getPropPosVaues()[var+1].set(temp, fld.getType());
@@ -1690,7 +1692,9 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 		Method meth = clas.getMethod(methname,argus);
 		if(fld.getType()=="short" || fld.getType()=="unsigned short" || fld.getType()=="int"
 				|| fld.getType()=="unsigned int" || fld.getType()=="long" || fld.getType()=="unsigned long"
-				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string")
+				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string"
+				|| fld.getType()=="bool" || fld.getType()=="long long" || fld.getType()=="unsigned long long"
+				|| fld.getType()=="Date")
 		{
 			void* temp = reflector->invokeMethodGVP(entity,meth,valus);
 			cquery.getPropPosVaues()[var+1].set(temp, fld.getType());

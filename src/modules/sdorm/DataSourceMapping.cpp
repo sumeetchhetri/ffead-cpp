@@ -81,10 +81,11 @@ void Mapping::addDataSourceEntityMapping(const DataSourceEntityMapping& dsemp) {
 string Mapping::getPropertyForColumn(const string& tableName, const string& columnName) {
 	if(tableClassMapping.find(tableName)!=tableClassMapping.end())
 	{
+		string cn = StringUtil::toLowerCopy(columnName);
 		DataSourceEntityMapping dsemp = dseMap[tableClassMapping[tableName]];
-		if(dsemp.columnPropertyMapping.find(columnName)!=dsemp.columnPropertyMapping.end())
+		if(dsemp.columnPropertyMapping.find(cn)!=dsemp.columnPropertyMapping.end())
 		{
-			return dsemp.columnPropertyMapping[columnName];
+			return dsemp.columnPropertyMapping[cn];
 		}
 	}
 	return "";
@@ -152,8 +153,9 @@ void DataSourceEntityMapping::setTableName(const string& tableName) {
 void DataSourceEntityMapping::addPropertyColumnMapping(const string& property, const string& column) {
 	if(property!="" && column!="")
 	{
-		propertyColumnMapping[property] = column;
-		columnPropertyMapping[column] = property;
+		string cn = StringUtil::toLowerCopy(column);
+		propertyColumnMapping[property] = cn;
+		columnPropertyMapping[cn] = property;
 	}
 }
 
@@ -174,9 +176,10 @@ const strMap& DataSourceEntityMapping::getColumnPropertyMapping() const {
 }
 
 string DataSourceEntityMapping::getPropertyForColumn(const string& column) {
-	if(columnPropertyMapping.find(column)!=columnPropertyMapping.end())
+	string cn = StringUtil::toLowerCopy(column);
+	if(columnPropertyMapping.find(cn)!=columnPropertyMapping.end())
 	{
-		return columnPropertyMapping[column];
+		return columnPropertyMapping[cn];
 	}
 	return "";
 }
