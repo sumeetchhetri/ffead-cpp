@@ -14,7 +14,7 @@ using namespace std;
 #pragma @Entity
 #pragma @Table name="Fortune"
 class TeBkFortune {
-	#pragma @Id dbf="_id"
+	#pragma @Id dbf="id"
 	int id;
 	#pragma @Column dbf="message"
 	string message;

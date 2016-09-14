@@ -3,6 +3,9 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
 AM_CPPFLAGS=-I"../../../../include" -I"../../include"
 
+packageIdentifier=${PACKAGE_NAME}-${PACKAGE_VERSION}-bin
+distdir=${PACKAGE_NAME}-${PACKAGE_VERSION}-src
+fprefix=../../../../${packageIdentifier}
 prefix=${abs_builddir}
 
 lib_LTLIBRARIES = libdefault.la
@@ -31,6 +34,6 @@ libdefault_la_SOURCES = ../DefTemp.cpp \
 				../GtmAccesController.cpp
 
 libdefault_la_LDFLAGS = -no-undefined 
-libdefault_la_LIBADD = -L"../../../../src/autotools/.libs" -lffead_common -lffead_framework
+libdefault_la_LIBADD = -L"${fprefix}/lib" -lffead_common -lffead_framework
 
 #dist_noinst_SCRIPTS = autogen.sh

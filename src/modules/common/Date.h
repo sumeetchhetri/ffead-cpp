@@ -71,7 +71,7 @@ public:
 	Date(const int& yyyy, const int& mm, const int& dd);
 	Date(const int& yy, const string& mmm, const int& dd, const bool&);
 	Date(const int& yy, const int& mm, const int& dd, const bool&);
-	void setTime(const int& hh, const int& mi, const int& ss);
+	void setTime(const int& hh, const int& mi, const int& ss, const unsigned long long& ns = 0);
 	virtual ~Date();
     string toString();
     Date addSecondsGet(const double& seconds);

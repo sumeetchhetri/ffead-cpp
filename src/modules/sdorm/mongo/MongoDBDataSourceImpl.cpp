@@ -1440,12 +1440,54 @@ bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, vector<void*> entiti
 
 	bool fl = true;
 	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
-	//mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation (collection, true, NULL);
+	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation (collection, true, NULL);
 	for (int k = 0; k < (int)dbEntities.size(); k++) {
 		bson_error_t er;
-		fl &= mongoc_collection_save(collection, (bson_t*)dbEntities.at(k), NULL, &er);
+
+		bson_t* data = (bson_t*)dbEntities.at(k);
+		bson_iter_t i;
+		bson_iter_init(&i, data);
+		bool isIdFound = bson_iter_find(&i, "_id");
+		if(isIdFound) {
+			bson_t* q = bson_new();
+			bson_type_t t = bson_iter_type(&i);
+			GenericObject go;
+			switch (t) {
+				case BSON_TYPE_INT32:
+				case BSON_TYPE_INT64:
+				case BSON_TYPE_DOUBLE:
+				{
+					long long d = getIterNumericVal(i, t);
+					go.set(d);
+					break;
+				}
+				case BSON_TYPE_UTF8:
+				{
+					uint32_t len;
+					const char *cs = bson_iter_utf8(&i, &len);
+					string s(cs, len);
+					go.set(s);
+					break;
+				}
+				case BSON_TYPE_OID:
+				{
+					char oidhex[25];
+					bson_oid_to_string(bson_iter_oid(&i), oidhex);
+					string s(oidhex);
+					go.set(s);
+					break;
+				}
+			}
+			appendGenericObject(q, "_id", go);
+			mongoc_bulk_operation_replace_one(bulk, q, data, false);
+			bson_destroy(q);
+		}
 		bson_destroy((bson_t*)dbEntities.at(k));
 	}
+	bson_t reply;
+	bson_error_t error;
+	fl = mongoc_bulk_operation_execute (bulk, &reply, &error);
+	mongoc_bulk_operation_destroy (bulk);
 	_release(conn, collection);
 	return fl;
 }

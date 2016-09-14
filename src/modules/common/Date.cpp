@@ -545,13 +545,14 @@ void Date::populateMonth()
 	monthAbbr = monthName.substr(0, 3);
 }
 
-void Date::setTime(const int& hh, const int& mi, const int& ss)
+void Date::setTime(const int& hh, const int& mi, const int& ss, const unsigned long long& ns)
 {
 	if(hh>24 || hh<0 || mi<0 || mi>60 || ss<0 || ss>60)
 		throw "Invalid Time";
 	hours = hh;
 	minutes = mi;
 	seconds = ss;
+	nanoseconds = ns;
 }
 
 Date Date::toGMT()

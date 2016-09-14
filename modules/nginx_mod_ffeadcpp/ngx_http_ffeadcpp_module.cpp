@@ -205,7 +205,7 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler(ngx_http_request_t *r)
     return NGX_DONE;
 }
 
-ngx_int_t set_custom_header_in_headers_out(ngx_http_request_t *r, string& key, string& value) {
+ngx_int_t set_custom_header_in_headers_out(ngx_http_request_t *r, const string& key, const string& value) {
     ngx_table_elt_t   *h;
 
     /*
@@ -274,7 +274,7 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
             i = 0;
         }
 
-        req->buildRequest(h->key, h->value);
+        req->buildRequest(string(h[i]->key.data, h[i]->key.len), string(h[i]->value.data, h[i]->value.len));
     }
 
     string content;
@@ -291,35 +291,35 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 	{
 		req->buildRequest("GetArguments", r->args.data);
 	}
-	req->buildRequest("HttpVersion", r->http_version);
+	req->buildRequest("HttpVersion", CastUtil::lexical_cast<string>(r->http_version));
 
 	HttpResponse* respo = new HttpResponse;
 	ServiceTask* task = new ServiceTask;
 	task->handle(req, respo);
 	delete task;
 
-	for (int var = 0; var < (int)respo->getCookies().size(); var++)
-	{
-		set_custom_header_in_headers_out(r, "Set-Cookie", respo->getCookies().at(var));
-	}
-
-	/* allocate a buffer for your response body */
-	b = ngx_pcalloc(r->pool, sizeof(ngx_buf_t));
-	if (b == NULL) {
-		return NGX_HTTP_INTERNAL_SERVER_ERROR;
-	}
-
-	/* attach this buffer to the buffer chain */
-	out.buf = b;
-	out.next = NULL;
-
 	if(respo->isDone()) {
+		for (int var = 0; var < (int)respo->getCookies().size(); var++)
+		{
+			set_custom_header_in_headers_out(r, string("Set-Cookie"), respo->getCookies().at(var));
+		}
+
+		/* allocate a buffer for your response body */
+		b = ngx_pcalloc(r->pool, sizeof(ngx_buf_t));
+		if (b == NULL) {
+			return NGX_HTTP_INTERNAL_SERVER_ERROR;
+		}
+
+		/* attach this buffer to the buffer chain */
+		out.buf = b;
+		out.next = NULL;
+
 		string data = respo->generateResponse(false);
 		map<string,string>::const_iterator it;
 		for(it=respo->getHeaders().begin();it!=respo->getHeaders().end();it++) {
-			if(StringUtil::toLowerCopy(it->first)==StringUtil::toLowerCopy(HttpResponse::ContentType)) {
+			if(StringUtil::toLowerCopy(it->first)=="content-length") {
 				r->headers_out.content_length_n = CastUtil::lexical_cast<int>(it->second);
-			} else {
+			} else if(StringUtil::toLowerCopy(it->first)!="server") {
 				set_custom_header_in_headers_out(r, it->first, it->second);
 			}
 		}
@@ -331,19 +331,19 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 
 		/* set the status line */
 		r->headers_out.status = CastUtil::lexical_cast<int>(respo->getStatusCode());
+
+		/* send the headers of your response */
+		rc = ngx_http_send_header(r);
+
+		if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
+	        return rc;
+	    }
+
+	    /* send the buffer chain of your response */
+	    return ngx_http_output_filter(r, &out);
 	} else {
-
+		return NGX_DONE;
 	}
-
-	/* send the headers of your response */
-	rc = ngx_http_send_header(r);
-
-	if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
-        return rc;
-    }
-
-    /* send the buffer chain of your response */
-    return ngx_http_output_filter(r, &out);
 }
 
 /*

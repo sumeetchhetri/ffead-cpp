@@ -13,7 +13,7 @@ using namespace std;
 #pragma @Entity
 #pragma @Table name="World"
 class TeBkWorld {
-	#pragma @Id dbf="_id"
+	#pragma @Id dbf="id"
 	int id;
 	#pragma @Column dbf="randomNumber"
 	int randomNumber;

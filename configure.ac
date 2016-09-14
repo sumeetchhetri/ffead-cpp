@@ -749,6 +749,7 @@ AX_CXX_COMPILE_STDCXX_11(,mandatory)
 #fi
 
 if test "x$generate_apache_module" = "xyes"; then
+	AM_CONDITIONAL(MOD_APACHEMOD, test "x$generate_apache_module" = "xyes")
 	AC_SUBST(GENERATE_APACHEMOD,[modules/apache_mod_ffeadcpp/autotools])
 	if test "x$local_os_type" = "xcygwin"; then
 		AC_SUBST(LIB_TYPE,[-l])

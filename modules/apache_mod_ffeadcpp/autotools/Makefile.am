@@ -32,11 +32,14 @@ AM_CPPFLAGS =  -I"../../../src/framework" \
 				-I"../../../src/modules/threads"
 AM_CPPFLAGS += -I"$(APXS_INCLUDEDIR)" -I"$(APR_INCLUDEDIR)" -fpermissive -w
 
+packageIdentifier=${PACKAGE_NAME}-${PACKAGE_VERSION}-bin
+distdir=${PACKAGE_NAME}-${PACKAGE_VERSION}-src
+fprefix=../../../${packageIdentifier}
 prefix=${abs_builddir}
 
 noinst_LTLIBRARIES = mod_ffeadcpp.la
 mod_ffeadcpp_la_SOURCES = ../mod_ffeadcpp.cpp
-mod_ffeadcpp_la_LIBADD = -L"../../../src/autotools/.libs" -lffead_common -lffead_framework -ldl -lcrypto -lssl @LIB_TYPE@apr-1 @LIB_TYPE@aprutil-1 @APACHE_HTTPD_LIB@
+mod_ffeadcpp_la_LIBADD = -L"${fprefix}/lib" -lffead_common -lffead_framework -ldl -lcrypto -lssl @LIB_TYPE@apr-1 @LIB_TYPE@aprutil-1 @APACHE_HTTPD_LIB@
 mod_ffeadcpp_la_LDFLAGS = -avoid-version -shared -module -rpath ${prefix}/lib -no-undefined 
 
 

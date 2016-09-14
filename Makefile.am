@@ -1,4 +1,4 @@
-SUBDIRS = src/autotools tests/autotools @GENERATE_APACHEMOD@
+SUBDIRS = src/autotools
 
 modules = all
 packageIdentifier=${PACKAGE_NAME}-${PACKAGE_VERSION}-bin
@@ -217,7 +217,9 @@ install-data-hook:
 	-rm -f ${prefix}/lib/*.la ${prefix}/lib/*.lai
 #-rm -rf $(prefix)/web/default/src/ $(prefix)/web/flexApp/src/ $(prefix)/web/oauthApp/src/ $(prefix)/web/markers/src/
 		
-build-apps: install
+build-apps: install build-apache-mod
+	cd tests/autotools && make
+	${buildapachemod}
 	cd web/default/src/autotools && make
 	cd web/flexApp/src/autotools && make
 	cd web/oauthApp/src/autotools && make
@@ -235,6 +237,11 @@ build-bin-dist: install
 	tardir=$(packageIdentifier) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(packageIdentifier).tar.gz
 	
 build-bin-dist-noinst:
-	tardir=$(packageIdentifier) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(packageIdentifier).tar.gz	
+	tardir=$(packageIdentifier) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(packageIdentifier).tar.gz
+	
+build-apache-mod:
+if MOD_APACHEMOD
+	cd @GENERATE_APACHEMOD@ && make
+endif
 
 dist_noinst_SCRIPTS = autogen.sh

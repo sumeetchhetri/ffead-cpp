@@ -701,150 +701,236 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 	SQLLEN indicator;
 	Field fe = clas.getField(fieldName);
 	string te = fe.getType();
-	if(te=="int")
-	{
-		col = new int;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(int*)col);
+
+	SQLSMALLINT    colNameLen;
+	SQLSMALLINT    colDataType;
+	SQLULEN        colDataSize;
+	SQLSMALLINT    colDataDigits;
+	SQLSMALLINT    colDataNullable;
+	ret = SQLDescribeCol (V_OD_hstmt,                    // Select Statement (Prepared)
+					var+1,                      // coln Number
+	                NULL,            // col Name (returned)
+	                0,         // size of col Name buffer
+	                &colNameLen,        // Actual size of col name
+	                &colDataType,       // SQL Data type of col
+	                &colDataSize,       // Data size of col in table
+	                &colDataDigits,     // Number of decimal digits
+	                &colDataNullable);
+
+	unsigned long long dn;
+	double dd;
+	float df;
+	bool db;
+	Date* ddt;
+	string *ds;
+	std::wstring* dws;
+
+	switch (colDataType) {
+		case SQL_SMALLINT:
+		{
+			unsigned short us;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_USHORT, &us, sizeof(us), &indicator);
+			fldVal = CastUtil::lexical_cast<string>(us);
+			dn = us;
+			break;
+		}
+		case SQL_INTEGER:
+		{
+			unsigned int us;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_ULONG, &us, sizeof(us), &indicator);
+			fldVal = CastUtil::lexical_cast<string>(us);
+			dn = us;
+			break;
+		}
+		case SQL_TINYINT:
+		{
+			unsigned char us;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_UTINYINT, &us, sizeof(us), &indicator);
+			fldVal = CastUtil::lexical_cast<string>(us);
+			dn = us;
+			break;
+		}
+		case SQL_BIGINT:
+		{
+			unsigned long long us;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_UBIGINT, &us, sizeof(us), &indicator);
+			fldVal = CastUtil::lexical_cast<string>(us);
+			dn = us;
+			break;
+		}
+
+		case SQL_REAL:
+		{
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_FLOAT, &df, sizeof(df), &indicator);
+			fldVal = CastUtil::lexical_cast<string>(df);
+			break;
+		}
+		case SQL_FLOAT:
+		case SQL_DOUBLE:
+		{
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE, &dd, sizeof(dd), &indicator);
+			fldVal = CastUtil::lexical_cast<string>(dd);
+			break;
+		}
+		case SQL_DECIMAL:
+		case SQL_NUMERIC:
+
+		case SQL_BIT:
+		{
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT, &db, sizeof(db), &indicator);
+			fldVal = CastUtil::lexical_cast<string>(db);
+			break;
+		}
+
+#if (ODBCVER >= 0x0300)
+		case SQL_TYPE_DATE:
+#endif
+		case SQL_DATE:
+		{
+			DATE_STRUCT ds;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_TYPE_DATE, &ds, sizeof(ds), &indicator);
+			ddt = new Date(ds.year, ds.month, ds.day);
+			fldVal = ddt->toString();
+			break;
+		}
+#if (ODBCVER >= 0x0300)
+		//case SQL_TYPE_UTCTIME:
+		case SQL_TYPE_TIME:
+#endif
+		case SQL_TIME:
+		{
+			TIME_STRUCT ts;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_TYPE_TIME, &ts, sizeof(ts), &indicator);
+			ddt = new Date();
+			ddt->setTime(ts.hour, ts.minute, ts.second);
+			fldVal = ddt->toString();
+			break;
+		}
+#if (ODBCVER >= 0x0300)
+		case SQL_TYPE_TIMESTAMP:
+		//case SQL_TYPE_UTCDATETIME:
+#endif
+		case SQL_TIMESTAMP:
+		{
+			TIMESTAMP_STRUCT ts;
+			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_TYPE_TIMESTAMP, &ts, sizeof(ts), &indicator);
+			ddt = new Date(ts.year, ts.month, ts.day);
+			ddt->setTime(ts.hour, ts.minute, ts.second, ts.fraction);
+			fldVal = ddt->toString();
+			break;
+		}
+
+		case SQL_GUID:
+		case SQL_BINARY:
+		case SQL_VARBINARY:
+		case SQL_CHAR:
+		case SQL_VARCHAR:
+		case SQL_LONGVARCHAR:
+		case SQL_WCHAR:
+		case SQL_WVARCHAR:
+		case SQL_WLONGVARCHAR:
+		{
+			size_t numBytes;
+			unsigned char buf[1024];
+			ds = new string;
+			// Retrieve and display each row of data.
+			while ((ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator)) != SQL_NO_DATA) {
+				numBytes = (indicator > 1024) || (indicator == SQL_NO_TOTAL) ? 1024 : indicator;
+				ds->append((const char*)&buf[0], numBytes);
+			}
+			fldVal = CastUtil::lexical_cast<string>(*ds);
+			break;
+		}
 	}
-	else if(te=="unsigned int")
+
+	if(te=="char")
 	{
-		col = new unsigned int;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_ULONG,col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(unsigned int*)col);
+		col = new char;
+		*((char*)col) = (char)dn;
 	}
-	else if(te=="long")
+	else if(te=="unsigned char")
 	{
-		col = new long;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG,col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(long*)col);
-	}
-	else if(te=="unsigned long")
-	{
-		col = new unsigned long;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_ULONG, col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(unsigned long*)col);
-	}
-	else if(te=="long long")
-	{
-		col = new long long;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_SBIGINT, col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(long long*)col);
-	}
-	else if(te=="unsigned long long")
-	{
-		col = new unsigned long long;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_UBIGINT, col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(unsigned long long*)col);
+		col = new unsigned char;
+		*((unsigned char*)col) = (unsigned char)dn;
 	}
 	else if(te=="short")
 	{
 		col = new short;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_SHORT,col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(short*)col);
+		*((short*)col) = (short)dn;
 	}
 	else if(te=="unsigned short")
 	{
 		col = new unsigned short;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_USHORT,col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(unsigned short*)col);
+		*((unsigned short*)col) = (unsigned short)dn;
+	}
+	else if(te=="int")
+	{
+		col = new int;
+		*((int*)col) = (int)dn;
+	}
+	else if(te=="unsigned int")
+	{
+		col = new unsigned int;
+		*((unsigned int*)col) = (unsigned int)dn;
+	}
+	else if(te=="long")
+	{
+		col = new long;
+		*((long*)col) = (long)dn;
+	}
+	else if(te=="unsigned long")
+	{
+		col = new unsigned long;
+		*((unsigned long*)col) = (unsigned long)dn;
+	}
+	else if(te=="long long")
+	{
+		col = new long long;
+		*((long long*)col) = (long long)dn;
+	}
+	else if(te=="unsigned long long")
+	{
+		col = new unsigned long long;
+		*((unsigned long long*)col) = (unsigned long long)dn;
 	}
 	else if(te=="double")
 	{
 		col = new double;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE, col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(double*)col);
+		*((double*)col) = (double)dd;
 	}
 	else if(te=="float")
 	{
 		col = new float;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_FLOAT, col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(float*)col);
+		*((float*)col) = (float)dd;
 	}
 	else if(te=="bool")
 	{
 		col = new bool;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT, col, sizeof(col), &indicator);
-		fldVal = CastUtil::lexical_cast<string>(*(bool*)col);
+		*((bool*)col) = (bool)dd;
 	}
 	else if(te=="string")
 	{
-		/*col = new string;
-		SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-		char buf[24];
-		string *temp = new string;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
-		temp->append(buf);
-		//logger << indicator << endl;
-		if(indicator > (long)24)
-		{
-			int len = indicator-24;
-			char buf1[len];
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
-			temp->append(buf1);
-			//logger << buf1 << endl;
-		}
-		col = temp;
-		fldVal = CastUtil::lexical_cast<string>(*temp);
-		//logger << *temp << "\n" << endl;
+		col = ds;
 	}
 	else if(te=="Date")
 	{
-		//col = new Date;
-		//ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DATE,col, sizeof(col), &indicator);
-		/*col = new string;
-		SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-		char buf[24];
-
-		string temp;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
-		temp.append(buf);
-		//logger << indicator << endl;
-		if(indicator > (long)24)
-		{
-			int len = indicator-24;
-			char buf1[len];
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
-			temp.append(buf1);
-			//logger << buf1 << endl;
-		}
-		DateFormat datf("yyyy-mm-dd");
-		if(temp.length()>10)
-			datf.setFormatspec("yyyy-mm-dd hh:mi:ss");
-		else
-			datf.setFormatspec("yyyy-mm-dd hh:mi:ss.nnnnnn");
-		Date *date = datf.parse(temp);
-		col = date;
-		fldVal = CastUtil::lexical_cast<string>(temp);
-		//logger << temp << "\n" << endl;
+		col = ddt;
 	}
 	else if(te=="BinaryData")
 	{
-		/*col = new string;
-		SQLBindCol(V_OD_hstmt,var,SQL_C_CHAR, col,10,sizes);*/
-		unsigned char buf[24];
 		BinaryData *temp = new BinaryData;
-		ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
-		//temp->append(buf,indicator);
-		//logger << indicator << endl;
-
-		if(indicator > (long)24)
-		{
-			int len = indicator-24;
-			unsigned char buf1[len];
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf1, sizeof(buf1), &indicator);
-			temp->append(buf,24);
-			temp->append(buf1,len);
-		}
-		else
-			temp->append(buf,indicator);
+		temp->append(*ds);
+		delete ds;
 		col = temp;
-		fldVal = CastUtil::lexical_cast<string>(temp);
-		//logger << buf << "\n" << endl;
 	}
 	else//if its not a vector means its a one-to-one relationship
 	{
-
+		if(ds!=NULL) {
+			delete ds;
+		}
+		if(ddt!=NULL) {
+			delete ddt;
+		}
 	}
 	if(col!=NULL)
 	{
@@ -1356,7 +1442,7 @@ void SQLDataSourceImpl::procedureCall(const string& procName) {
 				V_OD_erg = SQLBindParameter(V_OD_hstmt, par++, SQL_PARAM_INPUT_OUTPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &sv, 20, NULL);
 				if (!SQL_SUCCEEDED(V_OD_erg))
 				{
-					showError("SQLExecDirect", V_OD_hstmt, SQL_HANDLE_STMT);
+					showError("SQLBindParameter", V_OD_hstmt, SQL_HANDLE_STMT);
 					close();
 					throw "Error in call to stored procedure";
 				}
@@ -1652,6 +1738,9 @@ void* SQLDataSourceImpl::getDbEntityForBulkInsert(void* entity, const string& cl
 
 bool SQLDataSourceImpl::executeInsertBulk(Query& query, vector<void*> entities, vector<void*> dbEntities) {
 	for (unsigned int k = 0; k < entities.size(); k++) {
+		query.getColumnBindings().clear();
+		query.getPropNameVaues().clear();
+		query.getPropPosVaues().clear();
 		executeInsert(query, entities.at(k));
 	}
 	return true;
@@ -1659,6 +1748,9 @@ bool SQLDataSourceImpl::executeInsertBulk(Query& query, vector<void*> entities, 
 
 bool SQLDataSourceImpl::executeUpdateBulk(Query& query, vector<void*> entities, vector<void*> dbEntities) {
 	for (unsigned int k = 0; k < entities.size(); k++) {
+		query.getColumnBindings().clear();
+		query.getPropNameVaues().clear();
+		query.getPropPosVaues().clear();
 		executeUpdate(query, entities.at(k));
 	}
 	return true;
@@ -1834,6 +1926,22 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 		}
 	}
 	query.setQuery(queryString);
+
+	if(StringUtil::toLowerCopy(pool->getProperties().getProperty("logsql"))=="true")
+	{
+		string out = queryString;
+		int par = 1;
+		int totalParams = query.getPropPosVaues().size();
+		while(totalParams-->0)
+		{
+				if(query.getPropPosVaues().find(par)!=query.getPropPosVaues().end())
+				{
+						out += (" ("+query.getPropPosVaues().find(par)->second.getSerilaizedState()+")" );
+				}
+				par++;
+		}
+		cout << out << endl;
+	}
 
 	if(query.isUpdate())
 	{

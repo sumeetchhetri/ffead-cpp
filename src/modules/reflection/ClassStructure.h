@@ -39,6 +39,7 @@ class PropStructure
 	map<string, vector<Marker> > markers;
 	friend class Reflection;
 	friend class ConfigurationHandler;
+	friend class ClassStructure;
 };
 
 class MethStructure
@@ -50,6 +51,7 @@ class MethStructure
 	map<string, vector<Marker> > markers;
 	friend class Reflection;
 	friend class ConfigurationHandler;
+	friend class ClassStructure;
 };
 
 class ClassStructure
