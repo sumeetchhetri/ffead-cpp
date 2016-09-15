@@ -207,9 +207,6 @@ install-data-hook:
 	cp -Rf rtdcf/* ${prefix}/rtdcf/
 	cp -Rf web/* ${prefix}/web
 	cp -Rf script/* ${prefix}/
-	cp -f tests/autotools/.libs/tests tests/test.csv \
-		tests/testValues.prop tests/runTests.sh \
-		tests/*.pem tests/security.prop ${prefix}/tests
 #cp -f web/default/src/autotools/.libs/*default* ${prefix}/lib
 #cp -f web/flexApp/src/autotools/.libs/*flexApp* ${prefix}/lib
 #cp -f web/oauthApp/src/autotools/.libs/*oauthApp* ${prefix}/lib
@@ -225,6 +222,9 @@ build-apps: install build-apache-mod
 	cd web/oauthApp/src/autotools && make
 	cd web/markers/src/autotools && make
 	cd web/te-benchmark/src/autotools && make
+	cp -f tests/autotools/.libs/tests tests/test.csv \
+		tests/testValues.prop tests/runTests.sh \
+		tests/*.pem tests/security.prop ${prefix}/tests
 	cp -f web/default/src/autotools/.libs/*default* ${prefix}/lib
 	cp -f web/flexApp/src/autotools/.libs/*flexApp* ${prefix}/lib
 	cp -f web/oauthApp/src/autotools/.libs/*oauthApp* ${prefix}/lib

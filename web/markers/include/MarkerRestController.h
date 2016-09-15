@@ -28,7 +28,7 @@
 #include "vector"
 #include <fstream>
 
-using namespace std;
+
 
 #pragma @RestController path="/markRest"
 #pragma @Secure role="ROLE_USER" providerName="markerProvider"

@@ -10,34 +10,34 @@
 #include "string"
 #include "map"
 #include "vector"
-using namespace std;
+
 
 class ConnectionNode {
 public:
 	float getConnectionTimeout() const;
 	void setConnectionTimeout(const float& connectionTimeout);
-	const string& getHost() const;
-	void setHost(const string& host);
-	const string& getPassword() const;
-	void setPassword(const string& password);
+	const std::string& getHost() const;
+	void setHost(const std::string& host);
+	const std::string& getPassword() const;
+	void setPassword(const std::string& password);
 	int getPort() const;
 	void setPort(const int& port);
 	float getReadTimeout() const;
 	void setReadTimeout(const float& readTimeout);
-	const string& getUsername() const;
-	void setUsername(const string& username);
+	const std::string& getUsername() const;
+	void setUsername(const std::string& username);
 	ConnectionNode();
 	virtual ~ConnectionNode();
-	const string& getDatabaseName() const;
-	void setDatabaseName(const string& databaseName);
-	const string& getDsn() const;
+	const std::string& getDatabaseName() const;
+	void setDatabaseName(const std::string& databaseName);
+	const std::string& getDsn() const;
 
 private:
-	string dsn;
-	string host;
-	string username;
-	string password;
-	string databaseName;
+	std::string dsn;
+	std::string host;
+	std::string username;
+	std::string password;
+	std::string databaseName;
 	int port;
 	float readTimeout;
 	float connectionTimeout;
@@ -65,36 +65,36 @@ public:
 };
 
 class ConnectionProperties {
-	static string BLANK;
+	static std::string BLANK;
 public:
 	bool isNewConnectionStrategy() const;
 	void setNewConnectionStrategy(const bool& newConnectionStrategy);
-	const vector<ConnectionNode>& getNodes() const;
-	void setNodes(const vector<ConnectionNode>& nodes);
+	const std::vector<ConnectionNode>& getNodes() const;
+	void setNodes(const std::vector<ConnectionNode>& nodes);
 	void addNode(const ConnectionNode& node);
 	int getPoolReadSize() const;
 	void setPoolReadSize(const int& poolReadSize);
 	int getPoolWriteSize() const;
 	void setPoolWriteSize(const int& poolWriteSize);
-	const map<string, string>& getProperties() const;
-	const string& getProperty(const string& name) const;
-	void setProperties(const map<string, string>& properties);
-	void addProperty(const string& name, const string& value);
-	const string& getType() const;
-	void setType(const string& type);
+	const std::map<std::string, std::string>& getProperties() const;
+	const std::string& getProperty(const std::string& name) const;
+	void setProperties(const std::map<std::string, std::string>& properties);
+	void addProperty(const std::string& name, const std::string& value);
+	const std::string& getType() const;
+	void setType(const std::string& type);
 	ConnectionProperties();
 	virtual ~ConnectionProperties();
-	const string& getName() const;
-	void setName(const string& name);
+	const std::string& getName() const;
+	void setName(const std::string& name);
 
 private:
-	string name;
-	string type;
+	std::string name;
+	std::string type;
 	int poolReadSize;
 	int poolWriteSize;
 	bool newConnectionStrategy;
-	vector<ConnectionNode> nodes;
-	map<string, string> properties;
+	std::vector<ConnectionNode> nodes;
+	std::map<std::string, std::string> properties;
 	friend class ConfigurationHandler;
 };
 

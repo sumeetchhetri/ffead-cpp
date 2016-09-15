@@ -23,17 +23,17 @@
 #ifndef CONNECTIONSETTINGS_H_
 #define CONNECTIONSETTINGS_H_
 #include "string"
-using namespace std;
+
 
 class ConnectionSettings {
-	string mode;//ldap|database|filesystem
-	string source;
-	string username;
-	string passwd;
-	string address;
+	std::string mode;//ldap|database|filesystem
+	std::string source;
+	std::string username;
+	std::string passwd;
+	std::string address;
 public:
 	ConnectionSettings();
-	ConnectionSettings(string,string,string,string,string);
+	ConnectionSettings(std::string,std::string,std::string,std::string,std::string);
 	virtual ~ConnectionSettings();
 	friend class ComponentGen;
 };

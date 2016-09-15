@@ -23,12 +23,12 @@
 #ifndef YOBJECT_H_
 #define YOBJECT_H_
 #include "string"
-using namespace std;
+
 class YObject
 {
 	public:
 		int i;
-		string j;
+		std::string j;
 		float c;
 };
 

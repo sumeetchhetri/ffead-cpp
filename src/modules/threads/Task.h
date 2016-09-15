@@ -25,7 +25,7 @@
 #include "string"
 #include "Timer.h"
 #include "TimeUnit.h"
-using namespace std;
+
 
 class Task {
 	bool isFuture;

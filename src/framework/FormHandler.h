@@ -33,7 +33,7 @@
 #include "FormController.h"
 #include "JSONSerialize.h"
 
-typedef void* (*toVoidP) (const string&);
+typedef void* (*toVoidP) (const std::string&);
 
 class FormHandler {
 public:

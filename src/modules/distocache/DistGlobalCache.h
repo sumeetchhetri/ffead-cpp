@@ -32,27 +32,27 @@ public:
 	{
 		cl = PooledDistoCacheConnectionFactory::getConnection();
 	}
-	template <class T> void add(const string& key, const T& value)
+	template <class T> void add(const std::string& key, const T& value)
 	{
-		string serValue = BinarySerialize::serialize<T>(value);
+		std::string serValue = BinarySerialize::serialize<T>(value);
 		cl->addObjectEntry(key, serValue);
 	}
-	template <class K, class V> void addMap(const string& key, map<K,V>& value)
+	template <class K, class V> void addMap(const std::string& key, std::map<K,V>& value)
 	{
-		string serValue = BinarySerialize::serializeMap<K,V>(value);
+		std::string serValue = BinarySerialize::serializeMap<K,V>(value);
 		cl->addObjectEntry(key, serValue);
 	}
-	template <class T> T get(const string& key)
+	template <class T> T get(const std::string& key)
 	{
-		string serValue = cl->getObjectEntryValue(key);
+		std::string serValue = cl->getObjectEntryValue(key);
 		return BinarySerialize::unserialize<T>(serValue);
 	}
-	template <class K, class V> map<K, V> getMap(const string& key)
+	template <class K, class V> std::map<K, V> getMap(const std::string& key)
 	{
-		string serValue = cl->getObjectEntryValue(key);
+		std::string serValue = cl->getObjectEntryValue(key);
 		return BinarySerialize::unSerializeToMap<K, V>(serValue);
 	}
-	void erase(const string& key)
+	void erase(const std::string& key)
 	{
 		cl->removeObjectEntry(key);
 	}

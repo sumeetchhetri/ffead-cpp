@@ -13,7 +13,7 @@ class Http2PriorityFrame : public Http2Frame {
 	bool exclusive;
 	int streamDependency;
 	unsigned char weight;
-	Http2PriorityFrame(string data, Http2FrameHeader& aheader);
+	Http2PriorityFrame(std::string data, Http2FrameHeader& aheader);
 	friend class Http2Handler;
 public:
 	Http2PriorityFrame();
@@ -21,7 +21,7 @@ public:
 	bool isExclusive() const;
 	int getStreamDependency() const;
 	unsigned char getWeight() const;
-	string getFrameData();
+	std::string getFrameData();
 };
 
 #endif /* HTTP2PRIORITYFRAME_H_ */

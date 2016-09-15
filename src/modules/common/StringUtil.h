@@ -29,28 +29,28 @@
 #include "vector"
 #include <stdio.h>
 #include "cstring"
-using namespace std;
+
 
 class StringUtil {
-	static string whitespaces;
+	static std::string whitespaces;
 public:
-	static void eraseAll(string &str, const string& ths);
-	static void capitalized(string &str);
-	static string capitalizedCopy(const string &str);
-	static void camelCased(string& str, const string& delim);
-	static string camelCasedCopy(const string& str, const string& delim);
-	static void toUpper(string &str);
-	static string toUpperCopy(const string& str);
-	static void toLower(string& str);
-	static string toLowerCopy(const string& str);
-	static void replaceFirst(string &str, const string& ths, const string& with);
-	static string replaceFirstCopy(const string &str, const string& ths, const string& with);
-	static void replaceLast(string &str, const string& ths, const string& with);
-	static string replaceLastCopy(const string &str, const string& ths, const string& with);
-	static void replaceAll(string &str, const string& ths, const string& with);
-	static string replaceAllCopy(const string &str, const string& ths, const string& with);
-	static vector<string> split(const string& input, const vector<string>& delimiters);
-	static void split(vector<string> &output, const string& input, const vector<string>& delimiters);
+	static void eraseAll(std::string &str, const std::string& ths);
+	static void capitalized(std::string &str);
+	static std::string capitalizedCopy(const std::string &str);
+	static void camelCased(std::string& str, const std::string& delim);
+	static std::string camelCasedCopy(const std::string& str, const std::string& delim);
+	static void toUpper(std::string &str);
+	static std::string toUpperCopy(const std::string& str);
+	static void toLower(std::string& str);
+	static std::string toLowerCopy(const std::string& str);
+	static void replaceFirst(std::string &str, const std::string& ths, const std::string& with);
+	static std::string replaceFirstCopy(const std::string &str, const std::string& ths, const std::string& with);
+	static void replaceLast(std::string &str, const std::string& ths, const std::string& with);
+	static std::string replaceLastCopy(const std::string &str, const std::string& ths, const std::string& with);
+	static void replaceAll(std::string &str, const std::string& ths, const std::string& with);
+	static std::string replaceAllCopy(const std::string &str, const std::string& ths, const std::string& with);
+	static std::vector<std::string> split(const std::string& input, const std::vector<std::string>& delimiters);
+	static void split(std::vector<std::string> &output, const std::string& input, const std::vector<std::string>& delimiters);
 	template < class ContainerT >
 	static void split(ContainerT& tokens, const std::string& str, const std::string& delimiters, const bool& trimEmpty= false)
 	{
@@ -117,24 +117,24 @@ public:
 		}
 		return tokens;
 	}
-	static int countOccurrences(const string& input, const string& delimiter);
-	static void trim(string& str);
-	static string trimCopy(const string &str);
-	static string toHEX(const int&);
-	static string toHEX(const unsigned int&);
-	static string toHEX(const long&);
-	static string toHEX(const unsigned long&);
-	static string toHEX(const long long&);
-	static string toHEX(const unsigned long long&);
-	static string toOCTAL(const int&);
-	static string toOCTAL(const unsigned int&);
-	static string toOCTAL(const long&);
-	static string toOCTAL(const unsigned long&);
-	static string toOCTAL(const long long&);
-	static string toOCTAL(const unsigned long long&);
-	static long int fromHEX(string hexVal);
-	static bool startsWith(const string& str, const string& prefix);
-	static bool endsWith(const string& str, const string& suffix);
+	static int countOccurrences(const std::string& input, const std::string& delimiter);
+	static void trim(std::string& str);
+	static std::string trimCopy(const std::string &str);
+	static std::string toHEX(const int&);
+	static std::string toHEX(const unsigned int&);
+	static std::string toHEX(const long&);
+	static std::string toHEX(const unsigned long&);
+	static std::string toHEX(const long long&);
+	static std::string toHEX(const unsigned long long&);
+	static std::string toOCTAL(const int&);
+	static std::string toOCTAL(const unsigned int&);
+	static std::string toOCTAL(const long&);
+	static std::string toOCTAL(const unsigned long&);
+	static std::string toOCTAL(const long long&);
+	static std::string toOCTAL(const unsigned long long&);
+	static long int fromHEX(std::string hexVal);
+	static bool startsWith(const std::string& str, const std::string& prefix);
+	static bool endsWith(const std::string& str, const std::string& suffix);
 };
 
 #endif /* STRINGUTIL_H_ */

@@ -17,7 +17,7 @@ bool Http2WindowUpdateFrame::isReserved() const {
 	return reserved;
 }
 
-Http2WindowUpdateFrame::Http2WindowUpdateFrame(string data, Http2FrameHeader& aheader) {
+Http2WindowUpdateFrame::Http2WindowUpdateFrame(std::string data, Http2FrameHeader& aheader) {
 	header = aheader;
 	header.type = 8;
 	reserved = ((data[0] >> 7) & 0x01);
@@ -33,9 +33,9 @@ Http2WindowUpdateFrame::~Http2WindowUpdateFrame() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http2WindowUpdateFrame::getFrameData() {
-	string edata;
-	string data = CommonUtils::ulonglongTocharArray(windowSizeIncrement, 4);
+std::string Http2WindowUpdateFrame::getFrameData() {
+	std::string edata;
+	std::string data = CommonUtils::ulonglongTocharArray(windowSizeIncrement, 4);
 	if(reserved)
 		data[0] |= 0x01 << 7;
 	else

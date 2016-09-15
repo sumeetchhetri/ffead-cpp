@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef vector<Connection*> connVec;
+typedef std::vector<Connection*> connVec;
 
 class ConnectionPooler {
 	connVec readConnections;

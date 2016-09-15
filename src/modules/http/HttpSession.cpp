@@ -32,12 +32,12 @@ HttpSession::~HttpSession()
 {
 	//delete this;
 }
-string HttpSession::getSessionId() const
+std::string HttpSession::getSessionId() const
 {
 	return sessionId;
 }
 
-void HttpSession::setSessionId(const string& sessionId)
+void HttpSession::setSessionId(const std::string& sessionId)
 {
 	this->sessionId = sessionId;
 }
@@ -49,21 +49,21 @@ Map HttpSession::getSessionAttributes()
 
 void HttpSession::setSessionAttributes(const Map& sessionAttributes)
 {
-	map<string,string>::const_iterator it;
+	std::map<std::string,std::string>::const_iterator it;
 	for(it=sessionAttributes.begin();it!=sessionAttributes.end();it++)
 	{
 		this->sessionAttributes[it->first] = it->second;
 	}
 }
-string HttpSession::getAttribute(const string& key)
+std::string HttpSession::getAttribute(const std::string& key)
 {
-	string tem;
+	std::string tem;
 	if(sessionAttributes.find(key)!=sessionAttributes.end())
 		return sessionAttributes[key];
 	else return tem;
 }
 
-void HttpSession::setAttribute(const string& key, const string& value)
+void HttpSession::setAttribute(const std::string& key, const std::string& value)
 {
 	this->sessionAttributes[key] = value;
 	this->dirty = true;

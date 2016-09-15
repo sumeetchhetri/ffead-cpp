@@ -22,7 +22,7 @@
 
 #include "ServiceTask.h"
 
-ServiceTask::ServiceTask(const int& fd, const string& serverRootDirectory) {
+ServiceTask::ServiceTask(const int& fd, const std::string& serverRootDirectory) {
 	this->fd=fd;
 	this->serverRootDirectory=serverRootDirectory;
 	logger = LoggerFactory::getLogger("ServiceTask");
@@ -36,10 +36,10 @@ ServiceTask::ServiceTask() {
 	logger = LoggerFactory::getLogger("ServiceTask");
 }
 
-void ServiceTask::saveSessionDataToFile(const string& sessionId, const string& value)
+void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std::string& value)
 {
-	string lockfil = serverRootDirectory+"/tmp/"+sessionId+".lck";
-	ifstream ifs(lockfil.c_str(), ios::binary);
+	std::string lockfil = serverRootDirectory+"/tmp/"+sessionId+".lck";
+	std::ifstream ifs(lockfil.c_str(), std::ios::binary);
 	int counter = 5000/100;
 	while(ifs.is_open()) {
 		Thread::mSleep(100);
@@ -48,21 +48,21 @@ void ServiceTask::saveSessionDataToFile(const string& sessionId, const string& v
 		if(counter--<=0)break;
 	}
 
-	string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
-	logger << ("Saving session to file " + filen) << endl;
-	ofstream ofs(filen.c_str(), ios::binary);
+	std::string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
+	logger << ("Saving session to file " + filen) << std::endl;
+	std::ofstream ofs(filen.c_str(), std::ios::binary);
 	ofs.write(value.c_str(),value.length());
 	ofs.close();
 
 	remove(lockfil.c_str());
 }
 
-map<string,string> ServiceTask::getSessionDataFromFile(const string& sessionId)
+std::map<std::string,std::string> ServiceTask::getSessionDataFromFile(const std::string& sessionId)
 {
-	map<string,string> valss;
-	string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
-	ifstream ifs(filen.c_str(), ios::binary);
-	string tem,all;
+	std::map<std::string,std::string> valss;
+	std::string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
+	std::ifstream ifs(filen.c_str(), std::ios::binary);
+	std::string tem,all;
 	while(getline(ifs,tem))
 	{
 		all.append(tem+"\n");
@@ -87,27 +87,27 @@ map<string,string> ServiceTask::getSessionDataFromFile(const string& sessionId)
 			StringUtil::replaceAll(results1.at(0),"%3D","=");
 			valss[results1.at(0)] = "true";
 		}
-		logger << ("Read key/value pair " + results1.at(0) + " = " + valss[results1.at(0)]) << endl;
+		logger << ("Read key/value pair " + results1.at(0) + " = " + valss[results1.at(0)]) << std::endl;
 	}
 	return valss;
 }
 
 #ifdef INC_DSTC
-void ServiceTask::saveSessionDataToDistocache(const string& sessionId, map<string,string>& sessAttrs)
+void ServiceTask::saveSessionDataToDistocache(const std::string& sessionId, std::map<std::string,std::string>& sessAttrs)
 {
 	DistGlobalCache globalMap;
 	globalMap.addMap(sessionId, sessAttrs);
 }
 
 
-map<string,string> ServiceTask::getSessionDataFromDistocache(const string& sessionId)
+std::map<std::string,std::string> ServiceTask::getSessionDataFromDistocache(const std::string& sessionId)
 {
-	map<string,string> mp;
+	std::map<std::string,std::string> mp;
 	DistGlobalCache globalMap;
 	try {
-		mp = globalMap.getMap<string,string>(sessionId);
+		mp = globalMap.getMap<std::string,std::string>(sessionId);
 	} catch (...) {
-		logger << "error readin map value"<< endl;
+		logger << "error readin map value"<< std::endl;
 	}
 	return mp;
 }
@@ -120,17 +120,17 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 
 	if(sessionchanged)
 	{
-		map<string,string> vals = req->getSession()->getSessionAttributes();
-		string prevcookid = req->getCookieInfoAttribute("FFEADID");
+		std::map<std::string,std::string> vals = req->getSession()->getSessionAttributes();
+		std::string prevcookid = req->getCookieInfoAttribute("FFEADID");
 
-		string values;
-		//logger << "session object modified " << vals.size() << endl;
+		std::string values;
+		//logger << "session object modified " << vals.size() << std::endl;
 		Date date(true);
-		string id = CastUtil::lexical_cast<string>(Timer::getCurrentTime());
+		std::string id = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
 		//int seconds = sessionTimeout;
 		date.updateSeconds(sessionTimeout);
 		DateFormat dformat("ddd, dd-mmm-yyyy hh:mi:ss");
-		map<string,string>::iterator it;
+		std::map<std::string,std::string>::iterator it;
 
 		if(sessatserv)
 		{
@@ -147,13 +147,13 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 		{
 			for(it=vals.begin();it!=vals.end();it++)
 			{
-				string key = it->first;
-				string value = it->second;
+				std::string key = it->first;
+				std::string value = it->second;
 				StringUtil::replaceAll(key,"; ","%3B%20");
 				StringUtil::replaceAll(key,"=","%3D");
 				StringUtil::replaceAll(value,"; ","%3B%20");
 				StringUtil::replaceAll(value,"=","%3D");
-				//logger << it->first << " = " << it->second << endl;
+				//logger << it->first << " = " << it->second << std::endl;
 				if(!sessatserv)
 					res->addCookie(key + "=" + value + "; expires="+dformat.format(date)+" GMT; path=/; HttpOnly");
 				else
@@ -176,23 +176,23 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 
 unsigned int ServiceTask::getFileSize(const char *fileName)
 {
-	ifstream myfile;
+	std::ifstream myfile;
 	unsigned int siz = 0;
-	myfile.open(fileName, ios::binary | ios::ate);
+	myfile.open(fileName, std::ios::binary | std::ios::ate);
 	if (myfile.is_open())
 	{
-		myfile.seekg(0, ios::end);
+		myfile.seekg(0, std::ios::end);
 		siz = myfile.tellg();
 		myfile.close();
 	}
 	return siz;
 }
 
-string ServiceTask::getFileContents(const char *fileName, const int& start, const int& end)
+std::string ServiceTask::getFileContents(const char *fileName, const int& start, const int& end)
 {
-	ifstream myfile;
-	string all;
-	myfile.open(fileName, ios::in | ios::binary);
+	std::ifstream myfile;
+	std::string all;
+	myfile.open(fileName, std::ios::in | std::ios::binary);
 	if (myfile.is_open())
 	{
 		if(start==-1 && end==-1)
@@ -212,29 +212,29 @@ string ServiceTask::getFileContents(const char *fileName, const int& start, cons
 	return all;
 }
 
-void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const string& ext, const int& techunkSiz)
+void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::string& ext, const int& techunkSiz)
 {
-	vector<string> rangesVec;
-	vector<vector<int> > rangeValuesLst = req->getRanges(rangesVec);
+	std::vector<std::string> rangesVec;
+	std::vector<std::vector<int> > rangeValuesLst = req->getRanges(rangesVec);
 
-	string url = req->getUrl();
-	string locale = CommonUtils::getLocale(StringUtil::toLowerCopy(req->getDefaultLocale()));
-	string type = CommonUtils::getMimeType(ext);
+	std::string url = req->getUrl();
+	std::string locale = CommonUtils::getLocale(StringUtil::toLowerCopy(req->getDefaultLocale()));
+	std::string type = CommonUtils::getMimeType(ext);
 
-	string all;
-    string fname = url;
+	std::string all;
+    std::string fname = url;
 	if (url=="/")
     {
 		res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 		return;
     }
 
-	ifstream myfile;
-    if(locale.find("english")==string::npos && (ext==".html" || ext==".htm"))
+	std::ifstream myfile;
+    if(locale.find("english")==std::string::npos && (ext==".html" || ext==".htm"))
     {
-    	string tfname = fname;
+    	std::string tfname = fname;
     	StringUtil::replaceFirst(tfname, "." , ("_" + locale+"."));
-    	ifstream gzipdfile(tfname.c_str(), ios::binary);
+    	std::ifstream gzipdfile(tfname.c_str(), std::ios::binary);
 		if(gzipdfile.good())
 		{
 			fname = tfname;
@@ -244,7 +244,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 
 	if(req->getMethod()=="HEAD")
 	{
-		res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<string>(getFileSize(fname.c_str())));
+		res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(getFileSize(fname.c_str())));
 		res->addHeaderValue(HttpResponse::AcceptRanges, "bytes");
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
@@ -255,7 +255,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 	}
 	else
 	{
-		ifstream infile(fname.c_str(), ios::binary);
+		std::ifstream infile(fname.c_str(), std::ios::binary);
 		if(infile.good())
 		{
 			infile.close();
@@ -274,11 +274,11 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 		
 		Date filemodifieddate(&tim);
 		DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
-		string lastmodDate = df.format(filemodifieddate);
+		std::string lastmodDate = df.format(filemodifieddate);
 
 		bool isifmodsincvalid = false;
 
-		string ifmodsincehdr = req->getHeader(HttpRequest::IfModifiedSince);
+		std::string ifmodsincehdr = req->getHeader(HttpRequest::IfModifiedSince);
 
 		bool forceLoadFile = false;
 		if(ifmodsincehdr!="")
@@ -287,27 +287,27 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 			try {
 				ifmodsince = df.parse(ifmodsincehdr);
 				isifmodsincvalid = true;
-				logger << "Parsed date success" << endl;
+				logger << "Parsed date success" << std::endl;
 			} catch(...) {
 				isifmodsincvalid = false;
 			}
 
 			if(ifmodsince!=NULL)
 			{
-				logger << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << endl;
-				logger << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << endl;
-				logger << "Date Comparisons = " +CastUtil::lexical_cast<string>(*ifmodsince>=filemodifieddate)  << endl;
+				logger << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
+				logger << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
+				logger << "Date Comparisons = " +CastUtil::lexical_cast<std::string>(*ifmodsince>=filemodifieddate)  << std::endl;
 
 				if(isifmodsincvalid && *ifmodsince>=filemodifieddate)
 				{
 					res->addHeaderValue(HttpResponse::LastModified, ifmodsincehdr);
-					logger << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << endl;
+					logger << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
 					return;
 				}
 				else if(isifmodsincvalid && *ifmodsince<filemodifieddate)
 				{
-					logger << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << endl;
+					logger << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 					forceLoadFile = true;
 				}
 				delete ifmodsince;
@@ -319,10 +319,10 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 		if(res->isHeaderValue(HttpResponse::ContentEncoding, "gzip"))
 		{
 			bool gengzipfile = true;
-			string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".gz";
+			std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".gz";
 			if(!forceLoadFile)
 			{
-				ifstream gzipdfile(ofname.c_str(), ios::binary);
+				std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
 				if(gzipdfile.good())
 				{
 					gzipdfile.close();
@@ -340,10 +340,10 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 		else if(res->isHeaderValue(HttpResponse::ContentEncoding, "deflate"))
 		{
 			bool genzlibfile = true;
-			string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".z";
+			std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".z";
 			if(!forceLoadFile)
 			{
-				ifstream gzipdfile(ofname.c_str(), ios::binary);
+				std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
 				if(gzipdfile.good())
 				{
 					gzipdfile.close();
@@ -359,7 +359,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 			req->setUrl(fname);
 		}
 
-		logger << ("Content request for " + url + " " + ext + " actual file " + fname) << endl;
+		logger << ("Content request for " + url + " " + ext + " actual file " + fname) << std::endl;
 
 		if(req->getHttpVers()<1.1 && rangeValuesLst.size()>0)
 		{
@@ -371,7 +371,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 			res->setHTTPResponseStatus(HTTPResponseStatus::PartialContent);
 			res->addHeaderValue(HttpResponse::ContentType, "multipart/byteranges");
 			unsigned int totlen = getFileSize(fname.c_str());
-			res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<string>(totlen));
+			res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
 			for (int var = 0; var <(int)rangeValuesLst.size(); ++var) {
 				int start = rangeValuesLst.at(var).at(0);
 				int end = rangeValuesLst.at(var).at(1);
@@ -387,10 +387,10 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 						end = totlen - 1;
 					else
 						end += 1;
-					string cont = getFileContents(fname.c_str(), start, end);
+					std::string cont = getFileContents(fname.c_str(), start, end);
 					MultipartContent conte(cont);
 					conte.addHeaderValue(MultipartContent::ContentType, type);
-					conte.addHeaderValue(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<string>(totlen));
+					conte.addHeaderValue(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<std::string>(totlen));
 					res->addContent(conte);
 				}
 			}
@@ -410,7 +410,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 			}
 			else
 			{
-				res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<string>(totlen));
+				res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
 				all = getFileContents(fname.c_str());
 			}
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
@@ -476,8 +476,8 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const strin
 
 void ServiceTask::run_old()
 {
-	string ip = "invalid session";
-	string alldatlg = "\ngot fd from parent";
+	std::string ip = "invalid session";
+	std::string alldatlg = "\ngot fd from parent";
 	SocketUtil* sockUtil = new SocketUtil(fd);
 	//SSL *ssl = NULL;
 	//BIO *sbio = NULL;
@@ -485,7 +485,7 @@ void ServiceTask::run_old()
 	Timer timer;
 	timer.start();
 	int connKeepAlive = 10, techunkSiz = 8192, maxReqHdrCnt = 100, maxEntitySize = 2147483648;
-	string cntEnc = "";
+	std::string cntEnc = "";
 	try {
 		connKeepAlive = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->coreServerProperties.sprops["KEEP_ALIVE_SECONDS"]);
 	} catch (...) {
@@ -520,7 +520,7 @@ void ServiceTask::run_old()
 		int r = SSL_accept(ssl);
 		if(r<=0)
 		{
-			logger << "SSL accept error" << endl;
+			logger << "SSL accept error" << std::endl;
 			SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 			return;
 		}
@@ -536,7 +536,7 @@ void ServiceTask::run_old()
 				char* str = X509_NAME_oneline(X509_get_subject_name(client_cert), 0, 0);
 				if(str == NULL)
 				{
-					logger << "Could not get client certificate subject name" << endl;
+					logger << "Could not get client certificate subject name" << std::endl;
 					SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 				}
 				printf ("\t subject: %s\n", str);
@@ -544,7 +544,7 @@ void ServiceTask::run_old()
 				str = X509_NAME_oneline(X509_get_issuer_name(client_cert), 0, 0);
 				if(str == NULL)
 				{
-					logger << "Could not get client certificate issuer name" << endl;
+					logger << "Could not get client certificate issuer name" << std::endl;
 					SSLHandler::getInstance()->closeSSL(fd, ssl, io);
 				}
 				printf ("\t issuer: %s\n", str);
@@ -553,7 +553,7 @@ void ServiceTask::run_old()
 			}
 			else
 			{
-				logger << ("The SSL client does not have certificate.\n") << endl;
+				logger << ("The SSL client does not have certificate.\n") << std::endl;
 			}
 		}
 	}
@@ -575,7 +575,7 @@ void ServiceTask::run_old()
 			//Close the connection after inactivity period of connKeepAlive seconds
 			if(!sockUtil->checkSocketWaitForTimeout(0, connKeepAlive))
 			{
-				logger << "Closing connection as read operation timed out..." << endl;
+				logger << "Closing connection as read operation timed out..." << std::endl;
 				/*if(SSLHandler::getInstance()->getIsSSL())
 				{
 					SSLHandler::getInstance()->closeSSL(fd,ssl,io);
@@ -592,19 +592,19 @@ void ServiceTask::run_old()
 
 			int cntlen = 0;
 			strVec results;
-			logger << "Into Http Service method" << endl;
+			logger << "Into Http Service method" << std::endl;
 			int headerCount = 0;
 			while(true)
 			{
 				headerCount++;
-				string temp;
+				std::string temp;
 				bool fl = sockUtil->readLine(temp);
 				if(temp.length()>32765)
 				{
 					res.setHTTPResponseStatus(HTTPResponseStatus::ReqUrlLarge);
 					res.addHeaderValue(HttpResponse::Connection, "close");
 					bool sendSuccess = sockUtil->writeData(res.generateResponse(), true);
-					logger << "Closing connection..." << endl;
+					logger << "Closing connection..." << std::endl;
 					if(sendSuccess)sockUtil->closeSocket();
 					delete sockUtil;
 					return;
@@ -623,14 +623,14 @@ void ServiceTask::run_old()
 				results.push_back(temp);
 				if(headerCount>=maxReqHdrCnt)
 				{
-					logger << ("Cannot accept more than "+CastUtil::lexical_cast<string>(maxReqHdrCnt)+" headers") << endl;
+					logger << ("Cannot accept more than "+CastUtil::lexical_cast<std::string>(maxReqHdrCnt)+" headers") << std::endl;
 					sockUtil->closeSocket();
 					break;
 				}
 			}
 
 			alldatlg += "--read data";
-			string webpath = serverRootDirectory + "web/";
+			std::string webpath = serverRootDirectory + "web/";
 			//Parse the HTTP headers
 			req = new HttpRequest(results, webpath);
 
@@ -639,14 +639,14 @@ void ServiceTask::run_old()
 				res.setHTTPResponseStatus(req->getRequestParseStatus());
 				res.addHeaderValue(HttpResponse::Connection, "close");
 				bool sendSuccess = sockUtil->writeData(res.generateResponse(), true);
-				logger << "Closing connection..." << endl;
+				logger << "Closing connection..." << std::endl;
 				if(sendSuccess)sockUtil->closeSocket();
 				delete sockUtil;
 				delete req;
 				return;
 			}
 
-			string cntle = req->getHeader(HttpRequest::ContentLength);
+			std::string cntle = req->getHeader(HttpRequest::ContentLength);
 			try
 			{
 				cntlen = CastUtil::lexical_cast<int>(cntle);
@@ -655,7 +655,7 @@ void ServiceTask::run_old()
 					res.setHTTPResponseStatus(HTTPResponseStatus::ReqEntityLarge);
 					res.addHeaderValue(HttpResponse::Connection, "close");
 					bool sendSuccess = sockUtil->writeData(res.generateResponse(), true);
-					logger << "Closing connection..." << endl;
+					logger << "Closing connection..." << std::endl;
 					if(sendSuccess)sockUtil->closeSocket();
 					delete sockUtil;
 					delete req;
@@ -664,7 +664,7 @@ void ServiceTask::run_old()
 			}
 			catch(const char* ex)
 			{
-				logger << "Bad lexical cast exception while reading http Content-Length" << endl;
+				logger << "Bad lexical cast exception while reading http Content-Length" << std::endl;
 			}
 
 			if(!ConfigurationData::isServingContext(req->getCntxt_name()))
@@ -672,7 +672,7 @@ void ServiceTask::run_old()
 				req->setCntxt_name("default");
 				req->setCntxt_root(webpath+"default");
 
-				string folder = webpath+req->getCntxt_name();
+				std::string folder = webpath+req->getCntxt_name();
 				struct stat attrib;
 				int rv = stat(folder.c_str(), &attrib);
 				if(rv==0)
@@ -690,16 +690,16 @@ void ServiceTask::run_old()
 				res.setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 				res.addHeaderValue(HttpResponse::Connection, "close");
 				bool sendSuccess = sockUtil->writeData(res.generateResponse(), true);
-				logger << "Context not found, Closing connection..." << endl;
+				logger << "Context not found, Closing connection..." << std::endl;
 				if(sendSuccess)sockUtil->closeSocket();
 				delete sockUtil;
 				delete req;
 				return;
 			}
 
-			if(req->getHeader(HttpRequest::ContentType).find("application/x-www-form-urlencoded")!=string::npos)
+			if(req->getHeader(HttpRequest::ContentType).find("application/x-www-form-urlencoded")!=std::string::npos)
 			{
-				string content;
+				std::string content;
 				/*
 				 * Clients can not send chunked requests, due to a requirement of pre-negotiation
 				 * in terms of how the request should be sent, this may be required in the future
@@ -709,7 +709,7 @@ void ServiceTask::run_old()
 				{
 					while(true)
 					{
-						string chunksizstr;
+						std::string chunksizstr;
 						bool fl = sockUtil->readLine(chunksizstr);
 						if(!fl)
 						{
@@ -750,12 +750,12 @@ void ServiceTask::run_old()
 				/*
 				if(req->isHeaderValue(HttpRequest::TransferEncoding, "chunked"))
 				{
-					string content;
-					ofstream filei;
-					string tfilen;
+					std::string content;
+					std::ofstream filei;
+					std::string tfilen;
 					while(true)
 					{
-						string chunksizstr;
+						std::string chunksizstr;
 						bool fl = sockUtil->readLine(chunksizstr);
 						if(!fl)
 						{
@@ -777,8 +777,8 @@ void ServiceTask::run_old()
 						{
 							if(!filei.is_open())
 							{
-								tfilen = req->getContextHome() + "/temp/"+ "HttpRequest_" + CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".req";
-								filei.open(tfilen.c_str(), ios::app | ios::binary);
+								tfilen = req->getContextHome() + "/temp/"+ "HttpRequest_" + CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".req";
+								filei.open(tfilen.c_str(), std::ios::app | std::ios::binary);
 								filei.write(content.c_str(), content.length());
 								content = "";
 							}
@@ -804,14 +804,14 @@ void ServiceTask::run_old()
 				if(cntlen>0)
 				{
 					bool fmode = cntlen > 2*102400;
-					string tfilen;
-					ofstream filei;
+					std::string tfilen;
+					std::ofstream filei;
 					if(fmode)
 					{
-						tfilen = req->getContextHome() + "/temp/"+ "HttpRequest_" + CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".req";
-						filei.open(tfilen.c_str(), ios::app | ios::binary);
+						tfilen = req->getContextHome() + "/temp/"+ "HttpRequest_" + CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".req";
+						filei.open(tfilen.c_str(), std::ios::app | std::ios::binary);
 					}
-					string content;
+					std::string content;
 					if(cntlen>0)
 					{
 						if(!sockUtil->readData(cntlen, content))
@@ -864,9 +864,9 @@ void ServiceTask::run_old()
 
 					if(parts>0)
 					{
-						ofstream filei;
-						string tfilen = req->getContextHome() + "/temp/"+ "HttpRequest_" + CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".req" + ".unc";
-						filei.open(tfilen.c_str(), ios::app | ios::binary);
+						std::ofstream filei;
+						std::string tfilen = req->getContextHome() + "/temp/"+ "HttpRequest_" + CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".req" + ".unc";
+						filei.open(tfilen.c_str(), std::ios::app | std::ios::binary);
 						for (int var = 0; var <= parts; var++) {
 							unsigned int len = totlen - techunkSiz*var;
 							if((int)len>techunkSiz)
@@ -874,7 +874,7 @@ void ServiceTask::run_old()
 								len = techunkSiz;
 							}
 
-							string temp = getFileContents(req->getContent_tfile().c_str(), techunkSiz*var, len);
+							std::string temp = getFileContents(req->getContent_tfile().c_str(), techunkSiz*var, len);
 							if(isCEGzip)
 								temp = CompressionUtil::gzipUnCompress(temp);
 							else
@@ -898,7 +898,7 @@ void ServiceTask::run_old()
 
 			if(req->getFile()=="")
 			{
-				logger << ("File requested -> " + req->getFile()) << endl;
+				logger << ("File requested -> " + req->getFile()) << std::endl;
 				req->setFile("index.html");
 			}
 			if(req->hasCookie())
@@ -907,9 +907,9 @@ void ServiceTask::run_old()
 					req->getSession()->setSessionAttributes(req->getCookieInfo());
 				else
 				{
-					string id = req->getCookieInfoAttribute("FFEADID");
-					logger << id << endl;
-					map<string,string> values;
+					std::string id = req->getCookieInfoAttribute("FFEADID");
+					logger << id << std::endl;
+					std::map<std::string,std::string> values;
 #ifdef INC_DSTC
 					if(ConfigurationData::getInstance()->coreServerProperties.sessservdistocache)
 						values = getSessionDataFromDistocache(id);
@@ -920,28 +920,28 @@ void ServiceTask::run_old()
 				}
 			}
 
-			logger << ("Done with request initialization/session setup") << endl;
+			logger << ("Done with request initialization/session setup") << std::endl;
 
 			dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 			if(dlib == NULL)
 			{
-				cerr << dlerror() << endl;
+				std::cerr << dlerror() << std::endl;
 				throw "Cannot load application shared library";
 			}
 			ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 			if(ddlib == NULL)
 			{
-				cerr << dlerror() << endl;
+				std::cerr << dlerror() << std::endl;
 				throw "Cannot load application shared library";
 			}
 
-			logger << ("Done with loading libraries") << endl;
+			logger << ("Done with loading libraries") << std::endl;
 
 			bool isWebSockRequest = req->isHeaderValue(HttpRequest::Upgrade, "websocket", true)
 					&& req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true);
 
 			Reflector reflector(dlib);
-			//logger << req->getCntxt_name() << req->getContextHome() << req->getUrl() << endl;
+			//logger << req->getCntxt_name() << req->getContextHome() << req->getUrl() << std::endl;
 #ifdef INC_APPFLOW
 			if(!isWebSockRequest && ConfigurationData::getInstance()->applicationFlowMap.find(req->getCntxt_name())!=
 					ConfigurationData::getInstance()->applicationFlowMap.end() &&
@@ -949,18 +949,18 @@ void ServiceTask::run_old()
 			{
 				if(dlib == NULL)
 				{
-					cerr << dlerror() << endl;
+					std::cerr << dlerror() << std::endl;
 					exit(-1);
 				}
-				string meth1 = (req->getCntxt_name()+"checkRules");
-				string path1;
+				std::string meth1 = (req->getCntxt_name()+"checkRules");
+				std::string path1;
 				void *mkr1 = dlsym(dlib, meth1.c_str());
 				if(mkr1!=NULL)
 				{
-					typedef string (*DCPPtr1) (string,HttpSession);
+					typedef std::string (*DCPPtr1) (std::string,HttpSession);
 					DCPPtr1 f =  (DCPPtr1)mkr1;
 					path1 = f(req->getUrl(),*(req->getSession()));
-					//logger << path1 << flush;
+					//logger << path1 << std::flush;
 					if(path1=="FAILED")
 					{
 						req->setUrl("");
@@ -973,12 +973,12 @@ void ServiceTask::run_old()
 			}
 #endif
 
-			logger << ("Done with handling appflow") << endl;
+			logger << ("Done with handling appflow") << std::endl;
 
-			string ext = req->getExt();
-			vector<unsigned char> test;
-			string content;
-			string claz;
+			std::string ext = req->getExt();
+			std::vector<unsigned char> test;
+			std::string content;
+			std::string claz;
 			long sessionTimeoutVar = ConfigurationData::getInstance()->coreServerProperties.sessionTimeout;
 
 			bool isContrl = false;
@@ -989,18 +989,18 @@ void ServiceTask::run_old()
 				isContrl = true;
 			}
 
-			logger << ("Done with handling cors") << endl;
+			logger << ("Done with handling cors") << std::endl;
 
 			if(!isContrl)
 			{
 				isContrl = SecurityHandler::handle(req, &res, sessionTimeoutVar, reflector);
 				if(isContrl)
 				{
-					logger << ("Request handled by SecurityHandler") << endl;
+					logger << ("Request handled by SecurityHandler") << std::endl;
 				}
 			}
 
-			logger << ("Done with handling security") << endl;
+			logger << ("Done with handling security") << std::endl;
 
 			//Is is a websocket connection request/client handshake request
 			if(isWebSockRequest)
@@ -1009,8 +1009,8 @@ void ServiceTask::run_old()
 						|| req->hasHeaderValuePart(HttpRequest::SecWebSocketVersion, "8", false)
 						|| req->hasHeaderValuePart(HttpRequest::SecWebSocketVersion, "13", false)))
 				{
-					string seckey = req->getHeader(HttpRequest::SecWebSocketKey);
-					string servseckey = seckey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+					std::string seckey = req->getHeader(HttpRequest::SecWebSocketKey);
+					std::string servseckey = seckey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 					servseckey = CryptoHandler::sha1(servseckey);
 					servseckey = CryptoHandler::base64encodeStr(servseckey);
 
@@ -1042,11 +1042,11 @@ void ServiceTask::run_old()
 				isContrl = !FilterHandler::handle(req, &res, ext, reflector);
 				if(isContrl)
 				{
-					logger << ("Request handled by FilterHandler") << endl;
+					logger << ("Request handled by FilterHandler") << std::endl;
 				}
 			}
 
-			logger << ("Done with handling filters") << endl;
+			logger << ("Done with handling filters") << std::endl;
 
 			ext = req->getExt();
 
@@ -1055,14 +1055,14 @@ void ServiceTask::run_old()
 				isContrl = authHandler.handle(req, res, ext);
 				if(isContrl)
 				{
-					logger << ("Request handled by AuthHandler") << endl;
+					logger << ("Request handled by AuthHandler") << std::endl;
 				}
 			}
-			logger << ("Done with handling auth") << endl;*/
+			logger << ("Done with handling auth") << std::endl;*/
 
 			ext = req->getExt();
 
-			string pthwofile = req->getCntxt_name()+req->getActUrl();
+			std::string pthwofile = req->getCntxt_name()+req->getActUrl();
 			if(req->getCntxt_name()!="default" && ConfigurationData::isServingContext(req->getCntxt_name()))
 			{
 				pthwofile = req->getActUrl();
@@ -1072,23 +1072,23 @@ void ServiceTask::run_old()
 				isContrl = ControllerHandler::handle(req, &res, ext, pthwofile, reflector);
 				if(isContrl)
 				{
-					logger << ("Request handled by ControllerHandler") << endl;
+					logger << ("Request handled by ControllerHandler") << std::endl;
 				}
 			}
 
-			logger << ("Done with handling controllers") << endl;
+			logger << ("Done with handling controllers") << std::endl;
 
 			ext = req->getExt();
 
 			/*After going through the controller the response might be blank, just set the HTTP version*/
 			res.update(req);
 			res.addHeaderValue(HttpResponse::AcceptRanges, "none");
-			//logger << req->toString() << endl;
+			//logger << req->toString() << std::endl;
 			if(req->getMethod()!="TRACE")
 			{
-				logger << ("Started processing request - phase II") << endl;
+				logger << ("Started processing request - phase II") << std::endl;
 
-				string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
+				std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
 				if(isContrl)
 				{
 
@@ -1097,23 +1097,23 @@ void ServiceTask::run_old()
 						ConfigurationData::getInstance()->fviewFormMap.end())
 				{
 					FormHandler::handle(req, &res, reflector);
-					logger << ("Request handled by FormHandler") << endl;
+					logger << ("Request handled by FormHandler") << std::endl;
 				}
 #ifdef INC_WEBSVC
 				else if(ConfigurationData::getInstance()->wsdlMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->wsdlMap.end() &&
 						ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()].find(wsUrl)!=ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()].end())
 				{
-					if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos
-							|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=string::npos)
+					if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=std::string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=std::string::npos
+							|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=std::string::npos)
 					{
 						SoapHandler::handle(req, &res, dlib);
 					}
 					else
 					{
-						logger << ("Invalid Content type for soap request") << endl;
+						logger << ("Invalid Content type for soap request") << std::endl;
 						res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 					}
-					logger << ("Request handled by SoapHandler for Url "+wsUrl) << endl;
+					logger << ("Request handled by SoapHandler for Url "+wsUrl) << std::endl;
 				}
 #endif
 				else
@@ -1123,33 +1123,33 @@ void ServiceTask::run_old()
 					cntrlit = ScriptHandler::handle(req, &res, ConfigurationData::getInstance()->handoffs, ext);
 #endif
 
-					logger << ("Done handling scripts") << endl;
+					logger << ("Done handling scripts") << std::endl;
 
 					if(cntrlit)
 					{
-						logger << ("Request handled by ScriptHandler") << endl;
+						logger << ("Request handled by ScriptHandler") << std::endl;
 					}
 					else
 					{
 						cntrlit = ExtHandler::handle(req, &res, dlib, ddlib, ext, reflector);
 						if(cntrlit)
 						{
-							logger << ("Request handled by ExtHandler") << endl;
+							logger << ("Request handled by ExtHandler") << std::endl;
 						}
-						logger << ("Done handling extra flows") << endl;
+						logger << ("Done handling extra flows") << std::endl;
 					}
-					map<string, map<string, string> > fviewMappingMap = ConfigurationData::getInstance()->fviewMappingMap;
-					map<string, string> fviewMap;
+					std::map<std::string, std::map<std::string, std::string> > fviewMappingMap = ConfigurationData::getInstance()->fviewMappingMap;
+					std::map<std::string, std::string> fviewMap;
 					if(fviewMappingMap.find(req->getCntxt_name())!=fviewMappingMap.end())
 						fviewMap = fviewMappingMap[req->getCntxt_name()];
 					if(!cntrlit && ext==".fview" && fviewMap.find(req->getFile())!=fviewMap.end())
 					{
 						FviewHandler::handle(req, &res);
-						logger << ("Request handled by FviewHandler") << endl;
+						logger << ("Request handled by FviewHandler") << std::endl;
 					}
 					else
 					{
-						logger << ("Request for static resource/file") << endl;
+						logger << ("Request for static resource/file") << std::endl;
 						if(req->isAgentAcceptsCE() && (cntEnc=="gzip" || cntEnc=="deflate") && req->isNonBinary(CommonUtils::getMimeType(ext)))
 						{
 							res.addHeaderValue(HttpResponse::ContentEncoding, cntEnc);
@@ -1186,20 +1186,20 @@ void ServiceTask::run_old()
 				res.addHeaderValue(HttpResponse::ContentEncoding, cntEnc);
 			}
 
-			logger << ("Done setting compression headers") << endl;
+			logger << ("Done setting compression headers") << std::endl;
 
 			Date cdate(true);
 			DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
 			res.addHeaderValue(HttpResponse::DateHeader, df.format(cdate));
 
 			alldatlg += "--processed data";
-			string h1;
+			std::string h1;
 
 			//if(req->getConnection()!="")
 			//	res.setConnection("close");
 			storeSessionAttributes(&res, req, sessionTimeoutVar, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
 
-			logger << ("Done storing session attributes") << endl;
+			logger << ("Done storing session attributes") << std::endl;
 
 			//An errored request/response phase will close the connection
 			if(StringUtil::toLowerCopy(req->getHeader(HttpRequest::Connection))!="keep-alive" || CastUtil::lexical_cast<int>(res.getStatusCode())>307
@@ -1216,7 +1216,7 @@ void ServiceTask::run_old()
 			//Head should behave exactly as Get but there should be no entity body
 			h1 = res.generateResponse(req->getMethod(), req);
 			
-			logger << ("Done generating response content") << endl;
+			logger << ("Done generating response content") << std::endl;
 
 			/*if(req->getMethod()=="HEAD")
 			{
@@ -1297,7 +1297,7 @@ void ServiceTask::run_old()
 
 			if(!cont)
 			{
-				logger << "Closing connection..." << endl;
+				logger << "Closing connection..." << std::endl;
 				sockUtil->closeSocket();
 				delete sockUtil;
 				delete req;
@@ -1310,7 +1310,7 @@ void ServiceTask::run_old()
 			delete req;
 			dlclose(dlib);
 			dlclose(ddlib);
-			//logger << (alldatlg + "--sent data--DONE") << endl;
+			//logger << (alldatlg + "--sent data--DONE") << std::endl;
 			//sessionMap[sessId] = sess;
 		}
 		catch(const char* err)
@@ -1323,7 +1323,7 @@ void ServiceTask::run_old()
 				dlclose(dlib);
 			if(ddlib!=NULL)
 				dlclose(ddlib);
-			logger << "Exception occurred while processing ServiceTask request - " << err << endl;
+			logger << "Exception occurred while processing ServiceTask request - " << err << std::endl;
 		}
 		catch(...)
 		{
@@ -1335,20 +1335,20 @@ void ServiceTask::run_old()
 				dlclose(dlib);
 			if(ddlib!=NULL)
 				dlclose(ddlib);
-			logger << "Standard exception occurred while processing ServiceTask request " << endl;
+			logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
 		}
 	}
 }
 
-void ServiceTask::handleWebsockOpen(const string& url) {
+void ServiceTask::handleWebsockOpen(const std::string& url) {
 
 }
 
-void ServiceTask::handleWebsockClose(const string& url) {
+void ServiceTask::handleWebsockClose(const std::string& url) {
 
 }
 
-void ServiceTask::handleWebsockMessage(const string& url, WebSocketData* request, WebSocketData* response) {
+void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* request, WebSocketData* response) {
 
 }
 
@@ -1368,13 +1368,13 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			return;
 		}
 
-		string& webpath = ConfigurationData::getInstance()->coreServerProperties.webPath;
+		std::string& webpath = ConfigurationData::getInstance()->coreServerProperties.webPath;
 
 		if(req->getActUrlParts().size()==0)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 			res->addHeaderValue(HttpResponse::Connection, "close");
-			logger << "Context not found, Closing connection..." << endl;
+			logger << "Context not found, Closing connection..." << std::endl;
 			return;
 		}
 
@@ -1395,7 +1395,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 					==ConfigurationData::getInstance()->servingContexts.end())
 			{
 				res->addHeaderValue(HttpResponse::Connection, "close");
-				logger << "Context not found, Closing connection..." << endl;
+				logger << "Context not found, Closing connection..." << std::endl;
 				return;
 			}
 		}
@@ -1413,7 +1413,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		/*if(req->getFile()=="")
 		{
-			logger << ("File requested -> " + req->getFile()) << endl;
+			logger << ("File requested -> " + req->getFile()) << std::endl;
 			req->setFile("index.html");
 		}*/
 
@@ -1423,9 +1423,9 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				req->getSession()->setSessionAttributes(req->getCookieInfo());
 			else
 			{
-				string id = req->getCookieInfoAttribute("FFEADID");
-				logger << id << endl;
-				map<string,string> values;
+				std::string id = req->getCookieInfoAttribute("FFEADID");
+				logger << id << std::endl;
+				std::map<std::string,std::string> values;
 #ifdef INC_DSTC
 				if(ConfigurationData::getInstance()->coreServerProperties.sessservdistocache)
 					values = getSessionDataFromDistocache(id);
@@ -1435,24 +1435,24 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				req->getSession()->setSessionAttributes(values);
 			}
 		}
-		logger << ("Done with request initialization/session setup") << endl;
+		logger << ("Done with request initialization/session setup") << std::endl;
 
 		dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 		if(dlib == NULL)
 		{
-			cerr << dlerror() << endl;
+			std::cerr << dlerror() << std::endl;
 			throw "Cannot load application shared library";
 		}
 		ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 		if(ddlib == NULL)
 		{
-			cerr << dlerror() << endl;
+			std::cerr << dlerror() << std::endl;
 			throw "Cannot load application shared library";
 		}
-		logger << ("Done with loading libraries") << endl;
+		logger << ("Done with loading libraries") << std::endl;
 
 		Reflector reflector(dlib);
-		//logger << req->getCntxt_name() << req->getContextHome() << req->getUrl() << endl;
+		//logger << req->getCntxt_name() << req->getContextHome() << req->getUrl() << std::endl;
 #ifdef INC_APPFLOW
 		if(ConfigurationData::getInstance()->applicationFlowMap.find(req->getCntxt_name())!=
 				ConfigurationData::getInstance()->applicationFlowMap.end() &&
@@ -1460,18 +1460,18 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		{
 			if(dlib == NULL)
 			{
-				cerr << dlerror() << endl;
+				std::cerr << dlerror() << std::endl;
 				exit(-1);
 			}
-			string meth1 = (req->getCntxt_name()+"checkRules");
-			string path1;
+			std::string meth1 = (req->getCntxt_name()+"checkRules");
+			std::string path1;
 			void *mkr1 = dlsym(dlib, meth1.c_str());
 			if(mkr1!=NULL)
 			{
-				typedef string (*DCPPtr1) (string,HttpSession);
+				typedef std::string (*DCPPtr1) (std::string,HttpSession);
 				DCPPtr1 f =  (DCPPtr1)mkr1;
 				path1 = f(req->getUrl(),*(req->getSession()));
-				//logger << path1 << flush;
+				//logger << path1 << std::flush;
 				if(path1=="FAILED")
 				{
 					req->setUrl("");
@@ -1483,12 +1483,12 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			}
 		}
 #endif
-		logger << ("Done with handling appflow") << endl;
+		logger << ("Done with handling appflow") << std::endl;
 
-		string ext = req->getExt();
-		vector<unsigned char> test;
-		string content;
-		string claz;
+		std::string ext = req->getExt();
+		std::vector<unsigned char> test;
+		std::string content;
+		std::string claz;
 		long sessionTimeoutVar = ConfigurationData::getInstance()->coreServerProperties.sessionTimeout;
 
 		bool isContrl = false;
@@ -1498,17 +1498,17 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			res->setHTTPResponseStatus(status);
 			isContrl = true;
 		}
-		logger << ("Done with handling cors") << endl;
+		logger << ("Done with handling cors") << std::endl;
 
 		if(!isContrl)
 		{
 			isContrl = SecurityHandler::handle(req, res, sessionTimeoutVar, reflector);
 			if(isContrl)
 			{
-				logger << ("Request handled by SecurityHandler") << endl;
+				logger << ("Request handled by SecurityHandler") << std::endl;
 			}
 		}
-		logger << ("Done with handling security") << endl;
+		logger << ("Done with handling security") << std::endl;
 		ext = req->getExt();
 
 		if(!isContrl)
@@ -1518,13 +1518,13 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			isContrl = !FilterHandler::handle(req, res, ext, reflector);
 			if(isContrl)
 			{
-				logger << ("Request handled by FilterHandler") << endl;
+				logger << ("Request handled by FilterHandler") << std::endl;
 			}
 		}
-		logger << ("Done with handling filters") << endl;
+		logger << ("Done with handling filters") << std::endl;
 		ext = req->getExt();
 
-		string pthwofile = req->getCntxt_name()+req->getActUrl();
+		std::string pthwofile = req->getCntxt_name()+req->getActUrl();
 		if(req->getCntxt_name()!="default")
 		{
 			pthwofile = req->getActUrl();
@@ -1535,10 +1535,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			isContrl = ControllerHandler::handle(req, res, ext, pthwofile, reflector);
 			if(isContrl)
 			{
-				logger << ("Request handled by ControllerHandler") << endl;
+				logger << ("Request handled by ControllerHandler") << std::endl;
 			}
 		}
-		logger << ("Done with handling controllers") << endl;
+		logger << ("Done with handling controllers") << std::endl;
 		ext = req->getExt();
 
 		if(!isContrl)
@@ -1546,10 +1546,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			isContrl = ExtHandler::handle(req, res, dlib, ddlib, ext, reflector);
 			if(isContrl)
 			{
-				logger << ("Request handled by ExtHandler") << endl;
+				logger << ("Request handled by ExtHandler") << std::endl;
 			}
 		}
-		logger << ("Done handling extra flows") << endl;
+		logger << ("Done handling extra flows") << std::endl;
 
 		/*After going through the controller the response might be blank, just set the HTTP version*/
 		res->update(req);
@@ -1557,26 +1557,26 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		if(req->getMethod()!="TRACE" && !res->isDone())
 		{
-			logger << ("Started processing request - phase II") << endl;
+			logger << ("Started processing request - phase II") << std::endl;
 
-			string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + req->getActUrl();
+			std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + req->getActUrl();
 			if(!isContrl)
 			{
 #ifdef INC_WEBSVC
 				if(ConfigurationData::getInstance()->wsdlMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->wsdlMap.end() &&
 						ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()].find(wsUrl)!=ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()].end())
 				{
-					if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos
-							|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=string::npos)
+					if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=std::string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=std::string::npos
+							|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=std::string::npos)
 					{
 						SoapHandler::handle(req, res, dlib);
 					}
 					else
 					{
-						logger << ("Invalid Content type for soap request") << endl;
+						logger << ("Invalid Content type for soap request") << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 					}
-					logger << ("Request handled by SoapHandler for Url "+wsUrl) << endl;
+					logger << ("Request handled by SoapHandler for Url "+wsUrl) << std::endl;
 				}
 #endif
 				else
@@ -1585,17 +1585,17 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 #ifdef INC_SCRH
 					cntrlit = ScriptHandler::handle(req, res, ConfigurationData::getInstance()->handoffs, ext);
 #endif
-					logger << ("Done handling scripts") << endl;
+					logger << ("Done handling scripts") << std::endl;
 
 					if(cntrlit)
 					{
-						logger << ("Request handled by ScriptHandler") << endl;
+						logger << ("Request handled by ScriptHandler") << std::endl;
 					}
 					else
 					{
-						string pubUrlPath = req->getCntxt_root() + "/public/";
+						std::string pubUrlPath = req->getCntxt_root() + "/public/";
 						if(req->getUrl().find(pubUrlPath)!=0) {
-							string post = "";
+							std::string post = "";
 							if(req->getUrl()!=req->getCntxt_root()) {
 								post = req->getUrl().substr(req->getCntxt_root().length()+1);
 							}
@@ -1605,7 +1605,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 							req->setUrl(pubUrlPath+post);
 						}
 						res->setDone(false);
-						logger << ("Static file requested") << endl;
+						logger << ("Static file requested") << std::endl;
 					}
 				}
 			}
@@ -1613,7 +1613,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		FilterHandler::handleOut(req, res, ext, reflector);
 
 		storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
-		logger << ("Done storing session attributes") << endl;
+		logger << ("Done storing session attributes") << std::endl;
 
 		dlclose(dlib);
 		dlclose(ddlib);
@@ -1624,7 +1624,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			dlclose(dlib);
 		if(ddlib!=NULL)
 			dlclose(ddlib);
-		logger << "Exception occurred while processing ServiceTask request - " << err << endl;
+		logger << "Exception occurred while processing ServiceTask request - " << err << std::endl;
 	}
 	catch(...)
 	{
@@ -1632,11 +1632,11 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			dlclose(dlib);
 		if(ddlib!=NULL)
 			dlclose(ddlib);
-		logger << "Standard exception occurred while processing ServiceTask request " << endl;
+		logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
 	}
 }
 
-/*bool ServiceTask::sendData(SSL* ssl, BIO* io, const int& fd, const string& h1)
+/*bool ServiceTask::sendData(SSL* ssl, BIO* io, const int& fd, const std::string& h1)
 {
 	if(SSLHandler::getInstance()->getIsSSL())
 	{
@@ -1654,33 +1654,33 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 			if(SSL_renegotiate(ssl)<=0)
 			{
-				logger << "SSL renegotiation error" << endl;
+				logger << "SSL renegotiation error" << std::endl;
 				closeSocket(ssl, io, fd);
 				return false;
 			}
 			if(SSL_do_handshake(ssl)<=0)
 			{
-				logger << "SSL renegotiation error" << endl;
+				logger << "SSL renegotiation error" << std::endl;
 				closeSocket(ssl, io, fd);
 				return false;;
 			}
 			ssl->state = SSL_ST_ACCEPT;
 			if(SSL_do_handshake(ssl)<=0)
 			{
-				logger << "SSL handshake error" << endl;
+				logger << "SSL handshake error" << std::endl;
 				closeSocket(ssl, io, fd);
 				return false;;
 			}
 		}
 		if((r=BIO_write(io, h1.c_str(), h1.length()))<=0)
 		{
-			logger << "Send failed" << endl;
+			logger << "Send failed" << std::endl;
 			closeSocket(ssl, io, fd);
 			return false;
 		}
 		if((r=BIO_flush(io))<0)
 		{
-			logger << "Error flushing BIO" << endl;
+			logger << "Error flushing BIO" << std::endl;
 			closeSocket(ssl, io, fd);
 			return false;;
 		}
@@ -1690,13 +1690,13 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		int r;
 		if ((r=BIO_write(io, h1.c_str() , h1.length())) <= 0)
 		{
-			logger << "send failed" << flush;
+			logger << "send failed" << std::flush;
 			closeSocket(ssl, io, fd);
 			return false;
 		}
 		if((r=BIO_flush(io))<0)
 		{
-			logger << "Error flushing BIO" << endl;
+			logger << "Error flushing BIO" << std::endl;
 			closeSocket(ssl, io, fd);
 			return false;
 		}
@@ -1717,11 +1717,11 @@ void ServiceTask::closeSocket(SSL* ssl, BIO* io, const int& fd)
 	}
 }
 
-bool ServiceTask::readLine(SSL* ssl, BIO* io, const int& fd, string& line)
+bool ServiceTask::readLine(SSL* ssl, BIO* io, const int& fd, std::string& line)
 {
 	//if(!checkSocketWaitForTimeout(fd, 0, 0, 10))
 	//{
-	//	logger << "Closing connection as there was no data to read in 10us..." << endl;
+	//	logger << "Closing connection as there was no data to read in 10us..." << std::endl;
 	//	closeSocket(ssl, io, fd);
 	//	return false;
 	//}
@@ -1736,12 +1736,12 @@ bool ServiceTask::readLine(SSL* ssl, BIO* io, const int& fd, string& line)
 		{
 			case SSL_ERROR_WANT_READ:
 			{
-				logger << "ssl more to read error" << endl;
+				logger << "ssl more to read error" << std::endl;
 				break;
 			}
 			case SSL_ERROR_WANT_WRITE:
 			{
-				logger << "ssl more to write error" << endl;
+				logger << "ssl more to write error" << std::endl;
 				break;
 			}
 			case SSL_ERROR_NONE:
@@ -1755,7 +1755,7 @@ bool ServiceTask::readLine(SSL* ssl, BIO* io, const int& fd, string& line)
 			}
 			default:
 			{
-				logger << "SSL read problem" << endl;
+				logger << "SSL read problem" << std::endl;
 				closeSocket(ssl, io, fd);
 				return false;
 			}
@@ -1770,7 +1770,7 @@ bool ServiceTask::readLine(SSL* ssl, BIO* io, const int& fd, string& line)
 		if(er==0)
 		{
 			closeSocket(ssl, io, fd);
-			logger << "Socket closed before being serviced" << endl;
+			logger << "Socket closed before being serviced" << std::endl;
 			return false;
 		}
 		line.append(buf, er);
@@ -1779,11 +1779,11 @@ bool ServiceTask::readLine(SSL* ssl, BIO* io, const int& fd, string& line)
 	return true;
 }
 
-bool ServiceTask::readData(SSL* ssl, BIO* io, const int& fd, const int& cntlen, string& content)
+bool ServiceTask::readData(SSL* ssl, BIO* io, const int& fd, const int& cntlen, std::string& content)
 {
 	//if(!checkSocketWaitForTimeout(fd, 0, 0, 10))
 	//{
-	//	logger << "Closing connection as there was no data to read in 10us..." << endl;
+	//	logger << "Closing connection as there was no data to read in 10us..." << std::endl;
 	//	closeSocket(ssl, io, fd);
 	//	return false;
 	//}
@@ -1810,7 +1810,7 @@ bool ServiceTask::readData(SSL* ssl, BIO* io, const int& fd, const int& cntlen, 
 				}
 				default:
 				{
-					logger << "SSL read problem" << endl;
+					logger << "SSL read problem" << std::endl;
 					closeSocket(ssl, io, fd);
 					return false;
 				}
@@ -1825,16 +1825,16 @@ bool ServiceTask::readData(SSL* ssl, BIO* io, const int& fd, const int& cntlen, 
 		int er=-1;
 		while(cntlen>0)
 		{
-			logger << "Length is " + CastUtil::lexical_cast<string>(cntlen) << endl;
+			logger << "Length is " + CastUtil::lexical_cast<std::string>(cntlen) << std::endl;
 			int readLen = MAXBUFLENM;
 			if(cntlen<MAXBUFLENM)
 				readLen = cntlen;
 			er = BIO_read(io,buf,readLen);
-			logger << "Done reading" << endl;
+			logger << "Done reading" << std::endl;
 			if(er==0)
 			{
 				closeSocket(ssl, io, fd);
-				logger << "Socket closed before being serviced" << endl;
+				logger << "Socket closed before being serviced" << std::endl;
 				return false;
 			}
 			else if(er>0)
@@ -1850,21 +1850,21 @@ bool ServiceTask::readData(SSL* ssl, BIO* io, const int& fd, const int& cntlen, 
 
 HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 {
-	//logger << dlib << endl;
+	//logger << dlib << std::endl;
 	HttpResponse res;
-	string ip;
-	string alldatlg = "\ngot fd from parent";
+	std::string ip;
+	std::string alldatlg = "\ngot fd from parent";
 	void *dlib = NULL, *ddlib = NULL;
 	try
 	{
-		string webpath = serverRootDirectory + "web/";
+		std::string webpath = serverRootDirectory + "web/";
 
 		if(ConfigurationData::isServingContext(req->getCntxt_name()))
 		{
 			req->setCntxt_name("default");
 			req->setCntxt_root(webpath+"default");
 
-			string folder = webpath+req->getCntxt_name();
+			std::string folder = webpath+req->getCntxt_name();
 			struct stat attrib;
 			int rv = stat(folder.c_str(), &attrib);
 			if(rv==0)
@@ -1881,7 +1881,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 
 		if(req->getFile()=="")
 		{
-			logger << ("File requested -> " + req->getFile()) << endl;
+			logger << ("File requested -> " + req->getFile()) << std::endl;
 			req->setFile("index.html");
 		}
 		if(req->hasCookie())
@@ -1890,8 +1890,8 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 				req->getSession()->setSessionAttributes(req->getCookieInfo());
 			else
 			{
-				string id = req->getCookieInfoAttribute("FFEADID");
-				map<string,string> values;
+				std::string id = req->getCookieInfoAttribute("FFEADID");
+				std::map<std::string,std::string> values;
 #ifdef INC_DSTC
 				if(ConfigurationData::getInstance()->coreServerProperties.sessservdistocache)
 					values = getSessionDataFromDistocache(id);
@@ -1907,7 +1907,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			req->setCntxt_name("default");
 			req->setCntxt_root(webpath+"default");
 
-			string folder = webpath+req->getCntxt_name();
+			std::string folder = webpath+req->getCntxt_name();
 			struct stat attrib;
 			int rv = stat(folder.c_str(), &attrib);
 			if(rv==0)
@@ -1919,18 +1919,18 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 				req->setUrl(webpath+"default"+req->getActUrl());
 			}
 		}
-		//logger << req->getCntxt_name() << req->getContextHome() << req->getUrl() << endl;
+		//logger << req->getCntxt_name() << req->getContextHome() << req->getUrl() << std::endl;
 
 		dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 		if(dlib == NULL)
 		{
-			cerr << dlerror() << endl;
+			std::cerr << dlerror() << std::endl;
 			throw "Cannot load application shared library";
 		}
 		ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 		if(ddlib == NULL)
 		{
-			cerr << dlerror() << endl;
+			std::cerr << dlerror() << std::endl;
 			throw "Cannot load application shared library";
 		}
 
@@ -1942,18 +1942,18 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		{
 			if(dlib == NULL)
 			{
-				cerr << dlerror() << endl;
+				std::cerr << dlerror() << std::endl;
 				exit(-1);
 			}
-			string meth1 = (req->getCntxt_name()+"checkRules");
-			string path1;
+			std::string meth1 = (req->getCntxt_name()+"checkRules");
+			std::string path1;
 			void *mkr1 = dlsym(dlib, meth1.c_str());
 			if(mkr1!=NULL)
 			{
-				typedef string (*DCPPtr1) (string,HttpSession);
+				typedef std::string (*DCPPtr1) (std::string,HttpSession);
 				DCPPtr1 f =  (DCPPtr1)mkr1;
 				path1 = f(req->getUrl(),*(req->getSession()));
-				//logger << path1 << flush;
+				//logger << path1 << std::flush;
 				if(path1=="FAILED")
 				{
 					req->setUrl("");
@@ -1966,10 +1966,10 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		}
 #endif
 
-		string ext = req->getExt();
-		vector<unsigned char> test;
-		string content;
-		string claz;
+		std::string ext = req->getExt();
+		std::vector<unsigned char> test;
+		std::string content;
+		std::string claz;
 		long sessionTimeoutVar = ConfigurationData::getInstance()->coreServerProperties.sessionTimeout;
 
 		bool isContrl = false;
@@ -1980,18 +1980,18 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			isContrl = true;
 		}
 
-		logger << ("Done with handling cors") << endl;
+		logger << ("Done with handling cors") << std::endl;
 
 		if(!isContrl)
 		{
 			isContrl = SecurityHandler::handle(req, &res, sessionTimeoutVar, reflector);
 			if(isContrl)
 			{
-				logger << ("Request handled by SecurityHandler") << endl;
+				logger << ("Request handled by SecurityHandler") << std::endl;
 			}
 		}
 
-		logger << ("Done with handling security") << endl;
+		logger << ("Done with handling security") << std::endl;
 
 		ext = req->getExt();
 
@@ -2002,11 +2002,11 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			isContrl = FilterHandler::handle(req, &res, ext, reflector);
 			if(isContrl)
 			{
-				logger << ("Request handled by FilterHandler") << endl;
+				logger << ("Request handled by FilterHandler") << std::endl;
 			}
 		}
 
-		logger << ("Done with handling filters") << endl;
+		logger << ("Done with handling filters") << std::endl;
 
 		ext = req->getExt();
 
@@ -2015,14 +2015,14 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			isContrl = authHandler.handle(req, res, ext);
 			if(isContrl)
 			{
-				logger << ("Request handled by AuthHandler") << endl;
+				logger << ("Request handled by AuthHandler") << std::endl;
 			}
 		}
-		logger << ("Done with handling auth") << endl;*/
+		logger << ("Done with handling auth") << std::endl;*/
 
 		ext = req->getExt();
 
-		string pthwofile = req->getCntxt_name()+req->getActUrl();
+		std::string pthwofile = req->getCntxt_name()+req->getActUrl();
 		if(req->getCntxt_name()!="default" && ConfigurationData::isServingContext(req->getCntxt_name()))
 		{
 			pthwofile = req->getActUrl();
@@ -2032,23 +2032,23 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			isContrl = ControllerHandler::handle(req, &res, ext, pthwofile, reflector);
 			if(isContrl)
 			{
-				logger << ("Request handled by ControllerHandler") << endl;
+				logger << ("Request handled by ControllerHandler") << std::endl;
 			}
 		}
 
-		logger << ("Done with handling controllers") << endl;
+		logger << ("Done with handling controllers") << std::endl;
 
 		ext = req->getExt();
 
 		/*After going through the controller the response might be blank, just set the HTTP version*/
 		res.update(req);
-		//logger << req->toString() << endl;
+		//logger << req->toString() << std::endl;
 		if(req->getMethod()!="TRACE")
 		{
-			logger << ("Started processing request - phase II") << endl;
+			logger << ("Started processing request - phase II") << std::endl;
 
-			string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
-			logger << wsUrl << endl;
+			std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + "/" + req->getCntxt_name() + "/" + req->getFile();
+			logger << wsUrl << std::endl;
 			if(isContrl)
 			{
 
@@ -2056,22 +2056,22 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			else if(ext==".form")
 			{
 				FormHandler::handle(req, &res, reflector);
-				logger << ("Request handled by FormHandler") << endl;
+				logger << ("Request handled by FormHandler") << std::endl;
 			}
 #ifdef INC_WEBSVC
 			else if(ConfigurationData::getInstance()->wsdlMap.find(wsUrl)!=ConfigurationData::getInstance()->wsdlMap.end())
 			{
-				if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=string::npos
-						|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=string::npos)
+				if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=std::string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=std::string::npos
+						|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=std::string::npos)
 				{
 					SoapHandler::handle(req, &res, dlib);
 				}
 				else
 				{
-					logger << ("Invalid Content type for soap request") << endl;
+					logger << ("Invalid Content type for soap request") << std::endl;
 					res.setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 				}
-				logger << ("Request handled by SoapHandler for Url "+wsUrl) << endl;
+				logger << ("Request handled by SoapHandler for Url "+wsUrl) << std::endl;
 			}
 #endif
 			else
@@ -2081,33 +2081,33 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 				cntrlit = ScriptHandler::handle(req, &res, ConfigurationData::getInstance()->handoffs, ext);
 #endif
 
-				logger << ("Done handling scripts") << endl;
+				logger << ("Done handling scripts") << std::endl;
 
 				if(cntrlit)
 				{
-					logger << ("Request handled by ScriptHandler") << endl;
+					logger << ("Request handled by ScriptHandler") << std::endl;
 				}
 				else
 				{
 					cntrlit = ExtHandler::handle(req, &res, dlib, ddlib, ext, reflector);
 					if(cntrlit)
 					{
-						logger << ("Request handled by ExtHandler") << endl;
+						logger << ("Request handled by ExtHandler") << std::endl;
 					}
-					logger << ("Done handling extra flows") << endl;
+					logger << ("Done handling extra flows") << std::endl;
 				}
-				map<string, map<string, string> > fviewMappingMap = ConfigurationData::getInstance()->fviewMappingMap;
-				map<string, string> fviewMap;
+				std::map<std::string, std::map<std::string, std::string> > fviewMappingMap = ConfigurationData::getInstance()->fviewMappingMap;
+				std::map<std::string, std::string> fviewMap;
 				if(fviewMappingMap.find(req->getCntxt_name())!=fviewMappingMap.end())
 					fviewMap = fviewMappingMap[req->getCntxt_name()];
 				if(!cntrlit && ext==".fview" && fviewMap.find(req->getFile())!=fviewMap.end())
 				{
 					FviewHandler::handle(req, &res);
-					logger << ("Request handled by FviewHandler") << endl;
+					logger << ("Request handled by FviewHandler") << std::endl;
 				}
 				else
 				{
-					logger << ("Request for static resource/file") << endl;
+					logger << ("Request for static resource/file") << std::endl;
 
 					if(res.getContent()=="")
 						updateContent(req, &res, ext, 0);
@@ -2139,7 +2139,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 		res.addHeaderValue(HttpResponse::DateHeader, df.format(cdate));
 
 		alldatlg += "--processed data";
-		string h1;
+		std::string h1;
 		//if(req->getHeader("Connection")!="")
 		//	res.addHeaderValue(HttpResponse::Connection, "close");
 		storeSessionAttributes(&res, req, sessionTimeoutVar, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
@@ -2147,7 +2147,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 
 		dlclose(dlib);
 		dlclose(ddlib);
-		//logger << (alldatlg + "--sent data--DONE") << endl;
+		//logger << (alldatlg + "--sent data--DONE") << std::endl;
 		//sessionMap[sessId] = sess;
 	}
 	catch(const char* ex)
@@ -2156,7 +2156,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			dlclose(dlib);
 		if(ddlib!=NULL)
 			dlclose(ddlib);
-		logger << ex << endl;
+		logger << ex << std::endl;
 	}
 	catch(...)
 	{
@@ -2164,7 +2164,7 @@ HttpResponse ServiceTask::apacheRun(HttpRequest* req)
 			dlclose(dlib);
 		if(ddlib!=NULL)
 			dlclose(ddlib);
-		logger << "Standard exception occurred while processing ServiceTask request " << endl;
+		logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
 	}
 	return res;
 }
@@ -2173,19 +2173,19 @@ void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, Soc
 {
 	Reflector reflector(dlib);
 
-	string actUrl = req->getActUrl();
+	std::string actUrl = req->getActUrl();
 	if(actUrl.length()>1)
 		actUrl = actUrl.substr(1);
 	if(actUrl.find(req->getCntxt_name())!=0)
 		actUrl = req->getCntxt_name() + "/" + actUrl;
 	StringUtil::replaceFirst(actUrl,"//","/");
 
-	string className;
-	map<string, map<string, string> > websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
+	std::string className;
+	std::map<std::string, std::map<std::string, std::string> > websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
 	if(websocketMappingMap.find(req->getCntxt_name())!=websocketMappingMap.end())
 	{
-		map<string, string> websockcntMap = websocketMappingMap[req->getCntxt_name()];
-		map<string, string>::iterator it;
+		std::map<std::string, std::string> websockcntMap = websocketMappingMap[req->getCntxt_name()];
+		std::map<std::string, std::string>::iterator it;
 		for (it=websockcntMap.begin();it!=websockcntMap.end();++it) {
 			if(ConfigurationData::urlMatchesPath(req->getCntxt_name(), it->first, actUrl))
 			{
@@ -2203,13 +2203,13 @@ void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, Soc
 		Method meth = srv.getMethod("onOpen", argus);
 		if(meth.getMethodName()!="")
 		{
-			 logger << ("WebSocket Controller " + className + " called") << endl;
+			 logger << ("WebSocket Controller " + className + " called") << std::endl;
 			 WebSocketData data = reflector.invokeMethod<WebSocketData>(_temp,meth,valus,req->getCntxt_name());
-			 logger << "WebSocket Controller onOpen" << endl;
+			 logger << "WebSocket Controller onOpen" << std::endl;
 		}
 		else
 		{
-			logger << "Invalid WebSocket Controller" << endl;
+			logger << "Invalid WebSocket Controller" << std::endl;
 		}
 
 		argus.push_back("WebSocketData");
@@ -2222,13 +2222,13 @@ void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, Soc
 			Method methc = srv.getMethod("onClose", argus);
 			if(methc.getMethodName()!="")
 			{
-				 logger << ("WebSocket Controller " + className + " called") << endl;
+				 logger << ("WebSocket Controller " + className + " called") << std::endl;
 				 WebSocketData data = reflector.invokeMethod<WebSocketData>(_temp,methc,valus,req->getCntxt_name());
-				 logger << "WebSocket Controller onClose" << endl;
+				 logger << "WebSocket Controller onClose" << std::endl;
 			}
 			else
 			{
-				logger << "Invalid WebSocket Controller" << endl;
+				logger << "Invalid WebSocket Controller" << std::endl;
 			}
 		}
 	}*/

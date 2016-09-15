@@ -40,12 +40,12 @@ void Test::setId(int id)
 	this->id = id;
 }
 
-string Test::getName() const
+std::string Test::getName() const
 {
 	return name;
 }
 
-void Test::setName(string name)
+void Test::setName(std::string name)
 {
 	this->name = name;
 }

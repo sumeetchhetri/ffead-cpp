@@ -31,50 +31,50 @@
 #include "CommonUtils.h"
 #include "SSLHandler.h"
 #include "ClassStructure.h"
-using namespace std;
 
-typedef void* (*toObjectFromJson) (const string&);
+
+typedef void* (*toObjectFromJson) (const std::string&);
 
 class WsDetails {
-	string claz;
-	string location;
-	string namespc;
-	string appname;
-	map<string, string> outnmmp;
+	std::string claz;
+	std::string location;
+	std::string namespc;
+	std::string appname;
+	std::map<std::string, std::string> outnmmp;
 	friend class ConfigurationHandler;
 	friend class WsUtil;
 };
 
 class RestFunctionParams
 {
-	string name;
-	string type;
-	string from;
-	string defValue;
+	std::string name;
+	std::string type;
+	std::string from;
+	std::string defValue;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;
 };
 
 class RestFunction
 {
-	string name;
-	string path;
-	string clas;
-	string meth;
-	string statusCode;
-	string icontentType;
-	string ocontentType;
-	vector<RestFunctionParams> params;
+	std::string name;
+	std::string path;
+	std::string clas;
+	std::string meth;
+	std::string statusCode;
+	std::string icontentType;
+	std::string ocontentType;
+	std::vector<RestFunctionParams> params;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;
 };
 
-typedef map<string, vector<RestFunction> > resFuncMap;
+typedef std::map<std::string, std::vector<RestFunction> > resFuncMap;
 
 class SecureAspect
 {
-	string path;
-	string role;
+	std::string path;
+	std::string role;
 	friend class ConfigurationHandler;
 	friend class ConfigurationData;
 	friend class Security;
@@ -84,19 +84,19 @@ class SecureAspect
 class Security
 {
 	Logger logger;
-	map<string, SecureAspect> secures;
-	string loginProvider;
-	string loginUrl;
-	string welcomeFile;
-	string name;
+	std::map<std::string, SecureAspect> secures;
+	std::string loginProvider;
+	std::string loginUrl;
+	std::string welcomeFile;
+	std::string name;
 	long sessTimeout;
-	map<string, string> securityFieldNames;
-	map<string, string> securityFieldFrom;
+	std::map<std::string, std::string> securityFieldNames;
+	std::map<std::string, std::string> securityFieldFrom;
 	bool isLoginConfigured();
 	bool isSecureConfigured();
-	bool isLoginUrl(const string& cntxtName, const string& actUrl);
-	bool isLoginPage(const string& cntxtName, const string& actUrl);
-	SecureAspect matchesPath(const string& cntxtName, string actUrl);
+	bool isLoginUrl(const std::string& cntxtName, const std::string& actUrl);
+	bool isLoginPage(const std::string& cntxtName, const std::string& actUrl);
+	SecureAspect matchesPath(const std::string& cntxtName, std::string actUrl);
 	bool addAspect(const SecureAspect&);
 	friend class ConfigurationData;
 	friend class ConfigurationHandler;
@@ -107,7 +107,7 @@ public:
 };
 
 class UrlPattern {
-	string pattern;
+	std::string pattern;
 	int type;
 	friend class ConfigurationHandler;
 	friend class ConfigurationData;
@@ -118,16 +118,16 @@ public:
 };
 
 class CoreServerProperties {
-	string serverRootDirectory;
-	string ip_address;
-	string resourcePath;
-	string webPath;
+	std::string serverRootDirectory;
+	std::string ip_address;
+	std::string resourcePath;
+	std::string webPath;
 	long sessionTimeout;
 	long sessionFileLockTimeout;
 	bool sessatserv;
 	bool sessservdistocache;
 	bool isMainServerProcess;
-	map<string, string> sprops;
+	std::map<std::string, std::string> sprops;
 	friend class ExtHandler;
 	friend class SecurityHandler;
 	friend class FormHandler;
@@ -140,7 +140,7 @@ class CoreServerProperties {
 	friend class TemplateGenerator;
 public:
 	CoreServerProperties(){}
-	CoreServerProperties(string serverRootDirectory, string resourcePath, string webPath, propMap sprops, long sessionTimeout, bool sessatserv) {
+	CoreServerProperties(std::string serverRootDirectory, std::string resourcePath, std::string webPath, propMap sprops, long sessionTimeout, bool sessatserv) {
 		isMainServerProcess = false;
 		sessservdistocache = false;
 		this->serverRootDirectory = serverRootDirectory;
@@ -155,37 +155,37 @@ public:
 class ConfigurationData {
 	ConfigurationData();
 	static ConfigurationData* instance;
-	map<string, string> appAliases;
-	map<string, vector<string> > filterMap;
-	map<string, map<string, vector<RestFunction> > > rstCntMap;
-	map<string, string> handoffs;
-	map<string, map<string, Security> > securityObjectMap;
-	map<string, map<string, string> > controllerObjectMap;
-	map<string, map<string, string> > mappingObjectMap;
-	map<string, map<string, string> > mappingextObjectMap;
-	map<string, map<string, vector<string> > > filterObjectMap;
-	map<string, map<string, string> > viewMappingMap;
-	map<string, map<string, string> > ajaxInterfaceMap;
-	map<string, map<string, string> > fviewMappingMap;
-	map<string, map<string, string> > wsdlMap;
-	map<string, map<string, Element> > fviewFormMap;
-	map<string, map<string, string> > templateMappingMap;
-	map<string, map<string, string> > dcpMappingMap;
-	map<string, map<string, string> > websocketMappingMap;
-	map<string, string> dynamicCppPagesMap;
-	map<string, string> templateFilesMap;
-	map<string, bool> applicationFlowMap;
-	map<string, bool> servingContexts;
-	vector<string> componentNames;
+	std::map<std::string, std::string> appAliases;
+	std::map<std::string, std::vector<std::string> > filterMap;
+	std::map<std::string, std::map<std::string, std::vector<RestFunction> > > rstCntMap;
+	std::map<std::string, std::string> handoffs;
+	std::map<std::string, std::map<std::string, Security> > securityObjectMap;
+	std::map<std::string, std::map<std::string, std::string> > controllerObjectMap;
+	std::map<std::string, std::map<std::string, std::string> > mappingObjectMap;
+	std::map<std::string, std::map<std::string, std::string> > mappingextObjectMap;
+	std::map<std::string, std::map<std::string, std::vector<std::string> > > filterObjectMap;
+	std::map<std::string, std::map<std::string, std::string> > viewMappingMap;
+	std::map<std::string, std::map<std::string, std::string> > ajaxInterfaceMap;
+	std::map<std::string, std::map<std::string, std::string> > fviewMappingMap;
+	std::map<std::string, std::map<std::string, std::string> > wsdlMap;
+	std::map<std::string, std::map<std::string, Element> > fviewFormMap;
+	std::map<std::string, std::map<std::string, std::string> > templateMappingMap;
+	std::map<std::string, std::map<std::string, std::string> > dcpMappingMap;
+	std::map<std::string, std::map<std::string, std::string> > websocketMappingMap;
+	std::map<std::string, std::string> dynamicCppPagesMap;
+	std::map<std::string, std::string> templateFilesMap;
+	std::map<std::string, bool> applicationFlowMap;
+	std::map<std::string, bool> servingContexts;
+	std::vector<std::string> componentNames;
 	FFEADContext ffeadContext;
 	CorsConfig corsConfig;
 	SecurityProperties securityProperties;
 	CoreServerProperties coreServerProperties;
-	map<string, map<string, ConnectionProperties> > sdormConnProperties;
-	map<string, map<string, Mapping> > sdormEntityMappings;
-	map<string, map<string, ConnectionProperties> > cacheConnProperties;
-	map<string, vector<WsDetails> > webserviceDetailMap;
-	map<string, map<string, ClassStructure> > classStructureMap;
+	std::map<std::string, std::map<std::string, ConnectionProperties> > sdormConnProperties;
+	std::map<std::string, std::map<std::string, Mapping> > sdormEntityMappings;
+	std::map<std::string, std::map<std::string, ConnectionProperties> > cacheConnProperties;
+	std::map<std::string, std::vector<WsDetails> > webserviceDetailMap;
+	std::map<std::string, std::map<std::string, ClassStructure> > classStructureMap;
 	Logger logger;
 	ThreadLocal httpRequest;
 	ThreadLocal httpResponse;
@@ -208,9 +208,9 @@ class ConfigurationData {
 	friend class ApplicationUtil;
 	friend class FFEADContext;
 	friend class SocketUtil;
-	static bool urlMatchesPath(const string& cntxtName, string pathurl, string url);
+	static bool urlMatchesPath(const std::string& cntxtName, std::string pathurl, std::string url);
 public:
-	static bool isServingContext(const string& cntxtName);
+	static bool isServingContext(const std::string& cntxtName);
 	static ConfigurationData* getInstance();
 	static SecurityProperties const& getSecurityProperties();
 	static CoreServerProperties const& getCoreServerProperties();

@@ -22,25 +22,25 @@ AMEFEncoder::AMEFEncoder() {
 AMEFEncoder::~AMEFEncoder() {
 }
 
-string AMEFEncoder::encodeB(AMEFObject* packet)
+std::string AMEFEncoder::encodeB(AMEFObject* packet)
 {
-	string enc = encodeSinglePacketBNew(packet, true);
-	string len = AMEFObject::intTocharArray(enc.length(), 4);
-	string temp;
+	std::string enc = encodeSinglePacketBNew(packet, true);
+	std::string len = AMEFObject::intTocharArray(enc.length(), 4);
+	std::string temp;
 	temp.append(len);
 	temp.append(enc);
 	return temp;
 }
 
-string AMEFEncoder::encodeWL(AMEFObject* packet)
+std::string AMEFEncoder::encodeWL(AMEFObject* packet)
 {
-	string enc = encodeSinglePacketBNew(packet, true);
+	std::string enc = encodeSinglePacketBNew(packet, true);
 	return enc;
 }
 
-string AMEFEncoder::encodeSinglePacketB(AMEFObject *packet, const bool& ignoreName)
+std::string AMEFEncoder::encodeSinglePacketB(AMEFObject *packet, const bool& ignoreName)
 {
-	string buffer, vbuffer;
+	std::string buffer, vbuffer;
 	if(!ignoreName)
 	{
 		buffer.append(AMEFObject::ulonglongTocharArray(packet->getNameStr().length()));
@@ -50,7 +50,7 @@ string AMEFEncoder::encodeSinglePacketB(AMEFObject *packet, const bool& ignoreNa
 	for (int i=0;i<(int)packet->getPackets().size();i++)
 	{
 		AMEFObject *pack = packet->getPackets().at(i);
-		string val = encodeSinglePacketB(pack, false);
+		std::string val = encodeSinglePacketB(pack, false);
 		vbuffer.append(val);
 	}
 
@@ -80,20 +80,20 @@ string AMEFEncoder::encodeSinglePacketB(AMEFObject *packet, const bool& ignoreNa
 	return buffer;
 }
 /*
-string AMEFEncoder::encodeBNew(AMEFObject* packet)
+std::string AMEFEncoder::encodeBNew(AMEFObject* packet)
 {
-	string enc = encodeSinglePacketBNew(packet, true);
-	string len = AMEFObject::intTocharArray(enc.length(), 4);
-	string temp;
+	std::string enc = encodeSinglePacketBNew(packet, true);
+	std::string len = AMEFObject::intTocharArray(enc.length(), 4);
+	std::string temp;
 	temp.append(len);
 	temp.append(enc);
 	return temp;
 }
 */
 
-string AMEFEncoder::encodeSinglePacketBNew(AMEFObject *packet, const bool& ignoreName)
+std::string AMEFEncoder::encodeSinglePacketBNew(AMEFObject *packet, const bool& ignoreName)
 {
-	string buffer, vbuffer, pbuffer;
+	std::string buffer, vbuffer, pbuffer;
 	if(!ignoreName)
 	{
 		buffer.append(AMEFObject::ulonglongTocharArray(packet->getNameStr().length(), 1));
@@ -103,7 +103,7 @@ string AMEFEncoder::encodeSinglePacketBNew(AMEFObject *packet, const bool& ignor
 	for (int i=0;i<(int)packet->getPackets().size();i++)
 	{
 		AMEFObject *pack = packet->getPackets().at(i);
-		string val = encodeSinglePacketBNew(pack, false);
+		std::string val = encodeSinglePacketBNew(pack, false);
 		if(packet->getType()==AMEFObject::OBJECT_TYPE) {
 			pbuffer.append(AMEFObject::ulonglongTocharArray(val.length(), 4));
 		}

@@ -31,24 +31,24 @@ Renderer::~Renderer() {
 	// TODO Auto-generated destructor stub
 }
 
-string Renderer::generateStartOpenTag(const string& tagName)
+std::string Renderer::generateStartOpenTag(const std::string& tagName)
 {
-	string str = "<" + tagName;
+	std::string str = "<" + tagName;
 	return str;
 }
-string Renderer::generateEndOpenTag()
+std::string Renderer::generateEndOpenTag()
 {
-	string str = ">";
+	std::string str = ">";
 	return str;
 }
-string Renderer::generateCloseTag(const string& tagName)
+std::string Renderer::generateCloseTag(const std::string& tagName)
 {
-	string str = "</" + tagName + ">";
+	std::string str = "</" + tagName + ">";
 	return str;
 }
-string Renderer::generateAttributes(const AttributeList& attributes)
+std::string Renderer::generateAttributes(const AttributeList& attributes)
 {
-	string str;
+	std::string str;
 	AttributeList::const_iterator itr;
 	for(itr = attributes.begin();itr!=attributes.end();itr++)
 	{

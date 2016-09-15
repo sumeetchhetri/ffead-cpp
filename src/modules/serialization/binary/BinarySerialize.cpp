@@ -26,7 +26,7 @@ BinarySerialize::BinarySerialize() {
 	dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(dlib == NULL)
 	{
-		cerr << dlerror() << endl;
+		std::cerr << dlerror() << std::endl;
 		throw "Cannot load serialization shared library";
 	}
 	dlibinstantiated = true;
@@ -48,15 +48,15 @@ BinarySerialize::~BinarySerialize() {
 	}
 }
 
-string BinarySerialize::serializePrimitive(const string& className, void* t)
+std::string BinarySerialize::serializePrimitive(const std::string& className, void* t)
 {
-	string objXml;
+	std::string objXml;
 	AMEFEncoder enc;
 	AMEFObject object;
 
 	if(className=="std::string" || className=="string")
 	{
-		string tem = *(string*)t;
+		std::string tem = *(std::string*)t;
 		object.addPacket(tem, className);
 	}
 	else if(className=="char")
@@ -131,12 +131,12 @@ string BinarySerialize::serializePrimitive(const string& className, void* t)
 	}
 	else if(className=="Date")
 	{
-		string tem = *(string*)t;
+		std::string tem = *(std::string*)t;
 		object.addPacket(tem, className);
 	}
 	else if(className=="BinaryData")
 	{
-		string tem = *(string*)t;
+		std::string tem = *(std::string*)t;
 		object.addPacket(tem, className);
 	}
 	return enc.encodeB(&object);
@@ -153,25 +153,25 @@ void BinarySerialize::cleanSerializableObject(void* _1)
 	delete object;
 }
 
-void BinarySerialize::startContainerSerialization(void* _1, const string& className, const string& container)
+void BinarySerialize::startContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
 	AMEFEncoder enc;
 	AMEFObject* object = static_cast<AMEFObject*>(_1);
 	object->setName(container+"-"+className);
 }
 
-void BinarySerialize::endContainerSerialization(void* _1, const string& className, const string& container){}
+void BinarySerialize::endContainerSerialization(void* _1, const std::string& className, const std::string& container){}
 
 void BinarySerialize::afterAddContainerSerializableElement(void* _1, const int& counter, const int& size){}
 
-void BinarySerialize::addContainerSerializableElement(void* _1, const string& tem)
+void BinarySerialize::addContainerSerializableElement(void* _1, const std::string& tem)
 {
 	AMEFEncoder enc;
 	AMEFObject* object = static_cast<AMEFObject*>(_1);
 	object->addPacket(tem);
 }
 
-void BinarySerialize::addContainerSerializableElementMulti(void* _1, const string& tem)
+void BinarySerialize::addContainerSerializableElementMulti(void* _1, const std::string& tem)
 {
 	//tem = tem.substr(4);
 	AMEFEncoder enc;
@@ -179,24 +179,24 @@ void BinarySerialize::addContainerSerializableElementMulti(void* _1, const strin
 	object->addPacket(tem);
 }
 
-string BinarySerialize::fromSerializableObjectToString(void* _1)
+std::string BinarySerialize::fromSerializableObjectToString(void* _1)
 {
 	AMEFEncoder enc;
 	AMEFObject* object = static_cast<AMEFObject*>(_1);
 	return enc.encodeB(object);
 }
 
-string BinarySerialize::elementToSerializedString(void* _1, const int& counter)
+std::string BinarySerialize::elementToSerializedString(void* _1, const int& counter)
 {
 	AMEFObject* object = static_cast<AMEFObject*>(_1);
 	return object->getPackets().at(counter)->getValueStr();
 }
 
-string BinarySerialize::getConatinerElementClassName(void* _1, const string& className)
+std::string BinarySerialize::getConatinerElementClassName(void* _1, const std::string& className)
 {
 	AMEFObject* root = static_cast<AMEFObject*>(_1);
-	string stlclassName = className;
-	if(stlclassName.find(">")!=string::npos)
+	std::string stlclassName = className;
+	if(stlclassName.find(">")!=std::string::npos)
 	{
 		stlclassName = stlclassName.substr(stlclassName.find("<")+1);
 		return stlclassName.substr(0, stlclassName.find(">"));
@@ -204,12 +204,12 @@ string BinarySerialize::getConatinerElementClassName(void* _1, const string& cla
 	else
 	{
 		stlclassName = stlclassName.substr(stlclassName.find("<")+1);
-		if(stlclassName.find(",")!=string::npos)
+		if(stlclassName.find(",")!=std::string::npos)
 		{
 			return stlclassName.substr(0, stlclassName.find_last_of(','));
 		}
 	}
-	/*if(stlclassName.find("-")!=string::npos)
+	/*if(stlclassName.find("-")!=std::string::npos)
 	{
 		className = stlclassName.substr(stlclassName.find("-")+1);
 	}*/
@@ -224,14 +224,14 @@ void* BinarySerialize::getContainerElement(void* _1, const int& counter, const i
 	return root2;
 }
 
-void BinarySerialize::addPrimitiveElementToContainer(void* _1, const int& counter, const string& className, void* cont, const string& container)
+void BinarySerialize::addPrimitiveElementToContainer(void* _1, const int& counter, const std::string& className, void* cont, const std::string& container)
 {
 	AMEFDecoder dec;
 	AMEFObject* root = static_cast<AMEFObject*>(_1);
 	AMEFObject* root2 = dec.decodeB(root->getPackets().at(counter)->getValue(), true);
 	if(className=="std::string" || className=="string")
 	{
-		string retVal = root2->getPackets().at(0)->getValueStr();
+		std::string retVal = root2->getPackets().at(0)->getValueStr();
 		addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="int")
@@ -306,7 +306,7 @@ void BinarySerialize::addPrimitiveElementToContainer(void* _1, const int& counte
 	}
 }
 
-void* BinarySerialize::getUnserializableObject(const string& _1)
+void* BinarySerialize::getUnserializableObject(const std::string& _1)
 {
 	AMEFDecoder dec;
 	AMEFObject* root = dec.decodeB(_1, true);
@@ -325,7 +325,7 @@ void BinarySerialize::cleanValidUnserializableObject(void* _1)
 	delete object;
 }
 
-void* BinarySerialize::getValidUnserializableObject(const string& _1){return NULL;}
+void* BinarySerialize::getValidUnserializableObject(const std::string& _1){return NULL;}
 
 int BinarySerialize::getContainerSize(void* _1)
 {
@@ -333,13 +333,13 @@ int BinarySerialize::getContainerSize(void* _1)
 	return root->getPackets().size();
 }
 
-string BinarySerialize::getUnserializableClassName(void* _1, const string& className)
+std::string BinarySerialize::getUnserializableClassName(void* _1, const std::string& className)
 {
 	AMEFObject* root = static_cast<AMEFObject*>(_1);
 	return root->getNameStr();
 }
 
-void* BinarySerialize::getPrimitiveValue(void* _1, const string& className)
+void* BinarySerialize::getPrimitiveValue(void* _1, const std::string& className)
 {
 	AMEFObject* root = static_cast<AMEFObject*>(_1);
 	root = root->getPackets().at(0);
@@ -438,26 +438,26 @@ void* BinarySerialize::getPrimitiveValue(void* _1, const string& className)
 	}
 	else if((className=="std::string" || className=="string") && className==root->getNameStr())
 	{
-		string *vt = new string;
+		std::string *vt = new std::string;
 		*vt = root->getValueStr();
 		return vt;
 	}
 	return NULL;
 }
 
-string BinarySerialize::serializeUnknown(void* t, const string& className, const string& appName)
+std::string BinarySerialize::serializeUnknown(void* t, const std::string& className, const std::string& appName)
 {
 	BinarySerialize serialize;
 	return _handleAllSerialization(className,t,appName, &serialize);
 }
 
-void* BinarySerialize::unSerializeUnknown(const string& objXml, const string& className, const string& appName)
+void* BinarySerialize::unSerializeUnknown(const std::string& objXml, const std::string& className, const std::string& appName)
 {
 	BinarySerialize serialize;
 	return _handleAllUnSerialization(objXml,className,appName,&serialize,false,NULL);
 }
 
-bool BinarySerialize::isValidClassNamespace(void* _1, const string& cn, const string& namespc, const bool& iscontainer)
+bool BinarySerialize::isValidClassNamespace(void* _1, const std::string& cn, const std::string& namespc, const bool& iscontainer)
 {
 	/*StringUtil::replaceAll(namespc, "::", "_");
 	StringUtil::replaceAll(className, "std::", "");
@@ -466,10 +466,10 @@ bool BinarySerialize::isValidClassNamespace(void* _1, const string& cn, const st
 	StringUtil::replaceAll(className, ">", "-");
 	if(className.at(className.length()-1)=='-')
 		className = className.substr(0, className.length()-1);*/
-	string className = cn;
-	if(className.find('-')!=string::npos)
+	std::string className = cn;
+	if(className.find('-')!=std::string::npos)
 	{
-		string pre = className.substr(0, className.find_last_of("-")+1);
+		std::string pre = className.substr(0, className.find_last_of("-")+1);
 		className = className.substr(className.find_last_of("-")+1);
 		className = pre + namespc + className;
 	}
@@ -481,7 +481,7 @@ bool BinarySerialize::isValidClassNamespace(void* _1, const string& cn, const st
 	return true;
 }
 
-bool BinarySerialize::isValidObjectProperty(void* _1, const string& propname, const int& counter)
+bool BinarySerialize::isValidObjectProperty(void* _1, const std::string& propname, const int& counter)
 {
 	AMEFObject* element = static_cast<AMEFObject*>(_1);
 	if((int)element->getPackets().size()>counter && element->getPackets().at(counter)->getNameStr()==propname)
@@ -495,23 +495,23 @@ void* BinarySerialize::getObjectProperty(void* _1, const int& counter)
 	return element->getPackets().at(counter);
 }
 
-void BinarySerialize::startObjectSerialization(void* _1, const string& className)
+void BinarySerialize::startObjectSerialization(void* _1, const std::string& className)
 {
 	AMEFEncoder enc;
 	AMEFObject* object = static_cast<AMEFObject*>(_1);
 	object->setName(className);
 }
 
-void BinarySerialize::endObjectSerialization(void* _1, const string& className){}
+void BinarySerialize::endObjectSerialization(void* _1, const std::string& className){}
 
 void BinarySerialize::afterAddObjectProperty(void* _1){}
 
-void BinarySerialize::addObjectPrimitiveProperty(void* _1, const string& propName, const string& className, void* t)
+void BinarySerialize::addObjectPrimitiveProperty(void* _1, const std::string& propName, const std::string& className, void* t)
 {
 	AMEFObject* object = static_cast<AMEFObject*>(_1);
 	if(className=="std::string" || className=="string")
 	{
-		string tem = *(string*)t;
+		std::string tem = *(std::string*)t;
 		object->addPacket(tem, propName);
 	}
 	else if(className=="char")
@@ -586,23 +586,23 @@ void BinarySerialize::addObjectPrimitiveProperty(void* _1, const string& propNam
 	}
 	else if(className=="Date")
 	{
-		string tem = *(string*)t;
+		std::string tem = *(std::string*)t;
 		object->addPacket(tem, propName);
 	}
 	else if(className=="BinaryData")
 	{
-		string tem = *(string*)t;
+		std::string tem = *(std::string*)t;
 		object->addPacket(tem, propName);
 	}
 }
 
-void BinarySerialize::addObjectProperty(void* _1, const string& propName, string className, const string& t)
+void BinarySerialize::addObjectProperty(void* _1, const std::string& propName, std::string className, const std::string& t)
 {
 	AMEFObject* object = static_cast<AMEFObject*>(_1);
 	object->addPacket(t, propName);
 }
 
-void* BinarySerialize::getObjectPrimitiveValue(void* _1, const string& className, const string& propName)
+void* BinarySerialize::getObjectPrimitiveValue(void* _1, const std::string& className, const std::string& propName)
 {
 	AMEFObject* root = static_cast<AMEFObject*>(_1);
 	if((className=="signed" || className=="int" || className=="signed int") && root->getNameStr()==propName)
@@ -700,22 +700,22 @@ void* BinarySerialize::getObjectPrimitiveValue(void* _1, const string& className
 	}
 	else if((className=="std::string" || className=="string") && root->getNameStr()==propName)
 	{
-		string *vt = new string;
+		std::string *vt = new std::string;
 		*vt = root->getValueStr();
 		return vt;
 	}
 	return NULL;
 }
 
-string BinarySerialize::serializeUnknownBase(void* t, const string& className, const string& appName)
+std::string BinarySerialize::serializeUnknownBase(void* t, const std::string& className, const std::string& appName)
 {
 	return _handleAllSerialization(className,t,appName, this);
 }
-void* BinarySerialize::unSerializeUnknownBase(void* unserObj, const string& className, const string& appName)
+void* BinarySerialize::unSerializeUnknownBase(void* unserObj, const std::string& className, const std::string& appName)
 {
 	return _handleAllUnSerialization("",className,appName,this,false,unserObj);
 }
-void* BinarySerialize::unSerializeUnknownBase(const string& serVal, const string& className, const string& appName)
+void* BinarySerialize::unSerializeUnknownBase(const std::string& serVal, const std::string& className, const std::string& appName)
 {
 	return _handleAllUnSerialization(serVal,className,appName,this,false,NULL);
 }

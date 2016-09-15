@@ -45,7 +45,7 @@ void BinaryData::append(unsigned char *dat, const int& length)
 	for(int i=0;i<length;i++)
 		this->data.push_back(dat[i]);
 }
-void BinaryData::append(const string& dat)
+void BinaryData::append(const std::string& dat)
 {
 	for(int i=0;i<(signed int)dat.length();i++)
 		this->data.push_back(dat[i]);
@@ -60,15 +60,15 @@ binaryData BinaryData::getData()
 	return this->data;
 }
 
-string BinaryData::serilaize(const BinaryData& data)
+std::string BinaryData::serilaize(const BinaryData& data)
 {
-	string temp;
+	std::string temp;
 	for(int i=0;i<(signed int)data.data.size();i++)
 		temp += data.data.at(i);
 	return temp;
 }
 
-BinaryData* BinaryData::unSerilaize(const string& temp)
+BinaryData* BinaryData::unSerilaize(const std::string& temp)
 {
 	BinaryData *binr = new BinaryData;
 	binr->data.clear();

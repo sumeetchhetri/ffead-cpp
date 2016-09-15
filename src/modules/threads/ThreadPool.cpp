@@ -82,7 +82,7 @@ void ThreadPool::initializeThreads()
 {
 	if(runFlag)return;
 	wpool = new TaskPool(prioritypooling);
-	tpool = new vector<PoolThread*>;
+	tpool = new std::vector<PoolThread*>;
 	for (int i = 0; i < maxThreads; i++) {
 		PoolThread *thread = new PoolThread(wpool);
 		thread->execute();
@@ -193,5 +193,5 @@ ThreadPool::~ThreadPool() {
 		delete tpool->at(i);
 	}
 	delete m_mutex;
-	logger << "Destroyed PoolThread Pool\n" << flush;
+	logger << "Destroyed PoolThread Pool\n" << std::flush;
 }

@@ -32,9 +32,9 @@
 #include "StringUtil.h"
 #include "LoggerFactory.h"
 
-using namespace std;
-typedef vector<string> strVec;
-typedef map<string, string> propMap;
+
+typedef std::vector<std::string> strVec;
+typedef std::map<std::string, std::string> propMap;
 
 #ifndef AFCUTIL_H_
 #define AFCUTIL_H_
@@ -46,22 +46,22 @@ class AfcUtil {
 public:
 	AfcUtil();
 	virtual ~AfcUtil();
-	static string generateJsObjects(const strVec& obj, ClassStructure& classstruc, string &headers, string &objs, strVec pobj, const bool& isOpForSet, string& typrefs, const strVec& minfo, const string& app, const string& clspth, Reflection& ref);
-	static string generateReadObjects(const string& type, const string& name, const bool& priv, const bool& ptr, const string& typ, const string& app, ClassStructure& classstruc, Reflection& ref);
-	static string generateReadVectorObjects(const string& type, const string& name, const bool& priv, const bool& ptr, const string& typ, const string& conttype, const string& app, ClassStructure& classstruc, Reflection& ref);
-	static string generateToJSONObjects(const string& type, const string& name, const bool& priv, const bool& end, string &retu, string &headers, string &objs, const string& typ, const bool& ptr, const string& app, ClassStructure& classstruc, Reflection& ref);
-	static string generateToJSONVectorObjects(const string& type, const string& name, const bool& priv, string &retu, string &headers, string &objs, const string& typ, const bool& ptr, const string& stlcnttyp, const string& app, ClassStructure& classstruc, Reflection& ref);
+	static std::string generateJsObjects(const strVec& obj, ClassStructure& classstruc, std::string &headers, std::string &objs, strVec pobj, const bool& isOpForSet, std::string& typrefs, const strVec& minfo, const std::string& app, const std::string& clspth, Reflection& ref);
+	static std::string generateReadObjects(const std::string& type, const std::string& name, const bool& priv, const bool& ptr, const std::string& typ, const std::string& app, ClassStructure& classstruc, Reflection& ref);
+	static std::string generateReadVectorObjects(const std::string& type, const std::string& name, const bool& priv, const bool& ptr, const std::string& typ, const std::string& conttype, const std::string& app, ClassStructure& classstruc, Reflection& ref);
+	static std::string generateToJSONObjects(const std::string& type, const std::string& name, const bool& priv, const bool& end, std::string &retu, std::string &headers, std::string &objs, const std::string& typ, const bool& ptr, const std::string& app, ClassStructure& classstruc, Reflection& ref);
+	static std::string generateToJSONVectorObjects(const std::string& type, const std::string& name, const bool& priv, std::string &retu, std::string &headers, std::string &objs, const std::string& typ, const bool& ptr, const std::string& stlcnttyp, const std::string& app, ClassStructure& classstruc, Reflection& ref);
 
-	static string generateJsObjectsAll(map<string, ClassStructure>& allclsmap);
-	static string generateJsObjects(strVec obj, const string& claz, strVec pobj, const strVec& minfo);
+	static std::string generateJsObjectsAll(std::map<std::string, ClassStructure>& allclsmap);
+	static std::string generateJsObjects(strVec obj, const std::string& claz, strVec pobj, const strVec& minfo);
 
-	static void writeTofile(const string&, const string&, const bool&);
-	static string camelCased(const string&);
-	static string reverseCamelCased(const string&);
+	static void writeTofile(const std::string&, const std::string&, const bool&);
+	static std::string camelCased(const std::string&);
+	static std::string reverseCamelCased(const std::string&);
 
-	static string generateJsInterfacessAll(map<string, ClassStructure>& allclsmap, string &infjs, map<string, string>& ajintpthMap, strVec& afcd, Reflection& ref);
-	static string generateJsInterfaces(const strVec& obj, ClassStructure& classstruc, const string& path, string &infjs, const string& appName, map<string, string>& ajintpthMap, Reflection& ref);
-	static string updateAjaxInterface(const strVec& emp, ClassStructure& classstruc, const string& pars, const string& parswt, const string& types, const string& appName, Reflection& ref);
+	static std::string generateJsInterfacessAll(std::map<std::string, ClassStructure>& allclsmap, std::string &infjs, std::map<std::string, std::string>& ajintpthMap, strVec& afcd, Reflection& ref);
+	static std::string generateJsInterfaces(const strVec& obj, ClassStructure& classstruc, const std::string& path, std::string &infjs, const std::string& appName, std::map<std::string, std::string>& ajintpthMap, Reflection& ref);
+	static std::string updateAjaxInterface(const strVec& emp, ClassStructure& classstruc, const std::string& pars, const std::string& parswt, const std::string& types, const std::string& appName, Reflection& ref);
 
 
 };

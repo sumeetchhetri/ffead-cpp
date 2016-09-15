@@ -22,7 +22,7 @@
 
 #include "ClientInterface.h"
 
-int ClientInterface::getLengthCl(const string& header, const int& size)
+int ClientInterface::getLengthCl(const std::string& header, const int& size)
 {
 	int totsize = header[size-1] & 0xff;
 	for (int var = 0; var < size-1; var++)

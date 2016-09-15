@@ -31,8 +31,8 @@ class MarkerSecurityProvider : public AuthController {
 public:
 	MarkerSecurityProvider();
 	virtual ~MarkerSecurityProvider();
-	bool authenticate(const string& user, const string& password);
-	string getUserRole(const string& username);
+	bool authenticate(const std::string& user, const std::string& password);
+	std::string getUserRole(const std::string& username);
 	bool isInitialized();
 };
 

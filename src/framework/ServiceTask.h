@@ -58,32 +58,32 @@ class ServiceTask : public HttpServiceTask
 {
 	Logger logger;
 	int fd;
-	string serverRootDirectory;
-	map<string,string> *params;
+	std::string serverRootDirectory;
+	std::map<std::string,std::string> *params;
 	bool isSSLEnabled;
 	SSL_CTX *ctx;
-	void saveSessionDataToFile(const string& sessionId, const string& value);
-	map<string,string> getSessionDataFromFile(const string& sessionId);
-	void saveSessionDataToDistocache(const string& sessionId, map<string,string>& sessAttrs);
-	map<string,string> getSessionDataFromDistocache(const string& sessionId);
+	void saveSessionDataToFile(const std::string& sessionId, const std::string& value);
+	std::map<std::string,std::string> getSessionDataFromFile(const std::string& sessionId);
+	void saveSessionDataToDistocache(const std::string& sessionId, std::map<std::string,std::string>& sessAttrs);
+	std::map<std::string,std::string> getSessionDataFromDistocache(const std::string& sessionId);
 	void storeSessionAttributes(HttpResponse* res, HttpRequest* req, const long& sessionTimeout, const bool& sessatserv);
-	void updateContent(HttpRequest* req, HttpResponse *res, const string& ext, const int&);
+	void updateContent(HttpRequest* req, HttpResponse *res, const std::string& ext, const int&);
 	unsigned int getFileSize(const char *fileName);
-	string getFileContents(const char *fileName, const int& start= -1, const int& end= -1);
+	std::string getFileContents(const char *fileName, const int& start= -1, const int& end= -1);
 	bool checkSocketWaitForTimeout(const int& sock_fd, const int& writing, const int& seconds, const int& micros= 0);
-	/*bool sendData(SSL* ssl, BIO* io, const int& fd, const string& h1);
+	/*bool sendData(SSL* ssl, BIO* io, const int& fd, const std::string& h1);
 	void closeSocket(SSL* ssl, BIO* io, const int& fd);
-	bool readLine(SSL* ssl, BIO* io, const int& fd, string& line);
-	bool readData(SSL* ssl, BIO* io, const int& fd, const int& cntlen, string& content);
+	bool readLine(SSL* ssl, BIO* io, const int& fd, std::string& line);
+	bool readData(SSL* ssl, BIO* io, const int& fd, const int& cntlen, std::string& content);
 	*/
 	void handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketUtil* sockUtil);
 public:
-	ServiceTask(const int& fd, const string& serverRootDirectory);
+	ServiceTask(const int& fd, const std::string& serverRootDirectory);
 	ServiceTask();
 	virtual ~ServiceTask();
-	void handleWebsockOpen(const string& url);
-	void handleWebsockClose(const string& url);
-	void handleWebsockMessage(const string& url, WebSocketData* request, WebSocketData* response);
+	void handleWebsockOpen(const std::string& url);
+	void handleWebsockClose(const std::string& url);
+	void handleWebsockMessage(const std::string& url, WebSocketData* request, WebSocketData* response);
 	void handle(HttpRequest* req, HttpResponse* res);
 	void run_old();
 	HttpResponse apacheRun(HttpRequest* req);

@@ -22,16 +22,16 @@
 #include "Timer.h"
 class AMEFDecoder
 {
-	void decodeObjectName(const string& buffer, AMEFObject *jDBObject);
+	void decodeObjectName(const std::string& buffer, AMEFObject *jDBObject);
 public:
 	~AMEFDecoder();
 	AMEFDecoder();
-	AMEFObject* decodeB(const string& buffer, const bool& considerLength);
-	//AMEFObject* decodeBNew(const string& buffer, const bool& considerLength);
-	AMEFObject* decodeSinglePacketBInternal(const string& buffer, AMEFObject* jDBObject);
-	AMEFObject* decodeSinglePacketB(const string& buffer, AMEFObject* jDBObject);
-	//AMEFObject* decodeSinglePacketBNew(const string& buffer, bool ignoreName, AMEFObject* jDBObject);
-	string updatePacket(const string& orig, AMEFObject* jDBObject, int index);
+	AMEFObject* decodeB(const std::string& buffer, const bool& considerLength);
+	//AMEFObject* decodeBNew(const std::string& buffer, const bool& considerLength);
+	AMEFObject* decodeSinglePacketBInternal(const std::string& buffer, AMEFObject* jDBObject);
+	AMEFObject* decodeSinglePacketB(const std::string& buffer, AMEFObject* jDBObject);
+	//AMEFObject* decodeSinglePacketBNew(const std::string& buffer, bool ignoreName, AMEFObject* jDBObject);
+	std::string updatePacket(const std::string& orig, AMEFObject* jDBObject, int index);
 };
 
 #endif /* AMEFDECODER_H_ */

@@ -7,31 +7,31 @@
 
 #include "Http2HPACKContext.h"
 
-map<int, map<string, string> > Http2HPACKHeaderTable::HPACK_TABLE;
-vector<Bits> Http2HPACKHeaderTable::HUFFMAN_TABLE;
-map<string, map<int, int> > Http2HPACKHeaderTable::HUFFMAN_LK_STRINDX_NUMINDX_BL_TABLE;
-map<string, map<int, Bits> > Http2HPACKHeaderTable::HUFFMAN_LK_STRINDX_NUMINDX_TABLE;
-map<int, Bits> Http2HPACKHeaderTable::HUFFMAN_LK_NUMINDX_TABLE;
-map<int, int> Http2HPACKHeaderTable::HUFFMAN_LK_NUMINDX_BL_TABLE;
-map<string, Bits> Http2HPACKHeaderTable::cib;
-map<uint32_t, bitset<38> > Http2HPACKHeaderTable::masks;
+std::map<int, std::map<std::string, std::string> > Http2HPACKHeaderTable::HPACK_TABLE;
+std::vector<Bits> Http2HPACKHeaderTable::HUFFMAN_TABLE;
+std::map<std::string, std::map<int, int> > Http2HPACKHeaderTable::HUFFMAN_LK_STRINDX_NUMINDX_BL_TABLE;
+std::map<std::string, std::map<int, Bits> > Http2HPACKHeaderTable::HUFFMAN_LK_STRINDX_NUMINDX_TABLE;
+std::map<int, Bits> Http2HPACKHeaderTable::HUFFMAN_LK_NUMINDX_TABLE;
+std::map<int, int> Http2HPACKHeaderTable::HUFFMAN_LK_NUMINDX_BL_TABLE;
+std::map<std::string, Bits> Http2HPACKHeaderTable::cib;
+std::map<uint32_t, std::bitset<38> > Http2HPACKHeaderTable::masks;
 
 void Bits::print() {
-	cout << "0x";
+	std::cout << "0x";
 	for (int var = (int)bitv.size()-1; var >= 0; var--) {
 		char hexVal[20];
 		memset(hexVal, 0, sizeof(hexVal));
 		sprintf(hexVal, "%x", (unsigned char)bitv.at(var).to_ulong());
-		string hexstr(hexVal);
+		std::string hexstr(hexVal);
 		if(hexstr.length()==1)
 			hexstr = "0" + hexstr;
-		cout << hexstr;
+		std::cout << hexstr;
 	}
-	cout << endl;
+	std::cout << std::endl;
 }
 
 bool Bits::matches(const unsigned char& v, const int& nbits) {
-	bitset<8> bv(v);
+	std::bitset<8> bv(v);
 	for (int var = nbits; var < 8; ++var) {
 		bv.reset(var);
 	}
@@ -40,14 +40,14 @@ bool Bits::matches(const unsigned char& v, const int& nbits) {
 	return false;
 }
 
-void Bits::appendBits(string& out, const int& last) {
+void Bits::appendBits(std::string& out, const int& last) {
 	for (int var = 0; var < (int)bitv.size(); ++var) {
-		bitset<8> bb = bitv.at(var);
+		std::bitset<8> bb = bitv.at(var);
 		unsigned char v = bb.to_ulong();
 		if(last!=0) {
 			unsigned long long lon = (v << last);
-			bitset<16> bb1(lon);
-			bitset<8> bb2;
+			std::bitset<16> bb1(lon);
+			std::bitset<8> bb2;
 			for (int s2 = 0; s2 < 8; ++s2) {
 				bb2.set(s2, bb1.test(s2));
 			}
@@ -84,7 +84,7 @@ Bits::Bits(const uint32_t& code, const uint32_t& rembits, const unsigned char& s
 	int ind = rembits/8;
 	/*if(rembits==8)
 	{
-		bitset<8> bits(code);
+		std::bitset<8> bits(code);
 		bitv.push_back(bits);
 	}
 	else*/
@@ -92,19 +92,19 @@ Bits::Bits(const uint32_t& code, const uint32_t& rembits, const unsigned char& s
 		unsigned long long lon = code;
 		lon = lon << (8-lastbssize);
 		int c = ind + (lastbssize>0?1:0);
-		bits30v = bitset<30>(code << (30-numbits));
+		bits30v = std::bitset<30>(code << (30-numbits));
 		for (int i = 0; i < c; ++i)
 		{
 			int offset = (ind - i) * 8;
 			unsigned char v = ((lon >> offset) & 0xFF);
-			bitset<8> bits(v);
+			std::bitset<8> bits(v);
 			bitv.push_back(bits);
 		}
 	}
 	/*if(lastbssize!=0) {
 		int offset = 0;
 		unsigned char v = ((lon >> offset) & 0xFF);
-		bitset<8> bits(v);
+		std::bitset<8> bits(v);
 		bitv.push_back(bits);
 	}*/
 }
@@ -115,67 +115,67 @@ Bits::~Bits(){
 
 void Http2HPACKHeaderTable::init() {
 	if(HPACK_TABLE.size()>0)return;
-	HPACK_TABLE[1].insert(pair<string, string>(":authority", ""));
-	HPACK_TABLE[2].insert(pair<string, string>(":method", "GET"));
-	HPACK_TABLE[3].insert(pair<string, string>(":method", "POST"));
-	HPACK_TABLE[4].insert(pair<string, string>(":path", "/"));
-	HPACK_TABLE[5].insert(pair<string, string>(":path", "/index.html"));
-	HPACK_TABLE[6].insert(pair<string, string>(":scheme", "http"));
-	HPACK_TABLE[7].insert(pair<string, string>(":scheme", "https"));
-	HPACK_TABLE[8].insert(pair<string, string>(":status", "200"));
-	HPACK_TABLE[9].insert(pair<string, string>(":status", "204"));
-	HPACK_TABLE[10].insert(pair<string, string>(":status", "206"));
-	HPACK_TABLE[11].insert(pair<string, string>(":status", "304"));
-	HPACK_TABLE[12].insert(pair<string, string>(":status", "400"));
-	HPACK_TABLE[13].insert(pair<string, string>(":status", "404"));
-	HPACK_TABLE[14].insert(pair<string, string>(":status", "500"));
-	HPACK_TABLE[15].insert(pair<string, string>("accept-charset", ""));
-	HPACK_TABLE[16].insert(pair<string, string>("accept-encoding", "gzip, deflate"));
-	HPACK_TABLE[17].insert(pair<string, string>("accept-language", ""));
-	HPACK_TABLE[18].insert(pair<string, string>("accept-ranges", ""));
-	HPACK_TABLE[19].insert(pair<string, string>("accept", ""));
-	HPACK_TABLE[20].insert(pair<string, string>("access-control-allow-origin", ""));
-	HPACK_TABLE[21].insert(pair<string, string>("age", ""));
-	HPACK_TABLE[22].insert(pair<string, string>("allow", ""));
-	HPACK_TABLE[23].insert(pair<string, string>("authorization", ""));
-	HPACK_TABLE[24].insert(pair<string, string>("cache-control", ""));
-	HPACK_TABLE[25].insert(pair<string, string>("content-disposition", ""));
-	HPACK_TABLE[26].insert(pair<string, string>("content-encoding", ""));
-	HPACK_TABLE[27].insert(pair<string, string>("content-language", ""));
-	HPACK_TABLE[28].insert(pair<string, string>("content-length", ""));
-	HPACK_TABLE[29].insert(pair<string, string>("content-location", ""));
-	HPACK_TABLE[30].insert(pair<string, string>("content-range", ""));
-	HPACK_TABLE[31].insert(pair<string, string>("content-type", ""));
-	HPACK_TABLE[32].insert(pair<string, string>("cookie", ""));
-	HPACK_TABLE[33].insert(pair<string, string>("date", ""));
-	HPACK_TABLE[34].insert(pair<string, string>("etag", ""));
-	HPACK_TABLE[35].insert(pair<string, string>("expect", ""));
-	HPACK_TABLE[36].insert(pair<string, string>("expires", ""));
-	HPACK_TABLE[37].insert(pair<string, string>("from", ""));
-	HPACK_TABLE[38].insert(pair<string, string>("host", ""));
-	HPACK_TABLE[39].insert(pair<string, string>("if-match", ""));
-	HPACK_TABLE[40].insert(pair<string, string>("if-modified-since", ""));
-	HPACK_TABLE[41].insert(pair<string, string>("if-none-match", ""));
-	HPACK_TABLE[42].insert(pair<string, string>("if-range", ""));
-	HPACK_TABLE[43].insert(pair<string, string>("if-unmodified-since", ""));
-	HPACK_TABLE[44].insert(pair<string, string>("last-modified", ""));
-	HPACK_TABLE[45].insert(pair<string, string>("link", ""));
-	HPACK_TABLE[46].insert(pair<string, string>("location", ""));
-	HPACK_TABLE[47].insert(pair<string, string>("max-forwards", ""));
-	HPACK_TABLE[48].insert(pair<string, string>("proxy-authenticate", ""));
-	HPACK_TABLE[49].insert(pair<string, string>("proxy-authorization", ""));
-	HPACK_TABLE[50].insert(pair<string, string>("range", ""));
-	HPACK_TABLE[51].insert(pair<string, string>("referer", ""));
-	HPACK_TABLE[52].insert(pair<string, string>("refresh", ""));
-	HPACK_TABLE[53].insert(pair<string, string>("retry-after", ""));
-	HPACK_TABLE[54].insert(pair<string, string>("server", ""));
-	HPACK_TABLE[55].insert(pair<string, string>("set-cookie", ""));
-	HPACK_TABLE[56].insert(pair<string, string>("strict-transport-security", ""));
-	HPACK_TABLE[57].insert(pair<string, string>("transfer-encoding", ""));
-	HPACK_TABLE[58].insert(pair<string, string>("user-agent", ""));
-	HPACK_TABLE[59].insert(pair<string, string>("vary", ""));
-	HPACK_TABLE[60].insert(pair<string, string>("via", ""));
-	HPACK_TABLE[61].insert(pair<string, string>("www-authenticate", ""));
+	HPACK_TABLE[1].insert(std::pair<std::string, std::string>(":authority", ""));
+	HPACK_TABLE[2].insert(std::pair<std::string, std::string>(":method", "GET"));
+	HPACK_TABLE[3].insert(std::pair<std::string, std::string>(":method", "POST"));
+	HPACK_TABLE[4].insert(std::pair<std::string, std::string>(":path", "/"));
+	HPACK_TABLE[5].insert(std::pair<std::string, std::string>(":path", "/index.html"));
+	HPACK_TABLE[6].insert(std::pair<std::string, std::string>(":scheme", "http"));
+	HPACK_TABLE[7].insert(std::pair<std::string, std::string>(":scheme", "https"));
+	HPACK_TABLE[8].insert(std::pair<std::string, std::string>(":status", "200"));
+	HPACK_TABLE[9].insert(std::pair<std::string, std::string>(":status", "204"));
+	HPACK_TABLE[10].insert(std::pair<std::string, std::string>(":status", "206"));
+	HPACK_TABLE[11].insert(std::pair<std::string, std::string>(":status", "304"));
+	HPACK_TABLE[12].insert(std::pair<std::string, std::string>(":status", "400"));
+	HPACK_TABLE[13].insert(std::pair<std::string, std::string>(":status", "404"));
+	HPACK_TABLE[14].insert(std::pair<std::string, std::string>(":status", "500"));
+	HPACK_TABLE[15].insert(std::pair<std::string, std::string>("accept-charset", ""));
+	HPACK_TABLE[16].insert(std::pair<std::string, std::string>("accept-encoding", "gzip, deflate"));
+	HPACK_TABLE[17].insert(std::pair<std::string, std::string>("accept-language", ""));
+	HPACK_TABLE[18].insert(std::pair<std::string, std::string>("accept-ranges", ""));
+	HPACK_TABLE[19].insert(std::pair<std::string, std::string>("accept", ""));
+	HPACK_TABLE[20].insert(std::pair<std::string, std::string>("access-control-allow-origin", ""));
+	HPACK_TABLE[21].insert(std::pair<std::string, std::string>("age", ""));
+	HPACK_TABLE[22].insert(std::pair<std::string, std::string>("allow", ""));
+	HPACK_TABLE[23].insert(std::pair<std::string, std::string>("authorization", ""));
+	HPACK_TABLE[24].insert(std::pair<std::string, std::string>("cache-control", ""));
+	HPACK_TABLE[25].insert(std::pair<std::string, std::string>("content-disposition", ""));
+	HPACK_TABLE[26].insert(std::pair<std::string, std::string>("content-encoding", ""));
+	HPACK_TABLE[27].insert(std::pair<std::string, std::string>("content-language", ""));
+	HPACK_TABLE[28].insert(std::pair<std::string, std::string>("content-length", ""));
+	HPACK_TABLE[29].insert(std::pair<std::string, std::string>("content-location", ""));
+	HPACK_TABLE[30].insert(std::pair<std::string, std::string>("content-range", ""));
+	HPACK_TABLE[31].insert(std::pair<std::string, std::string>("content-type", ""));
+	HPACK_TABLE[32].insert(std::pair<std::string, std::string>("cookie", ""));
+	HPACK_TABLE[33].insert(std::pair<std::string, std::string>("date", ""));
+	HPACK_TABLE[34].insert(std::pair<std::string, std::string>("etag", ""));
+	HPACK_TABLE[35].insert(std::pair<std::string, std::string>("expect", ""));
+	HPACK_TABLE[36].insert(std::pair<std::string, std::string>("expires", ""));
+	HPACK_TABLE[37].insert(std::pair<std::string, std::string>("from", ""));
+	HPACK_TABLE[38].insert(std::pair<std::string, std::string>("host", ""));
+	HPACK_TABLE[39].insert(std::pair<std::string, std::string>("if-match", ""));
+	HPACK_TABLE[40].insert(std::pair<std::string, std::string>("if-modified-since", ""));
+	HPACK_TABLE[41].insert(std::pair<std::string, std::string>("if-none-match", ""));
+	HPACK_TABLE[42].insert(std::pair<std::string, std::string>("if-range", ""));
+	HPACK_TABLE[43].insert(std::pair<std::string, std::string>("if-unmodified-since", ""));
+	HPACK_TABLE[44].insert(std::pair<std::string, std::string>("last-modified", ""));
+	HPACK_TABLE[45].insert(std::pair<std::string, std::string>("link", ""));
+	HPACK_TABLE[46].insert(std::pair<std::string, std::string>("location", ""));
+	HPACK_TABLE[47].insert(std::pair<std::string, std::string>("max-forwards", ""));
+	HPACK_TABLE[48].insert(std::pair<std::string, std::string>("proxy-authenticate", ""));
+	HPACK_TABLE[49].insert(std::pair<std::string, std::string>("proxy-authorization", ""));
+	HPACK_TABLE[50].insert(std::pair<std::string, std::string>("range", ""));
+	HPACK_TABLE[51].insert(std::pair<std::string, std::string>("referer", ""));
+	HPACK_TABLE[52].insert(std::pair<std::string, std::string>("refresh", ""));
+	HPACK_TABLE[53].insert(std::pair<std::string, std::string>("retry-after", ""));
+	HPACK_TABLE[54].insert(std::pair<std::string, std::string>("server", ""));
+	HPACK_TABLE[55].insert(std::pair<std::string, std::string>("set-cookie", ""));
+	HPACK_TABLE[56].insert(std::pair<std::string, std::string>("strict-transport-security", ""));
+	HPACK_TABLE[57].insert(std::pair<std::string, std::string>("transfer-encoding", ""));
+	HPACK_TABLE[58].insert(std::pair<std::string, std::string>("user-agent", ""));
+	HPACK_TABLE[59].insert(std::pair<std::string, std::string>("vary", ""));
+	HPACK_TABLE[60].insert(std::pair<std::string, std::string>("via", ""));
+	HPACK_TABLE[61].insert(std::pair<std::string, std::string>("www-authenticate", ""));
 
 	HUFFMAN_TABLE.push_back(Bits(0x1ff8u, 13, 0));
 	HUFFMAN_TABLE.push_back(Bits(0x7fffd8u, 23, 1));
@@ -436,12 +436,12 @@ void Http2HPACKHeaderTable::init() {
 	//HUFFMAN_TABLE.push_back(Bits(0x3fffffffu, 30, (unsigned char)256u));
 
 	for(int i=0;i<(int)Http2HPACKHeaderTable::HUFFMAN_TABLE.size();i++) {
-		bitset<30> bs;
+		std::bitset<30> bs;
 		Bits bts = Http2HPACKHeaderTable::HUFFMAN_TABLE.at(i);
 		cib[bts.bits30v.to_string().substr(0, bts.numbits)] = bts;
-		//cout << bts.bits30v.to_string().substr(0, bts.numbits) << " = " << (int)bts.symbol << endl;
+		//cout << bts.bits30v.to_string().substr(0, bts.numbits) << " = " << (int)bts.symbol << std::endl;
 		if(masks.find(bts.numbits)==masks.end()) {
-			bitset<38> mask;
+			std::bitset<38> mask;
 			for (int j = 0; j < (int)bts.numbits; j++)
 			{
 				mask.set(37-j, true);
@@ -451,7 +451,7 @@ void Http2HPACKHeaderTable::init() {
 	}
 
 	for (int var = 0; var < (int)HUFFMAN_TABLE.size(); ++var) {
-		string key;
+		std::string key;
 		if(HUFFMAN_TABLE.at(var).bitv.size()>1)
 		{
 			for (int i = 0; i < (int)HUFFMAN_TABLE.at(var).bitv.size()-1 ; ++i) {
@@ -479,18 +479,18 @@ Http2HPACKContext::Http2HPACKContext() {
 	huffmanEncoding = true;
 }
 
-string Http2HPACKContext::encodeNumber(long number, const vector<bool>& prefixBits) {
-	string ecval;
+std::string Http2HPACKContext::encodeNumber(long number, const std::vector<bool>& prefixBits) {
+	std::string ecval;
 	int prefixSize = (int)prefixBits.size();
 	long suffixMaxValue = pow(2, (8-prefixSize)) - 1;
 	if(number<suffixMaxValue) {
-		bitset<8> bits(number);
+		std::bitset<8> bits(number);
 		for (int var = 7; var >= (8-prefixSize); var--) {
 			bits.set(var, prefixBits.at(7-var));
 		}
 		ecval.push_back((unsigned char)bits.to_ulong());
 	} else {
-		bitset<8> bits(number);
+		std::bitset<8> bits(number);
 		bits.set();
 		for (int var = 7; var >= (8-prefixSize); var--) {
 			bits.set(var, prefixBits.at(7-var));
@@ -500,17 +500,17 @@ string Http2HPACKContext::encodeNumber(long number, const vector<bool>& prefixBi
 		while(number>=128)
 		{
 			int np = (number %128) + 128;
-			bitset<8> npbits(np);
+			std::bitset<8> npbits(np);
 			ecval.push_back((unsigned char)npbits.to_ulong());
 			number = number/128;
 		}
-		bitset<8> rembits(number);
+		std::bitset<8> rembits(number);
 		ecval.push_back((unsigned char)rembits.to_ulong());
 	}
 	return ecval;
 }
 
-long Http2HPACKContext::decodeNumber(const string& data, const int& prefixSize, bitset<8> bits, size_t& index) {
+long Http2HPACKContext::decodeNumber(const std::string& data, const int& prefixSize, std::bitset<8> bits, size_t& index) {
 	long suffixMaxValue = pow(2, (8-prefixSize)) - 1;
 	for (int var = 7; var >= (8-prefixSize); var--) {
 		bits.set(var, false);
@@ -531,24 +531,24 @@ long Http2HPACKContext::decodeNumber(const string& data, const int& prefixSize, 
 	return -1;
 }
 
-string Http2HPACKContext::encode(const map<string, string>& headers) {
-	map<string, string>::const_iterator it;
-	string encoded;
+std::string Http2HPACKContext::encode(const std::map<std::string, std::string>& headers) {
+	std::map<std::string, std::string>::const_iterator it;
+	std::string encoded;
 	for (it=headers.begin();it!=headers.end();++it) {
-		string name = it->first;
-		string value = it->second;
+		std::string name = it->first;
+		std::string value = it->second;
 		//TODO handle cookie header 8.1.2.5.  Compressing the Cookie Header Field(https://tools.ietf.org/html/draft-ietf-httpbis-http2-16#page-9)
 		int index = table.getIndexByNameAndValue(name, value, false);
 		if(index!=-1) {
 			//Indexed header Name/Value pair
-			vector<bool> pref;
+			std::vector<bool> pref;
 			pref.push_back(true);
 			encoded.append(encodeNumber(index, pref));
 		} else {
 			index = table.getIndexByName(name, false);
 			if(index!=-1) {
 				//Indexed header Name
-				vector<bool> pref;
+				std::vector<bool> pref;
 				pref.push_back(false);
 				pref.push_back(true);
 				encoded.append(encodeNumber(index, pref));
@@ -565,20 +565,20 @@ string Http2HPACKContext::encode(const map<string, string>& headers) {
 	return encoded;
 }
 
-map<string, string> Http2HPACKContext::decode(const string& data) {
-	map<string, string> headers;
+std::map<std::string, std::string> Http2HPACKContext::decode(const std::string& data) {
+	std::map<std::string, std::string> headers;
 	size_t indx = 0;
 	while(data.length()>indx)
 	{
 		unsigned char st = data.at(indx);
-		bitset<8> bits(st);
+		std::bitset<8> bits(st);
 		int prefixSize = 1;
 		//TODO handle cookie header 8.1.2.5.  Compressing the Cookie Header Field(https://tools.ietf.org/html/draft-ietf-httpbis-http2-16#page-9)
 		if(bits.test(7)) {
 			//Indexed header
 			prefixSize = 1;
 			long index = decodeNumber(data, prefixSize, bits, indx);
-			map<string, string> hm = table.getNameAndValueByIndex(index, true);
+			std::map<std::string, std::string> hm = table.getNameAndValueByIndex(index, true);
 			headers[hm.begin()->first] = hm.begin()->second;
 		} else if(bits.test(6)) {
 			//Literal indexed
@@ -586,15 +586,15 @@ map<string, string> Http2HPACKContext::decode(const string& data) {
 			if(st==64) {
 				//New name
 				indx++;
-				string name = decodeString(data, indx);
-				string value = decodeString(data, indx);
+				std::string name = decodeString(data, indx);
+				std::string value = decodeString(data, indx);
 				headers[name] = value;
 				table.addHeader(name, value, true);
 			} else {
 				//Indexed name
 				long nmindx = decodeNumber(data, prefixSize, bits, indx);
-				string name = table.getNameByIndex(nmindx, true);
-				string value = decodeString(data, indx);
+				std::string name = table.getNameByIndex(nmindx, true);
+				std::string value = decodeString(data, indx);
 				headers[name] = value;
 				table.addHeader(name, value, true);
 			}
@@ -604,14 +604,14 @@ map<string, string> Http2HPACKContext::decode(const string& data) {
 			if(st==0) {
 				//New name
 				indx++;
-				string name = decodeString(data, indx);
-				string value = decodeString(data, indx);
+				std::string name = decodeString(data, indx);
+				std::string value = decodeString(data, indx);
 				headers[name] = value;
 			} else {
 				//Indexed name
 				long nmindx = decodeNumber(data, prefixSize, bits, indx);
-				string name = table.getNameByIndex(nmindx, true);
-				string value = decodeString(data, indx);
+				std::string name = table.getNameByIndex(nmindx, true);
+				std::string value = decodeString(data, indx);
 				headers[name] = value;
 			}
 		} else if(bits.test(3)) {
@@ -620,14 +620,14 @@ map<string, string> Http2HPACKContext::decode(const string& data) {
 			if(st==16) {
 				//New name
 				indx++;
-				string name = decodeString(data, indx);
-				string value = decodeString(data, indx);
+				std::string name = decodeString(data, indx);
+				std::string value = decodeString(data, indx);
 				headers[name] = value;
 			} else {
 				//Indexed name
 				long nmindx = decodeNumber(data, prefixSize, bits, indx);
-				string name = table.getNameByIndex(nmindx, true);
-				string value = decodeString(data, indx);
+				std::string name = table.getNameByIndex(nmindx, true);
+				std::string value = decodeString(data, indx);
 				headers[name] = value;
 			}
 		} else {
@@ -638,8 +638,8 @@ map<string, string> Http2HPACKContext::decode(const string& data) {
 	return headers;
 }
 
-string Http2HPACKContext::encodeHuffman(const string& value) {
-	string out;
+std::string Http2HPACKContext::encodeHuffman(const std::string& value) {
+	std::string out;
 	int last = 0;
 	int totbits = 0;
 	for (int var = 0; var < (int)value.length(); ++var) {
@@ -653,7 +653,7 @@ string Http2HPACKContext::encodeHuffman(const string& value) {
 			totbits = totbits%8;
 			if(totbits!=0)
 			{
-				bitset<8> bb(out.at(out.length()-1));
+				std::bitset<8> bb(out.at(out.length()-1));
 				for (int var = 0; var < 8-totbits; ++var) {
 					bb.set(var);
 				}
@@ -664,9 +664,9 @@ string Http2HPACKContext::encodeHuffman(const string& value) {
 	return out;
 }
 
-string Http2HPACKContext::encodeString(string value) {
-	string encoded;
-	vector<bool> vallen;
+std::string Http2HPACKContext::encodeString(std::string value) {
+	std::string encoded;
+	std::vector<bool> vallen;
 	if(huffmanEncoding)
 	{
 		value = encodeHuffman(value);
@@ -681,11 +681,11 @@ string Http2HPACKContext::encodeString(string value) {
 	return encoded;
 }
 
-string Http2HPACKContext::decodeHuffman(const string& value) {
-	map<uint32_t, bitset<38> >::reverse_iterator mit;
-	string dval;
+std::string Http2HPACKContext::decodeHuffman(const std::string& value) {
+	std::map<uint32_t, std::bitset<38> >::reverse_iterator mit;
+	std::string dval;
 	int indx = 0;
-	bitset<38> k;
+	std::bitset<38> k;
 	int stbind = 37;
 	int totbits = (int)value.length()*8;
 	int currbits = 0;
@@ -693,7 +693,7 @@ string Http2HPACKContext::decodeHuffman(const string& value) {
 	if(totbits>8)
 	{
 		c = (unsigned char)value.at(indx);
-		bitset<8> b(c);
+		std::bitset<8> b(c);
 		for (int i = 7; i >= 0; i--) {
 			k.set(stbind--, b.test(i));
 		}
@@ -702,8 +702,8 @@ string Http2HPACKContext::decodeHuffman(const string& value) {
 	while(indx<=(int)value.length()) {
 		for(mit=Http2HPACKHeaderTable::masks.rbegin();mit!=Http2HPACKHeaderTable::masks.rend();++mit) {
 			if((38-stbind)>=(int)mit->first) {
-				bitset<38> kn = k & mit->second;
-				string kt = kn.to_string().substr(0, mit->first);
+				std::bitset<38> kn = k & mit->second;
+				std::string kt = kn.to_string().substr(0, mit->first);
 				if(Http2HPACKHeaderTable::cib.find(kt)!=Http2HPACKHeaderTable::cib.end())
 				{
 					dval.push_back(Http2HPACKHeaderTable::cib[kt].symbol);
@@ -735,7 +735,7 @@ string Http2HPACKContext::decodeHuffman(const string& value) {
 			if(indx<=(int)value.length()-1)
 			{
 				c = (unsigned long)value.at(indx);
-				bitset<8> b((unsigned long)c);
+				std::bitset<8> b((unsigned long)c);
 				for (int i = 7; i >= 0; i--) {
 					if(stbind>=0)k.set(stbind--, b.test(i));
 				}
@@ -745,12 +745,12 @@ string Http2HPACKContext::decodeHuffman(const string& value) {
 	return dval;
 }
 
-string Http2HPACKContext::decodeHuffmanOld(string value) {
-	string out;
+std::string Http2HPACKContext::decodeHuffmanOld(std::string value) {
+	std::string out;
 	uint32_t indx = 0;
-	bitset<8> prev;
+	std::bitset<8> prev;
 	int last = 0;
-	string key;
+	std::string key;
 	bool useKey = false;
 	bool lastsymflow = false;
 	int totbits = 0;
@@ -786,9 +786,9 @@ string Http2HPACKContext::decodeHuffmanOld(string value) {
 		{
 			vm = (unsigned char)value.at(indx);
 		}
-		bitset<8> bvm(vm);
-		bitset<8> obvm = bvm;
-		bitset<8> tp;
+		std::bitset<8> bvm(vm);
+		std::bitset<8> obvm = bvm;
+		std::bitset<8> tp;
 		if(last>0)
 		{
 			for (int var = 0; var < last; ++var) {
@@ -815,7 +815,7 @@ string Http2HPACKContext::decodeHuffmanOld(string value) {
 				if(indx<value.length())
 					continue;
 			} else if(key.length()>0) {
-				string tkey = key;
+				std::string tkey = key;
 				tkey.push_back(vm);
 				useKey = true;
 				if(Http2HPACKHeaderTable::HUFFMAN_LK_STRINDX_NUMINDX_TABLE.find(tkey)
@@ -862,7 +862,7 @@ string Http2HPACKContext::decodeHuffmanOld(string value) {
 	return out;
 }
 
-bool Http2HPACKContext::decipherHuffmanValue(const int& bitnum, bitset<8> obvm, bitset<8>& bvm, string &out, bitset<8>& prev, int& last, uint32_t& indx, string& key, string& value, int& totbits, int& cub) {
+bool Http2HPACKContext::decipherHuffmanValue(const int& bitnum, std::bitset<8> obvm, std::bitset<8>& bvm, std::string &out, std::bitset<8>& prev, int& last, uint32_t& indx, std::string& key, std::string& value, int& totbits, int& cub) {
 	if(key.length()==0) {
 		if(bitnum!=-1)bvm.reset(bitnum);
 		if(Http2HPACKHeaderTable::HUFFMAN_LK_NUMINDX_TABLE.find((int)bvm.to_ulong())
@@ -874,7 +874,7 @@ bool Http2HPACKContext::decipherHuffmanValue(const int& bitnum, bitset<8> obvm, 
 			if(last>=8)
 			{
 				indx--;
-				obvm = bitset<8>((unsigned char)value.at(indx-1));
+				obvm = std::bitset<8>((unsigned char)value.at(indx-1));
 			}
 			last %= 8;
 			for (g = 0; g < last; ++g) {
@@ -899,7 +899,7 @@ bool Http2HPACKContext::decipherHuffmanValue(const int& bitnum, bitset<8> obvm, 
 				if(last>=8)
 				{
 					indx--;
-					obvm = bitset<8>((unsigned char)value.at(indx-1));
+					obvm = std::bitset<8>((unsigned char)value.at(indx-1));
 				}
 				last %= 8;
 				for (g = 0; g < last; ++g) {
@@ -915,17 +915,17 @@ bool Http2HPACKContext::decipherHuffmanValue(const int& bitnum, bitset<8> obvm, 
 	return false;
 }
 
-string Http2HPACKContext::decodeString(const string& data, size_t& indx) {
+std::string Http2HPACKContext::decodeString(const std::string& data, size_t& indx) {
 	unsigned char st = data.at(indx);
-	bitset<8> bits(st);
+	std::bitset<8> bits(st);
 	bool isHuffmanEncoded = bits.test(7);
 	long len = decodeNumber(data, 1, bits, indx);
-	string value = data.substr(indx, len);
+	std::string value = data.substr(indx, len);
 	//CommonUtils::printHEX(value);
 	if(isHuffmanEncoded) {
 		value = decodeHuffman(value);
 	}
-	//cout << value << endl;
+	//cout << value << std::endl;
 	indx += len;
 	return value;
 }
@@ -938,7 +938,7 @@ Http2HPACKHeaderTable::Http2HPACKHeaderTable() {
 	init();
 	this->reqContextTable = HPACK_TABLE;
 	this->reqcurrentSize = reqContextTable.size();
-	map<int, map<string, string> >::iterator it;
+	std::map<int, std::map<std::string, std::string> >::iterator it;
 	for (it=reqContextTable.begin();it!=reqContextTable.end();++it) {
 		if(it->second.begin()->second!="")
 		{
@@ -951,7 +951,7 @@ Http2HPACKHeaderTable::Http2HPACKHeaderTable() {
 	}
 	this->resContextTable = HPACK_TABLE;
 	this->rescurrentSize = resContextTable.size();
-	map<int, map<string, string> >::iterator itr;
+	std::map<int, std::map<std::string, std::string> >::iterator itr;
 	for (itr=resContextTable.begin();itr!=resContextTable.end();++itr) {
 		if(itr->second.begin()->second!="")
 		{
@@ -967,7 +967,7 @@ Http2HPACKHeaderTable::Http2HPACKHeaderTable() {
 Http2HPACKHeaderTable::~Http2HPACKHeaderTable() {
 }
 
-int Http2HPACKHeaderTable::getIndexByNameAndValue(const string& name, const string& value, const bool& isRequest) {
+int Http2HPACKHeaderTable::getIndexByNameAndValue(const std::string& name, const std::string& value, const bool& isRequest) {
 	if(isRequest)
 	{
 		if(reqhnvIndexTable.find(name+value)!=reqhnvIndexTable.end()) {
@@ -983,7 +983,7 @@ int Http2HPACKHeaderTable::getIndexByNameAndValue(const string& name, const stri
 	return -1;
 }
 
-int Http2HPACKHeaderTable::getIndexByName(const string& name, const bool& isRequest) {
+int Http2HPACKHeaderTable::getIndexByName(const std::string& name, const bool& isRequest) {
 	if(isRequest)
 	{
 		if(reqhnIndexTable.find(name)!=reqhnIndexTable.end()) {
@@ -999,7 +999,7 @@ int Http2HPACKHeaderTable::getIndexByName(const string& name, const bool& isRequ
 	return -1;
 }
 
-map<string, string> Http2HPACKHeaderTable::getNameAndValueByIndex(const int& index, const bool& isRequest) {
+std::map<std::string, std::string> Http2HPACKHeaderTable::getNameAndValueByIndex(const int& index, const bool& isRequest) {
 	if(isRequest)
 	{
 		if(reqContextTable.find(index)!=reqContextTable.end()) {
@@ -1012,11 +1012,11 @@ map<string, string> Http2HPACKHeaderTable::getNameAndValueByIndex(const int& ind
 			return resContextTable[index];
 		}
 	}
-	map<string, string> mp;
+	std::map<std::string, std::string> mp;
 	return mp;
 }
 
-string Http2HPACKHeaderTable::getNameByIndex(const int& index, const bool& isRequest) {
+std::string Http2HPACKHeaderTable::getNameByIndex(const int& index, const bool& isRequest) {
 	if(isRequest)
 	{
 		if(reqContextTable.find(index)!=reqContextTable.end()) {
@@ -1032,12 +1032,12 @@ string Http2HPACKHeaderTable::getNameByIndex(const int& index, const bool& isReq
 	return "";
 }
 
-void Http2HPACKHeaderTable::addHeader(const string& name, const string& value, const bool& isRequest) {
+void Http2HPACKHeaderTable::addHeader(const std::string& name, const std::string& value, const bool& isRequest) {
 	if(isRequest)
 	{
 		if(getIndexByNameAndValue(name, value, isRequest)==-1)
 		{
-			reqContextTable[++reqcurrentSize].insert(pair<string, string>(name, value));
+			reqContextTable[++reqcurrentSize].insert(std::pair<std::string, std::string>(name, value));
 			if(value!="")
 			{
 				reqhnvIndexTable[name+value] = reqcurrentSize;
@@ -1048,7 +1048,7 @@ void Http2HPACKHeaderTable::addHeader(const string& name, const string& value, c
 	{
 		if(getIndexByNameAndValue(name, value, isRequest)==-1)
 		{
-			resContextTable[++rescurrentSize].insert(pair<string, string>(name, value));
+			resContextTable[++rescurrentSize].insert(std::pair<std::string, std::string>(name, value));
 			if(value!="")
 			{
 				reshnvIndexTable[name+value] = rescurrentSize;

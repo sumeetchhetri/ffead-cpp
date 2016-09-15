@@ -29,32 +29,32 @@
 
 class Message {
 	Destination destination;
-	string timestamp;
-	string type;
-	string priority;
-	string userId;
-	string encoding;
-	string body;
+	std::string timestamp;
+	std::string type;
+	std::string priority;
+	std::string userId;
+	std::string encoding;
+	std::string body;
 public:
-	Message(const string&);
+	Message(const std::string&);
 	Message(Document&);
 	Message();
 	virtual ~Message();
     Destination getDestination() const;
     void setDestination(const Destination&);
-    string getTimestamp() const;
-    void setTimestamp(const string&);
-    string getType() const;
-    void setType(const string&);
-    string getPriority() const;
-    void setPriority(const string&);
-    string getUserId() const;
-    void setUserId(const string&);
-    string getBody() const;
-    void setBody(const string&);
-    string getEncoding() const;
-    void setEncoding(const string&);
-    string toXml() const;
+    std::string getTimestamp() const;
+    void setTimestamp(const std::string&);
+    std::string getType() const;
+    void setType(const std::string&);
+    std::string getPriority() const;
+    void setPriority(const std::string&);
+    std::string getUserId() const;
+    void setUserId(const std::string&);
+    std::string getBody() const;
+    void setBody(const std::string&);
+    std::string getEncoding() const;
+    void setEncoding(const std::string&);
+    std::string toXml() const;
 };
 
 #endif /* MESSAGE_H_ */

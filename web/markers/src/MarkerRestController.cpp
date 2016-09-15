@@ -33,6 +33,6 @@ MarkerRestController::~MarkerRestController() {
 
 int MarkerRestController::addNumbers(int a, int b)
 {
-	cout << "Processed input request inside MarkerRestController for addNumbers..." << endl;
+	std::cout << "Processed input request inside MarkerRestController for addNumbers..." << std::endl;
 	return a + b;
 }

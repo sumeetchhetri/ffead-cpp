@@ -34,14 +34,14 @@
 
 class XmlParser {
 	public:
-		XmlParser(const string&);
+		XmlParser(const std::string&);
 		virtual ~XmlParser();
-		void parse(string, Document&);
-		void readDocument(const string& filename, Document&);
+		void parse(std::string, Document&);
+		void readDocument(const std::string& filename, Document&);
 	private:
 		Logger logger;
-		string mode;
-		void readXML(string&, const string&, Element *);
+		std::string mode;
+		void readXML(std::string&, const std::string&, Element *);
 };
 
 #endif /* XMLPARSER_H_ */

@@ -23,20 +23,20 @@ public:
 	virtual ~HttpServiceTask();
 	HttpServiceTask();
 	virtual void handle(HttpRequest* request, HttpResponse* response)=0;
-	virtual void handleWebsockOpen(const string& url)=0;
-	virtual void handleWebsockClose(const string& url)=0;
-	virtual void handleWebsockMessage(const string& url, WebSocketData* request, WebSocketData* response)=0;
+	virtual void handleWebsockOpen(const std::string& url)=0;
+	virtual void handleWebsockClose(const std::string& url)=0;
+	virtual void handleWebsockMessage(const std::string& url, WebSocketData* request, WebSocketData* response)=0;
 };
 
 typedef HttpServiceTask* (*HttpServiceTaskFactory) ();
 
 class HttpServiceHandler : public ServiceHandler {
-	string cntEncoding;
+	std::string cntEncoding;
 	HttpServiceTaskFactory f;
 	friend class HttpServiceTask;
 	void service(HandlerRequest* handlerRequest);
 public:
-	HttpServiceHandler(const string& cntEncoding, const HttpServiceTaskFactory& f, const int& poolSize);
+	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& poolSize);
 	virtual ~HttpServiceHandler();
 };
 

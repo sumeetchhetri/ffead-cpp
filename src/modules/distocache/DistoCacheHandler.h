@@ -34,7 +34,7 @@
 
 #define BACKLOG1 500
 #define MAXBUFLEN1 1024
-using namespace std;
+
 class DistoCacheHandler {
 	static DistoCacheHandler* instance;
 	Logger logger;
@@ -45,7 +45,7 @@ class DistoCacheHandler {
 	DistoCacheHandler();
 	virtual ~DistoCacheHandler();
 public:
-	static void trigger(const string&, const int&);
+	static void trigger(const std::string&, const int&);
 	static void stop();
 };
 

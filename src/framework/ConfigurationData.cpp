@@ -43,7 +43,7 @@ CoreServerProperties const& ConfigurationData::getCoreServerProperties() {
 	return (getInstance()->coreServerProperties);
 }
 
-bool ConfigurationData::isServingContext(const string& cntxtName) {
+bool ConfigurationData::isServingContext(const std::string& cntxtName) {
 	return getInstance()->servingContexts.find(cntxtName)!=getInstance()->servingContexts.end()
 			&& getInstance()->servingContexts[cntxtName];
 }
@@ -76,28 +76,28 @@ bool Security::isSecureConfigured()
 {
 	return secures.size()!=0;
 }
-bool Security::isLoginUrl(const string& url, const string& actUrl)
+bool Security::isLoginUrl(const std::string& url, const std::string& actUrl)
 {
 	return (actUrl==(url+"/_ffead_security_cntxt_login_url"));
 }
-bool Security::isLoginPage(const string& cntxtName, const string& actUrl)
+bool Security::isLoginPage(const std::string& cntxtName, const std::string& actUrl)
 {
-	string fpath = "/"+cntxtName+"/"+loginUrl;
+	std::string fpath = "/"+cntxtName+"/"+loginUrl;
 	RegexUtil::replace(fpath,"[/]+","/");
-	string lpath = "/"+loginUrl;
+	std::string lpath = "/"+loginUrl;
 	RegexUtil::replace(lpath,"[/]+","/");
-	logger << actUrl << " " << lpath << " " << fpath << endl;
+	logger << actUrl << " " << lpath << " " << fpath << std::endl;
 	return actUrl==fpath || actUrl==lpath;
 }
 
 bool Security::addAspect(const SecureAspect& aspect)
 {
-	string pathurl = aspect.path;
+	std::string pathurl = aspect.path;
 	StringUtil::trim(pathurl);
 	RegexUtil::replace(pathurl,"[/]+","/");
 	if(secures.find("*")!=secures.end())
 	{
-		logger << ("Already found secure path mapping for * (All paths), cannot add any further secure paths, skipping...") << endl;
+		logger << ("Already found secure path mapping for * (All paths), cannot add any further secure paths, skipping...") << std::endl;
 		return false;
 	}
 	else if(secures.find(pathurl)==secures.end())
@@ -114,8 +114,8 @@ bool Security::addAspect(const SecureAspect& aspect)
 			endval = true;
 		}
 		bool exists = false;
-		string url;
-		map<string, SecureAspect>::iterator it;
+		std::string url;
+		std::map<std::string, SecureAspect>::iterator it;
 		for (it=secures.begin();it!=secures.end();++it) {
 			url = it->first;
 			if(startval && url.find(pathurl)==0)
@@ -126,7 +126,7 @@ bool Security::addAspect(const SecureAspect& aspect)
 			{
 				exists = true;
 			}
-			else if(startval && endval && url.find(pathurl)!=string::npos)
+			else if(startval && endval && url.find(pathurl)!=std::string::npos)
 			{
 				exists = true;
 			}
@@ -138,32 +138,32 @@ bool Security::addAspect(const SecureAspect& aspect)
 		}
 		else
 		{
-			logger << ("Already found secure path mapping for " + pathurl + "(" + url + "), skipping...") << endl;
+			logger << ("Already found secure path mapping for " + pathurl + "(" + url + "), skipping...") << std::endl;
 			return false;
 		}
 	}
 	else
 	{
-		logger << ("Duplicate secure aspect found for path" + pathurl + ", skipping...") << endl;
+		logger << ("Duplicate secure aspect found for path" + pathurl + ", skipping...") << std::endl;
 		return false;
 	}
 }
 
-SecureAspect Security::matchesPath(const string& cntxtName, string url)
+SecureAspect Security::matchesPath(const std::string& cntxtName, std::string url)
 {
 	SecureAspect aspect;
-	map<string, SecureAspect>::iterator it;
+	std::map<std::string, SecureAspect>::iterator it;
 	for (it=secures.begin();it!=secures.end();++it) {
 		SecureAspect secureAspect = it->second;
-		string pathurl = secureAspect.path;
+		std::string pathurl = secureAspect.path;
 		StringUtil::trim(pathurl);
 		RegexUtil::replace(pathurl,"[/]+","/");
-		logger << ("Checking security path " + pathurl + " against url " + url) << endl;
+		logger << ("Checking security path " + pathurl + " against url " + url) << std::endl;
 		if(StringUtil::startsWith(url, "/"+cntxtName) && StringUtil::startsWith(pathurl, "regex(") && StringUtil::endsWith(pathurl, ")"))
 		{
-			string regurl = pathurl.substr(6, pathurl.length()-1);
-			string cntpre = "/"+cntxtName;
-			string nurl = url.substr(cntpre.length());
+			std::string regurl = pathurl.substr(6, pathurl.length()-1);
+			std::string cntpre = "/"+cntxtName;
+			std::string nurl = url.substr(cntpre.length());
 			if(RegexUtil::find(nurl, regurl)!=-1)
 			{
 				aspect = secureAspect;
@@ -172,7 +172,7 @@ SecureAspect Security::matchesPath(const string& cntxtName, string url)
 		}
 		else if(StringUtil::startsWith(pathurl, "regex(") && StringUtil::endsWith(pathurl, ")"))
 		{
-			string regurl = pathurl.substr(6, pathurl.length()-1);
+			std::string regurl = pathurl.substr(6, pathurl.length()-1);
 			if(RegexUtil::find(url, regurl)!=-1)
 			{
 				aspect = secureAspect;
@@ -191,14 +191,14 @@ SecureAspect Security::matchesPath(const string& cntxtName, string url)
 		}
 
 		bool urlextmtch = true;
-		if(pathurl.find("*.")!=string::npos)
+		if(pathurl.find("*.")!=std::string::npos)
 		{
 			urlextmtch = false;
-			string pathext, urlext;
+			std::string pathext, urlext;
 			size_t indx = pathurl.find("*.");
 			pathext = pathurl.substr(indx+1);
 
-			if(url.find(".")==string::npos)
+			if(url.find(".")==std::string::npos)
 				continue;
 
 			if(indx==0)
@@ -220,7 +220,7 @@ SecureAspect Security::matchesPath(const string& cntxtName, string url)
 		}
 		else if(StringUtil::endsWith(pathurl, ".*"))
 		{
-			if(url.find(".")==string::npos)
+			if(url.find(".")==std::string::npos)
 				continue;
 
 			pathurl = pathurl.substr(0, pathurl.length()-2);
@@ -238,9 +238,9 @@ SecureAspect Security::matchesPath(const string& cntxtName, string url)
 			pathurl = pathurl.substr(1);
 			endval = true;
 		}
-		string fpath = "/"+cntxtName+"/"+pathurl;
+		std::string fpath = "/"+cntxtName+"/"+pathurl;
 		RegexUtil::replace(fpath,"[/]+","/");
-		if(urlextmtch && startval && endval && ((cntxtName=="default" && url.find(pathurl)!=string::npos) || url.find(fpath)!=string::npos))
+		if(urlextmtch && startval && endval && ((cntxtName=="default" && url.find(pathurl)!=std::string::npos) || url.find(fpath)!=std::string::npos))
 		{
 			aspect = secureAspect;
 		}
@@ -260,18 +260,18 @@ SecureAspect Security::matchesPath(const string& cntxtName, string url)
 	return aspect;
 }
 
-bool ConfigurationData::urlMatchesPath(const string& cntxtName, string pathurl, string url)
+bool ConfigurationData::urlMatchesPath(const std::string& cntxtName, std::string pathurl, std::string url)
 {
 	StringUtil::trim(pathurl);
 	RegexUtil::replace(pathurl,"[/]+","/");
-	string fpath = "/"+cntxtName+"/"+pathurl;
+	std::string fpath = "/"+cntxtName+"/"+pathurl;
 	RegexUtil::replace(fpath,"[/]+","/");
 
-	getInstance()->logger << ("Checking path " + pathurl + " against url " + url) << endl;
+	getInstance()->logger << ("Checking path " + pathurl + " against url " + url) << std::endl;
 	if(StringUtil::startsWith(url, cntxtName) && StringUtil::startsWith(pathurl, "regex(") && StringUtil::endsWith(pathurl, ")"))
 	{
-		string regurl = pathurl.substr(6, pathurl.length()-1);
-		string nurl = url.substr(cntxtName.length());
+		std::string regurl = pathurl.substr(6, pathurl.length()-1);
+		std::string nurl = url.substr(cntxtName.length());
 		if(RegexUtil::find(nurl, regurl)!=-1)
 		{
 			return true;
@@ -280,7 +280,7 @@ bool ConfigurationData::urlMatchesPath(const string& cntxtName, string pathurl, 
 	}
 	else if(StringUtil::startsWith(pathurl, "regex(") && StringUtil::endsWith(pathurl, ")"))
 	{
-		string regurl = pathurl.substr(6, pathurl.length()-1);
+		std::string regurl = pathurl.substr(6, pathurl.length()-1);
 		if(RegexUtil::find(url, regurl)!=-1)
 		{
 			return true;
@@ -297,13 +297,13 @@ bool ConfigurationData::urlMatchesPath(const string& cntxtName, string pathurl, 
 	}
 
 	bool urlextmtch = true;
-	if(pathurl.find("*.")!=string::npos)
+	if(pathurl.find("*.")!=std::string::npos)
 	{
-		string pathext, urlext;
+		std::string pathext, urlext;
 		size_t indx = pathurl.find("*.");
 		pathext = pathurl.substr(indx+1);
 
-		if(url.find(".")==string::npos)
+		if(url.find(".")==std::string::npos)
 		{
 			return false;
 		}
@@ -327,7 +327,7 @@ bool ConfigurationData::urlMatchesPath(const string& cntxtName, string pathurl, 
 	}
 	else if(StringUtil::endsWith(pathurl, ".*"))
 	{
-		if(url.find(".")==string::npos)
+		if(url.find(".")==std::string::npos)
 		{
 			return false;
 		}
@@ -348,7 +348,7 @@ bool ConfigurationData::urlMatchesPath(const string& cntxtName, string pathurl, 
 		endval = true;
 	}
 
-	if(urlextmtch && startval && endval && ((cntxtName=="default" && url.find(pathurl)!=string::npos) || url.find(fpath)!=string::npos))
+	if(urlextmtch && startval && endval && ((cntxtName=="default" && url.find(pathurl)!=std::string::npos) || url.find(fpath)!=std::string::npos))
 	{
 		return true;
 	}

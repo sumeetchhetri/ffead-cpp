@@ -62,7 +62,7 @@ GroupClause::GroupClause() {
 	qb = NULL;
 }
 
-const vector<string>& GroupClause::getColumns() const {
+const std::vector<std::string>& GroupClause::getColumns() const {
 	return columns;
 }
 
@@ -82,7 +82,7 @@ JoinClause::JoinClause(QueryBuilder* qb) {
 JoinClause::~JoinClause() {
 }
 
-LogicalGroup& JoinClause::on(const string& lhs, const QueryOperator& oper, const GenericObject& rhs) {
+LogicalGroup& JoinClause::on(const std::string& lhs, const QueryOperator& oper, const GenericObject& rhs) {
 	return condition;
 }
 
@@ -91,11 +91,11 @@ JoinClause::JoinClause() {
 	type = JoinType::CROSS;
 }
 
-const string& JoinClause::getAlias() const {
+const std::string& JoinClause::getAlias() const {
 	return alias;
 }
 
-const string& JoinClause::getClassName() const {
+const std::string& JoinClause::getClassName() const {
 	return className;
 }
 
@@ -103,7 +103,7 @@ const LogicalGroup& JoinClause::getCondition() const {
 	return condition;
 }
 
-const string& JoinClause::getTableName() const {
+const std::string& JoinClause::getTableName() const {
 	return tableName;
 }
 
@@ -124,7 +124,7 @@ LogicalGroup::LogicalGroup(QueryBuilder* qb) {
 LogicalGroup::~LogicalGroup() {
 }
 
-LogicalGroup& LogicalGroup::where(const string& lhs, const QueryOperator& oper, const GenericObject& rhs) {
+LogicalGroup& LogicalGroup::where(const std::string& lhs, const QueryOperator& oper, const GenericObject& rhs) {
 	Condition cond;
 	cond.lhs = lhs;
 	cond.oper = oper;
@@ -178,7 +178,7 @@ LogicalGroup::LogicalGroup() {
 	condStarted = false;
 }
 
-LogicalGroup& LogicalGroup::where(const string& lhs, const QueryOperator& oper, const GenericObject& rhs, const GenericObject& rhs1) {
+LogicalGroup& LogicalGroup::where(const std::string& lhs, const QueryOperator& oper, const GenericObject& rhs, const GenericObject& rhs1) {
 	Condition cond;
 	cond.lhs = lhs;
 	cond.oper = oper;
@@ -193,7 +193,7 @@ LogicalGroup& LogicalGroup::where(const string& lhs, const QueryOperator& oper, 
 	return *this;
 }
 
-LogicalGroup& LogicalGroup::where(const string& lhs, const QueryOperator& oper, const vector<GenericObject>& rhsList) {
+LogicalGroup& LogicalGroup::where(const std::string& lhs, const QueryOperator& oper, const std::vector<GenericObject>& rhsList) {
 	Condition cond;
 	cond.lhs = lhs;
 	cond.oper = oper;
@@ -207,7 +207,7 @@ LogicalGroup& LogicalGroup::where(const string& lhs, const QueryOperator& oper, 
 	return *this;
 }
 
-const vector<Condition>& LogicalGroup::getConds() const {
+const std::vector<Condition>& LogicalGroup::getConds() const {
 	return conds;
 }
 
@@ -220,7 +220,7 @@ QueryBuilder& QueryBuilder::allColumns() {
 	return *this;
 }
 
-QueryBuilder& QueryBuilder::columnName(string name, string calias) {
+QueryBuilder& QueryBuilder::columnName(std::string name, std::string calias) {
 	StringUtil::trim(name);
 	StringUtil::trim(calias);
 	if(className=="")
@@ -231,32 +231,32 @@ QueryBuilder& QueryBuilder::columnName(string name, string calias) {
 	return *this;
 }
 
-QueryBuilder& QueryBuilder::columnNames(const map<string, string>& columns) {
+QueryBuilder& QueryBuilder::columnNames(const std::map<std::string, std::string>& columns) {
 	this->columns = columns;
 	return *this;
 }
 
-QueryBuilder& QueryBuilder::delimitedColumnNames(const string& names) {
-	vector<string> cols = StringUtil::splitAndReturn<vector<string> >(names, ",");
+QueryBuilder& QueryBuilder::delimitedColumnNames(const std::string& names) {
+	std::vector<std::string> cols = StringUtil::splitAndReturn<std::vector<std::string> >(names, ",");
 	for (int var = 0; var < (int)cols.size(); ++var) {
-		string col = cols.at(var);
+		std::string col = cols.at(var);
 		StringUtil::trim(col);
 		if(className!="") {
 			columns[col] = "";
 		}
-		else if(StringUtil::toLowerCopy(col).find(" as ")!=string::npos) {
-			vector<string> colparts = StringUtil::splitAndReturn<vector<string> >(col, " as ");
-			string coln = StringUtil::trimCopy(colparts.at(0));
-			string colal = StringUtil::trimCopy(colparts.at(1));
-			if(coln.find(".")==string::npos) {
+		else if(StringUtil::toLowerCopy(col).find(" as ")!=std::string::npos) {
+			std::vector<std::string> colparts = StringUtil::splitAndReturn<std::vector<std::string> >(col, " as ");
+			std::string coln = StringUtil::trimCopy(colparts.at(0));
+			std::string colal = StringUtil::trimCopy(colparts.at(1));
+			if(coln.find(".")==std::string::npos) {
 				coln = (alias + "." + coln);
 			}
 			columns[coln] = colal;
-		} else if(StringUtil::toLowerCopy(col).find(" ")!=string::npos) {
-			vector<string> colparts = StringUtil::splitAndReturn<vector<string> >(col, " ");
-			string coln = StringUtil::trimCopy(colparts.at(0));
-			string colal = StringUtil::trimCopy(colparts.at(1));
-			if(coln.find(".")==string::npos) {
+		} else if(StringUtil::toLowerCopy(col).find(" ")!=std::string::npos) {
+			std::vector<std::string> colparts = StringUtil::splitAndReturn<std::vector<std::string> >(col, " ");
+			std::string coln = StringUtil::trimCopy(colparts.at(0));
+			std::string colal = StringUtil::trimCopy(colparts.at(1));
+			if(coln.find(".")==std::string::npos) {
 				coln = (alias + "." + coln);
 			}
 			columns[coln] = colal;
@@ -270,13 +270,13 @@ QueryBuilder& QueryBuilder::distinct() {
 	return *this;
 }
 
-QueryBuilder& QueryBuilder::fromTable(const string& name, const string& alias) {
+QueryBuilder& QueryBuilder::fromTable(const std::string& name, const std::string& alias) {
 	tableName = name;
 	this->alias = alias;
 	return *this;
 }
 
-QueryBuilder& QueryBuilder::fromClass(const string& name, const string& alias) {
+QueryBuilder& QueryBuilder::fromClass(const std::string& name, const std::string& alias) {
 	className = name;
 	this->alias = alias;
 	return *this;
@@ -286,32 +286,32 @@ LogicalGroup& QueryBuilder::condition() {
 	return conditions;
 }
 
-GroupClause& QueryBuilder::groupBy(const string& column) {
+GroupClause& QueryBuilder::groupBy(const std::string& column) {
 	group.columns.push_back(column);
 	return group;
 }
 
-GroupClause& QueryBuilder::groupBy(const vector<string>& columns) {
+GroupClause& QueryBuilder::groupBy(const std::vector<std::string>& columns) {
 	group.columns = columns;
 	return group;
 }
 
-GroupClause& QueryBuilder::delimitedGroupByColumns(const string& names) {
-	vector<string> cols = StringUtil::splitAndReturn<vector<string> >(names, ",");
+GroupClause& QueryBuilder::delimitedGroupByColumns(const std::string& names) {
+	std::vector<std::string> cols = StringUtil::splitAndReturn<std::vector<std::string> >(names, ",");
 	for (int var = 0; var < (int)cols.size(); ++var) {
-		string col = cols.at(var);
+		std::string col = cols.at(var);
 		StringUtil::trim(col);
 		group.columns.push_back(col);
 	}
 	return group;
 }
 
-QueryBuilder& QueryBuilder::orderByAsc(const string& column) {
+QueryBuilder& QueryBuilder::orderByAsc(const std::string& column) {
 	columnsAsc.push_back(column);
 	return *this;
 }
 
-QueryBuilder& QueryBuilder::orderByDesc(const string& column) {
+QueryBuilder& QueryBuilder::orderByDesc(const std::string& column) {
 	columnsAsc.push_back(column);
 	return *this;
 }
@@ -322,7 +322,7 @@ QueryBuilder& QueryBuilder::paginate(const int& start, const int& count) {
 	return *this;
 }
 
-JoinClause& QueryBuilder::joinTable(const JoinType& jt, const string& name, const string& alias) {
+JoinClause& QueryBuilder::joinTable(const JoinType& jt, const std::string& name, const std::string& alias) {
 	JoinClause* jc = new JoinClause(this);
 	jc->tableName = name;
 	jc->alias = alias;
@@ -331,7 +331,7 @@ JoinClause& QueryBuilder::joinTable(const JoinType& jt, const string& name, cons
 	return *jc;
 }
 
-JoinClause& QueryBuilder::joinClass(const JoinType& jt, const string& name, const string& alias) {
+JoinClause& QueryBuilder::joinClass(const JoinType& jt, const std::string& name, const std::string& alias) {
 	JoinClause* jc = new JoinClause(this);
 	jc->alias = alias;
 	jc->type = jt;
@@ -345,7 +345,7 @@ QueryBuilder& QueryBuilder::unionQuery(const QueryBuilder& qb) {
 	return *this;
 }
 
-const string& QueryBuilder::getAlias() const {
+const std::string& QueryBuilder::getAlias() const {
 	return alias;
 }
 
@@ -353,19 +353,19 @@ bool QueryBuilder::isAllCols() const {
 	return allCols;
 }
 
-const string& QueryBuilder::getClassName() const {
+const std::string& QueryBuilder::getClassName() const {
 	return className;
 }
 
-const map<string, string>& QueryBuilder::getColumns() const {
+const std::map<std::string, std::string>& QueryBuilder::getColumns() const {
 	return columns;
 }
 
-const vector<string>& QueryBuilder::getColumnsAsc() const {
+const std::vector<std::string>& QueryBuilder::getColumnsAsc() const {
 	return columnsAsc;
 }
 
-const vector<string>& QueryBuilder::getColumnsDesc() const {
+const std::vector<std::string>& QueryBuilder::getColumnsDesc() const {
 	return columnsDesc;
 }
 
@@ -381,7 +381,7 @@ const GroupClause& QueryBuilder::getGroup() const {
 	return group;
 }
 
-const vector<JoinClause*>& QueryBuilder::getJoinClauses() const {
+const std::vector<JoinClause*>& QueryBuilder::getJoinClauses() const {
 	return joinClauses;
 }
 
@@ -389,15 +389,15 @@ int QueryBuilder::getStart() const {
 	return start;
 }
 
-const string& QueryBuilder::getTableName() const {
+const std::string& QueryBuilder::getTableName() const {
 	return tableName;
 }
 
-const vector<QueryBuilder>& QueryBuilder::getUnionAlls() const {
+const std::vector<QueryBuilder>& QueryBuilder::getUnionAlls() const {
 	return unionAlls;
 }
 
-const vector<QueryBuilder>& QueryBuilder::getUnions() const {
+const std::vector<QueryBuilder>& QueryBuilder::getUnions() const {
 	return unions;
 }
 
@@ -414,7 +414,7 @@ QueryClause Condition::getClause() const {
 	return clause;
 }
 
-const string& Condition::getLhs() const {
+const std::string& Condition::getLhs() const {
 	return lhs;
 }
 

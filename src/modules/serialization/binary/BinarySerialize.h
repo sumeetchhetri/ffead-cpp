@@ -25,73 +25,73 @@
 #include "SerializeBase.h"
 #include "AMEFResources.h"
 
-typedef string (*SerPtr) (void*);
-typedef void* (*UnSerPtr) (const string&);
+typedef std::string (*SerPtr) (void*);
+typedef void* (*UnSerPtr) (const std::string&);
 
 class BinarySerialize : public SerializeBase {
 
-	string serializePrimitive(const string& className, void* t);
+	std::string serializePrimitive(const std::string& className, void* t);
 	void* getSerializableObject();
 	void cleanSerializableObject(void* _1);
-	void startContainerSerialization(void* _1, const string& className, const string& container);
-	void endContainerSerialization(void* _1, const string& className, const string& container);
+	void startContainerSerialization(void* _1, const std::string& className, const std::string& container);
+	void endContainerSerialization(void* _1, const std::string& className, const std::string& container);
 	void afterAddContainerSerializableElement(void* _1, const int& counter, const int& size);
-	void addContainerSerializableElement(void* _1, const string& tem);
-	void addContainerSerializableElementMulti(void* _1, const string& tem);
-	string fromSerializableObjectToString(void* _1);
-	string elementToSerializedString(void* _1, const int& counter);
-	string getConatinerElementClassName(void* _1, const string& className);
+	void addContainerSerializableElement(void* _1, const std::string& tem);
+	void addContainerSerializableElementMulti(void* _1, const std::string& tem);
+	std::string fromSerializableObjectToString(void* _1);
+	std::string elementToSerializedString(void* _1, const int& counter);
+	std::string getConatinerElementClassName(void* _1, const std::string& className);
 	void* getContainerElement(void* _1, const int& counter, const int& counter1= -1);
-	void addPrimitiveElementToContainer(void* _1, const int& counter, const string& className, void* cont, const string& container);
-	void* getUnserializableObject(const string& _1);
+	void addPrimitiveElementToContainer(void* _1, const int& counter, const std::string& className, void* cont, const std::string& container);
+	void* getUnserializableObject(const std::string& _1);
 	void cleanUnserializableObject(void* _1);
 	void cleanValidUnserializableObject(void* _1);
-	void* getValidUnserializableObject(const string& _1);
+	void* getValidUnserializableObject(const std::string& _1);
 	int getContainerSize(void* _1);
-	string getUnserializableClassName(void* _1, const string& className);
-	void* getPrimitiveValue(void* _1, const string& className);
+	std::string getUnserializableClassName(void* _1, const std::string& className);
+	void* getPrimitiveValue(void* _1, const std::string& className);
 public:
 	BinarySerialize();
 	BinarySerialize(void*);
 	~BinarySerialize();
 
-	template <class T> static string serialize(T& t, const string& appName = "")
+	template <class T> static std::string serialize(T& t, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
-		string className = CastUtil::getClassName(t);
+		std::string className = CastUtil::getClassName(t);
 		return _handleAllSerialization(className,&t,appName, &serialize);
 	}
-	template <class T> static string serializePointer(T* t, const string& appName = "")
+	template <class T> static std::string serializePointer(T* t, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
-		string className = CastUtil::getClassName(t);
+		std::string className = CastUtil::getClassName(t);
 		return _handleAllSerialization(className,t,appName, &serialize);
 	}
-	static string serializeUnknown(void* t, const string& className, const string& appName = "");
+	static std::string serializeUnknown(void* t, const std::string& className, const std::string& appName = "");
 
-	template <class K,class V> static string serializeMap(map<K,V>& mp, const string& appName = "")
+	template <class K,class V> static std::string serializeMap(std::map<K,V>& mp, const std::string& appName = "")
 	{
-		typedef typename map<K,V>::iterator kvmapiter;
+		typedef typename std::map<K,V>::iterator kvmapiter;
 		AMEFEncoder enc;
 		AMEFObject object;
 		K k;
-		string kclassName = CastUtil::getClassName(k);
+		std::string kclassName = CastUtil::getClassName(k);
 		V v;
-		string vclassName = CastUtil::getClassName(v);
+		std::string vclassName = CastUtil::getClassName(v);
 		kclassName = "map<"+kclassName+":"+vclassName+">";
 		object.setName(kclassName);
 		kvmapiter it;
 		for (it=mp.begin();it!=mp.end();++it)
 		{
 			//string key = serialize<K>(it->first,appName);
-			string value = serialize<V>(it->second,appName);
-			object.addPacket(value, CastUtil::lexical_cast<string>(it->first));
+			std::string value = serialize<V>(it->second,appName);
+			object.addPacket(value, CastUtil::lexical_cast<std::string>(it->first));
 		}
 		return enc.encodeB(&object);
 	}
-	template <class K,class V> static map<K,V> unSerializeToMap(const string& serStr, const string& appName = "")
+	template <class K,class V> static std::map<K,V> unSerializeToMap(const std::string& serStr, const std::string& appName = "")
 	{
-		map<K,V> mp;
+		std::map<K,V> mp;
 		AMEFDecoder dec;
 		AMEFObject object;
 		AMEFObject* root = dec.decodeB(serStr, true);
@@ -107,29 +107,29 @@ public:
 		return mp;
 	}
 
-	template <class K,class V> static string serializeMultiMap(multimap<K,V>& mp, const string& appName = "")
+	template <class K,class V> static std::string serializeMultiMap(std::multimap<K,V>& mp, const std::string& appName = "")
 	{
-		typedef typename multimap<K,V>::iterator kvmapiter;
+		typedef typename std::multimap<K,V>::iterator kvmapiter;
 		AMEFEncoder enc;
 		AMEFObject object;
 		K k;
-		string kclassName = CastUtil::getClassName(k);
+		std::string kclassName = CastUtil::getClassName(k);
 		V v;
-		string vclassName = CastUtil::getClassName(v);
+		std::string vclassName = CastUtil::getClassName(v);
 		kclassName = "multimap<"+kclassName+":"+vclassName+">";
 		object.setName(kclassName);
 		kvmapiter it;
 		for (it=mp.begin();it!=mp.end();++it)
 		{
 			//string key = serialize<K>(it->first,appName);
-			string value = serialize<V>(it->second,appName);
-			object.addPacket(value, CastUtil::lexical_cast<string>(it->first));
+			std::string value = serialize<V>(it->second,appName);
+			object.addPacket(value, CastUtil::lexical_cast<std::string>(it->first));
 		}
 		return enc.encodeB(&object);
 	}
-	template <class K,class V> static multimap<K,V> unSerializeToMultiMap(const string& serStr, const string& appName = "")
+	template <class K,class V> static std::multimap<K,V> unSerializeToMultiMap(const std::string& serStr, const std::string& appName = "")
 	{
-		multimap<K,V> mp;
+		std::multimap<K,V> mp;
 		AMEFDecoder dec;
 		AMEFObject object;
 		AMEFObject* root = dec.decodeB(serStr, true);
@@ -146,11 +146,11 @@ public:
 	}
 
 
-	template <class T> static T unserialize(const string& objXml, const string& appName = "")
+	template <class T> static T unserialize(const std::string& objXml, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		T t;
-		string className = CastUtil::getClassName(t);
+		std::string className = CastUtil::getClassName(t);
 		T* tp = (T*)_handleAllUnSerialization(objXml,className,appName,&serialize,false,NULL);
 		if(tp!=NULL)
 		{
@@ -159,11 +159,11 @@ public:
 		}
 		return t;
 	}
-	template <class T> static T unserialize(AMEFObject* serObject, const string& appName = "")
+	template <class T> static T unserialize(AMEFObject* serObject, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		T t;
-		string className = CastUtil::getClassName(t);
+		std::string className = CastUtil::getClassName(t);
 		T* tp = (T*)_handleAllUnSerialization("",className,appName,&serialize,false,serObject);
 		if(tp!=NULL)
 		{
@@ -172,34 +172,34 @@ public:
 		}
 		return t;
 	}
-	template <class T> static T* unserializeToPointer(const string& objXml, const string& appName = "")
+	template <class T> static T* unserializeToPointer(const std::string& objXml, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		T* t;
-		string className = CastUtil::getClassName(t);
+		std::string className = CastUtil::getClassName(t);
 		return (T*)_handleAllUnSerialization(objXml,className,appName,&serialize,false,NULL);
 	}
-	template <class T> static T* unserializeToPointer(AMEFObject* serObject, const string& appName = "")
+	template <class T> static T* unserializeToPointer(AMEFObject* serObject, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		T* t;
-		string className = CastUtil::getClassName(t);
+		std::string className = CastUtil::getClassName(t);
 		return (T*)_handleAllUnSerialization("",className,appName,&serialize,false,serObject);
 	}
 
-	bool isValidClassNamespace(void* _1, const string& className, const string& namespc, const bool& iscontainer= false);
-	bool isValidObjectProperty(void* _1, const string& propname, const int& counter);
+	bool isValidClassNamespace(void* _1, const std::string& className, const std::string& namespc, const bool& iscontainer= false);
+	bool isValidObjectProperty(void* _1, const std::string& propname, const int& counter);
 	void* getObjectProperty(void* _1, const int& counter);
-	void startObjectSerialization(void* _1, const string& className);
-	void endObjectSerialization(void* _1, const string& className);
+	void startObjectSerialization(void* _1, const std::string& className);
+	void endObjectSerialization(void* _1, const std::string& className);
 	void afterAddObjectProperty(void* _1);
-	void addObjectPrimitiveProperty(void* _1, const string& propName, const string& className, void* t);
-	void addObjectProperty(void* _1, const string& propName, string className, const string& t);
-	void* getObjectPrimitiveValue(void* _1, const string& className, const string& propName);
-	static void* unSerializeUnknown(const string& objXml, const string& className, const string& appName = "");
-	string serializeUnknownBase(void* t, const string& className, const string& appName = "");
-	void* unSerializeUnknownBase(void* unserObj, const string& className, const string& appName = "");
-	void* unSerializeUnknownBase(const string& serVal, const string& className, const string& appName = "");
+	void addObjectPrimitiveProperty(void* _1, const std::string& propName, const std::string& className, void* t);
+	void addObjectProperty(void* _1, const std::string& propName, std::string className, const std::string& t);
+	void* getObjectPrimitiveValue(void* _1, const std::string& className, const std::string& propName);
+	static void* unSerializeUnknown(const std::string& objXml, const std::string& className, const std::string& appName = "");
+	std::string serializeUnknownBase(void* t, const std::string& className, const std::string& appName = "");
+	void* unSerializeUnknownBase(void* unserObj, const std::string& className, const std::string& appName = "");
+	void* unSerializeUnknownBase(const std::string& serVal, const std::string& className, const std::string& appName = "");
 };
 
 #endif /* BINARYSERIALIZE_H_ */

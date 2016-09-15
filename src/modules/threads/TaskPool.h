@@ -37,9 +37,9 @@
 
 class TaskPool {
 	std::queue<Task*> *tasks;
-	priority_queue<Task*> *ptasks;
-	vector<Task*> *scheduledtasks;
-	vector<Timer*> *scheduledTimers;
+	std::priority_queue<Task*> *ptasks;
+	std::vector<Task*> *scheduledtasks;
+	std::vector<Timer*> *scheduledTimers;
 	Mutex *s_mutex;
 	ConditionMutex *c_mutex;
 	Thread *mthread;

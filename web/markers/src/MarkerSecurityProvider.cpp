@@ -28,15 +28,15 @@ MarkerSecurityProvider::MarkerSecurityProvider()
 MarkerSecurityProvider::~MarkerSecurityProvider()
 {}
 
-bool MarkerSecurityProvider::authenticate(const string& username, const string& password)
+bool MarkerSecurityProvider::authenticate(const std::string& username, const std::string& password)
 {
-	cout << "Username is " << username << ", Password is " << password << endl;
+	std::cout << "Username is " << username << ", Password is " << password << std::endl;
 	return true;
 }
 
-string MarkerSecurityProvider::getUserRole(const string& username)
+std::string MarkerSecurityProvider::getUserRole(const std::string& username)
 {
-	cout << "Username is " << username << endl;
+	std::cout << "Username is " << username << std::endl;
 	return "ROLE_USER";
 }
 

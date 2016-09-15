@@ -8,6 +8,6 @@
 
 #include "CastUtil.h"
 
-map<string, string> CastUtil::_mangledClassNameMap;
-const string CastUtil::STD_STRING = "std::string";
+std::map<std::string, std::string> CastUtil::_mangledClassNameMap;
+const std::string CastUtil::STD_STRING = "std::string";
 

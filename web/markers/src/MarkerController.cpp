@@ -35,7 +35,7 @@ MarkerController::~MarkerController() {
 bool MarkerController::service(HttpRequest* req, HttpResponse* res)
 {
 	res->setHTTPResponseStatus(HTTPResponseStatus::NoContent);
-	cout << "Called Marker Controller...." << flush;
+	std::cout << "Called Marker Controller...." << std::flush;
 	return true;
 }
 

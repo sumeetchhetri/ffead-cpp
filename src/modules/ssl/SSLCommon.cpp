@@ -22,15 +22,15 @@
 
 #include "SSLCommon.h"
 
-string SSLCommon::ciphers =
-    string("ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-") +
-	string("AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:") +
-	string("DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-") +
-	string("AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-") +
-	string("AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-") +
-	string("AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:") +
-	string("DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:") +
-	string("!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK");
+std::string SSLCommon::ciphers =
+    std::string("ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-") +
+	std::string("AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:") +
+	std::string("DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-") +
+	std::string("AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-") +
+	std::string("AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-") +
+	std::string("AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:") +
+	std::string("DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:") +
+	std::string("!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK");
 
 SSLCommon::SSLCommon() {
 	// TODO Auto-generated constructor stub
@@ -58,7 +58,7 @@ void SSLCommon::load_dh_params(SSL_CTX *ctx, char *file)
 
 	if ((bio=BIO_new_file(file,"r")) == NULL)
 	{
-		cout << "Couldn't open DH file, defaulting to setting DH to single use" << endl;
+		std::cout << "Couldn't open DH file, defaulting to setting DH to single use" << std::endl;
 		SSL_CTX_set_options(ctx, SSL_OP_SINGLE_DH_USE);
 		return;
 	}
@@ -66,7 +66,7 @@ void SSLCommon::load_dh_params(SSL_CTX *ctx, char *file)
 	ret = PEM_read_bio_DHparams(bio,NULL,NULL,NULL);
 	if(SSL_CTX_set_tmp_dh(ctx,ret)<0)
 	{
-		cout << "Couldn't set DH parameters" << endl;
+		std::cout << "Couldn't set DH parameters" << std::endl;
 		exitSSL("SSL_CTX_set_tmp_dh(dhfile)");
 	}
 	DH_free(ret);
@@ -86,12 +86,12 @@ void SSLCommon::load_ecdh_params(SSL_CTX *ctx)
 	EC_KEY *ecdh = EC_KEY_new_by_curve_name (NID_X9_62_prime256v1);
 	if (! ecdh)
 	{
-		cout << "Couldn't create elliptic curve" << endl;
+		std::cout << "Couldn't create elliptic curve" << std::endl;
 		exitSSL("EC_KEY_new_by_curve_name(ecdh)");
 	}
 	if (1 != SSL_CTX_set_tmp_ecdh (ctx, ecdh))
 	{
-		cout << "Couldn't set ecdh parameters" << endl;
+		std::cout << "Couldn't set ecdh parameters" << std::endl;
 		exitSSL("SSL_CTX_set_tmp_ecdh(ecdh)");
 	}
 	EC_KEY_free(ecdh);
@@ -137,7 +137,7 @@ SSL_CTX *SSLCommon::initialize_ctx(const bool& isServer)
 
 	if (ctx == NULL)
 	{
-		cout << "Could not create context" << endl;
+		std::cout << "Could not create context" << std::endl;
 		ERR_print_errors_fp(stderr);
 		exitSSL ("SSL_CTX_new");
 	}
@@ -146,7 +146,7 @@ SSL_CTX *SSLCommon::initialize_ctx(const bool& isServer)
 }
 
 
-void SSLCommon::loadCerts(SSL_CTX* ctx, char* certFile, char* keyFile, const string& caList, const bool& ldcrts)
+void SSLCommon::loadCerts(SSL_CTX* ctx, char* certFile, char* keyFile, const std::string& caList, const bool& ldcrts)
 {
 	if(ldcrts)
 	{
@@ -154,20 +154,20 @@ void SSLCommon::loadCerts(SSL_CTX* ctx, char* certFile, char* keyFile, const str
 		if (1 != SSL_CTX_use_PrivateKey_file(ctx, keyFile, SSL_FILETYPE_PEM))
 		{
 			ERR_print_errors_fp(stderr);
-			cout << "Couldn't read private key file" << endl;
+			std::cout << "Couldn't read private key file" << std::endl;
 			exitSSL("SSL_CTX_use_PrivateKey_file");
 		}
 		/* set the local certificate from CertFile */
 		if (1 != SSL_CTX_use_certificate_chain_file(ctx, certFile) )
 		{
 			ERR_print_errors_fp(stderr);
-			cout << "Couldn't read certificate chain file" << endl;
+			std::cout << "Couldn't read certificate chain file" << std::endl;
 			exitSSL("SSL_CTX_use_certificate_chain_file");
 		}
 		/* verify private key */
 		if (1 != SSL_CTX_check_private_key(ctx))
 		{
-			cout << "Private key does not match the public certificate" << endl;
+			std::cout << "Private key does not match the public certificate" << std::endl;
 			exitSSL("SSL_CTX_check_private_key");
 		}
 	}
@@ -175,7 +175,7 @@ void SSLCommon::loadCerts(SSL_CTX* ctx, char* certFile, char* keyFile, const str
     /* Load the CAs we trust*/
     if(!(SSL_CTX_load_verify_locations(ctx, caList.c_str(),0)))
     {
-    	cout << "Can't read CA list" << endl;
+    	std::cout << "Can't read CA list" << std::endl;
     	exitSSL("SSL_CTX_load_verify_locations");
     }
 }

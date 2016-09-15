@@ -23,7 +23,7 @@
 #ifndef MQUEUE_H_
 #define MQUEUE_H_
 #include "Message.h"
-typedef vector<Message> msgQ;
+typedef std::vector<Message> msgQ;
 class MQueue {
 public:
 	msgQ msgs;

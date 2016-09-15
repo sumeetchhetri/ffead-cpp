@@ -11,18 +11,18 @@
 
 class Http2DataFrame : public Http2Frame {
 	unsigned char padLength;
-	string data;
-	string padding;
-	Http2DataFrame(const string& data, Http2FrameHeader& aheader);
+	std::string data;
+	std::string padding;
+	Http2DataFrame(const std::string& data, Http2FrameHeader& aheader);
 	friend class Http2Handler;
 	friend class Http2StreamHandler;
 public:
 	Http2DataFrame();
 	virtual ~Http2DataFrame();
-	const string& getData() const;
-	const string& getPadding() const;
+	const std::string& getData() const;
+	const std::string& getPadding() const;
 	unsigned char getPadLength() const;
-	string getFrameData();
+	std::string getFrameData();
 };
 
 #endif /* HTTP2DATAFRAME_H_ */

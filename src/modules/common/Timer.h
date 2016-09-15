@@ -26,7 +26,7 @@
 #include "Compatibility.h"
 #include <stdlib.h>
 #include "Mutex.h"
-using namespace std;
+
 class Timer {
 	timespec st;
 	timespec en;

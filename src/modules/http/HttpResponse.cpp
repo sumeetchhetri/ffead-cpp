@@ -22,50 +22,50 @@
 
 #include "HttpResponse.h"
 
-string HttpResponse::VALID_RESPONSE_HEADERS = ",access-control-allow-origin,access-control-allow-headers,access-control-allow-credentials,access-control-allow-methods,access-control-max-age,accept-ranges,age,allow,cache-control,connection,content-encoding,content-language,content-length,content-location,content-md5,content-disposition,content-range,content-type,date,etag,expires,last-modified,link,location,p3p,pragma,proxy-authenticate,refresh,retry-after,server,set-cookie,status,strict-transport-security,trailer,transfer-encoding,vary,via,warning,www-authenticate,";
-string HttpResponse::AccessControlAllowOrigin		 = "Access-Control-Allow-Origin";
-string HttpResponse::AccessControlAllowHeaders		 = "Access-Control-Allow-Headers";
-string HttpResponse::AccessControlAllowCredentials	 = "Access-Control-Allow-Credentials";
-string HttpResponse::AccessControlAllowMethods		 = "Access-Control-Allow-Methods";
-string HttpResponse::AccessControlMaxAge		 = "Access-Control-Max-Age";
-string HttpResponse::AcceptRanges			 = "Accept-Ranges";
-string HttpResponse::Age				 = "Age";
-string HttpResponse::Allow				 = "Allow";
-string HttpResponse::CacheControl			 = "Cache-Control";
-string HttpResponse::Connection				 = "Connection";
-string HttpResponse::ContentEncoding			 = "Content-Encoding";
-string HttpResponse::ContentLanguage			 = "Content-Language";
-string HttpResponse::ContentLength			 = "Content-Length";
-string HttpResponse::ContentLocation			 = "Content-Location";
-string HttpResponse::ContentMD5				 = "Content-MD5";
-string HttpResponse::ContentDisposition			 = "Content-Disposition";
-string HttpResponse::ContentRange			 = "Content-Range";
-string HttpResponse::ContentType			 = "Content-Type";
-string HttpResponse::DateHeader				 = "Date";
-string HttpResponse::ETag				 = "ETag";
-string HttpResponse::Expires				 = "Expires";
-string HttpResponse::LastModified			 = "Last-Modified";
-string HttpResponse::Link				 = "Link";
-string HttpResponse::Location				 = "Location";
-string HttpResponse::P3P				 = "P3P";
-string HttpResponse::Pragma				 = "Pragma";
-string HttpResponse::ProxyAuthenticate			 = "Proxy-Authenticate";
-string HttpResponse::Refresh				 = "Refresh";
-string HttpResponse::RetryAfter				 = "Retry-After";
-string HttpResponse::Server				 = "Server";
-string HttpResponse::SetCookie				 = "Set-Cookie";
-string HttpResponse::Status				 = "Status";
-string HttpResponse::StrictTransportSecurity		 = "Strict-Transport-Security";
-string HttpResponse::Trailer				 = "Trailer";
-string HttpResponse::TransferEncoding			 = "Transfer-Encoding";
-string HttpResponse::Vary				 = "Vary";
-string HttpResponse::Via				 = "Via";
-string HttpResponse::Warning				 = "Warning";
-string HttpResponse::WWWAuthenticate			 = "WWW-Authenticate";
-string HttpResponse::Upgrade = 			 "Upgrade";
-string HttpResponse::SecWebSocketAccept = "Sec-WebSocket-Accept";
-string HttpResponse::SecWebSocketVersion = "Sec-WebSocket-Version";
-string HttpResponse::AltSvc = "Alt-Svc";
+std::string HttpResponse::VALID_RESPONSE_HEADERS = ",access-control-allow-origin,access-control-allow-headers,access-control-allow-credentials,access-control-allow-methods,access-control-max-age,accept-ranges,age,allow,cache-control,connection,content-encoding,content-language,content-length,content-location,content-md5,content-disposition,content-range,content-type,date,etag,expires,last-modified,link,location,p3p,pragma,proxy-authenticate,refresh,retry-after,server,set-cookie,status,strict-transport-security,trailer,transfer-encoding,vary,via,warning,www-authenticate,";
+std::string HttpResponse::AccessControlAllowOrigin		 = "Access-Control-Allow-Origin";
+std::string HttpResponse::AccessControlAllowHeaders		 = "Access-Control-Allow-Headers";
+std::string HttpResponse::AccessControlAllowCredentials	 = "Access-Control-Allow-Credentials";
+std::string HttpResponse::AccessControlAllowMethods		 = "Access-Control-Allow-Methods";
+std::string HttpResponse::AccessControlMaxAge		 = "Access-Control-Max-Age";
+std::string HttpResponse::AcceptRanges			 = "Accept-Ranges";
+std::string HttpResponse::Age				 = "Age";
+std::string HttpResponse::Allow				 = "Allow";
+std::string HttpResponse::CacheControl			 = "Cache-Control";
+std::string HttpResponse::Connection				 = "Connection";
+std::string HttpResponse::ContentEncoding			 = "Content-Encoding";
+std::string HttpResponse::ContentLanguage			 = "Content-Language";
+std::string HttpResponse::ContentLength			 = "Content-Length";
+std::string HttpResponse::ContentLocation			 = "Content-Location";
+std::string HttpResponse::ContentMD5				 = "Content-MD5";
+std::string HttpResponse::ContentDisposition			 = "Content-Disposition";
+std::string HttpResponse::ContentRange			 = "Content-Range";
+std::string HttpResponse::ContentType			 = "Content-Type";
+std::string HttpResponse::DateHeader				 = "Date";
+std::string HttpResponse::ETag				 = "ETag";
+std::string HttpResponse::Expires				 = "Expires";
+std::string HttpResponse::LastModified			 = "Last-Modified";
+std::string HttpResponse::Link				 = "Link";
+std::string HttpResponse::Location				 = "Location";
+std::string HttpResponse::P3P				 = "P3P";
+std::string HttpResponse::Pragma				 = "Pragma";
+std::string HttpResponse::ProxyAuthenticate			 = "Proxy-Authenticate";
+std::string HttpResponse::Refresh				 = "Refresh";
+std::string HttpResponse::RetryAfter				 = "Retry-After";
+std::string HttpResponse::Server				 = "Server";
+std::string HttpResponse::SetCookie				 = "Set-Cookie";
+std::string HttpResponse::Status				 = "Status";
+std::string HttpResponse::StrictTransportSecurity		 = "Strict-Transport-Security";
+std::string HttpResponse::Trailer				 = "Trailer";
+std::string HttpResponse::TransferEncoding			 = "Transfer-Encoding";
+std::string HttpResponse::Vary				 = "Vary";
+std::string HttpResponse::Via				 = "Via";
+std::string HttpResponse::Warning				 = "Warning";
+std::string HttpResponse::WWWAuthenticate			 = "WWW-Authenticate";
+std::string HttpResponse::Upgrade = 			 "Upgrade";
+std::string HttpResponse::SecWebSocketAccept = "Sec-WebSocket-Accept";
+std::string HttpResponse::SecWebSocketVersion = "Sec-WebSocket-Version";
+std::string HttpResponse::AltSvc = "Alt-Svc";
 
 HttpResponse::HttpResponse() {
 	httpVersion = "HTTP/1.1";
@@ -83,7 +83,7 @@ HttpResponse::HttpResponse() {
 HttpResponse::~HttpResponse() {
 }
 
-string HttpResponse::generateResponse(const string& httpMethod, HttpRequest *req, const bool& appendHeaders /*= true*/)
+std::string HttpResponse::generateResponse(const std::string& httpMethod, HttpRequest *req, const bool& appendHeaders /*= true*/)
 {
 	if(httpMethod=="HEAD" && appendHeaders)
 	{
@@ -103,7 +103,7 @@ string HttpResponse::generateResponse(const string& httpMethod, HttpRequest *req
 	}
 }
 
-string HttpResponse::generateOnlyHeaderResponse(HttpRequest *req)
+std::string HttpResponse::generateOnlyHeaderResponse(HttpRequest *req)
 {
 	if(req->getMethod()=="OPTIONS")
 	{
@@ -119,7 +119,7 @@ string HttpResponse::generateOnlyHeaderResponse(HttpRequest *req)
 	}
 }
 
-string HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
+std::string HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
 {
 	if(appendHeaders)
 	{
@@ -132,19 +132,19 @@ string HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
 	}
 }
 
-string HttpResponse::generateHeadResponse()
+std::string HttpResponse::generateHeadResponse()
 {
 	addHeaderValue("Server", "FFEAD 2.0");
 	bool isTE = isHeaderValue("Transfer-Encoding", "chunked");
-	string resp, boundary;
+	std::string resp, boundary;
 	if(this->contentList.size()>0)
 	{
 		content = "";
-		boundary = "FFEAD_SERVER_" + CastUtil::lexical_cast<string>(Timer::getCurrentTime());
+		boundary = "FFEAD_SERVER_" + CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
 		for (int var = 0; var < (int)contentList.size(); ++var) {
 			content += "--" + boundary + "\r\n";
-			map<string,string> headers = contentList.at(var).getHeaders();
-			map<string,string>::iterator it;
+			std::map<std::string,std::string> headers = contentList.at(var).getHeaders();
+			std::map<std::string,std::string>::iterator it;
 			for(it=headers.begin();it!=headers.end();++it)
 			{
 				content += it->first + ": " + it->second + "\r\n";
@@ -166,9 +166,9 @@ string HttpResponse::generateHeadResponse()
 	}
 	if(!isTE && getHeader(ContentLength)=="")
 	{
-		addHeaderValue(ContentLength, CastUtil::lexical_cast<string>((int)content.length()));
+		addHeaderValue(ContentLength, CastUtil::lexical_cast<std::string>((int)content.length()));
 	}
-	map<string,string>::iterator it;
+	std::map<std::string,std::string>::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		resp += it->first + ": " + it->second + "\r\n";
@@ -181,12 +181,12 @@ string HttpResponse::generateHeadResponse()
 	return resp;
 }
 
-string HttpResponse::generateOptionsResponse()
+std::string HttpResponse::generateOptionsResponse()
 {
 	addHeaderValue("Server", "FFEAD 2.0");
-	string resp;
+	std::string resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
-	map<string,string>::iterator it;
+	std::map<std::string,std::string>::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		resp += it->first + ": " + it->second + "\r\n";
@@ -200,12 +200,12 @@ string HttpResponse::generateOptionsResponse()
 	return resp;
 }
 
-string HttpResponse::generateTraceResponse(HttpRequest* req)
+std::string HttpResponse::generateTraceResponse(HttpRequest* req)
 {
 	addHeaderValue("Server", "FFEAD 2.0");
-	string resp;
+	std::string resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
-	map<string,string>::iterator it;
+	std::map<std::string,std::string>::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		resp += it->first + ": " + it->second + "\r\n";
@@ -219,7 +219,7 @@ string HttpResponse::generateTraceResponse(HttpRequest* req)
 	{
 		resp += "TRACE " + req->getActUrl() + " " + req->getHttpVersion();
 		resp += "\r\n";
-		map<string,string>::iterator it;
+		std::map<std::string,std::string>::iterator it;
 		for(it=headers.begin();it!=headers.end();++it)
 		{
 			resp += it->first + ": " + it->second + "\r\n";
@@ -229,7 +229,7 @@ string HttpResponse::generateTraceResponse(HttpRequest* req)
 }
 
 
-string HttpResponse::getHttpVersion() const
+std::string HttpResponse::getHttpVersion() const
 {
 	return httpVersion;
 }
@@ -242,36 +242,36 @@ void HttpResponse::update(HttpRequest* req)
 
 void HttpResponse::setHTTPResponseStatus(const HTTPResponseStatus& status)
 {
-	this->statusCode = CastUtil::lexical_cast<string>(status.getCode());
+	this->statusCode = CastUtil::lexical_cast<std::string>(status.getCode());
 	this->statusMsg = status.getMsg();
 }
 
-string HttpResponse::getStatusCode() const
+std::string HttpResponse::getStatusCode() const
 {
 	return statusCode;
 }
 
-void HttpResponse::setStatusCode(const string& statusCode)
+void HttpResponse::setStatusCode(const std::string& statusCode)
 {
 	this->statusCode = statusCode;
 }
 
-string HttpResponse::getStatusMsg() const
+std::string HttpResponse::getStatusMsg() const
 {
 	return statusMsg;
 }
 
-void HttpResponse::setStatusMsg(const string& statusMsg)
+void HttpResponse::setStatusMsg(const std::string& statusMsg)
 {
 	this->statusMsg = statusMsg;
 }
 
-string HttpResponse::getContent() const
+std::string HttpResponse::getContent() const
 {
 	return content;
 }
 
-void HttpResponse::setContent(const string& content)
+void HttpResponse::setContent(const std::string& content)
 {
 	this->content = content;
 	if(content!="") {
@@ -279,7 +279,7 @@ void HttpResponse::setContent(const string& content)
 	}
 }
 
-void HttpResponse::addCookie(const string& cookie)
+void HttpResponse::addCookie(const std::string& cookie)
 {
 	this->cookies.push_back(cookie);
 }
@@ -289,12 +289,12 @@ void HttpResponse::addContent(const MultipartContent& content)
 	contentList.push_back(content);
 }
 
-void HttpResponse::addHeaderValue(string header, const string& value)
+void HttpResponse::addHeaderValue(std::string header, const std::string& value)
 {
 	StringUtil::toLower(header);
 	if(header!="")
 	{
-		if(VALID_RESPONSE_HEADERS.find(","+header+",")!=string::npos)
+		if(VALID_RESPONSE_HEADERS.find(","+header+",")!=std::string::npos)
 		{
 			if(headers.find(header)!=headers.end()) {
 				headers[header] += "," + value;
@@ -304,11 +304,11 @@ void HttpResponse::addHeaderValue(string header, const string& value)
 		}
 		else
 		{
-			cout << ("Non standard Header string " + header) << endl;
-			vector<string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
+			std::cout << ("Non standard Header std::string " + header) << std::endl;
+			std::vector<std::string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
 			if(matres.size()==0)
 			{
-				cout << ("Invalid Header string " + header) << endl;
+				std::cout << ("Invalid Header std::string " + header) << std::endl;
 				return;
 			}
 			if(headers.find(header)!=headers.end()) {
@@ -320,7 +320,7 @@ void HttpResponse::addHeaderValue(string header, const string& value)
 	}
 }
 
-bool HttpResponse::isHeaderValue(string header, const string& value, const bool& ignoreCase)
+bool HttpResponse::isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase)
 {
 	StringUtil::toLower(header);
 	return header!="" && headers.find(header)!=headers.end()
@@ -328,7 +328,7 @@ bool HttpResponse::isHeaderValue(string header, const string& value, const bool&
 					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
 }
 
-string HttpResponse::getHeader(string header)
+std::string HttpResponse::getHeader(std::string header)
 {
 	StringUtil::toLower(header);
 	if(header!="" && headers.find(header)!=headers.end())
@@ -338,10 +338,10 @@ string HttpResponse::getHeader(string header)
 
 bool HttpResponse::isNonBinary()
 {
-	string contType = StringUtil::toLowerCopy(getHeader(ContentType));
-	return (contType.find("text")!=string::npos || contType.find("css")!=string::npos
-			|| contType.find("x-javascript")!=string::npos || contType.find("json")!=string::npos
-			|| contType.find("xml")!=string::npos || contType.find("html")!=string::npos);
+	std::string contType = StringUtil::toLowerCopy(getHeader(ContentType));
+	return (contType.find("text")!=std::string::npos || contType.find("css")!=std::string::npos
+			|| contType.find("x-javascript")!=std::string::npos || contType.find("json")!=std::string::npos
+			|| contType.find("xml")!=std::string::npos || contType.find("html")!=std::string::npos);
 }
 
 void HttpResponse::setCompressed(const bool& compressed)
@@ -354,11 +354,11 @@ bool HttpResponse::getCompressed()
 	return this->compressed;
 }
 
-vector<string> HttpResponse::getCookies() const {
+std::vector<std::string> HttpResponse::getCookies() const {
 	return cookies;
 }
 
-string HttpResponse::getStatusLine() const {
+std::string HttpResponse::getStatusLine() const {
 	return (httpVersion + " " + statusCode + " " + statusMsg);
 }
 
@@ -370,11 +370,11 @@ unsigned int HttpResponse::getContentSize(const char *fileName)
 	unsigned int siz = 0;
 	if(fileName!=NULL)
 	{
-		ifstream myfile;
-		myfile.open(fileName, ios::binary | ios::ate);
+		std::ifstream myfile;
+		myfile.open(fileName, std::ios::binary | std::ios::ate);
 		if (myfile.is_open())
 		{
-			myfile.seekg(0, ios::end);
+			myfile.seekg(0, std::ios::end);
 			siz = myfile.tellg();
 			myfile.close();
 		}
@@ -387,13 +387,13 @@ unsigned int HttpResponse::getContentSize(const char *fileName)
 	return siz;
 }
 
-string HttpResponse::getContent(const char *fileName, const int& start, const int& end)
+std::string HttpResponse::getContent(const char *fileName, const int& start, const int& end)
 {
-	string all;
+	std::string all;
 	if(fileName!=NULL)
 	{
-		ifstream myfile;
-		myfile.open(fileName, ios::in | ios::binary);
+		std::ifstream myfile;
+		myfile.open(fileName, std::ios::in | std::ios::binary);
 		if (myfile.is_open())
 		{
 			if(start==-1 && end==-1)
@@ -431,18 +431,18 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 	this->httpVersion = req->getHttpVersion();
 	this->httpVers = req->httpVers;
 
-	string ext = req->getExt();
+	std::string ext = req->getExt();
 
 	HttpResponse *res = this;
-	vector<string> rangesVec;
-	vector<vector<int> > rangeValuesLst = req->getRanges(rangesVec);
+	std::vector<std::string> rangesVec;
+	std::vector<std::vector<int> > rangeValuesLst = req->getRanges(rangesVec);
 
-	string url = req->getUrl();
-	string locale = CommonUtils::getLocale(StringUtil::toLowerCopy(req->getDefaultLocale()));
-	string type = CommonUtils::getMimeType(ext);
+	std::string url = req->getUrl();
+	std::string locale = CommonUtils::getLocale(StringUtil::toLowerCopy(req->getDefaultLocale()));
+	std::string type = CommonUtils::getMimeType(ext);
 
-	string all;
-    string fname = url;
+	std::string all;
+    std::string fname = url;
 	if (url=="/")
     {
 		res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -450,11 +450,11 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
     }
 
 	/*ifstream myfile;
-    if(locale.find("english")==string::npos && (ext==".html" || ext==".htm"))
+    if(locale.find("english")==std::string::npos && (ext==".html" || ext==".htm"))
     {
-    	string tfname = fname;
+    	std::string tfname = fname;
     	StringUtil::replaceFirst(tfname, "." , ("_" + locale+"."));
-    	ifstream gzipdfile(tfname.c_str(), ios::binary);
+    	std::ifstream gzipdfile(tfname.c_str(), std::ios::binary);
 		if(gzipdfile.good())
 		{
 			fname = tfname;
@@ -464,7 +464,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 
 	if(req->getMethod()=="HEAD")
 	{
-		res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<string>(getContentSize(fname.c_str())));
+		res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(getContentSize(fname.c_str())));
 		res->addHeaderValue(HttpResponse::AcceptRanges, "bytes");
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
@@ -491,11 +491,11 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 
 			Date filemodifieddate(&tim);
 			DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
-			string lastmodDate = df.format(filemodifieddate);
+			std::string lastmodDate = df.format(filemodifieddate);
 
 			bool isifmodsincvalid = false;
 
-			string ifmodsincehdr = req->getHeader(HttpRequest::IfModifiedSince);
+			std::string ifmodsincehdr = req->getHeader(HttpRequest::IfModifiedSince);
 
 			bool forceLoadFile = false;
 			if(ifmodsincehdr!="")
@@ -504,27 +504,27 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 				try {
 					ifmodsince = df.parse(ifmodsincehdr);
 					isifmodsincvalid = true;
-					cout << "Parsed date success" << endl;
+					std::cout << "Parsed date success" << std::endl;
 				} catch(...) {
 					isifmodsincvalid = false;
 				}
 
 				if(ifmodsince!=NULL)
 				{
-					cout << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << endl;
-					cout << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << endl;
-					cout << "Date Comparisons = " +CastUtil::lexical_cast<string>(*ifmodsince>=filemodifieddate)  << endl;
+					std::cout << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
+					std::cout << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
+					std::cout << "Date Comparisons = " +CastUtil::lexical_cast<std::string>(*ifmodsince>=filemodifieddate)  << std::endl;
 
 					if(isifmodsincvalid && *ifmodsince>=filemodifieddate)
 					{
 						res->addHeaderValue(HttpResponse::LastModified, ifmodsincehdr);
-						cout << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << endl;
+						std::cout << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
 						return false;
 					}
 					else if(isifmodsincvalid && *ifmodsince<filemodifieddate)
 					{
-						cout << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << endl;
+						std::cout << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 						forceLoadFile = true;
 					}
 					delete ifmodsince;
@@ -536,10 +536,10 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			if(isCEGzip)
 			{
 				bool gengzipfile = true;
-				string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".gz";
+				std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".gz";
 				if(!forceLoadFile)
 				{
-					ifstream gzipdfile(ofname.c_str(), ios::binary);
+					std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
 					if(gzipdfile.good())
 					{
 						gzipdfile.close();
@@ -557,10 +557,10 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			else if(isCEDef)
 			{
 				bool genzlibfile = true;
-				string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".z";
+				std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".z";
 				if(!forceLoadFile)
 				{
-					ifstream gzipdfile(ofname.c_str(), ios::binary);
+					std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
 					if(gzipdfile.good())
 					{
 						gzipdfile.close();
@@ -586,7 +586,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 				res->setHTTPResponseStatus(HTTPResponseStatus::PartialContent);
 				res->addHeaderValue(HttpResponse::ContentType, "multipart/byteranges");
 				unsigned int totlen = getContentSize(fname.c_str());
-				res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<string>(totlen));
+				res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
 				for (int var = 0; var <(int)rangeValuesLst.size(); ++var) {
 					int start = rangeValuesLst.at(var).at(0);
 					int end = rangeValuesLst.at(var).at(1);
@@ -602,10 +602,10 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 							end = totlen - 1;
 						else
 							end += 1;
-						string cont = getContent(fname.c_str(), start, end);
+						std::string cont = getContent(fname.c_str(), start, end);
 						MultipartContent conte(cont);
 						conte.addHeaderValue(MultipartContent::ContentType, type);
-						conte.addHeaderValue(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<string>(totlen));
+						conte.addHeaderValue(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<std::string>(totlen));
 						res->addContent(conte);
 					}
 				}
@@ -634,13 +634,13 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			if(res->httpVers>=1.1 && res->httpVers<1.2) {
 				res->addHeaderValue(HttpResponse::TransferEncoding, "chunked");
 			} else {
-				res->addHeaderValue(ContentLength, CastUtil::lexical_cast<string>(totlen));
+				res->addHeaderValue(ContentLength, CastUtil::lexical_cast<std::string>(totlen));
 			}
 		}
 		else
 		{
 			res->content = getContent(fname.c_str());
-			res->addHeaderValue(ContentLength, CastUtil::lexical_cast<string>((int)res->content.length()));
+			res->addHeaderValue(ContentLength, CastUtil::lexical_cast<std::string>((int)res->content.length()));
 		}
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
@@ -649,8 +649,8 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 	return hasContent;
 }
 
-string HttpResponse::getRemainingContent(const string& fname, const bool& isFirst) {
-	string rem;
+std::string HttpResponse::getRemainingContent(const std::string& fname, const bool& isFirst) {
+	std::string rem;
 	if(isContentRemains() && httpVers>=1.1) {
 		unsigned int totlen = getContentSize(fname.c_str());
 		unsigned int len = totlen - techunkSiz*tecurrpart;
@@ -682,61 +682,61 @@ bool HttpResponse::isContentRemains() {
 	return teparts>0 && tecurrpart<teparts;
 }
 
-string HttpResponse::toPluginString() {
-	string text = (this->statusCode + "\n");
+std::string HttpResponse::toPluginString() {
+	std::string text = (this->statusCode + "\n");
 	text += (this->statusMsg + "\n");
-	text += (CastUtil::lexical_cast<string>(this->httpVersion) + "\n");
+	text += (CastUtil::lexical_cast<std::string>(this->httpVersion) + "\n");
 	text += (this->outFileName + "\n");
 
-	text += (CastUtil::lexical_cast<string>(this->content.length()) + "\n");
+	text += (CastUtil::lexical_cast<std::string>(this->content.length()) + "\n");
 	text += (this->content);
 
-	text += (CastUtil::lexical_cast<string>(this->preamble.length()) + "\n");
+	text += (CastUtil::lexical_cast<std::string>(this->preamble.length()) + "\n");
 	text += (this->preamble);
 
-	text += (CastUtil::lexical_cast<string>(this->epilogue.length()) + "\n");
+	text += (CastUtil::lexical_cast<std::string>(this->epilogue.length()) + "\n");
 	text += (this->epilogue);
 
-	map<string,string>::iterator it;
-	text += (CastUtil::lexical_cast<string>(this->headers.size()) + "\n");
+	std::map<std::string,std::string>::iterator it;
+	text += (CastUtil::lexical_cast<std::string>(this->headers.size()) + "\n");
 	for(it=this->headers.begin();it!=this->headers.end();++it)
 	{
 		text += it->first + "\n";
-		text += CastUtil::lexical_cast<string>(it->second.length()) + "\n";
+		text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
 		text += it->second;
 	}
 
-	text += (CastUtil::lexical_cast<string>(this->multipartFormData.size()) + "\n");
+	text += (CastUtil::lexical_cast<std::string>(this->multipartFormData.size()) + "\n");
 	FMap::iterator fit;
 	for(fit=this->multipartFormData.begin();fit!=this->multipartFormData.end();++fit)
 	{
 		text += fit->second.name + "\n";
 		text += fit->second.fileName + "\n";
 		text += fit->second.tempFileName + "\n";
-		text += (CastUtil::lexical_cast<string>(fit->second.content.length()) + "\n");
+		text += (CastUtil::lexical_cast<std::string>(fit->second.content.length()) + "\n");
 		text += (fit->second.content);
-		text += (CastUtil::lexical_cast<string>(fit->second.headers.size()) + "\n");
+		text += (CastUtil::lexical_cast<std::string>(fit->second.headers.size()) + "\n");
 		for(it=fit->second.headers.begin();it!=fit->second.headers.end();++it)
 		{
 			text += it->first + "\n";
-			text += CastUtil::lexical_cast<string>(it->second.length()) + "\n";
+			text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
 			text += it->second;
 		}
 	}
 
-	text += (CastUtil::lexical_cast<string>(this->contentList.size()) + "\n");
+	text += (CastUtil::lexical_cast<std::string>(this->contentList.size()) + "\n");
 	for(int k=0;k<(int)this->contentList.size();k++)
 	{
 		text += this->contentList.at(k).name + "\n";
 		text += this->contentList.at(k).fileName + "\n";
 		text += this->contentList.at(k).tempFileName + "\n";
-		text += (CastUtil::lexical_cast<string>(this->contentList.at(k).content.length()) + "\n");
+		text += (CastUtil::lexical_cast<std::string>(this->contentList.at(k).content.length()) + "\n");
 		text += (this->contentList.at(k).content);
-		text += (CastUtil::lexical_cast<string>(this->contentList.at(k).headers.size()) + "\n");
+		text += (CastUtil::lexical_cast<std::string>(this->contentList.at(k).headers.size()) + "\n");
 		for(it=this->contentList.at(k).headers.begin();it!=this->contentList.at(k).headers.end();++it)
 		{
 			text += it->first + "\n";
-			text += CastUtil::lexical_cast<string>(it->second.length()) + "\n";
+			text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
 			text += it->second;
 		}
 	}
@@ -752,8 +752,8 @@ void HttpResponse::setDone(const bool& done) {
 	this->done = done;
 }
 
-string HttpResponse::getFileExtension(const string& file)
+std::string HttpResponse::getFileExtension(const std::string& file)
 {
-	if(file.find_last_of(".")!=string::npos)return file.substr(file.find_last_of("."));
+	if(file.find_last_of(".")!=std::string::npos)return file.substr(file.find_last_of("."));
 	return file;
 }

@@ -22,23 +22,23 @@ Http11WebSocketDataFrame::Http11WebSocketDataFrame() {
 Http11WebSocketDataFrame::~Http11WebSocketDataFrame() {
 }
 
-string Http11WebSocketDataFrame::getPayloadData() const {
+std::string Http11WebSocketDataFrame::getPayloadData() const {
 	if(extensionData.size()==0)
 		return applicationData;
-	string tpayloadData = extensionData;
+	std::string tpayloadData = extensionData;
 	tpayloadData.append(applicationData);
 	return tpayloadData;
 }
 
-const string& Http11WebSocketDataFrame::getApplicationData() const {
+const std::string& Http11WebSocketDataFrame::getApplicationData() const {
 	return applicationData;
 }
 
-void Http11WebSocketDataFrame::setApplicationData(const string& applicationData) {
+void Http11WebSocketDataFrame::setApplicationData(const std::string& applicationData) {
 	this->applicationData = applicationData;
 }
 
-const string& Http11WebSocketDataFrame::getExtensionData() const {
+const std::string& Http11WebSocketDataFrame::getExtensionData() const {
 	return extensionData;
 }
 
@@ -78,9 +78,9 @@ bool Http11WebSocketDataFrame::isRsv3() const {
 	return rsv3;
 }
 
-string Http11WebSocketDataFrame::getFrameData() {
-	string finaldata;
-	bitset<8> firstBits;
+std::string Http11WebSocketDataFrame::getFrameData() {
+	std::string finaldata;
+	std::bitset<8> firstBits;
 	firstBits.set(7, this->fin);
 	firstBits.set(6, this->rsv1);
 	firstBits.set(5, this->rsv2);
@@ -111,7 +111,7 @@ string Http11WebSocketDataFrame::getFrameData() {
 	return finaldata;
 }
 
-WebSocketData::WebSocketData(const string& data, const short& dataType)
+WebSocketData::WebSocketData(const std::string& data, const short& dataType)
 {
 	this->data = data;
 	this->dataType = dataType;
@@ -129,7 +129,7 @@ WebSocketData::WebSocketData() {
 
 WebSocketData::~WebSocketData() {}
 
-string WebSocketData::getData() const {
+std::string WebSocketData::getData() const {
 	return data;
 }
 
@@ -148,8 +148,8 @@ bool WebSocketData::isContentRemains() {
 	return teparts>0 && tecurrpart<teparts;
 }
 
-string WebSocketData::getRemainingContent() {
-	string rem;
+std::string WebSocketData::getRemainingContent() {
+	std::string rem;
 	if(isContentRemains()) {
 		unsigned int totlen = data.length();
 		unsigned int len = totlen - techunkSiz*tecurrpart;

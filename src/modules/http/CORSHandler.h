@@ -25,29 +25,29 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "HTTPResponseStatus.h"
-using namespace std;
+
 
 class CorsConfig {
 	void init();
-	string allwdOrigins;
-	vector<string> allwdOriginsv;
-	string allwdMethods;
-	vector<string> allwdMethodsv;
-	string allwdHeaders;
-	vector<string> allwdHeadersv;
-	string exposedHeaders;
-	vector<string> exposedHeadersv;
+	std::string allwdOrigins;
+	std::vector<std::string> allwdOriginsv;
+	std::string allwdMethods;
+	std::vector<std::string> allwdMethodsv;
+	std::string allwdHeaders;
+	std::vector<std::string> allwdHeadersv;
+	std::string exposedHeaders;
+	std::vector<std::string> exposedHeadersv;
 	bool allwdCredentials;
 	long maxAge;
 	friend class CORSHandler;
 	friend class ConfigurationHandler;
 public:
 	CorsConfig();
-	CorsConfig(const string& allwdOrigins, const string& allwdMethods, const string& allwdHeaders, const string& exposedHeaders, const bool& allwdCredentials, const long& maxAge);
+	CorsConfig(const std::string& allwdOrigins, const std::string& allwdMethods, const std::string& allwdHeaders, const std::string& exposedHeaders, const bool& allwdCredentials, const long& maxAge);
 	virtual ~CorsConfig();
 	bool isOriginAllowed(const strVec& reqOrgLst);
-	bool isMethodAllowed(const string& method);
-	bool isHeaderAllowed(const strVec& reqHdrLst, string& erheadr);
+	bool isMethodAllowed(const std::string& method);
+	bool isHeaderAllowed(const strVec& reqHdrLst, std::string& erheadr);
 };
 
 class CORSHandler {

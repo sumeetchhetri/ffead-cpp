@@ -32,11 +32,11 @@ ConfigurationHandler::~ConfigurationHandler() {
 }
 
 
-/*void ConfigurationHandler::listi(const string& cwd, const string& type, const bool& apDir, strVec &folders, const bool& showHidden)
+/*void ConfigurationHandler::listi(const std::string& cwd, const std::string& type, const bool& apDir, strVec &folders, const bool& showHidden)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	FILE *pipe_fp;
-	string command;
+	std::string command;
 	if(chdir(cwd.c_str())!=0)
 		return;
 	if(type=="/")
@@ -56,20 +56,20 @@ ConfigurationHandler::~ConfigurationHandler() {
 		#endif
 	}
 	//command = ("ls -F1 "+cwd+"|grep '"+type+"'");
-	logger << ("Searching directory " + cwd + " for pattern " + type) << endl;
+	logger << ("Searching directory " + cwd + " for pattern " + type) << std::endl;
 	if ((pipe_fp = popen(command.c_str(), "r")) == NULL)
 	{
 		printf("pipe open error in cmd_list\n");
 	}
 	int t_char;
-	string folderName;
+	std::string folderName;
 	while ((t_char = fgetc(pipe_fp)) != EOF)
 	{
 		if(t_char!='\n')
 		{
-			stringstream ss;
+			std::stringstream ss;
 			ss << (char)t_char;
-			string temp;
+			std::string temp;
 			ss >> temp;
 			folderName.append(temp);
 		}
@@ -77,7 +77,7 @@ ConfigurationHandler::~ConfigurationHandler() {
 		{
 			StringUtil::replaceFirst(folderName,"*","");
 			StringUtil::replaceFirst(folderName,"./","");
-			if(folderName.find("~")==string::npos && (showHidden || (!showHidden && folderName.find(".")!=0)))
+			if(folderName.find("~")==std::string::npos && (showHidden || (!showHidden && folderName.find(".")!=0)))
 			{
 				if(apDir)
 				{
@@ -103,7 +103,7 @@ ConfigurationHandler::~ConfigurationHandler() {
 	pclose(pipe_fp);
 }*/
 
-void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const string& incpath, const string& rtdcfpath, const string& serverRootDirectory, const string& respath)
+void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const std::string& incpath, const std::string& rtdcfpath, const std::string& serverRootDirectory, const std::string& respath)
 {
 	Reflection ref;
 	//First initialize framework markers
@@ -165,12 +165,12 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	strVec all,afcd,appf,wspath,handoffVec;
-	string includeRef;
+	std::string includeRef;
 	StringContext cntxt;
-	string libs,ilibs,isrcs,iobjs,ideps,ipdobjs;
-	vector<bool> stat;
+	std::string libs,ilibs,isrcs,iobjs,ideps,ipdobjs;
+	std::vector<bool> stat;
 	strVec vecvp,pathvec;
-	map<string, string> ajintpthMap, tpes, dcps, compnts;
+	std::map<std::string, std::string> ajintpthMap, tpes, dcps, compnts;
 	propMap srp;
 	XmlParser parser("Parser");
 #ifdef INC_COMP
@@ -187,11 +187,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			ConfigurationData::getInstance()->securityProperties.ca_list = serverRootDirectory + sslsec["CA_LIST"];
 			ConfigurationData::getInstance()->securityProperties.rand_file = serverRootDirectory + sslsec["RANDOM"];
 			ConfigurationData::getInstance()->securityProperties.sec_password = sslsec["PASSWORD"];
-			string tempcl = sslsec["CLIENT_SEC_LEVEL"];
+			std::string tempcl = sslsec["CLIENT_SEC_LEVEL"];
 			ConfigurationData::getInstance()->securityProperties.srv_auth_prvd = sslsec["SRV_AUTH_PRVD"];
 			ConfigurationData::getInstance()->securityProperties.srv_auth_mode = sslsec["SRV_AUTH_MODE"];
 			ConfigurationData::getInstance()->securityProperties.srv_auth_file = serverRootDirectory + sslsec["SRV_AUTH_FILE"];
-			string alpnprotolist = sslsec["ALPN_PROTO_LIST"];
+			std::string alpnprotolist = sslsec["ALPN_PROTO_LIST"];
 			if(tempcl!="")
 			{
 				try
@@ -200,7 +200,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 				}
 				catch(...)
 				{
-					logger << "Invalid client auth level defined" << endl;
+					logger << "Invalid client auth level defined" << std::endl;
 					ConfigurationData::getInstance()->securityProperties.client_auth = 0;
 				}
 			}
@@ -211,65 +211,65 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			}
 			catch(...)
 			{
-				logger << "Invalid boolean value for isDHParams defined" << endl;
+				logger << "Invalid boolean value for isDHParams defined" << std::endl;
 			}
 			ConfigurationData::getInstance()->securityProperties.alpnEnabled = true;
 			try
 			{
 				ConfigurationData::getInstance()->securityProperties.alpnEnabled = CastUtil::lexical_cast<bool>(sslsec["ALPN_ENABLED"]);
 				if(alpnprotolist!="") {
-					logger << "ALPN protocols list = " << alpnprotolist << endl;
-					ConfigurationData::getInstance()->securityProperties.alpnProtoList = StringUtil::splitAndReturn<vector<string> >(alpnprotolist, ",");
+					logger << "ALPN protocols list = " << alpnprotolist << std::endl;
+					ConfigurationData::getInstance()->securityProperties.alpnProtoList = StringUtil::splitAndReturn<std::vector<std::string> >(alpnprotolist, ",");
 				} else {
-					logger << "No ALPN protocols defined............." << endl;
+					logger << "No ALPN protocols defined............." << std::endl;
 				}
 			}
 			catch(...)
 			{
-				logger << "Invalid boolean value for alpnEnabled defined" << endl;
+				logger << "Invalid boolean value for alpnEnabled defined" << std::endl;
 			}
 		}
 	}
-	string rundyncontent;
-	string ajrt;
+	std::string rundyncontent;
+	std::string ajrt;
 
-	map<string, map<string, ClassStructure> > clsstrucMaps;
+	std::map<std::string, std::map<std::string, ClassStructure> > clsstrucMaps;
 
 	for(unsigned int var=0;var<webdirs.size();var++)
 	{
-		//logger <<  webdirs.at(0) << flush;
-		string defpath = webdirs.at(var);
-		string dcppath = defpath + "dcp/";
+		//logger <<  webdirs.at(0) << std::flush;
+		std::string defpath = webdirs.at(var);
+		std::string dcppath = defpath + "dcp/";
 		RegexUtil::replace(dcppath,"[/]+","/");
-		string webpubpath = defpath + "public/";
+		std::string webpubpath = defpath + "public/";
 		RegexUtil::replace(webpubpath,"[/]+","/");
-		string tmplpath = defpath + "tpe/";
+		std::string tmplpath = defpath + "tpe/";
 		RegexUtil::replace(tmplpath,"[/]+","/");
-		string cmppath = defpath + "components/";
+		std::string cmppath = defpath + "components/";
 		RegexUtil::replace(cmppath,"[/]+","/");
-		string usrincludes = defpath + "include/";
+		std::string usrincludes = defpath + "include/";
 		RegexUtil::replace(usrincludes,"[/]+","/");
 		//propMap srp = pread.getProperties(defpath+"config/app.prop");
 
-		string name = webdirs1.at(var);
+		std::string name = webdirs1.at(var);
 		StringUtil::replaceAll(name,"/","");
 		rundyncontent += "cp -Rf $FFEAD_CPP_PATH/public/* $FFEAD_CPP_PATH/web/"+name+"/public/\n";
 		ConfigurationData::getInstance()->servingContexts[name] = true;
 
-		vector<string> adcps;
+		std::vector<std::string> adcps;
 		CommonUtils::listFiles(adcps, dcppath, ".dcp");
 		//listi(dcppath,".dcp",true,adcps,false);
 		for (int var = 0; var < (int)adcps.size(); ++var) {
 			dcps[adcps.at(var)] = name;
 		}
-		vector<string> atpes;
+		std::vector<std::string> atpes;
 		CommonUtils::listFiles(atpes, tmplpath, ".tpe");
 		//listi(tmplpath,".tpe",true,atpes,false);
 		for (int var = 0; var < (int)atpes.size(); ++var) {
 			//tpes[atpes.at(var)] = name;
 		}
 
-		vector<string> acompnts;
+		std::vector<std::string> acompnts;
 		CommonUtils::listFiles(acompnts, cmppath, ".cmp");
 		//listi(cmppath,".cmp",true,acompnts,false);
 		for (int var = 0; var < (int)acompnts.size(); ++var) {
@@ -281,25 +281,25 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 
 		ilibs += ("-I" + usrincludes+" ");
 
-		vector<string> includes;
+		std::vector<std::string> includes;
 		CommonUtils::listFiles(includes, usrincludes, ".h");
 		//listi(usrincludes, ".h",true,includes,false);
-		map<string, ClassStructure> allclsmap;
+		std::map<std::string, ClassStructure> allclsmap;
 		for (unsigned int ind = 0; ind < includes.size(); ++ind)
 		{
-			map<string, ClassStructure> clsmap = ref.getClassStructures(includes.at(ind), name);
-			map<string, ClassStructure>::iterator it;
+			std::map<std::string, ClassStructure> clsmap = ref.getClassStructures(includes.at(ind), name);
+			std::map<std::string, ClassStructure>::iterator it;
 			allclsmap.insert(clsmap.begin(), clsmap.end());
 		}
 		clsstrucMaps[name] = allclsmap;
-		string tinc,ttypedefs,tclasses,tmethods,topers;
+		std::string tinc,ttypedefs,tclasses,tmethods,topers;
 		ref.generateClassDefinition(allclsmap,tinc,ttypedefs,tclasses,tmethods,topers,name);
 
-		string applibname = name;
+		std::string applibname = name;
 		StringUtil::replaceAll(applibname, "-", "_");
 		RegexUtil::replace(applibname, "[^a-zA-Z0-9_]+", "");
 
-		logger << "started reading application.xml " << endl;
+		logger << "started reading application.xml " << std::endl;
 		Document doc;
 		parser.readDocument(defpath+"config/application.xml", doc);
 		const Element& root = doc.getRootElement();
@@ -321,63 +321,63 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(cntrls.at(cntn)->getTagName()=="controller")
 						{
-							string url = cntrls.at(cntn)->getAttribute("path");
+							std::string url = cntrls.at(cntn)->getAttribute("path");
 							StringUtil::trim(url);
-							string clas = cntrls.at(cntn)->getAttribute("class");
+							std::string clas = cntrls.at(cntn)->getAttribute("class");
 							StringUtil::trim(clas);
-							string scope = cntrls.at(cntn)->getAttribute("scope");
+							std::string scope = cntrls.at(cntn)->getAttribute("scope");
 							if(url!="" && clas!="")
 							{
 								Bean bean("controller_"+clas,"",clas,scope,false,name);
 								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								ConfigurationData::getInstance()->controllerObjectMap[name][url] = clas;
-								logger << ("Adding Controller for " + url + " :: " + clas) << endl;
+								logger << ("Adding Controller for " + url + " :: " + clas) << std::endl;
 							}
 							else
 							{
-								string from = cntrls.at(cntn)->getAttribute("from");
+								std::string from = cntrls.at(cntn)->getAttribute("from");
 								StringUtil::trim(from);
-								string to = cntrls.at(cntn)->getAttribute("to");
+								std::string to = cntrls.at(cntn)->getAttribute("to");
 								StringUtil::trim(to);
-								if(to.find("*")!=string::npos || to.find("regex(")!=string::npos)
+								if(to.find("*")!=std::string::npos || to.find("regex(")!=std::string::npos)
 								{
-									logger << ("Skipping controller mapping as it contains */regex function") << endl;
+									logger << ("Skipping controller mapping as it contains */regex function") << std::endl;
 									to = "";
 								}
 								if(from!="" && to!="")
 								{
 									ConfigurationData::getInstance()->mappingObjectMap[name][from] = to;
-									logger << ("Adding Mapping for " + from + " :: " + to) << endl;
+									logger << ("Adding Mapping for " + from + " :: " + to) << std::endl;
 								}
 
 								from = cntrls.at(cntn)->getAttribute("fromext");
 								StringUtil::trim(from);
 								to = cntrls.at(cntn)->getAttribute("toext");
 								StringUtil::trim(to);
-								if(to.find("*")!=string::npos || to.find("regex(")!=string::npos)
+								if(to.find("*")!=std::string::npos || to.find("regex(")!=std::string::npos)
 								{
-									logger << ("Skipping controller extension mapping as it contains */regex function") << endl;
+									logger << ("Skipping controller extension mapping as it contains */regex function") << std::endl;
 									to = "";
 								}
 								if(to.find(".")==0)
 								{
-									logger << ("Skipping controller provide 'to' file extension without dot(.)") << endl;
+									logger << ("Skipping controller provide 'to' file extension without dot(.)") << std::endl;
 									to = "";
 								}
-								if(from.find("*")!=string::npos || from.find("regex(")!=string::npos)
+								if(from.find("*")!=std::string::npos || from.find("regex(")!=std::string::npos)
 								{
-									logger << ("Skipping controller extension mapping as it contains */regex function") << endl;
+									logger << ("Skipping controller extension mapping as it contains */regex function") << std::endl;
 									from = "";
 								}
 								if(from.find(".")==0)
 								{
-									logger << ("Skipping controller provide 'from' file extension without dot(.)") << endl;
+									logger << ("Skipping controller provide 'from' file extension without dot(.)") << std::endl;
 									to = "";
 								}
 								if(from!="" && to!="")
 								{
 									ConfigurationData::getInstance()->mappingextObjectMap[name][from] = to;
-									logger << ("Adding Extension Mapping for " + from + " :: " + to) << endl;
+									logger << ("Adding Extension Mapping for " + from + " :: " + to) << std::endl;
 								}
 							}
 						}
@@ -390,27 +390,27 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(cntrls.at(cntn)->getTagName()=="authhandler")
 						{
-							string url = cntrls.at(cntn)->getAttribute("url");
+							std::string url = cntrls.at(cntn)->getAttribute("url");
 							StringUtil::trim(url);
-							string provider = cntrls.at(cntn)->getAttribute("provider");
+							std::string provider = cntrls.at(cntn)->getAttribute("provider");
 							StringUtil::trim(provider);
-							string scope = cntrls.at(cntn)->getAttribute("scope");
+							std::string scope = cntrls.at(cntn)->getAttribute("scope");
 							StringUtil::trim(scope);
-							if(url.find("*")!=string::npos || url.find("regex(")!=string::npos)
+							if(url.find("*")!=std::string::npos || url.find("regex(")!=std::string::npos)
 							{
-								logger << ("Skipping authhandler as login url contains *regex function") << endl;
+								logger << ("Skipping authhandler as login url contains *regex function") << std::endl;
 								url = "";
 							}
 							if(url!="" && provider!="")
 							{
 								ConfigurationData::getInstance()->authHandlerObjectMap[name][url] = provider;
-								if(provider!="" && provider.find("class:")!=string::npos)
+								if(provider!="" && provider.find("class:")!=std::string::npos)
 								{
-									string clas = provider.substr(provider.find(":")+1);
+									std::string clas = provider.substr(provider.find(":")+1);
 									Bean bean("authhandler_"+name+clas,"",clas,scope,false,name);
 									ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								}
-								logger << ("Adding Authhandler for " + (name + url) + " :: " + provider) << endl;
+								logger << ("Adding Authhandler for " + (name + url) + " :: " + provider) << std::endl;
 							}
 						}
 					}
@@ -422,13 +422,13 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(cntrls.at(cntn)->getTagName()=="filter")
 						{
-							string url = cntrls.at(cntn)->getAttribute("path");
+							std::string url = cntrls.at(cntn)->getAttribute("path");
 							StringUtil::trim(url);
-							string clas = cntrls.at(cntn)->getAttribute("class");
+							std::string clas = cntrls.at(cntn)->getAttribute("class");
 							StringUtil::trim(clas);
-							string type = cntrls.at(cntn)->getAttribute("type");
+							std::string type = cntrls.at(cntn)->getAttribute("type");
 							StringUtil::trim(type);
-							string scope = cntrls.at(cntn)->getAttribute("scope");
+							std::string scope = cntrls.at(cntn)->getAttribute("scope");
 							StringUtil::trim(scope);
 							if(clas!="" && (type=="in" || type=="out" || type=="handle"))
 							{
@@ -439,7 +439,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									Bean bean("filter_"+clas,"",clas,scope,false,name);
 									ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								}
-								logger << ("Adding Filter for " + (name + url + type) + " :: " + clas) << endl;
+								logger << ("Adding Filter for " + (name + url + type) + " :: " + clas) << std::endl;
 							}
 						}
 					}
@@ -451,10 +451,10 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(tmplts.at(tmpn)->getTagName()=="template")
 						{
-							string clas = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("class"));
-							string url = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("path"));
-							string file = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("file"));
-							if(url.find("*")==string::npos && url.find("regex(")==string::npos)
+							std::string clas = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("class"));
+							std::string url = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("path"));
+							std::string file = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("file"));
+							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
 								if(url=="")
 									url = "/";
@@ -462,25 +462,25 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									url = "/" + url;
 								url = "/" + name + "/" + url;
 								RegexUtil::replace(url,"[/]+","/");
-								string fpath = tmplpath+file;
+								std::string fpath = tmplpath+file;
 								RegexUtil::replace(fpath,"[/]+","/");
-								string wbpi = fpath;
+								std::string wbpi = fpath;
 								StringUtil::replaceFirst(wbpi, ConfigurationData::getInstance()->coreServerProperties.webPath, "");
 								RegexUtil::replace(wbpi,"[^a-zA-Z0-9_]+","");
 								ConfigurationData::getInstance()->templateMappingMap[name][url] = clas+";"+wbpi;
 								tpes[fpath] = name;
 								//tpes.push_back(defpath+tmplts.at(tmpn)->getAttribute("file"));
-								string scope = tmplts.at(tmpn)->getAttribute("scope");
+								std::string scope = tmplts.at(tmpn)->getAttribute("scope");
 								if(clas!="")
 								{
 									Bean bean("template_"+clas,"",clas,scope,false,name);
 									ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								}
-								logger << ("Adding Template for " + (url) + " :: " + clas) << endl;
+								logger << ("Adding Template for " + (url) + " :: " + clas) << std::endl;
 							}
 							else
 							{
-								logger << ("Skipping Template as path contains */regex function") << endl;
+								logger << ("Skipping Template as path contains */regex function") << std::endl;
 							}
 						}
 					}
@@ -492,9 +492,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(dycpppgs.at(tmpn)->getTagName()=="dynamic-cpp-page")
 						{
-							string url = StringUtil::trimCopy(dycpppgs.at(tmpn)->getAttribute("path"));
-							string file = StringUtil::trimCopy(dycpppgs.at(tmpn)->getAttribute("file"));
-							if(url.find("*")==string::npos && url.find("regex(")==string::npos)
+							std::string url = StringUtil::trimCopy(dycpppgs.at(tmpn)->getAttribute("path"));
+							std::string file = StringUtil::trimCopy(dycpppgs.at(tmpn)->getAttribute("file"));
+							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
 								if(url=="")
 									url = "/";
@@ -502,24 +502,24 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									url = "/" + url;
 								url = "/" + name + "/" + url;
 								RegexUtil::replace(url,"[/]+","/");
-								string fpath = dcppath+file;
+								std::string fpath = dcppath+file;
 								RegexUtil::replace(fpath,"[/]+","/");
 								if(dcps.find(fpath)!=dcps.end())
 								{
-									string wbpi = fpath;
+									std::string wbpi = fpath;
 									StringUtil::replaceFirst(wbpi, ConfigurationData::getInstance()->coreServerProperties.webPath, "");
 									RegexUtil::replace(wbpi,"[^a-zA-Z0-9_]+","");
 									ConfigurationData::getInstance()->dcpMappingMap[name][url] = wbpi;
-									logger << ("Adding Dynamic C++ Page for " + (url) + " :: " + fpath) << endl;
+									logger << ("Adding Dynamic C++ Page for " + (url) + " :: " + fpath) << std::endl;
 								}
 								else
 								{
-									logger << ("Could not find Dynamic C++ Page for " + (url) + " :: " + fpath) << endl;
+									logger << ("Could not find Dynamic C++ Page for " + (url) + " :: " + fpath) << std::endl;
 								}
 							}
 							else
 							{
-								logger << ("Skipping Template as path contains */regex function") << endl;
+								logger << ("Skipping Template as path contains */regex function") << std::endl;
 							}
 						}
 					}
@@ -531,9 +531,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(tmplts.at(tmpn)->getTagName()=="web-socket-handler")
 						{
-							string clas = tmplts.at(tmpn)->getAttribute("class");
-							string url = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("path"));
-							if(url.find("*")==string::npos && url.find("regex(")==string::npos)
+							std::string clas = tmplts.at(tmpn)->getAttribute("class");
+							std::string url = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("path"));
+							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
 								if(url=="")
 									url = "/";
@@ -542,17 +542,17 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 								url = "/" + name + "/" + url;
 								RegexUtil::replace(url,"[/]+","/");
 								ConfigurationData::getInstance()->websocketMappingMap[name][url] = clas;
-								string scope = tmplts.at(tmpn)->getAttribute("scope");
+								std::string scope = tmplts.at(tmpn)->getAttribute("scope");
 								if(clas!="")
 								{
 									Bean bean("websocketclass_"+clas,"",clas,scope,false,name);
 									ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								}
-								logger << ("Adding WebSocketHandler for " + (url) + " :: " + clas) << endl;
+								logger << ("Adding WebSocketHandler for " + (url) + " :: " + clas) << std::endl;
 							}
 							else
 							{
-								logger << ("Skipping WebSocketHandler as path contains */regex function") << endl;
+								logger << ("Skipping WebSocketHandler as path contains */regex function") << std::endl;
 							}
 						}
 					}
@@ -565,15 +565,15 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(dvs.at(dn)->getTagName()=="dview")
 						{
-							string clas = dvs.at(dn)->getAttribute("class");
+							std::string clas = dvs.at(dn)->getAttribute("class");
 							ConfigurationData::getInstance()->viewMappingMap[name][dvs.at(dn)->getAttribute("path")] = clas;
-							string scope = dvs.at(dn)->getAttribute("scope");
+							std::string scope = dvs.at(dn)->getAttribute("scope");
 							if(clas!="")
 							{
 								Bean bean("dview_"+clas,"",clas,scope,false,name);
 								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 							}
-							logger << ("Adding Dynamic View for " + (name+dvs.at(dn)->getAttribute("path")) + " :: " + clas) << endl;
+							logger << ("Adding Dynamic View for " + (name+dvs.at(dn)->getAttribute("path")) + " :: " + clas) << std::endl;
 						}
 					}
 				}
@@ -585,8 +585,8 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(ajintfs.at(dn)->getTagName()=="ajax-interface")
 						{
-							string url = ajintfs.at(dn)->getAttribute("path");
-							if(url.find("*")==string::npos && url.find("regex(")==string::npos)
+							std::string url = ajintfs.at(dn)->getAttribute("path");
+							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
 								if(url=="")
 									url = "/";
@@ -594,18 +594,18 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									url = "/" + url;
 								url = "/" + name + "/" + url;
 								RegexUtil::replace(url,"[/]+","/");
-								string clas = ajintfs.at(dn)->getAttribute("class");
+								std::string clas = ajintfs.at(dn)->getAttribute("class");
 								ConfigurationData::getInstance()->ajaxInterfaceMap[name][url] = clas;
 								pathvec.push_back(name);
 								vecvp.push_back(usrincludes);
 								stat.push_back(false);
 								ajintpthMap[clas] = url;
 								afcd.push_back(clas);
-								logger << ("Adding Ajax Interface for " + (name+url) + " :: " + clas) << endl;
+								logger << ("Adding Ajax Interface for " + (name+url) + " :: " + clas) << std::endl;
 							}
 							else
 							{
-								logger << ("Skipping Ajax Interface as path contains */regex function") << endl;
+								logger << ("Skipping Ajax Interface as path contains */regex function") << std::endl;
 							}
 						}
 					}
@@ -617,10 +617,10 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(cntrls.at(cntn)->getTagName()=="restcontroller")
 						{
-							string url = cntrls.at(cntn)->getAttribute("path");
-							string clas = cntrls.at(cntn)->getAttribute("class");
-							string rname = "";//cntrls.at(cntn)->getAttribute("name");
-							string scope = cntrls.at(cntn)->getAttribute("scope");
+							std::string url = cntrls.at(cntn)->getAttribute("path");
+							std::string clas = cntrls.at(cntn)->getAttribute("class");
+							std::string rname = "";//cntrls.at(cntn)->getAttribute("name");
+							std::string scope = cntrls.at(cntn)->getAttribute("scope");
 							ElementList resfuncs = cntrls.at(cntn)->getChildElements();
 							for (unsigned int cntn1 = 0; cntn1 < resfuncs.size(); cntn1++)
 							{
@@ -637,7 +637,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 										try {
 											CastUtil::lexical_cast<int>(restfunction.statusCode);
 										} catch(...) {
-											logger << "Rest: invalid response statusCode specified, defaulting to 200.." << endl;
+											logger << "Rest: invalid response statusCode specified, defaulting to 200.." << std::endl;
 											restfunction.statusCode = "200";
 										}
 									}
@@ -667,7 +667,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											if(StringUtil::trimCopy(param.type)=="")
 											{
 												invalidParam = true;
-												logger << "Rest: no type specified for param" << endl;
+												logger << "Rest: no type specified for param" << std::endl;
 											}
 											else if((param.type=="filestream" || param.type=="vector-of-filestream") && param.from!="multipart-content")
 											{
@@ -681,26 +681,26 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											else if(param.from!="body" && StringUtil::trimCopy(param.name)=="")
 											{
 												invalidParam = true;
-												logger << "Rest: no name specified for param" << endl;
+												logger << "Rest: no name specified for param" << std::endl;
 											}
 											else if(param.from=="body" && (restfunction.meth=="GET" || restfunction.meth=="OPTIONS" || restfunction.meth=="TRACE"
 													|| restfunction.meth=="HEAD"))
 											{
 												invalidParam = true;
-												logger << ("Rest: skipping param " + param.type + ", from is body and method is " + restfunction.meth) << endl;
+												logger << ("Rest: skipping param " + param.type + ", from is body and method is " + restfunction.meth) << std::endl;
 											}
 											else if(!(param.type=="int" || param.type=="short" || param.type=="long" || param.type=="float" || param.type=="string"
-													|| param.type=="std::string" || param.type=="double" || param.type=="bool"
-															|| param.type=="filestream" || param.type=="vector-of-filestream") && param.from!="body")
+													|| param.type=="long long" || param.type=="std::string" || param.type=="double" || param.type=="bool"
+													|| param.type=="filestream" || param.type=="vector-of-filestream") && param.from!="body")
 											{
 												invalidParam = true;
-												logger << ("Rest: skipping param " + param.type + ", from is not body and input is a complex type") << endl;
+												logger << ("Rest: skipping param " + param.type + ", from is not body and input is a complex type") << std::endl;
 											}
 											else if(param.from=="postparam" && (restfunction.meth=="GET" || restfunction.meth=="OPTIONS" || restfunction.meth=="TRACE"
 													|| restfunction.meth=="HEAD"))
 											{
 												invalidParam = true;
-												logger << ("Rest: skipping param " + param.type + ", from is postparam and method is " + restfunction.meth) << endl;
+												logger << ("Rest: skipping param " + param.type + ", from is postparam and method is " + restfunction.meth) << std::endl;
 											}
 											if(!invalidParam)
 											{
@@ -710,7 +710,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									}
 									if(hasBodyParam && restfunction.params.size()>1)
 									{
-										logger << ("Rest: skipping method " + restfunction.meth + " as only one argument allowed of type body") << endl;
+										logger << ("Rest: skipping method " + restfunction.meth + " as only one argument allowed of type body") << std::endl;
 										continue;
 									}
 									if(invalidParam)
@@ -719,13 +719,13 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									}
 									if(clas!="")
 									{
-										if(url.find("*")==string::npos)
+										if(url.find("*")==std::string::npos)
 										{
 											if(url=="")
 												url = "/" + clas;
 											else if(url.at(0)!='/')
 												url = "/" + url;
-											string urlmpp;
+											std::string urlmpp;
 											if(restfunction.path!="")
 											{
 												urlmpp = "/"+name+url+"/"+restfunction.path;
@@ -743,7 +743,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 												Bean bean("restcontroller_"+clas,"",clas,scope,false,name);
 												ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 											}
-											logger << ("Rest: Adding rest-controller => " + urlmpp  + " , class => " + clas) << endl;
+											logger << ("Rest: Adding rest-controller => " + urlmpp  + " , class => " + clas) << std::endl;
 										}
 									}
 								}
@@ -764,17 +764,17 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 								if(provs.at(cntpr)->getTagName()!="provider")
 									continue;
 
-								string provName = provs.at(cntpr)->getAttribute("name");
+								std::string provName = provs.at(cntpr)->getAttribute("name");
 								if(provName=="")
 								{
-									logger << ("No name provided for security-provider, skipping...") << endl;
+									logger << ("No name provided for security-provider, skipping...") << std::endl;
 									continue;
 								}
 
 								if(ConfigurationData::getInstance()->securityObjectMap.find(name)!=ConfigurationData::getInstance()->securityObjectMap.end()
 										&& ConfigurationData::getInstance()->securityObjectMap[name].find(provName)!=ConfigurationData::getInstance()->securityObjectMap[name].end())
 								{
-									logger << ("Security-provider already exists, skipping duplicate...") << endl;
+									logger << ("Security-provider already exists, skipping duplicate...") << std::endl;
 									continue;
 								}
 
@@ -783,10 +783,10 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 								{
 									if(cntrls.at(cntn)->getTagName()=="login-handler")
 									{
-										string provider = cntrls.at(cntn)->getAttribute("provider");
-										string url = cntrls.at(cntn)->getAttribute("path");
-										string sessionTimeoutV = cntrls.at(cntn)->getAttribute("sessionTimeout");
-										string scope = cntrls.at(cntn)->getAttribute("scope");
+										std::string provider = cntrls.at(cntn)->getAttribute("provider");
+										std::string url = cntrls.at(cntn)->getAttribute("path");
+										std::string sessionTimeoutV = cntrls.at(cntn)->getAttribute("sessionTimeout");
+										std::string scope = cntrls.at(cntn)->getAttribute("scope");
 
 										Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
 										securityObject.loginProvider = provider;
@@ -798,43 +798,43 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											securityObject.sessTimeout = CastUtil::lexical_cast<long>(sessionTimeoutV);
 										} catch (...) {
 											securityObject.sessTimeout = 3600;
-											logger << ("Security: Invalid session timeout value defined, defaulting to 1hour/3600sec") << endl;
+											logger << ("Security: Invalid session timeout value defined, defaulting to 1hour/3600sec") << std::endl;
 										}
 										ConfigurationData::getInstance()->securityObjectMap[name][provName] = securityObject;
-										if(provider!="" && provider.find("class:")!=string::npos)
+										if(provider!="" && provider.find("class:")!=std::string::npos)
 										{
-											string clas = provider.substr(provider.find(":")+1);
+											std::string clas = provider.substr(provider.find(":")+1);
 											Bean bean("login-handler_"+clas,"",clas,scope,false,name);
 											ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 										}
-										logger << ("Security: Adding Login Handler => " + url  + " , provider => " + provider) << endl;
+										logger << ("Security: Adding Login Handler => " + url  + " , provider => " + provider) << std::endl;
 									}
 									else if(cntrls.at(cntn)->getTagName()=="secure")
 									{
 										Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
-										string path = cntrls.at(cntn)->getAttribute("path");
-										string role = cntrls.at(cntn)->getAttribute("role");
+										std::string path = cntrls.at(cntn)->getAttribute("path");
+										std::string role = cntrls.at(cntn)->getAttribute("role");
 										SecureAspect secureAspect;
 										secureAspect.path = path;
 										secureAspect.role = role;
 										if(securityObject.addAspect(secureAspect))
 										{
 											ConfigurationData::getInstance()->securityObjectMap[name][provName] = securityObject;
-											logger << ("Security: Adding Secure Path => " + path  + " , role => " + role) << endl;
+											logger << ("Security: Adding Secure Path => " + path  + " , role => " + role) << std::endl;
 										}
 									}
 									else if(cntrls.at(cntn)->getTagName()=="welcome")
 									{
-										string welcomeFile = cntrls.at(cntn)->getAttribute("file");
+										std::string welcomeFile = cntrls.at(cntn)->getAttribute("file");
 										Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
 										securityObject.welcomeFile = welcomeFile;
 										ConfigurationData::getInstance()->securityObjectMap[name][provName] = securityObject;
-										logger << ("Security: Adding Welcome file => " + welcomeFile) << endl;
+										logger << ("Security: Adding Welcome file => " + welcomeFile) << std::endl;
 									}
 									else if(cntrls.at(cntn)->getTagName()=="username")
 									{
-										string ffrom = cntrls.at(cntn)->getAttribute("from");
-										string fname = cntrls.at(cntn)->getAttribute("name");
+										std::string ffrom = cntrls.at(cntn)->getAttribute("from");
+										std::string fname = cntrls.at(cntn)->getAttribute("name");
 										if(ffrom!="reqparam" && ffrom!="postparam" && ffrom!="header" && fname!="")
 										{
 											Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
@@ -845,8 +845,8 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									}
 									else if(cntrls.at(cntn)->getTagName()=="password")
 									{
-										string ffrom = cntrls.at(cntn)->getAttribute("from");
-										string fname = cntrls.at(cntn)->getAttribute("name");
+										std::string ffrom = cntrls.at(cntn)->getAttribute("from");
+										std::string fname = cntrls.at(cntn)->getAttribute("name");
 										if(ffrom!="reqparam" && ffrom!="postparam" && ffrom!="header" && fname!="")
 										{
 											Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
@@ -867,20 +867,20 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(cntrls.at(cntn)->getTagName()=="handoff")
 						{
-							string app = cntrls.at(cntn)->getAttribute("app");
-							string def = cntrls.at(cntn)->getAttribute("default");
-							string ext = cntrls.at(cntn)->getAttribute("ext");
+							std::string app = cntrls.at(cntn)->getAttribute("app");
+							std::string def = cntrls.at(cntn)->getAttribute("default");
+							std::string ext = cntrls.at(cntn)->getAttribute("ext");
 							ConfigurationData::getInstance()->handoffs[app] = def;
 							ConfigurationData::getInstance()->handoffs[app+"extension"] = ext;
 							handoffVec.push_back("-l"+ app+" ");
-							logger << ("Adding Handoff for app => " + app  + " , ext => " + ext  + " , default url => " + def) << endl;
+							logger << ("Adding Handoff for app => " + app  + " , ext => " + ext  + " , default url => " + def) << std::endl;
 						}
 					}
 				}
 				else if(eles.at(apps)->getTagName()=="cors-config")
 				{
 					ElementList cntrls = eles.at(apps)->getChildElements();
-					string allwdOrigins, allwdMethods, allwdHeaders, exposedHeaders;
+					std::string allwdOrigins, allwdMethods, allwdHeaders, exposedHeaders;
 					bool allwdCredentials;
 					long maxAge;
 					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
@@ -919,9 +919,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					logger << ("CORS Configuartion allow-origins => " + ConfigurationData::getInstance()->corsConfig.allwdOrigins
 							+ " , allow-methods => " + ConfigurationData::getInstance()->corsConfig.allwdMethods
 							+ " , allow-headers => " + ConfigurationData::getInstance()->corsConfig.allwdHeaders
-							+ " , allow-credentials => " + CastUtil::lexical_cast<string>(ConfigurationData::getInstance()->corsConfig.allwdCredentials)
+							+ " , allow-credentials => " + CastUtil::lexical_cast<std::string>(ConfigurationData::getInstance()->corsConfig.allwdCredentials)
 							+ " , expose-headers => " + ConfigurationData::getInstance()->corsConfig.exposedHeaders
-							+ " , max-age => " + CastUtil::lexical_cast<string>(ConfigurationData::getInstance()->corsConfig.maxAge)) << endl;
+							+ " , max-age => " + CastUtil::lexical_cast<std::string>(ConfigurationData::getInstance()->corsConfig.maxAge)) << std::endl;
 				}
 #ifdef INC_JOBS
 				else if(eles.at(apps)->getTagName()=="job-procs")
@@ -932,14 +932,14 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 #endif
 			}
 		}
-		logger << "done reading application.xml " << endl;
+		logger << "done reading application.xml " << std::endl;
 
 		libs += ("-l"+ applibname+" ");
 
 		configureDataSources(name, defpath+"config/sdorm.xml", allclsmap);
 		configureCaches(name, defpath+"config/cache.xml");
 
-		logger << "started reading fviews.xml " << endl;
+		logger << "started reading fviews.xml " << std::endl;
 		Document doc1;
 		parser.readDocument(defpath+"config/fviews.xml", doc1);
 		const Element& root1 = doc1.getRootElement();
@@ -950,7 +950,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			{
 				if(eles.at(apps)->getTagName()=="page")
 				{
-					string fvw = eles.at(apps)->getAttribute("htm");
+					std::string fvw = eles.at(apps)->getAttribute("htm");
 					StringUtil::replaceFirst(fvw,".html",".fview");
 					ConfigurationData::getInstance()->fviewMappingMap[name][fvw] = eles.at(apps)->getAttribute("class");
 					pathvec.push_back(name);
@@ -961,26 +961,26 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					ConfigurationData::getInstance()->ajaxInterfaceMap[name][fvw] = eles.at(apps)->getAttribute("class");
 					afcd.push_back(eles.at(apps)->getAttribute("class"));
 					ElementList elese = eles.at(apps)->getChildElements();
-					string nsfns = "\nvar _fview_namespace = {";
-					string js = "\n\nwindow.onload = function(){";
+					std::string nsfns = "\nvar _fview_namespace = {";
+					std::string js = "\n\nwindow.onload = function(){";
 					for (int appse = 0; appse < (int)elese.size(); appse++)
 					{
 						if(elese.at(appse)->getTagName()=="event")
 						{
-							nsfns += "\n\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<string>(appse)+"\" : function(response){" + elese.at(appse)->getAttribute("cb") + "},";
+							nsfns += "\n\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<std::string>(appse)+"\" : function(response){" + elese.at(appse)->getAttribute("cb") + "},";
 							js += "\ndocument.getElementById('"+elese.at(appse)->getAttribute("eid")+"').";
 							js += elese.at(appse)->getAttribute("type") + " = function(){";
 							js += eles.at(apps)->getAttribute("class")+"."+elese.at(appse)->getAttribute("func")+"(";
-							string args = elese.at(appse)->getAttribute("args");
+							std::string args = elese.at(appse)->getAttribute("args");
 							if(args!="")
 								args += ",";
-							js += args + "\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<string>(appse)+"\",\"/"+name+"/"+fvw+"\",_fview_namespace);}";
+							js += args + "\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<std::string>(appse)+"\",\"/"+name+"/"+fvw+"\",_fview_namespace);}";
 						}
 						else if(elese.at(appse)->getTagName()=="form")
 						{
 							//ConfigurationData::getInstance()->fviewFormMap[name][elese.at(appse)->getAttribute("name")] = *(elese.at(appse));
-							string clas = elese.at(appse)->getAttribute("controller");
-							string scope = elese.at(appse)->getAttribute("scope");
+							std::string clas = elese.at(appse)->getAttribute("controller");
+							std::string scope = elese.at(appse)->getAttribute("scope");
 							if(clas!="")
 							{
 								Bean bean("form_"+clas,"",clas,scope,false,name);
@@ -989,7 +989,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							elese.at(appse)->copy(&(ConfigurationData::getInstance()->fviewFormMap[name][elese.at(appse)->getAttribute("name")]));
 							logger << ("Fview: Adding form => " + elese.at(appse)->getAttribute("name")
 								+ " , form class => " + elese.at(appse)->getAttribute("bean")
-								+ " , form controller => " + elese.at(appse)->getAttribute("controller")) << endl;
+								+ " , form controller => " + elese.at(appse)->getAttribute("controller")) << std::endl;
 						}
 					}
 					js += "\n}\n\n";
@@ -1005,15 +1005,15 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					AfcUtil::writeTofile(webpubpath+eles.at(apps)->getAttribute("class")+".js",js,true);
 
 					logger << ("Fview: Adding fview page class => " + eles.at(apps)->getAttribute("class")
-							+ " , html => " + eles.at(apps)->getAttribute("htm")) << endl;
+							+ " , html => " + eles.at(apps)->getAttribute("htm")) << std::endl;
 				}
 			}
 		}
-		logger << "done reading fviews.xml " << endl;
+		logger << "done reading fviews.xml " << std::endl;
 
-		string infjs;
+		std::string infjs;
 		ajrt += AfcUtil::generateJsInterfacessAll(allclsmap,infjs,ajintpthMap,afcd,ref);
-		string objs = AfcUtil::generateJsObjectsAll(allclsmap);
+		std::string objs = AfcUtil::generateJsObjectsAll(allclsmap);
 		vecvp.clear();
 		afcd.clear();
 		pathvec.clear();
@@ -1027,16 +1027,16 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 
 	ConfigurationData::getInstance()->classStructureMap = clsstrucMaps;
 
-	string confsrcFiles = "", confsrcFilesDinter = "";
+	std::string confsrcFiles = "", confsrcFilesDinter = "";
 #ifdef INC_COMP
-	logger << "started generating component code" <<endl;
-	map<string, string>::iterator cmpit;
+	logger << "started generating component code" <<std::endl;
+	std::map<std::string, std::string>::iterator cmpit;
 	for (cmpit=compnts.begin();cmpit!=compnts.end();++cmpit)
 	{
-		string cudata,cuheader,curemote,curemoteheaders;
+		std::string cudata,cuheader,curemote,curemoteheaders;
 		try
 		{
-			string file = gen.generateComponentCU(cmpit->first,cudata,cuheader,curemote,curemoteheaders,cmpit->second);
+			std::string file = gen.generateComponentCU(cmpit->first,cudata,cuheader,curemote,curemoteheaders,cmpit->second);
 			AfcUtil::writeTofile(rtdcfpath+file+".h",cuheader,true);
 			AfcUtil::writeTofile(rtdcfpath+file+".cpp",cudata,true);
 			AfcUtil::writeTofile(rtdcfpath+file+"_Remote.h",curemoteheaders,true);
@@ -1050,24 +1050,24 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		}
 		catch(const char* ex)
 		{
-			logger << ("Exception occurred during component code generation : ") << ex << endl;
+			logger << ("Exception occurred during component code generation : ") << ex << std::endl;
 		}
 	}
-	logger << "done generating component code" <<endl;
+	logger << "done generating component code" <<std::endl;
 #endif
 	for (unsigned int cntn = 0; cntn < handoffVec.size(); cntn++)
 	{
 		StringUtil::replaceFirst(libs, handoffVec.at(cntn), "");
 	}
-	logger << "started generating reflection/serialization code" <<endl;
-	string ret = ref.generateClassDefinitionsAll(clsstrucMaps,includeRef,webdirs1);
-	string objs, ajaxret, headers,typerefs;
+	logger << "started generating reflection/serialization code" <<std::endl;
+	std::string ret = ref.generateClassDefinitionsAll(clsstrucMaps,includeRef,webdirs1);
+	std::string objs, ajaxret, headers,typerefs;
 	AfcUtil::writeTofile(rtdcfpath+"ReflectorInterface.cpp",ret,true);
 	confsrcFiles += "../ReflectorInterface.cpp ";
 	ret = ref.generateSerDefinitionAll(clsstrucMaps,includeRef, true, objs, ajaxret, headers,typerefs,webdirs1);
 	AfcUtil::writeTofile(rtdcfpath+"SerializeInterface.cpp",ret,true);
 	confsrcFiles += "../SerializeInterface.cpp ";
-	logger << "done generating reflection/serialization code" <<endl;
+	logger << "done generating reflection/serialization code" <<std::endl;
 	cntxt["RUNTIME_LIBRARIES"] = libs;
 	//ret = TemplateEngine::evaluate(rtdcfpath+"objects.mk.template",cntxt);
 	//AfcUtil::writeTofile(rtdcfpath+"objects.mk",ret,true);
@@ -1079,31 +1079,31 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	ipdobjs = "";
 
 	//Process all markers
-	vector<WsDetails> allwsdets;
+	std::vector<WsDetails> allwsdets;
 	handleMarkerConfigurations(clsstrucMaps, allwsdets, stat, vecvp, pathvec, ajintpthMap, tpes, serverRootDirectory, afcd, ajrt, ref);
 
 #ifdef INC_DCP
 	ConfigurationData::getInstance()->dynamicCppPagesMap = dcps;
-	logger << "started generating dcp code" <<endl;
+	logger << "started generating dcp code" <<std::endl;
 	ret = DCPGenerator::generateDCPAll();
 	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
 	confsrcFilesDinter = "../DCPInterface.cpp ";
-	logger << "done generating dcp code" <<endl;
+	logger << "done generating dcp code" <<std::endl;
 	ipdobjs += "./DCPInterface.o \\\n";
 #endif
 	ConfigurationData::getInstance()->templateFilesMap = tpes;
 #ifdef INC_TPE
-	logger << "started generating template code" <<endl;
+	logger << "started generating template code" <<std::endl;
 	ret = TemplateGenerator::generateTempCdAll(serverRootDirectory);
-	//logger << ret << endl;
+	//logger << ret << std::endl;
 	AfcUtil::writeTofile(rtdcfpath+"TemplateInterface.cpp",ret,true);
 	confsrcFilesDinter += "../TemplateInterface.cpp ";
-	logger << "done generating template code" <<endl;
+	logger << "done generating template code" <<std::endl;
 	ipdobjs += "./TemplateInterface.o \\\n";
 #endif
-	string infjs;
-	logger << endl<< "started generating ajax code" <<endl;
-	string ajaxHeaders;
+	std::string infjs;
+	logger << std::endl<< "started generating ajax code" <<std::endl;
+	std::string ajaxHeaders;
 	//ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,infjs,pathvec,ajintpthMap);
 	ret = ajaxret + ajrt + "\n}\n";
 	AfcUtil::writeTofile(rtdcfpath+"AjaxInterface.cpp",ret,true);
@@ -1111,26 +1111,26 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	//AfcUtil::writeTofile(pubpath+"_afc_Objects.js",objs,true);
 	//AfcUtil::writeTofile(pubpath+"_afc_Interfaces.js",infjs,true);
 	AfcUtil::writeTofile(incpath+"AfcInclude.h",(ajaxHeaders+headers),true);
-	logger << "done generating ajax code" <<endl;
+	logger << "done generating ajax code" <<std::endl;
 	webdirs.clear();
 #ifdef INC_APPFLOW
 	ApplicationUtil apputil;
-	logger << "started generating application code" <<endl;
+	logger << "started generating application code" <<std::endl;
 	ret = apputil.buildAllApplications(appf,webdirs1);
 	AfcUtil::writeTofile(rtdcfpath+"ApplicationInterface.cpp",ret,true);
 	confsrcFiles += "../ApplicationInterface.cpp ";
-	logger <<  "done generating application code" <<endl;
+	logger <<  "done generating application code" <<std::endl;
 	iobjs += "./ApplicationInterface.o \\\n";
 #endif
 #ifdef INC_WEBSVC
 	WsUtil wsu;
-	logger <<  "started generating web-service code" <<endl;
-	vector<WsDetails> allwsdets1 = wsu.getWsDetails(webdirs1, serverRootDirectory);
+	logger <<  "started generating web-service code" <<std::endl;
+	std::vector<WsDetails> allwsdets1 = wsu.getWsDetails(webdirs1, serverRootDirectory);
 	std::copy(allwsdets1.begin(), allwsdets1.end(), back_inserter(allwsdets));
 	ret = wsu.generateAllWSDL(allwsdets, respath, ref, clsstrucMaps);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
 	confsrcFiles += "../WsInterface.cpp ";
-	logger <<  "done generating web-service code" <<endl;
+	logger <<  "done generating web-service code" <<std::endl;
 	iobjs += "./WsInterface.o \\\n";
 #endif
 
@@ -1146,7 +1146,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	else
 		cntxt["TARGET_LIB"] = "all";
 	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
-	string cont = TemplateEngine::evaluate(respath+"/rundyn_template.sh", cntxt);
+	std::string cont = TemplateEngine::evaluate(respath+"/rundyn_template.sh", cntxt);
 	AfcUtil::writeTofile(respath+"/rundyn.sh", cont, true);
 	cntxt.clear();
 	cntxt["TARGET_LIB"] = "libdinter";
@@ -1160,8 +1160,8 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	cntxt["INTER_SOURCES"] = confsrcFiles;
 	cntxt["DINTER_SOURCES"] = confsrcFilesDinter;
 
-	string mkfileloc = rtdcfpath+"/autotools/Makefile.am.template";
-	string mkfileamloc = rtdcfpath+"/autotools/Makefile.am";
+	std::string mkfileloc = rtdcfpath+"/autotools/Makefile.am.template";
+	std::string mkfileamloc = rtdcfpath+"/autotools/Makefile.am";
 	ret = TemplateEngine::evaluate(mkfileloc,cntxt);
 	AfcUtil::writeTofile(mkfileamloc,ret,true);
 
@@ -1182,41 +1182,41 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	cntxt["MOD_SCRIPT"] = "false";
 #endif
 
-	string cffileloc = rtdcfpath+"/autotools/configure.ac.template";
-	string cffileamloc = rtdcfpath+"/autotools/configure.ac";
+	std::string cffileloc = rtdcfpath+"/autotools/configure.ac.template";
+	std::string cffileamloc = rtdcfpath+"/autotools/configure.ac";
 	ret = TemplateEngine::evaluate(cffileloc,cntxt);
 	AfcUtil::writeTofile(cffileamloc,ret,true);
 
 	/*string configureFilePath = rtdcfpath+"/autotools/configure";
     if (access( configureFilePath.c_str(), F_OK ) == -1 )
 	{
-		string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
-		string output = ScriptHandler::execute(compres, true);
-		logger << "Set up configure for intermediate libraries\n\n" << endl;
+		std::string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
+		std::string output = ScriptHandler::execute(compres, true);
+		logger << "Set up configure for intermediate libraries\n\n" << std::endl;
 	}
 
-	string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+	std::string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
 #ifdef DEBUG
 	compres += " --enable-debug=yes";
 #endif
-	string output = ScriptHandler::execute(compres, true);
-	logger << "Set up makefiles for intermediate libraries\n\n" << endl;
-	logger << output << endl;*/
+	std::string output = ScriptHandler::execute(compres, true);
+	logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
+	logger << output << std::endl;*/
 //#endif
 }
 
-void ConfigurationHandler::configureDataSources(const string& name, const string& configFile, map<string, ClassStructure>& allclsmap)
+void ConfigurationHandler::configureDataSources(const std::string& name, const std::string& configFile, std::map<std::string, ClassStructure>& allclsmap)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	XmlParser parser("Parser");
-	logger << ("started reading sdorm config file " + configFile) << endl;
+	logger << ("started reading sdorm config file " + configFile) << std::endl;
 
 	Document doc;
 	parser.readDocument(configFile, doc);
 	const Element& dbroot = doc.getRootElement();
 
-	map<string, ConnectionProperties> allProps;
-	map<string, Mapping> allMapps;
+	std::map<std::string, ConnectionProperties> allProps;
+	std::map<std::string, Mapping> allMapps;
 
 	if(dbroot.getTagName()=="sdorm")
 	{
@@ -1374,7 +1374,7 @@ void ConfigurationHandler::configureDataSources(const string& name, const string
 				StringUtil::trim(cprops.name);
 				if(cprops.name == "")
 				{
-					logger << "Data Source Name not defined, skipping.... " << endl;
+					logger << "Data Source Name not defined, skipping.... " << std::endl;
 					continue;
 				}
 				allProps[cprops.name] = cprops;
@@ -1388,7 +1388,7 @@ void ConfigurationHandler::configureDataSources(const string& name, const string
 	ConfigurationData::getInstance()->sdormConnProperties[name] = allProps;
 	ConfigurationData::getInstance()->sdormEntityMappings[name] = allMapps;
 
-	logger << "done reading sdorm config file " + configFile << endl;
+	logger << "done reading sdorm config file " + configFile << std::endl;
 }
 
 void ConfigurationHandler::destroyDataSources()
@@ -1396,11 +1396,11 @@ void ConfigurationHandler::destroyDataSources()
 	DataSourceManager::destroy();
 }
 
-void ConfigurationHandler::configureCaches(const string& name, const string& configFile)
+void ConfigurationHandler::configureCaches(const std::string& name, const std::string& configFile)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	XmlParser parser("Parser");
-	logger << ("started reading cache config file " + configFile) << endl;
+	logger << ("started reading cache config file " + configFile) << std::endl;
 
 	Document doc;
 	parser.readDocument(configFile, doc);
@@ -1507,7 +1507,7 @@ void ConfigurationHandler::configureCaches(const string& name, const string& con
 		}
 	}
 
-	logger << "done reading cache config file " + configFile << endl;
+	logger << "done reading cache config file " + configFile << std::endl;
 }
 
 void ConfigurationHandler::destroyCaches()
@@ -1515,15 +1515,15 @@ void ConfigurationHandler::destroyCaches()
 	CacheManager::destroy();
 }
 
-void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, ClassStructure> >& clsstrucMaps, vector<WsDetails>& wsdvec, vector<bool>& stat, strVec& vecvp, strVec& pathvec, map<string, string>& ajintpthMap, map<string, string>& tpes, const string& serverRootDirectory, strVec& afcd, string& ajrt, Reflection& ref)
+void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps, std::vector<WsDetails>& wsdvec, std::vector<bool>& stat, strVec& vecvp, strVec& pathvec, std::map<std::string, std::string>& ajintpthMap, std::map<std::string, std::string>& tpes, const std::string& serverRootDirectory, strVec& afcd, std::string& ajrt, Reflection& ref)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
-	map<string, map<string, ClassStructure> >::iterator it;
+	std::map<std::string, std::map<std::string, ClassStructure> >::iterator it;
 	for (it=clsstrucMaps.begin();it!=clsstrucMaps.end();++it) {
 		bool isJsObjects = false;
-		string appName = it->first;
-		string defpath = serverRootDirectory + "/web/" + appName;
-		map<string, ClassStructure>::iterator itt;
+		std::string appName = it->first;
+		std::string defpath = serverRootDirectory + "/web/" + appName;
+		std::map<std::string, ClassStructure>::iterator itt;
 		for (itt=it->second.begin();itt!=it->second.end();++itt) {
 			ClassStructure cs = itt->second;
 			if(cs.markers.find("@SecurityProvider")!=cs.markers.end())
@@ -1532,49 +1532,49 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 
 				if(cs.markers["@SecurityProvider"].size()>1)
 				{
-					logger << ("Found more than one @SecurityProvider marker, only the last defined marker will be considered, ignoring others..") << endl;
+					logger << ("Found more than one @SecurityProvider marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 				}
 
-				string clas = cs.getFullyQualifiedClassName();
-				string provider = clas;
-				string url = secProv.getAttributeValue("url");
-				string provName = secProv.getAttributeValue("providerName");
-				string sessionTimeoutV = secProv.getAttributeValue("sessionTimeout");
-				string scope = secProv.getAttributeValue("scope");
-				string welcomefile = secProv.getAttributeValue("welcomefile");
-				string userfld = secProv.getAttributeValue("usernamefld");
-				string userfrom = secProv.getAttributeValue("usernamefrom");
-				string passfld = secProv.getAttributeValue("passwordfld");
-				string passfrom = secProv.getAttributeValue("passwordfrom");
+				std::string clas = cs.getFullyQualifiedClassName();
+				std::string provider = clas;
+				std::string url = secProv.getAttributeValue("url");
+				std::string provName = secProv.getAttributeValue("providerName");
+				std::string sessionTimeoutV = secProv.getAttributeValue("sessionTimeout");
+				std::string scope = secProv.getAttributeValue("scope");
+				std::string welcomefile = secProv.getAttributeValue("welcomefile");
+				std::string userfld = secProv.getAttributeValue("usernamefld");
+				std::string userfrom = secProv.getAttributeValue("usernamefrom");
+				std::string passfld = secProv.getAttributeValue("passwordfld");
+				std::string passfrom = secProv.getAttributeValue("passwordfrom");
 
 				if(provName=="")
 				{
-					logger << ("Provider name cannot be blank, skipping...") <<  endl;
+					logger << ("Provider name cannot be blank, skipping...") <<  std::endl;
 					continue;
 				}
 
 				if(url=="")
 				{
-					logger << ("Login Path cannot be blank, skipping...") <<  endl;
+					logger << ("Login Path cannot be blank, skipping...") <<  std::endl;
 					continue;
 				}
 
 				if((userfld!="" && passfld=="") || (userfld=="" && passfld!=""))
 				{
-					logger << ("Both usernamefld/passwordfld need to be provided together, skipping...") <<  endl;
+					logger << ("Both usernamefld/passwordfld need to be provided together, skipping...") <<  std::endl;
 					continue;
 				}
 
 				if((userfld!="" && userfrom!="" && passfrom=="") || (passfld!="" && userfrom=="" && passfrom!=""))
 				{
-					logger << ("Both usernamefrom/passwordfrom need to be provided together, skipping...") <<  endl;
+					logger << ("Both usernamefrom/passwordfrom need to be provided together, skipping...") <<  std::endl;
 					continue;
 				}
 
 				if(ConfigurationData::getInstance()->securityObjectMap[appName].find(provName)
 						!=ConfigurationData::getInstance()->securityObjectMap[appName].end())
 				{
-					logger << ("Provider with name " + provName + " already exists, skipping duplicate...") <<  endl;
+					logger << ("Provider with name " + provName + " already exists, skipping duplicate...") <<  std::endl;
 					continue;
 				}
 
@@ -1588,7 +1588,7 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 					securityObject.sessTimeout = CastUtil::lexical_cast<long>(sessionTimeoutV);
 				} catch (...) {
 					securityObject.sessTimeout = 3600;
-					logger << ("Security: Invalid session timeout value defined, defaulting to 1hour/3600sec") << endl;
+					logger << ("Security: Invalid session timeout value defined, defaulting to 1hour/3600sec") << std::endl;
 				}
 
 				securityObject.welcomeFile = welcomefile;
@@ -1600,7 +1600,7 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 				ConfigurationData::getInstance()->securityObjectMap[appName][provName] = securityObject;
 				Bean bean("login-handler_"+clas,"",clas,scope,false,appName);
 				ConfigurationData::getInstance()->ffeadContext.addBean(bean);
-				logger << ("Security: Adding Security Provider => " + url  + " , provider => " + provider) << endl;
+				logger << ("Security: Adding Security Provider => " + url  + " , provider => " + provider) << std::endl;
 			}
 		}
 
@@ -1615,23 +1615,23 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 				Marker webcnt = cs.markers["@WebService"].at(cs.markers["@WebService"].size()-1);
 				if(cs.markers["@WebService"].size()>1)
 				{
-					logger << ("Found more than one @WebService marker, only the last defined marker will be considered, ignoring others..") << endl;
+					logger << ("Found more than one @WebService marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 				}
 				WsDetails wsd;
 				wsd.claz = cs.getFullyQualifiedClassName();
 				wsd.location = webcnt.getAttributeValue("location");
 				if(StringUtil::trimCopy(wsd.location)=="")
 				{
-					logger << ("No location defined for web-service, skipping...") << endl;
+					logger << ("No location defined for web-service, skipping...") << std::endl;
 					continue;
 				}
 				wsd.namespc = webcnt.getAttributeValue("namespc");
 				/*if(StringUtil::trimCopy(wsd.namespc)=="")
 				{
-					logger << ("No namespace defined for web-service, skipping...") << endl;
+					logger << ("No namespace defined for web-service, skipping...") << std::endl;
 					continue;
 				}*/
-				map<string, string> outnmmp;
+				std::map<std::string, std::string> outnmmp;
 				if(cs.markers.find("@Secure")!=cs.markers.end())
 				{
 					Marker securr = cs.markers["@Secure"].at(cs.markers["@Secure"].size()-1);
@@ -1640,18 +1640,18 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 					bool valid = true;
 					if(StringUtil::trimCopy(aspect.role)=="")
 					{
-						logger << ("No role defined for Secure path, skipping...") << endl;
+						logger << ("No role defined for Secure path, skipping...") << std::endl;
 						valid = false;
 					}
-					string provName = securr.getAttributeValue("providerName");
+					std::string provName = securr.getAttributeValue("providerName");
 					if(StringUtil::trimCopy(provName)=="")
 					{
-						logger << ("No providerName defined for Secure path, skipping...") << endl;
+						logger << ("No providerName defined for Secure path, skipping...") << std::endl;
 						valid = false;
 					}
 					if(cs.markers["@Secure"].size()>1)
 					{
-						logger << ("Found more than one @Secure marker, only the last defined marker will be considered, ignoring others..") << endl;
+						logger << ("Found more than one @Secure marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 					}
 					aspect.path = wsd.location;
 					if(wsd.location.at(wsd.location.length()-1)!='/')
@@ -1672,12 +1672,12 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 						{
 							securityObject.addAspect(aspect);
 							ConfigurationData::getInstance()->securityObjectMap[appName][provName] = securityObject;
-							logger << ("Security: Adding Secure Path => " + aspect.path  + " , role => " + aspect.role) << endl;
+							logger << ("Security: Adding Secure Path => " + aspect.path  + " , role => " + aspect.role) << std::endl;
 						}
 					}
 					else if(valid)
 					{
-						logger << ("Security Provider " + provName + " not found, skipping...") << endl;
+						logger << ("Security Provider " + provName + " not found, skipping...") << std::endl;
 					}
 				}
 				for (int var = 0; var < (int)cs.pubms.size(); ++var) {
@@ -1686,7 +1686,7 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 						Marker websrvmth = cs.pubms.at(var).markers["@WebServiceMethod"].at(cs.pubms.at(var).markers["@WebServiceMethod"].size()-1);
 						if(cs.pubms.at(var).markers["@WebServiceMethod"].size()>1)
 						{
-							logger << ("Found more than one @WebServiceMethod marker, only the last defined marker will be considered, ignoring others..") << endl;
+							logger << ("Found more than one @WebServiceMethod marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 						}
 						outnmmp[cs.pubms.at(var).name] = websrvmth.getAttributeValue("outname");
 					}
@@ -1697,18 +1697,18 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 			}
 			else if(cs.markers.find("@Controller")!=cs.markers.end())
 			{
-				vector<Marker> controllers = cs.markers["@Controller"];
+				std::vector<Marker> controllers = cs.markers["@Controller"];
 				for (int var = 0; var < (int)controllers.size(); ++var) {
-					string url = controllers.at(var).getAttributeValue("path");
+					std::string url = controllers.at(var).getAttributeValue("path");
 					StringUtil::trim(url);
 					if(url=="")
 					{
-						logger << ("No url defined for Controller, skipping...") << endl;
+						logger << ("No url defined for Controller, skipping...") << std::endl;
 						continue;
 					}
-					string scope = controllers.at(var).getAttributeValue("scope");
+					std::string scope = controllers.at(var).getAttributeValue("scope");
 					StringUtil::trim(scope);
-					string clas = cs.getFullyQualifiedClassName();
+					std::string clas = cs.getFullyQualifiedClassName();
 					StringUtil::trim(clas);
 					if(clas!="")
 					{
@@ -1716,17 +1716,17 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 						Bean bean("controller_"+clas,"",clas,scope,false,appName);
 						ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 					}
-					logger << ("Adding Controller for " + (appName + url) + " :: " + clas) << endl;
+					logger << ("Adding Controller for " + (appName + url) + " :: " + clas) << std::endl;
 				}
 			}
 			else if(cs.markers.find("@AjaxInterface")!=cs.markers.end())
 			{
-				vector<Marker> ajaxintfs = cs.markers["@AjaxInterface"];
+				std::vector<Marker> ajaxintfs = cs.markers["@AjaxInterface"];
 				for (int var = 0; var < (int)ajaxintfs.size(); ++var) {
-					string url = ajaxintfs.at(var).getAttributeValue("path");
+					std::string url = ajaxintfs.at(var).getAttributeValue("path");
 					if(StringUtil::trimCopy(url)=="")
 					{
-						logger << ("No path defined for AjaxInterface, skipping...") << endl;
+						logger << ("No path defined for AjaxInterface, skipping...") << std::endl;
 						continue;
 					}
 					if(cs.markers.find("@Secure")!=cs.markers.end())
@@ -1743,17 +1743,17 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 						bool valid = true;
 						if(StringUtil::trimCopy(aspect.role)=="")
 						{
-							logger << ("No role defined for Secure path, skipping...") << endl;
+							logger << ("No role defined for Secure path, skipping...") << std::endl;
 							valid = false;
 						}
 						if(cs.markers["@Secure"].size()>1)
 						{
-							logger << ("Found more than one @Secure marker, only the last defined marker will be considered, ignoring others..") << endl;
+							logger << ("Found more than one @Secure marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 						}
-						string provName = cs.markers["@Secure"].at(totl-1).getAttributeValue("providerName");
+						std::string provName = cs.markers["@Secure"].at(totl-1).getAttributeValue("providerName");
 						if(StringUtil::trimCopy(provName)=="")
 						{
-							logger << ("No providerName defined for Secure path, skipping...") << endl;
+							logger << ("No providerName defined for Secure path, skipping...") << std::endl;
 							valid = false;
 						}
 						if(valid && ConfigurationData::getInstance()->securityObjectMap[appName].find(provName)
@@ -1763,15 +1763,15 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 							if(securityObject.addAspect(aspect))
 							{
 								ConfigurationData::getInstance()->securityObjectMap[appName][provName] = securityObject;
-								logger << ("Security: Adding Secure Path => " + aspect.path  + " , role => " + aspect.role) << endl;
+								logger << ("Security: Adding Secure Path => " + aspect.path  + " , role => " + aspect.role) << std::endl;
 							}
 						}
 						else if(valid)
 						{
-							logger << ("Security Provider " + provName + " not found, skipping...") << endl;
+							logger << ("Security Provider " + provName + " not found, skipping...") << std::endl;
 						}
 					}
-					if(url.find("*")==string::npos && url.find("regex(")==string::npos)
+					if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 					{
 						if(url=="")
 							url = "/";
@@ -1779,36 +1779,36 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 							url = "/" + url;
 						url = "/" + appName + "/" + url;
 						RegexUtil::replace(url,"[/]+","/");
-						string clas = cs.getFullyQualifiedClassName();
+						std::string clas = cs.getFullyQualifiedClassName();
 						ConfigurationData::getInstance()->ajaxInterfaceMap[appName][url] = clas;
 						pathvec.push_back(appName);
-						string usrincludes = defpath + "include/";
+						std::string usrincludes = defpath + "include/";
 						vecvp.push_back(usrincludes);
 						stat.push_back(false);
 						ajintpthMap[clas] = url;
 						afcd.push_back(clas);
-						logger << ("Adding Ajax Interface for " + (appName+url) + " :: " + clas) << endl;
+						logger << ("Adding Ajax Interface for " + (appName+url) + " :: " + clas) << std::endl;
 						isJsObjects = true;
 					}
 					else
 					{
-						logger << ("Skipping Ajax Interface as path contains */regex function") << endl;
+						logger << ("Skipping Ajax Interface as path contains */regex function") << std::endl;
 					}
 				}
 			}
 			else if(cs.markers.find("@Filter")!=cs.markers.end())
 			{
-				vector<Marker> filters = cs.markers["@Filter"];
+				std::vector<Marker> filters = cs.markers["@Filter"];
 				for (int var = 0; var < (int)filters.size(); ++var) {
-					string url = filters.at(var).getAttributeValue("path");
+					std::string url = filters.at(var).getAttributeValue("path");
 					if(StringUtil::trimCopy(url)=="")
 					{
-						logger << ("No path defined for Filter, skipping...") << endl;
+						logger << ("No path defined for Filter, skipping...") << std::endl;
 						continue;
 					}
-					string clas = cs.getFullyQualifiedClassName();
-					string type = filters.at(var).getAttributeValue("type");
-					string scope = filters.at(var).getAttributeValue("scope");
+					std::string clas = cs.getFullyQualifiedClassName();
+					std::string type = filters.at(var).getAttributeValue("type");
+					std::string scope = filters.at(var).getAttributeValue("scope");
 					if(clas!="" && (type=="in" || type=="out" || type=="handle"))
 					{
 						if(url=="")url="*.*";
@@ -1818,23 +1818,23 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 							Bean bean("filter_"+clas,"",clas,scope,false,appName);
 							ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 						}
-						logger << ("Adding Filter for " + (appName + url + type) + " :: " + clas) << endl;
+						logger << ("Adding Filter for " + (appName + url + type) + " :: " + clas) << std::endl;
 					}
 				}
 			}
 			else if(cs.markers.find("@Template")!=cs.markers.end())
 			{
-				vector<Marker> templates = cs.markers["@Template"];
+				std::vector<Marker> templates = cs.markers["@Template"];
 				for (int var = 0; var < (int)templates.size(); ++var) {
-					string clas = cs.getFullyQualifiedClassName();
-					string url = templates.at(var).getAttributeValue("path");
-					string file = StringUtil::trimCopy(templates.at(var).getAttributeValue("file"));
+					std::string clas = cs.getFullyQualifiedClassName();
+					std::string url = templates.at(var).getAttributeValue("path");
+					std::string file = StringUtil::trimCopy(templates.at(var).getAttributeValue("file"));
 					if(StringUtil::trimCopy(url)=="")
 					{
-						logger << ("No path defined for Template, skipping...") << endl;
+						logger << ("No path defined for Template, skipping...") << std::endl;
 						continue;
 					}
-					if(url.find("*")==string::npos && url.find("regex(")==string::npos)
+					if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 					{
 						if(url=="")
 							url = "/";
@@ -1842,40 +1842,40 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 							url = "/" + url;
 						url = "/" + appName + "/" + url;
 						RegexUtil::replace(url,"[/]+","/");
-						string fpath = defpath+"/tpe/"+file;
+						std::string fpath = defpath+"/tpe/"+file;
 						RegexUtil::replace(fpath,"[/]+","/");
-						string wbpi = fpath;
+						std::string wbpi = fpath;
 						StringUtil::replaceFirst(wbpi, ConfigurationData::getInstance()->coreServerProperties.webPath, "");
 						RegexUtil::replace(wbpi,"[^a-zA-Z0-9_]+","");
 						ConfigurationData::getInstance()->templateMappingMap[appName][url] = clas+";"+wbpi;
 						tpes[fpath] = appName;
 						//tpes.push_back(defpath+tmplts.at(tmpn).getAttribute("file"));
-						string scope = templates.at(var).getAttributeValue("scope");
+						std::string scope = templates.at(var).getAttributeValue("scope");
 						if(clas!="")
 						{
 							Bean bean("template_"+clas,"",clas,scope,false,appName);
 							ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 						}
-						logger << ("Adding Template for " + (url) + " :: " + clas) << endl;
+						logger << ("Adding Template for " + (url) + " :: " + clas) << std::endl;
 					}
 					else
 					{
-						logger << ("Skipping Template as path contains */regex function") << endl;
+						logger << ("Skipping Template as path contains */regex function") << std::endl;
 					}
 				}
 			}
 			else if(cs.markers.find("@WebSocketHandler")!=cs.markers.end())
 			{
-				vector<Marker> templates = cs.markers["@WebSocketHandler"];
+				std::vector<Marker> templates = cs.markers["@WebSocketHandler"];
 				for (int var = 0; var < (int)templates.size(); ++var) {
-					string clas = cs.getFullyQualifiedClassName();
-					string url = StringUtil::trimCopy(templates.at(var).getAttributeValue("path"));
+					std::string clas = cs.getFullyQualifiedClassName();
+					std::string url = StringUtil::trimCopy(templates.at(var).getAttributeValue("path"));
 					if(StringUtil::trimCopy(url)=="")
 					{
-						logger << ("No path defined for WebSocketHandler, skipping...") << endl;
+						logger << ("No path defined for WebSocketHandler, skipping...") << std::endl;
 						continue;
 					}
-					if(url.find("*")==string::npos && url.find("regex(")==string::npos)
+					if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 					{
 						if(url=="")
 							url = "/";
@@ -1884,53 +1884,53 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 						url = "/" + appName + "/" + url;
 						RegexUtil::replace(url,"[/]+","/");
 						ConfigurationData::getInstance()->websocketMappingMap[appName][url] = clas;
-						string scope = templates.at(var).getAttributeValue("scope");
+						std::string scope = templates.at(var).getAttributeValue("scope");
 						if(clas!="")
 						{
 							Bean bean("websocketclass_"+clas,"",clas,scope,false,appName);
 							ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 						}
-						logger << ("Adding WebSocketHandler for " + (url) + " :: " + clas) << endl;
+						logger << ("Adding WebSocketHandler for " + (url) + " :: " + clas) << std::endl;
 					}
 					else
 					{
-						logger << ("Skipping WebSocketHandler as path contains */regex function") << endl;
+						logger << ("Skipping WebSocketHandler as path contains */regex function") << std::endl;
 					}
 				}
 			}
 			else if(cs.markers.find("@Dview")!=cs.markers.end())
 			{
-				vector<Marker> dviews = cs.markers["@Dview"];
+				std::vector<Marker> dviews = cs.markers["@Dview"];
 				for (int var = 0; var < (int)dviews.size(); ++var) {
-					string clas = cs.getFullyQualifiedClassName();
-					string path = dviews.at(var).getAttributeValue("path");
+					std::string clas = cs.getFullyQualifiedClassName();
+					std::string path = dviews.at(var).getAttributeValue("path");
 					if(StringUtil::trimCopy(path)=="")
 					{
-						logger << ("No path defined for Dview, skipping...") << endl;
+						logger << ("No path defined for Dview, skipping...") << std::endl;
 						continue;
 					}
 					ConfigurationData::getInstance()->viewMappingMap[appName][path] = clas;
-					string scope = dviews.at(var).getAttributeValue("scope");
+					std::string scope = dviews.at(var).getAttributeValue("scope");
 					if(clas!="")
 					{
 						Bean bean("dview_"+clas,"",clas,scope,false,appName);
 						ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 					}
-					logger << ("Adding Dynamic View for " + (appName+path) + " :: " + clas) << endl;
+					logger << ("Adding Dynamic View for " + (appName+path) + " :: " + clas) << std::endl;
 				}
 			}
 		}
 
 		if(isJsObjects)
 		{
-			string infjs;
+			std::string infjs;
 			ajrt += AfcUtil::generateJsInterfacessAll(it->second,infjs,ajintpthMap,afcd,ref);
-			string objs = AfcUtil::generateJsObjectsAll(it->second);
+			std::string objs = AfcUtil::generateJsObjectsAll(it->second);
 			vecvp.clear();
 			afcd.clear();
 			pathvec.clear();
 			ajintpthMap.clear();
-			string webpubpath = serverRootDirectory + "/web/" + appName + "/public/";
+			std::string webpubpath = serverRootDirectory + "/web/" + appName + "/public/";
 
 			AfcUtil::writeTofile(webpubpath+"_afc_Objects.js",objs,true);
 			AfcUtil::writeTofile(webpubpath+"_afc_Interfaces.js",infjs,true);
@@ -1938,63 +1938,63 @@ void ConfigurationHandler::handleMarkerConfigurations(map<string, map<string, Cl
 	}
 }
 
-void ConfigurationHandler::handleDataSourceEntities(const string& appName, map<string, Mapping>& mappings, map<string, ClassStructure>& allclsmap)
+void ConfigurationHandler::handleDataSourceEntities(const std::string& appName, std::map<std::string, Mapping>& mappings, std::map<std::string, ClassStructure>& allclsmap)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 
-	map<string, ClassStructure>::iterator itt;
+	std::map<std::string, ClassStructure>::iterator itt;
 	for (itt=allclsmap.begin();itt!=allclsmap.end();++itt) {
 		ClassStructure cs = itt->second;
-		string clas = cs.getFullyQualifiedClassName();
+		std::string clas = cs.getFullyQualifiedClassName();
 		if(cs.markers.find("@Entity")!=cs.markers.end() && cs.markers.find("@Table")!=cs.markers.end())
 		{
-			cout << "Entity " << clas << endl;
+			std::cout << "Entity " << clas << std::endl;
 			DataSourceEntityMapping dsempg;
 			dsempg.className = clas;
-			vector<Marker> entityv = cs.markers["@Entity"];
-			vector<Marker> tablev = cs.markers["@Table"];
+			std::vector<Marker> entityv = cs.markers["@Entity"];
+			std::vector<Marker> tablev = cs.markers["@Table"];
 
 			if(entityv.size()>1)
 			{
-				logger << ("Found more than one @Entity marker, only the last defined marker will be considered, ignoring others..") << endl;
+				logger << ("Found more than one @Entity marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 			}
 
 			if(tablev.size()>1)
 			{
-				logger << ("Found more than one @Entity marker, only the last defined marker will be considered, ignoring others..") << endl;
+				logger << ("Found more than one @Entity marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 			}
 
 			Marker mentity = entityv.at(entityv.size()-1);
 			Marker mtable = tablev.at(tablev.size()-1);
 
-			string tablename = mtable.getAttributeValue("name");
+			std::string tablename = mtable.getAttributeValue("name");
 			if(StringUtil::trimCopy(tablename)=="")
 			{
-				logger << ("No table name defined for Table, skipping...") << endl;
+				logger << ("No table name defined for Table, skipping...") << std::endl;
 				continue;
 			}
-			string dataSourceName = mentity.getAttributeValue("dataSourceName");
+			std::string dataSourceName = mentity.getAttributeValue("dataSourceName");
 			dsempg.tableName = tablename;
 			bool idfound = false;
 			bool skipIt = false;
-			vector<PropStructure> csaps = cs.getAllProps();
+			std::vector<PropStructure> csaps = cs.getAllProps();
 			for (int var = 0; var < (int)csaps.size(); ++var) {
-				cout << "Property " << csaps.at(var).name << endl;
-				map<string, vector<Marker> >::iterator piit;
+				std::cout << "Property " << csaps.at(var).name << std::endl;
+				std::map<std::string, std::vector<Marker> >::iterator piit;
 				for (piit=csaps.at(var).markers.begin();piit!=csaps.at(var).markers.end();++piit) {
-					vector<Marker> miit = piit->second;
+					std::vector<Marker> miit = piit->second;
 					for(int mi=0;mi<(int)miit.size();mi++) {
-						cout << miit.at(mi).name << endl;
+						std::cout << miit.at(mi).name << std::endl;
 					}
 				}
 				if(csaps.at(var).markers.find("@Column")!=csaps.at(var).markers.end())
 				{
 					if(csaps.at(var).markers["@Column"].size()>1)
 					{
-						logger << ("Found more than one @Column marker, only the last defined marker will be considered, ignoring others..") << endl;
+						logger << ("Found more than one @Column marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 					}
 					Marker colmrk = csaps.at(var).markers["@Column"].at(csaps.at(var).markers["@Column"].size()-1);
-					string dbf = colmrk.getAttributeValue("dbf");
+					std::string dbf = colmrk.getAttributeValue("dbf");
 					if(dbf=="")dbf = csaps.at(var).name;
 					dsempg.addPropertyColumnMapping(csaps.at(var).name, dbf);
 				}
@@ -2002,11 +2002,11 @@ void ConfigurationHandler::handleDataSourceEntities(const string& appName, map<s
 				{
 					if(csaps.at(var).markers["@Id"].size()>1)
 					{
-						logger << ("Found more than one @Id marker, only the last defined marker will be considered, ignoring others..") << endl;
+						logger << ("Found more than one @Id marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 					}
 					if(!idfound) {
 						Marker colmrk = csaps.at(var).markers["@Id"].at(csaps.at(var).markers["@Id"].size()-1);
-						string dbf = colmrk.getAttributeValue("dbf");
+						std::string dbf = colmrk.getAttributeValue("dbf");
 						if(dbf=="")dbf = csaps.at(var).name;
 						dsempg.addPropertyColumnMapping(csaps.at(var).name, dbf);
 						dsempg.idPropertyName = csaps.at(var).name;
@@ -2015,7 +2015,7 @@ void ConfigurationHandler::handleDataSourceEntities(const string& appName, map<s
 						{
 							if(csaps.at(var).markers["@IdGenerate"].size()>1)
 							{
-								logger << ("Found more than one @IdGenerate marker, only the last defined marker will be considered, ignoring others..") << endl;
+								logger << ("Found more than one @IdGenerate marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 							}
 							colmrk = csaps.at(var).markers["@IdGenerate"].at(csaps.at(var).markers["@IdGenerate"].size()-1);
 							dsempg.idgendbEntityType = colmrk.getAttributeValue("dbEntityType");
@@ -2028,7 +2028,7 @@ void ConfigurationHandler::handleDataSourceEntities(const string& appName, map<s
 							if(dsempg.idgencolumnName=="")dsempg.idgencolumnName = csaps.at(var).name;
 						}
 					} else {
-						logger << ("Multiple Id properties defined, skipping...") << endl;
+						logger << ("Multiple Id properties defined, skipping...") << std::endl;
 						skipIt = true;
 						break;
 					}
@@ -2038,14 +2038,14 @@ void ConfigurationHandler::handleDataSourceEntities(const string& appName, map<s
 				{
 					if(csaps.at(var).markers["@HasOne"].size()>1)
 					{
-						logger << ("Found more than one @HasOne marker, only the last defined marker will be considered, ignoring others..") << endl;
+						logger << ("Found more than one @HasOne marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 					}
 					Marker colmrk = csaps.at(var).markers["@HasOne"].at(csaps.at(var).markers["@HasOne"].size()-1);
-					string dfk = colmrk.getAttributeValue("dfk");
-					string dmappedBy = colmrk.getAttributeValue("dmappedBy");
+					std::string dfk = colmrk.getAttributeValue("dfk");
+					std::string dmappedBy = colmrk.getAttributeValue("dmappedBy");
 					if(StringUtil::trimCopy(dfk)=="" || StringUtil::trimCopy(dmappedBy)=="")
 					{
-						logger << ("No dfk/dmappedBy defined for HasOne marker, both need to be defined, skipping...") << endl;
+						logger << ("No dfk/dmappedBy defined for HasOne marker, both need to be defined, skipping...") << std::endl;
 						continue;
 					}
 					DataSourceInternalRelation relation;
@@ -2060,29 +2060,29 @@ void ConfigurationHandler::handleDataSourceEntities(const string& appName, map<s
 				{
 					if(csaps.at(var).markers["@HasMany"].size()>1)
 					{
-						logger << ("Found more than one @HasMany marker, only the last defined marker will be considered, ignoring others..") << endl;
+						logger << ("Found more than one @HasMany marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 					}
 					Marker colmrk = csaps.at(var).markers["@HasMany"].at(csaps.at(var).markers["@HasMany"].size()-1);
-					string dfk = colmrk.getAttributeValue("dfk");
-					string dmappedBy = colmrk.getAttributeValue("dmappedBy");
+					std::string dfk = colmrk.getAttributeValue("dfk");
+					std::string dmappedBy = colmrk.getAttributeValue("dmappedBy");
 					if(StringUtil::trimCopy(dfk)=="" || StringUtil::trimCopy(dmappedBy)=="")
 					{
-						logger << ("No dfk/dmappedBy defined for HasMany marker, both need to be defined, skipping...") << endl;
+						logger << ("No dfk/dmappedBy defined for HasMany marker, both need to be defined, skipping...") << std::endl;
 						continue;
 					}
 
-					string mtype = csaps.at(var).type;
-					if(mtype.find("vector<")==string::npos || mtype.find("std::vector<")==string::npos)
+					std::string mtype = csaps.at(var).type;
+					if(mtype.find("vector<")==std::string::npos || mtype.find("std::vector<")==std::string::npos)
 					{
-						logger << ("HasMany association can have only a stl vector mapping, skipping...") << endl;
+						logger << ("HasMany association can have only a stl vector mapping, skipping...") << std::endl;
 						continue;
 					}
 
 					StringUtil::replaceFirst(mtype,"std::","");
 					StringUtil::replaceFirst(mtype,"vector<","");
-					if(mtype.find(",")!=string::npos)
+					if(mtype.find(",")!=std::string::npos)
 						mtype = mtype.substr(0,mtype.find(","));
-					else if(mtype.find(">")!=string::npos)
+					else if(mtype.find(">")!=std::string::npos)
 						mtype = mtype.substr(0,mtype.find(">"));
 
 					DataSourceInternalRelation relation;
@@ -2103,16 +2103,16 @@ void ConfigurationHandler::handleDataSourceEntities(const string& appName, map<s
 						Mapping mp = mappings[dataSourceName];
 						mp.addDataSourceEntityMapping(dsempg);
 						mappings[dataSourceName] = mp;
-						cout << "adding mapping for dsn " << dataSourceName << ", app is " << appName << endl;
+						std::cout << "adding mapping for dsn " << dataSourceName << ", app is " << appName << std::endl;
 					}
 					else
 					{
-						map<string, Mapping>::iterator it;
+						std::map<std::string, Mapping>::iterator it;
 						for(it=mappings.begin();it!=mappings.end();++it)
 						{
 							if(it->second.appName==appName)
 							{
-								cout << "adding mapping for dsn " << it->first << ", app is " << appName << endl;
+								std::cout << "adding mapping for dsn " << it->first << ", app is " << appName << std::endl;
 								Mapping mp = it->second;
 								mp.addDataSourceEntityMapping(dsempg);
 								mappings[it->first] = mp;
@@ -2122,7 +2122,7 @@ void ConfigurationHandler::handleDataSourceEntities(const string& appName, map<s
 				}
 				else
 				{
-					logger << ("No Id column specified, skipping...") << endl;
+					logger << ("No Id column specified, skipping...") << std::endl;
 					continue;
 				}
 			}
@@ -2130,14 +2130,14 @@ void ConfigurationHandler::handleDataSourceEntities(const string& appName, map<s
 	}
 }
 
-Marker ConfigurationHandler::getRestFunctionMarker(map<string, vector<Marker> >& markers)
+Marker ConfigurationHandler::getRestFunctionMarker(std::map<std::string, std::vector<Marker> >& markers)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	if(markers.find("@GET")!=markers.end())
 	{
 		if(markers["@GET"].size()>1)
 		{
-			logger << ("Found more than one @GET marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @GET marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
 		return markers["@GET"].at(markers["@GET"].size()-1);
 	}
@@ -2145,7 +2145,7 @@ Marker ConfigurationHandler::getRestFunctionMarker(map<string, vector<Marker> >&
 	{
 		if(markers["@POST"].size()>1)
 		{
-			logger << ("Found more than one @POST marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @POST marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
 		return markers["@POST"].at(markers["@POST"].size()-1);
 	}
@@ -2153,7 +2153,7 @@ Marker ConfigurationHandler::getRestFunctionMarker(map<string, vector<Marker> >&
 	{
 		if(markers["@PUT"].size()>1)
 		{
-			logger << ("Found more than one @PUT marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @PUT marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
 		return markers["@PUT"].at(markers["@PUT"].size()-1);
 	}
@@ -2161,21 +2161,21 @@ Marker ConfigurationHandler::getRestFunctionMarker(map<string, vector<Marker> >&
 	{
 		if(markers["@DELETE"].size()>1)
 		{
-			logger << ("Found more than one @DELETE marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @DELETE marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
 		return markers["@DELETE"].at(markers["@DELETE"].size()-1);
 	}
 	return Marker();
 }
 
-Marker ConfigurationHandler::getRestFunctionParamMarker(map<string, vector<Marker> >& markers)
+Marker ConfigurationHandler::getRestFunctionParamMarker(std::map<std::string, std::vector<Marker> >& markers)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	if(markers.find("@PathParam")!=markers.end())
 	{
 		if(markers["@PathParam"].size()>1)
 		{
-			logger << ("Found more than one @PathParam marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @PathParam marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
 		return markers["@PathParam"].at(markers["@PathParam"].size()-1);
 	}
@@ -2183,7 +2183,7 @@ Marker ConfigurationHandler::getRestFunctionParamMarker(map<string, vector<Marke
 	{
 		if(markers["@QueryParam"].size()>1)
 		{
-			logger << ("Found more than one @QueryParam marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @QueryParam marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
 		return markers["@QueryParam"].at(markers["@QueryParam"].size()-1);
 	}
@@ -2191,7 +2191,7 @@ Marker ConfigurationHandler::getRestFunctionParamMarker(map<string, vector<Marke
 	{
 		if(markers["@FormParam"].size()>1)
 		{
-			logger << ("Found more than one @FormParam marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @FormParam marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
 		return markers["@FormParam"].at(markers["@FormParam"].size()-1);
 	}
@@ -2199,7 +2199,7 @@ Marker ConfigurationHandler::getRestFunctionParamMarker(map<string, vector<Marke
 	{
 		if(markers["@HeaderParam"].size()>1)
 		{
-			logger << ("Found more than one @HeaderParam marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @HeaderParam marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
 		return markers["@HeaderParam"].at(markers["@HeaderParam"].size()-1);
 	}
@@ -2207,7 +2207,7 @@ Marker ConfigurationHandler::getRestFunctionParamMarker(map<string, vector<Marke
 	{
 		if(markers["@Body"].size()>1)
 		{
-			logger << ("Found more than one @Body marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @Body marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
 		return markers["@Body"].at(markers["@Body"].size()-1);
 	}
@@ -2215,24 +2215,24 @@ Marker ConfigurationHandler::getRestFunctionParamMarker(map<string, vector<Marke
 	{
 		if(markers["@MultipartContent"].size()>1)
 		{
-			logger << ("Found more than one @MultipartContent marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @MultipartContent marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
 		return markers["@MultipartContent"].at(markers["@MultipartContent"].size()-1);
 	}
 	return Marker();
 }
 
-void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const string& appName)
+void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const std::string& appName)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	Marker restcnt = cs.markers["@RestController"].at(cs.markers["@RestController"].size()-1);
 	if(cs.markers["@RestController"].size()>1)
 	{
-		logger << ("Found more than one @RestController marker, only the last defined marker will be considered, ignoring others..") << endl;
+		logger << ("Found more than one @RestController marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 	}
-	string url = restcnt.getAttributeValue("path");
-	string scope = restcnt.getAttributeValue("scope");
-	string clas = cs.getFullyQualifiedClassName();
+	std::string url = restcnt.getAttributeValue("path");
+	std::string scope = restcnt.getAttributeValue("scope");
+	std::string clas = cs.getFullyQualifiedClassName();
 	StringUtil::trim(url);
 
 	bool isClasSecure = false;
@@ -2245,7 +2245,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 		bool valid = true;
 		if(StringUtil::trimCopy(aspect.role)=="")
 		{
-			logger << ("No role defined for Secure path, skipping...") << endl;
+			logger << ("No role defined for Secure path, skipping...") << std::endl;
 			valid = false;
 		}
 		if(url.at(url.length()-1)!='/')
@@ -2255,12 +2255,12 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 		aspect.path += "*";
 		if(cs.markers["@Secure"].size()>1)
 		{
-			logger << ("Found more than one @Secure marker, only the last defined marker will be considered, ignoring others..") << endl;
+			logger << ("Found more than one @Secure marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 		}
-		string provName = cs.markers["@Secure"].at(totl-1).getAttributeValue("providerName");
+		std::string provName = cs.markers["@Secure"].at(totl-1).getAttributeValue("providerName");
 		if(StringUtil::trimCopy(provName)=="")
 		{
-			logger << ("No providerName defined for Secure path, skipping...") << endl;
+			logger << ("No providerName defined for Secure path, skipping...") << std::endl;
 			valid = false;
 		}
 		if(valid && ConfigurationData::getInstance()->securityObjectMap[appName].find(provName)
@@ -2271,12 +2271,12 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 			{
 				ConfigurationData::getInstance()->securityObjectMap[appName][provName] = securityObject;
 				isClasSecure = true;
-				logger << ("Security: Adding Secure Path => " + aspect.path  + " , role => " + aspect.role) << endl;
+				logger << ("Security: Adding Secure Path => " + aspect.path  + " , role => " + aspect.role) << std::endl;
 			}
 		}
 		else if(valid)
 		{
-			logger << ("Security Provider " + provName + " not found, skipping...") << endl;
+			logger << ("Security Provider " + provName + " not found, skipping...") << std::endl;
 		}
 	}
 
@@ -2293,7 +2293,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 				try {
 					CastUtil::lexical_cast<int>(restfunction.statusCode);
 				} catch(...) {
-					logger << "Rest: invalid response statusCode specified, defaulting to 200.." << endl;
+					logger << "Rest: invalid response statusCode specified, defaulting to 200.." << std::endl;
 					restfunction.statusCode = "200";
 				}
 			}
@@ -2302,8 +2302,8 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 			restfunction.icontentType = m.getAttributeValue("icontentType");
 			restfunction.ocontentType = m.getAttributeValue("ocontentType");
 
-			map<int, map<string, vector<Marker> > > argMarkers = cs.pubms.at(var).argMarkers;
-			map<int, map<string, vector<Marker> > >::iterator pit;
+			std::map<int, std::map<std::string, std::vector<Marker> > > argMarkers = cs.pubms.at(var).argMarkers;
+			std::map<int, std::map<std::string, std::vector<Marker> > >::iterator pit;
 			bool hasBodyParam = false, invalidParam = false;
 			for (pit=argMarkers.begin();pit!=argMarkers.end();++pit)
 			{
@@ -2322,8 +2322,8 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 						|| param.type.find("std::set<")==0 || param.type.find("set<")==0
 						|| param.type.find("std::multiset<")==0 || param.type.find("multiset<")==0)
 				{
-					string tmpltyp = param.type.substr(0, param.type.find("<"));
-					string typ = param.type;
+					std::string tmpltyp = param.type.substr(0, param.type.find("<"));
+					std::string typ = param.type;
 					StringUtil::replaceFirst(typ, tmpltyp+"<", "");
 					StringUtil::replaceFirst(typ, ">", "");
 
@@ -2357,10 +2357,10 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 
 				if(pit->second.find("@DefaultValue")!=pit->second.end())
 				{
-					vector<Marker> defmarkers = pit->second["@DefaultValue"];
+					std::vector<Marker> defmarkers = pit->second["@DefaultValue"];
 					if(defmarkers.size()>1)
 					{
-						logger << ("Found more than one @DefaultValue marker, only the last defined marker will be considered, ignoring others..") << endl;
+						logger << ("Found more than one @DefaultValue marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 					}
 					if(defmarkers.at(defmarkers.size()-1).getAttributeValue("value")!="")
 					{
@@ -2375,7 +2375,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 				if(StringUtil::trimCopy(param.type)=="")
 				{
 					invalidParam = true;
-					logger << "Rest: no type specified for param" << endl;
+					logger << "Rest: no type specified for param" << std::endl;
 				}
 				else if((param.type=="filestream" || param.type=="vector-of-filestream") && param.from!="multipart-content")
 				{
@@ -2389,26 +2389,26 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 				else if(param.from!="body" && StringUtil::trimCopy(param.name)=="")
 				{
 					invalidParam = true;
-					logger << "Rest: no name specified for param" << endl;
+					logger << "Rest: no name specified for param" << std::endl;
 				}
 				else if(param.from=="body" && (restfunction.meth=="GET" || restfunction.meth=="OPTIONS" || restfunction.meth=="TRACE"
 						|| restfunction.meth=="HEAD"))
 				{
 					invalidParam = true;
-					logger << ("Rest: skipping param " + param.type + ", from is body and method is " + restfunction.meth) << endl;
+					logger << ("Rest: skipping param " + param.type + ", from is body and method is " + restfunction.meth) << std::endl;
 				}
 				else if(!(param.type=="int" || param.type=="short" || param.type=="long" || param.type=="float" || param.type=="string"
-						|| param.type=="std::string" || param.type=="double" || param.type=="bool"
-								|| param.type=="filestream" || param.type=="vector-of-filestream") && param.from!="body")
+						|| param.type=="long long" || param.type=="std::string" || param.type=="double" || param.type=="bool"
+						|| param.type=="filestream" || param.type=="vector-of-filestream") && param.from!="body")
 				{
 					invalidParam = true;
-					logger << ("Rest: skipping param " + param.type + ", from is not body and input is a complex type") << endl;
+					logger << ("Rest: skipping param " + param.type + ", from is not body and input is a complex type") << std::endl;
 				}
 				else if(param.from=="postparam" && (restfunction.meth=="GET" || restfunction.meth=="OPTIONS" || restfunction.meth=="TRACE"
 						|| restfunction.meth=="HEAD"))
 				{
 					invalidParam = true;
-					logger << ("Rest: skipping param " + param.type + ", from is postparam and method is " + restfunction.meth) << endl;
+					logger << ("Rest: skipping param " + param.type + ", from is postparam and method is " + restfunction.meth) << std::endl;
 				}
 				if(!invalidParam)
 				{
@@ -2418,20 +2418,20 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 
 			if(hasBodyParam && restfunction.params.size()>1)
 			{
-				logger << ("Rest: skipping method " + restfunction.meth + " as only one argument allowed of type body") << endl;
+				logger << ("Rest: skipping method " + restfunction.meth + " as only one argument allowed of type body") << std::endl;
 				continue;
 			}
 			if(invalidParam)
 			{
 				continue;
 			}
-			if(clas!="" && url.find("*")==string::npos)
+			if(clas!="" && url.find("*")==std::string::npos)
 			{
 				if(url=="")
 					url = "/" + clas;
 				else if(url.at(0)!='/')
 					url = "/" + url;
-				string urlmpp;
+				std::string urlmpp;
 				if(restfunction.path!="")
 				{
 					urlmpp = "/"+appName+url+"/"+restfunction.path;
@@ -2462,20 +2462,20 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 					bool valid = true;
 					if(StringUtil::trimCopy(aspect.role)=="")
 					{
-						logger << ("No role defined for Secure path, skipping...") << endl;
+						logger << ("No role defined for Secure path, skipping...") << std::endl;
 						valid = false;
 					}
 					aspect.path = urlmpp;
-					string provName = cs.pubms.at(var).markers["@Secure"].at(totl-1).getAttributeValue("providerName");
+					std::string provName = cs.pubms.at(var).markers["@Secure"].at(totl-1).getAttributeValue("providerName");
 					if(StringUtil::trimCopy(provName)=="")
 					{
-						logger << ("No providerName defined for Secure path, skipping...") << endl;
+						logger << ("No providerName defined for Secure path, skipping...") << std::endl;
 						valid = false;
 					}
 
 					if(cs.pubms.at(var).markers["@Secure"].size()>1)
 					{
-						logger << ("Found more than one @Secure marker, only the last defined marker will be considered, ignoring others..") << endl;
+						logger << ("Found more than one @Secure marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 					}
 
 					if(valid && ConfigurationData::getInstance()->securityObjectMap[appName].find(provName)
@@ -2485,15 +2485,15 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 						if(securityObject.addAspect(aspect))
 						{
 							ConfigurationData::getInstance()->securityObjectMap[appName][provName] = securityObject;
-							logger << ("Security: Adding Secure Path => " + aspect.path  + " , role => " + aspect.role) << endl;
+							logger << ("Security: Adding Secure Path => " + aspect.path  + " , role => " + aspect.role) << std::endl;
 						}
 					}
 					else if(valid)
 					{
-						logger << ("Security Provider " + provName + " not found, skipping...") << endl;
+						logger << ("Security Provider " + provName + " not found, skipping...") << std::endl;
 					}
 				}
-				logger << ("Rest: Adding rest-controller => " + urlmpp  + " , class => " + clas) << endl;
+				logger << ("Rest: Adding rest-controller => " + urlmpp  + " , class => " + clas) << std::endl;
 			}
 		}
 	}
@@ -2501,19 +2501,19 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 
 void ConfigurationHandler::initializeDataSources()
 {
-	map<string, bool> mycntxts = ConfigurationData::getInstance()->servingContexts;
-	map<string, map<string, ConnectionProperties> > sdormConnProperties = ConfigurationData::getInstance()->sdormConnProperties;
-	map<string, map<string, Mapping> > sdormEntityMappings = ConfigurationData::getInstance()->sdormEntityMappings;
-	map<string, bool>::iterator mit;
+	std::map<std::string, bool> mycntxts = ConfigurationData::getInstance()->servingContexts;
+	std::map<std::string, std::map<std::string, ConnectionProperties> > sdormConnProperties = ConfigurationData::getInstance()->sdormConnProperties;
+	std::map<std::string, std::map<std::string, Mapping> > sdormEntityMappings = ConfigurationData::getInstance()->sdormEntityMappings;
+	std::map<std::string, bool>::iterator mit;
 	for (mit=mycntxts.begin();mit!=mycntxts.end();++mit) {
-		map<string, ConnectionProperties>::iterator it;
+		std::map<std::string, ConnectionProperties>::iterator it;
 		if(sdormConnProperties.find(mit->first)!=sdormConnProperties.end())
 		{
-			cout << "app for ds is " << mit->first << endl;
-			map<string, ConnectionProperties> allProps = sdormConnProperties[mit->first];
-			map<string, Mapping> allMapps = sdormEntityMappings[mit->first];
+			std::cout << "app for ds is " << mit->first << std::endl;
+			std::map<std::string, ConnectionProperties> allProps = sdormConnProperties[mit->first];
+			std::map<std::string, Mapping> allMapps = sdormEntityMappings[mit->first];
 			for (it=allProps.begin();it!=allProps.end();++it) {
-				cout << "ds is " << it->first << endl;
+				std::cout << "ds is " << it->first << std::endl;
 				DataSourceManager::initDSN(allProps[it->first], allMapps[it->first]);
 			}
 		}
@@ -2522,14 +2522,14 @@ void ConfigurationHandler::initializeDataSources()
 
 void ConfigurationHandler::initializeCaches()
 {
-	map<string, bool> mycntxts = ConfigurationData::getInstance()->servingContexts;
-	map<string, map<string, ConnectionProperties> > cacheConnProperties = ConfigurationData::getInstance()->cacheConnProperties;
-	map<string, bool>::iterator mit;
+	std::map<std::string, bool> mycntxts = ConfigurationData::getInstance()->servingContexts;
+	std::map<std::string, std::map<std::string, ConnectionProperties> > cacheConnProperties = ConfigurationData::getInstance()->cacheConnProperties;
+	std::map<std::string, bool>::iterator mit;
 	for (mit=mycntxts.begin();mit!=mycntxts.end();++mit) {
 		if(cacheConnProperties.find(mit->first)!=cacheConnProperties.end())
 		{
-			map<string, ConnectionProperties> allProps = cacheConnProperties[mit->first];
-			map<string, ConnectionProperties>::iterator it;
+			std::map<std::string, ConnectionProperties> allProps = cacheConnProperties[mit->first];
+			std::map<std::string, ConnectionProperties>::iterator it;
 			for (it=allProps.begin();it!=allProps.end();++it) {
 				CacheManager::initCache(allProps[it->first], mit->first);
 			}
@@ -2541,13 +2541,13 @@ void ConfigurationHandler::initializeWsdls()
 {
 	Reflection ref;
 	WsUtil wsu;
-	map<string, bool> mycntxts = ConfigurationData::getInstance()->servingContexts;
-	map<string, vector<WsDetails> > webserviceDetailMap = ConfigurationData::getInstance()->webserviceDetailMap;
-	map<string, bool>::iterator mit;
+	std::map<std::string, bool> mycntxts = ConfigurationData::getInstance()->servingContexts;
+	std::map<std::string, std::vector<WsDetails> > webserviceDetailMap = ConfigurationData::getInstance()->webserviceDetailMap;
+	std::map<std::string, bool>::iterator mit;
 	for (mit=mycntxts.begin();mit!=mycntxts.end();++mit) {
 		if(webserviceDetailMap.find(mit->first)!=webserviceDetailMap.end())
 		{
-			vector<WsDetails> allwsdets = webserviceDetailMap[mit->first];
+			std::vector<WsDetails> allwsdets = webserviceDetailMap[mit->first];
 			wsu.generateAllWSDL(allwsdets, ConfigurationData::getInstance()->coreServerProperties.resourcePath,
 					ref, ConfigurationData::getInstance()->classStructureMap);
 		}

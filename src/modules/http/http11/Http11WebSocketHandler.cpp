@@ -7,19 +7,19 @@
 
 #include "Http11WebSocketHandler.h"
 
-Http11WebSocketHandler::Http11WebSocketHandler(const string& url, const bool& isServer, SocketUtil* sockUtil) {
+Http11WebSocketHandler::Http11WebSocketHandler(const std::string& url, const bool& isServer, SocketUtil* sockUtil) {
 	logger = LoggerFactory::getLogger("Http11WebSocketHandler");
 	this->sockUtil = sockUtil;
 	this->url = url;
 }
 
-string Http11WebSocketHandler::getUrl() {
+std::string Http11WebSocketHandler::getUrl() {
 	return this->url;
 }
 
 Http11WebSocketDataFrame Http11WebSocketHandler::readFrame() {
 	Http11WebSocketDataFrame frame;
-	vector<unsigned char> f2bytes;
+	std::vector<unsigned char> f2bytes;
 	if(!sockUtil->readData(2, f2bytes))
 	{
 		frame.opcode = 8;
@@ -36,7 +36,7 @@ Http11WebSocketDataFrame Http11WebSocketHandler::readFrame() {
 	frame.payloadLength = s & 0x7F;
 	unsigned long long dataLength = frame.payloadLength;
 	if(frame.payloadLength==126) {
-		vector<unsigned char> extdlenbytes;
+		std::vector<unsigned char> extdlenbytes;
 		if(!sockUtil->readData(2, extdlenbytes))
 		{
 			frame.opcode = 8;
@@ -45,7 +45,7 @@ Http11WebSocketDataFrame Http11WebSocketHandler::readFrame() {
 		frame.extendedPayloadLength = CommonUtils::charArrayToULongLong(extdlenbytes);
 		dataLength = frame.extendedPayloadLength;
 	} else if(frame.payloadLength==127) {
-		vector<unsigned char> extdlenbytes;
+		std::vector<unsigned char> extdlenbytes;
 		if(!sockUtil->readData(8, extdlenbytes))
 		{
 			frame.opcode = 8;
@@ -55,7 +55,7 @@ Http11WebSocketDataFrame Http11WebSocketHandler::readFrame() {
 		dataLength = frame.extendedPayloadLength;
 	}
 	if(frame.mask) {
-		vector<unsigned char> maskingbytes;
+		std::vector<unsigned char> maskingbytes;
 		if(!sockUtil->readData(4, maskingbytes))
 		{
 			frame.opcode = 8;
@@ -83,17 +83,17 @@ void Http11WebSocketHandler::replyPong() {
 	frame.opcode = 10;
 	frame.mask = false;
 	frame.payloadLength = 0;
-	string pong = frame.getFrameData();
+	std::string pong = frame.getFrameData();
 	//sockUtil->sendData(pong);
 }
 
-/*int WebSocket::doIt(const Reflector& reflector, void* _temp, const Method& method, const string& cntxtName) {
-	map<int, string> dataframes;
-	map<int, bool> dataframesComplete;
+/*int WebSocket::doIt(const Reflector& reflector, void* _temp, const Method& method, const std::string& cntxtName) {
+	std::map<int, std::string> dataframes;
+	std::map<int, bool> dataframesComplete;
 	while(true)
 	{
 		Http11WebSocketDataFrame frame = readFrame();
-		logger << "read new websocket frame " << frame.opcode << endl;
+		logger << "read new websocket frame " << frame.opcode << std::endl;
 		if(frame.opcode==8) {
 			return frame.opcode;
 		}
@@ -116,7 +116,7 @@ void Http11WebSocketHandler::replyPong() {
 			continue;
 		}
 
-		map<int, string>::iterator it;
+		std::map<int, std::string>::iterator it;
 		for(it=dataframes.begin();it!=dataframes.end();++it)
 		{
 			if(dataframesComplete[it->first])
@@ -134,11 +134,11 @@ void Http11WebSocketHandler::replyPong() {
 					{
 						writeData(data);
 					}
-					logger << "WebSocket Controller onMessage called" << endl;
+					logger << "WebSocket Controller onMessage called" << std::endl;
 				}
 				else
 				{
-					logger << "Invalid WebSocket Controller" << endl;
+					logger << "Invalid WebSocket Controller" << std::endl;
 				}
 
 				dataframes[it->first].clear();
@@ -170,7 +170,7 @@ Http11WebSocketHandler::~Http11WebSocketHandler() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http11WebSocketHandler::getProtocol(void* context) {
+std::string Http11WebSocketHandler::getProtocol(void* context) {
 	return "HTTP1.1WS";
 }
 
@@ -251,7 +251,7 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, void*
 		return false;
 	}
 
-	map<int, string>::iterator it;
+	std::map<int, std::string>::iterator it;
 	for(it=dataframes.begin();it!=dataframes.end();++it)
 	{
 		if(dataframesComplete[it->first])
@@ -260,7 +260,7 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, void*
 			wsd->data = dataframes[it->first];
 			wsd->dataType = frame->opcode;
 			request = wsd;
-			logger << "Message is " << wsd->data << endl;
+			logger << "Message is " << wsd->data << std::endl;
 			dataframes[it->first].clear();
 			dataframesComplete[it->first] = false;
 			break;

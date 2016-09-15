@@ -15,7 +15,7 @@ Http2FrameHeader::Http2FrameHeader() {
 	flags.reset();
 }
 
-bitset<8> Http2FrameHeader::getFlags() const {
+std::bitset<8> Http2FrameHeader::getFlags() const {
 	return flags;
 }
 

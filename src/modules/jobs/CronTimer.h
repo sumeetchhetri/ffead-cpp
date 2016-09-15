@@ -31,7 +31,7 @@
 #include "map"
 #include "Date.h"
 #include "CastUtil.h"
-using namespace std;
+
 
 class CronTimer {
 	class CronExpressionPart
@@ -40,9 +40,9 @@ class CronTimer {
 		int from;
 		int to;
 		int interval;
-		string list;
+		std::string list;
 		int nextRun;
-		vector<int> lstParts;
+		std::vector<int> lstParts;
 		friend class CronTimer;
 		CronExpressionPart()
 		{
@@ -53,15 +53,15 @@ class CronTimer {
 			nextRun = -1;
 		}
 	};
-	vector<CronExpressionPart> cParts;
+	std::vector<CronExpressionPart> cParts;
 	Date* nextRunDate;
-	vector<int> starts, ends, lstParts;
-	map<string, int> months, days;
+	std::vector<int> starts, ends, lstParts;
+	std::map<std::string, int> months, days;
 	friend class JobScheduler;
 public:
-	CronTimer(const string& cronExpression);
+	CronTimer(const std::string& cronExpression);
 	virtual ~CronTimer();
-	string toString();
+	std::string toString();
 	bool isValid(const int& pos, const int& cvalue, const int& nvalue);
 	void correctNextRunDateTime(const int& pos);
 	bool tryIncrement(const int& pos, const int& cvalue);

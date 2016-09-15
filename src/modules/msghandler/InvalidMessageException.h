@@ -24,11 +24,11 @@
 #define INVALIDMESSAGEEXCEPTION_H_
 #include "Exception.h"
 #include "string"
-using namespace std;
+
 
 class InvalidMessageException : public Exception {
 public:
-	InvalidMessageException(const string&);
+	InvalidMessageException(const std::string&);
 	virtual ~InvalidMessageException() throw();
 };
 

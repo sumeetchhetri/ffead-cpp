@@ -47,31 +47,31 @@
 
 #define MAXBUFLEN 1024
 #define BACKLOG 10
-typedef vector<unsigned char> Cont;
-using namespace std;
+typedef std::vector<unsigned char> Cont;
+
 class MessageHandler {
-	string path;
+	std::string path;
 	Logger logger;
 public:
-	MessageHandler(const string&);
+	MessageHandler(const std::string&);
 	~MessageHandler()
 	{
 	}
-	static void trigger(const string&, const string&);
+	static void trigger(const std::string&, const std::string&);
 	static void stop();
 	static MessageHandler* instance;
 private:
 	Server server;
 	bool running;
 	static void* service(void* arg);
-	static void init(const string&);
-	Message readMessageFromQ(const string& fileName, const bool& erase);
-	void writeMessageToQ(const Message& msg, const string& fileName);
-	bool tempUnSubscribe(const string& subs, const string& fileName);
-	Message readMessageFromT(const string& fileName, const string& subs);
-	void writeMessageToT(const Message& msg, const string& fileName);
-	void subscribe(const string& subs, string fileName);
-	void unSubscribe(const string& subs, string fileName);
+	static void init(const std::string&);
+	Message readMessageFromQ(const std::string& fileName, const bool& erase);
+	void writeMessageToQ(const Message& msg, const std::string& fileName);
+	bool tempUnSubscribe(const std::string& subs, const std::string& fileName);
+	Message readMessageFromT(const std::string& fileName, const std::string& subs);
+	void writeMessageToT(const Message& msg, const std::string& fileName);
+	void subscribe(const std::string& subs, std::string fileName);
+	void unSubscribe(const std::string& subs, std::string fileName);
 };
 
 #endif /* MESSAGEHANDLER_H_ */

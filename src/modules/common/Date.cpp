@@ -38,11 +38,11 @@ int Date::getDay() const {
 	return day;
 }
 
-const string& Date::getDayAbbr() const {
+const std::string& Date::getDayAbbr() const {
 	return dayAbbr;
 }
 
-const string& Date::getHourdesignation() const {
+const std::string& Date::getHourdesignation() const {
 	return hourdesignation;
 }
 
@@ -50,11 +50,11 @@ int Date::getMonth() const {
 	return month;
 }
 
-const string& Date::getMonthAbbr() const {
+const std::string& Date::getMonthAbbr() const {
 	return monthAbbr;
 }
 
-const string& Date::getMonthName() const {
+const std::string& Date::getMonthName() const {
 	return monthName;
 }
 
@@ -66,7 +66,7 @@ int Date::getPmHours() const {
 	return pmHours;
 }
 
-const string& Date::getTimeZone() const {
+const std::string& Date::getTimeZone() const {
 	return timeZone;
 }
 
@@ -117,14 +117,14 @@ void Date::populateEpochAndTimeZone(const bool& utc)
 	else
 		timeinfo = localtime(&rawtime);
 
-	string tem;
+	std::string tem;
 	char buffer[20];
 	//Sun May 11 02:03:25 2014 Sunday May 7 AM +0530 IST 02
 	strftime(buffer, 80, "%z %Z", timeinfo);
 	tem.append(buffer);
 	StringUtil::replaceAll(tem, "\n", "");
 	StringUtil::replaceAll(tem, "  ", " ");
-	vector<string> temp, vemp;
+	std::vector<std::string> temp, vemp;
 	StringUtil::split(temp, tem, (" "));
 	this->timeZoneOffset = (CastUtil::lexical_cast<float>(temp.at(0)) / (float)100);
 	this->timeZone = StringUtil::toUpperCopy(temp.at(1));
@@ -137,14 +137,14 @@ void Date::populateDateFields(struct tm* timeinfo)
 	this->epochTime = en.tv_sec;
 	this->nanoseconds = en.tv_nsec;
 
-	string tem;
+	std::string tem;
 	char buffer[80];
 	//Sun May 11 02:03:25 2014 Sunday May 7 AM +0530 IST 02
 	strftime(buffer, 80, "%a %b %d %T %Y %A %B %u %p %z %Z %I %m", timeinfo);
 	tem.append(buffer);
 	StringUtil::replaceAll(tem, "\n", "");
 	StringUtil::replaceAll(tem, "  ", " ");
-	vector<string> temp, vemp;
+	std::vector<std::string> temp, vemp;
 	StringUtil::split(temp, tem, (" "));
 	this->dayAbbr = StringUtil::toUpperCopy(temp.at(0));
 	this->monthAbbr = StringUtil::toUpperCopy(temp.at(1));
@@ -175,12 +175,12 @@ Date::~Date() {
 }
 
 
-string Date::toString()
+std::string Date::toString()
 {
-	return dayAbbr+" "+CastUtil::lexical_cast<string>(year)+" "+monthAbbr+" "+CastUtil::lexical_cast<string>(day)
-			+" "+CastUtil::lexical_cast<string>(hours)+":"+CastUtil::lexical_cast<string>(minutes)
-			+":"+CastUtil::lexical_cast<string>(seconds)+"."+CastUtil::lexical_cast<string>(nanoseconds)
-			+" "+CastUtil::lexical_cast<string>(timeZoneOffset);
+	return dayAbbr+" "+CastUtil::lexical_cast<std::string>(year)+" "+monthAbbr+" "+CastUtil::lexical_cast<std::string>(day)
+			+" "+CastUtil::lexical_cast<std::string>(hours)+":"+CastUtil::lexical_cast<std::string>(minutes)
+			+":"+CastUtil::lexical_cast<std::string>(seconds)+"."+CastUtil::lexical_cast<std::string>(nanoseconds)
+			+" "+CastUtil::lexical_cast<std::string>(timeZoneOffset);
 }
 
 Date Date::addSecondsGet(const double& seconds)
@@ -351,9 +351,9 @@ bool Date::validateDate(const int& dd, const int& mm, const int& yyyy)
 
 	if (mm < 1 || mm > 12)
 		error = false;
-	string mw31days = ",1,3,5,7,8,10,12,";
-	string mw30oldays =  ",4,6,9,11,";
-	string mtc = "," + CastUtil::lexical_cast<string>(mm) + ",";
+	std::string mw31days = ",1,3,5,7,8,10,12,";
+	std::string mw30oldays =  ",4,6,9,11,";
+	std::string mtc = "," + CastUtil::lexical_cast<std::string>(mm) + ",";
 	if (mm==2)
 	{
 		if (!(yyyy % 4) && ((yyyy % 100) || !(yyyy % 400)))
@@ -364,12 +364,12 @@ bool Date::validateDate(const int& dd, const int& mm, const int& yyyy)
 		else if (dd < 1 || dd >28)
 			error = false;
 	}
-	else if (mw31days.find(mtc)!=string::npos)
+	else if (mw31days.find(mtc)!=std::string::npos)
 	{
 		if (dd < 1 || dd > 31)
 			error = false;
 	}
-	else if (mw30oldays.find(mtc)!=string::npos)
+	else if (mw30oldays.find(mtc)!=std::string::npos)
 	{
 		if (dd < 1 || dd > 30)
 			error = false;
@@ -378,9 +378,9 @@ bool Date::validateDate(const int& dd, const int& mm, const int& yyyy)
 }
 
 //Based on program by Stanley Wong
-string Date::getDayName(int dd, const int& mm, const int& yyyy)
+std::string Date::getDayName(int dd, const int& mm, const int& yyyy)
 {
-	string dayName;
+	std::string dayName;
 	if(!validateDate(dd,mm,yyyy))return dayName;
 	int days = ((yyyy-1)*365 + (yyyy-1)/4 - (yyyy-1)/100 + (yyyy-1)/400) % 7;//Daycode for prev year 31st Dec
 	switch(mm)
@@ -458,9 +458,9 @@ void Date::populateDay()
 	}
 }
 
-Date::Date(const int& yyyy, const string& mmm, const int& dd)
+Date::Date(const int& yyyy, const std::string& mmm, const int& dd)
 {
-	string mm = getMon(mmm);
+	std::string mm = getMon(mmm);
 	if(mm=="-1")throw "Invalid month";
 	if(!validateDate(dd,CastUtil::lexical_cast<int>(mm),yyyy))throw "Invalid date";
 	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
@@ -480,12 +480,12 @@ Date::Date(const int& yyyy, const int& mm, const int& dd)
 	populateEpochAndTimeZone(false);
 }
 
-Date::Date(const int& yy, const string& mmm, const int& dd, const bool& te)
+Date::Date(const int& yy, const std::string& mmm, const int& dd, const bool& te)
 {
 	Date d;
-	string syyyy = CastUtil::lexical_cast<string>(d.year).substr(0,2) + CastUtil::lexical_cast<string>(yy);
+	std::string syyyy = CastUtil::lexical_cast<std::string>(d.year).substr(0,2) + CastUtil::lexical_cast<std::string>(yy);
 	int yyyy = CastUtil::lexical_cast<int>(syyyy);
-	string mm = getMon(mmm);
+	std::string mm = getMon(mmm);
 	if(mm=="-1")throw "Invalid month";
 	if(!validateDate(dd,CastUtil::lexical_cast<int>(mm),yyyy))throw "Invalid date";
 	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
@@ -498,7 +498,7 @@ Date::Date(const int& yy, const string& mmm, const int& dd, const bool& te)
 Date::Date(const int& yy, const int& mm, const int& dd, const bool& te)
 {
 	Date d;
-	string syyyy = CastUtil::lexical_cast<string>(d.year).substr(0,2) + CastUtil::lexical_cast<string>(yy);
+	std::string syyyy = CastUtil::lexical_cast<std::string>(d.year).substr(0,2) + CastUtil::lexical_cast<std::string>(yy);
 	int yyyy = CastUtil::lexical_cast<int>(syyyy);
 	if(!validateDate(dd,mm,yyyy))throw "Invalid date";
 	long g = getDays(yyyy,mm,dd);
@@ -508,9 +508,9 @@ Date::Date(const int& yy, const int& mm, const int& dd, const bool& te)
 	populateEpochAndTimeZone(false);
 }
 
-string Date::getMon(const string& m) const
+std::string Date::getMon(const std::string& m) const
 {
-	string mmm = StringUtil::toUpperCopy(m);
+	std::string mmm = StringUtil::toUpperCopy(m);
 	if(mmm=="JAN")return "01";
 	else if(mmm=="FEB")return "02";
 	else if(mmm=="MAR")return "03";
@@ -575,19 +575,19 @@ int Date::test()
 	gg = getSecondsI(2008,12,31,12,56,56);
 	getDateFromSeconds(gg);
 	Date d;
-	//logger << d.toString() << endl;
+	//logger << d.toString() << std::endl;
 	Date d1 = addYearsGet(1);
-	//logger << d1.toString() << endl;
+	//logger << d1.toString() << std::endl;
 	Date d2 = addMonthsGet(23);
-	//logger << d2.toString() << endl;
+	//logger << d2.toString() << std::endl;
 	Date d3 = addDaysGet(17);
-	//logger << d3.toString() << endl;
+	//logger << d3.toString() << std::endl;
 	Date d4 = addHoursGet(25);
-	//logger << d4.toString() << endl;
+	//logger << d4.toString() << std::endl;
 	Date d5 = addMinutesGet(61);
-	//logger << d5.toString() << endl;
+	//logger << d5.toString() << std::endl;
 	Date d6 = addSecondsGet(61);
-	//logger << d6.toString() << endl;
+	//logger << d6.toString() << std::endl;
 	return 0;
 }
 

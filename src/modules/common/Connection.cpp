@@ -7,7 +7,7 @@
 
 #include "Connection.h"
 
-string ConnectionProperties::BLANK = "";
+std::string ConnectionProperties::BLANK = "";
 
 void* Connection::getConn() {
 	return _conn;
@@ -58,19 +58,19 @@ void ConnectionNode::setConnectionTimeout(const float& connectionTimeout) {
 	this->connectionTimeout = connectionTimeout;
 }
 
-const string& ConnectionNode::getHost() const {
+const std::string& ConnectionNode::getHost() const {
 	return host;
 }
 
-void ConnectionNode::setHost(const string& host) {
+void ConnectionNode::setHost(const std::string& host) {
 	this->host = host;
 }
 
-const string& ConnectionNode::getPassword() const {
+const std::string& ConnectionNode::getPassword() const {
 	return password;
 }
 
-void ConnectionNode::setPassword(const string& password) {
+void ConnectionNode::setPassword(const std::string& password) {
 	this->password = password;
 }
 
@@ -90,19 +90,19 @@ void ConnectionNode::setReadTimeout(const float& readTimeout) {
 	this->readTimeout = readTimeout;
 }
 
-const string& ConnectionNode::getUsername() const {
+const std::string& ConnectionNode::getUsername() const {
 	return username;
 }
 
-void ConnectionNode::setUsername(const string& username) {
+void ConnectionNode::setUsername(const std::string& username) {
 	this->username = username;
 }
 
-const vector<ConnectionNode>& ConnectionProperties::getNodes() const {
+const std::vector<ConnectionNode>& ConnectionProperties::getNodes() const {
 	return nodes;
 }
 
-void ConnectionProperties::setNodes(const vector<ConnectionNode>& nodes) {
+void ConnectionProperties::setNodes(const std::vector<ConnectionNode>& nodes) {
 	this->nodes = nodes;
 }
 
@@ -135,11 +135,11 @@ void ConnectionProperties::setPoolWriteSize(const int& poolWriteSize) {
 	this->poolWriteSize = poolWriteSize;
 }
 
-const map<string, string>& ConnectionProperties::getProperties() const {
+const std::map<std::string, std::string>& ConnectionProperties::getProperties() const {
 	return properties;
 }
 
-const string& ConnectionProperties::getProperty(const string& name) const {
+const std::string& ConnectionProperties::getProperty(const std::string& name) const {
 	if(properties.find(name)!=properties.end()) {
 		return properties.find(name)->second;
 	}
@@ -147,19 +147,19 @@ const string& ConnectionProperties::getProperty(const string& name) const {
 }
 
 void ConnectionProperties::setProperties(
-		const map<string, string>& properties) {
+		const std::map<std::string, std::string>& properties) {
 	this->properties = properties;
 }
 
-void ConnectionProperties::addProperty(const string& name, const string& value) {
+void ConnectionProperties::addProperty(const std::string& name, const std::string& value) {
 	this->properties[name] = value;
 }
 
-const string& ConnectionProperties::getType() const {
+const std::string& ConnectionProperties::getType() const {
 	return type;
 }
 
-void ConnectionProperties::setType(const string& type) {
+void ConnectionProperties::setType(const std::string& type) {
 	this->type = type;
 }
 
@@ -181,22 +181,22 @@ ConnectionProperties::ConnectionProperties() {
 ConnectionProperties::~ConnectionProperties() {
 }
 
-const string& ConnectionNode::getDatabaseName() const {
+const std::string& ConnectionNode::getDatabaseName() const {
 	return databaseName;
 }
 
-void ConnectionNode::setDatabaseName(const string& databaseName) {
+void ConnectionNode::setDatabaseName(const std::string& databaseName) {
 	this->databaseName = databaseName;
 }
 
-const string& ConnectionProperties::getName() const {
+const std::string& ConnectionProperties::getName() const {
 	return name;
 }
 
-void ConnectionProperties::setName(const string& name) {
+void ConnectionProperties::setName(const std::string& name) {
 	this->name = name;
 }
 
-const string& ConnectionNode::getDsn() const {
+const std::string& ConnectionNode::getDsn() const {
 	return dsn;
 }

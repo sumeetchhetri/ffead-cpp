@@ -19,16 +19,16 @@ bool Http2HeadersFrame::isExclusive() const {
 	return exclusive;
 }
 
-const string& Http2HeadersFrame::getHeaderBlockFragment() const {
+const std::string& Http2HeadersFrame::getHeaderBlockFragment() const {
 	return headerBlockFragment;
 }
 
 void Http2HeadersFrame::setHeaderBlockFragment(
-		const string& headerBlockFragment) {
+		const std::string& headerBlockFragment) {
 	this->headerBlockFragment = headerBlockFragment;
 }
 
-const string& Http2HeadersFrame::getPadding() const {
+const std::string& Http2HeadersFrame::getPadding() const {
 	return padding;
 }
 
@@ -40,7 +40,7 @@ int Http2HeadersFrame::getStreamDependency() const {
 	return streamDependency;
 }
 
-Http2HeadersFrame::Http2HeadersFrame(string data, Http2FrameHeader& aheader) {
+Http2HeadersFrame::Http2HeadersFrame(std::string data, Http2FrameHeader& aheader) {
 	header = aheader;
 	header.type = 1;
 	padLength = 0;
@@ -73,13 +73,13 @@ Http2HeadersFrame::~Http2HeadersFrame() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http2HeadersFrame::getFrameData() {
-	string edata;
+std::string Http2HeadersFrame::getFrameData() {
+	std::string edata;
 	if(header.isPadded()) {
 		edata.push_back(padLength);
 	}
 	if(header.isPriority()) {
-		string data = CommonUtils::ulonglongTocharArray(streamDependency, 4);
+		std::string data = CommonUtils::ulonglongTocharArray(streamDependency, 4);
 		if(exclusive)
 			data[0] |= 0x01 << 7;
 		else

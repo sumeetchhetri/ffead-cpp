@@ -50,15 +50,15 @@ void CppInterpreter::setBoundVariables(const mapVars& boundVariables)
 	this->boundVariables = boundVariables;
 }
 
-bool CppInterpreter::isInBuiltType(const string& type)
+bool CppInterpreter::isInBuiltType(const std::string& type)
 {
     return (type=="int" || type=="float" || type=="double" || type=="string" || type=="std::string");
 }
 /*
-vector<string> splitPattern(string str)
+std::vector<std::string> splitPattern(std::string str)
 {
-	string comm;
-	vector<string> commands;//stack of command structure
+	std::string comm;
+	std::vector<std::string> commands;//stack of command structure
 	for(unsigned int l=0;l<str.length();l++)
 	{
 		if(str.substr(l,1)=="+")
@@ -132,7 +132,7 @@ vector<string> splitPattern(string str)
 	return commands;
 }
 */
-void CppInterpreter::storeInbuilt(const string& type, const string& name)
+void CppInterpreter::storeInbuilt(const std::string& type, const std::string& name)
 {
     if(type=="int")
     {
@@ -151,12 +151,12 @@ void CppInterpreter::storeInbuilt(const string& type, const string& name)
     }
     else if(type=="string")
     {
-        string _temp = "";
+        std::string _temp = "";
         localVariables[name] << _temp;
     }
 }
 
-void CppInterpreter::storeCustom(const string& type, const string& name)
+void CppInterpreter::storeCustom(const std::string& type, const std::string& name)
 {
     Reflector ref;
     ClassInfo clas = ref.getClassInfo(type);
@@ -169,9 +169,9 @@ void CppInterpreter::storeCustom(const string& type, const string& name)
     localVariables[name] = o;
 }
 
-bool CppInterpreter::containsChar(const string& varname)
+bool CppInterpreter::containsChar(const std::string& varname)
 {
-	string allchars = "abcdefghijklmnopqrstuvwxyz_$";
+	std::string allchars = "abcdefghijklmnopqrstuvwxyz_$";
 	for(unsigned int l=0;l<varname.length();l++)
 	{
 		for(unsigned int l1=0;l1<allchars.length();l1++)
@@ -186,12 +186,12 @@ bool CppInterpreter::containsChar(const string& varname)
 }
 
 
-bool CppInterpreter::isCommand(const string& test)
+bool CppInterpreter::isCommand(const std::string& test)
 {
 	return (test=="if" || test=="else" || test=="elseif" || test=="while" || test=="for");
 }
 
-bool CppInterpreter::retState(const string& type, GenericObject& source, GenericObject& target)
+bool CppInterpreter::retState(const std::string& type, GenericObject& source, GenericObject& target)
 {
 	if(isInBuiltType(source.getTypeName()))
 	{
@@ -254,10 +254,10 @@ bool CppInterpreter::retState(const string& type, GenericObject& source, Generic
 		}
 		else if(source.getTypeName()=="string")
 		{
-			string s;
-			source.get<string>(s);
-			string t;
-			source.get<string>(t);
+			std::string s;
+			source.get<std::string>(s);
+			std::string t;
+			source.get<std::string>(t);
 			if(type=="==")
 				return (s==t);
 			else if(type=="<=")
@@ -275,7 +275,7 @@ bool CppInterpreter::retState(const string& type, GenericObject& source, Generic
 	return false;
 }
 
-bool CppInterpreter::retState(const string& type, GenericObject& source, const string& target)
+bool CppInterpreter::retState(const std::string& type, GenericObject& source, const std::string& target)
 {
 	if(isInBuiltType(source.getTypeName()))
 	{
@@ -335,9 +335,9 @@ bool CppInterpreter::retState(const string& type, GenericObject& source, const s
 		}
 		else if(source.getTypeName()=="string")
 		{
-			string s;
-			source.get<string>(s);
-			string t = target;
+			std::string s;
+			source.get<std::string>(s);
+			std::string t = target;
 			if(type=="==")
 				return (s==t);
 			else if(type=="<=")
@@ -355,37 +355,37 @@ bool CppInterpreter::retState(const string& type, GenericObject& source, const s
 	return false;
 }
 
-bool CppInterpreter::evaluateCondition(const string& condition)
+bool CppInterpreter::evaluateCondition(const std::string& condition)
 {
 	bool state = false;
-	string token;
-	if(condition.find("==")!=string::npos)
+	std::string token;
+	if(condition.find("==")!=std::string::npos)
 	{
 		token = "==";
 	}
-	else if(condition.find("!=")!=string::npos)
+	else if(condition.find("!=")!=std::string::npos)
 	{
 		token = "!=";
 	}
-	else if(condition.find("<=")!=string::npos || condition.find("=<")!=string::npos)
+	else if(condition.find("<=")!=std::string::npos || condition.find("=<")!=std::string::npos)
 	{
 		token = "<=";
 	}
-	else if(condition.find(">=")!=string::npos || condition.find("=>")!=string::npos)
+	else if(condition.find(">=")!=std::string::npos || condition.find("=>")!=std::string::npos)
 	{
 		token = ">=";
 	}
-	else if(condition.find(">")!=string::npos)
+	else if(condition.find(">")!=std::string::npos)
 	{
 		token = ">";
 	}
-	else if(condition.find("<")!=string::npos)
+	else if(condition.find("<")!=std::string::npos)
 	{
 		token = "<";
 	}
 	if(token!="")
 	{
-		vector<string> bs;
+		std::vector<std::string> bs;
 		StringUtil::split(bs, condition, (token));
 		if(bs.size()==2 && bs.at(0)!="" && bs.at(1)!="")
 		{
@@ -419,9 +419,9 @@ bool CppInterpreter::evaluateCondition(const string& condition)
 	return state;
 }
 
-void CppInterpreter::skipStatement(vector<string>::iterator &itr)
+void CppInterpreter::skipStatement(std::vector<std::string>::iterator &itr)
 {
-	string nextToken = *(itr);
+	std::string nextToken = *(itr);
 	while(nextToken!=";")
 	{
 		nextToken = *(++itr);
@@ -429,11 +429,11 @@ void CppInterpreter::skipStatement(vector<string>::iterator &itr)
 	//++itr;
 }
 
-void CppInterpreter::skipCommand(vector<string>::iterator &itr)
+void CppInterpreter::skipCommand(std::vector<std::string>::iterator &itr)
 {
 	int crcnt = 0;
 	int cucnt = 0;
-	string nextToken = *(itr);
+	std::string nextToken = *(itr);
 	while(1)
 	{
 		if(nextToken=="(")
@@ -475,7 +475,7 @@ void CppInterpreter::skipCommand(vector<string>::iterator &itr)
 	}
 }
 
-void CppInterpreter::evaluateUpdateCustom(const string& sep, const string& type, const string& name, const vector<string>& opr, const bool& local)
+void CppInterpreter::evaluateUpdateCustom(const std::string& sep, const std::string& type, const std::string& name, const std::vector<std::string>& opr, const bool& local)
 {
 	GenericObject o;
 	if(local)
@@ -495,7 +495,7 @@ void CppInterpreter::evaluateUpdateCustom(const string& sep, const string& type,
 	{
 		Reflector reflector;
 		ClassInfo clas = reflector.getClassInfo(type);
-		string name = "invokeReflectionCIAssignMethodFor"+i.getTypeName();
+		std::string name = "invokeReflectionCIAssignMethodFor"+i.getTypeName();
 		args argus;
 		argus.push_back("void*");
 		argus.push_back("void*");
@@ -506,7 +506,7 @@ void CppInterpreter::evaluateUpdateCustom(const string& sep, const string& type,
 	}
 }
 
-void CppInterpreter::evaluateUpdateInbuilt(const string& sep, const string& type, const string& name, vector<string> opr, const bool& local)
+void CppInterpreter::evaluateUpdateInbuilt(const std::string& sep, const std::string& type, const std::string& name, std::vector<std::string> opr, const bool& local)
 {
 	if(type=="int")
 	{
@@ -516,7 +516,7 @@ void CppInterpreter::evaluateUpdateInbuilt(const string& sep, const string& type
 		else
 			o = boundVariables[name];
 		int *_temp = (int*)o.getPointer();
-		vector<string> curr,going,temp;
+		std::vector<std::string> curr,going,temp;
 		//int scnt = 0,ecnt = 0,bcnt = 0;
 		//bool gost= false;
 		if(sep=="++" || sep=="--")
@@ -555,17 +555,17 @@ void CppInterpreter::evaluateUpdateInbuilt(const string& sep, const string& type
 				curr.push_back(opr.at(i));
 
 		}*/
-		vector<string>::iterator itre,endre;
+		std::vector<std::string>::iterator itre,endre;
 		itre = opr.begin();
 		endre = opr.end();
-		string res = evalBrackets<int>(itre,endre);
+		std::string res = evalBrackets<int>(itre,endre);
 		/*opr.clear();
 		for(unsigned int i=0;i<curr.size();i++)
 		{
 			if(containsChar(curr.at(i)))
 			{
 				GenericObject o = localVariables[curr.at(i)];
-				opr.push_back(CastUtil::lexical_cast<string>(o.getValue<int>()));
+				opr.push_back(CastUtil::lexical_cast<std::string>(o.getValue<int>()));
 			}
 			else
 				opr.push_back(curr.at(i));
@@ -607,20 +607,20 @@ void CppInterpreter::evaluateUpdateInbuilt(const string& sep, const string& type
 	}
 	else if(type=="string" || type=="std::string")
 	{
-		string *_temp = new string;
+		std::string *_temp = new string;
 		GenericObject o;
 		o << *_temp;
 		localVariables[name] = o;
 	}*/
 }
 
-void CppInterpreter::executeStatement(const string& sep, const vector<string>& lhs, const vector<string>& rhs)
+void CppInterpreter::executeStatement(const std::string& sep, const std::vector<std::string>& lhs, const std::vector<std::string>& rhs)
 {
 	if(sep!="")
 	{
 		if(lhs.size()>0)//probable declaration
 		{
-			vector<string> bs;
+			std::vector<std::string> bs;
 			StringUtil::split(bs, lhs.at(0), (" "));
 			if(bs.size()==1)
 			{
@@ -661,7 +661,7 @@ void CppInterpreter::executeStatement(const string& sep, const vector<string>& l
 	}
 	else
 	{
-		vector<string> bs;
+		std::vector<std::string> bs;
 		StringUtil::split(bs, lhs.at(0), (" "));
 		if(isInBuiltType(bs.at(0)))
 		{
@@ -676,15 +676,15 @@ void CppInterpreter::executeStatement(const string& sep, const vector<string>& l
 	}
 }
 
-Obj CppInterpreter::handleObjectMethodInvocation(const string& objn,const string& methn,vector<string>::iterator &itr)
+Obj CppInterpreter::handleObjectMethodInvocation(const std::string& objn,const std::string& methn,std::vector<std::string>::iterator &itr)
 {
-	string token = *(++itr);
+	std::string token = *(++itr);
 	int crcnt = 1;
-	string statement;
+	std::string statement;
 	vals valus;
 	args argus;
 	Obj obj;
-	string objname,methName;
+	std::string objname,methName;
 	bool objmem = false;
 	while(1)
 	{
@@ -787,13 +787,13 @@ Obj CppInterpreter::handleObjectMethodInvocation(const string& objn,const string
 	return obj;
 }
 
-void CppInterpreter::handleStatement(vector<string>::iterator &itr)
+void CppInterpreter::handleStatement(std::vector<std::string>::iterator &itr)
 {
-	string token = *itr;
-	string statement;
-	string sep;
-	vector<string> lhs,rhs;
-	string objname,methName;
+	std::string token = *itr;
+	std::string statement;
+	std::string sep;
+	std::vector<std::string> lhs,rhs;
+	std::string objname,methName;
 	bool rhsa = false,objmem = false;
 	int argn = 1;
 	bool objectex = false;
@@ -857,7 +857,7 @@ void CppInterpreter::handleStatement(vector<string>::iterator &itr)
 				{
 					GenericObject o;
 					o.set(obj.getPointer(), obj.getType());
-					string argname = "_argno"+CastUtil::lexical_cast<string>(argn++);
+					std::string argname = "_argno"+CastUtil::lexical_cast<std::string>(argn++);
 					localVariables[argname] = o;
 					//rhs.push_back(argname);
 					token = *(itr);
@@ -897,10 +897,10 @@ void CppInterpreter::handleStatement(vector<string>::iterator &itr)
 			sep = "--";
 			//rhs.push_back("=");
 		}
-		else if(token.find(".")!=string::npos)
+		else if(token.find(".")!=std::string::npos)
 		{
 			objmem = true;
-			vector<string> bs;
+			std::vector<std::string> bs;
 			StringUtil::split(bs,token, ("."));
 			objname = bs.at(0);
 			methName = bs.at(1);
@@ -923,13 +923,13 @@ void CppInterpreter::handleStatement(vector<string>::iterator &itr)
 	return;
 }
 
-bool CppInterpreter::evalCond(vector<string> str)
+bool CppInterpreter::evalCond(std::vector<std::string> str)
 {
-	vector<string>::iterator iter;
+	std::vector<std::string>::iterator iter;
 	iter = str.begin();
 	bool state = true;
-	string st = *(iter);
-	string prev,cond;
+	std::string st = *(iter);
+	std::string prev,cond;
 	int crcnt = 0;
 	while(1)
 	{
@@ -944,17 +944,17 @@ bool CppInterpreter::evalCond(vector<string> str)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			prev = "";
 			cond = "";
@@ -966,17 +966,17 @@ bool CppInterpreter::evalCond(vector<string> str)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			prev = "|";
 			cond = "";
@@ -986,17 +986,17 @@ bool CppInterpreter::evalCond(vector<string> str)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			prev = "&";
 			cond = "";
@@ -1011,15 +1011,15 @@ bool CppInterpreter::evalCond(vector<string> str)
 	}
 	if(cond!="" && cond!=" ")
 	{
-		logger << "state=" << state << "\n" << flush;
+		logger << "state=" << state << "\n" << std::flush;
 		state = evaluateCondition(cond);
 	}
 	return state;
 }
 
-void CppInterpreter::handleELSE(vector<string>::iterator &iter)
+void CppInterpreter::handleELSE(std::vector<std::string>::iterator &iter)
 {
-	string nextToken = *(++iter);
+	std::string nextToken = *(++iter);
 	int cucnt = 0;
 	if(nextToken=="{")
 	{
@@ -1059,11 +1059,11 @@ void CppInterpreter::handleELSE(vector<string>::iterator &iter)
 }
 
 
-void CppInterpreter::hanldeIF(vector<string>::iterator &iter)
+void CppInterpreter::hanldeIF(std::vector<std::string>::iterator &iter)
 {
 	bool state = true;
-	string st = *(++iter);
-	string prev,cond;
+	std::string st = *(++iter);
+	std::string prev,cond;
 	int crcnt = 0;
 	while(1)
 	{
@@ -1078,17 +1078,17 @@ void CppInterpreter::hanldeIF(vector<string>::iterator &iter)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			prev = "";
 			cond = "";
@@ -1100,17 +1100,17 @@ void CppInterpreter::hanldeIF(vector<string>::iterator &iter)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			prev = "|";
 			cond = "";
@@ -1120,17 +1120,17 @@ void CppInterpreter::hanldeIF(vector<string>::iterator &iter)
 			if(prev=="&")
 			{
 				state = state && evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(prev=="|")
 			{
 				state = state || evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			else if(cond!="")
 			{
 				state = evaluateCondition(cond);
-				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << flush;
+				logger << "prev=" << prev << " cond=" << cond << " state=" << state << "\n" << std::flush;
 			}
 			prev = "&";
 			cond = "";
@@ -1139,7 +1139,7 @@ void CppInterpreter::hanldeIF(vector<string>::iterator &iter)
 			cond += st;
 		st = *(++iter);
 	}
-	string nextToken = *(++iter);
+	std::string nextToken = *(++iter);
 	if(state)
 	{
 		int cucnt = 0;
@@ -1232,12 +1232,12 @@ void CppInterpreter::hanldeIF(vector<string>::iterator &iter)
 	}
 }
 
-void CppInterpreter::hanldeWHILE(vector<string>::iterator &itr)
+void CppInterpreter::hanldeWHILE(std::vector<std::string>::iterator &itr)
 {
-	string st = *(++itr);
-	string prev,cond;
+	std::string st = *(++itr);
+	std::string prev,cond;
 	int crcnt = 0;
-	vector<string> whlstr;
+	std::vector<std::string> whlstr;
 	while(1)
 	{
 		whlstr.push_back(st);
@@ -1253,8 +1253,8 @@ void CppInterpreter::hanldeWHILE(vector<string>::iterator &itr)
 		}
 		st = *(++itr);
 	}
-	string nextToken = *(++itr);
-	vector<string> stmt;
+	std::string nextToken = *(++itr);
+	std::vector<std::string> stmt;
 	bool blk = false;
 	//bool whd = false;
 	if(nextToken=="{")
@@ -1289,8 +1289,8 @@ void CppInterpreter::hanldeWHILE(vector<string>::iterator &itr)
 	while(evalCond(whlstr))
 	{
 		//whd = true;
-		vector<string>::iterator tok = stmt.begin();
-		string stok = *(tok);
+		std::vector<std::string>::iterator tok = stmt.begin();
+		std::string stok = *(tok);
 		int cucnt = 0;
 		while(tok<stmt.end())
 		{
@@ -1334,13 +1334,13 @@ void CppInterpreter::hanldeWHILE(vector<string>::iterator &itr)
 	}
 }
 
-void CppInterpreter::hanldeFOR(vector<string>::iterator &itr)
+void CppInterpreter::hanldeFOR(std::vector<std::string>::iterator &itr)
 {
-	string st = *(++itr);
-	string prev,cond;
+	std::string st = *(++itr);
+	std::string prev,cond;
 	int crcnt = 0;
 	bool condit=false,inc=false;
-	vector<string> whlstr,incr;
+	std::vector<std::string> whlstr,incr;
 	while(1)
 	{
 		if(st!=";" && condit)
@@ -1370,8 +1370,8 @@ void CppInterpreter::hanldeFOR(vector<string>::iterator &itr)
 			incr.push_back(st);
 		st = *(++itr);
 	}
-	string nextToken = *(++itr);
-	vector<string> stmt;
+	std::string nextToken = *(++itr);
+	std::vector<std::string> stmt;
 	bool blk = false;
 	//bool whd = false;
 	if(nextToken=="{")
@@ -1423,8 +1423,8 @@ void CppInterpreter::hanldeFOR(vector<string>::iterator &itr)
 	while(evalCond(whlstr))
 	{
 		//whd = true;
-		vector<string>::iterator tok = stmt.begin();
-		string stok = *(tok);
+		std::vector<std::string>::iterator tok = stmt.begin();
+		std::string stok = *(tok);
 		int cucnt = 0;
 		while(tok<stmt.end())
 		{
@@ -1468,7 +1468,7 @@ void CppInterpreter::hanldeFOR(vector<string>::iterator &itr)
 	}
 }
 
-void CppInterpreter::hanldeCommand(vector<string>::iterator &itr)
+void CppInterpreter::hanldeCommand(std::vector<std::string>::iterator &itr)
 {
 	if(*itr=="if" || *itr=="else if")
 	{
@@ -1485,43 +1485,43 @@ void CppInterpreter::hanldeCommand(vector<string>::iterator &itr)
 }
 
 
-void CppInterpreter::eval(string str)
+void CppInterpreter::eval(std::string str)
 {
-	logger << str << flush;
-	string temp = str;
+	logger << str << std::flush;
+	std::string temp = str;
 	int st = 1;
-	while(temp.find("\"")!=string::npos)
+	while(temp.find("\"")!=std::string::npos)
 	{
 		size_t s = temp.find_first_of("\"")+1;
-		string temp1 = temp.substr(s);
+		std::string temp1 = temp.substr(s);
 		size_t e = temp1.find_first_of("\"");
-		string litval;
+		std::string litval;
 		litval = temp.substr(s,e);
 		temp = temp.substr(e+s+1);
-		string varn =  ("_"+ CastUtil::lexical_cast<string>(st++));
+		std::string varn =  ("_"+ CastUtil::lexical_cast<std::string>(st++));
 		literals[varn] = litval;
-		string ini = str.substr(0,s-1);
+		std::string ini = str.substr(0,s-1);
 		str = (ini + varn + temp);
 		temp = str;
-		logger << "\n" << flush;
-		logger << litval << flush;
-		logger << "\n" << flush;
-		logger << s << e << flush;
-		logger << "\n" << flush;
-		logger << temp << flush;
-		logger << "\n" << flush;
+		logger << "\n" << std::flush;
+		logger << litval << std::flush;
+		logger << "\n" << std::flush;
+		logger << s << e << std::flush;
+		logger << "\n" << std::flush;
+		logger << temp << std::flush;
+		logger << "\n" << std::flush;
 	}
-	logger << str << flush;
+	logger << str << std::flush;
 	RegexUtil::replace(str, "[\t]+", " ");
 	RegexUtil::replace(str, "[ ]+", " ");
-	logger << "\n" << flush;
-	logger << str << flush;
-	logger << "\n" << flush;
+	logger << "\n" << std::flush;
+	logger << str << std::flush;
+	logger << "\n" << std::flush;
 
-	string comm;
-	vector<string> commands;//stack of command structure
+	std::string comm;
+	std::vector<std::string> commands;//stack of command structure
 	bool eqop = false;
-	string command;
+	std::string command;
 	for(unsigned int l=0;l<str.length();l++)
 	{
 		if(str.substr(l,1)=="{" || str.substr(l,1)=="}" || str.substr(l,1)==";" || str.substr(l,1)==")"
@@ -1542,7 +1542,7 @@ void CppInterpreter::eval(string str)
 			}
 			else
 			{
-				if(comm.find_first_not_of(" ")!=string::npos && comm.find_last_not_of(" ")!=string::npos)
+				if(comm.find_first_not_of(" ")!=std::string::npos && comm.find_last_not_of(" ")!=std::string::npos)
 				{
 					comm = comm.substr(comm.find_first_not_of(" "),comm.find_last_not_of(" ")+1);
 					commands.push_back(comm);
@@ -1575,9 +1575,9 @@ void CppInterpreter::eval(string str)
 		comm = comm.substr(comm.find_first_not_of(" "));
 		commands.push_back(comm);
 	}
-	vector<string>::iterator iter;
+	std::vector<std::string>::iterator iter;
 	iter = commands.begin();
-	string nextToken = *(iter);
+	std::string nextToken = *(iter);
 	while(iter<commands.end())
 	{
 		int cucnt = 0;
@@ -1613,15 +1613,15 @@ void CppInterpreter::eval(string str)
 	}
 	//while(iter!=commands.end())
 	//{
-		//logger << commands.at(k) << "\n" << flush;
+		//logger << commands.at(k) << "\n" << std::flush;
 		/*string curr = *(iter++);
 		int crcnt = 0;
-		vector<string> state;
-		string cond;
-		string prev;
+		std::vector<std::string> state;
+		std::string cond;
+		std::string prev;
 		while(curr=="if")
 		{
-			string st = *(iter++);
+			std::string st = *(iter++);
 			if(st=="(")
 			{
 				crcnt++;
@@ -1631,7 +1631,7 @@ void CppInterpreter::eval(string str)
 			{
 				crcnt--;
 				state.push_back(evaluate(cond,"IF"));
-				logger << cond << flush;
+				logger << cond << std::flush;
 				if(crcnt==0)
 					break;
 			}
@@ -1639,8 +1639,8 @@ void CppInterpreter::eval(string str)
 			{
 				state.push_back(evaluate(cond,"IF"));
 				state.push_back("OR");
-				logger << cond << flush;
-				logger << " OR " << flush;
+				logger << cond << std::flush;
+				logger << " OR " << std::flush;
 				cond = "";
 				prev = "OR";
 			}
@@ -1648,17 +1648,17 @@ void CppInterpreter::eval(string str)
 			{
 				state.push_back(evaluate(cond,"IF"));
 				state.push_back("AND");
-				logger << cond << flush;
-				logger << " AND " << flush;
+				logger << cond << std::flush;
+				logger << " AND " << std::flush;
 				cond = "";
 				prev = "AND";
 			}
 			else
 				cond += st;
 		}*/
-		/*if(commands.at(k).find("=")!=string::npos)//inititialization operation
+		/*if(commands.at(k).find("=")!=std::string::npos)//inititialization operation
 		{
-			vector<string> bs,lhs;
+			std::vector<std::string> bs,lhs;
 			StringUtil::split(bs, commands.at(k), ("="));
 			StringUtil::split(lhs, bs.at(0), (" "));
 			if(lhs.size()==2)
@@ -1708,7 +1708,7 @@ void CppInterpreter::eval(string str)
 			if(target.getType()!="" && source.getType()!="" && target.getType()==source.getType())
 				target.setPointer(source.getPointer());
 			else
-				logger << "run time exception" << flush;
+				logger << "run time exception" << std::flush;
 		}
 		else if(tokens.size()==3 && tokens.at(1)=="=")//assignment operation
 		{
@@ -1721,7 +1721,7 @@ void CppInterpreter::eval(string str)
 			if(target.getType()!="" && source.getType()!="" && target.getType()==source.getType())
 				target.setPointer(source.getPointer());
 			else
-				logger << "run time exception" << flush;
+				logger << "run time exception" << std::flush;
 		}
 		else if(tokens.size()>=5 && tokens.at(1)=="=")//multiple opeartions and final addition on this line
 		{

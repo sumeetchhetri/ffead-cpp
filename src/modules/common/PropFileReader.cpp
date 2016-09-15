@@ -34,15 +34,15 @@ PropFileReader::~PropFileReader() {
 	// TODO Auto-generated destructor stub
 }
 
-propMap PropFileReader::getProperties(const string& filepath)
+propMap PropFileReader::getProperties(const std::string& filepath)
 {
 	propMap all;
-	string line;
+	std::string line;
 	if (filepath=="")
 	{
 		return all;
 	}
-	ifstream myfile (&filepath[0],ios::in | ios::binary);
+	std::ifstream myfile (&filepath[0],std::ios::in | std::ios::binary);
     if (myfile.is_open())
     {
       strVec vemp;
@@ -50,7 +50,7 @@ propMap PropFileReader::getProperties(const string& filepath)
 	  {
 		  if(line!="")
 		  {
-		  	  if(line.find("=")!=string::npos)
+		  	  if(line.find("=")!=std::string::npos)
 		  	  {
 		  		  StringUtil::trim(line);
 		  		  if(line.find("=")!=line.length()-1)
@@ -65,15 +65,15 @@ propMap PropFileReader::getProperties(const string& filepath)
     return all;
 }
 
-propMultiMap PropFileReader::getPropertiesMultiMap(const string& filepath)
+propMultiMap PropFileReader::getPropertiesMultiMap(const std::string& filepath)
 {
 	propMultiMap all;
-	string line;
+	std::string line;
 	if (filepath=="")
 	{
 		return all;
 	}
-	ifstream myfile (&filepath[0],ios::in | ios::binary);
+	std::ifstream myfile (&filepath[0],std::ios::in | std::ios::binary);
     if (myfile.is_open())
     {
       strVec vemp;
@@ -81,7 +81,7 @@ propMultiMap PropFileReader::getPropertiesMultiMap(const string& filepath)
 	  {
 		  if(line!="")
 		  {
-		  	  if(line.find("=")!=string::npos)
+		  	  if(line.find("=")!=std::string::npos)
 		  	  {
 		  		  StringUtil::trim(line);
 		  		  if(line.find("=")!=line.length()-1)

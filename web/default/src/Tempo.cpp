@@ -34,7 +34,7 @@ Tempo::~Tempo() {
 void Tempo::prin()
 {
 	int y = 10;
-	cout << "----------" << flush;
+	std::cout << "----------" << std::flush;
 }
 
 void Tempo::prin1()
@@ -42,5 +42,5 @@ void Tempo::prin1()
 	int y = 10;
 	/*p = 5;
 	h = "asdasdasdasa";*/
-	cout << "dssfsd" << flush;
+	std::cout << "dssfsd" << std::flush;
 }

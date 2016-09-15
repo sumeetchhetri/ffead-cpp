@@ -28,7 +28,7 @@
 #include "TestObject1.h"
 #include "iostream"
 #include "CastUtil.h"
-using namespace std;
+
 
 namespace ws {
 	namespace test {
@@ -36,11 +36,11 @@ namespace ws {
 		public:
 			TestingWS();
 			virtual ~TestingWS();
-			void wsmeth1(int a, string, long);
-			string wsmeth2(string b, vector<int> c);
-			TestObject wsmeth3(string);
+			void wsmeth1(int a, std::string, long);
+			std::string wsmeth2(std::string b, std::vector<int> c);
+			TestObject wsmeth3(std::string);
 			com::obj::TestObject wsmeth4(bool);
-			string wsmeth5(TestObject);
+			std::string wsmeth5(TestObject);
 			long wsmeth6(com::obj::TestObject);
 		};
 	}

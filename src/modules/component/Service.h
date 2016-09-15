@@ -24,13 +24,13 @@
 #define SERVICE_H_
 #include "string"
 #include "vector"
-using namespace std;
+
 class Service {
 private:
-	string name;
-	string address;
-	vector<string> accessList;
-	string type;
+	std::string name;
+	std::string address;
+	std::vector<std::string> accessList;
+	std::string type;
 public:
 	Service();
 	virtual ~Service();

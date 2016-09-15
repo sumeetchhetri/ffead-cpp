@@ -23,18 +23,18 @@
 #ifndef TEMPO_H_
 #define TEMPO_H_
 #include "iostream"
-using namespace std;
+
 class Tempo {
 	void prin();
 	int p;
-	string h;
+	std::string h;
 public:
 	Tempo();
 	virtual ~Tempo();
 	void prin1();
 	template<class T> void func()
 	{
-		cout << p << flush;
+		std::cout << p << std::flush;
 	}
 };
 

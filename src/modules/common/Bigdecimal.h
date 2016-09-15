@@ -25,15 +25,15 @@
 #include "Bigint.h"
 
 class Bigdecimal {
-	vector<int> parts;
+	std::vector<int> parts;
 	bool isPositive;
 	int decimalDigits;
 	int decimalStartsAt;
-	void create(const string& value);
+	void create(const std::string& value);
 	void checkAndSetIfZero();
 public:
 	Bigdecimal();
-	Bigdecimal(const string& value);
+	Bigdecimal(const std::string& value);
 	void add(const Bigdecimal& number);
 	Bigdecimal operator+(const Bigdecimal& number);
 	Bigdecimal operator-(const Bigdecimal& number);
@@ -54,7 +54,7 @@ public:
 	void divide(const Bigdecimal& number, const int& precision=15);
 	static int compare(const Bigdecimal& number1, const Bigdecimal& number2);
 	int compare(const Bigdecimal& number) const;
-	string toString() const;
+	std::string toString() const;
 	virtual ~Bigdecimal();
 };
 

@@ -27,33 +27,33 @@
 #include "TemplateEngine.h"
 #include "CastUtil.h"
 #include "DataSourceMapping.h"
-using namespace std;
+
 
 class DialectHelper {
 	static bool init;
-	static map<string, map<int, string> > dialectStrMap;
+	static std::map<std::string, std::map<int, std::string> > dialectStrMap;
 	static void loadDialectSQLStrings();
 	static void loadOracleDialectStrings();
 	static void loadMySQLDialectStrings();
 	static void loadPostgresDialectStrings();
 	static void loadSQLServerDialectStrings();
 	static void loadDB22DialectStrings();
-	static void getPaginationSQL(const string& dialect, string& query, const StringContext& params);
+	static void getPaginationSQL(const std::string& dialect, std::string& query, const StringContext& params);
 	DialectHelper();
 public:
-	static string ORACLE_DIALECT, MYSQLMYISAM_DIALECT, MYSQLINNODB_DIALECT, POSTGRES_DIALECT,
+	static std::string ORACLE_DIALECT, MYSQLMYISAM_DIALECT, MYSQLINNODB_DIALECT, POSTGRES_DIALECT,
 				  SQLSERVER_DIALECT, SQLSERVER12_DIALECT, TIMESTEN_DIALECT,
 				  DB2_DIALECT, SQLLITE_DIALECT, ANY_DIALECT;
 	static int PAGINATION_OFFSET_SQL, PAGINATION_NO_OFFSET_SQL, VALIDDB_FUNCTIONS, IDGEN_SEQUENCE_QUERY,
 				IDGEN_TABLESEL_QUERY, IDGEN_TABLEUPD_QUERY, IS_TRANSACTION_SUPPORTED, IDGEN_IDENTITY_QUERY,
 				IDGEN_TABLESELNOLOCK_QUERY, IDGEN_TABLESELNOLOCKMHL_QUERY, IDGEN_TABLESELMHL_QUERY,
 				IDGEN_TABLEUPDMHL_QUERY, BULK_INSERT_QUERY, BULK_UPDATE_QUERY;
-	static string getSQLString(const string& dialect, const int& type, string query, StringContext params);
-	static string getSQLString(const string& dialect, const int& type, StringContext params);
-	static string getProperty(const string& dialect, const int& type);
-	static bool isTransactionSupported(const string& dialect);
-	static string getIdGenerateQueryPre(const string& dialect, const DataSourceEntityMapping& dsemp);
-	static string getIdGenerateQueryPost(const string& dialect, const DataSourceEntityMapping& dsemp);
+	static std::string getSQLString(const std::string& dialect, const int& type, std::string query, StringContext params);
+	static std::string getSQLString(const std::string& dialect, const int& type, StringContext params);
+	static std::string getProperty(const std::string& dialect, const int& type);
+	static bool isTransactionSupported(const std::string& dialect);
+	static std::string getIdGenerateQueryPre(const std::string& dialect, const DataSourceEntityMapping& dsemp);
+	static std::string getIdGenerateQueryPost(const std::string& dialect, const DataSourceEntityMapping& dsemp);
 	static void load();
 	virtual ~DialectHelper();
 };

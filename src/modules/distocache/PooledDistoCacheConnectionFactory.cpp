@@ -24,7 +24,7 @@
 
 PooledDistoCacheConnectionFactory* PooledDistoCacheConnectionFactory::instance = NULL;
 
-PooledDistoCacheConnectionFactory::PooledDistoCacheConnectionFactory(const string& host, const int& port, const int& poolSize, const bool& isSSL) {
+PooledDistoCacheConnectionFactory::PooledDistoCacheConnectionFactory(const std::string& host, const int& port, const int& poolSize, const bool& isSSL) {
 	this->host = host;
 	this->port = port;
 	this->isSSL = isSSL;
@@ -34,7 +34,7 @@ PooledDistoCacheConnectionFactory::PooledDistoCacheConnectionFactory(const strin
 PooledDistoCacheConnectionFactory::~PooledDistoCacheConnectionFactory() {
 }
 
-void PooledDistoCacheConnectionFactory::init(const string& host, const int& port, const int& poolSize, const bool& isSSL) {
+void PooledDistoCacheConnectionFactory::init(const std::string& host, const int& port, const int& poolSize, const bool& isSSL) {
 	if(instance==NULL)
 	{
 		instance = new PooledDistoCacheConnectionFactory(host, port, poolSize, isSSL);

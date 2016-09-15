@@ -22,33 +22,33 @@
 
 #include "StringUtil.h"
 
-string StringUtil::whitespaces = " \t\f\v\n\r";
+std::string StringUtil::whitespaces = " \t\f\v\n\r";
 
-void StringUtil::toUpper(string &str)
+void StringUtil::toUpper(std::string &str)
 {
 	transform(str.begin(), str.end(), str.begin(), ::toupper);
 }
 
-string StringUtil::toUpperCopy(const string& str)
+std::string StringUtil::toUpperCopy(const std::string& str)
 {
-	string strn = str;
+	std::string strn = str;
 	toUpper(strn);
 	return strn;
 }
 
-void StringUtil::toLower(string& str)
+void StringUtil::toLower(std::string& str)
 {
 	transform(str.begin(), str.end(), str.begin(), ::tolower);
 }
 
-string StringUtil::toLowerCopy(const string& str)
+std::string StringUtil::toLowerCopy(const std::string& str)
 {
-	string strn = str;
+	std::string strn = str;
 	toLower(strn);
 	return strn;
 }
 
-void StringUtil::replaceFirst(string &str, const string& ths, const string& with)
+void StringUtil::replaceFirst(std::string &str, const std::string& ths, const std::string& with)
 {
 	size_t start_pos = str.find(ths);
 	if(start_pos != std::string::npos)
@@ -57,14 +57,14 @@ void StringUtil::replaceFirst(string &str, const string& ths, const string& with
 	}
 }
 
-string StringUtil::replaceFirstCopy(const string &str, const string& ths, const string& with)
+std::string StringUtil::replaceFirstCopy(const std::string &str, const std::string& ths, const std::string& with)
 {
-	string strn = str;
+	std::string strn = str;
 	replaceFirst(strn, ths, with);
 	return strn;
 }
 
-void StringUtil::replaceAll(string &str, const string& ths, const string& with)
+void StringUtil::replaceAll(std::string &str, const std::string& ths, const std::string& with)
 {
 	if(ths.empty())
 		return;
@@ -75,14 +75,14 @@ void StringUtil::replaceAll(string &str, const string& ths, const string& with)
 	}
 }
 
-string StringUtil::replaceAllCopy(const string &str, const string& ths, const string& with)
+std::string StringUtil::replaceAllCopy(const std::string &str, const std::string& ths, const std::string& with)
 {
-	string strn = str;
+	std::string strn = str;
 	replaceAll(strn, ths, with);
 	return strn;
 }
 
-void StringUtil::eraseAll(string& str, const string& ths)
+void StringUtil::eraseAll(std::string& str, const std::string& ths)
 {
 	if(ths.empty())
 		return;
@@ -92,22 +92,22 @@ void StringUtil::eraseAll(string& str, const string& ths)
 	}
 }
 
-void StringUtil::capitalized(string& str)
+void StringUtil::capitalized(std::string& str)
 {
 	if(str.length()>0)
 		str[0] = toupper(str[0]);
 }
 
-string StringUtil::capitalizedCopy(const string& str)
+std::string StringUtil::capitalizedCopy(const std::string& str)
 {
-	string strn(str);
+	std::string strn(str);
 	capitalized(strn);
 	return strn;
 }
 
-void StringUtil::camelCased(string& str, const string& delim)
+void StringUtil::camelCased(std::string& str, const std::string& delim)
 {
-	vector<string> vec = StringUtil::splitAndReturn<vector<string> >(str, delim);
+	std::vector<std::string> vec = StringUtil::splitAndReturn<std::vector<std::string> >(str, delim);
 	str.clear();
 	for (int var = 0; var < (int)vec.size(); ++var) {
 		str.append(StringUtil::capitalizedCopy(vec.at(var)));
@@ -118,14 +118,14 @@ void StringUtil::camelCased(string& str, const string& delim)
 	}
 }
 
-string StringUtil::camelCasedCopy(const string& str, const string& delim)
+std::string StringUtil::camelCasedCopy(const std::string& str, const std::string& delim)
 {
-	string strn(str);
+	std::string strn(str);
 	camelCased(strn, delim);
 	return strn;
 }
 
-void StringUtil::replaceLast(string& str, const string& ths, const string& with)
+void StringUtil::replaceLast(std::string& str, const std::string& ths, const std::string& with)
 {
 	size_t start_pos = str.find_last_of(ths);
 	if(start_pos != std::string::npos)
@@ -134,37 +134,37 @@ void StringUtil::replaceLast(string& str, const string& ths, const string& with)
 	}
 }
 
-string StringUtil::replaceLastCopy(const string& str, const string& ths, const string& with)
+std::string StringUtil::replaceLastCopy(const std::string& str, const std::string& ths, const std::string& with)
 {
-	string strn = str;
+	std::string strn = str;
 	replaceLast(strn, ths, with);
 	return strn;
 }
 
-int StringUtil::countOccurrences(const string& input, const string& delimiter)
+int StringUtil::countOccurrences(const std::string& input, const std::string& delimiter)
 {
 	int counter = 0;
 	size_t index = 0;
-	while((index = input.find(delimiter, index))!=string::npos) {
+	while((index = input.find(delimiter, index))!=std::string::npos) {
 		++counter;
 		++index;
 	}
 	return counter;
 }
 
-vector<string> StringUtil::split(const string& input, const vector<string>& delimiters)
+std::vector<std::string> StringUtil::split(const std::string& input, const std::vector<std::string>& delimiters)
 {
-	vector<string> output;
+	std::vector<std::string> output;
 	split(output, input, delimiters);
 	return output;
 }
 
-void StringUtil::split(vector<string>& output, const string& input, const vector<string>& delimiters)
+void StringUtil::split(std::vector<std::string>& output, const std::string& input, const std::vector<std::string>& delimiters)
 {
 	output.clear();
 	output.push_back(input);
 	for (int var = 0; var < (int)delimiters.size(); ++var) {
-		vector<string> output1;
+		std::vector<std::string> output1;
 		for (int var1 = 0; var1 < (int)output.size(); ++var1) {
 			split(output1, output.at(var1), delimiters.at(var));
 		}
@@ -172,116 +172,116 @@ void StringUtil::split(vector<string>& output, const string& input, const vector
 	}
 }
 
-void StringUtil::trim(string& str)
+void StringUtil::trim(std::string& str)
 {
 	size_t end = str.find_last_not_of(whitespaces);
 	size_t start = str.find_first_not_of(whitespaces);
-	if(start!=string::npos && end!=string::npos)
+	if(start!=std::string::npos && end!=std::string::npos)
 		str = str.substr(start, end-start+1);
-	else if (end!=string::npos)
+	else if (end!=std::string::npos)
 		str.erase(end+1);
-	else if(start!=string::npos)
+	else if(start!=std::string::npos)
 		str = str.substr(start);
 	else
 		str.clear();
 }
 
-string StringUtil::trimCopy(const string& str)
+std::string StringUtil::trimCopy(const std::string& str)
 {
-	string strn(str);
+	std::string strn(str);
 	trim(strn);
 	return strn;
 }
 
-string StringUtil::toHEX(const int& number)
+std::string StringUtil::toHEX(const int& number)
 {
 	return toHEX((unsigned int)number);
 }
 
-string StringUtil::toHEX(const unsigned int& number)
+std::string StringUtil::toHEX(const unsigned int& number)
 {
 	char hexVal[20];
 	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%x", number);
-	string hexstr(hexVal);
+	std::string hexstr(hexVal);
 	return hexstr;
 }
 
-string StringUtil::toHEX(const long& number)
+std::string StringUtil::toHEX(const long& number)
 {
 	return toHEX((unsigned long)number);
 }
 
-string StringUtil::toHEX(const unsigned long& number)
+std::string StringUtil::toHEX(const unsigned long& number)
 {
 	char hexVal[20];
 	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%lx", number);
-	string hexstr(hexVal);
+	std::string hexstr(hexVal);
 	return hexstr;
 }
 
 
-string StringUtil::toHEX(const long long& number)
+std::string StringUtil::toHEX(const long long& number)
 {
 	return toHEX((unsigned long long)number);
 }
 
-string StringUtil::toHEX(const unsigned long long& number)
+std::string StringUtil::toHEX(const unsigned long long& number)
 {
 	char hexVal[20];
 	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%llx", number);
-	string hexstr(hexVal);
+	std::string hexstr(hexVal);
 	return hexstr;
 }
 
-string StringUtil::toOCTAL(const int& number)
+std::string StringUtil::toOCTAL(const int& number)
 {
 	return toOCTAL((unsigned int)number);
 }
 
-string StringUtil::toOCTAL(const unsigned int& number)
+std::string StringUtil::toOCTAL(const unsigned int& number)
 {
 	char hexVal[20];
 	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%o", number);
-	string hexstr(hexVal);
+	std::string hexstr(hexVal);
 	return hexstr;
 }
 
-string StringUtil::toOCTAL(const long& number)
+std::string StringUtil::toOCTAL(const long& number)
 {
 	return toOCTAL((unsigned long)number);
 }
 
-string StringUtil::toOCTAL(const unsigned long& number)
+std::string StringUtil::toOCTAL(const unsigned long& number)
 {
 	char hexVal[20];
 	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%lo", number);
-	string hexstr(hexVal);
+	std::string hexstr(hexVal);
 	return hexstr;
 }
 
 
-string StringUtil::toOCTAL(const long long& number)
+std::string StringUtil::toOCTAL(const long long& number)
 {
 	return toOCTAL((unsigned long long)number);
 }
 
-string StringUtil::toOCTAL(const unsigned long long& number)
+std::string StringUtil::toOCTAL(const unsigned long long& number)
 {
 	char hexVal[20];
 	memset(hexVal, 0, sizeof(hexVal));
 	sprintf(hexVal, "%llo", number);
-	string hexstr(hexVal);
+	std::string hexstr(hexVal);
 	return hexstr;
 }
 
-long int StringUtil::fromHEX(string hexVal)
+long int StringUtil::fromHEX(std::string hexVal)
 {
-	if(hexVal.find("0x")==string::npos)
+	if(hexVal.find("0x")==std::string::npos)
 	{
 		hexVal = "0x" + hexVal;
 	}
@@ -290,12 +290,12 @@ long int StringUtil::fromHEX(string hexVal)
 	return li;
 }
 
-bool StringUtil::startsWith(const string& str, const string& prefix)
+bool StringUtil::startsWith(const std::string& str, const std::string& prefix)
 {
     return str.size() >= prefix.size() && str.substr(0, prefix.size()) == prefix;
 }
 
-bool StringUtil::endsWith(const string& str, const string& suffix)
+bool StringUtil::endsWith(const std::string& str, const std::string& suffix)
 {
     return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }

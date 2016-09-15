@@ -31,77 +31,77 @@ Class::~Class() {
 	// TODO Auto-generated destructor stub
 }
 
-string Class::getName() const
+std::string Class::getName() const
 {
 	return name;
 }
 
-void Class::setName(const string& name)
+void Class::setName(const std::string& name)
 {
 	this->name = name;
 }
 
-string Class::getAccess() const
+std::string Class::getAccess() const
 {
 	return access;
 }
 
-void Class::setAccess(const string& access)
+void Class::setAccess(const std::string& access)
 {
 	this->access = access;
 }
 
-string Class::getType() const
+std::string Class::getType() const
 {
 	return type;
 }
 
-void Class::setType(const string& type)
+void Class::setType(const std::string& type)
 {
 	this->type = type;
 }
 
-string Class::getPackage() const
+std::string Class::getPackage() const
 {
 	return package;
 }
 
-void Class::setPackage(const string& package)
+void Class::setPackage(const std::string& package)
 {
 	this->package = package;
 }
 
-string Class::getBase() const
+std::string Class::getBase() const
 {
 	return base;
 }
 
-void Class::setBase(const string& base)
+void Class::setBase(const std::string& base)
 {
 	this->base = base;
 }
 
-string Class::getInterfaces() const
+std::string Class::getInterfaces() const
 {
 	return interfaces;
 }
 
-void Class::setInterfaces(const string& interfaces)
+void Class::setInterfaces(const std::string& interfaces)
 {
 	this->interfaces = interfaces;
 }
 
-string Class::getLang() const
+std::string Class::getLang() const
 {
 	return lang;
 }
 
-void Class::setLang(const string& lang)
+void Class::setLang(const std::string& lang)
 {
 	this->lang = lang;
 }
 
-/*Method Class::getMethod(const string& name, const args& args)
+/*Method Class::getMethod(const std::string& name, const args& args)
 {
 	for (int var = 0; var < args.size(); ++var)
 	{
@@ -110,14 +110,14 @@ void Class::setLang(const string& lang)
 	return this->methods[name];
 }*/
 
-Field Class::getField(const string& name)
+Field Class::getField(const std::string& name)
 {
 	return this->fields[name];
 }
 
 void Class::addMethod(const Method& meth)
 {
-	string key = meth.getMethodName();
+	std::string key = meth.getMethodName();
 	for (int var = 0; var < (int)meth.getArgumentTypes().size(); ++var)
 	{
 		key += (meth.getArgumentTypes().at(var));

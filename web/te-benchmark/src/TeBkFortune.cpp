@@ -15,11 +15,11 @@ void TeBkFortune::setId(int id) {
 	this->id = id;
 }
 
-const string& TeBkFortune::getMessage() const {
+const std::string& TeBkFortune::getMessage() const {
 	return message;
 }
 
-void TeBkFortune::setMessage(const string& message) {
+void TeBkFortune::setMessage(const std::string& message) {
 	this->message = message;
 }
 

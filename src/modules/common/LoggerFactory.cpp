@@ -41,7 +41,7 @@ LoggerFactory::LoggerFactory()
 LoggerFactory::~LoggerFactory()
 {
 	dupLogNames.clear();
-	map<string, LoggerConfig*>::iterator it;
+	std::map<std::string, LoggerConfig*>::iterator it;
 	for (it=configs.begin();it!=configs.end();++it) {
 		it->second->lock.lock();
 		delete it->second;
@@ -54,23 +54,23 @@ void LoggerFactory::clear() {
 	{
 		return;
 	}
-	map<string, LoggerConfig*>::iterator it;
+	std::map<std::string, LoggerConfig*>::iterator it;
 	for(it=instance->configs.begin();it!=instance->configs.end();++it) {
-		cout << ("Clearing logger config for " + it->second->name) << endl;
+		std::cout << ("Clearing logger config for " + it->second->name) << std::endl;
 		if(it->second->mode=="FILE" && it->second->file!="" && it->second->out!=NULL) {
 			delete it->second->out;
 		}
 		delete it->second;
 	}
 	delete instance;
-	cout << ("Destructed LoggerFactory") << endl;
+	std::cout << ("Destructed LoggerFactory") << std::endl;
 }
 
 void LoggerFactory::setVhostNumber(const int& vhn) {
 	if(instance!=NULL)
 	{
 		instance->vhostNumber = vhn;
-		map<string, LoggerConfig*>::iterator it;
+		std::map<std::string, LoggerConfig*>::iterator it;
 		for(it=instance->configs.begin();it!=instance->configs.end();++it)
 		{
 			it->second->vhostNumber = vhn;
@@ -78,9 +78,9 @@ void LoggerFactory::setVhostNumber(const int& vhn) {
 	}
 }
 
-void LoggerFactory::configureDefaultLogger(const string& appName)
+void LoggerFactory::configureDefaultLogger(const std::string& appName)
 {
-	string lname = "DEFAULT";
+	std::string lname = "DEFAULT";
 	if(appName!="")
 	{
 		lname = appName + "." + lname;
@@ -93,12 +93,12 @@ void LoggerFactory::configureDefaultLogger(const string& appName)
 		config->file = "";
 		DateFormat df("dd/mm/yyyy hh:mi:ss");
 		config->datFormat = df;
-		config->out = &cout;
+		config->out = &std::cout;
 		config->lock.lock();
 		config->lock.unlock();
 
 		instance->configs[lname] = config;
-		cout << "Configuring default logger..." << endl;
+		std::cout << "Configuring default logger..." << std::endl;
 	}
 }
 
@@ -112,7 +112,7 @@ void LoggerFactory::init()
 	configureDefaultLogger("");
 }
 
-void LoggerFactory::init(const string& configFile, const string& serverRootDirectory, const string& appName, const bool& isLoggingEnabled) {
+void LoggerFactory::init(const std::string& configFile, const std::string& serverRootDirectory, const std::string& appName, const bool& isLoggingEnabled) {
 	if(instance==NULL)
 	{
 		instance = new LoggerFactory();
@@ -123,23 +123,23 @@ void LoggerFactory::init(const string& configFile, const string& serverRootDirec
 	Element& root = doc.getRootElement();
 	if(root.getTagName()=="loggers" && root.getChildElements().size()>0)
 	{
-		cout << "Reading " << configFile<< " file to configure loggers..." << endl;
+		std::cout << "Reading " << configFile<< " file to configure loggers..." << std::endl;
 		ElementList eles = root.getChildElements();
 		for (unsigned int apps = 0; apps < eles.size(); apps++)
 		{
 			if(eles.at(apps)->getTagName()=="logger")
 			{
 				Element* ele = eles.at(apps);
-				string name = StringUtil::toUpperCopy(ele->getAttribute("name"));
-				string mode = StringUtil::toUpperCopy(ele->getAttribute("mode"));
-				string level = StringUtil::toUpperCopy(ele->getAttribute("level"));
-				string dfstr = "dd/mm/yyyy hh:mi:ss";
+				std::string name = StringUtil::toUpperCopy(ele->getAttribute("name"));
+				std::string mode = StringUtil::toUpperCopy(ele->getAttribute("mode"));
+				std::string level = StringUtil::toUpperCopy(ele->getAttribute("level"));
+				std::string dfstr = "dd/mm/yyyy hh:mi:ss";
 				if(ele->getAttribute("dateformat")!="") {
 					dfstr = StringUtil::toLowerCopy(ele->getAttribute("dateformat"));
 				}
-				string file, pattern;
-				string logdirtype = "SERVER";
-				string logDirPath = serverRootDirectory + "logs/";
+				std::string file, pattern;
+				std::string logdirtype = "SERVER";
+				std::string logDirPath = serverRootDirectory + "logs/";
 				ElementList files = ele->getChildElements();
 				Element* fileele = NULL;
 
@@ -156,7 +156,7 @@ void LoggerFactory::init(const string& configFile, const string& serverRootDirec
 				}
 
 				if(file!="" && fileele->getAttribute("type")!="") {
-					string ftyp = StringUtil::toUpperCopy(fileele->getAttribute("type"));
+					std::string ftyp = StringUtil::toUpperCopy(fileele->getAttribute("type"));
 					if(ftyp=="ABSOLUTE") {
 						logdirtype = "ABSOLUTE";
 						logDirPath = "";
@@ -177,12 +177,12 @@ void LoggerFactory::init(const string& configFile, const string& serverRootDirec
 				}
 				if(mode=="FILE" && file=="")
 				{
-					cout << "Error configuring Logger, invalid mode and filepath defined..." << endl;
+					std::cout << "Error configuring Logger, invalid mode and filepath defined..." << std::endl;
 				}
 				else if(mode=="FILE")
 				{
-					string logfilepath = logDirPath + file;
-					ofstream ofs;
+					std::string logfilepath = logDirPath + file;
+					std::ofstream ofs;
 					if(isLoggingEnabled) {
 						ofs.open(logfilepath.c_str());
 					} else {
@@ -195,7 +195,7 @@ void LoggerFactory::init(const string& configFile, const string& serverRootDirec
 					else
 					{
 						ofs.close();
-						cout << "Error configuring Logger, invalid filepath defined..." << endl;
+						std::cout << "Error configuring Logger, invalid filepath defined..." << std::endl;
 						continue;
 					}
 				}
@@ -204,26 +204,26 @@ void LoggerFactory::init(const string& configFile, const string& serverRootDirec
 						&& level!=Logger::LEVEL_WARN && level!=Logger::LEVEL_INFO && level!=Logger::LEVEL_DEBUG
 						 && level!=Logger::LEVEL_TRACE)
 				{
-					cout << "Error configuring Logger, invalid level defined..." << endl;
+					std::cout << "Error configuring Logger, invalid level defined..." << std::endl;
 					continue;
 				}
 
-				string loggerName = name;
+				std::string loggerName = name;
 				if(appName!="") {
 					loggerName = appName + "." + loggerName;
 				}
 				if(instance->configs.find(loggerName)!=instance->configs.end())
 				{
-					cout << "Error configuring Logger " << loggerName << ", Logger already defined skipping..." << endl;
+					std::cout << "Error configuring Logger " << loggerName << ", Logger already defined skipping..." << std::endl;
 					continue;
 				} else {
 					bool foundDup = false;
-					map<string, LoggerConfig*>::iterator it;
+					std::map<std::string, LoggerConfig*>::iterator it;
 					for(it=instance->configs.begin();it!=instance->configs.end();++it) {
 						if((mode=="FILE" && file!="" && it->second->file==file && it->second->logdirtype==logdirtype)
 								|| (mode=="CONSOLE" && name!="DEFAULT")) {
 							instance->dupLogNames[loggerName] = level;
-							cout << "Found duplicate logger configuration for name " + loggerName << endl;
+							std::cout << "Found duplicate logger configuration for name " + loggerName << std::endl;
 							break;
 						}
 					}
@@ -247,44 +247,44 @@ void LoggerFactory::init(const string& configFile, const string& serverRootDirec
 				config->lock.lock();
 				if(mode=="FILE")
 				{
-					string logfilepath = logDirPath + file;
+					std::string logfilepath = logDirPath + file;
 					if(instance->vhostNumber>0) {
-						logfilepath += "." + CastUtil::lexical_cast<string>(instance->vhostNumber);
+						logfilepath += "." + CastUtil::lexical_cast<std::string>(instance->vhostNumber);
 					}
-					ofstream* strm = new ofstream();
+					std::ofstream* strm = new std::ofstream();
 					if(isLoggingEnabled) {
-						strm->open(logfilepath.c_str(), ios::app | ios::binary);
+						strm->open(logfilepath.c_str(), std::ios::app | std::ios::binary);
 					} else {
-						strm->open("/dev/null", ios::app | ios::binary);
+						strm->open("/dev/null", std::ios::app | std::ios::binary);
 					}
 					config->out = strm;
 				}
 				else
 				{
-					config->out = &cout;
+					config->out = &std::cout;
 				}
 				config->lock.unlock();
 				instance->configs[loggerName] = config;
 			}
 		}
-		cout << "Done configuring loggers..." << endl;
+		std::cout << "Done configuring loggers..." << std::endl;
 	}
 	configureDefaultLogger("");
 }
 
-Logger LoggerFactory::getLogger(const string& className) {
+Logger LoggerFactory::getLogger(const std::string& className) {
 	if(instance==NULL)
 	{
 		init();
 	}
-	map<string, LoggerConfig*>::iterator it;
+	std::map<std::string, LoggerConfig*>::iterator it;
 	for(it=instance->configs.begin();it!=instance->configs.end();++it)
 	{
 		if(it->second->pattern!="" && RegexUtil::find(className, it->second->pattern)!=-1) {
 			return Logger(it->second, className);
 		}
 	}
-	string appName = CommonUtils::getAppName("");
+	std::string appName = CommonUtils::getAppName("");
 	if(appName!="")
 	{
 		if(instance->configs.find(appName+".DEFAULT")!=instance->configs.end())
@@ -295,14 +295,14 @@ Logger LoggerFactory::getLogger(const string& className) {
 	return Logger(instance->configs["DEFAULT"], className);
 }
 
-Logger LoggerFactory::getLogger(const string& loggerName, const string& className) {
+Logger LoggerFactory::getLogger(const std::string& loggerName, const std::string& className) {
 	if(instance==NULL)
 	{
 		init();
 	}
-	string appName = CommonUtils::getAppName("");
+	std::string appName = CommonUtils::getAppName("");
 	if(appName!="") {
-		string nloggerName = appName + "." + loggerName;
+		std::string nloggerName = appName + "." + loggerName;
 		if(instance->configs.find(nloggerName)==instance->configs.end()) {
 			if(instance->dupLogNames.find(nloggerName)!=instance->dupLogNames.end()) {
 				return Logger(instance->configs[nloggerName], className, instance->dupLogNames[nloggerName]);

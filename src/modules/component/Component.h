@@ -26,26 +26,26 @@
 #include "Message.h"
 #include "ConnectionSettings.h"
 #include "DataSourceManager.h"
-using namespace std;
+
 class ComponentService {
 private:
-	string classn;
-	string methName;
-	string retType;
-	string address;
-	vector<string> allwugList;
-	vector<string> blkdugList;
-	vector<string> allwList;
-	vector<string> blkdList;
+	std::string classn;
+	std::string methName;
+	std::string retType;
+	std::string address;
+	std::vector<std::string> allwugList;
+	std::vector<std::string> blkdugList;
+	std::vector<std::string> allwList;
+	std::vector<std::string> blkdList;
 public:
 	ComponentService(){}
 	virtual ~ComponentService(){}
 	friend class ComponentGen;
 };
 class Component {
-	void* invokeServiceInternal(const string& serviceName, vector<void*> args);
-	string name;
-	string desc;
+	void* invokeServiceInternal(const std::string& serviceName, std::vector<void*> args);
+	std::string name;
+	std::string desc;
 	bool ajaxAvail;
 	bool websAvail;
 	bool methinvAvail;
@@ -53,17 +53,17 @@ class Component {
 	bool thrdPerReq;
 	int thrdPoolSize;
 	int dbconpoolSize;
-	string authFrom;
+	std::string authFrom;
 	ConnectionSettings authDets;
 	bool authMode;
-	vector<string> protocols;
-	vector<string> allwList;
-	vector<string> blkdList;
+	std::vector<std::string> protocols;
+	std::vector<std::string> allwList;
+	std::vector<std::string> blkdList;
 	bool session;
-	map<string,ComponentService> services;
+	std::map<std::string,ComponentService> services;
 	DataSourceInterface *chib;
 public:
-	Component(const string& name, const string& desc, const bool& ajav, const bool& wsav, const bool& miav, const bool& autotx, const bool& thrdpr, const int& thrdpsiz, const int& dbcps, const string& authfr, const ConnectionSettings& authdet, const string& authmod, const vector<string>& protocol, const vector<string>& alwls, const vector<string>& blkls, const bool& sess, const map<string,ComponentService>& service){}
+	Component(const std::string& name, const std::string& desc, const bool& ajav, const bool& wsav, const bool& miav, const bool& autotx, const bool& thrdpr, const int& thrdpsiz, const int& dbcps, const std::string& authfr, const ConnectionSettings& authdet, const std::string& authmod, const std::vector<std::string>& protocol, const std::vector<std::string>& alwls, const std::vector<std::string>& blkls, const bool& sess, const std::map<std::string,ComponentService>& service){}
 	Component();
 	virtual ~Component();
 	void init();
@@ -85,7 +85,7 @@ public:
 	DataSourceInterface* getDataSource();
 
 	//Security, Authentication and Authorization functions
-	bool setMode(const string& mode);//ldap|database|filesystem
+	bool setMode(const std::string& mode);//ldap|database|filesystem
 	void setDetails();//Details about the file/db or ldap connecn and parameters ConnectionSettings
 	bool isAuthorizedTo();//Task
 	bool allowAccess();
@@ -104,24 +104,24 @@ public:
 	bool calledFromMETHINVK();
 	bool calledFromPROGCNTX();
 
-	void* invokeService(const string& serviceName, vector<void*> args);
+	void* invokeService(const std::string& serviceName, std::vector<void*> args);
 
-	string getName() const
+	std::string getName() const
 	{
 		return name;
 	}
 
-	void setName(const string& name)
+	void setName(const std::string& name)
 	{
 		this->name = name;
 	}
 
-	string getDesc() const
+	std::string getDesc() const
 	{
 		return desc;
 	}
 
-	void setDesc(const string& desc)
+	void setDesc(const std::string& desc)
 	{
 		this->desc = desc;
 	}
@@ -196,12 +196,12 @@ public:
 		this->dbconpoolSize = dbconpoolSize;
 	}
 
-	string getAuthFrom() const
+	std::string getAuthFrom() const
 	{
 		return authFrom;
 	}
 
-	void setAuthFrom(const string& authFrom)
+	void setAuthFrom(const std::string& authFrom)
 	{
 		this->authFrom = authFrom;
 	}
@@ -226,32 +226,32 @@ public:
 		this->authMode = authMode;
 	}
 
-	vector<string> getProtocols() const
+	std::vector<std::string> getProtocols() const
 	{
 		return protocols;
 	}
 
-	void setProtocols(const vector<string>& protocols)
+	void setProtocols(const std::vector<std::string>& protocols)
 	{
 		this->protocols = protocols;
 	}
 
-	vector<string> getAllwList() const
+	std::vector<std::string> getAllwList() const
 	{
 		return allwList;
 	}
 
-	void setAllwList(const vector<string>& allwList)
+	void setAllwList(const std::vector<std::string>& allwList)
 	{
 		this->allwList = allwList;
 	}
 
-	vector<string> getBlkdList() const
+	std::vector<std::string> getBlkdList() const
 	{
 		return blkdList;
 	}
 
-	void setBlkdList(const vector<string>& blkdList)
+	void setBlkdList(const std::vector<std::string>& blkdList)
 	{
 		this->blkdList = blkdList;
 	}
@@ -266,12 +266,12 @@ public:
 		this->session = session;
 	}
 
-	map<string,ComponentService> getServices() const
+	std::map<std::string,ComponentService> getServices() const
 	{
 		return services;
 	}
 
-	void setServices(const map<string,ComponentService>& services)
+	void setServices(const std::map<std::string,ComponentService>& services)
 	{
 		this->services = services;
 	}

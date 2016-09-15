@@ -37,19 +37,19 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <signal.h>
-using namespace std;
+
 
 class SSLCommon {
 	SSLCommon();
 public:
-	static string ciphers;
+	static std::string ciphers;
 	virtual ~SSLCommon();
 	static void exitSSL(const char *func);
 	static void* zeroingMalloc (size_t howmuch);
 	static void load_dh_params(SSL_CTX *ctx, char *file);
 	static void load_ecdh_params(SSL_CTX *ctx);
 	static SSL_CTX *initialize_ctx(const bool&);
-	static void loadCerts(SSL_CTX* ctx, char* certFile, char* keyFile, const string& caList, const bool&);
+	static void loadCerts(SSL_CTX* ctx, char* certFile, char* keyFile, const std::string& caList, const bool&);
 	static void check_cert(SSL *ssl, char *host);
 	static void closeSSL(const int& fd, SSL *ssl, BIO* bio);
 };

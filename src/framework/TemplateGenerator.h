@@ -13,15 +13,15 @@
 #include "StringUtil.h"
 #include "map"
 #include "ConfigurationData.h"
-using namespace std;
+
 
 
 class TemplateGenerator {
 public:
 	TemplateGenerator();
 	virtual ~TemplateGenerator();
-	static string generateTempCd(const string&, string &, string &, const string& app);
-	static string generateTempCdAll(const string& serverRootDirectory);
+	static std::string generateTempCd(const std::string&, std::string &, std::string &, const std::string& app);
+	static std::string generateTempCdAll(const std::string& serverRootDirectory);
 };
 
 #endif /* TEMPLATEGENERATOR_H_ */

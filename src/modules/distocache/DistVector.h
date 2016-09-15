@@ -26,16 +26,16 @@
 #include "BinarySerialize.h"
 
 template <class T> class DistVector {
-	string cacheKey;
+	std::string cacheKey;
 	DistoCacheClientUtils* cl;
 public:
-	DistVector(const string& cacheKey)
+	DistVector(const std::string& cacheKey)
 	{
 		this->cacheKey = cacheKey;
 		cl = PooledDistoCacheConnectionFactory::getConnection();
 		try {
 			cl->allocate(cacheKey, "vector");
-		} catch(const string& err) {
+		} catch(const std::string& err) {
 			if(err!="Entry already exists") {
 				throw err;
 			}
@@ -43,32 +43,32 @@ public:
 	}
 	void push_back(const T& t)
 	{
-		string serValue = BinarySerialize::serialize<T>(t);
+		std::string serValue = BinarySerialize::serialize<T>(t);
 		cl->addCollectionEntry(cacheKey, serValue);
 	}
 	void insert(const T& t, const int& position)
 	{
-		string serValue = BinarySerialize::serialize<T>(t);
+		std::string serValue = BinarySerialize::serialize<T>(t);
 		cl->insert(cacheKey, serValue, position);
 	}
 	void insert(const T& t, const int& position, const int& repetition)
 	{
-		string serValue = BinarySerialize::serialize<T>(t);
+		std::string serValue = BinarySerialize::serialize<T>(t);
 		cl->insert(cacheKey, serValue, position, repetition);
 	}
 	T at(const int& position)
 	{
-		string serValue = cl->getCollectionEntryAt(cacheKey, position);
+		std::string serValue = cl->getCollectionEntryAt(cacheKey, position);
 		return BinarySerialize::unserialize<T>(serValue);
 	}
 	T front()
 	{
-		string serValue = cl->getFrontValue(cacheKey);
+		std::string serValue = cl->getFrontValue(cacheKey);
 		return BinarySerialize::unserialize<T>(serValue);
 	}
 	T back()
 	{
-		string serValue = cl->getBackValue(cacheKey);
+		std::string serValue = cl->getBackValue(cacheKey);
 		return BinarySerialize::unserialize<T>(serValue);
 	}
 	void erase(const int& position)
@@ -99,9 +99,9 @@ public:
 	class iterator {
 			friend class DistVector;
 			int position;
-			string cacheKey;
+			std::string cacheKey;
 			DistoCacheClientUtils* cl;
-			iterator(string cacheKey, DistoCacheClientUtils* cl)
+			iterator(std::string cacheKey, DistoCacheClientUtils* cl)
 			{
 				this->cacheKey = cacheKey;
 				this->cl = cl;
@@ -115,7 +115,7 @@ public:
 			{
 				if(position>=0)
 				{
-					string serValue = cl->getCollectionEntryAt(cacheKey, position);
+					std::string serValue = cl->getCollectionEntryAt(cacheKey, position);
 					return BinarySerialize::unserialize<T>(serValue);
 				}
 				else
@@ -127,7 +127,7 @@ public:
 			{
 				if(position>=0)
 				{
-					string serValue = BinarySerialize::serialize<T>(v);
+					std::string serValue = BinarySerialize::serialize<T>(v);
 					cl->setCollectionEntryAt(cacheKey, position, serValue);
 				}
 				else

@@ -10,12 +10,12 @@
 #include "map"
 #include "Mutex.h"
 
-using namespace std;
+
 
 template<typename K, typename V>
 class ConcurrentMap {
 	Mutex _l;
-	map<K, V> _m;
+	std::map<K, V> _m;
 public:
 	void put(const K& k, const V& v)
 	{

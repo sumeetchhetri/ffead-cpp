@@ -18,7 +18,7 @@
 #include "ServiceHandler.h"
 #include "ConcurrentQueue.h"
 #include "LoggerFactory.h"
-using namespace std;
+
 
 typedef SocketInterface* (*SocketInterfaceFactory) (SocketUtil*);
 
@@ -36,8 +36,8 @@ class RequestReaderHandler : public ReaderSwitchInterface {
 	ServiceHandler* shi;
 	long siIdentifierSeries;
 	SocketInterfaceFactory sf;
-	map<int, SocketInterface*> connections;
-	map<int, SocketInterface*> connectionsWithTimeouts;
+	std::map<int, SocketInterface*> connections;
+	std::map<int, SocketInterface*> connectionsWithTimeouts;
 	bool isActive();
 	void addSf(SocketInterface* sf);
 	static void* handleTimeouts(void* inp);

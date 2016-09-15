@@ -23,12 +23,12 @@
 #ifndef MarkerYOBJECT_H_
 #define MarkerYOBJECT_H_
 #include "string"
-using namespace std;
+
 class MarkerYObject
 {
 	public:
 		int i;
-		string j;
+		std::string j;
 		float c;
 };
 

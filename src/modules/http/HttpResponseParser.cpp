@@ -30,19 +30,19 @@ HttpResponseParser::~HttpResponseParser() {
 }
 
 
-HttpResponseParser::HttpResponseParser(const string& vecstr, HttpResponse &response)
+HttpResponseParser::HttpResponseParser(const std::string& vecstr, HttpResponse &response)
 {
-	vector<string> vec;
+	std::vector<std::string> vec;
 	StringUtil::split(vec, vecstr, ("\n"));
 	if(vec.size()!=0)
 	{
 		this->content = "";
-		string conten;
+		std::string conten;
 		bool contStarts = false;
 		for(unsigned int i=0;i<vec.size();i++)
 		{
-			//logger << endl << "Reading line " << vec.at(i) << endl << flush;
-			vector<string> temp,vemp,memp;
+			//logger << endl << "Reading line " << vec.at(i) << endl << std::flush;
+			std::vector<std::string> temp,vemp,memp;
 			if((vec.at(i)=="\r" || vec.at(i)==""|| vec.at(i)=="\r\n") && !contStarts)
 			{
 				contStarts = true;
@@ -52,9 +52,9 @@ HttpResponseParser::HttpResponseParser(const string& vecstr, HttpResponse &respo
 			if(i==0)
 			{
 				StringUtil::replaceFirst(vec.at(i),"\r","");
-				vector<string> httpst;
+				std::vector<std::string> httpst;
 				StringUtil::split(httpst, vec.at(i), (" "));
-				if(httpst.at(0).find("HTTP")==string::npos)
+				if(httpst.at(0).find("HTTP")==std::string::npos)
 				{
 
 				}
@@ -65,11 +65,11 @@ HttpResponseParser::HttpResponseParser(const string& vecstr, HttpResponse &respo
 					response.setStatusMsg(httpst.at(2));
 				}
 			}
-			else if(vec.at(i).find(": ")!=string::npos && !contStarts)
+			else if(vec.at(i).find(": ")!=std::string::npos && !contStarts)
 			{
 				temp.push_back(vec.at(i).substr(0, vec.at(i).find(": ")));
 				temp.push_back(vec.at(i).substr(vec.at(i).find(": ")+2));
-				//logger << temp.at(0) << " => " << temp.at(1) << endl;
+				//logger << temp.at(0) << " => " << temp.at(1) << std::endl;
 				StringUtil::replaceFirst(temp.at(1),"\r","");
 				response.addHeaderValue(temp.at(0), temp.at(1));
 			}
@@ -84,7 +84,7 @@ HttpResponseParser::HttpResponseParser(const string& vecstr, HttpResponse &respo
 	}
 }
 
-string HttpResponseParser::getContent()
+std::string HttpResponseParser::getContent()
 {
 	return content;
 }

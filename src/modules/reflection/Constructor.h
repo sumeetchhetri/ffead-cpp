@@ -24,22 +24,22 @@
 #define CONSTRUCTOR_H_
 #include "string"
 #include "vector"
-using namespace std;
+
 class Constructor {
-	string refName;
-	string name;
-	vector<string> argumentTypes;
+	std::string refName;
+	std::string name;
+	std::vector<std::string> argumentTypes;
 public:
 	Constructor();
 	virtual ~Constructor();
-	vector<string> getArgumentTypes() const;
-	void setArgumentTypes(const vector<string>&);
+	std::vector<std::string> getArgumentTypes() const;
+	void setArgumentTypes(const std::vector<std::string>&);
 	int getArgNum() const;
-    string getName() const;
-    void setName(const string& name);
+    std::string getName() const;
+    void setName(const std::string& name);
     void clear();
-	const string& getRefName() const;
-	void setRefName(const string& refName);
+	const std::string& getRefName() const;
+	void setRefName(const std::string& refName);
 };
 
 #endif /* CONSTRUCTOR_H_ */

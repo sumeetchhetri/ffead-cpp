@@ -26,26 +26,26 @@
 #include "Exception.h"
 #include "map"
 
-using namespace std;
+
 
 class BeanException : public Exception
 {
 public:
-	BeanException(const string&);
+	BeanException(const std::string&);
 	virtual ~BeanException() throw();
 };
 
 class AppContext {
-	map<string,string> components;
+	std::map<std::string,std::string> components;
 	static AppContext* _instance;
 	AppContext();
 	virtual ~AppContext();
 	static void init();
 	static void clear();
 public:
-	static bool registerComponent(const string&);
-	static bool unregisterComponent(const string&);
-	static void lookup(const string&);
+	static bool registerComponent(const std::string&);
+	static bool unregisterComponent(const std::string&);
+	static void lookup(const std::string&);
 };
 
 #endif /* APPCONTEXT_H_ */

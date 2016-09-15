@@ -23,14 +23,14 @@
 #ifndef CONTENTTYPES_H_
 #define CONTENTTYPES_H_
 #include "string"
-using namespace std;
+
 
 class ContentTypes {
 public:
-	static string CONTENT_TYPE_TEXT_PLAIN;
-	static string CONTENT_TYPE_TEXT_SHTML;
-	static string CONTENT_TYPE_APPLICATION_JSON;
-	static string CONTENT_TYPE_APPLICATION_XML;
+	static std::string CONTENT_TYPE_TEXT_PLAIN;
+	static std::string CONTENT_TYPE_TEXT_SHTML;
+	static std::string CONTENT_TYPE_APPLICATION_JSON;
+	static std::string CONTENT_TYPE_APPLICATION_XML;
 };
 
 #endif /* CONTENTTYPES_H_ */

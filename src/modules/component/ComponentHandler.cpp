@@ -47,15 +47,15 @@ void* ComponentHandler::service(void* arg)
 {
 	int fd = *(int*)arg;
 	init();
-	string methInfo,retValue;
+	std::string methInfo,retValue;
 	instance->server.Receive(fd,methInfo,1024);
 	methInfo =methInfo.substr(0,methInfo.find_last_of(">")+1);
-	instance->logger << ("Component method " +  methInfo) << endl;
+	instance->logger << ("Component method " +  methInfo) << std::endl;
 	try
 	{
 		XmlParser parser("Parser");
-		instance->logger << "Bean call parsed successfully" << endl;
-		if(methInfo.find("lang=\"c++\"")!=string::npos || methInfo.find("lang='c++'")!=string::npos)
+		instance->logger << "Bean call parsed successfully" << std::endl;
+		if(methInfo.find("lang=\"c++\"")!=std::string::npos || methInfo.find("lang='c++'")!=std::string::npos)
 		{
 			Document doc;
 			parser.parse(methInfo, doc);
@@ -118,20 +118,20 @@ void* ComponentHandler::service(void* arg)
 				}
 				if(argts.at(var)->getAttribute("type")!="")
 				{
-					string objxml = argts.at(var)->getChildElements().at(0)->render();
-					string objClassName = argts.at(var)->getChildElements().at(0)->getTagName();
+					std::string objxml = argts.at(var)->getChildElements().at(0)->render();
+					std::string objClassName = argts.at(var)->getChildElements().at(0)->getTagName();
 					value = ser.unSerializeUnknown(objxml, argts.at(var)->getAttribute("type"));
 				}
 				argus.push_back(argts.at(var)->getAttribute("type"));
 				valus.push_back(value);
 			}
-			string className = "Component_"+message.getAttribute("beanName");
-			instance->logger << ("Bean class = " + className) << endl;
-			string returnType = message.getAttribute("returnType");
-			string lang = message.getAttribute("lang");
+			std::string className = "Component_"+message.getAttribute("beanName");
+			instance->logger << ("Bean class = " + className) << std::endl;
+			std::string returnType = message.getAttribute("returnType");
+			std::string lang = message.getAttribute("lang");
 			ClassInfo clas = reflector.getClassInfo(className);
-			string methodName = message.getAttribute("name");
-			instance->logger << ("Bean service = " + methodName) << endl;
+			std::string methodName = message.getAttribute("name");
+			instance->logger << ("Bean service = " + methodName) << std::endl;
 			if(clas.getClassName()=="")
 			{
 				throw ComponentHandlerException("bean does not exist or is not regsitered\n",retValue);
@@ -144,44 +144,54 @@ void* ComponentHandler::service(void* arg)
 			}
 			else
 			{
-				instance->logger << ("Got Bean service " + methodName) << endl;
+				instance->logger << ("Got Bean service " + methodName) << std::endl;
 				args argus;
 				Constructor ctor = clas.getConstructor(argus);
 				void *_temp = reflector.newInstanceGVP(ctor);
-				instance->logger << ("Got Bean") << endl;
+				instance->logger << ("Got Bean") << std::endl;
 				if(returnType=="void" || returnType=="")
 				{
-					instance->logger << "Void return" << endl;
+					instance->logger << "Void return" << std::endl;
 					reflector.invokeMethod<void*>(_temp,meth,valus);
 					retValue = ("<return:void></return:void>");
 				}
 				else
 				{
-					instance->logger << ("Return type = " + returnType) << endl;
+					instance->logger << ("Return type = " + returnType) << std::endl;
 					if(returnType=="int")
 					{
 						int retv = reflector.invokeMethod<int>(_temp,meth,valus);
-						retValue = ("<return:int>"+CastUtil::lexical_cast<string>(retv)+"</return:int>");
+						retValue = ("<return:int>"+CastUtil::lexical_cast<std::string>(retv)+"</return:int>");
+					}
+					else if(returnType=="long")
+					{
+						long retv = reflector.invokeMethod<long>(_temp,meth,valus);
+						retValue = ("<return:long>"+CastUtil::lexical_cast<std::string>(retv)+"</return:long>");
+					}
+					else if(returnType=="long long")
+					{
+						long long retv = reflector.invokeMethod<long long>(_temp,meth,valus);
+						retValue = ("<return:longlong>"+CastUtil::lexical_cast<std::string>(retv)+"</return:longlong>");
 					}
 					else if(returnType=="float")
 					{
 						float retv = reflector.invokeMethod<float>(_temp,meth,valus);
-						retValue = ("<return:float>"+CastUtil::lexical_cast<string>(retv)+"</return:float>");
+						retValue = ("<return:float>"+CastUtil::lexical_cast<std::string>(retv)+"</return:float>");
 					}
 					else if(returnType=="double")
 					{
 						double retv = reflector.invokeMethod<double>(_temp,meth,valus);
-						retValue = ("<return:double>"+CastUtil::lexical_cast<string>(retv)+"</return:double>");
+						retValue = ("<return:double>"+CastUtil::lexical_cast<std::string>(retv)+"</return:double>");
 					}
 					else if(returnType=="string")
 					{
-						string retv = reflector.invokeMethod<string>(_temp,meth,valus);
+						std::string retv = reflector.invokeMethod<std::string>(_temp,meth,valus);
 						retValue = ("<return:string>"+retv+"</return:string>");
 					}
 					else if(returnType!="")
 					{
 						void* retobj = reflector.invokeMethodUnknownReturn(_temp,meth,valus);
-						string oxml = ser.serializeUnknown(retobj,returnType);
+						std::string oxml = ser.serializeUnknown(retobj,returnType);
 						retValue = ("<return:"+returnType+">"+oxml+"</return:"+returnType+">");
 					}
 				}
@@ -192,20 +202,20 @@ void* ComponentHandler::service(void* arg)
 		{
 			retValue = "<return:exception>This is a C++ daemon</return:exception>";
 		}
-		//instance->logger << "\nSending data = "<< retValue << "\n" << endl;
+		//instance->logger << "\nSending data = "<< retValue << "\n" << std::endl;
 		if(retValue!="")
 			instance->server.Send(fd,retValue);
 		//close(fd);
 	}
 	catch(const ComponentHandlerException& e)
 	{
-		instance->logger << e.getMessage() << endl;
+		instance->logger << e.getMessage() << std::endl;
 		instance->server.Send(fd,retValue);
 		close(fd);
 	}
 	catch(...)
 	{
-		instance->logger << "Component exception occurred" << endl;
+		instance->logger << "Component exception occurred" << std::endl;
 		retValue = ("<return:exception>XmlParseException occurred</return:exception>");
 		instance->server.Send(fd,retValue);
 		close(fd);
@@ -218,7 +228,7 @@ void ComponentHandler::initComponent()
 
 }
 
-bool ComponentHandler::registerComponent(const string& name)
+bool ComponentHandler::registerComponent(const std::string& name)
 {
 	init();
 	if(instance->components.find(name)!=instance->components.end())
@@ -232,10 +242,10 @@ bool ComponentHandler::registerComponent(const string& name)
 	}
 }
 
-bool ComponentHandler::unregisterComponent(const string& name)
+bool ComponentHandler::unregisterComponent(const std::string& name)
 {
 	init();
-	map<string,string>::iterator it = instance->components.find(name);
+	std::map<std::string,std::string>::iterator it = instance->components.find(name);
 	if(it!=instance->components.end())
 	{
 		instance->components.erase(it);
@@ -246,7 +256,7 @@ bool ComponentHandler::unregisterComponent(const string& name)
 }
 
 
-void ComponentHandler::trigger(const string& port)
+void ComponentHandler::trigger(const std::string& port)
 {
 	init();
 	if(instance->running)

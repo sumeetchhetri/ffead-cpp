@@ -33,10 +33,10 @@
 #include "ConfigurationData.h"
 
 class ControllerHandler {
-	static bool getControllerForPath(const string& cntxtName, const string& actUrl, string& className);
-	static bool getMappingForPath(const string& cntxtName, const string& actUrl, string& to);
+	static bool getControllerForPath(const std::string& cntxtName, const std::string& actUrl, std::string& className);
+	static bool getMappingForPath(const std::string& cntxtName, const std::string& actUrl, std::string& to);
 public:
-	static bool handle(HttpRequest* req, HttpResponse* res, const string& ext, const string& pthwofile, Reflector& reflector);
+	static bool handle(HttpRequest* req, HttpResponse* res, const std::string& ext, const std::string& pthwofile, Reflector& reflector);
 };
 
 #endif /* CONTROLLERHANDLER_H_ */

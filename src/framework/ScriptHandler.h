@@ -40,14 +40,14 @@
 class ScriptHandler {
 	#if !defined(OS_MINGW)
 	static int pcloseRWE(const int& pid, int *rwepipe);
-	static int popenRWE(int *rwepipe, const char *exe, const char *const argv[], const string& tmpf);
+	static int popenRWE(int *rwepipe, const char *exe, const char *const argv[], const std::string& tmpf);
 	static int popenRWEN(int *rwepipe, const char *exe, const char** argv);
 	#endif
 public:
-	static string execute(string exe, const bool& retErrs);
-	static string chdirExecute(const string& exe, const string& tmpf, const bool& retErrs);
+	static std::string execute(std::string exe, const bool& retErrs);
+	static std::string chdirExecute(const std::string& exe, const std::string& tmpf, const bool& retErrs);
 #ifdef INC_SCRH
-	static bool handle(HttpRequest* req, HttpResponse* res, map<string, string>& handoffs, const string& ext);
+	static bool handle(HttpRequest* req, HttpResponse* res, std::map<std::string, std::string>& handoffs, const std::string& ext);
 #endif
 };
 

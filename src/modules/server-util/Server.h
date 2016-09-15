@@ -30,7 +30,7 @@
 
 #define MAXEPOLLSIZES 10000
 #define BACKLOGM 500
-using namespace std;
+
 
 typedef void* (*Service)(void*);
 class Server {
@@ -50,25 +50,25 @@ class Server {
 public:
 	SOCKET getSocket();
 	Server();
-	Server(const string&, const bool&, const int&, const Service&, int);
-	//Server(const string& port, const int& waiting, const Service& serv);
+	Server(const std::string&, const bool&, const int&, const Service&, int);
+	//Server(const std::string& port, const int& waiting, const Service& serv);
 	virtual ~Server();
 	SOCKET Accept();
-	int Send(const SOCKET&, const string&);
-	int Send(const SOCKET&, const vector<char>&);
-	int Send(const SOCKET&, const vector<unsigned char>&);
+	int Send(const SOCKET&, const std::string&);
+	int Send(const SOCKET&, const std::vector<char>&);
+	int Send(const SOCKET&, const std::vector<unsigned char>&);
 	int Send(const SOCKET&, char*);
 	int Send(const SOCKET&, unsigned char*);
-	int Receive(const SOCKET&, string&, const int&);
-	int Receive(const SOCKET&, vector<char>&, const int&);
-	int Receive(const SOCKET&, vector<unsigned char>&, const int&);
+	int Receive(const SOCKET&, std::string&, const int&);
+	int Receive(const SOCKET&, std::vector<char>&, const int&);
+	int Receive(const SOCKET&, std::vector<unsigned char>&, const int&);
 	int Receive(const SOCKET&, const char *data, const int&);
 	int Receive(const SOCKET&, const unsigned char *data, const int&);
-	int Receive(const SOCKET&, vector<string>&, const int&);
+	int Receive(const SOCKET&, std::vector<std::string>&, const int&);
 	void start();
 	void stop();
 	
-	static SOCKET createListener(const string& ipAddress, const int& port, const bool& block);
+	static SOCKET createListener(const std::string& ipAddress, const int& port, const bool& block);
 	static SOCKET createListener(const int& port, const bool& block);
 };
 

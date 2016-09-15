@@ -33,16 +33,16 @@
 #include "iostream"
 #include "LoggerFactory.h"
 
-using namespace std;
+
 class HttpResponseParser {
 	//TODO - Need to move this content to a MultipartContent List object in the
 	//HttpResponse class itself
-	string content;
+	std::string content;
 	Logger logger;
 public:
-	string getContent();
+	std::string getContent();
 	HttpResponseParser();
-	HttpResponseParser(const string& vecstr, HttpResponse &response);
+	HttpResponseParser(const std::string& vecstr, HttpResponse &response);
 	virtual ~HttpResponseParser();
 };
 

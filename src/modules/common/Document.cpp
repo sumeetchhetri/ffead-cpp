@@ -41,22 +41,22 @@ void Document::setRootElement(const Element& root)
 	this->root = root;
 }
 
-const string& Document::getDocType() const
+const std::string& Document::getDocType() const
 {
 	return docType;
 }
 
-void Document::setDocType(const string& docType)
+void Document::setDocType(const std::string& docType)
 {
 	this->docType = docType;
 }
 
-Element* Document::getElementByName(const string& name)
+Element* Document::getElementByName(const std::string& name)
 {
 	return getElementByName(name, &(this->root));
 }
 
-Element* Document::getElementByName(const string& name, Element* ele)
+Element* Document::getElementByName(const std::string& name, Element* ele)
 {
 	if(ele->getTagName()==name)
 		return ele;
@@ -75,9 +75,9 @@ Element* Document::getElementByName(const string& name, Element* ele)
 	return NULL;
 }
 
-string Document::render()
+std::string Document::render()
 {
-	string rend = this->docType;
+	std::string rend = this->docType;
 	rend.append(generateStartOpenTag(this->root.getTagName()));
 	rend.append(generateAttributes(this->root.getAttributes()));
 	rend.append(generateEndOpenTag());

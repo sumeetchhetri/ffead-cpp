@@ -15,7 +15,7 @@ Http2AlternativeServicesFrame::Http2AlternativeServicesFrame() {
 	port = 0;
 }
 
-const string& Http2AlternativeServicesFrame::getHost() const {
+const std::string& Http2AlternativeServicesFrame::getHost() const {
 	return host;
 }
 
@@ -27,7 +27,7 @@ unsigned int Http2AlternativeServicesFrame::getMaxAge() const {
 	return maxAge;
 }
 
-const string& Http2AlternativeServicesFrame::getOrigin() const {
+const std::string& Http2AlternativeServicesFrame::getOrigin() const {
 	return origin;
 }
 
@@ -35,7 +35,7 @@ uint16_t Http2AlternativeServicesFrame::getPort() const {
 	return port;
 }
 
-const string& Http2AlternativeServicesFrame::getProtocolId() const {
+const std::string& Http2AlternativeServicesFrame::getProtocolId() const {
 	return protocolId;
 }
 
@@ -43,7 +43,7 @@ unsigned char Http2AlternativeServicesFrame::getProtoLength() const {
 	return protoLength;
 }
 
-Http2AlternativeServicesFrame::Http2AlternativeServicesFrame(const string& data, Http2FrameHeader& aheader) {
+Http2AlternativeServicesFrame::Http2AlternativeServicesFrame(const std::string& data, Http2FrameHeader& aheader) {
 	header = aheader;
 	header.type = 10;
 	maxAge = (unsigned int)CommonUtils::charArrayToULongLong(data.substr(0, 4));
@@ -62,8 +62,8 @@ Http2AlternativeServicesFrame::~Http2AlternativeServicesFrame() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http2AlternativeServicesFrame::getFrameData() {
-	string edata;
+std::string Http2AlternativeServicesFrame::getFrameData() {
+	std::string edata;
 	edata.append(CommonUtils::ulonglongTocharArray(maxAge, 4));
 	edata.append(CommonUtils::ulonglongTocharArray(port, 2));
 	edata.push_back(protoLength);

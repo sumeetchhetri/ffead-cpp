@@ -1,7 +1,7 @@
-#declare vector<string> vect#
+#declare std::vector<std::string> vect#
 #declare Test test#
 #declare int number#
-#declare string dat#
+#declare std::string dat#
 <html>
 	<head>
 		<script src="${dat}"></script>

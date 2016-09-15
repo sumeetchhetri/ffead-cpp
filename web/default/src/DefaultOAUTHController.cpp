@@ -34,26 +34,26 @@ DefaultOAUTHController::~DefaultOAUTHController() {
 
 bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 {
-	string method = req->getMethod();
+	std::string method = req->getMethod();
 	StringUtil::toUpper(method);
 
-	map<string,string>::iterator it;
-	map<string,string> reqparams = req->getAllParams();
-	map<string,string> oauthparams = req->getAuthinfo();
+	std::map<std::string,std::string>::iterator it;
+	std::map<std::string,std::string> reqparams = req->getAllParams();
+	std::map<std::string,std::string> oauthparams = req->getAuthinfo();
 	for(it=oauthparams.begin();it!=oauthparams.end();it++)
 	{
 		reqparams[it->first] = it->second;
 	}
 
-	string url = reqparams["realm"];
+	std::string url = reqparams["realm"];
 	if(url=="")
 		url = "http://" + req->getHeader(HttpRequest::Host) + req->getActUrl();
 
-	string allpars = (method + "&" + CryptoHandler::urlEncode(url) + "&");
-	string allparst;
-	cout << "init" <<endl;
+	std::string allpars = (method + "&" + CryptoHandler::urlEncode(url) + "&");
+	std::string allparst;
+	std::cout << "init" <<std::endl;
 
-	vector<string> temps;
+	std::vector<std::string> temps;
 	for(it=reqparams.begin();it!=reqparams.end();it++)
 	{
 		if(it->first!="realm" && it->first!="oauth_signature" && it->first!="Method")
@@ -67,16 +67,16 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 		if(var!=temps.size()-1)
 			allparst += "&";
 	}
-	cout << "req and oauth params" <<endl;
+	std::cout << "req and oauth params" <<std::endl;
 
 	FileAuthController fauthu(req->getContextHome()+"/users",":");
 	FileAuthController fautht(req->getContextHome()+"/tokens",":");
 	FileAuthController fauthta(req->getContextHome()+"/access_tokens",":");
 
-	string key,tokk,resu,csec;
+	std::string key,tokk,resu,csec;
 	bool isreqtype = false;
 	bool flag = true;
-	string conss;
+	std::string conss;
 	if(reqparams["oauth_consumer_key"]!="")
 	{
 		flag = fauthu.getPassword(reqparams["oauth_consumer_key"],key);
@@ -101,37 +101,37 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 
 	if(flag)
 	{
-		cout << allpars << allparst << endl;
+		std::cout << allpars << allparst << std::endl;
 		allpars += CryptoHandler::urlEncode(allparst);
-		cout << allpars << endl;
-		cout << "key = " << key << endl;
+		std::cout << allpars << std::endl;
+		std::cout << "key = " << key << std::endl;
 		char* resst = (char*)CryptoHandler::hmac_sha1((char*)allpars.c_str(),(char*)key.c_str(),true);
-		cout << "done crypto " << resst << endl;
+		std::cout << "done crypto " << resst << std::endl;
 		resu.append(resst);
 	}
 
-	cout << "encoded sig = " << reqparams["oauth_signature"] << endl;
-	string signature = CryptoHandler::urlDecode(reqparams["oauth_signature"]);
-	cout << "decoded sig = " << signature << endl;
+	std::cout << "encoded sig = " << reqparams["oauth_signature"] << std::endl;
+	std::string signature = CryptoHandler::urlDecode(reqparams["oauth_signature"]);
+	std::cout << "decoded sig = " << signature << std::endl;
 	if(flag && resu==signature && signature!="" && resu!="")
 	{
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-		string filen;
+		std::string filen;
 		if(tokk=="" && req->getFile()=="request.oauth")
 		{
 			filen = req->getContextHome()+"/tokens";
-			ofstream ofs(filen.c_str());
-			string oauthtok,oauthsec;
-			oauthtok = CastUtil::lexical_cast<string>(Timer::getCurrentTime());
-			oauthsec = CastUtil::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + CastUtil::lexical_cast<string>(rand()%1000 + 12353);
-			string wrf = oauthtok + ":" + key + oauthsec + "\n";
+			std::ofstream ofs(filen.c_str());
+			std::string oauthtok,oauthsec;
+			oauthtok = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
+			oauthsec = CastUtil::lexical_cast<std::string>(rand()%1000 + 123453) + oauthtok + CastUtil::lexical_cast<std::string>(rand()%1000 + 12353);
+			std::string wrf = oauthtok + ":" + key + oauthsec + "\n";
 			ofs.write(wrf.c_str(),wrf.length());
 			ofs.close();
-			string parsc;
+			std::string parsc;
 			for(it=reqparams.begin();it!=reqparams.end();it++)
 			{
-				if(it->first!="realm" && it->first.find("oauth_")==string::npos && it->first!="Method")
+				if(it->first!="realm" && it->first.find("oauth_")==std::string::npos && it->first!="Method")
 				{
 					parsc.append(it->first + "=" + it->second + "&");
 				}
@@ -139,34 +139,34 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 			if(reqparams["oauth_callback"]!="")
 			{
 				filen = req->getContextHome()+"/callbacks";
-				ofstream ofs1(filen.c_str());
-				string oauth_ver = oauthtok + CastUtil::lexical_cast<string>(rand()%1000);
+				std::ofstream ofs1(filen.c_str());
+				std::string oauth_ver = oauthtok + CastUtil::lexical_cast<std::string>(rand()%1000);
 				wrf = CryptoHandler::urlDecode(reqparams["oauth_callback"])+"?oauth_verifier="+oauth_ver+"&"+parsc;
 				ofs1.write(wrf.c_str(),wrf.length());
 				ofs1.close();
 			}
-			string cont = ("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec+"&")+parsc;
+			std::string cont = ("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec+"&")+parsc;
 			if(cont[cont.length()-1]=='&')
 				cont = cont.substr(0,cont.length()-1);
 			res->setContent(cont);
-			cout << "verified initial request signature is valid" << endl;
-			cout << "provided a request token" << endl;
+			std::cout << "verified initial request signature is valid" << std::endl;
+			std::cout << "provided a request token" << std::endl;
 		}
 		else if(isreqtype && reqparams["oauth_token"]!="" && reqparams["oauth_consumer_key"]!=""
 				&& req->getFile()=="access.oauth")
 		{
 			filen = req->getContextHome()+"/access_tokens";
-			ofstream ofs(filen.c_str());
-			string oauthtok,oauthsec;
-			oauthtok = CastUtil::lexical_cast<string>(Timer::getCurrentTime());
-			oauthsec = CastUtil::lexical_cast<string>(rand()%1000 + 123453) + oauthtok + CastUtil::lexical_cast<string>(rand()%1000 + 12353);
-			string wrf = oauthtok + ":" + csec + oauthsec + "\n";
+			std::ofstream ofs(filen.c_str());
+			std::string oauthtok,oauthsec;
+			oauthtok = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
+			oauthsec = CastUtil::lexical_cast<std::string>(rand()%1000 + 123453) + oauthtok + CastUtil::lexical_cast<std::string>(rand()%1000 + 12353);
+			std::string wrf = oauthtok + ":" + csec + oauthsec + "\n";
 			ofs.write(wrf.c_str(),wrf.length());
 			ofs.close();
-			string cont = ("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec+"&");
+			std::string cont = ("oauth_token="+oauthtok+"&oauth_token_secret="+oauthsec+"&");
 			for(it=reqparams.begin();it!=reqparams.end();it++)
 			{
-				if(it->first!="realm" && it->first.find("oauth_")==string::npos && it->first!="Method")
+				if(it->first!="realm" && it->first.find("oauth_")==std::string::npos && it->first!="Method")
 				{
 					cont.append(it->first + "=" + it->second + "&");
 				}
@@ -174,12 +174,12 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 			if(cont[cont.length()-1]=='&')
 				cont = cont.substr(0,cont.length()-1);
 			res->setContent(cont);
-			cout << "verified request token signature is valid" << endl;
-			cout << "provided an access token" << endl;
+			std::cout << "verified request token signature is valid" << std::endl;
+			std::cout << "provided an access token" << std::endl;
 		}
 		else if(!isreqtype && req->getFile()=="getResource.oauth" && reqparams["file"]!="")
 		{
-			cout << "resource access granted for " << reqparams["file"] << endl;
+			std::cout << "resource access granted for " << reqparams["file"] << std::endl;
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			req->setFile(reqparams["file"]);
@@ -194,35 +194,35 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
 			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-			cout << "invalid username/password" << endl;
+			std::cout << "invalid username/password" << std::endl;
 		}
 		else if(key==reqparams["password"])
 		{
-			cout << "valid username/password" << endl;
+			std::cout << "valid username/password" << std::endl;
 			if(reqparams["oauthparms"]!="")
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::MovedPermanently);
 				res->addHeaderValue(HttpResponse::Location, CryptoHandler::urlDecode(reqparams["oauthparms"])+"&access=true");
-				cout << "redirecting to callback url" << endl;
+				std::cout << "redirecting to callback url" << std::endl;
 			}
 			else
 			{
 				res->setContent(reqparams["oauthparms"]+"&access=true");
-				cout << "no callback url specified sending access info in content" << endl;
+				std::cout << "no callback url specified sending access info in content" << std::endl;
 			}
 		}
 		return true;
 	}
 	else if(req->getFile()=="login.oauth")
 	{
-		string filen = req->getContextHome()+"/callbacks";
-		ifstream ifs(filen.c_str());
-		string wrf;
+		std::string filen = req->getContextHome()+"/callbacks";
+		std::ifstream ifs(filen.c_str());
+		std::string wrf;
 		getline(ifs,wrf);
 		ifs.close();
 		if(reqparams["oauth_token"]!="")
 			wrf = wrf+"oauth_token="+reqparams["oauth_token"];
-		string html = "<html><head></head><body><form name=\"name1\" method=\"POST\" action=\"/login.oauth\">";
+		std::string html = "<html><head></head><body><form name=\"name1\" method=\"POST\" action=\"/login.oauth\">";
 		html += "<input name='oauthparms' type='hidden' value='"+wrf+"'/>";
 		html += "Username:<input name='username' type='text'/>";
 		html += "Password:<input name='password' type='password'/>";
@@ -231,14 +231,14 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 		res->setContent(html);
-		cout << "Login page display" << endl;
+		std::cout << "Login page display" << std::endl;
 		return true;
 	}
 	else
 	{
 		res->setStatusCode("401");
 		res->setStatusMsg("Unauthorized\r\nWWW-Authenticate: OAuth realm=\""+url+"\"");
-		cout << "verified request token signature is invalid" << endl;
+		std::cout << "verified request token signature is invalid" << std::endl;
 		return true;
 	}
 }

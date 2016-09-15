@@ -16,7 +16,7 @@ class Http11Handler : public SocketInterface {
 	HttpRequest* request;
 	bool isHeadersDone;
 	int bytesToRead;
-	string webpath;
+	std::string webpath;
 	int chunkSize;
 	int connKeepAlive;
 	bool isTeRequest;
@@ -25,11 +25,11 @@ class Http11Handler : public SocketInterface {
 public:
 	void onOpen();
 	void onClose();
-	string getProtocol(void* context);
+	std::string getProtocol(void* context);
 	int getTimeout();
 	void* readRequest(void*& context, int& pending);
 	bool writeResponse(void* req, void* res, void* context);
-	Http11Handler(SocketUtil* sockUtil, const string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
+	Http11Handler(SocketUtil* sockUtil, const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
 	virtual ~Http11Handler();
 };
 

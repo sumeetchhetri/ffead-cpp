@@ -31,7 +31,7 @@ ConnectionSettings::~ConnectionSettings() {
 	// TODO Auto-generated destructor stub
 }
 
-ConnectionSettings::ConnectionSettings(string mod,string src,string usn,string pas,string add) {
+ConnectionSettings::ConnectionSettings(std::string mod,std::string src,std::string usn,std::string pas,std::string add) {
 	this->mode = mod;
 	this-> source = src;
 	this->username = usn;

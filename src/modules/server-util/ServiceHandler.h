@@ -26,7 +26,7 @@ class HandlerRequest {
 	SocketInterface* sif;
 	void* context;
 	bool sentResponse;
-	string protocol;
+	std::string protocol;
 	ServiceHandler* sh;
 	ReaderSwitchInterface* switchReaderIntf;
 	friend class ServiceHandler;
@@ -36,7 +36,7 @@ public:
 	void setSentResponse();
 	virtual ~HandlerRequest();
 	void* getContext();
-	const string& getProtocol() const;
+	const std::string& getProtocol() const;
 	void* getRequest();
 	bool isSentResponse() const;
 	SocketInterface* getSif();
@@ -59,7 +59,7 @@ class ServiceHandler {
 	static void* taskService(void* inp);
 	static void* cleanSifs(void* inp);
 	void flagDone(SocketInterface* si);
-	void cleanSif(map<int, SocketInterface*> connectionsWithTimeouts);
+	void cleanSif(std::map<int, SocketInterface*> connectionsWithTimeouts);
 	friend class RequestReaderHandler;
 	friend class HandlerRequest;
 protected:

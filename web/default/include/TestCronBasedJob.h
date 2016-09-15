@@ -25,7 +25,7 @@
 #include "string"
 #include <iostream>
 #include "CastUtil.h"
-using namespace std;
+
 
 class TestCronBasedJob {
 	int counter;

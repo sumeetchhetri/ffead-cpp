@@ -22,7 +22,7 @@
 
 #include "HTTPResponseStatus.h"
 
-map<int, HTTPResponseStatus> HTTPResponseStatus::statuses;
+std::map<int, HTTPResponseStatus> HTTPResponseStatus::statuses;
 
 HTTPResponseStatus HTTPResponseStatus::getStatusByCode(const int& code)
 {
@@ -108,7 +108,7 @@ HTTPResponseStatus::HTTPResponseStatus() {
 	this->code = 0;
 }
 
-HTTPResponseStatus::HTTPResponseStatus(const int& code, const string& msg) {
+HTTPResponseStatus::HTTPResponseStatus(const int& code, const std::string& msg) {
 	this->code = code;
 	this->msg = msg;
 }
@@ -118,7 +118,7 @@ HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status) {
 	this->msg = status.msg;
 }
 
-HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status, const string& msg) {
+HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status, const std::string& msg) {
 	this->code = status.code;
 	this->msg = msg;
 }
@@ -131,7 +131,7 @@ int HTTPResponseStatus::getCode() const
 {
 	return code;
 }
-string HTTPResponseStatus::getMsg() const
+std::string HTTPResponseStatus::getMsg() const
 {
 	return msg;
 }

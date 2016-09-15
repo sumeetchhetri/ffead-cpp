@@ -26,16 +26,16 @@
 #include "BinarySerialize.h"
 
 template <class T> class DistQueue {
-	string cacheKey;
+	std::string cacheKey;
 	DistoCacheClientUtils* cl;
 public:
-	DistQueue(const string& cacheKey)
+	DistQueue(const std::string& cacheKey)
 	{
 		this->cacheKey = cacheKey;
 		cl = PooledDistoCacheConnectionFactory::getConnection();
 		try {
 			cl->allocate(cacheKey, "queue");
-		} catch(const string& err) {
+		} catch(const std::string& err) {
 			if(err!="Entry already exists") {
 				throw err;
 			}
@@ -43,24 +43,24 @@ public:
 	}
 	void push(const T& t)
 	{
-		string serValue = BinarySerialize::serialize<T>(t);
+		std::string serValue = BinarySerialize::serialize<T>(t);
 		cl->addCollectionEntry(cacheKey, serValue);
 	}
 	T front()
 	{
-		string serValue = cl->getFrontValue(cacheKey);
+		std::string serValue = cl->getFrontValue(cacheKey);
 		return BinarySerialize::unserialize<T>(serValue);
 	}
 	T back()
 	{
-		string serValue = cl->getBackValue(cacheKey);
+		std::string serValue = cl->getBackValue(cacheKey);
 		return BinarySerialize::unserialize<T>(serValue);
 	}
 	void pop()
 	{
 		cl->popValueQueue(cacheKey);
 	}
-	string get_pop()
+	std::string get_pop()
 	{
 		cl->popGetValueQueue(cacheKey);
 	}

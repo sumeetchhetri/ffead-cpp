@@ -31,7 +31,7 @@ JobScheduler::JobScheduler() {
 JobScheduler::~JobScheduler() {
 }
 
-void JobScheduler::init(const string& fileName, const string& appName) {
+void JobScheduler::init(const std::string& fileName, const std::string& appName) {
 	XmlParser parser("Parser");
 	Document doc;
 	parser.readDocument(fileName, doc);
@@ -42,23 +42,23 @@ void JobScheduler::init(const string& fileName, const string& appName) {
 	}
 }
 
-void JobScheduler::init(const ElementList& tabs, const string& appName) {
+void JobScheduler::init(const ElementList& tabs, const std::string& appName) {
 	if(instance!=NULL)
 		return;
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
 	instance = new JobScheduler();
-	logger << "Initialized JobScheduler" << endl;
+	logger << "Initialized JobScheduler" << std::endl;
 	for (unsigned int dn = 0; dn < tabs.size(); dn++)
 	{
 		if(tabs.at(dn)->getTagName()!="job-proc")
 		{
-			logger << "Invalid Element Tag found inside job-procs, should be job-proc..." << endl;
+			logger << "Invalid Element Tag found inside job-procs, should be job-proc..." << std::endl;
 			continue;
 		}
-		string clas = tabs.at(dn)->getAttribute("class");
-		string cron = tabs.at(dn)->getAttribute("cron");
-		string meth = tabs.at(dn)->getAttribute("method");
-		string name = tabs.at(dn)->getAttribute("name");
+		std::string clas = tabs.at(dn)->getAttribute("class");
+		std::string cron = tabs.at(dn)->getAttribute("cron");
+		std::string meth = tabs.at(dn)->getAttribute("method");
+		std::string name = tabs.at(dn)->getAttribute("name");
 		if(clas!="" && meth!="" && cron!="" && name!="")
 		{
 			JobConfig config;
@@ -68,11 +68,11 @@ void JobScheduler::init(const ElementList& tabs, const string& appName) {
 			config.meth = meth;
 			config.app = appName;
 			instance->configs.push_back(config);
-			logger << "Added JobConfig inside JobScheduler" << endl;
+			logger << "Added JobConfig inside JobScheduler" << std::endl;
 		}
 		else
 		{
-			logger << "Cannot add Job Process as some mandatory elements are missing from the configuration" << endl;
+			logger << "Cannot add Job Process as some mandatory elements are missing from the configuration" << std::endl;
 		}
 	}
 }
@@ -86,29 +86,29 @@ void JobScheduler::start() {
 	instance->isStarted = true;
 	for (int dn = 0; dn < (int)instance->configs.size(); dn++)
 	{
-		string clas = instance->configs.at(dn).clas;
-		string cron = instance->configs.at(dn).cron;
-		string method = instance->configs.at(dn).meth;
-		string name = instance->configs.at(dn).name;
-		string appName = instance->configs.at(dn).app;
+		std::string clas = instance->configs.at(dn).clas;
+		std::string cron = instance->configs.at(dn).cron;
+		std::string method = instance->configs.at(dn).meth;
+		std::string name = instance->configs.at(dn).name;
+		std::string appName = instance->configs.at(dn).app;
 		if(clas!="" && method!="" && cron!="" && name!="")
 		{
 			ClassInfo claz = ref.getClassInfo(clas, appName);
-			logger << "JobScheduler - Got class " + claz.getClassName() << endl;
+			logger << "JobScheduler - Got class " + claz.getClassName() << std::endl;
 			if(claz.getClassName()!="")
 			{
 				args argus;
 				Method meth = claz.getMethod(method, argus);
 				Constructor ctor = claz.getConstructor(argus);
 
-				logger << "JobScheduler - Got method,class " + meth.getMethodName() + "," + ctor.getName() << endl;
+				logger << "JobScheduler - Got method,class " + meth.getMethodName() + "," + ctor.getName() << std::endl;
 
 				if(meth.getMethodName()!="" && ctor.getName()!="")
 				{
 					void* objIns = ref.newInstanceGVP(ctor);
 					JobFunction f = (JobFunction)ref.getMethodInstance(meth);
 
-					logger << "JobScheduler - Got objins,func " << objIns << "," << f << endl;
+					logger << "JobScheduler - Got objins,func " << objIns << "," << f << std::endl;
 
 					if(objIns!=NULL && f!=NULL)
 					{
@@ -124,26 +124,26 @@ void JobScheduler::start() {
 						pthread.execute();
 
 						instance->tasks.push_back(task);
-						logger << "Added Job Process successfully" << endl;
+						logger << "Added Job Process successfully" << std::endl;
 					}
 					else
 					{
-						logger << "Cannot add Job Process as could not initialize class instance and method" << endl;
+						logger << "Cannot add Job Process as could not initialize class instance and method" << std::endl;
 					}
 				}
 				else
 				{
-					logger << "Cannot add Job Process as method was not found or public no argument constructor not defined for class" << endl;
+					logger << "Cannot add Job Process as method was not found or public no argument constructor not defined for class" << std::endl;
 				}
 			}
 			else
 			{
-				logger << "Cannot add Job Process as class information was not found" << endl;
+				logger << "Cannot add Job Process as class information was not found" << std::endl;
 			}
 		}
 		else
 		{
-			logger << "Cannot add Job Process as some mandatory elements are missing from the configuration" << endl;
+			logger << "Cannot add Job Process as some mandatory elements are missing from the configuration" << std::endl;
 		}
 	}
 }
@@ -201,7 +201,7 @@ void JobScheduler::JobTask::run() {
 						{
 							if(timer.isValid(0, d2.getMinutes(), timer.nextRunDate->getMinutes()))
 							{
-								logger << "Running Job Process " + name << endl;
+								logger << "Running Job Process " + name << std::endl;
 
 								f(objIns, values);
 
@@ -223,7 +223,7 @@ void JobScheduler::JobTask::run() {
 									incrementDone = timer.tryIncrement(5, timer.nextRunDate->getYear());
 								}
 
-								logger << "Running Job Process " + name + " complete" << endl;
+								logger << "Running Job Process " + name + " complete" << std::endl;
 							}
 						}
 					}
@@ -231,7 +231,7 @@ void JobScheduler::JobTask::run() {
 			}
 		}
 	} catch(const char* ex) {
-		logger << "Cannot run Job as the cron string is invalid" << endl;
+		logger << "Cannot run Job as the cron std::string is invalid" << std::endl;
 	}
 }
 

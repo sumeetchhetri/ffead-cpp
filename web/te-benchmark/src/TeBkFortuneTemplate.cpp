@@ -15,10 +15,10 @@ Context TeBkFortuneTemplate::getContext(HttpRequest* request)
 {
 	Context cnt;
 	DataSourceInterface* sqli = DataSourceManager::getImpl();
-	vector<TeBkFortune> flst = sqli->getAll<TeBkFortune>();
+	std::vector<TeBkFortune> flst = sqli->getAll<TeBkFortune>();
 	for(int i=0;i<(int)flst.size();i++)
 	{
-		string nm = flst.at(i).getMessage();
+		std::string nm = flst.at(i).getMessage();
 		CryptoHandler::sanitizeHtml(nm);
 		flst.at(i).setMessage(nm);
 	}

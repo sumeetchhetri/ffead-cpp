@@ -27,7 +27,7 @@ Exception::Exception() {
 
 }
 
-Exception::Exception(const string& message) {
+Exception::Exception(const std::string& message) {
 	this->message = message;
 }
 
@@ -35,12 +35,12 @@ Exception::~Exception() throw() {
 	// TODO Auto-generated destructor stub
 }
 
-const string& Exception::getMessage() const
+const std::string& Exception::getMessage() const
 {
    return message;
 }
 
-void Exception::setMessage(const string& message)
+void Exception::setMessage(const std::string& message)
 {
    this->message = message;
 }

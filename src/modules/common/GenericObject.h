@@ -11,15 +11,15 @@
 #include <typeinfo>
 #include <wchar.h>
 #include "XMLSerialize.h"
-using namespace std;
+
 
 class GenericObject {
-	string typeName;
-	string objSerState;
+	std::string typeName;
+	std::string objSerState;
 	void* objVal;
-	vector<char> cstr;
-	vector<unsigned char> ucstr;
-	vector<wchar_t> wstr;
+	std::vector<char> cstr;
+	std::vector<unsigned char> ucstr;
+	std::vector<wchar_t> wstr;
 	void internalClear();
 	void internalCopy(const GenericObject &obj);
 public:
@@ -27,24 +27,24 @@ public:
 	GenericObject& operator = (const GenericObject &obj);
 	GenericObject(const GenericObject &obj);
 	~GenericObject();
-	const string& getTypeName() const;
-	bool isInstanceOf(const string&);
+	const std::string& getTypeName() const;
+	bool isInstanceOf(const std::string&);
 	bool isNumber();
 	bool isBool();
 	bool isFPN();
 	bool isString();
 	bool isObject();
 	bool isNull();
-	string getSerilaizedState();
+	std::string getSerilaizedState();
 	void* getPointer();
 
-	static bool isNumber(const string& typeName);
-	static bool isNumber32(const string& typeName);
-	static bool isNumber64(const string& typeName);
-	static bool isString(const string& typeName);
-	static bool isFPN(const string& typeName);
-	static bool isPrimitive(const string& typeName);
-	template <typename T> static T getObjectFromSerilaizedState(const string& serilaizedState);
+	static bool isNumber(const std::string& typeName);
+	static bool isNumber32(const std::string& typeName);
+	static bool isNumber64(const std::string& typeName);
+	static bool isString(const std::string& typeName);
+	static bool isFPN(const std::string& typeName);
+	static bool isPrimitive(const std::string& typeName);
+	template <typename T> static T getObjectFromSerilaizedState(const std::string& serilaizedState);
 
 	template <typename T> void operator<<(T &t)
 	{
@@ -56,12 +56,12 @@ public:
 		set(t);
 	}
 
-	template<class T> void set(T* t, const size_t& strlength= string::npos) {
-		string typeName = CastUtil::getClassName(t);
+	template<class T> void set(T* t, const size_t& strlength= std::string::npos) {
+		std::string typeName = CastUtil::getClassName(t);
 		set((void*)t, typeName, strlength);
 	}
 
-	void set(void* t, string typeName, size_t strlength= string::npos) {
+	void set(void* t, std::string typeName, size_t strlength= std::string::npos) {
 		if(typeName.at(typeName.length()-1)=='*')
 		{
 			typeName = typeName.substr(0, typeName.length()-1);
@@ -70,7 +70,7 @@ public:
 		{
 			throw "Cannot handle double pointers and beyond...";
 		}
-		if(typeName.find(",")!=string::npos)
+		if(typeName.find(",")!=std::string::npos)
 		{
 			typeName = typeName.substr(0, typeName.find(",")+1);
 		}
@@ -88,14 +88,11 @@ public:
 		else if(typeName=="float") objVal = new float(*(float*)t);
 		else if(typeName=="double") objVal = new double(*(double*)t);
 		else if(typeName=="long double") objVal = new long double(*(long double*)t);
-		else if(typeName=="std::string" || typeName=="string") objVal = new string(*(string*)t);
+		else if(typeName=="std::string" || typeName=="string") objVal = new std::string(*(std::string*)t);
 		else if(typeName=="char" || typeName=="char const") {
 			char* src = (char*)t;
 			if(src) {
-				if(strlength==string::npos) {
-					strlength = strlen(src);
-				}
-				cstr.assign(src, src+strlength);
+				cstr.assign(src, src+strlen(src));
 				char* cstrptr = new char[cstr.size()];
 				std::copy(cstr.begin(), cstr.end(), cstrptr);
 				objVal = cstrptr;
@@ -104,10 +101,7 @@ public:
 		else if(typeName=="unsigned char" || typeName=="unsigned char const") {
 			unsigned char* src = (unsigned char*)t;
 			if(src) {
-				if(strlength==string::npos) {
-					strlength = strlen((char*)src);
-				}
-				ucstr.assign(src, src+strlength);
+				ucstr.assign(src, src+strlen((const char*)src));
 				unsigned char* ucstrpr = new unsigned char[ucstr.size()];
 				std::copy(ucstr.begin(), ucstr.end(), ucstrpr);
 				objVal = ucstrpr;
@@ -116,10 +110,7 @@ public:
 		else if(typeName=="wchar_t" || typeName=="wchar_t const") {
 			wchar_t* src = (wchar_t*)t;
 			if(src) {
-				if(strlength==string::npos) {
-					strlength = wcslen(src);
-				}
-				wstr.assign(src, src+strlength);
+				wstr.assign(src, src+wcslen(src));
 				wchar_t* wstrpr = new wchar_t[wstr.size()];
 				std::copy(wstr.begin(), wstr.end(), wstrpr);
 				objVal = wstrpr;
@@ -134,7 +125,7 @@ public:
 	}
 
 	template<class T> void set(T t, const size_t& strlength= -1) {
-		string typeName = CastUtil::getClassName(t);
+		std::string typeName = CastUtil::getClassName(t);
 		if(typeName.at(typeName.length()-1)=='*')
 		{
 			throw "Cannot handle pointer types use 'set(T* t)' instead...";
@@ -153,7 +144,46 @@ public:
 		else if(typeName=="float") objVal = new float(*(float*)&t);
 		else if(typeName=="double") objVal = new double(*(double*)&t);
 		else if(typeName=="long double") objVal = new long double(*(long double*)&t);
-		else if(typeName=="std::string" || typeName=="string") objVal = new string(*(string*)&t);
+		else if(typeName=="std::string" || typeName=="string") objVal = new std::string(*(std::string*)&t);
+		else if(typeName=="char" || typeName=="char const") {
+			char* src = (char*)&t;
+			if(src) {
+				size_t stln = strlength;
+				if(stln==std::string::npos) {
+					stln = strlen(src);
+				}
+				cstr.assign(src, src+stln);
+				char* cstrptr = new char[cstr.size()];
+				std::copy(cstr.begin(), cstr.end(), cstrptr);
+				objVal = cstrptr;
+			}
+		}
+		else if(typeName=="unsigned char" || typeName=="unsigned char const") {
+			unsigned char* src = (unsigned char*)&t;
+			if(src) {
+				size_t stln = strlength;
+				if(stln==std::string::npos) {
+					stln = strlen((char*)src);
+				}
+				ucstr.assign(src, src+strlength);
+				unsigned char* ucstrpr = new unsigned char[ucstr.size()];
+				std::copy(ucstr.begin(), ucstr.end(), ucstrpr);
+				objVal = ucstrpr;
+			}
+		}
+		else if(typeName=="wchar_t" || typeName=="wchar_t const") {
+			wchar_t* src = (wchar_t*)&t;
+			if(src) {
+				size_t stln = strlength;
+				if(stln==std::string::npos) {
+					stln = wcslen(src);
+				}
+				wstr.assign(src, src+strlength);
+				wchar_t* wstrpr = new wchar_t[wstr.size()];
+				std::copy(wstr.begin(), wstr.end(), wstrpr);
+				objVal = wstrpr;
+			}
+		}
 		//This means this is some other object, try to serialize it...
 		else
 		{
@@ -163,7 +193,7 @@ public:
 	}
 
 	template<class T> void get(T*& t) {
-		string typeName = CastUtil::getClassName(t);
+		std::string typeName = CastUtil::getClassName(t);
 		if(typeName.at(typeName.length()-1)=='*')
 		{
 			typeName = typeName.substr(0, typeName.length()-1);
@@ -177,7 +207,7 @@ public:
 	}
 
 	template<class T> void get(T& t) {
-		string typeName = CastUtil::getClassName(t);
+		std::string typeName = CastUtil::getClassName(t);
 		if(typeName.at(typeName.length()-1)=='*')
 		{
 			throw "Cannot handle pointer types use 'getP()' instead...";
@@ -187,9 +217,9 @@ public:
 };
 
 template<typename T>
-inline T GenericObject::getObjectFromSerilaizedState(const string& serilaizedState) {
+inline T GenericObject::getObjectFromSerilaizedState(const std::string& serilaizedState) {
 	T t;
-	string typeName = CastUtil::getClassName(t);
+	std::string typeName = CastUtil::getClassName(t);
 	if(typeName.at(typeName.length()-1)=='*')
 	{
 		throw "Cannot handle pointer types use 'getP()' instead...";

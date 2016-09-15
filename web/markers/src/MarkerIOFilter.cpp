@@ -34,13 +34,13 @@ MarkerIOFilter::~MarkerIOFilter() {
 void MarkerIOFilter::doInputFilter(HttpRequest *req)
 {
 	//Process the input request here...
-	cout << "Processed input request" << endl;
+	std::cout << "Processed input request" << std::endl;
 }
 
 void MarkerIOFilter::doOutputFilter(HttpResponse *res)
 {
 	//Process the output response here...
-	cout << "Processed output response" << endl;
+	std::cout << "Processed output response" << std::endl;
 }
 
 bool MarkerIOFilter::doHandle(HttpRequest *req, HttpResponse* res)

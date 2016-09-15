@@ -22,7 +22,7 @@
 
 #include "DistoCacheClientUtils.h"
 
-string DistoCacheClientUtils::ERR_NOELEMENTS = "No Elements in container", DistoCacheClientUtils::ERR_NOKEYCACHEMAP = "Unable to find value for Key specified",
+std::string DistoCacheClientUtils::ERR_NOELEMENTS = "No Elements in container", DistoCacheClientUtils::ERR_NOKEYCACHEMAP = "Unable to find value for Key specified",
 	   DistoCacheClientUtils::ERR_INVCONTAINER = "Invalid container specified", DistoCacheClientUtils::ERR_OPNOTSUPP = "Operation not supported on container",
 	   DistoCacheClientUtils::ERR_INDGRTCONTSIZ = "Index greater than container size", DistoCacheClientUtils::ERR_NOTAMAPCONT = "Not a map container",
 	   DistoCacheClientUtils::ERR_NOVALUEFOUND = "No value found for key", DistoCacheClientUtils::ERR_ALLOCENTEXISTS = "Entry already exists",
@@ -30,7 +30,7 @@ string DistoCacheClientUtils::ERR_NOELEMENTS = "No Elements in container", Disto
 	   DistoCacheClientUtils::ERR_POSNOTNUM = "Position value is not a number", DistoCacheClientUtils::ERR_NEGATIVEREP = "Repetition value is less than 0",
 	   DistoCacheClientUtils::ERR_REPNOTNUM = "Repetition value is not a number", DistoCacheClientUtils::SUCCESS = "SUCCESS";
 
-DistoCacheClientUtils::DistoCacheClientUtils(const string& host, const int& port, const bool& isSSL) {
+DistoCacheClientUtils::DistoCacheClientUtils(const std::string& host, const int& port, const bool& isSSL) {
 	if(isSSL)
 	{
 		client = new SSLClient;
@@ -44,7 +44,7 @@ DistoCacheClientUtils::DistoCacheClientUtils(const string& host, const int& port
 	if(!connected)
 	{
 		delete client;
-		throw "Error connecting to " + host + ":" + CastUtil::lexical_cast<string>(port);
+		throw "Error connecting to " + host + ":" + CastUtil::lexical_cast<std::string>(port);
 	}
 }
 
@@ -53,7 +53,7 @@ DistoCacheClientUtils::~DistoCacheClientUtils() {
 	delete client;
 }
 
-void DistoCacheClientUtils::allocate(const string& cacheKey, const string& type) {
+void DistoCacheClientUtils::allocate(const std::string& cacheKey, const std::string& type) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -61,14 +61,14 @@ void DistoCacheClientUtils::allocate(const string& cacheKey, const string& type)
 	object->addPacket("allocate "+type+" "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::deallocate(const string& cacheKey) {
+void DistoCacheClientUtils::deallocate(const std::string& cacheKey) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -76,14 +76,14 @@ void DistoCacheClientUtils::deallocate(const string& cacheKey) {
 	object->addPacket("deallocate "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::addObjectEntry(const string& key, const string& value) {
+void DistoCacheClientUtils::addObjectEntry(const std::string& key, const std::string& value) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -92,14 +92,14 @@ void DistoCacheClientUtils::addObjectEntry(const string& key, const string& valu
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::removeObjectEntry(const string& key) {
+void DistoCacheClientUtils::removeObjectEntry(const std::string& key) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -107,14 +107,14 @@ void DistoCacheClientUtils::removeObjectEntry(const string& key) {
 	object->addPacket("remove objentry "+key);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-string DistoCacheClientUtils::getObjectEntryValue(const string& key) {
+std::string DistoCacheClientUtils::getObjectEntryValue(const std::string& key) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -122,15 +122,15 @@ string DistoCacheClientUtils::getObjectEntryValue(const string& key) {
 	object->addPacket("get objentry "+key);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
-void DistoCacheClientUtils::addMapEntry(const string& cacheKey, const string& key, const string& value) {
+void DistoCacheClientUtils::addMapEntry(const std::string& cacheKey, const std::string& key, const std::string& value) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -139,14 +139,14 @@ void DistoCacheClientUtils::addMapEntry(const string& cacheKey, const string& ke
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::removeMapEntry(const string& cacheKey, const string& key) {
+void DistoCacheClientUtils::removeMapEntry(const std::string& cacheKey, const std::string& key) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -154,14 +154,14 @@ void DistoCacheClientUtils::removeMapEntry(const string& cacheKey, const string&
 	object->addPacket("remove mapentry "+cacheKey+" "+key);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-string DistoCacheClientUtils::getMapEntryValue(const string& cacheKey, const string& key) {
+std::string DistoCacheClientUtils::getMapEntryValue(const std::string& cacheKey, const std::string& key) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -169,63 +169,63 @@ string DistoCacheClientUtils::getMapEntryValue(const string& cacheKey, const str
 	object->addPacket("get mapentry "+cacheKey+" "+key);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
-string DistoCacheClientUtils::getMapEntryValueByPosition(const string& cacheKey, const int& position) {
+std::string DistoCacheClientUtils::getMapEntryValueByPosition(const std::string& cacheKey, const int& position) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("getbypos mapentry "+cacheKey+" "+CastUtil::lexical_cast<string>(position));
+	object->addPacket("getbypos mapentry "+cacheKey+" "+CastUtil::lexical_cast<std::string>(position));
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
-void DistoCacheClientUtils::setMapEntryValueByPosition(const string& cacheKey, const int& position, const string& value) {
+void DistoCacheClientUtils::setMapEntryValueByPosition(const std::string& cacheKey, const int& position, const std::string& value) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("set mapentry "+cacheKey + " " + CastUtil::lexical_cast<string>(position));
+	object->addPacket("set mapentry "+cacheKey + " " + CastUtil::lexical_cast<std::string>(position));
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::setCollectionEntryAt(const string& cacheKey, const int& position, const string& value) {
+void DistoCacheClientUtils::setCollectionEntryAt(const std::string& cacheKey, const int& position, const std::string& value) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("set collentry "+cacheKey + " " + CastUtil::lexical_cast<string>(position));
+	object->addPacket("set collentry "+cacheKey + " " + CastUtil::lexical_cast<std::string>(position));
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::addCollectionEntry(const string& cacheKey, const string& value) {
+void DistoCacheClientUtils::addCollectionEntry(const std::string& cacheKey, const std::string& value) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -234,45 +234,45 @@ void DistoCacheClientUtils::addCollectionEntry(const string& cacheKey, const str
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::removeCollectionEntryAt(const string& cacheKey, const int& position) {
+void DistoCacheClientUtils::removeCollectionEntryAt(const std::string& cacheKey, const int& position) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("remove collentry "+cacheKey+" "+CastUtil::lexical_cast<string>(position));
+	object->addPacket("remove collentry "+cacheKey+" "+CastUtil::lexical_cast<std::string>(position));
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-string DistoCacheClientUtils::getCollectionEntryAt(const string& cacheKey, const int& position) {
+std::string DistoCacheClientUtils::getCollectionEntryAt(const std::string& cacheKey, const int& position) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("get collentry "+cacheKey+" "+CastUtil::lexical_cast<string>(position));
+	object->addPacket("get collentry "+cacheKey+" "+CastUtil::lexical_cast<std::string>(position));
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
-size_t DistoCacheClientUtils::size(const string& cacheKey) {
+size_t DistoCacheClientUtils::size(const std::string& cacheKey) {
 	size_t siz = -1;
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
@@ -281,11 +281,11 @@ size_t DistoCacheClientUtils::size(const string& cacheKey) {
 	object->addPacket("size "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	if(resp!="")
 	{
 		try
@@ -298,7 +298,7 @@ size_t DistoCacheClientUtils::size(const string& cacheKey) {
 	return siz;
 }
 
-bool DistoCacheClientUtils::isEmpty(const string& cacheKey) {
+bool DistoCacheClientUtils::isEmpty(const std::string& cacheKey) {
 	bool isEmpty = false;
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
@@ -307,11 +307,11 @@ bool DistoCacheClientUtils::isEmpty(const string& cacheKey) {
 	object->addPacket("isempty "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	if(resp!="")
 	{
 		try
@@ -324,7 +324,7 @@ bool DistoCacheClientUtils::isEmpty(const string& cacheKey) {
 	return isEmpty;
 }
 
-void DistoCacheClientUtils::clear(const string& cacheKey) {
+void DistoCacheClientUtils::clear(const std::string& cacheKey) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -332,46 +332,46 @@ void DistoCacheClientUtils::clear(const string& cacheKey) {
 	object->addPacket("clear "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::insert(const string& cacheKey, const string& value, const int& position) {
+void DistoCacheClientUtils::insert(const std::string& cacheKey, const std::string& value, const int& position) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("insert collentry "+cacheKey+" "+CastUtil::lexical_cast<string>(position));
+	object->addPacket("insert collentry "+cacheKey+" "+CastUtil::lexical_cast<std::string>(position));
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::insert(const string& cacheKey, const string& value, const int& position, const int& repetition) {
+void DistoCacheClientUtils::insert(const std::string& cacheKey, const std::string& value, const int& position, const int& repetition) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("insert collentry "+cacheKey+" "+CastUtil::lexical_cast<string>(position)+" "+CastUtil::lexical_cast<string>(repetition));
+	object->addPacket("insert collentry "+cacheKey+" "+CastUtil::lexical_cast<std::string>(position)+" "+CastUtil::lexical_cast<std::string>(repetition));
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::popValueQueue(const string& cacheKey) {
+void DistoCacheClientUtils::popValueQueue(const std::string& cacheKey) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -379,14 +379,14 @@ void DistoCacheClientUtils::popValueQueue(const string& cacheKey) {
 	object->addPacket("pop collentry "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-string DistoCacheClientUtils::popGetValueQueue(const string& cacheKey) {
+std::string DistoCacheClientUtils::popGetValueQueue(const std::string& cacheKey) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -394,15 +394,15 @@ string DistoCacheClientUtils::popGetValueQueue(const string& cacheKey) {
 	object->addPacket("popget collentry "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
-void DistoCacheClientUtils::pushBackValue(const string& cacheKey, const string& value) {
+void DistoCacheClientUtils::pushBackValue(const std::string& cacheKey, const std::string& value) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -411,14 +411,14 @@ void DistoCacheClientUtils::pushBackValue(const string& cacheKey, const string& 
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::pushFrontValue(const string& cacheKey, const string& value) {
+void DistoCacheClientUtils::pushFrontValue(const std::string& cacheKey, const std::string& value) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -427,14 +427,14 @@ void DistoCacheClientUtils::pushFrontValue(const string& cacheKey, const string&
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::popFrontValue(const string& cacheKey) {
+void DistoCacheClientUtils::popFrontValue(const std::string& cacheKey) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -442,14 +442,14 @@ void DistoCacheClientUtils::popFrontValue(const string& cacheKey) {
 	object->addPacket("popfront collentry "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-void DistoCacheClientUtils::popBackValue(const string& cacheKey) {
+void DistoCacheClientUtils::popBackValue(const std::string& cacheKey) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -457,14 +457,14 @@ void DistoCacheClientUtils::popBackValue(const string& cacheKey) {
 	object->addPacket("popback collentry "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;readValueOrThrowExp(object, ignoreErrors);
 }
 
-string DistoCacheClientUtils::popGetFrontValue(const string& cacheKey) {
+std::string DistoCacheClientUtils::popGetFrontValue(const std::string& cacheKey) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -472,15 +472,15 @@ string DistoCacheClientUtils::popGetFrontValue(const string& cacheKey) {
 	object->addPacket("popfrontget collentry "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
-string DistoCacheClientUtils::popGetBackValue(const string& cacheKey) {
+std::string DistoCacheClientUtils::popGetBackValue(const std::string& cacheKey) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -488,15 +488,15 @@ string DistoCacheClientUtils::popGetBackValue(const string& cacheKey) {
 	object->addPacket("popbackget collentry "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
-string DistoCacheClientUtils::getFrontValue(const string& cacheKey) {
+std::string DistoCacheClientUtils::getFrontValue(const std::string& cacheKey) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -504,15 +504,15 @@ string DistoCacheClientUtils::getFrontValue(const string& cacheKey) {
 	object->addPacket("getfront collentry "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
-string DistoCacheClientUtils::getBackValue(const string& cacheKey) {
+std::string DistoCacheClientUtils::getBackValue(const std::string& cacheKey) {
 	AMEFEncoder encoder;
 	AMEFDecoder decoder;
 
@@ -520,17 +520,17 @@ string DistoCacheClientUtils::getBackValue(const string& cacheKey) {
 	object->addPacket("getback collentry "+cacheKey);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
-	string resp = client->getBinaryData(4, false);
+	std::string resp = client->getBinaryData(4, false);
 	lock.unlock();
 	delete object;
 	object = decoder.decodeB(resp, true);
-	vector<string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
+	std::vector<std::string> ignoreErrors;resp = readValueOrThrowExp(object, ignoreErrors);
 	return resp;
 }
 
-string DistoCacheClientUtils::readValueOrThrowExp(AMEFObject* object, const vector<string>& ignoreErrors)
+std::string DistoCacheClientUtils::readValueOrThrowExp(AMEFObject* object, const std::vector<std::string>& ignoreErrors)
 {
-	string exp, resp;
+	std::string exp, resp;
 	if(object!=NULL)
 	{
 		if(object->getPackets().size()>1 && object->getPackets().at(0)->getValue()=="SUCCESS")
@@ -549,7 +549,7 @@ string DistoCacheClientUtils::readValueOrThrowExp(AMEFObject* object, const vect
 		else
 		{
 			for(size_t i=0;i<ignoreErrors.size();i++) {
-				if(string(exp)==ignoreErrors.at(i))
+				if(std::string(exp)==ignoreErrors.at(i))
 					return "";
 			}
 		}

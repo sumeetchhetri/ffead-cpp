@@ -34,11 +34,11 @@ typedef void* (*JobFunction) (void*, const vals&);
 
 class JobConfig
 {
-	string name;
-	string cron;
-	string clas;
-	string meth;
-	string app;
+	std::string name;
+	std::string cron;
+	std::string clas;
+	std::string meth;
+	std::string app;
 	friend class JobScheduler;
 };
 
@@ -47,8 +47,8 @@ class JobScheduler {
 	class JobTask : public Task
 	{
 		void* objIns;
-		string cron;
-		string name, appName;
+		std::string cron;
+		std::string name, appName;
 		Method meth;
 		bool doRun;
 		//Mutex mutex;
@@ -56,15 +56,15 @@ class JobScheduler {
 		friend class JobScheduler;
 	};
 	bool isStarted;
-	vector<JobConfig> configs;
-	vector<JobTask*> tasks;
+	std::vector<JobConfig> configs;
+	std::vector<JobTask*> tasks;
 	static JobScheduler* instance;
 	JobScheduler();
 	virtual ~JobScheduler();
 	static void* service(void* arg);
 public:
-	static void init(const ElementList& tabs, const string& appName= "default");
-	static void init(const string& fileName, const string& appName= "default");
+	static void init(const ElementList& tabs, const std::string& appName= "default");
+	static void init(const std::string& fileName, const std::string& appName= "default");
 	static void start();
 	static void stop();
 };

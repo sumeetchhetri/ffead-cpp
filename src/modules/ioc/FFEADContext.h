@@ -31,23 +31,23 @@
 class Bean
 {
 	friend class FFEADContext;
-	string name,inbuilt,value,clas,bean,intfType,injectAs,scope;
+	std::string name,inbuilt,value,clas,bean,intfType,injectAs,scope;
 	bool realbean;
-	vector<string> injs,names,types;
-	string appName;
+	std::vector<std::string> injs,names,types;
+	std::string appName;
 public:
 	Bean();
-	Bean(const string& name, const string& value, const string& clas, const string& scope, const bool& isInbuilt, const string& appName= "default");
+	Bean(const std::string& name, const std::string& value, const std::string& clas, const std::string& scope, const bool& isInbuilt, const std::string& appName= "default");
 	~Bean();
 };
-typedef map<string,Bean> beanMap;
+typedef std::map<std::string,Bean> beanMap;
 class FFEADContext {
 	Logger logger;
 	beanMap beans,injbns;
-	map<string,void*> objects;
+	std::map<std::string,void*> objects;
 	bool cleared;
 	Reflector* reflector;
-	map<string, map<string, ClassInfo> > classInfoMap;
+	std::map<std::string, std::map<std::string, ClassInfo> > classInfoMap;
 	friend class ControllerHandler;
 	friend class ExtHandler;
 	friend class FormHandler;
@@ -55,17 +55,17 @@ class FFEADContext {
 	friend class FilterHandler;
 	friend class ServiceTask;
 public:
-	FFEADContext(const string&, const string& appName= "default");
+	FFEADContext(const std::string&, const std::string& appName= "default");
 	FFEADContext();
 	virtual ~FFEADContext();
-	void* getBean(const string&, const string& appName= "default");
+	void* getBean(const std::string&, const std::string& appName= "default");
 	void* getBean(const Bean&);
-	void clear(const string& appName= "default");
+	void clear(const std::string& appName= "default");
 	void addBean(const Bean& bean);
-	void initializeAllSingletonBeans(const map<string, bool>& servingContexts);
-	void clearAllSingletonBeans(const map<string, bool>& servingContexts);
+	void initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts);
+	void clearAllSingletonBeans(const std::map<std::string, bool>& servingContexts);
 	Reflector& getReflector();
-	void release(const string& beanName, const string& appName);
+	void release(const std::string& beanName, const std::string& appName);
 };
 
 #endif /* FFEADCONTEXT_H_ */

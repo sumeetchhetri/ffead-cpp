@@ -16,19 +16,19 @@ MemcachedImpl::~MemcachedImpl() {
 }
 
 void MemcachedImpl::initEnv() {
-	string configStr;
+	std::string configStr;
 	int numConns = 0;
 	for (int var = 0; var < (int)properties.getNodes().size(); ++var) {
 		configStr.append("--SERVER=");
 		configStr.append(properties.getNodes().at(var).getHost());
 		//configStr.append(":");
-		//configStr.append(CastUtil::lexical_cast<string>(nodes.at(var).getPort()));
+		//configStr.append(CastUtil::lexical_cast<std::string>(nodes.at(var).getPort()));
 		configStr.append(" ");
 	}
 
 	numConns = properties.getPoolReadSize() + properties.getPoolWriteSize();
 	configStr.append("--POOL-MIN=1 --POOL-MAX=");
-	configStr.append(CastUtil::lexical_cast<string>(numConns));
+	configStr.append(CastUtil::lexical_cast<std::string>(numConns));
 
 	memcached_pool_st* pool = memcached_pool(configStr.c_str(), configStr.length());
 	properties.setNewConnectionStrategy(true);
@@ -40,7 +40,7 @@ void MemcachedImpl::destroy() {
 	memcached_pool_destroy(pool);
 }
 
-bool MemcachedImpl::remove(const string& key) {
+bool MemcachedImpl::remove(const std::string& key) {
 	Connection* connection = checkout();
 	memcached_return_t reply = memcached_delete((memcached_st*)connection->getConn(),
 			key.c_str(), key.length(), (time_t)0);
@@ -48,7 +48,7 @@ bool MemcachedImpl::remove(const string& key) {
 	return replyStatus(reply);
 }
 
-long long MemcachedImpl::increment(const string& key, const int& number) {
+long long MemcachedImpl::increment(const std::string& key, const int& number) {
 	Connection* connection = checkout();
 	uint64_t value;
 	memcached_increment((memcached_st*)connection->getConn(),
@@ -57,7 +57,7 @@ long long MemcachedImpl::increment(const string& key, const int& number) {
 	return value;
 }
 
-long long MemcachedImpl::decrement(const string& key, const int& number) {
+long long MemcachedImpl::decrement(const std::string& key, const int& number) {
 	Connection* connection = checkout();
 	uint64_t value;
 	memcached_decrement((memcached_st*)connection->getConn(),
@@ -66,25 +66,25 @@ long long MemcachedImpl::decrement(const string& key, const int& number) {
 	return value;
 }
 
-long double MemcachedImpl::incrementFloat(const string& key, const double& number) {
+long double MemcachedImpl::incrementFloat(const std::string& key, const double& number) {
 	throw "Not Implemented";
 }
 
-long double MemcachedImpl::decrementFloat(const string& key, const double& number) {
+long double MemcachedImpl::decrementFloat(const std::string& key, const double& number) {
 	throw "Not Implemented";
 }
 
-map<string, string> MemcachedImpl::statistics() {
+std::map<std::string, std::string> MemcachedImpl::statistics() {
 	Connection* connection = checkout();
 	memcached_return_t reply;
 	memcached_stat_st* stat = memcached_stat((memcached_st*)connection->getConn(), NULL, &reply);
 	char** keys = memcached_stat_get_keys((memcached_st*)connection->getConn(), stat, &reply);
-	map<string, string> stats;
+	std::map<std::string, std::string> stats;
 	if(replyStatus(reply)) {
 		char **ptr;
 		for (ptr= keys; *ptr; ptr++) {
 			char* valuec = memcached_stat_get_value((memcached_st*)connection->getConn(), stat, *ptr, &reply);
-			stats[string(*ptr)] = string(valuec);
+			stats[string(*ptr)] = std::string(valuec);
 		}
 		free(keys);
 	}
@@ -107,7 +107,7 @@ void* MemcachedImpl::newConnection(const bool& isWrite, const ConnectionNode& no
 	return memc;
 }
 
-memcached_return_t MemcachedImpl::setInternal(const string& key, const string& value, const int& expireSeconds, const int& setOrAddOrRep) {
+memcached_return_t MemcachedImpl::setInternal(const std::string& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep) {
 	Connection* connection = checkout();
 	memcached_return_t reply;
 	if(setOrAddOrRep==1)
@@ -129,32 +129,32 @@ memcached_return_t MemcachedImpl::setInternal(const string& key, const string& v
 	return reply;
 }
 
-bool MemcachedImpl::set(const string& key, GenericObject& value, const int& expireSeconds) {
-	string valueStr = value.getSerilaizedState();
+bool MemcachedImpl::set(const std::string& key, GenericObject& value, const int& expireSeconds) {
+	std::string valueStr = value.getSerilaizedState();
 	memcached_return_t reply = setInternal(key, valueStr, expireSeconds, 1);
 	return replyStatus(reply);
 }
 
-bool MemcachedImpl::add(const string& key, GenericObject& value, const int& expireSeconds) {
-	string valueStr = value.getSerilaizedState();
+bool MemcachedImpl::add(const std::string& key, GenericObject& value, const int& expireSeconds) {
+	std::string valueStr = value.getSerilaizedState();
 	memcached_return_t reply = setInternal(key, valueStr, expireSeconds, 2);
 	return replyStatus(reply);
 }
 
-bool MemcachedImpl::replace(const string& key, GenericObject& value, const int& expireSeconds) {
-	string valueStr = value.getSerilaizedState();
+bool MemcachedImpl::replace(const std::string& key, GenericObject& value, const int& expireSeconds) {
+	std::string valueStr = value.getSerilaizedState();
 	memcached_return_t reply = setInternal(key, valueStr, expireSeconds, 3);
 	return replyStatus(reply);
 }
 
-string MemcachedImpl::getValue(const string& key) {
+std::string MemcachedImpl::getValue(const std::string& key) {
 	Connection* connection = checkout();
 	size_t siz;
 	uint32_t fl = (uint32_t)0;
 	memcached_return_t reply;
 	char* value = memcached_get((memcached_st*)connection->getConn(), key.c_str(), key.length(),
 			&siz, &fl, &reply);
-	string rval;
+	std::string rval;
 	if(replyStatus(reply)) {
 		for (int var = 0; var < (int)siz; ++var) {
 			rval.push_back(value[var]);
@@ -169,7 +169,7 @@ bool MemcachedImpl::replyStatus(const memcached_return_t& reply) {
 	return memcached_success(reply);
 }
 
-void* MemcachedImpl::executeCommand(const string& command, ...) {
+void* MemcachedImpl::executeCommand(const std::string& command, ...) {
 	throw "Not Implemented";
 }
 

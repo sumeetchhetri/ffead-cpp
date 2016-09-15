@@ -56,7 +56,7 @@
 #include "SelEpolKqEvPrt.h"
 #define MAXEPOLLSIZES 10000
 #define BACKLOGM 500
-using namespace std;
+
 
 typedef void* (*Service)(void*);
 class NBServer {
@@ -76,20 +76,20 @@ class NBServer {
 public:
 	SOCKET getSocket();
 	NBServer();
-	NBServer(const string&, const int&, const Service&);
+	NBServer(const std::string&, const int&, const Service&);
 	virtual ~NBServer();
 	int Accept();
-	int Send(const SOCKET&, const string&);
-	int Send(const SOCKET&, const vector<char>&);
-	int Send(const SOCKET&, const vector<unsigned char>&);
+	int Send(const SOCKET&, const std::string&);
+	int Send(const SOCKET&, const std::vector<char>&);
+	int Send(const SOCKET&, const std::vector<unsigned char>&);
 	int Send(const SOCKET&, char*);
 	int Send(const SOCKET&, unsigned char*);
-	int Receive(const SOCKET&, string&, const int&);
-	int Receive(const SOCKET&, vector<char>&, const int&);
-	int Receive(const SOCKET&, vector<unsigned char>&, const int&);
+	int Receive(const SOCKET&, std::string&, const int&);
+	int Receive(const SOCKET&, std::vector<char>&, const int&);
+	int Receive(const SOCKET&, std::vector<unsigned char>&, const int&);
 	int Receive(const SOCKET&, char *data, const int&);
 	int Receive(const SOCKET&, unsigned char *data, const int&);
-	int Receive(const SOCKET&, vector<string>&, const int&);
+	int Receive(const SOCKET&, std::vector<std::string>&, const int&);
 	void start();
 	void stop();
 };

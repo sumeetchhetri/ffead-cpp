@@ -23,6 +23,7 @@
 #include "ClassInfo.h"
 
 Constructor ClassInfo::nullcons;
+Method ClassInfo::nullmeth;
 
 ClassInfo::ClassInfo() {
 	size = 0;
@@ -32,29 +33,29 @@ ClassInfo::~ClassInfo() {
 	// TODO Auto-generated destructor stub
 }
 
-string ClassInfo::getClassName() const
+std::string ClassInfo::getClassName() const
 {
 	return className;
 }
 
-void ClassInfo::setClassName(const string& className)
+void ClassInfo::setClassName(const std::string& className)
 {
 	this->className = className;
 }
 
-string ClassInfo::getBase() const
+std::string ClassInfo::getBase() const
 {
 	return base;
 }
 
-void ClassInfo::setBase(const string& base)
+void ClassInfo::setBase(const std::string& base)
 {
 	this->base = base;
 }
 
 const Constructor& ClassInfo::getConstructor(const args& argumentTypes) const
 {
-	string key = getClassName();
+	std::string key = getClassName();
 	for (unsigned int var = 0; var < argumentTypes.size(); var++)
 	{
 		if(argumentTypes.at(var)!="")
@@ -69,7 +70,7 @@ const Constructor& ClassInfo::getConstructor(const args& argumentTypes) const
 
 void ClassInfo::addConstructor(const Constructor& ctor)
 {
-	string key = getClassName();
+	std::string key = getClassName();
 	for (unsigned int var = 0; var < ctor.getArgumentTypes().size(); var++)
 	{
 		if(ctor.getArgumentTypes().at(var)!="")
@@ -83,46 +84,30 @@ ctorMap ClassInfo::getConstructors()
 	return this->ctors;
 }
 
-const Method& ClassInfo::getMethod(const string& methodName, args argumentTypes) const
+const Method& ClassInfo::getMethod(const std::string& methodName, args argumentTypes) const
 {
-	string key1 = getClassName()+methodName;
-	string key2 = getClassName()+methodName;
+	std::string key1 = getClassName()+methodName;
 	for (unsigned int var = 0; var < argumentTypes.size(); var++)
 	{
 		if(argumentTypes.at(var)!="")
 		{
-			string temp = argumentTypes.at(var);
-			StringUtil::replaceFirst(temp," ","");
-			StringUtil::replaceFirst(temp,"<","ts");
-			StringUtil::replaceFirst(temp,">","te");
-			StringUtil::replaceFirst(temp,"*","ptr");
-			StringUtil::replaceFirst(temp,"&","adr");
-			StringUtil::replaceFirst(temp,"std::","");
-			StringUtil::replaceFirst(temp,"::","ns");
+			std::string temp = argumentTypes.at(var);
 			key1 += temp;
-
-			temp = argumentTypes.at(var);
-			StringUtil::replaceFirst(temp," ","");
-			StringUtil::replaceFirst(temp,"<","ts");
-			StringUtil::replaceFirst(temp,">","te");
-			StringUtil::replaceFirst(temp,"*","ptr");
-			StringUtil::replaceFirst(temp,"&","");
-			StringUtil::replaceFirst(temp,"std::","");
-			StringUtil::replaceFirst(temp,"::","ns");
-			key2 += temp;
 		}
 	}
+	StringUtil::replaceAll(key1,"std::","");
+	StringUtil::replaceAll(key1, " ", "");
+	StringUtil::replaceAll(key1, "*", "ptr");
+	StringUtil::replaceAll(key1, "&", "");
 	if(meths.find(key1)!=meths.end()) {
 		return meths.find(key1)->second;
-	} else if(meths.find(key2)!=meths.end()) {
-		return meths.find(key2)->second;
 	} else {
-		return Method();
+		return nullmeth;
 	}
 }
 void ClassInfo::addMethod(const Method& meth)
 {
-	string key = meth.getMethodName();
+	std::string key = meth.getMethodName();
 	/*for (unsigned int var = 0; var < meth.getArgumentTypes().size(); var++)
 	{
 		if(meth.getArgumentTypes().at(var)!="")
@@ -131,14 +116,14 @@ void ClassInfo::addMethod(const Method& meth)
 	meths[key] = meth;
 }
 
-Field ClassInfo::getField(const string& fldName)
+Field ClassInfo::getField(const std::string& fldName)
 {
-	string key = fldName;
+	std::string key = fldName;
 	return fields[key];
 }
 void ClassInfo::addField(const Field& fld)
 {
-	string key = fld.getFieldName();
+	std::string key = fld.getFieldName();
 	fields[key] = fld;
 	fldvec.push_back(fld);
 }
@@ -158,12 +143,12 @@ methMap ClassInfo::getMethods()
 	return meths;
 }
 
-void ClassInfo::setNamespace(const string& namespc)
+void ClassInfo::setNamespace(const std::string& namespc)
 {
 	this->namespc = namespc;
 }
 
-string ClassInfo::getNamespace()
+std::string ClassInfo::getNamespace()
 {
 	return namespc;
 }
@@ -178,28 +163,28 @@ int ClassInfo::getSize()
 	return this->size;
 }
 
-const string& ClassInfo::getDestRefName() const {
+const std::string& ClassInfo::getDestRefName() const {
 	return destRefName;
 }
 
-void ClassInfo::setDestRefName(const string& destRefName) {
+void ClassInfo::setDestRefName(const std::string& destRefName) {
 	this->destRefName = destRefName;
 }
 
-string ClassInfo::getOperatorRefName(const string& oper) {
+std::string ClassInfo::getOperatorRefName(const std::string& oper) {
 	if(operRefNames.find(oper)!=operRefNames.end()) {
 		return operRefNames.find(oper)->second;
 	}
 	return "";
 }
 
-void ClassInfo::addOperatorRefName(const string& oper, const string& rn) {
+void ClassInfo::addOperatorRefName(const std::string& oper, const std::string& rn) {
 	if(operRefNames.find(oper)==operRefNames.end()) {
 		operRefNames[oper] = rn;
 	}
 }
 
-string ClassInfo::getContRefName() {
+std::string ClassInfo::getContRefName() {
 	return contRefName;
 }
 
@@ -216,86 +201,86 @@ string ClassInfo::getContRefName() {
  * _fcrcasf_ = 9
  */
 
-void ClassInfo::setContRefName(const string& rn) {
+void ClassInfo::setContRefName(const std::string& rn) {
 	contRefName = rn;
 }
 /*
-string ClassInfo::getPublic_fields() const
+std::string ClassInfo::getPublic_fields() const
 {
 	return public_fields;
 }
 
-void ClassInfo::setPublic_fields(const string& public_fields)
+void ClassInfo::setPublic_fields(const std::string& public_fields)
 {
 	this->public_fields = public_fields;
 }
 
-string ClassInfo::getPrivate_fields() const
+std::string ClassInfo::getPrivate_fields() const
 {
 	return private_fields;
 }
 
-void ClassInfo::setPrivate_fields(const string& private_fields)
+void ClassInfo::setPrivate_fields(const std::string& private_fields)
 {
 	this->private_fields = private_fields;
 }
 
-string ClassInfo::getProtected_fields() const
+std::string ClassInfo::getProtected_fields() const
 {
 	return protected_fields;
 }
 
-void ClassInfo::setProtected_fields(const string& protected_fields)
+void ClassInfo::setProtected_fields(const std::string& protected_fields)
 {
 	this->protected_fields = protected_fields;
 }
 
-string ClassInfo::getPublic_meths() const
+std::string ClassInfo::getPublic_meths() const
 {
 	return public_meths;
 }
 
-void ClassInfo::setPublic_meths(const string& public_meths)
+void ClassInfo::setPublic_meths(const std::string& public_meths)
 {
 	this->public_meths = public_meths;
 }
 
-string ClassInfo::getPrivate_meths() const
+std::string ClassInfo::getPrivate_meths() const
 {
 	return private_meths;
 }
 
-void ClassInfo::setPrivate_meths(const string& private_meths)
+void ClassInfo::setPrivate_meths(const std::string& private_meths)
 {
 	this->private_meths = private_meths;
 }
 
-string ClassInfo::getProtected_meths() const
+std::string ClassInfo::getProtected_meths() const
 {
 	return protected_meths;
 }
 
-void ClassInfo::setProtected_meths(const string& protected_meths)
+void ClassInfo::setProtected_meths(const std::string& protected_meths)
 {
 	this->protected_meths = protected_meths;
 }
 
-vector<Method> ClassInfo::getMethods() const
+std::vector<Method> ClassInfo::getMethods() const
 {
 	return methods;
 }
 
-void ClassInfo::setMethods(const vector<Method>& methods)
+void ClassInfo::setMethods(const std::vector<Method>& methods)
 {
 	this->methods = methods;
 }
 
-vector<Field> ClassInfo::getFields() const
+std::vector<Field> ClassInfo::getFields() const
 {
 	return fields;
 }
 
-void ClassInfo::setFields(const vector<Field>& fields)
+void ClassInfo::setFields(const std::vector<Field>& fields)
 {
 	this->fields = fields;
 }

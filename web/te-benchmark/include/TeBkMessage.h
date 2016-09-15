@@ -9,14 +9,14 @@
 #define TEBKMESSAGE_H_
 #include "string"
 
-using namespace std;
+
 
 class TeBkMessage {
-	string message;
+	std::string message;
 public:
 	virtual ~TeBkMessage();
-	const string& getMessage() const;
-	void setMessage(const string& message);
+	const std::string& getMessage() const;
+	void setMessage(const std::string& message);
 };
 
 #endif /* TEBKMESSAGE_H_ */

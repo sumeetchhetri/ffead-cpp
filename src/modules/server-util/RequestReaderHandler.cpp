@@ -81,7 +81,7 @@ RequestReaderHandler::~RequestReaderHandler() {
 void* RequestReaderHandler::handleTimeouts(void* inp) {
 	Logger logger = LoggerFactory::getLogger("RequestReaderHandler");
 	RequestReaderHandler* ins  = static_cast<RequestReaderHandler*>(inp);
-	map<int, SocketInterface*>::iterator it;
+	std::map<int, SocketInterface*>::iterator it;
 	while(ins->isActive())
 	{
 		Timer cdt;
@@ -108,7 +108,7 @@ void* RequestReaderHandler::handleTimeouts(void* inp) {
 			{
 				if(it->second->t.elapsedMilliSeconds()>=it->second->getTimeout())
 				{
-					logger << "timedout connection " << it->second->getDescriptor() << " " << it->second->identifier << endl;
+					logger << "timedout connection " << it->second->getDescriptor() << " " << it->second->identifier << std::endl;
 					ins->timedoutSocks.push(it->second);
 					ins->connectionsWithTimeouts.erase(it++);
 				}
@@ -135,7 +135,7 @@ void* RequestReaderHandler::handle(void* inp) {
 		if(ins->isNotRegisteredListener)
 		{
 			cdt.start();
-			vector<SocketInterface*> pds;
+			std::vector<SocketInterface*> pds;
 			SocketInterface* psi = NULL;
 			while(ins->pendingSocks.pop(psi) && cdt.elapsedMilliSeconds()<100)
 			{
@@ -147,7 +147,7 @@ void* RequestReaderHandler::handle(void* inp) {
 			}
 			for (int var = 0; var < (int)pds.size(); ++var) {
 				ins->pendingSocks.push(pds.at(var));
-				logger << "existing connection " << pds.at(var)->getDescriptor() << endl;
+				logger << "existing connection " << pds.at(var)->getDescriptor() << std::endl;
 			}
 		}
 
@@ -165,7 +165,7 @@ void* RequestReaderHandler::handle(void* inp) {
 		SocketInterface* rsi = NULL;
 		while(ins->readerSwitchedSocks.pop(rsi) && cdt.elapsedMilliSeconds()<100)
 		{
-			logger << "Swicthing protocols.." << endl;
+			logger << "Swicthing protocols.." << std::endl;
 			if(ins->connections[rsi->getDescriptor()]->getTimeout()>0)
 			{
 				ins->remFromTimeoutSocks.push(rsi);
@@ -208,7 +208,7 @@ void* RequestReaderHandler::handle(void* inp) {
 							  break;
 							}
 						}
-						logger << "TARGET-REQUEST BEGINS AT " << Timer::getCurrentTime() <<  endl;
+						logger << "TARGET-REQUEST BEGINS AT " << Timer::getCurrentTime() <<  std::endl;
 						SocketUtil* sockUtil = new SocketUtil(newSocket);
 						SocketInterface* sockIntf = ins->sf(sockUtil);
 						ins->addSf(sockIntf);
@@ -224,7 +224,7 @@ void* RequestReaderHandler::handle(void* inp) {
 				else
 				{
 					if(ins->connections.find(descriptor)==ins->connections.end()) {
-						logger << "IDHAR KAISE AAYA@@@@@@@@" << endl;
+						logger << "IDHAR KAISE AAYA@@@@@@@@" << std::endl;
 						continue;
 					}
 					SocketInterface* si = ins->connections[descriptor];
@@ -242,7 +242,7 @@ void* RequestReaderHandler::handle(void* inp) {
 							pending = 0;
 							break;
 						} else if(request!=NULL) {
-							logger << "TARGET-REQUEST GOT AT " << Timer::getCurrentTime() <<  endl;
+							logger << "TARGET-REQUEST GOT AT " << Timer::getCurrentTime() <<  std::endl;
 							ins->shi->registerRequest(request, si, context, ins);
 						}
 					}
@@ -252,7 +252,7 @@ void* RequestReaderHandler::handle(void* inp) {
 	}
 
 	Thread::mSleep(600);
-	map<int, bool> donelist;
+	std::map<int, bool> donelist;
 	SocketInterface* si = NULL;
 	while(ins->pendingSocks.pop(si))
 	{
@@ -261,7 +261,7 @@ void* RequestReaderHandler::handle(void* inp) {
 		delete si->sockUtil;
 		delete si;
 	}
-	map<int, SocketInterface*>::iterator it;
+	std::map<int, SocketInterface*>::iterator it;
 	for(it=ins->connections.begin();it!=ins->connections.end();++it) {
 		if(donelist.find(it->first)==donelist.end()) {
 			it->second->close();

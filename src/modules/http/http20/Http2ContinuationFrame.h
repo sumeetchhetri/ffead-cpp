@@ -10,15 +10,15 @@
 #include "Http2Frame.h"
 
 class Http2ContinuationFrame : public Http2Frame {
-	string headerBlockFragment;
-	Http2ContinuationFrame(const string& data, Http2FrameHeader& aheader);
+	std::string headerBlockFragment;
+	Http2ContinuationFrame(const std::string& data, Http2FrameHeader& aheader);
 	friend class Http2Handler;
 	friend class Http2StreamHandler;
 public:
 	Http2ContinuationFrame();
 	virtual ~Http2ContinuationFrame();
-	const string& getHeaderBlockFragment() const;
-	string getFrameData();
+	const std::string& getHeaderBlockFragment() const;
+	std::string getFrameData();
 };
 
 #endif /* HTTP2CONTINUATIONFRAME_H_ */

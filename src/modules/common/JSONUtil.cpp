@@ -22,9 +22,9 @@
 
 #include "JSONUtil.h"
 
-void JSONUtil::array(string& json, JSONElement* element)
+void JSONUtil::array(std::string& json, JSONElement* element)
 {
-	while(json.find("[")!=string::npos && json.find("]")!=string::npos)
+	while(json.find("[")!=std::string::npos && json.find("]")!=std::string::npos)
 	{
 		element->setType(JSONElement::JSON_ARRAY);
 		StringUtil::replaceFirst(json, "[", "");
@@ -33,9 +33,9 @@ void JSONUtil::array(string& json, JSONElement* element)
 	}
 }
 
-void JSONUtil::object(string& json, JSONElement* element)
+void JSONUtil::object(std::string& json, JSONElement* element)
 {
-	while(json.find("{")!=string::npos && json.find("}")!=string::npos)
+	while(json.find("{")!=std::string::npos && json.find("}")!=std::string::npos)
 	{
 		element->setType(JSONElement::JSON_OBJECT);
 		StringUtil::replaceFirst(json, "{", "");
@@ -44,21 +44,21 @@ void JSONUtil::object(string& json, JSONElement* element)
 	}
 }
 
-void JSONUtil::arrayOrObject(string& json, JSONElement* element)
+void JSONUtil::arrayOrObject(std::string& json, JSONElement* element)
 {
-	while((json.find("{")!=string::npos && json.find("}")!=string::npos)
-			|| (json.find("[")!=string::npos && json.find("]")!=string::npos))
+	while((json.find("{")!=std::string::npos && json.find("}")!=std::string::npos)
+			|| (json.find("[")!=std::string::npos && json.find("]")!=std::string::npos))
 	{
 		int arrst = json.find("[");
 		int objst = json.find("{");
-		if(json.find("{")!=string::npos && json.find("}")!=string::npos && (objst<arrst || arrst==(int)string::npos))
+		if(json.find("{")!=std::string::npos && json.find("}")!=std::string::npos && (objst<arrst || arrst==(int)std::string::npos))
 		{
 			element->setType(JSONElement::JSON_OBJECT);
 			StringUtil::replaceFirst(json, "{", "");
 			StringUtil::replaceLast(json, "}", "");
 			readJSON(json,false,element);
 		}
-		else if(json.find("[")!=string::npos && json.find("]")!=string::npos)
+		else if(json.find("[")!=std::string::npos && json.find("]")!=std::string::npos)
 		{
 			element->setType(JSONElement::JSON_ARRAY);
 			StringUtil::replaceFirst(json, "[", "");
@@ -68,30 +68,30 @@ void JSONUtil::arrayOrObject(string& json, JSONElement* element)
 	}
 }
 
-void JSONUtil::readBalancedJSON(string& value, string& json, const bool& isarray, const size_t& obs)
+void JSONUtil::readBalancedJSON(std::string& value, std::string& json, const bool& isarray, const size_t& obs)
 {
-	string typest = "{";
-	string typeen = "}";
+	std::string typest = "{";
+	std::string typeen = "}";
 	if(isarray)
 	{
 		typest = "[";
 		typeen = "]";
 	}
 	size_t eee = json.find(typeen, obs);
-	if(eee==string::npos)
+	if(eee==std::string::npos)
 	{
-		string ex = "invalid json - unbalanced " + typest + " found at " + CastUtil::lexical_cast<string>(obs);
+		std::string ex = "invalid json - unbalanced " + typest + " found at " + CastUtil::lexical_cast<std::string>(obs);
 		throw (ex.c_str());
 	}
-	string test = json.substr(obs, eee-obs+1);
+	std::string test = json.substr(obs, eee-obs+1);
 	int stcnt = StringUtil::countOccurrences(test, typest);
 	int encnt = StringUtil::countOccurrences(test, typeen);
 	while(stcnt!=encnt)
 	{
 		eee = json.find(typeen, eee+1);
-		if(eee==string::npos)
+		if(eee==std::string::npos)
 		{
-			string ex = "invalid json - balancing " + typeen + " not found after " + CastUtil::lexical_cast<string>(eee);
+			std::string ex = "invalid json - balancing " + typeen + " not found after " + CastUtil::lexical_cast<std::string>(eee);
 			throw (ex.c_str());
 		}
 		test = json.substr(obs, eee-obs+1);
@@ -105,34 +105,34 @@ void JSONUtil::readBalancedJSON(string& value, string& json, const bool& isarray
 		json = "";
 }
 
-void JSONUtil::readJSON(string& json, const bool& isarray, JSONElement *par)
+void JSONUtil::readJSON(std::string& json, const bool& isarray, JSONElement *par)
 {
 	if(json=="")
 		return;
-	string name, value;
+	std::string name, value;
 	if(!isarray)
 	{
 		size_t stn = json.find("\"");
-		while(stn!=string::npos && stn>0 && json.at(stn-1)=='\\')
+		while(stn!=std::string::npos && stn>0 && json.at(stn-1)=='\\')
 		{
 			stn = json.find("\"", stn+1);
 			if(stn==0)
 			{
-				stn = string::npos;
+				stn = std::string::npos;
 			}
 		}
-		if(stn==string::npos)
+		if(stn==std::string::npos)
 			throw ("invalid json - no start '\"' found for name parameter");
 		size_t enn = json.find("\"", stn+1);
-		while(enn!=string::npos && enn>0 && json.at(enn-1)=='\\')
+		while(enn!=std::string::npos && enn>0 && json.at(enn-1)=='\\')
 		{
 			enn = json.find("\"", enn+1);
 			if(enn==0)
 			{
-				enn = string::npos;
+				enn = std::string::npos;
 			}
 		}
-		if(enn==string::npos)
+		if(enn==std::string::npos)
 			throw ("invalid json - no end '\"' found for name parameter");
 		if(stn!=enn-1)
 			name = json.substr(stn+1, (enn-stn-1));
@@ -140,10 +140,10 @@ void JSONUtil::readJSON(string& json, const bool& isarray, JSONElement *par)
 		json = json.substr(enn+1);
 		StringUtil::trim(json);
 		size_t vst = json.find(":");
-		if(vst==string::npos)
+		if(vst==std::string::npos)
 			throw ("invalid json - no ':' found");
 		else if(vst!=0)
-			throw ("invalid json - invalid json - invalid string before ':' found");
+			throw ("invalid json - invalid json - invalid std::string before ':' found");
 		json = json.substr(vst+1);
 	}
 	JSONElement* element = new JSONElement;
@@ -163,7 +163,7 @@ void JSONUtil::readJSON(string& json, const bool& isarray, JSONElement *par)
 		readBalancedJSON(value, json, true, ars);
 		element->setType(JSONElement::JSON_ARRAY);
 	}
-	else if(env==string::npos)
+	else if(env==std::string::npos)
 	{
 		value = json;
 		json = "";
@@ -171,22 +171,22 @@ void JSONUtil::readJSON(string& json, const bool& isarray, JSONElement *par)
 	}
 	else
 	{
-		if(obs!=string::npos && env==0 && (obs<ars || ars==string::npos))
+		if(obs!=std::string::npos && env==0 && (obs<ars || ars==std::string::npos))
 		{
 			readBalancedJSON(value, json, false, obs);
 			element->setType(JSONElement::JSON_OBJECT);
 		}
-		else if(ars!=string::npos && env==0 && (ars<obs || obs==string::npos))
+		else if(ars!=std::string::npos && env==0 && (ars<obs || obs==std::string::npos))
 		{
 			readBalancedJSON(value, json, true, ars);
 			element->setType(JSONElement::JSON_ARRAY);
 		}
-		else if(obs!=string::npos && obs<env && (obs<ars || ars==string::npos))
+		else if(obs!=std::string::npos && obs<env && (obs<ars || ars==std::string::npos))
 		{
 			readBalancedJSON(value, json, false, obs);
 			element->setType(JSONElement::JSON_OBJECT);
 		}
-		else if(ars!=string::npos && ars<env && (ars<obs || obs==string::npos))
+		else if(ars!=std::string::npos && ars<env && (ars<obs || obs==std::string::npos))
 		{
 			readBalancedJSON(value, json, true, ars);
 			element->setType(JSONElement::JSON_ARRAY);
@@ -200,7 +200,7 @@ void JSONUtil::readJSON(string& json, const bool& isarray, JSONElement *par)
 	}
 	if(value=="")
 	{
-		string ex = "invalid json - no value object found for name "+ name;
+		std::string ex = "invalid json - no value object found for name "+ name;
 		throw (ex.c_str());
 	}
 	if(element->getType()!=JSONElement::JSON_OBJECT && element->getType()!=JSONElement::JSON_ARRAY)
@@ -215,38 +215,38 @@ void JSONUtil::readJSON(string& json, const bool& isarray, JSONElement *par)
 	readJSON(json,isarray,par);
 }
 
-void JSONUtil::validateSetValue(JSONElement* element, const string& v)
+void JSONUtil::validateSetValue(JSONElement* element, const std::string& v)
 {
-	string value = v;
+	std::string value = v;
 	StringUtil::trim(value);
 	size_t stn = value.find("\"");
-	if(stn!=string::npos)
+	if(stn!=std::string::npos)
 	{
-		while(stn!=string::npos && stn>0 && value.at(stn-1)=='\\')
+		while(stn!=std::string::npos && stn>0 && value.at(stn-1)=='\\')
 		{
 			stn = value.find("\"", stn+1);
 			if(stn==0)
 			{
-				stn = string::npos;
+				stn = std::string::npos;
 			}
 		}
 		size_t enn = value.find("\"", stn+1);
-		while(enn!=string::npos && enn>0 && value.at(enn-1)=='\\')
+		while(enn!=std::string::npos && enn>0 && value.at(enn-1)=='\\')
 		{
 			enn = value.find("\"", enn+1);
 			if(enn==0)
 			{
-				enn = string::npos;
+				enn = std::string::npos;
 			}
 		}
-		if(enn==string::npos)
+		if(enn==std::string::npos)
 		{
-			string ex = "invalid json - invalid string object '"+value+"' found for name "+ element->getName();
+			std::string ex = "invalid json - invalid std::string object '"+value+"' found for name "+ element->getName();
 			throw (ex.c_str());
 		}
 		else if(enn!=value.length()-1)
 		{
-			string ex = "invalid json - invalid literal found after string object '"+value+"' for name "+ element->getName();
+			std::string ex = "invalid json - invalid literal found after std::string object '"+value+"' for name "+ element->getName();
 			throw (ex.c_str());
 		}
 		if(stn!=enn-1)
@@ -264,13 +264,13 @@ void JSONUtil::validateSetValue(JSONElement* element, const string& v)
 		value = StringUtil::toLowerCopy(value);
 		element->setType(JSONElement::JSON_BOOL);
 	}
-	else if(value.find(".")!=string::npos)
+	else if(value.find(".")!=std::string::npos)
 	{
 		try
 		{
 			CastUtil::lexical_cast<double>(value);
 		} catch (const char* ex) {
-			string exp = "invalid json - invalid double value "+value+" found for name "+ element->getName();
+			std::string exp = "invalid json - invalid double value "+value+" found for name "+ element->getName();
 			throw (exp.c_str());
 		}
 		element->setType(JSONElement::JSON_FLOAT);
@@ -281,7 +281,7 @@ void JSONUtil::validateSetValue(JSONElement* element, const string& v)
 		{
 			CastUtil::lexical_cast<unsigned long long>(value);
 		} catch (const char* ex) {
-			string exp = "invalid json - invalid numeric value "+value+" found for name "+ element->getName();
+			std::string exp = "invalid json - invalid numeric value "+value+" found for name "+ element->getName();
 			throw (exp.c_str());
 		}
 		element->setType(JSONElement::JSON_NUMBER);
@@ -289,21 +289,21 @@ void JSONUtil::validateSetValue(JSONElement* element, const string& v)
 	element->setValue(value);
 }
 
-void JSONUtil::getDocument(const string& jsonTxt, JSONElement& root)
+void JSONUtil::getDocument(const std::string& jsonTxt, JSONElement& root)
 {
-	string json(jsonTxt);
+	std::string json(jsonTxt);
 	root.setType(JSONElement::JSON_OBJECT);
 	root.setName("_JSON_ROOT");
 	int arrst = json.find("[");
 	int objst = json.find("{");
-	if(json.find("{")!=string::npos && json.find("}")!=string::npos && (objst<arrst || arrst==(int)string::npos))
+	if(json.find("{")!=std::string::npos && json.find("}")!=std::string::npos && (objst<arrst || arrst==(int)std::string::npos))
 	{
 		root.setType(JSONElement::JSON_OBJECT);
 		StringUtil::replaceFirst(json, "{", "");
 		StringUtil::replaceLast(json, "}", "");
 		readJSON(json,false,&root);
 	}
-	else if(json.find("[")!=string::npos && json.find("]")!=string::npos)
+	else if(json.find("[")!=std::string::npos && json.find("]")!=std::string::npos)
 	{
 		root.setType(JSONElement::JSON_ARRAY);
 		StringUtil::replaceFirst(json, "[", "");
@@ -312,9 +312,9 @@ void JSONUtil::getDocument(const string& jsonTxt, JSONElement& root)
 	}
 }
 
-string JSONUtil::getDocumentStr(const JSONElement& doc)
+std::string JSONUtil::getDocumentStr(const JSONElement& doc)
 {
-	string jsonText;
+	std::string jsonText;
 	if(doc.getType()==JSONElement::JSON_OBJECT)
 		jsonText += "{";
 	else

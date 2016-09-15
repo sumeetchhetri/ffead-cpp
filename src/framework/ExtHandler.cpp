@@ -22,35 +22,35 @@
 
 #include "ExtHandler.h"
 
-bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, const string& ext, Reflector& reflector)
+bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, const std::string& ext, Reflector& reflector)
 {
-	string& resourcePath = ConfigurationData::getInstance()->coreServerProperties.resourcePath;
+	std::string& resourcePath = ConfigurationData::getInstance()->coreServerProperties.resourcePath;
 
-	map<string, string>* tmplMap = NULL;
+	std::map<std::string, std::string>* tmplMap = NULL;
 	if(ConfigurationData::getInstance()->templateMappingMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->templateMappingMap.end())
 		tmplMap = &(ConfigurationData::getInstance()->templateMappingMap[req->getCntxt_name()]);
 
-	map<string, string>* dcpMap = NULL;
+	std::map<std::string, std::string>* dcpMap = NULL;
 	if(ConfigurationData::getInstance()->dcpMappingMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->dcpMappingMap.end())
 		dcpMap = &(ConfigurationData::getInstance()->dcpMappingMap[req->getCntxt_name()]);
 
-	map<string, string>* vwMap = NULL;
+	std::map<std::string, std::string>* vwMap = NULL;
 	if(ConfigurationData::getInstance()->viewMappingMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->viewMappingMap.end())
 		vwMap = &(ConfigurationData::getInstance()->viewMappingMap[req->getCntxt_name()]);
 
-	map<string, string>* ajaxIntfMap = NULL;
+	std::map<std::string, std::string>* ajaxIntfMap = NULL;
 	if(ConfigurationData::getInstance()->ajaxInterfaceMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->ajaxInterfaceMap.end())
 		ajaxIntfMap = &(ConfigurationData::getInstance()->ajaxInterfaceMap[req->getCntxt_name()]);
 
-	map<string, string>* fviewMap = NULL;
+	std::map<std::string, std::string>* fviewMap = NULL;
 	if(ConfigurationData::getInstance()->fviewMappingMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->fviewMappingMap.end())
 		fviewMap = &(ConfigurationData::getInstance()->fviewMappingMap[req->getCntxt_name()]);
 
 	Logger logger = LoggerFactory::getLogger("ExtHandler");
 	bool cntrlit = false;
-	string content, claz;
+	std::string content, claz;
 
-	string acurl = req->getActUrl();
+	std::string acurl = req->getActUrl();
 	RegexUtil::replace(acurl,"[/]+","/");
 	if(acurl.find("/"+req->getCntxt_name())!=0)
 		acurl = "/" + req->getCntxt_name() + "/" + acurl;
@@ -59,18 +59,18 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 	if(ajaxIntfMap!=NULL && ajaxIntfMap->find(acurl)!=ajaxIntfMap->end() && req->getMethod()=="POST" && req->getRequestParam("method")!="")
 	{
 		cntrlit = true;
-		string& claz = ajaxIntfMap->find(acurl)->second;
+		std::string& claz = ajaxIntfMap->find(acurl)->second;
 
-		logger << "Inside Ajax Interface Execute" << endl;
+		logger << "Inside Ajax Interface Execute" << std::endl;
 		strVec vemp;
-		string methName = req->getRequestParam("method");
+		std::string methName = req->getRequestParam("method");
 		if(methName=="")
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 		}
 		else
 		{
-			string temp = req->getRequestParam("paramsize");
+			std::string temp = req->getRequestParam("paramsize");
 			int paramSize = 0;
 			if(temp!="")
 			{
@@ -83,31 +83,31 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			}
 			if(paramSize>=0)
 			{
-				logger << "Reading Ajax params" << endl;
+				logger << "Reading Ajax params" << std::endl;
 				for(int i=0;i<paramSize;i++)
 				{
-					stringstream s;
-					string ss;
+					std::stringstream s;
+					std::string ss;
 					s << (i+1);
 					s >> ss;
 					ss = "param_" + ss;
-					//logger << ss << flush;
-					string tem = req->getRequestParam(ss);
+					//logger << ss << std::flush;
+					std::string tem = req->getRequestParam(ss);
 					vemp.push_back(tem);
 				}
-				string libName = INTER_LIB_FILE;
-				string funcName;
-				string metn,re;
+				std::string libName = INTER_LIB_FILE;
+				std::string funcName;
+				std::string metn,re;
 				StringUtil::replaceAll(claz, "::", "_");
 				metn = req->getCntxt_name() + "invokeAjaxMethodFor"+claz+methName;
 				void *mkr = dlsym(dlib, metn.c_str());
 				if(mkr!=NULL)
 				{
-					typedef string (*Funptr2) (strVec);
+					typedef std::string (*Funptr2) (strVec);
 					Funptr2 f2 = (Funptr2)mkr;
-					logger << ("Calling method " + metn) << endl;
+					logger << ("Calling method " + metn) << std::endl;
 					re = f2(vemp);
-					logger << "Completed method call" << endl;
+					logger << "Completed method call" << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 					res->addHeaderValue(HttpResponse::ContentType, "text/plain");
 					res->setContent(re);
@@ -127,22 +127,22 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			ConfigurationData::getInstance()->fviewFormMap.end())
 	{
 		cntrlit = FormHandler::handle(req, res, reflector);
-		logger << ("Request handled by FormHandler") << endl;
+		logger << ("Request handled by FormHandler") << std::endl;
 	}
 	else if(ext==".fview" && fviewMap!=NULL && fviewMap->find(req->getFile())!=fviewMap->end())
 	{
 		cntrlit = FviewHandler::handle(req, res);
-		logger << ("Request handled by FviewHandler") << endl;
+		logger << ("Request handled by FviewHandler") << std::endl;
 	}
 #ifdef INC_DCP
 	else if(dcpMap!=NULL && dcpMap->find(acurl)!=dcpMap->end())
 	{
-		string libName = INTER_LIB_FILE;
+		std::string libName = INTER_LIB_FILE;
 		if(ddlib != NULL)
 		{
 			cntrlit = true;
-			string meth;
-			string file = dcpMap->find(acurl)->second;
+			std::string meth;
+			std::string file = dcpMap->find(acurl)->second;
 			meth = "_" + file + "emittHTML";
 
 			void *mkr = dlsym(ddlib, meth.c_str());
@@ -153,7 +153,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			}
 			else
 			{
-				logger << ("No dcp found for " + meth) << endl;
+				logger << ("No dcp found for " + meth) << std::endl;
 			}
 			if(content.length()>0)
 			{
@@ -182,18 +182,18 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				valus.push_back(&doc);
 				reflector.invokeMethodGVP(_temp,meth,valus);
 				View view;
-				string t = view.generateDocument(doc);
+				std::string t = view.generateDocument(doc);
 				content = t;
 			}
 			else
 			{
-				logger << "Invalid Dynamic View handler, no method getDocument found..." << endl;
+				logger << "Invalid Dynamic View handler, no method getDocument found..." << std::endl;
 			}
 			ConfigurationData::getInstance()->ffeadContext.release("dview_"+vwMap->find(req->getFile())->second, req->getCntxt_name());
 		}
 		else
 		{
-			logger << "Invalid Dynamic View handler" << endl;
+			logger << "Invalid Dynamic View handler" << std::endl;
 		}
 
 		if(content.length()>0)
@@ -209,8 +209,8 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 	{
 		if(ddlib != NULL)
 		{
-			string tpefilename = tmplMap->find(acurl)->second.substr(tmplMap->find(acurl)->second.find(";")+1);
-			string tpeclasname = tmplMap->find(acurl)->second.substr(0, tmplMap->find(acurl)->second.find(";"));
+			std::string tpefilename = tmplMap->find(acurl)->second.substr(tmplMap->find(acurl)->second.find(";")+1);
+			std::string tpeclasname = tmplMap->find(acurl)->second.substr(0, tmplMap->find(acurl)->second.find(";"));
 			cntrlit = true;
 			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("template_"+tpeclasname, req->getCntxt_name());
 			if(_temp!=NULL)
@@ -224,15 +224,15 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				{
 					valus.push_back(req);
 					Context cnt = reflector.invokeMethod<Context>(_temp,meth,valus);
-					logger << "Done with Template Context fetch" << endl;
+					logger << "Done with Template Context fetch" << std::endl;
 
 					Context::iterator it;
 					for (it=cnt.begin();it!=cnt.end();it++) {
-						string key = it->first;
-						logger << ("Template key=" + key + " Value = ") << it->second.getPointer() << endl;
+						std::string key = it->first;
+						logger << ("Template key=" + key + " Value = ") << it->second.getPointer() << std::endl;
 					}
 
-					string fname = "_" + tpefilename + "emittTemplateHTML";
+					std::string fname = "_" + tpefilename + "emittTemplateHTML";
 
 					void* mkr = dlsym(ddlib, fname.c_str());
 					if(mkr!=NULL)
@@ -242,12 +242,12 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 					}
 					else
 					{
-						logger << ("No template found for " + fname) << endl;
+						logger << ("No template found for " + fname) << std::endl;
 					}
 				}
 				else
 				{
-					logger << "Invalid Template handler, no method getContext found..." << endl;
+					logger << "Invalid Template handler, no method getContext found..." << std::endl;
 				}
 				ConfigurationData::getInstance()->ffeadContext.release("template_"+tpeclasname, req->getCntxt_name());
 			}

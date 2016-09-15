@@ -24,12 +24,12 @@
 #define TESTOBJECT1_H_
 #include "string"
 #include "CastUtil.h"
-using namespace std;
+
 
 class TestObject {
 	int a;
 	long b;
-	string c;
+	std::string c;
 	float d;
 	double e;
 	bool f;
@@ -46,8 +46,8 @@ public:
 	void setA(int a);
 	long getB() const;
 	void setB(long b);
-	string getC() const;
-	void setC(string c);
+	std::string getC() const;
+	void setC(std::string c);
 	float getD() const;
 	void setD(float d);
 	double getE() const;
@@ -66,7 +66,7 @@ public:
 	void setK(unsigned long k);
 	unsigned long long getL() const;
 	void setL(unsigned long long l);
-	string toString();
+	std::string toString();
 };
 
 #endif /* TESTOBJECT1_H_ */

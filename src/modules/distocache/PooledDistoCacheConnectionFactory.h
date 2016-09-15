@@ -26,16 +26,16 @@
 
 class PooledDistoCacheConnectionFactory {
 	static PooledDistoCacheConnectionFactory* instance;
-	string host;
+	std::string host;
 	int port;
 	bool isSSL;
 	int poolSize;
-	vector<DistoCacheClientUtils*> pool;
-	PooledDistoCacheConnectionFactory(const string& host, const int& port, const int& poolSize, const bool& isSSL= false);
+	std::vector<DistoCacheClientUtils*> pool;
+	PooledDistoCacheConnectionFactory(const std::string& host, const int& port, const int& poolSize, const bool& isSSL= false);
 	void createPool();
 public:
 	virtual ~PooledDistoCacheConnectionFactory();
-	static void init(const string& host, const int& port, const int& poolSize, const bool& isSSL= false);
+	static void init(const std::string& host, const int& port, const int& poolSize, const bool& isSSL= false);
 	static void destroy();
 	static DistoCacheClientUtils* getConnection();
 	static void releaseConnection(DistoCacheClientUtils* clientUtil);

@@ -7,17 +7,17 @@
 
 #include "DataSourceManager.h"
 
-map<string, DataSourceManager*> DataSourceManager::dsns;
-string DataSourceManager::defDsnName;
+std::map<std::string, DataSourceManager*> DataSourceManager::dsns;
+std::string DataSourceManager::defDsnName;
 
 void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping& mapping)
 {
-	string name = StringUtil::trimCopy(props.getName());
+	std::string name = StringUtil::trimCopy(props.getName());
 	if(name=="")
 	{
 		throw "Data Source Name cannot be blank";
 	}
-	string appName = CommonUtils::getAppName(mapping.getAppName());
+	std::string appName = CommonUtils::getAppName(mapping.getAppName());
 	name = appName + name;
 	if(dsns.find(name)!=dsns.end())
 	{
@@ -32,7 +32,7 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 
 void DataSourceManager::destroy()
 {
-	map<string, DataSourceManager*>::iterator it;
+	std::map<std::string, DataSourceManager*>::iterator it;
 	for(it=dsns.begin();it!=dsns.end();++it)
 	{
 		if(it->second!=NULL)
@@ -64,8 +64,8 @@ DataSourceManager::~DataSourceManager() {
 	}
 }
 
-DataSourceInterface* DataSourceManager::getImpl(string name) {
-	string appName = CommonUtils::getAppName();
+DataSourceInterface* DataSourceManager::getImpl(std::string name) {
+	std::string appName = CommonUtils::getAppName();
 	StringUtil::trim(name);
 	if(name=="") {
 		name = defDsnName;
@@ -97,11 +97,11 @@ DataSourceInterface* DataSourceManager::getImpl(string name) {
 	t->dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(t->dlib == NULL)
 	{
-		cerr << dlerror() << endl;
+		std::cerr << dlerror() << std::endl;
 		throw "Cannot load application shared library";
 	}
 	t->reflector = new Reflector(t->dlib);
-	map<string, DataSourceEntityMapping>::iterator it;
+	std::map<std::string, DataSourceEntityMapping>::iterator it;
 	for(it=dsnMgr->mapping.getDseMap().begin();it!=dsnMgr->mapping.getDseMap().end();++it)
 	{
 		DataSourceEntityMapping dsemp = it->second;

@@ -31,14 +31,14 @@
 #include "CastUtil.h"
 #include "Component.h"
 #include "LoggerFactory.h"
-using namespace std;
-typedef vector<string> Cont1;
+
+typedef std::vector<std::string> Cont1;
 class ComponentGen {
 	Logger logger;
 public:
 	ComponentGen();
 	virtual ~ComponentGen();
-	string generateComponentCU(const string&, string &, string &, string &, string &, const string&);
+	std::string generateComponentCU(const std::string&, std::string &, std::string &, std::string &, std::string &, const std::string&);
 };
 
 #endif /* COMPONENTGEN_H_ */

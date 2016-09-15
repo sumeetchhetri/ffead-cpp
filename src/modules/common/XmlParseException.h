@@ -24,11 +24,11 @@
 #define XMLPARSEEXCEPTION_H_
 #include "Exception.h"
 #include "string"
-using namespace std;
+
 
 class XmlParseException : public Exception {
 public:
-	XmlParseException(const string&);
+	XmlParseException(const std::string&);
 	virtual ~XmlParseException() throw();
 };
 

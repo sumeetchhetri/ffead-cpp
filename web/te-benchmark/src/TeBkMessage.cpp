@@ -11,10 +11,10 @@ TeBkMessage::~TeBkMessage() {
 	// TODO Auto-generated destructor stub
 }
 
-const string& TeBkMessage::getMessage() const {
+const std::string& TeBkMessage::getMessage() const {
 	return message;
 }
 
-void TeBkMessage::setMessage(const string& message) {
+void TeBkMessage::setMessage(const std::string& message) {
 	this->message = message;
 }

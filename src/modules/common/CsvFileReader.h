@@ -29,13 +29,13 @@
 #include "vector"
 #include "StringUtil.h"
 
-typedef vector<vector<string> > strVecVec;
+typedef std::vector<std::vector<std::string> > strVecVec;
 
 class CsvFileReader {
 public:
 	CsvFileReader();
 	virtual ~CsvFileReader();
-	strVecVec getRows(const string&);
+	strVecVec getRows(const std::string&);
 };
 
 #endif /* CSVFILEREADER_H_ */

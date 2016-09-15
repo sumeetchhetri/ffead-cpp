@@ -24,7 +24,7 @@
 
 BasicDistoCacheConnectionFactory* BasicDistoCacheConnectionFactory::instance = NULL;
 
-BasicDistoCacheConnectionFactory::BasicDistoCacheConnectionFactory(const string& host, const int& port, const bool& isSSL) {
+BasicDistoCacheConnectionFactory::BasicDistoCacheConnectionFactory(const std::string& host, const int& port, const bool& isSSL) {
 	this->host = host;
 	this->port = port;
 	this->isSSL = isSSL;
@@ -33,7 +33,7 @@ BasicDistoCacheConnectionFactory::BasicDistoCacheConnectionFactory(const string&
 BasicDistoCacheConnectionFactory::~BasicDistoCacheConnectionFactory() {
 }
 
-void BasicDistoCacheConnectionFactory::init(const string& host, const int& port, const bool& isSSL) {
+void BasicDistoCacheConnectionFactory::init(const std::string& host, const int& port, const bool& isSSL) {
 	if(instance==NULL)
 	{
 		instance = new BasicDistoCacheConnectionFactory(host, port, isSSL);

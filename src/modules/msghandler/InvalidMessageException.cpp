@@ -22,7 +22,7 @@
 
 #include "InvalidMessageException.h"
 
-InvalidMessageException::InvalidMessageException(const string& message) {
+InvalidMessageException::InvalidMessageException(const std::string& message) {
 	this->setMessage("InvalidMessageException : "+message);
 }
 

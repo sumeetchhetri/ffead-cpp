@@ -23,7 +23,7 @@
 #include "XmlParser.h"
 
 
-XmlParser::XmlParser(const string& mode)
+XmlParser::XmlParser(const std::string& mode)
 {
 	//logger = LoggerFactory::getLogger("XmlParser");
 	this->mode = mode;
@@ -33,17 +33,17 @@ XmlParser::~XmlParser() {
 	// TODO Auto-generated destructor stub
 }
 
-void XmlParser::readDocument(const string& filename, Document& doc)
+void XmlParser::readDocument(const std::string& filename, Document& doc)
 {
-	ifstream infile(filename.c_str());
-	string temp;
-	string xml;
+	std::ifstream infile(filename.c_str());
+	std::string temp;
+	std::string xml;
 	if(infile.is_open())
 	{
 		xml = "";
 		while(getline(infile, temp))
 		{
-			if(temp.find("<?")==string::npos && temp.find("?>")==string::npos)
+			if(temp.find("<?")==std::string::npos && temp.find("?>")==std::string::npos)
 				xml.append(temp+"\n");
 		}
 		infile.close();
@@ -51,12 +51,12 @@ void XmlParser::readDocument(const string& filename, Document& doc)
 	parse(xml, doc);
 }
 
-void XmlParser::parse(string xml, Document& doc)
+void XmlParser::parse(std::string xml, Document& doc)
 {
 	StringUtil::trim(xml);
-	if(xml.find("<")==0 && xml.find(">")!=string::npos)
+	if(xml.find("<")==0 && xml.find(">")!=std::string::npos)
 	{
-		if(xml.find("<?")!=string::npos && xml.find("?>")!=string::npos)
+		if(xml.find("<?")!=std::string::npos && xml.find("?>")!=std::string::npos)
 		{
 			xml = xml.substr(xml.find("?>")+2);
 		}
@@ -67,13 +67,13 @@ void XmlParser::parse(string xml, Document& doc)
 		try {
 			doc.root.validateNs();
 		} catch (const char* ex) {
-			string errmsg(ex);
+			std::string errmsg(ex);
 			throw XmlParseException(errmsg);
 		}
 	}
 }
 
-void XmlParser::readXML(string& xml, const string& parent, Element *par)
+void XmlParser::readXML(std::string& xml, const std::string& parent, Element *par)
 {
 	if(xml=="")
 		return;
@@ -82,9 +82,9 @@ void XmlParser::readXML(string& xml, const string& parent, Element *par)
 	if(cdt==0)
 	{
 		int ecdt = xml.find("]]>");
-		if(ecdt==(int)string::npos)
+		if(ecdt==(int)std::string::npos)
 		{
-			string errmsg = ("Incomplete CDATA tag\n");
+			std::string errmsg = ("Incomplete CDATA tag\n");
 			throw XmlParseException(errmsg);
 
 		}
@@ -96,19 +96,19 @@ void XmlParser::readXML(string& xml, const string& parent, Element *par)
 		}
 	}
 	int cmt =  xml.find("<!--");
-	if(cmt!=(int)string::npos)
+	if(cmt!=(int)std::string::npos)
 	{
 		int ecmt = xml.find("-->");
-		if(ecmt==(int)string::npos)
+		if(ecmt==(int)std::string::npos)
 		{
-			string errmsg = ("Incomplete Comment tag\n");
+			std::string errmsg = ("Incomplete Comment tag\n");
 			throw XmlParseException(errmsg);
 
 		}
 		else
 		{
-			string stx = xml.substr(0,cmt);
-			string enx = xml.substr(ecmt+3);
+			std::string stx = xml.substr(0,cmt);
+			std::string enx = xml.substr(ecmt+3);
 			xml = stx + enx;
 		}
 	}
@@ -125,27 +125,27 @@ void XmlParser::readXML(string& xml, const string& parent, Element *par)
     	/*else
     		ed = ed2;*/
     }
-    string tag = xml.substr(st,ed-st);
+    std::string tag = xml.substr(st,ed-st);
     int ss = tag.find_first_not_of(" ");
     int se = tag.find_last_not_of(" ")+1;
     tag = tag.substr(ss,se-ss);
     Element* element = new Element;
 
     //split the tag with a space to get all the attribute sets of the element
-    string ta;
-    if(tag.find_first_of(" ")!=string::npos)
+    std::string ta;
+    if(tag.find_first_of(" ")!=std::string::npos)
     {
         ta = tag.substr(0,tag.find_first_of(" "));
         tag = tag.substr(tag.find_first_of(" ")+1);
-        while(tag.find_first_of("=")!=string::npos && tag.find_first_of("\"")!=string::npos)
+        while(tag.find_first_of("=")!=std::string::npos && tag.find_first_of("\"")!=std::string::npos)
         {
-            string atname = tag.substr(0,tag.find_first_of("="));
+            std::string atname = tag.substr(0,tag.find_first_of("="));
             int as = atname.find_first_not_of(" ");
             int ae = atname.find_last_not_of(" ")+1;
             atname = atname.substr(as,ae-as);
             int ds = tag.find_first_of("\"")+1;
             tag = tag.substr(ds);
-            string atvalue = tag.substr(0,tag.find_first_of("\""));
+            std::string atvalue = tag.substr(0,tag.find_first_of("\""));
             tag = tag.substr(tag.find_first_of("\"")+1);
             try {
 				if(parent!="")
@@ -159,11 +159,11 @@ void XmlParser::readXML(string& xml, const string& parent, Element *par)
             } catch(const char* ex) {
             	if(StringUtil::toLowerCopy(mode)=="validator")
             	{
-            		string errmsg(ex);
+            		std::string errmsg(ex);
             		throw XmlParseException(errmsg);
             	}
             }
-            //logger << "attname = " << atname << "   attvalue = " << atvalue << "\n" << flush;
+            //logger << "attname = " << atname << "   attvalue = " << atvalue << "\n" << std::flush;
         }
     }
     else
@@ -171,68 +171,68 @@ void XmlParser::readXML(string& xml, const string& parent, Element *par)
     int initcheck = xml.find_first_of("<");
     size_t someTag = (xml.substr(initcheck+1)).find("<");
     int pndTag=0,endTag=0;
-    if(xml.find("</"+ta)!=string::npos)
+    if(xml.find("</"+ta)!=std::string::npos)
     	pndTag = xml.find("</"+ta);
-    else if(xml.find("/>")!=string::npos && xml.find("/>")<someTag)
+    else if(xml.find("/>")!=std::string::npos && xml.find("/>")<someTag)
     	endTag = xml.find("/>");
-    if(xml.find("< ")!=string::npos)
+    if(xml.find("< ")!=std::string::npos)
     {
-        string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("< ")+1) + "\n");
+        std::string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("< ")+1) + "\n");
         throw XmlParseException(errmsg);
     }
-    else if(xml.find("<\t")!=string::npos)
+    else if(xml.find("<\t")!=std::string::npos)
     {
-        string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("<\t")+1) + "\n");
-        throw XmlParseException(errmsg);
-
-    }
-    else if(xml.find("</ ")!=string::npos)
-    {
-        string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("</ ")+1) + "\n");
+        std::string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("<\t")+1) + "\n");
         throw XmlParseException(errmsg);
 
     }
-    else if(xml.find("</\t")!=string::npos)
+    else if(xml.find("</ ")!=std::string::npos)
     {
-        string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("</\t")+1) + "\n");
+        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("</ ")+1) + "\n");
         throw XmlParseException(errmsg);
 
     }
-    else if(xml.find("< /")!=string::npos)
+    else if(xml.find("</\t")!=std::string::npos)
     {
-        string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("< /")+1) + "\n");
+        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("</\t")+1) + "\n");
         throw XmlParseException(errmsg);
 
     }
-    else if(xml.find("/ >")!=string::npos)
+    else if(xml.find("< /")!=std::string::npos)
+    {
+        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("< /")+1) + "\n");
+        throw XmlParseException(errmsg);
+
+    }
+    else if(xml.find("/ >")!=std::string::npos)
 	{
-		string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("/ >")+1) + "\n");
+		std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("/ >")+1) + "\n");
 		throw XmlParseException(errmsg);
 
 	}
-    else if(xml.find("<\t/")!=string::npos)
+    else if(xml.find("<\t/")!=std::string::npos)
     {
-        string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<string>((int)xml.find("<\t/")+1) + "\n");
+        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("<\t/")+1) + "\n");
         throw XmlParseException(errmsg);
 
     }
-    else if(xml.find("<"+ta)==string::npos && xml.find("</"+ta)!=string::npos)
+    else if(xml.find("<"+ta)==std::string::npos && xml.find("</"+ta)!=std::string::npos)
     {
-        string errmsg = ("No Start Tag - for : " + ta + "\n");
+        std::string errmsg = ("No Start Tag - for : " + ta + "\n");
         throw XmlParseException(errmsg);
 
     }
-    else if(xml.find("<"+ta)!=string::npos && pndTag==0 && endTag==0)
+    else if(xml.find("<"+ta)!=std::string::npos && pndTag==0 && endTag==0)
     {
-        string errmsg = ("No End Tag - for : " + ta + "\n");
+        std::string errmsg = ("No End Tag - for : " + ta + "\n");
         throw XmlParseException(errmsg);
 
     }
-    if(xml.find("<"+ta)!=string::npos && (xml.find("</"+ta)!=string::npos || xml.find("/>")!=string::npos))
+    if(xml.find("<"+ta)!=std::string::npos && (xml.find("</"+ta)!=std::string::npos || xml.find("/>")!=std::string::npos))
     {
-        //logger << "tag = " << ta << flush;
-        //logger << "   parent = " << parent << flush;
-        //logger << "\n" << flush;
+        //logger << "tag = " << ta << std::flush;
+        //logger << "   parent = " << parent << std::flush;
+        //logger << "\n" << std::flush;
 
         if(ed==ed1)
         {
@@ -247,18 +247,18 @@ void XmlParser::readXML(string& xml, const string& parent, Element *par)
 			}
         	xml = xml.substr(xml.find("/>")+2);
         }
-        else if(xml.find("</"+ta)!=string::npos)
+        else if(xml.find("</"+ta)!=std::string::npos)
 		{
 			//split each set by = to get the pairs
-			string tagx = "</"+ta+">";
+			std::string tagx = "</"+ta+">";
 			int end = xml.find("</"+ta+">");
-			string txml = xml.substr(ed+1,end-ed-1);
-			//logger << "temp = " << txml << flush;
-			//logger << "\n" << flush;
+			std::string txml = xml.substr(ed+1,end-ed-1);
+			//logger << "temp = " << txml << std::flush;
+			//logger << "\n" << std::flush;
 			if(parent!="")
 			{
 				element->setTagName(StringUtil::trimCopy(ta));
-				if(txml.find("<")!=string::npos)
+				if(txml.find("<")!=std::string::npos)
 				{
 					readXML(txml,ta,element);
 				}
@@ -269,7 +269,7 @@ void XmlParser::readXML(string& xml, const string& parent, Element *par)
 			else
 			{
 				par->setTagName(StringUtil::trimCopy(ta));
-				if(txml.find("<")!=string::npos)
+				if(txml.find("<")!=std::string::npos)
 				{
 					readXML(txml,ta,par);
 				}
@@ -279,21 +279,21 @@ void XmlParser::readXML(string& xml, const string& parent, Element *par)
 			xml = xml.substr(end+tagx.length());
 		}
     }
-    if(xml.find("<")!=string::npos && (xml.find("</")!=string::npos || xml.find("/>")!=string::npos))
+    if(xml.find("<")!=std::string::npos && (xml.find("</")!=std::string::npos || xml.find("/>")!=std::string::npos))
     {
-        //logger << "xml = " << xml << flush;
-        //logger << "\n" << flush;
+        //logger << "xml = " << xml << std::flush;
+        //logger << "\n" << std::flush;
         readXML(xml,parent,par);
     }
-    else if(xml.find("<")!=string::npos && (xml.find("</")==string::npos || xml.find("/>")==string::npos))
+    else if(xml.find("<")!=std::string::npos && (xml.find("</")==std::string::npos || xml.find("/>")==std::string::npos))
     {
-    	string errmsg = ("Invalid Start Tag\n");
+    	std::string errmsg = ("Invalid Start Tag\n");
     	throw XmlParseException(errmsg);
 
     }
-    else if(xml.find("<")==string::npos && (xml.find("</")!=string::npos || xml.find("/>")!=string::npos))
+    else if(xml.find("<")==std::string::npos && (xml.find("</")!=std::string::npos || xml.find("/>")!=std::string::npos))
 	{
-		string errmsg = ("Invalid End Tag\n");
+		std::string errmsg = ("Invalid End Tag\n");
 		throw XmlParseException(errmsg);
 
 	}

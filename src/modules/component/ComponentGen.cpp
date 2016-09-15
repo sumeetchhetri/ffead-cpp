@@ -30,7 +30,7 @@ ComponentGen::~ComponentGen() {
 	// TODO Auto-generated destructor stub
 }
 
-string convertfrom(string val)
+std::string convertfrom(std::string val)
 {
 	StringUtil::toUpper(val);
 	if(val=="TRUE")
@@ -44,21 +44,21 @@ string convertfrom(string val)
 }
 
 
-string ComponentGen::generateComponentCU(const string& fileName, string &cudata, string &cuheader, string &curemote, string &curemoteheaders, const string& appName)
+std::string ComponentGen::generateComponentCU(const std::string& fileName, std::string &cudata, std::string &cuheader, std::string &curemote, std::string &curemoteheaders, const std::string& appName)
 {
-	string file;
+	std::string file;
 	/*int s,en;
 	s = fileName.find_last_of("/")+1;
 	dir = fileName.substr(0,s-1);
 	en = fileName.find_last_of(".");*/
-	string initheaders,cuinithdrs,name;
+	std::string initheaders,cuinithdrs,name;
 	/*file = fileName.substr(s,en-s);
 	file = ("Component_"+file);
-	string initheaders = "#include \"Component.h\"\n";
-	string cuheader = "class "+file + ": public Component \n{\n";
-	string cudata = "#include \""+file+".h\"\n\n";
-	string constr;
-	string servs,servsh;
+	std::string initheaders = "#include \"Component.h\"\n";
+	std::string cuheader = "class "+file + ": public Component \n{\n";
+	std::string cudata = "#include \""+file+".h\"\n\n";
+	std::string constr;
+	std::string servs,servsh;
 	cuheader += "public:\n";
 	cuheader += "~"+file+"();\n";
 	cuheader += file+"();\n";
@@ -74,7 +74,7 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 			if(name=="")
 				throw "Component Name must be specified";
 			file = (StringUtil::capitalizedCopy(appName)+"_Component_"+name);
-			string cudef(file);
+			std::string cudef(file);
 			StringUtil::toUpper(cudef);
 			initheaders = "#ifndef "+cudef+"_H\n#define "+cudef+"_H\n";
 			cuinithdrs = "#ifndef "+cudef+"_REMOTE_H\n#define "+cudef+"_REMOTE_H\n";
@@ -91,8 +91,8 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 
 			cudata = "#include \""+file+".h\"\n\n";
 
-			string constr;
-			string servs,servsh,rsrvs;
+			std::string constr;
+			std::string servs,servsh,rsrvs;
 			cuheader += "public:\n";
 			cuheader += "~"+file+"();\n";
 			cuheader += file+"();\n";
@@ -106,7 +106,7 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 
 			cudata+= ("this->setName(\""+name+"\");\n");
 
-			string desc = srprps["@CMP_DESC"];
+			std::string desc = srprps["@CMP_DESC"];
 			cudata+= ("this->setDesc(\""+desc+"\");\n");
 
 			cudata+= ("this->setAjaxAvail("+convertfrom(srprps["@AJAX_AVAIL"])+");\n");
@@ -125,7 +125,7 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 
 			cudata+= ("this->setAuthMode("+convertfrom(srprps["@AUTH_ALL"])+");\n");
 
-			string alwd = srprps["@USR_GRP_ALWD"];
+			std::string alwd = srprps["@USR_GRP_ALWD"];
 			Cont1 alwdls;
 			StringUtil::split(alwdls, alwd, (","));
 			for (unsigned int var = 0; var < alwdls.size(); var++)
@@ -133,7 +133,7 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 				cudata+= ("this->getAllwList().push_back(\""+alwdls.at(var)+"\");\n");
 			}
 
-			string blkd = srprps["@BLOCK_USERS"];
+			std::string blkd = srprps["@BLOCK_USERS"];
 			Cont1 blkls;
 			StringUtil::split(blkls, blkd, (","));
 			for (unsigned int var = 0; var < blkls.size(); var++)
@@ -141,7 +141,7 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 				cudata+= ("this->getBlkdList().push_back(\""+blkls.at(var)+"\");\n");
 			}
 
-			string prots = srprps["@PROTO_ALWD"];
+			std::string prots = srprps["@PROTO_ALWD"];
 			Cont1 protls;
 			StringUtil::split(protls, prots, (","));
 			for (unsigned int var = 0; var < protls.size(); var++)
@@ -166,31 +166,31 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 			cudata+= ("this->setDbconpoolSize("+srprps["@DB_CONN_POOL_NUM"]+");\n");
 
 			int cnt =1;
-			while(srprps["@SERVICE"+CastUtil::lexical_cast<string>(cnt)]!="")
+			while(srprps["@SERVICE"+CastUtil::lexical_cast<std::string>(cnt)]!="")
 			{
-				string srvc = srprps["@SERVICE"+CastUtil::lexical_cast<string>(cnt++)];
+				std::string srvc = srprps["@SERVICE"+CastUtil::lexical_cast<std::string>(cnt++)];
 				ComponentService cmps;
-				if(srvc.find("@USR_GRP_ALWD(")!=string::npos)
+				if(srvc.find("@USR_GRP_ALWD(")!=std::string::npos)
 				{
 					int st = srvc.find("@USR_GRP_ALWD(");
-					string temp = srvc.substr(st+14);
+					std::string temp = srvc.substr(st+14);
 					size_t sp = temp.find_first_of(" ");
 					size_t cl = temp.find_first_of(")");
-					if((sp!=string::npos && sp<cl) || cl==string::npos)
+					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
 						throw "No spaces allowed between in value";
 					}
 					else
 					{
-						string temtem = temp.substr(0,cl);
-						if(temtem.find("@BLOCK_USERS")!=string::npos ||
-								temtem.find("@USR_GRP_ALWD")!=string::npos ||
-								temtem.find("@BLOCK_USR_GRPS")!=string::npos ||
-								temtem.find("@SRV_RET")!=string::npos ||
-								temtem.find("@USERS_ALWD")!=string::npos ||
-								temtem.find("@NAME")!=string::npos ||
-								temtem.find("@ARGS")!=string::npos ||
-								temtem.find("@SIGNATURE")!=string::npos)
+						std::string temtem = temp.substr(0,cl);
+						if(temtem.find("@BLOCK_USERS")!=std::string::npos ||
+								temtem.find("@USR_GRP_ALWD")!=std::string::npos ||
+								temtem.find("@BLOCK_USR_GRPS")!=std::string::npos ||
+								temtem.find("@SRV_RET")!=std::string::npos ||
+								temtem.find("@USERS_ALWD")!=std::string::npos ||
+								temtem.find("@NAME")!=std::string::npos ||
+								temtem.find("@ARGS")!=std::string::npos ||
+								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
 							throw "Invalid start of property within another property";
 						}
@@ -201,27 +201,27 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 						}
 					}
 				}
-				if(srvc.find("@BLOCK_USERS(")!=string::npos)
+				if(srvc.find("@BLOCK_USERS(")!=std::string::npos)
 				{
 					int st = srvc.find("@BLOCK_USERS(");
-					string temp = srvc.substr(st+13);
+					std::string temp = srvc.substr(st+13);
 					size_t sp = temp.find_first_of(" ");
 					size_t cl = temp.find_first_of(")");
-					if((sp!=string::npos && sp<cl) || cl==string::npos)
+					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
 						throw "No spaces allowed between in value";
 					}
 					else
 					{
-						string temtem = temp.substr(0,cl);
-						if(temtem.find("@BLOCK_USERS")!=string::npos ||
-								temtem.find("@USR_GRP_ALWD")!=string::npos ||
-								temtem.find("@BLOCK_USR_GRPS")!=string::npos ||
-								temtem.find("@SRV_RET")!=string::npos ||
-								temtem.find("@USERS_ALWD")!=string::npos ||
-								temtem.find("@NAME")!=string::npos ||
-								temtem.find("@ARGS")!=string::npos ||
-								temtem.find("@SIGNATURE")!=string::npos)
+						std::string temtem = temp.substr(0,cl);
+						if(temtem.find("@BLOCK_USERS")!=std::string::npos ||
+								temtem.find("@USR_GRP_ALWD")!=std::string::npos ||
+								temtem.find("@BLOCK_USR_GRPS")!=std::string::npos ||
+								temtem.find("@SRV_RET")!=std::string::npos ||
+								temtem.find("@USERS_ALWD")!=std::string::npos ||
+								temtem.find("@NAME")!=std::string::npos ||
+								temtem.find("@ARGS")!=std::string::npos ||
+								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
 							throw "Invalid start of property within another property";
 						}
@@ -232,27 +232,27 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 						}
 					}
 				}
-				if(srvc.find("@BLOCK_USR_GRPS(")!=string::npos)
+				if(srvc.find("@BLOCK_USR_GRPS(")!=std::string::npos)
 				{
 					int st = srvc.find("@BLOCK_USR_GRPS(");
-					string temp = srvc.substr(st+16);
+					std::string temp = srvc.substr(st+16);
 					size_t sp = temp.find_first_of(" ");
 					size_t cl = temp.find_first_of(")");
-					if((sp!=string::npos && sp<cl) || cl==string::npos)
+					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
 						throw "No spaces allowed between in value";
 					}
 					else
 					{
-						string temtem = temp.substr(0,cl);
-						if(temtem.find("@BLOCK_USERS")!=string::npos ||
-								temtem.find("@USR_GRP_ALWD")!=string::npos ||
-								temtem.find("@BLOCK_USR_GRPS")!=string::npos ||
-								temtem.find("@SRV_RET")!=string::npos ||
-								temtem.find("@USERS_ALWD")!=string::npos ||
-								temtem.find("@NAME")!=string::npos ||
-								temtem.find("@ARGS")!=string::npos ||
-								temtem.find("@SIGNATURE")!=string::npos)
+						std::string temtem = temp.substr(0,cl);
+						if(temtem.find("@BLOCK_USERS")!=std::string::npos ||
+								temtem.find("@USR_GRP_ALWD")!=std::string::npos ||
+								temtem.find("@BLOCK_USR_GRPS")!=std::string::npos ||
+								temtem.find("@SRV_RET")!=std::string::npos ||
+								temtem.find("@USERS_ALWD")!=std::string::npos ||
+								temtem.find("@NAME")!=std::string::npos ||
+								temtem.find("@ARGS")!=std::string::npos ||
+								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
 							throw "Invalid start of property within another property";
 						}
@@ -263,28 +263,28 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 						}
 					}
 				}
-				string srvret = "void";
-				if(srvc.find("@SRV_RET(")!=string::npos)
+				std::string srvret = "void";
+				if(srvc.find("@SRV_RET(")!=std::string::npos)
 				{
 					int st = srvc.find("@SRV_RET(");
-					string temp = srvc.substr(st+9);
+					std::string temp = srvc.substr(st+9);
 					size_t sp = temp.find_first_of(" ");
 					size_t cl = temp.find_first_of(")");
-					if((sp!=string::npos && sp<cl) || cl==string::npos)
+					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
 						throw "No spaces allowed between in value";
 					}
 					else
 					{
-						string temtem = temp.substr(0,cl);
-						if(temtem.find("@BLOCK_USERS")!=string::npos ||
-								temtem.find("@USR_GRP_ALWD")!=string::npos ||
-								temtem.find("@BLOCK_USR_GRPS")!=string::npos ||
-								temtem.find("@SRV_RET")!=string::npos ||
-								temtem.find("@USERS_ALWD")!=string::npos ||
-								temtem.find("@NAME")!=string::npos ||
-								temtem.find("@ARGS")!=string::npos ||
-								temtem.find("@SIGNATURE")!=string::npos)
+						std::string temtem = temp.substr(0,cl);
+						if(temtem.find("@BLOCK_USERS")!=std::string::npos ||
+								temtem.find("@USR_GRP_ALWD")!=std::string::npos ||
+								temtem.find("@BLOCK_USR_GRPS")!=std::string::npos ||
+								temtem.find("@SRV_RET")!=std::string::npos ||
+								temtem.find("@USERS_ALWD")!=std::string::npos ||
+								temtem.find("@NAME")!=std::string::npos ||
+								temtem.find("@ARGS")!=std::string::npos ||
+								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
 							throw "Invalid start of property within another property";
 						}
@@ -295,27 +295,27 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 						}
 					}
 				}
-				if(srvc.find("@USERS_ALWD(")!=string::npos)
+				if(srvc.find("@USERS_ALWD(")!=std::string::npos)
 				{
 					int st = srvc.find("@USERS_ALWD(");
-					string temp = srvc.substr(st+12);
+					std::string temp = srvc.substr(st+12);
 					size_t sp = temp.find_first_of(" ");
 					size_t cl = temp.find_first_of(")");
-					if((sp!=string::npos && sp<cl) || cl==string::npos)
+					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
 						throw "No spaces allowed between in value";
 					}
 					else
 					{
-						string temtem = temp.substr(0,cl);
-						if(temtem.find("@BLOCK_USERS")!=string::npos ||
-								temtem.find("@USR_GRP_ALWD")!=string::npos ||
-								temtem.find("@BLOCK_USR_GRPS")!=string::npos ||
-								temtem.find("@SRV_RET")!=string::npos ||
-								temtem.find("@USERS_ALWD")!=string::npos ||
-								temtem.find("@NAME")!=string::npos ||
-								temtem.find("@ARGS")!=string::npos ||
-								temtem.find("@SIGNATURE")!=string::npos)
+						std::string temtem = temp.substr(0,cl);
+						if(temtem.find("@BLOCK_USERS")!=std::string::npos ||
+								temtem.find("@USR_GRP_ALWD")!=std::string::npos ||
+								temtem.find("@BLOCK_USR_GRPS")!=std::string::npos ||
+								temtem.find("@SRV_RET")!=std::string::npos ||
+								temtem.find("@USERS_ALWD")!=std::string::npos ||
+								temtem.find("@NAME")!=std::string::npos ||
+								temtem.find("@ARGS")!=std::string::npos ||
+								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
 							throw "Invalid start of property within another property";
 						}
@@ -326,28 +326,28 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 						}
 					}
 				}
-				string srvcls,srvmeth;
-				if(srvc.find("@SIGNATURE(")!=string::npos)
+				std::string srvcls,srvmeth;
+				if(srvc.find("@SIGNATURE(")!=std::string::npos)
 				{
 					int st = srvc.find("@SIGNATURE(");
-					string temp = srvc.substr(st+11);
+					std::string temp = srvc.substr(st+11);
 					size_t sp = temp.find_first_of(" ");
 					size_t cl = temp.find_first_of(")");
-					if((sp!=string::npos && sp<cl) || cl==string::npos)
+					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
 						throw "No spaces allowed between in value";
 					}
 					else
 					{
-						string temtem = temp.substr(0,cl);
-						if(temtem.find("@BLOCK_USERS")!=string::npos ||
-								temtem.find("@USR_GRP_ALWD")!=string::npos ||
-								temtem.find("@BLOCK_USR_GRPS")!=string::npos ||
-								temtem.find("@SRV_RET")!=string::npos ||
-								temtem.find("@USERS_ALWD")!=string::npos ||
-								temtem.find("@NAME")!=string::npos ||
-								temtem.find("@ARGS")!=string::npos ||
-								temtem.find("@SIGNATURE")!=string::npos)
+						std::string temtem = temp.substr(0,cl);
+						if(temtem.find("@BLOCK_USERS")!=std::string::npos ||
+								temtem.find("@USR_GRP_ALWD")!=std::string::npos ||
+								temtem.find("@BLOCK_USR_GRPS")!=std::string::npos ||
+								temtem.find("@SRV_RET")!=std::string::npos ||
+								temtem.find("@USERS_ALWD")!=std::string::npos ||
+								temtem.find("@NAME")!=std::string::npos ||
+								temtem.find("@ARGS")!=std::string::npos ||
+								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
 							throw "Invalid start of property within another property";
 						}
@@ -369,28 +369,28 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 						}
 					}
 				}
-				string srvname;
-				if(srvc.find("@NAME(")!=string::npos)
+				std::string srvname;
+				if(srvc.find("@NAME(")!=std::string::npos)
 				{
 					int st = srvc.find("@NAME(");
-					string temp = srvc.substr(st+6);
+					std::string temp = srvc.substr(st+6);
 					size_t sp = temp.find_first_of(" ");
 					size_t cl = temp.find_first_of(")");
-					if((sp!=string::npos && sp<cl) || cl==string::npos)
+					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
 						throw "No spaces allowed between in value";
 					}
 					else
 					{
-						string temtem = temp.substr(0,cl);
-						if(temtem.find("@BLOCK_USERS")!=string::npos ||
-								temtem.find("@USR_GRP_ALWD")!=string::npos ||
-								temtem.find("@BLOCK_USR_GRPS")!=string::npos ||
-								temtem.find("@SRV_RET")!=string::npos ||
-								temtem.find("@USERS_ALWD")!=string::npos ||
-								temtem.find("@NAME")!=string::npos ||
-								temtem.find("@ARGS")!=string::npos ||
-								temtem.find("@SIGNATURE")!=string::npos)
+						std::string temtem = temp.substr(0,cl);
+						if(temtem.find("@BLOCK_USERS")!=std::string::npos ||
+								temtem.find("@USR_GRP_ALWD")!=std::string::npos ||
+								temtem.find("@BLOCK_USR_GRPS")!=std::string::npos ||
+								temtem.find("@SRV_RET")!=std::string::npos ||
+								temtem.find("@USERS_ALWD")!=std::string::npos ||
+								temtem.find("@NAME")!=std::string::npos ||
+								temtem.find("@ARGS")!=std::string::npos ||
+								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
 							throw "Invalid start of property within another property";
 						}
@@ -400,28 +400,28 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 						}
 					}
 				}
-				string srvargs,srvmcarg,srvmcargremote,srvmcargremotevec="vector<GenericObject> _vec;\n";
-				if(srvc.find("@ARGS(")!=string::npos)
+				std::string srvargs,srvmcarg,srvmcargremote,srvmcargremotevec="std::vector<GenericObject> _vec;\n";
+				if(srvc.find("@ARGS(")!=std::string::npos)
 				{
 					int st = srvc.find("@ARGS(");
-					string temp = srvc.substr(st+6);
+					std::string temp = srvc.substr(st+6);
 					size_t sp = temp.find_first_of(" ");
 					size_t cl = temp.find_first_of(")");
-					if((sp!=string::npos && sp<cl) || cl==string::npos)
+					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
 						throw "No spaces allowed between in value";
 					}
 					else
 					{
-						string temtem = temp.substr(0,cl);
-						if(temtem.find("@BLOCK_USERS")!=string::npos ||
-								temtem.find("@USR_GRP_ALWD")!=string::npos ||
-								temtem.find("@BLOCK_USR_GRPS")!=string::npos ||
-								temtem.find("@SRV_RET")!=string::npos ||
-								temtem.find("@USERS_ALWD")!=string::npos ||
-								temtem.find("@NAME")!=string::npos ||
-								temtem.find("@ARGS")!=string::npos ||
-								temtem.find("@SIGNATURE")!=string::npos)
+						std::string temtem = temp.substr(0,cl);
+						if(temtem.find("@BLOCK_USERS")!=std::string::npos ||
+								temtem.find("@USR_GRP_ALWD")!=std::string::npos ||
+								temtem.find("@BLOCK_USR_GRPS")!=std::string::npos ||
+								temtem.find("@SRV_RET")!=std::string::npos ||
+								temtem.find("@USERS_ALWD")!=std::string::npos ||
+								temtem.find("@NAME")!=std::string::npos ||
+								temtem.find("@ARGS")!=std::string::npos ||
+								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
 							throw "Invalid start of property within another property";
 						}
@@ -435,15 +435,15 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 								StringUtil::split(alwd, temtem, (","));
 								for (unsigned int var = 0; var < alwd.size(); ++var)
 								{
-									if(alwd.at(var)!="" && alwd.at(var).find("*")==string::npos && alwd.at(var).find("&")==string::npos)
+									if(alwd.at(var)!="" && alwd.at(var).find("*")==std::string::npos && alwd.at(var).find("&")==std::string::npos)
 									{
-										//srvargs += alwd.at(var) + "*_"+CastUtil::lexical_cast<string>(var+1)+" = ("+alwd.at(var)+"*)args.at("+CastUtil::lexical_cast<string>(var)+");\n";
-										srvmcarg += "_"+CastUtil::lexical_cast<string>(var+1)+"";
-										srvargs += alwd.at(var)+ " _"+CastUtil::lexical_cast<string>(var+1);
-										srvmcargremote += alwd.at(var)+ " &_"+CastUtil::lexical_cast<string>(var+1);
-										srvmcargremotevec += "GenericObject __"+CastUtil::lexical_cast<string>(var+1)+";\n";
-										srvmcargremotevec += "__"+CastUtil::lexical_cast<string>(var+1)+" << _"+CastUtil::lexical_cast<string>(var+1)+";\n";
-										srvmcargremotevec += "_vec.push_back(__"+CastUtil::lexical_cast<string>(var+1)+");\n";
+										//srvargs += alwd.at(var) + "*_"+CastUtil::lexical_cast<std::string>(var+1)+" = ("+alwd.at(var)+"*)args.at("+CastUtil::lexical_cast<std::string>(var)+");\n";
+										srvmcarg += "_"+CastUtil::lexical_cast<std::string>(var+1)+"";
+										srvargs += alwd.at(var)+ " _"+CastUtil::lexical_cast<std::string>(var+1);
+										srvmcargremote += alwd.at(var)+ " &_"+CastUtil::lexical_cast<std::string>(var+1);
+										srvmcargremotevec += "GenericObject __"+CastUtil::lexical_cast<std::string>(var+1)+";\n";
+										srvmcargremotevec += "__"+CastUtil::lexical_cast<std::string>(var+1)+" << _"+CastUtil::lexical_cast<std::string>(var+1)+";\n";
+										srvmcargremotevec += "_vec.push_back(__"+CastUtil::lexical_cast<std::string>(var+1)+");\n";
 										if(var!=alwd.size()-1)
 										{
 											srvmcarg += ",";
@@ -498,18 +498,18 @@ string ComponentGen::generateComponentCU(const string& fileName, string &cudata,
 			cuheader += servsh + "};\n";
 			cuheader = initheaders + cuheader+"#endif";
 			curemoteheaders = cuinithdrs + curemoteheaders+"#endif";
-			/*logger << cuheader << flush;
-			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
-			logger << cudata << flush;
-			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
-			logger << curemoteheaders << flush;
-			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << flush;
-			logger << curemote << flush;*/
+			/*logger << cuheader << std::flush;
+			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << std::flush;
+			logger << cudata << std::flush;
+			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << std::flush;
+			logger << curemoteheaders << std::flush;
+			logger << "\n\n\n\n\n\n------------------------------------------------------------------\n\n\n\n\n\n" << std::flush;
+			logger << curemote << std::flush;*/
 
 	    }
 		catch(const char* ex)
 		{
-			logger << "Exception occurred" << flush;
+			logger << "Exception occurred" << std::flush;
 			throw;
 		}
 

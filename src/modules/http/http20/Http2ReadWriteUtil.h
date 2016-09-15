@@ -13,13 +13,13 @@
 #include "Http11WebSocketDataFrame.h"
 
 class Http2RequestResponseData {
-	map<string, string> preHeaders;
-	map<string, string> postHeaders;
-	string data;
-	string url;
+	std::map<std::string, std::string> preHeaders;
+	std::map<std::string, std::string> postHeaders;
+	std::string data;
+	std::string url;
 	bool isWebSocket;
 	void* incompleteResponse;
-	string headerBlock;
+	std::string headerBlock;
 	int streamIdentifier;
 	bool endStream;
 	friend class Http2StreamHandler;
@@ -31,8 +31,8 @@ public:
 	bool isDataPending();
 	Http2RequestResponseData();
 	virtual ~Http2RequestResponseData();
-	const string& getData() const;
-	const map<string, string>& getHeaders() const;
+	const std::string& getData() const;
+	const std::map<std::string, std::string>& getHeaders() const;
 };
 
 class Http2ReadWriteUtil {
@@ -43,12 +43,12 @@ public:
 	virtual bool writePendingDataFrame(Http2RequestResponseData&)=0;
 	//virtual bool writeData(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS)=0;
 	virtual bool writeData(Http2Frame* data)=0;
-	virtual vector<string> getRelatedEntitiesForPP(const string&)=0;
+	virtual std::vector<std::string> getRelatedEntitiesForPP(const std::string&)=0;
 	virtual int getHighestPushPromiseStreamIdentifier()=0;
 	virtual int updateSenderWindowSize(const int& windowSize)=0;
 	virtual void addPushPromisedRequestToQ(const Http2RequestResponseData&)=0;
 	virtual void updateMaxFrameSize(const uint32_t& val)=0;
-	virtual string getMimeType(const string& ext)=0;
+	virtual std::string getMimeType(const std::string& ext)=0;
 };
 
 #endif /* HTTP2READWRITEUTIL_H_ */

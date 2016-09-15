@@ -11,8 +11,8 @@
 #include "map"
 
 class Http2SettingsFrame : public Http2Frame {
-	map<uint16_t, uint32_t> settings;
-	Http2SettingsFrame(const string& data, Http2FrameHeader& aheader);
+	std::map<uint16_t, uint32_t> settings;
+	Http2SettingsFrame(const std::string& data, Http2FrameHeader& aheader);
 	friend class Http2Handler;
 	friend class Http2StreamHandler;
 public:
@@ -28,8 +28,8 @@ public:
 	static uint16_t SETTINGS_WEBSOCKET_CAPABLE;
 	Http2SettingsFrame();
 	virtual ~Http2SettingsFrame();
-	const map<uint16_t, uint32_t>& getSettings() const;
-	string getFrameData();
+	const std::map<uint16_t, uint32_t>& getSettings() const;
+	std::string getFrameData();
 };
 
 #endif /* HTTP2SETTINGSFRAME_H_ */

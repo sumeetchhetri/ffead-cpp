@@ -7,20 +7,20 @@
 
 #include "Query.h"
 
-Query::Query(const string& query) {
+Query::Query(const std::string& query) {
 	this->start = 0;
 	this->count = 0;
 	this->query = query;
 }
 
-Query::Query(const string& query, const string& className) {
+Query::Query(const std::string& query, const std::string& className) {
 	this->start = 0;
 	this->count = 0;
 	this->query = query;
 	this->className = className;
 }
 
-Query Query::addParameter(const string& paramName, const GenericObject& paramValue) {
+Query Query::addParameter(const std::string& paramName, const GenericObject& paramValue) {
 	this->propNameVaues[paramName] = paramValue;
 	return *this;
 }
@@ -40,7 +40,7 @@ Query Query::addParameters(const PosParameters& propPosVaues) {
 	return *this;
 }
 
-Query Query::addColumnBinding(const string& columnName, const GenericObject& columnValue)
+Query Query::addColumnBinding(const std::string& columnName, const GenericObject& columnValue)
 {
 	this->columnBindings[columnName] = columnValue;
 	return *this;
@@ -99,11 +99,11 @@ void Query::setStart(const int& start) {
 	this->start = start;
 }
 
-const string& Query::getQuery() const {
+const std::string& Query::getQuery() const {
 	return query;
 }
 
-const string& Query::getClassName() const {
+const std::string& Query::getClassName() const {
 	return className;
 }
 
@@ -111,18 +111,18 @@ int Query::getStart() const {
 	return start;
 }
 
-void Query::setQuery(const string& query) {
+void Query::setQuery(const std::string& query) {
 	this->query = query;
 }
 
-const string& Query::getTableName() const {
+const std::string& Query::getTableName() const {
 	return tableName;
 }
 
-void Query::setTableName(const string& tableName) {
+void Query::setTableName(const std::string& tableName) {
 	this->tableName = tableName;
 }
 
-void Query::setClassName(const string& className) {
+void Query::setClassName(const std::string& className) {
 	this->className = className;
 }

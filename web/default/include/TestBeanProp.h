@@ -27,20 +27,20 @@
 #include "DependencyBean1.h"
 #include "DependencyBean2.h"
 #include "DependencyBean3.h"
-using namespace std;
+
 class TestBeanProp
 {
 private:
-    string *strProp;
+    std::string *strProp;
     DependencyBean1 *dependencyBean1;
     DependencyBean2 *dependencyBean2;
     DependencyBean3 *dependencyBean3;
 public:
-    void setStrProp(string *strProp)
+    void setStrProp(std::string *strProp)
     {
         this->strProp = strProp;
     }
-    string* getStrProp()
+    std::string* getStrProp()
     {
         return this->strProp;
     }
@@ -74,7 +74,7 @@ public:
 
     void print()
     {
-        cout << *(this->strProp) << flush;
+        std::cout << *(this->strProp) << std::flush;
         this->dependencyBean1->print();
         this->dependencyBean2->print();
         this->dependencyBean3->print();

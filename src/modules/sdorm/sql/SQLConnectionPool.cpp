@@ -20,12 +20,12 @@ void SQLConnectionPool::initEnv() {
 	V_OD_erg=SQLAllocHandle(SQL_HANDLE_ENV,SQL_NULL_HANDLE,&V_OD_Env);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		logger << "Error AllocHandle" << endl;
+		logger << "Error AllocHandle" << std::endl;
 	}
 	V_OD_erg=SQLSetEnvAttr(V_OD_Env, SQL_ATTR_ODBC_VERSION, (void*)SQL_OV_ODBC3, 0);
 	if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		logger << "Error SetEnv" << endl;
+		logger << "Error SetEnv" << std::endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 	}
 	setEnv(V_OD_Env);
@@ -45,7 +45,7 @@ void* SQLConnectionPool::newConnection(const bool& isWrite, const ConnectionNode
 	V_OD_erg = SQLAllocHandle(SQL_HANDLE_DBC, V_OD_Env, &conn);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		logger << "Error AllocHDB " << V_OD_erg << endl;
+		logger << "Error AllocHDB " << V_OD_erg << std::endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		return NULL;
 		//exit(0);
@@ -57,9 +57,9 @@ void* SQLConnectionPool::newConnection(const bool& isWrite, const ConnectionNode
 									 (SQLCHAR*) node.getPassword().c_str(), node.getPassword().length());
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
-		logger << "Error SQLConnect " << V_OD_erg << endl;
+		logger << "Error SQLConnect " << V_OD_erg << std::endl;
 		SQLGetDiagRec(SQL_HANDLE_DBC, conn, 1, V_OD_stat, &V_OD_err_s,V_OD_msg,100,&V_OD_mlen);
-		logger << V_OD_msg << " (" << (int)V_OD_err_s <<  ")" << endl;
+		logger << V_OD_msg << " (" << (int)V_OD_err_s <<  ")" << std::endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		return NULL;
 		//exit(0);

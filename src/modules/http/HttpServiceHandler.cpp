@@ -7,7 +7,7 @@
 
 #include "HttpServiceHandler.h"
 
-HttpServiceHandler::HttpServiceHandler(const string& cntEncoding, const HttpServiceTaskFactory& f, const int& poolSize= 0) : ServiceHandler(poolSize) {
+HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& poolSize= 0) : ServiceHandler(poolSize) {
 	this->cntEncoding = cntEncoding;
 	this->f = f;
 }
@@ -45,15 +45,15 @@ void HttpServiceTask::run() {
 	void* resp = NULL;
 	SocketInterface* switchedIntf = NULL;
 
-	cout << "servicing request" << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << endl;
+	std::cout << "servicing request" << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << std::endl;
 	if(handlerRequest->getProtocol()=="HTTP2.0" || handlerRequest->getProtocol()=="HTTP1.1")
 	{
 		HttpRequest* req = (HttpRequest*)handlerRequest->getRequest();
 		HttpResponse* res = new HttpResponse();
 		resp = res;
 
-		string mimeType = CommonUtils::getMimeType(req->ext);
-		string cntEncoding = service->cntEncoding;
+		std::string mimeType = CommonUtils::getMimeType(req->ext);
+		std::string cntEncoding = service->cntEncoding;
 		if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
 			res->addHeaderValue(HttpResponse::ContentEncoding, cntEncoding);
 		}
@@ -70,8 +70,8 @@ void HttpServiceTask::run() {
 					|| req->hasHeaderValuePart(HttpRequest::SecWebSocketVersion, "8", false)
 					|| req->hasHeaderValuePart(HttpRequest::SecWebSocketVersion, "13", false)))
 			{
-				string seckey = req->getHeader(HttpRequest::SecWebSocketKey);
-				string servseckey = seckey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+				std::string seckey = req->getHeader(HttpRequest::SecWebSocketKey);
+				std::string servseckey = seckey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 				servseckey = CryptoHandler::sha1(servseckey);
 				servseckey = CryptoHandler::base64encodeStr(servseckey);
 
@@ -87,7 +87,7 @@ void HttpServiceTask::run() {
 			else if(req->hasHeaderValuePart(HttpRequest::Connection, "HTTP2-Settings", false)
 					&& req->isHeaderValue(HttpRequest::Upgrade, "h2c", false))
 			{
-				string http2settings = req->getHeader(HttpRequest::Http2Settings);
+				std::string http2settings = req->getHeader(HttpRequest::Http2Settings);
 				http2settings = CryptoHandler::base64decodeStr(http2settings);
 
 				res->addHeaderValue(HttpResponse::Upgrade, "h2c");
@@ -111,8 +111,8 @@ void HttpServiceTask::run() {
 			handle(req, res);
 		}
 
-		string url = req->getUrl();
-		cout << url << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << endl;
+		std::string url = req->getUrl();
+		std::cout << url << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << std::endl;
 	}
 	else
 	{
@@ -123,9 +123,9 @@ void HttpServiceTask::run() {
 		resp = response;
 	}
 
-	cout << "\n\nwriting response " << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << endl;
+	std::cout << "\n\nwriting response " << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << std::endl;
 	handlerRequest->getSif()->writeResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext());
-	cout << "done writing response " << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << endl << endl;
+	std::cout << "done writing response " << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << std::endl << std::endl;
 	if(switchedIntf!=NULL)
 	{
 		service->switchReaders(handlerRequest, switchedIntf);

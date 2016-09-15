@@ -25,14 +25,14 @@
 #include "PropFileReader.h"
 #include "ConfigurationData.h"
 
-using namespace std;
+
 
 class DCPGenerator {
 public:
 	DCPGenerator();
 	virtual ~DCPGenerator();
-	static string generateDCP(const string&, string &, string &, const string&);
-	static string generateDCPAll();
+	static std::string generateDCP(const std::string&, std::string &, std::string &, const std::string&);
+	static std::string generateDCPAll();
 };
 
 #endif /* DCPGENERATOR_H_ */

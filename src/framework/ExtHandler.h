@@ -37,13 +37,13 @@
 #include "FormHandler.h"
 #include "FviewHandler.h"
 
-typedef string (*DCPPtr) ();
+typedef std::string (*DCPPtr) ();
 typedef ClassInfo (*FunPtr) ();
-typedef string (*TemplatePtr) (Context&);
+typedef std::string (*TemplatePtr) (Context&);
 
 class ExtHandler {
 public:
-	static bool handle(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, const string& ext, Reflector& reflector);
+	static bool handle(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, const std::string& ext, Reflector& reflector);
 };
 
 #endif /* EXTHANDLER_H_ */

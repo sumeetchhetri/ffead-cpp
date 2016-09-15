@@ -22,7 +22,7 @@
 
 #include "CronTimer.h"
 
-CronTimer::CronTimer(const string& cronExpression)
+CronTimer::CronTimer(const std::string& cronExpression)
 {
 	starts.push_back(0);
 	starts.push_back(0);
@@ -59,7 +59,7 @@ CronTimer::CronTimer(const string& cronExpression)
 	days["FRI"] = 5;
 	days["SAT"] = 6;
 
-	vector<string> cronParts = StringUtil::splitAndReturn<vector<string> >(cronExpression, " ");
+	std::vector<std::string> cronParts = StringUtil::splitAndReturn<std::vector<std::string> >(cronExpression, " ");
 	bool valid = true;
 	if((int)cronParts.size()>6)
 	{
@@ -69,28 +69,28 @@ CronTimer::CronTimer(const string& cronExpression)
 	{
 		for (int position = 0; position < (int)cronParts.size(); ++position)
 		{
-			string tst = cronParts.at(position);
+			std::string tst = cronParts.at(position);
 			CronExpressionPart cpart;
-			if(tst.find(" ")==string::npos)
+			if(tst.find(" ")==std::string::npos)
 			{
 				if(tst=="*")
 				{
 					cpart.all = true;
 				}
-				else if(tst.find("-")!=string::npos
-						&& tst.find("/")!=string::npos
+				else if(tst.find("-")!=std::string::npos
+						&& tst.find("/")!=std::string::npos
 						&& tst.find("-")<tst.find("/"))
 				{
-					vector<string> delimiters;
+					std::vector<std::string> delimiters;
 					delimiters.push_back("-");
 					delimiters.push_back("/");
-					vector<string> parts = StringUtil::split(tst, delimiters);
+					std::vector<std::string> parts = StringUtil::split(tst, delimiters);
 					int start, end;
 					start = starts.at(position);
 					end = ends.at(position);
 					if(parts.size()==3)
 					{
-						vector<int> vparts;
+						std::vector<int> vparts;
 						for (int i = 0; i < 3; ++i) {
 							int partValue = -1;
 							try {
@@ -98,7 +98,7 @@ CronTimer::CronTimer(const string& cronExpression)
 							} catch (...) {
 								if(position==3)
 								{
-									string month = StringUtil::toUpperCopy(parts.at(i));
+									std::string month = StringUtil::toUpperCopy(parts.at(i));
 									if(months.find(month)!=months.end())
 									{
 										partValue = months[month];
@@ -110,7 +110,7 @@ CronTimer::CronTimer(const string& cronExpression)
 								}
 								else if(position==4)
 								{
-									string day = StringUtil::toUpperCopy(parts.at(i));
+									std::string day = StringUtil::toUpperCopy(parts.at(i));
 									if(days.find(day)!=days.end())
 									{
 										partValue = days[day];
@@ -141,15 +141,15 @@ CronTimer::CronTimer(const string& cronExpression)
 						}
 					}
 				}
-				else if(tst.find("-")!=string::npos)
+				else if(tst.find("-")!=std::string::npos)
 				{
-					vector<string> parts = StringUtil::splitAndReturn<vector<string> >(tst, "-");
+					std::vector<std::string> parts = StringUtil::splitAndReturn<std::vector<std::string> >(tst, "-");
 					int start, end;
 					start = starts.at(position);
 					end = ends.at(position);
 					if(parts.size()==2)
 					{
-						vector<int> vparts;
+						std::vector<int> vparts;
 						for (int i = 0; i < 2; ++i) {
 							int partValue = -1;
 							try {
@@ -157,7 +157,7 @@ CronTimer::CronTimer(const string& cronExpression)
 							} catch (...) {
 								if(position==3)
 								{
-									string month = StringUtil::toUpperCopy(parts.at(i));
+									std::string month = StringUtil::toUpperCopy(parts.at(i));
 									if(months.find(month)!=months.end())
 									{
 										partValue = months[month];
@@ -169,7 +169,7 @@ CronTimer::CronTimer(const string& cronExpression)
 								}
 								else if(position==4)
 								{
-									string day = StringUtil::toUpperCopy(parts.at(i));
+									std::string day = StringUtil::toUpperCopy(parts.at(i));
 									if(days.find(day)!=days.end())
 									{
 										partValue = days[day];
@@ -199,15 +199,15 @@ CronTimer::CronTimer(const string& cronExpression)
 						}
 					}
 				}
-				else if(tst.find("/")!=string::npos)
+				else if(tst.find("/")!=std::string::npos)
 				{
-					vector<string> parts = StringUtil::splitAndReturn<vector<string> >(tst, "/");
+					std::vector<std::string> parts = StringUtil::splitAndReturn<std::vector<std::string> >(tst, "/");
 					int start, end;
 					start = starts.at(position);
 					end = ends.at(position);
 					if(parts.size()==2)
 					{
-						vector<int> vparts;
+						std::vector<int> vparts;
 						for (int i = 0; i < 2; ++i) {
 							int partValue = -1;
 							try {
@@ -219,7 +219,7 @@ CronTimer::CronTimer(const string& cronExpression)
 								}
 								else if(position==3)
 								{
-									string month = StringUtil::toUpperCopy(parts.at(i));
+									std::string month = StringUtil::toUpperCopy(parts.at(i));
 									if(months.find(month)!=months.end())
 									{
 										partValue = months[month];
@@ -231,7 +231,7 @@ CronTimer::CronTimer(const string& cronExpression)
 								}
 								else if(position==4)
 								{
-									string day = StringUtil::toUpperCopy(parts.at(i));
+									std::string day = StringUtil::toUpperCopy(parts.at(i));
 									if(days.find(day)!=days.end())
 									{
 										partValue = days[day];
@@ -262,14 +262,14 @@ CronTimer::CronTimer(const string& cronExpression)
 						}
 					}
 				}
-				else if(tst.find(",")!=string::npos)
+				else if(tst.find(",")!=std::string::npos)
 				{
-					vector<string> parts = StringUtil::splitAndReturn<vector<string> >(tst, ",");
+					std::vector<std::string> parts = StringUtil::splitAndReturn<std::vector<std::string> >(tst, ",");
 					int start, end;
 					start = starts.at(position);
 					end = ends.at(position);
 
-					vector<int> vparts;
+					std::vector<int> vparts;
 					for (int i = 0; i < (int)parts.size(); ++i) {
 						int partValue = -1;
 						try {
@@ -277,7 +277,7 @@ CronTimer::CronTimer(const string& cronExpression)
 						} catch (...) {
 							if(position==3)
 							{
-								string month = StringUtil::toUpperCopy(parts.at(i));
+								std::string month = StringUtil::toUpperCopy(parts.at(i));
 								if(months.find(month)!=months.end())
 								{
 									partValue = months[month];
@@ -289,7 +289,7 @@ CronTimer::CronTimer(const string& cronExpression)
 							}
 							else if(position==4)
 							{
-								string day = StringUtil::toUpperCopy(parts.at(i));
+								std::string day = StringUtil::toUpperCopy(parts.at(i));
 								if(days.find(day)!=days.end())
 								{
 									partValue = days[day];
@@ -313,7 +313,7 @@ CronTimer::CronTimer(const string& cronExpression)
 
 					if(valid) {
 						for (int j = 0; j < (int)vparts.size(); ++j) {
-							cpart.list += "," + CastUtil::lexical_cast<string>(vparts.at(j)) + ",";
+							cpart.list += "," + CastUtil::lexical_cast<std::string>(vparts.at(j)) + ",";
 							cpart.lstParts.push_back(vparts.at(j));
 							sort(cpart.lstParts.begin(), cpart.lstParts.end());
 						}
@@ -331,7 +331,7 @@ CronTimer::CronTimer(const string& cronExpression)
 					} catch (...) {
 						if(position==3)
 						{
-							string month = StringUtil::toUpperCopy(tst);
+							std::string month = StringUtil::toUpperCopy(tst);
 							if(months.find(month)!=months.end())
 							{
 								partValue = months[month];
@@ -343,7 +343,7 @@ CronTimer::CronTimer(const string& cronExpression)
 						}
 						else if(position==4)
 						{
-							string day = StringUtil::toUpperCopy(tst);
+							std::string day = StringUtil::toUpperCopy(tst);
 							if(days.find(day)!=days.end())
 							{
 								partValue = days[day];
@@ -395,16 +395,16 @@ CronTimer::~CronTimer() {
 	delete nextRunDate;
 }
 
-string CronTimer::toString()
+std::string CronTimer::toString()
 {
-	vector<string> types;
+	std::vector<std::string> types;
 	types.push_back("minute");
 	types.push_back("hour");
 	types.push_back("day");
 	types.push_back("month");
 	types.push_back("dayOfWeek");
 	types.push_back("year");
-	string builder;
+	std::string builder;
 	for (int var = 0; var < (const int&)cParts.size(); ++var) {
 		if(cParts.at(var).all)
 		{
@@ -419,7 +419,7 @@ string CronTimer::toString()
 			int start = cParts.at(var).from;
 			int end = cParts.at(var).to;
 			while(start<=end) {
-				builder.append(CastUtil::lexical_cast<string>(start) + " ");
+				builder.append(CastUtil::lexical_cast<std::string>(start) + " ");
 				start += cParts.at(var).interval;
 			}
 			builder.append(" " + types.at(var));
@@ -428,11 +428,11 @@ string CronTimer::toString()
 		{
 			int start = cParts.at(var).from;
 			int end = cParts.at(var).to;
-			builder.append("every " + types.at(var) + " from " + CastUtil::lexical_cast<string>(start) + " " + CastUtil::lexical_cast<string>(end));
+			builder.append("every " + types.at(var) + " from " + CastUtil::lexical_cast<std::string>(start) + " " + CastUtil::lexical_cast<std::string>(end));
 		}
 		else
 		{
-			builder.append("every " + CastUtil::lexical_cast<string>(cParts.at(var).from) + " " + types.at(var));
+			builder.append("every " + CastUtil::lexical_cast<std::string>(cParts.at(var).from) + " " + types.at(var));
 		}
 		if(var!=(int)cParts.size()-1)
 		{
@@ -472,7 +472,7 @@ bool CronTimer::isValid(const int& pos, const int& cvalue, const int& nvalue)
 		{
 			isValid = true;
 		}
-		else if(cParts.at(pos).list.find("," + CastUtil::lexical_cast<string>(cvalue) + ",")!=string::npos)
+		else if(cParts.at(pos).list.find("," + CastUtil::lexical_cast<std::string>(cvalue) + ",")!=std::string::npos)
 		{
 			isValid = true;
 		}
@@ -510,7 +510,7 @@ void CronTimer::correctNextRunDateTime(const int& pos)
 			end = cParts.at(index).lstParts.at(cParts.at(index).lstParts.size()-1);
 		}
 
-		//cout << " ========= " << start << " " << end << " " << nextRunDate->toString() << endl;
+		//cout << " ========= " << start << " " << end << " " << nextRunDate->toString() << std::endl;
 
 		if(pos==1) {
 			if(nextRunDate->getMinutes()>=end)
@@ -637,29 +637,29 @@ void CronTimer::run()
 					{
 						if(isValid(0, d2.getMinutes(), nextRunDate->getMinutes()))
 						{
-							cout << d2.toString() + " Cron run" << endl;
+							std::cout << d2.toString() + " Cron run" << std::endl;
 
 							bool incrementDone = false;
 							incrementDone = tryIncrement(0, nextRunDate->getMinutes());
-							//cout << "inc mins " + nextRunDate->toString() << endl;
+							//cout << "inc mins " + nextRunDate->toString() << std::endl;
 							if(!incrementDone) {
 								incrementDone = tryIncrement(1, nextRunDate->getHours());
-								//cout << "inc hours " + nextRunDate->toString() << endl;
+								//cout << "inc hours " + nextRunDate->toString() << std::endl;
 							}
 							if(!incrementDone) {
 								incrementDone = tryIncrement(2, nextRunDate->getDay());
-								//cout << "inc days " + nextRunDate->toString() << endl;
+								//cout << "inc days " + nextRunDate->toString() << std::endl;
 							}
 							if(!incrementDone) {
 								incrementDone = tryIncrement(3, nextRunDate->getMonth());
-								//cout << "inc months " + nextRunDate->toString() << endl;
+								//cout << "inc months " + nextRunDate->toString() << std::endl;
 							}
 							if(!incrementDone) {
 								incrementDone = tryIncrement(5, nextRunDate->getYear());
-								//cout << "inc years " + nextRunDate->toString() << endl;
+								//cout << "inc years " + nextRunDate->toString() << std::endl;
 							}
 
-							cout << "Next Run Date = " + nextRunDate->toString() << endl;
+							std::cout << "Next Run Date = " + nextRunDate->toString() << std::endl;
 						}
 					}
 				}

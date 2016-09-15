@@ -32,7 +32,7 @@ class ThreadPool {
 	int maxThreads;
 	int lowp;
 	int highp;
-	vector<PoolThread*> *tpool;
+	std::vector<PoolThread*> *tpool;
 	TaskPool *wpool;
 	bool prioritypooling;
 	bool runFlag, pollerStarted;

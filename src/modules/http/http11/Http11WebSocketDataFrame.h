@@ -10,7 +10,7 @@
 #include "CommonUtils.h"
 #include "string"
 #include <math.h>
-using namespace std;
+
 
 class Http11WebSocketDataFrame {
 	bool fin;
@@ -22,16 +22,16 @@ class Http11WebSocketDataFrame {
 	uint8_t payloadLength;
 	uint64_t extendedPayloadLength;
 	uint32_t maskingKey;
-	string extensionData;
-	string applicationData;
+	std::string extensionData;
+	std::string applicationData;
 	friend class Http11WebSocketHandler;
 public:
 	Http11WebSocketDataFrame();
 	virtual ~Http11WebSocketDataFrame();
-	string getPayloadData() const;
-	const string& getApplicationData() const;
-	void setApplicationData(const string& applicationData);
-	const string& getExtensionData() const;
+	std::string getPayloadData() const;
+	const std::string& getApplicationData() const;
+	void setApplicationData(const std::string& applicationData);
+	const std::string& getExtensionData() const;
 	uint64_t getExtendedPayloadLength() const;
 	bool isFin() const;
 	bool isMask() const;
@@ -41,11 +41,11 @@ public:
 	bool isRsv1() const;
 	bool isRsv2() const;
 	bool isRsv3() const;
-	string getFrameData();
+	std::string getFrameData();
 };
 
 class WebSocketData {
-	string data;
+	std::string data;
 	short dataType;
 	int techunkSiz;
 	int teparts;
@@ -55,12 +55,12 @@ class WebSocketData {
 	friend class Http2Handler;
 public:
 	WebSocketData();
-	WebSocketData(const string& data, const short& dataType);
-	string getData() const;
+	WebSocketData(const std::string& data, const short& dataType);
+	std::string getData() const;
 	virtual ~WebSocketData();
 	void updateContent(const uint32_t& techunkSiz);
 	bool isContentRemains();
-	string getRemainingContent();
+	std::string getRemainingContent();
 };
 
 #endif /* HTTP11WEBSOCKETDATAFRAME_H_ */

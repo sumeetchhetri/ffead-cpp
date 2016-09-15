@@ -37,7 +37,7 @@ Connection* ConnectionPooler::checkoutInternal(connVec& conns, const bool& isWri
 		}
 	} while(counter<5 && conn==NULL);
 	if(conn==NULL) {
-		vector<ConnectionNode> nodes = properties.getNodes();
+		std::vector<ConnectionNode> nodes = properties.getNodes();
 		void* c = this->newConnection(true, nodes.at(0));
 		conn = new Connection;
 		conn->setConn(c);
@@ -52,7 +52,7 @@ Connection* ConnectionPooler::checkoutInternal(connVec& conns, const bool& isWri
 
 Connection* ConnectionPooler::checkout() {
 	if(getProperties().isNewConnectionStrategy()) {
-		vector<ConnectionNode> nodes = properties.getNodes();
+		std::vector<ConnectionNode> nodes = properties.getNodes();
 		void* c = this->newConnection(true, nodes.at(0));
 		if(c!=NULL) {
 			Connection* connection = new Connection;
@@ -115,7 +115,7 @@ void ConnectionPooler::createPool(const ConnectionProperties& properties) {
 
 	initEnv();
 
-	vector<ConnectionNode> nodes = properties.getNodes();
+	std::vector<ConnectionNode> nodes = properties.getNodes();
 
 	if(getProperties().isNewConnectionStrategy())return;
 

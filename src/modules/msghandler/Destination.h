@@ -23,18 +23,18 @@
 #ifndef DESTINATION_H_
 #define DESTINATION_H_
 #include "string"
-using namespace std;
+
 
 class Destination {
-	string name;
-	string type;
+	std::string name;
+	std::string type;
 public:
 	Destination();
 	virtual ~Destination();
-    string getName() const;
-    void setName(const string&);
-    string getType() const;
-    void setType(const string&);
+    std::string getName() const;
+    void setName(const std::string&);
+    std::string getType() const;
+    void setType(const std::string&);
 };
 
 #endif /* DESTINATION_H_ */

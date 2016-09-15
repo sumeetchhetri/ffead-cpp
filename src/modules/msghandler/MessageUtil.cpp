@@ -35,17 +35,17 @@ void* MessageUtil::get_in_addr(struct sockaddr *sa)
 	#endif
 }
 
-string MessageUtil::getSubscriber() const
+std::string MessageUtil::getSubscriber() const
 {
 	return this->subscriber;
 }
 
-void MessageUtil::setSubscriber(const string& subscriber)
+void MessageUtil::setSubscriber(const std::string& subscriber)
 {
 	this->subscriber = subscriber;
 }
 
-MessageUtil::MessageUtil(const string& file)
+MessageUtil::MessageUtil(const std::string& file)
 {
 	logger = LoggerFactory::getLogger("MessageUtil");
 	XmlParser parser("Parser");
@@ -53,8 +53,8 @@ MessageUtil::MessageUtil(const string& file)
 	parser.readDocument(file, doc);
 	Element* dest = doc.getRootElement().getElementByName("destination");
 	Element* url = doc.getRootElement().getElementByName("url");
-	vector<string> vec;
-	string h = url->getText();
+	std::vector<std::string> vec;
+	std::string h = url->getText();
 	StringUtil::split(vec, h , (":"));
 	this->host = vec.at(0);
 	this->port = vec.at(1);
@@ -112,14 +112,14 @@ bool MessageUtil::sendMessage(const Message& msg)
 
 	freeaddrinfo(servinfo); // all done with this structure
 
-	string h = msg.toXml();
+	std::string h = msg.toXml();
 	bool flag = true;
 	if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 	{
-		logger << "send failed" << flush;
+		logger << "send failed" << std::flush;
 		flag = false;
 	}
-	logger << h << flush;
+	logger << h << std::flush;
 
 	if ((numbytes = recv(sockfd, buf, 99, 0)) == -1) {
 		perror("recv");
@@ -176,31 +176,31 @@ Message MessageUtil::receiveMessage()
 
 	freeaddrinfo(servinfo); // all done with this structure
 
-	string h = "GET FROM "+this->destination.getName()+":"+this->destination.getType();
+	std::string h = "GET FROM "+this->destination.getName()+":"+this->destination.getType();
 	if(this->destination.getType()=="Topic")
 		h += ("-" + this->getSubscriber());
 	//bool flag = true;
 	if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 	{
-		logger << "send failed" << flush;
+		logger << "send failed" << std::flush;
 		//flag = false;
 	}
-	logger << h << flush;
+	logger << h << std::flush;
 
 	if ((numbytes = recv(sockfd, buf, 1024, 0)) == -1) {
 		perror("recv");
 		exit(1);
 	}
-	string temp,results;
-	stringstream ss;
+	std::string temp,results;
+	std::stringstream ss;
 	ss << buf;
 	while(getline(ss,temp))
 	{
-		logger << temp << flush;
+		logger << temp << std::flush;
 		results += temp;
 	}
-	logger << "\n\nclient: received" << flush;
-	logger << results << flush;
+	logger << "\n\nclient: received" << std::flush;
+	logger << results << std::flush;
 	Message msg(results);
 	buf[numbytes] = '\0';
 
@@ -215,7 +215,7 @@ Destination MessageUtil::getDestination()
 }
 
 
-void MessageUtil::subscribe(const string& subs)
+void MessageUtil::subscribe(const std::string& subs)
 {
 	if(this->destination.getType()=="Topic")
 	{
@@ -260,36 +260,36 @@ void MessageUtil::subscribe(const string& subs)
 
 		freeaddrinfo(servinfo); // all done with this structure
 
-		string h = "SUBSCRIBE "+subs+" TO "+this->destination.getName()+":"+this->destination.getType();
+		std::string h = "SUBSCRIBE "+subs+" TO "+this->destination.getName()+":"+this->destination.getType();
 		//bool flag = true;
 		if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 		{
-			logger << "send failed" << flush;
+			logger << "send failed" << std::flush;
 			//flag = false;
 		}
-		logger << h << flush;
+		logger << h << std::flush;
 
 		if ((numbytes = recv(sockfd, buf, 1024, 0)) == -1) {
 			perror("recv");
 			exit(1);
 		}
-		string temp,results;
-		stringstream ss;
+		std::string temp,results;
+		std::stringstream ss;
 		ss << buf;
 		while(getline(ss,temp))
 		{
-			logger << temp << flush;
+			logger << temp << std::flush;
 			results += temp;
 		}
-		logger << "\n\nclient: received" << flush;
-		logger << results << flush;
+		logger << "\n\nclient: received" << std::flush;
+		logger << results << std::flush;
 		buf[numbytes] = '\0';
 		close(sockfd);
 		memset(&buf[0], 0, sizeof(buf));
 	}
 }
 
-void MessageUtil::unSubscribe(const string& subs)
+void MessageUtil::unSubscribe(const std::string& subs)
 {
 	if(this->destination.getType()=="Topic")
 	{
@@ -334,29 +334,29 @@ void MessageUtil::unSubscribe(const string& subs)
 
 		freeaddrinfo(servinfo); // all done with this structure
 
-		string h = "UNSUBSCRIBE "+subs+" TO "+this->destination.getName()+":"+this->destination.getType();
+		std::string h = "UNSUBSCRIBE "+subs+" TO "+this->destination.getName()+":"+this->destination.getType();
 		//bool flag = true;
 		if (send(sockfd, h.c_str(), h.length(), 0) == -1)
 		{
-			logger << "send failed" << flush;
+			logger << "send failed" << std::flush;
 			//flag = false;
 		}
-		logger << h << flush;
+		logger << h << std::flush;
 
 		if ((numbytes = recv(sockfd, buf, 1024, 0)) == -1) {
 			perror("recv");
 			exit(1);
 		}
-		string temp,results;
-		stringstream ss;
+		std::string temp,results;
+		std::stringstream ss;
 		ss << buf;
 		while(getline(ss,temp))
 		{
-			logger << temp << flush;
+			logger << temp << std::flush;
 			results += temp;
 		}
-		logger << "\n\nclient: received" << flush;
-		logger << results << flush;
+		logger << "\n\nclient: received" << std::flush;
+		logger << results << std::flush;
 		buf[numbytes] = '\0';
 
 		close(sockfd);

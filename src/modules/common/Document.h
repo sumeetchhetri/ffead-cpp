@@ -23,15 +23,15 @@ public:
 	virtual ~Document();
 	Element& getRootElement();
 	void setRootElement(const Element&);
-	Element* getElementByName(const string&);
-	string render();
-    const string& getDocType() const;
-    void setDocType(const string&);
+	Element* getElementByName(const std::string&);
+	std::string render();
+    const std::string& getDocType() const;
+    void setDocType(const std::string&);
 private:
     static Element nullele;
 	Element root;
-	string docType;
-	Element* getElementByName(const string&, Element*);
+	std::string docType;
+	Element* getElementByName(const std::string&, Element*);
 	friend class XmlParser;
 };
 

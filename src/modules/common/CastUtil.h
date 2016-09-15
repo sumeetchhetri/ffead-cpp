@@ -30,11 +30,11 @@
 #include <stdio.h>
 #include <assert.h>
 #include "map"
-using namespace std;
+
 
 class CastUtil {
-	static map<string, string> _mangledClassNameMap;
-	template <typename T> static string* primitive(const T& val, const char* fmt)
+	static std::map<std::string, std::string> _mangledClassNameMap;
+	template <typename T> static std::string* primitive(const T& val, const char* fmt)
 	{
 		int n = snprintf(NULL, 0, fmt, val);
 		char* ty;
@@ -42,39 +42,38 @@ class CastUtil {
 		int c = snprintf(ty, n+1, fmt, val);
 		assert(strlen(ty)==n);
 		assert(c == n);
-		string* d = new string(ty, n);
+		std::string* d = new std::string(ty, n);
 		free(ty);
 		return d;
 	}
 public:
-	static const string STD_STRING;
+	static const std::string STD_STRING;
 	CastUtil();
 	virtual ~CastUtil();
 
-	template <typename T> static string getClassName(T& t)
+	template <typename T> static std::string getClassName(T& t)
 	{
 		const char *mangled = typeid(t).name();
-		string sm(mangled);
+		std::string sm(mangled);
 		if(_mangledClassNameMap.find(sm)!=_mangledClassNameMap.end()) {
-			string tn = _mangledClassNameMap[sm];
+			std::string tn = _mangledClassNameMap[sm];
 			if(tn[tn.length()-1]=='*')
 				tn = tn.substr(0,tn.length()-1);
 			return tn;
 		}
 		int status;
 		char *demangled;
-		using namespace abi;
-		demangled = __cxa_demangle(mangled, NULL, 0, &status);
-		string tn(demangled);
+		demangled = abi::__cxa_demangle(mangled, NULL, 0, &status);
+		std::string tn(demangled);
 		free(demangled);
-		if(tn.find("std::__1::")!=string::npos) {
+		if(tn.find("std::__1::")!=std::string::npos) {
 			StringUtil::replaceAll(tn, "std::__1::", "std::");
-			if(tn.find("std::basic_string<char, std::char_traits<char>, std::allocator<char> >")!=string::npos) {
+			if(tn.find("std::basic_string<char, std::char_traits<char>, std::allocator<char> >")!=std::string::npos) {
 				StringUtil::replaceAll(tn, "std::basic_string<char, std::char_traits<char>, std::allocator<char> >", "std::string");
 			}
-		} else if(tn.find("std::__cxx11::")!=string::npos) {
+		} else if(tn.find("std::__cxx11::")!=std::string::npos) {
 			StringUtil::replaceAll(tn, "std::__cxx11::", "std::");
-			if(tn.find("std::basic_string<char, std::char_traits<char>, std::allocator<char> >")!=string::npos) {
+			if(tn.find("std::basic_string<char, std::char_traits<char>, std::allocator<char> >")!=std::string::npos) {
 				StringUtil::replaceAll(tn, "std::basic_string<char, std::char_traits<char>, std::allocator<char> >", "std::string");
 			}
 		}
@@ -92,15 +91,15 @@ public:
 	template <typename T> static T lexical_cast(const short& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%d");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -115,15 +114,15 @@ public:
 	template <typename T> static T lexical_cast(const unsigned short& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%d");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -138,15 +137,15 @@ public:
 	template <typename T> static T lexical_cast(const int& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%d");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -161,15 +160,15 @@ public:
 	template <typename T> static T lexical_cast(const unsigned int& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%u");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -184,15 +183,15 @@ public:
 	template <typename T> static T lexical_cast(const long& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%ld");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -207,15 +206,15 @@ public:
 	template <typename T> static T lexical_cast(const unsigned long& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%lu");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -230,15 +229,15 @@ public:
 	template <typename T> static T lexical_cast(const long long& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%lld");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -253,15 +252,15 @@ public:
 	template <typename T> static T lexical_cast(const unsigned long long& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%llu");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -276,15 +275,15 @@ public:
 	template <typename T> static T lexical_cast(const double& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%f");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -299,15 +298,15 @@ public:
 	template <typename T> static T lexical_cast(const long double& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%Lf");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -322,15 +321,15 @@ public:
 	template <typename T> static T lexical_cast(const float& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = primitive(val, "%f");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -345,19 +344,19 @@ public:
 	template <typename T> static T lexical_cast(const bool& val)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
 			void* d = NULL;
 			if(val)
-				d = new string("true");
+				d = new std::string("true");
 			else
-				d = new string("false");
+				d = new std::string("false");
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 			return t;
 		}
-		stringstream ss;
+		std::stringstream ss;
 		ss << val;
 		ss >> t;
 		if(ss)
@@ -369,10 +368,10 @@ public:
 			throw ("Conversion exception - bool to " + tn);
 		}
 	}
-	template <typename T> static T lexical_cast(const string& vval)
+	template <typename T> static T lexical_cast(const std::string& vval)
 	{
 		T t;
-		string tn = getClassName(t);
+		std::string tn = getClassName(t);
 		char* endptr;
 		if(tn=="double" || tn=="float")
 		{
@@ -381,31 +380,31 @@ public:
 			{
 				int dots = StringUtil::countOccurrences(vval, ".");
 				if(dots>1) {
-					throw "Conversion exception - string to double";
+					throw "Conversion exception - std::string to double";
 				}
 				if(vval.at(0)=='0')
 				{
-					if(vval.find_first_not_of(".0")==string::npos) {
+					if(vval.find_first_not_of(".0")==std::string::npos) {
 						t = d;
 					} else {
 						d = strtod(vval.c_str(), &endptr);
 						bool invalid = (d==0);
 						if(invalid)
 						{
-							throw "Conversion exception - string to double";
+							throw "Conversion exception - std::string to double";
 						}
 					}
 				}
 				else
 				{
-					if(vval.find_first_not_of(".0", 1)==string::npos) {
+					if(vval.find_first_not_of(".0", 1)==std::string::npos) {
 						t = d;
 					} else {
 						d = strtod(vval.substr(1).c_str(), &endptr);
 						bool invalid = (d==0);
 						if(invalid)
 						{
-							throw "Conversion exception - string to double";
+							throw "Conversion exception - std::string to double";
 						}
 					}
 				}
@@ -416,7 +415,7 @@ public:
 				bool invalid = (d==0);
 				if(invalid)
 				{
-					throw "Conversion exception - string to double";
+					throw "Conversion exception - std::string to double";
 				}
 			}
 			t = d;
@@ -430,15 +429,15 @@ public:
 			}
 			else
 			{
-				throw "Conversion exception - string to long double";
+				throw "Conversion exception - std::string to long double";
 			}
 		}
 		else if(tn=="int")
 		{
 			int d = 0;
-			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
-					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
-					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
+					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
 			} else {
 				bool invalid = false;
 				if(vval!="0")
@@ -448,7 +447,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - string to int";
+					throw "Conversion exception - std::string to int";
 				}
 			}
 			t = d;
@@ -456,9 +455,9 @@ public:
 		else if(tn=="short")
 		{
 			short d = 0;
-			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
-					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
-					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
+					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
 			} else {
 				bool invalid = false;
 				if(vval!="0")
@@ -468,7 +467,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - string to short";
+					throw "Conversion exception - std::string to short";
 				}
 			}
 			t = d;
@@ -476,9 +475,9 @@ public:
 		else if(tn=="long")
 		{
 			long d = 0;
-			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
-					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
-					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
+					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
 			} else {
 				bool invalid = false;
 				if(vval!="0")
@@ -488,7 +487,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - string to long";
+					throw "Conversion exception - std::string to long";
 				}
 			}
 			t = d;
@@ -496,9 +495,9 @@ public:
 		else if(tn=="unsigned short")
 		{
 			unsigned short d = 0;
-			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
-					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
-					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
+					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
 			} else {
 				bool invalid = false;
 				if(vval!="0")
@@ -508,7 +507,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - string to unsigned short";
+					throw "Conversion exception - std::string to unsigned short";
 				}
 			}
 			t = d;
@@ -516,9 +515,9 @@ public:
 		else if(tn=="unsigned int")
 		{
 			unsigned int d = 0;
-			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
-					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
-					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
+					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
 			} else {
 				bool invalid = false;
 				if(vval!="0")
@@ -528,7 +527,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - string to unsigned int";
+					throw "Conversion exception - std::string to unsigned int";
 				}
 			}
 			t = d;
@@ -536,9 +535,9 @@ public:
 		else if(tn=="unsigned long")
 		{
 			unsigned long d = 0;
-			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==string::npos)
-					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==string::npos)
-					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==string::npos)) {
+			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
+					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
 			} else {
 				bool invalid = false;
 				if(vval!="0")
@@ -548,7 +547,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - string to unsigned long";
+					throw "Conversion exception - std::string to unsigned long";
 				}
 			}
 			t = d;
@@ -562,7 +561,7 @@ public:
 			}
 			else
 			{
-				throw "Conversion exception - string to long long";
+				throw "Conversion exception - std::string to long long";
 			}
 		}
 		else if(tn=="unsigned long long")
@@ -574,7 +573,7 @@ public:
 			}
 			else
 			{
-				throw "Conversion exception - string to unsigned long long";
+				throw "Conversion exception - std::string to unsigned long long";
 			}
 		}
 		else if(tn=="bool")
@@ -586,17 +585,17 @@ public:
 				d = false;
 			else
 			{
-				throw "Conversion exception - string to bool";
+				throw "Conversion exception - std::string to bool";
 			}
 			t = d;
 		}
 		else if(tn==STD_STRING || tn=="string")
 		{
-			string str = vval;
+			std::string str = vval;
 			if(vval.length()==0)return t;
-			void* d = new string(vval);
+			void* d = new std::string(vval);
 			t = *(T*)d;
-			delete ((string*)d);
+			delete ((std::string*)d);
 		}
 		else
 		{
@@ -611,14 +610,14 @@ public:
 	template <typename T> static T lexical_cast(const char* val, const size_t& len)
 	{
 		T t;
-		string tn = getClassName(t);
-		string vval(val, len);
+		std::string tn = getClassName(t);
+		std::string vval(val, len);
 		return lexical_cast<T>(vval);
 	}
 	template <typename T> static bool isPrimitiveDataType()
 	{
 		T t;
-		string type = getClassName(t);
+		std::string type = getClassName(t);
 		if(type[type.length()-1]=='*')
 			type = type.substr(0,type.length()-1);
 
@@ -640,10 +639,10 @@ public:
 		}
 		return false;
 	}
-	template <typename T> static string getTypeName()
+	template <typename T> static std::string getTypeName()
 	{
 		T t;
-		string type = getClassName(t);
+		std::string type = getClassName(t);
 		if(type[type.length()-1]=='*')
 			type = type.substr(0,type.length()-1);
 

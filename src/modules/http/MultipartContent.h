@@ -28,37 +28,37 @@
 #include "RegexUtil.h"
 #include <fstream>
 #include "ContentTypes.h"
-using namespace std;
+
 
 class MultipartContent {
-	static string VALID_HEADERS;
-	map<string,string> headers;
-	string content;
-	string tempFileName;
-	string fileName;
-	string name;
-	void setContent(const string& content);
-	void setName(const string& name);
-	void setTempFileName(const string& tempFileName);
-	string getTempFileName() const;
-	void setFileName(const string& fileName);
+	static std::string VALID_HEADERS;
+	std::map<std::string,std::string> headers;
+	std::string content;
+	std::string tempFileName;
+	std::string fileName;
+	std::string name;
+	void setContent(const std::string& content);
+	void setName(const std::string& name);
+	void setTempFileName(const std::string& tempFileName);
+	std::string getTempFileName() const;
+	void setFileName(const std::string& fileName);
 	friend class HttpResponse;
 	friend class HttpRequest;
 	friend class ControllerHandler;
 public:
-	static string ContentId,ContentDisposition,ContentTransferEncoding,
+	static std::string ContentId,ContentDisposition,ContentTransferEncoding,
 				  ContentLocation,ContentBase,ContentLength,ContentMD5,ContentType;
 	MultipartContent();
-	MultipartContent(const string& content);
-	MultipartContent(const vector<string>& headers, const string& content= "");
+	MultipartContent(const std::string& content);
+	MultipartContent(const std::vector<std::string>& headers, const std::string& content= "");
 	virtual ~MultipartContent();
-	void addHeaderValue(string header, const string& value);
-	string getContent() const;
-	string getFileName() const;
-	map<string, string> getHeaders();
-	bool isHeaderValue(string header, const string& value, const bool& ignoreCase= true);
-	string getHeader(const string&);
-	string getName() const;
+	void addHeaderValue(std::string header, const std::string& value);
+	std::string getContent() const;
+	std::string getFileName() const;
+	std::map<std::string, std::string> getHeaders();
+	bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
+	std::string getHeader(const std::string&);
+	std::string getName() const;
 	bool isAFile();
 	bool isValid();
 };

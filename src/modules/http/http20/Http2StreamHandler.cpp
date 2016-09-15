@@ -35,7 +35,7 @@ Http2StreamHandler::Http2StreamHandler() {
 	this->endofsegment = false;
 }
 
-Http2StreamHandler::Http2StreamHandler(Http2HPACKContext* context, const int& streamIdentifier, const string& webpath) {
+Http2StreamHandler::Http2StreamHandler(Http2HPACKContext* context, const int& streamIdentifier, const std::string& webpath) {
 	this->streamIdentifier = streamIdentifier;
 	this->state = Idle;
 	this->lastFrameType = -1;
@@ -57,7 +57,7 @@ void Http2StreamHandler::closeConnection(const int& lastStreamIdentifier, Http2R
 	gframe.errorCode = 1;
 	handler->writeData(&gframe);
 	//handler->close();
-	cout << "closed stream " << lastStreamIdentifier << endl;
+	std::cout << "closed stream " << lastStreamIdentifier << std::endl;
 }
 
 bool Http2StreamHandler::isWebSocketRequest() {
@@ -82,7 +82,7 @@ void* Http2StreamHandler::getWsRequestAndReInit() {
 	return temp;
 }
 
-bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId, map<uint16_t, uint32_t>& settings, Http2ReadWriteUtil* handler, map<int, bool>& frameAcks, void*& requestObj) {
+bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId, std::map<uint16_t, uint32_t>& settings, Http2ReadWriteUtil* handler, std::map<int, bool>& frameAcks, void*& requestObj) {
 	if(frame->header.type==1) {
 		//Header Frame
 		Http2HeadersFrame* headerf  = static_cast<Http2HeadersFrame*>(frame);
@@ -98,7 +98,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 					return false;
 				}
 			} else if(headerf->getHeader().isEndHeaders()) {
-				map<string, string> wshdrs = context->decode(headerf->headerBlockFragment);
+				std::map<std::string, std::string> wshdrs = context->decode(headerf->headerBlockFragment);
 				if(wshdrs.find(":opcode")!=wshdrs.end()) {
 					try {
 						wsrequest->dataType = CastUtil::lexical_cast<short>(wshdrs[":opcode"]);
@@ -163,7 +163,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 					requestObj = getRequestAndReInit();
 				}
 			} else if(contf->getHeader().isEndHeaders()) {
-				map<string, string> wshdrs = context->decode(contf->headerBlockFragment);
+				std::map<std::string, std::string> wshdrs = context->decode(contf->headerBlockFragment);
 				if(wshdrs.find(":opcode")!=wshdrs.end()) {
 					try {
 						wsrequest->dataType = CastUtil::lexical_cast<short>(wshdrs[":opcode"]);
@@ -201,9 +201,9 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 				Http2SettingsFrame sframe;
 				sframe.header.flags.set(0);
 				handler->writeData(&sframe);
-				map<uint16_t, uint32_t>::iterator itt;
+				std::map<uint16_t, uint32_t>::iterator itt;
 				for(itt=settings.begin();itt!=settings.end();++itt) {
-					cout << "client_settings[" << itt->first << "] = " << itt->second << endl;
+					std::cout << "client_settings[" << itt->first << "] = " << itt->second << std::endl;
 				}
 				if(settings.find(Http2SettingsFrame::SETTINGS_MAX_FRAME_SIZE)!=settings.end()) {
 					handler->updateMaxFrameSize(settings[Http2SettingsFrame::SETTINGS_MAX_FRAME_SIZE]);
@@ -252,8 +252,8 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 		Http2GoAwayFrame* goawayf  = static_cast<Http2GoAwayFrame*>(frame);
 		//Go away Frame
 		if(streamIdentifier==0) {
-			cout << "Got go away frame for connection with last stream id " << goawayf->lastStreamId << " " <<
-					goawayf->errorCode << " " << goawayf->additionalDebugData << endl;
+			std::cout << "Got go away frame for connection with last stream id " << goawayf->lastStreamId << " " <<
+					goawayf->errorCode << " " << goawayf->additionalDebugData << std::endl;
 		}
 		closeConnection(frame->header.streamIdentifier, handler);
 		return true;
@@ -264,12 +264,12 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 			if(streamIdentifier==0)
 			{
 				handler->updateSenderWindowSize(windupdf->windowSizeIncrement);
-				cout << "Got window increment size " << windupdf->windowSizeIncrement << " for connection" << endl;
+				std::cout << "Got window increment size " << windupdf->windowSizeIncrement << " for connection" << std::endl;
 			}
 			else
 			{
 				senderFlowControlWindow += windupdf->windowSizeIncrement;
-				cout << "Got window increment size " << windupdf->windowSizeIncrement << " for stream " << streamIdentifier << endl;
+				std::cout << "Got window increment size " << windupdf->windowSizeIncrement << " for stream " << streamIdentifier << std::endl;
 			}
 
 			if(pendingSendData.isDataPending())
@@ -284,7 +284,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 		Http2AlternativeServicesFrame* alsvcf  = static_cast<Http2AlternativeServicesFrame*>(frame);
 		//Settings Frame
 		if(streamIdentifier>=0) {
-			cout << "Got alternative services frame for connection " << alsvcf->protocolId << endl;
+			std::cout << "Got alternative services frame for connection " << alsvcf->protocolId << std::endl;
 			//TODO is it even valid for a server context?
 		} else {
 			closeConnection(frame->header.streamIdentifier, handler);
@@ -345,11 +345,11 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 }
 
 
-void* Http2StreamHandler::handleWebSocketRequest(Http2HPACKContext* context, Http2Frame* frame, Http2ReadWriteUtil* handler, map<uint16_t, uint32_t>& settings)
+void* Http2StreamHandler::handleWebSocketRequest(Http2HPACKContext* context, Http2Frame* frame, Http2ReadWriteUtil* handler, std::map<uint16_t, uint32_t>& settings)
 {
 	if(settings.find(Http2SettingsFrame::SETTINGS_WEBSOCKET_CAPABLE)!=settings.end() && isWebSocketRequest())
 	{
-		map<string, string> wsheaders;
+		std::map<std::string, std::string> wsheaders;
 		wsheaders[":status"] = "101";
 		wsheaders["sec-websocket-protocol"] = "13";
 		Http2HeadersFrame hframe;
@@ -363,11 +363,11 @@ void* Http2StreamHandler::handleWebSocketRequest(Http2HPACKContext* context, Htt
 	return NULL;
 }
 
-void Http2StreamHandler::sendPushPromiseFrames(Http2HPACKContext* context, Http2Frame* frame, Http2ReadWriteUtil* handler, map<uint16_t, uint32_t>& settings)
+void Http2StreamHandler::sendPushPromiseFrames(Http2HPACKContext* context, Http2Frame* frame, Http2ReadWriteUtil* handler, std::map<uint16_t, uint32_t>& settings)
 {
 	if(!isWebSocket && (settings.find(Http2SettingsFrame::SETTINGS_ENABLE_PUSH)==settings.end()
 			|| settings[Http2SettingsFrame::SETTINGS_ENABLE_PUSH]!=0)) {
-		vector<string> relEntities = handler->getRelatedEntitiesForPP(request->getHeader(":path"));
+		std::vector<std::string> relEntities = handler->getRelatedEntitiesForPP(request->getHeader(":path"));
 		if(relEntities.size()>0) {
 			for (int var = 0; var < (int)relEntities.size(); ++var) {
 				Http2PushPromiseFrame ppframe;
@@ -375,7 +375,7 @@ void Http2StreamHandler::sendPushPromiseFrames(Http2HPACKContext* context, Http2
 				ppframe.headers[":path"] = relEntities.at(var);
 				ppframe.headers["host"] = request->getHeader("host");
 				//TODO mime-type translation from request
-				string ext = relEntities.at(var).substr(relEntities.at(var).find(".")+1);
+				std::string ext = relEntities.at(var).substr(relEntities.at(var).find(".")+1);
 				ppframe.headers["accept"] = handler->getMimeType(ext);
 				ppframe.header.flags.set(2);
 				ppframe.header.streamIdentifier = frame->header.streamIdentifier;

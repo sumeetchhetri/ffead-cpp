@@ -20,7 +20,7 @@ Http2SettingsFrame::Http2SettingsFrame() {
 	header.streamIdentifier = 0;
 }
 
-Http2SettingsFrame::Http2SettingsFrame(const string& data, Http2FrameHeader& aheader) {
+Http2SettingsFrame::Http2SettingsFrame(const std::string& data, Http2FrameHeader& aheader) {
 	header = aheader;
 	header.type = 4;
 	header.streamIdentifier = 0;
@@ -35,7 +35,7 @@ Http2SettingsFrame::Http2SettingsFrame(const string& data, Http2FrameHeader& ahe
 	}
 }
 
-const map<uint16_t, uint32_t>& Http2SettingsFrame::getSettings() const {
+const std::map<uint16_t, uint32_t>& Http2SettingsFrame::getSettings() const {
 	return settings;
 }
 
@@ -43,9 +43,9 @@ Http2SettingsFrame::~Http2SettingsFrame() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http2SettingsFrame::getFrameData() {
-	string edata;
-	map<uint16_t, uint32_t>::iterator it;
+std::string Http2SettingsFrame::getFrameData() {
+	std::string edata;
+	std::map<uint16_t, uint32_t>::iterator it;
 	for (it=settings.begin();it!=settings.end();++it) {
 		edata.append(CommonUtils::ulonglongTocharArray(it->first, 2));
 		edata.append(CommonUtils::ulonglongTocharArray(it->second, 4));

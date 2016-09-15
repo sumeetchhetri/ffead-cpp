@@ -28,10 +28,10 @@
 #include "AMEFDecoder.h"
 #include <exception>
 
-using namespace std;
+
 
 class DistoCacheClientUtils {
-	static string SUCCESS, ERR_NOELEMENTS, ERR_NOKEYCACHEMAP, ERR_INVCONTAINER,
+	static std::string SUCCESS, ERR_NOELEMENTS, ERR_NOKEYCACHEMAP, ERR_INVCONTAINER,
 					  ERR_OPNOTSUPP, ERR_INDGRTCONTSIZ, ERR_NOVALUEFOUND, ERR_NOTAMAPCONT,
 					  ERR_ALLOCENTEXISTS, ERR_NOVALUESPEC, ERR_NEGATIVEPOS,
 					  ERR_POSNOTNUM, ERR_NEGATIVEREP, ERR_REPNOTNUM;
@@ -40,47 +40,47 @@ class DistoCacheClientUtils {
 	bool inUse;
 	friend class BasicDistoCacheConnectionFactory;
 	friend class PooledDistoCacheConnectionFactory;
-	string readValueOrThrowExp(AMEFObject* object, const vector<string>& ignoreErrors);
+	std::string readValueOrThrowExp(AMEFObject* object, const std::vector<std::string>& ignoreErrors);
 public:
-	DistoCacheClientUtils(const string& host, const int& port, const bool& isSSL= false);
+	DistoCacheClientUtils(const std::string& host, const int& port, const bool& isSSL= false);
 	virtual ~DistoCacheClientUtils();
-	void allocate(const string&, const string&);
-	void deallocate(const string&);
+	void allocate(const std::string&, const std::string&);
+	void deallocate(const std::string&);
 
-	void addObjectEntry(const string& key, const string& value);
-	void removeObjectEntry(const string& key);
-	string getObjectEntryValue(const string&);
+	void addObjectEntry(const std::string& key, const std::string& value);
+	void removeObjectEntry(const std::string& key);
+	std::string getObjectEntryValue(const std::string&);
 
-	void addMapEntry(const string&, const string&, const string&);
-	void removeMapEntry(const string&, const string&);
-	string getMapEntryValue(const string&, const string&);
-	string getMapEntryValueByPosition(const string&, const int&);
-	void setMapEntryValueByPosition(const string&, const int&, const string&);
+	void addMapEntry(const std::string&, const std::string&, const std::string&);
+	void removeMapEntry(const std::string&, const std::string&);
+	std::string getMapEntryValue(const std::string&, const std::string&);
+	std::string getMapEntryValueByPosition(const std::string&, const int&);
+	void setMapEntryValueByPosition(const std::string&, const int&, const std::string&);
 
-	void addCollectionEntry(const string&, const string&);
-	void removeCollectionEntryAt(const string&, const int&);
-	string getCollectionEntryAt(const string&, const int&);
-	void setCollectionEntryAt(const string&, const int&, const string&);
+	void addCollectionEntry(const std::string&, const std::string&);
+	void removeCollectionEntryAt(const std::string&, const int&);
+	std::string getCollectionEntryAt(const std::string&, const int&);
+	void setCollectionEntryAt(const std::string&, const int&, const std::string&);
 
-	size_t size(const string&);
-	bool isEmpty(const string&);
-	void clear(const string&);
+	size_t size(const std::string&);
+	bool isEmpty(const std::string&);
+	void clear(const std::string&);
 
-	void insert(const string&, const string&, const int&);
-	void insert(const string&, const string&, const int&, const int&);
+	void insert(const std::string&, const std::string&, const int&);
+	void insert(const std::string&, const std::string&, const int&, const int&);
 	//Queue operations
-	void popValueQueue(const string&);
-	string popGetValueQueue(const string&);
+	void popValueQueue(const std::string&);
+	std::string popGetValueQueue(const std::string&);
 	//Deque/List operations
-	void pushBackValue(const string&, const string&);
-	void pushFrontValue(const string&, const string&);
-	void popFrontValue(const string&);
-	void popBackValue(const string&);
-	string popGetFrontValue(const string&);
-	string popGetBackValue(const string&);
+	void pushBackValue(const std::string&, const std::string&);
+	void pushFrontValue(const std::string&, const std::string&);
+	void popFrontValue(const std::string&);
+	void popBackValue(const std::string&);
+	std::string popGetFrontValue(const std::string&);
+	std::string popGetBackValue(const std::string&);
 	//Queue/Deque/List/Vector operations
-	string getFrontValue(const string&);
-	string getBackValue(const string&);
+	std::string getFrontValue(const std::string&);
+	std::string getBackValue(const std::string&);
 };
 
 #endif /* DISTOCACHECLIENTUTILS_H_ */

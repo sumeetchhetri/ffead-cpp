@@ -29,23 +29,23 @@
 #define CLIENT_AUTH_REQUIRE 2
 #define CLIENT_AUTH_REHANDSHAKE 3
 
-using namespace std;
+
 
 class SecurityProperties {
 public:
-	string cert_file;
-	string key_file;
-	string dh_file;
-	string ca_list;
-	string rand_file;
-	string sec_password;
-	string srv_auth_prvd;
-	string srv_auth_mode;
-	string srv_auth_file;
+	std::string cert_file;
+	std::string key_file;
+	std::string dh_file;
+	std::string ca_list;
+	std::string rand_file;
+	std::string sec_password;
+	std::string srv_auth_prvd;
+	std::string srv_auth_mode;
+	std::string srv_auth_file;
 	int client_auth;
 	long isDHParams;
 	bool alpnEnabled;
-	vector<string> alpnProtoList;
+	std::vector<std::string> alpnProtoList;
 	friend class SSLHandler;
 	friend class ServiceTask;
 	friend class ConfigurationHandler;
@@ -59,18 +59,18 @@ class SSLHandler {
 	static char *pass;
 	SSL_CTX *ctx;
 	bool isSSLEnabled;
-	map<int, string> socketAlpnProtoMap;
+	std::map<int, std::string> socketAlpnProtoMap;
 	static SSLHandler* instance;
 	bool isValid;
 	SecurityProperties securityProperties;
 	SSLHandler();
 	void init(const SecurityProperties& securityProperties);
-	vector<unsigned char> getDefaultALPN();
-	static vector<vector<unsigned char> > advertisedProtos;
+	std::vector<unsigned char> getDefaultALPN();
+	static std::vector<std::vector<unsigned char> > advertisedProtos;
 	static int next_proto_cb(SSL *s, const unsigned char **data, unsigned int *len, void *arg);
 	static int alpn_select_proto_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen, const unsigned char *in, unsigned int inlen, void *arg);
 	static int select_next_protocol(unsigned char **out, unsigned char *outlen, const unsigned char *in, const unsigned int& inlen);
-	static string getAlpnProto(const int& fd);
+	static std::string getAlpnProto(const int& fd);
 	static void removeAlpnProtoSocket(const int& fd);
 	friend class SocketUtil;
 public:

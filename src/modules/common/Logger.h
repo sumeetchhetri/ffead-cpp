@@ -29,9 +29,9 @@
 
 class LoggerConfig
 {
-	string name, mode, level, file, logdirtype, pattern;
+	std::string name, mode, level, file, logdirtype, pattern;
 	Mutex lock;
-	ostream* out;
+	std::ostream* out;
 	DateFormat datFormat;
 	int vhostNumber;
 	friend class LoggerFactory;
@@ -40,19 +40,19 @@ class LoggerConfig
 
 class Logger {
 public:
-	static string LEVEL_OFF;
-	static string LEVEL_FATAL;
-	static string LEVEL_ERROR;
-	static string LEVEL_WARN;
-	static string LEVEL_INFO;
-	static string LEVEL_DEBUG;
-	static string LEVEL_TRACE;
-	void fatal(const string&);
-	void error(const string&);
-	void warn(const string&);
-	void info(const string&);
-	void debug(const string&);
-	void trace(const string&);
+	static std::string LEVEL_OFF;
+	static std::string LEVEL_FATAL;
+	static std::string LEVEL_ERROR;
+	static std::string LEVEL_WARN;
+	static std::string LEVEL_INFO;
+	static std::string LEVEL_DEBUG;
+	static std::string LEVEL_TRACE;
+	void fatal(const std::string&);
+	void error(const std::string&);
+	void warn(const std::string&);
+	void info(const std::string&);
+	void debug(const std::string&);
+	void trace(const std::string&);
 	Logger();
 	virtual ~Logger();
 	Logger& f();
@@ -67,37 +67,37 @@ public:
 		logger.write(msg, logger.level, false);
 		return logger;
 	}
-	friend Logger& operator<< (Logger& logger, ostream& (*pf) (ostream&));
+	friend Logger& operator<< (Logger& logger, std::ostream& (*pf) (std::ostream&));
 private:
-	static map<string, int> levelMap;
-	void setClassName(const string& className);
+	static std::map<std::string, int> levelMap;
+	void setClassName(const std::string& className);
 	friend class CHServer;
 	friend class LoggerFactory;
-	Logger(LoggerConfig *config, const string& className);
-	Logger(LoggerConfig *config, const string& className, const string& level);
-	string className, level;
+	Logger(LoggerConfig *config, const std::string& className);
+	Logger(LoggerConfig *config, const std::string& className, const std::string& level);
+	std::string className, level;
 	LoggerConfig *config;
-	void write(const string& msg, const string& mod, const bool& newline);
+	void write(const std::string& msg, const std::string& mod, const bool& newline);
 	template <typename T>
-	void write(const T& tmsg, const string& mod, const bool& newline)
+	void write(const T& tmsg, const std::string& mod, const bool& newline)
 	{
 		if(config==NULL)return;
 		Date dat;
-		string te = config->datFormat.format(dat);
-		string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<string>(config->vhostNumber)):"");
-		string msg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :";
+		std::string te = config->datFormat.format(dat);
+		std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<std::string>(config->vhostNumber)):"");
+		std::string msg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :";
 		config->lock.lock();
 		*config->out << msg << tmsg;
 		if(newline)
 		{
-			*config->out << endl;
+			*config->out << std::endl;
 		}
 		else
 		{
-			*config->out << flush;
+			*config->out << std::flush;
 		}
 		config->lock.unlock();
 	}
-	void write(ostream& (*pf) (ostream&), const string& mod);
+	void write(std::ostream& (*pf) (std::ostream&), const std::string& mod);
 };
 #endif /* LOGGER_H_ */

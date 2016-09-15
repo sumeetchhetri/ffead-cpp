@@ -15,7 +15,7 @@
 */
 #include "Reflector.h"
 
-map<string, ClassInfo> Reflector::_ciMap;
+std::map<std::string, ClassInfo> Reflector::_ciMap;
 ClassInfo Reflector::nullclass;
 
 Reflector::Reflector()
@@ -23,7 +23,7 @@ Reflector::Reflector()
 	dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(dlib == NULL)
 	{
-		cerr << dlerror() << endl;
+		std::cerr << dlerror() << std::endl;
 		throw "Cannot load reflection shared library";
 	}
 	dlibinstantiated = true;
@@ -52,7 +52,7 @@ void Reflector::cleanUp()
 	{
 		if(objectT.at(var)=="string" || objectT.at(var)=="int" || objectT.at(var)=="long"
 			|| objectT.at(var)=="double" || objectT.at(var)=="float" || objectT.at(var)=="bool"
-				|| objectT.at(var)=="char")
+				|| objectT.at(var)=="char" || objectT.at(var)=="long long")
 			delete objects.at(var);
 		else
 		{
@@ -61,16 +61,16 @@ void Reflector::cleanUp()
 	}
 }
 
-const ClassInfo& Reflector::getClassInfo(const string& cs, const string& app)
+const ClassInfo& Reflector::getClassInfo(const std::string& cs, const std::string& app)
 {
-	string className = cs;
-	string appName = CommonUtils::getAppName(app);
+	std::string className = cs;
+	std::string appName = CommonUtils::getAppName(app);
 	StringUtil::replaceAll(className, "::", "_");
-	string ca = appName +"-"+ className;
+	std::string ca = appName +"-"+ className;
 	if(_ciMap.find(ca)!=_ciMap.end()) {
 		return _ciMap[ca];
 	}
-	string methodname = appName + "_"+className;
+	std::string methodname = appName + "_"+className;
 	void *mkr = dlsym(dlib, methodname.c_str());
 	typedef ClassInfo (*RfPtr) ();
 	RfPtr f = (RfPtr)mkr;

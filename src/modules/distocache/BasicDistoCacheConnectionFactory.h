@@ -26,13 +26,13 @@
 
 class BasicDistoCacheConnectionFactory {
 	static BasicDistoCacheConnectionFactory* instance;
-	string host;
+	std::string host;
 	int port;
 	bool isSSL;
-	BasicDistoCacheConnectionFactory(const string& host, const int& port, const bool& isSSL= false);
+	BasicDistoCacheConnectionFactory(const std::string& host, const int& port, const bool& isSSL= false);
 public:
 	virtual ~BasicDistoCacheConnectionFactory();
-	static void init(const string& host, const int& port, const bool& isSSL= false);
+	static void init(const std::string& host, const int& port, const bool& isSSL= false);
 	static void destroy();
 	static DistoCacheClientUtils* getConnection();
 	static void releaseConnection(DistoCacheClientUtils* clientUtil);

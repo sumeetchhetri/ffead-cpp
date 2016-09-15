@@ -24,18 +24,18 @@
 #define RENDERER_H_
 #include "string"
 #include "map"
-using namespace std;
+
 
 class Renderer {
 public:
 	Renderer();
 	virtual ~Renderer();
-	string generateStartOpenTag(const string&);
-	string generateEndOpenTag();
-	string generateCloseTag(const string&);
-	typedef map<string,string> AttributeList;
-	string generateAttributes(const AttributeList&);
-	virtual string render()=0;
+	std::string generateStartOpenTag(const std::string&);
+	std::string generateEndOpenTag();
+	std::string generateCloseTag(const std::string&);
+	typedef std::map<std::string,std::string> AttributeList;
+	std::string generateAttributes(const AttributeList&);
+	virtual std::string render()=0;
 };
 
 #endif /* RENDERER_H_ */

@@ -12,7 +12,7 @@ Http2ResetStreamFrame::Http2ResetStreamFrame() {
 	errorCode = -1;
 }
 
-Http2ResetStreamFrame::Http2ResetStreamFrame(const string& data, Http2FrameHeader& aheader) {
+Http2ResetStreamFrame::Http2ResetStreamFrame(const std::string& data, Http2FrameHeader& aheader) {
 	header= aheader;
 	header.type = 3;
 	errorCode = (unsigned int)CommonUtils::charArrayToULongLong(data.substr(0, 4));
@@ -26,8 +26,8 @@ Http2ResetStreamFrame::~Http2ResetStreamFrame() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http2ResetStreamFrame::getFrameData() {
-	string edata;
+std::string Http2ResetStreamFrame::getFrameData() {
+	std::string edata;
 	edata.append(CommonUtils::ulonglongTocharArray(errorCode, 4));
 	return edata;
 }

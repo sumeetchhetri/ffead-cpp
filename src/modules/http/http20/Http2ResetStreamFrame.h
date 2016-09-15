@@ -11,13 +11,13 @@
 
 class Http2ResetStreamFrame : public Http2Frame {
 	unsigned int errorCode;
-	Http2ResetStreamFrame(const string& data, Http2FrameHeader& aheader);
+	Http2ResetStreamFrame(const std::string& data, Http2FrameHeader& aheader);
 	friend class Http2Handler;
 public:
 	Http2ResetStreamFrame();
 	virtual ~Http2ResetStreamFrame();
 	unsigned int getErrorCode() const;
-	string getFrameData();
+	std::string getFrameData();
 };
 
 #endif /* HTTP2RESETSTREAMFRAME_H_ */

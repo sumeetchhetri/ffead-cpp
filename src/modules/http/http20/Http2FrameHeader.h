@@ -12,7 +12,7 @@
 #include "string"
 #include "stdint.h"
 #include "vector"
-using namespace std;
+
 
 class Http2ErrorCode;
 
@@ -84,7 +84,7 @@ public:
 class Http2FrameHeader {
 	int payloadLength;
 	unsigned char type;
-	bitset<8> flags;
+	std::bitset<8> flags;
 	bool reserved;
 	int streamIdentifier;
 	friend class Http2Frame;
@@ -104,7 +104,7 @@ class Http2FrameHeader {
 public:
 	Http2FrameHeader();
 	virtual ~Http2FrameHeader();
-	bitset<8> getFlags() const;
+	std::bitset<8> getFlags() const;
 	int getPayloadLength() const;
 	bool isReserved() const;
 	int getStreamIdentifier() const;

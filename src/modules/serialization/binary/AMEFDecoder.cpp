@@ -22,7 +22,7 @@ AMEFDecoder::AMEFDecoder() {
 AMEFDecoder::~AMEFDecoder() {
 }
 
-AMEFObject* AMEFDecoder::decodeB(const string& buffer, const bool& considerLength)
+AMEFObject* AMEFDecoder::decodeB(const std::string& buffer, const bool& considerLength)
 {
 	if(buffer.length()==0)return NULL;
 	AMEFObject* amefObject = new AMEFObject;
@@ -35,7 +35,7 @@ AMEFObject* AMEFDecoder::decodeB(const string& buffer, const bool& considerLengt
 	return amefObject;
 }
 
-/*AMEFObject* AMEFDecoder::decodeBNew(const string& buffer, const bool& considerLength)
+/*AMEFObject* AMEFDecoder::decodeBNew(const std::string& buffer, const bool& considerLength)
 {
 	if(buffer.length()==0)return NULL;
 	AMEFObject* amefObject = new AMEFObject;
@@ -48,7 +48,7 @@ AMEFObject* AMEFDecoder::decodeB(const string& buffer, const bool& considerLengt
 	return amefObject;
 }*/
 
-void AMEFDecoder::decodeObjectName(const string& buffer, AMEFObject *jDBObject)
+void AMEFDecoder::decodeObjectName(const std::string& buffer, AMEFObject *jDBObject)
 {
 	++jDBObject->position;
 	int lengthm = (int)buffer[jDBObject->position++];
@@ -59,7 +59,7 @@ void AMEFDecoder::decodeObjectName(const string& buffer, AMEFObject *jDBObject)
 	jDBObject->position += lengthm;
 }
 
-/*AMEFObject* AMEFDecoder::decodeSinglePacketB(const string& buffer, bool ignoreName, AMEFObject* jDBObject)
+/*AMEFObject* AMEFDecoder::decodeSinglePacketB(const std::string& buffer, bool ignoreName, AMEFObject* jDBObject)
 {
 	char type = (char)buffer[jDBObject->position];
 	if(type<AMEFObject::INT_TYPE) // All NULL Types
@@ -115,7 +115,7 @@ void AMEFDecoder::decodeObjectName(const string& buffer, AMEFObject *jDBObject)
 			++jDBObject->position;
 		int lengthm = AMEFObject::charArrayToInt(buffer, jDBObject->position, 2);
 		jDBObject->position += 2;
-		string value = buffer.substr(jDBObject->position, lengthm);
+		std::string value = buffer.substr(jDBObject->position, lengthm);
 		jDBObject->setValue(value);
 		jDBObject->position += lengthm;
 	}
@@ -143,7 +143,7 @@ void AMEFDecoder::decodeObjectName(const string& buffer, AMEFObject *jDBObject)
 }*/
 
 
-AMEFObject* AMEFDecoder::decodeSinglePacketBInternal(const string& buffer, AMEFObject* jDBObject)
+AMEFObject* AMEFDecoder::decodeSinglePacketBInternal(const std::string& buffer, AMEFObject* jDBObject)
 {
 	char type = (char)buffer[jDBObject->position];
 	if(type<AMEFObject::INT_TYPE) // All NULL Types
@@ -201,7 +201,7 @@ AMEFObject* AMEFDecoder::decodeSinglePacketBInternal(const string& buffer, AMEFO
 	return jDBObject;
 }
 
-AMEFObject* AMEFDecoder::decodeSinglePacketB(const string& buffer, AMEFObject* jDBObject)
+AMEFObject* AMEFDecoder::decodeSinglePacketB(const std::string& buffer, AMEFObject* jDBObject)
 {
 	char type = (char)buffer[jDBObject->position];
 	if(type==AMEFObject::OBJECT_TYPE) // Object Types
@@ -224,9 +224,9 @@ AMEFObject* AMEFDecoder::decodeSinglePacketB(const string& buffer, AMEFObject* j
 	return jDBObject;
 }
 
-string AMEFDecoder::updatePacket(const string& orig, AMEFObject* jDBObject, int index) {
-	string np;
-	vector<int> propLengths;
+std::string AMEFDecoder::updatePacket(const std::string& orig, AMEFObject* jDBObject, int index) {
+	std::string np;
+	std::vector<int> propLengths;
 	int poslen = AMEFObject::charArrayToInt(orig, 5, 4);
 	for (int var = 0; var < poslen/4; ++var) {
 		propLengths.push_back(AMEFObject::charArrayToInt(orig, 9+(var*4), 4));
@@ -234,7 +234,7 @@ string AMEFDecoder::updatePacket(const string& orig, AMEFObject* jDBObject, int 
 	int start = 0, lindx = 0;
 	for (int var = index; var < (int)jDBObject->getPackets().size(); var+=2) {
 		int ind = jDBObject->getPackets().at(var)->getIntValue();
-		string val = jDBObject->getPackets().at(var+1)->getValue();
+		std::string val = jDBObject->getPackets().at(var+1)->getValue();
 		int tlen = propLengths.at(ind);
 		int count = start==0?poslen+9:0;
 		for (int v1 = lindx; v1 < ind; ++v1) {
@@ -242,7 +242,7 @@ string AMEFDecoder::updatePacket(const string& orig, AMEFObject* jDBObject, int 
 		}
 		np.append(orig.substr(start, count));
 		lindx = ind+1;
-		string nlength = AMEFObject::ulonglongTocharArray(val.length(), 4);
+		std::string nlength = AMEFObject::ulonglongTocharArray(val.length(), 4);
 		np[9+ind*4] = nlength.at(0);
 		np[10+ind*4] = nlength.at(1);
 		np[11+ind*4] = nlength.at(2);
@@ -256,7 +256,7 @@ string AMEFDecoder::updatePacket(const string& orig, AMEFObject* jDBObject, int 
 	if(orig.length()!=np.length())
 	{
 		int clen = np.length() - 5;
-		string nlength = AMEFObject::ulonglongTocharArray(clen, 4);
+		std::string nlength = AMEFObject::ulonglongTocharArray(clen, 4);
 		np[1] = nlength.at(0);
 		np[2] = nlength.at(1);
 		np[3] = nlength.at(2);

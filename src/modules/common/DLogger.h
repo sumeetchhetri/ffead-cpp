@@ -28,24 +28,24 @@
 class DLogger {
 public:
 	static DLogger* getDLogger();
-	static void info(string);
-	static void debug(string);
-	static void error(string);
+	static void info(std::string);
+	static void debug(std::string);
+	static void error(std::string);
 	static void clear();
 	static void init();
-	static void init(string file);
-	static void init(string level,string mode,string file);
+	static void init(std::string file);
+	static void init(std::string level,std::string mode,std::string file);
 private:
 	virtual ~DLogger();
 	DLogger();
-	DLogger(string);
-	DLogger(string,string,string);
+	DLogger(std::string);
+	DLogger(std::string,std::string,std::string);
 	DateFormat datFormat;
-	string level;
-	string mode;
-	string filepath;
-	ofstream out;
-	void write(string,string);
+	std::string level;
+	std::string mode;
+	std::string filepath;
+	std::ofstream out;
+	void write(std::string,std::string);
 	Mutex p_mutex;
 	static DLogger* m_pInstance;
 };

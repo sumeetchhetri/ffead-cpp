@@ -34,27 +34,27 @@ class Http2Handler : public Http2ReadWriteUtil, public SocketInterface {
 	int highestPushPromiseStreamIdentifier;
 	Http2HPACKContext context;
 	//All the related entities for a PUSH_PROMISE frame
-	map<string, vector<string> > relatedEntitiesForPP;
-	map<int, Http2StreamHandler> streams;
+	std::map<std::string, std::vector<std::string> > relatedEntitiesForPP;
+	std::map<int, Http2StreamHandler> streams;
 	int senderFlowControlWindow;
 	int receiverFlowControlWindow;
-	map<int, bool> frameAcks;
-	map<uint16_t, uint32_t> settings;
+	std::map<int, bool> frameAcks;
+	std::map<uint16_t, uint32_t> settings;
 	int precedingstreamId;
 	bool isConnInit;
 	uint32_t maxDataFrameSize;
-	string webpath;
+	std::string webpath;
 	std::queue<Http2RequestResponseData> pushPromisedRequestQ;
 	Http2Frame* readFrame();
-	Http2Frame* readFrame(string data);
+	Http2Frame* readFrame(std::string data);
 	Http2Frame* nextFrame();
-	Http2Frame* getFrameByType(const string& data, Http2FrameHeader& header);
-	string serialize(Http2Frame* frame);
+	Http2Frame* getFrameByType(const std::string& data, Http2FrameHeader& header);
+	std::string serialize(Http2Frame* frame);
 	bool processFrame(Http2Frame* frame, void*& request);
 public:
 	void onOpen();
 	void onClose();
-	string getProtocol(void* context);
+	std::string getProtocol(void* context);
 	int getTimeout();
 	void* readRequest(void*& context, int& pending);
 	bool writeResponse(void* req, void* res, void* context);
@@ -65,15 +65,15 @@ public:
 	bool writeData(Http2Frame* frame);
 	bool writePendingDataFrame(Http2RequestResponseData&);
 	bool writeData(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS);
-	vector<string> getRelatedEntitiesForPP(const string&);
+	std::vector<std::string> getRelatedEntitiesForPP(const std::string&);
 	int getHighestPushPromiseStreamIdentifier();
 	int updateSenderWindowSize(const int& windowSize);
 	void updateMaxFrameSize(const uint32_t& val);
-	Http2Handler(const bool& isServer, SocketUtil* sockUtil, const string& webpath);
-	Http2Handler(const bool& isServer, SocketUtil* sockUtil, const string& webpath, const string& settingsFrameData);
+	Http2Handler(const bool& isServer, SocketUtil* sockUtil, const std::string& webpath);
+	Http2Handler(const bool& isServer, SocketUtil* sockUtil, const std::string& webpath, const std::string& settingsFrameData);
 	virtual ~Http2Handler();
-	const string& getWebpath() const;
-	string getMimeType(const string& ext);
+	const std::string& getWebpath() const;
+	std::string getMimeType(const std::string& ext);
 };
 
 #endif /* HTTP2HANDLER_H_ */

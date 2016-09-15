@@ -31,7 +31,7 @@ TestCronBasedJob::~TestCronBasedJob() {
 }
 
 void TestCronBasedJob::runJob() {
-	cout << "Job process run number - " + CastUtil::lexical_cast<string>(++counter) << endl;
+	std::cout << "Job process run number - " + CastUtil::lexical_cast<std::string>(++counter) << std::endl;
 }
 
 

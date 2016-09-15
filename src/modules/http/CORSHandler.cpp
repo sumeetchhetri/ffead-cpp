@@ -53,7 +53,7 @@ bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse 
 					throw status;
 				}
 
-				string erheadr;
+				std::string erheadr;
 				if(!corsConfig.isHeaderAllowed(reqHdrLst, erheadr))
 				{
 					HTTPResponseStatus status(HTTPResponseStatus::Forbidden, "Unsupported HTTP request header: " + erheadr);
@@ -75,7 +75,7 @@ bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse 
 
 				if(corsConfig.maxAge>0)
 				{
-					res->addHeaderValue(HttpResponse::AccessControlAllowMethods, CastUtil::lexical_cast<string>(corsConfig.maxAge));
+					res->addHeaderValue(HttpResponse::AccessControlAllowMethods, CastUtil::lexical_cast<std::string>(corsConfig.maxAge));
 				}
 
 				res->addHeaderValue(HttpResponse::AccessControlAllowMethods, corsConfig.allwdMethods);
@@ -121,7 +121,7 @@ bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse 
 
 CorsConfig::CorsConfig() {}
 
-CorsConfig::CorsConfig(const string& allwdOrigins, const string& allwdMethods, const string& allwdHeaders, const string& exposedHeaders, const bool& allwdCredentials, const long& maxAge)
+CorsConfig::CorsConfig(const std::string& allwdOrigins, const std::string& allwdMethods, const std::string& allwdHeaders, const std::string& exposedHeaders, const bool& allwdCredentials, const long& maxAge)
 {
 	this->allwdOrigins = allwdOrigins;
 	this->allwdMethods = allwdMethods;
@@ -183,7 +183,7 @@ bool CorsConfig::isOriginAllowed(const strVec& reqOrgLst)
 	}
 	return false;
 }
-bool CorsConfig::isMethodAllowed(const string& method)
+bool CorsConfig::isMethodAllowed(const std::string& method)
 {
 	init();
 	if(method=="")
@@ -198,7 +198,7 @@ bool CorsConfig::isMethodAllowed(const string& method)
 	}
 	return false;
 }
-bool CorsConfig::isHeaderAllowed(const strVec& reqHdrLst, string& erheadr)
+bool CorsConfig::isHeaderAllowed(const strVec& reqHdrLst, std::string& erheadr)
 {
 	init();
 	if(allwdHeaders=="*")

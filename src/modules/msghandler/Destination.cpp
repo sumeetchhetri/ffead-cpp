@@ -31,22 +31,22 @@ Destination::~Destination() {
 	// TODO Auto-generated destructor stub
 }
 
-string Destination::getName() const
+std::string Destination::getName() const
 {
 	return this->name;
 }
 
-void Destination::setName(const string& name)
+void Destination::setName(const std::string& name)
 {
 	this->name = name;
 }
 
-string Destination::getType() const
+std::string Destination::getType() const
 {
 	return this->type;
 }
 
-void Destination::setType(const string& type)
+void Destination::setType(const std::string& type)
 {
 	this->type = type;
 }

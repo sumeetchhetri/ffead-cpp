@@ -29,8 +29,8 @@ class Expose {
 public:
 	Expose();
 	virtual ~Expose();
-	YObject sayHello(string,int,float);
-	string sayHello1(string,int,float);
+	YObject sayHello(std::string,int,float);
+	std::string sayHello1(std::string,int,float);
 	YObject sayHello2(YObject,int,float);
 };
 

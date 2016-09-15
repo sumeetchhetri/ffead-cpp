@@ -25,7 +25,7 @@
 #include "SSLCommon.h"
 #include "ClientInterface.h"
 #include "PropFileReader.h"
-using namespace std;
+
 
 class SSLClient : public ClientInterface {
 	SSL *ssl;
@@ -34,7 +34,7 @@ class SSLClient : public ClientInterface {
 	SOCKET sockfd;
 	static char *pass;
 	bool connected, isDHParams;
-	string cert_file,key_file,dh_file,ca_list,rand_file,sec_password;
+	std::string cert_file,key_file,dh_file,ca_list,rand_file,sec_password;
 	int client_auth;
 	void *get_in_addr1(struct sockaddr *sa);
 	void init();
@@ -43,17 +43,17 @@ class SSLClient : public ClientInterface {
 	Logger logger;
 public:
 	SSLClient();
-	SSLClient(const string& secFile);
+	SSLClient(const std::string& secFile);
 	virtual ~SSLClient();
-	bool connection(const string&, const int&);
-	bool connectionUnresolv(const string& host, const int& port);
-	int sendData(string);
-	string getData(const string& hdrdelm, const string& cntlnhdr);
-	string getData(int cntlen);
+	bool connection(const std::string&, const int&);
+	bool connectionUnresolv(const std::string& host, const int& port);
+	int sendData(std::string);
+	std::string getData(const std::string& hdrdelm, const std::string& cntlnhdr);
+	std::string getData(int cntlen);
 	void closeConnection();
 	bool isConnected();
-	string getBinaryData(const int&, const bool&);
-	string getTextData(const string& hdrdelm, const string& cntlnhdr);
+	std::string getBinaryData(const int&, const bool&);
+	std::string getTextData(const std::string& hdrdelm, const std::string& cntlnhdr);
 };
 
 #endif /* SSLCLIENT_H_ */

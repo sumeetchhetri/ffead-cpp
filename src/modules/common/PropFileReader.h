@@ -28,17 +28,17 @@
 #include "vector"
 #include "StringUtil.h"
 
-using namespace std;
-typedef vector<string> strVec;
-typedef map<string, string> propMap;
-typedef map<string, vector<string> > propMultiMap;
+
+typedef std::vector<std::string> strVec;
+typedef std::map<std::string, std::string> propMap;
+typedef std::map<std::string, std::vector<std::string> > propMultiMap;
 class PropFileReader {
 public:
 	PropFileReader();
 	PropFileReader(const bool&);
 	virtual ~PropFileReader();
-	propMap getProperties(const string&);
-	propMultiMap getPropertiesMultiMap(const string&);
+	propMap getProperties(const std::string&);
+	propMultiMap getPropertiesMultiMap(const std::string&);
 private:
 	bool mergeSimProps;
 };

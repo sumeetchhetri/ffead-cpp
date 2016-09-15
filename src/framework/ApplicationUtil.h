@@ -31,7 +31,7 @@ class ApplicationUtil {
 public:
 	ApplicationUtil();
 	virtual ~ApplicationUtil();
-	string buildAllApplications(const vector<string>&, const vector<string>&);
+	std::string buildAllApplications(const std::vector<std::string>&, const std::vector<std::string>&);
 };
 
 #endif /* APPLICATIONUTIL_H_ */

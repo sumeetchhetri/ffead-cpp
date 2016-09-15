@@ -27,21 +27,21 @@
 #include "CommonUtils.h"
 
 class LoggerFactory {
-	map<string, LoggerConfig*> configs;
-	map<string, string> dupLogNames;
+	std::map<std::string, LoggerConfig*> configs;
+	std::map<std::string, std::string> dupLogNames;
 	int vhostNumber;
 	static LoggerFactory* instance;
 	LoggerFactory();
 	static void setVhostNumber(const int& vhn);
 	static void init();
-	static void configureDefaultLogger(const string& appName);
+	static void configureDefaultLogger(const std::string& appName);
 	friend class CHServer;
 public:
 	virtual ~LoggerFactory();
 	static void clear();
-	static void init(const string& configFile, const string& serverRootDirectory, const string& appName = "", const bool& isLoggingEnabled = true);
-	static Logger getLogger(const string& className);
-	static Logger getLogger(const string& loggerName, const string& className);
+	static void init(const std::string& configFile, const std::string& serverRootDirectory, const std::string& appName = "", const bool& isLoggingEnabled = true);
+	static Logger getLogger(const std::string& className);
+	static Logger getLogger(const std::string& loggerName, const std::string& className);
 };
 
 #endif /* LOGGERFACTORY_H_ */

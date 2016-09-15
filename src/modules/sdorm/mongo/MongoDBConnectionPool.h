@@ -23,7 +23,7 @@ class MongoDBConnectionPool: public ConnectionPooler {
 	bool isSharded;
 	bool isUnixDomainSocket;
 	bool isSSL;
-	string replicaSetName;
+	std::string replicaSetName;
 public:
 	MongoDBConnectionPool(const ConnectionProperties& props);
 	~MongoDBConnectionPool();

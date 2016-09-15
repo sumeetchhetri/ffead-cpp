@@ -25,15 +25,15 @@
 #include "string"
 #include "vector"
 #include "Field.h"
-using namespace std;
 
-typedef vector<string> args;
-typedef vector<void *> vals;
+
+typedef std::vector<std::string> args;
+typedef std::vector<void *> vals;
 class Method {
-	string refName;
-	string accessSpecifier;
-	string methodName;
-	string returnType;
+	std::string refName;
+	std::string accessSpecifier;
+	std::string methodName;
+	std::string returnType;
 	args argumentTypes;
 	bool isstat;
 	void addField(const Field&);
@@ -42,12 +42,12 @@ class Method {
 public:
 	Method();
 	virtual ~Method();
-	const string& getAccessSpecifier() const;
-    void setAccessSpecifier(const string&);
-    const string& getMethodName() const;
-    void setMethodName(const string&);
-    const string& getReturnType() const;
-    void setReturnType(const string&);
+	const std::string& getAccessSpecifier() const;
+    void setAccessSpecifier(const std::string&);
+    const std::string& getMethodName() const;
+    void setMethodName(const std::string&);
+    const std::string& getReturnType() const;
+    void setReturnType(const std::string&);
     args getArgumentTypes() const;
     void setArgumentTypes(const args&);
     int getArgNum() const;
@@ -55,8 +55,8 @@ public:
     bool isStatic();
     void setIsStatic(const bool& isStatic);
     //string getKey();
-	const string& getRefName() const;
-	void setRefName(const string& refName);
+	const std::string& getRefName() const;
+	void setRefName(const std::string& refName);
 };
 
 #endif /* METHOD_H_ */

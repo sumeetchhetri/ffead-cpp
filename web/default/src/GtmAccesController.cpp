@@ -22,8 +22,8 @@ bool GtmAccesController::service(HttpRequest* req, HttpResponse* res) {
 	gtma->set("^A(1)", 1);
 	gtma->set("^A(2)", 2);
 	gtma->set("^A(3)", 3);
-	string json = gtma->getJsonString("^A");
-	cout << "Called GtmAccesController " << json << endl;
+	std::string json = gtma->getJsonString("^A");
+	std::cout << "Called GtmAccesController " << json << std::endl;
 	res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 	res->setContent(json);

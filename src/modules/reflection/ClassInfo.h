@@ -30,80 +30,81 @@
 #include "vector"
 #include "map"
 #include "StringUtil.h"
-using namespace std;
-typedef map<string,Constructor> ctorMap;
-typedef map<string,Method> methMap;
-typedef map<string,Field> fldMap;
-typedef vector<Field> fldVec;
-typedef vector<string> args;
+
+typedef std::map<std::string,Constructor> ctorMap;
+typedef std::map<std::string,Method> methMap;
+typedef std::map<std::string,Field> fldMap;
+typedef std::vector<Field> fldVec;
+typedef std::vector<std::string> args;
 class ClassInfo {
 public:
 	ClassInfo();
 	virtual ~ClassInfo();
     //void *getInstance() const;
     //void setInstance(void *);
-    string getClassName() const;
-    void setClassName(const string&);
-    string getBase() const;
-    void setBase(const string&);
-    void setNamespace(const string&);
-    string getNamespace();
+    std::string getClassName() const;
+    void setClassName(const std::string&);
+    std::string getBase() const;
+    void setBase(const std::string&);
+    void setNamespace(const std::string&);
+    std::string getNamespace();
     /*string getPublic_fields() const;
-    void setPublic_fields(const string&);
-    string getPrivate_fields() const;
-    void setPrivate_fields(const string&);
-    string getProtected_fields() const;
-    void setProtected_fields(const string&);
-    string getPublic_meths() const;
-    void setPublic_meths(const string&);
-    string getPrivate_meths() const;
-    void setPrivate_meths(const string&);
-    string getProtected_meths() const;
-    void setProtected_meths(const string&);
-    vector<Method> getMethods() const;
-    void setMethods(const vector<Method>&);
-    vector<Field> getFields() const;
-    void setFields(const vector<Field>&);
+    void setPublic_fields(const std::string&);
+    std::string getPrivate_fields() const;
+    void setPrivate_fields(const std::string&);
+    std::string getProtected_fields() const;
+    void setProtected_fields(const std::string&);
+    std::string getPublic_meths() const;
+    void setPublic_meths(const std::string&);
+    std::string getPrivate_meths() const;
+    void setPrivate_meths(const std::string&);
+    std::string getProtected_meths() const;
+    void setProtected_meths(const std::string&);
+    std::vector<Method> getMethods() const;
+    void setMethods(const std::vector<Method>&);
+    std::vector<Field> getFields() const;
+    void setFields(const std::vector<Field>&);
     void setMeths(const methMap&);*/
     const Constructor& getConstructor(const args&) const;
 	void addConstructor(const Constructor&);
 	ctorMap getConstructors();
-    const Method& getMethod(const string&, args) const;
+    const Method& getMethod(const std::string&, args) const;
     void addMethod(const Method&);
     methMap getMethods();
-    Field getField(const string&);
+    Field getField(const std::string&);
     void addField(const Field&);
     fldMap getFields();
     fldVec getFieldVec();
     void setSize(const int&);
     int getSize();
-	const string& getDestRefName() const;
-	void setDestRefName(const string& destRefName);
-	string getOperatorRefName(const string&);
-	void addOperatorRefName(const string& oper, const string& rn);
-	string getContRefName();
-	void setContRefName(const string& rn);
+	const std::string& getDestRefName() const;
+	void setDestRefName(const std::string& destRefName);
+	std::string getOperatorRefName(const std::string&);
+	void addOperatorRefName(const std::string& oper, const std::string& rn);
+	std::string getContRefName();
+	void setContRefName(const std::string& rn);
 private:
-	string className;
-	string base;
-	string namespc;
+	std::string className;
+	std::string base;
+	std::string namespc;
 	int size;
 	/*string public_fields;
-	string private_fields;
-	string protected_fields;
-	string public_meths;
-	string private_meths;
-	string protected_meths;
-	vector<Method> methods;
-	vector<Field> fields;*/
+	std::string private_fields;
+	std::string protected_fields;
+	std::string public_meths;
+	std::string private_meths;
+	std::string protected_meths;
+	std::vector<Method> methods;
+	std::vector<Field> fields;*/
 	ctorMap ctors;
 	methMap meths;
 	fldMap fields;
 	fldVec fldvec;
-	string destRefName;
-	map<string, string> operRefNames;
-	string contRefName;
+	std::string destRefName;
+	std::map<std::string, std::string> operRefNames;
+	std::string contRefName;
 	static Constructor nullcons;
+	static Method nullmeth;
 };
 
 #endif /* CLASSINFO_H_ */

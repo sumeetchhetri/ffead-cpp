@@ -14,7 +14,7 @@
 #include "DataSourceManager.h"
 #include <stdlib.h>
 
-using namespace std;
+
 
 #pragma @RestController path="/"
 class TeBkRestController {
@@ -26,17 +26,17 @@ public:
 	TeBkWorld db();
 
 	#pragma @GET path="/queries" statusCode="200" ocontentType="application/json"
-	vector<TeBkWorld> queries(
+	std::vector<TeBkWorld> queries(
 					#pragma @QueryParam name="queries"
-					string queries);
+					std::string queries);
 
 	#pragma @GET path="/updates" statusCode="200" ocontentType="application/json"
-	vector<TeBkWorld> updates(
+	std::vector<TeBkWorld> updates(
 					#pragma @QueryParam name="queries"
-					string queries);
+					std::string queries);
 
 	#pragma @GET path="/plaintext" statusCode="200" ocontentType="text/plain"
-	string plaintext();
+	std::string plaintext();
 
 	virtual ~TeBkRestController();
 };

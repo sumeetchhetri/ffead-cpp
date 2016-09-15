@@ -24,48 +24,48 @@ void MemoryCacheImpl::initEnv() {
 void MemoryCacheImpl::destroy() {
 }
 
-bool MemoryCacheImpl::remove(const string& key) {
+bool MemoryCacheImpl::remove(const std::string& key) {
 	internalMap.erase(key);
 	return true;
 }
 
-long long MemoryCacheImpl::increment(const string& key, const int& number) {
+long long MemoryCacheImpl::increment(const std::string& key, const int& number) {
 	if(internalMap.find(key)!=internalMap.end()) {
 		long long val = CastUtil::lexical_cast<long long>(internalMap[key]) + number;
-		internalMap[key] = CastUtil::lexical_cast<string>(val);
+		internalMap[key] = CastUtil::lexical_cast<std::string>(val);
 		return val;
 	}
 	return -1;
 }
 
-long long MemoryCacheImpl::decrement(const string& key, const int& number) {
+long long MemoryCacheImpl::decrement(const std::string& key, const int& number) {
 	if(internalMap.find(key)!=internalMap.end()) {
 		long long val = CastUtil::lexical_cast<long long>(internalMap[key]) - number;
-		internalMap[key] = CastUtil::lexical_cast<string>(val);
+		internalMap[key] = CastUtil::lexical_cast<std::string>(val);
 		return val;
 	}
 	return -1;
 }
 
-long double MemoryCacheImpl::incrementFloat(const string& key, const double& number) {
+long double MemoryCacheImpl::incrementFloat(const std::string& key, const double& number) {
 	if(internalMap.find(key)!=internalMap.end()) {
 		long double val = CastUtil::lexical_cast<long double>(internalMap[key]) + number;
-		internalMap[key] = CastUtil::lexical_cast<string>(val);
+		internalMap[key] = CastUtil::lexical_cast<std::string>(val);
 		return val;
 	}
 	return -1.0;
 }
 
-long double MemoryCacheImpl::decrementFloat(const string& key, const double& number) {
+long double MemoryCacheImpl::decrementFloat(const std::string& key, const double& number) {
 	if(internalMap.find(key)!=internalMap.end()) {
 		long double val = CastUtil::lexical_cast<long double>(internalMap[key]) - number;
-		internalMap[key] = CastUtil::lexical_cast<string>(val);
+		internalMap[key] = CastUtil::lexical_cast<std::string>(val);
 		return val;
 	}
 	return -1.0;
 }
 
-map<string, string> MemoryCacheImpl::statistics() {
+std::map<std::string, std::string> MemoryCacheImpl::statistics() {
 	return internalMap;
 }
 
@@ -77,7 +77,7 @@ void* MemoryCacheImpl::newConnection(const bool& isWrite, const ConnectionNode& 
 	return NULL;
 }
 
-bool MemoryCacheImpl::setInternal(const string& key, const string& value, const int& expireSeconds, const int& setOrAddOrRep) {
+bool MemoryCacheImpl::setInternal(const std::string& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep) {
 	if(setOrAddOrRep==1)
 	{
 		internalMap[key] = value;
@@ -96,32 +96,32 @@ bool MemoryCacheImpl::setInternal(const string& key, const string& value, const 
 	return false;
 }
 
-string MemoryCacheImpl::getValue(const string& key) {
-	string rval = internalMap[key];
+std::string MemoryCacheImpl::getValue(const std::string& key) {
+	std::string rval = internalMap[key];
 	return rval;
 }
 
-void* MemoryCacheImpl::executeCommand(const string& command, ...) {
+void* MemoryCacheImpl::executeCommand(const std::string& command, ...) {
 	throw "Not Implemented";
 }
 
 void MemoryCacheImpl::closeConnection(void* conn) {
 }
 
-bool MemoryCacheImpl::set(const string& key, GenericObject& value, const int& expireSeconds) {
-	string valueStr = value.getSerilaizedState();
+bool MemoryCacheImpl::set(const std::string& key, GenericObject& value, const int& expireSeconds) {
+	std::string valueStr = value.getSerilaizedState();
 	bool status = setInternal(key, valueStr, expireSeconds, 1);
 	return status;
 }
 
-bool MemoryCacheImpl::add(const string& key, GenericObject& value, const int& expireSeconds) {
-	string valueStr = value.getSerilaizedState();
+bool MemoryCacheImpl::add(const std::string& key, GenericObject& value, const int& expireSeconds) {
+	std::string valueStr = value.getSerilaizedState();
 	bool status = setInternal(key, valueStr, expireSeconds, 2);
 	return status;
 }
 
-bool MemoryCacheImpl::replace(const string& key, GenericObject& value, const int& expireSeconds) {
-	string valueStr = value.getSerilaizedState();
+bool MemoryCacheImpl::replace(const std::string& key, GenericObject& value, const int& expireSeconds) {
+	std::string valueStr = value.getSerilaizedState();
 	bool status = setInternal(key, valueStr, expireSeconds, 3);
 	return status;
 }

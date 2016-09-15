@@ -39,7 +39,7 @@ extern "C" {
 #define BACKLOG 500
 #define MAXBUFLEN 1024
 
-using namespace std;
+
 
 static Logger logger;
 static bool doneOnce = false;
@@ -145,7 +145,7 @@ static char * ngx_http_ffeadcpp(ngx_conf_t *cf, void *post, void *data)
     ffeadcpp_path.data = name->data;
     ffeadcpp_path.len = ngx_strlen(ffeadcpp_path.data);
 	
-	cerr << "FFEAD in ngx_http_ffeadcpp " << name->data << endl;
+	std::cerr << "FFEAD in ngx_http_ffeadcpp " << name->data << std::endl;
 
     return NGX_CONF_OK;
 }
@@ -156,7 +156,7 @@ static char * ngx_http_ffeadcpp(ngx_conf_t *cf, void *post, void *data)
 
 static ngx_int_t ngx_http_ffeadcpp_module_handler(ngx_http_request_t *r)
 {
-	cerr << "FFEAD in ngx_http_ffeadcpp_module_handler" << endl;
+	std::cerr << "FFEAD in ngx_http_ffeadcpp_module_handler" << std::endl;
     ngx_int_t    rc;
     ngx_buf_t   *b;
     ngx_chain_t  out;
@@ -224,10 +224,10 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler(ngx_http_request_t *r)
 
 static ngx_int_t init_module(ngx_cycle_t *cycle)
 {
-	string serverRootDirectory;
+	std::string serverRootDirectory;
 	serverRootDirectory.append(ffeadcpp_path.data, ffeadcpp_path.len);
 	
-	cerr << "FFEAD in init_module " << serverRootDirectory << endl;
+	std::cerr << "FFEAD in init_module " << serverRootDirectory << std::endl;
 	//if(serverRootDirectory=="") {
 	//	serverRootDirectory = fconfig.defpath;
 	//}
@@ -238,25 +238,25 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 		RegexUtil::replace(serverRootDirectory,"[/]+","/");
 	}
 
-	string incpath = serverRootDirectory + "include/";
-	string rtdcfpath = serverRootDirectory + "rtdcf/";
-	string pubpath = serverRootDirectory + "public/";
-	string respath = serverRootDirectory + "resources/";
-	string webpath = serverRootDirectory + "web/";
-	string logpath = serverRootDirectory + "logs/";
-	string resourcePath = respath;
+	std::string incpath = serverRootDirectory + "include/";
+	std::string rtdcfpath = serverRootDirectory + "rtdcf/";
+	std::string pubpath = serverRootDirectory + "public/";
+	std::string respath = serverRootDirectory + "resources/";
+	std::string webpath = serverRootDirectory + "web/";
+	std::string logpath = serverRootDirectory + "logs/";
+	std::string resourcePath = respath;
 
 	PropFileReader pread;
 	propMap srprps = pread.getProperties(respath+"server.prop");
 
-	string servd = serverRootDirectory;
-	string logp = respath+"/logging.xml";
+	std::string servd = serverRootDirectory;
+	std::string logp = respath+"/logging.xml";
 	LoggerFactory::init(logp, serverRootDirectory, "", StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true");
 
 	logger = LoggerFactory::getLogger("MOD_FFEADCPP");
 
 	bool isCompileEnabled = false;
-   	string compileEnabled = srprps["DEV_MODE"];
+   	std::string compileEnabled = srprps["DEV_MODE"];
 	if(compileEnabled=="true" || compileEnabled=="TRUE")
 		isCompileEnabled = true;
 
@@ -273,7 +273,7 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
    		try {
    			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
 		} catch (...) {
-			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << endl;
+			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << std::endl;
 		}
    	}
 
@@ -302,22 +302,22 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
     }
     catch(const XmlParseException& p)
     {
-    	logger << p.getMessage() << endl;
+    	logger << p.getMessage() << std::endl;
     }
     catch(const char* msg)
 	{
-		logger << msg << endl;
+		logger << msg << std::endl;
 	}
 
-    logger << INTER_LIB_FILE << endl;
+    logger << INTER_LIB_FILE << std::endl;
 
     bool libpresent = true;
     void *dlibtemp = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	//logger << endl <<dlibtemp << endl;
+	//logger << endl <<dlibtemp << std::endl;
 	if(dlibtemp==NULL)
 	{
 		libpresent = false;
-		logger << dlerror() << endl;
+		logger << dlerror() << std::endl;
 		logger.info("Could not load Library");
 	}
 	else
@@ -329,59 +329,59 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 
 	if(!libpresent)
 	{
-		string configureFilePath = rtdcfpath+"/autotools/configure";
+		std::string configureFilePath = rtdcfpath+"/autotools/configure";
 		if (access( configureFilePath.c_str(), F_OK ) == -1 )
 		{
-			string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
-			string output = ScriptHandler::execute(compres, true);
-			logger << "Set up configure for intermediate libraries\n\n" << endl;
+			std::string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
+			std::string output = ScriptHandler::execute(compres, true);
+			logger << "Set up configure for intermediate libraries\n\n" << std::endl;
 		}
 
 		if (access( configureFilePath.c_str(), F_OK ) != -1 )
 		{
-			string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+			std::string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
 		#ifdef DEBUG
 			compres += " --enable-debug=yes";
 		#endif
-			string output = ScriptHandler::execute(compres, true);
-			logger << "Set up makefiles for intermediate libraries\n\n" << endl;
-			logger << output << endl;
+			std::string output = ScriptHandler::execute(compres, true);
+			logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
+			logger << output << std::endl;
 
 			compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 			output = ScriptHandler::execute(compres, true);
-			logger << "Intermediate code generation task\n\n" << endl;
-			logger << output << endl;
+			logger << "Intermediate code generation task\n\n" << std::endl;
+			logger << output << std::endl;
 		}
 	}
 
 	void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(checkdlib==NULL)
 	{
-		string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
-		string output = ScriptHandler::execute(compres, true);
-		logger << "Set up configure for intermediate libraries\n\n" << endl;
+		std::string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
+		std::string output = ScriptHandler::execute(compres, true);
+		logger << "Set up configure for intermediate libraries\n\n" << std::endl;
 
 		compres = respath+"rundyn-configure.sh "+serverRootDirectory;
 		#ifdef DEBUG
 			compres += " --enable-debug=yes";
 		#endif
 		output = ScriptHandler::execute(compres, true);
-		logger << "Set up makefiles for intermediate libraries\n\n" << endl;
-		logger << output << endl;
+		logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
+		logger << output << std::endl;
 
 		compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 		if(!libpresent)
 		{
-			string output = ScriptHandler::execute(compres, true);
-			logger << "Rerunning Intermediate code generation task\n\n" << endl;
-			logger << output << endl;
+			std::string output = ScriptHandler::execute(compres, true);
+			logger << "Rerunning Intermediate code generation task\n\n" << std::endl;
+			logger << output << std::endl;
 		}
 		checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	}
 
 	if(checkdlib==NULL)
 	{
-		logger << dlerror() << endl;
+		logger << dlerror() << std::endl;
 		logger.info("Could not load Library");
 		exit(0);
 	}
@@ -394,7 +394,7 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 #ifdef INC_COMP
 	for (unsigned int var1 = 0;var1<ConfigurationData::getInstance()->componentNames.size();var1++)
 	{
-		string name = ConfigurationData::getInstance()->componentNames.at(var1);
+		std::string name = ConfigurationData::getInstance()->componentNames.at(var1);
 		StringUtil::replaceFirst(name,"Component_","");
 		ComponentHandler::registerComponent(name);
 		AppContext::registerComponent(name);
@@ -410,7 +410,7 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 			distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
 		}
 	} catch(...) {
-		logger << ("Invalid poolsize specified for distocache") << endl;
+		logger << ("Invalid poolsize specified for distocache") << std::endl;
 	}
 
 	try {
@@ -418,15 +418,15 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 		{
 			CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
 			DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
-			logger << ("Session store is set to distocache store") << endl;
+			logger << ("Session store is set to distocache store") << std::endl;
 			distocache = true;
 		}
 	} catch(...) {
-		logger << ("Invalid port specified for distocache") << endl;
+		logger << ("Invalid port specified for distocache") << std::endl;
 	}
 
 	if(!distocache) {
-		logger << ("Session store is set to file store") << endl;
+		logger << ("Session store is set to file store") << std::endl;
 	}
 #endif*/
 
@@ -435,15 +435,15 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	JobScheduler::start();
 #endif
 
-	logger << ("Initializing WSDL files....") << endl;
+	logger << ("Initializing WSDL files....") << std::endl;
 	ConfigurationHandler::initializeWsdls();
-	logger << ("Initializing WSDL files done....") << endl;
+	logger << ("Initializing WSDL files done....") << std::endl;
 
 	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	//logger << endl <<dlib << endl;
+	//logger << endl <<dlib << std::endl;
 	if(dlib==NULL)
 	{
-		logger << dlerror() << endl;
+		logger << dlerror() << std::endl;
 		logger.info("Could not load Library");
 		exit(0);
 	}
@@ -454,10 +454,10 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	}
 
 	void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
-	//logger << endl <<dlib << endl;
+	//logger << endl <<dlib << std::endl;
 	if(ddlib==NULL)
 	{
-		logger << dlerror() << endl;
+		logger << dlerror() << std::endl;
 		logger.info("Could not load dynamic Library");
 		exit(0);
 	}
@@ -471,8 +471,8 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 
 static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 {
-	cerr << "FFEAD in init_worker_process" << endl;
-	cerr << "Initializing ffead-cpp....." << endl;
+	std::cerr << "FFEAD in init_worker_process" << std::endl;
+	std::cerr << "Initializing ffead-cpp....." << std::endl;
 #ifdef INC_COMP
 	try {
 		if(srprps["CMP_PORT"]!="")
@@ -484,7 +484,7 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 			}
 		}
 	} catch(...) {
-		logger << ("Component Handler Services are disabled") << endl;
+		logger << ("Component Handler Services are disabled") << std::endl;
 	}
 #endif
 
@@ -499,7 +499,7 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 			}
 		}
 	} catch(...) {
-		logger << ("Messaging Handler Services are disabled") << endl;
+		logger << ("Messaging Handler Services are disabled") << std::endl;
 	}
 #endif
 
@@ -514,25 +514,25 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 			}
 		}
 	} catch(...) {
-		logger << ("Method Invoker Services are disabled") << endl;
+		logger << ("Method Invoker Services are disabled") << std::endl;
 	}
 #endif
 
 #ifdef INC_SDORM
-	logger << ("Initializing DataSources....") << endl;
+	logger << ("Initializing DataSources....") << std::endl;
 	ConfigurationHandler::initializeDataSources();
-	logger << ("Initializing DataSources done....") << endl;
+	logger << ("Initializing DataSources done....") << std::endl;
 #endif
 
-	logger << ("Initializing Caches....") << endl;
+	logger << ("Initializing Caches....") << std::endl;
 	ConfigurationHandler::initializeCaches();
-	logger << ("Initializing Caches done....") << endl;
+	logger << ("Initializing Caches done....") << std::endl;
 
 	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
-	logger << ("Initializing ffeadContext....") << endl;
+	logger << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
-	logger << ("Initializing ffeadContext done....") << endl;
+	logger << ("Initializing ffeadContext done....") << std::endl;
 }
 
 static ngx_int_t exit_process(ngx_cycle_t *cycle)

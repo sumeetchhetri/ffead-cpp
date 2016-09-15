@@ -34,7 +34,7 @@ MarkerDview::~MarkerDview() {
 
 void MarkerDview::getDocument(Document* doc)
 {
-	string xml = "<html><head><script src=\"1.js\"></script></head><body><input type=\"text\"/><input type=\"submit\"/></body></html>";
+	std::string xml = "<html><head><script src=\"1.js\"></script></head><body><input type=\"text\"/><input type=\"submit\"/></body></html>";
 	XmlParser parser("Parser");
 	parser.parse(xml, *doc);
 }

@@ -56,19 +56,19 @@
 #include "CommonUtils.h"
 
 class ConfigurationHandler {
-	static Marker getRestFunctionMarker(map<string, vector<Marker> >& markers);
-	static Marker getRestFunctionParamMarker(map<string, vector<Marker> >& markers);
-	static void handleRestControllerMarker(ClassStructure& cs, const string& appName);
-	static void handleMarkerConfigurations(map<string, map<string, ClassStructure> >& clsstrucMaps, vector<WsDetails>& wsdvec, vector<bool>& stat, strVec& vecvp, strVec& pathvec, map<string, string>& ajintpthMap, map<string, string>& tpes, const string& serverRootDirectory, strVec& afcd, string& ajrt, Reflection& ref);
-	static void handleDataSourceEntities(const string& appName, map<string, Mapping>& mappings, map<string, ClassStructure>& allclsmap);
+	static Marker getRestFunctionMarker(std::map<std::string, std::vector<Marker> >& markers);
+	static Marker getRestFunctionParamMarker(std::map<std::string, std::vector<Marker> >& markers);
+	static void handleRestControllerMarker(ClassStructure& cs, const std::string& appName);
+	static void handleMarkerConfigurations(std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps, std::vector<WsDetails>& wsdvec, std::vector<bool>& stat, strVec& vecvp, strVec& pathvec, std::map<std::string, std::string>& ajintpthMap, std::map<std::string, std::string>& tpes, const std::string& serverRootDirectory, strVec& afcd, std::string& ajrt, Reflection& ref);
+	static void handleDataSourceEntities(const std::string& appName, std::map<std::string, Mapping>& mappings, std::map<std::string, ClassStructure>& allclsmap);
 public:
 	ConfigurationHandler();
 	virtual ~ConfigurationHandler();
-	static void handle(strVec webdirs, const strVec& webdirs1, const string& incpath, const string& rtdcfpath, const string& serverRootDirectory, const string& respath);
-	//static void listi(const string& cwd, const string& type, const bool& apDir, strVec &folders, const bool& showHidden);
-	static void configureDataSources(const string& name, const string& configFile, map<string, ClassStructure>& allclsmap);
+	static void handle(strVec webdirs, const strVec& webdirs1, const std::string& incpath, const std::string& rtdcfpath, const std::string& serverRootDirectory, const std::string& respath);
+	//static void listi(const std::string& cwd, const std::string& type, const bool& apDir, strVec &folders, const bool& showHidden);
+	static void configureDataSources(const std::string& name, const std::string& configFile, std::map<std::string, ClassStructure>& allclsmap);
 	static void destroyDataSources();
-	static void configureCaches(const string& name, const string& configFile);
+	static void configureCaches(const std::string& name, const std::string& configFile);
 	static void destroyCaches();
 	static void initializeDataSources();
 	static void initializeCaches();

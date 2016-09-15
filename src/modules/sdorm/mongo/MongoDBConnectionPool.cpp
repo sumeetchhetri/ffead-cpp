@@ -9,7 +9,7 @@
 
 MongoDBConnectionPool::MongoDBConnectionPool(const ConnectionProperties& props) {
 	logger = LoggerFactory::getLogger("SQLConnectionPool");
-	map<string, string> mp = props.getProperties();
+	std::map<std::string, std::string> mp = props.getProperties();
 	isReplicaSet = StringUtil::toLowerCopy(mp["isReplicaSet"])=="true";
 	isSSL = StringUtil::toLowerCopy(mp["isSSL"])=="true";
 	isUnixDomainSocket = StringUtil::toLowerCopy(mp["isUnixDomainSocket"])=="true";
@@ -22,7 +22,7 @@ void MongoDBConnectionPool::initEnv() {
 	mongoc_init();
 
 	ConnectionProperties props = getProperties();
-	string connectionString = "";
+	std::string connectionString = "";
 
 	if(isUnixDomainSocket)
 	{
@@ -37,8 +37,8 @@ void MongoDBConnectionPool::initEnv() {
 	}
 	else
 	{
-		string databaseName = "";
-		cout << props.getNodes().size() << endl;
+		std::string databaseName = "";
+		std::cout << props.getNodes().size() << std::endl;
 		for (int var = 0; var < (int)props.getNodes().size(); ++var) {
 			if(databaseName=="") {
 				databaseName = props.getNodes().at(var).getDatabaseName();
@@ -51,12 +51,12 @@ void MongoDBConnectionPool::initEnv() {
 				port = 27017;
 			}
 
-			cout << props.getNodes().at(var).getHost() << endl;
+			std::cout << props.getNodes().at(var).getHost() << std::endl;
 			if(props.getNodes().at(var).getUsername()!="" && props.getNodes().at(var).getPassword()!="") {
 				connectionString += (props.getNodes().at(var).getUsername() + ":" +
 						props.getNodes().at(var).getPassword() + "@");
 			}
-			connectionString += props.getNodes().at(var).getHost() + ":" + CastUtil::lexical_cast<string>(port);
+			connectionString += props.getNodes().at(var).getHost() + ":" + CastUtil::lexical_cast<std::string>(port);
 			if(var!=(int)props.getNodes().size()-1) {
 				connectionString += ",";
 			}
@@ -92,15 +92,15 @@ void MongoDBConnectionPool::initEnv() {
 	}
 
 	if(connectionString.at(connectionString.length()-1)=='?') {
-		connectionString += "minPoolSize=" + CastUtil::lexical_cast<string>(poolmin);
+		connectionString += "minPoolSize=" + CastUtil::lexical_cast<std::string>(poolmin);
 	} else {
-		connectionString += "&minPoolSize=" + CastUtil::lexical_cast<string>(poolmin);
+		connectionString += "&minPoolSize=" + CastUtil::lexical_cast<std::string>(poolmin);
 	}
-	connectionString += "&maxPoolSize=" + CastUtil::lexical_cast<string>(poolmax);
+	connectionString += "&maxPoolSize=" + CastUtil::lexical_cast<std::string>(poolmax);
 
 	connectionString = "mongodb://" + connectionString;
 
-	cout << connectionString << endl;
+	std::cout << connectionString << std::endl;
 
 	uri = mongoc_uri_new(connectionString.c_str());
 	mongoc_client_pool_t *pool = mongoc_client_pool_new(uri);
@@ -111,7 +111,7 @@ void MongoDBConnectionPool::initEnv() {
 void* MongoDBConnectionPool::newConnection(const bool& isWrite, const ConnectionNode& node) {
 	mongoc_client_pool_t *pool = (mongoc_client_pool_t*)getEnv();
 	mongoc_client_t *client = mongoc_client_pool_pop(pool);
-	cout << client << endl;
+	std::cout << client << std::endl;
 	return client;
 }
 

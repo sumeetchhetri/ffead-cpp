@@ -33,93 +33,93 @@ DefaultRestController::~DefaultRestController() {
 
 int DefaultRestController::addNumbers(int a, int b)
 {
-	cout << "Processed input request inside DefaultRestController for addNumbers..." << endl;
+	std::cout << "Processed input request inside DefaultRestController for addNumbers..." << std::endl;
 	return a + b;
 }
 
 double DefaultRestController::power(int base, int exponent)
 {
-	cout << "Processed input request inside DefaultRestController for power..." << endl;
+	std::cout << "Processed input request inside DefaultRestController for power..." << std::endl;
 	return pow((double)base, (double)exponent);
 }
 
-vector<int> DefaultRestController::testVector(vector<int> param)
+std::vector<int> DefaultRestController::testVector(std::vector<int> param)
 {
-	cout << "Processed input request inside DefaultRestController for testVector..." << endl;
+	std::cout << "Processed input request inside DefaultRestController for testVector..." << std::endl;
 	return param;
 }
 
 TestMany DefaultRestController::testObject(TestMany testMany)
 {
-	cout << "Processed input request inside DefaultRestController for testObject..." << endl;
+	std::cout << "Processed input request inside DefaultRestController for testObject..." << std::endl;
 	return testMany;
 }
 
 
-vector<TestMany> DefaultRestController::testVectorObject(vector<TestMany> param)
+std::vector<TestMany> DefaultRestController::testVectorObject(std::vector<TestMany> param)
 {
-	cout << "Processed input request inside DefaultRestController for testVectorObject..." << endl;
+	std::cout << "Processed input request inside DefaultRestController for testVectorObject..." << std::endl;
 	return param;
 }
 
-string DefaultRestController::testUploadFile(ifstream* ifs, string param)
+std::string DefaultRestController::testUploadFile(std::ifstream* ifs, std::string param)
 {
-	string vals;
+	std::string vals;
 	unsigned int siz = 0;
 	if (ifs!=NULL && ifs->is_open())
 	{
-		ifs->seekg(0, ios::end);
+		ifs->seekg(0, std::ios::end);
 		siz = ifs->tellg();
 	}
-	vals = "Uploaded File Size = " + CastUtil::lexical_cast<string>(siz);
+	vals = "Uploaded File Size = " + CastUtil::lexical_cast<std::string>(siz);
 	vals += "\nField value passed = " + param;
-	cout << "Processed input request inside DefaultRestController for testUploadFile..." << endl;
+	std::cout << "Processed input request inside DefaultRestController for testUploadFile..." << std::endl;
 	return vals;
 }
 
-string DefaultRestController::testUploadFileMulti1(ifstream* ifs1, ifstream* ifs2, ifstream* ifs3, string param)
+std::string DefaultRestController::testUploadFileMulti1(std::ifstream* ifs1, std::ifstream* ifs2, std::ifstream* ifs3, std::string param)
 {
-	string vals;
+	std::string vals;
 	unsigned int siz = 0;
 	if (ifs1!=NULL && ifs1->is_open())
 	{
-		ifs1->seekg(0, ios::end);
+		ifs1->seekg(0, std::ios::end);
 		siz = ifs1->tellg();
 	}
-	vals = "Uploaded File1 Size = " + CastUtil::lexical_cast<string>(siz);
+	vals = "Uploaded File1 Size = " + CastUtil::lexical_cast<std::string>(siz);
 	siz = 0;
 	if (ifs2!=NULL && ifs2->is_open())
 	{
-		ifs2->seekg(0, ios::end);
+		ifs2->seekg(0, std::ios::end);
 		siz = ifs2->tellg();
 	}
-	vals += "\nUploaded File2 Size = " + CastUtil::lexical_cast<string>(siz);
+	vals += "\nUploaded File2 Size = " + CastUtil::lexical_cast<std::string>(siz);
 	siz = 0;
 	if (ifs3!=NULL && ifs3->is_open())
 	{
-		ifs3->seekg(0, ios::end);
+		ifs3->seekg(0, std::ios::end);
 		siz = ifs3->tellg();
 	}
-	vals += "\nUploaded File3 Size = " + CastUtil::lexical_cast<string>(siz);
+	vals += "\nUploaded File3 Size = " + CastUtil::lexical_cast<std::string>(siz);
 	vals += "\nField value passed = " + param;
-	cout << "Processed input request inside DefaultRestController for testUploadFileMulti1..." << endl;
+	std::cout << "Processed input request inside DefaultRestController for testUploadFileMulti1..." << std::endl;
 	return vals;
 }
 
-string DefaultRestController::testUploadFileMulti2(vector<ifstream*> vifs, string param)
+std::string DefaultRestController::testUploadFileMulti2(std::vector<std::ifstream*> vifs, std::string param)
 {
-	string vals;
+	std::string vals;
 	for(int i=0;i<(int)vifs.size();++i) {
-		ifstream* ifs = vifs.at(i);
+		std::ifstream* ifs = vifs.at(i);
 		unsigned int siz = 0;
 		if (ifs!=NULL && ifs->is_open())
 		{
-			ifs->seekg(0, ios::end);
+			ifs->seekg(0, std::ios::end);
 			siz = ifs->tellg();
 		}
-		vals += "Uploaded File" + CastUtil::lexical_cast<string>(i) + " Size = " + CastUtil::lexical_cast<string>(siz) + "\n";
+		vals += "Uploaded File" + CastUtil::lexical_cast<std::string>(i) + " Size = " + CastUtil::lexical_cast<std::string>(siz) + "\n";
 	}
 	vals += "Field value passed = " + param;
-	cout << "Processed input request inside DefaultRestController for testUploadFileMulti2..." << endl;
+	std::cout << "Processed input request inside DefaultRestController for testUploadFileMulti2..." << std::endl;
 	return vals;
 }

@@ -31,108 +31,108 @@
 #include "set"
 #include "list"
 class TestSTLs {
-	list<int> vpli;
-	vector<int> vpvi;
-	set<int> vpls;
-	multiset<int> vpmsi;
+	std::list<int> vpli;
+	std::vector<int> vpvi;
+	std::set<int> vpls;
+	std::multiset<int> vpmsi;
 	std::queue<int> vpqi;
-	deque<int> vpdi;
+	std::deque<int> vpdi;
 
-	list<int>* vppli;
-	vector<int>* vppvi;
-	set<int>* vppls;
-	multiset<int>* vppmsi;
+	std::list<int>* vppli;
+	std::vector<int>* vppvi;
+	std::set<int>* vppls;
+	std::multiset<int>* vppmsi;
 	std::queue<int>* vppqi;
-	deque<int>* vppdi;
+	std::deque<int>* vppdi;
 public:
 	int mi;
 
-	list<int> vli;
-	list<string> vls;
-	list<double> vld;
-	list<long> vll;
-	list<bool> vlb;
-	list<short> vlsh;
-	list<YObject> vlyo;
+	std::list<int> vli;
+	std::list<std::string> vls;
+	std::list<double> vld;
+	std::list<long> vll;
+	std::list<bool> vlb;
+	std::list<short> vlsh;
+	std::list<YObject> vlyo;
 
-	vector<int> vvi;
-	vector<string> vvs;
-	vector<double> vvd;
-	vector<long> vvl;
-	vector<bool> vvb;
-	vector<short> vvsh;
-	vector<YObject> vvyo;
+	std::vector<int> vvi;
+	std::vector<std::string> vvs;
+	std::vector<double> vvd;
+	std::vector<long> vvl;
+	std::vector<bool> vvb;
+	std::vector<short> vvsh;
+	std::vector<YObject> vvyo;
 
-	deque<int> vdi;
-	deque<string> vds;
-	deque<double> vdd;
-	deque<long> vdl;
-	deque<bool> vdb;
-	deque<short> vdsh;
-	deque<YObject> vdyo;
+	std::deque<int> vdi;
+	std::deque<std::string> vds;
+	std::deque<double> vdd;
+	std::deque<long> vdl;
+	std::deque<bool> vdb;
+	std::deque<short> vdsh;
+	std::deque<YObject> vdyo;
 
-	set<int> vsi;
-	set<string> vss;
-	set<double> vsd;
-	set<long> vsl;
-	set<short> vssh;
-	set<Test> vsyo;
+	std::set<int> vsi;
+	std::set<std::string> vss;
+	std::set<double> vsd;
+	std::set<long> vsl;
+	std::set<short> vssh;
+	std::set<Test> vsyo;
 
-	multiset<int> vmsi;
-	multiset<string> vmss;
-	multiset<double> vmsd;
-	multiset<long> vmsl;
-	multiset<short> vmssh;
-	multiset<Test> vmsyo;
+	std::multiset<int> vmsi;
+	std::multiset<std::string> vmss;
+	std::multiset<double> vmsd;
+	std::multiset<long> vmsl;
+	std::multiset<short> vmssh;
+	std::multiset<Test> vmsyo;
 
 	std::queue<int> vqi;
-	std::queue<string> vqs;
+	std::queue<std::string> vqs;
 	std::queue<double> vqd;
 	std::queue<long> vql;
 	std::queue<bool> vqb;
 	std::queue<short> vqsh;
 	std::queue<YObject> vqyo;
 
-	list<int>* vpppli;
-	list<string>* vpppls;
-	list<double>* vpppld;
-	list<long>* vpppll;
-	list<bool>* vppplb;
-	list<short>* vppplsh;
-	list<YObject>* vppplyo;
+	std::list<int>* vpppli;
+	std::list<std::string>* vpppls;
+	std::list<double>* vpppld;
+	std::list<long>* vpppll;
+	std::list<bool>* vppplb;
+	std::list<short>* vppplsh;
+	std::list<YObject>* vppplyo;
 
-	vector<int>* vpppvi;
-	vector<string>* vpppvs;
-	vector<double>* vpppvd;
-	vector<long>* vpppvl;
-	vector<bool>* vpppvb;
-	vector<short>* vpppvsh;
-	vector<YObject>* vpppvyo;
+	std::vector<int>* vpppvi;
+	std::vector<std::string>* vpppvs;
+	std::vector<double>* vpppvd;
+	std::vector<long>* vpppvl;
+	std::vector<bool>* vpppvb;
+	std::vector<short>* vpppvsh;
+	std::vector<YObject>* vpppvyo;
 
-	deque<int>* vpppdi;
-	deque<string>* vpppds;
-	deque<double>* vpppdd;
-	deque<long>* vpppdl;
-	deque<bool>* vpppdb;
-	deque<short>* vpppdsh;
-	deque<YObject>* vpppdyo;
+	std::deque<int>* vpppdi;
+	std::deque<std::string>* vpppds;
+	std::deque<double>* vpppdd;
+	std::deque<long>* vpppdl;
+	std::deque<bool>* vpppdb;
+	std::deque<short>* vpppdsh;
+	std::deque<YObject>* vpppdyo;
 
-	set<int>* vpppsi;
-	set<string>* vpppss;
-	set<double>* vpppsd;
-	set<long>* vpppsl;
-	set<short>* vpppssh;
-	set<Test>* vpppsyo;
+	std::set<int>* vpppsi;
+	std::set<std::string>* vpppss;
+	std::set<double>* vpppsd;
+	std::set<long>* vpppsl;
+	std::set<short>* vpppssh;
+	std::set<Test>* vpppsyo;
 
-	multiset<int>* vpppmsi;
-	multiset<string>* vpppmss;
-	multiset<double>* vpppmsd;
-	multiset<long>* vpppmsl;
-	multiset<short>* vpppmssh;
-	multiset<Test>* vpppmsyo;
+	std::multiset<int>* vpppmsi;
+	std::multiset<std::string>* vpppmss;
+	std::multiset<double>* vpppmsd;
+	std::multiset<long>* vpppmsl;
+	std::multiset<short>* vpppmssh;
+	std::multiset<Test>* vpppmsyo;
 
 	std::queue<int>* vpppqi;
-	std::queue<string>* vpppqs;
+	std::queue<std::string>* vpppqs;
 	std::queue<double>* vpppqd;
 	std::queue<long>* vpppql;
 	std::queue<bool>* vpppqb;
@@ -143,42 +143,42 @@ public:
 
 	YObject yobject;
 public:
-	deque<int> getVpdi() const
+	std::deque<int> getVpdi() const
 	{
 		return vpdi;
 	}
 
-	void setVpdi(deque<int> vpdi)
+	void setVpdi(std::deque<int> vpdi)
 	{
 		this->vpdi = vpdi;
 	}
 
-	list<int> getVpli() const
+	std::list<int> getVpli() const
 	{
 		return vpli;
 	}
 
-	void setVpli(list<int> vpli)
+	void setVpli(std::list<int> vpli)
 	{
 		this->vpli = vpli;
 	}
 
-	set<int> getVpls() const
+	std::set<int> getVpls() const
 	{
 		return vpls;
 	}
 
-	void setVpls(set<int> vpls)
+	void setVpls(std::set<int> vpls)
 	{
 		this->vpls = vpls;
 	}
 
-	multiset<int> getVpmsi() const
+	std::multiset<int> getVpmsi() const
 	{
 		return vpmsi;
 	}
 
-	void setVpmsi(multiset<int> vpmsi)
+	void setVpmsi(std::multiset<int> vpmsi)
 	{
 		this->vpmsi = vpmsi;
 	}
@@ -193,45 +193,45 @@ public:
 		this->vpqi = vpqi;
 	}
 
-	vector<int> getVpvi() const
+	std::vector<int> getVpvi() const
 	{
 		return vpvi;
 	}
 
-	void setVpvi(vector<int> vpvi)
+	void setVpvi(std::vector<int> vpvi)
 	{
 		this->vpvi = vpvi;
 	}
 
-	deque<int>* getVppdi() const {
+	std::deque<int>* getVppdi() const {
 		return vppdi;
 	}
 
-	void setVppdi(deque<int>* vppdi) {
+	void setVppdi(std::deque<int>* vppdi) {
 		this->vppdi = vppdi;
 	}
 
-	list<int>* getVppli() const {
+	std::list<int>* getVppli() const {
 		return vppli;
 	}
 
-	void setVppli(list<int>* vppli) {
+	void setVppli(std::list<int>* vppli) {
 		this->vppli = vppli;
 	}
 
-	set<int>* getVppls() const {
+	std::set<int>* getVppls() const {
 		return vppls;
 	}
 
-	void setVppls(set<int>* vppls) {
+	void setVppls(std::set<int>* vppls) {
 		this->vppls = vppls;
 	}
 
-	multiset<int>* getVppmsi() const {
+	std::multiset<int>* getVppmsi() const {
 		return vppmsi;
 	}
 
-	void setVppmsi(multiset<int>* vppmsi) {
+	void setVppmsi(std::multiset<int>* vppmsi) {
 		this->vppmsi = vppmsi;
 	}
 
@@ -243,11 +243,11 @@ public:
 		this->vppqi = vppqi;
 	}
 
-	vector<int>* getVppvi() const {
+	std::vector<int>* getVppvi() const {
 		return vppvi;
 	}
 
-	void setVppvi(vector<int>* vppvi) {
+	void setVppvi(std::vector<int>* vppvi) {
 		this->vppvi = vppvi;
 	}
 
@@ -264,126 +264,126 @@ public:
 	{
 	}
 
-	string toString()
+	std::string toString()
 	{
-		string str;
+		std::string str;
 		for (int var = 0; var < (int)vvi.size(); ++var) {
-			str += CastUtil::lexical_cast<string>(vvi.at(var));
+			str += CastUtil::lexical_cast<std::string>(vvi.at(var));
 		}
 		for (int var = 0; var < (int)vvsh.size(); ++var) {
-			str += CastUtil::lexical_cast<string>(vvsh.at(var));
+			str += CastUtil::lexical_cast<std::string>(vvsh.at(var));
 		}
 		for (int var = 0; var < (int)vvl.size(); ++var) {
-			str += CastUtil::lexical_cast<string>(vvl.at(var));
+			str += CastUtil::lexical_cast<std::string>(vvl.at(var));
 		}
 		for (int var = 0; var < (int)vvd.size(); ++var) {
-			str += CastUtil::lexical_cast<string>(vvd.at(var));
+			str += CastUtil::lexical_cast<std::string>(vvd.at(var));
 		}
 		for (int var = 0; var < (int)vvb.size(); ++var) {
-			str += CastUtil::lexical_cast<string>(vvb.at(var));
+			str += CastUtil::lexical_cast<std::string>(vvb.at(var));
 		}
 		for (int var = 0; var < (int)vvs.size(); ++var) {
-			str += CastUtil::lexical_cast<string>(vvs.at(var));
+			str += CastUtil::lexical_cast<std::string>(vvs.at(var));
 		}
 
-		for (list<int>::iterator it=vli.begin();it!=vli.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::list<int>::iterator it=vli.begin();it!=vli.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (list<short>::iterator it=vlsh.begin();it!=vlsh.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::list<short>::iterator it=vlsh.begin();it!=vlsh.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (list<long>::iterator it=vll.begin();it!=vll.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::list<long>::iterator it=vll.begin();it!=vll.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (list<double>::iterator it=vld.begin();it!=vld.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::list<double>::iterator it=vld.begin();it!=vld.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (list<bool>::iterator it=vlb.begin();it!=vlb.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::list<bool>::iterator it=vlb.begin();it!=vlb.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (list<string>::iterator it=vls.begin();it!=vls.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
-		}
-
-		for (set<int>::iterator it=vsi.begin();it!=vsi.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
-		}
-		for (set<short>::iterator it=vssh.begin();it!=vssh.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
-		}
-		for (set<long>::iterator it=vsl.begin();it!=vsl.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
-		}
-		for (set<double>::iterator it=vsd.begin();it!=vsd.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
-		}
-		for (set<string>::iterator it=vss.begin();it!=vss.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::list<std::string>::iterator it=vls.begin();it!=vls.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
 
-		for (multiset<int>::iterator it=vmsi.begin();it!=vmsi.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::set<int>::iterator it=vsi.begin();it!=vsi.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (multiset<short>::iterator it=vmssh.begin();it!=vmssh.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::set<short>::iterator it=vssh.begin();it!=vssh.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (multiset<long>::iterator it=vmsl.begin();it!=vmsl.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::set<long>::iterator it=vsl.begin();it!=vsl.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (multiset<double>::iterator it=vmsd.begin();it!=vmsd.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::set<double>::iterator it=vsd.begin();it!=vsd.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (multiset<string>::iterator it=vmss.begin();it!=vmss.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::set<std::string>::iterator it=vss.begin();it!=vss.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
 
-		for (deque<int>::iterator it=vdi.begin();it!=vdi.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::multiset<int>::iterator it=vmsi.begin();it!=vmsi.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (deque<short>::iterator it=vdsh.begin();it!=vdsh.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::multiset<short>::iterator it=vmssh.begin();it!=vmssh.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (deque<long>::iterator it=vdl.begin();it!=vdl.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::multiset<long>::iterator it=vmsl.begin();it!=vmsl.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (deque<double>::iterator it=vdd.begin();it!=vdd.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::multiset<double>::iterator it=vmsd.begin();it!=vmsd.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (deque<bool>::iterator it=vdb.begin();it!=vdb.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+		for (std::multiset<std::string>::iterator it=vmss.begin();it!=vmss.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
-		for (deque<string>::iterator it=vds.begin();it!=vds.end();it++) {
-			str += CastUtil::lexical_cast<string>(*it);
+
+		for (std::deque<int>::iterator it=vdi.begin();it!=vdi.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
+		}
+		for (std::deque<short>::iterator it=vdsh.begin();it!=vdsh.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
+		}
+		for (std::deque<long>::iterator it=vdl.begin();it!=vdl.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
+		}
+		for (std::deque<double>::iterator it=vdd.begin();it!=vdd.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
+		}
+		for (std::deque<bool>::iterator it=vdb.begin();it!=vdb.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
+		}
+		for (std::deque<std::string>::iterator it=vds.begin();it!=vds.end();it++) {
+			str += CastUtil::lexical_cast<std::string>(*it);
 		}
 
 		std::queue<int> temp = vqi;
 		while (!temp.empty()) {
-			str += CastUtil::lexical_cast<string>(temp.front());
+			str += CastUtil::lexical_cast<std::string>(temp.front());
 			temp.pop();
 		}
 		std::queue<short> tempsh = vqsh;
 		while (!tempsh.empty()) {
-			str += CastUtil::lexical_cast<string>(tempsh.front());
+			str += CastUtil::lexical_cast<std::string>(tempsh.front());
 			tempsh.pop();
 		}
 		std::queue<long> templ = vql;
 		while (!templ.empty()) {
-			str += CastUtil::lexical_cast<string>(templ.front());
+			str += CastUtil::lexical_cast<std::string>(templ.front());
 			templ.pop();
 		}
 		std::queue<double> tempd = vqd;
 		while (!tempd.empty()) {
-			str += CastUtil::lexical_cast<string>(tempd.front());
+			str += CastUtil::lexical_cast<std::string>(tempd.front());
 			tempd.pop();
 		}
 		std::queue<bool> tempb = vqb;
 		while (!tempb.empty()) {
-			str += CastUtil::lexical_cast<string>(tempb.front());
+			str += CastUtil::lexical_cast<std::string>(tempb.front());
 			tempb.pop();
 		}
-		std::queue<string> temps = vqs;
+		std::queue<std::string> temps = vqs;
 		while (!temps.empty()) {
-			str += CastUtil::lexical_cast<string>(temps.front());
+			str += CastUtil::lexical_cast<std::string>(temps.front());
 			temps.pop();
 		}
 		return str;

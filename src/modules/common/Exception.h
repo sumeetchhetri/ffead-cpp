@@ -24,18 +24,18 @@
 #define CHSEXCEPTION_H_
 #include <exception>
 #include "string"
-using namespace std;
 
-class Exception : public exception {
+
+class Exception : public std::exception {
 public:
 	Exception();
-	Exception(const string&);
+	Exception(const std::string&);
 	virtual ~Exception() throw();
 	const char* what() throw();
-	const string& getMessage() const;
-    void setMessage(const string&);
+	const std::string& getMessage() const;
+    void setMessage(const std::string&);
 private:
-	string message;
+	std::string message;
 };
 
 #endif /* EXCEPTION_H_ */

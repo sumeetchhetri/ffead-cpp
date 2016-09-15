@@ -32,8 +32,8 @@
 typedef ClassInfo (*FunPtr) ();
 
 class SecurityHandler {
-	static string isLoginPage(const string& cntxtName, const string& actUrl);
-	static string validateSecurePath(const string& cntxtName, const string& actUrl, const string& username);
+	static std::string isLoginPage(const std::string& cntxtName, const std::string& actUrl);
+	static std::string validateSecurePath(const std::string& cntxtName, const std::string& actUrl, const std::string& username);
 	static void populateAuthDetails(HttpRequest* req);
 	friend class ServiceTask;
 public:

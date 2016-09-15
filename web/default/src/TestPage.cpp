@@ -31,7 +31,7 @@ TestPage::~TestPage() {
 	// TODO Auto-generated destructor stub
 }
 
-string TestPage::textonclick(int a,string b,string c)
+std::string TestPage::textonclick(int a,std::string b,std::string c)
 {
 	return "Test Successfull" + b + c;
 }

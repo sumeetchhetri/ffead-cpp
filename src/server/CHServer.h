@@ -153,8 +153,8 @@
 
 typedef bool (*FunPtr1) (void *);
 typedef ClassInfo (*FunPtr) ();
-typedef void* (*toVoidP) (const string&);
-typedef string (*DCPPtr) ();
+typedef void* (*toVoidP) (const std::string&);
+typedef std::string (*DCPPtr) ();
 typedef void (*ReceiveTask1)(const int&);
 
 #if defined(OS_MINGW)
@@ -168,7 +168,7 @@ static inline int waitpid(const pid_t& pid, int *status, const unsigned& options
 }
 #endif
 
-using namespace std;
+
 
 class CHServer {
 	static int techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize;
@@ -178,8 +178,8 @@ public:
 	static SocketInterface* createSocketInterface(SocketUtil* sockUtil);
 	static Logger& getLogger();
 	static void* dynamic_page_monitor(void* arg);
-	static void serve(string port, string ipaddr, int thrdpsiz, string serverRootDirectory, propMap sprops, int vhostNumber);
-	static int entryPoint(int vhostNum, bool isMain, string serverRootDirectory, string port, string ipaddr, vector<string> servedAppNames);
+	static void serve(std::string port, std::string ipaddr, int thrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber);
+	static int entryPoint(int vhostNum, bool isMain, std::string serverRootDirectory, std::string port, std::string ipaddr, std::vector<std::string> servedAppNames);
 };
 
 #endif /* CHSERVER_H_ */

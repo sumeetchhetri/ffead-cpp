@@ -14,11 +14,11 @@ Http2PushPromiseFrame::Http2PushPromiseFrame() {
 	promisedStreamId = -1;
 }
 
-const string& Http2PushPromiseFrame::getHeaderBlockFragment() const {
+const std::string& Http2PushPromiseFrame::getHeaderBlockFragment() const {
 	return headerBlockFragment;
 }
 
-const string& Http2PushPromiseFrame::getPadding() const {
+const std::string& Http2PushPromiseFrame::getPadding() const {
 	return padding;
 }
 
@@ -30,7 +30,7 @@ int Http2PushPromiseFrame::getPromisedStreamId() const {
 	return promisedStreamId;
 }
 
-Http2PushPromiseFrame::Http2PushPromiseFrame(string data, Http2FrameHeader& aheader) {
+Http2PushPromiseFrame::Http2PushPromiseFrame(std::string data, Http2FrameHeader& aheader) {
 	header = aheader;
 	header.type = 5;
 	padLength = data.at(0);
@@ -53,10 +53,10 @@ Http2PushPromiseFrame::~Http2PushPromiseFrame() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http2PushPromiseFrame::getFrameData() {
-	string edata;
+std::string Http2PushPromiseFrame::getFrameData() {
+	std::string edata;
 	edata.push_back(padLength);
-	string data = CommonUtils::ulonglongTocharArray(promisedStreamId, 4);
+	std::string data = CommonUtils::ulonglongTocharArray(promisedStreamId, 4);
 	if(reserved)
 		data[0] |= 0x01 << 0;
 	else

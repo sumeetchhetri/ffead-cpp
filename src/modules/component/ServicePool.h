@@ -29,17 +29,17 @@
 #include "vector"
 #include "Service.h"
 #include "CastUtil.h"
-using namespace std;
+
 class ServicePool {
 private:
 	ServicePool();
     virtual ~ServicePool();
 public:
     static ServicePool* getInstance();
-    static string registerService(const string& name, const Service& service);// will return a unique identification for this service
-    static bool unRegisterService(const string& id);//unregister will require the unique id
-    static vector<string> getServices(const string&);//return a list of available services
-    Service getService(const string&);//return a service
+    static std::string registerService(const std::string& name, const Service& service);// will return a unique identification for this service
+    static bool unRegisterService(const std::string& id);//unregister will require the unique id
+    static std::vector<std::string> getServices(const std::string&);//return a list of available services
+    Service getService(const std::string&);//return a service
 };
 
 #endif /* SERVICEPOOL_H_ */

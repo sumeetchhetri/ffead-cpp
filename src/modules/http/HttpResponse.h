@@ -36,11 +36,11 @@
 #include "DateFormat.h"
 #include "CommonUtils.h"
 
-using namespace std;
-typedef vector<unsigned char> Cont;
+
+typedef std::vector<unsigned char> Cont;
 class HttpResponse {
 public:
-	static string AccessControlAllowOrigin,AccessControlAllowHeaders,AccessControlAllowCredentials,
+	static std::string AccessControlAllowOrigin,AccessControlAllowHeaders,AccessControlAllowCredentials,
 				  AccessControlAllowMethods,AccessControlMaxAge,AcceptRanges,Age,Allow,CacheControl,
 				  Connection,ContentEncoding,ContentLanguage,ContentLength,ContentLocation,ContentMD5,
 				  ContentDisposition,ContentRange,ContentType,DateHeader,ETag,Expires,LastModified,Link,
@@ -49,65 +49,65 @@ public:
 				  Upgrade,SecWebSocketAccept,SecWebSocketVersion,AltSvc;
 	HttpResponse();
 	virtual ~HttpResponse();
-    string getHttpVersion() const;
+    std::string getHttpVersion() const;
     void setHTTPResponseStatus(const HTTPResponseStatus& status);
-    string getStatusCode() const;
-    void setStatusCode(const string& statusCode);
-    string getStatusMsg() const;
-    void setStatusMsg(const string& statusMsg);
-    string getContent() const;
+    std::string getStatusCode() const;
+    void setStatusCode(const std::string& statusCode);
+    std::string getStatusMsg() const;
+    void setStatusMsg(const std::string& statusMsg);
+    std::string getContent() const;
 	//void setContent(const Cont& content);
-	void setContent(const string& content);
-	void addCookie(const string& cookie);
+	void setContent(const std::string& content);
+	void addCookie(const std::string& cookie);
     void addContent(const MultipartContent& content);
-    void addHeaderValue(string header, const string& value);
-    bool isHeaderValue(string header, const string& value, const bool& ignoreCase= true);
+    void addHeaderValue(std::string header, const std::string& value);
+    bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
     bool isNonBinary();
-    string getHeader(string);
+    std::string getHeader(std::string);
     bool getCompressed();
-	vector<string> getCookies() const;
-	map<string,string> getHeaders() const {
+	std::vector<std::string> getCookies() const;
+	std::map<std::string,std::string> getHeaders() const {
 		return headers;
 	}
-	string getStatusLine() const;
-	string toPluginString();
+	std::string getStatusLine() const;
+	std::string toPluginString();
 	bool isDone() const;
 	void setDone(const bool& done);
-	string generateResponse(const string& httpMethod, HttpRequest *req, const bool& appendHeaders= true);
-	string generateResponse(const bool& appendHeaders= true);
-	string generateOnlyHeaderResponse(HttpRequest *req);
+	std::string generateResponse(const std::string& httpMethod, HttpRequest *req, const bool& appendHeaders= true);
+	std::string generateResponse(const bool& appendHeaders= true);
+	std::string generateOnlyHeaderResponse(HttpRequest *req);
 private:
     bool done;
     float httpVers;
     uint32_t intCntLen;
-    static string VALID_RESPONSE_HEADERS;
-	string httpVersion;
-	string statusCode;
-	string statusMsg;
-	string preamble;
-	string epilogue;
+    static std::string VALID_RESPONSE_HEADERS;
+	std::string httpVersion;
+	std::string statusCode;
+	std::string statusMsg;
+	std::string preamble;
+	std::string epilogue;
 	bool compressed;
-	map<string, MultipartContent> multipartFormData;
-	vector<MultipartContent> contentList;
-	string content;
-	string outFileName;
-	vector<string> cookies;
-	map<string,string> headers;
+	std::map<std::string, MultipartContent> multipartFormData;
+	std::vector<MultipartContent> contentList;
+	std::string content;
+	std::string outFileName;
+	std::vector<std::string> cookies;
+	std::map<std::string,std::string> headers;
 	int techunkSiz;
 	int teparts;
 	int tecurrpart;
 	bool hasContent;
 	void setCompressed(const bool& compressed);
 	void update(HttpRequest* req);
-	string generateHeadResponse();
-	string generateOptionsResponse();
-	string generateTraceResponse(HttpRequest* req);
+	std::string generateHeadResponse();
+	std::string generateOptionsResponse();
+	std::string generateTraceResponse(HttpRequest* req);
 	bool updateContent(HttpRequest* req, const uint32_t& techunkSiz);
 	unsigned int getContentSize(const char *fileName);
-	string getContent(const char *fileName, const int& start= -1, const int& end= -1);
+	std::string getContent(const char *fileName, const int& start= -1, const int& end= -1);
 	bool isContentRemains();
-	string getRemainingContent(const string& fname, const bool& isFirst);
-	static string getFileExtension(const string& file);
+	std::string getRemainingContent(const std::string& fname, const bool& isFirst);
+	static std::string getFileExtension(const std::string& file);
 	friend class ServiceTask;
 	friend class HttpResponseParser;
 	friend class Http11Handler;

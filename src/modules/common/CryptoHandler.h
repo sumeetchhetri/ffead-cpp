@@ -33,22 +33,22 @@
 #include "cstring"
 #include <stdlib.h>
 #include "StringUtil.h"
-using namespace std;
+
 
 class CryptoHandler {
 public:
-	static string base64encodeStr(const string& input);
-	static string base64decodeStr(const string& input);
+	static std::string base64encodeStr(const std::string& input);
+	static std::string base64decodeStr(const std::string& input);
 	static char* base64encode(const unsigned char *input, const int& length);
 	static char* base64decode(unsigned char *input, const int& length);
 	static char* hmac_sha1(char*, char*, const bool&);
 	static char* hmac_sha256(char*, char*, const bool&);
 	static char* hmac_sha384(char*, char*, const bool&);
 	static char* hmac_sha512(char*, char*, const bool&);
-	static string sha1(const string&);
-	static string urlEncode(const string& str);
-	static string urlDecode(const string& str);
-	static void sanitizeHtml(string& data);
+	static std::string sha1(const std::string&);
+	static std::string urlEncode(const std::string& str);
+	static std::string urlDecode(const std::string& str);
+	static void sanitizeHtml(std::string& data);
 };
 
 #endif /* CRYPTOHANDLER_H_ */

@@ -31,20 +31,20 @@
 #include "LoggerFactory.h"
 
 class BeanContext {
-	string host;
+	std::string host;
 	int port;
 	Client client;
 	Logger logger;
 public:
 	BeanContext();
-	BeanContext(const string& host, const int& port);
+	BeanContext(const std::string& host, const int& port);
 	virtual ~BeanContext();
-	string getHost() const;
-	void setHost(const string& host);
+	std::string getHost() const;
+	void setHost(const std::string& host);
 	int getPort() const;
 	void setPort(const int& port);
-	void* lookup(const string&);
-	void* invoke(const string& name, vector<GenericObject> args, const string&, const string&);
+	void* lookup(const std::string&);
+	void* invoke(const std::string& name, std::vector<GenericObject> args, const std::string&, const std::string&);
 };
 class RemoteComponentInt {
 	BeanContext cntxt;

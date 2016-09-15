@@ -22,7 +22,7 @@ public:
 	virtual void executePostTable(DataSourceEntityMapping& dsemp, GenericObject& id)=0;
 	virtual void executeSequence(DataSourceEntityMapping& dsemp, GenericObject&)=0;
 	virtual void executeIdentity(DataSourceEntityMapping& dsemp, GenericObject&)=0;
-	virtual void executeCustom(DataSourceEntityMapping& dsemp, const string& customMethod, GenericObject&)=0;
+	virtual void executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject&)=0;
 	void next(DataSourceEntityMapping& dsemp, GenericObject&);
 	IDGenerator();
 	virtual ~IDGenerator();

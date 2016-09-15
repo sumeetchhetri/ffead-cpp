@@ -36,12 +36,12 @@ public:
 	virtual ~DefaultRestController();
 	int addNumbers(int,int);
 	double power(int,int);
-	vector<int> testVector(vector<int>);
+	std::vector<int> testVector(std::vector<int>);
 	TestMany testObject(TestMany);
-	vector<TestMany> testVectorObject(vector<TestMany> param);
-	string testUploadFile(ifstream* ifs, string param);
-	string testUploadFileMulti1(ifstream* ifs1, ifstream* ifs2, ifstream* ifs3, string param);
-	string testUploadFileMulti2(vector<ifstream*> vifs, string param);
+	std::vector<TestMany> testVectorObject(std::vector<TestMany> param);
+	std::string testUploadFile(std::ifstream* ifs, std::string param);
+	std::string testUploadFileMulti1(std::ifstream* ifs1, std::ifstream* ifs2, std::ifstream* ifs3, std::string param);
+	std::string testUploadFileMulti2(std::vector<std::ifstream*> vifs, std::string param);
 };
 
 #endif /* DEFAULTRESTCONTROLLER_H_ */

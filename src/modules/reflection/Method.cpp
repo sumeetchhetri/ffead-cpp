@@ -31,32 +31,32 @@ Method::~Method() {
 	// TODO Auto-generated destructor stub
 }
 
-const string& Method::getAccessSpecifier() const
+const std::string& Method::getAccessSpecifier() const
 {
 	return accessSpecifier;
 }
 
-void Method::setAccessSpecifier(const string& accessSpecifier)
+void Method::setAccessSpecifier(const std::string& accessSpecifier)
 {
 	this->accessSpecifier = accessSpecifier;
 }
 
-const string& Method::getMethodName() const
+const std::string& Method::getMethodName() const
 {
 	return methodName;
 }
 
-void Method::setMethodName(const string& methodName)
+void Method::setMethodName(const std::string& methodName)
 {
 	this->methodName = methodName;
 }
 
-const string& Method::getReturnType() const
+const std::string& Method::getReturnType() const
 {
 	return returnType;
 }
 
-void Method::setReturnType(const string& returnType)
+void Method::setReturnType(const std::string& returnType)
 {
 	this->returnType = returnType;
 }
@@ -94,16 +94,16 @@ void Method::setIsStatic(const bool& isStatic)
 	this->isstat = isStatic;
 }
 
-const string& Method::getRefName() const {
+const std::string& Method::getRefName() const {
 	return refName;
 }
 
-void Method::setRefName(const string& refName) {
+void Method::setRefName(const std::string& refName) {
 	this->refName = refName;
 }
 /*string Method::getKey()
 {
-	string key = getMethodName();
+	std::string key = getMethodName();
 	for (unsigned int var = 0; var < getArgumentTypes().size(); var++)
 	{
 		if(getArgumentTypes().at(var)!="")

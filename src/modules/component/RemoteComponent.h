@@ -28,12 +28,12 @@
 
 
 class RemoteComponent :public RemoteComponentInt{
-	string name;
+	std::string name;
 public:
 	RemoteComponent();
 	virtual ~RemoteComponent();
-	void* invoke(const string& name, const vector<GenericObject>& args, const string& rettyp);
-	void setBeanName(const string& name)
+	void* invoke(const std::string& name, const std::vector<GenericObject>& args, const std::string& rettyp);
+	void setBeanName(const std::string& name)
 	{
 		this->name = name;
 	}

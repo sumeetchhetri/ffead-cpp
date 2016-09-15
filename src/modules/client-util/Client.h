@@ -24,7 +24,7 @@
 #define CLIENT_H_
 #include "AppDefines.h"
 #include "ClientInterface.h"
-using namespace std;
+
 class Client : public ClientInterface {
 	bool connected;
 	SOCKET sockfd;
@@ -32,19 +32,19 @@ class Client : public ClientInterface {
 public:
 	Client();
 	virtual ~Client();
-	bool connection(const string&, const int&);
-	bool connectionUnresolv(const string& host, const int& port);
-	int sendData(string);
-	string getTextData(const string& hdrdelm, const string& cntlnhdr);
-	string getBinaryData(const int&, const bool&);
+	bool connection(const std::string&, const int&);
+	bool connectionUnresolv(const std::string& host, const int& port);
+	int sendData(std::string);
+	std::string getTextData(const std::string& hdrdelm, const std::string& cntlnhdr);
+	std::string getBinaryData(const int&, const bool&);
 	void closeConnection();
 	bool isConnected();
 	void setSocketBlocking();
 	void setSocketNonBlocking();
-	int receive(string& buf, const int& flag);
-	int receivelen(string& buf, const int& len, const int& flag);
-	string getData();
-	int sendlen(const string& buf, const int& len);
+	int receive(std::string& buf, const int& flag);
+	int receivelen(std::string& buf, const int& len, const int& flag);
+	std::string getData();
+	int sendlen(const std::string& buf, const int& len);
 };
 
 #endif /* CLIENT_H_ */

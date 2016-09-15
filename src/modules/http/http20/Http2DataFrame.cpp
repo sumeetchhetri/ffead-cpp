@@ -12,15 +12,15 @@ Http2DataFrame::Http2DataFrame() {
 	padLength = 0;
 }
 
-const string& Http2DataFrame::getData() const {
+const std::string& Http2DataFrame::getData() const {
 	return data;
 }
 
-const string& Http2DataFrame::getPadding() const {
+const std::string& Http2DataFrame::getPadding() const {
 	return padding;
 }
 
-Http2DataFrame::Http2DataFrame(const string& data, Http2FrameHeader& aheader) {
+Http2DataFrame::Http2DataFrame(const std::string& data, Http2FrameHeader& aheader) {
 	this->header = aheader;
 	header.type = 0;
 	if(header.isPadded()) {
@@ -40,8 +40,8 @@ Http2DataFrame::~Http2DataFrame() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http2DataFrame::getFrameData() {
-	string edata;
+std::string Http2DataFrame::getFrameData() {
+	std::string edata;
 	if(header.isPadded()) {
 		edata.push_back(padLength);
 	}

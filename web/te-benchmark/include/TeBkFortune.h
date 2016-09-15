@@ -9,7 +9,7 @@
 #define TEBKFORTUNE_H_
 #include "string"
 
-using namespace std;
+
 
 #pragma @Entity
 #pragma @Table name="Fortune"
@@ -17,13 +17,13 @@ class TeBkFortune {
 	#pragma @Id dbf="id"
 	int id;
 	#pragma @Column dbf="message"
-	string message;
+	std::string message;
 public:
 	virtual ~TeBkFortune();
 	int getId() const;
 	void setId(int id);
-	const string& getMessage() const;
-	void setMessage(const string& message);
+	const std::string& getMessage() const;
+	void setMessage(const std::string& message);
 	bool operator < (const TeBkFortune& other) const;
 };
 

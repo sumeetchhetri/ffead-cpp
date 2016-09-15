@@ -21,17 +21,17 @@ class SocketInterface {
 protected:
 
 	SocketUtil* sockUtil;
-	string buffer;
+	std::string buffer;
 	Timer t;
 	int fd;
-	bool write(const string& data)
+	bool write(const std::string& data)
 	{
 		int offset = 0;
 		while(!isClosed() && offset<(int)data.length())
 		{
-			//cout << "writing data " << fd << " " << identifier << endl;
+			//cout << "writing data " << fd << " " << identifier << std::endl;
 			int ret = sockUtil->writeData(data, true, offset);
-			//cout << "done writing data " << fd << " " << identifier << endl;
+			//cout << "done writing data " << fd << " " << identifier << std::endl;
 			if(ret==0)
 			{
 				break;
@@ -59,7 +59,7 @@ protected:
 		while (!isClosed())
 		{
 			ssize_t count;
-			string temp;
+			std::string temp;
 			count = sockUtil->readData(MAXBUFLENM, temp);
 			if(count>0)
 			{
@@ -87,7 +87,7 @@ protected:
 		return fd;
 	}
 long identifier;
-	virtual string getProtocol(void* context)=0;
+	virtual std::string getProtocol(void* context)=0;
 	virtual int getTimeout()=0;
 	virtual void* readRequest(void*& context, int& pending)=0;
 	virtual bool writeResponse(void* req, void* res, void* context)=0;

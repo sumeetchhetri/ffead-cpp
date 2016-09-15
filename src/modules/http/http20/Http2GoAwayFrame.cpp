@@ -14,7 +14,7 @@ Http2GoAwayFrame::Http2GoAwayFrame() {
 	reserved = false;
 }
 
-const string& Http2GoAwayFrame::getAdditionalDebugData() const {
+const std::string& Http2GoAwayFrame::getAdditionalDebugData() const {
 	return additionalDebugData;
 }
 
@@ -26,7 +26,7 @@ int Http2GoAwayFrame::getLastStreamId() const {
 	return lastStreamId;
 }
 
-Http2GoAwayFrame::Http2GoAwayFrame(string data, Http2FrameHeader& aheader) {
+Http2GoAwayFrame::Http2GoAwayFrame(std::string data, Http2FrameHeader& aheader) {
 	header = aheader;
 	header.type = 7;
 	reserved = ((data.at(0) >> 7) & 0x01);
@@ -44,9 +44,9 @@ Http2GoAwayFrame::~Http2GoAwayFrame() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http2GoAwayFrame::getFrameData() {
-	string edata;
-	string data = CommonUtils::ulonglongTocharArray(lastStreamId, 4);
+std::string Http2GoAwayFrame::getFrameData() {
+	std::string edata;
+	std::string data = CommonUtils::ulonglongTocharArray(lastStreamId, 4);
 	if(reserved)
 		data[0] |= 0x01 << 0;
 	else

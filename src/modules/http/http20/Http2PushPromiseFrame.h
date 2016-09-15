@@ -13,21 +13,21 @@ class Http2PushPromiseFrame : public Http2Frame {
 	unsigned char padLength;
 	bool reserved;
 	int promisedStreamId;
-	string headerBlockFragment;
-	string padding;
-	Http2PushPromiseFrame(string data, Http2FrameHeader& aheader);
+	std::string headerBlockFragment;
+	std::string padding;
+	Http2PushPromiseFrame(std::string data, Http2FrameHeader& aheader);
 	friend class Http2Handler;
 	friend class Http2StreamHandler;
-	map<string, string> headers;
+	std::map<std::string, std::string> headers;
 public:
 	Http2PushPromiseFrame();
 	virtual ~Http2PushPromiseFrame();
-	const string& getHeaderBlockFragment() const;
-	const string& getPadding() const;
+	const std::string& getHeaderBlockFragment() const;
+	const std::string& getPadding() const;
 	unsigned char getPadLength() const;
 	int getPromisedStreamId() const;
 	bool isReserved() const;
-	string getFrameData();
+	std::string getFrameData();
 };
 
 #endif /* HTTP2PUSHPROMISEFRAME_H_ */

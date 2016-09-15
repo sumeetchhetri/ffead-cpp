@@ -25,7 +25,7 @@
 #include "map"
 #include "vector"
 #include "string"
-using namespace std;
+
 
 class JSONElement {
 public:
@@ -35,23 +35,23 @@ public:
 	bool hasChildren() const;
 	//void addChild(const JSONElement& child);
 	void addChild(JSONElement* child);
-	vector<JSONElement*> getChildren() const;
-	//const JSONElement& getNode(const string& name);
-	JSONElement* getNodeP(const string& name);
+	std::vector<JSONElement*> getChildren() const;
+	//const JSONElement& getNode(const std::string& name);
+	JSONElement* getNodeP(const std::string& name);
 	int getType() const;
 	void setType(const int& type);
-	const string& getValue() const;
-	void setValue(const string& value);
-	const string& getName() const;
-	void setName(const string& name);
-	string toString();
+	const std::string& getValue() const;
+	void setValue(const std::string& value);
+	const std::string& getName() const;
+	void setName(const std::string& name);
+	std::string toString();
 private:
 	static JSONElement nullele;
-	string name;
-	string value;
+	std::string name;
+	std::string value;
 	int type;
-	vector<JSONElement*> children;
-	map<string, JSONElement*> allnodes;
+	std::vector<JSONElement*> children;
+	std::map<std::string, JSONElement*> allnodes;
 };
 
 #endif /* JSONELEMENT_H_ */

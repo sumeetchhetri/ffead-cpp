@@ -22,48 +22,48 @@
 
 #include "MessageHandler.h"
 
-using namespace std;
-MessageHandler::MessageHandler(const string& path)
+
+MessageHandler::MessageHandler(const std::string& path)
 {
 	logger = LoggerFactory::getLogger("MessageHandler");
 	this->path = path;
 }
 MessageHandler* MessageHandler::instance = NULL;
 
-Message MessageHandler::readMessageFromQ(const string& fileName, const bool& erase)
+Message MessageHandler::readMessageFromQ(const std::string& fileName, const bool& erase)
 {
-	ifstream file;
+	std::ifstream file;
 	ifstream::pos_type fileSize;
 	char *fileContents, *remcontents;
-	file.open(fileName.c_str(), ios::in | ios::binary | ios::ate);
+	file.open(fileName.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
 	if (file.is_open())
 	{
 		fileContents = new char[4];
-		file.seekg(0, ios::beg);
+		file.seekg(0, std::ios::beg);
 		if(!file.read(fileContents, 4))
 		{
-			instance->logger << "Failed to readMessageFromQ" << endl;
+			instance->logger << "Failed to readMessageFromQ" << std::endl;
 		}
 		int len = (int)AMEFResources::charArrayToLong(fileContents, 4);
 		fileContents = new char[len];
-		file.seekg(4, ios::beg);
+		file.seekg(4, std::ios::beg);
 		if(!file.read(fileContents, len))
 		{
-			instance->logger << "Failed to readMessageFromQ" << endl;
+			instance->logger << "Failed to readMessageFromQ" << std::endl;
 		}
 		if(erase)
 		{
 			fileSize = (int)file.tellg() - len - 4;
 			remcontents = new char[fileSize];
-			file.seekg(4+len, ios::beg);
+			file.seekg(4+len, std::ios::beg);
 			if(!file.read(remcontents, fileSize))
 			{
-				instance->logger << "Failed to readMessageFromQ" << endl;
+				instance->logger << "Failed to readMessageFromQ" << std::endl;
 			}
 		}
 		file.close();
 	}
-	string f(fileContents);
+	std::string f(fileContents);
 	AMEFDecoder dec;
 	AMEFObject* obj = dec.decodeB(f, false);
 	Message m;
@@ -78,8 +78,8 @@ Message MessageHandler::readMessageFromQ(const string& fileName, const bool& era
 	delete[] fileContents;
 	if(erase)
 	{
-		ofstream myfile;
-		myfile.open(fileName.c_str(), ios::binary | ios::trunc);
+		std::ofstream myfile;
+		myfile.open(fileName.c_str(), std::ios::binary | std::ios::trunc);
 		myfile << remcontents;
 		myfile.close();
 		delete[] remcontents;
@@ -87,7 +87,7 @@ Message MessageHandler::readMessageFromQ(const string& fileName, const bool& era
 	return m;
 }
 
-void MessageHandler::writeMessageToQ(const Message& msg, const string& fileName)
+void MessageHandler::writeMessageToQ(const Message& msg, const std::string& fileName)
 {
 	AMEFEncoder enc;
 	AMEFObject ob;
@@ -99,65 +99,65 @@ void MessageHandler::writeMessageToQ(const Message& msg, const string& fileName)
 	ob.addPacket(msg.getBody());
 	ob.addPacket(msg.getDestination().getName());
 	ob.addPacket(msg.getDestination().getType());
-	ofstream myfile;
-	myfile.open(fileName.c_str(), ios::binary | ios::app);
+	std::ofstream myfile;
+	myfile.open(fileName.c_str(), std::ios::binary | std::ios::app);
 	myfile << enc.encodeB(&ob);
 	myfile.close();
 }
 
-bool MessageHandler::tempUnSubscribe(const string& subs, const string& fileName)
+bool MessageHandler::tempUnSubscribe(const std::string& subs, const std::string& fileName)
 {
-	string subscribers;
-	ifstream myfile1;
+	std::string subscribers;
+	std::ifstream myfile1;
 	myfile1.open(fileName.c_str());
 	if (myfile1.is_open())
 	{
 		while(getline(myfile1,subscribers))
 		{
-			//instance->logger << subscribers << flush;
+			//instance->logger << subscribers << std::flush;
 			break;
 		}
 	}
 	myfile1.close();
-	ofstream myfile;
+	std::ofstream myfile;
 	myfile.open(fileName.c_str());
-	string rep = subs + ":";
+	std::string rep = subs + ":";
 	StringUtil::replaceFirst(subscribers,rep,"");
 	myfile.write(subscribers.c_str(),subscribers.length());
 	myfile.close();
-	if(subscribers.find(":")!=string::npos)
+	if(subscribers.find(":")!=std::string::npos)
 		return false;
 	else
 		return true;
 }
 
-Message MessageHandler::readMessageFromT(const string& fileName, const string& subs)
+Message MessageHandler::readMessageFromT(const std::string& fileName, const std::string& subs)
 {
 	bool done = tempUnSubscribe(subs,fileName+":SubslistTemp");
 	Message msg = readMessageFromQ(fileName, done);
 	return msg;
 }
 
-void MessageHandler::writeMessageToT(const Message& msg, const string& fileName)
+void MessageHandler::writeMessageToT(const Message& msg, const std::string& fileName)
 {
 	writeMessageToQ(msg ,fileName);
 }
 
-void MessageHandler::subscribe(const string& subs, string fileName)
+void MessageHandler::subscribe(const std::string& subs, std::string fileName)
 {
-	ifstream myfile1;
+	std::ifstream myfile1;
 	myfile1.open(fileName.c_str());
-	string subscribers;
+	std::string subscribers;
 	if (myfile1.is_open())
 	{
 		while(getline(myfile1,subscribers))
 		{
-			//instance->logger << subscribers << flush;
+			//instance->logger << subscribers << std::flush;
 			break;
 		}
 	}
 	myfile1.close();
-	ofstream myfile;
+	std::ofstream myfile;
 	myfile.open(fileName.c_str());
 	subscribers += (subs + ":");
 	myfile.write(subscribers.c_str(),subscribers.length());
@@ -168,23 +168,23 @@ void MessageHandler::subscribe(const string& subs, string fileName)
 	myfile.close();
 }
 
-void MessageHandler::unSubscribe(const string& subs, string fileName)
+void MessageHandler::unSubscribe(const std::string& subs, std::string fileName)
 {
-	string subscribers;
-	ifstream myfile1;
+	std::string subscribers;
+	std::ifstream myfile1;
 	myfile1.open(fileName.c_str());
 	if (myfile1.is_open())
 	{
 		while(getline(myfile1,subscribers))
 		{
-			//instance->logger << subscribers << flush;
+			//instance->logger << subscribers << std::flush;
 			break;
 		}
 	}
 	myfile1.close();
-	ofstream myfile;
+	std::ofstream myfile;
 	myfile.open(fileName.c_str());
-	string rep = subs + ":";
+	std::string rep = subs + ":";
 	StringUtil::replaceFirst(subscribers,rep,"");
 	myfile.write(subscribers.c_str(),subscribers.length());
 	myfile.close();
@@ -198,28 +198,28 @@ void* MessageHandler::service(void* arg)
 {
 	int fd = *(int*)arg;
 	char buf[MAXBUFLEN];
-	string results;
+	std::string results;
 	//int bytes = recv(fd, buf, sizeof buf, 0);
 	instance->server.Receive(fd,results,1024);
 	//string temp,results;
-	/*stringstream ss;
+	/*std::stringstream ss;
 	ss << buf;
 	while(getline(ss,temp))
 	{
-		instance->logger << temp << flush;
+		instance->logger << temp << std::flush;
 		results.append(temp);
 	}*/
 	results = results.substr(0,results.find_last_of(">")+1);
-	instance->logger << results << flush;
+	instance->logger << results << std::flush;
 
-	if(results.find("<")!=string::npos && results.find(">")!=string::npos)
+	if(results.find("<")!=std::string::npos && results.find(">")!=std::string::npos)
 	{
-		string h = "Received Message----";
+		std::string h = "Received Message----";
 		Cont test;
 		try
 		{
 			Message msg(results);
-			string fileName = instance->path+msg.getDestination().getName()+":"+msg.getDestination().getType();
+			std::string fileName = instance->path+msg.getDestination().getName()+":"+msg.getDestination().getType();
 			if(msg.getDestination().getType()=="Queue")
 				instance->writeMessageToQ(msg,fileName);
 			else if(msg.getDestination().getType()=="Topic")
@@ -227,64 +227,64 @@ void* MessageHandler::service(void* arg)
 		}
 		catch(const Exception& e)
 		{
-			instance->logger << e.getMessage() << flush;
+			instance->logger << e.getMessage() << std::flush;
 		}
 		instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	instance->logger << "send failed" << flush;
-		instance->logger << h << flush;
+		//	instance->logger << "send failed" << std::flush;
+		instance->logger << h << std::flush;
 	}
-	else if(results.find("GET FROM ")!=string::npos)
+	else if(results.find("GET FROM ")!=std::string::npos)
 	{
 		Message msg;
-		if(results.find("Queue")!=string::npos)
+		if(results.find("Queue")!=std::string::npos)
 		{
 			StringUtil::replaceFirst(results,"GET FROM ",instance->path);
 			msg = instance->readMessageFromQ(results, true);
 		}
-		else if(results.find("Topic")!=string::npos)
+		else if(results.find("Topic")!=std::string::npos)
 		{
-			string subs = results.substr(results.find("-")+1);
-			string te = "-" + subs;
+			std::string subs = results.substr(results.find("-")+1);
+			std::string te = "-" + subs;
 			StringUtil::replaceFirst(results,te,"");
 			StringUtil::replaceFirst(results,"GET FROM ",instance->path);
 			msg = instance->readMessageFromT(results,subs);
 		}
-		string h;
-		if(results.find("Queue")!=string::npos || results.find("Topic")!=string::npos)
+		std::string h;
+		if(results.find("Queue")!=std::string::npos || results.find("Topic")!=std::string::npos)
 		{
 			h = msg.toXml();
-			instance->logger << h << flush;
+			instance->logger << h << std::flush;
 		}
 		else
 			h = "Improper Destination";
 		instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	instance->logger << "send failed" << flush;
+		//	instance->logger << "send failed" << std::flush;
 	}
-	else if(results.find("SUBSCRIBE ")!=string::npos)
+	else if(results.find("SUBSCRIBE ")!=std::string::npos)
 	{
 		int len = results.find("TO") - results.find("SUBSCRIBE ") - 11;
-		string subs  = results.substr(results.find("SUBSCRIBE ")+10,len);
+		std::string subs  = results.substr(results.find("SUBSCRIBE ")+10,len);
 		results = results.substr(results.find("TO ")+3);
 		results = (instance->path+results+":Subslist");
 		instance->subscribe(subs,results);
-		string h = "Subscribed";
+		std::string h = "Subscribed";
 		instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	instance->logger << "send failed" << flush;
+		//	instance->logger << "send failed" << std::flush;
 	}
-	else if(results.find("UNSUBSCRIBE ")!=string::npos)
+	else if(results.find("UNSUBSCRIBE ")!=std::string::npos)
 	{
 		int len = results.find("TO") - results.find("UNSUBSCRIBE ") - 12;
-		string subs  = results.substr(results.find("UNSUBSCRIBE ")+11,len);
+		std::string subs  = results.substr(results.find("UNSUBSCRIBE ")+11,len);
 		results = results.substr(results.find("TO ")+3);
 		results = (instance->path+results+":Subslist");
 		instance->subscribe(subs,results);
-		string h = "Unsubscribed";
+		std::string h = "Unsubscribed";
 		instance->server.Send(fd,h);
 		//if (send(fd,&h[0] , h.length(), 0) == -1)
-		//	instance->logger << "send failed" << flush;
+		//	instance->logger << "send failed" << std::flush;
 	}
 	memset(&buf[0], 0, sizeof(buf));
 	close(fd);
@@ -292,7 +292,7 @@ void* MessageHandler::service(void* arg)
 }
 
 
-void MessageHandler::init(const string& path)
+void MessageHandler::init(const std::string& path)
 {
 	if(instance==NULL)
 	{
@@ -301,7 +301,7 @@ void MessageHandler::init(const string& path)
 	}
 }
 
-void MessageHandler::trigger(const string& port, const string& path)
+void MessageHandler::trigger(const std::string& port, const std::string& path)
 {
 	init(path);
 	if(instance->running)

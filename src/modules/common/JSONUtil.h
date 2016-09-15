@@ -27,21 +27,21 @@
 #include "StringUtil.h"
 #include "CastUtil.h"
 #include <stdio.h>
-using namespace std;
+
 
 class JSONUtil {
-	static void array(string& json, JSONElement* element);
-	static void object(string& json, JSONElement* element);
-	static void arrayOrObject(string& json, JSONElement* element);
-	static void readBalancedJSON(string& value, string& json, const bool& isarray, const size_t& obs);
-	static void readJSON(string& json, const bool& isarray, JSONElement *par);
-	static void validateSetValue(JSONElement* element, const string& value);
+	static void array(std::string& json, JSONElement* element);
+	static void object(std::string& json, JSONElement* element);
+	static void arrayOrObject(std::string& json, JSONElement* element);
+	static void readBalancedJSON(std::string& value, std::string& json, const bool& isarray, const size_t& obs);
+	static void readJSON(std::string& json, const bool& isarray, JSONElement *par);
+	static void validateSetValue(JSONElement* element, const std::string& value);
 public:
-	static void getDocument(const string& json, JSONElement& root);
-	static string getDocumentStr(const JSONElement& doc);
-	template <typename T> static vector<T>* toVectorP(const JSONElement& root)
+	static void getDocument(const std::string& json, JSONElement& root);
+	static std::string getDocumentStr(const JSONElement& doc);
+	template <typename T> static std::vector<T>* toVectorP(const JSONElement& root)
 	{
-		vector<T>* vec = new vector<T>;
+		std::vector<T>* vec = new std::vector<T>;
 		for(int i=0;i<(int)root.getChildren().size();i++)
 		{
 			JSONElement* element = root.getChildren().at(i);

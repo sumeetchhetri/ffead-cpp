@@ -23,18 +23,18 @@
 #ifndef MarkerTEST_H_
 #define MarkerTEST_H_
 #include "string"
-using namespace std;
+
 
 class MarkerTest {
 	int id;
-	string name;
+	std::string name;
 public:
 	MarkerTest();
 	virtual ~MarkerTest();
     int getId() const;
     void setId(int);
-    string getName() const;
-    void setName(string);
+    std::string getName() const;
+    void setName(std::string);
     bool operator<(MarkerTest t) const;
 };
 

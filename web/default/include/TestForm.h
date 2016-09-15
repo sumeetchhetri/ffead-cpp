@@ -23,21 +23,21 @@
 #ifndef TESTFORM_H_
 #define TESTFORM_H_
 #include "string"
-using namespace std;
+
 
 class TestForm {
 	int num;
-	string txt;
-	string che;
+	std::string txt;
+	std::string che;
 public:
 	TestForm();
 	virtual ~TestForm();
-	string getChe() const;
+	std::string getChe() const;
     int getNum() const;
-    string getTxt() const;
-    void setChe(string che);
+    std::string getTxt() const;
+    void setChe(std::string che);
     void setNum(int num);
-    void setTxt(string txt);
+    void setTxt(std::string txt);
 };
 
 #endif /* TESTFORM_H_ */

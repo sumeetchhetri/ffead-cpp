@@ -22,7 +22,7 @@
 
 #include "XmlParseException.h"
 
-XmlParseException::XmlParseException(const string& message) {
+XmlParseException::XmlParseException(const std::string& message) {
 	this->setMessage("XmlParseException : "+message);
 }
 

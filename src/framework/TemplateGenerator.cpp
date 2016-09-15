@@ -16,13 +16,13 @@ TemplateGenerator::~TemplateGenerator() {
 	// TODO Auto-generated destructor stub
 }
 
-string TemplateGenerator::generateTempCd(const string& fileName, string &headersb, string &funcdefs, const string& app)
+std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::string &headersb, std::string &funcdefs, const std::string& app)
 {
-	ifstream infile;
-	string data;
-	vector<string> allcontent;
+	std::ifstream infile;
+	std::string data;
+	std::vector<std::string> allcontent;
 	infile.open(fileName.c_str());
-	string file,dir;
+	std::string file,dir;
 	/*int s,en;
 	s = fileName.find_last_of("/")+1;
 	dir = fileName.substr(0,s-1);
@@ -39,29 +39,29 @@ string TemplateGenerator::generateTempCd(const string& fileName, string &headers
 			allcontent.push_back(data+"\n");
 		}
 	}
-	string header,bodies,funcs,declars;
-	funcdefs.append("string _"+file+"emittTemplateHTML(map<string, GenericObject>& args);\n");
-	declars.append("string _"+file+"emittTemplateHTML(map<string, GenericObject>& args)\n{\nstring screen;\n");
-	string tempo;
-	map<string,string> uselocVars;
-	vector<string> inplaceVarValues;
+	std::string header,bodies,funcs,declars;
+	funcdefs.append("std::string _"+file+"emittTemplateHTML(std::map<std::string, GenericObject>& args);\n");
+	declars.append("std::string _"+file+"emittTemplateHTML(std::map<std::string, GenericObject>& args)\n{\nstd::string screen;\n");
+	std::string tempo;
+	std::map<std::string,std::string> uselocVars;
+	std::vector<std::string> inplaceVarValues;
 	bool startedFor = false, startedIf = false, startedWhile = false;
 	for (int var = 0; var < (int)allcontent.size(); ++var) {
-		string temp = allcontent.at(var);
+		std::string temp = allcontent.at(var);
 		StringUtil::trim(temp);
 		StringUtil::replaceAll(temp,"\"","\\\"");
 		if(temp.find("#declare")==0 && temp.at(temp.length()-1)=='#')
 		{
 			StringUtil::replaceAll(temp,"#declare ","");
 			StringUtil::replaceAll(temp,"#","");
-			vector<string> tvec;
+			std::vector<std::string> tvec;
 			StringUtil::split(tvec, temp, (" "));
 			if(tvec.size()==2)
 			{
 				declars.append(temp+";\n");
 				declars.append("if(args.find(\""+tvec.at(1)+"\")!=args.end())\n{\n");
 				inplaceVarValues.push_back(tvec.at(1));
-				/*if(tvec.at(0).find("*")==string::npos)
+				/*if(tvec.at(0).find("*")==std::string::npos)
 				{
 					declars.append(tvec.at(1)+" = *("+tvec.at(0)+"*)args[\""+tvec.at(1)+"\"];\n");
 				}
@@ -127,46 +127,46 @@ string TemplateGenerator::generateTempCd(const string& fileName, string &headers
 		{
 			for (int var1 = 0; var1 < (int)inplaceVarValues.size(); ++var1)
 			{
-				string rep = "${"+inplaceVarValues.at(var1)+"}";
-				string strrep = "$_S{"+inplaceVarValues.at(var1)+"}";
-				if(temp.find(rep)!=string::npos)
+				std::string rep = "${"+inplaceVarValues.at(var1)+"}";
+				std::string strrep = "$_S{"+inplaceVarValues.at(var1)+"}";
+				if(temp.find(rep)!=std::string::npos)
 				{
-					string repVal = inplaceVarValues.at(var1);
+					std::string repVal = inplaceVarValues.at(var1);
 					StringUtil::replaceAll(temp,rep,"\" + " + repVal + " + \"");
 				}
-				else if(temp.find(strrep)!=string::npos)
+				else if(temp.find(strrep)!=std::string::npos)
 				{
-					string repVal = inplaceVarValues.at(var1);
-					StringUtil::replaceAll(temp,strrep,"\" + CastUtil::lexical_cast<string>(" + repVal + ") + \"");
+					std::string repVal = inplaceVarValues.at(var1);
+					StringUtil::replaceAll(temp,strrep,"\" + CastUtil::lexical_cast<std::string>(" + repVal + ") + \"");
 				}
-				else if(temp.find("$_S{")!=string::npos && temp.find("}")!=string::npos
-							&& temp.find("$_S{"+inplaceVarValues.at(var1))!=string::npos)
+				else if(temp.find("$_S{")!=std::string::npos && temp.find("}")!=std::string::npos
+							&& temp.find("$_S{"+inplaceVarValues.at(var1))!=std::string::npos)
 				{
-					while(temp.find("$_S{")!=string::npos && temp.find("}")!=string::npos
-							&& temp.find("$_S{"+inplaceVarValues.at(var1))!=string::npos)
+					while(temp.find("$_S{")!=std::string::npos && temp.find("}")!=std::string::npos
+							&& temp.find("$_S{"+inplaceVarValues.at(var1))!=std::string::npos)
 					{
-						string reps = temp.substr(temp.find("$_S{")+4, temp.find("}")-(temp.find("$_S{")+4));
-						string oreps = temp.substr(temp.find("$_S{"), temp.find("}")+1-(temp.find("$_S{")));
-						if(reps.find(".")!=string::npos)
+						std::string reps = temp.substr(temp.find("$_S{")+4, temp.find("}")-(temp.find("$_S{")+4));
+						std::string oreps = temp.substr(temp.find("$_S{"), temp.find("}")+1-(temp.find("$_S{")));
+						if(reps.find(".")!=std::string::npos)
 						{
-							string repst = reps.substr(0, reps.find("."));
+							std::string repst = reps.substr(0, reps.find("."));
 							if(repst==inplaceVarValues.at(var1))
 							{
-								StringUtil::replaceAll(temp, oreps, "\" + CastUtil::lexical_cast<string>(" + reps + ") + \"");
+								StringUtil::replaceAll(temp, oreps, "\" + CastUtil::lexical_cast<std::string>(" + reps + ") + \"");
 							}
 						}
 					}
 				}
 				else
 				{
-					while(temp.find("${")!=string::npos && temp.find("}")!=string::npos
-							&& temp.find("${"+inplaceVarValues.at(var1))!=string::npos)
+					while(temp.find("${")!=std::string::npos && temp.find("}")!=std::string::npos
+							&& temp.find("${"+inplaceVarValues.at(var1))!=std::string::npos)
 					{
-						string reps = temp.substr(temp.find("${")+2, temp.find("}")-(temp.find("${")+2));
-						string oreps = temp.substr(temp.find("${"), temp.find("}")+1-(temp.find("${")));
-						if(reps.find(".")!=string::npos)
+						std::string reps = temp.substr(temp.find("${")+2, temp.find("}")-(temp.find("${")+2));
+						std::string oreps = temp.substr(temp.find("${"), temp.find("}")+1-(temp.find("${")));
+						if(reps.find(".")!=std::string::npos)
 						{
-							string repst = reps.substr(0, reps.find("."));
+							std::string repst = reps.substr(0, reps.find("."));
 							if(repst==inplaceVarValues.at(var1))
 							{
 								StringUtil::replaceAll(temp, oreps, "\" + " + reps + " + \"");
@@ -175,21 +175,21 @@ string TemplateGenerator::generateTempCd(const string& fileName, string &headers
 					}
 				}
 			}
-			while(temp.find("$_S{")!=string::npos && temp.find("}")!=string::npos)
+			while(temp.find("$_S{")!=std::string::npos && temp.find("}")!=std::string::npos)
 			{
-				string reps = temp.substr(temp.find("$_S{")+4, temp.find("}")-(temp.find("$_S{")+4));
-				string oreps = temp.substr(temp.find("$_S{"), temp.find("}")+1-(temp.find("$_S{")));
-				//if(reps.find(".")!=string::npos)
+				std::string reps = temp.substr(temp.find("$_S{")+4, temp.find("}")-(temp.find("$_S{")+4));
+				std::string oreps = temp.substr(temp.find("$_S{"), temp.find("}")+1-(temp.find("$_S{")));
+				//if(reps.find(".")!=std::string::npos)
 				{
 					//string repst = reps.substr(0, reps.find("."));
-					StringUtil::replaceAll(temp, oreps, "\" + CastUtil::lexical_cast<string>(" + reps + ") + \"");
+					StringUtil::replaceAll(temp, oreps, "\" + CastUtil::lexical_cast<std::string>(" + reps + ") + \"");
 				}
 			}
-			while(temp.find("${")!=string::npos && temp.find("}")!=string::npos)
+			while(temp.find("${")!=std::string::npos && temp.find("}")!=std::string::npos)
 			{
-				string reps = temp.substr(temp.find("${")+2, temp.find("}")-(temp.find("${")+2));
-				string oreps = temp.substr(temp.find("${"), temp.find("}")+1-(temp.find("${")));
-				//if(reps.find(".")!=string::npos)
+				std::string reps = temp.substr(temp.find("${")+2, temp.find("}")-(temp.find("${")+2));
+				std::string oreps = temp.substr(temp.find("${"), temp.find("}")+1-(temp.find("${")));
+				//if(reps.find(".")!=std::string::npos)
 				{
 					//string repst = reps.substr(0, reps.find("."));
 					StringUtil::replaceAll(temp, oreps, "\" + " + reps + " + \"");
@@ -205,11 +205,11 @@ string TemplateGenerator::generateTempCd(const string& fileName, string &headers
 	return declars;
 }
 
-string TemplateGenerator::generateTempCdAll(const string& serverRootDirectory)
+std::string TemplateGenerator::generateTempCdAll(const std::string& serverRootDirectory)
 {
-	map<string, string> templateMappingMap = ConfigurationData::getInstance()->templateFilesMap;
-	string bodies,headersb="#include \"AfcInclude.h\"",funcdefs;
-	map<string, string>::iterator msssit;
+	std::map<std::string, std::string> templateMappingMap = ConfigurationData::getInstance()->templateFilesMap;
+	std::string bodies,headersb="#include \"AfcInclude.h\"",funcdefs;
+	std::map<std::string, std::string>::iterator msssit;
 	for (msssit=templateMappingMap.begin();msssit!=templateMappingMap.end();++msssit)
 	{
 		bodies += generateTempCd(msssit->first,headersb,funcdefs,msssit->second);

@@ -59,7 +59,7 @@ bool ServiceHandler::isAvailable(SocketInterface* sif) {
 
 void ServiceHandler::addCloseRequest(SocketInterface* si) {
 	tbcSifQ.push(si);
-	cout << "Closing connection " << si->getDescriptor() << " " << si->identifier << endl;
+	std::cout << "Closing connection " << si->getDescriptor() << " " << si->identifier << std::endl;
 }
 
 void ServiceHandler::submitTask(Task* task) {
@@ -87,7 +87,7 @@ void* ServiceHandler::cleanSifs(void* inp) {
 			int val;
 			if(ins->requestNumMap.find(si->identifier, val) && val<=0)
 			{
-				cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << endl;
+				std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
 				delete si->sockUtil;
 				delete si;
 				ins->requestNumMap.erase(si->identifier);
@@ -103,14 +103,14 @@ void* ServiceHandler::cleanSifs(void* inp) {
 	return NULL;
 }
 
-void ServiceHandler::cleanSif(map<int, SocketInterface*> connectionsWithTimeouts) {
+void ServiceHandler::cleanSif(std::map<int, SocketInterface*> connectionsWithTimeouts) {
 	SocketInterface* si = NULL;
 	while(tbcSifQ.pop(si))
 	{
 		int val;
 		if(requestNumMap.find(si->identifier, val) && val<=0)
 		{
-			cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << endl;
+			std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
 			connectionsWithTimeouts.erase(si->getDescriptor());
 			delete si->sockUtil;
 			delete si;
@@ -185,7 +185,7 @@ void* HandlerRequest::getContext() {
 	return context;
 }
 
-const string& HandlerRequest::getProtocol() const {
+const std::string& HandlerRequest::getProtocol() const {
 	return protocol;
 }
 

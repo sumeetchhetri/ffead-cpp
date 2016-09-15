@@ -22,11 +22,11 @@
 
 #include "CHServer.h"
 
-static string servd, serverCntrlFileNm;
+static std::string servd, serverCntrlFileNm;
 static bool isSSLEnabled = false, isThreadprq = false, processforcekilled = false,
 		processgendone = false, isCompileEnabled = false;
 static int thrdpsiz, preForked = 5;
-static map<int,pid_t> pds;
+static std::map<int,pid_t> pds;
 static Mutex m_mutex, p_mutex;
 
 Logger CHServer::logger;
@@ -164,7 +164,7 @@ void handler(int sig)
 void siginthandler(int sig)
 {
 	if(errno!=EINTR) {
-		CHServer::getLogger() << "Exiting, Got errono " << sig << endl;
+		CHServer::getLogger() << "Exiting, Got errono " << sig << std::endl;
 		exit(0);
 	}
 }
@@ -172,102 +172,102 @@ void siginthandler(int sig)
 void signalSIGSEGV(int sig)
 {
 	signal(SIGSEGV,signalSIGSEGV);
-	string filename;
-	stringstream ss;
+	std::string filename;
+	std::stringstream ss;
 	ss << servd;
 	ss << getpid();
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Segmentation fault occurred for process" << getpid() << "\n" << endl;
+	CHServer::getLogger() << "Segmentation fault occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 void signalSIGCHLD(int sig)
 {
 	signal(SIGCHLD,signalSIGCHLD);
-	string filename;
-	stringstream ss;
+	std::string filename;
+	std::stringstream ss;
 	ss << servd;
 	ss << getpid();
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Child process got killed " << getpid() << "\n"  << endl;
+	CHServer::getLogger() << "Child process got killed " << getpid() << "\n"  << std::endl;
 	//abort();
 }
 void signalSIGABRT(int sig)
 {
 	signal(SIGABRT,signalSIGABRT);
-	string filename;
-	stringstream ss;
+	std::string filename;
+	std::stringstream ss;
 	ss << servd;
 	ss << getpid();
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Abort signal occurred for process" << getpid() << "\n" << endl;
+	CHServer::getLogger() << "Abort signal occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 void signalSIGTERM(int sig)
 {
 	signal(SIGTERM,signalSIGTERM);
-	string filename;
-	stringstream ss;
+	std::string filename;
+	std::stringstream ss;
 	ss << servd;
 	ss << getpid();
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Termination signal occurred for process" << getpid() << "\n" << endl;
+	CHServer::getLogger() << "Termination signal occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 
 void signalSIGKILL(int sig)
 {
 	signal(SIGKILL,signalSIGKILL);
-	string filename;
-	stringstream ss;
+	std::string filename;
+	std::stringstream ss;
 	ss << servd;
 	ss << getpid();
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Kill signal occurred for process" << getpid() << "\n" << endl;
+	CHServer::getLogger() << "Kill signal occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 
 void signalSIGINT(int sig)
 {
 	signal(SIGINT,signalSIGINT);
-	string filename;
-	stringstream ss;
+	std::string filename;
+	std::stringstream ss;
 	ss << servd;
 	ss << getpid();
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Interrupt signal occurred for process" << getpid() << "\n" << endl;
+	CHServer::getLogger() << "Interrupt signal occurred for process" << getpid() << "\n" << std::endl;
 	//abort();
 }
 
 void signalSIGFPE(int sig)
 {
 	signal(SIGFPE,signalSIGFPE);
-	string filename;
-	stringstream ss;
+	std::string filename;
+	std::stringstream ss;
 	ss << servd;
 	ss << getpid();
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Floating point Exception occurred for process" << getpid() << "\n" << endl;
+	CHServer::getLogger() << "Floating point Exception occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 
@@ -275,29 +275,29 @@ void signalSIGPIPE(int sig)
 {
 	signal(SIGPIPE,signalSIGPIPE);
 	/*string filename;
-	stringstream ss;
+	std::stringstream ss;
 	ss << servd;
 	ss << getpid();
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());*/
 	handler(sig);
-	CHServer::getLogger() << "Broken pipe ignore it" << getpid() << "\n" << endl;
+	CHServer::getLogger() << "Broken pipe ignore it" << getpid() << "\n" << std::endl;
 	//abort();
 }
 
 void signalSIGILL(int sig)
 {
 	signal(SIGILL,signalSIGILL);
-	string filename;
-	stringstream ss;
+	std::string filename;
+	std::stringstream ss;
 	ss << servd;
 	ss << getpid();
 	ss >> filename;
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Floating point Exception occurred for process" << getpid() << "\n" << endl;
+	CHServer::getLogger() << "Floating point Exception occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 
@@ -310,7 +310,7 @@ void* service(void* arg)
 }
 
 #if !defined(OS_MINGW) && !defined(OS_DARWIN) && !defined(OS_CYGWIN)
-pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
+pid_t createChildProcess(std::string serverRootDirectory,int sp[],int sockfd)
 {
 	pid_t pid;
 	if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sp) == -1)
@@ -323,21 +323,21 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 		char pidStr[10];
 		memset(pidStr, 0, 10);
 		sprintf(pidStr, "%ld", (long)getpid());
-		string lgname = "CHServer-";
+		std::string lgname = "CHServer-";
 		lgname.append(pidStr);
 		Logger plogger = LoggerFactory::getLogger(lgname);
 
 		servd = serverRootDirectory;
-		string filename;
-		stringstream ss;
+		std::string filename;
+		std::stringstream ss;
 		ss << serverRootDirectory;
 		ss << getpid();
 		ss >> filename;
 		filename.append(".cntrl");
-		plogger << ("generated file " + filename) << endl;
-		ofstream cntrlfile;
+		plogger << ("generated file " + filename) << std::endl;
+		std::ofstream cntrlfile;
 		cntrlfile.open(filename.c_str());
-		cntrlfile << "Process Running" << endl;
+		cntrlfile << "Process Running" << std::endl;
 		cntrlfile.close();
 
 		close(sockfd);
@@ -357,7 +357,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 			if (nfds == -1)
 			{
 				perror("poller wait child process");
-				plogger << "\n----------poller child process----" << endl;
+				plogger << "\n----------poller child process----" << std::endl;
 			}
 			else*/
 			{
@@ -376,7 +376,7 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				if((err=recv(fd,buf,10,MSG_PEEK))==0)
 				{
 					close(fd);
-					plogger << "Socket conn closed before being serviced" << endl;
+					plogger << "Socket conn closed before being serviced" << std::endl;
 					continue;
 				}
 
@@ -397,11 +397,11 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 				}
 				catch(const char* err)
 				{
-					plogger << "Exception occurred while processing ServiceTask request - " << err << endl;
+					plogger << "Exception occurred while processing ServiceTask request - " << err << std::endl;
 				}
 				catch(...)
 				{
-					plogger << "Standard exception occurred while processing ServiceTask request " << endl;
+					plogger << "Standard exception occurred while processing ServiceTask request " << std::endl;
 				}
 			}
 		}
@@ -421,21 +421,21 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 	}
 	if((pid=fork())==0)
 	{
-		map<string,bool> stat;
+		std::map<std::string,bool> stat;
 		while(1)
 		{
 			char buf[10];
 			memset(pidStr, 0, 10);
 			if(read(sp[1], buf, sizeof buf) < 0)
 			{
-				string temp = buf;
+				std::string temp = buf;
 				strVec tempv;
 				StringUtil::split(tempv, temp, ":");
 				if(tempv.size()==2)
 				{
 					if(tempv.at(0)=="R")
 					{
-						string h = "0";
+						std::string h = "0";
 						if(stat[tempv.at(1)])
 							h = "1";
 						write(sp[0], h.c_str() , sizeof(h));
@@ -453,14 +453,14 @@ pid_t createChildProcess(string serverRootDirectory,int sp[],int sockfd)
 
 void* gracefullShutdown_monitor(void* args)
 {
-	string* ipaddr = (string*)args;
+	std::string* ipaddr = (std::string*)args;
 	struct stat buffer;
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
 		Thread::sSleep(1);
 	}
-	string ip = ipaddr->substr(0, ipaddr->find(":"));
-	string port = ipaddr->substr(ipaddr->find(":")+1);
+	std::string ip = ipaddr->substr(0, ipaddr->find(":"));
+	std::string port = ipaddr->substr(ipaddr->find(":")+1);
 	ClientInterface* client;
 	if(isSSLEnabled)
 		client = new SSLClient;
@@ -476,14 +476,14 @@ void* gracefullShutdown_monitor(void* args)
 #ifdef INC_DCP
 void* CHServer::dynamic_page_monitor(void* arg)
 {
-	string serverRootDirectory = *(string*)arg;
+	std::string serverRootDirectory = *(std::string*)arg;
 	struct stat statbuf;
-	map<string, string> dcpsss = ConfigurationData::getInstance()->dynamicCppPagesMap;
-	map<string, string> tpes = ConfigurationData::getInstance()->templateFilesMap;
-	map<string, string> dcspstpes = dcpsss;
+	std::map<std::string, std::string> dcpsss = ConfigurationData::getInstance()->dynamicCppPagesMap;
+	std::map<std::string, std::string> tpes = ConfigurationData::getInstance()->templateFilesMap;
+	std::map<std::string, std::string> dcspstpes = dcpsss;
 	dcspstpes.insert(tpes.begin(), tpes.end());
-	map<string,long> statsinf;
-	map<string, string>::iterator it;
+	std::map<std::string,long> statsinf;
+	std::map<std::string, std::string>::iterator it;
 	for(it=dcspstpes.begin();it!=dcspstpes.end();++it)
 	{
 		stat(it->first.c_str(), &statbuf);
@@ -505,37 +505,37 @@ void* CHServer::dynamic_page_monitor(void* arg)
 			long tim = (uintmax_t)tm;
 			if(tim!=statsinf[it->first])
 			{
-				string rtdcfpath = serverRootDirectory + "rtdcf/";
-				string respath = serverRootDirectory + "resources/";
+				std::string rtdcfpath = serverRootDirectory + "rtdcf/";
+				std::string respath = serverRootDirectory + "resources/";
 
-				logger << "started generating dcp code" <<endl;
-				string ret = DCPGenerator::generateDCPAll();
+				logger << "started generating dcp code" <<std::endl;
+				std::string ret = DCPGenerator::generateDCPAll();
 				AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
-				logger << "done generating dcp code" <<endl;
-				logger << "started generating template code" <<endl;
+				logger << "done generating dcp code" <<std::endl;
+				logger << "started generating template code" <<std::endl;
 				ret = TemplateGenerator::generateTempCdAll(servd);
 				AfcUtil::writeTofile(rtdcfpath+"TemplateInterface.cpp",ret,true);
-				logger << "done generating template code" <<endl;
+				logger << "done generating template code" <<std::endl;
 
-				string compres;
+				std::string compres;
 //#if BUILT_WITH_CONFGURE == 1
 				compres = respath+"rundyn-automake_dinter.sh "+serverRootDirectory;
 //#else
 				//compres = respath+"rundyn_dinter.sh "+serverRootDirectory;
 //#endif
-				string output = ScriptHandler::execute(compres, true);
+				std::string output = ScriptHandler::execute(compres, true);
 				//int i=system(compres.c_str()); 
 				//if(!i)
 				{
-					logger << output << endl;
-					logger << "regenerating intermediate code-----Done" << endl;
+					logger << output << std::endl;
+					logger << "regenerating intermediate code-----Done" << std::endl;
 					logger.info("Done generating intermediate code");
 				}
 				m_mutex.lock();
 				#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 				if(preForked>0 && IS_FILE_DESC_PASSING_AVAIL)
 				{
-					map<int,pid_t>::iterator it;
+					std::map<int,pid_t>::iterator it;
 					for(it=pds.begin();it!=pds.end();it++)
 					{
 						kill(it->second,9);
@@ -568,30 +568,30 @@ int main(int argc, char* argv[])
 {
 	if(argc == 1)
 	{
-		//cout << "No Server root directory specified, quitting..." << endl;
+		//cout << "No Server root directory specified, quitting..." << std::endl;
 		return 0;
 	}
 
-	string serverRootDirectory = argv[1];
+	std::string serverRootDirectory = argv[1];
 	serverRootDirectory += "/";
 	if(serverRootDirectory.find("//")==0)
 	{
 		RegexUtil::replace(serverRootDirectory,"[/]+","/");
 	}
 
-	string port = "";
-	string ipaddr = "";
-	string servingAppNames = "";
-	vector<string> servedAppNames;
+	std::string port = "";
+	std::string ipaddr = "";
+	std::string servingAppNames = "";
+	std::vector<std::string> servedAppNames;
 	bool isMain = true;
 
 	PropFileReader pread;
-	string respath = serverRootDirectory + "resources/";
+	std::string respath = serverRootDirectory + "resources/";
 	propMap srprps = pread.getProperties(respath+"server.prop");
 
 	std::ofstream local("/dev/null");
 	if(StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])!="true") {
-		streambuf* cout_buff = std::cout.rdbuf();
+		std::streambuf* cout_buff = std::cout.rdbuf();
 		std::cout.rdbuf(local.rdbuf());
 	}
 
@@ -615,7 +615,7 @@ int main(int argc, char* argv[])
 	if(argc > 4)
 	{
 		servingAppNames = argv[4];
-		servedAppNames = StringUtil::splitAndReturn<vector<string> >(servingAppNames, ",");
+		servedAppNames = StringUtil::splitAndReturn<std::vector<std::string> >(servingAppNames, ",");
 	}
 	int vhostNum = 0;
 	if(argc > 5)
@@ -626,17 +626,17 @@ int main(int argc, char* argv[])
 	try {
 		return CHServer::entryPoint(vhostNum, isMain, serverRootDirectory, port, ipaddr, servedAppNames);
 	} catch (const char* e) {
-		cout << e << endl;
+		std::cout << e << std::endl;
 	} catch (const XmlParseException& e) {
-		cout << e.getMessage() << endl;
+		std::cout << e.getMessage() << std::endl;
 	} catch (...) {
-		cout << "Error Occurred in serve" << endl;
+		std::cout << "Error Occurred in serve" << std::endl;
 	}
 	return 0;
 }
 
 
-int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, string port, string ipaddr, vector<string> servedAppNames)
+int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirectory, std::string port, std::string ipaddr, std::vector<std::string> servedAppNames)
 {
 	pid_t parid = getpid();
 
@@ -677,22 +677,22 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 		RegexUtil::replace(serverRootDirectory,"[/]+","/");
 	}
 
-	string incpath = serverRootDirectory + "include/";
-	string rtdcfpath = serverRootDirectory + "rtdcf/";
-	string pubpath = serverRootDirectory + "public/";
-	string respath = serverRootDirectory + "resources/";
-	string webpath = serverRootDirectory + "web/";
-	string logpath = serverRootDirectory + "logs/";
-	string resourcePath = respath;
+	std::string incpath = serverRootDirectory + "include/";
+	std::string rtdcfpath = serverRootDirectory + "rtdcf/";
+	std::string pubpath = serverRootDirectory + "public/";
+	std::string respath = serverRootDirectory + "resources/";
+	std::string webpath = serverRootDirectory + "web/";
+	std::string logpath = serverRootDirectory + "logs/";
+	std::string resourcePath = respath;
 
 	PropFileReader pread;
 	propMap srprps = pread.getProperties(respath+"server.prop");
 
 	servd = serverRootDirectory;
-	string logp = respath+"/logging.xml";
+	std::string logp = respath+"/logging.xml";
 	LoggerFactory::init(logp, serverRootDirectory, "", StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true");
 
-	string name;
+	std::string name;
 	if(isMain)
 	{
 		serverCntrlFileNm = serverRootDirectory + "ffead.cntrl";
@@ -701,8 +701,8 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 	}
 	else
 	{
-		name = "CHServer(VHost-" + CastUtil::lexical_cast<string>(vhostNum) + ")";
-		serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." + CastUtil::lexical_cast<string>(vhostNum);
+		name = "CHServer(VHost-" + CastUtil::lexical_cast<std::string>(vhostNum) + ")";
+		serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." + CastUtil::lexical_cast<std::string>(vhostNum);
 	}
 
 	logger = LoggerFactory::getLogger(name);
@@ -715,14 +715,14 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 		}
 		catch(...)
 		{
-			logger << "Invalid number for worker processes defined" << endl;
+			logger << "Invalid number for worker processes defined" << std::endl;
 			preForked = 5;
 		}
     }
-    string sslEnabled = srprps["SSL_ENAB"];
+    std::string sslEnabled = srprps["SSL_ENAB"];
    	if(sslEnabled=="true" || sslEnabled=="TRUE")
    		isSSLEnabled = true;
-   	string thrdpreq = srprps["THRD_PREQ"];
+   	std::string thrdpreq = srprps["THRD_PREQ"];
    	if(thrdpreq=="true" || thrdpreq=="TRUE")
    		isThreadprq = true;
    	else
@@ -738,12 +738,12 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 			}
 			catch(...)
 			{
-				logger << "Invalid thread pool size defined" << endl;
+				logger << "Invalid thread pool size defined" << std::endl;
 				thrdpsiz = 10;
 			}
 		}
 	}
-   	string compileEnabled = srprps["DEV_MODE"];
+   	std::string compileEnabled = srprps["DEV_MODE"];
 	if(compileEnabled=="true" || compileEnabled=="TRUE")
 		isCompileEnabled = true;
 
@@ -760,7 +760,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
    		try {
    			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
 		} catch (...) {
-			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << endl;
+			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << std::endl;
 		}
    	}
 
@@ -769,7 +769,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
    		port = srprps["PORT_NO"];
    	}
 
-	string ipport;
+	std::string ipport;
 
 	if(ipaddr!="")
 	{
@@ -817,24 +817,24 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
     }
     catch(const XmlParseException& p)
     {
-    	logger << p.getMessage() << endl;
+    	logger << p.getMessage() << std::endl;
     }
     catch(const char* msg)
 	{
-		logger << msg << endl;
+		logger << msg << std::endl;
 	}
 
     SSLHandler::initInstance(ConfigurationData::getInstance()->securityProperties);
 
-    logger << INTER_LIB_FILE << endl;
+    logger << INTER_LIB_FILE << std::endl;
 
     bool libpresent = true;
     void *dlibtemp = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	//logger << endl <<dlibtemp << endl;
+	//logger << endl <<dlibtemp << std::endl;
 	if(dlibtemp==NULL)
 	{
 		libpresent = false;
-		logger << dlerror() << endl;
+		logger << dlerror() << std::endl;
 		logger.info("Could not load Library");
 	}
 	else
@@ -848,72 +848,75 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 
 		if(!libpresent)
 		{
-			string configureFilePath = rtdcfpath+"/autotools/configure";
+			std::string configureFilePath = rtdcfpath+"/autotools/configure";
 			if (access( configureFilePath.c_str(), F_OK ) == -1 )
 			{
-				string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
-				string output = ScriptHandler::execute(compres, true);
-				logger << "Set up configure for intermediate libraries\n\n" << endl;
+				std::string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
+				std::string output = ScriptHandler::execute(compres, true);
+				logger << "Set up configure for intermediate libraries\n\n" << std::endl;
 			}
 
 			if (access( configureFilePath.c_str(), F_OK ) != -1 )
 			{
-				string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+				std::string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
 			#ifdef DEBUG
 				compres += " --enable-debug=yes";
 			#endif
-				string output = ScriptHandler::execute(compres, true);
-				logger << "Set up makefiles for intermediate libraries\n\n" << endl;
-				logger << output << endl;
+				std::string output = ScriptHandler::execute(compres, true);
+				logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
+				logger << output << std::endl;
 
 				compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 				output = ScriptHandler::execute(compres, true);
-				logger << "Intermediate code generation task\n\n" << endl;
-				logger << output << endl;
+				logger << "Intermediate code generation task\n\n" << std::endl;
+				logger << output << std::endl;
 			}
 		}
 
 		void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-		if(checkdlib==NULL)
+		void* checkddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
+		if(checkdlib==NULL || checkddlib==NULL)
 		{
-			string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
-			string output = ScriptHandler::execute(compres, true);
-			logger << "Set up configure for intermediate libraries\n\n" << endl;
+			std::string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
+			std::string output = ScriptHandler::execute(compres, true);
+			logger << "Set up configure for intermediate libraries\n\n" << std::endl;
 
 			compres = respath+"rundyn-configure.sh "+serverRootDirectory;
 			#ifdef DEBUG
 				compres += " --enable-debug=yes";
 			#endif
 			output = ScriptHandler::execute(compres, true);
-			logger << "Set up makefiles for intermediate libraries\n\n" << endl;
-			logger << output << endl;
+			logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
+			logger << output << std::endl;
 
 			compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 			if(!libpresent)
 			{
-				string output = ScriptHandler::execute(compres, true);
-				logger << "Rerunning Intermediate code generation task\n\n" << endl;
-				logger << output << endl;
+				std::string output = ScriptHandler::execute(compres, true);
+				logger << "Rerunning Intermediate code generation task\n\n" << std::endl;
+				logger << output << std::endl;
 			}
 			checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+			checkddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 		}
 
-		if(checkdlib==NULL)
+		if(checkdlib==NULL || checkddlib==NULL)
 		{
-			logger << dlerror() << endl;
+			logger << dlerror() << std::endl;
 			logger.info("Could not load Library");
 			exit(0);
 		}
 		else
 		{
 			dlclose(checkdlib);
+			dlclose(checkddlib);
 			logger.info("Library generated successfully");
 		}
 
 	#ifdef INC_COMP
 		for (unsigned int var1 = 0;var1<ConfigurationData::getInstance()->componentNames.size();var1++)
 		{
-			string name = ConfigurationData::getInstance()->componentNames.at(var1);
+			std::string name = ConfigurationData::getInstance()->componentNames.at(var1);
 			StringUtil::replaceFirst(name,"Component_","");
 			ComponentHandler::registerComponent(name);
 			AppContext::registerComponent(name);
@@ -929,7 +932,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 				distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
 			}
 		} catch(...) {
-			logger << ("Invalid poolsize specified for distocache") << endl;
+			logger << ("Invalid poolsize specified for distocache") << std::endl;
 		}
 
 		try {
@@ -937,15 +940,15 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 			{
 				CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
 				DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
-				logger << ("Session store is set to distocache store") << endl;
+				logger << ("Session store is set to distocache store") << std::endl;
 				distocache = true;
 			}
 		} catch(...) {
-			logger << ("Invalid port specified for distocache") << endl;
+			logger << ("Invalid port specified for distocache") << std::endl;
 		}
 
 		if(!distocache) {
-			logger << ("Session store is set to file store") << endl;
+			logger << ("Session store is set to file store") << std::endl;
 		}
 	#endif*/
 
@@ -961,7 +964,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 				}
 			}
 		} catch(...) {
-			logger << ("Component Handler Services are disabled") << endl;
+			logger << ("Component Handler Services are disabled") << std::endl;
 		}
 	#endif
 
@@ -976,7 +979,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 				}
 			}
 		} catch(...) {
-			logger << ("Messaging Handler Services are disabled") << endl;
+			logger << ("Messaging Handler Services are disabled") << std::endl;
 		}
 	#endif
 
@@ -991,7 +994,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 				}
 			}
 		} catch(...) {
-			logger << ("Method Invoker Services are disabled") << endl;
+			logger << ("Method Invoker Services are disabled") << std::endl;
 		}
 	#endif
 
@@ -1007,42 +1010,42 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 		propMultiMap mpmap = pread.getPropertiesMultiMap(respath+"server.prop");
 		if(mpmap.find("VHOST_ENTRY")!=mpmap.end() && mpmap["VHOST_ENTRY"].size()>0)
 		{
-			vector<string> vhosts = mpmap["VHOST_ENTRY"];
+			std::vector<std::string> vhosts = mpmap["VHOST_ENTRY"];
 			for(int vhi=0;vhi<vhosts.size();vhi++)
 			{
-				vector<string> vhostprops = StringUtil::splitAndReturn<vector<string> >(vhosts.at(vhi), ";");
+				std::vector<std::string> vhostprops = StringUtil::splitAndReturn<std::vector<std::string> >(vhosts.at(vhi), ";");
 				if(vhostprops.size()==3)
 				{
-					string vhostname = StringUtil::trimCopy(vhostprops.at(0));
-					string vhostport = StringUtil::trimCopy(vhostprops.at(1));
-					string vhostapps = StringUtil::trimCopy(vhostprops.at(2));
+					std::string vhostname = StringUtil::trimCopy(vhostprops.at(0));
+					std::string vhostport = StringUtil::trimCopy(vhostprops.at(1));
+					std::string vhostapps = StringUtil::trimCopy(vhostprops.at(2));
 					bool valid = true;
 					if(vhostname=="")
 					{
 						valid = false;
-						logger << ("No host specified for Virtual-Host") << endl;
+						logger << ("No host specified for Virtual-Host") << std::endl;
 					}
 					if(vhostport=="")
 					{
 						valid = false;
-						logger << ("No port specified for Virtual-Host") << endl;
+						logger << ("No port specified for Virtual-Host") << std::endl;
 					}
 					if(vhostapps=="")
 					{
 						valid = false;
-						logger << ("No apps specified for Virtual-Host") << endl;
+						logger << ("No apps specified for Virtual-Host") << std::endl;
 					}
 
 					if(valid)
 					{
-						vector<string> spns = StringUtil::splitAndReturn<vector<string> >(vhostapps, ",");
-						map<string, bool> updatedcontextNames;
-						map<string, string> updatedaliasNames;
+						std::vector<std::string> spns = StringUtil::splitAndReturn<std::vector<std::string> >(vhostapps, ",");
+						std::map<std::string, bool> updatedcontextNames;
+						std::map<std::string, std::string> updatedaliasNames;
 						for (int spni = 0; spni < (int)spns.size(); ++spni) {
 							StringUtil::trim(spns.at(spni));
-							string vapnm = spns.at(spni);
-							string valias = vapnm;
-							if(vapnm.find(":")!=string::npos) {
+							std::string vapnm = spns.at(spni);
+							std::string valias = vapnm;
+							if(vapnm.find(":")!=std::string::npos) {
 								valias = vapnm.substr(vapnm.find(":")+1);
 								vapnm = vapnm.substr(0, vapnm.find(":"));
 							}
@@ -1055,7 +1058,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 								}
 							}
 						}
-						map<string, bool>::iterator ucit;
+						std::map<std::string, bool>::iterator ucit;
 						for(ucit=updatedcontextNames.begin();ucit!=updatedcontextNames.end();ucit++)
 						{
 							if(ConfigurationData::getInstance()->servingContexts.find(ucit->first)!=
@@ -1078,18 +1081,18 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 							ConfigurationData::getInstance()->servingContexts = updatedcontextNames;
 							ConfigurationData::getInstance()->appAliases = updatedaliasNames;
 
-							string lnm = "CHServer(VHost-" +
-									CastUtil::lexical_cast<string>(vhi+1) + ")";
+							std::string lnm = "CHServer(VHost-" +
+									CastUtil::lexical_cast<std::string>(vhi+1) + ")";
 							serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
-									CastUtil::lexical_cast<string>(vhi+1);
+									CastUtil::lexical_cast<std::string>(vhi+1);
 							serve(vhostport, vhostname, thrdpsiz, serverRootDirectory, srprps, vhi+1);
 						}
 					#else
-						string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
-								+ " " + vhostapps + " " + CastUtil::lexical_cast<string>(vhi+1);
-						string vhostcmdo = ScriptHandler::chdirExecute(vhostcmd, serverRootDirectory, true);
+						std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
+								+ " " + vhostapps + " " + CastUtil::lexical_cast<std::string>(vhi+1);
+						std::string vhostcmdo = ScriptHandler::chdirExecute(vhostcmd, serverRootDirectory, true);
 						logger.info("Starting new Virtual-Host at " + (vhostname + ":" + vhostport));
-						logger << vhostcmdo << endl;
+						logger << vhostcmdo << std::endl;
 					#endif
 					}
 				}
@@ -1099,9 +1102,9 @@ int CHServer::entryPoint(int vhostNum, bool isMain, string serverRootDirectory, 
 		try {
 			serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, vhostNum);
 		} catch (const char* e) {
-			logger << e << endl;
+			logger << e << std::endl;
 		} catch (...) {
-			logger << "Error Occurred in serve" << endl;
+			logger << "Error Occurred in serve" << std::endl;
 		}
 
 	#ifdef INC_COMP
@@ -1128,9 +1131,9 @@ HttpServiceTask* CHServer::httpServiceFactoryMethod() {
 	return new ServiceTask();
 }
 
-void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRootDirectory, propMap sprops, int vhostNumber)
+void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber)
 {
-	string ipport;
+	std::string ipport;
 
 	if(ipaddr!="")
 	{
@@ -1152,24 +1155,24 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 	if(ConfigurationData::getInstance()->servingContexts.size()==0)
 	{
 		if(vhostNumber==0)
-			logger << ("No context to be served by Server (" +  ipport  + ")") << endl;
+			logger << ("No context to be served by Server (" +  ipport  + ")") << std::endl;
 		else
-			logger << ("No context to be served by Virtual-Host (" +  ipport  + ")") << endl;
+			logger << ("No context to be served by Virtual-Host (" +  ipport  + ")") << std::endl;
 		return;
 	}
 	else
 	{
 		if(vhostNumber==0)
 		{
-			map<string, bool>::iterator it;
+			std::map<std::string, bool>::iterator it;
 			for (it=ConfigurationData::getInstance()->servingContexts.begin();it!=ConfigurationData::getInstance()->servingContexts.end();++it)
-				logger << ("Server (" +  ipport  + ") serves context (" +  it->first  + ")") << endl;
+				logger << ("Server (" +  ipport  + ") serves context (" +  it->first  + ")") << std::endl;
 		}
 		else
 		{
-			map<string, bool>::iterator it;
+			std::map<std::string, bool>::iterator it;
 			for (it=ConfigurationData::getInstance()->servingContexts.begin();it!=ConfigurationData::getInstance()->servingContexts.end();++it)
-				logger << ("Virtual-Host (" +  ipport  + ") serves context (" +  it->first  + ")") << endl;
+				logger << ("Virtual-Host (" +  ipport  + ") serves context (" +  it->first  + ")") << std::endl;
 		}
 	}
 
@@ -1182,7 +1185,7 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 		}
 		catch(...)
 		{
-			logger << "Invalid number for worker processes defined" << endl;
+			logger << "Invalid number for worker processes defined" << std::endl;
 			preForked = 5;
 		}
 	}
@@ -1196,25 +1199,25 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 
 	if(sockfd==-1)
 	{
-		logger << "Unable to start the server on the specified ip/port..." << endl;
+		logger << "Unable to start the server on the specified ip/port..." << std::endl;
 		return;
 	}
 
-	logger << ("Initializing WSDL files....") << endl;
+	logger << ("Initializing WSDL files....") << std::endl;
 	ConfigurationHandler::initializeWsdls();
-	logger << ("Initializing WSDL files done....") << endl;
+	logger << ("Initializing WSDL files done....") << std::endl;
 
 #ifdef INC_SDORM
-	logger << ("Initializing DataSources....") << endl;
+	logger << ("Initializing DataSources....") << std::endl;
 	ConfigurationHandler::initializeDataSources();
-	logger << ("Initializing DataSources done....") << endl;
+	logger << ("Initializing DataSources done....") << std::endl;
 #endif
 
-	logger << ("Initializing Caches....") << endl;
+	logger << ("Initializing Caches....") << std::endl;
 	ConfigurationHandler::initializeCaches();
-	logger << ("Initializing Caches done....") << endl;
+	logger << ("Initializing Caches done....") << std::endl;
 
-	vector<string> files;
+	std::vector<std::string> files;
 	int sp[preForked][2];
 	ThreadPool *pool = NULL;
 
@@ -1225,8 +1228,8 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 		{
 			pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
 			pds[j] = pid;
-			stringstream ss;
-			string filename;
+			std::stringstream ss;
+			std::string filename;
 			ss << serverRootDirectory;
 			ss << pds[j];
 			ss >> filename;
@@ -1238,10 +1241,10 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 	else*/
 	{
 		void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-		//logger << endl <<dlib << endl;
+		//logger << endl <<dlib << std::endl;
 		if(dlib==NULL)
 		{
-			logger << dlerror() << endl;
+			logger << dlerror() << std::endl;
 			logger.info("Could not load Library");
 			exit(0);
 		}
@@ -1252,10 +1255,10 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 		}
 
 		void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
-		//logger << endl <<dlib << endl;
+		//logger << endl <<dlib << std::endl;
 		if(ddlib==NULL)
 		{
-			logger << dlerror() << endl;
+			logger << dlerror() << std::endl;
 			logger.info("Could not load dynamic Library");
 			exit(0);
 		}
@@ -1282,16 +1285,16 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 
 	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
-	logger << ("Initializing ffeadContext....") << endl;
+	logger << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->ffeadContext.initializeAllSingletonBeans(ConfigurationData::getInstance()->servingContexts);
-	logger << ("Initializing ffeadContext done....") << endl;
+	logger << ("Initializing ffeadContext done....") << std::endl;
 
 	//printf("server: waiting for connections...\n");
 	logger.info("Server: waiting for connections on " + ipport);
 
-	ofstream serverCntrlFileo;
+	std::ofstream serverCntrlFileo;
 	serverCntrlFileo.open(serverCntrlFileNm.c_str());
-	serverCntrlFileo << "Server Running" << endl;
+	serverCntrlFileo << "Server Running" << std::endl;
 	serverCntrlFileo.close();
 
 	//Sleep for some time so as to make sure all the new child processes are set correctly
@@ -1301,7 +1304,7 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 	Thread gsthread(&gracefullShutdown_monitor, &ipport);
 	gsthread.execute();
 
-	string cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["CONTENT_ENCODING"]);
+	std::string cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["CONTENT_ENCODING"]);
 	try {
 		techunkSiz = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->coreServerProperties.sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);
 	} catch (...) {
@@ -1357,23 +1360,23 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 			//perror("poll_wait main process");
 			if(errno==EBADF)
 			{
-				logger << "Inavlid fd" <<endl;
+				logger << "Inavlid fd" <<std::endl;
 			}
 			else if(errno==EFAULT)
 			{
-				logger << "The memory area pointed to by events is not accessible" <<endl;
+				logger << "The memory area pointed to by events is not accessible" <<std::endl;
 			}
 			else if(errno==EINTR)
 			{
-				//logger << "call was interrupted by a signal handler before any of the requested events occurred" <<endl;
+				//logger << "call was interrupted by a signal handler before any of the requested events occurred" <<std::endl;
 			}
 			else if(errno==EINVAL)
 			{
-				//logger << "not a poll file descriptor, or maxevents is less than or equal to zero" << endl;
+				//logger << "not a poll file descriptor, or maxevents is less than or equal to zero" << std::endl;
 			}
 			else
 			{
-				logger << "not an epoll file descriptor" <<endl;
+				logger << "not an epoll file descriptor" <<std::endl;
 			}
 			continue;
 		}
@@ -1388,8 +1391,8 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 				{
 					pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
 					pds[j] = pid;
-					stringstream ss;
-					string filename;
+					std::stringstream ss;
+					std::string filename;
 					ss << serverRootDirectory;
 					ss << pds[j];
 					ss >> filename;
@@ -1430,18 +1433,18 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 			}
 			else if (descriptor != -1)
 			{
-				logger << ("got new connection " + CastUtil::lexical_cast<string>(descriptor)) << endl;
+				logger << ("got new connection " + CastUtil::lexical_cast<std::string>(descriptor)) << std::endl;
 				selEpolKqEvPrtHandler.unRegisterForEvent(descriptor);
 				if(preForked>0 && IS_FILE_DESC_PASSING_AVAIL)
 				{
 					errno = 0;
-					ifstream cntrlfile;
+					std::ifstream cntrlfile;
 					cntrlfile.open(files.at(childNo).c_str());
 					if(cntrlfile.is_open())
 					{
 						#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 						send_connection(sp[childNo][0], descriptor);
-						string cno = CastUtil::lexical_cast<string>(childNo);
+						std::string cno = CastUtil::lexical_cast<std::string>(childNo);
 						childNo++;
 						#endif
 					}
@@ -1452,7 +1455,7 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 					}
 					cntrlfile.close();
 					if(errno!=0) {
-						logger << ("Send socket failed with errno = " + CastUtil::lexical_cast<string>(errno)) << endl;
+						logger << ("Send socket failed with errno = " + CastUtil::lexical_cast<std::string>(errno)) << std::endl;
 					}
 				}
 				else
@@ -1480,11 +1483,11 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 					}
 					catch(const char* err)
 					{
-						logger << "Exception occurred while processing ServiceTask request - " << err << endl;
+						logger << "Exception occurred while processing ServiceTask request - " << err << std::endl;
 					}
 					catch(...)
 					{
-						logger << "Standard exception occurred while processing ServiceTask request " << endl;
+						logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
 					}
 				}
 			}
@@ -1505,23 +1508,23 @@ void CHServer::serve(string port, string ipaddr, int thrdpsiz, string serverRoot
 
 	ConfigurationData::clearInstance();
 
-	logger << "Destructed SSLHandler" << endl;
+	logger << "Destructed SSLHandler" << std::endl;
 
 	if(pool!=NULL) {
 		delete pool;
-		logger << "Destructed Thread pool" << endl;
+		logger << "Destructed Thread pool" << std::endl;
 	}
 
 	#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 	if(preForked>0 && IS_FILE_DESC_PASSING_AVAIL)
 	{
-		map<int,pid_t>::iterator it;
+		std::map<int,pid_t>::iterator it;
 		for(it=pds.begin();it!=pds.end();++it)
 		{
 			kill(it->second, SIGKILL);
-			logger << ("Killed child process ") << it->second << endl;
+			logger << ("Killed child process ") << it->second << std::endl;
 		}
-		logger << "Destructed child processes" << endl;
+		logger << "Destructed child processes" << std::endl;
 	}
 	#endif
 

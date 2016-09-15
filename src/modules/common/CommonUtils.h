@@ -23,34 +23,34 @@
 #include "PropFileReader.h"
 #include "RegexUtil.h"
 
-using namespace std;
+
 
 class CommonUtils {
-	static string BLANK;
+	static std::string BLANK;
 	static ThreadLocal contextName;
-	static map<string, string> mimeTypes;
-	static map<string, string> locales;
+	static std::map<std::string, std::string> mimeTypes;
+	static std::map<std::string, std::string> locales;
 public:
-	static unsigned long long charArrayToULongLong(const string& l, int ind);
-	static unsigned long long charArrayToULongLong(const string& l);
-	static string ulonglongTocharArray(const unsigned long long& lon, const int& provind= -1);
-	static unsigned long long charArrayToULongLong(const vector<unsigned char>& l);
-	static string xorEncryptDecrypt(const string& toEncrypt, const uint32_t& maskingKey);
-	static void printBinary(const string& encv, const bool& isNL= true);
-	static string toBinary(const string& encv);
-	static void printMap(const map<string, string>& mp);
-	static void printMap(const map<int, map<string, string> >& mp);
-	static void printMap(const map<string, int>& mp);
-	static void printHEX(const string& encv);
-	static string toHEX(const uint32_t& num);
-	static void setAppName(const string& appName);
-	static string getAppName(const string& appName = "");
-	static void loadMimeTypes(const string& file);
-	static void loadLocales(const string& file);
-	static const string& getMimeType(const string& extension);
-	static const string& getLocale(const string& abbrev);
-	static vector<string> getFiles(const string& cwd, const string& suffix, const bool& isAbs = true);
-	static void listFiles(vector<string>& files, const string& cwd, const string& suffix, const bool& isAbs = true);
+	static unsigned long long charArrayToULongLong(const std::string& l, int ind);
+	static unsigned long long charArrayToULongLong(const std::string& l);
+	static std::string ulonglongTocharArray(const unsigned long long& lon, const int& provind= -1);
+	static unsigned long long charArrayToULongLong(const std::vector<unsigned char>& l);
+	static std::string xorEncryptDecrypt(const std::string& toEncrypt, const uint32_t& maskingKey);
+	static void printBinary(const std::string& encv, const bool& isNL= true);
+	static std::string toBinary(const std::string& encv);
+	static void printMap(const std::map<std::string, std::string>& mp);
+	static void printMap(const std::map<int, std::map<std::string, std::string> >& mp);
+	static void printMap(const std::map<std::string, int>& mp);
+	static void printHEX(const std::string& encv);
+	static std::string toHEX(const uint32_t& num);
+	static void setAppName(const std::string& appName);
+	static std::string getAppName(const std::string& appName = "");
+	static void loadMimeTypes(const std::string& file);
+	static void loadLocales(const std::string& file);
+	static const std::string& getMimeType(const std::string& extension);
+	static const std::string& getLocale(const std::string& abbrev);
+	static std::vector<std::string> getFiles(const std::string& cwd, const std::string& suffix, const bool& isAbs = true);
+	static void listFiles(std::vector<std::string>& files, const std::string& cwd, const std::string& suffix, const bool& isAbs = true);
 };
 
 #endif /* COMMONUTILS_H_ */

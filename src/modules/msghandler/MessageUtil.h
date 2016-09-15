@@ -30,22 +30,22 @@
 
 class MessageUtil {
 public:
-	MessageUtil(const string&);
+	MessageUtil(const std::string&);
 	virtual ~MessageUtil();
 	Destination getDestination();
 	bool sendMessage(const Message&);
 	Message receiveMessage();
-	void subscribe(const string&);
-	void unSubscribe(const string&);
-    string getSubscriber() const;
-    void setSubscriber(const string&);
+	void subscribe(const std::string&);
+	void unSubscribe(const std::string&);
+    std::string getSubscriber() const;
+    void setSubscriber(const std::string&);
 private:
     void *get_in_addr(struct sockaddr *sa);
     Logger logger;
 	Destination destination;
-	string host;
-	string port;
-	string subscriber;
+	std::string host;
+	std::string port;
+	std::string subscriber;
 };
 
 #endif /* MESSAGEUTIL_H_ */

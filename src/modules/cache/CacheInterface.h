@@ -18,75 +18,75 @@ public:
 	virtual ~CacheInterface();
 	virtual void init()=0;
 
-	bool set(const string& key, const char* value, const int& expireSeconds);
-	bool add(const string& key, const char* value, const int& expireSeconds);
-	bool replace(const string& key, const char* value, const int& expireSeconds);
+	bool set(const std::string& key, const char* value, const int& expireSeconds);
+	bool add(const std::string& key, const char* value, const int& expireSeconds);
+	bool replace(const std::string& key, const char* value, const int& expireSeconds);
 
-	bool set(const string& key, const string& value, const int& expireSeconds);
-	bool add(const string& key, const string& value, const int& expireSeconds);
-	bool replace(const string& key, const string& value, const int& expireSeconds);
+	bool set(const std::string& key, const std::string& value, const int& expireSeconds);
+	bool add(const std::string& key, const std::string& value, const int& expireSeconds);
+	bool replace(const std::string& key, const std::string& value, const int& expireSeconds);
 
-	bool set(const string& key, const short& value, const int& expireSeconds);
-	bool add(const string& key, const short& value, const int& expireSeconds);
-	bool replace(const string& key, const short& value, const int& expireSeconds);
-	bool set(const string& key, const unsigned short& value, const int& expireSeconds);
-	bool add(const string& key, const unsigned short& value, const int& expireSeconds);
-	bool replace(const string& key, const unsigned short& value, const int& expireSeconds);
+	bool set(const std::string& key, const short& value, const int& expireSeconds);
+	bool add(const std::string& key, const short& value, const int& expireSeconds);
+	bool replace(const std::string& key, const short& value, const int& expireSeconds);
+	bool set(const std::string& key, const unsigned short& value, const int& expireSeconds);
+	bool add(const std::string& key, const unsigned short& value, const int& expireSeconds);
+	bool replace(const std::string& key, const unsigned short& value, const int& expireSeconds);
 
-	bool set(const string& key, const int& value, const int& expireSeconds);
-	bool add(const string& key, const int& value, const int& expireSeconds);
-	bool replace(const string& key, const int& value, const int& expireSeconds);
-	bool set(const string& key, const unsigned int& value, const int& expireSeconds);
-	bool add(const string& key, const unsigned int& value, const int& expireSeconds);
-	bool replace(const string& key, const unsigned int& value, const int& expireSeconds);
+	bool set(const std::string& key, const int& value, const int& expireSeconds);
+	bool add(const std::string& key, const int& value, const int& expireSeconds);
+	bool replace(const std::string& key, const int& value, const int& expireSeconds);
+	bool set(const std::string& key, const unsigned int& value, const int& expireSeconds);
+	bool add(const std::string& key, const unsigned int& value, const int& expireSeconds);
+	bool replace(const std::string& key, const unsigned int& value, const int& expireSeconds);
 
-	bool set(const string& key, const long& value, const int& expireSeconds);
-	bool add(const string& key, const long& value, const int& expireSeconds);
-	bool replace(const string& key, const long& value, const int& expireSeconds);
-	bool set(const string& key, const unsigned long& value, const int& expireSeconds);
-	bool add(const string& key, const unsigned long& value, const int& expireSeconds);
-	bool replace(const string& key, const unsigned long& value, const int& expireSeconds);
+	bool set(const std::string& key, const long& value, const int& expireSeconds);
+	bool add(const std::string& key, const long& value, const int& expireSeconds);
+	bool replace(const std::string& key, const long& value, const int& expireSeconds);
+	bool set(const std::string& key, const unsigned long& value, const int& expireSeconds);
+	bool add(const std::string& key, const unsigned long& value, const int& expireSeconds);
+	bool replace(const std::string& key, const unsigned long& value, const int& expireSeconds);
 
-	bool set(const string& key, const long long& value, const int& expireSeconds);
-	bool add(const string& key, const long long& value, const int& expireSeconds);
-	bool replace(const string& key, const long long& value, const int& expireSeconds);
-	bool set(const string& key, const unsigned long long& value, const int& expireSeconds);
-	bool add(const string& key, const unsigned long long& value, const int& expireSeconds);
-	bool replace(const string& key, const unsigned long long& value, const int& expireSeconds);
+	bool set(const std::string& key, const long long& value, const int& expireSeconds);
+	bool add(const std::string& key, const long long& value, const int& expireSeconds);
+	bool replace(const std::string& key, const long long& value, const int& expireSeconds);
+	bool set(const std::string& key, const unsigned long long& value, const int& expireSeconds);
+	bool add(const std::string& key, const unsigned long long& value, const int& expireSeconds);
+	bool replace(const std::string& key, const unsigned long long& value, const int& expireSeconds);
 
-	bool set(const string& key, const float& value, const int& expireSeconds);
-	bool add(const string& key, const float& value, const int& expireSeconds);
-	bool replace(const string& key, const float& value, const int& expireSeconds);
+	bool set(const std::string& key, const float& value, const int& expireSeconds);
+	bool add(const std::string& key, const float& value, const int& expireSeconds);
+	bool replace(const std::string& key, const float& value, const int& expireSeconds);
 
-	bool set(const string& key, const double& value, const int& expireSeconds);
-	bool add(const string& key, const double& value, const int& expireSeconds);
-	bool replace(const string& key, const double& value, const int& expireSeconds);
-	bool set(const string& key, const long double& value, const int& expireSeconds);
-	bool add(const string& key, const long double& value, const int& expireSeconds);
-	bool replace(const string& key, const long double& value, const int& expireSeconds);
+	bool set(const std::string& key, const double& value, const int& expireSeconds);
+	bool add(const std::string& key, const double& value, const int& expireSeconds);
+	bool replace(const std::string& key, const double& value, const int& expireSeconds);
+	bool set(const std::string& key, const long double& value, const int& expireSeconds);
+	bool add(const std::string& key, const long double& value, const int& expireSeconds);
+	bool replace(const std::string& key, const long double& value, const int& expireSeconds);
 
-	bool set(const string& key, const bool& value, const int& expireSeconds);
-	bool add(const string& key, const bool& value, const int& expireSeconds);
-	bool replace(const string& key, const bool& value, const int& expireSeconds);
+	bool set(const std::string& key, const bool& value, const int& expireSeconds);
+	bool add(const std::string& key, const bool& value, const int& expireSeconds);
+	bool replace(const std::string& key, const bool& value, const int& expireSeconds);
 
-	virtual bool set(const string& key, GenericObject& value, const int& expireSeconds)=0;
-	virtual bool add(const string& key, GenericObject& value, const int& expireSeconds)=0;
-	virtual bool replace(const string& key, GenericObject& value, const int& expireSeconds)=0;
-	virtual bool remove(const string& key)=0;
-	virtual long long increment(const string& key, const int& number= 1)=0;
-	virtual long long decrement(const string& key, const int& number= 1)=0;
-	virtual long double incrementFloat(const string& key, const double& number = 1.0)=0;
-	virtual long double decrementFloat(const string& key, const double& number = 1.0)=0;
-	virtual map<string, string> statistics()=0;
+	virtual bool set(const std::string& key, GenericObject& value, const int& expireSeconds)=0;
+	virtual bool add(const std::string& key, GenericObject& value, const int& expireSeconds)=0;
+	virtual bool replace(const std::string& key, GenericObject& value, const int& expireSeconds)=0;
+	virtual bool remove(const std::string& key)=0;
+	virtual long long increment(const std::string& key, const int& number= 1)=0;
+	virtual long long decrement(const std::string& key, const int& number= 1)=0;
+	virtual long double incrementFloat(const std::string& key, const double& number = 1.0)=0;
+	virtual long double decrementFloat(const std::string& key, const double& number = 1.0)=0;
+	virtual std::map<std::string, std::string> statistics()=0;
 	virtual bool flushAll()=0;
-	virtual string getValue(const string& key)=0;
+	virtual std::string getValue(const std::string& key)=0;
 
-	template<typename T> inline T get(const string& key) {
-		string val = getValue(key);
+	template<typename T> inline T get(const std::string& key) {
+		std::string val = getValue(key);
 		return GenericObject::getObjectFromSerilaizedState<T>(val);
 	}
 
-	virtual void* executeCommand(const string& command, ...)=0;
+	virtual void* executeCommand(const std::string& command, ...)=0;
 };
 
 #endif /* CACHEINTERFACE_H_ */

@@ -23,13 +23,13 @@
 #ifndef DEPENDENCYBEAN2_H_
 #define DEPENDENCYBEAN2_H_
 #include "iostream"
-using namespace std;
+
 class DependencyBean2
 {
 public:
     void print()
     {
-        cout << "rl" << flush;
+        std::cout << "rl" << std::flush;
     };
 };
 

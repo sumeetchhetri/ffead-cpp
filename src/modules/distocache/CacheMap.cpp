@@ -23,7 +23,7 @@
 
 CacheMap* CacheMap::instance = NULL;
 
-string CacheMap::MAP_ENTRY = "mapentry", CacheMap::COLL_ENTRY = "collentry", CacheMap::REMOVE = "remove",
+std::string CacheMap::MAP_ENTRY = "mapentry", CacheMap::COLL_ENTRY = "collentry", CacheMap::REMOVE = "remove",
 	   CacheMap::SIZE = "size", CacheMap::CLEAR = "clear", CacheMap::IS_EMPTY = "isempty",
 	   CacheMap::ALLOCATE = "allocate", CacheMap::DEALLOCATE = "deallocate", CacheMap::MAP = "map",
 	   CacheMap::SET = "set", CacheMap::LIST = "list", CacheMap::VECTOR = "vector", CacheMap::QUEUE = "queue",
@@ -33,7 +33,7 @@ string CacheMap::MAP_ENTRY = "mapentry", CacheMap::COLL_ENTRY = "collentry", Cac
 	   CacheMap::INSERT = "insert", CacheMap::OBJ_ENTRY = "objentry", CacheMap::GETBYPOS = "getbypos",
 	   CacheMap::POPGET = "popget", CacheMap::POP_FRONTGET = "popfrontget", CacheMap::POP_BACKGET = "popbackget";
 
-string CacheMap::ERR_NOELEMENTS = "No Elements in container", CacheMap::ERR_NOKEYCACHEMAP = "Unable to find value for Key specified",
+std::string CacheMap::ERR_NOELEMENTS = "No Elements in container", CacheMap::ERR_NOKEYCACHEMAP = "Unable to find value for Key specified",
 	   CacheMap::ERR_INVCONTAINER = "Invalid container specified", CacheMap::ERR_OPNOTSUPP = "Operation not supported on container",
 	   CacheMap::ERR_INDGRTCONTSIZ = "Index greater than container size", CacheMap::ERR_NOTAMAPCONT = "Not a map container",
 	   CacheMap::ERR_NOVALUEFOUND = "No value found for key", CacheMap::ERR_ALLOCENTEXISTS = "Entry already exists",
@@ -44,7 +44,7 @@ string CacheMap::ERR_NOELEMENTS = "No Elements in container", CacheMap::ERR_NOKE
 CacheMap::CacheMap() {
 }
 
-void CacheMap::allocate(const string& cacheKey, const string& type) {
+void CacheMap::allocate(const std::string& cacheKey, const std::string& type) {
 	if(checkExistance(cacheKey))
 	{
 		throw ERR_ALLOCENTEXISTS;
@@ -53,27 +53,27 @@ void CacheMap::allocate(const string& cacheKey, const string& type) {
 	void *entry = NULL;
 	if(type==MAP)
 	{
-		entry = new map<string, string>;
+		entry = new std::map<std::string, std::string>;
 	}
 	else if(type==SET)
 	{
-		entry = new set<string>;
+		entry = new std::set<std::string>;
 	}
 	else if(type==LIST)
 	{
-		entry = new list<string>;
+		entry = new std::list<std::string>;
 	}
 	else if(type==VECTOR)
 	{
-		entry = new vector<string>;
+		entry = new std::vector<std::string>;
 	}
 	else if(type==QUEUE)
 	{
-		entry = new queue<string>;
+		entry = new std::queue<std::string>;
 	}
 	else if(type==DEQUE)
 	{
-		entry = new deque<string>;
+		entry = new std::deque<std::string>;
 	}
 	else
 	{
@@ -89,7 +89,7 @@ void CacheMap::allocate(const string& cacheKey, const string& type) {
 	}
 }
 
-void CacheMap::deallocate(const string& cacheKey) {
+void CacheMap::deallocate(const std::string& cacheKey) {
 	if(checkExistance(cacheKey))
 	{
 		instance->mutex.lock();
@@ -106,20 +106,20 @@ void CacheMap::deallocate(const string& cacheKey) {
 	}
 }
 
-void CacheMap::addObjectEntry(const string& key, const string& value) {
+void CacheMap::addObjectEntry(const std::string& key, const std::string& value) {
 	instance->objMapMutex.lock();
 	instance->objCacheMap[key] = value;
 	instance->objMapMutex.unlock();
 }
 
-void CacheMap::removeObjectEntry(const string& key) {
+void CacheMap::removeObjectEntry(const std::string& key) {
 	instance->objMapMutex.lock();
 	instance->objCacheMap.erase(key);
 	instance->objMapMutex.unlock();
 }
 
-string CacheMap::getObjectEntryValue(const string& key) {
-	string value;
+std::string CacheMap::getObjectEntryValue(const std::string& key) {
+	std::string value;
 	bool error = false;
 	instance->objMapMutex.lock();
 	if(instance->objCacheMap.find(key)!=instance->objCacheMap.end())
@@ -138,15 +138,15 @@ string CacheMap::getObjectEntryValue(const string& key) {
 	return value;
 }
 
-void CacheMap::addMapEntry(const string& cacheKey, const string& key, const string& value) {
+void CacheMap::addMapEntry(const std::string& cacheKey, const std::string& key, const std::string& value) {
 	if(checkExistance(cacheKey, MAP))
 	{
 		instance->mutex.lock();
-		map<string, string>* valueMap = (map<string, string>*)instance->cacheMap[cacheKey];
+		std::map<std::string, std::string>* valueMap = (std::map<std::string, std::string>*)instance->cacheMap[cacheKey];
 		instance->mutex.unlock();
 
 		instance->valueLocks[cacheKey]->lock();
-		valueMap->insert(pair<string, string>(key, value));
+		valueMap->insert(std::pair<std::string, std::string>(key, value));
 		instance->valueLocks[cacheKey]->unlock();
 	}
 	else
@@ -155,11 +155,11 @@ void CacheMap::addMapEntry(const string& cacheKey, const string& key, const stri
 	}
 }
 
-void CacheMap::removeMapEntry(const string& cacheKey, const string& key) {
+void CacheMap::removeMapEntry(const std::string& cacheKey, const std::string& key) {
 	if(checkExistance(cacheKey, MAP))
 	{
 		instance->mutex.lock();
-		map<string, string>* valueMap = (map<string, string>*)instance->cacheMap[cacheKey];
+		std::map<std::string, std::string>* valueMap = (std::map<std::string, std::string>*)instance->cacheMap[cacheKey];
 		instance->mutex.unlock();
 
 		instance->valueLocks[cacheKey]->lock();
@@ -172,14 +172,14 @@ void CacheMap::removeMapEntry(const string& cacheKey, const string& key) {
 	}
 }
 
-void CacheMap::addCollectionEntry(const string& cacheKey, const string& value) {
-	string type = checkExistanceAndGetType(cacheKey);
+void CacheMap::addCollectionEntry(const std::string& cacheKey, const std::string& value) {
+	std::string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -189,7 +189,7 @@ void CacheMap::addCollectionEntry(const string& cacheKey, const string& value) {
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueVector = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueVector = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -199,7 +199,7 @@ void CacheMap::addCollectionEntry(const string& cacheKey, const string& value) {
 		else if(type==SET)
 		{
 			instance->mutex.lock();
-			set<string>* valueVector = (set<string>*)instance->cacheMap[cacheKey];
+			std::set<std::string>* valueVector = (std::set<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -209,7 +209,7 @@ void CacheMap::addCollectionEntry(const string& cacheKey, const string& value) {
 		else if(type==QUEUE)
 		{
 			instance->mutex.lock();
-			queue<string>* valueVector = (queue<string>*)instance->cacheMap[cacheKey];
+			std::queue<std::string>* valueVector = (std::queue<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -219,7 +219,7 @@ void CacheMap::addCollectionEntry(const string& cacheKey, const string& value) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueVector = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueVector = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -249,12 +249,12 @@ void CacheMap::destroy() {
 	}
 }
 
-string CacheMap::getMapEntryValue(const string& cacheKey, const string& key) {
-	string value;
+std::string CacheMap::getMapEntryValue(const std::string& cacheKey, const std::string& key) {
+	std::string value;
 	if(checkExistance(cacheKey, MAP))
 	{
 		instance->mutex.lock();
-		map<string, string>* valueMap = (map<string, string>*)instance->cacheMap[cacheKey];
+		std::map<std::string, std::string>* valueMap = (std::map<std::string, std::string>*)instance->cacheMap[cacheKey];
 		instance->mutex.unlock();
 
 		instance->valueLocks[cacheKey]->lock();
@@ -275,18 +275,18 @@ string CacheMap::getMapEntryValue(const string& cacheKey, const string& key) {
 	return value;
 }
 
-string CacheMap::getMapEntryValueByPosition(const string& cacheKey, const int& position) {
-	string value;
+std::string CacheMap::getMapEntryValueByPosition(const std::string& cacheKey, const int& position) {
+	std::string value;
 	if(checkExistance(cacheKey, MAP))
 	{
 		instance->mutex.lock();
-		map<string, string>* valueMap = (map<string, string>*)instance->cacheMap[cacheKey];
+		std::map<std::string, std::string>* valueMap = (std::map<std::string, std::string>*)instance->cacheMap[cacheKey];
 		instance->mutex.unlock();
 
 		instance->valueLocks[cacheKey]->lock();
 		if(position<(int)valueMap->size())
 		{
-			map<string, string>::iterator it = valueMap->begin();
+			std::map<std::string, std::string>::iterator it = valueMap->begin();
 			advance(it, position);
 			value = it->second;
 		}
@@ -303,17 +303,17 @@ string CacheMap::getMapEntryValueByPosition(const string& cacheKey, const int& p
 	return value;
 }
 
-void CacheMap::setMapEntryValueByPosition(const string& cacheKey, const int& position, const string& value) {
+void CacheMap::setMapEntryValueByPosition(const std::string& cacheKey, const int& position, const std::string& value) {
 	if(checkExistance(cacheKey, MAP))
 	{
 		instance->mutex.lock();
-		map<string, string>* valueMap = (map<string, string>*)instance->cacheMap[cacheKey];
+		std::map<std::string, std::string>* valueMap = (std::map<std::string, std::string>*)instance->cacheMap[cacheKey];
 		instance->mutex.unlock();
 
 		instance->valueLocks[cacheKey]->lock();
 		if(position<(int)valueMap->size())
 		{
-			map<string, string>::iterator it = valueMap->begin();
+			std::map<std::string, std::string>::iterator it = valueMap->begin();
 			advance(it, position);
 			it->second = value;
 		}
@@ -329,15 +329,15 @@ void CacheMap::setMapEntryValueByPosition(const string& cacheKey, const int& pos
 	}
 }
 
-void CacheMap::setCollectionEntryAt(const string& cacheKey, const int& position, const string& value) {
+void CacheMap::setCollectionEntryAt(const std::string& cacheKey, const int& position, const std::string& value) {
 	bool error = false;
-	string type = checkExistanceAndGetType(cacheKey);
+	std::string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -354,13 +354,13 @@ void CacheMap::setCollectionEntryAt(const string& cacheKey, const int& position,
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
 			if(position<(int)valueList->size())
 			{
-				list<string>::iterator it = valueList->begin();
+				std::list<std::string>::iterator it = valueList->begin();
 				advance(it, position);
 				*it = value;
 			}
@@ -373,13 +373,13 @@ void CacheMap::setCollectionEntryAt(const string& cacheKey, const int& position,
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
 			if(position<(int)valueDeque->size())
 			{
-				deque<string>::iterator it = valueDeque->begin();
+				std::deque<std::string>::iterator it = valueDeque->begin();
 				advance(it, position);
 				*it = value;
 			}
@@ -408,16 +408,16 @@ void CacheMap::setCollectionEntryAt(const string& cacheKey, const int& position,
 	}
 }
 
-string CacheMap::getCollectionEntryAt(const string& cacheKey, const int& position) {
-	string value;
+std::string CacheMap::getCollectionEntryAt(const std::string& cacheKey, const int& position) {
+	std::string value;
 	bool error = false;
-	string type = checkExistanceAndGetType(cacheKey);
+	std::string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -434,13 +434,13 @@ string CacheMap::getCollectionEntryAt(const string& cacheKey, const int& positio
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
 			if(position<(int)valueList->size())
 			{
-				list<string>::iterator it = valueList->begin();
+				std::list<std::string>::iterator it = valueList->begin();
 				advance(it, position);
 				value = *it;
 			}
@@ -453,13 +453,13 @@ string CacheMap::getCollectionEntryAt(const string& cacheKey, const int& positio
 		else if(type==SET)
 		{
 			instance->mutex.lock();
-			set<string>* valueSet = (set<string>*)instance->cacheMap[cacheKey];
+			std::set<std::string>* valueSet = (std::set<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
 			if(position<(int)valueSet->size())
 			{
-				set<string>::iterator it = valueSet->begin();
+				std::set<std::string>::iterator it = valueSet->begin();
 				advance(it, position);
 				value = *it;
 			}
@@ -472,13 +472,13 @@ string CacheMap::getCollectionEntryAt(const string& cacheKey, const int& positio
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
 			if(position<(int)valueDeque->size())
 			{
-				deque<string>::iterator it = valueDeque->begin();
+				std::deque<std::string>::iterator it = valueDeque->begin();
 				advance(it, position);
 				value = *it;
 			}
@@ -508,15 +508,15 @@ string CacheMap::getCollectionEntryAt(const string& cacheKey, const int& positio
 	return value;
 }
 
-long CacheMap::size(const string& cacheKey) {
+long CacheMap::size(const std::string& cacheKey) {
 	long value = -1;
-	string type = checkExistanceAndGetType(cacheKey);
+	std::string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -526,7 +526,7 @@ long CacheMap::size(const string& cacheKey) {
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -536,7 +536,7 @@ long CacheMap::size(const string& cacheKey) {
 		else if(type==SET)
 		{
 			instance->mutex.lock();
-			set<string>* valueSet = (set<string>*)instance->cacheMap[cacheKey];
+			std::set<std::string>* valueSet = (std::set<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -546,7 +546,7 @@ long CacheMap::size(const string& cacheKey) {
 		else if(type==QUEUE)
 		{
 			instance->mutex.lock();
-			queue<string>* valueQueue = (queue<string>*)instance->cacheMap[cacheKey];
+			std::queue<std::string>* valueQueue = (std::queue<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -556,7 +556,7 @@ long CacheMap::size(const string& cacheKey) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -566,7 +566,7 @@ long CacheMap::size(const string& cacheKey) {
 		else if(type==MAP)
 		{
 			instance->mutex.lock();
-			map<string, string>* valueMap = (map<string, string>*)instance->cacheMap[cacheKey];
+			std::map<std::string, std::string>* valueMap = (std::map<std::string, std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -586,15 +586,15 @@ long CacheMap::size(const string& cacheKey) {
 }
 
 
-void CacheMap::removeCollectionEntryAt(const string& cacheKey, const int& position) {
-	string type = checkExistanceAndGetType(cacheKey);
+void CacheMap::removeCollectionEntryAt(const std::string& cacheKey, const int& position) {
+	std::string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -611,13 +611,13 @@ void CacheMap::removeCollectionEntryAt(const string& cacheKey, const int& positi
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
 			if(position<(int)valueList->size())
 			{
-				list<string>::iterator it = valueList->begin();
+				std::list<std::string>::iterator it = valueList->begin();
 				advance(it, position);
 				valueList->erase(it);
 			}
@@ -630,13 +630,13 @@ void CacheMap::removeCollectionEntryAt(const string& cacheKey, const int& positi
 		else if(type==SET)
 		{
 			instance->mutex.lock();
-			set<string>* valueSet = (set<string>*)instance->cacheMap[cacheKey];
+			std::set<std::string>* valueSet = (std::set<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
 			if(position<(int)valueSet->size())
 			{
-				set<string>::iterator it = valueSet->begin();
+				std::set<std::string>::iterator it = valueSet->begin();
 				advance(it, position);
 				valueSet->erase(it);
 			}
@@ -649,7 +649,7 @@ void CacheMap::removeCollectionEntryAt(const string& cacheKey, const int& positi
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -682,15 +682,15 @@ void CacheMap::removeCollectionEntryAt(const string& cacheKey, const int& positi
 	}
 }
 
-bool CacheMap::isEmpty(const string& cacheKey) {
+bool CacheMap::isEmpty(const std::string& cacheKey) {
 	bool value = false;
-	string type = checkExistanceAndGetType(cacheKey);
+	std::string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -700,7 +700,7 @@ bool CacheMap::isEmpty(const string& cacheKey) {
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -710,7 +710,7 @@ bool CacheMap::isEmpty(const string& cacheKey) {
 		else if(type==SET)
 		{
 			instance->mutex.lock();
-			set<string>* valueSet = (set<string>*)instance->cacheMap[cacheKey];
+			std::set<std::string>* valueSet = (std::set<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -720,7 +720,7 @@ bool CacheMap::isEmpty(const string& cacheKey) {
 		else if(type==QUEUE)
 		{
 			instance->mutex.lock();
-			queue<string>* valueQueue = (queue<string>*)instance->cacheMap[cacheKey];
+			std::queue<std::string>* valueQueue = (std::queue<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -730,7 +730,7 @@ bool CacheMap::isEmpty(const string& cacheKey) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -740,7 +740,7 @@ bool CacheMap::isEmpty(const string& cacheKey) {
 		else if(type==MAP)
 		{
 			instance->mutex.lock();
-			map<string, string>* valueMap = (map<string, string>*)instance->cacheMap[cacheKey];
+			std::map<std::string, std::string>* valueMap = (std::map<std::string, std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -759,14 +759,14 @@ bool CacheMap::isEmpty(const string& cacheKey) {
 	return value;
 }
 
-void CacheMap::clear(const string& cacheKey) {
-	string type = checkExistanceAndGetType(cacheKey);
+void CacheMap::clear(const std::string& cacheKey) {
+	std::string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -776,7 +776,7 @@ void CacheMap::clear(const string& cacheKey) {
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -786,7 +786,7 @@ void CacheMap::clear(const string& cacheKey) {
 		else if(type==SET)
 		{
 			instance->mutex.lock();
-			set<string>* valueSet = (set<string>*)instance->cacheMap[cacheKey];
+			std::set<std::string>* valueSet = (std::set<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -796,7 +796,7 @@ void CacheMap::clear(const string& cacheKey) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -806,7 +806,7 @@ void CacheMap::clear(const string& cacheKey) {
 		else if(type==MAP)
 		{
 			instance->mutex.lock();
-			map<string, string>* valueMap = (map<string, string>*)instance->cacheMap[cacheKey];
+			std::map<std::string, std::string>* valueMap = (std::map<std::string, std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -824,15 +824,15 @@ void CacheMap::clear(const string& cacheKey) {
 	}
 }
 
-void CacheMap::insert(const string& cacheKey, const string& value, const int& position) {
-	string type = checkExistanceAndGetType(cacheKey);
+void CacheMap::insert(const std::string& cacheKey, const std::string& value, const int& position) {
+	std::string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -849,13 +849,13 @@ void CacheMap::insert(const string& cacheKey, const string& value, const int& po
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
 			if(position<(int)valueList->size())
 			{
-				list<string>::iterator it = valueList->begin();
+				std::list<std::string>::iterator it = valueList->begin();
 				advance(it, position);
 				valueList->insert(it, value);
 			}
@@ -868,13 +868,13 @@ void CacheMap::insert(const string& cacheKey, const string& value, const int& po
 		else if(type==SET)
 		{
 			instance->mutex.lock();
-			set<string>* valueSet = (set<string>*)instance->cacheMap[cacheKey];
+			std::set<std::string>* valueSet = (std::set<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
 			if(position<(int)valueSet->size())
 			{
-				set<string>::iterator it = valueSet->begin();
+				std::set<std::string>::iterator it = valueSet->begin();
 				advance(it, position);
 				valueSet->insert(it, value);
 			}
@@ -887,7 +887,7 @@ void CacheMap::insert(const string& cacheKey, const string& value, const int& po
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -920,15 +920,15 @@ void CacheMap::insert(const string& cacheKey, const string& value, const int& po
 	}
 }
 
-void CacheMap::insert(const string& cacheKey, const string& value, const int& position, const int& repeat) {
-	string type = checkExistanceAndGetType(cacheKey);
+void CacheMap::insert(const std::string& cacheKey, const std::string& value, const int& position, const int& repeat) {
+	std::string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -945,13 +945,13 @@ void CacheMap::insert(const string& cacheKey, const string& value, const int& po
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
 			if(position<(int)valueList->size())
 			{
-				list<string>::iterator it = valueList->begin();
+				std::list<std::string>::iterator it = valueList->begin();
 				advance(it, position);
 				valueList->insert(it, repeat, value);
 			}
@@ -964,7 +964,7 @@ void CacheMap::insert(const string& cacheKey, const string& value, const int& po
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -997,14 +997,14 @@ void CacheMap::insert(const string& cacheKey, const string& value, const int& po
 	}
 }
 
-void CacheMap::popValueQueue(const string& cacheKey) {
-	string type = checkExistanceAndGetType(cacheKey);
+void CacheMap::popValueQueue(const std::string& cacheKey) {
+	std::string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
 		if(type==QUEUE)
 		{
 			instance->mutex.lock();
-			queue<string>* valueQueue = (queue<string>*)instance->cacheMap[cacheKey];
+			std::queue<std::string>* valueQueue = (std::queue<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			bool error = false;
@@ -1038,15 +1038,15 @@ void CacheMap::popValueQueue(const string& cacheKey) {
 	}
 }
 
-string CacheMap::popGetValueQueue(const string& cacheKey) {
-	string resp;
-	string type = checkExistanceAndGetType(cacheKey);
+std::string CacheMap::popGetValueQueue(const std::string& cacheKey) {
+	std::string resp;
+	std::string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
 		if(type==QUEUE)
 		{
 			instance->mutex.lock();
-			queue<string>* valueQueue = (queue<string>*)instance->cacheMap[cacheKey];
+			std::queue<std::string>* valueQueue = (std::queue<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			bool error = false;
@@ -1082,14 +1082,14 @@ string CacheMap::popGetValueQueue(const string& cacheKey) {
 	return resp;
 }
 
-void CacheMap::pushBackValue(const string& cacheKey, const string& value) {
-	string type = checkExistanceAndGetType(cacheKey);
+void CacheMap::pushBackValue(const std::string& cacheKey, const std::string& value) {
+	std::string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
 		if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1099,7 +1099,7 @@ void CacheMap::pushBackValue(const string& cacheKey, const string& value) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1121,14 +1121,14 @@ void CacheMap::pushBackValue(const string& cacheKey, const string& value) {
 	}
 }
 
-void CacheMap::pushFrontValue(const string& cacheKey, const string& value) {
-	string type = checkExistanceAndGetType(cacheKey);
+void CacheMap::pushFrontValue(const std::string& cacheKey, const std::string& value) {
+	std::string type = checkExistanceAndGetType(cacheKey);
 	if(type!="")
 	{
 		if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1138,7 +1138,7 @@ void CacheMap::pushFrontValue(const string& cacheKey, const string& value) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1160,15 +1160,15 @@ void CacheMap::pushFrontValue(const string& cacheKey, const string& value) {
 	}
 }
 
-void CacheMap::popFrontValue(const string& cacheKey) {
-	string type = checkExistanceAndGetType(cacheKey);
+void CacheMap::popFrontValue(const std::string& cacheKey) {
+	std::string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
 	{
 		if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1185,7 +1185,7 @@ void CacheMap::popFrontValue(const string& cacheKey) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1218,15 +1218,15 @@ void CacheMap::popFrontValue(const string& cacheKey) {
 	}
 }
 
-void CacheMap::popBackValue(const string& cacheKey) {
-	string type = checkExistanceAndGetType(cacheKey);
+void CacheMap::popBackValue(const std::string& cacheKey) {
+	std::string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
 	{
 		if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1243,7 +1243,7 @@ void CacheMap::popBackValue(const string& cacheKey) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1276,16 +1276,16 @@ void CacheMap::popBackValue(const string& cacheKey) {
 	}
 }
 
-string CacheMap::popGetFrontValue(const string& cacheKey) {
-	string resp;
-	string type = checkExistanceAndGetType(cacheKey);
+std::string CacheMap::popGetFrontValue(const std::string& cacheKey) {
+	std::string resp;
+	std::string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
 	{
 		if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1303,7 +1303,7 @@ string CacheMap::popGetFrontValue(const string& cacheKey) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1338,16 +1338,16 @@ string CacheMap::popGetFrontValue(const string& cacheKey) {
 	return resp;
 }
 
-string CacheMap::popGetBackValue(const string& cacheKey) {
-	string resp;
-	string type = checkExistanceAndGetType(cacheKey);
+std::string CacheMap::popGetBackValue(const std::string& cacheKey) {
+	std::string resp;
+	std::string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
 	{
 		if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1365,7 +1365,7 @@ string CacheMap::popGetBackValue(const string& cacheKey) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1399,16 +1399,16 @@ string CacheMap::popGetBackValue(const string& cacheKey) {
 	}
 }
 
-string CacheMap::getFrontValue(const string& cacheKey) {
-	string value;
-	string type = checkExistanceAndGetType(cacheKey);
+std::string CacheMap::getFrontValue(const std::string& cacheKey) {
+	std::string value;
+	std::string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1425,7 +1425,7 @@ string CacheMap::getFrontValue(const string& cacheKey) {
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1442,7 +1442,7 @@ string CacheMap::getFrontValue(const string& cacheKey) {
 		else if(type==QUEUE)
 		{
 			instance->mutex.lock();
-			queue<string>* valueQueue = (queue<string>*)instance->cacheMap[cacheKey];
+			std::queue<std::string>* valueQueue = (std::queue<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1459,7 +1459,7 @@ string CacheMap::getFrontValue(const string& cacheKey) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1493,16 +1493,16 @@ string CacheMap::getFrontValue(const string& cacheKey) {
 	return value;
 }
 
-string CacheMap::getBackValue(const string& cacheKey) {
-	string value;
-	string type = checkExistanceAndGetType(cacheKey);
+std::string CacheMap::getBackValue(const std::string& cacheKey) {
+	std::string value;
+	std::string type = checkExistanceAndGetType(cacheKey);
 	bool error = false;
 	if(type!="")
 	{
 		if(type==VECTOR)
 		{
 			instance->mutex.lock();
-			vector<string>* valueVector = (vector<string>*)instance->cacheMap[cacheKey];
+			std::vector<std::string>* valueVector = (std::vector<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1519,7 +1519,7 @@ string CacheMap::getBackValue(const string& cacheKey) {
 		else if(type==LIST)
 		{
 			instance->mutex.lock();
-			list<string>* valueList = (list<string>*)instance->cacheMap[cacheKey];
+			std::list<std::string>* valueList = (std::list<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1536,7 +1536,7 @@ string CacheMap::getBackValue(const string& cacheKey) {
 		else if(type==QUEUE)
 		{
 			instance->mutex.lock();
-			queue<string>* valueQueue = (queue<string>*)instance->cacheMap[cacheKey];
+			std::queue<std::string>* valueQueue = (std::queue<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1553,7 +1553,7 @@ string CacheMap::getBackValue(const string& cacheKey) {
 		else if(type==DEQUE)
 		{
 			instance->mutex.lock();
-			deque<string>* valueDeque = (deque<string>*)instance->cacheMap[cacheKey];
+			std::deque<std::string>* valueDeque = (std::deque<std::string>*)instance->cacheMap[cacheKey];
 			instance->mutex.unlock();
 
 			instance->valueLocks[cacheKey]->lock();
@@ -1590,7 +1590,7 @@ string CacheMap::getBackValue(const string& cacheKey) {
 CacheMap::~CacheMap() {
 }
 
-bool CacheMap::checkObjectExistance(const string& key)
+bool CacheMap::checkObjectExistance(const std::string& key)
 {
 	bool flag = false;
 	instance->objMapMutex.lock();
@@ -1599,7 +1599,7 @@ bool CacheMap::checkObjectExistance(const string& key)
 	return flag;
 }
 
-bool CacheMap::checkExistance(const string& cacheKey, const string& type)
+bool CacheMap::checkExistance(const std::string& cacheKey, const std::string& type)
 {
 	bool flag = false;
 	instance->mutex.lock();
@@ -1611,9 +1611,9 @@ bool CacheMap::checkExistance(const string& cacheKey, const string& type)
 }
 
 
-string CacheMap::checkExistanceAndGetType(const string& cacheKey)
+std::string CacheMap::checkExistanceAndGetType(const std::string& cacheKey)
 {
-	string type;
+	std::string type;
 	instance->mutex.lock();
 	if(instance->cacheMap.find(cacheKey)!=instance->cacheMap.end())
 	{

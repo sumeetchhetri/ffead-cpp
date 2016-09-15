@@ -9,13 +9,13 @@
 
 Query SQLDataSourceImpl::fromQueryBuilder(QueryBuilder& qb) {
 	Query q;
-	string qs;
+	std::string qs;
 	qs.append("SELECT ");
 	if(qb.isUnique())
 		qs.append("DISTINCT ");
 
-	string tableNm = qb.getTableName();
-	string alias = qb.getAlias();
+	std::string tableNm = qb.getTableName();
+	std::string alias = qb.getAlias();
 	bool isClassProps = false;
 
 	DataSourceEntityMapping dsemp;
@@ -40,7 +40,7 @@ Query SQLDataSourceImpl::fromQueryBuilder(QueryBuilder& qb) {
 		strMap::iterator it;
 		for(it=tabcolmap.begin();it!=tabcolmap.end();it++)
 		{
-			string columnName = it->first;
+			std::string columnName = it->first;
 			qs.append(qb.getClassName() + "."  + columnName);
 			if(var++!=fldsiz)
 				qs.append(",");
@@ -49,8 +49,8 @@ Query SQLDataSourceImpl::fromQueryBuilder(QueryBuilder& qb) {
 	}
 	else
 	{
-		map<string, string> cols = qb.getColumns();
-		map<string, string>::iterator it;
+		std::map<std::string, std::string> cols = qb.getColumns();
+		std::map<std::string, std::string>::iterator it;
 		for (it=cols.begin(); it!=cols.end(); ++it) {
 			if(!isClassProps)
 			{
@@ -273,7 +273,7 @@ void SQLDataSourceImpl::executePreTable(DataSourceEntityMapping& dsemp, GenericO
 	long long id = -1;
 	if(dsemp.getIdgendbEntityType()=="table")
 	{
-		string query;
+		std::string query;
 		Query q;
 		if(dsemp.getIdgentype()=="hilo" || dsemp.getIdgentype()=="multihilo")
 		{
@@ -300,7 +300,7 @@ void SQLDataSourceImpl::executePreTable(DataSourceEntityMapping& dsemp, GenericO
 		}
 
 		q.setQuery(query);
-		vector<map<string, GenericObject> > vecmp = execute(q);
+		std::vector<std::map<std::string, GenericObject> > vecmp = execute(q);
 		if(vecmp.size()>0 && vecmp.at(0).size()>0)
 		{
 			if(vecmp.at(0).begin()->second.getTypeName()!="")
@@ -315,7 +315,7 @@ void SQLDataSourceImpl::executePreTable(DataSourceEntityMapping& dsemp, GenericO
 void SQLDataSourceImpl::executePostTable(DataSourceEntityMapping& dsemp, GenericObject& idv) {
 	if(dsemp.getIdgendbEntityType()=="table")
 	{
-		string query;
+		std::string query;
 		Query q;
 		if(dsemp.getIdgentype()=="hilo" || dsemp.getIdgentype()=="multihilo")
 		{
@@ -362,10 +362,10 @@ void SQLDataSourceImpl::executeSequence(DataSourceEntityMapping& dsemp, GenericO
 	{
 		StringContext params;
 		params["seq_name"] = dsemp.getIdgendbEntityName();
-		string query = DialectHelper::getSQLString(dialect, DialectHelper::IDGEN_SEQUENCE_QUERY, params);
+		std::string query = DialectHelper::getSQLString(dialect, DialectHelper::IDGEN_SEQUENCE_QUERY, params);
 
 		Query q(query);
-		vector<map<string, GenericObject> > vecmp = execute(q);
+		std::vector<std::map<std::string, GenericObject> > vecmp = execute(q);
 		if(vecmp.size()>0 && vecmp.at(0).size()>0)
 		{
 			if(vecmp.at(0).begin()->second.getTypeName()!="")
@@ -381,9 +381,9 @@ void SQLDataSourceImpl::executeIdentity(DataSourceEntityMapping& dsemp, GenericO
 	long long id = -1;
 	if(dsemp.getIdgendbEntityType()=="identity")
 	{
-		string query = DialectHelper::getIdGenerateQueryPost(dialect, dsemp);
+		std::string query = DialectHelper::getIdGenerateQueryPost(dialect, dsemp);
 		Query q(query);
-		vector<map<string, GenericObject> > vecmp = execute(q);
+		std::vector<std::map<std::string, GenericObject> > vecmp = execute(q);
 		if(vecmp.size()>0 && vecmp.at(0).size()>0)
 		{
 			if(vecmp.at(0).begin()->second.getTypeName()!="")
@@ -398,7 +398,7 @@ void SQLDataSourceImpl::executeIdentity(DataSourceEntityMapping& dsemp, GenericO
 SQLDataSourceImpl::SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping) {
 	this->pool = pool;
 	this->mapping = mapping;
-	map<string, string> props = pool->getProperties().getProperties();
+	std::map<std::string, std::string> props = pool->getProperties().getProperties();
 	this->dialect = props["dialect"];
 	this->appName = mapping->getAppName();
 	V_OD_hdbc = NULL;
@@ -411,7 +411,7 @@ SQLDataSourceImpl::SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping) {
 SQLDataSourceImpl::~SQLDataSourceImpl() {
 }
 
-void SQLDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const string& customMethod, GenericObject& idv) {
+void SQLDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject& idv) {
 	long long id = -1;
 	if(dsemp.getIdgendbEntityType().find("custom:")==0)
 	{}
@@ -465,41 +465,41 @@ void SQLDataSourceImpl::close() {
 
 void* SQLDataSourceImpl::getElements(Query& q)
 {
-	vector<string> cols;
+	std::vector<std::string> cols;
 	return getElements(cols,q);
 }
 
-void* SQLDataSourceImpl::getElements(const vector<string>& cols, Query& q)
+void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query& q)
 {
 #ifdef HAVE_LIBODBC
-	string clasName = q.getClassName();
+	std::string clasName = q.getClassName();
 	int V_OD_erg;// result of functions
 
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
 
 	ClassInfo clas = reflector->getClassInfo(clasName, appName);
-	string tableName = dsemp.getTableName();
-	vector<DataSourceInternalRelation> relv = dsemp.getRelations();
+	std::string tableName = dsemp.getTableName();
+	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
 
 	fldMap fields = clas.getFields();
 	fldMap::iterator it;
 	void *vecT = reflector->getNewContainer(clasName,"std::vector",appName);
 	SQLSMALLINT	V_OD_colanz;
 
-	map<string, void*> rel2Insmap;
-	map<string, void*> rel2Vecmap;
-	map<string, string> fldvalrel2clsmap;
-	map<string, string> fldnmrel2clsmap;
-	map<string, int> rel2reltype;
+	std::map<std::string, void*> rel2Insmap;
+	std::map<std::string, void*> rel2Vecmap;
+	std::map<std::string, std::string> fldvalrel2clsmap;
+	std::map<std::string, std::string> fldnmrel2clsmap;
+	std::map<std::string, int> rel2reltype;
 
 	V_OD_erg=SQLFetch(V_OD_hstmt);
 	while(V_OD_erg != SQL_NO_DATA)
 	{
 		unsigned int var = 0;
 		args argus1;
-		map<string, void*> instances;
+		std::map<std::string, void*> instances;
 		void* relVecEle = NULL;
-		string fldVal;
+		std::string fldVal;
 		const Constructor& ctor = clas.getConstructor(argus1);
 		void *t = reflector->newInstanceGVP(ctor);
 
@@ -509,16 +509,16 @@ void* SQLDataSourceImpl::getElements(const vector<string>& cols, Query& q)
 			close();
 		}
 		bool norel = true;
-		//logger << "Number of Columns " << V_OD_colanz << endl;
+		//logger << "Number of Columns " << V_OD_colanz << std::endl;
 		for(int i=1;i<=V_OD_colanz;i++)
 		{
-			string columnName = q.aliasedColumns.at(i-1);
+			std::string columnName = q.aliasedColumns.at(i-1);
 
-			string thisTableName = tableName;
+			std::string thisTableName = tableName;
 
-			if(columnName.find(".")!=string::npos)
+			if(columnName.find(".")!=std::string::npos)
 			{
-				string tclas = columnName.substr(0, columnName.find("."));
+				std::string tclas = columnName.substr(0, columnName.find("."));
 				thisTableName = mapping->getTableForClass(tclas);
 				columnName = columnName.substr(columnName.find(".")+1);
 			}
@@ -529,7 +529,7 @@ void* SQLDataSourceImpl::getElements(const vector<string>& cols, Query& q)
 			ClassInfo instanceClas;
 			DataSourceInternalRelation instanceRelation;
 
-			string fieldName = this->mapping->getPropertyForColumn(thisTableName, columnName);
+			std::string fieldName = this->mapping->getPropertyForColumn(thisTableName, columnName);
 
 			if(thisTableName==tableName && fieldName!="")
 			{
@@ -547,7 +547,7 @@ void* SQLDataSourceImpl::getElements(const vector<string>& cols, Query& q)
 						rel2reltype[fldVal] = relation.getType();
 						fldnmrel2clsmap[fldVal] = relation.getField();
 						fldvalrel2clsmap[fldVal] = relation.getClsName();
-						string tableName1 = this->mapping->getTableForClass(relation.getClsName());
+						std::string tableName1 = this->mapping->getTableForClass(relation.getClsName());
 						fieldName = this->mapping->getPropertyForColumn(tableName1, columnName);
 						if(fieldName!="" && tableName1==thisTableName)
 						{
@@ -588,7 +588,7 @@ void* SQLDataSourceImpl::getElements(const vector<string>& cols, Query& q)
 				}
 			}
 
-			string fldvalt;
+			std::string fldvalt;
 			var = storeProperty(instanceClas, instance, var, fieldName, fldvalt);
 			if(thisTableName==tableName && fieldName!="" && fieldName==dsemp.getIdPropertyName()) {
 				fldVal = fldvalt;
@@ -611,10 +611,10 @@ void* SQLDataSourceImpl::getElements(const vector<string>& cols, Query& q)
 	}
 	if(fldvalrel2clsmap.size()>0)
 	{
-		map<string, string>::iterator fldvalrel2clsmapit;
+		std::map<std::string, std::string>::iterator fldvalrel2clsmapit;
 		for(fldvalrel2clsmapit=fldvalrel2clsmap.begin();fldvalrel2clsmapit!=fldvalrel2clsmap.end();++fldvalrel2clsmapit)
 		{
-			string flv = fldvalrel2clsmapit->first;
+			std::string flv = fldvalrel2clsmapit->first;
 			void* rvect = rel2Vecmap[flv];
 			if (rvect != NULL) {
 				vals valus;
@@ -624,7 +624,7 @@ void* SQLDataSourceImpl::getElements(const vector<string>& cols, Query& q)
 					argus.push_back("vector<"+fldvalrel2clsmapit->second+">");
 				else
 					argus.push_back(fldvalrel2clsmapit->second);
-				string methname = "set"+StringUtil::capitalizedCopy(fldnmrel2clsmap[flv]);
+				std::string methname = "set"+StringUtil::capitalizedCopy(fldnmrel2clsmap[flv]);
 				Method meth = clas.getMethod(methname,argus);
 				reflector->invokeMethodGVP(rel2Insmap[flv],meth,valus);
 				reflector->addToContainer(vecT,rel2Insmap[flv],clasName,"std::vector",appName);
@@ -649,7 +649,7 @@ void* SQLDataSourceImpl::getElements()
 	SQLSMALLINT	V_OD_colanz, colNameLen, dataType, numDecimalDigits, allowsNullValues;
 	SQLULEN columnSize;
 
-	vector<map<string, GenericObject> >* vecT = new vector<map<string, GenericObject> >;
+	std::vector<std::map<std::string, GenericObject> >* vecT = new std::vector<std::map<std::string, GenericObject> >;
 
 	V_OD_erg=SQLFetch(V_OD_hstmt);
 	while(V_OD_erg != SQL_NO_DATA)
@@ -662,18 +662,18 @@ void* SQLDataSourceImpl::getElements()
 			close();
 		}
 
-		//logger << "Number of Columns " << V_OD_colanz << endl;
+		//logger << "Number of Columns " << V_OD_colanz << std::endl;
 
-		map<string, GenericObject> colValMap;
+		std::map<std::string, GenericObject> colValMap;
 
 		for(int i=1;i<=V_OD_colanz;i++)
 		{
 			V_OD_erg = SQLDescribeCol(V_OD_hstmt, i, colName, 255, &colNameLen, &dataType, &columnSize, &numDecimalDigits, &allowsNullValues);
-			string columnName((char*)colName, colNameLen);
+			std::string columnName((char*)colName, colNameLen);
 
 			//string thisTableName = tableName;
 
-			/*if(columnName.find(".")!=string::npos)
+			/*if(columnName.find(".")!=std::string::npos)
 			{
 				thisTableName = columnName.substr(0, columnName.find("."));
 				columnName = columnName.substr(columnName.find(".")+1);
@@ -693,14 +693,14 @@ void* SQLDataSourceImpl::getElements()
 }
 
 
-int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const string& fieldName, string& fldVal)
+int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const std::string& fieldName, std::string& fldVal)
 {
 #ifdef HAVE_LIBODBC
 	void* col = NULL;
 	SQLRETURN ret;
 	SQLLEN indicator;
 	Field fe = clas.getField(fieldName);
-	string te = fe.getType();
+	std::string te = fe.getType();
 
 	SQLSMALLINT    colNameLen;
 	SQLSMALLINT    colDataType;
@@ -722,7 +722,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 	float df;
 	bool db;
 	Date* ddt;
-	string *ds;
+	std::string *ds;
 	std::wstring* dws;
 
 	switch (colDataType) {
@@ -730,7 +730,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		{
 			unsigned short us;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_USHORT, &us, sizeof(us), &indicator);
-			fldVal = CastUtil::lexical_cast<string>(us);
+			fldVal = CastUtil::lexical_cast<std::string>(us);
 			dn = us;
 			break;
 		}
@@ -738,7 +738,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		{
 			unsigned int us;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_ULONG, &us, sizeof(us), &indicator);
-			fldVal = CastUtil::lexical_cast<string>(us);
+			fldVal = CastUtil::lexical_cast<std::string>(us);
 			dn = us;
 			break;
 		}
@@ -746,7 +746,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		{
 			unsigned char us;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_UTINYINT, &us, sizeof(us), &indicator);
-			fldVal = CastUtil::lexical_cast<string>(us);
+			fldVal = CastUtil::lexical_cast<std::string>(us);
 			dn = us;
 			break;
 		}
@@ -754,7 +754,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		{
 			unsigned long long us;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_UBIGINT, &us, sizeof(us), &indicator);
-			fldVal = CastUtil::lexical_cast<string>(us);
+			fldVal = CastUtil::lexical_cast<std::string>(us);
 			dn = us;
 			break;
 		}
@@ -762,14 +762,14 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		case SQL_REAL:
 		{
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_FLOAT, &df, sizeof(df), &indicator);
-			fldVal = CastUtil::lexical_cast<string>(df);
+			fldVal = CastUtil::lexical_cast<std::string>(df);
 			break;
 		}
 		case SQL_FLOAT:
 		case SQL_DOUBLE:
 		{
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE, &dd, sizeof(dd), &indicator);
-			fldVal = CastUtil::lexical_cast<string>(dd);
+			fldVal = CastUtil::lexical_cast<std::string>(dd);
 			break;
 		}
 		case SQL_DECIMAL:
@@ -778,7 +778,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		case SQL_BIT:
 		{
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT, &db, sizeof(db), &indicator);
-			fldVal = CastUtil::lexical_cast<string>(db);
+			fldVal = CastUtil::lexical_cast<std::string>(db);
 			break;
 		}
 
@@ -832,13 +832,13 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		{
 			size_t numBytes;
 			unsigned char buf[1024];
-			ds = new string;
+			ds = new std::string;
 			// Retrieve and display each row of data.
 			while ((ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator)) != SQL_NO_DATA) {
 				numBytes = (indicator > 1024) || (indicator == SQL_NO_TOTAL) ? 1024 : indicator;
 				ds->append((const char*)&buf[0], numBytes);
 			}
-			fldVal = CastUtil::lexical_cast<string>(*ds);
+			fldVal = CastUtil::lexical_cast<std::string>(*ds);
 			break;
 		}
 	}
@@ -939,7 +939,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		vals valus;
 		//valus.push_back(columns.at(var));
 		valus.push_back(col);
-		string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
+		std::string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
 		Method meth = clas.getMethod(methname,argus);
 		reflector->invokeMethodUnknownReturn(t,meth,valus);
 		var++;
@@ -951,7 +951,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 }
 
 
-int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, map<string, GenericObject>& colValMap, const string& colName, const int& var)
+int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, std::map<std::string, GenericObject>& colValMap, const std::string& colName, const int& var)
 {
 #ifdef HAVE_LIBODBC
 	SQLRETURN ret;
@@ -984,7 +984,7 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, m
 		default:
 		{
 			char buf[24];
-			string temp;
+			std::string temp;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 			temp.append(buf);
 			if(indicator > (long)24)
@@ -1034,7 +1034,7 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, m
 		case SQL_BIGINT:
 		{
 			char buf[24];
-			string temp;
+			std::string temp;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 			temp.append(buf);
 			if(indicator > (long)24)
@@ -1053,7 +1053,7 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, m
 		case SQL_TIMESTAMP:
 		{
 			char buf[24];
-			string temp;
+			std::string temp;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 			temp.append(buf);
 			if(indicator > (long)24)
@@ -1063,7 +1063,7 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, m
 				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 				temp.append(buf1);
 			}
-			string fmstr;
+			std::string fmstr;
 			if(dataType==SQL_DATE)
 				fmstr = "yyyy-mm-dd";
 			else if(dataType==SQL_TIME)
@@ -1085,32 +1085,32 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, m
 
 void* SQLDataSourceImpl::executeQueryObject(Query& cquery)
 {
-	string clasName = cquery.getClassName();
+	std::string clasName = cquery.getClassName();
 
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
-	string tableName = dsemp.getTableName();
+	std::string tableName = dsemp.getTableName();
 	ClassInfo clas = reflector->getClassInfo(clasName,appName);
-	vector<DataSourceInternalRelation> relv = dsemp.getRelations();
-	string query = "select ";
+	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
+	std::string query = "select ";
 	strMap tabcolmap = this->mapping->getMappingForTable(tableName);
 	strMap::iterator it;
 	int fldsiz = (int)tabcolmap.size();
 	int var = 1;
 	for(it=tabcolmap.begin();it!=tabcolmap.end();it++)
 	{
-		string columnName = it->first;
+		std::string columnName = it->first;
 		query += (clasName + "."  + columnName);
 		if(var++!=fldsiz)
 			query += ",";
 		cquery.aliasedColumns.push_back(clasName + "."  + columnName);
 	}
-	string reltabs = " from " + tableName + " " + clasName + " ";
+	std::string reltabs = " from " + tableName + " " + clasName + " ";
 	for (int var1 = 0; var1 < (int)relv.size(); var1++)
 	{
 		DataSourceInternalRelation relation = relv.at(var1);
 		if(relation.getType()==1 || relation.getType()==2)
 		{
-			string tableName1 = this->mapping->getTableForClass(relation.getClsName());
+			std::string tableName1 = this->mapping->getTableForClass(relation.getClsName());
 			if(tableName1!="")
 			{
 				query += ",";
@@ -1121,7 +1121,7 @@ void* SQLDataSourceImpl::executeQueryObject(Query& cquery)
 				int var = 1;
 				for(it=tabcolmap.begin();it!=tabcolmap.end();it++)
 				{
-					string columnName = it->first;
+					std::string columnName = it->first;
 					query += (relation.getClsName() + "."  + columnName);
 					if(var++!=fldsiz)
 						query += ",";
@@ -1147,18 +1147,18 @@ void SQLDataSourceImpl::bindQueryParams(Query& query)
 	Parameters columnBindings = query.getColumnBindings();
 	PosParameters* propPosVaues;
 	Parameters::iterator ite;
-	string queryString = query.getQuery();
+	std::string queryString = query.getQuery();
 	int posst = 1;
 	if(qparams.size()>0)
 	{
 		PosParameters propPosVaues;
-		vector<string> tst = RegexUtil::search(queryString, ":");
+		std::vector<std::string> tst = RegexUtil::search(queryString, ":");
 		int counter = tst.size();
-		while(counter-->0 && queryString.find(":")!=string::npos)
+		while(counter-->0 && queryString.find(":")!=std::string::npos)
 		{
 			for(ite=qparams.begin();ite!=qparams.end();++ite)
 			{
-				if(queryString.find(":")!=string::npos &&  queryString.find(":"+ite->first)!=queryString.find(":"))
+				if(queryString.find(":")!=std::string::npos &&  queryString.find(":"+ite->first)!=queryString.find(":"))
 				{
 					propPosVaues[posst++] = ite->second;
 					queryString = queryString.substr(0, queryString.find(":")) + "?" +
@@ -1173,13 +1173,13 @@ void SQLDataSourceImpl::bindQueryParams(Query& query)
 		propPosVaues = &(query.getPropPosVaues());
 	}
 
-	logger << query.getQuery() << endl;
+	logger << query.getQuery() << std::endl;
 
 	int totalParams = propPosVaues->size();
 	while(totalParams-->0)
 	{
 		if(propPosVaues->find(par)==propPosVaues->end())
-			throw ("No parameter value found for position " + CastUtil::lexical_cast<string>(par));
+			throw ("No parameter value found for position " + CastUtil::lexical_cast<std::string>(par));
 
 		GenericObject* paramValue = &(propPosVaues->find(par)->second);
 		if(paramValue->getTypeName()=="short")
@@ -1261,7 +1261,7 @@ void SQLDataSourceImpl::bindQueryParams(Query& query)
 		}
 		else if(paramValue->getTypeName()=="std::string" || paramValue->getTypeName()=="string")
 		{
-			string* parm;
+			std::string* parm;
 			paramValue->get(parm);
 			V_OD_erg= SQLBindParameter(V_OD_hstmt, par, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_LONGVARCHAR, 0, 0, (void*)parm->c_str(), parm->length(), NULL);
 			if (!SQL_SUCCEEDED(V_OD_erg))
@@ -1380,18 +1380,18 @@ bool SQLDataSourceImpl::rollback()
 	return false;
 }
 
-void SQLDataSourceImpl::procedureCall(const string& procName) {
+void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 #ifdef HAVE_LIBODBC
 	bool flagc = allocateStmt(true);
 	if(!flagc)throw "Error getting Database connection";
 	int V_OD_erg;// result of functions
 	SQLCHAR *query;
-	string quer = "{call " + procName + "(";
-	map<string, string>::iterator it;
-	map<string, string> revType;
+	std::string quer = "{call " + procName + "(";
+	std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::string> revType;
 	bool outq = false, inoutq = false;
-	vector<string> outargs, inoutargs;
-	string outQuery = "select ", inoutQuery;
+	std::vector<std::string> outargs, inoutargs;
+	std::string outQuery = "select ", inoutQuery;
 	int outC = 1;
 	int size = ntmap.size();
 	for (it = ntmap.begin(); it != ntmap.end(); ++it) {
@@ -1421,7 +1421,7 @@ void SQLDataSourceImpl::procedureCall(const string& procName) {
 		}
 	}
 	if (inoutq) {
-		string temp = "select ";
+		std::string temp = "select ";
 		for (unsigned int var = 0; var < inoutargs.size(); ++var) {
 			inoutQuery += (inoutargs.at(var));
 			temp += "?";
@@ -1451,7 +1451,7 @@ void SQLDataSourceImpl::procedureCall(const string& procName) {
 	}
 	if (inoutq)
 	{
-		logger << inoutQuery << endl;
+		logger << inoutQuery << std::endl;
 		V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) inoutQuery.c_str(), SQL_NTS);
 		if (!SQL_SUCCEEDED(V_OD_erg))
 		{
@@ -1462,7 +1462,7 @@ void SQLDataSourceImpl::procedureCall(const string& procName) {
 		refreshStmt();
 	}
 
-	logger << quer << endl;
+	logger << quer << std::endl;
 	query = (SQLCHAR*) quer.c_str();
 
 	par = 1;
@@ -1496,8 +1496,8 @@ void SQLDataSourceImpl::procedureCall(const string& procName) {
 					throw "Error Binding parameter";
 				}
 			}
-			else if (params[it->first].getTypeName() == "std::string") {
-				string sv;
+			else if (params[it->first].getTypeName() == "std::string" || params[it->first].getTypeName() == "string") {
+				std::string sv;
 				params[it->first].get(sv);
 				V_OD_erg= SQLBindParameter(V_OD_hstmt, par , SQL_PARAM_INPUT,
 						SQL_C_CHAR,SQL_VARCHAR, 0, 0, (SQLPOINTER)sv.c_str() ,sv.length(), &hotelInd);
@@ -1519,7 +1519,7 @@ void SQLDataSourceImpl::procedureCall(const string& procName) {
 		throw "Error in call to stored procedure";
 	}
 
-	logger << outQuery << endl;
+	logger << outQuery << std::endl;
 	SQLLEN siz;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) outQuery.c_str(), SQL_NTS);
 	if (!SQL_SUCCEEDED(V_OD_erg))
@@ -1537,14 +1537,14 @@ void SQLDataSourceImpl::procedureCall(const string& procName) {
 				params[outargs.at(var)].get(sv);
 				StringUtil::replaceFirst(outargs.at(var), "@", "");
 				SQLGetData(V_OD_hstmt, var + 1, SQL_C_LONG, &sv, sizeof(long), &siz);
-				logger << sv << endl;
+				logger << sv << std::endl;
 			}
 			else if (revType[outargs.at(var)] == "short") {
 				short sv;
 				params[outargs.at(var)].get(sv);
 				StringUtil::replaceFirst(outargs.at(var), "@", "");
 				SQLGetData(V_OD_hstmt, var + 1, SQL_C_SHORT, &sv, sizeof(short), &siz);
-				logger << sv << endl;
+				logger << sv << std::endl;
 			}
 		}
 		V_OD_erg = SQLFetch(V_OD_hstmt);
@@ -1555,15 +1555,15 @@ void SQLDataSourceImpl::procedureCall(const string& procName) {
 #endif
 }
 
-void SQLDataSourceImpl::empty(const string& clasName) {
+void SQLDataSourceImpl::empty(const std::string& clasName) {
 #ifdef HAVE_LIBODBC
 	bool flagc = allocateStmt(true);
 		if(!flagc)return;
 	int V_OD_erg;// result of functions
 	//SQLINTEGER V_OD_id;
-	string tableName = mapping->getTableForClass(clasName);
-	string query = "truncate table "+tableName;
-	logger << query << endl;
+	std::string tableName = mapping->getTableForClass(clasName);
+	std::string query = "truncate table "+tableName;
+	logger << query << std::endl;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
 	if (!SQL_SUCCEEDED(V_OD_erg))
 	{
@@ -1575,28 +1575,28 @@ void SQLDataSourceImpl::empty(const string& clasName) {
 #endif
 }
 
-long SQLDataSourceImpl::getNumRows(const string& clasName) {
+long SQLDataSourceImpl::getNumRows(const std::string& clasName) {
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
 	Query query("SELECT COUNT(*) FROM "+dsemp.getTableName(), clasName);
-	vector<map<string, GenericObject> > tv;
+	std::vector<std::map<std::string, GenericObject> > tv;
 	void* temp = executeQueryInternal(query, false);
 	long size = -1;
 	if(temp!=NULL) {
-		tv = *(vector<map<string, GenericObject> >*) temp;
+		tv = *(std::vector<std::map<std::string, GenericObject> >*) temp;
 		tv.at(0).begin()->second.get(size);
 		delete temp;
 	}
 	return size;
 }
 
-vector<map<string, GenericObject> > SQLDataSourceImpl::execute(Query& query) {
-	vector<map<string, GenericObject> > tv;
+std::vector<std::map<std::string, GenericObject> > SQLDataSourceImpl::execute(Query& query) {
+	std::vector<std::map<std::string, GenericObject> > tv;
 	void* temp = executeQueryInternal(query, false);
 	if(temp!=NULL)
 	{
 		if(!query.isUpdate())
 		{
-			tv = *(vector<map<string, GenericObject> >*)temp;
+			tv = *(std::vector<std::map<std::string, GenericObject> >*)temp;
 		}
 		delete temp;
 	}
@@ -1617,15 +1617,15 @@ bool SQLDataSourceImpl::executeUpdate(Query& query) {
 	return tv;
 }
 
-vector<map<string, GenericObject> > SQLDataSourceImpl::execute(QueryBuilder& qb) {
+std::vector<std::map<std::string, GenericObject> > SQLDataSourceImpl::execute(QueryBuilder& qb) {
 	Query q = fromQueryBuilder(qb);
-	vector<map<string, GenericObject> > tv;
+	std::vector<std::map<std::string, GenericObject> > tv;
 	void* temp = executeQueryInternal(q, false);
 	if(temp!=NULL)
 	{
 		if(!q.isUpdate())
 		{
-			tv = *(vector<map<string, GenericObject> >*)temp;
+			tv = *(std::vector<std::map<std::string, GenericObject> >*)temp;
 		}
 		delete temp;
 	}
@@ -1633,39 +1633,39 @@ vector<map<string, GenericObject> > SQLDataSourceImpl::execute(QueryBuilder& qb)
 }
 
 bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
-	string clasName = cquery.getClassName();
+	std::string clasName = cquery.getClassName();
 
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
 	ClassInfo clas = reflector->getClassInfo(clasName,appName);
 	fldMap fields = clas.getFields();
 
-	string tableName = dsemp.getTableName();
-	vector<DataSourceInternalRelation> relv = dsemp.getRelations();
-	string query = "insert into "+tableName+"(";
+	std::string tableName = dsemp.getTableName();
+	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
+	std::string query = "insert into "+tableName+"(";
 	unsigned var=0;
 
-	string vals;
+	std::string vals;
 
-	vector<Field> remFields;
-	vector<string> vldFields;
+	std::vector<Field> remFields;
+	std::vector<std::string> vldFields;
 	fldMap::iterator it;
 	int counter = 0;
 	for(it=fields.begin();it!=fields.end();++it,counter++)
 	{
 		Field fld = it->second;
-		string propertyName = fld.getFieldName();
-		string columnName = propertyName;
+		std::string propertyName = fld.getFieldName();
+		std::string columnName = propertyName;
 		if(dsemp.getColumnForProperty(propertyName)!="")
 			columnName = dsemp.getColumnForProperty(propertyName);
 		args argus;
-		vector<void *> valus;
-		string methname = "get"+StringUtil::capitalizedCopy(it->first);
+		std::vector<void *> valus;
+		std::string methname = "get"+StringUtil::capitalizedCopy(it->first);
 		Method meth = clas.getMethod(methname,argus);
 		if(fld.getType()=="short" || fld.getType()=="unsigned short" || fld.getType()=="int"
 				|| fld.getType()=="unsigned int" || fld.getType()=="long" || fld.getType()=="unsigned long"
 				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string"
 				|| fld.getType()=="bool" || fld.getType()=="long long" || fld.getType()=="unsigned long long"
-				|| fld.getType()=="Date")
+				|| fld.getType()=="Date" || fld.getType()=="char" || fld.getType()=="unsigned char")
 		{
 			void* temp = reflector->invokeMethodGVP(entity,meth,valus);
 			cquery.getPropPosVaues()[var+1].set(temp, fld.getType());
@@ -1705,12 +1705,12 @@ bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
 				if(relation.getField()==remFields.at(i).getFieldName() && (relation.getType()==1 || relation.getType()==2))
 				{
 					args argus;
-					vector<void *> valus;
-					string methname = "get"+StringUtil::capitalizedCopy(relation.getField());
+					std::vector<void *> valus;
+					std::string methname = "get"+StringUtil::capitalizedCopy(relation.getField());
 					Method meth = clas.getMethod(methname,argus);
-					string clasName = relation.getClsName();
+					std::string clasName = relation.getClsName();
 					Query iq("", clasName);
-					vector<string> icols;
+					std::vector<std::string> icols;
 					void* ival = reflector->invokeMethodGVP(entity,meth,valus,appName);
 					if(relation.getType()==1)
 					{
@@ -1732,11 +1732,11 @@ bool SQLDataSourceImpl::isGetDbEntityForBulkInsert() {
 	return false;
 }
 
-void* SQLDataSourceImpl::getDbEntityForBulkInsert(void* entity, const string& clasName, string& error) {
+void* SQLDataSourceImpl::getDbEntityForBulkInsert(void* entity, const std::string& clasName, std::string& error) {
 	return NULL;
 }
 
-bool SQLDataSourceImpl::executeInsertBulk(Query& query, vector<void*> entities, vector<void*> dbEntities) {
+bool SQLDataSourceImpl::executeInsertBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities) {
 	for (unsigned int k = 0; k < entities.size(); k++) {
 		query.getColumnBindings().clear();
 		query.getPropNameVaues().clear();
@@ -1746,7 +1746,7 @@ bool SQLDataSourceImpl::executeInsertBulk(Query& query, vector<void*> entities, 
 	return true;
 }
 
-bool SQLDataSourceImpl::executeUpdateBulk(Query& query, vector<void*> entities, vector<void*> dbEntities) {
+bool SQLDataSourceImpl::executeUpdateBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities) {
 	for (unsigned int k = 0; k < entities.size(); k++) {
 		query.getColumnBindings().clear();
 		query.getPropNameVaues().clear();
@@ -1757,36 +1757,36 @@ bool SQLDataSourceImpl::executeUpdateBulk(Query& query, vector<void*> entities, 
 }
 
 bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
-	string clasName = cquery.getClassName();
+	std::string clasName = cquery.getClassName();
 
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
 
-	string tableName = dsemp.getTableName();
-	vector<DataSourceInternalRelation> relv = dsemp.getRelations();
-	string query = "update "+tableName+" set ";
+	std::string tableName = dsemp.getTableName();
+	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
+	std::string query = "update "+tableName+" set ";
 
-	string vals;
+	std::string vals;
 	ClassInfo clas = reflector->getClassInfo(clasName,appName);
 	fldMap fields = clas.getFields();
-	vector<Field> remFields;
-	vector<string> vldFields;
+	std::vector<Field> remFields;
+	std::vector<std::string> vldFields;
 	unsigned var=0;
 	fldMap::iterator it;
 	for(it=fields.begin();it!=fields.end();++it)
 	{
 		args argus;
-		vector<void *> valus;
+		std::vector<void *> valus;
 		Field fld = it->second;
-		string columnName = fld.getFieldName();
+		std::string columnName = fld.getFieldName();
 		if(dsemp.getColumnForProperty(columnName)!="")
 			columnName = dsemp.getColumnForProperty(columnName);
-		string methname = "get"+StringUtil::capitalizedCopy(it->first);
+		std::string methname = "get"+StringUtil::capitalizedCopy(it->first);
 		Method meth = clas.getMethod(methname,argus);
 		if(fld.getType()=="short" || fld.getType()=="unsigned short" || fld.getType()=="int"
 				|| fld.getType()=="unsigned int" || fld.getType()=="long" || fld.getType()=="unsigned long"
 				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string"
 				|| fld.getType()=="bool" || fld.getType()=="long long" || fld.getType()=="unsigned long long"
-				|| fld.getType()=="Date")
+				|| fld.getType()=="Date" || fld.getType()=="char" || fld.getType()=="unsigned char")
 		{
 			void* temp = reflector->invokeMethodGVP(entity,meth,valus);
 			cquery.getPropPosVaues()[var+1].set(temp, fld.getType());
@@ -1800,7 +1800,7 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 		}
 
 		if(dsemp.getIdPropertyName()==fld.getFieldName()) {
-			string idColName = dsemp.getColumnForProperty(fld.getFieldName());
+			std::string idColName = dsemp.getColumnForProperty(fld.getFieldName());
 			cquery.addColumnBinding(idColName, cquery.getPropPosVaues()[var+1]);
 		}
 
@@ -1829,12 +1829,12 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 				if(relation.getField()==remFields.at(i).getFieldName() && (relation.getType()==1 || relation.getType()==2))
 				{
 					args argus;
-					vector<void *> valus;
-					string methname = "get"+StringUtil::capitalizedCopy(relation.getField());
+					std::vector<void *> valus;
+					std::string methname = "get"+StringUtil::capitalizedCopy(relation.getField());
 					Method meth = clas.getMethod(methname,argus);
-					string clasName = relation.getClsName();
+					std::string clasName = relation.getClsName();
 					Query iq("", clasName);
-					vector<string> icols;
+					std::vector<std::string> icols;
 					void* ival = reflector->invokeMethodGVP(entity,meth,valus,appName);
 				}
 			}
@@ -1844,14 +1844,14 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 	return ffl;
 }
 
-bool SQLDataSourceImpl::remove(const string& clasName, GenericObject& id) {
+bool SQLDataSourceImpl::remove(const std::string& clasName, GenericObject& id) {
 	Query cquery("", clasName);
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
 
-	string idcolname = dsemp.getColumnForProperty(dsemp.getIdPropertyName());
-	string tableName = dsemp.getTableName();
-	vector<DataSourceInternalRelation> relv = dsemp.getRelations();
-	string query = string("DELETE FROM ") + tableName + string(" WHERE ") + idcolname + " = ?";
+	std::string idcolname = dsemp.getColumnForProperty(dsemp.getIdPropertyName());
+	std::string tableName = dsemp.getTableName();
+	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
+	std::string query = std::string("DELETE FROM ") + tableName + std::string(" WHERE ") + idcolname + " = ?";
 	if(id.getTypeName()!="") {
 		cquery.getPropPosVaues()[1] = id;
 	}
@@ -1884,14 +1884,14 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 		if(query.getStart()>0 && query.getCount()>0)
 		{
 			StringContext params;
-			params["start"] = CastUtil::lexical_cast<string>(query.getStart());
-			params["count"] = CastUtil::lexical_cast<string>(query.getCount());
+			params["start"] = CastUtil::lexical_cast<std::string>(query.getStart());
+			params["count"] = CastUtil::lexical_cast<std::string>(query.getCount());
 			query.setQuery(DialectHelper::getSQLString(dialect, DialectHelper::PAGINATION_OFFSET_SQL, query.getQuery(), params));
 		}
 		else if(query.getCount()>0)
 		{
 			StringContext params;
-			params["count"] = CastUtil::lexical_cast<string>(query.getCount());
+			params["count"] = CastUtil::lexical_cast<std::string>(query.getCount());
 			query.setQuery(DialectHelper::getSQLString(dialect, DialectHelper::PAGINATION_NO_OFFSET_SQL, query.getQuery(), params));
 		}
 	}
@@ -1906,8 +1906,8 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 
 	SQLFreeStmt(V_OD_hstmt, SQL_RESET_PARAMS);
 
-	string queryString = query.getQuery();
-	if(StringUtil::toLowerCopy(query.getQuery()).find(" where ")==string::npos && query.getColumnBindings().size()>0)
+	std::string queryString = query.getQuery();
+	if(StringUtil::toLowerCopy(query.getQuery()).find(" where ")==std::string::npos && query.getColumnBindings().size()>0)
 	{
 		queryString += " where ";
 		int position = query.getPropPosVaues().size();
@@ -1929,7 +1929,7 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 
 	if(StringUtil::toLowerCopy(pool->getProperties().getProperty("logsql"))=="true")
 	{
-		string out = queryString;
+		std::string out = queryString;
 		int par = 1;
 		int totalParams = query.getPropPosVaues().size();
 		while(totalParams-->0)
@@ -1940,7 +1940,7 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 				}
 				par++;
 		}
-		cout << out << endl;
+		std::cout << out << std::endl;
 	}
 
 	if(query.isUpdate())
@@ -1989,7 +1989,7 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 			close();
 			return vecT;
 		}
-		logger << "Number of Rows " << (int)V_OD_rowanz << endl;
+		logger << "Number of Rows " << (int)V_OD_rowanz << std::endl;
 		if(query.getClassName()!="" && isObj)
 			return getElements(query);
 		else

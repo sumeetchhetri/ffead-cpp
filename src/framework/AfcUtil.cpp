@@ -21,7 +21,7 @@
  */
 
 #include "AfcUtil.h"
-typedef map<string,strVec> mapofvec;
+typedef std::map<std::string,strVec> mapofvec;
 
 AfcUtil::AfcUtil() {
 }
@@ -29,22 +29,22 @@ AfcUtil::AfcUtil() {
 AfcUtil::~AfcUtil() {
 	// TODO Auto-generated destructor stub
 }
-static map<string,string> doneMap;
-string AfcUtil::generateJsInterfacessAll(map<string, ClassStructure>& allclsmap, string &infjs, map<string, string>& ajintpthMap, strVec& afcd, Reflection& ref)
+static std::map<std::string,std::string> doneMap;
+std::string AfcUtil::generateJsInterfacessAll(std::map<std::string, ClassStructure>& allclsmap, std::string &infjs, std::map<std::string, std::string>& ajintpthMap, strVec& afcd, Reflection& ref)
 {
-	string ret;
-	/*map<string, ClassStructure> allclsmap;
+	std::string ret;
+	/*map<std::string, ClassStructure> allclsmap;
 	for (unsigned int var = 0; var < obj.size(); ++var)
 	{
-		map<string, ClassStructure> clsmap = ref.getClassStructures(obj.at(var)+files.at(var)+".h");
-		map<string, ClassStructure>::iterator it;
+		std::map<std::string, ClassStructure> clsmap = ref.getClassStructures(obj.at(var)+files.at(var)+".h");
+		std::map<std::string, ClassStructure>::iterator it;
 		for (it=clsmap.begin();it!=clsmap.end();++it)
 		{
 			it->second.appName = pv.at(var);
 		}
 		allclsmap.insert(clsmap.begin(), clsmap.end());
 	}*/
-	map<string, ClassStructure>::iterator it;
+	std::map<std::string, ClassStructure>::iterator it;
 	for (int var = 0; var < (int)afcd.size(); ++var) {
 		for (it=allclsmap.begin();it!=allclsmap.end();++it)
 		{
@@ -68,18 +68,18 @@ string AfcUtil::generateJsInterfacessAll(map<string, ClassStructure>& allclsmap,
 	return ret;
 }
 
-string AfcUtil::generateJsObjectsAll(map<string, ClassStructure>& allclsmap)
+std::string AfcUtil::generateJsObjectsAll(std::map<std::string, ClassStructure>& allclsmap)
 {
 	Reflection ref;
-	string ret;
+	std::string ret;
 	/*strVec includes = ref.list(includeDir);
-	map<string, ClassStructure> allclsmap;
+	std::map<std::string, ClassStructure> allclsmap;
 	for (unsigned int var = 0; var < includes.size(); ++var)
 	{
-		map<string, ClassStructure> clsmap = ref.getClassStructures(includes.at(var));
+		std::map<std::string, ClassStructure> clsmap = ref.getClassStructures(includes.at(var));
 		allclsmap.insert(clsmap.begin(), clsmap.end());
 	}*/
-	map<string, ClassStructure>::iterator it;
+	std::map<std::string, ClassStructure>::iterator it;
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
 		strVec pinfo;
@@ -103,25 +103,25 @@ string AfcUtil::generateJsObjectsAll(map<string, ClassStructure>& allclsmap)
 }
 
 
-string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, const strVec& minfo)
+std::string AfcUtil::generateJsObjects(strVec obj, const std::string& claz, strVec pobj, const strVec& minfo)
 {
 	if(doneMap.find(claz)==doneMap.end())
 		doneMap[claz] = "done";
 	else
 		return "";
 	Reflection ref;
-	string retu;
-	string test = "function _"+claz+"()\n{\n";
+	std::string retu;
+	std::string test = "function _"+claz+"()\n{\n";
 	bool priv = false;
 	size_t tess;
-	string meth;
+	std::string meth;
 	strVec fldnames;
-	map<string, int> fldstat;
+	std::map<std::string, int> fldstat;
 	for (unsigned int i = 0; i < pobj.size(); i++)
 	{
-		if(((tess=pobj.at(i).find("("))==string::npos && (tess=pobj.at(i).find(")"))==string::npos && pobj.at(i).find("~")==string::npos))
+		if(((tess=pobj.at(i).find("("))==std::string::npos && (tess=pobj.at(i).find(")"))==std::string::npos && pobj.at(i).find("~")==std::string::npos))
 		{
-			string fld = pobj.at(i);
+			std::string fld = pobj.at(i);
 
 			bool fldstatic = false;
 			if(RegexUtil::find(fld, "[ \\t]*static[ \\t]+")!=-1 || RegexUtil::find(fld, "[ \\t]+static[ \\t]+")!=-1)
@@ -139,19 +139,19 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 			StringUtil::trim(fld);
 
 			bool ptr = false;
-			if(fld.find("*")!=string::npos)
+			if(fld.find("*")!=std::string::npos)
 			{
 				ptr = true;
 				StringUtil::replaceFirst(fld,"*","");
 			}
 
-			vector<string> fldp;
+			std::vector<std::string> fldp;
 			fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
 			fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
 
 			if(fldp.size()==2)
 			{
-				string nam = fldp.at(1);
+				std::string nam = fldp.at(1);
 				fldnames.push_back(fldp.at(0));
 				fldnames.push_back(nam);
 				fldstat[nam] = 0;
@@ -160,13 +160,13 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 	}
 	for(unsigned int i=0;i<minfo.size();i++)
 	{
-		if((tess=minfo.at(i).find("("))!=string::npos && (tess=minfo.at(i).find(")"))!=string::npos && minfo.at(i).find("~")==string::npos
+		if((tess=minfo.at(i).find("("))!=std::string::npos && (tess=minfo.at(i).find(")"))!=std::string::npos && minfo.at(i).find("~")==std::string::npos
 							&& fldnames.size()>0)
 		{
 			meth = minfo.at(i);
 			StringUtil::replaceFirst(meth,";","");
 
-			string argts = meth.substr(meth.find("("),meth.find(")")-meth.find("("));
+			std::string argts = meth.substr(meth.find("("),meth.find(")")-meth.find("("));
 			StringUtil::replaceFirst(argts,"(","");
 			StringUtil::replaceAll(argts,")","");
 			meth = meth.substr(0,meth.find("("));
@@ -185,7 +185,7 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 			StringUtil::trim(meth);
 
 			//StringUtil::replaceFirst(meth,")"," ");
-			vector<string> methp,methpm,argp,argpm,argpmtemp;
+			std::vector<std::string> methp,methpm,argp,argpm,argpmtemp;
 			StringUtil::split(argp, argts, (","));
 			methp.push_back(meth.substr(0, meth.find_last_of(" ")));
 			methp.push_back(meth.substr(meth.find_last_of(" ")+1));
@@ -202,14 +202,14 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 			{
 				if(argp.at(j)!="" && argp.at(j)!="(")
 				{
-					string argpmtemp = argp.at(j);
+					std::string argpmtemp = argp.at(j);
 					StringUtil::trim(argpmtemp);
-					string typ;
-					if(argpmtemp.find("*")!=string::npos)
+					std::string typ;
+					if(argpmtemp.find("*")!=std::string::npos)
 						typ = "*";
-					else if(argpmtemp.find("&")!=string::npos)
+					else if(argpmtemp.find("&")!=std::string::npos)
 						typ = "&";
-					if(argpmtemp.find(" ")!=string::npos)
+					if(argpmtemp.find(" ")!=std::string::npos)
 					{
 						argpmtemp = argpmtemp.substr(0, argpmtemp.find_last_of(" "));
 					}
@@ -218,22 +218,22 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 				}
 			}
 			bool ptr = false;
-			if(meth.find("*")!=string::npos)
+			if(meth.find("*")!=std::string::npos)
 			{
 				ptr = true;
 				StringUtil::replaceFirst(meth,"*","");
 			}
 
-			if(meth.find(" operator")!=string::npos)
+			if(meth.find(" operator")!=std::string::npos)
 			{
 				meth = meth.substr(meth.find(" operator"));
 				StringUtil::replaceAll(meth, " ", "");
 			}
-			if(meth.find("operator<")!=string::npos || meth.find("operator>")!=string::npos || meth.find("operator<=")!=string::npos
-				|| meth.find("operator>=")!=string::npos || meth.find("operator==")!=string::npos || meth.find("operator!=")!=string::npos || meth.find("operator!")!=string::npos
-				|| meth.find("operator<<")!=string::npos || meth.find("operator>>")!=string::npos || meth.find("operator+")!=string::npos || meth.find("operator-")!=string::npos
-				|| meth.find("operator*")!=string::npos || meth.find("operator/")!=string::npos || meth.find("operator[]")!=string::npos || meth.find("operator()")!=string::npos
-				|| meth.find("operator&")!=string::npos || meth.find("operator&&")!=string::npos || meth.find("operator||")!=string::npos || meth.find("operator|")!=string::npos)
+			if(meth.find("operator<")!=std::string::npos || meth.find("operator>")!=std::string::npos || meth.find("operator<=")!=std::string::npos
+				|| meth.find("operator>=")!=std::string::npos || meth.find("operator==")!=std::string::npos || meth.find("operator!=")!=std::string::npos || meth.find("operator!")!=std::string::npos
+				|| meth.find("operator<<")!=std::string::npos || meth.find("operator>>")!=std::string::npos || meth.find("operator+")!=std::string::npos || meth.find("operator-")!=std::string::npos
+				|| meth.find("operator*")!=std::string::npos || meth.find("operator/")!=std::string::npos || meth.find("operator[]")!=std::string::npos || meth.find("operator()")!=std::string::npos
+				|| meth.find("operator&")!=std::string::npos || meth.find("operator&&")!=std::string::npos || meth.find("operator||")!=std::string::npos || meth.find("operator|")!=std::string::npos)
 			{}
 			else
 			{
@@ -241,7 +241,7 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 				{
 					for(unsigned int k = 0; k < fldnames.size(); k=k+2)
 					{
-						string cam = AfcUtil::camelCased(fldnames.at(k+1));
+						std::string cam = AfcUtil::camelCased(fldnames.at(k+1));
 						if("set"+cam==methpm.at(1) && argpm.size()==1 && argpm.at(0)==fldnames.at(k) && methpm.at(0)=="void")
 						{
 							fldstat[fldnames.at(k+1)]++;
@@ -260,8 +260,8 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 	{
 		if(fldstat[fldnames.at(k+1)]==2)
 		{
-			string data = fldnames.at(k) + " " + fldnames.at(k+1) + ";";
-			//logger << "===========> " << data << endl;
+			std::string data = fldnames.at(k) + " " + fldnames.at(k+1) + ";";
+			//logger << "===========> " << data << std::endl;
 			pobj.push_back(data);
 		}
 	}
@@ -273,9 +273,9 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 	for(unsigned int i=0;i<obj.size();i++)
 	{
 		strVec vemp;
-		string data = obj.at(i);
+		std::string data = obj.at(i);
 		//bool ptr = false;
-		if(data.find("*")!=string::npos)
+		if(data.find("*")!=std::string::npos)
 		{
 			//ptr = true;
 			StringUtil::replaceFirst(data,"*","");
@@ -284,7 +284,7 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 		StringUtil::split(vemp, data, (" "));
 		if(vemp.size()<2)
 		{
-			//logger << data << " error" <<  endl;
+			//logger << data << " error" <<  std::endl;
 		}
 		else
 		{
@@ -295,17 +295,17 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 	for(unsigned int i=0;i<obj.size();i++)
 	{
 		strVec vemp;
-		string data = obj.at(i);
+		std::string data = obj.at(i);
 		bool ptr = false;
-		if(data.find("*")!=string::npos)
+		if(data.find("*")!=std::string::npos)
 		{
 			ptr = true;
 			StringUtil::replaceFirst(data,"*","");
 		}
 		StringUtil::replaceFirst(data,";","");
-		if(data.find(" ")==string::npos)
+		if(data.find(" ")==std::string::npos)
 		{
-			//logger << data << " error" <<  endl;
+			//logger << data << " error" <<  std::endl;
 			continue;
 		}
 		data = data.substr(data.find_last_of(" ")+1);
@@ -319,30 +319,30 @@ string AfcUtil::generateJsObjects(strVec obj, const string& claz, strVec pobj, c
 	return test;
 }
 
-string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc, string &headers, string &objs, strVec pobj, const bool& isOpForSet, string& typrefs, const strVec& minfo, const string& app, const string& clspth, Reflection& ref)
+std::string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc, std::string &headers, std::string &objs, strVec pobj, const bool& isOpForSet, std::string& typrefs, const strVec& minfo, const std::string& app, const std::string& clspth, Reflection& ref)
 {
 	if(doneMap.find(classstruc.getFullyQualifiedClassName())==doneMap.end())
 		doneMap[classstruc.getFullyQualifiedClassName()] = "done";
 	else
 		return "";
-	string tes,tes1,fres,fres1;
-	string retu;
-	string test = "function _"+classstruc.getTreatedClassName(false)+"()\n{\n";
+	std::string tes,tes1,fres,fres1;
+	std::string retu;
+	std::string test = "function _"+classstruc.getTreatedClassName(false)+"()\n{\n";
 	tes += "JSONElement* _node;\n";
 	tes1 += "JSONElement* _node;\n";
-	fres = "string json=\"{\";\n";
-	fres1 = "string json=\"{\";\n";
+	fres = "std::string json=\"{\";\n";
+	fres1 = "std::string json=\"{\";\n";
 	bool priv = false;
 	size_t tess;
-	string meth;
+	std::string meth;
 	strVec fldnames;
-	map<string, int> fldstat;
-	map<string, bool> fldptr;
+	std::map<std::string, int> fldstat;
+	std::map<std::string, bool> fldptr;
 	for (unsigned int i = 0; i < pobj.size(); i++)
 	{
-		if(((tess=pobj.at(i).find("("))==string::npos && (tess=pobj.at(i).find(")"))==string::npos && pobj.at(i).find("~")==string::npos))
+		if(((tess=pobj.at(i).find("("))==std::string::npos && (tess=pobj.at(i).find(")"))==std::string::npos && pobj.at(i).find("~")==std::string::npos))
 		{
-			string fld = pobj.at(i);
+			std::string fld = pobj.at(i);
 
 			bool fldstatic = false;
 			if(RegexUtil::find(fld, "[ \\t]*static[ \\t]+")!=-1 || RegexUtil::find(fld, "[ \\t]+static[ \\t]+")!=-1)
@@ -360,19 +360,19 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 			StringUtil::trim(fld);
 
 			bool ptr = false;
-			if(fld.find("*")!=string::npos)
+			if(fld.find("*")!=std::string::npos)
 			{
 				ptr = true;
 				StringUtil::replaceFirst(fld,"*","");
 			}
 
-			vector<string> fldp;
+			std::vector<std::string> fldp;
 			fldp.push_back(fld.substr(0, fld.find_last_of(" ")));
 			fldp.push_back(fld.substr(fld.find_last_of(" ")+1));
 
 			if(fldp.size()==2)
 			{
-				string nam = fldp.at(1);
+				std::string nam = fldp.at(1);
 				fldnames.push_back(fldp.at(0));
 				fldnames.push_back(nam);
 				if(ptr)
@@ -389,13 +389,13 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 	}
 	for(unsigned int i=0;i<minfo.size();i++)
 	{
-		if((tess=minfo.at(i).find("("))!=string::npos && (tess=minfo.at(i).find(")"))!=string::npos && minfo.at(i).find("~")==string::npos
+		if((tess=minfo.at(i).find("("))!=std::string::npos && (tess=minfo.at(i).find(")"))!=std::string::npos && minfo.at(i).find("~")==std::string::npos
 							&& fldnames.size()>0)
 		{
 			meth = minfo.at(i);
 			StringUtil::replaceFirst(meth,";","");
 
-			string argts = meth.substr(meth.find("("),meth.find(")")-meth.find("("));
+			std::string argts = meth.substr(meth.find("("),meth.find(")")-meth.find("("));
 			StringUtil::replaceFirst(argts,"(","");
 			StringUtil::replaceAll(argts,")","");
 			meth = meth.substr(0,meth.find("("));
@@ -414,7 +414,7 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 			StringUtil::trim(meth);
 
 			//StringUtil::replaceFirst(meth,")"," ");
-			vector<string> methp,methpm,argp,argpm,argpmtemp;
+			std::vector<std::string> methp,methpm,argp,argpm,argpmtemp;
 			StringUtil::split(argp, argts, (","));
 			methp.push_back(meth.substr(0, meth.find_last_of(" ")));
 			methp.push_back(meth.substr(meth.find_last_of(" ")+1));
@@ -431,14 +431,14 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 			{
 				if(argp.at(j)!="" && argp.at(j)!="(")
 				{
-					string argpmtemp = argp.at(j);
+					std::string argpmtemp = argp.at(j);
 					StringUtil::trim(argpmtemp);
-					string typ;
-					if(argpmtemp.find("*")!=string::npos)
+					std::string typ;
+					if(argpmtemp.find("*")!=std::string::npos)
 						typ = "*";
-					else if(argpmtemp.find("&")!=string::npos)
+					else if(argpmtemp.find("&")!=std::string::npos)
 						typ = "&";
-					if(argpmtemp.find(" ")!=string::npos)
+					if(argpmtemp.find(" ")!=std::string::npos)
 					{
 						argpmtemp = argpmtemp.substr(0, argpmtemp.find_last_of(" "));
 					}
@@ -447,22 +447,22 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 				}
 			}
 			bool ptr = false;
-			if(meth.find("*")!=string::npos)
+			if(meth.find("*")!=std::string::npos)
 			{
 				ptr = true;
 				StringUtil::replaceFirst(meth,"*","");
 			}
 
-			if(meth.find(" operator")!=string::npos)
+			if(meth.find(" operator")!=std::string::npos)
 			{
 				meth = meth.substr(meth.find(" operator"));
 				StringUtil::replaceAll(meth, " ", "");
 			}
-			if(meth.find("operator<")!=string::npos || meth.find("operator>")!=string::npos || meth.find("operator<=")!=string::npos
-				|| meth.find("operator>=")!=string::npos || meth.find("operator==")!=string::npos || meth.find("operator!=")!=string::npos || meth.find("operator!")!=string::npos
-				|| meth.find("operator<<")!=string::npos || meth.find("operator>>")!=string::npos || meth.find("operator+")!=string::npos || meth.find("operator-")!=string::npos
-				|| meth.find("operator*")!=string::npos || meth.find("operator/")!=string::npos || meth.find("operator[]")!=string::npos || meth.find("operator()")!=string::npos
-				|| meth.find("operator&")!=string::npos || meth.find("operator&&")!=string::npos || meth.find("operator||")!=string::npos || meth.find("operator|")!=string::npos)
+			if(meth.find("operator<")!=std::string::npos || meth.find("operator>")!=std::string::npos || meth.find("operator<=")!=std::string::npos
+				|| meth.find("operator>=")!=std::string::npos || meth.find("operator==")!=std::string::npos || meth.find("operator!=")!=std::string::npos || meth.find("operator!")!=std::string::npos
+				|| meth.find("operator<<")!=std::string::npos || meth.find("operator>>")!=std::string::npos || meth.find("operator+")!=std::string::npos || meth.find("operator-")!=std::string::npos
+				|| meth.find("operator*")!=std::string::npos || meth.find("operator/")!=std::string::npos || meth.find("operator[]")!=std::string::npos || meth.find("operator()")!=std::string::npos
+				|| meth.find("operator&")!=std::string::npos || meth.find("operator&&")!=std::string::npos || meth.find("operator||")!=std::string::npos || meth.find("operator|")!=std::string::npos)
 			{}
 			else
 			{
@@ -470,7 +470,7 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 				{
 					for(unsigned int k = 0; k < fldnames.size(); k=k+2)
 					{
-						string cam = AfcUtil::camelCased(fldnames.at(k+1));
+						std::string cam = AfcUtil::camelCased(fldnames.at(k+1));
 						if("set"+cam==methpm.at(1) && argpm.size()==1 && argpm.at(0)==fldnames.at(k) && methpm.at(0)=="void")
 						{
 							fldstat[fldnames.at(k+1)]++;
@@ -489,7 +489,7 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 	{
 		if(fldstat[fldnames.at(k+1)]==2)
 		{
-			string data = fldnames.at(k) + " " + fldnames.at(k+1) + ";";
+			std::string data = fldnames.at(k) + " " + fldnames.at(k+1) + ";";
 
 			priv = (fldstat[fldnames.at(k+1)]==2?true:false);
 
@@ -508,9 +508,9 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 	for(unsigned int i=0;i<obj.size();i++)
 	{
 		strVec vemp;
-		string data = obj.at(i);
+		std::string data = obj.at(i);
 		//bool ptr = false;
-		if(data.find("*")!=string::npos)
+		if(data.find("*")!=std::string::npos)
 		{
 			//ptr = true;
 			StringUtil::replaceFirst(data,"*","");
@@ -519,7 +519,7 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 		StringUtil::split(vemp, data, (" "));
 		if(vemp.size()<2)
 		{
-			//logger << data << " error" <<  endl;
+			//logger << data << " error" <<  std::endl;
 		}
 		else
 		{
@@ -530,9 +530,9 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 	for(unsigned int i=0;i<obj.size();i++)
 	{
 		strVec vemp;
-		string data = obj.at(i);
+		std::string data = obj.at(i);
 		bool ptr = false;
-		if(data.find("*")!=string::npos)
+		if(data.find("*")!=std::string::npos)
 		{
 			ptr = true;
 			StringUtil::replaceFirst(data,"*","");
@@ -541,7 +541,7 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 		StringUtil::split(vemp, data, (" "));
 		if(vemp.size()<2)
 		{
-			//logger << data << " error" <<  endl;
+			//logger << data << " error" <<  std::endl;
 			continue;
 		}
 
@@ -558,9 +558,9 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 	{
 		priv = true;
 		strVec vemp;
-		string data = pobj.at(i);
+		std::string data = pobj.at(i);
 		bool ptr = false;
-		if(data.find("*")!=string::npos)
+		if(data.find("*")!=std::string::npos)
 		{
 			ptr = true;
 			StringUtil::replaceFirst(data,"*","");
@@ -569,7 +569,7 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 		StringUtil::split(vemp, data, (" "));
 		if(vemp.size()<2)
 		{
-			logger << data << " error" <<  endl;
+			logger << data << " error" <<  std::endl;
 			continue;
 		}
 
@@ -581,151 +581,151 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 	}*/
 	fres += "\njson += \"}\";";
 	fres1 += "\njson += \"}\";";
-	//logger << fres << flush;
+	//logger << fres << std::flush;
 	test += "}";
-	//logger << test << flush;
+	//logger << test << std::flush;
 	objs += test;
 	headers += "#include \""+clspth+"\"\n";
 
 	typrefs += classstruc.getFullyQualifiedClassName() + " " + app + "read"+classstruc.getTreatedClassName(true)+"(JSONElement& obj);\n" + classstruc.getFullyQualifiedClassName() + "* "+app+"read"+classstruc.getTreatedClassName(true)+"P(JSONElement& obj);\n";
-	typrefs += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON("+classstruc.getFullyQualifiedClassName()+" _obj);\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"VPToJSON("+classstruc.getFullyQualifiedClassName()+"* _obj);\n";
-	typrefs	+= classstruc.getFullyQualifiedClassName() + " " + app + "to"+classstruc.getTreatedClassName(true)+"(string s);\n" + classstruc.getFullyQualifiedClassName() + "* " + app + "to"+classstruc.getTreatedClassName(true)+"P(string s);\n";
-	typrefs	+= "vector<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(string s);\nvector<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"VecVP(string s);\n";
-	typrefs	+= "list<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Lis(string s);\nlist<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"LisVP(string s);\n";
-	typrefs	+= "deque<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Dq(string s);\ndeque<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"DqVP(string s);\n";
-	typrefs	+= "std::queue<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Q(string s);\nstd::queue<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"QVP(string s);\n";
+	typrefs += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON("+classstruc.getFullyQualifiedClassName()+" _obj);\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"VPToJSON("+classstruc.getFullyQualifiedClassName()+"* _obj);\n";
+	typrefs	+= classstruc.getFullyQualifiedClassName() + " " + app + "to"+classstruc.getTreatedClassName(true)+"(std::string s);\n" + classstruc.getFullyQualifiedClassName() + "* " + app + "to"+classstruc.getTreatedClassName(true)+"P(std::string s);\n";
+	typrefs	+= "std::vector<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(std::string s);\nstd::vector<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"VecVP(std::string s);\n";
+	typrefs	+= "std::list<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Lis(std::string s);\nstd::list<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"LisVP(std::string s);\n";
+	typrefs	+= "std::deque<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Dq(std::string s);\nstd::deque<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"DqVP(std::string s);\n";
+	typrefs	+= "std::queue<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Q(std::string s);\nstd::queue<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"QVP(std::string s);\n";
 	if(isOpForSet)
 	{
-		typrefs	+= "set<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Set(string s);\nset<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"SetVP(string s);\n";
-		typrefs	+= "multiset<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"MulSet(string s);\nmultiset<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"MulSetVP(string s);\n";
+		typrefs	+= "std::set<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Set(std::string s);\nstd::set<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"SetVP(std::string s);\n";
+		typrefs	+= "std::multiset<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"MulSet(std::string s);\nstd::multiset<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"MulSetVP(std::string s);\n";
 	}
-	typrefs += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"VecToJSON(vector<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"VecVPToJSON(vector<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
-	typrefs += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"LisToJSON(list<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"LisVPToJSON(list<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
-	typrefs += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"DqToJSON(deque<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"DqVPToJSON(deque<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
-	typrefs += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"QToJSON(std::queue<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"QVPToJSON(std::queue<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
+	typrefs += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"VecToJSON(std::vector<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"VecVPToJSON(std::vector<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
+	typrefs += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"LisToJSON(std::list<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"LisVPToJSON(std::list<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
+	typrefs += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"DqToJSON(std::deque<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"DqVPToJSON(std::deque<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
+	typrefs += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"QToJSON(std::queue<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"QVPToJSON(std::queue<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
 	if(isOpForSet)
 	{
-		typrefs += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"SetToJSON(set<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"SetVPToJSON(set<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
-		typrefs += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"MulSetToJSON(multiset<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"MulSetVPToJSON(multiset<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
+		typrefs += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"SetToJSON(std::set<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"SetVPToJSON(std::set<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
+		typrefs += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"MulSetToJSON(std::multiset<"+classstruc.getFullyQualifiedClassName()+"> _obj);\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"MulSetVPToJSON(std::multiset<"+classstruc.getFullyQualifiedClassName()+">* _obj);\n";
 	}
 
 	test = retu+ "\n\n" + classstruc.getFullyQualifiedClassName() + " " + app + "read"+classstruc.getTreatedClassName(true)+"(JSONElement& obj)\n{\n"+classstruc.getFullyQualifiedClassName()+" _obj;\n";
 	test += tes + "\nreturn _obj;\n}\n";
 	test += "\n\n" + classstruc.getFullyQualifiedClassName() + "* "+app+"read"+classstruc.getTreatedClassName(true)+"P(JSONElement& obj)\n{\n"+classstruc.getFullyQualifiedClassName()+"* _obj = new "+classstruc.getFullyQualifiedClassName()+";\n";
 	test += tes1 + "\nreturn _obj;\n}\n";
-	test += classstruc.getFullyQualifiedClassName() + " " + app + "to"+classstruc.getTreatedClassName(true)+"(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ classstruc.getFullyQualifiedClassName() +" _obj = " + app + "read"+classstruc.getTreatedClassName(true)+"(element);\nreturn _obj;\n}\n";
-	test += "vector<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n" +
-			"vector<"+classstruc.getFullyQualifiedClassName()+"> vec;\nfor(int i=0;i<(int)element.getChildren().size();i++){\n" +
+	test += classstruc.getFullyQualifiedClassName() + " " + app + "to"+classstruc.getTreatedClassName(true)+"(std::string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ classstruc.getFullyQualifiedClassName() +" _obj = " + app + "read"+classstruc.getTreatedClassName(true)+"(element);\nreturn _obj;\n}\n";
+	test += "std::vector<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(std::string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n" +
+			"std::vector<"+classstruc.getFullyQualifiedClassName()+"> vec;\nfor(int i=0;i<(int)element.getChildren().size();i++){\n" +
 			classstruc.getFullyQualifiedClassName() +" _obj = " + app + "read"+classstruc.getTreatedClassName(true)+"(*element.getChildren().at(i));\nvec.push_back(_obj);\n" +
 			"}\nreturn vec;\n}\n";
-	test += "list<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Lis(string s)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
-			"list<"+classstruc.getFullyQualifiedClassName()+"> tt;\nstd::copy(vec.begin(), vec.end(), std::back_inserter(tt));\n" +
+	test += "std::list<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Lis(std::string s)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
+			"std::list<"+classstruc.getFullyQualifiedClassName()+"> tt;\nstd::copy(vec.begin(), vec.end(), std::back_inserter(tt));\n" +
 			"return tt;\n}\n";
 	if(isOpForSet)
 	{
-		test += "set<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Set(string s)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
-				"set<"+classstruc.getFullyQualifiedClassName()+"> tt;\nstd::copy(vec.begin(), vec.end(), std::inserter(tt, tt.begin()));\n" +
+		test += "std::set<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Set(std::string s)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
+				"std::set<"+classstruc.getFullyQualifiedClassName()+"> tt;\nstd::copy(vec.begin(), vec.end(), std::inserter(tt, tt.begin()));\n" +
 				"return tt;\n}\n";
-		test += "multiset<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"MulSet(string s)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
-				"multiset<"+classstruc.getFullyQualifiedClassName()+"> tt;\nstd::copy(vec.begin(), vec.end(), std::inserter(tt, tt.begin()));\n" +
+		test += "std::multiset<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"MulSet(std::string s)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
+				"std::multiset<"+classstruc.getFullyQualifiedClassName()+"> tt;\nstd::copy(vec.begin(), vec.end(), std::inserter(tt, tt.begin()));\n" +
 				"return tt;\n}\n";
 	}
-	test += "deque<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Dq(string s)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
-			"deque<"+classstruc.getFullyQualifiedClassName()+"> tt;\nstd::copy(vec.begin(), vec.end(), std::inserter(tt, tt.begin()));\n" +
+	test += "std::deque<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Dq(std::string s)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
+			"std::deque<"+classstruc.getFullyQualifiedClassName()+"> tt;\nstd::copy(vec.begin(), vec.end(), std::inserter(tt, tt.begin()));\n" +
 			"return tt;\n}\n";
-	test += "std::queue<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Q(string s)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
+	test += "std::queue<"+classstruc.getFullyQualifiedClassName()+"> " + app + "to"+classstruc.getTreatedClassName(true)+"Q(std::string s)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
 			"std::queue<"+classstruc.getFullyQualifiedClassName()+"> tt;for (int var = 0; var < (int)vec.size(); ++var) {\ntt.push(vec.at(var));\n}\n" +
 			"return tt;\n}\n";
-	test += "vector<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"VecVP(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n" +
-			"vector<"+classstruc.getFullyQualifiedClassName()+">* vec = new vector<"+classstruc.getFullyQualifiedClassName()+">;\nfor(int i=0;i<element.getChildren().size();i++){\n" +
+	test += "std::vector<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"VecVP(std::string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n" +
+			"std::vector<"+classstruc.getFullyQualifiedClassName()+">* vec = new std::vector<"+classstruc.getFullyQualifiedClassName()+">;\nfor(int i=0;i<element.getChildren().size();i++){\n" +
 			classstruc.getFullyQualifiedClassName() +" _obj = " + app + "read"+classstruc.getTreatedClassName(true)+"(*element.getChildren().at(i));\nvec->push_back(_obj);\n" +
 			"}\nreturn vec;\n}\n";
-	test += "list<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"LisVP(string s)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
-			"list<"+classstruc.getFullyQualifiedClassName()+">* tt = new list<"+classstruc.getFullyQualifiedClassName()+">;\nstd::copy(vec.begin(), vec.end(), std::back_inserter(*tt));\n" +
+	test += "std::list<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"LisVP(std::string s)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
+			"std::list<"+classstruc.getFullyQualifiedClassName()+">* tt = new std::list<"+classstruc.getFullyQualifiedClassName()+">;\nstd::copy(vec.begin(), vec.end(), std::back_inserter(*tt));\n" +
 			"return tt;\n}\n";
 	if(isOpForSet)
 	{
-		test += "set<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"SetVP(string s)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
-			"set<"+classstruc.getFullyQualifiedClassName()+">* tt = new set<"+classstruc.getFullyQualifiedClassName()+">;\nstd::copy(vec.begin(), vec.end(), std::inserter(*tt, tt->begin()));\n" +
+		test += "std::set<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"SetVP(std::string s)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
+			"std::set<"+classstruc.getFullyQualifiedClassName()+">* tt = new std::set<"+classstruc.getFullyQualifiedClassName()+">;\nstd::copy(vec.begin(), vec.end(), std::inserter(*tt, tt->begin()));\n" +
 			"return tt;\n}\n";
-		test += "multiset<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"MulSetVP(string s)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
-				"multiset<"+classstruc.getFullyQualifiedClassName()+">* tt = new multiset<"+classstruc.getFullyQualifiedClassName()+">;\nstd::copy(vec.begin(), vec.end(), std::inserter(*tt, tt->begin()));\n" +
+		test += "std::multiset<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"MulSetVP(std::string s)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
+				"std::multiset<"+classstruc.getFullyQualifiedClassName()+">* tt = new std::multiset<"+classstruc.getFullyQualifiedClassName()+">;\nstd::copy(vec.begin(), vec.end(), std::inserter(*tt, tt->begin()));\n" +
 				"return tt;\n}\n";
 	}
-	test += "deque<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"DqVP(string s)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
-			"deque<"+classstruc.getFullyQualifiedClassName()+">* tt = new deque<"+classstruc.getFullyQualifiedClassName()+">;\nstd::copy(vec.begin(), vec.end(), std::inserter(*tt, tt->begin()));\n" +
+	test += "std::deque<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"DqVP(std::string s)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
+			"std::deque<"+classstruc.getFullyQualifiedClassName()+">* tt = new std::deque<"+classstruc.getFullyQualifiedClassName()+">;\nstd::copy(vec.begin(), vec.end(), std::inserter(*tt, tt->begin()));\n" +
 			"return tt;\n}\n";
-	test += "std::queue<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"QVP(string s)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
+	test += "std::queue<"+classstruc.getFullyQualifiedClassName()+">* " + app + "to"+classstruc.getTreatedClassName(true)+"QVP(std::string s)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> vec = " + app + "to"+classstruc.getTreatedClassName(true)+"Vec(s);\n" +
 			"std::queue<"+classstruc.getFullyQualifiedClassName()+">* tt = new std::queue<"+classstruc.getFullyQualifiedClassName()+">;for (int var = 0; var < (int)vec.size(); ++var) {\ntt->push(vec.at(var));\n}\n" +
 			"return tt;\n}\n";
-	test += "void* " + app + "toVoidP"+classstruc.getTreatedClassName(true)+"(string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ classstruc.getFullyQualifiedClassName()+"*_obj = new "+classstruc.getFullyQualifiedClassName()+";\n*_obj = " + app + "read"+classstruc.getTreatedClassName(true)+"(element);\nreturn _obj;\n}\n";
-	test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON("+classstruc.getFullyQualifiedClassName()+" _obj)\n{\n"+fres+"\nreturn json;\n}\n";
-	test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"VPToJSON("+classstruc.getFullyQualifiedClassName()+"* _obj)\n{\n"+fres1+"\nreturn json;\n}\n";
-	test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"VecToJSON(vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj)\n{\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+	test += "void* " + app + "toVoidP"+classstruc.getTreatedClassName(true)+"(std::string s)\n{\nJSONElement element = JSONUtil::getDocument(s);\n"+ classstruc.getFullyQualifiedClassName()+"*_obj = new "+classstruc.getFullyQualifiedClassName()+";\n*_obj = " + app + "read"+classstruc.getTreatedClassName(true)+"(element);\nreturn _obj;\n}\n";
+	test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON("+classstruc.getFullyQualifiedClassName()+" _obj)\n{\n"+fres+"\nreturn json;\n}\n";
+	test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"VPToJSON("+classstruc.getFullyQualifiedClassName()+"* _obj)\n{\n"+fres1+"\nreturn json;\n}\n";
+	test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"VecToJSON(std::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj)\n{\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
-	test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"LisToJSON(list<"+classstruc.getFullyQualifiedClassName()+"> _lisobj)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
-			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+	test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"LisToJSON(std::list<"+classstruc.getFullyQualifiedClassName()+"> _lisobj)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
+			"\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	if(isOpForSet)
 	{
-		test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"SetToJSON(set<"+classstruc.getFullyQualifiedClassName()+"> _lisobj)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
-				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+		test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"SetToJSON(std::set<"+classstruc.getFullyQualifiedClassName()+"> _lisobj)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
+				"\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 				"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
-		test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"MulSetToJSON(multiset<"+classstruc.getFullyQualifiedClassName()+"> _lisobj)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
-				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+		test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"MulSetToJSON(std::multiset<"+classstruc.getFullyQualifiedClassName()+"> _lisobj)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
+				"\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 				"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
 	}
-	test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"DqToJSON(deque<"+classstruc.getFullyQualifiedClassName()+"> _lisobj)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
-			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+	test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"DqToJSON(std::deque<"+classstruc.getFullyQualifiedClassName()+"> _lisobj)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj.begin(), _lisobj.end(), std::back_inserter(_vecobj));" +
+			"\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
-	test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"QToJSON(std::queue<"+classstruc.getFullyQualifiedClassName()+"> _lisobj)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;" +
+	test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"QToJSON(std::queue<"+classstruc.getFullyQualifiedClassName()+"> _lisobj)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;" +
 			"std::queue<"+classstruc.getFullyQualifiedClassName()+"> qq = _lisobj;\nfor (int var = 0; var < (int)qq.size(); ++var)\n{" +
 			"_vecobj.push_back(qq.front());\nqq.pop();\n}\n" +
-			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+			"\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
-	test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"VecVPToJSON(vector<"+classstruc.getFullyQualifiedClassName()+">* _vecobj)\n{\nstring json = \"[\";\nfor(int i=0;i<_vecobj->size();i++){\n" +
+	test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"VecVPToJSON(std::vector<"+classstruc.getFullyQualifiedClassName()+">* _vecobj)\n{\nstd::string json = \"[\";\nfor(int i=0;i<_vecobj->size();i++){\n" +
 			"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj->at(i));\n" +
 			"if(i!=_vecobj->size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
-	test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"LisVPToJSON(list<"+classstruc.getFullyQualifiedClassName()+">* _lisobj)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
-			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+	test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"LisVPToJSON(std::list<"+classstruc.getFullyQualifiedClassName()+">* _lisobj)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
+			"\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
 	if(isOpForSet)
 	{
-		test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"SetVPToJSON(set<"+classstruc.getFullyQualifiedClassName()+">* _lisobj)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
-				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+		test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"SetVPToJSON(std::set<"+classstruc.getFullyQualifiedClassName()+">* _lisobj)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
+				"\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 				"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
-		test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"MulSetVPToJSON(multiset<"+classstruc.getFullyQualifiedClassName()+">* _lisobj)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
-				"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+		test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"MulSetVPToJSON(std::multiset<"+classstruc.getFullyQualifiedClassName()+">* _lisobj)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
+				"\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 				"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 				"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 				"\n}\njson += \"]\";\nreturn json;\n}\n";
 	}
-	test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"DqVPToJSON(deque<"+classstruc.getFullyQualifiedClassName()+">* _lisobj)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
-			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+	test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"DqVPToJSON(std::deque<"+classstruc.getFullyQualifiedClassName()+">* _lisobj)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\nstd::copy(_lisobj->begin(), _lisobj->end(), std::back_inserter(_vecobj));" +
+			"\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
-	test += "\nstring " + app + "from"+classstruc.getTreatedClassName(true)+"QVPToJSON(std::queue<"+classstruc.getFullyQualifiedClassName()+">* _lisobj)\n{\nvector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\n" +
+	test += "\nstd::string " + app + "from"+classstruc.getTreatedClassName(true)+"QVPToJSON(std::queue<"+classstruc.getFullyQualifiedClassName()+">* _lisobj)\n{\nstd::vector<"+classstruc.getFullyQualifiedClassName()+"> _vecobj;\n" +
 			"std::queue<"+classstruc.getFullyQualifiedClassName()+"> qq = *_lisobj;\nfor (int var = 0; var < (int)qq.size(); ++var)\n{" +
 			"_vecobj.push_back(qq.front());\nqq.pop();\n}\n" +
-			"\nstring json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
+			"\nstd::string json = \"[\";\nfor(int i=0;i<(int)_vecobj.size();i++){\n" +
 			"json += " + app + "from"+classstruc.getTreatedClassName(true)+"ToJSON(_vecobj.at(i));\n" +
 			"if(i!=(int)_vecobj.size()-1)json += \",\";\n" +
 			"\n}\njson += \"]\";\nreturn json;\n}\n";
@@ -733,9 +733,9 @@ string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classstruc,
 }
 
 
-string AfcUtil::generateReadObjects(const string& type, const string& name, const bool& priv, const bool& ptr, const string& typ, const string& app, ClassStructure& classstruc, Reflection& ref)
+std::string AfcUtil::generateReadObjects(const std::string& type, const std::string& name, const bool& priv, const bool& ptr, const std::string& typ, const std::string& app, ClassStructure& classstruc, Reflection& ref)
 {
-	string tes;
+	std::string tes;
 	if(Reflection::isPrimitiveDataType(type))
 	{
 		tes += "_node = obj.getNode(\""+name+"\");\n";
@@ -753,21 +753,21 @@ string AfcUtil::generateReadObjects(const string& type, const string& name, cons
 	else
 	{
 		tes += "_node = obj.getNode(\""+name+"\");\n";
-		string tempp = type;//StringUtil::replaceAllCopy(type, " ", "");
-		string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
-		if(tempp.find("vector<")!=string::npos || tempp.find("list<")!=string::npos || tempp.find("set<")!=string::npos
-				|| tempp.find("multiset<")!=string::npos || tempp.find("queue<")!=string::npos || tempp.find("deque<")!=string::npos)
+		std::string tempp = type;//StringUtil::replaceAllCopy(type, " ", "");
+		std::string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
+		if(tempp.find("vector<")!=std::string::npos || tempp.find("list<")!=std::string::npos || tempp.find("set<")!=std::string::npos
+				|| tempp.find("multiset<")!=std::string::npos || tempp.find("queue<")!=std::string::npos || tempp.find("deque<")!=std::string::npos)
 		{
-			string stlcnttyp;
-			if(tempp.find("vector")!=string::npos)
+			std::string stlcnttyp;
+			if(tempp.find("vector")!=std::string::npos)
 				stlcnttyp = "vector";
-			else if(tempp.find("queue")!=string::npos)
+			else if(tempp.find("queue")!=std::string::npos)
 				stlcnttyp = "std::queue";
-			else if(tempp.find("deque")!=string::npos)
+			else if(tempp.find("deque")!=std::string::npos)
 				stlcnttyp = "deque";
-			else if(tempp.find("list")!=string::npos)
+			else if(tempp.find("list")!=std::string::npos)
 				stlcnttyp = "list";
-			else if(tempp.find("multiset")!=string::npos)
+			else if(tempp.find("multiset")!=std::string::npos)
 				stlcnttyp = "multiset";
 			else
 				stlcnttyp = "set";
@@ -788,7 +788,7 @@ string AfcUtil::generateReadObjects(const string& type, const string& name, cons
 		}
 		else if(fqcn=="Date" || fqcn=="BinaryData")
 		{
-			string tapp = "";
+			std::string tapp = "";
 			StringUtil::replaceAll(fqcn, "::", "_");
 			if(!ptr)
 			{
@@ -803,7 +803,7 @@ string AfcUtil::generateReadObjects(const string& type, const string& name, cons
 		}
 		else if(Reflection::isValidClass(fqcn, app))
 		{
-			string tapp = app;
+			std::string tapp = app;
 			StringUtil::replaceAll(fqcn, "::", "_");
 			if(!ptr)
 			{
@@ -821,11 +821,11 @@ string AfcUtil::generateReadObjects(const string& type, const string& name, cons
 }
 
 
-string AfcUtil::generateReadVectorObjects(const string& type, const string& name, const bool& priv, const bool& ptr, const string& typ, const string& conttype, const string& app, ClassStructure& classstruc, Reflection& ref)
+std::string AfcUtil::generateReadVectorObjects(const std::string& type, const std::string& name, const bool& priv, const bool& ptr, const std::string& typ, const std::string& conttype, const std::string& app, ClassStructure& classstruc, Reflection& ref)
 {
-	string tes;
-	string act = ((conttype=="set" || conttype=="multiset")?"insert":(conttype=="std::queue"?"push":"push_back"));
-	string fqcn = ref.getFullyQualifiedClassName(type, classstruc.getNamespaces());
+	std::string tes;
+	std::string act = ((conttype=="set" || conttype=="multiset")?"insert":(conttype=="std::queue"?"push":"push_back"));
+	std::string fqcn = ref.getFullyQualifiedClassName(type, classstruc.getNamespaces());
 	if(Reflection::isPrimitiveDataType(type))
 	{
 		if(!ptr)
@@ -841,8 +841,8 @@ string AfcUtil::generateReadVectorObjects(const string& type, const string& name
 	}
 	else if(fqcn=="Date" || fqcn=="BinaryData")
 	{
-		string tapp = "";
-		string tfqcn = fqcn;
+		std::string tapp = "";
+		std::string tfqcn = fqcn;
 		StringUtil::replaceAll(tfqcn, "::", "_");
 		if(!ptr)
 		{
@@ -857,8 +857,8 @@ string AfcUtil::generateReadVectorObjects(const string& type, const string& name
 	}
 	else if(Reflection::isValidClass(fqcn, app))
 	{
-		string tapp = app;
-		string tfqcn = fqcn;
+		std::string tapp = app;
+		std::string tfqcn = fqcn;
 		StringUtil::replaceAll(tfqcn, "::", "_");
 		if(!ptr)
 		{
@@ -874,9 +874,9 @@ string AfcUtil::generateReadVectorObjects(const string& type, const string& name
 	return tes;
 }
 
-string AfcUtil::generateToJSONObjects(const string& type, const string& name, const bool& priv, const bool& end, string &retu, string &headers, string &objs, const string& typ, const bool& ptr, const string& app, ClassStructure& classstruc, Reflection& ref)
+std::string AfcUtil::generateToJSONObjects(const std::string& type, const std::string& name, const bool& priv, const bool& end, std::string &retu, std::string &headers, std::string &objs, const std::string& typ, const bool& ptr, const std::string& app, ClassStructure& classstruc, Reflection& ref)
 {
-	string fres;
+	std::string fres;
 	if(Reflection::isPrimitiveDataType(type))
 	{
 		if(type=="string")
@@ -896,13 +896,13 @@ string AfcUtil::generateToJSONObjects(const string& type, const string& name, co
 		{
 			if(!ptr)
 			{
-				if(!priv)fres += "json += \"\\\""+name+"\\\" : \"+CastUtil::lexical_cast<string>(_obj"+typ+name+");";
-				else fres += "json += \"\\\""+name+"\\\" : \"+CastUtil::lexical_cast<string>(_obj"+typ+"get"+camelCased(name)+"());";
+				if(!priv)fres += "json += \"\\\""+name+"\\\" : \"+CastUtil::lexical_cast<std::string>(_obj"+typ+name+");";
+				else fres += "json += \"\\\""+name+"\\\" : \"+CastUtil::lexical_cast<std::string>(_obj"+typ+"get"+camelCased(name)+"());";
 			}
 			else
 			{
-				if(!priv)fres += "if(_obj"+typ+name+"!=NULL)json += \"\\\""+name+"\\\" : \"+CastUtil::lexical_cast<string>(*_obj"+typ+name+");\nelse json += \"null\";\n";
-				else fres += "if(_obj"+typ+"get"+camelCased(name)+"()!=NULL)json += \"\\\""+name+"\\\" : \"+CastUtil::lexical_cast<string>(*_obj"+typ+"get"+camelCased(name)+"());\nelse json += \"null\";\n";
+				if(!priv)fres += "if(_obj"+typ+name+"!=NULL)json += \"\\\""+name+"\\\" : \"+CastUtil::lexical_cast<std::string>(*_obj"+typ+name+");\nelse json += \"null\";\n";
+				else fres += "if(_obj"+typ+"get"+camelCased(name)+"()!=NULL)json += \"\\\""+name+"\\\" : \"+CastUtil::lexical_cast<std::string>(*_obj"+typ+"get"+camelCased(name)+"());\nelse json += \"null\";\n";
 			}
 		}
 
@@ -913,21 +913,21 @@ string AfcUtil::generateToJSONObjects(const string& type, const string& name, co
 	}
 	else
 	{
-		string fqcn = ref.getFullyQualifiedClassName(type, classstruc.getNamespaces());
-		string tempp = type;//StringUtil::replaceAllCopy(type, " ", "");
-		if(tempp.find("vector<")!=string::npos || tempp.find("list<")!=string::npos || tempp.find("set<")!=string::npos
-				|| tempp.find("multiset<")!=string::npos || tempp.find("queue<")!=string::npos || tempp.find("deque<")!=string::npos)
+		std::string fqcn = ref.getFullyQualifiedClassName(type, classstruc.getNamespaces());
+		std::string tempp = type;//StringUtil::replaceAllCopy(type, " ", "");
+		if(tempp.find("vector<")!=std::string::npos || tempp.find("list<")!=std::string::npos || tempp.find("set<")!=std::string::npos
+				|| tempp.find("multiset<")!=std::string::npos || tempp.find("queue<")!=std::string::npos || tempp.find("deque<")!=std::string::npos)
 		{
-			string stlcnttyp;
-			if(tempp.find("vector")!=string::npos)
+			std::string stlcnttyp;
+			if(tempp.find("vector")!=std::string::npos)
 				stlcnttyp = "vector";
-			else if(tempp.find("queue")!=string::npos)
+			else if(tempp.find("queue")!=std::string::npos)
 				stlcnttyp = "std::queue";
-			else if(tempp.find("deque")!=string::npos)
+			else if(tempp.find("deque")!=std::string::npos)
 				stlcnttyp = "deque";
-			else if(tempp.find("list")!=string::npos)
+			else if(tempp.find("list")!=std::string::npos)
 				stlcnttyp = "list";
-			else if(tempp.find("multiset")!=string::npos)
+			else if(tempp.find("multiset")!=std::string::npos)
 				stlcnttyp = "multiset";
 			else
 				stlcnttyp = "set";
@@ -940,7 +940,7 @@ string AfcUtil::generateToJSONObjects(const string& type, const string& name, co
 			tempp = StringUtil::replaceAllCopy(tempp, "std::", "");
 			tempp = StringUtil::replaceAllCopy(tempp, ">", "");
 
-			string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
+			std::string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
 
 			fres += "json += \"\\\""+name+"\\\" : \";\n";
 			if(!priv)
@@ -967,7 +967,7 @@ string AfcUtil::generateToJSONObjects(const string& type, const string& name, co
 		}
 		else if(fqcn=="Date" || fqcn=="BinaryData")
 		{
-			string tapp = "";
+			std::string tapp = "";
 			StringUtil::replaceAll(fqcn, "::", "_");
 			if(!ptr)
 			{
@@ -982,7 +982,7 @@ string AfcUtil::generateToJSONObjects(const string& type, const string& name, co
 		}
 		else if(Reflection::isValidClass(fqcn, app))
 		{
-			string tapp = app;
+			std::string tapp = app;
 			StringUtil::replaceAll(fqcn, "::", "_");
 			if(!ptr)
 			{
@@ -1003,10 +1003,10 @@ string AfcUtil::generateToJSONObjects(const string& type, const string& name, co
 	return fres;
 }
 
-string AfcUtil::generateToJSONVectorObjects(const string& type, const string& name, const bool& priv, string &retu, string &headers, string &objs, const string& typ, const bool& ptr, const string& stlcnttyp, const string& app, ClassStructure& classstruc, Reflection& ref)
+std::string AfcUtil::generateToJSONVectorObjects(const std::string& type, const std::string& name, const bool& priv, std::string &retu, std::string &headers, std::string &objs, const std::string& typ, const bool& ptr, const std::string& stlcnttyp, const std::string& app, ClassStructure& classstruc, Reflection& ref)
 {
-	string fres = "json += \"\\\""+name+"\\\" : [\";\n";
-	string vtyp = ".";
+	std::string fres = "json += \"\\\""+name+"\\\" : [\";\n";
+	std::string vtyp = ".";
 	if(ptr)
 		vtyp = "->";
 	//Is list/set then use iterator
@@ -1015,7 +1015,7 @@ string AfcUtil::generateToJSONVectorObjects(const string& type, const string& na
 
 	if(!priv)
 	{
-		string fqcn = ref.getFullyQualifiedClassName(type, classstruc.getNamespaces());
+		std::string fqcn = ref.getFullyQualifiedClassName(type, classstruc.getNamespaces());
 		if(stlcnttyp=="vector")
 			fres += "for(int j=0;j<_obj"+typ+name+vtyp+"size();j++)\n{\n";
 		else if(stlcnttyp=="list" || stlcnttyp=="set" || stlcnttyp=="multiset" || stlcnttyp=="deque")
@@ -1032,7 +1032,7 @@ string AfcUtil::generateToJSONVectorObjects(const string& type, const string& na
 	}
 	else
 	{
-		string fqcn = ref.getFullyQualifiedClassName(type, classstruc.getNamespaces());
+		std::string fqcn = ref.getFullyQualifiedClassName(type, classstruc.getNamespaces());
 		if(stlcnttyp=="vector")
 			fres += "for(int j=0;j<_obj"+typ+"get"+camelCased(name)+"()"+vtyp+"size();j++)\n{\n";
 		else if(stlcnttyp=="list" || stlcnttyp=="set" || stlcnttyp=="multiset" || stlcnttyp=="deque")
@@ -1047,7 +1047,7 @@ string AfcUtil::generateToJSONVectorObjects(const string& type, const string& na
 					"for(int j=0;j<(int)tt"+name+"->size();j++)\n{\n";
 		}
 	}
-	string fqcn = ref.getFullyQualifiedClassName(type, classstruc.getNamespaces());
+	std::string fqcn = ref.getFullyQualifiedClassName(type, classstruc.getNamespaces());
 	if(Reflection::isPrimitiveDataType(type))
 	{
 		if(type=="string")
@@ -1091,45 +1091,45 @@ string AfcUtil::generateToJSONVectorObjects(const string& type, const string& na
 			{
 				if(stlcnttyp=="vector")
 				{
-					if(!priv)fres += "json += CastUtil::lexical_cast<string>(_obj"+typ+name+".at(j));";
-					else fres += "json += CastUtil::lexical_cast<string>(_obj"+typ+"get"+camelCased(name)+"().at(j));";
+					if(!priv)fres += "json += CastUtil::lexical_cast<std::string>(_obj"+typ+name+".at(j));";
+					else fres += "json += CastUtil::lexical_cast<std::string>(_obj"+typ+"get"+camelCased(name)+"().at(j));";
 				}
 				else if(stlcnttyp=="list" || stlcnttyp=="set" || stlcnttyp=="multiset" || stlcnttyp=="deque")
 				{
-					fres += "json += CastUtil::lexical_cast<string>(*it"+name+");";
+					fres += "json += CastUtil::lexical_cast<std::string>(*it"+name+");";
 				}
 				else
 				{
 					if(!ptr)
-						fres += "json += CastUtil::lexical_cast<string>(tt"+name+".front());\ntt"+name+".pop();\n";
+						fres += "json += CastUtil::lexical_cast<std::string>(tt"+name+".front());\ntt"+name+".pop();\n";
 					else
-						fres += "json += CastUtil::lexical_cast<string>(tt"+name+"->front());\ntt"+name+"->pop();\n";
+						fres += "json += CastUtil::lexical_cast<std::string>(tt"+name+"->front());\ntt"+name+"->pop();\n";
 				}
 			}
 			else
 			{
 				if(stlcnttyp=="vector")
 				{
-					if(!priv)fres += "json += CastUtil::lexical_cast<string>(_obj"+typ+name+"->at(j));";
-					else fres += "json += CastUtil::lexical_cast<string>(_obj"+typ+"get"+camelCased(name)+"()->at(j));";
+					if(!priv)fres += "json += CastUtil::lexical_cast<std::string>(_obj"+typ+name+"->at(j));";
+					else fres += "json += CastUtil::lexical_cast<std::string>(_obj"+typ+"get"+camelCased(name)+"()->at(j));";
 				}
 				else if(stlcnttyp=="list" || stlcnttyp=="set" || stlcnttyp=="multiset" || stlcnttyp=="deque")
 				{
-					fres += "json += CastUtil::lexical_cast<string>(*it"+name+");";
+					fres += "json += CastUtil::lexical_cast<std::string>(*it"+name+");";
 				}
 				else
 				{
 					if(!ptr)
-						fres += "json += CastUtil::lexical_cast<string>(tt"+name+".front());\ntt"+name+".pop();\n";
+						fres += "json += CastUtil::lexical_cast<std::string>(tt"+name+".front());\ntt"+name+".pop();\n";
 					else
-						fres += "json += CastUtil::lexical_cast<string>(tt"+name+"->front());\ntt"+name+"->pop();\n";
+						fres += "json += CastUtil::lexical_cast<std::string>(tt"+name+"->front());\ntt"+name+"->pop();\n";
 				}
 			}
 		}
 	}
 	else if(fqcn=="Date" || fqcn=="BinaryData")
 	{
-		string tapp = "";
+		std::string tapp = "";
 		StringUtil::replaceAll(fqcn, "::", "_");
 		if(!ptr)
 		{
@@ -1170,7 +1170,7 @@ string AfcUtil::generateToJSONVectorObjects(const string& type, const string& na
 	}
 	else if(Reflection::isValidClass(fqcn, app))
 	{
-		string tapp = app;
+		std::string tapp = app;
 		StringUtil::replaceAll(fqcn, "::", "_");
 		if(!ptr)
 		{
@@ -1245,20 +1245,20 @@ string AfcUtil::generateToJSONVectorObjects(const string& type, const string& na
 	return fres;
 }
 
-string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstruc, const string& path, string &infjs, const string& appName, map<string, string>& ajintpthMap, Reflection& ref)
+std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstruc, const std::string& path, std::string &infjs, const std::string& appName, std::map<std::string, std::string>& ajintpthMap, Reflection& ref)
 {
-	string test,intf,intff,inc;
+	std::string test,intf,intff,inc;
 	//headers += "#include \"" + claz + ".h\"\n";
 	//writeTofile("/home/sumeet/workspace/inter/AfcInclude.h",inc,false);
-	//inc = "\nextern \"C\"{\n";//string executeAFC(string fn,strVec _inp){\nstring ret;\n";
+	//inc = "\nextern \"C\"{\n";//string executeAFC(std::string fn,strVec _inp){\nstd::string ret;\n";
 	//bool fl = false;
 	test = ("var " + classstruc.getTreatedClassName(false) + "= {\n");
 	for(unsigned int i=0;i<obj.size();i++)
 	{
 		strVec vemp,emp;
-		string data = obj.at(i);
+		std::string data = obj.at(i);
 		StringUtil::replaceFirst(data,";","");
-		vector<string> delimiters;
+		std::vector<std::string> delimiters;
 		delimiters.push_back(" ");
 		delimiters.push_back(",");
 		delimiters.push_back(")");
@@ -1268,15 +1268,15 @@ string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstr
 		{
 			if(vemp.at(k)!="")
 				emp.push_back(vemp.at(k));
-			//logger << vemp.at(i) << "\n" << flush;
+			//logger << vemp.at(i) << "\n" << std::flush;
 		}
-		//logger << "\n------------------------------------\n" << flush;
+		//logger << "\n------------------------------------\n" << std::flush;
 		if(emp.size()>1)
 		{
 			size_t te = emp.at(1).find("~");
-			if(te==string::npos)
+			if(te==std::string::npos)
 			{
-				string pars,parswt,types,jsonstr;
+				std::string pars,parswt,types,jsonstr;
 				if(emp.size()==2)
 				{
 					test += emp.at(1) + ": function(_cb,_url,_cntxt){\n";
@@ -1287,7 +1287,7 @@ string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstr
 					test += emp.at(1) + ": function(";
 					for(unsigned int j=2;j<emp.size();j++)
 					{
-						stringstream st,st1,st2;
+						std::stringstream st,st1,st2;
 						//types += ("\"" + emp.at(j) + "\"");
 						st << "_";
 						st << (j-1);
@@ -1296,47 +1296,47 @@ string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstr
 							st << ",";
 							//types += ",";
 						}
-						string h;
+						std::string h;
 						st >> h;
 						test += h;
 						pars += h;
-						parswt += ("string " + h);
+						parswt += ("std::string " + h);
 						//st1 << emp.at(j) << " __" << (j-1);
 						//st1 << " = (" << emp.at(j) << ")_" << (j-1) << "->c_str();\n";
-						string h1;
+						std::string h1;
 						//st1 >> h1;
 						if(Reflection::isPrimitiveDataType(emp.at(j)))
 						{
 							types.append(emp.at(j));
 							types.append(" _");
-							jsonstr += "_"+CastUtil::lexical_cast<string>(j-1);
-							types.append(CastUtil::lexical_cast<string>(j-1));
+							jsonstr += "_"+CastUtil::lexical_cast<std::string>(j-1);
+							types.append(CastUtil::lexical_cast<std::string>(j-1));
 							types.append(" = CastUtil::lexical_cast<");
 							types.append(emp.at(j));
 							types.append(">(_inp.at(");
-							types.append(CastUtil::lexical_cast<string>(j-2));
+							types.append(CastUtil::lexical_cast<std::string>(j-2));
 							types.append("));\n");
 						}
 						else
 						{
-							string varname = CastUtil::lexical_cast<string>(j-1);
-							string retType = emp.at(j);
-							bool ptr = retType.find("*")!=string::npos;
-							string tempp = StringUtil::replaceAllCopy(retType, " ", "");
-							string fqcn = ref.getFullyQualifiedClassName(retType, classstruc.getNamespaces());
-							if(tempp.find("vector<")!=string::npos || tempp.find("list<")!=string::npos || tempp.find("set<")!=string::npos
-									|| tempp.find("multiset<")!=string::npos || tempp.find("queue<")!=string::npos || tempp.find("deque<")!=string::npos)
+							std::string varname = CastUtil::lexical_cast<std::string>(j-1);
+							std::string retType = emp.at(j);
+							bool ptr = retType.find("*")!=std::string::npos;
+							std::string tempp = StringUtil::replaceAllCopy(retType, " ", "");
+							std::string fqcn = ref.getFullyQualifiedClassName(retType, classstruc.getNamespaces());
+							if(tempp.find("vector<")!=std::string::npos || tempp.find("list<")!=std::string::npos || tempp.find("set<")!=std::string::npos
+									|| tempp.find("multiset<")!=std::string::npos || tempp.find("queue<")!=std::string::npos || tempp.find("deque<")!=std::string::npos)
 							{
-								string stlcnttyp;
-								if(tempp.find("vector")!=string::npos)
+								std::string stlcnttyp;
+								if(tempp.find("vector")!=std::string::npos)
 									stlcnttyp = "vector";
-								else if(tempp.find("queue")!=string::npos)
+								else if(tempp.find("queue")!=std::string::npos)
 									stlcnttyp = "std::queue";
-								else if(tempp.find("deque")!=string::npos)
+								else if(tempp.find("deque")!=std::string::npos)
 									stlcnttyp = "deque";
-								else if(tempp.find("list")!=string::npos)
+								else if(tempp.find("list")!=std::string::npos)
 									stlcnttyp = "list";
-								else if(tempp.find("multiset")!=string::npos)
+								else if(tempp.find("multiset")!=std::string::npos)
 									stlcnttyp = "multiset";
 								else
 									stlcnttyp = "set";
@@ -1349,17 +1349,17 @@ string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstr
 								tempp = StringUtil::replaceAllCopy(tempp, "std::", "");
 								tempp = StringUtil::replaceAllCopy(tempp, ">", "");
 
-								string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
+								std::string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
 
 								types.append(emp.at(j));
 								if(ptr)
 									types.append("* _");
 								else
 									types.append(" _");
-								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<string>(j-1)+")";
+								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<std::string>(j-1)+")";
 
 								types.append(varname);
-								string adden = "", padden = "";
+								std::string adden = "", padden = "";
 								if(ptr)
 								{
 									adden = ", \""+stlcnttyp+"<"+fqcn+">\"";
@@ -1368,20 +1368,20 @@ string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstr
 								}
 								else
 									types.append(" = JSONSerialize::unserialize<"+stlcnttyp+"<"+fqcn+"> >(_inp.at(");
-								types.append(CastUtil::lexical_cast<string>(j-2));
+								types.append(CastUtil::lexical_cast<std::string>(j-2));
 								types.append(")"+adden+", \""+appName+"\");\n"+padden);
 							}
 							else if(fqcn=="Date" || fqcn=="BinaryData")
 							{
-								string tapp = "";
+								std::string tapp = "";
 								types.append(retType);
 								if(ptr)
 									types.append("* _");
 								else
 									types.append(" _");
 
-								string adden = "", padden = "";
-								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<string>(j-1)+")";
+								std::string adden = "", padden = "";
+								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<std::string>(j-1)+")";
 								types.append(varname);
 								if(ptr)
 								{
@@ -1391,21 +1391,21 @@ string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstr
 								}
 								else
 									types.append(" = JSONSerialize::unserialize<"+fqcn+">(_inp.at(");
-								types.append(CastUtil::lexical_cast<string>(j-2));
+								types.append(CastUtil::lexical_cast<std::string>(j-2));
 								types.append(")"+adden+", \""+appName+"\");\n"+padden);
 							}
 							else if(Reflection::isValidClass(fqcn, appName))
 							{
-								string tapp = appName;
+								std::string tapp = appName;
 								types.append(retType);
 								if(ptr)
 									types.append("* _");
 								else
 									types.append(" _");
 
-								string adden = "", padden = "";
-								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<string>(j-1)+")";
-								types.append(CastUtil::lexical_cast<string>(j-1));
+								std::string adden = "", padden = "";
+								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<std::string>(j-1)+")";
+								types.append(CastUtil::lexical_cast<std::string>(j-1));
 								if(ptr)
 								{
 									padden = "delete _" + varname + ";\n";
@@ -1414,7 +1414,7 @@ string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstr
 								}
 								else
 									types.append(" = JSONSerialize::unserialize<"+fqcn+">(_inp.at(");
-								types.append(CastUtil::lexical_cast<string>(j-2));
+								types.append(CastUtil::lexical_cast<std::string>(j-2));
 								types.append(")"+adden+", \""+appName+"\");\n"+padden);
 							}
 						}
@@ -1423,7 +1423,7 @@ string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstr
 							jsonstr += ",";
 						}
 						//types += (emp.at(j).c_str() + " __" + (j-1));
-						//logger << vemp.at(i) << "\n" << flush;
+						//logger << vemp.at(i) << "\n" << std::flush;
 					}
 					//fl = true;
 					test += ",_cb,_url,_cntxt){\n";
@@ -1446,19 +1446,19 @@ string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstr
 	infjs += test;
 	//writeTofile("/home/sumeet/workspace/inter/AjaxInterface.cpp",inc,false);
 	return inc;
-	//logger << test << flush;
+	//logger << test << std::flush;
 }
 
-string AfcUtil::updateAjaxInterface(const strVec& emp, ClassStructure& classstruc, const string& pars, const string& parswt, const string& types, const string& appName, Reflection& ref)
+std::string AfcUtil::updateAjaxInterface(const strVec& emp, ClassStructure& classstruc, const std::string& pars, const std::string& parswt, const std::string& types, const std::string& appName, Reflection& ref)
 {
-	string test;
-	string retType = emp.at(0);
-	string funcName = emp.at(1);
-	bool ptr = retType.find("*")!=string::npos;
+	std::string test;
+	std::string retType = emp.at(0);
+	std::string funcName = emp.at(1);
+	bool ptr = retType.find("*")!=std::string::npos;
 	StringUtil::replaceAll(retType, "*", "");
 	StringUtil::replaceAll(retType, "&", "");
 	//test = "#include \"" + claz + ".h\"\n#include "CastUtil.h"\n\n";
-	test += ("string "+appName+"invokeAjaxMethodFor" + classstruc.getTreatedClassName(true) + funcName + "(strVec _inp");
+	test += ("std::string "+appName+"invokeAjaxMethodFor" + classstruc.getTreatedClassName(true) + funcName + "(strVec _inp");
 	test += ")\n{\n" + types;
 	test += (classstruc.getFullyQualifiedClassName() + " _obj;\n");
 	if(retType=="void")
@@ -1471,25 +1471,25 @@ string AfcUtil::updateAjaxInterface(const strVec& emp, ClassStructure& classstru
 	}
 	else if(Reflection::isPrimitiveDataType(retType))
 	{
-		test += "return CastUtil::lexical_cast<string>(_obj."+funcName+"("+pars+"));\n}\n";
+		test += "return CastUtil::lexical_cast<std::string>(_obj."+funcName+"("+pars+"));\n}\n";
 	}
 	else
 	{
-		string tempp = StringUtil::replaceAllCopy(retType, " ", "");
-		string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
-		if(tempp.find("vector<")!=string::npos || tempp.find("list<")!=string::npos || tempp.find("set<")!=string::npos
-				|| tempp.find("multiset<")!=string::npos || tempp.find("queue<")!=string::npos || tempp.find("deque<")!=string::npos)
+		std::string tempp = StringUtil::replaceAllCopy(retType, " ", "");
+		std::string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
+		if(tempp.find("vector<")!=std::string::npos || tempp.find("list<")!=std::string::npos || tempp.find("set<")!=std::string::npos
+				|| tempp.find("multiset<")!=std::string::npos || tempp.find("queue<")!=std::string::npos || tempp.find("deque<")!=std::string::npos)
 		{
-			string stlcnttyp;
-			if(tempp.find("vector")!=string::npos)
+			std::string stlcnttyp;
+			if(tempp.find("vector")!=std::string::npos)
 				stlcnttyp = "vector";
-			else if(tempp.find("queue")!=string::npos)
+			else if(tempp.find("queue")!=std::string::npos)
 				stlcnttyp = "std::queue";
-			else if(tempp.find("deque")!=string::npos)
+			else if(tempp.find("deque")!=std::string::npos)
 				stlcnttyp = "deque";
-			else if(tempp.find("list")!=string::npos)
+			else if(tempp.find("list")!=std::string::npos)
 				stlcnttyp = "list";
-			else if(tempp.find("multiset")!=string::npos)
+			else if(tempp.find("multiset")!=std::string::npos)
 				stlcnttyp = "multiset";
 			else
 				stlcnttyp = "set";
@@ -1502,7 +1502,7 @@ string AfcUtil::updateAjaxInterface(const strVec& emp, ClassStructure& classstru
 			tempp = StringUtil::replaceAllCopy(tempp, "std::", "");
 			tempp = StringUtil::replaceAllCopy(tempp, ">", "");
 
-			string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
+			std::string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
 
 			if(ptr)
 			{
@@ -1558,13 +1558,13 @@ string AfcUtil::updateAjaxInterface(const strVec& emp, ClassStructure& classstru
 	return test;
 }
 
-void AfcUtil::writeTofile(const string& fileName, const string& data, const bool& trunc)
+void AfcUtil::writeTofile(const std::string& fileName, const std::string& data, const bool& trunc)
 {
-	ofstream myfile1;
+	std::ofstream myfile1;
 	if(trunc)
-		myfile1.open(fileName.c_str(),ios::trunc | ios::binary);
+		myfile1.open(fileName.c_str(),std::ios::trunc | std::ios::binary);
 	else
-		myfile1.open(fileName.c_str(),ios::app | ios::binary);
+		myfile1.open(fileName.c_str(),std::ios::app | std::ios::binary);
 	if (myfile1.is_open())
 	{
 		myfile1.write(data.c_str(),data.length());
@@ -1573,16 +1573,16 @@ void AfcUtil::writeTofile(const string& fileName, const string& data, const bool
 }
 
 
-string AfcUtil::camelCased(const string& s)
+std::string AfcUtil::camelCased(const std::string& s)
 {
-	string str(s);
+	std::string str(s);
 	str[0] = toupper(str[0]);
 	return str;
 }
 
-string AfcUtil::reverseCamelCased(const string& s)
+std::string AfcUtil::reverseCamelCased(const std::string& s)
 {
-	string str(s);
+	std::string str(s);
 	str[0] = tolower(str[0]);
 	return str;
 }

@@ -44,13 +44,13 @@ void* MethodInvoc::service(void* arg)
 {
 	int fd = *(int*)arg;
 	init();
-	string methInfo,retValue;
+	std::string methInfo,retValue;
 	instance->server.Receive(fd,methInfo,1024);
 	methInfo =methInfo.substr(0,methInfo.find_last_of(">")+1);
 	try
 	{
 		XmlParser parser("Parser");
-		if(methInfo.find("lang=\"c++\"")!=string::npos || methInfo.find("lang='c++'")!=string::npos)
+		if(methInfo.find("lang=\"c++\"")!=std::string::npos || methInfo.find("lang='c++'")!=std::string::npos)
 		{
 			Document doc;
 			parser.parse(methInfo, doc);
@@ -102,6 +102,18 @@ void* MethodInvoc::service(void* arg)
 					*vt = CastUtil::lexical_cast<int>(arg->getText());
 					value = vt;
 				}
+				else if(arg->getAttribute("type")=="long")
+				{
+					long *vt = new long;
+					*vt = CastUtil::lexical_cast<long>(arg->getText());
+					value = vt;
+				}
+				else if(arg->getAttribute("type")=="long long")
+				{
+					long long *vt = new long long;
+					*vt = CastUtil::lexical_cast<long long>(arg->getText());
+					value = vt;
+				}
 				else if(arg->getAttribute("type")=="float")
 				{
 					float *vt = new float;
@@ -116,25 +128,25 @@ void* MethodInvoc::service(void* arg)
 				}
 				else if(arg->getAttribute("type")=="string")
 				{
-					string *vt = new string;
-					*vt = CastUtil::lexical_cast<string>(arg->getText());
+					std::string *vt = new string;
+					*vt = CastUtil::lexical_cast<std::string>(arg->getText());
 					value = vt;
 				}
 				else if(arg->getAttribute("type")!="")
 				{
 					Element* obj = arg->getChildElements().at(0);
-					string objxml = obj->render();
-					string objClassName = obj->getTagName();
+					std::string objxml = obj->render();
+					std::string objClassName = obj->getTagName();
 					value = ser.unSerializeUnknown(objxml,arg->getAttribute("type"));
 				}
 				argus.push_back(arg->getAttribute("type"));
 				valus.push_back(value);
 			}
-			string className = message.getAttribute("className");
-			string returnType = message.getAttribute("returnType");
-			string lang = message.getAttribute("lang");
+			std::string className = message.getAttribute("className");
+			std::string returnType = message.getAttribute("returnType");
+			std::string lang = message.getAttribute("lang");
 			ClassInfo clas = reflector.getClassInfo(className);
-			string methodName = message.getAttribute("name");;
+			std::string methodName = message.getAttribute("name");;
 			if(clas.getClassName()=="")
 			{
 				throw MethodInvokerException("class does not exist or is not in the library path\n",retValue);
@@ -159,27 +171,37 @@ void* MethodInvoc::service(void* arg)
 					if(returnType=="int")
 					{
 						int retv = reflector.invokeMethod<int>(_temp,meth,valus);
-						retValue = ("<return:int>"+CastUtil::lexical_cast<string>(retv)+"</return:int>");
+						retValue = ("<return:int>"+CastUtil::lexical_cast<std::string>(retv)+"</return:int>");
+					}
+					else if(returnType=="long")
+					{
+						long retv = reflector.invokeMethod<long>(_temp,meth,valus);
+						retValue = ("<return:long>"+CastUtil::lexical_cast<std::string>(retv)+"</return:long>");
+					}
+					else if(returnType=="long long")
+					{
+						long long retv = reflector.invokeMethod<long long>(_temp,meth,valus);
+						retValue = ("<return:longlong>"+CastUtil::lexical_cast<std::string>(retv)+"</return:longlong>");
 					}
 					else if(returnType=="float")
 					{
 						float retv = reflector.invokeMethod<float>(_temp,meth,valus);
-						retValue = ("<return:float>"+CastUtil::lexical_cast<string>(retv)+"</return:float>");
+						retValue = ("<return:float>"+CastUtil::lexical_cast<std::string>(retv)+"</return:float>");
 					}
 					else if(returnType=="double")
 					{
 						double retv = reflector.invokeMethod<double>(_temp,meth,valus);
-						retValue = ("<return:double>"+CastUtil::lexical_cast<string>(retv)+"</return:double>");
+						retValue = ("<return:double>"+CastUtil::lexical_cast<std::string>(retv)+"</return:double>");
 					}
 					else if(returnType=="string")
 					{
-						string retv = reflector.invokeMethod<string>(_temp,meth,valus);
+						std::string retv = reflector.invokeMethod<std::string>(_temp,meth,valus);
 						retValue = ("<return:string>"+retv+"</return:string>");
 					}
 					else if(returnType!="")
 					{
 						void* retobj = reflector.invokeMethodUnknownReturn(_temp,meth,valus);
-						string oxml = ser.serializeUnknown(retobj,returnType);
+						std::string oxml = ser.serializeUnknown(retobj,returnType);
 						retValue = ("<return:"+returnType+">"+oxml+"</return:"+returnType+">");
 					}
 				}
@@ -209,7 +231,7 @@ void* MethodInvoc::service(void* arg)
 }
 
 
-void MethodInvoc::trigger(const string& port)
+void MethodInvoc::trigger(const std::string& port)
 {
 	init();
 	if(instance->running)

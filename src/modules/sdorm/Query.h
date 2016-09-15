@@ -11,9 +11,9 @@
 #include "string"
 #include "GenericObject.h"
 #include "StringUtil.h"
-using namespace std;
-typedef map<string, GenericObject> Parameters;
-typedef map<int, GenericObject> PosParameters;
+
+typedef std::map<std::string, GenericObject> Parameters;
+typedef std::map<int, GenericObject> PosParameters;
 
 class Query {
 	/*The column bindings used in the where clause for the entity*/
@@ -22,24 +22,24 @@ class Query {
 	Parameters propNameVaues;
 	/*The property/column positions to be queried for the entity*/
 	PosParameters propPosVaues;
-	/*The actual Query string*/
-	string query;
+	/*The actual Query std::string*/
+	std::string query;
 	/*The start and count values required for pagination*/
 	int start, count;
 	/*The class for criteria building*/
-	string className;
-	string tableName;
-	vector<string> aliasedColumns;
+	std::string className;
+	std::string tableName;
+	std::vector<std::string> aliasedColumns;
 	friend class SQLDataSourceImpl;
 public:
 	Query();
-	Query(const string& query);
-	Query(const string& query, const string& className);
-	Query addParameter(const string&, const GenericObject&);
+	Query(const std::string& query);
+	Query(const std::string& query, const std::string& className);
+	Query addParameter(const std::string&, const GenericObject&);
 	Query addParameters(const Parameters& propNameVaues);
 	Query addParameter(const int&, const GenericObject&);
 	Query addParameters(const PosParameters& propPosVaues);
-	Query addColumnBinding(const string&, const GenericObject&);
+	Query addColumnBinding(const std::string&, const GenericObject&);
 	Query addColumnBindings(const Parameters& columnBindings);
 	Query paginate(const int&, const int&);
 	bool isUpdate();
@@ -47,16 +47,16 @@ public:
 	Parameters& getColumnBindings();
 	Parameters& getPropNameVaues();
 	PosParameters& getPropPosVaues();
-	void setQuery(const string& query);
+	void setQuery(const std::string& query);
 	int getCount() const;
 	int getStart() const;
-	const string& getClassName() const;
-	const string& getQuery() const;
+	const std::string& getClassName() const;
+	const std::string& getQuery() const;
 	void setCount(const int& count);
 	void setStart(const int& start);
-	const string& getTableName() const;
-	void setTableName(const string& tableName);
-	void setClassName(const string& className);
+	const std::string& getTableName() const;
+	void setTableName(const std::string& tableName);
+	void setClassName(const std::string& className);
 };
 
 #endif /* QUERY_H_ */

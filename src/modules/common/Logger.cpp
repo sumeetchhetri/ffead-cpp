@@ -22,17 +22,17 @@
 
 #include "LoggerFactory.h"
 
-string Logger::LEVEL_OFF = "OFF";
-string Logger::LEVEL_FATAL = "FATAL";
-string Logger::LEVEL_ERROR = "ERROR";
-string Logger::LEVEL_WARN = "WARN";
-string Logger::LEVEL_INFO = "INFO";
-string Logger::LEVEL_DEBUG = "DEBUG";
-string Logger::LEVEL_TRACE = "TRACE";
+std::string Logger::LEVEL_OFF = "OFF";
+std::string Logger::LEVEL_FATAL = "FATAL";
+std::string Logger::LEVEL_ERROR = "ERROR";
+std::string Logger::LEVEL_WARN = "WARN";
+std::string Logger::LEVEL_INFO = "INFO";
+std::string Logger::LEVEL_DEBUG = "DEBUG";
+std::string Logger::LEVEL_TRACE = "TRACE";
 
-map<string, int> Logger::levelMap;
+std::map<std::string, int> Logger::levelMap;
 
-Logger::Logger(LoggerConfig *config, const string& className)
+Logger::Logger(LoggerConfig *config, const std::string& className)
 {
 	this->className = className;
 	this->config = NULL;
@@ -42,12 +42,12 @@ Logger::Logger(LoggerConfig *config, const string& className)
 	}
 }
 
-void Logger::setClassName(const string& className)
+void Logger::setClassName(const std::string& className)
 {
 	this->className = className;
 }
 
-Logger::Logger(LoggerConfig *config, const string& className, const string& level)
+Logger::Logger(LoggerConfig *config, const std::string& className, const std::string& level)
 {
 	this->className = className;
 	this->config = NULL;
@@ -67,33 +67,33 @@ Logger::~Logger()
 	this->config = NULL;
 }
 
-void Logger::write(const string& msg, const string& mod, const bool& newline)
+void Logger::write(const std::string& msg, const std::string& mod, const bool& newline)
 {
 	if(config==NULL)return;
 	Date dat;
-	string te = config->datFormat.format(dat);
-	string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<string>(config->vhostNumber)):"");
-	string fmsg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :"+msg+(newline?"\n":"");
+	std::string te = config->datFormat.format(dat);
+	std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<std::string>(config->vhostNumber)):"");
+	std::string fmsg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :"+msg+(newline?"\n":"");
 	config->lock.lock();
 	config->out->write(fmsg.c_str(),fmsg.length());
-	*config->out << flush;
+	*config->out << std::flush;
 	config->lock.unlock();
 }
 
-void Logger::write(ostream& (*pf) (ostream&), const string& mod)
+void Logger::write(std::ostream& (*pf) (std::ostream&), const std::string& mod)
 {
 	if(config==NULL)return;
 	Date dat;
-	string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<string>(config->vhostNumber)):"");
-	string te = config->datFormat.format(dat);
-	string msg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :";
+	std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<std::string>(config->vhostNumber)):"");
+	std::string te = config->datFormat.format(dat);
+	std::string msg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :";
 	config->lock.lock();
 	*config->out << msg;
 	*config->out << pf;
 	config->lock.unlock();
 }
 
-void Logger::fatal(const string& msg)
+void Logger::fatal(const std::string& msg)
 {
 	if(config==NULL)return;
 	if(levelMap[config->mode]==2)
@@ -102,7 +102,7 @@ void Logger::fatal(const string& msg)
 	}
 }
 
-void Logger::error(const string& msg)
+void Logger::error(const std::string& msg)
 {
 	if(config==NULL)return;
 	if(levelMap[config->mode]<=3)
@@ -111,7 +111,7 @@ void Logger::error(const string& msg)
 	}
 }
 
-void Logger::warn(const string& msg)
+void Logger::warn(const std::string& msg)
 {
 	if(config==NULL)return;
 	if(levelMap[config->mode]<=4)
@@ -120,7 +120,7 @@ void Logger::warn(const string& msg)
 	}
 }
 
-void Logger::info(const string& msg)
+void Logger::info(const std::string& msg)
 {
 	if(config==NULL)return;
 	if(levelMap[config->mode]<=5)
@@ -129,7 +129,7 @@ void Logger::info(const string& msg)
 	}
 }
 
-void Logger::debug(const string& msg)
+void Logger::debug(const std::string& msg)
 {
 	if(config==NULL)return;
 	if(levelMap[config->mode]<=6)
@@ -138,7 +138,7 @@ void Logger::debug(const string& msg)
 	}
 }
 
-void Logger::trace(const string& msg)
+void Logger::trace(const std::string& msg)
 {
 	if(config==NULL)return;
 	if(levelMap[config->mode]<=7)
@@ -147,7 +147,7 @@ void Logger::trace(const string& msg)
 	}
 }
 
-Logger& operator<< (Logger& logger, ostream& (*pf) (ostream&))
+Logger& operator<< (Logger& logger, std::ostream& (*pf) (std::ostream&))
 {
 	logger.write(pf, logger.level);
 	if(pf == static_cast <std::ostream & (*)(std::ostream &)> (std::endl) ||

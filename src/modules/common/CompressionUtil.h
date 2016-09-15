@@ -29,30 +29,30 @@
 #include "string"
 #include "math.h"
 #include "fstream"
-using namespace std;
+
 #define CHUNK 8192
 #define COMPRESS_OK 1
 #define COMPRESS_NOK 0
 
 class CompressionUtil {
-	static string _compress(char* datain, const size_t& insize, const bool& eostream, const bool& isGz, const int& chunkSize, const bool& retu= true, char* toFile= NULL);
-	static string _uncompress(char* datain, const size_t& insize, const bool& isGz, const bool& retu= true, char* toFile= NULL);
-	static string _compress(char* infile, const bool& isGz, const bool& retu, char* toFile);
-	static string _uncompress(char* infile, const bool& isGz, const bool& retu, char* toFile);
+	static std::string _compress(char* datain, const size_t& insize, const bool& eostream, const bool& isGz, const int& chunkSize, const bool& retu= true, char* toFile= NULL);
+	static std::string _uncompress(char* datain, const size_t& insize, const bool& isGz, const bool& retu= true, char* toFile= NULL);
+	static std::string _compress(char* infile, const bool& isGz, const bool& retu, char* toFile);
+	static std::string _uncompress(char* infile, const bool& isGz, const bool& retu, char* toFile);
 	CompressionUtil();
 public:
-	static string zlibCompress(char* input, const size_t& siz, const bool& eostream= false, const int& chunkSize= 8192, const bool& retu= true, char* toFile= NULL);
-	static string zlibCompress(const string& input, const bool& eostream= false, const int& chunkSize= 8192, const bool& retu= true, char* toFile= NULL);
-	static string zlibCompressFile(char* infile, const bool& retu= true, char* toFile= NULL);
-	static string gzipCompress(char* input, const size_t& siz, const bool& eostream= false, const int& chunkSize= 8192, const bool& retu= true, char* toFile= NULL);
-	static string gzipCompress(const string& input, const bool& eostream= false, const int& chunkSize= 8192, const bool& retu= true, char* toFile= NULL);
-	static string gzipCompressFile(char* infile, const bool& retu= true, char* toFile= NULL);
-	static string zlibUnCompress(char* input, const size_t& siz, const bool& retu= true, char* toFile= NULL);
-	static string zlibUnCompress(const string& input, const bool& retu= true, char* toFile= NULL);
-	static string zlibUnCompressFile(char* infile, const bool& retu= true, char* toFile= NULL);
-	static string gzipUnCompress(char* input, const size_t& siz, const bool& retu= true, char* toFile= NULL);
-	static string gzipUnCompress(const string& input, const bool& retu= true, char* toFile= NULL);
-	static string gzipUnCompressFile(char* infile, const bool& retu= true, char* toFile= NULL);
+	static std::string zlibCompress(char* input, const size_t& siz, const bool& eostream= false, const int& chunkSize= 8192, const bool& retu= true, char* toFile= NULL);
+	static std::string zlibCompress(const std::string& input, const bool& eostream= false, const int& chunkSize= 8192, const bool& retu= true, char* toFile= NULL);
+	static std::string zlibCompressFile(char* infile, const bool& retu= true, char* toFile= NULL);
+	static std::string gzipCompress(char* input, const size_t& siz, const bool& eostream= false, const int& chunkSize= 8192, const bool& retu= true, char* toFile= NULL);
+	static std::string gzipCompress(const std::string& input, const bool& eostream= false, const int& chunkSize= 8192, const bool& retu= true, char* toFile= NULL);
+	static std::string gzipCompressFile(char* infile, const bool& retu= true, char* toFile= NULL);
+	static std::string zlibUnCompress(char* input, const size_t& siz, const bool& retu= true, char* toFile= NULL);
+	static std::string zlibUnCompress(const std::string& input, const bool& retu= true, char* toFile= NULL);
+	static std::string zlibUnCompressFile(char* infile, const bool& retu= true, char* toFile= NULL);
+	static std::string gzipUnCompress(char* input, const size_t& siz, const bool& retu= true, char* toFile= NULL);
+	static std::string gzipUnCompress(const std::string& input, const bool& retu= true, char* toFile= NULL);
+	static std::string gzipUnCompressFile(char* infile, const bool& retu= true, char* toFile= NULL);
 	virtual ~CompressionUtil();
 };
 

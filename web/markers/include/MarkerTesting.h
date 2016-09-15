@@ -30,10 +30,10 @@ class MarkerTesting {
 public:
 	MarkerTesting();
 	virtual ~MarkerTesting();
-	void test1(string in);
-	string test2();
+	void test1(std::string in);
+	std::string test2();
 	void test3(MarkerTest t);
-	MarkerTest test4(string in);
+	MarkerTest test4(std::string in);
 };
 
 #endif /* TESTING_H_ */

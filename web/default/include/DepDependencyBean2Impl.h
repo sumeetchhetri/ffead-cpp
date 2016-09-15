@@ -30,7 +30,7 @@ class DepDependencyBean2Impl : public DependencyIntf2
 public:
     void print2()
     {
-        cout <<"World!!" << flush;
+        std::cout <<"World!!" << std::flush;
     }
 };
 #endif /* DEPDEPENDENCYBEAN2IMPL_H_ */

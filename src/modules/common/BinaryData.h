@@ -26,8 +26,8 @@
 #include "string"
 #include <stdio.h>
 #include "cstring"
-using namespace std;
-typedef vector<unsigned char> binaryData;
+
+typedef std::vector<unsigned char> binaryData;
 
 
 class BinaryData {
@@ -38,11 +38,11 @@ public:
 	void append(const unsigned char& dat);
 	void append(unsigned char *dat);
 	void append(unsigned char *dat, const int&);
-	void append(const string& dat);
-	void append(const vector<unsigned char>& data);
+	void append(const std::string& dat);
+	void append(const std::vector<unsigned char>& data);
 	binaryData getData();
-	static string serilaize(const BinaryData& data);
-	static BinaryData* unSerilaize(const string& temp);
+	static std::string serilaize(const BinaryData& data);
+	static BinaryData* unSerilaize(const std::string& temp);
 };
 
 #endif /* BINARYDATA_H_ */

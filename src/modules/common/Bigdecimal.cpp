@@ -32,16 +32,16 @@ Bigdecimal::Bigdecimal() {
 Bigdecimal::~Bigdecimal() {
 }
 
-Bigdecimal::Bigdecimal(const string& value)
+Bigdecimal::Bigdecimal(const std::string& value)
 {
 	create(value);
 }
 
-void Bigdecimal::create(const string& value)
+void Bigdecimal::create(const std::string& value)
 {
 	isPositive = true;
 	parts.clear();
-	string temp = StringUtil::trimCopy(value);
+	std::string temp = StringUtil::trimCopy(value);
 	int minusSign = temp.find_last_of("-");
 	if(minusSign>0)
 		throw "Invalid -";
@@ -50,7 +50,7 @@ void Bigdecimal::create(const string& value)
 		isPositive = false;
 		temp = temp.substr(1);
 	}
-	if(temp.find_first_not_of("0")==string::npos)
+	if(temp.find_first_not_of("0")==std::string::npos)
 	{
 		this->decimalStartsAt = 0;
 		this->decimalDigits = 0;
@@ -59,7 +59,7 @@ void Bigdecimal::create(const string& value)
 		return;
 	}
 	temp = temp.substr(temp.find_first_not_of("0"));
-	if(temp.find(".")!=string::npos)
+	if(temp.find(".")!=std::string::npos)
 	{
 		if(temp.find(".")!=temp.find_last_of("."))
 		{
@@ -122,8 +122,8 @@ void Bigdecimal::checkAndSetIfZero()
 
 void Bigdecimal::add(const Bigdecimal& number)
 {
-	string fval = toString();
-	string sval = number.toString();
+	std::string fval = toString();
+	std::string sval = number.toString();
 	int maxdecdigits = decimalDigits>number.decimalDigits?decimalDigits:number.decimalDigits;
 	for (int j = 0; j < maxdecdigits-decimalDigits; j++) {
 		fval.append(Bigint::ZERO);
@@ -239,8 +239,8 @@ bool operator>=(const Bigdecimal& lhs, const Bigdecimal& rhs)
 
 void Bigdecimal::subtract(const Bigdecimal& number)
 {
-	string fval = toString();
-	string sval = number.toString();
+	std::string fval = toString();
+	std::string sval = number.toString();
 	int maxdecdigits = decimalDigits>number.decimalDigits?decimalDigits:number.decimalDigits;
 	for (int j = 0; j < maxdecdigits-decimalDigits; j++) {
 		fval.append(Bigint::ZERO);
@@ -260,8 +260,8 @@ void Bigdecimal::subtract(const Bigdecimal& number)
 
 void Bigdecimal::multiply(const Bigdecimal& number)
 {
-	string fval = toString();
-	string sval = number.toString();
+	std::string fval = toString();
+	std::string sval = number.toString();
 	int maxdecdigits = decimalDigits>number.decimalDigits?decimalDigits:number.decimalDigits;
 	for (int j = 0; j < maxdecdigits-decimalDigits; j++) {
 		fval.append(Bigint::ZERO);
@@ -281,8 +281,8 @@ void Bigdecimal::multiply(const Bigdecimal& number)
 
 void Bigdecimal::divide(const Bigdecimal& number, const int& precision)
 {
-	string fval = toString();
-	string sval = number.toString();
+	std::string fval = toString();
+	std::string sval = number.toString();
 	int maxdecdigits = decimalDigits>number.decimalDigits?decimalDigits:number.decimalDigits;
 	for (int j = 0; j < maxdecdigits-decimalDigits; j++) {
 		fval.append(Bigint::ZERO);
@@ -311,8 +311,8 @@ int Bigdecimal::compare(const Bigdecimal& number) const
 {
 	if(isPositive==number.isPositive)
 	{
-		string fnvalue = toString();
-		string snvalue = number.toString();
+		std::string fnvalue = toString();
+		std::string snvalue = number.toString();
 		Bigint fnum, snum;
 		if(decimalStartsAt>0)
 		{
@@ -337,8 +337,8 @@ int Bigdecimal::compare(const Bigdecimal& number) const
 		int compVal = fnum.compare(snum);
 		if(compVal==0)
 		{
-			string fmantstr = fnvalue.substr(decimalStartsAt+1, decimalDigits);
-			string smantstr = snvalue.substr(number.decimalStartsAt+1, number.decimalDigits);
+			std::string fmantstr = fnvalue.substr(decimalStartsAt+1, decimalDigits);
+			std::string smantstr = snvalue.substr(number.decimalStartsAt+1, number.decimalDigits);
 			int maxdecdigits = decimalDigits>number.decimalDigits?decimalDigits:number.decimalDigits;
 			for (int j = 0; j < maxdecdigits-decimalDigits; j++) {
 				fmantstr.append(Bigint::ZERO);
@@ -362,12 +362,12 @@ int Bigdecimal::compare(const Bigdecimal& number) const
 	}
 }
 
-string Bigdecimal::toString() const
+std::string Bigdecimal::toString() const
 {
 	if(parts.size()==0)
 		return Bigint::ZERO;
-	string build;
-	vector<int> nparts = parts;
+	std::string build;
+	std::vector<int> nparts = parts;
 	std::reverse(nparts.begin(),nparts.end());
 	if(!isPositive)
 	{
@@ -376,7 +376,7 @@ string Bigdecimal::toString() const
 	for (int i=0;i<(int)nparts.size();i++) {
 		if(i!=0)
 		{
-			string numstr = CastUtil::lexical_cast<string>(nparts.at(i));
+			std::string numstr = CastUtil::lexical_cast<std::string>(nparts.at(i));
 			for (int j = 0; j < Bigint::NUM_LENGTH-(int)numstr.length(); j++) {
 				build.append(Bigint::ZERO);
 			}
@@ -384,7 +384,7 @@ string Bigdecimal::toString() const
 		}
 		else
 		{
-			build.append(CastUtil::lexical_cast<string>(nparts.at(i)));
+			build.append(CastUtil::lexical_cast<std::string>(nparts.at(i)));
 		}
 	}
 	if(decimalDigits>0)

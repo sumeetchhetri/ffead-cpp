@@ -7,7 +7,7 @@
 
 #include "DataSourceInterface.h"
 
-string DataSourceInterface::BLANK = "";
+std::string DataSourceInterface::BLANK = "";
 
 DataSourceInterface::DataSourceInterface() {
 	dlib = NULL;
@@ -45,7 +45,7 @@ void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo& cl
 	if(!idv.isNull())
 	{
 		Field fld = clas.getField(dsemp.getIdPropertyName());
-		vector<void *> valus;
+		std::vector<void *> valus;
 		if(GenericObject::isNumber32(idv.getTypeName()) && GenericObject::isNumber(fld.getType()))
 		{
 			long* id;
@@ -66,7 +66,7 @@ void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo& cl
 		}
 		else if(GenericObject::isString(idv.getTypeName()) && GenericObject::isString(fld.getType()))
 		{
-			string* id;
+			std::string* id;
 			idv.set(id);
 			valus.push_back(id);
 		}
@@ -77,7 +77,7 @@ void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo& cl
 
 		args argus;
 		argus.push_back(fld.getType());
-		string methname = "set"+StringUtil::capitalizedCopy(fld.getFieldName());
+		std::string methname = "set"+StringUtil::capitalizedCopy(fld.getFieldName());
 		Method meth = clas.getMethod(methname,argus);
 		reflector->invokeMethodGVP(entity,meth,valus);
 	}

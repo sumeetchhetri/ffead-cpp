@@ -34,7 +34,7 @@ MarkerDefTemp::~MarkerDefTemp() {
 Context MarkerDefTemp::getContext(HttpRequest* request)
 {
 	Context cnt;
-	string dat = "1.js";
+	std::string dat = "1.js";
 	GenericObject dato;
 	dato << dat;
 	cnt["dat"] = dato;
@@ -47,7 +47,7 @@ Context MarkerDefTemp::getContext(HttpRequest* request)
 	delete t;
 	cnt["test"] = to;
 
-	vector<string>* vect = new vector<string>;
+	std::vector<std::string>* vect = new std::vector<std::string>;
 	vect->push_back("vec1");
 	vect->push_back("vec2");
 	GenericObject vecto;

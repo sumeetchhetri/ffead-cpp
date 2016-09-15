@@ -25,17 +25,17 @@
 #include "PropFileReader.h"
 #include "Method.h"
 
-typedef map<string,Method> Meth;
-typedef map<string,Field> Fld;
+typedef std::map<std::string,Method> Meth;
+typedef std::map<std::string,Field> Fld;
 
 class Class {
-	string name;
-	string access;
-	string type;
-	string package;
-	string base;
-	string interfaces;
-	string lang;
+	std::string name;
+	std::string access;
+	std::string type;
+	std::string package;
+	std::string base;
+	std::string interfaces;
+	std::string lang;
 	Meth methods;
 	Fld fields;
 	void addMethod(const Method&);
@@ -43,23 +43,23 @@ class Class {
 public:
 	Class();
 	virtual ~Class();
-	void generatee(const string&);
-    string getName() const;
-    void setName(const string&);
-    string getAccess() const;
-    void setAccess(const string&);
-    string getType() const;
-    void setType(const string&);
-    string getPackage() const;
-    void setPackage(const string&);
-    string getBase() const;
-    void setBase(const string&);
-    string getInterfaces() const;
-    void setInterfaces(const string&);
-    string getLang() const;
-    void setLang(const string&);
-    //Method getMethod(const string&, const string&);
-    Field getField(const string&);
+	void generatee(const std::string&);
+    std::string getName() const;
+    void setName(const std::string&);
+    std::string getAccess() const;
+    void setAccess(const std::string&);
+    std::string getType() const;
+    void setType(const std::string&);
+    std::string getPackage() const;
+    void setPackage(const std::string&);
+    std::string getBase() const;
+    void setBase(const std::string&);
+    std::string getInterfaces() const;
+    void setInterfaces(const std::string&);
+    std::string getLang() const;
+    void setLang(const std::string&);
+    //Method getMethod(const std::string&, const std::string&);
+    Field getField(const std::string&);
 };
 
 #endif /* CLASS_H_ */

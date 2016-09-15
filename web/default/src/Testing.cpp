@@ -31,24 +31,24 @@ Testing::~Testing() {
 	// TODO Auto-generated destructor stub
 }
 
-void Testing::test1(string in)
+void Testing::test1(std::string in)
 {
-	cout << "in Webservice Req for test1 --\n" << in << flush;
+	std::cout << "in Webservice Req for test1 --\n" << in << std::flush;
 }
-string Testing::test2()
+std::string Testing::test2()
 {
-	cout << "in Webservice Req for test2 --\n" <<  flush;
+	std::cout << "in Webservice Req for test2 --\n" <<  std::flush;
 	return "success";
 }
 void Testing::test3(Test t)
 {
-	cout << "in Webservice Req for test3 --\n" << t.getName() << flush;
+	std::cout << "in Webservice Req for test3 --\n" << t.getName() << std::flush;
 }
-Test Testing::test4(string in)
+Test Testing::test4(std::string in)
 {
 	Test g;
 	g.setId(1);
 	g.setName("Sumeet");
-	cout << "in Webservice Req for test4 --\n" << in << flush;
+	std::cout << "in Webservice Req for test4 --\n" << in << std::flush;
 	return g;
 }

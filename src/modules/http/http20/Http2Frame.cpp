@@ -12,11 +12,11 @@ Http2Frame::~Http2Frame() {
 }
 
 /*string Http2Frame::getFrameData() {
-	string finaldata;
+	std::string finaldata;
 	finaldata.append(CommonUtils::ulonglongTocharArray(header.payloadLength, 3));
 	finaldata.push_back(header.type);
 	//finaldata.push_back(header.flags);
-	string rstib = CommonUtils::ulonglongTocharArray(header.streamIdentifier, 4);
+	std::string rstib = CommonUtils::ulonglongTocharArray(header.streamIdentifier, 4);
 	if(header.reserved)
 	{
 		rstib[0] |= 0x01 << 1;

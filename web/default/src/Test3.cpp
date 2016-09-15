@@ -40,12 +40,12 @@ void Test3::setId(int id)
 	this->id = id;
 }
 
-vector<Test> Test3::getTests() const
+std::vector<Test> Test3::getTests() const
 {
 	return tests;
 }
 
-void Test3::setTests(vector<Test> tests)
+void Test3::setTests(std::vector<Test> tests)
 {
 	this->tests = tests;
 }

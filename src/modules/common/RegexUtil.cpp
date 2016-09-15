@@ -22,20 +22,20 @@
 
 #include "RegexUtil.h"
 
-map<string, regex_t> RegexUtil::patterns;
-map<string, regex_t> RegexUtil::nlpatterns;
+std::map<std::string, regex_t> RegexUtil::patterns;
+std::map<std::string, regex_t> RegexUtil::nlpatterns;
 bool RegexUtil::cacheRegexes = true;
 
 void RegexUtil::flushCache() {
 	if(patterns.size()>0) {
-		map<string, regex_t>::iterator it;
+		std::map<std::string, regex_t>::iterator it;
 		for(it=patterns.begin();it!=patterns.end();++it) {
 			regfree(&(it->second));
 		}
 		patterns.clear();
 	}
 	if(nlpatterns.size()>0) {
-		map<string, regex_t>::iterator it;
+		std::map<std::string, regex_t>::iterator it;
 		for(it=nlpatterns.begin();it!=nlpatterns.end();++it) {
 			regfree(&(it->second));
 		}
@@ -43,7 +43,7 @@ void RegexUtil::flushCache() {
 	}
 }
 
-void RegexUtil::getRegex(regex_t& regex, const string& pattern, const bool& matchNewLine) {
+void RegexUtil::getRegex(regex_t& regex, const std::string& pattern, const bool& matchNewLine) {
 	bool found = false;
 	if(cacheRegexes) {
 		if(!matchNewLine && patterns.find(pattern)!=patterns.end()) {
@@ -62,7 +62,7 @@ void RegexUtil::getRegex(regex_t& regex, const string& pattern, const bool& matc
 		int reti = regcomp(&regex, pattern.c_str(), cflags);
 		if(reti!=0)
 		{
-			cout << ("Could not compile regex - "+pattern + " failed with error ") << reti << endl;
+			std::cout << ("Could not compile regex - "+pattern + " failed with error ") << reti << std::endl;
 		}
 		else if(cacheRegexes)
 		{
@@ -75,9 +75,9 @@ void RegexUtil::getRegex(regex_t& regex, const string& pattern, const bool& matc
 	}
 }
 
-void RegexUtil::find(const string& text, const string& pattern, int &spos, int &epos, const bool& matchNewLine/* = false*/)
+void RegexUtil::find(const std::string& text, const std::string& pattern, int &spos, int &epos, const bool& matchNewLine/* = false*/)
 {
-	string ttext(text);
+	std::string ttext(text);
 	regex_t regex;
 	getRegex(regex, pattern, matchNewLine);
 	spos = -1;
@@ -93,9 +93,9 @@ void RegexUtil::find(const string& text, const string& pattern, int &spos, int &
 	}
 }
 
-bool RegexUtil::matches(const string& text, const string& pattern, const bool& matchNewLine/* = false*/)
+bool RegexUtil::matches(const std::string& text, const std::string& pattern, const bool& matchNewLine/* = false*/)
 {
-	string ttext(text);
+	std::string ttext(text);
 	regex_t regex;
 	getRegex(regex, pattern, matchNewLine);
 	regmatch_t pm;
@@ -107,9 +107,9 @@ bool RegexUtil::matches(const string& text, const string& pattern, const bool& m
 	return false;
 }
 
-int RegexUtil::find(const string& text, const string& pattern, const bool& matchNewLine/* = false*/)
+int RegexUtil::find(const std::string& text, const std::string& pattern, const bool& matchNewLine/* = false*/)
 {
-	string ttext(text);
+	std::string ttext(text);
 	regex_t regex;
 	getRegex(regex, pattern, matchNewLine);
 	regmatch_t pm;
@@ -123,9 +123,9 @@ int RegexUtil::find(const string& text, const string& pattern, const bool& match
 	return -1;
 }
 
-vector<string> RegexUtil::search(const string& text, const string& pattern, const bool& matchNewLine/* = false*/) {
-	vector<string> vec;
-	string ttext(text);
+std::vector<std::string> RegexUtil::search(const std::string& text, const std::string& pattern, const bool& matchNewLine/* = false*/) {
+	std::vector<std::string> vec;
+	std::string ttext(text);
 	regex_t regex;
 	getRegex(regex, pattern, matchNewLine);
 	regmatch_t pm;
@@ -134,7 +134,7 @@ vector<string> RegexUtil::search(const string& text, const string& pattern, cons
 		/* substring found between pm.rm_so and pm.rm_eo */
 		/* This call to regexec() finds the next match */
 		if(!reti) {
-			string match;
+			std::string match;
 			match = ttext.substr(pm.rm_so, pm.rm_eo-pm.rm_so);
 			vec.push_back(match);
 		} else {
@@ -149,9 +149,9 @@ vector<string> RegexUtil::search(const string& text, const string& pattern, cons
 	return vec;
 }
 
-string RegexUtil::replaceCopy(const string& text, const string& pattern, const string& with, const bool& matchNewLine/* = false*/) {
-	string ttext(text);
-	string rettxt;
+std::string RegexUtil::replaceCopy(const std::string& text, const std::string& pattern, const std::string& with, const bool& matchNewLine/* = false*/) {
+	std::string ttext(text);
+	std::string rettxt;
 	regex_t regex;
 	getRegex(regex, pattern, matchNewLine);
 	regmatch_t pm;
@@ -160,7 +160,7 @@ string RegexUtil::replaceCopy(const string& text, const string& pattern, const s
 		/* substring found between pm.rm_so and pm.rm_eo */
 		/* This call to regexec() finds the next match */
 		if(!reti) {
-			string match;
+			std::string match;
 			match = ttext.substr(pm.rm_so, pm.rm_eo-pm.rm_so);
 			rettxt += ttext.substr(0, pm.rm_so) + with;
 		} else {
@@ -182,9 +182,9 @@ string RegexUtil::replaceCopy(const string& text, const string& pattern, const s
 	return rettxt;
 }
 
-bool RegexUtil::replace(string& text, const string& pattern, const string& with, const bool& matchNewLine/* = false*/) {
-	string ttext(text);
-	string rettxt;
+bool RegexUtil::replace(std::string& text, const std::string& pattern, const std::string& with, const bool& matchNewLine/* = false*/) {
+	std::string ttext(text);
+	std::string rettxt;
 	regex_t regex;
 	getRegex(regex, pattern, matchNewLine);
 	regmatch_t pm;
@@ -193,7 +193,7 @@ bool RegexUtil::replace(string& text, const string& pattern, const string& with,
 		/* substring found between pm.rm_so and pm.rm_eo */
 		/* This call to regexec() finds the next match */
 		if(!reti) {
-			string match;
+			std::string match;
 			match = ttext.substr(pm.rm_so, pm.rm_eo-pm.rm_so);
 			rettxt += ttext.substr(0, pm.rm_so) + with;
 		} else {
@@ -214,9 +214,9 @@ bool RegexUtil::replace(string& text, const string& pattern, const string& with,
 	return true;
 }
 
-vector<string> RegexUtil::findWithGroups(const string& text, const string& pattern, const bool& matchNewLine) {
-	vector<string> data;
-	string ttext(text);
+std::vector<std::string> RegexUtil::findWithGroups(const std::string& text, const std::string& pattern, const bool& matchNewLine) {
+	std::vector<std::string> data;
+	std::string ttext(text);
 	regex_t regex;
 	getRegex(regex, pattern, matchNewLine);
 	regmatch_t pm[10];
@@ -225,16 +225,16 @@ vector<string> RegexUtil::findWithGroups(const string& text, const string& patte
 	if (reti == 0) {    /* while matches found */
 		for (int i = 0; pm[i].rm_so != -1; i++)
 		{
-			string co = ttext.substr(pm[i].rm_so, pm[i].rm_eo-pm[i].rm_so);
+			std::string co = ttext.substr(pm[i].rm_so, pm[i].rm_eo-pm[i].rm_so);
 			data.push_back(co);
 		}
 	}
 	return data;
 }
 
-vector<string> RegexUtil::findWithGroups(const string& text, const string& pattern, const int& groupCount, const bool& matchNewLine /*= false*/) {
-	vector<string> data;
-	string ttext(text);
+std::vector<std::string> RegexUtil::findWithGroups(const std::string& text, const std::string& pattern, const int& groupCount, const bool& matchNewLine /*= false*/) {
+	std::vector<std::string> data;
+	std::string ttext(text);
 	regex_t regex;
 	getRegex(regex, pattern, matchNewLine);
 	regmatch_t pm[groupCount];
@@ -243,7 +243,7 @@ vector<string> RegexUtil::findWithGroups(const string& text, const string& patte
 	if (reti == 0) {    /* while matches found */
 		for (int i = 0; pm[i].rm_so != -1; i++)
 		{
-			string co = ttext.substr(pm[i].rm_so, pm[i].rm_eo-pm[i].rm_so);
+			std::string co = ttext.substr(pm[i].rm_so, pm[i].rm_eo-pm[i].rm_so);
 			data.push_back(co);
 		}
 	}

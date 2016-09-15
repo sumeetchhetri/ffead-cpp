@@ -26,7 +26,7 @@ JSONSerialize::JSONSerialize() {
 	dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(dlib == NULL)
 	{
-		cerr << dlerror() << endl;
+		std::cerr << dlerror() << std::endl;
 		throw "Cannot load serialization shared library";
 	}
 	dlibinstantiated = true;
@@ -48,87 +48,87 @@ JSONSerialize::~JSONSerialize() {
 	}
 }
 
-string JSONSerialize::serializePrimitive(const string& className, void* t)
+std::string JSONSerialize::serializePrimitive(const std::string& className, void* t)
 {
-	string objXml;
+	std::string objXml;
 	if(className=="std::string" || className=="string")
 	{
-		string tem = *(string*)t;
+		std::string tem = *(std::string*)t;
 		objXml = "\""+tem+"\"";
 	}
 	else if(className=="char")
 	{
 		char tem = *(char*)t;
-		string temp;
+		std::string temp;
 		temp.push_back(tem);
 		objXml = "\""+temp+"\"";
 	}
 	else if(className=="unsigned char")
 	{
 		unsigned char tem = *(char*)t;
-		string temp;
+		std::string temp;
 		temp.push_back(tem);
 		objXml = "\""+temp+"\"";
 	}
 	else if(className=="int")
 	{
 		int tem = *(int*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned int")
 	{
 		unsigned int tem = *(unsigned int*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="short")
 	{
 		short tem = *(short*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned short")
 	{
 		unsigned short tem = *(unsigned short*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="long")
 	{
 		long tem = *(long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned long")
 	{
 		unsigned long tem = *(unsigned long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="long long")
 	{
 		long long tem = *(long long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned long long")
 	{
 		unsigned long long tem = *(unsigned long long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="float")
 	{
 		float tem = *(float*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="double")
 	{
 		double tem = *(double*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="long double")
 	{
 		long double tem = *(long double*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="bool")
 	{
 		bool tem = *(bool*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="Date")
 	{
@@ -144,24 +144,24 @@ string JSONSerialize::serializePrimitive(const string& className, void* t)
 
 void* JSONSerialize::getSerializableObject()
 {
-	return new string;
+	return new std::string;
 }
 
 void JSONSerialize::cleanSerializableObject(void* _1)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	delete object;
 }
 
-void JSONSerialize::startContainerSerialization(void* _1, const string& className, const string& container)
+void JSONSerialize::startContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	*object = "[";
 }
 
-void JSONSerialize::endContainerSerialization(void* _1, const string& className, const string& container)
+void JSONSerialize::endContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	if(object->at(object->length()-1)==',')
 		*object = object->substr(0, object->length()-1);
 	*object += "]";
@@ -169,30 +169,30 @@ void JSONSerialize::endContainerSerialization(void* _1, const string& className,
 
 void JSONSerialize::afterAddContainerSerializableElement(void* _1, const int& counter, const int& size)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	//if(counter!=size)
 		*object += ",";
 }
 
-void JSONSerialize::addContainerSerializableElement(void* _1, const string& tem)
+void JSONSerialize::addContainerSerializableElement(void* _1, const std::string& tem)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	*object += tem;
 }
 
-void JSONSerialize::addContainerSerializableElementMulti(void* _1, const string& tem)
+void JSONSerialize::addContainerSerializableElementMulti(void* _1, const std::string& tem)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	*object += tem;
 }
 
-string JSONSerialize::fromSerializableObjectToString(void* _1)
+std::string JSONSerialize::fromSerializableObjectToString(void* _1)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	return *object;
 }
 
-string JSONSerialize::elementToSerializedString(void* _1, const int& counter)
+std::string JSONSerialize::elementToSerializedString(void* _1, const int& counter)
 {
 	JSONElement* root = (JSONElement*)_1;
 	if((int)root->getChildren().size()<counter)
@@ -200,10 +200,10 @@ string JSONSerialize::elementToSerializedString(void* _1, const int& counter)
 	return root->getChildren().at(counter)->toString();
 }
 
-string JSONSerialize::getConatinerElementClassName(void* _1, const string& className)
+std::string JSONSerialize::getConatinerElementClassName(void* _1, const std::string& className)
 {
-	string stlclassName = className;
-	if(stlclassName.find(">")!=string::npos)
+	std::string stlclassName = className;
+	if(stlclassName.find(">")!=std::string::npos)
 	{
 		stlclassName = stlclassName.substr(stlclassName.find("<")+1);
 		return className.substr(0, className.find(">"));
@@ -211,7 +211,7 @@ string JSONSerialize::getConatinerElementClassName(void* _1, const string& class
 	else
 	{
 		stlclassName = stlclassName.substr(stlclassName.find("<")+1);
-		if(stlclassName.find(",")!=string::npos)
+		if(stlclassName.find(",")!=std::string::npos)
 		{
 			return stlclassName.substr(0, stlclassName.find_last_of(','));
 		}
@@ -227,13 +227,13 @@ void* JSONSerialize::getContainerElement(void* _1, const int& counter, const int
 	return root->getChildren().at(counter);
 }
 
-void JSONSerialize::addPrimitiveElementToContainer(void* _1, const int& counter, const string& className, void* cont, const string& container)
+void JSONSerialize::addPrimitiveElementToContainer(void* _1, const int& counter, const std::string& className, void* cont, const std::string& container)
 {
 	JSONElement* root = (JSONElement*)_1;
 	JSONElement* ele = root->getChildren().at(counter);
 	if(className=="std::string" || className=="string")
 	{
-		string retVal = ele->getValue();
+		std::string retVal = ele->getValue();
 		addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="int")
@@ -308,15 +308,15 @@ void JSONSerialize::addPrimitiveElementToContainer(void* _1, const int& counter,
 	}
 }
 
-void* JSONSerialize::getUnserializableObject(const string& _1)
+void* JSONSerialize::getUnserializableObject(const std::string& _1)
 {
-	string* tem = new string(_1);
+	std::string* tem = new std::string(_1);
 	return tem;
 }
 
 void JSONSerialize::cleanUnserializableObject(void* _1)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	delete object;
 }
 
@@ -326,7 +326,7 @@ void JSONSerialize::cleanValidUnserializableObject(void* _1)
 	delete object;
 }
 
-void* JSONSerialize::getValidUnserializableObject(const string& _1)
+void* JSONSerialize::getValidUnserializableObject(const std::string& _1)
 {
 	JSONElement* nroot = new JSONElement;
 	JSONUtil::getDocument(_1, *nroot);
@@ -339,14 +339,14 @@ int JSONSerialize::getContainerSize(void* _1)
 	return root->getChildren().size();
 }
 
-string JSONSerialize::getUnserializableClassName(void* _1, const string& className)
+std::string JSONSerialize::getUnserializableClassName(void* _1, const std::string& className)
 {
 	return className;
 }
 
-void* JSONSerialize::getPrimitiveValue(void* _1, const string& className)
+void* JSONSerialize::getPrimitiveValue(void* _1, const std::string& className)
 {
-	string* root = (string*)_1;
+	std::string* root = (std::string*)_1;
 	if((className=="signed" || className=="int" || className=="signed int"))
 	{
 		int *vt = new int;
@@ -430,26 +430,26 @@ void* JSONSerialize::getPrimitiveValue(void* _1, const string& className)
 	}
 	else if(className=="std::string" || className=="string")
 	{
-		string *vt = new string;
+		std::string *vt = new std::string;
 		*vt = *root;
 		return vt;
 	}
 	return NULL;
 }
 
-string JSONSerialize::serializeUnknown(void* t, const string& className, const string& appName)
+std::string JSONSerialize::serializeUnknown(void* t, const std::string& className, const std::string& appName)
 {
 	JSONSerialize serialize;
 	return _handleAllSerialization(className,t,appName, &serialize);
 }
 
-void* JSONSerialize::unSerializeUnknown(const string& objXml, const string& className, const string& appName)
+void* JSONSerialize::unSerializeUnknown(const std::string& objXml, const std::string& className, const std::string& appName)
 {
 	JSONSerialize serialize;
 	return _handleAllUnSerialization(objXml,className,appName,&serialize,true,NULL);
 }
 
-bool JSONSerialize::isValidClassNamespace(void* _1, const string& classname, const string& namespc, const bool& iscontainer)
+bool JSONSerialize::isValidClassNamespace(void* _1, const std::string& classname, const std::string& namespc, const bool& iscontainer)
 {
 	JSONElement* node = (JSONElement*)_1;
 	if(iscontainer && node->getChildren().size()==0)
@@ -457,7 +457,7 @@ bool JSONSerialize::isValidClassNamespace(void* _1, const string& classname, con
 	return true;
 }
 
-bool JSONSerialize::isValidObjectProperty(void* _1, const string& propname, const int& counter)
+bool JSONSerialize::isValidObjectProperty(void* _1, const std::string& propname, const int& counter)
 {
 	JSONElement* node = (JSONElement*)_1;
 	if((int)node->getChildren().size()>counter && node->getChildren().at(counter)->getName()==propname)
@@ -471,15 +471,15 @@ void* JSONSerialize::getObjectProperty(void* _1, const int& counter)
 	return elel->getChildren().at(counter);
 }
 
-void JSONSerialize::startObjectSerialization(void* _1, const string& className)
+void JSONSerialize::startObjectSerialization(void* _1, const std::string& className)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	*object = "{";
 }
 
-void JSONSerialize::endObjectSerialization(void* _1, const string& className)
+void JSONSerialize::endObjectSerialization(void* _1, const std::string& className)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	if(object->at(object->length()-1)==',')
 		*object = object->substr(0, object->length()-1);
 	*object += "}";
@@ -487,93 +487,93 @@ void JSONSerialize::endObjectSerialization(void* _1, const string& className)
 
 void JSONSerialize::afterAddObjectProperty(void* _1)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	*object += ",";
 }
 
-void JSONSerialize::addObjectPrimitiveProperty(void* _1, const string& propName, const string& className, void* t)
+void JSONSerialize::addObjectPrimitiveProperty(void* _1, const std::string& propName, const std::string& className, void* t)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 
-	string objXml;
+	std::string objXml;
 	if(className=="std::string" || className=="string")
 	{
-		string tem = *(string*)t;
+		std::string tem = *(std::string*)t;
 		objXml = "\""+tem+"\"";
 	}
 	else if(className=="char")
 	{
 		char tem = *(char*)t;
-		string temp;
+		std::string temp;
 		temp.push_back(tem);
 		objXml = "\""+temp+"\"";
 	}
 	else if(className=="unsigned char")
 	{
 		unsigned char tem = *(char*)t;
-		string temp;
+		std::string temp;
 		temp.push_back(tem);
 		objXml = "\""+temp+"\"";
 	}
 	else if(className=="int")
 	{
 		int tem = *(int*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned int")
 	{
 		unsigned int tem = *(unsigned int*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="short")
 	{
 		short tem = *(short*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned short")
 	{
 		unsigned short tem = *(unsigned short*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="long")
 	{
 		long tem = *(long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned long")
 	{
 		unsigned long tem = *(unsigned long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="long long")
 	{
 		long long tem = *(long long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned long long")
 	{
 		unsigned long long tem = *(unsigned long long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="float")
 	{
 		float tem = *(float*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="double")
 	{
 		double tem = *(double*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="long double")
 	{
 		long double tem = *(long double*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="bool")
 	{
 		bool tem = *(bool*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="Date")
 	{
@@ -587,13 +587,13 @@ void JSONSerialize::addObjectPrimitiveProperty(void* _1, const string& propName,
 	*object += "\"" + propName + "\" : " + objXml;
 }
 
-void JSONSerialize::addObjectProperty(void* _1, const string& propName, string className, const string& t)
+void JSONSerialize::addObjectProperty(void* _1, const std::string& propName, std::string className, const std::string& t)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	*object += "\"" + propName + "\" : " + t;
 }
 
-void* JSONSerialize::getObjectPrimitiveValue(void* _1, const string& className, const string& propName)
+void* JSONSerialize::getObjectPrimitiveValue(void* _1, const std::string& className, const std::string& propName)
 {
 	JSONElement* root = (JSONElement*)_1;
 	if((className=="signed" || className=="int" || className=="signed int"))
@@ -691,22 +691,22 @@ void* JSONSerialize::getObjectPrimitiveValue(void* _1, const string& className, 
 	}
 	else if(className=="std::string" || className=="string")
 	{
-		string *vt = new string;
+		std::string *vt = new std::string;
 		*vt = root->getValue();
 		return vt;
 	}
 	return NULL;
 }
 
-string JSONSerialize::serializeUnknownBase(void* t, const string& className, const string& appName)
+std::string JSONSerialize::serializeUnknownBase(void* t, const std::string& className, const std::string& appName)
 {
 	return _handleAllSerialization(className,t,appName, this);
 }
-void* JSONSerialize::unSerializeUnknownBase(void* unserObj, const string& className, const string& appName)
+void* JSONSerialize::unSerializeUnknownBase(void* unserObj, const std::string& className, const std::string& appName)
 {
 	return _handleAllUnSerialization("",className,appName,this,true,unserObj);
 }
-void* JSONSerialize::unSerializeUnknownBase(const string& serVal, const string& className, const string& appName)
+void* JSONSerialize::unSerializeUnknownBase(const std::string& serVal, const std::string& className, const std::string& appName)
 {
 	return _handleAllUnSerialization(serVal,className,appName,this,true,NULL);
 }

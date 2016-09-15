@@ -22,14 +22,14 @@
 
 #include "CryptoHandler.h"
 
-string CryptoHandler::base64encodeStr(const string& input)
+std::string CryptoHandler::base64encodeStr(const std::string& input)
 {
-	return string(base64encode((const unsigned char *)input.c_str(), input.length()));
+	return std::string(base64encode((const unsigned char *)input.c_str(), input.length()));
 }
 
-string CryptoHandler::base64decodeStr(const string& input)
+std::string CryptoHandler::base64decodeStr(const std::string& input)
 {
-	return string(base64decode((unsigned char *)input.c_str(), input.length()));
+	return std::string(base64decode((unsigned char *)input.c_str(), input.length()));
 }
 
 char* CryptoHandler::base64decode(unsigned char *input, const int& length)
@@ -171,9 +171,9 @@ char* CryptoHandler::hmac_sha512(char* datain, char* keyin, const bool& base64)
 }
 
 
-string CryptoHandler::urlDecode(const string& str)
+std::string CryptoHandler::urlDecode(const std::string& str)
 {
-	string strret = str;
+	std::string strret = str;
 	StringUtil::replaceAll(strret,"%25","%");
 	StringUtil::replaceAll(strret,"%3D","=");
 	StringUtil::replaceAll(strret,"%3A",":");
@@ -197,9 +197,9 @@ string CryptoHandler::urlDecode(const string& str)
 	return strret;
 }
 
-string CryptoHandler::urlEncode(const string& str)
+std::string CryptoHandler::urlEncode(const std::string& str)
 {
-	string strret;
+	std::string strret;
 	int len = str.length();
 	for(int i=0; i<len; i++)
 	{
@@ -273,15 +273,15 @@ string CryptoHandler::urlEncode(const string& str)
 	return strret;
 }
 
-string CryptoHandler::sha1(const string& data)
+std::string CryptoHandler::sha1(const std::string& data)
 {
 	unsigned char hash[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*)data.c_str(), data.length(), hash);
-	return string((const char*)hash);
+	return std::string((const char*)hash);
 }
 
-void CryptoHandler::sanitizeHtml(string& data) {
-    string buffer;
+void CryptoHandler::sanitizeHtml(std::string& data) {
+    std::string buffer;
     buffer.reserve(data.size());
     for(size_t pos = 0; pos != data.size(); ++pos) {
         switch(data[pos]) {

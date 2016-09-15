@@ -26,17 +26,17 @@
 #include "string"
 #include "map"
 #include "MarkerHandler.h"
-using namespace std;
 
-typedef vector<string> strVec;
-typedef map<string, string> propMap;
+
+typedef std::vector<std::string> strVec;
+typedef std::map<std::string, std::string> propMap;
 
 class PropStructure
 {
-	string type;
-	string name;
-	string decl;
-	map<string, vector<Marker> > markers;
+	std::string type;
+	std::string name;
+	std::string decl;
+	std::map<std::string, std::vector<Marker> > markers;
 	friend class Reflection;
 	friend class ConfigurationHandler;
 	friend class ClassStructure;
@@ -44,11 +44,11 @@ class PropStructure
 
 class MethStructure
 {
-	string name;
-	map<int, string > argstypes;
-	map<int, map<string, vector<Marker> > > argMarkers;
-	string decl;
-	map<string, vector<Marker> > markers;
+	std::string name;
+	std::map<int, std::string > argstypes;
+	std::map<int, std::map<std::string, std::vector<Marker> > > argMarkers;
+	std::string decl;
+	std::map<std::string, std::vector<Marker> > markers;
 	friend class Reflection;
 	friend class ConfigurationHandler;
 	friend class ClassStructure;
@@ -56,24 +56,24 @@ class MethStructure
 
 class ClassStructure
 {
-	map<string, vector<Marker> > markers;
+	std::map<std::string, std::vector<Marker> > markers;
 	bool prosetser;
 	strVec pub,pri,pro;
-	vector<PropStructure> pubps, prips, props;
-	vector<MethStructure> pubms, prims, proms;
-	string classN,baseClassN,bcvisib,nmSpc;
-	vector<string> namespaces;
-	vector<PropStructure> getAllProps()
+	std::vector<PropStructure> pubps, prips, props;
+	std::vector<MethStructure> pubms, prims, proms;
+	std::string classN,baseClassN,bcvisib,nmSpc;
+	std::vector<std::string> namespaces;
+	std::vector<PropStructure> getAllProps()
 	{
-		vector<PropStructure> a;
+		std::vector<PropStructure> a;
 		a.insert(a.end(), prips.begin(), prips.end());
 		a.insert(a.end(), props.begin(), props.end());
 		a.insert(a.end(), pubps.begin(), pubps.end());
 		return a;
 	}
-	PropStructure getPs(string name) {
+	PropStructure getPs(std::string name) {
 		PropStructure t;
-		vector<PropStructure> aps = getAllProps();
+		std::vector<PropStructure> aps = getAllProps();
 		for (int var = 0; var < (int)aps.size(); ++var) {
 			if(aps.at(var).name == name) {
 				return aps.at(var);
@@ -84,15 +84,15 @@ class ClassStructure
 	friend class Reflection;
 	friend class ConfigurationHandler;
 public:
-	string appName, incfile;
-	string toString()
+	std::string appName, incfile;
+	std::string toString()
 	{
-		string out;
-		string tab;
+		std::string out;
+		std::string tab;
 		for (int var = 0; var < (int)namespaces.size(); ++var) {
 			out.append("using namespace " + namespaces.at(var) + "n");
 		}
-		vector<string> clnms = StringUtil::splitAndReturn<vector<string> >(nmSpc, "::");
+		std::vector<std::string> clnms = StringUtil::splitAndReturn<std::vector<std::string> >(nmSpc, "::");
 		if(clnms.size()!=0)
 		{
 			for (int var = 0; var < (int)clnms.size(); ++var) {
@@ -137,11 +137,11 @@ public:
 		}
 		return out;
 	}
-	string getTreatedClassName(const bool& flag)
+	std::string getTreatedClassName(const bool& flag)
 	{
 		if(flag)
 		{
-			string nm = nmSpc;
+			std::string nm = nmSpc;
 			StringUtil::replaceAll(nm, "::", "_");
 			return nm+classN;
 		}
@@ -150,7 +150,7 @@ public:
 			return classN;
 		}
 	}
-	string getFullyQualifiedClassName()
+	std::string getFullyQualifiedClassName()
 	{
 		/*if(nmSpc!="")
 		{
@@ -158,11 +158,11 @@ public:
 		}*/
 		return nmSpc+classN;
 	}
-	vector<string> getNamespaces()
+	std::vector<std::string> getNamespaces()
 	{
 		return namespaces;
 	}
-	string getNamespace()
+	std::string getNamespace()
 	{
 		return nmSpc;
 	}

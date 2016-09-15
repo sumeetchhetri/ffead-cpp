@@ -21,27 +21,27 @@
 #include "cstring"
 #include "vector"
 #include "CastUtil.h"
-using namespace std;
+
 
 class AMEFObject
 {
-	/*The type of the Object can be string, number, date, boolean, character or any complex object*/
+	/*The type of the Object can be std::string, number, date, boolean, character or any complex object*/
 	char type;
 
 	/*The name of the Object if required can be used to represent object properties*/
-	string name;
+	std::string name;
 
-	/*The Object value in string format*/
-	string value;
+	/*The Object value in std::string format*/
+	std::string value;
 
 	int position;
 
 	int blength;
 
 	/*The properties of a complex object*/
-	vector<AMEFObject*> packets;
+	std::vector<AMEFObject*> packets;
 
-	AMEFObject* addStringPacket(const string& stringa);
+	AMEFObject* addStringPacket(const std::string& stringa);
 	AMEFObject* addCharStringPacket(char* stringa);
 	AMEFObject* addBoolPacket(const bool& boole);
 	AMEFObject* addCharPacket(const char& chr);
@@ -52,13 +52,13 @@ class AMEFObject
 	friend class CacheMap;
 	friend class AMEFDecoder;
 public:
-	static int charArrayToInt(const string& l, const int& off, const int& ind);
-	static string intTocharArray(const int& l, const int& ind);
-	static string ulonglongTocharArray(const unsigned long long& lon, int ind = -1);
-	static unsigned long long charArrayToULongLong(const string& l);
-	static unsigned long long charArrayToULongLong(const string& l, const int&);
-	static string ulonglongTocharArrayWithLI(const unsigned long long& lon);
-	static void ulonglongTocharArrayF(const unsigned long long& lon, string& result, int ind = -1)
+	static int charArrayToInt(const std::string& l, const int& off, const int& ind);
+	static std::string intTocharArray(const int& l, const int& ind);
+	static std::string ulonglongTocharArray(const unsigned long long& lon, int ind = -1);
+	static unsigned long long charArrayToULongLong(const std::string& l);
+	static unsigned long long charArrayToULongLong(const std::string& l, const int&);
+	static std::string ulonglongTocharArrayWithLI(const unsigned long long& lon);
+	static void ulonglongTocharArrayF(const unsigned long long& lon, std::string& result, int ind = -1)
 	{
 		if(ind==-1)
 		{
@@ -117,39 +117,39 @@ public:
 
 	bool isNull();
 
-	void addNullPacket(const char& type, const string& name="");
+	void addNullPacket(const char& type, const std::string& name="");
 
-	void addPacket(const string& stringa, const string name= "");
+	void addPacket(const std::string& stringa, const std::string name= "");
 
-	void addPacket(char* stringa, const string name= "");
+	void addPacket(char* stringa, const std::string name= "");
 
-	void addPacket(const bool& boole, const string name= "");
+	void addPacket(const bool& boole, const std::string name= "");
 
-	void addPacket(const char& chr, const string name= "");
+	void addPacket(const char& chr, const std::string name= "");
 
-	void addPacket(const unsigned char& chr, const string name= "");
+	void addPacket(const unsigned char& chr, const std::string name= "");
 
-	void addPacket(const short& integer, const string name= "");
+	void addPacket(const short& integer, const std::string name= "");
 
-	void addPacket(const unsigned short& integer, const string name= "");
+	void addPacket(const unsigned short& integer, const std::string name= "");
 
-	void addPacket(const int& integer, const string name= "");
+	void addPacket(const int& integer, const std::string name= "");
 
-	void addPacket(const unsigned int& integer, const string name= "");
+	void addPacket(const unsigned int& integer, const std::string name= "");
 
-	void addPacket(const long& lon, const string name= "");
+	void addPacket(const long& lon, const std::string name= "");
 
-	void addPacket(const unsigned long& lon, const string name= "");
+	void addPacket(const unsigned long& lon, const std::string name= "");
 
-	void addPacket(const long long& lon, const string name= "");
+	void addPacket(const long long& lon, const std::string name= "");
 
-	void addPacket(const unsigned long long& lon, const string name= "");
+	void addPacket(const unsigned long long& lon, const std::string name= "");
 
-	void addPacket(const float& doub, const string name= "");
+	void addPacket(const float& doub, const std::string name= "");
 
-	void addPacket(const double& doub, const string name= "");
+	void addPacket(const double& doub, const std::string name= "");
 
-	void addPacket(const long double& doub, const string name= "");
+	void addPacket(const long double& doub, const std::string name= "");
 
 	void addPacket(AMEFObject *packet);
 
@@ -189,21 +189,21 @@ public:
 
 	char* getName();
 
-	string getNameStr();
+	std::string getNameStr();
 
-	void setName(const string& name);
+	void setName(const std::string& name);
 
-	vector<AMEFObject*> getPackets();
+	std::vector<AMEFObject*> getPackets();
 
-	void setPackets(vector<AMEFObject*> packets);
+	void setPackets(std::vector<AMEFObject*> packets);
 
 	char getType();
 
 	void setType(const char& type);
 
-	string getValue();
+	std::string getValue();
 
-	string getValueStr();
+	std::string getValueStr();
 
 	void pushChar(const char& v);
 
@@ -213,7 +213,7 @@ public:
 
 	void setValue(char *value, const int& len);
 
-	void setValue(const string& value);
+	void setValue(const std::string& value);
 
 	char getCharValue();
 
@@ -245,9 +245,9 @@ public:
 
 	float getFloatValue();
 
-	string tostring();
+	std::string tostring();
 
-	string displayObject(const string& tab);
+	std::string displayObject(const std::string& tab);
 
 	void addStaticPacket(AMEFObject *obj);
 
@@ -255,7 +255,7 @@ public:
 	{
 		T t;
 
-		string desiredType = CastUtil::getTypeName<T>();
+		std::string desiredType = CastUtil::getTypeName<T>();
 		if(!CastUtil::isPrimitiveDataType<T>())
 		{
 			throw "Invalid Object value requested";

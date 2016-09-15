@@ -26,9 +26,9 @@ AMEFObject::~AMEFObject() {
 	clear();
 }
 
-string AMEFObject::intTocharArray(const int& l, const int& ind)
+std::string AMEFObject::intTocharArray(const int& l, const int& ind)
 {
-	string result;
+	std::string result;
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
@@ -38,7 +38,7 @@ string AMEFObject::intTocharArray(const int& l, const int& ind)
 }
 
 
-string AMEFObject::ulonglongTocharArray(const unsigned long long& lon, int ind)
+std::string AMEFObject::ulonglongTocharArray(const unsigned long long& lon, int ind)
 {
 	if(ind==-1)
 	{
@@ -75,7 +75,7 @@ string AMEFObject::ulonglongTocharArray(const unsigned long long& lon, int ind)
 			ind = 8;
 		}
 	}
-	string result;
+	std::string result;
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
@@ -84,7 +84,7 @@ string AMEFObject::ulonglongTocharArray(const unsigned long long& lon, int ind)
 	return result;
 }
 
-string AMEFObject::ulonglongTocharArrayWithLI(const unsigned long long& lon)
+std::string AMEFObject::ulonglongTocharArrayWithLI(const unsigned long long& lon)
 {
 	int ind;
 	if(lon<256)
@@ -119,7 +119,7 @@ string AMEFObject::ulonglongTocharArrayWithLI(const unsigned long long& lon)
 	{
 		ind = 8;
 	}
-	string result;
+	std::string result;
 	for (int i = 0; i<ind; i++)
 	{
 		int offset = (ind - 1 - i) * 8;
@@ -128,7 +128,7 @@ string AMEFObject::ulonglongTocharArrayWithLI(const unsigned long long& lon)
 	return result;
 }
 
-int AMEFObject::charArrayToInt(const string& l, const int& off, const int& ind)
+int AMEFObject::charArrayToInt(const std::string& l, const int& off, const int& ind)
 {
 	int t = 0;
 	for (int i = 0; i < ind; i++)
@@ -138,7 +138,7 @@ int AMEFObject::charArrayToInt(const string& l, const int& off, const int& ind)
 	return t;
 }
 
-unsigned long long AMEFObject::charArrayToULongLong(const string& l)
+unsigned long long AMEFObject::charArrayToULongLong(const std::string& l)
 {
 	unsigned long long t = 0;
 	int ind = l.length();
@@ -149,7 +149,7 @@ unsigned long long AMEFObject::charArrayToULongLong(const string& l)
 	return t;
 }
 
-unsigned long long AMEFObject::charArrayToULongLong(const string& l, const int& ind)
+unsigned long long AMEFObject::charArrayToULongLong(const std::string& l, const int& ind)
 {
 	unsigned long long t = 0;
 	for (int i = 0; i < ind; i++)
@@ -203,7 +203,7 @@ AMEFObject::AMEFObject()
 	blength = 0;
 }
 
-void AMEFObject::addNullPacket(const char& type, const string& name)
+void AMEFObject::addNullPacket(const char& type, const std::string& name)
 {
 	AMEFObject* JDBObjectNew = new AMEFObject();
 	JDBObjectNew->name = name;
@@ -214,18 +214,18 @@ void AMEFObject::addNullPacket(const char& type, const string& name)
 /**
  * @param string
  * @param name
- * Add a string property to an Object
+ * Add a std::string property to an Object
  */
-void AMEFObject::addPacket(const string& stringa, const string name)
+void AMEFObject::addPacket(const std::string& stringa, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addStringPacket(stringa);
 	JDBObjectNew->name = name;
 }
 /**
  * @param string
- * Add a string property to an Object
+ * Add a std::string property to an Object
  */
-AMEFObject* AMEFObject::addStringPacket(const string& stringa)
+AMEFObject* AMEFObject::addStringPacket(const std::string& stringa)
 {
 	AMEFObject* JDBObjectNew = new AMEFObject();
 	JDBObjectNew->name = "";
@@ -238,23 +238,23 @@ AMEFObject* AMEFObject::addStringPacket(const string& stringa)
 /**
  * @param string
  * @param name
- * Add a string property to an Object
+ * Add a std::string property to an Object
  */
-void AMEFObject::addPacket(char* stringa, const string name)
+void AMEFObject::addPacket(char* stringa, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addCharStringPacket(stringa);
 	JDBObjectNew->name = name;
 }
 /**
  * @param string
- * Add a string property to an Object
+ * Add a std::string property to an Object
  */
 AMEFObject* AMEFObject::addCharStringPacket(char* stringa)
 {
 	AMEFObject* JDBObjectNew = new AMEFObject();
 	JDBObjectNew->name = "";
 	JDBObjectNew->type = STRING_TYPE;
-	JDBObjectNew->value = string(stringa);
+	JDBObjectNew->value = std::string(stringa);
 	packets.push_back(JDBObjectNew);
 	return JDBObjectNew;
 }
@@ -264,7 +264,7 @@ AMEFObject* AMEFObject::addCharStringPacket(char* stringa)
  * @param name
  * Add a bool  property to an Object
  */
-void AMEFObject::addPacket(const bool& boole, const string name)
+void AMEFObject::addPacket(const bool& boole, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addBoolPacket(boole);
 	JDBObjectNew->name = name;
@@ -290,13 +290,13 @@ AMEFObject* AMEFObject::addBoolPacket(const bool& boole)
 	return JDBObjectNew;
 }
 
-void AMEFObject::addPacket(const char& chr, const string name)
+void AMEFObject::addPacket(const char& chr, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addCharPacket(chr);
 	JDBObjectNew->name = name;
 }
 
-void AMEFObject::addPacket(const unsigned char& chr, const string name)
+void AMEFObject::addPacket(const unsigned char& chr, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addCharPacket(chr);
 	JDBObjectNew->name = name;
@@ -312,49 +312,49 @@ AMEFObject* AMEFObject::addCharPacket(const char& chr)
 	return JDBObjectNew;
 }
 
-void AMEFObject::addPacket(const short& lon, const string name)
+void AMEFObject::addPacket(const short& lon, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addULLPacket((unsigned long long)lon);
 	JDBObjectNew->name = name;
 }
 
-void AMEFObject::addPacket(const unsigned short& lon, const string name)
+void AMEFObject::addPacket(const unsigned short& lon, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addULLPacket((unsigned long long)lon);
 	JDBObjectNew->name = name;
 }
 
-void AMEFObject::addPacket(const int& lon, const string name)
+void AMEFObject::addPacket(const int& lon, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addULLPacket((unsigned long long)lon);
 	JDBObjectNew->name = name;
 }
 
-void AMEFObject::addPacket(const unsigned int& lon, const string name)
+void AMEFObject::addPacket(const unsigned int& lon, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addULLPacket((unsigned long long)lon);
 	JDBObjectNew->name = name;
 }
 
-void AMEFObject::addPacket(const long& lon, const string name)
+void AMEFObject::addPacket(const long& lon, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addULLPacket((unsigned long long)lon);
 	JDBObjectNew->name = name;
 }
 
-void AMEFObject::addPacket(const unsigned long& lon, const string name)
+void AMEFObject::addPacket(const unsigned long& lon, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addULLPacket((unsigned long long)lon);
 	JDBObjectNew->name = name;
 }
 
-void AMEFObject::addPacket(const long long& lon, const string name)
+void AMEFObject::addPacket(const long long& lon, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addULLPacket((unsigned long long)lon);
 	JDBObjectNew->name = name;
 }
 
-void AMEFObject::addPacket(const unsigned long long& lon, const string name)
+void AMEFObject::addPacket(const unsigned long long& lon, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addULLPacket(lon);
 	JDBObjectNew->name = name;
@@ -383,7 +383,7 @@ AMEFObject* AMEFObject::addULLPacket(const unsigned long long& lon)
  * @param name
  * Add a double property to an Object
  */
-void AMEFObject::addPacket(const float& doub, const string name)
+void AMEFObject::addPacket(const float& doub, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addFloatPacket(doub);
 	JDBObjectNew->name = name;
@@ -397,20 +397,20 @@ AMEFObject* AMEFObject::addFloatPacket(const float& doub)
 	AMEFObject* JDBObjectNew = new AMEFObject();
 	JDBObjectNew->type = DOUBLE_FLOAT_TYPE;
 	JDBObjectNew->name = "";
-	JDBObjectNew->value = CastUtil::lexical_cast<string>(doub);
+	JDBObjectNew->value = CastUtil::lexical_cast<std::string>(doub);
 	packets.push_back(JDBObjectNew);
 	return JDBObjectNew;
 }
 
 
 
-void AMEFObject::addPacket(const double& doub, const string name)
+void AMEFObject::addPacket(const double& doub, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addDoublePacket(doub);
 	JDBObjectNew->name = name;
 }
 
-void AMEFObject::addPacket(const long double& doub, const string name)
+void AMEFObject::addPacket(const long double& doub, const std::string name)
 {
 	AMEFObject* JDBObjectNew = addLDoublePacket(doub);
 	JDBObjectNew->name = name;
@@ -421,7 +421,7 @@ AMEFObject* AMEFObject::addLDoublePacket(const long double& doub)
 	AMEFObject* JDBObjectNew = new AMEFObject();
 	JDBObjectNew->type = DOUBLE_FLOAT_TYPE;
 	JDBObjectNew->name = "";
-	JDBObjectNew->value = CastUtil::lexical_cast<string>(doub);
+	JDBObjectNew->value = CastUtil::lexical_cast<std::string>(doub);
 	packets.push_back(JDBObjectNew);
 	return JDBObjectNew;
 }
@@ -432,7 +432,7 @@ AMEFObject* AMEFObject::addDoublePacket(const double& doub)
 	AMEFObject* JDBObjectNew = new AMEFObject();
 	JDBObjectNew->type = DOUBLE_FLOAT_TYPE;
 	JDBObjectNew->name = "";
-	JDBObjectNew->value = CastUtil::lexical_cast<string>(doub);
+	JDBObjectNew->value = CastUtil::lexical_cast<std::string>(doub);
 	packets.push_back(JDBObjectNew);
 	return JDBObjectNew;
 }
@@ -544,20 +544,20 @@ char* AMEFObject::getName()
 {
 	return (char*)name.c_str();
 }
-string AMEFObject::getNameStr()
+std::string AMEFObject::getNameStr()
 {
 	return name;
 }
-void AMEFObject::setName(const string& name)
+void AMEFObject::setName(const std::string& name)
 {
 	this->name = name;
 }
 
-vector<AMEFObject*> AMEFObject::getPackets()
+std::vector<AMEFObject*> AMEFObject::getPackets()
 {
 	return packets;
 }
-void AMEFObject::setPackets(vector<AMEFObject*> packets)
+void AMEFObject::setPackets(std::vector<AMEFObject*> packets)
 {
 	this->packets = packets;
 }
@@ -571,12 +571,12 @@ void AMEFObject::setType(const char& type)
 	this->type = type;
 }
 
-string AMEFObject::getValue()
+std::string AMEFObject::getValue()
 {
 	return value;
 }
 
-string AMEFObject::getValueStr()
+std::string AMEFObject::getValueStr()
 {
 	return value;
 }
@@ -612,7 +612,7 @@ void AMEFObject::setValue(char *value, const int& len)
 	this->value.clear();
 	this->value.append(value,len);
 }
-void AMEFObject::setValue(const string& value)
+void AMEFObject::setValue(const std::string& value)
 {
 	this->value = value;
 }
@@ -771,14 +771,14 @@ unsigned long long AMEFObject::getNumericValue()
 }
 
 
-string AMEFObject::tostring()
+std::string AMEFObject::tostring()
 {
 	return displayObject("\t");
 }
 
-string AMEFObject::displayObject(const string& tab)
+std::string AMEFObject::displayObject(const std::string& tab)
 {
-	string displ = "Object Type = ";
+	std::string displ = "Object Type = ";
 	displ += type;
 	displ += "\nObject Name = " + name + "\n";
 	for (int i=0;i<(int)getPackets().size();i++)
@@ -793,13 +793,13 @@ string AMEFObject::displayObject(const string& tab)
 		else if(obj->isChar())
 		{
 			if(obj->type==BOOLEAN_TYPE)
-				displ += CastUtil::lexical_cast<string>(obj->getBoolValue()) + "\n";
+				displ += CastUtil::lexical_cast<std::string>(obj->getBoolValue()) + "\n";
 			else
 				displ += (char)obj->value[0] + "\n";
 		}
 		else if(obj->isNumberOrNullNumber())
 		{
-			displ += CastUtil::lexical_cast<string>(obj->getNumericValue()) + "\n";
+			displ += CastUtil::lexical_cast<std::string>(obj->getNumericValue()) + "\n";
 		}
 		if(obj->type==OBJECT_TYPE)
 		{

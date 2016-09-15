@@ -27,39 +27,39 @@
 #include "map"
 
 template <class K, class V> class DistMap {
-	string cacheKey;
+	std::string cacheKey;
 	DistoCacheClientUtils* cl;
 public:
-	DistMap(const string& cacheKey)
+	DistMap(const std::string& cacheKey)
 	{
 		this->cacheKey = cacheKey;
 		cl = PooledDistoCacheConnectionFactory::getConnection();
 		try {
 			cl->allocate(cacheKey, "map");
-		} catch(const string& err) {
+		} catch(const std::string& err) {
 			if(err!="Entry already exists") {
 				throw err;
 			}
 		}
 	}
-	void insert(const pair<K, V>& entry)
+	void insert(const std::pair<K, V>& entry)
 	{
-		string serValue = BinarySerialize::serialize<V>(entry.second);
-		cl->addMapEntry(cacheKey, CastUtil::lexical_cast<string>(entry.first), serValue);
+		std::string serValue = BinarySerialize::serialize<V>(entry.second);
+		cl->addMapEntry(cacheKey, CastUtil::lexical_cast<std::string>(entry.first), serValue);
 	}
 	const V operator[](const K& key) const
 	{
-		string serValue = cl->getMapEntryValue(cacheKey, CastUtil::lexical_cast<string>(key));
+		std::string serValue = cl->getMapEntryValue(cacheKey, CastUtil::lexical_cast<std::string>(key));
 		return BinarySerialize::unserialize<V>(serValue);
 	}
 	V at(const K& key)
 	{
-		string serValue = cl->getMapEntryValue(cacheKey, CastUtil::lexical_cast<string>(key));
+		std::string serValue = cl->getMapEntryValue(cacheKey, CastUtil::lexical_cast<std::string>(key));
 		return BinarySerialize::unserialize<V>(serValue);
 	}
 	void erase(const K& key)
 	{
-		cl->removeMapEntry(cacheKey, CastUtil::lexical_cast<string>(key));
+		cl->removeMapEntry(cacheKey, CastUtil::lexical_cast<std::string>(key));
 	}
 	size_t size()
 	{
@@ -85,9 +85,9 @@ public:
 	class iterator {
 			friend class DistMap;
 			int position;
-			string cacheKey;
+			std::string cacheKey;
 			DistoCacheClientUtils* cl;
-			iterator(string cacheKey, DistoCacheClientUtils* cl)
+			iterator(std::string cacheKey, DistoCacheClientUtils* cl)
 			{
 				this->cacheKey = cacheKey;
 				this->cl = cl;
@@ -101,7 +101,7 @@ public:
 			{
 				if(position>=0)
 				{
-					string serValue = cl->getMapEntryValueByPosition(cacheKey, position);
+					std::string serValue = cl->getMapEntryValueByPosition(cacheKey, position);
 					return BinarySerialize::unserialize<V>(serValue);
 				}
 				else
@@ -113,7 +113,7 @@ public:
 			{
 				if(position>=0)
 				{
-					string serValue = BinarySerialize::serialize<V>(v);
+					std::string serValue = BinarySerialize::serialize<V>(v);
 					cl->setMapEntryValueByPosition(cacheKey, position, serValue);
 				}
 				else

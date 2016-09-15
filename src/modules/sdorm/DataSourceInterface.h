@@ -27,38 +27,38 @@ protected:
 	void* dlib;
 	ConnectionPooler* pool;
 	Mapping* mapping;
-	string appName;
+	std::string appName;
 	Reflector* reflector;
 	void* context;
 	bool executeInsertInternal(Query& query, void* entity);
 	virtual bool executeInsert(Query& query, void* entity)=0;
 	virtual bool isGetDbEntityForBulkInsert()=0;
-	virtual void* getDbEntityForBulkInsert(void* entity, const string& clasName, string& error)=0;
-	virtual bool executeInsertBulk(Query& query, vector<void*> entities, vector<void*> dbEntities)=0;
-	virtual bool executeUpdateBulk(Query& query, vector<void*> entities, vector<void*> dbEntities)=0;
+	virtual void* getDbEntityForBulkInsert(void* entity, const std::string& clasName, std::string& error)=0;
+	virtual bool executeInsertBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities)=0;
+	virtual bool executeUpdateBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities)=0;
 	virtual bool executeUpdate(Query& query, void* entity)=0;
-	virtual bool remove(const string& clasName, GenericObject& id)=0;
+	virtual bool remove(const std::string& clasName, GenericObject& id)=0;
 
 	virtual void* executeQuery(Query& query, const bool& isObj)=0;
 	virtual void* executeQuery(QueryBuilder& qb, const bool& isObj)=0;
-	virtual long getNumRows(const string& clasName)=0;
-	virtual void empty(const string& clasName)=0;
+	virtual long getNumRows(const std::string& clasName)=0;
+	virtual void empty(const std::string& clasName)=0;
 
 	virtual void* getContext(void*)=0;
 	virtual void destroyContext(void*)=0;
 
 	void assignId(DataSourceEntityMapping& dsemp, ClassInfo& clas, void* entity);
 public:
-	static string BLANK;
+	static std::string BLANK;
 	DataSourceInterface();
 	virtual ~DataSourceInterface();
 	virtual bool startTransaction()=0;
 	virtual bool commit()=0;
 	virtual bool rollback()=0;
-	virtual void procedureCall(const string&)=0;
-	virtual vector<map<string, GenericObject> > execute(Query& query)=0;
+	virtual void procedureCall(const std::string&)=0;
+	virtual std::vector<std::map<std::string, GenericObject> > execute(Query& query)=0;
 	virtual bool executeUpdate(Query& query)=0;
-	virtual vector<map<string, GenericObject> > execute(QueryBuilder& qb)=0;
+	virtual std::vector<std::map<std::string, GenericObject> > execute(QueryBuilder& qb)=0;
 
 	bool startSession(void*);
 	bool startSession();
@@ -66,51 +66,51 @@ public:
 
 	template<class T> bool insert(T& t);
 	template<class T> bool update(T& t);
-	template<class T> map<int, string> bulkUpdate(vector<T>& vecT);
+	template<class T> std::map<int, std::string> bulkUpdate(std::vector<T>& vecT);
 	template<class T> bool remove(GenericObject& id);
 	template<class T> void empty();
 	template<class T> long getNumRows();
-	template<class T> map<int, string> bulkInsert(vector<T>& vecT);
+	template<class T> std::map<int, std::string> bulkInsert(std::vector<T>& vecT);
 	template<class T> T get(GenericObject& id);
-	template<class T> vector<T> getAll();
+	template<class T> std::vector<T> getAll();
 
-	template<class T> vector<T> getList(Query& query);
+	template<class T> std::vector<T> getList(Query& query);
 	template<class T> T get(Query& query);
 
-	template<class T> vector<T> getList(QueryBuilder& qb);
+	template<class T> std::vector<T> getList(QueryBuilder& qb);
 	template<class T> T get(QueryBuilder& qb);
 };
 
 template<class T>
 inline bool DataSourceInterface::insert(T& t) {
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	Query q(BLANK, clasName);
 	return executeInsertInternal(q, &t);
 }
 
 template<class T>
 inline bool DataSourceInterface::update(T& t) {
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	Query q(BLANK, clasName);
 	return executeUpdate(q, &t);
 }
 
 template<class T>
-inline map<int, string> DataSourceInterface::bulkInsert(vector<T>& vecT) {
+inline std::map<int, std::string> DataSourceInterface::bulkInsert(std::vector<T>& vecT) {
 	T t;
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
 	ClassInfo clas = reflector->getClassInfo(clasName, appName);
-	vector<void*> dbEntities;
-	vector<void*> entities;
-	map<int, string> errors;
+	std::vector<void*> dbEntities;
+	std::vector<void*> entities;
+	std::map<int, std::string> errors;
 
 	for (unsigned int k = 0; k < vecT.size(); k++) {
 		T* t = &(vecT.at(k));
 		if(dsemp.isIdGenerate() && dsemp.getIdgendbEntityType()!="identity") {
 			assignId(dsemp, clas, t);
 		}
-		string error;
+		std::string error;
 		if(isGetDbEntityForBulkInsert())
 		{
 			void* dbEntity = getDbEntityForBulkInsert(t, clasName, error);
@@ -118,7 +118,7 @@ inline map<int, string> DataSourceInterface::bulkInsert(vector<T>& vecT) {
 				entities.push_back(&(vecT.at(k)));
 				dbEntities.push_back(dbEntity);
 			} else if(error!="") {
-				errors.insert(std::pair<int, string>(k, error));
+				errors.insert(std::pair<int, std::string>(k, error));
 			}
 		}
 		else
@@ -135,17 +135,17 @@ inline map<int, string> DataSourceInterface::bulkInsert(vector<T>& vecT) {
 }
 
 template<class T>
-inline map<int, string> DataSourceInterface::bulkUpdate(vector<T>& vecT) {
+inline std::map<int, std::string> DataSourceInterface::bulkUpdate(std::vector<T>& vecT) {
 	T t;
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
 	ClassInfo clas = reflector->getClassInfo(clasName, appName);
-	vector<void*> dbEntities;
-	vector<void*> entities;
-	map<int, string> errors;
+	std::vector<void*> dbEntities;
+	std::vector<void*> entities;
+	std::map<int, std::string> errors;
 	for (unsigned int k = 0; k < vecT.size(); k++) {
 		T* t = &(vecT.at(k));
-		string error;
+		std::string error;
 		if(isGetDbEntityForBulkInsert())
 		{
 			void* dbEntity = getDbEntityForBulkInsert(t, clasName, error);
@@ -153,7 +153,7 @@ inline map<int, string> DataSourceInterface::bulkUpdate(vector<T>& vecT) {
 				entities.push_back(&(vecT.at(k)));
 				dbEntities.push_back(dbEntity);
 			} else if(error!="") {
-				errors.insert(std::pair<int, string>(k, error));
+				errors.insert(std::pair<int, std::string>(k, error));
 			}
 		}
 		else
@@ -172,16 +172,16 @@ inline map<int, string> DataSourceInterface::bulkUpdate(vector<T>& vecT) {
 template<class T>
 inline T DataSourceInterface::get(GenericObject& id) {
 	T t;
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
-	string idColName = dsemp.getColumnForProperty(dsemp.getIdPropertyName());
+	std::string idColName = dsemp.getColumnForProperty(dsemp.getIdPropertyName());
 	QueryBuilder qb;
 	qb.fromClass(clasName, BLANK).condition().where(idColName, QueryOperator::EQUALS, id).end();
-	vector<map<string, GenericObject> > results;
+	std::vector<std::map<std::string, GenericObject> > results;
 	void* vect = executeQuery(qb, true);
-	vector<T> vecT;
+	std::vector<T> vecT;
 	if (vect != NULL) {
-		vecT = *(vector<T>*) vect;
+		vecT = *(std::vector<T>*) vect;
 		delete vect;
 		if(vecT.size()>0)
 		{
@@ -192,28 +192,28 @@ inline T DataSourceInterface::get(GenericObject& id) {
 }
 
 template<class T>
-inline vector<T> DataSourceInterface::getAll() {
+inline std::vector<T> DataSourceInterface::getAll() {
 	T t;
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	Query query(BLANK, clasName);
-	vector<T> vecT;
+	std::vector<T> vecT;
 	void* vect = executeQuery(query, true);
 	if (vect != NULL) {
-		vecT = *(vector<T>*) vect;
+		vecT = *(std::vector<T>*) vect;
 		delete vect;
 	}
 	return vecT;
 }
 
 template<class T>
-inline vector<T> DataSourceInterface::getList(Query& query) {
+inline std::vector<T> DataSourceInterface::getList(Query& query) {
 	T t;
-	vector<T> vecT;
-	string clasName = CastUtil::getClassName(t);
+	std::vector<T> vecT;
+	std::string clasName = CastUtil::getClassName(t);
 	if(query.getClassName()!=clasName)return vecT;
 	void* vect = executeQuery(query, true);
 	if (vect != NULL) {
-		vecT = *(vector<T>*) vect;
+		vecT = *(std::vector<T>*) vect;
 		delete vect;
 	}
 	return vecT;
@@ -222,12 +222,12 @@ inline vector<T> DataSourceInterface::getList(Query& query) {
 template<class T>
 inline T DataSourceInterface::get(Query& query) {
 	T t;
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	if(query.getClassName()!=clasName)return t;
 	void* vect = executeQuery(query, true);
-	vector<T> vecT;
+	std::vector<T> vecT;
 	if (vect != NULL) {
-		vecT = *(vector<T>*) vect;
+		vecT = *(std::vector<T>*) vect;
 		delete vect;
 		if(vecT.size()>0)
 		{
@@ -238,14 +238,14 @@ inline T DataSourceInterface::get(Query& query) {
 }
 
 template<class T>
-inline vector<T> DataSourceInterface::getList(QueryBuilder& qb) {
+inline std::vector<T> DataSourceInterface::getList(QueryBuilder& qb) {
 	T t;
-	vector<T> vecT;
-	string clasName = CastUtil::getClassName(t);
+	std::vector<T> vecT;
+	std::string clasName = CastUtil::getClassName(t);
 	if(qb.getClassName()!=clasName)return vecT;
 	void* vect = executeQuery(qb, true);
 	if (vect != NULL) {
-		vecT = *(vector<T>*) vect;
+		vecT = *(std::vector<T>*) vect;
 		delete vect;
 	}
 	return vecT;
@@ -254,12 +254,12 @@ inline vector<T> DataSourceInterface::getList(QueryBuilder& qb) {
 template<class T>
 inline T DataSourceInterface::get(QueryBuilder& qb) {
 	T t;
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	if(qb.getClassName()!=clasName)return t;
 	void* vect = executeQuery(qb, true);
-	vector<T> vecT;
+	std::vector<T> vecT;
 	if (vect != NULL) {
-		vecT = *(vector<T>*) vect;
+		vecT = *(std::vector<T>*) vect;
 		delete vect;
 		if(vecT.size()>0)
 		{
@@ -272,21 +272,21 @@ inline T DataSourceInterface::get(QueryBuilder& qb) {
 template<class T>
 inline void DataSourceInterface::empty() {
 	T t;
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	return empty(clasName);
 }
 
 template<class T>
 inline long DataSourceInterface::getNumRows() {
 	T t;
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	return getNumRows(clasName);
 }
 
 template<class T>
 inline bool DataSourceInterface::remove(GenericObject& id) {
 	T t;
-	string clasName = CastUtil::getClassName(t);
+	std::string clasName = CastUtil::getClassName(t);
 	return remove(clasName, id);
 }
 

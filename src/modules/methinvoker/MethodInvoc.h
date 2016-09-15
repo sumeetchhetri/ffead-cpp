@@ -32,23 +32,23 @@
 #define BACKLOGMI 500
 #define MAXBUFLEN 1024
 
-using namespace std;
 
-class MethodInvokerException: public exception
+
+class MethodInvokerException: public std::exception
 {
 	public:
-		MethodInvokerException(string message, string &ret){message="<return:exception>"+message+"</return:exception>";ret=message;}
+		MethodInvokerException(std::string message, std::string &ret){message="<return:exception>"+message+"</return:exception>";ret=message;}
 		virtual ~MethodInvokerException() throw(){}
-		string getMessage() const{return message;};
+		std::string getMessage() const{return message;};
 	private:
-		string message;
+		std::string message;
 };
 class MethodInvoc {
-	string className;
-	string methodName;
-	string returntype;
-	string retByValOrRef;
-	map<string,string> arguments;
+	std::string className;
+	std::string methodName;
+	std::string returntype;
+	std::string retByValOrRef;
+	std::map<std::string,std::string> arguments;
 	bool startTranx;
 	bool endTranx;
 	Server server;
@@ -59,7 +59,7 @@ class MethodInvoc {
 public:
 	MethodInvoc();
 	virtual ~MethodInvoc();
-	static void trigger(const string&);
+	static void trigger(const std::string&);
 	static void stop();
 	Server getServer(){return this->server;}
 	void setServer(const Server& server){this->server = server;}

@@ -57,9 +57,9 @@ void* PoolThread::run(void *arg)
 					delete task;
 				}
 			}
-			catch(const exception& e)
+			catch(const std::exception& e)
 			{
-				ths->logger << e.what() << flush;
+				ths->logger << e.what() << std::flush;
 				if(task->isFuture)
 				{
 					FutureTask* ftask = dynamic_cast<FutureTask*>(task);
@@ -71,7 +71,7 @@ void* PoolThread::run(void *arg)
 			}
 			catch(...)
 			{
-				ths->logger << "Error Occurred while executing task" << flush;
+				ths->logger << "Error Occurred while executing task" << std::flush;
 				if(task->isFuture)
 				{
 					FutureTask* ftask = dynamic_cast<FutureTask*>(task);
@@ -108,7 +108,7 @@ PoolThread::~PoolThread() {
 	}
 	delete mthread;
 	delete m_mutex;
-	logger << "Destroyed PoolThread\n" << flush;
+	logger << "Destroyed PoolThread\n" << std::flush;
 }
 
 void PoolThread::stop() {

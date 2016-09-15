@@ -31,15 +31,15 @@ CsvFileReader::~CsvFileReader() {
 	// TODO Auto-generated destructor stub
 }
 
-strVecVec CsvFileReader::getRows(const string& filepath)
+strVecVec CsvFileReader::getRows(const std::string& filepath)
 {
 	strVecVec all;
-	string line;
+	std::string line;
 	if (filepath=="")
 	{
 		return all;
 	}
-	ifstream myfile (&filepath[0],ios::in | ios::binary);
+	std::ifstream myfile (&filepath[0],std::ios::in | std::ios::binary);
 	if (myfile.is_open())
 	{
 		while(getline(myfile,line,'\n'))
@@ -48,7 +48,7 @@ strVecVec CsvFileReader::getRows(const string& filepath)
 			{
 				StringUtil::replaceAll(line,"\n","");
 				StringUtil::replaceAll(line,"\r","");
-				vector<string> vemp = StringUtil::splitAndReturn<vector<string> >(line, (","));
+				std::vector<std::string> vemp = StringUtil::splitAndReturn<std::vector<std::string> >(line, (","));
 				if(vemp.size()>0)
 					all.push_back(vemp);
 			}

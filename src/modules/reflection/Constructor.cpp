@@ -31,12 +31,12 @@ Constructor::~Constructor() {
 	// TODO Auto-generated destructor stub
 }
 
-vector<string> Constructor::getArgumentTypes() const
+std::vector<std::string> Constructor::getArgumentTypes() const
 {
 	return argumentTypes;
 }
 
-void Constructor::setArgumentTypes(const vector<string>& argumentTypes)
+void Constructor::setArgumentTypes(const std::vector<std::string>& argumentTypes)
 {
 	this->argumentTypes = argumentTypes;
 }
@@ -46,12 +46,12 @@ int Constructor::getArgNum() const
 	return this->argumentTypes.size();
 }
 
-string Constructor::getName() const
+std::string Constructor::getName() const
 {
 	return name;
 }
 
-void Constructor::setName(const string& name)
+void Constructor::setName(const std::string& name)
 {
 	this->name = name;
 }
@@ -62,10 +62,10 @@ void Constructor::clear()
 	argumentTypes.clear();
 }
 
-const string& Constructor::getRefName() const {
+const std::string& Constructor::getRefName() const {
 	return refName;
 }
 
-void Constructor::setRefName(const string& refName) {
+void Constructor::setRefName(const std::string& refName) {
 	this->refName = refName;
 }

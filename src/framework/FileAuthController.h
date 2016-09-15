@@ -12,17 +12,17 @@
 
 class FileAuthController :public AuthController
 {
-	string filename;
-	string delimiter;
+	std::string filename;
+	std::string delimiter;
 public:
-	string treat_password(const string&);
-	FileAuthController(const string&, const string&);
+	std::string treat_password(const std::string&);
+	FileAuthController(const std::string&, const std::string&);
 	virtual ~FileAuthController();
-	bool authenticate(const string&, const string&);
+	bool authenticate(const std::string&, const std::string&);
 	bool isInitialized();
-	bool getPassword(const string& username, string &passwd);
-	string getUserRole(const string&);
-	string get(const string& username, const int& pos);
+	bool getPassword(const std::string& username, std::string &passwd);
+	std::string getUserRole(const std::string&);
+	std::string get(const std::string& username, const int& pos);
 };
 
 #endif /* FILEAUTHCONTROLLER_H_ */

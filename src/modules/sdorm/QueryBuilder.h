@@ -193,9 +193,9 @@ public:
 };
 
 class Condition {
-	string lhs;
+	std::string lhs;
 	QueryOperator oper;
-	vector<GenericObject> rhsVec;
+	std::vector<GenericObject> rhsVec;
 	QueryClause clause;
 	bool managed;
 	friend class LogicalGroup;
@@ -203,7 +203,7 @@ public:
 	Condition();
 	virtual ~Condition();
 	QueryClause getClause() const;
-	const string& getLhs() const;
+	const std::string& getLhs() const;
 	QueryOperator getOper() const;
 	GenericObject& getRhs();
 	GenericObject& getRhs(const int& index);
@@ -213,7 +213,7 @@ public:
 
 class LogicalGroup {
 	QueryBuilder* qb;
-	vector<Condition> conds;
+	std::vector<Condition> conds;
 	QueryClause lastClause;
 	bool condStarted;
 	friend class QueryBuilder;
@@ -221,25 +221,25 @@ class LogicalGroup {
 public:
 	LogicalGroup();
 	virtual ~LogicalGroup();
-	LogicalGroup& where(const string& lhs, const QueryOperator& oper, const GenericObject& rhs);
-	LogicalGroup& where(const string& lhs, const QueryOperator& oper, const GenericObject& rhs, const GenericObject& rhs1);
-	LogicalGroup& where(const string& lhs, const QueryOperator& oper, const vector<GenericObject>& rhsList);
-	template <class T> LogicalGroup& where(const string& lhs, const QueryOperator& oper, const T& rhs);
-	template <class T> LogicalGroup& where(const string& lhs, const QueryOperator& oper, const T& rhs, const T& rhs1);
-	template <class T> LogicalGroup& where(const string& lhs, const QueryOperator& oper, const vector<T>& rhsList);
+	LogicalGroup& where(const std::string& lhs, const QueryOperator& oper, const GenericObject& rhs);
+	LogicalGroup& where(const std::string& lhs, const QueryOperator& oper, const GenericObject& rhs, const GenericObject& rhs1);
+	LogicalGroup& where(const std::string& lhs, const QueryOperator& oper, const std::vector<GenericObject>& rhsList);
+	template <class T> LogicalGroup& where(const std::string& lhs, const QueryOperator& oper, const T& rhs);
+	template <class T> LogicalGroup& where(const std::string& lhs, const QueryOperator& oper, const T& rhs, const T& rhs1);
+	template <class T> LogicalGroup& where(const std::string& lhs, const QueryOperator& oper, const std::vector<T>& rhsList);
 	LogicalGroup& logicalAnd();
 	LogicalGroup& logicalOr();
 	LogicalGroup& open();
 	LogicalGroup& close();
 	QueryBuilder& end();
-	const vector<Condition>& getConds() const;
+	const std::vector<Condition>& getConds() const;
 };
 
 class JoinClause {
 	QueryBuilder* qb;
-	string tableName;
-	string className;
-	string alias;
+	std::string tableName;
+	std::string className;
+	std::string alias;
 	JoinType type;
 	LogicalGroup condition;
 	friend class QueryBuilder;
@@ -247,18 +247,18 @@ class JoinClause {
 public:
 	JoinClause();
 	virtual ~JoinClause();
-	LogicalGroup& on(const string& lhs, const QueryOperator& oper, const GenericObject& rhs);
+	LogicalGroup& on(const std::string& lhs, const QueryOperator& oper, const GenericObject& rhs);
 	QueryBuilder& end();
-	const string& getAlias() const;
-	const string& getClassName() const;
+	const std::string& getAlias() const;
+	const std::string& getClassName() const;
 	const LogicalGroup& getCondition() const;
-	const string& getTableName() const;
+	const std::string& getTableName() const;
 	JoinType getType() const;
 };
 
 class GroupClause {
 	QueryBuilder* qb;
-	vector<string> columns;
+	std::vector<std::string> columns;
 	LogicalGroup conditions;
 	friend class QueryBuilder;
 	GroupClause(QueryBuilder* qb);
@@ -267,75 +267,75 @@ public:
 	virtual ~GroupClause();
 	LogicalGroup& having();
 	QueryBuilder& end();
-	const vector<string>& getColumns() const;
+	const std::vector<std::string>& getColumns() const;
 	const LogicalGroup& getConditions() const;
 };
 
 class QueryBuilder {
 	friend class Query;
-	string tableName;
-	string className;
-	string alias;
-	map<string, string> columns;
+	std::string tableName;
+	std::string className;
+	std::string alias;
+	std::map<std::string, std::string> columns;
 	bool allCols;
 	bool unique;
 	int start;
 	int count;
-	vector<JoinClause*> joinClauses;
+	std::vector<JoinClause*> joinClauses;
 	LogicalGroup conditions;
-	vector<string> columnsAsc;
-	vector<string> columnsDesc;
-	vector<QueryBuilder> unions;
-	vector<QueryBuilder> unionAlls;
+	std::vector<std::string> columnsAsc;
+	std::vector<std::string> columnsDesc;
+	std::vector<QueryBuilder> unions;
+	std::vector<QueryBuilder> unionAlls;
 	GroupClause group;
 public:
 	QueryBuilder();
 	virtual ~QueryBuilder();
 
 	QueryBuilder& allColumns();
-	QueryBuilder& columnName(string name, string calias= "");
-	QueryBuilder& columnNames(const map<string, string>& columns);
-	QueryBuilder& delimitedColumnNames(const string& names);
+	QueryBuilder& columnName(std::string name, std::string calias= "");
+	QueryBuilder& columnNames(const std::map<std::string, std::string>& columns);
+	QueryBuilder& delimitedColumnNames(const std::string& names);
 	QueryBuilder& distinct();
 
-	QueryBuilder& fromTable(const string& name, const string& alias);
-	QueryBuilder& fromClass(const string& name, const string& alias);
+	QueryBuilder& fromTable(const std::string& name, const std::string& alias);
+	QueryBuilder& fromClass(const std::string& name, const std::string& alias);
 
 	LogicalGroup& condition();
 
-	GroupClause& groupBy(const string& column);
-	GroupClause& groupBy(const vector<string>& columns);
-	GroupClause& delimitedGroupByColumns(const string& name);
+	GroupClause& groupBy(const std::string& column);
+	GroupClause& groupBy(const std::vector<std::string>& columns);
+	GroupClause& delimitedGroupByColumns(const std::string& name);
 
-	QueryBuilder& orderByAsc(const string& column);
-	QueryBuilder& orderByDesc(const string& column);
+	QueryBuilder& orderByAsc(const std::string& column);
+	QueryBuilder& orderByDesc(const std::string& column);
 
 	QueryBuilder& paginate(const int&, const int&);
 
-	JoinClause& joinTable(const JoinType& jt, const string& name, const string& alias);
-	JoinClause& joinClass(const JoinType& jt, const string& name, const string& alias);
+	JoinClause& joinTable(const JoinType& jt, const std::string& name, const std::string& alias);
+	JoinClause& joinClass(const JoinType& jt, const std::string& name, const std::string& alias);
 
 	QueryBuilder& unionQuery(const QueryBuilder& qb);
 	QueryBuilder& unionAllQuery(const QueryBuilder& qb);
-	const string& getAlias() const;
+	const std::string& getAlias() const;
 	bool isAllCols() const;
-	const string& getClassName() const;
-	const map<string, string>& getColumns() const;
-	const vector<string>& getColumnsAsc() const;
-	const vector<string>& getColumnsDesc() const;
+	const std::string& getClassName() const;
+	const std::map<std::string, std::string>& getColumns() const;
+	const std::vector<std::string>& getColumnsAsc() const;
+	const std::vector<std::string>& getColumnsDesc() const;
 	const LogicalGroup& getConditions() const;
 	int getCount() const;
 	const GroupClause& getGroup() const;
-	const vector<JoinClause*>& getJoinClauses() const;
+	const std::vector<JoinClause*>& getJoinClauses() const;
 	int getStart() const;
-	const string& getTableName() const;
-	const vector<QueryBuilder>& getUnionAlls() const;
-	const vector<QueryBuilder>& getUnions() const;
+	const std::string& getTableName() const;
+	const std::vector<QueryBuilder>& getUnionAlls() const;
+	const std::vector<QueryBuilder>& getUnions() const;
 	bool isUnique() const;
 };
 
 template<class T>
-inline LogicalGroup& LogicalGroup::where(const string& lhs, const QueryOperator& oper, const T& rhs) {
+inline LogicalGroup& LogicalGroup::where(const std::string& lhs, const QueryOperator& oper, const T& rhs) {
 	Condition cond;
 	cond.lhs = lhs;
 	cond.oper = oper;
@@ -353,7 +353,7 @@ inline LogicalGroup& LogicalGroup::where(const string& lhs, const QueryOperator&
 }
 
 template<class T>
-inline LogicalGroup& LogicalGroup::where(const string& lhs, const QueryOperator& oper, const T& rhs, const T& rhs1) {
+inline LogicalGroup& LogicalGroup::where(const std::string& lhs, const QueryOperator& oper, const T& rhs, const T& rhs1) {
 	Condition cond;
 	cond.lhs = lhs;
 	cond.oper = oper;
@@ -377,7 +377,7 @@ inline LogicalGroup& LogicalGroup::where(const string& lhs, const QueryOperator&
 }
 
 template<class T>
-inline LogicalGroup& LogicalGroup::where(const string& lhs, const QueryOperator& oper, const vector<T>& rhsList) {
+inline LogicalGroup& LogicalGroup::where(const std::string& lhs, const QueryOperator& oper, const std::vector<T>& rhsList) {
 	Condition cond;
 	cond.lhs = lhs;
 	cond.oper = oper;

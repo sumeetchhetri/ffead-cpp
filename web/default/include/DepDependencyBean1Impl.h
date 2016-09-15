@@ -29,7 +29,7 @@ class DepDependencyBean1Impl : public DependencyIntf1
 public:
     void print1()
     {
-        cout <<"Hello " << flush;
+        std::cout <<"Hello " << std::flush;
     }
 };
 #endif /* DEPDEPENDENCYBEAN1IMPL_H_ */

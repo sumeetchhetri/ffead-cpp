@@ -45,7 +45,7 @@ BeanContext::BeanContext() {
 	logger = LoggerFactory::getLogger("BeanContext");
 }
 
-BeanContext::BeanContext(const string& host, const int& port) {
+BeanContext::BeanContext(const std::string& host, const int& port) {
 	this->setHost(host);
 	this->setPort(port);
 }
@@ -53,12 +53,12 @@ BeanContext::BeanContext(const string& host, const int& port) {
 BeanContext::~BeanContext() {
 	// TODO Auto-generated destructor stub
 }
-string BeanContext::getHost() const
+std::string BeanContext::getHost() const
 {
 	return host;
 }
 
-void BeanContext::setHost(const string& host)
+void BeanContext::setHost(const std::string& host)
 {
 	this->host = host;
 }
@@ -73,7 +73,7 @@ void BeanContext::setPort(const int& port)
 	this->port = port;
 }
 
-void* BeanContext::lookup(const string& cmpName)
+void* BeanContext::lookup(const std::string& cmpName)
 {
 	void *_temp = NULL;
 	if(!client.isConnected())
@@ -81,7 +81,7 @@ void* BeanContext::lookup(const string& cmpName)
 	if(client.isConnected())
 	{
 		Reflector ref;
-		string classn;
+		std::string classn;
 		classn = "Component_"+cmpName+"_Remote";
 		ClassInfo clas = ref.getClassInfo(classn);
 		args argus;
@@ -93,13 +93,13 @@ void* BeanContext::lookup(const string& cmpName)
 	return _temp;
 }
 
-void* BeanContext::invoke(const string& name, vector<GenericObject> args, const string& bname, const string& rettyp)
+void* BeanContext::invoke(const std::string& name, std::vector<GenericObject> args, const std::string& bname, const std::string& rettyp)
 {
 	void* retval = NULL;
 	if(client.isConnected())
 	{
 		XMLSerialize ser;
-		string argus;
+		std::string argus;
 		if(args.size()>0)
 		{
 			for (unsigned int var = 0; var < args.size(); ++var)
@@ -107,31 +107,31 @@ void* BeanContext::invoke(const string& name, vector<GenericObject> args, const 
 				argus += "<argument type=\""+rettyp+"\">"+ser.serializeUnknown(args.at(var).getPointer(),rettyp)+"</argument>";
 			}
 		}
-		string call = "<service name=\""+name+"\" beanName=\""+bname+"\" lang=\"c++\" returnType=\""+rettyp+"\"><args>"+argus+"</args></service>";
+		std::string call = "<service name=\""+name+"\" beanName=\""+bname+"\" lang=\"c++\" returnType=\""+rettyp+"\"><args>"+argus+"</args></service>";
 		client.sendData(call);
 		call = "";
 		while((call=client.getData())=="")
 		{
 		}
-		//logger << call << flush;
+		//logger << call << std::flush;
 		XmlParser parser("Parser");
 		Document doc;
 		parser.parse(call, doc);
 		Element message = doc.getRootElement();
-		if(message.getTagName().find("<return:exception>")==string::npos)
+		if(message.getTagName().find("<return:exception>")==std::string::npos)
 		{
-			string tag = message.getTagName();
+			std::string tag = message.getTagName();
 			StringUtil::replaceFirst(tag,"return:","");
 			message.setTagName(tag);
 			call = message.render();
-			//logger << call << flush;
+			//logger << call << std::flush;
 			retval = ser.unSerializeUnknown(call,tag);
 		}
 		else
 		{
 			throw "Exception occurred";
 		}
-		//logger << retval << flush;
+		//logger << retval << std::flush;
 	}
 	else
 	{

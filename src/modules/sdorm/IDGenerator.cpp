@@ -35,7 +35,7 @@ void IDGenerator::init(DataSourceEntityMapping& dsemp, const bool& forceReinit) 
 		}
 		else if(dsemp.getIdgendbEntityType().find("custom:")==0)
 		{
-			string custMethod = dsemp.getIdgendbEntityType().substr(7);
+			std::string custMethod = dsemp.getIdgendbEntityType().substr(7);
 			executeCustom(dsemp, custMethod, hiValue);
 		}
 
@@ -92,7 +92,7 @@ void IDGenerator::next(DataSourceEntityMapping& dsemp, GenericObject& id) {
 	{
 		uuid_t idt;
 		uuid_generate(idt);
-		string ids;
+		std::string ids;
 		for(int i=0;i<16;i++){
 			ids.push_back(idt[i]);
 		}
@@ -101,7 +101,7 @@ void IDGenerator::next(DataSourceEntityMapping& dsemp, GenericObject& id) {
 #endif
 	else if(dsemp.getIdgendbEntityType().find("custom:")==0)
 	{
-		string custMethod = dsemp.getIdgendbEntityType().substr(7);
+		std::string custMethod = dsemp.getIdgendbEntityType().substr(7);
 		executeCustom(dsemp, custMethod, id);
 	}
 }

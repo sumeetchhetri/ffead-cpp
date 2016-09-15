@@ -24,12 +24,12 @@
 #include "string"
 #include "Renderer.h"
 #include <iostream>
-using namespace std;
+
 
 class Element;
-typedef vector<Element*> ElementList;
-typedef map<string, string> AttributeList;
-typedef map<string, Element*> ElementMap;
+typedef std::vector<Element*> ElementList;
+typedef std::map<std::string, std::string> AttributeList;
+typedef std::map<std::string, Element*> ElementMap;
 
 class Element : public Renderer
 {
@@ -37,47 +37,47 @@ public:
 	Element();
 	~Element();
 
-	//typedef vector<Element*> ElementList;
+	//typedef std::vector<Element*> ElementList;
 	void addElement(Element*);
 	void removeElement(Element*);
 	//void updateElement(Element*);
-	void addAttribute(const string& key, const string& value, const bool& validate= false);
-	void removeAttribute(const string& key);
+	void addAttribute(const std::string& key, const std::string& value, const bool& validate= false);
+	void removeAttribute(const std::string& key);
 	const AttributeList& getAttributes() const;
-	const string getAttribute(const string&) const;
+	const std::string getAttribute(const std::string&) const;
 	const ElementList& getChildElements() const;
 	bool isNull();
-	const string& getTagName() const;
-	string getTagNameSpc() const;
-	const string& getNameSpc();
-	void setTagName(const string& tagName);
+	const std::string& getTagName() const;
+	std::string getTagNameSpc() const;
+	const std::string& getNameSpc();
+	void setTagName(const std::string& tagName);
 	bool operator == (const Element&) const;
 	bool operator == (Element *);
 	bool getCdata() const;
 	void setCdata(const bool&);
-	const string& getText() const;
-	void setText(const string&);
-	Element* getElementByName(const string&);
-	Element* getElementByNameIgnoreCase(const string&);
-	ElementList getElementsByName(const string& name);
-	string render();
-	string renderSerialization();
-	string renderChildren() const;
+	const std::string& getText() const;
+	void setText(const std::string&);
+	Element* getElementByName(const std::string&);
+	Element* getElementByNameIgnoreCase(const std::string&);
+	ElementList getElementsByName(const std::string& name);
+	std::string render();
+	std::string renderSerialization();
+	std::string renderChildren() const;
 	void validateNs();
-	string getNameSpcValue();
+	std::string getNameSpcValue();
 	void copy(Element* to);
 private:
 	static Element nullele;
-	bool isValidNamespace(Element* ele, const string& nameSpace);
-	string getNmspc(Element* ele, const string& nameSpace);
+	bool isValidNamespace(Element* ele, const std::string& nameSpace);
+	std::string getNmspc(Element* ele, const std::string& nameSpace);
 	Element* parent;
 	AttributeList attributes;
 	AttributeList namespaces;
 	AttributeList allnmspcs;
 	ElementList elements;
-	string tagName;
-	string nameSpace;
-	string text;
+	std::string tagName;
+	std::string nameSpace;
+	std::string text;
 	bool cdata;
 	ElementMap mapOfEle;
 	friend class Document;

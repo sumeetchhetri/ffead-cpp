@@ -11,7 +11,7 @@ XMLSerialize::XMLSerialize() {
 	dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(dlib == NULL)
 	{
-		cerr << dlerror() << endl;
+		std::cerr << dlerror() << std::endl;
 		throw "Cannot load serialization shared library";
 	}
 	dlibinstantiated = true;
@@ -33,87 +33,87 @@ XMLSerialize::~XMLSerialize() {
 	}
 }
 
-string XMLSerialize::serializePrimitive(const string& className, void* t)
+std::string XMLSerialize::serializePrimitive(const std::string& className, void* t)
 {
-	string objXml;
+	std::string objXml;
 	if(className=="std::string" || className=="string")
 	{
-		string tem = *(string*)t;
-		objXml = "<string>"+CastUtil::lexical_cast<string>(tem)+"</string>";
+		std::string tem = *(std::string*)t;
+		objXml = "<string>"+CastUtil::lexical_cast<std::string>(tem)+"</string>";
 	}
 	else if(className=="char")
 	{
 		char tem = *(char*)t;
-		string temp;
+		std::string temp;
 		temp.push_back(tem);
 		objXml = "<char>"+temp+"</char>";
 	}
 	else if(className=="unsigned char")
 	{
 		unsigned char tem = *(char*)t;
-		string temp;
+		std::string temp;
 		temp.push_back(tem);
 		objXml = "<uchar>"+temp+"</uchar>";
 	}
 	else if(className=="int")
 	{
 		int tem = *(int*)t;
-		objXml = "<int>"+CastUtil::lexical_cast<string>(tem)+"</int>";
+		objXml = "<int>"+CastUtil::lexical_cast<std::string>(tem)+"</int>";
 	}
 	else if(className=="unsigned int")
 	{
 		unsigned int tem = *(unsigned int*)t;
-		objXml = "<uint>"+CastUtil::lexical_cast<string>(tem)+"</uint>";
+		objXml = "<uint>"+CastUtil::lexical_cast<std::string>(tem)+"</uint>";
 	}
 	else if(className=="short")
 	{
 		short tem = *(short*)t;
-		objXml = "<short>"+CastUtil::lexical_cast<string>(tem)+"</short>";
+		objXml = "<short>"+CastUtil::lexical_cast<std::string>(tem)+"</short>";
 	}
 	else if(className=="unsigned short")
 	{
 		unsigned short tem = *(unsigned short*)t;
-		objXml = "<ushort>"+CastUtil::lexical_cast<string>(tem)+"</ushort>";
+		objXml = "<ushort>"+CastUtil::lexical_cast<std::string>(tem)+"</ushort>";
 	}
 	else if(className=="long")
 	{
 		long tem = *(long*)t;
-		objXml = "<long>"+CastUtil::lexical_cast<string>(tem)+"</long>";
+		objXml = "<long>"+CastUtil::lexical_cast<std::string>(tem)+"</long>";
 	}
 	else if(className=="unsigned long")
 	{
 		unsigned long tem = *(unsigned long*)t;
-		objXml = "<ulong>"+CastUtil::lexical_cast<string>(tem)+"</ulong>";
+		objXml = "<ulong>"+CastUtil::lexical_cast<std::string>(tem)+"</ulong>";
 	}
 	else if(className=="long long")
 	{
 		long long tem = *(long long*)t;
-		objXml = "<llong>"+CastUtil::lexical_cast<string>(tem)+"</llong>";
+		objXml = "<llong>"+CastUtil::lexical_cast<std::string>(tem)+"</llong>";
 	}
 	else if(className=="unsigned long long")
 	{
 		unsigned long long tem = *(unsigned long long*)t;
-		objXml = "<ullong>"+CastUtil::lexical_cast<string>(tem)+"</ullong>";
+		objXml = "<ullong>"+CastUtil::lexical_cast<std::string>(tem)+"</ullong>";
 	}
 	else if(className=="float")
 	{
 		float tem = *(float*)t;
-		objXml = "<float>"+CastUtil::lexical_cast<string>(tem)+"</float>";
+		objXml = "<float>"+CastUtil::lexical_cast<std::string>(tem)+"</float>";
 	}
 	else if(className=="double")
 	{
 		double tem = *(double*)t;
-		objXml = "<double>"+CastUtil::lexical_cast<string>(tem)+"</double>";
+		objXml = "<double>"+CastUtil::lexical_cast<std::string>(tem)+"</double>";
 	}
 	else if(className=="long double")
 	{
 		long double tem = *(long double*)t;
-		objXml = "<ldouble>"+CastUtil::lexical_cast<string>(tem)+"</ldouble>";
+		objXml = "<ldouble>"+CastUtil::lexical_cast<std::string>(tem)+"</ldouble>";
 	}
 	else if(className=="bool")
 	{
 		bool tem = *(bool*)t;
-		objXml = "<bool>"+CastUtil::lexical_cast<string>(tem)+"</bool>";
+		objXml = "<bool>"+CastUtil::lexical_cast<std::string>(tem)+"</bool>";
 	}
 	else if(className=="Date")
 	{
@@ -129,58 +129,62 @@ string XMLSerialize::serializePrimitive(const string& className, void* t)
 
 void* XMLSerialize::getSerializableObject()
 {
-	return new string;
+	return new std::string;
 }
 
 void XMLSerialize::cleanSerializableObject(void* _1)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	delete object;
 }
 
-void XMLSerialize::startContainerSerialization(void* _1, const string& className, const string& container)
+void XMLSerialize::startContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
-	string* object = (string*)_1;
-	*object = "<"+container+"-"+className+">";
+	std::string clsn = StringUtil::replaceFirstCopy(className, "std::", "");
+	std::string cntn = StringUtil::replaceFirstCopy(container, "std::", "");
+	std::string* object = (std::string*)_1;
+	*object = "<"+cntn+"-"+clsn+">";
 }
 
-void XMLSerialize::endContainerSerialization(void* _1, const string& className, const string& container)
+void XMLSerialize::endContainerSerialization(void* _1, const std::string& className, const std::string& container)
 {
-	string* object = (string*)_1;
-	*object += "</"+container+"-"+className+">";
+	std::string clsn = StringUtil::replaceFirstCopy(className, "std::", "");
+	std::string cntn = StringUtil::replaceFirstCopy(container, "std::", "");
+	std::string* object = (std::string*)_1;
+	*object += "</"+cntn+"-"+clsn+">";
 }
 
 void XMLSerialize::afterAddContainerSerializableElement(void* _1, const int& counter, const int& size){}
 
-void XMLSerialize::addContainerSerializableElement(void* _1, const string& tem)
+void XMLSerialize::addContainerSerializableElement(void* _1, const std::string& tem)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	*object += tem;
 }
 
-void XMLSerialize::addContainerSerializableElementMulti(void* _1, const string& tem)
+void XMLSerialize::addContainerSerializableElementMulti(void* _1, const std::string& tem)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	*object += tem;
 }
 
-string XMLSerialize::fromSerializableObjectToString(void* _1)
+std::string XMLSerialize::fromSerializableObjectToString(void* _1)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	return *object;
 }
 
-string XMLSerialize::elementToSerializedString(void* _1, const int& counter)
+std::string XMLSerialize::elementToSerializedString(void* _1, const int& counter)
 {
 	Element* object = (Element*)_1;
 	return object->getChildElements().at(counter)->renderChildren();
 }
 
-string XMLSerialize::getConatinerElementClassName(void* _1, const string& className)
+std::string XMLSerialize::getConatinerElementClassName(void* _1, const std::string& className)
 {
 	Element* root = (Element*)_1;
-	string stlclassName = root->getTagName();
-	if(stlclassName.find("-")!=string::npos)
+	std::string stlclassName = root->getTagName();
+	if(stlclassName.find("-")!=std::string::npos)
 	{
 		return stlclassName.substr(stlclassName.find_last_of("-")+1);
 	}
@@ -202,13 +206,13 @@ void* XMLSerialize::getContainerElement(void* _1, const int& counter, const int&
 	return ele;
 }
 
-void XMLSerialize::addPrimitiveElementToContainer(void* _1, const int& counter, const string& className, void* cont, const string& container)
+void XMLSerialize::addPrimitiveElementToContainer(void* _1, const int& counter, const std::string& className, void* cont, const std::string& container)
 {
 	Element* root = (Element*)_1;
 	Element* ele = root->getChildElements().at(counter);
 	if(className=="std::string" || className=="string")
 	{
-		string retVal = ele->getText();
+		std::string retVal = ele->getText();
 		addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="int")
@@ -283,7 +287,7 @@ void XMLSerialize::addPrimitiveElementToContainer(void* _1, const int& counter, 
 	}
 }
 
-void* XMLSerialize::getUnserializableObject(const string& _1)
+void* XMLSerialize::getUnserializableObject(const std::string& _1)
 {
 	XmlParser parser("Parser");
 	try
@@ -294,9 +298,9 @@ void* XMLSerialize::getUnserializableObject(const string& _1)
 		doc.getRootElement().copy(message);
 		return message;
 	} catch(const XmlParseException& str) {
-		cout << str.getMessage() << endl;
+		std::cout << str.getMessage() << std::endl;
 	} catch(...) {
-		cout << "XML Parse Error" << endl;
+		std::cout << "XML Parse Error" << std::endl;
 	}
 	return NULL;
 }
@@ -313,7 +317,7 @@ void XMLSerialize::cleanValidUnserializableObject(void* _1)
 	delete object;
 }
 
-void* XMLSerialize::getValidUnserializableObject(const string& _1){return NULL;}
+void* XMLSerialize::getValidUnserializableObject(const std::string& _1){return NULL;}
 
 int XMLSerialize::getContainerSize(void* _1)
 {
@@ -321,13 +325,13 @@ int XMLSerialize::getContainerSize(void* _1)
 	return root->getChildElements().size();
 }
 
-string XMLSerialize::getUnserializableClassName(void* _1, const string& className)
+std::string XMLSerialize::getUnserializableClassName(void* _1, const std::string& className)
 {
 	Element* root = (Element*)_1;
 	return root->getTagName();
 }
 
-void* XMLSerialize::getPrimitiveValue(void* _1, const string& className)
+void* XMLSerialize::getPrimitiveValue(void* _1, const std::string& className)
 {
 	Element* root = (Element*)_1;
 	if((className=="signed" || className=="int" || className=="signed int"))
@@ -419,28 +423,28 @@ void* XMLSerialize::getPrimitiveValue(void* _1, const string& className)
 	}
 	else if((className=="std::string" || className=="string"))
 	{
-		string *vt = new string;
+		std::string *vt = new std::string;
 		*vt = root->getText();
 		return vt;
 	}
 	return NULL;
 }
 
-string XMLSerialize::serializeUnknown(void* t, const string& className, const string& appName)
+std::string XMLSerialize::serializeUnknown(void* t, const std::string& className, const std::string& appName)
 {
 	XMLSerialize serialize;
 	return _handleAllSerialization(className,t,appName, &serialize);
 }
 
-void* XMLSerialize::unSerializeUnknown(const string& objXml, const string& className, const string& appName)
+void* XMLSerialize::unSerializeUnknown(const std::string& objXml, const std::string& className, const std::string& appName)
 {
 	XMLSerialize serialize;
 	return _handleAllUnSerialization(objXml,className,appName,&serialize,false,NULL);
 }
 
-bool XMLSerialize::isValidClassNamespace(void* _1, const string& className, const string& namespc, const bool& iscontainer)
+bool XMLSerialize::isValidClassNamespace(void* _1, const std::string& className, const std::string& namespc, const bool& iscontainer)
 {
-	string tnmspc = namespc;
+	std::string tnmspc = namespc;
 	StringUtil::replaceAll(tnmspc, "::", "_");
 	/*StringUtil::replaceAll(className, "std::", "");
 	StringUtil::replaceAll(className, "::", "_");
@@ -448,10 +452,10 @@ bool XMLSerialize::isValidClassNamespace(void* _1, const string& className, cons
 	StringUtil::replaceAll(className, ">", "-");
 	if(className.at(className.length()-1)=='-')
 		className = className.substr(0, className.length()-1);*/
-	string cn = className;
-	if(cn.find('-')!=string::npos)
+	std::string cn = className;
+	if(cn.find('-')!=std::string::npos)
 	{
-		string pre = cn.substr(0, cn.find_last_of("-")+1);
+		std::string pre = cn.substr(0, cn.find_last_of("-")+1);
 		cn = cn.substr(cn.find_last_of("-")+1);
 		cn = pre + tnmspc + cn;
 	}
@@ -463,7 +467,7 @@ bool XMLSerialize::isValidClassNamespace(void* _1, const string& className, cons
 	return true;
 }
 
-bool XMLSerialize::isValidObjectProperty(void* _1, const string& propname, const int& counter)
+bool XMLSerialize::isValidObjectProperty(void* _1, const std::string& propname, const int& counter)
 {
 	Element* element = (Element*)_1;
 	if((int)element->getChildElements().size()>counter && element->getChildElements().at(counter)->getTagName()==propname)
@@ -477,102 +481,102 @@ void* XMLSerialize::getObjectProperty(void* _1, const int& counter)
 	return elel->getChildElements().at(counter);
 }
 
-void XMLSerialize::startObjectSerialization(void* _1, const string& className)
+void XMLSerialize::startObjectSerialization(void* _1, const std::string& className)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	*object = "<"+className+">";
 }
 
-void XMLSerialize::endObjectSerialization(void* _1, const string& className)
+void XMLSerialize::endObjectSerialization(void* _1, const std::string& className)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 	*object += "</"+className+">";
 }
 
 void XMLSerialize::afterAddObjectProperty(void* _1){}
 
-void XMLSerialize::addObjectPrimitiveProperty(void* _1, const string& propName, const string& className, void* t)
+void XMLSerialize::addObjectPrimitiveProperty(void* _1, const std::string& propName, const std::string& className, void* t)
 {
-	string* object = (string*)_1;
-	string objXml;
+	std::string* object = (std::string*)_1;
+	std::string objXml;
 	if(className=="std::string" || className=="string")
 	{
-		string tem = *(string*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		std::string tem = *(std::string*)t;
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="char")
 	{
 		char tem = *(char*)t;
-		string temp;
+		std::string temp;
 		temp.push_back(tem);
 		objXml = temp;
 	}
 	else if(className=="unsigned char")
 	{
 		unsigned char tem = *(char*)t;
-		string temp;
+		std::string temp;
 		temp.push_back(tem);
 		objXml = temp;
 	}
 	else if(className=="int")
 	{
 		int tem = *(int*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned int")
 	{
 		unsigned int tem = *(unsigned int*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="short")
 	{
 		short tem = *(short*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned short")
 	{
 		unsigned short tem = *(unsigned short*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="long")
 	{
 		long tem = *(long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned long")
 	{
 		unsigned long tem = *(unsigned long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="long long")
 	{
 		long long tem = *(long long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="unsigned long long")
 	{
 		unsigned long long tem = *(unsigned long long*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="float")
 	{
 		float tem = *(float*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="double")
 	{
 		double tem = *(double*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="long double")
 	{
 		long double tem = *(long double*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="bool")
 	{
 		bool tem = *(bool*)t;
-		objXml = CastUtil::lexical_cast<string>(tem);
+		objXml = CastUtil::lexical_cast<std::string>(tem);
 	}
 	else if(className=="Date")
 	{
@@ -595,9 +599,9 @@ void XMLSerialize::addObjectPrimitiveProperty(void* _1, const string& propName, 
 	*object += "<" + propName + ">" + objXml + "</" + propName + ">";
 }
 
-void XMLSerialize::addObjectProperty(void* _1, const string& propName, string className, const string& t)
+void XMLSerialize::addObjectProperty(void* _1, const std::string& propName, std::string className, const std::string& t)
 {
-	string* object = (string*)_1;
+	std::string* object = (std::string*)_1;
 
 	StringUtil::replaceAll(className, "std::", "");
 	StringUtil::replaceAll(className, "::", "_");
@@ -610,7 +614,7 @@ void XMLSerialize::addObjectProperty(void* _1, const string& propName, string cl
 	*object += "<" + propName + ">" + t + "</" + propName + ">";
 }
 
-void* XMLSerialize::getObjectPrimitiveValue(void* _1, const string& className, const string& propName)
+void* XMLSerialize::getObjectPrimitiveValue(void* _1, const std::string& className, const std::string& propName)
 {
 	Element* root = (Element*)_1;
 	if(root->getTagName()!=propName)
@@ -710,22 +714,22 @@ void* XMLSerialize::getObjectPrimitiveValue(void* _1, const string& className, c
 	}
 	else if((className=="std::string" || className=="string"))
 	{
-		string *vt = new string;
+		std::string *vt = new std::string;
 		*vt = root->getText();
 		return vt;
 	}
 	return NULL;
 }
 
-string XMLSerialize::serializeUnknownBase(void* t, const string& className, const string& appName)
+std::string XMLSerialize::serializeUnknownBase(void* t, const std::string& className, const std::string& appName)
 {
 	return _handleAllSerialization(className,t,appName, this);
 }
-void* XMLSerialize::unSerializeUnknownBase(void* unserObj, const string& className, const string& appName)
+void* XMLSerialize::unSerializeUnknownBase(void* unserObj, const std::string& className, const std::string& appName)
 {
 	return _handleAllUnSerialization("",className,appName,this,false,unserObj);
 }
-void* XMLSerialize::unSerializeUnknownBase(const string& serVal, const string& className, const string& appName)
+void* XMLSerialize::unSerializeUnknownBase(const std::string& serVal, const std::string& className, const std::string& appName)
 {
 	return _handleAllUnSerialization(serVal,className,appName,this,false,NULL);
 }

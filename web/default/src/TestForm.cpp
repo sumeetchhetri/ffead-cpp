@@ -27,7 +27,7 @@ TestForm::TestForm() {
 
 }
 
-string TestForm::getChe() const
+std::string TestForm::getChe() const
 {
     return che;
 }
@@ -37,12 +37,12 @@ int TestForm::getNum() const
     return num;
 }
 
-string TestForm::getTxt() const
+std::string TestForm::getTxt() const
 {
     return txt;
 }
 
-void TestForm::setChe(string che)
+void TestForm::setChe(std::string che)
 {
     this->che = che;
 }
@@ -52,7 +52,7 @@ void TestForm::setNum(int num)
     this->num = num;
 }
 
-void TestForm::setTxt(string txt)
+void TestForm::setTxt(std::string txt)
 {
     this->txt = txt;
 }

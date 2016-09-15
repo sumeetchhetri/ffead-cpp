@@ -23,12 +23,12 @@
 #ifndef TESTPAGE_H_
 #define TESTPAGE_H_
 #include "string"
-using namespace std;
+
 class TestPage {
 public:
 	TestPage();
 	virtual ~TestPage();
-	string textonclick(int,string,string);
+	std::string textonclick(int,std::string,std::string);
 	int linkonclick();
 };
 

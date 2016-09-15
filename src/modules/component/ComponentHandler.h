@@ -37,15 +37,15 @@
 
 #define BACKLOG1 500
 #define MAXBUFLEN1 1024
-using namespace std;
-class ComponentHandlerException: public exception
+
+class ComponentHandlerException: public std::exception
 {
 	public:
-		ComponentHandlerException(string message, string &ret){message="<return:exception>"+message+"</return:exception>";ret=message;}
+		ComponentHandlerException(std::string message, std::string &ret){message="<return:exception>"+message+"</return:exception>";ret=message;}
 		virtual ~ComponentHandlerException() throw(){}
-		string getMessage() const{return message;};
+		std::string getMessage() const{return message;};
 	private:
-		string message;
+		std::string message;
 };
 class ComponentHandler {
 	static ComponentHandler* instance;
@@ -53,15 +53,15 @@ class ComponentHandler {
 	static void* service(void* arg);
 	Server server;
 	bool running;
-	map<string,string> components;
+	std::map<std::string,std::string> components;
 	static void initComponent();
 	static void init();
 	ComponentHandler();
 	virtual ~ComponentHandler();
 public:
-	static bool registerComponent(const string&);
-	static bool unregisterComponent(const string&);
-	static void trigger(const string&);
+	static bool registerComponent(const std::string&);
+	static bool unregisterComponent(const std::string&);
+	static void trigger(const std::string&);
 	static void stop();
 };
 

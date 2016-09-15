@@ -24,26 +24,26 @@
 #define FIELD_H_
 #include "string"
 #include "vector"
-using namespace std;
+
 
 class Field {
-	string refName;
-	string accessSpecifier;
-	string fieldName;
-	string type;
-	string initVal;
+	std::string refName;
+	std::string accessSpecifier;
+	std::string fieldName;
+	std::string type;
+	std::string initVal;
 public:
 	Field();
 	virtual ~Field();
-	const string& getAccessSpecifier() const;
-    void setAccessSpecifier(const string&);
-    const string& getFieldName() const;
-    void setFieldName(const string&);
-    const string& getType() const;
-    void setType(const string&);
+	const std::string& getAccessSpecifier() const;
+    void setAccessSpecifier(const std::string&);
+    const std::string& getFieldName() const;
+    void setFieldName(const std::string&);
+    const std::string& getType() const;
+    void setType(const std::string&);
     void clear();
-	const string& getRefName() const;
-	void setRefName(const string& refName);
+	const std::string& getRefName() const;
+	void setRefName(const std::string& refName);
 };
 
 #endif /* FIELD_H_ */

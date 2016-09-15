@@ -16,17 +16,17 @@
 #endif
 
 class CacheManager {
-	static map<string, CacheManager*> caches;
-	static string defDsnName;
+	static std::map<std::string, CacheManager*> caches;
+	static std::string defDsnName;
 	ConnectionProperties props;
 	ConnectionPooler* pool;
-	static void initCache(const ConnectionProperties& props, const string& appName);
+	static void initCache(const ConnectionProperties& props, const std::string& appName);
 	static void destroy();
 	CacheManager(const ConnectionProperties& props);
 	friend class ConfigurationHandler;
 public:
 	virtual ~CacheManager();
-	CacheInterface* getImpl(string name = "");
+	CacheInterface* getImpl(std::string name = "");
 };
 
 #endif /* CACHEMANAGER_H_ */

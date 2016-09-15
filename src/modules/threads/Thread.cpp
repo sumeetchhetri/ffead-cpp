@@ -21,7 +21,7 @@
  */
 
 #include "Thread.h"
-using namespace std;
+
 
 void* Thread::_service(void* arg)
 {

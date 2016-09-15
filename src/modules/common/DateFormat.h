@@ -27,19 +27,19 @@
 #include "vector"
 #include <iostream>
 
-using namespace std;
+
 
 class DateFormat {
-	string formatspec;
-	string appendZero(const int& value);
+	std::string formatspec;
+	std::string appendZero(const int& value);
 public:
 	DateFormat();
 	virtual ~DateFormat();
-	DateFormat(const string&);
-	string format(const Date&);
-	Date* parse(string);
-    const string& getFormatspec() const;
-    void setFormatspec(const string& formatspec);
+	DateFormat(const std::string&);
+	std::string format(const Date&);
+	Date* parse(std::string);
+    const std::string& getFormatspec() const;
+    void setFormatspec(const std::string& formatspec);
 };
 
 #endif /* DATEFORMAT_H_ */

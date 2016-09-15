@@ -28,14 +28,14 @@
 class Test3 {
 	int id;
 	int test_id;
-	vector<Test> tests;
+	std::vector<Test> tests;
 public:
 	Test3();
 	virtual ~Test3();
     int getId() const;
     void setId(int id);
-    vector<Test> getTests() const;
-    void setTests(vector<Test> tests);
+    std::vector<Test> getTests() const;
+    void setTests(std::vector<Test> tests);
     int getTest_id() const;
     void setTest_id(int test_id);
 };

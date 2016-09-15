@@ -30,15 +30,15 @@ ApplicationUtil::~ApplicationUtil() {
 	// TODO Auto-generated destructor stub
 }
 
-string ApplicationUtil::buildAllApplications(const vector<string>& files, const vector<string>& apps)
+std::string ApplicationUtil::buildAllApplications(const std::vector<std::string>& files, const std::vector<std::string>& apps)
 {
-	string headers = "#include \"fstream\"\n#include \"string\"\n#include \"HttpSession.h\"\n#include \"CastUtil.h\"\nusing namespace std;\n";
-	string code;
-	string meth,methdef,vars;
+	std::string headers = "#include \"fstream\"\n#include \"string\"\n#include \"HttpSession.h\"\n#include \"CastUtil.h\"\n\n";
+	std::string code;
+	std::string meth,methdef,vars;
 	for (unsigned int var = 0; var < files.size(); ++var)
 	{
-		string path = files.at(var).substr(0,files.at(var).find_last_of("/")+1);
-		string appName = apps.at(var).substr(0,apps.at(var).find_last_of("/"));
+		std::string path = files.at(var).substr(0,files.at(var).find_last_of("/")+1);
+		std::string appName = apps.at(var).substr(0,apps.at(var).find_last_of("/"));
 
 		XmlParser parser("Parser");
 		Document doc;
@@ -51,12 +51,12 @@ string ApplicationUtil::buildAllApplications(const vector<string>& files, const 
 		}
 		else
 		{
-			meth += "string "+appName+"checkRules(string to,HttpSession session)\n{\nstring curr=session.getAttribute(\"CURR\");\n";
+			meth += "std::string "+appName+"checkRules(std::string to,HttpSession session)\n{\nstd::string curr=session.getAttribute(\"CURR\");\n";
 			for (unsigned int var = 0; var < eles.size(); var++)
 			{
 				if(eles.at(var)->getTagName()=="include")
 				{
-					string inc = eles.at(var)->getText();
+					std::string inc = eles.at(var)->getText();
 					strVec incs;
 					StringUtil::split(incs, inc, (" "));
 					for (unsigned int i = 0; i < incs.size(); i++)
@@ -66,19 +66,19 @@ string ApplicationUtil::buildAllApplications(const vector<string>& files, const 
 				}
 				else if(eles.at(var)->getTagName()=="page" || eles.at(var)->getTagName()=="welcome")
 				{
-					meth += ("string " + eles.at(var)->getAttribute("id") + " = \""+path+eles.at(var)->getAttribute("path")+"\";\n");
+					meth += ("std::string " + eles.at(var)->getAttribute("id") + " = \""+path+eles.at(var)->getAttribute("path")+"\";\n");
 					if(eles.at(var)->getAttribute("who")!="" && eles.at(var)->getAttribute("where")!="")
 					{
-						if(eles.at(var)->getAttribute("where").find("FILE:")!=string::npos)
+						if(eles.at(var)->getAttribute("where").find("FILE:")!=std::string::npos)
 						{
-							string fileName = eles.at(var)->getAttribute("where");
+							std::string fileName = eles.at(var)->getAttribute("where");
 							StringUtil::replaceFirst(fileName,"FILE:","");
 							fileName = (path + fileName);
-							meth += "string path;\nif(to=="+eles.at(var)->getAttribute("id")+")\n{";
-							meth += "string user = session.getAttribute(\"USER\");\n";
-							meth += "string pass = session.getAttribute(\"PASS\");\n";
+							meth += "std::string path;\nif(to=="+eles.at(var)->getAttribute("id")+")\n{";
+							meth += "std::string user = session.getAttribute(\"USER\");\n";
+							meth += "std::string pass = session.getAttribute(\"PASS\");\n";
 							meth += "ifstream f(\""+fileName+"\");\n";
-							meth += "if(f.is_open())\n{\nstring temp;\nwhile(getline(f,temp,'\\n'))\n{\n";
+							meth += "if(f.is_open())\n{\nstd::string temp;\nwhile(getline(f,temp,'\\n'))\n{\n";
 							meth += "if(temp==(user+\" \"+pass))\n{\nf.close();path = "+eles.at(var)->getAttribute("id");
 							meth += ";break;}\n}\nf.close();\n}\nif(path==\"\")\npath=\"FAILED\";\n}\n";
 						}
@@ -96,17 +96,17 @@ string ApplicationUtil::buildAllApplications(const vector<string>& files, const 
 					{
 						if(elesc.at(var1)->getTagName()=="execute")
 						{
-							string call = elesc.at(var1)->getAttribute("call");
-							string clas = call.substr(0,call.find("."));
-							string method = call.substr(call.find(".")+1);
+							std::string call = elesc.at(var1)->getAttribute("call");
+							std::string clas = call.substr(0,call.find("."));
+							std::string method = call.substr(call.find(".")+1);
 							headers += ("#include \""+clas+".h\"\n");
 							meth += clas + " _object;\n";
-							string args;
+							std::string args;
 							ElementList elesce = elesc.at(var1)->getChildElements();
 							for (unsigned int var2 = 0; var2 < elesce.size(); var2++)
 							{
-								meth += (elesce.at(var2)->getTagName() + " _" + CastUtil::lexical_cast<string>(var2+1) + " = CastUtil::lexical_cast<"+elesce.at(var2)->getTagName()+">(\""+elesce.at(var2)->getText()+"\");\n");
-								args += ("_"+CastUtil::lexical_cast<string>(var2+1));
+								meth += (elesce.at(var2)->getTagName() + " _" + CastUtil::lexical_cast<std::string>(var2+1) + " = CastUtil::lexical_cast<"+elesce.at(var2)->getTagName()+">(\""+elesce.at(var2)->getText()+"\");\n");
+								args += ("_"+CastUtil::lexical_cast<std::string>(var2+1));
 								if(var2!=elesce.size()-1)
 									args += ",";
 							}

@@ -52,7 +52,7 @@ void* DistoCacheHandler::service(void* arg)
 	return NULL;
 }
 
-void DistoCacheHandler::trigger(const string& port, const int& poolSize)
+void DistoCacheHandler::trigger(const std::string& port, const int& poolSize)
 {
 	init();
 	if(instance->running)
@@ -63,7 +63,7 @@ void DistoCacheHandler::trigger(const string& port, const int& poolSize)
 	instance->running = true;
 	CacheMap::init();
 	PooledDistoCacheConnectionFactory::init("localhost", CastUtil::lexical_cast<int>(port), poolSize);
-	instance->logger << ("Distocache running on port" + port) << endl;
+	instance->logger << ("Distocache running on port" + port) << std::endl;
 	return;
 }
 

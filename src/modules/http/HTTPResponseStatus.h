@@ -24,20 +24,20 @@
 #define HTTPRESPONSESTATUS_H_
 #include "string"
 #include "map"
-using namespace std;
+
 
 class HTTPResponseStatus {
-	HTTPResponseStatus(const int&, const string&);
+	HTTPResponseStatus(const int&, const std::string&);
 	int code;
-	string msg;
-	static map<int, HTTPResponseStatus> statuses;
+	std::string msg;
+	static std::map<int, HTTPResponseStatus> statuses;
 public:
 	HTTPResponseStatus();
 	HTTPResponseStatus(const HTTPResponseStatus& status) ;
-	HTTPResponseStatus(const HTTPResponseStatus& status, const string& msg);
+	HTTPResponseStatus(const HTTPResponseStatus& status, const std::string& msg);
 	virtual ~HTTPResponseStatus();
 	int getCode() const;
-	string getMsg() const;
+	std::string getMsg() const;
 	static HTTPResponseStatus getStatusByCode(const int& code);
 
 	static HTTPResponseStatus Continue;

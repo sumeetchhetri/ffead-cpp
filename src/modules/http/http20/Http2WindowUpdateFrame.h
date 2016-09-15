@@ -12,7 +12,7 @@
 class Http2WindowUpdateFrame : public Http2Frame {
 	bool reserved;
 	int windowSizeIncrement;
-	Http2WindowUpdateFrame(string data, Http2FrameHeader& aheader);
+	Http2WindowUpdateFrame(std::string data, Http2FrameHeader& aheader);
 	friend class Http2Handler;
 	friend class Http2StreamHandler;
 public:
@@ -20,7 +20,7 @@ public:
 	virtual ~Http2WindowUpdateFrame();
 	bool isReserved() const;
 	int getWindowSizeIncrement() const;
-	string getFrameData();
+	std::string getFrameData();
 };
 
 #endif /* HTTP2WINDOWUPDATEFRAME_H_ */

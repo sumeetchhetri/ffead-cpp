@@ -7,35 +7,35 @@
 
 #include "DataSourceMapping.h"
 
-const string& DataSourceInternalRelation::getClsName() const {
+const std::string& DataSourceInternalRelation::getClsName() const {
 	return clsName;
 }
 
-void DataSourceInternalRelation::setClsName(const string& clsName) {
+void DataSourceInternalRelation::setClsName(const std::string& clsName) {
 	this->clsName = clsName;
 }
 
-const string& DataSourceInternalRelation::getField() const {
+const std::string& DataSourceInternalRelation::getField() const {
 	return field;
 }
 
-void DataSourceInternalRelation::setField(const string& field) {
+void DataSourceInternalRelation::setField(const std::string& field) {
 	this->field = field;
 }
 
-const string& DataSourceInternalRelation::getDfk() const {
+const std::string& DataSourceInternalRelation::getDfk() const {
 	return dfk;
 }
 
-void DataSourceInternalRelation::setDfk(const string& dfk) {
+void DataSourceInternalRelation::setDfk(const std::string& dfk) {
 	this->dfk = dfk;
 }
 
-const string& DataSourceInternalRelation::getDmappedBy() const {
+const std::string& DataSourceInternalRelation::getDmappedBy() const {
 	return dmappedBy;
 }
 
-void DataSourceInternalRelation::setDmappedBy(const string& dmappedBy) {
+void DataSourceInternalRelation::setDmappedBy(const std::string& dmappedBy) {
 	this->dmappedBy = dmappedBy;
 }
 
@@ -48,7 +48,7 @@ void DataSourceInternalRelation::setType(const int& type) {
 }
 
 
-string Mapping::getClassForTable(const string& table) {
+std::string Mapping::getClassForTable(const std::string& table) {
 	if(tableClassMapping.find(table)!=tableClassMapping.end())
 	{
 		return tableClassMapping[table];
@@ -56,7 +56,7 @@ string Mapping::getClassForTable(const string& table) {
 	return "";
 }
 
-string Mapping::getTableForClass(const string& clas) {
+std::string Mapping::getTableForClass(const std::string& clas) {
 	if(dseMap.find(clas)!=dseMap.end())
 	{
 		return dseMap[clas].tableName;
@@ -65,7 +65,7 @@ string Mapping::getTableForClass(const string& clas) {
 }
 
 
-const string& Mapping::getAppName() const {
+const std::string& Mapping::getAppName() const {
 	return appName;
 }
 
@@ -78,10 +78,10 @@ void Mapping::addDataSourceEntityMapping(const DataSourceEntityMapping& dsemp) {
 	}
 }
 
-string Mapping::getPropertyForColumn(const string& tableName, const string& columnName) {
+std::string Mapping::getPropertyForColumn(const std::string& tableName, const std::string& columnName) {
 	if(tableClassMapping.find(tableName)!=tableClassMapping.end())
 	{
-		string cn = StringUtil::toLowerCopy(columnName);
+		std::string cn = StringUtil::toLowerCopy(columnName);
 		DataSourceEntityMapping dsemp = dseMap[tableClassMapping[tableName]];
 		if(dsemp.columnPropertyMapping.find(cn)!=dsemp.columnPropertyMapping.end())
 		{
@@ -91,7 +91,7 @@ string Mapping::getPropertyForColumn(const string& tableName, const string& colu
 	return "";
 }
 
-strMap Mapping::getMappingForTable(const string& tableName) {
+strMap Mapping::getMappingForTable(const std::string& tableName) {
 	if(tableClassMapping.find(tableName)!=tableClassMapping.end())
 	{
 		DataSourceEntityMapping dsemp = dseMap[tableClassMapping[tableName]];
@@ -101,27 +101,27 @@ strMap Mapping::getMappingForTable(const string& tableName) {
 	return s;
 }
 
-map<string, DataSourceEntityMapping>& Mapping::getDseMap() {
+std::map<std::string, DataSourceEntityMapping>& Mapping::getDseMap() {
 	return dseMap;
 }
 
-void Mapping::setAppName(const string& appName) {
+void Mapping::setAppName(const std::string& appName) {
 	this->appName = appName;
 }
 
-const string& DataSourceEntityMapping::getClassName() const {
+const std::string& DataSourceEntityMapping::getClassName() const {
 	return className;
 }
 
-void DataSourceEntityMapping::setClassName(const string& className) {
+void DataSourceEntityMapping::setClassName(const std::string& className) {
 	this->className = className;
 }
 
-const string& DataSourceEntityMapping::getIdPropertyName() const {
+const std::string& DataSourceEntityMapping::getIdPropertyName() const {
 	return idPropertyName;
 }
 
-void DataSourceEntityMapping::setIdPropertyName(const string& idPropertyName) {
+void DataSourceEntityMapping::setIdPropertyName(const std::string& idPropertyName) {
 	this->idPropertyName = idPropertyName;
 }
 
@@ -133,7 +133,7 @@ void DataSourceEntityMapping::setIsEmbedded(const bool& embedded) {
 	this->embedded = embedded;
 }
 
-const string& DataSourceEntityMapping::getTableName() const {
+const std::string& DataSourceEntityMapping::getTableName() const {
 	return tableName;
 }
 
@@ -146,14 +146,14 @@ DataSourceEntityMapping::DataSourceEntityMapping() {
 DataSourceEntityMapping::~DataSourceEntityMapping() {
 }
 
-void DataSourceEntityMapping::setTableName(const string& tableName) {
+void DataSourceEntityMapping::setTableName(const std::string& tableName) {
 	this->tableName = tableName;
 }
 
-void DataSourceEntityMapping::addPropertyColumnMapping(const string& property, const string& column) {
+void DataSourceEntityMapping::addPropertyColumnMapping(const std::string& property, const std::string& column) {
 	if(property!="" && column!="")
 	{
-		string cn = StringUtil::toLowerCopy(column);
+		std::string cn = StringUtil::toLowerCopy(column);
 		propertyColumnMapping[property] = cn;
 		columnPropertyMapping[cn] = property;
 	}
@@ -163,7 +163,7 @@ void DataSourceEntityMapping::addRelation(const DataSourceInternalRelation& rela
 	relations.push_back(relation);
 }
 
-string DataSourceEntityMapping::getColumnForProperty(const string& property) {
+std::string DataSourceEntityMapping::getColumnForProperty(const std::string& property) {
 	if(propertyColumnMapping.find(property)!=propertyColumnMapping.end())
 	{
 		return propertyColumnMapping[property];
@@ -175,8 +175,8 @@ const strMap& DataSourceEntityMapping::getColumnPropertyMapping() const {
 	return columnPropertyMapping;
 }
 
-string DataSourceEntityMapping::getPropertyForColumn(const string& column) {
-	string cn = StringUtil::toLowerCopy(column);
+std::string DataSourceEntityMapping::getPropertyForColumn(const std::string& column) {
+	std::string cn = StringUtil::toLowerCopy(column);
 	if(columnPropertyMapping.find(cn)!=columnPropertyMapping.end())
 	{
 		return columnPropertyMapping[cn];
@@ -188,11 +188,11 @@ const strMap& DataSourceEntityMapping::getPropertyColumnMapping() const {
 	return propertyColumnMapping;
 }
 
-vector<DataSourceInternalRelation> DataSourceEntityMapping::getRelations() {
+std::vector<DataSourceInternalRelation> DataSourceEntityMapping::getRelations() {
 	return relations;
 }
 
-DataSourceEntityMapping Mapping::getDataSourceEntityMapping(const string& clas) {
+DataSourceEntityMapping Mapping::getDataSourceEntityMapping(const std::string& clas) {
 	if(dseMap.find(clas)!=dseMap.end())
 	{
 		return dseMap[clas];
@@ -200,27 +200,27 @@ DataSourceEntityMapping Mapping::getDataSourceEntityMapping(const string& clas) 
 	return __c;
 }
 
-const string& DataSourceEntityMapping::getIdgencolumnName() const {
+const std::string& DataSourceEntityMapping::getIdgencolumnName() const {
 	return idgencolumnName;
 }
 
-const string& DataSourceEntityMapping::getIdgendbEntityName() const {
+const std::string& DataSourceEntityMapping::getIdgendbEntityName() const {
 	return idgendbEntityName;
 }
 
-const string& DataSourceEntityMapping::getIdgendbEntityType() const {
+const std::string& DataSourceEntityMapping::getIdgendbEntityType() const {
 	return idgendbEntityType;
 }
 
-const string& DataSourceEntityMapping::getIdgenentityColumn() const {
+const std::string& DataSourceEntityMapping::getIdgenentityColumn() const {
 	return idgenentityColumn;
 }
 
-const string& DataSourceEntityMapping::getIdgenhiValueColumn() const {
+const std::string& DataSourceEntityMapping::getIdgenhiValueColumn() const {
 	return idgenhiValueColumn;
 }
 
-const string& DataSourceEntityMapping::getIdgentype() const {
+const std::string& DataSourceEntityMapping::getIdgentype() const {
 	return idgentype;
 }
 
@@ -237,22 +237,22 @@ void DataSourceEntityMapping::setEmbedded(const bool& embedded) {
 }
 
 void DataSourceEntityMapping::setIdgencolumnName(
-		const string& idgencolumnName) {
+		const std::string& idgencolumnName) {
 	this->idgencolumnName = idgencolumnName;
 }
 
 void DataSourceEntityMapping::setIdgendbEntityName(
-		const string& idgendbEntityName) {
+		const std::string& idgendbEntityName) {
 	this->idgendbEntityName = idgendbEntityName;
 }
 
 void DataSourceEntityMapping::setIdgendbEntityType(
-		const string& idgendbEntityType) {
+		const std::string& idgendbEntityType) {
 	this->idgendbEntityType = idgendbEntityType;
 }
 
 void DataSourceEntityMapping::setIdgenentityColumn(
-		const string& idgenentityColumn) {
+		const std::string& idgenentityColumn) {
 	this->idgenentityColumn = idgenentityColumn;
 }
 
@@ -261,11 +261,11 @@ void DataSourceEntityMapping::setIdGenerate(const bool& idGenerate) {
 }
 
 void DataSourceEntityMapping::setIdgenhiValueColumn(
-		const string& idgenhiValueColumn) {
+		const std::string& idgenhiValueColumn) {
 	this->idgenhiValueColumn = idgenhiValueColumn;
 }
 
-void DataSourceEntityMapping::setIdgentype(const string& idgentype) {
+void DataSourceEntityMapping::setIdgentype(const std::string& idgentype) {
 	this->idgentype = idgentype;
 }
 

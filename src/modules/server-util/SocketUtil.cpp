@@ -34,7 +34,7 @@ void SocketUtil::init(const SOCKET& fd) {
 		int r = SSL_accept(ssl);
 		if(r<=0)
 		{
-			logger << "SSL accept error" << endl;
+			logger << "SSL accept error" << std::endl;
 			closeSocket(false);
 			return;
 		}
@@ -51,7 +51,7 @@ void SocketUtil::init(const SOCKET& fd) {
 				char* str = X509_NAME_oneline(X509_get_subject_name(client_cert), 0, 0);
 				if(str == NULL)
 				{
-					logger << "Could not get client certificate subject name" << endl;
+					logger << "Could not get client certificate subject name" << std::endl;
 					closeSocket(false);
 					return;
 				}
@@ -60,7 +60,7 @@ void SocketUtil::init(const SOCKET& fd) {
 				str = X509_NAME_oneline(X509_get_issuer_name(client_cert), 0, 0);
 				if(str == NULL)
 				{
-					logger << "Could not get client certificate issuer name" << endl;
+					logger << "Could not get client certificate issuer name" << std::endl;
 					closeSocket(false);
 					return;
 				}
@@ -70,7 +70,7 @@ void SocketUtil::init(const SOCKET& fd) {
 			}
 			else
 			{
-				logger << ("The SSL client does not have certificate.\n") << endl;
+				logger << ("The SSL client does not have certificate.\n") << std::endl;
 			}
 		}
 	}
@@ -88,7 +88,7 @@ SocketUtil::~SocketUtil() {
 	// TODO Auto-generated destructor stub
 }
 
-int SocketUtil::writeData(const string& data, const bool& flush, const int& offset/* = 0*/)
+int SocketUtil::writeData(const std::string& data, const bool& flush, const int& offset/* = 0*/)
 {
 	if(data.length()>0)
 	{
@@ -139,7 +139,7 @@ bool SocketUtil::flush(const bool& lk) {
 	if(lk)lock.lock();
 	if(!closed && BIO_flush(io)<=0 && !BIO_should_retry(io))
 	{
-		logger << "Error flushing BIO" << endl;
+		logger << "Error flushing BIO" << std::endl;
 		closeSocket(lk);
 		fl = true;
 	}
@@ -147,7 +147,7 @@ bool SocketUtil::flush(const bool& lk) {
 	return fl;
 }
 
-int SocketUtil::readLine(string& line)
+int SocketUtil::readLine(std::string& line)
 {
 	char buf[MAXBUFLENM];
 	memset(buf, 0, sizeof(buf));
@@ -199,7 +199,7 @@ int SocketUtil::readLine(string& line)
 	}
 }
 
-int SocketUtil::readData(int cntlen, string& content)
+int SocketUtil::readData(int cntlen, std::string& content)
 {
 	if(cntlen>0)
 	{
@@ -266,7 +266,7 @@ int SocketUtil::readData(int cntlen, string& content)
 	return cntlen;
 }
 
-int SocketUtil::readData(int cntlen, vector<unsigned char>& content)
+int SocketUtil::readData(int cntlen, std::vector<unsigned char>& content)
 {
 	if(cntlen>0)
 	{
@@ -432,12 +432,12 @@ bool SocketUtil::handleSSlErrors(const int& er)
 	{
 		case SSL_ERROR_WANT_READ:
 		{
-			logger << "ssl more to read error" << endl;
+			logger << "ssl more to read error" << std::endl;
 			break;
 		}
 		case SSL_ERROR_WANT_WRITE:
 		{
-			logger << "ssl more to write error" << endl;
+			logger << "ssl more to write error" << std::endl;
 			break;
 		}
 		case SSL_ERROR_NONE:
@@ -446,7 +446,7 @@ bool SocketUtil::handleSSlErrors(const int& er)
 		}
 		case SSL_ERROR_WANT_X509_LOOKUP:
 		{
-			logger << "SSL_ERROR_WANT_X509_LOOKUP" << endl;
+			logger << "SSL_ERROR_WANT_X509_LOOKUP" << std::endl;
 			break;
 		}
 		case SSL_ERROR_SYSCALL:
@@ -460,7 +460,7 @@ bool SocketUtil::handleSSlErrors(const int& er)
 		case SSL_ERROR_SSL:
 		{
 			ERR_print_errors_fp(stderr);
-			logger << "SSL_ERROR_SSL" << endl;
+			logger << "SSL_ERROR_SSL" << std::endl;
 			break;
 		}
 		case SSL_ERROR_ZERO_RETURN:
@@ -471,7 +471,7 @@ bool SocketUtil::handleSSlErrors(const int& er)
 		}
 		default:
 		{
-			logger << "SSL read problem" << endl;
+			logger << "SSL read problem" << std::endl;
 			closeSocket(false);
 			flag = true;
 		}
@@ -494,20 +494,20 @@ bool SocketUtil::handleRenegotiation()
 
 		if(SSL_renegotiate(ssl)<=0)
 		{
-			logger << "SSL renegotiation error" << endl;
+			logger << "SSL renegotiation error" << std::endl;
 			closeSocket(false);
 			return true;
 		}
 		if(SSL_do_handshake(ssl)<=0)
 		{
-			logger << "SSL renegotiation error" << endl;
+			logger << "SSL renegotiation error" << std::endl;
 			closeSocket(false);
 			return true;
 		}
 		ssl->state = SSL_ST_ACCEPT;
 		if(SSL_do_handshake(ssl)<=0)
 		{
-			logger << "SSL handshake error" << endl;
+			logger << "SSL handshake error" << std::endl;
 			closeSocket(false);
 			return true;
 		}
@@ -515,6 +515,6 @@ bool SocketUtil::handleRenegotiation()
 	return false;
 }
 
-string SocketUtil::getAlpnProto() {
+std::string SocketUtil::getAlpnProto() {
 	return SSLHandler::getAlpnProto(fd);
 }

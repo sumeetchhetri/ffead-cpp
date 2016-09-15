@@ -7,7 +7,7 @@
 
 #include "FileAuthController.h"
 
-FileAuthController::FileAuthController(const string& filename, const string& delimiter) {
+FileAuthController::FileAuthController(const std::string& filename, const std::string& delimiter) {
 	this->filename = filename;
 	this->delimiter = delimiter;
 }
@@ -16,29 +16,29 @@ FileAuthController::~FileAuthController() {
 	// TODO Auto-generated destructor stub
 }
 
-string FileAuthController::treat_password(const string& password)
+std::string FileAuthController::treat_password(const std::string& password)
 {
 	return password;
 }
 
 bool FileAuthController::isInitialized()
 {
-	ifstream ifs(this->filename.c_str());
+	std::ifstream ifs(this->filename.c_str());
 	bool fl = ifs.is_open();
 	ifs.close();
 	return fl;
 }
 
-bool FileAuthController::authenticate(const string& username, const string& password)
+bool FileAuthController::authenticate(const std::string& username, const std::string& password)
 {
-	string userstamp = (username + delimiter + treat_password(password));
-	ifstream ifs(this->filename.c_str());
+	std::string userstamp = (username + delimiter + treat_password(password));
+	std::ifstream ifs(this->filename.c_str());
 	if(ifs.is_open())
 	{
-		string temp;
+		std::string temp;
 		while(getline(ifs, temp))
 		{
-			if(temp.find(userstamp)!=string::npos)
+			if(temp.find(userstamp)!=std::string::npos)
 			{
 				ifs.close();
 				return true;
@@ -49,16 +49,16 @@ bool FileAuthController::authenticate(const string& username, const string& pass
 	return false;
 }
 
-bool FileAuthController::getPassword(const string& username, string &passwd)
+bool FileAuthController::getPassword(const std::string& username, std::string &passwd)
 {
 	bool passwdf = false;
-	ifstream ifs(this->filename.c_str());
+	std::ifstream ifs(this->filename.c_str());
 	if(ifs.is_open() && username!="")
 	{
-		string temp;
+		std::string temp;
 		while(getline(ifs, temp))
 		{
-			vector<string> tempv;
+			std::vector<std::string> tempv;
 			StringUtil::split(tempv, temp, (this->delimiter));
 			if(tempv.size()>=2 && tempv.at(0)==username)
 			{
@@ -73,16 +73,16 @@ bool FileAuthController::getPassword(const string& username, string &passwd)
 	return passwdf;
 }
 
-string FileAuthController::getUserRole(const string& username)
+std::string FileAuthController::getUserRole(const std::string& username)
 {
 	//bool passwdf = false;
-	ifstream ifs(this->filename.c_str());
+	std::ifstream ifs(this->filename.c_str());
 	if(ifs.is_open() && username!="")
 	{
-		string temp;
+		std::string temp;
 		while(getline(ifs, temp))
 		{
-			vector<string> tempv;
+			std::vector<std::string> tempv;
 			StringUtil::split(tempv, temp, (this->delimiter));
 			if(tempv.size()>=3 && tempv.at(0)==username)
 			{
@@ -93,20 +93,20 @@ string FileAuthController::getUserRole(const string& username)
 		}
 		ifs.close();
 	}
-	string blnk;
+	std::string blnk;
 	return blnk;
 }
 
-string FileAuthController::get(const string& username, const int& pos)
+std::string FileAuthController::get(const std::string& username, const int& pos)
 {
 	//bool passwdf = false;
-	ifstream ifs(this->filename.c_str());
+	std::ifstream ifs(this->filename.c_str());
 	if(ifs.is_open() && username!="")
 	{
-		string temp;
+		std::string temp;
 		while(getline(ifs, temp))
 		{
-			vector<string> tempv;
+			std::vector<std::string> tempv;
 			StringUtil::split(tempv, temp, (this->delimiter));
 			if((int)tempv.size()>pos && tempv.at(0)==username)
 			{
@@ -117,6 +117,6 @@ string FileAuthController::get(const string& username, const int& pos)
 		}
 		ifs.close();
 	}
-	string blnk;
+	std::string blnk;
 	return blnk;
 }

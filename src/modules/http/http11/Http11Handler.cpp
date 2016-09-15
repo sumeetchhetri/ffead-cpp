@@ -9,20 +9,20 @@
 
 void* Http11Handler::readRequest(void*& context, int& pending) {
 	if(read())return NULL;
-	if(!isHeadersDone && buffer.find("\r\n\r\n")!=string::npos)
+	if(!isHeadersDone && buffer.find("\r\n\r\n")!=std::string::npos)
 	{
 		bytesToRead = 0;
-		string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
+		std::string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
 		buffer = buffer.substr(buffer.find("\r\n\r\n")+4);
-		vector<string> lines = StringUtil::splitAndReturn<vector<string> >(headers, "\r\n");
+		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, "\r\n");
 		request = new HttpRequest(webpath);
 		request->buildRequest("httpline", lines.at(0));
 		int hdrc = 0;
 		for (int var = 0; var < (int)lines.size(); ++var) {
-			size_t kind = string::npos;
-			if(var>0 && (kind = lines.at(var).find(":"))!=string::npos) {
-				string key = lines.at(var).substr(0, kind);
-				string value = lines.at(var).substr(kind+1);
+			size_t kind = std::string::npos;
+			if(var>0 && (kind = lines.at(var).find(":"))!=std::string::npos) {
+				std::string key = lines.at(var).substr(0, kind);
+				std::string value = lines.at(var).substr(kind+1);
 				request->buildRequest(key, value);
 				if(hdrc++>maxReqHdrCnt) {
 					close();
@@ -33,7 +33,7 @@ void* Http11Handler::readRequest(void*& context, int& pending) {
 				//TODO stop processing request some invalid http line
 			}
 		}
-		string bytesstr = request->getHeader(HttpRequest::ContentLength);
+		std::string bytesstr = request->getHeader(HttpRequest::ContentLength);
 		if(bytesstr!="") {
 			bytesToRead = CastUtil::lexical_cast<int>(bytesstr);
 			if(bytesToRead>maxEntitySize) {
@@ -41,7 +41,7 @@ void* Http11Handler::readRequest(void*& context, int& pending) {
 				delete request;
 				return NULL;
 			}
-		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find("\r\n")!=string::npos) {
+		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find("\r\n")!=std::string::npos) {
 			bytesstr = buffer.substr(0, buffer.find("\r\n"));
 			buffer = buffer.substr(buffer.find("\r\n")+2);
 			if(bytesstr!="") {
@@ -60,8 +60,8 @@ void* Http11Handler::readRequest(void*& context, int& pending) {
 
 	if(request!=NULL && isHeadersDone)
 	{
-		if(isTeRequest && bytesToRead==0 && buffer.find("\r\n")!=string::npos) {
-			string bytesstr = buffer.substr(0, buffer.find("\r\n"));
+		if(isTeRequest && bytesToRead==0 && buffer.find("\r\n")!=std::string::npos) {
+			std::string bytesstr = buffer.substr(0, buffer.find("\r\n"));
 			buffer = buffer.substr(buffer.find("\r\n")+2);
 			if(bytesstr!="") {
 				bytesToRead = (int)StringUtil::fromHEX(bytesstr);
@@ -100,7 +100,7 @@ int Http11Handler::getTimeout() {
 	return connKeepAlive;
 }
 
-Http11Handler::Http11Handler(SocketUtil* sockUtil, const string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
+Http11Handler::Http11Handler(SocketUtil* sockUtil, const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
 	isHeadersDone = false;
 	bytesToRead = 0;
 	this->sockUtil = sockUtil;
@@ -119,7 +119,7 @@ Http11Handler::~Http11Handler() {
 	}
 }
 
-string Http11Handler::getProtocol(void* context) {
+std::string Http11Handler::getProtocol(void* context) {
 	return "HTTP1.1";
 }
 
@@ -152,7 +152,7 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 		}
 	}
 
-	string data = response->generateOnlyHeaderResponse(request);
+	std::string data = response->generateOnlyHeaderResponse(request);
 	if(!write(data)) {
 		bool isFirst = true;
 		while(response->hasContent && (data = response->getRemainingContent(request->getUrl(), isFirst)) != "") {

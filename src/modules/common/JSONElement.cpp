@@ -60,7 +60,7 @@ void JSONElement::setType(const int& type) {
 	this->type = type;
 }
 
-const string& JSONElement::getValue() const {
+const std::string& JSONElement::getValue() const {
 	return value;
 }
 
@@ -68,37 +68,37 @@ bool JSONElement::hasChildren() const {
 	return this->children.size()>0;
 }
 
-void JSONElement::setValue(const string& value) {
+void JSONElement::setValue(const std::string& value) {
 	this->value = value;
 }
 
-const string& JSONElement::getName() const {
+const std::string& JSONElement::getName() const {
 	return name;
 }
 
-vector<JSONElement*> JSONElement::getChildren() const {
+std::vector<JSONElement*> JSONElement::getChildren() const {
 	return this->children;
 }
 
-void JSONElement::setName(const string& name) {
+void JSONElement::setName(const std::string& name) {
 	this->name = name;
 }
 
-/*const JSONElement& JSONElement::getNode(const string& name) {
+/*const JSONElement& JSONElement::getNode(const std::string& name) {
 	if(allnodes.find(name)!=allnodes.end())
 		return allnodes[name];
 	return nullele;
 }*/
 
-JSONElement* JSONElement::getNodeP(const string& name) {
+JSONElement* JSONElement::getNodeP(const std::string& name) {
 	if(allnodes.find(name)!=allnodes.end())
 		return allnodes[name];
 	return NULL;
 }
 
-string JSONElement::toString()
+std::string JSONElement::toString()
 {
-	string txt = "[name=" + name;
+	std::string txt = "[name=" + name;
 	txt += ", value=" + value;
 	txt += ", children={";
 	for (int var = 0; var < (int)children.size(); ++var) {

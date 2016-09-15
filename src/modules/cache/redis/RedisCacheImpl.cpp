@@ -21,14 +21,14 @@ void RedisCacheImpl::initEnv() {
 void RedisCacheImpl::destroy() {
 }
 
-bool RedisCacheImpl::remove(const string& key) {
+bool RedisCacheImpl::remove(const std::string& key) {
 	redisReply *reply = execute("DEL %s", key.c_str());
 	return replyStatus(reply);
 }
 
-long long RedisCacheImpl::increment(const string& key, const int& number) {
+long long RedisCacheImpl::increment(const std::string& key, const int& number) {
 	redisReply *reply = execute("INCRBY %s %d", key.c_str(), number);
-	string val = replyValue(reply);
+	std::string val = replyValue(reply);
 	if(val=="") {
 		throw "Command Failed";
 	} else {
@@ -36,9 +36,9 @@ long long RedisCacheImpl::increment(const string& key, const int& number) {
 	}
 }
 
-long long RedisCacheImpl::decrement(const string& key, const int& number) {
+long long RedisCacheImpl::decrement(const std::string& key, const int& number) {
 	redisReply *reply = execute("DECRBY %s %d", key.c_str(), number);
-	string val = replyValue(reply);
+	std::string val = replyValue(reply);
 	if(val=="") {
 		throw "Command Failed";
 	} else {
@@ -46,9 +46,9 @@ long long RedisCacheImpl::decrement(const string& key, const int& number) {
 	}
 }
 
-long double RedisCacheImpl::incrementFloat(const string& key, const double& number) {
+long double RedisCacheImpl::incrementFloat(const std::string& key, const double& number) {
 	redisReply *reply = execute("INCRBYFLOAT %s %f", key.c_str(), number);
-	string val = replyValue(reply);
+	std::string val = replyValue(reply);
 	if(val=="") {
 		throw "Command Failed";
 	} else {
@@ -56,20 +56,20 @@ long double RedisCacheImpl::incrementFloat(const string& key, const double& numb
 	}
 }
 
-long double RedisCacheImpl::decrementFloat(const string& key, const double& number) {
+long double RedisCacheImpl::decrementFloat(const std::string& key, const double& number) {
 	return incrementFloat(key, -number);
 }
 
-map<string, string> RedisCacheImpl::statistics() {
+std::map<std::string, std::string> RedisCacheImpl::statistics() {
 	redisReply *reply = execute("INFO", 0);
-	string sValue = replyValue(reply);
-	map<string, string> stats;
+	std::string sValue = replyValue(reply);
+	std::map<std::string, std::string> stats;
 	if(sValue=="")return stats;
-	vector<string> data = StringUtil::splitAndReturn<vector<string> >(sValue, "\r\n");
+	std::vector<std::string> data = StringUtil::splitAndReturn<std::vector<std::string> >(sValue, "\r\n");
 	for (int var = 0; var < (int)data.size(); ++var) {
-		if(data.at(var).find(":")!=string::npos) {
-			string key = data.at(var).substr(0, data.at(var).find(":"));
-			string value = data.at(var).substr(data.at(var).find(":")+1);
+		if(data.at(var).find(":")!=std::string::npos) {
+			std::string key = data.at(var).substr(0, data.at(var).find(":"));
+			std::string value = data.at(var).substr(data.at(var).find(":")+1);
 			stats[key] = value;
 		}
 	}
@@ -100,25 +100,25 @@ void* RedisCacheImpl::newConnection(const bool& isWrite, const ConnectionNode& n
 	return c;
 }
 
-bool RedisCacheImpl::set(const string& key, GenericObject& value, const int& expireSeconds) {
-	string valueStr = value.getSerilaizedState();
+bool RedisCacheImpl::set(const std::string& key, GenericObject& value, const int& expireSeconds) {
+	std::string valueStr = value.getSerilaizedState();
 	redisReply *reply = execute("SET %s %s EX %d", key.c_str(), valueStr.c_str(), expireSeconds);
 	return replyStatus(reply);
 }
 
-bool RedisCacheImpl::add(const string& key, GenericObject& value, const int& expireSeconds) {
-	string valueStr = value.getSerilaizedState();
+bool RedisCacheImpl::add(const std::string& key, GenericObject& value, const int& expireSeconds) {
+	std::string valueStr = value.getSerilaizedState();
 	redisReply *reply = execute("SET %s %s EX %d NX", key.c_str(), valueStr.c_str(), expireSeconds);
 	return replyStatus(reply);
 }
 
-bool RedisCacheImpl::replace(const string& key, GenericObject& value, const int& expireSeconds) {
-	string valueStr = value.getSerilaizedState();
+bool RedisCacheImpl::replace(const std::string& key, GenericObject& value, const int& expireSeconds) {
+	std::string valueStr = value.getSerilaizedState();
 	redisReply *reply = execute("SET %s %s EX %d XX", key.c_str(), valueStr.c_str(), expireSeconds);
 	return replyStatus(reply);
 }
 
-string RedisCacheImpl::getValue(const string& key) {
+std::string RedisCacheImpl::getValue(const std::string& key) {
 	redisReply *reply = execute("GET %s", key.c_str());
 	return replyValue(reply);
 }
@@ -134,11 +134,11 @@ bool RedisCacheImpl::replyStatus(redisReply* reply) {
 	return status;
 }
 
-string RedisCacheImpl::replyValue(redisReply* reply) {
+std::string RedisCacheImpl::replyValue(redisReply* reply) {
 	if (reply->type == REDIS_REPLY_INTEGER) {
-		return CastUtil::lexical_cast<string>(reply->integer);
+		return CastUtil::lexical_cast<std::string>(reply->integer);
 	} else if (reply->type == REDIS_REPLY_STRING) {
-		string value;
+		std::string value;
 		for (int var = 0; var < reply->len; ++var) {
 			value.push_back(reply->str[var]);
 		}
@@ -159,9 +159,9 @@ redisReply* RedisCacheImpl::execute(const char* format, ...) {
 	return reply;
 }
 
-void* RedisCacheImpl::executeCommand(const string& command, ...) {
+void* RedisCacheImpl::executeCommand(const std::string& command, ...) {
 	va_list vl;
-	string c = command;
+	std::string c = command;
 	va_start(vl, c);
 	void* reply = execute(command.c_str());
 	va_end(vl);

@@ -44,12 +44,12 @@ int main()
 	strVecVec testCases = csvFileReader.getRows("test.csv");
 
 	Timer timer, timerc;
-	string cookies, result;
+	std::string cookies, result;
 	int total, skipped = 0, passed = 0, failed = 0, header = 0, counter = 0;
 
 	total = (int)testCases.size();
 
-	string ip = props["SERVER_IP_ADDRESS"];
+	std::string ip = props["SERVER_IP_ADDRESS"];
 	if(ip=="")
 		ip = "localhost";
 	int port = 8080;
@@ -70,20 +70,20 @@ int main()
 		}
 	}
 
-	string sslFile = props["SERVER_SSL_FILE"];
+	std::string sslFile = props["SERVER_SSL_FILE"];
 
 	bool isDebug = false;
 	if(StringUtil::toLowerCopy(props["DEBUG"])=="true") {
 		isDebug = true;
 	}
 
-	cout << "Server IP - " << ip <<endl;
-	cout << "Server Port - " << port <<endl;
-	cout << "Debug Mode - " << isDebug <<endl;
-	cout << "Server SSL Enabled - " << CastUtil::lexical_cast<string>(sslEnabled) <<endl;
+	std::cout << "Server IP - " << ip <<std::endl;
+	std::cout << "Server Port - " << port <<std::endl;
+	std::cout << "Debug Mode - " << isDebug <<std::endl;
+	std::cout << "Server SSL Enabled - " << CastUtil::lexical_cast<std::string>(sslEnabled) <<std::endl;
 	if(sslEnabled)
 	{
-		cout << "Server SSL File - " << sslFile <<endl;
+		std::cout << "Server SSL File - " << sslFile <<std::endl;
 	}
 
 	timerc.start();
@@ -107,27 +107,27 @@ int main()
 				continue;
 			}
 			counter = var;
-			string request = testCases[var][2];
+			std::string request = testCases[var][2];
 			if(testCases[var][0]=="N" || testCases[var][0]=="n")
 			{
-				cout << "Request " << counter << " " << request << " was Skipped" << endl;
+				std::cout << "Request " << counter << " " << request << " was Skipped" << std::endl;
 				skipped++;
 				continue;
 			}
 
 			bool debugCont = false;
-			string debugContStr = testCases[var][1];
+			std::string debugContStr = testCases[var][1];
 			if(debugContStr=="Y" || debugContStr=="y")
 				debugCont = true;
 
-			string responseCode = testCases[var][3];
-			string file;
+			std::string responseCode = testCases[var][3];
+			std::string file;
 			if(testCases[var].size()>4)
 				file = testCases[var][4];
-			string fileCntlen;
+			std::string fileCntlen;
 			if(testCases[var].size()>5)
 				fileCntlen = testCases[var][5];
-			string reqContTyp, content, headers, respCntType;
+			std::string reqContTyp, content, headers, respCntType;
 			if(testCases[var].size()>6)
 			{
 				reqContTyp = testCases[var][6];
@@ -139,17 +139,17 @@ int main()
 			if(testCases[var].size()>8)
 			{
 				headers = testCases[var][8];
-				if(headers!="" && headers.find("HEADERVALS_")!=string::npos)
+				if(headers!="" && headers.find("HEADERVALS_")!=std::string::npos)
 				{
 					headers = props[headers];
 				}
 				else
 				{
-					vector<string> headerVec;
+					std::vector<std::string> headerVec;
 					StringUtil::split(headerVec, headers, ";");
 					headers = "";
 					for (int var = 0; var < (int)headerVec.size(); ++var) {
-						vector<string> param;
+						std::vector<std::string> param;
 						StringUtil::split(param, headerVec.at(var), "=");
 						if(param.size()==2)
 						{
@@ -163,10 +163,10 @@ int main()
 				respCntType = testCases[var][9];
 			}
 
-			string data = request;
-			data += " HTTP/1.1\r\nHost: "+ip+":"+CastUtil::lexical_cast<string>(port)+"\r\nUser-Agent: Program\r\n";
+			std::string data = request;
+			data += " HTTP/1.1\r\nHost: "+ip+":"+CastUtil::lexical_cast<std::string>(port)+"\r\nUser-Agent: Program\r\n";
 
-			if(content!="" && content.find("TSTVALUES_")!=string::npos)
+			if(content!="" && content.find("TSTVALUES_")!=std::string::npos)
 				content = props[content];
 
 			if(reqContTyp!="")
@@ -175,7 +175,7 @@ int main()
 			}
 			if(content.length()>0)
 			{
-				data += "Content-Length: " + CastUtil::lexical_cast<string>((int)content.length()) + "\r\n";
+				data += "Content-Length: " + CastUtil::lexical_cast<std::string>((int)content.length()) + "\r\n";
 			}
 			if(cookies!="")
 			{
@@ -195,16 +195,16 @@ int main()
 			timer.start();
 
 			if(isDebug) {
-				cout << "HTTP Request Is=>\n" << data << "\n\n" << endl;
+				std::cout << "HTTP Request Is=>\n" << data << "\n\n" << std::endl;
 			}
 
 			client->connectionUnresolv(ip,port);
 			int bytes = client->sendData(data);
-			string tot = client->getTextData("\r\n","content-length");
+			std::string tot = client->getTextData("\r\n","content-length");
 			long long millis = timer.elapsedMilliSeconds();
 
 			if(isDebug) {
-				cout << "HTTP Response Is=>\n" << tot << "\n\n" << endl;
+				std::cout << "HTTP Response Is=>\n" << tot << "\n\n" << std::endl;
 			}
 
 			HttpResponse res;
@@ -216,13 +216,13 @@ int main()
 				cookies = cookies.substr(0, cookies.find(";"));
 			}
 
-			string debugContentValue;
+			std::string debugContentValue;
 			if(debugCont)
 			{
 				debugContentValue = ", Content => " + parser.getContent();
 			}
 
-			string ss;
+			std::string ss;
 			bool passedFlag = false, done = false;
 			if(res.getStatusCode()==responseCode)
 			{
@@ -231,13 +231,13 @@ int main()
 					if(res.getHeader("Content-Type")==respCntType)
 					{
 						ss.clear();
-						ss = "Test " + CastUtil::lexical_cast<string>(counter) + " " + request + " was Successfull, Response Time = " + CastUtil::lexical_cast<string>(millis) + "ms" + debugContentValue;
+						ss = "Test " + CastUtil::lexical_cast<std::string>(counter) + " " + request + " was Successfull, Response Time = " + CastUtil::lexical_cast<std::string>(millis) + "ms" + debugContentValue;
 						passedFlag = true;
 					}
 					else
 					{
 						ss.clear();
-						ss = "Test " + CastUtil::lexical_cast<string>(counter) + " " + request + " Failed, Response Time = " + CastUtil::lexical_cast<string>(millis) + "ms"
+						ss = "Test " + CastUtil::lexical_cast<std::string>(counter) + " " + request + " Failed, Response Time = " + CastUtil::lexical_cast<std::string>(millis) + "ms"
 								+ ", Expected ContentType = " + respCntType + ", Actual ContentType = "  + res.getHeader("Content-Type");
 						passedFlag = false;
 					}
@@ -245,33 +245,33 @@ int main()
 				}
 				if(!done)
 				{
-					string cntlen = res.getHeader("Content-Length");
+					std::string cntlen = res.getHeader("Content-Length");
 					if(file!="")
 					{
-						ifstream myfile (&file[0], ios::binary | ios::ate);
+						std::ifstream myfile (&file[0], std::ios::binary | std::ios::ate);
 						if (myfile.is_open() && cntlen!="" && myfile.tellg()==CastUtil::lexical_cast<int>(cntlen))
 						{
 							ss.clear();
-							ss = "Test " + CastUtil::lexical_cast<string>(counter) + " " + request + " was Successfull, Response Time = " + CastUtil::lexical_cast<string>(millis) + "ms" + debugContentValue;
+							ss = "Test " + CastUtil::lexical_cast<std::string>(counter) + " " + request + " was Successfull, Response Time = " + CastUtil::lexical_cast<std::string>(millis) + "ms" + debugContentValue;
 							passedFlag = true;
 						}
 						else
 						{
 							ss.clear();
-							ss = "Test " + CastUtil::lexical_cast<string>(counter) + " " + request + ", Invalid Content Length, Response Time = " + CastUtil::lexical_cast<string>(millis) + "ms" + debugContentValue;
+							ss = "Test " + CastUtil::lexical_cast<std::string>(counter) + " " + request + ", Invalid Content Length, Response Time = " + CastUtil::lexical_cast<std::string>(millis) + "ms" + debugContentValue;
 							passedFlag = false;
 						}
 					}
 					else if((file=="" && fileCntlen=="") || (fileCntlen!="" && fileCntlen==cntlen))
 					{
 						ss.clear();
-						ss = "Test " + CastUtil::lexical_cast<string>(counter) + " " + request + " was Successfull, Response Time = " + CastUtil::lexical_cast<string>(millis) + "ms" + debugContentValue;
+						ss = "Test " + CastUtil::lexical_cast<std::string>(counter) + " " + request + " was Successfull, Response Time = " + CastUtil::lexical_cast<std::string>(millis) + "ms" + debugContentValue;
 						passedFlag = true;
 					}
 					else
 					{
 						ss.clear();
-						ss = "Test " + CastUtil::lexical_cast<string>(counter) + " " + request + ", Invalid Content Length, Response Time = " + CastUtil::lexical_cast<string>(millis) + "ms" + debugContentValue;
+						ss = "Test " + CastUtil::lexical_cast<std::string>(counter) + " " + request + ", Invalid Content Length, Response Time = " + CastUtil::lexical_cast<std::string>(millis) + "ms" + debugContentValue;
 						passedFlag = false;
 					}
 				}
@@ -279,11 +279,11 @@ int main()
 			else
 			{
 				ss.clear();
-				ss = "Test " + CastUtil::lexical_cast<string>(counter) + " " + request + " Failed, Response Time = " + CastUtil::lexical_cast<string>(millis) + "ms" + ", Expected Status = " +
+				ss = "Test " + CastUtil::lexical_cast<std::string>(counter) + " " + request + " Failed, Response Time = " + CastUtil::lexical_cast<std::string>(millis) + "ms" + ", Expected Status = " +
 						responseCode + ", Actual Status = "  + res.getStatusCode();
 				passedFlag = false;
 			}
-			cout << ss << endl;
+			std::cout << ss << std::endl;
 			if(passedFlag)
 				passed++;
 			else
@@ -300,8 +300,8 @@ int main()
 		}
 	}
 
-	cout << "Total Tests = " << total-1 << ", Passed = " << passed << ", Failed = " << failed
-			<< ", Skipped = " << skipped << ", Time taken = " << timerc.elapsedMilliSeconds() << "ms" << endl;
+	std::cout << "Total Tests = " << total-1 << ", Passed = " << passed << ", Failed = " << failed
+			<< ", Skipped = " << skipped << ", Time taken = " << timerc.elapsedMilliSeconds() << "ms" << std::endl;
 	
 	#ifdef OS_MINGW
 		WSACleanup();

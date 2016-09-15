@@ -22,9 +22,9 @@
 
 #include "Bigint.h"
 
-string Bigint::BLANK = "";
-string Bigint::MINUS = "-";
-string Bigint::ZERO = "0";
+std::string Bigint::BLANK = "";
+std::string Bigint::MINUS = "-";
+std::string Bigint::ZERO = "0";
 int Bigint::ZERO_INT = 0L;
 int Bigint::NUM_LENGTH = 8;
 int Bigint::NUM_MAX = 99999999;
@@ -39,16 +39,16 @@ Bigint::Bigint() {
 Bigint::~Bigint() {
 }
 
-Bigint::Bigint(const string& value)
+Bigint::Bigint(const std::string& value)
 {
 	create(value);
 }
 
-void Bigint::create(const string& value)
+void Bigint::create(const std::string& value)
 {
 	isPositive = true;
 	parts.clear();
-	string temp = StringUtil::trimCopy(value);
+	std::string temp = StringUtil::trimCopy(value);
 	int minusSign = temp.find_last_of("-");
 	if(minusSign>0)
 		throw "Invalid -";
@@ -57,7 +57,7 @@ void Bigint::create(const string& value)
 		isPositive = false;
 		temp = temp.substr(1);
 	}
-	if(temp.find_first_not_of("0")==string::npos)
+	if(temp.find_first_not_of("0")==std::string::npos)
 	{
 		decimalStartsAt = 0;
 		isPositive = true;
@@ -197,7 +197,7 @@ bool operator>=(const Bigint &lhs, const Bigint &rhs)
 
 void Bigint::internalAdd(const Bigint& number)
 {
-	vector<int> nparts;
+	std::vector<int> nparts;
 	if(parts.size()>0 && number.parts.size()>0)
 	{
 		int eqprtssiz = parts.size();
@@ -229,7 +229,7 @@ void Bigint::subtract(const Bigint& number)
 		add(number);
 		return;
 	}
-	vector<int> nparts;
+	std::vector<int> nparts;
 	if(parts.size()>0 && number.parts.size()>0)
 	{
 		int eqprtssiz = parts.size();
@@ -237,7 +237,7 @@ void Bigint::subtract(const Bigint& number)
 			eqprtssiz = number.parts.size();
 		bool carryOver = false;
 		int compValue = compare(number);
-		vector<int> fparts, sparts;
+		std::vector<int> fparts, sparts;
 		if(compValue>=0)
 		{
 			fparts = parts;
@@ -274,10 +274,10 @@ void Bigint::subtract(const Bigint& number)
 void Bigint::multiply(const Bigint& number)
 {
 	Bigint mulResult;
-	string mstring;
-	vector<int> mparts;
-	string fnvalue = toString();
-	string snvalue = number.toString();
+	std::string mstring;
+	std::vector<int> mparts;
+	std::string fnvalue = toString();
+	std::string snvalue = number.toString();
 	if(fnvalue.length()>snvalue.length())
 	{
 		if(!number.isPositive)
@@ -298,25 +298,25 @@ void Bigint::multiply(const Bigint& number)
 	{
 		int position = 0;
 		for (int i = mstring.length(); i > 0 ; i--, position++) {
-			string numstr = BLANK;
+			std::string numstr = BLANK;
 			int mult = mstring.at(i-1) - '0';
 			int carryOver = 0;
 			for (int j=0;j<(int)mparts.size();j++) {
-				string res = CastUtil::lexical_cast<string>(mparts.at(j)*mult);
+				std::string res = CastUtil::lexical_cast<std::string>(mparts.at(j)*mult);
 				if(j!=(int)mparts.size()-1)
 				{
 
-					string mrtn = CastUtil::lexical_cast<string>(mparts.at(j));
+					std::string mrtn = CastUtil::lexical_cast<std::string>(mparts.at(j));
 					if(res.length()>mrtn.length())
 					{
 						int numm = CastUtil::lexical_cast<int>(res.substr(1)) + carryOver;
-						numstr = CastUtil::lexical_cast<string>(numm) + numstr;
+						numstr = CastUtil::lexical_cast<std::string>(numm) + numstr;
 						carryOver = res.at(0) - '0';
 					}
 					else
 					{
 						int numm = CastUtil::lexical_cast<int>(res) + carryOver;
-						numstr = CastUtil::lexical_cast<string>(numm) + numstr;
+						numstr = CastUtil::lexical_cast<std::string>(numm) + numstr;
 						carryOver = 0;
 					}
 					if(j==0)
@@ -330,7 +330,7 @@ void Bigint::multiply(const Bigint& number)
 				else
 				{
 					int numm = CastUtil::lexical_cast<int>(res) + carryOver;
-					numstr = CastUtil::lexical_cast<string>(numm) + numstr;
+					numstr = CastUtil::lexical_cast<std::string>(numm) + numstr;
 					carryOver = 0;
 				}
 			}
@@ -362,10 +362,10 @@ void Bigint::divide(const Bigint& number)
 
 void Bigint::internalDivide(const Bigint& number, const bool& isDecimal, const int& precision)
 {
-	string mstring;
-	vector<int> mparts;
-	string fnvalue = toString();
-	string snvalue = number.toString();
+	std::string mstring;
+	std::vector<int> mparts;
+	std::string fnvalue = toString();
+	std::string snvalue = number.toString();
 	if(fnvalue.length()>snvalue.length())
 	{
 		if(!number.isPositive)
@@ -385,7 +385,7 @@ void Bigint::internalDivide(const Bigint& number, const bool& isDecimal, const i
 	if(mstring!="" && mparts.size()>0)
 	{
 		int recurse = 0;
-		string build;
+		std::string build;
 		decompose(fnvalue, snvalue, number, recurse, build, isDecimal, precision);
 		try {
 			create(build);
@@ -394,10 +394,10 @@ void Bigint::internalDivide(const Bigint& number, const bool& isDecimal, const i
 	}
 }
 
-int Bigint::decompose(string fnvalue, string snvalue, const Bigint& number, int recurse, string& build, const bool& isDecimal, const int& precision)
+int Bigint::decompose(std::string fnvalue, std::string snvalue, const Bigint& number, int recurse, std::string& build, const bool& isDecimal, const int& precision)
 {
 	if(recurse>=precision || fnvalue==BLANK)return recurse;
-	string fntemp;
+	std::string fntemp;
 	int diff = fnvalue.length() - snvalue.length();
 	if(diff>0)
 	{
@@ -480,7 +480,7 @@ int Bigint::decompose(string fnvalue, string snvalue, const Bigint& number, int 
 		}
 		if(quotient>0)
 		{
-			build.append(CastUtil::lexical_cast<string>(quotient));
+			build.append(CastUtil::lexical_cast<std::string>(quotient));
 		}
 		if(fnvalue=="")
 		{
@@ -567,12 +567,12 @@ int Bigint::compare(const Bigint& number) const
 	}
 }
 
-string Bigint::toString() const
+std::string Bigint::toString() const
 {
 	if(parts.size()==0)
 		return ZERO;
-	string build;
-	vector<int> nparts = parts;
+	std::string build;
+	std::vector<int> nparts = parts;
 	std::reverse(nparts.begin(),nparts.end());
 	if(!isPositive)
 	{
@@ -581,7 +581,7 @@ string Bigint::toString() const
 	for (int i=0;i<(int)nparts.size();i++) {
 		if(i!=0)
 		{
-			string numstr = CastUtil::lexical_cast<string>(nparts.at(i));
+			std::string numstr = CastUtil::lexical_cast<std::string>(nparts.at(i));
 			for (int j = 0; j < NUM_LENGTH-(int)numstr.length(); j++) {
 				build.append(ZERO);
 			}
@@ -589,7 +589,7 @@ string Bigint::toString() const
 		}
 		else
 		{
-			build.append(CastUtil::lexical_cast<string>(nparts.at(i)));
+			build.append(CastUtil::lexical_cast<std::string>(nparts.at(i)));
 		}
 	}
 	return build;

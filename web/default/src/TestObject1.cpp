@@ -43,11 +43,11 @@ void TestObject::setB(long b) {
 	this->b = b;
 }
 
-string TestObject::getC() const {
+std::string TestObject::getC() const {
 	return c;
 }
 
-void TestObject::setC(string c) {
+void TestObject::setC(std::string c) {
 	this->c = c;
 }
 
@@ -127,20 +127,20 @@ TestObject::~TestObject() {
 	// TODO Auto-generated destructor stub
 }
 
-string TestObject::toString() {
-	string out;
-	out.append(CastUtil::lexical_cast<string>(a) + " ");
-	out.append(CastUtil::lexical_cast<string>(b) + " ");
-	out.append(CastUtil::lexical_cast<string>(c) + " ");
-	out.append(CastUtil::lexical_cast<string>(d) + " ");
-	out.append(CastUtil::lexical_cast<string>(e) + " ");
-	out.append(CastUtil::lexical_cast<string>(f) + " ");
-	out.append(CastUtil::lexical_cast<string>(g) + " ");
-	out.append(CastUtil::lexical_cast<string>(h) + " ");
-	out.append(CastUtil::lexical_cast<string>(i) + " ");
-	out.append(CastUtil::lexical_cast<string>(j) + " ");
-	out.append(CastUtil::lexical_cast<string>(k) + " ");
-	out.append(CastUtil::lexical_cast<string>(l) + " ");
+std::string TestObject::toString() {
+	std::string out;
+	out.append(CastUtil::lexical_cast<std::string>(a) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(b) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(c) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(d) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(e) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(f) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(g) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(h) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(i) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(j) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(k) + " ");
+	out.append(CastUtil::lexical_cast<std::string>(l) + " ");
 	return out;
 }
 

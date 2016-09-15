@@ -22,7 +22,7 @@
 
 #include "ServicePool.h"
 static ServicePool *instance=NULL;
-static map<string,Service> servicePool;
+static std::map<std::string,Service> servicePool;
 ServicePool::ServicePool()
 {
 	instance = NULL;
@@ -39,7 +39,7 @@ ServicePool* ServicePool::getInstance()
 	return instance;
 }
 
-string ServicePool::registerService(const string& name, const Service& service)// will return a unique identification for this service
+std::string ServicePool::registerService(const std::string& name, const Service& service)// will return a unique identification for this service
 {
 	time_t rawtime;
     struct tm * timeinfo;
@@ -48,21 +48,21 @@ string ServicePool::registerService(const string& name, const Service& service)/
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
 
-	string yr = CastUtil::lexical_cast<string>(timeinfo->tm_year);
-	string mo = CastUtil::lexical_cast<string>(timeinfo->tm_mon);
-	string da = CastUtil::lexical_cast<string>(timeinfo->tm_mday);
-	string hr = CastUtil::lexical_cast<string>(timeinfo->tm_hour);
-	string mm = CastUtil::lexical_cast<string>(timeinfo->tm_min);
-	string ms = CastUtil::lexical_cast<string>(((en.tv_sec * 1000000000) + en.tv_nsec)/1000000);
+	std::string yr = CastUtil::lexical_cast<std::string>(timeinfo->tm_year);
+	std::string mo = CastUtil::lexical_cast<std::string>(timeinfo->tm_mon);
+	std::string da = CastUtil::lexical_cast<std::string>(timeinfo->tm_mday);
+	std::string hr = CastUtil::lexical_cast<std::string>(timeinfo->tm_hour);
+	std::string mm = CastUtil::lexical_cast<std::string>(timeinfo->tm_min);
+	std::string ms = CastUtil::lexical_cast<std::string>(((en.tv_sec * 1000000000) + en.tv_nsec)/1000000);
 
-	string regName = (name+yr+mo+da+hr+mm+ms);
+	std::string regName = (name+yr+mo+da+hr+mm+ms);
 	servicePool[regName] = service;
 	return regName;
 }
 
-bool ServicePool::unRegisterService(const string& name)//unregister will require the unique id
+bool ServicePool::unRegisterService(const std::string& name)//unregister will require the unique id
 {
-	map<string,Service>::iterator it;
+	std::map<std::string,Service>::iterator it;
 	if(it==servicePool.end())
 		return false;
 	it = servicePool.find(name);
@@ -70,10 +70,10 @@ bool ServicePool::unRegisterService(const string& name)//unregister will require
 	return true;
 }
 
-vector<string> ServicePool::getServices(const string& access)//return a list of available services
+std::vector<std::string> ServicePool::getServices(const std::string& access)//return a list of available services
 {
-	vector<string> services;
-	map<string,Service>::iterator it;
+	std::vector<std::string> services;
+	std::map<std::string,Service>::iterator it;
 	for(it=servicePool.begin();it!=servicePool.end();++it)
 	{
 		services.push_back(it->first);
@@ -81,7 +81,7 @@ vector<string> ServicePool::getServices(const string& access)//return a list of 
 	return services;
 }
 
-Service ServicePool::getService(const string& regName)
+Service ServicePool::getService(const std::string& regName)
 {
 	return servicePool[regName];
 }

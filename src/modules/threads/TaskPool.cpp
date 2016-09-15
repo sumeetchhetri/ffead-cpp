@@ -25,11 +25,11 @@
 void* TaskPool::run(void *arg)
 {
 	TaskPool* pool  = static_cast<TaskPool*>(arg);
-	vector<Task*>::iterator iter;
+	std::vector<Task*>::iterator iter;
 	while(pool->runFlag)
 	{
-		vector<Task*>::iterator it;
-		vector<Timer*>::iterator tit;
+		std::vector<Task*>::iterator it;
+		std::vector<Timer*>::iterator tit;
 		int counter = 0;
 		pool->s_mutex->lock();
 		for (it=pool->scheduledtasks->begin(),tit=pool->scheduledTimers->begin();
@@ -65,9 +65,9 @@ TaskPool::TaskPool(bool prioritybased) {
 	s_mutex = new Mutex();
 	c_mutex = new ConditionMutex();
 	tasks = new std::queue<Task*>;
-	ptasks = new priority_queue<Task*>;
-	scheduledtasks = new vector<Task*>;
-	scheduledTimers = new vector<Timer*>;
+	ptasks = new std::priority_queue<Task*>;
+	scheduledtasks = new std::vector<Task*>;
+	scheduledTimers = new std::vector<Timer*>;
 	runFlag = true;
 	complete = false;
 	count = 0;

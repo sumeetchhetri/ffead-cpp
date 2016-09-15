@@ -27,9 +27,9 @@ int DialectHelper::VALIDDB_FUNCTIONS = 0, DialectHelper::PAGINATION_OFFSET_SQL =
 		DialectHelper::IS_TRANSACTION_SUPPORTED = 6, DialectHelper::IDGEN_IDENTITY_QUERY = 7,
 		DialectHelper::IDGEN_TABLESELNOLOCK_QUERY = 8, DialectHelper::IDGEN_TABLESELNOLOCKMHL_QUERY = 9, DialectHelper::IDGEN_TABLESELMHL_QUERY = 10,
 		DialectHelper::IDGEN_TABLEUPDMHL_QUERY = 11, DialectHelper::BULK_INSERT_QUERY = 12, DialectHelper::BULK_UPDATE_QUERY = 13;
-map<string, map<int, string> > DialectHelper::dialectStrMap;
+std::map<std::string, std::map<int, std::string> > DialectHelper::dialectStrMap;
 bool DialectHelper::init = false;
-string DialectHelper::ORACLE_DIALECT = "OracleDialect", DialectHelper::MYSQLMYISAM_DIALECT = "MySQLMyISAMDialect",
+std::string DialectHelper::ORACLE_DIALECT = "OracleDialect", DialectHelper::MYSQLMYISAM_DIALECT = "MySQLMyISAMDialect",
 	   DialectHelper::POSTGRES_DIALECT = "PostgresDialect", DialectHelper::SQLSERVER_DIALECT = "SQLServerDialect",
 	   DialectHelper::SQLSERVER12_DIALECT = "SQLServer12Dialect", DialectHelper::TIMESTEN_DIALECT = "TimestenDialect",
 	   DialectHelper::DB2_DIALECT = "DB2Dialect", DialectHelper::SQLLITE_DIALECT = "SQLLiteDialect",
@@ -38,17 +38,17 @@ string DialectHelper::ORACLE_DIALECT = "OracleDialect", DialectHelper::MYSQLMYIS
 DialectHelper::DialectHelper() {
 }
 
-string DialectHelper::getSQLString(const string& dialect, const int& type, string query, StringContext params) {
+std::string DialectHelper::getSQLString(const std::string& dialect, const int& type, std::string query, StringContext params) {
 	load();
 	if(dialectStrMap.find(dialect)!=dialectStrMap.end())
 	{
 		if(dialectStrMap[ANY_DIALECT].find(type)!=dialectStrMap[ANY_DIALECT].end())
 		{
-			string& dquery = dialectStrMap[ANY_DIALECT][type];
-			string temp = query;
+			std::string& dquery = dialectStrMap[ANY_DIALECT][type];
+			std::string temp = query;
 			StringUtil::trim(temp);
 			StringUtil::toLower(temp);
-			string fupd;
+			std::string fupd;
 			if(temp.find_last_of(" for update")==0)
 			{
 				fupd = " for update";
@@ -65,9 +65,9 @@ string DialectHelper::getSQLString(const string& dialect, const int& type, strin
 	return query;
 }
 
-string DialectHelper::getSQLString(const string& dialect, const int& type, StringContext params) {
+std::string DialectHelper::getSQLString(const std::string& dialect, const int& type, StringContext params) {
 	load();
-	string dquery;
+	std::string dquery;
 	if(dialectStrMap.find(dialect)!=dialectStrMap.end())
 	{
 		if(dialectStrMap[dialect].find(type)!=dialectStrMap[dialect].end())
@@ -80,10 +80,10 @@ string DialectHelper::getSQLString(const string& dialect, const int& type, Strin
 		}
 		if(dquery!="")
 		{
-			string temp = dquery;
+			std::string temp = dquery;
 			StringUtil::trim(temp);
 			StringUtil::toLower(temp);
-			string fupd;
+			std::string fupd;
 			if(temp.find_last_of(" for update")==0)
 			{
 				fupd = " for update";
@@ -96,9 +96,9 @@ string DialectHelper::getSQLString(const string& dialect, const int& type, Strin
 	return dquery;
 }
 
-string DialectHelper::getProperty(const string& dialect, const int& type) {
+std::string DialectHelper::getProperty(const std::string& dialect, const int& type) {
 	load();
-	string propValue;
+	std::string propValue;
 	if(dialectStrMap.find(dialect)!=dialectStrMap.end())
 	{
 		if(dialectStrMap[dialect].find(type)!=dialectStrMap[dialect].end())
@@ -113,16 +113,16 @@ string DialectHelper::getProperty(const string& dialect, const int& type) {
 	return propValue;
 }
 
-bool DialectHelper::isTransactionSupported(const string& dialect) {
+bool DialectHelper::isTransactionSupported(const std::string& dialect) {
 	if(getProperty(dialect, IS_TRANSACTION_SUPPORTED)!="true")
 		return false;
 	return true;
 }
 
-string DialectHelper::getIdGenerateQueryPre(const string& dialect, const DataSourceEntityMapping& dsemp) {
+std::string DialectHelper::getIdGenerateQueryPre(const std::string& dialect, const DataSourceEntityMapping& dsemp) {
 	if(dsemp.getIdgentype()!="hilo" && dsemp.getIdgentype()!="multihilo")
 	{
-		string query;
+		std::string query;
 		if(dsemp.getIdgendbEntityType()=="table")
 		{
 			StringContext params;
@@ -149,10 +149,10 @@ string DialectHelper::getIdGenerateQueryPre(const string& dialect, const DataSou
 	return "";
 }
 
-string DialectHelper::getIdGenerateQueryPost(const string& dialect, const DataSourceEntityMapping& dsemp) {
+std::string DialectHelper::getIdGenerateQueryPost(const std::string& dialect, const DataSourceEntityMapping& dsemp) {
 	if(dsemp.getIdgentype()!="hilo" && dsemp.getIdgentype()!="multihilo" && dsemp.getIdgendbEntityType()=="table")
 	{
-		string query;
+		std::string query;
 		StringContext params;
 		params["idgen_tabname"] = dsemp.getIdgendbEntityName();
 		params["idgen_colname"] = dsemp.getIdgencolumnName();
@@ -169,7 +169,7 @@ string DialectHelper::getIdGenerateQueryPost(const string& dialect, const DataSo
 	}
 	else if(dsemp.getIdgentype()!="hilo" && dsemp.getIdgentype()!="multihilo" && dsemp.getIdgendbEntityType()=="identity")
 	{
-		string query;
+		std::string query;
 		StringContext params;
 		query = getSQLString(dialect, DialectHelper::IDGEN_IDENTITY_QUERY, params);
 		return query;
@@ -207,9 +207,9 @@ void DialectHelper::loadDialectSQLStrings()
 
 
 void DialectHelper::loadOracleDialectStrings() {
-	string PAGINATION_OFFSET = "select * from ( select row_.*, ROWNUM rownum_ from ( $query ) row_ ) where rownum_ <= $count and rownum_ > $start";
-	string PAGINATION_NO_OFFSET = "select * from ( $query ) where ROWNUM <= $count";
-	string VALID_DBFUNCS = ",abs,sign,acos,asin,atan,cos,cosh,exp,ln,sin,sinh,stddev,sqrt,tan,"
+	std::string PAGINATION_OFFSET = "select * from ( select row_.*, ROWNUM rownum_ from ( $query ) row_ ) where rownum_ <= $count and rownum_ > $start";
+	std::string PAGINATION_NO_OFFSET = "select * from ( $query ) where ROWNUM <= $count";
+	std::string VALID_DBFUNCS = ",abs,sign,acos,asin,atan,cos,cosh,exp,ln,sin,sinh,stddev,sqrt,tan,"
 			"tanh,variance,round,trunc,ceil,floor,chr,initcap,lower,ltrim,rtrim,soundex,upper,"
 			"ascii,to_char,to_date,current_date,current_time,current_timestamp,last_day,sysdate,"
 			"systimestamp,uid,user,rowid,rownum,concat,instr,instrb,lpad,replace,rpad,substr,"
@@ -230,9 +230,9 @@ void DialectHelper::loadOracleDialectStrings() {
 }
 
 void DialectHelper::loadMySQLDialectStrings() {
-	string PAGINATION_OFFSET = "$query LIMIT $count";
-	string PAGINATION_NO_OFFSET = "$query LIMIT $start OFFSET $count";
-	string VALID_DBFUNCS = ",ascii,bin,char_length,character_length,lcase,lower,ltrim,ord,"
+	std::string PAGINATION_OFFSET = "$query LIMIT $count";
+	std::string PAGINATION_NO_OFFSET = "$query LIMIT $start OFFSET $count";
+	std::string VALID_DBFUNCS = ",ascii,bin,char_length,character_length,lcase,lower,ltrim,ord,"
 			"quote,reverse,rtrim,soundex,space,ucase,upper,unhex,abs,sign,acos,asin,atan,"
 			"cos,cot,crc32,exp,ln,log,log2,log10,pi,rand,sin,sqrt,tan,radians,degrees,ceiling,"
 			"ceil,floor,round,datediff,timediff,date_format,curdate,curtime,current_date,"
@@ -259,9 +259,9 @@ void DialectHelper::loadMySQLDialectStrings() {
 }
 
 void DialectHelper::loadPostgresDialectStrings() {
-	string PAGINATION_OFFSET = "$query LIMIT $count";
-	string PAGINATION_NO_OFFSET = "$query LIMIT $start OFFSET $count";
-	string VALID_DBFUNCS = ",ltrim,rtrim,soundex,sysdate,rowid,rownum,instr,lpad,replace,"
+	std::string PAGINATION_OFFSET = "$query LIMIT $count";
+	std::string PAGINATION_NO_OFFSET = "$query LIMIT $start OFFSET $count";
+	std::string VALID_DBFUNCS = ",ltrim,rtrim,soundex,sysdate,rowid,rownum,instr,lpad,replace,"
 			"rpad,translate,substring,coalesce,atan2,mod,nvl,nvl2,power,add_months,"
 			"months_between,next_day,abs,sign,acos,asin,atan,cos,cot,exp,ln,log,sin,sqrt,"
 			"cbrt,tan,radians,degrees,stddev,variance,random,round,trunc,ceil,floor,chr,lower,"
@@ -280,9 +280,9 @@ void DialectHelper::loadPostgresDialectStrings() {
 }
 
 void DialectHelper::loadSQLServerDialectStrings() {
-	string PAGINATION_OFFSET = "$query OFFSET $start ROWS FETCH NEXT $count ROWS ONLY";
-	string PAGINATION_NO_OFFSET = "$query FETCH FIRST $count ROWS ONLY";
-	string VALID_DBFUNCS = ",datepart,locate,mod,datalength,trim,current_timestamp,row_number,";
+	std::string PAGINATION_OFFSET = "$query OFFSET $start ROWS FETCH NEXT $count ROWS ONLY";
+	std::string PAGINATION_NO_OFFSET = "$query FETCH FIRST $count ROWS ONLY";
+	std::string VALID_DBFUNCS = ",datepart,locate,mod,datalength,trim,current_timestamp,row_number,";
 
 	dialectStrMap[SQLSERVER12_DIALECT][PAGINATION_OFFSET_SQL] = PAGINATION_OFFSET;
 	dialectStrMap[SQLSERVER12_DIALECT][PAGINATION_NO_OFFSET_SQL] = PAGINATION_NO_OFFSET;
@@ -297,9 +297,9 @@ void DialectHelper::loadSQLServerDialectStrings() {
 }
 
 void DialectHelper::loadDB22DialectStrings() {
-	string PAGINATION_OFFSET = "select * from ( select inner2_.*, rownumber() over(order by order of inner2_) as rownumber_ from ( $query fetch first $count rows only ) as inner2_ ) as inner1_ where rownumber_ > $start order by rownumber_";
-	string PAGINATION_NO_OFFSET = "$query FETCH FIRST $count ROWS ONLY";
-	string VALID_DBFUNCS = ",avg,abs,absval,sign,ceiling,ceil,floor,round,acos,asin,atan,cos,cot,"
+	std::string PAGINATION_OFFSET = "select * from ( select inner2_.*, rownumber() over(order by order of inner2_) as rownumber_ from ( $query fetch first $count rows only ) as inner2_ ) as inner1_ where rownumber_ > $start order by rownumber_";
+	std::string PAGINATION_NO_OFFSET = "$query FETCH FIRST $count ROWS ONLY";
+	std::string VALID_DBFUNCS = ",avg,abs,absval,sign,ceiling,ceil,floor,round,acos,asin,atan,cos,cot,"
 			"degrees,exp,float,hex,ln,log,log10,radians,rand,sin,soundex,sqrt,stddev,tan,variance,"
 			"julian_day,microsecond,midnight_seconds,minute,month,monthname,quarter,hour,second,"
 			"current_date,date,day,dayname,dayofweek,dayofweek_iso,dayofyear,days,current_time,time,"
@@ -314,9 +314,9 @@ void DialectHelper::loadDB22DialectStrings() {
 	dialectStrMap[DB2_DIALECT][IS_TRANSACTION_SUPPORTED] = "TRUE";
 }
 
-void DialectHelper::getPaginationSQL(const string& dialect, string& query, const StringContext& params)
+void DialectHelper::getPaginationSQL(const std::string& dialect, std::string& query, const StringContext& params)
 {
-	string count = StringUtil::trimCopy(params.find("count")->second);
+	std::string count = StringUtil::trimCopy(params.find("count")->second);
 	if(count!="")return;
 	if(dialect == SQLSERVER_DIALECT)
 	{

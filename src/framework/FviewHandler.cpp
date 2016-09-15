@@ -24,30 +24,30 @@
 
 bool FviewHandler::handle(HttpRequest* req, HttpResponse* res)
 {
-	map<string, string> fviewmap = ConfigurationData::getInstance()->fviewMappingMap[req->getCntxt_name()];
+	std::map<std::string, std::string> fviewmap = ConfigurationData::getInstance()->fviewMappingMap[req->getCntxt_name()];
 	Logger logger = LoggerFactory::getLogger("FviewHandler");
-	string content;
-	logger << ("Inside fview " + req->getFile()) << endl;
-	string file = req->getFile();
+	std::string content;
+	logger << ("Inside fview " + req->getFile()) << std::endl;
+	std::string file = req->getFile();
 	StringUtil::replaceFirst(file,"fview","html");
-	string ffile = req->getContextHome()+"/fviews/"+file;
-	//logger << ffile << endl;
-	ifstream infile(ffile.c_str(), ios::binary);
-	string temp;
+	std::string ffile = req->getContextHome()+"/fviews/"+file;
+	//logger << ffile << std::endl;
+	std::ifstream infile(ffile.c_str(), std::ios::binary);
+	std::string temp;
 	if(infile.is_open())
 	{
 		content = "";
 		while(getline(infile, temp))
 		{
-			if(temp.find("<?")==string::npos && temp.find("?>")==string::npos)
+			if(temp.find("<?")==std::string::npos && temp.find("?>")==std::string::npos)
 				content.append(temp);
 		}
 		int h = content.find("</head>");
 		int ht = content.find("<html>");
-		if(h!=(int)string::npos)
+		if(h!=(int)std::string::npos)
 		{
-			string st = content.substr(0,h-1);
-			string en = content.substr(h);
+			std::string st = content.substr(0,h-1);
+			std::string en = content.substr(h);
 			content = st + "<script type=\"text/javascript\" src=\"json2.js\"></script>";
 			content += "<script type=\"text/javascript\" src=\"prototype.js\"></script>";
 			content += "<script type=\"text/javascript\" src=\"afc.js\"></script>";
@@ -57,10 +57,10 @@ bool FviewHandler::handle(HttpRequest* req, HttpResponse* res)
 		}
 		else
 		{
-			if(ht!=(int)string::npos)
+			if(ht!=(int)std::string::npos)
 			{
-				string st = content.substr(0,ht+6);
-				string en = content.substr(ht+6);
+				std::string st = content.substr(0,ht+6);
+				std::string en = content.substr(ht+6);
 				content = st + "<script type=\"text/javascript\" src=\"json2.js\"></script>";
 				content += "<script type=\"text/javascript\" src=\"prototype.js\"></script>";
 				content += "<script type=\"text/javascript\" src=\"afc.js\"></script>";

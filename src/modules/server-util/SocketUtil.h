@@ -15,7 +15,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include "string"
-using namespace std;
+
 #include <fcntl.h>
 #include "SSLHandler.h"
 
@@ -41,15 +41,15 @@ class SocketUtil {
 	friend class SocketInterface;
 	friend class Http11WebSocketHandler;
 public:
-	string getAlpnProto();
+	std::string getAlpnProto();
 	SocketUtil(const SOCKET& fd);
 	virtual ~SocketUtil();
-	int writeData(const string& data, const bool& flush, const int& offset= 0);
+	int writeData(const std::string& data, const bool& flush, const int& offset= 0);
 	bool flush(const bool& lk= true);
 	void closeSocket(const bool& lk= true);
-	int readLine(string& line);
-	int readData(int cntlen, string& content);
-	int readData(int cntlen, vector<unsigned char>& content);
+	int readLine(std::string& line);
+	int readData(int cntlen, std::string& content);
+	int readData(int cntlen, std::vector<unsigned char>& content);
 	bool checkSocketWaitForTimeout(const int& writing, const int& seconds, const int& micros= 0);
 };
 

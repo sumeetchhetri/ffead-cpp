@@ -32,7 +32,7 @@ char* AMEFResources::longTocharArray(const long& l, const int& ind)
 	return result;
 }
 
-string AMEFResources::longTocharArrayS(const long& l, const int& ind)
+std::string AMEFResources::longTocharArrayS(const long& l, const int& ind)
 {
 	char* result = new char[ind];
 	for (int i = 0; i<ind; i++)
@@ -40,7 +40,7 @@ string AMEFResources::longTocharArrayS(const long& l, const int& ind)
 		int offset = (ind - 1 - i) * 8;
 		result[i] = (char) ((l >> offset) & 0xFF);
 	}
-	string tem(result);
+	std::string tem(result);
 	return tem;
 }
 
@@ -105,7 +105,7 @@ long AMEFResources::charArrayToLong(char* l, const int& ind)
 	return t;
 }
 
-string AMEFResources::intTocharArrayS(const int& l, const int& ind)
+std::string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 {
 	char* result = new char[ind];
 	for (int i = 0; i<ind; i++)
@@ -113,11 +113,11 @@ string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 		int offset = (ind - 1 - i) * 8;
 		result[i] = (char) ((l >> offset) & 0xFF);
 	}
-	string tem(result);
+	std::string tem(result);
 	return tem;
 }
 #ifdef IS_64_BIT
-	string AMEFResources::longTocharArrayWI(const unsigned long long& l)
+	std::string AMEFResources::longTocharArrayWI(const unsigned long long& l)
 	{
 		int ind = 1;
 		if(l<256)
@@ -136,7 +136,7 @@ string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 			ind =7;
 		else
 			ind =8;
-		string result;
+		std::string result;
 		for (int i = 0; i<ind; i++)
 		{
 			int offset = (ind - 1 - i) * 8;
@@ -144,7 +144,7 @@ string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 		}
 		return result;
 	}
-	string AMEFResources::longTocharArrayWI(const long& l)
+	std::string AMEFResources::longTocharArrayWI(const long& l)
 	{
 		int ind = 1;
 		if(l<256)
@@ -163,7 +163,7 @@ string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 			ind =7;
 		else
 			ind =8;
-		string result;
+		std::string result;
 		for (int i = 0; i<ind; i++)
 		{
 			int offset = (ind - 1 - i) * 8;
@@ -172,7 +172,7 @@ string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 		return result;
 	}
 #else
-	string AMEFResources::longTocharArrayWI(const unsigned long long& l)
+	std::string AMEFResources::longTocharArrayWI(const unsigned long long& l)
 	{
 		int ind = 1;
 		if(l<256)
@@ -191,7 +191,7 @@ string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 			ind =7;
 		else
 			ind =8;
-		string result;
+		std::string result;
 		for (int i = 0; i<ind; i++)
 		{
 			int offset = (ind - 1 - i) * 8;
@@ -199,7 +199,7 @@ string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 		}
 		return result;
 	}
-	string AMEFResources::longTocharArrayWI(const long& l)
+	std::string AMEFResources::longTocharArrayWI(const long& l)
 	{
 		int ind = 1;
 		if(l<256)
@@ -210,7 +210,7 @@ string AMEFResources::intTocharArrayS(const int& l, const int& ind)
 			ind =3;
 		else
 			ind =4;
-		string result;
+		std::string result;
 		for (int i = 0; i<ind; i++)
 		{
 			int offset = (ind - 1 - i) * 8;

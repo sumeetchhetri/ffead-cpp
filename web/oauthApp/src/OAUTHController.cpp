@@ -34,11 +34,11 @@ OAUTHController::~OAUTHController() {
 
 bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 {
-	map<string,string> reqParams = req->getAllParams();
+	std::map<std::string,std::string> reqParams = req->getAllParams();
 
-	string hostp = req->getHeader(HttpRequest::Host);
+	std::string hostp = req->getHeader(HttpRequest::Host);
 	int port = 8080;
-	if(hostp.find(":")!=string::npos)
+	if(hostp.find(":")!=std::string::npos)
 		port = CastUtil::lexical_cast<int>(hostp.substr(hostp.find(":")+1));
 
 	if(req->getFile()=="login.auth")
@@ -46,7 +46,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 		if(reqParams["username"]!="" && reqParams["password"]!="")
 		{
 			FileAuthController fauthu(req->getContextHome()+"/users",":");
-			string key;
+			std::string key;
 			bool flag = fauthu.getPassword(reqParams["username"],key);
 			if(flag)
 			{
@@ -60,60 +60,60 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 				res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 				res->setContent("InValid Login");
 			}
-			cout << "inside oauth controller non empty credentials" << endl;
+			std::cout << "inside oauth controller non empty credentials" << std::endl;
 		}
 		else
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 			res->setContent("Username and Password cannot be blank");
-			cout << "inside oauth controller empty credentials" << endl;
+			std::cout << "inside oauth controller empty credentials" << std::endl;
 		}
 	}
 	else if(req->getFile()=="requestToken.auth")
 	{
 		Client client;
 		client.connection("localhost",port);
-		string data = "GET /request.oauth?";
+		std::string data = "GET /request.oauth?";
 		data += "oauth_callback=http://"+hostp+"/oauthApp/calledback.auth&oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token=&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+reqParams["tusername"]+"&";
-		string sig = "GET&" + CryptoHandler::urlEncode("http://"+hostp+"/request.oauth") + "&";
+		std::string sig = "GET&" + CryptoHandler::urlEncode("http://"+hostp+"/request.oauth") + "&";
 		sig += CryptoHandler::urlEncode("oauth_callback=http://"+hostp+"/oauthApp/calledback.auth&oauth_consumer_key=sumeet&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=0&oauth_token=&oauth_version=1.0&tusername="+reqParams["tusername"]);
 
-		cout << sig << endl;
+		std::cout << sig << std::endl;
 
 		char* resst = (char*)CryptoHandler::hmac_sha1((char*)sig.c_str(),"sumeet&",true);
 		data += "oauth_signature=";
-		string sign(resst);
+		std::string sign(resst);
 		data.append(CryptoHandler::urlEncode(sign));
 
 		data += " HTTP/1.1\r\nHost: "+hostp+"\r\nUser-Agent: Program\r\n\r\n";
 
-		cout << data << endl;
+		std::cout << data << std::endl;
 
 		int bytes = client.sendData(data);
-		string call,tot;
+		std::string call,tot;
 		while((call=client.getData())!="")
 			tot.append(call);
 		HttpResponseParser parser(tot, *res);
 		client.closeConnection();
 
-		map<string,string> mapsd;
-		vector<string> temp;
-		string conte = parser.getContent();
+		std::map<std::string,std::string> mapsd;
+		std::vector<std::string> temp;
+		std::string conte = parser.getContent();
 		StringUtil::split(temp, conte, ("&"));
-		//cout << conte << flush;
+		//cout << conte << std::flush;
 		for(unsigned int i=0;i<temp.size();i++)
 		{
-			vector<string> temp1;
+			std::vector<std::string> temp1;
 			StringUtil::split(temp1, temp.at(i), ("="));
 			mapsd[temp1.at(0)] = temp1.at(1);
-			cout << temp1.at(0) << " = " << temp1.at(1) << endl;
+			std::cout << temp1.at(0) << " = " << temp1.at(1) << std::endl;
 		}
 		if(mapsd["oauth_token"]!="" && mapsd["oauth_token_secret"]!="" && mapsd["tusername"]!="")
 		{
-			string filen = req->getContextHome()+"/"+reqParams["tusername"]+"-tokens-secrets";
-			ofstream ofs(filen.c_str());
-			string wrf = mapsd["tusername"] + ":" + mapsd["oauth_token"] + ":" + mapsd["oauth_token_secret"]+"\n";
+			std::string filen = req->getContextHome()+"/"+reqParams["tusername"]+"-tokens-secrets";
+			std::ofstream ofs(filen.c_str());
+			std::string wrf = mapsd["tusername"] + ":" + mapsd["oauth_token"] + ":" + mapsd["oauth_token_secret"]+"\n";
 			ofs.write(wrf.c_str(),wrf.length());
 			ofs.close();
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
@@ -130,20 +130,20 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 	else if(req->getFile()=="authorizeUser.auth")
 	{
 		FileAuthController fauthu(req->getContextHome()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
-		string key1 = "sumeet&",key;
+		std::string key1 = "sumeet&",key;
 		bool flag = fauthu.getPassword(reqParams["tusername"],key);
 		if(reqParams["tusername"]!="" && flag)
 		{
-			string tok = key.substr(0,key.find(":"));
+			std::string tok = key.substr(0,key.find(":"));
 			key = key1 + key.substr(key.find(":")+1);
 
-			string data = "http://"+hostp+"/login.oauth?";
+			std::string data = "http://"+hostp+"/login.oauth?";
 			data += "oauth_token="+tok+"&username="+reqParams["tusername"];
-			cout << data << endl;
+			std::cout << data << std::endl;
 
 			res->setHTTPResponseStatus(HTTPResponseStatus::MovedPermanently);
 			res->addHeaderValue(HttpResponse::Location, data);
-			cout << "redirecting to third party url" << endl;
+			std::cout << "redirecting to third party url" << std::endl;
 		}
 		else
 		{
@@ -155,9 +155,9 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 	else if(req->getFile()=="calledback.auth")
 	{
 		FileAuthController fauthu(req->getContextHome()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
-		string key1 = "sumeet&",key;
+		std::string key1 = "sumeet&",key;
 		key = fauthu.get(reqParams["tusername"],2);
-		string tok = fauthu.get(reqParams["tusername"],1);
+		std::string tok = fauthu.get(reqParams["tusername"],1);
 		bool flag = (tok!="" && key!="");
 		if(reqParams["tusername"]!="" && flag && reqParams["access"]=="true")
 		{
@@ -165,51 +165,51 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 
 			Client client;
 			client.connection("localhost",port);
-			string data = "GET /access.oauth?";
+			std::string data = "GET /access.oauth?";
 			data += "oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token="+tok+"&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+reqParams["tusername"]+"&";
-			string sig = "GET&" + CryptoHandler::urlEncode("http://"+hostp+"/access.oauth") + "&";
+			std::string sig = "GET&" + CryptoHandler::urlEncode("http://"+hostp+"/access.oauth") + "&";
 			sig += CryptoHandler::urlEncode("oauth_consumer_key=sumeet&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=0&oauth_token="+tok+"&oauth_version=1.0&tusername="+reqParams["tusername"]);
 
-			cout << sig << endl;
-			cout << key << endl;
+			std::cout << sig << std::endl;
+			std::cout << key << std::endl;
 			char* resst = (char*)CryptoHandler::hmac_sha1((char*)sig.c_str(),(char*)key.c_str(),true);
 			data += "oauth_signature=";
-			string sign(resst);
+			std::string sign(resst);
 			data.append(CryptoHandler::urlEncode(sign));
 
 			data += " HTTP/1.1\r\nHost: "+hostp+"\r\nUser-Agent: Program\r\n\r\n";
 
-			cout << data << endl;
+			std::cout << data << std::endl;
 
 			int bytes = client.sendData(data);
-			string call,tot;
+			std::string call,tot;
 			while((call=client.getData())!="")
 				tot.append(call);
 			HttpResponseParser parser(tot, *res);
 			client.closeConnection();
 
-			map<string,string> mapsd;
-			vector<string> temp;
-			string conte = parser.getContent();
+			std::map<std::string,std::string> mapsd;
+			std::vector<std::string> temp;
+			std::string conte = parser.getContent();
 			StringUtil::split(temp, conte, ("&"));
-			//cout << conte << flush;
+			//cout << conte << std::flush;
 			for(unsigned int i=0;i<temp.size();i++)
 			{
-				vector<string> temp1;
+				std::vector<std::string> temp1;
 				StringUtil::split(temp1, temp.at(i), ("="));
 				mapsd[temp1.at(0)] = temp1.at(1);
-				cout << temp1.at(0) << " = " << temp1.at(1) << endl;
+				std::cout << temp1.at(0) << " = " << temp1.at(1) << std::endl;
 			}
 			if(mapsd["oauth_token"]!="" && mapsd["oauth_token_secret"]!="" && mapsd["tusername"]!="")
 			{
-				string filen = req->getContextHome()+"/"+reqParams["tusername"]+"-access-secrets";
-				ofstream ofs(filen.c_str());
-				string wrf = mapsd["tusername"] + ":" + mapsd["oauth_token"] + ":" + mapsd["oauth_token_secret"]+"\n";
+				std::string filen = req->getContextHome()+"/"+reqParams["tusername"]+"-access-secrets";
+				std::ofstream ofs(filen.c_str());
+				std::string wrf = mapsd["tusername"] + ":" + mapsd["oauth_token"] + ":" + mapsd["oauth_token_secret"]+"\n";
 				ofs.write(wrf.c_str(),wrf.length());
 				ofs.close();
 				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 				res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
-				string conte = "<html><head><script type='text/javascript' src='public/json2.js'></script><script type='text/javascript' src='public/prototype.js'></script><script type='text/javascript' src='public/oauth.js'></script></head>";
+				std::string conte = "<html><head><script type='text/javascript' src='public/json2.js'></script><script type='text/javascript' src='public/prototype.js'></script><script type='text/javascript' src='public/oauth.js'></script></head>";
 				conte += "File Name: <input id='resource' type='text'/><input type='submit' onclick='getResource(\"resource\",\""+reqParams["tusername"]+"\")'/></body>";
 				conte += "</html>";
 				res->setContent(conte);
@@ -235,9 +235,9 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 	else if(req->getFile()=="getResource.auth")
 	{
 		FileAuthController fauthu(req->getContextHome()+"/"+reqParams["tusername"]+"-access-secrets",":");
-		string key1 = "sumeet&",key;
+		std::string key1 = "sumeet&",key;
 		key = fauthu.get(reqParams["tusername"],2);
-		string tok = fauthu.get(reqParams["tusername"],1);
+		std::string tok = fauthu.get(reqParams["tusername"],1);
 		bool flag = (tok!="" && key!="");
 		if(reqParams["tusername"]!="" && flag && reqParams["file"]!="")
 		{
@@ -245,24 +245,24 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 
 			Client client;
 			client.connection("localhost",port);
-			string data = "GET /getResource.oauth?file="+reqParams["file"];
+			std::string data = "GET /getResource.oauth?file="+reqParams["file"];
 			data += "&oauth_consumer_key=sumeet&oauth_nonce=&oauth_timestamp=0&oauth_token="+tok+"&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&tusername="+reqParams["tusername"]+"&";
-			string sig = "GET&" + CryptoHandler::urlEncode("http://"+hostp+"/getResource.oauth") + "&";
+			std::string sig = "GET&" + CryptoHandler::urlEncode("http://"+hostp+"/getResource.oauth") + "&";
 			sig += CryptoHandler::urlEncode("file="+reqParams["file"]+"&oauth_consumer_key=sumeet&oauth_nonce=&oauth_signature_method=HMAC-SHA1&oauth_timestamp=0&oauth_token="+tok+"&oauth_version=1.0&tusername="+reqParams["tusername"]);
 
-			cout << sig << endl;
-			cout << key << endl;
+			std::cout << sig << std::endl;
+			std::cout << key << std::endl;
 			char* resst = (char*)CryptoHandler::hmac_sha1((char*)sig.c_str(),(char*)key.c_str(),true);
 			data += "oauth_signature=";
-			string sign(resst);
+			std::string sign(resst);
 			data.append(CryptoHandler::urlEncode(sign));
 
 			data += " HTTP/1.1\r\nHost: "+hostp+"\r\nUser-Agent: Program\r\n\r\n";
 
-			cout << data << endl;
+			std::cout << data << std::endl;
 
 			int bytes = client.sendData(data);
-			string call,tot;
+			std::string call,tot;
 			while((call=client.getData())!="")
 				tot.append(call);
 			HttpResponseParser parser(tot, *res);

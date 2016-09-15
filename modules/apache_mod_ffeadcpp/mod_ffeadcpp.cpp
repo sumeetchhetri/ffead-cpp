@@ -66,7 +66,7 @@
 #define BACKLOG 500
 #define MAXBUFLEN 1024
 
-using namespace std;
+
 
 static Logger logger;
 
@@ -88,7 +88,7 @@ static void *create_modffeadcpp_config(apr_pool_t *p, server_rec *s)
 	// Allocate memory from the provided pool.
 	newcfg = (ffead_cpp_module_config *) apr_pcalloc(p, sizeof(ffead_cpp_module_config));
 
-	// Set the string to a default value.
+	// Set the std::string to a default value.
 	newcfg->path = "/";
 	newcfg->defpath = "/";
 
@@ -100,7 +100,7 @@ const char *set_modffeadcpp_path(cmd_parms *parms, void *mconfig, const char *ar
 {
 	//ffead_cpp_module_config *s_cfg = (ffead_cpp_module_config*)ap_get_module_config(
 	//		parms->server->module_config, &ffead_cpp_module);
-	cout << "path = " << arg << endl;
+	std::cout << "path = " << arg << std::endl;
 	fconfig.path = arg;
 	return NULL;
 }
@@ -109,7 +109,7 @@ const char *set_modffeadcpp_defpath(cmd_parms *parms, void *mconfig, const char 
 {
 	//ffead_cpp_module_config *s_cfg = (ffead_cpp_module_config*)ap_get_module_config(
 	//		parms->server->module_config, &ffead_cpp_module);
-	cout << "defpath = " << arg << endl;
+	std::cout << "defpath = " << arg << std::endl;
 	fconfig.defpath = arg;
 	return NULL;
 }
@@ -152,11 +152,11 @@ static apr_bucket* get_file_bucket(request_rec* r, const char* fname)
 
 static int mod_ffeadcpp_method_handler (request_rec *r)
 {
-	string serverRootDirectory;
+	std::string serverRootDirectory;
 	serverRootDirectory.append(fconfig.path);
 
-	string port = CastUtil::lexical_cast<string>(r->server->port);
-	string content;
+	std::string port = CastUtil::lexical_cast<std::string>(r->server->port);
+	std::string content;
 
 	apr_bucket_brigade *bb = apr_brigade_create(r->pool, r->connection->bucket_alloc);
 	for ( ; ; ) {
@@ -173,7 +173,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 			}
 			else if (apr_bucket_read(b, &buf, &bytes, APR_BLOCK_READ)== APR_SUCCESS )
 			{
-				content += string(buf, 0, bytes);
+				content += std::string(buf, 0, bytes);
 			}
 		}
 
@@ -184,7 +184,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	}
 	apr_brigade_destroy(bb) ;
 
-	string cntpath = serverRootDirectory + "/web/";
+	std::string cntpath = serverRootDirectory + "/web/";
 	HttpRequest* req = new HttpRequest(cntpath);
 
 	const apr_array_header_t* fields = apr_table_elts(r->headers_in);
@@ -193,8 +193,8 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 		req->buildRequest(e[i].key, e[i].val);
 	}
 
-	string ip_address = req->getHeader(HttpRequest::Host);
-	string tipaddr = ip_address;
+	std::string ip_address = req->getHeader(HttpRequest::Host);
+	std::string tipaddr = ip_address;
 	if(port!="80")
 		tipaddr += (":" + port);
 
@@ -221,8 +221,8 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	}
 
 	if(respo->isDone()) {
-		string data = respo->generateResponse(false);
-		map<string,string>::const_iterator it;
+		std::string data = respo->generateResponse(false);
+		std::map<std::string,std::string>::const_iterator it;
 		for(it=respo->getHeaders().begin();it!=respo->getHeaders().end();it++) {
 			if(StringUtil::toLowerCopy(it->first)==StringUtil::toLowerCopy(HttpResponse::ContentType)) {
 				ap_set_content_type(r, it->second.c_str());
@@ -253,15 +253,15 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 			return HTTP_FORBIDDEN;
 		}
 
-		string webPath = string(fconfig.path) + "/web";
+		std::string webPath = std::string(fconfig.path) + "/web";
 		RegexUtil::replace(webPath,"[/]+","/");
-		string acurl = req->getUrl();
+		std::string acurl = req->getUrl();
 		RegexUtil::replace(acurl,"[/]+","/");
 		if(acurl.find(webPath)==0) {
 			acurl = acurl.substr(webPath.length());
 		}
 		RegexUtil::replace(acurl,"[/]+","/");
-		logger << "static file will be processed by apache " << req->getUrl() << " " << acurl << endl;
+		logger << "static file will be processed by apache " << req->getUrl() << " " << acurl << std::endl;
 
 		r->uri = acurl.c_str();
 		r->finfo = finfo;
@@ -294,7 +294,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 
 void one_time_init()
 {
-	string serverRootDirectory;
+	std::string serverRootDirectory;
 	serverRootDirectory.append(fconfig.path);
 	//if(serverRootDirectory=="") {
 	//	serverRootDirectory = fconfig.defpath;
@@ -306,25 +306,25 @@ void one_time_init()
 		RegexUtil::replace(serverRootDirectory,"[/]+","/");
 	}
 
-	string incpath = serverRootDirectory + "include/";
-	string rtdcfpath = serverRootDirectory + "rtdcf/";
-	string pubpath = serverRootDirectory + "public/";
-	string respath = serverRootDirectory + "resources/";
-	string webpath = serverRootDirectory + "web/";
-	string logpath = serverRootDirectory + "logs/";
-	string resourcePath = respath;
+	std::string incpath = serverRootDirectory + "include/";
+	std::string rtdcfpath = serverRootDirectory + "rtdcf/";
+	std::string pubpath = serverRootDirectory + "public/";
+	std::string respath = serverRootDirectory + "resources/";
+	std::string webpath = serverRootDirectory + "web/";
+	std::string logpath = serverRootDirectory + "logs/";
+	std::string resourcePath = respath;
 
 	PropFileReader pread;
 	propMap srprps = pread.getProperties(respath+"server.prop");
 
-	string servd = serverRootDirectory;
-	string logp = respath+"/logging.xml";
+	std::string servd = serverRootDirectory;
+	std::string logp = respath+"/logging.xml";
 	LoggerFactory::init(logp, serverRootDirectory, "", StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true");
 
 	logger = LoggerFactory::getLogger("MOD_FFEADCPP");
 
 	bool isCompileEnabled = false;
-   	string compileEnabled = srprps["DEV_MODE"];
+   	std::string compileEnabled = srprps["DEV_MODE"];
 	if(compileEnabled=="true" || compileEnabled=="TRUE")
 		isCompileEnabled = true;
 
@@ -341,7 +341,7 @@ void one_time_init()
    		try {
    			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
 		} catch (...) {
-			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << endl;
+			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << std::endl;
 		}
    	}
 
@@ -370,22 +370,22 @@ void one_time_init()
     }
     catch(const XmlParseException& p)
     {
-    	logger << p.getMessage() << endl;
+    	logger << p.getMessage() << std::endl;
     }
     catch(const char* msg)
 	{
-		logger << msg << endl;
+		logger << msg << std::endl;
 	}
 
-    logger << INTER_LIB_FILE << endl;
+    logger << INTER_LIB_FILE << std::endl;
 
     bool libpresent = true;
     void *dlibtemp = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	//logger << endl <<dlibtemp << endl;
+	//logger << endl <<dlibtemp << std::endl;
 	if(dlibtemp==NULL)
 	{
 		libpresent = false;
-		logger << dlerror() << endl;
+		logger << dlerror() << std::endl;
 		logger.info("Could not load Library");
 	}
 	else
@@ -397,59 +397,59 @@ void one_time_init()
 
 	if(!libpresent)
 	{
-		string configureFilePath = rtdcfpath+"/autotools/configure";
+		std::string configureFilePath = rtdcfpath+"/autotools/configure";
 		if (access( configureFilePath.c_str(), F_OK ) == -1 )
 		{
-			string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
-			string output = ScriptHandler::execute(compres, true);
-			logger << "Set up configure for intermediate libraries\n\n" << endl;
+			std::string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
+			std::string output = ScriptHandler::execute(compres, true);
+			logger << "Set up configure for intermediate libraries\n\n" << std::endl;
 		}
 
 		if (access( configureFilePath.c_str(), F_OK ) != -1 )
 		{
-			string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+			std::string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
 		#ifdef DEBUG
 			compres += " --enable-debug=yes";
 		#endif
-			string output = ScriptHandler::execute(compres, true);
-			logger << "Set up makefiles for intermediate libraries\n\n" << endl;
-			logger << output << endl;
+			std::string output = ScriptHandler::execute(compres, true);
+			logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
+			logger << output << std::endl;
 
 			compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 			output = ScriptHandler::execute(compres, true);
-			logger << "Intermediate code generation task\n\n" << endl;
-			logger << output << endl;
+			logger << "Intermediate code generation task\n\n" << std::endl;
+			logger << output << std::endl;
 		}
 	}
 
 	void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(checkdlib==NULL)
 	{
-		string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
-		string output = ScriptHandler::execute(compres, true);
-		logger << "Set up configure for intermediate libraries\n\n" << endl;
+		std::string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
+		std::string output = ScriptHandler::execute(compres, true);
+		logger << "Set up configure for intermediate libraries\n\n" << std::endl;
 
 		compres = respath+"rundyn-configure.sh "+serverRootDirectory;
 		#ifdef DEBUG
 			compres += " --enable-debug=yes";
 		#endif
 		output = ScriptHandler::execute(compres, true);
-		logger << "Set up makefiles for intermediate libraries\n\n" << endl;
-		logger << output << endl;
+		logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
+		logger << output << std::endl;
 
 		compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 		if(!libpresent)
 		{
-			string output = ScriptHandler::execute(compres, true);
-			logger << "Rerunning Intermediate code generation task\n\n" << endl;
-			logger << output << endl;
+			std::string output = ScriptHandler::execute(compres, true);
+			logger << "Rerunning Intermediate code generation task\n\n" << std::endl;
+			logger << output << std::endl;
 		}
 		checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	}
 
 	if(checkdlib==NULL)
 	{
-		logger << dlerror() << endl;
+		logger << dlerror() << std::endl;
 		logger.info("Could not load Library");
 		exit(0);
 	}
@@ -462,7 +462,7 @@ void one_time_init()
 #ifdef INC_COMP
 	for (unsigned int var1 = 0;var1<ConfigurationData::getInstance()->componentNames.size();var1++)
 	{
-		string name = ConfigurationData::getInstance()->componentNames.at(var1);
+		std::string name = ConfigurationData::getInstance()->componentNames.at(var1);
 		StringUtil::replaceFirst(name,"Component_","");
 		ComponentHandler::registerComponent(name);
 		AppContext::registerComponent(name);
@@ -478,7 +478,7 @@ void one_time_init()
 			distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
 		}
 	} catch(...) {
-		logger << ("Invalid poolsize specified for distocache") << endl;
+		logger << ("Invalid poolsize specified for distocache") << std::endl;
 	}
 
 	try {
@@ -486,15 +486,15 @@ void one_time_init()
 		{
 			CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
 			DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
-			logger << ("Session store is set to distocache store") << endl;
+			logger << ("Session store is set to distocache store") << std::endl;
 			distocache = true;
 		}
 	} catch(...) {
-		logger << ("Invalid port specified for distocache") << endl;
+		logger << ("Invalid port specified for distocache") << std::endl;
 	}
 
 	if(!distocache) {
-		logger << ("Session store is set to file store") << endl;
+		logger << ("Session store is set to file store") << std::endl;
 	}
 #endif*/
 
@@ -503,15 +503,15 @@ void one_time_init()
 	JobScheduler::start();
 #endif
 
-	logger << ("Initializing WSDL files....") << endl;
+	logger << ("Initializing WSDL files....") << std::endl;
 	ConfigurationHandler::initializeWsdls();
-	logger << ("Initializing WSDL files done....") << endl;
+	logger << ("Initializing WSDL files done....") << std::endl;
 
 	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	//logger << endl <<dlib << endl;
+	//logger << endl <<dlib << std::endl;
 	if(dlib==NULL)
 	{
-		logger << dlerror() << endl;
+		logger << dlerror() << std::endl;
 		logger.info("Could not load Library");
 		exit(0);
 	}
@@ -522,10 +522,10 @@ void one_time_init()
 	}
 
 	void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
-	//logger << endl <<dlib << endl;
+	//logger << endl <<dlib << std::endl;
 	if(ddlib==NULL)
 	{
-		logger << dlerror() << endl;
+		logger << dlerror() << std::endl;
 		logger.info("Could not load dynamic Library");
 		exit(0);
 	}
@@ -561,7 +561,7 @@ static int mod_ffeadcp_post_config_hanlder(apr_pool_t *pconf, apr_pool_t *plog, 
 	//		ap_get_module_config(s->module_config, &ffead_cpp_module);
 	if(!doneOnce)
 	{
-		cout << "Configuring ffead-cpp....." << endl;
+		std::cout << "Configuring ffead-cpp....." << std::endl;
 		one_time_init();
 	}
 	doneOnce = true;
@@ -583,7 +583,7 @@ static void mod_ffeadcp_child_uninit()
 static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 {
 	apr_pool_cleanup_register(p, NULL, mod_ffeadcp_child_uninit, apr_pool_cleanup_null);
-	cout << "Initializing ffead-cpp....." << endl;
+	std::cout << "Initializing ffead-cpp....." << std::endl;
 #ifdef INC_COMP
 	try {
 		if(srprps["CMP_PORT"]!="")
@@ -595,7 +595,7 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 			}
 		}
 	} catch(...) {
-		logger << ("Component Handler Services are disabled") << endl;
+		logger << ("Component Handler Services are disabled") << std::endl;
 	}
 #endif
 
@@ -610,7 +610,7 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 			}
 		}
 	} catch(...) {
-		logger << ("Messaging Handler Services are disabled") << endl;
+		logger << ("Messaging Handler Services are disabled") << std::endl;
 	}
 #endif
 
@@ -625,25 +625,25 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 			}
 		}
 	} catch(...) {
-		logger << ("Method Invoker Services are disabled") << endl;
+		logger << ("Method Invoker Services are disabled") << std::endl;
 	}
 #endif
 
 #ifdef INC_SDORM
-	logger << ("Initializing DataSources....") << endl;
+	logger << ("Initializing DataSources....") << std::endl;
 	ConfigurationHandler::initializeDataSources();
-	logger << ("Initializing DataSources done....") << endl;
+	logger << ("Initializing DataSources done....") << std::endl;
 #endif
 
-	logger << ("Initializing Caches....") << endl;
+	logger << ("Initializing Caches....") << std::endl;
 	ConfigurationHandler::initializeCaches();
-	logger << ("Initializing Caches done....") << endl;
+	logger << ("Initializing Caches done....") << std::endl;
 
 	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
-	logger << ("Initializing ffeadContext....") << endl;
+	logger << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
-	logger << ("Initializing ffeadContext done....") << endl;
+	logger << ("Initializing ffeadContext done....") << std::endl;
 }
 
 static void mod_ffeadcpp_register_hooks (apr_pool_t *p)

@@ -12,7 +12,7 @@ Http2PingFrame::Http2PingFrame() {
 	opaqueData = -1;
 }
 
-Http2PingFrame::Http2PingFrame(const string& data, Http2FrameHeader& aheader) {
+Http2PingFrame::Http2PingFrame(const std::string& data, Http2FrameHeader& aheader) {
 	header = aheader;
 	header.type = 6;
 	opaqueData = (uint64_t)CommonUtils::charArrayToULongLong(data.substr(0, 8));
@@ -26,8 +26,8 @@ Http2PingFrame::~Http2PingFrame() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http2PingFrame::getFrameData() {
-	string edata;
+std::string Http2PingFrame::getFrameData() {
+	std::string edata;
 	edata.append(CommonUtils::ulonglongTocharArray(opaqueData, 8));
 	return edata;
 }

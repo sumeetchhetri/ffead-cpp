@@ -30,27 +30,27 @@ View::~View()
 
 }
 
-string View::generateStartOpenTag(string tagName)
+std::string View::generateStartOpenTag(std::string tagName)
 {
-	string str = "<" + tagName;
+	std::string str = "<" + tagName;
 	return str;
 }
 
-string View::generateEndOpenTag()
+std::string View::generateEndOpenTag()
 {
-	string str = ">\n";
+	std::string str = ">\n";
 	return str;
 }
 
-string View::generateCloseTag(string tagName)
+std::string View::generateCloseTag(std::string tagName)
 {
-	string str = "</" + tagName + ">\n";
+	std::string str = "</" + tagName + ">\n";
 	return str;
 }
 
-string View::generateAttributes(AttributeList attributes)
+std::string View::generateAttributes(AttributeList attributes)
 {
-	string str;
+	std::string str;
 	AttributeList::iterator itr;
 	for(itr = attributes.begin();itr!=attributes.end();itr++)
 	{
@@ -59,7 +59,7 @@ string View::generateAttributes(AttributeList attributes)
 	return str;
 }
 
-void View::traverseElement(string *ss, Element* element)
+void View::traverseElement(std::string *ss, Element* element)
 {
 	ss->append(generateStartOpenTag(element->getTagName()));
 	ss->append(generateAttributes(element->getAttributes()));
@@ -73,9 +73,9 @@ void View::traverseElement(string *ss, Element* element)
 	ss->append(generateCloseTag(element->getTagName()));
 }
 
-string View::generateDocument(Document& document)
+std::string View::generateDocument(Document& document)
 {
-	string ss;
+	std::string ss;
 	traverseElement(&ss, &(document.getRootElement()));
 	return ss;
 }

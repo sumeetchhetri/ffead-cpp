@@ -19,7 +19,7 @@
 #include "string"
 #include "iostream"
 #include "DependencyBean4.h"
-using namespace std;
+
 class TestBeanCons
 {
 private:
@@ -57,7 +57,7 @@ public:
         if(this->boolProp)
         {
             this->dependencyBean4.print();
-            cout << (this->intProp) << flush;
+            std::cout << (this->intProp) << std::flush;
         }
     }
 };

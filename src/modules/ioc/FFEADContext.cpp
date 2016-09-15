@@ -28,7 +28,7 @@ FFEADContext::FFEADContext()
 	logger = LoggerFactory::getLogger("FFEADContext");
 }
 
-FFEADContext::FFEADContext(const string& depFile, const string& appName)
+FFEADContext::FFEADContext(const std::string& depFile, const std::string& appName)
 {
 	logger = LoggerFactory::getLogger("FFEADContext");
 	XmlParser parser("Parser");
@@ -118,7 +118,7 @@ FFEADContext::~FFEADContext()
 void* FFEADContext::getBean(const Bean& bean)
 {
 	void *_temp = NULL;
-	string type;
+	std::string type;
 	if(bean.inbuilt!="" && bean.value!="")
 	{
 		type = bean.inbuilt;
@@ -140,9 +140,9 @@ void* FFEADContext::getBean(const Bean& bean)
 	}
 	if(bean.inbuilt!="" && bean.value!="")
 	{
-		if(bean.inbuilt=="string")
+		if(bean.inbuilt=="string" || bean.inbuilt=="std::string")
 		{
-			string *in = new string(bean.value);
+			std::string *in = new std::string(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="int")
@@ -151,7 +151,7 @@ void* FFEADContext::getBean(const Bean& bean)
 			*in = CastUtil::lexical_cast<int>(bean.value);
 			_temp = in;
 		}
-		else if(bean.inbuilt=="flaot")
+		else if(bean.inbuilt=="float")
 		{
 			float *in = new float;
 			*in = CastUtil::lexical_cast<float>(bean.value);
@@ -167,6 +167,12 @@ void* FFEADContext::getBean(const Bean& bean)
 		{
 			long *in = new long;
 			*in = CastUtil::lexical_cast<long>(bean.value);
+			_temp = in;
+		}
+		else if(bean.inbuilt=="long long")
+		{
+			long long *in = new long long;
+			*in = CastUtil::lexical_cast<long long>(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="bool")
@@ -206,7 +212,7 @@ void* FFEADContext::getBean(const Bean& bean)
 			Bean& beanc = injbns[bean.injs.at(var)];
 			if(beanc.name=="")
 				beanc = beans[bean.injs.at(var)];
-			string methodName("set");
+			std::string methodName("set");
 			methodName += StringUtil::capitalizedCopy(bean.names.at(var));
 			if(beanc.inbuilt!="")
 				argus.push_back(beanc.inbuilt);
@@ -258,7 +264,7 @@ void* FFEADContext::getBean(const Bean& bean)
 			Bean& beanc = injbns[bean.injs.at(var)];
 			if(beanc.name=="")
 				beanc = beans[bean.injs.at(var)];
-			string methodName("set");
+			std::string methodName("set");
 			methodName += StringUtil::capitalizedCopy(bean.names.at(var));
 			if(bean.types.at(var)!="")
 				argus.push_back(bean.types.at(var));
@@ -279,7 +285,7 @@ void* FFEADContext::getBean(const Bean& bean)
 	return _temp;
 }
 
-void* FFEADContext::getBean(const string& beanName, const string& appName)
+void* FFEADContext::getBean(const std::string& beanName, const std::string& appName)
 {
 	if(beanName!="" && beans.find(appName+beanName)!=beans.end())
 	{
@@ -289,7 +295,7 @@ void* FFEADContext::getBean(const string& beanName, const string& appName)
 	return NULL;
 }
 
-void FFEADContext::release(const string& beanName, const string& appName)
+void FFEADContext::release(const std::string& beanName, const std::string& appName)
 {
 	if(beanName!="" && beans.find(appName+beanName)!=beans.end())
 	{
@@ -305,14 +311,14 @@ void FFEADContext::release(const string& beanName, const string& appName)
 	}
 }
 
-void FFEADContext::clear(const string& appName)
+void FFEADContext::clear(const std::string& appName)
 {
 	if(cleared)
 		return;
-	map<string,void*>::iterator objectsIter;
+	std::map<std::string,void*>::iterator objectsIter;
 	for (objectsIter=objects.begin();objectsIter != objects.end();objectsIter++)
 	{
-		if(objectsIter->first=="string" || objectsIter->first=="int" || objectsIter->first=="long"
+		if(objectsIter->first=="string" || objectsIter->first=="std::string" || objectsIter->first=="int" || objectsIter->first=="long"
 			|| objectsIter->first=="double" || objectsIter->first=="float" || objectsIter->first=="bool"
 				|| objectsIter->first=="char")
 			delete objectsIter->second;
@@ -330,26 +336,26 @@ void FFEADContext::addBean(const Bean& bean)
 		beans[bean.appName+bean.name] = bean;
 }
 
-void FFEADContext::clearAllSingletonBeans(const map<string, bool>& servingContexts)
+void FFEADContext::clearAllSingletonBeans(const std::map<std::string, bool>& servingContexts)
 {
-	map<string, bool>::const_iterator it;
+	std::map<std::string, bool>::const_iterator it;
 	for (it=servingContexts.begin();it!=servingContexts.end();it++)
 	{
 		clear(it->first);
 	}
 }
 
-void FFEADContext::initializeAllSingletonBeans(const map<string, bool>& servingContexts)
+void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts)
 {
 	if(reflector==NULL) {
 		reflector = new Reflector;
 	}
-	map<string,Bean>::iterator beanIter;
-	logger << "Initializing singleton beans..." << endl;
+	std::map<std::string,Bean>::iterator beanIter;
+	logger << "Initializing singleton beans..." << std::endl;
 	for (beanIter=beans.begin();beanIter!=beans.end();beanIter++)
 	{
 		Bean& bean = beanIter->second;
-		string type;
+		std::string type;
 		if(bean.inbuilt!="" && bean.value!="")
 		{
 			type = bean.inbuilt;
@@ -361,7 +367,7 @@ void FFEADContext::initializeAllSingletonBeans(const map<string, bool>& servingC
 		if(servingContexts.find(bean.appName)!=servingContexts.end()
 				&& StringUtil::toLowerCopy(bean.scope)!="prototype" && objects.find(type)==objects.end())
 		{
-			logger << ("Initializing Bean [appName = "+bean.appName+", name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)getBean(bean))) << endl;
+			logger << ("Initializing Bean [appName = "+bean.appName+", name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)getBean(bean))) << std::endl;
 		}
 	}
 }
@@ -371,7 +377,7 @@ Reflector& FFEADContext::getReflector()
 	return *reflector;
 }
 
-Bean::Bean(const string& name, const string& value, const string& type, const string& scope, const bool& isInbuilt, const string& appName)
+Bean::Bean(const std::string& name, const std::string& value, const std::string& type, const std::string& scope, const bool& isInbuilt, const std::string& appName)
 {
 	this->name = name;
 	this->value = value;

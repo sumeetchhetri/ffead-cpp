@@ -31,24 +31,24 @@ MarkerTesting::~MarkerTesting() {
 	// TODO Auto-generated destructor stub
 }
 
-void MarkerTesting::test1(string in)
+void MarkerTesting::test1(std::string in)
 {
-	cout << "in Webservice Req for test1 --\n" << in << flush;
+	std::cout << "in Webservice Req for test1 --\n" << in << std::flush;
 }
-string MarkerTesting::test2()
+std::string MarkerTesting::test2()
 {
-	cout << "in Webservice Req for test2 --\n" <<  flush;
+	std::cout << "in Webservice Req for test2 --\n" <<  std::flush;
 	return "success";
 }
 void MarkerTesting::test3(MarkerTest t)
 {
-	cout << "in Webservice Req for test3 --\n" << t.getName() << flush;
+	std::cout << "in Webservice Req for test3 --\n" << t.getName() << std::flush;
 }
-MarkerTest MarkerTesting::test4(string in)
+MarkerTest MarkerTesting::test4(std::string in)
 {
 	MarkerTest g;
 	g.setId(1);
 	g.setName("Sumeet");
-	cout << "in Webservice Req for test4 --\n" << in << flush;
+	std::cout << "in Webservice Req for test4 --\n" << in << std::flush;
 	return g;
 }

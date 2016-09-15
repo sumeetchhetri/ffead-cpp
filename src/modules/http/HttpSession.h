@@ -26,22 +26,22 @@
 
 #ifndef HTTPSESSION_H_
 #define HTTPSESSION_H_
-using namespace std;
 
-typedef map<string, string> Map;
+
+typedef std::map<std::string, std::string> Map;
 class HttpSession {
-	string sessionId;
+	std::string sessionId;
 	Map sessionAttributes;
 	bool dirty;
 public:
 	HttpSession();
 	virtual ~HttpSession();
-    string getSessionId() const;
-    void setSessionId(const string&);
+    std::string getSessionId() const;
+    void setSessionId(const std::string&);
     Map getSessionAttributes();
     void setSessionAttributes(const Map&);
-    string getAttribute(const string&);
-    void setAttribute(const string&, const string&);
+    std::string getAttribute(const std::string&);
+    void setAttribute(const std::string&, const std::string&);
     bool isDirty() const{return dirty;}
 };
 

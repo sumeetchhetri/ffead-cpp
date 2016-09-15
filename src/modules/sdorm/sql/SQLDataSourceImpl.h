@@ -16,7 +16,7 @@
 #include "DataSourceInterface.h"
 #include "DialectHelper.h"
 
-typedef map<string, GenericObject> Params;
+typedef std::map<std::string, GenericObject> Params;
 
 class SQLDataSourceImpl: public DataSourceInterface {
 	Logger logger;
@@ -25,47 +25,47 @@ class SQLDataSourceImpl: public DataSourceInterface {
 	SQLHSTMT V_OD_hstmt; //statement
 #endif
 	Params params;
-	string appName, dialect;
+	std::string appName, dialect;
 	bool isTransaction;
 	Connection *conn;
 	bool allocateStmt(const bool&);
 	void refreshStmt();
-	map<string, string> ntmap;
+	std::map<std::string, std::string> ntmap;
 	void clearMaps() {
 		ntmap.clear();
 		params.clear();
 	}
 	void* getElements();
 	void* getElements(Query& q);
-	void* getElements(const vector<string>& cols, Query& q);
+	void* getElements(const std::vector<std::string>& cols, Query& q);
 	void showError(const char *fn, const SQLHANDLE& handle, const SQLSMALLINT& type);
 	void close();
 	void bindQueryParams(Query& query);
 	Query fromQueryBuilder(QueryBuilder& qb);
 	void* executeQueryObject(Query& cquery);
 	void* executeQueryInternal(Query& query, const bool& isObj);
-	int storeProperty(ClassInfo& clas, void* t, int var, const string& fieldName, string& fldVal);
-	int getProperty(const int& dataType, const int& columnSize, map<string, GenericObject>& colValMap, const string& colName, const int& var);
-	long getNumRows(const string& clasName);
-	void empty(const string& clasName);
+	int storeProperty(ClassInfo& clas, void* t, int var, const std::string& fieldName, std::string& fldVal);
+	int getProperty(const int& dataType, const int& columnSize, std::map<std::string, GenericObject>& colValMap, const std::string& colName, const int& var);
+	long getNumRows(const std::string& clasName);
+	void empty(const std::string& clasName);
 public:
 	SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping);
 	~SQLDataSourceImpl();
 	bool startTransaction();
 	bool commit();
 	bool rollback();
-	void procedureCall(const string&);
-	vector<map<string, GenericObject> > execute(Query& query);
+	void procedureCall(const std::string&);
+	std::vector<std::map<std::string, GenericObject> > execute(Query& query);
 	bool executeUpdate(Query& query);
-	vector<map<string, GenericObject> > execute(QueryBuilder& qb);
+	std::vector<std::map<std::string, GenericObject> > execute(QueryBuilder& qb);
 protected:
 	bool executeInsert(Query& query, void* entity);
 	bool isGetDbEntityForBulkInsert();
-	void* getDbEntityForBulkInsert(void* entity, const string& clasName, string& error);
-	bool executeInsertBulk(Query& query, vector<void*> entities, vector<void*> dbEntities);
-	bool executeUpdateBulk(Query& query, vector<void*> entities, vector<void*> dbEntities);
+	void* getDbEntityForBulkInsert(void* entity, const std::string& clasName, std::string& error);
+	bool executeInsertBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities);
+	bool executeUpdateBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities);
 	bool executeUpdate(Query& query, void* entity);
-	bool remove(const string& clasName, GenericObject& id);
+	bool remove(const std::string& clasName, GenericObject& id);
 
 	void* executeQuery(Query& query, const bool& isObj);
 	void* executeQuery(QueryBuilder& qb, const bool& isObj);
@@ -74,7 +74,7 @@ protected:
 	void executePostTable(DataSourceEntityMapping& dsemp, GenericObject& idv);
 	void executeSequence(DataSourceEntityMapping& dsemp, GenericObject& idv);
 	void executeIdentity(DataSourceEntityMapping& dsemp, GenericObject& idv);
-	void executeCustom(DataSourceEntityMapping& dsemp, const string& customMethod, GenericObject& idv);
+	void executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject& idv);
 
 	void* getContext(void* details);
 	void destroyContext(void*);

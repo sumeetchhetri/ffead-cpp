@@ -15,12 +15,12 @@
 class QueryComponent {
 	bool isAnd;
 	bool undecided;
-	vector<Condition> andClauses;
-	vector<Condition> orClauses;
-	vector<Condition> tempClauses;
-	vector<QueryComponent*> andChildren;
-	vector<QueryComponent*> orChildren;
-	vector<QueryComponent*> tempChildren;
+	std::vector<Condition> andClauses;
+	std::vector<Condition> orClauses;
+	std::vector<Condition> tempClauses;
+	std::vector<QueryComponent*> andChildren;
+	std::vector<QueryComponent*> orChildren;
+	std::vector<QueryComponent*> tempChildren;
 	QueryComponent* parent;
 	bson_t* actualQuery;
 	friend class MongoDBDataSourceImpl;
@@ -37,20 +37,20 @@ class MongoContext {
 
 class MongoDBDataSourceImpl: public DataSourceInterface {
 	Logger logger;
-	static QueryComponent* getQueryComponent(const vector<Condition>& conds);
+	static QueryComponent* getQueryComponent(const std::vector<Condition>& conds);
 	static void populateQueryComponents(QueryComponent* sq);
-	static bson_t* createSubMongoQuery(vector<Condition>& conds);
-	static void appendGenericObject(bson_t* b, const string& name, GenericObject& o);
-	static map<string, map<string, Condition> > toMap(vector<Condition>& conds);
-	void getBSONObjectFromObject(const string& clasName, void* object, bson_t*, const bool& isIdBsonAppend= true);
-	string initializeQueryParts(Query& cquery, bson_t** fields, bson_t** querySpec, string& operationName);
-	string initializeDMLQueryParts(Query& cquery, bson_t** data, bson_t** query, string& operationName);
-	string getQueryForRelationship(const string& column, const string& type, void* val);
-	void getMapOfProperties(bson_t* data, map<string, GenericObject>* map);
-	void* getObject(bson_t* data, uint8_t* buf, uint32_t len, const string& clasName);
+	static bson_t* createSubMongoQuery(std::vector<Condition>& conds);
+	static void appendGenericObject(bson_t* b, const std::string& name, GenericObject& o);
+	static std::map<std::string, std::map<std::string, Condition> > toMap(std::vector<Condition>& conds);
+	void getBSONObjectFromObject(const std::string& clasName, void* object, bson_t*, const bool& isIdBsonAppend= true);
+	std::string initializeQueryParts(Query& cquery, bson_t** fields, bson_t** querySpec, std::string& operationName);
+	std::string initializeDMLQueryParts(Query& cquery, bson_t** data, bson_t** query, std::string& operationName);
+	std::string getQueryForRelationship(const std::string& column, const std::string& type, void* val);
+	void getMapOfProperties(bson_t* data, std::map<std::string, GenericObject>* map);
+	void* getObject(bson_t* data, uint8_t* buf, uint32_t len, const std::string& clasName);
 	void storeProperty(const ClassInfo& clas, void* t, void* colV, const Field& fe);
-	void* getResults(const string& tableNm, Query& cquery, bson_t* fields, bson_t* querySpec, const bool& isObj, const bool& isCountQuery);
-	void* getResults(const string& tableNm, QueryBuilder& qb, bson_t* fields, bson_t* query, const bool& isObj);
+	void* getResults(const std::string& tableNm, Query& cquery, bson_t* fields, bson_t* querySpec, const bool& isObj, const bool& isCountQuery);
+	void* getResults(const std::string& tableNm, QueryBuilder& qb, bson_t* fields, bson_t* query, const bool& isObj);
 	Connection* _conn();
 	mongoc_collection_t* _collection(Connection*, const char*);
 	void _release(Connection*, mongoc_collection_t*);
@@ -60,20 +60,20 @@ public:
 	bool startTransaction();
 	bool commit();
 	bool rollback();
-	void procedureCall(const string&);
-	void empty(const string& clasName);
-	long getNumRows(const string& clasName);
+	void procedureCall(const std::string&);
+	void empty(const std::string& clasName);
+	long getNumRows(const std::string& clasName);
 	bool executeUpdate(Query& query);
-	vector<map<string, GenericObject> > execute(QueryBuilder& qb);
-	vector<map<string, GenericObject> > execute(Query& query);
+	std::vector<std::map<std::string, GenericObject> > execute(QueryBuilder& qb);
+	std::vector<std::map<std::string, GenericObject> > execute(Query& query);
 protected:
 	bool executeInsert(Query& query, void* entity);
 	bool isGetDbEntityForBulkInsert();
-	void* getDbEntityForBulkInsert(void* entity, const string& clasName, string& error);
-	bool executeInsertBulk(Query& query, vector<void*> entities, vector<void*> dbEntities);
-	bool executeUpdateBulk(Query& query, vector<void*> entities, vector<void*> dbEntities);
+	void* getDbEntityForBulkInsert(void* entity, const std::string& clasName, std::string& error);
+	bool executeInsertBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities);
+	bool executeUpdateBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities);
 	bool executeUpdate(Query& query, void* entity);
-	bool remove(const string& clasName, GenericObject& id);
+	bool remove(const std::string& clasName, GenericObject& id);
 
 	void* executeQuery(Query& query, const bool& isObj);
 	void* executeQuery(QueryBuilder& qb, const bool& isObj);
@@ -82,7 +82,7 @@ protected:
 	void executePostTable(DataSourceEntityMapping& dsemp, GenericObject& idv);
 	void executeSequence(DataSourceEntityMapping& dsemp, GenericObject& idv);
 	void executeIdentity(DataSourceEntityMapping& dsemp, GenericObject& idv);
-	void executeCustom(DataSourceEntityMapping& dsemp, const string& customMethod, GenericObject& idv);
+	void executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject& idv);
 
 	void* getContext(void* details);
 	void destroyContext(void*);

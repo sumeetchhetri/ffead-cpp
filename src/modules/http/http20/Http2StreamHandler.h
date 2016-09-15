@@ -32,7 +32,7 @@ class Http2StreamHandler {
 
 	HttpRequest* request;
 	bool isHeadersDone;
-	string headerBlockFragment;
+	std::string headerBlockFragment;
 	bool endofstream;
 
 	WebSocketData* wsrequest;
@@ -47,14 +47,14 @@ class Http2StreamHandler {
 	void* getWsRequestAndReInit();
 	void closeConnection(const int& lastStreamIdentifier, Http2ReadWriteUtil* handler);
 	bool isWebSocketRequest();
-	void* handleWebSocketRequest(Http2HPACKContext* context, Http2Frame* frame, Http2ReadWriteUtil* handler, map<uint16_t, uint32_t>& settings);
-	void sendPushPromiseFrames(Http2HPACKContext* context, Http2Frame* frame, Http2ReadWriteUtil* handler, map<uint16_t, uint32_t>& settings);
+	void* handleWebSocketRequest(Http2HPACKContext* context, Http2Frame* frame, Http2ReadWriteUtil* handler, std::map<uint16_t, uint32_t>& settings);
+	void sendPushPromiseFrames(Http2HPACKContext* context, Http2Frame* frame, Http2ReadWriteUtil* handler, std::map<uint16_t, uint32_t>& settings);
 	friend class Http2Handler;
 public:
 	Http2StreamHandler();
-	Http2StreamHandler(Http2HPACKContext* context, const int& streamIdentifier, const string& webpath);
+	Http2StreamHandler(Http2HPACKContext* context, const int& streamIdentifier, const std::string& webpath);
 	virtual ~Http2StreamHandler();
-	bool handle(Http2Frame* frame, const int& precedingStreamId, map<uint16_t, uint32_t>& settings, Http2ReadWriteUtil* handler, map<int, bool>& frameAcks, void*& requestObj);
+	bool handle(Http2Frame* frame, const int& precedingStreamId, std::map<uint16_t, uint32_t>& settings, Http2ReadWriteUtil* handler, std::map<int, bool>& frameAcks, void*& requestObj);
 };
 
 #endif /* HTTP2STREAMHANDLER_H_ */

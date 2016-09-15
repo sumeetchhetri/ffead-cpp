@@ -26,7 +26,7 @@ SSLHandler* SSLHandler::instance = NULL;
 char* SSLHandler::pass = NULL;
 int SSLHandler::s_server_session_id_context = 1;
 int SSLHandler::s_server_auth_session_id_context = 2;
-vector<vector<unsigned char> > SSLHandler::advertisedProtos;
+std::vector<std::vector<unsigned char> > SSLHandler::advertisedProtos;
 
 SSLHandler::SSLHandler() {
 	logger = LoggerFactory::getLogger("SSLHandler");
@@ -80,8 +80,8 @@ void SSLHandler::init(const SecurityProperties& securityProperties) {
 		{
 			for(int pn=0;pn<(int)securityProperties.alpnProtoList.size();pn++)
 			{
-				string protoname = securityProperties.alpnProtoList.at(pn);
-				vector<unsigned char> res = vector<unsigned char>(1 + protoname.length());
+				std::string protoname = securityProperties.alpnProtoList.at(pn);
+				std::vector<unsigned char> res = std::vector<unsigned char>(1 + protoname.length());
 				unsigned char* p = res.data();
 				*p++ = protoname.length();
 				memcpy(p, protoname.c_str(), protoname.length());
@@ -89,7 +89,7 @@ void SSLHandler::init(const SecurityProperties& securityProperties) {
 			}
 		}
 
-		string sslConfsettings = "Server setup with SSL enabled, CERTFILE = ";
+		std::string sslConfsettings = "Server setup with SSL enabled, CERTFILE = ";
 		sslConfsettings.append(securityProperties.cert_file);
 		sslConfsettings.append(", KEYFILE = ");
 		sslConfsettings.append(securityProperties.key_file);
@@ -100,10 +100,10 @@ void SSLHandler::init(const SecurityProperties& securityProperties) {
 		sslConfsettings.append(", CA_LIST = ");
 		sslConfsettings.append(securityProperties.ca_list);
 		sslConfsettings.append(", ISDH_PARAMS = ");
-		//sslConfsettings.append(CastUtil::lexical_cast<string>(securityProperties.isDHParams));
+		//sslConfsettings.append(CastUtil::lexical_cast<std::string>(securityProperties.isDHParams));
 		//sslConfsettings.append(", CLIENT_SEC_LEVEL = ");
-		//sslConfsettings.append(CastUtil::lexical_cast<string>(securityProperties.client_auth));
-		logger << sslConfsettings << endl;
+		//sslConfsettings.append(CastUtil::lexical_cast<std::string>(securityProperties.client_auth));
+		logger << sslConfsettings << std::endl;
 
 		/* Build our SSL context*/
 		ctx = SSLCommon::initialize_ctx(true);
@@ -189,7 +189,7 @@ int SSLHandler::alpn_select_proto_cb(SSL *ssl, const unsigned char **out, unsign
 	instance->logger << "[ALPN] client offers:" << std::endl;
 	for (unsigned int i = 0; i < inlen; i += in [i] + 1) {
 		instance->logger << " * ";
-		instance->logger << (string(reinterpret_cast<const char *>(&in[i + 1]), in[i]));
+		instance->logger << (std::string(reinterpret_cast<const char *>(&in[i + 1]), in[i]));
 		instance->logger << std::endl;
 	}
 	if (select_next_protocol(const_cast<unsigned char **>(out), outlen, in, inlen) <= 0) {
@@ -197,13 +197,13 @@ int SSLHandler::alpn_select_proto_cb(SSL *ssl, const unsigned char **out, unsign
 	}
 	int sockfd;
 	BIO_get_fd(ssl->rbio, &sockfd);
-	instance->socketAlpnProtoMap[sockfd] = string((char*)*out, (int)(*outlen));
+	instance->socketAlpnProtoMap[sockfd] = std::string((char*)*out, (int)(*outlen));
 	return SSL_TLSEXT_ERR_OK;
 }
 #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
 
-string SSLHandler::getAlpnProto(const int& fd) {
-	string retval;
+std::string SSLHandler::getAlpnProto(const int& fd) {
+	std::string retval;
 	instance->lock.lock();
 	if(instance->socketAlpnProtoMap.find(fd)!=instance->socketAlpnProtoMap.end()) {
 		retval = instance->socketAlpnProtoMap[fd];
@@ -255,14 +255,14 @@ int SSLHandler::select_next_protocol(unsigned char **out, unsigned char *outlen,
 }
 
 int SSLHandler::next_proto_cb(SSL *s, const unsigned char **data, unsigned int *len, void *arg) {
-	vector<unsigned char>* next_proto = static_cast<vector<unsigned char> *>(arg);
+	std::vector<unsigned char>* next_proto = static_cast<std::vector<unsigned char> *>(arg);
 	*data = next_proto->data();
 	*len = next_proto->size();
 	return SSL_TLSEXT_ERR_OK;
 }
 
-vector<unsigned char> SSLHandler::getDefaultALPN() {
-	vector<unsigned char> res;
+std::vector<unsigned char> SSLHandler::getDefaultALPN() {
+	std::vector<unsigned char> res;
 	if(advertisedProtos.size()>0) {
 		res = advertisedProtos.at(0);
 	}

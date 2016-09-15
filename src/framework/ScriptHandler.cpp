@@ -22,16 +22,16 @@
 
 #include "ScriptHandler.h"
 
-string ScriptHandler::chdirExecute(const string& exe, const string& tmpf, const bool& retErrs)
+std::string ScriptHandler::chdirExecute(const std::string& exe, const std::string& tmpf, const bool& retErrs)
 {
 	if(chdir(tmpf.c_str())==0)
 		return execute(exe, retErrs);
 	return "";
 }
 
-string ScriptHandler::execute(string exe, const bool& retErrs)
+std::string ScriptHandler::execute(std::string exe, const bool& retErrs)
 {
-	string data;
+	std::string data;
 	if(retErrs)
 	{
 		exe += " 2>&1";
@@ -59,7 +59,7 @@ string ScriptHandler::execute(string exe, const bool& retErrs)
 }
 
 #if !defined(OS_MINGW)
-int ScriptHandler::popenRWE(int *rwepipe, const char *exe, const char *const argv[], const string& tmpf)
+int ScriptHandler::popenRWE(int *rwepipe, const char *exe, const char *const argv[], const std::string& tmpf)
 {
 	int in[2];
 	int out[2];
@@ -98,7 +98,7 @@ int ScriptHandler::popenRWE(int *rwepipe, const char *exe, const char *const arg
 		dup(out[1]);
 		close(2);
 		dup(err[1]);
-		//logger << tmpf << endl;
+		//logger << tmpf << std::endl;
 		chdir(tmpf.c_str());
 		execvp(exe, (char**)argv);
 		exit(1);
@@ -149,7 +149,7 @@ int ScriptHandler::popenRWEN(int *rwepipe, const char *exe, const char** argv)
 		rwepipe[2] = err[0];
 		return pid;
 	} else if (pid == 0) { // child
-		//logger << pid << endl;
+		//logger << pid << std::endl;
 		close(in[1]);
 		close(out[0]);
 		close(err[0]);
@@ -191,13 +191,13 @@ int ScriptHandler::pcloseRWE(const int& pid, int *rwepipe)
 #endif
 
 #ifdef INC_SCRH
-bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, string>& handoffs, const string& ext)
+bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::string, std::string>& handoffs, const std::string& ext)
 {
 	bool skipit = false;
-	string referer = req->getHeader(HttpRequest::Referer);
-	if(referer.find("http://")!=string::npos)
+	std::string referer = req->getHeader(HttpRequest::Referer);
+	if(referer.find("http://")!=std::string::npos)
 	{
-		string appl = referer.substr(referer.find("http://")+7);
+		std::string appl = referer.substr(referer.find("http://")+7);
 		appl = appl.substr(referer.find("/")+1);
 		if(appl.find(req->getCntxt_name())==0 && handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
@@ -212,23 +212,23 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 		skipit = true;
 		//int pipe[3];
 		//int pid;
-		string def;
-		string tmpf = "/temp/";
-		string filen;
+		std::string def;
+		std::string tmpf = "/temp/";
+		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
 			def = handoffs[req->getCntxt_name()];
 			tmpf = "/";
 		}
-		string phpcnts = req->toPHPVariablesString(def);
-		//logger << phpcnts << endl;
-		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".php";
+		std::string phpcnts = req->toPHPVariablesString(def);
+		//logger << phpcnts << std::endl;
+		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".php";
 		tmpf = req->getContextHome() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string command = "php " + filen;
-		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
+		std::string command = "php " + filen;
+		std::string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -239,7 +239,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<string>(content.length()));
+			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
 	}
 	else if(ext==".pl")
@@ -247,21 +247,21 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 		skipit = true;
 		//int pipe[3];
 		//int pid;
-		string def;
-		string tmpf = "/temp/";
-		string filen;
+		std::string def;
+		std::string tmpf = "/temp/";
+		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
 			def = handoffs[req->getCntxt_name()];
 			tmpf = "/";
 		}
-		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".pl";
+		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".pl";
 		tmpf = req->getContextHome() + tmpf;
-		string phpcnts = req->toPerlVariablesString();
-		//logger << tmpf << endl;
-		string plfile = req->getUrl();
-		ifstream infile(plfile.c_str(), ios::binary);
-		string xml;
+		std::string phpcnts = req->toPerlVariablesString();
+		//logger << tmpf << std::endl;
+		std::string plfile = req->getUrl();
+		std::ifstream infile(plfile.c_str(), std::ios::binary);
+		std::string xml;
 		if(infile.is_open())
 		{
 			while(getline(infile, xml))
@@ -272,8 +272,8 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 		infile.close();
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string command = "perl " + filen;
-		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
+		std::string command = "perl " + filen;
+		std::string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -284,7 +284,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<string>(content.length()));
+			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
 	}
 	else if(ext==".rb")
@@ -292,23 +292,23 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 		skipit = true;
 		//int pipe[3];
 		//int pid;
-		string def;
-		string tmpf = "/temp/";
-		string filen;
+		std::string def;
+		std::string tmpf = "/temp/";
+		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
 			def = handoffs[req->getCntxt_name()];
 			tmpf = "/";
 		}
-		string phpcnts = req->toRubyVariablesString();
-		//logger << phpcnts << endl;
-		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".rb";
+		std::string phpcnts = req->toRubyVariablesString();
+		//logger << phpcnts << std::endl;
+		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".rb";
 		tmpf = req->getContextHome() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string command = "ruby " + filen;
-		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
+		std::string command = "ruby " + filen;
+		std::string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -319,7 +319,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<string>(content.length()));
+			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
 	}
 	else if(ext==".py")
@@ -327,20 +327,20 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 		skipit = true;
 		//int pipe[3];
 		//int pid;
-		string def;
-		string tmpf = "/temp/";
-		string filen;
+		std::string def;
+		std::string tmpf = "/temp/";
+		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
 			def = handoffs[req->getCntxt_name()];
 			tmpf = "/";
 		}
-		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".py";
+		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".py";
 		tmpf = req->getContextHome() + tmpf;
-		string phpcnts = req->toPythonVariablesString();
-		string plfile = req->getUrl();
-		ifstream infile(plfile.c_str(), ios::binary);
-		string xml;
+		std::string phpcnts = req->toPythonVariablesString();
+		std::string plfile = req->getUrl();
+		std::ifstream infile(plfile.c_str(), std::ios::binary);
+		std::string xml;
 		if(infile.is_open())
 		{
 			while(getline(infile, xml))
@@ -351,8 +351,8 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 		infile.close();
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string command = "python " + filen;
-		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
+		std::string command = "python " + filen;
+		std::string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -363,7 +363,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<string>(content.length()));
+			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
 	}
 	else if(ext==".lua")
@@ -371,23 +371,23 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 		skipit = true;
 		//int pipe[3];
 		//int pid;
-		string def;
-		string tmpf = "/temp/";
-		string filen;
+		std::string def;
+		std::string tmpf = "/temp/";
+		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
 			def = handoffs[req->getCntxt_name()];
 			tmpf = "/";
 		}
-		string phpcnts = req->toLuaVariablesString();
-		//logger << phpcnts << endl;
-		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".lua";
+		std::string phpcnts = req->toLuaVariablesString();
+		//logger << phpcnts << std::endl;
+		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".lua";
 		tmpf = req->getContextHome() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string command = "lua " + filen;
-		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
+		std::string command = "lua " + filen;
+		std::string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -398,7 +398,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<string>(content.length()));
+			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
 	}
 	else if(ext==".njs")
@@ -406,23 +406,23 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 		skipit = true;
 		//int pipe[3];
 		//int pid;
-		string def;
-		string tmpf = "/temp/";
-		string filen;
+		std::string def;
+		std::string tmpf = "/temp/";
+		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
 			def = handoffs[req->getCntxt_name()];
 			tmpf = "/";
 		}
-		string phpcnts = req->toNodejsVariablesString();
-		//logger << phpcnts << endl;
-		filen = CastUtil::lexical_cast<string>(Timer::getCurrentTime()) + ".njs";
+		std::string phpcnts = req->toNodejsVariablesString();
+		//logger << phpcnts << std::endl;
+		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".njs";
 		tmpf = req->getContextHome() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
-		string command = "node " + filen;
-		string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
+		std::string command = "node " + filen;
+		std::string content = chdirExecute(command, tmpf, SCRIPT_EXEC_SHOW_ERRS);
 		if((content.length()==0))
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -433,7 +433,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, map<string, stri
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<string>(content.length()));
+			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
 	}
 	return skipit;

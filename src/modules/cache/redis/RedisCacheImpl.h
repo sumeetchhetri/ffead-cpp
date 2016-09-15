@@ -14,28 +14,28 @@
 class RedisCacheImpl: public CacheInterface, public ConnectionPooler {
 	redisReply* execute(const char* format, ...);
 	bool replyStatus(redisReply* reply);
-	string replyValue(redisReply* reply);
+	std::string replyValue(redisReply* reply);
 	ConnectionProperties properties;
 public:
 	RedisCacheImpl(const ConnectionProperties& properties);
 	~RedisCacheImpl();
 	void init();
 
-	bool set(const string& key, GenericObject& value, const int& expireSeconds);
-	bool add(const string& key, GenericObject& value, const int& expireSeconds);
-	bool replace(const string& key, GenericObject& value, const int& expireSeconds);
+	bool set(const std::string& key, GenericObject& value, const int& expireSeconds);
+	bool add(const std::string& key, GenericObject& value, const int& expireSeconds);
+	bool replace(const std::string& key, GenericObject& value, const int& expireSeconds);
 
-	string getValue(const string& key);
+	std::string getValue(const std::string& key);
 
-	bool remove(const string& key);
-	long long increment(const string& key, const int& number= 1);
-	long long decrement(const string& key, const int& number= 1);
-	long double incrementFloat(const string& key, const double& number = 1.0);
-	long double decrementFloat(const string& key, const double& number = 1.0);
-	map<string, string> statistics();
+	bool remove(const std::string& key);
+	long long increment(const std::string& key, const int& number= 1);
+	long long decrement(const std::string& key, const int& number= 1);
+	long double incrementFloat(const std::string& key, const double& number = 1.0);
+	long double decrementFloat(const std::string& key, const double& number = 1.0);
+	std::map<std::string, std::string> statistics();
 	bool flushAll();
 
-	void* executeCommand(const string& command, ...);
+	void* executeCommand(const std::string& command, ...);
 
 	void initEnv();
 	void destroy();

@@ -38,7 +38,7 @@ DistoCacheServiceHandler::DistoCacheServiceHandler(const int& fd) {
 DistoCacheServiceHandler::~DistoCacheServiceHandler() {
 }
 
-int DistoCacheServiceHandler::getLength(const string& header, const int& size)
+int DistoCacheServiceHandler::getLength(const std::string& header, const int& size)
 {
 	int totsize = header[size-1] & 0xff;
 	for (int var = 0; var < size-1; var++)
@@ -48,7 +48,7 @@ int DistoCacheServiceHandler::getLength(const string& header, const int& size)
 	return totsize;
 }
 
-bool DistoCacheServiceHandler::validQuery(const vector<string>& parts, const int& size, const string& cmd1, const string& cmd2)
+bool DistoCacheServiceHandler::validQuery(const std::vector<std::string>& parts, const int& size, const std::string& cmd1, const std::string& cmd2)
 {
 	bool flag = true;
 	flag = (int)parts.size()==size;
@@ -95,7 +95,7 @@ void DistoCacheServiceHandler::run()
 	{
 		int cntlen = 0;
 		char buf[MAXBUFLENM];
-		string alldat;
+		std::string alldat;
 
 		if(isSSLEnabled)
 		{
@@ -151,7 +151,7 @@ void DistoCacheServiceHandler::run()
 			{
 				close(fd);
 			}
-			logger << "WARNING>> Invalid data or someone trying to attack the cache or maybe a simple telnet attempt...ignore..." << endl;
+			logger << "WARNING>> Invalid data or someone trying to attack the cache or maybe a simple telnet attempt...ignore..." << std::endl;
 			return;
 		}
 
@@ -204,17 +204,17 @@ void DistoCacheServiceHandler::run()
 			}
 		}
 
-		string responseMsg = CacheMap::SUCCESS;
-		string responseValue;
+		std::string responseMsg = CacheMap::SUCCESS;
+		std::string responseValue;
 
 		try {
 			AMEFDecoder decoder;
 			AMEFObject* query = decoder.decodeB(alldat,true);
 			if(query!=NULL && query->getPackets().size()>0)
 			{
-				string quer = query->getPackets().at(0)->getValue();
+				std::string quer = query->getPackets().at(0)->getValue();
 
-				vector<string> parts;
+				std::vector<std::string> parts;
 				StringUtil::trim(quer);
 				StringUtil::split(parts, quer, (" "));
 
@@ -230,7 +230,7 @@ void DistoCacheServiceHandler::run()
 				{
 					if(query->getPackets().size()==2)
 					{
-						string value = query->getPackets().at(1)->getValue();
+						std::string value = query->getPackets().at(1)->getValue();
 						CacheMap::addObjectEntry(parts.at(2), value);
 					}
 					else
@@ -242,7 +242,7 @@ void DistoCacheServiceHandler::run()
 				{
 					if(query->getPackets().size()==2)
 					{
-						string value = query->getPackets().at(1)->getValue();
+						std::string value = query->getPackets().at(1)->getValue();
 						CacheMap::addMapEntry(parts.at(2), parts.at(3), value);
 					}
 					else
@@ -254,7 +254,7 @@ void DistoCacheServiceHandler::run()
 				{
 					if(query->getPackets().size()==2)
 					{
-						string value = query->getPackets().at(1)->getValue();
+						std::string value = query->getPackets().at(1)->getValue();
 						CacheMap::addCollectionEntry(parts.at(2), value);
 					}
 					else
@@ -266,7 +266,7 @@ void DistoCacheServiceHandler::run()
 				{
 					if(query->getPackets().size()==2)
 					{
-						string value = query->getPackets().at(1)->getValue();
+						std::string value = query->getPackets().at(1)->getValue();
 						CacheMap::pushFrontValue(parts.at(2), value);
 					}
 					else
@@ -278,7 +278,7 @@ void DistoCacheServiceHandler::run()
 				{
 					if(query->getPackets().size()==2)
 					{
-						string value = query->getPackets().at(1)->getValue();
+						std::string value = query->getPackets().at(1)->getValue();
 						CacheMap::pushBackValue(parts.at(2), value);
 					}
 					else
@@ -296,7 +296,7 @@ void DistoCacheServiceHandler::run()
 						{
 							if(query->getPackets().size()==2)
 							{
-								string value = query->getPackets().at(1)->getValue();
+								std::string value = query->getPackets().at(1)->getValue();
 								CacheMap::insert(parts.at(2), value, position);
 							}
 							else
@@ -327,7 +327,7 @@ void DistoCacheServiceHandler::run()
 						{
 							if(query->getPackets().size()==2)
 							{
-								string value = query->getPackets().at(1)->getValue();
+								std::string value = query->getPackets().at(1)->getValue();
 								CacheMap::insert(parts.at(2), value, position, repeats);
 							}
 							else
@@ -368,7 +368,7 @@ void DistoCacheServiceHandler::run()
 						{
 							if(query->getPackets().size()==2)
 							{
-								string value = query->getPackets().at(1)->getValue();
+								std::string value = query->getPackets().at(1)->getValue();
 								CacheMap::setMapEntryValueByPosition(parts.at(2), position, value);
 							}
 							else
@@ -398,7 +398,7 @@ void DistoCacheServiceHandler::run()
 						{
 							if(query->getPackets().size()==2)
 							{
-								string value = query->getPackets().at(1)->getValue();
+								std::string value = query->getPackets().at(1)->getValue();
 								CacheMap::setCollectionEntryAt(parts.at(2), position, value);
 							}
 							else
@@ -534,7 +534,7 @@ void DistoCacheServiceHandler::run()
 				}
 				else if(validQuery(parts, 2, CacheMap::SIZE))
 				{
-					responseValue = CastUtil::lexical_cast<string>(CacheMap::size(parts.at(1)));
+					responseValue = CastUtil::lexical_cast<std::string>(CacheMap::size(parts.at(1)));
 				}
 				else if(validQuery(parts, 2, CacheMap::CLEAR))
 				{
@@ -542,7 +542,7 @@ void DistoCacheServiceHandler::run()
 				}
 				else if(validQuery(parts, 2, CacheMap::IS_EMPTY))
 				{
-					responseValue = CastUtil::lexical_cast<string>(CacheMap::isEmpty(parts.at(1)));
+					responseValue = CastUtil::lexical_cast<std::string>(CacheMap::isEmpty(parts.at(1)));
 				}
 				else
 				{
@@ -555,7 +555,7 @@ void DistoCacheServiceHandler::run()
 			{
 				responseMsg = "Invalid query specified";
 			}
-		} catch(string& err) {
+		} catch(std::string& err) {
 			responseMsg = err;
 		} catch(const char* err) {
 			responseMsg = err;
@@ -572,7 +572,7 @@ void DistoCacheServiceHandler::run()
 		}
 		AMEFEncoder encoder;
 
-		string response = encoder.encodeB(&responseObject);
+		std::string response = encoder.encodeB(&responseObject);
 
 		int toto = response.length();
 		if(isSSLEnabled)

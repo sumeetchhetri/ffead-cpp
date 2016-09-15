@@ -25,11 +25,11 @@ class AMEFEncoder
 public:
 	AMEFEncoder();
 	~AMEFEncoder();
-	string encodeB(AMEFObject* packet);
+	std::string encodeB(AMEFObject* packet);
 	//string encodeBNew(AMEFObject* packet);
-	string encodeWL(AMEFObject* packet);
-	string encodeSinglePacketB(AMEFObject *packet, const bool&);
-	string encodeSinglePacketBNew(AMEFObject *packet, const bool&);
+	std::string encodeWL(AMEFObject* packet);
+	std::string encodeSinglePacketB(AMEFObject *packet, const bool&);
+	std::string encodeSinglePacketBNew(AMEFObject *packet, const bool&);
 };
 
 #endif /* AMEFENCODER_H_ */

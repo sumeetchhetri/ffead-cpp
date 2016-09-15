@@ -34,8 +34,8 @@ class DistoCacheServiceHandler {
 	bool isSSLEnabled;
 	SSL_CTX *ctx;
 	Logger logger;
-	int getLength(const string& header, const int& size);
-	bool validQuery(const vector<string>& parts, const int& size, const string& cmd1="", const string& cmd2="");
+	int getLength(const std::string& header, const int& size);
+	bool validQuery(const std::vector<std::string>& parts, const int& size, const std::string& cmd1="", const std::string& cmd2="");
 public:
 	DistoCacheServiceHandler(const int& fd, const bool& isSSLEnabled, SSL_CTX *ctx);
 	DistoCacheServiceHandler(const int& fd);

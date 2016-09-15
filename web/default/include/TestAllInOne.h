@@ -38,14 +38,14 @@ namespace test
 					public:
 						TestObject to;
 						com::obj::TestObject coto;
-						vector<TestObject> vto;
-						vector<com::obj::TestObject> vcoto;
-						vector<vector<TestObject> > vvto;
-						vector<vector<com::obj::TestObject> > vvcoto;
+						std::vector<TestObject> vto;
+						std::vector<com::obj::TestObject> vcoto;
+						std::vector<std::vector<TestObject> > vvto;
+						std::vector<std::vector<com::obj::TestObject> > vvcoto;
 
-						string toString()
+						std::string toString()
 						{
-							string out;
+							std::string out;
 							out.append(to.toString());
 							out.append("\n");
 							out.append(coto.toString());

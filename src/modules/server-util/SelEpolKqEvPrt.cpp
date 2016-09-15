@@ -115,7 +115,7 @@ int SelEpolKqEvPrt::getEvents()
 				int errCd = WSAGetLastError();
 				if(errCd != WAIT_TIMEOUT)
 				{
-					cout << "Error occurred during GetQueuedCompletionStatusEx " << WSAGetLastError() << endl;
+					std::cout << "Error occurred during GetQueuedCompletionStatusEx " << WSAGetLastError() << std::endl;
 				}
 	           	return -1;
 	        }
@@ -368,7 +368,7 @@ bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor)
 		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, descriptor, &ev) < 0)
 		{
 			perror("epoll");
-			cout << "Error adding to epoll cntl list" << endl;
+			std::cout << "Error adding to epoll cntl list" << std::endl;
 			return false;
 		}
 	#elif defined USE_KQUEUE

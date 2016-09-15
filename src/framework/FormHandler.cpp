@@ -24,26 +24,29 @@
 
 bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflector)
 {
-	map<string, Element>& formMap = ConfigurationData::getInstance()->fviewFormMap[req->getCntxt_name()];
+	std::map<std::string, Element>& formMap = ConfigurationData::getInstance()->fviewFormMap[req->getCntxt_name()];
 	Logger logger = LoggerFactory::getLogger("FormHandler");
 	Reflector ref;
 	Element* ele = &(formMap[req->getFile()]);
-	//logger << ele->getTagName() << endl;
-	//logger << ele->render() << endl;
+	//logger << ele->getTagName() << std::endl;
+	//logger << ele->render() << std::endl;
 	ClassInfo binfo = ref.getClassInfo(ele->getAttribute("bean"), req->getCntxt_name());
 	ElementList eles = ele->getChildElements();
-	string json = "{";
+	std::string json = "{";
 	for (unsigned int apps = 0; apps < eles.size(); apps++)
 	{
 		if(eles.at(apps)->getTagName()=="field")
 		{
-			string name = eles.at(apps)->getAttribute("name");
+			std::string name = eles.at(apps)->getAttribute("name");
 			Field fld = binfo.getField(eles.at(apps)->getAttribute("prop"));
-			if(fld.getType()=="string")
+			if(fld.getType()=="std::string" || fld.getType()=="string")
 				json += "\""+eles.at(apps)->getAttribute("prop")+"\": \"" + req->getParamValue(name) + "\",";
 			else
 			{
-				if(fld.getType()=="int" || fld.getType()=="long")
+				if(fld.getType()=="short" || fld.getType()=="unsigned short"
+						|| fld.getType()=="int" || fld.getType()=="unsigned int"
+						|| fld.getType()=="long" || fld.getType()=="unsigned long"
+						|| fld.getType()=="char" || fld.getType()=="unsigned char")
 				{
 					if(req->getQueryParam(name)=="")
 						json += "\""+eles.at(apps)->getAttribute("prop")+"\": 0,";
@@ -67,12 +70,12 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 			}
 		}
 	}
-	if(json.find(",")!=string::npos)
+	if(json.find(",")!=std::string::npos)
 	{
 		json = json.substr(0,json.length()-1);
 	}
 	json += "}";
-	logger << json << endl;
+	logger << json << std::endl;
 
 	void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("form_"+ele->getAttribute("controller"), req->getCntxt_name());
 	args argus;
@@ -83,12 +86,12 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 	Method meth = srv.getMethod("onSubmit", argus);
 	if(meth.getMethodName()!="")
 	{
-		logger << ("Fetching Formcontroller for " + ele->getAttribute("bean")) << endl;
+		logger << ("Fetching Formcontroller for " + ele->getAttribute("bean")) << std::endl;
 		void *_beaninst = JSONSerialize::unSerializeUnknown(json, ele->getAttribute("bean"), req->getCntxt_name());
 		valus.push_back(_beaninst);
 		valus.push_back(res);
 		reflector.invokeMethod<void*>(_temp,meth,valus);
-		logger << "Successfully called Formcontroller" << endl;
+		logger << "Successfully called Formcontroller" << std::endl;
 		ConfigurationData::getInstance()->ffeadContext.release("form_"+ele->getAttribute("controller"), req->getCntxt_name());
 		return true;
 	}

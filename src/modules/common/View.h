@@ -22,14 +22,14 @@
 
 class View
 {
-	void traverseElement(string *ss, Element* element);
-	string generateAttributes(AttributeList attributes);
-	string generateCloseTag(string tagName);
-	string generateEndOpenTag();
-	string generateStartOpenTag(string tagName);
+	void traverseElement(std::string *ss, Element* element);
+	std::string generateAttributes(AttributeList attributes);
+	std::string generateCloseTag(std::string tagName);
+	std::string generateEndOpenTag();
+	std::string generateStartOpenTag(std::string tagName);
 	public:
 		View();
 		~View();
-		string generateDocument(Document& document);
+		std::string generateDocument(Document& document);
 };
 #endif

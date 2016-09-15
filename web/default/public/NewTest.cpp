@@ -1,20 +1,20 @@
 #include "NewTest.h"
 
-NewTest::NewTest(int a,string b)
+NewTest::NewTest(int a,std::string b)
 {
 }
 void NewTest::setA(int a)
 {
 return a;
 }
-string NewTest::getstr(int e)
+std::string NewTest::getstr(int e)
 {
 return "Hi!!!";
 }
-string NewTest::service(int a,string message)
+std::string NewTest::service(int a,std::string message)
 {
-string ret = "Sumeet\n\n\t\s";
-string ret2;
+std::string ret = "Sumeet\n\n\t\s";
+std::string ret2;
 ret2 = "How are you???";
 ret = temp + ret;
 ret = getstr(2) + ret + "\nWhere have you been these days?";

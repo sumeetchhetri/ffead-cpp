@@ -32,22 +32,22 @@ DateFormat::~DateFormat() {
 }
 
 
-DateFormat::DateFormat(const string& format)
+DateFormat::DateFormat(const std::string& format)
 {
 	this->formatspec  = format;
 }
 
-string DateFormat::appendZero(const int& value)
+std::string DateFormat::appendZero(const int& value)
 {
-	string te = CastUtil::lexical_cast<string>(value);
+	std::string te = CastUtil::lexical_cast<std::string>(value);
 	if(te.length()==1)
 		te = "0" + te;
 	return te;
 }
 
-string DateFormat::format(const Date& date)
+std::string DateFormat::format(const Date& date)
 {
-	string temp = this->formatspec;
+	std::string temp = this->formatspec;
 	StringUtil::replaceAll(temp,"hh",appendZero(date.getHours()));
 	StringUtil::replaceAll(temp,"mi",appendZero(date.getMinutes()));
 	StringUtil::replaceAll(temp,"ss",appendZero(date.getSeconds()));
@@ -59,8 +59,8 @@ string DateFormat::format(const Date& date)
 	StringUtil::replaceAll(temp,"yyyy",appendZero(date.getYear()));
 	StringUtil::replaceAll(temp,"yy",appendZero(date.getYear()).substr(2));
 	StringUtil::replaceAll(temp,"z",date.getTimeZone());
-	string tz = CastUtil::lexical_cast<string>(date.getTimeZoneOffset()*100);
-	if(tz.find(".")!=string::npos) {
+	std::string tz = CastUtil::lexical_cast<std::string>(date.getTimeZoneOffset()*100);
+	if(tz.find(".")!=std::string::npos) {
 		tz = tz.substr(0, tz.find("."));
 	}
 	if(date.getTimeZoneOffset()>0)
@@ -76,18 +76,18 @@ string DateFormat::format(const Date& date)
 	return temp;
 }
 
-Date* DateFormat::parse(string strdate)
+Date* DateFormat::parse(std::string strdate)
 {
-	string temp = this->formatspec;
+	std::string temp = this->formatspec;
 	Date* date = NULL;
-	string yyyy,yy,ddd,dd,mmm,mm,hh,mi,ss,tzv;
-	if(temp.find("yyyy")!=string::npos)
+	std::string yyyy,yy,ddd,dd,mmm,mm,hh,mi,ss,tzv;
+	if(temp.find("yyyy")!=std::string::npos)
 	{
 		yyyy = strdate.substr(temp.find("yyyy"),4);
-		string ytemp = temp;
-		while(ytemp.find("yyyy")!=string::npos)
+		std::string ytemp = temp;
+		while(ytemp.find("yyyy")!=std::string::npos)
 		{
-			string tyyyy = strdate.substr(ytemp.find("yyyy"),4);
+			std::string tyyyy = strdate.substr(ytemp.find("yyyy"),4);
 			if(yyyy!=tyyyy)
 				throw "Multiple instances with different year(yyyy) values found";
 			strdate = strdate.substr(0, ytemp.find("yyyy")) +
@@ -96,13 +96,13 @@ Date* DateFormat::parse(string strdate)
 		}
 		temp = ytemp;
 	}
-	else if(temp.find("yy")!=string::npos)
+	else if(temp.find("yy")!=std::string::npos)
 	{
 		yy = strdate.substr(temp.find("yy"),2);
-		string ytemp = temp;
-		while(ytemp.find("yy")!=string::npos)
+		std::string ytemp = temp;
+		while(ytemp.find("yy")!=std::string::npos)
 		{
-			string tyy = strdate.substr(ytemp.find("yy"),2);
+			std::string tyy = strdate.substr(ytemp.find("yy"),2);
 			if(yy!=tyy)
 				throw "Multiple instances with different year(yy) values found";
 			strdate = strdate.substr(0, ytemp.find("yy")) +
@@ -111,13 +111,13 @@ Date* DateFormat::parse(string strdate)
 		}
 		temp = ytemp;
 	}
-	if(temp.find("ddd")!=string::npos)
+	if(temp.find("ddd")!=std::string::npos)
 	{
 		ddd = strdate.substr(temp.find("ddd"),3);
-		string ytemp = temp;
-		while(ytemp.find("ddd")!=string::npos)
+		std::string ytemp = temp;
+		while(ytemp.find("ddd")!=std::string::npos)
 		{
-			string tddd = strdate.substr(ytemp.find("ddd"),3);
+			std::string tddd = strdate.substr(ytemp.find("ddd"),3);
 			if(ddd!=tddd)
 				throw "Multiple instances with different day(ddd) values found";
 			strdate = strdate.substr(0, ytemp.find("ddd")) +
@@ -126,13 +126,13 @@ Date* DateFormat::parse(string strdate)
 		}
 		temp = ytemp;
 	}
-	if(temp.find("dd")!=string::npos)
+	if(temp.find("dd")!=std::string::npos)
 	{
 		dd = strdate.substr(temp.find("dd"),2);
-		string ytemp = temp;
-		while(ytemp.find("dd")!=string::npos)
+		std::string ytemp = temp;
+		while(ytemp.find("dd")!=std::string::npos)
 		{
-			string tdd = strdate.substr(ytemp.find("dd"),2);
+			std::string tdd = strdate.substr(ytemp.find("dd"),2);
 			if(dd!=tdd)
 				throw "Multiple instances with different day(dd) values found";
 			strdate = strdate.substr(0, ytemp.find("dd")) +
@@ -141,13 +141,13 @@ Date* DateFormat::parse(string strdate)
 		}
 		temp = ytemp;
 	}
-	if(temp.find("mmm")!=string::npos)
+	if(temp.find("mmm")!=std::string::npos)
 	{
 		mmm = strdate.substr(temp.find("mmm"),3);
-		string ytemp = temp;
-		while(ytemp.find("mmm")!=string::npos)
+		std::string ytemp = temp;
+		while(ytemp.find("mmm")!=std::string::npos)
 		{
-			string tmmm = strdate.substr(ytemp.find("mmm"),3);
+			std::string tmmm = strdate.substr(ytemp.find("mmm"),3);
 			if(mmm!=tmmm)
 				throw "Multiple instances with different month(mmm) values found";
 			strdate = strdate.substr(0, ytemp.find("mmm")) +
@@ -156,13 +156,13 @@ Date* DateFormat::parse(string strdate)
 		}
 		temp = ytemp;
 	}
-	else if(temp.find("mm")!=string::npos)
+	else if(temp.find("mm")!=std::string::npos)
 	{
 		mm = strdate.substr(temp.find("mm"),2);
-		string ytemp = temp;
-		while(ytemp.find("mm")!=string::npos)
+		std::string ytemp = temp;
+		while(ytemp.find("mm")!=std::string::npos)
 		{
-			string tmm = strdate.substr(ytemp.find("mm"),2);
+			std::string tmm = strdate.substr(ytemp.find("mm"),2);
 			if(mm!=tmm)
 				throw "Multiple instances with different month(mm) values found";
 			strdate = strdate.substr(0, ytemp.find("mm")) +
@@ -171,13 +171,13 @@ Date* DateFormat::parse(string strdate)
 		}
 		temp = ytemp;
 	}
-	if(temp.find("hh")!=string::npos)
+	if(temp.find("hh")!=std::string::npos)
 	{
 		hh = strdate.substr(temp.find("hh"),2);
-		string ytemp = temp;
-		while(ytemp.find("hh")!=string::npos)
+		std::string ytemp = temp;
+		while(ytemp.find("hh")!=std::string::npos)
 		{
-			string thh = strdate.substr(ytemp.find("hh"),2);
+			std::string thh = strdate.substr(ytemp.find("hh"),2);
 			if(hh!=thh)
 				throw "Multiple instances with different hours(hh) values found";
 			strdate = strdate.substr(0, ytemp.find("hh")) +
@@ -186,13 +186,13 @@ Date* DateFormat::parse(string strdate)
 		}
 		temp = ytemp;
 	}
-	if(temp.find("mi")!=string::npos)
+	if(temp.find("mi")!=std::string::npos)
 	{
 		mi = strdate.substr(temp.find("mi"),2);
-		string ytemp = temp;
-		while(ytemp.find("mi")!=string::npos)
+		std::string ytemp = temp;
+		while(ytemp.find("mi")!=std::string::npos)
 		{
-			string tmi = strdate.substr(ytemp.find("mi"),2);
+			std::string tmi = strdate.substr(ytemp.find("mi"),2);
 			if(mi!=tmi)
 				throw "Multiple instances with different minutes(mi) values found";
 			strdate = strdate.substr(0, ytemp.find("mi")) +
@@ -201,13 +201,13 @@ Date* DateFormat::parse(string strdate)
 		}
 		temp = ytemp;
 	}
-	if(temp.find("ss")!=string::npos)
+	if(temp.find("ss")!=std::string::npos)
 	{
 		ss = strdate.substr(temp.find("ss"),2);
-		string ytemp = temp;
-		while(ytemp.find("ss")!=string::npos)
+		std::string ytemp = temp;
+		while(ytemp.find("ss")!=std::string::npos)
 		{
-			string tss = strdate.substr(ytemp.find("ss"),2);
+			std::string tss = strdate.substr(ytemp.find("ss"),2);
 			if(ss!=tss)
 				throw "Multiple instances with different seconds(ss) values found";
 			strdate = strdate.substr(0, ytemp.find("ss")) +
@@ -216,11 +216,11 @@ Date* DateFormat::parse(string strdate)
 		}
 		temp = ytemp;
 	}
-	if(strdate.find("+")!=string::npos)
+	if(strdate.find("+")!=std::string::npos)
 	{
 		tzv = strdate.substr(temp.find("+")+1);
 	}
-	else if(strdate.find("-")!=string::npos)
+	else if(strdate.find("-")!=std::string::npos)
 	{
 		tzv = strdate.substr(temp.find("-"));
 	}
@@ -285,22 +285,22 @@ Date* DateFormat::parse(string strdate)
 		}
 	}
 	if(hh=="")
-		hh = CastUtil::lexical_cast<string>(date->getHours());
+		hh = CastUtil::lexical_cast<std::string>(date->getHours());
 	if(mi=="")
-		mi = CastUtil::lexical_cast<string>(date->getMinutes());
+		mi = CastUtil::lexical_cast<std::string>(date->getMinutes());
 	if(ss=="")
-		ss = CastUtil::lexical_cast<string>(date->getSeconds());
+		ss = CastUtil::lexical_cast<std::string>(date->getSeconds());
 	date->setTime(CastUtil::lexical_cast<int>(hh),
 		CastUtil::lexical_cast<int>(mi), CastUtil::lexical_cast<int>(ss));
 	return date;
 }
 
-const string& DateFormat::getFormatspec() const
+const std::string& DateFormat::getFormatspec() const
 {
 	return formatspec;
 }
 
-void DateFormat::setFormatspec(const string& formatspec)
+void DateFormat::setFormatspec(const std::string& formatspec)
 {
 	this->formatspec = formatspec;
 }

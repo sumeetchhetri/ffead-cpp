@@ -31,11 +31,11 @@ DCPGenerator::DCPGenerator() {
 DCPGenerator::~DCPGenerator() {
 	// TODO Auto-generated destructor stub
 }
-string DCPGenerator::generateDCPAll()
+std::string DCPGenerator::generateDCPAll()
 {
-	map<string,string> fileNames = ConfigurationData::getInstance()->dynamicCppPagesMap;
-	string bodies,headersb="#include \"AfcUtil.h\"",funcdefs;
-	map<string, string>::iterator it;
+	std::map<std::string,std::string> fileNames = ConfigurationData::getInstance()->dynamicCppPagesMap;
+	std::string bodies,headersb="#include \"AfcUtil.h\"",funcdefs;
+	std::map<std::string, std::string>::iterator it;
 	for (it=fileNames.begin();it!=fileNames.end();++it)
 	{
 		bodies += generateDCP(it->first,headersb,funcdefs,it->second);
@@ -44,12 +44,12 @@ string DCPGenerator::generateDCPAll()
 	return bodies;
 }
 
-string DCPGenerator::generateDCP(const string& fileName, string &headersb, string &funcdefs, const string& app)
+std::string DCPGenerator::generateDCP(const std::string& fileName, std::string &headersb, std::string &funcdefs, const std::string& app)
 {
-	ifstream infile;
-	string data,allcontent;
+	std::ifstream infile;
+	std::string data,allcontent;
 	infile.open(fileName.c_str());
-	string file,dir;
+	std::string file,dir;
 	/*int s,en;
 	s = fileName.find_last_of("/")+1;
 	dir = fileName.substr(0,s-1);
@@ -63,12 +63,12 @@ string DCPGenerator::generateDCP(const string& fileName, string &headersb, strin
 	{
 		while(getline(infile, data))
 		{
-			if(data.find("<import>")!=string::npos && data.find("</import>")!=string::npos)
+			if(data.find("<import>")!=std::string::npos && data.find("</import>")!=std::string::npos)
 			{
 				int s = data.find("<import>")+8;
 				int e = data.find("</import>");
 				data=data.substr(s,e-s);
-				string file1 = app + "/dcp/" + data;
+				std::string file1 = app + "/dcp/" + data;
 				RegexUtil::replace(file1, "[^a-zA-Z0-9_]+", "");
 				allcontent.append("<DCPB>screen << _"+file1+"emittHTML();\n</DCPB>");
 				/*ifstream inf(data.c_str());
@@ -84,7 +84,7 @@ string DCPGenerator::generateDCP(const string& fileName, string &headersb, strin
 				allcontent.append(data+"\n");
 		}
 	}
-	string header,bodies,funcs;
+	std::string header,bodies,funcs;
 	int b = allcontent.find("<DCPH>") + 6;
 	int e = allcontent.find("</DCPH>");
 	int len = e - b;
@@ -95,11 +95,11 @@ string DCPGenerator::generateDCP(const string& fileName, string &headersb, strin
 		headersb.append(header+"\n");
 	}
 
-	while(allcontent.find("<DCPF>")!=string::npos)
+	while(allcontent.find("<DCPF>")!=std::string::npos)
 	{
 		b = allcontent.find("<DCPF>");
 		e = allcontent.find("</DCPF>") + 7;
-		string temp1 = allcontent.substr(b,e-b);
+		std::string temp1 = allcontent.substr(b,e-b);
 		StringUtil::replaceAll(allcontent,temp1,"");
 
 		//string ter(allcontent.substr(0,b-6));
@@ -112,13 +112,13 @@ string DCPGenerator::generateDCP(const string& fileName, string &headersb, strin
 	}
 	bodies.append(funcs);
 	//bodies.append();
-	funcdefs.append("string _"+file+"emittHTML();\n");
-	bodies.append("string _"+file+"emittHTML()\n{\n");
-	bodies.append("stringstream screen;\n");
-	while(allcontent.find("<DCPB>")!=string::npos)
+	funcdefs.append("std::string _"+file+"emittHTML();\n");
+	bodies.append("std::string _"+file+"emittHTML()\n{\n");
+	bodies.append("std::stringstream screen;\n");
+	while(allcontent.find("<DCPB>")!=std::string::npos)
 	{
 		b = allcontent.find("<DCPB>") + 6;
-		string ter(allcontent.substr(0,b-6));
+		std::string ter(allcontent.substr(0,b-6));
 		StringUtil::replaceAll(ter,"\n","");
 		StringUtil::replaceAll(ter,"\"","\\\"");
 		bodies.append("screen << \""+ter+"\";");
@@ -127,10 +127,10 @@ string DCPGenerator::generateDCP(const string& fileName, string &headersb, strin
 		bodies.append(allcontent.substr(b,len));
 		allcontent = allcontent.substr(e+7);
 	}
-	string ter(allcontent.substr(0));
+	std::string ter(allcontent.substr(0));
 	StringUtil::replaceAll(ter,"\n","");
 	StringUtil::replaceAll(ter,"\"","\\\"");
-	bodies.append("screen << \""+ter+"\";\nstring scr;\nscr = screen.str();\n");
+	bodies.append("screen << \""+ter+"\";\nstd::string scr;\nscr = screen.str();\n");
 	//bodies.append("\nAfcUtil::writeTofile(\""+dir+"_"+file+".html\",scr,true);\n");
 	bodies.append("\nreturn scr;\n");
 	bodies.append("\n}\n");

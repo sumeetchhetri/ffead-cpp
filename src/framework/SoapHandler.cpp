@@ -25,8 +25,8 @@
 void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 {
 	Logger logger = LoggerFactory::getLogger("SoapHandler");
-	string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + "/";
-	string acurl = req->getActUrl();
+	std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + "/";
+	std::string acurl = req->getActUrl();
 	StringUtil::replaceFirst(acurl,"//","/");
 	if(acurl.length()>1)
 		acurl = acurl.substr(1);
@@ -34,10 +34,10 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 		acurl = req->getCntxt_name() + "/" + acurl;
 	wsUrl += acurl;
 	RegexUtil::replace(acurl,"[/]+","/");
-	logger << ("WsUrl is " + wsUrl) << endl;
+	logger << ("WsUrl is " + wsUrl) << std::endl;
 
-	string xmlcnttype = CommonUtils::getMimeType(".xml");
-	string meth,ws_name,env;
+	std::string xmlcnttype = CommonUtils::getMimeType(".xml");
+	std::string meth,ws_name,env;
 	ws_name = ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()][wsUrl];
 	Element* soapenv = NULL;
 	logger.info("request => "+req->getContent());
@@ -48,7 +48,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 		Document doc;
 		parser.parse(req->getContent(), doc);
 		soapenv = &(doc.getRootElement());
-		//logger << soapenv->getTagName() << "----\n" << flush;
+		//logger << soapenv->getTagName() << "----\n" << std::flush;
 
 		/*if(soapenv->getChildElements().size()==1
 				&& StringUtil::toLowerCopy(soapenv->getChildElements().at(0)->getTagName())=="body")
@@ -62,22 +62,22 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 			throw "SOAP Body not found in request";
 		}
 
-		//logger << soapbody->getTagName() << "----\n" << flush;
+		//logger << soapbody->getTagName() << "----\n" << std::flush;
 		Element* method = soapbody->getChildElements().at(0);
-		//logger << method.getTagName() << "----\n" << flush;
+		//logger << method.getTagName() << "----\n" << std::flush;
 		meth = method->getTagName();
-		string methodname = req->getCntxt_name() + meth + ws_name;
-		logger << methodname << "----\n" << flush;
+		std::string methodname = req->getCntxt_name() + meth + ws_name;
+		logger << methodname << "----\n" << std::flush;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		if(mkr!=NULL)
 		{
-			typedef string (*WsPtr) (Element*);
+			typedef std::string (*WsPtr) (Element*);
 			WsPtr f =  (WsPtr)mkr;
-			string outpt = f(method);
-			typedef map<string,string> AttributeList;
+			std::string outpt = f(method);
+			typedef std::map<std::string,std::string> AttributeList;
 			AttributeList attl = soapbody->getAttributes();
 			AttributeList::iterator it;
-			string bod = "<" + soapbody->getTagNameSpc();
+			std::string bod = "<" + soapbody->getTagNameSpc();
 			for(it=attl.begin();it!=attl.end();it++)
 			{
 				bod.append(" " + it->first + "=\"" + it->second + "\" ");
@@ -96,7 +96,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 		{
 			AttributeList attl = soapbody->getAttributes();
 			AttributeList::iterator it;
-			string bod = "<" + soapbody->getTagNameSpc();
+			std::string bod = "<" + soapbody->getTagNameSpc();
 			for(it=attl.begin();it!=attl.end();it++)
 			{
 				bod.append(" " + it->first + "=\"" + it->second + "\" ");
@@ -110,13 +110,13 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 			}
 			env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
 		}
-		logger << "\n----------------------------------------------------------------------------\n" << flush;
-		logger << env << "\n----------------------------------------------------------------------------\n" << flush;
+		logger << "\n----------------------------------------------------------------------------\n" << std::flush;
+		logger << env << "\n----------------------------------------------------------------------------\n" << std::flush;
 	}
 	catch(const char* faultc)
 	{
-		string fault(faultc);
-		string bod = "", btag = "";
+		std::string fault(faultc);
+		std::string bod = "", btag = "";
 		AttributeList attl;
 		AttributeList::iterator it;
 		if(soapbody!=NULL)
@@ -142,11 +142,11 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		logger << ("Soap fault - " + fault) << flush;
+		logger << ("Soap fault - " + fault) << std::flush;
 	}
-	catch(const string &fault)
+	catch(const std::string &fault)
 	{
-		string bod = "", btag = "";
+		std::string bod = "", btag = "";
 		AttributeList attl;
 		AttributeList::iterator it;
 		if(soapbody!=NULL)
@@ -172,11 +172,11 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		logger << ("Soap fault - " + fault) << flush;
+		logger << ("Soap fault - " + fault) << std::flush;
 	}
 	catch(const Exception& e)
 	{
-		string bod = "", btag = "";
+		std::string bod = "", btag = "";
 		AttributeList attl;
 		AttributeList::iterator it;
 		if(soapbody!=NULL)
@@ -202,11 +202,11 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		logger << ("Soap fault - " + e.getMessage()) << flush;
+		logger << ("Soap fault - " + e.getMessage()) << std::flush;
 	}
 	catch(...)
 	{
-		string bod = "", btag = "";
+		std::string bod = "", btag = "";
 		AttributeList attl;
 		AttributeList::iterator it;
 		if(soapbody!=NULL)
@@ -232,7 +232,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		logger << "Soap Standard Exception" << flush;
+		logger << "Soap Standard Exception" << std::flush;
 	}
 	res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	res->addHeaderValue(HttpResponse::ContentType, xmlcnttype);

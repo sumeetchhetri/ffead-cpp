@@ -27,8 +27,8 @@ TeBkWorld TeBkRestController::db() {
 	return w;
 }
 
-vector<TeBkWorld> TeBkRestController::queries(string queries) {
-	vector<TeBkWorld> wlst;
+std::vector<TeBkWorld> TeBkRestController::queries(std::string queries) {
+	std::vector<TeBkWorld> wlst;
 	int queryCount = 1;
 	try {
 		queryCount = CastUtil::lexical_cast<int>(queries);
@@ -51,8 +51,8 @@ vector<TeBkWorld> TeBkRestController::queries(string queries) {
 	return wlst;
 }
 
-vector<TeBkWorld> TeBkRestController::updates(string queries) {
-	vector<TeBkWorld> wlst;
+std::vector<TeBkWorld> TeBkRestController::updates(std::string queries) {
+	std::vector<TeBkWorld> wlst;
 	int queryCount = 1;
 	try {
 		queryCount = CastUtil::lexical_cast<int>(queries);
@@ -77,6 +77,6 @@ vector<TeBkWorld> TeBkRestController::updates(string queries) {
 	return wlst;
 }
 
-string TeBkRestController::plaintext() {
+std::string TeBkRestController::plaintext() {
 	return "Hello, World!";
 }

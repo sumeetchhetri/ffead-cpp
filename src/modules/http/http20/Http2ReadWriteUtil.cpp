@@ -16,7 +16,7 @@ Http2RequestResponseData::Http2RequestResponseData() {
 Http2RequestResponseData::~Http2RequestResponseData() {
 }
 
-const string& Http2RequestResponseData::getData() const {
+const std::string& Http2RequestResponseData::getData() const {
 	return data;
 }
 
@@ -58,7 +58,7 @@ void Http2RequestResponseData::updateContent() {
 	}
 }
 
-const map<string, string>& Http2RequestResponseData::getHeaders() const {
+const std::map<std::string, std::string>& Http2RequestResponseData::getHeaders() const {
 	return preHeaders;
 }
 

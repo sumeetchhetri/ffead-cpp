@@ -39,7 +39,7 @@ Server::Server()
 	logger = LoggerFactory::getLogger("Server");
 }
 /*
-Server::Server(const string& port, const int& waiting, const Service& serv)
+Server::Server(const std::string& port, const int& waiting, const Service& serv)
 {
 	runn = true;
 	service = serv;
@@ -97,7 +97,7 @@ Server::Server(const string& port, const int& waiting, const Service& serv)
 		perror("sigaction");
 		exit(1);
 	}
-	logger << ("waiting for connections on " + port + ".....") << endl;
+	logger << ("waiting for connections on " + port + ".....") << std::endl;
 
 	if(fork()==0)
 	{
@@ -154,7 +154,7 @@ Server::Server(const string& port, const int& waiting, const Service& serv)
 
 }*/
 
-Server::Server(const string& port, const bool& block, const int& waiting, const Service& serv, int mode)
+Server::Server(const std::string& port, const bool& block, const int& waiting, const Service& serv, int mode)
 {
 	started = false;
 	runn = true;
@@ -236,7 +236,7 @@ Server::Server(const string& port, const bool& block, const int& waiting, const 
 		exit(1);
 	}
 	#endif
-	logger << ("waiting for connections on " + port + ".....") << endl;
+	logger << ("waiting for connections on " + port + ".....") << std::endl;
 	this->mode = mode;
 }
 
@@ -274,30 +274,30 @@ SOCKET Server::Accept()
 	SOCKET new_fd = accept(this->sock, (struct sockaddr *)&(this->their_addr), &sin_size);
 	return new_fd;
 }
-int Server::Send(const SOCKET& fd, const string& data)
+int Server::Send(const SOCKET& fd, const std::string& data)
 {
 	int bytes = send(fd,data.c_str(),data.length(),0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << endl;
+		logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
-int Server::Send(const SOCKET& fd, const vector<char>& data)
+int Server::Send(const SOCKET& fd, const std::vector<char>& data)
 {
 	int bytes = send(fd,&data[0],data.size(),0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << endl;
+		logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
-int Server::Send(const SOCKET& fd, const vector<unsigned char>& data)
+int Server::Send(const SOCKET& fd, const std::vector<unsigned char>& data)
 {
 	int bytes = send(fd,(const char*)&data[0],data.size(),0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << endl;
+		logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
@@ -306,7 +306,7 @@ int Server::Send(const SOCKET& fd, char *data)
 	int bytes = send(fd,data,sizeof data,0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << endl;
+		logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
@@ -315,12 +315,12 @@ int Server::Send(const SOCKET& fd, unsigned char *data)
 	int bytes = send(fd,(const char*)data,sizeof data,0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << endl;
+		logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
 
-int Server::Receive(const SOCKET& fd, string &data, const int& bytes)
+int Server::Receive(const SOCKET& fd, std::string &data, const int& bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -328,18 +328,18 @@ int Server::Receive(const SOCKET& fd, string &data, const int& bytes)
 	memset(buf, 0, sizeof(buf));
 	int bytesr = recv(fd, buf, bytes, 0);
 	/*string temp;
-	stringstream ss;
+	std::stringstream ss;
 	ss << buf;
 	while(getline(ss,temp,'\r'))
 	{
 		data.append(temp);
 	}*/
-	string temp(buf,buf+bytesr);
+	std::string temp(buf,buf+bytesr);
 	data = temp;
 	memset(&buf[0], 0, sizeof(buf));
 	return bytesr;
 }
-int Server::Receive(const SOCKET& fd, vector<char>& data, const int& bytes)
+int Server::Receive(const SOCKET& fd, std::vector<char>& data, const int& bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -350,7 +350,7 @@ int Server::Receive(const SOCKET& fd, vector<char>& data, const int& bytes)
 	copy(te,te+bytes,data.begin());
 	return bytesr;
 }
-int Server::Receive(const SOCKET& fd, vector<unsigned char>& data, const int& bytes)
+int Server::Receive(const SOCKET& fd, std::vector<unsigned char>& data, const int& bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -375,20 +375,20 @@ int Server::Receive(const SOCKET& fd, const unsigned char* data, const int& byte
 	int bytesr = recv(fd, (char*)data, bytes, 0);
 	return bytesr;
 }
-int Server::Receive(const SOCKET& fd, vector<string>& data, const int& bytes)
+int Server::Receive(const SOCKET& fd, std::vector<std::string>& data, const int& bytes)
 {
 	if(bytes==0)
 		return -1;
 	char te[bytes];
 	memset(te, 0, sizeof(te));
-	string temp;
+	std::string temp;
 	int bytesr = Receive(fd,te,bytes);
-	stringstream ss;
+	std::stringstream ss;
 	ss << te;
 	while(getline(ss,temp,'\n'))
 	{
 		data.push_back(temp);
-		logger << temp << endl;
+		logger << temp << std::endl;
 	}
 	memset(&te[0], 0, sizeof(te));
 	return bytesr;
@@ -476,7 +476,7 @@ SOCKET Server::createListener(const int& port, const bool& block)
 	return sockfd;
 }
 
-SOCKET Server::createListener(const string& ipAddress, const int& port, const bool& block)
+SOCKET Server::createListener(const std::string& ipAddress, const int& port, const bool& block)
 {
 	SOCKET    sockfd;
 	struct addrinfo hints, *servinfo, *p;
@@ -494,7 +494,7 @@ SOCKET Server::createListener(const string& ipAddress, const int& port, const bo
 		ip_addr = ipAddress.c_str();
 	else
 		return createListener(port, block);
-	string ports = CastUtil::lexical_cast<string>(port);
+	std::string ports = CastUtil::lexical_cast<std::string>(port);
 	if ((rv = getaddrinfo(ip_addr, ports.c_str(), &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return -1;

@@ -7,15 +7,15 @@
 
 #include "HiloIdGenerator.h"
 
-map<string, long long> HiloIdGenerator::idsInSession;
+std::map<std::string, long long> HiloIdGenerator::idsInSession;
 
-map<string, long long> HiloIdGenerator::hiloIdMaxValuesInSession;
+std::map<std::string, long long> HiloIdGenerator::hiloIdMaxValuesInSession;
 
-map<string, Mutex> HiloIdGenerator::locks;
+std::map<std::string, Mutex> HiloIdGenerator::locks;
 
-string HiloIdGenerator::ALL = "__ALL__";
+std::string HiloIdGenerator::ALL = "__ALL__";
 
-void HiloIdGenerator::init(const string& name, const long long& id, const int& lowValue, const bool& forceReinit) {
+void HiloIdGenerator::init(const std::string& name, const long long& id, const int& lowValue, const bool& forceReinit) {
 	locks[name].lock();
 	if(forceReinit || (!forceReinit && idsInSession.find(name)==idsInSession.end()))
 	{
@@ -48,7 +48,7 @@ long long HiloIdGenerator::next() {
 	return val;
 }
 
-long long HiloIdGenerator::next(const string& name) {
+long long HiloIdGenerator::next(const std::string& name) {
 	if(locks.find(name)==locks.end())return -1;
 	long long val = -2;
 	locks[name].lock();
@@ -61,7 +61,7 @@ long long HiloIdGenerator::next(const string& name) {
 	return val;
 }
 
-bool HiloIdGenerator::isInitialized(const string& name) {
+bool HiloIdGenerator::isInitialized(const std::string& name) {
 	locks[name].lock();
 	bool fl = idsInSession.find(name)!=idsInSession.end();
 	locks[name].unlock();

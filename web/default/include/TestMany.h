@@ -28,25 +28,25 @@
 #include "queue"
 #include "list"
 class TestMany {
-	vector<int> vpi;
+	std::vector<int> vpi;
 public:
 	Test t;
 	int y;
-	vector<int> vi;
-	vector<string> vs;
-	vector<double> vd;
-	vector<long> vl;
-	vector<bool> vb;
-	vector<short> vsh;
-	vector<YObject> vyo;
-	list<int> li;
+	std::vector<int> vi;
+	std::vector<std::string> vs;
+	std::vector<double> vd;
+	std::vector<long> vl;
+	std::vector<bool> vb;
+	std::vector<short> vsh;
+	std::vector<YObject> vyo;
+	std::list<int> li;
 	std::queue<short> qsh;
 public:
-	void setVpi(vector<int> vpi)
+	void setVpi(std::vector<int> vpi)
 	{
 		this->vpi = vpi;
 	}
-	vector<int> getVpi()
+	std::vector<int> getVpi()
 	{
 		return vpi;
 	}

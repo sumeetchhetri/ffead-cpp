@@ -22,7 +22,7 @@ int Http2PriorityFrame::getStreamDependency() const {
 	return streamDependency;
 }
 
-Http2PriorityFrame::Http2PriorityFrame(string data, Http2FrameHeader& aheader) {
+Http2PriorityFrame::Http2PriorityFrame(std::string data, Http2FrameHeader& aheader) {
 	header = aheader;
 	header.type = 2;
 	exclusive = ((data.at(0) >> 7) & 0x01);
@@ -39,9 +39,9 @@ Http2PriorityFrame::~Http2PriorityFrame() {
 	// TODO Auto-generated destructor stub
 }
 
-string Http2PriorityFrame::getFrameData() {
-	string edata;
-	string data = CommonUtils::ulonglongTocharArray(streamDependency, 4);
+std::string Http2PriorityFrame::getFrameData() {
+	std::string edata;
+	std::string data = CommonUtils::ulonglongTocharArray(streamDependency, 4);
 	if(exclusive)
 		data[0] |= 0x01 << 7;
 	else

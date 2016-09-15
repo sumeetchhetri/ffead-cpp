@@ -33,23 +33,23 @@
 #include "StringUtil.h"
 #include <iostream>
 #include <stdlib.h>
-using namespace std;
+
 
 class RegexUtil {
-	static map<string, regex_t> nlpatterns;
-	static map<string, regex_t> patterns;
+	static std::map<std::string, regex_t> nlpatterns;
+	static std::map<std::string, regex_t> patterns;
 	static bool cacheRegexes;
 	friend class ConfigurationHandler;
-	static void getRegex(regex_t& regex, const string& pattern, const bool& matchNewLine);
+	static void getRegex(regex_t& regex, const std::string& pattern, const bool& matchNewLine);
 public:
-	static vector<string> findWithGroups(const string& text, const string& pattern, const int& groupCount, const bool& matchNewLine= false);
-	static vector<string> findWithGroups(const string& text, const string& pattern, const bool& matchNewLine= false);
-	static vector<string> search(const string& text, const string& pattern, const bool& matchNewLine= false);
-	static void find(const string& text, const string& pattern, int &spos, int &epos, const bool& matchNewLine= false);
-	static bool matches(const string& text, const string& pattern, const bool& matchNewLine= false);
-	static int find(const string& text, const string& pattern, const bool& matchNewLine= false);
-	static string replaceCopy(const string& text, const string& pattern, const string& with, const bool& matchNewLine= false);
-	static bool replace(string& text, const string& pattern, const string& with, const bool& matchNewLine= false);
+	static std::vector<std::string> findWithGroups(const std::string& text, const std::string& pattern, const int& groupCount, const bool& matchNewLine= false);
+	static std::vector<std::string> findWithGroups(const std::string& text, const std::string& pattern, const bool& matchNewLine= false);
+	static std::vector<std::string> search(const std::string& text, const std::string& pattern, const bool& matchNewLine= false);
+	static void find(const std::string& text, const std::string& pattern, int &spos, int &epos, const bool& matchNewLine= false);
+	static bool matches(const std::string& text, const std::string& pattern, const bool& matchNewLine= false);
+	static int find(const std::string& text, const std::string& pattern, const bool& matchNewLine= false);
+	static std::string replaceCopy(const std::string& text, const std::string& pattern, const std::string& with, const bool& matchNewLine= false);
+	static bool replace(std::string& text, const std::string& pattern, const std::string& with, const bool& matchNewLine= false);
 	static void flushCache();
 };
 

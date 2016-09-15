@@ -8,7 +8,7 @@
 #ifndef TEBKWORLD_H_
 #define TEBKWORLD_H_
 #include "string"
-using namespace std;
+
 
 #pragma @Entity
 #pragma @Table name="World"

@@ -11,7 +11,7 @@ CompressionUtil::CompressionUtil() {
 }
 
 
-string CompressionUtil::_compress(char* infile, const bool& isGz, const bool& retu, char* toFile)
+std::string CompressionUtil::_compress(char* infile, const bool& isGz, const bool& retu, char* toFile)
 {
 	int chunkSize = 8192;
 
@@ -24,7 +24,7 @@ string CompressionUtil::_compress(char* infile, const bool& isGz, const bool& re
     unsigned int have;
     z_stream strm;
 
-    string s;
+    std::string s;
     FILE* ofs;
     FILE* ifs;
     if(infile!=NULL)
@@ -118,7 +118,7 @@ string CompressionUtil::_compress(char* infile, const bool& isGz, const bool& re
     return s;
 }
 
-string CompressionUtil::_uncompress(char* infile, const bool& isGz, const bool& retu, char* toFile)
+std::string CompressionUtil::_uncompress(char* infile, const bool& isGz, const bool& retu, char* toFile)
 {
 	int chunkSize = 8192;
 
@@ -131,7 +131,7 @@ string CompressionUtil::_uncompress(char* infile, const bool& isGz, const bool& 
     unsigned int have;
     z_stream strm;
 
-    string s;
+    std::string s;
     FILE* ofs;
     FILE* ifs;
     if(infile!=NULL)
@@ -242,7 +242,7 @@ string CompressionUtil::_uncompress(char* infile, const bool& isGz, const bool& 
    level is supplied, Z_VERSION_ERROR if the version of zlib.h and the
    version of the library linked do not match, or Z_ERRNO if there is
    an error reading or writing the files. */
-string CompressionUtil::_compress(char* datain, const size_t& insize, const bool& eostream, const bool& isGz, const int& chunkSize, const bool& retu, char* toFile)
+std::string CompressionUtil::_compress(char* datain, const size_t& insize, const bool& eostream, const bool& isGz, const int& chunkSize, const bool& retu, char* toFile)
 {
 	unsigned char out[chunkSize];
 	memset(out, 0, sizeof(out));
@@ -251,11 +251,11 @@ string CompressionUtil::_compress(char* datain, const size_t& insize, const bool
     unsigned int have;
     z_stream strm;
 
-    string s;
-    ofstream ofs;
+    std::string s;
+    std::ofstream ofs;
     if(toFile!=NULL)
     {
-    	ofs.open(toFile, ios::binary);
+    	ofs.open(toFile, std::ios::binary);
     }
 
     float parts = (float)insize/chunkSize;
@@ -400,7 +400,7 @@ string CompressionUtil::_compress(char* datain, const size_t& insize, const bool
    invalid or incomplete, Z_VERSION_ERROR if the version of zlib.h and
    the version of the library linked do not match, or Z_ERRNO if there
    is an error reading or writing the files. */
-string CompressionUtil::_uncompress(char* datain, const size_t& insize, const bool& isGz, const bool& retu, char* toFile)
+std::string CompressionUtil::_uncompress(char* datain, const size_t& insize, const bool& isGz, const bool& retu, char* toFile)
 {
     int ret;
     unsigned have;
@@ -408,11 +408,11 @@ string CompressionUtil::_uncompress(char* datain, const size_t& insize, const bo
     unsigned char out[CHUNK];
 	memset(out, 0, sizeof(out));
 
-    string s;
-    ofstream ofs;
+    std::string s;
+    std::ofstream ofs;
     if(toFile!=NULL)
     {
-    	ofs.open(toFile, ios::binary);
+    	ofs.open(toFile, std::ios::binary);
     }
 
 	float parts = (float)insize/CHUNK;
@@ -552,8 +552,8 @@ string CompressionUtil::_uncompress(char* datain, const size_t& insize, const bo
 }
 
 
-string CompressionUtil::zlibCompress(char* input, const size_t& siz, const bool& eostream, const int& chunkSize, const bool& ret, char* toFile) {
-	string compData = _compress(input, siz, eostream, false, chunkSize, ret, toFile);
+std::string CompressionUtil::zlibCompress(char* input, const size_t& siz, const bool& eostream, const int& chunkSize, const bool& ret, char* toFile) {
+	std::string compData = _compress(input, siz, eostream, false, chunkSize, ret, toFile);
 	if(toFile==NULL)
 	{
 		return compData;
@@ -571,12 +571,12 @@ string CompressionUtil::zlibCompress(char* input, const size_t& siz, const bool&
 	}
 }
 
-string CompressionUtil::zlibCompress(const string& input, const bool& eostream, const int& chunkSize, const bool& ret, char* toFile) {
+std::string CompressionUtil::zlibCompress(const std::string& input, const bool& eostream, const int& chunkSize, const bool& ret, char* toFile) {
 	return zlibCompress((char*)input.c_str(), input.length(), eostream, chunkSize, ret, toFile);
 }
 
-string CompressionUtil::gzipCompress(char* input, const size_t& siz, const bool& eostream, const int& chunkSize, const bool& ret, char* toFile) {
-	string compData = _compress(input, siz, eostream, true, chunkSize, ret, toFile);
+std::string CompressionUtil::gzipCompress(char* input, const size_t& siz, const bool& eostream, const int& chunkSize, const bool& ret, char* toFile) {
+	std::string compData = _compress(input, siz, eostream, true, chunkSize, ret, toFile);
 	if(toFile==NULL)
 	{
 		return compData;
@@ -594,12 +594,12 @@ string CompressionUtil::gzipCompress(char* input, const size_t& siz, const bool&
 	}
 }
 
-string CompressionUtil::gzipCompress(const string& input, const bool& eostream, const int& chunkSize, const bool& ret, char* toFile) {
+std::string CompressionUtil::gzipCompress(const std::string& input, const bool& eostream, const int& chunkSize, const bool& ret, char* toFile) {
 	return gzipCompress((char*)input.c_str(), input.length(), eostream, chunkSize, ret, toFile);
 }
 
-string CompressionUtil::zlibUnCompress(char* input, const size_t& siz, const bool& ret, char* toFile) {
-	string compData = _uncompress(input, siz, false, ret, toFile);
+std::string CompressionUtil::zlibUnCompress(char* input, const size_t& siz, const bool& ret, char* toFile) {
+	std::string compData = _uncompress(input, siz, false, ret, toFile);
 	if(toFile==NULL)
 	{
 		return compData;
@@ -617,12 +617,12 @@ string CompressionUtil::zlibUnCompress(char* input, const size_t& siz, const boo
 	}
 }
 
-string CompressionUtil::zlibUnCompress(const string& input, const bool& ret, char* toFile) {
+std::string CompressionUtil::zlibUnCompress(const std::string& input, const bool& ret, char* toFile) {
 	return zlibUnCompress((char*)input.c_str(), input.length(), ret, toFile);
 }
 
-string CompressionUtil::gzipUnCompress(char* input, const size_t& siz, const bool& ret, char* toFile) {
-	string compData = _uncompress(input, siz, true, ret, toFile);
+std::string CompressionUtil::gzipUnCompress(char* input, const size_t& siz, const bool& ret, char* toFile) {
+	std::string compData = _uncompress(input, siz, true, ret, toFile);
 	if(toFile==NULL)
 	{
 		return compData;
@@ -640,23 +640,23 @@ string CompressionUtil::gzipUnCompress(char* input, const size_t& siz, const boo
 	}
 }
 
-string CompressionUtil::gzipUnCompress(const string& input, const bool& ret, char* toFile) {
+std::string CompressionUtil::gzipUnCompress(const std::string& input, const bool& ret, char* toFile) {
 	return gzipUnCompress((char*)input.c_str(), input.length(), ret, toFile);
 }
 
-string CompressionUtil::zlibCompressFile(char* infile, const bool& retu, char* toFile) {
+std::string CompressionUtil::zlibCompressFile(char* infile, const bool& retu, char* toFile) {
 	return _compress(infile, false, retu, toFile);
 }
 
-string CompressionUtil::gzipCompressFile(char* infile, const bool& retu, char* toFile) {
+std::string CompressionUtil::gzipCompressFile(char* infile, const bool& retu, char* toFile) {
 	return _compress(infile, true, retu, toFile);
 }
 
-string CompressionUtil::zlibUnCompressFile(char* infile, const bool& retu, char* toFile) {
+std::string CompressionUtil::zlibUnCompressFile(char* infile, const bool& retu, char* toFile) {
 	return _uncompress(infile, false, retu, toFile);
 }
 
-string CompressionUtil::gzipUnCompressFile(char* infile, const bool& retu, char* toFile) {
+std::string CompressionUtil::gzipUnCompressFile(char* infile, const bool& retu, char* toFile) {
 	return _uncompress(infile, true, retu, toFile);
 }
 

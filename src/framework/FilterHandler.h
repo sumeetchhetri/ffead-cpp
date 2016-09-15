@@ -31,11 +31,11 @@
 typedef ClassInfo (*FunPtr) ();
 
 class FilterHandler {
-	static bool getFilterForPath(const string& cntxtName, const string& actUrl, vector<string>& filters, const string& type);
+	static bool getFilterForPath(const std::string& cntxtName, const std::string& actUrl, std::vector<std::string>& filters, const std::string& type);
 public:
-	static void handleIn(HttpRequest* req, const string& ext, Reflector& reflector);
-	static bool handle(HttpRequest* req, HttpResponse* res, const string& ext, Reflector& reflector);
-	static void handleOut(HttpRequest* req, HttpResponse* res, const string& ext, Reflector& reflector);
+	static void handleIn(HttpRequest* req, const std::string& ext, Reflector& reflector);
+	static bool handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector);
+	static void handleOut(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector);
 };
 
 #endif /* FILTERHANDLER_H_ */

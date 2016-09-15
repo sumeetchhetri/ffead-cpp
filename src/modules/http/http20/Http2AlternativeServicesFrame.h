@@ -13,23 +13,23 @@ class Http2AlternativeServicesFrame : public Http2Frame {
 	unsigned int maxAge;
 	uint16_t port;
 	unsigned char protoLength;
-	string protocolId;
+	std::string protocolId;
 	unsigned char hostLength;
-	string host;
-	string origin;
-	Http2AlternativeServicesFrame(const string& data, Http2FrameHeader& header);
+	std::string host;
+	std::string origin;
+	Http2AlternativeServicesFrame(const std::string& data, Http2FrameHeader& header);
 	friend class Http2Handler;
 	friend class Http2StreamHandler;
 public:
 	Http2AlternativeServicesFrame();
 	virtual ~Http2AlternativeServicesFrame();
-	string getFrameData();
-	const string& getHost() const;
+	std::string getFrameData();
+	const std::string& getHost() const;
 	unsigned char getHostLength() const;
 	unsigned int getMaxAge() const;
-	const string& getOrigin() const;
+	const std::string& getOrigin() const;
 	uint16_t getPort() const;
-	const string& getProtocolId() const;
+	const std::string& getProtocolId() const;
 	unsigned char getProtoLength() const;
 };
 

@@ -25,7 +25,7 @@
 #include "TemplateHandler.h"
 #include "vector"
 #include "MarkerTest.h"
-using namespace std;
+
 
 #pragma @Template path="mark.tpe" file="mark.tpe"
 class MarkerDefTemp : public TemplateHandler{

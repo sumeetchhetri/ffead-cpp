@@ -35,7 +35,7 @@ NBServer::NBServer()
 	started = false;
 }
 
-NBServer::NBServer(const string& port, const int& waiting, const Service& serv)
+NBServer::NBServer(const std::string& port, const int& waiting, const Service& serv)
 {
 	started = false;
 	runn = true;
@@ -113,7 +113,7 @@ NBServer::NBServer(const string& port, const int& waiting, const Service& serv)
 		exit(1);
 	}
 	#endif
-	logger << ("waiting for connections on " + port + ".....") << endl;
+	logger << ("waiting for connections on " + port + ".....") << std::endl;
 }
 
 NBServer::~NBServer() {
@@ -146,15 +146,15 @@ void* NBServer::servicing(void* arg)
 		{
 			perror("event handler main process");
 			if(errno==EBADF)
-				server->logger << "\nInavlid fd" <<flush;
+				server->logger << "\nInavlid fd" <<std::flush;
 			else if(errno==EFAULT)
-				server->logger << "\nThe memory area pointed to by events is not accessible" <<flush;
+				server->logger << "\nThe memory area pointed to by events is not accessible" <<std::flush;
 			else if(errno==EINTR)
-				server->logger << "\ncall was interrupted by a signal handler before any of the requested events occurred" <<flush;
+				server->logger << "\ncall was interrupted by a signal handler before any of the requested events occurred" <<std::flush;
 			else if(errno==EINVAL)
-				server->logger << "not a poll file descriptor, or maxevents is less than or equal to zero" << endl;
+				server->logger << "not a poll file descriptor, or maxevents is less than or equal to zero" << std::endl;
 			else
-				server->logger << "\nnot an epoll file descriptor" <<flush;
+				server->logger << "\nnot an epoll file descriptor" <<std::flush;
 		}
 		for(int n=0;n<nfds;n++)
 		{
@@ -206,30 +206,30 @@ int NBServer::Accept()
 {
 	return selEpolKqEvPrtHandler.getEvents();
 }
-int NBServer::Send(const SOCKET& fd, const string& data)
+int NBServer::Send(const SOCKET& fd, const std::string& data)
 {
 	int bytes = send(fd,data.c_str(),data.length(),0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << endl;
+		logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
-int NBServer::Send(const SOCKET& fd, const vector<char>& data)
+int NBServer::Send(const SOCKET& fd, const std::vector<char>& data)
 {
 	int bytes = send(fd,&data[0],data.size(),0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << endl;
+		logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
-int NBServer::Send(const SOCKET& fd, const vector<unsigned char>& data)
+int NBServer::Send(const SOCKET& fd, const std::vector<unsigned char>& data)
 {
 	int bytes = send(fd,(const char*)&data[0],data.size(),0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << endl;
+		logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
@@ -238,7 +238,7 @@ int NBServer::Send(const SOCKET& fd, char *data)
 	int bytes = send(fd,data,sizeof data,0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << endl;
+		logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
@@ -247,12 +247,12 @@ int NBServer::Send(const SOCKET& fd, unsigned char *data)
 	int bytes = send(fd,(const char*)data,sizeof data,0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << endl;
+		logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
 
-int NBServer::Receive(const SOCKET& fd, string &data, const int& bytes)
+int NBServer::Receive(const SOCKET& fd, std::string &data, const int& bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -260,18 +260,18 @@ int NBServer::Receive(const SOCKET& fd, string &data, const int& bytes)
 	memset(buf, 0, sizeof(buf));
 	int bytesr = recv(fd, buf, bytes, 0);
 	/*string temp;
-	stringstream ss;
+	std::stringstream ss;
 	ss << buf;
 	while(getline(ss,temp,'\r'))
 	{
 		data.append(temp);
 	}*/
-	string temp(buf,buf+bytesr);
+	std::string temp(buf,buf+bytesr);
 	data = temp;
 	memset(&buf[0], 0, sizeof(buf));
 	return bytesr;
 }
-int NBServer::Receive(const SOCKET& fd, vector<char> &data, const int& bytes)
+int NBServer::Receive(const SOCKET& fd, std::vector<char> &data, const int& bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -282,7 +282,7 @@ int NBServer::Receive(const SOCKET& fd, vector<char> &data, const int& bytes)
 	copy(te,te+bytes,data.begin());
 	return bytesr;
 }
-int NBServer::Receive(const SOCKET& fd, vector<unsigned char>& data, const int& bytes)
+int NBServer::Receive(const SOCKET& fd, std::vector<unsigned char>& data, const int& bytes)
 {
 	if(bytes==0)
 		return -1;
@@ -306,20 +306,20 @@ int NBServer::Receive(const SOCKET& fd, unsigned char* data, const int& bytes)
 	int bytesr = recv(fd, (char*)data, bytes, 0);
 	return bytesr;
 }
-int NBServer::Receive(const SOCKET& fd, vector<string>& data, const int& bytes)
+int NBServer::Receive(const SOCKET& fd, std::vector<std::string>& data, const int& bytes)
 {
 	if(bytes==0)
 		return -1;
 	char te[bytes];
 	memset(te, 0, sizeof(te));
-	string temp;
+	std::string temp;
 	int bytesr = Receive(fd,te,bytes);
-	stringstream ss;
+	std::stringstream ss;
 	ss << te;
 	while(getline(ss,temp,'\n'))
 	{
 		data.push_back(temp);
-		//logger << temp << endl;
+		//logger << temp << std::endl;
 	}
 	memset(&te[0], 0, sizeof(te));
 	return bytesr;

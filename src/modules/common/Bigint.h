@@ -27,29 +27,29 @@
 #include "algorithm"
 #include "CastUtil.h"
 #include <iostream>
-using namespace std;
+
 
 
 class Bigint {
 	friend class Bigdecimal;
-	vector<int> parts;
+	std::vector<int> parts;
 	bool isPositive;
 	int decimalStartsAt;
-	void create(const string& value);
+	void create(const std::string& value);
 	void checkAndSetIfZero();
-	int decompose(string fnvalue, string snvalue, const Bigint& number, int recurse, string& build, const bool& isDecimal, const int&);
+	int decompose(std::string fnvalue, std::string snvalue, const Bigint& number, int recurse, std::string& build, const bool& isDecimal, const int&);
 	void internalAdd(const Bigint& number);
 	void internalDivide(const Bigint& number, const bool& isDecimal, const int&);
 public:
-	static string BLANK;
-	static string MINUS;
-	static string ZERO;
+	static std::string BLANK;
+	static std::string MINUS;
+	static std::string ZERO;
 	static int ZERO_INT;
 	static int NUM_LENGTH;
 	static int NUM_MAX;
 	static int NUM_MAX_THRESHOLD;
 	Bigint();
-	Bigint(const string& value);
+	Bigint(const std::string& value);
 	void add(const Bigint& number);
 	Bigint operator+(const Bigint& number);
 	Bigint operator-(const Bigint& number);
@@ -70,7 +70,7 @@ public:
 	void divide(const Bigint& number);
 	static int compare(const Bigint& number1, const Bigint& number2);
 	int compare(const Bigint& number) const;
-	string toString() const;
+	std::string toString() const;
 	virtual ~Bigint();
 };
 

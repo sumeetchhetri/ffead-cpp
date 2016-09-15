@@ -31,32 +31,32 @@ Field::~Field() {
 	// TODO Auto-generated destructor stub
 }
 
-const string& Field::getAccessSpecifier() const
+const std::string& Field::getAccessSpecifier() const
 {
 	return accessSpecifier;
 }
 
-void Field::setAccessSpecifier(const string& accessSpecifier)
+void Field::setAccessSpecifier(const std::string& accessSpecifier)
 {
 	this->accessSpecifier = accessSpecifier;
 }
 
-const string& Field::getFieldName() const
+const std::string& Field::getFieldName() const
 {
 	return fieldName;
 }
 
-void Field::setFieldName(const string& fieldName)
+void Field::setFieldName(const std::string& fieldName)
 {
 	this->fieldName = fieldName;
 }
 
-const string& Field::getType() const
+const std::string& Field::getType() const
 {
 	return type;
 }
 
-void Field::setType(const string& type)
+void Field::setType(const std::string& type)
 {
 	this->type = type;
 }
@@ -68,10 +68,10 @@ void Field::clear()
 	type="";
 }
 
-const string& Field::getRefName() const {
+const std::string& Field::getRefName() const {
 	return refName;
 }
 
-void Field::setRefName(const string& refName) {
+void Field::setRefName(const std::string& refName) {
 	this->refName = refName;
 }

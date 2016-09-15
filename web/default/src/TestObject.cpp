@@ -29,99 +29,99 @@ namespace com {
 
 		}
 
-		vector<short> TestObject::getA() const {
+		std::vector<short> TestObject::getA() const {
 			return a;
 		}
 
-		void TestObject::setA(vector<short> a) {
+		void TestObject::setA(std::vector<short> a) {
 			this->a = a;
 		}
 
-		vector<int> TestObject::getB() const {
+		std::vector<int> TestObject::getB() const {
 			return b;
 		}
 
-		void TestObject::setB(vector<int> b) {
+		void TestObject::setB(std::vector<int> b) {
 			this->b = b;
 		}
 
-		vector<long> TestObject::getC() const {
+		std::vector<long> TestObject::getC() const {
 			return c;
 		}
 
-		void TestObject::setC(vector<long> c) {
+		void TestObject::setC(std::vector<long> c) {
 			this->c = c;
 		}
 
-		vector<long long> TestObject::getD() const {
+		std::vector<long long> TestObject::getD() const {
 			return d;
 		}
 
-		void TestObject::setD(vector<long long> d) {
+		void TestObject::setD(std::vector<long long> d) {
 			this->d = d;
 		}
 
-		vector<unsigned short> TestObject::getE() const {
+		std::vector<unsigned short> TestObject::getE() const {
 			return e;
 		}
 
-		void TestObject::setE(vector<unsigned short> e) {
+		void TestObject::setE(std::vector<unsigned short> e) {
 			this->e = e;
 		}
 
-		vector<unsigned int> TestObject::getF() const {
+		std::vector<unsigned int> TestObject::getF() const {
 			return f;
 		}
 
-		void TestObject::setF(vector<unsigned int> f) {
+		void TestObject::setF(std::vector<unsigned int> f) {
 			this->f = f;
 		}
 
-		vector<unsigned long> TestObject::getG() const {
+		std::vector<unsigned long> TestObject::getG() const {
 			return g;
 		}
 
-		void TestObject::setG(vector<unsigned long> g) {
+		void TestObject::setG(std::vector<unsigned long> g) {
 			this->g = g;
 		}
 
-		vector<unsigned long long> TestObject::getH() const {
+		std::vector<unsigned long long> TestObject::getH() const {
 			return h;
 		}
 
-		void TestObject::setH(vector<unsigned long long> h) {
+		void TestObject::setH(std::vector<unsigned long long> h) {
 			this->h = h;
 		}
 
-		vector<float> TestObject::getI() const {
+		std::vector<float> TestObject::getI() const {
 			return i;
 		}
 
-		void TestObject::setI(vector<float> i) {
+		void TestObject::setI(std::vector<float> i) {
 			this->i = i;
 		}
 
-		vector<double> TestObject::getJ() const {
+		std::vector<double> TestObject::getJ() const {
 			return j;
 		}
 
-		void TestObject::setJ(vector<double> j) {
+		void TestObject::setJ(std::vector<double> j) {
 			this->j = j;
 		}
 
-		vector<bool> TestObject::getK() const {
+		std::vector<bool> TestObject::getK() const {
 			return k;
 		}
 
-		void TestObject::setK(vector<bool> k) {
+		void TestObject::setK(std::vector<bool> k) {
 			this->k = k;
 		}
 
-		vector<string> TestObject::getL() const {
+		std::vector<std::string> TestObject::getL() const {
 			return l;
 		}
 
-		void TestObject::setL(vector<string> l) {
+		void TestObject::setL(std::vector<std::string> l) {
 			this->l = l;
 		}
 
@@ -129,43 +129,43 @@ namespace com {
 			// TODO Auto-generated destructor stub
 		}
 
-		string TestObject::toString() {
-			string out;
+		std::string TestObject::toString() {
+			std::string out;
 			for (int var = 0; var < (int)a.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(a.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(a.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)b.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(b.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(b.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)c.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(c.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(c.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)d.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(d.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(d.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)e.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(e.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(e.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)f.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(f.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(f.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)g.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(g.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(g.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)h.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(h.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(h.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)i.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(i.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(i.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)j.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(j.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(j.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)k.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(k.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(k.at(var)) + " ");
 			}
 			for (int var = 0; var < (int)l.size(); ++var) {
-				out.append(CastUtil::lexical_cast<string>(l.at(var)) + " ");
+				out.append(CastUtil::lexical_cast<std::string>(l.at(var)) + " ");
 			}
 			return out;
 		}

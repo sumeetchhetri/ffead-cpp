@@ -57,26 +57,26 @@
 
 class Constants {
 public:
-	static const string BLANK;
-	static const string INT_TYPE;
-	static const string UINT_TYPE;
-	static const string SHORTINT_TYPE;
-	static const string SSHORTINT_TYPE;
-	static const string SSHORT_TYPE;
-	static const string SHORT_TYPE;
-	static const string USHORT_TYPE;
-	static const string LONG_TYPE;
-	static const string ULONG_TYPE;
-	static const string LONGLONG_TYPE;
-	static const string ULONGLONG_TYPE;
-	static const string FLOAT_TYPE;
-	static const string DOUBLE_TYPE;
-	static const string LDOUBLE_TYPE;
-	static const string BOOL_TYPE;
-	static const string CHAR_TYPE;
-	static const string UCHAR_TYPE;
-	static const string STD_STRING_TYPE;
-	static const string STRING_TYPE;
+	static const std::string BLANK;
+	static const std::string INT_TYPE;
+	static const std::string UINT_TYPE;
+	static const std::string SHORTINT_TYPE;
+	static const std::string SSHORTINT_TYPE;
+	static const std::string SSHORT_TYPE;
+	static const std::string SHORT_TYPE;
+	static const std::string USHORT_TYPE;
+	static const std::string LONG_TYPE;
+	static const std::string ULONG_TYPE;
+	static const std::string LONGLONG_TYPE;
+	static const std::string ULONGLONG_TYPE;
+	static const std::string FLOAT_TYPE;
+	static const std::string DOUBLE_TYPE;
+	static const std::string LDOUBLE_TYPE;
+	static const std::string BOOL_TYPE;
+	static const std::string CHAR_TYPE;
+	static const std::string UCHAR_TYPE;
+	static const std::string STD_STRING_TYPE;
+	static const std::string STRING_TYPE;
 };
 
 #endif /* CONSTANTS_H_ */

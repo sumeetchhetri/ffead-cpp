@@ -7,16 +7,16 @@
 
 #include "MongoDBDataSourceImpl.h"
 
-string MongoDBDataSourceImpl::initializeDMLQueryParts(Query& cquery, bson_t** data, bson_t** query, string& operationName) {
-	string qs = cquery.getQuery();
+std::string MongoDBDataSourceImpl::initializeDMLQueryParts(Query& cquery, bson_t** data, bson_t** query, std::string& operationName) {
+	std::string qs = cquery.getQuery();
 	StringUtil::trim(qs);
-	string collectionName;
-	if(qs.find("db.")!=string::npos && qs.find("(")!=string::npos && qs.at(qs.length()-1)==')') {
-		string querySchemaPart = qs.substr(3);
+	std::string collectionName;
+	if(qs.find("db.")!=std::string::npos && qs.find("(")!=std::string::npos && qs.at(qs.length()-1)==')') {
+		std::string querySchemaPart = qs.substr(3);
 		querySchemaPart = querySchemaPart.substr(0, querySchemaPart.find("("));
 		StringUtil::trim(querySchemaPart);
 
-		if(querySchemaPart.find(".")==string::npos)
+		if(querySchemaPart.find(".")==std::string::npos)
 			throw "Invalid querySchemaPart specified";
 
 		collectionName = querySchemaPart.substr(0, querySchemaPart.find("."));
@@ -27,7 +27,7 @@ string MongoDBDataSourceImpl::initializeDMLQueryParts(Query& cquery, bson_t** da
 		if(operationName=="")
 			throw "No operation name specified";
 
-		string queryStrPart = qs.substr(qs.find("(")+1);
+		std::string queryStrPart = qs.substr(qs.find("(")+1);
 		queryStrPart = queryStrPart.substr(0, queryStrPart.length()-1);
 		StringUtil::trim(queryStrPart);
 
@@ -60,17 +60,17 @@ string MongoDBDataSourceImpl::initializeDMLQueryParts(Query& cquery, bson_t** da
 	return collectionName;
 }
 
-string MongoDBDataSourceImpl::initializeQueryParts(Query& cquery, bson_t** querySpec, bson_t** fields, string& operationName) {
+std::string MongoDBDataSourceImpl::initializeQueryParts(Query& cquery, bson_t** querySpec, bson_t** fields, std::string& operationName) {
 	*fields = NULL;
-	string qs = cquery.getQuery();
+	std::string qs = cquery.getQuery();
 	StringUtil::trim(qs);
-	string collectionName;
-	if(qs.find("db.")!=string::npos && qs.find("(")!=string::npos && qs.at(qs.length()-1)==')') {
-		string querySchemaPart = qs.substr(3);
+	std::string collectionName;
+	if(qs.find("db.")!=std::string::npos && qs.find("(")!=std::string::npos && qs.at(qs.length()-1)==')') {
+		std::string querySchemaPart = qs.substr(3);
 		querySchemaPart = querySchemaPart.substr(0, querySchemaPart.find("("));
 		StringUtil::trim(querySchemaPart);
 
-		if(querySchemaPart.find(".")==string::npos)
+		if(querySchemaPart.find(".")==std::string::npos)
 			throw "Invalid querySchemaPart specified";
 
 		collectionName = querySchemaPart.substr(0, querySchemaPart.find("."));
@@ -81,7 +81,7 @@ string MongoDBDataSourceImpl::initializeQueryParts(Query& cquery, bson_t** query
 		if(operationName=="")
 			throw "No operation name specified";
 
-		string queryStrPart = qs.substr(qs.find("(")+1);
+		std::string queryStrPart = qs.substr(qs.find("(")+1);
 		queryStrPart = queryStrPart.substr(0, queryStrPart.length()-1);
 		StringUtil::trim(queryStrPart);
 
@@ -91,7 +91,7 @@ string MongoDBDataSourceImpl::initializeQueryParts(Query& cquery, bson_t** query
 		bson_error_t err;
 		bson_t* queryParts = bson_new_from_json((const uint8_t*)queryStrPart.c_str(), queryStrPart.length(), &err);
 		bson_iter_t i;
-		cout << bson_as_json(queryParts, NULL) << endl;
+		std::cout << bson_as_json(queryParts, NULL) << std::endl;
 
 		bson_iter_init(&i, queryParts);
 		bool t = bson_iter_find(&i, "$query");
@@ -117,7 +117,7 @@ string MongoDBDataSourceImpl::initializeQueryParts(Query& cquery, bson_t** query
 	return collectionName;
 }
 
-QueryComponent* MongoDBDataSourceImpl::getQueryComponent(const vector<Condition>& conds)
+QueryComponent* MongoDBDataSourceImpl::getQueryComponent(const std::vector<Condition>& conds)
 {
 	QueryComponent* subQuery = new QueryComponent();
 	QueryComponent* currentSubQuery = subQuery;
@@ -255,8 +255,8 @@ void MongoDBDataSourceImpl::populateQueryComponents(QueryComponent* sq)
 	}
 	if(sq->andClauses.size()>0 || sq->orClauses.size()>0 || hasChildren)
 	{
-		vector<bson_t*> andChildQs;
-		vector<bson_t*> orChildQs;
+		std::vector<bson_t*> andChildQs;
+		std::vector<bson_t*> orChildQs;
 		if(sq->andClauses.size()>0)
 			andChildQs.push_back(createSubMongoQuery(sq->andClauses));
 		if(sq->orClauses.size()>0)
@@ -304,8 +304,8 @@ void MongoDBDataSourceImpl::populateQueryComponents(QueryComponent* sq)
 	}
 }
 
-map<string, map<string, Condition> > MongoDBDataSourceImpl::toMap(vector<Condition>& conds) {
-	map<string, map<string, Condition> > cols;
+std::map<std::string, std::map<std::string, Condition> > MongoDBDataSourceImpl::toMap(std::vector<Condition>& conds) {
+	std::map<std::string, std::map<std::string, Condition> > cols;
 	for (int i=0;i<(int)conds.size();i++)
 	{
 		Condition cond = conds.at(i);
@@ -330,15 +330,15 @@ map<string, map<string, Condition> > MongoDBDataSourceImpl::toMap(vector<Conditi
 	return cols;
 }
 
-bson_t* MongoDBDataSourceImpl::createSubMongoQuery(vector<Condition>& conds) {
+bson_t* MongoDBDataSourceImpl::createSubMongoQuery(std::vector<Condition>& conds) {
 	bson_t* subQ = bson_new();
-	map<string, map<string, Condition> > cols = toMap(conds);
-	map<string, map<string, Condition> >::iterator mit;
+	std::map<std::string, std::map<std::string, Condition> > cols = toMap(conds);
+	std::map<std::string, std::map<std::string, Condition> >::iterator mit;
 	for (mit=cols.begin();mit!=cols.end();++mit)
 	{
-		string propName = mit->first;
-		map<string, Condition> condMap = mit->second;
-		map<string, Condition>::iterator cit;
+		std::string propName = mit->first;
+		std::map<std::string, Condition> condMap = mit->second;
+		std::map<std::string, Condition>::iterator cit;
 		for (cit=condMap.begin();cit!=condMap.end();++cit)
 		{
 			if(cit->first=="$in" || cit->first=="$nin") {
@@ -368,9 +368,10 @@ bson_t* MongoDBDataSourceImpl::createSubMongoQuery(vector<Condition>& conds) {
 	return subQ;
 }
 
-void MongoDBDataSourceImpl::appendGenericObject(bson_t* b, const string& name, GenericObject& o) {
+void MongoDBDataSourceImpl::appendGenericObject(bson_t* b, const std::string& name, GenericObject& o) {
 	if(o.isInstanceOf("int") || o.isInstanceOf("short") || o.isInstanceOf("long")
-			|| o.isInstanceOf("unsigned int") || o.isInstanceOf("unsigned short")) {
+			|| o.isInstanceOf("unsigned int") || o.isInstanceOf("unsigned short")
+			|| o.isInstanceOf("char") || o.isInstanceOf("unsigned char")) {
 		int sv;
 		o.get(sv);
 		bson_append_int32(b, name.c_str(), name.length(), sv);
@@ -379,7 +380,7 @@ void MongoDBDataSourceImpl::appendGenericObject(bson_t* b, const string& name, G
 		o.get(sv);
 		bson_append_int64(b, name.c_str(), name.length(), sv);
 	} else if(o.isInstanceOf("std::string")) {
-		string sv;
+		std::string sv;
 		o.get(sv);
 		bson_append_utf8(b, name.c_str(), name.length(), sv.c_str(), sv.length());
 	} else if(o.isInstanceOf("bool")) {
@@ -397,7 +398,7 @@ void MongoDBDataSourceImpl::appendGenericObject(bson_t* b, const string& name, G
 	}
 }
 
-void* MongoDBDataSourceImpl::getResults(const string& collectionName, Query& query, bson_t* querySpec, bson_t* fields, const bool& isObj, const bool& isCountQuery) {
+void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query& query, bson_t* querySpec, bson_t* fields, const bool& isObj, const bool& isCountQuery) {
 	Connection* conn = _conn();
 
 	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
@@ -405,14 +406,14 @@ void* MongoDBDataSourceImpl::getResults(const string& collectionName, Query& que
 	mongoc_cursor_t* cursor = NULL;
 
 	void* result = NULL;
-	string clasName = mapping->getClassForTable(collectionName);
+	std::string clasName = mapping->getClassForTable(collectionName);
 	if(isObj)
 	{
 		result = reflector->getNewContainer(clasName, "std::vector", appName);
 	}
 	else if(!isCountQuery)
 	{
-		result = new vector<map<string, GenericObject> >;
+		result = new std::vector<std::map<std::string, GenericObject> >;
 	}
 
 	if(!isCountQuery)
@@ -429,9 +430,9 @@ void* MongoDBDataSourceImpl::getResults(const string& collectionName, Query& que
 			}
 			else
 			{
-				map<string, GenericObject> row;
+				std::map<std::string, GenericObject> row;
 				getMapOfProperties((bson_t*)doc, &row);
-				((vector<map<string, GenericObject> >*)result)->push_back(row);
+				((std::vector<std::map<std::string, GenericObject> >*)result)->push_back(row);
 			}
 		}
 		mongoc_cursor_destroy (cursor);
@@ -452,7 +453,7 @@ void* MongoDBDataSourceImpl::getResults(const string& collectionName, Query& que
 
 
 
-void* MongoDBDataSourceImpl::getResults(const string& collectionName, QueryBuilder& qb, bson_t* query, bson_t* fields, const bool& isObj) {
+void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, QueryBuilder& qb, bson_t* query, bson_t* fields, const bool& isObj) {
 	Connection* conn = _conn();
 
 	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
@@ -471,11 +472,11 @@ void* MongoDBDataSourceImpl::getResults(const string& collectionName, QueryBuild
 		bson_t* child = bson_new();
 		bson_append_document_begin(querySpec, "$orderby", 8, child);
 		for(int i=0;i<(int)qb.getColumnsAsc().size();i++) {
-			string colnm = qb.getColumnsAsc().at(i);
+			std::string colnm = qb.getColumnsAsc().at(i);
 			bson_append_int32(child, colnm.c_str(), colnm.length(), 1);
 		}
 		for(int i=0;i<(int)qb.getColumnsDesc().size();i++) {
-			string colnm = qb.getColumnsDesc().at(i);
+			std::string colnm = qb.getColumnsDesc().at(i);
 			bson_append_int32(child, colnm.c_str(), colnm.length(), 1);
 		}
 		bson_append_document_end(querySpec, child);
@@ -483,14 +484,14 @@ void* MongoDBDataSourceImpl::getResults(const string& collectionName, QueryBuild
 	}
 
 	void* result = NULL;
-	string clasName = mapping->getClassForTable(collectionName);
+	std::string clasName = mapping->getClassForTable(collectionName);
 	if(isObj)
 	{
 		result = reflector->getNewContainer(clasName, "std::vector", appName);
 	}
 	else
 	{
-		result = new vector<map<string, GenericObject> >;
+		result = new std::vector<std::map<std::string, GenericObject> >;
 	}
 
 	cursor = mongoc_collection_find(collection, MONGOC_QUERY_NONE, qb.getStart(), qb.getCount(), 0,
@@ -505,9 +506,9 @@ void* MongoDBDataSourceImpl::getResults(const string& collectionName, QueryBuild
 		}
 		else
 		{
-			map<string, GenericObject> row;
+			std::map<std::string, GenericObject> row;
 			getMapOfProperties((bson_t*)doc, &row);
-			((vector<map<string, GenericObject> >*)result)->push_back(row);
+			((std::vector<std::map<std::string, GenericObject> >*)result)->push_back(row);
 		}
 	}
 	mongoc_cursor_destroy (cursor);
@@ -520,17 +521,19 @@ void* MongoDBDataSourceImpl::getResults(const string& collectionName, QueryBuild
 	return result;
 }
 
-string MongoDBDataSourceImpl::getQueryForRelationship(const string& column, const string& type, void* val)
+std::string MongoDBDataSourceImpl::getQueryForRelationship(const std::string& column, const std::string& type, void* val)
 {
-	string qstr = "{\"" + column + "\":";
-	if(type=="string") {
-		qstr += "\"" + (*(string*)val) + "\"}";
-	} else if(type=="short" || type=="int" || type=="unsigned short" || type=="unsigned int" || type=="long") {
-		qstr += CastUtil::lexical_cast<string>(*(long*)val) + "}";
+	std::string qstr = "{\"" + column + "\":";
+	if(type=="string" || type=="std::string") {
+		qstr += "\"" + (*(std::string*)val) + "\"}";
+	} else if(type=="short" || type=="int" || type=="unsigned short" || type=="unsigned int" || type=="long"
+			|| type=="unsigned long" || type=="long long"
+			|| type=="char" || type=="unsigned char") {
+		qstr += CastUtil::lexical_cast<std::string>(*(unsigned long long*)val) + "}";
 	} else if(type=="bool") {
-		qstr += CastUtil::lexical_cast<string>(*(bool*)val) + "}";
+		qstr += CastUtil::lexical_cast<std::string>(*(bool*)val) + "}";
 	} else if(type=="float" || type=="double") {
-		qstr += CastUtil::lexical_cast<string>(*(double*)val) + "}";
+		qstr += CastUtil::lexical_cast<std::string>(*(double*)val) + "}";
 	}
 	delete val;
 	return qstr;
@@ -540,12 +543,12 @@ void MongoDBDataSourceImpl::storeProperty(const ClassInfo& clas, void* t, void* 
 {
 	if(colV!=NULL)
 	{
-		string te = fe.getType();
+		std::string te = fe.getType();
 		args argus;
 		argus.push_back(te);
 		vals valus;
 		valus.push_back(colV);
-		string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
+		std::string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
 		Method meth = clas.getMethod(methname, argus);
 		reflector->invokeMethod<void*>(t,meth,valus);
 	}
@@ -554,7 +557,7 @@ void MongoDBDataSourceImpl::storeProperty(const ClassInfo& clas, void* t, void* 
 void MongoDBDataSourceImpl::executePreTable(DataSourceEntityMapping& dsemp, GenericObject& idv) {
 	if(dsemp.getIdgendbEntityType()=="table")
 	{
-		string query;
+		std::string query;
 		StringContext params;
 		params["idgen_tabname"] = dsemp.getIdgendbEntityName();
 		params["idgen_colname"] = dsemp.getIdgencolumnName();
@@ -562,8 +565,8 @@ void MongoDBDataSourceImpl::executePreTable(DataSourceEntityMapping& dsemp, Gene
 		{
 			params["entity_column"] = dsemp.getIdgenentityColumn();
 			params["entity_name"] = dsemp.getTableName();
-			query = string("db.${idgen_tabname}.find({\"$query\": {\"${entity_column}\": \"${entity_name}\"}, ") +
-						string("\"$fields\": {\"${idgen_colname}\": 1}})");
+			query = std::string("db.${idgen_tabname}.find({\"$query\": {\"${entity_column}\": \"${entity_name}\"}, ") +
+						std::string("\"$fields\": {\"${idgen_colname}\": 1}})");
 		}
 		else
 		{
@@ -572,7 +575,7 @@ void MongoDBDataSourceImpl::executePreTable(DataSourceEntityMapping& dsemp, Gene
 		query = TemplateEngine::evaluate(query, params);
 
 		Query q(query);
-		vector<map<string, GenericObject> > vecmp = execute(q);
+		std::vector<std::map<std::string, GenericObject> > vecmp = execute(q);
 		if(vecmp.size()>0 && vecmp.at(0).size()>0)
 		{
 			if(vecmp.at(0).find(dsemp.getIdgencolumnName())!=vecmp.at(0).end())
@@ -586,7 +589,7 @@ void MongoDBDataSourceImpl::executePreTable(DataSourceEntityMapping& dsemp, Gene
 void MongoDBDataSourceImpl::executePostTable(DataSourceEntityMapping& dsemp, GenericObject& idv) {
 	if(dsemp.getIdgendbEntityType()=="table")
 	{
-		string query;
+		std::string query;
 		StringContext params;
 		params["idgen_tabname"] = dsemp.getIdgendbEntityName();
 		params["idgen_colname"] = dsemp.getIdgencolumnName();
@@ -594,8 +597,8 @@ void MongoDBDataSourceImpl::executePostTable(DataSourceEntityMapping& dsemp, Gen
 		{
 			params["entity_column"] = dsemp.getIdgenentityColumn();
 			params["entity_name"] = dsemp.getTableName();
-			query = string("db.${idgen_tabname}.update({\"$query\": {\"${entity_column}\": \"${entity_name}\"}, ") +
-						string("\"$data\": {\"$inc\": {\"${idgen_colname}\": 1}}})");
+			query = std::string("db.${idgen_tabname}.update({\"$query\": {\"${entity_column}\": \"${entity_name}\"}, ") +
+						std::string("\"$data\": {\"$inc\": {\"${idgen_colname}\": 1}}})");
 		}
 		else
 		{
@@ -614,11 +617,11 @@ void MongoDBDataSourceImpl::executeSequence(DataSourceEntityMapping& dsemp, Gene
 void MongoDBDataSourceImpl::executeIdentity(DataSourceEntityMapping& dsemp, GenericObject& idv) {
 }
 
-vector<map<string, GenericObject> > MongoDBDataSourceImpl::execute(Query& query) {
+std::vector<std::map<std::string, GenericObject> > MongoDBDataSourceImpl::execute(Query& query) {
 	void* res = executeQuery(query, false);
-	vector<map<string, GenericObject> > vec;
+	std::vector<std::map<std::string, GenericObject> > vec;
 	if(res!=NULL) {
-		vec = *(vector<map<string, GenericObject> >*)res;
+		vec = *(std::vector<std::map<std::string, GenericObject> >*)res;
 		delete res;
 	}
 	return vec;
@@ -634,7 +637,7 @@ MongoDBDataSourceImpl::MongoDBDataSourceImpl(ConnectionPooler* pool, Mapping* ma
 MongoDBDataSourceImpl::~MongoDBDataSourceImpl() {
 }
 
-void MongoDBDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const string& customMethod, GenericObject& idv) {
+void MongoDBDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject& idv) {
 	if(dsemp.getIdgendbEntityType().find("custom:")==0)
 	{
 		if(customMethod=="oid") {
@@ -643,27 +646,27 @@ void MongoDBDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const 
 			char buffer[100];
 			memset(buffer, 0, sizeof(buffer));
 			bson_oid_to_string(&oid, buffer);
-			string oidv = string(buffer, strlen(buffer));
+			std::string oidv = std::string(buffer, strlen(buffer));
 			idv.set(oidv);
 		}
 	}
 }
 
-void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void* object, bson_t* b, const bool& isIdBsonAppend) {
+void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName, void* object, bson_t* b, const bool& isIdBsonAppend) {
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
-	string tableName = dsemp.getTableName();
+	std::string tableName = dsemp.getTableName();
 	strMap clsprpmap = dsemp.getPropertyColumnMapping();
-	map<string, string>::iterator clsprpmapit;
+	std::map<std::string, std::string>::iterator clsprpmapit;
 	ClassInfo clas = reflector->getClassInfo(clasName, appName);
 
 	for(clsprpmapit=clsprpmap.begin();clsprpmapit!=clsprpmap.end();++clsprpmapit)
 	{
-		string prop = clsprpmapit->first;
-		string col = clsprpmapit->second;
+		std::string prop = clsprpmapit->first;
+		std::string col = clsprpmapit->second;
 		Field pf = clas.getField(prop);
 		args argus;
-		vector<void *> valus;
-		string methname = "get"+StringUtil::capitalizedCopy(prop);
+		std::vector<void *> valus;
+		std::string methname = "get"+StringUtil::capitalizedCopy(prop);
 		Method meth = clas.getMethod(methname,argus);
 
 		//MongoDB has the _id attribute as the id for an GenericObject
@@ -674,12 +677,14 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			}
 		}
 
-		if(pf.getType()=="short" || pf.getType()=="int" || pf.getType()=="unsigned short")
+		if(pf.getType()=="short" || pf.getType()=="int" || pf.getType()=="unsigned short"
+				|| pf.getType()=="char" || pf.getType()=="unsigned char")
 		{
 			long val = reflector->invokeMethod<long>(object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
-		else if(pf.getType()=="unsigned int" || pf.getType()=="long" || pf.getType()=="unsigned long" || pf.getType()=="long long")
+		else if(pf.getType()=="unsigned int" || pf.getType()=="long" || pf.getType()=="unsigned long"
+				|| pf.getType()=="long long")
 		{
 			long long val = reflector->invokeMethod<long long>(object,meth,valus);
 			bson_append_int64(b, col.c_str(), col.length(), val);
@@ -691,7 +696,7 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 		}
 		else if(pf.getType()=="string" || pf.getType()=="std::string")
 		{
-			string val = reflector->invokeMethod<string>(object,meth,valus);
+			std::string val = reflector->invokeMethod<std::string>(object,meth,valus);
 			bson_append_utf8(b, col.c_str(), col.length(), val.c_str(), val.length());
 		}
 		else if(pf.getType()=="bool")
@@ -699,9 +704,9 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bool val = reflector->invokeMethod<bool>(object,meth,valus);
 			bson_append_bool(b, col.c_str(), col.length(), val);
 		}
-		else if(pf.getType().find("std::vector<short,")!=string::npos)
+		else if(pf.getType().find("std::vector<short,")!=std::string::npos)
 		{
-			vector<short> *val = (vector<short>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<short> *val = (std::vector<short>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -711,9 +716,9 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<unsigned short,")!=string::npos)
+		else if(pf.getType().find("std::vector<unsigned short,")!=std::string::npos)
 		{
-			vector<unsigned short> *val = (vector<unsigned short>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<unsigned short> *val = (std::vector<unsigned short>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -723,9 +728,9 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<int,")!=string::npos)
+		else if(pf.getType().find("std::vector<int,")!=std::string::npos)
 		{
-			vector<int> *val = (vector<int>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<int> *val = (std::vector<int>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -735,9 +740,9 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<unsigned int,")!=string::npos)
+		else if(pf.getType().find("std::vector<unsigned int,")!=std::string::npos)
 		{
-			vector<unsigned int> *val = (vector<unsigned int>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<unsigned int> *val = (std::vector<unsigned int>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -747,9 +752,9 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<long,")!=string::npos)
+		else if(pf.getType().find("std::vector<long,")!=std::string::npos)
 		{
-			vector<long> *val = (vector<long>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<long> *val = (std::vector<long>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -759,9 +764,9 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<unsigned long,")!=string::npos)
+		else if(pf.getType().find("std::vector<unsigned long,")!=std::string::npos)
 		{
-			vector<unsigned long> *val = (vector<unsigned long>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<unsigned long> *val = (std::vector<unsigned long>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -771,9 +776,9 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<long long,")!=string::npos)
+		else if(pf.getType().find("std::vector<long long,")!=std::string::npos)
 		{
-			vector<long long> *val = (vector<long long>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<long long> *val = (std::vector<long long>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -783,9 +788,9 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<bool,")!=string::npos)
+		else if(pf.getType().find("std::vector<bool,")!=std::string::npos)
 		{
-			vector<bool> *val = (vector<bool>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<bool> *val = (std::vector<bool>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -795,9 +800,9 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<float,")!=string::npos)
+		else if(pf.getType().find("std::vector<float,")!=std::string::npos)
 		{
-			vector<float> *val = (vector<float>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<float> *val = (std::vector<float>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -807,9 +812,9 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<double,")!=string::npos)
+		else if(pf.getType().find("std::vector<double,")!=std::string::npos)
 		{
-			vector<double> *val = (vector<double>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<double> *val = (std::vector<double>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -819,10 +824,10 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<std::string,")!=string::npos
-				|| pf.getType().find("std::vector<string,")!=string::npos)
+		else if(pf.getType().find("std::vector<std::string,")!=std::string::npos
+				|| pf.getType().find("std::vector<std::string,")!=std::string::npos)
 		{
-			vector<string> *val = (vector<string>*)reflector->invokeMethodGVP(object,meth,valus);
+			std::vector<std::string> *val = (std::vector<std::string>*)reflector->invokeMethodGVP(object,meth,valus);
 			bson_t* child = bson_new();
 			bson_append_array_begin(b, col.c_str(), col.length(), child);
 			for (int var = 0; var < (int)val->size(); ++var) {
@@ -832,11 +837,11 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const string& clasName, void
 			bson_destroy(child);
 			delete val;
 		}
-		else if(pf.getType().find("std::vector<")!=string::npos)
+		else if(pf.getType().find("std::vector<")!=std::string::npos)
 		{
-			string pclsnm = pf.getType();
+			std::string pclsnm = pf.getType();
 			StringUtil::replaceFirst(pclsnm,"std::vector<","");
-			string vtyp = pclsnm.substr(0,pclsnm.find(","));
+			std::string vtyp = pclsnm.substr(0,pclsnm.find(","));
 			void *val = reflector->invokeMethodGVP(object,meth,valus);
 			if(val!=NULL)
 			{
@@ -894,9 +899,9 @@ long long getIterNumericVal(bson_iter_t& i, bson_type_t& t)
 	return v;
 }
 
-void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len, const string& clasName) {
+void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len, const std::string& clasName) {
     bson_iter_t i;
-    string key;
+    std::string key;
     char oidhex[25];
 
     if(buf != NULL)
@@ -921,9 +926,9 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
     	bson_type_t t = bson_iter_type( &i );
         if ( t == 0 )
             break;
-        key = string(bson_iter_key(&i));
+        key = std::string(bson_iter_key(&i));
 
-        string fieldName;
+        std::string fieldName;
 
         if(key=="_id") {
         	fieldName = dsemp.getIdPropertyName();
@@ -960,7 +965,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 			case BSON_TYPE_UTF8:
 			{
 				uint32_t len;
-				string* s = new string(bson_iter_utf8(&i, &len), len);
+				std::string* s = new std::string(bson_iter_utf8(&i, &len), len);
 				storeProperty(clas, instance, s, fe);
 				delete s;
 				break;
@@ -969,7 +974,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 			case BSON_TYPE_OID:
 			{
 				bson_oid_to_string(bson_iter_oid(&i), oidhex);
-				string* s = new string(oidhex);
+				std::string* s = new std::string(oidhex);
 				storeProperty(clas, instance, s, fe);
 				delete s;
 				break;
@@ -1005,13 +1010,13 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 			}
 			case BSON_TYPE_ARRAY:
 			{
-				string vtyp = fe.getType();
+				std::string vtyp = fe.getType();
 
 				StringUtil::replaceFirst(vtyp,"std::","");
 				StringUtil::replaceFirst(vtyp,"vector<","");
-				string te;
+				std::string te;
 
-				if(vtyp.find(",")==string::npos) {
+				if(vtyp.find(",")==std::string::npos) {
 					te = vtyp.substr(0,vtyp.find(">"));
 				} else {
 					te = vtyp.substr(0,vtyp.find(","));
@@ -1024,9 +1029,29 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 
 				bson_iter_init(&ii , d);
 
-				if(te=="short")
+				if(te=="char")
 				{
-					vector<short> veci;
+					std::vector<char> veci;
+					while ( bson_iter_next( &ii ) ){
+						bson_type_t t = bson_iter_type( &ii );
+						long long v = getIterNumericVal(ii, t);
+						veci.push_back((char)v);
+					}
+					storeProperty(clas, instance, &veci, fe);
+				}
+				else if(te=="unsigned char")
+				{
+					std::vector<unsigned char> veci;
+					while ( bson_iter_next( &ii ) ){
+						bson_type_t t = bson_iter_type( &ii );
+						long long v = getIterNumericVal(ii, t);
+						veci.push_back((unsigned char)v);
+					}
+					storeProperty(clas, instance, &veci, fe);
+				}
+				else if(te=="short")
+				{
+					std::vector<short> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
@@ -1036,7 +1061,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				}
 				else if(te=="unsigned short")
 				{
-					vector<unsigned short> veci;
+					std::vector<unsigned short> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
@@ -1046,7 +1071,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				}
 				else if(te=="int")
 				{
-					vector<int> veci;
+					std::vector<int> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
@@ -1056,7 +1081,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				}
 				else if(te=="unsigned int")
 				{
-					vector<unsigned int> veci;
+					std::vector<unsigned int> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
@@ -1066,7 +1091,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				}
 				else if(te=="long")
 				{
-					vector<long> veci;
+					std::vector<long> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
@@ -1076,7 +1101,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				}
 				else if(te=="unsigned long")
 				{
-					vector<unsigned long> veci;
+					std::vector<unsigned long> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
@@ -1086,7 +1111,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				}
 				else if(te=="long long")
 				{
-					vector<long long> veci;
+					std::vector<long long> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
@@ -1096,7 +1121,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				}
 				else if(te=="float")
 				{
-					vector<float> veci;
+					std::vector<float> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
@@ -1106,7 +1131,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				}
 				else if(te=="double")
 				{
-					vector<double> veci;
+					std::vector<double> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
@@ -1116,15 +1141,15 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				}
 				else if(te=="string" || te=="std::string")
 				{
-					vector<string> veci;
+					std::vector<std::string> veci;
 					while ( bson_iter_next( &ii ) ){
-						veci.push_back(string(bson_iter_utf8(&ii, &len), len));
+						veci.push_back(std::string(bson_iter_utf8(&ii, &len), len));
 					}
 					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="bool")
 				{
-					vector<bool> veci;
+					std::vector<bool> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						veci.push_back(bson_iter_bool(&ii));
@@ -1147,7 +1172,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 					}
 					else
 					{
-						logger << ("Invalid class definition found while deserializing "+clasName+" - invalid class " + te) << endl;
+						logger << ("Invalid class definition found while deserializing "+clasName+" - invalid class " + te) << std::endl;
 					}
 				}
 				bson_destroy(d);
@@ -1164,9 +1189,9 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
     return instance;
 }
 
-void MongoDBDataSourceImpl::getMapOfProperties(bson_t* data, map<string, GenericObject>* map) {
+void MongoDBDataSourceImpl::getMapOfProperties(bson_t* data, std::map<std::string, GenericObject>* map) {
     bson_iter_t i;
-    string key;
+    std::string key;
     char oidhex[25];
     bson_iter_init( &i , data );
 
@@ -1174,7 +1199,7 @@ void MongoDBDataSourceImpl::getMapOfProperties(bson_t* data, map<string, Generic
     	bson_type_t t = bson_iter_type( &i );
         if ( t == 0 )
             break;
-        key = string(bson_iter_key(&i));
+        key = std::string(bson_iter_key(&i));
 
         switch (t) {
 			case BSON_TYPE_INT32:
@@ -1204,7 +1229,7 @@ void MongoDBDataSourceImpl::getMapOfProperties(bson_t* data, map<string, Generic
 			case BSON_TYPE_UTF8:
 			{
 				uint32_t len;
-				string s = string(bson_iter_utf8(&i, &len), len);
+				std::string s = std::string(bson_iter_utf8(&i, &len), len);
 				(*map)[key].set(s);
 				break;
 			}
@@ -1212,7 +1237,7 @@ void MongoDBDataSourceImpl::getMapOfProperties(bson_t* data, map<string, Generic
 			case BSON_TYPE_OID:
 			{
 				bson_oid_to_string(bson_iter_oid(&i), oidhex);
-				string s = string(oidhex);
+				std::string s = std::string(oidhex);
 				(*map)[key].set(s);
 				break;
 			}
@@ -1269,21 +1294,21 @@ bool MongoDBDataSourceImpl::rollback() {
 	return false;
 }
 
-void MongoDBDataSourceImpl::procedureCall(const string& procName) {
+void MongoDBDataSourceImpl::procedureCall(const std::string& procName) {
 	throw "Not Implemented";
 }
 
-void MongoDBDataSourceImpl::empty(const string& clasName) {
-	string collectionName = mapping->getTableForClass(clasName);
-	string qstr = "db."+collectionName+".remove({})";
+void MongoDBDataSourceImpl::empty(const std::string& clasName) {
+	std::string collectionName = mapping->getTableForClass(clasName);
+	std::string qstr = "db."+collectionName+".remove({})";
 	Query q(qstr, clasName);
 	executeUpdate(q);
 }
 
-long MongoDBDataSourceImpl::getNumRows(const string& clasName) {
-	string collectionName = mapping->getTableForClass(clasName);
-	string qstr = "db."+collectionName+".count({})";
-	vector<map<string, GenericObject> > vec;
+long MongoDBDataSourceImpl::getNumRows(const std::string& clasName) {
+	std::string collectionName = mapping->getTableForClass(clasName);
+	std::string qstr = "db."+collectionName+".count({})";
+	std::vector<std::map<std::string, GenericObject> > vec;
 	Query q(qstr, clasName);
 	void* count = executeQuery(q, false);
 	if(count!=NULL) {
@@ -1298,8 +1323,8 @@ long MongoDBDataSourceImpl::getNumRows(const string& clasName) {
 bool MongoDBDataSourceImpl::executeUpdate(Query& query) {
 	bson_t* data = NULL;
 	bson_t* q = NULL;
-	string operationName;
-	string collectionName = initializeDMLQueryParts(query, &data, &q, operationName);
+	std::string operationName;
+	std::string collectionName = initializeDMLQueryParts(query, &data, &q, operationName);
 	if(q==NULL) {
 		q = bson_new();
 	}
@@ -1350,11 +1375,11 @@ bool MongoDBDataSourceImpl::executeUpdate(Query& query) {
 	return false;
 }
 
-vector<map<string, GenericObject> > MongoDBDataSourceImpl::execute(QueryBuilder& qb) {
+std::vector<std::map<std::string, GenericObject> > MongoDBDataSourceImpl::execute(QueryBuilder& qb) {
 	void* res = executeQuery(qb, false);
-	vector<map<string, GenericObject> > vec;
+	std::vector<std::map<std::string, GenericObject> > vec;
 	if(res!=NULL) {
-		vec = *(vector<map<string, GenericObject> >*)res;
+		vec = *(std::vector<std::map<std::string, GenericObject> >*)res;
 		delete res;
 	}
 	return vec;
@@ -1374,8 +1399,8 @@ bool MongoDBDataSourceImpl::executeInsert(Query& query, void* entity) {
 
 	if(isIdFound)
 	{
-		cout << bson_as_json(data, NULL) << endl;
-		string collectionName = dsemp.getTableName();
+		std::cout << bson_as_json(data, NULL) << std::endl;
+		std::string collectionName = dsemp.getTableName();
 		Connection* conn = _conn();
 		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
 		bson_error_t er;
@@ -1390,15 +1415,15 @@ bool MongoDBDataSourceImpl::isGetDbEntityForBulkInsert() {
 	return true;
 }
 
-void* MongoDBDataSourceImpl::getDbEntityForBulkInsert(void* entity, const string& clasName, string& error) {
+void* MongoDBDataSourceImpl::getDbEntityForBulkInsert(void* entity, const std::string& clasName, std::string& error) {
 	bson_t* b = bson_new();
 	getBSONObjectFromObject(clasName, entity, b, true);
 	return b;
 }
 
 //mongoc_collection_insert_bulk is deprecated
-/*bool MongoDBDataSourceImpl::executeInsertBulk(Query& query, vector<void*> entities, vector<void*> dbEntities) {
-	string collectionName = mapping->getTableForClass(query.getClassName());
+/*bool MongoDBDataSourceImpl::executeInsertBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities) {
+	std::string collectionName = mapping->getTableForClass(query.getClassName());
 	bson_t** data;
 	data = new bson_t*[dbEntities.size()];
 	for (int k = 0; k < (int)dbEntities.size(); k++) {
@@ -1416,8 +1441,8 @@ void* MongoDBDataSourceImpl::getDbEntityForBulkInsert(void* entity, const string
 	return fl;
 }*/
 
-bool MongoDBDataSourceImpl::executeInsertBulk(Query& query, vector<void*> entities, vector<void*> dbEntities) {
-	string collectionName = mapping->getTableForClass(query.getClassName());
+bool MongoDBDataSourceImpl::executeInsertBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities) {
+	std::string collectionName = mapping->getTableForClass(query.getClassName());
 	Connection* conn = _conn();
 
 	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
@@ -1434,8 +1459,8 @@ bool MongoDBDataSourceImpl::executeInsertBulk(Query& query, vector<void*> entiti
 	return fl;
 }
 
-bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, vector<void*> entities, vector<void*> dbEntities) {
-	string collectionName = mapping->getTableForClass(query.getClassName());
+bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities) {
+	std::string collectionName = mapping->getTableForClass(query.getClassName());
 	Connection* conn = _conn();
 
 	bool fl = true;
@@ -1465,7 +1490,7 @@ bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, vector<void*> entiti
 				{
 					uint32_t len;
 					const char *cs = bson_iter_utf8(&i, &len);
-					string s(cs, len);
+					std::string s(cs, len);
 					go.set(s);
 					break;
 				}
@@ -1473,7 +1498,7 @@ bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, vector<void*> entiti
 				{
 					char oidhex[25];
 					bson_oid_to_string(bson_iter_oid(&i), oidhex);
-					string s(oidhex);
+					std::string s(oidhex);
 					go.set(s);
 					break;
 				}
@@ -1504,7 +1529,7 @@ bool MongoDBDataSourceImpl::executeUpdate(Query& query, void* entity) {
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(query.getClassName());
 	if(isIdFound)
 	{
-		string collectionName = dsemp.getTableName();
+		std::string collectionName = dsemp.getTableName();
 		Connection* conn = _conn();
 		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
 		bson_error_t er;
@@ -1515,10 +1540,10 @@ bool MongoDBDataSourceImpl::executeUpdate(Query& query, void* entity) {
 	return fl;
 }
 
-bool MongoDBDataSourceImpl::remove(const string& clasName, GenericObject& id) {
-	string idClsName = id.getTypeName();
-	string collectionName = mapping->getTableForClass(clasName);
-	string idValue = "";
+bool MongoDBDataSourceImpl::remove(const std::string& clasName, GenericObject& id) {
+	std::string idClsName = id.getTypeName();
+	std::string collectionName = mapping->getTableForClass(clasName);
+	std::string idValue = "";
 	if(id.isNumber() || id.isFPN())
 	{
 		idValue = id.getSerilaizedState();
@@ -1528,7 +1553,7 @@ bool MongoDBDataSourceImpl::remove(const string& clasName, GenericObject& id) {
 		idValue = "\"" + id.getSerilaizedState() + "\"";
 	}
 
-	string qstr = string("db."+collectionName+".remove({\"$query\": {\"_id\":") + idValue + string("}})");
+	std::string qstr = std::string("db."+collectionName+".remove({\"$query\": {\"_id\":") + idValue + std::string("}})");
 	Query q(qstr, clasName);
 	return executeUpdate(q);
 }
@@ -1536,8 +1561,8 @@ bool MongoDBDataSourceImpl::remove(const string& clasName, GenericObject& id) {
 void* MongoDBDataSourceImpl::executeQuery(Query& cquery, const bool& isObj) {
 	bson_t* querySpec = bson_new();
 	bson_t* fields = NULL;
-	string operationName;
-	string collectionName;
+	std::string operationName;
+	std::string collectionName;
 	bool isCountQuery = false;
 	if(!isObj)
 	{
@@ -1570,7 +1595,7 @@ void* MongoDBDataSourceImpl::executeQuery(QueryBuilder& qb, const bool& isObj) {
 	bson_t* fields = NULL;
 	bson_t* query = NULL;
 
-	string collectionName = qb.getTableName();
+	std::string collectionName = qb.getTableName();
 	bool isClassProps = false;
 	DataSourceEntityMapping dsemp;
 
@@ -1583,12 +1608,12 @@ void* MongoDBDataSourceImpl::executeQuery(QueryBuilder& qb, const bool& isObj) {
 	if(!qb.isAllCols())
 	{
 		fields = NULL;
-		map<string, string> cols = qb.getColumns();
+		std::map<std::string, std::string> cols = qb.getColumns();
 		if(cols.size()>0)
 		{
 			fields = bson_new();
 		}
-		map<string, string>::iterator it;
+		std::map<std::string, std::string>::iterator it;
 		for (it=cols.begin(); it!=cols.end(); ++it) {
 			if(!isClassProps)
 			{
@@ -1645,7 +1670,7 @@ void MongoDBDataSourceImpl::_release(Connection* conn, mongoc_collection_t* coll
 
 void* MongoDBDataSourceImpl::getContext(void* details) {
 	MongoContext* mc = new MongoContext;
-	string* mcd = (string*)details;
+	std::string* mcd = (std::string*)details;
 	mc->conn = pool->checkout();
 	if(mcd!=NULL && *mcd!="") {
 		mc->collection = mongoc_client_get_collection ((mongoc_client_t*)mc->conn->getConn(), mc->conn->getNode().getDatabaseName().c_str(), mcd->c_str());

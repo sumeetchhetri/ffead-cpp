@@ -27,19 +27,19 @@ class AMEFResources
 public:
 
 	static char* longTocharArray(const long& l, const int& ind);
-	static string longTocharArrayS(const long& l, const int& ind);
+	static std::string longTocharArrayS(const long& l, const int& ind);
 	static char* intTocharArray(const int& l, const int& ind);
 	static char* intTocharArrayWI(const int& l);
 	static int charArrayToInt(char* l, const int& off, const int& ind);
 	static long charArrayToLong(char* l, const int& off, const int& ind);
 	static long charArrayToLong(char* l, const int& ind);
-	static string intTocharArrayS(const int& l, const int& ind);
+	static std::string intTocharArrayS(const int& l, const int& ind);
 	#ifdef IS_64_BIT
-		static string longTocharArrayWI(const unsigned long long& l);
-		static string longTocharArrayWI(const long& l);
+		static std::string longTocharArrayWI(const unsigned long long& l);
+		static std::string longTocharArrayWI(const long& l);
 	#else
-		static string longTocharArrayWI(const unsigned long long& l);
-		static string longTocharArrayWI(const long& l);
+		static std::string longTocharArrayWI(const unsigned long long& l);
+		static std::string longTocharArrayWI(const long& l);
 	#endif
 };
 

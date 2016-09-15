@@ -7,16 +7,16 @@
 
 #include "CacheManager.h"
 
-map<string, CacheManager*> CacheManager::caches;
-string CacheManager::defDsnName;
+std::map<std::string, CacheManager*> CacheManager::caches;
+std::string CacheManager::defDsnName;
 
-void CacheManager::initCache(const ConnectionProperties& props, const string& appName) {
-	string name = StringUtil::trimCopy(props.getName());
+void CacheManager::initCache(const ConnectionProperties& props, const std::string& appName) {
+	std::string name = StringUtil::trimCopy(props.getName());
 	if(name=="")
 	{
 		throw "Cache Name cannot be blank";
 	}
-	string appNameN = CommonUtils::getAppName(appName);
+	std::string appNameN = CommonUtils::getAppName(appName);
 	name = appNameN + name;
 	if(caches.find(name)!=caches.end())
 	{
@@ -31,7 +31,7 @@ void CacheManager::initCache(const ConnectionProperties& props, const string& ap
 
 void CacheManager::destroy()
 {
-	map<string, CacheManager*>::iterator it;
+	std::map<std::string, CacheManager*>::iterator it;
 	for(it=caches.begin();it!=caches.end();++it)
 	{
 		if(it->second!=NULL)
@@ -42,8 +42,8 @@ void CacheManager::destroy()
 	caches.clear();
 }
 
-CacheInterface* CacheManager::getImpl(string name) {
-	string appName = CommonUtils::getAppName();
+CacheInterface* CacheManager::getImpl(std::string name) {
+	std::string appName = CommonUtils::getAppName();
 	StringUtil::trim(name);
 	if(name=="") {
 		name = defDsnName;

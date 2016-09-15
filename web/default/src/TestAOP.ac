@@ -6,5 +6,5 @@
 @ARGS("string")
 @RETURN("*")
 @WHEN("BEFORE")
-@CODE(cout << _1 << flush;)
+@CODE(cout << _1 << std::flush;)
 @ASPECTEND

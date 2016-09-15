@@ -1,7 +1,7 @@
 <DCPH>
 #include "string"
 #include <iostream>
-using namespace std;
+
 </DCPH>
 <html>
 <head>
@@ -10,7 +10,7 @@ using namespace std;
 <input type="1"/>
 lsdflsdkfjsdlflk
 <DCPB>
-string h;
+std::string h;
 h = "sdfsdf";
 </DCPB>
 <import>testheader.dcp</import>
@@ -19,13 +19,13 @@ h = "sdfsdf";
 
 <DCPB>
 screen << "<button>From Screen</button>";
-cout << h << flush;
+std::cout << h << std::flush;
 </DCPB>
 
 <DCPF>
 void printscrn()
 {
-	cout << "sdfsdfsdf" << flush;
+	std::cout << "sdfsdfsdf" << std::flush;
 }
 </DCPF>
 

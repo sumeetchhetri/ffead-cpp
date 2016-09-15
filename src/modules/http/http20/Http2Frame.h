@@ -18,7 +18,7 @@ protected:
 public:
 	Http2FrameHeader& getHeader();
 	virtual ~Http2Frame();
-	virtual string getFrameData()=0;
+	virtual std::string getFrameData()=0;
 };
 
 #endif /* HTTP2FRAME_H_ */

@@ -50,7 +50,7 @@ void DLogger::clear()
 	}
 }
 
-void DLogger::init(string file)
+void DLogger::init(std::string file)
 {
 	if(m_pInstance==NULL)
 	{
@@ -58,7 +58,7 @@ void DLogger::init(string file)
 	}
 }
 
-void DLogger::init(string level,string mode,string file)
+void DLogger::init(std::string level,std::string mode,std::string file)
 {
 	if(m_pInstance==NULL)
 	{
@@ -74,7 +74,7 @@ DLogger::DLogger()
 	datFormat.setFormatspec("dd/mm/yyyy hh:mi:ss");
 }
 
-DLogger::DLogger(string file)
+DLogger::DLogger(std::string file)
 {
 	PropFileReader pf;
 	propMap props = pf.getProperties(file);
@@ -89,10 +89,10 @@ DLogger::DLogger(string file)
 	mode = props["MODE"];
 	filepath = props["FILEPATH"];
 	if(mode=="FILE")
-		out.open(filepath.c_str(),ios::app | ios::binary);
+		out.open(filepath.c_str(),std::ios::app | std::ios::binary);
 	datFormat.setFormatspec(props["DATEFMT"]);
 }
-DLogger::DLogger(string level,string mode,string filepath)
+DLogger::DLogger(std::string level,std::string mode,std::string filepath)
 {
 	this->level = level;
 	this->mode = mode;
@@ -104,38 +104,38 @@ DLogger::~DLogger()
 	out.close();
 }
 
-void DLogger::write(string msg,string mod)
+void DLogger::write(std::string msg,std::string mod)
 {
 	Date dat;
-	string te = this->datFormat.format(dat);
+	std::string te = this->datFormat.format(dat);
 	if(mode=="FILE")
 	{
 		msg = "[" + te + "] <"+mod+"> :"+msg+"\n";
 		m_pInstance->p_mutex.lock();
 		m_pInstance->out.write(msg.c_str(),msg.length());
-		m_pInstance->out << flush;
+		m_pInstance->out << std::flush;
 		m_pInstance->p_mutex.unlock();
 	}
 	else
 	{
 		msg = "[" + te + "] <"+mod+"> :"+msg+"\n";
 		m_pInstance->p_mutex.lock();
-		cout << msg << flush;
+		std::cout << msg << std::flush;
 		m_pInstance->p_mutex.unlock();
 	}
 }
 
-void DLogger::info(string msg)
+void DLogger::info(std::string msg)
 {
 	m_pInstance->write(msg,"info");
 }
 
-void DLogger::debug(string msg)
+void DLogger::debug(std::string msg)
 {
 	m_pInstance->write(msg,"debug");
 }
 
-void DLogger::error(string msg)
+void DLogger::error(std::string msg)
 {
 	m_pInstance->write(msg,"error");
 }

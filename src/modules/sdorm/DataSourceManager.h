@@ -21,8 +21,8 @@
 class DataSourceManager;
 
 class DataSourceManager {
-	static map<string, DataSourceManager*> dsns;
-	static string defDsnName;
+	static std::map<std::string, DataSourceManager*> dsns;
+	static std::string defDsnName;
 	ConnectionProperties props;
 	Mapping mapping;
 	ConnectionPooler* pool;
@@ -32,7 +32,7 @@ class DataSourceManager {
 	friend class ConfigurationHandler;
 public:
 	virtual ~DataSourceManager();
-	static DataSourceInterface* getImpl(string name = "");
+	static DataSourceInterface* getImpl(std::string name = "");
 };
 
 #endif /* DATASOURCEMANAGER_H_ */

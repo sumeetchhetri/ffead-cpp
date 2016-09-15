@@ -34,13 +34,13 @@ DefaultIOFilter::~DefaultIOFilter() {
 void DefaultIOFilter::doInputFilter(HttpRequest *req)
 {
 	//Process the input request here...
-	cout << "Processed input request" << endl;
+	std::cout << "Processed input request" << std::endl;
 }
 
 void DefaultIOFilter::doOutputFilter(HttpResponse *res)
 {
 	//Process the output response here...
-	cout << "Processed output response" << endl;
+	std::cout << "Processed output response" << std::endl;
 }
 
 bool DefaultIOFilter::doHandle(HttpRequest *req, HttpResponse* res)

@@ -31,7 +31,7 @@ Client::~Client() {
 	closeConnection();
 }
 
-bool Client::connection(const string& host, const int& port)
+bool Client::connection(const std::string& host, const int& port)
 {
 	if(host=="localhost")
 	{
@@ -73,7 +73,7 @@ bool Client::connection(const string& host, const int& port)
 }
 
 
-bool Client::connectionUnresolv(const string& host, const int& port)
+bool Client::connectionUnresolv(const std::string& host, const int& port)
 {
     struct addrinfo hints, *servinfo, *p;
     int rv;
@@ -82,7 +82,7 @@ bool Client::connectionUnresolv(const string& host, const int& port)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    string sport = CastUtil::lexical_cast<string>(port);
+    std::string sport = CastUtil::lexical_cast<std::string>(port);
     if ((rv = getaddrinfo(host.c_str(), sport.c_str(), &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return false;
@@ -142,7 +142,7 @@ void Client::setSocketNonBlocking()
 	#endif
 }
 
-int Client::sendData(string data)
+int Client::sendData(std::string data)
 {
 	int sent = 0;
 	while(data.length()>0)
@@ -156,11 +156,11 @@ int Client::sendData(string data)
 	return sent;
 }
 
-string Client::getTextData(const string& hdrdelm, const string& cntlnhdr)
+std::string Client::getTextData(const std::string& hdrdelm, const std::string& cntlnhdr)
 {
 	int er=-1;
 	bool flag = true;
-	string alldat;
+	std::string alldat;
 	int cntlen;
 	char buf[MAXBUFLE];
 	memset(buf, 0, MAXBUFLE);
@@ -168,26 +168,26 @@ string Client::getTextData(const string& hdrdelm, const string& cntlnhdr)
 	BIO* io=BIO_new(BIO_f_buffer());
 	BIO_push(io,sbio);
 	bool isTE = false;
-	string tehdr = "transfer-encoding";
+	std::string tehdr = "transfer-encoding";
 	while(flag)
 	{
 		er = BIO_gets(io,buf,MAXBUFLE-1);
 		if(er==0)
 		{
 			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<flush;
+			//logger << "\nsocket closed before being serviced" <<std::flush;
 			return alldat;
 		}
 		if(!strcmp(buf,hdrdelm.c_str()))
 		{
-			string tt(buf, er);
+			std::string tt(buf, er);
 			alldat += tt;
 			break;
 		}
-		string temp(buf, er);
+		std::string temp(buf, er);
 		alldat += temp;
-		string ltemp = StringUtil::toLowerCopy(temp);
-		if(ltemp.find(cntlnhdr)!=string::npos)
+		std::string ltemp = StringUtil::toLowerCopy(temp);
+		if(ltemp.find(cntlnhdr)!=std::string::npos)
 		{
 			std::string cntle = temp.substr(temp.find(": ")+2);
 			StringUtil::trim(cntle);
@@ -197,10 +197,10 @@ string Client::getTextData(const string& hdrdelm, const string& cntlnhdr)
 			}
 			catch(...)
 			{
-				logger << "bad lexical cast" <<endl;
+				logger << "bad lexical cast" <<std::endl;
 			}
 		}
-		else if(ltemp.find(tehdr)!=string::npos)
+		else if(ltemp.find(tehdr)!=std::string::npos)
 		{
 			std::string cntle = ltemp.substr(ltemp.find(": ")+2);
 			StringUtil::trim(cntle);
@@ -217,17 +217,17 @@ string Client::getTextData(const string& hdrdelm, const string& cntlnhdr)
 		if(er==0)
 		{
 			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<flush;
+			//logger << "\nsocket closed before being serviced" <<std::flush;
 			return alldat;
 		}
-		string bytesstr(buf, er);
+		std::string bytesstr(buf, er);
 		StringUtil::replaceFirst(bytesstr,"\r\n","");
 		int bytesToRead = (int)StringUtil::fromHEX(bytesstr);
 		if(bytesToRead==0)
 		{
 			er = BIO_read(io,buf,2);
 			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<flush;
+			//logger << "\nsocket closed before being serviced" <<std::flush;
 			return alldat;
 		}
 		memset(&buf[0], 0, sizeof(buf));
@@ -235,16 +235,16 @@ string Client::getTextData(const string& hdrdelm, const string& cntlnhdr)
 		if(er==0)
 		{
 			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<flush;
+			//logger << "\nsocket closed before being serviced" <<std::flush;
 			return alldat;
 		}
-		string temp(buf, er);
+		std::string temp(buf, er);
 		alldat += temp;
 		er = BIO_read(io,buf,2);
 		if(er==0)
 		{
 			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<flush;
+			//logger << "\nsocket closed before being serviced" <<std::flush;
 			return alldat;
 		}
 	}
@@ -258,10 +258,10 @@ string Client::getTextData(const string& hdrdelm, const string& cntlnhdr)
 		if(er==0)
 		{
 			if(io!=NULL)BIO_free_all(io);
-			//logger << "\nsocket closed before being serviced" <<flush;
+			//logger << "\nsocket closed before being serviced" <<std::flush;
 			return alldat;
 		}
-		string temp(buf, er);
+		std::string temp(buf, er);
 		alldat += temp;
 		cntlen -= er;
 		memset(&buf[0], 0, sizeof(buf));
@@ -269,7 +269,7 @@ string Client::getTextData(const string& hdrdelm, const string& cntlnhdr)
 	return alldat;
 }
 
-int Client::receive(string& buf, const int& flag)
+int Client::receive(std::string& buf, const int& flag)
 {
 	char buff[MAXBUFLE+1];
 	memset(buff, 0, sizeof(buff));
@@ -279,7 +279,7 @@ int Client::receive(string& buf, const int& flag)
 	return t;
 }
 
-int Client::receivelen(string& buf, const int& len, const int& flag)
+int Client::receivelen(std::string& buf, const int& len, const int& flag)
 {
 	char buff[len+1];
 	memset(buff, 0, sizeof(buff));
@@ -289,15 +289,15 @@ int Client::receivelen(string& buf, const int& len, const int& flag)
 	return t;
 }
 
-int Client::sendlen(const string& buf, const int& len)
+int Client::sendlen(const std::string& buf, const int& len)
 {
 	return send(sockfd, buf.c_str(), len, 0);
 }
 
-string Client::getBinaryData(const int& len, const bool& isLengthIncluded)
+std::string Client::getBinaryData(const int& len, const bool& isLengthIncluded)
 {
 	//logger << len;
-	string alldat;
+	std::string alldat;
 	char *buf1 = new char[len];
 	memset(buf1, 0, len);
 	recv(sockfd, buf1, len, 0);
@@ -333,7 +333,7 @@ bool Client::isConnected()
 	return connected && ClientInterface::isConnected(sockfd);
 }
 
-string Client::getData()
+std::string Client::getData()
 {
 	int numbytes;
 	char buf[MAXBUFLE];
@@ -351,7 +351,7 @@ string Client::getData()
 		closesocket(sockfd);
 		return "";
 	}
-	string data(buf,buf+numbytes);
+	std::string data(buf,buf+numbytes);
 	memset(&buf[0], 0, sizeof(buf));
 	return data;
 }

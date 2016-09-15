@@ -28,16 +28,16 @@
 #include "GenericObject.h"
 #include <fstream>
 #include <iostream>
-using namespace std;
 
-typedef map<string,GenericObject> Context;
-typedef map<string,string> StringContext;
+
+typedef std::map<std::string,GenericObject> Context;
+typedef std::map<std::string,std::string> StringContext;
 class TemplateEngine {
 	TemplateEngine();
 public:
 	virtual ~TemplateEngine();
-	static string evaluate(const string&, const StringContext&);
-	//string evaluateTemplate(const string&, const Context&);
+	static std::string evaluate(const std::string&, const StringContext&);
+	//string evaluateTemplate(const std::string&, const Context&);
 };
 
 #endif /* TEMPLATEENGINE_H_ */

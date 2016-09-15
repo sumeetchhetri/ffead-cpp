@@ -25,7 +25,7 @@
 #include "TemplateHandler.h"
 #include "vector"
 #include "Test.h"
-using namespace std;
+
 
 class DefTemp : public TemplateHandler{
 public:

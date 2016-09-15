@@ -77,12 +77,12 @@ void Element::removeElement(Element* element)
 	}
 }
 
-void Element::addAttribute(const string& k, const string& value, const bool& validate)
+void Element::addAttribute(const std::string& k, const std::string& value, const bool& validate)
 {
 	if(StringUtil::trimCopy(value)=="")return;
 	if(StringUtil::trimCopy(k).find("xmlns:")==0)
 	{
-		string key = k.substr(6);
+		std::string key = k.substr(6);
 		if(validate && this->namespaces.find(key)!=this->namespaces.end())
 		{
 			//throw ("Duplicate namespace found - xmlns:" + key);
@@ -98,7 +98,7 @@ void Element::addAttribute(const string& k, const string& value, const bool& val
 		this->attributes[k] = value;
 	}
 }
-void Element::removeAttribute(const string& key)
+void Element::removeAttribute(const std::string& key)
 {
 	this->attributes.erase(key);
 }
@@ -115,7 +115,7 @@ const AttributeList& Element::getAttributes() const
 {
 	return this->attributes;
 }
-const string Element::getAttribute(const string& key) const
+const std::string Element::getAttribute(const std::string& key) const
 {
 	if(this->attributes.find(key)!=this->attributes.end())
 	{
@@ -127,25 +127,25 @@ const ElementList& Element::getChildElements() const
 {
 	return elements;
 }
-const string& Element::getTagName() const
+const std::string& Element::getTagName() const
 {
 	return this->tagName;
 }
-const string& Element::getNameSpc()
+const std::string& Element::getNameSpc()
 {
 	return this->nameSpace;
 }
 
-string Element::getTagNameSpc() const
+std::string Element::getTagNameSpc() const
 {
 	if(this->nameSpace!="")
 		return (this->nameSpace + ":" + this->tagName);
 	else
 		return this->tagName;
 }
-void Element::setTagName(const string& tagName)
+void Element::setTagName(const std::string& tagName)
 {
-	vector<string> vemp;
+	std::vector<std::string> vemp;
 	StringUtil::split(vemp, tagName, (":"));
 	if(vemp.size()==2)
 	{
@@ -156,12 +156,12 @@ void Element::setTagName(const string& tagName)
 		this->tagName = tagName;
 }
 
-const string& Element::getText() const
+const std::string& Element::getText() const
 {
 	return this->text;
 }
 
-void Element::setText(const string& text)
+void Element::setText(const std::string& text)
 {
 	this->text = text;
 }
@@ -176,7 +176,7 @@ void Element::setCdata(const bool& cdata)
 	this->cdata = cdata;
 }
 
-Element* Element::getElementByName(const string& name)
+Element* Element::getElementByName(const std::string& name)
 {
 	if(mapOfEle.find(name)!=mapOfEle.end())
 	{
@@ -185,13 +185,13 @@ Element* Element::getElementByName(const string& name)
 	return NULL;
 }
 
-Element* Element::getElementByNameIgnoreCase(const string& name)
+Element* Element::getElementByNameIgnoreCase(const std::string& name)
 {
 	ElementMap::iterator it;
-	string lname = StringUtil::toLowerCopy(name);
+	std::string lname = StringUtil::toLowerCopy(name);
 	for(it=mapOfEle.begin();it!=mapOfEle.end();++it)
 	{
-		string itn = StringUtil::toLowerCopy(it->first);
+		std::string itn = StringUtil::toLowerCopy(it->first);
 		if(itn==lname)
 		{
 			return it->second;
@@ -200,7 +200,7 @@ Element* Element::getElementByNameIgnoreCase(const string& name)
 	return NULL;
 }
 
-ElementList Element::getElementsByName(const string& name)
+ElementList Element::getElementsByName(const std::string& name)
 {
 	ElementList list;
 	for(int i=0;i<(int)this->elements.size();i++)
@@ -211,9 +211,9 @@ ElementList Element::getElementsByName(const string& name)
 	return list;
 }
 
-string Element::render()
+std::string Element::render()
 {
-	string rend;
+	std::string rend;
 	rend.append(generateStartOpenTag(this->getTagName()));
 	rend.append(generateAttributes(this->getAttributes()));
 	//rend.append(generateAttributes(this->namespaces));
@@ -228,9 +228,9 @@ string Element::render()
 	return rend;
 }
 
-string Element::renderSerialization()
+std::string Element::renderSerialization()
 {
-	string rend;
+	std::string rend;
 	rend.append(generateStartOpenTag(this->getTagName()));
 	rend.append(generateAttributes(this->getAttributes()));
 	//rend.append(" namespace=\""+getNameSpcValue()+"\"");
@@ -245,9 +245,9 @@ string Element::renderSerialization()
 	return rend;
 }
 
-string Element::renderChildren() const
+std::string Element::renderChildren() const
 {
-	string rend;
+	std::string rend;
 	ElementList elements = this->getChildElements();
 	for(unsigned int i=0;i<elements.size();i++)
 	{
@@ -256,7 +256,7 @@ string Element::renderChildren() const
 	return rend;
 }
 
-bool Element::isValidNamespace(Element* ele, const string& nameSpace)
+bool Element::isValidNamespace(Element* ele, const std::string& nameSpace)
 {
 	bool valid = false;
 	if(ele==NULL)
@@ -295,7 +295,7 @@ void Element::validateNs()
 }
 
 
-string Element::getNmspc(Element* ele, const string& nameSpace)
+std::string Element::getNmspc(Element* ele, const std::string& nameSpace)
 {
 	if(ele==NULL)
 	{
@@ -312,7 +312,7 @@ string Element::getNmspc(Element* ele, const string& nameSpace)
 	return getNmspc(ele->parent, nameSpace);
 }
 
-string Element::getNameSpcValue()
+std::string Element::getNameSpcValue()
 {
 	return getNmspc(this, nameSpace);
 }

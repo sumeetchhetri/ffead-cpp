@@ -26,13 +26,13 @@
 #include "map"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
-using namespace std;
+
 class AuthController {
 public:
 	AuthController();
 	virtual ~AuthController();
-	virtual bool authenticate(const string& user, const string& password)=0;
-	virtual string getUserRole(const string& username)=0;
+	virtual bool authenticate(const std::string& user, const std::string& password)=0;
+	virtual std::string getUserRole(const std::string& username)=0;
 	virtual bool isInitialized()=0;
 };
 

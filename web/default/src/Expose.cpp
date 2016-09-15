@@ -31,13 +31,13 @@ Expose::~Expose() {
 	// TODO Auto-generated destructor stub
 }
 
-YObject Expose::sayHello(string i,int b,float d)
+YObject Expose::sayHello(std::string i,int b,float d)
 {
 	YObject y;
 	return y;
 }
 
-string Expose::sayHello1(string i,int b,float d)
+std::string Expose::sayHello1(std::string i,int b,float d)
 {
 	return "Hello World";
 }

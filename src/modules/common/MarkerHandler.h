@@ -13,50 +13,50 @@
 #include "StringUtil.h"
 #include <stdarg.h>
 #include <iostream>
-using namespace std;
+
 
 class MarkerHandler;
 
 class Marker {
 public:
-	const map<string, bool>& getAttributes() const;
-	string getAttributeValue(const string&);
-	const string& getName() const;
+	const std::map<std::string, bool>& getAttributes() const;
+	std::string getAttributeValue(const std::string&);
+	const std::string& getName() const;
 	const bool isTypeClass() const;
 	const bool isTypeProp() const;
 	const bool isTypeMeth() const;
 	const bool isTypeArg() const;
-	static string getTypeName(const int&);
-	string getTypeName();
+	static std::string getTypeName(const int&);
+	std::string getTypeName();
 	Marker();
 private:
 	int reqAttrSize;
 	enum {TYPE_CLASS, TYPE_PROP, TYPE_METH, TYPE_ARG};
-	string name;
-	map<string, bool> attributes;
-	map<string, vector<string> > valueSet;
-	map<string, string> defValues;
-	map<string, string> attributeValues;
+	std::string name;
+	std::map<std::string, bool> attributes;
+	std::map<std::string, std::vector<std::string> > valueSet;
+	std::map<std::string, std::string> defValues;
+	std::map<std::string, std::string> attributeValues;
 	int type;
-	Marker(const string& name, const int& type);
-	Marker(const string& name, const int& type, const vector<string>& attributes);
-	Marker(const string& name, const int& type, const vector<string>& attributes, const vector<bool>& reqLst);
+	Marker(const std::string& name, const int& type);
+	Marker(const std::string& name, const int& type, const std::vector<std::string>& attributes);
+	Marker(const std::string& name, const int& type, const std::vector<std::string>& attributes, const std::vector<bool>& reqLst);
 	friend class MarkerHandler;
 	friend class ConfigurationHandler;
 };
 
 class MarkerHandler {
-	vector<Marker> validMarkers;
+	std::vector<Marker> validMarkers;
 	void initMarkers();
-	Marker getMarker(const string& name, const int& where);
-	Marker getMarker(const string& name);
+	Marker getMarker(const std::string& name, const int& where);
+	Marker getMarker(const std::string& name);
 public:
-	static vector<string> collectStr(int num, ...);
-	static vector<bool> collectBool(int num, ...);
+	static std::vector<std::string> collectStr(int num, ...);
+	static std::vector<bool> collectBool(int num, ...);
 	void addMarker(const Marker& m);
 	MarkerHandler();
 	virtual ~MarkerHandler();
-	Marker processMarker(string markerText, const int& where);
+	Marker processMarker(std::string markerText, const int& where);
 };
 
 #endif /* MARKERHANDLER_H_ */

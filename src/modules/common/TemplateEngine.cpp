@@ -31,39 +31,39 @@ TemplateEngine::~TemplateEngine() {
 	// TODO Auto-generated destructor stub
 }
 
-/*string TemplateEngine::evaluate(const string& str, const Context& cntxt)
+/*string TemplateEngine::evaluate(const std::string& str, const Context& cntxt)
 {
-	string ret(str);
+	std::string ret(str);
 	Context::iterator itr;
 	for(itr = cntxt.begin();itr!=cntxt.end();itr++)
 	{
-		string rep;
+		std::string rep;
 		rep = "{$"+itr->first+"}";
 		StringUtil::replaceAll(ret,rep,itr->second);
 	}
 	return ret;
 }*/
 
-string TemplateEngine::evaluate(const string& fileName, const StringContext& cntxt)
+std::string TemplateEngine::evaluate(const std::string& fileName, const StringContext& cntxt)
 {
-	string ret,data;
-	ifstream infile;
-	infile.open(fileName.c_str(), ios::binary);
+	std::string ret,data;
+	std::ifstream infile;
+	infile.open(fileName.c_str(), std::ios::binary);
 	if(infile.is_open())
 	{
-		string file;
+		std::string file;
 		int s,en;
 		s = fileName.find_last_of("/")+1;
 		en = fileName.find_last_of(".");
 		file = fileName.substr(s,en-s);
 		while(getline(infile, data))
 		{
-			if(data.find("<import>")!=string::npos && data.find("</import>")!=string::npos)
+			if(data.find("<import>")!=std::string::npos && data.find("</import>")!=std::string::npos)
 			{
 				int s = data.find("<import>")+8;
 				int e = data.find("</import>");
 				data=data.substr(s,e-s);
-				ifstream inf(data.c_str(), ios::binary);
+				std::ifstream inf(data.c_str(), std::ios::binary);
 				if(inf)
 				{
 					while(getline(inf, data))
@@ -80,7 +80,7 @@ string TemplateEngine::evaluate(const string& fileName, const StringContext& cnt
 	StringContext::const_iterator itr;
 	for(itr = cntxt.begin();itr!=cntxt.end();itr++)
 	{
-		string rep;
+		std::string rep;
 		rep = "${"+itr->first+"}";
 		StringUtil::replaceAll(ret,rep,itr->second);
 	}

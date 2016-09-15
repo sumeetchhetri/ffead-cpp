@@ -17,19 +17,19 @@ DefaultWebSocketHandler::~DefaultWebSocketHandler() {
 }
 
 WebSocketData DefaultWebSocketHandler::onOpen() {
-	cout << "Got onOpen request for WebSocket" << endl;
+	std::cout << "Got onOpen request for WebSocket" << std::endl;
 	WebSocketData data;
 	return data;
 }
 
 WebSocketData DefaultWebSocketHandler::onMessage(WebSocketData data) {
-	cout << "Got onMessage request for WebSocket" << endl;
-	cout << data.getData() << endl;
+	std::cout << "Got onMessage request for WebSocket" << std::endl;
+	std::cout << data.getData() << std::endl;
 	return data;
 }
 
 WebSocketData DefaultWebSocketHandler::onClose() {
-	cout << "Got onClose request for WebSocket" << endl;
+	std::cout << "Got onClose request for WebSocket" << std::endl;
 	WebSocketData data;
 	return data;
 }

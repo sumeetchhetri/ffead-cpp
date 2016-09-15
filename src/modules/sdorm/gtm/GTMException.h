@@ -30,7 +30,7 @@ public:
 
   GTMException( const char * errorMessage )
   {
-    std::ostringstream messageStream;
+    std::ostd::stringstream messageStream;
     messageStream << errorMessage;
     this->message = messageStream.str().c_str();
   }

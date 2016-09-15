@@ -30,8 +30,8 @@ class MarkerExpose {
 public:
 	MarkerExpose();
 	virtual ~MarkerExpose();
-	MarkerYObject sayHello(string,int,float);
-	string sayHello1(string,int,float);
+	MarkerYObject sayHello(std::string,int,float);
+	std::string sayHello1(std::string,int,float);
 	MarkerYObject sayHello2(MarkerYObject,int,float);
 };
 

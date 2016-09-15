@@ -32,23 +32,23 @@
 #include "StringUtil.h"
 #include <math.h>
 
-using namespace std;
+
 
 class Date {
 	int month;
-	string monthName;
-	string monthAbbr;
+	std::string monthName;
+	std::string monthAbbr;
 	int year;
 	int day;
-	string dayName;
-	string dayAbbr;
+	std::string dayName;
+	std::string dayAbbr;
 	int hours;
 	int minutes;
 	int seconds;
-	string hourdesignation;
+	std::string hourdesignation;
 	long long nanoseconds;
 	float timeZoneOffset;
-	string timeZone;
+	std::string timeZone;
 	int weekday;
 	int pmHours;
 	long long epochTime;
@@ -63,17 +63,17 @@ class Date {
 	unsigned long long getSecondsI(const long y, const long m, const long d, const long hh, const long mi, const long ss) const;
 	static Date getDateFromDaysInternal(const long& days);
 	void compare(const Date& d, unsigned long long &thisss, unsigned long long &thtsss) const;
-	string getMon(const string& m) const;
+	std::string getMon(const std::string& m) const;
 public:
 	Date(const bool& utc= false);
 	Date(struct tm* tim);
-	Date(const int& yyyy, const string& mmm, const int& dd);
+	Date(const int& yyyy, const std::string& mmm, const int& dd);
 	Date(const int& yyyy, const int& mm, const int& dd);
-	Date(const int& yy, const string& mmm, const int& dd, const bool&);
+	Date(const int& yy, const std::string& mmm, const int& dd, const bool&);
 	Date(const int& yy, const int& mm, const int& dd, const bool&);
 	void setTime(const int& hh, const int& mi, const int& ss, const unsigned long long& ns = 0);
 	virtual ~Date();
-    string toString();
+    std::string toString();
     Date addSecondsGet(const double& seconds);
 	Date addMinutesGet(const double& minutes);
 	Date addHoursGet(const double& hours);
@@ -87,7 +87,7 @@ public:
 	void updateMonths(long months);
 	void updateYears(const long& years);
 	static bool validateDate(const int& dd, const int& mm, const int& yyyy);
-	static string getDayName(int dd, const int& mm, const int& yyyy);
+	static std::string getDayName(int dd, const int& mm, const int& yyyy);
 	static Date getDateFromDays(const long& days);
 	static Date getDateFromHours(long hours);
 	static Date getDateFromMinutes(long long minutes);
@@ -101,14 +101,14 @@ public:
 	bool operator>=(const Date& d) const;
 	bool operator!=(const Date& d) const;
 	int getDay() const;
-	const string& getDayAbbr() const;
-	const string& getHourdesignation() const;
+	const std::string& getDayAbbr() const;
+	const std::string& getHourdesignation() const;
 	int getMonth() const;
-	const string& getMonthAbbr() const;
-	const string& getMonthName() const;
+	const std::string& getMonthAbbr() const;
+	const std::string& getMonthName() const;
 	long long getNanoseconds() const;
 	int getPmHours() const;
-	const string& getTimeZone() const;
+	const std::string& getTimeZone() const;
 	float getTimeZoneOffset() const;
 	int getWeekday() const;
 	int getYear() const;

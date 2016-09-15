@@ -31,13 +31,13 @@ MarkerExpose::~MarkerExpose() {
 	// TODO Auto-generated destructor stub
 }
 
-MarkerYObject MarkerExpose::sayHello(string i,int b,float d)
+MarkerYObject MarkerExpose::sayHello(std::string i,int b,float d)
 {
 	MarkerYObject y;
 	return y;
 }
 
-string MarkerExpose::sayHello1(string i,int b,float d)
+std::string MarkerExpose::sayHello1(std::string i,int b,float d)
 {
 	return "Hello World";
 }

@@ -27,7 +27,7 @@ Message::Message()
 
 }
 
-Message::Message(const string& xml)
+Message::Message(const std::string& xml)
 {
 	XmlParser parser("Parser");
 	Document doc;
@@ -140,9 +140,9 @@ Message::Message(Document& doc)
 	this->encoding = encoding->getText();
 }
 
-string Message::toXml() const
+std::string Message::toXml() const
 {
-	string xml;
+	std::string xml;
 	xml = "<message>\n<headers>\n<destination ";
 	xml += ("name=\""+this->getDestination().getName());
 	xml += ("\" type=\""+this->getDestination().getType());
@@ -184,62 +184,62 @@ void Message::setDestination(const Destination& destination)
 	this->destination = destination;
 }
 
-string Message::getTimestamp() const
+std::string Message::getTimestamp() const
 {
 	return this->timestamp;
 }
 
-void Message::setTimestamp(const string& timestamp)
+void Message::setTimestamp(const std::string& timestamp)
 {
 	this->timestamp = timestamp;
 }
 
-string Message::getType() const
+std::string Message::getType() const
 {
 	return this->type;
 }
 
-void Message::setType(const string& type)
+void Message::setType(const std::string& type)
 {
 	this->type = type;
 }
 
-string Message::getPriority() const
+std::string Message::getPriority() const
 {
 	return this->priority;
 }
 
-void Message::setPriority(const string& priority)
+void Message::setPriority(const std::string& priority)
 {
 	this->priority = priority;
 }
 
-string Message::getUserId() const
+std::string Message::getUserId() const
 {
 	return this->userId;
 }
 
-void Message::setUserId(const string& userId)
+void Message::setUserId(const std::string& userId)
 {
 	this->userId = userId;
 }
 
-string Message::getBody() const
+std::string Message::getBody() const
 {
 	return this->body;
 }
 
-void Message::setBody(const string& body)
+void Message::setBody(const std::string& body)
 {
 	this->body = body;
 }
 
-string Message::getEncoding() const
+std::string Message::getEncoding() const
 {
 	return this->encoding;
 }
 
-void Message::setEncoding(const string& encoding)
+void Message::setEncoding(const std::string& encoding)
 {
 	this->encoding = encoding;
 }

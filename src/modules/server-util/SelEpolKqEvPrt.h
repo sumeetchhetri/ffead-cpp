@@ -25,7 +25,7 @@
 #include "Compatibility.h"
 #include "map"
 #include "Mutex.h"
-using namespace std;
+
 #define MAXDESCRIPTORS 1024
 #define OP_READ     0
 #define OP_WRITE    1
@@ -138,8 +138,8 @@ class SelEpolKqEvPrt {
 	SOCKET curfds;
 	Mutex l;
 	#ifdef USE_WIN_IOCP
-		map<SOCKET, void*> cntxtMap;
-		vector<void*> psocks;
+		std::map<SOCKET, void*> cntxtMap;
+		std::vector<void*> psocks;
 		HANDLE iocpPort;
 		bool initIOCP();
 		bool addToIOCP(void *p);

@@ -40,12 +40,12 @@ void MarkerTest::setId(int id)
 	this->id = id;
 }
 
-string MarkerTest::getName() const
+std::string MarkerTest::getName() const
 {
 	return name;
 }
 
-void MarkerTest::setName(string name)
+void MarkerTest::setName(std::string name)
 {
 	this->name = name;
 }

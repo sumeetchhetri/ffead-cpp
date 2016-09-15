@@ -29,7 +29,7 @@ SSLClient::SSLClient() {
 	client_auth = 0;
 }
 
-SSLClient::SSLClient(const string& secFile) {
+SSLClient::SSLClient(const std::string& secFile) {
 	logger = LoggerFactory::getLogger("SSLClient");
 	PropFileReader pread;
 	propMap sslsec = pread.getProperties(secFile);
@@ -41,7 +41,7 @@ SSLClient::SSLClient(const string& secFile) {
 		ca_list = sslsec["CA_LIST"];
 		rand_file = sslsec["RANDOM"];
 		sec_password = sslsec["PASSWORD"];
-		string tempcl = sslsec["CLIENT_SEC_LEVEL"];
+		std::string tempcl = sslsec["CLIENT_SEC_LEVEL"];
 		if(tempcl!="")
 		{
 			try
@@ -50,7 +50,7 @@ SSLClient::SSLClient(const string& secFile) {
 			}
 			catch(...)
 			{
-				logger << "\nInvalid client auth level defined" << flush;
+				logger << "\nInvalid client auth level defined" << std::flush;
 				client_auth = 0;
 			}
 		}
@@ -61,7 +61,7 @@ SSLClient::SSLClient(const string& secFile) {
 		}
 		catch(...)
 		{
-			logger << "\nInvalid boolean value for isDHParams defined" << flush;
+			logger << "\nInvalid boolean value for isDHParams defined" << std::flush;
 		}
 	}
 }
@@ -120,7 +120,7 @@ void SSLClient::destroy_ctx(SSL_CTX *ctx)
 	SSL_CTX_free(ctx);
 }
 
-bool SSLClient::connection(const string& host, const int& port)
+bool SSLClient::connection(const std::string& host, const int& port)
 {
 	if(host=="localhost")
 	{
@@ -181,7 +181,7 @@ bool SSLClient::connection(const string& host, const int& port)
 	return true;
 }
 
-bool SSLClient::connectionUnresolv(const string& host, const int& port)
+bool SSLClient::connectionUnresolv(const std::string& host, const int& port)
 {
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
@@ -190,7 +190,7 @@ bool SSLClient::connectionUnresolv(const string& host, const int& port)
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
-	string sport = CastUtil::lexical_cast<string>(port);
+	std::string sport = CastUtil::lexical_cast<std::string>(port);
 	if ((rv = getaddrinfo(host.c_str(), sport.c_str(), &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return false;
@@ -247,7 +247,7 @@ bool SSLClient::connectionUnresolv(const string& host, const int& port)
 	return connected;
 }
 
-int SSLClient::sendData(string data)
+int SSLClient::sendData(std::string data)
 {
 	ERR_clear_error();
 	while(data.length()>0)
@@ -265,16 +265,16 @@ int SSLClient::sendData(string data)
 	return 1;
 }
 
-string SSLClient::getData(const string& hdrdelm, const string& cntlnhdr)
+std::string SSLClient::getData(const std::string& hdrdelm, const std::string& cntlnhdr)
 {
 	return getTextData(hdrdelm, cntlnhdr);
 }
 
-string SSLClient::getTextData(const string& hdrdelm, const string& cntlnhdr)
+std::string SSLClient::getTextData(const std::string& hdrdelm, const std::string& cntlnhdr)
 {
 	int er=-1;
 	bool flag = true;
-	string alldat;
+	std::string alldat;
 	int cntlen;
 	char buf[MAXBUFLE];
 	memset(buf, 0, sizeof(buf));
@@ -298,14 +298,14 @@ string SSLClient::getTextData(const string& hdrdelm, const string& cntlnhdr)
 		}
 		if(!strcmp(buf,hdrdelm.c_str()))
 		{
-			string tt(buf, er);
+			std::string tt(buf, er);
 			alldat += tt;
 			break;
 		}
-		string temp(buf, er);
+		std::string temp(buf, er);
 		temp = temp.substr(0,temp.length()-1);
 		alldat += (temp + "\n");
-		if(temp.find(cntlnhdr)!=string::npos)
+		if(temp.find(cntlnhdr)!=std::string::npos)
 		{
 			std::string cntle = temp.substr(temp.find(": ")+2);
 			cntle = cntle.substr(0,cntle.length()-1);
@@ -315,7 +315,7 @@ string SSLClient::getTextData(const string& hdrdelm, const string& cntlnhdr)
 			}
 			catch(...)
 			{
-				logger << "bad lexical cast" <<endl;
+				logger << "bad lexical cast" <<std::endl;
 			}
 		}
 		memset(&buf[0], 0, sizeof(buf));
@@ -343,16 +343,16 @@ string SSLClient::getTextData(const string& hdrdelm, const string& cntlnhdr)
 			return alldat;
 		}
 		}
-		string temp(buf, er);
+		std::string temp(buf, er);
 		alldat += temp;
 		memset(&buf[0], 0, sizeof(buf));
 	}
 	return alldat;
 }
 
-string SSLClient::getData(int cntlen)
+std::string SSLClient::getData(int cntlen)
 {
-	string alldat;
+	std::string alldat;
 	char buf[MAXBUFLE];
 	memset(buf, 0, sizeof(buf));
 	int er;
@@ -382,10 +382,10 @@ string SSLClient::getData(int cntlen)
 	return alldat;
 }
 
-string SSLClient::getBinaryData(const int& len, const bool& isLengthIncluded)
+std::string SSLClient::getBinaryData(const int& len, const bool& isLengthIncluded)
 {
 	//logger << len;
-	string alldat = getData(len);
+	std::string alldat = getData(len);
 
 	int leng = getLengthCl(alldat, len);
 	if(isLengthIncluded)
