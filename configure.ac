@@ -32,6 +32,13 @@ AS_HELP_STRING([--enable-apachemod],
     [generate_apache_module=$enableval]
 )
 
+generate_nginx_module=no
+AC_ARG_ENABLE(nginxmod,
+AS_HELP_STRING([--enable-nginxmod],
+               [enable nginxmod, default: no]),
+    [generate_nginx_module=$enableval]
+)
+
 AC_CANONICAL_HOST
 local_os_type="unknown"
 is_librt_available="yes"
@@ -904,6 +911,17 @@ AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"
 # --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
 AC_SUBST([AM_CXXFLAGS])    
 AC_SUBST([ADD_LIBDL])
+
+if test "x$generate_nginx_module" = "xyes"; then
+        INC_PATHSNGX="$CPPFLAGS $AM_CXXFLAGS"
+        AM_CONDITIONAL(MOD_NGINXMOD, test "x$generate_nginx_module" = "xyes")
+        AC_SUBST(GENERATE_NGINXMOD,[modules/nginx_mod_ffeadcpp])
+        AC_SUBST(INCPATHS_NGINXMOD,[$INC_PATHSNGX])
+
+        AC_SUBST(LIBPATHS_NGINXMOD,[$LDFLAGS])
+else
+        AC_SUBST(GENERATE_NGINXMOD,[ ])
+fi
 
 AC_CONFIG_FILES([Makefile
 				src/autotools/Makefile

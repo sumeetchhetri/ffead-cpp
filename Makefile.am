@@ -214,7 +214,7 @@ install-data-hook:
 	-rm -f ${prefix}/lib/*.la ${prefix}/lib/*.lai
 #-rm -rf $(prefix)/web/default/src/ $(prefix)/web/flexApp/src/ $(prefix)/web/oauthApp/src/ $(prefix)/web/markers/src/
 		
-build-apps: install build-apache-mod
+build-apps: install
 	cd tests/autotools && make
 	${buildapachemod}
 	cd web/default/src/autotools && make
@@ -242,6 +242,12 @@ build-bin-dist-noinst:
 build-apache-mod:
 if MOD_APACHEMOD
 	cd @GENERATE_APACHEMOD@ && make
+endif
+
+build-nginx-mod:
+if MOD_NGINXMOD
+        -mkdir tmp
+        ./@GENERATE_NGINXMOD@/build-nginx.sh "$(prefix)" "@INCPATHS_NGINXMOD@" "@LIBPATHS_NGINXMOD@" "${abs_builddir}/@GENERATE_NGINXMOD@"
 endif
 
 dist_noinst_SCRIPTS = autogen.sh

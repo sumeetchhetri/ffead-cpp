@@ -261,7 +261,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 			acurl = acurl.substr(webPath.length());
 		}
 		RegexUtil::replace(acurl,"[/]+","/");
-		logger << "static file will be processed by apache " << req->getUrl() << " " << acurl << std::endl;
+		//logger << "static file will be processed by apache " << req->getUrl() << " " << acurl << std::endl;
 
 		r->uri = acurl.c_str();
 		r->finfo = finfo;

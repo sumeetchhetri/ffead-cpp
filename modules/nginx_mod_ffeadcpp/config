@@ -1,4 +1,4 @@
 ngx_addon_name=ngx_http_ffeadcpp_module
-CORE_LIBS="$CORE_LIBS -lffead_common -lffead_framework -lmarkers -ldefault -lte_benchmark -loauthApp -lflexApp -ldl -luuid -lz -lcrypto -lssl -lpthread"
+CORE_LIBS="$CORE_LIBS -lffead_common -lffead_framework"
 HTTP_MODULES="$HTTP_MODULES ngx_http_ffeadcpp_module"
 NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/ngx_http_ffeadcpp_module.cpp"

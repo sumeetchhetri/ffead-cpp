@@ -3,9 +3,13 @@ extern "C" {
 #include <ngx_core.h>
 #include <ngx_http.h>
 }
+#include "HttpRequest.h"
+#include "PropFileReader.h"
 #include "cstdlib"
 #include "dlfcn.h"
+#include "WsUtil.h"
 #include "sstream"
+#include "StringUtil.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -14,24 +18,15 @@ extern "C" {
 #include <signal.h>
 #include <fcntl.h>
 #include <queue>
-#ifdef INC_COMP
-#include "ComponentGen.h"
 #include "ComponentHandler.h"
-#endif
-#ifdef INC_MSGH
-#include "MessageHandler.h"
-#endif
-#ifdef INC_MI
-#include "MethodInvoc.h"
-#endif
-#ifdef INC_COMP
 #include "AppContext.h"
-#endif
 #include "Logger.h"
 #include "ConfigurationHandler.h"
 #include "ServiceTask.h"
 #include "PropFileReader.h"
 #include "XmlParseException.h"
+#include "MessageHandler.h"
+#include "MethodInvoc.h"
 #undef strtoul
 #ifdef WINDOWS
 #include <direct.h>
@@ -40,9 +35,16 @@ extern "C" {
 #include <unistd.h>
 #define pwd getcwd
 #endif
+#define MAXEPOLLSIZE 100
+#define BACKLOG 500
+#define MAXBUFLEN 1024
+
+using namespace std;
 
 static Logger logger;
 static bool doneOnce = false;
+
+extern char **environ;
 
 extern "C" {
 static char *ngx_http_ffeadcpp(ngx_conf_t *cf, void *post, void *data);
@@ -57,7 +59,7 @@ static ngx_str_t ffeadcpp_path;
  * module directive hello
  */
 typedef struct {
-	ngx_str_t   name;
+    ngx_str_t   name;
 } ngx_http_ffeadcpp_module_loc_conf_t;
 
 /* The function which initializes memory for the module configuration structure
@@ -65,14 +67,14 @@ typedef struct {
 static void *
 ngx_http_ffeadcpp_module_create_loc_conf(ngx_conf_t *cf)
 {
-	ngx_http_ffeadcpp_module_loc_conf_t  *conf;
+    ngx_http_ffeadcpp_module_loc_conf_t  *conf;
 
-	conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_ffeadcpp_module_loc_conf_t));
-	if (conf == NULL) {
-		return NULL;
-	}
+    conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_ffeadcpp_module_loc_conf_t));
+    if (conf == NULL) {
+        return NULL;
+    }
 
-	return conf;
+    return conf;
 }
 
 /*
@@ -81,32 +83,32 @@ ngx_http_ffeadcpp_module_create_loc_conf(ngx_conf_t *cf)
  * directive and also initializes the main handler of this module
  */
 static ngx_command_t ngx_http_ffeadcpp_module_commands[] = {
-		{ ngx_string("ffeadcpp_path"),
-				NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-				ngx_conf_set_str_slot,
-				NGX_HTTP_LOC_CONF_OFFSET,
-				offsetof(ngx_http_ffeadcpp_module_loc_conf_t, name),
-				&ngx_http_ffeadcpp_module_p },
+    { ngx_string("ffeadcpp_path"),
+      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      ngx_conf_set_str_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_ffeadcpp_module_loc_conf_t, name),
+      &ngx_http_ffeadcpp_module_p },
 
-				ngx_null_command
+    ngx_null_command
 };
 
 static ngx_int_t
 ngx_http_static_init1(ngx_conf_t *cf)
 {
-	ngx_http_handler_pt        *h;
-	ngx_http_core_main_conf_t  *cmcf;
+    ngx_http_handler_pt        *h;
+    ngx_http_core_main_conf_t  *cmcf;
 
-	cmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
+    cmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
 
-	h = ngx_array_push(&cmcf->phases[NGX_HTTP_CONTENT_PHASE].handlers);
-	if (h == NULL) {
-		return NGX_ERROR;
-	}
+    h = ngx_array_push(&cmcf->phases[NGX_HTTP_CONTENT_PHASE].handlers);
+    if (h == NULL) {
+        return NGX_ERROR;
+    }
 
-	*h = ngx_http_ffeadcpp_module_handler;
+    *h = ngx_http_ffeadcpp_module_handler;
 
-	return NGX_OK;
+    return NGX_OK;
 }
 
 
@@ -115,17 +117,17 @@ ngx_http_static_init1(ngx_conf_t *cf)
  * location configuration
  */
 static ngx_http_module_t ngx_http_ffeadcpp_module_module_ctx = {
-		NULL,                          /* preconfiguration */
-		ngx_http_static_init1,                          /* postconfiguration */
+    NULL,                          /* preconfiguration */
+    ngx_http_static_init1,                          /* postconfiguration */
 
-		NULL,                          /* create main configuration */
-		NULL,                          /* init main configuration */
+    NULL,                          /* create main configuration */
+    NULL,                          /* init main configuration */
 
-		NULL,                          /* create server configuration */
-		NULL,                          /* merge server configuration */
+    NULL,                          /* create server configuration */
+    NULL,                          /* merge server configuration */
 
-		ngx_http_ffeadcpp_module_create_loc_conf, /* create location configuration */
-		NULL                           /* merge location configuration */
+    ngx_http_ffeadcpp_module_create_loc_conf, /* create location configuration */
+    NULL                           /* merge location configuration */
 };
 
 
@@ -134,193 +136,189 @@ static ngx_http_module_t ngx_http_ffeadcpp_module_module_ctx = {
  *
  */
 ngx_module_t ngx_http_ffeadcpp_module = {
-		NGX_MODULE_V1,
-		&ngx_http_ffeadcpp_module_module_ctx,    /* module context */
-		ngx_http_ffeadcpp_module_commands,       /* module directives */
-		NGX_HTTP_MODULE,               /* module type */
-		NULL,                          /* init master */
-		&init_module,                  /* init module */
-		&init_worker_process,          /* init process */
-		NULL,                          /* init thread */
-		NULL,                          /* exit thread */
-		&exit_process,                /* exit process */
-		NULL,                          /* exit master */
-		NGX_MODULE_V1_PADDING
+    NGX_MODULE_V1,
+    &ngx_http_ffeadcpp_module_module_ctx,    /* module context */
+    ngx_http_ffeadcpp_module_commands,       /* module directives */
+    NGX_HTTP_MODULE,               /* module type */
+    NULL,                          /* init master */
+	&init_module,                  /* init module */
+    &init_worker_process,          /* init process */
+    NULL,                          /* init thread */
+    NULL,                          /* exit thread */
+    &exit_process,                /* exit process */
+    NULL,                          /* exit master */
+    NGX_MODULE_V1_PADDING
 };
 
 static char * ngx_http_ffeadcpp(ngx_conf_t *cf, void *post, void *data)
 {
-	ngx_str_t  *name = data; // i.e., first field of ngx_http_ffeadcpp_module_loc_conf_t
+    /*ngx_http_core_loc_conf_t *clcf;
 
-	if (ngx_strcmp(name->data, "") == 0) {
-		return NGX_CONF_ERROR;
-	}
-	ffeadcpp_path.data = name->data;
-	ffeadcpp_path.len = ngx_strlen(ffeadcpp_path.data);
+    clcf = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
+    clcf->handler = ngx_http_ffeadcpp_module_handler;*/
 
-	std::cout << "FFEAD in ngx_http_ffeadcpp " << name->data << std::endl;
+    ngx_str_t  *name = data; // i.e., first field of ngx_http_ffeadcpp_module_loc_conf_t
 
-	return NGX_CONF_OK;
+    if (ngx_strcmp(name->data, "") == 0) {
+        return NGX_CONF_ERROR;
+    }
+    ffeadcpp_path.data = name->data;
+    ffeadcpp_path.len = ngx_strlen(ffeadcpp_path.data);
+	
+	cerr << "FFEAD in ngx_http_ffeadcpp " << name->data << endl;
+
+    return NGX_CONF_OK;
 }
 }
 /*
  * Main handler function of the module.
  */
 
-static ngx_http_read_input_data(ngx_http_request_t *r, std::string& data)
+static ngx_http_read_input_data(ngx_http_request_t *r, string& data)
 {
 	if(NULL == r->request_body->temp_file)
-	{
-		/*
-		 * The entire request body is available in the list of buffers pointed by r->request_body->bufs.
-		 *
-		 * The list can have a maixmum of two buffers. One buffer contains the request body that was pre-read along with the request headers.
-		 * The other buffer contains the rest of the request body. The maximum size of the buffer is controlled by 'client_body_buffer_size' directive.
-		 * If the request body cannot be contained within these two buffers, the entire body  is writtin to the temp file and the buffers are cleared.
-		 */
-		ngx_buf_t    *buf;
-		ngx_chain_t  *cl;
+    {
+        /*
+         * The entire request body is available in the list of buffers pointed by r->request_body->bufs.
+         *
+         * The list can have a maixmum of two buffers. One buffer contains the request body that was pre-read along with the request headers.
+         * The other buffer contains the rest of the request body. The maximum size of the buffer is controlled by 'client_body_buffer_size' directive.
+         * If the request body cannot be contained within these two buffers, the entire body  is writtin to the temp file and the buffers are cleared.
+         */
+        ngx_buf_t    *buf;
+        ngx_chain_t  *cl;
 
-		cl = r->request_body->bufs;
-		for( ;NULL != cl; cl = cl->next )
-		{
-			buf = cl->buf;
+        cl = r->request_body->bufs;
+        for( ;NULL != cl; cl = cl->next )
+        {
+            buf = cl->buf;
 			data.append((const char*)buf->pos, buf->last-buf->pos);
-		}
-	}
-	else
-	{
-		/**
-		 * The entire request body is available in the temporary file.
-		 *
-		 */
-		size_t ret;
-		size_t offset = 0;
-		unsigned char buff[4096];
+        }
+    }
+    else
+    {
+        /**
+         * The entire request body is available in the temporary file.
+         *
+         */
+        size_t ret;
+        size_t offset = 0;
+        unsigned char buff[4096];
 
-		while(  (ret = ngx_read_file(&r->request_body->temp_file->file, buff, 4096, offset)) > 0)
-		{
-			data.append((const char*)buff, ret);
+        while(  (ret = ngx_read_file(&r->request_body->temp_file->file, buff, 4096, offset)) > 0)
+        {
+            data.append((const char*)buff, ret);
 			offset = offset + ret;
-		}
-	}
+        }
+    }
 }
 
 static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *r);
 static ngx_int_t ngx_http_ffeadcpp_module_handler(ngx_http_request_t *r)
 {
-	ngx_int_t rc = ngx_http_read_client_request_body(r, ngx_http_ffeadcpp_module_handler_post_read);
-	if (rc >= NGX_HTTP_SPECIAL_RESPONSE) {
-		return rc;
-	}
-	return NGX_DONE;
+cerr << "cin"<<endl;
+    ngx_int_t rc = ngx_http_read_client_request_body(r, ngx_http_ffeadcpp_module_handler_post_read);
+    if (rc >= NGX_HTTP_SPECIAL_RESPONSE) {
+        return rc;
+    }
+cerr << "cout" <<endl;
+    return NGX_DONE;
 }
 
-ngx_int_t set_custom_header_in_headers_out(ngx_http_request_t *r, const std::string& key, const std::string& value) {
-	ngx_table_elt_t   *h;
+ngx_int_t set_custom_header_in_headers_out(ngx_http_request_t *r, const string& key, const string& value) {
+    ngx_table_elt_t   *h;
 
-	/*
+    /*
     All we have to do is just to allocate the header...
-	 */
-	h = ngx_list_push(&r->headers_out.headers);
-	if (h == NULL) {
-		return NGX_ERROR;
-	}
+    */
+    h = ngx_list_push(&r->headers_out.headers);
+    if (h == NULL) {
+        return NGX_ERROR;
+    }
 
-	/*
+    /*
     ... setup the header key ...
-	 */
-	h->key.data = key.c_str();
-	h->key.len = ngx_strlen(h->key.data);
+    */
+    h->key.data = key.c_str();
+    h->key.len = ngx_strlen(h->key.data);
 
-	/*
+    /*
     ... and the value.
-	 */
-	h->value.data = value.c_str();
-	h->value.len = ngx_strlen(h->value.data);
+    */
+    h->value.data = value.c_str();
+    h->value.len = ngx_strlen(h->value.data);
 
-	/*
+    /*
     Mark the header as not deleted.
-	 */
-	h->hash = 1;
+    */
+    h->hash = 1;
 
-	return NGX_OK;
-}
-
-static bool ignoreHeader(std::string hdr)
-{
-	StringUtil::toLower(hdr);
-	if(hdr==StringUtil::toLowerCopy(HttpResponse::Server)
-		|| hdr==StringUtil::toLowerCopy(HttpResponse::DateHeader)
-		|| hdr==StringUtil::toLowerCopy(HttpResponse::AcceptRanges)
-		|| hdr==StringUtil::toLowerCopy(HttpResponse::ContentType))
-	{
-		return true;
-	}
-	return false;
+    return NGX_OK;
 }
 
 static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *r)
 {
-	std::string cntpath = "";
+string cntpath = "";
 	cntpath.append(ffeadcpp_path.data, ffeadcpp_path.len);
 	cntpath += "/web/";
 	HttpRequest* req = new HttpRequest(cntpath);
 
-	ngx_int_t    rc;
-	ngx_buf_t   *b;
-	ngx_chain_t  out;
+	//cerr << "FFEAD in ngx_http_ffeadcpp_module_handler " << cntpath << r->uri.data << endl;
+    ngx_int_t    rc;
+    ngx_buf_t   *b;
+    ngx_chain_t  out;
 
 	ngx_list_part_t            *part;
-	ngx_table_elt_t            *h;
-	ngx_uint_t                  i;
+    ngx_table_elt_t            *h;
+    ngx_uint_t                  i;
 
-	/*
+    /*
     Get the first part of the list. There is usual only one part.
-	 */
-	part = &r->headers_in.headers.part;
-	h = part->elts;
+    */
+    part = &r->headers_in.headers.part;
+    h = part->elts;
 
-	/*
+    /*
     Headers list array may consist of more than one part,
     so loop through all of it
-	 */
-	for (i = 0; /* void */ ; i++) {
-		if (i >= part->nelts) {
-			if (part->next == NULL) {
-				/* The last part, search is done. */
-				break;
-			}
+    */
+    for (i = 0; /* void */ ; i++) {
+        if (i >= part->nelts) {
+            if (part->next == NULL) {
+                /* The last part, search is done. */
+                break;
+            }
 
-			part = part->next;
-			h = part->elts;
-			i = 0;
-		}
-		req->buildRequest(string(h[i].key.data, h[i].key.len), std::string(h[i].value.data, h[i].value.len));
-	}
+            part = part->next;
+            h = part->elts;
+            i = 0;
+        }
+//	cerr << "header -> " << string(h[i].key.data, h[i].key.len) << " = " << string(h[i].value.data, h[i].value.len) << endl;
+	req->buildRequest(string(h[i].key.data, h[i].key.len), string(h[i].value.data, h[i].value.len));
+    }
 
-	std::string content;
+    string content;
 	ngx_http_read_input_data(r, content);
-	//logger << "Input Request Data\n " << content << "\n======================\n" << std::endl;
-	//logger << "URL -> " << std::string(r->uri.data,r->uri.len) << std::endl;
-	//logger << "Method -> " << std::string(r->main->method_name.data, r->main->method_name.len) << std::endl;
+	//cerr << "Input Request Data\n " << content << "\n======================\n" << endl;
+	//cerr << "URL -> " << string(r->uri.data,r->uri.len) << endl;
+	//cerr << "Method -> " << string(r->main->method_name.data, r->main->method_name.len) << endl;
 	if(content!="")
 	{
 		req->buildRequest("Content", content.c_str());
 	}
-	req->buildRequest("URL",  std::string(r->uri.data,r->uri.len));
-	req->buildRequest("Method", std::string(r->main->method_name.data, r->main->method_name.len));
+	req->buildRequest("URL",  string(r->uri.data,r->uri.len));
+	req->buildRequest("Method", string(r->main->method_name.data, r->main->method_name.len));
 	if(r->args.len > 0)
 	{
-		req->buildRequest("GetArguments", std::string(r->args.data,r->args.len));
+		req->buildRequest("GetArguments", string(r->args.data,r->args.len));
 	}
-	req->buildRequest("HttpVersion", CastUtil::lexical_cast<std::string>(r->http_version));
+	req->buildRequest("HttpVersion", CastUtil::lexical_cast<string>(r->http_version));
 
 	HttpResponse* respo = new HttpResponse;
 	ServiceTask* task = new ServiceTask;
 	task->handle(req, respo);
 	delete task;
-
+cerr << req->toString() << endl;
 	if(respo->isDone()) {
 		for (int var = 0; var < (int)respo->getCookies().size(); var++)
 		{
@@ -337,22 +335,20 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 		out.buf = b;
 		out.next = NULL;
 
-		std::string data = respo->generateResponse(false);
-		std::map<std::string,std::string>::const_iterator it;
+		string data = respo->generateResponse(false);
+		//cerr << "OUT -> " << data << endl;
+		map<string,string>::const_iterator it;
 		for(it=respo->getHeaders().begin();it!=respo->getHeaders().end();it++) {
 			if(StringUtil::toLowerCopy(it->first)==StringUtil::toLowerCopy(HttpResponse::ContentLength)) {
 				r->headers_out.content_length_n = CastUtil::lexical_cast<int>(it->second);
-			} else if(!ignoreHeader(it->first)) {
+			} else {
 				set_custom_header_in_headers_out(r, it->first, it->second);
 			}
 		}
-
-		r->headers_out.content_type.data = respo->getHeader(HttpResponse::ContentType).c_str();
-		r->headers_out.content_type.len = ngx_strlen(r->headers_out.content_type.data);
-
-		/* adjust the pointers of the buffer */
+		//cerr << "done writing headers" << endl;		
+/* adjust the pointers of the buffer */
 		b->pos = data.c_str();
-		b->last = ngx_strlen(b->pos);
+		b->last = data.length();
 		b->memory = 1;    /* this buffer is in memory */
 		b->last_buf = 1;  /* this is the last buffer in the buffer chain */
 
@@ -363,13 +359,13 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 		delete req;
 		/* send the headers of your response */
 		rc = ngx_http_send_header(r);
-
+//cerr << "done sending headers " << rc << " " << NGX_OK  <<" "<<  r->header_only  <<" " << NGX_ERROR << endl;
 		if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
-			return rc;
-		}
+	        return rc;
+	    }
 
-		/* send the buffer chain of your response */
-		return ngx_http_output_filter(r, &out);
+	    /* send the buffer chain of your response */
+	    return ngx_http_output_filter(r, &out);
 	} else {
 		u_char                    *last, *location;
 		size_t                     len;
@@ -393,21 +389,16 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 
 		path.data = req->getUrl().c_str();
 		path.len = ngx_strlen(path.data);
-
+		
 		delete respo;
 		delete req;
-
 		rc = NGX_OK;
-
 		if (ngx_http_set_disable_symlinks(r, clcf, &path, &of) != NGX_OK) {
-			rc = NGX_HTTP_INTERNAL_SERVER_ERROR;
-			r->headers_out.status = rc;
-			ngx_http_send_header(r);
-			return ngx_http_send_special (r, NGX_HTTP_LAST);
+			return NGX_HTTP_INTERNAL_SERVER_ERROR;
 		}
-
+cerr << string(path.data,path.len) << endl;		
 		if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
-				!= NGX_OK)
+		        != NGX_OK)
 		{
 			switch (of.err) {
 
@@ -423,10 +414,10 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 				break;
 
 			case NGX_EACCES:
-#if (NGX_HAVE_OPENAT)
+	#if (NGX_HAVE_OPENAT)
 			case NGX_EMLINK:
 			case NGX_ELOOP:
-#endif
+	#endif
 
 				level = NGX_LOG_ERR;
 				rc = NGX_HTTP_FORBIDDEN;
@@ -441,13 +432,13 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 
 			if (rc != NGX_HTTP_NOT_FOUND || clcf->log_not_found) {
 				ngx_log_error(level, log, of.err,
-						"%s \"%s\" faileddddddddddddddd", of.failed, path.data);
+							  "%s \"%s\" faileddddddddddddddd", of.failed, path.data);
 			}
 
 			//return rc;
 		}
 		r->root_tested = !r->error_page;
-
+cerr << "found file" << endl;
 		ngx_log_debug1(NGX_LOG_DEBUG_HTTP, log, 0, "http static fd: %d", of.fd);
 
 		/*if (of.is_dir) {
@@ -466,7 +457,7 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 			if (!clcf->alias && clcf->root_lengths == NULL && r->args.len == 0) {
 				location = path.data + clcf->root.len;
 
-		 *last = '/';
+				*last = '/';
 
 			} else {
 				if (r->args.len) {
@@ -480,37 +471,37 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 
 				last = ngx_copy(location, r->uri.data, r->uri.len);
 
-		 *last = '/';
+				*last = '/';
 
 				if (r->args.len) {
-		 *++last = '?';
+					*++last = '?';
 					ngx_memcpy(++last, r->args.data, r->args.len);
 				}
 			}
-		 */
-		/*
-		 * we do not need to set the r->headers_out.location->hash and
-		 * r->headers_out.location->key fields
-		 */
+			*/
+			/*
+			 * we do not need to set the r->headers_out.location->hash and
+			 * r->headers_out.location->key fields
+			 */
 
-		/*r->headers_out.location->value.len = len;
+			/*r->headers_out.location->value.len = len;
 			r->headers_out.location->value.data = location;
 
 			return NGX_HTTP_MOVED_PERMANENTLY;
 		}*/
 
-#if !(NGX_WIN32) /* the not regular files are probably Unix specific */
+	#if !(NGX_WIN32) /* the not regular files are probably Unix specific */
 
 		if (!of.is_file) {
 			ngx_log_error(NGX_LOG_CRIT, log, 0,
-					"\"%s\" is not a regular file", path.data);
+						  "\"%s\" is not a regular file", path.data);
 
 			rc = NGX_HTTP_NOT_FOUND;
 		}
 
-#endif
+	#endif
 
-		/*if (r->method == NGX_HTTP_POST) {
+	/*	if (r->method == NGX_HTTP_POST) {
 			return NGX_HTTP_NOT_ALLOWED;
 		}*/
 
@@ -532,18 +523,16 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 		r->headers_out.content_length_n = of.size;
 		r->headers_out.last_modified_time = of.mtime;
 
-		if (ngx_http_set_etag(r) != NGX_OK) {
-			rc = NGX_HTTP_INTERNAL_SERVER_ERROR;
-		}
+		/*if (ngx_http_set_etag(r) != NGX_OK) {
+			return NGX_HTTP_INTERNAL_SERVER_ERROR;
+		}*/
 
 		if (ngx_http_set_content_type(r) != NGX_OK) {
-			rc = NGX_HTTP_INTERNAL_SERVER_ERROR;
+			return NGX_HTTP_INTERNAL_SERVER_ERROR;
 		}
 
 		if (r != r->main && of.size == 0) {
-			r->headers_out.status = rc;
-			ngx_http_send_header(r);
-			return ngx_http_send_special (r, NGX_HTTP_LAST);
+			return ngx_http_send_header(r);
 		}
 
 		r->allow_ranges = 1;
@@ -552,20 +541,18 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 
 		b = ngx_pcalloc(r->pool, sizeof(ngx_buf_t));
 		if (b == NULL) {
-			rc = NGX_HTTP_INTERNAL_SERVER_ERROR;
+			return NGX_HTTP_INTERNAL_SERVER_ERROR;
 		}
 
 		b->file = ngx_pcalloc(r->pool, sizeof(ngx_file_t));
 		if (b->file == NULL) {
-			rc = NGX_HTTP_INTERNAL_SERVER_ERROR;
+			return NGX_HTTP_INTERNAL_SERVER_ERROR;
 		}
 
 		rc = ngx_http_send_header(r);
 
-		if (rc != NGX_OK || r->header_only) {
-			r->headers_out.status = rc;
-			ngx_http_send_header(r);
-			return ngx_http_send_special (r, NGX_HTTP_LAST);
+		if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
+			return rc;
 		}
 
 		b->file_pos = 0;
@@ -583,8 +570,18 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 		out.buf = b;
 		out.next = NULL;
 
-		ngx_http_finalize_request(r, ngx_http_output_filter(r, &out));
-		return NGX_DONE;
+		//return ngx_http_output_filter(r, &out);	
+		ngx_http_finalize_request(r, ngx_http_output_filter(r, &out));return NGX_DONE;
+		/*cerr << req->getUrl() << " " << cntpath << endl; 
+		cntpath = cntpath.substr(0, cntpath.length()-1);
+		string rurl = req->getUrl();
+		StringUtil::replaceAll(cntpath, "//", "/");
+		StringUtil::replaceFirst(rurl, cntpath, "");
+		cerr << req->getUrl() << " " << cntpath <<  " " << rurl << endl;
+		ngx_str_t nuri;
+		nuri.data = rurl.c_str();
+		nuri.len = ngx_strlen(nuri.data);
+		return ngx_http_internal_redirect(r, &nuri, NULL);*/
 	}
 }
 
@@ -595,36 +592,39 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 
 static ngx_int_t init_module(ngx_cycle_t *cycle)
 {
-	std::string serverRootDirectory;
+	string serverRootDirectory;
 	serverRootDirectory.append(ffeadcpp_path.data, ffeadcpp_path.len);
+	
+	cerr << "FFEAD in init_module " << serverRootDirectory << endl;
+	//if(serverRootDirectory=="") {
+	//	serverRootDirectory = fconfig.defpath;
+	//}
 
-	serverRootDirectory += "/";
+    serverRootDirectory += "/";
 	if(serverRootDirectory.find("//")==0)
 	{
 		RegexUtil::replace(serverRootDirectory,"[/]+","/");
 	}
 
-	std::string incpath = serverRootDirectory + "include/";
-	std::string rtdcfpath = serverRootDirectory + "rtdcf/";
-	std::string pubpath = serverRootDirectory + "public/";
-	std::string respath = serverRootDirectory + "resources/";
-	std::string webpath = serverRootDirectory + "web/";
-	std::string logpath = serverRootDirectory + "logs/";
-	std::string resourcePath = respath;
+	string incpath = serverRootDirectory + "include/";
+	string rtdcfpath = serverRootDirectory + "rtdcf/";
+	string pubpath = serverRootDirectory + "public/";
+	string respath = serverRootDirectory + "resources/";
+	string webpath = serverRootDirectory + "web/";
+	string logpath = serverRootDirectory + "logs/";
+	string resourcePath = respath;
 
 	PropFileReader pread;
 	propMap srprps = pread.getProperties(respath+"server.prop");
 
-	std::string servd = serverRootDirectory;
-	std::string logp = respath+"/logging.xml";
+	string servd = serverRootDirectory;
+	string logp = respath+"/logging.xml";
 	LoggerFactory::init(logp, serverRootDirectory, "", StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true");
 
 	logger = LoggerFactory::getLogger("MOD_FFEADCPP");
 
-	logger << "FFEAD in init_module " << serverRootDirectory << std::endl;
-
 	bool isCompileEnabled = false;
-	std::string compileEnabled = srprps["DEV_MODE"];
+   	string compileEnabled = srprps["DEV_MODE"];
 	if(compileEnabled=="true" || compileEnabled=="TRUE")
 		isCompileEnabled = true;
 
@@ -633,17 +633,17 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 		SCRIPT_EXEC_SHOW_ERRS = true;
 	}*/
 	bool sessatserv = true;
-	if(srprps["SESS_STATE"]=="server")
-		sessatserv = true;
-	long sessionTimeout = 3600;
-	if(srprps["SESS_TIME_OUT"]!="")
-	{
-		try {
-			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
+   	if(srprps["SESS_STATE"]=="server")
+   		sessatserv = true;
+   	long sessionTimeout = 3600;
+   	if(srprps["SESS_TIME_OUT"]!="")
+   	{
+   		try {
+   			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
 		} catch (...) {
-			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << std::endl;
+			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << endl;
 		}
-	}
+   	}
 
 	ConfigurationData::getInstance();
 	SSLHandler::setIsSSL(false);
@@ -651,10 +651,10 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	strVec webdirs,webdirs1,pubfiles;
 	//ConfigurationHandler::listi(webpath,"/",true,webdirs,false);
 	CommonUtils::listFiles(webdirs, webpath, "/");
-	//ConfigurationHandler::listi(webpath,"/",false,webdirs1,false);
+    //ConfigurationHandler::listi(webpath,"/",false,webdirs1,false);
 	CommonUtils::listFiles(webdirs1, webpath, "/", false);
 
-	CommonUtils::loadMimeTypes(respath+"mime-types.prop");
+    CommonUtils::loadMimeTypes(respath+"mime-types.prop");
 	CommonUtils::loadLocales(respath+"locale.prop");
 
 	RegexUtil::replace(serverRootDirectory,"[/]+","/");
@@ -663,29 +663,29 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	CoreServerProperties csp(serverRootDirectory, respath, webpath, srprps, sessionTimeout, sessatserv);
 	ConfigurationData::getInstance()->setCoreServerProperties(csp);
 
-	strVec cmpnames;
-	try
+    strVec cmpnames;
+    try
+    {
+    	ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, serverRootDirectory, respath);
+    }
+    catch(const XmlParseException& p)
+    {
+    	logger << p.getMessage() << endl;
+    }
+    catch(const char* msg)
 	{
-		ConfigurationHandler::handle(webdirs, webdirs1, incpath, rtdcfpath, serverRootDirectory, respath);
-	}
-	catch(const XmlParseException& p)
-	{
-		logger << p.getMessage() << std::endl;
-	}
-	catch(const char* msg)
-	{
-		logger << msg << std::endl;
+		logger << msg << endl;
 	}
 
-	logger << INTER_LIB_FILE << std::endl;
+    logger << INTER_LIB_FILE << endl;
 
-	bool libpresent = true;
-	void *dlibtemp = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	//logger << std::endl <<dlibtemp << std::endl;
+    bool libpresent = true;
+    void *dlibtemp = dlopen(INTER_LIB_FILE, RTLD_NOW);
+	//logger << endl <<dlibtemp << endl;
 	if(dlibtemp==NULL)
 	{
 		libpresent = false;
-		logger << dlerror() << std::endl;
+		logger << dlerror() << endl;
 		logger.info("Could not load Library");
 	}
 	else
@@ -697,59 +697,59 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 
 	if(!libpresent)
 	{
-		std::string configureFilePath = rtdcfpath+"/autotools/configure";
+		string configureFilePath = rtdcfpath+"/autotools/configure";
 		if (access( configureFilePath.c_str(), F_OK ) == -1 )
 		{
-			std::string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
-			std::string output = ScriptHandler::execute(compres, true);
-			logger << "Set up configure for intermediate libraries\n\n" << std::endl;
+			string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
+			string output = ScriptHandler::execute(compres, true);
+			logger << "Set up configure for intermediate libraries\n\n" << endl;
 		}
 
 		if (access( configureFilePath.c_str(), F_OK ) != -1 )
 		{
-			std::string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
-#ifdef DEBUG
+			string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+		#ifdef DEBUG
 			compres += " --enable-debug=yes";
-#endif
-			std::string output = ScriptHandler::execute(compres, true);
-			logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
-			logger << output << std::endl;
+		#endif
+			string output = ScriptHandler::execute(compres, true);
+			logger << "Set up makefiles for intermediate libraries\n\n" << endl;
+			logger << output << endl;
 
 			compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 			output = ScriptHandler::execute(compres, true);
-			logger << "Intermediate code generation task\n\n" << std::endl;
-			logger << output << std::endl;
+			logger << "Intermediate code generation task\n\n" << endl;
+			logger << output << endl;
 		}
 	}
 
 	void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(checkdlib==NULL)
 	{
-		std::string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
-		std::string output = ScriptHandler::execute(compres, true);
-		logger << "Set up configure for intermediate libraries\n\n" << std::endl;
+		string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
+		string output = ScriptHandler::execute(compres, true);
+		logger << "Set up configure for intermediate libraries\n\n" << endl;
 
 		compres = respath+"rundyn-configure.sh "+serverRootDirectory;
-#ifdef DEBUG
-		compres += " --enable-debug=yes";
-#endif
+		#ifdef DEBUG
+			compres += " --enable-debug=yes";
+		#endif
 		output = ScriptHandler::execute(compres, true);
-		logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
-		logger << output << std::endl;
+		logger << "Set up makefiles for intermediate libraries\n\n" << endl;
+		logger << output << endl;
 
 		compres = respath+"rundyn-automake.sh "+serverRootDirectory;
 		if(!libpresent)
 		{
-			std::string output = ScriptHandler::execute(compres, true);
-			logger << "Rerunning Intermediate code generation task\n\n" << std::endl;
-			logger << output << std::endl;
+			string output = ScriptHandler::execute(compres, true);
+			logger << "Rerunning Intermediate code generation task\n\n" << endl;
+			logger << output << endl;
 		}
 		checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	}
 
 	if(checkdlib==NULL)
 	{
-		logger << dlerror() << std::endl;
+		logger << dlerror() << endl;
 		logger.info("Could not load Library");
 		exit(0);
 	}
@@ -762,7 +762,7 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 #ifdef INC_COMP
 	for (unsigned int var1 = 0;var1<ConfigurationData::getInstance()->componentNames.size();var1++)
 	{
-		std::string name = ConfigurationData::getInstance()->componentNames.at(var1);
+		string name = ConfigurationData::getInstance()->componentNames.at(var1);
 		StringUtil::replaceFirst(name,"Component_","");
 		ComponentHandler::registerComponent(name);
 		AppContext::registerComponent(name);
@@ -770,7 +770,7 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 #endif
 
 	bool distocache = false;
-	/*#ifdef INC_DSTC
+/*#ifdef INC_DSTC
 	int distocachepoolsize = 20;
 	try {
 		if(srprps["DISTOCACHE_POOL_SIZE"]!="")
@@ -778,7 +778,7 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 			distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
 		}
 	} catch(...) {
-		logger << ("Invalid poolsize specified for distocache") << std::endl;
+		logger << ("Invalid poolsize specified for distocache") << endl;
 	}
 
 	try {
@@ -786,15 +786,15 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 		{
 			CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
 			DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
-			logger << ("Session store is set to distocache store") << std::endl;
+			logger << ("Session store is set to distocache store") << endl;
 			distocache = true;
 		}
 	} catch(...) {
-		logger << ("Invalid port specified for distocache") << std::endl;
+		logger << ("Invalid port specified for distocache") << endl;
 	}
 
 	if(!distocache) {
-		logger << ("Session store is set to file store") << std::endl;
+		logger << ("Session store is set to file store") << endl;
 	}
 #endif*/
 
@@ -803,15 +803,19 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	JobScheduler::start();
 #endif
 
-	logger << ("Initializing WSDL files....") << std::endl;
+	logger << ("Initializing WSDL files....") << endl;
 	ConfigurationHandler::initializeWsdls();
-	logger << ("Initializing WSDL files done....") << std::endl;
+	logger << ("Initializing WSDL files done....") << endl;
+
+	for(char **current = environ; *current; current++) {
+        cerr << *current << endl;
+    }
 
 	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	//logger << std::endl <<dlib << std::endl;
+	//logger << endl <<dlib << endl;
 	if(dlib==NULL)
 	{
-		logger << dlerror() << std::endl;
+		logger << dlerror() << endl;
 		logger.info("Could not load Library");
 		exit(0);
 	}
@@ -822,10 +826,10 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	}
 
 	void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
-	//logger << std::endl <<dlib << std::endl;
+	//logger << endl <<dlib << endl;
 	if(ddlib==NULL)
 	{
-		logger << dlerror() << std::endl;
+		logger << dlerror() << endl;
 		logger.info("Could not load dynamic Library");
 		exit(0);
 	}
@@ -836,25 +840,26 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	}
 
 	ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
-	//logger << std::endl <<dlib << std::endl;
-	if(ddlib==NULL)
-	{
-		logger << dlerror() << std::endl;
-		logger.info("Could not load dynamic Library");
-		exit(0);
-	}
-	else
-	{
-		logger.info("Second Dynamic Library loaded successfully");
-		dlclose(ddlib);
-	}
+        //logger << endl <<dlib << endl;
+        if(ddlib==NULL)
+        {
+                logger << dlerror() << endl;
+                logger.info("Could not load dynamic Library");
+                exit(0);
+        }
+        else
+        {
+                logger.info("Second Dynamic Library loaded successfully");
+                dlclose(ddlib);
+        }	
+	cerr << getpid() << endl;
 	return NGX_OK;
 }
 
 static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 {
-	logger << "FFEAD in init_worker_process" << std::endl;
-	logger << "Initializing ffead-cpp....." << std::endl;
+	cerr << "FFEAD in init_worker_process" << endl;
+	cerr << "Initializing ffead-cpp....." << endl;
 #ifdef INC_COMP
 	try {
 		if(srprps["CMP_PORT"]!="")
@@ -866,7 +871,7 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 			}
 		}
 	} catch(...) {
-		logger << ("Component Handler Services are disabled") << std::endl;
+		logger << ("Component Handler Services are disabled") << endl;
 	}
 #endif
 
@@ -881,7 +886,7 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 			}
 		}
 	} catch(...) {
-		logger << ("Messaging Handler Services are disabled") << std::endl;
+		logger << ("Messaging Handler Services are disabled") << endl;
 	}
 #endif
 
@@ -896,25 +901,25 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 			}
 		}
 	} catch(...) {
-		logger << ("Method Invoker Services are disabled") << std::endl;
+		logger << ("Method Invoker Services are disabled") << endl;
 	}
 #endif
 
 #ifdef INC_SDORM
-	logger << ("Initializing DataSources....") << std::endl;
+	logger << ("Initializing DataSources....") << endl;
 	ConfigurationHandler::initializeDataSources();
-	logger << ("Initializing DataSources done....") << std::endl;
+	logger << ("Initializing DataSources done....") << endl;
 #endif
 
-	logger << ("Initializing Caches....") << std::endl;
+	logger << ("Initializing Caches....") << endl;
 	ConfigurationHandler::initializeCaches();
-	logger << ("Initializing Caches done....") << std::endl;
+	logger << ("Initializing Caches done....") << endl;
 
 	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
-	logger << ("Initializing ffeadContext....") << std::endl;
+	logger << ("Initializing ffeadContext....") << endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
-	logger << ("Initializing ffeadContext done....") << std::endl;
+	logger << ("Initializing ffeadContext done....") << endl;
 }
 
 static ngx_int_t exit_process(ngx_cycle_t *cycle)
