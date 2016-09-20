@@ -230,14 +230,22 @@ ngx_int_t set_custom_header_in_headers_out(ngx_http_request_t *r, const std::str
 	/*
     ... setup the header key ...
 	 */
-	h->key.data = key.c_str();
-	h->key.len = ngx_strlen(h->key.data);
+	h->key.data = ngx_pcalloc(r->pool, key.size()+1);
+	if (h->key.data == NULL) {
+		return NGX_ERROR;
+	}
+	ngx_cpystrn(h->key.data, key.c_str(), key.size()+1);
+	h->key.len = key.size();
 
 	/*
     ... and the value.
 	 */
-	h->value.data = value.c_str();
-	h->value.len = ngx_strlen(h->value.data);
+	h->value.data = ngx_pcalloc(r->pool, value.size()+1);
+	if (h->value.data == NULL) {
+		return NGX_ERROR;
+	}
+	ngx_cpystrn(h->value.data, value.c_str(), value.size()+1);
+	h->value.len = value.size();
 
 	/*
     Mark the header as not deleted.
@@ -296,7 +304,7 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 			h = part->elts;
 			i = 0;
 		}
-		req->buildRequest(string(h[i].key.data, h[i].key.len), std::string(h[i].value.data, h[i].value.len));
+		req->buildRequest(std::string(h[i].key.data, h[i].key.len), std::string(h[i].value.data, h[i].value.len));
 	}
 
 	std::string content;
@@ -306,7 +314,7 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 	//logger << "Method -> " << std::string(r->main->method_name.data, r->main->method_name.len) << std::endl;
 	if(content!="")
 	{
-		req->buildRequest("Content", content.c_str());
+		req->buildRequest("Content", content);
 	}
 	req->buildRequest("URL",  std::string(r->uri.data,r->uri.len));
 	req->buildRequest("Method", std::string(r->main->method_name.data, r->main->method_name.len));
@@ -324,18 +332,8 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 	if(respo->isDone()) {
 		for (int var = 0; var < (int)respo->getCookies().size(); var++)
 		{
-			set_custom_header_in_headers_out(r, "Set-Cookie", respo->getCookies().at(var));
+			set_custom_header_in_headers_out(r, std::string("Set-Cookie"), respo->getCookies().at(var));
 		}
-
-		/* allocate a buffer for your response body */
-		b = ngx_pcalloc(r->pool, sizeof(ngx_buf_t));
-		if (b == NULL) {
-			return NGX_HTTP_INTERNAL_SERVER_ERROR;
-		}
-
-		/* attach this buffer to the buffer chain */
-		out.buf = b;
-		out.next = NULL;
 
 		std::string data = respo->generateResponse(false);
 		std::map<std::string,std::string>::const_iterator it;
@@ -347,22 +345,46 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 			}
 		}
 
-		r->headers_out.content_type.data = respo->getHeader(HttpResponse::ContentType).c_str();
-		r->headers_out.content_type.len = ngx_strlen(r->headers_out.content_type.data);
-
-		/* adjust the pointers of the buffer */
-		b->pos = data.c_str();
-		b->last = ngx_strlen(b->pos);
-		b->memory = 1;    /* this buffer is in memory */
-		b->last_buf = 1;  /* this is the last buffer in the buffer chain */
-
 		/* set the status line */
 		r->headers_out.status = CastUtil::lexical_cast<int>(respo->getStatusCode());
 
-		delete respo;
-		delete req;
+		if(data.length()>0)
+		{
+			r->headers_out.content_type.data = ngx_pcalloc(r->pool, respo->getHeader(HttpResponse::ContentType).size()+1);
+			if (r->headers_out.content_type.data == NULL) {
+				return NGX_HTTP_INTERNAL_SERVER_ERROR;
+			}
+			ngx_cpystrn(r->headers_out.content_type.data, respo->getHeader(HttpResponse::ContentType).c_str(), respo->getHeader(HttpResponse::ContentType).size()+1);
+			r->headers_out.content_type.len = respo->getHeader(HttpResponse::ContentType).size();
+
+			b = ngx_create_temp_buf(r->pool, data.size());
+			if (b == NULL) {
+				return NGX_HTTP_INTERNAL_SERVER_ERROR;
+			}
+
+			/* adjust the pointers of the buffer */
+			ngx_memcpy(b->pos, data.c_str(), data.size());
+			b->last = b->pos + data.size();
+			b->memory = 1;    /* this buffer is in memory */
+			b->last_buf = 1;  /* this is the last buffer in the buffer chain */
+
+			/* attach this buffer to the buffer chain */
+			out.buf = b;
+			out.next = NULL;
+		}
+		else
+		{
+			ngx_http_send_header(r);
+			delete respo;
+			delete req;
+			return ngx_http_send_special (r, NGX_HTTP_LAST);
+		}
+
 		/* send the headers of your response */
 		rc = ngx_http_send_header(r);
+
+		delete respo;
+		delete req;
 
 		if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
 			return rc;
@@ -394,15 +416,16 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 		path.data = req->getUrl().c_str();
 		path.len = ngx_strlen(path.data);
 
-		delete respo;
-		delete req;
-
 		rc = NGX_OK;
 
 		if (ngx_http_set_disable_symlinks(r, clcf, &path, &of) != NGX_OK) {
 			rc = NGX_HTTP_INTERNAL_SERVER_ERROR;
 			r->headers_out.status = rc;
 			ngx_http_send_header(r);
+
+			delete respo;
+			delete req;
+
 			return ngx_http_send_special (r, NGX_HTTP_LAST);
 		}
 
@@ -517,6 +540,10 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 		if (rc != NGX_OK) {
 			r->headers_out.status = rc;
 			ngx_http_send_header(r);
+
+			delete respo;
+			delete req;
+
 			return ngx_http_send_special (r, NGX_HTTP_LAST);
 		}		
 
@@ -543,6 +570,9 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 		if (r != r->main && of.size == 0) {
 			r->headers_out.status = rc;
 			ngx_http_send_header(r);
+
+			delete respo;
+			delete req;
 			return ngx_http_send_special (r, NGX_HTTP_LAST);
 		}
 
@@ -560,13 +590,16 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 			rc = NGX_HTTP_INTERNAL_SERVER_ERROR;
 		}
 
-		rc = ngx_http_send_header(r);
+		delete respo;
+		delete req;
 
 		if (rc != NGX_OK || r->header_only) {
 			r->headers_out.status = rc;
 			ngx_http_send_header(r);
 			return ngx_http_send_special (r, NGX_HTTP_LAST);
 		}
+
+		rc = ngx_http_send_header(r);
 
 		b->file_pos = 0;
 		b->file_last = of.size;

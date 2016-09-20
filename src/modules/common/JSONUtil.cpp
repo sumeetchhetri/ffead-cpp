@@ -81,7 +81,7 @@ void JSONUtil::readBalancedJSON(std::string& value, std::string& json, const boo
 	if(eee==std::string::npos)
 	{
 		std::string ex = "invalid json - unbalanced " + typest + " found at " + CastUtil::lexical_cast<std::string>(obs);
-		throw (ex.c_str());
+		throw ex;
 	}
 	std::string test = json.substr(obs, eee-obs+1);
 	int stcnt = StringUtil::countOccurrences(test, typest);
@@ -92,7 +92,7 @@ void JSONUtil::readBalancedJSON(std::string& value, std::string& json, const boo
 		if(eee==std::string::npos)
 		{
 			std::string ex = "invalid json - balancing " + typeen + " not found after " + CastUtil::lexical_cast<std::string>(eee);
-			throw (ex.c_str());
+			throw ex;
 		}
 		test = json.substr(obs, eee-obs+1);
 		stcnt = StringUtil::countOccurrences(test, typest);
@@ -201,7 +201,7 @@ void JSONUtil::readJSON(std::string& json, const bool& isarray, JSONElement *par
 	if(value=="")
 	{
 		std::string ex = "invalid json - no value object found for name "+ name;
-		throw (ex.c_str());
+		throw ex;
 	}
 	if(element->getType()!=JSONElement::JSON_OBJECT && element->getType()!=JSONElement::JSON_ARRAY)
 	{
@@ -242,12 +242,12 @@ void JSONUtil::validateSetValue(JSONElement* element, const std::string& v)
 		if(enn==std::string::npos)
 		{
 			std::string ex = "invalid json - invalid std::string object '"+value+"' found for name "+ element->getName();
-			throw (ex.c_str());
+			throw ex;
 		}
 		else if(enn!=value.length()-1)
 		{
 			std::string ex = "invalid json - invalid literal found after std::string object '"+value+"' for name "+ element->getName();
-			throw (ex.c_str());
+			throw ex;
 		}
 		if(stn!=enn-1)
 		{
@@ -271,7 +271,7 @@ void JSONUtil::validateSetValue(JSONElement* element, const std::string& v)
 			CastUtil::lexical_cast<double>(value);
 		} catch (const char* ex) {
 			std::string exp = "invalid json - invalid double value "+value+" found for name "+ element->getName();
-			throw (exp.c_str());
+			throw exp;
 		}
 		element->setType(JSONElement::JSON_FLOAT);
 	}
@@ -282,7 +282,7 @@ void JSONUtil::validateSetValue(JSONElement* element, const std::string& v)
 			CastUtil::lexical_cast<unsigned long long>(value);
 		} catch (const char* ex) {
 			std::string exp = "invalid json - invalid numeric value "+value+" found for name "+ element->getName();
-			throw (exp.c_str());
+			throw exp;
 		}
 		element->setType(JSONElement::JSON_NUMBER);
 	}
