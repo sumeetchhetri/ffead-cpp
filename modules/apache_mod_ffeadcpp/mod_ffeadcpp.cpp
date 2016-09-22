@@ -223,7 +223,8 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	if(respo->isDone()) {
 		std::string data = respo->generateResponse(false);
 		std::map<std::string,std::string>::const_iterator it;
-		for(it=respo->getHeaders().begin();it!=respo->getHeaders().end();it++) {
+		int hdrcount = respo->getHeaders().size();
+		for(it=respo->getHeaders().begin();hdrcount>0;it++,hdrcount--) {
 			if(StringUtil::toLowerCopy(it->first)==StringUtil::toLowerCopy(HttpResponse::ContentType)) {
 				ap_set_content_type(r, it->second.c_str());
 			} else {

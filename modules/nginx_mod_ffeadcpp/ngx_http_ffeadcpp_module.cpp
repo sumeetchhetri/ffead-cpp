@@ -255,9 +255,9 @@ ngx_int_t set_custom_header_in_headers_out(ngx_http_request_t *r, const std::str
 	return NGX_OK;
 }
 
-static bool ignoreHeader(std::string hdr)
+static bool ignoreHeader(const std::string& hdr)
 {
-	StringUtil::toLower(hdr);
+	string hdr1 = StringUtil::toLowerCopy(hdr);
 	if(hdr==StringUtil::toLowerCopy(HttpResponse::Server)
 		|| hdr==StringUtil::toLowerCopy(HttpResponse::DateHeader)
 		|| hdr==StringUtil::toLowerCopy(HttpResponse::AcceptRanges)
@@ -337,7 +337,8 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 
 		std::string data = respo->generateResponse(false);
 		std::map<std::string,std::string>::const_iterator it;
-		for(it=respo->getHeaders().begin();it!=respo->getHeaders().end();it++) {
+		int hdrcount = respo->getHeaders().size();
+		for(it=respo->getHeaders().begin();hdrcount>0;it++,hdrcount--) {
 			if(StringUtil::toLowerCopy(it->first)==StringUtil::toLowerCopy(HttpResponse::ContentLength)) {
 				r->headers_out.content_length_n = CastUtil::lexical_cast<int>(it->second);
 			} else if(!ignoreHeader(it->first)) {
