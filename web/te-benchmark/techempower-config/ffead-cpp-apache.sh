@@ -11,7 +11,7 @@ cd unixODBC-2.3.4
 sudo apt-get install build-essential
 sudo apt-get install -y uuid-dev libmyodbc odbc-postgresql
 
-fw_get -o ffead-cpp-2.0.tar.gz https://github.com/sumeetchhetri/ffead-cpp/releases/download/v2.0-Draft-TLV-Fixed-TE_Benchmark/ffead-cpp-2.0-tlfixed-bin.tar.gz
+fw_get -o ffead-cpp-2.0.tar.gz https://github.com/sumeetchhetri/ffead-cpp/releases/download/2.0/ffead-cpp-2.0-te-bin.tar.gz
 fw_untar ffead-cpp-2.0.tar.gz
 
 sudo rm -rf /var/www/ffead-cpp-2.0
