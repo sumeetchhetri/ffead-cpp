@@ -13,7 +13,7 @@
 #pragma @Entity
 #pragma @Table name="World"
 class TeBkWorld {
-	#pragma @Id dbf="id"
+	#pragma @Id dbf="_id"
 	int id;
 	#pragma @Column dbf="randomNumber"
 	int randomNumber;

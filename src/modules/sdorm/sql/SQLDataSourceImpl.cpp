@@ -908,7 +908,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		col = new bool;
 		*((bool*)col) = (bool)dd;
 	}
-	else if(te=="string")
+	else if(te=="string" || te=="std::string")
 	{
 		col = ds;
 	}
@@ -1663,7 +1663,7 @@ bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
 		Method meth = clas.getMethod(methname,argus);
 		if(fld.getType()=="short" || fld.getType()=="unsigned short" || fld.getType()=="int"
 				|| fld.getType()=="unsigned int" || fld.getType()=="long" || fld.getType()=="unsigned long"
-				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string"
+				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string" || fld.getType()=="std::string"
 				|| fld.getType()=="bool" || fld.getType()=="long long" || fld.getType()=="unsigned long long"
 				|| fld.getType()=="Date" || fld.getType()=="char" || fld.getType()=="unsigned char")
 		{
@@ -1784,7 +1784,7 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 		Method meth = clas.getMethod(methname,argus);
 		if(fld.getType()=="short" || fld.getType()=="unsigned short" || fld.getType()=="int"
 				|| fld.getType()=="unsigned int" || fld.getType()=="long" || fld.getType()=="unsigned long"
-				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string"
+				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string" || fld.getType()=="std::string"
 				|| fld.getType()=="bool" || fld.getType()=="long long" || fld.getType()=="unsigned long long"
 				|| fld.getType()=="Date" || fld.getType()=="char" || fld.getType()=="unsigned char")
 		{

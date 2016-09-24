@@ -246,8 +246,8 @@ endif
 
 build-nginx-mod:
 if MOD_NGINXMOD
-        -mkdir tmp
-        ./@GENERATE_NGINXMOD@/build-nginx.sh "$(prefix)" "@INCPATHS_NGINXMOD@" "@LIBPATHS_NGINXMOD@" "${abs_builddir}/@GENERATE_NGINXMOD@"
+	-mkdir tmp
+	./@GENERATE_NGINXMOD@/build-nginx.sh "$(prefix)" "@INCPATHS_NGINXMOD@" "@LIBPATHS_NGINXMOD@" "${abs_builddir}/@GENERATE_NGINXMOD@"
 endif
 
 dist_noinst_SCRIPTS = autogen.sh

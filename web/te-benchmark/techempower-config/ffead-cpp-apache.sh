@@ -3,25 +3,23 @@
 RETCODE=$(fw_exists ${IROOT}/ffead-cpp-apache.installed)
 [ ! "$RETCODE" == 0 ] || { return 0; }
 
-sudo apt-get remove libodbc1 unixodbc unixodbc-dev
-sudo apt-get install build-essential
-sudo apt-get install -y uuid-dev libmyodbc odbc-postgresql
-
 fw_get -o unixODBC-2.3.4.tar.gz ftp://ftp.unixodbc.org/pub/unixODBC/unixODBC-2.3.4.tar.gz
 fw_untar unixODBC-2.3.4.tar.gz
 cd unixODBC-2.3.4
 ./configure --enable-stats=no --enable-gui=no --enable-drivers=no --enable-iconv --with-iconv-char-enc=UTF8 --with-iconv-ucode-enc=UTF16LE --libdir=/usr/lib/x86_64-linux-gnu --prefix=/usr --sysconfdir=/etc
 
+sudo apt-get install build-essential
+sudo apt-get install -y uuid-dev libmyodbc odbc-postgresql
 
 fw_get -o ffead-cpp-2.0.tar.gz https://github.com/sumeetchhetri/ffead-cpp/releases/download/v2.0-Draft-TLV-Fixed-TE_Benchmark/ffead-cpp-2.0-tlfixed-bin.tar.gz
 fw_untar ffead-cpp-2.0.tar.gz
 
-sudo rm -rf /var/www/ffead-cpp-2.0-bin
+sudo rm -rf /var/www/ffead-cpp-2.0
 sudo cp -R ffead-cpp-2.0-bin/ /var/www
 sudo mv /var/www/ffead-cpp-2.0-bin /var/www/ffead-cpp-2.0
 rm -rf ffead-cpp-2.0/
 
-sudo sed -i 's|localhost|'${DBHOST}'|g' ${TROOT}/ffead-cpp-2.0/web/te-benchmark/config/sdorm.xml
+sudo sed -i 's|localhost|'${DBHOST}'|g' ${TROOT}/ffead-cpp-2.0/web/te-benchmark/config/sdorm*
 
 sudo rm -f /etc/odbcinst.ini
 sudo rm -f /etc/odbc.ini
@@ -67,7 +65,6 @@ FFEAD_CPP_PATH '"${FFEADROOT}"'
 </VirtualHost>
 EOL'
 
-sudo adduser testrunner www-data
 sudo chown -R www-data:www-data ${FFEADROOT}
 sudo chmod -R g+rw ${FFEADROOT}
 

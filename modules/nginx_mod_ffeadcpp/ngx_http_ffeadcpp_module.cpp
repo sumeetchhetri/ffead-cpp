@@ -257,7 +257,7 @@ ngx_int_t set_custom_header_in_headers_out(ngx_http_request_t *r, const std::str
 
 static bool ignoreHeader(const std::string& hdr)
 {
-	string hdr1 = StringUtil::toLowerCopy(hdr);
+	std::string hdr1 = StringUtil::toLowerCopy(hdr);
 	if(hdr==StringUtil::toLowerCopy(HttpResponse::Server)
 		|| hdr==StringUtil::toLowerCopy(HttpResponse::DateHeader)
 		|| hdr==StringUtil::toLowerCopy(HttpResponse::AcceptRanges)
