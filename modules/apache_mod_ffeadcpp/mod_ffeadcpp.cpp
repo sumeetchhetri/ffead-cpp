@@ -45,15 +45,25 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <queue>
+#ifdef INC_COMP
+#include "ComponentGen.h"
 #include "ComponentHandler.h"
 #include "AppContext.h"
+#endif
+#ifdef INC_MSGH
+#include "MessageHandler.h"
+#endif
+#ifdef INC_MI
+#include "MethodInvoc.h"
+#endif
+#ifdef INC_COMP
+#include "AppContext.h"
+#endif
 #include "Logger.h"
 #include "ConfigurationHandler.h"
 #include "ServiceTask.h"
 #include "PropFileReader.h"
 #include "XmlParseException.h"
-#include "MessageHandler.h"
-#include "MethodInvoc.h"
 #undef strtoul
 #ifdef WINDOWS
 #include <direct.h>
@@ -217,7 +227,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 
 	for (int var = 0; var < (int)respo->getCookies().size(); var++)
 	{
-		apr_table_setn(r->headers_out, "Set-Cookie", respo->getCookies().at(var).c_str());
+		apr_table_set(r->headers_out, "Set-Cookie", respo->getCookies().at(var).c_str());
 	}
 
 	if(respo->isDone()) {
@@ -228,7 +238,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 			if(StringUtil::toLowerCopy(it->first)==StringUtil::toLowerCopy(HttpResponse::ContentType)) {
 				ap_set_content_type(r, it->second.c_str());
 			} else {
-				apr_table_setn(r->headers_out, it->first.c_str(), it->second.c_str());
+				apr_table_set(r->headers_out, it->first.c_str(), it->second.c_str());
 			}
 		}
 		ap_rprintf(r, data.c_str(), data.length());
