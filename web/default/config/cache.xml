@@ -4,7 +4,6 @@
 			<node>
 				<username>sumeet</username>
 				<password>sumeet</password>
-				<dsn>MySQL-test</dsn>
 			</node>
 		</nodes>
 		<name>Memory-Cached</name>
