@@ -1,6 +1,13 @@
+Contributions Welcome!!
+=======================
+Calling all bright minds out there to be a part of this initiative and make ffead-cpp the best enterprise appliation development framework for C++
+There are a lot of areas that may need immediate attention like, documentation, manuals, wiki, tests.
+Any enhancements or improvments related to the base code or any of the modules are also welcome
+
 v2.0 is here and is definitely the beginning of a new era!!
 
 Features
+==========
 - Introduction of modules
 - Advanced ORM - SDORM (sql/monogo)
 - Better Event loop
@@ -19,6 +26,7 @@ Features
 - Faster server engine
 
 Quickstart
+===========
 - ./autogen.sh (Setup configure for your platform)
 - ./configure (Setup makefiles)
 - Stretch a bit :-)
