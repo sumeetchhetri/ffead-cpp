@@ -755,8 +755,8 @@ AX_CXX_COMPILE_STDCXX_11(,mandatory)
 #	AC_MSG_ERROR([Please install GNU GCC/G++ to continue.])
 #fi
 
+AM_CONDITIONAL(MOD_APACHEMOD, test "x$generate_apache_module" = "xyes")
 if test "x$generate_apache_module" = "xyes"; then
-	AM_CONDITIONAL(MOD_APACHEMOD, test "x$generate_apache_module" = "xyes")
 	AC_SUBST(GENERATE_APACHEMOD,[modules/apache_mod_ffeadcpp/autotools])
 	if test "x$local_os_type" = "xcygwin"; then
 		AC_SUBST(LIB_TYPE,[-l])
@@ -912,9 +912,9 @@ AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"
 AC_SUBST([AM_CXXFLAGS])    
 AC_SUBST([ADD_LIBDL])
 
+AM_CONDITIONAL(MOD_NGINXMOD, test "x$generate_nginx_module" = "xyes")
 if test "x$generate_nginx_module" = "xyes"; then
         INC_PATHSNGX="$CPPFLAGS $AM_CXXFLAGS"
-        AM_CONDITIONAL(MOD_NGINXMOD, test "x$generate_nginx_module" = "xyes")
         AC_SUBST(GENERATE_NGINXMOD,[modules/nginx_mod_ffeadcpp])
         AC_SUBST(INCPATHS_NGINXMOD,[$INC_PATHSNGX])
 
