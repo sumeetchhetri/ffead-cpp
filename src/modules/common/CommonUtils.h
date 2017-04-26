@@ -51,6 +51,21 @@ public:
 	static const std::string& getLocale(const std::string& abbrev);
 	static std::vector<std::string> getFiles(const std::string& cwd, const std::string& suffix, const bool& isAbs = true);
 	static void listFiles(std::vector<std::string>& files, const std::string& cwd, const std::string& suffix, const bool& isAbs = true);
+	static long long tsPoll;
+	static long long tsRead;
+	static long long tsService;
+	static long long tsService1;
+	static long long tsService2;
+	static long long tsService3;
+	static long long tsService4;
+	static long long tsService5;
+	static long long tsService6;
+	static long long tsService7;
+	static long long tsService8;
+	static long long tsService9;
+	static long long tsService10;
+	static long long tsService11;
+	static long long tsWrite;
 };
 
 #endif /* COMMONUTILS_H_ */

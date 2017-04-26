@@ -198,7 +198,7 @@ int SelEpolKqEvPrt::getEvents()
 		if(curfds<=0) {
 			ccfds = 1;
 		}
-		numEvents = epoll_wait(epoll_handle, events, ccfds+1, timeoutMilis);
+		numEvents = epoll_wait(epoll_handle, events, MAXDESCRIPTORS, timeoutMilis);
 	#elif defined USE_KQUEUE
 		if(timeoutMilis>1)
 		{

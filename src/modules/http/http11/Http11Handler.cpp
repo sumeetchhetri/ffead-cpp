@@ -8,6 +8,8 @@
 #include "Http11Handler.h"
 
 void* Http11Handler::readRequest(void*& context, int& pending) {
+	Timer t;
+	t.start();
 	if(read())return NULL;
 	if(!isHeadersDone && buffer.find("\r\n\r\n")!=std::string::npos)
 	{
@@ -91,8 +93,12 @@ void* Http11Handler::readRequest(void*& context, int& pending) {
 		isHeadersDone = false;
 		void* temp = request;
 		request = NULL;
+		t.end();
+		CommonUtils::tsRead += t.timerMilliSeconds();
 		return temp;
 	}
+	t.end();
+	CommonUtils::tsRead += t.timerMilliSeconds();
 	return NULL;
 }
 
@@ -124,6 +130,9 @@ std::string Http11Handler::getProtocol(void* context) {
 }
 
 bool Http11Handler::writeResponse(void* req, void* res, void* context) {
+	Timer t;
+	t.start();
+
 	HttpRequest* request = (HttpRequest*)req;
 	HttpResponse* response = (HttpResponse*)res;
 
@@ -132,6 +141,8 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 			delete request;
 		}
 		delete response;
+		t.end();
+		CommonUtils::tsWrite += t.timerMilliSeconds();
 		return true;
 	}
 
@@ -166,6 +177,8 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 		delete request;
 	}
 	delete response;
+	t.end();
+	CommonUtils::tsWrite += t.timerMilliSeconds();
 	return true;
 }
 void Http11Handler::onOpen(){}

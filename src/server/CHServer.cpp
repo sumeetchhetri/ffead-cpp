@@ -751,7 +751,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	{
 		SCRIPT_EXEC_SHOW_ERRS = true;
 	}*/
-	bool sessatserv = true;
+	bool sessatserv = false;
    	if(srprps["SESS_STATE"]=="server")
    		sessatserv = true;
    	long sessionTimeout = 3600;
@@ -1240,9 +1240,9 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	}
 	else*/
 	{
-		void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+		ConfigurationData->getInstance().dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 		//logger << endl <<dlib << std::endl;
-		if(dlib==NULL)
+		if(ConfigurationData->getInstance().dlib==NULL)
 		{
 			logger << dlerror() << std::endl;
 			logger.info("Could not load Library");
@@ -1251,12 +1251,12 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		else
 		{
 			logger.info("Library loaded successfully");
-			dlclose(dlib);
+			//dlclose(ConfigurationData->getInstance().dlib);
 		}
 
-		void* ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
+		ConfigurationData->getInstance().ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 		//logger << endl <<dlib << std::endl;
-		if(ddlib==NULL)
+		if(ConfigurationData->getInstance().ddlib==NULL)
 		{
 			logger << dlerror() << std::endl;
 			logger.info("Could not load dynamic Library");
@@ -1265,7 +1265,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		else
 		{
 			logger.info("Dynamic Library loaded successfully");
-			dlclose(ddlib);
+			//dlclose(ConfigurationData->getInstance().ddlib);
 		}
 
 		/*TODO if(!isThreadprq)
@@ -1333,6 +1333,48 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
 		Thread::sSleep(1);
+		if(CommonUtils::tsRead>0) {
+			std::cout << "Time spent on read = " << CommonUtils::tsRead << std::endl;
+		}
+		if(CommonUtils::tsWrite>0) {
+			std::cout << "Time spent on write = " << CommonUtils::tsWrite << std::endl;
+		}
+		if(CommonUtils::tsService>0) {
+			std::cout << "Time spent on service = " << CommonUtils::tsService << std::endl;
+		}
+		if(CommonUtils::tsService1>0) {
+			std::cout << "Time spent on setup request = " << CommonUtils::tsService1 << std::endl;
+		}
+		if(CommonUtils::tsService2>0) {
+			std::cout << "Time spent on security populate = " << CommonUtils::tsService2 << std::endl;
+		}
+		if(CommonUtils::tsService3>0) {
+			std::cout << "Time spent on session = " << CommonUtils::tsService3 << std::endl;
+		}
+		if(CommonUtils::tsService4>0) {
+			std::cout << "Time spent on dynlib = " << CommonUtils::tsService4 << std::endl;
+		}
+		if(CommonUtils::tsService5>0) {
+			std::cout << "Time spent on cors = " << CommonUtils::tsService5 << std::endl;
+		}
+		if(CommonUtils::tsService6>0) {
+			std::cout << "Time spent on security = " << CommonUtils::tsService6 << std::endl;
+		}
+		if(CommonUtils::tsService7>0) {
+			std::cout << "Time spent on in filter = " << CommonUtils::tsService7 << std::endl;
+		}
+		if(CommonUtils::tsService8>0) {
+			std::cout << "Time spent on controllers = " << CommonUtils::tsService8 << std::endl;
+		}
+		if(CommonUtils::tsService9>0) {
+			std::cout << "Time spent on extra flows = " << CommonUtils::tsService9 << std::endl;
+		}
+		if(CommonUtils::tsService10>0) {
+			std::cout << "Time spent on update response = " << CommonUtils::tsService10 << std::endl;
+		}
+		if(CommonUtils::tsService11>0) {
+			std::cout << "Time spent on out filter = " << CommonUtils::tsService11 << std::endl;
+		}
 	}
 	reader.stop();
 

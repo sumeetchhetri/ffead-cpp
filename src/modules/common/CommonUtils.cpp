@@ -11,6 +11,21 @@ ThreadLocal CommonUtils::contextName;
 std::map<std::string, std::string> CommonUtils::mimeTypes;
 std::map<std::string, std::string> CommonUtils::locales;
 std::string CommonUtils::BLANK = "";
+long long CommonUtils::tsPoll = 0;
+long long CommonUtils::tsRead = 0;
+long long CommonUtils::tsService = 0;
+long long CommonUtils::tsWrite = 0;
+long long CommonUtils::tsService1 = 0;
+long long CommonUtils::tsService2 = 0;
+long long CommonUtils::tsService3 = 0;
+long long CommonUtils::tsService4 = 0;
+long long CommonUtils::tsService5 = 0;
+long long CommonUtils::tsService6 = 0;
+long long CommonUtils::tsService7 = 0;
+long long CommonUtils::tsService8 = 0;
+long long CommonUtils::tsService9 = 0;
+long long CommonUtils::tsService10 = 0;
+long long CommonUtils::tsService11 = 0;
 
 void CommonUtils::setAppName(const std::string& appName)
 {

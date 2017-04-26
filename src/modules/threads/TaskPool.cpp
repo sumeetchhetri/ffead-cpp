@@ -86,7 +86,7 @@ void TaskPool::addTask(Task &task) {
 	c_mutex->lock();
 	tasks->push(&task);
 	++count;
-	c_mutex->conditionalNotifyAll();
+	c_mutex->conditionalNotifyOne();
 	c_mutex->unlock();
 }
 
@@ -94,7 +94,7 @@ void TaskPool::addPTask(Task &task) {
 	c_mutex->lock();
 	ptasks->push(&task);
 	++count;
-	c_mutex->conditionalNotifyAll();
+	c_mutex->conditionalNotifyOne();
 	c_mutex->unlock();
 }
 
@@ -114,7 +114,7 @@ void TaskPool::addTask(Task *task) {
 	c_mutex->lock();
 	tasks->push(task);
 	++count;
-	c_mutex->conditionalNotifyAll();
+	c_mutex->conditionalNotifyOne();
 	c_mutex->unlock();
 }
 
@@ -122,7 +122,7 @@ void TaskPool::addPTask(Task *task) {
 	c_mutex->lock();
 	ptasks->push(task);
 	++count;
-	c_mutex->conditionalNotifyAll();
+	c_mutex->conditionalNotifyOne();
 	c_mutex->unlock();
 }
 

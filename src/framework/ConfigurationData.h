@@ -189,6 +189,8 @@ class ConfigurationData {
 	Logger logger;
 	ThreadLocal httpRequest;
 	ThreadLocal httpResponse;
+	void* dlib;
+	void* ddlib;
 	static void clearInstance();
 	friend class ExtHandler;
 	friend class FilterHandler;

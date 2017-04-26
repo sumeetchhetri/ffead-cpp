@@ -11,6 +11,7 @@
 #include "SocketUtil.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
+#include "ConfigurationData.h"
 
 class Http11Handler : public SocketInterface {
 	HttpRequest* request;
