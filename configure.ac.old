@@ -32,6 +32,13 @@ AS_HELP_STRING([--enable-apachemod],
     [generate_apache_module=$enableval]
 )
 
+generate_nginx_module=no
+AC_ARG_ENABLE(nginxmod,
+AS_HELP_STRING([--enable-nginxmod],
+               [enable nginxmod, default: no]),
+    [generate_nginx_module=$enableval]
+)
+
 AC_CANONICAL_HOST
 local_os_type="unknown"
 is_librt_available="yes"
@@ -650,13 +657,13 @@ if test "x$mod_httpframework" = "xyes"; then
 	
 	AC_ARG_ENABLE(mod_appflow,
 	AS_HELP_STRING([--enable-mod_appflow],
-	               [enable mod_appflow, default: yes]),
+	               [enable mod_appflow, default: no]),
 	[case "${enableval}" in
 	             yes) mod_appflow=yes ;;
 	             no)  mod_appflow=no ;;
 	             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_appflow]) ;;
 	esac],
-	[mod_appflow=yes])
+	[mod_appflow=no])
 	AM_CONDITIONAL(MOD_APPFLOW, test "x$mod_appflow" = "xyes")
 	if test "x$mod_appflow" = "xyes"; then
 	    AC_DEFINE(INC_APPFLOW, [], [enable http framework application flow module])
@@ -678,13 +685,13 @@ if test "x$mod_httpframework" = "xyes"; then
 	
 	AC_ARG_ENABLE(mod_script,
 	AS_HELP_STRING([--enable-mod_script],
-	               [enable mod_script, default: yes]),
+	               [enable mod_script, default: no]),
 	[case "${enableval}" in
 	             yes) mod_script=yes ;;
 	             no)  mod_script=no ;;
 	             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_script]) ;;
 	esac],
-	[mod_script=yes])
+	[mod_script=no])
 	AM_CONDITIONAL(MOD_SCRH, test "x$mod_script" = "xyes")
 	if test "x$mod_script" = "xyes"; then
 	    AC_DEFINE(INC_SCRH, [], [enable http framework scripting support module])
@@ -748,8 +755,9 @@ AX_CXX_COMPILE_STDCXX_11(,mandatory)
 #	AC_MSG_ERROR([Please install GNU GCC/G++ to continue.])
 #fi
 
+AM_CONDITIONAL(MOD_APACHEMOD, test "x$generate_apache_module" = "xyes")
 if test "x$generate_apache_module" = "xyes"; then
-	AC_SUBST(GENERATE_APACHEMOD,[apache_mod_ffeadcpp/autotools])
+	AC_SUBST(GENERATE_APACHEMOD,[modules/apache_mod_ffeadcpp/autotools])
 	if test "x$local_os_type" = "xcygwin"; then
 		AC_SUBST(LIB_TYPE,[-l])
 		AC_SUBST(LIBRARY_EXTENSION,[dll])
@@ -802,7 +810,9 @@ AM_CONDITIONAL(BUILT_WITH_CONFGURE, test "x1" = "x1")
 AC_CHECK_HEADER([_mingw_mac.h], 
 					 [AC_DEFINE(OS_MINGW_W64, [1], [Define to 1 if you have _mingw_mac.h])], 
 					 [AC_DEFINE(OS_MINGW_W64, [0], [Define to 0 if you don't have _mingw_mac.h])])
-
+AC_CHECK_HEADER([sys/sendfile.h], 
+					 [AC_DEFINE(IS_SENDFILE, [1], [Define to 1 if you have sys/sendfile.h])], 
+					 [AC_DEFINE(IS_SENDFILE, [0], [Define to 0 if you don't have sys/sendfile.h])])
 dnl# Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
 AC_CHECK_HEADER([sys/epoll.h],
@@ -904,15 +914,22 @@ AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"
 AC_SUBST([AM_CXXFLAGS])    
 AC_SUBST([ADD_LIBDL])
 
+AM_CONDITIONAL(MOD_NGINXMOD, test "x$generate_nginx_module" = "xyes")
+if test "x$generate_nginx_module" = "xyes"; then
+        INC_PATHSNGX="$CPPFLAGS $AM_CXXFLAGS"
+        AC_SUBST(GENERATE_NGINXMOD,[modules/nginx_mod_ffeadcpp])
+        AC_SUBST(INCPATHS_NGINXMOD,[$INC_PATHSNGX])
+
+        AC_SUBST(LIBPATHS_NGINXMOD,[$LDFLAGS])
+else
+        AC_SUBST(GENERATE_NGINXMOD,[ ])
+fi
+
 AC_CONFIG_FILES([Makefile
 				src/autotools/Makefile
 				tests/autotools/Makefile
-				src/apache_mod_ffeadcpp/autotools/Makefile
-				web/default/src/autotools/Makefile
-				web/flexApp/src/autotools/Makefile
-				web/oauthApp/src/autotools/Makefile
-				web/markers/src/autotools/Makefile
-				web/te-benchmark/src/autotools/Makefile])
+				modules/apache_mod_ffeadcpp/autotools/Makefile
+	web/hello_world/src/autotools/Makefile])
 AC_OUTPUT
 
 echo "Host: $host"
@@ -922,3 +939,4 @@ echo "LDFLAGS: $LDFLAGS"
 echo "Debug mode: $support_debug"
 echo "Make Executable: $MAKE"
 echo "Generate Apache Module: $generate_apache_module"
+

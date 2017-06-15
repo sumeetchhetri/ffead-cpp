@@ -11,7 +11,7 @@
 
 
 #pragma @Entity
-#pragma @Table name="World"
+#pragma @Table name="world"
 class TeBkWorld {
 	#pragma @Id dbf="_id"
 	int id;

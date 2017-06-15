@@ -810,7 +810,9 @@ AM_CONDITIONAL(BUILT_WITH_CONFGURE, test "x1" = "x1")
 AC_CHECK_HEADER([_mingw_mac.h], 
 					 [AC_DEFINE(OS_MINGW_W64, [1], [Define to 1 if you have _mingw_mac.h])], 
 					 [AC_DEFINE(OS_MINGW_W64, [0], [Define to 0 if you don't have _mingw_mac.h])])
-
+AC_CHECK_HEADER([sys/sendfile.h], 
+					 [AC_DEFINE(IS_SENDFILE, [1], [Define to 1 if you have sys/sendfile.h])], 
+					 [AC_DEFINE(IS_SENDFILE, [0], [Define to 0 if you don't have sys/sendfile.h])])
 dnl# Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
 AC_CHECK_HEADER([sys/epoll.h],
@@ -941,3 +943,4 @@ echo "LDFLAGS: $LDFLAGS"
 echo "Debug mode: $support_debug"
 echo "Make Executable: $MAKE"
 echo "Generate Apache Module: $generate_apache_module"
+

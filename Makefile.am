@@ -216,22 +216,27 @@ install-data-hook:
 		
 build-apps: install
 	cd tests/autotools && make
-	${buildapachemod}
-	cd web/default/src/autotools && make
-	cd web/flexApp/src/autotools && make
-	cd web/oauthApp/src/autotools && make
-	cd web/markers/src/autotools && make
-	cd web/te-benchmark/src/autotools && make
 	cp -f tests/autotools/.libs/tests tests/test.csv \
 		tests/testValues.prop tests/runTests.sh \
 		tests/*.pem tests/security.prop ${prefix}/tests
-	cp -f web/default/src/autotools/.libs/*default* ${prefix}/lib
-	cp -f web/flexApp/src/autotools/.libs/*flexApp* ${prefix}/lib
-	cp -f web/oauthApp/src/autotools/.libs/*oauthApp* ${prefix}/lib
-	cp -f web/markers/src/autotools/.libs/*markers* ${prefix}/lib
-	cp -f web/te-benchmark/src/autotools/.libs/*te_benchmark* ${prefix}/lib
+	${buildapachemod}
+	for webdir in web/*/ ; do \ 
+		dir=$${webdir%*/}; \
+		wdir=`echo $${dir##*/}`; \
+		echo $${wdir}; \	
+		if [ -d "$${webdir}/src/" ] && [ -d "$${webdir}/src/autotools" ] && [ -d "$${webdir}/include" ]; then \
+			hc=`ls $${webdir}/include/*.h 2>/dev/null|wc -l`; \ 
+			sc=`ls $${webdir}/src/*.cpp 2>/dev/null|wc -l`; \
+			if [ $$hc != 0 ] && [ $$sc != 0 ] && [ -f "$${webdir}/src/autotools/Makefile" ]; then \
+				weblibname=`echo "$${wdir}" | tr '-' '_'`; \
+				cd $${webdir}/src/autotools && make; \
+				cd -; \	
+				cp -f $${webdir}/src/autotools/.libs/*$${weblibname}* ${prefix}/lib; \
+				rm -rf $(prefix)/web/$${wdir}/src/; \
+			fi \
+		fi \
+	done
 	-rm -f ${prefix}/lib/*.la ${prefix}/lib/*.lai
-	-rm -rf $(prefix)/web/default/src/ $(prefix)/web/flexApp/src/ $(prefix)/web/oauthApp/src/ $(prefix)/web/markers/src/ $(prefix)/web/te-benchmark/src/
 	
 build-bin-dist: install
 	tardir=$(packageIdentifier) && $(am__tar) | GZIP=$(GZIP_ENV) gzip -c >$(packageIdentifier).tar.gz

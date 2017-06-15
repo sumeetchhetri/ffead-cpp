@@ -12,7 +12,7 @@
 
 
 #pragma @Entity
-#pragma @Table name="Fortune"
+#pragma @Table name="fortune"
 class TeBkFortune {
 	#pragma @Id dbf="id"
 	int id;

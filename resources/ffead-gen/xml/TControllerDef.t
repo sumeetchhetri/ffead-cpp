@@ -9,7 +9,7 @@
 
 bool @TCLASS@::service(HttpRequest* req, HttpResponse* res)
 {
-	res->setHTTPResponseStatus(HTTPResponseStatus:ok);
+	res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	res->addHeaderValue(HttpResponse::ContentType, "text/plain");
 	res->setContent("Hello World");
 	return true;

@@ -84,16 +84,20 @@ controllers () {
 	done
 }
 controllers_create () {
+	rm -f $FFEAD_CPP_PATH/web/$APP_NAME/src/.cpp
+	rm -f $FFEAD_CPP_PATH/web/$APP_NAME/include/.h
 	for var in "${APP_CONTROLLERS_CLASSES[@]}"
 	do
+		if [ "${var}" != "" ]; then
 		uvar=`echo $var |tr '[:lower:]' '[:upper:]'`
-	    cp -f $FFEAD_CPP_PATH/resources/ffead-gen/$FCNF_TYPE/TControllerHeader.t $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
+	    	cp -f $FFEAD_CPP_PATH/resources/ffead-gen/$FCNF_TYPE/TControllerHeader.t $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
 		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
-		sed -Ei "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${uvar}.h
+		sed -Ei "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
 		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/xml/TControllerDef.t $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
 		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
 		APP_CLASSES+="\.\.\/${var}\.cpp "
 		CONTOLLER_CONF+="\\n\\t\\t<controller class=\"${var}\" path=\"*\" \/>"
+		fi
 	done
 }
 
@@ -115,18 +119,22 @@ filters () {
 	done
 }
 filters_create () {
+	rm -f $FFEAD_CPP_PATH/web/$APP_NAME/src/.cpp
+        rm -f $FFEAD_CPP_PATH/web/$APP_NAME/include/.h
 	for var in "${APP_FILTERS_CLASSES[@]}"
 	do
+		if [ "${var}" != "" ]; then
 		uvar=`echo $var |tr '[:lower:]' '[:upper:]'`
-	    cp -f $FFEAD_CPP_PATH/resources/ffead-gen/$FCNF_TYPE/TFilterHeader.t $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
+	    	cp -f $FFEAD_CPP_PATH/resources/ffead-gen/$FCNF_TYPE/TFilterHeader.t $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
 		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
-		sed -Ei "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${uvar}.h
+		sed -Ei "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
 		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/xml/TFilterDef.t $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
 		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
 		APP_CLASSES+="\.\.\/${var}\.cpp "
 		FILTER_CONF+="\\n\\t\\t<filter class=\"${var}\" type=\"in\" \/>\\n"
 		FILTER_CONF+="\\t\\t<filter class=\"${var}\" type=\"out\" \/>\\n"
 		FILTER_CONF+="\\t\\t<filter class=\"${var}\" type=\"handle\" \/>"
+		fi
 	done
 }
 
@@ -148,12 +156,15 @@ restapis () {
 	done
 }
 restapis_create () {
+	rm -f $FFEAD_CPP_PATH/web/$APP_NAME/src/.cpp
+        rm -f $FFEAD_CPP_PATH/web/$APP_NAME/include/.h
 	for var in "${APP_RESTAPIS_CLASSES[@]}"
 	do
+		if [ "${var}" != "" ]; then
 		uvar=`echo $var |tr '[:lower:]' '[:upper:]'`
-	    cp -f $FFEAD_CPP_PATH/resources/ffead-gen/$FCNF_TYPE/TRestApiHeader.t $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
+	    	cp -f $FFEAD_CPP_PATH/resources/ffead-gen/$FCNF_TYPE/TRestApiHeader.t $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
 		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
-		sed -Ei "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${uvar}.h
+		sed -Ei "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
 		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/xml/TRestApiDef.t $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
 		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
 		APP_CLASSES+="\.\.\/${var}\.cpp "
@@ -161,6 +172,7 @@ restapis_create () {
 		RESTAPI_CONF+="\\n\\t\\t<restcontroller class=\"${var}\" path=\"\/$lvar\">\\n"
 		RESTAPI_CONF+="\\t\\t\\t<restfunction name=\"serve\" path=\"\/serve\" meth=\"GET\" statusCode=\"200\"\/>\\n"
 		RESTAPI_CONF+="\\t\\t<\/restcontroller>"
+		fi
 	done
 }
 
@@ -179,13 +191,14 @@ config_setup () {
 
 main () {
 	echo 1>&2 "The generator will now create application directories and makefile, 
-	 configure.ac will also be modified, Do you want to proceed (y/n): "
+	 configure.ac will also be modified, also delete any existing web directories by the same name, Do you want to proceed (y/n): "
 	read CONFIRM
 	RE="^[y|n|Y|N]$"
 	if [[ "$CONFIRM" =~ $RE ]]; then
 		echo "Application Name: $APP_NAME"
 		echo "Library Dependencies: $FAPP_LIBS"
 		echo "Generator will now generate a new application directory $FFEAD_CPP_PATH/web/$APP_NAME"
+		rm -rf $FFEAD_CPP_PATH/web/$APP_NAME
 		mkdir $FFEAD_CPP_PATH/web/$APP_NAME
 		mkdir $FFEAD_CPP_PATH/web/$APP_NAME/config
 		mkdir $FFEAD_CPP_PATH/web/$APP_NAME/include
