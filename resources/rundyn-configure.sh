@@ -3,13 +3,24 @@
 FFEAD_CPPPTH=$1
 export FFEAD_CPP_PATH=${FFEAD_CPPPTH}
 
-if [ "$#" -gt 1 -a -n "$2" ]
-then
-	DEBG=$2
-elif [ "$#" -gt 0 -a -n "$1" ]
-then
-	DEBG=
+DEBG="TO_REPLACE_DEBUG"
+PCFL="TO_REPLACE_CPPFLAGS"
+PLDFL="TO_REPLACE_LDFLAGS"
+PACFL="TO_REPLACE_AM_CXXFLAGS"
+
+if [ "$DEBG" == "yes" ]; then
+	DEBG="--enable-debug=yes"
+else
+	DEBG=""
 fi
+
+#if [ "$#" -gt 1 -a -n "$2" ]
+#then
+#	DEBG=$2
+#elif [ "$#" -gt 0 -a -n "$1" ]
+#then
+#	DEBG=
+#fi
 
 export LD_LIBRARY_PATH=$FFEAD_CPP_PATH/lib:$LD_LIBRARY_PATH
 #echo $LD_LIBRARY_PATH
@@ -29,4 +40,4 @@ cd $FFEAD_CPP_PATH/rtdcf/autotools
 #	echo $PATH
 #fi
 
-./configure $DEBG
+./configure $DEBG CPPFLAGS="$CPPFLAGS $PCFL $PACFL" LDFLAGS="$LDFLAGS $PLDFL"

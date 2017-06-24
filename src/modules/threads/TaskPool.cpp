@@ -61,7 +61,7 @@ void* TaskPool::run(void *arg)
 	return NULL;
 }
 
-TaskPool::TaskPool(bool prioritybased) {
+TaskPool::TaskPool(const bool& prioritybased, const bool& allowScheduledTasks) {
 	s_mutex = new Mutex();
 	c_mutex = new ConditionMutex();
 	tasks = new std::queue<Task*>;
@@ -71,14 +71,21 @@ TaskPool::TaskPool(bool prioritybased) {
 	runFlag = true;
 	complete = false;
 	count = 0;
-	mthread = new Thread(&run, this);
 	thrdStarted = false;
 	this->prioritybased = prioritybased;
+	this->allowScheduledTasks = allowScheduledTasks;
+	if(allowScheduledTasks) {
+		mthread = new Thread(&run, this);
+	} else {
+		mthread = NULL;
+	}
 }
 
 void TaskPool::start() {
 	if(thrdStarted)return;
-	mthread->execute();
+	if(this->allowScheduledTasks) {
+		mthread->execute();
+	}
 	thrdStarted = true;
 }
 
@@ -86,7 +93,7 @@ void TaskPool::addTask(Task &task) {
 	c_mutex->lock();
 	tasks->push(&task);
 	++count;
-	c_mutex->conditionalNotifyAll();
+	c_mutex->conditionalNotifyOne();
 	c_mutex->unlock();
 }
 
@@ -94,7 +101,7 @@ void TaskPool::addPTask(Task &task) {
 	c_mutex->lock();
 	ptasks->push(&task);
 	++count;
-	c_mutex->conditionalNotifyAll();
+	c_mutex->conditionalNotifyOne();
 	c_mutex->unlock();
 }
 
@@ -114,7 +121,7 @@ void TaskPool::addTask(Task *task) {
 	c_mutex->lock();
 	tasks->push(task);
 	++count;
-	c_mutex->conditionalNotifyAll();
+	c_mutex->conditionalNotifyOne();
 	c_mutex->unlock();
 }
 
@@ -122,7 +129,7 @@ void TaskPool::addPTask(Task *task) {
 	c_mutex->lock();
 	ptasks->push(task);
 	++count;
-	c_mutex->conditionalNotifyAll();
+	c_mutex->conditionalNotifyOne();
 	c_mutex->unlock();
 }
 
@@ -173,7 +180,9 @@ TaskPool::~TaskPool() {
 	{
 		Thread::sSleep(1);
 	}
-	delete mthread;
+	if(allowScheduledTasks) {
+		delete mthread;
+	}
 	delete tasks;
 	delete ptasks;
 	delete scheduledtasks;

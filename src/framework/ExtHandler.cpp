@@ -26,42 +26,23 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 {
 	std::string& resourcePath = ConfigurationData::getInstance()->coreServerProperties.resourcePath;
 
-	std::map<std::string, std::string>* tmplMap = NULL;
-	if(ConfigurationData::getInstance()->templateMappingMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->templateMappingMap.end())
-		tmplMap = &(ConfigurationData::getInstance()->templateMappingMap[req->getCntxt_name()]);
-
-	std::map<std::string, std::string>* dcpMap = NULL;
-	if(ConfigurationData::getInstance()->dcpMappingMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->dcpMappingMap.end())
-		dcpMap = &(ConfigurationData::getInstance()->dcpMappingMap[req->getCntxt_name()]);
-
-	std::map<std::string, std::string>* vwMap = NULL;
-	if(ConfigurationData::getInstance()->viewMappingMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->viewMappingMap.end())
-		vwMap = &(ConfigurationData::getInstance()->viewMappingMap[req->getCntxt_name()]);
-
-	std::map<std::string, std::string>* ajaxIntfMap = NULL;
-	if(ConfigurationData::getInstance()->ajaxInterfaceMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->ajaxInterfaceMap.end())
-		ajaxIntfMap = &(ConfigurationData::getInstance()->ajaxInterfaceMap[req->getCntxt_name()]);
-
-	std::map<std::string, std::string>* fviewMap = NULL;
-	if(ConfigurationData::getInstance()->fviewMappingMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->fviewMappingMap.end())
-		fviewMap = &(ConfigurationData::getInstance()->fviewMappingMap[req->getCntxt_name()]);
+	std::map<std::string, std::string>* tmplMap = &(ConfigurationData::getInstance()->templateMappingMap[req->getCntxt_name()]);
+	std::map<std::string, std::string>* dcpMap = &(ConfigurationData::getInstance()->dcpMappingMap[req->getCntxt_name()]);
+	std::map<std::string, std::string>* vwMap = &(ConfigurationData::getInstance()->viewMappingMap[req->getCntxt_name()]);
+	std::map<std::string, std::string>* ajaxIntfMap = &(ConfigurationData::getInstance()->ajaxInterfaceMap[req->getCntxt_name()]);
+	std::map<std::string, std::string>* fviewMap = &(ConfigurationData::getInstance()->fviewMappingMap[req->getCntxt_name()]);
+	std::map<std::string, Element>* formMap = &(ConfigurationData::getInstance()->fviewFormMap[req->getCntxt_name()]);
 
 	Logger logger = LoggerFactory::getLogger("ExtHandler");
 	bool cntrlit = false;
 	std::string content, claz;
 
-	std::string acurl = req->getActUrl();
-	RegexUtil::replace(acurl,"[/]+","/");
-	if(acurl.find("/"+req->getCntxt_name())!=0)
-		acurl = "/" + req->getCntxt_name() + "/" + acurl;
-	RegexUtil::replace(acurl,"[/]+","/");
-
-	if(ajaxIntfMap!=NULL && ajaxIntfMap->find(acurl)!=ajaxIntfMap->end() && req->getMethod()=="POST" && req->getRequestParam("method")!="")
+	if(ajaxIntfMap->find(req->getCurl())!=ajaxIntfMap->end() && req->getMethod()=="POST" && req->getRequestParam("method")!="")
 	{
 		cntrlit = true;
-		std::string& claz = ajaxIntfMap->find(acurl)->second;
+		std::string& claz = ajaxIntfMap->find(req->getCurl())->second;
 
-		logger << "Inside Ajax Interface Execute" << std::endl;
+		//logger << "Inside Ajax Interface Execute" << std::endl;
 		strVec vemp;
 		std::string methName = req->getRequestParam("method");
 		if(methName=="")
@@ -83,7 +64,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			}
 			if(paramSize>=0)
 			{
-				logger << "Reading Ajax params" << std::endl;
+				//logger << "Reading Ajax params" << std::endl;
 				for(int i=0;i<paramSize;i++)
 				{
 					std::stringstream s;
@@ -105,11 +86,11 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				{
 					typedef std::string (*Funptr2) (strVec);
 					Funptr2 f2 = (Funptr2)mkr;
-					logger << ("Calling method " + metn) << std::endl;
+					//logger << ("Calling method " + metn) << std::endl;
 					re = f2(vemp);
-					logger << "Completed method call" << std::endl;
+					//logger << "Completed method call" << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-					res->addHeaderValue(HttpResponse::ContentType, "text/plain");
+					res->addHeaderValue(HttpResponse::ContentType, (re.find("{")==0 || re.find("[")==0)?"application/json":"text/plain");
 					res->setContent(re);
 				}
 				else
@@ -123,26 +104,25 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			}
 		}
 	}
-	else if(ext==".form" && ConfigurationData::getInstance()->fviewFormMap.find(req->getCntxt_name())!=
-			ConfigurationData::getInstance()->fviewFormMap.end())
+	else if(ext==".form" && formMap->find(req->getFile())!=formMap->end())
 	{
-		cntrlit = FormHandler::handle(req, res, reflector);
-		logger << ("Request handled by FormHandler") << std::endl;
+		cntrlit = FormHandler::handle(req, res, reflector, &((*formMap)[req->getFile()]));
+		//logger << ("Request handled by FormHandler") << std::endl;
 	}
-	else if(ext==".fview" && fviewMap!=NULL && fviewMap->find(req->getFile())!=fviewMap->end())
+	else if(ext==".fview" && fviewMap->find(req->getFile())!=fviewMap->end())
 	{
 		cntrlit = FviewHandler::handle(req, res);
-		logger << ("Request handled by FviewHandler") << std::endl;
+		//logger << ("Request handled by FviewHandler") << std::endl;
 	}
 #ifdef INC_DCP
-	else if(dcpMap!=NULL && dcpMap->find(acurl)!=dcpMap->end())
+	else if(dcpMap->find(req->getCurl())!=dcpMap->end())
 	{
 		std::string libName = INTER_LIB_FILE;
 		if(ddlib != NULL)
 		{
 			cntrlit = true;
 			std::string meth;
-			std::string file = dcpMap->find(acurl)->second;
+			std::string file = dcpMap->find(req->getCurl())->second;
 			meth = "_" + file + "emittHTML";
 
 			void *mkr = dlsym(ddlib, meth.c_str());
@@ -165,16 +145,16 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 	}
 #endif
 #ifdef INC_DVIEW
-	else if(vwMap!=NULL && ext==".view" && vwMap->find(req->getFile())!=vwMap->end())
+	else if(ext==".view" && vwMap->find(req->getCurl())!=vwMap->end())
 	{
-		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("dview_"+vwMap->find(req->getFile())->second, req->getCntxt_name());
+		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("dview_"+vwMap->find(req->getCurl())->second, req->getCntxt_name());
 		if(_temp!=NULL)
 		{
 			cntrlit = true;
 			args argus;
 			argus.push_back("Document*");
 			vals valus;
-			const ClassInfo& srv = ConfigurationData::getInstance()->ffeadContext.classInfoMap[req->getCntxt_name()][vwMap->find(req->getFile())->second];
+			const ClassInfo& srv = ConfigurationData::getInstance()->ffeadContext.classInfoMap[req->getCntxt_name()][vwMap->find(req->getCurl())->second];
 			const Method& meth = srv.getMethod("getDocument", argus);
 			if(meth.getMethodName()!="")
 			{
@@ -189,7 +169,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			{
 				logger << "Invalid Dynamic View handler, no method getDocument found..." << std::endl;
 			}
-			ConfigurationData::getInstance()->ffeadContext.release("dview_"+vwMap->find(req->getFile())->second, req->getCntxt_name());
+			ConfigurationData::getInstance()->ffeadContext.release("dview_"+vwMap->find(req->getCurl())->second, req->getCntxt_name());
 		}
 		else
 		{
@@ -205,12 +185,12 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 	}
 #endif
 #ifdef INC_TPE
-	else if(tmplMap!=NULL && tmplMap->find(acurl)!=tmplMap->end())
+	else if(tmplMap->find(req->getCurl())!=tmplMap->end())
 	{
 		if(ddlib != NULL)
 		{
-			std::string tpefilename = tmplMap->find(acurl)->second.substr(tmplMap->find(acurl)->second.find(";")+1);
-			std::string tpeclasname = tmplMap->find(acurl)->second.substr(0, tmplMap->find(acurl)->second.find(";"));
+			std::string tpefilename = tmplMap->find(req->getCurl())->second.substr(tmplMap->find(req->getCurl())->second.find(";")+1);
+			std::string tpeclasname = tmplMap->find(req->getCurl())->second.substr(0, tmplMap->find(req->getCurl())->second.find(";"));
 			cntrlit = true;
 			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("template_"+tpeclasname, req->getCntxt_name());
 			if(_temp!=NULL)
@@ -224,12 +204,12 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				{
 					valus.push_back(req);
 					Context cnt = reflector.invokeMethod<Context>(_temp,meth,valus);
-					logger << "Done with Template Context fetch" << std::endl;
+					//logger << "Done with Template Context fetch" << std::endl;
 
 					Context::iterator it;
 					for (it=cnt.begin();it!=cnt.end();it++) {
 						std::string key = it->first;
-						logger << ("Template key=" + key + " Value = ") << it->second.getPointer() << std::endl;
+						//logger << ("Template key=" + key + " Value = ") << it->second.getPointer() << std::endl;
 					}
 
 					std::string fname = "_" + tpefilename + "emittTemplateHTML";

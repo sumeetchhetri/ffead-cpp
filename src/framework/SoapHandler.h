@@ -33,7 +33,7 @@
 
 class SoapHandler {
 public:
-	static void handle(HttpRequest* req, HttpResponse* res, void* dlib);
+	static void handle(HttpRequest* req, HttpResponse* res, void* dlib, std::string ws_name);
 };
 
 #endif /* SOAPHANDLER_H_ */

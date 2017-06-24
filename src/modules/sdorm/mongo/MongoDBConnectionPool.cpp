@@ -38,7 +38,7 @@ void MongoDBConnectionPool::initEnv() {
 	else
 	{
 		std::string databaseName = "";
-		std::cout << props.getNodes().size() << std::endl;
+		//std::cout << props.getNodes().size() << std::endl;
 		for (int var = 0; var < (int)props.getNodes().size(); ++var) {
 			if(databaseName=="") {
 				databaseName = props.getNodes().at(var).getDatabaseName();
@@ -51,7 +51,7 @@ void MongoDBConnectionPool::initEnv() {
 				port = 27017;
 			}
 
-			std::cout << props.getNodes().at(var).getHost() << std::endl;
+			//std::cout << props.getNodes().at(var).getHost() << std::endl;
 			if(props.getNodes().at(var).getUsername()!="" && props.getNodes().at(var).getPassword()!="") {
 				connectionString += (props.getNodes().at(var).getUsername() + ":" +
 						props.getNodes().at(var).getPassword() + "@");
@@ -100,7 +100,7 @@ void MongoDBConnectionPool::initEnv() {
 
 	connectionString = "mongodb://" + connectionString;
 
-	std::cout << connectionString << std::endl;
+	//std::cout << connectionString << std::endl;
 
 	uri = mongoc_uri_new(connectionString.c_str());
 	mongoc_client_pool_t *pool = mongoc_client_pool_new(uri);
@@ -111,7 +111,7 @@ void MongoDBConnectionPool::initEnv() {
 void* MongoDBConnectionPool::newConnection(const bool& isWrite, const ConnectionNode& node) {
 	mongoc_client_pool_t *pool = (mongoc_client_pool_t*)getEnv();
 	mongoc_client_t *client = mongoc_client_pool_pop(pool);
-	std::cout << client << std::endl;
+	//std::cout << client << std::endl;
 	return client;
 }
 

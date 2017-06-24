@@ -75,7 +75,7 @@ public:
 	void setDone(const bool& done);
 	std::string generateResponse(const std::string& httpMethod, HttpRequest *req, const bool& appendHeaders= true);
 	std::string generateResponse(const bool& appendHeaders= true);
-	std::string generateOnlyHeaderResponse(HttpRequest *req);
+	std::string generateResponse(HttpRequest *req, const bool& appendHeaders= true);
 private:
     bool done;
     float httpVers;

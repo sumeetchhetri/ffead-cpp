@@ -22,7 +22,13 @@
 
 #ifndef MUTEX_H_
 #define MUTEX_H_
+#include "AppDefines.h"
 #include <pthread.h>
+#if USE_ATOMIC_H == 1
+#include <atomic>
+#elif USE_CSTDATOMIC_H == 1
+#include <cstdatomic>
+#endif
 
 class Mutex {
 protected:
@@ -66,7 +72,7 @@ public:
 	void interrupt();
 };
 
-#ifndef HAVE_CXX11
+#if USE_ATOMIC_H==0 && USE_CSTDATOMIC_H==0
 namespace std {
 	template<typename T>
 	class atomic {};
@@ -86,6 +92,33 @@ namespace std {
 		{
 			_l.lock();
 			bool f = flag;
+			_l.unlock();
+			return f;
+		}
+	};
+	template<>
+	class atomic<int> {
+		Mutex _l;
+		int flag;
+	public:
+		bool operator=(int f)
+		{
+			_l.lock();
+			flag = f;
+			_l.unlock();
+			return f;
+		}
+		bool operator+=(int f)
+		{
+			_l.lock();
+			flag += f;
+			_l.unlock();
+			return f;
+		}
+		operator int()
+		{
+			_l.lock();
+			int f = flag;
 			_l.unlock();
 			return f;
 		}

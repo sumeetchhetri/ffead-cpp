@@ -36,7 +36,7 @@ class ControllerHandler {
 	static bool getControllerForPath(const std::string& cntxtName, const std::string& actUrl, std::string& className);
 	static bool getMappingForPath(const std::string& cntxtName, const std::string& actUrl, std::string& to);
 public:
-	static bool handle(HttpRequest* req, HttpResponse* res, const std::string& ext, const std::string& pthwofile, Reflector& reflector);
+	static bool handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector);
 };
 
 #endif /* CONTROLLERHANDLER_H_ */

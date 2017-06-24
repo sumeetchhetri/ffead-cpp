@@ -1940,7 +1940,7 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 				}
 				par++;
 		}
-		std::cout << out << std::endl;
+		//std::cout << out << std::endl;
 	}
 
 	if(query.isUpdate())

@@ -24,10 +24,10 @@
 
 bool FviewHandler::handle(HttpRequest* req, HttpResponse* res)
 {
-	std::map<std::string, std::string> fviewmap = ConfigurationData::getInstance()->fviewMappingMap[req->getCntxt_name()];
+	std::map<std::string, std::string>& fviewmap = ConfigurationData::getInstance()->fviewMappingMap[req->getCntxt_name()];
 	Logger logger = LoggerFactory::getLogger("FviewHandler");
 	std::string content;
-	logger << ("Inside fview " + req->getFile()) << std::endl;
+	//logger << ("Inside fview " + req->getFile()) << std::endl;
 	std::string file = req->getFile();
 	StringUtil::replaceFirst(file,"fview","html");
 	std::string ffile = req->getContextHome()+"/fviews/"+file;

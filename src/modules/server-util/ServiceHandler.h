@@ -26,6 +26,8 @@ class HandlerRequest {
 	SocketInterface* sif;
 	void* context;
 	bool sentResponse;
+	void* response;
+	int reqPos;
 	std::string protocol;
 	ServiceHandler* sh;
 	ReaderSwitchInterface* switchReaderIntf;
@@ -38,9 +40,12 @@ public:
 	void* getContext();
 	const std::string& getProtocol() const;
 	void* getRequest();
+	void* getResponse();
 	bool isSentResponse() const;
 	SocketInterface* getSif();
 	ReaderSwitchInterface* getSwitchReaderIntf();
+	bool isValidWriteRequest();
+	void doneWithWrite();
 };
 
 class ServiceHandler {
@@ -48,13 +53,16 @@ class ServiceHandler {
 	ConcurrentQueue<SocketInterface*> tbcSifQ;
 	ConcurrentMap<long, int> requestNumMap;
 	bool run;
-	bool isThreadPerRequest;
-	int poolSize;
-	ThreadPool pool;
+	bool isThreadPerRequests;
+	bool isThreadPerRequestw;
+	int spoolSize;
+	int wpoolSize;
+	ThreadPool spool;
+	ThreadPool wpool;
 	bool addOpenRequest(SocketInterface* si);
 	void addCloseRequest(SocketInterface* si);
 	bool isAvailable(SocketInterface* si);
-	void registerRequest(void* request, SocketInterface* sif, void* context, ReaderSwitchInterface* switchReaderIntf);
+	void registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos, ReaderSwitchInterface* switchReaderIntf);
 	bool isActive();
 	static void* taskService(void* inp);
 	static void* cleanSifs(void* inp);
@@ -63,13 +71,17 @@ class ServiceHandler {
 	friend class RequestReaderHandler;
 	friend class HandlerRequest;
 protected:
-	void submitTask(Task* task);
-	virtual void service(HandlerRequest* req)=0;
+	void submitServiceTask(Task* task);
+	void submitWriteTask(Task* task);
+	virtual void handleService(HandlerRequest* req)=0;
+	virtual void handleWrite(HandlerRequest* req)=0;
 public:
 	void switchReaders(HandlerRequest* hr, SocketInterface* next);
+	void registerWriteRequest(HandlerRequest* request, void* response);
+	void registerRead(HandlerRequest* hr);
 	void start();
 	void stop();
-	ServiceHandler(const int& poolSize);
+	ServiceHandler(const int& spoolSize, const int& wpoolSize);
 	virtual ~ServiceHandler();
 };
 

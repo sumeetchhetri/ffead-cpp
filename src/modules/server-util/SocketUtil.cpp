@@ -8,10 +8,8 @@
 #include "SocketUtil.h"
 
 SocketUtil::SocketUtil(const SOCKET& fd) {
-	lock.lock();
 	inited = false;
 	init(fd);
-	lock.unlock();
 }
 
 void SocketUtil::init(const SOCKET& fd) {
@@ -76,9 +74,9 @@ void SocketUtil::init(const SOCKET& fd) {
 	}
 	else
 	{
-		sbio=BIO_new_socket(fd,BIO_CLOSE);
+		/*sbio=BIO_new_socket(fd,BIO_CLOSE);
 		io=BIO_new(BIO_f_buffer());
-		BIO_push(io,sbio);
+		BIO_push(io,sbio);*/
 	}
 	closed = false;
 	inited = true;
@@ -94,56 +92,53 @@ int SocketUtil::writeData(const std::string& data, const bool& flush, const int&
 	{
 		if(SSLHandler::getInstance()->getIsSSL())
 		{
-			lock.lock();
 			bool fl = handleRenegotiation();
-			lock.unlock();
 			if(fl)
 			{
 				return 0;
 			}
+			int er = 0;
+			if(!closed)
+			{
+				er = BIO_write(io, &data[offset] , data.length()-offset);
+				if(SSLHandler::getInstance()->getIsSSL())
+				{
+					er = handleSSlErrors(er)?0:er;
+				}
+				else if(er<=0)
+				{
+					if(!BIO_should_retry(io))
+					{
+						er = 0;
+					}
+					else
+					{
+						er = -1;
+					}
+				}
+				if(er>0 && flush)
+				{
+					this->flush(false);
+				}
+			}
+			return er;
 		}
-		lock.lock();
-		int er = 0;
-		if(!closed)
+		else
 		{
-			er = BIO_write(io, &data[offset] , data.length()-offset);
-			if(SSLHandler::getInstance()->getIsSSL())
-			{
-				er = handleSSlErrors(er)?0:er;
-			}
-			else if(er<=0)
-			{
-				if(!BIO_should_retry(io))
-				{
-					closeSocket(false);
-					er = 0;
-				}
-				else
-				{
-					er = -1;
-				}
-			}
-			if(er>0 && flush)
-			{
-				this->flush(false);
-			}
+			return send(this->fd, &data[offset] , data.length()-offset, 0);
 		}
-		lock.unlock();
-		return er;
 	}
 	return -1;
 }
 
 bool SocketUtil::flush(const bool& lk) {
 	bool fl = false;
-	if(lk)lock.lock();
 	if(!closed && BIO_flush(io)<=0 && !BIO_should_retry(io))
 	{
 		logger << "Error flushing BIO" << std::endl;
 		closeSocket(lk);
 		fl = true;
 	}
-	if(lk)lock.unlock();
 	return fl;
 }
 
@@ -154,47 +149,28 @@ int SocketUtil::readLine(std::string& line)
 	if(SSLHandler::getInstance()->getIsSSL())
 	{
 		int er = 0;
-		lock.lock();
 		if(!closed)
 		{
 			er = BIO_gets(io,buf,BUFSIZZ-1);
 			er = handleSSlErrors(er)?0:er;
 			if(er<=0)
 			{
-				lock.unlock();
 				return er;
 			}
 			line.append(buf, er);
 			memset(&buf[0], 0, sizeof(buf));
 		}
-		lock.unlock();
 		return er;
 	}
 	else
 	{
-		int er = 0;
-		lock.lock();
-		if(!closed)
+		int er = recv(fd, buf, BUFSIZZ-1, 0);
+		if(er<=0)
 		{
-			er = BIO_gets(io,buf,BUFSIZZ-1);
-			if(er<=0)
-			{
-				if(!BIO_should_retry(io))
-				{
-					closeSocket(false);
-					er = 0;
-				}
-				else
-				{
-					er = -1;
-				}
-				lock.unlock();
-				return er;
-			}
-			line.append(buf, er);
-			memset(&buf[0], 0, sizeof(buf));
+			return er;
 		}
-		lock.unlock();
+		line.append(buf, er);
+		memset(&buf[0], 0, sizeof(buf));
 		return er;
 	}
 }
@@ -208,7 +184,6 @@ int SocketUtil::readData(int cntlen, std::string& content)
 		if(SSLHandler::getInstance()->getIsSSL())
 		{
 			int er = 0;
-			lock.lock();
 			if(!closed)
 			{
 				int readLen = MAXBUFLENM;
@@ -218,48 +193,26 @@ int SocketUtil::readData(int cntlen, std::string& content)
 				er = handleSSlErrors(er)?0:er;
 				if(er<=0)
 				{
-					lock.unlock();
 					return er;
 				}
 				content.append(buf, er);
 				memset(&buf[0], 0, sizeof(buf));
 			}
-			lock.unlock();
 			return er;
 		}
 		else
 		{
-			int er = 0;
-			lock.lock();
-			if(!closed)
+			int readLen = MAXBUFLENM;
+			if(cntlen<MAXBUFLENM)
+				readLen = cntlen;
+			int er = recv(fd, buf, BUFSIZZ-1, 0);
+			if(er<=0)
 			{
-				int readLen = MAXBUFLENM;
-				if(cntlen<MAXBUFLENM)
-					readLen = cntlen;
-				er = BIO_read(io,buf,readLen);
-				if(er<=0)
-				{
-					if(!BIO_should_retry(io))
-					{
-#if !defined(USE_EPOLL_ET)
-						closeSocket(false);
-						er = 0;
-#else
-						er = -1;
-#endif
-					}
-					else
-					{
-						er = -1;
-					}
-					lock.unlock();
-					return er;
-				}
-				cntlen -= er;
-				content.append(buf, er);
-				memset(&buf[0], 0, sizeof(buf));
+				return er;
 			}
-			lock.unlock();
+			cntlen -= er;
+			content.append(buf, er);
+			memset(&buf[0], 0, sizeof(buf));
 			return er;
 		}
 	}
@@ -275,7 +228,6 @@ int SocketUtil::readData(int cntlen, std::vector<unsigned char>& content)
 		if(SSLHandler::getInstance()->getIsSSL())
 		{
 			int er = 0;
-			lock.lock();
 			if(!closed)
 			{
 				int readLen = MAXBUFLENM;
@@ -285,7 +237,6 @@ int SocketUtil::readData(int cntlen, std::vector<unsigned char>& content)
 				er = handleSSlErrors(er)?0:er;
 				if(er<=0)
 				{
-					lock.unlock();
 					return er;
 				}
 				for(int cc=0;cc<er;cc++)
@@ -294,41 +245,24 @@ int SocketUtil::readData(int cntlen, std::vector<unsigned char>& content)
 				}
 				memset(&buf[0], 0, sizeof(buf));
 			}
-			lock.unlock();
 			return er;
 		}
 		else
 		{
-			int er = 0;
-			lock.lock();
-			if(!closed)
+			int readLen = MAXBUFLENM;
+			if(cntlen<MAXBUFLENM)
+				readLen = cntlen;
+			int er = recv(fd, buf, BUFSIZZ-1, 0);
+			if(er<=0)
 			{
-				int readLen = MAXBUFLENM;
-				if(cntlen<MAXBUFLENM)
-					readLen = cntlen;
-				er = BIO_read(io,buf,readLen);
-				if(er<=0)
-				{
-					if(!BIO_should_retry(io))
-					{
-						closeSocket(false);
-						er = 0;
-					}
-					else
-					{
-						er = -1;
-					}
-					lock.unlock();
-					return er;
-				}
-				cntlen -= er;
-				for(int cc=0;cc<er;cc++)
-				{
-					content.push_back(buf[cc]);
-				}
-				memset(&buf[0], 0, sizeof(buf));
+				return er;
 			}
-			lock.unlock();
+			cntlen -= er;
+			for(int cc=0;cc<er;cc++)
+			{
+				content.push_back(buf[cc]);
+			}
+			memset(&buf[0], 0, sizeof(buf));
 			return er;
 		}
 	}
@@ -337,7 +271,6 @@ int SocketUtil::readData(int cntlen, std::vector<unsigned char>& content)
 
 void SocketUtil::closeSocket(const bool& lk)
 {
-	if(lk)lock.lock();
 	if(!closed)
 	{
 		if(SSLHandler::getInstance()->getIsSSL())
@@ -346,12 +279,14 @@ void SocketUtil::closeSocket(const bool& lk)
 		}
 		else
 		{
-			if(io!=NULL)BIO_free_all(io);
+			//if(io!=NULL)BIO_free_all(io);
 			close(fd);
 		}
+	} else {
+		return;
 	}
 	closed = true;
-	if(lk)lock.unlock();
+	sel->unRegisterForEvent(fd);
 }
 
 bool SocketUtil::checkSocketWaitForTimeout(const int& writing, const int& seconds, const int& micros)

@@ -40,7 +40,7 @@
 #include <port.h>
 #include <poll.h>
 #elif USE_EPOLL == 1
-	#define USE_EPOLL_LT
+	#define USE_EPOLL_ET
 	#undef USE_EVPORT
 	#undef USE_KQUEUE
 	#undef USE_DEVPOLL
@@ -151,16 +151,15 @@ class SelEpolKqEvPrt {
 		fd_set master;
 	#elif USE_SELECT
 		int fdMax, fdsetSize;
-		fd_set readfds[MAXDESCRIPTORS/FD_SETSIZE];  // temp file descriptor list for select()
+		fd_set readfds[MAXDESCRIPTORS/FD_SETSIZE];
+		fd_set writefds[MAXDESCRIPTORS/FD_SETSIZE];
 		fd_set master[MAXDESCRIPTORS/FD_SETSIZE];
 	#elif defined USE_EPOLL
-		struct epoll_event ev;
 		struct epoll_event events[MAXDESCRIPTORS];
 		int epoll_handle;
 	#elif defined USE_KQUEUE
 		int kq;
 		struct kevent evlist[MAXDESCRIPTORS];
-	    struct kevent change;
 	#elif defined USE_DEVPOLL
 	    int dev_poll_fd;
 	    struct pollfd polled_fds[MAXDESCRIPTORS];

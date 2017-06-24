@@ -99,11 +99,18 @@ std::string HttpResponse::generateResponse(const std::string& httpMethod, HttpRe
 	}
 	else
 	{
-		return generateResponse(appendHeaders);
+		if(appendHeaders)
+		{
+			return generateHeadResponse() + this->content;
+		}
+		else
+		{
+			return generateHeadResponse();
+		}
 	}
 }
 
-std::string HttpResponse::generateOnlyHeaderResponse(HttpRequest *req)
+std::string HttpResponse::generateResponse(HttpRequest *req, const bool& appendHeaders /*= true*/)
 {
 	if(req->getMethod()=="OPTIONS")
 	{
@@ -115,7 +122,14 @@ std::string HttpResponse::generateOnlyHeaderResponse(HttpRequest *req)
 	}
 	else
 	{
-		return generateHeadResponse();
+		if(appendHeaders)
+		{
+			return generateHeadResponse() + this->content;
+		}
+		else
+		{
+			return generateHeadResponse();
+		}
 	}
 }
 
@@ -126,7 +140,7 @@ std::string HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
 		return generateHeadResponse() + this->content;
 	}
 	else
-	{	
+	{
 		generateHeadResponse();
 		return this->content;
 	}
@@ -238,6 +252,7 @@ void HttpResponse::update(HttpRequest* req)
 {
 	this->httpVers = req->httpVers;
 	this->httpVersion = req->getHttpVersion();
+	addHeaderValue(HttpResponse::AcceptRanges, "none");
 }
 
 void HttpResponse::setHTTPResponseStatus(const HTTPResponseStatus& status)
@@ -304,11 +319,11 @@ void HttpResponse::addHeaderValue(std::string header, const std::string& value)
 		}
 		else
 		{
-			std::cout << ("Non standard Header string " + header) << std::endl;
+			//std::cout << ("Non standard Header string " + header) << std::endl;
 			std::vector<std::string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
 			if(matres.size()==0)
 			{
-				std::cout << ("Invalid Header string " + header) << std::endl;
+				//std::cout << ("Invalid Header string " + header) << std::endl;
 				return;
 			}
 			if(headers.find(header)!=headers.end()) {
@@ -504,27 +519,27 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 				try {
 					ifmodsince = df.parse(ifmodsincehdr);
 					isifmodsincvalid = true;
-					std::cout << "Parsed date success" << std::endl;
+					//std::cout << "Parsed date success" << std::endl;
 				} catch(...) {
 					isifmodsincvalid = false;
 				}
 
 				if(ifmodsince!=NULL)
 				{
-					std::cout << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
-					std::cout << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
-					std::cout << "Date Comparisons = " +CastUtil::lexical_cast<std::string>(*ifmodsince>=filemodifieddate)  << std::endl;
+					//std::cout << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
+					//std::cout << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
+					//std::cout << "Date Comparisons = " +CastUtil::lexical_cast<std::string>(*ifmodsince>=filemodifieddate)  << std::endl;
 
 					if(isifmodsincvalid && *ifmodsince>=filemodifieddate)
 					{
 						res->addHeaderValue(HttpResponse::LastModified, ifmodsincehdr);
-						std::cout << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
+						//std::cout << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
 						return false;
 					}
 					else if(isifmodsincvalid && *ifmodsince<filemodifieddate)
 					{
-						std::cout << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
+						//std::cout << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 						forceLoadFile = true;
 					}
 					delete ifmodsince;

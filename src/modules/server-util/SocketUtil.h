@@ -15,9 +15,10 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include "string"
-
+#include "Mutex.h"
 #include <fcntl.h>
 #include "SSLHandler.h"
+#include "SelEpolKqEvPrt.h"
 
 #define MAXBUFLENM 32768
 #define BUFSIZZ 1024
@@ -27,8 +28,8 @@ class SocketUtil {
 	BIO *sbio;
 	BIO *io, *ssl_bio;
 	SOCKET fd;
-	bool closed;
-	Mutex lock;
+	std::atomic<bool> closed;
+	SelEpolKqEvPrt *sel;
 	bool inited;
 	Logger logger;
 	SocketUtil();
@@ -40,6 +41,7 @@ class SocketUtil {
 	friend class Http11Handler;
 	friend class SocketInterface;
 	friend class Http11WebSocketHandler;
+	friend class RequestReaderHandler;
 public:
 	std::string getAlpnProto();
 	SocketUtil(const SOCKET& fd);

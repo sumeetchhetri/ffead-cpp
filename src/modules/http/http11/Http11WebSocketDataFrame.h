@@ -45,6 +45,8 @@ public:
 };
 
 class WebSocketData {
+	std::string url;
+	std::string cnxtName;
 	std::string data;
 	short dataType;
 	int techunkSiz;
@@ -53,10 +55,13 @@ class WebSocketData {
 	friend class Http11WebSocketHandler;
 	friend class Http2StreamHandler;
 	friend class Http2Handler;
+	friend class HttpServiceTask;
 public:
 	WebSocketData();
 	WebSocketData(const std::string& data, const short& dataType);
 	std::string getData() const;
+	std::string getUrl() const;
+	std::string getCntxt_name() const;
 	virtual ~WebSocketData();
 	void updateContent(const uint32_t& techunkSiz);
 	bool isContentRemains();

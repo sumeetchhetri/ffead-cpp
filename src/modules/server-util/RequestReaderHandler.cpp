@@ -21,9 +21,7 @@ void RequestReaderHandler::switchReaders(SocketInterface* prev, SocketInterface*
 }
 
 void RequestReaderHandler::registerRead(SocketInterface* si) {
-	if(isNotRegisteredListener) {
-		pendingSocks.push(si);
-	}
+	selector.registerForEvent(si->getDescriptor());
 }
 
 void RequestReaderHandler::start() {
@@ -34,7 +32,7 @@ void RequestReaderHandler::start() {
 			return;
 		}
 		run = true;
-		selector.initialize(listenerSock, 100);
+		selector.initialize(listenerSock, -1);
 		Thread thr(&handle, this);
 		thr.execute();
 		Thread hthr(&handleTimeouts, this);
@@ -63,6 +61,7 @@ void RequestReaderHandler::registerSocketInterfaceFactory(const SocketInterfaceF
 
 void RequestReaderHandler::addSf(SocketInterface* psi) {
 	psi->t.start();
+	psi->sockUtil->sel = &selector;
 	psi->setIdentifier(siIdentifierSeries++);
 	connections[psi->getDescriptor()] = psi;
 	if(psi->getTimeout()>0)
@@ -130,6 +129,9 @@ void* RequestReaderHandler::handle(void* inp) {
 	socklen_t sin_size;
 	while(ins->isActive())
 	{
+		//Timer t0;
+		//t0.start();
+
 		Timer cdt(false);
 
 		if(ins->isNotRegisteredListener)
@@ -177,8 +179,15 @@ void* RequestReaderHandler::handle(void* inp) {
 				ins->addToTimeoutSocks.push(rsi);
 			}
 		}
+		//t0.end();
+		//CommonUtils::tsPoll1 += t0.timerMilliSeconds();
 
+		//Timer t1;
+		//t1.start();
 		int num = ins->selector.getEvents();
+		//t1.end();
+		//CommonUtils::tsPoll += t1.timerMilliSeconds();
+
 		if (num<=0)
 		{
 			if(num==-1) {
@@ -187,6 +196,8 @@ void* RequestReaderHandler::handle(void* inp) {
 			continue;
 		}
 
+		Timer t2;
+		t2.start();
 		for(int n=0;n<num;n++)
 		{
 			SOCKET descriptor = ins->selector.getDescriptor(n);
@@ -208,10 +219,11 @@ void* RequestReaderHandler::handle(void* inp) {
 							  break;
 							}
 						}
-						logger << "TARGET-REQUEST BEGINS AT " << Timer::getCurrentTime() <<  std::endl;
 						SocketUtil* sockUtil = new SocketUtil(newSocket);
 						SocketInterface* sockIntf = ins->sf(sockUtil);
 						ins->addSf(sockIntf);
+
+						//CommonUtils::cSocks += 1;
 					}
 #else
 					sin_size = sizeof their_addr;
@@ -219,12 +231,15 @@ void* RequestReaderHandler::handle(void* inp) {
 					SocketUtil* sockUtil = new SocketUtil(newSocket);
 					SocketInterface* sockIntf = ins->sf(sockUtil);
 					ins->addSf(sockIntf);
+
+					//CommonUtils::cSocks += 1;
 #endif
 				}
 				else
 				{
 					if(ins->connections.find(descriptor)==ins->connections.end()) {
-						logger << "IDHAR KAISE AAYA@@@@@@@@" << std::endl;
+						//logger << "IDHAR KAISE AAYA@@@@@@@@" << std::endl;
+						ins->selector.unRegisterForEvent(descriptor);
 						continue;
 					}
 					SocketInterface* si = ins->connections[descriptor];
@@ -232,7 +247,8 @@ void* RequestReaderHandler::handle(void* inp) {
 					while(pending>0 && ins->shi->isAvailable(si))
 					{
 						void* context = NULL;
-						void* request = si->readRequest(context, pending);
+						int reqPos = 0;
+						void* request = si->readRequest(context, pending, reqPos);
 						if(si->isClosed()) {
 							si->onClose();
 							ins->selector.unRegisterForEvent(si->getDescriptor());
@@ -242,13 +258,17 @@ void* RequestReaderHandler::handle(void* inp) {
 							pending = 0;
 							break;
 						} else if(request!=NULL) {
-							logger << "TARGET-REQUEST GOT AT " << Timer::getCurrentTime() <<  std::endl;
-							ins->shi->registerRequest(request, si, context, ins);
+							//ins->selector.unRegisterForEvent(si->getDescriptor());
+							ins->shi->registerServiceRequest(request, si, context, reqPos, ins);
+							//CommonUtils::cReqs += 1;
 						}
 					}
 				}
 			}
 		}
+
+		//t2.end();
+		//CommonUtils::tsProcess += t2.timerMilliSeconds();
 	}
 
 	Thread::mSleep(600);

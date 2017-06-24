@@ -37,7 +37,7 @@ typedef void* (*toVoidP) (const std::string&);
 
 class FormHandler {
 public:
-	static bool handle(HttpRequest* req, HttpResponse* res, Reflector& reflector);
+	static bool handle(HttpRequest* req, HttpResponse* res, Reflector& reflector, Element* ele);
 };
 
 #endif /* FORMHANDLER_H_ */

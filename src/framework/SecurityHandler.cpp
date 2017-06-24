@@ -31,17 +31,13 @@ SecurityHandler::~SecurityHandler() {
 
 void SecurityHandler::populateAuthDetails(HttpRequest* req)
 {
-	std::string cntxtName = req->getCntxt_name();
-
-	std::string actUrl = req->getActUrl();
-
-	std::string provKey = isLoginPage(cntxtName, actUrl);
+	std::string provKey = isLoginPage(req->getCntxt_name(), req->getCurl());
 	if(provKey=="")
 	{
 		return;
 	}
-	std::map<std::string, std::map<std::string, Security> > securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
-	Security securityObject = securityObjectMap[cntxtName][provKey];
+	std::map<std::string, std::map<std::string, Security> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
+	Security securityObject = securityObjectMap[req->getCntxt_name()][provKey];
 	std::string userfld = securityObject.securityFieldNames["username"];
 	std::string passfld = securityObject.securityFieldNames["password"];
 	std::string userfrom = securityObject.securityFieldFrom["username"];
@@ -97,37 +93,34 @@ void SecurityHandler::populateAuthDetails(HttpRequest* req)
 
 std::string SecurityHandler::isLoginPage(const std::string& cntxtName, const std::string& actUrl)
 {
-	std::map<std::string, std::map<std::string, Security> > securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
-	if(securityObjectMap.find(cntxtName)!=securityObjectMap.end())
-	{
-		std::map<std::string, Security> securityProv = securityObjectMap[cntxtName];
-		std::map<std::string, Security>::iterator it;
-		for (it=securityProv.begin();it!=securityProv.end();++it) {
-			Security provider = it->second;
-			if(provider.isLoginPage(cntxtName, actUrl))
-			{
-				return it->first;
-			}
+	std::map<std::string, std::map<std::string, Security> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
+	std::map<std::string, Security> securityProv = securityObjectMap[cntxtName];
+	std::map<std::string, Security>::iterator it;
+	for (it=securityProv.begin();it!=securityProv.end();++it) {
+		Security provider = it->second;
+		if(provider.isLoginPage(cntxtName, actUrl))
+		{
+			return it->first;
 		}
 	}
 	return "";
 }
 
+bool SecurityHandler::hasSecurity(const std::string& cntxtName) {
+	return ConfigurationData::getInstance()->securityObjectMap[cntxtName].size()>0;
+}
+
 std::string SecurityHandler::validateSecurePath(const std::string& cntxtName, const std::string& actUrl, const std::string& username)
 {
-	std::map<std::string, std::map<std::string, Security> > securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
-	if(securityObjectMap.find(cntxtName)!=securityObjectMap.end())
-	{
-		std::map<std::string, Security> securityProv = securityObjectMap[cntxtName];
-		std::map<std::string, Security>::iterator it;
-		for (it=securityProv.begin();it!=securityProv.end();++it) {
-			Security provider = it->second;
-			SecureAspect aspect = provider.matchesPath(cntxtName, actUrl);
-			if(provider.isLoginConfigured() && ((aspect.path!="" && aspect.role!="ROLE_ANONYMOUS")
-				|| (provider.isLoginPage(cntxtName, actUrl) && username!="")))
-			{
-				return it->first;
-			}
+	std::map<std::string, std::map<std::string, Security> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
+	std::map<std::string, Security> securityProv = securityObjectMap[cntxtName];
+	std::map<std::string, Security>::iterator it;
+	for (it=securityProv.begin();it!=securityProv.end();++it) {
+		Security provider = it->second;
+		SecureAspect aspect = provider.matchesPath(cntxtName, actUrl);
+		if(provider.isLoginConfigured() && ((aspect.path!="" && aspect.role!="ROLE_ANONYMOUS") || (provider.isLoginPage(cntxtName, actUrl) && username!="")))
+		{
+			return it->first;
 		}
 	}
 	return "";
@@ -135,12 +128,10 @@ std::string SecurityHandler::validateSecurePath(const std::string& cntxtName, co
 
 bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& sessionTimeout, Reflector& reflector)
 {
-	std::map<std::string, std::map<std::string, Security> > securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
+	std::map<std::string, std::map<std::string, Security> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
 	Logger logger = LoggerFactory::getLogger("SecurityHandler");
 
 	bool isContrl = false;
-
-	std::string actUrl = req->getActUrl();
 
 	std::string userRole = req->getSession()->getAttribute("_FFEAD_USER_ACCESS_ROLE");
 	if(userRole=="")
@@ -152,17 +143,17 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 	std::string username = req->userName;
 	std::string password = req->password;
 
-	std::string provKey = validateSecurePath(req->getCntxt_name(), actUrl, username);
+	std::string provKey = validateSecurePath(req->getCntxt_name(), req->getCurl(), username);
 	if(provKey!="")
 	{
 		Security securityObject = securityObjectMap[req->getCntxt_name()][provKey];
-		SecureAspect aspect = securityObject.matchesPath(req->getCntxt_name(), req->getActUrl());
+		SecureAspect aspect = securityObject.matchesPath(req->getCntxt_name(), req->getCurl());
 		//long sessionTimeoutVar = sessionTimeout;
 		if(securityObject.isLoginConfigured())
 		{
 			//sessionTimeoutVar = securityObject.sessTimeout;
 		}
-		if(!securityObject.isLoginPage(req->getCntxt_name(), actUrl))
+		if(!securityObject.isLoginPage(req->getCntxt_name(), req->getCurl()))
 		{
 			if(aspect.path!="")
 			{
@@ -176,7 +167,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 				isContrl = true;
 			}
 		}
-		else if(securityObject.isLoginPage(req->getCntxt_name(), actUrl) && username!="")
+		else if(securityObject.isLoginPage(req->getCntxt_name(), req->getCurl()) && username!="")
 		{
 			claz = securityObject.loginProvider;
 			bool validUser = false;
@@ -258,12 +249,12 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 				}
 				ConfigurationData::getInstance()->ffeadContext.release("login-handler_"+claz, req->getCntxt_name());
 			}
-			if(validUser && (aspect.role==userRole || securityObject.isLoginPage(req->getCntxt_name(), actUrl)))
+			if(validUser && (aspect.role==userRole || securityObject.isLoginPage(req->getCntxt_name(), req->getCurl())))
 			{
 				req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", userRole);
 				res->setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
 				res->addHeaderValue(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.welcomeFile);
-				logger << ("Valid role " + userRole + " for path " + req->getActUrl()) << std::endl;
+				logger << ("Valid role " + userRole + " for path " + req->getCurl()) << std::endl;
 				isContrl = true;
 				res->setDone(true);
 			}

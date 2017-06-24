@@ -31,6 +31,23 @@ ConfigurationHandler::~ConfigurationHandler() {
 	// TODO Auto-generated destructor stub
 }
 
+void ConfigurationHandler::normalizeUrl(const std::string& appName, std::string& url) {
+	if(url=="")return;
+	if(StringUtil::startsWith(url, "regex(") && StringUtil::endsWith(url, ")")) {
+		std::string regurl = url.substr(6, url.length()-7);
+		if(!RegexUtil::isValidRegex(regurl)) {
+			url = "";
+		}
+		return;
+	}
+	if(url.at(0)!='/')
+		url = "/" + url;
+	if(url.find("/")==0 && url.find("/"+appName+"/")!=0) {
+		url = "/" + appName + url;
+	}
+	RegexUtil::replace(url, "[/]+", "/");
+	StringUtil::trim(url);
+}
 
 /*void ConfigurationHandler::listi(const std::string& cwd, const std::string& type, const bool& apDir, strVec &folders, const bool& showHidden)
 {
@@ -299,6 +316,20 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		StringUtil::replaceAll(applibname, "-", "_");
 		RegexUtil::replace(applibname, "[^a-zA-Z0-9_]+", "");
 
+		ConfigurationData::getInstance()->securityObjectMap[name];
+		ConfigurationData::getInstance()->filterObjectMap[name];
+		ConfigurationData::getInstance()->controllerObjectMap[name];
+		ConfigurationData::getInstance()->mappingObjectMap[name];
+		ConfigurationData::getInstance()->mappingextObjectMap[name];
+		ConfigurationData::getInstance()->rstCntMap[name];
+		ConfigurationData::getInstance()->templateMappingMap[name];
+		ConfigurationData::getInstance()->dcpMappingMap[name];
+		ConfigurationData::getInstance()->viewMappingMap[name];
+		ConfigurationData::getInstance()->ajaxInterfaceMap[name];
+		ConfigurationData::getInstance()->fviewMappingMap[name];
+		ConfigurationData::getInstance()->wsdlMap[name];
+		ConfigurationData::getInstance()->websocketMappingMap[name];
+
 		logger << "started reading application.xml " << std::endl;
 		Document doc;
 		parser.readDocument(defpath+"config/application.xml", doc);
@@ -328,6 +359,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							std::string scope = cntrls.at(cntn)->getAttribute("scope");
 							if(url!="" && clas!="")
 							{
+								normalizeUrl(name, url);
 								Bean bean("controller_"+clas,"",clas,scope,false,name);
 								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								ConfigurationData::getInstance()->controllerObjectMap[name][url] = clas;
@@ -346,6 +378,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 								}
 								if(from!="" && to!="")
 								{
+									normalizeUrl(name, from);
 									ConfigurationData::getInstance()->mappingObjectMap[name][from] = to;
 									logger << ("Adding Mapping for " + from + " :: " + to) << std::endl;
 								}
@@ -432,6 +465,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							StringUtil::trim(scope);
 							if(clas!="" && (type=="in" || type=="out" || type=="handle"))
 							{
+								normalizeUrl(name, url);
 								if(url=="")url="*.*";
 								ConfigurationData::getInstance()->filterObjectMap[name][url+type].push_back(clas);
 								if(clas!="")
@@ -456,12 +490,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							std::string file = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("file"));
 							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
-								if(url=="")
-									url = "/";
-								else if(url.at(0)!='/')
-									url = "/" + url;
-								url = "/" + name + "/" + url;
-								RegexUtil::replace(url,"[/]+","/");
+								normalizeUrl(name, url);
 								std::string fpath = tmplpath+file;
 								RegexUtil::replace(fpath,"[/]+","/");
 								std::string wbpi = fpath;
@@ -496,12 +525,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							std::string file = StringUtil::trimCopy(dycpppgs.at(tmpn)->getAttribute("file"));
 							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
-								if(url=="")
-									url = "/";
-								else if(url.at(0)!='/')
-									url = "/" + url;
-								url = "/" + name + "/" + url;
-								RegexUtil::replace(url,"[/]+","/");
+								normalizeUrl(name, url);
 								std::string fpath = dcppath+file;
 								RegexUtil::replace(fpath,"[/]+","/");
 								if(dcps.find(fpath)!=dcps.end())
@@ -535,12 +559,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							std::string url = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("path"));
 							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
-								if(url=="")
-									url = "/";
-								else if(url.at(0)!='/')
-									url = "/" + url;
-								url = "/" + name + "/" + url;
-								RegexUtil::replace(url,"[/]+","/");
+								normalizeUrl(name, url);
 								ConfigurationData::getInstance()->websocketMappingMap[name][url] = clas;
 								std::string scope = tmplts.at(tmpn)->getAttribute("scope");
 								if(clas!="")
@@ -565,15 +584,17 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(dvs.at(dn)->getTagName()=="dview")
 						{
+							std::string url = dvs.at(dn)->getAttribute("path");
+							normalizeUrl(name, url);
 							std::string clas = dvs.at(dn)->getAttribute("class");
-							ConfigurationData::getInstance()->viewMappingMap[name][dvs.at(dn)->getAttribute("path")] = clas;
+							ConfigurationData::getInstance()->viewMappingMap[name][url] = clas;
 							std::string scope = dvs.at(dn)->getAttribute("scope");
 							if(clas!="")
 							{
 								Bean bean("dview_"+clas,"",clas,scope,false,name);
 								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 							}
-							logger << ("Adding Dynamic View for " + (name+dvs.at(dn)->getAttribute("path")) + " :: " + clas) << std::endl;
+							logger << ("Adding Dynamic View for " + (name+url) + " :: " + clas) << std::endl;
 						}
 					}
 				}
@@ -588,12 +609,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							std::string url = ajintfs.at(dn)->getAttribute("path");
 							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
-								if(url=="")
-									url = "/";
-								else if(url.at(0)!='/')
-									url = "/" + url;
-								url = "/" + name + "/" + url;
-								RegexUtil::replace(url,"[/]+","/");
+								normalizeUrl(name, url);
 								std::string clas = ajintfs.at(dn)->getAttribute("class");
 								ConfigurationData::getInstance()->ajaxInterfaceMap[name][url] = clas;
 								pathvec.push_back(name);
@@ -630,7 +646,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									restfunction.name = resfuncs.at(cntn1)->getAttribute("name");
 									restfunction.path = resfuncs.at(cntn1)->getAttribute("path");
 									restfunction.clas = clas;
-									restfunction.meth = resfuncs.at(cntn1)->getAttribute("meth");
+									restfunction.meth = StringUtil::toUpperCopy(resfuncs.at(cntn1)->getAttribute("meth"));
 									restfunction.statusCode = resfuncs.at(cntn1)->getAttribute("statusCode");
 									if(restfunction.statusCode!="")
 									{
@@ -730,13 +746,15 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											{
 												urlmpp = "/"+name+url+"/"+restfunction.path;
 												RegexUtil::replace(urlmpp,"[/]+","/");
-												ConfigurationData::getInstance()->rstCntMap[name][urlmpp].push_back(restfunction);
+												restfunction.path = urlmpp;
+												ConfigurationData::getInstance()->rstCntMap[name][restfunction.meth+urlmpp].push_back(restfunction);
 											}
 											else
 											{
 												urlmpp = "/"+name+url+"/"+restfunction.name;
 												RegexUtil::replace(urlmpp,"[/]+","/");
-												ConfigurationData::getInstance()->rstCntMap[name][urlmpp].push_back(restfunction);
+												restfunction.path = urlmpp;
+												ConfigurationData::getInstance()->rstCntMap[name][restfunction.meth+urlmpp].push_back(restfunction);
 											}
 											if(clas!="")
 											{
@@ -790,9 +808,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 
 										Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
 										securityObject.loginProvider = provider;
-										RegexUtil::replace(url,"[/]+","/");
-										if(url.at(0)=='/' && url.length()>1)
-											url = url.substr(1);
+										normalizeUrl(name, url);
 										securityObject.loginUrl = url;
 										try {
 											securityObject.sessTimeout = CastUtil::lexical_cast<long>(sessionTimeoutV);
@@ -815,6 +831,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 										std::string path = cntrls.at(cntn)->getAttribute("path");
 										std::string role = cntrls.at(cntn)->getAttribute("role");
 										SecureAspect secureAspect;
+										normalizeUrl(name, path);
 										secureAspect.path = path;
 										secureAspect.role = role;
 										if(securityObject.addAspect(secureAspect))
@@ -956,8 +973,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					pathvec.push_back(name);
 					vecvp.push_back(usrincludes);
 					stat.push_back(false);
-					fvw = name + "/" + fvw;
-					RegexUtil::replace(fvw,"[/]+","/");
+					normalizeUrl(name, fvw);
 					ConfigurationData::getInstance()->ajaxInterfaceMap[name][fvw] = eles.at(apps)->getAttribute("class");
 					afcd.push_back(eles.at(apps)->getAttribute("class"));
 					ElementList elese = eles.at(apps)->getChildElements();
@@ -1580,9 +1596,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 
 				Security securityObject = ConfigurationData::getInstance()->securityObjectMap[appName][provName];
 				securityObject.loginProvider = "class:" + provider;
-				RegexUtil::replace(url,"[/]+","/");
-				if(url.at(0)=='/' && url.length()>1)
-					url = url.substr(1);
+				normalizeUrl(appName, url);
 				securityObject.loginUrl = url;
 				try {
 					securityObject.sessTimeout = CastUtil::lexical_cast<long>(sessionTimeoutV);
@@ -1654,15 +1668,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 						logger << ("Found more than one @Secure marker, only the last defined marker will be considered, ignoring others..") << std::endl;
 					}
 					aspect.path = wsd.location;
-					if(wsd.location.at(wsd.location.length()-1)!='/')
-					{
-						aspect.path += "/";
-					}
-					if(wsd.location.at(0)!='/')
-					{
-						aspect.path = "/" + aspect.path;
-					}
-					aspect.path += "*";
+					normalizeUrl(appName, aspect.path);
 
 					if(valid && ConfigurationData::getInstance()->securityObjectMap[appName].find(provName)
 							!=ConfigurationData::getInstance()->securityObjectMap[appName].end())
@@ -1712,6 +1718,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 					StringUtil::trim(clas);
 					if(clas!="")
 					{
+						normalizeUrl(appName, url);
 						ConfigurationData::getInstance()->controllerObjectMap[appName][url] = clas;
 						Bean bean("controller_"+clas,"",clas,scope,false,appName);
 						ConfigurationData::getInstance()->ffeadContext.addBean(bean);
@@ -1735,11 +1742,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 						SecureAspect aspect;
 						aspect.role = cs.markers["@Secure"].at(totl-1).getAttributeValue("role");
 						aspect.path = url;
-						if(url.at(url.length()-1)!='/')
-						{
-							aspect.path += "/";
-						}
-						aspect.path += "*";
+						normalizeUrl(appName, aspect.path);
 						bool valid = true;
 						if(StringUtil::trimCopy(aspect.role)=="")
 						{
@@ -1773,12 +1776,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 					}
 					if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 					{
-						if(url=="")
-							url = "/";
-						else if(url.at(0)!='/')
-							url = "/" + url;
-						url = "/" + appName + "/" + url;
-						RegexUtil::replace(url,"[/]+","/");
+						normalizeUrl(appName, url);
 						std::string clas = cs.getFullyQualifiedClassName();
 						ConfigurationData::getInstance()->ajaxInterfaceMap[appName][url] = clas;
 						pathvec.push_back(appName);
@@ -1811,6 +1809,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 					std::string scope = filters.at(var).getAttributeValue("scope");
 					if(clas!="" && (type=="in" || type=="out" || type=="handle"))
 					{
+						normalizeUrl(appName, url);
 						if(url=="")url="*.*";
 						if(clas!="")
 						{
@@ -1836,12 +1835,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 					}
 					if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 					{
-						if(url=="")
-							url = "/";
-						else if(url.at(0)!='/')
-							url = "/" + url;
-						url = "/" + appName + "/" + url;
-						RegexUtil::replace(url,"[/]+","/");
+						normalizeUrl(appName, url);
 						std::string fpath = defpath+"/tpe/"+file;
 						RegexUtil::replace(fpath,"[/]+","/");
 						std::string wbpi = fpath;
@@ -1877,12 +1871,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 					}
 					if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 					{
-						if(url=="")
-							url = "/";
-						else if(url.at(0)!='/')
-							url = "/" + url;
-						url = "/" + appName + "/" + url;
-						RegexUtil::replace(url,"[/]+","/");
+						normalizeUrl(appName, url);
 						ConfigurationData::getInstance()->websocketMappingMap[appName][url] = clas;
 						std::string scope = templates.at(var).getAttributeValue("scope");
 						if(clas!="")
@@ -1909,14 +1898,16 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 						logger << ("No path defined for Dview, skipping...") << std::endl;
 						continue;
 					}
-					ConfigurationData::getInstance()->viewMappingMap[appName][path] = clas;
+					std::string url = path;
+					normalizeUrl(appName, url);
+					ConfigurationData::getInstance()->viewMappingMap[appName][url] = clas;
 					std::string scope = dviews.at(var).getAttributeValue("scope");
 					if(clas!="")
 					{
 						Bean bean("dview_"+clas,"",clas,scope,false,appName);
 						ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 					}
-					logger << ("Adding Dynamic View for " + (appName+path) + " :: " + clas) << std::endl;
+					logger << ("Adding Dynamic View for " + (appName+url) + " :: " + clas) << std::endl;
 				}
 			}
 		}
@@ -2248,11 +2239,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 			logger << ("No role defined for Secure path, skipping...") << std::endl;
 			valid = false;
 		}
-		if(url.at(url.length()-1)!='/')
-		{
-			aspect.path += "/";
-		}
-		aspect.path += "*";
+		normalizeUrl(appName, aspect.path);
 		if(cs.markers["@Secure"].size()>1)
 		{
 			logger << ("Found more than one @Secure marker, only the last defined marker will be considered, ignoring others..") << std::endl;
@@ -2298,7 +2285,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 				}
 			}
 			restfunction.clas = clas;
-			restfunction.meth = m.getName().substr(1);
+			restfunction.meth = StringUtil::toUpperCopy(m.getName().substr(1));
 			restfunction.icontentType = m.getAttributeValue("icontentType");
 			restfunction.ocontentType = m.getAttributeValue("ocontentType");
 
@@ -2440,7 +2427,8 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 					if(urlmpp.at(urlmpp.length()-1)=='/') {
 						urlmpp = urlmpp.substr(0, urlmpp.length()-1);
 					}
-					ConfigurationData::getInstance()->rstCntMap[appName][urlmpp].push_back(restfunction);
+					restfunction.path = urlmpp;
+					ConfigurationData::getInstance()->rstCntMap[appName][restfunction.meth+urlmpp].push_back(restfunction);
 				}
 				else
 				{
@@ -2450,7 +2438,8 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 					if(urlmpp.at(urlmpp.length()-1)=='/') {
 						urlmpp = urlmpp.substr(0, urlmpp.length()-1);
 					}
-					ConfigurationData::getInstance()->rstCntMap[appName][urlmpp].push_back(restfunction);
+					restfunction.path = urlmpp;
+					ConfigurationData::getInstance()->rstCntMap[appName][restfunction.meth+urlmpp].push_back(restfunction);
 				}
 				Bean bean("restcontroller_"+clas,"",clas,scope,false,appName);
 				ConfigurationData::getInstance()->ffeadContext.addBean(bean);
@@ -2466,6 +2455,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 						valid = false;
 					}
 					aspect.path = urlmpp;
+					normalizeUrl(appName, aspect.path);
 					std::string provName = cs.pubms.at(var).markers["@Secure"].at(totl-1).getAttributeValue("providerName");
 					if(StringUtil::trimCopy(provName)=="")
 					{

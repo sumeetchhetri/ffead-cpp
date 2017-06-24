@@ -91,7 +91,7 @@ std::string MongoDBDataSourceImpl::initializeQueryParts(Query& cquery, bson_t** 
 		bson_error_t err;
 		bson_t* queryParts = bson_new_from_json((const uint8_t*)queryStrPart.c_str(), queryStrPart.length(), &err);
 		bson_iter_t i;
-		std::cout << bson_as_json(queryParts, NULL) << std::endl;
+		//std::cout << bson_as_json(queryParts, NULL) << std::endl;
 
 		bson_iter_init(&i, queryParts);
 		bool t = bson_iter_find(&i, "$query");
@@ -1399,7 +1399,7 @@ bool MongoDBDataSourceImpl::executeInsert(Query& query, void* entity) {
 
 	if(isIdFound)
 	{
-		std::cout << bson_as_json(data, NULL) << std::endl;
+		//std::cout << bson_as_json(data, NULL) << std::endl;
 		std::string collectionName = dsemp.getTableName();
 		Connection* conn = _conn();
 		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());

@@ -43,7 +43,7 @@ LoggerFactory::~LoggerFactory()
 	dupLogNames.clear();
 	std::map<std::string, LoggerConfig*>::iterator it;
 	for (it=configs.begin();it!=configs.end();++it) {
-		it->second->lock.lock();
+		it->second->lock->lock();
 		delete it->second;
 	}
 	configs.clear();
@@ -94,8 +94,7 @@ void LoggerFactory::configureDefaultLogger(const std::string& appName)
 		DateFormat df("dd/mm/yyyy hh:mi:ss");
 		config->datFormat = df;
 		config->out = &std::cout;
-		config->lock.lock();
-		config->lock.unlock();
+		config->lock = new DummyMutex;
 
 		instance->configs[lname] = config;
 		std::cout << "Configuring default logger..." << std::endl;
@@ -121,7 +120,7 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 	Document doc;
 	parser.readDocument(configFile, doc);
 	Element& root = doc.getRootElement();
-	if(root.getTagName()=="loggers" && root.getChildElements().size()>0)
+	if(isLoggingEnabled && root.getTagName()=="loggers" && root.getChildElements().size()>0)
 	{
 		std::cout << "Reading " << configFile<< " file to configure loggers..." << std::endl;
 		ElementList eles = root.getChildElements();
@@ -183,11 +182,11 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 				{
 					std::string logfilepath = logDirPath + file;
 					std::ofstream ofs;
-					if(isLoggingEnabled) {
+					//if(isLoggingEnabled) {
 						ofs.open(logfilepath.c_str());
-					} else {
-						ofs.open("/dev/null");
-					}
+					//} else {
+					//	ofs.open("/dev/null");
+					//}
 					if(ofs.is_open())
 					{
 						ofs.close();
@@ -244,7 +243,8 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 				DateFormat df(dfstr);
 				config->datFormat = df;
 
-				config->lock.lock();
+				config->lock = new Mutex;
+				config->lock->lock();
 				if(mode=="FILE")
 				{
 					std::string logfilepath = logDirPath + file;
@@ -252,18 +252,18 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 						logfilepath += "." + CastUtil::lexical_cast<std::string>(instance->vhostNumber);
 					}
 					std::ofstream* strm = new std::ofstream();
-					if(isLoggingEnabled) {
+					//if(isLoggingEnabled) {
 						strm->open(logfilepath.c_str(), std::ios::app | std::ios::binary);
-					} else {
-						strm->open("/dev/null", std::ios::app | std::ios::binary);
-					}
+					//} else {
+					//	strm->open("/dev/null", std::ios::app | std::ios::binary);
+					//}
 					config->out = strm;
 				}
 				else
 				{
 					config->out = &std::cout;
 				}
-				config->lock.unlock();
+				config->lock->unlock();
 				instance->configs[loggerName] = config;
 			}
 		}

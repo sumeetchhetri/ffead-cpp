@@ -81,12 +81,10 @@ public:
 	ServiceTask(const int& fd, const std::string& serverRootDirectory);
 	ServiceTask();
 	virtual ~ServiceTask();
-	void handleWebsockOpen(const std::string& url);
-	void handleWebsockClose(const std::string& url);
+	void handleWebsockOpen(WebSocketData* request);
+	void handleWebsockClose(WebSocketData* request);
 	void handleWebsockMessage(const std::string& url, WebSocketData* request, WebSocketData* response);
 	void handle(HttpRequest* req, HttpResponse* res);
-	void run_old();
-	HttpResponse apacheRun(HttpRequest* req);
 };
 
 #endif /* SERVICETASK_H_ */

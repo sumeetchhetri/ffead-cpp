@@ -12,6 +12,7 @@
 class ReaderSwitchInterface {
 protected:
 	virtual void switchReaders(SocketInterface* prev, SocketInterface* next)=0;
+	virtual void registerRead(SocketInterface* sif)=0;
 	friend class ServiceHandler;
 public:
 	virtual ~ReaderSwitchInterface(){}

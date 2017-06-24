@@ -270,7 +270,7 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, void*
 	return false;
 }
 
-void* Http11WebSocketHandler::readRequest(void*& context, int& pending) {
+void* Http11WebSocketHandler::readRequest(void*& context, int& pending, int& reqPos) {
 	if(read())return NULL;
 
 	void* request = NULL;
@@ -283,6 +283,8 @@ void* Http11WebSocketHandler::readRequest(void*& context, int& pending) {
 			break;
 		}
 		if(request!=NULL) {
+			startRequest();
+			reqPos = getReqPos();
 			break;
 		}
 	}
