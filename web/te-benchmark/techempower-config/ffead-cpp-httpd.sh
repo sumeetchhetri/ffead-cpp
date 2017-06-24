@@ -9,6 +9,9 @@ sudo apt-get remove -y apache2
 fw_get -o httpd-2.4.25.tar.gz http://www-us.apache.org/dist//httpd/httpd-2.4.25.tar.gz
 fw_get -o apr-1.5.2.tar.gz http://www-us.apache.org/dist//apr/apr-1.5.2.tar.gz
 fw_get -o apr-util-1.5.4.tar.gz http://www-us.apache.org/dist//apr/apr-util-1.5.4.tar.gz
+rm -rf ${IROOT}/httpd-2.4.25
+rm -rf ${IROOT}/apr-1.5.2
+rm -rf ${IROOT}/apr-util-1.5.4
 fw_untar httpd-2.4.25.tar.gz
 fw_untar apr-1.5.2.tar.gz
 fw_untar apr-util-1.5.4.tar.gz

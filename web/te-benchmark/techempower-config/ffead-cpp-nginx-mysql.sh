@@ -16,7 +16,7 @@ make build-apps
 rm -rf ${IROOT}/ffead-cpp-2.0
 cp -rf ffead-cpp-2.0-bin ${IROOT}/ffead-cpp-2.0
 cd ${IROOT}/ffead-cpp-2.0
-chmod 755 *.sh resources/*.sh
+chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh > ffead-cpp-nginx-mysql.log 2>&1
 while ! echo exit | nc localhost 8080; do sleep 5; done
 rm -f serv.ctrl
