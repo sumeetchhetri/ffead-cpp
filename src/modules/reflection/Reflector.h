@@ -47,6 +47,7 @@ class Reflector
 	static std::map<std::string, ClassInfo> _ciMap;
 	bool dlibinstantiated;
 	void* dlib;
+	bool closedlib;
 	std::vector<std::string> objectT;
 	std::vector<void*> objects;
 	void cleanUp();

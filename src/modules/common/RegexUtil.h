@@ -36,11 +36,12 @@
 
 
 class RegexUtil {
-	static std::map<std::string, regex_t> nlpatterns;
-	static std::map<std::string, regex_t> patterns;
+	static std::map<std::string, regex_t*> nlpatterns;
+	static std::map<std::string, regex_t*> patterns;
 	static bool cacheRegexes;
 	friend class ConfigurationHandler;
-	static void getRegex(regex_t& regex, const std::string& pattern, const bool& matchNewLine);
+	static bool isValidRegex(const std::string& pattern);
+	static regex_t* getRegex(const std::string& pattern, const bool& matchNewLine);
 public:
 	static std::vector<std::string> findWithGroups(const std::string& text, const std::string& pattern, const int& groupCount, const bool& matchNewLine= false);
 	static std::vector<std::string> findWithGroups(const std::string& text, const std::string& pattern, const bool& matchNewLine= false);

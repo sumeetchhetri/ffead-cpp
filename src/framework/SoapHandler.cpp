@@ -22,23 +22,15 @@
 
 #include "SoapHandler.h"
 
-void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
+void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::string ws_name)
 {
 	Logger logger = LoggerFactory::getLogger("SoapHandler");
 	std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + "/";
-	std::string acurl = req->getActUrl();
-	StringUtil::replaceFirst(acurl,"//","/");
-	if(acurl.length()>1)
-		acurl = acurl.substr(1);
-	if(acurl.find(req->getCntxt_name())!=0)
-		acurl = req->getCntxt_name() + "/" + acurl;
-	wsUrl += acurl;
-	RegexUtil::replace(acurl,"[/]+","/");
+	wsUrl += req->getCurl();
 	logger << ("WsUrl is " + wsUrl) << std::endl;
 
 	std::string xmlcnttype = CommonUtils::getMimeType(".xml");
-	std::string meth,ws_name,env;
-	ws_name = ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()][wsUrl];
+	std::string meth,env;
 	Element* soapenv = NULL;
 	logger.info("request => "+req->getContent());
 	Element* soapbody = NULL;
@@ -48,14 +40,6 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 		Document doc;
 		parser.parse(req->getContent(), doc);
 		soapenv = &(doc.getRootElement());
-		//logger << soapenv->getTagName() << "----\n" << std::flush;
-
-		/*if(soapenv->getChildElements().size()==1
-				&& StringUtil::toLowerCopy(soapenv->getChildElements().at(0)->getTagName())=="body")
-			soapbody = soapenv->getChildElements().at(0);
-		else if(soapenv->getChildElements().size()==2
-				&& StringUtil::toLowerCopy(soapenv->getChildElements().at(1)->getTagName())=="body")
-			soapbody = soapenv->getChildElements().at(1);*/
 
 		soapbody = soapenv->getElementByNameIgnoreCase("body");
 		if(soapbody == NULL) {
@@ -67,7 +51,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 		//logger << method.getTagName() << "----\n" << std::flush;
 		meth = method->getTagName();
 		std::string methodname = req->getCntxt_name() + meth + ws_name;
-		logger << methodname << "----\n" << std::flush;
+		//logger << methodname << "----\n" << std::flush;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		if(mkr!=NULL)
 		{
@@ -110,8 +94,8 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib)
 			}
 			env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
 		}
-		logger << "\n----------------------------------------------------------------------------\n" << std::flush;
-		logger << env << "\n----------------------------------------------------------------------------\n" << std::flush;
+		//logger << "\n----------------------------------------------------------------------------\n" << std::flush;
+		//logger << env << "\n----------------------------------------------------------------------------\n" << std::flush;
 	}
 	catch(const char* faultc)
 	{

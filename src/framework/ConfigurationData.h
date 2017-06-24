@@ -210,7 +210,6 @@ class ConfigurationData {
 	friend class ApplicationUtil;
 	friend class FFEADContext;
 	friend class SocketUtil;
-	static bool urlMatchesPath(const std::string& cntxtName, std::string pathurl, std::string url);
 public:
 	static bool isServingContext(const std::string& cntxtName);
 	static ConfigurationData* getInstance();
@@ -218,15 +217,10 @@ public:
 	static CoreServerProperties const& getCoreServerProperties();
 	static HttpRequest* getHttpRequest();
 	static HttpResponse* getHttpResponse();
-	static void initializeAllSingletonBeans() {
-		getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts);
-	}
-	static void clearAllSingletonBeans() {
-		getInstance()->ffeadContext.clearAllSingletonBeans(getInstance()->servingContexts);
-	}
-	static void setCoreServerProperties(CoreServerProperties coreServerProperties) {
-		getInstance()->coreServerProperties = coreServerProperties;
-	}
+	static bool urlMatchesPath(const std::string& cntxtName, std::string pathurl, std::string url);
+	static void initializeAllSingletonBeans();
+	static void clearAllSingletonBeans();
+	static void setCoreServerProperties(CoreServerProperties coreServerProperties);
 	virtual ~ConfigurationData();
 };
 

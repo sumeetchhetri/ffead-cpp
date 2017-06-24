@@ -43,9 +43,10 @@ class CorsConfig {
 	friend class ConfigurationHandler;
 public:
 	CorsConfig();
-	CorsConfig(const std::string& allwdOrigins, const std::string& allwdMethods, const std::string& allwdHeaders, const std::string& exposedHeaders, const bool& allwdCredentials, const long& maxAge);
+	CorsConfig(const std::string& allwdOrigins, const std::string& allwdMethods, const std::string& allwdHeaders,
+			const std::string& exposedHeaders, const bool& allwdCredentials, const long& maxAge);
 	virtual ~CorsConfig();
-	bool isOriginAllowed(const strVec& reqOrgLst);
+	bool isOriginAllowed(const std::string& reqOrgLst);
 	bool isMethodAllowed(const std::string& method);
 	bool isHeaderAllowed(const strVec& reqHdrLst, std::string& erheadr);
 };

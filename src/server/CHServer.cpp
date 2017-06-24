@@ -25,7 +25,7 @@
 static std::string servd, serverCntrlFileNm;
 static bool isSSLEnabled = false, isThreadprq = false, processforcekilled = false,
 		processgendone = false, isCompileEnabled = false;
-static int thrdpsiz, preForked = 5;
+static int preForked = 5;
 static std::map<int,pid_t> pds;
 static Mutex m_mutex, p_mutex;
 
@@ -722,14 +722,18 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
     std::string sslEnabled = srprps["SSL_ENAB"];
    	if(sslEnabled=="true" || sslEnabled=="TRUE")
    		isSSLEnabled = true;
+
+   	int thrdpsiz = 0, wthrdpsiz = 2;
    	std::string thrdpreq = srprps["THRD_PREQ"];
    	if(thrdpreq=="true" || thrdpreq=="TRUE")
+   	{
    		isThreadprq = true;
+   	}
    	else
 	{
 		thrdpreq = srprps["THRD_PSIZ"];
 		if(thrdpreq=="")
-			thrdpsiz = 10;
+			thrdpsiz = CommonUtils::getProcessorCount();
 		else
 		{
 			try
@@ -738,9 +742,22 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 			}
 			catch(...)
 			{
-				logger << "Invalid thread pool size defined" << std::endl;
-				thrdpsiz = 10;
+				logger << "Invalid service thread pool size defined" << std::endl;
+				thrdpsiz = CommonUtils::getProcessorCount();
 			}
+		}
+	}
+   	thrdpreq = srprps["W_THRD_PSIZ"];
+	if(thrdpreq!="")
+	{
+		try
+		{
+			wthrdpsiz = CastUtil::lexical_cast<int>(thrdpreq);
+		}
+		catch(...)
+		{
+			logger << "Invalid writer thread pool size defined" << std::endl;
+			wthrdpsiz = 2;
 		}
 	}
    	std::string compileEnabled = srprps["DEV_MODE"];
@@ -1085,7 +1102,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 									CastUtil::lexical_cast<std::string>(vhi+1) + ")";
 							serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
 									CastUtil::lexical_cast<std::string>(vhi+1);
-							serve(vhostport, vhostname, thrdpsiz, serverRootDirectory, srprps, vhi+1);
+							serve(vhostport, vhostname, thrdpsiz, wthrdpsiz, serverRootDirectory, srprps, vhi+1);
 						}
 					#else
 						std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
@@ -1100,7 +1117,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		}
 
 		try {
-			serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, vhostNum);
+			serve(port, ipaddr, thrdpsiz, wthrdpsiz, serverRootDirectory, srprps, vhostNum);
 		} catch (const char* e) {
 			logger << e << std::endl;
 		} catch (...) {
@@ -1131,7 +1148,7 @@ HttpServiceTask* CHServer::httpServiceFactoryMethod() {
 	return new ServiceTask();
 }
 
-void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber)
+void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wthrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber)
 {
 	std::string ipport;
 
@@ -1240,34 +1257,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	}
 	else*/
 	{
-		ConfigurationData->getInstance().dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-		//logger << endl <<dlib << std::endl;
-		if(ConfigurationData->getInstance().dlib==NULL)
-		{
-			logger << dlerror() << std::endl;
-			logger.info("Could not load Library");
-			exit(0);
-		}
-		else
-		{
-			logger.info("Library loaded successfully");
-			//dlclose(ConfigurationData->getInstance().dlib);
-		}
-
-		ConfigurationData->getInstance().ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
-		//logger << endl <<dlib << std::endl;
-		if(ConfigurationData->getInstance().ddlib==NULL)
-		{
-			logger << dlerror() << std::endl;
-			logger.info("Could not load dynamic Library");
-			exit(0);
-		}
-		else
-		{
-			logger.info("Dynamic Library loaded successfully");
-			//dlclose(ConfigurationData->getInstance().ddlib);
-		}
-
 		/*TODO if(!isThreadprq)
 		{
 			pool = new ThreadPool(thrdpsiz/2,thrdpsiz,true);
@@ -1286,7 +1275,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
 	logger << ("Initializing ffeadContext....") << std::endl;
-	ConfigurationData::getInstance()->ffeadContext.initializeAllSingletonBeans(ConfigurationData::getInstance()->servingContexts);
+	ConfigurationData::getInstance()->initializeAllSingletonBeans();
 	logger << ("Initializing ffeadContext done....") << std::endl;
 
 	//printf("server: waiting for connections...\n");
@@ -1301,8 +1290,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	//and all init is complete...
 	sleep(5);
 
-	Thread gsthread(&gracefullShutdown_monitor, &ipport);
-	gsthread.execute();
+	//Thread gsthread(&gracefullShutdown_monitor, &ipport);
+	//gsthread.execute();
 
 	std::string cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["CONTENT_ENCODING"]);
 	try {
@@ -1322,64 +1311,98 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	} catch (...) {
 	}
 
-	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, thrdpsiz);
+	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, thrdpsiz, wthrdpsiz);
 	handler->start();
 
 	RequestReaderHandler reader(handler, sockfd);
 	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
 	reader.start();
 
+	bool stats = false;
+
 	struct stat buffer;
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
-		Thread::sSleep(1);
-		if(CommonUtils::tsRead>0) {
-			std::cout << "Time spent on read = " << CommonUtils::tsRead << std::endl;
-		}
-		if(CommonUtils::tsWrite>0) {
-			std::cout << "Time spent on write = " << CommonUtils::tsWrite << std::endl;
-		}
-		if(CommonUtils::tsService>0) {
-			std::cout << "Time spent on service = " << CommonUtils::tsService << std::endl;
-		}
-		if(CommonUtils::tsService1>0) {
-			std::cout << "Time spent on setup request = " << CommonUtils::tsService1 << std::endl;
-		}
-		if(CommonUtils::tsService2>0) {
-			std::cout << "Time spent on security populate = " << CommonUtils::tsService2 << std::endl;
-		}
-		if(CommonUtils::tsService3>0) {
-			std::cout << "Time spent on session = " << CommonUtils::tsService3 << std::endl;
-		}
-		if(CommonUtils::tsService4>0) {
-			std::cout << "Time spent on dynlib = " << CommonUtils::tsService4 << std::endl;
-		}
-		if(CommonUtils::tsService5>0) {
-			std::cout << "Time spent on cors = " << CommonUtils::tsService5 << std::endl;
-		}
-		if(CommonUtils::tsService6>0) {
-			std::cout << "Time spent on security = " << CommonUtils::tsService6 << std::endl;
-		}
-		if(CommonUtils::tsService7>0) {
-			std::cout << "Time spent on in filter = " << CommonUtils::tsService7 << std::endl;
-		}
-		if(CommonUtils::tsService8>0) {
-			std::cout << "Time spent on controllers = " << CommonUtils::tsService8 << std::endl;
-		}
-		if(CommonUtils::tsService9>0) {
-			std::cout << "Time spent on extra flows = " << CommonUtils::tsService9 << std::endl;
-		}
-		if(CommonUtils::tsService10>0) {
-			std::cout << "Time spent on update response = " << CommonUtils::tsService10 << std::endl;
-		}
-		if(CommonUtils::tsService11>0) {
-			std::cout << "Time spent on out filter = " << CommonUtils::tsService11 << std::endl;
-		}
+		Thread::sSleep(5);
+		/*if(stats) {
+			if(CommonUtils::tsPoll>0) {
+				std::cout << "Time spent on poll = " << CommonUtils::tsPoll << std::endl;
+			}
+			if(CommonUtils::tsPoll1>0) {
+				std::cout << "Time spent on poll cleanup/checks = " << CommonUtils::tsPoll1 << std::endl;
+			}
+			if(CommonUtils::tsProcess>0) {
+				std::cout << "Time spent on poll process (+reads) = " << CommonUtils::tsProcess << std::endl;
+			}
+			if(CommonUtils::tsRead>0) {
+				std::cout << "Time spent on read = " << CommonUtils::tsRead << std::endl;
+			}
+			if(CommonUtils::tsWrite>0) {
+				std::cout << "Time spent on write = " << CommonUtils::tsWrite << std::endl;
+			}
+			if(CommonUtils::tsService>0) {
+				std::cout << "Time spent on service (+writes) = " << CommonUtils::tsService << std::endl;
+			}
+			if(CommonUtils::tsService1>0) {
+				std::cout << "Time spent on setup request = " << CommonUtils::tsService1 << std::endl;
+			}
+			if(CommonUtils::tsService2>0) {
+				std::cout << "Time spent on security populate = " << CommonUtils::tsService2 << std::endl;
+			}
+			if(CommonUtils::tsService3>0) {
+				std::cout << "Time spent on session = " << CommonUtils::tsService3 << std::endl;
+			}
+			if(CommonUtils::tsService4>0) {
+				std::cout << "Time spent on dynlib = " << CommonUtils::tsService4 << std::endl;
+			}
+			if(CommonUtils::tsService5>0) {
+				std::cout << "Time spent on cors = " << CommonUtils::tsService5 << std::endl;
+			}
+			if(CommonUtils::tsService6>0) {
+				std::cout << "Time spent on security = " << CommonUtils::tsService6 << std::endl;
+			}
+			if(CommonUtils::tsService7>0) {
+				std::cout << "Time spent on in filter = " << CommonUtils::tsService7 << std::endl;
+			}
+			if(CommonUtils::tsService8>0) {
+				std::cout << "Time spent on controllers = " << CommonUtils::tsService8 << std::endl;
+			}
+			if(CommonUtils::tsService9>0) {
+				std::cout << "Time spent on extra flows = " << CommonUtils::tsService9 << std::endl;
+			}
+			if(CommonUtils::tsService10>0) {
+				std::cout << "Time spent on update response = " << CommonUtils::tsService10 << std::endl;
+			}
+			if(CommonUtils::tsService11>0) {
+				std::cout << "Time spent on out filter = " << CommonUtils::tsService11 << std::endl;
+			}
+			if(CommonUtils::tsService12>0) {
+				std::cout << "Time spent on store attributes = " << CommonUtils::tsService12 << std::endl;
+			}
+			if(CommonUtils::cSocks>0) {
+				std::cout << "Total Sockets opened = " << CommonUtils::cSocks << std::endl;
+			}
+			if(CommonUtils::cReqs>0) {
+				std::cout << "Total number of requests = " << CommonUtils::cReqs << std::endl;
+			}
+			if(CommonUtils::cResps>0) {
+				std::cout << "Total number of responses = " << CommonUtils::cResps << std::endl;
+			}
+		}*/
 	}
 	reader.stop();
 
-	sleep(2);
+	std::string ip = ipport.substr(0, ipport.find(":"));
+	ClientInterface* client;
+	if(isSSLEnabled)
+		client = new SSLClient;
+	else
+		client = new Client;
+	client->connectionUnresolv(ip,CastUtil::lexical_cast<int>(port));
+	client->closeConnection();
+	delete client;
 
+	sleep(2);
 
 	/*SelEpolKqEvPrt selEpolKqEvPrtHandler;
 	selEpolKqEvPrtHandler.initialize(sockfd);
@@ -1571,6 +1594,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	#endif
 
 	LoggerFactory::clear();
+
+	RegexUtil::flushCache();
 
 	#ifdef OS_MINGW
 		WSACleanup();

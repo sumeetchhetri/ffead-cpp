@@ -61,6 +61,7 @@ class ConfigurationHandler {
 	static void handleRestControllerMarker(ClassStructure& cs, const std::string& appName);
 	static void handleMarkerConfigurations(std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps, std::vector<WsDetails>& wsdvec, std::vector<bool>& stat, strVec& vecvp, strVec& pathvec, std::map<std::string, std::string>& ajintpthMap, std::map<std::string, std::string>& tpes, const std::string& serverRootDirectory, strVec& afcd, std::string& ajrt, Reflection& ref);
 	static void handleDataSourceEntities(const std::string& appName, std::map<std::string, Mapping>& mappings, std::map<std::string, ClassStructure>& allclsmap);
+	static void normalizeUrl(const std::string& appName, std::string& url);
 public:
 	ConfigurationHandler();
 	virtual ~ConfigurationHandler();

@@ -23,9 +23,20 @@ public:
 	virtual ~HttpServiceTask();
 	HttpServiceTask();
 	virtual void handle(HttpRequest* request, HttpResponse* response)=0;
-	virtual void handleWebsockOpen(const std::string& url)=0;
-	virtual void handleWebsockClose(const std::string& url)=0;
+	virtual void handleWebsockOpen(WebSocketData* request)=0;
+	virtual void handleWebsockClose(WebSocketData* request)=0;
 	virtual void handleWebsockMessage(const std::string& url, WebSocketData* request, WebSocketData* response)=0;
+};
+
+class HttpWriteTask : public Task {
+	HandlerRequest* handlerRequest;
+	HttpServiceHandler* service;
+	HttpWriteTask(HandlerRequest* handlerRequest, HttpServiceHandler* service);
+	void run();
+	friend class HttpServiceHandler;
+public:
+	virtual ~HttpWriteTask();
+	HttpWriteTask();
 };
 
 typedef HttpServiceTask* (*HttpServiceTaskFactory) ();
@@ -34,9 +45,11 @@ class HttpServiceHandler : public ServiceHandler {
 	std::string cntEncoding;
 	HttpServiceTaskFactory f;
 	friend class HttpServiceTask;
-	void service(HandlerRequest* handlerRequest);
+	friend class HttpWriteTask;
+	void handleService(HandlerRequest* handlerRequest);
+	void handleWrite(HandlerRequest* handlerRequest);
 public:
-	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& poolSize);
+	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const int& wpoolSize);
 	virtual ~HttpServiceHandler();
 };
 

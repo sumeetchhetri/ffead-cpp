@@ -22,20 +22,21 @@
 
 #include "FilterHandler.h"
 
+bool FilterHandler::hasFilters(const std::string& cntxtName) {
+	return ConfigurationData::getInstance()->filterObjectMap[cntxtName].size()>0;
+}
+
 bool FilterHandler::getFilterForPath(const std::string& cntxtName, const std::string& actUrl, std::vector<std::string>& filters, const std::string& type)
 {
-	std::map<std::string, std::map<std::string, std::vector<std::string> > > filterObjectMap = ConfigurationData::getInstance()->filterObjectMap;
-	if(filterObjectMap.find(cntxtName)!=filterObjectMap.end())
-	{
-		std::map<std::string, std::vector<std::string> > filterMap = filterObjectMap[cntxtName];
-		std::map<std::string, std::vector<std::string> >::iterator it;
-		for (it=filterMap.begin();it!=filterMap.end();++it) {
-			std::string pathurl = it->first.substr(0, it->first.length()-type.length());
-			if(StringUtil::endsWith(it->first, type) && ConfigurationData::urlMatchesPath(cntxtName, pathurl, actUrl))
-			{
-				filters = it->second;
-				return true;
-			}
+	std::map<std::string, std::map<std::string, std::vector<std::string> > >& filterObjectMap = ConfigurationData::getInstance()->filterObjectMap;
+	std::map<std::string, std::vector<std::string> > filterMap = filterObjectMap[cntxtName];
+	std::map<std::string, std::vector<std::string> >::iterator it;
+	for (it=filterMap.begin();it!=filterMap.end();++it) {
+		std::string pathurl = it->first.substr(0, it->first.length()-type.length());
+		if(StringUtil::endsWith(it->first, type) && ConfigurationData::urlMatchesPath(cntxtName, pathurl, actUrl))
+		{
+			filters = it->second;
+			return true;
 		}
 	}
 	return false;
@@ -43,15 +44,9 @@ bool FilterHandler::getFilterForPath(const std::string& cntxtName, const std::st
 
 void FilterHandler::handleIn(HttpRequest* req, const std::string& ext, Reflector& reflector)
 {
-	std::string acurl = req->getActUrl();
-	RegexUtil::replace(acurl,"[/]+","/");
-	if(acurl.find("/"+req->getCntxt_name())!=0)
-		acurl = "/" + req->getCntxt_name() + "/" + acurl;
-	RegexUtil::replace(acurl,"[/]+","/");
-
 	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	std::vector<std::string> filters;
-	if(getFilterForPath(req->getCntxt_name(), acurl, filters, "in"))
+	if(getFilterForPath(req->getCntxt_name(), req->getCurl(), filters, "in"))
 	{
 		for (int var = 0; var < (int)filters.size(); ++var)
 		{
@@ -66,7 +61,7 @@ void FilterHandler::handleIn(HttpRequest* req, const std::string& ext, Reflector
 			{
 				valus.push_back(req);
 				reflector.invokeMethod<void*>(_temp,meth,valus);
-				logger << "Input Filter called" << std::endl;
+				//logger << "Input Filter called" << std::endl;
 			}
 			ConfigurationData::getInstance()->ffeadContext.release("filter_"+claz, req->getCntxt_name());
 		}
@@ -76,16 +71,10 @@ void FilterHandler::handleIn(HttpRequest* req, const std::string& ext, Reflector
 
 bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
 {
-	std::string acurl = req->getActUrl();
-	RegexUtil::replace(acurl,"[/]+","/");
-	if(acurl.find("/"+req->getCntxt_name())!=0)
-		acurl = "/" + req->getCntxt_name() + "/" + acurl;
-	RegexUtil::replace(acurl,"[/]+","/");
-
 	bool continue_proc_request = true;
 	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	std::vector<std::string> filters;
-	if(getFilterForPath(req->getCntxt_name(), acurl, filters, "handle"))
+	if(getFilterForPath(req->getCntxt_name(), req->getCurl(), filters, "handle"))
 	{
 		for (int var = 0; var < (int)filters.size(); ++var)
 		{
@@ -102,7 +91,7 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const std::strin
 				valus.push_back(req);
 				valus.push_back(res);
 				continue_proc_request = reflector.invokeMethod<bool>(_temp,meth,valus);
-				logger << "Handler Filter called" << std::endl;
+				//logger << "Handler Filter called" << std::endl;
 			}
 			ConfigurationData::getInstance()->ffeadContext.release("filter_"+claz, req->getCntxt_name());
 		}
@@ -112,15 +101,9 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const std::strin
 
 void FilterHandler::handleOut(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
 {
-	std::string acurl = req->getActUrl();
-	RegexUtil::replace(acurl,"[/]+","/");
-	if(acurl.find("/"+req->getCntxt_name())!=0)
-		acurl = "/" + req->getCntxt_name() + "/" + acurl;
-	RegexUtil::replace(acurl,"[/]+","/");
-
 	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	std::vector<std::string> filters;
-	if(getFilterForPath(req->getCntxt_name(), acurl, filters, "out"))
+	if(getFilterForPath(req->getCntxt_name(), req->getCurl(), filters, "out"))
 	{
 		for (int var = 0; var < (int)filters.size(); ++var)
 		{
@@ -135,7 +118,7 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse* res, const std::st
 			{
 				valus.push_back(res);
 				reflector.invokeMethod<void*>(_temp,meth,valus);
-				logger << "Output Filter called" << std::endl;
+				//logger << "Output Filter called" << std::endl;
 			}
 			ConfigurationData::getInstance()->ffeadContext.release("filter_"+claz, req->getCntxt_name());
 		}

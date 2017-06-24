@@ -32,6 +32,7 @@ class ThreadPool {
 	int maxThreads;
 	int lowp;
 	int highp;
+	bool allowScheduledTasks;
 	std::vector<PoolThread*> *tpool;
 	TaskPool *wpool;
 	bool prioritypooling;
@@ -42,7 +43,7 @@ class ThreadPool {
 	void initPointers();
 public:
 	ThreadPool(const int&, const int&, const int&);
-	ThreadPool(const int&);
+	ThreadPool(const int&, const bool& allowScheduledTasks = false);
 	ThreadPool();
 	void start();
 	void init(const int&);

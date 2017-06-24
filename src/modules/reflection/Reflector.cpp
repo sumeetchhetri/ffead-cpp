@@ -20,6 +20,7 @@ ClassInfo Reflector::nullclass;
 
 Reflector::Reflector()
 {
+	closedlib = true;
 	dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(dlib == NULL)
 	{
@@ -35,13 +36,14 @@ Reflector::Reflector(void* dlib)
 	{
 		throw "Cannot load reflection shared library";
 	}
+	closedlib = false;
 	this->dlib = dlib;
 	dlibinstantiated = false;
 }
 
 Reflector::~Reflector()
 {
-	if(dlibinstantiated)
+	if(dlibinstantiated && closedlib)
 	{
 		dlclose(dlib);
 	}

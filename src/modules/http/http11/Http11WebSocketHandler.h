@@ -46,7 +46,7 @@ public:
 	std::string getUrl();
 	std::string getProtocol(void* context);
 	int getTimeout();
-	void* readRequest(void*& context, int& pending);
+	void* readRequest(void*& context, int& pending, int& reqPos);
 	bool writeResponse(void* req, void* res, void* context);
 	//int doIt(const Reflector& reflector, void* _temp, const Method& method, const std::string& cntxtName);
 	bool writeData(const WebSocketData& data);

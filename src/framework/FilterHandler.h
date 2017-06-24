@@ -36,6 +36,7 @@ public:
 	static void handleIn(HttpRequest* req, const std::string& ext, Reflector& reflector);
 	static bool handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector);
 	static void handleOut(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector);
+	static bool hasFilters(const std::string& cntxtName);
 };
 
 #endif /* FILTERHANDLER_H_ */

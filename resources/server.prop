@@ -25,8 +25,11 @@ NUM_PROC=1
 #The type of Threading strategy
 THRD_PREQ=false
 
-#The Thread Pool size for Pooled implementations
-THRD_PSIZ=10
+#The Thread Pool size for Service pool
+THRD_PSIZ=6
+
+#The Thread Pool size for Writer pool
+W_THRD_PSIZ=2
 
 #Where to store the session state Browser cookies/Server side file
 SESS_STATE=server

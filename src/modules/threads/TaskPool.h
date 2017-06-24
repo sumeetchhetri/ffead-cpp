@@ -48,9 +48,10 @@ class TaskPool {
 	friend class ThreadPool;
 	friend class PoolThread;
 	bool prioritybased;
+	bool allowScheduledTasks;
 	std::atomic<bool> runFlag, complete, thrdStarted;
 public:
-	TaskPool(bool prioritybased);
+	TaskPool(const bool& prioritybased, const bool& allowScheduledTasks);
 	~TaskPool();
 	void addTask(Task &task);
 	void addTask(Task *task);

@@ -49,12 +49,14 @@ class HttpRequest {
 	std::string scheme;
 	std::string host;
 	std::string url;
+	std::string curl;
 	std::string ext;
 	std::string cntxt_root;
 	std::string cntxt_home;
 	std::string cntxt_name;
 	std::string httpVersion;
 	float httpVers;
+	bool corsRequest;
 	std::string method;
 	std::string content;
 	std::string content_boundary;
@@ -95,6 +97,7 @@ class HttpRequest {
 	void setQueryParams(const RMap& queryParams);
 	void setAuthinfo(const std::map<std::string,std::string>&);
 	void normalizeUrl();
+    void setCurl(std::string url);
 	void setActUrl(const std::string&);
 	void setCntxt_name(const std::string&);
 	void setCntxt_root(const std::string&);
@@ -129,10 +132,12 @@ public:
 	HttpRequest(const std::string&);
 	void updateContent();
 	virtual ~HttpRequest();
+	bool isCorsRequest();
     void setUrl(std::string url);
     HttpSession* getSession();
     std::string getMethod() const;
 	std::string getUrl() const;
+	std::string getCurl() const;
 	std::string getHttpVersion() const;
 	float getHttpVers() const;
 	std::string getContent_boundary() const;

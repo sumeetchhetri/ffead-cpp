@@ -194,7 +194,7 @@ int ScriptHandler::pcloseRWE(const int& pid, int *rwepipe)
 bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::string, std::string>& handoffs, const std::string& ext)
 {
 	bool skipit = false;
-	std::string referer = req->getHeader(HttpRequest::Referer);
+	/*std::string referer = req->getHeader(HttpRequest::Referer);
 	if(referer.find("http://")!=std::string::npos)
 	{
 		std::string appl = referer.substr(referer.find("http://")+7);
@@ -206,7 +206,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 
 			}
 		}
-	}
+	}*/
 	if(ext==".php")
 	{
 		skipit = true;

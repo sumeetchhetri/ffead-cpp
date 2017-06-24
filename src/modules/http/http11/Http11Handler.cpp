@@ -7,9 +7,9 @@
 
 #include "Http11Handler.h"
 
-void* Http11Handler::readRequest(void*& context, int& pending) {
-	Timer t;
-	t.start();
+void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
+	//Timer t;
+	//t.start();
 	if(read())return NULL;
 	if(!isHeadersDone && buffer.find("\r\n\r\n")!=std::string::npos)
 	{
@@ -90,15 +90,17 @@ void* Http11Handler::readRequest(void*& context, int& pending) {
 
 	if(!isTeRequest && bytesToRead==0 && request!=NULL)
 	{
+		startRequest();
+		reqPos = getReqPos();
 		isHeadersDone = false;
 		void* temp = request;
 		request = NULL;
-		t.end();
-		CommonUtils::tsRead += t.timerMilliSeconds();
+		//t.end();
+		//CommonUtils::tsRead += t.timerMilliSeconds();
 		return temp;
 	}
-	t.end();
-	CommonUtils::tsRead += t.timerMilliSeconds();
+	//t.end();
+	//CommonUtils::tsRead += t.timerMilliSeconds();
 	return NULL;
 }
 
@@ -130,8 +132,8 @@ std::string Http11Handler::getProtocol(void* context) {
 }
 
 bool Http11Handler::writeResponse(void* req, void* res, void* context) {
-	Timer t;
-	t.start();
+	//Timer t;
+	//t.start();
 
 	HttpRequest* request = (HttpRequest*)req;
 	HttpResponse* response = (HttpResponse*)res;
@@ -141,8 +143,8 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 			delete request;
 		}
 		delete response;
-		t.end();
-		CommonUtils::tsWrite += t.timerMilliSeconds();
+		//t.end();
+		//CommonUtils::tsWrite += t.timerMilliSeconds();
 		return true;
 	}
 
@@ -163,22 +165,28 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 		}
 	}
 
-	std::string data = response->generateOnlyHeaderResponse(request);
-	if(!write(data)) {
-		bool isFirst = true;
-		while(response->hasContent && (data = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
-			isFirst = false;
-			if(write(data)) {
-				break;
+	if(!response->isContentRemains()) {
+		std::string data = response->generateResponse(request);
+		write(data);
+	} else {
+		std::string data = response->generateResponse(request, false);
+		if(!write(data)) {
+			bool isFirst = true;
+			while(response->hasContent && (data = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
+				isFirst = false;
+				if(write(data)) {
+					break;
+				}
 			}
 		}
 	}
+
 	if(request!=NULL) {
 		delete request;
 	}
 	delete response;
-	t.end();
-	CommonUtils::tsWrite += t.timerMilliSeconds();
+	//t.end();
+	//CommonUtils::tsWrite += t.timerMilliSeconds();
 	return true;
 }
 void Http11Handler::onOpen(){}

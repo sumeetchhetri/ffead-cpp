@@ -37,6 +37,7 @@ Logger::Logger(LoggerConfig *config, const std::string& className)
 	this->className = className;
 	this->config = NULL;
 	this->level = LEVEL_INFO;
+	this->oldLevel = level;
 	if(config->level!=LEVEL_OFF) {
 		this->config = config;
 	}
@@ -52,6 +53,7 @@ Logger::Logger(LoggerConfig *config, const std::string& className, const std::st
 	this->className = className;
 	this->config = NULL;
 	this->level = level;
+	this->oldLevel = level;
 	if(config->level!=LEVEL_OFF) {
 		this->config = config;
 	}
@@ -74,10 +76,10 @@ void Logger::write(const std::string& msg, const std::string& mod, const bool& n
 	std::string te = config->datFormat.format(dat);
 	std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<std::string>(config->vhostNumber)):"");
 	std::string fmsg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :"+msg+(newline?"\n":"");
-	config->lock.lock();
+	config->lock->lock();
 	config->out->write(fmsg.c_str(),fmsg.length());
 	*config->out << std::flush;
-	config->lock.unlock();
+	config->lock->unlock();
 }
 
 void Logger::write(std::ostream& (*pf) (std::ostream&), const std::string& mod)
@@ -87,10 +89,10 @@ void Logger::write(std::ostream& (*pf) (std::ostream&), const std::string& mod)
 	std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<std::string>(config->vhostNumber)):"");
 	std::string te = config->datFormat.format(dat);
 	std::string msg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :";
-	config->lock.lock();
+	config->lock->lock();
 	*config->out << msg;
 	*config->out << pf;
-	config->lock.unlock();
+	config->lock->unlock();
 }
 
 void Logger::fatal(const std::string& msg)
@@ -150,8 +152,7 @@ void Logger::trace(const std::string& msg)
 Logger& operator<< (Logger& logger, std::ostream& (*pf) (std::ostream&))
 {
 	logger.write(pf, logger.level);
-	if(pf == static_cast <std::ostream & (*)(std::ostream &)> (std::endl) ||
-			pf == static_cast <std::ostream & (*)(std::ostream &)> (std::flush)) {
+	if(pf == static_cast <std::ostream & (*)(std::ostream &)> (std::endl) || pf == static_cast <std::ostream & (*)(std::ostream &)> (std::flush)) {
 		logger.level = Logger::LEVEL_INFO;
 	}
 	return logger;
@@ -190,5 +191,11 @@ Logger& Logger::d()
 Logger& Logger::t()
 {
 	level = LEVEL_TRACE;
+	return *this;
+}
+
+Logger& Logger::o()
+{
+	level = oldLevel;
 	return *this;
 }

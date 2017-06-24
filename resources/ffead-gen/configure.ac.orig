@@ -833,6 +833,12 @@ AC_CHECK_HEADER([sys/poll.h],
 AC_CHECK_HEADER([sys/select.h],
                      [AC_DEFINE(USE_SELECT, [1], [Define to 1 if you have <sys/select.h>.])],
                      [AC_DEFINE(USE_SELECT, [0], [select support not found])])
+AC_CHECK_HEADER([atomic.h],
+                     [AC_DEFINE(USE_ATOMIC_H, [1], [Define to 1 if you have <atomic.h>.])],
+                     [AC_DEFINE(USE_ATOMIC_H, [0], [atomic support not found])])
+AC_CHECK_HEADER([cstdatomic.h],
+                     [AC_DEFINE(USE_CSTDATOMIC_H, [1], [Define to 1 if you have <cstdatomic.h>.])],
+                     [AC_DEFINE(USE_CSTDATOMIC_H, [0], [cstdatomic support not found])])
 
 AC_CHECK_HEADER([openssl/ssl.h],,[AC_MSG_ERROR([ssl header not found])])
 
@@ -924,6 +930,11 @@ if test "x$generate_nginx_module" = "xyes"; then
 else
         AC_SUBST(GENERATE_NGINXMOD,[ ])
 fi
+
+AC_SUBST(BUILD_CPPFLAGS,[$CPPFLAGS])
+AC_SUBST(BUILD_AM_CXXFLAGS,[$AM_CXXFLAGS])
+AC_SUBST(BUILD_LDFLAGS,[$LDFLAGS])
+AC_SUBST(BUILD_DEBUG,[$support_debug])
 
 AC_CONFIG_FILES([Makefile
 				src/autotools/Makefile

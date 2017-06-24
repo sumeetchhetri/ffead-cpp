@@ -30,12 +30,18 @@
 class LoggerConfig
 {
 	std::string name, mode, level, file, logdirtype, pattern;
-	Mutex lock;
+	Mutex* lock;
 	std::ostream* out;
 	DateFormat datFormat;
 	int vhostNumber;
 	friend class LoggerFactory;
 	friend class Logger;
+public:
+	~LoggerConfig() {
+		if(lock!=NULL) {
+			delete lock;
+		}
+	}
 };
 
 class Logger {
@@ -61,6 +67,7 @@ public:
 	Logger& i();
 	Logger& d();
 	Logger& t();
+	Logger& o();
 	template <typename T>
 	friend Logger& operator<< (Logger& logger, const T& msg)
 	{
@@ -75,7 +82,7 @@ private:
 	friend class LoggerFactory;
 	Logger(LoggerConfig *config, const std::string& className);
 	Logger(LoggerConfig *config, const std::string& className, const std::string& level);
-	std::string className, level;
+	std::string className, level, oldLevel;
 	LoggerConfig *config;
 	void write(const std::string& msg, const std::string& mod, const bool& newline);
 	template <typename T>
@@ -86,7 +93,7 @@ private:
 		std::string te = config->datFormat.format(dat);
 		std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<std::string>(config->vhostNumber)):"");
 		std::string msg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :";
-		config->lock.lock();
+		config->lock->lock();
 		*config->out << msg << tmsg;
 		if(newline)
 		{
@@ -96,7 +103,7 @@ private:
 		{
 			*config->out << std::flush;
 		}
-		config->lock.unlock();
+		config->lock->unlock();
 	}
 	void write(std::ostream& (*pf) (std::ostream&), const std::string& mod);
 };

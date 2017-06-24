@@ -133,6 +133,14 @@ std::string WebSocketData::getData() const {
 	return data;
 }
 
+std::string WebSocketData::getUrl() const {
+	return url;
+}
+
+std::string WebSocketData::getCntxt_name() const {
+	return cnxtName;
+}
+
 void WebSocketData::updateContent(const uint32_t& techunkSiz) {
 	unsigned int totlen = data.length();
 	if(techunkSiz>0 && techunkSiz<totlen)

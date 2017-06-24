@@ -35,6 +35,7 @@ class SecurityHandler {
 	static std::string isLoginPage(const std::string& cntxtName, const std::string& actUrl);
 	static std::string validateSecurePath(const std::string& cntxtName, const std::string& actUrl, const std::string& username);
 	static void populateAuthDetails(HttpRequest* req);
+	static bool hasSecurity(const std::string& cntxtName);
 	friend class ServiceTask;
 public:
 	SecurityHandler();

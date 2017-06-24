@@ -22,7 +22,16 @@
 #include "ThreadLocal.h"
 #include "PropFileReader.h"
 #include "RegexUtil.h"
-
+#if defined(OS_MINGW)
+#include <windows.h>
+#elif defined(OS_DARWIN) || defined(OS_BSD)
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#elif defined(OS_HPUX)
+#include <sys/mpctl.h>
+#else
+#include <unistd.h>
+#endif
 
 
 class CommonUtils {
@@ -31,6 +40,7 @@ class CommonUtils {
 	static std::map<std::string, std::string> mimeTypes;
 	static std::map<std::string, std::string> locales;
 public:
+	static int getProcessorCount();
 	static unsigned long long charArrayToULongLong(const std::string& l, int ind);
 	static unsigned long long charArrayToULongLong(const std::string& l);
 	static std::string ulonglongTocharArray(const unsigned long long& lon, const int& provind= -1);
@@ -52,6 +62,8 @@ public:
 	static std::vector<std::string> getFiles(const std::string& cwd, const std::string& suffix, const bool& isAbs = true);
 	static void listFiles(std::vector<std::string>& files, const std::string& cwd, const std::string& suffix, const bool& isAbs = true);
 	static long long tsPoll;
+	static long long tsPoll1;
+	static long long tsProcess;
 	static long long tsRead;
 	static long long tsService;
 	static long long tsService1;
@@ -65,7 +77,11 @@ public:
 	static long long tsService9;
 	static long long tsService10;
 	static long long tsService11;
+	static long long tsService12;
 	static long long tsWrite;
+	static long long cSocks;
+	static long long cReqs;
+	static long long cResps;
 };
 
 #endif /* COMMONUTILS_H_ */

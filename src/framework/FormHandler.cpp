@@ -22,12 +22,10 @@
 
 #include "FormHandler.h"
 
-bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflector)
+bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflector, Element* ele)
 {
-	std::map<std::string, Element>& formMap = ConfigurationData::getInstance()->fviewFormMap[req->getCntxt_name()];
 	Logger logger = LoggerFactory::getLogger("FormHandler");
 	Reflector ref;
-	Element* ele = &(formMap[req->getFile()]);
 	//logger << ele->getTagName() << std::endl;
 	//logger << ele->render() << std::endl;
 	ClassInfo binfo = ref.getClassInfo(ele->getAttribute("bean"), req->getCntxt_name());
@@ -86,12 +84,12 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 	Method meth = srv.getMethod("onSubmit", argus);
 	if(meth.getMethodName()!="")
 	{
-		logger << ("Fetching Formcontroller for " + ele->getAttribute("bean")) << std::endl;
+		//logger << ("Fetching Formcontroller for " + ele->getAttribute("bean")) << std::endl;
 		void *_beaninst = JSONSerialize::unSerializeUnknown(json, ele->getAttribute("bean"), req->getCntxt_name());
 		valus.push_back(_beaninst);
 		valus.push_back(res);
 		reflector.invokeMethod<void*>(_temp,meth,valus);
-		logger << "Successfully called Formcontroller" << std::endl;
+		//logger << "Successfully called Formcontroller" << std::endl;
 		ConfigurationData::getInstance()->ffeadContext.release("form_"+ele->getAttribute("controller"), req->getCntxt_name());
 		return true;
 	}

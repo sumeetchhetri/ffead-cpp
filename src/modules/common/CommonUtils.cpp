@@ -12,6 +12,8 @@ std::map<std::string, std::string> CommonUtils::mimeTypes;
 std::map<std::string, std::string> CommonUtils::locales;
 std::string CommonUtils::BLANK = "";
 long long CommonUtils::tsPoll = 0;
+long long CommonUtils::tsPoll1 = 0;
+long long CommonUtils::tsProcess = 0;
 long long CommonUtils::tsRead = 0;
 long long CommonUtils::tsService = 0;
 long long CommonUtils::tsWrite = 0;
@@ -26,6 +28,38 @@ long long CommonUtils::tsService8 = 0;
 long long CommonUtils::tsService9 = 0;
 long long CommonUtils::tsService10 = 0;
 long long CommonUtils::tsService11 = 0;
+long long CommonUtils::tsService12 = 0;
+long long CommonUtils::cSocks = 0;
+long long CommonUtils::cReqs = 0;
+long long CommonUtils::cResps = 0;
+
+int CommonUtils::getProcessorCount() {
+#if defined(OS_MINGW)
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    return sysinfo.dwNumberOfProcessors;
+#elif defined(OS_DARWIN) || defined(OS_BSD)
+    int nm[2];
+    size_t len = 4;
+    uint32_t count;
+
+    nm[0] = CTL_HW; nm[1] = HW_AVAILCPU;
+    sysctl(nm, 2, &count, &len, NULL, 0);
+
+    if(count < 1) {
+        nm[1] = HW_NCPU;
+        sysctl(nm, 2, &count, &len, NULL, 0);
+        if(count < 1) { count = 1; }
+    }
+    return count;
+#elif defined(OS_HPUX)
+    return  mpctl(MPC_GETNUMSPUS, NULL, NULL);
+#elif defined(OS_IRIX)
+    return sysconf(_SC_NPROC_ONLN);
+#else
+    return sysconf(_SC_NPROCESSORS_ONLN);
+#endif
+}
 
 void CommonUtils::setAppName(const std::string& appName)
 {

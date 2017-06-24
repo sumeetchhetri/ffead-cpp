@@ -2,7 +2,7 @@
   "framework": "ffead-cpp",
   "tests": [{
     "default": {
-      "setup_file": "setup",
+      "setup_file": "setup-mongo",
       "json_url": "/te-benchmark/json",
       "plaintext_url": "/te-benchmark/plaintext",
       "db_url": "/te-benchmark/db",
@@ -70,8 +70,8 @@
       "notes": "",
       "versus": ""
     },
-    "apache2-mongo": {
-      "setup_file": "setup-apache2",
+    "apache-mongo": {
+      "setup_file": "setup-apache-mongo",
       "json_url": "/te-benchmark/json",
       "plaintext_url": "/te-benchmark/plaintext",
       "db_url": "/te-benchmark/db",
@@ -85,16 +85,16 @@
       "framework": "ffead-cpp",
       "language": "C++",
       "orm": "Full",
-      "platform": "ffead-cpp-apache2",
-      "webserver": "apache2",
+      "platform": "ffead-cpp-apache",
+      "webserver": "apache",
       "os": "Linux",
       "database_os": "Linux",
-      "display_name": "ffead-cpp-apache2-mongo",
+      "display_name": "ffead-cpp-apache-mongo",
       "notes": "",
       "versus": ""
     },
-	"apache2-mysql": {
-      "setup_file": "setup-apache2-mysql",
+	"apache-mysql": {
+      "setup_file": "setup-apache-mysql",
       "json_url": "/te-benchmark/json",
       "plaintext_url": "/te-benchmark/plaintext",
       "db_url": "/te-benchmark/db",
@@ -108,16 +108,16 @@
       "framework": "ffead-cpp",
       "language": "C++",
       "orm": "Full",
-      "platform": "ffead-cpp-apache2",
-      "webserver": "apache2",
+      "platform": "ffead-cpp-apache",
+      "webserver": "apache",
       "os": "Linux",
       "database_os": "Linux",
-      "display_name": "ffead-cpp-apache2-mysql",
+      "display_name": "ffead-cpp-apache-mysql",
       "notes": "",
       "versus": ""
     },
-	"apache2-postgresql": {
-      "setup_file": "setup-apache2-postgresql",
+	"apache-postgresql": {
+      "setup_file": "setup-apache-postgresql",
       "json_url": "/te-benchmark/json",
       "plaintext_url": "/te-benchmark/plaintext",
       "db_url": "/te-benchmark/db",
@@ -131,16 +131,16 @@
       "framework": "ffead-cpp",
       "language": "C++",
       "orm": "Full",
-      "platform": "ffead-cpp-apache2",
-      "webserver": "apache2",
+      "platform": "ffead-cpp-apache",
+      "webserver": "apache",
       "os": "Linux",
       "database_os": "Linux",
-      "display_name": "ffead-cpp-apache2-postgresql",
+      "display_name": "ffead-cpp-apache-postgresql",
       "notes": "",
       "versus": ""
     },
     "nginx-mongo": {
-      "setup_file": "setup-nginx",
+      "setup_file": "setup-nginx-mongo",
       "json_url": "/te-benchmark/json",
       "plaintext_url": "/te-benchmark/plaintext",
       "db_url": "/te-benchmark/db",

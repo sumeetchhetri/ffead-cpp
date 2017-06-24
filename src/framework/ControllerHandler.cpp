@@ -25,16 +25,13 @@
 bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const std::string& actUrl, std::string& className)
 {
 	std::map<std::string, std::map<std::string, std::string> >& controllerObjectMap = ConfigurationData::getInstance()->controllerObjectMap;
-	if(controllerObjectMap.find(cntxtName)!=controllerObjectMap.end())
-	{
-		std::map<std::string, std::string>& controllerMap = controllerObjectMap[cntxtName];
-		std::map<std::string, std::string>::iterator it;
-		for (it=controllerMap.begin();it!=controllerMap.end();++it) {
-			if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
-			{
-				className = it->second;
-				return true;
-			}
+	std::map<std::string, std::string>& controllerMap = controllerObjectMap[cntxtName];
+	std::map<std::string, std::string>::iterator it;
+	for (it=controllerMap.begin();it!=controllerMap.end();++it) {
+		if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
+		{
+			className = it->second;
+			return true;
 		}
 	}
 	return false;
@@ -43,35 +40,26 @@ bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const
 bool ControllerHandler::getMappingForPath(const std::string& cntxtName, const std::string& actUrl, std::string& to)
 {
 	std::map<std::string, std::map<std::string, std::string> >& mappingObjectMap = ConfigurationData::getInstance()->mappingObjectMap;
-	if(mappingObjectMap.find(cntxtName)!=mappingObjectMap.end())
-	{
-		std::map<std::string, std::string>& mappingMap = mappingObjectMap[cntxtName];
-		std::map<std::string, std::string>::iterator it;
-		for (it=mappingMap.begin();it!=mappingMap.end();++it) {
-			if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
-			{
-				to = it->second;
-				return true;
-			}
+	std::map<std::string, std::string>& mappingMap = mappingObjectMap[cntxtName];
+	std::map<std::string, std::string>::iterator it;
+	for (it=mappingMap.begin();it!=mappingMap.end();++it) {
+		if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
+		{
+			to = it->second;
+			return true;
 		}
 	}
 	return false;
 }
 
-bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::string& ext, const std::string& pthwofile, Reflector& reflector)
+bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
 {
-	std::string acurl = req->getActUrl();
-	RegexUtil::replace(acurl,"[/]+","/");
-	if(acurl.find("/"+req->getCntxt_name())!=0)
-		acurl = "/" + req->getCntxt_name() + "/" + acurl;
-	RegexUtil::replace(acurl,"[/]+","/");
-
 	Logger logger = LoggerFactory::getLogger("ControllerHandler");
 	bool isContrl = false;
 	std::string controller;
 	std::string to;
-	std::string extwodot = ext.substr(1);
-	if(getControllerForPath(req->getCntxt_name(), acurl, controller))
+	std::string extwodot = ext!=""?ext.substr(1):"";
+	if(getControllerForPath(req->getCntxt_name(), req->getCurl(), controller))
 	{
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("controller_"+controller, req->getCntxt_name());
 		args argus;
@@ -84,11 +72,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		{
 			 valus.push_back(req);
 			 valus.push_back(res);
-			 logger << ("Controller " + controller + " called") << std::endl;
+			 //logger << ("Controller " + controller + " called") << std::endl;
 			 bool isDone = reflector.invokeMethod<bool>(_temp,meth,valus);
 			 if(isDone && res->getStatusCode()!="")
 				 isContrl = true;
-			 logger << "Controller call complete" << std::endl;
+			 //logger << "Controller call complete" << std::endl;
 		}
 		else
 		{
@@ -98,9 +86,9 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		}
 		ConfigurationData::getInstance()->ffeadContext.release("controller_"+controller, req->getCntxt_name());
 	}
-	else if(getMappingForPath(req->getCntxt_name(), acurl, to))
+	else if(getMappingForPath(req->getCntxt_name(), req->getCurl(), to))
 	{
-		if(!StringUtil::endsWith(acurl, "/"+req->getFile()))
+		if(!StringUtil::endsWith(req->getCurl(), "/"+req->getFile()))
 		{
 			req->setUrl(to);
 			req->setActUrl(to+"/"+req->getFile());
@@ -124,110 +112,101 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 	}
 	else if(ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->rstCntMap.end())
 	{
-		resFuncMap rstCntMap = ConfigurationData::getInstance()->rstCntMap[req->getCntxt_name()];
+		resFuncMap& rstCntMap = ConfigurationData::getInstance()->rstCntMap[req->getCntxt_name()];
 		resFuncMap::iterator it;
 		RestFunction rft;
 		bool flag = false;
 		int prsiz = 0;
-		std::vector<std::string> valss;
 		std::map<std::string, std::string> mapOfValues;
-		//logger << pthwofile << std::endl;
-		for (it=rstCntMap.begin();it!=rstCntMap.end();it++)
+		std::string hmeth = StringUtil::toUpperCopy(req->getMethod());
+		std::string rkey = hmeth+req->getCurl();
+		if(rstCntMap.find(rkey)!=rstCntMap.end()) {
+			rft = rstCntMap[rkey][0];
+			flag = true;
+			prsiz = rft.params.size();
+		}
+		if(!flag)
 		{
-			valss.clear();
-			//logger << it->first << std::endl;
-			std::vector<RestFunction> fts = it->second;
-			for(int rftc=0;rftc<fts.size();rftc++)
+			for (it=rstCntMap.begin();it!=rstCntMap.end();it++)
 			{
-				RestFunction ft = fts.at(rftc);
-				prsiz = ft.params.size();
-				std::string pthwofiletemp(acurl);
-
-				std::string baseUrl(it->first);
-				strVec resturlparts;
-				StringUtil::split(resturlparts, baseUrl, "/");
-
-				strVec urlparts;
-				StringUtil::split(urlparts, pthwofiletemp, "/");
-
-				if(urlparts.size()!=resturlparts.size())
+				std::vector<RestFunction> fts = it->second;
+				for(int rftc=0;rftc<fts.size();rftc++)
 				{
-					flag = false;
-					//break;
-				}
-				else
-				{
-					flag = true;
-				}
-				if(flag)
-				{
-					bool fflag = true;
-					for (int var = 0; var < (int)resturlparts.size(); var++)
+					RestFunction ft = fts.at(rftc);
+					prsiz = ft.params.size();
+
+					std::string baseUrl(it->first);
+					strVec resturlparts;
+					StringUtil::split(resturlparts, baseUrl, "/");
+
+					if(req->getActUrlParts().size()!=resturlparts.size()-1)
 					{
-						//logger << "resturlparts.at(var) = " << resturlparts.at(var) << std::endl;
-						if(resturlparts.at(var).find("{")!=std::string::npos && resturlparts.at(var).find("}")!=std::string::npos
-								&& resturlparts.at(var).length()>2)
-						{
-							std::string paramname = resturlparts.at(var);
-							std::string pref, suff;
-							int st = paramname.find("{")+1;
-							pref = paramname.substr(0, st-1);
-							int len = paramname.find("}") - st;
-							suff = paramname.substr(paramname.find("}")+1);
-							paramname = paramname.substr(st, len);
-							std::string paramvalue = urlparts.at(var);
-							if(st>1)
-							{
-								int stpre = paramvalue.find(pref) + pref.length();
-								int len = paramvalue.length() - pref.length() - suff.length();
-								paramvalue = paramvalue.substr(stpre, len);
-							}
-							mapOfValues[paramname] = paramvalue;
-							//logger << "mapOfValues(" << paramname << ") = "<< paramvalue << std::endl;
-							logger << ("Restcontroller matched url : " + pthwofiletemp + ",param size: " + CastUtil::lexical_cast<std::string>(prsiz) +
-										", against url: " + baseUrl) << std::endl;
-						}
-						else if(urlparts.at(var)!=resturlparts.at(var))
-						{
-							fflag = false;
-							break;
-						}
+						flag = false;
 					}
-					flag = fflag;
-				}
-
-				std::string lhs = StringUtil::toUpperCopy(ft.meth);
-				std::string rhs = StringUtil::toUpperCopy(req->getMethod());
-				//if(prsiz==(int)valss.size() && lhs==rhs)
-				if(flag && lhs==rhs)
-				{
-
-					logger << "Encountered rest controller url/method match" << std::endl;
-					rft = ft;
-					flag = true;
-					break;
-				}
-				else if(flag)
-				{
-					flag = false;
-					res->setHTTPResponseStatus(HTTPResponseStatus::InvalidMethod);
-					res->setDone(true);
-					//return true;
-					break;
-				}
-				else
-				{
-					res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-					//res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-					/*if(prsiz==valss.size())
-						res->setContent("Invalid number of arguments");
 					else
-						res->setContent("Invalid HTTPMethod used");*/
-					//logger << "Rest Controller Param/Method Error" << std::endl;
+					{
+						flag = true;
+					}
+					if(flag)
+					{
+						bool fflag = true;
+						for (int var = 1; var < (int)resturlparts.size(); var++)
+						{
+							//logger << "resturlparts.at(var) = " << resturlparts.at(var) << std::endl;
+							if(resturlparts.at(var).find("{")!=std::string::npos && resturlparts.at(var).find("}")!=std::string::npos
+									&& resturlparts.at(var).length()>2)
+							{
+								std::string paramname = resturlparts.at(var);
+								std::string pref, suff;
+								int st = paramname.find("{")+1;
+								pref = paramname.substr(0, st-1);
+								int len = paramname.find("}") - st;
+								suff = paramname.substr(paramname.find("}")+1);
+								paramname = paramname.substr(st, len);
+								std::string paramvalue = req->getActUrlParts().at(var-1);
+								if(st>1)
+								{
+									int stpre = paramvalue.find(pref) + pref.length();
+									int len = paramvalue.length() - pref.length() - suff.length();
+									paramvalue = paramvalue.substr(stpre, len);
+								}
+								mapOfValues[paramname] = paramvalue;
+								//logger << ("Restcontroller matched url : " + req->getCurl() + ",param size: " + CastUtil::lexical_cast<std::string>(prsiz) +
+								//			", against url: " + baseUrl) << std::endl;
+							}
+							else if(req->getActUrlParts().at(var-1)!=resturlparts.at(var))
+							{
+								fflag = false;
+								break;
+							}
+						}
+						flag = fflag;
+					}
+
+					std::string lhs = StringUtil::toUpperCopy(ft.meth);
+					if(flag && lhs==hmeth)
+					{
+
+						//logger << "Encountered rest controller url/method match" << std::endl;
+						rft = ft;
+						flag = true;
+						break;
+					}
+					else if(flag)
+					{
+						flag = false;
+						res->setHTTPResponseStatus(HTTPResponseStatus::InvalidMethod);
+						res->setDone(true);
+						break;
+					}
+					else
+					{
+						res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+					}
 				}
-			}
-			if(flag || res->isDone()) {
-				break;
+				if(flag || res->isDone()) {
+					break;
+				}
 			}
 		}
 		if(flag)
@@ -235,7 +214,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			args argus;
 			vals valus;
 
-			//logger << "inside restcontroller logic ..." << std::endl;
 			const ClassInfo& srv = ConfigurationData::getInstance()->ffeadContext.classInfoMap[req->getCntxt_name()][rft.clas];
 			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft.clas, req->getCntxt_name());
 			if(_temp==NULL){
@@ -270,7 +248,9 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				{
 					std::string pmvalue;
 					if(rft.params.at(var).from=="path")
+					{
 						pmvalue = mapOfValues[rft.params.at(var).name];
+					}
 					else if(rft.params.at(var).from=="reqparam")
 					{
 						if(req->getQueryParams().find(rft.params.at(var).name)!=req->getQueryParams().end())
@@ -336,8 +316,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						pmvalue = req->getContent();
 					}
 
-					logger << ("Restcontroller parameter type/value = "  + rft.params.at(var).type + "/" + pmvalue) << std::endl;
-					logger << ("Restcontroller content types input/output = " + icont + "/" + ocont) << std::endl;
+					//logger << ("Restcontroller parameter type/value = "  + rft.params.at(var).type + "/" + pmvalue) << std::endl;
+					//logger << ("Restcontroller content types input/output = " + icont + "/" + ocont) << std::endl;
 
 					if(rft.params.at(var).type=="int")
 					{
@@ -566,8 +546,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								CastUtil::lexical_cast<int>(rft.statusCode)));
 						delete ouput;
 					}
-					logger << "Successfully called restcontroller output follows - " << std::endl;
-					logger << outcontent << std::endl;
+					//logger << "Successfully called restcontroller output follows - " << std::endl;
+					//logger << outcontent << std::endl;
 
 					isContrl = true;
 

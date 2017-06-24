@@ -26,11 +26,10 @@ CORSHandler::~CORSHandler() {
 }
 
 bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse *res) {
-	int reqType = req->getCORSRequestType();
-	if(reqType == PREFLIGHT)
+	if(!req->isCorsRequest())return false;
+	if(req->getCORSRequestType() == PREFLIGHT)
 	{
-		strVec reqOrgLst = req->parseHeaderValue(req->getHeader(HttpRequest::Origin));
-		if(corsConfig.isOriginAllowed(reqOrgLst))
+		if(corsConfig.isOriginAllowed(req->getHeader(HttpRequest::Origin)))
 		{
 			if(req->getHeader(HttpResponse::AccessControlAllowMethods)=="")
 			{
@@ -91,10 +90,9 @@ bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse 
 
 		return true;
 	}
-	else if(reqType == CORS)
+	else if(req->getCORSRequestType() == CORS)
 	{
-		strVec reqOrgLst = req->parseHeaderValue(req->getHeader(HttpRequest::Origin));
-		if(corsConfig.isOriginAllowed(reqOrgLst))
+		if(corsConfig.isOriginAllowed(req->getHeader(HttpRequest::Origin)))
 		{
 			if(!corsConfig.isMethodAllowed(req->getMethod()))
 			{
@@ -166,26 +164,22 @@ void CorsConfig::init()
 	}
 }
 
-bool CorsConfig::isOriginAllowed(const strVec& reqOrgLst)
+bool CorsConfig::isOriginAllowed(const std::string& reqOrgLst)
 {
-	init();
 	if(allwdOrigins=="*")
 	{
 		return true;
 	}
-	for (int var = 0; var < (int)reqOrgLst.size(); ++var) {
-		for (int var1 = 0; var1 < (int)allwdOriginsv.size(); ++var1) {
-			if(allwdOriginsv.at(var1)==StringUtil::toLowerCopy(reqOrgLst.at(var)))
-			{
-				return true;
-			}
+	for (int var1 = 0; var1 < (int)allwdOriginsv.size(); ++var1) {
+		if(allwdOriginsv.at(var1)==StringUtil::toLowerCopy(reqOrgLst))
+		{
+			return true;
 		}
 	}
 	return false;
 }
 bool CorsConfig::isMethodAllowed(const std::string& method)
 {
-	init();
 	if(method=="")
 	{
 		return false;
@@ -200,7 +194,6 @@ bool CorsConfig::isMethodAllowed(const std::string& method)
 }
 bool CorsConfig::isHeaderAllowed(const strVec& reqHdrLst, std::string& erheadr)
 {
-	init();
 	if(allwdHeaders=="*")
 	{
 		return true;

@@ -15,16 +15,25 @@ bool ServiceHandler::isActive() {
 	return fl;
 }
 
-void ServiceHandler::registerRequest(void* request, SocketInterface* sif, void* context, ReaderSwitchInterface* switchReaderIntf) {
+void ServiceHandler::registerWriteRequest(HandlerRequest* request, void* response) {
+	if(request!=NULL && response!=NULL) {
+		request->response = response;
+		handleWrite(request);
+	}
+}
+
+void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos, ReaderSwitchInterface* switchReaderIntf) {
 	HandlerRequest* req = NULL;
 	int val;
 	if(requestNumMap.find(sif->identifier, val))
 	{
 		req = new HandlerRequest;
 		req->request = request;
+		req->response = NULL;
 		req->sif = sif;
 		req->context = context;
 		req->sh = this;
+		req->reqPos = reqPos;
 		req->switchReaderIntf = switchReaderIntf;
 		req->protocol = sif->getProtocol(context);
 		requestNumMap.put(sif->identifier, val+1);
@@ -37,7 +46,7 @@ void ServiceHandler::registerRequest(void* request, SocketInterface* sif, void* 
 			delete context;
 	}
 	if(req!=NULL) {
-		service(req);
+		handleService(req);
 	}
 }
 
@@ -59,15 +68,24 @@ bool ServiceHandler::isAvailable(SocketInterface* sif) {
 
 void ServiceHandler::addCloseRequest(SocketInterface* si) {
 	tbcSifQ.push(si);
-	std::cout << "Closing connection " << si->getDescriptor() << " " << si->identifier << std::endl;
+	//std::cout << "Closing connection " << si->getDescriptor() << " " << si->identifier << std::endl;
 }
 
-void ServiceHandler::submitTask(Task* task) {
-	if(isThreadPerRequest) {
+void ServiceHandler::submitServiceTask(Task* task) {
+	if(isThreadPerRequests) {
 		Thread pthread(&taskService, task);
 		pthread.execute();
 	} else {
-		pool.submit(task);
+		spool.submit(task);
+	}
+}
+
+void ServiceHandler::submitWriteTask(Task* task) {
+	if(isThreadPerRequestw) {
+		Thread pthread(&taskService, task);
+		pthread.execute();
+	} else {
+		wpool.submit(task);
 	}
 }
 
@@ -87,7 +105,7 @@ void* ServiceHandler::cleanSifs(void* inp) {
 			int val;
 			if(ins->requestNumMap.find(si->identifier, val) && val<=0)
 			{
-				std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
+				//std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
 				delete si->sockUtil;
 				delete si;
 				ins->requestNumMap.erase(si->identifier);
@@ -110,7 +128,7 @@ void ServiceHandler::cleanSif(std::map<int, SocketInterface*> connectionsWithTim
 		int val;
 		if(requestNumMap.find(si->identifier, val) && val<=0)
 		{
-			std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
+			//std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
 			connectionsWithTimeouts.erase(si->getDescriptor());
 			delete si->sockUtil;
 			delete si;
@@ -144,14 +162,21 @@ void ServiceHandler::stop() {
 	mutex.unlock();
 }
 
-ServiceHandler::ServiceHandler(const int& poolSize) {
-	this->poolSize = poolSize;
+ServiceHandler::ServiceHandler(const int& spoolSize, const int& wpoolSize) {
+	this->spoolSize = spoolSize;
+	this->wpoolSize = wpoolSize;
 	run = false;
-	isThreadPerRequest = false;
-	if(poolSize <= 0) {
-		isThreadPerRequest = true;
+	isThreadPerRequests = false;
+	isThreadPerRequestw = false;
+	if(spoolSize <= 0) {
+		isThreadPerRequests = true;
 	} else {
-		pool.init(poolSize);
+		spool.init(spoolSize);
+	}
+	if(wpoolSize <= 0) {
+		isThreadPerRequestw = true;
+	} else {
+		wpool.init(wpoolSize);
 	}
 }
 
@@ -193,8 +218,20 @@ void* HandlerRequest::getRequest() {
 	return request;
 }
 
+void* HandlerRequest::getResponse() {
+	return response;
+}
+
 bool HandlerRequest::isSentResponse() const {
 	return sentResponse;
+}
+
+bool HandlerRequest::isValidWriteRequest() {
+	return reqPos == sif->current + 1;
+}
+
+void HandlerRequest::doneWithWrite() {
+	sif->current += 1;
 }
 
 SocketInterface* HandlerRequest::getSif() {
@@ -207,4 +244,8 @@ ReaderSwitchInterface* HandlerRequest::getSwitchReaderIntf() {
 
 void ServiceHandler::switchReaders(HandlerRequest* hr, SocketInterface* next) {
 	hr->switchReaderIntf->switchReaders(hr->getSif(), next);
+}
+
+void ServiceHandler::registerRead(HandlerRequest* hr) {
+	hr->switchReaderIntf->registerRead(hr->getSif());
 }

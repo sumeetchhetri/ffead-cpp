@@ -147,7 +147,7 @@ void MultipartContent::addHeaderValue(std::string header, const std::string& val
 			std::vector<std::string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
 			if(matres.size()==0)
 			{
-				std::cout << ("Invalid Header std::string " + header) << std::endl;
+				//std::cout << ("Invalid Header std::string " + header) << std::endl;
 				return;
 			}
 			headers[header] = value;
