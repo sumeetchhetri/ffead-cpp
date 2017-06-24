@@ -8,7 +8,7 @@ PCFL="TO_REPLACE_CPPFLAGS"
 PLDFL="TO_REPLACE_LDFLAGS"
 PACFL="TO_REPLACE_AM_CXXFLAGS"
 
-if [ "$DEBG" == "yes" ]; then
+if [ "$DEBG" = "yes" ]; then
 	DEBG="--enable-debug=yes"
 else
 	DEBG=""

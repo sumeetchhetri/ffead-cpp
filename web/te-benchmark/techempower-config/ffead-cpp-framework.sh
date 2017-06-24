@@ -3,8 +3,12 @@
 fw_installed ffead-cpp-framework && return 0
 
 fw_get -o ffead-cpp-src.zip https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+rm -rf ffead-cpp-src
+rm -rf ffead-cpp-master
 unzip ffead-cpp-src.zip
+mv ffead-cpp-master ffead-cpp-src
 cd ffead-cpp-src/
+chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./autogen.sh
 ./configure --enable-apachemod=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes CPPFLAGS="$CPPFLAGS -I${IROOT}/include/libmongoc-1.0 -I${IROOT}/include/libbson-1.0 -I${IROOT}/include/" LDFLAGS="$LDFLAGS -L${IROOT}"
 make install
