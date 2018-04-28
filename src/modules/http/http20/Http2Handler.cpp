@@ -252,7 +252,7 @@ void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		return ppreq;
 	}
 
-	if(read())return NULL;
+	if(readFrom())return NULL;
 
 	if(!this->isConnInit) {
 		std::string clientpreface = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
@@ -320,7 +320,7 @@ std::string Http2Handler::serialize(Http2Frame* frame) {
 
 bool Http2Handler::writeData(Http2Frame* frame) {
 	std::string serv = serialize(frame);
-	write(serv);
+	writeTo(serv);
 	CommonUtils::printHEX(serv);
 	return false;
 }
@@ -340,7 +340,7 @@ bool Http2Handler::writePendingDataFrame(Http2RequestResponseData& pendingSendDa
 			dframe.data = pendingSendData.data;
 			dframe.header.flags.set(0);
 
-			if(write(serialize(&dframe))) {
+			if(writeTo(serialize(&dframe))) {
 				pendingSendData.reset();
 				return true;
 			}
@@ -361,7 +361,7 @@ bool Http2Handler::writePendingDataFrame(Http2RequestResponseData& pendingSendDa
 			dframe.header.streamIdentifier = streamIdentifier;
 			dframe.data = pendingSendData.data.substr(0, minreslen);
 			//No end of stream set for this incomplete data frame
-			if(write(serialize(&dframe))) {
+			if(writeTo(serialize(&dframe))) {
 				pendingSendData.reset();
 				return true;
 			}
@@ -407,7 +407,7 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si) {
 	if(response->data=="") {
 		hframe.header.flags.set(6);
 	}
-	if(write(serialize(&hframe))) {
+	if(writeTo(serialize(&hframe))) {
 		return true;
 	}
 
@@ -424,7 +424,7 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si) {
 				dframe.header.flags.set(6);
 			}
 
-			if(write(serialize(&dframe))) {
+			if(writeTo(serialize(&dframe))) {
 				return true;
 			}
 			logger << "write data frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << std::endl;
@@ -446,7 +446,7 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si) {
 			dframe.data = data.substr(0, minreslen);
 			//No end of stream set for this incomplete data frame
 			logger << "write partial data frame " << dframe.header.streamIdentifier << std::endl;
-			if(write(serialize(&dframe))) {
+			if(writeTo(serialize(&dframe))) {
 				streams[streamIdentifier].pendingSendData.reset();
 				return true;
 			}
@@ -487,7 +487,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 	if(!response->hasContent) {
 		hframe.header.flags.set(0);
 	}
-	if(write(serialize(&hframe))) {
+	if(writeTo(serialize(&hframe))) {
 		return true;
 	}
 	//logger << response->generateResponse(request, false) << std::endl;
@@ -508,7 +508,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 				dframe.header.flags.set(0);
 			}
 
-			if(write(serialize(&dframe))) {
+			if(writeTo(serialize(&dframe))) {
 				return true;
 			}
 			logger << "write data frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << std::endl;
@@ -530,7 +530,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 			dframe.data = data.substr(0, minreslen);
 			//No end of stream set for this incomplete data frame
 			logger << "write partial data frame " << dframe.header.streamIdentifier << std::endl;
-			if(write(serialize(&dframe))) {
+			if(writeTo(serialize(&dframe))) {
 				streams[streamIdentifier].pendingSendData.reset();
 				return true;
 			}
@@ -555,7 +555,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 					dframe.header.flags.set(0);
 				}
 
-				if(write(serialize(&dframe))) {
+				if(writeTo(serialize(&dframe))) {
 					return true;
 				}
 				logger << "write data frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << std::endl;
@@ -577,7 +577,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 				dframe.data = data.substr(0, minreslen);
 				//No end of stream set for this incomplete data frame
 				logger << "write partial data frame " << dframe.header.streamIdentifier << std::endl;
-				if(write(serialize(&dframe))) {
+				if(writeTo(serialize(&dframe))) {
 					streams[streamIdentifier].pendingSendData.reset();
 					return true;
 				}
@@ -608,7 +608,7 @@ bool Http2Handler::writeData(Http2RequestResponseData& data, Http2RequestRespons
 	CommonUtils::printHEX(hframe.headerBlockFragment);
 	hframe.header.streamIdentifier = data.streamIdentifier;
 	hframe.header.flags.set(2);
-	write(serialize(&hframe));
+	writeTo(serialize(&hframe));
 	CommonUtils::printHEX(serialize(&hframe));
 
 	Http2DataFrame dframe;
@@ -620,7 +620,7 @@ bool Http2Handler::writeData(Http2RequestResponseData& data, Http2RequestRespons
 	//Check the connection/stream sender window size before sending data frame
 	if(senderFlowControlWindow>=dframe.header.payloadLength && streamFlowControlWindowS>=dframe.header.payloadLength)
 	{
-		write(dfdata);
+		writeTo(dfdata);
 		//Handle flow control for data frames
 		senderFlowControlWindow -= dframe.header.payloadLength;
 		streamFlowControlWindowS -= dframe.header.payloadLength;

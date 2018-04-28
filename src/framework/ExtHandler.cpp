@@ -169,7 +169,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			{
 				logger << "Invalid Dynamic View handler, no method getDocument found..." << std::endl;
 			}
-			ConfigurationData::getInstance()->ffeadContext.release("dview_"+vwMap->find(req->getCurl())->second, req->getCntxt_name());
+			ConfigurationData::getInstance()->ffeadContext.release(_temp, "dview_"+vwMap->find(req->getCurl())->second, req->getCntxt_name());
 		}
 		else
 		{
@@ -229,7 +229,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				{
 					logger << "Invalid Template handler, no method getContext found..." << std::endl;
 				}
-				ConfigurationData::getInstance()->ffeadContext.release("template_"+tpeclasname, req->getCntxt_name());
+				ConfigurationData::getInstance()->ffeadContext.release(_temp, "template_"+tpeclasname, req->getCntxt_name());
 			}
 			if(content.length()>0)
 			{

@@ -40,6 +40,8 @@
 #include "map"
 #include "set"
 #include "CommonUtils.h"
+#include "Date.h"
+#include "BinaryData.h"
 
 class Reflector
 {
@@ -59,7 +61,7 @@ public:
 	void* getMethodInstance(const Method& method)
 	{
 		void *mkr = dlsym(dlib, method.getRefName().c_str());
-		typedef void* (*RfPtr) (void*,vals);
+		typedef void* (*RfPtr) (void*,vals,bool);
 		RfPtr f = (RfPtr)mkr;
 		if(f!=NULL)
 		{
@@ -67,104 +69,94 @@ public:
 		}
 		return NULL;
 	}
-	template <class T> T invokeMethod(void* instance, const Method& method, const vals& values)
+	template <class T> T invokeMethod(void* instance, const Method& method, const vals& values, const bool& cleanVals = false)
 	{
 		T obj;
 		void *mkr = dlsym(dlib, method.getRefName().c_str());
-		typedef void* (*RfPtr) (void*,vals);
+		typedef void* (*RfPtr) (void*,vals,bool);
 		RfPtr f = (RfPtr)mkr;
 		if(f!=NULL)
 		{
 			if(method.getReturnType()!="void")
 			{
-				void* rt = f(instance,values);
+				void* rt = f(instance,values,cleanVals);
 				obj = *(T*)rt;
 				delete (T*)rt;
 			}
 			else
-				f(instance,values);
+				f(instance,values,cleanVals);
 		}
 		return obj;
 	}
-	void destroy(void* instance, const std::string& cs, const std::string& app= "")
-	{
-		ClassInfo ci = getClassInfo(cs, app);
-		void *mkr = dlsym(dlib, ci.getDestRefName().c_str());
-		typedef void (*RfPtr) (void*);
-		RfPtr f = (RfPtr)mkr;
-		if(f!=NULL)
-		{
-			f(instance);
-		}
-	}
-	void* invokeMethodGVP(void* instance, const Method& method, const vals& values)
+	void destroy(void* instance, std::string cs, const std::string& app= "");
+	void* invokeMethodGVP(void* instance, const Method& method, const vals& values, const bool& cleanVals = false)
 	{
 		void *obj = NULL;
 		void *mkr = dlsym(dlib, method.getRefName().c_str());
-		typedef void* (*RfPtr) (void*,vals);
+		typedef void* (*RfPtr) (void*,vals,bool);
 		RfPtr f = (RfPtr)mkr;
 		if(f!=NULL)
 		{
 			if(method.getReturnType()!="void")
-				obj = f(instance,values);
+				obj = f(instance,values,cleanVals);
 			else
-				f(instance,values);
+				f(instance,values,cleanVals);
 		}
 		return obj;
 	}
 
-	template <class T> T newInstance(const Constructor& ctor, const vals& values)
+	template <class T> T newInstance(const Constructor& ctor, const vals& values, const bool& cleanVals = false)
 	{
 		T obj;
 		void *mkr = dlsym(dlib, ctor.getRefName().c_str());
-		typedef void* (*RfPtr) (vals);
+		typedef void* (*RfPtr) (vals,bool);
 		RfPtr f = (RfPtr)mkr;
 		if(f!=NULL)
 		{
-			T* objt = (T*)f(values);
+			T* objt = (T*)f(values,cleanVals);
 			obj = *objt;
 			delete objt;
 		}
 		return *obj;
 	}
-	template <class T> T newInstance(const Constructor& ctor)
+	template <class T> T newInstance(const Constructor& ctor, const bool& cleanVals = false)
 	{
 		vals values;
-		return newInstance<T>(ctor,values);
+		return newInstance<T>(ctor,values,cleanVals);
 	}
 
-	void* newInstanceGVP(const Constructor& ctor, const vals& values)
+	void* newInstanceGVP(const Constructor& ctor, const vals& values, const bool& cleanVals = false)
 	{
 		void *obj = NULL;
 		void *mkr = dlsym(dlib, ctor.getRefName().c_str());
-		typedef void* (*RfPtr) (vals);
+		typedef void* (*RfPtr) (vals,bool);
 		RfPtr f = (RfPtr)mkr;
 		if(f!=NULL)
 		{
-			obj = f(values);
+			obj = f(values,cleanVals);
 		}
-		objectT.push_back(ctor.getName());
-		objects.push_back(obj);
+		//objectT.push_back(ctor.getName());
+		//objects.push_back(obj);
 		return obj;
 	}
-	void* newInstanceGVP(const Constructor& ctor)
+	void* newInstanceGVP(const Constructor& ctor, const bool& cleanVals = false)
 	{
 		vals values;
-		return newInstanceGVP(ctor,values);
+		return newInstanceGVP(ctor,values,cleanVals);
 	}
 
-	void* invokeMethodUnknownReturn(void* instance, const Method& method, const vals& values)
+	void* invokeMethodUnknownReturn(void* instance, const Method& method, const vals& values, const bool& cleanVals = false)
 	{
 		void* obj = NULL;
 		void *mkr = dlsym(dlib, method.getRefName().c_str());
-		typedef void* (*RfPtr) (void*,vals);
+		typedef void* (*RfPtr) (void*,vals,bool);
 		RfPtr f = (RfPtr)mkr;
 		if(f!=NULL)
 		{
 			if(method.getReturnType()!="void")
-				obj = f(instance,values);
+				obj = f(instance,values,cleanVals);
 			else
-				f(instance,values);
+				f(instance,values,cleanVals);
 		}
 		return obj;
 	}
@@ -181,17 +173,17 @@ public:
 		}
 		return t;
 	}
-	void* execOperator(void* instance, const std::string& operato, const vals& values, const std::string& cs, const std::string& app= "")
+	void* execOperator(void* instance, const std::string& operato, const vals& values, const std::string& cs, const bool& cleanVals = false, const std::string& app= "")
 	{
 		ClassInfo ci = getClassInfo(cs, app);
 		std::string oprfn = ci.getOperatorRefName(operato);
 		void *resul = NULL;
 		void *mkr = dlsym(dlib, oprfn.c_str());
-		typedef void* (*RfPtr) (void*,vals);
+		typedef void* (*RfPtr) (void*,vals,bool);
 		RfPtr f = (RfPtr)mkr;
 		if(f!=NULL)
 		{
-			resul = f(instance,values);
+			resul = f(instance,values,cleanVals);
 		}
 		return resul;
 	}
@@ -215,6 +207,23 @@ public:
 		}
 		return obj;
 	}
+	void destroyContainer(void* vec, const std::string& cs, const std::string& contType, const std::string& app= "")
+	{
+		ClassInfo ci = getClassInfo(cs, app);
+		std::string methodname = ci.getContRefName();
+		int t = -1;
+		if(contType=="std::set" || contType=="std::multiset") {
+			t = 0;
+			methodname += "sv";
+		}
+		void *mkr = dlsym(dlib, methodname.c_str());
+		typedef void (*RfPtr) (void*,void*,int,std::string,int);
+		RfPtr f = (RfPtr)mkr;
+		if(f!=NULL)
+		{
+			f(NULL,NULL,-1,contType,t);
+		}
+	}
 	int getContainerSize(void* vec, const std::string& cs, const std::string& contType, const std::string& app= "")
 	{
 		ClassInfo ci = getClassInfo(cs, app);
@@ -226,11 +235,13 @@ public:
 			methodname += "sv";
 		}
 		void *mkr = dlsym(dlib, methodname.c_str());
-		typedef int (*RfPtr) (void*,void*,int,std::string,int);
+		typedef int* (*RfPtr) (void*,void*,int,std::string,int);
 		RfPtr f = (RfPtr)mkr;
 		if(f!=NULL)
 		{
-			size = f(vec,NULL,-1,contType,t);
+			int* tt = f(vec,NULL,-1,contType,t);
+			size = *tt;
+			delete tt;
 		}
 		return size;
 	}
@@ -307,6 +318,40 @@ public:
 		else if(container=="std::queue")
 		{
 			return new std::queue<T>;
+		}
+		return NULL;
+	}
+
+	template <typename T> static void* destroyNestedContainer(const std::string& container, void* instance)
+	{
+		if(container=="std::vector")
+		{
+			delete (std::vector<T>*)instance;
+		}
+		else if(container=="std::deque")
+		{
+			delete (std::deque<T>*)instance;
+		}
+		else if(container=="std::list")
+		{
+			delete (std::list<T>*)instance;
+		}
+		else if(container=="std::queue")
+		{
+			delete (std::queue<T>*)instance;
+		}
+		return NULL;
+	}
+
+	template <typename T> static void* destroyNestedContainerSV(const std::string& container, void* instance)
+	{
+		if(container=="std::set")
+		{
+			delete (std::set<T>*)instance;
+		}
+		else if(container=="std::multiset")
+		{
+			delete (std::multiset<T>*)instance;
 		}
 		return NULL;
 	}

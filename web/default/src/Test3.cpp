@@ -23,8 +23,8 @@
 #include "Test3.h"
 
 Test3::Test3() {
-	// TODO Auto-generated constructor stub
-
+	id = 0;
+	test_id = 0;
 }
 
 Test3::~Test3() {

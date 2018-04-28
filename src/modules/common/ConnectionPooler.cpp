@@ -86,13 +86,13 @@ void ConnectionPooler::release(Connection* conn) {
 void ConnectionPooler::destroyPool() {
 	if(!getProperties().isNewConnectionStrategy())
 	{
-		for(int i=0;i<properties.getPoolWriteSize();i++)
+		for(int i=0;i<(int)writeConnections.size();i++)
 		{
 			Connection* connection = this->writeConnections.at(i);
 			closeConnection(connection->getConn());
 			delete connection;
 		}
-		for(int i=0;i<properties.getPoolReadSize();i++)
+		for(int i=0;i<(int)readConnections.size();i++)
 		{
 			Connection* connection = this->readConnections.at(i);
 			closeConnection(connection->getConn());

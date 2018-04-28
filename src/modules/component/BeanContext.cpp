@@ -42,6 +42,7 @@ BeanContext RemoteComponentInt::getContext()
 
 
 BeanContext::BeanContext() {
+	port = -1;
 	logger = LoggerFactory::getLogger("BeanContext");
 }
 

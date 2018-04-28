@@ -33,6 +33,7 @@ void ThreadPool::initPointers()
 	wpool = NULL;
 	this->runFlag = false;
 	joinComplete = false;
+	this->allowScheduledTasks = false;
 	logger = LoggerFactory::getLogger("ThreadPool");
 }
 
@@ -103,17 +104,15 @@ void ThreadPool::start()
 
 void ThreadPool::joinAll() {
 	while (!joinComplete) {
-		while (wpool->tasksPending()) {
+		/*while (wpool->tasksPending()) {
 			Thread::sSleep(1);
-		}
+		}*/
 		for (unsigned int var = 0; var < tpool->size(); var++) {
 			tpool->at(var)->stop();
 		}
 		joinComplete = true;
-		while(true) {
-			for (unsigned int var = 0; var < tpool->size(); var++) {
-				joinComplete &= tpool->at(var)->isComplete();
-			}
+		for (unsigned int var = 0; var < tpool->size(); var++) {
+			joinComplete &= tpool->at(var)->isComplete();
 		}
 		Thread::sSleep(1);
 	}
@@ -213,14 +212,14 @@ void ThreadPool::schedule(FutureTask &task, const long long& tunit, const int& t
 }
 
 ThreadPool::~ThreadPool() {
-	while(!joinComplete) {
-		joinAll();
-	}
+	joinAll();
 	this->runFlag = false;
+	wpool->stop();
 	delete wpool;
 	for (int i = 0; i <(int)tpool->size(); i++) {
 		delete tpool->at(i);
 	}
+	delete tpool;
 	delete m_mutex;
 	logger << "Destroyed PoolThread Pool\n" << std::flush;
 }

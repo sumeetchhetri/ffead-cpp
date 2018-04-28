@@ -23,8 +23,7 @@
 #include "Tempo.h"
 
 Tempo::Tempo() {
-	// TODO Auto-generated constructor stub
-
+	p = 0;
 }
 
 Tempo::~Tempo() {

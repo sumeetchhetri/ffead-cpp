@@ -385,8 +385,8 @@ pid_t createChildProcess(std::string serverRootDirectory,int sp[],int sockfd)
 					if(isThreadprq)
 					{
 						ServiceTask *task = new ServiceTask(fd,serverRootDirectory);
-						Thread pthread(&service, task);
-						pthread.execute();
+						Thread* pthread = new Thread(&service, task);
+						pthread->execute();
 					}
 					else
 					{
@@ -1123,29 +1123,9 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		} catch (...) {
 			logger << "Error Occurred in serve" << std::endl;
 		}
-
-	#ifdef INC_COMP
-		ComponentHandler::stop();
-	#endif
-
-	#ifdef INC_MSGH
-		MessageHandler::stop();
-	#endif
-
-	#ifdef INC_MI
-		MethodInvoc::stop();
-	#endif
-
-	#ifdef INC_JOBS
-		JobScheduler::stop();
-	#endif
 	}
 
 	return 0;
-}
-
-HttpServiceTask* CHServer::httpServiceFactoryMethod() {
-	return new ServiceTask();
 }
 
 void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wthrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber)
@@ -1236,7 +1216,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 
 	std::vector<std::string> files;
 	int sp[preForked][2];
-	ThreadPool *pool = NULL;
 
 	/*TODO if(preForked>0 && IS_FILE_DESC_PASSING_AVAIL)
 	{
@@ -1267,8 +1246,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 #ifdef INC_DCP
 	if(isCompileEnabled)
 	{
-		Thread pthread(&CHServer::dynamic_page_monitor, &serverRootDirectory);
-		pthread.execute();
+		Thread* pthread = new Thread(&CHServer::dynamic_page_monitor, &serverRootDirectory);
+		pthread->execute();
 	}
 #endif
 
@@ -1290,8 +1269,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	//and all init is complete...
 	sleep(5);
 
-	//Thread gsthread(&gracefullShutdown_monitor, &ipport);
-	//gsthread.execute();
+	//Thread* pthread = new Thread(&gracefullShutdown_monitor, &ipport);
+	//pthread->execute();
 
 	std::string cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["CONTENT_ENCODING"]);
 	try {
@@ -1311,6 +1290,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	} catch (...) {
 	}
 
+	HTTPResponseStatus::getStatusByCode(200);
+
 	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, thrdpsiz, wthrdpsiz);
 	handler->start();
 
@@ -1324,242 +1305,16 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
 		Thread::sSleep(5);
-		/*if(stats) {
-			if(CommonUtils::tsPoll>0) {
-				std::cout << "Time spent on poll = " << CommonUtils::tsPoll << std::endl;
-			}
-			if(CommonUtils::tsPoll1>0) {
-				std::cout << "Time spent on poll cleanup/checks = " << CommonUtils::tsPoll1 << std::endl;
-			}
-			if(CommonUtils::tsProcess>0) {
-				std::cout << "Time spent on poll process (+reads) = " << CommonUtils::tsProcess << std::endl;
-			}
-			if(CommonUtils::tsRead>0) {
-				std::cout << "Time spent on read = " << CommonUtils::tsRead << std::endl;
-			}
-			if(CommonUtils::tsWrite>0) {
-				std::cout << "Time spent on write = " << CommonUtils::tsWrite << std::endl;
-			}
-			if(CommonUtils::tsService>0) {
-				std::cout << "Time spent on service (+writes) = " << CommonUtils::tsService << std::endl;
-			}
-			if(CommonUtils::tsService1>0) {
-				std::cout << "Time spent on setup request = " << CommonUtils::tsService1 << std::endl;
-			}
-			if(CommonUtils::tsService2>0) {
-				std::cout << "Time spent on security populate = " << CommonUtils::tsService2 << std::endl;
-			}
-			if(CommonUtils::tsService3>0) {
-				std::cout << "Time spent on session = " << CommonUtils::tsService3 << std::endl;
-			}
-			if(CommonUtils::tsService4>0) {
-				std::cout << "Time spent on dynlib = " << CommonUtils::tsService4 << std::endl;
-			}
-			if(CommonUtils::tsService5>0) {
-				std::cout << "Time spent on cors = " << CommonUtils::tsService5 << std::endl;
-			}
-			if(CommonUtils::tsService6>0) {
-				std::cout << "Time spent on security = " << CommonUtils::tsService6 << std::endl;
-			}
-			if(CommonUtils::tsService7>0) {
-				std::cout << "Time spent on in filter = " << CommonUtils::tsService7 << std::endl;
-			}
-			if(CommonUtils::tsService8>0) {
-				std::cout << "Time spent on controllers = " << CommonUtils::tsService8 << std::endl;
-			}
-			if(CommonUtils::tsService9>0) {
-				std::cout << "Time spent on extra flows = " << CommonUtils::tsService9 << std::endl;
-			}
-			if(CommonUtils::tsService10>0) {
-				std::cout << "Time spent on update response = " << CommonUtils::tsService10 << std::endl;
-			}
-			if(CommonUtils::tsService11>0) {
-				std::cout << "Time spent on out filter = " << CommonUtils::tsService11 << std::endl;
-			}
-			if(CommonUtils::tsService12>0) {
-				std::cout << "Time spent on store attributes = " << CommonUtils::tsService12 << std::endl;
-			}
-			if(CommonUtils::cSocks>0) {
-				std::cout << "Total Sockets opened = " << CommonUtils::cSocks << std::endl;
-			}
-			if(CommonUtils::cReqs>0) {
-				std::cout << "Total number of requests = " << CommonUtils::cReqs << std::endl;
-			}
-			if(CommonUtils::cResps>0) {
-				std::cout << "Total number of responses = " << CommonUtils::cResps << std::endl;
-			}
-		}*/
 	}
-	reader.stop();
+
+	handler->stop();
 
 	std::string ip = ipport.substr(0, ipport.find(":"));
-	ClientInterface* client;
-	if(isSSLEnabled)
-		client = new SSLClient;
-	else
-		client = new Client;
-	client->connectionUnresolv(ip,CastUtil::lexical_cast<int>(port));
-	client->closeConnection();
-	delete client;
-
-	sleep(2);
-
-	/*SelEpolKqEvPrt selEpolKqEvPrtHandler;
-	selEpolKqEvPrtHandler.initialize(sockfd);
-	int childNo = 0;
-	//if(fork()==0)
-	//{
-		//start  of hotdeployment process
-
-	//}
-
-	struct stat buffer;
-	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
-	{
-		if(childNo>=preForked)
-			childNo = 0;
-		errno = 0;
-		nfds = selEpolKqEvPrtHandler.getEvents();
-		if (nfds == -1)
-		{
-			//perror("poll_wait main process");
-			if(errno==EBADF)
-			{
-				logger << "Inavlid fd" <<std::endl;
-			}
-			else if(errno==EFAULT)
-			{
-				logger << "The memory area pointed to by events is not accessible" <<std::endl;
-			}
-			else if(errno==EINTR)
-			{
-				//logger << "call was interrupted by a signal handler before any of the requested events occurred" <<std::endl;
-			}
-			else if(errno==EINVAL)
-			{
-				//logger << "not a poll file descriptor, or maxevents is less than or equal to zero" << std::endl;
-			}
-			else
-			{
-				logger << "not an epoll file descriptor" <<std::endl;
-			}
-			continue;
-		}
-		processgendone = false;
-		if(processforcekilled)
-		{
-			if(preForked>0 && IS_FILE_DESC_PASSING_AVAIL)
-			{
-				#if !defined(OS_MINGW) && !defined(OS_DARWIN)
-				files.clear();
-				for(int j=0;j<preForked;j++)
-				{
-					pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
-					pds[j] = pid;
-					std::stringstream ss;
-					std::string filename;
-					ss << serverRootDirectory;
-					ss << pds[j];
-					ss >> filename;
-					filename.append(".cntrl");
-					files.push_back(filename);
-				}
-				#endif
-			}
-			else
-			{
-				delete pool;
-				pool = new ThreadPool;
-				pool->init(thrdpsiz,thrdpsiz+30,true);
-			}
-			processforcekilled = false;
-			processgendone = true;
-		}
-		for(int n=0;n<nfds;n++)
-		{
-			if(childNo>=preForked)
-				childNo = 0;
-			SOCKET descriptor = selEpolKqEvPrtHandler.getDescriptor(n);
-			if (descriptor == sockfd)
-			{
-				new_fd = -1;
-				sin_size = sizeof their_addr;
-				new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-				if (new_fd == -1)
-				{
-					perror("accept");
-					continue;
-				}
-				else
-				{
-					selEpolKqEvPrtHandler.reRegisterServerSock();
-					selEpolKqEvPrtHandler.registerForEvent(new_fd);
-				}
-			}
-			else if (descriptor != -1)
-			{
-				logger << ("got new connection " + CastUtil::lexical_cast<std::string>(descriptor)) << std::endl;
-				selEpolKqEvPrtHandler.unRegisterForEvent(descriptor);
-				if(preForked>0 && IS_FILE_DESC_PASSING_AVAIL)
-				{
-					errno = 0;
-					std::ifstream cntrlfile;
-					cntrlfile.open(files.at(childNo).c_str());
-					if(cntrlfile.is_open())
-					{
-						#if !defined(OS_MINGW) && !defined(OS_DARWIN)
-						send_connection(sp[childNo][0], descriptor);
-						std::string cno = CastUtil::lexical_cast<std::string>(childNo);
-						childNo++;
-						#endif
-					}
-					else
-					{
-						logger.info("Child Process got killed exiting...\n");
-						break;
-					}
-					cntrlfile.close();
-					if(errno!=0) {
-						logger << ("Send socket failed with errno = " + CastUtil::lexical_cast<std::string>(errno)) << std::endl;
-					}
-				}
-				else
-				{
-					#ifdef OS_MINGW
-						u_long bMode = 0;
-						ioctlsocket(descriptor, FIONBIO, &bMode);
-					#else
-						fcntl(descriptor, F_SETFL, O_SYNC);
-					#endif
-					try
-					{
-						if(isThreadprq)
-						{
-							ServiceTask *task = new ServiceTask(descriptor,serverRootDirectory);
-							Thread pthread(&service, task);
-							pthread.execute();
-						}
-						else
-						{
-							ServiceTask *task = new ServiceTask(descriptor,serverRootDirectory);
-							task->setCleanUp(true);
-							pool->submit(task);
-						}
-					}
-					catch(const char* err)
-					{
-						logger << "Exception occurred while processing ServiceTask request - " << err << std::endl;
-					}
-					catch(...)
-					{
-						logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
-					}
-				}
-			}
-		}
-	}*/
+	reader.stop(ip, CastUtil::lexical_cast<int>(port), isSSLEnabled);
 
 	close(sockfd);
+
+	delete (HttpServiceHandler*)handler;
 
 #ifdef INC_SDORM
 	ConfigurationHandler::destroyDataSources();
@@ -1575,11 +1330,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 
 	logger << "Destructed SSLHandler" << std::endl;
 
-	if(pool!=NULL) {
-		delete pool;
-		logger << "Destructed Thread pool" << std::endl;
-	}
-
 	#if !defined(OS_MINGW) && !defined(OS_DARWIN)
 	if(preForked>0 && IS_FILE_DESC_PASSING_AVAIL)
 	{
@@ -1593,9 +1343,27 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	}
 	#endif
 
-	LoggerFactory::clear();
+	#ifdef INC_COMP
+		ComponentHandler::stop();
+	#endif
+
+	#ifdef INC_MSGH
+		MessageHandler::stop();
+	#endif
+
+	#ifdef INC_MI
+		MethodInvoc::stop();
+	#endif
+
+	#ifdef INC_JOBS
+		JobScheduler::stop();
+	#endif
 
 	RegexUtil::flushCache();
+
+	LoggerFactory::clear();
+
+	CommonUtils::clear();
 
 	#ifdef OS_MINGW
 		WSACleanup();
@@ -1605,6 +1373,11 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 int CHServer::techunkSiz = 0;
 int CHServer::connKeepAlive = 10;
 int CHServer::maxReqHdrCnt = 100, CHServer::maxEntitySize = 2147483647;
+
+
+HttpServiceTask* CHServer::httpServiceFactoryMethod() {
+	return new ServiceTask();
+}
 
 SocketInterface* CHServer::createSocketInterface(SocketUtil* sockUtil) {
 	SocketInterface* sockIntf = NULL;

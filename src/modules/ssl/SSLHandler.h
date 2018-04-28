@@ -43,7 +43,7 @@ public:
 	std::string srv_auth_mode;
 	std::string srv_auth_file;
 	int client_auth;
-	long isDHParams;
+	bool isDHParams;
 	bool alpnEnabled;
 	std::vector<std::string> alpnProtoList;
 	friend class SSLHandler;
@@ -51,6 +51,11 @@ public:
 	friend class ConfigurationHandler;
 	friend class CHServer;
 	friend class SocketUtil;
+	SecurityProperties() {
+		client_auth = 0;
+		isDHParams = false;
+		alpnEnabled = false;
+	}
 };
 
 class SSLHandler {

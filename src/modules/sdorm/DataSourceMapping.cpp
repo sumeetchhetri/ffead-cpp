@@ -81,8 +81,12 @@ void Mapping::addDataSourceEntityMapping(const DataSourceEntityMapping& dsemp) {
 std::string Mapping::getPropertyForColumn(const std::string& tableName, const std::string& columnName) {
 	if(tableClassMapping.find(tableName)!=tableClassMapping.end())
 	{
-		std::string cn = StringUtil::toLowerCopy(columnName);
 		DataSourceEntityMapping dsemp = dseMap[tableClassMapping[tableName]];
+		if(dsemp.columnPropertyMappingCS.find(columnName)!=dsemp.columnPropertyMappingCS.end())
+		{
+			return dsemp.columnPropertyMappingCS[columnName];
+		}
+		std::string cn = StringUtil::toLowerCopy(columnName);
 		if(dsemp.columnPropertyMapping.find(cn)!=dsemp.columnPropertyMapping.end())
 		{
 			return dsemp.columnPropertyMapping[cn];
@@ -91,14 +95,13 @@ std::string Mapping::getPropertyForColumn(const std::string& tableName, const st
 	return "";
 }
 
-strMap Mapping::getMappingForTable(const std::string& tableName) {
+strMap& Mapping::getMappingForTable(const std::string& tableName) {
 	if(tableClassMapping.find(tableName)!=tableClassMapping.end())
 	{
-		DataSourceEntityMapping dsemp = dseMap[tableClassMapping[tableName]];
+		DataSourceEntityMapping& dsemp = dseMap[tableClassMapping[tableName]];
 		return dsemp.columnPropertyMapping;
 	}
-	strMap s;
-	return s;
+	return __s;
 }
 
 std::map<std::string, DataSourceEntityMapping>& Mapping::getDseMap() {
@@ -153,6 +156,8 @@ void DataSourceEntityMapping::setTableName(const std::string& tableName) {
 void DataSourceEntityMapping::addPropertyColumnMapping(const std::string& property, const std::string& column) {
 	if(property!="" && column!="")
 	{
+		propertyColumnMappingCS[property] = column;
+		columnPropertyMappingCS[column] = property;
 		std::string cn = StringUtil::toLowerCopy(column);
 		propertyColumnMapping[property] = cn;
 		columnPropertyMapping[cn] = property;
@@ -176,6 +181,10 @@ const strMap& DataSourceEntityMapping::getColumnPropertyMapping() const {
 }
 
 std::string DataSourceEntityMapping::getPropertyForColumn(const std::string& column) {
+	if(columnPropertyMappingCS.find(column)!=columnPropertyMappingCS.end())
+	{
+		return columnPropertyMappingCS[column];
+	}
 	std::string cn = StringUtil::toLowerCopy(column);
 	if(columnPropertyMapping.find(cn)!=columnPropertyMapping.end())
 	{
@@ -192,7 +201,7 @@ std::vector<DataSourceInternalRelation> DataSourceEntityMapping::getRelations() 
 	return relations;
 }
 
-DataSourceEntityMapping Mapping::getDataSourceEntityMapping(const std::string& clas) {
+DataSourceEntityMapping& Mapping::getDataSourceEntityMapping(const std::string& clas) {
 	if(dseMap.find(clas)!=dseMap.end())
 	{
 		return dseMap[clas];

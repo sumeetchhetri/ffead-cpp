@@ -18,19 +18,24 @@
 #include "ServiceHandler.h"
 #include "ConcurrentQueue.h"
 #include "LoggerFactory.h"
+#include "SSLClient.h"
+#include "Client.h"
+#ifdef HAVE_CXX11
+#include "atomic"
+#endif
 
 
 typedef SocketInterface* (*SocketInterfaceFactory) (SocketUtil*);
 
 class RequestReaderHandler : public ReaderSwitchInterface {
-	Mutex cMutex;
 	ConcurrentQueue<SocketInterface*> pendingSocks;
 	ConcurrentQueue<SocketInterface*> addToTimeoutSocks;
 	ConcurrentQueue<SocketInterface*> remFromTimeoutSocks;
 	ConcurrentQueue<SocketInterface*> timedoutSocks;
 	ConcurrentQueue<SocketInterface*> readerSwitchedSocks;
 	SelEpolKqEvPrt selector;
-	bool run;
+	std::atomic<bool> run;
+	std::atomic<int> complete;
 	bool isNotRegisteredListener;
 	SOCKET listenerSock;
 	ServiceHandler* shi;
@@ -46,7 +51,7 @@ public:
 	void switchReaders(SocketInterface* prev, SocketInterface* next);
 	void registerRead(SocketInterface* sd);
 	void start();
-	void stop();
+	void stop(std::string, int, bool);
 	RequestReaderHandler(ServiceHandler* shi, const SOCKET& listenerSock= INVALID_SOCKET);
 	void registerSocketInterfaceFactory(const SocketInterfaceFactory& f);
 	virtual ~RequestReaderHandler();

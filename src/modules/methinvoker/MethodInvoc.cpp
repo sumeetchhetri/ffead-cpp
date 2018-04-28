@@ -23,8 +23,9 @@
 #include "MethodInvoc.h"
 
 MethodInvoc::MethodInvoc() {
-	// TODO Auto-generated constructor stub
-
+	startTranx = false;
+	endTranx = false;
+	running = false;
 }
 
 MethodInvoc::~MethodInvoc() {
@@ -163,49 +164,49 @@ void* MethodInvoc::service(void* arg)
 				void *_temp = reflector.newInstanceGVP(ctor);
 				if(returnType=="void" || returnType=="")
 				{
-					reflector.invokeMethod<void*>(_temp,meth,valus);
+					reflector.invokeMethod<void*>(_temp,meth,valus,true);
 					retValue = ("<return:void></return:void>");
 				}
 				else
 				{
 					if(returnType=="int")
 					{
-						int retv = reflector.invokeMethod<int>(_temp,meth,valus);
+						int retv = reflector.invokeMethod<int>(_temp,meth,valus,true);
 						retValue = ("<return:int>"+CastUtil::lexical_cast<std::string>(retv)+"</return:int>");
 					}
 					else if(returnType=="long")
 					{
-						long retv = reflector.invokeMethod<long>(_temp,meth,valus);
+						long retv = reflector.invokeMethod<long>(_temp,meth,valus,true);
 						retValue = ("<return:long>"+CastUtil::lexical_cast<std::string>(retv)+"</return:long>");
 					}
 					else if(returnType=="long long")
 					{
-						long long retv = reflector.invokeMethod<long long>(_temp,meth,valus);
+						long long retv = reflector.invokeMethod<long long>(_temp,meth,valus,true);
 						retValue = ("<return:longlong>"+CastUtil::lexical_cast<std::string>(retv)+"</return:longlong>");
 					}
 					else if(returnType=="float")
 					{
-						float retv = reflector.invokeMethod<float>(_temp,meth,valus);
+						float retv = reflector.invokeMethod<float>(_temp,meth,valus,true);
 						retValue = ("<return:float>"+CastUtil::lexical_cast<std::string>(retv)+"</return:float>");
 					}
 					else if(returnType=="double")
 					{
-						double retv = reflector.invokeMethod<double>(_temp,meth,valus);
+						double retv = reflector.invokeMethod<double>(_temp,meth,valus,true);
 						retValue = ("<return:double>"+CastUtil::lexical_cast<std::string>(retv)+"</return:double>");
 					}
 					else if(returnType=="string")
 					{
-						std::string retv = reflector.invokeMethod<std::string>(_temp,meth,valus);
+						std::string retv = reflector.invokeMethod<std::string>(_temp,meth,valus,true);
 						retValue = ("<return:string>"+retv+"</return:string>");
 					}
 					else if(returnType!="")
 					{
-						void* retobj = reflector.invokeMethodUnknownReturn(_temp,meth,valus);
+						void* retobj = reflector.invokeMethodUnknownReturn(_temp,meth,valus,true);
 						std::string oxml = ser.serializeUnknown(retobj,returnType);
 						retValue = ("<return:"+returnType+">"+oxml+"</return:"+returnType+">");
 					}
 				}
-
+				reflector.destroy(_temp, className);
 			}
 		}
 		else

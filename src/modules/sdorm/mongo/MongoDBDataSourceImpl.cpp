@@ -281,23 +281,23 @@ void MongoDBDataSourceImpl::populateQueryComponents(QueryComponent* sq)
 			bson_t* dbo = bson_new();
 			if(andChildQs.size()>0)
 			{
-				bson_t *child = bson_new();
-				bson_append_array_begin(dbo, "$and", 4, child);
+				bson_t child;
+				bson_append_array_begin(dbo, "$and", 4, &child);
 				for (int var = 0; var < (int)andChildQs.size(); ++var) {
-					bson_append_document(child, "", 0, andChildQs.at(var));
+					bson_append_document(&child, "", 0, andChildQs.at(var));
+					bson_destroy(andChildQs.at(var));
 				}
-				bson_append_array_end(dbo, child);
-				bson_destroy(child);
+				bson_append_array_end(dbo, &child);
 			}
 			if(orChildQs.size()>0)
 			{
-				bson_t *child = bson_new();
-				bson_append_array_begin(dbo, "$or", 3, child);
+				bson_t child;
+				bson_append_array_begin(dbo, "$or", 3, &child);
 				for (int var = 0; var < (int)orChildQs.size(); ++var) {
-					bson_append_document(child, "", 0, orChildQs.at(var));
+					bson_append_document(&child, "", 0, orChildQs.at(var));
+					bson_destroy(orChildQs.at(var));
 				}
-				bson_append_array_end(dbo, child);
-				bson_destroy(child);
+				bson_append_array_end(dbo, &child);
 			}
 			sq->actualQuery = dbo;
 		}
@@ -342,24 +342,18 @@ bson_t* MongoDBDataSourceImpl::createSubMongoQuery(std::vector<Condition>& conds
 		for (cit=condMap.begin();cit!=condMap.end();++cit)
 		{
 			if(cit->first=="$in" || cit->first=="$nin") {
-				bson_t* subNe = bson_new();
-				bson_t* child = bson_new();
-				bson_append_document_begin(subNe, propName.c_str(), propName.length(), child);
-				bson_t* childa = bson_new();
-				bson_append_array_begin(child, cit->first.c_str(), cit->first.length(), childa);
+				bson_t child;
+				bson_t childa;
+				bson_append_array_begin(&child, cit->first.c_str(), cit->first.length(), &childa);
 				for (int var = 0; var < cit->second.getRhsSize(); ++var) {
-					appendGenericObject(childa, "", cit->second.getRhs(var));
+					appendGenericObject(&childa, "", cit->second.getRhs(var));
 				}
-				bson_append_array_end(child, childa);
-				bson_append_document_end(subNe, child);
-				bson_destroy(subNe);
-				bson_destroy(child);
-				bson_destroy(childa);
+				bson_append_array_end(&child, &childa);
+				bson_append_document(subQ, propName.c_str(), propName.length(), &child);
 			} else if(cit->first!="$eq") {
-				bson_t* subNe = bson_new();
-				appendGenericObject(subNe, cit->first, cit->second.getRhs());
-				bson_append_document(subQ, propName.c_str(), propName.length(), subNe);
-				bson_destroy(subNe);
+				bson_t subNe;
+				appendGenericObject(&subNe, cit->first, cit->second.getRhs());
+				bson_append_document(subQ, propName.c_str(), propName.length(), &subNe);
 			} else {
 				appendGenericObject(subQ, propName, cit->second.getRhs());
 			}
@@ -369,13 +363,39 @@ bson_t* MongoDBDataSourceImpl::createSubMongoQuery(std::vector<Condition>& conds
 }
 
 void MongoDBDataSourceImpl::appendGenericObject(bson_t* b, const std::string& name, GenericObject& o) {
-	if(o.isInstanceOf("int") || o.isInstanceOf("short") || o.isInstanceOf("long")
-			|| o.isInstanceOf("unsigned int") || o.isInstanceOf("unsigned short")
-			|| o.isInstanceOf("char") || o.isInstanceOf("unsigned char")) {
+	if(o.isInstanceOf("int")) {
 		int sv;
 		o.get(sv);
 		bson_append_int32(b, name.c_str(), name.length(), sv);
-	} else if(o.isInstanceOf("unsigned long") || o.isInstanceOf("long long")) {
+	} else if(o.isInstanceOf("short")) {
+		short sv;
+		o.get(sv);
+		bson_append_int32(b, name.c_str(), name.length(), sv);
+	} else if(o.isInstanceOf("long")) {
+		long sv;
+		o.get(sv);
+		bson_append_int64(b, name.c_str(), name.length(), sv);
+	} else if(o.isInstanceOf("unsigned int")) {
+		unsigned int sv;
+		o.get(sv);
+		bson_append_int64(b, name.c_str(), name.length(), sv);
+	} else if(o.isInstanceOf("unsigned short")) {
+		unsigned short sv;
+		o.get(sv);
+		bson_append_int32(b, name.c_str(), name.length(), sv);
+	} else if(o.isInstanceOf("char")) {
+		char sv;
+		o.get(sv);
+		bson_append_int32(b, name.c_str(), name.length(), sv);
+	} else if(o.isInstanceOf("unsigned char")) {
+		unsigned char sv;
+		o.get(sv);
+		bson_append_int32(b, name.c_str(), name.length(), sv);
+	} else if(o.isInstanceOf("unsigned long")) {
+		unsigned long sv;
+		o.get(sv);
+		bson_append_int64(b, name.c_str(), name.length(), sv);
+	} else if(o.isInstanceOf("long long")) {
 		long long sv;
 		o.get(sv);
 		bson_append_int64(b, name.c_str(), name.length(), sv);
@@ -469,18 +489,17 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 
 	if(qb.getColumnsAsc().size()>0 || qb.getColumnsDesc().size()>0)
 	{
-		bson_t* child = bson_new();
-		bson_append_document_begin(querySpec, "$orderby", 8, child);
+		bson_t child;
+		bson_append_document_begin(querySpec, "$orderby", 8, &child);
 		for(int i=0;i<(int)qb.getColumnsAsc().size();i++) {
 			std::string colnm = qb.getColumnsAsc().at(i);
-			bson_append_int32(child, colnm.c_str(), colnm.length(), 1);
+			bson_append_int32(&child, colnm.c_str(), colnm.length(), 1);
 		}
 		for(int i=0;i<(int)qb.getColumnsDesc().size();i++) {
 			std::string colnm = qb.getColumnsDesc().at(i);
-			bson_append_int32(child, colnm.c_str(), colnm.length(), 1);
+			bson_append_int32(&child, colnm.c_str(), colnm.length(), 1);
 		}
-		bson_append_document_end(querySpec, child);
-		bson_destroy(child);
+		bson_append_document_end(querySpec, &child);
 	}
 
 	void* result = NULL;
@@ -503,6 +522,7 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 		{
 			void* ob = getObject((bson_t*)doc, NULL, 0, clasName);
 			reflector->addToContainer(result, ob, clasName, "std::vector", appName);
+			reflector->destroy(ob, clasName, appName);
 		}
 		else
 		{
@@ -550,7 +570,7 @@ void MongoDBDataSourceImpl::storeProperty(const ClassInfo& clas, void* t, void* 
 		valus.push_back(colV);
 		std::string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
 		Method meth = clas.getMethod(methname, argus);
-		reflector->invokeMethod<void*>(t,meth,valus);
+		reflector->invokeMethod<void*>(t,meth,valus,true);
 	}
 }
 
@@ -653,7 +673,7 @@ void MongoDBDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const 
 }
 
 void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName, void* object, bson_t* b, const bool& isIdBsonAppend) {
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	std::string tableName = dsemp.getTableName();
 	strMap clsprpmap = dsemp.getPropertyColumnMapping();
 	std::map<std::string, std::string>::iterator clsprpmapit;
@@ -677,19 +697,57 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName,
 			}
 		}
 
-		if(pf.getType()=="short" || pf.getType()=="int" || pf.getType()=="unsigned short"
-				|| pf.getType()=="char" || pf.getType()=="unsigned char")
+		if(pf.getType()=="short")
 		{
-			long val = reflector->invokeMethod<long>(object,meth,valus);
+			short val = reflector->invokeMethod<short>(object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
-		else if(pf.getType()=="unsigned int" || pf.getType()=="long" || pf.getType()=="unsigned long"
-				|| pf.getType()=="long long")
+		else if(pf.getType()=="int")
+		{
+			int val = reflector->invokeMethod<int>(object,meth,valus);
+			bson_append_int32(b, col.c_str(), col.length(), val);
+		}
+		else if(pf.getType()=="unsigned short")
+		{
+			unsigned short val = reflector->invokeMethod<unsigned short>(object,meth,valus);
+			bson_append_int32(b, col.c_str(), col.length(), val);
+		}
+		else if(pf.getType()=="char")
+		{
+			char val = reflector->invokeMethod<char>(object,meth,valus);
+			bson_append_int32(b, col.c_str(), col.length(), val);
+		}
+		else if(pf.getType()=="unsigned char")
+		{
+			unsigned char val = reflector->invokeMethod<unsigned char>(object,meth,valus);
+			bson_append_int32(b, col.c_str(), col.length(), val);
+		}
+		else if(pf.getType()=="unsigned int")
+		{
+			unsigned int val = reflector->invokeMethod<unsigned int>(object,meth,valus);
+			bson_append_int64(b, col.c_str(), col.length(), val);
+		}
+		else if(pf.getType()=="long")
+		{
+			long val = reflector->invokeMethod<long>(object,meth,valus);
+			bson_append_int64(b, col.c_str(), col.length(), val);
+		}
+		else if(pf.getType()=="unsigned long")
+		{
+			unsigned long val = reflector->invokeMethod<unsigned long>(object,meth,valus);
+			bson_append_int64(b, col.c_str(), col.length(), val);
+		}
+		else if(pf.getType()=="long long")
 		{
 			long long val = reflector->invokeMethod<long long>(object,meth,valus);
 			bson_append_int64(b, col.c_str(), col.length(), val);
 		}
-		else if(pf.getType()=="float" || pf.getType()=="double")
+		else if(pf.getType()=="float")
+		{
+			float val = reflector->invokeMethod<float>(object,meth,valus);
+			bson_append_double(b, col.c_str(), col.length(), val);
+		}
+		else if(pf.getType()=="double")
 		{
 			double val = reflector->invokeMethod<double>(object,meth,valus);
 			bson_append_double(b, col.c_str(), col.length(), val);
@@ -707,134 +765,123 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName,
 		else if(pf.getType().find("std::vector<short,")!=std::string::npos)
 		{
 			std::vector<short> *val = (std::vector<short>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
 				bson_append_int32(b, "", 0, val->at(var));
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<unsigned short,")!=std::string::npos)
 		{
 			std::vector<unsigned short> *val = (std::vector<unsigned short>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
 				bson_append_int32(b, "", 0, val->at(var));
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<int,")!=std::string::npos)
 		{
 			std::vector<int> *val = (std::vector<int>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
 				bson_append_int32(b, "", 0, val->at(var));
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<unsigned int,")!=std::string::npos)
 		{
 			std::vector<unsigned int> *val = (std::vector<unsigned int>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
 				bson_append_int32(b, "", 0, val->at(var));
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<long,")!=std::string::npos)
 		{
 			std::vector<long> *val = (std::vector<long>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
-				bson_append_int32(b, "", 0, val->at(var));
+				bson_append_int64(b, "", 0, val->at(var));
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<unsigned long,")!=std::string::npos)
 		{
 			std::vector<unsigned long> *val = (std::vector<unsigned long>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
 				bson_append_int64(b, "", 0, val->at(var));
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<long long,")!=std::string::npos)
 		{
 			std::vector<long long> *val = (std::vector<long long>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
 				bson_append_int64(b, "", 0, val->at(var));
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<bool,")!=std::string::npos)
 		{
 			std::vector<bool> *val = (std::vector<bool>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
 				bson_append_bool(b, "", 0, val->at(var));
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<float,")!=std::string::npos)
 		{
 			std::vector<float> *val = (std::vector<float>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
 				bson_append_double(b, "", 0, val->at(var));
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<double,")!=std::string::npos)
 		{
 			std::vector<double> *val = (std::vector<double>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
 				bson_append_double(b, "", 0, val->at(var));
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<std::string,")!=std::string::npos
 				|| pf.getType().find("std::vector<std::string,")!=std::string::npos)
 		{
 			std::vector<std::string> *val = (std::vector<std::string>*)reflector->invokeMethodGVP(object,meth,valus);
-			bson_t* child = bson_new();
-			bson_append_array_begin(b, col.c_str(), col.length(), child);
+			bson_t child;
+			bson_append_array_begin(b, col.c_str(), col.length(), &child);
 			for (int var = 0; var < (int)val->size(); ++var) {
 				bson_append_utf8(b, "", 0, val->at(var).c_str(), val->at(var).length());
 			}
-			bson_append_array_end(b, child);
-			bson_destroy(child);
+			bson_append_array_end(b, &child);
 			delete val;
 		}
 		else if(pf.getType().find("std::vector<")!=std::string::npos)
@@ -845,17 +892,16 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName,
 			void *val = reflector->invokeMethodGVP(object,meth,valus);
 			if(val!=NULL)
 			{
-				bson_t* child = bson_new();
-				bson_append_array_begin(b, col.c_str(), col.length(), child);
+				bson_t child;
+				bson_append_array_begin(b, col.c_str(), col.length(), &child);
 				int contSize = reflector->getContainerSize(val, vtyp, "std::vector", appName);
 				for (int var = 0; var < contSize; ++var) {
 					void* contEle = reflector->getContainerElementAt(val, var, vtyp, "std::vector", appName);
 					getBSONObjectFromObject(vtyp, contEle, b, true);
 					delete contEle;
 				}
-				bson_append_array_end(b, child);
-				bson_destroy(child);
-				delete val;
+				bson_append_array_end(b, &child);
+				reflector->destroy(val, meth.getReturnType(), appName);
 			}
 		}
 		else
@@ -863,12 +909,11 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName,
 			void* val = reflector->invokeMethodGVP(object,meth,valus);
 			if(val!=NULL)
 			{
-				bson_t* child = bson_new();
-				bson_append_document_begin(b, col.c_str(), col.length(), child);
+				bson_t child;
+				bson_append_document_begin(b, col.c_str(), col.length(), &child);
 				getBSONObjectFromObject(pf.getType(), val, b, true);
-				bson_append_document_end(b, child);
-				bson_destroy(child);
-				delete val;
+				bson_append_document_end(b, &child);
+				reflector->destroy(val, meth.getReturnType(), appName);
 			}
 		}
 	}
@@ -915,7 +960,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 		bson_iter_init(&i , data);
 	}
 
-    DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
+    DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 
 	ClassInfo clas = reflector->getClassInfo(clasName, appName);
     args argus1;
@@ -952,14 +997,14 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 			{
 				long long* d = new long long(getIterNumericVal(i, t));
 				storeProperty(clas, instance, d, fe);
-				delete d;
+				//delete d;
 				break;
 			}
 			case BSON_TYPE_BOOL:
 			{
 				bool* b = new bool(bson_iter_bool(&i));
 				storeProperty(clas, instance, b, fe);
-				delete b;
+				//delete b;
 				break;
 			}
 			case BSON_TYPE_UTF8:
@@ -967,7 +1012,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				uint32_t len;
 				std::string* s = new std::string(bson_iter_utf8(&i, &len), len);
 				storeProperty(clas, instance, s, fe);
-				delete s;
+				//delete s;
 				break;
 			}
 			case BSON_TYPE_NULL: break;
@@ -976,7 +1021,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				bson_oid_to_string(bson_iter_oid(&i), oidhex);
 				std::string* s = new std::string(oidhex);
 				storeProperty(clas, instance, s, fe);
-				delete s;
+				//delete s;
 				break;
 			}
 			case BSON_TYPE_TIMESTAMP:
@@ -987,7 +1032,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				Date* dt = new Date;
 				*dt = Date::getDateFromSeconds(ts);
 				storeProperty(clas, instance, dt, fe);
-				delete dt;
+				//delete dt;
 				break;
 			}
 			case BSON_TYPE_DATE_TIME:
@@ -997,7 +1042,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				Date* dd = new Date;
 				*dd = Date::getDateFromSeconds(td/1000);
 				storeProperty(clas, instance, dd, fe);
-				delete dd;
+				//delete dd;
 				break;
 			}
 			case BSON_TYPE_DOCUMENT:
@@ -1005,7 +1050,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				void* ob = getObject(NULL, bson_iter_value(&i)->value.v_doc.data, bson_iter_value(&i)->value.v_doc.data_len,
 						fe.getType());
 				storeProperty(clas, instance, ob, fe);
-				delete ob;
+				//delete ob;
 				break;
 			}
 			case BSON_TYPE_ARRAY:
@@ -1031,130 +1076,130 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 
 				if(te=="char")
 				{
-					std::vector<char> veci;
+					std::vector<char>* veci = new std::vector<char>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back((char)v);
+						veci->push_back((char)v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="unsigned char")
 				{
-					std::vector<unsigned char> veci;
+					std::vector<unsigned char>* veci = new std::vector<unsigned char>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back((unsigned char)v);
+						veci->push_back((unsigned char)v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="short")
 				{
-					std::vector<short> veci;
+					std::vector<short>* veci = new std::vector<short>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back((short)v);
+						veci->push_back((short)v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="unsigned short")
 				{
-					std::vector<unsigned short> veci;
+					std::vector<unsigned short>* veci = new std::vector<unsigned short>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back((unsigned short)v);
+						veci->push_back((unsigned short)v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="int")
 				{
-					std::vector<int> veci;
+					std::vector<int>* veci = new std::vector<int>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back((int)v);
+						veci->push_back((int)v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="unsigned int")
 				{
-					std::vector<unsigned int> veci;
+					std::vector<unsigned int>* veci = new std::vector<unsigned int>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back((unsigned int)v);
+						veci->push_back((unsigned int)v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="long")
 				{
-					std::vector<long> veci;
+					std::vector<long>* veci = new std::vector<long>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back((long)v);
+						veci->push_back((long)v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="unsigned long")
 				{
-					std::vector<unsigned long> veci;
+					std::vector<unsigned long>* veci = new std::vector<unsigned long>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back((unsigned long)v);
+						veci->push_back((unsigned long)v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="long long")
 				{
-					std::vector<long long> veci;
+					std::vector<long long>* veci = new std::vector<long long>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back(v);
+						veci->push_back(v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="float")
 				{
-					std::vector<float> veci;
+					std::vector<float>* veci = new std::vector<float>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back((float)v);
+						veci->push_back((float)v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="double")
 				{
-					std::vector<double> veci;
+					std::vector<double>* veci = new std::vector<double>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci.push_back((double)v);
+						veci->push_back((double)v);
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="string" || te=="std::string")
 				{
-					std::vector<std::string> veci;
+					std::vector<std::string>* veci = new std::vector<std::string>;
 					while ( bson_iter_next( &ii ) ){
-						veci.push_back(std::string(bson_iter_utf8(&ii, &len), len));
+						veci->push_back(std::string(bson_iter_utf8(&ii, &len), len));
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else if(te=="bool")
 				{
-					std::vector<bool> veci;
+					std::vector<bool>* veci = new std::vector<bool>;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
-						veci.push_back(bson_iter_bool(&ii));
+						veci->push_back(bson_iter_bool(&ii));
 					}
-					storeProperty(clas, instance, &veci, fe);
+					storeProperty(clas, instance, veci, fe);
 				}
 				else
 				{
@@ -1166,7 +1211,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 							void* ob = getObject(NULL, bson_iter_value(&ii)->value.v_doc.data,
 									bson_iter_value(&ii)->value.v_doc.data_len, te);
 							reflector->addToContainer(veci, ob, te, "std::vector", appName);
-							delete ob;
+							reflector->destroy(ob, te, appName);
 						}
 						storeProperty(clas, instance, veci, fe);
 					}
@@ -1265,6 +1310,11 @@ void MongoDBDataSourceImpl::getMapOfProperties(bson_t* data, std::map<std::strin
 				break;
         }
     }
+}
+
+QueryComponent::QueryComponent() {
+	isAnd = false;
+	undecided = false;
 }
 
 QueryComponent::~QueryComponent() {
@@ -1390,7 +1440,7 @@ bool MongoDBDataSourceImpl::executeInsert(Query& query, void* entity) {
 	bson_t* data = bson_new();
 	getBSONObjectFromObject(query.getClassName(), entity, data, true);
 
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(query.getClassName());
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(query.getClassName());
 	ClassInfo clas = reflector->getClassInfo(query.getClassName(), appName);
 
 	bson_iter_t i;
@@ -1526,7 +1576,7 @@ bool MongoDBDataSourceImpl::executeUpdate(Query& query, void* entity) {
 	bson_iter_init(&i, data);
 	bool isIdFound = bson_iter_find(&i, "_id");
 
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(query.getClassName());
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(query.getClassName());
 	if(isIdFound)
 	{
 		std::string collectionName = dsemp.getTableName();
@@ -1585,7 +1635,7 @@ void* MongoDBDataSourceImpl::executeQuery(Query& cquery, const bool& isObj) {
 	}
 	else
 	{
-		DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(cquery.getClassName());
+		DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(cquery.getClassName());
 		collectionName = dsemp.getTableName();
 	}
 	return getResults(collectionName, cquery, querySpec, fields, isObj, isCountQuery);
@@ -1597,7 +1647,9 @@ void* MongoDBDataSourceImpl::executeQuery(QueryBuilder& qb, const bool& isObj) {
 
 	std::string collectionName = qb.getTableName();
 	bool isClassProps = false;
-	DataSourceEntityMapping dsemp;
+
+	DataSourceEntityMapping temp;
+	DataSourceEntityMapping& dsemp = temp;
 
 	if(qb.getClassName()!="") {
 		dsemp = mapping->getDataSourceEntityMapping(qb.getClassName());

@@ -30,6 +30,10 @@ class YObject
 		int i;
 		std::string j;
 		float c;
+		YObject() {
+			i = 0;
+			c = 0;
+		}
 };
 
 #endif /* YOBJECT_H_ */

@@ -25,8 +25,8 @@ void ServiceHandler::registerWriteRequest(HandlerRequest* request, void* respons
 void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos, ReaderSwitchInterface* switchReaderIntf) {
 	HandlerRequest* req = NULL;
 	int val;
-	if(requestNumMap.find(sif->identifier, val))
-	{
+	//if(requestNumMap.find(sif->identifier, val))
+	//{
 		req = new HandlerRequest;
 		req->request = request;
 		req->response = NULL;
@@ -36,8 +36,8 @@ void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif,
 		req->reqPos = reqPos;
 		req->switchReaderIntf = switchReaderIntf;
 		req->protocol = sif->getProtocol(context);
-		requestNumMap.put(sif->identifier, val+1);
-	}
+		//requestNumMap.put(sif->identifier, val+1);
+	/*}
 	else
 	{
 		if(request!=NULL)
@@ -45,36 +45,37 @@ void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif,
 		if(context!=NULL)
 			delete context;
 	}
-	if(req!=NULL) {
+	if(req!=NULL) {*/
 		handleService(req);
-	}
+	//}
 }
 
 bool ServiceHandler::addOpenRequest(SocketInterface* si) {
-	requestNumMap.put(si->identifier, 0);
+	//requestNumMap.put(si->identifier, 0);
 	return true;
 }
 
 void ServiceHandler::flagDone(SocketInterface* sif) {
-	int val;
+	/*int val;
 	if(requestNumMap.find(sif->identifier, val)) {
 		requestNumMap.put(sif->identifier, val-1);
-	}
+	}*/
 }
 
 bool ServiceHandler::isAvailable(SocketInterface* sif) {
-	return requestNumMap.find(sif->identifier);
+	//return requestNumMap.find(sif->identifier);
+	return true;
 }
 
 void ServiceHandler::addCloseRequest(SocketInterface* si) {
-	tbcSifQ.push(si);
+	//tbcSifQ.push(si);
 	//std::cout << "Closing connection " << si->getDescriptor() << " " << si->identifier << std::endl;
 }
 
 void ServiceHandler::submitServiceTask(Task* task) {
 	if(isThreadPerRequests) {
-		Thread pthread(&taskService, task);
-		pthread.execute();
+		Thread* pthread = new Thread(&taskService, task);
+		pthread->execute();
 	} else {
 		spool.submit(task);
 	}
@@ -82,8 +83,8 @@ void ServiceHandler::submitServiceTask(Task* task) {
 
 void ServiceHandler::submitWriteTask(Task* task) {
 	if(isThreadPerRequestw) {
-		Thread pthread(&taskService, task);
-		pthread.execute();
+		Thread* pthread = new Thread(&taskService, task);
+		pthread->execute();
 	} else {
 		wpool.submit(task);
 	}
@@ -131,8 +132,8 @@ void ServiceHandler::cleanSif(std::map<int, SocketInterface*> connectionsWithTim
 			//std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
 			connectionsWithTimeouts.erase(si->getDescriptor());
 			delete si->sockUtil;
-			delete si;
 			requestNumMap.erase(si->identifier);
+			delete si;
 		}
 		else
 		{
@@ -150,13 +151,19 @@ void ServiceHandler::start() {
 			return;
 		}
 		run = true;
-		//Thread csifthr(&cleanSifs, this);
-		//csifthr.execute();
+		//Thread* pthread = new Thread(&cleanSifs, this);
+		//pthread->execute();
 		mutex.unlock();
 	}
 }
 
 void ServiceHandler::stop() {
+	if(spoolSize > 0) {
+		spool.joinAll();
+	}
+	if(wpoolSize > 0) {
+		wpool.joinAll();
+	}
 	mutex.lock();
 	run = false;
 	mutex.unlock();
@@ -192,6 +199,7 @@ HandlerRequest::HandlerRequest() {
 	switchReaderIntf = NULL;
 	sentResponse = false;
 	protocol = "";
+	reqPos = 0;
 }
 
 HandlerRequest::~HandlerRequest() {
@@ -200,6 +208,15 @@ HandlerRequest::~HandlerRequest() {
 
 SocketUtil* HandlerRequest::getSocketUtil() {
 	return sif->sockUtil;
+}
+
+void HandlerRequest::clearObjects() {
+	if(request!=NULL)delete request;
+	request = NULL;
+	if(context!=NULL)delete context;
+	context = NULL;
+	if(response!=NULL)delete response;
+	response = NULL;
 }
 
 void HandlerRequest::setSentResponse() {
@@ -230,8 +247,9 @@ bool HandlerRequest::isValidWriteRequest() {
 	return reqPos == sif->current + 1;
 }
 
-void HandlerRequest::doneWithWrite() {
+bool HandlerRequest::doneWithWrite() {
 	sif->current += 1;
+	return sif->current == sif->reqPos;
 }
 
 SocketInterface* HandlerRequest::getSif() {

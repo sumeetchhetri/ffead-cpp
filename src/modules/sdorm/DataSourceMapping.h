@@ -51,6 +51,8 @@ class DataSourceEntityMapping {
 	std::string idPropertyName;
 	strMap propertyColumnMapping;
 	strMap columnPropertyMapping;
+	strMap propertyColumnMappingCS;
+	strMap columnPropertyMappingCS;
 	std::vector<DataSourceInternalRelation> relations;
 	friend class Mapping;
 	friend class ConfigurationHandler;
@@ -94,15 +96,16 @@ public:
 class Mapping
 {
 	DataSourceEntityMapping __c;
+	strMap __s;
 	std::string appName;
 	strMap tableClassMapping;
 	std::map<std::string, DataSourceEntityMapping> dseMap;
 	friend class ConfigurationHandler;
 public:
 	void addDataSourceEntityMapping(const DataSourceEntityMapping& dsemp);
-	DataSourceEntityMapping getDataSourceEntityMapping(const std::string& clas);
+	DataSourceEntityMapping& getDataSourceEntityMapping(const std::string& clas);
     std::string getPropertyForColumn(const std::string& tableName, const std::string& columnName);
-    strMap getMappingForTable(const std::string& tableName);
+    strMap& getMappingForTable(const std::string& tableName);
     std::string getTableForClass(const std::string& claz);
     std::string getClassForTable(const std::string& table);
 	const std::string& getAppName() const;

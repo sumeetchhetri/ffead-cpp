@@ -18,11 +18,12 @@ DataSourceInterface::DataSourceInterface() {
 }
 
 DataSourceInterface::~DataSourceInterface() {
+	delete reflector;
 	endSession();
 }
 
 bool DataSourceInterface::executeInsertInternal(Query& query, void* entity) {
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(query.getClassName());
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(query.getClassName());
 	ClassInfo clas = reflector->getClassInfo(query.getClassName(), appName);
 
 	if(dsemp.isIdGenerate() && dsemp.getIdgendbEntityType()!="identity") {
@@ -79,7 +80,7 @@ void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo& cl
 		argus.push_back(fld.getType());
 		std::string methname = "set"+StringUtil::capitalizedCopy(fld.getFieldName());
 		Method meth = clas.getMethod(methname,argus);
-		reflector->invokeMethodGVP(entity,meth,valus);
+		reflector->invokeMethodGVP(entity,meth,valus,true);
 	}
 }
 

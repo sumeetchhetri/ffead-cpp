@@ -130,6 +130,7 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
     int se = tag.find_last_not_of(" ")+1;
     tag = tag.substr(ss,se-ss);
     Element* element = new Element;
+    bool clearEl = true;
 
     //split the tag with a space to get all the attribute sets of the element
     std::string ta;
@@ -151,6 +152,7 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
 				if(parent!="")
 				{
 					element->addAttribute(StringUtil::trimCopy(atname),atvalue,true);
+					clearEl= false;
 				}
 				else
 				{
@@ -240,6 +242,7 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
 			{
 				element->setTagName(StringUtil::trimCopy(ta));
 				par->addElement(element);
+				clearEl= false;
 			}
 			else
 			{
@@ -265,6 +268,7 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
 				else
 					element->setText(txml);
 				par->addElement(element);
+				clearEl= false;
 			}
 			else
 			{
@@ -289,13 +293,15 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
     {
     	std::string errmsg = ("Invalid Start Tag\n");
     	throw XmlParseException(errmsg);
-
     }
     else if(xml.find("<")==std::string::npos && (xml.find("</")!=std::string::npos || xml.find("/>")!=std::string::npos))
 	{
 		std::string errmsg = ("Invalid End Tag\n");
 		throw XmlParseException(errmsg);
-
 	}
+
+    if(clearEl) {
+    	delete element;
+    }
 }
 

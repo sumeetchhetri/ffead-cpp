@@ -37,6 +37,9 @@ class LoggerConfig
 	friend class LoggerFactory;
 	friend class Logger;
 public:
+	LoggerConfig() {
+		vhostNumber = 0;
+	}
 	~LoggerConfig() {
 		if(lock!=NULL) {
 			delete lock;

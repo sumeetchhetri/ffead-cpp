@@ -28,13 +28,14 @@ class QueryClause {
 	}
 	QueryClause()
 	{
-		init();
+		val = 0;
 	}
 	friend class Condition;
 	friend class LogicalGroup;
 	friend class QueryBuilder;
 	friend class GroupClause;
 	friend class JoinClause;
+	friend class ConfigurationHandler;
 public:
 	int get() const
 	{
@@ -47,7 +48,6 @@ public:
 		OR;
 	bool operator==(const QueryClause& other) const
 	{
-		init();
 		if(this->val == other.val)
 		{
 			return true;
@@ -56,7 +56,6 @@ public:
 	}
 	bool operator!=(const QueryClause& other) const
 	{
-		init();
 		if(this->val != other.val)
 		{
 			return true;
@@ -87,13 +86,14 @@ class QueryOperator {
 	}
 	QueryOperator()
 	{
-		init();
+		val = 0;
 	}
 	friend class Condition;
 	friend class LogicalGroup;
 	friend class QueryBuilder;
 	friend class GroupClause;
 	friend class JoinClause;
+	friend class ConfigurationHandler;
 public:
 	int get() const
 	{
@@ -111,7 +111,6 @@ public:
 		LESS_THAN_EQUALS;
 	bool operator==(const QueryOperator& other) const
 	{
-		init();
 		if(this->val == other.val)
 		{
 			return true;
@@ -120,7 +119,6 @@ public:
 	}
 	bool operator!=(const QueryOperator& other) const
 	{
-		init();
 		if(this->val != other.val)
 		{
 			return true;
@@ -151,13 +149,14 @@ class JoinType {
 	}
 	JoinType()
 	{
-		init();
+		val = 0;
 	}
 	friend class Condition;
 	friend class LogicalGroup;
 	friend class QueryBuilder;
 	friend class GroupClause;
 	friend class JoinClause;
+	friend class ConfigurationHandler;
 public:
 	int get() const
 	{
@@ -174,7 +173,6 @@ public:
 		FULL_OUTER;
 	bool operator==(const JoinType& other) const
 	{
-		init();
 		if(this->val == other.val)
 		{
 			return true;
@@ -183,7 +181,6 @@ public:
 	}
 	bool operator!=(const JoinType& other) const
 	{
-		init();
 		if(this->val != other.val)
 		{
 			return true;

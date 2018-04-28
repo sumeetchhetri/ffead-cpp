@@ -10,7 +10,7 @@
 void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	//Timer t;
 	//t.start();
-	if(read())return NULL;
+	if(readFrom())return NULL;
 	if(!isHeadersDone && buffer.find("\r\n\r\n")!=std::string::npos)
 	{
 		bytesToRead = 0;
@@ -29,6 +29,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 				if(hdrc++>maxReqHdrCnt) {
 					close();
 					delete request;
+					request = NULL;
 					return NULL;
 				}
 			} else if(var!=0) {
@@ -41,6 +42,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 			if(bytesToRead>maxEntitySize) {
 				close();
 				delete request;
+				request = NULL;
 				return NULL;
 			}
 		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find("\r\n")!=std::string::npos) {
@@ -124,6 +126,7 @@ Http11Handler::Http11Handler(SocketUtil* sockUtil, const std::string& webpath, c
 Http11Handler::~Http11Handler() {
 	if(request!=NULL) {
 		delete request;
+		request = NULL;
 	}
 }
 
@@ -141,8 +144,10 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 	if(isClosed()) {
 		if(request!=NULL) {
 			delete request;
+			request = NULL;
 		}
 		delete response;
+		response = NULL;
 		//t.end();
 		//CommonUtils::tsWrite += t.timerMilliSeconds();
 		return true;
@@ -167,14 +172,14 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 
 	if(!response->isContentRemains()) {
 		std::string data = response->generateResponse(request);
-		write(data);
+		writeTo(data);
 	} else {
 		std::string data = response->generateResponse(request, false);
-		if(!write(data)) {
+		if(!writeTo(data)) {
 			bool isFirst = true;
 			while(response->hasContent && (data = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
 				isFirst = false;
-				if(write(data)) {
+				if(writeTo(data)) {
 					break;
 				}
 			}
@@ -183,8 +188,10 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 
 	if(request!=NULL) {
 		delete request;
+		request = NULL;
 	}
 	delete response;
+	response = NULL;
 	//t.end();
 	//CommonUtils::tsWrite += t.timerMilliSeconds();
 	return true;

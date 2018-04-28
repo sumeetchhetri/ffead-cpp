@@ -138,7 +138,7 @@ template<class T>
 inline std::map<int, std::string> DataSourceInterface::bulkUpdate(std::vector<T>& vecT) {
 	T t;
 	std::string clasName = CastUtil::getClassName(t);
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	ClassInfo clas = reflector->getClassInfo(clasName, appName);
 	std::vector<void*> dbEntities;
 	std::vector<void*> entities;
@@ -173,7 +173,7 @@ template<class T>
 inline T DataSourceInterface::get(GenericObject& id) {
 	T t;
 	std::string clasName = CastUtil::getClassName(t);
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	std::string idColName = dsemp.getColumnForProperty(dsemp.getIdPropertyName());
 	QueryBuilder qb;
 	qb.fromClass(clasName, BLANK).condition().where(idColName, QueryOperator::EQUALS, id).end();
@@ -182,7 +182,7 @@ inline T DataSourceInterface::get(GenericObject& id) {
 	std::vector<T> vecT;
 	if (vect != NULL) {
 		vecT = *(std::vector<T>*) vect;
-		delete vect;
+		delete (std::vector<T>*)vect;
 		if(vecT.size()>0)
 		{
 			t = vecT.at(0);
@@ -200,7 +200,7 @@ inline std::vector<T> DataSourceInterface::getAll() {
 	void* vect = executeQuery(query, true);
 	if (vect != NULL) {
 		vecT = *(std::vector<T>*) vect;
-		delete vect;
+		delete (std::vector<T>*)vect;
 	}
 	return vecT;
 }
@@ -214,7 +214,7 @@ inline std::vector<T> DataSourceInterface::getList(Query& query) {
 	void* vect = executeQuery(query, true);
 	if (vect != NULL) {
 		vecT = *(std::vector<T>*) vect;
-		delete vect;
+		delete (std::vector<T>*)vect;
 	}
 	return vecT;
 }
@@ -228,7 +228,7 @@ inline T DataSourceInterface::get(Query& query) {
 	std::vector<T> vecT;
 	if (vect != NULL) {
 		vecT = *(std::vector<T>*) vect;
-		delete vect;
+		delete (std::vector<T>*)vect;
 		if(vecT.size()>0)
 		{
 			t = vecT.at(0);
@@ -246,7 +246,7 @@ inline std::vector<T> DataSourceInterface::getList(QueryBuilder& qb) {
 	void* vect = executeQuery(qb, true);
 	if (vect != NULL) {
 		vecT = *(std::vector<T>*) vect;
-		delete vect;
+		delete (std::vector<T>*)vect;
 	}
 	return vecT;
 }
@@ -260,7 +260,7 @@ inline T DataSourceInterface::get(QueryBuilder& qb) {
 	std::vector<T> vecT;
 	if (vect != NULL) {
 		vecT = *(std::vector<T>*) vect;
-		delete vect;
+		delete (std::vector<T>*)vect;
 		if(vecT.size()>0)
 		{
 			t = vecT.at(0);

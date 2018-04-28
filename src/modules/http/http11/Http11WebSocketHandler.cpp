@@ -271,7 +271,7 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, void*
 }
 
 void* Http11WebSocketHandler::readRequest(void*& context, int& pending, int& reqPos) {
-	if(read())return NULL;
+	if(readFrom())return NULL;
 
 	void* request = NULL;
 	Http11WebSocketDataFrame* frame = NULL;
@@ -321,11 +321,11 @@ bool Http11WebSocketHandler::writeResponse(void* req, void* res, void* context) 
 	frame.payloadLength = wsdata->data.length();
 	//We will not set application data here, we will directly send the data as
 	//we have computed other control options
-	write(frame.getFrameData());
+	writeTo(frame.getFrameData());
 	if(req!=NULL) {
 		delete (WebSocketData*)req;
 	}
- 	bool fl = write(wsdata->data);
+ 	bool fl = writeTo(wsdata->data);
 	delete wsdata;
 	return fl;
 }

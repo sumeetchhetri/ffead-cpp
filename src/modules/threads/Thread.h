@@ -34,6 +34,7 @@ class ThreadFunctor
 	friend class Thread;
 	ThreadFunc f;
 	void* arg;
+	Thread* _t;
 };
 
 class Thread {

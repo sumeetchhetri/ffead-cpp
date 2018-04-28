@@ -23,8 +23,7 @@
 #include "TestForm.h"
 
 TestForm::TestForm() {
-	// TODO Auto-generated constructor stub
-
+	num = 0;
 }
 
 std::string TestForm::getChe() const

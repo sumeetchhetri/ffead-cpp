@@ -23,8 +23,7 @@
 #include "Method.h"
 
 Method::Method() {
-	// TODO Auto-generated constructor stub
-
+	isstat = false;
 }
 
 Method::~Method() {

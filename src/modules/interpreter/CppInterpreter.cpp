@@ -165,7 +165,7 @@ void CppInterpreter::storeCustom(const std::string& type, const std::string& nam
 	void *_temp = ref.newInstanceGVP(ctor);
 	GenericObject o;
     o.set(_temp, type);
-    delete _temp;
+    ref.destroy(_temp, type);
     localVariables[name] = o;
 }
 

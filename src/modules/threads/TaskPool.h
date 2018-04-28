@@ -64,6 +64,7 @@ public:
 	bool tasksPending();
 	bool tasksPPending();
 	void start();
+	void stop();
 };
 
 #endif /* TASKPOOL_H_ */

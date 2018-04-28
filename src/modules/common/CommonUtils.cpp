@@ -32,6 +32,7 @@ long long CommonUtils::tsService12 = 0;
 long long CommonUtils::cSocks = 0;
 long long CommonUtils::cReqs = 0;
 long long CommonUtils::cResps = 0;
+std::vector<std::string*> CommonUtils::appNames;
 
 int CommonUtils::getProcessorCount() {
 #if defined(OS_MINGW)
@@ -61,11 +62,19 @@ int CommonUtils::getProcessorCount() {
 #endif
 }
 
+void CommonUtils::clear() {
+	for(int i=0;i<(int)appNames.size();i++) {
+		delete appNames.at(i);
+	}
+}
+
 void CommonUtils::setAppName(const std::string& appName)
 {
 	if(contextName.get()==NULL)
 	{
-		contextName.set(new std::string(appName));
+		std::string* s = new std::string(appName);
+		appNames.push_back(s);
+		contextName.set(s);
 	}
 	else
 	{

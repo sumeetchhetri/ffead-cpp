@@ -69,7 +69,9 @@ void GenericObject::internalCopy(const GenericObject& obj) {
 
 void GenericObject::internalClear() {
 	if(objVal!=NULL) {
-		delete objVal;
+		Reflector r;
+		r.destroy(objVal, typeName);
+		//delete objVal;
 		objVal = NULL;
 	}
 	if(cstr.size()>0) {

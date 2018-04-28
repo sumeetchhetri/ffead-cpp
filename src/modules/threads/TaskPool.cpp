@@ -174,14 +174,18 @@ bool TaskPool::tasksPending() {
 	return tp;
 }
 
+void TaskPool::stop() {
+	c_mutex->lock();
+	++count;
+	c_mutex->conditionalNotifyAll();
+	c_mutex->unlock();
+	Thread::sSleep(1);
+}
+
 TaskPool::~TaskPool() {
 	runFlag = false;
-	while(!this->complete)
-	{
-		Thread::sSleep(1);
-	}
 	if(allowScheduledTasks) {
-		delete mthread;
+		//delete mthread;
 	}
 	delete tasks;
 	delete ptasks;

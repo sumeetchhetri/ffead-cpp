@@ -43,10 +43,16 @@ LoggerFactory::~LoggerFactory()
 	dupLogNames.clear();
 	std::map<std::string, LoggerConfig*>::iterator it;
 	for (it=configs.begin();it!=configs.end();++it) {
+		std::cout << ("Clearing logger config for " + it->second->name) << std::endl;
 		it->second->lock->lock();
+		if(it->second->mode=="FILE" && it->second->file!="" && it->second->out!=NULL) {
+			delete it->second->out;
+		}
+		it->second->lock->unlock();
 		delete it->second;
 	}
 	configs.clear();
+	std::cout << ("Destructed LoggerFactory") << std::endl;
 }
 
 void LoggerFactory::clear() {
@@ -54,16 +60,7 @@ void LoggerFactory::clear() {
 	{
 		return;
 	}
-	std::map<std::string, LoggerConfig*>::iterator it;
-	for(it=instance->configs.begin();it!=instance->configs.end();++it) {
-		std::cout << ("Clearing logger config for " + it->second->name) << std::endl;
-		if(it->second->mode=="FILE" && it->second->file!="" && it->second->out!=NULL) {
-			delete it->second->out;
-		}
-		delete it->second;
-	}
 	delete instance;
-	std::cout << ("Destructed LoggerFactory") << std::endl;
 }
 
 void LoggerFactory::setVhostNumber(const int& vhn) {

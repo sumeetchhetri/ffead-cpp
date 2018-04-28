@@ -11,7 +11,7 @@
 #include <typeinfo>
 #include <wchar.h>
 #include "XMLSerialize.h"
-
+#include "Reflector.h"
 
 class GenericObject {
 	std::string typeName;

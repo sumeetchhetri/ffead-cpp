@@ -30,6 +30,10 @@ class MarkerYObject
 		int i;
 		std::string j;
 		float c;
+		MarkerYObject() {
+			i = 0;
+			c = 0;
+		}
 };
 
 #endif /* MarkerYOBJECT_H_ */

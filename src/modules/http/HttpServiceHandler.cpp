@@ -35,28 +35,35 @@ void HttpServiceHandler::handleWrite(HandlerRequest* handlerRequest)
 }
 
 void HttpWriteTask::run() {
+	//Logger logger = LoggerFactory::getLogger("HttpWriteTask");
 	if(handlerRequest->getSif()->isClosed()) {
-		if(handlerRequest->getRequest()!=NULL) {
-			delete handlerRequest->getRequest();
-		}
-		if(handlerRequest->getContext()!=NULL) {
-			delete handlerRequest->getContext();
-		}
-		if(handlerRequest->getResponse()!=NULL) {
-			delete handlerRequest->getResponse();
+		handlerRequest->clearObjects();
+		bool flag = handlerRequest->doneWithWrite();
+		if(flag && handlerRequest->getSif()->isClosed()) {
+			//logger << "Delete Sif from writer " << handlerRequest->getSif()->identifier << std::endl;
+			handlerRequest->sh->donelist.put(handlerRequest->getSif()->identifier, true);
+			delete handlerRequest->getSif()->sockUtil;
+			delete handlerRequest->getSif();
 		}
 		return;
 	}
 
 	if(!handlerRequest->isValidWriteRequest()) {
 		service->registerWriteRequest(handlerRequest, handlerRequest->getResponse());
+		return;
 	}
 
 	//CommonUtils::cResps += 1;
 
 	handlerRequest->getSif()->writeResponse(handlerRequest->getRequest(), handlerRequest->getResponse(), handlerRequest->getContext());
 
-	handlerRequest->doneWithWrite();
+	bool flag = handlerRequest->doneWithWrite();
+	if(flag && handlerRequest->getSif()->isClosed()) {
+		//logger << "Delete Sif from writer " << handlerRequest->getSif()->identifier << std::endl;
+		handlerRequest->sh->donelist.put(handlerRequest->getSif()->identifier, true);
+		delete handlerRequest->getSif()->sockUtil;
+		delete handlerRequest->getSif();
+	}
 }
 
 HttpServiceTask::HttpServiceTask() {
@@ -69,9 +76,6 @@ HttpServiceTask::HttpServiceTask(HandlerRequest* handlerRequest, HttpServiceHand
 }
 
 HttpServiceTask::~HttpServiceTask() {
-	if(handlerRequest!=NULL) {
-		//delete handlerRequest;
-	}
 }
 
 HttpWriteTask::HttpWriteTask() {
@@ -86,12 +90,8 @@ HttpWriteTask::~HttpWriteTask() {
 
 void HttpServiceTask::run() {
 	if(handlerRequest->getSif()->isClosed()) {
-		if(handlerRequest->getRequest()!=NULL) {
-			delete handlerRequest->getRequest();
-		}
-		if(handlerRequest->getContext()!=NULL) {
-			delete handlerRequest->getContext();
-		}
+		handlerRequest->clearObjects();
+		delete handlerRequest;
 		return;
 	}
 

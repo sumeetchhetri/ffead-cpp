@@ -18,7 +18,8 @@ Query SQLDataSourceImpl::fromQueryBuilder(QueryBuilder& qb) {
 	std::string alias = qb.getAlias();
 	bool isClassProps = false;
 
-	DataSourceEntityMapping dsemp;
+	DataSourceEntityMapping temp;
+	DataSourceEntityMapping& dsemp = temp;
 
 	q.setClassName(qb.getClassName());
 	if(qb.getClassName()!="") {
@@ -35,7 +36,7 @@ Query SQLDataSourceImpl::fromQueryBuilder(QueryBuilder& qb) {
 	if(qb.isAllCols() || qb.getColumns().size()==0)
 	{
 		int var = 1;
-		strMap tabcolmap = this->mapping->getMappingForTable(tableNm);
+		strMap& tabcolmap = this->mapping->getMappingForTable(tableNm);
 		int fldsiz = (int)tabcolmap.size();
 		strMap::iterator it;
 		for(it=tabcolmap.begin();it!=tabcolmap.end();it++)
@@ -475,7 +476,7 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 	std::string clasName = q.getClassName();
 	int V_OD_erg;// result of functions
 
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 
 	ClassInfo clas = reflector->getClassInfo(clasName, appName);
 	std::string tableName = dsemp.getTableName();
@@ -604,7 +605,7 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 		if(norel)
 		{
 			reflector->addToContainer(vecT,t,clasName,"std::vector",appName);
-			delete t;
+			reflector->destroy(t, clasName, appName);
 		}
 
 		V_OD_erg=SQLFetch(V_OD_hstmt);
@@ -721,9 +722,9 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 	double dd;
 	float df;
 	bool db;
-	Date* ddt;
-	std::string *ds;
-	std::wstring* dws;
+	Date* ddt = NULL;
+	std::string *ds = NULL;
+	std::wstring* dws = NULL;
 
 	switch (colDataType) {
 		case SQL_SMALLINT:
@@ -923,15 +924,6 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		delete ds;
 		col = temp;
 	}
-	else//if its not a vector means its a one-to-one relationship
-	{
-		if(ds!=NULL) {
-			delete ds;
-		}
-		if(ddt!=NULL) {
-			delete ddt;
-		}
-	}
 	if(col!=NULL)
 	{
 		args argus;
@@ -943,7 +935,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		Method meth = clas.getMethod(methname,argus);
 		reflector->invokeMethodUnknownReturn(t,meth,valus);
 		var++;
-		delete col;
+		reflector->destroy(col, te);
 	}
 	return var;
 #endif
@@ -1087,12 +1079,12 @@ void* SQLDataSourceImpl::executeQueryObject(Query& cquery)
 {
 	std::string clasName = cquery.getClassName();
 
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	std::string tableName = dsemp.getTableName();
 	ClassInfo clas = reflector->getClassInfo(clasName,appName);
 	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
 	std::string query = "select ";
-	strMap tabcolmap = this->mapping->getMappingForTable(tableName);
+	strMap& tabcolmap = this->mapping->getMappingForTable(tableName);
 	strMap::iterator it;
 	int fldsiz = (int)tabcolmap.size();
 	int var = 1;
@@ -1114,7 +1106,7 @@ void* SQLDataSourceImpl::executeQueryObject(Query& cquery)
 			if(tableName1!="")
 			{
 				query += ",";
-				DataSourceEntityMapping rdsemp = mapping->getDataSourceEntityMapping(relation.getClsName());
+				DataSourceEntityMapping& rdsemp = mapping->getDataSourceEntityMapping(relation.getClsName());
 				strMap tabcolmap = rdsemp.getColumnPropertyMapping();
 				strMap::iterator it;
 				int fldsiz = (int)tabcolmap.size();
@@ -1576,7 +1568,7 @@ void SQLDataSourceImpl::empty(const std::string& clasName) {
 }
 
 long SQLDataSourceImpl::getNumRows(const std::string& clasName) {
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	Query query("SELECT COUNT(*) FROM "+dsemp.getTableName(), clasName);
 	std::vector<std::map<std::string, GenericObject> > tv;
 	void* temp = executeQueryInternal(query, false);
@@ -1635,7 +1627,7 @@ std::vector<std::map<std::string, GenericObject> > SQLDataSourceImpl::execute(Qu
 bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
 	std::string clasName = cquery.getClassName();
 
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	ClassInfo clas = reflector->getClassInfo(clasName,appName);
 	fldMap fields = clas.getFields();
 
@@ -1670,7 +1662,7 @@ bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
 			void* temp = reflector->invokeMethodGVP(entity,meth,valus);
 			cquery.getPropPosVaues()[var+1].set(temp, fld.getType());
 			vldFields.push_back(columnName);
-			delete temp;
+			reflector->destroy(temp, fld.getType(), appName);
 		}
 		else
 		{
@@ -1759,7 +1751,7 @@ bool SQLDataSourceImpl::executeUpdateBulk(Query& query, std::vector<void*> entit
 bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 	std::string clasName = cquery.getClassName();
 
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 
 	std::string tableName = dsemp.getTableName();
 	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
@@ -1791,7 +1783,7 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 			void* temp = reflector->invokeMethodGVP(entity,meth,valus);
 			cquery.getPropPosVaues()[var+1].set(temp, fld.getType());
 			vldFields.push_back(columnName);
-			delete temp;
+			reflector->destroy(temp, fld.getType(), appName);
 		}
 		else
 		{
@@ -1846,7 +1838,7 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 
 bool SQLDataSourceImpl::remove(const std::string& clasName, GenericObject& id) {
 	Query cquery("", clasName);
-	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
+	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 
 	std::string idcolname = dsemp.getColumnForProperty(dsemp.getIdPropertyName());
 	std::string tableName = dsemp.getTableName();

@@ -24,6 +24,7 @@ class QueryComponent {
 	QueryComponent* parent;
 	bson_t* actualQuery;
 	friend class MongoDBDataSourceImpl;
+	QueryComponent();
 	virtual ~QueryComponent();
 };
 

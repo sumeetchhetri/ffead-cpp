@@ -23,8 +23,7 @@
 #include "MarkerTest.h"
 
 MarkerTest::MarkerTest() {
-	// TODO Auto-generated constructor stub
-
+	id = 0;
 }
 
 MarkerTest::~MarkerTest() {

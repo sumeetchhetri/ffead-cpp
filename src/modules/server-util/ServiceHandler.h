@@ -32,6 +32,7 @@ class HandlerRequest {
 	ServiceHandler* sh;
 	ReaderSwitchInterface* switchReaderIntf;
 	friend class ServiceHandler;
+	friend class HttpWriteTask;
 	HandlerRequest();
 public:
 	SocketUtil* getSocketUtil();
@@ -45,13 +46,15 @@ public:
 	SocketInterface* getSif();
 	ReaderSwitchInterface* getSwitchReaderIntf();
 	bool isValidWriteRequest();
-	void doneWithWrite();
+	bool doneWithWrite();
+	void clearObjects();
 };
 
 class ServiceHandler {
 	Mutex mutex;
 	ConcurrentQueue<SocketInterface*> tbcSifQ;
 	ConcurrentMap<long, int> requestNumMap;
+	ConcurrentMap<long, bool> donelist;
 	bool run;
 	bool isThreadPerRequests;
 	bool isThreadPerRequestw;
@@ -70,6 +73,7 @@ class ServiceHandler {
 	void cleanSif(std::map<int, SocketInterface*> connectionsWithTimeouts);
 	friend class RequestReaderHandler;
 	friend class HandlerRequest;
+	friend class HttpWriteTask;
 protected:
 	void submitServiceTask(Task* task);
 	void submitWriteTask(Task* task);

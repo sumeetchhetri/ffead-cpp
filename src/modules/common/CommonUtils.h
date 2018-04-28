@@ -39,7 +39,9 @@ class CommonUtils {
 	static ThreadLocal contextName;
 	static std::map<std::string, std::string> mimeTypes;
 	static std::map<std::string, std::string> locales;
+	static std::vector<std::string*> appNames;
 public:
+	static void clear();
 	static int getProcessorCount();
 	static unsigned long long charArrayToULongLong(const std::string& l, int ind);
 	static unsigned long long charArrayToULongLong(const std::string& l);

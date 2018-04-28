@@ -24,12 +24,14 @@
 
 FFEADContext::FFEADContext()
 {
+	cleared = false;
 	reflector = NULL;
 	logger = LoggerFactory::getLogger("FFEADContext");
 }
 
 FFEADContext::FFEADContext(const std::string& depFile, const std::string& appName)
 {
+	cleared = false;
 	logger = LoggerFactory::getLogger("FFEADContext");
 	XmlParser parser("Parser");
 	Document doc;
@@ -111,7 +113,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 
 FFEADContext::~FFEADContext()
 {
-	this->clear();
+	//this->clearAllSingletonBeans();
 	if(reflector!=NULL)delete reflector;
 }
 
@@ -131,11 +133,15 @@ void* FFEADContext::getBean(const Bean& bean)
 	{
 		type = bean.clas;
 	}
+	std::string k = bean.name+";"+type;
 	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
 	{
-		if(objects.find(bean.appName+type)!=objects.end())
+		if(objects.find(bean.appName)!=objects.end())
 		{
-			return objects[bean.appName+type];
+			if(objects[bean.appName].find(k)!=objects[bean.appName].end())
+			{
+				return objects[bean.appName][k];
+			}
 		}
 	}
 	if(bean.inbuilt!="" && bean.value!="")
@@ -280,7 +286,14 @@ void* FFEADContext::getBean(const Bean& bean)
 	}
 	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
 	{
-		objects[bean.appName+type] = _temp;
+		if(objects.find(bean.appName)==objects.end())
+		{
+			objects[bean.appName];
+		}
+		if(objects[bean.appName].find(k)==objects[bean.appName].end())
+		{
+			objects[bean.appName][k] = _temp;
+		}
 	}
 	return _temp;
 }
@@ -295,54 +308,69 @@ void* FFEADContext::getBean(const std::string& beanName, const std::string& appN
 	return NULL;
 }
 
-void FFEADContext::release(const std::string& beanName, const std::string& appName)
+void FFEADContext::release(void* instance, const std::string& beanName, const std::string& appName)
 {
 	if(beanName!="" && beans.find(appName+beanName)!=beans.end())
 	{
 		Bean& bean = beans[appName+beanName];
 		if(StringUtil::toLowerCopy(bean.scope)=="prototype")
 		{
-			if(objects.find(bean.appName+bean.clas)!=objects.end() && objects[bean.appName+bean.clas]!=NULL)
+			std::string type;
+			if(bean.inbuilt!="" && bean.value!="")
 			{
-				delete objects[bean.appName+bean.clas];
-				objects.erase(bean.appName+bean.clas);
+				type = bean.inbuilt;
 			}
+			else
+			{
+				type = bean.clas;
+			}
+			reflector->destroy(instance, type, appName);
 		}
 	}
 }
 
 void FFEADContext::clear(const std::string& appName)
 {
-	if(cleared)
-		return;
-	std::map<std::string,void*>::iterator objectsIter;
-	for (objectsIter=objects.begin();objectsIter != objects.end();objectsIter++)
+	std::map<std::string, void*>::iterator objectsIter;
+	for (objectsIter=objects[appName].begin();objectsIter != objects[appName].end();objectsIter++)
 	{
-		if(objectsIter->first=="string" || objectsIter->first=="std::string" || objectsIter->first=="int" || objectsIter->first=="long"
-			|| objectsIter->first=="double" || objectsIter->first=="float" || objectsIter->first=="bool"
-				|| objectsIter->first=="char")
-			delete objectsIter->second;
-		else
-		{
-			reflector->destroy(objectsIter->second,objectsIter->first, appName);
-		}
+		std::string k = objectsIter->first;
+		k = k.substr(k.find(";")+1);
+		reflector->destroy(objectsIter->second, k, appName);
 	}
-	cleared = true;
+	objects[appName].clear();
 }
 
-void FFEADContext::addBean(const Bean& bean)
+void FFEADContext::addBean(Bean& bean)
 {
+	StringUtil::trim(bean.name);
+	if(bean.name=="") {
+#ifdef HAVE_LIBUUID
+		uuid_t idt;
+		uuid_generate(idt);
+		std::string ids;
+		for(int i=0;i<16;i++){
+			ids.push_back(idt[i]);
+		}
+		bean.name = ids;
+#else
+		bean.name = CastUtil<std::string>(Timer::getCurrentTime());
+#endif
+	}
 	if(bean.name!="" && beans.find(bean.appName+bean.name)==beans.end())
 		beans[bean.appName+bean.name] = bean;
 }
 
 void FFEADContext::clearAllSingletonBeans(const std::map<std::string, bool>& servingContexts)
 {
+	if(cleared)
+		return;
 	std::map<std::string, bool>::const_iterator it;
 	for (it=servingContexts.begin();it!=servingContexts.end();it++)
 	{
 		clear(it->first);
 	}
+	cleared = true;
 }
 
 void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts)
@@ -392,6 +420,7 @@ Bean::Bean(const std::string& name, const std::string& value, const std::string&
 
 Bean::Bean()
 {
+	this->realbean = false;
 	this->appName = "default";
 }
 

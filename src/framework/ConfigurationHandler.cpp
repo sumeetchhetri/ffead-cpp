@@ -122,6 +122,10 @@ void ConfigurationHandler::normalizeUrl(const std::string& appName, std::string&
 
 void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const std::string& incpath, const std::string& rtdcfpath, const std::string& serverRootDirectory, const std::string& respath)
 {
+	QueryClause::init();
+	QueryOperator::init();
+	JoinType::init();
+
 	Reflection ref;
 	//First initialize framework markers
 	//Start Rest-full markers

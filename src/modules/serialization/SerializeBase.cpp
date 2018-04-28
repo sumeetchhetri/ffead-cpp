@@ -1287,7 +1287,7 @@ void* SerializeBase::_handleAllUnSerialization(const std::string& serVal, std::s
 			base->cleanValidUnserializableObject(mintermediateObject);
 		}
 	}
-	if(StringUtil::trimCopy(serVal)!="" && serObject!=NULL)
+	if(StringUtil::trimCopy(serVal)!="" && intermediateObject!=NULL)
 	{
 		base->cleanUnserializableObject(intermediateObject);
 	}

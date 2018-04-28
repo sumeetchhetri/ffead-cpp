@@ -14,6 +14,7 @@ RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const SOCKET& li
 	this->run = false;
 	this->siIdentifierSeries = 1;
 	this->sf = NULL;
+	this->complete = 0;
 }
 
 void RequestReaderHandler::switchReaders(SocketInterface* prev, SocketInterface* next) {
@@ -25,34 +26,37 @@ void RequestReaderHandler::registerRead(SocketInterface* si) {
 }
 
 void RequestReaderHandler::start() {
+	if(run) {
+		return;
+	}
 	if(!run) {
-		cMutex.lock();
-		if(run) {
-			cMutex.unlock();
-			return;
-		}
 		run = true;
 		selector.initialize(listenerSock, -1);
-		Thread thr(&handle, this);
-		thr.execute();
-		Thread hthr(&handleTimeouts, this);
-		hthr.execute();
-		cMutex.unlock();
+		Thread* pthread = new Thread(&handle, this);
+		pthread->execute();
+		//Thread* pthread1 = new Thread(&handleTimeouts, this);
+		//pthread1->execute();
 	}
 }
 
-void RequestReaderHandler::stop() {
-	cMutex.lock();
+void RequestReaderHandler::stop(std::string ip, int port, bool isSSLEnabled) {
 	run = false;
-	cMutex.unlock();
+	while(complete<1) {
+		Thread::mSleep(500);
+
+		ClientInterface* client;
+		if(isSSLEnabled)
+			client = new SSLClient;
+		else
+			client = new Client;
+		client->connectionUnresolv(ip, port);
+		client->closeConnection();
+		delete client;
+	}
 }
 
 bool RequestReaderHandler::isActive() {
-	bool fl = false;
-	cMutex.lock();
-	fl = run;
-	cMutex.unlock();
-	return fl;
+	return run;
 }
 
 void RequestReaderHandler::registerSocketInterfaceFactory(const SocketInterfaceFactory& f) {
@@ -60,13 +64,14 @@ void RequestReaderHandler::registerSocketInterfaceFactory(const SocketInterfaceF
 }
 
 void RequestReaderHandler::addSf(SocketInterface* psi) {
-	psi->t.start();
+	int tt = Timer::getTimestamp() - 1203700;
+	psi->t = tt;
 	psi->sockUtil->sel = &selector;
 	psi->setIdentifier(siIdentifierSeries++);
 	connections[psi->getDescriptor()] = psi;
 	if(psi->getTimeout()>0)
 	{
-		addToTimeoutSocks.push(psi);
+		//addToTimeoutSocks.push(psi);
 	}
 	selector.registerForEvent(psi->getDescriptor());
 	shi->addOpenRequest(psi);
@@ -74,7 +79,7 @@ void RequestReaderHandler::addSf(SocketInterface* psi) {
 }
 
 RequestReaderHandler::~RequestReaderHandler() {
-	stop();
+	//stop();
 }
 
 void* RequestReaderHandler::handleTimeouts(void* inp) {
@@ -105,7 +110,8 @@ void* RequestReaderHandler::handleTimeouts(void* inp) {
 		{
 			for(it=ins->connectionsWithTimeouts.begin();it!=ins->connectionsWithTimeouts.end();)
 			{
-				if(it->second->t.elapsedMilliSeconds()>=it->second->getTimeout())
+				int tt = (Timer::getTimestamp() - 1203700) + it->second->getTimeout();
+				if(it->second->t>=tt)
 				{
 					logger << "timedout connection " << it->second->getDescriptor() << " " << it->second->identifier << std::endl;
 					ins->timedoutSocks.push(it->second);
@@ -119,6 +125,7 @@ void* RequestReaderHandler::handleTimeouts(void* inp) {
 		}
 		Thread::sSleep(1);
 	}
+	ins->complete += 1;
 	return NULL;
 }
 
@@ -134,7 +141,7 @@ void* RequestReaderHandler::handle(void* inp) {
 
 		Timer cdt(false);
 
-		if(ins->isNotRegisteredListener)
+		/*if(ins->isNotRegisteredListener)
 		{
 			cdt.start();
 			std::vector<SocketInterface*> pds;
@@ -161,7 +168,9 @@ void* RequestReaderHandler::handle(void* inp) {
 			ins->selector.unRegisterForEvent(tsi->getDescriptor());
 			ins->connections.erase(tsi->getDescriptor());
 			ins->shi->addCloseRequest(tsi);
-		}
+			delete tsi->sockUtil;
+			delete tsi;
+		}*/
 
 		cdt.start();
 		SocketInterface* rsi = NULL;
@@ -170,13 +179,13 @@ void* RequestReaderHandler::handle(void* inp) {
 			logger << "Swicthing protocols.." << std::endl;
 			if(ins->connections[rsi->getDescriptor()]->getTimeout()>0)
 			{
-				ins->remFromTimeoutSocks.push(rsi);
+				//ins->remFromTimeoutSocks.push(rsi);
 			}
 			delete ins->connections[rsi->getDescriptor()];
 			ins->connections[rsi->getDescriptor()] = rsi;
 			if(rsi->getTimeout()>0)
 			{
-				ins->addToTimeoutSocks.push(rsi);
+				//ins->addToTimeoutSocks.push(rsi);
 			}
 		}
 		//t0.end();
@@ -222,7 +231,7 @@ void* RequestReaderHandler::handle(void* inp) {
 						SocketUtil* sockUtil = new SocketUtil(newSocket);
 						SocketInterface* sockIntf = ins->sf(sockUtil);
 						ins->addSf(sockIntf);
-
+						//logger << "New Sif " << sockIntf->identifier << std::endl;
 						//CommonUtils::cSocks += 1;
 					}
 #else
@@ -253,8 +262,13 @@ void* RequestReaderHandler::handle(void* inp) {
 							si->onClose();
 							ins->selector.unRegisterForEvent(si->getDescriptor());
 							ins->connections.erase(si->getDescriptor());
-							ins->remFromTimeoutSocks.push(si);
-							ins->shi->addCloseRequest(si);
+							if(si->current == si->reqPos) {
+								//logger << "Delete Sif " << si->identifier << std::endl;
+								delete si->sockUtil;
+								delete si;
+							}
+							//ins->remFromTimeoutSocks.push(si);
+							//ins->shi->addCloseRequest(si);
 							pending = 0;
 							break;
 						} else if(request!=NULL) {
@@ -271,20 +285,24 @@ void* RequestReaderHandler::handle(void* inp) {
 		//CommonUtils::tsProcess += t2.timerMilliSeconds();
 	}
 
-	Thread::mSleep(600);
-	std::map<int, bool> donelist;
+	while(ins->shi->run) {
+		Thread::mSleep(100);
+	}
+
 	SocketInterface* si = NULL;
 	while(ins->pendingSocks.pop(si))
 	{
-		donelist[si->getDescriptor()] = true;
+		ins->shi->donelist.put(si->identifier, true);
 		si->close();
+		//logger << "Delete Sif " << si->identifier << std::endl;
 		delete si->sockUtil;
 		delete si;
 	}
 	std::map<int, SocketInterface*>::iterator it;
 	for(it=ins->connections.begin();it!=ins->connections.end();++it) {
-		if(donelist.find(it->first)==donelist.end()) {
+		if(!ins->shi->donelist.find(it->second->identifier)) {
 			it->second->close();
+			//logger << "Delete Sif " << it->second->identifier << std::endl;
 			delete it->second->sockUtil;
 			delete it->second;
 		}
@@ -308,5 +326,6 @@ void* RequestReaderHandler::handle(void* inp) {
 	{
 	}
 	Thread::mSleep(500);
+	ins->complete += 1;
 	return 0;
 }

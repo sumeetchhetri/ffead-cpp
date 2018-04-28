@@ -194,8 +194,8 @@ void* NBServer::servicing(void* arg)
 					fcntl(descriptor, F_SETFL, O_SYNC);
 				#endif
 
-				Thread pthread(serv, &descriptor);
-				pthread.execute();
+				Thread* pthread = new Thread(serv, &descriptor);
+				pthread->execute();
 			}
 		}
 	}
@@ -331,8 +331,8 @@ void NBServer::start()
 	if(!started && runn)
 	{
 		started = true;
-		Thread servicing_thread(&servicing, this);
-		servicing_thread.execute();
+		Thread* pthread = new Thread(&servicing, this);
+		pthread->execute();
 	}
 	lock.unlock();
 }

@@ -195,6 +195,7 @@ Marker MarkerHandler::processMarker(std::string markerText, const int& where) {
 }
 
 Marker::Marker() {
+	reqAttrSize = 0;
 	this->type = -1;
 }
 

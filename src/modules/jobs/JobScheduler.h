@@ -47,11 +47,10 @@ class JobScheduler {
 	class JobTask : public Task
 	{
 		void* objIns;
-		std::string cron;
+		std::string cron, clas;
 		std::string name, appName;
 		Method meth;
-		bool doRun;
-		//Mutex mutex;
+		std::atomic<bool> doRun;
 		void run();
 		friend class JobScheduler;
 	};

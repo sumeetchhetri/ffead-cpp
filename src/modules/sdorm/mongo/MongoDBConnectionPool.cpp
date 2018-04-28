@@ -125,6 +125,8 @@ void MongoDBConnectionPool::destroy() {
 	mongoc_client_pool_t *pool = (mongoc_client_pool_t*)getEnv();
 	mongoc_client_pool_destroy(pool);
 	mongoc_uri_destroy(uri);
+
+	mongoc_cleanup();
 }
 
 MongoDBConnectionPool::~MongoDBConnectionPool() {

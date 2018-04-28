@@ -25,6 +25,7 @@
 
 MessageHandler::MessageHandler(const std::string& path)
 {
+	running = false;
 	logger = LoggerFactory::getLogger("MessageHandler");
 	this->path = path;
 }

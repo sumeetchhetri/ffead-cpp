@@ -27,6 +27,10 @@
 #include "CastUtil.h"
 #include "StringUtil.h"
 #include "LoggerFactory.h"
+#ifdef HAVE_LIBUUID
+#include <uuid/uuid.h>
+#endif
+#include "Timer.h"
 
 class Bean
 {
@@ -44,7 +48,7 @@ typedef std::map<std::string,Bean> beanMap;
 class FFEADContext {
 	Logger logger;
 	beanMap beans,injbns;
-	std::map<std::string,void*> objects;
+	std::map<std::string, std::map<std::string, void*> > objects;
 	bool cleared;
 	Reflector* reflector;
 	std::map<std::string, std::map<std::string, ClassInfo> > classInfoMap;
@@ -61,11 +65,11 @@ public:
 	void* getBean(const std::string&, const std::string& appName= "default");
 	void* getBean(const Bean&);
 	void clear(const std::string& appName= "default");
-	void addBean(const Bean& bean);
+	void addBean(Bean& bean);
 	void initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts);
 	void clearAllSingletonBeans(const std::map<std::string, bool>& servingContexts);
 	Reflector& getReflector();
-	void release(const std::string& beanName, const std::string& appName);
+	void release(void* instance, const std::string& beanName, const std::string& appName);
 };
 
 #endif /* FFEADCONTEXT_H_ */

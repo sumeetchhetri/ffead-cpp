@@ -20,10 +20,11 @@ class SocketInterface {
 	friend class RequestReaderHandler;
 	friend class ServiceHandler;
 	friend class HandlerRequest;
+	friend class HttpWriteTask;
 protected:
 	SocketUtil* sockUtil;
 	std::string buffer;
-	Timer t;
+	std::atomic<int> t;
 	int fd;
 	int reqPos;
 	std::atomic<int> current;
@@ -33,7 +34,7 @@ protected:
 	int getReqPos() {
 		return reqPos;
 	}
-	bool write(const std::string& data)
+	bool writeTo(const std::string& data)
 	{
 		int offset = 0;
 		while(!isClosed() && offset<(int)data.length())
@@ -99,7 +100,7 @@ public:
 #endif
 		return isClosed();
 	}
-	bool read()
+	bool readFrom()
 	{
 		while (!isClosed())
 		{
@@ -108,7 +109,8 @@ public:
 			count = sockUtil->readData(MAXBUFLENM, temp);
 			if(count>0)
 			{
-				t.start();
+				int tt = Timer::getTimestamp() - 1203700;
+				t = tt;
 				buffer.append(temp);
 			}
 			else if (count == -1 && errno == EAGAIN)
@@ -131,7 +133,11 @@ public:
 	int getDescriptor() {
 		return fd;
 	}
+	std::string getAddress() {
+		return address;
+	}
 	long identifier;
+	std::string address;
 	virtual std::string getProtocol(void* context)=0;
 	virtual int getTimeout()=0;
 	virtual void* readRequest(void*& context, int& pending, int& reqPos)=0;
@@ -147,6 +153,7 @@ public:
 		fd = sockUtil->fd;
 		reqPos = 0;
 		current = 0;
+		address = StringUtil::toHEX((long long)this);
 	}
 };
 

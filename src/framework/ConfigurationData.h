@@ -143,6 +143,7 @@ public:
 	CoreServerProperties(std::string serverRootDirectory, std::string resourcePath, std::string webPath, propMap sprops, long sessionTimeout, bool sessatserv) {
 		isMainServerProcess = false;
 		sessservdistocache = false;
+		sessionFileLockTimeout = 0;
 		this->serverRootDirectory = serverRootDirectory;
 		this->resourcePath = resourcePath;
 		this->webPath = webPath;

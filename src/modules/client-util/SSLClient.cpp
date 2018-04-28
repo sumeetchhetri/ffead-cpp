@@ -27,6 +27,7 @@ SSLClient::SSLClient() {
 	ca_list = "root.pem";
 	isDHParams = true;
 	client_auth = 0;
+	connected = false;
 }
 
 SSLClient::SSLClient(const std::string& secFile) {

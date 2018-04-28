@@ -21,14 +21,19 @@ void SQLConnectionPool::initEnv() {
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
 	{
 		logger << "Error AllocHandle" << std::endl;
-	}
-	V_OD_erg=SQLSetEnvAttr(V_OD_Env, SQL_ATTR_ODBC_VERSION, (void*)SQL_OV_ODBC3, 0);
-	if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-	{
-		logger << "Error SetEnv" << std::endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
+		V_OD_Env = NULL;
 	}
-	setEnv(V_OD_Env);
+	else
+	{
+		V_OD_erg=SQLSetEnvAttr(V_OD_Env, SQL_ATTR_ODBC_VERSION, (void*)SQL_OV_ODBC3, 0);
+		if((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+		{
+			logger << "Error SetEnv" << std::endl;
+			SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
+		}
+		setEnv(V_OD_Env);
+	}
 #endif
 }
 
@@ -41,6 +46,7 @@ void* SQLConnectionPool::newConnection(const bool& isWrite, const ConnectionNode
 	SQLINTEGER V_OD_err_s;
 	SQLHDBC conn;
 	ConnectionProperties props = getProperties();
+	if(V_OD_Env==NULL)return NULL;
 	// 2. allocate connection handle, set timeout
 	V_OD_erg = SQLAllocHandle(SQL_HANDLE_DBC, V_OD_Env, &conn);
 	if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
@@ -61,6 +67,7 @@ void* SQLConnectionPool::newConnection(const bool& isWrite, const ConnectionNode
 		SQLGetDiagRec(SQL_HANDLE_DBC, conn, 1, V_OD_stat, &V_OD_err_s,V_OD_msg,100,&V_OD_mlen);
 		logger << V_OD_msg << " (" << (int)V_OD_err_s <<  ")" << std::endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
+		SQLFreeHandle(SQL_HANDLE_DBC, conn);
 		return NULL;
 		//exit(0);
 	}

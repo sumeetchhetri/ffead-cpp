@@ -83,6 +83,15 @@ void* PoolThread::run(void *arg)
 			}
 		}
 	}
+	Task* task = NULL;
+	while((task = ths->wpool->getTask())!=NULL)
+	{
+		if(task->cleanUp)
+		{
+			delete task;
+		}
+		continue;
+	}
 	ths->complete = true;
 	return NULL;
 }
@@ -106,7 +115,7 @@ PoolThread::~PoolThread() {
 	{
 		Thread::sSleep(1);
 	}
-	delete mthread;
+	//delete mthread;
 	delete m_mutex;
 	logger << "Destroyed PoolThread\n" << std::flush;
 }
@@ -114,6 +123,10 @@ PoolThread::~PoolThread() {
 void PoolThread::stop() {
 	if(!thrdStarted)return;
 	this->runFlag = false;
+	this->wpool->c_mutex->lock();
+	this->wpool->count++;
+	this->wpool->c_mutex->conditionalNotifyAll();
+	this->wpool->c_mutex->unlock();
 }
 
 void PoolThread::execute() {

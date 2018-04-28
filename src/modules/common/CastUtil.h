@@ -39,9 +39,9 @@ class CastUtil {
 		int n = snprintf(NULL, 0, fmt, val);
 		char* ty;
 		ty = (char*)malloc((n + 1) * sizeof(char));
-		int c = snprintf(ty, n+1, fmt, val);
-		assert(strlen(ty)==n);
-		assert(c == n);
+		/*int c = */snprintf(ty, n+1, fmt, val);
+		//assert(strlen(ty)==n);
+		//assert(c == n);
 		std::string* d = new std::string(ty, n);
 		free(ty);
 		return d;

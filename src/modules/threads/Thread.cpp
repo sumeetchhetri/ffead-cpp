@@ -27,8 +27,9 @@ void* Thread::_service(void* arg)
 {
 	ThreadFunctor* threadFunctor  = static_cast<ThreadFunctor*>(arg);
 	void* ret = threadFunctor->f(threadFunctor->arg);
+	Thread* _t = threadFunctor->_t;
+	delete _t;
 	pthread_exit(NULL);
-	delete threadFunctor;
 	return ret;
 }
 
@@ -38,6 +39,7 @@ Thread::Thread(const ThreadFunc& f, void* arg, const bool& isDetached /*= true*/
 	#endif
 	this->isDetached = isDetached;
 	this->threadFunctor = new ThreadFunctor();
+	this->threadFunctor->_t = this;
 	this->threadFunctor->f = f;
 	this->threadFunctor->arg = arg;
 	pthread_mutex_init(&mut, NULL);
@@ -48,6 +50,7 @@ Thread::~Thread() {
 	//pthread_join(pthread, NULL);
 	pthread_mutex_destroy(&mut);
 	pthread_cond_destroy(&cond);
+	delete threadFunctor;
 }
 
 void Thread::join() {
@@ -58,7 +61,7 @@ void Thread::join() {
 }
 
 void Thread::nSleep(const long& nanos) {
-#ifdef HAVE_CLOCK_NANOSLEEP
+/*#ifdef HAVE_CLOCK_NANOSLEEP
 	struct timespec deadline;
 	clock_gettime(CLOCK_MONOTONIC, &deadline);
 
@@ -71,12 +74,12 @@ void Thread::nSleep(const long& nanos) {
 		deadline.tv_sec++;
 	}
 	clock_nanosleep(CLOCK_REALTIME, 0, &deadline, NULL);
-#else
-	struct timespec deadline, rem;
+#else*/
+	struct timespec deadline = {0};
 	deadline.tv_sec  = 0;
 	deadline.tv_nsec = nanos;
-	nanosleep(&deadline , &rem);
-#endif
+	nanosleep(&deadline , (struct timespec *)NULL);
+//#endif
 }
 
 void Thread::uSleep(const long& micros) {

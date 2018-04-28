@@ -1075,7 +1075,7 @@ std::string Reflection::generateClassDefinitionsAll(std::map<std::string, std::m
 	/*ret += "ClassInfo Reflector::getClassInfo(std::string className)\n{\n";
 	ret += classes;
 	ret += "\n\treturn info;\n}\n";
-	ret += "void* Reflector::invokeMethod(void* instance,Method method,vals values)\n{\n";
+	ret += "void* Reflector::invokeMethod(void* instance,Method method,vals values,bool cleanvals)\n{\n";
 	ret += methods;
 	ret += "\n\treturn returnValue;\n}\n";
 	ret += "bool Reflector::instanceOf(void* instance,std::string className)\n{\n";
@@ -1235,7 +1235,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							argpm.push_back(markerstr+argpmtemp+typ);
 						}
 					}
-					std::string typdefName,methsd,valsd,valsa;
+					std::string typdefName,methsd,valsd,valsa,valsades;
 					//bool ctor = false;
 					if(methpm.size()>0 && methpm.at(0).find("virtual")!=std::string::npos)
 						return "";
@@ -1352,30 +1352,32 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							StringUtil::replaceLast(mdecl,"*","");
 							std::string fqcn = getFullyQualifiedClassName(mdecl, classStructure.namespaces);
-							valsd += "\t\t"+(fqcn  + " *_" + CastUtil::lexical_cast<std::string>(j)+" = ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");");
+							valsd += "\t\t"+(fqcn  + " *_" + CastUtil::lexical_cast<std::string>(j)+" = ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");\n");
 							StringUtil::replaceAll(mdecl,"*","");
 						}
 						else if(type12=="&")
 						{
 							StringUtil::replaceLast(mdecl,"&","");
 							std::string fqcn = getFullyQualifiedClassName(mdecl, classStructure.namespaces);
-							valsd += "\t\t"+(fqcn + " *_" + CastUtil::lexical_cast<std::string>(j)+" = ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");");
+							valsd += "\t\t"+(fqcn + " *_" + CastUtil::lexical_cast<std::string>(j)+" = ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");\n");
 							StringUtil::replaceAll(mdecl,"&","");
 						}
 						else
 						{
 							std::string fqcn = getFullyQualifiedClassName(mdecl, classStructure.namespaces);
-							valsd += "\t\t"+(fqcn + " *_" + CastUtil::lexical_cast<std::string>(j)+" = ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");");
+							valsd += "\t\t"+(fqcn + " *_" + CastUtil::lexical_cast<std::string>(j)+" = ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");\n");
 						}
 						if(type12=="*")
 							valsa += "_" + CastUtil::lexical_cast<std::string>(j);
 						else
 							valsa += "*_" + CastUtil::lexical_cast<std::string>(j);
+						std::string fqcn = getTreatedFullyQualifiedClassName(mdecl, classStructure.namespaces);
+						valsades += "\t\tif(cleanvals)delete ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");\n";
 						//if(methpm.at(0)!=classStructure.getFullyQualifiedClassName())
 						//{
 							typedefs += mdecl;
 							typdefName += mdecl;
-							std::string fqcn = getTreatedFullyQualifiedClassName(mdecl, classStructure.namespaces);
+							//std::string fqcn = getTreatedFullyQualifiedClassName(mdecl, classStructure.namespaces);
 							methsd += fqcn + (type12=="*"?"ptr":"");
 							if(j!=argpm.size()-1)
 							{
@@ -1421,11 +1423,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " + omn + "(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " + omn + "(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t*_obj<="+valsa+";";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1433,6 +1436,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (*_obj<="+valsa+");";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\"<=\", \""+omn+"\");");
@@ -1442,11 +1446,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " +omn+"(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t*_obj>="+valsa+";";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1454,6 +1459,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (*_obj>="+valsa+");";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\">=\", \""+omn+"\");");
@@ -1463,11 +1469,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " +omn+"(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t*_obj<"+valsa+";";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1475,6 +1482,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (*_obj<"+valsa+");";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\"<\", \""+omn+"\");");
@@ -1484,11 +1492,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " +omn+"(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t*_obj>"+valsa+";";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1496,6 +1505,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (*_obj>"+valsa+");";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\">\", \""+omn+"\");");
@@ -1505,11 +1515,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " +omn+"(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t*_obj=="+valsa+";";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1517,6 +1528,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (*_obj=="+valsa+");";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\"==\", \""+omn+"\");");
@@ -1526,11 +1538,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " +omn+"(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t*_obj!="+valsa+";";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1538,6 +1551,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (*_obj!="+valsa+");";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\"!=\", \""+omn+"\");");
@@ -1547,11 +1561,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " +omn+"(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t!*_obj;";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1559,6 +1574,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (!*_obj);";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\"!\", \""+omn+"\");");
@@ -1568,11 +1584,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " +omn+"(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t*_obj+"+valsa+";";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1580,6 +1597,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (*_obj+"+valsa+");";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\"+\", \""+omn+"\");");
@@ -1589,11 +1607,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " +omn+"(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t*_obj-"+valsa+";";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1601,6 +1620,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (*_obj-"+valsa+");";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\"-\", \""+omn+"\");");
@@ -1610,11 +1630,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " +omn+"(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t*_obj/"+valsa+";";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1622,6 +1643,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (*_obj/"+valsa+");";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\"-\", \""+omn+"\");");
@@ -1631,11 +1653,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
 									CastUtil::lexical_cast<std::string>(opcounter++);
-							opers += "\nvoid* " +omn+"(void* instance,vals values)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
+							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
 								opers += valsd;
 								opers += "\n\tvoid* returnValue=NULL;\n\t*_obj*"+valsa+";";
+								opers += valsades;
 								opers += "\n\treturn returnValue;";
 							}
 							else
@@ -1643,6 +1666,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
 								opers += "\n\t*_retVal = (*_obj*"+valsa+");";
+								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
 							refDef += ("\nci.addOperatorRefName(\"*\", \""+omn+"\");");
@@ -1695,7 +1719,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							typedefs += (") ("+typdefName+");\n");
 							std::string mmn = app+ "_" + classStructure.getTreatedClassName(true) + "_m" +
 										CastUtil::lexical_cast<std::string>(methcounter++);
-							methods += "\nvoid* " +mmn+"(void* instance,vals values)\n{\n\t";
+							methods += "\nvoid* " +mmn+"(void* instance,vals values,bool cleanvals)\n{\n\t";
 							if(!methstat)
 							{
 								methods += classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
@@ -1711,6 +1735,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								{
 									methods += "\n\tvoid* returnValue=NULL;\n\t_obj->"+methpm.at(1)+"("+valsa+");";
 								}
+								methods += valsades;
 								methods += "\n\treturn returnValue;";
 							}
 							else
@@ -1726,6 +1751,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								{
 									methods += "\n\t*_retVal = (_obj->"+methpm.at(1)+"("+valsa+"));";
 								}
+								methods += valsades;
 								methods += "\n\treturn _retVal;";
 							}
 							methods += "\n}";
@@ -1756,10 +1782,11 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							std::string mmn = app+ "_" + classStructure.getTreatedClassName(true) + "_m" +
 									CastUtil::lexical_cast<std::string>(methcounter++);
 							typedefs += (") ("+typdefName+");\n");
-							methods += "\nvoid* " +mmn+"(vals values)\n{";
+							methods += "\nvoid* " +mmn+"(vals values,bool cleanvals)\n{";
 							methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_retVal = NULL;\n";
 							methods += valsd;
 							methods += "\n\t_retVal = (new "+classStructure.getFullyQualifiedClassName()+"("+valsa+"));";
+							methods += valsades;
 							methods += "\n\treturn _retVal;";
 							methods += "\n}";
 							refDef += ("ctor.setName(\""+methsd+"\");\n");
@@ -2250,7 +2277,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 					CastUtil::lexical_cast<std::string>(methcounter++);
 			refDef += ("ctor.setName(\""+classStructure.getTreatedClassName(true)+"\");\n");
 			refDef += ("argu.clear();\n");
-			methods += "\nvoid* " +mmn+"(vals values)\n{";
+			methods += "\nvoid* " +mmn+"(vals values,bool cleanvals)\n{";
 			methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_retVal = NULL;\n";
 			methods += "\n\t_retVal = (new "+classStructure.getFullyQualifiedClassName()+"());";
 			methods += "\n\treturn _retVal;";
@@ -2287,7 +2314,8 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 		refDef += ("\nci.setContRefName(\""+app+ "_"+classStructure.getTreatedClassName(true)+"co\");");
 
 		methods += "\nvoid* " +app+ "_"+classStructure.getTreatedClassName(true)+"co(void* _vec,void* _instance,int pos,std::string contType,int t){"
-				+ "\nif(t==1)return Reflector::getNewNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType);\n"
+				+ "\nif(t==-1)return Reflector::destroyNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec);\n"
+				+ "\nelse if(t==1)return Reflector::getNewNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType);\n"
 				+ "\nelse if(t==2){int* _obj = new int;\n*_obj = Reflector::getNestedContainerSize<"+classStructure.getFullyQualifiedClassName()+">(contType,_vec);return _obj;}\n"
 				+ "\nelse if(t==3){Reflector::addValueToNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, *(("+classStructure.getFullyQualifiedClassName()+"*)_instance),_vec);return NULL;}\n"
 				+ "\nelse if(t==4){"+classStructure.getFullyQualifiedClassName()+" *_obj = new "+classStructure.getFullyQualifiedClassName()+";\n*_obj = Reflector::getValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\nreturn _obj;\n}\n"
@@ -2330,7 +2358,8 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 					+ "return Reflector::getPValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\n}\n";
 			*/
 			methods += "\nvoid* " +app+ "_"+classStructure.getTreatedClassName(true)+"cosv(void* _vec,void* _instance,int pos,std::string contType,int t){"
-					+ "\nif(t==6)return Reflector::getNewNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType);\n"
+					+ "\nif(t==0)return Reflector::destroyNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec);\n"
+					+ "\nelse if(t==6)return Reflector::getNewNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType);\n"
 					+ "\nif(t==7){int* _obj = new int;\n*_obj = Reflector::getNestedContainerSizeSV<"+classStructure.getFullyQualifiedClassName()+">(contType,_vec);return _obj;}\n"
 					+ "\nif(t==8){Reflector::addValueToNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, *(("+classStructure.getFullyQualifiedClassName()+"*)_instance),_vec);return NULL;}\n"
 					+ "\nif(t==9){"+classStructure.getFullyQualifiedClassName()+" *_obj = new "+classStructure.getFullyQualifiedClassName()+";\n*_obj = Reflector::getValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\nreturn _obj;\n}\n"
@@ -2872,7 +2901,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 							//StringUtil::replaceFirst(stlcnt," ","");
 
 							std::string fqcn = contType + getFullyQualifiedClassName(stlcnt, classStructure.namespaces);
-							if(fqcn.find(">")==-1) {
+							if(fqcn.find(">")==std::string::npos) {
 								fqcn += ">";
 							} else {
 								fqcn += " >";
@@ -3259,7 +3288,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 										//StringUtil::replaceFirst(stlcnt," ","");
 
 										std::string fqcn = contType + getFullyQualifiedClassName(stlcnt, classStructure.namespaces);
-										if(fqcn.find(">")==-1) {
+										if(fqcn.find(">")==std::string::npos) {
 											fqcn += ">";
 										} else {
 											fqcn += " >";

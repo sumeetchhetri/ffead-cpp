@@ -84,7 +84,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 			isContrl = true;
 		}
-		ConfigurationData::getInstance()->ffeadContext.release("controller_"+controller, req->getCntxt_name());
+		ConfigurationData::getInstance()->ffeadContext.release(_temp, "controller_"+controller, req->getCntxt_name());
 	}
 	else if(getMappingForPath(req->getCntxt_name(), req->getCurl(), to))
 	{
@@ -233,7 +233,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
 				res->setDone(true);
-				ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+				ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				return true;
 			}
 
@@ -287,7 +287,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								{
 									logger << "File can only be mapped to ifstream" << std::endl;
 									res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-									ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+									ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 									return true;
 								}
 							}
@@ -300,7 +300,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						{
 							logger << "Invalid mapping specified in config, no multipart content found with name " + rft.params.at(var).name << std::endl;
 							res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-							ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+							ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 							return true;
 						}
 					}
@@ -310,7 +310,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						{
 							logger << "Request Body cannot be mapped to more than one argument..." << std::endl;
 							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-							ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+							ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 							return true;
 						}
 						pmvalue = req->getContent();
@@ -394,7 +394,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 									std::ifstream* ifs = new std::ifstream;
 									ifs->open(mcont.getTempFileName().c_str());
 									vifs->push_back(ifs);
-									allStreams.push_back(ifs);
+									//allStreams.push_back(ifs);
 								}
 							}
 							mpvecstreams[rft.params.at(var).name] = vifs;
@@ -466,7 +466,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						if(voidPvect==NULL)
 						{
 							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-							ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+							ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 							return true;
 						}
 						valus.push_back(voidPvect);
@@ -488,7 +488,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						if(voidPvect==NULL)
 						{
 							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-							ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+							ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 							return true;
 						}
 						valus.push_back(voidPvect);
@@ -498,13 +498,13 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					logger << ex << std::endl;
 					invValue= true;
 					res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-					ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 					return true;
 				} catch (...) {
 					logger << "Restcontroller exception occurred" << std::endl;
 					invValue= true;
 					res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-					ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 					return true;
 				}
 			}
@@ -515,7 +515,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				if(meth.getMethodName()!="" && !invValue)
 				{
 					std::string outRetType = meth.getReturnType();
-					void* ouput = reflector.invokeMethodUnknownReturn(_temp,meth,valus);
+					void* ouput = reflector.invokeMethodUnknownReturn(_temp,meth,valus,true);
 					std::string outcontent = "void";
 					if(outRetType=="void")
 					{
@@ -544,7 +544,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						res->addHeaderValue(HttpResponse::ContentType, ocont);
 						res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(
 								CastUtil::lexical_cast<int>(rft.statusCode)));
-						delete ouput;
+						//delete ouput;
+						reflector.destroy(ouput, outRetType, req->getCntxt_name());
 					}
 					//logger << "Successfully called restcontroller output follows - " << std::endl;
 					//logger << outcontent << std::endl;
@@ -556,40 +557,60 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							if(allStreams.at(i)->is_open()) {
 								allStreams.at(i)->close();
 								allStreams.at(i)->clear();
+								//delete allStreams.at(i);
 							}
 						}
 					}
 
 					std::map<std::string, std::vector<std::ifstream*>* >::iterator it;
 					for(it=mpvecstreams.begin();it!=mpvecstreams.end();++it) {
-						delete it->second;
-					}
-
-					for(int i=0;i<(int)valus.size();++i) {
-						if(valus.at(i)!=NULL) {
-							delete valus.at(i);
+						for(int i=0;i<(int)it->second->size();++i) {
+							if(it->second->at(i)!=NULL) {
+								if(it->second->at(i)->is_open()) {
+									it->second->at(i)->close();
+									it->second->at(i)->clear();
+									delete it->second->at(i);
+								}
+							}
 						}
+						it->second->clear();
 					}
+					mpvecstreams.clear();
 				}
 				else
 				{
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 					//res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 					logger << "Rest Controller Method Not Found" << std::endl;
-					ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+				}
+
+				for(int i=0;i<(int)valus.size();++i) {
+					if(valus.at(i)!=NULL) {
+						if(argus.at(i)=="filestream")
+						{
+						}
+						else if(argus.at(i)=="vector-of-filestream")
+						{
+						}
+						else
+						{
+							//reflector.destroy(valus.at(i), argus.at(i), req->getCntxt_name());
+						}
+					}
 				}
 			} catch (const char* ex) {
 				logger << "Restcontroller exception occurred" << std::endl;
 				logger << ex << std::endl;
 				invValue= true;
 				res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-				ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+				ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				return true;
 			} catch (...) {
 				logger << "Restcontroller exception occurred" << std::endl;
 				invValue= true;
 				res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-				ConfigurationData::getInstance()->ffeadContext.release("restcontroller_"+rft.clas, req->getCntxt_name());
+				ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				return true;
 			}
 		}

@@ -38,121 +38,6 @@ Server::Server()
 	service = NULL;
 	logger = LoggerFactory::getLogger("Server");
 }
-/*
-Server::Server(const std::string& port, const int& waiting, const Service& serv)
-{
-	runn = true;
-	service = serv;
-	logger = LoggerFactory::getLogger("Server");
-	struct addrinfo hints, *servinfo, *p;
-	struct sigaction sa;
-	int yes=1;
-	int rv;
-
-	memset(&hints, 0, sizeof hints);
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE; // use my IP
-	if ((rv = getaddrinfo(NULL, port.c_str(), &hints, &servinfo)) != 0) {
-		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-		exit(0);
-	}
-	// loop through all the results and bind to the first we can
-	for(p = servinfo; p != NULL; p = p->ai_next)
-	{
-		if ((this->sock = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == -1)
-		{
-			perror("server: socket");
-			continue;
-		}
-		if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &yes,
-				sizeof(int)) == -1) {
-			perror("setsockopt");
-			exit(1);
-		}
-		if (bind(this->sock, p->ai_addr, p->ai_addrlen) == -1) {
-			closesocket(this->sock);
-			perror("server: bind");
-			continue;
-		}
-		break;
-	}
-
-	if (p == NULL)
-	{
-		fprintf(stderr, "server: failed to bind\n");
-		exit(0);
-	}
-	freeaddrinfo(servinfo); // all done with this structure
-	if (listen(this->sock, BACKLOGM) == -1)
-	{
-		perror("listen");
-		exit(1);
-	}
-	sa.sa_handler = sigchld_handler; // reap all dead processes
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
-	if (sigaction(SIGCHLD, &sa, NULL) == -1)
-	{
-		perror("sigaction");
-		exit(1);
-	}
-	logger << ("waiting for connections on " + port + ".....") << std::endl;
-
-	if(fork()==0)
-	{
-		fd_set master;    // master file descriptor list
-		fd_set read_fds;  // temp file descriptor list for select()
-		int fdmax;        // maximum file descriptor number
-
-		FD_ZERO(&master);    // clear the master and temp sets
-		FD_ZERO(&read_fds);
-
-		FD_SET(this->sock, &master);
-		// keep track of the biggest file descriptor
-		fdmax = this->sock; // so far, it's this on
-
-		while(runn)
-		{
-			read_fds = master; // copy it
-			int nfds = select(fdmax+1, &read_fds, NULL, NULL, NULL);
-			if (nfds == -1)
-			{
-				perror("epoll_wait");
-				break;
-			}
-			for(int n=0;n<=fdmax;n++)
-			{
-				if (FD_ISSET(n, &read_fds))
-				{
-					if (n == this->sock)
-					{
-						int new_fd = this->Accept();
-						if (new_fd == -1)
-						{
-							perror("accept");
-							continue;
-						}
-						else
-						{
-							fcntl(new_fd, F_SETFL, fcntl(new_fd, F_GETFD, 0) | O_NONBLOCK);
-							FD_SET(new_fd, &master); // add to master set
-							if (new_fd > fdmax) {    // keep track of the max
-								fdmax = new_fd;
-							}
-						}
-					}
-					else
-					{
-						//Thread pthread(serv, &new_fd);
-						//pthread.execute();
-					}
-				}
-			}
-		}
-	}
-
-}*/
 
 Server::Server(const std::string& port, const bool& block, const int& waiting, const Service& serv, int mode)
 {
@@ -261,8 +146,8 @@ void* Server::servicing(void* arg)
 		}
 		else
 		{
-			//Thread pthread(serv, &new_fd);
-			//pthread.execute();
+			//Thread* pthread = new Thread(serv, &new_fd);
+			//pthread->execute();
 		}
 	}
 	return NULL;
@@ -595,8 +480,8 @@ void Server::start()
 		}
 		else if(mode==2)
 		{
-			//Thread servicing_thread(&servicing, this);
-			//servicing_thread.execute();
+			//Thread* pthread = new Thread(&servicing, this);
+			//pthread->execute();
 		}
 		else if(mode==3)
 		{

@@ -115,13 +115,14 @@ void JobScheduler::start() {
 						JobTask* task = new JobTask;
 						task->objIns = objIns;
 						task->cron = cron;
+						task->clas = clas;
 						task->name = name;
 						task->meth = meth;
 						task->appName = appName;
 						task->doRun = true;
 
-						Thread pthread(&JobScheduler::service, task);
-						pthread.execute();
+						Thread* pthread = new Thread(&JobScheduler::service, task);
+						pthread->execute();
 
 						instance->tasks.push_back(task);
 						logger << "Added Job Process successfully" << std::endl;
@@ -154,13 +155,14 @@ void JobScheduler::stop() {
 		return;
 	}
 	for (int var = 0; var < (int)instance->tasks.size(); ++var) {
-		//instance->tasks.at(var)->mutex.lock();
 		instance->tasks.at(var)->doRun = false;
-		//instance->tasks.at(var)->mutex.unlock();
 	}
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
 	logger << "Waiting 10 seconds for all Job Processes to shutdown....";
 	sleep(10);
+	for (int var = 0; var < (int)instance->tasks.size(); ++var) {
+		//delete instance->tasks.at(var);
+	}
 	delete instance;
 }
 
@@ -179,15 +181,11 @@ void JobScheduler::JobTask::run() {
 		CronTimer timer(cron);
 		vals values;
 		timer.nextRunDate = new Date;
-		bool toRun;
-		//task->mutex.lock();
-		toRun = doRun;
-		//task->mutex.unlock();
 
 		Reflector ref;
 		JobFunction f = (JobFunction)ref.getMethodInstance(meth);
 
-		while(toRun)
+		while(doRun)
 		{
 			sleep(1);
 			Date d2;
@@ -229,6 +227,11 @@ void JobScheduler::JobTask::run() {
 					}
 				}
 			}
+		}
+
+		if(objIns!=NULL) {
+			ref.destroy(objIns, clas, appName);
+			objIns = NULL;
 		}
 	} catch(const char* ex) {
 		logger << "Cannot run Job as the cron std::string is invalid" << std::endl;

@@ -86,6 +86,7 @@ ConfigurationData::~ConfigurationData() {
 
 Security::Security()
 {
+	sessTimeout = 0;
 	logger = LoggerFactory::getLogger("Security");
 }
 

@@ -101,19 +101,54 @@ namespace std {
 		Mutex _l;
 		int flag;
 	public:
-		bool operator=(int f)
+		int operator=(int f)
 		{
 			_l.lock();
 			flag = f;
 			_l.unlock();
 			return f;
 		}
-		bool operator+=(int f)
+		int operator+=(int f)
 		{
 			_l.lock();
 			flag += f;
 			_l.unlock();
 			return f;
+		}
+		int operator-=(int f)
+		{
+			_l.lock();
+			flag = f;
+			_l.unlock();
+			return f;
+		}
+		int operator++(int f)
+		{
+			_l.lock();
+			flag++;
+			_l.unlock();
+			return f;
+		}
+		int operator--(int f)
+		{
+			_l.lock();
+			flag--;
+			_l.unlock();
+			return f;
+		}
+		int& operator++()
+		{
+			_l.lock();
+			++flag;
+			_l.unlock();
+			return flag;
+		}
+		int& operator--()
+		{
+			_l.lock();
+			--flag;
+			_l.unlock();
+			return flag;
 		}
 		operator int()
 		{

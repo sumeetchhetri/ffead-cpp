@@ -23,8 +23,7 @@
 #include "TestMany.h"
 
 TestMany::TestMany() {
-	// TODO Auto-generated constructor stub
-
+	y = 0;
 }
 
 TestMany::~TestMany() {
