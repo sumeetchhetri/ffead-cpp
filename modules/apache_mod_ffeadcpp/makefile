@@ -1,5 +1,5 @@
-APXS=apxs2
-APACHECTL=apachectl2
+APXS=apxs
+APACHECTL=apachectl
 
 # Get all of apxs's internal values.
 APXS_CC=`$(APXS) -q CC`   

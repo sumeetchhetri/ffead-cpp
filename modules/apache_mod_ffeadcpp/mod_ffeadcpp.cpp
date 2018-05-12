@@ -160,6 +160,20 @@ static apr_bucket* get_file_bucket(request_rec* r, const char* fname)
 	return apr_bucket_file_create(file, 0, finfo.size, r->pool, r->connection->bucket_alloc) ;
 }
 
+static bool ignoreHeader(const std::string& hdr)
+{
+	std::string hdr1 = StringUtil::toLowerCopy(hdr);
+	if(hdr1==StringUtil::toLowerCopy(HttpResponse::Server)
+		|| hdr1==StringUtil::toLowerCopy(HttpResponse::DateHeader)
+		|| hdr1==StringUtil::toLowerCopy(HttpResponse::AcceptRanges)
+		|| hdr1==StringUtil::toLowerCopy(HttpResponse::ContentType)
+		|| hdr1==StringUtil::toLowerCopy(HttpResponse::ContentLength))
+	{
+		return true;
+	}
+	return false;
+}
+
 static int mod_ffeadcpp_method_handler (request_rec *r)
 {
 	std::string serverRootDirectory;
@@ -195,78 +209,91 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	apr_brigade_destroy(bb) ;
 
 	std::string cntpath = serverRootDirectory + "/web/";
-	HttpRequest* req = new HttpRequest(cntpath);
+	HttpRequest req(cntpath);
 
 	const apr_array_header_t* fields = apr_table_elts(r->headers_in);
 	apr_table_entry_t* e = (apr_table_entry_t *) fields->elts;
 	for(int i = 0; i < fields->nelts; i++) {
-		req->buildRequest(e[i].key, e[i].val);
+		req.buildRequest(e[i].key, e[i].val);
 	}
 
-	std::string ip_address = req->getHeader(HttpRequest::Host);
+	std::string ip_address = req.getHeader(HttpRequest::Host);
 	std::string tipaddr = ip_address;
 	if(port!="80")
 		tipaddr += (":" + port);
 
 	if(content!="")
 	{
-		req->buildRequest("Content", content.c_str());
+		req.buildRequest("Content", content.c_str());
 	}
-	req->buildRequest("URL", r->uri);
-	req->buildRequest("Method", r->method);
+	req.buildRequest("URL", r->uri);
+	req.buildRequest("Method", r->method);
 	if(r->args != NULL && r->args[0] != '\0')
 	{
-		req->buildRequest("GetArguments", r->args);
+		req.buildRequest("GetArguments", r->args);
 	}
-	req->buildRequest("HttpVersion", r->protocol);
+	req.buildRequest("HttpVersion", r->protocol);
 
-	HttpResponse* respo = new HttpResponse;
-	ServiceTask* task = new ServiceTask;
-	task->handle(req, respo);
-	delete task;
+	HttpResponse respo;
+	ServiceTask task;
+	task.handle(&req, &respo);
 
-	for (int var = 0; var < (int)respo->getCookies().size(); var++)
+	for (int var = 0; var < (int)respo.getCookies().size(); var++)
 	{
-		apr_table_set(r->headers_out, "Set-Cookie", respo->getCookies().at(var).c_str());
+		apr_table_set(r->headers_out, "Set-Cookie", respo.getCookies().at(var).c_str());
 	}
 
-	if(respo->isDone()) {
-		std::string data = respo->generateResponse(false);
-		std::map<std::string,std::string>::const_iterator it;
-		int hdrcount = respo->getHeaders().size();
-		for(it=respo->getHeaders().begin();hdrcount>0;it++,hdrcount--) {
-			if(StringUtil::toLowerCopy(it->first)==StringUtil::toLowerCopy(HttpResponse::ContentType)) {
-				ap_set_content_type(r, it->second.c_str());
-			} else {
+	if(respo.isDone()) {
+		std::string data = respo.generateResponse(false);
+		std::map<std::string, std::string>::const_iterator it;
+		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
+			if(!ignoreHeader(it->first)) {
 				apr_table_set(r->headers_out, it->first.c_str(), it->second.c_str());
 			}
 		}
-		ap_rprintf(r, data.c_str(), data.length());
+
+		char* ptr = apr_pstrdup(r->pool, respo.getHeader(HttpResponse::ContentType).c_str());
+		ap_set_content_type(r, ptr);
+		if(data.length()>0) {
+			ap_set_content_length(r, data.length());
+			unsigned int offset = 0;
+
+			int remain_bytes = data.length();
+			int bytes_send = 0;
+			while (remain_bytes > 0)
+			{
+				bytes_send = ap_rwrite(&data[offset], remain_bytes, r);
+				if (bytes_send <= 0)
+				{
+					return EIO;
+				}
+				remain_bytes -= bytes_send;
+			}
+		}
+		r->status = CastUtil::lexical_cast<int>(respo.getStatusCode());
+		return OK;
+		//ap_rprintf(r, data.c_str(), data.length());
 	} else {
 		apr_file_t *file;
 		apr_finfo_t finfo;
 		int rc, exists;
-		rc = apr_stat(&finfo, req->getUrl().c_str(), APR_FINFO_MIN, r->pool);
+		rc = apr_stat(&finfo, req.getUrl().c_str(), APR_FINFO_MIN, r->pool);
 		if (rc == APR_SUCCESS) {
 			exists =
 			(
 				(finfo.filetype != APR_NOFILE) &&  !(finfo.filetype & APR_DIR)
 			);
 			if (!exists) {
-				delete respo;
-				delete req;
 				return HTTP_NOT_FOUND;
 			}
 		}
 		else {
-			delete respo;
-			delete req;
 			return HTTP_FORBIDDEN;
 		}
 
 		std::string webPath = std::string(fconfig.path) + "/web";
 		RegexUtil::replace(webPath,"[/]+","/");
-		std::string acurl = req->getUrl();
+		std::string acurl = req.getUrl();
 		RegexUtil::replace(acurl,"[/]+","/");
 		if(acurl.find(webPath)==0) {
 			acurl = acurl.substr(webPath.length());
@@ -274,21 +301,15 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 		RegexUtil::replace(acurl,"[/]+","/");
 		//logger << "static file will be processed by apache " << req->getUrl() << " " << acurl << std::endl;
 
-		r->uri = acurl.c_str();
+		char* au = apr_pstrdup(r->pool, acurl.c_str());
+		r->uri = au;
 		r->finfo = finfo;
-		r->filename = req->getUrl().c_str();
+		char* fn = apr_pstrdup(r->pool, req.getUrl().c_str());
+		r->filename = fn;
 		apr_table_unset(r->headers_out, HttpResponse::Status.c_str());
-		ap_set_content_type(r, CommonUtils::getMimeType(req->getExt()).c_str());
-	}
+		ap_set_content_type(r, CommonUtils::getMimeType(req.getExt()).c_str());
 
-	if(respo->isDone()) {
-		delete respo;
-		delete req;
-		return DONE;
-	} else {
-		delete respo;
-		delete req;
-		return DECLINED;
+		return OK;
 	}
 }
 
@@ -588,7 +609,16 @@ static void mod_ffeadcp_child_uninit()
 	ConfigurationHandler::destroyCaches();
 
 	ConfigurationData::getInstance()->clearAllSingletonBeans();
-	return APR_SUCCESS;
+
+	//ConfigurationData::clearInstance();
+
+#ifdef INC_JOBS
+	JobScheduler::stop();
+#endif
+
+	RegexUtil::flushCache();
+
+	LoggerFactory::clear();
 }
 
 static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)

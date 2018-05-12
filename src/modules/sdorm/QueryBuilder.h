@@ -278,7 +278,7 @@ class QueryBuilder {
 	bool unique;
 	int start;
 	int count;
-	std::vector<JoinClause*> joinClauses;
+	std::vector<JoinClause> joinClauses;
 	LogicalGroup conditions;
 	std::vector<std::string> columnsAsc;
 	std::vector<std::string> columnsDesc;
@@ -323,7 +323,7 @@ public:
 	const LogicalGroup& getConditions() const;
 	int getCount() const;
 	const GroupClause& getGroup() const;
-	const std::vector<JoinClause*>& getJoinClauses() const;
+	const std::vector<JoinClause>& getJoinClauses() const;
 	int getStart() const;
 	const std::string& getTableName() const;
 	const std::vector<QueryBuilder>& getUnionAlls() const;
@@ -355,15 +355,12 @@ inline LogicalGroup& LogicalGroup::where(const std::string& lhs, const QueryOper
 	cond.lhs = lhs;
 	cond.oper = oper;
 	cond.managed = true;
-	T* t = new T;
-	*t = rhs;
 	GenericObject o;
-	o << t;
+	o << rhs;
 	cond.rhsVec.push_back(o);
-	t = new T;
-	*t = rhs1;
-	o << t;
-	cond.rhsVec.push_back(o);
+	GenericObject o1;
+	o1 << rhs1;
+	cond.rhsVec.push_back(o1);
 	cond.clause = QueryClause::NONE;
 	if(condStarted && (lastClause!=QueryClause::AND && lastClause!=QueryClause::OR)) {
 		logicalAnd();
@@ -380,10 +377,8 @@ inline LogicalGroup& LogicalGroup::where(const std::string& lhs, const QueryOper
 	cond.oper = oper;
 	cond.managed = true;
 	for (int var = 0; var < (int)rhsList.size(); ++var) {
-		T* t = new T;
-		*t = rhsList.at(var);
 		GenericObject o;
-		o << t;
+		o << rhsList.at(var);
 		cond.rhsVec.push_back(o);
 	}
 	cond.clause = QueryClause::NONE;

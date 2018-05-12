@@ -146,8 +146,8 @@ void JSONUtil::readJSON(std::string& json, const bool& isarray, JSONElement *par
 			throw ("invalid json - invalid json - invalid std::string before ':' found");
 		json = json.substr(vst+1);
 	}
-	JSONElement* element = new JSONElement;
-	element->setName(name);
+	JSONElement element;
+	element.setName(name);
 
 	StringUtil::trim(json);
 	size_t env = json.find(",");
@@ -156,46 +156,46 @@ void JSONUtil::readJSON(std::string& json, const bool& isarray, JSONElement *par
 	if(obs==0)
 	{
 		readBalancedJSON(value, json, false, obs);
-		element->setType(JSONElement::JSON_OBJECT);
+		element.setType(JSONElement::JSON_OBJECT);
 	}
 	else if(ars==0)
 	{
 		readBalancedJSON(value, json, true, ars);
-		element->setType(JSONElement::JSON_ARRAY);
+		element.setType(JSONElement::JSON_ARRAY);
 	}
 	else if(env==std::string::npos)
 	{
 		value = json;
 		json = "";
-		element->setType(JSONElement::JSON_STRING);
+		element.setType(JSONElement::JSON_STRING);
 	}
 	else
 	{
 		if(obs!=std::string::npos && env==0 && (obs<ars || ars==std::string::npos))
 		{
 			readBalancedJSON(value, json, false, obs);
-			element->setType(JSONElement::JSON_OBJECT);
+			element.setType(JSONElement::JSON_OBJECT);
 		}
 		else if(ars!=std::string::npos && env==0 && (ars<obs || obs==std::string::npos))
 		{
 			readBalancedJSON(value, json, true, ars);
-			element->setType(JSONElement::JSON_ARRAY);
+			element.setType(JSONElement::JSON_ARRAY);
 		}
 		else if(obs!=std::string::npos && obs<env && (obs<ars || ars==std::string::npos))
 		{
 			readBalancedJSON(value, json, false, obs);
-			element->setType(JSONElement::JSON_OBJECT);
+			element.setType(JSONElement::JSON_OBJECT);
 		}
 		else if(ars!=std::string::npos && ars<env && (ars<obs || obs==std::string::npos))
 		{
 			readBalancedJSON(value, json, true, ars);
-			element->setType(JSONElement::JSON_ARRAY);
+			element.setType(JSONElement::JSON_ARRAY);
 		}
 		else
 		{
 			value = json.substr(0, env);
 			json = json.substr(env+1);
-			element->setType(JSONElement::JSON_STRING);
+			element.setType(JSONElement::JSON_STRING);
 		}
 	}
 	if(value=="")
@@ -203,15 +203,16 @@ void JSONUtil::readJSON(std::string& json, const bool& isarray, JSONElement *par
 		std::string ex = "invalid json - no value object found for name "+ name;
 		throw ex;
 	}
-	if(element->getType()!=JSONElement::JSON_OBJECT && element->getType()!=JSONElement::JSON_ARRAY)
+	if(element.getType()!=JSONElement::JSON_OBJECT && element.getType()!=JSONElement::JSON_ARRAY)
 	{
-		validateSetValue(element, value);
+		validateSetValue(&element, value);
 	}
 	par->addChild(element);
-	if(element->getType()==JSONElement::JSON_OBJECT)
-		object(value, element);
-	else if(element->getType()==JSONElement::JSON_ARRAY)
-		array(value, element);
+	JSONElement* ele = (JSONElement*)&(par->getChildren().back());
+	if(ele->getType()==JSONElement::JSON_OBJECT)
+		object(value, ele);
+	else if(ele->getType()==JSONElement::JSON_ARRAY)
+		array(value, ele);
 	readJSON(json,isarray,par);
 }
 
@@ -322,7 +323,7 @@ std::string JSONUtil::getDocumentStr(const JSONElement& doc)
 	if(doc.hasChildren())
 	{
 		for (int var = 0; var < (int)doc.getChildren().size(); ++var) {
-			JSONElement* child = doc.getChildren().at(var);
+			const JSONElement* child = &(doc.getChildren().at(var));
 			if(doc.getType()==JSONElement::JSON_OBJECT)
 				jsonText += "\"" + child->getName() + "\":";
 			if(child->getType()==JSONElement::JSON_OBJECT || child->getType()==JSONElement::JSON_ARRAY)

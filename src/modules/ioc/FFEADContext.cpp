@@ -42,7 +42,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 	{
 		for (unsigned int var = 0; var < eles.size(); var++)
 		{
-			Element* ele = eles.at(var);
+			Element* ele = &(eles.at(var));
 			if(ele->getTagName()=="bean")
 			{
 				Bean bean;
@@ -67,7 +67,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 				{
 					for (unsigned int var1 = 0; var1 < eleeles.size(); var1++)
 					{
-						Element* ele1 = eleeles.at(var1);
+						Element* ele1 = &(eleeles.at(var1));
 						if(ele1->getTagName()=="inject")
 						{
 							if(ele1->getAttribute("bean")!="")

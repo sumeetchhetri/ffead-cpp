@@ -199,7 +199,7 @@ int main()
 			}
 
 			client->connectionUnresolv(ip,port);
-			int bytes = client->sendData(data);
+			client->sendData(data);
 			std::string tot = client->getTextData("\r\n","content-length");
 			long long millis = timer.elapsedMilliSeconds();
 

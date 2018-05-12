@@ -11,21 +11,33 @@
 #include "CacheInterface.h"
 #include "ConnectionPooler.h"
 
-class RedisCacheImpl: public CacheInterface, public ConnectionPooler {
+class RedisCacheConnectionPool: public ConnectionPooler {
+	Logger logger;
+	void initEnv();
+	void* newConnection(const bool& isWrite, const ConnectionNode& node);
+	void closeConnection(void* conn);
+	void destroy();
+public:
+	RedisCacheConnectionPool(const ConnectionProperties& props);
+	virtual ~RedisCacheConnectionPool();
+};
+
+class RedisCacheImpl: public CacheInterface {
 	redisReply* execute(const char* format, ...);
 	bool replyStatus(redisReply* reply);
 	std::string replyValue(redisReply* reply);
 	ConnectionProperties properties;
 public:
-	RedisCacheImpl(const ConnectionProperties& properties);
+	RedisCacheImpl(ConnectionPooler* pool);
 	~RedisCacheImpl();
 	void init();
 
-	bool set(const std::string& key, GenericObject& value, const int& expireSeconds);
-	bool add(const std::string& key, GenericObject& value, const int& expireSeconds);
-	bool replace(const std::string& key, GenericObject& value, const int& expireSeconds);
+	bool set(const std::string& key, GenericObject& value, int expireSeconds);
+	bool add(const std::string& key, GenericObject& value, int expireSeconds);
+	bool replace(const std::string& key, GenericObject& value, int expireSeconds);
 
 	std::string getValue(const std::string& key);
+	std::vector<std::string> getValues(const std::vector<std::string>& keys);
 
 	bool remove(const std::string& key);
 	long long increment(const std::string& key, const int& number= 1);
@@ -36,11 +48,6 @@ public:
 	bool flushAll();
 
 	void* executeCommand(const std::string& command, ...);
-
-	void initEnv();
-	void destroy();
-	void* newConnection(const bool& isWrite, const ConnectionNode& node);
-	void closeConnection(void* conn);
 };
 
 #endif /* REDISCACHEIMPL_H_ */

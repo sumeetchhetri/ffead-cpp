@@ -461,14 +461,16 @@ void* gracefullShutdown_monitor(void* args)
 	}
 	std::string ip = ipaddr->substr(0, ipaddr->find(":"));
 	std::string port = ipaddr->substr(ipaddr->find(":")+1);
-	ClientInterface* client;
-	if(isSSLEnabled)
-		client = new SSLClient;
-	else
-		client = new Client;
-	client->connectionUnresolv(ip,CastUtil::lexical_cast<int>(port));
-	client->closeConnection();
-	delete client;
+
+	if(isSSLEnabled) {
+		SSLClient sc;
+		sc.connectionUnresolv(ip,CastUtil::lexical_cast<int>(port));
+		sc.closeConnection();
+	} else {
+		Client sc;
+		sc.connectionUnresolv(ip,CastUtil::lexical_cast<int>(port));
+		sc.closeConnection();
+	}
 
 	return NULL;
 }
@@ -1363,8 +1365,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 
 	LoggerFactory::clear();
 
-	CommonUtils::clear();
-
 	#ifdef OS_MINGW
 		WSACleanup();
 	#endif
@@ -1379,17 +1379,17 @@ HttpServiceTask* CHServer::httpServiceFactoryMethod() {
 	return new ServiceTask();
 }
 
-SocketInterface* CHServer::createSocketInterface(SocketUtil* sockUtil) {
+SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
 	SocketInterface* sockIntf = NULL;
-	if(SSLHandler::getInstance()->getIsSSL() && sockUtil->getAlpnProto().find("h2")==0)
+	/*if(SSLHandler::getInstance()->getIsSSL() && sockUtil->getAlpnProto().find("h2")==0)
 	{
-		sockIntf = new Http2Handler(true, sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath);
+		sockIntf = new Http2Handler(true, fd, ConfigurationData::getInstance()->coreServerProperties.webPath);
 	}
-	else
-	{
-		sockIntf = new Http11Handler(sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath,
+	else*/
+	//{
+		sockIntf = new Http11Handler(fd, ConfigurationData::getInstance()->coreServerProperties.webPath,
 				techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
-	}
+	//}
 
 	return sockIntf;
 }

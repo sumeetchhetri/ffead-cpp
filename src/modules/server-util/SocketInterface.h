@@ -22,17 +22,30 @@ class SocketInterface {
 	friend class HandlerRequest;
 	friend class HttpWriteTask;
 protected:
-	SocketUtil* sockUtil;
+	SocketUtil sockUtil;
 	std::string buffer;
 	std::atomic<int> t;
 	int fd;
-	int reqPos;
+	std::atomic<int> reqPos;
 	std::atomic<int> current;
-	void startRequest() {
-		reqPos++;
+	void init(const SOCKET& fd) {
+		reqPos = 0;
+		current = 0;
+		address = StringUtil::toHEX((long long)this);
+		this->fd = fd;
+		sockUtil.init(fd);
 	}
-	int getReqPos() {
-		return reqPos;
+	int startRequest() {
+		return ++reqPos;
+	}
+	int endRequest() {
+		return ++current;
+	}
+	bool allRequestsDone() {
+		return current == reqPos;
+	}
+	bool isCurrentRequest(int reqp) {
+		return reqp == (current + 1);
 	}
 	bool writeTo(const std::string& data)
 	{
@@ -40,7 +53,7 @@ protected:
 		while(!isClosed() && offset<(int)data.length())
 		{
 			//cout << "writing data " << fd << " " << identifier << std::endl;
-			int count = sockUtil->writeData(data, true, offset);
+			int count = sockUtil.writeData(data, true, offset);
 			//cout << "done writing data " << fd << " " << identifier << std::endl;
 			if(count>0)
 			{
@@ -106,7 +119,7 @@ public:
 		{
 			ssize_t count;
 			std::string temp;
-			count = sockUtil->readData(MAXBUFLENM, temp);
+			count = sockUtil.readData(MAXBUFLENM, temp);
 			if(count>0)
 			{
 				int tt = Timer::getTimestamp() - 1203700;
@@ -128,7 +141,7 @@ public:
 		return isClosed();
 	}
 	void close() {
-		sockUtil->closeSocket();
+		sockUtil.closeSocket();
 	}
 	int getDescriptor() {
 		return fd;
@@ -146,14 +159,10 @@ public:
 	virtual void onClose()=0;
 	virtual ~SocketInterface() {}
 	bool isClosed() {
-		return sockUtil->closed;
+		return sockUtil.closed;
 	}
 	void setIdentifier(const long& identifier) {
 		this->identifier = identifier;
-		fd = sockUtil->fd;
-		reqPos = 0;
-		current = 0;
-		address = StringUtil::toHEX((long long)this);
 	}
 };
 

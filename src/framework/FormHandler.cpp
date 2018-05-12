@@ -33,12 +33,12 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 	std::string json = "{";
 	for (unsigned int apps = 0; apps < eles.size(); apps++)
 	{
-		if(eles.at(apps)->getTagName()=="field")
+		if(eles.at(apps).getTagName()=="field")
 		{
-			std::string name = eles.at(apps)->getAttribute("name");
-			Field fld = binfo.getField(eles.at(apps)->getAttribute("prop"));
+			std::string name = eles.at(apps).getAttribute("name");
+			Field fld = binfo.getField(eles.at(apps).getAttribute("prop"));
 			if(fld.getType()=="std::string" || fld.getType()=="string")
-				json += "\""+eles.at(apps)->getAttribute("prop")+"\": \"" + req->getParamValue(name) + "\",";
+				json += "\""+eles.at(apps).getAttribute("prop")+"\": \"" + req->getParamValue(name) + "\",";
 			else
 			{
 				if(fld.getType()=="short" || fld.getType()=="unsigned short"
@@ -47,23 +47,23 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 						|| fld.getType()=="char" || fld.getType()=="unsigned char")
 				{
 					if(req->getQueryParam(name)=="")
-						json += "\""+eles.at(apps)->getAttribute("prop")+"\": 0,";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": 0,";
 					else
-						json += "\""+eles.at(apps)->getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
 				}
 				else if(fld.getType()=="double" || fld.getType()=="float")
 				{
 					if(req->getQueryParam(name)=="")
-						json += "\""+eles.at(apps)->getAttribute("prop")+"\": 0.0,";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": 0.0,";
 					else
-						json += "\""+eles.at(apps)->getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
 				}
 				else if(fld.getType()=="bool")
 				{
 					if(req->getQueryParam(name)=="")
-						json += "\""+eles.at(apps)->getAttribute("prop")+"\": false,";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": false,";
 					else
-						json += "\""+eles.at(apps)->getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
+						json += "\""+eles.at(apps).getAttribute("prop")+"\": " + req->getParamValue(name) + ",";
 				}
 			}
 		}

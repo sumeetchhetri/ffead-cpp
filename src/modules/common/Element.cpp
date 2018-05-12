@@ -30,7 +30,7 @@ Element::Element() {
 
 Element::~Element() {
 	for (int var = 0; var < (int)elements.size(); ++var) {
-		delete elements.at(var);
+		//delete elements.at(var);
 	}
 }
 
@@ -57,19 +57,20 @@ bool Element::operator == (Element *ele)
 		return false;
 }
 
-void Element::addElement(Element* element)
+void Element::addElement(Element element)
 {
 	this->elements.push_back(element);
-	if(mapOfEle.find(element->getTagName())==mapOfEle.end())
+	Element* el = &(this->elements.back());
+	if(mapOfEle.find(el->getTagName())==mapOfEle.end())
 	{
-		this->mapOfEle[element->getTagName()] = element;
+		this->mapOfEle[el->getTagName()] = el;
 	}
 }
 void Element::removeElement(Element* element)
 {
 	for(unsigned int i=0;i<this->elements.size();i++)
 	{
-		if(element==elements.at(i))
+		if(*element==elements.at(i))
 		{
 			this->elements.erase(elements.begin()+i);
 			this->mapOfEle.erase(element->getTagName());
@@ -205,7 +206,7 @@ ElementList Element::getElementsByName(const std::string& name)
 	ElementList list;
 	for(int i=0;i<(int)this->elements.size();i++)
 	{
-		if(this->elements.at(i)->getTagName()==name)
+		if(this->elements.at(i).getTagName()==name)
 			list.push_back(this->elements.at(i));
 	}
 	return list;
@@ -222,7 +223,7 @@ std::string Element::render()
 	ElementList elements = this->getChildElements();
 	for(unsigned int i=0;i<elements.size();i++)
 	{
-		rend.append(elements.at(i)->render());
+		rend.append(elements.at(i).render());
 	}
 	rend.append(generateCloseTag(this->getTagName()));
 	return rend;
@@ -239,7 +240,7 @@ std::string Element::renderSerialization()
 	ElementList elements = this->getChildElements();
 	for(unsigned int i=0;i<elements.size();i++)
 	{
-		rend.append(elements.at(i)->renderSerialization());
+		rend.append(elements.at(i).renderSerialization());
 	}
 	rend.append(generateCloseTag(this->getTagName()));
 	return rend;
@@ -251,7 +252,7 @@ std::string Element::renderChildren() const
 	ElementList elements = this->getChildElements();
 	for(unsigned int i=0;i<elements.size();i++)
 	{
-		rend.append(elements.at(i)->render());
+		rend.append(elements.at(i).render());
 	}
 	return rend;
 }
@@ -284,8 +285,8 @@ void Element::validateNs()
 		ElementList elements = this->getChildElements();
 		for(unsigned int i=0;i<elements.size();i++)
 		{
-			elements.at(i)->parent = this;
-			elements.at(i)->validateNs();
+			elements.at(i).parent = this;
+			elements.at(i).validateNs();
 		}
 	}
 	else

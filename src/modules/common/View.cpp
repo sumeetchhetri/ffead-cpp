@@ -68,7 +68,7 @@ void View::traverseElement(std::string *ss, Element* element)
 	ElementList elements = element->getChildElements();
 	for(unsigned int i=0;i<elements.size();i++)
 	{
-		traverseElement(ss, elements.at(i));
+		traverseElement(ss, &(elements.at(i)));
 	}
 	ss->append(generateCloseTag(element->getTagName()));
 }

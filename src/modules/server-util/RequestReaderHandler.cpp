@@ -44,14 +44,15 @@ void RequestReaderHandler::stop(std::string ip, int port, bool isSSLEnabled) {
 	while(complete<1) {
 		Thread::mSleep(500);
 
-		ClientInterface* client;
-		if(isSSLEnabled)
-			client = new SSLClient;
-		else
-			client = new Client;
-		client->connectionUnresolv(ip, port);
-		client->closeConnection();
-		delete client;
+		if(isSSLEnabled) {
+			SSLClient sc;
+			sc.connectionUnresolv(ip, port);
+			sc.closeConnection();
+		} else {
+			Client sc;
+			sc.connectionUnresolv(ip, port);
+			sc.closeConnection();
+		}
 	}
 }
 
@@ -66,7 +67,7 @@ void RequestReaderHandler::registerSocketInterfaceFactory(const SocketInterfaceF
 void RequestReaderHandler::addSf(SocketInterface* psi) {
 	int tt = Timer::getTimestamp() - 1203700;
 	psi->t = tt;
-	psi->sockUtil->sel = &selector;
+	psi->sockUtil.sel = &selector;
 	psi->setIdentifier(siIdentifierSeries++);
 	connections[psi->getDescriptor()] = psi;
 	if(psi->getTimeout()>0)
@@ -168,7 +169,6 @@ void* RequestReaderHandler::handle(void* inp) {
 			ins->selector.unRegisterForEvent(tsi->getDescriptor());
 			ins->connections.erase(tsi->getDescriptor());
 			ins->shi->addCloseRequest(tsi);
-			delete tsi->sockUtil;
 			delete tsi;
 		}*/
 
@@ -228,8 +228,7 @@ void* RequestReaderHandler::handle(void* inp) {
 							  break;
 							}
 						}
-						SocketUtil* sockUtil = new SocketUtil(newSocket);
-						SocketInterface* sockIntf = ins->sf(sockUtil);
+						SocketInterface* sockIntf = ins->sf(newSocket);
 						ins->addSf(sockIntf);
 						//logger << "New Sif " << sockIntf->identifier << std::endl;
 						//CommonUtils::cSocks += 1;
@@ -237,8 +236,7 @@ void* RequestReaderHandler::handle(void* inp) {
 #else
 					sin_size = sizeof their_addr;
 					SOCKET newSocket = accept(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size);
-					SocketUtil* sockUtil = new SocketUtil(newSocket);
-					SocketInterface* sockIntf = ins->sf(sockUtil);
+					SocketInterface* sockIntf = ins->sf(newSocket);
 					ins->addSf(sockIntf);
 
 					//CommonUtils::cSocks += 1;
@@ -262,9 +260,8 @@ void* RequestReaderHandler::handle(void* inp) {
 							si->onClose();
 							ins->selector.unRegisterForEvent(si->getDescriptor());
 							ins->connections.erase(si->getDescriptor());
-							if(si->current == si->reqPos) {
+							if(si->allRequestsDone()) {
 								//logger << "Delete Sif " << si->identifier << std::endl;
-								delete si->sockUtil;
 								delete si;
 							}
 							//ins->remFromTimeoutSocks.push(si);
@@ -295,7 +292,6 @@ void* RequestReaderHandler::handle(void* inp) {
 		ins->shi->donelist.put(si->identifier, true);
 		si->close();
 		//logger << "Delete Sif " << si->identifier << std::endl;
-		delete si->sockUtil;
 		delete si;
 	}
 	std::map<int, SocketInterface*>::iterator it;
@@ -303,7 +299,6 @@ void* RequestReaderHandler::handle(void* inp) {
 		if(!ins->shi->donelist.find(it->second->identifier)) {
 			it->second->close();
 			//logger << "Delete Sif " << it->second->identifier << std::endl;
-			delete it->second->sockUtil;
 			delete it->second;
 		}
 	}

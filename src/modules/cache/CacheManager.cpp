@@ -27,6 +27,40 @@ void CacheManager::initCache(const ConnectionProperties& props, const std::strin
 	}
 	CacheManager* mgr = new CacheManager(props);
 	caches[name] = mgr;
+
+	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+	if(dlib == NULL)
+	{
+		std::cerr << dlerror() << std::endl;
+		throw "Cannot load application shared library";
+	}
+	Reflector ref(dlib);
+	if(props.getProperty("init")!="") {
+		std::string meth = props.getProperty("init");
+		std::vector<std::string> v;
+		StringUtil::split(v, meth, ".");
+		if(v.size()==2) {
+			CommonUtils::setAppName(appName);
+			ClassInfo clas = ref.getClassInfo(v.at(0), appName);
+			if(clas.getClassName()!="") {
+				args argus;
+				vals valus;
+				const Constructor& ctor = clas.getConstructor(argus);
+				void* _temp = ref.newInstanceGVP(ctor);
+				try {
+					if(_temp!=NULL) {
+						const Method& meth = clas.getMethod(v.at(1), argus);
+						if(meth.getMethodName()!="")
+						{
+							ref.invokeMethodGVP(_temp, meth, valus);
+						}
+					}
+				} catch(...) {
+				}
+				ref.destroy(_temp, v.at(0), appName);
+			}
+		}
+	}
 }
 
 void CacheManager::destroy()
@@ -36,6 +70,7 @@ void CacheManager::destroy()
 	{
 		if(it->second!=NULL)
 		{
+			delete it->second->pool;
 			delete it->second;
 		}
 	}
@@ -53,21 +88,22 @@ CacheInterface* CacheManager::getImpl(std::string name) {
 	{
 		throw "Cache Not found...";
 	}
+	CacheManager* cchMgr = caches[name];
 	CacheInterface* t = NULL;
-	if(StringUtil::toLowerCopy(props.getType())=="memory")
+	if(StringUtil::toLowerCopy(cchMgr->props.getType())=="memory")
 	{
-		t = new MemoryCacheImpl(props);
+		t = new MemoryCacheImpl(cchMgr->pool);
 	}
-	else if(StringUtil::toLowerCopy(props.getType())=="memcached")
+	else if(StringUtil::toLowerCopy(cchMgr->props.getType())=="memcached")
 	{
-#ifdef INC_CACHE_MEMCACHED
-		t = new MemcachedImpl(props);
+#ifdef INC_MEMCACHED
+		t = new MemcachedImpl(cchMgr->pool);
 #endif
 	}
-	else if(StringUtil::toLowerCopy(props.getType())=="redis")
+	else if(StringUtil::toLowerCopy(cchMgr->props.getType())=="redis")
 	{
-#ifdef INC_CACHE_REDIS
-		t = new RedisCacheImpl(props);
+#ifdef INC_REDISCACHE
+		t = new RedisCacheImpl(cchMgr->pool);
 #endif
 	}
 	t->init();
@@ -77,9 +113,19 @@ CacheInterface* CacheManager::getImpl(std::string name) {
 CacheManager::CacheManager(const ConnectionProperties& props) {
 	this->pool = NULL;
 	this->props = props;
+	if(StringUtil::toLowerCopy(props.getType()) == "memory") {
+		this->pool = new MemoryCacheConnectionPool(props);
+	} else if(StringUtil::toLowerCopy(props.getType()) == "memcached") {
+#ifdef INC_MEMCACHED
+		this->pool = new MemcachedConnectionPool(props);
+#endif
+	} else if(StringUtil::toLowerCopy(props.getType()) == "redis") {
+#ifdef INC_REDISCACHE
+		this->pool = new RedisCacheConnectionPool(props);
+#endif
+	}
 }
 
 CacheManager::~CacheManager() {
-	// TODO Auto-generated destructor stub
 }
 

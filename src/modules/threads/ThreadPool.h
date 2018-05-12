@@ -32,13 +32,14 @@ class ThreadPool {
 	int maxThreads;
 	int lowp;
 	int highp;
+	bool inited;
 	bool allowScheduledTasks;
-	std::vector<PoolThread*> *tpool;
-	TaskPool *wpool;
+	std::vector<PoolThread*> tpool;
+	TaskPool wpool;
 	bool prioritypooling;
 	bool runFlag, pollerStarted;
 	void initializeThreads();
-	ConditionMutex *m_mutex;
+	ConditionMutex m_mutex;
 	bool joinComplete;
 	void initPointers();
 public:

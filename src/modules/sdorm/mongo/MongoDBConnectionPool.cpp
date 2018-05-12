@@ -104,6 +104,9 @@ void MongoDBConnectionPool::initEnv() {
 
 	uri = mongoc_uri_new(connectionString.c_str());
 	mongoc_client_pool_t *pool = mongoc_client_pool_new(uri);
+	if(pool==NULL) {
+		throw "Unable to create memcached connection pool";
+	}
 	setEnv(pool);
 	props.setNewConnectionStrategy(true);
 }

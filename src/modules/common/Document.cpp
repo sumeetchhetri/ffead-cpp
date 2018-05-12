@@ -65,7 +65,7 @@ Element* Document::getElementByName(const std::string& name, Element* ele)
 		ElementList chi = ele->getChildElements();
 		for(unsigned int i=0;i<chi.size();i++)
 		{
-			Element* ele1 = getElementByName(name, chi.at(i));
+			Element* ele1 = getElementByName(name, &(chi.at(i)));
 			if(ele1!=NULL)
 			{
 				return ele1;
@@ -85,7 +85,7 @@ std::string Document::render()
 	ElementList elements = this->root.getChildElements();
 	for(unsigned int i=0;i<elements.size();i++)
 	{
-		rend.append(elements.at(i)->render());
+		rend.append(elements.at(i).render());
 	}
 	rend.append(generateCloseTag(this->root.getTagName()));
 	return rend;

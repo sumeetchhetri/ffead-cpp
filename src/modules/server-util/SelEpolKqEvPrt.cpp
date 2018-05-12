@@ -58,7 +58,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 		FD_ZERO(&readfds);
 		FD_ZERO(&master);
 	#elif defined(USE_SELECT)
-		fdsetSize = MAXDESCRIPTORS/FD_SETSIZE;
+		fdsetSize = 1024/FD_SETSIZE;
 		fdMax = sockfd;
 		for (int var = 0; var < fdsetSize; ++var) {
 			FD_ZERO(&readfds[var]);
@@ -299,7 +299,7 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index)
 		l.unlock();
 		return temp;
 	#elif defined USE_EPOLL
-		if(index>-1 && index<sizeof events)
+		if(index>-1 && index<(int)(sizeof events))
 		{
 			if ((events[index].events & EPOLLERR) ||
 				  (events[index].events & EPOLLHUP) ||

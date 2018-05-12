@@ -194,7 +194,7 @@ std::string BinarySerialize::elementToSerializedString(void* _1, const int& coun
 
 std::string BinarySerialize::getConatinerElementClassName(void* _1, const std::string& className)
 {
-	AMEFObject* root = static_cast<AMEFObject*>(_1);
+	//AMEFObject* root = static_cast<AMEFObject*>(_1);
 	std::string stlclassName = className;
 	if(stlclassName.find(">")!=std::string::npos)
 	{

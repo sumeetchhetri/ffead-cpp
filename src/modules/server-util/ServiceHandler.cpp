@@ -24,7 +24,7 @@ void ServiceHandler::registerWriteRequest(HandlerRequest* request, void* respons
 
 void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos, ReaderSwitchInterface* switchReaderIntf) {
 	HandlerRequest* req = NULL;
-	int val;
+	//int val;
 	//if(requestNumMap.find(sif->identifier, val))
 	//{
 		req = new HandlerRequest;
@@ -107,7 +107,6 @@ void* ServiceHandler::cleanSifs(void* inp) {
 			if(ins->requestNumMap.find(si->identifier, val) && val<=0)
 			{
 				//std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
-				delete si->sockUtil;
 				delete si;
 				ins->requestNumMap.erase(si->identifier);
 			}
@@ -131,7 +130,6 @@ void ServiceHandler::cleanSif(std::map<int, SocketInterface*> connectionsWithTim
 		{
 			//std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
 			connectionsWithTimeouts.erase(si->getDescriptor());
-			delete si->sockUtil;
 			requestNumMap.erase(si->identifier);
 			delete si;
 		}
@@ -207,7 +205,7 @@ HandlerRequest::~HandlerRequest() {
 }
 
 SocketUtil* HandlerRequest::getSocketUtil() {
-	return sif->sockUtil;
+	return &(sif->sockUtil);
 }
 
 void HandlerRequest::clearObjects() {
@@ -244,12 +242,12 @@ bool HandlerRequest::isSentResponse() const {
 }
 
 bool HandlerRequest::isValidWriteRequest() {
-	return reqPos == sif->current + 1;
+	return sif->isCurrentRequest(reqPos);
 }
 
 bool HandlerRequest::doneWithWrite() {
-	sif->current += 1;
-	return sif->current == sif->reqPos;
+	sif->endRequest();
+	return sif->allRequestsDone();
 }
 
 SocketInterface* HandlerRequest::getSif() {

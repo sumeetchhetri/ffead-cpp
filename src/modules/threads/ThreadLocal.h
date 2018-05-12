@@ -28,20 +28,16 @@ public:
 template<typename T>
 inline ThreadLocal::ThreadLocal(const T& t) {
 	init();
-	T* tt = new T;
-	*tt = t;
 	if (pthread_getspecific(_key) == NULL) {
-		pthread_setspecific(_key, tt);
+		pthread_setspecific(_key, &t);
 	}
 }
 
 template<typename T>
 inline ThreadLocal::ThreadLocal(T* t) {
 	init();
-	T* tt = new T;
-	*tt = *t;
 	if (pthread_getspecific(_key) == NULL) {
-		pthread_setspecific(_key, tt);
+		pthread_setspecific(_key, t);
 	}
 }
 

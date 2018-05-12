@@ -425,8 +425,7 @@ bool SQLDataSourceImpl::allocateStmt(const bool& read) {
 	{
 		return false;
 	}
-	if (this->pool != NULL && this->conn != NULL && this->conn->isType() == read
-			&& V_OD_hstmt != NULL) {
+	if (this->pool != NULL && this->conn != NULL && this->conn->isType() == read && V_OD_hstmt != NULL) {
 		refreshStmt();
 		//return false;
 	}
@@ -451,7 +450,9 @@ bool SQLDataSourceImpl::allocateStmt(const bool& read) {
 
 void SQLDataSourceImpl::refreshStmt() {
 #ifdef HAVE_LIBODBC
-	SQLCloseCursor(V_OD_hstmt);
+	SQLFreeStmt(V_OD_hstmt, SQL_UNBIND);
+	SQLFreeStmt(V_OD_hstmt, SQL_RESET_PARAMS);
+	SQLFreeStmt(V_OD_hstmt, SQL_CLOSE);
 #endif
 }
 
@@ -629,7 +630,7 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 				Method meth = clas.getMethod(methname,argus);
 				reflector->invokeMethodGVP(rel2Insmap[flv],meth,valus);
 				reflector->addToContainer(vecT,rel2Insmap[flv],clasName,"std::vector",appName);
-				delete rel2Insmap[flv];
+				reflector->destroy(rel2Insmap[flv], clasName, appName);
 				delete rvect;
 			}
 		}
@@ -697,7 +698,7 @@ void* SQLDataSourceImpl::getElements()
 int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const std::string& fieldName, std::string& fldVal)
 {
 #ifdef HAVE_LIBODBC
-	void* col = NULL;
+	//void* col = NULL;
 	SQLRETURN ret;
 	SQLLEN indicator;
 	Field fe = clas.getField(fieldName);
@@ -722,9 +723,8 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 	double dd;
 	float df;
 	bool db;
-	Date* ddt = NULL;
-	std::string *ds = NULL;
-	std::wstring* dws = NULL;
+	Date ddt;
+	std::string ds;
 
 	switch (colDataType) {
 		case SQL_SMALLINT:
@@ -790,8 +790,8 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		{
 			DATE_STRUCT ds;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_TYPE_DATE, &ds, sizeof(ds), &indicator);
-			ddt = new Date(ds.year, ds.month, ds.day);
-			fldVal = ddt->toString();
+			ddt = Date(ds.year, ds.month, ds.day);
+			fldVal = ddt.toString();
 			break;
 		}
 #if (ODBCVER >= 0x0300)
@@ -802,9 +802,8 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		{
 			TIME_STRUCT ts;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_TYPE_TIME, &ts, sizeof(ts), &indicator);
-			ddt = new Date();
-			ddt->setTime(ts.hour, ts.minute, ts.second);
-			fldVal = ddt->toString();
+			ddt.setTime(ts.hour, ts.minute, ts.second);
+			fldVal = ddt.toString();
 			break;
 		}
 #if (ODBCVER >= 0x0300)
@@ -815,9 +814,9 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		{
 			TIMESTAMP_STRUCT ts;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_TYPE_TIMESTAMP, &ts, sizeof(ts), &indicator);
-			ddt = new Date(ts.year, ts.month, ts.day);
-			ddt->setTime(ts.hour, ts.minute, ts.second, ts.fraction);
-			fldVal = ddt->toString();
+			ddt = Date(ts.year, ts.month, ts.day);
+			ddt.setTime(ts.hour, ts.minute, ts.second, ts.fraction);
+			fldVal = ddt.toString();
 			break;
 		}
 
@@ -833,115 +832,114 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 		{
 			size_t numBytes;
 			unsigned char buf[1024];
-			ds = new std::string;
 			// Retrieve and display each row of data.
 			while ((ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator)) != SQL_NO_DATA) {
 				numBytes = (indicator > 1024) || (indicator == SQL_NO_TOTAL) ? 1024 : indicator;
-				ds->append((const char*)&buf[0], numBytes);
+				ds.append((const char*)&buf[0], numBytes);
 			}
-			fldVal = CastUtil::lexical_cast<std::string>(*ds);
+			fldVal = CastUtil::lexical_cast<std::string>(ds);
 			break;
 		}
 	}
 
 	if(te=="char")
 	{
-		col = new char;
-		*((char*)col) = (char)dn;
+		char o = (char)dn;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="unsigned char")
 	{
-		col = new unsigned char;
-		*((unsigned char*)col) = (unsigned char)dn;
+		unsigned char o = (unsigned char)dn;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="short")
 	{
-		col = new short;
-		*((short*)col) = (short)dn;
+		short o = (short)dn;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="unsigned short")
 	{
-		col = new unsigned short;
-		*((unsigned short*)col) = (unsigned short)dn;
+		unsigned short o = (unsigned short)dn;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="int")
 	{
-		col = new int;
-		*((int*)col) = (int)dn;
+		int o = (int)dn;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="unsigned int")
 	{
-		col = new unsigned int;
-		*((unsigned int*)col) = (unsigned int)dn;
+		unsigned int o = (unsigned int)dn;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="long")
 	{
-		col = new long;
-		*((long*)col) = (long)dn;
+		long o = (long)dn;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="unsigned long")
 	{
-		col = new unsigned long;
-		*((unsigned long*)col) = (unsigned long)dn;
+		unsigned long o = (unsigned long)dn;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="long long")
 	{
-		col = new long long;
-		*((long long*)col) = (long long)dn;
+		long long o = (long long)dn;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="unsigned long long")
 	{
-		col = new unsigned long long;
-		*((unsigned long long*)col) = (unsigned long long)dn;
+		unsigned long long o = (unsigned long long)dn;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="double")
 	{
-		col = new double;
-		*((double*)col) = (double)dd;
+		double o = (double)dd;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="float")
 	{
-		col = new float;
-		*((float*)col) = (float)dd;
+		float o = (float)dd;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="bool")
 	{
-		col = new bool;
-		*((bool*)col) = (bool)dd;
+		float o = (float)db;
+		storePropertyInt(clas, t, &o, fe, var);
 	}
 	else if(te=="string" || te=="std::string")
 	{
-		col = ds;
+		storePropertyInt(clas, t, &ds, fe, var);
 	}
 	else if(te=="Date")
 	{
-		col = ddt;
+		storePropertyInt(clas, t, &ddt, fe, var);
 	}
 	else if(te=="BinaryData")
 	{
-		BinaryData *temp = new BinaryData;
-		temp->append(*ds);
-		delete ds;
-		col = temp;
-	}
-	if(col!=NULL)
-	{
-		args argus;
-		argus.push_back(te);
-		vals valus;
-		//valus.push_back(columns.at(var));
-		valus.push_back(col);
-		std::string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
-		Method meth = clas.getMethod(methname,argus);
-		reflector->invokeMethodUnknownReturn(t,meth,valus);
-		var++;
-		reflector->destroy(col, te);
+		BinaryData temp;
+		temp.append(ds);
+		storePropertyInt(clas, t, &temp, fe, var);
 	}
 	return var;
 #endif
 	return 0;
 }
 
+
+void SQLDataSourceImpl::storePropertyInt(const ClassInfo& clas, void* t, void* col, const Field& fe, int& var) {
+	if(col!=NULL)
+	{
+		args argus;
+		argus.push_back(fe.getType());
+		vals valus;
+		valus.push_back(col);
+		std::string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
+		Method meth = clas.getMethod(methname,argus);
+		reflector->invokeMethodUnknownReturn(t,meth,valus);
+		var++;
+	}
+}
 
 int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, std::map<std::string, GenericObject>& colValMap, const std::string& colName, const int& var)
 {
@@ -1165,7 +1163,7 @@ void SQLDataSourceImpl::bindQueryParams(Query& query)
 		propPosVaues = &(query.getPropPosVaues());
 	}
 
-	logger << query.getQuery() << std::endl;
+	//logger << query.getQuery() << std::endl;
 
 	int totalParams = propPosVaues->size();
 	while(totalParams-->0)
@@ -1285,7 +1283,7 @@ void SQLDataSourceImpl::showError(const char *fn, const SQLHANDLE& handle, const
 	{
 		ret = SQLGetDiagRec(type, handle, ++i, state, &native, text, sizeof(text), &len );
 		if (SQL_SUCCEEDED(ret))
-		printf("%s:%ld:%ld:%s\n", state, i, native, text);
+		printf("%s:%d:%d:%s\n", state, i, native, text);
 	}
 	while( ret == SQL_SUCCESS );
 #endif
@@ -1443,7 +1441,7 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 	}
 	if (inoutq)
 	{
-		logger << inoutQuery << std::endl;
+		//logger << inoutQuery << std::endl;
 		V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) inoutQuery.c_str(), SQL_NTS);
 		if (!SQL_SUCCEEDED(V_OD_erg))
 		{
@@ -1454,7 +1452,7 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 		refreshStmt();
 	}
 
-	logger << quer << std::endl;
+	//logger << quer << std::endl;
 	query = (SQLCHAR*) quer.c_str();
 
 	par = 1;
@@ -1511,7 +1509,7 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 		throw "Error in call to stored procedure";
 	}
 
-	logger << outQuery << std::endl;
+	//logger << outQuery << std::endl;
 	SQLLEN siz;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) outQuery.c_str(), SQL_NTS);
 	if (!SQL_SUCCEEDED(V_OD_erg))
@@ -1529,14 +1527,14 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 				params[outargs.at(var)].get(sv);
 				StringUtil::replaceFirst(outargs.at(var), "@", "");
 				SQLGetData(V_OD_hstmt, var + 1, SQL_C_LONG, &sv, sizeof(long), &siz);
-				logger << sv << std::endl;
+				//logger << sv << std::endl;
 			}
 			else if (revType[outargs.at(var)] == "short") {
 				short sv;
 				params[outargs.at(var)].get(sv);
 				StringUtil::replaceFirst(outargs.at(var), "@", "");
 				SQLGetData(V_OD_hstmt, var + 1, SQL_C_SHORT, &sv, sizeof(short), &siz);
-				logger << sv << std::endl;
+				//logger << sv << std::endl;
 			}
 		}
 		V_OD_erg = SQLFetch(V_OD_hstmt);
@@ -1555,7 +1553,7 @@ void SQLDataSourceImpl::empty(const std::string& clasName) {
 	//SQLINTEGER V_OD_id;
 	std::string tableName = mapping->getTableForClass(clasName);
 	std::string query = "truncate table "+tableName;
-	logger << query << std::endl;
+	//logger << query << std::endl;
 	V_OD_erg = SQLExecDirect(V_OD_hstmt, (SQLCHAR*) query.c_str(), SQL_NTS);
 	if (!SQL_SUCCEEDED(V_OD_erg))
 	{
@@ -1981,7 +1979,7 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 			close();
 			return vecT;
 		}
-		logger << "Number of Rows " << (int)V_OD_rowanz << std::endl;
+		//logger << "Number of Rows " << (int)V_OD_rowanz << std::endl;
 		if(query.getClassName()!="" && isObj)
 			return getElements(query);
 		else
@@ -2009,4 +2007,11 @@ void* SQLDataSourceImpl::getContext(void* details) {
 }
 
 void SQLDataSourceImpl::destroyContext(void* cntxt) {
+}
+
+SQLContext::SQLContext() {
+	conn = NULL;
+}
+
+SQLContext::~SQLContext() {
 }

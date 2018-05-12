@@ -41,28 +41,31 @@ void HttpWriteTask::run() {
 		bool flag = handlerRequest->doneWithWrite();
 		if(flag && handlerRequest->getSif()->isClosed()) {
 			//logger << "Delete Sif from writer " << handlerRequest->getSif()->identifier << std::endl;
-			handlerRequest->sh->donelist.put(handlerRequest->getSif()->identifier, true);
-			delete handlerRequest->getSif()->sockUtil;
-			delete handlerRequest->getSif();
+			//handlerRequest->sh->donelist.put(handlerRequest->getSif()->identifier, true);
+			//delete handlerRequest->getSif()->sockUtil;
+			//delete handlerRequest->getSif();
 		}
 		return;
 	}
 
 	if(!handlerRequest->isValidWriteRequest()) {
-		service->registerWriteRequest(handlerRequest, handlerRequest->getResponse());
+		//This handlerRequest will be processed in a pipelined manner and will be later cleared by the handling HttpWriteTask object
+		//Set handlerRequest to NULL to avoid deleting requests getting handled in an out of order manner
+		HandlerRequest* handlerRequestOrig = handlerRequest;
+		this->handlerRequest = NULL;
+		service->registerWriteRequest(handlerRequestOrig, handlerRequestOrig->getResponse());
 		return;
 	}
 
 	//CommonUtils::cResps += 1;
-
 	handlerRequest->getSif()->writeResponse(handlerRequest->getRequest(), handlerRequest->getResponse(), handlerRequest->getContext());
 
 	bool flag = handlerRequest->doneWithWrite();
 	if(flag && handlerRequest->getSif()->isClosed()) {
 		//logger << "Delete Sif from writer " << handlerRequest->getSif()->identifier << std::endl;
-		handlerRequest->sh->donelist.put(handlerRequest->getSif()->identifier, true);
-		delete handlerRequest->getSif()->sockUtil;
-		delete handlerRequest->getSif();
+		//handlerRequest->sh->donelist.put(handlerRequest->getSif()->identifier, true);
+		//delete handlerRequest->getSif()->sockUtil;
+		//delete handlerRequest->getSif();
 	}
 }
 
@@ -90,6 +93,7 @@ HttpWriteTask::~HttpWriteTask() {
 
 void HttpServiceTask::run() {
 	if(handlerRequest->getSif()->isClosed()) {
+		handlerRequest->doneWithWrite();
 		handlerRequest->clearObjects();
 		delete handlerRequest;
 		return;
@@ -136,7 +140,7 @@ void HttpServiceTask::run() {
 				res->addHeaderValue(HttpResponse::SecWebSocketAccept, servseckey);
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
-				switchedIntf = new Http11WebSocketHandler(req->getUrl(), true, handlerRequest->getSocketUtil());
+				switchedIntf = new Http11WebSocketHandler(req->getUrl(), true, handlerRequest->getSif()->getDescriptor());
 
 				WebSocketData wreq;
 				wreq.url = req->getCurl();
@@ -154,7 +158,7 @@ void HttpServiceTask::run() {
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
 				Http2Handler* prev = (Http2Handler*)handlerRequest->getSif();
-				switchedIntf = new Http2Handler(true, handlerRequest->getSocketUtil(), prev->getWebpath(),
+				switchedIntf = new Http2Handler(true, handlerRequest->getSif()->getDescriptor(), prev->getWebpath(),
 						http2settings);
 			}
 			else

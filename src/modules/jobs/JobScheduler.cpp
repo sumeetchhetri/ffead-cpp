@@ -50,15 +50,15 @@ void JobScheduler::init(const ElementList& tabs, const std::string& appName) {
 	logger << "Initialized JobScheduler" << std::endl;
 	for (unsigned int dn = 0; dn < tabs.size(); dn++)
 	{
-		if(tabs.at(dn)->getTagName()!="job-proc")
+		if(tabs.at(dn).getTagName()!="job-proc")
 		{
 			logger << "Invalid Element Tag found inside job-procs, should be job-proc..." << std::endl;
 			continue;
 		}
-		std::string clas = tabs.at(dn)->getAttribute("class");
-		std::string cron = tabs.at(dn)->getAttribute("cron");
-		std::string meth = tabs.at(dn)->getAttribute("method");
-		std::string name = tabs.at(dn)->getAttribute("name");
+		std::string clas = tabs.at(dn).getAttribute("class");
+		std::string cron = tabs.at(dn).getAttribute("cron");
+		std::string meth = tabs.at(dn).getAttribute("method");
+		std::string name = tabs.at(dn).getAttribute("name");
 		if(clas!="" && meth!="" && cron!="" && name!="")
 		{
 			JobConfig config;
@@ -180,7 +180,7 @@ void JobScheduler::JobTask::run() {
 	try {
 		CronTimer timer(cron);
 		vals values;
-		timer.nextRunDate = new Date;
+		timer.nextRunDate = Date();
 
 		Reflector ref;
 		JobFunction f = (JobFunction)ref.getMethodInstance(meth);
@@ -189,15 +189,15 @@ void JobScheduler::JobTask::run() {
 		{
 			sleep(1);
 			Date d2;
-			if(timer.isValid(5, d2.getYear(), timer.nextRunDate->getYear()))
+			if(timer.isValid(5, d2.getYear(), timer.nextRunDate.getYear()))
 			{
-				if(timer.isValid(3, d2.getMonth(), timer.nextRunDate->getMonth()))
+				if(timer.isValid(3, d2.getMonth(), timer.nextRunDate.getMonth()))
 				{
-					if(timer.isValid(2, d2.getDay(), timer.nextRunDate->getDay()))
+					if(timer.isValid(2, d2.getDay(), timer.nextRunDate.getDay()))
 					{
-						if(timer.isValid(1, d2.getHours(), timer.nextRunDate->getHours()))
+						if(timer.isValid(1, d2.getHours(), timer.nextRunDate.getHours()))
 						{
-							if(timer.isValid(0, d2.getMinutes(), timer.nextRunDate->getMinutes()))
+							if(timer.isValid(0, d2.getMinutes(), timer.nextRunDate.getMinutes()))
 							{
 								logger << "Running Job Process " + name << std::endl;
 
@@ -205,20 +205,20 @@ void JobScheduler::JobTask::run() {
 
 								bool incrementDone = false;
 
-								incrementDone = timer.tryIncrement(0, timer.nextRunDate->getMinutes());
+								incrementDone = timer.tryIncrement(0, timer.nextRunDate.getMinutes());
 								if(!incrementDone) {
-									incrementDone = timer.tryIncrement(1, timer.nextRunDate->getHours());
+									incrementDone = timer.tryIncrement(1, timer.nextRunDate.getHours());
 								}
 
 								if(!incrementDone) {
-									incrementDone = timer.tryIncrement(2, timer.nextRunDate->getDay());
+									incrementDone = timer.tryIncrement(2, timer.nextRunDate.getDay());
 								}
 
 								if(!incrementDone) {
-									incrementDone = timer.tryIncrement(3, timer.nextRunDate->getMonth());
+									incrementDone = timer.tryIncrement(3, timer.nextRunDate.getMonth());
 								}
 								if(!incrementDone) {
-									incrementDone = timer.tryIncrement(5, timer.nextRunDate->getYear());
+									incrementDone = timer.tryIncrement(5, timer.nextRunDate.getYear());
 								}
 
 								logger << "Running Job Process " + name + " complete" << std::endl;

@@ -1,17 +1,17 @@
 /*
- * ConcurrentQueue.h
+ * SynchronizedQueue.h
  *
  *  Created on: 08-Mar-2015
  *      Author: sumeetc
  */
 
-#ifndef CONCURRENTQUEUE_H_
-#define CONCURRENTQUEUE_H_
+#ifndef SYNCHRONIZEDQUEUE_H_
+#define SYNCHRONIZEDQUEUE_H_
 #include "queue"
 #include "Mutex.h"
 
 template<typename T>
-class ConcurrentQueue {
+class SynchronizedQueue {
 	Mutex _m;
 	std::queue<T> _q;
 public:
@@ -35,4 +35,4 @@ public:
 	}
 };
 
-#endif /* CONCURRENTQUEUE_H_ */
+#endif /* SYNCHRONIZEDQUEUE_H_ */

@@ -151,9 +151,9 @@ class SelEpolKqEvPrt {
 		fd_set master;
 	#elif USE_SELECT
 		int fdMax, fdsetSize;
-		fd_set readfds[MAXDESCRIPTORS/FD_SETSIZE];
-		fd_set writefds[MAXDESCRIPTORS/FD_SETSIZE];
-		fd_set master[MAXDESCRIPTORS/FD_SETSIZE];
+		fd_set readfds[1024/FD_SETSIZE];
+		fd_set writefds[1024/FD_SETSIZE];
+		fd_set master[1024/FD_SETSIZE];
 	#elif defined USE_EPOLL
 		struct epoll_event events[MAXDESCRIPTORS];
 		int epoll_handle;

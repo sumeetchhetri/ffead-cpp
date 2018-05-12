@@ -195,13 +195,14 @@ Marker MarkerHandler::processMarker(std::string markerText, const int& where) {
 }
 
 Marker::Marker() {
-	reqAttrSize = 0;
+	this->reqAttrSize = 0;
 	this->type = -1;
 }
 
 Marker::Marker(const std::string& name, const int& type) {
 	this->name = name;
 	this->type = type;
+	this->reqAttrSize = 0;
 }
 
 const bool Marker::isTypeClass() const {

@@ -392,7 +392,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 }
 
 CronTimer::~CronTimer() {
-	delete nextRunDate;
+	//delete nextRunDate;
 }
 
 std::string CronTimer::toString()
@@ -510,29 +510,29 @@ void CronTimer::correctNextRunDateTime(const int& pos)
 			end = cParts.at(index).lstParts.at(cParts.at(index).lstParts.size()-1);
 		}
 
-		//cout << " ========= " << start << " " << end << " " << nextRunDate->toString() << std::endl;
+		//cout << " ========= " << start << " " << end << " " << nextRunDate.toString() << std::endl;
 
 		if(pos==1) {
-			if(nextRunDate->getMinutes()>=end)
+			if(nextRunDate.getMinutes()>=end)
 			{
-				nextRunDate->updateMinutes(start - nextRunDate->getMinutes());
+				nextRunDate.updateMinutes(start - nextRunDate.getMinutes());
 			}
 		} else if(pos==2) {
-			if(nextRunDate->getHours()>=end)
+			if(nextRunDate.getHours()>=end)
 			{
-				nextRunDate->updateHours(start - nextRunDate->getHours());
+				nextRunDate.updateHours(start - nextRunDate.getHours());
 			}
 			correctNextRunDateTime(pos-1);
 		} else if(pos==3) {
-			if(nextRunDate->getDay()>=end)
+			if(nextRunDate.getDay()>=end)
 			{
-				nextRunDate->updateDays(start - nextRunDate->getDay());
+				nextRunDate.updateDays(start - nextRunDate.getDay());
 			}
 			correctNextRunDateTime(pos-1);
 		} else if(pos==5) {
-			if(nextRunDate->getMonth()>=end)
+			if(nextRunDate.getMonth()>=end)
 			{
-				nextRunDate->updateMonths(start - nextRunDate->getMonth());
+				nextRunDate.updateMonths(start - nextRunDate.getMonth());
 			}
 			correctNextRunDateTime(pos-2);
 		}
@@ -590,23 +590,23 @@ bool CronTimer::tryIncrement(const int& pos, const int& cvalue)
 	{
 		if(pos==0)
 		{
-			nextRunDate->updateMinutes(intervalValue);
+			nextRunDate.updateMinutes(intervalValue);
 		}
 		else if(pos==1)
 		{
-			nextRunDate->updateHours(intervalValue);
+			nextRunDate.updateHours(intervalValue);
 		}
 		else if(pos==2)
 		{
-			nextRunDate->updateDays(intervalValue);
+			nextRunDate.updateDays(intervalValue);
 		}
 		else if(pos==3)
 		{
-			nextRunDate->updateMonths(intervalValue);
+			nextRunDate.updateMonths(intervalValue);
 		}
 		else if(pos==5)
 		{
-			nextRunDate->updateYears(intervalValue);
+			nextRunDate.updateYears(intervalValue);
 		}
 		correctNextRunDateTime(pos);
 
@@ -622,44 +622,44 @@ bool CronTimer::tryIncrement(const int& pos, const int& cvalue)
 
 void CronTimer::run()
 {
-	nextRunDate = new Date;
+	nextRunDate = Date();
 	while(true)
 	{
 		sleep(1);
 		Date d2;
-		if(isValid(5, d2.getYear(), nextRunDate->getYear()))
+		if(isValid(5, d2.getYear(), nextRunDate.getYear()))
 		{
-			if(isValid(3, d2.getMonth(), nextRunDate->getMonth()))
+			if(isValid(3, d2.getMonth(), nextRunDate.getMonth()))
 			{
-				if(isValid(2, d2.getDay(), nextRunDate->getDay()))
+				if(isValid(2, d2.getDay(), nextRunDate.getDay()))
 				{
-					if(isValid(1, d2.getHours(), nextRunDate->getHours()))
+					if(isValid(1, d2.getHours(), nextRunDate.getHours()))
 					{
-						if(isValid(0, d2.getMinutes(), nextRunDate->getMinutes()))
+						if(isValid(0, d2.getMinutes(), nextRunDate.getMinutes()))
 						{
 							std::cout << d2.toString() + " Cron run" << std::endl;
 
 							bool incrementDone = false;
-							incrementDone = tryIncrement(0, nextRunDate->getMinutes());
-							//cout << "inc mins " + nextRunDate->toString() << std::endl;
+							incrementDone = tryIncrement(0, nextRunDate.getMinutes());
+							//cout << "inc mins " + nextRunDate.toString() << std::endl;
 							if(!incrementDone) {
-								incrementDone = tryIncrement(1, nextRunDate->getHours());
-								//cout << "inc hours " + nextRunDate->toString() << std::endl;
+								incrementDone = tryIncrement(1, nextRunDate.getHours());
+								//cout << "inc hours " + nextRunDate.toString() << std::endl;
 							}
 							if(!incrementDone) {
-								incrementDone = tryIncrement(2, nextRunDate->getDay());
-								//cout << "inc days " + nextRunDate->toString() << std::endl;
+								incrementDone = tryIncrement(2, nextRunDate.getDay());
+								//cout << "inc days " + nextRunDate.toString() << std::endl;
 							}
 							if(!incrementDone) {
-								incrementDone = tryIncrement(3, nextRunDate->getMonth());
-								//cout << "inc months " + nextRunDate->toString() << std::endl;
+								incrementDone = tryIncrement(3, nextRunDate.getMonth());
+								//cout << "inc months " + nextRunDate.toString() << std::endl;
 							}
 							if(!incrementDone) {
-								incrementDone = tryIncrement(5, nextRunDate->getYear());
-								//cout << "inc years " + nextRunDate->toString() << std::endl;
+								incrementDone = tryIncrement(5, nextRunDate.getYear());
+								//cout << "inc years " + nextRunDate.toString() << std::endl;
 							}
 
-							std::cout << "Next Run Date = " + nextRunDate->toString() << std::endl;
+							std::cout << "Next Run Date = " + nextRunDate.toString() << std::endl;
 						}
 					}
 				}

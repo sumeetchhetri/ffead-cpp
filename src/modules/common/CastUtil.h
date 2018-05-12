@@ -34,7 +34,7 @@
 
 class CastUtil {
 	static std::map<std::string, std::string> _mangledClassNameMap;
-	template <typename T> static std::string* primitive(const T& val, const char* fmt)
+	template <typename T> static void primitive(const T& val, const char* fmt, std::string* d)
 	{
 		int n = snprintf(NULL, 0, fmt, val);
 		char* ty;
@@ -42,12 +42,13 @@ class CastUtil {
 		/*int c = */snprintf(ty, n+1, fmt, val);
 		//assert(strlen(ty)==n);
 		//assert(c == n);
-		std::string* d = new std::string(ty, n);
+		d->append(ty, n);
 		free(ty);
-		return d;
 	}
 public:
 	static const std::string STD_STRING;
+	static const std::string BOOL_TRUE;
+	static const std::string BOOL_FALSE;
 	CastUtil();
 	virtual ~CastUtil();
 
@@ -94,9 +95,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%d");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%d", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -117,9 +118,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%d");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%d", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -140,9 +141,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%d");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%d", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -163,9 +164,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%u");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%u", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -186,9 +187,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%ld");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%ld", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -209,9 +210,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%lu");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%lu", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -232,9 +233,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%lld");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%lld", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -255,9 +256,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%llu");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%llu", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -278,9 +279,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%f");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%f", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -301,9 +302,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%Lf");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%Lf", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -324,9 +325,9 @@ public:
 		std::string tn = getClassName(t);
 		if(tn==STD_STRING)
 		{
-			void* d = primitive(val, "%f");
-			t = *(T*)d;
-			delete ((std::string*)d);
+			std::string _t;
+			primitive(val, "%f", &_t);
+			t = *(T*)(&_t);
 			return t;
 		}
 		std::stringstream ss;
@@ -371,11 +372,68 @@ public:
 	template <typename T> static T lexical_cast(const std::string& vval)
 	{
 		T t;
+		void* vt;
 		std::string tn = getClassName(t);
 		char* endptr;
-		if(tn=="double" || tn=="float")
+		float f = 0;
+		double d = 0;
+		long double ld = 0;
+		int i = 0;
+		short s = 0;
+		long l = 0;
+		unsigned short us = 0;
+		unsigned int ui = 0;
+		unsigned long ul = 0;
+		long long ll = -1;
+		unsigned long long ull = -1;
+		bool b = false;
+		if(tn=="float")
 		{
-			double d = 0;
+			if(vval.at(0)=='0' || vval.find("+0")==0 || vval.find("-0")==0)
+			{
+				int dots = StringUtil::countOccurrences(vval, ".");
+				if(dots>1) {
+					throw "Conversion exception - std::string to float";
+				}
+				if(vval.at(0)=='0')
+				{
+					if(vval.find_first_not_of(".0")==std::string::npos) {
+					} else {
+						f = strtof(vval.c_str(), &endptr);
+						bool invalid = (f==0);
+						if(invalid)
+						{
+							throw "Conversion exception - std::string to float";
+						}
+					}
+				}
+				else
+				{
+					if(vval.find_first_not_of(".0", 1)==std::string::npos) {
+					} else {
+						f = strtof(vval.substr(1).c_str(), &endptr);
+						bool invalid = (f==0);
+						if(invalid)
+						{
+							throw "Conversion exception - std::string to float";
+						}
+					}
+				}
+			}
+			else
+			{
+				f = strtof(vval.c_str(), &endptr);
+				bool invalid = (f==0);
+				if(invalid)
+				{
+					throw "Conversion exception - std::string to float";
+				}
+			}
+			vt = &f;
+			t = *(T*)vt;
+		}
+		else if(tn=="double")
+		{
 			if(vval.at(0)=='0' || vval.find("+0")==0 || vval.find("-0")==0)
 			{
 				int dots = StringUtil::countOccurrences(vval, ".");
@@ -385,7 +443,6 @@ public:
 				if(vval.at(0)=='0')
 				{
 					if(vval.find_first_not_of(".0")==std::string::npos) {
-						t = d;
 					} else {
 						d = strtod(vval.c_str(), &endptr);
 						bool invalid = (d==0);
@@ -398,7 +455,6 @@ public:
 				else
 				{
 					if(vval.find_first_not_of(".0", 1)==std::string::npos) {
-						t = d;
 					} else {
 						d = strtod(vval.substr(1).c_str(), &endptr);
 						bool invalid = (d==0);
@@ -418,23 +474,23 @@ public:
 					throw "Conversion exception - std::string to double";
 				}
 			}
-			t = d;
+			vt = &d;
+			t = *(T*)vt;
 		}
 		else if(tn=="long double")
 		{
-			long double d = 0;
-			if(sscanf(vval.c_str(), "%Lf", &d)==1)
+			if(sscanf(vval.c_str(), "%Lf", &ld)==1)
 			{
-				t = d;
 			}
 			else
 			{
 				throw "Conversion exception - std::string to long double";
 			}
+			vt = &ld;
+			t = *(T*)vt;
 		}
 		else if(tn=="int")
 		{
-			int d = 0;
 			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
@@ -442,19 +498,19 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					d = strtol(vval.c_str(), &endptr, 10);
-					invalid = (d==0);
+					i = strtol(vval.c_str(), &endptr, 10);
+					invalid = (i==0);
 				}
 				if(invalid)
 				{
 					throw "Conversion exception - std::string to int";
 				}
 			}
-			t = d;
+			vt = &i;
+			t = *(T*)vt;
 		}
 		else if(tn=="short")
 		{
-			short d = 0;
 			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
@@ -462,19 +518,19 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					d = strtol(vval.c_str(), &endptr, 10);
-					invalid = (d==0);
+					s = strtol(vval.c_str(), &endptr, 10);
+					invalid = (s==0);
 				}
 				if(invalid)
 				{
 					throw "Conversion exception - std::string to short";
 				}
 			}
-			t = d;
+			vt = &s;
+			t = *(T*)vt;
 		}
 		else if(tn=="long")
 		{
-			long d = 0;
 			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
@@ -482,19 +538,19 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					d = strtol(vval.c_str(), &endptr, 10);
-					invalid = (d==0);
+					l = strtol(vval.c_str(), &endptr, 10);
+					invalid = (l==0);
 				}
 				if(invalid)
 				{
 					throw "Conversion exception - std::string to long";
 				}
 			}
-			t = d;
+			vt = &l;
+			t = *(T*)vt;
 		}
 		else if(tn=="unsigned short")
 		{
-			unsigned short d = 0;
 			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
@@ -502,19 +558,19 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					d = strtol(vval.c_str(), &endptr, 10);
-					invalid = (d==0);
+					us = strtol(vval.c_str(), &endptr, 10);
+					invalid = (us==0);
 				}
 				if(invalid)
 				{
 					throw "Conversion exception - std::string to unsigned short";
 				}
 			}
-			t = d;
+			vt = &us;
+			t = *(T*)vt;
 		}
 		else if(tn=="unsigned int")
 		{
-			unsigned int d = 0;
 			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
@@ -522,19 +578,19 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					d = strtol(vval.c_str(), &endptr, 10);
-					invalid = (d==0);
+					ui = strtol(vval.c_str(), &endptr, 10);
+					invalid = (ui==0);
 				}
 				if(invalid)
 				{
 					throw "Conversion exception - std::string to unsigned int";
 				}
 			}
-			t = d;
+			vt = &ui;
+			t = *(T*)vt;
 		}
 		else if(tn=="unsigned long")
 		{
-			unsigned long d = 0;
 			if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 					|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 					|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
@@ -542,52 +598,53 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					d = strtol(vval.c_str(), &endptr, 10);
-					invalid = (d==0);
+					ul = strtol(vval.c_str(), &endptr, 10);
+					invalid = (ul==0);
 				}
 				if(invalid)
 				{
 					throw "Conversion exception - std::string to unsigned long";
 				}
 			}
-			t = d;
+			vt = &ul;
+			t = *(T*)vt;
 		}
 		else if(tn=="long long")
 		{
-			long long d = -1;
-			if(sscanf(vval.c_str(), "%lld", &d)==1)
+			if(sscanf(vval.c_str(), "%lld", &ll)==1)
 			{
-				t = d;
 			}
 			else
 			{
 				throw "Conversion exception - std::string to long long";
 			}
+			vt = &ll;
+			t = *(T*)vt;
 		}
 		else if(tn=="unsigned long long")
 		{
-			unsigned long long d = -1;
-			if(sscanf(vval.c_str(), "%llu", &d)==1)
+			if(sscanf(vval.c_str(), "%llu", &ull)==1)
 			{
-				t = d;
 			}
 			else
 			{
 				throw "Conversion exception - std::string to unsigned long long";
 			}
+			vt = &ull;
+			t = *(T*)vt;
 		}
 		else if(tn=="bool")
 		{
-			bool d = false;
 			if(StringUtil::toLowerCopy(vval)=="true" || StringUtil::toLowerCopy(vval)=="1")
-				d = true;
+				b = true;
 			else if(StringUtil::toLowerCopy(vval)=="false" || StringUtil::toLowerCopy(vval)=="0")
-				d = false;
+				b = false;
 			else
 			{
 				throw "Conversion exception - std::string to bool";
 			}
-			t = d;
+			vt = &b;
+			t = *(T*)vt;
 		}
 		else if(tn==STD_STRING || tn=="string")
 		{

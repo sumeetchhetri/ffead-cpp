@@ -36,12 +36,12 @@
 #endif
 
 class TaskPool {
-	std::queue<Task*> *tasks;
-	std::priority_queue<Task*> *ptasks;
-	std::vector<Task*> *scheduledtasks;
-	std::vector<Timer*> *scheduledTimers;
-	Mutex *s_mutex;
-	ConditionMutex *c_mutex;
+	std::queue<Task*> tasks;
+	std::priority_queue<Task*> ptasks;
+	std::vector<Task*> scheduledtasks;
+	std::vector<Timer> scheduledTimers;
+	Mutex s_mutex;
+	ConditionMutex c_mutex;
 	Thread *mthread;
 	int count;
 	static void* run(void *arg);
@@ -51,7 +51,8 @@ class TaskPool {
 	bool allowScheduledTasks;
 	std::atomic<bool> runFlag, complete, thrdStarted;
 public:
-	TaskPool(const bool& prioritybased, const bool& allowScheduledTasks);
+	TaskPool();
+	void init(const bool& prioritybased, const bool& allowScheduledTasks);
 	~TaskPool();
 	void addTask(Task &task);
 	void addTask(Task *task);

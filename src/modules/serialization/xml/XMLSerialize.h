@@ -97,18 +97,18 @@ public:
 				keytype = keytype.substr(0, keytype.find("-"));
 				for (int var = 0; var < (int)message.getChildElements().size(); var++)
 				{
-					Element* entry = message.getChildElements().at(var);
+					Element* entry = &(message.getChildElements().at(var));
 					if(entry->getTagName()=="entry")
 					{
 						Element* key = entry->getElementByName("key");
 						Element* value = entry->getElementByName("value");
 						if(key->getTagName()!="" && value->getTagName()!="" && key->getChildElements().size()>0
 								&& value->getChildElements().size()>0) {
-							K k = unserialize<K>(key->getChildElements().at(0), keytype);
-							V v = unserialize<K>(value->getChildElements().at(0), valtype);
+							K k = unserialize<K>(&(key->getChildElements().at(0)), keytype);
+							V v = unserialize<K>(&(value->getChildElements().at(0)), valtype);
 							mp[k] = v;
 						} else if(key->getTagName()!="" && key->getChildElements().size()>0) {
-							K k = unserialize<K>(key->getChildElements().at(0), keytype);
+							K k = unserialize<K>(&(key->getChildElements().at(0)), keytype);
 							V v;
 							mp[k] = v;
 						}
@@ -164,18 +164,18 @@ public:
 				keytype = keytype.substr(0, keytype.find("-"));
 				for (int var = 0; var < (int)message.getChildElements().size(); var++)
 				{
-					Element* entry = message.getChildElements().at(var);
+					Element* entry = &(message.getChildElements().at(var));
 					if(entry->getTagName()=="entry")
 					{
 						Element* key = entry->getElementByName("key");
 						Element* value = entry->getElementByName("value");
 						if(key->getTagName()!="" && value->getTagName()!="" && key->getChildElements().size()>0
 								&& value->getChildElements().size()>0) {
-							K k = unserialize<K>(key->getChildElements().at(0), keytype);
-							V v = unserialize<K>(value->getChildElements().at(0), valtype);
+							K k = unserialize<K>(&(key->getChildElements().at(0)), keytype);
+							V v = unserialize<K>(&(value->getChildElements().at(0)), valtype);
 							mp[k] = v;
 						} else if(key->getTagName()!="" && key->getChildElements().size()>0) {
-							K k = unserialize<K>(key->getChildElements().at(0), keytype);
+							K k = unserialize<K>(&(key->getChildElements().at(0)), keytype);
 							V v;
 							mp[k] = v;
 						}

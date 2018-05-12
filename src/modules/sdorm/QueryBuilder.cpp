@@ -323,21 +323,21 @@ QueryBuilder& QueryBuilder::paginate(const int& start, const int& count) {
 }
 
 JoinClause& QueryBuilder::joinTable(const JoinType& jt, const std::string& name, const std::string& alias) {
-	JoinClause* jc = new JoinClause(this);
-	jc->tableName = name;
-	jc->alias = alias;
-	jc->type = jt;
+	JoinClause jc(this);
+	jc.tableName = name;
+	jc.alias = alias;
+	jc.type = jt;
 	joinClauses.push_back(jc);
-	return *jc;
+	return joinClauses.back();
 }
 
 JoinClause& QueryBuilder::joinClass(const JoinType& jt, const std::string& name, const std::string& alias) {
-	JoinClause* jc = new JoinClause(this);
-	jc->alias = alias;
-	jc->type = jt;
-	jc->className = name;
+	JoinClause jc(this);
+	jc.alias = alias;
+	jc.type = jt;
+	jc.className = name;
 	joinClauses.push_back(jc);
-	return *jc;
+	return joinClauses.back();
 }
 
 QueryBuilder& QueryBuilder::unionQuery(const QueryBuilder& qb) {
@@ -381,7 +381,7 @@ const GroupClause& QueryBuilder::getGroup() const {
 	return group;
 }
 
-const std::vector<JoinClause*>& QueryBuilder::getJoinClauses() const {
+const std::vector<JoinClause>& QueryBuilder::getJoinClauses() const {
 	return joinClauses;
 }
 

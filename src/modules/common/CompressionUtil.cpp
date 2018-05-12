@@ -127,7 +127,7 @@ std::string CompressionUtil::_uncompress(char* infile, const bool& isGz, const b
 	memset(in, 0, sizeof(in));
 	memset(out, 0, sizeof(out));
 
-    int ret, flush;
+    int ret;
     unsigned int have;
     z_stream strm;
 
@@ -177,7 +177,7 @@ std::string CompressionUtil::_uncompress(char* infile, const bool& isGz, const b
             (void)deflateEnd(&strm);
             return s;
         }
-        flush = feof(ifs) ? Z_FINISH : Z_NO_FLUSH;
+        //flush = feof(ifs) ? Z_FINISH : Z_NO_FLUSH;
 
 		if (strm.avail_in == 0)
 			break;

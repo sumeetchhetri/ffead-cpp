@@ -5,6 +5,8 @@
  *      Author: sumeetc
  */
 
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 #ifndef GENERICOBJECTTYPE_H_
 #define GENERICOBJECTTYPE_H_
 #include <cxxabi.h>

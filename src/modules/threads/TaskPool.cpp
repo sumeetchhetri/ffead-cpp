@@ -29,21 +29,21 @@ void* TaskPool::run(void *arg)
 	while(pool->runFlag)
 	{
 		std::vector<Task*>::iterator it;
-		std::vector<Timer*>::iterator tit;
+		std::vector<Timer>::iterator tit;
 		int counter = 0;
-		pool->s_mutex->lock();
-		for (it=pool->scheduledtasks->begin(),tit=pool->scheduledTimers->begin();
-				it!=pool->scheduledtasks->end(),tit!=pool->scheduledTimers->end();++counter) {
+		pool->s_mutex.lock();
+		for (it=pool->scheduledtasks.begin(),tit=pool->scheduledTimers.begin();
+				it!=pool->scheduledtasks.end(),tit!=pool->scheduledTimers.end();++counter) {
 			Task* task = *it;
-			Timer* timer = *tit;
-			if(task!=NULL && task->isWaitOver(timer))
+			Timer& timer = *tit;
+			if(task!=NULL && task->isWaitOver(&timer))
 			{
-				pool->c_mutex->lock();
-				pool->tasks->push(task);
-				pool->c_mutex->unlock();
+				pool->c_mutex.lock();
+				pool->tasks.push(task);
+				pool->c_mutex.unlock();
 
-				it = pool->scheduledtasks->erase(it);
-				tit = pool->scheduledTimers->erase(tit);
+				it = pool->scheduledtasks.erase(it);
+				tit = pool->scheduledTimers.erase(tit);
 			}
 			else
 			{
@@ -54,20 +54,16 @@ void* TaskPool::run(void *arg)
 				break;
 			}
 		}
-		pool->s_mutex->unlock();
+		pool->s_mutex.unlock();
 		Thread::mSleep(1);
 	}
 	pool->complete = true;
 	return NULL;
 }
 
-TaskPool::TaskPool(const bool& prioritybased, const bool& allowScheduledTasks) {
-	s_mutex = new Mutex();
-	c_mutex = new ConditionMutex();
-	tasks = new std::queue<Task*>;
-	ptasks = new std::priority_queue<Task*>;
-	scheduledtasks = new std::vector<Task*>;
-	scheduledTimers = new std::vector<Timer*>;
+TaskPool::TaskPool() {}
+
+void TaskPool::init(const bool& prioritybased, const bool& allowScheduledTasks) {
 	runFlag = true;
 	complete = false;
 	count = 0;
@@ -90,95 +86,95 @@ void TaskPool::start() {
 }
 
 void TaskPool::addTask(Task &task) {
-	c_mutex->lock();
-	tasks->push(&task);
+	c_mutex.lock();
+	tasks.push(&task);
 	++count;
-	c_mutex->conditionalNotifyOne();
-	c_mutex->unlock();
+	c_mutex.conditionalNotifyOne();
+	c_mutex.unlock();
 }
 
 void TaskPool::addPTask(Task &task) {
-	c_mutex->lock();
-	ptasks->push(&task);
+	c_mutex.lock();
+	ptasks.push(&task);
 	++count;
-	c_mutex->conditionalNotifyOne();
-	c_mutex->unlock();
+	c_mutex.conditionalNotifyOne();
+	c_mutex.unlock();
 }
 
 void TaskPool::addSTask(Task &task) {
 	if (task.type >= 0 && task.type <= 6 && task.tunit > 0)
 	{
-		s_mutex->lock();
-		Timer* t = new Timer;
+		s_mutex.lock();
+		scheduledTimers.push_back(Timer());
+		Timer* t = &(scheduledTimers.back());
 		t->start();
-		scheduledTimers->push_back(t);
-		scheduledtasks->push_back(&task);
-		s_mutex->unlock();
+		scheduledtasks.push_back(&task);
+		s_mutex.unlock();
 	}
 }
 
 void TaskPool::addTask(Task *task) {
-	c_mutex->lock();
-	tasks->push(task);
+	c_mutex.lock();
+	tasks.push(task);
 	++count;
-	c_mutex->conditionalNotifyOne();
-	c_mutex->unlock();
+	c_mutex.conditionalNotifyOne();
+	c_mutex.unlock();
 }
 
 void TaskPool::addPTask(Task *task) {
-	c_mutex->lock();
-	ptasks->push(task);
+	c_mutex.lock();
+	ptasks.push(task);
 	++count;
-	c_mutex->conditionalNotifyOne();
-	c_mutex->unlock();
+	c_mutex.conditionalNotifyOne();
+	c_mutex.unlock();
 }
 
 void TaskPool::addSTask(Task *task) {
 	if (task->type >= 0 && task->type <= 6 && task->tunit > 0)
 	{
-		s_mutex->lock();
-		Timer* t = new Timer;
+		s_mutex.lock();
+		scheduledTimers.push_back(Timer());
+		Timer* t = &(scheduledTimers.back());
 		t->start();
-		scheduledTimers->push_back(t);
-		scheduledtasks->push_back(task);
-		s_mutex->unlock();
+		scheduledtasks.push_back(task);
+		s_mutex.unlock();
 	}
 }
 
 Task* TaskPool::getTask() {
 	Task *task = NULL;
-	c_mutex->lock();
-	if(!prioritybased && !tasks->empty())
+	c_mutex.lock();
+	if(!prioritybased && !tasks.empty())
 	{
-		task = tasks->front();
-		tasks->pop();
+		task = tasks.front();
+		tasks.pop();
 		--count;
 	}
-	else if(prioritybased && !ptasks->empty())
+	else if(prioritybased && !ptasks.empty())
 	{
-		task = ptasks->top();
-		ptasks->pop();
+		task = ptasks.top();
+		ptasks.pop();
 		--count;
 	}
-	c_mutex->unlock();
+	c_mutex.unlock();
 	return task;
 }
 
 bool TaskPool::tasksPending() {
-	c_mutex->lock();
-	bool tp = !prioritybased?!tasks->empty():!ptasks->empty();
-	c_mutex->unlock();
-	s_mutex->lock();
-	tp |= !scheduledtasks->empty();
-	s_mutex->unlock();
+	c_mutex.lock();
+	bool tp = !prioritybased?!tasks.empty():!ptasks.empty();
+	c_mutex.unlock();
+	s_mutex.lock();
+	tp |= !scheduledtasks.empty();
+	s_mutex.unlock();
 	return tp;
 }
 
 void TaskPool::stop() {
-	c_mutex->lock();
+	c_mutex.lock();
 	++count;
-	c_mutex->conditionalNotifyAll();
-	c_mutex->unlock();
+	c_mutex.conditionalNotifyAll();
+	c_mutex.unlock();
 	Thread::sSleep(1);
 }
 
@@ -187,10 +183,4 @@ TaskPool::~TaskPool() {
 	if(allowScheduledTasks) {
 		//delete mthread;
 	}
-	delete tasks;
-	delete ptasks;
-	delete scheduledtasks;
-	delete scheduledTimers;
-	delete s_mutex;
-	delete c_mutex;
 }

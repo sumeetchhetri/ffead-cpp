@@ -30,22 +30,13 @@ JSONElement::JSONElement() {
 
 JSONElement::~JSONElement() {
 	for (int var = 0; var < (int)children.size(); ++var) {
-		delete children.at(var);
+		//delete children.at(var);
 	}
 }
 
-/*void JSONElement::addChild(const JSONElement& child) {
-	JSONElement* tc = new JSONElement;
-	*tc = child;
-	this->children.push_back(tc);
-	if(child.name!="" && this->type!=JSON_ARRAY)
-	{
-		this->allnodes[child.name] = tc;
-	}
-}*/
-
-void JSONElement::addChild(JSONElement* child) {
-	this->children.push_back(child);
+void JSONElement::addChild(JSONElement ele) {
+	this->children.push_back(ele);
+	JSONElement* child = &(this->children.back());
 	if(child->name!="" && this->type!=JSON_ARRAY)
 	{
 		this->allnodes[child->name] = child;
@@ -76,7 +67,7 @@ const std::string& JSONElement::getName() const {
 	return name;
 }
 
-std::vector<JSONElement*> JSONElement::getChildren() const {
+const std::vector<JSONElement>& JSONElement::getChildren() const {
 	return this->children;
 }
 
@@ -96,13 +87,13 @@ JSONElement* JSONElement::getNodeP(const std::string& name) {
 	return NULL;
 }
 
-std::string JSONElement::toString()
+std::string JSONElement::toString() const
 {
 	std::string txt = "[name=" + name;
 	txt += ", value=" + value;
 	txt += ", children={";
 	for (int var = 0; var < (int)children.size(); ++var) {
-		txt += children.at(var)->toString();
+		txt += children.at(var).toString();
 	}
 	txt += "}]";
 	return txt;

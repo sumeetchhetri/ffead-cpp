@@ -74,6 +74,7 @@ public:
 	std::vector<DataSourceInternalRelation> getRelations();
 	const strMap& getColumnPropertyMapping() const;
 	const strMap& getPropertyColumnMapping() const;
+	const strMap& getPropertyColumnMappingCS() const;
 	const std::string& getIdgencolumnName() const;
 	const std::string& getIdgendbEntityName() const;
 	const std::string& getIdgendbEntityType() const;

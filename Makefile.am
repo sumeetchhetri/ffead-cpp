@@ -1,4 +1,5 @@
 SUBDIRS = src/autotools
+ACLOCAL_AMFLAGS = ${ACLOCAL_AMFLAGS} -I m4
 
 modules = all
 packageIdentifier=${PACKAGE_NAME}-${PACKAGE_VERSION}-bin
@@ -223,17 +224,17 @@ build-apps: install
 	cp -f tests/autotools/.libs/tests tests/test.csv \
 		tests/testValues.prop tests/runTests.sh \
 		tests/*.pem tests/security.prop ${prefix}/tests
-	for webdir in web/*/ ; do \ 
+	for webdir in web/*/ ; do \
 		dir=$${webdir%*/}; \
 		wdir=`echo $${dir##*/}`; \
-		echo $${wdir}; \	
+		echo $${wdir}; \
 		if [ -d "$${webdir}/src/" ] && [ -d "$${webdir}/src/autotools" ] && [ -d "$${webdir}/include" ]; then \
-			hc=`ls $${webdir}/include/*.h 2>/dev/null|wc -l`; \ 
+			hc=`ls $${webdir}/include/*.h 2>/dev/null|wc -l`; \
 			sc=`ls $${webdir}/src/*.cpp 2>/dev/null|wc -l`; \
 			if [ $$hc != 0 ] && [ $$sc != 0 ] && [ -f "$${webdir}/src/autotools/Makefile" ]; then \
 				weblibname=`echo "$${wdir}" | tr '-' '_'`; \
 				cd $${webdir}/src/autotools && make; \
-				cd -; \	
+				cd -; \
 				cp -f $${webdir}/src/autotools/.libs/*$${weblibname}* ${prefix}/lib; \
 				rm -rf $(prefix)/web/$${wdir}/src/; \
 			fi \

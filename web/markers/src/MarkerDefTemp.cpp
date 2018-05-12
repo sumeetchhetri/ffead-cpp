@@ -31,34 +31,27 @@ MarkerDefTemp::~MarkerDefTemp() {
 	// TODO Auto-generated destructor stub
 }
 
-Context MarkerDefTemp::getContext(HttpRequest* request)
+void MarkerDefTemp::getContext(HttpRequest* request, Context* context)
 {
 	Context cnt;
 	std::string dat = "1.js";
-	GenericObject dato;
+	GenericObject& dato;
 	dato << dat;
 	cnt["dat"] = dato;
 
-	MarkerTest* t = new MarkerTest;
-	t->setId(1);
-	t->setName("name");
-	GenericObject to;
+	MarkerTest t;
+	t.setId(1);
+	t.setName("name");
+	GenericObject& to = (*cnt)["test"];
 	to << t;
-	delete t;
-	cnt["test"] = to;
 
-	std::vector<std::string>* vect = new std::vector<std::string>;
-	vect->push_back("vec1");
-	vect->push_back("vec2");
-	GenericObject vecto;
+	std::vector<std::string> vect;
+	vect.push_back("vec1");
+	vect.push_back("vec2");
+	GenericObject& vecto = (*cnt)["vect"];
 	vecto << vect;
-	delete vect;
-	cnt["vect"] = vecto;
 
-	int* num = new int(5);
-	GenericObject numo;
+	int num = 5;
+	GenericObject& numo = (*cnt)["number"];
 	numo << num;
-	delete num;
-	cnt["number"] = numo;
-	return cnt;
 }

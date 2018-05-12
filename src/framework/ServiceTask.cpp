@@ -585,18 +585,11 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 
 void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 {
-	//Timer t1;
-	//t1.start();
-
-	//Timer t12;
 
 	res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 	this->serverRootDirectory = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory;
-	//void *dlib = NULL, *ddlib = NULL;
 	try
 	{
-		bool cont = true;
-
 		if(req->getRequestParseStatus().getCode()>0)
 		{
 			res->setHTTPResponseStatus(req->getRequestParseStatus());
@@ -641,22 +634,12 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		ConfigurationData::getInstance()->httpResponse.set(res);
 		CommonUtils::setAppName(req->getCntxt_name());
 
-		//t1.end();
-		//CommonUtils::tsService1 += t1.timerMilliSeconds();
-		//Timer t2;
-		//t2.start();
-
 		SecurityHandler::populateAuthDetails(req);
-
-		//t2.end();
-		//CommonUtils::tsService2 += t2.timerMilliSeconds();
-		//Timer t3;
-		//t3.start();
 
 		if(req->hasCookie())
 		{
 			//if(!ConfigurationData::getInstance()->coreServerProperties.sessatserv)
-				req->getSession()->setSessionAttributes(req->getCookieInfo());
+			req->getSession()->setSessionAttributes(req->getCookieInfo());
 			/*else
 			{
 				std::string id = req->getCookieInfoAttribute("FFEADID");
@@ -671,35 +654,9 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				req->getSession()->setSessionAttributes(values);
 			}*/
 		}
-		//logger << ("Done with request initialization/session setup") << std::endl;
-
-		//t3.end();
-		//CommonUtils::tsService3 += t3.timerMilliSeconds();
-		//Timer t4;
-		//t4.start();
-
-		/*dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-		if(dlib == NULL)
-		{
-			std::cerr << dlerror() << std::endl;
-			throw "Cannot load application shared library";
-		}
-		ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
-		if(ddlib == NULL)
-		{
-			std::cerr << dlerror() << std::endl;
-			throw "Cannot load application shared library";
-		}
-		logger << ("Done with loading libraries") << std::endl;*/
 
 		Reflector reflector(ConfigurationData::getInstance()->dlib);
 
-		//t4.end();
-		//CommonUtils::tsService4 += t4.timerMilliSeconds();
-		//Timer t5;
-		//t5.start();
-
-		//logger << req->getCntxt_name() << req->getContextHome() << req->getUrl() << std::endl;
 #ifdef INC_APPFLOW
 		/*if(ConfigurationData::getInstance()->applicationFlowMap.find(req->getCntxt_name())!=
 				ConfigurationData::getInstance()->applicationFlowMap.end() &&
@@ -730,7 +687,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			}
 		}*/
 #endif
-		//logger << ("Done with handling appflow") << std::endl;
 
 		std::string ext = req->getExt();
 		long sessionTimeoutVar = ConfigurationData::getInstance()->coreServerProperties.sessionTimeout;
@@ -742,12 +698,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			res->setHTTPResponseStatus(status);
 			isContrl = true;
 		}
-		//logger << ("Done with handling cors") << std::endl;
-
-		//t5.end();
-		//CommonUtils::tsService5 += t5.timerMilliSeconds();
-		//Timer t6;
-		//t6.start();
 
 		bool hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
 		if(!isContrl && hasSecurity)
@@ -755,16 +705,9 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			isContrl = SecurityHandler::handle(req, res, sessionTimeoutVar, reflector);
 			if(isContrl)
 			{
-				//logger << ("Request handled by SecurityHandler") << std::endl;
 				ext = req->getExt();
 			}
 		}
-		//logger << ("Done with handling security") << std::endl;
-
-		//t6.end();
-		//CommonUtils::tsService6 += t6.timerMilliSeconds();
-		//Timer t7;
-		//t7.start();
 
 		bool hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
 		if(!isContrl && hasFilters)
@@ -774,55 +717,29 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			isContrl = !FilterHandler::handle(req, res, ext, reflector);
 			if(isContrl)
 			{
-				//logger << ("Request handled by FilterHandler") << std::endl;
 			}
 			ext = req->getExt();
 		}
-		//logger << ("Done with handling filters") << std::endl;
-
-		//t7.end();
-		//CommonUtils::tsService7 += t7.timerMilliSeconds();
-		//Timer t8;
-		//t8.start();
 
 		if(!isContrl)
 		{
 			isContrl = ControllerHandler::handle(req, res, ext, reflector);
 			if(isContrl)
 			{
-				//logger << ("Request handled by ControllerHandler") << std::endl;
 			}
 			ext = req->getExt();
 		}
-		//logger << ("Done with handling controllers") << std::endl;
-
-		//t8.end();
-		//CommonUtils::tsService8 += t8.timerMilliSeconds();
-		//Timer t9;
-		//t9.start();
 
 		if(!isContrl)
 		{
 			isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
 			if(isContrl)
 			{
-				//logger << ("Request handled by ExtHandler") << std::endl;
 			}
 		}
-		//logger << ("Done handling extra flows") << std::endl;
-
-		//t9.end();
-		//CommonUtils::tsService9 += t9.timerMilliSeconds();
-		//Timer t10;
-		//t10.start();
 
 		/*After going through the controller the response might be blank, just set the HTTP version*/
 		res->update(req);
-
-		//t10.end();
-		//CommonUtils::tsService10 += t10.timerMilliSeconds();
-		//Timer t11;
-		//t11.start();
 
 		if(req->getMethod()!="TRACE" && !res->isDone())
 		{
@@ -842,10 +759,8 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 					}
 					else
 					{
-						//logger << ("Invalid Content type for soap request") << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 					}
-					//logger << ("Request handled by SoapHandler for Url "+wsUrl) << std::endl;
 				}
 #endif
 				else
@@ -854,11 +769,8 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 #ifdef INC_SCRH
 					cntrlit = ScriptHandler::handle(req, res, ConfigurationData::getInstance()->handoffs, ext);
 #endif
-					//logger << ("Done handling scripts") << std::endl;
-
 					if(cntrlit)
 					{
-						//logger << ("Request handled by ScriptHandler") << std::endl;
 					}
 					else
 					{
@@ -884,38 +796,18 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			FilterHandler::handleOut(req, res, ext, reflector);
 		}
 
-		//t11.end();
-		//CommonUtils::tsService11 += t11.timerMilliSeconds();
-
-		//t12.start();
-
 		if(hasSecurity) {
 			storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
 		}
-		//logger << ("Done storing session attributes") << std::endl;
-
-		//dlclose(dlib);
-		//dlclose(ddlib);
 	}
 	catch(const char* err)
 	{
-		//if(dlib!=NULL)
-		//	dlclose(dlib);
-		//if(ddlib!=NULL)
-		//	dlclose(ddlib);
 		logger << "Exception occurred while processing ServiceTask request - " << err << std::endl;
 	}
 	catch(...)
 	{
-		//if(dlib!=NULL)
-		//	dlclose(dlib);
-		//if(ddlib!=NULL)
-		//	dlclose(ddlib);
 		logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
 	}
-
-	//t12.end();
-	//CommonUtils::tsService12 += t12.timerMilliSeconds();
 }
 
 /*bool ServiceTask::sendData(SSL* ssl, BIO* io, const int& fd, const std::string& h1)

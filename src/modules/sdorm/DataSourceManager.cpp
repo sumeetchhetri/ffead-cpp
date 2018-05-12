@@ -28,6 +28,40 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 	}
 	DataSourceManager* dsnMgr = new DataSourceManager(props, mapping);
 	dsns[name] = dsnMgr;
+
+	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+	if(dlib == NULL)
+	{
+		std::cerr << dlerror() << std::endl;
+		throw "Cannot load application shared library";
+	}
+	Reflector ref(dlib);
+	if(props.getProperty("init")!="") {
+		std::string meth = props.getProperty("init");
+		std::vector<std::string> v;
+		StringUtil::split(v, meth, ".");
+		if(v.size()==2) {
+			CommonUtils::setAppName(appName);
+			ClassInfo clas = ref.getClassInfo(v.at(0), appName);
+			if(clas.getClassName()!="") {
+				args argus;
+				vals valus;
+				const Constructor& ctor = clas.getConstructor(argus);
+				void* _temp = ref.newInstanceGVP(ctor);
+				try {
+					if(_temp!=NULL) {
+						const Method& meth = clas.getMethod(v.at(1), argus);
+						if(meth.getMethodName()!="")
+						{
+							ref.invokeMethodGVP(_temp, meth, valus);
+						}
+					}
+				} catch(...) {
+				}
+				ref.destroy(_temp, v.at(0), appName);
+			}
+		}
+	}
 }
 
 void DataSourceManager::destroy()

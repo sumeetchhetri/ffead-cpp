@@ -140,11 +140,13 @@ bool SSLClient::connection(const std::string& host, const int& port)
 	tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
 	if( tmpres < 0)
 	{
+		free(remote);
 		perror("Can't set remote->sin_addr.s_addr");
 		return false;
 	}
 	else if(tmpres == 0)
 	{
+		free(remote);
 		fprintf(stderr, "%s is not a valid IP address\n", ip);
 		return false;
 	}

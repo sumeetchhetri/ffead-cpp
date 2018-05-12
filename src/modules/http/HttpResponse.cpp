@@ -369,7 +369,7 @@ bool HttpResponse::getCompressed()
 	return this->compressed;
 }
 
-std::vector<std::string> HttpResponse::getCookies() const {
+const std::vector<std::string> HttpResponse::getCookies() const {
 	return cookies;
 }
 
@@ -771,4 +771,11 @@ std::string HttpResponse::getFileExtension(const std::string& file)
 {
 	if(file.find_last_of(".")!=std::string::npos)return file.substr(file.find_last_of("."));
 	return file;
+}
+
+const std::map<std::string,std::string>& HttpResponse::getCHeaders() const {
+	return headers;
+}
+std::map<std::string,std::string> HttpResponse::getHeaders() const {
+	return headers;
 }

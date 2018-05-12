@@ -16,7 +16,7 @@
 #include "map"
 #include "ReaderSwitchInterface.h"
 #include "ServiceHandler.h"
-#include "ConcurrentQueue.h"
+#include "SynchronizedQueue.h"
 #include "LoggerFactory.h"
 #include "SSLClient.h"
 #include "Client.h"
@@ -25,14 +25,14 @@
 #endif
 
 
-typedef SocketInterface* (*SocketInterfaceFactory) (SocketUtil*);
+typedef SocketInterface* (*SocketInterfaceFactory) (SOCKET);
 
 class RequestReaderHandler : public ReaderSwitchInterface {
-	ConcurrentQueue<SocketInterface*> pendingSocks;
-	ConcurrentQueue<SocketInterface*> addToTimeoutSocks;
-	ConcurrentQueue<SocketInterface*> remFromTimeoutSocks;
-	ConcurrentQueue<SocketInterface*> timedoutSocks;
-	ConcurrentQueue<SocketInterface*> readerSwitchedSocks;
+	SynchronizedQueue<SocketInterface*> pendingSocks;
+	SynchronizedQueue<SocketInterface*> addToTimeoutSocks;
+	SynchronizedQueue<SocketInterface*> remFromTimeoutSocks;
+	SynchronizedQueue<SocketInterface*> timedoutSocks;
+	SynchronizedQueue<SocketInterface*> readerSwitchedSocks;
 	SelEpolKqEvPrt selector;
 	std::atomic<bool> run;
 	std::atomic<int> complete;

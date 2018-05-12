@@ -18,7 +18,7 @@ AS_HELP_STRING([--enable-debug],
 )
 if test "x$support_debug" = "xyes"; then
     AC_DEFINE(DEBUG, [], [set DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Wno-uninitialized -O2"
+    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -O2"
 else
     AC_DEFINE(NDEBUG, [], [unset DEBUG mode])
     AM_CXXFLAGS="$AM_CXXFLAGS -O2"
@@ -755,6 +755,16 @@ AX_CXX_COMPILE_STDCXX_11(,mandatory)
 #	AC_MSG_ERROR([Please install GNU GCC/G++ to continue.])
 #fi
 
+if test "x$mod_rediscache" = "xyes"; then
+	AC_CHECK_HEADER([hiredis/hiredis.h],,[AC_MSG_ERROR([hiredis header files not found, please install hiredis])])
+	AC_SEARCH_LIBS(redisCommand, hiredis, [],[AC_MSG_ERROR([redis library "hiredis" not found])])
+fi
+
+if test "x$mod_memcached" = "xyes"; then
+	AC_CHECK_HEADER([libmemcached/memcached.h],,[AC_MSG_ERROR([libmemcached header files not found, please install libmemcached])])
+	AC_SEARCH_LIBS(memcached_pool, memcachedutil, [],[AC_MSG_ERROR([memcached library "libmemcachedutil" not found])])
+fi
+
 AM_CONDITIONAL(MOD_APACHEMOD, test "x$generate_apache_module" = "xyes")
 if test "x$generate_apache_module" = "xyes"; then
 	AC_SUBST(GENERATE_APACHEMOD,[modules/apache_mod_ffeadcpp/autotools])
@@ -833,12 +843,17 @@ AC_CHECK_HEADER([sys/poll.h],
 AC_CHECK_HEADER([sys/select.h],
                      [AC_DEFINE(USE_SELECT, [1], [Define to 1 if you have <sys/select.h>.])],
                      [AC_DEFINE(USE_SELECT, [0], [select support not found])])
-AC_CHECK_HEADER([atomic.h],
+                     
+                     
+OLD_CPP=$CPP
+CPP="$CXXCPP $STDCXX_11_SWITCH"
+AC_CHECK_HEADER([atomic],
                      [AC_DEFINE(USE_ATOMIC_H, [1], [Define to 1 if you have <atomic.h>.])],
-                     [AC_DEFINE(USE_ATOMIC_H, [0], [atomic support not found])])
-AC_CHECK_HEADER([cstdatomic.h],
+                     [AC_DEFINE(USE_ATOMIC_H, [0], [atomic support not found])], [-])
+AC_CHECK_HEADER([cstdatomic],
                      [AC_DEFINE(USE_CSTDATOMIC_H, [1], [Define to 1 if you have <cstdatomic.h>.])],
-                     [AC_DEFINE(USE_CSTDATOMIC_H, [0], [cstdatomic support not found])])
+                     [AC_DEFINE(USE_CSTDATOMIC_H, [0], [cstdatomic support not found])], [-])
+CPP=$OLD_CPP
 
 AC_CHECK_HEADER([openssl/ssl.h],,[AC_MSG_ERROR([ssl header not found])])
 

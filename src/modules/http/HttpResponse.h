@@ -65,10 +65,9 @@ public:
     bool isNonBinary();
     std::string getHeader(std::string);
     bool getCompressed();
-	std::vector<std::string> getCookies() const;
-	std::map<std::string,std::string> getHeaders() const {
-		return headers;
-	}
+    const std::vector<std::string> getCookies() const;
+	const std::map<std::string,std::string>& getCHeaders() const;
+	std::map<std::string,std::string> getHeaders() const;
 	std::string getStatusLine() const;
 	std::string toPluginString();
 	bool isDone() const;

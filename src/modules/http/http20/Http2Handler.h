@@ -69,8 +69,8 @@ public:
 	int getHighestPushPromiseStreamIdentifier();
 	int updateSenderWindowSize(const int& windowSize);
 	void updateMaxFrameSize(const uint32_t& val);
-	Http2Handler(const bool& isServer, SocketUtil* sockUtil, const std::string& webpath);
-	Http2Handler(const bool& isServer, SocketUtil* sockUtil, const std::string& webpath, const std::string& settingsFrameData);
+	Http2Handler(const bool& isServer, const int& fd, const std::string& webpath);
+	Http2Handler(const bool& isServer, const int& fd, const std::string& webpath, const std::string& settingsFrameData);
 	virtual ~Http2Handler();
 	const std::string& getWebpath() const;
 	std::string getMimeType(const std::string& ext);

@@ -205,7 +205,7 @@ int SocketUtil::readData(int cntlen, std::string& content)
 			int readLen = MAXBUFLENM;
 			if(cntlen<MAXBUFLENM)
 				readLen = cntlen;
-			int er = recv(fd, buf, BUFSIZZ-1, 0);
+			int er = recv(fd, buf, readLen, 0);
 			if(er<=0)
 			{
 				return er;
@@ -252,7 +252,7 @@ int SocketUtil::readData(int cntlen, std::vector<unsigned char>& content)
 			int readLen = MAXBUFLENM;
 			if(cntlen<MAXBUFLENM)
 				readLen = cntlen;
-			int er = recv(fd, buf, BUFSIZZ-1, 0);
+			int er = recv(fd, buf, readLen, 0);
 			if(er<=0)
 			{
 				return er;

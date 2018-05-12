@@ -27,10 +27,10 @@ void* PoolThread::run(void *arg)
 	PoolThread* ths  = static_cast<PoolThread*>(arg);
 	while (ths->runFlag)
 	{
-		ths->wpool->c_mutex->lock();
+		ths->wpool->c_mutex.lock();
 		while (ths->wpool->count<=0)
-		ths->wpool->c_mutex->conditionalWait();
-		ths->wpool->c_mutex->unlock();
+		ths->wpool->c_mutex.conditionalWait();
+		ths->wpool->c_mutex.unlock();
 
 		Task* task = NULL;
 		while((task = ths->wpool->getTask())!=NULL)
@@ -101,11 +101,10 @@ PoolThread::PoolThread(TaskPool* wpool) {
 	this->task = NULL;
 	this->idle = true;
 	this->thrdStarted = false;
-	m_mutex = new Mutex;
 	this->complete = false;
+	this->runFlag = true;
 	this->prioritybased = wpool->prioritybased;
 	this->wpool = wpool;
-	this->runFlag = true;
 	mthread = new Thread(&run, this);
 }
 
@@ -116,25 +115,24 @@ PoolThread::~PoolThread() {
 		Thread::sSleep(1);
 	}
 	//delete mthread;
-	delete m_mutex;
 	logger << "Destroyed PoolThread\n" << std::flush;
 }
 
 void PoolThread::stop() {
 	if(!thrdStarted)return;
 	this->runFlag = false;
-	this->wpool->c_mutex->lock();
+	this->wpool->c_mutex.lock();
 	this->wpool->count++;
-	this->wpool->c_mutex->conditionalNotifyAll();
-	this->wpool->c_mutex->unlock();
+	this->wpool->c_mutex.conditionalNotifyAll();
+	this->wpool->c_mutex.unlock();
 }
 
 void PoolThread::execute() {
 	if(thrdStarted)return;
-	m_mutex->lock();
+	m_mutex.lock();
 	mthread->execute();
 	thrdStarted = true;
-	m_mutex->unlock();
+	m_mutex.unlock();
 }
 
 bool PoolThread::isComplete() {

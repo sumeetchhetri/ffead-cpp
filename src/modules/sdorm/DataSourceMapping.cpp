@@ -197,6 +197,10 @@ const strMap& DataSourceEntityMapping::getPropertyColumnMapping() const {
 	return propertyColumnMapping;
 }
 
+const strMap& DataSourceEntityMapping::getPropertyColumnMappingCS() const {
+	return propertyColumnMappingCS;
+}
+
 std::vector<DataSourceInternalRelation> DataSourceEntityMapping::getRelations() {
 	return relations;
 }

@@ -16,8 +16,8 @@
 #include "Http11WebSocketHandler.h"
 #include "ThreadPool.h"
 #include "Thread.h"
-#include "ConcurrentQueue.h"
-#include "ConcurrentMap.h"
+#include "SynchronizedQueue.h"
+#include "SynchronizedMap.h"
 
 class ServiceHandler;
 
@@ -33,6 +33,7 @@ class HandlerRequest {
 	ReaderSwitchInterface* switchReaderIntf;
 	friend class ServiceHandler;
 	friend class HttpWriteTask;
+	friend class HttpServiceTask;
 	HandlerRequest();
 public:
 	SocketUtil* getSocketUtil();
@@ -52,9 +53,9 @@ public:
 
 class ServiceHandler {
 	Mutex mutex;
-	ConcurrentQueue<SocketInterface*> tbcSifQ;
-	ConcurrentMap<long, int> requestNumMap;
-	ConcurrentMap<long, bool> donelist;
+	SynchronizedQueue<SocketInterface*> tbcSifQ;
+	SynchronizedMap<long, int> requestNumMap;
+	SynchronizedMap<long, bool> donelist;
 	bool run;
 	bool isThreadPerRequests;
 	bool isThreadPerRequestw;

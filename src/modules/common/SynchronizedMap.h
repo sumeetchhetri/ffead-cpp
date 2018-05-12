@@ -1,19 +1,19 @@
 /*
- * ConcurrentMap.h
+ * SynchronizedMap.h
  *
  *  Created on: 09-Mar-2015
  *      Author: sumeetc
  */
 
-#ifndef CONCURRENTMAP_H_
-#define CONCURRENTMAP_H_
+#ifndef SYNCHRONIZEDMAP_H_
+#define SYNCHRONIZEDMAP_H_
 #include "map"
 #include "Mutex.h"
 
 
 
 template<typename K, typename V>
-class ConcurrentMap {
+class SynchronizedMap {
 	Mutex _l;
 	std::map<K, V> _m;
 public:
@@ -63,4 +63,4 @@ public:
 	}
 };
 
-#endif /* CONCURRENTMAP_H_ */
+#endif /* SYNCHRONIZEDMAP_H_ */

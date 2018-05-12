@@ -28,12 +28,12 @@
 
 
 class Task {
-	bool isFuture;
 	int tunit;
 	int type;
 	int priority;
 	bool console;
 	bool cleanUp;
+	bool isFuture;
 	Task(const int& priority);
 	Task(const int& tunit, const int& type);
 	friend class PoolThread;

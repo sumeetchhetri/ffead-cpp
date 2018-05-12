@@ -32,7 +32,7 @@ class MarkerDefTemp : public TemplateHandler{
 public:
 	MarkerDefTemp();
 	virtual ~MarkerDefTemp();
-	Context getContext(HttpRequest* request);
+	void getContext(HttpRequest* request, Context* context);
 };
 
 #endif /* MarkerDefTemp_H_ */

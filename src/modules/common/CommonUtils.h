@@ -39,7 +39,9 @@ class CommonUtils {
 	static ThreadLocal contextName;
 	static std::map<std::string, std::string> mimeTypes;
 	static std::map<std::string, std::string> locales;
-	static std::vector<std::string*> appNames;
+	static std::vector<std::string> appNames;
+	friend class ConfigurationHandler;
+	static void addContext(std::string appName);
 public:
 	static void clear();
 	static int getProcessorCount();

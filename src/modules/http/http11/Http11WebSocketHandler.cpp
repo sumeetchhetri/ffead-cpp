@@ -7,9 +7,9 @@
 
 #include "Http11WebSocketHandler.h"
 
-Http11WebSocketHandler::Http11WebSocketHandler(const std::string& url, const bool& isServer, SocketUtil* sockUtil) {
+Http11WebSocketHandler::Http11WebSocketHandler(const std::string& url, const bool& isServer, const int& fd) {
+	init(fd);
 	logger = LoggerFactory::getLogger("Http11WebSocketHandler");
-	this->sockUtil = sockUtil;
 	this->url = url;
 }
 
@@ -20,7 +20,7 @@ std::string Http11WebSocketHandler::getUrl() {
 Http11WebSocketDataFrame Http11WebSocketHandler::readFrame() {
 	Http11WebSocketDataFrame frame;
 	std::vector<unsigned char> f2bytes;
-	if(!sockUtil->readData(2, f2bytes))
+	if(!sockUtil.readData(2, f2bytes))
 	{
 		frame.opcode = 8;
 		return frame;
@@ -37,7 +37,7 @@ Http11WebSocketDataFrame Http11WebSocketHandler::readFrame() {
 	unsigned long long dataLength = frame.payloadLength;
 	if(frame.payloadLength==126) {
 		std::vector<unsigned char> extdlenbytes;
-		if(!sockUtil->readData(2, extdlenbytes))
+		if(!sockUtil.readData(2, extdlenbytes))
 		{
 			frame.opcode = 8;
 			return frame;
@@ -46,7 +46,7 @@ Http11WebSocketDataFrame Http11WebSocketHandler::readFrame() {
 		dataLength = frame.extendedPayloadLength;
 	} else if(frame.payloadLength==127) {
 		std::vector<unsigned char> extdlenbytes;
-		if(!sockUtil->readData(8, extdlenbytes))
+		if(!sockUtil.readData(8, extdlenbytes))
 		{
 			frame.opcode = 8;
 			return frame;
@@ -56,14 +56,14 @@ Http11WebSocketDataFrame Http11WebSocketHandler::readFrame() {
 	}
 	if(frame.mask) {
 		std::vector<unsigned char> maskingbytes;
-		if(!sockUtil->readData(4, maskingbytes))
+		if(!sockUtil.readData(4, maskingbytes))
 		{
 			frame.opcode = 8;
 			return frame;
 		}
 		frame.maskingKey = CommonUtils::charArrayToULongLong(maskingbytes);
 	}
-	if(!sockUtil->readData(dataLength, frame.applicationData))
+	if(!sockUtil.readData(dataLength, frame.applicationData))
 	{
 		frame.opcode = 8;
 		return frame;
@@ -84,7 +84,7 @@ void Http11WebSocketHandler::replyPong() {
 	frame.mask = false;
 	frame.payloadLength = 0;
 	std::string pong = frame.getFrameData();
-	//sockUtil->sendData(pong);
+	//sockUtil.sendData(pong);
 }
 
 /*int WebSocket::doIt(const Reflector& reflector, void* _temp, const Method& method, const std::string& cntxtName) {
@@ -146,7 +146,7 @@ void Http11WebSocketHandler::replyPong() {
 			}
 		}
 	}
-	sockUtil->closeSocket();
+	sockUtil.closeSocket();
 	delete sockUtil;
 }*/
 
@@ -161,8 +161,8 @@ bool Http11WebSocketHandler::writeData(const WebSocketData& wsdata) {
 	frame.payloadLength = wsdata.data.length();
 	//We will not set application data here, we will directly send the data as
 	//we have computed other control options
-	//sockUtil->sendData(frame.getFrameData());
-	//sockUtil->sendData(wsdata.data);
+	//sockUtil.sendData(frame.getFrameData());
+	//sockUtil.sendData(wsdata.data);
 	return false;
 }
 
@@ -283,8 +283,7 @@ void* Http11WebSocketHandler::readRequest(void*& context, int& pending, int& req
 			break;
 		}
 		if(request!=NULL) {
-			startRequest();
-			reqPos = getReqPos();
+			reqPos = startRequest();
 			break;
 		}
 	}

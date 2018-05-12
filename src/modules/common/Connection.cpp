@@ -164,8 +164,8 @@ void ConnectionProperties::setType(const std::string& type) {
 }
 
 ConnectionNode::ConnectionNode() {
-	readTimeout = 10000;
-	connectionTimeout = 10000;
+	readTimeout = 5000;
+	connectionTimeout = 5000;
 	port = -1;
 }
 

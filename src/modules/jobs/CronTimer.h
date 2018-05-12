@@ -54,7 +54,7 @@ class CronTimer {
 		}
 	};
 	std::vector<CronExpressionPart> cParts;
-	Date* nextRunDate;
+	Date nextRunDate;
 	std::vector<int> starts, ends, lstParts;
 	std::map<std::string, int> months, days;
 	friend class JobScheduler;

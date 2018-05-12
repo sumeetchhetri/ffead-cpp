@@ -50,7 +50,7 @@ public:
 	bool writeResponse(void* req, void* res, void* context);
 	//int doIt(const Reflector& reflector, void* _temp, const Method& method, const std::string& cntxtName);
 	bool writeData(const WebSocketData& data);
-	Http11WebSocketHandler(const std::string& url, const bool& isServer, SocketUtil* sockUtil);
+	Http11WebSocketHandler(const std::string& url, const bool& isServer, const int& fd);
 	virtual ~Http11WebSocketHandler();
 };
 

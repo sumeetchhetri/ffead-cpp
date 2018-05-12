@@ -276,6 +276,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		StringUtil::replaceAll(name,"/","");
 		rundyncontent += "cp -Rf $FFEAD_CPP_PATH/public/* $FFEAD_CPP_PATH/web/"+name+"/public/\n";
 		ConfigurationData::getInstance()->servingContexts[name] = true;
+		CommonUtils::addContext(name);
 
 		std::vector<std::string> adcps;
 		CommonUtils::listFiles(adcps, dcppath, ".dcp");
@@ -349,18 +350,18 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			}
 			for (unsigned int apps = 0; apps < eles.size(); apps++)
 			{
-				if(eles.at(apps)->getTagName()=="controllers")
+				if(eles.at(apps).getTagName()=="controllers")
 				{
-					ElementList cntrls = eles.at(apps)->getChildElements();
+					ElementList cntrls = eles.at(apps).getChildElements();
 					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
 					{
-						if(cntrls.at(cntn)->getTagName()=="controller")
+						if(cntrls.at(cntn).getTagName()=="controller")
 						{
-							std::string url = cntrls.at(cntn)->getAttribute("path");
+							std::string url = cntrls.at(cntn).getAttribute("path");
 							StringUtil::trim(url);
-							std::string clas = cntrls.at(cntn)->getAttribute("class");
+							std::string clas = cntrls.at(cntn).getAttribute("class");
 							StringUtil::trim(clas);
-							std::string scope = cntrls.at(cntn)->getAttribute("scope");
+							std::string scope = cntrls.at(cntn).getAttribute("scope");
 							if(url!="" && clas!="")
 							{
 								normalizeUrl(name, url);
@@ -371,9 +372,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							}
 							else
 							{
-								std::string from = cntrls.at(cntn)->getAttribute("from");
+								std::string from = cntrls.at(cntn).getAttribute("from");
 								StringUtil::trim(from);
-								std::string to = cntrls.at(cntn)->getAttribute("to");
+								std::string to = cntrls.at(cntn).getAttribute("to");
 								StringUtil::trim(to);
 								if(to.find("*")!=std::string::npos || to.find("regex(")!=std::string::npos)
 								{
@@ -387,9 +388,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									logger << ("Adding Mapping for " + from + " :: " + to) << std::endl;
 								}
 
-								from = cntrls.at(cntn)->getAttribute("fromext");
+								from = cntrls.at(cntn).getAttribute("fromext");
 								StringUtil::trim(from);
-								to = cntrls.at(cntn)->getAttribute("toext");
+								to = cntrls.at(cntn).getAttribute("toext");
 								StringUtil::trim(to);
 								if(to.find("*")!=std::string::npos || to.find("regex(")!=std::string::npos)
 								{
@@ -420,18 +421,18 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						}
 					}
 				}
-				/*else if(eles.at(apps)->getTagName()=="authhandlers")
+				/*else if(eles.at(apps).getTagName()=="authhandlers")
 				{
-					ElementList cntrls = eles.at(apps)->getChildElements();
+					ElementList cntrls = eles.at(apps).getChildElements();
 					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
 					{
-						if(cntrls.at(cntn)->getTagName()=="authhandler")
+						if(cntrls.at(cntn).getTagName()=="authhandler")
 						{
-							std::string url = cntrls.at(cntn)->getAttribute("url");
+							std::string url = cntrls.at(cntn).getAttribute("url");
 							StringUtil::trim(url);
-							std::string provider = cntrls.at(cntn)->getAttribute("provider");
+							std::string provider = cntrls.at(cntn).getAttribute("provider");
 							StringUtil::trim(provider);
-							std::string scope = cntrls.at(cntn)->getAttribute("scope");
+							std::string scope = cntrls.at(cntn).getAttribute("scope");
 							StringUtil::trim(scope);
 							if(url.find("*")!=std::string::npos || url.find("regex(")!=std::string::npos)
 							{
@@ -452,20 +453,20 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						}
 					}
 				}*/
-				else if(eles.at(apps)->getTagName()=="filters")
+				else if(eles.at(apps).getTagName()=="filters")
 				{
-					ElementList cntrls = eles.at(apps)->getChildElements();
+					ElementList cntrls = eles.at(apps).getChildElements();
 					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
 					{
-						if(cntrls.at(cntn)->getTagName()=="filter")
+						if(cntrls.at(cntn).getTagName()=="filter")
 						{
-							std::string url = cntrls.at(cntn)->getAttribute("path");
+							std::string url = cntrls.at(cntn).getAttribute("path");
 							StringUtil::trim(url);
-							std::string clas = cntrls.at(cntn)->getAttribute("class");
+							std::string clas = cntrls.at(cntn).getAttribute("class");
 							StringUtil::trim(clas);
-							std::string type = cntrls.at(cntn)->getAttribute("type");
+							std::string type = cntrls.at(cntn).getAttribute("type");
 							StringUtil::trim(type);
-							std::string scope = cntrls.at(cntn)->getAttribute("scope");
+							std::string scope = cntrls.at(cntn).getAttribute("scope");
 							StringUtil::trim(scope);
 							if(clas!="" && (type=="in" || type=="out" || type=="handle"))
 							{
@@ -482,16 +483,16 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						}
 					}
 				}
-				else if(eles.at(apps)->getTagName()=="templates")
+				else if(eles.at(apps).getTagName()=="templates")
 				{
-					ElementList tmplts = eles.at(apps)->getChildElements();
+					ElementList tmplts = eles.at(apps).getChildElements();
 					for (unsigned int tmpn = 0; tmpn < tmplts.size(); tmpn++)
 					{
-						if(tmplts.at(tmpn)->getTagName()=="template")
+						if(tmplts.at(tmpn).getTagName()=="template")
 						{
-							std::string clas = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("class"));
-							std::string url = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("path"));
-							std::string file = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("file"));
+							std::string clas = StringUtil::trimCopy(tmplts.at(tmpn).getAttribute("class"));
+							std::string url = StringUtil::trimCopy(tmplts.at(tmpn).getAttribute("path"));
+							std::string file = StringUtil::trimCopy(tmplts.at(tmpn).getAttribute("file"));
 							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
 								normalizeUrl(name, url);
@@ -502,8 +503,8 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 								RegexUtil::replace(wbpi,"[^a-zA-Z0-9_]+","");
 								ConfigurationData::getInstance()->templateMappingMap[name][url] = clas+";"+wbpi;
 								tpes[fpath] = name;
-								//tpes.push_back(defpath+tmplts.at(tmpn)->getAttribute("file"));
-								std::string scope = tmplts.at(tmpn)->getAttribute("scope");
+								//tpes.push_back(defpath+tmplts.at(tmpn).getAttribute("file"));
+								std::string scope = tmplts.at(tmpn).getAttribute("scope");
 								if(clas!="")
 								{
 									Bean bean("template_"+clas,"",clas,scope,false,name);
@@ -518,15 +519,15 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						}
 					}
 				}
-				else if(eles.at(apps)->getTagName()=="dynamic-cpp-pages")
+				else if(eles.at(apps).getTagName()=="dynamic-cpp-pages")
 				{
-					ElementList dycpppgs = eles.at(apps)->getChildElements();
+					ElementList dycpppgs = eles.at(apps).getChildElements();
 					for (unsigned int tmpn = 0; tmpn < dycpppgs.size(); tmpn++)
 					{
-						if(dycpppgs.at(tmpn)->getTagName()=="dynamic-cpp-page")
+						if(dycpppgs.at(tmpn).getTagName()=="dynamic-cpp-page")
 						{
-							std::string url = StringUtil::trimCopy(dycpppgs.at(tmpn)->getAttribute("path"));
-							std::string file = StringUtil::trimCopy(dycpppgs.at(tmpn)->getAttribute("file"));
+							std::string url = StringUtil::trimCopy(dycpppgs.at(tmpn).getAttribute("path"));
+							std::string file = StringUtil::trimCopy(dycpppgs.at(tmpn).getAttribute("file"));
 							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
 								normalizeUrl(name, url);
@@ -552,20 +553,20 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						}
 					}
 				}
-				else if(eles.at(apps)->getTagName()=="web-socket-handlers")
+				else if(eles.at(apps).getTagName()=="web-socket-handlers")
 				{
-					ElementList tmplts = eles.at(apps)->getChildElements();
+					ElementList tmplts = eles.at(apps).getChildElements();
 					for (unsigned int tmpn = 0; tmpn < tmplts.size(); tmpn++)
 					{
-						if(tmplts.at(tmpn)->getTagName()=="web-socket-handler")
+						if(tmplts.at(tmpn).getTagName()=="web-socket-handler")
 						{
-							std::string clas = tmplts.at(tmpn)->getAttribute("class");
-							std::string url = StringUtil::trimCopy(tmplts.at(tmpn)->getAttribute("path"));
+							std::string clas = tmplts.at(tmpn).getAttribute("class");
+							std::string url = StringUtil::trimCopy(tmplts.at(tmpn).getAttribute("path"));
 							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
 								normalizeUrl(name, url);
 								ConfigurationData::getInstance()->websocketMappingMap[name][url] = clas;
-								std::string scope = tmplts.at(tmpn)->getAttribute("scope");
+								std::string scope = tmplts.at(tmpn).getAttribute("scope");
 								if(clas!="")
 								{
 									Bean bean("websocketclass_"+clas,"",clas,scope,false,name);
@@ -581,18 +582,18 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					}
 				}
 #ifdef INC_DVIEW
-				else if(eles.at(apps)->getTagName()=="dviews")
+				else if(eles.at(apps).getTagName()=="dviews")
 				{
-					ElementList dvs = eles.at(apps)->getChildElements();
+					ElementList dvs = eles.at(apps).getChildElements();
 					for (unsigned int dn = 0; dn < dvs.size(); dn++)
 					{
-						if(dvs.at(dn)->getTagName()=="dview")
+						if(dvs.at(dn).getTagName()=="dview")
 						{
-							std::string url = dvs.at(dn)->getAttribute("path");
+							std::string url = dvs.at(dn).getAttribute("path");
 							normalizeUrl(name, url);
-							std::string clas = dvs.at(dn)->getAttribute("class");
+							std::string clas = dvs.at(dn).getAttribute("class");
 							ConfigurationData::getInstance()->viewMappingMap[name][url] = clas;
-							std::string scope = dvs.at(dn)->getAttribute("scope");
+							std::string scope = dvs.at(dn).getAttribute("scope");
 							if(clas!="")
 							{
 								Bean bean("dview_"+clas,"",clas,scope,false,name);
@@ -603,18 +604,18 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					}
 				}
 #endif
-				else if(eles.at(apps)->getTagName()=="ajax-interfaces")
+				else if(eles.at(apps).getTagName()=="ajax-interfaces")
 				{
-					ElementList ajintfs = eles.at(apps)->getChildElements();
+					ElementList ajintfs = eles.at(apps).getChildElements();
 					for (unsigned int dn = 0; dn < ajintfs.size(); dn++)
 					{
-						if(ajintfs.at(dn)->getTagName()=="ajax-interface")
+						if(ajintfs.at(dn).getTagName()=="ajax-interface")
 						{
-							std::string url = ajintfs.at(dn)->getAttribute("path");
+							std::string url = ajintfs.at(dn).getAttribute("path");
 							if(url.find("*")==std::string::npos && url.find("regex(")==std::string::npos)
 							{
 								normalizeUrl(name, url);
-								std::string clas = ajintfs.at(dn)->getAttribute("class");
+								std::string clas = ajintfs.at(dn).getAttribute("class");
 								ConfigurationData::getInstance()->ajaxInterfaceMap[name][url] = clas;
 								pathvec.push_back(name);
 								vecvp.push_back(usrincludes);
@@ -630,28 +631,28 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						}
 					}
 				}
-				else if(eles.at(apps)->getTagName()=="restcontrollers")
+				else if(eles.at(apps).getTagName()=="restcontrollers")
 				{
-					ElementList cntrls = eles.at(apps)->getChildElements();
+					ElementList cntrls = eles.at(apps).getChildElements();
 					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
 					{
-						if(cntrls.at(cntn)->getTagName()=="restcontroller")
+						if(cntrls.at(cntn).getTagName()=="restcontroller")
 						{
-							std::string url = cntrls.at(cntn)->getAttribute("path");
-							std::string clas = cntrls.at(cntn)->getAttribute("class");
-							std::string rname = "";//cntrls.at(cntn)->getAttribute("name");
-							std::string scope = cntrls.at(cntn)->getAttribute("scope");
-							ElementList resfuncs = cntrls.at(cntn)->getChildElements();
+							std::string url = cntrls.at(cntn).getAttribute("path");
+							std::string clas = cntrls.at(cntn).getAttribute("class");
+							std::string rname = "";//cntrls.at(cntn).getAttribute("name");
+							std::string scope = cntrls.at(cntn).getAttribute("scope");
+							ElementList resfuncs = cntrls.at(cntn).getChildElements();
 							for (unsigned int cntn1 = 0; cntn1 < resfuncs.size(); cntn1++)
 							{
-								if(resfuncs.at(cntn1)->getTagName()=="restfunction")
+								if(resfuncs.at(cntn1).getTagName()=="restfunction")
 								{
 									RestFunction restfunction;
-									restfunction.name = resfuncs.at(cntn1)->getAttribute("name");
-									restfunction.path = resfuncs.at(cntn1)->getAttribute("path");
+									restfunction.name = resfuncs.at(cntn1).getAttribute("name");
+									restfunction.path = resfuncs.at(cntn1).getAttribute("path");
 									restfunction.clas = clas;
-									restfunction.meth = StringUtil::toUpperCopy(resfuncs.at(cntn1)->getAttribute("meth"));
-									restfunction.statusCode = resfuncs.at(cntn1)->getAttribute("statusCode");
+									restfunction.meth = StringUtil::toUpperCopy(resfuncs.at(cntn1).getAttribute("meth"));
+									restfunction.statusCode = resfuncs.at(cntn1).getAttribute("statusCode");
 									if(restfunction.statusCode!="")
 									{
 										try {
@@ -661,25 +662,25 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											restfunction.statusCode = "200";
 										}
 									}
-									/*restfunction.baseUrl = resfuncs.at(cntn1)->getAttribute("baseUrl");
+									/*restfunction.baseUrl = resfuncs.at(cntn1).getAttribute("baseUrl");
 									if(restfunction.baseUrl!="")
 									{
 										if(restfunction.baseUrl.at(0)!='/')
 											restfunction.baseUrl = "/" + restfunction.baseUrl;
 									}*/
-									restfunction.icontentType = resfuncs.at(cntn1)->getAttribute("icontentType");
-									restfunction.ocontentType = resfuncs.at(cntn1)->getAttribute("ocontentType");
-									ElementList resfuncparams = resfuncs.at(cntn1)->getChildElements();
+									restfunction.icontentType = resfuncs.at(cntn1).getAttribute("icontentType");
+									restfunction.ocontentType = resfuncs.at(cntn1).getAttribute("ocontentType");
+									ElementList resfuncparams = resfuncs.at(cntn1).getChildElements();
 									bool hasBodyParam = false, invalidParam = false;;
 									for (unsigned int cntn2 = 0; cntn2 < resfuncparams.size(); cntn2++)
 									{
-										if(resfuncparams.at(cntn2)->getTagName()=="param")
+										if(resfuncparams.at(cntn2).getTagName()=="param")
 										{
 											RestFunctionParams param;
-											param.type = resfuncparams.at(cntn2)->getAttribute("type");
-											param.from = resfuncparams.at(cntn2)->getAttribute("from");
-											param.name = resfuncparams.at(cntn2)->getAttribute("name");
-											param.defValue = resfuncparams.at(cntn2)->getAttribute("defValue");
+											param.type = resfuncparams.at(cntn2).getAttribute("type");
+											param.from = resfuncparams.at(cntn2).getAttribute("from");
+											param.name = resfuncparams.at(cntn2).getAttribute("name");
+											param.defValue = resfuncparams.at(cntn2).getAttribute("defValue");
 											if(param.from=="body")
 											{
 												hasBodyParam = true;
@@ -773,20 +774,20 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						}
 					}
 				}
-				else if(eles.at(apps)->getTagName()=="security")
+				else if(eles.at(apps).getTagName()=="security")
 				{
-					ElementList allprovs = eles.at(apps)->getChildElements();
+					ElementList allprovs = eles.at(apps).getChildElements();
 					for (unsigned int cntpra = 0; cntpra < allprovs.size(); cntpra++)
 					{
-						if(allprovs.at(cntpra)->getTagName()=="providers")
+						if(allprovs.at(cntpra).getTagName()=="providers")
 						{
-							ElementList provs = allprovs.at(cntpra)->getChildElements();
+							ElementList provs = allprovs.at(cntpra).getChildElements();
 							for (unsigned int cntpr = 0; cntpr < provs.size(); cntpr++)
 							{
-								if(provs.at(cntpr)->getTagName()!="provider")
+								if(provs.at(cntpr).getTagName()!="provider")
 									continue;
 
-								std::string provName = provs.at(cntpr)->getAttribute("name");
+								std::string provName = provs.at(cntpr).getAttribute("name");
 								if(provName=="")
 								{
 									logger << ("No name provided for security-provider, skipping...") << std::endl;
@@ -800,15 +801,15 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									continue;
 								}
 
-								ElementList cntrls = provs.at(cntpr)->getChildElements();
+								ElementList cntrls = provs.at(cntpr).getChildElements();
 								for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
 								{
-									if(cntrls.at(cntn)->getTagName()=="login-handler")
+									if(cntrls.at(cntn).getTagName()=="login-handler")
 									{
-										std::string provider = cntrls.at(cntn)->getAttribute("provider");
-										std::string url = cntrls.at(cntn)->getAttribute("path");
-										std::string sessionTimeoutV = cntrls.at(cntn)->getAttribute("sessionTimeout");
-										std::string scope = cntrls.at(cntn)->getAttribute("scope");
+										std::string provider = cntrls.at(cntn).getAttribute("provider");
+										std::string url = cntrls.at(cntn).getAttribute("path");
+										std::string sessionTimeoutV = cntrls.at(cntn).getAttribute("sessionTimeout");
+										std::string scope = cntrls.at(cntn).getAttribute("scope");
 
 										Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
 										securityObject.loginProvider = provider;
@@ -829,11 +830,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 										}
 										logger << ("Security: Adding Login Handler => " + url  + " , provider => " + provider) << std::endl;
 									}
-									else if(cntrls.at(cntn)->getTagName()=="secure")
+									else if(cntrls.at(cntn).getTagName()=="secure")
 									{
 										Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
-										std::string path = cntrls.at(cntn)->getAttribute("path");
-										std::string role = cntrls.at(cntn)->getAttribute("role");
+										std::string path = cntrls.at(cntn).getAttribute("path");
+										std::string role = cntrls.at(cntn).getAttribute("role");
 										SecureAspect secureAspect;
 										normalizeUrl(name, path);
 										secureAspect.path = path;
@@ -844,18 +845,18 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											logger << ("Security: Adding Secure Path => " + path  + " , role => " + role) << std::endl;
 										}
 									}
-									else if(cntrls.at(cntn)->getTagName()=="welcome")
+									else if(cntrls.at(cntn).getTagName()=="welcome")
 									{
-										std::string welcomeFile = cntrls.at(cntn)->getAttribute("file");
+										std::string welcomeFile = cntrls.at(cntn).getAttribute("file");
 										Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
 										securityObject.welcomeFile = welcomeFile;
 										ConfigurationData::getInstance()->securityObjectMap[name][provName] = securityObject;
 										logger << ("Security: Adding Welcome file => " + welcomeFile) << std::endl;
 									}
-									else if(cntrls.at(cntn)->getTagName()=="username")
+									else if(cntrls.at(cntn).getTagName()=="username")
 									{
-										std::string ffrom = cntrls.at(cntn)->getAttribute("from");
-										std::string fname = cntrls.at(cntn)->getAttribute("name");
+										std::string ffrom = cntrls.at(cntn).getAttribute("from");
+										std::string fname = cntrls.at(cntn).getAttribute("name");
 										if(ffrom!="reqparam" && ffrom!="postparam" && ffrom!="header" && fname!="")
 										{
 											Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
@@ -864,10 +865,10 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											ConfigurationData::getInstance()->securityObjectMap[name][provName] = securityObject;
 										}
 									}
-									else if(cntrls.at(cntn)->getTagName()=="password")
+									else if(cntrls.at(cntn).getTagName()=="password")
 									{
-										std::string ffrom = cntrls.at(cntn)->getAttribute("from");
-										std::string fname = cntrls.at(cntn)->getAttribute("name");
+										std::string ffrom = cntrls.at(cntn).getAttribute("from");
+										std::string fname = cntrls.at(cntn).getAttribute("name");
 										if(ffrom!="reqparam" && ffrom!="postparam" && ffrom!="header" && fname!="")
 										{
 											Security securityObject = ConfigurationData::getInstance()->securityObjectMap[name][provName];
@@ -881,16 +882,16 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						}
 					}
 				}
-				else if(eles.at(apps)->getTagName()=="handoffs")
+				else if(eles.at(apps).getTagName()=="handoffs")
 				{
-					ElementList cntrls = eles.at(apps)->getChildElements();
+					ElementList cntrls = eles.at(apps).getChildElements();
 					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
 					{
-						if(cntrls.at(cntn)->getTagName()=="handoff")
+						if(cntrls.at(cntn).getTagName()=="handoff")
 						{
-							std::string app = cntrls.at(cntn)->getAttribute("app");
-							std::string def = cntrls.at(cntn)->getAttribute("default");
-							std::string ext = cntrls.at(cntn)->getAttribute("ext");
+							std::string app = cntrls.at(cntn).getAttribute("app");
+							std::string def = cntrls.at(cntn).getAttribute("default");
+							std::string ext = cntrls.at(cntn).getAttribute("ext");
 							ConfigurationData::getInstance()->handoffs[app] = def;
 							ConfigurationData::getInstance()->handoffs[app+"extension"] = ext;
 							handoffVec.push_back("-l"+ app+" ");
@@ -898,40 +899,40 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						}
 					}
 				}
-				else if(eles.at(apps)->getTagName()=="cors-config")
+				else if(eles.at(apps).getTagName()=="cors-config")
 				{
-					ElementList cntrls = eles.at(apps)->getChildElements();
+					ElementList cntrls = eles.at(apps).getChildElements();
 					std::string allwdOrigins, allwdMethods, allwdHeaders, exposedHeaders;
 					bool allwdCredentials;
 					long maxAge;
 					for (unsigned int cntn = 0; cntn < cntrls.size(); cntn++)
 					{
-						if(cntrls.at(cntn)->getTagName()=="allow-origins")
+						if(cntrls.at(cntn).getTagName()=="allow-origins")
 						{
-							allwdOrigins = cntrls.at(cntn)->getText();
+							allwdOrigins = cntrls.at(cntn).getText();
 						}
-						else if(cntrls.at(cntn)->getTagName()=="allow-methods")
+						else if(cntrls.at(cntn).getTagName()=="allow-methods")
 						{
-							allwdMethods = cntrls.at(cntn)->getText();
+							allwdMethods = cntrls.at(cntn).getText();
 						}
-						else if(cntrls.at(cntn)->getTagName()=="allow-headers")
+						else if(cntrls.at(cntn).getTagName()=="allow-headers")
 						{
-							allwdHeaders = cntrls.at(cntn)->getText();
+							allwdHeaders = cntrls.at(cntn).getText();
 						}
-						else if(cntrls.at(cntn)->getTagName()=="allow-credentials")
+						else if(cntrls.at(cntn).getTagName()=="allow-credentials")
 						{
 							try {
-								allwdCredentials = CastUtil::lexical_cast<bool>(cntrls.at(cntn)->getText());
+								allwdCredentials = CastUtil::lexical_cast<bool>(cntrls.at(cntn).getText());
 							} catch(...) {}
 						}
-						else if(cntrls.at(cntn)->getTagName()=="expose-headers")
+						else if(cntrls.at(cntn).getTagName()=="expose-headers")
 						{
-							exposedHeaders = cntrls.at(cntn)->getText();
+							exposedHeaders = cntrls.at(cntn).getText();
 						}
-						else if(cntrls.at(cntn)->getTagName()=="max-age")
+						else if(cntrls.at(cntn).getTagName()=="max-age")
 						{
 							try {
-								maxAge = CastUtil::lexical_cast<long>(cntrls.at(cntn)->getText());
+								maxAge = CastUtil::lexical_cast<long>(cntrls.at(cntn).getText());
 							} catch(...) {}
 						}
 					}
@@ -945,9 +946,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							+ " , max-age => " + CastUtil::lexical_cast<std::string>(ConfigurationData::getInstance()->corsConfig.maxAge)) << std::endl;
 				}
 #ifdef INC_JOBS
-				else if(eles.at(apps)->getTagName()=="job-procs")
+				else if(eles.at(apps).getTagName()=="job-procs")
 				{
-					ElementList cntrls = eles.at(apps)->getChildElements();
+					ElementList cntrls = eles.at(apps).getChildElements();
 					JobScheduler::init(cntrls, name);
 				}
 #endif
@@ -969,47 +970,47 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			ElementList eles = root1.getChildElements();
 			for (unsigned int apps = 0; apps < eles.size(); apps++)
 			{
-				if(eles.at(apps)->getTagName()=="page")
+				if(eles.at(apps).getTagName()=="page")
 				{
-					std::string fvw = eles.at(apps)->getAttribute("htm");
+					std::string fvw = eles.at(apps).getAttribute("htm");
 					StringUtil::replaceFirst(fvw,".html",".fview");
-					ConfigurationData::getInstance()->fviewMappingMap[name][fvw] = eles.at(apps)->getAttribute("class");
+					ConfigurationData::getInstance()->fviewMappingMap[name][fvw] = eles.at(apps).getAttribute("class");
 					pathvec.push_back(name);
 					vecvp.push_back(usrincludes);
 					stat.push_back(false);
 					normalizeUrl(name, fvw);
-					ConfigurationData::getInstance()->ajaxInterfaceMap[name][fvw] = eles.at(apps)->getAttribute("class");
-					afcd.push_back(eles.at(apps)->getAttribute("class"));
-					ElementList elese = eles.at(apps)->getChildElements();
+					ConfigurationData::getInstance()->ajaxInterfaceMap[name][fvw] = eles.at(apps).getAttribute("class");
+					afcd.push_back(eles.at(apps).getAttribute("class"));
+					ElementList elese = eles.at(apps).getChildElements();
 					std::string nsfns = "\nvar _fview_namespace = {";
 					std::string js = "\n\nwindow.onload = function(){";
 					for (int appse = 0; appse < (int)elese.size(); appse++)
 					{
-						if(elese.at(appse)->getTagName()=="event")
+						if(elese.at(appse).getTagName()=="event")
 						{
-							nsfns += "\n\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<std::string>(appse)+"\" : function(response){" + elese.at(appse)->getAttribute("cb") + "},";
-							js += "\ndocument.getElementById('"+elese.at(appse)->getAttribute("eid")+"').";
-							js += elese.at(appse)->getAttribute("type") + " = function(){";
-							js += eles.at(apps)->getAttribute("class")+"."+elese.at(appse)->getAttribute("func")+"(";
-							std::string args = elese.at(appse)->getAttribute("args");
+							nsfns += "\n\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<std::string>(appse)+"\" : function(response){" + elese.at(appse).getAttribute("cb") + "},";
+							js += "\ndocument.getElementById('"+elese.at(appse).getAttribute("eid")+"').";
+							js += elese.at(appse).getAttribute("type") + " = function(){";
+							js += eles.at(apps).getAttribute("class")+"."+elese.at(appse).getAttribute("func")+"(";
+							std::string args = elese.at(appse).getAttribute("args");
 							if(args!="")
 								args += ",";
 							js += args + "\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<std::string>(appse)+"\",\"/"+name+"/"+fvw+"\",_fview_namespace);}";
 						}
-						else if(elese.at(appse)->getTagName()=="form")
+						else if(elese.at(appse).getTagName()=="form")
 						{
-							//ConfigurationData::getInstance()->fviewFormMap[name][elese.at(appse)->getAttribute("name")] = *(elese.at(appse));
-							std::string clas = elese.at(appse)->getAttribute("controller");
-							std::string scope = elese.at(appse)->getAttribute("scope");
+							//ConfigurationData::getInstance()->fviewFormMap[name][elese.at(appse).getAttribute("name")] = *(elese.at(appse));
+							std::string clas = elese.at(appse).getAttribute("controller");
+							std::string scope = elese.at(appse).getAttribute("scope");
 							if(clas!="")
 							{
 								Bean bean("form_"+clas,"",clas,scope,false,name);
 								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 							}
-							elese.at(appse)->copy(&(ConfigurationData::getInstance()->fviewFormMap[name][elese.at(appse)->getAttribute("name")]));
-							logger << ("Fview: Adding form => " + elese.at(appse)->getAttribute("name")
-								+ " , form class => " + elese.at(appse)->getAttribute("bean")
-								+ " , form controller => " + elese.at(appse)->getAttribute("controller")) << std::endl;
+							elese.at(appse).copy(&(ConfigurationData::getInstance()->fviewFormMap[name][elese.at(appse).getAttribute("name")]));
+							logger << ("Fview: Adding form => " + elese.at(appse).getAttribute("name")
+								+ " , form class => " + elese.at(appse).getAttribute("bean")
+								+ " , form controller => " + elese.at(appse).getAttribute("controller")) << std::endl;
 						}
 					}
 					js += "\n}\n\n";
@@ -1017,15 +1018,15 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					js = nsfns + js;
 					for (unsigned int appse = 0; appse < elese.size(); appse++)
 					{
-						if(elese.at(appse)->getTagName()=="functions")
+						if(elese.at(appse).getTagName()=="functions")
 						{
-							js += elese.at(appse)->getText();
+							js += elese.at(appse).getText();
 						}
 					}
-					AfcUtil::writeTofile(webpubpath+eles.at(apps)->getAttribute("class")+".js",js,true);
+					AfcUtil::writeTofile(webpubpath+eles.at(apps).getAttribute("class")+".js",js,true);
 
-					logger << ("Fview: Adding fview page class => " + eles.at(apps)->getAttribute("class")
-							+ " , html => " + eles.at(apps)->getAttribute("htm")) << std::endl;
+					logger << ("Fview: Adding fview page class => " + eles.at(apps).getAttribute("class")
+							+ " , html => " + eles.at(apps).getAttribute("htm")) << std::endl;
 				}
 			}
 		}
@@ -1244,146 +1245,146 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 		bool found_default = false;
 		for (unsigned int dsnu = 0; dsnu < datasrcs.size(); dsnu++)
 		{
-			if(datasrcs.at(dsnu)->getTagName()=="data-source")
+			if(datasrcs.at(dsnu).getTagName()=="data-source")
 			{
 				ConnectionProperties cprops;
-				if(!found_default && (datasrcs.at(dsnu)->getAttribute("default")=="true" || datasrcs.size()==1)) {
+				if(!found_default && (datasrcs.at(dsnu).getAttribute("default")=="true" || datasrcs.size()==1)) {
 					cprops.addProperty("_isdefault_", "true");
 					found_default = true;
 				}
 				Mapping mapping;
 				mapping.appName = name;
 
-				ElementList dbeles = datasrcs.at(dsnu)->getChildElements();
+				ElementList dbeles = datasrcs.at(dsnu).getChildElements();
 				for (unsigned int dbs = 0; dbs < dbeles.size(); dbs++)
 				{
-					if(dbeles.at(dbs)->getTagName()=="config")
+					if(dbeles.at(dbs).getTagName()=="config")
 					{
-						ElementList confs = dbeles.at(dbs)->getChildElements();
+						ElementList confs = dbeles.at(dbs).getChildElements();
 						int psize= 2;
 						for (unsigned int cns = 0; cns < confs.size(); cns++)
 						{
-							if(confs.at(cns)->getTagName()=="nodes")
+							if(confs.at(cns).getTagName()=="nodes")
 							{
-								ElementList nodec = confs.at(cns)->getChildElements();
+								ElementList nodec = confs.at(cns).getChildElements();
 								for (unsigned int nn = 0; nn < nodec.size(); nn++)
 								{
-									if(nodec.at(nn)->getTagName()!="node")continue;
+									if(nodec.at(nn).getTagName()!="node")continue;
 									ConnectionNode cnode;
-									ElementList nodes = nodec.at(nn)->getChildElements();
+									ElementList nodes = nodec.at(nn).getChildElements();
 									for (unsigned int ncc = 0; ncc < nodes.size(); ncc++)
 									{
-										if(nodes.at(ncc)->getTagName()=="username")
+										if(nodes.at(ncc).getTagName()=="username")
 										{
-											cnode.username = nodes.at(ncc)->getText();
+											cnode.username = nodes.at(ncc).getText();
 										}
-										else if(nodes.at(ncc)->getTagName()=="password")
+										else if(nodes.at(ncc).getTagName()=="password")
 										{
-											cnode.password = nodes.at(ncc)->getText();
+											cnode.password = nodes.at(ncc).getText();
 										}
-										else if(nodes.at(ncc)->getTagName()=="host")
+										else if(nodes.at(ncc).getTagName()=="host")
 										{
-											cnode.host = nodes.at(ncc)->getText();
+											cnode.host = nodes.at(ncc).getText();
 										}
-										else if(nodes.at(ncc)->getTagName()=="port")
+										else if(nodes.at(ncc).getTagName()=="port")
 										{
 											try {
-												cnode.port = CastUtil::lexical_cast<int>(nodes.at(ncc)->getText());
+												cnode.port = CastUtil::lexical_cast<int>(nodes.at(ncc).getText());
 											} catch (...) {
 
 											}
 										}
-										else if(nodes.at(ncc)->getTagName()=="readTimeout")
+										else if(nodes.at(ncc).getTagName()=="readTimeout")
 										{
 											try {
-												cnode.readTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc)->getText());
+												cnode.readTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
 											} catch (...) {
 
 											}
 										}
-										else if(nodes.at(ncc)->getTagName()=="connectionTimeout")
+										else if(nodes.at(ncc).getTagName()=="connectionTimeout")
 										{
 											try {
-												cnode.connectionTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc)->getText());
+												cnode.connectionTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
 											} catch (...) {
 
 											}
 										}
-										else if(nodes.at(ncc)->getTagName()=="dsn")
+										else if(nodes.at(ncc).getTagName()=="dsn")
 										{
-											cnode.dsn = nodes.at(ncc)->getText();
+											cnode.dsn = nodes.at(ncc).getText();
 										}
-										else if(nodes.at(ncc)->getTagName()=="databaseName")
+										else if(nodes.at(ncc).getTagName()=="databaseName")
 										{
-											cnode.databaseName = nodes.at(ncc)->getText();
+											cnode.databaseName = nodes.at(ncc).getText();
 										}
 									}
 									cprops.addNode(cnode);
 								}
 							}
-							else if(confs.at(cns)->getTagName()=="pool-size")
+							else if(confs.at(cns).getTagName()=="pool-size")
 							{
-								if(confs.at(cns)->getText()!="")
+								if(confs.at(cns).getText()!="")
 								{
 									try {
-										psize = CastUtil::lexical_cast<int>(confs.at(cns)->getText());
+										psize = CastUtil::lexical_cast<int>(confs.at(cns).getText());
 									} catch (...) {
 
 									}
 								}
 								cprops.poolWriteSize = psize;
 							}
-							else if(confs.at(cns)->getTagName()=="name")
+							else if(confs.at(cns).getTagName()=="name")
 							{
-								cprops.name = confs.at(cns)->getText();
+								cprops.name = confs.at(cns).getText();
 							}
-							else if(confs.at(cns)->getTagName()=="type")
+							else if(confs.at(cns).getTagName()=="type")
 							{
-								cprops.type = confs.at(cns)->getText();
+								cprops.type = confs.at(cns).getText();
 							}
 							else
 							{
-								cprops.addProperty(confs.at(cns)->getTagName(), confs.at(cns)->getText());
+								cprops.addProperty(confs.at(cns).getTagName(), confs.at(cns).getText());
 							}
 						}
 					}
-					else if(dbeles.at(dbs)->getTagName()=="tables")
+					else if(dbeles.at(dbs).getTagName()=="tables")
 					{
-						ElementList tabs = dbeles.at(dbs)->getChildElements();
+						ElementList tabs = dbeles.at(dbs).getChildElements();
 						for (unsigned int dn = 0; dn < tabs.size(); dn++)
 						{
-							if(tabs.at(dn)->getTagName()=="table")
+							if(tabs.at(dn).getTagName()=="table")
 							{
 								DataSourceEntityMapping dsempg;
-								dsempg.tableName = tabs.at(dn)->getAttribute("name");
-								dsempg.className = tabs.at(dn)->getAttribute("class");
-								ElementList cols = tabs.at(dn)->getChildElements();
+								dsempg.tableName = tabs.at(dn).getAttribute("name");
+								dsempg.className = tabs.at(dn).getAttribute("class");
+								ElementList cols = tabs.at(dn).getChildElements();
 								for (unsigned int cn = 0; cn < cols.size(); cn++)
 								{
-									if(cols.at(cn)->getTagName()=="hasOne")
+									if(cols.at(cn).getTagName()=="hasOne")
 									{
 										DataSourceInternalRelation relation;
-										relation.clsName = cols.at(cn)->getText();
+										relation.clsName = cols.at(cn).getText();
 										relation.type = 1;
-										relation.dfk = cols.at(cn)->getAttribute("dfk");
-										relation.dmappedBy = cols.at(cn)->getAttribute("dmappedBy");
-										relation.field = cols.at(cn)->getAttribute("field");
+										relation.dfk = cols.at(cn).getAttribute("dfk");
+										relation.dmappedBy = cols.at(cn).getAttribute("dmappedBy");
+										relation.field = cols.at(cn).getAttribute("field");
 										dsempg.addRelation(relation);
 									}
-									else if(cols.at(cn)->getTagName()=="hasMany")
+									else if(cols.at(cn).getTagName()=="hasMany")
 									{
 										DataSourceInternalRelation relation;
-										relation.clsName = cols.at(cn)->getText();
+										relation.clsName = cols.at(cn).getText();
 										relation.type = 2;
-										relation.dfk = cols.at(cn)->getAttribute("dfk");
-										relation.dmappedBy = cols.at(cn)->getAttribute("dmappedBy");
-										relation.field = cols.at(cn)->getAttribute("field");
+										relation.dfk = cols.at(cn).getAttribute("dfk");
+										relation.dmappedBy = cols.at(cn).getAttribute("dmappedBy");
+										relation.field = cols.at(cn).getAttribute("field");
 										dsempg.addRelation(relation);
 									}
-									else if(cols.at(cn)->getTagName()=="col")
+									else if(cols.at(cn).getTagName()=="col")
 									{
-										dsempg.addPropertyColumnMapping(cols.at(cn)->getAttribute("obf"),
-												cols.at(cn)->getAttribute("dbf"));
+										dsempg.addPropertyColumnMapping(cols.at(cn).getAttribute("obf"),
+												cols.at(cn).getAttribute("dbf"));
 									}
 								}
 								mapping.addDataSourceEntityMapping(dsempg);
@@ -1432,59 +1433,59 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 		bool found_default = false;
 		for (unsigned int dsnu = 0; dsnu < datasrcs.size(); dsnu++)
 		{
-			if(datasrcs.at(dsnu)->getTagName()=="cache")
+			if(datasrcs.at(dsnu).getTagName()=="cache")
 			{
 				ConnectionProperties cprops;
-				if(!found_default && (datasrcs.at(dsnu)->getAttribute("default")=="true" || datasrcs.size()==1)) {
+				if(!found_default && (datasrcs.at(dsnu).getAttribute("default")=="true" || datasrcs.size()==1)) {
 					cprops.addProperty("_isdefault_", "true");
 					found_default = true;
 				}
 				int psize = 1;
-				ElementList confs = datasrcs.at(dsnu)->getChildElements();
+				ElementList confs = datasrcs.at(dsnu).getChildElements();
 				for (unsigned int cns = 0; cns < confs.size(); cns++)
 				{
-					if(confs.at(cns)->getTagName()=="nodes")
+					if(confs.at(cns).getTagName()=="nodes")
 					{
-						ElementList nodec = confs.at(cns)->getChildElements();
+						ElementList nodec = confs.at(cns).getChildElements();
 						for (unsigned int nn = 0; nn < nodec.size(); nn++)
 						{
-							if(nodec.at(nn)->getTagName()!="node")continue;
+							if(nodec.at(nn).getTagName()!="node")continue;
 							ConnectionNode cnode;
-							ElementList nodes = nodec.at(nn)->getChildElements();
+							ElementList nodes = nodec.at(nn).getChildElements();
 							for (unsigned int ncc = 0; ncc < nodes.size(); ncc++)
 							{
-								if(nodes.at(ncc)->getTagName()=="username")
+								if(nodes.at(ncc).getTagName()=="username")
 								{
-									cnode.username = nodes.at(ncc)->getText();
+									cnode.username = nodes.at(ncc).getText();
 								}
-								else if(nodes.at(ncc)->getTagName()=="password")
+								else if(nodes.at(ncc).getTagName()=="password")
 								{
-									cnode.password = nodes.at(ncc)->getText();
+									cnode.password = nodes.at(ncc).getText();
 								}
-								else if(nodes.at(ncc)->getTagName()=="host")
+								else if(nodes.at(ncc).getTagName()=="host")
 								{
-									cnode.host = nodes.at(ncc)->getText();
+									cnode.host = nodes.at(ncc).getText();
 								}
-								else if(nodes.at(ncc)->getTagName()=="port")
+								else if(nodes.at(ncc).getTagName()=="port")
 								{
 									try {
-										cnode.port = CastUtil::lexical_cast<int>(nodes.at(ncc)->getText());
+										cnode.port = CastUtil::lexical_cast<int>(nodes.at(ncc).getText());
 									} catch (...) {
 
 									}
 								}
-								else if(nodes.at(ncc)->getTagName()=="readTimeout")
+								else if(nodes.at(ncc).getTagName()=="readTimeout")
 								{
 									try {
-										cnode.readTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc)->getText());
+										cnode.readTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
 									} catch (...) {
 
 									}
 								}
-								else if(nodes.at(ncc)->getTagName()=="connectionTimeout")
+								else if(nodes.at(ncc).getTagName()=="connectionTimeout")
 								{
 									try {
-										cnode.connectionTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc)->getText());
+										cnode.connectionTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
 									} catch (...) {
 
 									}
@@ -1493,29 +1494,29 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 							cprops.addNode(cnode);
 						}
 					}
-					else if(confs.at(cns)->getTagName()=="pool-size")
+					else if(confs.at(cns).getTagName()=="pool-size")
 					{
-						if(confs.at(cns)->getText()!="")
+						if(confs.at(cns).getText()!="")
 						{
 							try {
-								psize = CastUtil::lexical_cast<int>(confs.at(cns)->getText());
+								psize = CastUtil::lexical_cast<int>(confs.at(cns).getText());
 							} catch (...) {
 
 							}
 						}
 						cprops.poolWriteSize = psize;
 					}
-					else if(confs.at(cns)->getTagName()=="name")
+					else if(confs.at(cns).getTagName()=="name")
 					{
-						cprops.name = confs.at(cns)->getText();
+						cprops.name = confs.at(cns).getText();
 					}
-					else if(confs.at(cns)->getTagName()=="type")
+					else if(confs.at(cns).getTagName()=="type")
 					{
-						cprops.type = confs.at(cns)->getText();
+						cprops.type = confs.at(cns).getText();
 					}
 					else
 					{
-						cprops.addProperty(confs.at(cns)->getTagName(), confs.at(cns)->getText());
+						cprops.addProperty(confs.at(cns).getTagName(), confs.at(cns).getText());
 					}
 				}
 
@@ -1943,7 +1944,7 @@ void ConfigurationHandler::handleDataSourceEntities(const std::string& appName, 
 		std::string clas = cs.getFullyQualifiedClassName();
 		if(cs.markers.find("@Entity")!=cs.markers.end() && cs.markers.find("@Table")!=cs.markers.end())
 		{
-			std::cout << "Entity " << clas << std::endl;
+			//std::cout << "Entity " << clas << std::endl;
 			DataSourceEntityMapping dsempg;
 			dsempg.className = clas;
 			std::vector<Marker> entityv = cs.markers["@Entity"];
@@ -1974,12 +1975,12 @@ void ConfigurationHandler::handleDataSourceEntities(const std::string& appName, 
 			bool skipIt = false;
 			std::vector<PropStructure> csaps = cs.getAllProps();
 			for (int var = 0; var < (int)csaps.size(); ++var) {
-				std::cout << "Property " << csaps.at(var).name << std::endl;
+				//std::cout << "Property " << csaps.at(var).name << std::endl;
 				std::map<std::string, std::vector<Marker> >::iterator piit;
 				for (piit=csaps.at(var).markers.begin();piit!=csaps.at(var).markers.end();++piit) {
 					std::vector<Marker> miit = piit->second;
 					for(int mi=0;mi<(int)miit.size();mi++) {
-						std::cout << miit.at(mi).name << std::endl;
+						//std::cout << miit.at(mi).name << std::endl;
 					}
 				}
 				if(csaps.at(var).markers.find("@Column")!=csaps.at(var).markers.end())
@@ -2098,7 +2099,7 @@ void ConfigurationHandler::handleDataSourceEntities(const std::string& appName, 
 						Mapping mp = mappings[dataSourceName];
 						mp.addDataSourceEntityMapping(dsempg);
 						mappings[dataSourceName] = mp;
-						std::cout << "adding mapping for dsn " << dataSourceName << ", app is " << appName << std::endl;
+						//std::cout << "adding mapping for dsn " << dataSourceName << ", app is " << appName << std::endl;
 					}
 					else
 					{
@@ -2107,7 +2108,7 @@ void ConfigurationHandler::handleDataSourceEntities(const std::string& appName, 
 						{
 							if(it->second.appName==appName)
 							{
-								std::cout << "adding mapping for dsn " << it->first << ", app is " << appName << std::endl;
+								//std::cout << "adding mapping for dsn " << it->first << ", app is " << appName << std::endl;
 								Mapping mp = it->second;
 								mp.addDataSourceEntityMapping(dsempg);
 								mappings[it->first] = mp;
@@ -2495,6 +2496,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 
 void ConfigurationHandler::initializeDataSources()
 {
+	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	std::map<std::string, bool> mycntxts = ConfigurationData::getInstance()->servingContexts;
 	std::map<std::string, std::map<std::string, ConnectionProperties> > sdormConnProperties = ConfigurationData::getInstance()->sdormConnProperties;
 	std::map<std::string, std::map<std::string, Mapping> > sdormEntityMappings = ConfigurationData::getInstance()->sdormEntityMappings;
@@ -2503,11 +2505,11 @@ void ConfigurationHandler::initializeDataSources()
 		std::map<std::string, ConnectionProperties>::iterator it;
 		if(sdormConnProperties.find(mit->first)!=sdormConnProperties.end())
 		{
-			std::cout << "app for ds is " << mit->first << std::endl;
+			logger << "app for ds is " << mit->first << std::endl;
 			std::map<std::string, ConnectionProperties> allProps = sdormConnProperties[mit->first];
 			std::map<std::string, Mapping> allMapps = sdormEntityMappings[mit->first];
 			for (it=allProps.begin();it!=allProps.end();++it) {
-				std::cout << "ds is " << it->first << std::endl;
+				logger << "ds is " << it->first << std::endl;
 				DataSourceManager::initDSN(allProps[it->first], allMapps[it->first]);
 			}
 		}

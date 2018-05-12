@@ -92,8 +92,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 
 	if(!isTeRequest && bytesToRead==0 && request!=NULL)
 	{
-		startRequest();
-		reqPos = getReqPos();
+		reqPos = startRequest();
 		isHeadersDone = false;
 		void* temp = request;
 		request = NULL;
@@ -110,10 +109,10 @@ int Http11Handler::getTimeout() {
 	return connKeepAlive;
 }
 
-Http11Handler::Http11Handler(SocketUtil* sockUtil, const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
+Http11Handler::Http11Handler(const int& fd, const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
+	init(fd);
 	isHeadersDone = false;
 	bytesToRead = 0;
-	this->sockUtil = sockUtil;
 	request = NULL;
 	this->webpath = webpath;
 	this->chunkSize = chunkSize<=0?0:chunkSize;

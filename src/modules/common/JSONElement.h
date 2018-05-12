@@ -34,8 +34,8 @@ public:
 	virtual ~JSONElement();
 	bool hasChildren() const;
 	//void addChild(const JSONElement& child);
-	void addChild(JSONElement* child);
-	std::vector<JSONElement*> getChildren() const;
+	void addChild(JSONElement);
+	const std::vector<JSONElement>& getChildren() const;
 	//const JSONElement& getNode(const std::string& name);
 	JSONElement* getNodeP(const std::string& name);
 	int getType() const;
@@ -44,13 +44,13 @@ public:
 	void setValue(const std::string& value);
 	const std::string& getName() const;
 	void setName(const std::string& name);
-	std::string toString();
+	std::string toString() const;
 private:
 	static JSONElement nullele;
 	std::string name;
 	std::string value;
 	int type;
-	std::vector<JSONElement*> children;
+	std::vector<JSONElement> children;
 	std::map<std::string, JSONElement*> allnodes;
 };
 

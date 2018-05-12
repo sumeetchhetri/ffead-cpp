@@ -197,7 +197,7 @@ std::string JSONSerialize::elementToSerializedString(void* _1, const int& counte
 	JSONElement* root = (JSONElement*)_1;
 	if((int)root->getChildren().size()<counter)
 		return NULL;
-	return root->getChildren().at(counter)->toString();
+	return root->getChildren().at(counter).toString();
 }
 
 std::string JSONSerialize::getConatinerElementClassName(void* _1, const std::string& className)
@@ -224,13 +224,13 @@ void* JSONSerialize::getContainerElement(void* _1, const int& counter, const int
 	JSONElement* root = (JSONElement*)_1;
 	if((int)root->getChildren().size()<counter)
 		return NULL;
-	return root->getChildren().at(counter);
+	return (void*)(&(root->getChildren().at(counter)));
 }
 
 void JSONSerialize::addPrimitiveElementToContainer(void* _1, const int& counter, const std::string& className, void* cont, const std::string& container)
 {
 	JSONElement* root = (JSONElement*)_1;
-	JSONElement* ele = root->getChildren().at(counter);
+	JSONElement* ele = (JSONElement*)&(root->getChildren().at(counter));
 	if(className=="std::string" || className=="string")
 	{
 		std::string retVal = ele->getValue();
@@ -460,7 +460,7 @@ bool JSONSerialize::isValidClassNamespace(void* _1, const std::string& classname
 bool JSONSerialize::isValidObjectProperty(void* _1, const std::string& propname, const int& counter)
 {
 	JSONElement* node = (JSONElement*)_1;
-	if((int)node->getChildren().size()>counter && node->getChildren().at(counter)->getName()==propname)
+	if((int)node->getChildren().size()>counter && node->getChildren().at(counter).getName()==propname)
 		return true;
 	return false;
 }
@@ -468,7 +468,7 @@ bool JSONSerialize::isValidObjectProperty(void* _1, const std::string& propname,
 void* JSONSerialize::getObjectProperty(void* _1, const int& counter)
 {
 	JSONElement* elel = (JSONElement*)_1;
-	return elel->getChildren().at(counter);
+	return (void*)&(elel->getChildren().at(counter));
 }
 
 void JSONSerialize::startObjectSerialization(void* _1, const std::string& className)

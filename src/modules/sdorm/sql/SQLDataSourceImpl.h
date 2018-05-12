@@ -18,6 +18,15 @@
 
 typedef std::map<std::string, GenericObject> Params;
 
+class SQLContext {
+	Connection* conn;
+	SQLHDBC V_OD_hdbc;
+	SQLHSTMT V_OD_hstmt;
+	friend class SQLDataSourceImpl;
+	SQLContext();
+	virtual ~SQLContext();
+};
+
 class SQLDataSourceImpl: public DataSourceInterface {
 	Logger logger;
 #ifdef HAVE_LIBODBC
@@ -48,6 +57,7 @@ class SQLDataSourceImpl: public DataSourceInterface {
 	int getProperty(const int& dataType, const int& columnSize, std::map<std::string, GenericObject>& colValMap, const std::string& colName, const int& var);
 	long getNumRows(const std::string& clasName);
 	void empty(const std::string& clasName);
+	void storePropertyInt(const ClassInfo& clas, void* t, void* colV, const Field& fe, int& var);
 public:
 	SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping);
 	~SQLDataSourceImpl();

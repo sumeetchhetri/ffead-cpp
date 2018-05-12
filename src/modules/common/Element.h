@@ -27,7 +27,7 @@
 
 
 class Element;
-typedef std::vector<Element*> ElementList;
+typedef std::vector<Element> ElementList;
 typedef std::map<std::string, std::string> AttributeList;
 typedef std::map<std::string, Element*> ElementMap;
 
@@ -38,7 +38,7 @@ public:
 	~Element();
 
 	//typedef std::vector<Element*> ElementList;
-	void addElement(Element*);
+	void addElement(Element);
 	void removeElement(Element*);
 	//void updateElement(Element*);
 	void addAttribute(const std::string& key, const std::string& value, const bool& validate= false);

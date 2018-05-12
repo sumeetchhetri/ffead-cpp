@@ -19,6 +19,7 @@
  *  Created on: Jun 17, 2012
  *      Author: Sumeet
  */
+#pragma GCC diagnostic ignored "-Wunused-result"
 
 #include "ScriptHandler.h"
 

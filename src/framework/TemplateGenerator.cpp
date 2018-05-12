@@ -40,12 +40,12 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 		}
 	}
 	std::string header,bodies,funcs,declars;
-	funcdefs.append("std::string _"+file+"emittTemplateHTML(std::map<std::string, GenericObject>& args);\n");
-	declars.append("std::string _"+file+"emittTemplateHTML(std::map<std::string, GenericObject>& args)\n{\nstd::string screen;\n");
+	funcdefs.append("std::string _"+file+"emittTemplateHTML(std::map<std::string, GenericObject>* args);\n");
+	declars.append("std::string _"+file+"emittTemplateHTML(std::map<std::string, GenericObject>* args)\n{\nstd::string screen;\n");
 	std::string tempo;
 	std::map<std::string,std::string> uselocVars;
 	std::vector<std::string> inplaceVarValues;
-	bool startedFor = false, startedIf = false, startedWhile = false;
+	//bool startedFor = false, startedIf = false, startedWhile = false;
 	for (int var = 0; var < (int)allcontent.size(); ++var) {
 		std::string temp = allcontent.at(var);
 		StringUtil::trim(temp);
@@ -59,7 +59,7 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 			if(tvec.size()==2)
 			{
 				declars.append(temp+";\n");
-				declars.append("if(args.find(\""+tvec.at(1)+"\")!=args.end())\n{\n");
+				declars.append("if(args->find(\""+tvec.at(1)+"\")!=args->end())\n{\n");
 				inplaceVarValues.push_back(tvec.at(1));
 				/*if(tvec.at(0).find("*")==std::string::npos)
 				{
@@ -69,7 +69,7 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 				{
 					declars.append(tvec.at(1)+" = ("+tvec.at(0)+"*)args[\""+tvec.at(1)+"\"];\n");
 				}*/
-				declars.append("args[\""+tvec.at(1)+"\"].get("+tvec.at(1)+");\n");
+				declars.append("args->find(\""+tvec.at(1)+"\")->second.get("+tvec.at(1)+");\n");
 				declars.append("}\n");
 			}
 		}
@@ -82,45 +82,45 @@ std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::
 		{
 			StringUtil::replaceAll(temp,"#","");
 			tempo.append(temp + "\n{\n");
-			startedFor = true;
+			//startedFor = true;
 		}
 		else if(temp.find("#while(")==0 && temp.at(temp.length()-1)=='#')
 		{
 			StringUtil::replaceAll(temp,"#","");
 			tempo.append(temp + "\n{\n");
-			startedWhile = true;
+			//startedWhile = true;
 		}
 		else if(temp.find("#if(")==0 && temp.at(temp.length()-1)=='#')
 		{
 			StringUtil::replaceAll(temp,"#","");
 			tempo.append(temp + "\n{\n");
-			startedIf = true;
+			//startedIf = true;
 		}
 		else if(temp.find("#elseif(")==0 && temp.at(temp.length()-1)=='#')
 		{
 			StringUtil::replaceAll(temp,"#","");
 			tempo.append("}\n" + temp + "\n{\n");
-			startedIf = true;
+			//startedIf = true;
 		}
 		else if(temp.find("#else")==0 && temp.at(temp.length()-1)=='#')
 		{
 			StringUtil::replaceAll(temp,"#","");
 			tempo.append("}\n" + temp + "\n{\n");
-			startedIf = true;
+			//startedIf = true;
 		}
 		else if(temp.find("#rof")==0 && temp.at(temp.length()-1)=='#')
 		{
-			startedFor = false;
+			//startedFor = false;
 			tempo.append("}\n");
 		}
 		else if(temp.find("#fi")==0 && temp.at(temp.length()-1)=='#')
 		{
-			startedIf = false;
+			//startedIf = false;
 			tempo.append("}\n");
 		}
 		else if(temp.find("#elihw")==0 && temp.at(temp.length()-1)=='#')
 		{
-			startedWhile = false;
+			//startedWhile = false;
 			tempo.append("}\n");
 		}
 		else

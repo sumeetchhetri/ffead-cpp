@@ -35,7 +35,7 @@ typedef std::map<std::string, GenericObject> Context;
 
 class TemplateHandler {
 public:
-	virtual Context getContext(HttpRequest* request)=0;
+	virtual void getContext(HttpRequest* request, Context* context)=0;
 };
 
 #endif /* TEMPLATEHANDLER_H_ */

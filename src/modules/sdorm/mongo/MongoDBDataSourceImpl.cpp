@@ -447,6 +447,7 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 			{
 				void* ob = getObject((bson_t*)doc, NULL, 0, clasName);
 				reflector->addToContainer(result, ob, clasName, "std::vector", appName);
+				reflector->destroy(ob, clasName, appName);
 			}
 			else
 			{
@@ -570,7 +571,7 @@ void MongoDBDataSourceImpl::storeProperty(const ClassInfo& clas, void* t, void* 
 		valus.push_back(colV);
 		std::string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
 		Method meth = clas.getMethod(methname, argus);
-		reflector->invokeMethod<void*>(t,meth,valus,true);
+		reflector->invokeMethod<void*>(t,meth,valus,false);
 	}
 }
 
@@ -675,7 +676,7 @@ void MongoDBDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const 
 void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName, void* object, bson_t* b, const bool& isIdBsonAppend) {
 	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	std::string tableName = dsemp.getTableName();
-	strMap clsprpmap = dsemp.getPropertyColumnMapping();
+	strMap clsprpmap = dsemp.getPropertyColumnMappingCS();
 	std::map<std::string, std::string>::iterator clsprpmapit;
 	ClassInfo clas = reflector->getClassInfo(clasName, appName);
 
@@ -995,33 +996,29 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 			case BSON_TYPE_INT64:
 			case BSON_TYPE_DOUBLE:
 			{
-				long long* d = new long long(getIterNumericVal(i, t));
-				storeProperty(clas, instance, d, fe);
-				//delete d;
+				long long d = getIterNumericVal(i, t);
+				storeProperty(clas, instance, &d, fe);
 				break;
 			}
 			case BSON_TYPE_BOOL:
 			{
-				bool* b = new bool(bson_iter_bool(&i));
-				storeProperty(clas, instance, b, fe);
-				//delete b;
+				bool b = bson_iter_bool(&i);
+				storeProperty(clas, instance, &b, fe);
 				break;
 			}
 			case BSON_TYPE_UTF8:
 			{
 				uint32_t len;
-				std::string* s = new std::string(bson_iter_utf8(&i, &len), len);
-				storeProperty(clas, instance, s, fe);
-				//delete s;
+				std::string s(bson_iter_utf8(&i, &len));
+				storeProperty(clas, instance, &s, fe);
 				break;
 			}
 			case BSON_TYPE_NULL: break;
 			case BSON_TYPE_OID:
 			{
 				bson_oid_to_string(bson_iter_oid(&i), oidhex);
-				std::string* s = new std::string(oidhex);
-				storeProperty(clas, instance, s, fe);
-				//delete s;
+				std::string s(oidhex);
+				storeProperty(clas, instance, &s, fe);
 				break;
 			}
 			case BSON_TYPE_TIMESTAMP:
@@ -1029,20 +1026,16 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				uint32_t inc;
 				uint32_t ts;
 				bson_iter_timestamp(&i, &ts, &inc);
-				Date* dt = new Date;
-				*dt = Date::getDateFromSeconds(ts);
-				storeProperty(clas, instance, dt, fe);
-				//delete dt;
+				Date dt = Date::getDateFromSeconds(ts);
+				storeProperty(clas, instance, &dt, fe);
 				break;
 			}
 			case BSON_TYPE_DATE_TIME:
 			{
 				int64_t td;
 				td = bson_iter_date_time(&i);
-				Date* dd = new Date;
-				*dd = Date::getDateFromSeconds(td/1000);
-				storeProperty(clas, instance, dd, fe);
-				//delete dd;
+				Date dd = Date::getDateFromSeconds(td/1000);
+				storeProperty(clas, instance, &dd, fe);
 				break;
 			}
 			case BSON_TYPE_DOCUMENT:
@@ -1050,7 +1043,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				void* ob = getObject(NULL, bson_iter_value(&i)->value.v_doc.data, bson_iter_value(&i)->value.v_doc.data_len,
 						fe.getType());
 				storeProperty(clas, instance, ob, fe);
-				//delete ob;
+				delete ob;
 				break;
 			}
 			case BSON_TYPE_ARRAY:
@@ -1076,130 +1069,130 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 
 				if(te=="char")
 				{
-					std::vector<char>* veci = new std::vector<char>;
+					std::vector<char> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back((char)v);
+						veci.push_back((char)v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="unsigned char")
 				{
-					std::vector<unsigned char>* veci = new std::vector<unsigned char>;
+					std::vector<unsigned char> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back((unsigned char)v);
+						veci.push_back((unsigned char)v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="short")
 				{
-					std::vector<short>* veci = new std::vector<short>;
+					std::vector<short> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back((short)v);
+						veci.push_back((short)v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="unsigned short")
 				{
-					std::vector<unsigned short>* veci = new std::vector<unsigned short>;
+					std::vector<unsigned short> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back((unsigned short)v);
+						veci.push_back((unsigned short)v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="int")
 				{
-					std::vector<int>* veci = new std::vector<int>;
+					std::vector<int> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back((int)v);
+						veci.push_back((int)v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="unsigned int")
 				{
-					std::vector<unsigned int>* veci = new std::vector<unsigned int>;
+					std::vector<unsigned int> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back((unsigned int)v);
+						veci.push_back((unsigned int)v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="long")
 				{
-					std::vector<long>* veci = new std::vector<long>;
+					std::vector<long> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back((long)v);
+						veci.push_back((long)v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="unsigned long")
 				{
-					std::vector<unsigned long>* veci = new std::vector<unsigned long>;
+					std::vector<unsigned long> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back((unsigned long)v);
+						veci.push_back((unsigned long)v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="long long")
 				{
-					std::vector<long long>* veci = new std::vector<long long>;
+					std::vector<long long> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back(v);
+						veci.push_back(v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="float")
 				{
-					std::vector<float>* veci = new std::vector<float>;
+					std::vector<float> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back((float)v);
+						veci.push_back((float)v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="double")
 				{
-					std::vector<double>* veci = new std::vector<double>;
+					std::vector<double> veci;
 					while ( bson_iter_next( &ii ) ){
 						bson_type_t t = bson_iter_type( &ii );
 						long long v = getIterNumericVal(ii, t);
-						veci->push_back((double)v);
+						veci.push_back((double)v);
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="string" || te=="std::string")
 				{
-					std::vector<std::string>* veci = new std::vector<std::string>;
+					std::vector<std::string> veci;
 					while ( bson_iter_next( &ii ) ){
-						veci->push_back(std::string(bson_iter_utf8(&ii, &len), len));
+						veci.push_back(std::string(bson_iter_utf8(&ii, &len)));
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else if(te=="bool")
 				{
-					std::vector<bool>* veci = new std::vector<bool>;
+					std::vector<bool> veci;
 					while ( bson_iter_next( &ii ) ){
-						bson_type_t t = bson_iter_type( &ii );
-						veci->push_back(bson_iter_bool(&ii));
+						//bson_type_t t = bson_iter_type( &ii );
+						veci.push_back(bson_iter_bool(&ii));
 					}
-					storeProperty(clas, instance, veci, fe);
+					storeProperty(clas, instance, &veci, fe);
 				}
 				else
 				{
@@ -1207,13 +1200,14 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 					if(veci!=NULL)
 					{
 						while ( bson_iter_next( &ii ) ){
-							bson_type_t t = bson_iter_type( &ii );
+							//bson_type_t t = bson_iter_type( &ii );
 							void* ob = getObject(NULL, bson_iter_value(&ii)->value.v_doc.data,
 									bson_iter_value(&ii)->value.v_doc.data_len, te);
 							reflector->addToContainer(veci, ob, te, "std::vector", appName);
 							reflector->destroy(ob, te, appName);
 						}
 						storeProperty(clas, instance, veci, fe);
+						delete veci;
 					}
 					else
 					{
@@ -1274,7 +1268,7 @@ void MongoDBDataSourceImpl::getMapOfProperties(bson_t* data, std::map<std::strin
 			case BSON_TYPE_UTF8:
 			{
 				uint32_t len;
-				std::string s = std::string(bson_iter_utf8(&i, &len), len);
+				std::string s = std::string(bson_iter_utf8(&i, &len));
 				(*map)[key].set(s);
 				break;
 			}
@@ -1471,26 +1465,6 @@ void* MongoDBDataSourceImpl::getDbEntityForBulkInsert(void* entity, const std::s
 	return b;
 }
 
-//mongoc_collection_insert_bulk is deprecated
-/*bool MongoDBDataSourceImpl::executeInsertBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities) {
-	std::string collectionName = mapping->getTableForClass(query.getClassName());
-	bson_t** data;
-	data = new bson_t*[dbEntities.size()];
-	for (int k = 0; k < (int)dbEntities.size(); k++) {
-		data[k] = (bson_t*)dbEntities.at(k);
-	}
-	Connection* conn = _conn();
-	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
-	bson_error_t er;
-	bool fl = mongoc_collection_insert_bulk(collection, MONGOC_INSERT_NONE, (const bson_t**)data, (int)dbEntities.size(), NULL, &er);
-	_release(conn, collection);
-	for (int k = 0; k < (int)dbEntities.size(); k++) {
-		bson_destroy(data[k]);
-	}
-	delete[] data;
-	return fl;
-}*/
-
 bool MongoDBDataSourceImpl::executeInsertBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities) {
 	std::string collectionName = mapping->getTableForClass(query.getClassName());
 	Connection* conn = _conn();
@@ -1517,7 +1491,7 @@ bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, std::vector<void*> e
 	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
 	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation (collection, true, NULL);
 	for (int k = 0; k < (int)dbEntities.size(); k++) {
-		bson_error_t er;
+		//bson_error_t er;
 
 		bson_t* data = (bson_t*)dbEntities.at(k);
 		bson_iter_t i;
@@ -1552,6 +1526,8 @@ bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, std::vector<void*> e
 					go.set(s);
 					break;
 				}
+				default:
+					break;
 			}
 			appendGenericObject(q, "_id", go);
 			mongoc_bulk_operation_replace_one(bulk, q, data, false);
@@ -1726,6 +1702,9 @@ void* MongoDBDataSourceImpl::getContext(void* details) {
 	mc->conn = pool->checkout();
 	if(mcd!=NULL && *mcd!="") {
 		mc->collection = mongoc_client_get_collection ((mongoc_client_t*)mc->conn->getConn(), mc->conn->getNode().getDatabaseName().c_str(), mcd->c_str());
+		if(mc->collection==NULL) {
+			throw "Collection not found";
+		}
 	}
 	return mc;
 }

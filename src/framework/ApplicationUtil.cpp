@@ -54,9 +54,9 @@ std::string ApplicationUtil::buildAllApplications(const std::vector<std::string>
 			meth += "std::string "+appName+"checkRules(std::string to,HttpSession session)\n{\nstd::string curr=session.getAttribute(\"CURR\");\n";
 			for (unsigned int var = 0; var < eles.size(); var++)
 			{
-				if(eles.at(var)->getTagName()=="include")
+				if(eles.at(var).getTagName()=="include")
 				{
-					std::string inc = eles.at(var)->getText();
+					std::string inc = eles.at(var).getText();
 					strVec incs;
 					StringUtil::split(incs, inc, (" "));
 					for (unsigned int i = 0; i < incs.size(); i++)
@@ -64,55 +64,55 @@ std::string ApplicationUtil::buildAllApplications(const std::vector<std::string>
 						headers += ("#include \"" + incs.at(i) + "\"\n");
 					}
 				}
-				else if(eles.at(var)->getTagName()=="page" || eles.at(var)->getTagName()=="welcome")
+				else if(eles.at(var).getTagName()=="page" || eles.at(var).getTagName()=="welcome")
 				{
-					meth += ("std::string " + eles.at(var)->getAttribute("id") + " = \""+path+eles.at(var)->getAttribute("path")+"\";\n");
-					if(eles.at(var)->getAttribute("who")!="" && eles.at(var)->getAttribute("where")!="")
+					meth += ("std::string " + eles.at(var).getAttribute("id") + " = \""+path+eles.at(var).getAttribute("path")+"\";\n");
+					if(eles.at(var).getAttribute("who")!="" && eles.at(var).getAttribute("where")!="")
 					{
-						if(eles.at(var)->getAttribute("where").find("FILE:")!=std::string::npos)
+						if(eles.at(var).getAttribute("where").find("FILE:")!=std::string::npos)
 						{
-							std::string fileName = eles.at(var)->getAttribute("where");
+							std::string fileName = eles.at(var).getAttribute("where");
 							StringUtil::replaceFirst(fileName,"FILE:","");
 							fileName = (path + fileName);
-							meth += "std::string path;\nif(to=="+eles.at(var)->getAttribute("id")+")\n{";
+							meth += "std::string path;\nif(to=="+eles.at(var).getAttribute("id")+")\n{";
 							meth += "std::string user = session.getAttribute(\"USER\");\n";
 							meth += "std::string pass = session.getAttribute(\"PASS\");\n";
 							meth += "ifstream f(\""+fileName+"\");\n";
 							meth += "if(f.is_open())\n{\nstd::string temp;\nwhile(getline(f,temp,'\\n'))\n{\n";
-							meth += "if(temp==(user+\" \"+pass))\n{\nf.close();path = "+eles.at(var)->getAttribute("id");
+							meth += "if(temp==(user+\" \"+pass))\n{\nf.close();path = "+eles.at(var).getAttribute("id");
 							meth += ";break;}\n}\nf.close();\n}\nif(path==\"\")\npath=\"FAILED\";\n}\n";
 						}
 					}
-					else if(eles.at(var)->getAttribute("onsuccess")!="" && eles.at(var)->getAttribute("onfail")!="")
+					else if(eles.at(var).getAttribute("onsuccess")!="" && eles.at(var).getAttribute("onfail")!="")
 					{
 
 					}
 				}
-				else if(eles.at(var)->getTagName()=="rule")
+				else if(eles.at(var).getTagName()=="rule")
 				{
-					meth += "\nif(to=="+eles.at(var)->getAttribute("topage")+" && curr=="+eles.at(var)->getAttribute("currpage")+")\n{";
-					ElementList elesc = eles.at(var)->getChildElements();
+					meth += "\nif(to=="+eles.at(var).getAttribute("topage")+" && curr=="+eles.at(var).getAttribute("currpage")+")\n{";
+					ElementList elesc = eles.at(var).getChildElements();
 					for (unsigned int var1 = 0; var1 < elesc.size(); var1++)
 					{
-						if(elesc.at(var1)->getTagName()=="execute")
+						if(elesc.at(var1).getTagName()=="execute")
 						{
-							std::string call = elesc.at(var1)->getAttribute("call");
+							std::string call = elesc.at(var1).getAttribute("call");
 							std::string clas = call.substr(0,call.find("."));
 							std::string method = call.substr(call.find(".")+1);
 							headers += ("#include \""+clas+".h\"\n");
 							meth += clas + " _object;\n";
 							std::string args;
-							ElementList elesce = elesc.at(var1)->getChildElements();
+							ElementList elesce = elesc.at(var1).getChildElements();
 							for (unsigned int var2 = 0; var2 < elesce.size(); var2++)
 							{
-								meth += (elesce.at(var2)->getTagName() + " _" + CastUtil::lexical_cast<std::string>(var2+1) + " = CastUtil::lexical_cast<"+elesce.at(var2)->getTagName()+">(\""+elesce.at(var2)->getText()+"\");\n");
+								meth += (elesce.at(var2).getTagName() + " _" + CastUtil::lexical_cast<std::string>(var2+1) + " = CastUtil::lexical_cast<"+elesce.at(var2).getTagName()+">(\""+elesce.at(var2).getText()+"\");\n");
 								args += ("_"+CastUtil::lexical_cast<std::string>(var2+1));
 								if(var2!=elesce.size()-1)
 									args += ",";
 							}
-							if(elesc.at(var1)->getAttribute("rettype")!="" || elesc.at(var1)->getAttribute("rettype")!="void")
+							if(elesc.at(var1).getAttribute("rettype")!="" || elesc.at(var1).getAttribute("rettype")!="void")
 							{
-								meth += (elesc.at(var1)->getAttribute("rettype") + " " + elesc.at(var1)->getAttribute("retname") + " = ");
+								meth += (elesc.at(var1).getAttribute("rettype") + " " + elesc.at(var1).getAttribute("retname") + " = ");
 								meth += "_object."+method+"("+args+");\n";
 							}
 						}

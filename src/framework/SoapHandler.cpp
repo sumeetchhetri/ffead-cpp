@@ -47,7 +47,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 		}
 
 		//logger << soapbody->getTagName() << "----\n" << std::flush;
-		Element* method = soapbody->getChildElements().at(0);
+		Element* method = (Element*)&(soapbody->getChildElements().at(0));
 		//logger << method.getTagName() << "----\n" << std::flush;
 		meth = method->getTagName();
 		std::string methodname = req->getCntxt_name() + meth + ws_name;

@@ -217,7 +217,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 					this->cookie = true;
 					strVec results;
 					StringUtil::split(results, temp.at(1), ("; "));
-					for(unsigned j=0;j<(int)results.size();j++)
+					for(int j=0;j<(int)results.size();j++)
 					{
 						strVec results1;
 						StringUtil::split(results1, results.at(j), ("="));
@@ -317,10 +317,6 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 									this->queryParams[attN.substr(0, attN.find("[")+1)
 											  + CastUtil::lexical_cast<std::string>(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-									/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-													  + CastUtil::lexical_cast<std::string>(indices[attN])
-													  + "]"
-													  + CryptoHandler::urlDecode(param.at(1))) << std::endl;*/
 								}
 								else
 								{
@@ -397,10 +393,6 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 									this->queryParams[attN.substr(0, attN.find("[")+1)
 											  + CastUtil::lexical_cast<std::string>(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-									/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-													  + CastUtil::lexical_cast<std::string>(indices[attN])
-													  + "]"
-													  + CryptoHandler::urlDecode(param.at(1))) << std::endl;*/
 								}
 								else
 								{
@@ -477,10 +469,6 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 									this->queryParams[attN.substr(0, attN.find("[")+1)
 											  + CastUtil::lexical_cast<std::string>(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-									/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-													  + CastUtil::lexical_cast<std::string>(indices[attN])
-													  + "]"
-													  + CryptoHandler::urlDecode(param.at(1))) << std::endl;*/
 								}
 								else
 								{
@@ -588,10 +576,6 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 									this->queryParams[attN.substr(0, attN.find("[")+1)
 											  + CastUtil::lexical_cast<std::string>(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-									/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-													  + CastUtil::lexical_cast<std::string>(indices[attN])
-													  + "]"
-													  + CryptoHandler::urlDecode(param.at(1))) << std::endl;*/
 								}
 								else
 								{
@@ -667,10 +651,6 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 									this->queryParams[attN.substr(0, attN.find("[")+1)
 											  + CastUtil::lexical_cast<std::string>(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-									/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-													  + CastUtil::lexical_cast<std::string>(indices[attN])
-													  + "]"
-													  + CryptoHandler::urlDecode(param.at(1))) << std::endl;*/
 								}
 								else
 								{
@@ -748,10 +728,6 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 									this->queryParams[attN.substr(0, attN.find("[")+1)
 											  + CastUtil::lexical_cast<std::string>(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-									/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-													  + CastUtil::lexical_cast<std::string>(indices[attN])
-													  + "]"
-													  + CryptoHandler::urlDecode(param.at(1))) << std::endl;*/
 								}
 								else
 								{
@@ -818,7 +794,6 @@ void HttpRequest::updateContent()
 
 void HttpRequest::updateFromContentStr_Old()
 {
-	//cout << this->getContent() << std::flush;
 	if(this->getHeader(ContentType).find("application/x-www-form-urlencoded")!=std::string::npos)
 	{
 		strVec params;
@@ -850,10 +825,6 @@ void HttpRequest::updateFromContentStr_Old()
 					this->requestParams[attN.substr(0, attN.find("[")+1)
 							  + CastUtil::lexical_cast<std::string>(indices[attN])
 							  + "]"] = CryptoHandler::urlDecode(param.at(1));
-					/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-									  + CastUtil::lexical_cast<std::string>(indices[attN])
-									  + "]"
-									  + CryptoHandler::urlDecode(param.at(1))) << std::endl;*/
 				}
 				else
 				{
@@ -874,10 +845,6 @@ void HttpRequest::updateFromContentStr_Old()
 		param_conts = param_conts.substr(0,param_conts.length()-1);
 		strVec parameters;
 		StringUtil::split(parameters, param_conts, (delb));
-		//cout << "Boundary: " << this->getContent_boundary() << std::flush;
-		//cout << "\nLength: " << this->getContent().length() << std::flush;
-		//cout << "\nStart End: " << stb << " " << enb << "\n" << std::flush;
-		//cout << "\nContent: " << param_conts << "\n" << std::flush;
 		std::map<std::string ,int> indices;
 		std::map<std::string,std::string>::iterator it;
 		for(unsigned j=0;j<parameters.size();j++)
@@ -887,7 +854,6 @@ void HttpRequest::updateFromContentStr_Old()
 				continue;
 			MultipartContent datf;
 			std::string parm = parameters.at(j);
-			//cout << parm << "\nparm" << std::flush;
 			size_t dis = parm.find("Content-Disposition: ");
 			if(dis==std::string::npos)
 				dis = parm.find("Content-disposition: ");
@@ -969,10 +935,6 @@ void HttpRequest::updateFromContentStr_Old()
 					this->requestParamsF[attN.substr(0, attN.find("[")+1)
 							  + CastUtil::lexical_cast<std::string>(indices[attN])
 							  + "]"] = datf;
-					/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-									  + CastUtil::lexical_cast<std::string>(indices[attN])
-									  + "]"
-									  + datf.getFileName()) << std::endl;*/
 				}
 				else
 				{
@@ -1030,10 +992,6 @@ void HttpRequest::updateFromContentStr()
 					this->requestParams[attN.substr(0, attN.find("[")+1)
 							  + CastUtil::lexical_cast<std::string>(indices[attN])
 							  + "]"] = CryptoHandler::urlDecode(param.at(1));
-					/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-									  + CastUtil::lexical_cast<std::string>(indices[attN])
-									  + "]"
-									  + CryptoHandler::urlDecode(param.at(1))) << std::endl;*/
 				}
 				else
 				{
@@ -1109,9 +1067,6 @@ void HttpRequest::updateFromContentStr()
 						addMultipartFormContent(attN.substr(0, attN.find("[")+1)
 								  + CastUtil::lexical_cast<std::string>(indices[attN])
 								  + "]", content);
-						/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-										  + CastUtil::lexical_cast<std::string>(indices[attN])
-										  + "]") << std::endl;*/
 					}
 					else if(indices.find(attN)!=indices.end() || requestParamsF.find(attN)!=requestParamsF.end())
 					{
@@ -1131,9 +1086,6 @@ void HttpRequest::updateFromContentStr()
 							addMultipartFormContent(attN+"["
 									  + CastUtil::lexical_cast<std::string>(indices[attN])
 									  + "]", content);
-							/*std::cout << ("for existing ---- creating array from similar params" + attN+"["
-											  + CastUtil::lexical_cast<std::string>(indices[attN])
-											  + "]") << std::endl;*/
 						}
 
 						if(indices.find(attN)==indices.end())
@@ -1269,9 +1221,6 @@ void HttpRequest::updateFromContentFile()
 							addMultipartFormContent(attN.substr(0, attN.find("[")+1)
 									  + CastUtil::lexical_cast<std::string>(indices[attN])
 									  + "]", content);
-							/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-											  + CastUtil::lexical_cast<std::string>(indices[attN])
-											  + "]") << std::endl;*/
 						}
 						else if(indices.find(attN)!=indices.end() || requestParamsF.find(attN)!=requestParamsF.end())
 						{
@@ -1291,9 +1240,6 @@ void HttpRequest::updateFromContentFile()
 								addMultipartFormContent(attN+"["
 										  + CastUtil::lexical_cast<std::string>(indices[attN])
 										  + "]", content);
-								/*std::cout << ("for existing ---- creating array from similar params" + attN+"["
-												  + CastUtil::lexical_cast<std::string>(indices[attN])
-												  + "]") << std::endl;*/
 							}
 
 							if(indices.find(attN)==indices.end())
@@ -1307,9 +1253,6 @@ void HttpRequest::updateFromContentFile()
 							addMultipartFormContent(attN+"["
 									  + CastUtil::lexical_cast<std::string>(indices[attN])
 									  + "]", content);
-							/*std::cout << ("creating array from similar params" + attN+"["
-											  + CastUtil::lexical_cast<std::string>(indices[attN])
-											  + "]") << std::endl;*/
 
 						}
 						else
@@ -1427,7 +1370,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		this->cookie = true;
 		strVec results;
 		StringUtil::split(results, value, ("; "));
-		for(unsigned j=0;j<(int)results.size();j++)
+		for(int j=0;j<(int)results.size();j++)
 		{
 			strVec results1;
 			StringUtil::split(results1, results.at(j), ("="));
@@ -1509,10 +1452,6 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 					this->queryParams[attN.substr(0, attN.find("[")+1)
 							  + CastUtil::lexical_cast<std::string>(indices[attN])
 							  + "]"] = CryptoHandler::urlDecode(param.at(1));
-					/*std::cout << ("creating array from similar params" + attN.substr(0, attN.find("[")+1)
-									  + CastUtil::lexical_cast<std::string>(indices[attN])
-									  + "]"
-									  + CryptoHandler::urlDecode(param.at(1))) << std::endl;*/
 				}
 				else
 				{
@@ -1645,9 +1584,10 @@ std::string HttpRequest::toString()
 			MultipartContent dat = iter->second;
 			vals+= ("\nKey: "+iter->first);
 			std::cout << dat.getHeaders().size() << std::endl;
-			for(it=dat.headers.begin();it!=dat.headers.end();++it)
+			std::map<std::string,std::string>::iterator it1;
+			for(it1=dat.headers.begin();it1!=dat.headers.end();++it1)
 			{
-				vals += "\n\t" + it->first + ": " + it->second;
+				vals += "\n\t" + it1->first + ": " + it1->second;
 			}
 			vals+= ("\n\tFileName: "+dat.fileName);
 			vals+= ("\n\tTempFileName: "+dat.tempFileName);
@@ -1808,11 +1748,9 @@ std::string HttpRequest::getFile() const
 
 void HttpRequest::setFile(const std::string& file)
 {
-	//cout << "file is " << this->file << std::endl;
 	if(this->file!="" && this->url.find(this->file)!=std::string::npos
 			&& this->url.find("/")!=std::string::npos)
 	{
-		//int fst = this->url.find_last_of(this->file) - this->file.length() + 1;
 		this->url = this->url.substr(0, this->url.find_last_of("/")+1) +  file;
 	}
 	else
@@ -2576,6 +2514,7 @@ int HttpRequest::getCORSRequestType()
 			return CORS;
 		}
 	}
+	return -1;
 }
 
 void HttpRequest::addHeaderValue(std::string header, const std::string& value)

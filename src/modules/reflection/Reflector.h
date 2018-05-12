@@ -221,7 +221,7 @@ public:
 		RfPtr f = (RfPtr)mkr;
 		if(f!=NULL)
 		{
-			f(NULL,NULL,-1,contType,t);
+			f(vec,NULL,-1,contType,t);
 		}
 	}
 	int getContainerSize(void* vec, const std::string& cs, const std::string& contType, const std::string& app= "")

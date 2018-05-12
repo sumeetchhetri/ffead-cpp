@@ -33,10 +33,6 @@ void* ThreadLocal::get() {
 }
 
 ThreadLocal::~ThreadLocal() {
-	void* tem = get();
-	if(tem) {
-		delete tem;
-	}
 	pthread_key_delete(_key);
 }
 

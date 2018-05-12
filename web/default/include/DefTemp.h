@@ -31,7 +31,7 @@ class DefTemp : public TemplateHandler{
 public:
 	DefTemp();
 	virtual ~DefTemp();
-	Context getContext(HttpRequest* request);
+	void getContext(HttpRequest* request, Context* context);
 };
 
 #endif /* DEFTEMP_H_ */

@@ -28,9 +28,6 @@
 #include "TimeUnit.h"
 #include "LoggerFactory.h"
 #include "FutureTask.h"
-#ifdef HAVE_CXX11
-#include "atomic"
-#endif
 
 class PoolThread {
 	static void* run(void *arg);
@@ -40,11 +37,13 @@ class PoolThread {
 	bool idle;
 	Task *task;
 	Logger logger;
-	Mutex *m_mutex;
+	Mutex m_mutex;
 	TaskPool* wpool;
 	friend class ThreadPool;
 	bool prioritybased;
-	std::atomic<bool> runFlag, complete, thrdStarted;
+	std::atomic<bool> runFlag;
+	std::atomic<bool> complete;
+	std::atomic<bool> thrdStarted;
 public:
 	void execute();
 	void stop();

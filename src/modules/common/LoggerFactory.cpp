@@ -123,9 +123,9 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 		ElementList eles = root.getChildElements();
 		for (unsigned int apps = 0; apps < eles.size(); apps++)
 		{
-			if(eles.at(apps)->getTagName()=="logger")
+			if(eles.at(apps).getTagName()=="logger")
 			{
-				Element* ele = eles.at(apps);
+				Element* ele = &(eles.at(apps));
 				std::string name = StringUtil::toUpperCopy(ele->getAttribute("name"));
 				std::string mode = StringUtil::toUpperCopy(ele->getAttribute("mode"));
 				std::string level = StringUtil::toUpperCopy(ele->getAttribute("level"));
@@ -140,10 +140,10 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 				Element* fileele = NULL;
 
 				for(int fc=0;fc<(int)files.size();fc++) {
-					if(files.at(fc)->getTagName()=="file") {
-						fileele = files.at(fc);
-					} else if(files.at(fc)->getTagName()=="pattern") {
-						pattern = files.at(fc)->getText();
+					if(files.at(fc).getTagName()=="file") {
+						fileele = &(files.at(fc));
+					} else if(files.at(fc).getTagName()=="pattern") {
+						pattern = files.at(fc).getText();
 					}
 				}
 

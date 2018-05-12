@@ -50,11 +50,13 @@ bool Client::connection(const std::string& host, const int& port)
 	tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
 	if( tmpres < 0)
 	{
+		free(remote);
 		perror("Can't set remote->sin_addr.s_addr");
 		return false;
 	}
 	else if(tmpres == 0)
 	{
+		free(remote);
 		fprintf(stderr, "%s is not a valid IP address\n", ip);
 		return false;
 	}
@@ -298,26 +300,24 @@ std::string Client::getBinaryData(const int& len, const bool& isLengthIncluded)
 {
 	//logger << len;
 	std::string alldat;
-	char *buf1 = new char[len];
+	char buf1[len];
 	memset(buf1, 0, len);
 	recv(sockfd, buf1, len, 0);
 	for (int var = 0; var < len; ++var) {
 		alldat.push_back(buf1[var]);
 	}
-	delete[] buf1;
 
 	int leng = getLengthCl(alldat, len);
 	if(isLengthIncluded)
 	{
 		leng -= len;
 	}
-	char *buf = new char[leng];
+	char buf[leng];
 	memset(buf, 0, leng);
 	recv(sockfd, buf, leng, 0);
 	for (int var = 0; var < leng; ++var) {
 		alldat.push_back(buf[var]);
 	}
-	delete[] buf;
 	return alldat;
 }
 

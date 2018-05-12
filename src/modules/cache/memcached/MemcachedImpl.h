@@ -12,21 +12,33 @@
 #include "CacheInterface.h"
 #include "ConnectionPooler.h"
 
-class MemcachedImpl : public CacheInterface, public ConnectionPooler {
+class MemcachedConnectionPool: public ConnectionPooler {
+	Logger logger;
+	void initEnv();
+	void* newConnection(const bool& isWrite, const ConnectionNode& node);
+	void closeConnection(void* conn);
+	void destroy();
+public:
+	MemcachedConnectionPool(const ConnectionProperties& props);
+	virtual ~MemcachedConnectionPool();
+};
+
+class MemcachedImpl : public CacheInterface {
 	memcached_return_t setInternal(const std::string& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep);
 	bool replyStatus(const memcached_return_t& reply);
 	std::string replyValue(const memcached_return_t& reply);
 	ConnectionProperties properties;
 public:
-	MemcachedImpl(const ConnectionProperties& properties);
+	MemcachedImpl(ConnectionPooler* pool);
 	~MemcachedImpl();
 	void init();
 
-	bool set(const std::string& key, GenericObject& value, const int& expireSeconds);
-	bool add(const std::string& key, GenericObject& value, const int& expireSeconds);
-	bool replace(const std::string& key, GenericObject& value, const int& expireSeconds);
+	bool set(const std::string& key, GenericObject& value, int expireSeconds);
+	bool add(const std::string& key, GenericObject& value, int expireSeconds);
+	bool replace(const std::string& key, GenericObject& value, int expireSeconds);
 
 	std::string getValue(const std::string& key);
+	std::vector<std::string> getValues(const std::vector<std::string>& keys);
 
 	bool remove(const std::string& key);
 	long long increment(const std::string& key, const int& number= 1);
@@ -37,11 +49,6 @@ public:
 	bool flushAll();
 
 	void* executeCommand(const std::string& command, ...);
-
-	void initEnv();
-	void destroy();
-	void* newConnection(const bool& isWrite, const ConnectionNode& node);
-	void closeConnection(void* conn);
 };
 
 #endif /* MEMCACHEDIMPL_H_ */

@@ -23,6 +23,7 @@ void SQLConnectionPool::initEnv() {
 		logger << "Error AllocHandle" << std::endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		V_OD_Env = NULL;
+		throw "Unable to initialize odbc/sql handle";
 	}
 	else
 	{

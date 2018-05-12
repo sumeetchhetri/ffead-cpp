@@ -175,7 +175,7 @@ class CHServer {
 	static Logger logger;
 	static HttpServiceTask* httpServiceFactoryMethod();
 public:
-	static SocketInterface* createSocketInterface(SocketUtil* sockUtil);
+	static SocketInterface* createSocketInterface(SOCKET);
 	static Logger& getLogger();
 	static void* dynamic_page_monitor(void* arg);
 	static void serve(std::string port, std::string ipaddr, int thrdpsiz, int wthrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber);

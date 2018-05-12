@@ -37,7 +37,7 @@ std::string WsUtil::generateAllWSDL(const std::vector<WsDetails>& wsdvec, const 
 	{
 		handleWebService(ret, wsdvec.at(var), clsstrucMaps, resp, headers, ref);
 	}
-	return (headers + "\n\n" + "extern \"C\"\n{\nvoid normalizeNamespaces(Element* ele, std::string appname, std::string& allnmspcs) { 	ElementList elements = ele->getChildElements(); 	std::string nmspc = ele->getAttribute(\"namespace\"); 	if(nmspc!=\"\") 	{ 		std::string nmspcid = Reflection::getNameSpaceId(nmspc, appname); 		ele->setTagName(nmspcid+\":\"+ele->getTagName()); 		ele->removeAttribute(\"namespace\"); 		allnmspcs += (\" xmlns:\" + nmspcid + \"=\\\"\" + nmspc + \"\\\"\"); 	} 	for(unsigned int i=0;i<elements.size();i++) 	{ 		normalizeNamespaces(elements.at(i), appname, allnmspcs);		} }" + ret + "\n}\n");
+	return (headers + "\n\n" + "extern \"C\"\n{\nvoid normalizeNamespaces(Element* ele, std::string appname, std::string& allnmspcs) { 	ElementList elements = ele->getChildElements(); 	std::string nmspc = ele->getAttribute(\"namespace\"); 	if(nmspc!=\"\") 	{ 		std::string nmspcid = Reflection::getNameSpaceId(nmspc, appname); 		ele->setTagName(nmspcid+\":\"+ele->getTagName()); 		ele->removeAttribute(\"namespace\"); 		allnmspcs += (\" xmlns:\" + nmspcid + \"=\\\"\" + nmspc + \"\\\"\"); 	} 	for(unsigned int i=0;i<elements.size();i++) 	{ 		normalizeNamespaces((Element*)&(elements.at(i)), appname, allnmspcs);		} }" + ret + "\n}\n");
 }
 
 std::vector<WsDetails> WsUtil::getWsDetails(const std::vector<std::string>& apps, const std::string& serverRootDirectory)
@@ -53,10 +53,8 @@ std::vector<WsDetails> WsUtil::getWsDetails(const std::vector<std::string>& apps
 		Document doc;
 		parser.readDocument(file, doc);
 		const Element& root = doc.getRootElement();
-		typedef std::vector<Element> ElementList;
 		typedef std::map<std::string,std::string> strMap;
 		typedef std::map<std::string,strMap> meth_Map;
-		typedef std::map<std::string,meth_Map> ws_inp_out_Map;
 		if(root.getChildElements().size()==0)
 			continue;
 
@@ -64,10 +62,10 @@ std::vector<WsDetails> WsUtil::getWsDetails(const std::vector<std::string>& apps
 		for(unsigned int ii=0;ii<root.getChildElements().size();ii++)
 		{
 			std::map<std::string, std::string> outnmmp;
-			Element* ws = root.getChildElements().at(ii);
+			Element* ws = (Element*)&(root.getChildElements().at(ii));
 			for(unsigned int i=0;i<ws->getChildElements().size();i++)
 			{
-				outnmmp[ws->getChildElements().at(i)->getTagName()] = ws->getChildElements().at(i)->getAttribute("outname");
+				outnmmp[ws->getChildElements().at(i).getTagName()] = ws->getChildElements().at(i).getAttribute("outname");
 			}
 			WsDetails wsd;
 			wsd.claz = ws->getAttribute("class");

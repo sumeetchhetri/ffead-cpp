@@ -175,12 +175,12 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 			{
 				claz = req->getContextHome()+"/"+claz.substr(claz.find(":")+1);
 				logger << ("Auth handled by file " + claz) << std::endl;
-				FileAuthController* authc = new FileAuthController(claz,":");
-				if(authc->isInitialized())
+				FileAuthController authc(claz,":");
+				if(authc.isInitialized())
 				{
-					if(authc->authenticate(username, password))
+					if(authc.authenticate(username, password))
 					{
-						userRole = authc->getUserRole(username);
+						userRole = authc.getUserRole(username);
 						logger << ("Valid user " + username
 								+ ", role is "  + userRole) << std::endl;
 						validUser = true;
@@ -196,7 +196,6 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 				{
 					logger << "Invalid user repo defined" << std::endl;
 				}
-				delete authc;
 			}
 			else if(claz.find("class:")!=std::string::npos)
 			{

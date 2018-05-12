@@ -177,7 +177,7 @@ std::string XMLSerialize::fromSerializableObjectToString(void* _1)
 std::string XMLSerialize::elementToSerializedString(void* _1, const int& counter)
 {
 	Element* object = (Element*)_1;
-	return object->getChildElements().at(counter)->renderChildren();
+	return object->getChildElements().at(counter).renderChildren();
 }
 
 std::string XMLSerialize::getConatinerElementClassName(void* _1, const std::string& className)
@@ -196,12 +196,12 @@ void* XMLSerialize::getContainerElement(void* _1, const int& counter, const int&
 	Element* root = (Element*)_1;
 	if((int)root->getChildElements().size()<counter)
 		return NULL;
-	Element* ele = root->getChildElements().at(counter);
+	Element* ele = (Element*)&(root->getChildElements().at(counter));
 	if(counter1!=-1)
 	{
 		if((int)ele->getChildElements().size()<counter1)
 			return NULL;
-		ele = ele->getChildElements().at(counter1);
+		ele = (Element*)&(ele->getChildElements().at(counter1));
 	}
 	return ele;
 }
@@ -209,7 +209,7 @@ void* XMLSerialize::getContainerElement(void* _1, const int& counter, const int&
 void XMLSerialize::addPrimitiveElementToContainer(void* _1, const int& counter, const std::string& className, void* cont, const std::string& container)
 {
 	Element* root = (Element*)_1;
-	Element* ele = root->getChildElements().at(counter);
+	Element* ele = (Element*)&(root->getChildElements().at(counter));
 	if(className=="std::string" || className=="string")
 	{
 		std::string retVal = ele->getText();
@@ -470,7 +470,7 @@ bool XMLSerialize::isValidClassNamespace(void* _1, const std::string& className,
 bool XMLSerialize::isValidObjectProperty(void* _1, const std::string& propname, const int& counter)
 {
 	Element* element = (Element*)_1;
-	if((int)element->getChildElements().size()>counter && element->getChildElements().at(counter)->getTagName()==propname)
+	if((int)element->getChildElements().size()>counter && element->getChildElements().at(counter).getTagName()==propname)
 		return true;
 	return false;
 }
@@ -478,7 +478,7 @@ bool XMLSerialize::isValidObjectProperty(void* _1, const std::string& propname, 
 void* XMLSerialize::getObjectProperty(void* _1, const int& counter)
 {
 	Element* elel = (Element*)_1;
-	return elel->getChildElements().at(counter);
+	return (void*)&(elel->getChildElements().at(counter));
 }
 
 void XMLSerialize::startObjectSerialization(void* _1, const std::string& className)

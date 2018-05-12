@@ -39,7 +39,7 @@
 
 typedef std::string (*DCPPtr) ();
 typedef ClassInfo (*FunPtr) ();
-typedef std::string (*TemplatePtr) (Context&);
+typedef std::string (*TemplatePtr) (Context*);
 
 class ExtHandler {
 public:
