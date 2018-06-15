@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 FFEAD_CPPPTH=$1
 export FFEAD_CPP_PATH=${FFEAD_CPPPTH}
