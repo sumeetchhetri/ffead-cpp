@@ -8,6 +8,12 @@ PCFL="TO_REPLACE_CPPFLAGS"
 PLDFL="TO_REPLACE_LDFLAGS"
 PACFL="TO_REPLACE_AM_CXXFLAGS"
 
+PACFL=${PACFL//-std=gnu++11/}
+PACFL=${PACFL//-std=gnu++0x/}
+PACFL=${PACFL//-std=c++11/}
+PACFL=${PACFL//+std=c++11/}
+PACFL=${PACFL//-std=c++0x/}
+
 if [ "$DEBG" = "yes" ]; then
 	DEBG="--enable-debug=yes"
 else

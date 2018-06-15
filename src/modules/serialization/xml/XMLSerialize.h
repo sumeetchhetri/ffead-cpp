@@ -97,7 +97,7 @@ public:
 				keytype = keytype.substr(0, keytype.find("-"));
 				for (int var = 0; var < (int)message.getChildElements().size(); var++)
 				{
-					Element* entry = &(message.getChildElements().at(var));
+					Element* entry = (Element*)&(message.getChildElements().at(var));
 					if(entry->getTagName()=="entry")
 					{
 						Element* key = entry->getElementByName("key");
@@ -164,7 +164,7 @@ public:
 				keytype = keytype.substr(0, keytype.find("-"));
 				for (int var = 0; var < (int)message.getChildElements().size(); var++)
 				{
-					Element* entry = &(message.getChildElements().at(var));
+					Element* entry = (Element*)&(message.getChildElements().at(var));
 					if(entry->getTagName()=="entry")
 					{
 						Element* key = entry->getElementByName("key");

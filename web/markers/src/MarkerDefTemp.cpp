@@ -33,25 +33,23 @@ MarkerDefTemp::~MarkerDefTemp() {
 
 void MarkerDefTemp::getContext(HttpRequest* request, Context* context)
 {
-	Context cnt;
 	std::string dat = "1.js";
-	GenericObject& dato;
-	dato << dat;
-	cnt["dat"] = dato;
+	GenericObject& dato = (*context)["dat"];
+        dato << dat;
 
 	MarkerTest t;
 	t.setId(1);
 	t.setName("name");
-	GenericObject& to = (*cnt)["test"];
+	GenericObject& to = (*context)["test"];
 	to << t;
 
 	std::vector<std::string> vect;
 	vect.push_back("vec1");
 	vect.push_back("vec2");
-	GenericObject& vecto = (*cnt)["vect"];
+	GenericObject& vecto = (*context)["vect"];
 	vecto << vect;
 
 	int num = 5;
-	GenericObject& numo = (*cnt)["number"];
+	GenericObject& numo = (*context)["number"];
 	numo << num;
 }

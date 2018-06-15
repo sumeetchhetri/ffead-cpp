@@ -94,7 +94,7 @@ case "$host" in
     local_os_type="freebsd"
 
     dnl our hack for freebsd system
-    AM_CXXFLAGS="$AM_CXXFLAGS -pthread"
+
     LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-netbsd*)
@@ -122,9 +122,12 @@ case "$host" in
     local_os_type="osf"
     ;;
 *-darwin*)
-	is_librt_available="no"
+    is_librt_available="no"
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
     AC_DEFINE(OS_DARWIN, [], [set OS to darwin])
+    CPPFLAGS="$CPPFLAGS -I/usr/local/opt/openssl/include -I/usr/local/opt/unixodbc/include -I/usr/local/include/"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/opt/openssl/include -I/usr/local/opt/unixodbc/include -I/usr/local/include/"
+    LDFLAGS="$LDFLAGS -L/usr/local/opt/openssl/lib -L/usr/local/opt/unixodbc/lib/ -L/usr/local/lib"
     local_os_type="darwin"
     ;;
 *-sco*)
@@ -952,7 +955,8 @@ AC_SUBST(BUILD_LDFLAGS,[$LDFLAGS])
 AC_SUBST(BUILD_DEBUG,[$support_debug])
 
 AC_CONFIG_FILES([Makefile
-				src/autotools/Makefile
+				src/autotools/libs/Makefile
+				src/autotools/bins/Makefile
 				tests/autotools/Makefile
 				modules/apache_mod_ffeadcpp/autotools/Makefile
 				web/default/src/autotools/Makefile
