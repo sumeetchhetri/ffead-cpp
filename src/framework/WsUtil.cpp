@@ -558,7 +558,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 							ws_funcs.append("std::vector<"+vecn+" > "+argname+";\n");
 							ws_funcs.append("ElementList list = _req->getElementsByName(\""+argname+"\");\n");
 							ws_funcs.append("for(int i=0;i<list.size();i++)");
-							ws_funcs.append(argname+".push_back(CastUtil::lexical_cast<"+vecn+">(list.at(i)->getText()));\n");
+							ws_funcs.append(argname+".push_back(CastUtil::lexical_cast<"+vecn+">((&(list.at(i)))->getText()));\n");
 						}
 						else
 						{

@@ -26,6 +26,8 @@ MAC OS X - To install all dependencies on MAC OS X use,
 	Make sure Xcode is installed or at-least the Command line tools are present
 	Install homebrew first using,
 		ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
+	Install autoconf libtool automake
+		brew install autoconf libtool automake
 	Install openssl
 		brew install openssl
 	Install unixodbc

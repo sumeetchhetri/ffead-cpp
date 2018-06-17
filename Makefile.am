@@ -1,5 +1,5 @@
-SUBDIRS = src/autotools
-ACLOCAL_AMFLAGS = ${ACLOCAL_AMFLAGS} -I m4
+SUBDIRS = src/autotools/libs src/autotools/bins
+ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
 modules = all
 packageIdentifier=${PACKAGE_NAME}-${PACKAGE_VERSION}-bin
@@ -201,8 +201,8 @@ install-data-hook:
 	-mkdir include
 	cp -f ${includedirsall} include/
 	cp -Rf resources/* ${prefix}/resources/
-	cp -Rf src/autotools/.libs/*ffead_* ${prefix}/lib/
-	cp -Rf src/autotools/.libs/CHS ${prefix}/
+	cp -Rf src/autotools/libs/.libs/*ffead_* ${prefix}/lib/
+	cp -Rf src/autotools/bins/bin/CHS ${prefix}/
 	cp -Rf public/* ${prefix}/public/
 	cp -f ${includedirsall} ${prefix}/include/
 	cp -Rf rtdcf/* ${prefix}/rtdcf/
@@ -213,10 +213,10 @@ install-data-hook:
 #cp -f web/oauthApp/src/autotools/.libs/*oauthApp* ${prefix}/lib
 #cp -f web/markers/src/autotools/.libs/*marker* ${prefix}/lib
 	-rm -f ${prefix}/lib/*.la ${prefix}/lib/*.lai
-	sed -i "s/TO_REPLACE_DEBUG/$(subst /,\/,@BUILD_DEBUG@)/" $(prefix)/resources/rundyn-configure.sh
-	sed -i "s/TO_REPLACE_CPPFLAGS/$(subst /,\/,@BUILD_CPPFLAGS@)/" $(prefix)/resources/rundyn-configure.sh
-	sed -i "s/TO_REPLACE_LDFLAGS/$(subst /,\/,@BUILD_LDFLAGS@)/" $(prefix)/resources/rundyn-configure.sh
-	sed -i "s/TO_REPLACE_AM_CXXFLAGS/$(subst /,\/,@BUILD_AM_CXXFLAGS@)/" $(prefix)/resources/rundyn-configure.sh
+	sed -i'' -e "s/TO_REPLACE_DEBUG/$(subst /,\/,@BUILD_DEBUG@)/" $(prefix)/resources/rundyn-configure.sh
+	sed -i'' -e "s/TO_REPLACE_CPPFLAGS/$(subst /,\/,@BUILD_CPPFLAGS@)/" $(prefix)/resources/rundyn-configure.sh
+	sed -i'' -e "s/TO_REPLACE_LDFLAGS/$(subst /,\/,@BUILD_LDFLAGS@)/" $(prefix)/resources/rundyn-configure.sh
+	sed -i'' -e "s/TO_REPLACE_AM_CXXFLAGS/$(subst /,\/,@BUILD_AM_CXXFLAGS@)/" $(prefix)/resources/rundyn-configure.sh
 #-rm -rf $(prefix)/web/default/src/ $(prefix)/web/flexApp/src/ $(prefix)/web/oauthApp/src/ $(prefix)/web/markers/src/
 		
 build-apps: install

@@ -44,7 +44,7 @@ public:
 		std::vector<T>* vec = new std::vector<T>;
 		for(int i=0;i<(int)root.getChildren().size();i++)
 		{
-			JSONElement* element = root.getChildren().at(i);
+			JSONElement* element = (JSONElement*)(&(root.getChildren().at(i)));
 			if(element!=NULL)
 				vec->push_back(CastUtil::lexical_cast<T>(element->getValue()));
 		}

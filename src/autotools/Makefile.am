@@ -528,7 +528,7 @@ libffead_common_la_SOURCES += \
 libffead_common_la_LDFLAGS = -no-undefined
 libffead_framework_la_LDFLAGS = -lffead_common -no-undefined
 
-noinst_PROGRAMS = CHS
+bin_PROGRAMS = CHS
 CHS_SOURCES = ../server/CHServer.cpp
 CHS_LDFLAGS= -no-undefined
 CHS_LDADD = -lffead_common -lffead_framework @ADD_LIBDL@

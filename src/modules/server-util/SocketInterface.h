@@ -12,7 +12,11 @@
 #include "Mutex.h"
 #include <sys/stat.h>
 #include <fcntl.h>
-#if defined(IS_SENDFILE)
+#if defined OS_DARWIN
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/uio.h>
+#elif defined(IS_SENDFILE)
 #include <sys/sendfile.h>
 #endif
 
@@ -79,7 +83,13 @@ public:
 		off_t offset = 0;
 		int sent_bytes = 0;
 		/* Sending file data */
-#if defined(IS_SENDFILE)
+#if defined(OS_DARWIN)
+		off_t sent_bytes1 = BUFSIZ;
+		while ((sendfile(fdes, fd, offset, &sent_bytes1, NULL, 0) == 0) && sent_bytes1>0 && (remain_data > 0))
+                {
+                        remain_data -= sent_bytes1;
+                }
+#elif defined(IS_SENDFILE)
 		while (((sent_bytes = sendfile(fd, fdes, &offset, BUFSIZ)) > 0) && (remain_data > 0))
 		{
 			remain_data -= sent_bytes;
