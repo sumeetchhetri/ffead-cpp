@@ -23,7 +23,6 @@ with my humble/honest effort.
 
 Features
 ==========
-- Introduction of modules
 - Advanced ORM - SDORM (sql/monogo)
 - Better Event loop
 - Server Framework
@@ -32,13 +31,12 @@ Features
 - Cache API (memcached/redis)
 - Improved Thread/ThreadPool API(s)
 - Marker based configuration (Java style annotations)
-- Added sample application for techempower benchmarks
 - Improved autotools support
-- Improved Reflection support
-- Improved Serialization support
-- Fixed issues related to Date/Time
+- Reflection support
+- Serialization support
+- Date/Time Ultility functions
 - Better Logging support
-- Faster server engine
+- Dependency Injection
 
 Quickstart
 ===========
