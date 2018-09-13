@@ -1,9 +1,8 @@
-# The ffead-cpp Framework #
+#The ffead-cpp Framework
 
 ffead-cpp is a web-framework, application framework, utilities all bundled into one. 
 It also provides and embedded HTTP/HTT2/Web-Socket compliant high performance server core. 
-It is a collection of modules all geared towards performing individual roles which together 
-form the cohesive back-bone of ffead-cpp.
+It is a collection of modules all geared towards performing individual roles which together form the cohesive back-bone of ffead-cpp.
 
 It provides a very simple to use and maintain web-framework library with advanced features like Reflection, Dependency Injection (IOC), Inbuilt REST/SOAP support, Security/Authentication features. Moreover implementation for interfacing to caching tools like Memcached/Redis are provided in-built. 
 Database integration/ORM framework (SDORM) solves all major issues with respect to interfacing with SQL/No-SQL database alike.
