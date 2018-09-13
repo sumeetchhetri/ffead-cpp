@@ -50,9 +50,3 @@ Quickstart
 - make build-apps (Build the sample applications in web + generate ffead-cpp binary)
 - cd ffead-cpp-2.0-bin/ (Navigate to the ffead-cpp binary folder)
 - ./server.sh (Startup ffead-cpp Njoy!!)
-
-
-v2.0 will bring better documentation to the world of ffead-cpp
-v2.0 also outlines interfacing support for multiple platforms!
-
-Stay tuned for further updates!!
