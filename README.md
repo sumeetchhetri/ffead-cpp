@@ -1,4 +1,4 @@
-#The ffead-cpp Framework
+# The ffead-cpp Framework
 
 ffead-cpp is a web-framework, application framework, utilities all bundled into one. 
 It also provides and embedded HTTP/HTT2/Web-Socket compliant high performance server core. 
@@ -50,3 +50,5 @@ Quickstart
 - make build-apps (Build the sample applications in web + generate ffead-cpp binary)
 - cd ffead-cpp-2.0-bin/ (Navigate to the ffead-cpp binary folder)
 - ./server.sh (Startup ffead-cpp Njoy!!)
+
+For further details checkout the [wiki](https://github.com/sumeetchhetri/ffead-cpp/wiki) page
