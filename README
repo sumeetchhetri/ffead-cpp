@@ -1,10 +1,19 @@
-Contributions Welcome!!
-=======================
-Calling all bright minds out there to be a part of this initiative and make ffead-cpp the best enterprise appliation development framework for C++
-There are a lot of areas that may need immediate attention like, documentation, manuals, wiki, tests.
-Any enhancements or improvments related to the base code or any of the modules are also welcome
+# The ffead-cpp Framework #
 
-v2.0 is here and is definitely the beginning of a new era!!
+ffead-cpp is a web-framework, application framework, utilities all bundled into one. 
+It also provides and embedded HTTP/HTT2/Web-Socket compliant high performance server core. 
+It is a collection of modules all geared towards performing individual roles which together 
+form the cohesive back-bone of ffead-cpp.
+
+It provides a very simple to use and maintain web-framework library with advanced features like Reflection, Dependency Injection (IOC), Inbuilt REST/SOAP support, Security/Authentication features. Moreover implementation for interfacing to caching tools like Memcached/Redis are provided in-built. 
+Database integration/ORM framework (SDORM) solves all major issues with respect to interfacing with SQL/No-SQL database alike.
+
+Multi-level serialization or template level serialization is a high point of ffead-cpp core serialization run-time. Any C++ POCO class can be marked as serializable and the run-time will take care of marshalling/un-marshalling the object to its intended serializable form and back(JSON/XML/BINARY).
+
+ffead-cpp can be easily driven by XML configuration, Services/Controllers/Filters/Interfaces/API (s) are all simple POCO classes without any need for them to extend any classes. 
+The differentiating feature in ffead-cpp is the usage/implementation/support for markers (Annotations in java). Simple **#pragma** directives can now be used to drive the entire configuration in ffead-cpp, so you can just forget XML configuration.
+
+All in all ffead-cpp is the gap in the world of C++ web application or enterprise application development which I have tried to fill with my humble/honest effort.
 
 Features
 ==========
