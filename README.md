@@ -1,7 +1,7 @@
 # The ffead-cpp Framework
 
 ffead-cpp is a web-framework, application framework, utilities all bundled into one. 
-It also provides and embedded HTTP/HTT2/Web-Socket compliant high performance server core. 
+It also provides an embedded HTTP/HTT2/Web-Socket compliant high-performance server core. 
 It is a collection of modules all geared towards performing individual roles which together form the cohesive back-bone of ffead-cpp.
 
 It provides a very simple to use and maintain web-framework library with advanced features like Reflection, Dependency Injection (IOC),
@@ -13,7 +13,7 @@ Multi-level serialization or template level serialization is a high point of ffe
 can be marked as serializable and the run-time will take care of marshalling/un-marshalling the object to its intended serializable form
 and back(JSON/XML/BINARY).
 
-ffead-cpp can be easily driven by XML configuration, Services/Controllers/Filters/Interfaces/API (s) are all simple POCO classes without
+ffead-cpp can be easily driven by XML configuration, Services/Controllers/Filters/Interfaces/API(s) are all simple POCO classes without
 any need for them to extend any classes. 
 The differentiating feature in ffead-cpp is the usage/implementation/support for markers (Annotations in java). Simple **#pragma**
 directives can now be used to drive the entire configuration in ffead-cpp, so you can just forget XML configuration.
