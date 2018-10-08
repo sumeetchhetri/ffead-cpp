@@ -3,3 +3,16 @@
 *.la
 *.o
 *.dirstamp
+*.dylib
+*.a
+*.lai
+**/CHS
+ffead-cpp-*/*
+include/*
+src/autotools/bins/CHS
+src/autotools/bins/bin/*
+src/autotools/libs/lib/*
+src/autotools/libs/.libs/*
+**/.deps/*
+**/.DS_Store
+autom4te.cache/

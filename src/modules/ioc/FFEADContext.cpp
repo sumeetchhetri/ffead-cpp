@@ -354,7 +354,7 @@ void FFEADContext::addBean(Bean& bean)
 		}
 		bean.name = ids;
 #else
-		bean.name = CastUtil<std::string>(Timer::getCurrentTime());
+		bean.name = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
 #endif
 	}
 	if(bean.name!="" && beans.find(bean.appName+bean.name)==beans.end())

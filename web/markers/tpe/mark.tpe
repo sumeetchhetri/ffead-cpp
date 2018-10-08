@@ -1,5 +1,5 @@
 #declare std::vector<std::string> vect#
-#declare Test test#
+#declare MarkerTest test#
 #declare int number#
 #declare std::string dat#
 <html>

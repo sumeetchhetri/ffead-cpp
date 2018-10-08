@@ -11,6 +11,8 @@ fi
 echo $FFEAD_CPP_PATH
 export LD_LIBRARY_PATH=$FFEAD_CPP_PATH/lib:$LD_LIBRARY_PATH
 echo $LD_LIBRARY_PATH
+export DYLD_FALLBACK_LIBRARY_PATH=$LD_LIBRARY_PATH
+echo $DYLD_FALLBACK_LIBRARY_PATH
 export PATH=$FFEAD_CPP_PATH/lib:$PATH
 echo $PATH
 rm -f $FFEAD_CPP_PATH/rtdcf/*.d $FFEAD_CPP_PATH/rtdcf/*.o 
@@ -23,6 +25,6 @@ chmod 700 $FFEAD_CPP_PATH/CHS*
 chmod 700 $FFEAD_CPP_PATH/resources/*.sh
 chmod 700 $FFEAD_CPP_PATH/tests/*
 chmod 700 $FFEAD_CPP_PATH/rtdcf/*
-#chmod 700 $FFEAD_CPP_PATH/rtdcf/autotools/*
+chmod 700 $FFEAD_CPP_PATH/rtdcf/autotools/*
 #/usr/sbin/setenforce 0
 ./CHS $FFEAD_CPP_PATH > ffead.log 2>&1

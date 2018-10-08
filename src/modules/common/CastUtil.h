@@ -63,8 +63,7 @@ public:
 			return tn;
 		}
 		int status;
-		char *demangled;
-		demangled = abi::__cxa_demangle(mangled, NULL, 0, &status);
+		char *demangled = abi::__cxa_demangle(typeid(t).name(), 0, 0, &status);
 		std::string tn(demangled);
 		free(demangled);
 		if(tn.find("std::__1::")!=std::string::npos) {
