@@ -14,7 +14,7 @@ MemcachedImpl::MemcachedImpl(ConnectionPooler* pool) {
 	if(properties.getProperty("expiryTime")!="") {
 		try {
 			this->defaultExpireSeconds = CastUtil::lexical_cast<int>(properties.getProperty("expiryTime"));
-		} catch(...) {
+		} catch(const std::exception& e) {
 		}
 	}
 }
@@ -49,11 +49,11 @@ long long MemcachedImpl::decrement(const std::string& key, const int& number) {
 }
 
 long double MemcachedImpl::incrementFloat(const std::string& key, const double& number) {
-	throw "Not Implemented";
+	throw std::runtime_error("Not Implemented");
 }
 
 long double MemcachedImpl::decrementFloat(const std::string& key, const double& number) {
-	throw "Not Implemented";
+	throw std::runtime_error("Not Implemented");
 }
 
 std::map<std::string, std::string> MemcachedImpl::statistics() {
@@ -176,7 +176,7 @@ bool MemcachedImpl::replyStatus(const memcached_return_t& reply) {
 }
 
 void* MemcachedImpl::executeCommand(const std::string& command, ...) {
-	throw "Not Implemented";
+	throw std::runtime_error("Not Implemented");
 }
 
 void MemcachedImpl::init() {
@@ -225,9 +225,15 @@ void MemcachedConnectionPool::initEnv() {
 
 	memcached_pool_st* pool = memcached_pool(configStr.c_str(), configStr.length());
 	if(pool==NULL) {
-		throw "Unable to create memcached connection pool";
+		throw std::runtime_error("Unable to create memcached connection pool");
 	}
 	getProps().setNewConnectionStrategy(true);
+	memcached_return_t rc;
+	memcached_st *memc = memcached_pool_pop(pool, true, &rc);
+	if(memc==NULL) {
+		throw std::runtime_error("Unable to create memcached connection");
+	}
+	memcached_pool_push(pool, memc);
 	setEnv(pool);
 }
 

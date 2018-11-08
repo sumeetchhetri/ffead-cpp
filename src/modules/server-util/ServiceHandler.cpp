@@ -198,6 +198,7 @@ HandlerRequest::HandlerRequest() {
 	sentResponse = false;
 	protocol = "";
 	reqPos = 0;
+	response = NULL;
 }
 
 HandlerRequest::~HandlerRequest() {

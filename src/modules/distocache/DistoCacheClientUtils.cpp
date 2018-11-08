@@ -44,8 +44,9 @@ DistoCacheClientUtils::DistoCacheClientUtils(const std::string& host, const int&
 	if(!connected)
 	{
 		delete client;
-		throw "Error connecting to " + host + ":" + CastUtil::lexical_cast<std::string>(port);
+		throw std::runtime_error("Error connecting to " + host + ":" + CastUtil::lexical_cast<std::string>(port));
 	}
+	inUse = false;
 }
 
 DistoCacheClientUtils::~DistoCacheClientUtils() {
@@ -291,7 +292,7 @@ size_t DistoCacheClientUtils::size(const std::string& cacheKey) {
 		try
 		{
 			siz = CastUtil::lexical_cast<size_t>(resp);
-		} catch(...) {
+		} catch(const std::exception& e) {
 			siz = -1;
 		}
 	}
@@ -317,7 +318,7 @@ bool DistoCacheClientUtils::isEmpty(const std::string& cacheKey) {
 		try
 		{
 			isEmpty = CastUtil::lexical_cast<bool>(object->getPackets().at(1)->getValue());
-		} catch(...) {
+		} catch(const std::exception& e) {
 			isEmpty = true;
 		}
 	}

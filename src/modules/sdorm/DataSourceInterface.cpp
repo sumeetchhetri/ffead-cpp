@@ -19,7 +19,6 @@ DataSourceInterface::DataSourceInterface() {
 
 DataSourceInterface::~DataSourceInterface() {
 	delete reflector;
-	endSession();
 }
 
 bool DataSourceInterface::executeInsertInternal(Query& query, void* entity) {
@@ -73,7 +72,7 @@ void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo& cl
 		}
 		else
 		{
-			throw "Data-Source-Object/Entity types do not match for id property" + dsemp.getClassName() + ":" + dsemp.getIdPropertyName();
+			throw std::runtime_error("Data-Source-Object/Entity types do not match for id property" + dsemp.getClassName() + ":" + dsemp.getIdPropertyName());
 		}
 
 		args argus;

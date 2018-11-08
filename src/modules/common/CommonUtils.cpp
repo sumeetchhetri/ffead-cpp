@@ -70,7 +70,7 @@ void CommonUtils::setAppName(const std::string& appName)
 {
 	for(int i=0;i<(int)appNames.size();i++) {
 		if(appName==appNames.at(i)) {
-			contextName.set(&appNames.at(i));
+			contextName.reset(&appNames.at(i));
 			return;
 		}
 	}

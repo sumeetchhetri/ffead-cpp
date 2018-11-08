@@ -65,10 +65,15 @@ HttpResponseParser::HttpResponseParser(const std::string& vecstr, HttpResponse &
 					response.setStatusMsg(httpst.at(2));
 				}
 			}
-			else if(vec.at(i).find(": ")!=std::string::npos && !contStarts)
+			else if(vec.at(i).find_first_of(":")!=std::string::npos && !contStarts)
 			{
-				temp.push_back(vec.at(i).substr(0, vec.at(i).find(": ")));
-				temp.push_back(vec.at(i).substr(vec.at(i).find(": ")+2));
+				if(vec.at(i).find(":")==vec.at(i).find(": ")) {
+					temp.push_back(StringUtil::toLowerCopy(vec.at(i).substr(0, vec.at(i).find_first_of(": "))));
+					temp.push_back(vec.at(i).substr(vec.at(i).find_first_of(": ")+2));
+				} else {
+					temp.push_back(StringUtil::toLowerCopy(vec.at(i).substr(0, vec.at(i).find_first_of(":"))));
+					temp.push_back(vec.at(i).substr(vec.at(i).find_first_of(":")+1));
+				}
 				//logger << temp.at(0) << " => " << temp.at(1) << std::endl;
 				StringUtil::replaceFirst(temp.at(1),"\r","");
 				response.addHeaderValue(temp.at(0), temp.at(1));

@@ -29,6 +29,8 @@
 #include "TestMany.h"
 #include <fstream>
 #include "CastUtil.h"
+#include "TestSTLs.h"
+#include "ConfigurationData.h"
 
 class DefaultRestController {
 public:
@@ -42,6 +44,8 @@ public:
 	std::string testUploadFile(std::ifstream* ifs, std::string param);
 	std::string testUploadFileMulti1(std::ifstream* ifs1, std::ifstream* ifs2, std::ifstream* ifs3, std::string param);
 	std::string testUploadFileMulti2(std::vector<std::ifstream*> vifs, std::string param);
+	TestSTLs sertest(TestSTLs ts);
+	//int alloccounter();
 };
 
 #endif /* DEFAULTRESTCONTROLLER_H_ */

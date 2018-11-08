@@ -16,6 +16,7 @@
 #endif
 
 class CacheManager {
+	Logger logger;
 	static std::map<std::string, CacheManager*> caches;
 	static std::string defDsnName;
 	ConnectionProperties props;

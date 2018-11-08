@@ -33,10 +33,16 @@ NBServer::NBServer()
 {
 	runn = false;
 	started = false;
+	service = NULL;
+	mode = -1;
+	sock = -1;
 }
 
 NBServer::NBServer(const std::string& port, const int& waiting, const Service& serv)
 {
+	mode = -1;
+	sock = -1;
+
 	started = false;
 	runn = true;
 

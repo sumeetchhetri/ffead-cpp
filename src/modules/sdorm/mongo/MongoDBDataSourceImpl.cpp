@@ -17,22 +17,22 @@ std::string MongoDBDataSourceImpl::initializeDMLQueryParts(Query& cquery, bson_t
 		StringUtil::trim(querySchemaPart);
 
 		if(querySchemaPart.find(".")==std::string::npos)
-			throw "Invalid querySchemaPart specified";
+			throw std::runtime_error("Invalid querySchemaPart specified");
 
 		collectionName = querySchemaPart.substr(0, querySchemaPart.find("."));
 		if(collectionName=="")
-			throw "No collection name specified";
+			throw std::runtime_error("No collection name specified");
 
 		operationName = querySchemaPart.substr(querySchemaPart.find(".")+1);
 		if(operationName=="")
-			throw "No operation name specified";
+			throw std::runtime_error("No operation name specified");
 
 		std::string queryStrPart = qs.substr(qs.find("(")+1);
 		queryStrPart = queryStrPart.substr(0, queryStrPart.length()-1);
 		StringUtil::trim(queryStrPart);
 
 		if(queryStrPart.at(0)!='{' || queryStrPart.at(queryStrPart.length()-1)!='}')
-			throw "Invalid JSON query parts specified";
+			throw std::runtime_error("Invalid JSON query parts specified");
 
 		if(operationName=="insert") {
 			bson_error_t err;
@@ -71,22 +71,22 @@ std::string MongoDBDataSourceImpl::initializeQueryParts(Query& cquery, bson_t** 
 		StringUtil::trim(querySchemaPart);
 
 		if(querySchemaPart.find(".")==std::string::npos)
-			throw "Invalid querySchemaPart specified";
+			throw std::runtime_error("Invalid querySchemaPart specified");
 
 		collectionName = querySchemaPart.substr(0, querySchemaPart.find("."));
 		if(collectionName=="")
-			throw "No collection name specified";
+			throw std::runtime_error("No collection name specified");
 
 		operationName = querySchemaPart.substr(querySchemaPart.find(".")+1);
 		if(operationName=="")
-			throw "No operation name specified";
+			throw std::runtime_error("No operation name specified");
 
 		std::string queryStrPart = qs.substr(qs.find("(")+1);
 		queryStrPart = queryStrPart.substr(0, queryStrPart.length()-1);
 		StringUtil::trim(queryStrPart);
 
 		if(queryStrPart.at(0)!='{' || queryStrPart.at(queryStrPart.length()-1)!='}')
-			throw "Invalid JSON query parts specified";
+			throw std::runtime_error("Invalid JSON query parts specified");
 
 		bson_error_t err;
 		bson_t* queryParts = bson_new_from_json((const uint8_t*)queryStrPart.c_str(), queryStrPart.length(), &err);
@@ -230,7 +230,7 @@ QueryComponent* MongoDBDataSourceImpl::getQueryComponent(const std::vector<Condi
 	if(brackets!=0) {
 		delete currentSubQuery;
 		currentSubQuery = NULL;
-		throw "Unbalanced paranthesis used in query";
+		throw std::runtime_error("Unbalanced paranthesis used in query");
 	}
 
 	return currentSubQuery;
@@ -267,12 +267,14 @@ void MongoDBDataSourceImpl::populateQueryComponents(QueryComponent* sq)
 				if(subQ->actualQuery!=NULL)
 				{
 					andChildQs.push_back(subQ->actualQuery);
+					subQ->actualQuery = NULL;
 				}
 			}
 			for (QueryComponent* subQ : sq->orChildren) {
 				if(subQ->actualQuery!=NULL)
 				{
 					orChildQs.push_back(subQ->actualQuery);
+					subQ->actualQuery = NULL;
 				}
 			}
 		}
@@ -456,6 +458,26 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 				((std::vector<std::map<std::string, GenericObject> >*)result)->push_back(row);
 			}
 		}
+		bson_error_t error;
+		if (mongoc_cursor_error (cursor, &error)) {
+			mongoc_cursor_destroy (cursor);
+
+			bson_destroy(querySpec);
+			if(fields!=NULL)bson_destroy(fields);
+
+			_release(conn, collection);
+
+			if(isObj)
+			{
+				reflector->destroyContainer(result, clasName, "std::vector", appName);
+			}
+			else if(!isCountQuery)
+			{
+				delete (std::vector<std::map<std::string, GenericObject> >*)result;
+			}
+
+			throw std::runtime_error(error.message);
+		}
 		mongoc_cursor_destroy (cursor);
 	}
 	else
@@ -532,6 +554,21 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 			((std::vector<std::map<std::string, GenericObject> >*)result)->push_back(row);
 		}
 	}
+	bson_error_t error;
+	if (mongoc_cursor_error (cursor, &error)) {
+		mongoc_cursor_destroy (cursor);
+
+		bson_destroy(query);
+		bson_destroy(querySpec);
+		if(fields!=NULL)bson_destroy(fields);
+
+		_release(conn, collection);
+
+		reflector->destroyContainer(result, clasName, "std::vector", appName);
+
+		throw std::runtime_error(error.message);
+	}
+
 	mongoc_cursor_destroy (cursor);
 
 	bson_destroy(query);
@@ -656,6 +693,7 @@ MongoDBDataSourceImpl::MongoDBDataSourceImpl(ConnectionPooler* pool, Mapping* ma
 }
 
 MongoDBDataSourceImpl::~MongoDBDataSourceImpl() {
+	endSession();
 }
 
 void MongoDBDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject& idv) {
@@ -1309,6 +1347,8 @@ void MongoDBDataSourceImpl::getMapOfProperties(bson_t* data, std::map<std::strin
 QueryComponent::QueryComponent() {
 	isAnd = false;
 	undecided = false;
+	actualQuery = NULL;
+	parent = NULL;
 }
 
 QueryComponent::~QueryComponent() {
@@ -1339,7 +1379,7 @@ bool MongoDBDataSourceImpl::rollback() {
 }
 
 void MongoDBDataSourceImpl::procedureCall(const std::string& procName) {
-	throw "Not Implemented";
+	throw std::runtime_error("Not Implemented");
 }
 
 void MongoDBDataSourceImpl::empty(const std::string& clasName) {
@@ -1703,7 +1743,7 @@ void* MongoDBDataSourceImpl::getContext(void* details) {
 	if(mcd!=NULL && *mcd!="") {
 		mc->collection = mongoc_client_get_collection ((mongoc_client_t*)mc->conn->getConn(), mc->conn->getNode().getDatabaseName().c_str(), mcd->c_str());
 		if(mc->collection==NULL) {
-			throw "Collection not found";
+			throw std::runtime_error("Collection not found");
 		}
 	}
 	return mc;

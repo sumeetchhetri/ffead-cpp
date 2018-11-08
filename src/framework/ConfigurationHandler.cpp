@@ -219,7 +219,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 				{
 					ConfigurationData::getInstance()->securityProperties.client_auth = CastUtil::lexical_cast<int>(tempcl);
 				}
-				catch(...)
+				catch(const std::exception& e)
 				{
 					logger << "Invalid client auth level defined" << std::endl;
 					ConfigurationData::getInstance()->securityProperties.client_auth = 0;
@@ -230,7 +230,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			{
 				ConfigurationData::getInstance()->securityProperties.isDHParams = CastUtil::lexical_cast<bool>(sslsec["ISDH_PARAMS"]);
 			}
-			catch(...)
+			catch(const std::exception& e)
 			{
 				logger << "Invalid boolean value for isDHParams defined" << std::endl;
 			}
@@ -245,7 +245,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					logger << "No ALPN protocols defined............." << std::endl;
 				}
 			}
-			catch(...)
+			catch(const std::exception& e)
 			{
 				logger << "Invalid boolean value for alpnEnabled defined" << std::endl;
 			}
@@ -657,7 +657,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									{
 										try {
 											CastUtil::lexical_cast<int>(restfunction.statusCode);
-										} catch(...) {
+										} catch(const std::exception& e) {
 											logger << "Rest: invalid response statusCode specified, defaulting to 200.." << std::endl;
 											restfunction.statusCode = "200";
 										}
@@ -817,7 +817,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 										securityObject.loginUrl = url;
 										try {
 											securityObject.sessTimeout = CastUtil::lexical_cast<long>(sessionTimeoutV);
-										} catch (...) {
+										} catch(const std::exception& e) {
 											securityObject.sessTimeout = 3600;
 											logger << ("Security: Invalid session timeout value defined, defaulting to 1hour/3600sec") << std::endl;
 										}
@@ -923,7 +923,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						{
 							try {
 								allwdCredentials = CastUtil::lexical_cast<bool>(cntrls.at(cntn).getText());
-							} catch(...) {}
+							} catch(const std::exception& e) {}
 						}
 						else if(cntrls.at(cntn).getTagName()=="expose-headers")
 						{
@@ -933,7 +933,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						{
 							try {
 								maxAge = CastUtil::lexical_cast<long>(cntrls.at(cntn).getText());
-							} catch(...) {}
+							} catch(const std::exception& e) {}
 						}
 					}
 					ConfigurationData::getInstance()->corsConfig = CorsConfig(allwdOrigins, allwdMethods, allwdHeaders,
@@ -1069,7 +1069,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			ideps += "./"+file+".d \\\n"+"./"+file+"_Remote.d \\\n";
 			ConfigurationData::getInstance()->componentNames.push_back(file);
 		}
-		catch(const char* ex)
+		catch(const std::exception& ex)
 		{
 			logger << ("Exception occurred during component code generation : ") << ex << std::endl;
 		}
@@ -1290,7 +1290,7 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 										{
 											try {
 												cnode.port = CastUtil::lexical_cast<int>(nodes.at(ncc).getText());
-											} catch (...) {
+											} catch(const std::exception& e) {
 
 											}
 										}
@@ -1298,7 +1298,7 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 										{
 											try {
 												cnode.readTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
-											} catch (...) {
+											} catch(const std::exception& e) {
 
 											}
 										}
@@ -1306,7 +1306,7 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 										{
 											try {
 												cnode.connectionTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
-											} catch (...) {
+											} catch(const std::exception& e) {
 
 											}
 										}
@@ -1328,7 +1328,7 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 								{
 									try {
 										psize = CastUtil::lexical_cast<int>(confs.at(cns).getText());
-									} catch (...) {
+									} catch(const std::exception& e) {
 
 									}
 								}
@@ -1470,7 +1470,7 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 								{
 									try {
 										cnode.port = CastUtil::lexical_cast<int>(nodes.at(ncc).getText());
-									} catch (...) {
+									} catch(const std::exception& e) {
 
 									}
 								}
@@ -1478,7 +1478,7 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 								{
 									try {
 										cnode.readTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
-									} catch (...) {
+									} catch(const std::exception& e) {
 
 									}
 								}
@@ -1486,7 +1486,7 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 								{
 									try {
 										cnode.connectionTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
-									} catch (...) {
+									} catch(const std::exception& e) {
 
 									}
 								}
@@ -1500,7 +1500,7 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 						{
 							try {
 								psize = CastUtil::lexical_cast<int>(confs.at(cns).getText());
-							} catch (...) {
+							} catch(const std::exception& e) {
 
 							}
 						}
@@ -1605,7 +1605,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 				securityObject.loginUrl = url;
 				try {
 					securityObject.sessTimeout = CastUtil::lexical_cast<long>(sessionTimeoutV);
-				} catch (...) {
+				} catch(const std::exception& e) {
 					securityObject.sessTimeout = 3600;
 					logger << ("Security: Invalid session timeout value defined, defaulting to 1hour/3600sec") << std::endl;
 				}
@@ -2284,7 +2284,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 			{
 				try {
 					CastUtil::lexical_cast<int>(restfunction.statusCode);
-				} catch(...) {
+				} catch(const std::exception& e) {
 					logger << "Rest: invalid response statusCode specified, defaulting to 200.." << std::endl;
 					restfunction.statusCode = "200";
 				}

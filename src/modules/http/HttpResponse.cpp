@@ -520,7 +520,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 					ifmodsince = df.parse(ifmodsincehdr);
 					isifmodsincvalid = true;
 					//std::cout << "Parsed date success" << std::endl;
-				} catch(...) {
+				} catch(const std::exception& e) {
 					isifmodsincvalid = false;
 				}
 

@@ -59,7 +59,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			{
 				try {
 					paramSize = CastUtil::lexical_cast<int>(temp.c_str());
-				} catch(...) {
+				} catch(const std::exception& e) {
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 					paramSize = -1;
 				}
@@ -95,11 +95,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 						res->addHeaderValue(HttpResponse::ContentType, (re.find("{")==0 || re.find("[")==0)?"application/json":"text/plain");
 						res->setContent(re);
-					} catch (const char* ex) {
-						logger << "AjaxInterface exception occurred" << std::endl;
-						logger << ex << std::endl;
-						res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-					} catch (...) {
+					} catch(const std::exception& e) {
 						logger << "AjaxInterface exception occurred" << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 					}
@@ -120,11 +116,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 		try {
 			cntrlit = FormHandler::handle(req, res, reflector, &((*formMap)[req->getFile()]));
 			//logger << ("Request handled by FormHandler") << std::endl;
-		} catch (const char* ex) {
-			logger << "FormHandler exception occurred" << std::endl;
-			logger << ex << std::endl;
-			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-		} catch (...) {
+		} catch(const std::exception& e) {
 			logger << "FormHandler exception occurred" << std::endl;
 			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 		}
@@ -157,11 +149,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 						res->setContent(content);
 					}
-				} catch (const char* ex) {
-					logger << "DCP exception occurred" << std::endl;
-					logger << ex << std::endl;
-					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-				} catch (...) {
+				} catch(const std::exception& e) {
 					logger << "DCP exception occurred" << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				}
@@ -200,11 +188,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 					logger << "Invalid Dynamic View handler, no method getDocument found..." << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				}
-			} catch (const char* ex) {
-				logger << "Dview exception occurred" << std::endl;
-				logger << ex << std::endl;
-				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-			} catch (...) {
+			} catch(const std::exception& e) {
 				logger << "Dview exception occurred" << std::endl;
 				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 			}
@@ -266,11 +250,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						logger << "Invalid Template handler, no method getContext found..." << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 					}
-				} catch (const char* ex) {
-					logger << "Template exception occurred" << std::endl;
-					logger << ex << std::endl;
-					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-				} catch (...) {
+				} catch(const std::exception& e) {
 					logger << "Template exception occurred" << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				}

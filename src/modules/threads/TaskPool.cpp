@@ -61,7 +61,15 @@ void* TaskPool::run(void *arg)
 	return NULL;
 }
 
-TaskPool::TaskPool() {}
+TaskPool::TaskPool() {
+	runFlag = false;
+	complete = false;
+	count = 0;
+	thrdStarted = false;
+	prioritybased = false;
+	allowScheduledTasks = false;
+	mthread = NULL;
+}
 
 void TaskPool::init(const bool& prioritybased, const bool& allowScheduledTasks) {
 	runFlag = true;

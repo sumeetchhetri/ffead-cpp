@@ -34,22 +34,22 @@ DefTemp::~DefTemp() {
 void DefTemp::getContext(HttpRequest* request, Context* context)
 {
 	std::string dat = "1.js";
-	GenericObject& dato = (*context)["dat"];
-	dato << dat;
+	context->insert(std::pair<std::string, GenericObject>("dat", GenericObject()));
+	context->find("dat")->second << dat;
 
 	Test t;
 	t.setId(1);
 	t.setName("name");
-	GenericObject& to = (*context)["test"];
-	to << t;
+	context->insert(std::pair<std::string, GenericObject>("test", GenericObject()));
+	context->find("test")->second << t;
 
 	std::vector<std::string> vect;
 	vect.push_back("vec1");
 	vect.push_back("vec2");
-	GenericObject& vecto = (*context)["vect"];
-	vecto << vect;
+	context->insert(std::pair<std::string, GenericObject>("vect", GenericObject()));
+	context->find("vect")->second << vect;
 
 	int num = 5;
-	GenericObject& numo = (*context)["number"];
-	numo << num;
+	context->insert(std::pair<std::string, GenericObject>("number", GenericObject()));
+	context->find("number")->second <<  num;
 }

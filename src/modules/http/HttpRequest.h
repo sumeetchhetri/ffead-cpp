@@ -116,6 +116,7 @@ class HttpRequest {
 	friend class HttpResponse;
 	friend class HttpServiceHandler;
 	friend class HttpServiceTask;
+	friend class HttpClient;
 public:
 	enum {
 		PREFLIGHT, CORS, OTHER
@@ -199,6 +200,9 @@ public:
 	std::string getPassword() const;
 	std::string getUserName() const;
 	std::string getAuthMethod() const;
+	void setPassword(std::string v);
+	void setUserName(std::string v);
+	void setAuthMethod(std::string v);
 	std::string getContextHome();
 	std::string getExt() const;
 	static std::string getFileExtension(const std::string& file);

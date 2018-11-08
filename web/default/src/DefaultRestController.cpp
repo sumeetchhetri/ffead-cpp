@@ -123,3 +123,11 @@ std::string DefaultRestController::testUploadFileMulti2(std::vector<std::ifstrea
 	std::cout << "Processed input request inside DefaultRestController for testUploadFileMulti2..." << std::endl;
 	return vals;
 }
+
+TestSTLs DefaultRestController::sertest(TestSTLs ts) {
+	return ts;
+}
+
+/*int DefaultRestController::alloccounter() {
+	return ConfigurationData::counter;
+}*/

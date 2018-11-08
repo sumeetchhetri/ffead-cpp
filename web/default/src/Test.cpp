@@ -53,3 +53,9 @@ bool Test::operator<(Test t) const
 {
 	return this->id<t.id;
 }
+
+Test::Test(int id, std::string name) {
+	this->id = id;
+	this->name = name;
+}
+

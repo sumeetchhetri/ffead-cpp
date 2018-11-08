@@ -139,7 +139,13 @@ class CoreServerProperties {
 	friend class DCPGenerator;
 	friend class TemplateGenerator;
 public:
-	CoreServerProperties(){}
+	CoreServerProperties(){
+		isMainServerProcess = false;
+		sessservdistocache = false;
+		sessionFileLockTimeout = 0;
+		sessionTimeout = -1;
+		sessatserv = false;
+	}
 	CoreServerProperties(std::string serverRootDirectory, std::string resourcePath, std::string webPath, propMap sprops, long sessionTimeout, bool sessatserv) {
 		isMainServerProcess = false;
 		sessservdistocache = false;
@@ -212,6 +218,7 @@ class ConfigurationData {
 	friend class FFEADContext;
 	friend class SocketUtil;
 public:
+	//static std::atomic<int> counter;
 	static bool isServingContext(const std::string& cntxtName);
 	static ConfigurationData* getInstance();
 	static SecurityProperties const& getSecurityProperties();

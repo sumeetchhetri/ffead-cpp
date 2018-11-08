@@ -22,6 +22,7 @@ Y,Y,POST /restobj/tstobj.xml,200,,164,application/xml,TSTVALUES_POSTXMLOBJ_VALUE
 Y,Y,POST /restvecobj/tstvecobj.xml,200,,166,application/xml,TSTVALUES_POSTXMLVECOBJ_VALUES,,application/json
 Y,N,POST /restvecobj/tstvecobj,415,,,application/xml,TSTVALUES_POSTJSONVECOBJ_VALUES,,
 Y,N,GET /restvecobj/tstvecobj,405,,,,
+N,Y,POST /sertest/s,200,,,application/json,TSTVALUES_POST_COMPLEX_OBJECT_SER_VALUES
 Y,Y,POST /expose,200,,,application/x-www-form-urlencoded,TSTVALUES_POSTAFCTST_VALUES
 Y,Y,POST /testing,200,,,application/soap+xml,TSTVALUES_POSTSOAP_VALUES
 Y,N,GET /oauthApp/,200,../web/oauthApp/public/index.html,

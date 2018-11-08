@@ -70,7 +70,7 @@ public:
 		}
 		if(typeName.at(typeName.length()-1)=='*')
 		{
-			throw "Cannot handle double pointers and beyond...";
+			throw std::runtime_error("Cannot handle double pointers and beyond...");
 		}
 		if(typeName.find(",")!=std::string::npos)
 		{
@@ -130,7 +130,7 @@ public:
 		std::string typeName = CastUtil::getClassName(t);
 		if(typeName.at(typeName.length()-1)=='*')
 		{
-			throw "Cannot handle pointer types use 'set(T* t)' instead...";
+			throw std::runtime_error("Cannot handle pointer types use 'set(T* t)' instead...");
 		}
 		this->typeName = typeName;
 		internalClear();
@@ -202,7 +202,7 @@ public:
 		}
 		if(typeName.at(typeName.length()-1)=='*')
 		{
-			throw "Cannot handle double pointers and beyond...";
+			throw std::runtime_error("Cannot handle double pointers and beyond...");
 		}
 
 		t = (T*)objVal;
@@ -212,7 +212,7 @@ public:
 		std::string typeName = CastUtil::getClassName(t);
 		if(typeName.at(typeName.length()-1)=='*')
 		{
-			throw "Cannot handle pointer types use 'getP()' instead...";
+			throw std::runtime_error("Cannot handle pointer types use 'getP()' instead...");
 		}
 		t = *(T*)objVal;
 	}
@@ -224,7 +224,7 @@ inline T GenericObject::getObjectFromSerilaizedState(const std::string& serilaiz
 	std::string typeName = CastUtil::getClassName(t);
 	if(typeName.at(typeName.length()-1)=='*')
 	{
-		throw "Cannot handle pointer types use 'getP()' instead...";
+		throw std::runtime_error("Cannot handle pointer types use 'getP()' instead...");
 	}
 	if(GenericObject::isPrimitive(typeName)) t = CastUtil::lexical_cast<T>(serilaizedState);
 	else t = XMLSerialize::unserialize<T>(serilaizedState);

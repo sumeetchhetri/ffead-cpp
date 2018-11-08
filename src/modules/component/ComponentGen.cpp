@@ -39,7 +39,7 @@ std::string convertfrom(std::string val)
 		return "false";
 	else
 	{
-		throw "Conversion exception";
+		throw std::runtime_error("Conversion exception");
 	}
 }
 
@@ -72,7 +72,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 	    {
 			name = srprps["@CMP_NAME"];
 			if(name=="")
-				throw "Component Name must be specified";
+				throw std::runtime_error("Component Name must be specified");
 			file = (StringUtil::capitalizedCopy(appName)+"_Component_"+name);
 			std::string cudef(file);
 			StringUtil::toUpper(cudef);
@@ -178,7 +178,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 					size_t cl = temp.find_first_of(")");
 					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
-						throw "No spaces allowed between in value";
+						throw std::runtime_error("No spaces allowed between in value");
 					}
 					else
 					{
@@ -192,7 +192,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 								temtem.find("@ARGS")!=std::string::npos ||
 								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
-							throw "Invalid start of property within another property";
+							throw std::runtime_error("Invalid start of property within another property");
 						}
 						else
 						{
@@ -209,7 +209,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 					size_t cl = temp.find_first_of(")");
 					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
-						throw "No spaces allowed between in value";
+						throw std::runtime_error("No spaces allowed between in value");
 					}
 					else
 					{
@@ -223,7 +223,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 								temtem.find("@ARGS")!=std::string::npos ||
 								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
-							throw "Invalid start of property within another property";
+							throw std::runtime_error("Invalid start of property within another property");
 						}
 						else
 						{
@@ -240,7 +240,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 					size_t cl = temp.find_first_of(")");
 					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
-						throw "No spaces allowed between in value";
+						throw std::runtime_error("No spaces allowed between in value");
 					}
 					else
 					{
@@ -254,7 +254,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 								temtem.find("@ARGS")!=std::string::npos ||
 								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
-							throw "Invalid start of property within another property";
+							throw std::runtime_error("Invalid start of property within another property");
 						}
 						else
 						{
@@ -272,7 +272,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 					size_t cl = temp.find_first_of(")");
 					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
-						throw "No spaces allowed between in value";
+						throw std::runtime_error("No spaces allowed between in value");
 					}
 					else
 					{
@@ -286,7 +286,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 								temtem.find("@ARGS")!=std::string::npos ||
 								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
-							throw "Invalid start of property within another property";
+							throw std::runtime_error("Invalid start of property within another property");
 						}
 						else
 						{
@@ -303,7 +303,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 					size_t cl = temp.find_first_of(")");
 					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
-						throw "No spaces allowed between in value";
+						throw std::runtime_error("No spaces allowed between in value");
 					}
 					else
 					{
@@ -317,7 +317,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 								temtem.find("@ARGS")!=std::string::npos ||
 								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
-							throw "Invalid start of property within another property";
+							throw std::runtime_error("Invalid start of property within another property");
 						}
 						else
 						{
@@ -335,7 +335,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 					size_t cl = temp.find_first_of(")");
 					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
-						throw "No spaces allowed between in value";
+						throw std::runtime_error("No spaces allowed between in value");
 					}
 					else
 					{
@@ -349,7 +349,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 								temtem.find("@ARGS")!=std::string::npos ||
 								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
-							throw "Invalid start of property within another property";
+							throw std::runtime_error("Invalid start of property within another property");
 						}
 						else
 						{
@@ -364,7 +364,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 							}
 							else
 							{
-								throw "Invalid Service Signature";
+								throw std::runtime_error("Invalid Service Signature");
 							}
 						}
 					}
@@ -378,7 +378,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 					size_t cl = temp.find_first_of(")");
 					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
-						throw "No spaces allowed between in value";
+						throw std::runtime_error("No spaces allowed between in value");
 					}
 					else
 					{
@@ -392,7 +392,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 								temtem.find("@ARGS")!=std::string::npos ||
 								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
-							throw "Invalid start of property within another property";
+							throw std::runtime_error("Invalid start of property within another property");
 						}
 						else
 						{
@@ -409,7 +409,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 					size_t cl = temp.find_first_of(")");
 					if((sp!=std::string::npos && sp<cl) || cl==std::string::npos)
 					{
-						throw "No spaces allowed between in value";
+						throw std::runtime_error("No spaces allowed between in value");
 					}
 					else
 					{
@@ -423,7 +423,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 								temtem.find("@ARGS")!=std::string::npos ||
 								temtem.find("@SIGNATURE")!=std::string::npos)
 						{
-							throw "Invalid start of property within another property";
+							throw std::runtime_error("Invalid start of property within another property");
 						}
 						else
 						{
@@ -453,7 +453,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 									}
 									else
 									{
-										throw "Invalid service arguments";
+										throw std::runtime_error("Invalid service arguments");
 									}
 								}
 							}
@@ -474,7 +474,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 					servs += "_retvalue = _serviceImpl."+srvmeth+"("+srvmcarg+");\n}\n";
 				else
 					servs += "_serviceImpl."+srvmeth+"("+srvmcarg+");\n}\n";
-				servs += "catch(...){\n";
+				servs += "catch(const std::exception& e){\n";
 				if(convertfrom(srprps["@AUTO_TRANS"])=="true")
 					servs += "this->rollback();\n";
 				servs += "}\n";
@@ -507,7 +507,7 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 			logger << curemote << std::flush;*/
 
 	    }
-		catch(const char* ex)
+		catch(const std::exception& ex)
 		{
 			logger << "Exception occurred" << std::flush;
 			throw;
@@ -515,6 +515,6 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 
 	}
 	else
-		throw "Error Parsing Component";
+		throw std::runtime_error("Error Parsing Component");
 	return file;
 }

@@ -53,7 +53,7 @@ DistoCacheClientUtils* BasicDistoCacheConnectionFactory::getConnection() {
 	{
 		return new DistoCacheClientUtils(instance->host, instance->port, instance->isSSL);;
 	}
-	throw "BasicDistoCacheConnectionFactory not initialized";
+	throw std::runtime_error("BasicDistoCacheConnectionFactory not initialized");
 }
 
 void BasicDistoCacheConnectionFactory::releaseConnection(DistoCacheClientUtils* clientUtil) {

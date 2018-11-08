@@ -27,7 +27,7 @@ JSONSerialize::JSONSerialize() {
 	if(dlib == NULL)
 	{
 		std::cerr << dlerror() << std::endl;
-		throw "Cannot load serialization shared library";
+		throw std::runtime_error("Cannot load serialization shared library");
 	}
 	dlibinstantiated = true;
 }
@@ -35,7 +35,7 @@ JSONSerialize::JSONSerialize() {
 JSONSerialize::JSONSerialize(void* dlib) {
 	if(dlib == NULL)
 	{
-		throw "Cannot load serialization shared library";
+		throw std::runtime_error("Cannot load serialization shared library");
 	}
 	this->dlib = dlib;
 	dlibinstantiated = false;

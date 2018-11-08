@@ -71,6 +71,7 @@ void HttpWriteTask::run() {
 
 HttpServiceTask::HttpServiceTask() {
 	this->handlerRequest = NULL;
+	service = NULL;
 }
 
 HttpServiceTask::HttpServiceTask(HandlerRequest* handlerRequest, HttpServiceHandler* service) {
@@ -83,6 +84,7 @@ HttpServiceTask::~HttpServiceTask() {
 
 HttpWriteTask::HttpWriteTask() {
 	this->handlerRequest = NULL;
+	service = NULL;
 }
 
 HttpWriteTask::~HttpWriteTask() {

@@ -12,7 +12,7 @@ XMLSerialize::XMLSerialize() {
 	if(dlib == NULL)
 	{
 		std::cerr << dlerror() << std::endl;
-		throw "Cannot load serialization shared library";
+		throw std::runtime_error("Cannot load serialization shared library");
 	}
 	dlibinstantiated = true;
 }
@@ -20,7 +20,7 @@ XMLSerialize::XMLSerialize() {
 XMLSerialize::XMLSerialize(void* dlib) {
 	if(dlib == NULL)
 	{
-		throw "Cannot load serialization shared library";
+		throw std::runtime_error("Cannot load serialization shared library");
 	}
 	this->dlib = dlib;
 	dlibinstantiated = false;
@@ -299,7 +299,7 @@ void* XMLSerialize::getUnserializableObject(const std::string& _1)
 		return message;
 	} catch(const XmlParseException& str) {
 		std::cout << str.getMessage() << std::endl;
-	} catch(...) {
+	} catch(const std::exception& e) {
 		std::cout << "XML Parse Error" << std::endl;
 	}
 	return NULL;

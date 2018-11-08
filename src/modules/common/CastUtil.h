@@ -392,7 +392,7 @@ public:
 			{
 				int dots = StringUtil::countOccurrences(vval, ".");
 				if(dots>1) {
-					throw "Conversion exception - std::string to float";
+					throw std::runtime_error("Conversion exception - std::string to float");
 				}
 				if(vval.at(0)=='0')
 				{
@@ -402,7 +402,7 @@ public:
 						bool invalid = (f==0);
 						if(invalid)
 						{
-							throw "Conversion exception - std::string to float";
+							throw std::runtime_error("Conversion exception - std::string to float");
 						}
 					}
 				}
@@ -414,7 +414,7 @@ public:
 						bool invalid = (f==0);
 						if(invalid)
 						{
-							throw "Conversion exception - std::string to float";
+							throw std::runtime_error("Conversion exception - std::string to float");
 						}
 					}
 				}
@@ -425,7 +425,7 @@ public:
 				bool invalid = (f==0);
 				if(invalid)
 				{
-					throw "Conversion exception - std::string to float";
+					throw std::runtime_error("Conversion exception - std::string to float");
 				}
 			}
 			vt = &f;
@@ -437,7 +437,7 @@ public:
 			{
 				int dots = StringUtil::countOccurrences(vval, ".");
 				if(dots>1) {
-					throw "Conversion exception - std::string to double";
+					throw std::runtime_error("Conversion exception - std::string to double");
 				}
 				if(vval.at(0)=='0')
 				{
@@ -447,7 +447,7 @@ public:
 						bool invalid = (d==0);
 						if(invalid)
 						{
-							throw "Conversion exception - std::string to double";
+							throw std::runtime_error("Conversion exception - std::string to double");
 						}
 					}
 				}
@@ -459,7 +459,7 @@ public:
 						bool invalid = (d==0);
 						if(invalid)
 						{
-							throw "Conversion exception - std::string to double";
+							throw std::runtime_error("Conversion exception - std::string to double");
 						}
 					}
 				}
@@ -470,7 +470,7 @@ public:
 				bool invalid = (d==0);
 				if(invalid)
 				{
-					throw "Conversion exception - std::string to double";
+					throw std::runtime_error("Conversion exception - std::string to double");
 				}
 			}
 			vt = &d;
@@ -483,7 +483,7 @@ public:
 			}
 			else
 			{
-				throw "Conversion exception - std::string to long double";
+				throw std::runtime_error("Conversion exception - std::string to long double");
 			}
 			vt = &ld;
 			t = *(T*)vt;
@@ -502,10 +502,22 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - std::string to int";
+					throw std::runtime_error("Conversion exception - std::string to int");
 				}
 			}
 			vt = &i;
+			t = *(T*)vt;
+		}
+		else if(tn=="char")
+		{
+			char tc = vval.at(0);
+			vt = &tc;
+			t = *(T*)vt;
+		}
+		else if(tn=="unsigned char")
+		{
+			unsigned char tc = vval.at(0);
+			vt = &tc;
 			t = *(T*)vt;
 		}
 		else if(tn=="short")
@@ -522,7 +534,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - std::string to short";
+					throw std::runtime_error("Conversion exception - std::string to short");
 				}
 			}
 			vt = &s;
@@ -542,7 +554,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - std::string to long";
+					throw std::runtime_error("Conversion exception - std::string to long");
 				}
 			}
 			vt = &l;
@@ -562,7 +574,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - std::string to unsigned short";
+					throw std::runtime_error("Conversion exception - std::string to unsigned short");
 				}
 			}
 			vt = &us;
@@ -582,7 +594,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - std::string to unsigned int";
+					throw std::runtime_error("Conversion exception - std::string to unsigned int");
 				}
 			}
 			vt = &ui;
@@ -602,7 +614,7 @@ public:
 				}
 				if(invalid)
 				{
-					throw "Conversion exception - std::string to unsigned long";
+					throw std::runtime_error("Conversion exception - std::string to unsigned long");
 				}
 			}
 			vt = &ul;
@@ -615,7 +627,7 @@ public:
 			}
 			else
 			{
-				throw "Conversion exception - std::string to long long";
+				throw std::runtime_error("Conversion exception - std::string to long long");
 			}
 			vt = &ll;
 			t = *(T*)vt;
@@ -627,7 +639,7 @@ public:
 			}
 			else
 			{
-				throw "Conversion exception - std::string to unsigned long long";
+				throw std::runtime_error("Conversion exception - std::string to unsigned long long");
 			}
 			vt = &ull;
 			t = *(T*)vt;
@@ -640,7 +652,7 @@ public:
 				b = false;
 			else
 			{
-				throw "Conversion exception - std::string to bool";
+				throw std::runtime_error("Conversion exception - std::string to bool");
 			}
 			vt = &b;
 			t = *(T*)vt;
@@ -655,7 +667,7 @@ public:
 		}
 		else
 		{
-			throw "Generic Conversion exception";
+			throw std::runtime_error("Generic Conversion exception");
 		}
 		return t;
 	}

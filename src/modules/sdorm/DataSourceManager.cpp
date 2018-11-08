@@ -12,28 +12,34 @@ std::string DataSourceManager::defDsnName;
 
 void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping& mapping)
 {
+	Logger logger = LoggerFactory::getLogger("DataSourceManager");
 	std::string name = StringUtil::trimCopy(props.getName());
 	if(name=="")
 	{
-		throw "Data Source Name cannot be blank";
+		throw std::runtime_error("Data Source Name cannot be blank");
 	}
 	std::string appName = CommonUtils::getAppName(mapping.getAppName());
 	name = appName + name;
 	if(dsns.find(name)!=dsns.end())
 	{
-		throw "Data Source Already exists";
+		throw std::runtime_error("Data Source Already exists");
 	}
 	if(props.getProperty("_isdefault_")=="true") {
 		defDsnName = StringUtil::trimCopy(props.getName());
 	}
-	DataSourceManager* dsnMgr = new DataSourceManager(props, mapping);
-	dsns[name] = dsnMgr;
+
+	try {
+		DataSourceManager* dsnMgr = new DataSourceManager(props, mapping);
+		dsns[name] = dsnMgr;
+	} catch (const std::exception& e) {
+		logger.info("Error initializing Datasource " + appName + "@" + props.getName() + " " + std::string(e.what()));
+	}
 
 	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(dlib == NULL)
 	{
 		std::cerr << dlerror() << std::endl;
-		throw "Cannot load application shared library";
+		throw std::runtime_error("Cannot load application shared library");
 	}
 	Reflector ref(dlib);
 	if(props.getProperty("init")!="") {
@@ -56,7 +62,8 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 							ref.invokeMethodGVP(_temp, meth, valus);
 						}
 					}
-				} catch(...) {
+				} catch(const std::exception& e) {
+					logger.info("Error during init call for Datasource " + appName + "@" + props.getName() + " " + std::string(e.what()));
 				}
 				ref.destroy(_temp, v.at(0), appName);
 			}
@@ -78,6 +85,7 @@ void DataSourceManager::destroy()
 }
 
 DataSourceManager::DataSourceManager(const ConnectionProperties& props, const Mapping& mapping) {
+	logger = LoggerFactory::getLogger("DataSourceManager");
 	this->pool = NULL;
 	this->props = props;
 	this->mapping = mapping;
@@ -107,7 +115,7 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name) {
 	name = appName + name;
 	if(dsns.find(name)==dsns.end())
 	{
-		throw "Data Source Not found...";
+		throw std::runtime_error("Data Source Not found...");
 	}
 	DataSourceManager* dsnMgr = dsns[name];
 	DataSourceInterface* t = NULL;
@@ -132,7 +140,7 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name) {
 	if(t->dlib == NULL)
 	{
 		std::cerr << dlerror() << std::endl;
-		throw "Cannot load application shared library";
+		throw std::runtime_error("Cannot load application shared library");
 	}
 	t->reflector = new Reflector(t->dlib);
 	std::map<std::string, DataSourceEntityMapping>::iterator it;

@@ -25,26 +25,10 @@
 #include "map"
 #include "vector"
 #include "string"
+#include "CastUtil.h"
 
 
 class JSONElement {
-public:
-	static enum {JSON_OBJECT, JSON_ARRAY, JSON_STRING, JSON_NUMBER, JSON_BOOL, JSON_FLOAT} JSON_TYPE;
-	JSONElement();
-	virtual ~JSONElement();
-	bool hasChildren() const;
-	//void addChild(const JSONElement& child);
-	void addChild(JSONElement);
-	const std::vector<JSONElement>& getChildren() const;
-	//const JSONElement& getNode(const std::string& name);
-	JSONElement* getNodeP(const std::string& name);
-	int getType() const;
-	void setType(const int& type);
-	const std::string& getValue() const;
-	void setValue(const std::string& value);
-	const std::string& getName() const;
-	void setName(const std::string& name);
-	std::string toString() const;
 private:
 	static JSONElement nullele;
 	std::string name;
@@ -52,6 +36,33 @@ private:
 	int type;
 	std::vector<JSONElement> children;
 	std::map<std::string, JSONElement*> allnodes;
+	JSONElement(int type);
+	JSONElement(int type, std::string k, std::string v);
+public:
+	static enum {JSON_OBJECT, JSON_ARRAY, JSON_STRING, JSON_NUMBER, JSON_BOOL, JSON_FLOAT} JSON_TYPE;
+	JSONElement();
+	virtual ~JSONElement();
+	bool hasChildren() const;
+	//void addChild(const JSONElement& child);
+	JSONElement& addChild(JSONElement);
+	const std::vector<JSONElement>& getChildren() const;
+	//const JSONElement& getNode(const std::string& name);
+	JSONElement* getNodeP(const std::string& name);
+	int getType() const;
+	JSONElement& setType(const int& type);
+	const std::string& getValue() const;
+	JSONElement& setValue(const std::string& value);
+	const std::string& getName() const;
+	JSONElement& setName(const std::string& name);
+	std::string toString() const;
+
+	static JSONElement object();
+	static JSONElement array();
+	JSONElement& add(JSONElement el);
+	JSONElement& add(std::string k, std::string v);
+	JSONElement& add(std::string k, unsigned long long v);
+	JSONElement& add(std::string k, bool v);
+	JSONElement& add(std::string k, long double v);
 };
 
 #endif /* JSONELEMENT_H_ */

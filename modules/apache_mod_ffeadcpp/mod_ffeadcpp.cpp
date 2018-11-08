@@ -372,7 +372,7 @@ void one_time_init()
    	{
    		try {
    			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
-		} catch (...) {
+		} catch(const std::exception& e) {
 			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << std::endl;
 		}
    	}
@@ -404,7 +404,7 @@ void one_time_init()
     {
     	logger << p.getMessage() << std::endl;
     }
-    catch(const char* msg)
+    catch(const std::exception& msg)
 	{
 		logger << msg << std::endl;
 	}
@@ -509,7 +509,7 @@ void one_time_init()
 		{
 			distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
 		}
-	} catch(...) {
+	} catch(const std::exception& e) {
 		logger << ("Invalid poolsize specified for distocache") << std::endl;
 	}
 
@@ -521,7 +521,7 @@ void one_time_init()
 			logger << ("Session store is set to distocache store") << std::endl;
 			distocache = true;
 		}
-	} catch(...) {
+	} catch(const std::exception& e) {
 		logger << ("Invalid port specified for distocache") << std::endl;
 	}
 
@@ -635,7 +635,7 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 				ComponentHandler::trigger(srprps["CMP_PORT"]);
 			}
 		}
-	} catch(...) {
+	} catch(const std::exception& e) {
 		logger << ("Component Handler Services are disabled") << std::endl;
 	}
 #endif
@@ -650,7 +650,7 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 				MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
 			}
 		}
-	} catch(...) {
+	} catch(const std::exception& e) {
 		logger << ("Messaging Handler Services are disabled") << std::endl;
 	}
 #endif
@@ -665,7 +665,7 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 				MethodInvoc::trigger(srprps["MI_PORT"]);
 			}
 		}
-	} catch(...) {
+	} catch(const std::exception& e) {
 		logger << ("Method Invoker Services are disabled") << std::endl;
 	}
 #endif

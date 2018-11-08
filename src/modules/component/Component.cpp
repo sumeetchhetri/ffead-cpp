@@ -23,11 +23,19 @@
 #include "Component.h"
 
 Component::Component() {
-	//chib = new DataSourceInterface("default");
+	ajaxAvail = false;
+	websAvail = false;
+	methinvAvail = false;
+	autoTranx = false;
+	thrdPerReq = false;
+	authMode = false;
+	session = false;
+	thrdPoolSize = 0;
+	dbconpoolSize = 0;
+	chib = NULL;
 }
 
 Component::~Component() {
-	// TODO Auto-generated destructor stub
 }
 
 
@@ -53,7 +61,6 @@ void Component::rollback()
 
 void Component::execute()
 {
-
 }
 
 DataSourceInterface* Component::getDataSource()

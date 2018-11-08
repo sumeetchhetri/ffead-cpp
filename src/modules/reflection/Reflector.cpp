@@ -25,7 +25,7 @@ Reflector::Reflector()
 	if(dlib == NULL)
 	{
 		std::cerr << dlerror() << std::endl;
-		throw "Cannot load reflection shared library";
+		throw std::runtime_error("Cannot load reflection shared library");
 	}
 	dlibinstantiated = true;
 }
@@ -34,7 +34,7 @@ Reflector::Reflector(void* dlib)
 {
 	if(dlib == NULL)
 	{
-		throw "Cannot load reflection shared library";
+		throw std::runtime_error("Cannot load reflection shared library");
 	}
 	closedlib = false;
 	this->dlib = dlib;
@@ -716,12 +716,14 @@ void Reflector::destroy(void* instance, std::string className, const std::string
 	else
 	{
 		ClassInfo ci = getClassInfo(className, app);
-		void *mkr = dlsym(dlib, ci.getDestRefName().c_str());
-		typedef void (*RfPtr) (void*);
-		RfPtr f = (RfPtr)mkr;
-		if(f!=NULL)
-		{
-			f(instance);
+		if(ci.getDestRefName()!="") {
+			void *mkr = dlsym(dlib, ci.getDestRefName().c_str());
+			typedef void (*RfPtr) (void*);
+			RfPtr f = (RfPtr)mkr;
+			if(f!=NULL)
+			{
+				f(instance);
+			}
 		}
 		delete instance;
 	}

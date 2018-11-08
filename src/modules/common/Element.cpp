@@ -60,10 +60,9 @@ bool Element::operator == (Element *ele)
 void Element::addElement(Element element)
 {
 	this->elements.push_back(element);
-	Element* el = &(this->elements.back());
-	if(mapOfEle.find(el->getTagName())==mapOfEle.end())
+	if(mapOfEle.find(element.getTagName())==mapOfEle.end())
 	{
-		this->mapOfEle[el->getTagName()] = el;
+		this->mapOfEle[element.getTagName()] = this->elements.size()-1;
 	}
 }
 void Element::removeElement(Element* element)
@@ -181,7 +180,7 @@ Element* Element::getElementByName(const std::string& name)
 {
 	if(mapOfEle.find(name)!=mapOfEle.end())
 	{
-		return this->mapOfEle.find(name)->second;
+		return &(elements[this->mapOfEle.find(name)->second]);
 	}
 	return NULL;
 }
@@ -195,7 +194,7 @@ Element* Element::getElementByNameIgnoreCase(const std::string& name)
 		std::string itn = StringUtil::toLowerCopy(it->first);
 		if(itn==lname)
 		{
-			return it->second;
+			return &(elements[it->second]);
 		}
 	}
 	return NULL;

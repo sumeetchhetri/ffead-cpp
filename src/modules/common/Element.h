@@ -29,7 +29,7 @@
 class Element;
 typedef std::vector<Element> ElementList;
 typedef std::map<std::string, std::string> AttributeList;
-typedef std::map<std::string, Element*> ElementMap;
+typedef std::map<std::string, int> ElementMap;
 
 class Element : public Renderer
 {

@@ -27,6 +27,7 @@
 class DynamicView {
 public:
 	virtual void getDocument(Document*)=0;
+	virtual ~DynamicView(){}
 };
 
 #endif /* DYNAMICVIEW_H_ */

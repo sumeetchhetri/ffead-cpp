@@ -23,17 +23,23 @@
 #include "ServiceTask.h"
 
 ServiceTask::ServiceTask(const int& fd, const std::string& serverRootDirectory) {
-	this->fd=fd;
-	this->serverRootDirectory=serverRootDirectory;
+	this->fd = fd;
+	this->serverRootDirectory = serverRootDirectory;
 	logger = LoggerFactory::getLogger("ServiceTask");
+	isSSLEnabled = false;
+	ctx = NULL;
+	params = NULL;
 }
 
 ServiceTask::~ServiceTask() {
-	// TODO Auto-generated destructor stub
 }
 
 ServiceTask::ServiceTask() {
 	logger = LoggerFactory::getLogger("ServiceTask");
+	fd = -1;
+	isSSLEnabled = false;
+	ctx = NULL;
+	params = NULL;
 }
 
 void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std::string& value)
@@ -106,7 +112,7 @@ std::map<std::string,std::string> ServiceTask::getSessionDataFromDistocache(cons
 	DistGlobalCache globalMap;
 	try {
 		mp = globalMap.getMap<std::string,std::string>(sessionId);
-	} catch (...) {
+	} catch(const std::exception& e) {
 		logger << "error readin map value"<< std::endl;
 	}
 	return mp;
@@ -288,7 +294,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 				ifmodsince = df.parse(ifmodsincehdr);
 				isifmodsincvalid = true;
 				logger << "Parsed date success" << std::endl;
-			} catch(...) {
+			} catch(const std::exception& e) {
 				isifmodsincvalid = false;
 			}
 
@@ -585,7 +591,6 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 
 void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 {
-
 	res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 	this->serverRootDirectory = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory;
 	try
@@ -800,11 +805,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
 		}
 	}
-	catch(const char* err)
-	{
-		logger << "Exception occurred while processing ServiceTask request - " << err << std::endl;
-	}
-	catch(...)
+	catch(const std::exception& e)
 	{
 		logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
 	}

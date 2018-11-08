@@ -51,7 +51,7 @@ void Bigint::create(const std::string& value)
 	std::string temp = StringUtil::trimCopy(value);
 	int minusSign = temp.find_last_of("-");
 	if(minusSign>0)
-		throw "Invalid -";
+		throw std::runtime_error("Invalid -");
 	else if(minusSign==0)
 	{
 		isPositive = false;
@@ -71,8 +71,8 @@ void Bigint::create(const std::string& value)
 			int x = CastUtil::lexical_cast<int>(temp.substr(temp.length()-NUM_LENGTH));
 			temp = temp.substr(0, temp.length()-NUM_LENGTH);
 			parts.push_back(x);
-		} catch(...) {
-			throw "Invalid Bigint value";
+		} catch(const std::exception& e) {
+			throw std::runtime_error("Invalid Bigint value");
 		}
 	}
 	if(temp.length()>0)
@@ -80,8 +80,8 @@ void Bigint::create(const std::string& value)
 		try {
 			int x = CastUtil::lexical_cast<int>(temp);
 			parts.push_back(x);
-		} catch(...) {
-			throw "Invalid Bigint value";
+		} catch(const std::exception& e) {
+			throw std::runtime_error("Invalid Bigint value");
 		}
 	}
 	if(parts.at(parts.size()-1)==0)
@@ -340,7 +340,7 @@ void Bigint::multiply(const Bigint& number)
 			try {
 				Bigint num(numstr);
 				mulResult.internalAdd(num);
-			} catch (...) {
+			} catch(const std::exception& e) {
 			}
 		}
 	}
@@ -389,7 +389,7 @@ void Bigint::internalDivide(const Bigint& number, const bool& isDecimal, const i
 		decompose(fnvalue, snvalue, number, recurse, build, isDecimal, precision);
 		try {
 			create(build);
-		} catch (...) {
+		} catch(const std::exception& e) {
 		}
 	}
 }
@@ -411,7 +411,7 @@ int Bigint::decompose(std::string fnvalue, std::string snvalue, const Bigint& nu
 				fntemp = fnvalue.substr(0, len);
 				fntmp.create(fntemp);
 			}
-		} catch (...) {
+		} catch(const std::exception& e) {
 		}
 	}
 	else if(diff<0)
@@ -500,7 +500,7 @@ int Bigint::decompose(std::string fnvalue, std::string snvalue, const Bigint& nu
 			}
 		}
 		recurse = decompose((fbtemp.toString()==ZERO?"":fbtemp.toString())  + fnvalue, snvalue, number, recurse, build, isDecimal, precision);
-	} catch (...) {
+	} catch(const std::exception& e) {
 		// TODO Auto-generated catch block
 	}
 	return recurse;

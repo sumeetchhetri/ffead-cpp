@@ -8,6 +8,8 @@ else
 	export FFEAD_CPP_PATH=`echo $(dirname $(readlink -f $0))`
 fi
 
+export ODBCINI=$FFEAD_CPP_PATH/resources/odbc.ini
+export ODBCSYSINI=$FFEAD_CPP_PATH/resources
 echo $FFEAD_CPP_PATH
 export LD_LIBRARY_PATH=$FFEAD_CPP_PATH/lib:$LD_LIBRARY_PATH
 echo $LD_LIBRARY_PATH

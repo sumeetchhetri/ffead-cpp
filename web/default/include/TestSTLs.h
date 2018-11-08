@@ -30,364 +30,354 @@
 #include "deque"
 #include "set"
 #include "list"
+#include "Date.h"
+
 class TestSTLs {
-	std::list<int> vpli;
-	std::vector<int> vpvi;
-	std::set<int> vpls;
-	std::multiset<int> vpmsi;
-	std::queue<int> vpqi;
-	std::deque<int> vpdi;
-
-	std::list<int>* vppli;
-	std::vector<int>* vppvi;
-	std::set<int>* vppls;
-	std::multiset<int>* vppmsi;
-	std::queue<int>* vppqi;
-	std::deque<int>* vppdi;
 public:
-	int mi;
+	bool _1;
+	char _2;
+	unsigned char _3;
+	short _4;
+	unsigned short _5;
+	int _6;
+	unsigned int _7;
+	long _8;
+	unsigned long _9;
+	long long _10;
+	unsigned long long _11;
+	float _12;
+	double _13;
+	long double _14;
+	std::string _15;
+	Date _16;
+	Test _17;
+	std::set<bool> _c_1;
+	std::multiset<bool> _c_2;
+	std::list<bool> _c_3;
+	std::vector<bool> _c_4;
+	std::queue<bool> _c_5;
+	std::deque<bool> _c_6;
+	std::set<char> _c_7;
+	std::multiset<char> _c_8;
+	std::list<char> _c_9;
+	std::vector<char> _c_10;
+	std::queue<char> _c_11;
+	std::deque<char> _c_12;
+	std::set<unsigned char> _c_13;
+	std::multiset<unsigned char> _c_14;
+	std::list<unsigned char> _c_15;
+	std::vector<unsigned char> _c_16;
+	std::queue<unsigned char> _c_17;
+	std::deque<unsigned char> _c_18;
+	std::set<short> _c_19;
+	std::multiset<short> _c_20;
+	std::list<short> _c_21;
+	std::vector<short> _c_22;
+	std::queue<short> _c_23;
+	std::deque<short> _c_24;
+	std::set<unsigned short> _c_25;
+	std::multiset<unsigned short> _c_26;
+	std::list<unsigned short> _c_27;
+	std::vector<unsigned short> _c_28;
+	std::queue<unsigned short> _c_29;
+	std::deque<unsigned short> _c_30;
+	std::set<int> _c_31;
+	std::multiset<int> _c_32;
+	std::list<int> _c_33;
+	std::vector<int> _c_34;
+	std::queue<int> _c_35;
+	std::deque<int> _c_36;
+	std::set<unsigned int> _c_37;
+	std::multiset<unsigned int> _c_38;
+	std::list<unsigned int> _c_39;
+	std::vector<unsigned int> _c_40;
+	std::queue<unsigned int> _c_41;
+	std::deque<unsigned int> _c_42;
+	std::set<long> _c_43;
+	std::multiset<long> _c_44;
+	std::list<long> _c_45;
+	std::vector<long> _c_46;
+	std::queue<long> _c_47;
+	std::deque<long> _c_48;
+	std::set<unsigned long> _c_49;
+	std::multiset<unsigned long> _c_50;
+	std::list<unsigned long> _c_51;
+	std::vector<unsigned long> _c_52;
+	std::queue<unsigned long> _c_53;
+	std::deque<unsigned long> _c_54;
+	std::set<long long> _c_55;
+	std::multiset<long long> _c_56;
+	std::list<long long> _c_57;
+	std::vector<long long> _c_58;
+	std::queue<long long> _c_59;
+	std::deque<long long> _c_60;
+	std::set<unsigned long long> _c_61;
+	std::multiset<unsigned long long> _c_62;
+	std::list<unsigned long long> _c_63;
+	std::vector<unsigned long long> _c_64;
+	std::queue<unsigned long long> _c_65;
+	std::deque<unsigned long long> _c_66;
+	std::set<float> _c_67;
+	std::multiset<float> _c_68;
+	std::list<float> _c_69;
+	std::vector<float> _c_70;
+	std::queue<float> _c_71;
+	std::deque<float> _c_72;
+	std::set<double> _c_73;
+	std::multiset<double> _c_74;
+	std::list<double> _c_75;
+	std::vector<double> _c_76;
+	std::queue<double> _c_77;
+	std::deque<double> _c_78;
+	std::set<long double> _c_79;
+	std::multiset<long double> _c_80;
+	std::list<long double> _c_81;
+	std::vector<long double> _c_82;
+	std::queue<long double> _c_83;
+	std::deque<long double> _c_84;
+	std::set<std::string> _c_85;
+	std::multiset<std::string> _c_86;
+	std::list<std::string> _c_87;
+	std::vector<std::string> _c_88;
+	std::queue<std::string> _c_89;
+	std::deque<std::string> _c_90;
+	std::set<Date> _c_91;
+	std::multiset<Date> _c_92;
+	std::list<Date> _c_93;
+	std::vector<Date> _c_94;
+	std::queue<Date> _c_95;
+	std::deque<Date> _c_96;
+	std::set<Test> _c_97;
+	std::multiset<Test> _c_98;
+	std::list<Test> _c_99;
+	std::vector<Test> _c_100;
+	std::queue<Test> _c_101;
+	std::deque<Test> _c_102;
 
-	std::list<int> vli;
-	std::list<std::string> vls;
-	std::list<double> vld;
-	std::list<long> vll;
-	std::list<bool> vlb;
-	std::list<short> vlsh;
-	std::list<YObject> vlyo;
-
-	std::vector<int> vvi;
-	std::vector<std::string> vvs;
-	std::vector<double> vvd;
-	std::vector<long> vvl;
-	std::vector<bool> vvb;
-	std::vector<short> vvsh;
-	std::vector<YObject> vvyo;
-
-	std::deque<int> vdi;
-	std::deque<std::string> vds;
-	std::deque<double> vdd;
-	std::deque<long> vdl;
-	std::deque<bool> vdb;
-	std::deque<short> vdsh;
-	std::deque<YObject> vdyo;
-
-	std::set<int> vsi;
-	std::set<std::string> vss;
-	std::set<double> vsd;
-	std::set<long> vsl;
-	std::set<short> vssh;
-	std::set<Test> vsyo;
-
-	std::multiset<int> vmsi;
-	std::multiset<std::string> vmss;
-	std::multiset<double> vmsd;
-	std::multiset<long> vmsl;
-	std::multiset<short> vmssh;
-	std::multiset<Test> vmsyo;
-
-	std::queue<int> vqi;
-	std::queue<std::string> vqs;
-	std::queue<double> vqd;
-	std::queue<long> vql;
-	std::queue<bool> vqb;
-	std::queue<short> vqsh;
-	std::queue<YObject> vqyo;
-
-	std::list<int>* vpppli;
-	std::list<std::string>* vpppls;
-	std::list<double>* vpppld;
-	std::list<long>* vpppll;
-	std::list<bool>* vppplb;
-	std::list<short>* vppplsh;
-	std::list<YObject>* vppplyo;
-
-	std::vector<int>* vpppvi;
-	std::vector<std::string>* vpppvs;
-	std::vector<double>* vpppvd;
-	std::vector<long>* vpppvl;
-	std::vector<bool>* vpppvb;
-	std::vector<short>* vpppvsh;
-	std::vector<YObject>* vpppvyo;
-
-	std::deque<int>* vpppdi;
-	std::deque<std::string>* vpppds;
-	std::deque<double>* vpppdd;
-	std::deque<long>* vpppdl;
-	std::deque<bool>* vpppdb;
-	std::deque<short>* vpppdsh;
-	std::deque<YObject>* vpppdyo;
-
-	std::set<int>* vpppsi;
-	std::set<std::string>* vpppss;
-	std::set<double>* vpppsd;
-	std::set<long>* vpppsl;
-	std::set<short>* vpppssh;
-	std::set<Test>* vpppsyo;
-
-	std::multiset<int>* vpppmsi;
-	std::multiset<std::string>* vpppmss;
-	std::multiset<double>* vpppmsd;
-	std::multiset<long>* vpppmsl;
-	std::multiset<short>* vpppmssh;
-	std::multiset<Test>* vpppmsyo;
-
-	std::queue<int>* vpppqi;
-	std::queue<std::string>* vpppqs;
-	std::queue<double>* vpppqd;
-	std::queue<long>* vpppql;
-	std::queue<bool>* vpppqb;
-	std::queue<short>* vpppqsh;
-	std::queue<YObject>* vpppqyo;
-
-	YObject* yobjectp;
-
-	YObject yobject;
-public:
-	std::deque<int> getVpdi() const
-	{
-		return vpdi;
+	TestSTLs() {
+		_1 = true;
+		_2 = 'a';
+		_3 = 129;
+		_4 = 2;
+		_5 = 130;
+		_6 = 222;
+		_7 = 32999;
+		_8 = 222;
+		_9 = 32999;
+		_10 = 23456789;
+		_11 = 23456899665;
+		_12 = 1.67;
+		_13 = 2.34;
+		_14 = 2.34444544;
+		_15 = "String";
+		_16 = Date();
+		_17 = Test(2,"Name");
+		_c_1.insert(true);
+		_c_1.insert(true);
+		_c_2.insert(true);
+		_c_2.insert(true);
+		_c_3.push_back(true);
+		_c_3.push_back(true);
+		_c_4.push_back(true);
+		_c_4.push_back(true);
+		_c_5.push(true);
+		_c_5.push(true);
+		_c_6.push_back(true);
+		_c_6.push_back(true);
+		_c_7.insert('a');
+		_c_7.insert('a');
+		_c_8.insert('a');
+		_c_8.insert('a');
+		_c_9.push_back('a');
+		_c_9.push_back('a');
+		_c_10.push_back('a');
+		_c_10.push_back('a');
+		_c_11.push('a');
+		_c_11.push('a');
+		_c_12.push_back('a');
+		_c_12.push_back('a');
+		_c_13.insert(129);
+		_c_13.insert(129);
+		_c_14.insert(129);
+		_c_14.insert(129);
+		_c_15.push_back(129);
+		_c_15.push_back(129);
+		_c_16.push_back(129);
+		_c_16.push_back(129);
+		_c_17.push(129);
+		_c_17.push(129);
+		_c_18.push_back(129);
+		_c_18.push_back(129);
+		_c_19.insert(2);
+		_c_19.insert(2);
+		_c_20.insert(2);
+		_c_20.insert(2);
+		_c_21.push_back(2);
+		_c_21.push_back(2);
+		_c_22.push_back(2);
+		_c_22.push_back(2);
+		_c_23.push(2);
+		_c_23.push(2);
+		_c_24.push_back(2);
+		_c_24.push_back(2);
+		_c_25.insert(130);
+		_c_25.insert(130);
+		_c_26.insert(130);
+		_c_26.insert(130);
+		_c_27.push_back(130);
+		_c_27.push_back(130);
+		_c_28.push_back(130);
+		_c_28.push_back(130);
+		_c_29.push(130);
+		_c_29.push(130);
+		_c_30.push_back(130);
+		_c_30.push_back(130);
+		_c_31.insert(222);
+		_c_31.insert(222);
+		_c_32.insert(222);
+		_c_32.insert(222);
+		_c_33.push_back(222);
+		_c_33.push_back(222);
+		_c_34.push_back(222);
+		_c_34.push_back(222);
+		_c_35.push(222);
+		_c_35.push(222);
+		_c_36.push_back(222);
+		_c_36.push_back(222);
+		_c_37.insert(32999);
+		_c_37.insert(32999);
+		_c_38.insert(32999);
+		_c_38.insert(32999);
+		_c_39.push_back(32999);
+		_c_39.push_back(32999);
+		_c_40.push_back(32999);
+		_c_40.push_back(32999);
+		_c_41.push(32999);
+		_c_41.push(32999);
+		_c_42.push_back(32999);
+		_c_42.push_back(32999);
+		_c_43.insert(222);
+		_c_43.insert(222);
+		_c_44.insert(222);
+		_c_44.insert(222);
+		_c_45.push_back(222);
+		_c_45.push_back(222);
+		_c_46.push_back(222);
+		_c_46.push_back(222);
+		_c_47.push(222);
+		_c_47.push(222);
+		_c_48.push_back(222);
+		_c_48.push_back(222);
+		_c_49.insert(32999);
+		_c_49.insert(32999);
+		_c_50.insert(32999);
+		_c_50.insert(32999);
+		_c_51.push_back(32999);
+		_c_51.push_back(32999);
+		_c_52.push_back(32999);
+		_c_52.push_back(32999);
+		_c_53.push(32999);
+		_c_53.push(32999);
+		_c_54.push_back(32999);
+		_c_54.push_back(32999);
+		_c_55.insert(23456789);
+		_c_55.insert(23456789);
+		_c_56.insert(23456789);
+		_c_56.insert(23456789);
+		_c_57.push_back(23456789);
+		_c_57.push_back(23456789);
+		_c_58.push_back(23456789);
+		_c_58.push_back(23456789);
+		_c_59.push(23456789);
+		_c_59.push(23456789);
+		_c_60.push_back(23456789);
+		_c_60.push_back(23456789);
+		_c_61.insert(23456899665);
+		_c_61.insert(23456899665);
+		_c_62.insert(23456899665);
+		_c_62.insert(23456899665);
+		_c_63.push_back(23456899665);
+		_c_63.push_back(23456899665);
+		_c_64.push_back(23456899665);
+		_c_64.push_back(23456899665);
+		_c_65.push(23456899665);
+		_c_65.push(23456899665);
+		_c_66.push_back(23456899665);
+		_c_66.push_back(23456899665);
+		_c_67.insert(1.67);
+		_c_67.insert(1.67);
+		_c_68.insert(1.67);
+		_c_68.insert(1.67);
+		_c_69.push_back(1.67);
+		_c_69.push_back(1.67);
+		_c_70.push_back(1.67);
+		_c_70.push_back(1.67);
+		_c_71.push(1.67);
+		_c_71.push(1.67);
+		_c_72.push_back(1.67);
+		_c_72.push_back(1.67);
+		_c_73.insert(2.34);
+		_c_73.insert(2.34);
+		_c_74.insert(2.34);
+		_c_74.insert(2.34);
+		_c_75.push_back(2.34);
+		_c_75.push_back(2.34);
+		_c_76.push_back(2.34);
+		_c_76.push_back(2.34);
+		_c_77.push(2.34);
+		_c_77.push(2.34);
+		_c_78.push_back(2.34);
+		_c_78.push_back(2.34);
+		_c_79.insert(2.34444544);
+		_c_79.insert(2.34444544);
+		_c_80.insert(2.34444544);
+		_c_80.insert(2.34444544);
+		_c_81.push_back(2.34444544);
+		_c_81.push_back(2.34444544);
+		_c_82.push_back(2.34444544);
+		_c_82.push_back(2.34444544);
+		_c_83.push(2.34444544);
+		_c_83.push(2.34444544);
+		_c_84.push_back(2.34444544);
+		_c_84.push_back(2.34444544);
+		_c_85.insert("String");
+		_c_85.insert("String");
+		_c_86.insert("String");
+		_c_86.insert("String");
+		_c_87.push_back("String");
+		_c_87.push_back("String");
+		_c_88.push_back("String");
+		_c_88.push_back("String");
+		_c_89.push("String");
+		_c_89.push("String");
+		_c_90.push_back("String");
+		_c_90.push_back("String");
+		_c_91.insert(Date());
+		_c_91.insert(Date());
+		_c_92.insert(Date());
+		_c_92.insert(Date());
+		_c_93.push_back(Date());
+		_c_93.push_back(Date());
+		_c_94.push_back(Date());
+		_c_94.push_back(Date());
+		_c_95.push(Date());
+		_c_95.push(Date());
+		_c_96.push_back(Date());
+		_c_96.push_back(Date());
+		_c_97.insert(Test(2,"Name"));
+		_c_97.insert(Test(2,"Name"));
+		_c_98.insert(Test(2,"Name"));
+		_c_98.insert(Test(2,"Name"));
+		_c_99.push_back(Test(2,"Name"));
+		_c_99.push_back(Test(2,"Name"));
+		_c_100.push_back(Test(2,"Name"));
+		_c_100.push_back(Test(2,"Name"));
+		_c_101.push(Test(2,"Name"));
+		_c_101.push(Test(2,"Name"));
+		_c_102.push_back(Test(2,"Name"));
+		_c_102.push_back(Test(2,"Name"));
 	}
-
-	void setVpdi(std::deque<int> vpdi)
-	{
-		this->vpdi = vpdi;
-	}
-
-	std::list<int> getVpli() const
-	{
-		return vpli;
-	}
-
-	void setVpli(std::list<int> vpli)
-	{
-		this->vpli = vpli;
-	}
-
-	std::set<int> getVpls() const
-	{
-		return vpls;
-	}
-
-	void setVpls(std::set<int> vpls)
-	{
-		this->vpls = vpls;
-	}
-
-	std::multiset<int> getVpmsi() const
-	{
-		return vpmsi;
-	}
-
-	void setVpmsi(std::multiset<int> vpmsi)
-	{
-		this->vpmsi = vpmsi;
-	}
-
-	std::queue<int> getVpqi() const
-	{
-		return vpqi;
-	}
-
-	void setVpqi(std::queue<int> vpqi)
-	{
-		this->vpqi = vpqi;
-	}
-
-	std::vector<int> getVpvi() const
-	{
-		return vpvi;
-	}
-
-	void setVpvi(std::vector<int> vpvi)
-	{
-		this->vpvi = vpvi;
-	}
-
-	std::deque<int>* getVppdi() const {
-		return vppdi;
-	}
-
-	void setVppdi(std::deque<int>* vppdi) {
-		this->vppdi = vppdi;
-	}
-
-	std::list<int>* getVppli() const {
-		return vppli;
-	}
-
-	void setVppli(std::list<int>* vppli) {
-		this->vppli = vppli;
-	}
-
-	std::set<int>* getVppls() const {
-		return vppls;
-	}
-
-	void setVppls(std::set<int>* vppls) {
-		this->vppls = vppls;
-	}
-
-	std::multiset<int>* getVppmsi() const {
-		return vppmsi;
-	}
-
-	void setVppmsi(std::multiset<int>* vppmsi) {
-		this->vppmsi = vppmsi;
-	}
-
-	std::queue<int>* getVppqi() const {
-		return vppqi;
-	}
-
-	void setVppqi(std::queue<int>* vppqi) {
-		this->vppqi = vppqi;
-	}
-
-	std::vector<int>* getVppvi() const {
-		return vppvi;
-	}
-
-	void setVppvi(std::vector<int>* vppvi) {
-		this->vppvi = vppvi;
-	}
-
-	bool operator <(TestSTLs t) const
-	{
-		return this->mi < t.mi;
-	}
-
-	TestSTLs()
-	{
-	}
-
-	virtual ~TestSTLs()
-	{
-	}
-
-	std::string toString()
-	{
-		std::string str;
-		for (int var = 0; var < (int)vvi.size(); ++var) {
-			str += CastUtil::lexical_cast<std::string>(vvi.at(var));
-		}
-		for (int var = 0; var < (int)vvsh.size(); ++var) {
-			str += CastUtil::lexical_cast<std::string>(vvsh.at(var));
-		}
-		for (int var = 0; var < (int)vvl.size(); ++var) {
-			str += CastUtil::lexical_cast<std::string>(vvl.at(var));
-		}
-		for (int var = 0; var < (int)vvd.size(); ++var) {
-			str += CastUtil::lexical_cast<std::string>(vvd.at(var));
-		}
-		for (int var = 0; var < (int)vvb.size(); ++var) {
-			str += CastUtil::lexical_cast<std::string>(vvb.at(var));
-		}
-		for (int var = 0; var < (int)vvs.size(); ++var) {
-			str += CastUtil::lexical_cast<std::string>(vvs.at(var));
-		}
-
-		for (std::list<int>::iterator it=vli.begin();it!=vli.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::list<short>::iterator it=vlsh.begin();it!=vlsh.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::list<long>::iterator it=vll.begin();it!=vll.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::list<double>::iterator it=vld.begin();it!=vld.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::list<bool>::iterator it=vlb.begin();it!=vlb.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::list<std::string>::iterator it=vls.begin();it!=vls.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-
-		for (std::set<int>::iterator it=vsi.begin();it!=vsi.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::set<short>::iterator it=vssh.begin();it!=vssh.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::set<long>::iterator it=vsl.begin();it!=vsl.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::set<double>::iterator it=vsd.begin();it!=vsd.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::set<std::string>::iterator it=vss.begin();it!=vss.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-
-		for (std::multiset<int>::iterator it=vmsi.begin();it!=vmsi.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::multiset<short>::iterator it=vmssh.begin();it!=vmssh.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::multiset<long>::iterator it=vmsl.begin();it!=vmsl.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::multiset<double>::iterator it=vmsd.begin();it!=vmsd.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::multiset<std::string>::iterator it=vmss.begin();it!=vmss.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-
-		for (std::deque<int>::iterator it=vdi.begin();it!=vdi.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::deque<short>::iterator it=vdsh.begin();it!=vdsh.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::deque<long>::iterator it=vdl.begin();it!=vdl.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::deque<double>::iterator it=vdd.begin();it!=vdd.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::deque<bool>::iterator it=vdb.begin();it!=vdb.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-		for (std::deque<std::string>::iterator it=vds.begin();it!=vds.end();it++) {
-			str += CastUtil::lexical_cast<std::string>(*it);
-		}
-
-		std::queue<int> temp = vqi;
-		while (!temp.empty()) {
-			str += CastUtil::lexical_cast<std::string>(temp.front());
-			temp.pop();
-		}
-		std::queue<short> tempsh = vqsh;
-		while (!tempsh.empty()) {
-			str += CastUtil::lexical_cast<std::string>(tempsh.front());
-			tempsh.pop();
-		}
-		std::queue<long> templ = vql;
-		while (!templ.empty()) {
-			str += CastUtil::lexical_cast<std::string>(templ.front());
-			templ.pop();
-		}
-		std::queue<double> tempd = vqd;
-		while (!tempd.empty()) {
-			str += CastUtil::lexical_cast<std::string>(tempd.front());
-			tempd.pop();
-		}
-		std::queue<bool> tempb = vqb;
-		while (!tempb.empty()) {
-			str += CastUtil::lexical_cast<std::string>(tempb.front());
-			tempb.pop();
-		}
-		std::queue<std::string> temps = vqs;
-		while (!temps.empty()) {
-			str += CastUtil::lexical_cast<std::string>(temps.front());
-			temps.pop();
-		}
-		return str;
-	}
+	~TestSTLs() {}
 };
 
 #endif /* TESTSTLS_H_ */

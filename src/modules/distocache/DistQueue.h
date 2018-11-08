@@ -35,7 +35,7 @@ public:
 		cl = PooledDistoCacheConnectionFactory::getConnection();
 		try {
 			cl->allocate(cacheKey, "queue");
-		} catch(const std::string& err) {
+		} catch(const std::exception& err) {
 			if(err!="Entry already exists") {
 				throw err;
 			}
@@ -62,7 +62,7 @@ public:
 	}
 	std::string get_pop()
 	{
-		cl->popGetValueQueue(cacheKey);
+		return cl->popGetValueQueue(cacheKey);
 	}
 	size_t size()
 	{

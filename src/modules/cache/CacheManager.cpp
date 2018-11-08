@@ -11,28 +11,34 @@ std::map<std::string, CacheManager*> CacheManager::caches;
 std::string CacheManager::defDsnName;
 
 void CacheManager::initCache(const ConnectionProperties& props, const std::string& appName) {
+	Logger logger = LoggerFactory::getLogger("CacheManager");
 	std::string name = StringUtil::trimCopy(props.getName());
 	if(name=="")
 	{
-		throw "Cache Name cannot be blank";
+		throw std::runtime_error("Cache Name cannot be blank");
 	}
 	std::string appNameN = CommonUtils::getAppName(appName);
 	name = appNameN + name;
 	if(caches.find(name)!=caches.end())
 	{
-		throw "Cache Already exists";
+		throw std::runtime_error("Cache Already exists");
 	}
 	if(props.getProperty("_isdefault_")=="true") {
 		defDsnName = StringUtil::trimCopy(props.getName());
 	}
-	CacheManager* mgr = new CacheManager(props);
-	caches[name] = mgr;
+
+	try {
+		CacheManager* mgr = new CacheManager(props);
+		caches[name] = mgr;
+	} catch (const std::exception& e) {
+		logger.info("Error initializing Cache " + appName + "@" + props.getName() + " " + std::string(e.what()));
+	}
 
 	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 	if(dlib == NULL)
 	{
 		std::cerr << dlerror() << std::endl;
-		throw "Cannot load application shared library";
+		throw std::runtime_error("Cannot load application shared library");
 	}
 	Reflector ref(dlib);
 	if(props.getProperty("init")!="") {
@@ -55,7 +61,8 @@ void CacheManager::initCache(const ConnectionProperties& props, const std::strin
 							ref.invokeMethodGVP(_temp, meth, valus);
 						}
 					}
-				} catch(...) {
+				} catch(const std::exception& e) {
+					logger.info("Error during init call for Cache " + appName + "@" + props.getName() + " " + std::string(e.what()));
 				}
 				ref.destroy(_temp, v.at(0), appName);
 			}
@@ -86,7 +93,7 @@ CacheInterface* CacheManager::getImpl(std::string name) {
 	name = appName + name;
 	if(caches.find(name)==caches.end())
 	{
-		throw "Cache Not found...";
+		throw std::runtime_error("Cache Not found...");
 	}
 	CacheManager* cchMgr = caches[name];
 	CacheInterface* t = NULL;
@@ -111,6 +118,8 @@ CacheInterface* CacheManager::getImpl(std::string name) {
 }
 
 CacheManager::CacheManager(const ConnectionProperties& props) {
+	logger = LoggerFactory::getLogger("CacheManager");
+	this->reflector = NULL;
 	this->pool = NULL;
 	this->props = props;
 	if(StringUtil::toLowerCopy(props.getType()) == "memory") {

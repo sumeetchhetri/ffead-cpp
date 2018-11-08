@@ -286,6 +286,9 @@ void* Http11WebSocketHandler::readRequest(void*& context, int& pending, int& req
 			reqPos = startRequest();
 			break;
 		}
+
+		delete frame;
+		frame = NULL;
 	}
 
 	if(pending==(int)buffer.length())

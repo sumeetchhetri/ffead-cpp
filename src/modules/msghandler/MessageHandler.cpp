@@ -34,7 +34,7 @@ MessageHandler* MessageHandler::instance = NULL;
 Message MessageHandler::readMessageFromQ(const std::string& fileName, const bool& erase)
 {
 	std::ifstream file;
-	ifstream::pos_type fileSize;
+	size_t fileSize;
 	char *fileContents, *remcontents;
 	file.open(fileName.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
 	if (file.is_open())

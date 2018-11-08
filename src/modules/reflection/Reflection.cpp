@@ -105,12 +105,8 @@ void Reflection::collectInfo(std::string data, const std::string& flag, ClassStr
 					std::cout << prg << " - Method marker Valid" << std::endl;
 					ps.markers[m.getName()].push_back(m);
 				}
-			} catch(std::string& c) {
-				std::cout << prg << " - " << c << std::endl;
-			} catch(const char* c) {
-				std::cout << prg << " - " << std::string(c) << std::endl;
-			} catch(char* c) {
-				std::cout << prg << " - " << std::string(c) << std::endl;
+			} catch(const std::exception& c) {
+				std::cout << prg << " - " <<  c.what() << std::endl;
 			}
 		}
 		if(flag=="public")
@@ -140,12 +136,8 @@ void Reflection::collectInfo(std::string data, const std::string& flag, ClassStr
 					std::cout << prg << " - Property marker Valid" << std::endl;
 					ps.markers[m.getName()].push_back(m);
 				}
-			} catch(std::string& c) {
-				std::cout << prg << " - " << c << std::endl;
-			} catch(const char* c) {
-				std::cout << prg << " - " << std::string(c) << std::endl;
-			} catch(char* c) {
-				std::cout << prg << " - " << std::string(c) << std::endl;
+			} catch(const std::exception& c) {
+				std::cout << prg << " - " <<  c.what() << std::endl;
 			}
 		}
 		if(flag=="public")
@@ -424,12 +416,8 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 						std::cout << prg << " - Valid" << std::endl;
 					}
 					cstruc.markers[m.getName()].push_back(m);
-				} catch(std::string& c) {
-					std::cout << prg << " - " << c << std::endl;
-				} catch(const char* c) {
-					std::cout << prg << " - " << std::string(c) << std::endl;
-				} catch(char* c) {
-					std::cout << prg << " - " << std::string(c) << std::endl;
+				} catch(const std::exception& c) {
+					std::cout << prg << " - " <<  c.what() << std::endl;
 				}
 			}
 			clsvec[nmspc] = cstruc;
@@ -1334,12 +1322,8 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 										std::cout << argprg << " - Valid" << std::endl;
 										ms.argMarkers[argNumm][m.getName()].push_back(m);
 									}
-								} catch(std::string& c) {
-									std::cout << argprg << " - " << c << std::endl;
-								} catch(const char* c) {
-									std::cout << argprg << " - " << std::string(c) << std::endl;
-								} catch(char* c) {
-									std::cout << argprg << " - " << std::string(c) << std::endl;
+								} catch(const std::exception& c) {
+									std::cout << argprg << " - " <<  c.what() << std::endl;
 								}
 							}
 
@@ -1435,7 +1419,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (*_obj<="+valsa+");";
+								opers += "\n\ttry{*_retVal = (*_obj<="+valsa+");} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1458,7 +1442,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (*_obj>="+valsa+");";
+								opers += "\n\ttry{*_retVal = (*_obj>="+valsa+");} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1481,7 +1465,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (*_obj<"+valsa+");";
+								opers += "\n\ttry{*_retVal = (*_obj<"+valsa+");} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1504,7 +1488,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (*_obj>"+valsa+");";
+								opers += "\n\ttry{*_retVal = (*_obj>"+valsa+");} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1527,7 +1511,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (*_obj=="+valsa+");";
+								opers += "\n\ttry{*_retVal = (*_obj=="+valsa+");} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1550,7 +1534,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (*_obj!="+valsa+");";
+								opers += "\n\ttry{*_retVal = (*_obj!="+valsa+");} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1573,7 +1557,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (!*_obj);";
+								opers += "\n\ttry{*_retVal = (!*_obj);} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1596,7 +1580,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (*_obj+"+valsa+");";
+								opers += "\n\ttry{*_retVal = (*_obj+"+valsa+");} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1619,7 +1603,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (*_obj-"+valsa+");";
+								opers += "\n\ttry{*_retVal = (*_obj-"+valsa+");} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1642,7 +1626,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (*_obj/"+valsa+");";
+								opers += "\n\ttry{*_retVal = (*_obj/"+valsa+");} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1665,7 +1649,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							{
 								opers += "\n\t"+methpm.at(0)+" *_retVal=new "+methpm.at(0)+";\n";
 								opers += valsd;
-								opers += "\n\t*_retVal = (*_obj*"+valsa+");";
+								opers += "\n\ttry{*_retVal = (*_obj*"+valsa+");} catch(...) {delete ("+methpm.at(0)+"*)_retVal;"+valsades+"throw;}\n";
 								opers += valsades;
 								opers += "\n\treturn _retVal;";
 							}
@@ -1729,11 +1713,11 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								methods += valsd;
 								if(methstat)
 								{
-									methods += "\n\tvoid* returnValue=NULL;\n\t_"+classStructure.getFullyQualifiedClassName()+"::"+methpm.at(1)+"("+valsa+");";
+									methods += "\n\tvoid* returnValue=NULL;\n\t_"+classStructure.getFullyQualifiedClassName()+"::"+methpm.at(1)+"("+valsa+");\n";
 								}
 								else
 								{
-									methods += "\n\tvoid* returnValue=NULL;\n\t_obj->"+methpm.at(1)+"("+valsa+");";
+									methods += "\n\tvoid* returnValue=NULL;\n\t_obj->"+methpm.at(1)+"("+valsa+");\n";
 								}
 								methods += valsades;
 								methods += "\n\treturn returnValue;";
@@ -1745,11 +1729,11 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 								methods += valsd;
 								if(methstat)
 								{
-									methods += "\n\t*_retVal = ("+classStructure.getFullyQualifiedClassName()+"::"+methpm.at(1)+"("+valsa+"));";
+									methods += "\n\ttry{*_retVal = ("+classStructure.getFullyQualifiedClassName()+"::"+methpm.at(1)+"("+valsa+"));} catch(...) {delete ("+fqcn+"*)_retVal;"+valsades+"throw;}\n";
 								}
 								else
 								{
-									methods += "\n\t*_retVal = (_obj->"+methpm.at(1)+"("+valsa+"));";
+									methods += "\n\ttry{*_retVal = (_obj->"+methpm.at(1)+"("+valsa+"));} catch(...) {delete ("+fqcn+"*)_retVal;"+valsades+"throw;}\n";
 								}
 								methods += valsades;
 								methods += "\n\treturn _retVal;";
@@ -2467,9 +2451,9 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 				+";\nvoid* serobject = base->getSerializableObject();\nbase->startObjectSerialization(serobject, \""
 				+classStructure.getTreatedClassName(true)+"\");\n";
 		typedefs += "\nvoid* " +ttapp+ "unSerialize" + classStructure.getTreatedClassName(true) + "(void* intermediateObject, SerializeBase* base)\n{\n";
-		typedefs += classStructure.getFullyQualifiedClassName()+" *__obj=new " + classStructure.getFullyQualifiedClassName()
-				 +";\nif(!base->isValidClassNamespace(intermediateObject, \""
-				 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\"))\n\treturn NULL;\n";
+		typedefs += "if(!base->isValidClassNamespace(intermediateObject, \""
+				 + classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\"))\n\treturn NULL;\n"
+				 + classStructure.getFullyQualifiedClassName()+" *__obj=new " + classStructure.getFullyQualifiedClassName() +";\n";
 		typedefs += "int totsize = base->getContainerSize(intermediateObject);\nfor(int i=0;i<totsize;i++)\n{\n";
 
 		std::string publf, privf, protf ,publm, privm, protm;
@@ -3414,82 +3398,22 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 
 		typedefs += "\n}\nreturn __obj;\n}\n";
 		typedefs += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Container(void* cintobject, SerializeBase* base, const std::string& _cont){\n"
-			 +"void* t = SerializeBase::getNewNestedContainer<"+classStructure.getFullyQualifiedClassName()
-			 +">(_cont);\nif(!base->isValidClassNamespace(cintobject, _cont+\"-"
-			 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\", true))\n\treturn NULL;\n"
+			 +"if(!base->isValidClassNamespace(cintobject, _cont+\"-"
+			 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\", true))\n\treturn NULL;\nvoid* t = SerializeBase::getNewNestedContainer<"+classStructure.getFullyQualifiedClassName()
+			 +">(_cont);\n"
 			 +"int totsize = base->getContainerSize(cintobject);\nfor(int i=0;i<totsize;i++)\n{\n"
 			 +"void* ciintobject = base->getContainerElement(cintobject, i);\n"
 			 +"if(ciintobject!=NULL)\n{\n"+classStructure.getFullyQualifiedClassName()+"* __val__ = ("
 			 +classStructure.getFullyQualifiedClassName()+"*)"+ttapp+"unSerialize"+classStructure.getTreatedClassName(true)
 			 +"(ciintobject, base);\nSerializeBase::addValueToNestedContainer<"+classStructure.getFullyQualifiedClassName()
 			 +">(_cont,*__val__,t);delete __val__;\n}\n}\nreturn t;\n}\n";
-		/*typedefs += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Dq(void* cintobject, SerializeBase* base){\nstd::deque<"
-				 +classStructure.getFullyQualifiedClassName()+"> *t = new std::deque<"+classStructure.getFullyQualifiedClassName()
-				 +">;\nif(!base->isValidClassNamespace(cintobject, \"deque-"
-				 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\", true))\n\treturn NULL;\n"
-				 +"int totsize = base->getContainerSize(cintobject);\nfor(int i=0;i<totsize;i++)\n{\n"
-				 +"void* ciintobject = base->getContainerElement(cintobject, i);\n"
-				 +"if(ciintobject!=NULL)\n{\n"+classStructure.getFullyQualifiedClassName()+"* __val__ = ("
-				 +classStructure.getFullyQualifiedClassName()+"*)"+ttapp+"unSerialize"+classStructure.getTreatedClassName(true)
-				 +"(ciintobject, base);\nt->push_back(*__val__);delete __val__;\n}\n}\nreturn t;\n}\n";
-		typedefs += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Q(void* cintobject, SerializeBase* base){\nstd::queue<"
-				 +classStructure.getFullyQualifiedClassName()+"> *t = new std::queue<"+classStructure.getFullyQualifiedClassName()
-				 +">;\nif(!base->isValidClassNamespace(cintobject, \"queue-"
-				 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\", true))\n\treturn NULL;\n"
-				 +"int totsize = base->getContainerSize(cintobject);\nfor(int i=0;i<totsize;i++)\n{\n"
-				 +"void* ciintobject = base->getContainerElement(cintobject, i);\n"
-				 +"if(ciintobject!=NULL)\n{\n"+classStructure.getFullyQualifiedClassName()+"* __val__ = ("
-				 +classStructure.getFullyQualifiedClassName()+"*)"+ttapp+"unSerialize"+classStructure.getTreatedClassName(true)
-				 +"(ciintobject, base);\nt->push(*__val__);delete __val__;\n}\n}\nreturn t;\n}\n";
-		typedefs += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Lis(void* cintobject, SerializeBase* base){\nstd::list<"
-				 +classStructure.getFullyQualifiedClassName()+"> *t = new std::list<"+classStructure.getFullyQualifiedClassName()
-				 +">;\nif(!base->isValidClassNamespace(cintobject, \"list-"
-				 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\", true))\n\treturn NULL;\n"
-				 +"int totsize = base->getContainerSize(cintobject);\nfor(int i=0;i<totsize;i++)\n{\n"
-				 +"void* ciintobject = base->getContainerElement(cintobject, i);\n"
-				 +"if(ciintobject!=NULL)\n{\n"+classStructure.getFullyQualifiedClassName()+"* __val__ = ("
-				 +classStructure.getFullyQualifiedClassName()+"*)"+ttapp+"unSerialize"+classStructure.getTreatedClassName(true)
-				 +"(ciintobject, base);\nt->push_back(*__val__);delete __val__;\n}\n}\nreturn t;\n}\n";
-		typedefs += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Vec(void* cintobject, SerializeBase* base){\nstd::vector<"
-				 +classStructure.getFullyQualifiedClassName()+"> *t = new std::vector<"+classStructure.getFullyQualifiedClassName()
-				 +">;\nif(!base->isValidClassNamespace(cintobject, \"vector-"
-				 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\", true))\n\treturn NULL;\n"
-				 +"int totsize = base->getContainerSize(cintobject);\nfor(int i=0;i<totsize;i++)\n{\n"
-				 +"void* ciintobject = base->getContainerElement(cintobject, i);\n"
-				 +"if(ciintobject!=NULL)\n{\n"+classStructure.getFullyQualifiedClassName()+"* __val__ = ("
-				 +classStructure.getFullyQualifiedClassName()+"*)"+ttapp+"unSerialize"+classStructure.getTreatedClassName(true)
-				 +"(ciintobject, base);\nt->push_back(*__val__);delete __val__;\n}\n}\nreturn t;\n}\n";
-		classes += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Vec(void* cintobject, SerializeBase* base);\n"
-				+"void* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Q(void* cintobject, SerializeBase* base);\n"
-				+"void* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Dq(void* cintobject, SerializeBase* base);\n"
-				+"void* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Lis(void* cintobject, SerializeBase* base);\n";*/
 		classes += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Container(void* cintobject, SerializeBase* base, const std::string& _cont);\n";
 		if(classStructure.prosetser)
 		{
-			/*typedefs += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Set(void* cintobject, SerializeBase* base){\nstd::set<"
-					 +classStructure.getFullyQualifiedClassName()+"> *t = new std::set<"+classStructure.getFullyQualifiedClassName()
-					 +">;\nif(!base->isValidClassNamespace(cintobject, \"set-"
-					 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\", true))\n\treturn NULL;\n"
-					 +"int totsize = base->getContainerSize(cintobject);\nfor(int i=0;i<totsize;i++)\n{\n"
-					 +"void* ciintobject = base->getContainerElement(cintobject, i);\n"
-					 +"if(ciintobject!=NULL)\n{\n"+classStructure.getFullyQualifiedClassName()+"* __val__ = ("
-				 +classStructure.getFullyQualifiedClassName()+"*)"+ttapp+"unSerialize"+classStructure.getTreatedClassName(true)
-				 +"(ciintobject, base);\nt->insert(*__val__);delete __val__;\n}\n}\nreturn t;\n}\n";
-			typedefs += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"MulSet(void* cintobject, SerializeBase* base){\nstd::multiset<"
-					 +classStructure.getFullyQualifiedClassName()+"> *t = new std::multiset<"+classStructure.getFullyQualifiedClassName()
-					 +">;if(!base->isValidClassNamespace(cintobject, \"multiset-"
-					 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\", true))\n\treturn NULL;\n"
-					 +"int totsize = base->getContainerSize(cintobject);\nfor(int i=0;i<totsize;i++)\n{\n"
-					 +"void* ciintobject = base->getContainerElement(cintobject, i);\n"
-					 +"if(ciintobject!=NULL)\n{\n"+classStructure.getFullyQualifiedClassName()+"* __val__ = ("
-				 +classStructure.getFullyQualifiedClassName()+"*)"+ttapp+"unSerialize"+classStructure.getTreatedClassName(true)
-				 +"(ciintobject, base);\nt->insert(*__val__);delete __val__;\n}\n}\nreturn t;\n}\n";
-			classes += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"Set(void* cintobject, SerializeBase* base);\nvoid* "
-					+ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"MulSet(void* cintobject, SerializeBase* base);\n";*/
 			typedefs += "\nvoid* " +ttapp+ "unSerialize"+classStructure.getTreatedClassName(true)+"ContainerSV(void* cintobject, SerializeBase* base, const std::string& _cont){\n"
-					 +"void* t = SerializeBase::getNewNestedContainerSV<"+classStructure.getFullyQualifiedClassName()
-					 +">(_cont);\nif(!base->isValidClassNamespace(cintobject, _cont+\"-"
-					 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\", true))\n\treturn NULL;\n"
+					 +"if(!base->isValidClassNamespace(cintobject, _cont+\"-"
+					 +classStructure.getTreatedClassName(false)+"\", \""+classStructure.nmSpc+"\", true))\n\treturn NULL;\nvoid* t = SerializeBase::getNewNestedContainerSV<"+classStructure.getFullyQualifiedClassName()
+					 +">(_cont);\n"
 					 +"int totsize = base->getContainerSize(cintobject);\nfor(int i=0;i<totsize;i++)\n{\n"
 					 +"void* ciintobject = base->getContainerElement(cintobject, i);\n"
 					 +"if(ciintobject!=NULL)\n{\n"+classStructure.getFullyQualifiedClassName()+"* __val__ = ("

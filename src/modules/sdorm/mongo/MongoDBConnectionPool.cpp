@@ -15,6 +15,7 @@ MongoDBConnectionPool::MongoDBConnectionPool(const ConnectionProperties& props) 
 	isUnixDomainSocket = StringUtil::toLowerCopy(mp["isUnixDomainSocket"])=="true";
 	isSharded = StringUtil::toLowerCopy(mp["isSharded"])=="true";
 	replicaSetName = mp["replicaName"];
+	uri = NULL;
 	createPool(props);
  }
 
@@ -23,6 +24,7 @@ void MongoDBConnectionPool::initEnv() {
 
 	ConnectionProperties props = getProperties();
 	std::string connectionString = "";
+	std::string connTimeOut = "";
 
 	if(isUnixDomainSocket)
 	{
@@ -33,6 +35,10 @@ void MongoDBConnectionPool::initEnv() {
 		connectionString += "/tmp/mongodb.sock";
 		if(props.getNodes().at(0).getDatabaseName()!="") {
 			connectionString += "/" + props.getNodes().at(0).getDatabaseName();
+		}
+
+		if(props.getNodes().at(0).getConnectionTimeout()>0) {
+			connTimeOut = CastUtil::lexical_cast<std::string>((long)getProperties().getNodes().at(0).getConnectionTimeout());
 		}
 	}
 	else
@@ -57,6 +63,11 @@ void MongoDBConnectionPool::initEnv() {
 						props.getNodes().at(var).getPassword() + "@");
 			}
 			connectionString += props.getNodes().at(var).getHost() + ":" + CastUtil::lexical_cast<std::string>(port);
+
+			if(connTimeOut=="" && props.getNodes().at(var).getConnectionTimeout()>0) {
+				connTimeOut = CastUtil::lexical_cast<std::string>((long)getProperties().getNodes().at(var).getConnectionTimeout());
+			}
+
 			if(var!=(int)props.getNodes().size()-1) {
 				connectionString += ",";
 			}
@@ -98,6 +109,10 @@ void MongoDBConnectionPool::initEnv() {
 	}
 	connectionString += "&maxPoolSize=" + CastUtil::lexical_cast<std::string>(poolmax);
 
+	if(connTimeOut!="") {
+		connectionString += "&connectTimeoutMS=" + connTimeOut;
+	}
+
 	connectionString = "mongodb://" + connectionString;
 
 	//std::cout << connectionString << std::endl;
@@ -105,8 +120,13 @@ void MongoDBConnectionPool::initEnv() {
 	uri = mongoc_uri_new(connectionString.c_str());
 	mongoc_client_pool_t *pool = mongoc_client_pool_new(uri);
 	if(pool==NULL) {
-		throw "Unable to create memcached connection pool";
+		throw std::runtime_error("Unable to create mongodb connection pool");
 	}
+	mongoc_client_t *client = mongoc_client_pool_pop(pool);
+	if(client==NULL) {
+		throw std::runtime_error("Unable to create mongodb connection");
+	}
+	mongoc_client_pool_push(pool, client);
 	setEnv(pool);
 	props.setNewConnectionStrategy(true);
 }

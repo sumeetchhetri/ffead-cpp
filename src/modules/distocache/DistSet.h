@@ -35,7 +35,7 @@ public:
 		cl = PooledDistoCacheConnectionFactory::getConnection();
 		try {
 			cl->allocate(cacheKey, "set");
-		} catch(const std::string& err) {
+		} catch(const std::exception& err) {
 			if(err!="Entry already exists") {
 				throw err;
 			}
@@ -85,11 +85,13 @@ public:
 			{
 				this->cacheKey = cacheKey;
 				this->cl = cl;
+				position = -1;
 			}
 		public:
 			iterator()
 			{
 				position = -1;
+				cl = NULL;
 			}
 			T get()
 			{
@@ -100,7 +102,7 @@ public:
 				}
 				else
 				{
-					throw "Position value is less than 0";
+					throw std::runtime_error("Position value is less than 0");
 				}
 			}
 			iterator& operator++()
@@ -145,7 +147,7 @@ public:
 
 	iterator begin()
 	{
-		iterator it(const cacheKey&, const cl&);
+		iterator it(cacheKey, cl);
 		it.position = 0;
 		return it;
 	}

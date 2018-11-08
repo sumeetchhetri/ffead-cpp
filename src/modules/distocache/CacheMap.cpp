@@ -1397,6 +1397,7 @@ std::string CacheMap::popGetBackValue(const std::string& cacheKey) {
 	{
 		throw ERR_NOELEMENTS;
 	}
+	return resp;
 }
 
 std::string CacheMap::getFrontValue(const std::string& cacheKey) {

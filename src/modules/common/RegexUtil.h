@@ -36,8 +36,8 @@
 
 
 class RegexUtil {
-	static std::map<std::string, regex_t*> nlpatterns;
-	static std::map<std::string, regex_t*> patterns;
+	static std::map<std::string, regex_t> nlpatterns;
+	static std::map<std::string, regex_t> patterns;
 	static bool cacheRegexes;
 	friend class ConfigurationHandler;
 	static bool isValidRegex(const std::string& pattern);

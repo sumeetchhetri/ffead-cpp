@@ -63,7 +63,6 @@ class Component {
 	std::map<std::string,ComponentService> services;
 	DataSourceInterface *chib;
 public:
-	Component(const std::string& name, const std::string& desc, const bool& ajav, const bool& wsav, const bool& miav, const bool& autotx, const bool& thrdpr, const int& thrdpsiz, const int& dbcps, const std::string& authfr, const ConnectionSettings& authdet, const std::string& authmod, const std::vector<std::string>& protocol, const std::vector<std::string>& alwls, const std::vector<std::string>& blkls, const bool& sess, const std::map<std::string,ComponentService>& service){}
 	Component();
 	virtual ~Component();
 	void init();

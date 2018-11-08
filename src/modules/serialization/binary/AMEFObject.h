@@ -258,7 +258,7 @@ public:
 		std::string desiredType = CastUtil::getTypeName<T>();
 		if(!CastUtil::isPrimitiveDataType<T>())
 		{
-			throw "Invalid Object value requested";
+			throw std::runtime_error("Invalid Object value requested");
 		}
 
 		if(desiredType=="short" || desiredType=="short int" || desiredType=="signed short" || desiredType=="signed short int"
@@ -277,7 +277,7 @@ public:
 			}
 			else
 			{
-				throw "Invalid Object value requested";
+				throw std::runtime_error("Invalid Object value requested");
 			}
 			if(desiredType=="short")
 			{

@@ -66,8 +66,8 @@ void XmlParser::parse(std::string xml, Document& doc)
 	{
 		try {
 			doc.root.validateNs();
-		} catch (const char* ex) {
-			std::string errmsg(ex);
+		} catch(const std::exception& ex) {
+			std::string errmsg(ex.what());
 			throw XmlParseException(errmsg);
 		}
 	}
@@ -156,10 +156,10 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
 				{
 					par->addAttribute(StringUtil::trimCopy(atname),atvalue,true);
 				}
-            } catch(const char* ex) {
+            } catch(const std::exception& ex) {
             	if(StringUtil::toLowerCopy(mode)=="validator")
             	{
-            		std::string errmsg(ex);
+            		std::string errmsg(ex.what());
             		throw XmlParseException(errmsg);
             	}
             }

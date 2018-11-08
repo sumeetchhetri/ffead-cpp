@@ -80,7 +80,7 @@ void* MethodInvoc::service(void* arg)
 			{
 				throw MethodInvokerException("message tag should have only one child tag\n",retValue);
 			}
-			else if(message.getChildElements().at(0)->getTagName()!="args")
+			else if(message.getChildElements().at(0).getTagName()!="args")
 			{
 				throw MethodInvokerException("message tag should have an args child tag\n",retValue);
 			}
@@ -88,7 +88,7 @@ void* MethodInvoc::service(void* arg)
 			Reflector reflector;
 			args argus;
 			vals valus;
-			ElementList argts = message.getChildElements().at(0)->getChildElements();
+			ElementList argts = message.getChildElements().at(0).getChildElements();
 			for (unsigned var = 0; var < argts.size();  var++)
 			{
 				void *value = NULL;
@@ -129,7 +129,7 @@ void* MethodInvoc::service(void* arg)
 				}
 				else if(arg->getAttribute("type")=="string")
 				{
-					std::string *vt = new string;
+					std::string *vt = new std::string;
 					*vt = CastUtil::lexical_cast<std::string>(arg->getText());
 					value = vt;
 				}
@@ -222,7 +222,7 @@ void* MethodInvoc::service(void* arg)
 		instance->server.Send(fd,retValue);
 		close(fd);
 	}
-	catch(...)
+	catch(const std::exception& e)
 	{
 		retValue = ("<return:exception>XmlParseException occurred</return:exception>");
 		instance->server.Send(fd,retValue);

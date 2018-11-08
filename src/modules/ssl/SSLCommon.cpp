@@ -32,6 +32,7 @@ std::string SSLCommon::ciphers =
 	std::string("DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:") +
 	std::string("!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK");
 
+
 SSLCommon::SSLCommon() {
 	// TODO Auto-generated constructor stub
 
@@ -108,13 +109,41 @@ void* SSLCommon::zeroingMalloc (size_t howmuch)
 	return calloc (1, howmuch);
 }
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#define ssl_malloc(size, file, line) ssl_malloc(size)
+#define ssl_realloc(ptr, size, file, line) ssl_realloc(ptr, size)
+#define ssl_free(ptr, file, line) ssl_free(ptr)
+#endif
+
+void *
+ssl_malloc(size_t size, const char * /*filename */, int /*lineno*/)
+{
+  return calloc(1, size);
+}
+
+void *
+ssl_realloc(void *ptr, size_t size, const char * /*filename*/, int /*lineno*/)
+{
+  return realloc(ptr, size);
+}
+
+void
+ssl_free(void *ptr, const char * /*filename*/, int /*lineno*/)
+{
+	free(ptr);
+}
+
 SSL_CTX *SSLCommon::initialize_ctx(const bool& isServer)
 {
 	SSL_METHOD *meth;
 	SSL_CTX *ctx;
 
-	CRYPTO_set_mem_functions (zeroingMalloc, realloc, free);
+	CRYPTO_set_mem_functions (ssl_malloc, ssl_realloc, ssl_free);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	SSL_library_init ();
+#else
+	OPENSSL_init_ssl(0, NULL);
+#endif
 	OpenSSL_add_all_algorithms();		/* load & register all cryptos, etc. */
 	SSL_load_error_strings();			/* load all error messages */
 

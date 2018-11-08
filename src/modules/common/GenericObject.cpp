@@ -30,6 +30,7 @@ GenericObject& GenericObject::operator =(const GenericObject& obj) {
 
 void GenericObject::internalCopy(const GenericObject& obj) {
 	objVal = NULL;
+	if(obj.objSerState=="" && obj.objVal==NULL)return;
 	typeName = obj.typeName;
 	objSerState = obj.objSerState;
 	cstr = obj.cstr;
@@ -48,23 +49,23 @@ void GenericObject::internalCopy(const GenericObject& obj) {
 	else if(typeName=="double") objVal = new double(*(double*)obj.objVal);
 	else if(typeName=="long double") objVal = new long double(*(long double*)obj.objVal);
 	else if(typeName=="std::string" || typeName=="string") objVal = new std::string(*(std::string*)obj.objVal);
-	else objVal = XMLSerialize::unSerializeUnknown(obj.objSerState, obj.typeName);
 	//Handle c strings
-	if(cstr.size()>0) {
+	else if(cstr.size()>0) {
 		char* cstrpr = new char[cstr.size()];
 		std::copy(cstr.begin(), cstr.end(), cstrpr);
 		objVal = cstrpr;
 	}
-	if(ucstr.size()>0) {
+	else if(ucstr.size()>0) {
 		unsigned char* ucstrpr = new unsigned char[ucstr.size()];
 		std::copy(ucstr.begin(), ucstr.end(), ucstrpr);
 		objVal = ucstrpr;
 	}
-	if(wstr.size()>0) {
+	else if(wstr.size()>0) {
 		wchar_t* wstrpr = new wchar_t[wstr.size()];
 		std::copy(wstr.begin(), wstr.end(), wstrpr);
 		objVal = wstrpr;
 	}
+	else objVal = XMLSerialize::unSerializeUnknown(obj.objSerState, obj.typeName);
 }
 
 void GenericObject::internalClear() {
@@ -140,6 +141,7 @@ bool GenericObject::isPrimitive(const std::string& typeName) {
 
 std::string GenericObject::getSerilaizedState() {
 	std::string valueStr = objSerState;
+	if(objVal==NULL)return std::string();
 	if(typeName=="short") valueStr = CastUtil::lexical_cast<std::string>(*(short*)objVal);
 	else if(typeName=="int") valueStr = CastUtil::lexical_cast<std::string>(*(int*)objVal);
 	else if(typeName=="long") valueStr = CastUtil::lexical_cast<std::string>(*(long*)objVal);

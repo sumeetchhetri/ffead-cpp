@@ -73,7 +73,7 @@ DistoCacheClientUtils* PooledDistoCacheConnectionFactory::getConnection() {
 		//No issues with synchronization as the DistoCacheClientUtils class is thread-safe
 		return instance->pool.at(0);
 	}
-	throw "PooledDistoCacheConnectionFactory not initialized";
+	throw std::runtime_error("PooledDistoCacheConnectionFactory not initialized");
 }
 
 void PooledDistoCacheConnectionFactory::releaseConnection(DistoCacheClientUtils* clientUtil) {

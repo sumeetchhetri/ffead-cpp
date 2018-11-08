@@ -31,6 +31,7 @@ FFEADContext::FFEADContext()
 
 FFEADContext::FFEADContext(const std::string& depFile, const std::string& appName)
 {
+	reflector = NULL;
 	cleared = false;
 	logger = LoggerFactory::getLogger("FFEADContext");
 	XmlParser parser("Parser");
@@ -51,7 +52,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 				bean.value = ele->getAttribute("value");
 				bean.inbuilt = ele->getAttribute("inbuilt");
 				if(ele->getAttribute("bean")!="")
-					throw "Invalid attribute";
+					throw std::runtime_error("Invalid attribute");
 				bean.bean = ele->getAttribute("bean");
 				bean.clas = ele->getAttribute("class");
 				bean.intfType = ele->getAttribute("intfType");
@@ -97,7 +98,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 						}
 						else
 						{
-							throw "Invalid tag";
+							throw std::runtime_error("Invalid tag");
 						}
 					}
 				}
@@ -105,7 +106,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 			}
 			else
 			{
-				throw "Invalid tag";
+				throw std::runtime_error("Invalid tag");
 			}
 		}
 	}
@@ -127,7 +128,7 @@ void* FFEADContext::getBean(const Bean& bean)
 	}
 	else if(bean.inbuilt!="" && bean.value=="")
 	{
-		throw "Invalid value for inbuilt type";
+		throw std::runtime_error("Invalid value for inbuilt type");
 	}
 	else
 	{
@@ -225,7 +226,7 @@ void* FFEADContext::getBean(const Bean& bean)
 			else if(beanc.clas!="")
 				argus.push_back(beanc.clas);
 			else
-				throw "Invalid or no bean type defined";
+				throw std::runtime_error("Invalid or no bean type defined");
 			Method meth = clas.getMethod(methodName,argus);
 			void *value = getBean(beanc);
 			valus.push_back(value);
@@ -250,7 +251,7 @@ void* FFEADContext::getBean(const Bean& bean)
 			else if(beanc.clas!="")
 				argus.push_back(beanc.clas);
 			else
-				throw "Invalid or no bean type defined";
+				throw std::runtime_error("Invalid or no bean type defined");
 			void *value = getBean(beanc);
 			valus.push_back(value);
 		}
@@ -275,7 +276,7 @@ void* FFEADContext::getBean(const Bean& bean)
 			if(bean.types.at(var)!="")
 				argus.push_back(bean.types.at(var));
 			else
-				throw "Invalid or no bean type defined";
+				throw std::runtime_error("Invalid or no bean type defined");
 			Method meth = clas.getMethod(methodName,argus);
 			void *value = getBean(beanc);
 			valus.push_back(value);

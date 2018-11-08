@@ -76,7 +76,8 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <queue>
-
+#include <curl/curl.h>
+#include "HttpClient.h"
 
 #ifdef INC_SDORM
 #include "DataSourceManager.h"

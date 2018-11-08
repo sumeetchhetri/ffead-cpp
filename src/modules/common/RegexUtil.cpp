@@ -22,24 +22,22 @@
 
 #include "RegexUtil.h"
 
-std::map<std::string, regex_t*> RegexUtil::patterns;
-std::map<std::string, regex_t*> RegexUtil::nlpatterns;
+std::map<std::string, regex_t> RegexUtil::patterns;
+std::map<std::string, regex_t> RegexUtil::nlpatterns;
 bool RegexUtil::cacheRegexes = true;
 
 void RegexUtil::flushCache() {
 	if(patterns.size()>0) {
-		std::map<std::string, regex_t*>::iterator it;
+		std::map<std::string, regex_t>::iterator it;
 		for(it=patterns.begin();it!=patterns.end();++it) {
-			regfree(it->second);
-			delete it->second;
+			regfree(&(it->second));
 		}
 		patterns.clear();
 	}
 	if(nlpatterns.size()>0) {
-		std::map<std::string, regex_t*>::iterator it;
+		std::map<std::string, regex_t>::iterator it;
 		for(it=nlpatterns.begin();it!=nlpatterns.end();++it) {
-			regfree(it->second);
-			delete it->second;
+			regfree(&(it->second));
 		}
 		nlpatterns.clear();
 	}
@@ -54,10 +52,10 @@ regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLin
 	bool found = false;
 	if(cacheRegexes) {
 		if(!matchNewLine && patterns.find(pattern)!=patterns.end()) {
-			regex = patterns[pattern];
+			regex = &(patterns[pattern]);
 			found = true;
 		} else if(nlpatterns.find(pattern)!=nlpatterns.end()) {
-			regex = nlpatterns[pattern];
+			regex = &(nlpatterns[pattern]);
 			found = true;
 		}
 	}
@@ -66,18 +64,26 @@ regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLin
 		if(matchNewLine)
 			cflags = REG_NEWLINE | REG_EXTENDED;
 
-		regex = new regex_t;
-		int reti = regcomp(regex, pattern.c_str(), cflags);
-		if(reti!=0)
-		{
-			std::cout << ("Could not compile regex - "+pattern + " failed with error ") << reti << std::endl;
-		}
-		else if(cacheRegexes)
+		if(cacheRegexes)
 		{
 			if(!matchNewLine) {
-				patterns[pattern] = regex;
+				regex = &(patterns[pattern]);
 			} else {
-				nlpatterns[pattern] = regex;
+				regex = &(nlpatterns[pattern]);
+			}
+			int reti = regcomp(regex, pattern.c_str(), cflags);
+			if(reti!=0)
+			{
+				std::cout << ("Could not compile regex - "+pattern + " failed with error ") << reti << std::endl;
+			}
+		}
+		else
+		{
+			regex = new regex_t;
+			int reti = regcomp(regex, pattern.c_str(), cflags);
+			if(reti!=0)
+			{
+				std::cout << ("Could not compile regex - "+pattern + " failed with error ") << reti << std::endl;
 			}
 		}
 	}
@@ -92,7 +98,10 @@ void RegexUtil::find(const std::string& text, const std::string& pattern, int &s
 	epos = -1;
 	regmatch_t pm;
 	int reti = regexec(regex, ttext.c_str(), 1, &pm, 0);
-	if(!cacheRegexes)regfree(regex);
+	if(!cacheRegexes) {
+		regfree(regex);
+		delete regex;
+	}
 	if (reti == 0) {    /* while matches found */
 		/* substring found between pm.rm_so and pm.rm_eo */
 		/* This call to regexec() finds the next match */
@@ -107,7 +116,10 @@ bool RegexUtil::matches(const std::string& text, const std::string& pattern, con
 	regex_t* regex = getRegex(pattern, matchNewLine);
 	regmatch_t pm;
 	int reti = regexec(regex, ttext.c_str(), 1, &pm, 0);
-	if(!cacheRegexes)regfree(regex);
+	if(!cacheRegexes) {
+		regfree(regex);
+		delete regex;
+	}
 	if (reti == 0) {    /* while matches found */
 		return true;
 	}
@@ -120,7 +132,10 @@ int RegexUtil::find(const std::string& text, const std::string& pattern, const b
 	regex_t* regex = getRegex(pattern, matchNewLine);
 	regmatch_t pm;
 	int reti = regexec(regex, ttext.c_str(), 1, &pm, 0);
-	if(!cacheRegexes)regfree(regex);
+	if(!cacheRegexes) {
+		regfree(regex);
+		delete regex;
+	}
 	if (reti == 0) {    /* while matches found */
 		/* substring found between pm.rm_so and pm.rm_eo */
 		/* This call to regexec() finds the next match */
@@ -150,7 +165,10 @@ std::vector<std::string> RegexUtil::search(const std::string& text, const std::s
 		pm.rm_so = -1;
 		reti = regexec (regex, ttext.c_str(), 1, &pm, 0);
 	}
-	if(!cacheRegexes)regfree(regex);
+	if(!cacheRegexes) {
+		regfree(regex);
+		delete regex;
+	}
 	return vec;
 }
 
@@ -176,7 +194,10 @@ std::string RegexUtil::replaceCopy(const std::string& text, const std::string& p
 		pm.rm_so = -1;
 		reti = regexec (regex, ttext.c_str(), 1, &pm, 0);
 	}
-	if(!cacheRegexes)regfree(regex);
+	if(!cacheRegexes) {
+		regfree(regex);
+		delete regex;
+	}
 	if(ttext!="")rettxt += ttext;
 
 	if(text!=rettxt)
@@ -208,7 +229,10 @@ bool RegexUtil::replace(std::string& text, const std::string& pattern, const std
 		pm.rm_so = -1;
 		reti = regexec (regex, ttext.c_str(), 1, &pm, 0);
 	}
-	if(!cacheRegexes)regfree(regex);
+	if(!cacheRegexes) {
+		regfree(regex);
+		delete regex;
+	}
 	if(ttext!="")rettxt += ttext;
 	if(text==rettxt)
 		return false;
@@ -223,7 +247,10 @@ std::vector<std::string> RegexUtil::findWithGroups(const std::string& text, cons
 	regex_t* regex = getRegex(pattern, matchNewLine);
 	regmatch_t pm[10];
 	int reti = regexec(regex, ttext.c_str(), 10, pm, 0);
-	if(!cacheRegexes)regfree(regex);
+	if(!cacheRegexes) {
+		regfree(regex);
+		delete regex;
+	}
 	if (reti == 0) {    /* while matches found */
 		for (int i = 0; pm[i].rm_so != -1; i++)
 		{
@@ -240,7 +267,10 @@ std::vector<std::string> RegexUtil::findWithGroups(const std::string& text, cons
 	regex_t* regex = getRegex(pattern, matchNewLine);
 	regmatch_t pm[groupCount];
 	int reti = regexec(regex, ttext.c_str(), groupCount, pm, 0);
-	if(!cacheRegexes)regfree(regex);
+	if(!cacheRegexes) {
+		regfree(regex);
+		delete regex;
+	}
 	if (reti == 0) {    /* while matches found */
 		for (int i = 0; pm[i].rm_so != -1; i++)
 		{

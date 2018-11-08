@@ -26,6 +26,12 @@ void MarkerHandler::initMarkers() {
 	validMarkers.push_back(Marker("@Id", Marker::TYPE_PROP, collectStr(1, "dbf")));
 	validMarkers.push_back(Marker("@HasOne", Marker::TYPE_PROP, collectStr(2, "dmappedBy", "dfk")));
 	validMarkers.push_back(Marker("@HasMany", Marker::TYPE_PROP, collectStr(2, "dmappedBy", "dfk")));
+
+	validMarkers.push_back(Marker("@Field", Marker::TYPE_PROP, MarkerHandler::collectStr(7, "type", "name", "index,false,true,false",
+				"store,false,true,false", "required,false,true,false", "analyzer", "searchanalyzer"),
+			MarkerHandler::collectBool(7, true, true, false, false, false, false, false)));
+	validMarkers.push_back(Marker("@Document", Marker::TYPE_CLASS, collectStr(5, "name", "type", "shards", "replicas", "create,true,true,false"),
+				collectBool(5, true, false, false, false, false)));
 }
 
 MarkerHandler::~MarkerHandler() {
@@ -110,19 +116,16 @@ Marker MarkerHandler::processMarker(std::string markerText, const int& where) {
 	Marker targetMarker = getMarker(name, where);
 	if(targetMarker.name=="")
 	{
-		std::string err = "Could not find the "+Marker::getTypeName(where)+" type marker with name " + name;
-		throw err;
+		throw std::runtime_error("Could not find the "+Marker::getTypeName(where)+" type marker with name " + name);
 	}
 	targetMarker = getMarker(name);
 	if(targetMarker.name=="")
 	{
-		std::string err = "Could not find a marker with name " + name;
-		throw err;
+		throw std::runtime_error("Could not find a marker with name " + name);
 	}
 	if(targetMarker.reqAttrSize>0 && (int)fragments.size()==1)
 	{
-		std::string err = "No attributes specified for the marker " + targetMarker.name;
-		throw err;
+		throw std::runtime_error("No attributes specified for the marker " + targetMarker.name);
 	}
 	else
 	{
@@ -137,8 +140,7 @@ Marker MarkerHandler::processMarker(std::string markerText, const int& where) {
 				StringUtil::trim(value);
 				if(value.at(0)!='"' && value.at(value.length()-1)!='"')
 				{
-					std::string err = "Attribute value for "+attname+" should be within double quotes (\"\") for the marker " + targetMarker.name;
-					throw err;
+					throw std::runtime_error("Attribute value for "+attname+" should be within double quotes (\"\") for the marker " + targetMarker.name);
 				}
 				if(value!="\"\"")
 				{
@@ -156,8 +158,7 @@ Marker MarkerHandler::processMarker(std::string markerText, const int& where) {
 			if(tvalues.find(it->first)==tvalues.end())
 			{
 				if(it->second) {
-					std::string err = "No value specified for mandatory attribute "+it->first+" for the marker " + targetMarker.name;
-					throw err;
+					throw std::runtime_error("No value specified for mandatory attribute "+it->first+" for the marker " + targetMarker.name);
 				}
 				std::cout << "Ignoring attribute " + it->first + " for marker " + targetMarker.name << std::endl;
 				tvalues.erase(it->first);
@@ -168,8 +169,7 @@ Marker MarkerHandler::processMarker(std::string markerText, const int& where) {
 				std::string value = tvalues[it->first];
 				if(value=="")
 				{
-					std::string err = "Attribute value for "+it->first+" cannot be blank for the marker " + targetMarker.name;
-					throw err;
+					throw std::runtime_error("Attribute value for "+it->first+" cannot be blank for the marker " + targetMarker.name);
 				}
 				if(vss.size()>0)
 				{

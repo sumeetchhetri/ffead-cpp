@@ -43,7 +43,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 
 		soapbody = soapenv->getElementByNameIgnoreCase("body");
 		if(soapbody == NULL) {
-			throw "SOAP Body not found in request";
+			throw std::runtime_error("SOAP Body not found in request");
 		}
 
 		//logger << soapbody->getTagName() << "----\n" << std::flush;
@@ -97,67 +97,6 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 		//logger << "\n----------------------------------------------------------------------------\n" << std::flush;
 		//logger << env << "\n----------------------------------------------------------------------------\n" << std::flush;
 	}
-	catch(const char* faultc)
-	{
-		std::string fault(faultc);
-		std::string bod = "", btag = "";
-		AttributeList attl;
-		AttributeList::iterator it;
-		if(soapbody!=NULL)
-		{
-			attl = soapbody->getAttributes();
-			btag = soapbody->getTagNameSpc();
-			bod = "<" + soapbody->getTagNameSpc();
-			for(it=attl.begin();it!=attl.end();it++)
-			{
-				bod.append(" " + it->first + "=\"" + it->second + "\" ");
-			}
-		}
-		else
-		{
-			btag = soapenv->getNameSpc() + ":body";
-			bod = "<" + btag;
-		}
-		bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>"+fault+"</faultstring><detail></detail><soap-fault></" + btag+">");
-		attl = soapenv->getAttributes();
-		env = "<" + soapenv->getTagNameSpc();
-		for(it=attl.begin();it!=attl.end();it++)
-		{
-			env.append(" " + it->first + "=\"" + it->second + "\" ");
-		}
-		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		logger << ("Soap fault - " + fault) << std::flush;
-	}
-	catch(const std::string &fault)
-	{
-		std::string bod = "", btag = "";
-		AttributeList attl;
-		AttributeList::iterator it;
-		if(soapbody!=NULL)
-		{
-			attl = soapbody->getAttributes();
-			btag = soapbody->getTagNameSpc();
-			bod = "<" + soapbody->getTagNameSpc();
-			for(it=attl.begin();it!=attl.end();it++)
-			{
-				bod.append(" " + it->first + "=\"" + it->second + "\" ");
-			}
-		}
-		else
-		{
-			btag = soapenv->getNameSpc() + ":body";
-			bod = "<" + btag;
-		}
-		bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>"+fault+"</faultstring><detail></detail><soap-fault></" + btag+">");
-		attl = soapenv->getAttributes();
-		env = "<" + soapenv->getTagNameSpc();
-		for(it=attl.begin();it!=attl.end();it++)
-		{
-			env.append(" " + it->first + "=\"" + it->second + "\" ");
-		}
-		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		logger << ("Soap fault - " + fault) << std::flush;
-	}
 	catch(const Exception& e)
 	{
 		std::string bod = "", btag = "";
@@ -188,8 +127,9 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
 		logger << ("Soap fault - " + e.getMessage()) << std::flush;
 	}
-	catch(...)
+	catch(const std::exception& faultc)
 	{
+		std::string fault(faultc.what());
 		std::string bod = "", btag = "";
 		AttributeList attl;
 		AttributeList::iterator it;
@@ -208,7 +148,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 			btag = soapenv->getNameSpc() + ":body";
 			bod = "<" + btag;
 		}
-		bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>Standard Exception</faultstring><detail></detail><soap-fault></" + btag+">");
+		bod.append("><soap-fault><faultcode>soap:Server</faultcode><faultstring>"+fault+"</faultstring><detail></detail><soap-fault></" + btag+">");
 		attl = soapenv->getAttributes();
 		env = "<" + soapenv->getTagNameSpc();
 		for(it=attl.begin();it!=attl.end();it++)
@@ -216,7 +156,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		logger << "Soap Standard Exception" << std::flush;
+		logger << ("Soap fault - " + fault) << std::flush;
 	}
 	res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	res->addHeaderValue(HttpResponse::ContentType, xmlcnttype);

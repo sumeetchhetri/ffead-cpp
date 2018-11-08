@@ -95,7 +95,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 							int partValue = -1;
 							try {
 								partValue = CastUtil::lexical_cast<int>(parts.at(i));
-							} catch (...) {
+							} catch(const std::exception& e) {
 								if(position==3)
 								{
 									std::string month = StringUtil::toUpperCopy(parts.at(i));
@@ -154,7 +154,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 							int partValue = -1;
 							try {
 								partValue = CastUtil::lexical_cast<int>(parts.at(i));
-							} catch (...) {
+							} catch(const std::exception& e) {
 								if(position==3)
 								{
 									std::string month = StringUtil::toUpperCopy(parts.at(i));
@@ -212,7 +212,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 							int partValue = -1;
 							try {
 								partValue = CastUtil::lexical_cast<int>(parts.at(i));
-							} catch (...) {
+							} catch(const std::exception& e) {
 								if(parts.at(i)=="*")
 								{
 									partValue = start;
@@ -274,7 +274,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 						int partValue = -1;
 						try {
 							partValue = CastUtil::lexical_cast<int>(parts.at(i));
-						} catch (...) {
+						} catch(const std::exception& e) {
 							if(position==3)
 							{
 								std::string month = StringUtil::toUpperCopy(parts.at(i));
@@ -328,7 +328,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 					int partValue = -1;
 					try {
 						partValue = CastUtil::lexical_cast<int>(tst);
-					} catch (...) {
+					} catch(const std::exception& e) {
 						if(position==3)
 						{
 							std::string month = StringUtil::toUpperCopy(tst);
@@ -378,7 +378,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 		if(!valid)
 		{
 			cParts.clear();
-			throw "Invalid Cron Expression";
+			throw std::runtime_error("Invalid Cron Expression");
 		}
 
 		if(cParts.size()==5) {
@@ -551,7 +551,7 @@ bool CronTimer::tryIncrement(const int& pos, const int& cvalue)
 				break;
 			}
 		}
-	} catch(...) {
+	} catch(const std::exception& e) {
 
 	}
 

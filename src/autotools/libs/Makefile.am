@@ -100,6 +100,7 @@ libffead_common_la_SOURCES += \
 						../../modules/client-util/Client.cpp \
 						../../modules/client-util/ClientInterface.cpp \
 						../../modules/client-util/SSLClient.cpp \
+						../../modules/client-util/HttpClient.cpp \
 						../../modules/component/AppContext.cpp \
 						../../modules/component/BeanContext.cpp \
 						../../modules/component/Component.cpp \
@@ -250,6 +251,7 @@ libffead_common_la_SOURCES += \
 				../../modules/client-util/Client.cpp \
 				../../modules/client-util/ClientInterface.cpp \
 				../../modules/client-util/SSLClient.cpp \
+				../../modules/client-util/HttpClient.cpp \
 				../../modules/http/ContentTypes.cpp \
 				../../modules/http/CORSHandler.cpp \
 				../../modules/http/http11/Http11Handler.cpp \

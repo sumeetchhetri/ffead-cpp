@@ -189,6 +189,15 @@ void ConnectionNode::setDatabaseName(const std::string& databaseName) {
 	this->databaseName = databaseName;
 }
 
+
+void ConnectionNode::setBaseUrl(const std::string& url) {
+	this->url = url;
+}
+
+const std::string& ConnectionNode::getBaseUrl() const {
+	return url;
+}
+
 const std::string& ConnectionProperties::getName() const {
 	return name;
 }

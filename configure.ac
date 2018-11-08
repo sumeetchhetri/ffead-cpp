@@ -768,6 +768,8 @@ if test "x$mod_memcached" = "xyes"; then
 	AC_SEARCH_LIBS(memcached_pool, memcachedutil, [],[AC_MSG_ERROR([memcached library "libmemcachedutil" not found])])
 fi
 
+AC_SEARCH_LIBS(curl_easy_init, curl, [],[AC_MSG_ERROR([curl library "libcurl" not found])])
+
 AM_CONDITIONAL(MOD_APACHEMOD, test "x$generate_apache_module" = "xyes")
 if test "x$generate_apache_module" = "xyes"; then
 	AC_SUBST(GENERATE_APACHEMOD,[modules/apache_mod_ffeadcpp/autotools])

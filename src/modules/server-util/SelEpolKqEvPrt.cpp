@@ -27,6 +27,7 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 	sockfd = -1;
 	curfds = 0;
 	timeoutMilis = -1;
+	epoll_handle = -1;
 }
 
 SelEpolKqEvPrt::~SelEpolKqEvPrt() {

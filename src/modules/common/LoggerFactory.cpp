@@ -44,11 +44,6 @@ LoggerFactory::~LoggerFactory()
 	std::map<std::string, LoggerConfig*>::iterator it;
 	for (it=configs.begin();it!=configs.end();++it) {
 		std::cout << ("Clearing logger config for " + it->second->name) << std::endl;
-		it->second->lock->lock();
-		if(it->second->mode=="FILE" && it->second->file!="" && it->second->out!=NULL) {
-			delete it->second->out;
-		}
-		it->second->lock->unlock();
 		delete it->second;
 	}
 	configs.clear();
@@ -61,6 +56,7 @@ void LoggerFactory::clear() {
 		return;
 	}
 	delete instance;
+	instance = NULL;
 }
 
 void LoggerFactory::setVhostNumber(const int& vhn) {

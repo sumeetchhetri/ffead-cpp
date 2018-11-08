@@ -57,7 +57,7 @@ int main()
 	{
 		try{
 			port = CastUtil::lexical_cast<int>(props["SERVER_PORT"]);
-		} catch(...) {
+		} catch(const std::exception& e) {
 		}
 
 	}
@@ -66,7 +66,7 @@ int main()
 	{
 		try{
 			sslEnabled = CastUtil::lexical_cast<bool>(props["SERVER_SSL_ENABLED"]);
-		} catch(...) {
+		} catch(const std::exception& e) {
 		}
 	}
 

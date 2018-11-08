@@ -28,9 +28,22 @@ SSLClient::SSLClient() {
 	isDHParams = true;
 	client_auth = 0;
 	connected = false;
+	ssl = NULL;
+	ctx = NULL;
+	sbio = io = ssl_bio = NULL;
+	sockfd = -1;
+	connected = isDHParams = false;
 }
 
 SSLClient::SSLClient(const std::string& secFile) {
+	isDHParams = true;
+	client_auth = 0;
+	connected = false;
+	ssl = NULL;
+	ctx = NULL;
+	sbio = io = ssl_bio = NULL;
+	sockfd = -1;
+	connected = isDHParams = false;
 	logger = LoggerFactory::getLogger("SSLClient");
 	PropFileReader pread;
 	propMap sslsec = pread.getProperties(secFile);
@@ -49,7 +62,7 @@ SSLClient::SSLClient(const std::string& secFile) {
 			{
 				client_auth = CastUtil::lexical_cast<int>(tempcl);
 			}
-			catch(...)
+			catch(const std::exception& e)
 			{
 				logger << "\nInvalid client auth level defined" << std::flush;
 				client_auth = 0;
@@ -60,7 +73,7 @@ SSLClient::SSLClient(const std::string& secFile) {
 		{
 			isDHParams = CastUtil::lexical_cast<bool>(sslsec["ISDH_PARAMS"]);
 		}
-		catch(...)
+		catch(const std::exception& e)
 		{
 			logger << "\nInvalid boolean value for isDHParams defined" << std::flush;
 		}
@@ -316,7 +329,7 @@ std::string SSLClient::getTextData(const std::string& hdrdelm, const std::string
 			{
 				cntlen = CastUtil::lexical_cast<int>(cntle);
 			}
-			catch(...)
+			catch(const std::exception& e)
 			{
 				logger << "bad lexical cast" <<std::endl;
 			}

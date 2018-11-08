@@ -44,7 +44,7 @@ void Bigdecimal::create(const std::string& value)
 	std::string temp = StringUtil::trimCopy(value);
 	int minusSign = temp.find_last_of("-");
 	if(minusSign>0)
-		throw "Invalid -";
+		throw std::runtime_error("Invalid -");
 	else if(minusSign==0)
 	{
 		isPositive = false;
@@ -63,7 +63,7 @@ void Bigdecimal::create(const std::string& value)
 	{
 		if(temp.find(".")!=temp.find_last_of("."))
 		{
-			throw "Invalid decimal Number";
+			throw std::runtime_error("Invalid decimal Number");
 		}
 		else
 		{
@@ -84,8 +84,8 @@ void Bigdecimal::create(const std::string& value)
 			int x = CastUtil::lexical_cast<int>(temp.substr(temp.length()-Bigint::NUM_LENGTH));
 			temp = temp.substr(0, temp.length()-Bigint::NUM_LENGTH);
 			parts.push_back(x);
-		} catch(...) {
-			throw "Invalid Bigdecimal value";
+		} catch(const std::exception& e) {
+			throw std::runtime_error("Invalid Bigdecimal value");
 		}
 	}
 	if(temp.length()>0)
@@ -93,8 +93,8 @@ void Bigdecimal::create(const std::string& value)
 		try {
 			int x = CastUtil::lexical_cast<int>(temp);
 			parts.push_back(x);
-		} catch(...) {
-			throw "Invalid Bigdecimal value";
+		} catch(const std::exception& e) {
+			throw std::runtime_error("Invalid Bigdecimal value");
 		}
 	}
 	if(parts.at(parts.size()-1)==0)

@@ -25,6 +25,7 @@
 Client::Client() {
 	logger = LoggerFactory::getLogger("Client");
 	connected = false;
+	sockfd = -1;
 }
 
 Client::~Client() {
@@ -197,7 +198,7 @@ std::string Client::getTextData(const std::string& hdrdelm, const std::string& c
 			{
 				cntlen = CastUtil::lexical_cast<int>(cntle);
 			}
-			catch(...)
+			catch(const std::exception& e)
 			{
 				logger << "bad lexical cast" <<std::endl;
 			}

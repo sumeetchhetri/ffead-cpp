@@ -33,6 +33,7 @@ DistoCacheServiceHandler::DistoCacheServiceHandler(const int& fd) {
 	this->fd = fd;
 	this->isSSLEnabled = false;
 	logger = LoggerFactory::getLogger("DistoCacheServiceHandler");
+	ctx = NULL;
 }
 
 DistoCacheServiceHandler::~DistoCacheServiceHandler() {
@@ -312,7 +313,7 @@ void DistoCacheServiceHandler::run()
 						{
 							responseMsg = CacheMap::ERR_NEGATIVEPOS;
 						}
-					} catch(...) {
+					} catch(const std::exception& e) {
 						responseMsg = CacheMap::ERR_POSNOTNUM;
 					}
 				}
@@ -347,7 +348,7 @@ void DistoCacheServiceHandler::run()
 						{
 							responseMsg = CacheMap::ERR_NEGATIVEREP;
 						}
-					} catch(...) {
+					} catch(const std::exception& e) {
 						if(position==-1)
 						{
 							responseMsg = CacheMap::CacheMap::ERR_POSNOTNUM;
@@ -384,7 +385,7 @@ void DistoCacheServiceHandler::run()
 						{
 							responseMsg = CacheMap::ERR_NEGATIVEPOS;
 						}
-					} catch(...) {
+					} catch(const std::exception& e) {
 						responseMsg = CacheMap::ERR_POSNOTNUM;
 					}
 				}
@@ -414,7 +415,7 @@ void DistoCacheServiceHandler::run()
 						{
 							responseMsg = CacheMap::ERR_NEGATIVEPOS;
 						}
-					} catch(...) {
+					} catch(const std::exception& e) {
 						responseMsg = CacheMap::ERR_POSNOTNUM;
 					}
 				}
@@ -444,7 +445,7 @@ void DistoCacheServiceHandler::run()
 						{
 							responseMsg = CacheMap::ERR_NEGATIVEPOS;
 						}
-					} catch(...) {
+					} catch(const std::exception& e) {
 						responseMsg = CacheMap::ERR_POSNOTNUM;
 					}
 				}
@@ -466,7 +467,7 @@ void DistoCacheServiceHandler::run()
 						{
 							responseMsg = CacheMap::ERR_NEGATIVEPOS;
 						}
-					} catch(...) {
+					} catch(const std::exception& e) {
 						responseMsg = CacheMap::ERR_POSNOTNUM;
 					}
 				}
@@ -516,7 +517,7 @@ void DistoCacheServiceHandler::run()
 						{
 							responseMsg = CacheMap::ERR_NEGATIVEPOS;
 						}
-					} catch(...) {
+					} catch(const std::exception& e) {
 						responseMsg = CacheMap::ERR_POSNOTNUM;
 					}
 				}
@@ -555,12 +556,8 @@ void DistoCacheServiceHandler::run()
 			{
 				responseMsg = "Invalid query specified";
 			}
-		} catch(std::string& err) {
-			responseMsg = err;
-		} catch(const char* err) {
-			responseMsg = err;
-		} catch(...) {
-			responseMsg = "Application Error Occurred";
+		} catch(const std::exception& e) {
+			responseMsg = e.what();
 		}
 
 

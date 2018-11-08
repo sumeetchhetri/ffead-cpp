@@ -32,6 +32,23 @@ std::string Logger::LEVEL_TRACE = "TRACE";
 
 std::map<std::string, int> Logger::levelMap;
 
+LoggerConfig::LoggerConfig() {
+	vhostNumber = 0;
+	lock = NULL;
+	out = NULL;
+}
+
+LoggerConfig::~LoggerConfig() {
+	lock->lock();
+	if(mode=="FILE" && file!="" && out!=NULL) {
+		delete out;
+	}
+	lock->unlock();
+	if(lock!=NULL) {
+		delete lock;
+	}
+}
+
 Logger::Logger(LoggerConfig *config, const std::string& className)
 {
 	this->className = className;

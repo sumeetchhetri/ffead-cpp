@@ -117,7 +117,10 @@ bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse 
 	return false;
 }
 
-CorsConfig::CorsConfig() {}
+CorsConfig::CorsConfig() {
+	allwdCredentials = false;
+	maxAge = -1;
+}
 
 CorsConfig::CorsConfig(const std::string& allwdOrigins, const std::string& allwdMethods, const std::string& allwdHeaders, const std::string& exposedHeaders, const bool& allwdCredentials, const long& maxAge)
 {

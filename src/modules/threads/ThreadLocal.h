@@ -19,6 +19,7 @@ public:
 	template<typename T> ThreadLocal(T* t);
 	ThreadLocal(void* t);
 	void set(void*);
+	void reset(void*);
 	void* get();
 	template<typename T> T get();
 	template<typename T> T* getPointer();

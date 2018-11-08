@@ -9,6 +9,7 @@
 
 CacheInterface::CacheInterface() {
 	this->defaultExpireSeconds = -1;
+	pool = NULL;
 }
 
 CacheInterface::~CacheInterface() {

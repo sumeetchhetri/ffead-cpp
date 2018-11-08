@@ -351,6 +351,7 @@ SocketUtil::SocketUtil() {
 	fd = -1;
 	sbio = NULL;
 	inited = false;
+	sel = NULL;
 }
 
 bool SocketUtil::isBlocking()
@@ -439,7 +440,11 @@ bool SocketUtil::handleRenegotiation()
 			closeSocket(false);
 			return true;
 		}
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 		ssl->state = SSL_ST_ACCEPT;
+#else
+		SSL_set_accept_state(ssl);
+#endif
 		if(SSL_do_handshake(ssl)<=0)
 		{
 			logger << "SSL handshake error" << std::endl;

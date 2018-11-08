@@ -501,20 +501,17 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						}
 						valus.push_back(voidPvect);
 					}
-				} catch (const char* ex) {
-					logger << "Restcontroller exception occurred" << std::endl;
-					logger << ex << std::endl;
-					invValue= true;
-					res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-					res->setDone(true);
-					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
-					return true;
-				} catch (...) {
+				} catch(const std::exception& e) {
 					logger << "Restcontroller exception occurred" << std::endl;
 					invValue= true;
 					res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 					res->setDone(true);
 					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+					for(int i=0;i<(int)valus.size();++i) {
+						if(valus.at(i)!=NULL) {
+							delete valus.at(i);
+						}
+					}
 					return true;
 				}
 			}
@@ -586,6 +583,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						it->second->clear();
 					}
 					mpvecstreams.clear();
+					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				}
 				else
 				{
@@ -594,30 +592,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					logger << "Rest Controller Method Not Found" << std::endl;
 					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				}
-
-				for(int i=0;i<(int)valus.size();++i) {
-					if(valus.at(i)!=NULL) {
-						if(argus.at(i)=="filestream")
-						{
-						}
-						else if(argus.at(i)=="vector-of-filestream")
-						{
-						}
-						else
-						{
-							//reflector.destroy(valus.at(i), argus.at(i), req->getCntxt_name());
-						}
-					}
-				}
-			} catch (const char* ex) {
-				logger << "Restcontroller exception occurred" << std::endl;
-				logger << ex << std::endl;
-				invValue= true;
-				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-				res->setDone(true);
-				ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
-				return true;
-			} catch (...) {
+			} catch(const std::exception& e) {
 				logger << "Restcontroller exception occurred" << std::endl;
 				invValue= true;
 				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);

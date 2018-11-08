@@ -126,6 +126,7 @@ HttpRequest::HttpRequest()
 {
 	cookie = false;
 	httpVers = 0;
+	corsRequest = false;
 }
 
 HttpRequest::HttpRequest(const std::string& path)
@@ -133,6 +134,7 @@ HttpRequest::HttpRequest(const std::string& path)
 	this->webpath = path;
 	cookie = false;
 	httpVers = 0;
+	corsRequest = false;
 }
 
 HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
@@ -154,11 +156,16 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 			}
 			//if(!contStarts && vec.at(i)=="\r")
 			//	contStarts = true;
-			StringUtil::split(temp, vec.at(i), (": "));
-			if(!contStarts && temp.size()>1)
+			if(!contStarts && temp.size()>1 && vec.at(i).find(":")!=std::string::npos)
 			{
+				if(vec.at(i).find(":")==vec.at(i).find(": ")) {
+					temp.push_back(StringUtil::toLowerCopy(vec.at(i).substr(0, vec.at(i).find_first_of(": "))));
+					temp.push_back(vec.at(i).substr(vec.at(i).find_first_of(": ")+2));
+				} else {
+					temp.push_back(StringUtil::toLowerCopy(vec.at(i).substr(0, vec.at(i).find_first_of(":"))));
+					temp.push_back(vec.at(i).substr(vec.at(i).find_first_of(":")+1));
+				}
 				StringUtil::replaceFirst(temp.at(1),"\r","");
-				StringUtil::toLower(temp.at(0));
 				if(temp.at(0)==HttpRequest::Authorization)
 				{
 					this->getAuthParams(temp.at(1));
@@ -257,7 +264,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						try {
 							version = CastUtil::lexical_cast<float>(versionStr);
 							this->httpVers = version;
-						} catch(...) {
+						} catch(const std::exception& e) {
 							status = HTTPResponseStatus::HttpVersionNotSupported;
 							return;
 						}
@@ -1420,7 +1427,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		try {
 			version = CastUtil::lexical_cast<float>(versionStr);
 			this->httpVers = version;
-		} catch(...) {
+		} catch(const std::exception& e) {
 		}
 	}
 	else if(key=="getarguments")
@@ -1506,7 +1513,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 			try {
 				version = CastUtil::lexical_cast<float>(versionStr);
 				this->httpVers = version;
-			} catch(...) {
+			} catch(const std::exception& e) {
 				status = HTTPResponseStatus::HttpVersionNotSupported;
 				return;
 			}
@@ -2656,12 +2663,12 @@ std::vector<std::vector<int> > HttpRequest::getRanges(std::vector<std::string> &
 					int end = CastUtil::lexical_cast<int>(rangeVals.at(1));
 
 					if(start<0 || start>end)
-						throw 1;
+						throw std::runtime_error("1");
 					std::vector<int> values;
 					values.push_back(start);
 					values.push_back(end - start);
 					rangeValuesLst.push_back(values);
-				} catch(...) {
+				} catch(const std::exception& e) {
 					//error
 				}
 			}
@@ -2670,12 +2677,12 @@ std::vector<std::vector<int> > HttpRequest::getRanges(std::vector<std::string> &
 				try {
 					int start = CastUtil::lexical_cast<int>(rangeVals.at(0));
 					if(start<0)
-						throw 1;
+						throw std::runtime_error("1");
 					std::vector<int> values;
 					values.push_back(start);
 					values.push_back(-1);
 					rangeValuesLst.push_back(values);
-				} catch(...) {
+				} catch(const std::exception& e) {
 					//error
 				}
 			}
@@ -2684,12 +2691,12 @@ std::vector<std::vector<int> > HttpRequest::getRanges(std::vector<std::string> &
 				try {
 					int end = CastUtil::lexical_cast<int>(rangeVals.at(1));
 					if(end<0)
-						throw 1;
+						throw std::runtime_error("1");
 					std::vector<int> values;
 					values.push_back(-1);
 					values.push_back(end);
 					rangeValuesLst.push_back(values);
-				} catch(...) {
+				} catch(const std::exception& e) {
 					//error
 				}
 			}
@@ -2783,6 +2790,18 @@ std::string HttpRequest::getUserName() const {
 
 std::string HttpRequest::getAuthMethod() const {
 	return authMethod;
+}
+
+void HttpRequest::setPassword(std::string v) {
+	this->password = v;
+}
+
+void HttpRequest::setUserName(std::string v) {
+	this->userName = v;
+}
+
+void HttpRequest::setAuthMethod(std::string v) {
+	this->authMethod = v;
 }
 
 std::string HttpRequest::toPluginString() {

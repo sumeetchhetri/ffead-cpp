@@ -41,7 +41,9 @@ class Obj
 	std::string type;
 	void* pointer;
 public:
-	Obj(){}
+	Obj(){
+		pointer = NULL;
+	}
 	~Obj(){}
     std::string getType() const
     {

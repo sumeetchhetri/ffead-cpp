@@ -80,8 +80,7 @@ void JSONUtil::readBalancedJSON(std::string& value, std::string& json, const boo
 	size_t eee = json.find(typeen, obs);
 	if(eee==std::string::npos)
 	{
-		std::string ex = "invalid json - unbalanced " + typest + " found at " + CastUtil::lexical_cast<std::string>(obs);
-		throw ex;
+		throw std::runtime_error("invalid json - unbalanced " + typest + " found at " + CastUtil::lexical_cast<std::string>(obs));
 	}
 	std::string test = json.substr(obs, eee-obs+1);
 	int stcnt = StringUtil::countOccurrences(test, typest);
@@ -91,8 +90,7 @@ void JSONUtil::readBalancedJSON(std::string& value, std::string& json, const boo
 		eee = json.find(typeen, eee+1);
 		if(eee==std::string::npos)
 		{
-			std::string ex = "invalid json - balancing " + typeen + " not found after " + CastUtil::lexical_cast<std::string>(eee);
-			throw ex;
+			throw std::runtime_error("invalid json - balancing " + typeen + " not found after " + CastUtil::lexical_cast<std::string>(eee));
 		}
 		test = json.substr(obs, eee-obs+1);
 		stcnt = StringUtil::countOccurrences(test, typest);
@@ -200,8 +198,7 @@ void JSONUtil::readJSON(std::string& json, const bool& isarray, JSONElement *par
 	}
 	if(value=="")
 	{
-		std::string ex = "invalid json - no value object found for name "+ name;
-		throw ex;
+		throw std::runtime_error("invalid json - no value object found for name "+ name);
 	}
 	if(element.getType()!=JSONElement::JSON_OBJECT && element.getType()!=JSONElement::JSON_ARRAY)
 	{
@@ -242,13 +239,11 @@ void JSONUtil::validateSetValue(JSONElement* element, const std::string& v)
 		}
 		if(enn==std::string::npos)
 		{
-			std::string ex = "invalid json - invalid std::string object '"+value+"' found for name "+ element->getName();
-			throw ex;
+			throw std::runtime_error("invalid json - invalid string object '"+value+"' found for name "+ element->getName());
 		}
 		else if(enn!=value.length()-1)
 		{
-			std::string ex = "invalid json - invalid literal found after std::string object '"+value+"' for name "+ element->getName();
-			throw ex;
+			throw std::runtime_error("invalid json - invalid literal found after string object '"+value+"' for name "+ element->getName());
 		}
 		if(stn!=enn-1)
 		{
@@ -270,9 +265,8 @@ void JSONUtil::validateSetValue(JSONElement* element, const std::string& v)
 		try
 		{
 			CastUtil::lexical_cast<double>(value);
-		} catch (const char* ex) {
-			std::string exp = "invalid json - invalid double value "+value+" found for name "+ element->getName();
-			throw exp;
+		} catch(const std::exception& ex) {
+			throw std::runtime_error("invalid json - invalid double value "+value+" found for name "+ element->getName());
 		}
 		element->setType(JSONElement::JSON_FLOAT);
 	}
@@ -281,9 +275,8 @@ void JSONUtil::validateSetValue(JSONElement* element, const std::string& v)
 		try
 		{
 			CastUtil::lexical_cast<unsigned long long>(value);
-		} catch (const char* ex) {
-			std::string exp = "invalid json - invalid numeric value "+value+" found for name "+ element->getName();
-			throw exp;
+		} catch(const std::exception& ex) {
+			throw std::runtime_error("invalid json - invalid numeric value "+value+" found for name "+ element->getName());
 		}
 		element->setType(JSONElement::JSON_NUMBER);
 	}
@@ -315,37 +308,5 @@ void JSONUtil::getDocument(const std::string& jsonTxt, JSONElement& root)
 
 std::string JSONUtil::getDocumentStr(const JSONElement& doc)
 {
-	std::string jsonText;
-	if(doc.getType()==JSONElement::JSON_OBJECT)
-		jsonText += "{";
-	else
-		jsonText += "[";
-	if(doc.hasChildren())
-	{
-		for (int var = 0; var < (int)doc.getChildren().size(); ++var) {
-			const JSONElement* child = &(doc.getChildren().at(var));
-			if(doc.getType()==JSONElement::JSON_OBJECT)
-				jsonText += "\"" + child->getName() + "\":";
-			if(child->getType()==JSONElement::JSON_OBJECT || child->getType()==JSONElement::JSON_ARRAY)
-			{
-				jsonText += getDocumentStr(*child);
-			}
-			else
-			{
-				if(child->getType()==JSONElement::JSON_STRING)
-					jsonText += "\"" + child->getValue() + "\"";
-				else
-					jsonText += child->getValue();
-			}
-			if(var!=(int)doc.getChildren().size()-1)
-			{
-				jsonText += ", ";
-			}
-		}
-	}
-	if(doc.getType()==JSONElement::JSON_OBJECT)
-		jsonText += "}";
-	else
-		jsonText += "]";
-	return jsonText;
+	return doc.toString();
 }

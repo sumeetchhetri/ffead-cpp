@@ -12,6 +12,7 @@
 class FormController {
 public:
 	virtual void onSubmit(void*, HttpResponse*)=0;
+	virtual ~FormController(){}
 };
 
 #endif /* FORMCONTROLLER_H_ */

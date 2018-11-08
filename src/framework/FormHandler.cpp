@@ -88,7 +88,8 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 		void *_beaninst = JSONSerialize::unSerializeUnknown(json, ele->getAttribute("bean"), req->getCntxt_name());
 		valus.push_back(_beaninst);
 		valus.push_back(res);
-		reflector.invokeMethod<void*>(_temp,meth,valus);
+		reflector.invokeMethod<void*>(_temp,meth,valus,false);
+		reflector.destroy(_beaninst, ele->getAttribute("bean"));
 		//logger << "Successfully called Formcontroller" << std::endl;
 		ConfigurationData::getInstance()->ffeadContext.release(_temp, "form_"+ele->getAttribute("controller"), req->getCntxt_name());
 		return true;

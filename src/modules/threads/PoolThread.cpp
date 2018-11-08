@@ -69,18 +69,6 @@ void* PoolThread::run(void *arg)
 					}
 				}
 			}
-			catch(...)
-			{
-				ths->logger << "Error Occurred while executing task" << std::flush;
-				if(task->isFuture)
-				{
-					FutureTask* ftask = dynamic_cast<FutureTask*>(task);
-					if(ftask!=NULL)
-					{
-						ftask->taskComplete();
-					}
-				}
-			}
 		}
 	}
 	Task* task = NULL;

@@ -14,7 +14,7 @@ RedisCacheImpl::RedisCacheImpl(ConnectionPooler* pool) {
 	if(properties.getProperty("expiryTime")!="") {
 		try {
 			this->defaultExpireSeconds = CastUtil::lexical_cast<int>(properties.getProperty("expiryTime"));
-		} catch(...) {
+		} catch(const std::exception& e) {
 		}
 	}
 	if(this->defaultExpireSeconds<=0) {
@@ -34,7 +34,7 @@ long long RedisCacheImpl::increment(const std::string& key, const int& number) {
 	redisReply* reply = execute("INCRBY %s %d", key.c_str(), number);
 	std::string val = replyValue(reply);
 	if(val=="") {
-		throw "Command Failed";
+		throw std::runtime_error("Command Failed");
 	} else {
 		return CastUtil::lexical_cast<long long>(val);
 	}
@@ -44,7 +44,7 @@ long long RedisCacheImpl::decrement(const std::string& key, const int& number) {
 	redisReply* reply = execute("DECRBY %s %d", key.c_str(), number);
 	std::string val = replyValue(reply);
 	if(val=="") {
-		throw "Command Failed";
+		throw std::runtime_error("Command Failed");
 	} else {
 		return CastUtil::lexical_cast<long long>(val);
 	}
@@ -54,7 +54,7 @@ long double RedisCacheImpl::incrementFloat(const std::string& key, const double&
 	redisReply* reply = execute("INCRBYFLOAT %s %f", key.c_str(), number);
 	std::string val = replyValue(reply);
 	if(val=="") {
-		throw "Command Failed";
+		throw std::runtime_error("Command Failed");
 	} else {
 		return CastUtil::lexical_cast<long double>(val);
 	}

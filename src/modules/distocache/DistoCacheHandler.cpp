@@ -27,6 +27,7 @@ DistoCacheHandler* DistoCacheHandler::instance = NULL;
 DistoCacheHandler::DistoCacheHandler()
 {
 	logger = LoggerFactory::getLogger("DistoCacheHandler");
+	running = false;
 }
 
 DistoCacheHandler::~DistoCacheHandler()

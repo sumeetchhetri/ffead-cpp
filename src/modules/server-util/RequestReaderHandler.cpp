@@ -287,8 +287,10 @@ void* RequestReaderHandler::handle(void* inp) {
 	}
 
 	SocketInterface* si = NULL;
+	bool isPendingSocks = false;
 	while(ins->pendingSocks.pop(si))
 	{
+		isPendingSocks = true;
 		ins->shi->donelist.put(si->identifier, true);
 		si->close();
 		//logger << "Delete Sif " << si->identifier << std::endl;
@@ -296,7 +298,7 @@ void* RequestReaderHandler::handle(void* inp) {
 	}
 	std::map<int, SocketInterface*>::iterator it;
 	for(it=ins->connections.begin();it!=ins->connections.end();++it) {
-		if(!ins->shi->donelist.find(it->second->identifier)) {
+		if(!isPendingSocks || !ins->shi->donelist.find(it->second->identifier)) {
 			it->second->close();
 			//logger << "Delete Sif " << it->second->identifier << std::endl;
 			delete it->second;

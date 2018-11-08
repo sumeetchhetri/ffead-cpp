@@ -25,16 +25,19 @@
 FutureTask::FutureTask() {
 	init();
 	result = NULL;
+	isComplete = false;
 }
 
 FutureTask::FutureTask(const int& priority) {
 	setPriority(priority);
 	result = NULL;
+	isComplete = false;
 }
 
 FutureTask::FutureTask(const int& tunit, const int& type) {
 	setTunitType(tunit, type);
 	result = NULL;
+	isComplete = false;
 }
 
 FutureTask::~FutureTask() {

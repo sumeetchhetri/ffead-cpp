@@ -22,9 +22,15 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		int hdrc = 0;
 		for (int var = 0; var < (int)lines.size(); ++var) {
 			size_t kind = std::string::npos;
+			std::string key, value;
 			if(var>0 && (kind = lines.at(var).find(":"))!=std::string::npos) {
-				std::string key = lines.at(var).substr(0, kind);
-				std::string value = lines.at(var).substr(kind+1);
+				if(lines.at(var).find(":")==lines.at(var).find(": ")) {
+					key = lines.at(var).substr(0, lines.at(var).find_first_of(": "));
+					value = lines.at(var).substr(lines.at(var).find_first_of(": ")+2);
+				} else {
+					key = lines.at(var).substr(0, lines.at(var).find_first_of(":"));
+					value = lines.at(var).substr(lines.at(var).find_first_of(":")+1);
+				}
 				request->buildRequest(key, value);
 				if(hdrc++>maxReqHdrCnt) {
 					close();

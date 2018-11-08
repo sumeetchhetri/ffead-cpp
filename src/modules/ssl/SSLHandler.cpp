@@ -196,7 +196,11 @@ int SSLHandler::alpn_select_proto_cb(SSL *ssl, const unsigned char **out, unsign
 		return SSL_TLSEXT_ERR_NOACK;
 	}
 	int sockfd;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	BIO_get_fd(ssl->rbio, &sockfd);
+#else
+	BIO_get_fd(SSL_get_rbio(ssl), &sockfd);
+#endif
 	instance->socketAlpnProtoMap[sockfd] = std::string((char*)*out, (int)(*outlen));
 	return SSL_TLSEXT_ERR_OK;
 }

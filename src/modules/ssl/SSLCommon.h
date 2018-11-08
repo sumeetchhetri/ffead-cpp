@@ -37,7 +37,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <signal.h>
-
+#include <openssl/opensslv.h>
 
 class SSLCommon {
 	SSLCommon();

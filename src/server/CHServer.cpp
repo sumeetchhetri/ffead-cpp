@@ -395,13 +395,9 @@ pid_t createChildProcess(std::string serverRootDirectory,int sp[],int sockfd)
 						pool.submit(task);
 					}
 				}
-				catch(const char* err)
+				catch(const std::exception& err)
 				{
-					plogger << "Exception occurred while processing ServiceTask request - " << err << std::endl;
-				}
-				catch(...)
-				{
-					plogger << "Standard exception occurred while processing ServiceTask request " << std::endl;
+					plogger << "Exception occurred while processing ServiceTask request - " << err.what() << std::endl;
 				}
 			}
 		}
@@ -565,6 +561,31 @@ void* CHServer::dynamic_page_monitor(void* arg)
 }
 #endif
 
+/*
+void * operator new(size_t size) throw(std::bad_alloc)
+{
+	ConfigurationData::counter++;
+    return malloc(size);
+}
+
+void operator delete(void * p) throw()
+{
+	ConfigurationData::counter--;
+    free(p);
+}
+
+void *operator new[](std::size_t size) throw(std::bad_alloc)
+{
+	ConfigurationData::counter++;
+    return malloc(size);
+}
+void operator delete[](void *p) throw()
+{
+	ConfigurationData::counter--;
+    free(p);
+}
+*/
+
 
 int main(int argc, char* argv[])
 {
@@ -627,11 +648,9 @@ int main(int argc, char* argv[])
 
 	try {
 		return CHServer::entryPoint(vhostNum, isMain, serverRootDirectory, port, ipaddr, servedAppNames);
-	} catch (const char* e) {
-		std::cout << e << std::endl;
 	} catch (const XmlParseException& e) {
 		std::cout << e.getMessage() << std::endl;
-	} catch (...) {
+	} catch(const std::exception& e) {
 		std::cout << "Error Occurred in serve" << std::endl;
 	}
 	return 0;
@@ -715,7 +734,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		{
     		preForked = CastUtil::lexical_cast<int>(srprps["NUM_PROC"]);
 		}
-		catch(...)
+		catch(const std::exception& e)
 		{
 			logger << "Invalid number for worker processes defined" << std::endl;
 			preForked = 5;
@@ -742,7 +761,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 			{
 				thrdpsiz = CastUtil::lexical_cast<int>(thrdpreq);
 			}
-			catch(...)
+			catch(const std::exception& e)
 			{
 				logger << "Invalid service thread pool size defined" << std::endl;
 				thrdpsiz = CommonUtils::getProcessorCount();
@@ -756,7 +775,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		{
 			wthrdpsiz = CastUtil::lexical_cast<int>(thrdpreq);
 		}
-		catch(...)
+		catch(const std::exception& e)
 		{
 			logger << "Invalid writer thread pool size defined" << std::endl;
 			wthrdpsiz = 2;
@@ -778,7 +797,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
    	{
    		try {
    			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
-		} catch (...) {
+		} catch(const std::exception& e) {
 			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << std::endl;
 		}
    	}
@@ -838,9 +857,9 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
     {
     	logger << p.getMessage() << std::endl;
     }
-    catch(const char* msg)
+    catch(const std::exception& msg)
 	{
-		logger << msg << std::endl;
+		logger << msg.what() << std::endl;
 	}
 
     SSLHandler::initInstance(ConfigurationData::getInstance()->securityProperties);
@@ -950,7 +969,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 			{
 				distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
 			}
-		} catch(...) {
+		} catch(const std::exception& e) {
 			logger << ("Invalid poolsize specified for distocache") << std::endl;
 		}
 
@@ -962,7 +981,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 				logger << ("Session store is set to distocache store") << std::endl;
 				distocache = true;
 			}
-		} catch(...) {
+		} catch(const std::exception& e) {
 			logger << ("Invalid port specified for distocache") << std::endl;
 		}
 
@@ -982,7 +1001,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 					ComponentHandler::trigger(srprps["CMP_PORT"]);
 				}
 			}
-		} catch(...) {
+		} catch(const std::exception& e) {
 			logger << ("Component Handler Services are disabled") << std::endl;
 		}
 	#endif
@@ -997,7 +1016,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 					MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
 				}
 			}
-		} catch(...) {
+		} catch(const std::exception& e) {
 			logger << ("Messaging Handler Services are disabled") << std::endl;
 		}
 	#endif
@@ -1012,7 +1031,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 					MethodInvoc::trigger(srprps["MI_PORT"]);
 				}
 			}
-		} catch(...) {
+		} catch(const std::exception& e) {
 			logger << ("Method Invoker Services are disabled") << std::endl;
 		}
 	#endif
@@ -1120,10 +1139,8 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 
 		try {
 			serve(port, ipaddr, thrdpsiz, wthrdpsiz, serverRootDirectory, srprps, vhostNum);
-		} catch (const char* e) {
-			logger << e << std::endl;
-		} catch (...) {
-			logger << "Error Occurred in serve" << std::endl;
+		} catch(const std::exception& e) {
+			logger << e.what() << std::endl;
 		}
 	}
 
@@ -1182,12 +1199,14 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 		{
 			preForked = CastUtil::lexical_cast<int>(sprops["NUM_PROC"]);
 		}
-		catch(...)
+		catch(const std::exception& e)
 		{
 			logger << "Invalid number for worker processes defined" << std::endl;
 			preForked = 5;
 		}
 	}
+
+	HttpClient::init();
 
 	SOCKET sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
 
@@ -1277,19 +1296,19 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	std::string cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["CONTENT_ENCODING"]);
 	try {
 		techunkSiz = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->coreServerProperties.sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);
-	} catch (...) {
+	} catch(const std::exception& e) {
 	}
 	try {
 		connKeepAlive = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->coreServerProperties.sprops["KEEP_ALIVE_SECONDS"]);
-	} catch (...) {
+	} catch(const std::exception& e) {
 	}
 	try {
 		maxReqHdrCnt = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->coreServerProperties.sprops["MAX_REQUEST_HEADERS_COUNT"]);
-	} catch (...) {
+	} catch(const std::exception& e) {
 	}
 	try {
 		maxEntitySize = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->coreServerProperties.sprops["MAX_REQUEST_ENTITY_SIZE"]);
-	} catch (...) {
+	} catch(const std::exception& e) {
 	}
 
 	HTTPResponseStatus::getStatusByCode(200);
@@ -1306,6 +1325,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	struct stat buffer;
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
+		//std::string lg = "Memory allocations waiting to be freed = " + CastUtil::lexical_cast<std::string>(ConfigurationData::counter);
+		//logger <<  lg << std::endl;
 		Thread::sSleep(5);
 	}
 
@@ -1363,11 +1384,16 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 
 	RegexUtil::flushCache();
 
-	LoggerFactory::clear();
+	HttpClient::cleanup();
 
 	#ifdef OS_MINGW
 		WSACleanup();
 	#endif
+
+	//std::string lg = "Memory allocations waiting to be freed = " + CastUtil::lexical_cast<std::string>(ConfigurationData::counter);
+	//logger <<  lg << std::endl;
+
+	LoggerFactory::clear();
 }
 
 int CHServer::techunkSiz = 0;

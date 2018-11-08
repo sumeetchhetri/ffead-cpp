@@ -89,7 +89,7 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			std::string tyyyy = strdate.substr(ytemp.find("yyyy"),4);
 			if(yyyy!=tyyyy)
-				throw "Multiple instances with different year(yyyy) values found";
+				throw std::runtime_error("Multiple instances with different year(yyyy) values found");
 			strdate = strdate.substr(0, ytemp.find("yyyy")) +
 						strdate.substr(ytemp.find("yyyy")+4);
 			StringUtil::replaceFirst(ytemp, "yyyy", "");
@@ -104,7 +104,7 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			std::string tyy = strdate.substr(ytemp.find("yy"),2);
 			if(yy!=tyy)
-				throw "Multiple instances with different year(yy) values found";
+				throw std::runtime_error("Multiple instances with different year(yy) values found");
 			strdate = strdate.substr(0, ytemp.find("yy")) +
 						strdate.substr(ytemp.find("yy")+2);
 			StringUtil::replaceFirst(ytemp, "yy", "");
@@ -119,7 +119,7 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			std::string tddd = strdate.substr(ytemp.find("ddd"),3);
 			if(ddd!=tddd)
-				throw "Multiple instances with different day(ddd) values found";
+				throw std::runtime_error("Multiple instances with different day(ddd) values found");
 			strdate = strdate.substr(0, ytemp.find("ddd")) +
 						strdate.substr(ytemp.find("ddd")+3);
 			StringUtil::replaceFirst(ytemp, "ddd", "");
@@ -134,7 +134,7 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			std::string tdd = strdate.substr(ytemp.find("dd"),2);
 			if(dd!=tdd)
-				throw "Multiple instances with different day(dd) values found";
+				throw std::runtime_error("Multiple instances with different day(dd) values found");
 			strdate = strdate.substr(0, ytemp.find("dd")) +
 						strdate.substr(ytemp.find("dd")+2);
 			StringUtil::replaceFirst(ytemp, "dd", "");
@@ -149,7 +149,7 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			std::string tmmm = strdate.substr(ytemp.find("mmm"),3);
 			if(mmm!=tmmm)
-				throw "Multiple instances with different month(mmm) values found";
+				throw std::runtime_error("Multiple instances with different month(mmm) values found");
 			strdate = strdate.substr(0, ytemp.find("mmm")) +
 						strdate.substr(ytemp.find("mmm")+3);
 			StringUtil::replaceFirst(ytemp, "mmm", "");
@@ -164,7 +164,7 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			std::string tmm = strdate.substr(ytemp.find("mm"),2);
 			if(mm!=tmm)
-				throw "Multiple instances with different month(mm) values found";
+				throw std::runtime_error("Multiple instances with different month(mm) values found");
 			strdate = strdate.substr(0, ytemp.find("mm")) +
 						strdate.substr(ytemp.find("mm")+2);
 			StringUtil::replaceFirst(ytemp, "mm", "");
@@ -179,7 +179,7 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			std::string thh = strdate.substr(ytemp.find("hh"),2);
 			if(hh!=thh)
-				throw "Multiple instances with different hours(hh) values found";
+				throw std::runtime_error("Multiple instances with different hours(hh) values found");
 			strdate = strdate.substr(0, ytemp.find("hh")) +
 						strdate.substr(ytemp.find("hh")+2);
 			StringUtil::replaceFirst(ytemp, "hh", "");
@@ -194,7 +194,7 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			std::string tmi = strdate.substr(ytemp.find("mi"),2);
 			if(mi!=tmi)
-				throw "Multiple instances with different minutes(mi) values found";
+				throw std::runtime_error("Multiple instances with different minutes(mi) values found");
 			strdate = strdate.substr(0, ytemp.find("mi")) +
 						strdate.substr(ytemp.find("mi")+2);
 			StringUtil::replaceFirst(ytemp, "mi", "");
@@ -209,20 +209,31 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			std::string tss = strdate.substr(ytemp.find("ss"),2);
 			if(ss!=tss)
-				throw "Multiple instances with different seconds(ss) values found";
+				throw std::runtime_error("Multiple instances with different seconds(ss) values found");
 			strdate = strdate.substr(0, ytemp.find("ss")) +
 						strdate.substr(ytemp.find("ss")+2);
 			StringUtil::replaceFirst(ytemp, "ss", "");
 		}
 		temp = ytemp;
 	}
-	if(strdate.find("+")!=std::string::npos)
+	if(temp.find("Z")!=std::string::npos)
 	{
-		tzv = strdate.substr(temp.find("+")+1);
+		tzv = strdate.substr(temp.find("Z"),5);
+		std::string ytemp = temp;
+		int cnt = 0;
+		while(ytemp.find("Z")!=std::string::npos)
+		{
+			std::string ttzv = strdate.substr(ytemp.find("Z"), 1);
+			if(tzv!=ttzv)
+				throw std::runtime_error("Multiple instances with different timezone offsets(Z) values found");
+			strdate = strdate.substr(0, ytemp.find("Z")) +
+						strdate.substr(ytemp.find("Z")+5);
+			StringUtil::replaceFirst(ytemp, "Z", "");
+		}
+		temp = ytemp;
 	}
-	else if(strdate.find("-")!=std::string::npos)
-	{
-		tzv = strdate.substr(temp.find("-"));
+	if(temp!=strdate) {
+		throw std::runtime_error("Invalid Date specified");
 	}
 	try
 	{
@@ -240,7 +251,7 @@ Date* DateFormat::parse(std::string strdate)
 			}
 			else
 			{
-				throw "Invalid Date month specified";
+				throw std::runtime_error("Invalid Date month specified");
 			}
 		}
 		else if(yy!="" && dd!="")
@@ -257,31 +268,29 @@ Date* DateFormat::parse(std::string strdate)
 			}
 			else
 			{
-				throw "Invalid Date month specified";
+				throw std::runtime_error("Invalid Date month specified");
 			}
 		}
 		else
 		{
-			throw "Invalid Date year/day specified";
+			throw std::runtime_error("Invalid Date year/day specified");
 		}
 		if(tzv!="")
 		{
 			try {
 				date->setTimeZoneOffset(CastUtil::lexical_cast<float>(tzv));
-			} catch (...) {
-				throw "Invalid Timezone specified";
+			} catch(const std::exception& e) {
+				throw std::runtime_error("Invalid Timezone specified");
 			}
 		}
-	} catch (const char* s) {
-		throw;
-	} catch (...) {
-		throw "Invalid Date specified";
+	} catch(const std::exception& e) {
+		throw std::runtime_error("Invalid Date specified");
 	}
 	if(date!=NULL)
 	{
 		if(ddd!="" && date->getDayAbbr()!=StringUtil::toUpperCopy(ddd))
 		{
-			throw "Invalid Day(ddd) specified";
+			throw std::runtime_error("Invalid Day(ddd) specified");
 		}
 	}
 	if(hh=="")

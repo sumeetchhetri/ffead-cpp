@@ -14,7 +14,7 @@ MemoryCacheImpl::MemoryCacheImpl(ConnectionPooler* pool) {
 	if(properties.getProperty("expiryTime")!="") {
 		try {
 			this->defaultExpireSeconds = CastUtil::lexical_cast<int>(properties.getProperty("expiryTime"));
-		} catch(...) {
+		} catch(const std::exception& e) {
 		}
 	}
 }
@@ -122,7 +122,7 @@ std::vector<std::string> MemoryCacheImpl::getValues(const std::vector<std::strin
 }
 
 void* MemoryCacheImpl::executeCommand(const std::string& command, ...) {
-	throw "Not Implemented";
+	throw std::runtime_error("Not Implemented");
 }
 
 bool MemoryCacheImpl::set(const std::string& key, GenericObject& value, int expireSeconds) {

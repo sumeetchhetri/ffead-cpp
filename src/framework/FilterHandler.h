@@ -27,6 +27,8 @@
 #include <dlfcn.h>
 #include "LoggerFactory.h"
 #include "ConfigurationData.h"
+#include "string"
+#include "vector"
 
 typedef ClassInfo (*FunPtr) ();
 

@@ -29,6 +29,8 @@ private:
 public:
     TestBeanCons()
     {
+    	boolProp = false;
+    	intProp = 0;
     }     
     TestBeanCons(int intProp,bool boolProp,DependencyBean4 dependencyBean4)
     {

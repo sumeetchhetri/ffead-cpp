@@ -90,7 +90,7 @@ void* ComponentHandler::service(void* arg)
 			{
 				throw ComponentHandlerException("message tag should have only one child tag\n",retValue);
 			}
-			else if(message.getChildElements().at(0)->getTagName()!="args")
+			else if(message.getChildElements().at(0).getTagName()!="args")
 			{
 				throw ComponentHandlerException("message tag should have an args child tag\n",retValue);
 			}
@@ -98,32 +98,32 @@ void* ComponentHandler::service(void* arg)
 			Reflector reflector;
 			args argus;
 			vals valus;
-			ElementList argts = message.getChildElements().at(0)->getChildElements();
+			ElementList argts = message.getChildElements().at(0).getChildElements();
 			for (unsigned var = 0; var < argts.size();  var++)
 			{
 				void *value = NULL;
-				if(argts.at(var)->getTagName()!="argument")
+				if(argts.at(var).getTagName()!="argument")
 				{
 					throw ComponentHandlerException("Invalid Tag, only argument tag allowed\n",retValue);
 
 				}
-				else if(argts.at(var)->getAttribute("type")=="")
+				else if(argts.at(var).getAttribute("type")=="")
 				{
 					throw ComponentHandlerException("every argument tag should have a type attribute\n",retValue);
 
 				}
-				if(argts.at(var)->getText()=="" && argts.at(var)->getChildElements().size()==0)
+				if(argts.at(var).getText()=="" && argts.at(var).getChildElements().size()==0)
 				{
 					throw ComponentHandlerException("argument value missing\n",retValue);
 
 				}
-				if(argts.at(var)->getAttribute("type")!="")
+				if(argts.at(var).getAttribute("type")!="")
 				{
-					std::string objxml = argts.at(var)->getChildElements().at(0)->render();
-					std::string objClassName = argts.at(var)->getChildElements().at(0)->getTagName();
-					value = ser.unSerializeUnknown(objxml, argts.at(var)->getAttribute("type"));
+					std::string objxml = argts.at(var).getChildElements().at(0).render(); // @suppress("Invalid arguments")
+					std::string objClassName = argts.at(var).getChildElements().at(0).getTagName();
+					value = ser.unSerializeUnknown(objxml, argts.at(var).getAttribute("type"));
 				}
-				argus.push_back(argts.at(var)->getAttribute("type"));
+				argus.push_back(argts.at(var).getAttribute("type"));
 				valus.push_back(value);
 			}
 			std::string className = "Component_"+message.getAttribute("beanName");
@@ -214,7 +214,7 @@ void* ComponentHandler::service(void* arg)
 		instance->server.Send(fd,retValue);
 		close(fd);
 	}
-	catch(...)
+	catch(const std::exception& e)
 	{
 		instance->logger << "Component exception occurred" << std::endl;
 		retValue = ("<return:exception>XmlParseException occurred</return:exception>");

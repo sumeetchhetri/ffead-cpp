@@ -56,7 +56,7 @@ void ThreadPool::init(const int& maxThreads)
 
 ThreadPool::ThreadPool(const int& maxThreads, const int& lowp, const int& highp) {
 	if (lowp > highp)
-		throw "Low Priority should be less than Highest Priority";
+		throw std::runtime_error("Low Priority should be less than Highest Priority");
 	initPointers();
 	this->maxThreads = maxThreads;
 	this->lowp = lowp;

@@ -28,6 +28,7 @@
 class Controller {
 public:
 	virtual bool service(HttpRequest* req, HttpResponse* res)=0;
+	virtual ~Controller(){}
 };
 
 #endif /* CONTROLLER_H_ */

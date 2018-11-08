@@ -31,8 +31,11 @@ public:
 	const std::string& getDatabaseName() const;
 	void setDatabaseName(const std::string& databaseName);
 	const std::string& getDsn() const;
+	void setBaseUrl(const std::string& url);
+	const std::string& getBaseUrl() const;
 
 private:
+	std::string url;
 	std::string dsn;
 	std::string host;
 	std::string username;

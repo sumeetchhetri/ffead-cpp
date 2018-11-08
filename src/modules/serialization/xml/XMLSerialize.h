@@ -117,7 +117,7 @@ public:
 			}
 		} catch(const XmlParseException& str) {
 			std::cout << str.getMessage() << std::endl;
-		} catch(...) {
+		} catch(const std::exception& e) {
 			std::cout << "XML Parse Error" << std::endl;
 		}
 		return mp;
@@ -184,7 +184,7 @@ public:
 			}
 		} catch(const XmlParseException& str) {
 			std::cout << str.getMessage() << std::endl;
-		} catch(...) {
+		} catch(const std::exception& e) {
 			std::cout << "XML Parse Error" << std::endl;
 		}
 		return mp;

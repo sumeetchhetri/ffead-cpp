@@ -1230,7 +1230,9 @@ void* SerializeBase::_handleAllUnSerialization(const std::string& serVal, std::s
 	{
 		if(serObject==NULL)
 			return NULL;
-		base->cleanUnserializableObject(intermediateObject);
+		if(intermediateObject!=NULL) {
+			base->cleanUnserializableObject(intermediateObject);
+		}
 		intermediateObject = serObject;
 	}
 	StringUtil::trim(className);
@@ -1355,8 +1357,10 @@ void* SerializeBase::handleMultiLevelUnSerialization(void* intermediateObject, s
 				{
 					temp = temp->_M_next;
 				}
-				temp->_M_next = (DummyList::_List_node_base*)&(*it)._M_impl._M_node;
-				temp->_M_prev = (DummyList::_List_node_base*)&(*it)._M_impl._M_node;
+
+				DummyList::_List_node_base temp1 = (*it)._M_impl._M_node;
+				temp->_M_next = (DummyList::_List_node_base*)&temp1;
+				temp->_M_prev = (DummyList::_List_node_base*)&temp1;
 			}
 		}
 		else if((container.find("std::deque<")==0 || container.find("deque<")==0) && elesizes.size()>0
@@ -1372,8 +1376,10 @@ void* SerializeBase::handleMultiLevelUnSerialization(void* intermediateObject, s
 				{
 					temp = temp->_M_next;
 				}
-				temp->_M_next = (DummyList::_List_node_base*)&(*it)._M_impl._M_node;
-				temp->_M_prev = (DummyList::_List_node_base*)&(*it)._M_impl._M_node;
+
+				DummyList::_List_node_base temp1 = (*it)._M_impl._M_node;
+				temp->_M_next = (DummyList::_List_node_base*)&temp1;
+				temp->_M_prev = (DummyList::_List_node_base*)&temp1;
 			}
 		}
 		else if((container.find("std::set<")==0 || container.find("set<")==0) && elesizes.size()>0
@@ -1389,8 +1395,10 @@ void* SerializeBase::handleMultiLevelUnSerialization(void* intermediateObject, s
 				{
 					temp = temp->_M_next;
 				}
-				temp->_M_next = (DummyList::_List_node_base*)&(*it)._M_impl._M_node;
-				temp->_M_prev = (DummyList::_List_node_base*)&(*it)._M_impl._M_node;
+
+				DummyList::_List_node_base temp1 = (*it)._M_impl._M_node;
+				temp->_M_next = (DummyList::_List_node_base*)&temp1;
+				temp->_M_prev = (DummyList::_List_node_base*)&temp1;
 			}
 		}
 		else if((container.find("std::multiset<")==0 || container.find("multiset<")==0) && elesizes.size()>0
@@ -1406,8 +1414,10 @@ void* SerializeBase::handleMultiLevelUnSerialization(void* intermediateObject, s
 				{
 					temp = temp->_M_next;
 				}
-				temp->_M_next = (DummyList::_List_node_base*)&(*it)._M_impl._M_node;
-				temp->_M_prev = (DummyList::_List_node_base*)&(*it)._M_impl._M_node;
+
+				DummyList::_List_node_base temp1 = (*it)._M_impl._M_node;
+				temp->_M_next = (DummyList::_List_node_base*)&temp1;
+				temp->_M_prev = (DummyList::_List_node_base*)&temp1;
 			}
 		}
 		/*else if(container.find("std::queue<")==0 && elesizes.size()>0 && className.find("std::list<")==0)
@@ -1422,8 +1432,10 @@ void* SerializeBase::handleMultiLevelUnSerialization(void* intermediateObject, s
 				{
 					temp = temp->_M_next;
 				}
-				temp->_M_next = (DummyList::_List_node_base*)&(*it)._M_impl._M_node;
-				temp->_M_prev = (DummyList::_List_node_base*)&(*it)._M_impl._M_node;
+
+				DummyList::_List_node_base* temp1 = (*it)._M_impl._M_node;
+				temp->_M_next = (DummyList::_List_node_base*)&temp1;
+				temp->_M_prev = (DummyList::_List_node_base*)&temp1;
 			}
 		}*/
 	}
@@ -1502,6 +1514,8 @@ void* SerializeBase::unserializeset(void* unserableObject, const std::string& ap
 		t = new std::set<float>();
 	else if(className=="double")
 		t = new std::set<double>();
+	else if(className=="long double")
+		t = new std::set<long double>();
 	else if(className=="bool")
 		t = new std::set<bool>();
 	else if(className=="char")
@@ -1559,6 +1573,8 @@ void* SerializeBase::unserializelist(void* unserableObject, const std::string& a
 		t = new std::list<float>();
 	else if(className=="double")
 		t = new std::list<double>();
+	else if(className=="long double")
+		t = new std::list<long double>();
 	else if(className=="bool")
 		t = new std::list<bool>();
 	else if(className=="char")
@@ -1616,6 +1632,8 @@ void* SerializeBase::unserializeq(void* unserableObject, const std::string& app,
 		t = new std::queue<float>();
 	else if(className=="double")
 		t = new std::queue<double>();
+	else if(className=="long double")
+		t = new std::queue<long double>();
 	else if(className=="bool")
 		t = new std::queue<bool>();
 	else if(className=="char")
@@ -1673,6 +1691,8 @@ void* SerializeBase::unserializevec(void* unserableObject, const std::string& ap
 		t = new std::vector<float>();
 	else if(className=="double")
 		t = new std::vector<double>();
+	else if(className=="long double")
+		t = new std::vector<long double>();
 	else if(className=="bool")
 		t = new std::vector<bool>();
 	else if(className=="char")
@@ -1730,6 +1750,8 @@ void* SerializeBase::unserializedq(void* unserableObject, const std::string& app
 		t = new std::deque<float>();
 	else if(className=="double")
 		t = new std::deque<double>();
+	else if(className=="long double")
+		t = new std::deque<long double>();
 	else if(className=="bool")
 		t = new std::deque<bool>();
 	else if(className=="char")
@@ -1787,6 +1809,8 @@ void* SerializeBase::unserializemultiset(void* unserableObject, const std::strin
 		t = new std::multiset<float>();
 	else if(className=="double")
 		t = new std::multiset<double>();
+	else if(className=="long double")
+		t = new std::multiset<long double>();
 	else if(className=="bool")
 		t = new std::multiset<bool>();
 	else if(className=="char")

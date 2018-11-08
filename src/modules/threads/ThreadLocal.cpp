@@ -21,6 +21,10 @@ void ThreadLocal::set(void* val) {
 	}
 }
 
+void ThreadLocal::reset(void* val) {
+	pthread_setspecific(_key, val);
+}
+
 ThreadLocal::ThreadLocal(void* t) {
 	init();
 	if (pthread_getspecific(_key) == NULL) {

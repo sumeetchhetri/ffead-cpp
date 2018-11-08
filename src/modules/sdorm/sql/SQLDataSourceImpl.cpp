@@ -410,6 +410,7 @@ SQLDataSourceImpl::SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping) {
 }
 
 SQLDataSourceImpl::~SQLDataSourceImpl() {
+	endSession();
 }
 
 void SQLDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject& idv) {
@@ -1261,7 +1262,7 @@ void SQLDataSourceImpl::bindQueryParams(Query& query)
 			}
 		}
 		else
-			throw "Cannot bind value";
+			throw std::runtime_error("Cannot bind value");
 
 		par++;
 	}
@@ -1373,7 +1374,7 @@ bool SQLDataSourceImpl::rollback()
 void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 #ifdef HAVE_LIBODBC
 	bool flagc = allocateStmt(true);
-	if(!flagc)throw "Error getting Database connection";
+	if(!flagc)throw std::runtime_error("Error getting Database connection");
 	int V_OD_erg;// result of functions
 	SQLCHAR *query;
 	std::string quer = "{call " + procName + "(";
@@ -1434,7 +1435,7 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 				{
 					showError("SQLBindParameter", V_OD_hstmt, SQL_HANDLE_STMT);
 					close();
-					throw "Error in call to stored procedure";
+					throw std::runtime_error("Error in call to stored procedure");
 				}
 			}
 		}
@@ -1447,7 +1448,7 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 		{
 			showError("SQLExecDirect", V_OD_hstmt, SQL_HANDLE_STMT);
 			close();
-			throw "Error in call to stored procedure";
+			throw std::runtime_error("Error in call to stored procedure");
 		}
 		refreshStmt();
 	}
@@ -1472,7 +1473,7 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 				{
 					showError("SQLBindParameter", V_OD_hstmt, SQL_HANDLE_STMT);
 					close();
-					throw "Error Binding parameter";
+					throw std::runtime_error("Error Binding parameter");
 				}
 			}
 			else if (params[it->first].getTypeName() == "short") {
@@ -1483,7 +1484,7 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 				{
 					showError("SQLBindParameter", V_OD_hstmt, SQL_HANDLE_STMT);
 					close();
-					throw "Error Binding parameter";
+					throw std::runtime_error("Error Binding parameter");
 				}
 			}
 			else if (params[it->first].getTypeName() == "std::string" || params[it->first].getTypeName() == "string") {
@@ -1495,7 +1496,7 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 				{
 					showError("SQLBindParameter", V_OD_hstmt, SQL_HANDLE_STMT);
 					close();
-					throw "Error Binding parameter";
+					throw std::runtime_error("Error Binding parameter");
 				}
 			}
 		}
@@ -1506,7 +1507,7 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 	{
 		showError("SQLExecDirect", V_OD_hstmt, SQL_HANDLE_STMT);
 		close();
-		throw "Error in call to stored procedure";
+		throw std::runtime_error("Error in call to stored procedure");
 	}
 
 	//logger << outQuery << std::endl;
@@ -1516,7 +1517,7 @@ void SQLDataSourceImpl::procedureCall(const std::string& procName) {
 	{
 		showError("SQLExecDirect", V_OD_hstmt, SQL_HANDLE_STMT);
 		close();
-		throw "Error in call to stored procedure";
+		throw std::runtime_error("Error in call to stored procedure");
 	}
 
 	V_OD_erg = SQLFetch(V_OD_hstmt);
@@ -1891,7 +1892,7 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 
 	if(query.getPropPosVaues().size()>0 && query.getPropNameVaues().size()>0)
 	{
-		throw "Cannot mix positional and named parameters";
+		throw std::runtime_error("Cannot mix positional and named parameters");
 	}
 
 	SQLFreeStmt(V_OD_hstmt, SQL_RESET_PARAMS);
@@ -2011,6 +2012,8 @@ void SQLDataSourceImpl::destroyContext(void* cntxt) {
 
 SQLContext::SQLContext() {
 	conn = NULL;
+	V_OD_hdbc = NULL;
+	V_OD_hstmt = NULL;
 }
 
 SQLContext::~SQLContext() {

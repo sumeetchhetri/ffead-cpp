@@ -47,8 +47,8 @@ BeanContext::BeanContext() {
 }
 
 BeanContext::BeanContext(const std::string& host, const int& port) {
-	this->setHost(host);
-	this->setPort(port);
+	this->host = host;
+	this->port = port;
 }
 
 BeanContext::~BeanContext() {
@@ -130,13 +130,13 @@ void* BeanContext::invoke(const std::string& name, std::vector<GenericObject> ar
 		}
 		else
 		{
-			throw "Exception occurred";
+			throw std::runtime_error("Exception occurred");
 		}
 		//logger << retval << std::flush;
 	}
 	else
 	{
-		throw "Invalid BeanContext";
+		throw std::runtime_error("Invalid BeanContext");
 	}
 	return retval;
 }

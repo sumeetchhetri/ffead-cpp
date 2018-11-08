@@ -56,7 +56,7 @@ Thread::~Thread() {
 void Thread::join() {
 	if(!isDetached && pthread_join(pthread, NULL)) {
 		perror("pthread_join");
-		throw "Error in join for pthread";
+		throw std::runtime_error("Error in join for pthread");
 	}
 }
 
@@ -113,7 +113,7 @@ void Thread::wait() {
 void Thread::execute() {
 	if(pthread_create(&pthread, NULL, _service, this->threadFunctor)) {
 		perror("pthread_create");
-		throw "Error Creating pthread";
+		throw std::runtime_error("Error Creating pthread");
 	}
 	if(isDetached) {
 		pthread_detach(pthread);

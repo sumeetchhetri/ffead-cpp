@@ -23,7 +23,7 @@ void SQLConnectionPool::initEnv() {
 		logger << "Error AllocHandle" << std::endl;
 		SQLFreeHandle(SQL_HANDLE_ENV, V_OD_Env);
 		V_OD_Env = NULL;
-		throw "Unable to initialize odbc/sql handle";
+		throw std::runtime_error("Unable to initialize odbc/sql handle");
 	}
 	else
 	{
@@ -57,7 +57,10 @@ void* SQLConnectionPool::newConnection(const bool& isWrite, const ConnectionNode
 		return NULL;
 		//exit(0);
 	}
-	SQLSetConnectAttr(conn, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
+
+	int seconds = node.getConnectionTimeout()/1000;
+	SQLSetConnectAttr(conn, SQL_ATTR_CONNECTION_TIMEOUT, (SQLUINTEGER*)&seconds, 0);
+	SQLSetConnectAttr(conn, SQL_LOGIN_TIMEOUT, (SQLPOINTER)&seconds, 0);
 	// 3. Connect to the datasource "MySQL-test"
 	V_OD_erg = SQLConnect(conn, (SQLCHAR*) node.getDsn().c_str(), node.getDsn().length(),
 									 (SQLCHAR*) node.getUsername().c_str(), node.getUsername().length(),

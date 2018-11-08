@@ -461,8 +461,8 @@ void Date::populateDay()
 Date::Date(const int& yyyy, const std::string& mmm, const int& dd)
 {
 	std::string mm = getMon(mmm);
-	if(mm=="-1")throw "Invalid month";
-	if(!validateDate(dd,CastUtil::lexical_cast<int>(mm),yyyy))throw "Invalid date";
+	if(mm=="-1")throw std::runtime_error("Invalid month");
+	if(!validateDate(dd,CastUtil::lexical_cast<int>(mm),yyyy))throw std::runtime_error("Invalid date");
 	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
 	*this = getDateFromDays(g);
 	populateDay();
@@ -472,7 +472,7 @@ Date::Date(const int& yyyy, const std::string& mmm, const int& dd)
 
 Date::Date(const int& yyyy, const int& mm, const int& dd)
 {
-	if(!validateDate(dd,mm,yyyy))throw "Invalid date";
+	if(!validateDate(dd,mm,yyyy))throw std::runtime_error("Invalid date");
 	long g = getDays(yyyy,mm,dd);
 	*this = getDateFromDays(g);
 	populateDay();
@@ -486,8 +486,8 @@ Date::Date(const int& yy, const std::string& mmm, const int& dd, const bool& te)
 	std::string syyyy = CastUtil::lexical_cast<std::string>(d.year).substr(0,2) + CastUtil::lexical_cast<std::string>(yy);
 	int yyyy = CastUtil::lexical_cast<int>(syyyy);
 	std::string mm = getMon(mmm);
-	if(mm=="-1")throw "Invalid month";
-	if(!validateDate(dd,CastUtil::lexical_cast<int>(mm),yyyy))throw "Invalid date";
+	if(mm=="-1")throw std::runtime_error("Invalid month");
+	if(!validateDate(dd,CastUtil::lexical_cast<int>(mm),yyyy))throw std::runtime_error("Invalid date");
 	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
 	*this = getDateFromDays(g);
 	populateDay();
@@ -500,7 +500,7 @@ Date::Date(const int& yy, const int& mm, const int& dd, const bool& te)
 	Date d;
 	std::string syyyy = CastUtil::lexical_cast<std::string>(d.year).substr(0,2) + CastUtil::lexical_cast<std::string>(yy);
 	int yyyy = CastUtil::lexical_cast<int>(syyyy);
-	if(!validateDate(dd,mm,yyyy))throw "Invalid date";
+	if(!validateDate(dd,mm,yyyy))throw std::runtime_error("Invalid date");
 	long g = getDays(yyyy,mm,dd);
 	*this = getDateFromDays(g);
 	populateDay();
@@ -548,7 +548,7 @@ void Date::populateMonth()
 void Date::setTime(const int& hh, const int& mi, const int& ss, const unsigned long long& ns)
 {
 	if(hh>24 || hh<0 || mi<0 || mi>60 || ss<0 || ss>60)
-		throw "Invalid Time";
+		throw std::runtime_error("Invalid Time");
 	hours = hh;
 	minutes = mi;
 	seconds = ss;

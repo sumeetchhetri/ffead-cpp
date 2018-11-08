@@ -30,6 +30,7 @@ class Test {
 	std::string name;
 public:
 	Test();
+	Test(int, std::string);
 	virtual ~Test();
     int getId() const;
     void setId(int);

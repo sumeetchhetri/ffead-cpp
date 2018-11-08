@@ -233,7 +233,7 @@ void JobScheduler::JobTask::run() {
 			ref.destroy(objIns, clas, appName);
 			objIns = NULL;
 		}
-	} catch(const char* ex) {
+	} catch(const std::exception& ex) {
 		logger << "Cannot run Job as the cron std::string is invalid" << std::endl;
 	}
 }

@@ -80,18 +80,26 @@ char* CryptoHandler::hmac_sha1(char* datain, char* keyin, const bool& base64)
 	unsigned char* result;
 	unsigned int result_len = 20;
 
-	HMAC_CTX ctx;
 	result = (unsigned char*) malloc(sizeof(char) * result_len);
 
 	ENGINE_load_builtin_engines();
 	ENGINE_register_all_complete();
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	HMAC_CTX ctx;
 	HMAC_CTX_init(&ctx);
 	HMAC_Init_ex(&ctx, key, strlen(keyin), EVP_sha1(), NULL);
 	HMAC_Update(&ctx, data, strlen(datain));
 	HMAC_Final(&ctx, result, &result_len);
 	HMAC_CTX_cleanup(&ctx);
-
+#else
+	HMAC_CTX *ctx = HMAC_CTX_new();
+	HMAC_Init_ex(ctx, key, strlen(keyin), EVP_sha1(), NULL);
+	HMAC_Update(ctx, data, strlen(datain));
+	HMAC_Final(ctx, result, &result_len);
+	HMAC_CTX_free(ctx) ;
+	ctx = NULL;
+#endif
 	//HMAC(EVP_sha1(),key,strlen(keyin),data,strlen(datain),result,&result_len);
 	if(base64)
 		return base64encode(result,result_len);
@@ -105,17 +113,26 @@ char* CryptoHandler::hmac_sha256(char* datain, char* keyin, const bool& base64)
 	unsigned char* result;
 	unsigned int result_len = 32;
 
-	HMAC_CTX ctx;
 	result = (unsigned char*) malloc(sizeof(char) * result_len);
 
 	ENGINE_load_builtin_engines();
 	ENGINE_register_all_complete();
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	HMAC_CTX ctx;
 	HMAC_CTX_init(&ctx);
 	HMAC_Init_ex(&ctx, key, strlen(keyin), EVP_sha256(), NULL);
 	HMAC_Update(&ctx, data, strlen(datain));
 	HMAC_Final(&ctx, result, &result_len);
 	HMAC_CTX_cleanup(&ctx);
+#else
+	HMAC_CTX *ctx = HMAC_CTX_new();
+	HMAC_Init_ex(ctx, key, strlen(keyin), EVP_sha256(), NULL);
+	HMAC_Update(ctx, data, strlen(datain));
+	HMAC_Final(ctx, result, &result_len);
+	HMAC_CTX_free(ctx) ;
+	ctx = NULL;
+#endif
 
 	if(base64)
 		return base64encode(result,result_len);
@@ -129,17 +146,26 @@ char* CryptoHandler::hmac_sha384(char* datain, char* keyin, const bool& base64)
 	unsigned char* result;
 	unsigned int result_len = 48;
 
-	HMAC_CTX ctx;
 	result = (unsigned char*) malloc(sizeof(char) * result_len);
 
 	ENGINE_load_builtin_engines();
 	ENGINE_register_all_complete();
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	HMAC_CTX ctx;
 	HMAC_CTX_init(&ctx);
 	HMAC_Init_ex(&ctx, key, strlen(keyin), EVP_sha384(), NULL);
 	HMAC_Update(&ctx, data, strlen(datain));
 	HMAC_Final(&ctx, result, &result_len);
 	HMAC_CTX_cleanup(&ctx);
+#else
+	HMAC_CTX *ctx = HMAC_CTX_new();
+	HMAC_Init_ex(ctx, key, strlen(keyin), EVP_sha384(), NULL);
+	HMAC_Update(ctx, data, strlen(datain));
+	HMAC_Final(ctx, result, &result_len);
+	HMAC_CTX_free(ctx) ;
+	ctx = NULL;
+#endif
 
 	if(base64)
 		return base64encode(result,result_len);
@@ -153,17 +179,26 @@ char* CryptoHandler::hmac_sha512(char* datain, char* keyin, const bool& base64)
 	unsigned char* result;
 	unsigned int result_len = 64;
 
-	HMAC_CTX ctx;
 	result = (unsigned char*) malloc(sizeof(char) * result_len);
 
 	ENGINE_load_builtin_engines();
 	ENGINE_register_all_complete();
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	HMAC_CTX ctx;
 	HMAC_CTX_init(&ctx);
 	HMAC_Init_ex(&ctx, key, strlen(keyin), EVP_sha512(), NULL);
 	HMAC_Update(&ctx, data, strlen(datain));
 	HMAC_Final(&ctx, result, &result_len);
 	HMAC_CTX_cleanup(&ctx);
+#else
+	HMAC_CTX *ctx = HMAC_CTX_new();
+	HMAC_Init_ex(ctx, key, strlen(keyin), EVP_sha512(), NULL);
+	HMAC_Update(ctx, data, strlen(datain));
+	HMAC_Final(ctx, result, &result_len);
+	HMAC_CTX_free(ctx) ;
+	ctx = NULL;
+#endif
 
 	if(base64)
 		return base64encode(result,result_len);

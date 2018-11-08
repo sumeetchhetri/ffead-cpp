@@ -649,9 +649,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 			ws_funcs.append("_retStr += \"</tns:\" + _req->getTagName() + \"Response>\";\n");
 			ws_funcs.append("}catch(const Exception& e){\n");
 			ws_funcs.append("return e.getMessage();\n} ");
-			ws_funcs.append("catch(const char* e){\n");
-			ws_funcs.append("return std::string(e);\n} ");
-			ws_funcs.append("catch(...){\n");
+			ws_funcs.append("catch(const std::exception& e){\n");
 			ws_funcs.append("return \"<soap:Fault><faultcode>soap:Server</faultcode><faultstring>Exception occurred</faultstring></soap:Fault>\";\n}\n");
 			ws_funcs.append("return _retStr;\n}\n");
 		}

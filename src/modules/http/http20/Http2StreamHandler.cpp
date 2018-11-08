@@ -102,7 +102,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 				if(wshdrs.find(":opcode")!=wshdrs.end()) {
 					try {
 						wsrequest->dataType = CastUtil::lexical_cast<short>(wshdrs[":opcode"]);
-					} catch (...) {
+					} catch(const std::exception& e) {
 						//TODO specify proper error
 						closeConnection(frame->header.streamIdentifier, handler);
 						return true;
@@ -167,7 +167,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 				if(wshdrs.find(":opcode")!=wshdrs.end()) {
 					try {
 						wsrequest->dataType = CastUtil::lexical_cast<short>(wshdrs[":opcode"]);
-					} catch (...) {
+					} catch(const std::exception& e) {
 						//TODO specify proper error
 						closeConnection(frame->header.streamIdentifier, handler);
 						return true;

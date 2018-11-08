@@ -28,27 +28,39 @@ JSONElement::JSONElement() {
 	type = -1;
 }
 
+JSONElement::JSONElement(int type) {
+	this->type = type;
+}
+
+JSONElement::JSONElement(int type, std::string k, std::string v) {
+	this->type = type;
+	this->name = k;
+	this->value = v;
+}
+
 JSONElement::~JSONElement() {
 	for (int var = 0; var < (int)children.size(); ++var) {
 		//delete children.at(var);
 	}
 }
 
-void JSONElement::addChild(JSONElement ele) {
+JSONElement& JSONElement::addChild(JSONElement ele) {
 	this->children.push_back(ele);
 	JSONElement* child = &(this->children.back());
 	if(child->name!="" && this->type!=JSON_ARRAY)
 	{
 		this->allnodes[child->name] = child;
 	}
+	return *this;
 }
 
 int JSONElement::getType() const {
 	return type;
 }
 
-void JSONElement::setType(const int& type) {
+JSONElement& JSONElement::setType(const int& type) {
 	this->type = type;
+	return *this;
 }
 
 const std::string& JSONElement::getValue() const {
@@ -59,8 +71,9 @@ bool JSONElement::hasChildren() const {
 	return this->children.size()>0;
 }
 
-void JSONElement::setValue(const std::string& value) {
+JSONElement& JSONElement::setValue(const std::string& value) {
 	this->value = value;
+	return *this;
 }
 
 const std::string& JSONElement::getName() const {
@@ -71,8 +84,9 @@ const std::vector<JSONElement>& JSONElement::getChildren() const {
 	return this->children;
 }
 
-void JSONElement::setName(const std::string& name) {
+JSONElement& JSONElement::setName(const std::string& name) {
 	this->name = name;
+	return *this;
 }
 
 /*const JSONElement& JSONElement::getNode(const std::string& name) {
@@ -89,13 +103,80 @@ JSONElement* JSONElement::getNodeP(const std::string& name) {
 
 std::string JSONElement::toString() const
 {
-	std::string txt = "[name=" + name;
-	txt += ", value=" + value;
-	txt += ", children={";
-	for (int var = 0; var < (int)children.size(); ++var) {
-		txt += children.at(var).toString();
+	std::string jsonText;
+	if(type==JSONElement::JSON_OBJECT)
+		jsonText += "{";
+	else
+		jsonText += "[";
+	if(hasChildren())
+	{
+		for (int var = 0; var < (int)children.size(); ++var) {
+			const JSONElement* child = &(children.at(var));
+			if(type==JSONElement::JSON_OBJECT)
+				jsonText += "\"" + child->getName() + "\":";
+			if(child->getType()==JSONElement::JSON_OBJECT || child->getType()==JSONElement::JSON_ARRAY)
+			{
+				jsonText += child->toString();
+			}
+			else
+			{
+				if(child->getType()==JSONElement::JSON_STRING)
+					jsonText += "\"" + child->getValue() + "\"";
+				else
+					jsonText += child->getValue();
+			}
+			if(var!=(int)children.size()-1)
+			{
+				jsonText += ", ";
+			}
+		}
 	}
-	txt += "}]";
-	return txt;
+	if(type==JSONElement::JSON_OBJECT)
+		jsonText += "}";
+	else
+		jsonText += "]";
+	return jsonText;
 }
 
+JSONElement JSONElement::object() {
+	return JSONElement(JSON_OBJECT);
+}
+
+JSONElement JSONElement::array() {
+	return JSONElement(JSON_ARRAY);
+}
+
+JSONElement& JSONElement::add(JSONElement el) {
+	if(this->type == JSON_OBJECT || this->type == JSON_ARRAY) {
+		addChild(el);
+	}
+	return *this;
+}
+
+JSONElement& JSONElement::add(std::string k, std::string v) {
+	if(this->type == JSON_OBJECT || this->type == JSON_ARRAY) {
+		addChild(JSONElement(JSON_STRING, k, v));
+	}
+	return *this;
+}
+
+JSONElement& JSONElement::add(std::string k, unsigned long long v) {
+	if(this->type == JSON_OBJECT || this->type == JSON_ARRAY) {
+		addChild(JSONElement(JSON_NUMBER, k, CastUtil::lexical_cast<std::string>(v)));
+	}
+	return *this;
+}
+
+JSONElement& JSONElement::add(std::string k, bool v) {
+	if(this->type == JSON_OBJECT || this->type == JSON_ARRAY) {
+		addChild(JSONElement(JSON_BOOL, k, CastUtil::lexical_cast<std::string>(v)));
+	}
+	return *this;
+}
+
+JSONElement& JSONElement::add(std::string k, long double v) {
+	if(this->type == JSON_OBJECT) {
+		addChild(JSONElement(JSON_FLOAT, k, CastUtil::lexical_cast<std::string>(v)));
+	}
+	return *this;
+}
