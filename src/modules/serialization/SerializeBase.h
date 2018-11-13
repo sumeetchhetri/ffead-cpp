@@ -506,6 +506,7 @@ public:
 
 	template <typename T> static T getValueFromNestedContainer(const std::string& container, void* cont, const int& pos)
 	{
+		T t;
 		if(container.find("std::vector")==0 || container.find("vector")==0)
 		{
 			return ((std::vector<T>*)cont)->at(pos);
@@ -520,13 +521,27 @@ public:
 			iterator_type it;
 			it = ((std::list<T>*)cont)->begin();
 			for(int i=0;i<pos;++i, ++it){}
-			return *it;
+			t = *it;
+			return t;
 		}
 		else if(container.find("std::queue")==0 || container.find("queue")==0)
 		{
-			//((std::queue<T>*)cont)->push(t);
+			std::vector<T> tv;
+			int c = 0;
+			std::queue<T>* tq = (std::queue<T>*)cont;
+			while (!tq->empty()) {
+				tv.push_back(tq->front());
+				tq->pop();
+			}
+			typedef typename std::vector<T>::iterator iterator_type;
+			iterator_type it;
+			for(it=tv.begin();it!=tv.end();++it) {
+				if(c++==pos) {
+					t = *it;
+				}
+				tq->push(*it);
+			}
 		}
-		T t;
 		return t;
 	}
 

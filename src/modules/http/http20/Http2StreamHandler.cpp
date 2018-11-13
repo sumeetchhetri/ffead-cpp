@@ -14,9 +14,6 @@ Http2StreamHandler::~Http2StreamHandler() {
 	if(wsrequest!=NULL) {
 		delete wsrequest;
 	}
-	if(context!=NULL) {
-		delete context;
-	}
 	pendingSendData.reset();
 }
 

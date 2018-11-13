@@ -11,7 +11,7 @@ Http2Frame* Http2Handler::readFrame() {
 	std::string fd;
 	Http2FrameHeader header;
 	std::vector<unsigned char> lenbytes;
-	if(!sockUtil.readData(3, lenbytes))
+	if(!sockUtil->readData(3, lenbytes))
 	{
 		return NULL;
 	}
@@ -20,7 +20,7 @@ Http2Frame* Http2Handler::readFrame() {
 	}
 	header.payloadLength = (int)CommonUtils::charArrayToULongLong(lenbytes);
 	std::vector<unsigned char> tfbytes;
-	if(!sockUtil.readData(2, tfbytes))
+	if(!sockUtil->readData(2, tfbytes))
 	{
 		return NULL;
 	}
@@ -30,7 +30,7 @@ Http2Frame* Http2Handler::readFrame() {
 	header.type = tfbytes.at(0);
 	header.flags = tfbytes.at(1);
 	std::vector<unsigned char> rsibytes;
-	if(!sockUtil.readData(4, rsibytes))
+	if(!sockUtil->readData(4, rsibytes))
 	{
 		return NULL;
 	}
@@ -41,7 +41,7 @@ Http2Frame* Http2Handler::readFrame() {
 	rsibytes[0] = rsibytes[0] & 0x7F;
 	header.streamIdentifier = (int)CommonUtils::charArrayToULongLong(rsibytes);
 	std::string payload;
-	if(!sockUtil.readData(header.payloadLength, payload))
+	if(!sockUtil->readData(header.payloadLength, payload))
 	{
 		return NULL;
 	}
@@ -117,8 +117,10 @@ Http2Frame* Http2Handler::getFrameByType(const std::string& data, Http2FrameHead
 	return NULL;
 }
 
-Http2Handler::Http2Handler(const bool& isServer, const int& fd, const std::string& webpath) {
-	init(fd);
+Http2Handler::Http2Handler(const bool& isServer, SocketUtil* sockUtil, const std::string& webpath) {
+	reqPos = 0;
+	current = 0;
+	address = StringUtil::toHEX((long long)this);
 	logger = LoggerFactory::getLogger("Http2Handler");
 	this->highestStreamIdentifier = 0;
 	this->context.huffmanEncoding = true;
@@ -129,10 +131,14 @@ Http2Handler::Http2Handler(const bool& isServer, const int& fd, const std::strin
 	this->precedingstreamId = -1;
 	this->maxDataFrameSize = 16384;
 	this->webpath = webpath;
+	this->sockUtil = sockUtil;
+	fd = sockUtil->fd;
 }
 
-Http2Handler::Http2Handler(const bool& isServer, const int& fd, const std::string& webpath, const std::string& settingsFrameData) {
-	init(fd);
+Http2Handler::Http2Handler(const bool& isServer, SocketUtil* sockUtil, const std::string& webpath, const std::string& settingsFrameData) {
+	reqPos = 0;
+	current = 0;
+	address = StringUtil::toHEX((long long)this);
 	this->highestStreamIdentifier = 0;
 	this->context.huffmanEncoding = true;
 	this->highestPushPromiseStreamIdentifier = 2;
@@ -142,6 +148,8 @@ Http2Handler::Http2Handler(const bool& isServer, const int& fd, const std::strin
 	this->precedingstreamId = -1;
 	this->maxDataFrameSize = 16384;
 	this->webpath = webpath;
+	this->sockUtil = sockUtil;
+	fd = sockUtil->fd;
 
 	Http2Frame* sframe = readFrame(settingsFrameData);
 	if(sframe!=NULL)
@@ -150,11 +158,11 @@ Http2Handler::Http2Handler(const bool& isServer, const int& fd, const std::strin
 		processFrame(sframe, temp);
 
 		if(!this->isConnInit) {
-			Http2SettingsFrame sframe;
-			sframe.settings[Http2SettingsFrame::SETTINGS_MAX_CONCURRENT_STREAMS] = 100;
-			sframe.settings[Http2SettingsFrame::SETTINGS_INITIAL_WINDOW_SIZE] = 20971520;
-			writeData(&sframe);
-			frameAcks[sframe.header.type] = true;
+			Http2SettingsFrame stframe;
+			stframe.settings[Http2SettingsFrame::SETTINGS_MAX_CONCURRENT_STREAMS] = 100;
+			stframe.settings[Http2SettingsFrame::SETTINGS_INITIAL_WINDOW_SIZE] = 20971520;
+			writeData(&stframe);
+			frameAcks[stframe.header.type] = true;
 			isConnInit = true;
 		}
 	}
@@ -170,28 +178,28 @@ void Http2Handler::doIt() {
 	while(true)
 	{
 		std::string temp;
-		int fl = sockUtil.readLine(temp);
+		int fl = sockUtil->readLine(temp);
 		if(fl>0 && temp!="PRI * HTTP/2.0\r")
 		{
 			break;
 		}
 		else if(fl==0)
 		{
-			sockUtil.closeSocket();
+			sockUtil->closeSocket();
 			return;
 		}
 	}
 	while(true)
 	{
 		std::string temp;
-		int fl = sockUtil.readLine(temp);
+		int fl = sockUtil->readLine(temp);
 		if(fl>0 && temp!="SM\r")
 		{
 			break;
 		}
 		else if(fl==0)
 		{
-			sockUtil.closeSocket();
+			sockUtil->closeSocket();
 			return;
 		}
 	}
@@ -212,7 +220,7 @@ void Http2Handler::doIt() {
 			break;
 		}
 	}
-	sockUtil.closeSocket();
+	sockUtil->closeSocket();
 }
 
 bool Http2Handler::processFrame(Http2Frame* frame, void*& request) {
@@ -232,12 +240,18 @@ bool Http2Handler::processFrame(Http2Frame* frame, void*& request) {
 	}
 
 	logger << "read new Http2Frame " << (int)frame->header.type << std::endl;
+	int streamIdentifier = frame->header.streamIdentifier;
 	if(streams.find(frame->header.streamIdentifier)==streams.end()) {
-		streams.insert(std::pair<int, Http2StreamHandler>(frame->header.streamIdentifier,
-				Http2StreamHandler(&context, frame->header.streamIdentifier, webpath)));
+		Http2StreamHandler& stream = streams[frame->header.streamIdentifier];
+		stream.request = new HttpRequest(webpath);
+		stream.wsrequest = new WebSocketData();
+		stream.streamIdentifier = streamIdentifier;
+		stream.context = &context;
+		//streams.insert(std::pair<int, Http2StreamHandler>(frame->header.streamIdentifier,
+		//		Http2StreamHandler(&context, frame->header.streamIdentifier, webpath)));
 	}
-	bool flag = streams[frame->header.streamIdentifier].handle(frame, precedingstreamId, settings, this, frameAcks, request);
-	precedingstreamId = frame->getHeader().getStreamIdentifier();
+	bool flag = streams[streamIdentifier].handle(frame, precedingstreamId, settings, this, frameAcks, request);
+	precedingstreamId = streamIdentifier;
 	return flag;
 }
 
@@ -273,6 +287,7 @@ void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	Http2Frame* frame = NULL;
 	while((frame=nextFrame())!=NULL)
 	{
+		int streamIdentifier = frame->header.streamIdentifier;
 		if(processFrame(frame, request)) {
 			//closed = true;
 			close();
@@ -280,7 +295,7 @@ void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		}
 		if(request!=NULL) {
 			reqPos = startRequest();
-			context = new int(frame->header.streamIdentifier);
+			context = new int(streamIdentifier);
 			break;
 		}
 	}

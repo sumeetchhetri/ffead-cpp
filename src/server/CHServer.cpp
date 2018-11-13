@@ -1407,16 +1407,16 @@ HttpServiceTask* CHServer::httpServiceFactoryMethod() {
 
 SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
 	SocketInterface* sockIntf = NULL;
-	/*if(SSLHandler::getInstance()->getIsSSL() && sockUtil->getAlpnProto().find("h2")==0)
+	SocketUtil* sockUtil = new SocketUtil(fd);
+	if(SSLHandler::getInstance()->getIsSSL() && sockUtil->isHttp2())
 	{
-		sockIntf = new Http2Handler(true, fd, ConfigurationData::getInstance()->coreServerProperties.webPath);
+		sockIntf = new Http2Handler(true, sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath);
 	}
-	else*/
-	//{
-		sockIntf = new Http11Handler(fd, ConfigurationData::getInstance()->coreServerProperties.webPath,
+	else
+	{
+		sockIntf = new Http11Handler(sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath,
 				techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
-	//}
-
+	}
 	return sockIntf;
 }
 

@@ -115,8 +115,10 @@ int Http11Handler::getTimeout() {
 	return connKeepAlive;
 }
 
-Http11Handler::Http11Handler(const int& fd, const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
-	init(fd);
+Http11Handler::Http11Handler(SocketUtil* sockUtil, const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
+	reqPos = 0;
+	current = 0;
+	address = StringUtil::toHEX((long long)this);
 	isHeadersDone = false;
 	bytesToRead = 0;
 	request = NULL;
@@ -126,6 +128,8 @@ Http11Handler::Http11Handler(const int& fd, const std::string& webpath, const in
 	this->connKeepAlive = connKeepAlive;
 	this->maxReqHdrCnt = maxReqHdrCnt;
 	this->maxEntitySize = maxEntitySize;
+	this->sockUtil = sockUtil;
+	fd = sockUtil->fd;
 }
 
 Http11Handler::~Http11Handler() {

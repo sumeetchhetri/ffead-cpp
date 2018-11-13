@@ -206,7 +206,7 @@ HandlerRequest::~HandlerRequest() {
 }
 
 SocketUtil* HandlerRequest::getSocketUtil() {
-	return &(sif->sockUtil);
+	return sif->sockUtil;
 }
 
 void HandlerRequest::clearObjects() {

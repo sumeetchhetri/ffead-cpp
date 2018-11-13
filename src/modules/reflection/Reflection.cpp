@@ -2894,9 +2894,9 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 
 							if(!ptr)
 							{
-								methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
+								//methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(&__temp_obj_ser"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(&(__obj->"+fldp.at(j)+"),\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
@@ -2905,9 +2905,9 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 							}
 							else
 							{
-								methods += (fqcn+"* __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
+								//methods += (fqcn+"* __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("if(__obj->"+fldp.at(j)+"!=NULL)base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(__temp_obj_ser"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(__obj->"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
@@ -2920,9 +2920,9 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 							std::string fqcn = getFullyQualifiedClassName(fldp.at(0), classStructure.namespaces);
 							if(!ptr)
 							{
-								methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
+								//methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(&__temp_obj_ser"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(&(__obj->"+fldp.at(j)+"),\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
@@ -2931,9 +2931,9 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 							}
 							else
 							{
-								methods += (fldp.at(0)+"* __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
+								//methods += (fldp.at(0)+"* __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("if(__obj->"+fldp.at(j)+"!=NULL)base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(__temp_obj_ser"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(__obj->"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "

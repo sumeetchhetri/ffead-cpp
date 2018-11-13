@@ -8,6 +8,7 @@
 #include "SocketUtil.h"
 
 SocketUtil::SocketUtil(const SOCKET& fd) {
+	http2 = false;
 	inited = false;
 	init(fd);
 }
@@ -36,8 +37,6 @@ void SocketUtil::init(const SOCKET& fd) {
 			closeSocket(false);
 			return;
 		}
-		SSLHandler::getInstance()->isValid = true;
-
 		if (SSLHandler::getInstance()->securityProperties.client_auth==2 || SSLHandler::getInstance()->securityProperties.client_auth==1)
 		{
 			X509* client_cert = NULL;
@@ -71,6 +70,7 @@ void SocketUtil::init(const SOCKET& fd) {
 				logger << ("The SSL client does not have certificate.\n") << std::endl;
 			}
 		}
+		http2 = SSLHandler::getAlpnProto(fd).find("h2")==0;
 	}
 	else
 	{
@@ -344,6 +344,7 @@ bool SocketUtil::checkSocketWaitForTimeout(const int& writing, const int& second
 }
 
 SocketUtil::SocketUtil() {
+	http2 = false;
 	closed = true;
 	ssl = NULL;
 	io = NULL;
@@ -457,4 +458,8 @@ bool SocketUtil::handleRenegotiation()
 
 std::string SocketUtil::getAlpnProto() {
 	return SSLHandler::getAlpnProto(fd);
+}
+
+bool SocketUtil::isHttp2() {
+	return http2;
 }

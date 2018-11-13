@@ -181,6 +181,7 @@ void SSLHandler::init(const SecurityProperties& securityProperties) {
 			SSL_CTX_set_alpn_select_cb(ctx, SSLHandler::alpn_select_proto_cb, NULL);
 		}
 #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
+		isValid = true;
 	}
 }
 
@@ -201,7 +202,9 @@ int SSLHandler::alpn_select_proto_cb(SSL *ssl, const unsigned char **out, unsign
 #else
 	BIO_get_fd(SSL_get_rbio(ssl), &sockfd);
 #endif
+	instance->lock.lock();
 	instance->socketAlpnProtoMap[sockfd] = std::string((char*)*out, (int)(*outlen));
+	instance->lock.unlock();
 	return SSL_TLSEXT_ERR_OK;
 }
 #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
@@ -280,11 +283,8 @@ void SSLHandler::clear() {
 		{
 			SSL_CTX_free(instance->ctx);
 		}
-		if(pass!=NULL)
-		{
-			delete SSLHandler::pass;
-		}
 		delete instance;
+		instance = NULL;
 	}
 }
 

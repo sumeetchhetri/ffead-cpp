@@ -111,6 +111,7 @@ void MongoDBConnectionPool::initEnv() {
 
 	if(connTimeOut!="") {
 		connectionString += "&connectTimeoutMS=" + connTimeOut;
+		connectionString += "&serverSelectionTimeoutMS=" + connTimeOut;
 	}
 
 	connectionString = "mongodb://" + connectionString;

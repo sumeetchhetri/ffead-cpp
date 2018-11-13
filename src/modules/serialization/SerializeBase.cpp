@@ -245,14 +245,12 @@ std::string SerializeBase::_handleAllSerialization(std::string className, void *
 	}
 	else if(className=="Date")
 	{
-		DateFormat formt("yyyy-mm-dd hh:mi:ss");
-		std::string dateval = formt.format(*(Date*)t);
-		serVal = base->serializePrimitive(className, &dateval);
+		serVal = base->serializePrimitive(className, t);
 	}
 	else if(className=="BinaryData")
 	{
 		std::string binaryData = BinaryData::serilaize(*(BinaryData*)t);
-		serVal = base->serializePrimitive(className, &binaryData);
+		serVal = base->serializePrimitive(className, t);
 	}
 	else if(level>1)
 	{
@@ -349,6 +347,12 @@ std::string SerializeBase::_handleAllSerialization(std::string className, void *
 	{
 		std::vector<bool> *tt = (std::vector<bool>*)t;
 		serVal = serializevec<bool>(*tt, appName, base);
+	}
+	else if(className.find("std::vector<Date,")!=std::string::npos || className.find("std::vector<Date>")!=std::string::npos
+		|| className.find("vector<Date,")!=std::string::npos || className.find("vector<Date>")!=std::string::npos)
+	{
+		std::vector<Date> *tt = (std::vector<Date>*)t;
+		serVal = serializevec<Date>(*tt, appName, base);
 	}
 	else if(className.find("std::vector<")!=std::string::npos || className.find("vector<")!=std::string::npos)
 	{
@@ -454,6 +458,12 @@ std::string SerializeBase::_handleAllSerialization(std::string className, void *
 		std::list<bool> *tt = (std::list<bool>*)t;
 		serVal = serializelist<bool>(*tt, appName, base);
 	}
+	else if(className.find("std::list<Date,")!=std::string::npos || className.find("std::list<Date>")!=std::string::npos
+		|| className.find("list<Date,")!=std::string::npos || className.find("list<Date>")!=std::string::npos)
+	{
+		std::list<Date> *tt = (std::list<Date>*)t;
+		serVal = serializelist<Date>(*tt, appName, base);
+	}
 	else if(className.find("std::list<")!=std::string::npos || className.find("list<")!=std::string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::list<","");
@@ -465,110 +475,6 @@ std::string SerializeBase::_handleAllSerialization(std::string className, void *
 			vtyp = className.substr(0,className.find(">"));
 		processClassName(vtyp);
 		serVal = _serContainer(t, vtyp, appName, "list", base);
-	}
-	else if(className.find("std::set<std::string,")!=std::string::npos || className.find("std::set<std::string>")!=std::string::npos
-		|| className.find("set<std::string,")!=std::string::npos || className.find("set<std::string>")!=std::string::npos
-		|| className.find("std::set<string,")!=std::string::npos || className.find("std::set<string>")!=std::string::npos
-		|| className.find("set<string,")!=std::string::npos || className.find("set<string>")!=std::string::npos)
-	{
-		std::set<std::string> *tt = (std::set<std::string>*)t;
-		serVal = serializeset<std::string>(*tt, appName, base);
-	}
-	else if(className.find("std::set<char,")!=std::string::npos || className.find("std::set<char>")!=std::string::npos
-		|| className.find("set<char,")!=std::string::npos || className.find("set<char>")!=std::string::npos)
-	{
-		std::set<char> *tt = (std::set<char>*)t;
-		serVal = serializeset<char>(*tt, appName, base);
-	}
-	else if(className.find("std::set<unsigned char,")!=std::string::npos || className.find("std::set<unsigned char>")!=std::string::npos
-		|| className.find("set<unsigned char,")!=std::string::npos || className.find("set<unsigned char>")!=std::string::npos)
-	{
-		std::set<unsigned char> *tt = (std::set<unsigned char>*)t;
-		serVal = serializeset<unsigned char>(*tt, appName, base);
-	}
-	else if(className.find("std::set<int,")!=std::string::npos || className.find("std::set<int>")!=std::string::npos
-		|| className.find("set<int,")!=std::string::npos || className.find("set<int>")!=std::string::npos)
-	{
-		std::set<int> *tt = (std::set<int>*)t;
-		serVal = serializeset<int>(*tt, appName, base);
-	}
-	else if(className.find("std::set<short,")!=std::string::npos || className.find("std::set<short>")!=std::string::npos
-		|| className.find("set<short,")!=std::string::npos || className.find("set<short>")!=std::string::npos)
-	{
-		std::set<short> *tt = (std::set<short>*)t;
-		serVal = serializeset<short>(*tt, appName, base);
-	}
-	else if(className.find("std::set<long,")!=std::string::npos || className.find("std::set<long>")!=std::string::npos
-		|| className.find("set<long,")!=std::string::npos || className.find("set<long>")!=std::string::npos)
-	{
-		std::set<long> *tt = (std::set<long>*)t;
-		serVal = serializeset<long>(*tt, appName, base);
-	}
-	else if(className.find("std::set<long long,")!=std::string::npos || className.find("std::set<long long>")!=std::string::npos
-		|| className.find("set<long long,")!=std::string::npos || className.find("set<long long>")!=std::string::npos)
-	{
-		std::set<long long> *tt = (std::set<long long>*)t;
-		serVal = serializeset<long long>(*tt, appName, base);
-	}
-	else if(className.find("std::set<unsigned int,")!=std::string::npos || className.find("std::set<unsigned int>")!=std::string::npos
-		|| className.find("set<unsigned int,")!=std::string::npos || className.find("set<unsigned int>")!=std::string::npos)
-	{
-		std::set<unsigned int> *tt = (std::set<unsigned int>*)t;
-		serVal = serializeset<unsigned int>(*tt, appName, base);
-	}
-	else if(className.find("std::set<unsigned short,")!=std::string::npos || className.find("std::set<unsigned short>")!=std::string::npos
-		|| className.find("set<unsigned short,")!=std::string::npos || className.find("set<unsigned short>")!=std::string::npos)
-	{
-		std::set<unsigned short> *tt = (std::set<unsigned short>*)t;
-		serVal = serializeset<unsigned short>(*tt, appName, base);
-	}
-	else if(className.find("std::set<unsigned long,")!=std::string::npos || className.find("std::set<unsigned long>")!=std::string::npos
-		|| className.find("set<unsigned long,")!=std::string::npos || className.find("set<unsigned long>")!=std::string::npos)
-	{
-		std::set<unsigned long> *tt = (std::set<unsigned long>*)t;
-		serVal = serializeset<unsigned long>(*tt, appName, base);
-	}
-	else if(className.find("std::set<unsigned long long,")!=std::string::npos || className.find("std::set<unsigned long long>")!=std::string::npos
-		|| className.find("set<unsigned long long,")!=std::string::npos || className.find("set<unsigned long long>")!=std::string::npos)
-	{
-		std::set<unsigned long long> *tt = (std::set<unsigned long long>*)t;
-		serVal = serializeset<unsigned long long>(*tt, appName, base);
-	}
-	else if(className.find("std::set<long double,")!=std::string::npos || className.find("std::set<long double>")!=std::string::npos
-		|| className.find("set<long double,")!=std::string::npos || className.find("set<long double>")!=std::string::npos)
-	{
-		std::set<long double> *tt = (std::set<long double>*)t;
-		serVal = serializeset<long double>(*tt, appName, base);
-	}
-	else if(className.find("std::set<double,")!=std::string::npos || className.find("std::set<double>")!=std::string::npos
-		|| className.find("set<double,")!=std::string::npos || className.find("set<double>")!=std::string::npos)
-	{
-		std::set<double> *tt = (std::set<double>*)t;
-		serVal = serializeset<double>(*tt, appName, base);
-	}
-	else if(className.find("std::set<float,")!=std::string::npos || className.find("std::set<float>")!=std::string::npos
-		|| className.find("set<float,")!=std::string::npos || className.find("set<float>")!=std::string::npos)
-	{
-		std::set<float> *tt = (std::set<float>*)&t;
-		serVal = serializeset<float>(*tt, appName, base);
-	}
-	else if(className.find("std::set<bool,")!=std::string::npos || className.find("std::set<bool>")!=std::string::npos
-		|| className.find("set<bool,")!=std::string::npos || className.find("set<bool>")!=std::string::npos)
-	{
-		std::set<bool> *tt = (std::set<bool>*)&t;
-		serVal = serializeset<bool>(*tt, appName, base);
-	}
-	else if(className.find("std::set<")!=std::string::npos || className.find("set<")!=std::string::npos)
-	{
-		StringUtil::replaceFirst(className,"std::set<","");
-		StringUtil::replaceFirst(className,"set<","");
-		std::string vtyp;
-		if(className.find(",")!=std::string::npos)
-			vtyp = className.substr(0,className.find(","));
-		else
-			vtyp = className.substr(0,className.find(">"));
-		processClassName(vtyp);
-		serVal = _serContainer(t, vtyp, appName, "set", base);
 	}
 	else if(className.find("std::multiset<std::string,")!=std::string::npos || className.find("std::multiset<std::string>")!=std::string::npos
 		|| className.find("multiset<std::string,")!=std::string::npos || className.find("multiset<std::string>")!=std::string::npos
@@ -662,6 +568,12 @@ std::string SerializeBase::_handleAllSerialization(std::string className, void *
 		std::multiset<bool> *tt = (std::multiset<bool>*)t;
 		serVal = serializemultiset<bool>(*tt, appName, base);
 	}
+	else if(className.find("std::multiset<Date,")!=std::string::npos || className.find("std::multiset<Date>")!=std::string::npos
+		|| className.find("multiset<Date,")!=std::string::npos || className.find("multiset<Date>")!=std::string::npos)
+	{
+		std::multiset<Date> *tt = (std::multiset<Date>*)t;
+		serVal = serializemultiset<Date>(*tt, appName, base);
+	}
 	else if(className.find("std::multiset<")!=std::string::npos || className.find("multiset<")!=std::string::npos)
 	{
 		StringUtil::replaceFirst(className,"std::multiset<","");
@@ -673,6 +585,116 @@ std::string SerializeBase::_handleAllSerialization(std::string className, void *
 			vtyp = className.substr(0,className.find(">"));
 		processClassName(vtyp);
 		serVal = _serContainer(t, vtyp, appName, "multiset", base);
+	}
+	else if(className.find("std::set<std::string,")!=std::string::npos || className.find("std::set<std::string>")!=std::string::npos
+		|| className.find("set<std::string,")!=std::string::npos || className.find("set<std::string>")!=std::string::npos
+		|| className.find("std::set<string,")!=std::string::npos || className.find("std::set<string>")!=std::string::npos
+		|| className.find("set<string,")!=std::string::npos || className.find("set<string>")!=std::string::npos)
+	{
+		std::set<std::string> *tt = (std::set<std::string>*)t;
+		serVal = serializeset<std::string>(*tt, appName, base);
+	}
+	else if(className.find("std::set<char,")!=std::string::npos || className.find("std::set<char>")!=std::string::npos
+		|| className.find("set<char,")!=std::string::npos || className.find("set<char>")!=std::string::npos)
+	{
+		std::set<char> *tt = (std::set<char>*)t;
+		serVal = serializeset<char>(*tt, appName, base);
+	}
+	else if(className.find("std::set<unsigned char,")!=std::string::npos || className.find("std::set<unsigned char>")!=std::string::npos
+		|| className.find("set<unsigned char,")!=std::string::npos || className.find("set<unsigned char>")!=std::string::npos)
+	{
+		std::set<unsigned char> *tt = (std::set<unsigned char>*)t;
+		serVal = serializeset<unsigned char>(*tt, appName, base);
+	}
+	else if(className.find("std::set<int,")!=std::string::npos || className.find("std::set<int>")!=std::string::npos
+		|| className.find("set<int,")!=std::string::npos || className.find("set<int>")!=std::string::npos)
+	{
+		std::set<int> *tt = (std::set<int>*)t;
+		serVal = serializeset<int>(*tt, appName, base);
+	}
+	else if(className.find("std::set<short,")!=std::string::npos || className.find("std::set<short>")!=std::string::npos
+		|| className.find("set<short,")!=std::string::npos || className.find("set<short>")!=std::string::npos)
+	{
+		std::set<short> *tt = (std::set<short>*)t;
+		serVal = serializeset<short>(*tt, appName, base);
+	}
+	else if(className.find("std::set<long,")!=std::string::npos || className.find("std::set<long>")!=std::string::npos
+		|| className.find("set<long,")!=std::string::npos || className.find("set<long>")!=std::string::npos)
+	{
+		std::set<long> *tt = (std::set<long>*)t;
+		serVal = serializeset<long>(*tt, appName, base);
+	}
+	else if(className.find("std::set<long long,")!=std::string::npos || className.find("std::set<long long>")!=std::string::npos
+		|| className.find("set<long long,")!=std::string::npos || className.find("set<long long>")!=std::string::npos)
+	{
+		std::set<long long> *tt = (std::set<long long>*)t;
+		serVal = serializeset<long long>(*tt, appName, base);
+	}
+	else if(className.find("std::set<unsigned int,")!=std::string::npos || className.find("std::set<unsigned int>")!=std::string::npos
+		|| className.find("set<unsigned int,")!=std::string::npos || className.find("set<unsigned int>")!=std::string::npos)
+	{
+		std::set<unsigned int> *tt = (std::set<unsigned int>*)t;
+		serVal = serializeset<unsigned int>(*tt, appName, base);
+	}
+	else if(className.find("std::set<unsigned short,")!=std::string::npos || className.find("std::set<unsigned short>")!=std::string::npos
+		|| className.find("set<unsigned short,")!=std::string::npos || className.find("set<unsigned short>")!=std::string::npos)
+	{
+		std::set<unsigned short> *tt = (std::set<unsigned short>*)t;
+		serVal = serializeset<unsigned short>(*tt, appName, base);
+	}
+	else if(className.find("std::set<unsigned long,")!=std::string::npos || className.find("std::set<unsigned long>")!=std::string::npos
+		|| className.find("set<unsigned long,")!=std::string::npos || className.find("set<unsigned long>")!=std::string::npos)
+	{
+		std::set<unsigned long> *tt = (std::set<unsigned long>*)t;
+		serVal = serializeset<unsigned long>(*tt, appName, base);
+	}
+	else if(className.find("std::set<unsigned long long,")!=std::string::npos || className.find("std::set<unsigned long long>")!=std::string::npos
+		|| className.find("set<unsigned long long,")!=std::string::npos || className.find("set<unsigned long long>")!=std::string::npos)
+	{
+		std::set<unsigned long long> *tt = (std::set<unsigned long long>*)t;
+		serVal = serializeset<unsigned long long>(*tt, appName, base);
+	}
+	else if(className.find("std::set<long double,")!=std::string::npos || className.find("std::set<long double>")!=std::string::npos
+		|| className.find("set<long double,")!=std::string::npos || className.find("set<long double>")!=std::string::npos)
+	{
+		std::set<long double> *tt = (std::set<long double>*)t;
+		serVal = serializeset<long double>(*tt, appName, base);
+	}
+	else if(className.find("std::set<double,")!=std::string::npos || className.find("std::set<double>")!=std::string::npos
+		|| className.find("set<double,")!=std::string::npos || className.find("set<double>")!=std::string::npos)
+	{
+		std::set<double> *tt = (std::set<double>*)t;
+		serVal = serializeset<double>(*tt, appName, base);
+	}
+	else if(className.find("std::set<float,")!=std::string::npos || className.find("std::set<float>")!=std::string::npos
+		|| className.find("set<float,")!=std::string::npos || className.find("set<float>")!=std::string::npos)
+	{
+		std::set<float> *tt = (std::set<float>*)t;
+		serVal = serializeset<float>(*tt, appName, base);
+	}
+	else if(className.find("std::set<bool,")!=std::string::npos || className.find("std::set<bool>")!=std::string::npos
+		|| className.find("set<bool,")!=std::string::npos || className.find("set<bool>")!=std::string::npos)
+	{
+		std::set<bool> *tt = (std::set<bool>*)t;
+		serVal = serializeset<bool>(*tt, appName, base);
+	}
+	else if(className.find("std::set<Date,")!=std::string::npos || className.find("std::set<Date>")!=std::string::npos
+		|| className.find("set<Date,")!=std::string::npos || className.find("set<Date>")!=std::string::npos)
+	{
+		std::set<Date> *tt = (std::set<Date>*)t;
+		serVal = serializeset<Date>(*tt, appName, base);
+	}
+	else if(className.find("std::set<")!=std::string::npos || className.find("set<")!=std::string::npos)
+	{
+		StringUtil::replaceFirst(className,"std::set<","");
+		StringUtil::replaceFirst(className,"set<","");
+		std::string vtyp;
+		if(className.find(",")!=std::string::npos)
+			vtyp = className.substr(0,className.find(","));
+		else
+			vtyp = className.substr(0,className.find(">"));
+		processClassName(vtyp);
+		serVal = _serContainer(t, vtyp, appName, "set", base);
 	}
 	else if(className.find("std::queue<std::string,")!=std::string::npos || className.find("std::queue<std::string>")!=std::string::npos
 		|| className.find("queue<std::string,")!=std::string::npos || className.find("queue<std::string>")!=std::string::npos
@@ -765,6 +787,12 @@ std::string SerializeBase::_handleAllSerialization(std::string className, void *
 	{
 		std::queue<bool> *tt = (std::queue<bool>*)t;
 		serVal = serializeq<bool>(*tt, appName, base);
+	}
+	else if(className.find("std::queue<Date,")!=std::string::npos || className.find("std::queue<Date>")!=std::string::npos
+		|| className.find("queue<Date,")!=std::string::npos || className.find("queue<Date>")!=std::string::npos)
+	{
+		std::queue<Date> *tt = (std::queue<Date>*)t;
+		serVal = serializeq<Date>(*tt, appName, base);
 	}
 	else if(className.find("std::queue<")!=std::string::npos || className.find("queue<")!=std::string::npos)
 	{
@@ -869,6 +897,12 @@ std::string SerializeBase::_handleAllSerialization(std::string className, void *
 	{
 		std::deque<bool> *tt = (std::deque<bool>*)t;
 		serVal = serializedq<bool>(*tt, appName, base);
+	}
+	else if(className.find("std::deque<Date,")!=std::string::npos || className.find("std::deque<Date>")!=std::string::npos
+		|| className.find("deque<Date,")!=std::string::npos || className.find("deque<Date>")!=std::string::npos)
+	{
+		std::deque<Date> *tt = (std::deque<Date>*)t;
+		serVal = serializedq<Date>(*tt, appName, base);
 	}
 	else if(className.find("std::deque<")!=std::string::npos || className.find("deque<")!=std::string::npos)
 	{
@@ -1522,6 +1556,8 @@ void* SerializeBase::unserializeset(void* unserableObject, const std::string& ap
 		t = new std::set<char>();
 	else if(className=="unsigned char")
 		t = new std::set<unsigned char>();
+	else if(className=="Date")
+		t = new std::set<Date>();
 	else
 	{
 		processClassName(className);
@@ -1581,6 +1617,8 @@ void* SerializeBase::unserializelist(void* unserableObject, const std::string& a
 		t = new std::list<char>();
 	else if(className=="unsigned char")
 		t = new std::list<unsigned char>();
+	else if(className=="Date")
+		t = new std::list<Date>();
 	else
 	{
 		processClassName(className);
@@ -1640,6 +1678,8 @@ void* SerializeBase::unserializeq(void* unserableObject, const std::string& app,
 		t = new std::queue<char>();
 	else if(className=="unsigned char")
 		t = new std::queue<unsigned char>();
+	else if(className=="Date")
+		t = new std::queue<Date>();
 	else
 	{
 		processClassName(className);
@@ -1699,6 +1739,8 @@ void* SerializeBase::unserializevec(void* unserableObject, const std::string& ap
 		t = new std::vector<char>();
 	else if(className=="unsigned char")
 		t = new std::vector<unsigned char>();
+	else if(className=="Date")
+		t = new std::vector<Date>();
 	else
 	{
 		processClassName(className);
@@ -1758,6 +1800,8 @@ void* SerializeBase::unserializedq(void* unserableObject, const std::string& app
 		t = new std::deque<char>();
 	else if(className=="unsigned char")
 		t = new std::deque<unsigned char>();
+	else if(className=="Date")
+		t = new std::deque<Date>();
 	else
 	{
 		processClassName(className);
@@ -1817,6 +1861,8 @@ void* SerializeBase::unserializemultiset(void* unserableObject, const std::strin
 		t = new std::multiset<char>();
 	else if(className=="unsigned char")
 		t = new std::multiset<unsigned char>();
+	else if(className=="Date")
+		t = new std::multiset<Date>();
 	else
 	{
 		processClassName(className);

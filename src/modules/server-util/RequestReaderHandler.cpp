@@ -67,7 +67,7 @@ void RequestReaderHandler::registerSocketInterfaceFactory(const SocketInterfaceF
 void RequestReaderHandler::addSf(SocketInterface* psi) {
 	int tt = Timer::getTimestamp() - 1203700;
 	psi->t = tt;
-	psi->sockUtil.sel = &selector;
+	psi->sockUtil->sel = &selector;
 	psi->setIdentifier(siIdentifierSeries++);
 	connections[psi->getDescriptor()] = psi;
 	if(psi->getTimeout()>0)

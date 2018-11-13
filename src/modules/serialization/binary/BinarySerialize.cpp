@@ -131,13 +131,12 @@ std::string BinarySerialize::serializePrimitive(const std::string& className, vo
 	}
 	else if(className=="Date")
 	{
-		std::string tem = *(std::string*)t;
-		object.addPacket(tem, className);
+		DateFormat formt("yyyy-mm-dd hh:mi:ss");
+		object.addPacket(formt.format(*(Date*)t), className);
 	}
 	else if(className=="BinaryData")
 	{
-		std::string tem = *(std::string*)t;
-		object.addPacket(tem, className);
+		object.addPacket(BinaryData::serilaize(*(BinaryData*)t), className);
 	}
 	return enc.encodeB(&object);
 }
@@ -232,77 +231,100 @@ void BinarySerialize::addPrimitiveElementToContainer(void* _1, const int& counte
 	if(className=="std::string" || className=="string")
 	{
 		std::string retVal = root2->getPackets().at(0)->getValueStr();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="int")
 	{
 		int retVal = root2->getPackets().at(0)->getIntValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="short")
 	{
 		short retVal = root2->getPackets().at(0)->getShortValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="long")
 	{
 		long retVal = root2->getPackets().at(0)->getLongValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="long long")
 	{
 		long long retVal = root2->getPackets().at(0)->getLongLongValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="long double")
 	{
 		long double retVal = root2->getPackets().at(0)->getLongDoubleValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="unsigned int")
 	{
 		unsigned int retVal = root2->getPackets().at(0)->getUIntValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="unsigned short")
 	{
 		unsigned short retVal = root2->getPackets().at(0)->getUShortValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="unsigned long")
 	{
 		unsigned long retVal = root2->getPackets().at(0)->getULongValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="unsigned long long")
 	{
 		unsigned long long retVal = root2->getPackets().at(0)->getULongLongValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="float")
 	{
 		float retVal = root2->getPackets().at(0)->getFloatValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="double")
 	{
 		double retVal = root2->getPackets().at(0)->getDoubleValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="bool")
 	{
 		bool retVal = root2->getPackets().at(0)->getBoolValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="char")
 	{
 		char retVal = root2->getPackets().at(0)->getCharValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="unsigned char")
 	{
 		unsigned char retVal = root2->getPackets().at(0)->getUCharValue();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="Date")
+	{
+		DateFormat formt("yyyy-mm-dd hh:mi:ss");
+		Date* _d = formt.parse(root2->getPackets().at(0)->getValueStr());
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, *_d, cont);
+		else addValueToNestedContainer(container, *_d, cont);
+		delete _d;
 	}
 }
 

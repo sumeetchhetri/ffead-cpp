@@ -142,7 +142,7 @@ void HttpServiceTask::run() {
 				res->addHeaderValue(HttpResponse::SecWebSocketAccept, servseckey);
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
-				switchedIntf = new Http11WebSocketHandler(req->getUrl(), true, handlerRequest->getSif()->getDescriptor());
+				switchedIntf = new Http11WebSocketHandler(req->getUrl(), true, handlerRequest->getSif()->sockUtil);
 
 				WebSocketData wreq;
 				wreq.url = req->getCurl();
@@ -160,7 +160,7 @@ void HttpServiceTask::run() {
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
 				Http2Handler* prev = (Http2Handler*)handlerRequest->getSif();
-				switchedIntf = new Http2Handler(true, handlerRequest->getSif()->getDescriptor(), prev->getWebpath(),
+				switchedIntf = new Http2Handler(true, handlerRequest->getSif()->sockUtil, prev->getWebpath(),
 						http2settings);
 			}
 			else

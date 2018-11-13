@@ -30,7 +30,7 @@ class SocketUtil {
 	SOCKET fd;
 	std::atomic<bool> closed;
 	SelEpolKqEvPrt *sel;
-	bool inited;
+	bool inited, http2;
 	Logger logger;
 	SocketUtil();
 	bool isBlocking();
@@ -44,6 +44,7 @@ class SocketUtil {
 	friend class RequestReaderHandler;
 public:
 	std::string getAlpnProto();
+	bool isHttp2();
 	SocketUtil(const SOCKET& fd);
 	virtual ~SocketUtil();
 	int writeData(const std::string& data, const bool& flush, const int& offset= 0);

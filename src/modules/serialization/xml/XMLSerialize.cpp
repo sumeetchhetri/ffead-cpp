@@ -122,7 +122,7 @@ std::string XMLSerialize::serializePrimitive(const std::string& className, void*
 	}
 	else if(className=="BinaryData")
 	{
-		objXml = BinaryData::serilaize(*(BinaryData*)t);
+		objXml = "<BinaryData>"+BinaryData::serilaize(*(BinaryData*)t)+"</BinaryData>";
 	}
 	return objXml;
 }
@@ -213,77 +213,100 @@ void XMLSerialize::addPrimitiveElementToContainer(void* _1, const int& counter, 
 	if(className=="std::string" || className=="string")
 	{
 		std::string retVal = ele->getText();
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="int")
 	{
 		int retVal = CastUtil::lexical_cast<int>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="short")
 	{
 		short retVal = CastUtil::lexical_cast<short>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="long")
 	{
 		long retVal = CastUtil::lexical_cast<long>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="long long")
 	{
 		long long retVal = CastUtil::lexical_cast<long long>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="long double")
 	{
 		long double retVal = CastUtil::lexical_cast<long double>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="unsigned int")
 	{
 		unsigned int retVal = CastUtil::lexical_cast<unsigned int>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="unsigned short")
 	{
 		unsigned short retVal = CastUtil::lexical_cast<unsigned short>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="unsigned long")
 	{
 		unsigned long retVal = CastUtil::lexical_cast<unsigned long>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="unsigned long long")
 	{
 		unsigned long long retVal = CastUtil::lexical_cast<unsigned long long>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="float")
 	{
 		float retVal = CastUtil::lexical_cast<float>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="double")
 	{
 		double retVal = CastUtil::lexical_cast<double>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="bool")
 	{
 		bool retVal = CastUtil::lexical_cast<bool>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="char")
 	{
 		char retVal = CastUtil::lexical_cast<char>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
 	}
 	else if(className=="unsigned char")
 	{
 		unsigned char retVal = CastUtil::lexical_cast<unsigned char>(ele->getText());
-		addValueToNestedContainer(container, retVal, cont);
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+		else addValueToNestedContainer(container, retVal, cont);
+	}
+	else if(className=="Date")
+	{
+		DateFormat formt("yyyy-mm-dd hh:mi:ss");
+		Date* _d = formt.parse(ele->getText());
+		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, *_d, cont);
+		else addValueToNestedContainer(container, *_d, cont);
+		delete _d;
 	}
 }
 
