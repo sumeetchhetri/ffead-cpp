@@ -24,8 +24,7 @@ with my humble/honest effort.
 Features
 ==========
 - Advanced ORM - SDORM (sql/monogo)
-- Better Event loop
-- Server Framework
+- Embedded Server, Apache/Nginx support (modules)
 - Web Socket Support
 - HTTP2.0 Support
 - Cache API (memcached/redis)
