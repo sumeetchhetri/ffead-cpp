@@ -67,7 +67,7 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 	}
 
 	if(request->headers.find(HttpRequest::UserAgent)!=request->headers.end()) {
-		curl_easy_setopt(_h, CURLOPT_USERAGENT, request->headers[HttpRequest::UserAgent]);
+		curl_easy_setopt(_h, CURLOPT_USERAGENT, request->headers[HttpRequest::UserAgent].c_str());
 	} else {
 		curl_easy_setopt(_h, CURLOPT_USERAGENT, "ffead-cpp client v2.0");
 	}
