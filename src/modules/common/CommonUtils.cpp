@@ -7,9 +7,7 @@
 
 #include "CommonUtils.h"
 
-ThreadLocal CommonUtils::contextName;
-std::map<std::string, std::string> CommonUtils::mimeTypes;
-std::map<std::string, std::string> CommonUtils::locales;
+CommonUtils* CommonUtils::instance = NULL;
 std::string CommonUtils::BLANK = "";
 long long CommonUtils::tsPoll = 0;
 long long CommonUtils::tsPoll1 = 0;
@@ -32,7 +30,25 @@ long long CommonUtils::tsService12 = 0;
 long long CommonUtils::cSocks = 0;
 long long CommonUtils::cReqs = 0;
 long long CommonUtils::cResps = 0;
-std::vector<std::string> CommonUtils::appNames;
+
+CommonUtils::CommonUtils() {
+}
+
+CommonUtils::~CommonUtils() {
+}
+
+CommonUtils* CommonUtils::getInstance() {
+	if(instance==NULL) {
+		instance = new CommonUtils;
+	}
+	return instance;
+}
+
+void CommonUtils::clearInstance() {
+	if(instance!=NULL) {
+		delete instance;
+	}
+}
 
 int CommonUtils::getProcessorCount() {
 #if defined(OS_MINGW)
@@ -63,14 +79,14 @@ int CommonUtils::getProcessorCount() {
 }
 
 void CommonUtils::addContext(std::string appName) {
-	appNames.push_back(appName);
+	getInstance()->appNames.push_back(appName);
 }
 
 void CommonUtils::setAppName(const std::string& appName)
 {
-	for(int i=0;i<(int)appNames.size();i++) {
-		if(appName==appNames.at(i)) {
-			contextName.reset(&appNames.at(i));
+	for(int i=0;i<(int)getInstance()->appNames.size();i++) {
+		if(appName==getInstance()->appNames.at(i)) {
+			getInstance()->contextName.reset(&getInstance()->appNames.at(i));
 			return;
 		}
 	}
@@ -78,32 +94,32 @@ void CommonUtils::setAppName(const std::string& appName)
 
 void CommonUtils::loadMimeTypes(const std::string& file)
 {
-	if(mimeTypes.size()>0)return;
+	if(getInstance()->mimeTypes.size()>0)return;
 	PropFileReader pread;
-	mimeTypes = pread.getProperties(file);
+	getInstance()->mimeTypes = pread.getProperties(file);
 }
 
 const std::string& CommonUtils::getMimeType(const std::string& extension)
 {
-	if(mimeTypes.find(extension)!=mimeTypes.end())
+	if(getInstance()->mimeTypes.find(extension)!=getInstance()->mimeTypes.end())
 	{
-		return mimeTypes[extension];
+		return getInstance()->mimeTypes[extension];
 	}
 	return BLANK;
 }
 
 void CommonUtils::loadLocales(const std::string& file)
 {
-	if(locales.size()>0)return;
+	if(getInstance()->locales.size()>0)return;
 	PropFileReader pread;
-	locales = pread.getProperties(file);
+	getInstance()->locales = pread.getProperties(file);
 }
 
 const std::string& CommonUtils::getLocale(const std::string& abbrev)
 {
-	if(locales.find(abbrev)!=locales.end())
+	if(getInstance()->locales.find(abbrev)!=getInstance()->locales.end())
 	{
-		return locales[abbrev];
+		return getInstance()->locales[abbrev];
 	}
 	return BLANK;
 }
@@ -111,9 +127,10 @@ const std::string& CommonUtils::getLocale(const std::string& abbrev)
 std::string CommonUtils::getAppName(const std::string& appName)
 {
 	std::string appn = appName;
-	if(appn=="" && contextName.get()!=NULL)
+	void* tlcn = getInstance()->contextName.get();
+	if(appn=="" && tlcn!=NULL)
 	{
-		appn = *(std::string*)contextName.get();
+		appn = *(std::string*)tlcn;
 	}
 	StringUtil::replaceAll(appn, "-", "_");
 	RegexUtil::replace(appn, "[^a-zA-Z0-9_]+", "");

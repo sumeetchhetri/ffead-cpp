@@ -1,0 +1,10 @@
+
+file(GLOB sources
+    "include/*.h"
+    "src/*.cpp"
+)
+
+include_directories("${CMAKE_SOURCE_DIR}/web/@APP_NAME@/include")
+add_library(@APP_NAME@ SHARED ${sources})
+set_property(TARGET @APP_NAME@ PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(@APP_NAME@ ffead-modules ffead-framework @FAPP_LIBS@ ${HAVE_CURLLIB} ${HAVE_SSLLIB} ${HAVE_MEMCACHEDLIB} ${HAVE_ODBCLIB} ${HAVE_MONGOCLIB} ${HAVE_BSONLIB} ${HAVE_ZLIB} ${HAVE_CRYPTOLIB})

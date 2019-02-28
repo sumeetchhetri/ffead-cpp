@@ -9,7 +9,6 @@
 
 IndexQuery::IndexQuery() {
 	status = -1;
-	type = -1;
 }
 
 const std::string& IndexQuery::getError() const {

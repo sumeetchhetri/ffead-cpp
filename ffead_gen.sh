@@ -215,18 +215,18 @@ main () {
 		else
 			cp -f $FFEAD_CPP_PATH/resources/ffead-gen/markers/application.xml $FFEAD_CPP_PATH/web/$APP_NAME/config
 		fi
-		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/Makefile.am $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools
+		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/CMakeLists.txt.template $FFEAD_CPP_PATH/web/$APP_NAME/CMakeLists.txt
 		cp -Rf $FFEAD_CPP_PATH/public $FFEAD_CPP_PATH/web/$APP_NAME/
-		sed -Ei "s/@APP_NAME@/$APP_NAME/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools/Makefile.am
-		sed -Ei "s/@APP_CLASSES@/$APP_CLASSES/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools/Makefile.am
+		sed -Ei "s/@APP_NAME@/$APP_NAME/g" $FFEAD_CPP_PATH/web/$APP_NAME/CMakeLists.txt
+		sed -Ei "s/@APP_CLASSES@/$APP_CLASSES/g" $FFEAD_CPP_PATH/web/$APP_NAME/CMakeLists.txt
 		FAPP_LIBS=`echo $FAPP_LIBS|sed 's/ /\\ /g'`
-		sed -Ei "s/@FAPP_LIBS@/$FAPP_LIBS/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools/Makefile.am
-		WEB_APPS=`find $FFEAD_CPP_PATH/web -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -printf "%p\n"| rev |awk -F"./" '{print $0}'| cut -d '/' -f1 | rev| xargs -I {} printf '\tweb\/'{}"\/src\/autotools\/Makefile"`
-		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/configure.ac.orig $FFEAD_CPP_PATH/configure.ac.template
-		sed -Ei "s/WEB_APPS/$WEB_APPS/g" $FFEAD_CPP_PATH/configure.ac.template
-		cp -f $FFEAD_CPP_PATH/configure.ac $FFEAD_CPP_PATH/configure.ac.old
-		cp -f $FFEAD_CPP_PATH/configure.ac.template $FFEAD_CPP_PATH/configure.ac
-		rm -f $FFEAD_CPP_PATH/configure.ac.template
+		sed -Ei "s/@FAPP_LIBS@/$FAPP_LIBS/g" $FFEAD_CPP_PATH/web/$APP_NAME/CMakeLists.txt.template
+		WEB_APPS=`find $FFEAD_CPP_PATH/web -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -printf "%p\n"| rev |awk -F"./" '{print $0}'| cut -d '/' -f1 | rev| xargs -I {} printf 'add_subdirectory\(\$\{PROJECT_SOURCE_DIR\}\/web\/'{}"\)"`
+		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/CMakeLists.txt.template.top $FFEAD_CPP_PATH/CMakeLists.txt.template
+		sed -Ei "s/WEB_APPS/$WEB_APPS/g" $FFEAD_CPP_PATH/CMakeLists.txt.template
+		cp -f $FFEAD_CPP_PATH/CMakeLists.txt $FFEAD_CPP_PATH/CMakeLists.txt.template.old
+		cp -f $FFEAD_CPP_PATH/CMakeLists.txt.template $FFEAD_CPP_PATH/CMakeLists.txt
+		rm -f $FFEAD_CPP_PATH/CMakeLists.txt.template
 		test -d "$FFEAD_CPP_PATH/web/$APP_NAME" && echo "Application directory created Successfully" || echo "Unable to create Application directory"
 		test -d "$FFEAD_CPP_PATH/web/$APP_NAME/config" && echo "Application config directory created Successfully" || echo "Unable to create Application directory"
 		test -d "$FFEAD_CPP_PATH/web/$APP_NAME/include" && echo "Application include directory created Successfully" || echo "Unable to create Application directory"

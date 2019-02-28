@@ -886,58 +886,14 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 
 		if(!libpresent)
 		{
-			std::string configureFilePath = rtdcfpath+"/autotools/configure";
-			if (access( configureFilePath.c_str(), F_OK ) == -1 )
-			{
-				std::string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
-				std::string output = ScriptHandler::execute(compres, true);
-				logger << "Set up configure for intermediate libraries\n\n" << std::endl;
-			}
-
-			if (access( configureFilePath.c_str(), F_OK ) != -1 )
-			{
-				std::string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
-			#ifdef DEBUG
-				compres += " --enable-debug=yes";
-			#endif
-				std::string output = ScriptHandler::execute(compres, true);
-				logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
-				logger << output << std::endl;
-
-				compres = respath+"rundyn-automake.sh "+serverRootDirectory;
-				output = ScriptHandler::execute(compres, true);
-				logger << "Intermediate code generation task\n\n" << std::endl;
-				logger << output << std::endl;
-			}
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory;
+			std::string output = ScriptHandler::execute(compres, true);
+			logger << "Intermediate code generation task\n\n" << std::endl;
+			logger << output << std::endl;
 		}
 
 		void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
 		void* checkddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
-		if(checkdlib==NULL || checkddlib==NULL)
-		{
-			std::string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
-			std::string output = ScriptHandler::execute(compres, true);
-			logger << "Set up configure for intermediate libraries\n\n" << std::endl;
-
-			compres = respath+"rundyn-configure.sh "+serverRootDirectory;
-			#ifdef DEBUG
-				compres += " --enable-debug=yes";
-			#endif
-			output = ScriptHandler::execute(compres, true);
-			logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
-			logger << output << std::endl;
-
-			compres = respath+"rundyn-automake.sh "+serverRootDirectory;
-			if(!libpresent)
-			{
-				std::string output = ScriptHandler::execute(compres, true);
-				logger << "Rerunning Intermediate code generation task\n\n" << std::endl;
-				logger << output << std::endl;
-			}
-			checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-			checkddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
-		}
-
 		if(checkdlib==NULL || checkddlib==NULL)
 		{
 			logger << dlerror() << std::endl;
@@ -1394,6 +1350,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	//logger <<  lg << std::endl;
 
 	LoggerFactory::clear();
+
+	CommonUtils::clearInstance();
 }
 
 int CHServer::techunkSiz = 0;
