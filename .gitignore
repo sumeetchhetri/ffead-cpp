@@ -38,4 +38,8 @@ m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~*.m4
 **/AppDefines.h.*
-pw.txt
+.settings/
+**/CMakeFiles/
+**/cmake_install.cmake
+CMakeCache.txt
+cmake_install.cmake

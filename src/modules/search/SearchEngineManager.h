@@ -37,7 +37,6 @@ class SearchEngineManager {
 	SearchEngineManager(const ConnectionProperties& props);
 	friend class ConfigurationHandler;
 public:
-	SearchEngineManager(const ConnectionProperties& props);
 	virtual ~SearchEngineManager();
 	static SearchEngineInterface* getImpl(std::string name = "");
 };

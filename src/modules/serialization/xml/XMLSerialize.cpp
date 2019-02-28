@@ -39,7 +39,7 @@ std::string XMLSerialize::serializePrimitive(const std::string& className, void*
 	if(className=="std::string" || className=="string")
 	{
 		std::string tem = *(std::string*)t;
-		objXml = "<string>"+CastUtil::lexical_cast<std::string>(tem)+"</string>";
+		objXml = "<string>"+tem+"</string>";
 	}
 	else if(className=="char")
 	{
@@ -525,7 +525,7 @@ void XMLSerialize::addObjectPrimitiveProperty(void* _1, const std::string& propN
 	if(className=="std::string" || className=="string")
 	{
 		std::string tem = *(std::string*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
+		objXml = tem;
 	}
 	else if(className=="char")
 	{

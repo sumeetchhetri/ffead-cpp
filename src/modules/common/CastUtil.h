@@ -31,9 +31,7 @@
 #include <assert.h>
 #include "map"
 
-
 class CastUtil {
-	static std::map<std::string, std::string> _mangledClassNameMap;
 	template <typename T> static void primitive(const T& val, const char* fmt, std::string* d)
 	{
 		int n = snprintf(NULL, 0, fmt, val);
@@ -51,17 +49,8 @@ public:
 	static const std::string BOOL_FALSE;
 	CastUtil();
 	virtual ~CastUtil();
-
 	template <typename T> static std::string getClassName(T& t)
 	{
-		const char *mangled = typeid(t).name();
-		std::string sm(mangled);
-		if(_mangledClassNameMap.find(sm)!=_mangledClassNameMap.end()) {
-			std::string tn = _mangledClassNameMap[sm];
-			if(tn[tn.length()-1]=='*')
-				tn = tn.substr(0,tn.length()-1);
-			return tn;
-		}
 		int status;
 		char *demangled = abi::__cxa_demangle(typeid(t).name(), 0, 0, &status);
 		std::string tn(demangled);
@@ -77,7 +66,6 @@ public:
 				StringUtil::replaceAll(tn, "std::basic_string<char, std::char_traits<char>, std::allocator<char> >", "std::string");
 			}
 		}
-		_mangledClassNameMap[sm] = tn;
 		if(tn[tn.length()-1]=='*')
 			tn = tn.substr(0,tn.length()-1);
 		return tn;

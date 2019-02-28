@@ -21,6 +21,9 @@ directives can now be used to drive the entire configuration in ffead-cpp, so yo
 All in all ffead-cpp is the gap in the world of C++ web application or enterprise application development which I have tried to fill
 with my humble/honest effort.
 
+The build system has moved to *cmake* from autoconf/automake.
+autoconf/automake based version is available at https://github.com/sumeetchhetri/ffead-cpp/tree/v2.2
+
 Features
 ==========
 - Advanced ORM - SDORM (sql/monogo)
@@ -39,13 +42,13 @@ Features
 
 Quickstart
 ===========
-- ./autogen.sh (Setup configure for your platform)
-- ./configure (Setup makefiles)
-- Stretch a bit :-)
-- make all (Build ffead-cpp)
+- Install cmake >= 3.8.2, c++17 compliant gcc g++ compiler, libcurl-devel, libuuid-devel, openssl-devel, unixodbc-devel and zlib-devel
+- cmake .
+- make install -j4
 - Sip some coffee
-- make build-apps (Build the sample applications in web + generate ffead-cpp binary)
-- cd ffead-cpp-2.0-bin/ (Navigate to the ffead-cpp binary folder)
+- make install (Build the sample applications in web + generate ffead-cpp binary)
+- cd ffead-cpp-3.0-bin/ (Navigate to the ffead-cpp binary folder)
+- chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
 For further details checkout the [wiki](https://github.com/sumeetchhetri/ffead-cpp/wiki) page

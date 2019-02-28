@@ -24,11 +24,7 @@
 #define MUTEX_H_
 #include "AppDefines.h"
 #include <pthread.h>
-#if USE_ATOMIC_H == 1
 #include <atomic>
-#elif USE_CSTDATOMIC_H == 1
-#include <cstdatomic>
-#endif
 
 class Mutex {
 protected:
@@ -71,94 +67,5 @@ public:
 	void wait();
 	void interrupt();
 };
-
-#if USE_ATOMIC_H==0 && USE_CSTDATOMIC_H==0
-namespace std {
-	template<typename T>
-	class atomic {};
-	template<>
-	class atomic<bool> {
-		Mutex _l;
-		bool flag;
-	public:
-		bool operator=(bool f)
-		{
-			_l.lock();
-			flag = f;
-			_l.unlock();
-			return f;
-		}
-		operator bool()
-		{
-			_l.lock();
-			bool f = flag;
-			_l.unlock();
-			return f;
-		}
-	};
-	template<>
-	class atomic<int> {
-		Mutex _l;
-		int flag;
-	public:
-		int operator=(int f)
-		{
-			_l.lock();
-			flag = f;
-			_l.unlock();
-			return f;
-		}
-		int operator+=(int f)
-		{
-			_l.lock();
-			flag += f;
-			_l.unlock();
-			return f;
-		}
-		int operator-=(int f)
-		{
-			_l.lock();
-			flag = f;
-			_l.unlock();
-			return f;
-		}
-		int operator++(int f)
-		{
-			_l.lock();
-			flag++;
-			_l.unlock();
-			return f;
-		}
-		int operator--(int f)
-		{
-			_l.lock();
-			flag--;
-			_l.unlock();
-			return f;
-		}
-		int& operator++()
-		{
-			_l.lock();
-			++flag;
-			_l.unlock();
-			return flag;
-		}
-		int& operator--()
-		{
-			_l.lock();
-			--flag;
-			_l.unlock();
-			return flag;
-		}
-		operator int()
-		{
-			_l.lock();
-			int f = flag;
-			_l.unlock();
-			return f;
-		}
-	};
-}
-#endif
 
 #endif /* MUTEX_H_ */
