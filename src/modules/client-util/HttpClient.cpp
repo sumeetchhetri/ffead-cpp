@@ -61,7 +61,11 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 		} else if(request->authMethod=="digest") {
 			curl_easy_setopt(_h, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
 		} else if(request->authMethod=="negotiate") {
+#ifdef CURLAUTH_NEGOTIATE
 			curl_easy_setopt(_h, CURLOPT_HTTPAUTH, CURLAUTH_NEGOTIATE);
+#else
+			curl_easy_setopt(_h, CURLOPT_HTTPAUTH, CURLAUTH_GSSNEGOTIATE);
+#endif
 		}
 		curl_easy_setopt(_h, CURLOPT_USERPWD, _t.c_str());
 	}

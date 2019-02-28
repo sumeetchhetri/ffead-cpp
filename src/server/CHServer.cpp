@@ -1394,6 +1394,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	//logger <<  lg << std::endl;
 
 	LoggerFactory::clear();
+
+	CommonUtils::clearInstance();
 }
 
 int CHServer::techunkSiz = 0;
