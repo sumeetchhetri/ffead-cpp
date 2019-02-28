@@ -21,7 +21,8 @@ directives can now be used to drive the entire configuration in ffead-cpp, so yo
 All in all ffead-cpp is the gap in the world of C++ web application or enterprise application development which I have tried to fill
 with my humble/honest effort.
 
-The build system has moved to *cmake* from autoconf/automake.
+The build system has moved to **cmake** from autoconf/automake.
+
 autoconf/automake based version is available at https://github.com/sumeetchhetri/ffead-cpp/tree/v2.2
 
 Features
