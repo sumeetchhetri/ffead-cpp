@@ -29,9 +29,11 @@
 #include "cstring"
 #include <stdio.h>
 #include <assert.h>
-#include "map"
+#include <libcuckoo/cuckoohash_map.hh>
+
 
 class CastUtil {
+	static cuckoohash_map<std::string, std::string> _mangledClassNameMap;
 	template <typename T> static void primitive(const T& val, const char* fmt, std::string* d)
 	{
 		int n = snprintf(NULL, 0, fmt, val);
@@ -49,8 +51,17 @@ public:
 	static const std::string BOOL_FALSE;
 	CastUtil();
 	virtual ~CastUtil();
+
 	template <typename T> static std::string getClassName(T& t)
 	{
+		const char *mangled = typeid(t).name();
+		std::string sm(mangled);
+		if(_mangledClassNameMap.contains(sm)) {
+			std::string tn1 = _mangledClassNameMap.find(sm);
+			if(tn1[tn1.length()-1]=='*')
+				tn1 = tn1.substr(0,tn1.length()-1);
+			return tn1;
+		}
 		int status;
 		char *demangled = abi::__cxa_demangle(typeid(t).name(), 0, 0, &status);
 		std::string tn(demangled);
@@ -66,6 +77,7 @@ public:
 				StringUtil::replaceAll(tn, "std::basic_string<char, std::char_traits<char>, std::allocator<char> >", "std::string");
 			}
 		}
+		_mangledClassNameMap.insert(sm, tn);
 		if(tn[tn.length()-1]=='*')
 			tn = tn.substr(0,tn.length()-1);
 		return tn;

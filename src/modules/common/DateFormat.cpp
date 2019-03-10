@@ -220,7 +220,6 @@ Date* DateFormat::parse(std::string strdate)
 	{
 		tzv = strdate.substr(temp.find("Z"),5);
 		std::string ytemp = temp;
-		int cnt = 0;
 		while(ytemp.find("Z")!=std::string::npos)
 		{
 			std::string ttzv = strdate.substr(ytemp.find("Z"), 1);

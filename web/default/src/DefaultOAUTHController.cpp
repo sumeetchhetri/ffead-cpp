@@ -61,10 +61,10 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 			temps.push_back((it->first + "=" + it->second));
 		}
 	}
-	for (int var = 0; var < temps.size(); ++var)
+	for (int var = 0; var < (int)temps.size(); ++var)
 	{
 		allparst += temps.at(var);
-		if(var!=temps.size()-1)
+		if(var!=(int)temps.size()-1)
 			allparst += "&";
 	}
 	std::cout << "req and oauth params" <<std::endl;

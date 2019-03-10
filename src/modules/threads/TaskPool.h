@@ -54,12 +54,9 @@ public:
 	TaskPool();
 	void init(const bool& prioritybased, const bool& allowScheduledTasks);
 	~TaskPool();
-	void addTask(Task &task);
-	void addTask(Task *task);
-	void addSTask(Task &task);
-	void addSTask(Task *task);
-	void addPTask(Task &task);
-	void addPTask(Task *task);
+	void addTask(Task* task);
+	void addSTask(Task* task);
+	void addPTask(Task* task);
 	Task* getTask();
 	Task* getPTask();
 	bool tasksPending();

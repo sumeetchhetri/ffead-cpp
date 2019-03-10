@@ -45,7 +45,7 @@ void Exception::setMessage(const std::string& message)
    this->message = message;
 }
 
-const char* Exception::what() throw()
+const char* Exception::what() const throw()
 {
 	return this->getMessage().c_str();
 }

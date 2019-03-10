@@ -53,8 +53,6 @@ std::vector<WsDetails> WsUtil::getWsDetails(const std::vector<std::string>& apps
 		Document doc;
 		parser.readDocument(file, doc);
 		const Element& root = doc.getRootElement();
-		typedef std::map<std::string,std::string> strMap;
-		typedef std::map<std::string,strMap> meth_Map;
 		if(root.getChildElements().size()==0)
 			continue;
 

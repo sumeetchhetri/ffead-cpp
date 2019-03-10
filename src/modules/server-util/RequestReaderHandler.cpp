@@ -18,7 +18,7 @@ RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const SOCKET& li
 }
 
 void RequestReaderHandler::switchReaders(SocketInterface* prev, SocketInterface* next) {
-	readerSwitchedSocks.push(next);
+	readerSwitchedSocks.enqueue(next);
 }
 
 void RequestReaderHandler::registerRead(SocketInterface* si) {
@@ -69,7 +69,7 @@ void RequestReaderHandler::addSf(SocketInterface* psi) {
 	psi->t = tt;
 	psi->sockUtil->sel = &selector;
 	psi->setIdentifier(siIdentifierSeries++);
-	connections[psi->getDescriptor()] = psi;
+	connections.insert(psi->getDescriptor(), psi);
 	if(psi->getTimeout()>0)
 	{
 		//addToTimeoutSocks.push(psi);
@@ -91,32 +91,33 @@ void* RequestReaderHandler::handleTimeouts(void* inp) {
 	{
 		Timer cdt;
 
-		SocketInterface* asi = NULL;
+		SocketInterface* asi;
 		cdt.start();
-		while(ins->remFromTimeoutSocks.pop(asi) && cdt.elapsedMilliSeconds()<1000)
+		while(ins->remFromTimeoutSocks.try_dequeue(asi) && cdt.elapsedMilliSeconds()<1000)
 		{
 			ins->connectionsWithTimeouts.erase(asi->getDescriptor());
 		}
 
-		asi = NULL;
 		cdt.start();
-		while(ins->addToTimeoutSocks.pop(asi) && cdt.elapsedMilliSeconds()<1000)
+		while(ins->addToTimeoutSocks.try_dequeue(asi) && cdt.elapsedMilliSeconds()<1000)
 		{
-			ins->connectionsWithTimeouts[asi->getDescriptor()] = asi;
+			ins->connectionsWithTimeouts.insert(asi->getDescriptor(), asi);
 		}
 
 		ins->shi->cleanSif(ins->connectionsWithTimeouts);
 
 		if(!ins->connectionsWithTimeouts.empty())
 		{
-			for(it=ins->connectionsWithTimeouts.begin();it!=ins->connectionsWithTimeouts.end();)
+			auto lt = ins->connectionsWithTimeouts.lock_table();
+			cuckoohash_map<int, SocketInterface*>::locked_table::iterator it;
+			for(it=lt.begin();it!=lt.end();++it)
 			{
 				int tt = (Timer::getTimestamp() - 1203700) + it->second->getTimeout();
 				if(it->second->t>=tt)
 				{
 					logger << "timedout connection " << it->second->getDescriptor() << " " << it->second->identifier << std::endl;
-					ins->timedoutSocks.push(it->second);
-					ins->connectionsWithTimeouts.erase(it++);
+					ins->timedoutSocks.enqueue(it->second);
+					ins->connectionsWithTimeouts.erase(it->first);
 				}
 				else
 				{
@@ -173,16 +174,16 @@ void* RequestReaderHandler::handle(void* inp) {
 		}*/
 
 		cdt.start();
-		SocketInterface* rsi = NULL;
-		while(ins->readerSwitchedSocks.pop(rsi) && cdt.elapsedMilliSeconds()<100)
+		SocketInterface* rsi;
+		while(ins->readerSwitchedSocks.try_dequeue(rsi))
 		{
 			logger << "Swicthing protocols.." << std::endl;
-			if(ins->connections[rsi->getDescriptor()]->getTimeout()>0)
+			if(ins->connections.contains(rsi->getDescriptor()) && ins->connections.find(rsi->getDescriptor())->getTimeout()>0)
 			{
 				//ins->remFromTimeoutSocks.push(rsi);
 			}
-			delete ins->connections[rsi->getDescriptor()];
-			ins->connections[rsi->getDescriptor()] = rsi;
+			delete ins->connections.find(rsi->getDescriptor());
+			ins->connections.insert(rsi->getDescriptor(), rsi);
 			if(rsi->getTimeout()>0)
 			{
 				//ins->addToTimeoutSocks.push(rsi);
@@ -244,12 +245,12 @@ void* RequestReaderHandler::handle(void* inp) {
 				}
 				else
 				{
-					if(ins->connections.find(descriptor)==ins->connections.end()) {
+					if(!ins->connections.contains(descriptor)) {
 						//logger << "IDHAR KAISE AAYA@@@@@@@@" << std::endl;
 						ins->selector.unRegisterForEvent(descriptor);
 						continue;
 					}
-					SocketInterface* si = ins->connections[descriptor];
+					SocketInterface* si = ins->connections.find(descriptor);
 					int pending = 1;
 					while(pending>0 && ins->shi->isAvailable(si))
 					{
@@ -286,18 +287,19 @@ void* RequestReaderHandler::handle(void* inp) {
 		Thread::mSleep(100);
 	}
 
-	SocketInterface* si = NULL;
+	SocketInterface* si;
 	bool isPendingSocks = false;
-	while(ins->pendingSocks.pop(si))
+	while(ins->pendingSocks.try_dequeue(si))
 	{
 		isPendingSocks = true;
-		ins->shi->donelist.put(si->identifier, true);
+		ins->shi->donelist.insert(si->identifier, true);
 		si->close();
 		//logger << "Delete Sif " << si->identifier << std::endl;
 		delete si;
 	}
-	std::map<int, SocketInterface*>::iterator it;
-	for(it=ins->connections.begin();it!=ins->connections.end();++it) {
+	auto lt = ins->connections.lock_table();
+	cuckoohash_map<int, SocketInterface*>::locked_table::iterator it;
+	for(it=lt.begin();it!=lt.end();++it) {
 		if(!isPendingSocks || !ins->shi->donelist.find(it->second->identifier)) {
 			it->second->close();
 			//logger << "Delete Sif " << it->second->identifier << std::endl;
@@ -307,19 +309,19 @@ void* RequestReaderHandler::handle(void* inp) {
 	ins->connections.clear();
 	ins->connectionsWithTimeouts.clear();
 	si = NULL;
-	while(ins->timedoutSocks.pop(si))
+	while(ins->timedoutSocks.try_dequeue(si))
 	{
 	}
 	si = NULL;
-	while(ins->readerSwitchedSocks.pop(si))
+	while(ins->readerSwitchedSocks.try_dequeue(si))
 	{
 	}
 	si = NULL;
-	while(ins->addToTimeoutSocks.pop(si))
+	while(ins->addToTimeoutSocks.try_dequeue(si))
 	{
 	}
 	si = NULL;
-	while(ins->remFromTimeoutSocks.pop(si))
+	while(ins->remFromTimeoutSocks.try_dequeue(si))
 	{
 	}
 	Thread::mSleep(500);

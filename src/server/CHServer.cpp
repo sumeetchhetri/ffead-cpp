@@ -614,7 +614,7 @@ int main(int argc, char* argv[])
 
 	std::ofstream local("/dev/null");
 	if(StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])!="true") {
-		std::streambuf* cout_buff = std::cout.rdbuf();
+		//std::streambuf* cout_buff = std::cout.rdbuf();
 		std::cout.rdbuf(local.rdbuf());
 	}
 
@@ -659,7 +659,7 @@ int main(int argc, char* argv[])
 
 int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirectory, std::string port, std::string ipaddr, std::vector<std::string> servedAppNames)
 {
-	pid_t parid = getpid();
+	//pid_t parid = getpid();
 
 	#ifndef OS_MINGW
 	/*struct sigaction act;
@@ -681,16 +681,16 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	#endif
 	
 	#ifdef OS_MINGW
-	SOCKET sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
+	//SOCKET sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
 	#else
-	int sockfd, new_fd;
+	//int sockfd, new_fd;
 	#endif
 	
-	struct sockaddr_storage their_addr; // connector's address information
-	socklen_t sin_size;
+	//struct sockaddr_storage their_addr; // connector's address information
+	//socklen_t sin_size;
 
     //int yes=1,rv;
-    int nfds;
+    //int nfds;
 
     serverRootDirectory += "/";
 	if(serverRootDirectory.find("//")==0)
@@ -883,7 +883,74 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		//Generate library if dev mode = true or the library is not found in prod mode
 		if(isCompileEnabled || !libpresent)
 			libpresent = false;
+	#ifdef BUILD_AUTOCONF
+		if(!libpresent)
+		{
+			std::string configureFilePath = rtdcfpath+"/autotools/configure";
+			if (access( configureFilePath.c_str(), F_OK ) == -1 )
+			{
+				std::string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
+				std::string output = ScriptHandler::execute(compres, true);
+				logger << "Set up configure for intermediate libraries\n\n" << std::endl;
+			}
 
+			if (access( configureFilePath.c_str(), F_OK ) != -1 )
+			{
+				std::string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+			#ifdef DEBUG
+				compres += " --enable-debug=yes";
+			#endif
+				std::string output = ScriptHandler::execute(compres, true);
+				logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
+				logger << output << std::endl;
+
+				compres = respath+"rundyn-automake_autoconf.sh "+serverRootDirectory;
+				output = ScriptHandler::execute(compres, true);
+				logger << "Intermediate code generation task\n\n" << std::endl;
+				logger << output << std::endl;
+			}
+		}
+
+		void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+		void* checkddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
+		if(checkdlib==NULL || checkddlib==NULL)
+		{
+			std::string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
+			std::string output = ScriptHandler::execute(compres, true);
+			logger << "Set up configure for intermediate libraries\n\n" << std::endl;
+
+			compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+			#ifdef DEBUG
+				compres += " --enable-debug=yes";
+			#endif
+			output = ScriptHandler::execute(compres, true);
+			logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
+			logger << output << std::endl;
+
+			compres = respath+"rundyn-automake_autoconf.sh "+serverRootDirectory;
+			if(!libpresent)
+			{
+				std::string output = ScriptHandler::execute(compres, true);
+				logger << "Rerunning Intermediate code generation task\n\n" << std::endl;
+				logger << output << std::endl;
+			}
+			checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+			checkddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
+		}
+
+		if(checkdlib==NULL || checkddlib==NULL)
+		{
+			logger << dlerror() << std::endl;
+			logger.info("Could not load Library");
+			exit(0);
+		}
+		else
+		{
+			dlclose(checkdlib);
+			dlclose(checkddlib);
+			logger.info("Library generated successfully");
+		}
+	#else
 		if(!libpresent)
 		{
 			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory;
@@ -906,6 +973,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 			dlclose(checkddlib);
 			logger.info("Library generated successfully");
 		}
+	#endif
 
 	#ifdef INC_COMP
 		for (unsigned int var1 = 0;var1<ConfigurationData::getInstance()->componentNames.size();var1++)
@@ -917,7 +985,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		}
 	#endif
 
-		bool distocache = false;
+		//bool distocache = false;
 	/*#ifdef INC_DSTC
 		int distocachepoolsize = 20;
 		try {
@@ -1005,7 +1073,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		if(mpmap.find("VHOST_ENTRY")!=mpmap.end() && mpmap["VHOST_ENTRY"].size()>0)
 		{
 			std::vector<std::string> vhosts = mpmap["VHOST_ENTRY"];
-			for(int vhi=0;vhi<vhosts.size();vhi++)
+			for(int vhi=0;vhi<(int)vhosts.size();vhi++)
 			{
 				std::vector<std::string> vhostprops = StringUtil::splitAndReturn<std::vector<std::string> >(vhosts.at(vhi), ";");
 				if(vhostprops.size()==3)
@@ -1148,7 +1216,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 		}
 	}
 
-	int nfds;
+	//int nfds;
 	if(sprops["NUM_PROC"]!="")
 	{
 		try
@@ -1164,10 +1232,10 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 
 	HttpClient::init();
 
-	SOCKET sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
+	SOCKET sockfd;  // listen on sock_fd, new connection on new_fd
 
-	struct sockaddr_storage their_addr; // connector's address information
-	socklen_t sin_size;
+	//struct sockaddr_storage their_addr; // connector's address information
+	//socklen_t sin_size;
 
 	sockfd = Server::createListener(ipaddr, CastUtil::lexical_cast<int>(port), true);
 
@@ -1192,7 +1260,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	logger << ("Initializing Caches done....") << std::endl;
 
 	std::vector<std::string> files;
-	int sp[preForked][2];
+	//int sp[preForked][2];
 
 	/*TODO if(preForked>0 && IS_FILE_DESC_PASSING_AVAIL)
 	{
@@ -1276,7 +1344,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
 	reader.start();
 
-	bool stats = false;
+	//bool stats = false;
 
 	struct stat buffer;
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)

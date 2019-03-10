@@ -6,5 +6,5 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${FFEAD_CPPPTH}/lib
 
 cd $FFEAD_CPP_PATH/rtdcf/
 cmake .
-make
+make -j4
 cp -f *inter* $FFEAD_CPP_PATH/lib/

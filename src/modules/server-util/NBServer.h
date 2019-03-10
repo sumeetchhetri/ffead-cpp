@@ -65,11 +65,11 @@ class NBServer {
 	int mode;
 	Service service;
 	Mutex lock;
-	#ifdef OS_MINGW
+	/*#ifdef OS_MINGW
 		struct sockaddr_in their_addr;
 	#else
 		struct sockaddr_storage their_addr;
-	#endif
+	#endif*/
 	static void* servicing(void* arg);
 	bool runn, started;
 	SelEpolKqEvPrt selEpolKqEvPrtHandler;

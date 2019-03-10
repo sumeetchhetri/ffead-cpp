@@ -1085,7 +1085,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 	std::map<std::string, ClassStructure>::iterator it;
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
-		int opcounter = 1, methcounter = 1, fldcounter = 1, smethcounter = 1;
+		int opcounter = 1, methcounter = 1, fldcounter = 1;
 		ClassStructure classStructure = it->second;
 		classStructure.prosetser = false;
 		includesDefs += "#include \"" + getClassPath(it->second.getTreatedClassName(true)) + "\"\n";
@@ -1110,7 +1110,6 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 		refDef += ("args argu;\n");
 		std::string publf, privf, protf ,publm, privm, protm;
 		std::string meth,fld;
-		size_t tes;
 		bool ctorisp = false,ddtorisp = false;;
 		if (classStructure.pubps.size() > 0 || classStructure.pubms.size() > 0)
 		{
@@ -1806,12 +1805,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				StringUtil::trim(fld);
 				if(fld.length()==0)continue;
 
-				bool fldstatic = false;
+				//bool fldstatic = false;
 				if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
 				{
 					RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
 					RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
-					fldstatic = true;
+					//fldstatic = true;
 				}
 				RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
 				RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
@@ -1907,12 +1906,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				StringUtil::trim(meth);
 				RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
-				bool methstat = false;
+				//bool methstat = false;
 				if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
 				{
 					RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
 					RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-					methstat = true;
+					//methstat = true;
 				}
 				RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 				RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");
@@ -2013,10 +2012,10 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				StringUtil::replaceFirst(fld,";","");
 				StringUtil::trim(fld);
 
-				bool ptr = false;
+				//bool ptr = false;
 				if(fld.find("*")!=std::string::npos)
 				{
-					ptr = true;
+					//ptr = true;
 					StringUtil::replaceFirst(fld,"*","");
 				}
 
@@ -2090,12 +2089,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				StringUtil::trim(meth);
 				RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
-				bool methstat = false;
+				//bool methstat = false;
 				if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
 				{
 					RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
 					RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-					methstat = true;
+					//methstat = true;
 				}
 				RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 				RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");
@@ -2181,12 +2180,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 
 				fld = pubdecl;
 
-				bool fldstatic = false;
+				//bool fldstatic = false;
 				if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
 				{
 					RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
 					RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
-					fldstatic = true;
+					//fldstatic = true;
 				}
 				RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
 				RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
@@ -2196,10 +2195,10 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				StringUtil::replaceFirst(fld,";","");
 				StringUtil::trim(fld);
 
-				bool ptr = false;
+				//bool ptr = false;
 				if(fld.find("*")!=std::string::npos)
 				{
-					ptr = true;
+					//ptr = true;
 					StringUtil::replaceFirst(fld,"*","");
 				}
 
@@ -2471,12 +2470,12 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 				{
 					fld = classStructure.pri.at(i);
 
-					bool fldstatic = false;
+					//bool fldstatic = false;
 					if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
 					{
 						RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
 						RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
-						fldstatic = true;
+						//fldstatic = true;
 					}
 					RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
 					RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
@@ -2536,12 +2535,12 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 				{
 					fld = classStructure.pro.at(i);
 
-					bool fldstatic = false;
+					//bool fldstatic = false;
 					if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
 					{
 						RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
 						RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
-						fldstatic = true;
+						//fldstatic = true;
 					}
 					RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
 					RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
@@ -2609,12 +2608,12 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 					StringUtil::trim(meth);
 					RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
-					bool methstat = false;
+					//bool methstat = false;
 					if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
 					{
 						RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
 						RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-						methstat = true;
+						//methstat = true;
 					}
 					RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 					RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");
@@ -2653,10 +2652,10 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 							argpm.push_back(argpmtemp);
 						}
 					}
-					bool ptr = false;
+					//bool ptr = false;
 					if(meth.find("*")!=std::string::npos)
 					{
-						ptr = true;
+						//ptr = true;
 						StringUtil::replaceFirst(meth,"*","");
 					}
 
@@ -2719,12 +2718,12 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 				{
 					fld = classStructure.pub.at(i);
 
-					bool fldstatic = false;
+					//bool fldstatic = false;
 					if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
 					{
 						RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
 						RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
-						fldstatic = true;
+						//fldstatic = true;
 					}
 					RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
 					RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
@@ -2957,12 +2956,12 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 					StringUtil::trim(meth);
 					RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
-					bool methstat = false;
+					//bool methstat = false;
 					if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
 					{
 						RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
 						RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-						methstat = true;
+						//methstat = true;
 					}
 					RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 					RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");
@@ -3533,12 +3532,12 @@ std::string Reflection::getXSDDefinitions(std::map<std::string, ClassStructure>&
 		{
 			fld = clstruct->pub.at(i);
 
-			bool fldstatic = false;
+			//bool fldstatic = false;
 			if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
 			{
 				RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
 				RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
-				fldstatic = true;
+				//fldstatic = true;
 			}
 			RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
 			RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");
@@ -3749,12 +3748,12 @@ std::string Reflection::getXSDDefinitions(std::map<std::string, ClassStructure>&
 			StringUtil::trim(meth);
 			RegexUtil::replace(meth, "[ \t]*,[ \t]*", ",");
 
-			bool methstat = false;
+			//bool methstat = false;
 			if(RegexUtil::find(meth, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(meth, "[ \t]+static[ \t]+")!=-1)
 			{
 				RegexUtil::replace(meth, "[ \t]*static[ \t]+", " ");
 				RegexUtil::replace(meth, "[ \t]+static[ \t]+", " ");
-				methstat = true;
+				//methstat = true;
 			}
 			RegexUtil::replace(meth, "[ \t]*inline[ \t]+", " ");
 			RegexUtil::replace(meth, "[ \t]+inline[ \t]+", " ");

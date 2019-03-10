@@ -81,7 +81,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 
 		std::cout << sig << std::endl;
 
-		char* resst = (char*)CryptoHandler::hmac_sha1((char*)sig.c_str(),"sumeet&",true);
+		char* resst = (char*)CryptoHandler::hmac_sha1((char*)sig.c_str(),(char*)"sumeet&",true);
 		data += "oauth_signature=";
 		std::string sign(resst);
 		data.append(CryptoHandler::urlEncode(sign));
@@ -90,7 +90,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 
 		std::cout << data << std::endl;
 
-		int bytes = client.sendData(data);
+		client.sendData(data);
 		std::string call,tot;
 		while((call=client.getData())!="")
 			tot.append(call);
@@ -181,7 +181,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 
 			std::cout << data << std::endl;
 
-			int bytes = client.sendData(data);
+			client.sendData(data);
 			std::string call,tot;
 			while((call=client.getData())!="")
 				tot.append(call);
@@ -261,7 +261,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 
 			std::cout << data << std::endl;
 
-			int bytes = client.sendData(data);
+			client.sendData(data);
 			std::string call,tot;
 			while((call=client.getData())!="")
 				tot.append(call);

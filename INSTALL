@@ -16,7 +16,14 @@ following software packages:
     o zlib-devel
     o libcurl
     o libuuid-devel
+    o libcuckoo
 
+cd /tmp
+wget https://github.com/efficient/libcuckoo/archive/master.zip
+unzip master.zip
+cd libcuckoo-master or cd master
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
+make install
 
 Dependencies
 ============
@@ -44,7 +51,7 @@ Centos 7 (1810)
 	    make && make install
 
 OpenSuse 15 (Tumbleweed)
-	zypper in gcc gcc-c++ make cmake libcurl-devel hiredis-devel openssl-devel libmemcached-devel zlib-devel libuuid-devel unixODBC unixODBC-devel
+	zypper in gcc gcc-c++ make cmake libcurl-devel hiredis-devel openssl-devel libmemcached-devel zlib-devel libuuid-devel unixODBC unixODBC-devel zlib unzip
 	Download and install mongo c driver
 		wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz
 		tar xf mongo-c-driver-1.4.0.tar.gz
@@ -57,10 +64,12 @@ Ubuntu 18.04.2
 	apt install libmemcached-dev libmongoc-dev libhiredis-dev
 	apt install unixodbc
 	apt install libssl-dev
+	apt install libtbb-dev
 
 MAC OS X - To install all dependencies on MAC OS X use,
 	Make sure Xcode is installed or at-least the Command line tools are present
 	xcode-select --install
+	open /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg (for Mojave)
 	Install homebrew first using,
 		ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
 	Install autoconf libtool automake
@@ -80,13 +89,23 @@ MAC OS X - To install all dependencies on MAC OS X use,
 SOLARIS - To install all dependencies on solaris(OpenCSW) use,
 	`pkgutil -y -i autoconf automake libtool unixodbc unixodbc_dev libssl1_0_0 libssl_dev`
 	
-BSD(x86/x86_64) - To install all dependencies on bsd systems use,
-	(portsnap fetch extract/portsnap fetch update)
+BSD(x86/x86_64) - To install all dependencies on bsd systems use, 
+	If you have not installed sources during install of freebsd then,
+		fetch -o /tmp ftp://ftp.freebsd.org/pub/`uname -s`/releases/`uname -m`/`uname -r | cut -d'-' -f1,2`/src.txz
+		tar -C / -xvf /tmp/src.txz
+	portsnap fetch extract
+	cd /usr/ports/devel/cmake && make install
 	cd /usr/ports/security/openssl && make install
 	cd /usr/ports/databases/unixODBC && make install
-	cd /usr/ports/devel/autoconf && make install
-	cd /usr/ports/devel/automake && make install
-	cd /usr/ports/devel/libtool && make install
+	cd /usr/ports/databases/hiredis && make install
+	cd /usr/ports/databases/libmemcached && make install
+	cd /usr/ports/ftp/wget && make install
+	cd /usr/ports/misc/e2fsprogs-libuuid && make install
+
+Arch Linux 2019-02-01
+	Install Arch Linux https://wiki.archlinux.org/index.php/installation_guide
+			   http://www.cs.columbia.edu/~jae/4118-LAST/arch-setup-2018-1.html
+	pacman -Sy unixodbc curl hiredis libmemcached mongo-c-driver cmake openssh libutil-linux automake autoconf libtool wget
 
 OTHERS - haven't tested on any other platform/os yet
 

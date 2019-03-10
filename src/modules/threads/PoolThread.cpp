@@ -27,6 +27,63 @@ void* PoolThread::run(void *arg)
 	PoolThread* ths  = static_cast<PoolThread*>(arg);
 	while (ths->runFlag)
 	{
+		Task* task;
+		ths->tasks.wait_dequeue(task);
+		if(task==NULL)break;
+
+		try
+		{
+			if(!task->isFuture)
+				task->run();
+			else
+			{
+				FutureTask* ftask = dynamic_cast<FutureTask*>(task);
+				if(ftask!=NULL)
+				{
+					ftask->result = ftask->call();
+					ftask->taskComplete();
+				}
+				else
+				{
+					task->run();
+				}
+			}
+			if(task->cleanUp)
+			{
+				delete task;
+			}
+		}
+		catch(const std::exception& e)
+		{
+			ths->logger << e.what() << std::flush;
+			if(task->isFuture)
+			{
+				FutureTask* ftask = dynamic_cast<FutureTask*>(task);
+				if(ftask!=NULL)
+				{
+					ftask->taskComplete();
+				}
+			}
+		}
+	}
+	Task* task = NULL;
+	while(ths->tasks.try_dequeue(task))
+	{
+		if(task->cleanUp)
+		{
+			delete task;
+		}
+		continue;
+	}
+	ths->complete = true;
+	return NULL;
+}
+
+void* PoolThread::runWithTaskPool(void *arg)
+{
+	PoolThread* ths  = static_cast<PoolThread*>(arg);
+	while (ths->runFlag)
+	{
 		ths->wpool->c_mutex.lock();
 		while (ths->wpool->count<=0)
 		ths->wpool->c_mutex.conditionalWait();
@@ -78,22 +135,29 @@ void* PoolThread::run(void *arg)
 		{
 			delete task;
 		}
-		continue;
 	}
 	ths->complete = true;
 	return NULL;
 }
 
-PoolThread::PoolThread(TaskPool* wpool) {
+PoolThread::PoolThread() {
 	logger = LoggerFactory::getLogger("PoolThread");
-	this->task = NULL;
 	this->idle = true;
 	this->thrdStarted = false;
 	this->complete = false;
 	this->runFlag = true;
-	this->prioritybased = wpool->prioritybased;
-	this->wpool = wpool;
+	wpool = NULL;
 	mthread = new Thread(&run, this);
+}
+
+PoolThread::PoolThread(TaskPool* wpool) {
+	logger = LoggerFactory::getLogger("PoolThread");
+	this->idle = true;
+	this->thrdStarted = false;
+	this->complete = false;
+	this->runFlag = true;
+	this->wpool = wpool;
+	mthread = new Thread(&runWithTaskPool, this);
 }
 
 PoolThread::~PoolThread() {
@@ -109,20 +173,20 @@ PoolThread::~PoolThread() {
 void PoolThread::stop() {
 	if(!thrdStarted)return;
 	this->runFlag = false;
-	this->wpool->c_mutex.lock();
-	this->wpool->count++;
-	this->wpool->c_mutex.conditionalNotifyAll();
-	this->wpool->c_mutex.unlock();
+	tasks.enqueue(NULL);
 }
 
 void PoolThread::execute() {
 	if(thrdStarted)return;
-	m_mutex.lock();
 	mthread->execute();
 	thrdStarted = true;
-	m_mutex.unlock();
 }
 
 bool PoolThread::isComplete() {
 	return complete;
+}
+
+void PoolThread::addTask(Task* task) {
+	if(!runFlag)return;
+	tasks.enqueue(task);
 }

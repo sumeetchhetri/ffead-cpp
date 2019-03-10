@@ -24,23 +24,23 @@
 #define POOLTHREAD_H_
 #include "TaskPool.h"
 #include "Thread.h"
-#include "Mutex.h"
 #include "TimeUnit.h"
 #include "LoggerFactory.h"
 #include "FutureTask.h"
+#include "blockingconcurrentqueue.h"
 
 class PoolThread {
+	TaskPool* wpool;
+	moodycamel::BlockingConcurrentQueue<Task*> tasks;
 	static void* run(void *arg);
+	static void* runWithTaskPool(void* arg);
 	PoolThread(TaskPool* wpool);
+	PoolThread();
 	virtual ~PoolThread();
 	Thread *mthread;
 	bool idle;
-	Task *task;
 	Logger logger;
-	Mutex m_mutex;
-	TaskPool* wpool;
 	friend class ThreadPool;
-	bool prioritybased;
 	std::atomic<bool> runFlag;
 	std::atomic<bool> complete;
 	std::atomic<bool> thrdStarted;
@@ -48,6 +48,7 @@ public:
 	void execute();
 	void stop();
 	bool isComplete();
+	void addTask(Task* task);
 };
 
 #endif /* POOLTHREAD_H_ */

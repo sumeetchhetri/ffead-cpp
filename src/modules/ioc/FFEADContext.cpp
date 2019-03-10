@@ -354,6 +354,13 @@ void FFEADContext::addBean(Bean& bean)
 			ids.push_back(idt[i]);
 		}
 		bean.name = ids;
+#elif HAVE_BSDUUIDINC
+		uuid_t idt;
+		uint32_t status;
+		uuid_create(&idt, &status);
+		std::string ids((const char *) &idt, sizeof(idt));
+		bean.name = ids;
+
 #else
 		bean.name = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
 #endif

@@ -48,25 +48,25 @@ void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo& cl
 		std::vector<void *> valus;
 		if(GenericObject::isNumber32(idv.getTypeName()) && GenericObject::isNumber(fld.getType()))
 		{
-			long* id;
+			long* id = new long;
 			idv.get(id);
 			valus.push_back(id);
 		}
 		else if(GenericObject::isNumber64(idv.getTypeName()) && GenericObject::isNumber(fld.getType()))
 		{
-			long long* id;
+			long long* id = new long long;
 			idv.get(id);
 			valus.push_back(id);
 		}
 		else if(GenericObject::isFPN(idv.getTypeName()) && GenericObject::isFPN(fld.getType()))
 		{
-			long double* id;
+			long double* id = new long double;
 			idv.get(id);
 			valus.push_back(id);
 		}
 		else if(GenericObject::isString(idv.getTypeName()) && GenericObject::isString(fld.getType()))
 		{
-			std::string* id;
+			std::string* id = new std::string;
 			idv.set(id);
 			valus.push_back(id);
 		}

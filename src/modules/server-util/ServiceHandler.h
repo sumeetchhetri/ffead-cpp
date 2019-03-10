@@ -16,8 +16,8 @@
 #include "Http11WebSocketHandler.h"
 #include "ThreadPool.h"
 #include "Thread.h"
-#include "SynchronizedQueue.h"
-#include "SynchronizedMap.h"
+#include <libcuckoo/cuckoohash_map.hh>
+#include "concurrentqueue.h"
 
 class ServiceHandler;
 
@@ -53,9 +53,9 @@ public:
 
 class ServiceHandler {
 	Mutex mutex;
-	SynchronizedQueue<SocketInterface*> tbcSifQ;
-	SynchronizedMap<long, int> requestNumMap;
-	SynchronizedMap<long, bool> donelist;
+	moodycamel::ConcurrentQueue<SocketInterface*> tbcSifQ;
+	cuckoohash_map<long, int> requestNumMap;
+	cuckoohash_map<long, bool> donelist;
 	bool run;
 	bool isThreadPerRequests;
 	bool isThreadPerRequestw;
@@ -71,7 +71,7 @@ class ServiceHandler {
 	static void* taskService(void* inp);
 	static void* cleanSifs(void* inp);
 	void flagDone(SocketInterface* si);
-	void cleanSif(std::map<int, SocketInterface*> connectionsWithTimeouts);
+	void cleanSif(cuckoohash_map<int, SocketInterface*> connectionsWithTimeouts);
 	friend class RequestReaderHandler;
 	friend class HandlerRequest;
 	friend class HttpWriteTask;

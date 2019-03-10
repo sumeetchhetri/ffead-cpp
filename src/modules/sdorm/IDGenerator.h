@@ -14,6 +14,9 @@
 #ifdef HAVE_LIBUUID
 #include <uuid/uuid.h>
 #endif
+#ifdef HAVE_BSDUUIDINC
+#include <uuid.h>
+#endif
 
 class IDGenerator {
 public:

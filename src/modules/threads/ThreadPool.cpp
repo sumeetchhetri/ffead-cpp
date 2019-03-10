@@ -25,7 +25,6 @@ void ThreadPool::initPointers()
 {
 	inited = false;
 	prioritypooling = false;
-	pollerStarted = false;
 	maxThreads = 0;
 	lowp = 0;
 	highp = 0;
@@ -43,6 +42,7 @@ ThreadPool::ThreadPool()
 void ThreadPool::init(const int& maxThreads)
 {
 	if(inited)return;
+	currentThread = 0;
 	initPointers();
 	this->lowp = -1;
 	this->highp = -1;
@@ -50,7 +50,6 @@ void ThreadPool::init(const int& maxThreads)
 	joinComplete = false;
 	prioritypooling = false;
 	initializeThreads();
-	start();
 	inited = true;
 }
 
@@ -82,21 +81,23 @@ ThreadPool::ThreadPool(const int& maxThreads, const bool& allowScheduledTasks /*
 void ThreadPool::initializeThreads()
 {
 	if(runFlag)return;
-	wpool.init(prioritypooling, allowScheduledTasks);
+	if(prioritypooling || allowScheduledTasks) {
+		wpool.init(prioritypooling, allowScheduledTasks);
+	}
 	for (int i = 0; i < maxThreads; i++) {
-		PoolThread *thread = new PoolThread(&wpool);
+		PoolThread* thread = NULL;
+		if(prioritypooling || allowScheduledTasks) {
+			thread = new PoolThread(&wpool);
+		} else {
+			thread = new PoolThread();
+		}
 		thread->execute();
 		tpool.push_back(thread);
 	}
 	runFlag = true;
-	wpool.start();
-	pollerStarted = false;
-}
-
-void ThreadPool::start()
-{
-	if(pollerStarted)return;
-	pollerStarted = true;
+	if(prioritypooling || allowScheduledTasks) {
+		wpool.start();
+	}
 }
 
 void ThreadPool::joinAll() {
@@ -115,96 +116,56 @@ void ThreadPool::joinAll() {
 	}
 }
 
+void ThreadPool::submit(Task* task) {
+	if(currentThread==tpool.size()) {
+		currentThread = 0;
+	}
+	tpool.at(currentThread++)->addTask(task);
+}
 void ThreadPool::submit(Task* task, const int& priority) {
 	if(this->prioritypooling) {
-		submit(*task, priority);
-	} else {
-		submit(*task);
-	}
-}
-void ThreadPool::submit(Task &task, const int& priority) {
-	if(this->prioritypooling) {
-		task.tunit = -1;
-		task.type = -1;
-		task.priority = priority;
+		task->tunit = -1;
+		task->type = -1;
+		task->priority = priority;
 		wpool.addPTask(task);
 	} else {
 		submit(task);
 	}
 }
-void ThreadPool::submit (Task* task) {
-	submit(*task);
-}
-void ThreadPool::submit (Task &task) {
-	task.tunit = -1;
-	task.type = -1;
-	task.priority = -1;
-	wpool.addTask(task);
-}
-
 void ThreadPool::schedule(Task* task, const long long& tunit, const int& type) {
 	if(this->allowScheduledTasks) {
-		schedule(*task, tunit, type);
-	} else {
-		submit(*task);
-	}
-}
-
-void ThreadPool::schedule(Task &task, const long long& tunit, const int& type) {
-	if(this->allowScheduledTasks) {
-		task.tunit = tunit;
-		task.type = type;
-		task.priority = -1;
+		task->tunit = tunit;
+		task->type = type;
+		task->priority = -1;
 		wpool.addSTask(task);
 	} else {
 		submit(task);
 	}
 }
 
-void ThreadPool::submit(FutureTask *task, const int& priority) {
-	if(this->prioritypooling) {
-		submit(*task, priority);
-	} else {
-		submit(*task);
-	}
+void ThreadPool::submit(FutureTask* task) {
+	tpool.at(currentThread)->addTask(task);
 }
-
-void ThreadPool::submit(FutureTask &task, const int& priority) {
+void ThreadPool::submit(FutureTask* task, const int& priority) {
 	if(this->prioritypooling) {
-		task.tunit = -1;
-		task.type = -1;
-		task.priority = priority;
-		wpool.addPTask(&task);
-		task.isFuture = true;
+		task->tunit = -1;
+		task->type = -1;
+		task->priority = priority;
+		wpool.addPTask(task);
+		task->isFuture = true;
 	} else {
 		submit(task);
 	}
 }
-void ThreadPool::submit(FutureTask *task) {
-	submit(*task);
-}
-
-void ThreadPool::submit(FutureTask &task) {
-	task.tunit = -1;
-	task.type = -1;
-	task.priority = -1;
-	task.isFuture = true;
-	wpool.addTask(&task);
-}
-
-void ThreadPool::schedule(FutureTask *task, const long long& tunit, const int& type) {
+void ThreadPool::schedule(FutureTask* task, const long long& tunit, const int& type) {
 	if(this->allowScheduledTasks) {
-		schedule(*task, tunit, type);
-	}
-}
-
-void ThreadPool::schedule(FutureTask &task, const long long& tunit, const int& type) {
-	if(this->allowScheduledTasks) {
-		task.tunit = tunit;
-		task.type = type;
-		task.priority = -1;
-		task.isFuture = true;
-		wpool.addSTask(&task);
+		task->tunit = tunit;
+		task->type = type;
+		task->priority = -1;
+		task->isFuture = true;
+		wpool.addSTask(task);
+	} else {
+		submit(task);
 	}
 }
 
@@ -212,11 +173,8 @@ ThreadPool::~ThreadPool() {
 	joinAll();
 	this->runFlag = false;
 	wpool.stop();
-	//delete wpool;
 	for (int i = 0; i <(int)tpool.size(); i++) {
 		delete tpool.at(i);
 	}
-	//delete tpool;
-	//delete m_mutex;
 	logger << "Destroyed PoolThread Pool\n" << std::flush;
 }

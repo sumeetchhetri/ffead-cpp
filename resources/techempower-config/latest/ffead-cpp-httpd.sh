@@ -28,8 +28,8 @@ sed -i 's|#define PACKAGE_TARNAME "ffead-cpp"| |g' ${IROOT}/ffead-cpp-2.0/includ
 sed -i 's|#define PACKAGE_VERSION "2.0"| |g' ${IROOT}/ffead-cpp-2.0/include/AppDefines.h
 
 cd ${IROOT}/ffead-cpp-src/modules/apache_mod_ffeadcpp/
-g++ -fpic -DSHARED_MODULE -fpermissive -std=gnu++11 -I"${IROOT}/httpd/include" -I"${IROOT}/ffead-cpp-2.0/include/" -I"${IROOT}/include" -I"${IROOT}/include/libbson-1.0/" -I"${IROOT}/include/libmongoc-1.0" mod_ffeadcpp.cpp -L"${IROOT}/ffead-cpp-2.0/lib" -L"${IROOT}" -L"${IROOT}/lib" -lffead_common -lffead_framework -ldl -lcrypto -lssl ${ADD_EXTRA_LIB} -c mod_ffeadcpp.cpp
-g++ -shared -o mod_ffeadcpp.so mod_ffeadcpp.o -L"${IROOT}/ffead-cpp-2.0/lib" -L"${IROOT}" -L"${IROOT}/lib" -L"${IROOT}/httpd/lib" -lffead_common -lffead_framework -ldl -lcrypto -lssl -lapr-1 -laprutil-1 -lstdc++ ${ADD_EXTRA_LIB}
+g++ -fpic -DSHARED_MODULE -fpermissive -std=gnu++11 -I"${IROOT}/httpd/include" -I"${IROOT}/ffead-cpp-2.0/include/" -I"${IROOT}/include" -I"${IROOT}/include/libbson-1.0/" -I"${IROOT}/include/libmongoc-1.0" mod_ffeadcpp.cpp -L"${IROOT}/ffead-cpp-2.0/lib" -L"${IROOT}" -L"${IROOT}/lib" -lffead-modules -lffead-framework -ldl -lcrypto -lssl ${ADD_EXTRA_LIB} -c mod_ffeadcpp.cpp
+g++ -shared -o mod_ffeadcpp.so mod_ffeadcpp.o -L"${IROOT}/ffead-cpp-2.0/lib" -L"${IROOT}" -L"${IROOT}/lib" -L"${IROOT}/httpd/lib" -lffead-modules -lffead-framework -ldl -lcrypto -lssl -lapr-1 -laprutil-1 -lstdc++ ${ADD_EXTRA_LIB}
 ${IROOT}/httpd/bin/apxs -i -n 'ffead_cpp' mod_ffeadcpp.so
 cd -
 

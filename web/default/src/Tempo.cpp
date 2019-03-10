@@ -32,13 +32,11 @@ Tempo::~Tempo() {
 
 void Tempo::prin()
 {
-	int y = 10;
 	//std::cout << "----------" << std::flush;
 }
 
 void Tempo::prin1()
 {
-	int y = 10;
 	/*p = 5;
 	h = "asdasdasdasa";*/
 	//std::cout << "dssfsd" << std::flush;

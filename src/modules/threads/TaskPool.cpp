@@ -33,7 +33,7 @@ void* TaskPool::run(void *arg)
 		int counter = 0;
 		pool->s_mutex.lock();
 		for (it=pool->scheduledtasks.begin(),tit=pool->scheduledTimers.begin();
-				it!=pool->scheduledtasks.end(),tit!=pool->scheduledTimers.end();++counter) {
+				it!=pool->scheduledtasks.end() || tit!=pool->scheduledTimers.end();++counter) {
 			Task* task = *it;
 			Timer& timer = *tit;
 			if(task!=NULL && task->isWaitOver(&timer))
@@ -91,34 +91,6 @@ void TaskPool::start() {
 		mthread->execute();
 	}
 	thrdStarted = true;
-}
-
-void TaskPool::addTask(Task &task) {
-	c_mutex.lock();
-	tasks.push(&task);
-	++count;
-	c_mutex.conditionalNotifyOne();
-	c_mutex.unlock();
-}
-
-void TaskPool::addPTask(Task &task) {
-	c_mutex.lock();
-	ptasks.push(&task);
-	++count;
-	c_mutex.conditionalNotifyOne();
-	c_mutex.unlock();
-}
-
-void TaskPool::addSTask(Task &task) {
-	if (task.type >= 0 && task.type <= 6 && task.tunit > 0)
-	{
-		s_mutex.lock();
-		scheduledTimers.push_back(Timer());
-		Timer* t = &(scheduledTimers.back());
-		t->start();
-		scheduledtasks.push_back(&task);
-		s_mutex.unlock();
-	}
 }
 
 void TaskPool::addTask(Task *task) {

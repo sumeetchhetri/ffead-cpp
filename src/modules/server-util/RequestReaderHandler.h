@@ -16,23 +16,22 @@
 #include "map"
 #include "ReaderSwitchInterface.h"
 #include "ServiceHandler.h"
-#include "SynchronizedQueue.h"
 #include "LoggerFactory.h"
 #include "SSLClient.h"
 #include "Client.h"
-#ifdef HAVE_CXX11
+#include "concurrentqueue.h"
+#include <libcuckoo/cuckoohash_map.hh>
 #include "atomic"
-#endif
 
 
 typedef SocketInterface* (*SocketInterfaceFactory) (SOCKET);
 
 class RequestReaderHandler : public ReaderSwitchInterface {
-	SynchronizedQueue<SocketInterface*> pendingSocks;
-	SynchronizedQueue<SocketInterface*> addToTimeoutSocks;
-	SynchronizedQueue<SocketInterface*> remFromTimeoutSocks;
-	SynchronizedQueue<SocketInterface*> timedoutSocks;
-	SynchronizedQueue<SocketInterface*> readerSwitchedSocks;
+	moodycamel::ConcurrentQueue<SocketInterface*> pendingSocks;
+	moodycamel::ConcurrentQueue<SocketInterface*> addToTimeoutSocks;
+	moodycamel::ConcurrentQueue<SocketInterface*> remFromTimeoutSocks;
+	moodycamel::ConcurrentQueue<SocketInterface*> timedoutSocks;
+	moodycamel::ConcurrentQueue<SocketInterface*> readerSwitchedSocks;
 	SelEpolKqEvPrt selector;
 	std::atomic<bool> run;
 	std::atomic<int> complete;
@@ -41,8 +40,8 @@ class RequestReaderHandler : public ReaderSwitchInterface {
 	ServiceHandler* shi;
 	long siIdentifierSeries;
 	SocketInterfaceFactory sf;
-	std::map<int, SocketInterface*> connections;
-	std::map<int, SocketInterface*> connectionsWithTimeouts;
+	cuckoohash_map<int, SocketInterface*> connections;
+	cuckoohash_map<int, SocketInterface*> connectionsWithTimeouts;
 	bool isActive();
 	void addSf(SocketInterface* sf);
 	static void* handleTimeouts(void* inp);

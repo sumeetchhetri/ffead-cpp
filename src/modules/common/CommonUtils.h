@@ -24,7 +24,7 @@
 #include "RegexUtil.h"
 #if defined(OS_MINGW)
 #include <windows.h>
-#elif defined(OS_DARWIN) || defined(OS_BSD)
+#elif defined(OS_DARWIN)
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #elif defined(OS_HPUX)

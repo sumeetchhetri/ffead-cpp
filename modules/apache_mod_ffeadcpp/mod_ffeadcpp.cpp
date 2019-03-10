@@ -406,7 +406,7 @@ void one_time_init()
     }
     catch(const std::exception& msg)
 	{
-		logger << msg << std::endl;
+		logger << msg.what() << std::endl;
 	}
 
     logger << INTER_LIB_FILE << std::endl;
@@ -619,6 +619,8 @@ static void mod_ffeadcp_child_uninit()
 	RegexUtil::flushCache();
 
 	LoggerFactory::clear();
+
+	CommonUtils::clearInstance();
 }
 
 static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)

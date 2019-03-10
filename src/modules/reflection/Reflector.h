@@ -46,7 +46,7 @@
 class Reflector
 {
 	static ClassInfo nullclass;
-	static std::map<std::string, ClassInfo> _ciMap;
+	static cuckoohash_map<std::string, ClassInfo> _ciMap;
 	bool dlibinstantiated;
 	void* dlib;
 	bool closedlib;
@@ -57,7 +57,7 @@ public:
 	Reflector();
 	Reflector(void*);
 	virtual ~Reflector();
-	const ClassInfo& getClassInfo(const std::string&, const std::string& app= "");
+	const ClassInfo getClassInfo(const std::string&, const std::string& app= "");
 	void* getMethodInstance(const Method& method)
 	{
 		void *mkr = dlsym(dlib, method.getRefName().c_str());

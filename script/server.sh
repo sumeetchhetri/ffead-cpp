@@ -27,5 +27,6 @@ chmod 700 $FFEAD_CPP_PATH/ffead-cpp
 chmod 700 $FFEAD_CPP_PATH/resources/*.sh
 chmod 700 $FFEAD_CPP_PATH/tests/*
 chmod 700 $FFEAD_CPP_PATH/rtdcf/*
+chmod 700 $FFEAD_CPP_PATH/rtdcf/autotools/*
 #/usr/sbin/setenforce 0
 ./ffead-cpp $FFEAD_CPP_PATH > ffead.log 2>&1

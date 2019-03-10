@@ -138,7 +138,6 @@ template<class T>
 inline std::map<int, std::string> DataSourceInterface::bulkUpdate(std::vector<T>& vecT) {
 	T t;
 	std::string clasName = CastUtil::getClassName(t);
-	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	ClassInfo clas = reflector->getClassInfo(clasName, appName);
 	std::vector<void*> dbEntities;
 	std::vector<void*> entities;

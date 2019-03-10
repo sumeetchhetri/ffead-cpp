@@ -8,6 +8,7 @@
 *.a
 *.lai
 **/CHS
+**/ffead-cpp
 ffead-cpp-*/*
 include/*
 **/tests

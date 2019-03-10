@@ -35,9 +35,10 @@ class ThreadPool {
 	bool inited;
 	bool allowScheduledTasks;
 	std::vector<PoolThread*> tpool;
+	std::atomic<int> currentThread;
 	TaskPool wpool;
 	bool prioritypooling;
-	bool runFlag, pollerStarted;
+	bool runFlag;
 	void initializeThreads();
 	ConditionMutex m_mutex;
 	bool joinComplete;
@@ -46,19 +47,12 @@ public:
 	ThreadPool(const int&, const int&, const int&);
 	ThreadPool(const int&, const bool& allowScheduledTasks = false);
 	ThreadPool();
-	void start();
 	void init(const int&);
 	void joinAll();
-	void submit(Task &task, const int& priority);
-	void submit(Task &task);
-	void schedule(Task &task, const long long& tunit, const int& type);
 	void submit(Task *task, const int& priority);
 	void submit(Task *task);
 	void schedule(Task *task, const long long& tunit, const int& type);
 
-	void submit(FutureTask &task, const int& priority);
-	void submit(FutureTask &task);
-	void schedule(FutureTask &task, const long long& tunit, const int& type);
 	void submit(FutureTask *task, const int& priority);
 	void submit(FutureTask *task);
 	void schedule(FutureTask *task, const long long& tunit, const int& type);

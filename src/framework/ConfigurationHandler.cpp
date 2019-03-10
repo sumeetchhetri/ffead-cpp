@@ -301,7 +301,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		all.push_back(usrincludes);
 		appf.push_back(defpath+"app.xml");
 
+		#ifdef BUILD_AUTOCONF
+		ilibs += ("-I" + usrincludes+" ");
+		#else
 		ilibs += ("include_directories("+usrincludes+")\n");
+		#endif
 
 		std::vector<std::string> includes;
 		CommonUtils::listFiles(includes, usrincludes, ".h");
@@ -956,11 +960,15 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		}
 		logger << "done reading application.xml " << std::endl;
 
+		#ifdef BUILD_AUTOCONF
+		libs += ("-l"+ applibname+" ");
+		#else
 		libs += ("${HAVE_"+StringUtil::toUpperCopy(applibname)+"} ");
 		ilibs += ("FIND_LIBRARY(HAVE_"+StringUtil::toUpperCopy(applibname)+" "+applibname+" HINTS \"${CMAKE_SOURCE_DIR}/../lib\")\n");
 		ilibs += ("if(NOT HAVE_"+StringUtil::toUpperCopy(applibname)+")\n");
 		ilibs += ("\tmessage(FATAL_ERROR \""+applibname+" lib not found\")\n");
 		ilibs += ("endif()\n");
+		#endif
 
 		configureDataSources(name, defpath+"config/sdorm.xml", allclsmap);
 		configureCaches(name, defpath+"config/cache.xml");
@@ -1066,8 +1074,13 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			AfcUtil::writeTofile(rtdcfpath+file+".cpp",cudata,true);
 			AfcUtil::writeTofile(rtdcfpath+file+"_Remote.h",curemoteheaders,true);
 			AfcUtil::writeTofile(rtdcfpath+file+"_Remote.cpp",curemote,true);
-			confsrcFiles = file+".cpp ";
+			#ifdef BUILD_AUTOCONF
+			confsrcFiles += "../" + file+".cpp ";
+			confsrcFiles += "../" + file+"_Remote.cpp ";
+			#else
+			confsrcFiles += file+".cpp ";
 			confsrcFiles += file+"_Remote.cpp ";
+			#endif
 			isrcs += "./"+file+".cpp \\\n"+"./"+file+"_Remote.cpp \\\n";
 			iobjs += "./"+file+".o \\\n"+"./"+file+"_Remote.o \\\n";
 			ideps += "./"+file+".d \\\n"+"./"+file+"_Remote.d \\\n";
@@ -1088,10 +1101,18 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	std::string ret = ref.generateClassDefinitionsAll(clsstrucMaps,includeRef,webdirs1);
 	std::string objs, ajaxret, headers,typerefs;
 	AfcUtil::writeTofile(rtdcfpath+"ReflectorInterface.cpp",ret,true);
+	#ifdef BUILD_AUTOCONF
+	confsrcFiles += "../ReflectorInterface.cpp ";
+	#else
 	confsrcFiles += "ReflectorInterface.cpp ";
+	#endif
 	ret = ref.generateSerDefinitionAll(clsstrucMaps,includeRef, true, objs, ajaxret, headers,typerefs,webdirs1);
 	AfcUtil::writeTofile(rtdcfpath+"SerializeInterface.cpp",ret,true);
+	#ifdef BUILD_AUTOCONF
+	confsrcFiles += "../SerializeInterface.cpp ";
+	#else
 	confsrcFiles += "SerializeInterface.cpp ";
+	#endif
 	logger << "done generating reflection/serialization code" <<std::endl;
 	cntxt["RUNTIME_LIBRARIES"] = libs;
 	//ret = TemplateEngine::evaluate(rtdcfpath+"objects.mk.template",cntxt);
@@ -1112,7 +1133,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	logger << "started generating dcp code" <<std::endl;
 	ret = DCPGenerator::generateDCPAll();
 	AfcUtil::writeTofile(rtdcfpath+"DCPInterface.cpp",ret,true);
-	confsrcFilesDinter = "DCPInterface.cpp ";
+	#ifdef BUILD_AUTOCONF
+	confsrcFilesDinter += "../DCPInterface.cpp ";
+	#else
+	confsrcFilesDinter += "DCPInterface.cpp ";
+	#endif
 	logger << "done generating dcp code" <<std::endl;
 	ipdobjs += "./DCPInterface.o \\\n";
 #endif
@@ -1122,7 +1147,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	ret = TemplateGenerator::generateTempCdAll(serverRootDirectory);
 	//logger << ret << std::endl;
 	AfcUtil::writeTofile(rtdcfpath+"TemplateInterface.cpp",ret,true);
+	#ifdef BUILD_AUTOCONF
+	confsrcFilesDinter += "../TemplateInterface.cpp ";
+	#else
 	confsrcFilesDinter += "TemplateInterface.cpp ";
+	#endif
 	logger << "done generating template code" <<std::endl;
 	ipdobjs += "./TemplateInterface.o \\\n";
 #endif
@@ -1132,7 +1161,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	//ret = AfcUtil::generateJsObjectsAll(vecvp,afcd,infjs,pathvec,ajintpthMap);
 	ret = ajaxret + ajrt + "\n}\n";
 	AfcUtil::writeTofile(rtdcfpath+"AjaxInterface.cpp",ret,true);
+	#ifdef BUILD_AUTOCONF
+	confsrcFiles += "../AjaxInterface.cpp ";
+	#else
 	confsrcFiles += "AjaxInterface.cpp ";
+	#endif
 	//AfcUtil::writeTofile(pubpath+"_afc_Objects.js",objs,true);
 	//AfcUtil::writeTofile(pubpath+"_afc_Interfaces.js",infjs,true);
 	AfcUtil::writeTofile(incpath+"AfcInclude.h",(ajaxHeaders+headers),true);
@@ -1143,7 +1176,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	logger << "started generating application code" <<std::endl;
 	ret = apputil.buildAllApplications(appf,webdirs1);
 	AfcUtil::writeTofile(rtdcfpath+"ApplicationInterface.cpp",ret,true);
+	#ifdef BUILD_AUTOCONF
+	confsrcFiles += "../ApplicationInterface.cpp ";
+	#else
 	confsrcFiles += "ApplicationInterface.cpp ";
+	#endif
 	logger <<  "done generating application code" <<std::endl;
 	iobjs += "./ApplicationInterface.o \\\n";
 #endif
@@ -1154,7 +1191,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	std::copy(allwsdets1.begin(), allwsdets1.end(), back_inserter(allwsdets));
 	ret = wsu.generateAllWSDL(allwsdets, respath, ref, clsstrucMaps);
 	AfcUtil::writeTofile(rtdcfpath+"WsInterface.cpp",ret,true);
+	#ifdef BUILD_AUTOCONF
+	confsrcFiles += "../WsInterface.cpp ";
+	#else
 	confsrcFiles += "WsInterface.cpp ";
+	#endif
 	logger <<  "done generating web-service code" <<std::endl;
 	iobjs += "./WsInterface.o \\\n";
 #endif
@@ -1178,7 +1219,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	cntxt["Dynamic_Public_Folder_Copy"] = rundyncontent;
 	cont = TemplateEngine::evaluate(respath+"/rundyn_template.sh", cntxt);
 	AfcUtil::writeTofile(respath+"/rundyn_dinter.sh", cont, true);*/
-//#if BUILT_WITH_CONFGURE == 1
+//#ifdef BUILT_WITH_CONFGURE == 1
 	cntxt.clear();
 	cntxt["INTER_DINTER_LIBRARIES"] = libs;
 	cntxt["INTER_DINTER_INCLUDES"] = ilibs;
@@ -1187,10 +1228,30 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 
 	std::string mkfileloc = rtdcfpath+"/autotools/Makefile.am.template";
 	std::string mkfileamloc = rtdcfpath+"/autotools/Makefile.am";
-	//ret = TemplateEngine::evaluate(mkfileloc,cntxt);
-	//AfcUtil::writeTofile(mkfileamloc,ret,true);
-	//cntxt.clear();
+	#ifdef BUILD_AUTOCONF
+	ret = TemplateEngine::evaluate(mkfileloc,cntxt);
+	AfcUtil::writeTofile(mkfileamloc,ret,true);
 
+	cntxt.clear();
+	#endif
+
+#ifdef BUILD_AUTOCONF
+#ifdef INC_SDORM_SQL
+	cntxt["MOD_SDORM_SQL"] = "true";
+#else
+	cntxt["MOD_SDORM_SQL"] = "false";
+#endif
+#ifdef INC_SDORM_MONGO
+	cntxt["MOD_SDORM_MONGO"] = "true";
+#else
+	cntxt["MOD_SDORM_MONGO"] = "false";
+#endif
+#ifdef INC_SCRH
+	cntxt["MOD_SCRIPT"] = "true";
+#else
+	cntxt["MOD_SCRIPT"] = "false";
+#endif
+#else
 #ifdef INC_SDORM_SQL
 	cntxt["MOD_SDORM_SQL"] = "1";
 #else
@@ -1206,14 +1267,15 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 #else
 	cntxt["MOD_SCRIPT"] = "0";
 #endif
+#endif
 
-	/*logger << libs << std::endl;
-	logger << ilibs << std::endl;
-	logger << confsrcFiles << std::endl;
-	logger << confsrcFilesDinter << std::endl;*/
-
+#ifdef BUILD_AUTOCONF
+	std::string cffileloc = rtdcfpath+"/autotools/configure.ac.template";
+	std::string cffileamloc = rtdcfpath+"/autotools/configure.ac";
+#else
 	std::string cffileloc = rtdcfpath+"/CMakeLists.txt.template";
 	std::string cffileamloc = rtdcfpath+"/CMakeLists.txt";
+#endif
 	ret = TemplateEngine::evaluate(cffileloc,cntxt);
 	AfcUtil::writeTofile(cffileamloc,ret,true);
 

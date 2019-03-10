@@ -112,7 +112,7 @@ std::string AfcUtil::generateJsObjects(strVec obj, const std::string& claz, strV
 	Reflection ref;
 	std::string retu;
 	std::string test = "function _"+claz+"()\n{\n";
-	bool priv = false;
+	//bool priv = false;
 	size_t tess;
 	std::string meth;
 	strVec fldnames;
@@ -123,12 +123,12 @@ std::string AfcUtil::generateJsObjects(strVec obj, const std::string& claz, strV
 		{
 			std::string fld = pobj.at(i);
 
-			bool fldstatic = false;
+			//bool fldstatic = false;
 			if(RegexUtil::find(fld, "[ \\t]*static[ \\t]+")!=-1 || RegexUtil::find(fld, "[ \\t]+static[ \\t]+")!=-1)
 			{
 				RegexUtil::replace(fld, "[ \\t]*static[ \\t]+", " ");
 				RegexUtil::replace(fld, "[ \\t]+static[ \\t]+", " ");
-				fldstatic = true;
+				//fldstatic = true;
 			}
 			RegexUtil::replace(fld, "[ \\t]*const[ \\t]+", " ");
 			RegexUtil::replace(fld, "[ \\t]+const[ \\t]+", " ");
@@ -138,10 +138,10 @@ std::string AfcUtil::generateJsObjects(strVec obj, const std::string& claz, strV
 			StringUtil::replaceFirst(fld,";","");
 			StringUtil::trim(fld);
 
-			bool ptr = false;
+			//bool ptr = false;
 			if(fld.find("*")!=std::string::npos)
 			{
-				ptr = true;
+				//ptr = true;
 				StringUtil::replaceFirst(fld,"*","");
 			}
 
@@ -217,10 +217,10 @@ std::string AfcUtil::generateJsObjects(strVec obj, const std::string& claz, strV
 					argpm.push_back(argpmtemp);
 				}
 			}
-			bool ptr = false;
+			//bool ptr = false;
 			if(meth.find("*")!=std::string::npos)
 			{
-				ptr = true;
+				//ptr = true;
 				StringUtil::replaceFirst(meth,"*","");
 			}
 
@@ -296,10 +296,10 @@ std::string AfcUtil::generateJsObjects(strVec obj, const std::string& claz, strV
 	{
 		strVec vemp;
 		std::string data = obj.at(i);
-		bool ptr = false;
+		//bool ptr = false;
 		if(data.find("*")!=std::string::npos)
 		{
-			ptr = true;
+			//ptr = true;
 			StringUtil::replaceFirst(data,"*","");
 		}
 		StringUtil::replaceFirst(data,";","");
@@ -311,7 +311,7 @@ std::string AfcUtil::generateJsObjects(strVec obj, const std::string& claz, strV
 		data = data.substr(data.find_last_of(" ")+1);
 		StringUtil::trim(data);
 
-		priv = (fldstat[data]==2?true:false);
+		//priv = (fldstat[data]==2?true:false);
 
 		test += "this." + data + "= null;\n";
 	}
@@ -344,12 +344,12 @@ std::string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classs
 		{
 			std::string fld = pobj.at(i);
 
-			bool fldstatic = false;
+			//bool fldstatic = false;
 			if(RegexUtil::find(fld, "[ \\t]*static[ \\t]+")!=-1 || RegexUtil::find(fld, "[ \\t]+static[ \\t]+")!=-1)
 			{
 				RegexUtil::replace(fld, "[ \\t]*static[ \\t]+", " ");
 				RegexUtil::replace(fld, "[ \\t]+static[ \\t]+", " ");
-				fldstatic = true;
+				//fldstatic = true;
 			}
 			RegexUtil::replace(fld, "[ \\t]*const[ \\t]+", " ");
 			RegexUtil::replace(fld, "[ \\t]+const[ \\t]+", " ");
@@ -402,12 +402,12 @@ std::string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classs
 			StringUtil::trim(meth);
 			RegexUtil::replace(meth, "[ \\t]*,[ \\t]*", ",");
 
-			bool methstat = false;
+			//bool methstat = false;
 			if(RegexUtil::find(meth, "[ \\t]*static[ \\t]+")!=-1 || RegexUtil::find(meth, "[ \\t]+static[ \\t]+")!=-1)
 			{
 				RegexUtil::replace(meth, "[ \\t]*static[ \\t]+", " ");
 				RegexUtil::replace(meth, "[ \\t]+static[ \\t]+", " ");
-				methstat = true;
+				//methstat = true;
 			}
 			RegexUtil::replace(meth, "[ \\t]*inline[ \\t]+", " ");
 			RegexUtil::replace(meth, "[ \\t]+inline[ \\t]+", " ");
@@ -446,10 +446,10 @@ std::string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classs
 					argpm.push_back(argpmtemp);
 				}
 			}
-			bool ptr = false;
+			//bool ptr = false;
 			if(meth.find("*")!=std::string::npos)
 			{
-				ptr = true;
+				//ptr = true;
 				StringUtil::replaceFirst(meth,"*","");
 			}
 

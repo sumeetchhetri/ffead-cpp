@@ -113,7 +113,7 @@ bool OAUTH2Controller::service(HttpRequest* req, HttpResponse* res)
 			data += " HTTP/1.1\r\nHost: graph.facebook.com\r\nUser-Agent: Program\r\n\r\n";
 			std::cout << data << std::endl;
 
-			int bytes = client.sendData(data);
+			client.sendData(data);
 			std::string call=client.getData("\r\n","Content-Length: ");
 			HttpResponseParser parser(call, *res);
 			client.closeConnection();

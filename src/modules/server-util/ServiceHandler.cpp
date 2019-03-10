@@ -101,7 +101,7 @@ void* ServiceHandler::cleanSifs(void* inp) {
 	while(ins->isActive())
 	{
 		SocketInterface* si = NULL;
-		while(ins->tbcSifQ.pop(si))
+		while(ins->tbcSifQ.try_dequeue(si))
 		{
 			int val;
 			if(ins->requestNumMap.find(si->identifier, val) && val<=0)
@@ -112,7 +112,7 @@ void* ServiceHandler::cleanSifs(void* inp) {
 			}
 			else
 			{
-				ins->tbcSifQ.push(si);
+				ins->tbcSifQ.enqueue(si);
 			}
 			Thread::mSleep(10);
 		}
@@ -121,9 +121,9 @@ void* ServiceHandler::cleanSifs(void* inp) {
 	return NULL;
 }
 
-void ServiceHandler::cleanSif(std::map<int, SocketInterface*> connectionsWithTimeouts) {
+void ServiceHandler::cleanSif(cuckoohash_map<int, SocketInterface*> connectionsWithTimeouts) {
 	SocketInterface* si = NULL;
-	while(tbcSifQ.pop(si))
+	while(tbcSifQ.try_dequeue(si))
 	{
 		int val;
 		if(requestNumMap.find(si->identifier, val) && val<=0)
@@ -135,7 +135,7 @@ void ServiceHandler::cleanSif(std::map<int, SocketInterface*> connectionsWithTim
 		}
 		else
 		{
-			tbcSifQ.push(si);
+			tbcSifQ.enqueue(si);
 		}
 		Thread::mSleep(1);
 	}

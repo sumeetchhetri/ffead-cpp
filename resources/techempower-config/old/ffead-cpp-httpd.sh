@@ -26,8 +26,8 @@ make install
 cd ${IROOT}
 
 cd ${IROOT}/ffead-cpp-src/modules/apache_mod_ffeadcpp/
-g++ -fpic -DSHARED_MODULE -fpermissive -I"${IROOT}/httpd/include" -I"${IROOT}/ffead-cpp-2.0/include/" -I"${IROOT}/include" -I"${IROOT}/include/libbson-1.0/" -I"${IROOT}/include/libmongoc-1.0" mod_ffeadcpp.cpp -L"${IROOT}/ffead-cpp-2.0/lib" -L"${IROOT}" -lffead_common -lffead_framework -ldl -lcrypto -lssl -c mod_ffeadcpp.cpp
-g++ -shared -o mod_ffeadcpp.so mod_ffeadcpp.o -L"${IROOT}/ffead-cpp-2.0/lib" -L"${IROOT}" -L"${IROOT}/httpd/lib" -lffead_common -lffead_framework -ldl -lcrypto -lssl -lapr-1 -laprutil-1 -lstdc++
+g++ -fpic -DSHARED_MODULE -fpermissive -I"${IROOT}/httpd/include" -I"${IROOT}/ffead-cpp-2.0/include/" -I"${IROOT}/include" -I"${IROOT}/include/libbson-1.0/" -I"${IROOT}/include/libmongoc-1.0" mod_ffeadcpp.cpp -L"${IROOT}/ffead-cpp-2.0/lib" -L"${IROOT}" -lffead-modules -lffead-framework -ldl -lcrypto -lssl -c mod_ffeadcpp.cpp
+g++ -shared -o mod_ffeadcpp.so mod_ffeadcpp.o -L"${IROOT}/ffead-cpp-2.0/lib" -L"${IROOT}" -L"${IROOT}/httpd/lib" -lffead-modules -lffead-framework -ldl -lcrypto -lssl -lapr-1 -laprutil-1 -lstdc++
 ${IROOT}/httpd/bin/apxs -i -n 'ffead_cpp' mod_ffeadcpp.so
 cd -
 

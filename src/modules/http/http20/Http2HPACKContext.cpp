@@ -436,7 +436,6 @@ void Http2HPACKHeaderTable::init() {
 	//HUFFMAN_TABLE.push_back(Bits(0x3fffffffu, 30, (unsigned char)256u));
 
 	for(int i=0;i<(int)Http2HPACKHeaderTable::HUFFMAN_TABLE.size();i++) {
-		std::bitset<30> bs;
 		Bits bts = Http2HPACKHeaderTable::HUFFMAN_TABLE.at(i);
 		cib[bts.bits30v.to_string().substr(0, bts.numbits)] = bts;
 		//cout << bts.bits30v.to_string().substr(0, bts.numbits) << " = " << (int)bts.symbol << std::endl;

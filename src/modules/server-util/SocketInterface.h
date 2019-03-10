@@ -12,7 +12,7 @@
 #include "Mutex.h"
 #include <sys/stat.h>
 #include <fcntl.h>
-#if defined OS_DARWIN
+#if defined(OS_DARWIN) || defined(OS_BSD)
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
@@ -82,15 +82,20 @@ public:
 	bool writeFile(int fdes, int remain_data)
 	{
 		off_t offset = 0;
-		int sent_bytes = 0;
-		/* Sending file data */
 #if defined(OS_DARWIN)
 		off_t sent_bytes1 = BUFSIZ;
 		while ((sendfile(fdes, fd, offset, &sent_bytes1, NULL, 0) == 0) && sent_bytes1>0 && (remain_data > 0))
-                {
-                        remain_data -= sent_bytes1;
-                }
+		{
+				remain_data -= sent_bytes1;
+		}
+#elif defined(OS_BSD)
+		off_t sent_bytes1 = BUFSIZ;
+		while ((sendfile(fdes, fd, offset, BUFSIZ, 0, &sent_bytes1, 0) == 0) && sent_bytes1>0 && (remain_data > 0))
+		{
+				remain_data -= sent_bytes1;
+		}
 #elif defined(IS_SENDFILE)
+		int sent_bytes = 0;
 		while (((sent_bytes = sendfile(fd, fdes, &offset, BUFSIZ)) > 0) && (remain_data > 0))
 		{
 			remain_data -= sent_bytes;

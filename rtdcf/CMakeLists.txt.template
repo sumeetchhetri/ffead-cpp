@@ -8,7 +8,7 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS " -I/usr/local/include -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0/ -I/usr/local/opt/openssl/include")
+set(CMAKE_CXX_FLAGS " -I/usr/local/include -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0/ -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -O2 -I/usr/local/opt/openssl/include")
 set(CMAKE_EXE_LINKER_FLAGS " -L/usr/local/lib -L/usr/local/opt/openssl/lib -avoid-version -shared -no-undefined -module -export-dynamic")
 include_directories("/usr/local/include" "${CMAKE_SOURCE_DIR}/../include")
 

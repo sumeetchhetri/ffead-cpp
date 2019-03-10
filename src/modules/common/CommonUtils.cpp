@@ -55,7 +55,7 @@ int CommonUtils::getProcessorCount() {
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
     return sysinfo.dwNumberOfProcessors;
-#elif defined(OS_DARWIN) || defined(OS_BSD)
+#elif defined(OS_DARWIN)
     int nm[2];
     size_t len = 4;
     uint32_t count;

@@ -15,7 +15,7 @@
 */
 #include "Reflector.h"
 
-std::map<std::string, ClassInfo> Reflector::_ciMap;
+cuckoohash_map<std::string, ClassInfo> Reflector::_ciMap;
 ClassInfo Reflector::nullclass;
 
 Reflector::Reflector()
@@ -66,14 +66,15 @@ void Reflector::cleanUp()
 	objects.clear();
 }
 
-const ClassInfo& Reflector::getClassInfo(const std::string& cs, const std::string& app)
+const ClassInfo Reflector::getClassInfo(const std::string& cs, const std::string& app)
 {
 	std::string className = cs;
 	std::string appName = CommonUtils::getAppName(app);
 	StringUtil::replaceAll(className, "::", "_");
 	std::string ca = appName +"-"+ className;
-	if(_ciMap.find(ca)!=_ciMap.end()) {
-		return _ciMap[ca];
+	ClassInfo t;
+	if(_ciMap.contains(ca)) {
+		return _ciMap.find(ca);
 	}
 	std::string methodname = appName + "_"+className;
 	void *mkr = dlsym(dlib, methodname.c_str());
@@ -81,8 +82,9 @@ const ClassInfo& Reflector::getClassInfo(const std::string& cs, const std::strin
 	RfPtr f = (RfPtr)mkr;
 	if(f!=NULL)
 	{
-		_ciMap[ca] = f();
-		return _ciMap[ca];
+		t = f();
+		_ciMap.insert(ca, t);
+		return _ciMap.find(ca);
 	}
 	else
 		return nullclass;

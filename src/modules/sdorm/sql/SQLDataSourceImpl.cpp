@@ -1137,12 +1137,12 @@ void SQLDataSourceImpl::bindQueryParams(Query& query)
 	Parameters qparams = query.getPropNameVaues();
 	Parameters columnBindings = query.getColumnBindings();
 	PosParameters* propPosVaues;
+	PosParameters propPosVauesT;
 	Parameters::iterator ite;
 	std::string queryString = query.getQuery();
 	int posst = 1;
 	if(qparams.size()>0)
 	{
-		PosParameters propPosVaues;
 		std::vector<std::string> tst = RegexUtil::search(queryString, ":");
 		int counter = tst.size();
 		while(counter-->0 && queryString.find(":")!=std::string::npos)
@@ -1151,13 +1151,14 @@ void SQLDataSourceImpl::bindQueryParams(Query& query)
 			{
 				if(queryString.find(":")!=std::string::npos &&  queryString.find(":"+ite->first)!=queryString.find(":"))
 				{
-					propPosVaues[posst++] = ite->second;
+					propPosVauesT[posst++] = ite->second;
 					queryString = queryString.substr(0, queryString.find(":")) + "?" +
 							queryString.substr(queryString.find(":"+ite->first)+ite->first.length()+1);
 				}
 			}
 		}
 		query.setQuery(queryString);
+		propPosVaues = &propPosVauesT;
 	}
 	else
 	{

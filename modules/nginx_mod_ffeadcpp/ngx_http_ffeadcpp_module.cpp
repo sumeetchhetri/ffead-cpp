@@ -703,7 +703,7 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	}
 	catch(const std::exception& msg)
 	{
-		logger << msg << std::endl;
+		logger << msg.what() << std::endl;
 	}
 
 	logger << INTER_LIB_FILE << std::endl;

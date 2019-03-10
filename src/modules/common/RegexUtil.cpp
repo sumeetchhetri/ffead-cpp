@@ -22,22 +22,24 @@
 
 #include "RegexUtil.h"
 
-std::map<std::string, regex_t> RegexUtil::patterns;
-std::map<std::string, regex_t> RegexUtil::nlpatterns;
+cuckoohash_map<std::string, regex_t*> RegexUtil::patterns;
+cuckoohash_map<std::string, regex_t*> RegexUtil::nlpatterns;
 bool RegexUtil::cacheRegexes = true;
 
 void RegexUtil::flushCache() {
 	if(patterns.size()>0) {
-		std::map<std::string, regex_t>::iterator it;
-		for(it=patterns.begin();it!=patterns.end();++it) {
-			regfree(&(it->second));
+		auto lt = patterns.lock_table();
+		cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
+		for(it=lt.begin();it!=lt.end();++it) {
+			regfree(it->second);
 		}
 		patterns.clear();
 	}
 	if(nlpatterns.size()>0) {
-		std::map<std::string, regex_t>::iterator it;
-		for(it=nlpatterns.begin();it!=nlpatterns.end();++it) {
-			regfree(&(it->second));
+		auto lt = nlpatterns.lock_table();
+		cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
+		for(it=lt.begin();it!=lt.end();++it) {
+			regfree(it->second);
 		}
 		nlpatterns.clear();
 	}
@@ -51,12 +53,10 @@ regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLin
 	regex_t* regex = NULL;
 	bool found = false;
 	if(cacheRegexes) {
-		if(!matchNewLine && patterns.find(pattern)!=patterns.end()) {
-			regex = &(patterns[pattern]);
-			found = true;
-		} else if(nlpatterns.find(pattern)!=nlpatterns.end()) {
-			regex = &(nlpatterns[pattern]);
-			found = true;
+		if(!matchNewLine && patterns.contains(pattern)) {
+			return patterns.find(pattern);
+		} else if(nlpatterns.contains(pattern)) {
+			return nlpatterns.find(pattern);
 		}
 	}
 	if(!found) {
@@ -67,9 +67,11 @@ regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLin
 		if(cacheRegexes)
 		{
 			if(!matchNewLine) {
-				regex = &(patterns[pattern]);
+				regex = new regex_t;
+				patterns.insert(pattern, regex);
 			} else {
-				regex = &(nlpatterns[pattern]);
+				regex = new regex_t;
+				nlpatterns.insert(pattern, regex);
 			}
 			int reti = regcomp(regex, pattern.c_str(), cflags);
 			if(reti!=0)

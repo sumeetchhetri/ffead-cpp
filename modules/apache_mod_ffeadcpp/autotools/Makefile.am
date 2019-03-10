@@ -39,7 +39,7 @@ prefix=${abs_builddir}
 
 noinst_LTLIBRARIES = mod_ffeadcpp.la
 mod_ffeadcpp_la_SOURCES = ../mod_ffeadcpp.cpp
-mod_ffeadcpp_la_LIBADD = -L"${fprefix}/lib" -lffead_common -lffead_framework -ldl -lcrypto -lssl @LIB_TYPE@apr-1 @LIB_TYPE@aprutil-1 @APACHE_HTTPD_LIB@
+mod_ffeadcpp_la_LIBADD = -L"${fprefix}/lib" -lffead-modules -lffead-framework -ldl -lcrypto -lssl @LIB_TYPE@apr-1 @LIB_TYPE@aprutil-1 @APACHE_HTTPD_LIB@
 mod_ffeadcpp_la_LDFLAGS = -avoid-version -shared -module -rpath ${prefix}/lib -no-undefined 
 
 
