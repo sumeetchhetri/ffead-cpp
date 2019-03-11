@@ -25,8 +25,8 @@ std::string CompressionUtil::_compress(char* infile, const bool& isGz, const boo
     z_stream strm;
 
     std::string s;
-    FILE* ofs;
-    FILE* ifs;
+    FILE* ofs = NULL;
+    FILE* ifs = NULL;
     if(infile!=NULL)
     {
     	ifs = fopen(infile, "rb");
@@ -132,8 +132,8 @@ std::string CompressionUtil::_uncompress(char* infile, const bool& isGz, const b
     z_stream strm;
 
     std::string s;
-    FILE* ofs;
-    FILE* ifs;
+    FILE* ofs = NULL;
+    FILE* ifs = NULL;
     if(infile!=NULL)
     {
     	ifs = fopen(infile, "rb");

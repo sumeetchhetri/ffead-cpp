@@ -720,7 +720,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 	                &colDataDigits,     // Number of decimal digits
 	                &colDataNullable);
 
-	unsigned long long dn;
+	unsigned long long dn = 0;
 	double dd;
 	float df;
 	bool db;

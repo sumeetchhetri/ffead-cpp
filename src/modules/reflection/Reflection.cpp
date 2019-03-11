@@ -1997,12 +1997,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 
 				fld = pubdecl;
 
-				bool fldstatic = false;
+				//bool fldstatic = false;
 				if(RegexUtil::find(fld, "[ \t]*static[ \t]+")!=-1 || RegexUtil::find(fld, "[ \t]+static[ \t]+")!=-1)
 				{
 					RegexUtil::replace(fld, "[ \t]*static[ \t]+", " ");
 					RegexUtil::replace(fld, "[ \t]+static[ \t]+", " ");
-					fldstatic = true;
+					//fldstatic = true;
 				}
 				RegexUtil::replace(fld, "[ \t]*const[ \t]+", " ");
 				RegexUtil::replace(fld, "[ \t]+const[ \t]+", " ");

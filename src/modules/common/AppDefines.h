@@ -1,393 +1,58 @@
-/* src/modules/common/AppDefines.h.  Generated from AppDefines.h.in by configure.  */
-/* src/modules/common/AppDefines.h.in.  Generated from configure.ac by autoheader.  */
 
-/* set build system to autoconf/automake */
-#define BUILD_AUTOCONF /**/
-
-/* set configure mode */
-#define BUILT_WITH_CONFGURE 1
-
-/* set DEBUG mode */
-#define DEBUG /**/
-
-/* Define to 1 if you have the <arpa/inet.h> header file. */
-#define HAVE_ARPA_INET_H 1
-
-/* set uuid lib to bsd type */
-/* #undef HAVE_BSDUUIDINC */
-
-/* Define to 1 if you have the `clock_gettime' function. */
-#define HAVE_CLOCK_GETTIME 1
-
-/* Define if you have clock_nanosleep() */
-/* #undef HAVE_CLOCK_NANOSLEEP */
-
-/* define if the compiler supports basic C++11 syntax */
-#define HAVE_CXX11 1
-
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#define HAVE_DLFCN_H 1
-
-/* Define to 1 if you have the <fcntl.h> header file. */
-#define HAVE_FCNTL_H 1
-
-/* Define to 1 if you have the `floor' function. */
-#define HAVE_FLOOR 1
-
-/* Define to 1 if you have the `fork' function. */
-#define HAVE_FORK 1
-
-/* Define to 1 if you have the `gethostbyname' function. */
-#define HAVE_GETHOSTBYNAME 1
-
-/* Define to 1 if you have the <inttypes.h> header file. */
-#define HAVE_INTTYPES_H 1
-
-/* Define to 1 if you have the `bson-1.0' library (-lbson-1.0). */
-/* #undef HAVE_LIBBSON_1_0 */
-
-/* Define to 1 if you have the `crypto' library (-lcrypto). */
-#define HAVE_LIBCRYPTO 1
-
-/* Define to 1 if you have the `gtmshr' library (-lgtmshr). */
-/* #undef HAVE_LIBGTMSHR */
-
-/* Define to 1 if you have the `kernel32' library (-lkernel32). */
-/* #undef HAVE_LIBKERNEL32 */
-
-/* Define to 1 if you have the `mongoc-1.0' library (-lmongoc-1.0). */
-/* #undef HAVE_LIBMONGOC_1_0 */
-
-/* Define to 1 if you have the `odbc' library (-lodbc). */
-/* #undef HAVE_LIBODBC */
-
-/* Define to 1 if you have the `pthread' library (-lpthread). */
-#define HAVE_LIBPTHREAD 1
-
-/* Define to 1 if you have the `pthreads' library (-lpthreads). */
-/* #undef HAVE_LIBPTHREADS */
-
-/* Define to 1 if you have the `regex' library (-lregex). */
-/* #undef HAVE_LIBREGEX */
-
-/* Define to 1 if you have the `rt' library (-lrt). */
-/* #undef HAVE_LIBRT */
-
-/* Define to 1 if you have the `ssl' library (-lssl). */
-#define HAVE_LIBSSL 1
-
-/* Define to 1 if you have the `uuid' library (-luuid). */
-/* #undef HAVE_LIBUUID */
-
-/* Define to 1 if you have the `ws2_32' library (-lws2_32). */
-/* #undef HAVE_LIBWS2_32 */
-
-/* Define to 1 if you have the `wsock32' library (-lwsock32). */
-/* #undef HAVE_LIBWSOCK32 */
-
-/* Define to 1 if you have the `z' library (-lz). */
-#define HAVE_LIBZ 1
-
-/* Define to 1 if the system has the type `long long'. */
-#define HAVE_LONG_LONG 1
-
-/* Define to 1 if your system has a GNU libc compatible `malloc' function, and
-   to 0 otherwise. */
-#define HAVE_MALLOC 1
-
-/* Define to 1 if you have the <memory.h> header file. */
-#define HAVE_MEMORY_H 1
-
-/* Define to 1 if you have the `memset' function. */
-#define HAVE_MEMSET 1
-
-/* Define to 1 if you have the <netdb.h> header file. */
-#define HAVE_NETDB_H 1
-
-/* Define to 1 if you have the <netinet/in.h> header file. */
-#define HAVE_NETINET_IN_H 1
-
-/* Define to 1 if you have the `pow' function. */
-#define HAVE_POW 1
-
-/* Define to 1 if you have the `regcomp' function. */
-#define HAVE_REGCOMP 1
-
-/* Define to 1 if you have the `select' function. */
-#define HAVE_SELECT 1
-
-/* Define to 1 if the system has the type `signed char'. */
-#define HAVE_SIGNED_CHAR 1
-
-/* Define to 1 if you have the `socket' function. */
-#define HAVE_SOCKET 1
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#define HAVE_STDINT_H 1
-
-/* Define to 1 if you have the <stdlib.h> header file. */
-#define HAVE_STDLIB_H 1
-
-/* Define to 1 if you have the `strcasecmp' function. */
-#define HAVE_STRCASECMP 1
-
-/* Define to 1 if you have the <strings.h> header file. */
-#define HAVE_STRINGS_H 1
-
-/* Define to 1 if you have the <string.h> header file. */
-#define HAVE_STRING_H 1
-
-/* Define to 1 if you have the `strtol' function. */
-#define HAVE_STRTOL 1
-
-/* Define to 1 if you have the `strtoul' function. */
-#define HAVE_STRTOUL 1
-
-/* Define to 1 if you have the <sys/ioctl.h> header file. */
-#define HAVE_SYS_IOCTL_H 1
-
-/* Define to 1 if you have the <sys/socket.h> header file. */
-#define HAVE_SYS_SOCKET_H 1
-
-/* Define to 1 if you have the <sys/stat.h> header file. */
-#define HAVE_SYS_STAT_H 1
-
-/* Define to 1 if you have the <sys/time.h> header file. */
-#define HAVE_SYS_TIME_H 1
-
-/* Define to 1 if you have the <sys/types.h> header file. */
-#define HAVE_SYS_TYPES_H 1
-
-/* Define to 1 if you have the <unistd.h> header file. */
-#define HAVE_UNISTD_H 1
-
-/* Define to 1 if you have the `vfork' function. */
-#define HAVE_VFORK 1
-
-/* Define to 1 if you have the <vfork.h> header file. */
-/* #undef HAVE_VFORK_H */
-
-/* Define to 1 if `fork' works. */
-#define HAVE_WORKING_FORK 1
-
-/* Define to 1 if `vfork' works. */
-#define HAVE_WORKING_VFORK 1
-
-/* enable http framework application flow module */
-/* #undef INC_APPFLOW */
-
-/* enable binary serilaization module */
-#define INC_BINSER /**/
-
-/* enable client-utility module */
-#define INC_CLIENTUTIL /**/
-
-/* enable component module */
-/* #undef INC_CMP */
-
-/* enable http framework dynamic c++ pages module */
-#define INC_DCP /**/
-
-/* enable distocache module */
-/* #undef INC_DSTC */
-
-/* enable http framework dynamic views module */
-#define INC_DVIEW /**/
-
-/* enable sdorm gtm module */
-/* #undef INC_GTM */
-
-/* enable http module */
-#define INC_HTTP /**/
-
-/* enable http framework module */
-#define INC_HTTPFRAMEWORK /**/
-
-/* enable c++ interpreter module */
-#define INC_INTP /**/
-
-/* enable ioc module */
-#define INC_IOC /**/
-
-/* enable cron/batch jobs module */
-#define INC_JOBS /**/
-
-/* enable json serilaization module */
-#define INC_JSONSER /**/
-
-/* enable memcached cache module */
-/* #undef INC_MEMCACHED */
-
-/* enable memory cache module */
-#define INC_MEMORYCACHE /**/
-
-/* enable method invoker module */
-/* #undef INC_MI */
-
-/* enable message handler module */
-/* #undef INC_MSGH */
-
-/* enable redis cache module */
+#define INC_MEMORYCACHE 1
 /* #undef INC_REDISCACHE */
-
-/* enable reflection module */
-#define INC_REFLECTION /**/
-
-/* enable http framework scripting support module */
-/* #undef INC_SCRH */
-
-/* enable data-source-orm module */
-/* #undef INC_SDORM */
-
-/* enable data-source-orm-mongo module */
+/* #undef INC_MEMCACHED */
+#define INC_SDORM 1
+#define INC_SDORM_SQL 1
 /* #undef INC_SDORM_MONGO */
+/* #undef INC_BINSER */
+#define INC_JOBS 1
+#define APPLE 1
+/* #undef MINGW */
+/* #undef DEBUG_MODE */
 
-/* enable data-source-orm-sql module */
-/* #undef INC_SDORM_SQL */
-
-/* enable server-utility module */
-#define INC_SERVERUTIL /**/
-
-/* enable ssl-utility module */
-#define INC_SSLUTIL /**/
-
-/* enable threads module */
-#define INC_THREADS /**/
-
-/* enable http framework templates module */
-#define INC_TPE /**/
-
-/* enable http framework web-service module */
-#define INC_WEBSVC /**/
-
-/* enable xml serialization module */
-#define INC_XMLSER /**/
-
-/* Define to 0 if you don't have sys/sendfile.h */
-#define IS_SENDFILE 0
-
-/* Define to the sub-directory where libtool stores uninstalled libraries. */
-#define LT_OBJDIR ".libs/"
-
-/* unset DEBUG mode */
-/* #undef NDEBUG */
-
-/* set OS to aix */
-/* #undef OS_AIX */
-
-/* set OS to bsd */
-#define OS_BSD /**/
-
-/* set OS to cygwin */
-/* #undef OS_CYGWIN */
-
-/* set OS to darwin */
-#define OS_DARWIN /**/
-
-/* set OS to freebsd */
-/* #undef OS_FREEBSD */
-
-/* set OS to hp-ux */
-/* #undef OS_HPUX */
-
-/* set OS to irix */
-/* #undef OS_IRIX */
-
-/* set OS to linux */
-/* #undef OS_LINUX */
-
-/* set OS to mingw */
-/* #undef OS_MINGW */
-
-/* Define to 0 if you don't have _mingw_mac.h */
-#define OS_MINGW_W64 0
-
-/* set OS to netbsd */
-/* #undef OS_NETBSD */
-
-/* set OS to openbsd */
-/* #undef OS_OPENBSD */
-
-/* set openbsd release number */
-/* #undef OS_OPENBSD_REL */
-
-/* set OS to osf */
-/* #undef OS_OSF */
-
-/* set OS to sco */
-/* #undef OS_SCO */
-
-/* set OS to solaris */
-/* #undef OS_SOLARIS */
-
-/* set OS to sunos */
-/* #undef OS_SUNOS */
-
-/* set OS to svr4 */
-/* #undef OS_SVR4 */
-
-/* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "sumeet.chhetri@gmail.com"
-
-/* Define to the full name of this package. */
-#define PACKAGE_NAME "ffead-cpp"
-
-/* Define to the full name and version of this package. */
-#define PACKAGE_STRING "ffead-cpp 3.0"
-
-/* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "ffead-cpp"
-
-/* Define to the home page for this package. */
-#define PACKAGE_URL ""
-
-/* Define to the version of this package. */
-#define PACKAGE_VERSION "3.0"
-
-/* The size of `long', as computed by sizeof. */
-#define SIZEOF_LONG 8
-
-/* The size of `void *', as computed by sizeof. */
-#define SIZEOF_VOID_P 8
-
-/* Define to 1 if you have the ANSI C header files. */
-#define STDC_HEADERS 1
-
-/* atomic support not found */
-#define USE_ATOMIC_H 1
-
-/* cstdatomic support not found */
-#define USE_CSTDATOMIC_H 0
-
-/* devpoll support not found */
-#define USE_DEVPOLL 0
-
-/* epoll support not found */
-#define USE_EPOLL 0
-
-/* event port support not found */
-#define USE_EVPORT 0
-
-/* kqueue support not found */
+/* #undef USE_EPOLL */
 #define USE_KQUEUE 1
-
-/* poll support not found */
+/* #undef USE_EVPORT */
+/* #undef USE_DEVPOLL */
 #define USE_POLL 1
-
-/* select support not found */
 #define USE_SELECT 1
 
-/* use io completion ports on windows */
-/* #undef USE_WIN_IOCP */
+#define HAVE_SSLINC 1
+#define HAVE_SSLLIB /usr/lib/libssl.dylib
+/* #undef HAVE_REDISINC */
+/* #undef HAVE_REDISLIB */
+/* #undef HAVE_MEMCACHEDINC */
+/* #undef HAVE_MEMCACHEDLIB */
+#define HAVE_CURLLIB /usr/lib/libcurl.dylib
+#define HAVE_UUIDINC 1
+/* #undef HAVE_BSDUUIDINC */
+#define HAVE_SQLINC 1
+#define HAVE_ODBCLIB /usr/local/lib/libodbc.dylib
+/* #undef HAVE_MONGOINC */
+/* #undef HAVE_MONGOCLIB */
+/* #undef HAVE_BSONINC */
+/* #undef HAVE_BSONLIB */
+#define INC_JOBS 1
+/* #undef OS_BSD */
 
-/* Define to rpl_malloc if the replacement function should be used. */
-/* #undef malloc */
+#ifdef HAVE_ODBCLIB
+#define HAVE_LIBODBC 1
+#endif
 
-/* Define to `int' if <sys/types.h> does not define. */
-/* #undef pid_t */
+#define INC_WEBSVC 1
+#define INC_TPE 1
+#define INC_DVIEW 1
+#define INC_DCP 1
+#define INC_XMLSER 1
+#define IS_SENDFILE 1
+#define BUILD_CMAKE 1
 
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-/* #undef size_t */
+#ifdef APPLE
+#define OS_DARWIN 1
+#endif
 
-/* Define as `fork' if `vfork' does not work. */
-/* #undef vfork */
+#ifdef MINGW
+#undef USE_SELECT
+#define USE_MINGW_SELECT 1
+#endif

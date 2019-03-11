@@ -11,7 +11,6 @@
 **/ffead-cpp
 ffead-cpp-*/*
 include/*
-**/tests
 src/autotools/bins/bin/*
 src/autotools/libs/lib/*
 src/autotools/libs/.libs/*
@@ -38,7 +37,7 @@ m4/ltoptions.m4
 m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~*.m4
-**/AppDefines.h.*
+**/AppDefines.h.in
 .settings/
 **/CMakeFiles/
 **/cmake_install.cmake

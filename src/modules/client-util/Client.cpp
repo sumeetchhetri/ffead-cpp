@@ -164,7 +164,7 @@ std::string Client::getTextData(const std::string& hdrdelm, const std::string& c
 	int er=-1;
 	bool flag = true;
 	std::string alldat;
-	int cntlen;
+	int cntlen = 0;
 	char buf[MAXBUFLE];
 	memset(buf, 0, MAXBUFLE);
 	BIO* sbio=BIO_new_socket(sockfd,BIO_NOCLOSE);

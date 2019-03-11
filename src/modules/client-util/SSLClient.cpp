@@ -291,7 +291,7 @@ std::string SSLClient::getTextData(const std::string& hdrdelm, const std::string
 	int er=-1;
 	bool flag = true;
 	std::string alldat;
-	int cntlen;
+	int cntlen = 0;
 	char buf[MAXBUFLE];
 	memset(buf, 0, sizeof(buf));
 	while(flag)

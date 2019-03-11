@@ -173,12 +173,12 @@ std::string AfcUtil::generateJsObjects(strVec obj, const std::string& claz, strV
 			StringUtil::trim(meth);
 			RegexUtil::replace(meth, "[ \\t]*,[ \\t]*", ",");
 
-			bool methstat = false;
+			//bool methstat = false;
 			if(RegexUtil::find(meth, "[ \\t]*static[ \\t]+")!=-1 || RegexUtil::find(meth, "[ \\t]+static[ \\t]+")!=-1)
 			{
 				RegexUtil::replace(meth, "[ \\t]*static[ \\t]+", " ");
 				RegexUtil::replace(meth, "[ \\t]+static[ \\t]+", " ");
-				methstat = true;
+				//methstat = true;
 			}
 			RegexUtil::replace(meth, "[ \\t]*inline[ \\t]+", " ");
 			RegexUtil::replace(meth, "[ \\t]+inline[ \\t]+", " ");

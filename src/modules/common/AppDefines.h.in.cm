@@ -1,0 +1,58 @@
+
+#cmakedefine INC_MEMORYCACHE @INC_MEMORYCACHE@
+#cmakedefine INC_REDISCACHE @INC_REDISCACHE@
+#cmakedefine INC_MEMCACHED @INC_MEMCACHED@
+#cmakedefine INC_SDORM @INC_SDORM@
+#cmakedefine INC_SDORM_SQL @INC_SDORM_SQL@
+#cmakedefine INC_SDORM_MONGO @INC_SDORM_MONGO@
+#cmakedefine INC_BINSER @INC_BINSER@
+#cmakedefine INC_JOBS @INC_JOBS@
+#cmakedefine APPLE @APPLE@
+#cmakedefine MINGW @MINGW@
+#cmakedefine DEBUG_MODE @CMAKE_BUILD_TYPE@
+
+#cmakedefine USE_EPOLL @USE_EPOLL@
+#cmakedefine USE_KQUEUE @USE_KQUEUE@
+#cmakedefine USE_EVPORT @USE_EVPORT@
+#cmakedefine USE_DEVPOLL @USE_DEVPOLL@
+#cmakedefine USE_POLL @USE_POLL@
+#cmakedefine USE_SELECT @USE_SELECT@
+
+#cmakedefine HAVE_SSLINC @HAVE_SSLINC@
+#cmakedefine HAVE_SSLLIB @HAVE_SSLLIB@
+#cmakedefine HAVE_REDISINC @HAVE_REDISINC@
+#cmakedefine HAVE_REDISLIB @HAVE_REDISLIB@
+#cmakedefine HAVE_MEMCACHEDINC @HAVE_MEMCACHEDINC@
+#cmakedefine HAVE_MEMCACHEDLIB @HAVE_MEMCACHEDLIB@
+#cmakedefine HAVE_CURLLIB @HAVE_CURLLIB@
+#cmakedefine HAVE_UUIDINC @HAVE_UUIDINC@
+#cmakedefine HAVE_BSDUUIDINC @HAVE_BSDUUIDINC@
+#cmakedefine HAVE_SQLINC @HAVE_SQLINC@
+#cmakedefine HAVE_ODBCLIB @HAVE_ODBCLIB@
+#cmakedefine HAVE_MONGOINC @HAVE_MONGOINC@
+#cmakedefine HAVE_MONGOCLIB @HAVE_MONGOCLIB@
+#cmakedefine HAVE_BSONINC @HAVE_BSONINC@
+#cmakedefine HAVE_BSONLIB @HAVE_BSONLIB@
+#cmakedefine INC_JOBS @INC_JOBS@
+#cmakedefine OS_BSD @OS_BSD@
+
+#ifdef HAVE_ODBCLIB
+#define HAVE_LIBODBC 1
+#endif
+
+#define INC_WEBSVC 1
+#define INC_TPE 1
+#define INC_DVIEW 1
+#define INC_DCP 1
+#define INC_XMLSER 1
+#define IS_SENDFILE 1
+#define BUILD_CMAKE 1
+
+#ifdef APPLE
+#define OS_DARWIN 1
+#endif
+
+#ifdef MINGW
+#undef USE_SELECT
+#define USE_MINGW_SELECT 1
+#endif

@@ -64,7 +64,6 @@ Ubuntu 18.04.2
 	apt install libmemcached-dev libmongoc-dev libhiredis-dev
 	apt install unixodbc
 	apt install libssl-dev
-	apt install libtbb-dev
 
 MAC OS X - To install all dependencies on MAC OS X use,
 	Make sure Xcode is installed or at-least the Command line tools are present

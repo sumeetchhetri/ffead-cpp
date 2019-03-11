@@ -117,7 +117,7 @@ void ThreadPool::joinAll() {
 }
 
 void ThreadPool::submit(Task* task) {
-	if(currentThread==tpool.size()) {
+	if(currentThread==(int)tpool.size()) {
 		currentThread = 0;
 	}
 	tpool.at(currentThread++)->addTask(task);

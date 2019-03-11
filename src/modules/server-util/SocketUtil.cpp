@@ -300,7 +300,7 @@ bool SocketUtil::checkSocketWaitForTimeout(const int& writing, const int& second
 
 	fd_set rset, wset;
 	struct timeval tv = {seconds, micros};
-	int rc;
+	int rc = 0;
 
 	/* Guard against closed socket */
 	if (fd < 0)
