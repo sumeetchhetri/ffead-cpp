@@ -21,9 +21,8 @@ directives can now be used to drive the entire configuration in ffead-cpp, so yo
 All in all ffead-cpp is the gap in the world of C++ web application or enterprise application development which I have tried to fill
 with my humble/honest effort.
 
-The build system has moved to **cmake** from autoconf/automake.
+Starting version 3.0 ffead-cpp supports both **autoconf** and **cmake** for builds
 
-autoconf/automake based version is available at https://github.com/sumeetchhetri/ffead-cpp/tree/v2.2
 
 Features
 ==========
@@ -41,13 +40,26 @@ Features
 - Better Logging support
 - Dependency Injection
 
-Quickstart
+Quickstart (Using cmake)
 ===========
-- Install cmake >= 3.8.2, c++17 compliant gcc g++ compiler, libcurl-devel, libuuid-devel, openssl-devel, unixodbc-devel and zlib-devel
+- Install cmake >= 3.8.2 and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
 - cmake .
 - make install -j4
 - Sip some coffee
-- make install (Build the sample applications in web + generate ffead-cpp binary)
+- make install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- cd ffead-cpp-3.0-bin/ (Navigate to the ffead-cpp binary folder)
+- chmod +x *.sh
+- ./server.sh (Startup ffead-cpp Njoy!!)
+
+Quickstart (Using autoconf)
+===========
+- Install [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
+- ./autogen.sh (Setup configure for your platform)
+- ./configure (Setup makefiles)
+- Stretch a bit :-)
+- make install (Build ffead-cpp)
+- Sip some coffee
+- make build-apps (Build the sample applications in web + generate ffead-cpp binary)
 - cd ffead-cpp-3.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
