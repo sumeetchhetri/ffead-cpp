@@ -137,12 +137,10 @@ void* FFEADContext::getBean(const Bean& bean)
 	std::string k = bean.name+";"+type;
 	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
 	{
-		if(objects.find(bean.appName)!=objects.end())
+		std::string _k = bean.appName + k;
+		if(objects.contains(_k))
 		{
-			if(objects[bean.appName].find(k)!=objects[bean.appName].end())
-			{
-				return objects[bean.appName][k];
-			}
+			return objects.find(_k);
 		}
 	}
 	if(bean.inbuilt!="" && bean.value!="")
@@ -204,14 +202,12 @@ void* FFEADContext::getBean(const Bean& bean)
 		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
 		const Constructor& ctor = clas.getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor);
-		classInfoMap[bean.appName][bean.clas] = clas;
 	}
 	else if(bean.injectAs=="prop")
 	{
 		args argus;
 		vals valus;
 		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
-		classInfoMap[bean.appName][bean.clas] = clas;
 		const Constructor& ctor = clas.getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
@@ -240,7 +236,6 @@ void* FFEADContext::getBean(const Bean& bean)
 		args argus;
 		vals valus;
 		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
-		classInfoMap[bean.appName][bean.clas] = clas;
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
 		{
 			Bean& beanc = injbns[bean.injs.at(var)];
@@ -263,7 +258,6 @@ void* FFEADContext::getBean(const Bean& bean)
 		args argus;
 		vals valus;
 		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
-		classInfoMap[bean.appName][bean.clas] = clas;
 		const Constructor& ctor = clas.getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
@@ -287,13 +281,10 @@ void* FFEADContext::getBean(const Bean& bean)
 	}
 	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
 	{
-		if(objects.find(bean.appName)==objects.end())
+		std::string _k = bean.appName + k;
+		if(!objects.contains(_k))
 		{
-			objects[bean.appName];
-		}
-		if(objects[bean.appName].find(k)==objects[bean.appName].end())
-		{
-			objects[bean.appName][k] = _temp;
+			objects.insert(_k, _temp);
 		}
 	}
 	return _temp;
@@ -332,14 +323,14 @@ void FFEADContext::release(void* instance, const std::string& beanName, const st
 
 void FFEADContext::clear(const std::string& appName)
 {
-	std::map<std::string, void*>::iterator objectsIter;
-	for (objectsIter=objects[appName].begin();objectsIter != objects[appName].end();objectsIter++)
-	{
-		std::string k = objectsIter->first;
+	auto lt = objects.lock_table();
+	cuckoohash_map<std::string, void*>::locked_table::iterator it;
+	for(it=lt.begin();it!=lt.end();++it) {
+		std::string k = StringUtil::replaceFirstCopy(it->first, appName, "");
 		k = k.substr(k.find(";")+1);
-		reflector->destroy(objectsIter->second, k, appName);
+		reflector->destroy(it->second, k, appName);
 	}
-	objects[appName].clear();
+	objects.clear();
 }
 
 void FFEADContext::addBean(Bean& bean)
@@ -400,8 +391,9 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 		{
 			type = bean.clas;
 		}
+		std::string _k = bean.appName + bean.name + ";" + type;
 		if(servingContexts.find(bean.appName)!=servingContexts.end()
-				&& StringUtil::toLowerCopy(bean.scope)!="prototype" && objects.find(type)==objects.end())
+				&& StringUtil::toLowerCopy(bean.scope)!="prototype" && !objects.contains(type))
 		{
 			logger << ("Initializing Bean [appName = "+bean.appName+", name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)getBean(bean))) << std::endl;
 		}

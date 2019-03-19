@@ -66,7 +66,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		argus.push_back("HttpRequest*");
 		argus.push_back("HttpResponse*");
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getInstance()->ffeadContext.classInfoMap[req->getCntxt_name()][controller];
+		const ClassInfo& srv = ConfigurationData::getClassInfo(controller, req->getCntxt_name());
 		const Method& meth = srv.getMethod("service", argus);
 		if(meth.getMethodName()!="")
 		{
@@ -214,7 +214,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			args argus;
 			vals valus;
 
-			const ClassInfo& srv = ConfigurationData::getInstance()->ffeadContext.classInfoMap[req->getCntxt_name()][rft.clas];
+			const ClassInfo& srv = ConfigurationData::getClassInfo(rft.clas, req->getCntxt_name());
 			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft.clas, req->getCntxt_name());
 			if(_temp==NULL) {
 				logger << "Rest Controller Not Found" << std::endl;

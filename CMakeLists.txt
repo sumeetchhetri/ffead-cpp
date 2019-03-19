@@ -4,6 +4,7 @@ include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set( CMAKE_SKIP_BUILD_RPATH true )
 
 option(DEBUG "Generate with debug options" OFF)
 option(MOD_MEMORY "Enable Memory Cache module" ON)

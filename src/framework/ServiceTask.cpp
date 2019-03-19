@@ -500,7 +500,7 @@ void ServiceTask::handleWebsockOpen(WebSocketData* req) {
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
 		args argus;
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getInstance()->ffeadContext.classInfoMap[req->getCntxt_name()][className];
+		const ClassInfo& srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
 		Method meth = srv.getMethod("onOpen", argus);
 		if(meth.getMethodName()!="")
 		{
@@ -535,7 +535,7 @@ void ServiceTask::handleWebsockClose(WebSocketData* req) {
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
 		args argus;
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getInstance()->ffeadContext.classInfoMap[req->getCntxt_name()][className];
+		const ClassInfo& srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
 		Method methc = srv.getMethod("onClose", argus);
 		if(methc.getMethodName()!="")
 		{
@@ -570,7 +570,7 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
 		args argus;
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getInstance()->ffeadContext.classInfoMap[req->getCntxt_name()][className];
+		const ClassInfo& srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
 		argus.push_back("WebSocketData*");
 		valus.push_back(req);
 		argus.push_back("WebSocketData*");

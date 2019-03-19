@@ -80,7 +80,7 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 	argus.push_back("void*");
 	argus.push_back("HttpResponse*");
 	vals valus;
-	const ClassInfo& srv = ConfigurationData::getInstance()->ffeadContext.classInfoMap[req->getCntxt_name()][ele->getAttribute("controller")];
+	const ClassInfo& srv = ConfigurationData::getClassInfo(ele->getAttribute("controller"), req->getCntxt_name());
 	Method meth = srv.getMethod("onSubmit", argus);
 	if(meth.getMethodName()!="")
 	{

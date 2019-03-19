@@ -51,17 +51,18 @@ typedef std::map<std::string,Bean> beanMap;
 class FFEADContext {
 	Logger logger;
 	beanMap beans,injbns;
-	std::map<std::string, std::map<std::string, void*> > objects;
+	cuckoohash_map<std::string, void*> objects;
 	bool cleared;
 	Reflector* reflector;
-	std::map<std::string, std::map<std::string, ClassInfo> > classInfoMap;
 	friend class ControllerHandler;
 	friend class ExtHandler;
 	friend class FormHandler;
 	friend class SecurityHandler;
 	friend class FilterHandler;
 	friend class ServiceTask;
+	friend class ConfigurationData;
 public:
+
 	FFEADContext(const std::string&, const std::string& appName= "default");
 	FFEADContext();
 	virtual ~FFEADContext();

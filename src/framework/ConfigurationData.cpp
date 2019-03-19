@@ -51,6 +51,10 @@ bool ConfigurationData::isServingContext(const std::string& cntxtName) {
 			&& getInstance()->servingContexts[cntxtName];
 }
 
+const ClassInfo ConfigurationData::getClassInfo(const std::string& cs, const std::string& app) {
+	return getInstance()->ffeadContext.reflector->getClassInfo(cs, app);
+}
+
 void ConfigurationData::clearAllSingletonBeans() {
 	getInstance()->ffeadContext.clearAllSingletonBeans(getInstance()->servingContexts);
 }
