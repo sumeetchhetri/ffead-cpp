@@ -32,7 +32,7 @@ Dependencies
 ============
 Centos 7 (1810)
 	yum install -y --nogpgcheck tar centos-release-scl centos-release-scl-rh epel-release
-	yum install -y --nogpgcheck scl-utils devtoolset-7 cmake3 libcurl libcurl-devel openssl openssl-devel libuuid-devel hiredis hiredis-devel zlib zlib-devel libmemcached libmemcached-devel unixODBC* tar gzip wget nmap-ncat
+	yum install -y --nogpgcheck autoconf-archive scl-utils devtoolset-7 cmake3 libcurl libcurl-devel openssl openssl-devel libuuid-devel hiredis hiredis-devel zlib zlib-devel libmemcached libmemcached-devel unixODBC* tar gzip wget nmap-ncat
 	scl enable devtoolset-7 bash
 	mv /usr/bin/cc /usr/bin/cc_old
 	ln -s /opt/rh/devtoolset-7/root/usr/bin/gcc /usr/bin/cc
@@ -42,36 +42,30 @@ Centos 7 (1810)
 	    cd /tmp
 	    wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz
 	    tar xf mongo-c-driver-1.4.0.tar.gz
-	    cd mongo-c-driver-1.4.0/ && \
-	    ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup && \
-	    make && make install
+	    cd mongo-c-driver-1.4.0/ &&  ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup && make && make install
 
 OpenSuse 15 (Tumbleweed)
-	zypper in -y gcc gcc-c++ make cmake libcurl-devel hiredis-devel openssl openssl-devel libmemcached-devel zlib-devel libuuid-devel unixODBC unixODBC-devel unzip wget netcat-openbsd tar gzip
+	zypper in -y autoconf-archive gcc gcc-c++ make cmake libcurl-devel hiredis-devel openssl openssl-devel libmemcached-devel zlib-devel libuuid-devel unixODBC unixODBC-devel unzip wget netcat-openbsd tar gzip
 	#Download and install mongo c driver
 	    cd /tmp
 	    wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz
 	    tar xf mongo-c-driver-1.4.0.tar.gz
-	    cd mongo-c-driver-1.4.0/ && \
-	    ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup && \
-	    make && make install
+	    cd mongo-c-driver-1.4.0/ &&  ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup && make && make install
 
 Ubuntu 18.04.2
-	apt update -yqq && apt install -yqq gcc g++ cmake unzip libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev libmongoc-dev libhiredis-dev wget netcat
+	apt update -yqq && apt install -yqq autoconf-archive gcc g++ cmake unzip libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev libmongoc-dev libhiredis-dev wget netcat
 
 Arch Linux
-	pacman -Sy --noconfirm make clang unixodbc curl hiredis libmemcached mongo-c-driver cmake openssh libutil-linux wget gnu-netcat tar gzip zlib unzip gawk procps-ng
+	pacman -Sy --noconfirm autoconf-archive make clang unixodbc curl hiredis libmemcached mongo-c-driver cmake openssh libutil-linux wget gnu-netcat tar gzip zlib unzip gawk procps-ng
 
 Gentoo
 	emerge-webrsync
-	emerge dev-db/unixODBC curl dev-libs/hiredis libmemcached cmake wget netcat tar gzip zlib
+	emerge dev-db/unixODBC curl dev-libs/hiredis libmemcached cmake wget netcat tar gzip zlib sys-devel/autoconf-archive
 	#Download and install mongo c driver
 	    cd /tmp
 	    wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz
 	    tar xf mongo-c-driver-1.4.0.tar.gz
-	    cd mongo-c-driver-1.4.0/ && \
-	    ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup && \
-	    make && make install
+	    cd mongo-c-driver-1.4.0/ &&  ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup && make && make install
 
 MAC OS X - To install all dependencies on MAC OS X use,
 	#Make sure Xcode is installed or at-least the Command line tools are present
@@ -80,7 +74,7 @@ MAC OS X - To install all dependencies on MAC OS X use,
 	#Install homebrew first using,
 		ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)"
 	#Install autoconf libtool automake
-		brew install autoconf libtool automake
+		brew install autoconf libtool automake autoconf-archive
 	#Install cmake
 		brew install cmake
 	#Install openssl
@@ -93,21 +87,48 @@ MAC OS X - To install all dependencies on MAC OS X use,
 	    brew install libmemcached
 	
 BSD(x86/x86_64) - To install all dependencies on bsd systems use, 
-	#If you have not installed sources during install of freebsd then,
-	fetch -o /tmp ftp://ftp.freebsd.org/pub/`uname -s`/releases/`uname -m`/`uname -r | cut -d'-' -f1,2`/src.txz
-	tar -C / -xvf /tmp/src.txz
-	portsnap fetch extract
-	cd /usr/ports/devel/cmake && make install
-	cd /usr/ports/security/openssl && make install
-	cd /usr/ports/databases/unixODBC && make install
-	cd /usr/ports/databases/hiredis && make install
-	cd /usr/ports/databases/libmemcached && make install
-	cd /usr/ports/ftp/wget && make install
-	cd /usr/ports/misc/e2fsprogs-libuuid && make install
+	Using pkg, (Tested with https://app.vagrantup.com/freebsd/boxes/FreeBSD-12.0-RELEASE)
+		pkg install autoconf-archive wget openssl hiredis libmemcached e2fsprogs-libuuid cmake unzip perl5 unixODBC
+	Using ports,
+		#If you have not installed sources during install of freebsd then,
+		fetch -o /tmp ftp://ftp.freebsd.org/pub/`uname -s`/releases/`uname -m`/`uname -r | cut -d'-' -f1,2`/src.txz
+		tar -C / -xvf /tmp/src.txz
+		portsnap fetch extract
+		cd /usr/ports/devel/cmake && make install clean
+		cd /usr/ports/security/openssl && make install clean
+		cd /usr/ports/databases/unixODBC && make install clean
+		cd /usr/ports/databases/hiredis && make install clean
+		cd /usr/ports/databases/libmemcached && make install clean
+		cd /usr/ports/ftp/wget && make install clean
+		cd /usr/ports/misc/e2fsprogs-libuuid && make install clean
+		cd /usr/ports/lang/perl5.16 && make install clean
+	#Download and install mongo c driver
+	    cd /tmp
+	    wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz
+	    tar xf mongo-c-driver-1.4.0.tar.gz
+	    cd mongo-c-driver-1.4.0/ &&  ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup && make && make install
 
 SOLARIS - To install all dependencies on solaris(OpenCSW) use,
-	`pkgutil -y -i autoconf automake libtool unixodbc unixodbc_dev libssl1_0_0 libssl_dev`
-
+	`pkgutil -y -i autoconf automake libtool unixodbc unixodbc_dev libssl1_0_0 libssl_dev cmake curl wget unzip tar gzip zlib`
+	
+Windows (Incomplete)
+	Install msys from https://www.msys2.org/ (x86_64)
+	Open the msys shell and not windows mingw64 shell
+	pacman -S automake autoconf make mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-SDL mingw-w64-x86_64-SDL_ttf 
+	pacman -S msys/gcc 7.3.0-1 msys/cmake
+	pacman -S mingw64/mingw-w64-x86_64-cmake msys/libutil-linux-devel msys/openssl-devel msys/libcurl-devel 
+	pacman -S wget tar unzip mingw64/mingw-w64-x86_64-unixodbc
+	#Download and install mongo c driver
+	    Change the following section in mongo-c-driver-1.4.0/src/Makefile to 
+	     `if OS_WIN32
+			MONGOC_LIBADD_SHARED += -lws2_32 -lcrypt32
+		  endif`
+		Notice the addition of -lcrypt32
+	    cd /tmp
+	    wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz
+	    tar xf mongo-c-driver-1.4.0.tar.gz
+	    cd mongo-c-driver-1.4.0/ &&  ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup && make && make install
+	
 OTHERS - haven't tested on any other platform/os yet
 
 Installation Names

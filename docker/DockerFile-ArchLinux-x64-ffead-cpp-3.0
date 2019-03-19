@@ -1,6 +1,6 @@
 FROM archlinux/base
 
-RUN pacman -Sy --noconfirm make clang unixodbc curl hiredis libmemcached mongo-c-driver cmake openssh libutil-linux wget gnu-netcat tar gzip zlib unzip gawk procps-ng
+RUN pacman -Sy --noconfirm autoconf-archive make clang unixodbc curl hiredis libmemcached mongo-c-driver cmake openssh libutil-linux wget gnu-netcat tar gzip zlib unzip gawk procps-ng
 
 #Install libcuckoo headers
 WORKDIR /tmp

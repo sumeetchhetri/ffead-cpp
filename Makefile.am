@@ -185,7 +185,6 @@ dist-hook: clean
 #	$(distdir)/web/markers/src/autotools/.libs $(distdir)/web/markers/src/autotools/lib*
 
 install-data-hook:
-#	@echo === install-data-hook ===
 	-rm -rf ${prefix}
 	mkdir ${prefix}
 	mkdir ${prefix}/resources
@@ -208,19 +207,18 @@ install-data-hook:
 	cp -Rf rtdcf/* ${prefix}/rtdcf/
 	cp -Rf web/* ${prefix}/web
 	cp -Rf script/* ${prefix}/
-#cp -f web/default/src/autotools/.libs/*default* ${prefix}/lib
-#cp -f web/flexApp/src/autotools/.libs/*flexApp* ${prefix}/lib
-#cp -f web/oauthApp/src/autotools/.libs/*oauthApp* ${prefix}/lib
-#cp -f web/markers/src/autotools/.libs/*marker* ${prefix}/lib
 	-rm -f ${prefix}/lib/*.la ${prefix}/lib/*.lai
 	sed -i'' -e "s/TO_REPLACE_DEBUG/$(subst /,\/,@BUILD_DEBUG@)/" $(prefix)/resources/rundyn-configure.sh
 	sed -i'' -e "s/TO_REPLACE_CPPFLAGS/$(subst /,\/,@BUILD_CPPFLAGS@)/" $(prefix)/resources/rundyn-configure.sh
 	sed -i'' -e "s/TO_REPLACE_LDFLAGS/$(subst /,\/,@BUILD_LDFLAGS@)/" $(prefix)/resources/rundyn-configure.sh
 	sed -i'' -e "s/TO_REPLACE_AM_CXXFLAGS/$(subst /,\/,@BUILD_AM_CXXFLAGS@)/" $(prefix)/resources/rundyn-configure.sh
-#-rm -rf $(prefix)/web/default/src/ $(prefix)/web/flexApp/src/ $(prefix)/web/oauthApp/src/ $(prefix)/web/markers/src/
-		
-build-apps: install
 	cd tests/autotools && make
+if MOD_NGINXMOD
+	cd modules/nginx_mod_ffeadcpp/autotools && make install
+endif
+if MOD_APACHEMOD	
+	cd modules/apache_mod_ffeadcpp/autotools && make install
+endif
 	cp -f tests/autotools/.libs/tests tests/test.csv \
 		tests/testValues.prop tests/runTests.sh \
 		tests/*.pem tests/security.prop ${prefix}/tests
@@ -250,13 +248,12 @@ build-bin-dist-noinst:
 	
 build-apache-mod:
 if MOD_APACHEMOD
-	cd @GENERATE_APACHEMOD@ && make
+	cd modules/apache_mod_ffeadcpp && make install
 endif
 
 build-nginx-mod:
 if MOD_NGINXMOD
-	-mkdir tmp
-	./@GENERATE_NGINXMOD@/build-nginx.sh "$(prefix)" "@INCPATHS_NGINXMOD@" "@LIBPATHS_NGINXMOD@" "${abs_builddir}/@GENERATE_NGINXMOD@"
+	cd modules/nginx_mod_ffeadcpp && make install
 endif
 
 dist_noinst_SCRIPTS = autogen.sh

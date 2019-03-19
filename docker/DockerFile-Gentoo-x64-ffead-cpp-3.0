@@ -1,7 +1,7 @@
 FROM gentoo/stage3-amd64
 
 RUN emerge-webrsync
-RUN emerge dev-db/unixODBC curl dev-libs/hiredis libmemcached cmake wget netcat tar gzip zlib
+RUN emerge sys-devel/autoconf-archive dev-db/unixODBC curl dev-libs/hiredis libmemcached cmake wget netcat tar gzip zlib
 
 #Download and install mongo c driver
 WORKDIR /tmp

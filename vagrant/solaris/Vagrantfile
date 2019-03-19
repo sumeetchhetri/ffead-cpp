@@ -1,0 +1,21 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require_relative 'core'
+
+Vagrant.configure("2") do |config|
+
+  config.vm.network :forwarded_port, guest: 8080, host: 28080
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.ssh.shell = "sh"
+  
+  provider_virtualbox(config)
+  provider_libvirt(config)
+
+  config.ssh.insert_key = false
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
+  end
+  
+end

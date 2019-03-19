@@ -5,8 +5,9 @@ AC_INIT([ffead-cpp], [3.0], [sumeet.chhetri@gmail.com])
 AM_INIT_AUTOMAKE([no-define foreign])
 AC_CONFIG_SRCDIR([src/framework/ConfigurationData.h])
 AC_CONFIG_HEADERS([src/modules/common/AppDefines.h])
-m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
 AC_CONFIG_MACRO_DIR([m4])
+m4_include([m4/ax_cxx_compile_stdcxx.m4])
+m4_include([m4/ax_cxx_compile_stdcxx_17.m4])
 
 LT_INIT([static shared dlopen])
 
@@ -747,14 +748,14 @@ AM_CONDITIONAL(MOD_ALL, test "x$mod_all" = "xyes")
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
 
-STDCXX_11_SWITCH=
+STDCXX_SWITCH=
 
 dnl# Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_CXX
-AX_CXX_COMPILE_STDCXX_11(,mandatory)
+AX_CXX_COMPILE_STDCXX(17,,mandatory)
 
 #if test "x$GCC" = "xno"; then
 #	AC_MSG_ERROR([Please install GNU GCC/G++ to continue.])
@@ -768,6 +769,7 @@ fi
 if test "x$mod_memcached" = "xyes"; then
 	AC_CHECK_HEADER([libmemcached/memcached.h],,[AC_MSG_ERROR([libmemcached header files not found, please install libmemcached])])
 	AC_SEARCH_LIBS(memcached_pool, memcachedutil, [],[AC_MSG_ERROR([memcached library "libmemcachedutil" not found])])
+	AC_SEARCH_LIBS(memcached_add, memcached, [],[AC_MSG_ERROR([memcached library "libmemcached" not found])])
 fi
 
 AC_LANG_PUSH(C++)
@@ -857,7 +859,7 @@ AC_CHECK_HEADER([sys/select.h],
                      
                      
 OLD_CPP=$CPP
-CPP="$CXXCPP $STDCXX_11_SWITCH"
+CPP="$CXXCPP $STDCXX_SWITCH"
 AC_CHECK_HEADER([atomic],
                      [AC_DEFINE(USE_ATOMIC_H, [1], [Define to 1 if you have <atomic.h>.])],
                      [AC_DEFINE(USE_ATOMIC_H, [0], [atomic support not found])], [-])
@@ -950,7 +952,8 @@ if test "x$mod_gtm" = "xyes"; then
     AC_CHECK_LIB(gtmshr, main, , [AC_MSG_ERROR([Not found libgtmshr library])])
 fi
  
-AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"
+AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_SWITCH"
+AC_SUBST(STDCXX_SWITCH, [$STDCXX_SWITCH])
 # distribute additional compiler and linker flags among Makefiles
 # --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
 AC_SUBST([AM_CXXFLAGS])    
@@ -973,11 +976,16 @@ AC_SUBST(BUILD_LDFLAGS,[$LDFLAGS])
 AC_SUBST(BUILD_DEBUG,[$support_debug])
 
 AC_CONFIG_FILES([Makefile
-				src/autotools/libs/Makefile
-				src/autotools/bins/Makefile
-				tests/autotools/Makefile
-				modules/apache_mod_ffeadcpp/autotools/Makefile
-				web/default/src/autotools/Makefile
+                src/autotools/libs/Makefile
+                src/autotools/bins/Makefile
+                tests/autotools/Makefile])
+if test "x$generate_apache_module" = "xyes"; then
+AC_CONFIG_FILES([modules/apache_mod_ffeadcpp/autotools/Makefile])
+fi
+if test "x$generate_nginx_module" = "xyes"; then
+AC_CONFIG_FILES(modules/nginx_mod_ffeadcpp/autotools/Makefile[])
+fi
+AC_CONFIG_FILES([web/default/src/autotools/Makefile
 				web/flexApp/src/autotools/Makefile
 				web/oauthApp/src/autotools/Makefile
 				web/markers/src/autotools/Makefile
@@ -988,6 +996,7 @@ echo "Host: $host"
 echo "CPPFLAGS: $CPPFLAGS"
 echo "AM_CXXFLAGS: $AM_CXXFLAGS"
 echo "LDFLAGS: $LDFLAGS"
+echo "STDCXX_SWITCH: $STDCXX_SWITCH"
 echo "Debug mode: $support_debug"
 echo "Make Executable: $MAKE"
 echo "Generate Apache Module: $generate_apache_module"

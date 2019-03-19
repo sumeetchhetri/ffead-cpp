@@ -167,7 +167,7 @@ static char * ngx_http_ffeadcpp(ngx_conf_t *cf, void *post, void *data)
  * Main handler function of the module.
  */
 
-static ngx_http_read_input_data(ngx_http_request_t *r, std::string& data)
+static void ngx_http_read_input_data(ngx_http_request_t *r, std::string& data)
 {
 	if (r->request_body == NULL) {
 		return;

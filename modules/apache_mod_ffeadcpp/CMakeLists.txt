@@ -1,0 +1,12 @@
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -w")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -shared")
+execute_process(COMMAND bash -c "apxs2 -q INCLUDEDIR" OUTPUT_VARIABLE APXS_INCLUDEDIR)
+execute_process(COMMAND bash -c "apxs2 -q APR_INCLUDEDIR" OUTPUT_VARIABLE APXS_APR_INCLUDEDIR)
+include_directories("${APXS_INCLUDEDIR}")
+include_directories("${APXS_APR_INCLUDEDIR}")
+add_library(mod_ffeadcpp SHARED mod_ffeadcpp.cpp)
+set_property(TARGET mod_ffeadcpp PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(mod_ffeadcpp ffead-modules ffead-framework apr-1 aprutil-1 ${HAVE_CURLLIB} ${HAVE_SSLLIB} ${HAVE_MEMCACHEDLIB} ${HAVE_ODBCLIB} ${HAVE_MONGOCLIB} ${HAVE_BSONLIB} ${HAVE_ZLIB} ${HAVE_CRYPTOLIB})
+
+install(FILES ${PROJECT_SOURCE_DIR}/modules/apache_mod_ffeadcpp/libmod_ffeadcpp${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_SOURCE_DIR}/modules/apache_mod_ffeadcpp/ RENAME mod_ffeadcpplib${CMAKE_SHARED_LIBRARY_SUFFIX})
+install(CODE "execute_process(COMMAND bash -c \"apxs -i -n 'ffead_cpp_module' ${PROJECT_SOURCE_DIR}/modules/apache_mod_ffeadcpp/mod_ffeadcpplib${CMAKE_SHARED_LIBRARY_SUFFIX}\")")

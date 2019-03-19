@@ -45,8 +45,8 @@ class CommonUtils {
 	friend class ConfigurationHandler;
 	friend class CHServer;
 	static void addContext(std::string appName);
-	static void clearInstance();
 public:
+	static void clearInstance();
 	static int getProcessorCount();
 	static unsigned long long charArrayToULongLong(const std::string& l, int ind);
 	static unsigned long long charArrayToULongLong(const std::string& l);
