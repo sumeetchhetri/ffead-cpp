@@ -23,7 +23,7 @@ with my humble/honest effort.
 
 Starting version 3.0 ffead-cpp supports both **autoconf** and **cmake** for builds
 
-Official ffead-cpp pre-build images can be found at [dockerhub](https://cloud.docker.com/repository/docker/sumeetchhetri/ffead-cpp-3.0/tags)
+Official ffead-cpp pre-built images can be found at [dockerhub](https://cloud.docker.com/repository/docker/sumeetchhetri/ffead-cpp-3.0/tags)
 
 
 Features
