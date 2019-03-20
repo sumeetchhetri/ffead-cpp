@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  ffead-cpp:
+    depends_on:
+      - db
+    image: ffead-cpp-mongo-nginx:latest
+    container_name: ffead-cpp-mongo-nginx
+    restart: always
+    ports:
+      - "8080:8080"
+    networks: 
+      - backend
+
+  db:
+    image: mongo-for-ffeadcpp:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks: 
+      - backend
+
+networks:
+  backend:
+    driver: "bridge"

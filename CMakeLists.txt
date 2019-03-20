@@ -4,7 +4,10 @@ include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set( CMAKE_SKIP_BUILD_RPATH true )
+set(CMAKE_SKIP_BUILD_RPATH true)
+if(POLICY CMP0068)
+  cmake_policy(SET CMP0068 NEW)
+endif()
 
 option(DEBUG "Generate with debug options" OFF)
 option(MOD_MEMORY "Enable Memory Cache module" ON)

@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  ffead-cpp:
+    depends_on:
+      - db
+    image: ffead-cpp-mysql:latest
+    container_name: ffead-cpp-mysql
+    restart: always
+    ports:
+      - "8080:8080"
+    networks: 
+      - backend
+
+  db:
+    image: mysql-for-ffeadcpp:latest
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    networks: 
+      - backend
+
+networks:
+  backend:
+    driver: "bridge"

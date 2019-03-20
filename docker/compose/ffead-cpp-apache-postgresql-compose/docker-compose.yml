@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  ffead-cpp:
+    depends_on:
+      - db
+    image: ffead-cpp-postgresql-apache:latest
+    container_name: ffead-cpp-postgresql-apache
+    restart: always
+    ports:
+      - "8080:8080"
+    networks: 
+      - backend
+
+  db:
+    image: postgresql-for-ffeadcpp:latest
+    container_name: postgresql
+    ports:
+      - "5432:5432"
+    networks: 
+      - backend
+
+networks:
+  backend:
+    driver: "bridge"
