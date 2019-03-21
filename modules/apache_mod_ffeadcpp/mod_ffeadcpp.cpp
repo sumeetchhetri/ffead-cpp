@@ -128,14 +128,14 @@ static const command_rec mod_ffeadcpp_cmds[] =
 {
 		AP_INIT_TAKE1(
 				"FFEAD_CPP_PATH",
-				set_modffeadcpp_path,
+				(cmd_func)set_modffeadcpp_path,
 				NULL,
 				RSRC_CONF,
 				"FFEAD_CPP_PATH, the path to the ffead-server"
 		),
 		AP_INIT_TAKE1(
 				"DocumentRoot",
-				set_modffeadcpp_defpath,
+				(cmd_func)set_modffeadcpp_defpath,
 				NULL,
 				RSRC_CONF,
 				"DocumentRoot"
@@ -600,7 +600,7 @@ static int mod_ffeadcp_post_config_hanlder(apr_pool_t *pconf, apr_pool_t *plog, 
     return OK;
 }
 
-static void mod_ffeadcp_child_uninit()
+static apr_status_t mod_ffeadcp_child_uninit(void* arg)
 {
 #ifdef INC_SDORM
 	ConfigurationHandler::destroyDataSources();
@@ -682,7 +682,6 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 	ConfigurationHandler::initializeCaches();
 	logger << ("Initializing Caches done....") << std::endl;
 
-	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
 	logger << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();

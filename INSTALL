@@ -19,7 +19,7 @@ following software packages:
     o libcuckoo
 
 cd /tmp
-wget https://github.com/efficient/libcuckoo/archive/master.zip
+wget -q https://github.com/efficient/libcuckoo/archive/master.zip
 unzip master.zip
 rm -f master.zip
 cd /tmp/libcuckoo-master
@@ -85,6 +85,7 @@ MAC OS X - To install all dependencies on MAC OS X use,
 	    brew install libmongoc
 	    brew install hiredis
 	    brew install libmemcached
+	    brew reinstall -s httpd24
 	
 BSD(x86/x86_64) - To install all dependencies on bsd systems use, 
 	Using pkg, (Tested with https://app.vagrantup.com/freebsd/boxes/FreeBSD-12.0-RELEASE)

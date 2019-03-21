@@ -15,7 +15,7 @@ RUN rm -rf /tmp/mongo-c-driver-1.4.0
 
 #Install libcuckoo headers
 WORKDIR /tmp
-RUN wget https://github.com/efficient/libcuckoo/archive/master.zip
+RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
 RUN unzip master.zip
 RUN rm -f master.zip
 WORKDIR /tmp/libcuckoo-master
@@ -31,6 +31,7 @@ RUN unzip master.zip
 RUN rm -f master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 WORKDIR /tmp/ffead-cpp-src
+RUN chmod +x autogen.sh
 RUN ./autogen.sh
 RUN ./configure --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes CPPFLAGS="$CPPFLAGS -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0 -I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0" LDFLAGS="$LDFLAGS -L/usr/local/lib"
 RUN make install
@@ -42,8 +43,10 @@ WORKDIR /opt
 
 COPY *.sh  ./
 
+RUN chmod +x install_ffead-cpp-3.0.sh
 RUN ./install_ffead-cpp-3.0.sh
 
 WORKDIR /opt/ffead-cpp-3.0
 
+RUN chmod +x server.sh
 CMD ./server.sh

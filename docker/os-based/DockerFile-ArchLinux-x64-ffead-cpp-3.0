@@ -4,7 +4,7 @@ RUN pacman -Sy --noconfirm autoconf-archive make clang unixodbc curl hiredis lib
 
 #Install libcuckoo headers
 WORKDIR /tmp
-RUN wget https://github.com/efficient/libcuckoo/archive/master.zip
+RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
 RUN unzip master.zip
 RUN rm -f master.zip
 WORKDIR /tmp/libcuckoo-master
@@ -30,8 +30,10 @@ WORKDIR /opt
 
 COPY *.sh  ./
 
+RUN chmod +x install_ffead-cpp-3.0.sh
 RUN ./install_ffead-cpp-3.0.sh
 
 WORKDIR /opt/ffead-cpp-3.0
 
+RUN chmod +x server.sh
 CMD ./server.sh

@@ -102,12 +102,16 @@ void MongoDBConnectionPool::initEnv() {
 			poolmax += poolmin;
 	}
 
-	if(connectionString.at(connectionString.length()-1)=='?') {
+	/*if(connectionString.at(connectionString.length()-1)=='?') {
 		connectionString += "minPoolSize=" + CastUtil::lexical_cast<std::string>(poolmin);
 	} else {
 		connectionString += "&minPoolSize=" + CastUtil::lexical_cast<std::string>(poolmin);
+	}*/
+	if(connectionString.at(connectionString.length()-1)=='?') {
+		connectionString += "maxPoolSize=" + CastUtil::lexical_cast<std::string>(poolmax);
+	} else {
+		connectionString += "&maxPoolSize=" + CastUtil::lexical_cast<std::string>(poolmax);
 	}
-	connectionString += "&maxPoolSize=" + CastUtil::lexical_cast<std::string>(poolmax);
 
 	if(connTimeOut!="") {
 		connectionString += "&connectTimeoutMS=" + connTimeOut;

@@ -8,7 +8,7 @@ SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 
 cd $IROOT
 
-wget https://github.com/efficient/libcuckoo/archive/master.zip
+wget -q https://github.com/efficient/libcuckoo/archive/master.zip
 unzip master.zip
 rm -f master.zip
 cd libcuckoo-master
@@ -54,11 +54,7 @@ sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/markers/src/autotools/Makefile||g' configure.ac
 
-#./autogen.sh
-#./configure --enable-debug=no --enable-apachemod=yes --enable-nginxmod=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes CPPFLAGS="$CPPFLAGS -I${IROOT}/include/libmongoc-1.0 -I${IROOT}/include/libbson-1.0 -I${IROOT}/include/" LDFLAGS="$LDFLAGS -L${IROOT} -L${IROOT}/lib"
-#make install
 cmake -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
-#make install -j4
 
 cp resources/sample-odbcinst.ini ${IROOT}/odbcinst.ini
 cp resources/sample-odbc.ini ${IROOT}/odbc.ini
