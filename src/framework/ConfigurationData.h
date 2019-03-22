@@ -198,6 +198,9 @@ class ConfigurationData {
 	ThreadLocal httpResponse;
 	void* dlib;
 	void* ddlib;
+	bool embeddedServer;
+	bool apacheServer;
+	bool nginxServer;
 	static void clearInstance();
 	friend class ExtHandler;
 	friend class FilterHandler;
@@ -219,6 +222,13 @@ class ConfigurationData {
 	friend class SocketUtil;
 public:
 	//static std::atomic<int> counter;
+	static int getProcessId();
+	static bool isApacheServer();
+	static void setApacheServer(bool isApacheServer);
+	static bool isEmbeddedServer();
+	static void setEmbeddedServer(bool isEmbeddedServer);
+	static bool isNginxServer();
+	static void setNginxServer(bool isNginxServer);
 	static const ClassInfo getClassInfo(const std::string&, const std::string& app= "");
 	static bool isServingContext(const std::string& cntxtName);
 	static ConfigurationData* getInstance();

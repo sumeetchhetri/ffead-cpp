@@ -114,37 +114,21 @@ void TeBkRestController::updateCache() {
 	CacheInterface* cchi = CacheManager::getImpl();
 	DataSourceInterface* sqli = DataSourceManager::getImpl();
 
-	//In a multi-process scenario, the cache update section below should only execute once
-	//The "Updating Cache" key is only ever added to cache once by the first process which
-	//is able to complete the operation successfully. All other processes will get status as
-	//false and will never execute the prime cache section below.
-	//All processes first need to wait for the cache to be primed and only then can they start serving requests
-	bool status = cchi->add("Updating Cache", true, 200);
-	if(status) {
-		std::cout << "I will prime the cache, all others have to wait..." << std::endl;
-		Timer t;
-		t.start();
-		try {
-			std::string tbName = "world";
-			sqli->startSession(&tbName);
-			std::vector<TeBkWorld> wlist = sqli->getAll<TeBkWorld>();
-			sqli->endSession();
-			for (int c = 0; c < (int)wlist.size(); ++c) {
-				TeBkWorld& w = wlist.at(c);
-				cchi->setO(CastUtil::lexical_cast<std::string>(w.getId()), w);
-			}
-			delete sqli;
-			delete cchi;
-		} catch(const std::exception& e) {
-			delete sqli;
-			delete cchi;
-			throw e;
+	try {
+		std::string tbName = "world";
+		sqli->startSession(&tbName);
+		std::vector<TeBkWorld> wlist = sqli->getAll<TeBkWorld>();
+		sqli->endSession();
+		for (int c = 0; c < (int)wlist.size(); ++c) {
+			TeBkWorld& w = wlist.at(c);
+			cchi->setO(CastUtil::lexical_cast<std::string>(w.getId()), w);
 		}
-		cchi->remove("Updating Cache");
-		std::cout << "I am done priming the cache..." << "Time taken = " << t.elapsedMilliSeconds() << std::endl;
-	} else {
-		//In case of apache/nginx the other child processes need to wait for the cache to be primed
-		Thread::sSleep(10);
+		delete sqli;
+		delete cchi;
+	} catch(const std::exception& e) {
+		delete sqli;
+		delete cchi;
+		throw e;
 	}
 }
 

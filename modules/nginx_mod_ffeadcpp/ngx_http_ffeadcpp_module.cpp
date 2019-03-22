@@ -929,6 +929,8 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 	}
 #endif
 
+	ConfigurationData::setNginxServer(true);
+
 #ifdef INC_SDORM
 	logger << ("Initializing DataSources....") << std::endl;
 	ConfigurationHandler::initializeDataSources();

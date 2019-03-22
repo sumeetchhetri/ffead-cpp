@@ -1190,6 +1190,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 			ipport = "localhost:" + port;
 	}
 
+	ConfigurationData::setEmbeddedServer(true);
 	ConfigurationData::getInstance()->coreServerProperties.ip_address = ipport;
 
 	if(ConfigurationData::getInstance()->servingContexts.size()==0)

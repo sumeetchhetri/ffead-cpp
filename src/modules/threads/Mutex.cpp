@@ -111,3 +111,35 @@ void ReadWriteMutex::wlock() {
 void ReadWriteMutex::unlock() {
 	pthread_rwlock_unlock(&mut);
 }
+
+FileBasedLock::FileBasedLock(const std::string& lkFile) {
+	this->lkFile = lkFile;
+	fp = NULL;
+	remove(lkFile.c_str());
+}
+
+FileBasedLock::~FileBasedLock() {
+	remove(lkFile.c_str());
+}
+
+void FileBasedLock::lock() {
+	fl.l_type = F_WRLCK;
+	fl.l_len = 0;
+	fp = fopen(lkFile.c_str(), "w+");
+	if(fp == NULL)
+	{
+		throw std::runtime_error("Unable to create lock file");
+	}
+	if( fcntl(fileno(fp), F_SETLK, &fl) == -1)
+	{
+		throw std::runtime_error("Unable to acquire lock on file");
+	}
+}
+
+void FileBasedLock::unlock() {
+	if(fcntl(fileno(fp), F_UNLCK, &fl) < 0)
+	{
+		throw std::runtime_error("Unable to release lock on file");
+	}
+	fclose(fp);
+}

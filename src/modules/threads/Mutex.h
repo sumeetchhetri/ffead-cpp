@@ -25,6 +25,12 @@
 #include "AppDefines.h"
 #include <pthread.h>
 #include <atomic>
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include "string"
+#include "exception"
+#include <stdexcept>
 
 class Mutex {
 protected:
@@ -68,4 +74,14 @@ public:
 	void interrupt();
 };
 
+class FileBasedLock {
+	FILE *fp;
+	std::string lkFile;
+	struct flock fl;
+public:
+	FileBasedLock(const std::string& lkFile);
+	virtual ~FileBasedLock();
+	void lock();
+	void unlock();
+};
 #endif /* MUTEX_H_ */

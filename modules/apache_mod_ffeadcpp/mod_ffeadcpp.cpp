@@ -672,6 +672,8 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 	}
 #endif
 
+	ConfigurationData::setApacheServer(true);
+
 #ifdef INC_SDORM
 	logger << ("Initializing DataSources....") << std::endl;
 	ConfigurationHandler::initializeDataSources();
