@@ -46,9 +46,8 @@ Quickstart (Using cmake)
 ===========
 - Install cmake >= 3.8.2 and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
 - cmake .
-- make install -j4
+- make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- make install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - cd ffead-cpp-3.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
