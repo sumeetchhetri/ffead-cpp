@@ -1,12 +1,13 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([ffead-cpp], [2.0], [sumeet.chhetri@gmail.com])
+AC_INIT([ffead-cpp], [3.0], [sumeet.chhetri@gmail.com])
 AM_INIT_AUTOMAKE([no-define foreign])
 AC_CONFIG_SRCDIR([src/framework/ConfigurationData.h])
 AC_CONFIG_HEADERS([src/modules/common/AppDefines.h])
-m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
 AC_CONFIG_MACRO_DIR([m4])
+m4_include([m4/ax_cxx_compile_stdcxx.m4])
+m4_include([m4/ax_cxx_compile_stdcxx_17.m4])
 
 LT_INIT([static shared dlopen])
 
@@ -18,7 +19,7 @@ AS_HELP_STRING([--enable-debug],
 )
 if test "x$support_debug" = "xyes"; then
     AC_DEFINE(DEBUG, [], [set DEBUG mode])
-    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall -Wno-uninitialized -O2"
+    AM_CXXFLAGS="$AM_CXXFLAGS -g -Wall"
 else
     AC_DEFINE(NDEBUG, [], [unset DEBUG mode])
     AM_CXXFLAGS="$AM_CXXFLAGS -O2"
@@ -42,7 +43,8 @@ AS_HELP_STRING([--enable-nginxmod],
 AC_CANONICAL_HOST
 local_os_type="unknown"
 is_librt_available="yes"
-AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
+AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include -Wno-unknown-pragmas -Wno-delete-incomplete"
+CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 LDFLAGS="$LDFLAGS -L/usr/local/lib"
 case "$host" in
 *-cygwin*)
@@ -94,7 +96,7 @@ case "$host" in
     local_os_type="freebsd"
 
     dnl our hack for freebsd system
-    AM_CXXFLAGS="$AM_CXXFLAGS -pthread"
+
     LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-netbsd*)
@@ -122,9 +124,12 @@ case "$host" in
     local_os_type="osf"
     ;;
 *-darwin*)
-	is_librt_available="no"
+    is_librt_available="no"
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
     AC_DEFINE(OS_DARWIN, [], [set OS to darwin])
+    CPPFLAGS="$CPPFLAGS -I/usr/local/opt/openssl/include -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/opt/openssl/include -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
+    LDFLAGS="$LDFLAGS -L/usr/local/opt/openssl/lib -L/usr/local/opt/unixodbc/lib/ -L/usr/local/lib"
     local_os_type="darwin"
     ;;
 *-sco*)
@@ -134,6 +139,7 @@ case "$host" in
     AC_MSG_ERROR([We do not support SCO's products!])
 esac
 
+AC_DEFINE(BUILD_AUTOCONF, [], [set build system to autoconf/automake])
 
 ########################################################################################################
 ########################## CACHE MODULES, Memory, Redis, Memcached #####################################
@@ -263,7 +269,7 @@ fi
 
 AC_ARG_ENABLE(mod_sdormsql,
 AS_HELP_STRING([--enable-mod_sdormsql],
-               [enable mod_sdormsql, default: no]),
+               [enable mod_sdormsql, default: yes]),
 [case "${enableval}" in
              yes) mod_sdormsql=yes ;;
              no)  mod_sdormsql=no ;;
@@ -742,18 +748,35 @@ AM_CONDITIONAL(MOD_ALL, test "x$mod_all" = "xyes")
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
 
-STDCXX_11_SWITCH=
+STDCXX_SWITCH=
 
 dnl# Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_CXX
-AX_CXX_COMPILE_STDCXX_11(,mandatory)
+AX_CXX_COMPILE_STDCXX(17,,mandatory)
 
 #if test "x$GCC" = "xno"; then
 #	AC_MSG_ERROR([Please install GNU GCC/G++ to continue.])
 #fi
+
+if test "x$mod_rediscache" = "xyes"; then
+	AC_CHECK_HEADER([hiredis/hiredis.h],,[AC_MSG_ERROR([hiredis header files not found, please install hiredis])])
+	AC_SEARCH_LIBS(redisCommand, hiredis, [],[AC_MSG_ERROR([redis library "hiredis" not found])])
+fi
+
+if test "x$mod_memcached" = "xyes"; then
+	AC_CHECK_HEADER([libmemcached/memcached.h],,[AC_MSG_ERROR([libmemcached header files not found, please install libmemcached])])
+	AC_SEARCH_LIBS(memcached_pool, memcachedutil, [],[AC_MSG_ERROR([memcached library "libmemcachedutil" not found])])
+	AC_SEARCH_LIBS(memcached_add, memcached, [],[AC_MSG_ERROR([memcached library "libmemcached" not found])])
+fi
+
+AC_LANG_PUSH(C++)
+AC_CHECK_HEADER([libcuckoo/cuckoohash_map.hh],,[AC_MSG_ERROR([libcuckoo header files not found, please install libcuckoo])])
+AC_LANG_POP(C++)
+
+AC_SEARCH_LIBS(curl_easy_init, curl, [],[AC_MSG_ERROR([curl library "libcurl" not found])])
 
 AM_CONDITIONAL(MOD_APACHEMOD, test "x$generate_apache_module" = "xyes")
 if test "x$generate_apache_module" = "xyes"; then
@@ -788,7 +811,10 @@ if test "x$generate_apache_module" = "xyes"; then
 		AC_SUBST(APACHE_HTTPD_LIB,[ ])
 		AC_CHECK_PROG(APXS, apxs2, [apxs2], [apxs2 not found],[])
 		if test "x$APXS" = "xno" ; then
-		    AC_MSG_ERROR([Please install apache development tools (apxs/apxs2) to continue.])
+			AC_CHECK_PROG(APXS, apxs, [apxs], [apxs not found],[])
+			if test "x$APXS" = "xno" ; then
+			    AC_MSG_ERROR([Please install apache development tools (apxs/apxs2) to continue.])
+			fi
 		fi
 	fi
 else
@@ -833,12 +859,17 @@ AC_CHECK_HEADER([sys/poll.h],
 AC_CHECK_HEADER([sys/select.h],
                      [AC_DEFINE(USE_SELECT, [1], [Define to 1 if you have <sys/select.h>.])],
                      [AC_DEFINE(USE_SELECT, [0], [select support not found])])
-AC_CHECK_HEADER([atomic.h],
+                     
+                     
+OLD_CPP=$CPP
+CPP="$CXXCPP $STDCXX_SWITCH"
+AC_CHECK_HEADER([atomic],
                      [AC_DEFINE(USE_ATOMIC_H, [1], [Define to 1 if you have <atomic.h>.])],
-                     [AC_DEFINE(USE_ATOMIC_H, [0], [atomic support not found])])
-AC_CHECK_HEADER([cstdatomic.h],
+                     [AC_DEFINE(USE_ATOMIC_H, [0], [atomic support not found])], [-])
+AC_CHECK_HEADER([cstdatomic],
                      [AC_DEFINE(USE_CSTDATOMIC_H, [1], [Define to 1 if you have <cstdatomic.h>.])],
-                     [AC_DEFINE(USE_CSTDATOMIC_H, [0], [cstdatomic support not found])])
+                     [AC_DEFINE(USE_CSTDATOMIC_H, [0], [cstdatomic support not found])], [-])
+CPP=$OLD_CPP
 
 AC_CHECK_HEADER([openssl/ssl.h],,[AC_MSG_ERROR([ssl header not found])])
 
@@ -888,13 +919,23 @@ AC_CHECK_LIB(c, dlopen, ADD_LIBDL="", [AC_CHECK_LIB(dl, dlopen, ADD_LIBDL="-ldl"
 AC_CHECK_LIB(rt, clock_nanosleep, [AC_DEFINE(HAVE_CLOCK_NANOSLEEP, 1, [Define if you have clock_nanosleep()])], [])
 
 if test "x$mod_sdormsql" = "xyes"; then
-	AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+	if test "x$local_os_type" = "xfreebsd"; then
+		AC_DEFINE(HAVE_BSDUUIDINC, [], [set uuid lib to bsd type])
+		AC_CHECK_LIB(uuid, uuid_create, [], [AC_MSG_ERROR([uuid library not found])])
+	else
+		AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+	fi
 	AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then
-	AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+	if test "x$local_os_type" = "xfreebsd"; then
+		AC_DEFINE(HAVE_BSDUUIDINC, [], [set uuid lib to bsd type])
+		AC_CHECK_LIB(uuid, uuid_create, [], [AC_MSG_ERROR([uuid library not found])])
+	else
+		AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+	fi
     AC_CHECK_LIB(mongoc-1.0, mongoc_init, , [AC_MSG_ERROR([Not found libmongo library])])
     AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
 fi
@@ -914,7 +955,8 @@ if test "x$mod_gtm" = "xyes"; then
     AC_CHECK_LIB(gtmshr, main, , [AC_MSG_ERROR([Not found libgtmshr library])])
 fi
  
-AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"
+AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_SWITCH"
+AC_SUBST(STDCXX_SWITCH, [$STDCXX_SWITCH])
 # distribute additional compiler and linker flags among Makefiles
 # --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
 AC_SUBST([AM_CXXFLAGS])    
@@ -937,16 +979,25 @@ AC_SUBST(BUILD_LDFLAGS,[$LDFLAGS])
 AC_SUBST(BUILD_DEBUG,[$support_debug])
 
 AC_CONFIG_FILES([Makefile
-				src/autotools/Makefile
-				tests/autotools/Makefile
-				modules/apache_mod_ffeadcpp/autotools/Makefile
-WEB_APPS])
+                src/autotools/libs/Makefile
+                src/autotools/bins/Makefile
+                tests/autotools/Makefile])
+if test "x$generate_apache_module" = "xyes"; then
+AC_CONFIG_FILES([modules/apache_mod_ffeadcpp/autotools/Makefile])
+fi
+if test "x$generate_nginx_module" = "xyes"; then
+AC_CONFIG_FILES(modules/nginx_mod_ffeadcpp/autotools/Makefile[])
+fi
+AC_CONFIG_FILES([
+WEB_APPS
+])
 AC_OUTPUT
 
 echo "Host: $host"
 echo "CPPFLAGS: $CPPFLAGS"
 echo "AM_CXXFLAGS: $AM_CXXFLAGS"
 echo "LDFLAGS: $LDFLAGS"
+echo "STDCXX_SWITCH: $STDCXX_SWITCH"
 echo "Debug mode: $support_debug"
 echo "Make Executable: $MAKE"
 echo "Generate Apache Module: $generate_apache_module"

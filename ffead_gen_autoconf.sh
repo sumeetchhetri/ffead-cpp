@@ -91,10 +91,10 @@ controllers_create () {
 		if [ "${var}" != "" ]; then
 		uvar=`echo $var |tr '[:lower:]' '[:upper:]'`
 	    	cp -f $FFEAD_CPP_PATH/resources/ffead-gen/$FCNF_TYPE/TControllerHeader.t $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
-		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
-		sed -Ei "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
+		sed -i'' -e "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
+		sed -i'' -e "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
 		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/xml/TControllerDef.t $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
-		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
+		sed -i'' -e "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
 		APP_CLASSES+="\.\.\/${var}\.cpp "
 		CONTOLLER_CONF+="\\n\\t\\t<controller class=\"${var}\" path=\"*\" \/>"
 		fi
@@ -126,10 +126,10 @@ filters_create () {
 		if [ "${var}" != "" ]; then
 		uvar=`echo $var |tr '[:lower:]' '[:upper:]'`
 	    	cp -f $FFEAD_CPP_PATH/resources/ffead-gen/$FCNF_TYPE/TFilterHeader.t $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
-		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
-		sed -Ei "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
+		sed -i'' -e "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
+		sed -i'' -e "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
 		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/xml/TFilterDef.t $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
-		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
+		sed -i'' -e "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
 		APP_CLASSES+="\.\.\/${var}\.cpp "
 		FILTER_CONF+="\\n\\t\\t<filter class=\"${var}\" type=\"in\" \/>\\n"
 		FILTER_CONF+="\\t\\t<filter class=\"${var}\" type=\"out\" \/>\\n"
@@ -163,10 +163,10 @@ restapis_create () {
 		if [ "${var}" != "" ]; then
 		uvar=`echo $var |tr '[:lower:]' '[:upper:]'`
 	    	cp -f $FFEAD_CPP_PATH/resources/ffead-gen/$FCNF_TYPE/TRestApiHeader.t $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
-		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
-		sed -Ei "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
+		sed -i'' -e "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
+		sed -i'' -e "s/@TCLASSU@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/include/${var}.h
 		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/xml/TRestApiDef.t $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
-		sed -Ei "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
+		sed -i'' -e "s/@TCLASS@/${var}/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/${var}.cpp
 		APP_CLASSES+="\.\.\/${var}\.cpp "
 		lvar=`echo $var |tr '[:upper:]' '[:lower:]'`
 		RESTAPI_CONF+="\\n\\t\\t<restcontroller class=\"${var}\" path=\"\/$lvar\">\\n"
@@ -209,21 +209,29 @@ main () {
 		restapis_create
 		if [[ "$FCNF_TYPE" = "xml" ]]; then
 			cp -f $FFEAD_CPP_PATH/resources/ffead-gen/xml/application.xml $FFEAD_CPP_PATH/web/$APP_NAME/config
-			sed -Ei $"s/@CONTOLLER_CONF@/$CONTOLLER_CONF/g" $FFEAD_CPP_PATH/web/$APP_NAME/config/application.xml
-			sed -Ei $"s/@FILTER_CONF@/$FILTER_CONF/g" $FFEAD_CPP_PATH/web/$APP_NAME/config/application.xml
-			sed -Ei $"s/@RESTAPI_CONF@/$RESTAPI_CONF/g" $FFEAD_CPP_PATH/web/$APP_NAME/config/application.xml
+			sed -i'' -e $"s/@CONTOLLER_CONF@/$CONTOLLER_CONF/g" $FFEAD_CPP_PATH/web/$APP_NAME/config/application.xml
+			sed -i'' -e $"s/@FILTER_CONF@/$FILTER_CONF/g" $FFEAD_CPP_PATH/web/$APP_NAME/config/application.xml
+			sed -i'' -e $"s/@RESTAPI_CONF@/$RESTAPI_CONF/g" $FFEAD_CPP_PATH/web/$APP_NAME/config/application.xml
 		else
 			cp -f $FFEAD_CPP_PATH/resources/ffead-gen/markers/application.xml $FFEAD_CPP_PATH/web/$APP_NAME/config
 		fi
 		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/Makefile.am $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools
 		cp -Rf $FFEAD_CPP_PATH/public $FFEAD_CPP_PATH/web/$APP_NAME/
-		sed -Ei "s/@APP_NAME@/$APP_NAME/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools/Makefile.am
-		sed -Ei "s/@APP_CLASSES@/$APP_CLASSES/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools/Makefile.am
+		sed -i'' -e "s/@APP_NAME@/$APP_NAME/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools/Makefile.am
+		sed -i'' -e "s/@APP_CLASSES@/$APP_CLASSES/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools/Makefile.am
 		FAPP_LIBS=`echo $FAPP_LIBS|sed 's/ /\\ /g'`
-		sed -Ei "s/@FAPP_LIBS@/$FAPP_LIBS/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools/Makefile.am
-		WEB_APPS=`find $FFEAD_CPP_PATH/web -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -printf "%p\n"| rev |awk -F"./" '{print $0}'| cut -d '/' -f1 | rev| xargs -I {} printf '\tweb\/'{}"\/src\/autotools\/Makefile"`
+		sed -i'' -e "s/@FAPP_LIBS@/$FAPP_LIBS/g" $FFEAD_CPP_PATH/web/$APP_NAME/src/autotools/Makefile.am
+		#WEB_APPS=`find $FFEAD_CPP_PATH/web -maxdepth 1 -mindepth 1 -type d -not -path '*/\.*' -printf "%p\n"| rev |awk -F"./" '{print $0}'| cut -d '/' -f1 | rev| xargs -I {} printf '\tweb\/'{}"\/src\/autotools\/Makefile"`
 		cp -f $FFEAD_CPP_PATH/resources/ffead-gen/configure.ac.orig $FFEAD_CPP_PATH/configure.ac.template
-		sed -Ei "s/WEB_APPS/$WEB_APPS/g" $FFEAD_CPP_PATH/configure.ac.template
+		cd $FFEAD_CPP_PATH/web
+		for dir in *
+		do
+		    dir=${dir%*/}
+		    sed -i'' -e "s/WEB_APPS/    web\/${dir%*/}\/src\/autotools\/MakefileWEB_APPS/g" $FFEAD_CPP_PATH/configure.ac.template
+		    sed -i'' -e $'s/WEB_APPS/\\\nWEB_APPS/g' $FFEAD_CPP_PATH/configure.ac.template
+		done
+		sed -i'' -e $'s/WEB_APPS//g' $FFEAD_CPP_PATH/configure.ac.template
+		cd -
 		cp -f $FFEAD_CPP_PATH/configure.ac $FFEAD_CPP_PATH/configure.ac.old
 		cp -f $FFEAD_CPP_PATH/configure.ac.template $FFEAD_CPP_PATH/configure.ac
 		rm -f $FFEAD_CPP_PATH/configure.ac.template
