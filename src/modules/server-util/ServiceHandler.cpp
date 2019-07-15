@@ -72,21 +72,12 @@ void ServiceHandler::addCloseRequest(SocketInterface* si) {
 	//std::cout << "Closing connection " << si->getDescriptor() << " " << si->identifier << std::endl;
 }
 
-void ServiceHandler::submitServiceTask(Task* task) {
+void ServiceHandler::submitTask(Task* task) {
 	if(isThreadPerRequests) {
 		Thread* pthread = new Thread(&taskService, task);
 		pthread->execute();
 	} else {
 		spool.submit(task);
-	}
-}
-
-void ServiceHandler::submitWriteTask(Task* task) {
-	if(isThreadPerRequestw) {
-		Thread* pthread = new Thread(&taskService, task);
-		pthread->execute();
-	} else {
-		wpool.submit(task);
 	}
 }
 
@@ -159,29 +150,19 @@ void ServiceHandler::stop() {
 	if(spoolSize > 0) {
 		spool.joinAll();
 	}
-	if(wpoolSize > 0) {
-		wpool.joinAll();
-	}
 	mutex.lock();
 	run = false;
 	mutex.unlock();
 }
 
-ServiceHandler::ServiceHandler(const int& spoolSize, const int& wpoolSize) {
+ServiceHandler::ServiceHandler(const int& spoolSize) {
 	this->spoolSize = spoolSize;
-	this->wpoolSize = wpoolSize;
 	run = false;
 	isThreadPerRequests = false;
-	isThreadPerRequestw = false;
 	if(spoolSize <= 0) {
 		isThreadPerRequests = true;
 	} else {
 		spool.init(spoolSize);
-	}
-	if(wpoolSize <= 0) {
-		isThreadPerRequestw = true;
-	} else {
-		wpool.init(wpoolSize);
 	}
 }
 

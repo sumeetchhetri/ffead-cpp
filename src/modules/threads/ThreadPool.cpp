@@ -87,9 +87,9 @@ void ThreadPool::initializeThreads()
 	for (int i = 0; i < maxThreads; i++) {
 		PoolThread* thread = NULL;
 		if(prioritypooling || allowScheduledTasks) {
-			thread = new PoolThread(&wpool);
+			thread = new PoolThread(&wpool, i+1);
 		} else {
-			thread = new PoolThread();
+			thread = new PoolThread(i+1);
 		}
 		thread->execute();
 		tpool.push_back(thread);
@@ -105,11 +105,11 @@ void ThreadPool::joinAll() {
 		/*while (wpool->tasksPending()) {
 			Thread::sSleep(1);
 		}*/
-		for (unsigned int var = 0; var < tpool.size(); var++) {
+		for (int var = 0; var < maxThreads; var++) {
 			tpool.at(var)->stop();
 		}
 		joinComplete = true;
-		for (unsigned int var = 0; var < tpool.size(); var++) {
+		for (int var = 0; var < maxThreads; var++) {
 			joinComplete &= tpool.at(var)->isComplete();
 		}
 		Thread::sSleep(1);
@@ -117,10 +117,17 @@ void ThreadPool::joinAll() {
 }
 
 void ThreadPool::submit(Task* task) {
-	if(currentThread==(int)tpool.size()) {
-		currentThread = 0;
-	}
-	tpool.at(currentThread++)->addTask(task);
+	//https://stackoverflow.com/questions/33554255/c-thread-safe-increment-with-modulo-without-mutex-using-stdatomic
+	int index = currentThread ++;
+	int id = index % maxThreads;
+	// If size could wrap, then re-write the modulo value.
+	// oldValue keeps getting re-read.
+	// modulo occurs when nothing else updates it.
+	int oldValue = currentThread;
+	int newValue = oldValue % maxThreads;
+	while (!currentThread.compare_exchange_weak( oldValue, newValue, std::memory_order_relaxed ))
+		newValue = oldValue % maxThreads;
+	tpool.at(id)->addTask(task);
 }
 void ThreadPool::submit(Task* task, const int& priority) {
 	if(this->prioritypooling) {
@@ -144,7 +151,12 @@ void ThreadPool::schedule(Task* task, const long long& tunit, const int& type) {
 }
 
 void ThreadPool::submit(FutureTask* task) {
-	tpool.at(currentThread)->addTask(task);
+	if(currentThread==maxThreads) {
+		currentThread = 0;
+		tpool.at(0)->addTask(task);
+	} else {
+		tpool.at(currentThread++)->addTask(task);
+	}
 }
 void ThreadPool::submit(FutureTask* task, const int& priority) {
 	if(this->prioritypooling) {
@@ -173,7 +185,7 @@ ThreadPool::~ThreadPool() {
 	joinAll();
 	this->runFlag = false;
 	wpool.stop();
-	for (int i = 0; i <(int)tpool.size(); i++) {
+	for (int i = 0; i <maxThreads; i++) {
 		delete tpool.at(i);
 	}
 	logger << "Destroyed PoolThread Pool\n" << std::flush;

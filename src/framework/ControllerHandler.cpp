@@ -24,6 +24,8 @@
 
 bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const std::string& actUrl, std::string& className)
 {
+	Timer t(false);
+	t.start();
 	std::map<std::string, std::map<std::string, std::string> >& controllerObjectMap = ConfigurationData::getInstance()->controllerObjectMap;
 	std::map<std::string, std::string>& controllerMap = controllerObjectMap[cntxtName];
 	std::map<std::string, std::string>::iterator it;
@@ -31,14 +33,20 @@ bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const
 		if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
 		{
 			className = it->second;
+			t.end();
+			CommonUtils::tsCont1 += t.timerNanoSeconds();
 			return true;
 		}
 	}
+	t.end();
+	CommonUtils::tsCont1 += t.timerNanoSeconds();
 	return false;
 }
 
 bool ControllerHandler::getMappingForPath(const std::string& cntxtName, const std::string& actUrl, std::string& to)
 {
+	Timer t(false);
+	t.start();
 	std::map<std::string, std::map<std::string, std::string> >& mappingObjectMap = ConfigurationData::getInstance()->mappingObjectMap;
 	std::map<std::string, std::string>& mappingMap = mappingObjectMap[cntxtName];
 	std::map<std::string, std::string>::iterator it;
@@ -46,10 +54,25 @@ bool ControllerHandler::getMappingForPath(const std::string& cntxtName, const st
 		if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
 		{
 			to = it->second;
+			t.end();
+			CommonUtils::tsCont2 += t.timerNanoSeconds();
 			return true;
 		}
 	}
+	t.end();
+	CommonUtils::tsCont2 += t.timerNanoSeconds();
 	return false;
+}
+
+bool ControllerHandler::hasMappingExtension(std::string extwodot, HttpRequest* req) {
+	Timer t(false);
+	t.start();
+	bool f = ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->mappingextObjectMap.end()
+		&& ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].find(extwodot)
+			!=ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].end();
+	t.end();
+	CommonUtils::tsCont3 += t.timerNanoSeconds();
+	return f;
 }
 
 bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
@@ -61,6 +84,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 	std::string extwodot = ext!=""?ext.substr(1):"";
 	if(getControllerForPath(req->getCntxt_name(), req->getCurl(), controller))
 	{
+		Timer t(false);
+		t.start();
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("controller_"+controller, req->getCntxt_name());
 		args argus;
 		argus.push_back("HttpRequest*");
@@ -85,6 +110,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			isContrl = true;
 		}
 		ConfigurationData::getInstance()->ffeadContext.release(_temp, "controller_"+controller, req->getCntxt_name());
+		t.end();
+		CommonUtils::tsCont4 += t.timerNanoSeconds();
 	}
 	else if(getMappingForPath(req->getCntxt_name(), req->getCurl(), to))
 	{
@@ -102,8 +129,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		req->setFile(to);
 		logger << ("URL mapped from " + ext + " to " + to) << std::endl;
 	}
-	else if(ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->mappingextObjectMap.end()
-			&& ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].find(extwodot)!=ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].end())
+	else if(hasMappingExtension(extwodot, req))
 	{
 		std::string file = req->getFile();
 		std::string fili = file.substr(0,file.find_last_of(".")+1);
@@ -112,14 +138,16 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 	}
 	else if(ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->rstCntMap.end())
 	{
+		Timer t(false);
+		t.start();
+
 		resFuncMap& rstCntMap = ConfigurationData::getInstance()->rstCntMap[req->getCntxt_name()];
 		resFuncMap::iterator it;
 		RestFunction rft;
 		bool flag = false;
 		int prsiz = 0;
 		std::map<std::string, std::string> mapOfValues;
-		std::string hmeth = StringUtil::toUpperCopy(req->getMethod());
-		std::string rkey = hmeth+req->getCurl();
+		std::string rkey = req->getMethod()+req->getCurl();
 		if(rstCntMap.find(rkey)!=rstCntMap.end()) {
 			rft = rstCntMap[rkey][0];
 			flag = true;
@@ -184,7 +212,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					}
 
 					std::string lhs = StringUtil::toUpperCopy(ft.meth);
-					if(flag && lhs==hmeth)
+					if(flag && lhs==req->getMethod())
 					{
 
 						//logger << "Encountered rest controller url/method match" << std::endl;
@@ -209,8 +237,12 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				}
 			}
 		}
+		t.end();
+		CommonUtils::tsCont5 += t.timerNanoSeconds();
+
 		if(flag)
 		{
+			t.start();
 			args argus;
 			vals valus;
 
@@ -245,6 +277,10 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 
 			req->addHeaderValue(HttpRequest::ContentType, icont);
 
+			t.end();
+			CommonUtils::tsCont6 += t.timerNanoSeconds();
+
+			t.start();
 			for (int var = 0; var < prsiz; var++)
 			{
 				try
@@ -515,9 +551,12 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					return true;
 				}
 			}
+			t.end();
+			CommonUtils::tsCont7 += t.timerNanoSeconds();
 
 			try
 			{
+				t.start();
 				const Method& meth = srv.getMethod(rft.name, argus);
 				if(meth.getMethodName()!="" && !invValue)
 				{
@@ -584,6 +623,9 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					}
 					mpvecstreams.clear();
 					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+
+					t.end();
+					CommonUtils::tsCont8 += t.timerNanoSeconds();
 				}
 				else
 				{

@@ -9,27 +9,30 @@
 
 CommonUtils* CommonUtils::instance = NULL;
 std::string CommonUtils::BLANK = "";
-long long CommonUtils::tsPoll = 0;
-long long CommonUtils::tsPoll1 = 0;
-long long CommonUtils::tsProcess = 0;
-long long CommonUtils::tsRead = 0;
-long long CommonUtils::tsService = 0;
-long long CommonUtils::tsWrite = 0;
-long long CommonUtils::tsService1 = 0;
-long long CommonUtils::tsService2 = 0;
-long long CommonUtils::tsService3 = 0;
-long long CommonUtils::tsService4 = 0;
-long long CommonUtils::tsService5 = 0;
-long long CommonUtils::tsService6 = 0;
-long long CommonUtils::tsService7 = 0;
-long long CommonUtils::tsService8 = 0;
-long long CommonUtils::tsService9 = 0;
-long long CommonUtils::tsService10 = 0;
-long long CommonUtils::tsService11 = 0;
-long long CommonUtils::tsService12 = 0;
-long long CommonUtils::cSocks = 0;
-long long CommonUtils::cReqs = 0;
-long long CommonUtils::cResps = 0;
+std::atomic<long long> CommonUtils::tsPoll = 0;
+std::atomic<long long> CommonUtils::tsPoll1 = 0;
+std::atomic<long long> CommonUtils::tsProcess = 0;
+std::atomic<long long> CommonUtils::tsRead = 0;
+std::atomic<long long> CommonUtils::tsService = 0;
+std::atomic<long long> CommonUtils::tsWrite = 0;
+std::atomic<long long> CommonUtils::tsService1 = 0;
+std::atomic<long long> CommonUtils::tsService2 = 0;
+std::atomic<long long> CommonUtils::tsService3 = 0;
+std::atomic<long long> CommonUtils::tsService4 = 0;
+std::atomic<long long> CommonUtils::tsService5 = 0;
+std::atomic<long long> CommonUtils::tsService6 = 0;
+std::atomic<long long> CommonUtils::tsService7 = 0;
+std::atomic<long long> CommonUtils::tsCont1 = 0;
+std::atomic<long long> CommonUtils::tsCont2 = 0;
+std::atomic<long long> CommonUtils::tsCont3 = 0;
+std::atomic<long long> CommonUtils::tsCont4 = 0;
+std::atomic<long long> CommonUtils::tsCont5 = 0;
+std::atomic<long long> CommonUtils::tsCont6 = 0;
+std::atomic<long long> CommonUtils::tsCont7 = 0;
+std::atomic<long long> CommonUtils::tsCont8 = 0;
+std::atomic<long long> CommonUtils::cSocks = 0;
+std::atomic<long long> CommonUtils::cReqs = 0;
+std::atomic<long long> CommonUtils::cResps = 0;
 
 CommonUtils::CommonUtils() {
 }
@@ -339,4 +342,39 @@ std::vector<std::string> CommonUtils::getFiles(const std::string& cwd, const std
 	std::vector<std::string> files;
 	listFiles(files, cwd, suffix, isAbs);
 	return files;
+}
+
+void CommonUtils::printStats() {
+	Logger logger = LoggerFactory::getLogger("CommonUtils");
+	std::string a = ("Connections (Sockets: "+CastUtil::lexical_cast<std::string>(cSocks)+", Requests: "+CastUtil::lexical_cast<std::string>(cReqs)+", Responses: "+CastUtil::lexical_cast<std::string>(cResps)+")\n");
+	logger.info(a);
+	std::string b = ("E-E Total (EL_Pre: "+CastUtil::lexical_cast<std::string>(tsPoll1)+", EL_Wait: "+CastUtil::lexical_cast<std::string>(tsPoll)+", EL_Process: "+CastUtil::lexical_cast<std::string>(tsProcess)+", "
+			"Read: "+CastUtil::lexical_cast<std::string>(tsRead)+", Write: "+CastUtil::lexical_cast<std::string>(tsWrite)+", Service: "+CastUtil::lexical_cast<std::string>(tsService)+")\n");
+	logger.info(b);
+	if(cReqs>0) {
+		std::string c = ("E-E Average (EL_Pre: "+CastUtil::lexical_cast<std::string>(tsPoll1/cSocks)+", EL_Wait: "+CastUtil::lexical_cast<std::string>(tsPoll/cSocks)+", EL_Process: "+
+				CastUtil::lexical_cast<std::string>(tsProcess/cSocks)+", Read: "+CastUtil::lexical_cast<std::string>(tsRead/cReqs)+", Write: "+CastUtil::lexical_cast<std::string>(tsWrite/cResps)+", Service: "+
+				CastUtil::lexical_cast<std::string>(tsService/cReqs)+")\n");
+		logger.info(c);
+	}
+	std::string d = ("Service Total (Pre: "+CastUtil::lexical_cast<std::string>(tsService1)+", Cors: "+CastUtil::lexical_cast<std::string>(tsService2)+", Security: "+CastUtil::lexical_cast<std::string>(tsService3) +
+			", Filter: "+CastUtil::lexical_cast<std::string>(tsService4)+", Controller: "+CastUtil::lexical_cast<std::string>(tsService5)+", Ext: "+CastUtil::lexical_cast<std::string>(tsService6)+
+			", Post: "+CastUtil::lexical_cast<std::string>(tsService7)+")\n");
+	logger.info(d);
+	if(cReqs>0) {
+		std::string e = ("Service Average (Pre: "+CastUtil::lexical_cast<std::string>(tsService1/cReqs)+", Cors: "+CastUtil::lexical_cast<std::string>(tsService2/cReqs)+", Security: "+
+				CastUtil::lexical_cast<std::string>(tsService3/cReqs) + ", Filter: "+CastUtil::lexical_cast<std::string>(tsService4/cReqs)+", Controller: "+CastUtil::lexical_cast<std::string>(tsService5/cReqs)+
+				", Ext: "+CastUtil::lexical_cast<std::string>(tsService6/cReqs)+ ", Post: "+CastUtil::lexical_cast<std::string>(tsService7/cReqs)+")\n");
+		logger.info(e);
+	}
+	std::string f = ("Controller Total (Cont_Cond: "+CastUtil::lexical_cast<std::string>(tsCont1)+", Mapg_Cond: "+CastUtil::lexical_cast<std::string>(tsCont2)+", Ext_Cond: "+CastUtil::lexical_cast<std::string>(tsCont3) +
+			", Cont_Exec: "+CastUtil::lexical_cast<std::string>(tsCont4)+", Rest_Lkp: "+CastUtil::lexical_cast<std::string>(tsCont5)+", Rest_Ph1: "+CastUtil::lexical_cast<std::string>(tsCont6)+
+			", Rest_Ph2: "+CastUtil::lexical_cast<std::string>(tsCont7)+", Rest_Exec: "+CastUtil::lexical_cast<std::string>(tsCont8)+")\n");
+	logger.info(f);
+	if(cReqs>0) {
+		std::string g = ("Controller Average (Cont_Cond: "+CastUtil::lexical_cast<std::string>(tsCont1/cReqs)+", Mapg_Cond: "+CastUtil::lexical_cast<std::string>(tsCont2/cReqs)+", Ext_Cond: "+CastUtil::lexical_cast<std::string>(tsCont3/cReqs) +
+				", Cont_Exec: "+CastUtil::lexical_cast<std::string>(tsCont4/cReqs)+", Rest_Lkp: "+CastUtil::lexical_cast<std::string>(tsCont5/cReqs)+", Rest_Ph1: "+CastUtil::lexical_cast<std::string>(tsCont6/cReqs)+
+				", Rest_Ph2: "+CastUtil::lexical_cast<std::string>(tsCont7/cReqs)+", Rest_Exec: "+CastUtil::lexical_cast<std::string>(tsCont8/cReqs)+")\n");
+		logger.info(g);
+	}
 }

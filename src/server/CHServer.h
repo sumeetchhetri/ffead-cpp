@@ -179,7 +179,7 @@ public:
 	static SocketInterface* createSocketInterface(SOCKET);
 	static Logger& getLogger();
 	static void* dynamic_page_monitor(void* arg);
-	static void serve(std::string port, std::string ipaddr, int thrdpsiz, int wthrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber);
+	static void serve(std::string port, std::string ipaddr, int thrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber);
 	static int entryPoint(int vhostNum, bool isMain, std::string serverRootDirectory, std::string port, std::string ipaddr, std::vector<std::string> servedAppNames);
 };
 

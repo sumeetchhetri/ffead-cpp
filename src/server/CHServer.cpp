@@ -744,7 +744,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
    	if(sslEnabled=="true" || sslEnabled=="TRUE")
    		isSSLEnabled = true;
 
-   	int thrdpsiz = 0, wthrdpsiz = 2;
+   	int thrdpsiz = 0;
    	std::string thrdpreq = srprps["THRD_PREQ"];
    	if(thrdpreq=="true" || thrdpreq=="TRUE")
    	{
@@ -766,19 +766,6 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 				logger << "Invalid service thread pool size defined" << std::endl;
 				thrdpsiz = CommonUtils::getProcessorCount();
 			}
-		}
-	}
-   	thrdpreq = srprps["W_THRD_PSIZ"];
-	if(thrdpreq!="")
-	{
-		try
-		{
-			wthrdpsiz = CastUtil::lexical_cast<int>(thrdpreq);
-		}
-		catch(const std::exception& e)
-		{
-			logger << "Invalid writer thread pool size defined" << std::endl;
-			wthrdpsiz = 2;
 		}
 	}
    	std::string compileEnabled = srprps["DEV_MODE"];
@@ -1147,7 +1134,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 									CastUtil::lexical_cast<std::string>(vhi+1) + ")";
 							serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
 									CastUtil::lexical_cast<std::string>(vhi+1);
-							serve(vhostport, vhostname, thrdpsiz, wthrdpsiz, serverRootDirectory, srprps, vhi+1);
+							serve(vhostport, vhostname, thrdpsiz, serverRootDirectory, srprps, vhi+1);
 						}
 					#else
 						std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
@@ -1162,7 +1149,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		}
 
 		try {
-			serve(port, ipaddr, thrdpsiz, wthrdpsiz, serverRootDirectory, srprps, vhostNum);
+			serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, vhostNum);
 		} catch(const std::exception& e) {
 			logger << e.what() << std::endl;
 		}
@@ -1171,7 +1158,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	return 0;
 }
 
-void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wthrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber)
+void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber)
 {
 	std::string ipport;
 
@@ -1338,21 +1325,20 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 
 	HTTPResponseStatus::getStatusByCode(200);
 
-	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, thrdpsiz, wthrdpsiz);
+	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, thrdpsiz);
 	handler->start();
 
 	RequestReaderHandler reader(handler, sockfd);
 	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
 	reader.start();
 
-	//bool stats = false;
 
+	int counter = 0;
 	struct stat buffer;
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
-		//std::string lg = "Memory allocations waiting to be freed = " + CastUtil::lexical_cast<std::string>(ConfigurationData::counter);
-		//logger <<  lg << std::endl;
-		Thread::sSleep(5);
+		Thread::sSleep(10);
+		CommonUtils::printStats();
 	}
 
 	handler->stop();

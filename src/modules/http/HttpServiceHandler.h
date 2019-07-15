@@ -49,7 +49,7 @@ class HttpServiceHandler : public ServiceHandler {
 	void handleService(HandlerRequest* handlerRequest);
 	void handleWrite(HandlerRequest* handlerRequest);
 public:
-	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const int& wpoolSize);
+	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize);
 	virtual ~HttpServiceHandler();
 };
 

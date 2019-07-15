@@ -58,11 +58,8 @@ class ServiceHandler {
 	cuckoohash_map<long, bool> donelist;
 	bool run;
 	bool isThreadPerRequests;
-	bool isThreadPerRequestw;
 	int spoolSize;
-	int wpoolSize;
 	ThreadPool spool;
-	ThreadPool wpool;
 	bool addOpenRequest(SocketInterface* si);
 	void addCloseRequest(SocketInterface* si);
 	bool isAvailable(SocketInterface* si);
@@ -76,8 +73,7 @@ class ServiceHandler {
 	friend class HandlerRequest;
 	friend class HttpWriteTask;
 protected:
-	void submitServiceTask(Task* task);
-	void submitWriteTask(Task* task);
+	void submitTask(Task* task);
 	virtual void handleService(HandlerRequest* req)=0;
 	virtual void handleWrite(HandlerRequest* req)=0;
 public:
@@ -86,7 +82,7 @@ public:
 	void registerRead(HandlerRequest* hr);
 	void start();
 	void stop();
-	ServiceHandler(const int& spoolSize, const int& wpoolSize);
+	ServiceHandler(const int& spoolSize);
 	virtual ~ServiceHandler();
 };
 

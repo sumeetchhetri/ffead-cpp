@@ -591,6 +591,9 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 
 void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 {
+	Timer t1;
+	t1.start();
+
 	res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 	this->serverRootDirectory = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory;
 	try
@@ -696,6 +699,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		std::string ext = req->getExt();
 		long sessionTimeoutVar = ConfigurationData::getInstance()->coreServerProperties.sessionTimeout;
 
+		t1.end();
+		CommonUtils::tsService1 += t1.timerNanoSeconds();
+
+		t1.start();
 		bool isContrl = false;
 		try {
 			isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
@@ -703,7 +710,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			res->setHTTPResponseStatus(status);
 			isContrl = true;
 		}
+		t1.end();
+		CommonUtils::tsService2 += t1.timerNanoSeconds();
 
+		t1.start();
 		bool hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
 		if(!isContrl && hasSecurity)
 		{
@@ -713,7 +723,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				ext = req->getExt();
 			}
 		}
+		t1.end();
+		CommonUtils::tsService3 += t1.timerNanoSeconds();
 
+		t1.start();
 		bool hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
 		if(!isContrl && hasFilters)
 		{
@@ -725,7 +738,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			}
 			ext = req->getExt();
 		}
+		t1.end();
+		CommonUtils::tsService4 += t1.timerNanoSeconds();
 
+		t1.start();
 		if(!isContrl)
 		{
 			isContrl = ControllerHandler::handle(req, res, ext, reflector);
@@ -734,7 +750,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			}
 			ext = req->getExt();
 		}
+		t1.end();
+		CommonUtils::tsService5 += t1.timerNanoSeconds();
 
+		t1.start();
 		if(!isContrl)
 		{
 			isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
@@ -742,7 +761,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			{
 			}
 		}
+		t1.end();
+		CommonUtils::tsService6 += t1.timerNanoSeconds();
 
+		t1.start();
 		/*After going through the controller the response might be blank, just set the HTTP version*/
 		res->update(req);
 
@@ -804,6 +826,9 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		if(hasSecurity) {
 			storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
 		}
+
+		t1.end();
+		CommonUtils::tsService7 += t1.timerNanoSeconds();
 	}
 	catch(const std::exception& e)
 	{

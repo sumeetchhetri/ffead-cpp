@@ -23,7 +23,6 @@
 #include "ConfigurationData.h"
 
 ConfigurationData* ConfigurationData::instance = NULL;
-//std::atomic<int> ConfigurationData::counter(0);
 
 ConfigurationData::ConfigurationData() {
 	logger = LoggerFactory::getLogger("ConfigurationData");

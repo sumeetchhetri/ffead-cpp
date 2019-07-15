@@ -29,7 +29,7 @@ class SocketInterface {
 protected:
 	SocketUtil* sockUtil;
 	std::string buffer;
-	std::atomic<int> t;
+	std::atomic<long> t1;
 	int fd;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
@@ -138,8 +138,6 @@ public:
 			count = sockUtil->readData(MAXBUFLENM, temp);
 			if(count>0)
 			{
-				int tt = Timer::getTimestamp() - 1203700;
-				t = tt;
 				buffer.append(temp);
 			}
 			else if (count == -1 && errno == EAGAIN)

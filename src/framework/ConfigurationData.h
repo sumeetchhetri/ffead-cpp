@@ -221,7 +221,6 @@ class ConfigurationData {
 	friend class FFEADContext;
 	friend class SocketUtil;
 public:
-	//static std::atomic<int> counter;
 	static int getProcessId();
 	static bool isApacheServer();
 	static void setApacheServer(bool isApacheServer);

@@ -65,8 +65,7 @@ void RequestReaderHandler::registerSocketInterfaceFactory(const SocketInterfaceF
 }
 
 void RequestReaderHandler::addSf(SocketInterface* psi) {
-	int tt = Timer::getTimestamp() - 1203700;
-	psi->t = tt;
+	//psi->t1 = Timer::getCurrentTime();
 	psi->sockUtil->sel = &selector;
 	psi->setIdentifier(siIdentifierSeries++);
 	connections.insert(psi->getDescriptor(), psi);
@@ -112,7 +111,7 @@ void* RequestReaderHandler::handleTimeouts(void* inp) {
 			cuckoohash_map<int, SocketInterface*>::locked_table::iterator it;
 			for(it=lt.begin();it!=lt.end();++it)
 			{
-				int tt = (Timer::getTimestamp() - 1203700) + it->second->getTimeout();
+				/*int tt = (Timer::getTimestamp() - 1203700) + it->second->getTimeout();
 				if(it->second->t>=tt)
 				{
 					logger << "timedout connection " << it->second->getDescriptor() << " " << it->second->identifier << std::endl;
@@ -122,7 +121,7 @@ void* RequestReaderHandler::handleTimeouts(void* inp) {
 				else
 				{
 					it++;
-				}
+				}*/
 			}
 		}
 		Thread::sSleep(1);
@@ -138,8 +137,8 @@ void* RequestReaderHandler::handle(void* inp) {
 	socklen_t sin_size;
 	while(ins->isActive())
 	{
-		//Timer t0;
-		//t0.start();
+		Timer t;
+		t.start();
 
 		Timer cdt(false);
 
@@ -189,14 +188,13 @@ void* RequestReaderHandler::handle(void* inp) {
 				//ins->addToTimeoutSocks.push(rsi);
 			}
 		}
-		//t0.end();
-		//CommonUtils::tsPoll1 += t0.timerMilliSeconds();
+		t.end();
+		CommonUtils::tsPoll1 += t.timerNanoSeconds();
 
-		//Timer t1;
-		//t1.start();
+		t.start();
 		int num = ins->selector.getEvents();
-		//t1.end();
-		//CommonUtils::tsPoll += t1.timerMilliSeconds();
+		t.end();
+		CommonUtils::tsPoll += t.timerNanoSeconds();
 
 		if (num<=0)
 		{
@@ -206,8 +204,7 @@ void* RequestReaderHandler::handle(void* inp) {
 			continue;
 		}
 
-		Timer t2;
-		t2.start();
+		t.start();
 		for(int n=0;n<num;n++)
 		{
 			SOCKET descriptor = ins->selector.getDescriptor(n);
@@ -232,7 +229,7 @@ void* RequestReaderHandler::handle(void* inp) {
 						SocketInterface* sockIntf = ins->sf(newSocket);
 						ins->addSf(sockIntf);
 						//logger << "New Sif " << sockIntf->identifier << std::endl;
-						//CommonUtils::cSocks += 1;
+						CommonUtils::cSocks += 1;
 					}
 #else
 					sin_size = sizeof their_addr;
@@ -240,7 +237,7 @@ void* RequestReaderHandler::handle(void* inp) {
 					SocketInterface* sockIntf = ins->sf(newSocket);
 					ins->addSf(sockIntf);
 
-					//CommonUtils::cSocks += 1;
+					CommonUtils::cSocks += 1;
 #endif
 				}
 				else
@@ -252,7 +249,7 @@ void* RequestReaderHandler::handle(void* inp) {
 					}
 					SocketInterface* si = ins->connections.find(descriptor);
 					int pending = 1;
-					while(pending>0 && ins->shi->isAvailable(si))
+					while(pending>0)
 					{
 						void* context = NULL;
 						int reqPos = 0;
@@ -272,15 +269,15 @@ void* RequestReaderHandler::handle(void* inp) {
 						} else if(request!=NULL) {
 							//ins->selector.unRegisterForEvent(si->getDescriptor());
 							ins->shi->registerServiceRequest(request, si, context, reqPos, ins);
-							//CommonUtils::cReqs += 1;
+							CommonUtils::cReqs += 1;
 						}
 					}
 				}
 			}
 		}
 
-		//t2.end();
-		//CommonUtils::tsProcess += t2.timerMilliSeconds();
+		t.end();
+		CommonUtils::tsProcess += t.timerNanoSeconds();
 	}
 
 	while(ins->shi->run) {

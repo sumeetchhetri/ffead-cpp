@@ -7,8 +7,8 @@
 
 #include "HttpServiceHandler.h"
 
-HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize= 0, const int& wpoolSize= 0)
-	: ServiceHandler(spoolSize, wpoolSize) {
+HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize= 0)
+	: ServiceHandler(spoolSize) {
 	this->cntEncoding = cntEncoding;
 	this->f = f;
 }
@@ -22,7 +22,7 @@ void HttpServiceHandler::handleService(HandlerRequest* handlerRequest)
 	task->handlerRequest = handlerRequest;
 	task->service = this;
 	task->setCleanUp(true);
-	submitServiceTask(task);
+	submitTask(task);
 }
 
 void HttpServiceHandler::handleWrite(HandlerRequest* handlerRequest)
@@ -31,7 +31,7 @@ void HttpServiceHandler::handleWrite(HandlerRequest* handlerRequest)
 	task->handlerRequest = handlerRequest;
 	task->service = this;
 	task->setCleanUp(true);
-	submitWriteTask(task);
+	submitTask(task);
 }
 
 void HttpWriteTask::run() {
@@ -57,7 +57,7 @@ void HttpWriteTask::run() {
 		return;
 	}
 
-	//CommonUtils::cResps += 1;
+	CommonUtils::cResps += 1;
 	handlerRequest->getSif()->writeResponse(handlerRequest->getRequest(), handlerRequest->getResponse(), handlerRequest->getContext());
 
 	bool flag = handlerRequest->doneWithWrite();
@@ -94,15 +94,17 @@ HttpWriteTask::~HttpWriteTask() {
 }
 
 void HttpServiceTask::run() {
+	Timer t;
+	t.start();
+
 	if(handlerRequest->getSif()->isClosed()) {
 		handlerRequest->doneWithWrite();
 		handlerRequest->clearObjects();
 		delete handlerRequest;
+		t.end();
+		CommonUtils::tsService += t.timerNanoSeconds();
 		return;
 	}
-
-	//Timer t;
-	//t.start();
 
 	void* resp = NULL;
 	SocketInterface* switchedIntf = NULL;
@@ -198,6 +200,6 @@ void HttpServiceTask::run() {
 		service->switchReaders(handlerRequest, switchedIntf);
 	}
 
-	//t.end();
-	//CommonUtils::tsService += t.timerMilliSeconds();
+	t.end();
+	CommonUtils::tsService += t.timerNanoSeconds();
 }

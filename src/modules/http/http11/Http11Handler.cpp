@@ -8,9 +8,13 @@
 #include "Http11Handler.h"
 
 void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
-	//Timer t;
-	//t.start();
-	if(readFrom())return NULL;
+	Timer t;
+	t.start();
+	if(readFrom()) {
+		t.end();
+		CommonUtils::tsRead += t.timerNanoSeconds();
+		return NULL;
+	}
 	if(!isHeadersDone && buffer.find("\r\n\r\n")!=std::string::npos)
 	{
 		bytesToRead = 0;
@@ -102,12 +106,12 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		isHeadersDone = false;
 		void* temp = request;
 		request = NULL;
-		//t.end();
-		//CommonUtils::tsRead += t.timerMilliSeconds();
+		t.end();
+		CommonUtils::tsRead += t.timerNanoSeconds();
 		return temp;
 	}
-	//t.end();
-	//CommonUtils::tsRead += t.timerMilliSeconds();
+	t.end();
+	CommonUtils::tsRead += t.timerNanoSeconds();
 	return NULL;
 }
 
@@ -144,8 +148,8 @@ std::string Http11Handler::getProtocol(void* context) {
 }
 
 bool Http11Handler::writeResponse(void* req, void* res, void* context) {
-	//Timer t;
-	//t.start();
+	Timer t;
+	t.start();
 
 	HttpRequest* request = (HttpRequest*)req;
 	HttpResponse* response = (HttpResponse*)res;
@@ -157,8 +161,8 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 		}
 		delete response;
 		response = NULL;
-		//t.end();
-		//CommonUtils::tsWrite += t.timerMilliSeconds();
+		t.end();
+		CommonUtils::tsWrite += t.timerNanoSeconds();
 		return true;
 	}
 
@@ -201,8 +205,8 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 	}
 	delete response;
 	response = NULL;
-	//t.end();
-	//CommonUtils::tsWrite += t.timerMilliSeconds();
+	t.end();
+	CommonUtils::tsWrite += t.timerNanoSeconds();
 	return true;
 }
 void Http11Handler::onOpen(){}

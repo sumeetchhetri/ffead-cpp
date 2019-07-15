@@ -9,6 +9,7 @@
 #define COMMONUTILS_H_
 
 #include <dirent.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <dirent.h>
 #include "vector"
@@ -32,6 +33,8 @@
 #else
 #include <unistd.h>
 #endif
+#include "CastUtil.h"
+#include "LoggerFactory.h"
 
 
 class CommonUtils {
@@ -68,29 +71,33 @@ public:
 	static const std::string& getLocale(const std::string& abbrev);
 	static std::vector<std::string> getFiles(const std::string& cwd, const std::string& suffix, const bool& isAbs = true);
 	static void listFiles(std::vector<std::string>& files, const std::string& cwd, const std::string& suffix, const bool& isAbs = true);
-	static long long tsPoll;
-	static long long tsPoll1;
-	static long long tsProcess;
-	static long long tsRead;
-	static long long tsService;
-	static long long tsService1;
-	static long long tsService2;
-	static long long tsService3;
-	static long long tsService4;
-	static long long tsService5;
-	static long long tsService6;
-	static long long tsService7;
-	static long long tsService8;
-	static long long tsService9;
-	static long long tsService10;
-	static long long tsService11;
-	static long long tsService12;
-	static long long tsWrite;
-	static long long cSocks;
-	static long long cReqs;
-	static long long cResps;
+	static std::atomic<long long> tsPoll;
+	static std::atomic<long long> tsPoll1;
+	static std::atomic<long long> tsProcess;
+	static std::atomic<long long> tsRead;
+	static std::atomic<long long> tsWrite;
+	static std::atomic<long long> tsService;
+	static std::atomic<long long> tsService1;
+	static std::atomic<long long> tsService2;
+	static std::atomic<long long> tsService3;
+	static std::atomic<long long> tsService4;
+	static std::atomic<long long> tsService5;
+	static std::atomic<long long> tsService6;
+	static std::atomic<long long> tsService7;
+	static std::atomic<long long> tsCont1;
+	static std::atomic<long long> tsCont2;
+	static std::atomic<long long> tsCont3;
+	static std::atomic<long long> tsCont4;
+	static std::atomic<long long> tsCont5;
+	static std::atomic<long long> tsCont6;
+	static std::atomic<long long> tsCont7;
+	static std::atomic<long long> tsCont8;
+	static std::atomic<long long> cSocks;
+	static std::atomic<long long> cReqs;
+	static std::atomic<long long> cResps;
 	static CommonUtils* getInstance();
 	virtual ~CommonUtils();
+	static void printStats();
 };
 
 #endif /* COMMONUTILS_H_ */
