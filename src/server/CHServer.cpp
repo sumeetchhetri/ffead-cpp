@@ -662,14 +662,14 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	//pid_t parid = getpid();
 
 	#ifndef OS_MINGW
-	/*struct sigaction act;
-	memset (&act, '\0', sizeof(act));
-	act.sa_handler = siginthandler;
+	struct sigaction act;
+	sigemptyset(&act.sa_mask);
+	act.sa_handler = sigchld_handler_server;
 	act.sa_flags = SA_RESTART;
-	if (sigaction(SIGINT, &act, NULL) < 0) {
+	if (sigaction(SIGCHLD, &act, NULL) < 0) {
 		perror ("sigaction");
-		return 1;
-	}*/
+		exit(1);
+	}
 	//signal(SIGSEGV,signalSIGSEGV);
 	//signal(SIGFPE,signalSIGFPE);
 	(void) sigignore(SIGPIPE);
@@ -1071,6 +1071,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 						serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
 								CastUtil::lexical_cast<std::string>(var+1);
 						serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, var+1);
+						exit(0);
 					}
 				#else
 					std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " \"" + ipaddr + "\" " + port
@@ -1164,6 +1165,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 									serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
 											CastUtil::lexical_cast<std::string>(vhi+1);
 									serve(vhostport, vhostname, thrdpsiz, serverRootDirectory, srprps, vhi+1);
+									exit(0);
 								}
 							#else
 								std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
