@@ -17,7 +17,8 @@
 #include <sys/types.h>
 #include <time.h>
 #include <iostream>
-
+#define _GNU_SOURCE
+#include <sched.h>
 
 #if defined(OS_MINGW)
 #undef _WIN32_WINNT
@@ -129,6 +130,25 @@ typedef DWORD NUMEVENTS;
 #if defined(OS_DARWIN)
 #include <mach/clock.h>
 #include <mach/mach.h>
+
+#define SYSCTL_CORE_COUNT   "machdep.cpu.core_count"
+
+typedef struct cpu_set {
+  uint32_t    count;
+} cpu_set_t;
+
+static inline void
+CPU_ZERO(cpu_set_t *cs) { cs->count = 0; }
+int sched_getaffinity(pid_t pid, size_t cpu_size, cpu_set_t *cpu_set);
+int pthread_setaffinity_np(pthread_t thread, size_t cpu_size,
+                           cpu_set_t *cpu_set);
+
+static inline void
+CPU_SET(int num, cpu_set_t *cs) { cs->count |= (1 << num); }
+
+static inline int
+CPU_ISSET(int num, cpu_set_t *cs) { return (cs->count & (1 << num)); }
+
 
 #ifndef CLOCK_REALTIME
 #define CLOCK_REALTIME  0

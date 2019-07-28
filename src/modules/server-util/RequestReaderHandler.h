@@ -23,7 +23,6 @@
 #include <libcuckoo/cuckoohash_map.hh>
 #include "atomic"
 
-
 typedef SocketInterface* (*SocketInterfaceFactory) (SOCKET);
 
 class RequestReaderHandler : public ReaderSwitchInterface {
@@ -35,6 +34,7 @@ class RequestReaderHandler : public ReaderSwitchInterface {
 	SelEpolKqEvPrt selector;
 	std::atomic<bool> run;
 	std::atomic<int> complete;
+	bool isMain;
 	bool isNotRegisteredListener;
 	SOCKET listenerSock;
 	ServiceHandler* shi;
@@ -49,9 +49,9 @@ class RequestReaderHandler : public ReaderSwitchInterface {
 public:
 	void switchReaders(SocketInterface* prev, SocketInterface* next);
 	void registerRead(SocketInterface* sd);
-	void start();
+	void start(unsigned int cid);
 	void stop(std::string, int, bool);
-	RequestReaderHandler(ServiceHandler* shi, const SOCKET& listenerSock= INVALID_SOCKET);
+	RequestReaderHandler(ServiceHandler* shi, const bool& isMain, const SOCKET& listenerSock = INVALID_SOCKET);
 	void registerSocketInterfaceFactory(const SocketInterfaceFactory& f);
 	virtual ~RequestReaderHandler();
 };

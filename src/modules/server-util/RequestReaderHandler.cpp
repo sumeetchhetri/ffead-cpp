@@ -7,7 +7,7 @@
 
 #include "RequestReaderHandler.h"
 
-RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const SOCKET& listenerSock) {
+RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const bool& isMain, const SOCKET& listenerSock) {
 	this->shi = shi;
 	this->listenerSock = listenerSock;
 	this->isNotRegisteredListener = (listenerSock == INVALID_SOCKET);
@@ -15,6 +15,7 @@ RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const SOCKET& li
 	this->siIdentifierSeries = 1;
 	this->sf = NULL;
 	this->complete = 0;
+	this->isMain = isMain;
 }
 
 void RequestReaderHandler::switchReaders(SocketInterface* prev, SocketInterface* next) {
@@ -25,7 +26,7 @@ void RequestReaderHandler::registerRead(SocketInterface* si) {
 	selector.registerForEvent(si->getDescriptor());
 }
 
-void RequestReaderHandler::start() {
+void RequestReaderHandler::start(unsigned int cid) {
 	if(run) {
 		return;
 	}
@@ -33,7 +34,8 @@ void RequestReaderHandler::start() {
 		run = true;
 		selector.initialize(listenerSock, -1);
 		Thread* pthread = new Thread(&handle, this);
-		pthread->execute();
+		pthread->execute(cid);
+
 		//Thread* pthread1 = new Thread(&handleTimeouts, this);
 		//pthread1->execute();
 	}
@@ -74,12 +76,10 @@ void RequestReaderHandler::addSf(SocketInterface* psi) {
 		//addToTimeoutSocks.push(psi);
 	}
 	selector.registerForEvent(psi->getDescriptor());
-	shi->addOpenRequest(psi);
 	psi->onOpen();
 }
 
 RequestReaderHandler::~RequestReaderHandler() {
-	//stop();
 }
 
 void* RequestReaderHandler::handleTimeouts(void* inp) {
@@ -280,27 +280,29 @@ void* RequestReaderHandler::handle(void* inp) {
 		CommonUtils::tsProcess += t.timerNanoSeconds();
 	}
 
-	while(ins->shi->run) {
-		Thread::mSleep(100);
-	}
-
 	SocketInterface* si;
-	bool isPendingSocks = false;
-	while(ins->pendingSocks.try_dequeue(si))
-	{
-		isPendingSocks = true;
-		ins->shi->donelist.insert(si->identifier, true);
-		si->close();
-		//logger << "Delete Sif " << si->identifier << std::endl;
-		delete si;
-	}
-	auto lt = ins->connections.lock_table();
-	cuckoohash_map<int, SocketInterface*>::locked_table::iterator it;
-	for(it=lt.begin();it!=lt.end();++it) {
-		if(!isPendingSocks || !ins->shi->donelist.find(it->second->identifier)) {
-			it->second->close();
-			//logger << "Delete Sif " << it->second->identifier << std::endl;
-			delete it->second;
+	if(ins->isMain) {
+		while(ins->shi->run) {
+			Thread::mSleep(100);
+		}
+
+		bool isPendingSocks = false;
+		while(ins->pendingSocks.try_dequeue(si))
+		{
+			isPendingSocks = true;
+			ins->shi->donelist.insert(si->identifier, true);
+			si->close();
+			//logger << "Delete Sif " << si->identifier << std::endl;
+			delete si;
+		}
+		auto lt = ins->connections.lock_table();
+		cuckoohash_map<int, SocketInterface*>::locked_table::iterator it;
+		for(it=lt.begin();it!=lt.end();++it) {
+			if(!isPendingSocks || !ins->shi->donelist.find(it->second->identifier)) {
+				it->second->close();
+				//logger << "Delete Sif " << it->second->identifier << std::endl;
+				delete it->second;
+			}
 		}
 	}
 	ins->connections.clear();

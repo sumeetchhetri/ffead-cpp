@@ -1158,6 +1158,21 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	return 0;
 }
 
+//Copied from https://github.com/awgn/speedcore/blob/master/speedcore.cpp
+unsigned int CHServer::hardware_concurrency()
+{
+    auto proc = []() -> int {
+        std::ifstream cpuinfo("/proc/cpuinfo");
+        return std::count(std::istream_iterator<std::string>(cpuinfo),
+                          std::istream_iterator<std::string>(),
+                          std::string("processor"));
+    };
+
+    auto hc = std::thread::hardware_concurrency();
+    return hc ? hc : proc();
+}
+
+
 void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber)
 {
 	std::string ipport;
@@ -1325,13 +1340,18 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	HTTPResponseStatus::getStatusByCode(200);
 
-	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, thrdpsiz);
+	unsigned int nthreads = hardware_concurrency();
+	std::vector<RequestReaderHandler*> handlers;
+
+	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, nthreads-2);
 	handler->start();
 
-	RequestReaderHandler reader(handler, sockfd);
-	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
-	reader.start();
-
+	for(unsigned int i=0;i<nthreads;++i) {
+		RequestReaderHandler* reader = new RequestReaderHandler(handler, i==0?true:false, sockfd);
+		reader->registerSocketInterfaceFactory(&CHServer::createSocketInterface);
+		reader->start(i);
+		handlers.push_back(reader);
+	}
 
 	int counter = 0;
 	struct stat buffer;
@@ -1341,14 +1361,15 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		CommonUtils::printStats();
 	}
 
-	handler->stop();
-
-	std::string ip = ipport.substr(0, ipport.find(":"));
-	reader.stop(ip, CastUtil::lexical_cast<int>(port), isSSLEnabled);
+	for(unsigned int i=0;i<nthreads;++i) {
+		std::string ip = ipport.substr(0, ipport.find(":"));
+		handlers.at(i)->stop(ip, CastUtil::lexical_cast<int>(port), isSSLEnabled);
+		delete handlers.at(i);
+	}
 
 	close(sockfd);
 
-	delete (HttpServiceHandler*)handler;
+	delete (HttpServiceHandler)handler;
 
 #ifdef INC_SDORM
 	ConfigurationHandler::destroyDataSources();

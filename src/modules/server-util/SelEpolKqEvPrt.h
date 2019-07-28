@@ -178,7 +178,7 @@ public:
 	int getEvents();
 	SOCKET getDescriptor(const SOCKET& index);
 	bool isListeningDescriptor(const SOCKET& descriptor);
-	bool registerForEvent(const SOCKET& descriptor);
+	bool registerForEvent(const SOCKET& descriptor, const bool& isListeningSock = false);
 	bool unRegisterForEvent(const SOCKET& descriptor);
 	void reRegisterServerSock();
 	bool isInvalidDescriptor(const SOCKET& index);

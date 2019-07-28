@@ -30,6 +30,9 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 #if USE_EPOLL == 1
 	epoll_handle = -1;
 #endif
+#if USE_KQUEUE == 1
+	kq = -1;
+#endif
 }
 
 SelEpolKqEvPrt::~SelEpolKqEvPrt() {
@@ -96,7 +99,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 		return;
 	#endif
 	#if !defined(USE_WIN_IOCP)
-		if(sockfd>0)registerForEvent(sockfd);
+		if(sockfd>0)registerForEvent(sockfd, true);
 	#endif
 }
 
@@ -343,7 +346,7 @@ bool SelEpolKqEvPrt::isListeningDescriptor(const SOCKET& descriptor)
 	return false;
 }
 
-bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor)
+bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor, const bool& isListeningSock)
 {
 	//#ifndef USE_WIN_IOCP
 		#ifdef OS_MINGW
@@ -381,10 +384,22 @@ bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor)
 	#elif defined USE_EPOLL
 		struct epoll_event ev;
 		memset(&ev, 0, sizeof(ev));
-		#ifdef USE_EPOLL_LT
-			ev.events = EPOLLIN | EPOLLPRI;
+		#if defined(EPOLLEXCLUSIVE)
+			if(isListeningSock) {
+				ev.events = EPOLLIN | EPOLLPRI | EPOLLEXCLUSIVE;
+			} else {
+				#ifdef USE_EPOLL_LT
+					ev.events = EPOLLIN | EPOLLPRI;
+				#else
+					ev.events = EPOLLIN | EPOLLET;
+				#endif
+			}
 		#else
-			ev.events = EPOLLIN | EPOLLET;
+			#ifdef USE_EPOLL_LT
+				ev.events = EPOLLIN | EPOLLPRI;
+			#else
+				ev.events = EPOLLIN | EPOLLET;
+			#endif
 		#endif
 		ev.data.fd = descriptor;
 		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, descriptor, &ev) < 0)

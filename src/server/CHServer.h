@@ -139,6 +139,9 @@
 #include "Http2Handler.h"
 #include "Http11Handler.h"
 #include "HttpServiceHandler.h"
+#include <thread>
+#include <algorithm>
+#include <iterator>
 
 //#define CA_LIST "root.pem"
 #define HOST1	"localhost"
@@ -175,6 +178,7 @@ class CHServer {
 	static int techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize;
 	static Logger logger;
 	static HttpServiceTask* httpServiceFactoryMethod();
+	unsigned int hardware_concurrency();
 public:
 	static SocketInterface* createSocketInterface(SOCKET);
 	static Logger& getLogger();

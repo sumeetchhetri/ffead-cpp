@@ -110,13 +110,22 @@ void Thread::wait() {
 	pthread_mutex_unlock(&mut);
 }
 
-void Thread::execute() {
+void Thread::execute(int cid) {
 	if(pthread_create(&pthread, NULL, _service, this->threadFunctor)) {
 		perror("pthread_create");
 		throw std::runtime_error("Error Creating pthread");
 	}
 	if(isDetached) {
 		pthread_detach(pthread);
+	}
+
+	if(cid>=0) {
+		cpu_set_t cpuset;
+		CPU_ZERO(&cpuset);
+		CPU_SET(cid, &cpuset);
+		if (pthread_setaffinity_np(pthread, sizeof(cpuset), &cpuset) != 0) {
+			//throw std::runtime_error("pthread_setaffinity_np");
+		}
 	}
 }
 
