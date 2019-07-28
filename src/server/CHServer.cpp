@@ -1073,6 +1073,16 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 						serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, var+1);
 						exit(0);
 					}
+					else
+					{
+						serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
+								CastUtil::lexical_cast<std::string>(var+1);
+						struct stat buffer;
+						while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
+						{
+							Thread::sSleep(10);
+						}
+					}
 				#else
 					std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " \"" + ipaddr + "\" " + port
 							+ " \"\" " + CastUtil::lexical_cast<std::string>(var+1);
@@ -1166,6 +1176,16 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 											CastUtil::lexical_cast<std::string>(vhi+1);
 									serve(vhostport, vhostname, thrdpsiz, serverRootDirectory, srprps, vhi+1);
 									exit(0);
+								}
+								else
+								{
+									serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
+											CastUtil::lexical_cast<std::string>(vhi+1);
+									struct stat buffer;
+									while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
+									{
+										Thread::sSleep(10);
+									}
 								}
 							#else
 								std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
