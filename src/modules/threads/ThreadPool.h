@@ -39,7 +39,7 @@ class ThreadPool {
 	TaskPool wpool;
 	bool prioritypooling;
 	bool runFlag;
-	void initializeThreads();
+	void initializeThreads(const bool& setAffinity);
 	ConditionMutex m_mutex;
 	bool joinComplete;
 	void initPointers();
@@ -47,7 +47,7 @@ public:
 	ThreadPool(const int&, const int&, const int&);
 	ThreadPool(const int&, const bool& allowScheduledTasks = false);
 	ThreadPool();
-	void init(const int&);
+	void init(const int& maxThreads, const bool& setAffinity);
 	void joinAll();
 	void submit(Task *task, const int& priority);
 	void submit(Task *task);

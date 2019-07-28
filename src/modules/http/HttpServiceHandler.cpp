@@ -192,7 +192,11 @@ void HttpServiceTask::run() {
 
 	//std::cout << "\n\nwriting response " << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << std::endl;
 	//handlerRequest->getSif()->writeResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext());
-	service->registerWriteRequest(handlerRequest, resp);
+
+	//service->registerWriteRequest(handlerRequest, resp);
+	CommonUtils::cResps += 1;
+	handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->getResponse(), handlerRequest->getContext(), handlerRequest->reqPos);
+
 	//service->registerRead(handlerRequest);
 	//std::cout << "done writing response " << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << std::endl << std::endl;
 	if(switchedIntf!=NULL)

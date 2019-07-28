@@ -1397,9 +1397,9 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	HTTPResponseStatus::getStatusByCode(200);
 
-	//unsigned int nthreads = hardware_concurrency();
+	unsigned int nthreads = hardware_concurrency();
 
-	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, 2);
+	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, nthreads);
 	handler->start();
 
 	RequestReaderHandler* reader = new RequestReaderHandler(handler, true, sockfd);

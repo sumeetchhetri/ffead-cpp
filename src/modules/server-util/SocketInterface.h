@@ -19,6 +19,28 @@
 #elif defined(IS_SENDFILE)
 #include <sys/sendfile.h>
 #endif
+#include "set"
+
+class SocketInterface;
+
+class ResponseTask {
+	void* request;
+	void* context;
+	void* response;
+	int reqPos;
+	friend class SocketInterface;
+public:
+	ResponseTask(void* request, void* response, void* context, int reqPos) {
+		this->request = request;
+		this->response = response;
+		this->context = context;
+		this->reqPos = reqPos;
+	}
+	bool operator< (const ResponseTask& t) const
+	{
+		return reqPos < t.reqPos;
+	}
+};
 
 class SocketInterface {
 	friend class RequestReaderHandler;
@@ -26,13 +48,34 @@ class SocketInterface {
 	friend class HandlerRequest;
 	friend class HttpWriteTask;
 	friend class HttpServiceTask;
+	Mutex m;
 protected:
 	SocketUtil* sockUtil;
 	std::string buffer;
 	std::atomic<long> t1;
+	std::set<ResponseTask> wtasks;
 	int fd;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
+	void pushResponse(void* request, void* response, void* context, int reqPos) {
+		if(isCurrentRequest(reqPos)) {
+			endRequest();
+			writeResponse(request, response, context);
+		} else {
+			m.lock();
+			std::set<ResponseTask>::iterator it = wtasks.begin();
+			ResponseTask& t = *it;
+			while(isCurrentRequest(t.reqPos)) {
+				endRequest();
+				writeResponse(t.request, t.response, t.context);
+				wtasks.erase(it);
+				it = wtasks.begin();
+				t = *it;
+			}
+			wtasks.insert(ResponseTask(request, response, context, reqPos));
+			m.unlock();
+		}
+	}
 	void init(const SOCKET& fd) {
 		reqPos = 0;
 		current = 0;

@@ -39,7 +39,7 @@ ThreadPool::ThreadPool()
 	initPointers();
 }
 
-void ThreadPool::init(const int& maxThreads)
+void ThreadPool::init(const int& maxThreads, const bool& setAffinity)
 {
 	if(inited)return;
 	currentThread = 0;
@@ -49,7 +49,7 @@ void ThreadPool::init(const int& maxThreads)
 	this->maxThreads = maxThreads;
 	joinComplete = false;
 	prioritypooling = false;
-	initializeThreads();
+	initializeThreads(setAffinity);
 	inited = true;
 }
 
@@ -75,10 +75,10 @@ ThreadPool::ThreadPool(const int& maxThreads, const bool& allowScheduledTasks /*
 	joinComplete = false;
 	prioritypooling = false;
 	this->allowScheduledTasks = allowScheduledTasks;
-	initializeThreads();
+	initializeThreads(-1);
 }
 
-void ThreadPool::initializeThreads()
+void ThreadPool::initializeThreads(const bool& setAffinity)
 {
 	if(runFlag)return;
 	if(prioritypooling || allowScheduledTasks) {
@@ -91,7 +91,7 @@ void ThreadPool::initializeThreads()
 		} else {
 			thread = new PoolThread(i+1);
 		}
-		thread->execute(i);
+		thread->execute(setAffinity?i:-1);
 		tpool.push_back(thread);
 	}
 	runFlag = true;

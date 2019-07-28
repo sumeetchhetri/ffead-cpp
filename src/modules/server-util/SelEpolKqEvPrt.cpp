@@ -385,15 +385,15 @@ bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor, const bool& isLi
 		struct epoll_event ev;
 		memset(&ev, 0, sizeof(ev));
 		#if defined(EPOLLEXCLUSIVE)
-			if(isListeningSock) {
-				ev.events = EPOLLIN | EPOLLEXCLUSIVE;
-			} else {
+			//if(isListeningSock) {
+			//	ev.events = EPOLLIN | EPOLLEXCLUSIVE;
+			//} else {
 				#ifdef USE_EPOLL_LT
 					ev.events = EPOLLIN;
 				#else
 					ev.events = EPOLLIN | EPOLLET;
 				#endif
-			}
+			//}
 		#else
 			#ifdef USE_EPOLL_LT
 				ev.events = EPOLLIN;
