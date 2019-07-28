@@ -49,7 +49,7 @@ class PoolThread {
 	std::atomic<bool> complete;
 	std::atomic<bool> thrdStarted;
 public:
-	void execute();
+	void execute(int cid);
 	void stop();
 	bool isComplete();
 	void addTask(Task* task);

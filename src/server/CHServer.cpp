@@ -635,15 +635,15 @@ int main(int argc, char* argv[])
 	{
 		ipaddr = srprps["IP_ADDR"];
 	}
+	int vhostNum = 0;
 	if(argc > 4)
 	{
-		servingAppNames = argv[4];
-		servedAppNames = StringUtil::splitAndReturn<std::vector<std::string> >(servingAppNames, ",");
+		vhostNum = CastUtil::lexical_cast<int>(argv[4]);
 	}
-	int vhostNum = 0;
 	if(argc > 5)
 	{
-		vhostNum = CastUtil::lexical_cast<int>(argv[5]);
+		servingAppNames = argv[5];
+		servedAppNames = StringUtil::splitAndReturn<std::vector<std::string> >(servingAppNames, ",");
 	}
 
 	try {
@@ -1056,102 +1056,137 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 
 	if(isMain)
 	{
-		propMultiMap mpmap = pread.getPropertiesMultiMap(respath+"server.prop");
-		if(mpmap.find("VHOST_ENTRY")!=mpmap.end() && mpmap["VHOST_ENTRY"].size()>0)
-		{
-			std::vector<std::string> vhosts = mpmap["VHOST_ENTRY"];
-			for(int vhi=0;vhi<(int)vhosts.size();vhi++)
-			{
-				std::vector<std::string> vhostprops = StringUtil::splitAndReturn<std::vector<std::string> >(vhosts.at(vhi), ";");
-				if(vhostprops.size()==3)
-				{
-					std::string vhostname = StringUtil::trimCopy(vhostprops.at(0));
-					std::string vhostport = StringUtil::trimCopy(vhostprops.at(1));
-					std::string vhostapps = StringUtil::trimCopy(vhostprops.at(2));
-					bool valid = true;
-					if(vhostname=="")
+		bool startedOne = false;
+		if(StringUtil::toLowerCopy(srprps["PROC_PER_CORE"])=="true" || StringUtil::toLowerCopy(srprps["PROC_PER_CORE"])=="yes") {
+			unsigned int nthreads = hardware_concurrency();
+			for (int var = 0; var < (int)nthreads; ++var) {
+				#if !defined(OS_MINGW)
+					pid = fork();
+					if(pid == 0)
 					{
-						valid = false;
-						logger << ("No host specified for Virtual-Host") << std::endl;
-					}
-					if(vhostport=="")
-					{
-						valid = false;
-						logger << ("No port specified for Virtual-Host") << std::endl;
-					}
-					if(vhostapps=="")
-					{
-						valid = false;
-						logger << ("No apps specified for Virtual-Host") << std::endl;
-					}
+						LoggerFactory::instance->setVhostNumber(var+1);
 
-					if(valid)
+						std::string lnm = "CHServer(VHost-" +
+								CastUtil::lexical_cast<std::string>(var+1) + ")";
+						serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
+								CastUtil::lexical_cast<std::string>(var+1);
+						serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, var+1);
+					}
+				#else
+					std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " \"" + ipaddr + "\" " + port
+							+ " \"\" " + CastUtil::lexical_cast<std::string>(var+1);
+					std::string vhostcmdo = ScriptHandler::chdirExecute(vhostcmd, serverRootDirectory, true);
+					logger.info("Starting new Virtual-Host at " + (ipaddr + ":" + port));
+					logger << vhostcmdo << std::endl;
+				#endif
+			}
+			startedOne = true;
+		} else {
+			propMultiMap mpmap = pread.getPropertiesMultiMap(respath+"server.prop");
+			if(mpmap.find("VHOST_ENTRY")!=mpmap.end() && mpmap["VHOST_ENTRY"].size()>0)
+			{
+				std::vector<std::string> vhosts = mpmap["VHOST_ENTRY"];
+				for(int vhi=0;vhi<(int)vhosts.size();vhi++)
+				{
+					std::vector<std::string> vhostprops = StringUtil::splitAndReturn<std::vector<std::string> >(vhosts.at(vhi), ";");
+					if(vhostprops.size()==3)
 					{
-						std::vector<std::string> spns = StringUtil::splitAndReturn<std::vector<std::string> >(vhostapps, ",");
-						std::map<std::string, bool> updatedcontextNames;
-						std::map<std::string, std::string> updatedaliasNames;
-						for (int spni = 0; spni < (int)spns.size(); ++spni) {
-							StringUtil::trim(spns.at(spni));
-							std::string vapnm = spns.at(spni);
-							std::string valias = vapnm;
-							if(vapnm.find(":")!=std::string::npos) {
-								valias = vapnm.substr(vapnm.find(":")+1);
-								vapnm = vapnm.substr(0, vapnm.find(":"));
-							}
-							if(vapnm!="" && ConfigurationData::getInstance()->servingContexts.find(vapnm)!=
-									ConfigurationData::getInstance()->servingContexts.end())
-							{
-								updatedcontextNames[vapnm] = true;
-								if(valias!=vapnm) {
-									updatedaliasNames[valias] = vapnm;
+						std::string vhostname = StringUtil::trimCopy(vhostprops.at(0));
+						std::string vhostport = StringUtil::trimCopy(vhostprops.at(1));
+						std::string vhostapps = StringUtil::trimCopy(vhostprops.at(2));
+						bool valid = true;
+						if(vhostname=="")
+						{
+							//valid = false;
+							//logger << ("No host specified for Virtual-Host") << std::endl;
+						}
+						if(vhostport=="")
+						{
+							valid = false;
+							logger << ("No port specified for Virtual-Host") << std::endl;
+						}
+						if(vhostapps=="")
+						{
+							valid = false;
+							logger << ("No apps specified for Virtual-Host") << std::endl;
+						}
+
+						if(valid)
+						{
+							StringUtil::trim(vhostapps);
+							std::map<std::string, bool> updatedcontextNames = ConfigurationData::getInstance()->servingContexts;
+							std::map<std::string, std::string> updatedaliasNames = ConfigurationData::getInstance()->appAliases;
+							if(vhostapps!="") {
+								std::vector<std::string> spns = StringUtil::splitAndReturn<std::vector<std::string> >(vhostapps, ",");
+								for (int spni = 0; spni < (int)spns.size(); ++spni) {
+									StringUtil::trim(spns.at(spni));
+									std::string vapnm = spns.at(spni);
+									std::string valias = vapnm;
+									if(vapnm.find(":")!=std::string::npos) {
+										valias = vapnm.substr(vapnm.find(":")+1);
+										vapnm = vapnm.substr(0, vapnm.find(":"));
+									}
+									if(vapnm!="" && ConfigurationData::getInstance()->servingContexts.find(vapnm)!=
+											ConfigurationData::getInstance()->servingContexts.end())
+									{
+										updatedcontextNames[vapnm] = true;
+										if(valias!=vapnm) {
+											updatedaliasNames[valias] = vapnm;
+										}
+									}
+								}
+								std::map<std::string, bool>::iterator ucit;
+								for(ucit=updatedcontextNames.begin();ucit!=updatedcontextNames.end();ucit++)
+								{
+									if(ConfigurationData::getInstance()->servingContexts.find(ucit->first)!=
+											ConfigurationData::getInstance()->servingContexts.end())
+									{
+										ConfigurationData::getInstance()->servingContexts.erase(ucit->first);
+									}
+									if(ConfigurationData::getInstance()->appAliases.find(ucit->first)!=
+											ConfigurationData::getInstance()->appAliases.end())
+									{
+										ConfigurationData::getInstance()->appAliases.erase(ucit->first);
+									}
 								}
 							}
-						}
-						std::map<std::string, bool>::iterator ucit;
-						for(ucit=updatedcontextNames.begin();ucit!=updatedcontextNames.end();ucit++)
-						{
-							if(ConfigurationData::getInstance()->servingContexts.find(ucit->first)!=
-									ConfigurationData::getInstance()->servingContexts.end())
-							{
-								ConfigurationData::getInstance()->servingContexts.erase(ucit->first);
-							}
-							if(ConfigurationData::getInstance()->appAliases.find(ucit->first)!=
-									ConfigurationData::getInstance()->appAliases.end())
-							{
-								ConfigurationData::getInstance()->appAliases.erase(ucit->first);
-							}
-						}
+							startedOne = true;
+							#if !defined(OS_MINGW)
+								pid = fork();
+								if(pid == 0)
+								{
+									LoggerFactory::instance->setVhostNumber(vhi+1);
+									ConfigurationData::getInstance()->servingContexts = updatedcontextNames;
+									ConfigurationData::getInstance()->appAliases = updatedaliasNames;
 
-					#if !defined(OS_MINGW)
-						pid = fork();
-						if(pid == 0)
-						{
-							LoggerFactory::instance->setVhostNumber(vhi+1);
-							ConfigurationData::getInstance()->servingContexts = updatedcontextNames;
-							ConfigurationData::getInstance()->appAliases = updatedaliasNames;
-
-							std::string lnm = "CHServer(VHost-" +
-									CastUtil::lexical_cast<std::string>(vhi+1) + ")";
-							serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
-									CastUtil::lexical_cast<std::string>(vhi+1);
-							serve(vhostport, vhostname, thrdpsiz, serverRootDirectory, srprps, vhi+1);
+									std::string lnm = "CHServer(VHost-" +
+											CastUtil::lexical_cast<std::string>(vhi+1) + ")";
+									serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
+											CastUtil::lexical_cast<std::string>(vhi+1);
+									serve(vhostport, vhostname, thrdpsiz, serverRootDirectory, srprps, vhi+1);
+								}
+							#else
+								std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
+										+ " " + vhostapps + " " + CastUtil::lexical_cast<std::string>(vhi+1);
+								std::string vhostcmdo = ScriptHandler::chdirExecute(vhostcmd, serverRootDirectory, true);
+								logger.info("Starting new Virtual-Host at " + (vhostname + ":" + vhostport));
+								logger << vhostcmdo << std::endl;
+							#endif
 						}
-					#else
-						std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
-								+ " " + vhostapps + " " + CastUtil::lexical_cast<std::string>(vhi+1);
-						std::string vhostcmdo = ScriptHandler::chdirExecute(vhostcmd, serverRootDirectory, true);
-						logger.info("Starting new Virtual-Host at " + (vhostname + ":" + vhostport));
-						logger << vhostcmdo << std::endl;
-					#endif
 					}
+				}
+				if(!startedOne) {
+					logger << ("No valid Virtual-Hosts found, will run normal server") << std::endl;
 				}
 			}
 		}
 
-		try {
-			serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, vhostNum);
-		} catch(const std::exception& e) {
-			logger << e.what() << std::endl;
+		if(!startedOne) {
+			try {
+				serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, vhostNum);
+			} catch(const std::exception& e) {
+				logger << e.what() << std::endl;
+			}
 		}
 	}
 
@@ -1340,20 +1375,16 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	HTTPResponseStatus::getStatusByCode(200);
 
-	unsigned int nthreads = hardware_concurrency();
-	std::vector<RequestReaderHandler*> handlers;
+	//unsigned int nthreads = hardware_concurrency();
 
-	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, nthreads-2);
+	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, 2);
 	handler->start();
 
-	for(unsigned int i=0;i<nthreads;++i) {
-		RequestReaderHandler* reader = new RequestReaderHandler(handler, i==0?true:false, sockfd);
-		reader->registerSocketInterfaceFactory(&CHServer::createSocketInterface);
-		reader->start(i);
-		handlers.push_back(reader);
-	}
+	RequestReaderHandler* reader = new RequestReaderHandler(handler, true, sockfd);
+	reader->registerSocketInterfaceFactory(&CHServer::createSocketInterface);
+	reader->start(-1);
 
-	int counter = 0;
+	//int counter = 0;
 	struct stat buffer;
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
@@ -1361,15 +1392,9 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		CommonUtils::printStats();
 	}
 
-	for(unsigned int i=0;i<nthreads;++i) {
-		std::string ip = ipport.substr(0, ipport.find(":"));
-		handlers.at(i)->stop(ip, CastUtil::lexical_cast<int>(port), isSSLEnabled);
-		delete handlers.at(i);
-	}
-
 	close(sockfd);
 
-	delete (HttpServiceHandler)handler;
+	delete (HttpServiceHandler*)handler;
 
 #ifdef INC_SDORM
 	ConfigurationHandler::destroyDataSources();

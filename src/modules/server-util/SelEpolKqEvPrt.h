@@ -26,7 +26,7 @@
 #include "map"
 #include "Mutex.h"
 
-#define MAXDESCRIPTORS 10240
+#define MAXDESCRIPTORS 1024
 #define OP_READ     0
 #define OP_WRITE    1
 

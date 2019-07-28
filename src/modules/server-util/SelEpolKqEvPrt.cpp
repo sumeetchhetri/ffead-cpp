@@ -71,7 +71,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 			FD_ZERO(&master[var]);
 		}
 	#elif defined USE_EPOLL
-		epoll_handle = epoll_create(MAXDESCRIPTORS);
+		epoll_handle = epoll_create1(0);
 	#elif defined USE_KQUEUE
 		kq = kqueue();
 		if (kq == -1)
@@ -386,17 +386,17 @@ bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor, const bool& isLi
 		memset(&ev, 0, sizeof(ev));
 		#if defined(EPOLLEXCLUSIVE)
 			if(isListeningSock) {
-				ev.events = EPOLLIN | EPOLLPRI | EPOLLEXCLUSIVE;
+				ev.events = EPOLLIN | EPOLLEXCLUSIVE;
 			} else {
 				#ifdef USE_EPOLL_LT
-					ev.events = EPOLLIN | EPOLLPRI;
+					ev.events = EPOLLIN;
 				#else
 					ev.events = EPOLLIN | EPOLLET;
 				#endif
 			}
 		#else
 			#ifdef USE_EPOLL_LT
-				ev.events = EPOLLIN | EPOLLPRI;
+				ev.events = EPOLLIN;
 			#else
 				ev.events = EPOLLIN | EPOLLET;
 			#endif

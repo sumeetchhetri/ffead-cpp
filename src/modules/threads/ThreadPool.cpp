@@ -91,7 +91,7 @@ void ThreadPool::initializeThreads()
 		} else {
 			thread = new PoolThread(i+1);
 		}
-		thread->execute();
+		thread->execute(i);
 		tpool.push_back(thread);
 	}
 	runFlag = true;

@@ -202,9 +202,9 @@ void PoolThread::stop() {
 	c_mutex.unlock();
 }
 
-void PoolThread::execute() {
+void PoolThread::execute(int cid) {
 	if(thrdStarted)return;
-	mthread->execute();
+	mthread->execute(cid);
 	thrdStarted = true;
 }
 

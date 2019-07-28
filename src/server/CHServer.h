@@ -178,7 +178,7 @@ class CHServer {
 	static int techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize;
 	static Logger logger;
 	static HttpServiceTask* httpServiceFactoryMethod();
-	unsigned int hardware_concurrency();
+	static unsigned int hardware_concurrency();
 public:
 	static SocketInterface* createSocketInterface(SOCKET);
 	static Logger& getLogger();

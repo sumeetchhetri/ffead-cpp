@@ -67,6 +67,7 @@ MAX_REQUEST_ENTITY_SIZE=2147483647
 #Session File lock default time in seconds
 SESS_LCK_TIME=5
 
+PROC_PER_CORE=false
 #VHOST_ENTRY=localhost;8081;markers:default,flexApp
 #VHOST_ENTRY=localhost;8082;oauthApp:default
 
