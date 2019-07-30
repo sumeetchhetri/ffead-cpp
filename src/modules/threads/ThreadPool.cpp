@@ -63,7 +63,7 @@ ThreadPool::ThreadPool(const int& maxThreads, const int& lowp, const int& highp)
 	this->runFlag = false;
 	joinComplete = false;
 	prioritypooling = true;
-	initializeThreads();
+	initializeThreads(false);
 }
 
 ThreadPool::ThreadPool(const int& maxThreads, const bool& allowScheduledTasks /* = false*/) {
@@ -75,7 +75,7 @@ ThreadPool::ThreadPool(const int& maxThreads, const bool& allowScheduledTasks /*
 	joinComplete = false;
 	prioritypooling = false;
 	this->allowScheduledTasks = allowScheduledTasks;
-	initializeThreads(-1);
+	initializeThreads(false);
 }
 
 void ThreadPool::initializeThreads(const bool& setAffinity)

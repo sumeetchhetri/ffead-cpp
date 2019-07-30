@@ -19,7 +19,7 @@
 #elif defined(IS_SENDFILE)
 #include <sys/sendfile.h>
 #endif
-#include "set"
+#include "vector"
 
 class SocketInterface;
 
@@ -28,6 +28,7 @@ class ResponseTask {
 	void* context;
 	void* response;
 	int reqPos;
+	ResponseTask* next;
 	friend class SocketInterface;
 public:
 	ResponseTask(void* request, void* response, void* context, int reqPos) {
@@ -35,10 +36,7 @@ public:
 		this->response = response;
 		this->context = context;
 		this->reqPos = reqPos;
-	}
-	bool operator< (const ResponseTask& t) const
-	{
-		return reqPos < t.reqPos;
+		this->next = NULL;
 	}
 };
 
@@ -53,7 +51,7 @@ protected:
 	SocketUtil* sockUtil;
 	std::string buffer;
 	std::atomic<long> t1;
-	std::set<ResponseTask> wtasks;
+	ResponseTask* wtl;
 	int fd;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
@@ -63,16 +61,24 @@ protected:
 			writeResponse(request, response, context);
 		} else {
 			m.lock();
-			std::set<ResponseTask>::iterator it = wtasks.begin();
-			ResponseTask& t = *it;
-			while(isCurrentRequest(t.reqPos)) {
-				endRequest();
-				writeResponse(t.request, t.response, t.context);
-				wtasks.erase(it);
-				it = wtasks.begin();
-				t = *it;
+			if(wtl==NULL) {
+				wtl = new ResponseTask(request, response, context, reqPos);
+				wtl->next = NULL;
+			} else {
+				wtl->next = new ResponseTask(request, response, context, reqPos);
+				ResponseTask* t = wtl;
+				ResponseTask* t1 = wtl;
+				while(t->next!=NULL) {
+					if(isCurrentRequest(t->reqPos)) {
+						endRequest();
+						writeResponse(t->request, t->response, t->context);
+						t1->next = t->next;
+					} else {
+						t1 = t;
+						t = t->next;
+					}
+				}
 			}
-			wtasks.insert(ResponseTask(request, response, context, reqPos));
 			m.unlock();
 		}
 	}
@@ -100,9 +106,7 @@ protected:
 		int offset = 0;
 		while(!isClosed() && offset<(int)data.length())
 		{
-			//cout << "writing data " << fd << " " << identifier << std::endl;
 			int count = sockUtil->writeData(data, true, offset);
-			//cout << "done writing data " << fd << " " << identifier << std::endl;
 			if(count>0)
 			{
 				offset += count;
@@ -206,7 +210,6 @@ public:
 	std::string getAddress() {
 		return address;
 	}
-	long identifier;
 	std::string address;
 	virtual std::string getProtocol(void* context)=0;
 	virtual int getTimeout()=0;
@@ -214,15 +217,13 @@ public:
 	virtual bool writeResponse(void* req, void* res, void* context)=0;
 	virtual void onOpen()=0;
 	virtual void onClose()=0;
+	virtual void addHandler(SocketInterface* handler);
 	virtual ~SocketInterface() {
 		sockUtil->closeSocket();
 		delete sockUtil;
 	}
 	bool isClosed() {
 		return sockUtil->closed;
-	}
-	void setIdentifier(const long& identifier) {
-		this->identifier = identifier;
 	}
 };
 

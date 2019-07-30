@@ -25,12 +25,7 @@
 
 typedef SocketInterface* (*SocketInterfaceFactory) (SOCKET);
 
-class RequestReaderHandler : public ReaderSwitchInterface {
-	moodycamel::ConcurrentQueue<SocketInterface*> pendingSocks;
-	moodycamel::ConcurrentQueue<SocketInterface*> addToTimeoutSocks;
-	moodycamel::ConcurrentQueue<SocketInterface*> remFromTimeoutSocks;
-	moodycamel::ConcurrentQueue<SocketInterface*> timedoutSocks;
-	moodycamel::ConcurrentQueue<SocketInterface*> readerSwitchedSocks;
+class RequestReaderHandler {
 	SelEpolKqEvPrt selector;
 	std::atomic<bool> run;
 	std::atomic<int> complete;
@@ -40,15 +35,10 @@ class RequestReaderHandler : public ReaderSwitchInterface {
 	ServiceHandler* shi;
 	long siIdentifierSeries;
 	SocketInterfaceFactory sf;
-	cuckoohash_map<int, SocketInterface*> connections;
-	cuckoohash_map<int, SocketInterface*> connectionsWithTimeouts;
 	bool isActive();
 	void addSf(SocketInterface* sf);
-	static void* handleTimeouts(void* inp);
 	static void* handle(void* inp);
 public:
-	void switchReaders(SocketInterface* prev, SocketInterface* next);
-	void registerRead(SocketInterface* sd);
 	void start(unsigned int cid);
 	void stop(std::string, int, bool);
 	RequestReaderHandler(ServiceHandler* shi, const bool& isMain, const SOCKET& listenerSock = INVALID_SOCKET);

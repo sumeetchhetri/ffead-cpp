@@ -25,50 +25,37 @@ class HandlerRequest {
 	void* request;
 	SocketInterface* sif;
 	void* context;
-	bool sentResponse;
 	void* response;
 	int reqPos;
 	std::string protocol;
 	ServiceHandler* sh;
-	ReaderSwitchInterface* switchReaderIntf;
 	friend class ServiceHandler;
 	friend class HttpWriteTask;
 	friend class HttpServiceTask;
 	HandlerRequest();
 public:
 	SocketUtil* getSocketUtil();
-	void setSentResponse();
 	virtual ~HandlerRequest();
 	void* getContext();
 	const std::string& getProtocol() const;
 	void* getRequest();
 	void* getResponse();
-	bool isSentResponse() const;
 	SocketInterface* getSif();
-	ReaderSwitchInterface* getSwitchReaderIntf();
 	bool isValidWriteRequest();
 	bool doneWithWrite();
 	void clearObjects();
 };
 
 class ServiceHandler {
-	Mutex mutex;
-	moodycamel::ConcurrentQueue<SocketInterface*> tbcSifQ;
-	cuckoohash_map<long, int> requestNumMap;
-	cuckoohash_map<long, bool> donelist;
-	bool run;
+	std::atomic<bool> run;
 	bool isThreadPerRequests;
 	int spoolSize;
 	ThreadPool spool;
 	bool addOpenRequest(SocketInterface* si);
 	void addCloseRequest(SocketInterface* si);
-	bool isAvailable(SocketInterface* si);
-	void registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos, ReaderSwitchInterface* switchReaderIntf);
+	void registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos);
 	bool isActive();
 	static void* taskService(void* inp);
-	static void* cleanSifs(void* inp);
-	void flagDone(SocketInterface* si);
-	void cleanSif(cuckoohash_map<int, SocketInterface*> connectionsWithTimeouts);
 	friend class RequestReaderHandler;
 	friend class HandlerRequest;
 	friend class HttpWriteTask;
@@ -76,10 +63,10 @@ protected:
 	void submitTask(Task* task);
 	virtual void handleService(HandlerRequest* req)=0;
 	virtual void handleWrite(HandlerRequest* req)=0;
+	virtual void handleRead(HandlerRequest* req)=0;
 public:
-	void switchReaders(HandlerRequest* hr, SocketInterface* next);
 	void registerWriteRequest(HandlerRequest* request, void* response);
-	void registerRead(HandlerRequest* hr);
+	void registerReadRequest(SocketInterface* si);
 	void start();
 	void stop();
 	ServiceHandler(const int& spoolSize);

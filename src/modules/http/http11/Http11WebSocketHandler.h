@@ -41,6 +41,7 @@ class Http11WebSocketHandler : public SocketInterface {
 	Http11WebSocketDataFrame readFrame();
 	Http11WebSocketDataFrame* nextFrame();
 public:
+	void addHandler(SocketInterface* handler);
 	void onOpen();
 	void onClose();
 	std::string getUrl();

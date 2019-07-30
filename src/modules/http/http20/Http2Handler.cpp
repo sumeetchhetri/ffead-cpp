@@ -690,5 +690,6 @@ std::string Http2Handler::getMimeType(const std::string& ext) {
 	return CommonUtils::getMimeType(ext);
 }
 
+void Http11Handler::addHandler(SocketInterface* handler) {}
 void Http2Handler::onOpen(){}
 void Http2Handler::onClose(){}

@@ -347,7 +347,7 @@ pid_t createChildProcess(std::string serverRootDirectory,int sp[],int sockfd)
 		ThreadPool pool;
 		if(!isThreadprq)
 		{
-			pool.init(30);
+			pool.init(30, false);
 		}
 
 		struct stat buffer;

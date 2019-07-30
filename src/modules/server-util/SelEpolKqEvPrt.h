@@ -25,6 +25,7 @@
 #include "Compatibility.h"
 #include "map"
 #include "Mutex.h"
+#include <libcuckoo/cuckoohash_map.hh>
 
 #define MAXDESCRIPTORS 1024
 #define OP_READ     0
@@ -131,12 +132,19 @@
 #include <sys/select.h>
 #endif
 
+class epoll_data_obj {
+	int fd;
+	void* obj;
+	friend class SelEpolKqEvPrt;
+};
+
 class SelEpolKqEvPrt {
 	bool listenerMode;
 	int timeoutMilis;
 	SOCKET sockfd;
 	SOCKET curfds;
 	Mutex l;
+	cuckoohash_map<int, void*> connections;
 	#ifdef USE_WIN_IOCP
 		std::map<SOCKET, void*> cntxtMap;
 		std::vector<void*> psocks;
@@ -176,10 +184,11 @@ public:
 	void initialize(SOCKET sockfd, const int& timeout);
 	void initialize(const int& timeout);
 	int getEvents();
-	SOCKET getDescriptor(const SOCKET& index);
+	SOCKET getDescriptor(const SOCKET& index, void*& obj);
 	bool isListeningDescriptor(const SOCKET& descriptor);
-	bool registerForEvent(const SOCKET& descriptor, const bool& isListeningSock = false);
-	bool unRegisterForEvent(const SOCKET& descriptor);
+	bool registerForEvent(const SOCKET& descriptor, void* obj, const bool& isListeningSock = false);
+	bool unRegisterForEvent(const SOCKET& descriptor, const int& index);
+	void* getOptData(const int& index);
 	void reRegisterServerSock();
 	bool isInvalidDescriptor(const SOCKET& index);
 	void lock();

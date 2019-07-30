@@ -52,6 +52,7 @@ class Http2Handler : public Http2ReadWriteUtil, public SocketInterface {
 	std::string serialize(Http2Frame* frame);
 	bool processFrame(Http2Frame* frame, void*& request);
 public:
+	void addHandler(SocketInterface* handler);
 	void onOpen();
 	void onClose();
 	std::string getProtocol(void* context);

@@ -34,16 +34,32 @@ void HttpServiceHandler::handleWrite(HandlerRequest* handlerRequest)
 	submitTask(task);
 }
 
+void HttpServiceHandler::handleRead(HandlerRequest* handlerRequest)
+{
+	HttpReadTask* task = new HttpReadTask();
+	task->handlerRequest = handlerRequest;
+	task->service = this;
+	task->setCleanUp(true);
+	submitTask(task);
+}
+
+HttpWriteTask::HttpWriteTask() {
+	this->handlerRequest = NULL;
+	service = NULL;
+}
+
+HttpWriteTask::~HttpWriteTask() {
+	if(handlerRequest!=NULL) {
+		delete handlerRequest;
+	}
+}
+
 void HttpWriteTask::run() {
 	//Logger logger = LoggerFactory::getLogger("HttpWriteTask");
 	if(handlerRequest->getSif()->isClosed()) {
 		handlerRequest->clearObjects();
 		bool flag = handlerRequest->doneWithWrite();
 		if(flag && handlerRequest->getSif()->isClosed()) {
-			//logger << "Delete Sif from writer " << handlerRequest->getSif()->identifier << std::endl;
-			//handlerRequest->sh->donelist.put(handlerRequest->getSif()->identifier, true);
-			//delete handlerRequest->getSif()->sockUtil;
-			//delete handlerRequest->getSif();
 		}
 		return;
 	}
@@ -62,10 +78,43 @@ void HttpWriteTask::run() {
 
 	bool flag = handlerRequest->doneWithWrite();
 	if(flag && handlerRequest->getSif()->isClosed()) {
-		//logger << "Delete Sif from writer " << handlerRequest->getSif()->identifier << std::endl;
-		//handlerRequest->sh->donelist.put(handlerRequest->getSif()->identifier, true);
 		//delete handlerRequest->getSif()->sockUtil;
 		//delete handlerRequest->getSif();
+	}
+}
+
+HttpReadTask::HttpReadTask() {
+	this->handlerRequest = NULL;
+	service = NULL;
+}
+
+HttpReadTask::~HttpReadTask() {
+	if(handlerRequest!=NULL) {
+		delete handlerRequest;
+	}
+}
+
+void HttpReadTask::run() {
+	int pending = 1;
+	while(pending>0)
+	{
+		void* context = NULL;
+		int reqPos = 0;
+		void* request = handlerRequest->sif->readRequest(context, pending, reqPos);
+		if(handlerRequest->sif->isClosed()) {
+			handlerRequest->sif->onClose();
+			if(handlerRequest->context!=NULL) {
+				delete handlerRequest->context;
+			}
+			if(handlerRequest->sif->allRequestsDone()) {
+				delete handlerRequest->sif;
+			}
+			pending = 0;
+			break;
+		} else if(request!=NULL) {
+			service->registerServiceRequest(request, handlerRequest->sif, context, reqPos);
+			CommonUtils::cReqs += 1;
+		}
 	}
 }
 
@@ -82,17 +131,6 @@ HttpServiceTask::HttpServiceTask(HandlerRequest* handlerRequest, HttpServiceHand
 HttpServiceTask::~HttpServiceTask() {
 }
 
-HttpWriteTask::HttpWriteTask() {
-	this->handlerRequest = NULL;
-	service = NULL;
-}
-
-HttpWriteTask::~HttpWriteTask() {
-	if(handlerRequest!=NULL) {
-		delete handlerRequest;
-	}
-}
-
 void HttpServiceTask::run() {
 	Timer t;
 	t.start();
@@ -107,9 +145,7 @@ void HttpServiceTask::run() {
 	}
 
 	void* resp = NULL;
-	SocketInterface* switchedIntf = NULL;
 
-	//std::cout << "servicing request" << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << std::endl;
 	if(handlerRequest->getProtocol()=="HTTP2.0" || handlerRequest->getProtocol()=="HTTP1.1")
 	{
 		HttpRequest* req = (HttpRequest*)handlerRequest->getRequest();
@@ -144,7 +180,7 @@ void HttpServiceTask::run() {
 				res->addHeaderValue(HttpResponse::SecWebSocketAccept, servseckey);
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
-				switchedIntf = new Http11WebSocketHandler(req->getUrl(), true, handlerRequest->getSif()->sockUtil);
+				handlerRequest->getSif()->addHandler(new Http11WebSocketHandler(req->getUrl(), true, handlerRequest->getSif()->sockUtil));
 
 				WebSocketData wreq;
 				wreq.url = req->getCurl();
@@ -162,8 +198,7 @@ void HttpServiceTask::run() {
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
 				Http2Handler* prev = (Http2Handler*)handlerRequest->getSif();
-				switchedIntf = new Http2Handler(true, handlerRequest->getSif()->sockUtil, prev->getWebpath(),
-						http2settings);
+				handlerRequest->getSif()->addHandler(new Http2Handler(true, handlerRequest->getSif()->sockUtil, prev->getWebpath(), http2settings));
 			}
 			else
 			{
@@ -179,7 +214,6 @@ void HttpServiceTask::run() {
 		}
 
 		//std::string url = req->getUrl();
-		//std::cout << url << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << std::endl;
 	}
 	else
 	{
@@ -190,19 +224,12 @@ void HttpServiceTask::run() {
 		resp = response;
 	}
 
-	//std::cout << "\n\nwriting response " << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << std::endl;
 	//handlerRequest->getSif()->writeResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext());
 
 	//service->registerWriteRequest(handlerRequest, resp);
 	CommonUtils::cResps += 1;
-	handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->getResponse(), handlerRequest->getContext(), handlerRequest->reqPos);
+	handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
 
-	//service->registerRead(handlerRequest);
-	//std::cout << "done writing response " << handlerRequest->getSif()->getDescriptor() << " " << handlerRequest->getSif()->identifier << std::endl << std::endl;
-	if(switchedIntf!=NULL)
-	{
-		service->switchReaders(handlerRequest, switchedIntf);
-	}
 
 	t.end();
 	CommonUtils::tsService += t.timerNanoSeconds();

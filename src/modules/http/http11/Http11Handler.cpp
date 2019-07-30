@@ -8,6 +8,9 @@
 #include "Http11Handler.h"
 
 void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
+	if(handler!=NULL) {
+		return handler->readRequest(context, pending, reqPos);
+	}
 	Timer t;
 	t.start();
 	if(readFrom()) {
@@ -116,6 +119,9 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 }
 
 int Http11Handler::getTimeout() {
+	if(handler!=NULL) {
+		return handler->getTimeout();
+	}
 	return connKeepAlive;
 }
 
@@ -134,6 +140,11 @@ Http11Handler::Http11Handler(SocketUtil* sockUtil, const std::string& webpath, c
 	this->maxEntitySize = maxEntitySize;
 	this->sockUtil = sockUtil;
 	fd = sockUtil->fd;
+	this->handler = NULL;
+}
+
+void Http11Handler::addHandler(SocketInterface* handler) {
+	this->handler = handler;
 }
 
 Http11Handler::~Http11Handler() {
@@ -141,13 +152,23 @@ Http11Handler::~Http11Handler() {
 		delete request;
 		request = NULL;
 	}
+	if(handler!=NULL) {
+		delete handler;
+		handler = NULL;
+	}
 }
 
 std::string Http11Handler::getProtocol(void* context) {
+	if(handler!=NULL) {
+		return handler->getProtocol(context);
+	}
 	return "HTTP1.1";
 }
 
 bool Http11Handler::writeResponse(void* req, void* res, void* context) {
+	if(handler!=NULL) {
+		return handler->writeResponse(req, res, context);
+	}
 	Timer t;
 	t.start();
 
@@ -209,5 +230,15 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 	CommonUtils::tsWrite += t.timerNanoSeconds();
 	return true;
 }
-void Http11Handler::onOpen(){}
-void Http11Handler::onClose(){}
+void Http11Handler::onOpen(){
+	if(handler!=NULL) {
+		handler->onOpen();
+		return;
+	}
+}
+void Http11Handler::onClose(){
+	if(handler!=NULL) {
+		return handler->onClose();
+		return;
+	}
+}

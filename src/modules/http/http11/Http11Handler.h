@@ -23,7 +23,9 @@ class Http11Handler : public SocketInterface {
 	bool isTeRequest;
 	int maxReqHdrCnt;
 	int maxEntitySize;
+	SocketInterface* handler;
 public:
+	void addHandler(SocketInterface* handler);
 	void onOpen();
 	void onClose();
 	std::string getProtocol(void* context);
