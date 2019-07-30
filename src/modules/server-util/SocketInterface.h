@@ -46,6 +46,7 @@ class SocketInterface {
 	friend class HandlerRequest;
 	friend class HttpWriteTask;
 	friend class HttpServiceTask;
+	friend class HttpReadTask;
 	Mutex m;
 protected:
 	SocketUtil* sockUtil;

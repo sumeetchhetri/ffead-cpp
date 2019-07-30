@@ -14,7 +14,6 @@
 #include "Thread.h"
 #include "Mutex.h"
 #include "map"
-#include "ReaderSwitchInterface.h"
 #include "ServiceHandler.h"
 #include "LoggerFactory.h"
 #include "SSLClient.h"

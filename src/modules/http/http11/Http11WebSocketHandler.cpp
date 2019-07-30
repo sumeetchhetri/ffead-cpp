@@ -336,6 +336,6 @@ bool Http11WebSocketHandler::writeResponse(void* req, void* res, void* context) 
 	return fl;
 }
 
-void Http11Handler::addHandler(SocketInterface* handler) {}
+void Http11WebSocketHandler::addHandler(SocketInterface* handler) {}
 void Http11WebSocketHandler::onOpen(){}
 void Http11WebSocketHandler::onClose(){}

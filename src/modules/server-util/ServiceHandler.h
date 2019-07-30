@@ -10,7 +10,6 @@
 #include "Thread.h"
 #include "Mutex.h"
 #include "queue"
-#include "ReaderSwitchInterface.h"
 #include "Http11Handler.h"
 #include "Http2Handler.h"
 #include "Http11WebSocketHandler.h"
@@ -59,6 +58,7 @@ class ServiceHandler {
 	friend class RequestReaderHandler;
 	friend class HandlerRequest;
 	friend class HttpWriteTask;
+	friend class HttpReadTask;
 protected:
 	void submitTask(Task* task);
 	virtual void handleService(HandlerRequest* req)=0;
