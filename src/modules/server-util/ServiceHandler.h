@@ -17,6 +17,10 @@
 #include "Thread.h"
 #include <libcuckoo/cuckoohash_map.hh>
 #include "concurrentqueue.h"
+#include "queue"
+#include "map"
+#include <stdint.h>
+#include "ReusableInstanceHolder.h"
 
 class ServiceHandler;
 
@@ -29,12 +33,11 @@ class HandlerRequest {
 	std::string protocol;
 	ServiceHandler* sh;
 	friend class ServiceHandler;
-	friend class HttpWriteTask;
 	friend class HttpServiceTask;
+	friend class HttpReadTask;
 	HandlerRequest();
 public:
 	SocketUtil* getSocketUtil();
-	virtual ~HandlerRequest();
 	void* getContext();
 	const std::string& getProtocol() const;
 	void* getRequest();
@@ -43,13 +46,18 @@ public:
 	bool isValidWriteRequest();
 	bool doneWithWrite();
 	void clearObjects();
+	virtual ~HandlerRequest();
 };
 
 class ServiceHandler {
+	static void* closeConnections(void *arg);
+	moodycamel::ConcurrentQueue<SocketInterface*> toBeClosedConns;
 	std::atomic<bool> run;
 	bool isThreadPerRequests;
 	int spoolSize;
 	ThreadPool spool;
+	ReusableInstanceHolder* h1;
+	ReusableInstanceHolder* h2;
 	bool addOpenRequest(SocketInterface* si);
 	void addCloseRequest(SocketInterface* si);
 	void registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos);
@@ -57,19 +65,19 @@ class ServiceHandler {
 	static void* taskService(void* inp);
 	friend class RequestReaderHandler;
 	friend class HandlerRequest;
-	friend class HttpWriteTask;
 	friend class HttpReadTask;
 protected:
 	void submitTask(Task* task);
 	virtual void handleService(HandlerRequest* req)=0;
 	virtual void handleWrite(HandlerRequest* req)=0;
-	virtual void handleRead(HandlerRequest* req)=0;
+	virtual void handleRead(SocketInterface* req)=0;
 public:
+	void closeConnection(SocketInterface* si);
 	void registerWriteRequest(HandlerRequest* request, void* response);
 	void registerReadRequest(SocketInterface* si);
 	void start();
 	void stop();
-	ServiceHandler(const int& spoolSize);
+	ServiceHandler(ReusableInstanceHolder* h1, ReusableInstanceHolder* h2, const int& spoolSize);
 	virtual ~ServiceHandler();
 };
 

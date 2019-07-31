@@ -11,7 +11,7 @@ Http2Frame* Http2Handler::readFrame() {
 	std::string fd;
 	Http2FrameHeader header;
 	std::vector<unsigned char> lenbytes;
-	if(!sockUtil->readData(3, lenbytes))
+	if(!sockUtil.readData(3, lenbytes))
 	{
 		return NULL;
 	}
@@ -20,7 +20,7 @@ Http2Frame* Http2Handler::readFrame() {
 	}
 	header.payloadLength = (int)CommonUtils::charArrayToULongLong(lenbytes);
 	std::vector<unsigned char> tfbytes;
-	if(!sockUtil->readData(2, tfbytes))
+	if(!sockUtil.readData(2, tfbytes))
 	{
 		return NULL;
 	}
@@ -30,7 +30,7 @@ Http2Frame* Http2Handler::readFrame() {
 	header.type = tfbytes.at(0);
 	header.flags = tfbytes.at(1);
 	std::vector<unsigned char> rsibytes;
-	if(!sockUtil->readData(4, rsibytes))
+	if(!sockUtil.readData(4, rsibytes))
 	{
 		return NULL;
 	}
@@ -41,7 +41,7 @@ Http2Frame* Http2Handler::readFrame() {
 	rsibytes[0] = rsibytes[0] & 0x7F;
 	header.streamIdentifier = (int)CommonUtils::charArrayToULongLong(rsibytes);
 	std::string payload;
-	if(!sockUtil->readData(header.payloadLength, payload))
+	if(!sockUtil.readData(header.payloadLength, payload))
 	{
 		return NULL;
 	}
@@ -117,7 +117,7 @@ Http2Frame* Http2Handler::getFrameByType(const std::string& data, Http2FrameHead
 	return NULL;
 }
 
-Http2Handler::Http2Handler(const bool& isServer, SocketUtil* sockUtil, const std::string& webpath) {
+Http2Handler::Http2Handler(const bool& isServer, const std::string& webpath) {
 	reqPos = 0;
 	current = 0;
 	address = StringUtil::toHEX((long long)this);
@@ -131,11 +131,10 @@ Http2Handler::Http2Handler(const bool& isServer, SocketUtil* sockUtil, const std
 	this->precedingstreamId = -1;
 	this->maxDataFrameSize = 16384;
 	this->webpath = webpath;
-	this->sockUtil = sockUtil;
-	fd = sockUtil->fd;
+	fd = sockUtil.fd;
 }
 
-Http2Handler::Http2Handler(const bool& isServer, SocketUtil* sockUtil, const std::string& webpath, const std::string& settingsFrameData) {
+Http2Handler::Http2Handler(const bool& isServer, const std::string& webpath, const std::string& settingsFrameData) {
 	reqPos = 0;
 	current = 0;
 	address = StringUtil::toHEX((long long)this);
@@ -148,8 +147,7 @@ Http2Handler::Http2Handler(const bool& isServer, SocketUtil* sockUtil, const std
 	this->precedingstreamId = -1;
 	this->maxDataFrameSize = 16384;
 	this->webpath = webpath;
-	this->sockUtil = sockUtil;
-	fd = sockUtil->fd;
+	fd = sockUtil.fd;
 
 	Http2Frame* sframe = readFrame(settingsFrameData);
 	if(sframe!=NULL)
@@ -178,28 +176,28 @@ void Http2Handler::doIt() {
 	while(true)
 	{
 		std::string temp;
-		int fl = sockUtil->readLine(temp);
+		int fl = sockUtil.readLine(temp);
 		if(fl>0 && temp!="PRI * HTTP/2.0\r")
 		{
 			break;
 		}
 		else if(fl==0)
 		{
-			sockUtil->closeSocket();
+			sockUtil.closeSocket();
 			return;
 		}
 	}
 	while(true)
 	{
 		std::string temp;
-		int fl = sockUtil->readLine(temp);
+		int fl = sockUtil.readLine(temp);
 		if(fl>0 && temp!="SM\r")
 		{
 			break;
 		}
 		else if(fl==0)
 		{
-			sockUtil->closeSocket();
+			sockUtil.closeSocket();
 			return;
 		}
 	}
@@ -220,7 +218,7 @@ void Http2Handler::doIt() {
 			break;
 		}
 	}
-	sockUtil->closeSocket();
+	sockUtil.closeSocket();
 }
 
 bool Http2Handler::processFrame(Http2Frame* frame, void*& request) {

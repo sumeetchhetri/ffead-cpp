@@ -16,50 +16,40 @@ class HttpServiceHandler;
 class HttpServiceTask : public Task {
 	HandlerRequest* handlerRequest;
 	HttpServiceHandler* service;
-	HttpServiceTask(HandlerRequest* handlerRequest, HttpServiceHandler* service);
 	void run();
 	friend class HttpServiceHandler;
 public:
 	virtual ~HttpServiceTask();
-	HttpServiceTask();
+	HttpServiceTask(ReusableInstanceHolder* h);
 	virtual void handle(HttpRequest* request, HttpResponse* response)=0;
 	virtual void handleWebsockOpen(WebSocketData* request)=0;
 	virtual void handleWebsockClose(WebSocketData* request)=0;
 	virtual void handleWebsockMessage(const std::string& url, WebSocketData* request, WebSocketData* response)=0;
 };
 
-class HttpWriteTask : public Task {
-	HandlerRequest* handlerRequest;
-	HttpServiceHandler* service;
-	void run();
-	friend class HttpServiceHandler;
-public:
-	virtual ~HttpWriteTask();
-	HttpWriteTask();
-};
-
 class HttpReadTask : public Task {
-	HandlerRequest* handlerRequest;
+	SocketInterface* sif;
 	HttpServiceHandler* service;
 	void run();
 	friend class HttpServiceHandler;
 public:
 	virtual ~HttpReadTask();
-	HttpReadTask();
+	HttpReadTask(ReusableInstanceHolder* h);
 };
 
 typedef HttpServiceTask* (*HttpServiceTaskFactory) ();
+typedef HttpReadTask* (*HttpReadTaskFactory) ();
 
 class HttpServiceHandler : public ServiceHandler {
 	std::string cntEncoding;
 	HttpServiceTaskFactory f;
+	HttpReadTaskFactory fr;
 	friend class HttpServiceTask;
-	friend class HttpWriteTask;
 	void handleService(HandlerRequest* handlerRequest);
 	void handleWrite(HandlerRequest* handlerRequest);
-	void handleRead(HandlerRequest* handlerRequest);
+	void handleRead(SocketInterface* sif);
 public:
-	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize);
+	HttpServiceHandler(ReusableInstanceHolder* h1Hldr, ReusableInstanceHolder* h2Hldr, const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr);
 	virtual ~HttpServiceHandler();
 };
 

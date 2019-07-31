@@ -134,7 +134,7 @@ void* NBServer::servicing(void* arg)
 	bool flag = server->runn;
 	server->lock.unlock();
 
-	server->selEpolKqEvPrtHandler.initialize(server->sock);
+	server->selEpolKqEvPrtHandler.initialize(server->sock, -1);
 
 	SOCKET new_fd;
 	int nfds;  // listen on sock_fd, new connection on new_fd
@@ -164,7 +164,8 @@ void* NBServer::servicing(void* arg)
 		}
 		for(int n=0;n<nfds;n++)
 		{
-			SOCKET descriptor = server->selEpolKqEvPrtHandler.getDescriptor(n);
+			void* o;
+			SOCKET descriptor = server->selEpolKqEvPrtHandler.getDescriptor(n, o);
 			if (descriptor == server->sock)
 			{
 				new_fd = -1;
@@ -178,7 +179,7 @@ void* NBServer::servicing(void* arg)
 				else
 				{
 					server->selEpolKqEvPrtHandler.reRegisterServerSock();
-					server->selEpolKqEvPrtHandler.registerForEvent(new_fd);
+					server->selEpolKqEvPrtHandler.registerForEvent(NULL);
 				}
 			}
 			else if (descriptor!=-1)

@@ -7,10 +7,11 @@
 
 #include "HttpServiceHandler.h"
 
-HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize= 0)
-	: ServiceHandler(spoolSize) {
+HttpServiceHandler::HttpServiceHandler(ReusableInstanceHolder* h1Hldr, ReusableInstanceHolder* h2Hldr, const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr)
+	: ServiceHandler(h1Hldr, h2Hldr, spoolSize) {
 	this->cntEncoding = cntEncoding;
 	this->f = f;
+	this->fr = fr;
 }
 
 HttpServiceHandler::~HttpServiceHandler() {
@@ -25,73 +26,22 @@ void HttpServiceHandler::handleService(HandlerRequest* handlerRequest)
 	submitTask(task);
 }
 
-void HttpServiceHandler::handleWrite(HandlerRequest* handlerRequest)
+void HttpServiceHandler::handleRead(SocketInterface* sif)
 {
-	HttpWriteTask* task = new HttpWriteTask();
-	task->handlerRequest = handlerRequest;
+	HttpReadTask* task = fr();
+	task->sif = sif;
 	task->service = this;
 	task->setCleanUp(true);
 	submitTask(task);
 }
 
-void HttpServiceHandler::handleRead(HandlerRequest* handlerRequest)
-{
-	HttpReadTask* task = new HttpReadTask();
-	task->handlerRequest = handlerRequest;
-	task->service = this;
-	task->setCleanUp(true);
-	submitTask(task);
-}
-
-HttpWriteTask::HttpWriteTask() {
-	this->handlerRequest = NULL;
-	service = NULL;
-}
-
-HttpWriteTask::~HttpWriteTask() {
-	if(handlerRequest!=NULL) {
-		delete handlerRequest;
-	}
-}
-
-void HttpWriteTask::run() {
-	//Logger logger = LoggerFactory::getLogger("HttpWriteTask");
-	if(handlerRequest->getSif()->isClosed()) {
-		handlerRequest->clearObjects();
-		bool flag = handlerRequest->doneWithWrite();
-		if(flag && handlerRequest->getSif()->isClosed()) {
-		}
-		return;
-	}
-
-	if(!handlerRequest->isValidWriteRequest()) {
-		//This handlerRequest will be processed in a pipelined manner and will be later cleared by the handling HttpWriteTask object
-		//Set handlerRequest to NULL to avoid deleting requests getting handled in an out of order manner
-		HandlerRequest* handlerRequestOrig = handlerRequest;
-		this->handlerRequest = NULL;
-		service->registerWriteRequest(handlerRequestOrig, handlerRequestOrig->getResponse());
-		return;
-	}
-
-	CommonUtils::cResps += 1;
-	handlerRequest->getSif()->writeResponse(handlerRequest->getRequest(), handlerRequest->getResponse(), handlerRequest->getContext());
-
-	bool flag = handlerRequest->doneWithWrite();
-	if(flag && handlerRequest->getSif()->isClosed()) {
-		//delete handlerRequest->getSif()->sockUtil;
-		//delete handlerRequest->getSif();
-	}
-}
-
-HttpReadTask::HttpReadTask() {
-	this->handlerRequest = NULL;
+HttpReadTask::HttpReadTask(ReusableInstanceHolder* h) {
+	this->hdlr = h;
+	this->sif = NULL;
 	service = NULL;
 }
 
 HttpReadTask::~HttpReadTask() {
-	if(handlerRequest!=NULL) {
-		delete handlerRequest;
-	}
 }
 
 void HttpReadTask::run() {
@@ -100,35 +50,28 @@ void HttpReadTask::run() {
 	{
 		void* context = NULL;
 		int reqPos = 0;
-		void* request = handlerRequest->sif->readRequest(context, pending, reqPos);
-		if(handlerRequest->sif->isClosed()) {
-			handlerRequest->sif->onClose();
-			if(handlerRequest->context!=NULL) {
-				delete handlerRequest->context;
-			}
-			if(handlerRequest->sif->allRequestsDone()) {
-				delete handlerRequest->sif;
-			}
-			pending = 0;
+		void* request = sif->readRequest(context, pending, reqPos);
+		if(sif->isClosed()) {
+			sif->startRequest();
+			service->registerServiceRequest(NULL, sif, context, reqPos);
 			break;
 		} else if(request!=NULL) {
-			service->registerServiceRequest(request, handlerRequest->sif, context, reqPos);
+			service->registerServiceRequest(request, sif, context, reqPos);
 			CommonUtils::cReqs += 1;
 		}
 	}
 }
 
-HttpServiceTask::HttpServiceTask() {
+HttpServiceTask::HttpServiceTask(ReusableInstanceHolder* h) {
 	this->handlerRequest = NULL;
 	service = NULL;
-}
-
-HttpServiceTask::HttpServiceTask(HandlerRequest* handlerRequest, HttpServiceHandler* service) {
-	this->handlerRequest = handlerRequest;
-	this->service = service;
+	this->hdlr = h;
 }
 
 HttpServiceTask::~HttpServiceTask() {
+	if(handlerRequest!=NULL) {
+		delete handlerRequest;
+	}
 }
 
 void HttpServiceTask::run() {
@@ -138,7 +81,10 @@ void HttpServiceTask::run() {
 	if(handlerRequest->getSif()->isClosed()) {
 		handlerRequest->doneWithWrite();
 		handlerRequest->clearObjects();
-		delete handlerRequest;
+		handlerRequest->sif->onClose();
+		if(handlerRequest->sif->allRequestsDone()) {
+			service->closeConnection(handlerRequest->sif);
+		}
 		t.end();
 		CommonUtils::tsService += t.timerNanoSeconds();
 		return;
@@ -180,7 +126,7 @@ void HttpServiceTask::run() {
 				res->addHeaderValue(HttpResponse::SecWebSocketAccept, servseckey);
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
-				handlerRequest->getSif()->addHandler(new Http11WebSocketHandler(req->getUrl(), true, handlerRequest->getSif()->sockUtil));
+				handlerRequest->getSif()->addHandler(new Http11WebSocketHandler(req->getUrl(), true));
 
 				WebSocketData wreq;
 				wreq.url = req->getCurl();
@@ -198,7 +144,7 @@ void HttpServiceTask::run() {
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
 				Http2Handler* prev = (Http2Handler*)handlerRequest->getSif();
-				handlerRequest->getSif()->addHandler(new Http2Handler(true, handlerRequest->getSif()->sockUtil, prev->getWebpath(), http2settings));
+				handlerRequest->getSif()->addHandler(new Http2Handler(true, prev->getWebpath(), http2settings));
 			}
 			else
 			{
@@ -212,8 +158,6 @@ void HttpServiceTask::run() {
 		{
 			handle(req, res);
 		}
-
-		//std::string url = req->getUrl();
 	}
 	else
 	{
@@ -224,12 +168,9 @@ void HttpServiceTask::run() {
 		resp = response;
 	}
 
-	//handlerRequest->getSif()->writeResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext());
-
 	//service->registerWriteRequest(handlerRequest, resp);
 	CommonUtils::cResps += 1;
 	handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
-
 
 	t.end();
 	CommonUtils::tsService += t.timerNanoSeconds();

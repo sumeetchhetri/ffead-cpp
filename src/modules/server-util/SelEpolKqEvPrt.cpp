@@ -33,14 +33,11 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 #if USE_KQUEUE == 1
 	kq = -1;
 #endif
+	dsi = NULL;
 }
 
 SelEpolKqEvPrt::~SelEpolKqEvPrt() {
-}
-
-void SelEpolKqEvPrt::initialize(const int& timeout)
-{
-	initialize(-1, timeout);
+	delete dsi;
 }
 
 void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
@@ -99,7 +96,9 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 		return;
 	#endif
 	#if !defined(USE_WIN_IOCP)
-		if(sockfd>0)registerForEvent(sockfd, NULL, true);
+		dsi = new DummySocketInterface();
+		dsi->fd = sockfd;
+		if(sockfd>0)registerForEvent(dsi, true);
 	#endif
 }
 
@@ -311,15 +310,15 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj)
 	#elif defined USE_EPOLL
 		if(index>-1 && index<(int)(sizeof events))
 		{
+			SocketInterface* p = (SocketInterface*)events[index].data.ptr;
 			if ((events[index].events & EPOLLERR) ||
 				  (events[index].events & EPOLLHUP) ||
 				  (events[index].events & EPOLLRDHUP) ||
 				  (!(events[index].events & EPOLLIN)))
 			{
-				close(events[index].data.fd);
+				close(p->fd);
 			}
-			epoll_data_obj* p = (epoll_data_obj*)events[index].data.ptr;
-			obj = p->obj;
+			obj = p;
 			return p->fd;
 		}
 	#elif defined USE_KQUEUE
@@ -356,8 +355,9 @@ bool SelEpolKqEvPrt::isListeningDescriptor(const SOCKET& descriptor)
 	return false;
 }
 
-bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor, void* obj, const bool& isListeningSock)
+bool SelEpolKqEvPrt::registerForEvent(SocketInterface* obj, const bool& isListeningSock)
 {
+	SOCKET descriptor = obj->fd;
 	//#ifndef USE_WIN_IOCP
 		#ifdef OS_MINGW
 			u_long iMode = 1;
@@ -414,10 +414,7 @@ bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor, void* obj, const
 				ev.events = EPOLLIN | EPOLLET;
 			#endif
 		#endif
-		epoll_data_obj* p = new epoll_data_obj();
-		p.fd = descriptor;
-		p.obj = obj;
-		ev.data.dtr = p;
+		ev.data.ptr = obj;
 		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, descriptor, &ev) < 0)
 		{
 			perror("epoll");
@@ -464,7 +461,7 @@ void* SelEpolKqEvPrt::getOptData(const int& index) {
 	return NULL;
 }
 
-bool SelEpolKqEvPrt::unRegisterForEvent(const SOCKET& descriptor, const int& index)
+bool SelEpolKqEvPrt::unRegisterForEvent(const SOCKET& descriptor)
 {
 	if(descriptor<=0)return false;
 	#if defined(USE_WIN_IOCP)
@@ -487,8 +484,6 @@ bool SelEpolKqEvPrt::unRegisterForEvent(const SOCKET& descriptor, const int& ind
 		if(fdMax==descriptor)
 			fdMax--;
 	#elif defined USE_EPOLL
-		epoll_data_obj* p = (epoll_data_obj*)events[index].data.ptr;
-		delete p;
 		struct epoll_event ev;
 		memset(&ev, 0, sizeof(ev));
 		epoll_ctl(epoll_handle, EPOLL_CTL_DEL, descriptor, &ev);

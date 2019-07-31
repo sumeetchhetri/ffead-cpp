@@ -26,6 +26,7 @@
 #include "map"
 #include "Mutex.h"
 #include <libcuckoo/cuckoohash_map.hh>
+#include "SocketInterface.h"
 
 #define MAXDESCRIPTORS 1024
 #define OP_READ     0
@@ -132,10 +133,15 @@
 #include <sys/select.h>
 #endif
 
-class epoll_data_obj {
-	int fd;
-	void* obj;
-	friend class SelEpolKqEvPrt;
+class DummySocketInterface : public SocketInterface {
+public:
+	std::string getProtocol(void* context){return "";}
+	int getTimeout(){return -1;};
+	void* readRequest(void*& context, int& pending, int& reqPos){return NULL;}
+	bool writeResponse(void* req, void* res, void* context){return false;}
+	void onOpen(){}
+	void onClose(){}
+	void addHandler(SocketInterface* handler){}
 };
 
 class SelEpolKqEvPrt {
@@ -144,6 +150,7 @@ class SelEpolKqEvPrt {
 	SOCKET sockfd;
 	SOCKET curfds;
 	Mutex l;
+	DummySocketInterface* dsi;
 	cuckoohash_map<int, void*> connections;
 	#ifdef USE_WIN_IOCP
 		std::map<SOCKET, void*> cntxtMap;
@@ -182,12 +189,11 @@ public:
 	SelEpolKqEvPrt();
 	virtual ~SelEpolKqEvPrt();
 	void initialize(SOCKET sockfd, const int& timeout);
-	void initialize(const int& timeout);
 	int getEvents();
 	SOCKET getDescriptor(const SOCKET& index, void*& obj);
 	bool isListeningDescriptor(const SOCKET& descriptor);
-	bool registerForEvent(const SOCKET& descriptor, void* obj, const bool& isListeningSock = false);
-	bool unRegisterForEvent(const SOCKET& descriptor, const int& index);
+	bool registerForEvent(SocketInterface* obj, const bool& isListeningSock = false);
+	bool unRegisterForEvent(const SOCKET& descriptor);
 	void* getOptData(const int& index);
 	void reRegisterServerSock();
 	bool isInvalidDescriptor(const SOCKET& index);

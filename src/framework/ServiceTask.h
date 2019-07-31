@@ -57,11 +57,7 @@
 class ServiceTask : public HttpServiceTask
 {
 	Logger logger;
-	int fd;
 	std::string serverRootDirectory;
-	std::map<std::string,std::string> *params;
-	bool isSSLEnabled;
-	SSL_CTX *ctx;
 	void saveSessionDataToFile(const std::string& sessionId, const std::string& value);
 	std::map<std::string,std::string> getSessionDataFromFile(const std::string& sessionId);
 	void saveSessionDataToDistocache(const std::string& sessionId, std::map<std::string,std::string>& sessAttrs);
@@ -71,15 +67,9 @@ class ServiceTask : public HttpServiceTask
 	unsigned int getFileSize(const char *fileName);
 	std::string getFileContents(const char *fileName, const int& start= -1, const int& end= -1);
 	bool checkSocketWaitForTimeout(const int& sock_fd, const int& writing, const int& seconds, const int& micros= 0);
-	/*bool sendData(SSL* ssl, BIO* io, const int& fd, const std::string& h1);
-	void closeSocket(SSL* ssl, BIO* io, const int& fd);
-	bool readLine(SSL* ssl, BIO* io, const int& fd, std::string& line);
-	bool readData(SSL* ssl, BIO* io, const int& fd, const int& cntlen, std::string& content);
-	*/
 	void handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketUtil* sockUtil);
 public:
-	ServiceTask(const int& fd, const std::string& serverRootDirectory);
-	ServiceTask();
+	ServiceTask(ReusableInstanceHolder* h);
 	virtual ~ServiceTask();
 	void handleWebsockOpen(WebSocketData* request);
 	void handleWebsockClose(WebSocketData* request);

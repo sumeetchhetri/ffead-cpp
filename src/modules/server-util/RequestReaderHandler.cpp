@@ -56,13 +56,11 @@ void RequestReaderHandler::registerSocketInterfaceFactory(const SocketInterfaceF
 }
 
 void RequestReaderHandler::addSf(SocketInterface* psi) {
-	psi->sockUtil->sel = &selector;
-	//connections.insert(psi->getDescriptor(), psi);
 	if(psi->getTimeout()>0)
 	{
 		//addToTimeoutSocks.push(psi);
 	}
-	selector.registerForEvent(psi->getDescriptor(), psi);
+	selector.registerForEvent(psi);
 	psi->onOpen();
 }
 
@@ -135,7 +133,6 @@ void* RequestReaderHandler::handle(void* inp) {
 		CommonUtils::tsProcess += t.timerNanoSeconds();
 	}
 
-	SocketInterface* si;
 	if(ins->isMain) {
 		while(ins->shi->run) {
 			Thread::mSleep(100);

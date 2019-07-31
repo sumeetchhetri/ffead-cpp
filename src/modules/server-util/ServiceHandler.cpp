@@ -11,6 +11,40 @@ bool ServiceHandler::isActive() {
 	return run;
 }
 
+void* ServiceHandler::closeConnections(void *arg) {
+	ServiceHandler* ths = (ServiceHandler*)arg;
+	std::map<uintptr_t, long long> addrs;
+	std::map<uintptr_t, long long>::iterator it;
+	while(ths->run) {
+		Thread::sSleep(5);
+		SocketInterface* si;
+		while(ths->toBeClosedConns.try_dequeue(si)) {
+			uintptr_t addr = reinterpret_cast<uintptr_t>(si);
+			if(addrs.find(addr)==addrs.end()) {
+				addrs[addr] = Timer::getTimestamp();
+				if(SSLHandler::getInstance()->getIsSSL() && si->sockUtil.isHttp2()) {
+					h2->push(si);
+				} else {
+					h1->push(si);
+				}
+			}
+		}
+		for(it=addrs.begin();it!=addrs.end();) {
+			long long t = Timer::getTimestamp();
+			if(t-it->second>10) {
+				addrs.erase(it++);
+			} else {
+				++it;
+			}
+		}
+	}
+	return NULL;
+}
+
+void ServiceHandler::closeConnection(SocketInterface* si) {
+	this->toBeClosedConns.enqueue(si);
+}
+
 void ServiceHandler::registerWriteRequest(HandlerRequest* request, void* response) {
 	if(request!=NULL && response!=NULL) {
 		request->response = response;
@@ -19,8 +53,7 @@ void ServiceHandler::registerWriteRequest(HandlerRequest* request, void* respons
 }
 
 void ServiceHandler::registerReadRequest(SocketInterface* sif) {
-	HandlerRequest* req = new HandlerRequest;
-	req->sif = sif;
+	handleRead(sif);
 }
 
 void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos) {
@@ -54,6 +87,8 @@ void* ServiceHandler::taskService(void* inp) {
 void ServiceHandler::start() {
 	if(!run) {
 		run = true;
+		Thread* mthread = new Thread(&closeConnections, this);
+		mthread->execute(-1);
 	}
 }
 
@@ -62,10 +97,13 @@ void ServiceHandler::stop() {
 		spool.joinAll();
 	}
 	run = false;
+	Thread::sSleep(15);
 }
 
-ServiceHandler::ServiceHandler(const int& spoolSize) {
+ServiceHandler::ServiceHandler(ReusableInstanceHolder* h1, ReusableInstanceHolder* h2, const int& spoolSize) {
 	this->spoolSize = spoolSize;
+	this->h1 = h1;
+	this->h2 = h2;
 	run = false;
 	isThreadPerRequests = false;
 	if(spoolSize <= 0) {

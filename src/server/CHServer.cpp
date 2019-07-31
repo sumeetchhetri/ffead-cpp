@@ -656,7 +656,6 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-
 int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirectory, std::string port, std::string ipaddr, std::vector<std::string> servedAppNames)
 {
 	//pid_t parid = getpid();
@@ -1397,14 +1396,19 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	HTTPResponseStatus::getStatusByCode(200);
 
+	srvHldr = new ReusableInstanceHolder(&createSrvTask, &initSrvTask, &destroySrvTask, 100000);
+	rdHldr = new ReusableInstanceHolder(&createRdTask, &initRdTask, &destroyRdTask, 100000);
+	h1Hldr = new ReusableInstanceHolder(&createHandler, &initHandler, &destroyHandler, 10000);
+	h2Hldr = new ReusableInstanceHolder(&createHandler, &initHandler, &destroyHandler, 10000);
+
 	unsigned int nthreads = hardware_concurrency();
 
-	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, nthreads);
+	ServiceHandler* handler = new HttpServiceHandler(h1Hldr, h2Hldr, cntEnc, &httpServiceFactoryMethod, nthreads, &httpReadFactoryMethod);
 	handler->start();
 
-	RequestReaderHandler* reader = new RequestReaderHandler(handler, true, sockfd);
-	reader->registerSocketInterfaceFactory(&CHServer::createSocketInterface);
-	reader->start(-1);
+	RequestReaderHandler reader(handler, true, sockfd);
+	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
+	reader.start(-1);
 
 	//int counter = 0;
 	struct stat buffer;
@@ -1413,6 +1417,9 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		Thread::sSleep(10);
 		CommonUtils::printStats();
 	}
+
+	std::string ip = ipport.substr(0, ipport.find(":"));
+	reader.stop(ip, CastUtil::lexical_cast<int>(port), isSSLEnabled);
 
 	close(sockfd);
 
@@ -1481,27 +1488,127 @@ int CHServer::techunkSiz = 0;
 int CHServer::connKeepAlive = 10;
 int CHServer::maxReqHdrCnt = 100, CHServer::maxEntitySize = 2147483647;
 
-
 HttpServiceTask* CHServer::httpServiceFactoryMethod() {
-	return new ServiceTask();
+	return srvHldr->pull(srvHldr);
+}
+
+HttpReadTask* CHServer::httpReadFactoryMethod() {
+	return rdHldr->pull(rdHldr);
 }
 
 SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
-	SocketInterface* sockIntf = NULL;
-	SocketUtil* sockUtil = new SocketUtil(fd);
-	if(SSLHandler::getInstance()->getIsSSL() && sockUtil->isHttp2())
+	SocketUtil sockUtil(fd);
+	if(SSLHandler::getInstance()->getIsSSL() && sockUtil.isHttp2())
 	{
-		sockIntf = new Http2Handler(true, sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath);
+		return h2Hldr->pull(&sockUtil);
 	}
 	else
 	{
-		sockIntf = new Http11Handler(sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath,
-				techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+		return h1Hldr->pull(&sockUtil);
 	}
-	return sockIntf;
 }
 
 Logger& CHServer::getLogger()
 {
 	return logger;
+}
+
+void* CHServer::createHandler(void* args) {
+	SocketUtil* sockUtil = (SocketUtil*)args;
+	if(SSLHandler::getInstance()->getIsSSL() && sockUtil->isHttp2())
+	{
+		Http2Handler* h = new Http2Handler(true, ConfigurationData::getInstance()->coreServerProperties.webPath);
+		h->fd = sockUtil->fd;
+		h->sockUtil.fd = sockUtil->fd;
+		h->sockUtil.ssl = sockUtil->ssl;
+		h->sockUtil.io = sockUtil->io;
+		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
+		h->sockUtil.closed = sockUtil->closed;
+		h->sockUtil.inited = sockUtil->inited;
+		h->sockUtil.http2 = sockUtil->http2;
+		return h;
+	}
+	else
+	{
+		Http11Handler* h = new Http11Handler(ConfigurationData::getInstance()->coreServerProperties.webPath,
+				techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+		h->fd = sockUtil->fd;
+		h->sockUtil.fd = sockUtil->fd;
+		h->sockUtil.ssl = sockUtil->ssl;
+		h->sockUtil.io = sockUtil->io;
+		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
+		h->sockUtil.closed = sockUtil->closed;
+		h->sockUtil.inited = sockUtil->inited;
+		h->sockUtil.http2 = sockUtil->http2;
+		return h;
+	}
+}
+
+void CHServer::initHandler(void *item, void* args) {
+	SocketUtil* sockUtil = (SocketUtil*)args;
+	if(SSLHandler::getInstance()->getIsSSL() && sockUtil->isHttp2())
+	{
+		Http2Handler* h = (Http2Handler*)item;
+		h->Http2Handler(true, sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath);
+		h->fd = sockUtil->fd;
+		h->sockUtil.closeSocket(false);
+		h->sockUtil.fd = sockUtil->fd;
+		h->sockUtil.ssl = sockUtil->ssl;
+		h->sockUtil.io = sockUtil->io;
+		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
+		h->sockUtil.closed = sockUtil->closed;
+		h->sockUtil.inited = sockUtil->inited;
+		h->sockUtil.http2 = sockUtil->http2;
+	}
+	else
+	{
+		Http11Handler* h = (Http11Handler*)item;
+		if(h->handler!=NULL) {
+			delete h->handler;
+		}
+		h->Http11Handler(sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath,
+				techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+		h->fd = sockUtil->fd;
+		h->sockUtil.closeSocket(false);
+		h->sockUtil.fd = sockUtil->fd;
+		h->sockUtil.ssl = sockUtil->ssl;
+		h->sockUtil.io = sockUtil->io;
+		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
+		h->sockUtil.closed = sockUtil->closed;
+		h->sockUtil.inited = sockUtil->inited;
+		h->sockUtil.http2 = sockUtil->http2;
+	}
+}
+
+void CHServer::destroyHandler(void *item) {
+	SocketInterface* si = (SocketInterface*)item;
+	delete si;
+}
+
+void* CHServer::createSrvTask(void *args) {
+	return new ServiceTask((ReusableInstanceHolder*)args);
+}
+
+void CHServer::initSrvTask(void *item, void *args) {
+	ServiceTask* t = (ServiceTask*)item;
+	t->ServiceTask((ReusableInstanceHolder*)args);
+}
+
+void CHServer::destroySrvTask(void *item) {
+	ServiceTask* t = (ServiceTask*)item;
+	delete t;
+}
+
+void* CHServer::createRdTask(void *args) {
+	return new HttpReadTask((ReusableInstanceHolder*)args);
+}
+
+void CHServer::initRdTask(void *item, void *args) {
+	HttpReadTask* t = (HttpReadTask*)item;
+	t->HttpReadTask((ReusableInstanceHolder*)args);
+}
+
+void CHServer::destroyRdTask(void *item) {
+	HttpReadTask* t = (HttpReadTask*)item;
+	delete t;
 }

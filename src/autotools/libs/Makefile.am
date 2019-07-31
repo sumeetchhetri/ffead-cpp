@@ -37,7 +37,8 @@ libffead_modules_la_SOURCES =  ../../modules/common/Bigdecimal.cpp \
 						../../modules/common/XmlParser.cpp \
 						../../modules/common/MarkerHandler.cpp \
 						../../modules/common/TemplateEngine.cpp \
-						../../modules/common/CastUtil.cpp
+						../../modules/common/CastUtil.cpp \
+						../../modules/common/ReusableInstanceHolder.cpp
 
 if MOD_ALL
 lib_LTLIBRARIES +=  libffead-framework.la

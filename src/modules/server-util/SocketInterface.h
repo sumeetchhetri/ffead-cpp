@@ -30,6 +30,13 @@ class ResponseTask {
 	int reqPos;
 	ResponseTask* next;
 	friend class SocketInterface;
+	ResponseTask() {
+		this->request = NULL;
+		this->response = NULL;
+		this->context = NULL;
+		this->reqPos = -1;
+		this->next = NULL;
+	}
 public:
 	ResponseTask(void* request, void* response, void* context, int reqPos) {
 		this->request = request;
@@ -44,16 +51,16 @@ class SocketInterface {
 	friend class RequestReaderHandler;
 	friend class ServiceHandler;
 	friend class HandlerRequest;
-	friend class HttpWriteTask;
 	friend class HttpServiceTask;
 	friend class HttpReadTask;
+	friend class SelEpolKqEvPrt;
 	Mutex m;
 protected:
-	SocketUtil* sockUtil;
+	int fd;
+	SocketUtil sockUtil;
 	std::string buffer;
 	std::atomic<long> t1;
-	ResponseTask* wtl;
-	int fd;
+	std::vector<ResponseTask> wtl;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
 	void pushResponse(void* request, void* response, void* context, int reqPos) {
@@ -61,23 +68,18 @@ protected:
 			endRequest();
 			writeResponse(request, response, context);
 		} else {
+			std::vector<ResponseTask>::iterator it;
 			m.lock();
-			if(wtl==NULL) {
-				wtl = new ResponseTask(request, response, context, reqPos);
-				wtl->next = NULL;
-			} else {
-				wtl->next = new ResponseTask(request, response, context, reqPos);
-				ResponseTask* t = wtl;
-				ResponseTask* t1 = wtl;
-				while(t->next!=NULL) {
-					if(isCurrentRequest(t->reqPos)) {
-						endRequest();
-						writeResponse(t->request, t->response, t->context);
-						t1->next = t->next;
-					} else {
-						t1 = t;
-						t = t->next;
-					}
+			wtl.push_back(ResponseTask(request, response, context, reqPos));
+			it = wtl.begin();
+			while (it!=wtl.end()) {
+				ResponseTask& t = *it;
+				if(isCurrentRequest(t.reqPos)) {
+					endRequest();
+					writeResponse(t.request, t.response, t.context);
+					it = wtl.erase(it);
+				} else {
+					++it;
 				}
 			}
 			m.unlock();
@@ -107,7 +109,7 @@ protected:
 		int offset = 0;
 		while(!isClosed() && offset<(int)data.length())
 		{
-			int count = sockUtil->writeData(data, true, offset);
+			int count = sockUtil.writeData(data, true, offset);
 			if(count>0)
 			{
 				offset += count;
@@ -183,7 +185,7 @@ public:
 		{
 			ssize_t count;
 			std::string temp;
-			count = sockUtil->readData(MAXBUFLENM, temp);
+			count = sockUtil.readData(MAXBUFLENM, temp);
 			if(count>0)
 			{
 				buffer.append(temp);
@@ -203,7 +205,7 @@ public:
 		return isClosed();
 	}
 	void close() {
-		sockUtil->closeSocket();
+		sockUtil.closeSocket();
 	}
 	int getDescriptor() {
 		return fd;
@@ -218,13 +220,12 @@ public:
 	virtual bool writeResponse(void* req, void* res, void* context)=0;
 	virtual void onOpen()=0;
 	virtual void onClose()=0;
-	virtual void addHandler(SocketInterface* handler);
+	virtual void addHandler(SocketInterface* handler)=0;
 	virtual ~SocketInterface() {
-		sockUtil->closeSocket();
-		delete sockUtil;
+		sockUtil.closeSocket();
 	}
 	bool isClosed() {
-		return sockUtil->closed;
+		return sockUtil.closed;
 	}
 };
 

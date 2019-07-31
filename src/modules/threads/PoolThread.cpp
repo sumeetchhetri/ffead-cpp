@@ -60,7 +60,11 @@ void* PoolThread::run(void *arg)
 			}
 			if(task->cleanUp)
 			{
-				delete task;
+				if(task->hdlr!=NULL) {
+					task->hdlr->push(task);
+				} else {
+					delete task;
+				}
 			}
 		}
 		catch(const std::exception& e)
@@ -127,7 +131,11 @@ void* PoolThread::runWithTaskPool(void *arg)
 				}
 				if(task->cleanUp)
 				{
-					delete task;
+					if(task->hdlr!=NULL) {
+						task->hdlr->push(task);
+					} else {
+						delete task;
+					}
 				}
 			}
 			catch(const std::exception& e)
