@@ -309,144 +309,6 @@ void* service(void* arg)
 	return NULL;
 }
 
-#if !defined(OS_MINGW) && !defined(OS_DARWIN) && !defined(OS_CYGWIN)
-pid_t createChildProcess(std::string serverRootDirectory,int sp[],int sockfd)
-{
-	pid_t pid;
-	if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sp) == -1)
-	{
-		perror("socketpair");
-		exit(1);
-	}
-	if((pid=fork())==0)
-	{
-		char pidStr[10];
-		memset(pidStr, 0, 10);
-		sprintf(pidStr, "%ld", (long)getpid());
-		std::string lgname = "CHServer-";
-		lgname.append(pidStr);
-		Logger plogger = LoggerFactory::getLogger(lgname);
-
-		servd = serverRootDirectory;
-		std::string filename;
-		std::stringstream ss;
-		ss << serverRootDirectory;
-		ss << getpid();
-		ss >> filename;
-		filename.append(".cntrl");
-		plogger << ("generated file " + filename) << std::endl;
-		std::ofstream cntrlfile;
-		cntrlfile.open(filename.c_str());
-		cntrlfile << "Process Running" << std::endl;
-		cntrlfile.close();
-
-		close(sockfd);
-
-		//SelEpolKqEvPrt selEpolKqEvPrtHandler;
-		//selEpolKqEvPrtHandler.initialize(sp[1]);
-		ThreadPool pool;
-		if(!isThreadprq)
-		{
-			pool.init(30, false);
-		}
-
-		struct stat buffer;
-		while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
-		{
-			/*int nfds = selEpolKqEvPrtHandler.getEvents();
-			if (nfds == -1)
-			{
-				perror("poller wait child process");
-				plogger << "\n----------poller child process----" << std::endl;
-			}
-			else*/
-			{
-				int fd = receive_fd(sp[1]);
-				//selEpolKqEvPrtHandler.reRegisterServerSock();
-				#ifdef OS_MINGW
-					u_long bMode = 0;
-					ioctlsocket(fd, FIONBIO, &bMode);
-				#else
-					fcntl(fd, F_SETFL, O_SYNC);
-				#endif
-
-				char buf[10];
-				memset(buf, 0, 10);
-				int err;
-				if((err=recv(fd,buf,10,MSG_PEEK))==0)
-				{
-					close(fd);
-					plogger << "Socket conn closed before being serviced" << std::endl;
-					continue;
-				}
-
-				try
-				{
-					if(isThreadprq)
-					{
-						ServiceTask *task = new ServiceTask(fd,serverRootDirectory);
-						Thread* pthread = new Thread(&service, task);
-						pthread->execute();
-					}
-					else
-					{
-						ServiceTask *task = new ServiceTask(fd,serverRootDirectory);
-						task->setCleanUp(true);
-						pool.submit(task);
-					}
-				}
-				catch(const std::exception& err)
-				{
-					plogger << "Exception occurred while processing ServiceTask request - " << err.what() << std::endl;
-				}
-			}
-		}
-	}
-	return pid;
-}
-#endif
-
-
-/*pid_t createChildMonitProcess(int sp[])
-{
-	pid_t pid;
-	if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sp) == -1)
-	{
-		perror("socketpair");
-		exit(1);
-	}
-	if((pid=fork())==0)
-	{
-		std::map<std::string,bool> stat;
-		while(1)
-		{
-			char buf[10];
-			memset(pidStr, 0, 10);
-			if(read(sp[1], buf, sizeof buf) < 0)
-			{
-				std::string temp = buf;
-				strVec tempv;
-				StringUtil::split(tempv, temp, ":");
-				if(tempv.size()==2)
-				{
-					if(tempv.at(0)=="R")
-					{
-						std::string h = "0";
-						if(stat[tempv.at(1)])
-							h = "1";
-						write(sp[0], h.c_str() , sizeof(h));
-					}
-					else if(tempv.at(0)=="W")
-					{
-						stat[tempv.at(1)] = false;
-					}
-				}
-			}
-		}
-	}
-	return pid;
-}*/
-
 void* gracefullShutdown_monitor(void* args)
 {
 	std::string* ipaddr = (std::string*)args;
@@ -1319,33 +1181,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	logger << ("Initializing Caches done....") << std::endl;
 
 	std::vector<std::string> files;
-	//int sp[preForked][2];
-
-	/*TODO if(preForked>0 && IS_FILE_DESC_PASSING_AVAIL)
-	{
-		#if !defined(OS_MINGW) && !defined(OS_DARWIN)
-		for(int j=0;j<preForked;j++)
-		{
-			pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
-			pds[j] = pid;
-			std::stringstream ss;
-			std::string filename;
-			ss << serverRootDirectory;
-			ss << pds[j];
-			ss >> filename;
-			filename.append(".cntrl");
-			files.push_back(filename);
-		}
-		#endif
-	}
-	else*/
-	{
-		/*TODO if(!isThreadprq)
-		{
-			pool = new ThreadPool(thrdpsiz/2,thrdpsiz,true);
-			pool->start();
-		}*/
-	}
 
 #ifdef INC_DCP
 	if(isCompileEnabled)
@@ -1489,22 +1324,22 @@ int CHServer::connKeepAlive = 10;
 int CHServer::maxReqHdrCnt = 100, CHServer::maxEntitySize = 2147483647;
 
 HttpServiceTask* CHServer::httpServiceFactoryMethod() {
-	return srvHldr->pull(srvHldr);
+	return (HttpServiceTask*)srvHldr->pull(srvHldr);
 }
 
 HttpReadTask* CHServer::httpReadFactoryMethod() {
-	return rdHldr->pull(rdHldr);
+	return (HttpReadTask*)rdHldr->pull(rdHldr);
 }
 
 SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
 	SocketUtil sockUtil(fd);
 	if(SSLHandler::getInstance()->getIsSSL() && sockUtil.isHttp2())
 	{
-		return h2Hldr->pull(&sockUtil);
+		return (SocketInterface*)h2Hldr->pull(&sockUtil);
 	}
 	else
 	{
-		return h1Hldr->pull(&sockUtil);
+		return (SocketInterface*)h1Hldr->pull(&sockUtil);
 	}
 }
 
@@ -1523,7 +1358,7 @@ void* CHServer::createHandler(void* args) {
 		h->sockUtil.ssl = sockUtil->ssl;
 		h->sockUtil.io = sockUtil->io;
 		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
-		h->sockUtil.closed = sockUtil->closed;
+		h->sockUtil.closed = false;
 		h->sockUtil.inited = sockUtil->inited;
 		h->sockUtil.http2 = sockUtil->http2;
 		return h;
@@ -1537,7 +1372,7 @@ void* CHServer::createHandler(void* args) {
 		h->sockUtil.ssl = sockUtil->ssl;
 		h->sockUtil.io = sockUtil->io;
 		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
-		h->sockUtil.closed = sockUtil->closed;
+		h->sockUtil.closed = false;
 		h->sockUtil.inited = sockUtil->inited;
 		h->sockUtil.http2 = sockUtil->http2;
 		return h;
@@ -1556,7 +1391,7 @@ void CHServer::initHandler(void *item, void* args) {
 		h->sockUtil.ssl = sockUtil->ssl;
 		h->sockUtil.io = sockUtil->io;
 		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
-		h->sockUtil.closed = sockUtil->closed;
+		h->sockUtil.closed = false;
 		h->sockUtil.inited = sockUtil->inited;
 		h->sockUtil.http2 = sockUtil->http2;
 	}
@@ -1574,7 +1409,7 @@ void CHServer::initHandler(void *item, void* args) {
 		h->sockUtil.ssl = sockUtil->ssl;
 		h->sockUtil.io = sockUtil->io;
 		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
-		h->sockUtil.closed = sockUtil->closed;
+		h->sockUtil.closed = false;
 		h->sockUtil.inited = sockUtil->inited;
 		h->sockUtil.http2 = sockUtil->http2;
 	}
@@ -1590,8 +1425,6 @@ void* CHServer::createSrvTask(void *args) {
 }
 
 void CHServer::initSrvTask(void *item, void *args) {
-	ServiceTask* t = (ServiceTask*)item;
-	t->ServiceTask((ReusableInstanceHolder*)args);
 }
 
 void CHServer::destroySrvTask(void *item) {
@@ -1605,7 +1438,8 @@ void* CHServer::createRdTask(void *args) {
 
 void CHServer::initRdTask(void *item, void *args) {
 	HttpReadTask* t = (HttpReadTask*)item;
-	t->HttpReadTask((ReusableInstanceHolder*)args);
+	t->sif = NULL;
+	t->service = NULL;
 }
 
 void CHServer::destroyRdTask(void *item) {

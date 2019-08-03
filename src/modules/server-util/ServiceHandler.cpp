@@ -23,9 +23,9 @@ void* ServiceHandler::closeConnections(void *arg) {
 			if(addrs.find(addr)==addrs.end()) {
 				addrs[addr] = Timer::getTimestamp();
 				if(SSLHandler::getInstance()->getIsSSL() && si->sockUtil.isHttp2()) {
-					h2->push(si);
+					ths->h2->push(si);
 				} else {
-					h1->push(si);
+					ths->h1->push(si);
 				}
 			}
 		}
@@ -131,7 +131,7 @@ HandlerRequest::~HandlerRequest() {
 }
 
 SocketUtil* HandlerRequest::getSocketUtil() {
-	return sif->sockUtil;
+	return &(sif->sockUtil);
 }
 
 void HandlerRequest::clearObjects() {

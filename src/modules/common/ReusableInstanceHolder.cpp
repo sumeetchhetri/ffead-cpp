@@ -15,7 +15,7 @@ ReusableInstanceHolder::ReusableInstanceHolder(Create crt, Init ini, Destroy des
 }
 
 void ReusableInstanceHolder::push(void *item) {
-	if(repo.size_approx()>=limit) {
+	if(limit<=(int)repo.size_approx()) {
 		des(item);
 	} else {
 		repo.enqueue(item);
