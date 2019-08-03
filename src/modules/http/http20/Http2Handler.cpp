@@ -117,6 +117,23 @@ Http2Frame* Http2Handler::getFrameByType(const std::string& data, Http2FrameHead
 	return NULL;
 }
 
+void Http2Handler::init(const bool& isServer, const std::string& webpath) {
+	reqPos = 0;
+	current = 0;
+	address = StringUtil::toHEX((long long)this);
+	logger = LoggerFactory::getLogger("Http2Handler");
+	this->highestStreamIdentifier = 0;
+	this->context.huffmanEncoding = true;
+	this->highestPushPromiseStreamIdentifier = 2;
+	this->senderFlowControlWindow = 65535;
+	this->receiverFlowControlWindow = 20971520;
+	this->isConnInit = false;
+	this->precedingstreamId = -1;
+	this->maxDataFrameSize = 16384;
+	this->webpath = webpath;
+	fd = sockUtil.fd;
+}
+
 Http2Handler::Http2Handler(const bool& isServer, const std::string& webpath) {
 	reqPos = 0;
 	current = 0;

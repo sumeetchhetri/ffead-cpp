@@ -54,7 +54,7 @@ class SocketInterface {
 	friend class HttpServiceTask;
 	friend class HttpReadTask;
 	friend class SelEpolKqEvPrt;
-	friend CHServer;
+	friend class CHServer;
 	Mutex m;
 protected:
 	int fd;

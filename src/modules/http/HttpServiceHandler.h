@@ -32,6 +32,7 @@ class HttpReadTask : public Task {
 	HttpServiceHandler* service;
 	void run();
 	friend class HttpServiceHandler;
+	friend class CHServer;
 public:
 	virtual ~HttpReadTask();
 	HttpReadTask(ReusableInstanceHolder* h);

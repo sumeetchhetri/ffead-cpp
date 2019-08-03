@@ -70,6 +70,7 @@ public:
 	int getHighestPushPromiseStreamIdentifier();
 	int updateSenderWindowSize(const int& windowSize);
 	void updateMaxFrameSize(const uint32_t& val);
+	void init(const bool& isServer, const std::string& webpath);
 	Http2Handler(const bool& isServer, const std::string& webpath);
 	Http2Handler(const bool& isServer, const std::string& webpath, const std::string& settingsFrameData);
 	virtual ~Http2Handler();

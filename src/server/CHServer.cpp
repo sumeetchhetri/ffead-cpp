@@ -1384,7 +1384,7 @@ void CHServer::initHandler(void *item, void* args) {
 	if(SSLHandler::getInstance()->getIsSSL() && sockUtil->isHttp2())
 	{
 		Http2Handler* h = (Http2Handler*)item;
-		h->Http2Handler(true, sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath);
+		h->init(true, ConfigurationData::getInstance()->coreServerProperties.webPath);
 		h->fd = sockUtil->fd;
 		h->sockUtil.closeSocket(false);
 		h->sockUtil.fd = sockUtil->fd;
@@ -1401,8 +1401,7 @@ void CHServer::initHandler(void *item, void* args) {
 		if(h->handler!=NULL) {
 			delete h->handler;
 		}
-		h->Http11Handler(sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath,
-				techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+		h->init(ConfigurationData::getInstance()->coreServerProperties.webPath, techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
 		h->fd = sockUtil->fd;
 		h->sockUtil.closeSocket(false);
 		h->sockUtil.fd = sockUtil->fd;
