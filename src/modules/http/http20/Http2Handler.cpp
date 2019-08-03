@@ -122,6 +122,8 @@ void Http2Handler::init(const bool& isServer, const std::string& webpath) {
 	current = 0;
 	address = StringUtil::toHEX((long long)this);
 	logger = LoggerFactory::getLogger("Http2Handler");
+	wtl.clear();
+	buffer.clear();
 	this->highestStreamIdentifier = 0;
 	this->context.huffmanEncoding = true;
 	this->highestPushPromiseStreamIdentifier = 2;

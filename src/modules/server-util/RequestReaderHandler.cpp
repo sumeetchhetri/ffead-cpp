@@ -124,7 +124,15 @@ void* RequestReaderHandler::handle(void* inp) {
 				else
 				{
 					SocketInterface* si = (SocketInterface*)vsi;
-					ins->shi->registerReadRequest(si);
+					if(!si->isClosed()) {
+						ins->shi->registerReadRequest(si);
+					} else {
+						if(SSLHandler::getInstance()->getIsSSL() && si->sockUtil.isHttp2()) {
+							ins->shi->h2->push(si);
+						} else {
+							ins->shi->h1->push(si);
+						}
+					}
 				}
 			}
 		}

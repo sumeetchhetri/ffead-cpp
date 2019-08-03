@@ -78,6 +78,14 @@ void* PoolThread::run(void *arg)
 					ftask->taskComplete();
 				}
 			}
+			if(task->cleanUp)
+			{
+				if(task->hdlr!=NULL) {
+					task->hdlr->push(task);
+				} else {
+					delete task;
+				}
+			}
 		}
 
 		if(t.elapsedSeconds()>=10) {
@@ -91,7 +99,11 @@ void* PoolThread::run(void *arg)
 	{
 		if(task->cleanUp)
 		{
-			delete task;
+			if(task->hdlr!=NULL) {
+				task->hdlr->push(task);
+			} else {
+				delete task;
+			}
 		}
 		continue;
 	}
@@ -149,6 +161,14 @@ void* PoolThread::runWithTaskPool(void *arg)
 						ftask->taskComplete();
 					}
 				}
+				if(task->cleanUp)
+				{
+					if(task->hdlr!=NULL) {
+						task->hdlr->push(task);
+					} else {
+						delete task;
+					}
+				}
 			}
 		}
 	}
@@ -157,7 +177,11 @@ void* PoolThread::runWithTaskPool(void *arg)
 	{
 		if(task->cleanUp)
 		{
-			delete task;
+			if(task->hdlr!=NULL) {
+				task->hdlr->push(task);
+			} else {
+				delete task;
+			}
 		}
 	}
 	ths->complete = true;

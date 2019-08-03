@@ -130,6 +130,8 @@ void Http11Handler::init(const std::string& webpath, const int& chunkSize, const
 	reqPos = 0;
 	current = 0;
 	address = StringUtil::toHEX((long long)this);
+	wtl.clear();
+	buffer.clear();
 	isHeadersDone = false;
 	bytesToRead = 0;
 	this->webpath = webpath;

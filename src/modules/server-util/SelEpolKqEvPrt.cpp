@@ -316,7 +316,7 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj)
 				  (events[index].events & EPOLLRDHUP) ||
 				  (!(events[index].events & EPOLLIN)))
 			{
-				close(p->fd);
+				p->close();
 			}
 			obj = p;
 			return p->fd;
