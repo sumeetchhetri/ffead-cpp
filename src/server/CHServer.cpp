@@ -1322,6 +1322,10 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 int CHServer::techunkSiz = 0;
 int CHServer::connKeepAlive = 10;
 int CHServer::maxReqHdrCnt = 100, CHServer::maxEntitySize = 2147483647;
+ReusableInstanceHolder* CHServer::srvHldr = NULL;
+ReusableInstanceHolder* CHServer::rdHldr = NULL;
+ReusableInstanceHolder* CHServer::h1Hldr = NULL;
+ReusableInstanceHolder* CHServer::h2Hldr = NULL;
 
 HttpServiceTask* CHServer::httpServiceFactoryMethod() {
 	return (HttpServiceTask*)srvHldr->pull(srvHldr);
@@ -1424,6 +1428,11 @@ void* CHServer::createSrvTask(void *args) {
 }
 
 void CHServer::initSrvTask(void *item, void *args) {
+	ServiceTask* t = (ServiceTask*)item;
+	if(t->handlerRequest!=NULL) {
+		delete t->handlerRequest;
+	}
+	t->handlerRequest = NULL;
 }
 
 void CHServer::destroySrvTask(void *item) {

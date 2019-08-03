@@ -18,6 +18,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		CommonUtils::tsRead += t.timerNanoSeconds();
 		return NULL;
 	}
+	HttpRequest* request = NULL;
 	if(!isHeadersDone && buffer.find("\r\n\r\n")!=std::string::npos)
 	{
 		bytesToRead = 0;
@@ -131,7 +132,6 @@ void Http11Handler::init(const std::string& webpath, const int& chunkSize, const
 	address = StringUtil::toHEX((long long)this);
 	isHeadersDone = false;
 	bytesToRead = 0;
-	request = NULL;
 	this->webpath = webpath;
 	this->chunkSize = chunkSize<=0?0:chunkSize;
 	this->isTeRequest = false;
@@ -148,7 +148,6 @@ Http11Handler::Http11Handler(const std::string& webpath, const int& chunkSize, c
 	address = StringUtil::toHEX((long long)this);
 	isHeadersDone = false;
 	bytesToRead = 0;
-	request = NULL;
 	this->webpath = webpath;
 	this->chunkSize = chunkSize<=0?0:chunkSize;
 	this->isTeRequest = false;
@@ -164,10 +163,6 @@ void Http11Handler::addHandler(SocketInterface* handler) {
 }
 
 Http11Handler::~Http11Handler() {
-	if(request!=NULL) {
-		delete request;
-		request = NULL;
-	}
 	if(handler!=NULL) {
 		delete handler;
 		handler = NULL;

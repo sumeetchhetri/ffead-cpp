@@ -14,7 +14,6 @@
 #include "ConfigurationData.h"
 
 class Http11Handler : public SocketInterface {
-	HttpRequest* request;
 	bool isHeadersDone;
 	int bytesToRead;
 	std::string webpath;

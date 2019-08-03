@@ -45,13 +45,6 @@ void ServiceHandler::closeConnection(SocketInterface* si) {
 	this->toBeClosedConns.enqueue(si);
 }
 
-void ServiceHandler::registerWriteRequest(HandlerRequest* request, void* response) {
-	if(request!=NULL && response!=NULL) {
-		request->response = response;
-		handleWrite(request);
-	}
-}
-
 void ServiceHandler::registerReadRequest(SocketInterface* sif) {
 	handleRead(sif);
 }

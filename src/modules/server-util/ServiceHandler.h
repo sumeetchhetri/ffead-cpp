@@ -69,11 +69,9 @@ class ServiceHandler {
 protected:
 	void submitTask(Task* task);
 	virtual void handleService(HandlerRequest* req)=0;
-	virtual void handleWrite(HandlerRequest* req)=0;
 	virtual void handleRead(SocketInterface* req)=0;
 public:
 	void closeConnection(SocketInterface* si);
-	void registerWriteRequest(HandlerRequest* request, void* response);
 	void registerReadRequest(SocketInterface* si);
 	void start();
 	void stop();

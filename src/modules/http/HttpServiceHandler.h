@@ -18,6 +18,7 @@ class HttpServiceTask : public Task {
 	HttpServiceHandler* service;
 	void run();
 	friend class HttpServiceHandler;
+	friend class CHServer;
 public:
 	virtual ~HttpServiceTask();
 	HttpServiceTask(ReusableInstanceHolder* h);
@@ -47,7 +48,6 @@ class HttpServiceHandler : public ServiceHandler {
 	HttpReadTaskFactory fr;
 	friend class HttpServiceTask;
 	void handleService(HandlerRequest* handlerRequest);
-	void handleWrite(HandlerRequest* handlerRequest);
 	void handleRead(SocketInterface* sif);
 public:
 	HttpServiceHandler(ReusableInstanceHolder* h1Hldr, ReusableInstanceHolder* h2Hldr, const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr);
