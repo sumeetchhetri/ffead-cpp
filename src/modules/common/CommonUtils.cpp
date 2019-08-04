@@ -15,21 +15,22 @@ std::atomic<long long> CommonUtils::tsProcess = 0;
 std::atomic<long long> CommonUtils::tsRead = 0;
 std::atomic<long long> CommonUtils::tsService = 0;
 std::atomic<long long> CommonUtils::tsWrite = 0;
-std::atomic<long long> CommonUtils::tsService1 = 0;
-std::atomic<long long> CommonUtils::tsService2 = 0;
-std::atomic<long long> CommonUtils::tsService3 = 0;
-std::atomic<long long> CommonUtils::tsService4 = 0;
-std::atomic<long long> CommonUtils::tsService5 = 0;
-std::atomic<long long> CommonUtils::tsService6 = 0;
-std::atomic<long long> CommonUtils::tsService7 = 0;
-std::atomic<long long> CommonUtils::tsCont1 = 0;
-std::atomic<long long> CommonUtils::tsCont2 = 0;
-std::atomic<long long> CommonUtils::tsCont3 = 0;
-std::atomic<long long> CommonUtils::tsCont4 = 0;
-std::atomic<long long> CommonUtils::tsCont5 = 0;
+std::atomic<long long> CommonUtils::tsServicePre = 0;
+std::atomic<long long> CommonUtils::tsServiceCors = 0;
+std::atomic<long long> CommonUtils::tsServiceSec = 0;
+std::atomic<long long> CommonUtils::tsServiceFlt = 0;
+std::atomic<long long> CommonUtils::tsServiceCnt = 0;
+std::atomic<long long> CommonUtils::tsServiceExt = 0;
+std::atomic<long long> CommonUtils::tsServicePost = 0;
+std::atomic<long long> CommonUtils::tsContMpg = 0;
+std::atomic<long long> CommonUtils::tsContPath = 0;
+std::atomic<long long> CommonUtils::tsContExt = 0;
+std::atomic<long long> CommonUtils::tsContExec = 0;
+std::atomic<long long> CommonUtils::tsContRstLkp = 0;
 std::atomic<long long> CommonUtils::tsCont6 = 0;
-std::atomic<long long> CommonUtils::tsCont7 = 0;
-std::atomic<long long> CommonUtils::tsCont8 = 0;
+std::atomic<long long> CommonUtils::tsContRstPrsArgs = 0;
+std::atomic<long long> CommonUtils::tsContRstExec = 0;
+std::atomic<long long> CommonUtils::tsContRstSer = 0;
 std::atomic<long long> CommonUtils::cSocks = 0;
 std::atomic<long long> CommonUtils::cReqs = 0;
 std::atomic<long long> CommonUtils::cResps = 0;
@@ -357,24 +358,26 @@ void CommonUtils::printStats() {
 				CastUtil::lexical_cast<std::string>(tsService/cReqs)+")\n");
 		logger.info(c);
 	}
-	std::string d = ("Service Total (Pre: "+CastUtil::lexical_cast<std::string>(tsService1)+", Cors: "+CastUtil::lexical_cast<std::string>(tsService2)+", Security: "+CastUtil::lexical_cast<std::string>(tsService3) +
-			", Filter: "+CastUtil::lexical_cast<std::string>(tsService4)+", Controller: "+CastUtil::lexical_cast<std::string>(tsService5)+", Ext: "+CastUtil::lexical_cast<std::string>(tsService6)+
-			", Post: "+CastUtil::lexical_cast<std::string>(tsService7)+")\n");
+	std::string d = ("Service Total (Pre: "+CastUtil::lexical_cast<std::string>(tsServicePre)+", Cors: "+CastUtil::lexical_cast<std::string>(tsServiceCors)+", Security: "+CastUtil::lexical_cast<std::string>(tsServiceSec) +
+			", Filter: "+CastUtil::lexical_cast<std::string>(tsServiceFlt)+", Controller: "+CastUtil::lexical_cast<std::string>(tsServiceCnt)+", Ext: "+CastUtil::lexical_cast<std::string>(tsServiceExt)+
+			", Post: "+CastUtil::lexical_cast<std::string>(tsServicePost)+")\n");
 	logger.info(d);
 	if(cReqs>0) {
-		std::string e = ("Service Average (Pre: "+CastUtil::lexical_cast<std::string>(tsService1/cReqs)+", Cors: "+CastUtil::lexical_cast<std::string>(tsService2/cReqs)+", Security: "+
-				CastUtil::lexical_cast<std::string>(tsService3/cReqs) + ", Filter: "+CastUtil::lexical_cast<std::string>(tsService4/cReqs)+", Controller: "+CastUtil::lexical_cast<std::string>(tsService5/cReqs)+
-				", Ext: "+CastUtil::lexical_cast<std::string>(tsService6/cReqs)+ ", Post: "+CastUtil::lexical_cast<std::string>(tsService7/cReqs)+")\n");
+		std::string e = ("Service Average (Pre: "+CastUtil::lexical_cast<std::string>(tsServicePre/cReqs)+", Cors: "+CastUtil::lexical_cast<std::string>(tsServiceCors/cReqs)+", Security: "+
+				CastUtil::lexical_cast<std::string>(tsServiceSec/cReqs) + ", Filter: "+CastUtil::lexical_cast<std::string>(tsServiceFlt/cReqs)+", Controller: "+CastUtil::lexical_cast<std::string>(tsServiceCnt/cReqs)+
+				", Ext: "+CastUtil::lexical_cast<std::string>(tsServiceExt/cReqs)+ ", Post: "+CastUtil::lexical_cast<std::string>(tsServicePost/cReqs)+")\n");
 		logger.info(e);
 	}
-	std::string f = ("Controller Total (Cont_Cond: "+CastUtil::lexical_cast<std::string>(tsCont1)+", Mapg_Cond: "+CastUtil::lexical_cast<std::string>(tsCont2)+", Ext_Cond: "+CastUtil::lexical_cast<std::string>(tsCont3) +
-			", Cont_Exec: "+CastUtil::lexical_cast<std::string>(tsCont4)+", Rest_Lkp: "+CastUtil::lexical_cast<std::string>(tsCont5)+", Rest_Ph1: "+CastUtil::lexical_cast<std::string>(tsCont6)+
-			", Rest_Ph2: "+CastUtil::lexical_cast<std::string>(tsCont7)+", Rest_Exec: "+CastUtil::lexical_cast<std::string>(tsCont8)+")\n");
+	std::string f = ("Controller Total (Cont_Cond: "+CastUtil::lexical_cast<std::string>(tsContMpg)+", Mapg_Cond: "+CastUtil::lexical_cast<std::string>(tsContPath)+", Ext_Cond: "+CastUtil::lexical_cast<std::string>(tsContExt) +
+			", Cont_Exec: "+CastUtil::lexical_cast<std::string>(tsContExec)+", Rest_Lkp: "+CastUtil::lexical_cast<std::string>(tsContRstLkp)+", Rest_CsiLkp: "+CastUtil::lexical_cast<std::string>(tsContRstCsiLkp)+
+			", Rest_InsLkp: "+CastUtil::lexical_cast<std::string>(tsContRstInsLkp)+", Rest_PrsArgs: "+CastUtil::lexical_cast<std::string>(tsContRstPrsArgs)+", Rest_Exec: "+CastUtil::lexical_cast<std::string>(tsContRstExec)+
+			", Rest_Ser: "+CastUtil::lexical_cast<std::string>(tsContRstSer)+")\n");
 	logger.info(f);
 	if(cReqs>0) {
-		std::string g = ("Controller Average (Cont_Cond: "+CastUtil::lexical_cast<std::string>(tsCont1/cReqs)+", Mapg_Cond: "+CastUtil::lexical_cast<std::string>(tsCont2/cReqs)+", Ext_Cond: "+CastUtil::lexical_cast<std::string>(tsCont3/cReqs) +
-				", Cont_Exec: "+CastUtil::lexical_cast<std::string>(tsCont4/cReqs)+", Rest_Lkp: "+CastUtil::lexical_cast<std::string>(tsCont5/cReqs)+", Rest_Ph1: "+CastUtil::lexical_cast<std::string>(tsCont6/cReqs)+
-				", Rest_Ph2: "+CastUtil::lexical_cast<std::string>(tsCont7/cReqs)+", Rest_Exec: "+CastUtil::lexical_cast<std::string>(tsCont8/cReqs)+")\n");
+		std::string g = ("Controller Average (Cont_Cond: "+CastUtil::lexical_cast<std::string>(tsContMpg/cReqs)+", Mapg_Cond: "+CastUtil::lexical_cast<std::string>(tsContPath/cReqs)+", Ext_Cond: "+CastUtil::lexical_cast<std::string>(tsContExt/cReqs) +
+				", Cont_Exec: "+CastUtil::lexical_cast<std::string>(tsContExec/cReqs)+", Rest_Lkp: "+CastUtil::lexical_cast<std::string>(tsContRstLkp/cReqs)+", Rest_Exec: "+CastUtil::lexical_cast<std::string>(tsContRstExec/cReqs)+
+				", Rest_InsLkp: "+CastUtil::lexical_cast<std::string>(tsContRstPrsArgs/cReqs)+", Rest_PrsArgs: "+CastUtil::lexical_cast<std::string>(tsContRstPrsArgs/cReqs)+", Rest_Exec: "+CastUtil::lexical_cast<std::string>(tsContRstExec/cReqs)+
+				", Rest_Ser: "+CastUtil::lexical_cast<std::string>(tsContRstSer/cReqs)+")\n");
 		logger.info(g);
 	}
 }

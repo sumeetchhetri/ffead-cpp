@@ -22,11 +22,7 @@ void* ServiceHandler::closeConnections(void *arg) {
 			uintptr_t addr = reinterpret_cast<uintptr_t>(si);
 			if(addrs.find(addr)==addrs.end()) {
 				addrs[addr] = Timer::getTimestamp();
-				if(SSLHandler::getInstance()->getIsSSL() && si->sockUtil.isHttp2()) {
-					ths->h2->push(si);
-				} else {
-					ths->h1->push(si);
-				}
+				delete si;
 			}
 		}
 		for(it=addrs.begin();it!=addrs.end();) {
@@ -93,10 +89,8 @@ void ServiceHandler::stop() {
 	Thread::sSleep(15);
 }
 
-ServiceHandler::ServiceHandler(ReusableInstanceHolder* h1, ReusableInstanceHolder* h2, const int& spoolSize) {
+ServiceHandler::ServiceHandler(const int& spoolSize) {
 	this->spoolSize = spoolSize;
-	this->h1 = h1;
-	this->h2 = h2;
 	run = false;
 	isThreadPerRequests = false;
 	if(spoolSize <= 0) {

@@ -69,7 +69,7 @@ class ServiceTask : public HttpServiceTask
 	bool checkSocketWaitForTimeout(const int& sock_fd, const int& writing, const int& seconds, const int& micros= 0);
 	void handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketUtil* sockUtil);
 public:
-	ServiceTask(ReusableInstanceHolder* h);
+	ServiceTask();
 	virtual ~ServiceTask();
 	void handleWebsockOpen(WebSocketData* request);
 	void handleWebsockClose(WebSocketData* request);

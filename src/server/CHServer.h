@@ -176,24 +176,11 @@ static inline int waitpid(const pid_t& pid, int *status, const unsigned& options
 
 
 class CHServer {
-	static ReusableInstanceHolder* srvHldr;
-	static ReusableInstanceHolder* rdHldr;
-	static ReusableInstanceHolder* h1Hldr;
-	static ReusableInstanceHolder* h2Hldr;
 	static int techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize;
 	static Logger logger;
 	static HttpServiceTask* httpServiceFactoryMethod();
 	static HttpReadTask* httpReadFactoryMethod();
 	static unsigned int hardware_concurrency();
-	static void* createSrvTask(void* args);
-	static void initSrvTask(void* item, void* args);
-	static void destroySrvTask(void* item);
-	static void* createRdTask(void* args);
-	static void initRdTask(void* item, void* args);
-	static void destroyRdTask(void* item);
-	static void* createHandler(void* args);
-	static void initHandler(void* item, void* args);
-	static void destroyHandler(void* item);
 public:
 	static SocketInterface* createSocketInterface(SOCKET);
 	static Logger& getLogger();

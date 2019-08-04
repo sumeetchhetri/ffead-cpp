@@ -57,7 +57,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 				bean.clas = ele->getAttribute("class");
 				bean.intfType = ele->getAttribute("intfType");
 				bean.injectAs = ele->getAttribute("injectAs");
-				bean.scope = ele->getAttribute("scope");
+				bean.scope = StringUtil::toLowerCopy(ele->getAttribute("scope"));
 				bean.realbean = true;
 				ElementList eleeles = ele->getChildElements();
 				if(eleeles.size()==0)
@@ -89,7 +89,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 								beanc.inbuilt = ele1->getAttribute("inbuilt");
 								beanc.clas = ele1->getAttribute("class");
 								beanc.intfType = ele1->getAttribute("intfType");
-								bean.scope = ele1->getAttribute("scope");
+								bean.scope = StringUtil::toLowerCopy(ele1->getAttribute("scope"));
 								beanc.realbean = false;
 								injbns[beanc.appName+beanc.name] = beanc;
 								bean.injs.push_back(beanc.appName+beanc.name);
@@ -279,7 +279,7 @@ void* FFEADContext::getBean(const Bean& bean)
 			argus.clear();
 		}
 	}
-	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
+	if(bean.scope!="prototype")
 	{
 		std::string _k = bean.appName + k;
 		if(!objects.contains(_k))
@@ -305,7 +305,7 @@ void FFEADContext::release(void* instance, const std::string& beanName, const st
 	if(beanName!="" && beans.find(appName+beanName)!=beans.end())
 	{
 		Bean& bean = beans[appName+beanName];
-		if(StringUtil::toLowerCopy(bean.scope)=="prototype")
+		if(bean.scope=="prototype")
 		{
 			std::string type;
 			if(bean.inbuilt!="" && bean.value!="")
@@ -392,8 +392,7 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 			type = bean.clas;
 		}
 		std::string _k = bean.appName + bean.name + ";" + type;
-		if(servingContexts.find(bean.appName)!=servingContexts.end()
-				&& StringUtil::toLowerCopy(bean.scope)!="prototype" && !objects.contains(type))
+		if(servingContexts.find(bean.appName)!=servingContexts.end() && bean.scope!="prototype" && !objects.contains(type))
 		{
 			logger << ("Initializing Bean [appName = "+bean.appName+", name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)getBean(bean))) << std::endl;
 		}
@@ -413,7 +412,7 @@ Bean::Bean(const std::string& name, const std::string& value, const std::string&
 		this->inbuilt = type;
 	else
 		this->clas = type;
-	this->scope = scope;
+	this->scope = StringUtil::toLowerCopy(scope);
 	this->realbean = true;
 	this->appName = appName;
 }

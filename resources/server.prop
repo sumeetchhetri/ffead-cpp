@@ -72,3 +72,25 @@ PROC_PER_CORE=false
 #VHOST_ENTRY=localhost;8082;oauthApp:default
 
 LOGGING_ENABLED=true
+
+ENABLE_CRS=true
+
+ENABLE_SEC=true
+
+ENABLE_FLT=true
+
+ENABLE_CNT=true
+
+ENABLE_CNT_MPG=true
+
+ENABLE_CNT_PTH=true
+
+ENABLE_CNT_EXT=true
+
+ENABLE_CNT_RST=true
+
+ENABLE_EXT=true
+
+ENABLE_SCR=true
+
+ENABLE_SWS=true

@@ -56,8 +56,6 @@ class ServiceHandler {
 	bool isThreadPerRequests;
 	int spoolSize;
 	ThreadPool spool;
-	ReusableInstanceHolder* h1;
-	ReusableInstanceHolder* h2;
 	bool addOpenRequest(SocketInterface* si);
 	void addCloseRequest(SocketInterface* si);
 	void registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos);
@@ -75,7 +73,7 @@ public:
 	void registerReadRequest(SocketInterface* si);
 	void start();
 	void stop();
-	ServiceHandler(ReusableInstanceHolder* h1, ReusableInstanceHolder* h2, const int& spoolSize);
+	ServiceHandler(const int& spoolSize);
 	virtual ~ServiceHandler();
 };
 

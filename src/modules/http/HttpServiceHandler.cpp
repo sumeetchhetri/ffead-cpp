@@ -7,8 +7,8 @@
 
 #include "HttpServiceHandler.h"
 
-HttpServiceHandler::HttpServiceHandler(ReusableInstanceHolder* h1Hldr, ReusableInstanceHolder* h2Hldr, const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr)
-	: ServiceHandler(h1Hldr, h2Hldr, spoolSize) {
+HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr)
+	: ServiceHandler(spoolSize) {
 	this->cntEncoding = cntEncoding;
 	this->f = f;
 	this->fr = fr;
@@ -35,8 +35,7 @@ void HttpServiceHandler::handleRead(SocketInterface* sif)
 	submitTask(task);
 }
 
-HttpReadTask::HttpReadTask(ReusableInstanceHolder* h) {
-	this->hdlr = h;
+HttpReadTask::HttpReadTask() {
 	this->sif = NULL;
 	service = NULL;
 }

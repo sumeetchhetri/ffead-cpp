@@ -696,6 +696,18 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	ConfigurationData::getInstance()->coreServerProperties.isMainServerProcess = isMain;
 	ConfigurationData::getInstance()->coreServerProperties.sessservdistocache = false;
 
+	ConfigurationData::getInstance()->enableCors = StringUtil::toLower(srprps["ENABLE_CRS"])=="true";
+	ConfigurationData::getInstance()->enableSecurity = StringUtil::toLower(srprps["ENABLE_SEC"])=="true";
+	ConfigurationData::getInstance()->enableFilters = StringUtil::toLower(srprps["ENABLE_FLT"])=="true";
+	ConfigurationData::getInstance()->enableControllers = StringUtil::toLower(srprps["ENABLE_CNT"])=="true";
+	ConfigurationData::getInstance()->enableContMpg = StringUtil::toLower(srprps["ENABLE_CNT_MPG"])=="true";
+	ConfigurationData::getInstance()->enableContPath = StringUtil::toLower(srprps["ENABLE_CNT_PTH"])=="true";
+	ConfigurationData::getInstance()->enableContExt = StringUtil::toLower(srprps["ENABLE_CNT_EXT"])=="true";
+	ConfigurationData::getInstance()->enableContRst = StringUtil::toLower(srprps["ENABLE_CNT_RST"])=="true";
+	ConfigurationData::getInstance()->enableExtra = StringUtil::toLower(srprps["ENABLE_EXT"])=="true";
+	ConfigurationData::getInstance()->enableScripts = StringUtil::toLower(srprps["ENABLE_SCR"])=="true";
+	ConfigurationData::getInstance()->enableSoap = StringUtil::toLower(srprps["ENABLE_SWS"])=="true";
+
     strVec cmpnames;
     try
     {
@@ -1231,14 +1243,9 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	HTTPResponseStatus::getStatusByCode(200);
 
-	srvHldr = new ReusableInstanceHolder(&createSrvTask, &initSrvTask, &destroySrvTask, 100000);
-	rdHldr = new ReusableInstanceHolder(&createRdTask, &initRdTask, &destroyRdTask, 100000);
-	h1Hldr = new ReusableInstanceHolder(&createHandler, &initHandler, &destroyHandler, 10000);
-	h2Hldr = new ReusableInstanceHolder(&createHandler, &initHandler, &destroyHandler, 10000);
-
 	unsigned int nthreads = hardware_concurrency();
 
-	ServiceHandler* handler = new HttpServiceHandler(h1Hldr, h2Hldr, cntEnc, &httpServiceFactoryMethod, nthreads, &httpReadFactoryMethod);
+	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &httpServiceFactoryMethod, nthreads, &httpReadFactoryMethod);
 	handler->start();
 
 	RequestReaderHandler reader(handler, true, sockfd);
@@ -1322,135 +1329,47 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 int CHServer::techunkSiz = 0;
 int CHServer::connKeepAlive = 10;
 int CHServer::maxReqHdrCnt = 100, CHServer::maxEntitySize = 2147483647;
-ReusableInstanceHolder* CHServer::srvHldr = NULL;
-ReusableInstanceHolder* CHServer::rdHldr = NULL;
-ReusableInstanceHolder* CHServer::h1Hldr = NULL;
-ReusableInstanceHolder* CHServer::h2Hldr = NULL;
 
 HttpServiceTask* CHServer::httpServiceFactoryMethod() {
-	return (HttpServiceTask*)srvHldr->pull(srvHldr);
+	return new ServiceTask();
 }
 
 HttpReadTask* CHServer::httpReadFactoryMethod() {
-	return (HttpReadTask*)rdHldr->pull(rdHldr);
+	return new HttpReadTask();
 }
 
 SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
 	SocketUtil sockUtil(fd);
 	if(SSLHandler::getInstance()->getIsSSL() && sockUtil.isHttp2())
 	{
-		return (SocketInterface*)h2Hldr->pull(&sockUtil);
-	}
-	else
-	{
-		return (SocketInterface*)h1Hldr->pull(&sockUtil);
-	}
-}
-
-Logger& CHServer::getLogger()
-{
-	return logger;
-}
-
-void* CHServer::createHandler(void* args) {
-	SocketUtil* sockUtil = (SocketUtil*)args;
-	if(SSLHandler::getInstance()->getIsSSL() && sockUtil->isHttp2())
-	{
 		Http2Handler* h = new Http2Handler(true, ConfigurationData::getInstance()->coreServerProperties.webPath);
-		h->fd = sockUtil->fd;
-		h->sockUtil.fd = sockUtil->fd;
-		h->sockUtil.ssl = sockUtil->ssl;
-		h->sockUtil.io = sockUtil->io;
+		h->fd = sockUtil.fd;
+		h->sockUtil.fd = sockUtil.fd;
+		h->sockUtil.ssl = sockUtil.ssl;
+		h->sockUtil.io = sockUtil.io;
 		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
 		h->sockUtil.closed = false;
-		h->sockUtil.inited = sockUtil->inited;
-		h->sockUtil.http2 = sockUtil->http2;
+		h->sockUtil.inited = sockUtil.inited;
+		h->sockUtil.http2 = sockUtil.http2;
 		return h;
 	}
 	else
 	{
 		Http11Handler* h = new Http11Handler(ConfigurationData::getInstance()->coreServerProperties.webPath,
 				techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
-		h->fd = sockUtil->fd;
-		h->sockUtil.fd = sockUtil->fd;
-		h->sockUtil.ssl = sockUtil->ssl;
-		h->sockUtil.io = sockUtil->io;
+		h->fd = sockUtil.fd;
+		h->sockUtil.fd = sockUtil.fd;
+		h->sockUtil.ssl = sockUtil.ssl;
+		h->sockUtil.io = sockUtil.io;
 		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
 		h->sockUtil.closed = false;
-		h->sockUtil.inited = sockUtil->inited;
-		h->sockUtil.http2 = sockUtil->http2;
+		h->sockUtil.inited = sockUtil.inited;
+		h->sockUtil.http2 = sockUtil.http2;
 		return h;
 	}
 }
 
-void CHServer::initHandler(void *item, void* args) {
-	SocketUtil* sockUtil = (SocketUtil*)args;
-	if(SSLHandler::getInstance()->getIsSSL() && sockUtil->isHttp2())
-	{
-		Http2Handler* h = (Http2Handler*)item;
-		h->init(true, ConfigurationData::getInstance()->coreServerProperties.webPath);
-		h->fd = sockUtil->fd;
-		h->sockUtil.closeSocket(false);
-		h->sockUtil.fd = sockUtil->fd;
-		h->sockUtil.ssl = sockUtil->ssl;
-		h->sockUtil.io = sockUtil->io;
-		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
-		h->sockUtil.closed = false;
-		h->sockUtil.inited = sockUtil->inited;
-		h->sockUtil.http2 = sockUtil->http2;
-	}
-	else
-	{
-		Http11Handler* h = (Http11Handler*)item;
-		if(h->handler!=NULL) {
-			delete h->handler;
-		}
-		h->init(ConfigurationData::getInstance()->coreServerProperties.webPath, techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
-		h->fd = sockUtil->fd;
-		h->sockUtil.closeSocket(false);
-		h->sockUtil.fd = sockUtil->fd;
-		h->sockUtil.ssl = sockUtil->ssl;
-		h->sockUtil.io = sockUtil->io;
-		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
-		h->sockUtil.closed = false;
-		h->sockUtil.inited = sockUtil->inited;
-		h->sockUtil.http2 = sockUtil->http2;
-	}
-}
-
-void CHServer::destroyHandler(void *item) {
-	SocketInterface* si = (SocketInterface*)item;
-	delete si;
-}
-
-void* CHServer::createSrvTask(void *args) {
-	return new ServiceTask((ReusableInstanceHolder*)args);
-}
-
-void CHServer::initSrvTask(void *item, void *args) {
-	ServiceTask* t = (ServiceTask*)item;
-	if(t->handlerRequest!=NULL) {
-		delete t->handlerRequest;
-	}
-	t->handlerRequest = NULL;
-}
-
-void CHServer::destroySrvTask(void *item) {
-	ServiceTask* t = (ServiceTask*)item;
-	delete t;
-}
-
-void* CHServer::createRdTask(void *args) {
-	return new HttpReadTask((ReusableInstanceHolder*)args);
-}
-
-void CHServer::initRdTask(void *item, void *args) {
-	HttpReadTask* t = (HttpReadTask*)item;
-	t->sif = NULL;
-	t->service = NULL;
-}
-
-void CHServer::destroyRdTask(void *item) {
-	HttpReadTask* t = (HttpReadTask*)item;
-	delete t;
+Logger& CHServer::getLogger()
+{
+	return logger;
 }

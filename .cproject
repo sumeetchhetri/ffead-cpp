@@ -40,6 +40,7 @@
 									<listOptionValue builtIn="false" value="/usr/local/opt/openssl/include/"/>
 									<listOptionValue builtIn="false" value="/usr/local/include/libmongoc-1.0/"/>
 									<listOptionValue builtIn="false" value="/usr/local/include/libbson-1.0/"/>
+									<listOptionValue builtIn="false" value="/usr/local/include/"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.60620658" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

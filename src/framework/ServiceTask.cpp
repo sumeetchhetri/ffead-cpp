@@ -22,7 +22,7 @@
 
 #include "ServiceTask.h"
 
-ServiceTask::ServiceTask(ReusableInstanceHolder* h): HttpServiceTask(h) {
+ServiceTask::ServiceTask() {
 	logger = LoggerFactory::getLogger("ServiceTask");
 }
 
@@ -575,25 +575,13 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		ConfigurationData::getInstance()->httpResponse.set(res);
 		CommonUtils::setAppName(req->getCntxt_name());
 
-		SecurityHandler::populateAuthDetails(req);
+		if(ConfigurationData::getInstance()->enableSecurity) {
+			SecurityHandler::populateAuthDetails(req);
 
-		if(req->hasCookie())
-		{
-			//if(!ConfigurationData::getInstance()->coreServerProperties.sessatserv)
-			req->getSession()->setSessionAttributes(req->getCookieInfo());
-			/*else
+			if(req->hasCookie())
 			{
-				std::string id = req->getCookieInfoAttribute("FFEADID");
-				logger << id << std::endl;
-				std::map<std::string,std::string> values;
-#ifdef INC_DSTC
-				if(ConfigurationData::getInstance()->coreServerProperties.sessservdistocache)
-					values = getSessionDataFromDistocache(id);
-				else
-#endif
-					values = getSessionDataFromFile(id);
-				req->getSession()->setSessionAttributes(values);
-			}*/
+				req->getSession()->setSessionAttributes(req->getCookieInfo());
+			}
 		}
 
 		Reflector reflector(ConfigurationData::getInstance()->dlib);
@@ -633,69 +621,83 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		long sessionTimeoutVar = ConfigurationData::getInstance()->coreServerProperties.sessionTimeout;
 
 		t1.end();
-		CommonUtils::tsService1 += t1.timerNanoSeconds();
+		CommonUtils::tsServicePre += t1.timerNanoSeconds();
 
-		t1.start();
 		bool isContrl = false;
-		try {
-			isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
-		} catch(const HTTPResponseStatus& status) {
-			res->setHTTPResponseStatus(status);
-			isContrl = true;
-		}
-		t1.end();
-		CommonUtils::tsService2 += t1.timerNanoSeconds();
 
-		t1.start();
-		bool hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
-		if(!isContrl && hasSecurity)
-		{
-			isContrl = SecurityHandler::handle(req, res, sessionTimeoutVar, reflector);
-			if(isContrl)
+		if(ConfigurationData::getInstance()->enableCors) {
+			t1.start();
+			bool isContrl = false;
+			try {
+				isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
+			} catch(const HTTPResponseStatus& status) {
+				res->setHTTPResponseStatus(status);
+				isContrl = true;
+			}
+			t1.end();
+			CommonUtils::tsServiceCors += t1.timerNanoSeconds();
+		}
+
+		bool hasSecurity = false;
+		if(ConfigurationData::getInstance()->enableSecurity) {
+			t1.start();
+			hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
+			if(!isContrl && hasSecurity)
 			{
+				isContrl = SecurityHandler::handle(req, res, sessionTimeoutVar, reflector);
+				if(isContrl)
+				{
+					ext = req->getExt();
+				}
+			}
+			t1.end();
+			CommonUtils::tsServiceSec += t1.timerNanoSeconds();
+		}
+
+		bool hasFilters = false;
+		if(ConfigurationData::getInstance()->enableFilters) {
+			t1.start();
+			hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
+			if(!isContrl && hasFilters)
+			{
+				FilterHandler::handleIn(req, ext, reflector);
+
+				isContrl = !FilterHandler::handle(req, res, ext, reflector);
+				if(isContrl)
+				{
+				}
 				ext = req->getExt();
 			}
+			t1.end();
+			CommonUtils::tsServiceFlt += t1.timerNanoSeconds();
 		}
-		t1.end();
-		CommonUtils::tsService3 += t1.timerNanoSeconds();
 
-		t1.start();
-		bool hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
-		if(!isContrl && hasFilters)
-		{
-			FilterHandler::handleIn(req, ext, reflector);
-
-			isContrl = !FilterHandler::handle(req, res, ext, reflector);
-			if(isContrl)
+		if(ConfigurationData::getInstance()->enableControllers) {
+			t1.start();
+			if(!isContrl)
 			{
+				isContrl = ControllerHandler::handle(req, res, ext, reflector);
+				if(isContrl)
+				{
+				}
+				ext = req->getExt();
 			}
-			ext = req->getExt();
+			t1.end();
+			CommonUtils::tsServiceCnt += t1.timerNanoSeconds();
 		}
-		t1.end();
-		CommonUtils::tsService4 += t1.timerNanoSeconds();
 
-		t1.start();
-		if(!isContrl)
-		{
-			isContrl = ControllerHandler::handle(req, res, ext, reflector);
-			if(isContrl)
+		if(ConfigurationData::getInstance()->enableExtra) {
+			t1.start();
+			if(!isContrl)
 			{
+				isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
+				if(isContrl)
+				{
+				}
 			}
-			ext = req->getExt();
+			t1.end();
+			CommonUtils::tsServiceExt += t1.timerNanoSeconds();
 		}
-		t1.end();
-		CommonUtils::tsService5 += t1.timerNanoSeconds();
-
-		t1.start();
-		if(!isContrl)
-		{
-			isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
-			if(isContrl)
-			{
-			}
-		}
-		t1.end();
-		CommonUtils::tsService6 += t1.timerNanoSeconds();
 
 		t1.start();
 		/*After going through the controller the response might be blank, just set the HTTP version*/
@@ -708,31 +710,34 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + req->getCurl();
 			if(!isContrl)
 			{
+				bool isWbsvc = false;
 #ifdef INC_WEBSVC
-				std::string wsName = ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()][wsUrl];
-				if(wsName!="")
-				{
-					if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=std::string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=std::string::npos
-							|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=std::string::npos)
+				if(ConfigurationData::getInstance()->enableSoap) {
+					std::string wsName = ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()][wsUrl];
+					if(wsName!="")
 					{
-						SoapHandler::handle(req, res, ConfigurationData::getInstance()->dlib, wsName);
-					}
-					else
-					{
-						res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+						isWbsvc = true;
+						if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=std::string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=std::string::npos
+								|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=std::string::npos)
+						{
+							SoapHandler::handle(req, res, ConfigurationData::getInstance()->dlib, wsName);
+						}
+						else
+						{
+							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+						}
 					}
 				}
 #endif
-				else
+				if(isWbsvc)
 				{
 					bool cntrlit = false;
 #ifdef INC_SCRH
-					cntrlit = ScriptHandler::handle(req, res, ConfigurationData::getInstance()->handoffs, ext);
-#endif
-					if(cntrlit)
-					{
+					if(ConfigurationData::getInstance()->enableScripts) {
+						cntrlit = ScriptHandler::handle(req, res, ConfigurationData::getInstance()->handoffs, ext);
 					}
-					else
+#endif
+					if(!cntrlit)
 					{
 						std::string pubUrlPath = req->getCntxt_root() + "/public/";
 						if(req->getUrl().find(pubUrlPath)!=0) {
@@ -752,16 +757,16 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			}
 		}
 
-		if(hasFilters) {
+		if(ConfigurationData::getInstance()->enableFilters && hasFilters) {
 			FilterHandler::handleOut(req, res, ext, reflector);
 		}
 
-		if(hasSecurity) {
+		if(ConfigurationData::getInstance()->enableSecurity && hasSecurity) {
 			storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
 		}
 
 		t1.end();
-		CommonUtils::tsService7 += t1.timerNanoSeconds();
+		CommonUtils::tsServicePost += t1.timerNanoSeconds();
 	}
 	catch(const std::exception& e)
 	{

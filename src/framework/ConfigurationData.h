@@ -201,6 +201,17 @@ class ConfigurationData {
 	bool embeddedServer;
 	bool apacheServer;
 	bool nginxServer;
+	bool enableCors;
+	bool enableSecurity;
+	bool enableFilters;
+	bool enableControllers;
+	bool enableContMpg;
+	bool enableContPath;
+	bool enableContExt;
+	bool enableContRst;
+	bool enableExtra;
+	bool enableScripts;
+	bool enableSoap;
 	static void clearInstance();
 	friend class ExtHandler;
 	friend class FilterHandler;
