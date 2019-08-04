@@ -402,16 +402,16 @@ bool SelEpolKqEvPrt::registerForEvent(SocketInterface* obj, const bool& isListen
 			//	ev.events = EPOLLIN | EPOLLEXCLUSIVE;
 			//} else {
 				#ifdef USE_EPOLL_LT
-					ev.events = EPOLLIN;
+					ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP;
 				#else
-					ev.events = EPOLLIN | EPOLLET;
+					ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
 				#endif
 			//}
 		#else
 			#ifdef USE_EPOLL_LT
-				ev.events = EPOLLIN;
+				ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP;
 			#else
-				ev.events = EPOLLIN | EPOLLET;
+				ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
 			#endif
 		#endif
 		ev.data.ptr = obj;

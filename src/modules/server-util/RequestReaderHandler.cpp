@@ -127,10 +127,9 @@ void* RequestReaderHandler::handle(void* inp) {
 					if(!si->isClosed()) {
 						ins->shi->registerReadRequest(si);
 					} else {
-						if(SSLHandler::getInstance()->getIsSSL() && si->sockUtil.isHttp2()) {
-							ins->shi->h2->push(si);
-						} else {
-							ins->shi->h1->push(si);
+						si->onClose();
+						if(si->allRequestsDone()) {
+							ins->shi->closeConnection(si);
 						}
 					}
 				}
