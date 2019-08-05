@@ -47,7 +47,7 @@ protected:
 	virtual void* getContext(void*)=0;
 	virtual void destroyContext(void*)=0;
 
-	void assignId(DataSourceEntityMapping& dsemp, ClassInfo& clas, void* entity);
+	void assignId(DataSourceEntityMapping& dsemp, ClassInfo* clas, void* entity);
 public:
 	static std::string BLANK;
 	DataSourceInterface();

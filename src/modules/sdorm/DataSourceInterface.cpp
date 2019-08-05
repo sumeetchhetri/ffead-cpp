@@ -23,7 +23,7 @@ DataSourceInterface::~DataSourceInterface() {
 
 bool DataSourceInterface::executeInsertInternal(Query& query, void* entity) {
 	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(query.getClassName());
-	ClassInfo clas = reflector->getClassInfo(query.getClassName(), appName);
+	ClassInfo* clas = reflector->getClassInfo(query.getClassName(), appName);
 
 	if(dsemp.isIdGenerate() && dsemp.getIdgendbEntityType()!="identity") {
 		assignId(dsemp, clas, entity);
@@ -39,12 +39,12 @@ bool DataSourceInterface::executeInsertInternal(Query& query, void* entity) {
 }
 
 
-void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo& clas, void* entity) {
+void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo* clas, void* entity) {
 	GenericObject idv;
 	next(dsemp, idv);
 	if(!idv.isNull())
 	{
-		Field fld = clas.getField(dsemp.getIdPropertyName());
+		Field fld = clas->getField(dsemp.getIdPropertyName());
 		std::vector<void *> valus;
 		if(GenericObject::isNumber32(idv.getTypeName()) && GenericObject::isNumber(fld.getType()))
 		{
@@ -78,7 +78,7 @@ void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo& cl
 		args argus;
 		argus.push_back(fld.getType());
 		std::string methname = "set"+StringUtil::capitalizedCopy(fld.getFieldName());
-		Method meth = clas.getMethod(methname,argus);
+		Method meth = clas->getMethod(methname,argus);
 		reflector->invokeMethodGVP(entity,meth,valus,true);
 	}
 }

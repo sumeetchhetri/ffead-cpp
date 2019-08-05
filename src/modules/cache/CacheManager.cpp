@@ -47,15 +47,15 @@ void CacheManager::initCache(const ConnectionProperties& props, const std::strin
 		StringUtil::split(v, meth, ".");
 		if(v.size()==2) {
 			CommonUtils::setAppName(appName);
-			ClassInfo clas = ref->getClassInfo(v.at(0), appName);
-			if(clas.getClassName()!="") {
+			ClassInfo* clas = ref->getClassInfo(v.at(0), appName);
+			if(clas->getClassName()!="") {
 				args argus;
 				vals valus;
-				const Constructor& ctor = clas.getConstructor(argus);
+				const Constructor& ctor = clas->getConstructor(argus);
 				void* _temp = ref->newInstanceGVP(ctor);
 				try {
 					if(_temp!=NULL) {
-						const Method& meth = clas.getMethod(v.at(1), argus);
+						const Method& meth = clas->getMethod(v.at(1), argus);
 						if(meth.getMethodName()!="")
 						{
 							ref->invokeMethodGVP(_temp, meth, valus);
