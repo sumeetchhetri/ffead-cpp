@@ -95,7 +95,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 		std::cout << "Could not load dynamic Library" << std::endl;
 		exit(0);
 	}
-	getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts);
+	getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts, &getInstance()->reflector);
 }
 
 void ConfigurationData::clearInstance() {

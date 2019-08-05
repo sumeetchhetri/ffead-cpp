@@ -70,9 +70,9 @@ public:
 	void* getBean(const Bean&);
 	void clear(const std::string& appName= "default");
 	void addBean(Bean& bean);
-	void initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts);
+	void initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts, Reflector* reflector);
 	void clearAllSingletonBeans(const std::map<std::string, bool>& servingContexts);
-	Reflector& getReflector();
+	Reflector* getReflector();
 	void release(void* instance, const std::string& beanName, const std::string& appName);
 };
 

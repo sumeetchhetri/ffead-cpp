@@ -360,7 +360,7 @@ bool Date::validateDate(const int& dd, const int& mm, const int& yyyy)
 	return error;
 }
 
-std::string dayInWords(const int d, const bool& sf = false) {
+std::string Date::dayInWords(const int d, const bool& sf) {
 	switch(d)
 	{
 		case 0:return sf?"SUN":"SUNDAY";
@@ -374,7 +374,7 @@ std::string dayInWords(const int d, const bool& sf = false) {
 	return "";
 }
 
-std::string monthInWords(const int m, const bool& sf = false) {
+std::string Date::monthInWords(const int m, const bool& sf) {
 	switch(m)
 	{
 		case 1: return sf?"JAN":"JANUARY";

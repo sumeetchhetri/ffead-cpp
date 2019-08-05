@@ -29,6 +29,7 @@
 #include "Thread.h"
 #include "LoggerFactory.h"
 #include "Task.h"
+#include "ConfigurationData.h"
 
 typedef void* (*JobFunction) (void*, const vals&);
 

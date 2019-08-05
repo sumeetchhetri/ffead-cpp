@@ -142,7 +142,7 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name) {
 		std::cerr << dlerror() << std::endl;
 		throw std::runtime_error("Cannot load application shared library");
 	}
-	t->reflector = new Reflector(t->dlib);
+	t->reflector = &(ConfigurationData::getInstance()->reflector);
 	std::map<std::string, DataSourceEntityMapping>::iterator it;
 	for(it=dsnMgr->mapping.getDseMap().begin();it!=dsnMgr->mapping.getDseMap().end();++it)
 	{

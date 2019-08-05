@@ -232,6 +232,11 @@ class ConfigurationData {
 	friend class ApplicationUtil;
 	friend class FFEADContext;
 	friend class SocketUtil;
+	friend class GenericObject;
+	friend class FFEADContext;
+	friend class JobScheduler;
+	friend class DataSourceManager;
+	friend class CacheManager;
 public:
 	static int getProcessId();
 	static bool isApacheServer();

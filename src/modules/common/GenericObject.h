@@ -13,7 +13,7 @@
 #include <typeinfo>
 #include <wchar.h>
 #include "XMLSerialize.h"
-#include "Reflector.h"
+#include "ConfigurationData.h"
 
 class GenericObject {
 	std::string typeName;

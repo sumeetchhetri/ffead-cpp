@@ -415,7 +415,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 
 void ServiceTask::handleWebsockOpen(WebSocketData* req) {
 
-	Reflector reflector(ConfigurationData::getInstance()->dlib);
+	Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 	std::string className;
 	std::map<std::string, std::map<std::string, std::string> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
@@ -450,7 +450,7 @@ void ServiceTask::handleWebsockOpen(WebSocketData* req) {
 
 void ServiceTask::handleWebsockClose(WebSocketData* req) {
 
-	Reflector reflector(ConfigurationData::getInstance()->dlib);
+	Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 	std::string className;
 	std::map<std::string, std::map<std::string, std::string> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
@@ -485,7 +485,7 @@ void ServiceTask::handleWebsockClose(WebSocketData* req) {
 
 void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* req, WebSocketData* response) {
 
-	Reflector reflector(ConfigurationData::getInstance()->dlib);
+	Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 	std::string className;
 	std::map<std::string, std::map<std::string, std::string> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;

@@ -323,7 +323,7 @@ void FFEADContext::release(void* instance, const std::string& beanName, const st
 
 void FFEADContext::clear(const std::string& appName)
 {
-	auto lt = objects.lock_table();
+	cuckoohash_map<std::string, void*>::locked_table lt = objects.lock_table();
 	cuckoohash_map<std::string, void*>::locked_table::iterator it;
 	for(it=lt.begin();it!=lt.end();++it) {
 		std::string k = StringUtil::replaceFirstCopy(it->first, appName, "");
@@ -372,11 +372,9 @@ void FFEADContext::clearAllSingletonBeans(const std::map<std::string, bool>& ser
 	cleared = true;
 }
 
-void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts)
+void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts, Reflector* reflector)
 {
-	if(reflector==NULL) {
-		reflector = new Reflector;
-	}
+	this->reflector = reflector;
 	std::map<std::string,Bean>::iterator beanIter;
 	logger << "Initializing singleton beans..." << std::endl;
 	for (beanIter=beans.begin();beanIter!=beans.end();beanIter++)
@@ -399,9 +397,9 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 	}
 }
 
-Reflector& FFEADContext::getReflector()
+Reflector* FFEADContext::getReflector()
 {
-	return *reflector;
+	return reflector;
 }
 
 Bean::Bean(const std::string& name, const std::string& value, const std::string& type, const std::string& scope, const bool& isInbuilt, const std::string& appName)

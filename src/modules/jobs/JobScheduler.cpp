@@ -79,7 +79,7 @@ void JobScheduler::init(const ElementList& tabs, const std::string& appName) {
 
 
 void JobScheduler::start() {
-	Reflector ref;
+	Reflector& ref = ConfigurationData::getInstance()->reflector;
 	if(instance==NULL || (instance!=NULL && instance->isStarted))
 		return;
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
@@ -182,7 +182,7 @@ void JobScheduler::JobTask::run() {
 		vals values;
 		timer.nextRunDate = Date();
 
-		Reflector ref;
+		Reflector& ref = ConfigurationData::getInstance()->reflector;
 		JobFunction f = (JobFunction)ref.getMethodInstance(meth);
 
 		while(doRun)

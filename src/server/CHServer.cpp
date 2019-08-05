@@ -1178,6 +1178,12 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		return;
 	}
 
+	//Load all the FFEADContext beans so that the same copy is shared by all process
+	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
+	logger << ("Initializing ffeadContext....") << std::endl;
+	ConfigurationData::getInstance()->initializeAllSingletonBeans();
+	logger << ("Initializing ffeadContext done....") << std::endl;
+
 	logger << ("Initializing WSDL files....") << std::endl;
 	ConfigurationHandler::initializeWsdls();
 	logger << ("Initializing WSDL files done....") << std::endl;
@@ -1201,12 +1207,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		pthread->execute();
 	}
 #endif
-
-	//Load all the FFEADContext beans so that the same copy is shared by all process
-	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
-	logger << ("Initializing ffeadContext....") << std::endl;
-	ConfigurationData::getInstance()->initializeAllSingletonBeans();
-	logger << ("Initializing ffeadContext done....") << std::endl;
 
 	//printf("server: waiting for connections...\n");
 	logger.info("Server: waiting for connections on " + ipport);

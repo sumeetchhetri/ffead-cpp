@@ -21,13 +21,8 @@ ClassInfo Reflector::nullclass;
 Reflector::Reflector()
 {
 	closedlib = true;
-	dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load reflection shared library");
-	}
-	dlibinstantiated = true;
+	dlib = NULL;
+	dlibinstantiated = false;
 }
 
 Reflector::Reflector(void* dlib)
