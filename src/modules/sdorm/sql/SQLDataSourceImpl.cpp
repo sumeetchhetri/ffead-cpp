@@ -480,7 +480,7 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 
 	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 
-	ClassInfo clas = reflector->getClassInfo(clasName, appName);
+	ClassInfo* clas = reflector->getClassInfo(clasName, appName);
 	std::string tableName = dsemp.getTableName();
 	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
 
@@ -1080,7 +1080,7 @@ void* SQLDataSourceImpl::executeQueryObject(Query& cquery)
 
 	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	std::string tableName = dsemp.getTableName();
-	ClassInfo clas = reflector->getClassInfo(clasName,appName);
+	ClassInfo* clas = reflector->getClassInfo(clasName,appName);
 	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
 	std::string query = "select ";
 	strMap& tabcolmap = this->mapping->getMappingForTable(tableName);
@@ -1628,7 +1628,7 @@ bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
 	std::string clasName = cquery.getClassName();
 
 	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
-	ClassInfo clas = reflector->getClassInfo(clasName,appName);
+	ClassInfo* clas = reflector->getClassInfo(clasName,appName);
 	fldMap fields = clas.getFields();
 
 	std::string tableName = dsemp.getTableName();
@@ -1758,7 +1758,7 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 	std::string query = "update "+tableName+" set ";
 
 	std::string vals;
-	ClassInfo clas = reflector->getClassInfo(clasName,appName);
+	ClassInfo* clas = reflector->getClassInfo(clasName,appName);
 	fldMap fields = clas.getFields();
 	std::vector<Field> remFields;
 	std::vector<std::string> vldFields;

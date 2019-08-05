@@ -100,7 +100,7 @@ inline std::map<int, std::string> DataSourceInterface::bulkInsert(std::vector<T>
 	T t;
 	std::string clasName = CastUtil::getClassName(t);
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
-	ClassInfo clas = reflector->getClassInfo(clasName, appName);
+	ClassInfo* clas = reflector->getClassInfo(clasName, appName);
 	std::vector<void*> dbEntities;
 	std::vector<void*> entities;
 	std::map<int, std::string> errors;
@@ -138,7 +138,7 @@ template<class T>
 inline std::map<int, std::string> DataSourceInterface::bulkUpdate(std::vector<T>& vecT) {
 	T t;
 	std::string clasName = CastUtil::getClassName(t);
-	ClassInfo clas = reflector->getClassInfo(clasName, appName);
+	ClassInfo* clas = reflector->getClassInfo(clasName, appName);
 	std::vector<void*> dbEntities;
 	std::vector<void*> entities;
 	std::map<int, std::string> errors;

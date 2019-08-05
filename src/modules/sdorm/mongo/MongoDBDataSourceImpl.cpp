@@ -716,7 +716,7 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName,
 	std::string tableName = dsemp.getTableName();
 	strMap clsprpmap = dsemp.getPropertyColumnMappingCS();
 	std::map<std::string, std::string>::iterator clsprpmapit;
-	ClassInfo clas = reflector->getClassInfo(clasName, appName);
+	ClassInfo* clas = reflector->getClassInfo(clasName, appName);
 
 	for(clsprpmapit=clsprpmap.begin();clsprpmapit!=clsprpmap.end();++clsprpmapit)
 	{
@@ -1001,7 +1001,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 
     DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 
-	ClassInfo clas = reflector->getClassInfo(clasName, appName);
+	ClassInfo* clas = reflector->getClassInfo(clasName, appName);
     args argus1;
 	Constructor ctor = clas.getConstructor(argus1);
 	void *instance = reflector->newInstanceGVP(ctor);
@@ -1475,7 +1475,7 @@ bool MongoDBDataSourceImpl::executeInsert(Query& query, void* entity) {
 	getBSONObjectFromObject(query.getClassName(), entity, data, true);
 
 	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(query.getClassName());
-	ClassInfo clas = reflector->getClassInfo(query.getClassName(), appName);
+	ClassInfo* clas = reflector->getClassInfo(query.getClassName(), appName);
 
 	bson_iter_t i;
 	bson_iter_init(&i, data);
