@@ -245,7 +245,7 @@ public:
 	static void setEmbeddedServer(bool isEmbeddedServer);
 	static bool isNginxServer();
 	static void setNginxServer(bool isNginxServer);
-	static const ClassInfo getClassInfo(const std::string&, const std::string& app= "");
+	static ClassInfo* getClassInfo(const std::string&, const std::string& app= "");
 	static bool isServingContext(const std::string& cntxtName);
 	static ConfigurationData* getInstance();
 	static SecurityProperties const& getSecurityProperties();

@@ -172,8 +172,8 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				args argus;
 				argus.push_back("Document*");
 				vals valus;
-				const ClassInfo& srv = ConfigurationData::getClassInfo(vwMap->find(req->getCurl())->second, req->getCntxt_name());
-				const Method& meth = srv.getMethod("getDocument", argus);
+				ClassInfo* srv = ConfigurationData::getClassInfo(vwMap->find(req->getCurl())->second, req->getCntxt_name());
+				const Method& meth = srv->getMethod("getDocument", argus);
 				if(meth.getMethodName()!="")
 				{
 					Document doc;
@@ -221,10 +221,10 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				try {
 					args argus;
 					vals valus;
-					const ClassInfo& srv = ConfigurationData::getClassInfo(tpeclasname, req->getCntxt_name());
+					ClassInfo* srv = ConfigurationData::getClassInfo(tpeclasname, req->getCntxt_name());
 					argus.push_back("HttpRequest*");
 					argus.push_back("Context*");
-					const Method& meth = srv.getMethod("getContext", argus);
+					const Method& meth = srv->getMethod("getContext", argus);
 					if(meth.getMethodName()!="")
 					{
 						Context cnt;

@@ -15,14 +15,12 @@
 */
 #include "Reflector.h"
 
-cuckoohash_map<std::string, ClassInfo> Reflector::_ciMap;
+cuckoohash_map<std::string, ClassInfo*> Reflector::_ciMap;
 ClassInfo Reflector::nullclass;
 
 Reflector::Reflector()
 {
-	closedlib = true;
 	dlib = NULL;
-	dlibinstantiated = false;
 }
 
 Reflector::Reflector(void* dlib)
@@ -31,58 +29,38 @@ Reflector::Reflector(void* dlib)
 	{
 		throw std::runtime_error("Cannot load reflection shared library");
 	}
-	closedlib = false;
 	this->dlib = dlib;
-	dlibinstantiated = false;
 }
 
 Reflector::~Reflector()
 {
-	if(dlibinstantiated && closedlib)
-	{
-		dlclose(dlib);
-	}
 }
 void Reflector::cleanUp()
 {
-	for (int var=0;var<(int)objectT.size();var++)
-	{
-		if(objectT.at(var)=="string" || objectT.at(var)=="int" || objectT.at(var)=="long"
-			|| objectT.at(var)=="double" || objectT.at(var)=="float" || objectT.at(var)=="bool"
-				|| objectT.at(var)=="char" || objectT.at(var)=="long long")
-			delete objects.at(var);
-		else
-		{
-			//destroy(objects.at(var),objectT.at(var));
-			delete objects.at(var);
-		}
-	}
-	objectT.clear();
-	objects.clear();
 }
 
-const ClassInfo Reflector::getClassInfo(const std::string& cs, const std::string& app)
+ClassInfo* Reflector::getClassInfo(const std::string& cs, const std::string& app)
 {
-	std::string className = cs;
 	std::string appName = CommonUtils::getAppName(app);
-	StringUtil::replaceAll(className, "::", "_");
-	std::string ca = appName +"-"+ className;
-	ClassInfo t;
+	std::string ca = appName +"-"+ cs;
+	if(cs.find("::")!=std::string::npos) {
+		StringUtil::replaceAll(ca, "::", "_");
+	}
 	if(_ciMap.contains(ca)) {
 		return _ciMap.find(ca);
 	}
-	std::string methodname = appName + "_"+className;
-	void *mkr = dlsym(dlib, methodname.c_str());
+	void *mkr = dlsym(dlib, ca.c_str());
 	typedef ClassInfo (*RfPtr) ();
 	RfPtr f = (RfPtr)mkr;
 	if(f!=NULL)
 	{
-		t = f();
+		ClassInfo* t = new ClassInfo();
+		*t = f();
 		_ciMap.insert(ca, t);
-		return _ciMap.find(ca);
+		return t;
 	}
 	else
-		return nullclass;
+		return &nullclass;
 }
 
 void Reflector::destroy(void* instance, std::string className, const std::string& app) {
@@ -712,9 +690,9 @@ void Reflector::destroy(void* instance, std::string className, const std::string
 	}
 	else
 	{
-		ClassInfo ci = getClassInfo(className, app);
-		if(ci.getDestRefName()!="") {
-			void *mkr = dlsym(dlib, ci.getDestRefName().c_str());
+		ClassInfo* ci = getClassInfo(className, app);
+		if(ci->getDestRefName()!="") {
+			void *mkr = dlsym(dlib, ci->getDestRefName().c_str());
 			typedef void (*RfPtr) (void*);
 			RfPtr f = (RfPtr)mkr;
 			if(f!=NULL)

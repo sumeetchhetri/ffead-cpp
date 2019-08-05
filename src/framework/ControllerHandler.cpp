@@ -91,8 +91,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		argus.push_back("HttpRequest*");
 		argus.push_back("HttpResponse*");
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getClassInfo(controller, req->getCntxt_name());
-		const Method& meth = srv.getMethod("service", argus);
+		ClassInfo* srv = ConfigurationData::getClassInfo(controller, req->getCntxt_name());
+		const Method& meth = srv->getMethod("service", argus);
 		if(meth.getMethodName()!="")
 		{
 			 valus.push_back(req);
@@ -243,7 +243,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		if(flag)
 		{
 			t.start();
-			const ClassInfo& srv = ConfigurationData::getClassInfo(rft.clas, req->getCntxt_name());
+			ClassInfo* srv = ConfigurationData::getClassInfo(rft.clas, req->getCntxt_name());
 			t.end();
 			CommonUtils::tsContRstCsiLkp += t.timerNanoSeconds();
 
@@ -559,7 +559,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			{
 				t.start();
 				isContrl = true;
-				const Method& meth = srv.getMethod(rft.name, argus);
+				const Method& meth = srv->getMethod(rft.name, argus);
 				if(meth.getMethodName()!="" && !invValue)
 				{
 					std::string outRetType = meth.getReturnType();

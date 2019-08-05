@@ -67,7 +67,7 @@ bool ConfigurationData::isServingContext(const std::string& cntxtName) {
 			&& getInstance()->servingContexts[cntxtName];
 }
 
-const ClassInfo ConfigurationData::getClassInfo(const std::string& cs, const std::string& app) {
+ClassInfo* ConfigurationData::getClassInfo(const std::string& cs, const std::string& app) {
 	return getInstance()->ffeadContext.reflector->getClassInfo(cs, app);
 }
 
@@ -105,6 +105,12 @@ void ConfigurationData::clearInstance() {
 }
 
 ConfigurationData::~ConfigurationData() {
+	if(dlib!=NULL) {
+		dlclose(dlib);
+	}
+	if(ddlib!=NULL) {
+		dlclose(ddlib);
+	}
 }
 
 Security::Security() {

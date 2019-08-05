@@ -7,6 +7,8 @@
 
 #include "GenericObject.h"
 
+Reflector* GenericObject::ref = NULL;
+
 void GenericObject::init(Reflector* r) {
 	ref = r;
 }

@@ -376,7 +376,7 @@ void CommonUtils::printStats() {
 	logger.info(f);
 	if(cReqs>0) {
 		std::string g = ("Controller Average (Cont_Cond: "+CastUtil::lexical_cast<std::string>(tsContMpg/cReqs)+", Mapg_Cond: "+CastUtil::lexical_cast<std::string>(tsContPath/cReqs)+", Ext_Cond: "+CastUtil::lexical_cast<std::string>(tsContExt/cReqs) +
-				", Cont_Exec: "+CastUtil::lexical_cast<std::string>(tsContExec/cReqs)+", Rest_Lkp: "+CastUtil::lexical_cast<std::string>(tsContRstLkp/cReqs)+", Rest_Exec: "+CastUtil::lexical_cast<std::string>(tsContRstExec/cReqs)+
+				", Cont_Exec: "+CastUtil::lexical_cast<std::string>(tsContExec/cReqs)+", Rest_Lkp: "+CastUtil::lexical_cast<std::string>(tsContRstLkp/cReqs)+", Rest_CsiLkp: "+CastUtil::lexical_cast<std::string>(tsContRstCsiLkp/cReqs)+
 				", Rest_InsLkp: "+CastUtil::lexical_cast<std::string>(tsContRstPrsArgs/cReqs)+", Rest_PrsArgs: "+CastUtil::lexical_cast<std::string>(tsContRstPrsArgs/cReqs)+", Rest_Exec: "+CastUtil::lexical_cast<std::string>(tsContRstExec/cReqs)+
 				", Rest_Ser: "+CastUtil::lexical_cast<std::string>(tsContRstSer/cReqs)+")\n");
 		logger.info(g);

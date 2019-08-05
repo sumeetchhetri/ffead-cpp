@@ -433,8 +433,8 @@ void ServiceTask::handleWebsockOpen(WebSocketData* req) {
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
 		args argus;
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
-		Method meth = srv.getMethod("onOpen", argus);
+		ClassInfo* srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
+		Method meth = srv->getMethod("onOpen", argus);
 		if(meth.getMethodName()!="")
 		{
 			// logger << ("WebSocket Controller " + className + " called") << std::endl;
@@ -468,8 +468,8 @@ void ServiceTask::handleWebsockClose(WebSocketData* req) {
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
 		args argus;
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
-		Method methc = srv.getMethod("onClose", argus);
+		ClassInfo* srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
+		Method methc = srv->getMethod("onClose", argus);
 		if(methc.getMethodName()!="")
 		{
 			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
@@ -503,12 +503,12 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
 		args argus;
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
+		ClassInfo* srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
 		argus.push_back("WebSocketData*");
 		valus.push_back(req);
 		argus.push_back("WebSocketData*");
 		valus.push_back(response);
-		Method methc = srv.getMethod("onMessage", argus);
+		Method methc = srv->getMethod("onMessage", argus);
 		if(methc.getMethodName()!="")
 		{
 			 //logger << ("WebSocket Controller " + className + " called") << std::endl;

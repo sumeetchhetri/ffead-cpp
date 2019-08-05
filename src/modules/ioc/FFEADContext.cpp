@@ -199,16 +199,16 @@ void* FFEADContext::getBean(const Bean& bean)
 	else if(bean.injectAs=="" || bean.injs.size()==0)
 	{
 		args argus;
-		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
-		const Constructor& ctor = clas.getConstructor(argus);
+		ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
+		const Constructor& ctor = clas->getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor);
 	}
 	else if(bean.injectAs=="prop")
 	{
 		args argus;
 		vals valus;
-		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
-		const Constructor& ctor = clas.getConstructor(argus);
+		ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
+		const Constructor& ctor = clas->getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
 		{
@@ -223,7 +223,7 @@ void* FFEADContext::getBean(const Bean& bean)
 				argus.push_back(beanc.clas);
 			else
 				throw std::runtime_error("Invalid or no bean type defined");
-			Method meth = clas.getMethod(methodName,argus);
+			Method meth = clas->getMethod(methodName,argus);
 			void *value = getBean(beanc);
 			valus.push_back(value);
 			reflector->invokeMethod<void*>(_temp,meth,valus);
@@ -235,7 +235,7 @@ void* FFEADContext::getBean(const Bean& bean)
 	{
 		args argus;
 		vals valus;
-		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
+		ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
 		{
 			Bean& beanc = injbns[bean.injs.at(var)];
@@ -250,15 +250,15 @@ void* FFEADContext::getBean(const Bean& bean)
 			void *value = getBean(beanc);
 			valus.push_back(value);
 		}
-		const Constructor& ctor = clas.getConstructor(argus);
+		const Constructor& ctor = clas->getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor,valus);
 	}
 	else if(bean.injectAs=="intf")
 	{
 		args argus;
 		vals valus;
-		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
-		const Constructor& ctor = clas.getConstructor(argus);
+		ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
+		const Constructor& ctor = clas->getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
 		{
@@ -271,7 +271,7 @@ void* FFEADContext::getBean(const Bean& bean)
 				argus.push_back(bean.types.at(var));
 			else
 				throw std::runtime_error("Invalid or no bean type defined");
-			Method meth = clas.getMethod(methodName,argus);
+			Method meth = clas->getMethod(methodName,argus);
 			void *value = getBean(beanc);
 			valus.push_back(value);
 			reflector->invokeMethod<void*>(_temp,meth,valus);

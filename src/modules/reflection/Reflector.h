@@ -46,18 +46,14 @@
 class Reflector
 {
 	static ClassInfo nullclass;
-	static cuckoohash_map<std::string, ClassInfo> _ciMap;
-	bool dlibinstantiated;
+	static cuckoohash_map<std::string, ClassInfo*> _ciMap;
 	void* dlib;
-	bool closedlib;
-	std::vector<std::string> objectT;
-	std::vector<void*> objects;
 	void cleanUp();
 public:
 	Reflector();
 	Reflector(void*);
 	virtual ~Reflector();
-	const ClassInfo getClassInfo(const std::string&, const std::string& app= "");
+	ClassInfo* getClassInfo(const std::string&, const std::string& app= "");
 	void* getMethodInstance(const Method& method)
 	{
 		void *mkr = dlsym(dlib, method.getRefName().c_str());
@@ -135,8 +131,6 @@ public:
 		{
 			obj = f(values,cleanVals);
 		}
-		//objectT.push_back(ctor.getName());
-		//objects.push_back(obj);
 		return obj;
 	}
 	void* newInstanceGVP(const Constructor& ctor, const bool& cleanVals = false)
@@ -175,8 +169,8 @@ public:
 	}
 	void* execOperator(void* instance, const std::string& operato, const vals& values, const std::string& cs, const bool& cleanVals = false, const std::string& app= "")
 	{
-		ClassInfo ci = getClassInfo(cs, app);
-		std::string oprfn = ci.getOperatorRefName(operato);
+		ClassInfo* ci = getClassInfo(cs, app);
+		std::string oprfn = ci->getOperatorRefName(operato);
 		void *resul = NULL;
 		void *mkr = dlsym(dlib, oprfn.c_str());
 		typedef void* (*RfPtr) (void*,vals,bool);
@@ -190,9 +184,9 @@ public:
 
 	void* getNewContainer(const std::string& cs, const std::string& contType, const std::string& app= "")
 	{
-		ClassInfo ci = getClassInfo(cs, app);
+		ClassInfo* ci = getClassInfo(cs, app);
 		void *obj = NULL;
-		std::string methodname = ci.getContRefName();
+		std::string methodname = ci->getContRefName();
 		int t = 1;
 		if(contType=="std::set" || contType=="std::multiset") {
 			t = 6;
@@ -209,8 +203,8 @@ public:
 	}
 	void destroyContainer(void* vec, const std::string& cs, const std::string& contType, const std::string& app= "")
 	{
-		ClassInfo ci = getClassInfo(cs, app);
-		std::string methodname = ci.getContRefName();
+		ClassInfo* ci = getClassInfo(cs, app);
+		std::string methodname = ci->getContRefName();
 		int t = -1;
 		if(contType=="std::set" || contType=="std::multiset") {
 			t = 0;
@@ -226,9 +220,9 @@ public:
 	}
 	int getContainerSize(void* vec, const std::string& cs, const std::string& contType, const std::string& app= "")
 	{
-		ClassInfo ci = getClassInfo(cs, app);
+		ClassInfo* ci = getClassInfo(cs, app);
 		int size = -1;
-		std::string methodname = ci.getContRefName();
+		std::string methodname = ci->getContRefName();
 		int t = 2;
 		if(contType=="std::set" || contType=="std::multiset") {
 			t = 7;
@@ -247,8 +241,8 @@ public:
 	}
 	void addToContainer(void* vec, void* instance, const std::string& cs, const std::string& contType, const std::string& app= "")
 	{
-		ClassInfo ci = getClassInfo(cs, app);
-		std::string methodname = ci.getContRefName();
+		ClassInfo* ci = getClassInfo(cs, app);
+		std::string methodname = ci->getContRefName();
 		int t = 3;
 		if(contType=="std::set" || contType=="std::multiset") {
 			t = 8;
@@ -264,9 +258,9 @@ public:
 	}
 	void* getContainerElementValueAt(void* vec, const int& pos, const std::string& cs, const std::string& contType, const std::string& app= "")
 	{
-		ClassInfo ci = getClassInfo(cs, app);
+		ClassInfo* ci = getClassInfo(cs, app);
 		void *obj = NULL;
-		std::string methodname = ci.getContRefName();
+		std::string methodname = ci->getContRefName();
 		int t = 4;
 		if(contType=="std::set" || contType=="std::multiset") {
 			t = 9;
@@ -283,9 +277,9 @@ public:
 	}
 	void* getContainerElementAt(void* vec, const int& pos, const std::string& cs, const std::string& contType, const std::string& app= "")
 	{
-		ClassInfo ci = getClassInfo(cs, app);
+		ClassInfo* ci = getClassInfo(cs, app);
 		void *obj = NULL;
-		std::string methodname = ci.getContRefName();
+		std::string methodname = ci->getContRefName();
 		int t = 5;
 		if(contType=="std::set" || contType=="std::multiset") {
 			t = 10;

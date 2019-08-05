@@ -206,7 +206,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 				vals valusi, valusa, valusg;
 
 				void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("login-handler_"+claz, req->getCntxt_name());
-				const ClassInfo& srv = ConfigurationData::getClassInfo(claz, req->getCntxt_name());
+				ClassInfo* srv = ConfigurationData::getClassInfo(claz, req->getCntxt_name());
 
 				Method methIsInitialized = srv.getMethod("isInitialized", argusi);
 				argusg.push_back("string");
