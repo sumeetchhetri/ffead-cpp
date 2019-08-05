@@ -84,9 +84,9 @@ void* BeanContext::lookup(const std::string& cmpName)
 		Reflector ref;
 		std::string classn;
 		classn = "Component_"+cmpName+"_Remote";
-		ClassInfo clas = ref.getClassInfo(classn);
+		ClassInfo* clas = ref.getClassInfo(classn);
 		args argus;
-		Constructor ctor = clas.getConstructor(argus);
+		Constructor ctor = clas->getConstructor(argus);
 		_temp = ref.newInstanceGVP(ctor);
 		RemoteComponentInt* intf  = static_cast<RemoteComponentInt*>(_temp);
 		intf->setBeanContext(*this);

@@ -130,14 +130,14 @@ void* ComponentHandler::service(void* arg)
 			instance->logger << ("Bean class = " + className) << std::endl;
 			std::string returnType = message.getAttribute("returnType");
 			std::string lang = message.getAttribute("lang");
-			ClassInfo clas = reflector.getClassInfo(className);
+			ClassInfo* clas = reflector.getClassInfo(className);
 			std::string methodName = message.getAttribute("name");
 			instance->logger << ("Bean service = " + methodName) << std::endl;
-			if(clas.getClassName()=="")
+			if(clas->getClassName()=="")
 			{
 				throw ComponentHandlerException("bean does not exist or is not regsitered\n",retValue);
 			}
-			Method meth = clas.getMethod(methodName,argus);
+			Method meth = clas->getMethod(methodName,argus);
 			if(meth.getMethodName()=="")
 			{
 				throw ComponentHandlerException("service does not exist for the bean or the bean does not exist or is not regsitered\n\n",retValue);
@@ -147,7 +147,7 @@ void* ComponentHandler::service(void* arg)
 			{
 				instance->logger << ("Got Bean service " + methodName) << std::endl;
 				args argus;
-				Constructor ctor = clas.getConstructor(argus);
+				Constructor ctor = clas->getConstructor(argus);
 				void *_temp = reflector.newInstanceGVP(ctor);
 				instance->logger << ("Got Bean") << std::endl;
 				if(returnType=="void" || returnType=="")

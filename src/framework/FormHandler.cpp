@@ -28,7 +28,7 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 	Reflector ref;
 	//logger << ele->getTagName() << std::endl;
 	//logger << ele->render() << std::endl;
-	ClassInfo binfo = ref.getClassInfo(ele->getAttribute("bean"), req->getCntxt_name());
+	ClassInfo* clas = ref.getClassInfo(ele->getAttribute("bean"), req->getCntxt_name());
 	ElementList eles = ele->getChildElements();
 	std::string json = "{";
 	for (unsigned int apps = 0; apps < eles.size(); apps++)
@@ -36,7 +36,7 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 		if(eles.at(apps).getTagName()=="field")
 		{
 			std::string name = eles.at(apps).getAttribute("name");
-			Field fld = binfo.getField(eles.at(apps).getAttribute("prop"));
+			Field fld = clas->getField(eles.at(apps).getAttribute("prop"));
 			if(fld.getType()=="std::string" || fld.getType()=="string")
 				json += "\""+eles.at(apps).getAttribute("prop")+"\": \"" + req->getParamValue(name) + "\",";
 			else
@@ -81,7 +81,7 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 	argus.push_back("HttpResponse*");
 	vals valus;
 	ClassInfo* srv = ConfigurationData::getClassInfo(ele->getAttribute("controller"), req->getCntxt_name());
-	Method meth = srv.getMethod("onSubmit", argus);
+	Method meth = srv->getMethod("onSubmit", argus);
 	if(meth.getMethodName()!="")
 	{
 		//logger << ("Fetching Formcontroller for " + ele->getAttribute("bean")) << std::endl;
