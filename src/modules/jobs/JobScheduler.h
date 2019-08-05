@@ -29,7 +29,7 @@
 #include "Thread.h"
 #include "LoggerFactory.h"
 #include "Task.h"
-#include "ConfigurationData.h"
+#include "GenericObject.h"
 
 typedef void* (*JobFunction) (void*, const vals&);
 

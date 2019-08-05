@@ -14,6 +14,7 @@
 #ifdef INC_REDISCACHE
 #include "RedisCacheImpl.h"
 #endif
+#include "GenericObject.h"
 
 class CacheManager {
 	Logger logger;

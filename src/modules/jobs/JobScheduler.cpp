@@ -79,7 +79,7 @@ void JobScheduler::init(const ElementList& tabs, const std::string& appName) {
 
 
 void JobScheduler::start() {
-	Reflector& ref = ConfigurationData::getInstance()->reflector;
+	Reflector* ref = GenericObject::getReflector();
 	if(instance==NULL || (instance!=NULL && instance->isStarted))
 		return;
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
@@ -93,7 +93,7 @@ void JobScheduler::start() {
 		std::string appName = instance->configs.at(dn).app;
 		if(clas!="" && method!="" && cron!="" && name!="")
 		{
-			ClassInfo claz = ref.getClassInfo(clas, appName);
+			ClassInfo claz = ref->getClassInfo(clas, appName);
 			logger << "JobScheduler - Got class " + claz.getClassName() << std::endl;
 			if(claz.getClassName()!="")
 			{
@@ -105,8 +105,8 @@ void JobScheduler::start() {
 
 				if(meth.getMethodName()!="" && ctor.getName()!="")
 				{
-					void* objIns = ref.newInstanceGVP(ctor);
-					JobFunction f = (JobFunction)ref.getMethodInstance(meth);
+					void* objIns = ref->newInstanceGVP(ctor);
+					JobFunction f = (JobFunction)ref->getMethodInstance(meth);
 
 					logger << "JobScheduler - Got objins,func " << objIns << "," << f << std::endl;
 
@@ -182,8 +182,8 @@ void JobScheduler::JobTask::run() {
 		vals values;
 		timer.nextRunDate = Date();
 
-		Reflector& ref = ConfigurationData::getInstance()->reflector;
-		JobFunction f = (JobFunction)ref.getMethodInstance(meth);
+		Reflector* ref = GenericObject::getReflector();
+		JobFunction f = (JobFunction)ref->getMethodInstance(meth);
 
 		while(doRun)
 		{
@@ -230,7 +230,7 @@ void JobScheduler::JobTask::run() {
 		}
 
 		if(objIns!=NULL) {
-			ref.destroy(objIns, clas, appName);
+			ref->destroy(objIns, clas, appName);
 			objIns = NULL;
 		}
 	} catch(const std::exception& ex) {

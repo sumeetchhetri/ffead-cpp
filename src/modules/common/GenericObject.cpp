@@ -7,6 +7,14 @@
 
 #include "GenericObject.h"
 
+void GenericObject::init(Reflector* r) {
+	ref = r;
+}
+
+Reflector* GenericObject::getReflector() {
+	return ref;
+}
+
 GenericObject::GenericObject() {
 	objVal = NULL;
 }
@@ -70,7 +78,7 @@ void GenericObject::internalCopy(const GenericObject& obj) {
 
 void GenericObject::internalClear() {
 	if(objVal!=NULL) {
-		ConfigurationData::getInstance()->reflector.destroy(objVal, typeName);
+		ref->destroy(objVal, typeName);
 		objVal = NULL;
 	}
 	if(cstr.size()>0) {
