@@ -597,7 +597,7 @@ std::string MongoDBDataSourceImpl::getQueryForRelationship(const std::string& co
 	return qstr;
 }
 
-void MongoDBDataSourceImpl::storeProperty(const ClassInfo& clas, void* t, void* colV, const Field& fe)
+void MongoDBDataSourceImpl::storeProperty(ClassInfo* clas, void* t, void* colV, const Field& fe)
 {
 	if(colV!=NULL)
 	{
@@ -607,7 +607,7 @@ void MongoDBDataSourceImpl::storeProperty(const ClassInfo& clas, void* t, void* 
 		vals valus;
 		valus.push_back(colV);
 		std::string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
-		Method meth = clas.getMethod(methname, argus);
+		Method meth = clas->getMethod(methname, argus);
 		reflector->invokeMethod<void*>(t,meth,valus,false);
 	}
 }
@@ -722,11 +722,11 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName,
 	{
 		std::string prop = clsprpmapit->first;
 		std::string col = clsprpmapit->second;
-		Field pf = clas.getField(prop);
+		Field pf = clas->getField(prop);
 		args argus;
 		std::vector<void *> valus;
 		std::string methname = "get"+StringUtil::capitalizedCopy(prop);
-		Method meth = clas.getMethod(methname,argus);
+		Method meth = clas->getMethod(methname,argus);
 
 		//MongoDB has the _id attribute as the id for an GenericObject
 		if(dsemp.getIdPropertyName()==prop) {
@@ -1003,7 +1003,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 
 	ClassInfo* clas = reflector->getClassInfo(clasName, appName);
     args argus1;
-	Constructor ctor = clas.getConstructor(argus1);
+	Constructor ctor = clas->getConstructor(argus1);
 	void *instance = reflector->newInstanceGVP(ctor);
 
     while ( bson_iter_next( &i ) ){
@@ -1020,11 +1020,11 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
         	fieldName = dsemp.getPropertyForColumn(key);
         }
 
-        Field fe = clas.getField(fieldName);
+        Field fe = clas->getField(fieldName);
 
         //Every property should have a column mapping
         /*if(fe.getFieldName()=="") {
-        	fe = clas.getField(key);
+        	fe = clas->getField(key);
         }*/
         if(fe.getFieldName()=="")
         	continue;

@@ -49,7 +49,7 @@ class MongoDBDataSourceImpl: public DataSourceInterface {
 	std::string getQueryForRelationship(const std::string& column, const std::string& type, void* val);
 	void getMapOfProperties(bson_t* data, std::map<std::string, GenericObject>* map);
 	void* getObject(bson_t* data, uint8_t* buf, uint32_t len, const std::string& clasName);
-	void storeProperty(const ClassInfo& clas, void* t, void* colV, const Field& fe);
+	void storeProperty(ClassInfo* clas, void* t, void* colV, const Field& fe);
 	void* getResults(const std::string& tableNm, Query& cquery, bson_t* fields, bson_t* querySpec, const bool& isObj, const bool& isCountQuery);
 	void* getResults(const std::string& tableNm, QueryBuilder& qb, bson_t* fields, bson_t* query, const bool& isObj);
 	Connection* _conn();

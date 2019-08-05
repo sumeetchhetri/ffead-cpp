@@ -53,11 +53,11 @@ class SQLDataSourceImpl: public DataSourceInterface {
 	Query fromQueryBuilder(QueryBuilder& qb);
 	void* executeQueryObject(Query& cquery);
 	void* executeQueryInternal(Query& query, const bool& isObj);
-	int storeProperty(ClassInfo& clas, void* t, int var, const std::string& fieldName, std::string& fldVal);
+	int storeProperty(ClassInfo* clas, void* t, int var, const std::string& fieldName, std::string& fldVal);
 	int getProperty(const int& dataType, const int& columnSize, std::map<std::string, GenericObject>& colValMap, const std::string& colName, const int& var);
 	long getNumRows(const std::string& clasName);
 	void empty(const std::string& clasName);
-	void storePropertyInt(const ClassInfo& clas, void* t, void* colV, const Field& fe, int& var);
+	void storePropertyInt(ClassInfo* clas, void* t, void* colV, const Field& fe, int& var);
 public:
 	SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping);
 	~SQLDataSourceImpl();
