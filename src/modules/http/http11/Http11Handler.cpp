@@ -11,13 +11,11 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	if(handler!=NULL) {
 		return handler->readRequest(context, pending, reqPos);
 	}
-	Timer t;
-	t.start();
+
 	if(readFrom()) {
-		t.end();
-		CommonUtils::tsRead += t.timerNanoSeconds();
 		return NULL;
 	}
+
 	HttpRequest* request = NULL;
 	if(!isHeadersDone && buffer.find("\r\n\r\n")!=std::string::npos)
 	{
@@ -110,12 +108,8 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		isHeadersDone = false;
 		void* temp = request;
 		request = NULL;
-		t.end();
-		CommonUtils::tsRead += t.timerNanoSeconds();
 		return temp;
 	}
-	t.end();
-	CommonUtils::tsRead += t.timerNanoSeconds();
 	return NULL;
 }
 
@@ -182,8 +176,6 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 	if(handler!=NULL) {
 		return handler->writeResponse(req, res, context);
 	}
-	Timer t;
-	t.start();
 
 	HttpRequest* request = (HttpRequest*)req;
 	HttpResponse* response = (HttpResponse*)res;
@@ -195,8 +187,6 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 		}
 		delete response;
 		response = NULL;
-		t.end();
-		CommonUtils::tsWrite += t.timerNanoSeconds();
 		return true;
 	}
 
@@ -239,8 +229,6 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 	}
 	delete response;
 	response = NULL;
-	t.end();
-	CommonUtils::tsWrite += t.timerNanoSeconds();
 	return true;
 }
 void Http11Handler::onOpen(){

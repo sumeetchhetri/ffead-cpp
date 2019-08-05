@@ -31,6 +31,20 @@ ConfigurationData::ConfigurationData() {
 	embeddedServer = false;
 	apacheServer = false;
 	nginxServer = false;
+	embeddedServer = false;
+	apacheServer = false;
+	nginxServer = false;
+	enableCors = false;
+	enableSecurity = false;
+	enableFilters = false;
+	enableControllers = false;
+	enableContMpg = false;
+	enableContPath = false;
+	enableContExt = false;
+	enableContRst = false;
+	enableExtra = false;
+	enableScripts = false;
+	enableSoap = false;
 }
 
 ConfigurationData* ConfigurationData::getInstance() {
@@ -72,6 +86,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 		std::cout << "Could not load Library" << std::endl;
 		exit(0);
 	}
+	getInstance()->reflector = Reflector(getInstance()->dlib);
 
 	getInstance()->ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 	if(getInstance()->ddlib==NULL)
@@ -90,17 +105,14 @@ void ConfigurationData::clearInstance() {
 }
 
 ConfigurationData::~ConfigurationData() {
-	// TODO Auto-generated destructor stub
 }
 
-Security::Security()
-{
+Security::Security() {
 	sessTimeout = 0;
 	logger = LoggerFactory::getLogger("Security");
 }
 
-Security::~Security()
-{
+Security::~Security() {
 }
 
 bool Security::isLoginConfigured()
@@ -186,7 +198,6 @@ SecureAspect Security::matchesPath(const std::string& cntxtName, std::string url
 	for (it=secures.begin();it!=secures.end();++it) {
 		SecureAspect secureAspect = it->second;
 		std::string pathurl = secureAspect.path;
-		//logger << ("Checking security path " + pathurl + " against url " + url) << std::endl;
 		if(ConfigurationData::urlMatchesPath(cntxtName, pathurl, url)) {
 			aspect = secureAspect;
 		}
@@ -196,7 +207,6 @@ SecureAspect Security::matchesPath(const std::string& cntxtName, std::string url
 
 bool ConfigurationData::urlMatchesPath(const std::string& cntxtName, std::string pathurl, std::string url)
 {
-	//getInstance()->logger << ("Checking path " + pathurl + " against url " + url) << std::endl;
 	if(pathurl==url)
 	{
 		return true;

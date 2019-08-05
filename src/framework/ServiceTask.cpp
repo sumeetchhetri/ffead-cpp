@@ -31,7 +31,7 @@ ServiceTask::~ServiceTask() {
 
 void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std::string& value)
 {
-	std::string lockfil = serverRootDirectory+"/tmp/"+sessionId+".lck";
+	std::string lockfil = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory+"/tmp/"+sessionId+".lck";
 	std::ifstream ifs(lockfil.c_str(), std::ios::binary);
 	int counter = 5000/100;
 	while(ifs.is_open()) {
@@ -41,7 +41,7 @@ void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std:
 		if(counter--<=0)break;
 	}
 
-	std::string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
+	std::string filen = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory+"/tmp/"+sessionId+".sess";
 	logger << ("Saving session to file " + filen) << std::endl;
 	std::ofstream ofs(filen.c_str(), std::ios::binary);
 	ofs.write(value.c_str(),value.length());
@@ -53,7 +53,7 @@ void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std:
 std::map<std::string,std::string> ServiceTask::getSessionDataFromFile(const std::string& sessionId)
 {
 	std::map<std::string,std::string> valss;
-	std::string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
+	std::string filen = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory+"/tmp/"+sessionId+".sess";
 	std::ifstream ifs(filen.c_str(), std::ios::binary);
 	std::string tem,all;
 	while(getline(ifs,tem))
@@ -528,7 +528,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 	t1.start();
 
 	res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-	this->serverRootDirectory = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory;
 	try
 	{
 		if(req->getRequestParseStatus().getCode()>0)
@@ -538,13 +537,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			return;
 		}
 
-		std::string& webpath = ConfigurationData::getInstance()->coreServerProperties.webPath;
-
 		if(req->getActUrlParts().size()==0)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 			res->addHeaderValue(HttpResponse::Connection, "close");
-			logger << "Context not found, Closing connection..." << std::endl;
 			return;
 		}
 
@@ -568,7 +564,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		}
 
 		req->normalizeUrl();
-		req->setCntxt_root(webpath+req->getCntxt_name());
+		req->setCntxt_root(ConfigurationData::getInstance()->coreServerProperties.webPath+req->getCntxt_name());
 		req->updateContent();
 
 		ConfigurationData::getInstance()->httpRequest.set(req);
@@ -584,7 +580,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			}
 		}
 
-		Reflector reflector(ConfigurationData::getInstance()->dlib);
+		Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 #ifdef INC_APPFLOW
 		/*if(ConfigurationData::getInstance()->applicationFlowMap.find(req->getCntxt_name())!=
@@ -618,7 +614,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 #endif
 
 		std::string ext = req->getExt();
-		long sessionTimeoutVar = ConfigurationData::getInstance()->coreServerProperties.sessionTimeout;
 
 		t1.end();
 		CommonUtils::tsServicePre += t1.timerNanoSeconds();
@@ -627,7 +622,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		if(ConfigurationData::getInstance()->enableCors) {
 			t1.start();
-			bool isContrl = false;
 			try {
 				isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
 			} catch(const HTTPResponseStatus& status) {
@@ -644,7 +638,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
 			if(!isContrl && hasSecurity)
 			{
-				isContrl = SecurityHandler::handle(req, res, sessionTimeoutVar, reflector);
+				isContrl = SecurityHandler::handle(req, res, ConfigurationData::getInstance()->coreServerProperties.sessionTimeout, reflector);
 				if(isContrl)
 				{
 					ext = req->getExt();
@@ -663,9 +657,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				FilterHandler::handleIn(req, ext, reflector);
 
 				isContrl = !FilterHandler::handle(req, res, ext, reflector);
-				if(isContrl)
-				{
-				}
 				ext = req->getExt();
 			}
 			t1.end();
@@ -677,9 +668,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			if(!isContrl)
 			{
 				isContrl = ControllerHandler::handle(req, res, ext, reflector);
-				if(isContrl)
-				{
-				}
 				ext = req->getExt();
 			}
 			t1.end();
@@ -691,9 +679,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			if(!isContrl)
 			{
 				isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
-				if(isContrl)
-				{
-				}
 			}
 			t1.end();
 			CommonUtils::tsServiceExt += t1.timerNanoSeconds();
@@ -705,14 +690,12 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		if(req->getMethod()!="TRACE" && !res->isDone())
 		{
-			//logger << ("Started processing request - phase II") << std::endl;
-
-			std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + req->getCurl();
 			if(!isContrl)
 			{
 				bool isWbsvc = false;
 #ifdef INC_WEBSVC
 				if(ConfigurationData::getInstance()->enableSoap) {
+					std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + req->getCurl();
 					std::string wsName = ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()][wsUrl];
 					if(wsName!="")
 					{
@@ -762,7 +745,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		}
 
 		if(ConfigurationData::getInstance()->enableSecurity && hasSecurity) {
-			storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
+			storeSessionAttributes(res, req, ConfigurationData::getInstance()->coreServerProperties.sessionTimeout, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
 		}
 
 		t1.end();

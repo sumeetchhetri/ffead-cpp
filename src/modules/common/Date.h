@@ -40,6 +40,7 @@ class Date {
 	std::string monthAbbr;
 	int year;
 	int day;
+	int dayOfYear;
 	std::string dayName;
 	std::string dayAbbr;
 	int hours;
@@ -47,10 +48,12 @@ class Date {
 	int seconds;
 	std::string hourdesignation;
 	long long nanoseconds;
+	long timeZoneOffsetSecs;
 	float timeZoneOffset;
 	std::string timeZone;
 	int weekday;
 	int pmHours;
+	bool isDLS;
 	long long epochTime;
 	void populateDay();
 	void populateMonth();
@@ -65,6 +68,8 @@ class Date {
 	void compare(const Date& d, unsigned long long &thisss, unsigned long long &thtsss) const;
 	std::string getMon(const std::string& m) const;
 public:
+	static std::string dayInWords(const int d, const bool& sf = false);
+	static std::string monthInWords(const int m, const bool& sf = false);
 	Date(const bool& utc= false);
 	Date(struct tm* tim);
 	Date(const int& yyyy, const std::string& mmm, const int& dd);

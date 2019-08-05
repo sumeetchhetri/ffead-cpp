@@ -65,6 +65,9 @@ protected:
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
 	void pushResponse(void* request, void* response, void* context, int reqPos) {
+		Timer t;
+		t.start();
+
 		if(isCurrentRequest(reqPos)) {
 			endRequest();
 			writeResponse(request, response, context);
@@ -85,6 +88,9 @@ protected:
 			}
 			m.unlock();
 		}
+
+		t.end();
+		CommonUtils::tsWrite += t.timerNanoSeconds();
 	}
 	void init(const SOCKET& fd) {
 		reqPos = 0;

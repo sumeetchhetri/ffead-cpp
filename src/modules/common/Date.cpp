@@ -23,15 +23,14 @@
 
 Date::Date(const bool& utc)
 {
-	//logger = //logger::get//logger("Date");
 	time_t rawtime;
-	struct tm * timeinfo;
+	struct tm timeinfo;
 	time (&rawtime);
 	if(utc)
-		timeinfo = gmtime(&rawtime);
+		gmtime_r(&rawtime, &timeinfo);
 	else
-		timeinfo = localtime(&rawtime);
-	populateDateFields(timeinfo);
+		localtime_r(&rawtime, &timeinfo);
+	populateDateFields(&timeinfo);
 }
 
 int Date::getDay() const {
@@ -106,63 +105,48 @@ void Date::populateEpochAndTimeZone(const bool& utc)
 {
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
-	this->epochTime = en.tv_sec;
-	this->nanoseconds = en.tv_nsec;
+	epochTime = en.tv_sec;
+	nanoseconds = en.tv_nsec;
 
 	time_t rawtime;
-	struct tm * timeinfo;
+	struct tm t;
 	time (&rawtime);
 	if(utc)
-		timeinfo = gmtime(&rawtime);
+		gmtime_r(&rawtime, &t);
 	else
-		timeinfo = localtime(&rawtime);
+		localtime_r(&rawtime, &t);
 
-	std::string tem;
-	char buffer[20];
-	//Sun May 11 02:03:25 2014 Sunday May 7 AM +0530 IST 02
-	strftime(buffer, 80, "%z %Z", timeinfo);
-	tem.append(buffer);
-	StringUtil::replaceAll(tem, "\n", "");
-	StringUtil::replaceAll(tem, "  ", " ");
-	std::vector<std::string> temp, vemp;
-	StringUtil::split(temp, tem, (" "));
-	this->timeZoneOffset = (CastUtil::lexical_cast<float>(temp.at(0)) / (float)100);
-	this->timeZone = StringUtil::toUpperCopy(temp.at(1));
+	timeZoneOffsetSecs = t.tm_gmtoff;
+	timeZoneOffset = timeZoneOffsetSecs/60;
+	timeZone = std::string(t.tm_zone);
+	isDLS = t.tm_isdst==1;	/* Daylight Savings Time flag */
 }
 
-void Date::populateDateFields(struct tm* timeinfo)
+void Date::populateDateFields(struct tm* t)
 {
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
-	this->epochTime = en.tv_sec;
-	this->nanoseconds = en.tv_nsec;
 
-	std::string tem;
-	char buffer[80];
-	//Sun May 11 02:03:25 2014 Sunday May 7 AM +0530 IST 02
-	strftime(buffer, 80, "%a %b %d %T %Y %A %B %u %p %z %Z %I %m", timeinfo);
-	tem.append(buffer);
-	StringUtil::replaceAll(tem, "\n", "");
-	StringUtil::replaceAll(tem, "  ", " ");
-	std::vector<std::string> temp, vemp;
-	StringUtil::split(temp, tem, (" "));
-	this->dayAbbr = StringUtil::toUpperCopy(temp.at(0));
-	this->monthAbbr = StringUtil::toUpperCopy(temp.at(1));
-	this->day = CastUtil::lexical_cast<int>(temp.at(2));
-	StringUtil::split(vemp, temp.at(3), (":"));
-	this->hours = CastUtil::lexical_cast<int>(vemp.at(0));
-	this->minutes = CastUtil::lexical_cast<int>(vemp.at(1));
-	this->seconds = CastUtil::lexical_cast<int>(vemp.at(2));
-
-	this->year = CastUtil::lexical_cast<int>(temp.at(4));
-	this->dayName = StringUtil::toUpperCopy(temp.at(5));
-	this->monthName = StringUtil::toUpperCopy(temp.at(6));
-	this->weekday = CastUtil::lexical_cast<int>(temp.at(7));
-	this->hourdesignation = StringUtil::toUpperCopy(temp.at(8));
-	this->timeZoneOffset = (CastUtil::lexical_cast<float>(temp.at(9)) / (float)100);
-	this->timeZone = StringUtil::toUpperCopy(temp.at(10));
-	this->pmHours = CastUtil::lexical_cast<int>(temp.at(11));
-	this->month = CastUtil::lexical_cast<int>(temp.at(12));
+	epochTime = en.tv_sec;
+	nanoseconds = en.tv_nsec;
+	seconds = t->tm_sec;		/* seconds after the minute [0-60] */
+	minutes = t->tm_min;		/* minutes after the hour [0-59] */
+	hours = t->tm_hour;	/* hours since midnight [0-23] */
+	pmHours = hours>=13?(hours-12):hours;
+	hourdesignation = hours>=12?"PM":"AM";
+	day = t->tm_mday;	/* day of the month [1-31] */
+	dayOfYear = t->tm_yday;
+	month = t->tm_mon;		/* months since January [0-11] */
+	monthName = monthInWords(month);
+	monthAbbr = monthInWords(month, true);
+	year = t->tm_year + 1900;	/* years since 1900 */
+	weekday = t->tm_wday;
+	dayName = dayInWords(weekday);
+	dayAbbr = dayInWords(weekday, true);
+	timeZoneOffsetSecs = t->tm_gmtoff;
+	timeZoneOffset = timeZoneOffsetSecs/60;
+	timeZone = std::string(t->tm_zone);
+	isDLS = t->tm_isdst==1;	/* Daylight Savings Time flag */
 }
 
 Date::Date(struct tm* timeinfo)
@@ -171,7 +155,6 @@ Date::Date(struct tm* timeinfo)
 }
 
 Date::~Date() {
-	// TODO Auto-generated destructor stub
 }
 
 
@@ -375,6 +358,39 @@ bool Date::validateDate(const int& dd, const int& mm, const int& yyyy)
 			error = false;
 	}
 	return error;
+}
+
+std::string dayInWords(const int d, const bool& sf = false) {
+	switch(d)
+	{
+		case 0:return sf?"SUN":"SUNDAY";
+		case 1:return sf?"MON":"MONDAY";
+		case 2:return sf?"TUE":"TUESDAY";
+		case 3:return sf?"WED":"WEDNESDAY";
+		case 4:return sf?"THU":"THURSDAY";
+		case 5:return sf?"FRI":"FRIDAY";
+		case 6:return sf?"SAT":"SATURDAY";
+	}
+	return "";
+}
+
+std::string monthInWords(const int m, const bool& sf = false) {
+	switch(m)
+	{
+		case 1: return sf?"JAN":"JANUARY";
+		case 2: return sf?"FEB":"FEBRUARY";
+		case 3: return sf?"MAR":"MARCH";
+		case 4: return sf?"APR":"APRIL";
+		case 5: return sf?"MAY":"MAY";
+		case 6: return sf?"JUN":"JUNE";
+		case 7: return sf?"JUL":"JULY";
+		case 8: return sf?"AUG":"AUGUST";
+		case 9: return sf?"SEP":"SEPTEMBER";
+		case 10: return sf?"OCT":"OCTOBER";
+		case 11: return sf?"NOV":"NOVEMBER";
+		case 12: return sf?"DEC":"DECEMBER";
+	}
+	return "";
 }
 
 //Based on program by Stanley Wong

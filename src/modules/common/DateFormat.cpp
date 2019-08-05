@@ -23,12 +23,9 @@
 #include "DateFormat.h"
 
 DateFormat::DateFormat() {
-	// TODO Auto-generated constructor stub
-
 }
 
 DateFormat::~DateFormat() {
-	// TODO Auto-generated destructor stub
 }
 
 

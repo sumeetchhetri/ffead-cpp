@@ -57,7 +57,6 @@
 class ServiceTask : public HttpServiceTask
 {
 	Logger logger;
-	std::string serverRootDirectory;
 	void saveSessionDataToFile(const std::string& sessionId, const std::string& value);
 	std::map<std::string,std::string> getSessionDataFromFile(const std::string& sessionId);
 	void saveSessionDataToDistocache(const std::string& sessionId, std::map<std::string,std::string>& sessAttrs);

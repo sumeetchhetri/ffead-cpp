@@ -197,6 +197,7 @@ class ConfigurationData {
 	ThreadLocal httpRequest;
 	ThreadLocal httpResponse;
 	void* dlib;
+	Reflector reflector;
 	void* ddlib;
 	bool embeddedServer;
 	bool apacheServer;

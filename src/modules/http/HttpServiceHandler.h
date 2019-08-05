@@ -21,6 +21,7 @@ class HttpServiceTask : public Task {
 	friend class CHServer;
 public:
 	virtual ~HttpServiceTask();
+	HttpServiceTask();
 	HttpServiceTask(ReusableInstanceHolder* h);
 	virtual void handle(HttpRequest* request, HttpResponse* response)=0;
 	virtual void handleWebsockOpen(WebSocketData* request)=0;

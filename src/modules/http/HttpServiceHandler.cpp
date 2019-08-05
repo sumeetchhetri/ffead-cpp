@@ -44,6 +44,9 @@ HttpReadTask::~HttpReadTask() {
 }
 
 void HttpReadTask::run() {
+	Timer t;
+	t.start();
+
 	int pending = 1;
 	while(pending>0)
 	{
@@ -56,9 +59,16 @@ void HttpReadTask::run() {
 			break;
 		} else if(request!=NULL) {
 			service->registerServiceRequest(request, sif, context, reqPos);
-			CommonUtils::cReqs += 1;
 		}
 	}
+
+	t.end();
+	CommonUtils::tsRead += t.timerNanoSeconds();
+}
+
+HttpServiceTask::HttpServiceTask() {
+	this->handlerRequest = NULL;
+	service = NULL;
 }
 
 HttpServiceTask::HttpServiceTask(ReusableInstanceHolder* h) {
@@ -89,8 +99,9 @@ void HttpServiceTask::run() {
 		return;
 	}
 
-	void* resp = NULL;
+	CommonUtils::cReqs += 1;
 
+	void* resp = NULL;
 	if(handlerRequest->getProtocol()=="HTTP2.0" || handlerRequest->getProtocol()=="HTTP1.1")
 	{
 		HttpRequest* req = (HttpRequest*)handlerRequest->getRequest();
@@ -167,10 +178,9 @@ void HttpServiceTask::run() {
 		resp = response;
 	}
 
-	//service->registerWriteRequest(handlerRequest, resp);
-	CommonUtils::cResps += 1;
-	handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
-
 	t.end();
 	CommonUtils::tsService += t.timerNanoSeconds();
+
+	CommonUtils::cResps += 1;
+	handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
 }

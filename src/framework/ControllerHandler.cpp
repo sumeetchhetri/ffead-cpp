@@ -558,6 +558,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			try
 			{
 				t.start();
+				isContrl = true;
 				const Method& meth = srv.getMethod(rft.name, argus);
 				if(meth.getMethodName()!="" && !invValue)
 				{
@@ -600,8 +601,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					}
 					//logger << "Successfully called restcontroller output follows - " << std::endl;
 					//logger << outcontent << std::endl;
-
-					isContrl = true;
 
 					for(int i=0;i<(int)allStreams.size();++i) {
 						if(allStreams.at(i)!=NULL) {
