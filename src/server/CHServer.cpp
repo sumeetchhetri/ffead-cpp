@@ -696,17 +696,17 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	ConfigurationData::getInstance()->coreServerProperties.isMainServerProcess = isMain;
 	ConfigurationData::getInstance()->coreServerProperties.sessservdistocache = false;
 
-	ConfigurationData::getInstance()->enableCors = StringUtil::toLower(srprps["ENABLE_CRS"])=="true";
-	ConfigurationData::getInstance()->enableSecurity = StringUtil::toLower(srprps["ENABLE_SEC"])=="true";
-	ConfigurationData::getInstance()->enableFilters = StringUtil::toLower(srprps["ENABLE_FLT"])=="true";
-	ConfigurationData::getInstance()->enableControllers = StringUtil::toLower(srprps["ENABLE_CNT"])=="true";
-	ConfigurationData::getInstance()->enableContMpg = StringUtil::toLower(srprps["ENABLE_CNT_MPG"])=="true";
-	ConfigurationData::getInstance()->enableContPath = StringUtil::toLower(srprps["ENABLE_CNT_PTH"])=="true";
-	ConfigurationData::getInstance()->enableContExt = StringUtil::toLower(srprps["ENABLE_CNT_EXT"])=="true";
-	ConfigurationData::getInstance()->enableContRst = StringUtil::toLower(srprps["ENABLE_CNT_RST"])=="true";
-	ConfigurationData::getInstance()->enableExtra = StringUtil::toLower(srprps["ENABLE_EXT"])=="true";
-	ConfigurationData::getInstance()->enableScripts = StringUtil::toLower(srprps["ENABLE_SCR"])=="true";
-	ConfigurationData::getInstance()->enableSoap = StringUtil::toLower(srprps["ENABLE_SWS"])=="true";
+	ConfigurationData::getInstance()->enableCors = StringUtil::toLowerCopy(srprps["ENABLE_CRS"])=="true";
+	ConfigurationData::getInstance()->enableSecurity = StringUtil::toLowerCopy(srprps["ENABLE_SEC"])=="true";
+	ConfigurationData::getInstance()->enableFilters = StringUtil::toLowerCopy(srprps["ENABLE_FLT"])=="true";
+	ConfigurationData::getInstance()->enableControllers = StringUtil::toLowerCopy(srprps["ENABLE_CNT"])=="true";
+	ConfigurationData::getInstance()->enableContMpg = StringUtil::toLowerCopy(srprps["ENABLE_CNT_MPG"])=="true";
+	ConfigurationData::getInstance()->enableContPath = StringUtil::toLowerCopy(srprps["ENABLE_CNT_PTH"])=="true";
+	ConfigurationData::getInstance()->enableContExt = StringUtil::toLowerCopy(srprps["ENABLE_CNT_EXT"])=="true";
+	ConfigurationData::getInstance()->enableContRst = StringUtil::toLowerCopy(srprps["ENABLE_CNT_RST"])=="true";
+	ConfigurationData::getInstance()->enableExtra = StringUtil::toLowerCopy(srprps["ENABLE_EXT"])=="true";
+	ConfigurationData::getInstance()->enableScripts = StringUtil::toLowerCopy(srprps["ENABLE_SCR"])=="true";
+	ConfigurationData::getInstance()->enableSoap = StringUtil::toLowerCopy(srprps["ENABLE_SWS"])=="true";
 
     strVec cmpnames;
     try
