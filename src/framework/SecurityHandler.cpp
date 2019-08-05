@@ -208,12 +208,12 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 				void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("login-handler_"+claz, req->getCntxt_name());
 				ClassInfo* srv = ConfigurationData::getClassInfo(claz, req->getCntxt_name());
 
-				Method methIsInitialized = srv.getMethod("isInitialized", argusi);
+				Method methIsInitialized = srv->getMethod("isInitialized", argusi);
 				argusg.push_back("string");
-				Method methGetUserRole = srv.getMethod("getUserRole", argusg);
+				Method methGetUserRole = srv->getMethod("getUserRole", argusg);
 				argusa.push_back("string");
 				argusa.push_back("string");
-				Method methAuthenticate = srv.getMethod("authenticate", argusa);
+				Method methAuthenticate = srv->getMethod("authenticate", argusa);
 
 				if(methIsInitialized.getMethodName()=="" || methGetUserRole.getMethodName()=="" || methAuthenticate.getMethodName()=="")
 				{
