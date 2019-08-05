@@ -945,20 +945,20 @@ void SQLDataSourceImpl::storePropertyInt(ClassInfo* clas, void* t, void* col, co
 int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, std::map<std::string, GenericObject>& colValMap, const std::string& colName, const int& var)
 {
 #ifdef HAVE_LIBODBC
-	SQLRETURN ret;
+	//SQLRETURN ret;
 	SQLLEN indicator;
 	switch (dataType) {
 		case SQL_BIT:
 		{
 			bool col;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT, &col, sizeof(col), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT, &col, sizeof(col), &indicator);
 			colValMap[colName].set(col);
 		}
 		break;
 		case SQL_REAL:
 		{
 			float col;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_FLOAT, &col, sizeof(col), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_FLOAT, &col, sizeof(col), &indicator);
 			colValMap[colName].set(col);
 		}
 		break;
@@ -966,7 +966,7 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 		case SQL_DOUBLE:
 		{
 			double col;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE, &col, sizeof(col), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE, &col, sizeof(col), &indicator);
 			colValMap[colName].set(col);
 		}
 		break;
@@ -976,13 +976,13 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 		{
 			char buf[24];
 			std::string temp;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 			temp.append(buf);
 			if(indicator > (long)24)
 			{
 				int len = indicator-24;
 				char buf1[len];
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 				temp.append(buf1);
 			}
 			colValMap[colName].set(temp);
@@ -992,12 +992,12 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 		{
 			unsigned char buf[24];
 			BinaryData temp;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
 			if(indicator > (long)24)
 			{
 				int len = indicator-24;
 				unsigned char buf1[len];
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf1, sizeof(buf1), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf1, sizeof(buf1), &indicator);
 				temp.append(buf,24);
 				temp.append(buf1,len);
 			}
@@ -1011,13 +1011,13 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 			if(columnSize>10)
 			{
 				long col;
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, &col, sizeof(col), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, &col, sizeof(col), &indicator);
 				colValMap[colName].set(col);
 			}
 			else
 			{
 				int col;
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, &col, sizeof(col), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, &col, sizeof(col), &indicator);
 				colValMap[colName].set(col);
 			}
 		}
@@ -1026,13 +1026,13 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 		{
 			char buf[24];
 			std::string temp;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 			temp.append(buf);
 			if(indicator > (long)24)
 			{
 				int len = indicator-24;
 				char buf1[len];
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 				temp.append(buf1);
 			}
 			long long number = CastUtil::lexical_cast<long long>(temp);
@@ -1045,13 +1045,13 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 		{
 			char buf[24];
 			std::string temp;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 			temp.append(buf);
 			if(indicator > (long)24)
 			{
 				int len = indicator-24;
 				char buf1[len];
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 				temp.append(buf1);
 			}
 			std::string fmstr;
@@ -1080,7 +1080,7 @@ void* SQLDataSourceImpl::executeQueryObject(Query& cquery)
 
 	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	std::string tableName = dsemp.getTableName();
-	ClassInfo* clas = reflector->getClassInfo(clasName,appName);
+	//ClassInfo* clas = reflector->getClassInfo(clasName,appName);
 	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
 	std::string query = "select ";
 	strMap& tabcolmap = this->mapping->getMappingForTable(tableName);

@@ -93,13 +93,13 @@ void JobScheduler::start() {
 		std::string appName = instance->configs.at(dn).app;
 		if(clas!="" && method!="" && cron!="" && name!="")
 		{
-			ClassInfo claz = ref->getClassInfo(clas, appName);
-			logger << "JobScheduler - Got class " + claz.getClassName() << std::endl;
-			if(claz.getClassName()!="")
+			ClassInfo* claz = ref->getClassInfo(clas, appName);
+			logger << "JobScheduler - Got class " + claz->getClassName() << std::endl;
+			if(claz->getClassName()!="")
 			{
 				args argus;
-				Method meth = claz.getMethod(method, argus);
-				Constructor ctor = claz.getConstructor(argus);
+				Method meth = claz->getMethod(method, argus);
+				Constructor ctor = claz->getConstructor(argus);
 
 				logger << "JobScheduler - Got method,class " + meth.getMethodName() + "," + ctor.getName() << std::endl;
 
