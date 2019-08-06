@@ -66,7 +66,6 @@ public:
 	ConfigurationHandler();
 	virtual ~ConfigurationHandler();
 	static void handle(strVec webdirs, const strVec& webdirs1, const std::string& incpath, const std::string& rtdcfpath, const std::string& serverRootDirectory, const std::string& respath);
-	//static void listi(const std::string& cwd, const std::string& type, const bool& apDir, strVec &folders, const bool& showHidden);
 	static void configureDataSources(const std::string& name, const std::string& configFile, std::map<std::string, ClassStructure>& allclsmap);
 	static void destroyDataSources();
 	static void configureCaches(const std::string& name, const std::string& configFile);

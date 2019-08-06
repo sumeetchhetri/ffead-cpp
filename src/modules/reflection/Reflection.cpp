@@ -95,6 +95,19 @@ void Reflection::collectInfo(std::string data, const std::string& flag, ClassStr
 	{
 		MethStructure ps;
 		ps.decl = data;
+		std::string t = data.substr(0, data.find("("));
+		t = t.substr(0, t.find_last_of(" "));
+		if(t.find("const ")==0) {
+			t = t.substr(6);
+		}
+		if(t.find("virtual ")==0) {
+			t = t.substr(8);
+		}
+		if(t.find("~")!=std::string::npos) {
+			t = "void";
+		}
+		StringUtil::trim(t);
+		ps.retType = t;
 		for (int pi = 0; pi < (int)mrktxt.size(); ++pi) {
 			std::string prg = mrktxt.at(pi);
 			try {
@@ -2890,54 +2903,56 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 								fqcn += " >";
 							}
 							contType += getFullyQualifiedClassName(stlcnt, classStructure.namespaces) + ",";
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 
 							if(!ptr)
 							{
 								//methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(&(__obj->"+fldp.at(j)+"),\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(&(__obj->"+fldp.at(j)+"),"+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnown<"+fqcn+" >(base->getContainerElement("
-										 + "intermediateObject, i, 0),\""+contType+"\",\""+app+"\", base);\n";
+										 + "intermediateObject, i, 0),"+serOpt+",\""+contType+"\",\""+app+"\", base);\n";
 							}
 							else
 							{
 								//methods += (fqcn+"* __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("if(__obj->"+fldp.at(j)+"!=NULL)base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(__obj->"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(__obj->"+fldp.at(j)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnownToPointer<"+fqcn+" >(base->getContainerElement("
-										 +"intermediateObject, i, 0),\""+contType+"\",\""+app+"\", base);\n";
+										 +"intermediateObject, i, 0),"+serOpt+",\""+contType+"\",\""+app+"\", base);\n";
 							}
 						}
 						else
 						{
 							std::string fqcn = getFullyQualifiedClassName(fldp.at(0), classStructure.namespaces);
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 							if(!ptr)
 							{
 								//methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(&(__obj->"+fldp.at(j)+"),\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(&(__obj->"+fldp.at(j)+"),"+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnown<"+fqcn+" >(base->getContainerElement("
-										 +"intermediateObject, i, 0),\""+fqcn+"\",\""+app+"\", base);\n";
+										 +"intermediateObject, i, 0),"+serOpt+",\""+fqcn+"\",\""+app+"\", base);\n";
 							}
 							else
 							{
 								//methods += (fldp.at(0)+"* __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("if(__obj->"+fldp.at(j)+"!=NULL)base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(__obj->"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(__obj->"+fldp.at(j)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnownToPointer<"+fqcn+" >(base->getContainerElement("
-										 +"intermediateObject, i, 0),\""+fqcn+"\",\""+app+"\", base);\n";
+										 +"intermediateObject, i, 0),"+serOpt+",\""+fqcn+"\",\""+app+"\", base);\n";
 							}
 						}
 						//structinf += (fldp.at(0)+" "+fldp.at(j)+";\n");
@@ -3278,37 +3293,39 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 										}
 										std::string stlcontwosp = methpm.at(0);
 										StringUtil::trim(stlcontwosp);
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 
 										if(!ptr)
 										{
 											methods += (fqcn+" __temp_obj_ser"+fldnames.at(k+1)+" = __obj->"+methpm.at(1)+"();\n");
 											methods += ("base->addObjectProperty(serobject, \""+fldnames.at(k+1)+"\", \""+stlcontwosp+"\", "
-													+"SerializeBase::serializeUnknown(&__temp_obj_ser"+fldnames.at(k+1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+													+"SerializeBase::serializeUnknown(&__temp_obj_ser"+fldnames.at(k+1)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 										else
 										{
 											methods += (fqcn+"* __temp_obj_ser"+fldnames.at(k+1)+" = __obj->"+methpm.at(1)+"();\n");
 											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectProperty(serobject, \""+fldnames.at(k+1)+"\", \""+stlcontwosp+"\", "
-													+"SerializeBase::serializeUnknown(__temp_obj_ser"+fldnames.at(k+1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+													+"SerializeBase::serializeUnknown(__temp_obj_ser"+fldnames.at(k+1)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 									}
 									else
 									{
 										std::string fqcn = getFullyQualifiedClassName(methpm.at(0), classStructure.namespaces);
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 										if(!ptr)
 										{
 											methods += (methpm.at(0)+" __temp_obj_ser"+fldnames.at(k+1)+" = __obj->"+methpm.at(1)+"();\n");
 											methods += ("base->addObjectProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
-													+ "SerializeBase::serializeUnknown(&__temp_obj_ser"+fldnames.at(k+1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+													+ "SerializeBase::serializeUnknown(&__temp_obj_ser"+fldnames.at(k+1)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 										else
 										{
 											methods += (methpm.at(0)+"* __temp_obj_ser"+fldnames.at(k+1)+" = __obj->"+methpm.at(1)+"();\n");
 											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
-													+"SerializeBase::serializeUnknown(__temp_obj_ser"+fldnames.at(k+1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+													+"SerializeBase::serializeUnknown(__temp_obj_ser"+fldnames.at(k+1)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 									}

@@ -1423,7 +1423,7 @@ bool MongoDBDataSourceImpl::executeUpdate(Query& query) {
 		Connection* conn = _conn();
 		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
 		bson_error_t er;
-		bool fl = mongoc_collection_insert_one(collection, data, NULL, NULL, &er);
+		bool fl = mongoc_collection_save(collection, data, NULL, &er);
 		if(data==NULL)bson_destroy(data);
 		bson_destroy(q);
 		_release(conn, collection);
@@ -1509,7 +1509,7 @@ bool MongoDBDataSourceImpl::executeInsertBulk(Query& query, std::vector<void*> e
 	Connection* conn = _conn();
 
 	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
-	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation_with_opts (collection, NULL);
+	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation (collection, true, NULL);
 	for (int k = 0; k < (int)dbEntities.size(); k++) {
 		mongoc_bulk_operation_insert (bulk, (bson_t*)dbEntities.at(k));
 		bson_destroy((bson_t*)dbEntities.at(k));
@@ -1528,7 +1528,7 @@ bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, std::vector<void*> e
 
 	bool fl = true;
 	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
-	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation_with_opts (collection, NULL);
+	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation (collection, true, NULL);
 	for (int k = 0; k < (int)dbEntities.size(); k++) {
 		//bson_error_t er;
 
@@ -1598,7 +1598,7 @@ bool MongoDBDataSourceImpl::executeUpdate(Query& query, void* entity) {
 		Connection* conn = _conn();
 		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
 		bson_error_t er;
-		fl = mongoc_collection_insert_one(collection, data, NULL, NULL, &er);
+		fl = mongoc_collection_save(collection, data, NULL, &er);
 		_release(conn, collection);
 	}
 	bson_destroy(data);

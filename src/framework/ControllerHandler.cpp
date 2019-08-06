@@ -362,181 +362,141 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					//logger << ("Restcontroller parameter type/value = "  + rft.params.at(var).type + "/" + pmvalue) << std::endl;
 					//logger << ("Restcontroller content types input/output = " + icont + "/" + ocont) << std::endl;
 
-					if(rft.params.at(var).type=="int")
-					{
-						argus.push_back(rft.params.at(var).type);
-						int* ival = new int(CastUtil::lexical_cast<int>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="short")
-					{
-						argus.push_back(rft.params.at(var).type);
-						short* ival = new short(CastUtil::lexical_cast<short>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="long")
-					{
-						argus.push_back(rft.params.at(var).type);
-						long* ival = new long(CastUtil::lexical_cast<long>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="long long")
-					{
-						argus.push_back(rft.params.at(var).type);
-						long long* ival = new long long(CastUtil::lexical_cast<long long>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="double")
-					{
-						argus.push_back(rft.params.at(var).type);
-						double* ival = new double(CastUtil::lexical_cast<double>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="float")
-					{
-						argus.push_back(rft.params.at(var).type);
-						float* ival = new float(CastUtil::lexical_cast<float>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="bool")
-					{
-						argus.push_back(rft.params.at(var).type);
-						bool* ival = new bool(CastUtil::lexical_cast<bool>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="string" || rft.params.at(var).type=="std::string")
-					{
-						argus.push_back(rft.params.at(var).type);
-						std::string* sval = new std::string(pmvalue);
-						valus.push_back(sval);
-					}
-					else if(rft.params.at(var).type=="filestream")
-					{
-						argus.push_back("ifstream*");
-						MultipartContent mcont = req->getMultipartContent(pmvalue);
-						if(mcont.isValid() && mcont.isAFile())
-						{
-							std::ifstream* ifs = new std::ifstream;
-							ifs->open(mcont.getTempFileName().c_str());
-							valus.push_back(ifs);
-							allStreams.push_back(ifs);
-						}
-					}
-					else if(rft.params.at(var).type=="vector-of-filestream")
-					{
-						std::vector<std::ifstream*> *vifs = NULL;
-						if(mpvecstreams.find(rft.params.at(var).name)==mpvecstreams.end())
-						{
-							argus.push_back("vector<ifstream*>");
-							vifs = new std::vector<std::ifstream*>;
-							std::vector<MultipartContent> mcontvec = req->getMultiPartFileList(rft.params.at(var).name);
-							for(int mci=0;mci<(int)mcontvec.size();mci++) {
-								MultipartContent mcont = mcontvec.at(mci);
-								if(mcont.isValid() && mcont.isAFile())
-								{
-									std::ifstream* ifs = new std::ifstream;
-									ifs->open(mcont.getTempFileName().c_str());
-									vifs->push_back(ifs);
-									//allStreams.push_back(ifs);
-								}
+					switch(rft.params.at(var).serOpt) {
+						case 0: {
+							argus.push_back(rft.params.at(var).type);
+							void* voidPvect = NULL;
+							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+							{
+								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
 							}
-							mpvecstreams[rft.params.at(var).name] = vifs;
+							#ifdef INC_XMLSER
+							else
+							{
+								voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
+							}
+							#endif
+							if(voidPvect==NULL)
+							{
+								res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+								res->setDone(true);
+								ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+								for(int i=0;i<(int)valus.size();++i) {
+									if(valus.at(i)!=NULL) {
+										delete valus.at(i);
+									}
+								}
+								return true;
+							}
+							valus.push_back(voidPvect);
+							break;
 						}
-						else
-						{
-							vifs = mpvecstreams[rft.params.at(var).name];
+						case 1: argus.push_back(rft.params.at(var).type);valus.push_back(new std::string(CastUtil::lexical_cast<std::string>(pmvalue)));break;
+						case 2: argus.push_back(rft.params.at(var).type);valus.push_back(new char(CastUtil::lexical_cast<char>(pmvalue)));break;
+						case 3: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned char(CastUtil::lexical_cast<unsigned char>(pmvalue)));break;
+						case 4: argus.push_back(rft.params.at(var).type);valus.push_back(new int(CastUtil::lexical_cast<int>(pmvalue)));break;
+						case 5: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned int(CastUtil::lexical_cast<unsigned int>(pmvalue)));break;
+						case 6: argus.push_back(rft.params.at(var).type);valus.push_back(new short(CastUtil::lexical_cast<short>(pmvalue)));break;
+						case 7: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned short(CastUtil::lexical_cast<unsigned short>(pmvalue)));break;
+						case 8: argus.push_back(rft.params.at(var).type);valus.push_back(new long(CastUtil::lexical_cast<long long>(pmvalue)));break;
+						case 9: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned long(CastUtil::lexical_cast<unsigned long>(pmvalue)));break;
+						case 10: argus.push_back(rft.params.at(var).type);valus.push_back(new long long(CastUtil::lexical_cast<long long>(pmvalue)));break;
+						case 11: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned long long(CastUtil::lexical_cast<unsigned long long>(pmvalue)));break;
+						case 12: argus.push_back(rft.params.at(var).type);valus.push_back(new float(CastUtil::lexical_cast<float>(pmvalue)));break;
+						case 13: argus.push_back(rft.params.at(var).type);valus.push_back(new double(CastUtil::lexical_cast<double>(pmvalue)));break;
+						case 14: argus.push_back(rft.params.at(var).type);valus.push_back(new long double(CastUtil::lexical_cast<long double>(pmvalue)));break;
+						case 15: argus.push_back(rft.params.at(var).type);valus.push_back(new bool(CastUtil::lexical_cast<bool>(pmvalue)));break;
+						case 16: {
+							argus.push_back(rft.params.at(var).type);
+							DateFormat formt("yyyy-mm-dd hh:mi:ss");
+							valus.push_back(formt.parse(pmvalue));break;
 						}
-						valus.push_back(vifs);
-					}
-					else if(rft.params.at(var).type.find("vector-of-")==0 || rft.params.at(var).type.find("list-of-")==0
-							|| rft.params.at(var).type.find("deque-of-")==0 || rft.params.at(var).type.find("set-of-")==0
-							|| rft.params.at(var).type.find("multiset-of-")==0 || rft.params.at(var).type.find("queue-of-")==0)
-					{
-						std::string stlcnt = rft.params.at(var).type;
-						std::string stltype;
-						std::string typp;
-						if(rft.params.at(var).type.find("vector-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"vector-of-","");
-							stltype = "std::vector";
-							typp = "vector<" + stlcnt + ">";
+						case 19: {
+							argus.push_back("ifstream*");
+							MultipartContent mcont = req->getMultipartContent(pmvalue);
+							if(mcont.isValid() && mcont.isAFile())
+							{
+								std::ifstream* ifs = new std::ifstream;
+								ifs->open(mcont.getTempFileName().c_str());
+								valus.push_back(ifs);
+								allStreams.push_back(ifs);
+							}
+							else
+							{
+								valus.push_back(NULL);
+							}
+							break;
 						}
-						else if(rft.params.at(var).type.find("list-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"list-of-","");
-							stltype = "std::list";
-							typp = "list<" + stlcnt + ">";
+						case 100:
+						case 101:
+						case 102:
+						case 103:
+						case 104:
+						case 105:
+						case 106:
+						case 107:
+						case 108:
+						case 109:
+						case 110:
+						case 111:
+						case 112:
+						case 113:
+						case 114:
+						case 115:
+						case 116: {
+							argus.push_back(rft.params.at(var).type);
+							void* voidPvect = NULL;
+							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+							{
+								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
+							}
+							#ifdef INC_XMLSER
+							else
+							{
+								voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
+							}
+							#endif
+							if(voidPvect==NULL)
+							{
+								res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+								res->setDone(true);
+								ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+								for(int i=0;i<(int)valus.size();++i) {
+									if(valus.at(i)!=NULL) {
+										delete valus.at(i);
+									}
+								}
+								return true;
+							}
+							valus.push_back(voidPvect);
+							break;
 						}
-						else if(rft.params.at(var).type.find("deque-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"deque-of-","");
-							stltype = "std::deque";
-							typp = "deque<" + stlcnt + ">";
+						case 119: {
+							argus.push_back("vector<ifstream*>");
+							std::vector<std::ifstream*> *vifs = NULL;
+							if(mpvecstreams.find(rft.params.at(var).name)==mpvecstreams.end())
+							{
+								vifs = new std::vector<std::ifstream*>;
+								std::vector<MultipartContent> mcontvec = req->getMultiPartFileList(rft.params.at(var).name);
+								for(int mci=0;mci<(int)mcontvec.size();mci++) {
+									MultipartContent mcont = mcontvec.at(mci);
+									if(mcont.isValid() && mcont.isAFile())
+									{
+										std::ifstream* ifs = new std::ifstream;
+										ifs->open(mcont.getTempFileName().c_str());
+										vifs->push_back(ifs);
+										//allStreams.push_back(ifs);
+									}
+								}
+								mpvecstreams[rft.params.at(var).name] = vifs;
+							}
+							else
+							{
+								vifs = mpvecstreams[rft.params.at(var).name];
+							}
+							valus.push_back(vifs);
+							break;
 						}
-						else if(rft.params.at(var).type.find("set-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"set-of-","");
-							stltype = "std::set";
-							typp = "set<" + stlcnt + ">";
-						}
-						else if(rft.params.at(var).type.find("multiset-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"multiset-of-","");
-							stltype = "std::multiset";
-							typp = "multiset<" + stlcnt + ">";
-						}
-						else if(rft.params.at(var).type.find("queue-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"queue-of-","");
-							stltype = "std::queue";
-							typp = "queue<" + stlcnt + ">";
-						}
-						StringUtil::replaceFirst(stlcnt," ","");
-						logger << ("Restcontroller param body holds "+stltype+" of type "  + stlcnt) << std::endl;
-
-						argus.push_back(typp);
-						void* voidPvect = NULL;
-						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
-						{
-							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, stltype+"<"+stlcnt+",",req->getCntxt_name());
-						}
-#ifdef INC_XMLSER
-						else
-						{
-							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, stltype+"<"+stlcnt+",",req->getCntxt_name());
-						}
-#endif
-						if(voidPvect==NULL)
-						{
-							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-							res->setDone(true);
-							ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
-							return true;
-						}
-						valus.push_back(voidPvect);
-					}
-					else
-					{
-						argus.push_back(rft.params.at(var).type);
-						void* voidPvect = NULL;
-						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
-						{
-							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type,req->getCntxt_name());
-						}
-#ifdef INC_XMLSER
-						else
-						{
-							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type,req->getCntxt_name());
-						}
-#endif
-						if(voidPvect==NULL)
-						{
-							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-							res->setDone(true);
-							ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
-							return true;
-						}
-						valus.push_back(voidPvect);
 					}
 				} catch(const std::exception& e) {
 					logger << "Restcontroller exception occurred" << std::endl;
@@ -581,17 +541,21 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					{
 						if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_JSON && res->getContent()=="")
 						{
-							outcontent = JSONSerialize::serializeUnknown(ouput, outRetType, req->getCntxt_name());
+							outcontent = JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name());
 							res->setContent(outcontent);
 						}
 						else if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_XML && res->getContent()=="")
 						{
-							outcontent = XMLSerialize::serializeUnknown(ouput, outRetType, req->getCntxt_name());
+							outcontent = XMLSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name());
 							res->setContent(outcontent);
 						}
-						else if(outRetType=="std::string" || outRetType=="string")
+						else
 						{
-							res->setContent(*(std::string*)ouput);
+							if(rft.serOpt>17 || rft.serOpt==0) {
+								res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name()));
+							} else {
+								res->setContent(SerializeBase::trySerialize(ouput, rft.serOpt, outRetType, req->getCntxt_name()));
+							}
 						}
 						res->addHeaderValue(HttpResponse::ContentType, ocont);
 						res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(

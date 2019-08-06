@@ -42,7 +42,7 @@ void Reflector::cleanUp()
 ClassInfo* Reflector::getClassInfo(const std::string& cs, const std::string& app)
 {
 	std::string appName = CommonUtils::getAppName(app);
-	std::string ca = appName +"-"+ cs;
+	std::string ca = appName +"_"+ cs;
 	if(cs.find("::")!=std::string::npos) {
 		StringUtil::replaceAll(ca, "::", "_");
 	}

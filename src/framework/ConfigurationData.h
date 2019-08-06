@@ -49,6 +49,7 @@ class RestFunctionParams
 {
 	std::string name;
 	std::string type;
+	int serOpt;
 	std::string from;
 	std::string defValue;
 	friend class ConfigurationHandler;
@@ -64,6 +65,7 @@ class RestFunction
 	std::string statusCode;
 	std::string icontentType;
 	std::string ocontentType;
+	int serOpt;
 	std::vector<RestFunctionParams> params;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;

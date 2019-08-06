@@ -120,13 +120,13 @@
 		<restcontroller class="DefaultRestController" path="/restvec">
 			<restfunction name="testVector" path="tstvec" meth="POST"
 				statusCode="200">
-				<param type="vector-of-int" from="body" />
+				<param type="std::vector&lt;int&gt;" from="body" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restvecobj">
 			<restfunction name="testVectorObject" path="tstvecobj"
 				meth="POST" icontentType="application/json" statusCode="200">
-				<param type="vector-of-TestMany" from="body" />
+				<param type="std::vector&lt;TestMany&gt;" from="body" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restobj">
@@ -139,7 +139,7 @@
 		<restcontroller class="DefaultRestController" path="/restvecobj">
 			<restfunction name="testVectorObject" path="tstvecobj.xml"
 				meth="POST" icontentType="application/xml" statusCode="200">
-				<param type="vector-of-TestMany" from="body" />
+				<param type="std::vector&lt;TestMany&gt;" from="body" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restobj">
@@ -167,7 +167,7 @@
 		<restcontroller class="DefaultRestController" path="/restupload">
 			<restfunction name="testUploadFileMulti2" path="uploadFileMulti2"
 				meth="POST" icontentType="multipart/form-data" statusCode="200">
-				<param type="vector-of-filestream" name="files" from="multipart-content" />
+				<param type="std::vector&lt;filestream&gt;" name="files" from="multipart-content" />
 				<param type="string" name="field" from="multipart-content" />
 			</restfunction>
 		</restcontroller>

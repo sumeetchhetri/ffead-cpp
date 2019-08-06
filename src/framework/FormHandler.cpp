@@ -84,8 +84,9 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 	Method meth = srv->getMethod("onSubmit", argus);
 	if(meth.getMethodName()!="")
 	{
+		int serOpt = SerializeBase::identifySerOption(ele->getAttribute("bean"));
 		//logger << ("Fetching Formcontroller for " + ele->getAttribute("bean")) << std::endl;
-		void *_beaninst = JSONSerialize::unSerializeUnknown(json, ele->getAttribute("bean"), req->getCntxt_name());
+		void *_beaninst = JSONSerialize::unSerializeUnknown(json, serOpt, ele->getAttribute("bean"), req->getCntxt_name());
 		valus.push_back(_beaninst);
 		valus.push_back(res);
 		reflector.invokeMethod<void*>(_temp,meth,valus,false);

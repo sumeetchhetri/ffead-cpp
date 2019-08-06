@@ -49,77 +49,6 @@ void ConfigurationHandler::normalizeUrl(const std::string& appName, std::string&
 	StringUtil::trim(url);
 }
 
-/*void ConfigurationHandler::listi(const std::string& cwd, const std::string& type, const bool& apDir, strVec &folders, const bool& showHidden)
-{
-	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
-	FILE *pipe_fp;
-	std::string command;
-	if(chdir(cwd.c_str())!=0)
-		return;
-	if(type=="/")
-	{
-		#ifndef OS_MINGW
-		command = ("find . \\( ! -name . -prune \\) \\( -type d -o -type l \\) 2>/dev/null");
-		#else
-		command = ("sh -c \"find . \\( ! -name . -prune \\) \\( -type d -o -type l \\) 2>/dev/null\"");
-		#endif
-	}
-	else
-	{
-		#ifndef OS_MINGW
-		command = ("find . \\( ! -name . -prune \\) \\( -type f -o -type l \\) -name '*"+type+"' 2>/dev/null");
-		#else
-		command = ("sh -c \"find . \\( ! -name . -prune \\) \\( -type f -o -type l \\) -name '*"+type+"' 2>/dev/null\"");
-		#endif
-	}
-	//command = ("ls -F1 "+cwd+"|grep '"+type+"'");
-	logger << ("Searching directory " + cwd + " for pattern " + type) << std::endl;
-	if ((pipe_fp = popen(command.c_str(), "r")) == NULL)
-	{
-		printf("pipe open error in cmd_list\n");
-	}
-	int t_char;
-	std::string folderName;
-	while ((t_char = fgetc(pipe_fp)) != EOF)
-	{
-		if(t_char!='\n')
-		{
-			std::stringstream ss;
-			ss << (char)t_char;
-			std::string temp;
-			ss >> temp;
-			folderName.append(temp);
-		}
-		else if(folderName!="")
-		{
-			StringUtil::replaceFirst(folderName,"*","");
-			StringUtil::replaceFirst(folderName,"./","");
-			if(folderName.find("~")==std::string::npos && (showHidden || (!showHidden && folderName.find(".")!=0)))
-			{
-				if(apDir)
-				{
-					if(type=="/")
-					{
-						folderName = cwd+"/"+folderName+"/";
-						RegexUtil::replace(folderName,"[/]+","/");
-						folders.push_back(folderName);
-					}
-					else
-					{
-						folderName = cwd+"/"+folderName;
-						RegexUtil::replace(folderName,"[/]+","/");
-						folders.push_back(folderName);
-					}
-				}
-				else
-					folders.push_back(folderName);
-			}
-			folderName = "";
-		}
-	}
-	pclose(pipe_fp);
-}*/
-
 void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const std::string& incpath, const std::string& rtdcfpath, const std::string& serverRootDirectory, const std::string& respath)
 {
 	QueryClause::init();
@@ -666,6 +595,12 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											restfunction.statusCode = "200";
 										}
 									}
+									if(resfuncs.at(cntn1).getAttribute("rtype")=="")
+									{
+										logger << "Rest: invalid return type specified, will skip rest function definition.." << std::endl;
+										continue;
+									}
+									restfunction.serOpt = SerializeBase::identifySerOption(resfuncs.at(cntn1).getAttribute("rtype"));
 									/*restfunction.baseUrl = resfuncs.at(cntn1).getAttribute("baseUrl");
 									if(restfunction.baseUrl!="")
 									{
@@ -682,6 +617,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 										{
 											RestFunctionParams param;
 											param.type = resfuncparams.at(cntn2).getAttribute("type");
+											param.serOpt = SerializeBase::identifySerOption(param.type);
 											param.from = resfuncparams.at(cntn2).getAttribute("from");
 											param.name = resfuncparams.at(cntn2).getAttribute("name");
 											param.defValue = resfuncparams.at(cntn2).getAttribute("defValue");
@@ -2344,11 +2280,13 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 	}
 
 	for (int var = 0; var < (int)cs.pubms.size(); ++var) {
-		Marker m = getRestFunctionMarker(cs.pubms.at(var).markers);
+		MethStructure ms = cs.pubms.at(var);
+		Marker m = getRestFunctionMarker(ms.markers);
 		if(m.getName()!="")
 		{
 			RestFunction restfunction;
 			restfunction.name = cs.pubms.at(var).name;
+			restfunction.serOpt = SerializeBase::identifySerOption(cs.pubms.at(var).retType);
 			restfunction.path = m.getAttributeValue("path");
 			restfunction.statusCode = m.getAttributeValue("statusCode");
 			if(restfunction.statusCode!="")
@@ -2376,8 +2314,10 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 
 				RestFunctionParams param;
 				param.type = cs.pubms.at(var).argstypes[pit->first];
+				param.serOpt = SerializeBase::identifySerOption(param.type);
 				StringUtil::replaceAll(param.type, " ", "");
 
+				std::string ttype = param.type;
 				if(param.type.find("std::vector<")==0 || param.type.find("vector<")==0
 						|| param.type.find("std::list<")==0 || param.type.find("list<")==0
 						|| param.type.find("std::deque<")==0 || param.type.find("deque<")==0
@@ -2393,13 +2333,13 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 					StringUtil::replaceFirst(tmpltyp, "std::", "");
 
 					if(typ=="ifstream*" || typ=="std::ifstream*")
-						param.type = tmpltyp + "-of-filestream";
+						ttype = tmpltyp + "-of-filestream";
 					else
-						param.type = tmpltyp + "-of-" + typ;
+						ttype = tmpltyp + "-of-" + typ;
 				}
 
-				if(param.type=="ifstream*" || param.type=="std::ifstream*")
-					param.type = "filestream";
+				if(ttype=="ifstream*" || ttype=="std::ifstream*")
+					ttype = "filestream";
 
 				//TODO set deque set multiset list
 
@@ -2435,16 +2375,16 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 				{
 					hasBodyParam = true;
 				}
-				if(StringUtil::trimCopy(param.type)=="")
+				if(StringUtil::trimCopy(ttype)=="")
 				{
 					invalidParam = true;
 					logger << "Rest: no type specified for param" << std::endl;
 				}
-				else if((param.type=="filestream" || param.type=="vector-of-filestream") && param.from!="multipart-content")
+				else if((ttype=="filestream" || ttype=="vector-of-filestream") && param.from!="multipart-content")
 				{
 
 				}
-				else if(param.type=="vector-of-filestream" && param.from=="multipart-content"
+				else if(ttype=="vector-of-filestream" && param.from=="multipart-content"
 						&& StringUtil::trimCopy(param.name)=="")
 				{
 
@@ -2460,9 +2400,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 					invalidParam = true;
 					logger << ("Rest: skipping param " + param.type + ", from is body and method is " + restfunction.meth) << std::endl;
 				}
-				else if(!(param.type=="int" || param.type=="short" || param.type=="long" || param.type=="float" || param.type=="string"
-						|| param.type=="long long" || param.type=="std::string" || param.type=="double" || param.type=="bool"
-						|| param.type=="filestream" || param.type=="vector-of-filestream") && param.from!="body")
+				else if(!(SerializeBase::isPrimitiveDataType(ttype) || ttype=="filestream" || ttype=="vector-of-filestream") && param.from!="body")
 				{
 					invalidParam = true;
 					logger << ("Rest: skipping param " + param.type + ", from is not body and input is a complex type") << std::endl;

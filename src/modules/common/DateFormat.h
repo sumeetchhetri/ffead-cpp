@@ -36,6 +36,7 @@ public:
 	DateFormat();
 	virtual ~DateFormat();
 	DateFormat(const std::string&);
+	std::string format(Date*);
 	std::string format(const Date&);
 	Date* parse(std::string);
     const std::string& getFormatspec() const;

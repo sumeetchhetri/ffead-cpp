@@ -43,18 +43,18 @@ public:
 	}
 	void push(const T& t)
 	{
-		std::string serValue = BinarySerialize::serialize<T>(t);
+		std::string serValue = BinarySerialize::serialize<T>(t, -1);
 		cl->addCollectionEntry(cacheKey, serValue);
 	}
 	T front()
 	{
 		std::string serValue = cl->getFrontValue(cacheKey);
-		return BinarySerialize::unserialize<T>(serValue);
+		return BinarySerialize::unserialize<T>(serValue, -1);
 	}
 	T back()
 	{
 		std::string serValue = cl->getBackValue(cacheKey);
-		return BinarySerialize::unserialize<T>(serValue);
+		return BinarySerialize::unserialize<T>(serValue, -1);
 	}
 	void pop()
 	{

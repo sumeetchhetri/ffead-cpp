@@ -560,20 +560,22 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 						}
 						else
 						{
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption("std::vector<"+vecn+" > >"));
 							ws_funcs.append("std::vector<"+vecn+" > "+argname+";\n");
 							ws_funcs.append("ElementList list = _req->getElementsByName(\""+argname+"\");\n");
 							ws_funcs.append("for(int i=0;i<list.size();i++)\n{\n");
-							ws_funcs.append(argname+".push_back(XMLSerialize::unserialize<std::vector<"+vecn+" > >(list.at(i), \"vector<"+vecn+" >\", \""+appname+"\"));\n}\n");
+							ws_funcs.append(argname+".push_back(XMLSerialize::unserialize<std::vector<"+vecn+" > >(list.at(i), "+serOpt+", \"vector<"+vecn+" >\", \""+appname+"\"));\n}\n");
 						}
 					}
 					else
 					{
+						std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(iter2->second));
 						ws_funcs.append("ele = _req->getElementByNameIgnoreCase(\""+argname+"\");\n");
 						ws_funcs.append(iter2->second+" "+argname+";\n");
 						ws_funcs.append("if(ele!=NULL)");
 						ws_funcs.append("{\nele->setTagName(\""+iter2->second+"\");");
 						//ref.getTreatedFullyQualifiedClassName(argname, )
-						ws_funcs.append("\n"+argname+" = XMLSerialize::unserialize<"+iter2->second+" >(ele, \""+iter2->second+"\", \""+appname+"\");\n");
+						ws_funcs.append("\n"+argname+" = XMLSerialize::unserialize<"+iter2->second+" >(ele, "+serOpt+", \""+iter2->second+"\", \""+appname+"\");\n");
 						//ws_funcs.append("\ncout << ele->renderSerialization() << std::endl;");
 						ws_funcs.append("}\n");
 					}
@@ -606,6 +608,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 			}
 			else if(pars["RETURNTYP"]!="")
 			{
+				std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(pars["RETURNTYP"]));
 				ws_funcs.append(pars["RETURNTYP"]+" _retval;\n");
 				ws_funcs.append("_retval = _obj."+me_n+"("+args+");\n");
 				if(pars["RETURNTYP"].find("vector<")!=std::string::npos)
@@ -629,8 +632,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 						ws_funcs.append("\nXmlParser parser(\"Parser\");\n");
 						ws_funcs.append("for(int i=0;i<_retval.size();i++)\n{\n");
 						ws_funcs.append("allnmspcs = \"\";\n");
-						ws_funcs.append("Document doc;\nparser.parse(XMLSerialize::serialize<"+pars["RETURNTYP"]+" >(&(_retval.at(i)),\""+vecn+"\",\""+appname+"\"), doc);\n");
-						//ws_funcs.append("\ncout << XMLSerialize::serialize<"+pars["RETURNTYP"]+" >(&(_retval.at(i)),\""+vecn+"\",\""+appname+"\") << std::endl;");
+						ws_funcs.append("Document doc;\nparser.parse(XMLSerialize::serialize<"+pars["RETURNTYP"]+" >(&(_retval.at(i)),"+serOpt+",\""+vecn+"\",\""+appname+"\"), doc);\n");
 						ws_funcs.append("normalizeNamespaces(&(doc.getRootElement()),\""+appname+"\",allnmspcs);\n");
 						ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+doc.getRootElement().renderChildren()+\"</tns:"+pars["RETURN"]+">\";\n}\n");
 					}
@@ -639,7 +641,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 				{
 					ws_funcs.append("std::string allnmspcs;\n");
 					ws_funcs.append("XmlParser parser(\"Parser\");\n");
-					ws_funcs.append("Document doc;\nparser.parse(XMLSerialize::serialize<"+pars["RETURNTYP"]+" >(&_retval,\""+pars["RETURNTYP"]+"\",\""+appname+"\"), doc);\n");
+					ws_funcs.append("Document doc;\nparser.parse(XMLSerialize::serialize<"+pars["RETURNTYP"]+" >(&_retval,"+serOpt+",\""+pars["RETURNTYP"]+"\",\""+appname+"\"), doc);\n");
 					ws_funcs.append("normalizeNamespaces(&(doc.getRootElement()),\""+appname+"\",allnmspcs);\n");
 					ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+doc.getRootElement().renderChildren()+\"</tns:"+pars["RETURN"]+">\";\n");
 				}

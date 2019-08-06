@@ -941,6 +941,7 @@ std::string AfcUtil::generateToJSONObjects(const std::string& type, const std::s
 			tempp = StringUtil::replaceAllCopy(tempp, ">", "");
 
 			std::string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
+			std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(stlcnttyp+"<"+fqcn+">"));
 
 			fres += "json += \"\\\""+name+"\\\" : \";\n";
 			if(!priv)
@@ -948,20 +949,20 @@ std::string AfcUtil::generateToJSONObjects(const std::string& type, const std::s
 				if(ptr)
 				{
 					fres += "if(_obj"+typ+name+"!=NULL)\n";
-					fres += "json += JSONSerialize::serialize<"+stlcnttyp+"<"+fqcn+"> >(*_obj"+typ+name+", \""+app+"\");\n";
+					fres += "json += JSONSerialize::serialize<"+stlcnttyp+"<"+fqcn+"> >(*_obj"+typ+name+", "+serOpt+", \""+app+"\");\n";
 				}
 				else
-					fres += "json += JSONSerialize::serialize<"+stlcnttyp+"<"+fqcn+"> >(_obj"+typ+name+", \""+app+"\");\n";
+					fres += "json += JSONSerialize::serialize<"+stlcnttyp+"<"+fqcn+"> >(_obj"+typ+name+", "+serOpt+", \""+app+"\");\n";
 			}
 			else
 			{
 				if(ptr)
 				{
 					fres += "if(_obj"+typ+"get"+camelCased(name)+"()!=NULL)\n";
-					fres += "json += JSONSerialize::serialize<"+stlcnttyp+"<"+fqcn+"> >(*_obj"+typ+"get"+camelCased(name)+"(), \""+app+"\");\n";
+					fres += "json += JSONSerialize::serialize<"+stlcnttyp+"<"+fqcn+"> >(*_obj"+typ+"get"+camelCased(name)+"(), "+serOpt+", \""+app+"\");\n";
 				}
 				else
-					fres += "json += JSONSerialize::serialize<"+stlcnttyp+"<"+fqcn+"> >(_obj"+typ+"get"+camelCased(name)+"(), \""+app+"\");\n";
+					fres += "json += JSONSerialize::serialize<"+stlcnttyp+"<"+fqcn+"> >(_obj"+typ+"get"+camelCased(name)+"(), "+serOpt+", \""+app+"\");\n";
 			}
 			//fres += generateToJSONVectorObjects(tempp, name, priv, retu, headers, path, objs, typ, ptr, stlcnttyp);
 		}
@@ -1360,14 +1361,18 @@ std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& cla
 
 								types.append(varname);
 								std::string adden = "", padden = "";
+								std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(stlcnttyp+"<"+fqcn+">"));
 								if(ptr)
 								{
-									adden = ", \""+stlcnttyp+"<"+fqcn+">\"";
+									adden = "," +  serOpt + ", \""+stlcnttyp+"<"+fqcn+">\"";
 									padden = "delete _" + varname + ";\n";
 									types.append(" = ("+emp.at(j)+"*)JSONSerialize::unSerializeUnknown(_inp.at(");
 								}
 								else
+								{
+									adden = "," +  serOpt;
 									types.append(" = JSONSerialize::unserialize<"+stlcnttyp+"<"+fqcn+"> >(_inp.at(");
+								}
 								types.append(CastUtil::lexical_cast<std::string>(j-2));
 								types.append(")"+adden+", \""+appName+"\");\n"+padden);
 							}
@@ -1383,14 +1388,18 @@ std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& cla
 								std::string adden = "", padden = "";
 								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<std::string>(j-1)+")";
 								types.append(varname);
+								std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 								if(ptr)
 								{
 									padden = "delete _" + varname + ";\n";
-									adden = ", \""+fqcn+"\"";
+									adden = "," +  serOpt + ", \""+fqcn+"\"";
 									types.append(" = ("+fqcn+"*)JSONSerialize::unSerializeUnknown(_inp.at(");
 								}
 								else
+								{
+									adden = "," +  serOpt;
 									types.append(" = JSONSerialize::unserialize<"+fqcn+">(_inp.at(");
+								}
 								types.append(CastUtil::lexical_cast<std::string>(j-2));
 								types.append(")"+adden+", \""+appName+"\");\n"+padden);
 							}
@@ -1406,14 +1415,18 @@ std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& cla
 								std::string adden = "", padden = "";
 								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<std::string>(j-1)+")";
 								types.append(CastUtil::lexical_cast<std::string>(j-1));
+								std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 								if(ptr)
 								{
 									padden = "delete _" + varname + ";\n";
-									adden = ", \""+fqcn+"\"";
+									adden = "," +  serOpt + ", \""+fqcn+"\"";
 									types.append(" = ("+fqcn+"*)JSONSerialize::unSerializeUnknown(_inp.at(");
 								}
 								else
+								{
+									adden = "," +  serOpt;
 									types.append(" = JSONSerialize::unserialize<"+fqcn+">(_inp.at(");
+								}
 								types.append(CastUtil::lexical_cast<std::string>(j-2));
 								types.append(")"+adden+", \""+appName+"\");\n"+padden);
 							}
@@ -1503,50 +1516,53 @@ std::string AfcUtil::updateAjaxInterface(const strVec& emp, ClassStructure& clas
 			tempp = StringUtil::replaceAllCopy(tempp, ">", "");
 
 			std::string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
+			std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 
 			if(ptr)
 			{
 				test += tempp + "* __val__ = _obj."+funcName+"("+pars+");\n";
 				test += "if(__val__!=NULL) {\n";
-				test += "return JSONSerialize::serializeUnknown(__val__, \""+stlcnttyp+"<"+fqcn+">\", \""+appName+"\");\ndelete __val__;\n}\n";
+				test += "return JSONSerialize::serializeUnknown(__val__,"+serOpt+", \""+stlcnttyp+"<"+fqcn+">\", \""+appName+"\");\ndelete __val__;\n}\n";
 				test += "else return \"\";\n";
 			}
 			else
 			{
 				test += tempp + " __val__ = _obj."+funcName+"("+pars+");\n";
-				test += "return JSONSerialize::serializeUnknown(&__val__, \""+stlcnttyp+"<"+fqcn+">\", \""+appName+"\");\n";
+				test += "return JSONSerialize::serializeUnknown(&__val__,"+serOpt+", \""+stlcnttyp+"<"+fqcn+">\", \""+appName+"\");\n";
 			}
 			test += "\n}\n";
 		}
 		else if(fqcn=="Date" || fqcn=="BinaryData")
 		{
+			std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 			if(ptr)
 			{
 				test += fqcn + "* __val__ = _obj."+funcName+"("+pars+");\n";
 				test += "if(__val__!=NULL) {\n";
-				test += "return JSONSerialize::serializeUnknown(__val__, \""+fqcn+"\", \""+appName+"\");\ndelete __val__;\n}\n";
+				test += "return JSONSerialize::serializeUnknown(__val__,"+serOpt+", \""+fqcn+"\", \""+appName+"\");\ndelete __val__;\n}\n";
 				test += "else return \"\";\n";
 			}
 			else
 			{
 				test += tempp + " __val__ = _obj."+funcName+"("+pars+");\n";
-				test += "return JSONSerialize::serializeUnknown(&__val__, \""+fqcn+"\", \""+appName+"\");\n";
+				test += "return JSONSerialize::serializeUnknown(&__val__,"+serOpt+", \""+fqcn+"\", \""+appName+"\");\n";
 			}
 			test += "\n}\n";
 		}
 		else if(Reflection::isValidClass(fqcn, appName))
 		{
+			std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 			if(ptr)
 			{
 				test += fqcn + "* __val__ = _obj."+funcName+"("+pars+");\n";
 				test += "if(__val__!=NULL) {\n";
-				test += "return JSONSerialize::serializeUnknown(__val__, \""+fqcn+"\", \""+appName+"\");\ndelete __val__;\n}\n";
+				test += "return JSONSerialize::serializeUnknown(__val__,"+serOpt+", \""+fqcn+"\", \""+appName+"\");\ndelete __val__;\n}\n";
 				test += "else return \"\";\n";
 			}
 			else
 			{
 				test += tempp + " __val__ = _obj."+funcName+"("+pars+");\n";
-				test += "return JSONSerialize::serializeUnknown(&__val__, \""+fqcn+"\", \""+appName+"\");\n";
+				test += "return JSONSerialize::serializeUnknown(&__val__,"+serOpt+", \""+fqcn+"\", \""+appName+"\");\n";
 			}
 			test += "\n}\n";
 		}

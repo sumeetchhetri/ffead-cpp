@@ -42,6 +42,37 @@ std::string DateFormat::appendZero(const int& value)
 	return te;
 }
 
+std::string DateFormat::format(Date* date)
+{
+	std::string temp = this->formatspec;
+	StringUtil::replaceAll(temp,"hh",appendZero(date->getHours()));
+	StringUtil::replaceAll(temp,"mi",appendZero(date->getMinutes()));
+	StringUtil::replaceAll(temp,"ss",appendZero(date->getSeconds()));
+	StringUtil::replaceAll(temp,"ns",appendZero(date->getNanoseconds()));
+	StringUtil::replaceAll(temp,"ddd",date->getDayAbbr());
+	StringUtil::replaceAll(temp,"dd",appendZero(date->getDay()));
+	StringUtil::replaceAll(temp,"mmm",date->getMonthAbbr());
+	StringUtil::replaceAll(temp,"mm",appendZero(date->getMonth()));
+	StringUtil::replaceAll(temp,"yyyy",appendZero(date->getYear()));
+	StringUtil::replaceAll(temp,"yy",appendZero(date->getYear()).substr(2));
+	StringUtil::replaceAll(temp,"z",date->getTimeZone());
+	std::string tz = CastUtil::lexical_cast<std::string>(date->getTimeZoneOffset()*100);
+	if(tz.find(".")!=std::string::npos) {
+		tz = tz.substr(0, tz.find("."));
+	}
+	if(date->getTimeZoneOffset()>0)
+	{
+		tz = "+" + tz;
+		StringUtil::replaceAll(temp,"Z",tz);
+	}
+	else if(date->getTimeZoneOffset()<0)
+	{
+		tz = "-" + tz;
+		StringUtil::replaceAll(temp,"Z",tz);
+	}
+	return temp;
+}
+
 std::string DateFormat::format(const Date& date)
 {
 	std::string temp = this->formatspec;

@@ -30,7 +30,7 @@ typedef void* (*UnSerPtr) (const std::string&);
 
 class BinarySerialize : public SerializeBase {
 
-	std::string serializePrimitive(const std::string& className, void* t);
+	std::string serializePrimitive(int serOpt, const std::string& className, void* t);
 	void* getSerializableObject();
 	void cleanSerializableObject(void* _1);
 	void startContainerSerialization(void* _1, const std::string& className, const std::string& container);
@@ -42,32 +42,34 @@ class BinarySerialize : public SerializeBase {
 	std::string elementToSerializedString(void* _1, const int& counter);
 	std::string getConatinerElementClassName(void* _1, const std::string& className);
 	void* getContainerElement(void* _1, const int& counter, const int& counter1= -1);
-	void addPrimitiveElementToContainer(void* _1, const int& counter, const std::string& className, void* cont, const std::string& container);
+	void addPrimitiveElementToContainer(void* _1, int serOpt, const int& counter, const std::string& className, void* cont, const std::string& container);
 	void* getUnserializableObject(const std::string& _1);
 	void cleanUnserializableObject(void* _1);
 	void cleanValidUnserializableObject(void* _1);
 	void* getValidUnserializableObject(const std::string& _1);
 	int getContainerSize(void* _1);
 	std::string getUnserializableClassName(void* _1, const std::string& className);
-	void* getPrimitiveValue(void* _1, const std::string& className);
+	void* getPrimitiveValue(void* _1, int serOpt, const std::string& className);
 public:
 	BinarySerialize();
 	BinarySerialize(void*);
 	~BinarySerialize();
 
-	template <class T> static std::string serialize(T& t, const std::string& appName = "")
+	template <class T> static std::string serialize(T& t, int serOpt, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		std::string className = CastUtil::getClassName(t);
+		if(serOpt==-1) serOpt = identifySerOption(className);
 		return _handleAllSerialization(className,&t,appName, &serialize);
 	}
-	template <class T> static std::string serializePointer(T* t, const std::string& appName = "")
+	template <class T> static std::string serializePointer(T* t, int serOpt, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		std::string className = CastUtil::getClassName(t);
+		if(serOpt==-1) serOpt = identifySerOption(className);
 		return _handleAllSerialization(className,t,appName, &serialize);
 	}
-	static std::string serializeUnknown(void* t, const std::string& className, const std::string& appName = "");
+	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName = "");
 
 	template <class K,class V> static std::string serializeMap(std::map<K,V>& mp, const std::string& appName = "")
 	{
@@ -146,12 +148,13 @@ public:
 	}
 
 
-	template <class T> static T unserialize(const std::string& objXml, const std::string& appName = "")
+	template <class T> static T unserialize(const std::string& objXml, int serOpt, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		T t;
 		std::string className = CastUtil::getClassName(t);
-		T* tp = (T*)_handleAllUnSerialization(objXml,className,appName,&serialize,false,NULL);
+		if(serOpt==-1) serOpt = identifySerOption(className);
+		T* tp = (T*)_handleAllUnSerialization(objXml,serOpt,className,appName,&serialize,false,NULL);
 		if(tp!=NULL)
 		{
 			t = *(T*)tp;
@@ -159,12 +162,13 @@ public:
 		}
 		return t;
 	}
-	template <class T> static T unserialize(AMEFObject* serObject, const std::string& appName = "")
+	template <class T> static T unserialize(AMEFObject* serObject, int serOpt, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		T t;
 		std::string className = CastUtil::getClassName(t);
-		T* tp = (T*)_handleAllUnSerialization("",className,appName,&serialize,false,serObject);
+		if(serOpt==-1) serOpt = identifySerOption(className);
+		T* tp = (T*)_handleAllUnSerialization("",serOpt,className,appName,&serialize,false,serObject);
 		if(tp!=NULL)
 		{
 			t = *(T*)tp;
@@ -172,19 +176,19 @@ public:
 		}
 		return t;
 	}
-	template <class T> static T* unserializeToPointer(const std::string& objXml, const std::string& appName = "")
+	template <class T> static T* unserializeToPointer(const std::string& objXml, int serOpt, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		T* t;
 		std::string className = CastUtil::getClassName(t);
-		return (T*)_handleAllUnSerialization(objXml,className,appName,&serialize,false,NULL);
+		return (T*)_handleAllUnSerialization(objXml,serOpt,className,appName,&serialize,false,NULL);
 	}
-	template <class T> static T* unserializeToPointer(AMEFObject* serObject, const std::string& appName = "")
+	template <class T> static T* unserializeToPointer(AMEFObject* serObject, int serOpt, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		T* t;
 		std::string className = CastUtil::getClassName(t);
-		return (T*)_handleAllUnSerialization("",className,appName,&serialize,false,serObject);
+		return (T*)_handleAllUnSerialization("",serOpt,className,appName,&serialize,false,serObject);
 	}
 
 	bool isValidClassNamespace(void* _1, const std::string& className, const std::string& namespc, const bool& iscontainer= false);
@@ -193,13 +197,13 @@ public:
 	void startObjectSerialization(void* _1, const std::string& className);
 	void endObjectSerialization(void* _1, const std::string& className);
 	void afterAddObjectProperty(void* _1);
-	void addObjectPrimitiveProperty(void* _1, const std::string& propName, const std::string& className, void* t);
+	void addObjectPrimitiveProperty(void* _1, int serOpt, const std::string& propName, const std::string& className, void* t);
 	void addObjectProperty(void* _1, const std::string& propName, std::string className, const std::string& t);
-	void* getObjectPrimitiveValue(void* _1, const std::string& className, const std::string& propName);
-	static void* unSerializeUnknown(const std::string& objXml, const std::string& className, const std::string& appName = "");
-	std::string serializeUnknownBase(void* t, const std::string& className, const std::string& appName = "");
-	void* unSerializeUnknownBase(void* unserObj, const std::string& className, const std::string& appName = "");
-	void* unSerializeUnknownBase(const std::string& serVal, const std::string& className, const std::string& appName = "");
+	void* getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName);
+	static void* unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName = "");
+	std::string serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName = "");
+	void* unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName = "");
+	void* unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& appName = "");
 };
 
 #endif /* BINARYSERIALIZE_H_ */
