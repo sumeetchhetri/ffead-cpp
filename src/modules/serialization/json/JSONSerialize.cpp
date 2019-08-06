@@ -52,8 +52,8 @@ std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& cla
 {
 	switch(serOpt) {
 		case 1: return "\""+*(std::string*)t+"\"";
-		case 2: return "\""+(*(char*)t)[0]+"\"";
-		case 3: return "\""+(*(unsigned char*)t)[0]+"\"";
+		case 2: return "\""+((char*)t)[0]+"\"";
+		case 3: return "\""+((unsigned char*)t)[0]+"\"";
 		case 4: return "\""+CastUtil::lexical_cast<std::string>(*(int*)t)+"\"";
 		case 5: return "\""+CastUtil::lexical_cast<std::string>(*(unsigned int*)t)+"\"";
 		case 6: return "\""+CastUtil::lexical_cast<std::string>(*(short*)t)+"\"";
@@ -490,12 +490,12 @@ void JSONSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::
 		}
 		case 2:
 		{
-			*object += "\"" + propName + "\" : \"" + (*(char*)t)[0] + "\"";
+			*object += "\"" + propName + "\" : \"" + ((char*)t)[0] + "\"";
 			break;
 		}
 		case 3:
 		{
-			*object += "\"" + propName + "\" : \"" + (*(unsigned char*)t)[0] + "\"";
+			*object += "\"" + propName + "\" : \"" + ((unsigned char*)t)[0] + "\"";
 			break;
 		}
 		case 4:

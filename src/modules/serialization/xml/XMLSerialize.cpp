@@ -37,8 +37,8 @@ std::string XMLSerialize::serializePrimitive(int serOpt, const std::string& clas
 {
 	switch(serOpt) {
 		case 1: return "<string>"+*(std::string*)t+"</string>";
-		case 2: return "<string>"+(*(char*)t)[0]+"</string>";
-		case 3: return "<string>"+(*(unsigned char*)t)[0]+"</string>";
+		case 2: return "<string>"+((char*)t)[0]+"</string>";
+		case 3: return "<string>"+((unsigned char*)t)[0]+"</string>";
 		case 4: return "<int>"+CastUtil::lexical_cast<std::string>(*(int*)t)+"</int>";
 		case 5: return "<uint>"+CastUtil::lexical_cast<std::string>(*(unsigned int*)t)+"</uint>";
 		case 6: return "<short>"+CastUtil::lexical_cast<std::string>(*(short*)t)+"</short>";
@@ -489,7 +489,7 @@ void XMLSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::s
 		}
 		case 2:
 		{
-			*object += "<" + propName + ">" + (*(char*)t)[0] + "</" + propName + ">";
+			*object += "<" + propName + ">" + ((char*)t)[0] + "</" + propName + ">";
 			break;
 		}
 		case 3:

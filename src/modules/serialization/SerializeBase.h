@@ -186,7 +186,7 @@ protected:
 	static void processClassName(std::string& className);
 	static void processClassAndContainerNames(std::string& className, std::string& container);
 public:
-	template <class T> static std::string serializeset(const std::set<T>& t, const std::string& app, SerializeBase* base)
+	template <class T> static std::string serializeset(const std::set<T>& t, int serOpt, const std::string& app, SerializeBase* base)
 	{
 		T tr;
 		std::string appName = CommonUtils::getAppName(app);
@@ -199,7 +199,7 @@ public:
 		base->startContainerSerialization(object, className, "std::set");
 		for(it = t.begin(); it!= t.end(); ++it)
 		{
-			base->addContainerSerializableElement(object, serialize<T>(*it, appName, base));
+			base->addContainerSerializableElement(object, serialize<T>(*it, serOpt, appName, base));
 			base->afterAddContainerSerializableElement(object, cnt++, size);
 		}
 		base->endContainerSerialization(object, className, "std::set");
@@ -207,7 +207,7 @@ public:
 		base->cleanSerializableObject(object);
 		return ser;
 	}
-	template <class T> static std::string serializemultiset(const std::multiset<T>& t, const std::string& app, SerializeBase* base)
+	template <class T> static std::string serializemultiset(const std::multiset<T>& t, int serOpt, const std::string& app, SerializeBase* base)
 	{
 		T tr;
 		std::string appName = CommonUtils::getAppName(app);
@@ -220,7 +220,7 @@ public:
 		base->startContainerSerialization(object, className, "std::multiset");
 		for(it = t.begin(); it!= t.end(); ++it)
 		{
-			base->addContainerSerializableElement(object, serialize<T>(*it, appName, base));
+			base->addContainerSerializableElement(object, serialize<T>(*it, serOpt, appName, base));
 			base->afterAddContainerSerializableElement(object, cnt++, size);
 		}
 		base->endContainerSerialization(object, className, "std::multiset");
@@ -228,7 +228,7 @@ public:
 		base->cleanSerializableObject(object);
 		return ser;
 	}
-	template <class T> static std::string serializevec(const std::vector<T>& t, const std::string& app, SerializeBase* base)
+	template <class T> static std::string serializevec(const std::vector<T>& t, int serOpt, const std::string& app, SerializeBase* base)
 	{
 		T tr;
 		std::string appName = CommonUtils::getAppName(app);
@@ -238,7 +238,7 @@ public:
 		base->startContainerSerialization(object, className, "std::vector");
 		for(int var = 0; var < (int)t.size(); ++var)
 		{
-			base->addContainerSerializableElement(object, serialize<T>(t.at(var), appName, base));
+			base->addContainerSerializableElement(object, serialize<T>(t.at(var), serOpt, appName, base));
 			base->afterAddContainerSerializableElement(object, var, size);
 		}
 		base->endContainerSerialization(object, className, "std::vector");
@@ -246,7 +246,7 @@ public:
 		base->cleanSerializableObject(object);
 		return ser;
 	}
-	template <class T> static std::string serializedq(const std::deque<T>& t, const std::string& app, SerializeBase* base)
+	template <class T> static std::string serializedq(const std::deque<T>& t, int serOpt, const std::string& app, SerializeBase* base)
 	{
 		T tr;
 		std::string appName = CommonUtils::getAppName(app);
@@ -256,7 +256,7 @@ public:
 		base->startContainerSerialization(object, className, "std::deque");
 		for(int var = 0; var < (int)t.size(); ++var)
 		{
-			base->addContainerSerializableElement(object, serialize<T>(t.at(var), appName, base));
+			base->addContainerSerializableElement(object, serialize<T>(t.at(var), serOpt, appName, base));
 			base->afterAddContainerSerializableElement(object, var, size);
 		}
 		base->endContainerSerialization(object, className, "std::deque");
@@ -264,7 +264,7 @@ public:
 		base->cleanSerializableObject(object);
 		return ser;
 	}
-	template <class T> static std::string serializelist(const std::list<T>& t, const std::string& app, SerializeBase* base)
+	template <class T> static std::string serializelist(const std::list<T>& t, int serOpt, const std::string& app, SerializeBase* base)
 	{
 		T tr;
 		std::string appName = CommonUtils::getAppName(app);
@@ -277,7 +277,7 @@ public:
 		base->startContainerSerialization(object, className, "std::list");
 		for(it = t.begin(); it!= t.end(); ++it)
 		{
-			base->addContainerSerializableElement(object, serialize<T>(*it, appName, base));
+			base->addContainerSerializableElement(object, serialize<T>(*it, serOpt, appName, base));
 			base->afterAddContainerSerializableElement(object, cnt, size);
 		}
 		base->endContainerSerialization(object, className, "std::list");
@@ -285,7 +285,7 @@ public:
 		base->cleanSerializableObject(object);
 		return ser;
 	}
-	template <class T> static std::string serializeq(const std::queue<T>& t, const std::string& app, SerializeBase* base)
+	template <class T> static std::string serializeq(const std::queue<T>& t, int serOpt, const std::string& app, SerializeBase* base)
 	{
 		T tr;
 		std::string appName = CommonUtils::getAppName(app);
@@ -296,7 +296,7 @@ public:
 		base->startContainerSerialization(object, className, "std::queue");
 		for(int var = 0; var < (int)tt->size(); ++var)
 		{
-			base->addContainerSerializableElement(object, serialize<T>(tt->at(var), appName, base));
+			base->addContainerSerializableElement(object, serialize<T>(tt->at(var), serOpt, appName, base));
 			base->afterAddContainerSerializableElement(object, var, (int)tt->size());
 		}
 		base->endContainerSerialization(object, className, "std::queue");

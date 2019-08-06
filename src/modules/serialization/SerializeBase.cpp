@@ -322,22 +322,22 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			processClassName(vtyp);
 			return _serContainer(t, vtyp, appName, "vector", base);
 		}
-		case 101: return serializevec<std::string>(*(std::vector<std::string>*)t, appName, base);
-		case 102: return serializevec<char>(*(std::vector<char>*)t, appName, base);
-		case 103: return serializevec<unsigned char>(*(std::vector<unsigned char>*)t, appName, base);
-		case 104: return serializevec<int>(*(std::vector<int>*)t, appName, base);
-		case 105: return serializevec<unsigned int>(*(std::vector<unsigned int>*)t, appName, base);
-		case 106: return serializevec<short>(*(std::vector<short>*)t, appName, base);
-		case 107: return serializevec<unsigned short>(*(std::vector<unsigned short>*)t, appName, base);
-		case 108: return serializevec<long>(*(std::vector<long>*)t, appName, base);
-		case 109: return serializevec<unsigned long>(*(std::vector<unsigned long>*)t, appName, base);
-		case 110: return serializevec<long long>(*(std::vector<long long>*)t, appName, base);
-		case 111: return serializevec<unsigned long long>(*(std::vector<unsigned long long>*)t, appName, base);
-		case 112: return serializevec<float>(*(std::vector<float>*)t, appName, base);
-		case 113: return serializevec<double>(*(std::vector<double>*)t, appName, base);
-		case 114: return serializevec<long double>(*(std::vector<long double>*)t, appName, base);
-		case 115: return serializevec<bool>(*(std::vector<bool>*)t, appName, base);
-		case 116: return serializevec<Date>(*(std::vector<Date>*)t, appName, base);
+		case 101: return serializevec<std::string>(*(std::vector<std::string>*)t, serOpt - 100, appName, base);
+		case 102: return serializevec<char>(*(std::vector<char>*)t, serOpt - 100, appName, base);
+		case 103: return serializevec<unsigned char>(*(std::vector<unsigned char>*)t, serOpt - 100, appName, base);
+		case 104: return serializevec<int>(*(std::vector<int>*)t, serOpt - 100, appName, base);
+		case 105: return serializevec<unsigned int>(*(std::vector<unsigned int>*)t, serOpt - 100, appName, base);
+		case 106: return serializevec<short>(*(std::vector<short>*)t, serOpt - 100, appName, base);
+		case 107: return serializevec<unsigned short>(*(std::vector<unsigned short>*)t, serOpt - 100, appName, base);
+		case 108: return serializevec<long>(*(std::vector<long>*)t, serOpt - 100, appName, base);
+		case 109: return serializevec<unsigned long>(*(std::vector<unsigned long>*)t, serOpt - 100, appName, base);
+		case 110: return serializevec<long long>(*(std::vector<long long>*)t, serOpt - 100, appName, base);
+		case 111: return serializevec<unsigned long long>(*(std::vector<unsigned long long>*)t, serOpt - 100, appName, base);
+		case 112: return serializevec<float>(*(std::vector<float>*)t, serOpt - 100, appName, base);
+		case 113: return serializevec<double>(*(std::vector<double>*)t, serOpt - 100, appName, base);
+		case 114: return serializevec<long double>(*(std::vector<long double>*)t, serOpt - 100, appName, base);
+		case 115: return serializevec<bool>(*(std::vector<bool>*)t, serOpt - 100, appName, base);
+		case 116: return serializevec<Date>(*(std::vector<Date>*)t, serOpt - 100, appName, base);
 
 		case 200: {
 			StringUtil::replaceFirst(className,"std::list<","");
@@ -350,22 +350,22 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			processClassName(vtyp);
 			return _serContainer(t, vtyp, appName, "list", base);
 		}
-		case 201: return serializelist<std::string>(*(std::list<std::string>*)t, appName, base);
-		case 202: return serializelist<char>(*(std::list<char>*)t, appName, base);
-		case 203: return serializelist<unsigned char>(*(std::list<unsigned char>*)t, appName, base);
-		case 204: return serializelist<int>(*(std::list<int>*)t, appName, base);
-		case 205: return serializelist<unsigned int>(*(std::list<unsigned int>*)t, appName, base);
-		case 206: return serializelist<short>(*(std::list<short>*)t, appName, base);
-		case 207: return serializelist<unsigned short>(*(std::list<unsigned short>*)t, appName, base);
-		case 208: return serializelist<long>(*(std::list<long>*)t, appName, base);
-		case 209: return serializelist<unsigned long>(*(std::list<unsigned long>*)t, appName, base);
-		case 210: return serializelist<long long>(*(std::list<long long>*)t, appName, base);
-		case 211: return serializelist<unsigned long long>(*(std::list<unsigned long long>*)t, appName, base);
-		case 212: return serializelist<float>(*(std::list<float>*)t, appName, base);
-		case 213: return serializelist<double>(*(std::list<double>*)t, appName, base);
-		case 214: return serializelist<long double>(*(std::list<long double>*)t, appName, base);
-		case 215: return serializelist<bool>(*(std::list<bool>*)t, appName, base);
-		case 216: return serializelist<Date>(*(std::list<Date>*)t, appName, base);
+		case 201: return serializelist<std::string>(*(std::list<std::string>*)t, serOpt - 200, appName, base);
+		case 202: return serializelist<char>(*(std::list<char>*)t, serOpt - 200, appName, base);
+		case 203: return serializelist<unsigned char>(*(std::list<unsigned char>*)t, serOpt - 200, appName, base);
+		case 204: return serializelist<int>(*(std::list<int>*)t, serOpt - 200, appName, base);
+		case 205: return serializelist<unsigned int>(*(std::list<unsigned int>*)t, serOpt - 200, appName, base);
+		case 206: return serializelist<short>(*(std::list<short>*)t, serOpt - 200, appName, base);
+		case 207: return serializelist<unsigned short>(*(std::list<unsigned short>*)t, serOpt - 200, appName, base);
+		case 208: return serializelist<long>(*(std::list<long>*)t, serOpt - 200, appName, base);
+		case 209: return serializelist<unsigned long>(*(std::list<unsigned long>*)t, serOpt - 200, appName, base);
+		case 210: return serializelist<long long>(*(std::list<long long>*)t, serOpt - 200, appName, base);
+		case 211: return serializelist<unsigned long long>(*(std::list<unsigned long long>*)t, serOpt - 200, appName, base);
+		case 212: return serializelist<float>(*(std::list<float>*)t, serOpt - 200, appName, base);
+		case 213: return serializelist<double>(*(std::list<double>*)t, serOpt - 200, appName, base);
+		case 214: return serializelist<long double>(*(std::list<long double>*)t, serOpt - 200, appName, base);
+		case 215: return serializelist<bool>(*(std::list<bool>*)t, serOpt - 200, appName, base);
+		case 216: return serializelist<Date>(*(std::list<Date>*)t, serOpt - 200, appName, base);
 
 		case 300: {
 			StringUtil::replaceFirst(className,"std::set<","");
@@ -378,22 +378,22 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			processClassName(vtyp);
 			return _serContainer(t, vtyp, appName, "set", base);
 		}
-		case 301: return serializeset<std::string>(*(std::set<std::string>*)t, appName, base);
-		case 302: return serializeset<char>(*(std::set<char>*)t, appName, base);
-		case 303: return serializeset<unsigned char>(*(std::set<unsigned char>*)t, appName, base);
-		case 304: return serializeset<int>(*(std::set<int>*)t, appName, base);
-		case 305: return serializeset<unsigned int>(*(std::set<unsigned int>*)t, appName, base);
-		case 306: return serializeset<short>(*(std::set<short>*)t, appName, base);
-		case 307: return serializeset<unsigned short>(*(std::set<unsigned short>*)t, appName, base);
-		case 308: return serializeset<long>(*(std::set<long>*)t, appName, base);
-		case 309: return serializeset<unsigned long>(*(std::set<unsigned long>*)t, appName, base);
-		case 310: return serializeset<long long>(*(std::set<long long>*)t, appName, base);
-		case 311: return serializeset<unsigned long long>(*(std::set<unsigned long long>*)t, appName, base);
-		case 312: return serializeset<float>(*(std::set<float>*)t, appName, base);
-		case 313: return serializeset<double>(*(std::set<double>*)t, appName, base);
-		case 314: return serializeset<long double>(*(std::set<long double>*)t, appName, base);
-		case 315: return serializeset<bool>(*(std::set<bool>*)t, appName, base);
-		case 316: return serializeset<Date>(*(std::set<Date>*)t, appName, base);
+		case 301: return serializeset<std::string>(*(std::set<std::string>*)t, serOpt - 300, appName, base);
+		case 302: return serializeset<char>(*(std::set<char>*)t, serOpt - 300, appName, base);
+		case 303: return serializeset<unsigned char>(*(std::set<unsigned char>*)t, serOpt - 300, appName, base);
+		case 304: return serializeset<int>(*(std::set<int>*)t, serOpt - 300, appName, base);
+		case 305: return serializeset<unsigned int>(*(std::set<unsigned int>*)t, serOpt - 300, appName, base);
+		case 306: return serializeset<short>(*(std::set<short>*)t, serOpt - 300, appName, base);
+		case 307: return serializeset<unsigned short>(*(std::set<unsigned short>*)t, serOpt - 300, appName, base);
+		case 308: return serializeset<long>(*(std::set<long>*)t, serOpt - 300, appName, base);
+		case 309: return serializeset<unsigned long>(*(std::set<unsigned long>*)t, serOpt - 300, appName, base);
+		case 310: return serializeset<long long>(*(std::set<long long>*)t, serOpt - 300, appName, base);
+		case 311: return serializeset<unsigned long long>(*(std::set<unsigned long long>*)t, serOpt - 300, appName, base);
+		case 312: return serializeset<float>(*(std::set<float>*)t, serOpt - 300, appName, base);
+		case 313: return serializeset<double>(*(std::set<double>*)t, serOpt - 300, appName, base);
+		case 314: return serializeset<long double>(*(std::set<long double>*)t, serOpt - 300, appName, base);
+		case 315: return serializeset<bool>(*(std::set<bool>*)t, serOpt - 300, appName, base);
+		case 316: return serializeset<Date>(*(std::set<Date>*)t, serOpt - 300, appName, base);
 
 		case 400: {
 			StringUtil::replaceFirst(className,"std::multiset<","");
@@ -406,22 +406,22 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			processClassName(vtyp);
 			return _serContainer(t, vtyp, appName, "multiset", base);
 		}
-		case 401: return serializemultiset<std::string>(*(std::multiset<std::string>*)t, appName, base);
-		case 402: return serializemultiset<char>(*(std::multiset<char>*)t, appName, base);
-		case 403: return serializemultiset<unsigned char>(*(std::multiset<unsigned char>*)t, appName, base);
-		case 404: return serializemultiset<int>(*(std::multiset<int>*)t, appName, base);
-		case 405: return serializemultiset<unsigned int>(*(std::multiset<unsigned int>*)t, appName, base);
-		case 406: return serializemultiset<short>(*(std::multiset<short>*)t, appName, base);
-		case 407: return serializemultiset<unsigned short>(*(std::multiset<unsigned short>*)t, appName, base);
-		case 408: return serializemultiset<long>(*(std::multiset<long>*)t, appName, base);
-		case 409: return serializemultiset<unsigned long>(*(std::multiset<unsigned long>*)t, appName, base);
-		case 410: return serializemultiset<long long>(*(std::multiset<long long>*)t, appName, base);
-		case 411: return serializemultiset<unsigned long long>(*(std::multiset<unsigned long long>*)t, appName, base);
-		case 412: return serializemultiset<float>(*(std::multiset<float>*)t, appName, base);
-		case 413: return serializemultiset<double>(*(std::multiset<double>*)t, appName, base);
-		case 414: return serializemultiset<long double>(*(std::multiset<long double>*)t, appName, base);
-		case 415: return serializemultiset<bool>(*(std::multiset<bool>*)t, appName, base);
-		case 416: return serializemultiset<Date>(*(std::multiset<Date>*)t, appName, base);
+		case 401: return serializemultiset<std::string>(*(std::multiset<std::string>*)t, serOpt - 400, appName, base);
+		case 402: return serializemultiset<char>(*(std::multiset<char>*)t, serOpt - 400, appName, base);
+		case 403: return serializemultiset<unsigned char>(*(std::multiset<unsigned char>*)t, serOpt - 400, appName, base);
+		case 404: return serializemultiset<int>(*(std::multiset<int>*)t, serOpt - 400, appName, base);
+		case 405: return serializemultiset<unsigned int>(*(std::multiset<unsigned int>*)t, serOpt - 400, appName, base);
+		case 406: return serializemultiset<short>(*(std::multiset<short>*)t, serOpt - 400, appName, base);
+		case 407: return serializemultiset<unsigned short>(*(std::multiset<unsigned short>*)t, serOpt - 400, appName, base);
+		case 408: return serializemultiset<long>(*(std::multiset<long>*)t, serOpt - 400, appName, base);
+		case 409: return serializemultiset<unsigned long>(*(std::multiset<unsigned long>*)t, serOpt - 400, appName, base);
+		case 410: return serializemultiset<long long>(*(std::multiset<long long>*)t, serOpt - 400, appName, base);
+		case 411: return serializemultiset<unsigned long long>(*(std::multiset<unsigned long long>*)t, serOpt - 400, appName, base);
+		case 412: return serializemultiset<float>(*(std::multiset<float>*)t, serOpt - 400, appName, base);
+		case 413: return serializemultiset<double>(*(std::multiset<double>*)t, serOpt - 400, appName, base);
+		case 414: return serializemultiset<long double>(*(std::multiset<long double>*)t, serOpt - 400, appName, base);
+		case 415: return serializemultiset<bool>(*(std::multiset<bool>*)t, serOpt - 400, appName, base);
+		case 416: return serializemultiset<Date>(*(std::multiset<Date>*)t, serOpt - 400, appName, base);
 
 		case 500: {
 			StringUtil::replaceFirst(className,"std::queue<","");
@@ -434,22 +434,22 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			processClassName(vtyp);
 			return _serContainer(t, vtyp, appName, "queue", base);
 		}
-		case 501: return serializeq<std::string>(*(std::queue<std::string>*)t, appName, base);
-		case 502: return serializeq<char>(*(std::queue<char>*)t, appName, base);
-		case 503: return serializeq<unsigned char>(*(std::queue<unsigned char>*)t, appName, base);
-		case 504: return serializeq<int>(*(std::queue<int>*)t, appName, base);
-		case 505: return serializeq<unsigned int>(*(std::queue<unsigned int>*)t, appName, base);
-		case 506: return serializeq<short>(*(std::queue<short>*)t, appName, base);
-		case 507: return serializeq<unsigned short>(*(std::queue<unsigned short>*)t, appName, base);
-		case 508: return serializeq<long>(*(std::queue<long>*)t, appName, base);
-		case 509: return serializeq<unsigned long>(*(std::queue<unsigned long>*)t, appName, base);
-		case 510: return serializeq<long long>(*(std::queue<long long>*)t, appName, base);
-		case 511: return serializeq<unsigned long long>(*(std::queue<unsigned long long>*)t, appName, base);
-		case 512: return serializeq<float>(*(std::queue<float>*)t, appName, base);
-		case 513: return serializeq<double>(*(std::queue<double>*)t, appName, base);
-		case 514: return serializeq<long double>(*(std::queue<long double>*)t, appName, base);
-		case 515: return serializeq<bool>(*(std::queue<bool>*)t, appName, base);
-		case 516: return serializeq<Date>(*(std::queue<Date>*)t, appName, base);
+		case 501: return serializeq<std::string>(*(std::queue<std::string>*)t, serOpt - 500, appName, base);
+		case 502: return serializeq<char>(*(std::queue<char>*)t, serOpt - 500, appName, base);
+		case 503: return serializeq<unsigned char>(*(std::queue<unsigned char>*)t, serOpt - 500, appName, base);
+		case 504: return serializeq<int>(*(std::queue<int>*)t, serOpt - 500, appName, base);
+		case 505: return serializeq<unsigned int>(*(std::queue<unsigned int>*)t, serOpt - 500, appName, base);
+		case 506: return serializeq<short>(*(std::queue<short>*)t, serOpt - 500, appName, base);
+		case 507: return serializeq<unsigned short>(*(std::queue<unsigned short>*)t, serOpt - 500, appName, base);
+		case 508: return serializeq<long>(*(std::queue<long>*)t, serOpt - 500, appName, base);
+		case 509: return serializeq<unsigned long>(*(std::queue<unsigned long>*)t, serOpt - 500, appName, base);
+		case 510: return serializeq<long long>(*(std::queue<long long>*)t, serOpt - 500, appName, base);
+		case 511: return serializeq<unsigned long long>(*(std::queue<unsigned long long>*)t, serOpt - 500, appName, base);
+		case 512: return serializeq<float>(*(std::queue<float>*)t, serOpt - 500, appName, base);
+		case 513: return serializeq<double>(*(std::queue<double>*)t, serOpt - 500, appName, base);
+		case 514: return serializeq<long double>(*(std::queue<long double>*)t, serOpt - 500, appName, base);
+		case 515: return serializeq<bool>(*(std::queue<bool>*)t, serOpt - 500, appName, base);
+		case 516: return serializeq<Date>(*(std::queue<Date>*)t, serOpt - 500, appName, base);
 
 		case 600: {
 			StringUtil::replaceFirst(className,"std::queue<","");
@@ -462,22 +462,22 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			processClassName(vtyp);
 			return _serContainer(t, vtyp, appName, "queue", base);
 		}
-		case 601: return serializedq<std::string>(*(std::deque<std::string>*)t, appName, base);
-		case 602: return serializedq<char>(*(std::deque<char>*)t, appName, base);
-		case 603: return serializedq<unsigned char>(*(std::deque<unsigned char>*)t, appName, base);
-		case 604: return serializedq<int>(*(std::deque<int>*)t, appName, base);
-		case 605: return serializedq<unsigned int>(*(std::deque<unsigned int>*)t, appName, base);
-		case 606: return serializedq<short>(*(std::deque<short>*)t, appName, base);
-		case 607: return serializedq<unsigned short>(*(std::deque<unsigned short>*)t, appName, base);
-		case 608: return serializedq<long>(*(std::deque<long>*)t, appName, base);
-		case 609: return serializedq<unsigned long>(*(std::deque<unsigned long>*)t, appName, base);
-		case 610: return serializedq<long long>(*(std::deque<long long>*)t, appName, base);
-		case 611: return serializedq<unsigned long long>(*(std::deque<unsigned long long>*)t, appName, base);
-		case 612: return serializedq<float>(*(std::deque<float>*)t, appName, base);
-		case 613: return serializedq<double>(*(std::deque<double>*)t, appName, base);
-		case 614: return serializedq<long double>(*(std::deque<long double>*)t, appName, base);
-		case 615: return serializedq<bool>(*(std::deque<bool>*)t, appName, base);
-		case 616: return serializedq<Date>(*(std::deque<Date>*)t, appName, base);
+		case 601: return serializedq<std::string>(*(std::deque<std::string>*)t, serOpt - 600, appName, base);
+		case 602: return serializedq<char>(*(std::deque<char>*)t, serOpt - 600, appName, base);
+		case 603: return serializedq<unsigned char>(*(std::deque<unsigned char>*)t, serOpt - 600, appName, base);
+		case 604: return serializedq<int>(*(std::deque<int>*)t, serOpt - 600, appName, base);
+		case 605: return serializedq<unsigned int>(*(std::deque<unsigned int>*)t, serOpt - 600, appName, base);
+		case 606: return serializedq<short>(*(std::deque<short>*)t, serOpt - 600, appName, base);
+		case 607: return serializedq<unsigned short>(*(std::deque<unsigned short>*)t, serOpt - 600, appName, base);
+		case 608: return serializedq<long>(*(std::deque<long>*)t, serOpt - 600, appName, base);
+		case 609: return serializedq<unsigned long>(*(std::deque<unsigned long>*)t, serOpt - 600, appName, base);
+		case 610: return serializedq<long long>(*(std::deque<long long>*)t, serOpt - 600, appName, base);
+		case 611: return serializedq<unsigned long long>(*(std::deque<unsigned long long>*)t, serOpt - 600, appName, base);
+		case 612: return serializedq<float>(*(std::deque<float>*)t, serOpt - 600, appName, base);
+		case 613: return serializedq<double>(*(std::deque<double>*)t, serOpt - 600, appName, base);
+		case 614: return serializedq<long double>(*(std::deque<long double>*)t, serOpt - 600, appName, base);
+		case 615: return serializedq<bool>(*(std::deque<bool>*)t, serOpt - 600, appName, base);
+		case 616: return serializedq<Date>(*(std::deque<Date>*)t, serOpt - 600, appName, base);
 	}
 	return "";
 }
