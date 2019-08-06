@@ -37,8 +37,8 @@ std::string XMLSerialize::serializePrimitive(int serOpt, const std::string& clas
 {
 	switch(serOpt) {
 		case 1: return "<string>"+*(std::string*)t+"</string>";
-		case 2: return "<string>"+*(char*)t+"</string>";
-		case 3: return "<string>"+*(unsigned char*)t+"</string>";
+		case 2: return "<string>"+(*(char*)t)[0]+"</string>";
+		case 3: return "<string>"+(*(unsigned char*)t)[0]+"</string>";
 		case 4: return "<int>"+CastUtil::lexical_cast<std::string>(*(int*)t)+"</int>";
 		case 5: return "<uint>"+CastUtil::lexical_cast<std::string>(*(unsigned int*)t)+"</uint>";
 		case 6: return "<short>"+CastUtil::lexical_cast<std::string>(*(short*)t)+"</short>";
@@ -489,72 +489,72 @@ void XMLSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::s
 		}
 		case 2:
 		{
-			*object += "<" + propName + ">" + *(char*)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + (*(char*)t)[0] + "</" + propName + ">";
 			break;
 		}
 		case 3:
 		{
-			*object += "<" + propName + ">" + *(unsigned char)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + (*(unsigned char)t)[0] + "</" + propName + ">";
 			break;
 		}
 		case 4:
 		{
-			*object += "<" + propName + ">" + *(int*)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(int*)t) + "</" + propName + ">";
 			break;
 		}
 		case 5:
 		{
-			*object += "<" + propName + ">" + *(unsigned int)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(unsigned int*)t) + "</" + propName + ">";
 			break;
 		}
 		case 6:
 		{
-			*object += "<" + propName + ">" + *(short*)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(short*)t) + "</" + propName + ">";
 			break;
 		}
 		case 7:
 		{
-			*object += "<" + propName + ">" + *(unsigned short)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(unsigned short*)t) + "</" + propName + ">";
 			break;
 		}
 		case 8:
 		{
-			*object += "<" + propName + ">" + *(long*)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(long*)t) + "</" + propName + ">";
 			break;
 		}
 		case 9:
 		{
-			*object += "<" + propName + ">" + *(unsigned long)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(unsigned long*)t) + "</" + propName + ">";
 			break;
 		}
 		case 10:
 		{
-			*object += "<" + propName + ">" + *(long long*)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(long long*)t) + "</" + propName + ">";
 			break;
 		}
 		case 11:
 		{
-			*object += "<" + propName + ">" + *(unsigned long long)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(unsigned long long*)t) + "</" + propName + ">";
 			break;
 		}
 		case 12:
 		{
-			*object += "<" + propName + ">" + *(float*)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(float*)t) + "</" + propName + ">";
 			break;
 		}
 		case 13:
 		{
-			*object += "<" + propName + ">" + *(double*)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(double*)t) + "</" + propName + ">";
 			break;
 		}
 		case 14:
 		{
-			*object += "<" + propName + ">" + *(long double*)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(long double*)t) + "</" + propName + ">";
 			break;
 		}
 		case 15:
 		{
-			*object += "<" + propName + ">" + *(bool*)t + "</" + propName + ">";
+			*object += "<" + propName + ">" + CastUtil::lexical_cast<std::string>(*(bool*)t) + "</" + propName + ">";
 			break;
 		}
 		case 16:
