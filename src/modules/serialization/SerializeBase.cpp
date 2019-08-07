@@ -22,10 +22,10 @@
 
 #include "SerializeBase.h"
 
-cuckoohash_map<std::string, void*> SerializeBase::_serFMap;
-cuckoohash_map<std::string, void*> SerializeBase::_serCFMap;
-cuckoohash_map<std::string, void*> SerializeBase::_unserFMap;
-cuckoohash_map<std::string, void*> SerializeBase::_unserCFMap;
+cuckoohash_map<std::string, Ser> SerializeBase::_serFMap;
+cuckoohash_map<std::string, SerCont> SerializeBase::_serCFMap;
+cuckoohash_map<std::string, UnSer> SerializeBase::_unserFMap;
+cuckoohash_map<std::string, UnSerCont> SerializeBase::_unserCFMap;
 void* SerializeBase::dlib = NULL;
 
 void SerializeBase::init(void* dl) {

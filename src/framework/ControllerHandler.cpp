@@ -243,7 +243,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		if(flag)
 		{
 			t.start();
-			ClassInfo* srv = ConfigurationData::getClassInfo(rft.clas, req->getCntxt_name());
+			ClassInfo* srv = ConfigurationData::getInstance()->ffeadContext.contInsMap["restcontroller_"+rft.clas+req->getCntxt_name()];
+			//ConfigurationData::getClassInfo(rft.clas, req->getCntxt_name());
 			t.end();
 			CommonUtils::tsContRstCsiLkp += t.timerNanoSeconds();
 

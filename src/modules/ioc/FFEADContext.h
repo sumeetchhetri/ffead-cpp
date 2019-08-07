@@ -40,11 +40,12 @@ class Bean
 	friend class FFEADContext;
 	std::string name,inbuilt,value,clas,bean,intfType,injectAs,scope;
 	bool realbean;
+	bool isController;
 	std::vector<std::string> injs,names,types;
 	std::string appName;
 public:
 	Bean();
-	Bean(const std::string& name, const std::string& value, const std::string& clas, const std::string& scope, const bool& isInbuilt, const std::string& appName= "default");
+	Bean(const std::string& name, const std::string& value, const std::string& clas, const std::string& scope, const bool& isInbuilt, bool isController, const std::string& appName= "default");
 	~Bean();
 };
 typedef std::map<std::string,Bean> beanMap;
@@ -52,6 +53,7 @@ class FFEADContext {
 	Logger logger;
 	beanMap beans,injbns;
 	cuckoohash_map<std::string, void*> objects;
+	std::map<std::string, ClassInfo*> contInsMap;
 	bool cleared;
 	Reflector* reflector;
 	friend class ControllerHandler;

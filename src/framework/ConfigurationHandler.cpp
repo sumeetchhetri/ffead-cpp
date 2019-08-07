@@ -298,7 +298,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							if(url!="" && clas!="")
 							{
 								normalizeUrl(name, url);
-								Bean bean("controller_"+clas,"",clas,scope,false,name);
+								Bean bean("controller_"+clas,"",clas,scope,false,true,name);
 								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								ConfigurationData::getInstance()->controllerObjectMap[name][url] = clas;
 								logger << ("Adding Controller for " + url + " :: " + clas) << std::endl;
@@ -408,7 +408,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 								ConfigurationData::getInstance()->filterObjectMap[name][url+type].push_back(clas);
 								if(clas!="")
 								{
-									Bean bean("filter_"+clas,"",clas,scope,false,name);
+									Bean bean("filter_"+clas,"",clas,scope,false,false,name);
 									ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								}
 								logger << ("Adding Filter for " + (name + url + type) + " :: " + clas) << std::endl;
@@ -440,7 +440,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 								std::string scope = tmplts.at(tmpn).getAttribute("scope");
 								if(clas!="")
 								{
-									Bean bean("template_"+clas,"",clas,scope,false,name);
+									Bean bean("template_"+clas,"",clas,scope,false,false,name);
 									ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								}
 								logger << ("Adding Template for " + (url) + " :: " + clas) << std::endl;
@@ -502,7 +502,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 								std::string scope = tmplts.at(tmpn).getAttribute("scope");
 								if(clas!="")
 								{
-									Bean bean("websocketclass_"+clas,"",clas,scope,false,name);
+									Bean bean("websocketclass_"+clas,"",clas,scope,false,false,name);
 									ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 								}
 								logger << ("Adding WebSocketHandler for " + (url) + " :: " + clas) << std::endl;
@@ -529,7 +529,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							std::string scope = dvs.at(dn).getAttribute("scope");
 							if(clas!="")
 							{
-								Bean bean("dview_"+clas,"",clas,scope,false,name);
+								Bean bean("dview_"+clas,"",clas,scope,false,false,name);
 								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 							}
 							logger << ("Adding Dynamic View for " + (name+url) + " :: " + clas) << std::endl;
@@ -703,7 +703,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											}
 											if(clas!="")
 											{
-												Bean bean("restcontroller_"+clas,"",clas,scope,false,name);
+												Bean bean("restcontroller_"+clas,"",clas,scope,false,true,name);
 												ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 											}
 											logger << ("Rest: Adding rest-controller => " + urlmpp  + " , class => " + clas) << std::endl;
@@ -765,7 +765,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 										if(provider!="" && provider.find("class:")!=std::string::npos)
 										{
 											std::string clas = provider.substr(provider.find(":")+1);
-											Bean bean("login-handler_"+clas,"",clas,scope,false,name);
+											Bean bean("login-handler_"+clas,"",clas,scope,false,false,name);
 											ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 										}
 										logger << ("Security: Adding Login Handler => " + url  + " , provider => " + provider) << std::endl;
@@ -952,7 +952,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 							std::string scope = elese.at(appse).getAttribute("scope");
 							if(clas!="")
 							{
-								Bean bean("form_"+clas,"",clas,scope,false,name);
+								Bean bean("form_"+clas,"",clas,scope,false,false,name);
 								ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 							}
 							elese.at(appse).copy(&(ConfigurationData::getInstance()->fviewFormMap[name][elese.at(appse).getAttribute("name")]));
@@ -1624,7 +1624,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 				securityObject.securityFieldFrom["password"] = passfrom;
 
 				ConfigurationData::getInstance()->securityObjectMap[appName][provName] = securityObject;
-				Bean bean("login-handler_"+clas,"",clas,scope,false,appName);
+				Bean bean("login-handler_"+clas,"",clas,scope,false,false,appName);
 				ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 				logger << ("Security: Adding Security Provider => " + url  + " , provider => " + provider) << std::endl;
 			}
@@ -1732,7 +1732,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 					{
 						normalizeUrl(appName, url);
 						ConfigurationData::getInstance()->controllerObjectMap[appName][url] = clas;
-						Bean bean("controller_"+clas,"",clas,scope,false,appName);
+						Bean bean("controller_"+clas,"",clas,scope,false,true,appName);
 						ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 					}
 					logger << ("Adding Controller for " + (appName + url) + " :: " + clas) << std::endl;
@@ -1826,7 +1826,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 						if(clas!="")
 						{
 							ConfigurationData::getInstance()->filterObjectMap[appName][url+type].push_back(clas);
-							Bean bean("filter_"+clas,"",clas,scope,false,appName);
+							Bean bean("filter_"+clas,"",clas,scope,false,false,appName);
 							ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 						}
 						logger << ("Adding Filter for " + (appName + url + type) + " :: " + clas) << std::endl;
@@ -1859,7 +1859,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 						std::string scope = templates.at(var).getAttributeValue("scope");
 						if(clas!="")
 						{
-							Bean bean("template_"+clas,"",clas,scope,false,appName);
+							Bean bean("template_"+clas,"",clas,scope,false,false,appName);
 							ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 						}
 						logger << ("Adding Template for " + (url) + " :: " + clas) << std::endl;
@@ -1888,7 +1888,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 						std::string scope = templates.at(var).getAttributeValue("scope");
 						if(clas!="")
 						{
-							Bean bean("websocketclass_"+clas,"",clas,scope,false,appName);
+							Bean bean("websocketclass_"+clas,"",clas,scope,false,false,appName);
 							ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 						}
 						logger << ("Adding WebSocketHandler for " + (url) + " :: " + clas) << std::endl;
@@ -1916,7 +1916,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 					std::string scope = dviews.at(var).getAttributeValue("scope");
 					if(clas!="")
 					{
-						Bean bean("dview_"+clas,"",clas,scope,false,appName);
+						Bean bean("dview_"+clas,"",clas,scope,false,false,appName);
 						ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 					}
 					logger << ("Adding Dynamic View for " + (appName+url) + " :: " + clas) << std::endl;
@@ -2455,7 +2455,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 					restfunction.path = urlmpp;
 					ConfigurationData::getInstance()->rstCntMap[appName][restfunction.meth+urlmpp].push_back(restfunction);
 				}
-				Bean bean("restcontroller_"+clas,"",clas,scope,false,appName);
+				Bean bean("restcontroller_"+clas,"",clas,scope,false,true,appName);
 				ConfigurationData::getInstance()->ffeadContext.addBean(bean);
 				if(!isClasSecure && cs.pubms.at(var).markers.find("@Secure")!=cs.pubms.at(var).markers.end())
 				{

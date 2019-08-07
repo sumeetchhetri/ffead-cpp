@@ -430,6 +430,10 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 						if(f!=NULL) ci->second.f = f;
 					}
 				}
+
+				if(bean.isController) {
+					contInsMap[bean.name+bean.appName] = clas;
+				}
 			}
 			logger << ("Initializing Bean [appName = "+bean.appName+", name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)si)) << std::endl;
 		}
@@ -441,8 +445,9 @@ Reflector* FFEADContext::getReflector()
 	return reflector;
 }
 
-Bean::Bean(const std::string& name, const std::string& value, const std::string& type, const std::string& scope, const bool& isInbuilt, const std::string& appName)
+Bean::Bean(const std::string& name, const std::string& value, const std::string& type, const std::string& scope, const bool& isInbuilt, bool isController, const std::string& appName)
 {
+	this->isController = isController;
 	this->name = name;
 	this->value = value;
 	if(isInbuilt)
@@ -456,6 +461,7 @@ Bean::Bean(const std::string& name, const std::string& value, const std::string&
 
 Bean::Bean()
 {
+	this->isController = false;
 	this->realbean = false;
 	this->appName = "default";
 }

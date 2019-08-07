@@ -357,7 +357,7 @@ void CommonUtils::printStats() {
 	if(cReqs>0) {
 		std::string c = ("E-E Average (EL_Pre: "+CastUtil::lexical_cast<std::string>(tsPoll1/cSocks)+", EL_Wait: "+CastUtil::lexical_cast<std::string>(tsPoll/cSocks)+
 				", EL_Process: "+ CastUtil::lexical_cast<std::string>(tsProcess/cSocks)+", Read: "+CastUtil::lexical_cast<std::string>(tsRead/cReqs)+
-				", Write: "+CastUtil::lexical_cast<std::string>(tsWrite/cResps)+", Service: "+ CastUtil::lexical_cast<std::string>(tsService/cReqs)+")\n");
+				", Write: "+CastUtil::lexical_cast<std::string>(tsWrite/cReqs)+", Service: "+ CastUtil::lexical_cast<std::string>(tsService/cReqs)+")\n");
 		logger.info(c);
 	}
 	std::string d = ("Service Total (Pre: "+CastUtil::lexical_cast<std::string>(tsServicePre)+", Cors: "+CastUtil::lexical_cast<std::string>(tsServiceCors)+
