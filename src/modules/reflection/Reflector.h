@@ -43,34 +43,33 @@
 #include "Date.h"
 #include "BinaryData.h"
 
+typedef void* (*ExecOp) (void*,vals,bool);
+typedef void* (*GetNewCont) (void*,void*,int,std::string,int);
+typedef void (*DestCont) (void*,void*,int,std::string,int);
+typedef int* (*GetContSize) (void*,void*,int,std::string,int);
+typedef void (*AddToCont) (void*,void*,int,std::string,int);
+typedef void* (*GetContEleAt) (void*,void*,int,std::string,int);
+
 class Reflector
 {
 	static ClassInfo nullclass;
 	static cuckoohash_map<std::string, ClassInfo*> _ciMap;
 	void* dlib;
 	void cleanUp();
+	friend class FFEADContext;
 public:
 	Reflector();
 	Reflector(void*);
 	virtual ~Reflector();
 	ClassInfo* getClassInfo(const std::string&, const std::string& app= "");
-	void* getMethodInstance(const Method& method)
+	GetMeth getMethodInstance(const Method& method)
 	{
-		void *mkr = dlsym(dlib, method.getRefName().c_str());
-		typedef void* (*RfPtr) (void*,vals,bool);
-		RfPtr f = (RfPtr)mkr;
-		if(f!=NULL)
-		{
-			return mkr;
-		}
-		return NULL;
+		return method.getIns()!=NULL?method.getIns():(GetMeth)dlsym(dlib, method.getRefName().c_str());
 	}
 	template <class T> T invokeMethod(void* instance, const Method& method, const vals& values, const bool& cleanVals = false)
 	{
 		T obj;
-		void *mkr = dlsym(dlib, method.getRefName().c_str());
-		typedef void* (*RfPtr) (void*,vals,bool);
-		RfPtr f = (RfPtr)mkr;
+		GetMeth f = getMethodInstance(method);
 		if(f!=NULL)
 		{
 			if(method.getReturnType()!="void")
@@ -88,9 +87,7 @@ public:
 	void* invokeMethodGVP(void* instance, const Method& method, const vals& values, const bool& cleanVals = false)
 	{
 		void *obj = NULL;
-		void *mkr = dlsym(dlib, method.getRefName().c_str());
-		typedef void* (*RfPtr) (void*,vals,bool);
-		RfPtr f = (RfPtr)mkr;
+		GetMeth f = getMethodInstance(method);
 		if(f!=NULL)
 		{
 			if(method.getReturnType()!="void")
@@ -104,9 +101,7 @@ public:
 	template <class T> T newInstance(const Constructor& ctor, const vals& values, const bool& cleanVals = false)
 	{
 		T obj;
-		void *mkr = dlsym(dlib, ctor.getRefName().c_str());
-		typedef void* (*RfPtr) (vals,bool);
-		RfPtr f = (RfPtr)mkr;
+		NewInst f = ctor.getIns()!=NULL?ctor.getIns():(NewInst)dlsym(dlib, ctor.getRefName().c_str());
 		if(f!=NULL)
 		{
 			T* objt = (T*)f(values,cleanVals);
@@ -124,9 +119,7 @@ public:
 	void* newInstanceGVP(const Constructor& ctor, const vals& values, const bool& cleanVals = false)
 	{
 		void *obj = NULL;
-		void *mkr = dlsym(dlib, ctor.getRefName().c_str());
-		typedef void* (*RfPtr) (vals,bool);
-		RfPtr f = (RfPtr)mkr;
+		NewInst f = ctor.getIns()!=NULL?ctor.getIns():(NewInst)dlsym(dlib, ctor.getRefName().c_str());
 		if(f!=NULL)
 		{
 			obj = f(values,cleanVals);
@@ -142,9 +135,7 @@ public:
 	void* invokeMethodUnknownReturn(void* instance, const Method& method, const vals& values, const bool& cleanVals = false)
 	{
 		void* obj = NULL;
-		void *mkr = dlsym(dlib, method.getRefName().c_str());
-		typedef void* (*RfPtr) (void*,vals,bool);
-		RfPtr f = (RfPtr)mkr;
+		GetMeth f = getMethodInstance(method);
 		if(f!=NULL)
 		{
 			if(method.getReturnType()!="void")
@@ -158,30 +149,29 @@ public:
 	template <class T> T getField(void* instance, const Field& field)
 	{
 		T t;
-		void *mkr = dlsym(dlib, field.getRefName().c_str());
-		typedef T (*RfPtr) (void*);
-		RfPtr f = (RfPtr)mkr;
+		GetFld f = field.getIns()!=NULL?field.getIns():(NewInst)dlsym(dlib, field.getRefName().c_str());
 		if(f!=NULL)
 		{
-			t = f(instance);
+			T* fld = (T*)f(instance);
+			t = *fld;
+			delete fld;
 		}
 		return t;
 	}
+
 	void* execOperator(void* instance, const std::string& operato, const vals& values, const std::string& cs, const bool& cleanVals = false, const std::string& app= "")
 	{
 		ClassInfo* ci = getClassInfo(cs, app);
 		std::string oprfn = ci->getOperatorRefName(operato);
 		void *resul = NULL;
 		void *mkr = dlsym(dlib, oprfn.c_str());
-		typedef void* (*RfPtr) (void*,vals,bool);
-		RfPtr f = (RfPtr)mkr;
+		ExecOp f = (ExecOp)mkr;
 		if(f!=NULL)
 		{
 			resul = f(instance,values,cleanVals);
 		}
 		return resul;
 	}
-
 	void* getNewContainer(const std::string& cs, const std::string& contType, const std::string& app= "")
 	{
 		ClassInfo* ci = getClassInfo(cs, app);
@@ -193,8 +183,7 @@ public:
 			methodname += "sv";
 		}
 		void *mkr = dlsym(dlib, methodname.c_str());
-		typedef void* (*RfPtr) (void*,void*,int,std::string,int);
-		RfPtr f = (RfPtr)mkr;
+		GetNewCont f = (GetNewCont)mkr;
 		if(f!=NULL)
 		{
 			obj = f(NULL,NULL,-1,contType,t);
@@ -211,8 +200,7 @@ public:
 			methodname += "sv";
 		}
 		void *mkr = dlsym(dlib, methodname.c_str());
-		typedef void (*RfPtr) (void*,void*,int,std::string,int);
-		RfPtr f = (RfPtr)mkr;
+		DestCont f = (DestCont)mkr;
 		if(f!=NULL)
 		{
 			f(vec,NULL,-1,contType,t);
@@ -229,8 +217,7 @@ public:
 			methodname += "sv";
 		}
 		void *mkr = dlsym(dlib, methodname.c_str());
-		typedef int* (*RfPtr) (void*,void*,int,std::string,int);
-		RfPtr f = (RfPtr)mkr;
+		GetContSize f = (GetContSize)mkr;
 		if(f!=NULL)
 		{
 			int* tt = f(vec,NULL,-1,contType,t);
@@ -249,8 +236,7 @@ public:
 			methodname += "sv";
 		}
 		void *mkr = dlsym(dlib, methodname.c_str());
-		typedef void (*RfPtr) (void*,void*,int,std::string,int);
-		RfPtr f = (RfPtr)mkr;
+		AddToCont f = (AddToCont)mkr;
 		if(f!=NULL)
 		{
 			f(vec,instance,-1,contType,t);
@@ -267,8 +253,7 @@ public:
 			methodname += "sv";
 		}
 		void *mkr = dlsym(dlib, methodname.c_str());
-		typedef void* (*RfPtr) (void*,void*,int,std::string,int);
-		RfPtr f = (RfPtr)mkr;
+		GetContEleAt f = (GetContEleAt)mkr;
 		if(f!=NULL)
 		{
 			obj = f(vec,NULL,pos,contType,t);
@@ -286,15 +271,13 @@ public:
 			methodname += "sv";
 		}
 		void *mkr = dlsym(dlib, methodname.c_str());
-		typedef void* (*RfPtr) (void*,void*,int,std::string,int);
-		RfPtr f = (RfPtr)mkr;
+		GetContEleAt f = (GetContEleAt)mkr;
 		if(f!=NULL)
 		{
 			obj = f(vec,NULL,pos,contType,t);
 		}
 		return obj;
 	}
-
 	template <typename T> static void* getNewNestedContainer(const std::string& container)
 	{
 		if(container=="std::vector")

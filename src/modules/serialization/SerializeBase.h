@@ -180,9 +180,11 @@ public:
 };
 
 class SerializeBase {
+	static void* dlib;
+	static cuckoohash_map<std::string, void*> _serFMap;
+	static void init(void* dlib);
+	friend class CHServer;
 protected:
-	bool dlibinstantiated;
-	void* dlib;
 	static void processClassName(std::string& className);
 	static void processClassAndContainerNames(std::string& className, std::string& container);
 public:
@@ -615,5 +617,11 @@ public:
 	}
 	static std::string trySerialize(void* t, int serOpt, std::string& className, const std::string& app = "");
 };
+
+
+typedef std::string (*SerCont) (void*, SerializeBase*, const std::string&);
+typedef std::string (*Ser) (void*, SerializeBase*);
+typedef void* (*UnSerCont) (void*, SerializeBase*, const std::string&);
+typedef void* (*UnSer) (void*, SerializeBase*);
 
 #endif /* SERIALIZEBASE_H_ */

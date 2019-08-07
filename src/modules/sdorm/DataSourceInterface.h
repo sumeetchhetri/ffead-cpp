@@ -24,7 +24,6 @@
 class DataSourceInterface : public IDGenerator {
 	friend class DataSourceManager;
 protected:
-	void* dlib;
 	ConnectionPooler* pool;
 	Mapping* mapping;
 	std::string appName;

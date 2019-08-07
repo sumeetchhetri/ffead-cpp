@@ -23,12 +23,10 @@
 #include "Constructor.h"
 
 Constructor::Constructor() {
-	// TODO Auto-generated constructor stub
-
+	f = NULL;
 }
 
 Constructor::~Constructor() {
-	// TODO Auto-generated destructor stub
 }
 
 std::vector<std::string> Constructor::getArgumentTypes() const
@@ -68,4 +66,8 @@ const std::string& Constructor::getRefName() const {
 
 void Constructor::setRefName(const std::string& refName) {
 	this->refName = refName;
+}
+
+NewInst Constructor::getIns() const {
+	return f;
 }

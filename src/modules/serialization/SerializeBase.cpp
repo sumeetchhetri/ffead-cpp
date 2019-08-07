@@ -22,6 +22,13 @@
 
 #include "SerializeBase.h"
 
+cuckoohash_map<std::string, void*> SerializeBase::_serFMap;
+void* SerializeBase::dlib = NULL;
+
+void SerializeBase::init(void* dl) {
+	dlib = dl;
+}
+
 SerializeBase::~SerializeBase() {
 }
 
@@ -773,17 +780,14 @@ std::string SerializeBase::_serContainer(void* t, const std::string& className, 
 {
 	std::string appName = CommonUtils::getAppName(app);
 	std::string serVal;
-	std::string libName = INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		exit(-1);
-	}
 	std::string methodname = base->getSerializationMethodName(className,appName,true,type);
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef std::string (*RfPtr) (void*, SerializeBase*, const std::string&);
-	RfPtr f = (RfPtr)mkr;
+	SerCont f;
+	if(_serFMap.contains(methodname)) {
+		f = _serFMap.find(methodname);
+	} else {
+		f = (SerCont)dlsym(dlib, methodname.c_str());
+		_serFMap.insert(methodname, f);
+	}
 	if(f!=NULL)
 		serVal = f(t, base, type);
 	return serVal;
@@ -793,17 +797,14 @@ std::string SerializeBase::_ser(void* t, const std::string& className, const std
 {
 	std::string appName = CommonUtils::getAppName(app);
 	std::string serVal;
-	std::string libName = INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		exit(-1);
-	}
 	std::string methodname = base->getSerializationMethodName(className,appName,true);
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef std::string (*RfPtr) (void*, SerializeBase*);
-	RfPtr f = (RfPtr)mkr;
+	Ser f;
+	if(_serFMap.contains(methodname)) {
+		f = _serFMap.find(methodname);
+	} else {
+		f = (Ser)dlsym(dlib, methodname.c_str());
+		_serFMap.insert(methodname, f);
+	}
 	if(f!=NULL)
 		serVal = f(t, base);
 	return serVal;
@@ -1580,17 +1581,14 @@ void* SerializeBase::_unserContainer(void* unserableObject, const std::string& c
 {
 	std::string appName = CommonUtils::getAppName(app);
 	void* obj = NULL;
-	std::string libName = INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		exit(-1);
-	}
 	std::string methodname = base->getSerializationMethodName(className,appName,false,type);
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (void*, SerializeBase*, const std::string&);
-	RfPtr f = (RfPtr)mkr;
+	UnSerCont f;
+	if(_serFMap.contains(methodname)) {
+		f = _serFMap.find(methodname);
+	} else {
+		f = (UnSerCont)dlsym(dlib, methodname.c_str());
+		_serFMap.insert(methodname, f);
+	}
 	if(f!=NULL)
 	{
 		obj = f(unserableObject, base, type);
@@ -1602,17 +1600,14 @@ void* SerializeBase::_unser(void* unserableObject, const std::string& className,
 {
 	std::string appName = CommonUtils::getAppName(app);
 	void* obj = NULL;
-	std::string libName = INTER_LIB_FILE;
-	void *dlib = dlopen(libName.c_str(), RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		exit(-1);
-	}
 	std::string methodname = base->getSerializationMethodName(className,appName,false);
-	void *mkr = dlsym(dlib, methodname.c_str());
-	typedef void* (*RfPtr) (void*, SerializeBase*);
-	RfPtr f = (RfPtr)mkr;
+	UnSer f;
+	if(_serFMap.contains(methodname)) {
+		f = _serFMap.find(methodname);
+	} else {
+		f = (UnSer)dlsym(dlib, methodname.c_str());
+		_serFMap.insert(methodname, f);
+	}
 	if(f!=NULL)
 	{
 		obj = f(unserableObject, base);
@@ -1651,12 +1646,15 @@ std::string SerializeBase::getSerializationMethodName(const std::string& classNa
 {
 	std::string appName = CommonUtils::getAppName(app);
 	std::string methodname;
-	if(which)
+	if(which) {
 		methodname = appName + "serialize" + className + (type==""?"":"Container");
-	else
+	}  else {
 		methodname = appName + "unSerialize" + className + (type==""?"":"Container");
-	if(type=="set" || type=="std::set" || type=="multiset" || type=="std::multiset") {
-		methodname += "SV";
+	}
+	if(type!="") {
+		if(type=="set" || type=="std::set" || type=="multiset" || type=="std::multiset") {
+			methodname += "SV";
+		}
 	}
 	return methodname;
 }

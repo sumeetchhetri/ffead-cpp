@@ -34,12 +34,6 @@ void CacheManager::initCache(const ConnectionProperties& props, const std::strin
 		logger.info("Error initializing Cache " + appName + "@" + props.getName() + " " + std::string(e.what()));
 	}
 
-	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load application shared library");
-	}
 	Reflector* ref = GenericObject::getReflector();
 	if(props.getProperty("init")!="") {
 		std::string meth = props.getProperty("init");

@@ -35,12 +35,6 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 		logger.info("Error initializing Datasource " + appName + "@" + props.getName() + " " + std::string(e.what()));
 	}
 
-	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load application shared library");
-	}
 	Reflector* ref = GenericObject::getReflector();
 	if(props.getProperty("init")!="") {
 		std::string meth = props.getProperty("init");
@@ -136,12 +130,6 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name) {
 		return NULL;
 	}
 	t->appName = dsnMgr->mapping.getAppName();
-	t->dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(t->dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load application shared library");
-	}
 	t->reflector = GenericObject::getReflector();
 	std::map<std::string, DataSourceEntityMapping>::iterator it;
 	for(it=dsnMgr->mapping.getDseMap().begin();it!=dsnMgr->mapping.getDseMap().end();++it)

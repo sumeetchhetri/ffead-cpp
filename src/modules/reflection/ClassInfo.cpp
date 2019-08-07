@@ -27,10 +27,11 @@ Method ClassInfo::nullmeth;
 
 ClassInfo::ClassInfo() {
 	size = 0;
+	f = NULL;
+	si = NULL;
 }
 
 ClassInfo::~ClassInfo() {
-	// TODO Auto-generated destructor stub
 }
 
 std::string ClassInfo::getClassName() const
@@ -108,11 +109,6 @@ const Method& ClassInfo::getMethod(const std::string& methodName, args argumentT
 void ClassInfo::addMethod(const Method& meth)
 {
 	std::string key = meth.getMethodName();
-	/*for (unsigned int var = 0; var < meth.getArgumentTypes().size(); var++)
-	{
-		if(meth.getArgumentTypes().at(var)!="")
-			key += meth.getArgumentTypes().at(var);
-	}*/
 	meths[key] = meth;
 }
 
@@ -188,6 +184,14 @@ std::string ClassInfo::getContRefName() {
 	return contRefName;
 }
 
+void* ClassInfo::getSI() {
+	return si;
+}
+
+NewInst ClassInfo::getIns() {
+	return f;
+}
+
 /*
  * _fcrcnf_ = 0
  * _fcrcnsf_ = 1
@@ -204,87 +208,3 @@ std::string ClassInfo::getContRefName() {
 void ClassInfo::setContRefName(const std::string& rn) {
 	contRefName = rn;
 }
-/*
-std::string ClassInfo::getPublic_fields() const
-{
-	return public_fields;
-}
-
-void ClassInfo::setPublic_fields(const std::string& public_fields)
-{
-	this->public_fields = public_fields;
-}
-
-std::string ClassInfo::getPrivate_fields() const
-{
-	return private_fields;
-}
-
-void ClassInfo::setPrivate_fields(const std::string& private_fields)
-{
-	this->private_fields = private_fields;
-}
-
-std::string ClassInfo::getProtected_fields() const
-{
-	return protected_fields;
-}
-
-void ClassInfo::setProtected_fields(const std::string& protected_fields)
-{
-	this->protected_fields = protected_fields;
-}
-
-std::string ClassInfo::getPublic_meths() const
-{
-	return public_meths;
-}
-
-void ClassInfo::setPublic_meths(const std::string& public_meths)
-{
-	this->public_meths = public_meths;
-}
-
-std::string ClassInfo::getPrivate_meths() const
-{
-	return private_meths;
-}
-
-void ClassInfo::setPrivate_meths(const std::string& private_meths)
-{
-	this->private_meths = private_meths;
-}
-
-std::string ClassInfo::getProtected_meths() const
-{
-	return protected_meths;
-}
-
-void ClassInfo::setProtected_meths(const std::string& protected_meths)
-{
-	this->protected_meths = protected_meths;
-}
-
-std::vector<Method> ClassInfo::getMethods() const
-{
-	return methods;
-}
-
-void ClassInfo::setMethods(const std::vector<Method>& methods)
-{
-	this->methods = methods;
-}
-
-std::vector<Field> ClassInfo::getFields() const
-{
-	return fields;
-}
-
-void ClassInfo::setFields(const std::vector<Field>& fields)
-{
-	this->fields = fields;
-}
-void ClassInfo::setMeths(const methMap& meths)
-{
-	this->meths = meths;
-}*/

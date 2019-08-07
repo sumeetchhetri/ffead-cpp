@@ -392,7 +392,46 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 		std::string _k = bean.appName + bean.name + ";" + type;
 		if(servingContexts.find(bean.appName)!=servingContexts.end() && bean.scope!="prototype" && !objects.contains(type))
 		{
-			logger << ("Initializing Bean [appName = "+bean.appName+", name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)getBean(bean))) << std::endl;
+			void* si = getBean(bean);
+			ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
+			clas->si = si;
+			if(clas->getClassName()!="") {
+				if(clas->getConstructors().size()>0) {
+					ctorMap cm = clas->getConstructors();
+					ctorMap::iterator ci;
+					for(ci=cm.begin();ci!=cm.end();++ci) {
+						void *mkr = dlsym(reflector->dlib, ci->second.getRefName().c_str());
+						NewInst f = (NewInst)mkr;
+						if(f!=NULL) {
+							if(ci->second.getArgumentTypes().size()==0) {
+								clas->f = f;
+							}
+							ci->second.f = f;
+						}
+					}
+				}
+
+				if(clas->getMethods().size()>0) {
+					methMap cm = clas->getMethods();
+					methMap::iterator ci;
+					for(ci=cm.begin();ci!=cm.end();++ci) {
+						void *mkr = dlsym(reflector->dlib, ci->second.getRefName().c_str());
+						GetMeth f = (GetMeth)mkr;
+						if(f!=NULL) ci->second.f = f;
+					}
+				}
+
+				if(clas->getFields().size()>0) {
+					fldMap cm = clas->getFields();
+					fldMap::iterator ci;
+					for(ci=cm.begin();ci!=cm.end();++ci) {
+						void *mkr = dlsym(reflector->dlib, ci->second.getRefName().c_str());
+						GetMeth f = (GetMeth)mkr;
+						if(f!=NULL) ci->second.f = f;
+					}
+				}
+			}
+			logger << ("Initializing Bean [appName = "+bean.appName+", name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)si)) << std::endl;
 		}
 	}
 }

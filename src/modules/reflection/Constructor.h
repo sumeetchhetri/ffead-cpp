@@ -25,11 +25,17 @@
 #include "string"
 #include "vector"
 
+typedef std::vector<void *> vals;
+typedef void* (*NewInst) (vals,bool);
+
 class Constructor {
+	NewInst f;
 	std::string refName;
 	std::string name;
 	std::vector<std::string> argumentTypes;
+	friend class FFEADContext;
 public:
+	NewInst getIns() const;
 	Constructor();
 	virtual ~Constructor();
 	std::vector<std::string> getArgumentTypes() const;

@@ -24,10 +24,14 @@
 
 Method::Method() {
 	isstat = false;
+	f = NULL;
+}
+
+GetMeth Method::getIns() const {
+	return f;
 }
 
 Method::~Method() {
-	// TODO Auto-generated destructor stub
 }
 
 const std::string& Method::getAccessSpecifier() const
@@ -100,13 +104,3 @@ const std::string& Method::getRefName() const {
 void Method::setRefName(const std::string& refName) {
 	this->refName = refName;
 }
-/*string Method::getKey()
-{
-	std::string key = getMethodName();
-	for (unsigned int var = 0; var < getArgumentTypes().size(); var++)
-	{
-		if(getArgumentTypes().at(var)!="")
-			key += getArgumentTypes().at(var);
-	}
-	return key;
-}*/

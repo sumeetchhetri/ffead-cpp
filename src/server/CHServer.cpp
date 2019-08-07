@@ -1183,6 +1183,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	logger << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
 	GenericObject::init(&(ConfigurationData::getInstance()->reflector));
+	SerializeBase::init(ConfigurationData::getInstance()->dlib);
 	logger << ("Initializing ffeadContext done....") << std::endl;
 
 	logger << ("Initializing WSDL files....") << std::endl;
