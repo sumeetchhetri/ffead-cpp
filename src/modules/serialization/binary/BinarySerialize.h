@@ -60,14 +60,14 @@ public:
 		BinarySerialize serialize;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(className,&t,appName, &serialize);
+		return _handleAllSerialization(className,&t,appName, &serialize,NULL,NULL);
 	}
 	template <class T> static std::string serializePointer(T* t, int serOpt, const std::string& appName = "")
 	{
 		BinarySerialize serialize;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(className,t,appName, &serialize);
+		return _handleAllSerialization(className,t,appName, &serialize,NULL,NULL);
 	}
 	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName = "");
 

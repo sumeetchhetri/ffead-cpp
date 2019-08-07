@@ -42,13 +42,13 @@ public:
 		XMLSerialize serialize;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt,className,&t,appName, &serialize);
+		return _handleAllSerialization(serOpt,className,&t,appName, &serialize,NULL,NULL);
 	}
 	template <class T> static std::string serialize(void* t, int serOpt, const std::string& className, const std::string& appName = "")
 	{
 		XMLSerialize serialize;
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt,className,t,appName, &serialize);
+		return _handleAllSerialization(serOpt,className,t,appName, &serialize,NULL,NULL);
 	}
 	template <class T> static std::string serializePointer(T* t, int serOpt, const std::string& appName = "")
 	{
