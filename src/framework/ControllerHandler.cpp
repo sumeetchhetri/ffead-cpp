@@ -250,7 +250,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 
 			t.start();
 			void *_temp = srv->getSI();
-			if(_temp!=NULL) {
+			if(_temp==NULL) {
 				_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft.clas, req->getCntxt_name());
 			}
 			if(_temp==NULL) {

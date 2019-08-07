@@ -620,21 +620,21 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		bool isContrl = false;
 
+		t1.start();
 		if(ConfigurationData::getInstance()->enableCors) {
-			t1.start();
 			try {
 				isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
 			} catch(const HTTPResponseStatus& status) {
 				res->setHTTPResponseStatus(status);
 				isContrl = true;
 			}
-			t1.end();
-			CommonUtils::tsServiceCors += t1.timerNanoSeconds();
 		}
+		t1.end();
+		CommonUtils::tsServiceCors += t1.timerNanoSeconds();
 
+		t1.start();
 		bool hasSecurity = false;
 		if(ConfigurationData::getInstance()->enableSecurity) {
-			t1.start();
 			hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
 			if(!isContrl && hasSecurity)
 			{
@@ -644,13 +644,13 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 					ext = req->getExt();
 				}
 			}
-			t1.end();
-			CommonUtils::tsServiceSec += t1.timerNanoSeconds();
 		}
+		t1.end();
+		CommonUtils::tsServiceSec += t1.timerNanoSeconds();
 
+		t1.start();
 		bool hasFilters = false;
 		if(ConfigurationData::getInstance()->enableFilters) {
-			t1.start();
 			hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
 			if(!isContrl && hasFilters)
 			{
@@ -659,30 +659,30 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				isContrl = !FilterHandler::handle(req, res, ext, reflector);
 				ext = req->getExt();
 			}
-			t1.end();
-			CommonUtils::tsServiceFlt += t1.timerNanoSeconds();
 		}
+		t1.end();
+		CommonUtils::tsServiceFlt += t1.timerNanoSeconds();
 
+		t1.start();
 		if(ConfigurationData::getInstance()->enableControllers) {
-			t1.start();
 			if(!isContrl)
 			{
 				isContrl = ControllerHandler::handle(req, res, ext, reflector);
 				ext = req->getExt();
 			}
-			t1.end();
-			CommonUtils::tsServiceCnt += t1.timerNanoSeconds();
 		}
+		t1.end();
+		CommonUtils::tsServiceCnt += t1.timerNanoSeconds();
 
+		t1.start();
 		if(ConfigurationData::getInstance()->enableExtra) {
-			t1.start();
 			if(!isContrl)
 			{
 				isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
 			}
-			t1.end();
-			CommonUtils::tsServiceExt += t1.timerNanoSeconds();
 		}
+		t1.end();
+		CommonUtils::tsServiceExt += t1.timerNanoSeconds();
 
 		t1.start();
 		/*After going through the controller the response might be blank, just set the HTTP version*/

@@ -115,8 +115,8 @@ void HttpServiceTask::run() {
 		}
 
 		Date cdate(true);
-		DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
-		res->addHeaderValue(HttpResponse::DateHeader, df.format(cdate));
+		//DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
+		res->addHeaderValue(HttpResponse::DateHeader, "ddd, dd mmm yyyy hh:mi:ss GMT");
 
 		if(handlerRequest->getProtocol()=="HTTP1.1" && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
 		{
