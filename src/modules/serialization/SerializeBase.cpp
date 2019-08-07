@@ -510,9 +510,8 @@ void SerializeBase::processClassName(std::string& className)
 	StringUtil::replaceAll(className, "::", "_");
 }
 
-std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string className, const std::string& app, SerializeBase* base)
+std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string className, const std::string& appName, SerializeBase* base)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	if(className.find(",")!=std::string::npos)
 	{
 		className = className.substr(0, className.find(",")+1);
@@ -779,9 +778,8 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 	return ser;
 }
 
-std::string SerializeBase::_serContainer(void* t, const std::string& className, const std::string& app, const std::string& type, SerializeBase* base)
+std::string SerializeBase::_serContainer(void* t, const std::string& className, const std::string& appName, const std::string& type, SerializeBase* base)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	std::string serVal;
 	std::string methodname = base->getSerializationMethodName(className,appName,true,type);
 	SerCont f;
@@ -796,9 +794,8 @@ std::string SerializeBase::_serContainer(void* t, const std::string& className, 
 	return serVal;
 }
 
-std::string SerializeBase::_ser(void* t, const std::string& className, const std::string& app, SerializeBase* base)
+std::string SerializeBase::_ser(void* t, const std::string& className, const std::string& appName, SerializeBase* base)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	std::string serVal;
 	std::string methodname = base->getSerializationMethodName(className,appName,true);
 	Ser f;
@@ -1006,9 +1003,8 @@ void* SerializeBase::_handleAllUnSerialization(const std::string& serVal, int se
 	return unserObjectVal;
 }
 
-void* SerializeBase::handleMultiLevelUnSerialization(void* intermediateObject, std::string className, const std::string& app, int& size, SerializeBase* base)
+void* SerializeBase::handleMultiLevelUnSerialization(void* intermediateObject, std::string className, const std::string& appName, int& size, SerializeBase* base)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	if(className.find(",")!=std::string::npos)
 	{
 		className = className.substr(0, className.find(",")+1);
@@ -1298,9 +1294,8 @@ void* unSerializeUnknown(void* unserObj, const std::string& className, int serOp
 	return base->unSerializeUnknownBase(unserObj, serOpt, className, appName);
 }
 
-void* SerializeBase::unserializeset(void* unserableObject, int serOpt, const std::string& app, int &size, SerializeBase* base, const std::string& classN)
+void* SerializeBase::unserializeset(void* unserableObject, int serOpt, const std::string& appName, int &size, SerializeBase* base, const std::string& classN)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	std::string className = base->getConatinerElementClassName(unserableObject, classN);
 	StringUtil::trim(className);
 	void* t = NULL;
@@ -1345,9 +1340,8 @@ void* SerializeBase::unserializeset(void* unserableObject, int serOpt, const std
 	return NULL;
 }
 
-void* SerializeBase::unserializelist(void* unserableObject, int serOpt, const std::string& app, int &size, SerializeBase* base, const std::string& classN)
+void* SerializeBase::unserializelist(void* unserableObject, int serOpt, const std::string& appName, int &size, SerializeBase* base, const std::string& classN)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	std::string className = base->getConatinerElementClassName(unserableObject, classN);
 	StringUtil::trim(className);
 	void* t = NULL;
@@ -1392,9 +1386,8 @@ void* SerializeBase::unserializelist(void* unserableObject, int serOpt, const st
 	return NULL;
 }
 
-void* SerializeBase::unserializeq(void* unserableObject, int serOpt, const std::string& app, int &size, SerializeBase* base, const std::string& classN)
+void* SerializeBase::unserializeq(void* unserableObject, int serOpt, const std::string& appName, int &size, SerializeBase* base, const std::string& classN)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	std::string className = base->getConatinerElementClassName(unserableObject, classN);
 	StringUtil::trim(className);
 	void* t = NULL;
@@ -1439,9 +1432,8 @@ void* SerializeBase::unserializeq(void* unserableObject, int serOpt, const std::
 	return NULL;
 }
 
-void* SerializeBase::unserializevec(void* unserableObject, int serOpt, const std::string& app, int &size, SerializeBase* base, const std::string& classN)
+void* SerializeBase::unserializevec(void* unserableObject, int serOpt, const std::string& appName, int &size, SerializeBase* base, const std::string& classN)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	std::string className = base->getConatinerElementClassName(unserableObject, classN);
 	StringUtil::trim(className);
 	void* t = NULL;
@@ -1486,9 +1478,8 @@ void* SerializeBase::unserializevec(void* unserableObject, int serOpt, const std
 	return NULL;
 }
 
-void* SerializeBase::unserializedq(void* unserableObject, int serOpt, const std::string& app, int &size, SerializeBase* base, const std::string& classN)
+void* SerializeBase::unserializedq(void* unserableObject, int serOpt, const std::string& appName, int &size, SerializeBase* base, const std::string& classN)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	std::string className = base->getConatinerElementClassName(unserableObject, classN);
 	StringUtil::trim(className);
 	void* t = NULL;
@@ -1533,9 +1524,8 @@ void* SerializeBase::unserializedq(void* unserableObject, int serOpt, const std:
 	return NULL;
 }
 
-void* SerializeBase::unserializemultiset(void* unserableObject, int serOpt, const std::string& app, int &size, SerializeBase* base, const std::string& classN)
+void* SerializeBase::unserializemultiset(void* unserableObject, int serOpt, const std::string& appName, int &size, SerializeBase* base, const std::string& classN)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	std::string className = base->getConatinerElementClassName(unserableObject, classN);
 	StringUtil::trim(className);
 	void* t = NULL;
@@ -1580,9 +1570,8 @@ void* SerializeBase::unserializemultiset(void* unserableObject, int serOpt, cons
 	return NULL;
 }
 
-void* SerializeBase::_unserContainer(void* unserableObject, const std::string& className, const std::string& app, const std::string& type, SerializeBase* base)
+void* SerializeBase::_unserContainer(void* unserableObject, const std::string& className, const std::string& appName, const std::string& type, SerializeBase* base)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	void* obj = NULL;
 	std::string methodname = base->getSerializationMethodName(className,appName,false,type);
 	UnSerCont f;
@@ -1599,9 +1588,8 @@ void* SerializeBase::_unserContainer(void* unserableObject, const std::string& c
 	return obj;
 }
 
-void* SerializeBase::_unser(void* unserableObject, const std::string& className, const std::string& app, SerializeBase* base)
+void* SerializeBase::_unser(void* unserableObject, const std::string& className, const std::string& appName, SerializeBase* base)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	void* obj = NULL;
 	std::string methodname = base->getSerializationMethodName(className,appName,false);
 	UnSer f;
@@ -1645,9 +1633,8 @@ std::string SerializeBase::getTemplateArg(const std::string& s, std::string& tem
 	return tfrst;
 }
 
-std::string SerializeBase::getSerializationMethodName(const std::string& className, const std::string& app, const bool& which, const std::string& type)
+std::string SerializeBase::getSerializationMethodName(const std::string& className, const std::string& appName, const bool& which, const std::string& type)
 {
-	std::string appName = CommonUtils::getAppName(app);
 	std::string methodname;
 	if(which) {
 		methodname = appName + "serialize" + className + (type==""?"":"Container");

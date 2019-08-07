@@ -539,8 +539,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						{
 							outcontent = JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name());
 							res->setContent(outcontent);
-							t.end();
-							CommonUtils::tsContRstSer += t.timerNanoSeconds();
 						}
 						else if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_XML)
 						{
@@ -596,6 +594,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					mpvecstreams.clear();
 					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 
+					t.end();
+					CommonUtils::tsContRstSer += t.timerNanoSeconds();
 				}
 				else
 				{
