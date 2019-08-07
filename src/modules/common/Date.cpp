@@ -34,7 +34,7 @@ Date::Date(const bool& utc)
 	populateDateFields(&timeinfo);
 }
 
-tm* Date::getTimeinfo() const {
+tm* Date::getTimeinfo() {
 	return &ti;
 }
 
@@ -129,7 +129,7 @@ void Date::populateEpochAndTimeZone(const bool& utc)
 
 void Date::populateDateFields(struct tm* t)
 {
-	this->ti = t;
+	this->ti = *t;
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
 

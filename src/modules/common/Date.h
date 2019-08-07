@@ -69,7 +69,7 @@ class Date {
 	void compare(const Date& d, unsigned long long &thisss, unsigned long long &thtsss) const;
 	std::string getMon(const std::string& m) const;
 public:
-	tm* getTimeinfo() const;
+	tm* getTimeinfo();
 	static std::string dayInWords(const int d, const bool& sf = false);
 	static std::string monthInWords(const int m, const bool& sf = false);
 	Date(const bool& utc= false);

@@ -22,7 +22,7 @@
 
 #include "DateFormat.h"
 
-std::string DateFormat::DF = "%Y-%m-%d %H:%M%S";
+const std::string DateFormat::DF = "%Y-%m-%d %H:%M%S";
 
 DateFormat::DateFormat() {
 	this->formatspec = DF;
@@ -51,7 +51,7 @@ std::string DateFormat::format(Date* date)
 	return std::string(buffer);
 }
 
-std::string DateFormat::format(const Date& date)
+std::string DateFormat::format(Date& date)
 {
 	char buffer[formatspec.length()+1];
 	strftime(buffer, sizeof(buffer), formatspec.c_str(), date.getTimeinfo());
