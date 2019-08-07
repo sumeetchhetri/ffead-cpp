@@ -24,6 +24,7 @@
 #define CLASS_H_
 #include "PropFileReader.h"
 #include "Method.h"
+#include "Field.h"
 
 typedef std::map<std::string,Method> Meth;
 typedef std::map<std::string,Field> Fld;

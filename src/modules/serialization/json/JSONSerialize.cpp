@@ -23,29 +23,12 @@
 #include "JSONSerialize.h"
 
 JSONSerialize::JSONSerialize() {
-	dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load serialization shared library");
-	}
-	dlibinstantiated = true;
 }
 
 JSONSerialize::JSONSerialize(void* dlib) {
-	if(dlib == NULL)
-	{
-		throw std::runtime_error("Cannot load serialization shared library");
-	}
-	this->dlib = dlib;
-	dlibinstantiated = false;
 }
 
 JSONSerialize::~JSONSerialize() {
-	if(dlibinstantiated)
-	{
-		dlclose(dlib);
-	}
 }
 
 std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& className, void* t)

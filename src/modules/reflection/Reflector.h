@@ -149,7 +149,7 @@ public:
 	template <class T> T getField(void* instance, const Field& field)
 	{
 		T t;
-		GetFld f = field.getIns()!=NULL?field.getIns():(NewInst)dlsym(dlib, field.getRefName().c_str());
+		GetFld f = field.getIns()!=NULL?field.getIns():(GetFld)dlsym(dlib, field.getRefName().c_str());
 		if(f!=NULL)
 		{
 			T* fld = (T*)f(instance);

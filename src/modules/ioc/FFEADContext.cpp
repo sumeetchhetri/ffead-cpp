@@ -426,7 +426,7 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 					fldMap::iterator ci;
 					for(ci=cm.begin();ci!=cm.end();++ci) {
 						void *mkr = dlsym(reflector->dlib, ci->second.getRefName().c_str());
-						GetMeth f = (GetMeth)mkr;
+						GetFld f = (GetFld)mkr;
 						if(f!=NULL) ci->second.f = f;
 					}
 				}
