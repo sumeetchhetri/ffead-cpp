@@ -268,7 +268,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
 				res->setDone(true);
-				if(srv->getSI()!=NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				return true;
 			}
 			if(ocont=="")
@@ -332,7 +332,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 									logger << "File can only be mapped to ifstream" << std::endl;
 									res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 									res->setDone(true);
-									if(srv->getSI()!=NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 									return true;
 								}
 							}
@@ -346,7 +346,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							logger << "Invalid mapping specified in config, no multipart content found with name " + rft.params.at(var).name << std::endl;
 							res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 							res->setDone(true);
-							if(srv->getSI()!=NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+							if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 							return true;
 						}
 					}
@@ -357,7 +357,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							logger << "Request Body cannot be mapped to more than one argument..." << std::endl;
 							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 							res->setDone(true);
-							if(srv->getSI()!=NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+							if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 							return true;
 						}
 						pmvalue = req->getContent();
@@ -384,7 +384,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							{
 								res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 								res->setDone(true);
-								if(srv->getSI()!=NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 								for(int i=0;i<(int)valus.size();++i) {
 									if(valus.at(i)!=NULL) {
 										delete valus.at(i);
@@ -412,7 +412,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						case 15: argus.push_back(rft.params.at(var).type);valus.push_back(new bool(CastUtil::lexical_cast<bool>(pmvalue)));break;
 						case 16: {
 							argus.push_back(rft.params.at(var).type);
-							DateFormat formt("yyyy-mm-dd hh:mi:ss");
+							DateFormat formt;
 							valus.push_back(formt.parse(pmvalue));break;
 						}
 						case 19: {
@@ -464,7 +464,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							{
 								res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 								res->setDone(true);
-								if(srv->getSI()!=NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 								for(int i=0;i<(int)valus.size();++i) {
 									if(valus.at(i)!=NULL) {
 										delete valus.at(i);
@@ -507,7 +507,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					invValue= true;
 					res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 					res->setDone(true);
-					if(srv->getSI()!=NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 					for(int i=0;i<(int)valus.size();++i) {
 						if(valus.at(i)!=NULL) {
 							delete valus.at(i);
@@ -593,7 +593,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						it->second->clear();
 					}
 					mpvecstreams.clear();
-					if(srv->getSI()!=NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 
 					t.end();
 					CommonUtils::tsContRstSer += t.timerNanoSeconds();
@@ -603,14 +603,14 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 					//res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 					logger << "Rest Controller Method Not Found" << std::endl;
-					if(srv->getSI()!=NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				}
 			} catch(const std::exception& e) {
 				logger << "Restcontroller exception occurred" << std::endl;
 				invValue= true;
 				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				res->setDone(true);
-				if(srv->getSI()!=NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				return true;
 			}
 		}

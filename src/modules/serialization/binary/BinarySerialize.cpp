@@ -52,7 +52,7 @@ std::string BinarySerialize::serializePrimitive(int serOpt, const std::string& c
 		case 14: object.addPacket(*(long double*)t, className);break;
 		case 15: object.addPacket(*(bool*)t, className);break;
 		case 16: {
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			object.addPacket(formt.format(*(Date*)t), className);
 			break;
 		}
@@ -256,7 +256,7 @@ void BinarySerialize::addPrimitiveElementToContainer(void* _1, int serOpt, const
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			Date* _d = formt.parse(ele->getValueStr());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, *_d, cont);
 			else addValueToNestedContainer(container, *_d, cont);
@@ -400,7 +400,7 @@ void* BinarySerialize::getPrimitiveValue(void* _1, int serOpt, const std::string
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			return formt.parse(root->getValueStr());
 		}
 		case 17:
@@ -553,7 +553,7 @@ void BinarySerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			object->addPacket(formt.format((Date*)t), propName);
 			break;
 		}
@@ -667,7 +667,7 @@ void* BinarySerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			return formt.parse(root->getValueStr());
 		}
 		case 17:

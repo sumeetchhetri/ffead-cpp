@@ -71,7 +71,7 @@ DLogger::DLogger()
 	PropFileReader pf;
 	level = "ERROR";
 	mode = "CONSOLE";
-	datFormat.setFormatspec("dd/mm/yyyy hh:mi:ss");
+	datFormat.setFormatspec("%d/%m/%Y %H:%M:%S");
 }
 
 DLogger::DLogger(std::string file)
@@ -82,7 +82,7 @@ DLogger::DLogger(std::string file)
 	{
 		level = "ERROR";
 		mode = "CONSOLE";
-		datFormat.setFormatspec("dd/mm/yyyy hh:mi:ss");
+		datFormat.setFormatspec("%d/%m/%Y %H:%M:%S");
 		return;
 	}
 	level = props["LEVEL"];

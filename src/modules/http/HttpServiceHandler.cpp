@@ -114,9 +114,13 @@ void HttpServiceTask::run() {
 			res->addHeaderValue(HttpResponse::ContentEncoding, cntEncoding);
 		}
 
-		Date cdate(true);
-		//DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
-		res->addHeaderValue(HttpResponse::DateHeader, "ddd, dd mmm yyyy hh:mi:ss GMT");
+		time_t rt;
+		struct tm ti;
+		time (&rt);
+		gmtime_r(&rt, &ti);
+		char buffer[31];
+		strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
+		res->addHeaderValue(HttpResponse::DateHeader, std::string(buffer));
 
 		if(handlerRequest->getProtocol()=="HTTP1.1" && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
 		{

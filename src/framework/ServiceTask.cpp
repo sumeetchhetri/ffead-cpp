@@ -122,7 +122,7 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 		std::string id = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
 		//int seconds = sessionTimeout;
 		date.updateSeconds(sessionTimeout);
-		DateFormat dformat("ddd, dd-mmm-yyyy hh:mi:ss");
+		DateFormat dformat("%a, %d %b %Y %H:%M:%S");
 		std::map<std::string,std::string>::iterator it;
 
 		/*if(sessatserv)
@@ -266,7 +266,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 		gmtime_r(&(attrib.st_mtime), &tim);
 		
 		Date filemodifieddate(&tim);
-		DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
+		DateFormat df("%a, %d %b %Y %H:%M:%S GMT");
 		std::string lastmodDate = df.format(filemodifieddate);
 
 		bool isifmodsincvalid = false;

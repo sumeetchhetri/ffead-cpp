@@ -2389,15 +2389,6 @@ std::string Reflection::generateSerDefinitionAll(std::map<std::string, std::map<
 	ret += "}\n";
 	includeRef += typedefs;
 
-	//Ajax JSON Serialization part
-	/*string ttem = "Date readDate(JSONElement& obj){DateFormat formt(\"yyyy-mm-dd hh:mi:ss\");\nreturn *formt.parse(obj.getValue());}";
-	ttem += "Date* readDateP(JSONElement& obj){DateFormat formt(\"yyyy-mm-dd hh:mi:ss\");\nreturn formt.parse(obj.getValue());}";
-	ttem += "\nstd::string fromDateToJSON(Date d){DateFormat formt(\"yyyy-mm-dd hh:mi:ss\");\nreturn formt.format(d);}";
-	ttem += "\nstd::string fromDateVPToJSON(Date *d){DateFormat formt(\"yyyy-mm-dd hh:mi:ss\");\nreturn formt.format(*d);}";
-	ttem += "BinaryData readBinaryData(JSONElement& obj){BinaryData bd;return bd;}";
-	ttem += "BinaryData* readBinaryDataP(JSONElement& obj){return new BinaryData;}";
-	ttem += "\nstd::string fromBinaryDataToJSON(BinaryData d){return \"\";}";
-	ttem += "\nstd::string fromBinaryDataVPToJSON(BinaryData *d){return \"\";}";*/
 	ajaxret = /*ttem + */typerefs + ajaxret;
 	ajaxret ="#include \"AfcInclude.h\"\n#include \"JSONSerialize.h\"\n\nextern \"C\"\n{\n" + ajaxret;
 
@@ -2808,7 +2799,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
 										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
-										+fldp.at(j)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
+										+fldp.at(j)+";\n__obj->"
 										+fldp.at(j)+" = *(formt"+fldp.at(j)+".parse(*_val));\ndelete _val;\n}\n";
 							}
 							else
@@ -2819,7 +2810,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
 										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
-										+fldp.at(j)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
+										+fldp.at(j)+";\n__obj->"
 										+fldp.at(j)+" = (formt"+fldp.at(j)+".parse(*_val));\ndelete _val;\n}\n";
 							}
 						}
@@ -3083,12 +3074,12 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
 													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");\n"
-													 +"DateFormat formt"+cam+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
+													 +"DateFormat formt"+cam+";\n__obj->"
 													 +methpm.at(1)+"(*(formt"+cam+".parse(*_val)));\ndelete _val;\n}\n";
 										else
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
 													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");\n"
-													 +"DateFormat formt"+cam+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
+													 +"DateFormat formt"+cam+";\n__obj->"
 													 +methpm.at(1)+"(formt"+cam+".parse(*_val));\ndelete _val;\n}\n";
 									}
 									else if(argpm.at(0)=="BinaryData")

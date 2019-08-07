@@ -50,7 +50,7 @@ std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& cla
 		case 14: return "\""+CastUtil::lexical_cast<std::string>(*(long double*)t)+"\"";
 		case 15: return "\""+CastUtil::lexical_cast<std::string>(*(bool*)t)+"\"";
 		case 16: {
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			return "\""+formt.format(*(Date*)t)+"\"";
 		}
 		case 17: return "\""+BinaryData::serilaize(*(BinaryData*)t)+"\"";
@@ -255,7 +255,7 @@ void JSONSerialize::addPrimitiveElementToContainer(void* _1, int serOpt, const i
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			Date* _d = formt.parse(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, *_d, cont);
 			else addValueToNestedContainer(container, *_d, cont);
@@ -397,7 +397,7 @@ void* JSONSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& 
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			return formt.parse(*root);
 		}
 		case 17:
@@ -543,7 +543,7 @@ void JSONSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			*object += "\"" + propName + "\" : \"" + formt.format((Date*)t) + "\"";
 			break;
 		}
@@ -656,7 +656,7 @@ void* JSONSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::st
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			return formt.parse(root->getValue());
 		}
 		case 17:

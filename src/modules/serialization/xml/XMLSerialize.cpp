@@ -35,7 +35,7 @@ std::string XMLSerialize::serializePrimitive(int serOpt, const std::string& clas
 		case 14: return "<ldouble>"+CastUtil::lexical_cast<std::string>(*(long double*)t)+"</ldouble>";
 		case 15: return "<bool>"+CastUtil::lexical_cast<std::string>(*(bool*)t)+"</bool>";
 		case 16: {
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			return "<Date>"+formt.format(*(Date*)t)+"</Date>";
 		}
 		case 17: return "<BinaryData>"+BinaryData::serilaize(*(BinaryData*)t)+"</BinaryData>";
@@ -234,7 +234,7 @@ void XMLSerialize::addPrimitiveElementToContainer(void* _1, int serOpt, const in
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			Date* _d = formt.parse(ele->getText());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, *_d, cont);
 			else addValueToNestedContainer(container, *_d, cont);
@@ -384,7 +384,7 @@ void* XMLSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& c
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			return formt.parse(root->getText());
 		}
 		case 17:
@@ -542,7 +542,7 @@ void XMLSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::s
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			*object += "<" + propName + ">" + formt.format((Date*)t) + "</" + propName + ">";
 			break;
 		}
@@ -667,7 +667,7 @@ void* XMLSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::str
 		}
 		case 16:
 		{
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			return formt.parse(root->getText());
 		}
 		case 17:

@@ -30,7 +30,12 @@ Date::Date(const bool& utc)
 		gmtime_r(&rawtime, &timeinfo);
 	else
 		localtime_r(&rawtime, &timeinfo);
+	this->ti = timeinfo;
 	populateDateFields(&timeinfo);
+}
+
+tm* Date::getTimeinfo() const {
+	return &ti;
 }
 
 int Date::getDay() const {
@@ -124,6 +129,7 @@ void Date::populateEpochAndTimeZone(const bool& utc)
 
 void Date::populateDateFields(struct tm* t)
 {
+	this->ti = t;
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
 

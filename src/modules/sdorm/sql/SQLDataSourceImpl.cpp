@@ -1056,11 +1056,11 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 			}
 			std::string fmstr;
 			if(dataType==SQL_DATE)
-				fmstr = "yyyy-mm-dd";
+				fmstr = "%Y-%m-%d";
 			else if(dataType==SQL_TIME)
-				fmstr = "hh:mi:ss.nnnnnn";
+				fmstr = "%H:%M:%S.000000";
 			else if(dataType==SQL_TIMESTAMP)
-				fmstr = "yyyy-mm-dd hh:mi:ss.nnnnnn";
+				fmstr = "%Y-%m-%d %H:%M:%S.000000";
 			DateFormat datf(fmstr);
 			Date *date = datf.parse(temp);
 			colValMap[colName].set(*date);

@@ -1689,7 +1689,7 @@ std::string SerializeBase::trySerialize(void* t, int serOpt, std::string& classN
 		case 14: return CastUtil::lexical_cast<std::string>(*(long double*)t);
 		case 15: return CastUtil::lexical_cast<std::string>(*(bool*)t);
 		case 16: {
-			DateFormat formt("yyyy-mm-dd hh:mi:ss");
+			DateFormat formt;
 			return formt.format((Date*)t);
 		}
 	}

@@ -28,8 +28,8 @@
 #include <iostream>
 
 
-
 class DateFormat {
+	static const std::string DF;
 	std::string formatspec;
 	std::string appendZero(const int& value);
 public:
