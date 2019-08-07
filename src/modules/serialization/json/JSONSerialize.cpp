@@ -22,6 +22,8 @@
 
 #include "JSONSerialize.h"
 
+JSONSerialize JSONSerialize::_i;
+
 JSONSerialize::JSONSerialize() {
 }
 
@@ -410,14 +412,12 @@ void* JSONSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& 
 
 std::string JSONSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	JSONSerialize serialize;
-	return _handleAllSerialization(serOpt,className,t,appName, &serialize);
+	return _handleAllSerialization(serOpt,className,t,appName,&_i);
 }
 
 void* JSONSerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
 {
-	JSONSerialize serialize;
-	return _handleAllUnSerialization(objXml,serOpt,className,appName,&serialize,true,NULL);
+	return _handleAllUnSerialization(objXml,serOpt,className,appName,&_i,true,NULL);
 }
 
 bool JSONSerialize::isValidClassNamespace(void* _1, const std::string& classname, const std::string& namespc, const bool& iscontainer)

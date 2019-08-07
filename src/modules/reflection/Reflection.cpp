@@ -3343,74 +3343,19 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 				+"std::string ser = base->fromSerializableObjectToString(serobject);\nbase->cleanSerializableObject(serobject);\nreturn ser;\n}\n";
 		methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Container(void* obje, SerializeBase* base, const std::string& _cont)\n{\nvoid* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", _cont);\n"
 				+"int size = SerializeBase::getNestedContainerSize<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje);\n"
-				+"for(int i=0;i<size;i++)\n{\n" + classStructure.getFullyQualifiedClassName() + " _lo =SerializeBase::getValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje,i);\n;base->addContainerSerializableElement(object, "+ttapp+"serialize"
+				+"for(int i=0;i<size;i++)\n{\n" + classStructure.getFullyQualifiedClassName() + " _lo =SerializeBase::getValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje,i);\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
 				+classStructure.getTreatedClassName(true)+"(&_lo, base));\nbase->afterAddContainerSerializableElement(object,i,size);\n}\n"
 				+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", _cont);\nstd::string ser = base->fromSerializableObjectToString(object);\n"
 				+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-		/*methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Vec(void* obje, SerializeBase* base)\n{\nstd::vector<"
-				+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::vector<"+classStructure.getFullyQualifiedClassName()+">*)obje;\n"
-				+"void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"vector\");\n"
-				+"int cnt = 0;\nint size = __obj->size();\nstd::vector<"+classStructure.getFullyQualifiedClassName()+">::iterator it = __obj->begin();\n"
-				+"for(it = __obj->begin(); it!= __obj->end(); ++it)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-				+classStructure.getTreatedClassName(true)+"(&(*it), base));\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-				+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::vector\");\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-				+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-		methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Dq(void* obje, SerializeBase* base)\n{\nstd::deque<"
-				+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::deque<"+classStructure.getFullyQualifiedClassName()+">*)obje;\n"
-				+"void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"deque\");\n"
-				+"int cnt = 0;\nint size = __obj->size();\nstd::deque<"+classStructure.getFullyQualifiedClassName()+">::iterator it = __obj->begin();\n"
-				+"for(it = __obj->begin(); it!= __obj->end(); ++it)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-				+classStructure.getTreatedClassName(true)+"(&(*it), base));\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-				+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::deque\");\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-				+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-		methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Lis(void* obje, SerializeBase* base)\n{\nstd::list<"
-				+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::list<"+classStructure.getFullyQualifiedClassName()+">*)obje;\n"
-				+"void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"list\");\n"
-				+"int cnt = 0;\nint size = __obj->size();\nstd::list<"+classStructure.getFullyQualifiedClassName()+">::iterator it = __obj->begin();\n"
-				+"for(it = __obj->begin(); it!= __obj->end(); ++it)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-				+classStructure.getTreatedClassName(true)+"(&(*it), base));\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-				+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::list\");\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-				+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-		methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Q(void* obje, SerializeBase* base)\n{\nstd::queue<"
-				+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::queue<"+classStructure.getFullyQualifiedClassName()+">*)obje;\nstd::queue<"+
-				classStructure.getFullyQualifiedClassName()+"> *tt = new std::queue<"+classStructure.getFullyQualifiedClassName()
-				+">;	*tt = *__obj;void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"queue\");\n"
-				+"int cnt = 0;\nint size = __obj->size();\n"
-				+"for(int var=0;var<size;var++)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-				+classStructure.getTreatedClassName(true)+"(&(tt->front()), base));\ntt->pop();\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-				+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::queue\");\ndelete tt;\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-				+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-		classes += "\nstd::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Vec(void* obje, SerializeBase* base);\n"
-				+"std::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Lis(void* obje, SerializeBase* base);\n"
-				+"std::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Dq(void* obje, SerializeBase* base);\n"
-				+"std::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Q(void* obje, SerializeBase* base);\n";*/
 		classes += "\nstd::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Container(void* obje, SerializeBase* base, const std::string& _cont);\n";
 		if(classStructure.prosetser)
 		{
 			methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "ContainerSV(void* obje, SerializeBase* base, const std::string& _cont)\n{\nvoid* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", _cont);\n"
 					+"int size = SerializeBase::getNestedContainerSizeSV<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje);\n"
-					+"for(int i=0;i<size;i++)\n{\n" + classStructure.getFullyQualifiedClassName() + " _lo =SerializeBase::getValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje,i);\n;base->addContainerSerializableElement(object, "+ttapp+"serialize"
+					+"for(int i=0;i<size;i++)\n{\n" + classStructure.getFullyQualifiedClassName() + " _lo =SerializeBase::getValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje,i);\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
 					+classStructure.getTreatedClassName(true)+"(&_lo, base));\nbase->afterAddContainerSerializableElement(object,i,size);\n}\n"
 					+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", _cont);\nstd::string ser = base->fromSerializableObjectToString(object);\n"
 					+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-			/*methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Set(void* obje, SerializeBase* base)\n{\nstd::set<"
-					+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::set<"+classStructure.getFullyQualifiedClassName()+">*)obje;\n"
-					+"void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"set\");\n"
-					+"int cnt = 0;\nint size = __obj->size();\nstd::set<"+classStructure.getFullyQualifiedClassName()+">::iterator it = __obj->begin();\n"
-					+"for(it = __obj->begin(); it!= __obj->end(); ++it)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-					+classStructure.getTreatedClassName(true)+"((void*)&(*it), base));\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-					+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::set\");\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-					+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-			methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "MulSet(void* obje, SerializeBase* base)\n{\nstd::multiset<"
-					+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::multiset<"+classStructure.getFullyQualifiedClassName()+">*)obje;\n"
-					+"void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"multiset\");\n"
-					+"int cnt = 0;\nint size = __obj->size();\nstd::multiset<"+classStructure.getFullyQualifiedClassName()+">::iterator it = __obj->begin();\n"
-					+"for(it = __obj->begin(); it!= __obj->end(); ++it)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-					+classStructure.getTreatedClassName(true)+"((void*)&(*it), base));\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-					+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::multiset\");\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-					+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-			classes += "\nstd::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Set(void* obje, SerializeBase* base);\n"
-					+"std::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"MulSet(void* obje, SerializeBase* base);";*/
 			classes += "\nstd::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"ContainerSV(void* obje, SerializeBase* base, const std::string& _cont);\n";
 		}
 

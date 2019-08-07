@@ -46,14 +46,14 @@ std::string DateFormat::appendZero(const int& value)
 
 std::string DateFormat::format(Date* date)
 {
-	char buffer[formatspec.length()+1];
+	char buffer[100];
 	strftime(buffer, sizeof(buffer), formatspec.c_str(), date->getTimeinfo());
 	return std::string(buffer);
 }
 
 std::string DateFormat::format(Date& date)
 {
-	char buffer[formatspec.length()+1];
+	char buffer[100];
 	strftime(buffer, sizeof(buffer), formatspec.c_str(), date.getTimeinfo());
 	return std::string(buffer);
 }

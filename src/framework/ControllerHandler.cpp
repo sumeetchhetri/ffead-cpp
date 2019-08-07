@@ -533,22 +533,16 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 
 					t.start();
 					std::string outcontent = "void";
-					if(outRetType=="void")
+					if(ouput!=NULL)
 					{
-						if(rft.statusCode=="")
-							res->setHTTPResponseStatus(HTTPResponseStatus::NoContent);
-						else
-							res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(
-									CastUtil::lexical_cast<int>(rft.statusCode)));
-					}
-					else
-					{
-						if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_JSON && res->getContent()=="")
+						if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 						{
 							outcontent = JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name());
 							res->setContent(outcontent);
+							t.end();
+							CommonUtils::tsContRstSer += t.timerNanoSeconds();
 						}
-						else if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_XML && res->getContent()=="")
+						else if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_XML)
 						{
 							outcontent = XMLSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name());
 							res->setContent(outcontent);
@@ -565,6 +559,13 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
 						delete ouput;
 						//reflector.destroy(ouput, outRetType, req->getCntxt_name());
+					}
+					else if(outRetType=="void")
+					{
+						if(rft.statusCode=="")
+							res->setHTTPResponseStatus(HTTPResponseStatus::NoContent);
+						else
+							res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
 					}
 					//logger << "Successfully called restcontroller output follows - " << std::endl;
 					//logger << outcontent << std::endl;
@@ -595,8 +596,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					mpvecstreams.clear();
 					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 
-					t.end();
-					CommonUtils::tsContRstSer += t.timerNanoSeconds();
 				}
 				else
 				{

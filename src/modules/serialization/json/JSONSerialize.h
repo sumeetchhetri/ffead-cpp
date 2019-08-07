@@ -25,8 +25,10 @@
 #include "SerializeBase.h"
 #include "JSONUtil.h"
 
-class JSONSerialize : public SerializeBase {
+class JSONSerialize;
 
+class JSONSerialize : public SerializeBase {
+	static JSONSerialize _i;
 	void* getSerializableObject();
 	void cleanSerializableObject(void* _1);
 	void startContainerSerialization(void* _1, const std::string& className, const std::string& container);
@@ -54,17 +56,15 @@ public:
 	std::string serializePrimitive(int serOpt, const std::string& className, void* t);
 	template <class T> static std::string serialize(T& t, int serOpt, const std::string& appName = "")
 	{
-		JSONSerialize serialize;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt, className,&t,appName,&serialize);
+		return _handleAllSerialization(serOpt, className,&t,appName,&_i);
 	}
 	template <class T> static std::string serializePointer(T* t, int serOpt, const std::string& appName = "")
 	{
-		JSONSerialize serialize;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt, className,t,appName,&serialize);
+		return _handleAllSerialization(serOpt, className,t,appName,&_i);
 	}
 	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName = "");
 
@@ -113,11 +113,10 @@ public:
 	}*/
 	template <class T> static T unserialize(const std::string& objXml, int serOpt, const std::string& appName = "")
 	{
-		JSONSerialize serialize;
 		T t;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		T* tp = (T*)_handleAllUnSerialization(objXml,serOpt,className,appName,&serialize,true,NULL);
+		T* tp = (T*)_handleAllUnSerialization(objXml,serOpt,className,appName,&_i,true,NULL);
 		if(tp!=NULL)
 		{
 			t = *(T*)tp;
@@ -127,11 +126,10 @@ public:
 	}
 	template <class T> static T unserialize(JSONElement* element, int serOpt, const std::string& appName = "")
 	{
-		JSONSerialize serialize;
 		T t;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		T* tp = (T*)_handleAllUnSerialization("",serOpt,className,appName,&serialize,true,element);
+		T* tp = (T*)_handleAllUnSerialization("",serOpt,className,appName,&_i,true,element);
 		if(tp!=NULL)
 		{
 			t = *(T*)tp;
@@ -141,19 +139,17 @@ public:
 	}
 	template <class T> static T* unserializeToPointer(const std::string& objXml, int serOpt, const std::string& appName = "")
 	{
-		JSONSerialize serialize;
 		T* t;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return (T*)_handleAllUnSerialization(objXml,serOpt,className,appName,&serialize,true,NULL);
+		return (T*)_handleAllUnSerialization(objXml,serOpt,className,appName,&_i,true,NULL);
 	}
 	template <class T> static T* unserializeToPointer(JSONElement* element, int serOpt, const std::string& appName = "")
 	{
-		JSONSerialize serialize;
 		T* t;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return (T*)_handleAllUnSerialization("",serOpt,className,appName,&serialize,true,element);
+		return (T*)_handleAllUnSerialization("",serOpt,className,appName,&_i,true,element);
 	}
 
 	bool isValidClassNamespace(void* _1, const std::string& className, const std::string& namespc, const bool& iscontainer= false);
