@@ -2775,73 +2775,76 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 						if(isPrimitiveDataType(fldp.at(0)))
 						{
 							std::string typ = getTypeName(fldp.at(0));
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(typ));
 							if(!ptr)
 							{
 								methods += typ + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
-								methods += "base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""+typ+"\", &_objProp"+fldp.at(j)+");\n"
+								methods += "base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""+typ+"\", &_objProp"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n";
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+typ+"* _val = ("+typ+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""+typ+"\", \""+fldp.at(j)+"\");__obj->"+fldp.at(j)
+										+typ+"* _val = ("+typ+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \""+typ+"\", \""+fldp.at(j)+"\");__obj->"+fldp.at(j)
 										+" = *_val;\ndelete _val;\n}\n";
 							}
 							else
 							{
-								methods += "base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""+typ+"\", __obj->"+fldp.at(j)+");\n"
+								methods += "base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""+typ+"\", __obj->"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n";
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+typ+"* _val = ("+typ+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""+typ+"\", \""+fldp.at(j)+"\");__obj->"+fldp.at(j)
+										+typ+"* _val = ("+typ+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \""+typ+"\", \""+fldp.at(j)+"\");__obj->"+fldp.at(j)
 										+" = _val;\n}\n";
 							}
 						}
 						else if(fldp.at(0)=="Date")
 						{
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fldp.at(0)));
 							if(!ptr)
 							{
 								methods += fldp.at(0) + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+								methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""
 										+fldp.at(0)+"\", &_objProp"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
+										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
 										+fldp.at(j)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
 										+fldp.at(j)+" = *(formt"+fldp.at(j)+".parse(*_val));\ndelete _val;\n}\n";
 							}
 							else
 							{
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+								methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""
 										+fldp.at(0)+"\", __obj->"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
+										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
 										+fldp.at(j)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
 										+fldp.at(j)+" = (formt"+fldp.at(j)+".parse(*_val));\ndelete _val;\n}\n";
 							}
 						}
 						else if(fldp.at(0)=="BinaryData")
 						{
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fldp.at(0)));
 							if(!ptr)
 							{
 								methods += fldp.at(0) + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+								methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""
 										+fldp.at(0)+"\", &_objProp"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");"
+										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");"
 										+ "\n__obj->"+fldp.at(j)+" = *(BinaryData::unSerilaize(*_val));\ndelete _val;\n}\n";
 							}
 							else
 							{
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+								methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""
 										+fldp.at(0)+"\", __obj->"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");"
+										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");"
 										+ "\n__obj->"+fldp.at(j)+" = (BinaryData::unSerilaize(*_val));\ndelete _val;\n}\n";
 							}
 						}
@@ -3064,37 +3067,40 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									if(isPrimitiveDataType(argpm.at(0)))
 									{
 										argpm.at(0) = getTypeName(argpm.at(0));
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(argpm.at(0)));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													 +argpm.at(0)+"* _val = ("+argpm.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""
+													 +argpm.at(0)+"* _val = ("+argpm.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \""
 													 +argpm.at(0)+"\", \""+fldnames.at(k+1)+"\");\n__obj->"+methpm.at(1)+"(*_val);\ndelete _val;\n}\n";
 										else
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													 +argpm.at(0)+"* _val = ("+argpm.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""
+													 +argpm.at(0)+"* _val = ("+argpm.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \""
 													 +argpm.at(0)+"\", \""+fldnames.at(k+1)+"\");\n__obj->"+methpm.at(1)+"(_val);\n}\n";
 									}
 									else if(argpm.at(0)=="Date")
 									{
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(argpm.at(0)));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldnames.at(k+1)+"\");\n"
+													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");\n"
 													 +"DateFormat formt"+cam+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
 													 +methpm.at(1)+"(*(formt"+cam+".parse(*_val)));\ndelete _val;\n}\n";
 										else
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldnames.at(k+1)+"\");\n"
+													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");\n"
 													 +"DateFormat formt"+cam+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
 													 +methpm.at(1)+"(formt"+cam+".parse(*_val));\ndelete _val;\n}\n";
 									}
 									else if(argpm.at(0)=="BinaryData")
 									{
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(argpm.at(0)));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldnames.at(k+1)+"\");"
+													+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");"
 													+ "\n__obj->"+methpm.at(1)+"(*(BinaryData::unSerilaize(*_val)));\ndelete _val;\n}\n";
 										else
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldnames.at(k+1)+"\");"
+													+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");"
 													+ "\n__obj->"+methpm.at(1)+"((BinaryData::unSerilaize(*_val)));\ndelete _val;\n}\n";
 									}
 									else if(argpm.at(0).find("vector")!=std::string::npos || argpm.at(0).find("queue")!=std::string::npos ||
@@ -3152,33 +3158,35 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 
 										std::string fqcn = contType + getFullyQualifiedClassName(stlcnt, classStructure.namespaces) + " >";
 										contType += getFullyQualifiedClassName(stlcnt, classStructure.namespaces) + ",";
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 
 										if(!ptr)
 										{
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i)){";
 											typedefs += "\n__obj->set"+cam+"(SerializeBase::unSerializeKnown<"+fqcn+" >"
-													 + "(base->getContainerElement(intermediateObject, i, 0),\""+contType+"\",\""+app+"\", base));\n";
+													 + "(base->getContainerElement(intermediateObject, i, 0),"+serOpt+",\""+contType+"\",\""+app+"\", base));\n";
 											typedefs += "\n}\n";
 										}
 										else
 										{
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i)){";
 											typedefs += "\n__obj->set"+cam+"(SerializeBase::unSerializeKnownToPointer<"+fqcn+" >"
-													 + "(base->getContainerElement(intermediateObject, i, 0),\""+contType+"\",\""+app+"\", base));\n";
+													 + "(base->getContainerElement(intermediateObject, i, 0),"+serOpt+",\""+contType+"\",\""+app+"\", base));\n";
 											typedefs += "\n}\n";
 										}
 									}
 									else
 									{
 										std::string fqcn = getFullyQualifiedClassName(argpm.at(0), classStructure.namespaces);
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))"
 													 + "\n__obj->"+methpm.at(1)+"(SerializeBase::unSerializeKnown<"+fqcn+" >"
-													 + "(base->getContainerElement(intermediateObject, i, 0),\""+fqcn+"\",\""+app+"\", base));\n";
+													 + "(base->getContainerElement(intermediateObject, i, 0),"+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n";
 										else
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))"
 													 + "\n__obj->"+methpm.at(1)+"(SerializeBase::unSerializeKnownToPointer<"+fqcn+" >"
-													 + "(base->getContainerElement(intermediateObject, i, 0),\""+fqcn+"\",\""+app+"\", base));\n";
+													 + "(base->getContainerElement(intermediateObject, i, 0),"+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n";
 									}
 								}
 								else if("get"+cam==methpm.at(1) && argpm.size()==0 && methpm.at(0)==fldnames.at(k))
@@ -3186,48 +3194,51 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									if(isPrimitiveDataType(methpm.at(0)))
 									{
 										methpm.at(0) = getTypeName(methpm.at(0));
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(methpm.at(0)));
 										if(!ptr)
 										{
 											methods += methpm.at(0) + " _objProp" + fldnames.at(k+1) + " = " + "__obj->"+methpm.at(1) + "();\n";
-											methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", &_objProp"+fldnames.at(k+1)+");\n"
+											methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", &_objProp"+fldnames.at(k+1)+");\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 										else
 										{
-											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectPrimitiveProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
+											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
 													+"__obj->"+methpm.at(1)+"());\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 									}
 									else if(methpm.at(0)=="Date")
 									{
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(methpm.at(0)));
 										if(!ptr)
 										{
 											methods += methpm.at(0) + " _objProp" + fldnames.at(k+1) + " = " + "__obj->"+methpm.at(1) + "();\n";
-											methods += ("base->addObjectPrimitiveProperty(serobject, \""
+											methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""
 													+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", &_objProp"+fldnames.at(k+1)+");\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 										else
 										{
 											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL){\n"
-													+"base->addObjectPrimitiveProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
+													+"base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
 													+"__obj->"+methpm.at(1)+"());\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 									}
 									else if(methpm.at(0)=="BinaryData")
 									{
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(methpm.at(0)));
 										if(!ptr)
 										{
 											methods += methpm.at(0) + " _objProp" + fldnames.at(k+1) + " = " + "__obj->"+methpm.at(1) + "();\n";
-											methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
+											methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
 													+"&_objProp"+fldnames.at(k+1)+");\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 										else
 										{
-											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectPrimitiveProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
+											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
 													"__obj->"+methpm.at(1)+"());\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}

@@ -828,7 +828,6 @@ void* SerializeBase::_handleAllUnSerialization(const std::string& serVal, int se
 	int sizet;
 	if(unserObjName!="")
 	{
-		int level = StringUtil::countOccurrences(className, "<");
 		if(isJsonSer && StringUtil::trimCopy(serVal)!="")
 		{
 			mintermediateObject = base->getValidUnserializableObject(serVal);
