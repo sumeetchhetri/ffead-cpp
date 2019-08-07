@@ -23,6 +23,9 @@
 #include "SerializeBase.h"
 
 cuckoohash_map<std::string, void*> SerializeBase::_serFMap;
+cuckoohash_map<std::string, void*> SerializeBase::_serCFMap;
+cuckoohash_map<std::string, void*> SerializeBase::_unserFMap;
+cuckoohash_map<std::string, void*> SerializeBase::_unserCFMap;
 void* SerializeBase::dlib = NULL;
 
 void SerializeBase::init(void* dl) {
@@ -782,11 +785,11 @@ std::string SerializeBase::_serContainer(void* t, const std::string& className, 
 	std::string serVal;
 	std::string methodname = base->getSerializationMethodName(className,appName,true,type);
 	SerCont f;
-	if(_serFMap.contains(methodname)) {
-		f = (SerCont)_serFMap.find(methodname);
+	if(_serCFMap.contains(methodname)) {
+		f = (SerCont)_serCFMap.find(methodname);
 	} else {
 		f = (SerCont)dlsym(dlib, methodname.c_str());
-		_serFMap.insert(methodname, f);
+		_serCFMap.insert(methodname, f);
 	}
 	if(f!=NULL)
 		serVal = f(t, base, type);
@@ -1583,11 +1586,11 @@ void* SerializeBase::_unserContainer(void* unserableObject, const std::string& c
 	void* obj = NULL;
 	std::string methodname = base->getSerializationMethodName(className,appName,false,type);
 	UnSerCont f;
-	if(_serFMap.contains(methodname)) {
-		f = (UnSerCont)_serFMap.find(methodname);
+	if(_unserCFMap.contains(methodname)) {
+		f = (UnSerCont)_unserCFMap.find(methodname);
 	} else {
 		f = (UnSerCont)dlsym(dlib, methodname.c_str());
-		_serFMap.insert(methodname, f);
+		_unserCFMap.insert(methodname, f);
 	}
 	if(f!=NULL)
 	{
@@ -1602,11 +1605,11 @@ void* SerializeBase::_unser(void* unserableObject, const std::string& className,
 	void* obj = NULL;
 	std::string methodname = base->getSerializationMethodName(className,appName,false);
 	UnSer f;
-	if(_serFMap.contains(methodname)) {
-		f = (UnSer)_serFMap.find(methodname);
+	if(_unserFMap.contains(methodname)) {
+		f = (UnSer)_unserFMap.find(methodname);
 	} else {
 		f = (UnSer)dlsym(dlib, methodname.c_str());
-		_serFMap.insert(methodname, f);
+		_unserFMap.insert(methodname, f);
 	}
 	if(f!=NULL)
 	{

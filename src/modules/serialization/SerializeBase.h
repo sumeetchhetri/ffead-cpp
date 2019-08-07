@@ -179,9 +179,20 @@ public:
 	}
 };
 
+class SerializeBase;
+
+typedef std::string (*SerCont) (void*, SerializeBase*, const std::string&);
+typedef std::string (*Ser) (void*, SerializeBase*);
+typedef void* (*UnSerCont) (void*, SerializeBase*, const std::string&);
+typedef void* (*UnSer) (void*, SerializeBase*);
+
+
 class SerializeBase {
 	static void* dlib;
-	static cuckoohash_map<std::string, void*> _serFMap;
+	static cuckoohash_map<std::string, Ser> _serFMap;
+	static cuckoohash_map<std::string, SerCont> _serCFMap;
+	static cuckoohash_map<std::string, UnSer> _unserFMap;
+	static cuckoohash_map<std::string, UnSerCont> _unserCFMap;
 	static void init(void* dlib);
 	friend class CHServer;
 protected:
@@ -617,11 +628,5 @@ public:
 	}
 	static std::string trySerialize(void* t, int serOpt, std::string& className, const std::string& app = "");
 };
-
-
-typedef std::string (*SerCont) (void*, SerializeBase*, const std::string&);
-typedef std::string (*Ser) (void*, SerializeBase*);
-typedef void* (*UnSerCont) (void*, SerializeBase*, const std::string&);
-typedef void* (*UnSer) (void*, SerializeBase*);
 
 #endif /* SERIALIZEBASE_H_ */
