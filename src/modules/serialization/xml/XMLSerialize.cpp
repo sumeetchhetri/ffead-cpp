@@ -398,7 +398,7 @@ void* XMLSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& c
 std::string XMLSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
 	XMLSerialize serialize;
-	return _handleAllSerialization(serOpt,className,t,appName, &serialize);
+	return _handleAllSerialization(serOpt,className,t,appName, &serialize, NULL, NULL);
 }
 
 void* XMLSerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
@@ -680,7 +680,7 @@ void* XMLSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::str
 
 std::string XMLSerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, this);
+	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL);
 }
 void* XMLSerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {

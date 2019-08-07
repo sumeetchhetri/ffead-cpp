@@ -67,6 +67,7 @@ public:
 		return _handleAllSerialization(serOpt, className,t,appName,&_i);
 	}
 	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName = "");
+	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, const std::string& appName);
 
 	/*template <class K,class V> static std::string serialize(const std::map<K,V>& mp, const std::string& appName = "")
 	{

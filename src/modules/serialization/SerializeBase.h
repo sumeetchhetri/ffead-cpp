@@ -398,11 +398,16 @@ public:
 		return t;
 	}
 
+	static SerCont serContFunc(std::string& className, const std::string& app, const std::string& type);
+	static Ser serFunc(std::string& className, const std::string& app);
+	static UnSerCont unSerContFunc(std::string& className, const std::string& app, const std::string& type);
+	static UnSer unSerFunc(std::string& className, const std::string& app);
+
 	static std::string _serContainer(void* t, const std::string& className, const std::string& app, const std::string& type, SerializeBase* base);
 	static std::string _ser(void* t, const std::string& className, const std::string& app, SerializeBase* base);
 	static void* _unserContainer(void* unserableObject, const std::string& className, const std::string& app, const std::string& type, SerializeBase* base);
 	static void* _unser(void* unserableObject, const std::string& className, const std::string& app, SerializeBase* base);
-	std::string getSerializationMethodName(const std::string& className, const std::string& app, const bool& which, const std::string& type= "");
+	static std::string getSerializationMethodName(const std::string& className, const std::string& app, const bool& which, const std::string& type= "");
 
 	//Base Methods for serialization, implementation in Serilaize, XMLSerialize and JSONSerialize
 	virtual void* getSerializableObject() = 0;
@@ -443,7 +448,7 @@ public:
 	virtual void* unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& app) = 0;
 
 	static int identifySerOption(std::string className);
-	static std::string _handleAllSerialization(int serOpt, std::string className, void *t, const std::string& app, SerializeBase* base);
+	static std::string _handleAllSerialization(int serOpt, std::string className, void *t, const std::string& app, SerializeBase* base, Ser f1, SerCont f2);
 	static void* _handleAllUnSerialization(const std::string& serVal, int serOpt, std::string className, const std::string& app, SerializeBase* base, const bool& isJsonSer, void* serObject);
 
 	static std::string handleMultiLevelSerialization(void* t, std::string className, const std::string& app, SerializeBase* base);

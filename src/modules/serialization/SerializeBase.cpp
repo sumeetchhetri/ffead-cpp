@@ -294,11 +294,12 @@ int SerializeBase::identifySerOption(std::string className) {
 	return serOpt;
 }
 
-std::string SerializeBase::_handleAllSerialization(int serOpt, std::string className, void *t, const std::string& app, SerializeBase* base)
+std::string SerializeBase::_handleAllSerialization(int serOpt, std::string className, void *t, const std::string& app, SerializeBase* base, Ser f1, SerCont f2)
 {
 	std::string appName = CommonUtils::getAppName(app);
 	switch(serOpt) {
 		case 0: {
+			if(f1!=NULL) return f1(t, base);
 			StringUtil::replaceAll(className, "::", "_");
 			return _ser(t,className, appName, base);
 		}
@@ -322,6 +323,7 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 		case 18: return handleMultiLevelSerialization(t, className, appName, base);
 
 		case 100: {
+			if(f2!=NULL) return f2(t, base, "vector");
 			StringUtil::replaceFirst(className,"std::vector<","");
 			StringUtil::replaceFirst(className,"vector<","");
 			std::string vtyp;
@@ -350,6 +352,7 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 		case 116: return serializevec<Date>(*(std::vector<Date>*)t, serOpt - 100, appName, base);
 
 		case 200: {
+			if(f2!=NULL) return f2(t, base, "list");
 			StringUtil::replaceFirst(className,"std::list<","");
 			StringUtil::replaceFirst(className,"list<","");
 			std::string vtyp;
@@ -378,6 +381,7 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 		case 216: return serializelist<Date>(*(std::list<Date>*)t, serOpt - 200, appName, base);
 
 		case 300: {
+			if(f2!=NULL) return f2(t, base, "set");
 			StringUtil::replaceFirst(className,"std::set<","");
 			StringUtil::replaceFirst(className,"set<","");
 			std::string vtyp;
@@ -406,6 +410,7 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 		case 316: return serializeset<Date>(*(std::set<Date>*)t, serOpt - 300, appName, base);
 
 		case 400: {
+			if(f2!=NULL) return f2(t, base, "multiset");
 			StringUtil::replaceFirst(className,"std::multiset<","");
 			StringUtil::replaceFirst(className,"multiset<","");
 			std::string vtyp;
@@ -434,6 +439,7 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 		case 416: return serializemultiset<Date>(*(std::multiset<Date>*)t, serOpt - 400, appName, base);
 
 		case 500: {
+			if(f2!=NULL) return f2(t, base, "queue");
 			StringUtil::replaceFirst(className,"std::queue<","");
 			StringUtil::replaceFirst(className,"queue<","");
 			std::string vtyp;
@@ -462,6 +468,7 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 		case 516: return serializeq<Date>(*(std::queue<Date>*)t, serOpt - 500, appName, base);
 
 		case 600: {
+			if(f2!=NULL) return f2(t, base, "deque");
 			StringUtil::replaceFirst(className,"std::queue<","");
 			StringUtil::replaceFirst(className,"queue<","");
 			std::string vtyp;
@@ -528,7 +535,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::vector<"+className+",", t, appName, base);
+			return _handleAllSerialization(serOpt, "std::vector<"+className+",", t, appName, base, NULL, NULL);
 		} else {
 			if(className.find("std::vector<bool")==0 || className.find("vector<bool")==0)
 			{
@@ -609,7 +616,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::list<"+className+",", t, appName, base);
+			return _handleAllSerialization(serOpt, "std::list<"+className+",", t, appName, base, NULL, NULL);
 		} else {
 			std::list<Dummy>* ptr = (std::list<Dummy>*)t;
 			std::list<Dummy>::iterator itls = ptr->begin();
@@ -632,7 +639,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::deque<"+className+",", t, appName, base);
+			return _handleAllSerialization(serOpt, "std::deque<"+className+",", t, appName, base, NULL, NULL);
 		} else {
 			if(className.find("std::vector<bool")==0 || className.find("vector<bool")==0)
 			{
@@ -713,7 +720,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::queue<"+className+",", t, appName, base);
+			return _handleAllSerialization(serOpt, "std::queue<"+className+",", t, appName, base, NULL, NULL);
 		} else {
 			DummyQueue* dptr  = static_cast<DummyQueue*>(t);
 			std::deque<std::deque<Dummy> >* ptr = (std::deque<std::deque<Dummy> >*)&dptr->dq;
@@ -737,7 +744,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::set<"+className+",", t, appName, base);
+			return _handleAllSerialization(serOpt, "std::set<"+className+",", t, appName, base, NULL, NULL);
 		} else {
 			std::set<Dummy>* ptr = (std::set<Dummy>*)t;
 			std::set<Dummy>::iterator itls = ptr->begin();
@@ -760,7 +767,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::multiset<"+className+",", t, appName, base);
+			return _handleAllSerialization(serOpt, "std::multiset<"+className+",", t, appName, base, NULL, NULL);
 		} else {
 			std::multiset<Dummy>* ptr = (std::multiset<Dummy>*)t;
 			std::multiset<Dummy>::iterator itls = ptr->begin();
@@ -776,6 +783,20 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 	std::string ser = base->fromSerializableObjectToString(object);
 	base->cleanSerializableObject(object);
 	return ser;
+}
+
+SerCont SerializeBase::serContFunc(std::string& className, const std::string& appName, const std::string& type)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	std::string methodname = getSerializationMethodName(className,appName,true,type);
+	return (SerCont)dlsym(dlib, methodname.c_str());
+}
+
+Ser SerializeBase::serFunc(std::string& className, const std::string& appName)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	std::string methodname = getSerializationMethodName(className,appName,true);
+	return (Ser)dlsym(dlib, methodname.c_str());
 }
 
 std::string SerializeBase::_serContainer(void* t, const std::string& className, const std::string& appName, const std::string& type, SerializeBase* base)
@@ -1568,6 +1589,21 @@ void* SerializeBase::unserializemultiset(void* unserableObject, int serOpt, cons
 		return t;
 	}
 	return NULL;
+}
+
+
+UnSerCont SerializeBase::unSerContFunc(std::string& className, const std::string& appName, const std::string& type)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	std::string methodname = getSerializationMethodName(className,appName,false,type);
+	return (UnSerCont)dlsym(dlib, methodname.c_str());
+}
+
+UnSer SerializeBase::unSerFunc(std::string& className, const std::string& appName)
+{
+	StringUtil::replaceAll(className, "::", "_");
+	std::string methodname = getSerializationMethodName(className,appName,false);
+	return (UnSer)dlsym(dlib, methodname.c_str());
 }
 
 void* SerializeBase::_unserContainer(void* unserableObject, const std::string& className, const std::string& appName, const std::string& type, SerializeBase* base)

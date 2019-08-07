@@ -414,7 +414,7 @@ void* BinarySerialize::getPrimitiveValue(void* _1, int serOpt, const std::string
 std::string BinarySerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
 	BinarySerialize serialize;
-	return _handleAllSerialization(serOpt,className,t,appName, &serialize);
+	return _handleAllSerialization(serOpt,className,t,appName, &serialize, NULL, NULL);
 }
 
 void* BinarySerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
@@ -680,7 +680,7 @@ void* BinarySerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::
 
 std::string BinarySerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, this);
+	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL);
 }
 void* BinarySerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {

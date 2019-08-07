@@ -31,6 +31,7 @@
 #include "CommonUtils.h"
 #include "SSLHandler.h"
 #include "ClassStructure.h"
+#include "SerializeBase.h"
 
 
 typedef void* (*toObjectFromJson) (const std::string&);
@@ -52,6 +53,10 @@ class RestFunctionParams
 	int serOpt;
 	std::string from;
 	std::string defValue;
+	SerCont sc;
+	Ser s;
+	UnSerCont usc;
+	UnSer us;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;
 };
@@ -66,6 +71,11 @@ class RestFunction
 	std::string icontentType;
 	std::string ocontentType;
 	int serOpt;
+	std::string rtype;
+	SerCont sc;
+	Ser s;
+	UnSerCont usc;
+	UnSer us;
 	std::vector<RestFunctionParams> params;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;

@@ -96,6 +96,48 @@ void ConfigurationData::initializeAllSingletonBeans() {
 		exit(0);
 	}
 	getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts, &(getInstance()->reflector));
+
+	std::map<std::string, std::map<std::string, std::vector<RestFunction> > >& rstCntMap = ConfigurationData::getInstance()->rstCntMap;
+	std::map<std::string, std::map<std::string, std::vector<RestFunction> > >::iterator rsit = rstCntMap.begin();
+	for(;rsit!=rstCntMap.end();++rsit) {
+		resFuncMap& rstFMp = rsit->second;
+		resFuncMap::iterator rfit = rstFMp.begin();
+		for(;rfit!=rstFMp.end();++rfit) {
+			std::vector<RestFunction>& fncl = rfit->second;
+			for (int var = 0; var < (int)fncl.size(); ++var) {
+				RestFunction& rf = fncl.at(var);
+				if(rf.serOpt%100==0) {
+					rf.s = SerializeBase::serFunc(rf.rtype, rsit->first);
+					rf.us = SerializeBase::unSerFunc(rf.rtype, rsit->first);
+					std::string type;
+					if(rf.serOpt==100) type = "vector";
+					if(rf.serOpt==200) type = "list";
+					if(rf.serOpt==300) type = "set";
+					if(rf.serOpt==400) type = "multiset";
+					if(rf.serOpt==500) type = "queue";
+					if(rf.serOpt==600) type = "deque";
+					rf.sc = SerializeBase::serContFunc(rf.rtype, rsit->first, type);
+					rf.usc = SerializeBase::unSerContFunc(rf.rtype, rsit->first, type);
+				}
+				for (int var1 = 0; var1 < (int)rf.params.size(); ++var1) {
+					RestFunctionParams& rfp = rf.params.at(var1);
+					if(rfp.serOpt%100==0) {
+						rfp.s = SerializeBase::serFunc(rf.rtype, rsit->first);
+						rfp.us = SerializeBase::unSerFunc(rf.rtype, rsit->first);
+						std::string type;
+						if(rfp.serOpt==100) type = "vector";
+						if(rfp.serOpt==200) type = "list";
+						if(rfp.serOpt==300) type = "set";
+						if(rfp.serOpt==400) type = "multiset";
+						if(rfp.serOpt==500) type = "queue";
+						if(rfp.serOpt==600) type = "deque";
+						rfp.sc = SerializeBase::serContFunc(rf.rtype, rsit->first, type);
+						rfp.usc = SerializeBase::unSerContFunc(rf.rtype, rsit->first, type);
+					}
+				}
+			}
+		}
+	}
 }
 
 void ConfigurationData::clearInstance() {

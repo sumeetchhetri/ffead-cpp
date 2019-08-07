@@ -586,6 +586,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									restfunction.clas = clas;
 									restfunction.meth = StringUtil::toUpperCopy(resfuncs.at(cntn1).getAttribute("meth"));
 									restfunction.statusCode = resfuncs.at(cntn1).getAttribute("statusCode");
+									restfunction.rtype = resfuncs.at(cntn1).getAttribute("rtype");
 									if(restfunction.statusCode!="")
 									{
 										try {
@@ -2286,6 +2287,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 		{
 			RestFunction restfunction;
 			restfunction.name = cs.pubms.at(var).name;
+			restfunction.rtype = cs.pubms.at(var).retType;
 			restfunction.serOpt = SerializeBase::identifySerOption(cs.pubms.at(var).retType);
 			restfunction.path = m.getAttributeValue("path");
 			restfunction.statusCode = m.getAttributeValue("statusCode");

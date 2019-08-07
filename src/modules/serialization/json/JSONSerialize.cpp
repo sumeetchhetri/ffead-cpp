@@ -410,9 +410,14 @@ void* JSONSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& 
 	return NULL;
 }
 
+std::string JSONSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, const std::string& appName)
+{
+	return _handleAllSerialization(serOpt,className,t,appName,&_i, f1, f2);
+}
+
 std::string JSONSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllSerialization(serOpt,className,t,appName,&_i);
+	return _handleAllSerialization(serOpt,className,t,appName,&_i, NULL, NULL);
 }
 
 void* JSONSerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
@@ -669,7 +674,7 @@ void* JSONSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::st
 
 std::string JSONSerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, this);
+	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL);
 }
 void* JSONSerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {

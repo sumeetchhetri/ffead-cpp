@@ -537,7 +537,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					{
 						if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 						{
-							outcontent = JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name());
+							outcontent = JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, rft.s, rft.sc, req->getCntxt_name());
 							res->setContent(outcontent);
 						}
 						else if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_XML)
