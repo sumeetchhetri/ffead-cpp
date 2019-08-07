@@ -10,7 +10,6 @@
 std::string DataSourceInterface::BLANK = "";
 
 DataSourceInterface::DataSourceInterface() {
-	dlib = NULL;
 	reflector = NULL;
 	mapping = NULL;
 	pool = NULL;

@@ -783,7 +783,7 @@ std::string SerializeBase::_serContainer(void* t, const std::string& className, 
 	std::string methodname = base->getSerializationMethodName(className,appName,true,type);
 	SerCont f;
 	if(_serFMap.contains(methodname)) {
-		f = _serFMap.find(methodname);
+		f = (SerCont)_serFMap.find(methodname);
 	} else {
 		f = (SerCont)dlsym(dlib, methodname.c_str());
 		_serFMap.insert(methodname, f);
@@ -800,7 +800,7 @@ std::string SerializeBase::_ser(void* t, const std::string& className, const std
 	std::string methodname = base->getSerializationMethodName(className,appName,true);
 	Ser f;
 	if(_serFMap.contains(methodname)) {
-		f = _serFMap.find(methodname);
+		f = (Ser)_serFMap.find(methodname);
 	} else {
 		f = (Ser)dlsym(dlib, methodname.c_str());
 		_serFMap.insert(methodname, f);
@@ -1584,7 +1584,7 @@ void* SerializeBase::_unserContainer(void* unserableObject, const std::string& c
 	std::string methodname = base->getSerializationMethodName(className,appName,false,type);
 	UnSerCont f;
 	if(_serFMap.contains(methodname)) {
-		f = _serFMap.find(methodname);
+		f = (UnSerCont)_serFMap.find(methodname);
 	} else {
 		f = (UnSerCont)dlsym(dlib, methodname.c_str());
 		_serFMap.insert(methodname, f);
@@ -1603,7 +1603,7 @@ void* SerializeBase::_unser(void* unserableObject, const std::string& className,
 	std::string methodname = base->getSerializationMethodName(className,appName,false);
 	UnSer f;
 	if(_serFMap.contains(methodname)) {
-		f = _serFMap.find(methodname);
+		f = (UnSer)_serFMap.find(methodname);
 	} else {
 		f = (UnSer)dlsym(dlib, methodname.c_str());
 		_serFMap.insert(methodname, f);
