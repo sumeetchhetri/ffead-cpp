@@ -195,6 +195,7 @@ class SerializeBase {
 	static cuckoohash_map<std::string, UnSerCont> _unserCFMap;
 	static void init(void* dlib);
 	friend class CHServer;
+	friend class ConfigurationData;
 protected:
 	static void processClassName(std::string& className);
 	static void processClassAndContainerNames(std::string& className, std::string& container);

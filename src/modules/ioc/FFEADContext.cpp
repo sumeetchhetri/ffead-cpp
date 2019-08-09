@@ -407,6 +407,7 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 								clas->f = f;
 							}
 							ci->second.f = f;
+							clas->addConstructor(ci->second);
 						}
 					}
 				}
@@ -417,7 +418,10 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 					for(ci=cm.begin();ci!=cm.end();++ci) {
 						void *mkr = dlsym(reflector->dlib, ci->second.getRefName().c_str());
 						GetMeth f = (GetMeth)mkr;
-						if(f!=NULL) ci->second.f = f;
+						if(f!=NULL) {
+							ci->second.f = f;
+							clas->addMethod(ci->second);
+						}
 					}
 				}
 
@@ -427,7 +431,10 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 					for(ci=cm.begin();ci!=cm.end();++ci) {
 						void *mkr = dlsym(reflector->dlib, ci->second.getRefName().c_str());
 						GetFld f = (GetFld)mkr;
-						if(f!=NULL) ci->second.f = f;
+						if(f!=NULL) {
+							ci->second.f = f;
+							clas->addField(ci->second);
+						}
 					}
 				}
 

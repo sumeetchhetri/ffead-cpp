@@ -24,6 +24,25 @@
 
 ConfigurationData* ConfigurationData::instance = NULL;
 
+Reflector* ConfigurationData::getReflector() {
+	return &(getInstance()->reflector);
+}
+
+void ConfigurationData::enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
+		bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra, bool enableScripts, bool enableSoap) {
+	getInstance()->enableCors = enableCors;
+	getInstance()->enableSecurity = enableSecurity;
+	getInstance()->enableFilters = enableFilters;
+	getInstance()->enableControllers = enableControllers;
+	getInstance()->enableContMpg = enableContMpg;
+	getInstance()->enableContPath = enableContPath;
+	getInstance()->enableContExt = enableContExt;
+	getInstance()->enableContRst = enableContRst;
+	getInstance()->enableExtra = enableExtra;
+	getInstance()->enableScripts = enableScripts;
+	getInstance()->enableSoap = enableSoap;
+}
+
 ConfigurationData::ConfigurationData() {
 	logger = LoggerFactory::getLogger("ConfigurationData");
 	dlib = NULL;

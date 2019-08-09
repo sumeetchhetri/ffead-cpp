@@ -127,7 +127,7 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 				std::string level = StringUtil::toUpperCopy(ele->getAttribute("level"));
 				std::string dfstr = "%d/%m/%Y %H:%M:%S";
 				if(ele->getAttribute("dateformat")!="") {
-					dfstr = StringUtil::toLowerCopy(ele->getAttribute("dateformat"));
+					dfstr = ele->getAttribute("dateformat");
 				}
 				std::string file, pattern;
 				std::string logdirtype = "SERVER";

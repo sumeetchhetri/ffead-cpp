@@ -25,9 +25,8 @@ class GenericObject {
 	void internalClear();
 	void internalCopy(const GenericObject &obj);
 	static Reflector* ref;
-	static void init(Reflector* ref);
-	friend class CHServer;
 public:
+	static void init(Reflector* ref);
 	static Reflector* getReflector();
 	GenericObject();
 	GenericObject& operator = (const GenericObject &obj);
