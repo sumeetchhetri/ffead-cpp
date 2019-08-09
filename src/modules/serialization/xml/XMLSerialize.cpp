@@ -7,6 +7,8 @@
 
 #include "XMLSerialize.h"
 
+XMLSerialize XMLSerialize::_i;
+
 XMLSerialize::XMLSerialize() {
 }
 
@@ -397,14 +399,12 @@ void* XMLSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& c
 
 std::string XMLSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	XMLSerialize serialize;
-	return _handleAllSerialization(serOpt,className,t,appName, &serialize, NULL, NULL);
+	return _handleAllSerialization(serOpt,className,t,appName, &_i, NULL, NULL, NULL);
 }
 
 void* XMLSerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
 {
-	XMLSerialize serialize;
-	return _handleAllUnSerialization(objXml,serOpt,className,appName,&serialize,false,NULL);
+	return _handleAllUnSerialization(objXml,serOpt,className,appName,&_i,false,NULL);
 }
 
 bool XMLSerialize::isValidClassNamespace(void* _1, const std::string& className, const std::string& namespc, const bool& iscontainer)
@@ -680,7 +680,7 @@ void* XMLSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::str
 
 std::string XMLSerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL);
+	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL);
 }
 void* XMLSerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {

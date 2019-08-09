@@ -58,16 +58,16 @@ public:
 	{
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt, className,&t,appName,&_i,NULL,NULL);
+		return _handleAllSerialization(serOpt, className,&t,appName,&_i,NULL,NULL, NULL);
 	}
 	template <class T> static std::string serializePointer(T* t, int serOpt, const std::string& appName = "")
 	{
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt, className,t,appName,&_i,NULL,NULL);
+		return _handleAllSerialization(serOpt, className,t,appName,&_i,NULL,NULL, NULL);
 	}
 	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName = "");
-	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, const std::string& appName);
+	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, SerCont f3, const std::string& appName);
 
 	/*template <class K,class V> static std::string serialize(const std::map<K,V>& mp, const std::string& appName = "")
 	{

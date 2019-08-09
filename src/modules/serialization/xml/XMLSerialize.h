@@ -11,7 +11,7 @@
 #include "XmlParser.h"
 
 class XMLSerialize : public SerializeBase {
-
+	static XMLSerialize _i;
 	void* getSerializableObject();
 	void cleanSerializableObject(void* _1);
 	void startContainerSerialization(void* _1, const std::string& className, const std::string& container);
@@ -39,23 +39,20 @@ public:
 	std::string serializePrimitive(int serOpt, const std::string& className, void* t);
 	template <class T> static std::string serialize(T& t, int serOpt, const std::string& appName = "")
 	{
-		XMLSerialize serialize;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt,className,&t,appName, &serialize,NULL,NULL);
+		return _handleAllSerialization(serOpt,className,&t,appName, &_i,NULL,NULL, NULL);
 	}
 	template <class T> static std::string serialize(void* t, int serOpt, const std::string& className, const std::string& appName = "")
 	{
-		XMLSerialize serialize;
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt,className,t,appName, &serialize,NULL,NULL);
+		return _handleAllSerialization(serOpt,className,t,appName, &_i,NULL,NULL, NULL);
 	}
 	template <class T> static std::string serializePointer(T* t, int serOpt, const std::string& appName = "")
 	{
-		XMLSerialize serialize;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt,className,t,appName, &serialize);
+		return _handleAllSerialization(serOpt,className,t,appName, &_i,NULL,NULL, NULL);
 	}
 	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName = "");
 

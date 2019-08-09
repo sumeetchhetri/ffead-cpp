@@ -294,7 +294,7 @@ int SerializeBase::identifySerOption(std::string className) {
 	return serOpt;
 }
 
-std::string SerializeBase::_handleAllSerialization(int serOpt, std::string className, void *t, const std::string& app, SerializeBase* base, Ser f1, SerCont f2)
+std::string SerializeBase::_handleAllSerialization(int serOpt, std::string className, void *t, const std::string& app, SerializeBase* base, Ser f1, SerCont f2, SerCont f3)
 {
 	std::string appName = CommonUtils::getAppName(app);
 	switch(serOpt) {
@@ -535,7 +535,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::vector<"+className+",", t, appName, base, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::vector<"+className+",", t, appName, base, NULL, NULL, NULL);
 		} else {
 			if(className.find("std::vector<bool")==0 || className.find("vector<bool")==0)
 			{
@@ -616,7 +616,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::list<"+className+",", t, appName, base, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::list<"+className+",", t, appName, base, NULL, NULL, NULL);
 		} else {
 			std::list<Dummy>* ptr = (std::list<Dummy>*)t;
 			std::list<Dummy>::iterator itls = ptr->begin();
@@ -639,7 +639,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::deque<"+className+",", t, appName, base, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::deque<"+className+",", t, appName, base, NULL, NULL, NULL);
 		} else {
 			if(className.find("std::vector<bool")==0 || className.find("vector<bool")==0)
 			{
@@ -720,7 +720,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::queue<"+className+",", t, appName, base, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::queue<"+className+",", t, appName, base, NULL, NULL, NULL);
 		} else {
 			DummyQueue* dptr  = static_cast<DummyQueue*>(t);
 			std::deque<std::deque<Dummy> >* ptr = (std::deque<std::deque<Dummy> >*)&dptr->dq;
@@ -744,7 +744,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::set<"+className+",", t, appName, base, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::set<"+className+",", t, appName, base, NULL, NULL, NULL);
 		} else {
 			std::set<Dummy>* ptr = (std::set<Dummy>*)t;
 			std::set<Dummy>::iterator itls = ptr->begin();
@@ -767,7 +767,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::multiset<"+className+",", t, appName, base, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::multiset<"+className+",", t, appName, base, NULL, NULL, NULL);
 		} else {
 			std::multiset<Dummy>* ptr = (std::multiset<Dummy>*)t;
 			std::multiset<Dummy>::iterator itls = ptr->begin();

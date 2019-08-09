@@ -22,6 +22,8 @@
 
 #include "BinarySerialize.h"
 
+BinarySerialize BinarySerialize::_i;
+
 BinarySerialize::BinarySerialize() {
 }
 
@@ -413,14 +415,12 @@ void* BinarySerialize::getPrimitiveValue(void* _1, int serOpt, const std::string
 
 std::string BinarySerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	BinarySerialize serialize;
-	return _handleAllSerialization(serOpt,className,t,appName, &serialize, NULL, NULL);
+	return _handleAllSerialization(serOpt,className,t,appName, &_i, NULL, NULL, NULL);
 }
 
 void* BinarySerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
 {
-	BinarySerialize serialize;
-	return _handleAllUnSerialization(objXml,serOpt,className,appName,&serialize,false,NULL);
+	return _handleAllUnSerialization(objXml,serOpt,className,appName,&_i,false,NULL);
 }
 
 bool BinarySerialize::isValidClassNamespace(void* _1, const std::string& cn, const std::string& namespc, const bool& iscontainer)
@@ -680,7 +680,7 @@ void* BinarySerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::
 
 std::string BinarySerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL);
+	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL);
 }
 void* BinarySerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {

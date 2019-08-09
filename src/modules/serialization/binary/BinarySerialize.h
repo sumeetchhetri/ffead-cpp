@@ -29,7 +29,7 @@ typedef std::string (*SerPtr) (void*);
 typedef void* (*UnSerPtr) (const std::string&);
 
 class BinarySerialize : public SerializeBase {
-
+	static BinarySerialize _i;
 	std::string serializePrimitive(int serOpt, const std::string& className, void* t);
 	void* getSerializableObject();
 	void cleanSerializableObject(void* _1);
@@ -57,17 +57,15 @@ public:
 
 	template <class T> static std::string serialize(T& t, int serOpt, const std::string& appName = "")
 	{
-		BinarySerialize serialize;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(className,&t,appName, &serialize,NULL,NULL);
+		return _handleAllSerialization(className,&t,appName, &_i,NULL,NULL, NULL);
 	}
 	template <class T> static std::string serializePointer(T* t, int serOpt, const std::string& appName = "")
 	{
-		BinarySerialize serialize;
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(className,t,appName, &serialize,NULL,NULL);
+		return _handleAllSerialization(className,t,appName, &_i,NULL,NULL, NULL);
 	}
 	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName = "");
 

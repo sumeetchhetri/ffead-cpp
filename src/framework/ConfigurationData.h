@@ -54,11 +54,14 @@ class RestFunctionParams
 	std::string from;
 	std::string defValue;
 	SerCont sc;
+	SerCont scm;
 	Ser s;
 	UnSerCont usc;
+	UnSerCont uscm;
 	UnSer us;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;
+	friend class ConfigurationData;
 };
 
 class RestFunction
@@ -73,12 +76,15 @@ class RestFunction
 	int serOpt;
 	std::string rtype;
 	SerCont sc;
+	SerCont scm;
 	Ser s;
 	UnSerCont usc;
+	UnSerCont uscm;
 	UnSer us;
 	std::vector<RestFunctionParams> params;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;
+	friend class ConfigurationData;
 };
 
 typedef std::map<std::string, std::vector<RestFunction> > resFuncMap;

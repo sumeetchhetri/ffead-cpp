@@ -97,6 +97,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 	}
 	getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts, &(getInstance()->reflector));
 
+	SerializeBase::init(ConfigurationData::getInstance()->dlib);
 	std::map<std::string, std::map<std::string, std::vector<RestFunction> > >& rstCntMap = ConfigurationData::getInstance()->rstCntMap;
 	std::map<std::string, std::map<std::string, std::vector<RestFunction> > >::iterator rsit = rstCntMap.begin();
 	for(;rsit!=rstCntMap.end();++rsit) {
@@ -106,33 +107,133 @@ void ConfigurationData::initializeAllSingletonBeans() {
 			std::vector<RestFunction>& fncl = rfit->second;
 			for (int var = 0; var < (int)fncl.size(); ++var) {
 				RestFunction& rf = fncl.at(var);
+				std::string vtyp = rf.rtype;
+				std::string type;
 				if(rf.serOpt%100==0) {
-					rf.s = SerializeBase::serFunc(rf.rtype, rsit->first);
-					rf.us = SerializeBase::unSerFunc(rf.rtype, rsit->first);
-					std::string type;
-					if(rf.serOpt==100) type = "vector";
-					if(rf.serOpt==200) type = "list";
-					if(rf.serOpt==300) type = "set";
-					if(rf.serOpt==400) type = "multiset";
-					if(rf.serOpt==500) type = "queue";
-					if(rf.serOpt==600) type = "deque";
-					rf.sc = SerializeBase::serContFunc(rf.rtype, rsit->first, type);
-					rf.usc = SerializeBase::unSerContFunc(rf.rtype, rsit->first, type);
+					std::string className = rf.rtype;
+					if(rf.serOpt==100) {
+						type = "vector";
+						StringUtil::replaceFirst(className,"std::vector<","");
+						StringUtil::replaceFirst(className,"vector<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					} else if(rf.serOpt==200) {
+						type = "list";
+						StringUtil::replaceFirst(className,"std::list<","");
+						StringUtil::replaceFirst(className,"list<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					} else if(rf.serOpt==300) {
+						type = "set";
+						StringUtil::replaceFirst(className,"std::set<","");
+						StringUtil::replaceFirst(className,"set<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					} else if(rf.serOpt==400) {
+						type = "multiset";
+						StringUtil::replaceFirst(className,"std::multiset<","");
+						StringUtil::replaceFirst(className,"multiset<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					} else if(rf.serOpt==500) {
+						type = "queue";
+						StringUtil::replaceFirst(className,"std::queue<","");
+						StringUtil::replaceFirst(className,"queue<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					} else if(rf.serOpt==600) {
+						type = "deque";
+						StringUtil::replaceFirst(className,"std::deque<","");
+						StringUtil::replaceFirst(className,"deque<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					}
+					StringUtil::replaceAll(vtyp, "::", "_");
+					std::string appn = rsit->first;
+					StringUtil::replaceAll(appn, "-", "_");
+					RegexUtil::replace(appn, "[^a-zA-Z0-9_]+", "");
+					rf.s = SerializeBase::serFunc(vtyp, appn);
+					rf.sc = SerializeBase::serContFunc(vtyp, appn, "vector");
+					rf.scm = SerializeBase::serContFunc(vtyp, appn, "set");
+					rf.us = SerializeBase::unSerFunc(vtyp, appn);
+					rf.usc = SerializeBase::unSerContFunc(vtyp, appn, "vector");
+					rf.uscm = SerializeBase::unSerContFunc(vtyp, appn, "set");
 				}
 				for (int var1 = 0; var1 < (int)rf.params.size(); ++var1) {
 					RestFunctionParams& rfp = rf.params.at(var1);
 					if(rfp.serOpt%100==0) {
-						rfp.s = SerializeBase::serFunc(rf.rtype, rsit->first);
-						rfp.us = SerializeBase::unSerFunc(rf.rtype, rsit->first);
-						std::string type;
-						if(rfp.serOpt==100) type = "vector";
-						if(rfp.serOpt==200) type = "list";
-						if(rfp.serOpt==300) type = "set";
-						if(rfp.serOpt==400) type = "multiset";
-						if(rfp.serOpt==500) type = "queue";
-						if(rfp.serOpt==600) type = "deque";
-						rfp.sc = SerializeBase::serContFunc(rf.rtype, rsit->first, type);
-						rfp.usc = SerializeBase::unSerContFunc(rf.rtype, rsit->first, type);
+						std::string className = rfp.type;
+						if(rfp.serOpt==100) {
+							type = "vector";
+							StringUtil::replaceFirst(className,"std::vector<","");
+							StringUtil::replaceFirst(className,"vector<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						} else if(rfp.serOpt==200) {
+							type = "list";
+							StringUtil::replaceFirst(className,"std::list<","");
+							StringUtil::replaceFirst(className,"list<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						} else if(rfp.serOpt==300) {
+							type = "set";
+							StringUtil::replaceFirst(className,"std::set<","");
+							StringUtil::replaceFirst(className,"set<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						} else if(rfp.serOpt==400) {
+							type = "multiset";
+							StringUtil::replaceFirst(className,"std::multiset<","");
+							StringUtil::replaceFirst(className,"multiset<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						} else if(rfp.serOpt==500) {
+							type = "queue";
+							StringUtil::replaceFirst(className,"std::queue<","");
+							StringUtil::replaceFirst(className,"queue<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						} else if(rfp.serOpt==600) {
+							type = "deque";
+							StringUtil::replaceFirst(className,"std::deque<","");
+							StringUtil::replaceFirst(className,"deque<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						}
+						StringUtil::replaceAll(vtyp, "::", "_");
+						std::string appn = rsit->first;
+						StringUtil::replaceAll(appn, "-", "_");
+						RegexUtil::replace(appn, "[^a-zA-Z0-9_]+", "");
+						rfp.s = SerializeBase::serFunc(vtyp, appn);
+						rfp.sc = SerializeBase::serContFunc(vtyp, appn, "vector");
+						rfp.scm = SerializeBase::serContFunc(vtyp, appn, "set");
+						rfp.us = SerializeBase::unSerFunc(vtyp, appn);
+						rfp.usc = SerializeBase::unSerContFunc(vtyp, appn, "vector");
+						rfp.uscm = SerializeBase::unSerContFunc(vtyp, appn, "set");
 					}
 				}
 			}
