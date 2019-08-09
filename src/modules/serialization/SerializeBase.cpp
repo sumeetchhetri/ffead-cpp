@@ -411,7 +411,7 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 		case 216: return serializelist<Date>(*(std::list<Date>*)t, serOpt - 200, appName, base);
 
 		case 300: {
-			if(f2!=NULL) return f2(t, base, "set");
+			if(f3!=NULL) return f3(t, base, "set");
 			StringUtil::replaceFirst(className,"std::set<","");
 			StringUtil::replaceFirst(className,"set<","");
 			std::string vtyp;
@@ -455,7 +455,7 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 		case 316: return serializeset<Date>(*(std::set<Date>*)t, serOpt - 300, appName, base);
 
 		case 400: {
-			if(f2!=NULL) return f2(t, base, "multiset");
+			if(f3!=NULL) return f3(t, base, "multiset");
 			StringUtil::replaceFirst(className,"std::multiset<","");
 			StringUtil::replaceFirst(className,"multiset<","");
 			std::string vtyp;
@@ -535,7 +535,7 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			for(bool v: *tt)
 			{
 				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt, appName, base));
-				base->afterAddContainerSerializableElement(object, cnt++, (int)tt->size());
+				base->afterAddContainerSerializableElement(object, cnt++, size);
 			}
 			base->endContainerSerialization(object, "bool", "std::queue");
 			std::string ser = base->fromSerializableObjectToString(object);
