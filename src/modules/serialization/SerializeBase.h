@@ -209,7 +209,7 @@ public:
 		base->startContainerSerialization(object, className, "std::set");
 		for(auto& v: t)
 		{
-			base->addContainerSerializableElement(object, serializePointer<T>(&v, serOpt, appName, base));
+			base->addContainerSerializableElement(object, serializeUnknown(&v, serOpt, className, appName, base));
 			base->afterAddContainerSerializableElement(object, cnt++, size);
 		}
 		base->endContainerSerialization(object, className, "std::set");
@@ -227,7 +227,7 @@ public:
 		base->startContainerSerialization(object, className, "std::multiset");
 		for(auto& v: t)
 		{
-			base->addContainerSerializableElement(object, serializePointer<T>(&v, serOpt, appName, base));
+			base->addContainerSerializableElement(object, serializeUnknown(&v, serOpt, className, appName, base));
 			base->afterAddContainerSerializableElement(object, cnt++, size);
 		}
 		base->endContainerSerialization(object, className, "std::multiset");
@@ -245,7 +245,7 @@ public:
 		base->startContainerSerialization(object, className, "std::vector");
 		for(auto& v: t)
 		{
-			base->addContainerSerializableElement(object, serializePointer<T>(&v, serOpt, appName, base));
+			base->addContainerSerializableElement(object, serializeUnknown(&v, serOpt, className, appName, base));
 			base->afterAddContainerSerializableElement(object, cnt++, size);
 		}
 		base->endContainerSerialization(object, className, "std::vector");
@@ -263,7 +263,7 @@ public:
 		base->startContainerSerialization(object, className, "std::deque");
 		for(auto& v: t)
 		{
-			base->addContainerSerializableElement(object, serializePointer<T>(&v, serOpt, appName, base));
+			base->addContainerSerializableElement(object, serializeUnknown(&v, serOpt, className, appName, base));
 			base->afterAddContainerSerializableElement(object, cnt++, size);
 		}
 		base->endContainerSerialization(object, className, "std::deque");
@@ -281,7 +281,7 @@ public:
 		base->startContainerSerialization(object, className, "std::list");
 		for(auto& v: t)
 		{
-			base->addContainerSerializableElement(object, serializePointer<T>(&v, serOpt, appName, base));
+			base->addContainerSerializableElement(object, serializeUnknown(&v, serOpt, className, appName, base));
 			base->afterAddContainerSerializableElement(object, cnt++, size);
 		}
 		base->endContainerSerialization(object, className, "std::list");
@@ -301,7 +301,7 @@ public:
 		base->startContainerSerialization(object, className, "std::queue");
 		for(auto& v: *tt)
 		{
-			base->addContainerSerializableElement(object, serializePointer<T>(&v, serOpt, appName, base));
+			base->addContainerSerializableElement(object, serializeUnknown(&v, serOpt, className, appName, base));
 			base->afterAddContainerSerializableElement(object, cnt++, (int)tt->size());
 		}
 		base->endContainerSerialization(object, className, "std::queue");
