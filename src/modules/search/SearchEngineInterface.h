@@ -18,7 +18,6 @@
 #include "HttpClient.h"
 
 class SearchEngineInterface {
-	void* dlib;
 	ConnectionPooler* pool;
 	std::string appName;
 	Reflector* reflector;

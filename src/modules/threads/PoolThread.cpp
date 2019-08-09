@@ -24,15 +24,25 @@
 
 void* PoolThread::run(void *arg)
 {
+	Logger logger = LoggerFactory::getLogger("PoolThread");
 	PoolThread* ths  = static_cast<PoolThread*>(arg);
+	Timer t;
+	t.start();
+
 	while (ths->runFlag)
 	{
 		Task* task;
-		ths->tasks.wait_dequeue(task);
-		if(task==NULL)break;
+		ths->c_mutex.lock();
+		while (ths->condVar<=0)
+		ths->c_mutex.conditionalWait();
+		ths->c_mutex.unlock();
+		bool f = ths->tasks.try_dequeue(task);
+		if(f && task==NULL)break;
 
+		ths->condVar--;
 		try
 		{
+			ths->taskCount++;
 			if(!task->isFuture)
 				task->run();
 			else
@@ -50,7 +60,11 @@ void* PoolThread::run(void *arg)
 			}
 			if(task->cleanUp)
 			{
-				delete task;
+				if(task->hdlr!=NULL) {
+					task->hdlr->push(task);
+				} else {
+					delete task;
+				}
 			}
 		}
 		catch(const std::exception& e)
@@ -64,6 +78,20 @@ void* PoolThread::run(void *arg)
 					ftask->taskComplete();
 				}
 			}
+			if(task->cleanUp)
+			{
+				if(task->hdlr!=NULL) {
+					task->hdlr->push(task);
+				} else {
+					delete task;
+				}
+			}
+		}
+
+		if(t.elapsedSeconds()>=10) {
+			std::string a = (ths->name+": Total Tasks handled = "+CastUtil::lexical_cast<std::string>(ths->taskCount)+"\n");
+			logger.info(a);
+			t.start();
 		}
 	}
 	Task* task = NULL;
@@ -71,7 +99,11 @@ void* PoolThread::run(void *arg)
 	{
 		if(task->cleanUp)
 		{
-			delete task;
+			if(task->hdlr!=NULL) {
+				task->hdlr->push(task);
+			} else {
+				delete task;
+			}
 		}
 		continue;
 	}
@@ -111,7 +143,11 @@ void* PoolThread::runWithTaskPool(void *arg)
 				}
 				if(task->cleanUp)
 				{
-					delete task;
+					if(task->hdlr!=NULL) {
+						task->hdlr->push(task);
+					} else {
+						delete task;
+					}
 				}
 			}
 			catch(const std::exception& e)
@@ -125,6 +161,14 @@ void* PoolThread::runWithTaskPool(void *arg)
 						ftask->taskComplete();
 					}
 				}
+				if(task->cleanUp)
+				{
+					if(task->hdlr!=NULL) {
+						task->hdlr->push(task);
+					} else {
+						delete task;
+					}
+				}
 			}
 		}
 	}
@@ -133,14 +177,18 @@ void* PoolThread::runWithTaskPool(void *arg)
 	{
 		if(task->cleanUp)
 		{
-			delete task;
+			if(task->hdlr!=NULL) {
+				task->hdlr->push(task);
+			} else {
+				delete task;
+			}
 		}
 	}
 	ths->complete = true;
 	return NULL;
 }
 
-PoolThread::PoolThread() {
+PoolThread::PoolThread(int num) {
 	logger = LoggerFactory::getLogger("PoolThread");
 	this->idle = true;
 	this->thrdStarted = false;
@@ -148,9 +196,12 @@ PoolThread::PoolThread() {
 	this->runFlag = true;
 	wpool = NULL;
 	mthread = new Thread(&run, this);
+	this->condVar = 0;
+	this->taskCount = 0;
+	this->name = "Thread-" + CastUtil::lexical_cast<std::string>(num);
 }
 
-PoolThread::PoolThread(TaskPool* wpool) {
+PoolThread::PoolThread(TaskPool* wpool, int num) {
 	logger = LoggerFactory::getLogger("PoolThread");
 	this->idle = true;
 	this->thrdStarted = false;
@@ -158,6 +209,9 @@ PoolThread::PoolThread(TaskPool* wpool) {
 	this->runFlag = true;
 	this->wpool = wpool;
 	mthread = new Thread(&runWithTaskPool, this);
+	this->condVar = 0;
+	this->taskCount = 0;
+	this->name = "Thread-" + CastUtil::lexical_cast<std::string>(num);
 }
 
 PoolThread::~PoolThread() {
@@ -173,12 +227,16 @@ PoolThread::~PoolThread() {
 void PoolThread::stop() {
 	if(!thrdStarted)return;
 	this->runFlag = false;
+	c_mutex.lock();
 	tasks.enqueue(NULL);
+	this->condVar++;
+	c_mutex.conditionalNotifyOne();
+	c_mutex.unlock();
 }
 
-void PoolThread::execute() {
+void PoolThread::execute(int cid) {
 	if(thrdStarted)return;
-	mthread->execute();
+	mthread->execute(cid);
 	thrdStarted = true;
 }
 
@@ -188,5 +246,9 @@ bool PoolThread::isComplete() {
 
 void PoolThread::addTask(Task* task) {
 	if(!runFlag)return;
+	c_mutex.lock();
 	tasks.enqueue(task);
+	this->condVar++;
+	c_mutex.conditionalNotifyOne();
+	c_mutex.unlock();
 }

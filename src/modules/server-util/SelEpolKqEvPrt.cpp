@@ -30,14 +30,14 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 #if USE_EPOLL == 1
 	epoll_handle = -1;
 #endif
+#if USE_KQUEUE == 1
+	kq = -1;
+#endif
+	dsi = NULL;
 }
 
 SelEpolKqEvPrt::~SelEpolKqEvPrt() {
-}
-
-void SelEpolKqEvPrt::initialize(const int& timeout)
-{
-	initialize(-1, timeout);
+	delete dsi;
 }
 
 void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
@@ -68,7 +68,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 			FD_ZERO(&master[var]);
 		}
 	#elif defined USE_EPOLL
-		epoll_handle = epoll_create(MAXDESCRIPTORS);
+		epoll_handle = epoll_create1(0);
 	#elif defined USE_KQUEUE
 		kq = kqueue();
 		if (kq == -1)
@@ -96,7 +96,9 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 		return;
 	#endif
 	#if !defined(USE_WIN_IOCP)
-		if(sockfd>0)registerForEvent(sockfd);
+		dsi = new DummySocketInterface();
+		dsi->fd = sockfd;
+		if(sockfd>0)registerForEvent(dsi, true);
 	#endif
 }
 
@@ -264,7 +266,7 @@ int SelEpolKqEvPrt::getEvents()
 	return numEvents;
 }
 
-SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index)
+SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj)
 {
 	#if defined(USE_WIN_IOCP)
 		if(psocks.size()>index && index>=0)
@@ -274,12 +276,14 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index)
 				SingleIOOperation* iops = (SingleIOOperation*)psocks.at(index);
 				l.unlock();
 				iocpRecv(iops->sock, &(iops->o));
+				obj = connections.find(iops->sock);
 				return iops->sock;
 			#else
 				l.lock();
 				IOOperation* iops = (IOOperation*)psocks.at(index);
 				l.unlock();
 				iocpRecv(iops->sock, iops->o);
+				obj = connections.find(iops->sock);
 				return iops->sock;
 			#endif
 		}
@@ -291,6 +295,7 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index)
 			temp = index;
 		}
 		l.unlock();
+		obj = connections.find(temp);
 		return temp;
 	#elif defined(USE_SELECT)
 		int temp = 0;
@@ -300,35 +305,42 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index)
 			temp = index;
 		}
 		l.unlock();
+		obj = connections.find(temp);
 		return temp;
 	#elif defined USE_EPOLL
 		if(index>-1 && index<(int)(sizeof events))
 		{
+			SocketInterface* p = (SocketInterface*)events[index].data.ptr;
 			if ((events[index].events & EPOLLERR) ||
 				  (events[index].events & EPOLLHUP) ||
 				  (events[index].events & EPOLLRDHUP) ||
 				  (!(events[index].events & EPOLLIN)))
 			{
-				close(events[index].data.fd);
+				p->close();
 			}
-			return events[index].data.fd;
+			obj = p;
+			return p->fd;
 		}
 	#elif defined USE_KQUEUE
 		if(index>-1 && index<(int)(sizeof evlist))
 		{
+			obj = evlist[index].udata;
 			return evlist[index].ident;
 		}
 	#elif defined USE_DEVPOLL
+		obj = connections.find(polled_fds[index].fd);
 		return polled_fds[index].fd;
 	#elif defined USE_EVPORT
 		if(index>-1 && index<sizeof evlist)
 		{
+			obj = connections.find((int)evlist[index].portev_object);
 			return (int)evlist[index].portev_object;
 		}
 	#elif defined USE_POLL
 		l.lock();
 		int temp = polled_fds[index].fd;
 		l.unlock();
+		obj = connections.find(temp);
 		return temp;
 	#endif
 	return -1;
@@ -343,8 +355,9 @@ bool SelEpolKqEvPrt::isListeningDescriptor(const SOCKET& descriptor)
 	return false;
 }
 
-bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor)
+bool SelEpolKqEvPrt::registerForEvent(SocketInterface* obj, const bool& isListeningSock)
 {
+	SOCKET descriptor = obj->fd;
 	//#ifndef USE_WIN_IOCP
 		#ifdef OS_MINGW
 			u_long iMode = 1;
@@ -370,23 +383,38 @@ bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor)
 			return false;
 		}
 		cntxtMap[descriptor] = iops;
+		connections[descriptor] = obj;
 	#elif defined(USE_MINGW_SELECT)
 		FD_SET(descriptor, &master);
 		if(descriptor > fdMax)
 			fdMax = descriptor;
+		connections[descriptor] = obj;
 	#elif defined(USE_SELECT)
 		FD_SET(descriptor%FD_SETSIZE, &master[descriptor/FD_SETSIZE]);
 		if(descriptor > fdMax)
 			fdMax = descriptor;
+		connections[descriptor] = obj;
 	#elif defined USE_EPOLL
 		struct epoll_event ev;
 		memset(&ev, 0, sizeof(ev));
-		#ifdef USE_EPOLL_LT
-			ev.events = EPOLLIN | EPOLLPRI;
+		#if defined(EPOLLEXCLUSIVE)
+			//if(isListeningSock) {
+			//	ev.events = EPOLLIN | EPOLLEXCLUSIVE;
+			//} else {
+				#ifdef USE_EPOLL_LT
+					ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP;
+				#else
+					ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
+				#endif
+			//}
 		#else
-			ev.events = EPOLLIN | EPOLLET;
+			#ifdef USE_EPOLL_LT
+				ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP;
+			#else
+				ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
+			#endif
 		#endif
-		ev.data.fd = descriptor;
+		ev.data.ptr = obj;
 		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, descriptor, &ev) < 0)
 		{
 			perror("epoll");
@@ -396,7 +424,7 @@ bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor)
 	#elif defined USE_KQUEUE
 		struct kevent change;
 		memset(&change, 0, sizeof(change));
-		EV_SET(&change, descriptor, EVFILT_READ, EV_ADD, 0, 0, 0);
+		EV_SET(&change, descriptor, EVFILT_READ, EV_ADD, 0, 0, obj);
 		kevent(kq, &change, 1, NULL, 0, NULL);
 	#elif defined USE_DEVPOLL
 		struct pollfd poll_fd;
@@ -407,10 +435,12 @@ bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor)
 			perror("devpoll");
 			return false;
 		}
+		connections[descriptor] = obj;
 	#elif defined USE_EVPORT
 		if (port_associate(port, PORT_SOURCE_FD, descriptor, POLLIN, NULL) < 0) {
 			perror("port_associate");
 		}
+		connections[descriptor] = obj;
 	#elif defined USE_POLL
 		l.lock();
 		curfds++;
@@ -419,14 +449,23 @@ bool SelEpolKqEvPrt::registerForEvent(const SOCKET& descriptor)
 		(polled_fds+nfds)->fd = descriptor;
 		(polled_fds+nfds)->events = POLLIN | POLLPRI;
 		l.unlock();
+		connections[descriptor] = obj;
 	#endif
 	return true;
+}
+
+void* SelEpolKqEvPrt::getOptData(const int& index) {
+	#if defined USE_EPOLL
+		return events[index].data.ptr;
+	#endif
+	return NULL;
 }
 
 bool SelEpolKqEvPrt::unRegisterForEvent(const SOCKET& descriptor)
 {
 	if(descriptor<=0)return false;
 	#if defined(USE_WIN_IOCP)
+		connections.erase(descriptor);
 		if(cntxtMap.find(descriptor)!=cntxtMap.end()) {
 			void* t = cntxtMap[descriptor];
 			delete t;
@@ -435,10 +474,12 @@ bool SelEpolKqEvPrt::unRegisterForEvent(const SOCKET& descriptor)
 		}
 		return false;
 	#elif defined(USE_MINGW_SELECT)
+		connections.erase(descriptor);
 		FD_CLR(descriptor, &master);
 		if(fdMax==descriptor)
 			fdMax--;
 	#elif defined(USE_SELECT)
+		connections.erase(descriptor);
 		FD_CLR(descriptor%FD_SETSIZE, &master[descriptor/FD_SETSIZE]);
 		if(fdMax==descriptor)
 			fdMax--;
@@ -452,6 +493,7 @@ bool SelEpolKqEvPrt::unRegisterForEvent(const SOCKET& descriptor)
 		EV_SET(&change, descriptor, EVFILT_READ, EV_DELETE, 0, 0, 0);
 		kevent(kq, &change, 1, NULL, 0, NULL);
 	#elif defined USE_DEVPOLL
+		connections.erase(descriptor);
 		struct pollfd poll_fd;
 		poll_fd.fd = descriptor;
 		poll_fd.events = POLLREMOVE;
@@ -461,10 +503,12 @@ bool SelEpolKqEvPrt::unRegisterForEvent(const SOCKET& descriptor)
 			return false;
 		}
 	#elif defined USE_EVPORT
+		connections.erase(descriptor);
 		/*if (port_dissociate(port, PORT_SOURCE_FD, descriptor) < 0) {
 			perror("port_dissociate");
 		}*/
 	#elif defined USE_POLL
+		connections.erase(descriptor);
 		l.lock();
 		curfds--;
 		nfds--;

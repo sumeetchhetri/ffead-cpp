@@ -159,9 +159,9 @@ void CppInterpreter::storeInbuilt(const std::string& type, const std::string& na
 void CppInterpreter::storeCustom(const std::string& type, const std::string& name)
 {
     Reflector ref;
-    ClassInfo clas = ref.getClassInfo(type);
+    ClassInfo* clas = ref.getClassInfo(type);
     args argus;
-	Constructor ctor = clas.getConstructor(argus);
+	Constructor ctor = clas->getConstructor(argus);
 	void *_temp = ref.newInstanceGVP(ctor);
 	GenericObject o;
     o.set(_temp, type);
@@ -494,12 +494,12 @@ void CppInterpreter::evaluateUpdateCustom(const std::string& sep, const std::str
 	if(i.getTypeName()!="" && o.getTypeName()!="")
 	{
 		Reflector reflector;
-		ClassInfo clas = reflector.getClassInfo(type);
+		ClassInfo* clas = reflector.getClassInfo(type);
 		std::string name = "invokeReflectionCIAssignMethodFor"+i.getTypeName();
 		args argus;
 		argus.push_back("void*");
 		argus.push_back("void*");
-		Method meth = clas.getMethod(name,argus);
+		Method meth = clas->getMethod(name,argus);
 		vals valus;
 		valus.push_back(o.getPointer());
 		reflector.invokeMethod<void*>(i.getPointer(),meth,valus);
@@ -778,8 +778,8 @@ Obj CppInterpreter::handleObjectMethodInvocation(const std::string& objn,const s
 	if(source.getTypeName()!="")
 	{
 		Reflector reflector;
-		ClassInfo clas = reflector.getClassInfo(source.getTypeName());
-		Method meth = clas.getMethod(methn,argus);
+		ClassInfo* clas = reflector.getClassInfo(source.getTypeName());
+		Method meth = clas->getMethod(methn,argus);
 		void *po = reflector.invokeMethodGVP(source.getPointer(),meth,valus);
 		obj.setPointer(po);
 		obj.setType(meth.getReturnType());

@@ -139,6 +139,10 @@
 #include "Http2Handler.h"
 #include "Http11Handler.h"
 #include "HttpServiceHandler.h"
+#include <thread>
+#include <algorithm>
+#include <iterator>
+#include "ReusableInstanceHolder.h"
 
 //#define CA_LIST "root.pem"
 #define HOST1	"localhost"
@@ -175,11 +179,13 @@ class CHServer {
 	static int techunkSiz, connKeepAlive, maxReqHdrCnt, maxEntitySize;
 	static Logger logger;
 	static HttpServiceTask* httpServiceFactoryMethod();
+	static HttpReadTask* httpReadFactoryMethod();
+	static unsigned int hardware_concurrency();
 public:
 	static SocketInterface* createSocketInterface(SOCKET);
 	static Logger& getLogger();
 	static void* dynamic_page_monitor(void* arg);
-	static void serve(std::string port, std::string ipaddr, int thrdpsiz, int wthrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber);
+	static void serve(std::string port, std::string ipaddr, int thrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber);
 	static int entryPoint(int vhostNum, bool isMain, std::string serverRootDirectory, std::string port, std::string ipaddr, std::vector<std::string> servedAppNames);
 };
 

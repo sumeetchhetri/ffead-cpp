@@ -24,21 +24,20 @@
 #define METHOD_H_
 #include "string"
 #include "vector"
-#include "Field.h"
-
 
 typedef std::vector<std::string> args;
 typedef std::vector<void *> vals;
+typedef void* (*GetMeth) (void*,vals,bool);
+
 class Method {
+	GetMeth f;
 	std::string refName;
 	std::string accessSpecifier;
 	std::string methodName;
 	std::string returnType;
 	args argumentTypes;
 	bool isstat;
-	void addField(const Field&);
-	/*args methCalls;
-	args methCalls;*/
+	friend class FFEADContext;
 public:
 	Method();
 	virtual ~Method();
@@ -54,9 +53,9 @@ public:
     void clear();
     bool isStatic();
     void setIsStatic(const bool& isStatic);
-    //string getKey();
 	const std::string& getRefName() const;
 	void setRefName(const std::string& refName);
+	GetMeth getIns() const;
 };
 
 #endif /* METHOD_H_ */

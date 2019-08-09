@@ -55,8 +55,8 @@ void FilterHandler::handleIn(HttpRequest* req, const std::string& ext, Reflector
 			args argus;
 			argus.push_back("HttpRequest*");
 			vals valus;
-			const ClassInfo& srv = ConfigurationData::getClassInfo(claz, req->getCntxt_name());
-			Method meth = srv.getMethod("doInputFilter", argus);
+			ClassInfo* srv = ConfigurationData::getClassInfo(claz, req->getCntxt_name());
+			Method meth = srv->getMethod("doInputFilter", argus);
 			if(meth.getMethodName()!="")
 			{
 				valus.push_back(req);
@@ -84,8 +84,8 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const std::strin
 			argus.push_back("HttpRequest*");
 			argus.push_back("HttpResponse*");
 			vals valus;
-			const ClassInfo& srv = ConfigurationData::getClassInfo(claz, req->getCntxt_name());
-			Method meth = srv.getMethod("doHandle", argus);
+			ClassInfo* srv = ConfigurationData::getClassInfo(claz, req->getCntxt_name());
+			Method meth = srv->getMethod("doHandle", argus);
 			if(meth.getMethodName()!="")
 			{
 				valus.push_back(req);
@@ -112,8 +112,8 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse* res, const std::st
 			args argus;
 			argus.push_back("HttpResponse*");
 			vals valus;
-			const ClassInfo& srv = ConfigurationData::getClassInfo(claz, req->getCntxt_name());
-			Method meth = srv.getMethod("doOutputFilter", argus);
+			ClassInfo* srv = ConfigurationData::getClassInfo(claz, req->getCntxt_name());
+			Method meth = srv->getMethod("doOutputFilter", argus);
 			if(meth.getMethodName()!="")
 			{
 				valus.push_back(res);

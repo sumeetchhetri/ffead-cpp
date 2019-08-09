@@ -14,7 +14,6 @@
 #include "ConfigurationData.h"
 
 class Http11Handler : public SocketInterface {
-	HttpRequest* request;
 	bool isHeadersDone;
 	int bytesToRead;
 	std::string webpath;
@@ -23,14 +22,18 @@ class Http11Handler : public SocketInterface {
 	bool isTeRequest;
 	int maxReqHdrCnt;
 	int maxEntitySize;
+	SocketInterface* handler;
+	friend class CHServer;
 public:
+	void addHandler(SocketInterface* handler);
 	void onOpen();
 	void onClose();
 	std::string getProtocol(void* context);
 	int getTimeout();
 	void* readRequest(void*& context, int& pending, int& reqPos);
 	bool writeResponse(void* req, void* res, void* context);
-	Http11Handler(SocketUtil* sockUtil, const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
+	void init(const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
+	Http11Handler(const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
 	virtual ~Http11Handler();
 };
 

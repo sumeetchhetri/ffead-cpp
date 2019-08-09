@@ -23,14 +23,14 @@
 #include "Task.h"
 
 Task::Task() :
-	tunit(-1), type(-1), priority(false), console(false), cleanUp(false), isFuture(false) {
+	tunit(-1), type(-1), priority(false), console(false), cleanUp(false), isFuture(false), hdlr(NULL) {
 }
 Task::Task(const int& priority) :
-	tunit(-1), type(-1), console(false), cleanUp(false), isFuture(false) {
+	tunit(-1), type(-1), console(false), cleanUp(false), isFuture(false), hdlr(NULL) {
 	this->priority = priority;
 }
 Task::Task(const int& tunit, const int& type) :
-	priority(false), console(false), cleanUp(false), isFuture(false) {
+	priority(false), console(false), cleanUp(false), isFuture(false), hdlr(NULL) {
 	this->tunit = tunit;
 	this->type = type;
 }

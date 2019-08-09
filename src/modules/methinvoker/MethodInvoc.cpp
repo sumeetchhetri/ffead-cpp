@@ -146,13 +146,13 @@ void* MethodInvoc::service(void* arg)
 			std::string className = message.getAttribute("className");
 			std::string returnType = message.getAttribute("returnType");
 			std::string lang = message.getAttribute("lang");
-			ClassInfo clas = reflector.getClassInfo(className);
+			ClassInfo* clas = reflector.getClassInfo(className);
 			std::string methodName = message.getAttribute("name");;
-			if(clas.getClassName()=="")
+			if(clas->getClassName()=="")
 			{
 				throw MethodInvokerException("class does not exist or is not in the library path\n",retValue);
 			}
-			Method meth = clas.getMethod(methodName,argus);
+			Method meth = clas->getMethod(methodName,argus);
 			if(meth.getMethodName()=="")
 			{
 				throw MethodInvokerException("method does not exist for the class or the class does not exist in the library path\n",retValue);
@@ -160,7 +160,7 @@ void* MethodInvoc::service(void* arg)
 			else
 			{
 				args argus;
-				Constructor ctor = clas.getConstructor(argus);
+				Constructor ctor = clas->getConstructor(argus);
 				void *_temp = reflector.newInstanceGVP(ctor);
 				if(returnType=="void" || returnType=="")
 				{

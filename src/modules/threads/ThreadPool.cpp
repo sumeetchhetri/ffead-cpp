@@ -39,7 +39,7 @@ ThreadPool::ThreadPool()
 	initPointers();
 }
 
-void ThreadPool::init(const int& maxThreads)
+void ThreadPool::init(const int& maxThreads, const bool& setAffinity)
 {
 	if(inited)return;
 	currentThread = 0;
@@ -49,7 +49,7 @@ void ThreadPool::init(const int& maxThreads)
 	this->maxThreads = maxThreads;
 	joinComplete = false;
 	prioritypooling = false;
-	initializeThreads();
+	initializeThreads(setAffinity);
 	inited = true;
 }
 
@@ -63,7 +63,7 @@ ThreadPool::ThreadPool(const int& maxThreads, const int& lowp, const int& highp)
 	this->runFlag = false;
 	joinComplete = false;
 	prioritypooling = true;
-	initializeThreads();
+	initializeThreads(false);
 }
 
 ThreadPool::ThreadPool(const int& maxThreads, const bool& allowScheduledTasks /* = false*/) {
@@ -75,10 +75,10 @@ ThreadPool::ThreadPool(const int& maxThreads, const bool& allowScheduledTasks /*
 	joinComplete = false;
 	prioritypooling = false;
 	this->allowScheduledTasks = allowScheduledTasks;
-	initializeThreads();
+	initializeThreads(false);
 }
 
-void ThreadPool::initializeThreads()
+void ThreadPool::initializeThreads(const bool& setAffinity)
 {
 	if(runFlag)return;
 	if(prioritypooling || allowScheduledTasks) {
@@ -87,11 +87,11 @@ void ThreadPool::initializeThreads()
 	for (int i = 0; i < maxThreads; i++) {
 		PoolThread* thread = NULL;
 		if(prioritypooling || allowScheduledTasks) {
-			thread = new PoolThread(&wpool);
+			thread = new PoolThread(&wpool, i+1);
 		} else {
-			thread = new PoolThread();
+			thread = new PoolThread(i+1);
 		}
-		thread->execute();
+		thread->execute(setAffinity?i:-1);
 		tpool.push_back(thread);
 	}
 	runFlag = true;
@@ -105,11 +105,11 @@ void ThreadPool::joinAll() {
 		/*while (wpool->tasksPending()) {
 			Thread::sSleep(1);
 		}*/
-		for (unsigned int var = 0; var < tpool.size(); var++) {
+		for (int var = 0; var < maxThreads; var++) {
 			tpool.at(var)->stop();
 		}
 		joinComplete = true;
-		for (unsigned int var = 0; var < tpool.size(); var++) {
+		for (int var = 0; var < maxThreads; var++) {
 			joinComplete &= tpool.at(var)->isComplete();
 		}
 		Thread::sSleep(1);
@@ -190,7 +190,7 @@ ThreadPool::~ThreadPool() {
 	joinAll();
 	this->runFlag = false;
 	wpool.stop();
-	for (int i = 0; i <(int)tpool.size(); i++) {
+	for (int i = 0; i <maxThreads; i++) {
 		delete tpool.at(i);
 	}
 	logger << "Destroyed PoolThread Pool\n" << std::flush;

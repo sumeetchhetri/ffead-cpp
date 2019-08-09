@@ -480,11 +480,11 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 
 	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 
-	ClassInfo clas = reflector->getClassInfo(clasName, appName);
+	ClassInfo* clas = reflector->getClassInfo(clasName, appName);
 	std::string tableName = dsemp.getTableName();
 	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
 
-	fldMap fields = clas.getFields();
+	fldMap fields = clas->getFields();
 	fldMap::iterator it;
 	void *vecT = reflector->getNewContainer(clasName,"std::vector",appName);
 	SQLSMALLINT	V_OD_colanz;
@@ -503,7 +503,7 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 		std::map<std::string, void*> instances;
 		void* relVecEle = NULL;
 		std::string fldVal;
-		const Constructor& ctor = clas.getConstructor(argus1);
+		const Constructor& ctor = clas->getConstructor(argus1);
 		void *t = reflector->newInstanceGVP(ctor);
 
 		V_OD_erg = SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
@@ -529,7 +529,7 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 			StringUtil::toLower(columnName);
 
 			void* instance = NULL;
-			ClassInfo instanceClas;
+			ClassInfo* instanceClas = NULL;
 			DataSourceInternalRelation instanceRelation;
 
 			std::string fieldName = this->mapping->getPropertyForColumn(thisTableName, columnName);
@@ -556,12 +556,12 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 						{
 							thisTableName = tableName1;
 							args argus1;
-							ClassInfo clas1 = reflector->getClassInfo(relation.getClsName(),appName);
+							ClassInfo* clas1 = reflector->getClassInfo(relation.getClsName(),appName);
 							if(relation.getType()==1)
 							{
 								if(instances.find(tableName1)==instances.end())
 								{
-									const Constructor& ctor = clas1.getConstructor(argus1);
+									const Constructor& ctor = clas1->getConstructor(argus1);
 									void *tt = reflector->newInstanceGVP(ctor);
 									instances[tableName1] = tt;
 									rel2Vecmap[fldVal] = tt;
@@ -577,7 +577,7 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 								}
 								if(relVecEle==NULL)
 								{
-									const Constructor& ctor = clas1.getConstructor(argus1);
+									const Constructor& ctor = clas1->getConstructor(argus1);
 									relVecEle = reflector->newInstanceGVP(ctor);
 								}
 								instance = relVecEle;
@@ -628,7 +628,7 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 				else
 					argus.push_back(fldvalrel2clsmapit->second);
 				std::string methname = "set"+StringUtil::capitalizedCopy(fldnmrel2clsmap[flv]);
-				Method meth = clas.getMethod(methname,argus);
+				Method meth = clas->getMethod(methname,argus);
 				reflector->invokeMethodGVP(rel2Insmap[flv],meth,valus);
 				reflector->addToContainer(vecT,rel2Insmap[flv],clasName,"std::vector",appName);
 				reflector->destroy(rel2Insmap[flv], clasName, appName);
@@ -696,13 +696,13 @@ void* SQLDataSourceImpl::getElements()
 }
 
 
-int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const std::string& fieldName, std::string& fldVal)
+int SQLDataSourceImpl::storeProperty(ClassInfo* clas, void* t, int var, const std::string& fieldName, std::string& fldVal)
 {
 #ifdef HAVE_LIBODBC
 	//void* col = NULL;
 	SQLRETURN ret;
 	SQLLEN indicator;
-	Field fe = clas.getField(fieldName);
+	Field fe = clas->getField(fieldName);
 	std::string te = fe.getType();
 
 	SQLSMALLINT    colNameLen;
@@ -928,7 +928,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo& clas, void* t, int var, const st
 }
 
 
-void SQLDataSourceImpl::storePropertyInt(const ClassInfo& clas, void* t, void* col, const Field& fe, int& var) {
+void SQLDataSourceImpl::storePropertyInt(ClassInfo* clas, void* t, void* col, const Field& fe, int& var) {
 	if(col!=NULL)
 	{
 		args argus;
@@ -936,7 +936,7 @@ void SQLDataSourceImpl::storePropertyInt(const ClassInfo& clas, void* t, void* c
 		vals valus;
 		valus.push_back(col);
 		std::string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
-		Method meth = clas.getMethod(methname,argus);
+		Method meth = clas->getMethod(methname,argus);
 		reflector->invokeMethodUnknownReturn(t,meth,valus);
 		var++;
 	}
@@ -945,20 +945,20 @@ void SQLDataSourceImpl::storePropertyInt(const ClassInfo& clas, void* t, void* c
 int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, std::map<std::string, GenericObject>& colValMap, const std::string& colName, const int& var)
 {
 #ifdef HAVE_LIBODBC
-	SQLRETURN ret;
+	//SQLRETURN ret;
 	SQLLEN indicator;
 	switch (dataType) {
 		case SQL_BIT:
 		{
 			bool col;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT, &col, sizeof(col), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT, &col, sizeof(col), &indicator);
 			colValMap[colName].set(col);
 		}
 		break;
 		case SQL_REAL:
 		{
 			float col;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_FLOAT, &col, sizeof(col), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_FLOAT, &col, sizeof(col), &indicator);
 			colValMap[colName].set(col);
 		}
 		break;
@@ -966,7 +966,7 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 		case SQL_DOUBLE:
 		{
 			double col;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE, &col, sizeof(col), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE, &col, sizeof(col), &indicator);
 			colValMap[colName].set(col);
 		}
 		break;
@@ -976,13 +976,13 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 		{
 			char buf[24];
 			std::string temp;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 			temp.append(buf);
 			if(indicator > (long)24)
 			{
 				int len = indicator-24;
 				char buf1[len];
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 				temp.append(buf1);
 			}
 			colValMap[colName].set(temp);
@@ -992,12 +992,12 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 		{
 			unsigned char buf[24];
 			BinaryData temp;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf, sizeof(buf), &indicator);
 			if(indicator > (long)24)
 			{
 				int len = indicator-24;
 				unsigned char buf1[len];
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf1, sizeof(buf1), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_BINARY, buf1, sizeof(buf1), &indicator);
 				temp.append(buf,24);
 				temp.append(buf1,len);
 			}
@@ -1011,13 +1011,13 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 			if(columnSize>10)
 			{
 				long col;
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, &col, sizeof(col), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, &col, sizeof(col), &indicator);
 				colValMap[colName].set(col);
 			}
 			else
 			{
 				int col;
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, &col, sizeof(col), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_LONG, &col, sizeof(col), &indicator);
 				colValMap[colName].set(col);
 			}
 		}
@@ -1026,13 +1026,13 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 		{
 			char buf[24];
 			std::string temp;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 			temp.append(buf);
 			if(indicator > (long)24)
 			{
 				int len = indicator-24;
 				char buf1[len];
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 				temp.append(buf1);
 			}
 			long long number = CastUtil::lexical_cast<long long>(temp);
@@ -1045,22 +1045,22 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 		{
 			char buf[24];
 			std::string temp;
-			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
+			/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf, sizeof(buf), &indicator);
 			temp.append(buf);
 			if(indicator > (long)24)
 			{
 				int len = indicator-24;
 				char buf1[len];
-				ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
+				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 				temp.append(buf1);
 			}
 			std::string fmstr;
 			if(dataType==SQL_DATE)
-				fmstr = "yyyy-mm-dd";
+				fmstr = "%Y-%m-%d";
 			else if(dataType==SQL_TIME)
-				fmstr = "hh:mi:ss.nnnnnn";
+				fmstr = "%H:%M:%S.000000";
 			else if(dataType==SQL_TIMESTAMP)
-				fmstr = "yyyy-mm-dd hh:mi:ss.nnnnnn";
+				fmstr = "%Y-%m-%d %H:%M:%S.000000";
 			DateFormat datf(fmstr);
 			Date *date = datf.parse(temp);
 			colValMap[colName].set(*date);
@@ -1080,7 +1080,7 @@ void* SQLDataSourceImpl::executeQueryObject(Query& cquery)
 
 	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
 	std::string tableName = dsemp.getTableName();
-	ClassInfo clas = reflector->getClassInfo(clasName,appName);
+	//ClassInfo* clas = reflector->getClassInfo(clasName,appName);
 	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
 	std::string query = "select ";
 	strMap& tabcolmap = this->mapping->getMappingForTable(tableName);
@@ -1628,8 +1628,8 @@ bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
 	std::string clasName = cquery.getClassName();
 
 	DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(clasName);
-	ClassInfo clas = reflector->getClassInfo(clasName,appName);
-	fldMap fields = clas.getFields();
+	ClassInfo* clas = reflector->getClassInfo(clasName,appName);
+	fldMap fields = clas->getFields();
 
 	std::string tableName = dsemp.getTableName();
 	std::vector<DataSourceInternalRelation> relv = dsemp.getRelations();
@@ -1652,7 +1652,7 @@ bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
 		args argus;
 		std::vector<void *> valus;
 		std::string methname = "get"+StringUtil::capitalizedCopy(it->first);
-		Method meth = clas.getMethod(methname,argus);
+		Method meth = clas->getMethod(methname,argus);
 		if(fld.getType()=="short" || fld.getType()=="unsigned short" || fld.getType()=="int"
 				|| fld.getType()=="unsigned int" || fld.getType()=="long" || fld.getType()=="unsigned long"
 				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string" || fld.getType()=="std::string"
@@ -1699,7 +1699,7 @@ bool SQLDataSourceImpl::executeInsert(Query& cquery, void* entity) {
 					args argus;
 					std::vector<void *> valus;
 					std::string methname = "get"+StringUtil::capitalizedCopy(relation.getField());
-					Method meth = clas.getMethod(methname,argus);
+					Method meth = clas->getMethod(methname,argus);
 					std::string clasName = relation.getClsName();
 					Query iq("", clasName);
 					std::vector<std::string> icols;
@@ -1758,8 +1758,8 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 	std::string query = "update "+tableName+" set ";
 
 	std::string vals;
-	ClassInfo clas = reflector->getClassInfo(clasName,appName);
-	fldMap fields = clas.getFields();
+	ClassInfo* clas = reflector->getClassInfo(clasName,appName);
+	fldMap fields = clas->getFields();
 	std::vector<Field> remFields;
 	std::vector<std::string> vldFields;
 	unsigned var=0;
@@ -1773,7 +1773,7 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 		if(dsemp.getColumnForProperty(columnName)!="")
 			columnName = dsemp.getColumnForProperty(columnName);
 		std::string methname = "get"+StringUtil::capitalizedCopy(it->first);
-		Method meth = clas.getMethod(methname,argus);
+		Method meth = clas->getMethod(methname,argus);
 		if(fld.getType()=="short" || fld.getType()=="unsigned short" || fld.getType()=="int"
 				|| fld.getType()=="unsigned int" || fld.getType()=="long" || fld.getType()=="unsigned long"
 				|| fld.getType()=="float" || fld.getType()=="double" || fld.getType()=="string" || fld.getType()=="std::string"
@@ -1823,7 +1823,7 @@ bool SQLDataSourceImpl::executeUpdate(Query& cquery, void* entity) {
 					args argus;
 					std::vector<void *> valus;
 					std::string methname = "get"+StringUtil::capitalizedCopy(relation.getField());
-					Method meth = clas.getMethod(methname,argus);
+					Method meth = clas->getMethod(methname,argus);
 					std::string clasName = relation.getClsName();
 					Query iq("", clasName);
 					std::vector<std::string> icols;

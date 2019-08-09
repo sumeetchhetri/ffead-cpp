@@ -18,7 +18,6 @@
 #include "Mutex.h"
 #include <fcntl.h>
 #include "SSLHandler.h"
-#include "SelEpolKqEvPrt.h"
 
 #define MAXBUFLENM 32768
 #define BUFSIZZ 1024
@@ -29,7 +28,6 @@ class SocketUtil {
 	BIO *io, *ssl_bio;
 	SOCKET fd;
 	std::atomic<bool> closed;
-	SelEpolKqEvPrt *sel;
 	bool inited, http2;
 	Logger logger;
 	SocketUtil();
@@ -42,6 +40,7 @@ class SocketUtil {
 	friend class SocketInterface;
 	friend class Http11WebSocketHandler;
 	friend class RequestReaderHandler;
+	friend class CHServer;
 public:
 	std::string getAlpnProto();
 	bool isHttp2();

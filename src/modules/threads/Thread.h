@@ -47,7 +47,7 @@ class Thread {
 public:
 	Thread(const ThreadFunc& f, void* arg, const bool& isDetached= true);
 	virtual ~Thread();
-	void execute();
+	void execute(int cid = -1);
 	void join();
 	static void nSleep(const long& nanos);
 	static void uSleep(const long& nanos);

@@ -43,12 +43,12 @@ public:
 	}
 	void insert(const T& t)
 	{
-		std::string serValue = BinarySerialize::serialize<T>(t);
+		std::string serValue = BinarySerialize::serialize<T>(t, -1);
 		cl->addCollectionEntry(cacheKey, serValue);
 	}
 	void insert(const T& t, const int& position)
 	{
-		std::string serValue = BinarySerialize::serialize<T>(t);
+		std::string serValue = BinarySerialize::serialize<T>(t, -1);
 		cl->insert(cacheKey, serValue, position);
 	}
 	void erase(const int& position)
@@ -98,7 +98,7 @@ public:
 				if(position>=0)
 				{
 					std::string serValue = cl->getCollectionEntryAt(cacheKey, position);
-					return BinarySerialize::unserialize<T>(serValue);
+					return BinarySerialize::unserialize<T>(serValue, -1);
 				}
 				else
 				{

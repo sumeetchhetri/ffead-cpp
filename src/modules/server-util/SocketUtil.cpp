@@ -83,7 +83,6 @@ void SocketUtil::init(const SOCKET& fd) {
 }
 
 SocketUtil::~SocketUtil() {
-	// TODO Auto-generated destructor stub
 }
 
 int SocketUtil::writeData(const std::string& data, const bool& flush, const int& offset/* = 0*/)
@@ -286,7 +285,6 @@ void SocketUtil::closeSocket(const bool& lk)
 		return;
 	}
 	closed = true;
-	sel->unRegisterForEvent(fd);
 }
 
 bool SocketUtil::checkSocketWaitForTimeout(const int& writing, const int& seconds, const int& micros)
@@ -352,7 +350,6 @@ SocketUtil::SocketUtil() {
 	fd = -1;
 	sbio = NULL;
 	inited = false;
-	sel = NULL;
 }
 
 bool SocketUtil::isBlocking()

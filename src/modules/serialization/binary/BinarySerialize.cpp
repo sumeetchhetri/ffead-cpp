@@ -22,121 +22,43 @@
 
 #include "BinarySerialize.h"
 
+BinarySerialize BinarySerialize::_i;
+
 BinarySerialize::BinarySerialize() {
-	dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load serialization shared library");
-	}
-	dlibinstantiated = true;
 }
 
 BinarySerialize::BinarySerialize(void* dlib) {
-	if(dlib == NULL)
-	{
-		throw std::runtime_error("Cannot load serialization shared library");
-	}
-	this->dlib = dlib;
-	dlibinstantiated = false;
 }
 
 BinarySerialize::~BinarySerialize() {
-	if(dlibinstantiated)
-	{
-		dlclose(dlib);
-	}
 }
 
-std::string BinarySerialize::serializePrimitive(const std::string& className, void* t)
+std::string BinarySerialize::serializePrimitive(int serOpt, const std::string& className, void* t)
 {
-	std::string objXml;
 	AMEFEncoder enc;
 	AMEFObject object;
-
-	if(className=="std::string" || className=="string")
-	{
-		std::string tem = *(std::string*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="char")
-	{
-		char tem = *(char*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="unsigned char")
-	{
-		unsigned char tem = *(unsigned char*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="int")
-	{
-		int tem = *(int*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="unsigned int")
-	{
-		unsigned int tem = *(unsigned int*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="short")
-	{
-		short tem = *(short*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="unsigned short")
-	{
-		unsigned short tem = *(unsigned short*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="long")
-	{
-		long tem = *(long*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="unsigned long")
-	{
-		unsigned long tem = *(unsigned long*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="long long")
-	{
-		long long tem = *(long long*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="unsigned long long")
-	{
-		unsigned long long tem = *(unsigned long long*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="float")
-	{
-		float tem = *(float*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="double")
-	{
-		double tem = *(double*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="long double")
-	{
-		long double tem = *(long double*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="bool")
-	{
-		bool tem = *(bool*)t;
-		object.addPacket(tem, className);
-	}
-	else if(className=="Date")
-	{
-		DateFormat formt("yyyy-mm-dd hh:mi:ss");
-		object.addPacket(formt.format(*(Date*)t), className);
-	}
-	else if(className=="BinaryData")
-	{
-		object.addPacket(BinaryData::serilaize(*(BinaryData*)t), className);
+	switch(serOpt) {
+		case 1: object.addPacket(*(std::string*)t, className);break;
+		case 2: object.addPacket((char*)t, className);break;
+		case 3: object.addPacket((unsigned char*)t, className);break;
+		case 4: object.addPacket(*(int*)t, className);break;
+		case 5: object.addPacket(*(unsigned int*)t, className);break;
+		case 6: object.addPacket(*(short*)t, className);break;
+		case 7: object.addPacket(*(unsigned short*)t, className);break;
+		case 8: object.addPacket(*(long*)t, className);break;
+		case 9: object.addPacket(*(unsigned long*)t, className);break;
+		case 10: object.addPacket(*(long long*)t, className);break;
+		case 11: object.addPacket(*(unsigned long long*)t, className);break;
+		case 12: object.addPacket(*(float*)t, className);break;
+		case 13: object.addPacket(*(double*)t, className);break;
+		case 14: object.addPacket(*(long double*)t, className);break;
+		case 15: object.addPacket(*(bool*)t, className);break;
+		case 16: {
+			DateFormat formt;
+			object.addPacket(formt.format(*(Date*)t), className);
+			break;
+		}
+		case 17: object.addPacket(BinaryData::serilaize(*(BinaryData*)t), className);break;
 	}
 	return enc.encodeB(&object);
 }
@@ -223,108 +145,126 @@ void* BinarySerialize::getContainerElement(void* _1, const int& counter, const i
 	return root2;
 }
 
-void BinarySerialize::addPrimitiveElementToContainer(void* _1, const int& counter, const std::string& className, void* cont, const std::string& container)
+void BinarySerialize::addPrimitiveElementToContainer(void* _1, int serOpt, const int& counter, const std::string& className, void* cont, const std::string& container)
 {
 	AMEFDecoder dec;
 	AMEFObject* root = static_cast<AMEFObject*>(_1);
-	AMEFObject* root2 = dec.decodeB(root->getPackets().at(counter)->getValue(), true);
-	if(className=="std::string" || className=="string")
-	{
-		std::string retVal = root2->getPackets().at(0)->getValueStr();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="int")
-	{
-		int retVal = root2->getPackets().at(0)->getIntValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="short")
-	{
-		short retVal = root2->getPackets().at(0)->getShortValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="long")
-	{
-		long retVal = root2->getPackets().at(0)->getLongValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="long long")
-	{
-		long long retVal = root2->getPackets().at(0)->getLongLongValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="long double")
-	{
-		long double retVal = root2->getPackets().at(0)->getLongDoubleValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="unsigned int")
-	{
-		unsigned int retVal = root2->getPackets().at(0)->getUIntValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="unsigned short")
-	{
-		unsigned short retVal = root2->getPackets().at(0)->getUShortValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="unsigned long")
-	{
-		unsigned long retVal = root2->getPackets().at(0)->getULongValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="unsigned long long")
-	{
-		unsigned long long retVal = root2->getPackets().at(0)->getULongLongValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="float")
-	{
-		float retVal = root2->getPackets().at(0)->getFloatValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="double")
-	{
-		double retVal = root2->getPackets().at(0)->getDoubleValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="bool")
-	{
-		bool retVal = root2->getPackets().at(0)->getBoolValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="char")
-	{
-		char retVal = root2->getPackets().at(0)->getCharValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="unsigned char")
-	{
-		unsigned char retVal = root2->getPackets().at(0)->getUCharValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="Date")
-	{
-		DateFormat formt("yyyy-mm-dd hh:mi:ss");
-		Date* _d = formt.parse(root2->getPackets().at(0)->getValueStr());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, *_d, cont);
-		else addValueToNestedContainer(container, *_d, cont);
-		delete _d;
+	AMEFObject* ele = dec.decodeB(root->getPackets().at(counter)->getValue(), true);
+	switch(serOpt) {
+		case 1:
+		{
+			std::string retVal = ele->getValueStr();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 2:
+		{
+			char retVal = ele->getValueStr().at(0);
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 3:
+		{
+			unsigned char retVal = ele->getValueStr().at(0);
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 4:
+		{
+			int retVal = ele->getIntValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 5:
+		{
+			unsigned int retVal = ele->getUIntValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 6:
+		{
+			short retVal = ele->getShortValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 7:
+		{
+			unsigned short retVal = ele->getUShortValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 8:
+		{
+			long retVal = ele->getLongValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 9:
+		{
+			unsigned long retVal = ele->getULongValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 10:
+		{
+			long long retVal = ele->getLongLongValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 11:
+		{
+			unsigned long long retVal = ele->getULongLongValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 12:
+		{
+			float retVal = ele->getFloatValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 13:
+		{
+			double retVal = ele->getDoubleValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 14:
+		{
+			long double retVal = ele->getLongDoubleValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 15:
+		{
+			bool retVal = ele->getBoolValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 16:
+		{
+			DateFormat formt;
+			Date* _d = formt.parse(ele->getValueStr());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, *_d, cont);
+			else addValueToNestedContainer(container, *_d, cont);
+			delete _d;
+			break;
+		}
 	}
 }
 
@@ -361,122 +301,126 @@ std::string BinarySerialize::getUnserializableClassName(void* _1, const std::str
 	return root->getNameStr();
 }
 
-void* BinarySerialize::getPrimitiveValue(void* _1, const std::string& className)
+void* BinarySerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& className)
 {
 	AMEFObject* root = static_cast<AMEFObject*>(_1);
 	root = root->getPackets().at(0);
-	if((className=="signed" || className=="int" || className=="signed int") && className==root->getNameStr())
-	{
-		int *vt = new int;
-		*vt = root->getIntValue();
-		return vt;
-	}
-	else if((className=="unsigned" || className=="unsigned int") && className==root->getNameStr())
-	{
-		unsigned int *vt = new unsigned int;
-		*vt = root->getUIntValue();
-		return vt;
-	}
-	else if((className=="short" || className=="short int" || className=="signed short" || className=="signed short int") && className==root->getNameStr())
-	{
-		short *vt = new short;
-		*vt = root->getShortValue();
-		return vt;
-	}
-	else if((className=="unsigned short" || className=="unsigned short int") && className==root->getNameStr())
-	{
-		unsigned short *vt = new unsigned short;
-		*vt = root->getUShortValue();
-		return vt;
-	}
-	else if((className=="long" || className=="long int" || className=="signed long" || className=="signed long int") && className==root->getNameStr())
-	{
-		long *vt = new long;
-		*vt = root->getLongLongValue();
-		return vt;
-	}
-	else if((className=="unsigned long" || className=="unsigned long int") && root->getNameStr()==className)
-	{
-		long *vt = new long;
-		*vt = root->getLongLongValue();
-		return vt;
-	}
-	else if((className=="long long" || className=="long long int") && className==root->getNameStr())
-	{
-		long long *vt = new long long;
-		*vt = root->getULongLongValue();
-		return vt;
-	}
-	else if((className=="unsigned long long" || className=="unsigned long long int") && className==root->getNameStr())
-	{
-		unsigned long long *vt = new unsigned long long;
-		*vt = root->getULongLongValue();
-		return vt;
-	}
-	else if((className=="char" || className=="signed char") && className==root->getNameStr())
-	{
-		char *vt = new char;
-		*vt = root->getCharValue();
-		return vt;
-	}
-	else if(className=="unsigned char" && className==root->getNameStr())
-	{
-		unsigned char *vt = new unsigned char;
-		*vt = root->getUCharValue();
-		return vt;
-	}
-	else if(className=="Date" && className==root->getNameStr())
-	{
-		DateFormat formt("yyyy-mm-dd hh:mi:ss");
-		return formt.parse(root->getValueStr());
-	}
-	else if(className=="BinaryData" && className==root->getNameStr())
-	{
-		return BinaryData::unSerilaize(root->getValueStr());
-	}
-	else if(className=="float" && className==root->getNameStr())
-	{
-		float *vt = new float;
-		*vt = root->getFloatValue();
-		return vt;
-	}
-	else if(className=="double" && className==root->getNameStr())
-	{
-		double *vt = new double;
-		*vt = root->getDoubleValue();
-		return vt;
-	}
-	else if(className=="long double" && className==root->getNameStr())
-	{
-		long double *vt = new long double;
-		*vt = root->getLongDoubleValue();
-		return vt;
-	}
-	else if(className=="bool" && className==root->getNameStr())
-	{
-		bool *vt = new bool;
-		*vt = root->getBoolValue();
-		return vt;
-	}
-	else if((className=="std::string" || className=="string") && className==root->getNameStr())
-	{
-		std::string *vt = new std::string;
-		*vt = root->getValueStr();
-		return vt;
+
+	if(className!=root->getNameStr())
+		return NULL;
+
+	switch(serOpt) {
+		case 1:
+		{
+			std::string *vt = new std::string;
+			*vt = root->getValueStr();
+			return vt;
+		}
+		case 2:
+		{
+			char *vt = new char;
+			*vt = root->getValueStr().at(0);
+			return vt;
+		}
+		case 3:
+		{
+			unsigned char *vt = new unsigned char;
+			*vt = root->getValueStr().at(0);
+			return vt;
+		}
+		case 4:
+		{
+			int *vt = new int;
+			*vt = root->getIntValue();
+			return vt;
+		}
+		case 5:
+		{
+			unsigned int *vt = new unsigned int;
+			*vt = root->getUIntValue();
+			return vt;
+		}
+		case 6:
+		{
+			short *vt = new short;
+			*vt = root->getShortValue();
+			return vt;
+		}
+		case 7:
+		{
+			unsigned short *vt = new unsigned short;
+			*vt = root->getUShortValue();
+			return vt;
+		}
+		case 8:
+		{
+			long *vt = new long;
+			*vt = root->getLongValue();
+			return vt;
+		}
+		case 9:
+		{
+			unsigned long *vt = new unsigned long;
+			*vt = root->getULongValue();
+			return vt;
+		}
+		case 10:
+		{
+			long long *vt = new long long;
+			*vt = root->getLongLongValue();
+			return vt;
+		}
+		case 11:
+		{
+			unsigned long long *vt = new unsigned long long;
+			*vt = root->getULongLongValue();
+			return vt;
+		}
+		case 12:
+		{
+			float *vt = new float;
+			*vt = root->getFloatValue();
+			return vt;
+		}
+		case 13:
+		{
+			double *vt = new double;
+			*vt = root->getDoubleValue();
+			return vt;
+		}
+		case 14:
+		{
+			long double *vt = new long double;
+			*vt = root->getLongDoubleValue();
+			return vt;
+		}
+		case 15:
+		{
+			bool *vt = new bool;
+			*vt = root->getBoolValue();
+			return vt;
+		}
+		case 16:
+		{
+			DateFormat formt;
+			return formt.parse(root->getValueStr());
+		}
+		case 17:
+		{
+			return BinaryData::unSerilaize(root->getValueStr());
+		}
 	}
 	return NULL;
 }
 
-std::string BinarySerialize::serializeUnknown(void* t, const std::string& className, const std::string& appName)
+std::string BinarySerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	BinarySerialize serialize;
-	return _handleAllSerialization(className,t,appName, &serialize);
+	return _handleAllSerialization(serOpt,className,t,appName, &_i, NULL, NULL, NULL);
 }
 
-void* BinarySerialize::unSerializeUnknown(const std::string& objXml, const std::string& className, const std::string& appName)
+void* BinarySerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
 {
-	BinarySerialize serialize;
-	return _handleAllUnSerialization(objXml,className,appName,&serialize,false,NULL);
+	return _handleAllUnSerialization(objXml,serOpt,className,appName,&_i,false,NULL);
 }
 
 bool BinarySerialize::isValidClassNamespace(void* _1, const std::string& cn, const std::string& namespc, const bool& iscontainer)
@@ -528,93 +472,91 @@ void BinarySerialize::endObjectSerialization(void* _1, const std::string& classN
 
 void BinarySerialize::afterAddObjectProperty(void* _1){}
 
-void BinarySerialize::addObjectPrimitiveProperty(void* _1, const std::string& propName, const std::string& className, void* t)
+void BinarySerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::string& propName, const std::string& className, void* t)
 {
 	AMEFObject* object = static_cast<AMEFObject*>(_1);
-	if(className=="std::string" || className=="string")
-	{
-		std::string tem = *(std::string*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="char")
-	{
-		char tem = *(char*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="unsigned char")
-	{
-		unsigned char tem = *(unsigned char*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="int")
-	{
-		int tem = *(int*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="unsigned int")
-	{
-		unsigned int tem = *(unsigned int*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="short")
-	{
-		short tem = *(short*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="unsigned short")
-	{
-		unsigned short tem = *(unsigned short*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="long")
-	{
-		long tem = *(long*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="unsigned long")
-	{
-		unsigned long tem = *(unsigned long*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="long long")
-	{
-		long long tem = *(long long*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="unsigned long long")
-	{
-		unsigned long long tem = *(unsigned long long*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="float")
-	{
-		float tem = *(float*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="double")
-	{
-		double tem = *(double*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="long double")
-	{
-		long double tem = *(long double*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="bool")
-	{
-		bool tem = *(bool*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="Date")
-	{
-		std::string tem = *(std::string*)t;
-		object->addPacket(tem, propName);
-	}
-	else if(className=="BinaryData")
-	{
-		std::string tem = *(std::string*)t;
-		object->addPacket(tem, propName);
+	switch(serOpt) {
+		case 1:
+		{
+			object->addPacket(*(std::string*)t, propName);
+			break;
+		}
+		case 2:
+		{
+			object->addPacket((char*)t, propName);
+			break;
+		}
+		case 3:
+		{
+			object->addPacket((unsigned char*)t, propName);
+			break;
+		}
+		case 4:
+		{
+			object->addPacket(*(int*)t, propName);
+			break;
+		}
+		case 5:
+		{
+			object->addPacket(*(unsigned int*)t, propName);
+			break;
+		}
+		case 6:
+		{
+			object->addPacket(*(short*)t, propName);
+			break;
+		}
+		case 7:
+		{
+			object->addPacket(*(unsigned short*)t, propName);
+			break;
+		}
+		case 8:
+		{
+			object->addPacket(*(long*)t, propName);
+			break;
+		}
+		case 9:
+		{
+			object->addPacket(*(unsigned long*)t, propName);
+			break;
+		}
+		case 10:
+		{
+			object->addPacket(*(long long*)t, propName);
+			break;
+		}
+		case 11:
+		{
+			object->addPacket(*(unsigned long long*)t, propName);
+			break;
+		}
+		case 12:
+		{
+			object->addPacket(*(float*)t, propName);
+			break;
+		}
+		case 13:
+		{
+			object->addPacket(*(double*)t, propName);
+			break;
+		}
+		case 14:
+		{
+			object->addPacket(*(long double*)t, propName);
+			break;
+		}
+		case 15:
+		{
+			object->addPacket(*(bool*)t, propName);
+			break;
+		}
+		case 16:
+		{
+			DateFormat formt;
+			object->addPacket(formt.format((Date*)t), propName);
+			break;
+		}
 	}
 }
 
@@ -624,120 +566,127 @@ void BinarySerialize::addObjectProperty(void* _1, const std::string& propName, s
 	object->addPacket(t, propName);
 }
 
-void* BinarySerialize::getObjectPrimitiveValue(void* _1, const std::string& className, const std::string& propName)
+void* BinarySerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName)
 {
 	AMEFObject* root = static_cast<AMEFObject*>(_1);
-	if((className=="signed" || className=="int" || className=="signed int") && root->getNameStr()==propName)
-	{
-		int *vt = new int;
-		*vt = root->getIntValue();
-		return vt;
-	}
-	else if((className=="unsigned" || className=="unsigned int") && root->getNameStr()==propName)
-	{
-		unsigned int *vt = new unsigned int;
-		*vt = root->getUIntValue();
-		return vt;
-	}
-	else if((className=="short" || className=="short int" || className=="signed short" || className=="signed short int") && root->getNameStr()==propName)
-	{
-		short *vt = new short;
-		*vt = root->getShortValue();
-		return vt;
-	}
-	else if((className=="unsigned short" || className=="unsigned short int") && root->getNameStr()==propName)
-	{
-		unsigned short *vt = new unsigned short;
-		*vt = root->getUShortValue();
-		return vt;
-	}
-	else if((className=="long" || className=="long int" || className=="signed long" || className=="signed long int") && root->getNameStr()==propName)
-	{
-		long *vt = new long;
-		*vt = root->getLongLongValue();
-		return vt;
-	}
-	else if((className=="unsigned long" || className=="unsigned long int") && root->getNameStr()==propName)
-	{
-		long *vt = new long;
-		*vt = root->getLongLongValue();
-		return vt;
-	}
-	else if((className=="long long" || className=="long long int" || className=="signed long long int") && root->getNameStr()==propName)
-	{
-		long long *vt = new long long;
-		*vt = root->getULongLongValue();
-		return vt;
-	}
-	else if((className=="unsigned long long" || className=="unsigned long long int") && root->getNameStr()==propName)
-	{
-		unsigned long long *vt = new unsigned long long;
-		*vt = root->getULongLongValue();
-		return vt;
-	}
-	else if((className=="char" || className=="signed char") && root->getNameStr()==propName)
-	{
-		char *vt = new char;
-		*vt = root->getCharValue();
-		return vt;
-	}
-	else if(className=="unsigned char" && root->getNameStr()==propName)
-	{
-		unsigned char *vt = new unsigned char;
-		*vt = root->getUCharValue();
-		return vt;
-	}
-	else if(className=="Date" && root->getNameStr()==propName)
-	{
-		DateFormat formt("yyyy-mm-dd hh:mi:ss");
-		return formt.parse(root->getValueStr());
-	}
-	else if(className=="BinaryData" && root->getNameStr()==propName)
-	{
-		return BinaryData::unSerilaize(root->getValueStr());
-	}
-	else if(className=="float" && root->getNameStr()==propName)
-	{
-		float *vt = new float;
-		*vt = root->getFloatValue();
-		return vt;
-	}
-	else if(className=="double" && root->getNameStr()==propName)
-	{
-		double *vt = new double;
-		*vt = root->getDoubleValue();
-		return vt;
-	}
-	else if(className=="long double" && root->getNameStr()==propName)
-	{
-		long double *vt = new long double;
-		*vt = root->getLongDoubleValue();
-		return vt;
-	}
-	else if(className=="bool" && root->getNameStr()==propName)
-	{
-		bool *vt = new bool;
-		*vt = root->getBoolValue();
-		return vt;
-	}
-	else if((className=="std::string" || className=="string") && root->getNameStr()==propName)
-	{
-		std::string *vt = new std::string;
-		*vt = root->getValueStr();
-		return vt;
+	root = root->getPackets().at(0);
+
+	if(propName!=root->getNameStr())
+		return NULL;
+
+	switch(serOpt) {
+		case 1:
+		{
+			std::string *vt = new std::string;
+			*vt = root->getValueStr();
+			return vt;
+		}
+		case 2:
+		{
+			char *vt = new char;
+			*vt = root->getValueStr().at(0);
+			return vt;
+		}
+		case 3:
+		{
+			unsigned char *vt = new unsigned char;
+			*vt = root->getValueStr().at(0);
+			return vt;
+		}
+		case 4:
+		{
+			int *vt = new int;
+			*vt = root->getIntValue();
+			return vt;
+		}
+		case 5:
+		{
+			unsigned int *vt = new unsigned int;
+			*vt = root->getUIntValue();
+			return vt;
+		}
+		case 6:
+		{
+			short *vt = new short;
+			*vt = root->getShortValue();
+			return vt;
+		}
+		case 7:
+		{
+			unsigned short *vt = new unsigned short;
+			*vt = root->getUShortValue();
+			return vt;
+		}
+		case 8:
+		{
+			long *vt = new long;
+			*vt = root->getLongValue();
+			return vt;
+		}
+		case 9:
+		{
+			unsigned long *vt = new unsigned long;
+			*vt = root->getULongValue();
+			return vt;
+		}
+		case 10:
+		{
+			long long *vt = new long long;
+			*vt = root->getLongLongValue();
+			return vt;
+		}
+		case 11:
+		{
+			unsigned long long *vt = new unsigned long long;
+			*vt = root->getULongLongValue();
+			return vt;
+		}
+		case 12:
+		{
+			float *vt = new float;
+			*vt = root->getFloatValue();
+			return vt;
+		}
+		case 13:
+		{
+			double *vt = new double;
+			*vt = root->getDoubleValue();
+			return vt;
+		}
+		case 14:
+		{
+			long double *vt = new long double;
+			*vt = root->getLongDoubleValue();
+			return vt;
+		}
+		case 15:
+		{
+			bool *vt = new bool;
+			*vt = root->getBoolValue();
+			return vt;
+		}
+		case 16:
+		{
+			DateFormat formt;
+			return formt.parse(root->getValueStr());
+		}
+		case 17:
+		{
+			return BinaryData::unSerilaize(root->getValueStr());
+		}
 	}
 	return NULL;
 }
 
-std::string BinarySerialize::serializeUnknownBase(void* t, const std::string& className, const std::string& appName)
+std::string BinarySerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllSerialization(className,t,appName, this);
+	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL);
 }
-void* BinarySerialize::unSerializeUnknownBase(void* unserObj, const std::string& className, const std::string& appName)
+void* BinarySerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllUnSerialization("",className,appName,this,false,unserObj);
+	return _handleAllUnSerialization("",serOpt,className,appName,this,false,unserObj);
 }
-void* BinarySerialize::unSerializeUnknownBase(const std::string& serVal, const std::string& className, const std::string& appName)
+void* BinarySerialize::unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllUnSerialization(serVal,className,appName,this,false,NULL);
+	return _handleAllUnSerialization(serVal,serOpt,className,appName,this,false,NULL);
 }

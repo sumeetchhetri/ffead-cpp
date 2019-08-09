@@ -24,7 +24,10 @@ class GenericObject {
 	std::vector<wchar_t> wstr;
 	void internalClear();
 	void internalCopy(const GenericObject &obj);
+	static Reflector* ref;
 public:
+	static void init(Reflector* ref);
+	static Reflector* getReflector();
 	GenericObject();
 	GenericObject& operator = (const GenericObject &obj);
 	GenericObject(const GenericObject &obj);
@@ -121,8 +124,9 @@ public:
 		//This mean this is some other object, try to serialize it...
 		else
 		{
-			objSerState = XMLSerialize::serializeUnknown(t, typeName);
-			objVal = XMLSerialize::unSerializeUnknown(objSerState, typeName);
+			int serOpt = SerializeBase::identifySerOption(typeName);
+			objSerState = XMLSerialize::serializeUnknown(t, serOpt, typeName);
+			objVal = XMLSerialize::unSerializeUnknown(objSerState, serOpt, typeName);
 		}
 	}
 
@@ -189,8 +193,9 @@ public:
 		//This means this is some other object, try to serialize it...
 		else
 		{
-			objSerState = XMLSerialize::serialize<T>(t);
-			objVal = XMLSerialize::unserializeToPointer<T>(objSerState);
+			int serOpt = SerializeBase::identifySerOption(typeName);
+			objSerState = XMLSerialize::serialize<T>(t, serOpt);
+			objVal = XMLSerialize::unserializeToPointer<T>(objSerState, serOpt);
 		}
 	}
 
@@ -227,7 +232,7 @@ inline T GenericObject::getObjectFromSerilaizedState(const std::string& serilaiz
 		throw std::runtime_error("Cannot handle pointer types use 'getP()' instead...");
 	}
 	if(GenericObject::isPrimitive(typeName)) t = CastUtil::lexical_cast<T>(serilaizedState);
-	else t = XMLSerialize::unserialize<T>(serilaizedState);
+	else t = XMLSerialize::unserialize<T>(serilaizedState, -1);
 	return t;
 }
 

@@ -24,7 +24,6 @@
 class DataSourceInterface : public IDGenerator {
 	friend class DataSourceManager;
 protected:
-	void* dlib;
 	ConnectionPooler* pool;
 	Mapping* mapping;
 	std::string appName;
@@ -47,7 +46,7 @@ protected:
 	virtual void* getContext(void*)=0;
 	virtual void destroyContext(void*)=0;
 
-	void assignId(DataSourceEntityMapping& dsemp, ClassInfo& clas, void* entity);
+	void assignId(DataSourceEntityMapping& dsemp, ClassInfo* clas, void* entity);
 public:
 	static std::string BLANK;
 	DataSourceInterface();
@@ -100,7 +99,7 @@ inline std::map<int, std::string> DataSourceInterface::bulkInsert(std::vector<T>
 	T t;
 	std::string clasName = CastUtil::getClassName(t);
 	DataSourceEntityMapping dsemp = mapping->getDataSourceEntityMapping(clasName);
-	ClassInfo clas = reflector->getClassInfo(clasName, appName);
+	ClassInfo* clas = reflector->getClassInfo(clasName, appName);
 	std::vector<void*> dbEntities;
 	std::vector<void*> entities;
 	std::map<int, std::string> errors;
@@ -138,7 +137,7 @@ template<class T>
 inline std::map<int, std::string> DataSourceInterface::bulkUpdate(std::vector<T>& vecT) {
 	T t;
 	std::string clasName = CastUtil::getClassName(t);
-	ClassInfo clas = reflector->getClassInfo(clasName, appName);
+	//ClassInfo* clas = reflector->getClassInfo(clasName, appName);
 	std::vector<void*> dbEntities;
 	std::vector<void*> entities;
 	std::map<int, std::string> errors;

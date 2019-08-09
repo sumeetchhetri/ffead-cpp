@@ -8,85 +8,61 @@
 #include "ServiceHandler.h"
 
 bool ServiceHandler::isActive() {
-	bool fl = false;
-	mutex.lock();
-	fl = run;
-	mutex.unlock();
-	return fl;
+	return run;
 }
 
-void ServiceHandler::registerWriteRequest(HandlerRequest* request, void* response) {
-	if(request!=NULL && response!=NULL) {
-		request->response = response;
-		handleWrite(request);
+void* ServiceHandler::closeConnections(void *arg) {
+	ServiceHandler* ths = (ServiceHandler*)arg;
+	std::map<uintptr_t, long long> addrs;
+	std::map<uintptr_t, long long>::iterator it;
+	while(ths->run) {
+		Thread::sSleep(5);
+		SocketInterface* si;
+		while(ths->toBeClosedConns.try_dequeue(si)) {
+			uintptr_t addr = reinterpret_cast<uintptr_t>(si);
+			if(addrs.find(addr)==addrs.end()) {
+				addrs[addr] = Timer::getTimestamp();
+				delete si;
+			}
+		}
+		for(it=addrs.begin();it!=addrs.end();) {
+			long long t = Timer::getTimestamp();
+			if(t-it->second>10) {
+				addrs.erase(it++);
+			} else {
+				++it;
+			}
+		}
 	}
+	return NULL;
 }
 
-void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos, ReaderSwitchInterface* switchReaderIntf) {
-	HandlerRequest* req = NULL;
-	//int val;
-	//if(requestNumMap.find(sif->identifier, val))
-	//{
-		req = new HandlerRequest;
-		req->request = request;
-		req->response = NULL;
-		req->sif = sif;
-		req->context = context;
-		req->sh = this;
-		req->reqPos = reqPos;
-		req->switchReaderIntf = switchReaderIntf;
-		req->protocol = sif->getProtocol(context);
-		//requestNumMap.put(sif->identifier, val+1);
-	/*}
-	else
-	{
-		if(request!=NULL)
-			delete request;
-		if(context!=NULL)
-			delete context;
-	}
-	if(req!=NULL) {*/
-		handleService(req);
-	//}
+void ServiceHandler::closeConnection(SocketInterface* si) {
+	this->toBeClosedConns.enqueue(si);
 }
 
-bool ServiceHandler::addOpenRequest(SocketInterface* si) {
-	//requestNumMap.put(si->identifier, 0);
-	return true;
+void ServiceHandler::registerReadRequest(SocketInterface* sif) {
+	handleRead(sif);
 }
 
-void ServiceHandler::flagDone(SocketInterface* sif) {
-	/*int val;
-	if(requestNumMap.find(sif->identifier, val)) {
-		requestNumMap.put(sif->identifier, val-1);
-	}*/
+void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos) {
+	HandlerRequest* req = new HandlerRequest;
+	req->request = request;
+	req->response = NULL;
+	req->sif = sif;
+	req->context = context;
+	req->sh = this;
+	req->reqPos = reqPos;
+	req->protocol = sif->getProtocol(context);
+	handleService(req);
 }
 
-bool ServiceHandler::isAvailable(SocketInterface* sif) {
-	//return requestNumMap.find(sif->identifier);
-	return true;
-}
-
-void ServiceHandler::addCloseRequest(SocketInterface* si) {
-	//tbcSifQ.push(si);
-	//std::cout << "Closing connection " << si->getDescriptor() << " " << si->identifier << std::endl;
-}
-
-void ServiceHandler::submitServiceTask(Task* task) {
+void ServiceHandler::submitTask(Task* task) {
 	if(isThreadPerRequests) {
 		Thread* pthread = new Thread(&taskService, task);
 		pthread->execute();
 	} else {
 		spool.submit(task);
-	}
-}
-
-void ServiceHandler::submitWriteTask(Task* task) {
-	if(isThreadPerRequestw) {
-		Thread* pthread = new Thread(&taskService, task);
-		pthread->execute();
-	} else {
-		wpool.submit(task);
 	}
 }
 
@@ -96,62 +72,12 @@ void* ServiceHandler::taskService(void* inp) {
 	return NULL;
 }
 
-void* ServiceHandler::cleanSifs(void* inp) {
-	ServiceHandler* ins  = static_cast<ServiceHandler*>(inp);
-	while(ins->isActive())
-	{
-		SocketInterface* si = NULL;
-		while(ins->tbcSifQ.try_dequeue(si))
-		{
-			int val;
-			if(ins->requestNumMap.find(si->identifier, val) && val<=0)
-			{
-				//std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
-				delete si;
-				ins->requestNumMap.erase(si->identifier);
-			}
-			else
-			{
-				ins->tbcSifQ.enqueue(si);
-			}
-			Thread::mSleep(10);
-		}
-		Thread::sSleep(1);
-	}
-	return NULL;
-}
-
-void ServiceHandler::cleanSif(cuckoohash_map<int, SocketInterface*> connectionsWithTimeouts) {
-	SocketInterface* si = NULL;
-	while(tbcSifQ.try_dequeue(si))
-	{
-		int val;
-		if(requestNumMap.find(si->identifier, val) && val<=0)
-		{
-			//std::cout << "Connection resources released " << si->getDescriptor() << " " << si->identifier << std::endl;
-			connectionsWithTimeouts.erase(si->getDescriptor());
-			requestNumMap.erase(si->identifier);
-			delete si;
-		}
-		else
-		{
-			tbcSifQ.enqueue(si);
-		}
-		Thread::mSleep(1);
-	}
-}
 
 void ServiceHandler::start() {
 	if(!run) {
-		mutex.lock();
-		if(run) {
-			mutex.unlock();
-			return;
-		}
 		run = true;
-		//Thread* pthread = new Thread(&cleanSifs, this);
-		//pthread->execute();
-		mutex.unlock();
+		Thread* mthread = new Thread(&closeConnections, this);
+		mthread->execute(-1);
 	}
 }
 
@@ -159,29 +85,18 @@ void ServiceHandler::stop() {
 	if(spoolSize > 0) {
 		spool.joinAll();
 	}
-	if(wpoolSize > 0) {
-		wpool.joinAll();
-	}
-	mutex.lock();
 	run = false;
-	mutex.unlock();
+	Thread::sSleep(15);
 }
 
-ServiceHandler::ServiceHandler(const int& spoolSize, const int& wpoolSize) {
+ServiceHandler::ServiceHandler(const int& spoolSize) {
 	this->spoolSize = spoolSize;
-	this->wpoolSize = wpoolSize;
 	run = false;
 	isThreadPerRequests = false;
-	isThreadPerRequestw = false;
 	if(spoolSize <= 0) {
 		isThreadPerRequests = true;
 	} else {
-		spool.init(spoolSize);
-	}
-	if(wpoolSize <= 0) {
-		isThreadPerRequestw = true;
-	} else {
-		wpool.init(wpoolSize);
+		spool.init(spoolSize, true);
 	}
 }
 
@@ -194,19 +109,16 @@ HandlerRequest::HandlerRequest() {
 	request = NULL;
 	context = NULL;
 	sif = NULL;
-	switchReaderIntf = NULL;
-	sentResponse = false;
 	protocol = "";
 	reqPos = 0;
 	response = NULL;
 }
 
 HandlerRequest::~HandlerRequest() {
-	sh->flagDone(sif);
 }
 
 SocketUtil* HandlerRequest::getSocketUtil() {
-	return sif->sockUtil;
+	return &(sif->sockUtil);
 }
 
 void HandlerRequest::clearObjects() {
@@ -216,10 +128,6 @@ void HandlerRequest::clearObjects() {
 	context = NULL;
 	if(response!=NULL)delete response;
 	response = NULL;
-}
-
-void HandlerRequest::setSentResponse() {
-	sentResponse = true;
 }
 
 void* HandlerRequest::getContext() {
@@ -238,10 +146,6 @@ void* HandlerRequest::getResponse() {
 	return response;
 }
 
-bool HandlerRequest::isSentResponse() const {
-	return sentResponse;
-}
-
 bool HandlerRequest::isValidWriteRequest() {
 	return sif->isCurrentRequest(reqPos);
 }
@@ -253,16 +157,4 @@ bool HandlerRequest::doneWithWrite() {
 
 SocketInterface* HandlerRequest::getSif() {
 	return sif;
-}
-
-ReaderSwitchInterface* HandlerRequest::getSwitchReaderIntf() {
-	return switchReaderIntf;
-}
-
-void ServiceHandler::switchReaders(HandlerRequest* hr, SocketInterface* next) {
-	hr->switchReaderIntf->switchReaders(hr->getSif(), next);
-}
-
-void ServiceHandler::registerRead(HandlerRequest* hr) {
-	hr->switchReaderIntf->registerRead(hr->getSif());
 }

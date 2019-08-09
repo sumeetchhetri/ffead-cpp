@@ -23,7 +23,25 @@
 #include "ConfigurationData.h"
 
 ConfigurationData* ConfigurationData::instance = NULL;
-//std::atomic<int> ConfigurationData::counter(0);
+
+Reflector* ConfigurationData::getReflector() {
+	return &(getInstance()->reflector);
+}
+
+void ConfigurationData::enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
+		bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra, bool enableScripts, bool enableSoap) {
+	getInstance()->enableCors = enableCors;
+	getInstance()->enableSecurity = enableSecurity;
+	getInstance()->enableFilters = enableFilters;
+	getInstance()->enableControllers = enableControllers;
+	getInstance()->enableContMpg = enableContMpg;
+	getInstance()->enableContPath = enableContPath;
+	getInstance()->enableContExt = enableContExt;
+	getInstance()->enableContRst = enableContRst;
+	getInstance()->enableExtra = enableExtra;
+	getInstance()->enableScripts = enableScripts;
+	getInstance()->enableSoap = enableSoap;
+}
 
 ConfigurationData::ConfigurationData() {
 	logger = LoggerFactory::getLogger("ConfigurationData");
@@ -32,6 +50,20 @@ ConfigurationData::ConfigurationData() {
 	embeddedServer = false;
 	apacheServer = false;
 	nginxServer = false;
+	embeddedServer = false;
+	apacheServer = false;
+	nginxServer = false;
+	enableCors = false;
+	enableSecurity = false;
+	enableFilters = false;
+	enableControllers = false;
+	enableContMpg = false;
+	enableContPath = false;
+	enableContExt = false;
+	enableContRst = false;
+	enableExtra = false;
+	enableScripts = false;
+	enableSoap = false;
 }
 
 ConfigurationData* ConfigurationData::getInstance() {
@@ -54,7 +86,7 @@ bool ConfigurationData::isServingContext(const std::string& cntxtName) {
 			&& getInstance()->servingContexts[cntxtName];
 }
 
-const ClassInfo ConfigurationData::getClassInfo(const std::string& cs, const std::string& app) {
+ClassInfo* ConfigurationData::getClassInfo(const std::string& cs, const std::string& app) {
 	return getInstance()->ffeadContext.reflector->getClassInfo(cs, app);
 }
 
@@ -73,6 +105,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 		std::cout << "Could not load Library" << std::endl;
 		exit(0);
 	}
+	getInstance()->reflector = Reflector(getInstance()->dlib);
 
 	getInstance()->ddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 	if(getInstance()->ddlib==NULL)
@@ -81,7 +114,150 @@ void ConfigurationData::initializeAllSingletonBeans() {
 		std::cout << "Could not load dynamic Library" << std::endl;
 		exit(0);
 	}
-	getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts);
+	getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts, &(getInstance()->reflector));
+
+	SerializeBase::init(ConfigurationData::getInstance()->dlib);
+	std::map<std::string, std::map<std::string, std::vector<RestFunction> > >& rstCntMap = ConfigurationData::getInstance()->rstCntMap;
+	std::map<std::string, std::map<std::string, std::vector<RestFunction> > >::iterator rsit = rstCntMap.begin();
+	for(;rsit!=rstCntMap.end();++rsit) {
+		resFuncMap& rstFMp = rsit->second;
+		resFuncMap::iterator rfit = rstFMp.begin();
+		for(;rfit!=rstFMp.end();++rfit) {
+			std::vector<RestFunction>& fncl = rfit->second;
+			for (int var = 0; var < (int)fncl.size(); ++var) {
+				RestFunction& rf = fncl.at(var);
+				std::string vtyp = rf.rtype;
+				std::string type;
+				if(rf.serOpt%100==0) {
+					std::string className = rf.rtype;
+					if(rf.serOpt==100) {
+						type = "vector";
+						StringUtil::replaceFirst(className,"std::vector<","");
+						StringUtil::replaceFirst(className,"vector<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					} else if(rf.serOpt==200) {
+						type = "list";
+						StringUtil::replaceFirst(className,"std::list<","");
+						StringUtil::replaceFirst(className,"list<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					} else if(rf.serOpt==300) {
+						type = "set";
+						StringUtil::replaceFirst(className,"std::set<","");
+						StringUtil::replaceFirst(className,"set<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					} else if(rf.serOpt==400) {
+						type = "multiset";
+						StringUtil::replaceFirst(className,"std::multiset<","");
+						StringUtil::replaceFirst(className,"multiset<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					} else if(rf.serOpt==500) {
+						type = "queue";
+						StringUtil::replaceFirst(className,"std::queue<","");
+						StringUtil::replaceFirst(className,"queue<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					} else if(rf.serOpt==600) {
+						type = "deque";
+						StringUtil::replaceFirst(className,"std::deque<","");
+						StringUtil::replaceFirst(className,"deque<","");
+						if(className.find(",")!=std::string::npos)
+							vtyp = className.substr(0,className.find(","));
+						else
+							vtyp = className.substr(0,className.find(">"));
+					}
+					StringUtil::replaceAll(vtyp, "::", "_");
+					std::string appn = rsit->first;
+					StringUtil::replaceAll(appn, "-", "_");
+					RegexUtil::replace(appn, "[^a-zA-Z0-9_]+", "");
+					rf.s = SerializeBase::serFunc(vtyp, appn);
+					rf.sc = SerializeBase::serContFunc(vtyp, appn, "vector");
+					rf.scm = SerializeBase::serContFunc(vtyp, appn, "set");
+					rf.us = SerializeBase::unSerFunc(vtyp, appn);
+					rf.usc = SerializeBase::unSerContFunc(vtyp, appn, "vector");
+					rf.uscm = SerializeBase::unSerContFunc(vtyp, appn, "set");
+				}
+				for (int var1 = 0; var1 < (int)rf.params.size(); ++var1) {
+					RestFunctionParams& rfp = rf.params.at(var1);
+					if(rfp.serOpt%100==0) {
+						std::string className = rfp.type;
+						if(rfp.serOpt==100) {
+							type = "vector";
+							StringUtil::replaceFirst(className,"std::vector<","");
+							StringUtil::replaceFirst(className,"vector<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						} else if(rfp.serOpt==200) {
+							type = "list";
+							StringUtil::replaceFirst(className,"std::list<","");
+							StringUtil::replaceFirst(className,"list<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						} else if(rfp.serOpt==300) {
+							type = "set";
+							StringUtil::replaceFirst(className,"std::set<","");
+							StringUtil::replaceFirst(className,"set<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						} else if(rfp.serOpt==400) {
+							type = "multiset";
+							StringUtil::replaceFirst(className,"std::multiset<","");
+							StringUtil::replaceFirst(className,"multiset<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						} else if(rfp.serOpt==500) {
+							type = "queue";
+							StringUtil::replaceFirst(className,"std::queue<","");
+							StringUtil::replaceFirst(className,"queue<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						} else if(rfp.serOpt==600) {
+							type = "deque";
+							StringUtil::replaceFirst(className,"std::deque<","");
+							StringUtil::replaceFirst(className,"deque<","");
+							if(className.find(",")!=std::string::npos)
+								vtyp = className.substr(0,className.find(","));
+							else
+								vtyp = className.substr(0,className.find(">"));
+						}
+						StringUtil::replaceAll(vtyp, "::", "_");
+						std::string appn = rsit->first;
+						StringUtil::replaceAll(appn, "-", "_");
+						RegexUtil::replace(appn, "[^a-zA-Z0-9_]+", "");
+						rfp.s = SerializeBase::serFunc(vtyp, appn);
+						rfp.sc = SerializeBase::serContFunc(vtyp, appn, "vector");
+						rfp.scm = SerializeBase::serContFunc(vtyp, appn, "set");
+						rfp.us = SerializeBase::unSerFunc(vtyp, appn);
+						rfp.usc = SerializeBase::unSerContFunc(vtyp, appn, "vector");
+						rfp.uscm = SerializeBase::unSerContFunc(vtyp, appn, "set");
+					}
+				}
+			}
+		}
+	}
 }
 
 void ConfigurationData::clearInstance() {
@@ -91,17 +267,20 @@ void ConfigurationData::clearInstance() {
 }
 
 ConfigurationData::~ConfigurationData() {
-	// TODO Auto-generated destructor stub
+	if(dlib!=NULL) {
+		dlclose(dlib);
+	}
+	if(ddlib!=NULL) {
+		dlclose(ddlib);
+	}
 }
 
-Security::Security()
-{
+Security::Security() {
 	sessTimeout = 0;
 	logger = LoggerFactory::getLogger("Security");
 }
 
-Security::~Security()
-{
+Security::~Security() {
 }
 
 bool Security::isLoginConfigured()
@@ -187,7 +366,6 @@ SecureAspect Security::matchesPath(const std::string& cntxtName, std::string url
 	for (it=secures.begin();it!=secures.end();++it) {
 		SecureAspect secureAspect = it->second;
 		std::string pathurl = secureAspect.path;
-		//logger << ("Checking security path " + pathurl + " against url " + url) << std::endl;
 		if(ConfigurationData::urlMatchesPath(cntxtName, pathurl, url)) {
 			aspect = secureAspect;
 		}
@@ -197,7 +375,6 @@ SecureAspect Security::matchesPath(const std::string& cntxtName, std::string url
 
 bool ConfigurationData::urlMatchesPath(const std::string& cntxtName, std::string pathurl, std::string url)
 {
-	//getInstance()->logger << ("Checking path " + pathurl + " against url " + url) << std::endl;
 	if(pathurl==url)
 	{
 		return true;

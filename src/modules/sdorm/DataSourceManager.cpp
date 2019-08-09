@@ -35,37 +35,31 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 		logger.info("Error initializing Datasource " + appName + "@" + props.getName() + " " + std::string(e.what()));
 	}
 
-	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load application shared library");
-	}
-	Reflector ref(dlib);
+	Reflector* ref = GenericObject::getReflector();
 	if(props.getProperty("init")!="") {
 		std::string meth = props.getProperty("init");
 		std::vector<std::string> v;
 		StringUtil::split(v, meth, ".");
 		if(v.size()==2) {
 			CommonUtils::setAppName(appName);
-			ClassInfo clas = ref.getClassInfo(v.at(0), appName);
-			if(clas.getClassName()!="") {
+			ClassInfo* clas = ref->getClassInfo(v.at(0), appName);
+			if(clas->getClassName()!="") {
 				args argus;
 				vals valus;
-				const Constructor& ctor = clas.getConstructor(argus);
-				void* _temp = ref.newInstanceGVP(ctor);
+				const Constructor& ctor = clas->getConstructor(argus);
+				void* _temp = ref->newInstanceGVP(ctor);
 				try {
 					if(_temp!=NULL) {
-						const Method& meth = clas.getMethod(v.at(1), argus);
+						const Method& meth = clas->getMethod(v.at(1), argus);
 						if(meth.getMethodName()!="")
 						{
-							ref.invokeMethodGVP(_temp, meth, valus);
+							ref->invokeMethodGVP(_temp, meth, valus);
 						}
 					}
 				} catch(const std::exception& e) {
 					logger.info("Error during init call for Datasource " + appName + "@" + props.getName() + " " + std::string(e.what()));
 				}
-				ref.destroy(_temp, v.at(0), appName);
+				ref->destroy(_temp, v.at(0), appName);
 			}
 		}
 	}
@@ -136,13 +130,7 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name) {
 		return NULL;
 	}
 	t->appName = dsnMgr->mapping.getAppName();
-	t->dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(t->dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load application shared library");
-	}
-	t->reflector = new Reflector(t->dlib);
+	t->reflector = GenericObject::getReflector();
 	std::map<std::string, DataSourceEntityMapping>::iterator it;
 	for(it=dsnMgr->mapping.getDseMap().begin();it!=dsnMgr->mapping.getDseMap().end();++it)
 	{

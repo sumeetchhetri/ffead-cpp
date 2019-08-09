@@ -79,7 +79,7 @@ void JobScheduler::init(const ElementList& tabs, const std::string& appName) {
 
 
 void JobScheduler::start() {
-	Reflector ref;
+	Reflector* ref = GenericObject::getReflector();
 	if(instance==NULL || (instance!=NULL && instance->isStarted))
 		return;
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
@@ -93,20 +93,20 @@ void JobScheduler::start() {
 		std::string appName = instance->configs.at(dn).app;
 		if(clas!="" && method!="" && cron!="" && name!="")
 		{
-			ClassInfo claz = ref.getClassInfo(clas, appName);
-			logger << "JobScheduler - Got class " + claz.getClassName() << std::endl;
-			if(claz.getClassName()!="")
+			ClassInfo* claz = ref->getClassInfo(clas, appName);
+			logger << "JobScheduler - Got class " + claz->getClassName() << std::endl;
+			if(claz->getClassName()!="")
 			{
 				args argus;
-				Method meth = claz.getMethod(method, argus);
-				Constructor ctor = claz.getConstructor(argus);
+				Method meth = claz->getMethod(method, argus);
+				Constructor ctor = claz->getConstructor(argus);
 
 				logger << "JobScheduler - Got method,class " + meth.getMethodName() + "," + ctor.getName() << std::endl;
 
 				if(meth.getMethodName()!="" && ctor.getName()!="")
 				{
-					void* objIns = ref.newInstanceGVP(ctor);
-					JobFunction f = (JobFunction)ref.getMethodInstance(meth);
+					void* objIns = ref->newInstanceGVP(ctor);
+					JobFunction f = (JobFunction)ref->getMethodInstance(meth);
 
 					logger << "JobScheduler - Got objins,func " << objIns << "," << f << std::endl;
 
@@ -182,8 +182,8 @@ void JobScheduler::JobTask::run() {
 		vals values;
 		timer.nextRunDate = Date();
 
-		Reflector ref;
-		JobFunction f = (JobFunction)ref.getMethodInstance(meth);
+		Reflector* ref = GenericObject::getReflector();
+		JobFunction f = (JobFunction)ref->getMethodInstance(meth);
 
 		while(doRun)
 		{
@@ -230,7 +230,7 @@ void JobScheduler::JobTask::run() {
 		}
 
 		if(objIns!=NULL) {
-			ref.destroy(objIns, clas, appName);
+			ref->destroy(objIns, clas, appName);
 			objIns = NULL;
 		}
 	} catch(const std::exception& ex) {

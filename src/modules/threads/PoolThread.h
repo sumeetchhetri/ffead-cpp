@@ -27,25 +27,29 @@
 #include "TimeUnit.h"
 #include "LoggerFactory.h"
 #include "FutureTask.h"
-#include "blockingconcurrentqueue.h"
+#include "concurrentqueue.h"
 
 class PoolThread {
+	ConditionMutex c_mutex;
 	TaskPool* wpool;
-	moodycamel::BlockingConcurrentQueue<Task*> tasks;
+	moodycamel::ConcurrentQueue<Task*> tasks;
 	static void* run(void *arg);
 	static void* runWithTaskPool(void* arg);
-	PoolThread(TaskPool* wpool);
-	PoolThread();
+	PoolThread(TaskPool* wpool, int num);
+	PoolThread(int num);
 	virtual ~PoolThread();
 	Thread *mthread;
 	bool idle;
+	std::string name;
+	std::atomic<long long> taskCount;
+	std::atomic<int> condVar;
 	Logger logger;
 	friend class ThreadPool;
 	std::atomic<bool> runFlag;
 	std::atomic<bool> complete;
 	std::atomic<bool> thrdStarted;
 public:
-	void execute();
+	void execute(int cid);
 	void stop();
 	bool isComplete();
 	void addTask(Task* task);

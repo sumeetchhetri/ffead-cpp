@@ -19,20 +19,79 @@
 #elif defined(IS_SENDFILE)
 #include <sys/sendfile.h>
 #endif
+#include "vector"
+
+class SocketInterface;
+
+class ResponseTask {
+	void* request;
+	void* context;
+	void* response;
+	int reqPos;
+	ResponseTask* next;
+	friend class SocketInterface;
+	ResponseTask() {
+		this->request = NULL;
+		this->response = NULL;
+		this->context = NULL;
+		this->reqPos = -1;
+		this->next = NULL;
+	}
+public:
+	ResponseTask(void* request, void* response, void* context, int reqPos) {
+		this->request = request;
+		this->response = response;
+		this->context = context;
+		this->reqPos = reqPos;
+		this->next = NULL;
+	}
+};
 
 class SocketInterface {
 	friend class RequestReaderHandler;
 	friend class ServiceHandler;
 	friend class HandlerRequest;
-	friend class HttpWriteTask;
 	friend class HttpServiceTask;
+	friend class HttpReadTask;
+	friend class SelEpolKqEvPrt;
+	friend class CHServer;
+	Mutex m;
 protected:
-	SocketUtil* sockUtil;
-	std::string buffer;
-	std::atomic<int> t;
 	int fd;
+	SocketUtil sockUtil;
+	std::string buffer;
+	std::atomic<long> t1;
+	std::vector<ResponseTask> wtl;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
+	void pushResponse(void* request, void* response, void* context, int reqPos) {
+		Timer t;
+		t.start();
+
+		if(isCurrentRequest(reqPos)) {
+			endRequest();
+			writeResponse(request, response, context);
+		} else {
+			std::vector<ResponseTask>::iterator it;
+			m.lock();
+			wtl.push_back(ResponseTask(request, response, context, reqPos));
+			it = wtl.begin();
+			while (it!=wtl.end()) {
+				ResponseTask& t = *it;
+				if(isCurrentRequest(t.reqPos)) {
+					endRequest();
+					writeResponse(t.request, t.response, t.context);
+					it = wtl.erase(it);
+				} else {
+					++it;
+				}
+			}
+			m.unlock();
+		}
+
+		t.end();
+		CommonUtils::tsWrite += t.timerNanoSeconds();
+	}
 	void init(const SOCKET& fd) {
 		reqPos = 0;
 		current = 0;
@@ -57,9 +116,7 @@ protected:
 		int offset = 0;
 		while(!isClosed() && offset<(int)data.length())
 		{
-			//cout << "writing data " << fd << " " << identifier << std::endl;
-			int count = sockUtil->writeData(data, true, offset);
-			//cout << "done writing data " << fd << " " << identifier << std::endl;
+			int count = sockUtil.writeData(data, true, offset);
 			if(count>0)
 			{
 				offset += count;
@@ -135,11 +192,9 @@ public:
 		{
 			ssize_t count;
 			std::string temp;
-			count = sockUtil->readData(MAXBUFLENM, temp);
+			count = sockUtil.readData(MAXBUFLENM, temp);
 			if(count>0)
 			{
-				int tt = Timer::getTimestamp() - 1203700;
-				t = tt;
 				buffer.append(temp);
 			}
 			else if (count == -1 && errno == EAGAIN)
@@ -157,7 +212,7 @@ public:
 		return isClosed();
 	}
 	void close() {
-		sockUtil->closeSocket();
+		sockUtil.closeSocket();
 	}
 	int getDescriptor() {
 		return fd;
@@ -165,7 +220,6 @@ public:
 	std::string getAddress() {
 		return address;
 	}
-	long identifier;
 	std::string address;
 	virtual std::string getProtocol(void* context)=0;
 	virtual int getTimeout()=0;
@@ -173,15 +227,12 @@ public:
 	virtual bool writeResponse(void* req, void* res, void* context)=0;
 	virtual void onOpen()=0;
 	virtual void onClose()=0;
+	virtual void addHandler(SocketInterface* handler)=0;
 	virtual ~SocketInterface() {
-		sockUtil->closeSocket();
-		delete sockUtil;
+		sockUtil.closeSocket();
 	}
 	bool isClosed() {
-		return sockUtil->closed;
-	}
-	void setIdentifier(const long& identifier) {
-		this->identifier = identifier;
+		return sockUtil.closed;
 	}
 };
 

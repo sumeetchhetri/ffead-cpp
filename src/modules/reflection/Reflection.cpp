@@ -95,6 +95,19 @@ void Reflection::collectInfo(std::string data, const std::string& flag, ClassStr
 	{
 		MethStructure ps;
 		ps.decl = data;
+		std::string t = data.substr(0, data.find("("));
+		t = t.substr(0, t.find_last_of(" "));
+		if(t.find("const ")==0) {
+			t = t.substr(6);
+		}
+		if(t.find("virtual ")==0) {
+			t = t.substr(8);
+		}
+		if(t.find("~")!=std::string::npos) {
+			t = "void";
+		}
+		StringUtil::trim(t);
+		ps.retType = t;
 		for (int pi = 0; pi < (int)mrktxt.size(); ++pi) {
 			std::string prg = mrktxt.at(pi);
 			try {
@@ -2376,15 +2389,6 @@ std::string Reflection::generateSerDefinitionAll(std::map<std::string, std::map<
 	ret += "}\n";
 	includeRef += typedefs;
 
-	//Ajax JSON Serialization part
-	/*string ttem = "Date readDate(JSONElement& obj){DateFormat formt(\"yyyy-mm-dd hh:mi:ss\");\nreturn *formt.parse(obj.getValue());}";
-	ttem += "Date* readDateP(JSONElement& obj){DateFormat formt(\"yyyy-mm-dd hh:mi:ss\");\nreturn formt.parse(obj.getValue());}";
-	ttem += "\nstd::string fromDateToJSON(Date d){DateFormat formt(\"yyyy-mm-dd hh:mi:ss\");\nreturn formt.format(d);}";
-	ttem += "\nstd::string fromDateVPToJSON(Date *d){DateFormat formt(\"yyyy-mm-dd hh:mi:ss\");\nreturn formt.format(*d);}";
-	ttem += "BinaryData readBinaryData(JSONElement& obj){BinaryData bd;return bd;}";
-	ttem += "BinaryData* readBinaryDataP(JSONElement& obj){return new BinaryData;}";
-	ttem += "\nstd::string fromBinaryDataToJSON(BinaryData d){return \"\";}";
-	ttem += "\nstd::string fromBinaryDataVPToJSON(BinaryData *d){return \"\";}";*/
 	ajaxret = /*ttem + */typerefs + ajaxret;
 	ajaxret ="#include \"AfcInclude.h\"\n#include \"JSONSerialize.h\"\n\nextern \"C\"\n{\n" + ajaxret;
 
@@ -2762,73 +2766,76 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 						if(isPrimitiveDataType(fldp.at(0)))
 						{
 							std::string typ = getTypeName(fldp.at(0));
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(typ));
 							if(!ptr)
 							{
 								methods += typ + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
-								methods += "base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""+typ+"\", &_objProp"+fldp.at(j)+");\n"
+								methods += "base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""+typ+"\", &_objProp"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n";
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+typ+"* _val = ("+typ+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""+typ+"\", \""+fldp.at(j)+"\");__obj->"+fldp.at(j)
+										+typ+"* _val = ("+typ+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \""+typ+"\", \""+fldp.at(j)+"\");__obj->"+fldp.at(j)
 										+" = *_val;\ndelete _val;\n}\n";
 							}
 							else
 							{
-								methods += "base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""+typ+"\", __obj->"+fldp.at(j)+");\n"
+								methods += "base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""+typ+"\", __obj->"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n";
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+typ+"* _val = ("+typ+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""+typ+"\", \""+fldp.at(j)+"\");__obj->"+fldp.at(j)
+										+typ+"* _val = ("+typ+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \""+typ+"\", \""+fldp.at(j)+"\");__obj->"+fldp.at(j)
 										+" = _val;\n}\n";
 							}
 						}
 						else if(fldp.at(0)=="Date")
 						{
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fldp.at(0)));
 							if(!ptr)
 							{
 								methods += fldp.at(0) + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+								methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""
 										+fldp.at(0)+"\", &_objProp"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
-										+fldp.at(j)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
+										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
+										+fldp.at(j)+";\n__obj->"
 										+fldp.at(j)+" = *(formt"+fldp.at(j)+".parse(*_val));\ndelete _val;\n}\n";
 							}
 							else
 							{
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+								methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""
 										+fldp.at(0)+"\", __obj->"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
-										+fldp.at(j)+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
+										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
+										+fldp.at(j)+";\n__obj->"
 										+fldp.at(j)+" = (formt"+fldp.at(j)+".parse(*_val));\ndelete _val;\n}\n";
 							}
 						}
 						else if(fldp.at(0)=="BinaryData")
 						{
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fldp.at(0)));
 							if(!ptr)
 							{
 								methods += fldp.at(0) + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+								methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""
 										+fldp.at(0)+"\", &_objProp"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");"
+										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");"
 										+ "\n__obj->"+fldp.at(j)+" = *(BinaryData::unSerilaize(*_val));\ndelete _val;\n}\n";
 							}
 							else
 							{
-								methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldp.at(j)+"\", \""
+								methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldp.at(j)+"\", \""
 										+fldp.at(0)+"\", __obj->"+fldp.at(j)+");\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldp.at(j)+"\");"
+										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");"
 										+ "\n__obj->"+fldp.at(j)+" = (BinaryData::unSerilaize(*_val));\ndelete _val;\n}\n";
 							}
 						}
@@ -2890,54 +2897,56 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 								fqcn += " >";
 							}
 							contType += getFullyQualifiedClassName(stlcnt, classStructure.namespaces) + ",";
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 
 							if(!ptr)
 							{
 								//methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(&(__obj->"+fldp.at(j)+"),\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(&(__obj->"+fldp.at(j)+"),"+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnown<"+fqcn+" >(base->getContainerElement("
-										 + "intermediateObject, i, 0),\""+contType+"\",\""+app+"\", base);\n";
+										 + "intermediateObject, i, 0),"+serOpt+",\""+contType+"\",\""+app+"\", base);\n";
 							}
 							else
 							{
 								//methods += (fqcn+"* __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("if(__obj->"+fldp.at(j)+"!=NULL)base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(__obj->"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(__obj->"+fldp.at(j)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnownToPointer<"+fqcn+" >(base->getContainerElement("
-										 +"intermediateObject, i, 0),\""+contType+"\",\""+app+"\", base);\n";
+										 +"intermediateObject, i, 0),"+serOpt+",\""+contType+"\",\""+app+"\", base);\n";
 							}
 						}
 						else
 						{
 							std::string fqcn = getFullyQualifiedClassName(fldp.at(0), classStructure.namespaces);
+							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 							if(!ptr)
 							{
 								//methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(&(__obj->"+fldp.at(j)+"),\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(&(__obj->"+fldp.at(j)+"),"+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnown<"+fqcn+" >(base->getContainerElement("
-										 +"intermediateObject, i, 0),\""+fqcn+"\",\""+app+"\", base);\n";
+										 +"intermediateObject, i, 0),"+serOpt+",\""+fqcn+"\",\""+app+"\", base);\n";
 							}
 							else
 							{
 								//methods += (fldp.at(0)+"* __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
 								methods += ("if(__obj->"+fldp.at(j)+"!=NULL)base->addObjectProperty(serobject, \""+fldp.at(j)+"\", \""+fldp.at(0)+"\", "
-										+ "SerializeBase::serializeUnknown(__obj->"+fldp.at(j)+",\""+fqcn+"\",\""+app+"\", base));\n"
+										+ "SerializeBase::serializeUnknown(__obj->"+fldp.at(j)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n__obj->"+fldp.at(j)+" = "
 										 + "SerializeBase::unSerializeKnownToPointer<"+fqcn+" >(base->getContainerElement("
-										 +"intermediateObject, i, 0),\""+fqcn+"\",\""+app+"\", base);\n";
+										 +"intermediateObject, i, 0),"+serOpt+",\""+fqcn+"\",\""+app+"\", base);\n";
 							}
 						}
 						//structinf += (fldp.at(0)+" "+fldp.at(j)+";\n");
@@ -3049,37 +3058,40 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									if(isPrimitiveDataType(argpm.at(0)))
 									{
 										argpm.at(0) = getTypeName(argpm.at(0));
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(argpm.at(0)));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													 +argpm.at(0)+"* _val = ("+argpm.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""
+													 +argpm.at(0)+"* _val = ("+argpm.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \""
 													 +argpm.at(0)+"\", \""+fldnames.at(k+1)+"\");\n__obj->"+methpm.at(1)+"(*_val);\ndelete _val;\n}\n";
 										else
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													 +argpm.at(0)+"* _val = ("+argpm.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \""
+													 +argpm.at(0)+"* _val = ("+argpm.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \""
 													 +argpm.at(0)+"\", \""+fldnames.at(k+1)+"\");\n__obj->"+methpm.at(1)+"(_val);\n}\n";
 									}
 									else if(argpm.at(0)=="Date")
 									{
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(argpm.at(0)));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldnames.at(k+1)+"\");\n"
-													 +"DateFormat formt"+cam+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
+													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");\n"
+													 +"DateFormat formt"+cam+";\n__obj->"
 													 +methpm.at(1)+"(*(formt"+cam+".parse(*_val)));\ndelete _val;\n}\n";
 										else
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldnames.at(k+1)+"\");\n"
-													 +"DateFormat formt"+cam+"(\"yyyy-mm-dd hh:mi:ss\");\n__obj->"
+													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");\n"
+													 +"DateFormat formt"+cam+";\n__obj->"
 													 +methpm.at(1)+"(formt"+cam+".parse(*_val));\ndelete _val;\n}\n";
 									}
 									else if(argpm.at(0)=="BinaryData")
 									{
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(argpm.at(0)));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldnames.at(k+1)+"\");"
+													+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");"
 													+ "\n__obj->"+methpm.at(1)+"(*(BinaryData::unSerilaize(*_val)));\ndelete _val;\n}\n";
 										else
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), \"std::string\", \""+fldnames.at(k+1)+"\");"
+													+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");"
 													+ "\n__obj->"+methpm.at(1)+"((BinaryData::unSerilaize(*_val)));\ndelete _val;\n}\n";
 									}
 									else if(argpm.at(0).find("vector")!=std::string::npos || argpm.at(0).find("queue")!=std::string::npos ||
@@ -3137,33 +3149,35 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 
 										std::string fqcn = contType + getFullyQualifiedClassName(stlcnt, classStructure.namespaces) + " >";
 										contType += getFullyQualifiedClassName(stlcnt, classStructure.namespaces) + ",";
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 
 										if(!ptr)
 										{
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i)){";
 											typedefs += "\n__obj->set"+cam+"(SerializeBase::unSerializeKnown<"+fqcn+" >"
-													 + "(base->getContainerElement(intermediateObject, i, 0),\""+contType+"\",\""+app+"\", base));\n";
+													 + "(base->getContainerElement(intermediateObject, i, 0),"+serOpt+",\""+contType+"\",\""+app+"\", base));\n";
 											typedefs += "\n}\n";
 										}
 										else
 										{
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i)){";
 											typedefs += "\n__obj->set"+cam+"(SerializeBase::unSerializeKnownToPointer<"+fqcn+" >"
-													 + "(base->getContainerElement(intermediateObject, i, 0),\""+contType+"\",\""+app+"\", base));\n";
+													 + "(base->getContainerElement(intermediateObject, i, 0),"+serOpt+",\""+contType+"\",\""+app+"\", base));\n";
 											typedefs += "\n}\n";
 										}
 									}
 									else
 									{
 										std::string fqcn = getFullyQualifiedClassName(argpm.at(0), classStructure.namespaces);
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))"
 													 + "\n__obj->"+methpm.at(1)+"(SerializeBase::unSerializeKnown<"+fqcn+" >"
-													 + "(base->getContainerElement(intermediateObject, i, 0),\""+fqcn+"\",\""+app+"\", base));\n";
+													 + "(base->getContainerElement(intermediateObject, i, 0),"+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n";
 										else
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))"
 													 + "\n__obj->"+methpm.at(1)+"(SerializeBase::unSerializeKnownToPointer<"+fqcn+" >"
-													 + "(base->getContainerElement(intermediateObject, i, 0),\""+fqcn+"\",\""+app+"\", base));\n";
+													 + "(base->getContainerElement(intermediateObject, i, 0),"+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n";
 									}
 								}
 								else if("get"+cam==methpm.at(1) && argpm.size()==0 && methpm.at(0)==fldnames.at(k))
@@ -3171,48 +3185,51 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									if(isPrimitiveDataType(methpm.at(0)))
 									{
 										methpm.at(0) = getTypeName(methpm.at(0));
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(methpm.at(0)));
 										if(!ptr)
 										{
 											methods += methpm.at(0) + " _objProp" + fldnames.at(k+1) + " = " + "__obj->"+methpm.at(1) + "();\n";
-											methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", &_objProp"+fldnames.at(k+1)+");\n"
+											methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", &_objProp"+fldnames.at(k+1)+");\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 										else
 										{
-											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectPrimitiveProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
+											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
 													+"__obj->"+methpm.at(1)+"());\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 									}
 									else if(methpm.at(0)=="Date")
 									{
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(methpm.at(0)));
 										if(!ptr)
 										{
 											methods += methpm.at(0) + " _objProp" + fldnames.at(k+1) + " = " + "__obj->"+methpm.at(1) + "();\n";
-											methods += ("base->addObjectPrimitiveProperty(serobject, \""
+											methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""
 													+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", &_objProp"+fldnames.at(k+1)+");\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 										else
 										{
 											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL){\n"
-													+"base->addObjectPrimitiveProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
+													+"base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
 													+"__obj->"+methpm.at(1)+"());\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 									}
 									else if(methpm.at(0)=="BinaryData")
 									{
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(methpm.at(0)));
 										if(!ptr)
 										{
 											methods += methpm.at(0) + " _objProp" + fldnames.at(k+1) + " = " + "__obj->"+methpm.at(1) + "();\n";
-											methods += ("base->addObjectPrimitiveProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
+											methods += ("base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
 													+"&_objProp"+fldnames.at(k+1)+");\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 										else
 										{
-											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectPrimitiveProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
+											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectPrimitiveProperty(serobject, "+serOpt+", \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
 													"__obj->"+methpm.at(1)+"());\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
@@ -3278,37 +3295,39 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 										}
 										std::string stlcontwosp = methpm.at(0);
 										StringUtil::trim(stlcontwosp);
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 
 										if(!ptr)
 										{
 											methods += (fqcn+" __temp_obj_ser"+fldnames.at(k+1)+" = __obj->"+methpm.at(1)+"();\n");
 											methods += ("base->addObjectProperty(serobject, \""+fldnames.at(k+1)+"\", \""+stlcontwosp+"\", "
-													+"SerializeBase::serializeUnknown(&__temp_obj_ser"+fldnames.at(k+1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+													+"SerializeBase::serializeUnknown(&__temp_obj_ser"+fldnames.at(k+1)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 										else
 										{
 											methods += (fqcn+"* __temp_obj_ser"+fldnames.at(k+1)+" = __obj->"+methpm.at(1)+"();\n");
 											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectProperty(serobject, \""+fldnames.at(k+1)+"\", \""+stlcontwosp+"\", "
-													+"SerializeBase::serializeUnknown(__temp_obj_ser"+fldnames.at(k+1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+													+"SerializeBase::serializeUnknown(__temp_obj_ser"+fldnames.at(k+1)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 									}
 									else
 									{
 										std::string fqcn = getFullyQualifiedClassName(methpm.at(0), classStructure.namespaces);
+										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
 										if(!ptr)
 										{
 											methods += (methpm.at(0)+" __temp_obj_ser"+fldnames.at(k+1)+" = __obj->"+methpm.at(1)+"();\n");
 											methods += ("base->addObjectProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
-													+ "SerializeBase::serializeUnknown(&__temp_obj_ser"+fldnames.at(k+1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+													+ "SerializeBase::serializeUnknown(&__temp_obj_ser"+fldnames.at(k+1)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 										else
 										{
 											methods += (methpm.at(0)+"* __temp_obj_ser"+fldnames.at(k+1)+" = __obj->"+methpm.at(1)+"();\n");
 											methods += ("if(__obj->"+methpm.at(1)+"()!=NULL)base->addObjectProperty(serobject, \""+fldnames.at(k+1)+"\", \""+methpm.at(0)+"\", "
-													+"SerializeBase::serializeUnknown(__temp_obj_ser"+fldnames.at(k+1)+",\""+fqcn+"\",\""+app+"\", base));\n"
+													+"SerializeBase::serializeUnknown(__temp_obj_ser"+fldnames.at(k+1)+","+serOpt+",\""+fqcn+"\",\""+app+"\", base));\n"
 													+"base->afterAddObjectProperty(serobject);\n");
 										}
 									}
@@ -3324,74 +3343,19 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 				+"std::string ser = base->fromSerializableObjectToString(serobject);\nbase->cleanSerializableObject(serobject);\nreturn ser;\n}\n";
 		methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Container(void* obje, SerializeBase* base, const std::string& _cont)\n{\nvoid* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", _cont);\n"
 				+"int size = SerializeBase::getNestedContainerSize<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje);\n"
-				+"for(int i=0;i<size;i++)\n{\n" + classStructure.getFullyQualifiedClassName() + " _lo =SerializeBase::getValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje,i);\n;base->addContainerSerializableElement(object, "+ttapp+"serialize"
+				+"for(int i=0;i<size;i++)\n{\n" + classStructure.getFullyQualifiedClassName() + " _lo =SerializeBase::getValueFromNestedContainer<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje,i);\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
 				+classStructure.getTreatedClassName(true)+"(&_lo, base));\nbase->afterAddContainerSerializableElement(object,i,size);\n}\n"
 				+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", _cont);\nstd::string ser = base->fromSerializableObjectToString(object);\n"
 				+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-		/*methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Vec(void* obje, SerializeBase* base)\n{\nstd::vector<"
-				+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::vector<"+classStructure.getFullyQualifiedClassName()+">*)obje;\n"
-				+"void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"vector\");\n"
-				+"int cnt = 0;\nint size = __obj->size();\nstd::vector<"+classStructure.getFullyQualifiedClassName()+">::iterator it = __obj->begin();\n"
-				+"for(it = __obj->begin(); it!= __obj->end(); ++it)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-				+classStructure.getTreatedClassName(true)+"(&(*it), base));\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-				+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::vector\");\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-				+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-		methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Dq(void* obje, SerializeBase* base)\n{\nstd::deque<"
-				+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::deque<"+classStructure.getFullyQualifiedClassName()+">*)obje;\n"
-				+"void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"deque\");\n"
-				+"int cnt = 0;\nint size = __obj->size();\nstd::deque<"+classStructure.getFullyQualifiedClassName()+">::iterator it = __obj->begin();\n"
-				+"for(it = __obj->begin(); it!= __obj->end(); ++it)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-				+classStructure.getTreatedClassName(true)+"(&(*it), base));\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-				+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::deque\");\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-				+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-		methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Lis(void* obje, SerializeBase* base)\n{\nstd::list<"
-				+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::list<"+classStructure.getFullyQualifiedClassName()+">*)obje;\n"
-				+"void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"list\");\n"
-				+"int cnt = 0;\nint size = __obj->size();\nstd::list<"+classStructure.getFullyQualifiedClassName()+">::iterator it = __obj->begin();\n"
-				+"for(it = __obj->begin(); it!= __obj->end(); ++it)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-				+classStructure.getTreatedClassName(true)+"(&(*it), base));\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-				+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::list\");\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-				+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-		methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Q(void* obje, SerializeBase* base)\n{\nstd::queue<"
-				+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::queue<"+classStructure.getFullyQualifiedClassName()+">*)obje;\nstd::queue<"+
-				classStructure.getFullyQualifiedClassName()+"> *tt = new std::queue<"+classStructure.getFullyQualifiedClassName()
-				+">;	*tt = *__obj;void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"queue\");\n"
-				+"int cnt = 0;\nint size = __obj->size();\n"
-				+"for(int var=0;var<size;var++)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-				+classStructure.getTreatedClassName(true)+"(&(tt->front()), base));\ntt->pop();\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-				+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::queue\");\ndelete tt;\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-				+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-		classes += "\nstd::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Vec(void* obje, SerializeBase* base);\n"
-				+"std::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Lis(void* obje, SerializeBase* base);\n"
-				+"std::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Dq(void* obje, SerializeBase* base);\n"
-				+"std::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Q(void* obje, SerializeBase* base);\n";*/
 		classes += "\nstd::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Container(void* obje, SerializeBase* base, const std::string& _cont);\n";
 		if(classStructure.prosetser)
 		{
 			methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "ContainerSV(void* obje, SerializeBase* base, const std::string& _cont)\n{\nvoid* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", _cont);\n"
 					+"int size = SerializeBase::getNestedContainerSizeSV<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje);\n"
-					+"for(int i=0;i<size;i++)\n{\n" + classStructure.getFullyQualifiedClassName() + " _lo =SerializeBase::getValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje,i);\n;base->addContainerSerializableElement(object, "+ttapp+"serialize"
+					+"for(int i=0;i<size;i++)\n{\n" + classStructure.getFullyQualifiedClassName() + " _lo =SerializeBase::getValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(_cont,obje,i);\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
 					+classStructure.getTreatedClassName(true)+"(&_lo, base));\nbase->afterAddContainerSerializableElement(object,i,size);\n}\n"
 					+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", _cont);\nstd::string ser = base->fromSerializableObjectToString(object);\n"
 					+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-			/*methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "Set(void* obje, SerializeBase* base)\n{\nstd::set<"
-					+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::set<"+classStructure.getFullyQualifiedClassName()+">*)obje;\n"
-					+"void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"set\");\n"
-					+"int cnt = 0;\nint size = __obj->size();\nstd::set<"+classStructure.getFullyQualifiedClassName()+">::iterator it = __obj->begin();\n"
-					+"for(it = __obj->begin(); it!= __obj->end(); ++it)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-					+classStructure.getTreatedClassName(true)+"((void*)&(*it), base));\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-					+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::set\");\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-					+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-			methods += "\nstd::string " +ttapp+ "serialize" + classStructure.getTreatedClassName(true) + "MulSet(void* obje, SerializeBase* base)\n{\nstd::multiset<"
-					+classStructure.getFullyQualifiedClassName()+"> *__obj=(std::multiset<"+classStructure.getFullyQualifiedClassName()+">*)obje;\n"
-					+"void* object = base->getSerializableObject();\nbase->startContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"multiset\");\n"
-					+"int cnt = 0;\nint size = __obj->size();\nstd::multiset<"+classStructure.getFullyQualifiedClassName()+">::iterator it = __obj->begin();\n"
-					+"for(it = __obj->begin(); it!= __obj->end(); ++it)\n{\nbase->addContainerSerializableElement(object, "+ttapp+"serialize"
-					+classStructure.getTreatedClassName(true)+"((void*)&(*it), base));\nbase->afterAddContainerSerializableElement(object, cnt++, size);\n}\n"
-					+"base->endContainerSerialization(object, \""+classStructure.getTreatedClassName(true)+"\", \"std::multiset\");\nstd::string ser = base->fromSerializableObjectToString(object);\n"
-					+"base->cleanSerializableObject(object);\nreturn ser;\n}\n";
-			classes += "\nstd::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"Set(void* obje, SerializeBase* base);\n"
-					+"std::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"MulSet(void* obje, SerializeBase* base);";*/
 			classes += "\nstd::string " +ttapp+ "serialize"+classStructure.getTreatedClassName(true)+"ContainerSV(void* obje, SerializeBase* base, const std::string& _cont);\n";
 		}
 

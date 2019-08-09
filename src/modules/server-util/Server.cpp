@@ -282,7 +282,7 @@ int Server::Receive(const SOCKET& fd, std::vector<std::string>& data, const int&
 SOCKET Server::createListener(const int& port, const bool& block)
 {
 	SOCKET    sockfd = INVALID_SOCKET;
-	int yes=1;
+	int yes = 1;
 	//int rv;
 	//bool bound = false;
 
@@ -307,12 +307,12 @@ SOCKET Server::createListener(const int& port, const bool& block)
 
 	#ifdef OS_MINGW
 		BOOL bOptVal = FALSE;
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, (const char*)&bOptVal, sizeof(int)) == -1) {
 			perror("setsockopt");
 			return INVALID_SOCKET;
 		}
 	#else
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &yes, sizeof(int)) == -1) {
 			perror("setsockopt");
 			return INVALID_SOCKET;
 		}
@@ -400,12 +400,12 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 		}
 		#ifdef OS_MINGW
 			BOOL bOptVal = FALSE;
-			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
+			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, (const char*)&bOptVal, sizeof(int)) == -1) {
 				perror("setsockopt");
 				return -1;
 			}
 		#else
-			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &yes, sizeof(int)) == -1) {
 				perror("setsockopt");
 				return -1;
 			}

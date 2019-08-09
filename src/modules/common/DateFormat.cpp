@@ -22,15 +22,14 @@
 
 #include "DateFormat.h"
 
-DateFormat::DateFormat() {
-	// TODO Auto-generated constructor stub
+const std::string DateFormat::DF = "%Y-%m-%d %H:%M%S";
 
+DateFormat::DateFormat() {
+	this->formatspec = DF;
 }
 
 DateFormat::~DateFormat() {
-	// TODO Auto-generated destructor stub
 }
-
 
 DateFormat::DateFormat(const std::string& format)
 {
@@ -45,40 +44,26 @@ std::string DateFormat::appendZero(const int& value)
 	return te;
 }
 
-std::string DateFormat::format(const Date& date)
+std::string DateFormat::format(Date* date)
 {
-	std::string temp = this->formatspec;
-	StringUtil::replaceAll(temp,"hh",appendZero(date.getHours()));
-	StringUtil::replaceAll(temp,"mi",appendZero(date.getMinutes()));
-	StringUtil::replaceAll(temp,"ss",appendZero(date.getSeconds()));
-	StringUtil::replaceAll(temp,"ns",appendZero(date.getNanoseconds()));
-	StringUtil::replaceAll(temp,"ddd",date.getDayAbbr());
-	StringUtil::replaceAll(temp,"dd",appendZero(date.getDay()));
-	StringUtil::replaceAll(temp,"mmm",date.getMonthAbbr());
-	StringUtil::replaceAll(temp,"mm",appendZero(date.getMonth()));
-	StringUtil::replaceAll(temp,"yyyy",appendZero(date.getYear()));
-	StringUtil::replaceAll(temp,"yy",appendZero(date.getYear()).substr(2));
-	StringUtil::replaceAll(temp,"z",date.getTimeZone());
-	std::string tz = CastUtil::lexical_cast<std::string>(date.getTimeZoneOffset()*100);
-	if(tz.find(".")!=std::string::npos) {
-		tz = tz.substr(0, tz.find("."));
-	}
-	if(date.getTimeZoneOffset()>0)
-	{
-		tz = "+" + tz;
-		StringUtil::replaceAll(temp,"Z",tz);
-	}
-	else if(date.getTimeZoneOffset()<0)
-	{
-		tz = "-" + tz;
-		StringUtil::replaceAll(temp,"Z",tz);
-	}
-	return temp;
+	char buffer[100];
+	strftime(buffer, sizeof(buffer), formatspec.c_str(), date->getTimeinfo());
+	return std::string(buffer);
+}
+
+std::string DateFormat::format(Date& date)
+{
+	char buffer[100];
+	strftime(buffer, sizeof(buffer), formatspec.c_str(), date.getTimeinfo());
+	return std::string(buffer);
 }
 
 Date* DateFormat::parse(std::string strdate)
 {
-	std::string temp = this->formatspec;
+	struct tm ti;
+	strptime(strdate.c_str(), formatspec.c_str(), &ti);
+	return new Date(&ti);
+	/*std::string temp = this->formatspec;
 	Date* date = NULL;
 	std::string yyyy,yy,ddd,dd,mmm,mm,hh,mi,ss,tzv;
 	if(temp.find("yyyy")!=std::string::npos)
@@ -300,7 +285,7 @@ Date* DateFormat::parse(std::string strdate)
 		ss = CastUtil::lexical_cast<std::string>(date->getSeconds());
 	date->setTime(CastUtil::lexical_cast<int>(hh),
 		CastUtil::lexical_cast<int>(mi), CastUtil::lexical_cast<int>(ss));
-	return date;
+	return date;*/
 }
 
 const std::string& DateFormat::getFormatspec() const

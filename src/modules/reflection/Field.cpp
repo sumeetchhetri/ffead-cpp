@@ -23,12 +23,14 @@
 #include "Field.h"
 
 Field::Field() {
-	// TODO Auto-generated constructor stub
+	f = NULL;
+}
 
+GetFld Field::getIns() const {
+	return f;
 }
 
 Field::~Field() {
-	// TODO Auto-generated destructor stub
 }
 
 const std::string& Field::getAccessSpecifier() const

@@ -36,18 +36,27 @@ public:
 
 	template<class T> bool add(T& t) {
 		if(data=="") {
-			data = JSONSerialize::serialize(t);
+			std::string cn = CastUtil::getClassName(t);
+			int serOpt = SerializeBase::identifySerOption(cn);
+			data = JSONSerialize::serialize(t, serOpt);
 		}
+		return false;
 	}
 	template<class T> bool update(T& t) {
 		if(data=="") {
-			data = JSONSerialize::serialize(t);
+			std::string cn = CastUtil::getClassName(t);
+			int serOpt = SerializeBase::identifySerOption(cn);
+			data = JSONSerialize::serialize(t, serOpt);
 		}
+		return false;
 	}
 	template<class T> std::map<int, std::string> addMulti(std::vector<T>& vecT) {
 		if(data=="") {
-			data = JSONSerialize::serialize(vecT);
+			std::string cn = CastUtil::getClassName(vecT);
+			int serOpt = SerializeBase::identifySerOption(cn);
+			data = JSONSerialize::serialize(vecT, serOpt);
 		}
+		return false;
 	}
 };
 

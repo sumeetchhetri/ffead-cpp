@@ -25,6 +25,7 @@
 #include "string"
 #include "Timer.h"
 #include "TimeUnit.h"
+#include "ReusableInstanceHolder.h"
 
 
 class Task {
@@ -48,6 +49,7 @@ public:
 	virtual ~Task();
 	virtual void run()=0;
 protected:
+	ReusableInstanceHolder* hdlr;
 	void init();
 	void setPriority(const int& priority);
 	void setTunitType(const int& tunit, const int& type);

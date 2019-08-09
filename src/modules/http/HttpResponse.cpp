@@ -504,9 +504,8 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			//as per suggestion at http://stackoverflow.com/questions/10446526/get-last-modified-time-of-file-in-linux
 			gmtime_r(&(attrib.st_mtime), &tim);
 
+
 			Date filemodifieddate(&tim);
-			DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
-			std::string lastmodDate = df.format(filemodifieddate);
 
 			bool isifmodsincvalid = false;
 
@@ -517,6 +516,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			{
 				Date* ifmodsince = NULL;
 				try {
+					DateFormat df("%a, %d %b %Y %H:%M:%S GMT");
 					ifmodsince = df.parse(ifmodsincehdr);
 					isifmodsincvalid = true;
 					//std::cout << "Parsed date success" << std::endl;
@@ -546,7 +546,13 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 				}
 			}
 
-			res->addHeaderValue(HttpResponse::LastModified, lastmodDate);
+			time_t rt;
+			struct tm ti;
+			time (&rt);
+			gmtime_r(&rt, &ti);
+			char buffer[31];
+			strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
+			res->addHeaderValue(HttpResponse::LastModified, std::string(buffer));
 
 			if(isCEGzip)
 			{

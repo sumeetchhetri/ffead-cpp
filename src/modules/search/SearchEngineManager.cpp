@@ -28,36 +28,30 @@ void SearchEngineManager::initCache(const ConnectionProperties& props, const std
 	SearchEngineManager* mgr = new SearchEngineManager(props);
 	engines[name] = mgr;
 
-	void* dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load application shared library");
-	}
-	Reflector ref(dlib);
+	Reflector* ref = GenericObject::getReflector();
 	if(props.getProperty("init")!="") {
 		std::string meth = props.getProperty("init");
 		std::vector<std::string> v;
 		StringUtil::split(v, meth, ".");
 		if(v.size()==2) {
 			CommonUtils::setAppName(appName);
-			ClassInfo clas = ref.getClassInfo(v.at(0), appName);
-			if(clas.getClassName()!="") {
+			ClassInfo* clas = ref->getClassInfo(v.at(0), appName);
+			if(clas->getClassName()!="") {
 				args argus;
 				vals valus;
-				const Constructor& ctor = clas.getConstructor(argus);
-				void* _temp = ref.newInstanceGVP(ctor);
+				const Constructor& ctor = clas->getConstructor(argus);
+				void* _temp = ref->newInstanceGVP(ctor);
 				try {
 					if(_temp!=NULL) {
-						const Method& meth = clas.getMethod(v.at(1), argus);
+						const Method& meth = clas->getMethod(v.at(1), argus);
 						if(meth.getMethodName()!="")
 						{
-							ref.invokeMethodGVP(_temp, meth, valus);
+							ref->invokeMethodGVP(_temp, meth, valus);
 						}
 					}
 				} catch(const std::exception& e) {
 				}
-				ref.destroy(_temp, v.at(0), appName);
+				ref->destroy(_temp, v.at(0), appName);
 			}
 		}
 	}
@@ -107,13 +101,7 @@ SearchEngineInterface* SearchEngineManager::getImpl(std::string name) {
 		return NULL;
 	}
 	t->appName = appName;
-	t->dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(t->dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load application shared library");
-	}
-	t->reflector = new Reflector(t->dlib);
+	t->reflector = GenericObject::getReflector();
 	return t;
 }
 

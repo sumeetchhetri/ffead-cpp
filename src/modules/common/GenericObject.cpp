@@ -7,6 +7,16 @@
 
 #include "GenericObject.h"
 
+Reflector* GenericObject::ref = NULL;
+
+void GenericObject::init(Reflector* r) {
+	ref = r;
+}
+
+Reflector* GenericObject::getReflector() {
+	return ref;
+}
+
 GenericObject::GenericObject() {
 	objVal = NULL;
 }
@@ -65,14 +75,15 @@ void GenericObject::internalCopy(const GenericObject& obj) {
 		std::copy(wstr.begin(), wstr.end(), wstrpr);
 		objVal = wstrpr;
 	}
-	else objVal = XMLSerialize::unSerializeUnknown(obj.objSerState, obj.typeName);
+	else {
+		int serOpt = SerializeBase::identifySerOption(obj.typeName);
+		objVal = XMLSerialize::unSerializeUnknown(obj.objSerState, serOpt, obj.typeName);
+	}
 }
 
 void GenericObject::internalClear() {
 	if(objVal!=NULL) {
-		Reflector r;
-		r.destroy(objVal, typeName);
-		//delete objVal;
+		ref->destroy(objVal, typeName);
 		objVal = NULL;
 	}
 	if(cstr.size()>0) {

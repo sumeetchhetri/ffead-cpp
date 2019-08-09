@@ -22,124 +22,42 @@
 
 #include "JSONSerialize.h"
 
+JSONSerialize JSONSerialize::_i;
+
 JSONSerialize::JSONSerialize() {
-	dlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(dlib == NULL)
-	{
-		std::cerr << dlerror() << std::endl;
-		throw std::runtime_error("Cannot load serialization shared library");
-	}
-	dlibinstantiated = true;
 }
 
 JSONSerialize::JSONSerialize(void* dlib) {
-	if(dlib == NULL)
-	{
-		throw std::runtime_error("Cannot load serialization shared library");
-	}
-	this->dlib = dlib;
-	dlibinstantiated = false;
 }
 
 JSONSerialize::~JSONSerialize() {
-	if(dlibinstantiated)
-	{
-		dlclose(dlib);
-	}
 }
 
-std::string JSONSerialize::serializePrimitive(const std::string& className, void* t)
+std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& className, void* t)
 {
-	std::string objXml;
-	if(className=="std::string" || className=="string")
-	{
-		std::string tem = *(std::string*)t;
-		objXml = "\""+tem+"\"";
+	switch(serOpt) {
+		case 1: return "\""+*(std::string*)t+"\"";
+		case 2: return "\""+std::string((char*)t)+"\"";
+		case 3: return "\""+std::string((char*)t)+"\"";
+		case 4: return "\""+CastUtil::lexical_cast<std::string>(*(int*)t)+"\"";
+		case 5: return "\""+CastUtil::lexical_cast<std::string>(*(unsigned int*)t)+"\"";
+		case 6: return "\""+CastUtil::lexical_cast<std::string>(*(short*)t)+"\"";
+		case 7: return "\""+CastUtil::lexical_cast<std::string>(*(unsigned short*)t)+"\"";
+		case 8: return "\""+CastUtil::lexical_cast<std::string>(*(long*)t)+"\"";
+		case 9: return "\""+CastUtil::lexical_cast<std::string>(*(unsigned long*)t)+"\"";
+		case 10: return "\""+CastUtil::lexical_cast<std::string>(*(long long*)t)+"\"";
+		case 11: return "\""+CastUtil::lexical_cast<std::string>(*(unsigned long long*)t)+"\"";
+		case 12: return "\""+CastUtil::lexical_cast<std::string>(*(float*)t)+"\"";
+		case 13: return "\""+CastUtil::lexical_cast<std::string>(*(double*)t)+"\"";
+		case 14: return "\""+CastUtil::lexical_cast<std::string>(*(long double*)t)+"\"";
+		case 15: return "\""+CastUtil::lexical_cast<std::string>(*(bool*)t)+"\"";
+		case 16: {
+			DateFormat formt;
+			return "\""+formt.format(*(Date*)t)+"\"";
+		}
+		case 17: return "\""+BinaryData::serilaize(*(BinaryData*)t)+"\"";
 	}
-	else if(className=="char")
-	{
-		char tem = *(char*)t;
-		std::string temp;
-		temp.push_back(tem);
-		objXml = "\""+temp+"\"";
-	}
-	else if(className=="unsigned char")
-	{
-		unsigned char tem = *(char*)t;
-		std::string temp;
-		temp.push_back(tem);
-		objXml = "\""+temp+"\"";
-	}
-	else if(className=="int")
-	{
-		int tem = *(int*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="unsigned int")
-	{
-		unsigned int tem = *(unsigned int*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="short")
-	{
-		short tem = *(short*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="unsigned short")
-	{
-		unsigned short tem = *(unsigned short*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="long")
-	{
-		long tem = *(long*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="unsigned long")
-	{
-		unsigned long tem = *(unsigned long*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="long long")
-	{
-		long long tem = *(long long*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="unsigned long long")
-	{
-		unsigned long long tem = *(unsigned long long*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="float")
-	{
-		float tem = *(float*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="double")
-	{
-		double tem = *(double*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="long double")
-	{
-		long double tem = *(long double*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="bool")
-	{
-		bool tem = *(bool*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="Date")
-	{
-		DateFormat formt("yyyy-mm-dd hh:mi:ss");
-		objXml = "\""+formt.format(*(Date*)t)+"\"";
-	}
-	else if(className=="BinaryData")
-	{
-		objXml = "\""+BinaryData::serilaize(*(BinaryData*)t)+"\"";
-	}
-	return objXml;
+	return "";
 }
 
 void* JSONSerialize::getSerializableObject()
@@ -227,107 +145,125 @@ void* JSONSerialize::getContainerElement(void* _1, const int& counter, const int
 	return (void*)(&(root->getChildren().at(counter)));
 }
 
-void JSONSerialize::addPrimitiveElementToContainer(void* _1, const int& counter, const std::string& className, void* cont, const std::string& container)
+void JSONSerialize::addPrimitiveElementToContainer(void* _1, int serOpt, const int& counter, const std::string& className, void* cont, const std::string& container)
 {
 	JSONElement* root = (JSONElement*)_1;
 	JSONElement* ele = (JSONElement*)&(root->getChildren().at(counter));
-	if(className=="std::string" || className=="string")
-	{
-		std::string retVal = ele->getValue();
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="int")
-	{
-		int retVal = CastUtil::lexical_cast<int>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="short")
-	{
-		short retVal = CastUtil::lexical_cast<short>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="long")
-	{
-		long retVal = CastUtil::lexical_cast<long>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="long long")
-	{
-		long long retVal = CastUtil::lexical_cast<long long>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="long double")
-	{
-		long double retVal = CastUtil::lexical_cast<long double>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="unsigned int")
-	{
-		unsigned int retVal = CastUtil::lexical_cast<unsigned int>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="unsigned short")
-	{
-		unsigned short retVal = CastUtil::lexical_cast<unsigned short>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="unsigned long")
-	{
-		unsigned long retVal = CastUtil::lexical_cast<unsigned long>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="unsigned long long")
-	{
-		unsigned long long retVal = CastUtil::lexical_cast<unsigned long long>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="float")
-	{
-		float retVal = CastUtil::lexical_cast<float>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="double")
-	{
-		double retVal = CastUtil::lexical_cast<double>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="bool")
-	{
-		bool retVal = CastUtil::lexical_cast<bool>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="char")
-	{
-		char retVal = CastUtil::lexical_cast<char>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="unsigned char")
-	{
-		unsigned char retVal = CastUtil::lexical_cast<unsigned char>(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
-		else addValueToNestedContainer(container, retVal, cont);
-	}
-	else if(className=="Date")
-	{
-		DateFormat formt("yyyy-mm-dd hh:mi:ss");
-		Date* _d = formt.parse(ele->getValue());
-		if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, *_d, cont);
-		else addValueToNestedContainer(container, *_d, cont);
-		delete _d;
+	switch(serOpt) {
+		case 1:
+		{
+			std::string retVal = ele->getValue();
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 2:
+		{
+			char retVal = ele->getValue().at(0);
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 3:
+		{
+			unsigned char retVal = ele->getValue().at(0);
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 4:
+		{
+			int retVal = CastUtil::lexical_cast<int>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 5:
+		{
+			unsigned int retVal = CastUtil::lexical_cast<unsigned int>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 6:
+		{
+			short retVal = CastUtil::lexical_cast<short>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 7:
+		{
+			unsigned short retVal = CastUtil::lexical_cast<unsigned short>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 8:
+		{
+			long retVal = CastUtil::lexical_cast<long>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 9:
+		{
+			unsigned long retVal = CastUtil::lexical_cast<unsigned long>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 10:
+		{
+			long long retVal = CastUtil::lexical_cast<long long>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 11:
+		{
+			unsigned long long retVal = CastUtil::lexical_cast<unsigned long long>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 12:
+		{
+			float retVal = CastUtil::lexical_cast<float>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 13:
+		{
+			double retVal = CastUtil::lexical_cast<double>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 14:
+		{
+			long double retVal = CastUtil::lexical_cast<long double>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 15:
+		{
+			bool retVal = CastUtil::lexical_cast<bool>(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
+			else addValueToNestedContainer(container, retVal, cont);
+			break;
+		}
+		case 16:
+		{
+			DateFormat formt;
+			Date* _d = formt.parse(ele->getValue());
+			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, *_d, cont);
+			else addValueToNestedContainer(container, *_d, cont);
+			delete _d;
+			break;
+		}
 	}
 }
 
@@ -367,109 +303,126 @@ std::string JSONSerialize::getUnserializableClassName(void* _1, const std::strin
 	return className;
 }
 
-void* JSONSerialize::getPrimitiveValue(void* _1, const std::string& className)
+void* JSONSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& className)
 {
 	std::string* root = (std::string*)_1;
-	if((className=="signed" || className=="int" || className=="signed int"))
-	{
-		int *vt = new int;
-		*vt = CastUtil::lexical_cast<int>(*root);
-		return vt;
-	}
-	else if((className=="unsigned" || className=="unsigned int"))
-	{
-		unsigned int *vt = new unsigned int;
-		*vt = CastUtil::lexical_cast<unsigned int>(*root);
-		return vt;
-	}
-	else if((className=="short" || className=="short int" || className=="signed short" || className=="signed short int"))
-	{
-		short *vt = new short;
-		*vt = CastUtil::lexical_cast<short>(*root);
-		return vt;
-	}
-	else if((className=="unsigned short" || className=="unsigned short int"))
-	{
-		unsigned short *vt = new unsigned short;
-		*vt = CastUtil::lexical_cast<unsigned short>(*root);
-		return vt;
-	}
-	else if((className=="long int" || className=="signed long" || className=="signed long int" || className=="signed long long int"))
-	{
-		long *vt = new long;
-		*vt = CastUtil::lexical_cast<long>(*root);
-		return vt;
-	}
-	else if((className=="unsigned long long" || className=="unsigned long long int"))
-	{
-		unsigned long long *vt = new unsigned long long;
-		*vt = CastUtil::lexical_cast<unsigned long long>(*root);
-		return vt;
-	}
-	else if((className=="char" || className=="signed char"))
-	{
-		char *vt = new char;
-		*vt = root->at(0);
-		return vt;
-	}
-	else if(className=="unsigned char")
-	{
-		unsigned char *vt = new unsigned char;
-		*vt = root->at(0);
-		return vt;
-	}
-	else if(className=="Date")
-	{
-		DateFormat formt("yyyy-mm-dd hh:mi:ss");
-		return formt.parse(*root);
-	}
-	else if(className=="BinaryData")
-	{
-		return BinaryData::unSerilaize(*root);
-	}
-	else if(className=="float")
-	{
-		float *vt = new float;
-		*vt = CastUtil::lexical_cast<float>(*root);
-		return vt;
-	}
-	else if(className=="double")
-	{
-		double *vt = new double;
-		*vt = CastUtil::lexical_cast<double>(*root);
-		return vt;
-	}
-	else if(className=="long double")
-	{
-		long double *vt = new long double;
-		*vt = CastUtil::lexical_cast<long double>(*root);
-		return vt;
-	}
-	else if(className=="bool")
-	{
-		bool *vt = new bool;
-		*vt = CastUtil::lexical_cast<bool>(*root);
-		return vt;
-	}
-	else if(className=="std::string" || className=="string")
-	{
-		std::string *vt = new std::string;
-		*vt = *root;
-		return vt;
+	switch(serOpt) {
+		case 1:
+		{
+			std::string *vt = new std::string;
+			*vt = *root;
+			return vt;
+		}
+		case 2:
+		{
+			char *vt = new char;
+			*vt = root->at(0);
+			return vt;
+		}
+		case 3:
+		{
+			unsigned char *vt = new unsigned char;
+			*vt = root->at(0);
+			return vt;
+		}
+		case 4:
+		{
+			int *vt = new int;
+			*vt = CastUtil::lexical_cast<int>(*root);
+			return vt;
+		}
+		case 5:
+		{
+			unsigned int *vt = new unsigned int;
+			*vt = CastUtil::lexical_cast<unsigned int>(*root);
+			return vt;
+		}
+		case 6:
+		{
+			short *vt = new short;
+			*vt = CastUtil::lexical_cast<short>(*root);
+			return vt;
+		}
+		case 7:
+		{
+			unsigned short *vt = new unsigned short;
+			*vt = CastUtil::lexical_cast<unsigned short>(*root);
+			return vt;
+		}
+		case 8:
+		{
+			long *vt = new long;
+			*vt = CastUtil::lexical_cast<long>(*root);
+			return vt;
+		}
+		case 9:
+		{
+			unsigned long *vt = new unsigned long;
+			*vt = CastUtil::lexical_cast<long>(*root);
+			return vt;
+		}
+		case 10:
+		{
+			long long *vt = new long long;
+			*vt = CastUtil::lexical_cast<long long>(*root);
+			return vt;
+		}
+		case 11:
+		{
+			unsigned long long *vt = new unsigned long long;
+			*vt = CastUtil::lexical_cast<long>(*root);
+			return vt;
+		}
+		case 12:
+		{
+			float *vt = new float;
+			*vt = CastUtil::lexical_cast<float>(*root);
+			return vt;
+		}
+		case 13:
+		{
+			double *vt = new double;
+			*vt = CastUtil::lexical_cast<double>(*root);
+			return vt;
+		}
+		case 14:
+		{
+			long double *vt = new long double;
+			*vt = CastUtil::lexical_cast<long double>(*root);
+			return vt;
+		}
+		case 15:
+		{
+			bool *vt = new bool;
+			*vt = CastUtil::lexical_cast<bool>(*root);
+			return vt;
+		}
+		case 16:
+		{
+			DateFormat formt;
+			return formt.parse(*root);
+		}
+		case 17:
+		{
+			return BinaryData::unSerilaize(*root);
+		}
 	}
 	return NULL;
 }
 
-std::string JSONSerialize::serializeUnknown(void* t, const std::string& className, const std::string& appName)
+std::string JSONSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, SerCont f3, const std::string& appName)
 {
-	JSONSerialize serialize;
-	return _handleAllSerialization(className,t,appName, &serialize);
+	return _handleAllSerialization(serOpt,className,t,appName,&_i, f1, f2, f3);
 }
 
-void* JSONSerialize::unSerializeUnknown(const std::string& objXml, const std::string& className, const std::string& appName)
+std::string JSONSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	JSONSerialize serialize;
-	return _handleAllUnSerialization(objXml,className,appName,&serialize,true,NULL);
+	return _handleAllSerialization(serOpt,className,t,appName,&_i, NULL, NULL, NULL);
+}
+
+void* JSONSerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
+{
+	return _handleAllUnSerialization(objXml,serOpt,className,appName,&_i,true,NULL);
 }
 
 bool JSONSerialize::isValidClassNamespace(void* _1, const std::string& classname, const std::string& namespc, const bool& iscontainer)
@@ -514,100 +467,96 @@ void JSONSerialize::afterAddObjectProperty(void* _1)
 	*object += ",";
 }
 
-void JSONSerialize::addObjectPrimitiveProperty(void* _1, const std::string& propName, const std::string& className, void* t)
+void JSONSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::string& propName, const std::string& className, void* t)
 {
 	std::string* object = (std::string*)_1;
-
-	std::string objXml;
-	if(className=="std::string" || className=="string")
-	{
-		std::string tem = *(std::string*)t;
-		objXml = "\""+tem+"\"";
+	switch(serOpt) {
+		case 1:
+		{
+			*object += "\"" + propName + "\" : \"" + *(std::string*)t + "\"";
+			break;
+		}
+		case 2:
+		{
+			*object += "\"" + propName + "\" : \"" + std::string((char*)t) + "\"";
+			break;
+		}
+		case 3:
+		{
+			*object += "\"" + propName + "\" : \"" + std::string((char*)t) + "\"";
+			break;
+		}
+		case 4:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(int*)t);
+			break;
+		}
+		case 5:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(unsigned int*)t);
+			break;
+		}
+		case 6:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(short*)t);
+			break;
+		}
+		case 7:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(unsigned short*)t);
+			break;
+		}
+		case 8:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(long*)t);
+			break;
+		}
+		case 9:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(unsigned long*)t);
+			break;
+		}
+		case 10:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(long long*)t);
+			break;
+		}
+		case 11:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(unsigned long long*)t);
+			break;
+		}
+		case 12:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(float*)t);
+			break;
+		}
+		case 13:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(double*)t);
+			break;
+		}
+		case 14:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(long double*)t);
+			break;
+		}
+		case 15:
+		{
+			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(bool*)t);
+			break;
+		}
+		case 16:
+		{
+			DateFormat formt;
+			*object += "\"" + propName + "\" : \"" + formt.format((Date*)t) + "\"";
+			break;
+		}
+		case 17:
+		{
+			*object += "\"" + propName + "\" : \"" + BinaryData::serilaize(*(BinaryData*)t) + "\"";
+		}
 	}
-	else if(className=="char")
-	{
-		char tem = *(char*)t;
-		std::string temp;
-		temp.push_back(tem);
-		objXml = "\""+temp+"\"";
-	}
-	else if(className=="unsigned char")
-	{
-		unsigned char tem = *(char*)t;
-		std::string temp;
-		temp.push_back(tem);
-		objXml = "\""+temp+"\"";
-	}
-	else if(className=="int")
-	{
-		int tem = *(int*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="unsigned int")
-	{
-		unsigned int tem = *(unsigned int*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="short")
-	{
-		short tem = *(short*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="unsigned short")
-	{
-		unsigned short tem = *(unsigned short*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="long")
-	{
-		long tem = *(long*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="unsigned long")
-	{
-		unsigned long tem = *(unsigned long*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="long long")
-	{
-		long long tem = *(long long*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="unsigned long long")
-	{
-		unsigned long long tem = *(unsigned long long*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="float")
-	{
-		float tem = *(float*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="double")
-	{
-		double tem = *(double*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="long double")
-	{
-		long double tem = *(long double*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="bool")
-	{
-		bool tem = *(bool*)t;
-		objXml = CastUtil::lexical_cast<std::string>(tem);
-	}
-	else if(className=="Date")
-	{
-		DateFormat formt("yyyy-mm-dd hh:mi:ss");
-		objXml = "\""+formt.format(*(Date*)t)+"\"";
-	}
-	else if(className=="BinaryData")
-	{
-		objXml = "\""+BinaryData::serilaize(*(BinaryData*)t)+"\"";
-	}
-	*object += "\"" + propName + "\" : " + objXml;
 }
 
 void JSONSerialize::addObjectProperty(void* _1, const std::string& propName, std::string className, const std::string& t)
@@ -616,120 +565,122 @@ void JSONSerialize::addObjectProperty(void* _1, const std::string& propName, std
 	*object += "\"" + propName + "\" : " + t;
 }
 
-void* JSONSerialize::getObjectPrimitiveValue(void* _1, const std::string& className, const std::string& propName)
+void* JSONSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName)
 {
 	JSONElement* root = (JSONElement*)_1;
-	if((className=="signed" || className=="int" || className=="signed int"))
-	{
-		int *vt = new int;
-		*vt = CastUtil::lexical_cast<int>(root->getValue());
-		return vt;
-	}
-	else if((className=="unsigned" || className=="unsigned int"))
-	{
-		unsigned int *vt = new unsigned int;
-		*vt = CastUtil::lexical_cast<unsigned int>(root->getValue());
-		return vt;
-	}
-	else if((className=="short" || className=="short int" || className=="signed short" || className=="signed short int"))
-	{
-		short *vt = new short;
-		*vt = CastUtil::lexical_cast<short>(root->getValue());
-		return vt;
-	}
-	else if((className=="unsigned short" || className=="unsigned short int"))
-	{
-		unsigned short *vt = new unsigned short;
-		*vt = CastUtil::lexical_cast<unsigned short>(root->getValue());
-		return vt;
-	}
-	else if((className=="long" || className=="long int" || className=="signed long" || className=="signed long int"))
-	{
-		long *vt = new long;
-		*vt = CastUtil::lexical_cast<long>(root->getValue());
-		return vt;
-	}
-	else if((className=="unsigned long" || className=="unsigned long int"))
-	{
-		unsigned long *vt = new unsigned long;
-		*vt = CastUtil::lexical_cast<unsigned long>(root->getValue());
-		return vt;
-	}
-	else if((className=="long long" || className=="long long int" || className=="signed long long int"))
-	{
-		long long *vt = new long long;
-		*vt = CastUtil::lexical_cast<long long>(root->getValue());
-		return vt;
-	}
-	else if((className=="unsigned long long" || className=="unsigned long long int"))
-	{
-		unsigned long long *vt = new unsigned long long;
-		*vt = CastUtil::lexical_cast<unsigned long long>(root->getValue());
-		return vt;
-	}
-	else if((className=="char" || className=="signed char"))
-	{
-		char *vt = new char;
-		*vt = root->getValue().at(0);
-		return vt;
-	}
-	else if(className=="unsigned char")
-	{
-		unsigned char *vt = new unsigned char;
-		*vt = root->getValue().at(0);
-		return vt;
-	}
-	else if(className=="Date")
-	{
-		DateFormat formt("yyyy-mm-dd hh:mi:ss");
-		return formt.parse(root->getValue());
-	}
-	else if(className=="BinaryData")
-	{
-		return BinaryData::unSerilaize(root->getValue());
-	}
-	else if(className=="float")
-	{
-		float *vt = new float;
-		*vt = CastUtil::lexical_cast<float>(root->getValue());
-		return vt;
-	}
-	else if(className=="double")
-	{
-		double *vt = new double;
-		*vt = CastUtil::lexical_cast<double>(root->getValue());
-		return vt;
-	}
-	else if(className=="long double")
-	{
-		long double *vt = new long double;
-		*vt = CastUtil::lexical_cast<long double>(root->getValue());
-		return vt;
-	}
-	else if(className=="bool")
-	{
-		bool *vt = new bool;
-		*vt = CastUtil::lexical_cast<bool>(root->getValue());
-		return vt;
-	}
-	else if(className=="std::string" || className=="string")
-	{
-		std::string *vt = new std::string;
-		*vt = root->getValue();
-		return vt;
+	switch(serOpt) {
+		case 1:
+		{
+			std::string *vt = new std::string;
+			*vt = root->getValue();
+			return vt;
+		}
+		case 2:
+		{
+			char *vt = new char;
+			*vt = root->getValue().at(0);
+			return vt;
+		}
+		case 3:
+		{
+			unsigned char *vt = new unsigned char;
+			*vt = root->getValue().at(0);
+			return vt;
+		}
+		case 4:
+		{
+			int *vt = new int;
+			*vt = CastUtil::lexical_cast<int>(root->getValue());
+			return vt;
+		}
+		case 5:
+		{
+			unsigned int *vt = new unsigned int;
+			*vt = CastUtil::lexical_cast<unsigned int>(root->getValue());
+			return vt;
+		}
+		case 6:
+		{
+			short *vt = new short;
+			*vt = CastUtil::lexical_cast<short>(root->getValue());
+			return vt;
+		}
+		case 7:
+		{
+			unsigned short *vt = new unsigned short;
+			*vt = CastUtil::lexical_cast<unsigned short>(root->getValue());
+			return vt;
+		}
+		case 8:
+		{
+			long *vt = new long;
+			*vt = CastUtil::lexical_cast<long>(root->getValue());
+			return vt;
+		}
+		case 9:
+		{
+			unsigned long *vt = new unsigned long;
+			*vt = CastUtil::lexical_cast<long>(root->getValue());
+			return vt;
+		}
+		case 10:
+		{
+			long long *vt = new long long;
+			*vt = CastUtil::lexical_cast<long long>(root->getValue());
+			return vt;
+		}
+		case 11:
+		{
+			unsigned long long *vt = new unsigned long long;
+			*vt = CastUtil::lexical_cast<long>(root->getValue());
+			return vt;
+		}
+		case 12:
+		{
+			float *vt = new float;
+			*vt = CastUtil::lexical_cast<float>(root->getValue());
+			return vt;
+		}
+		case 13:
+		{
+			double *vt = new double;
+			*vt = CastUtil::lexical_cast<double>(root->getValue());
+			return vt;
+		}
+		case 14:
+		{
+			long double *vt = new long double;
+			*vt = CastUtil::lexical_cast<long double>(root->getValue());
+			return vt;
+		}
+		case 15:
+		{
+			bool *vt = new bool;
+			*vt = CastUtil::lexical_cast<bool>(root->getValue());
+			return vt;
+		}
+		case 16:
+		{
+			DateFormat formt;
+			return formt.parse(root->getValue());
+		}
+		case 17:
+		{
+			return BinaryData::unSerilaize(root->getValue());
+		}
 	}
 	return NULL;
 }
 
-std::string JSONSerialize::serializeUnknownBase(void* t, const std::string& className, const std::string& appName)
+std::string JSONSerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllSerialization(className,t,appName, this);
+	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL);
 }
-void* JSONSerialize::unSerializeUnknownBase(void* unserObj, const std::string& className, const std::string& appName)
+void* JSONSerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllUnSerialization("",className,appName,this,true,unserObj);
+	return _handleAllUnSerialization("",serOpt,className,appName,this,true,unserObj);
 }
-void* JSONSerialize::unSerializeUnknownBase(const std::string& serVal, const std::string& className, const std::string& appName)
+void* JSONSerialize::unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllUnSerialization(serVal,className,appName,this,true,NULL);
+	return _handleAllUnSerialization(serVal,serOpt,className,appName,this,true,NULL);
 }

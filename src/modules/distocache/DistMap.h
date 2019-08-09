@@ -44,18 +44,18 @@ public:
 	}
 	void insert(const std::pair<K, V>& entry)
 	{
-		std::string serValue = BinarySerialize::serialize<V>(entry.second);
+		std::string serValue = BinarySerialize::serialize<V>(entry.second, -1);
 		cl->addMapEntry(cacheKey, CastUtil::lexical_cast<std::string>(entry.first), serValue);
 	}
 	const V operator[](const K& key) const
 	{
 		std::string serValue = cl->getMapEntryValue(cacheKey, CastUtil::lexical_cast<std::string>(key));
-		return BinarySerialize::unserialize<V>(serValue);
+		return BinarySerialize::unserialize<V>(serValue, -1);
 	}
 	V at(const K& key)
 	{
 		std::string serValue = cl->getMapEntryValue(cacheKey, CastUtil::lexical_cast<std::string>(key));
-		return BinarySerialize::unserialize<V>(serValue);
+		return BinarySerialize::unserialize<V>(serValue, -1);
 	}
 	void erase(const K& key)
 	{
@@ -104,7 +104,7 @@ public:
 				if(position>=0)
 				{
 					std::string serValue = cl->getMapEntryValueByPosition(cacheKey, position);
-					return BinarySerialize::unserialize<V>(serValue);
+					return BinarySerialize::unserialize<V>(serValue, -1);
 				}
 				else
 				{
@@ -115,7 +115,7 @@ public:
 			{
 				if(position>=0)
 				{
-					std::string serValue = BinarySerialize::serialize<V>(v);
+					std::string serValue = BinarySerialize::serialize<V>(v, -1);
 					cl->setMapEntryValueByPosition(cacheKey, position, serValue);
 				}
 				else

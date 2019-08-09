@@ -28,15 +28,16 @@
 #include <iostream>
 
 
-
 class DateFormat {
+	static const std::string DF;
 	std::string formatspec;
 	std::string appendZero(const int& value);
 public:
 	DateFormat();
 	virtual ~DateFormat();
 	DateFormat(const std::string&);
-	std::string format(const Date&);
+	std::string format(Date*);
+	std::string format(Date&);
 	Date* parse(std::string);
     const std::string& getFormatspec() const;
     void setFormatspec(const std::string& formatspec);

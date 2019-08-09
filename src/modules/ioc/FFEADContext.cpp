@@ -57,7 +57,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 				bean.clas = ele->getAttribute("class");
 				bean.intfType = ele->getAttribute("intfType");
 				bean.injectAs = ele->getAttribute("injectAs");
-				bean.scope = ele->getAttribute("scope");
+				bean.scope = StringUtil::toLowerCopy(ele->getAttribute("scope"));
 				bean.realbean = true;
 				ElementList eleeles = ele->getChildElements();
 				if(eleeles.size()==0)
@@ -89,7 +89,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 								beanc.inbuilt = ele1->getAttribute("inbuilt");
 								beanc.clas = ele1->getAttribute("class");
 								beanc.intfType = ele1->getAttribute("intfType");
-								bean.scope = ele1->getAttribute("scope");
+								bean.scope = StringUtil::toLowerCopy(ele1->getAttribute("scope"));
 								beanc.realbean = false;
 								injbns[beanc.appName+beanc.name] = beanc;
 								bean.injs.push_back(beanc.appName+beanc.name);
@@ -199,16 +199,16 @@ void* FFEADContext::getBean(const Bean& bean)
 	else if(bean.injectAs=="" || bean.injs.size()==0)
 	{
 		args argus;
-		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
-		const Constructor& ctor = clas.getConstructor(argus);
+		ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
+		const Constructor& ctor = clas->getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor);
 	}
 	else if(bean.injectAs=="prop")
 	{
 		args argus;
 		vals valus;
-		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
-		const Constructor& ctor = clas.getConstructor(argus);
+		ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
+		const Constructor& ctor = clas->getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
 		{
@@ -223,7 +223,7 @@ void* FFEADContext::getBean(const Bean& bean)
 				argus.push_back(beanc.clas);
 			else
 				throw std::runtime_error("Invalid or no bean type defined");
-			Method meth = clas.getMethod(methodName,argus);
+			Method meth = clas->getMethod(methodName,argus);
 			void *value = getBean(beanc);
 			valus.push_back(value);
 			reflector->invokeMethod<void*>(_temp,meth,valus);
@@ -235,7 +235,7 @@ void* FFEADContext::getBean(const Bean& bean)
 	{
 		args argus;
 		vals valus;
-		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
+		ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
 		{
 			Bean& beanc = injbns[bean.injs.at(var)];
@@ -250,15 +250,15 @@ void* FFEADContext::getBean(const Bean& bean)
 			void *value = getBean(beanc);
 			valus.push_back(value);
 		}
-		const Constructor& ctor = clas.getConstructor(argus);
+		const Constructor& ctor = clas->getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor,valus);
 	}
 	else if(bean.injectAs=="intf")
 	{
 		args argus;
 		vals valus;
-		ClassInfo clas = reflector->getClassInfo(bean.clas, bean.appName);
-		const Constructor& ctor = clas.getConstructor(argus);
+		ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
+		const Constructor& ctor = clas->getConstructor(argus);
 		_temp = reflector->newInstanceGVP(ctor);
 		for (unsigned int var = 0; var < bean.injs.size(); var++)
 		{
@@ -271,7 +271,7 @@ void* FFEADContext::getBean(const Bean& bean)
 				argus.push_back(bean.types.at(var));
 			else
 				throw std::runtime_error("Invalid or no bean type defined");
-			Method meth = clas.getMethod(methodName,argus);
+			Method meth = clas->getMethod(methodName,argus);
 			void *value = getBean(beanc);
 			valus.push_back(value);
 			reflector->invokeMethod<void*>(_temp,meth,valus);
@@ -279,7 +279,7 @@ void* FFEADContext::getBean(const Bean& bean)
 			argus.clear();
 		}
 	}
-	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
+	if(bean.scope!="prototype")
 	{
 		std::string _k = bean.appName + k;
 		if(!objects.contains(_k))
@@ -305,7 +305,7 @@ void FFEADContext::release(void* instance, const std::string& beanName, const st
 	if(beanName!="" && beans.find(appName+beanName)!=beans.end())
 	{
 		Bean& bean = beans[appName+beanName];
-		if(StringUtil::toLowerCopy(bean.scope)=="prototype")
+		if(bean.scope=="prototype")
 		{
 			std::string type;
 			if(bean.inbuilt!="" && bean.value!="")
@@ -323,7 +323,7 @@ void FFEADContext::release(void* instance, const std::string& beanName, const st
 
 void FFEADContext::clear(const std::string& appName)
 {
-	auto lt = objects.lock_table();
+	cuckoohash_map<std::string, void*>::locked_table lt = objects.lock_table();
 	cuckoohash_map<std::string, void*>::locked_table::iterator it;
 	for(it=lt.begin();it!=lt.end();++it) {
 		std::string k = StringUtil::replaceFirstCopy(it->first, appName, "");
@@ -372,11 +372,9 @@ void FFEADContext::clearAllSingletonBeans(const std::map<std::string, bool>& ser
 	cleared = true;
 }
 
-void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts)
+void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts, Reflector* reflector)
 {
-	if(reflector==NULL) {
-		reflector = new Reflector;
-	}
+	this->reflector = reflector;
 	std::map<std::string,Bean>::iterator beanIter;
 	logger << "Initializing singleton beans..." << std::endl;
 	for (beanIter=beans.begin();beanIter!=beans.end();beanIter++)
@@ -392,34 +390,85 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 			type = bean.clas;
 		}
 		std::string _k = bean.appName + bean.name + ";" + type;
-		if(servingContexts.find(bean.appName)!=servingContexts.end()
-				&& StringUtil::toLowerCopy(bean.scope)!="prototype" && !objects.contains(type))
+		if(servingContexts.find(bean.appName)!=servingContexts.end() && bean.scope!="prototype" && !objects.contains(type))
 		{
-			logger << ("Initializing Bean [appName = "+bean.appName+", name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)getBean(bean))) << std::endl;
+			void* si = getBean(bean);
+			ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
+			clas->si = si;
+			if(clas->getClassName()!="") {
+				if(clas->getConstructors().size()>0) {
+					ctorMap cm = clas->getConstructors();
+					ctorMap::iterator ci;
+					for(ci=cm.begin();ci!=cm.end();++ci) {
+						void *mkr = dlsym(reflector->dlib, ci->second.getRefName().c_str());
+						NewInst f = (NewInst)mkr;
+						if(f!=NULL) {
+							if(ci->second.getArgumentTypes().size()==0) {
+								clas->f = f;
+							}
+							ci->second.f = f;
+							clas->addConstructor(ci->second);
+						}
+					}
+				}
+
+				if(clas->getMethods().size()>0) {
+					methMap cm = clas->getMethods();
+					methMap::iterator ci;
+					for(ci=cm.begin();ci!=cm.end();++ci) {
+						void *mkr = dlsym(reflector->dlib, ci->second.getRefName().c_str());
+						GetMeth f = (GetMeth)mkr;
+						if(f!=NULL) {
+							ci->second.f = f;
+							clas->addMethod(ci->second);
+						}
+					}
+				}
+
+				if(clas->getFields().size()>0) {
+					fldMap cm = clas->getFields();
+					fldMap::iterator ci;
+					for(ci=cm.begin();ci!=cm.end();++ci) {
+						void *mkr = dlsym(reflector->dlib, ci->second.getRefName().c_str());
+						GetFld f = (GetFld)mkr;
+						if(f!=NULL) {
+							ci->second.f = f;
+							clas->addField(ci->second);
+						}
+					}
+				}
+
+				if(bean.isController) {
+					contInsMap[bean.name+bean.appName] = clas;
+				}
+			}
+			logger << ("Initializing Bean [appName = "+bean.appName+", name = "+bean.name+ ", class = "+bean.clas+ ", value = 0x" + StringUtil::toHEX((long long)si)) << std::endl;
 		}
 	}
 }
 
-Reflector& FFEADContext::getReflector()
+Reflector* FFEADContext::getReflector()
 {
-	return *reflector;
+	return reflector;
 }
 
-Bean::Bean(const std::string& name, const std::string& value, const std::string& type, const std::string& scope, const bool& isInbuilt, const std::string& appName)
+Bean::Bean(const std::string& name, const std::string& value, const std::string& type, const std::string& scope, const bool& isInbuilt, bool isController, const std::string& appName)
 {
+	this->isController = isController;
 	this->name = name;
 	this->value = value;
 	if(isInbuilt)
 		this->inbuilt = type;
 	else
 		this->clas = type;
-	this->scope = scope;
+	this->scope = StringUtil::toLowerCopy(scope);
 	this->realbean = true;
 	this->appName = appName;
 }
 
 Bean::Bean()
 {
+	this->isController = false;
 	this->realbean = false;
 	this->appName = "default";
 }

@@ -24,6 +24,8 @@
 
 bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const std::string& actUrl, std::string& className)
 {
+	Timer t(false);
+	t.start();
 	std::map<std::string, std::map<std::string, std::string> >& controllerObjectMap = ConfigurationData::getInstance()->controllerObjectMap;
 	std::map<std::string, std::string>& controllerMap = controllerObjectMap[cntxtName];
 	std::map<std::string, std::string>::iterator it;
@@ -31,14 +33,20 @@ bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const
 		if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
 		{
 			className = it->second;
+			t.end();
+			CommonUtils::tsContMpg += t.timerNanoSeconds();
 			return true;
 		}
 	}
+	t.end();
+	CommonUtils::tsContMpg += t.timerNanoSeconds();
 	return false;
 }
 
 bool ControllerHandler::getMappingForPath(const std::string& cntxtName, const std::string& actUrl, std::string& to)
 {
+	Timer t(false);
+	t.start();
 	std::map<std::string, std::map<std::string, std::string> >& mappingObjectMap = ConfigurationData::getInstance()->mappingObjectMap;
 	std::map<std::string, std::string>& mappingMap = mappingObjectMap[cntxtName];
 	std::map<std::string, std::string>::iterator it;
@@ -46,10 +54,25 @@ bool ControllerHandler::getMappingForPath(const std::string& cntxtName, const st
 		if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
 		{
 			to = it->second;
+			t.end();
+			CommonUtils::tsContPath += t.timerNanoSeconds();
 			return true;
 		}
 	}
+	t.end();
+	CommonUtils::tsContPath += t.timerNanoSeconds();
 	return false;
+}
+
+bool ControllerHandler::hasMappingExtension(std::string extwodot, HttpRequest* req) {
+	Timer t(false);
+	t.start();
+	bool f = ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->mappingextObjectMap.end()
+		&& ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].find(extwodot)
+			!=ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].end();
+	t.end();
+	CommonUtils::tsContExt += t.timerNanoSeconds();
+	return f;
 }
 
 bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
@@ -59,15 +82,17 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 	std::string controller;
 	std::string to;
 	std::string extwodot = ext!=""?ext.substr(1):"";
-	if(getControllerForPath(req->getCntxt_name(), req->getCurl(), controller))
+	if(ConfigurationData::getInstance()->enableContMpg && getControllerForPath(req->getCntxt_name(), req->getCurl(), controller))
 	{
+		Timer t(false);
+		t.start();
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("controller_"+controller, req->getCntxt_name());
 		args argus;
 		argus.push_back("HttpRequest*");
 		argus.push_back("HttpResponse*");
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getClassInfo(controller, req->getCntxt_name());
-		const Method& meth = srv.getMethod("service", argus);
+		ClassInfo* srv = ConfigurationData::getClassInfo(controller, req->getCntxt_name());
+		const Method& meth = srv->getMethod("service", argus);
 		if(meth.getMethodName()!="")
 		{
 			 valus.push_back(req);
@@ -85,8 +110,10 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			isContrl = true;
 		}
 		ConfigurationData::getInstance()->ffeadContext.release(_temp, "controller_"+controller, req->getCntxt_name());
+		t.end();
+		CommonUtils::tsContExec += t.timerNanoSeconds();
 	}
-	else if(getMappingForPath(req->getCntxt_name(), req->getCurl(), to))
+	else if(ConfigurationData::getInstance()->enableContPath && getMappingForPath(req->getCntxt_name(), req->getCurl(), to))
 	{
 		if(!StringUtil::endsWith(req->getCurl(), "/"+req->getFile()))
 		{
@@ -102,24 +129,25 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		req->setFile(to);
 		logger << ("URL mapped from " + ext + " to " + to) << std::endl;
 	}
-	else if(ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->mappingextObjectMap.end()
-			&& ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].find(extwodot)!=ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].end())
+	else if(ConfigurationData::getInstance()->enableContExt && hasMappingExtension(extwodot, req))
 	{
 		std::string file = req->getFile();
 		std::string fili = file.substr(0,file.find_last_of(".")+1);
 		req->setFile(fili+ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()][extwodot]);
 		logger << ("URL extension mapped from " + extwodot + " to " + ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()][extwodot]) << std::endl;
 	}
-	else if(ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->rstCntMap.end())
+	else if(ConfigurationData::getInstance()->enableContRst && ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->rstCntMap.end())
 	{
+		Timer t(false);
+		t.start();
+
 		resFuncMap& rstCntMap = ConfigurationData::getInstance()->rstCntMap[req->getCntxt_name()];
 		resFuncMap::iterator it;
 		RestFunction rft;
 		bool flag = false;
 		int prsiz = 0;
 		std::map<std::string, std::string> mapOfValues;
-		std::string hmeth = StringUtil::toUpperCopy(req->getMethod());
-		std::string rkey = hmeth+req->getCurl();
+		std::string rkey = req->getMethod()+req->getCurl();
 		if(rstCntMap.find(rkey)!=rstCntMap.end()) {
 			rft = rstCntMap[rkey][0];
 			flag = true;
@@ -184,7 +212,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					}
 
 					std::string lhs = StringUtil::toUpperCopy(ft.meth);
-					if(flag && lhs==hmeth)
+					if(flag && lhs==req->getMethod())
 					{
 
 						//logger << "Encountered rest controller url/method match" << std::endl;
@@ -209,13 +237,22 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				}
 			}
 		}
+		t.end();
+		CommonUtils::tsContRstLkp += t.timerNanoSeconds();
+
 		if(flag)
 		{
-			args argus;
-			vals valus;
+			t.start();
+			ClassInfo* srv = ConfigurationData::getInstance()->ffeadContext.contInsMap["restcontroller_"+rft.clas+req->getCntxt_name()];
+			//ConfigurationData::getClassInfo(rft.clas, req->getCntxt_name());
+			t.end();
+			CommonUtils::tsContRstCsiLkp += t.timerNanoSeconds();
 
-			const ClassInfo& srv = ConfigurationData::getClassInfo(rft.clas, req->getCntxt_name());
-			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft.clas, req->getCntxt_name());
+			t.start();
+			void *_temp = srv->getSI();
+			if(_temp==NULL) {
+				_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft.clas, req->getCntxt_name());
+			}
 			if(_temp==NULL) {
 				logger << "Rest Controller Not Found" << std::endl;
 				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
@@ -223,27 +260,31 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				return true;
 			}
 
-			bool invValue = false;
-			std::vector<std::ifstream*> allStreams;
-			std::map<std::string, std::vector<std::ifstream*>* > mpvecstreams;
-
 			std::string icont = rft.icontentType;
 			std::string ocont = rft.ocontentType;
-
 			if(icont=="")
 				icont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
 			else if(icont!=req->getHeader(HttpRequest::ContentType) && req->getHeader(HttpRequest::ContentType).find(icont)!=0)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
 				res->setDone(true);
-				ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				return true;
 			}
-
 			if(ocont=="")
 				ocont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
-
 			req->addHeaderValue(HttpRequest::ContentType, icont);
+
+			t.end();
+			CommonUtils::tsContRstInsLkp += t.timerNanoSeconds();
+
+			t.start();
+			args argus;
+			vals valus;
+
+			bool invValue = false;
+			std::vector<std::ifstream*> allStreams;
+			std::map<std::string, std::vector<std::ifstream*>* > mpvecstreams;
 
 			for (int var = 0; var < prsiz; var++)
 			{
@@ -291,7 +332,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 									logger << "File can only be mapped to ifstream" << std::endl;
 									res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 									res->setDone(true);
-									ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 									return true;
 								}
 							}
@@ -305,7 +346,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							logger << "Invalid mapping specified in config, no multipart content found with name " + rft.params.at(var).name << std::endl;
 							res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 							res->setDone(true);
-							ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+							if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 							return true;
 						}
 					}
@@ -316,7 +357,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							logger << "Request Body cannot be mapped to more than one argument..." << std::endl;
 							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 							res->setDone(true);
-							ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+							if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 							return true;
 						}
 						pmvalue = req->getContent();
@@ -325,188 +366,148 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					//logger << ("Restcontroller parameter type/value = "  + rft.params.at(var).type + "/" + pmvalue) << std::endl;
 					//logger << ("Restcontroller content types input/output = " + icont + "/" + ocont) << std::endl;
 
-					if(rft.params.at(var).type=="int")
-					{
-						argus.push_back(rft.params.at(var).type);
-						int* ival = new int(CastUtil::lexical_cast<int>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="short")
-					{
-						argus.push_back(rft.params.at(var).type);
-						short* ival = new short(CastUtil::lexical_cast<short>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="long")
-					{
-						argus.push_back(rft.params.at(var).type);
-						long* ival = new long(CastUtil::lexical_cast<long>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="long long")
-					{
-						argus.push_back(rft.params.at(var).type);
-						long long* ival = new long long(CastUtil::lexical_cast<long long>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="double")
-					{
-						argus.push_back(rft.params.at(var).type);
-						double* ival = new double(CastUtil::lexical_cast<double>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="float")
-					{
-						argus.push_back(rft.params.at(var).type);
-						float* ival = new float(CastUtil::lexical_cast<float>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="bool")
-					{
-						argus.push_back(rft.params.at(var).type);
-						bool* ival = new bool(CastUtil::lexical_cast<bool>(pmvalue));
-						valus.push_back(ival);
-					}
-					else if(rft.params.at(var).type=="string" || rft.params.at(var).type=="std::string")
-					{
-						argus.push_back(rft.params.at(var).type);
-						std::string* sval = new std::string(pmvalue);
-						valus.push_back(sval);
-					}
-					else if(rft.params.at(var).type=="filestream")
-					{
-						argus.push_back("ifstream*");
-						MultipartContent mcont = req->getMultipartContent(pmvalue);
-						if(mcont.isValid() && mcont.isAFile())
-						{
-							std::ifstream* ifs = new std::ifstream;
-							ifs->open(mcont.getTempFileName().c_str());
-							valus.push_back(ifs);
-							allStreams.push_back(ifs);
-						}
-					}
-					else if(rft.params.at(var).type=="vector-of-filestream")
-					{
-						std::vector<std::ifstream*> *vifs = NULL;
-						if(mpvecstreams.find(rft.params.at(var).name)==mpvecstreams.end())
-						{
-							argus.push_back("vector<ifstream*>");
-							vifs = new std::vector<std::ifstream*>;
-							std::vector<MultipartContent> mcontvec = req->getMultiPartFileList(rft.params.at(var).name);
-							for(int mci=0;mci<(int)mcontvec.size();mci++) {
-								MultipartContent mcont = mcontvec.at(mci);
-								if(mcont.isValid() && mcont.isAFile())
-								{
-									std::ifstream* ifs = new std::ifstream;
-									ifs->open(mcont.getTempFileName().c_str());
-									vifs->push_back(ifs);
-									//allStreams.push_back(ifs);
-								}
+					switch(rft.params.at(var).serOpt) {
+						case 0: {
+							argus.push_back(rft.params.at(var).type);
+							void* voidPvect = NULL;
+							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+							{
+								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
 							}
-							mpvecstreams[rft.params.at(var).name] = vifs;
+							#ifdef INC_XMLSER
+							else
+							{
+								voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
+							}
+							#endif
+							if(voidPvect==NULL)
+							{
+								res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+								res->setDone(true);
+								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+								for(int i=0;i<(int)valus.size();++i) {
+									if(valus.at(i)!=NULL) {
+										delete valus.at(i);
+									}
+								}
+								return true;
+							}
+							valus.push_back(voidPvect);
+							break;
 						}
-						else
-						{
-							vifs = mpvecstreams[rft.params.at(var).name];
+						case 1: argus.push_back(rft.params.at(var).type);valus.push_back(new std::string(CastUtil::lexical_cast<std::string>(pmvalue)));break;
+						case 2: argus.push_back(rft.params.at(var).type);valus.push_back(new char(CastUtil::lexical_cast<char>(pmvalue)));break;
+						case 3: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned char(CastUtil::lexical_cast<unsigned char>(pmvalue)));break;
+						case 4: argus.push_back(rft.params.at(var).type);valus.push_back(new int(CastUtil::lexical_cast<int>(pmvalue)));break;
+						case 5: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned int(CastUtil::lexical_cast<unsigned int>(pmvalue)));break;
+						case 6: argus.push_back(rft.params.at(var).type);valus.push_back(new short(CastUtil::lexical_cast<short>(pmvalue)));break;
+						case 7: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned short(CastUtil::lexical_cast<unsigned short>(pmvalue)));break;
+						case 8: argus.push_back(rft.params.at(var).type);valus.push_back(new long(CastUtil::lexical_cast<long long>(pmvalue)));break;
+						case 9: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned long(CastUtil::lexical_cast<unsigned long>(pmvalue)));break;
+						case 10: argus.push_back(rft.params.at(var).type);valus.push_back(new long long(CastUtil::lexical_cast<long long>(pmvalue)));break;
+						case 11: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned long long(CastUtil::lexical_cast<unsigned long long>(pmvalue)));break;
+						case 12: argus.push_back(rft.params.at(var).type);valus.push_back(new float(CastUtil::lexical_cast<float>(pmvalue)));break;
+						case 13: argus.push_back(rft.params.at(var).type);valus.push_back(new double(CastUtil::lexical_cast<double>(pmvalue)));break;
+						case 14: argus.push_back(rft.params.at(var).type);valus.push_back(new long double(CastUtil::lexical_cast<long double>(pmvalue)));break;
+						case 15: argus.push_back(rft.params.at(var).type);valus.push_back(new bool(CastUtil::lexical_cast<bool>(pmvalue)));break;
+						case 16: {
+							argus.push_back(rft.params.at(var).type);
+							DateFormat formt;
+							valus.push_back(formt.parse(pmvalue));break;
 						}
-						valus.push_back(vifs);
-					}
-					else if(rft.params.at(var).type.find("vector-of-")==0 || rft.params.at(var).type.find("list-of-")==0
-							|| rft.params.at(var).type.find("deque-of-")==0 || rft.params.at(var).type.find("set-of-")==0
-							|| rft.params.at(var).type.find("multiset-of-")==0 || rft.params.at(var).type.find("queue-of-")==0)
-					{
-						std::string stlcnt = rft.params.at(var).type;
-						std::string stltype;
-						std::string typp;
-						if(rft.params.at(var).type.find("vector-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"vector-of-","");
-							stltype = "std::vector";
-							typp = "vector<" + stlcnt + ">";
+						case 19: {
+							argus.push_back("ifstream*");
+							MultipartContent mcont = req->getMultipartContent(pmvalue);
+							if(mcont.isValid() && mcont.isAFile())
+							{
+								std::ifstream* ifs = new std::ifstream;
+								ifs->open(mcont.getTempFileName().c_str());
+								valus.push_back(ifs);
+								allStreams.push_back(ifs);
+							}
+							else
+							{
+								valus.push_back(NULL);
+							}
+							break;
 						}
-						else if(rft.params.at(var).type.find("list-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"list-of-","");
-							stltype = "std::list";
-							typp = "list<" + stlcnt + ">";
+						case 100:
+						case 101:
+						case 102:
+						case 103:
+						case 104:
+						case 105:
+						case 106:
+						case 107:
+						case 108:
+						case 109:
+						case 110:
+						case 111:
+						case 112:
+						case 113:
+						case 114:
+						case 115:
+						case 116: {
+							argus.push_back(rft.params.at(var).type);
+							void* voidPvect = NULL;
+							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+							{
+								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
+							}
+							#ifdef INC_XMLSER
+							else
+							{
+								voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
+							}
+							#endif
+							if(voidPvect==NULL)
+							{
+								res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+								res->setDone(true);
+								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+								for(int i=0;i<(int)valus.size();++i) {
+									if(valus.at(i)!=NULL) {
+										delete valus.at(i);
+									}
+								}
+								return true;
+							}
+							valus.push_back(voidPvect);
+							break;
 						}
-						else if(rft.params.at(var).type.find("deque-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"deque-of-","");
-							stltype = "std::deque";
-							typp = "deque<" + stlcnt + ">";
+						case 119: {
+							argus.push_back("vector<ifstream*>");
+							std::vector<std::ifstream*> *vifs = NULL;
+							if(mpvecstreams.find(rft.params.at(var).name)==mpvecstreams.end())
+							{
+								vifs = new std::vector<std::ifstream*>;
+								std::vector<MultipartContent> mcontvec = req->getMultiPartFileList(rft.params.at(var).name);
+								for(int mci=0;mci<(int)mcontvec.size();mci++) {
+									MultipartContent mcont = mcontvec.at(mci);
+									if(mcont.isValid() && mcont.isAFile())
+									{
+										std::ifstream* ifs = new std::ifstream;
+										ifs->open(mcont.getTempFileName().c_str());
+										vifs->push_back(ifs);
+										//allStreams.push_back(ifs);
+									}
+								}
+								mpvecstreams[rft.params.at(var).name] = vifs;
+							}
+							else
+							{
+								vifs = mpvecstreams[rft.params.at(var).name];
+							}
+							valus.push_back(vifs);
+							break;
 						}
-						else if(rft.params.at(var).type.find("set-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"set-of-","");
-							stltype = "std::set";
-							typp = "set<" + stlcnt + ">";
-						}
-						else if(rft.params.at(var).type.find("multiset-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"multiset-of-","");
-							stltype = "std::multiset";
-							typp = "multiset<" + stlcnt + ">";
-						}
-						else if(rft.params.at(var).type.find("queue-of-")==0)
-						{
-							StringUtil::replaceFirst(stlcnt,"queue-of-","");
-							stltype = "std::queue";
-							typp = "queue<" + stlcnt + ">";
-						}
-						StringUtil::replaceFirst(stlcnt," ","");
-						logger << ("Restcontroller param body holds "+stltype+" of type "  + stlcnt) << std::endl;
-
-						argus.push_back(typp);
-						void* voidPvect = NULL;
-						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
-						{
-							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, stltype+"<"+stlcnt+",",req->getCntxt_name());
-						}
-#ifdef INC_XMLSER
-						else
-						{
-							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, stltype+"<"+stlcnt+",",req->getCntxt_name());
-						}
-#endif
-						if(voidPvect==NULL)
-						{
-							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-							res->setDone(true);
-							ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
-							return true;
-						}
-						valus.push_back(voidPvect);
-					}
-					else
-					{
-						argus.push_back(rft.params.at(var).type);
-						void* voidPvect = NULL;
-						if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
-						{
-							voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type,req->getCntxt_name());
-						}
-#ifdef INC_XMLSER
-						else
-						{
-							voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).type,req->getCntxt_name());
-						}
-#endif
-						if(voidPvect==NULL)
-						{
-							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-							res->setDone(true);
-							ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
-							return true;
-						}
-						valus.push_back(voidPvect);
 					}
 				} catch(const std::exception& e) {
 					logger << "Restcontroller exception occurred" << std::endl;
 					invValue= true;
 					res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 					res->setDone(true);
-					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 					for(int i=0;i<(int)valus.size();++i) {
 						if(valus.at(i)!=NULL) {
 							delete valus.at(i);
@@ -515,49 +516,57 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					return true;
 				}
 			}
+			t.end();
+			CommonUtils::tsContRstPrsArgs += t.timerNanoSeconds();
 
 			try
 			{
-				const Method& meth = srv.getMethod(rft.name, argus);
+				t.start();
+				isContrl = true;
+				const Method& meth = srv->getMethod(rft.name, argus);
 				if(meth.getMethodName()!="" && !invValue)
 				{
 					std::string outRetType = meth.getReturnType();
 					void* ouput = reflector.invokeMethodUnknownReturn(_temp,meth,valus,true);
+					t.end();
+					CommonUtils::tsContRstExec += t.timerNanoSeconds();
+
+					t.start();
 					std::string outcontent = "void";
-					if(outRetType=="void")
+					if(ouput!=NULL)
+					{
+						if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+						{
+							outcontent = JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, rft.s, rft.sc, rft.scm, req->getCntxt_name());
+							res->setContent(outcontent);
+						}
+						else if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_XML)
+						{
+							outcontent = XMLSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name());
+							res->setContent(outcontent);
+						}
+						else
+						{
+							if(rft.serOpt>17 || rft.serOpt==0) {
+								res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name()));
+							} else {
+								res->setContent(SerializeBase::trySerialize(ouput, rft.serOpt, outRetType, req->getCntxt_name()));
+							}
+						}
+						res->addHeaderValue(HttpResponse::ContentType, ocont);
+						res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
+						delete ouput;
+						//reflector.destroy(ouput, outRetType, req->getCntxt_name());
+					}
+					else if(outRetType=="void")
 					{
 						if(rft.statusCode=="")
 							res->setHTTPResponseStatus(HTTPResponseStatus::NoContent);
 						else
-							res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(
-									CastUtil::lexical_cast<int>(rft.statusCode)));
-					}
-					else
-					{
-						if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_JSON && res->getContent()=="")
-						{
-							outcontent = JSONSerialize::serializeUnknown(ouput, outRetType, req->getCntxt_name());
-							res->setContent(outcontent);
-						}
-						else if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_XML && res->getContent()=="")
-						{
-							outcontent = XMLSerialize::serializeUnknown(ouput, outRetType, req->getCntxt_name());
-							res->setContent(outcontent);
-						}
-						else if(outRetType=="std::string" || outRetType=="string")
-						{
-							res->setContent(*(std::string*)ouput);
-						}
-						res->addHeaderValue(HttpResponse::ContentType, ocont);
-						res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(
-								CastUtil::lexical_cast<int>(rft.statusCode)));
-						//delete ouput;
-						reflector.destroy(ouput, outRetType, req->getCntxt_name());
+							res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
 					}
 					//logger << "Successfully called restcontroller output follows - " << std::endl;
 					//logger << outcontent << std::endl;
-
-					isContrl = true;
 
 					for(int i=0;i<(int)allStreams.size();++i) {
 						if(allStreams.at(i)!=NULL) {
@@ -583,21 +592,24 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						it->second->clear();
 					}
 					mpvecstreams.clear();
-					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+
+					t.end();
+					CommonUtils::tsContRstSer += t.timerNanoSeconds();
 				}
 				else
 				{
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 					//res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 					logger << "Rest Controller Method Not Found" << std::endl;
-					ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				}
 			} catch(const std::exception& e) {
 				logger << "Restcontroller exception occurred" << std::endl;
 				invValue= true;
 				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				res->setDone(true);
-				ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
+				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				return true;
 			}
 		}

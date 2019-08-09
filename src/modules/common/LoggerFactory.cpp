@@ -84,7 +84,7 @@ void LoggerFactory::configureDefaultLogger(const std::string& appName)
 		config->level = "INFO";
 		config->mode = "CONSOLE";
 		config->file = "";
-		DateFormat df("dd/mm/yyyy hh:mi:ss");
+		DateFormat df("%d/%m/%Y %H:%M:%S");
 		config->datFormat = df;
 		config->out = &std::cout;
 		config->lock = new DummyMutex;
@@ -125,9 +125,9 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 				std::string name = StringUtil::toUpperCopy(ele->getAttribute("name"));
 				std::string mode = StringUtil::toUpperCopy(ele->getAttribute("mode"));
 				std::string level = StringUtil::toUpperCopy(ele->getAttribute("level"));
-				std::string dfstr = "dd/mm/yyyy hh:mi:ss";
+				std::string dfstr = "%d/%m/%Y %H:%M:%S";
 				if(ele->getAttribute("dateformat")!="") {
-					dfstr = StringUtil::toLowerCopy(ele->getAttribute("dateformat"));
+					dfstr = ele->getAttribute("dateformat");
 				}
 				std::string file, pattern;
 				std::string logdirtype = "SERVER";

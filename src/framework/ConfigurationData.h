@@ -31,6 +31,7 @@
 #include "CommonUtils.h"
 #include "SSLHandler.h"
 #include "ClassStructure.h"
+#include "SerializeBase.h"
 
 
 typedef void* (*toObjectFromJson) (const std::string&);
@@ -49,10 +50,18 @@ class RestFunctionParams
 {
 	std::string name;
 	std::string type;
+	int serOpt;
 	std::string from;
 	std::string defValue;
+	SerCont sc;
+	SerCont scm;
+	Ser s;
+	UnSerCont usc;
+	UnSerCont uscm;
+	UnSer us;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;
+	friend class ConfigurationData;
 };
 
 class RestFunction
@@ -64,9 +73,18 @@ class RestFunction
 	std::string statusCode;
 	std::string icontentType;
 	std::string ocontentType;
+	int serOpt;
+	std::string rtype;
+	SerCont sc;
+	SerCont scm;
+	Ser s;
+	UnSerCont usc;
+	UnSerCont uscm;
+	UnSer us;
 	std::vector<RestFunctionParams> params;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;
+	friend class ConfigurationData;
 };
 
 typedef std::map<std::string, std::vector<RestFunction> > resFuncMap;
@@ -197,10 +215,22 @@ class ConfigurationData {
 	ThreadLocal httpRequest;
 	ThreadLocal httpResponse;
 	void* dlib;
+	Reflector reflector;
 	void* ddlib;
 	bool embeddedServer;
 	bool apacheServer;
 	bool nginxServer;
+	bool enableCors;
+	bool enableSecurity;
+	bool enableFilters;
+	bool enableControllers;
+	bool enableContMpg;
+	bool enableContPath;
+	bool enableContExt;
+	bool enableContRst;
+	bool enableExtra;
+	bool enableScripts;
+	bool enableSoap;
 	static void clearInstance();
 	friend class ExtHandler;
 	friend class FilterHandler;
@@ -220,8 +250,15 @@ class ConfigurationData {
 	friend class ApplicationUtil;
 	friend class FFEADContext;
 	friend class SocketUtil;
+	friend class GenericObject;
+	friend class FFEADContext;
+	friend class JobScheduler;
+	friend class DataSourceManager;
+	friend class CacheManager;
 public:
-	//static std::atomic<int> counter;
+	static void enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
+			bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra, bool enableScripts, bool enableSoap);
+	static Reflector* getReflector();
 	static int getProcessId();
 	static bool isApacheServer();
 	static void setApacheServer(bool isApacheServer);
@@ -229,7 +266,7 @@ public:
 	static void setEmbeddedServer(bool isEmbeddedServer);
 	static bool isNginxServer();
 	static void setNginxServer(bool isNginxServer);
-	static const ClassInfo getClassInfo(const std::string&, const std::string& app= "");
+	static ClassInfo* getClassInfo(const std::string&, const std::string& app= "");
 	static bool isServingContext(const std::string& cntxtName);
 	static ConfigurationData* getInstance();
 	static SecurityProperties const& getSecurityProperties();

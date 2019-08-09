@@ -22,29 +22,16 @@
 
 #include "ServiceTask.h"
 
-ServiceTask::ServiceTask(const int& fd, const std::string& serverRootDirectory) {
-	this->fd = fd;
-	this->serverRootDirectory = serverRootDirectory;
+ServiceTask::ServiceTask() {
 	logger = LoggerFactory::getLogger("ServiceTask");
-	isSSLEnabled = false;
-	ctx = NULL;
-	params = NULL;
 }
 
 ServiceTask::~ServiceTask() {
 }
 
-ServiceTask::ServiceTask() {
-	logger = LoggerFactory::getLogger("ServiceTask");
-	fd = -1;
-	isSSLEnabled = false;
-	ctx = NULL;
-	params = NULL;
-}
-
 void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std::string& value)
 {
-	std::string lockfil = serverRootDirectory+"/tmp/"+sessionId+".lck";
+	std::string lockfil = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory+"/tmp/"+sessionId+".lck";
 	std::ifstream ifs(lockfil.c_str(), std::ios::binary);
 	int counter = 5000/100;
 	while(ifs.is_open()) {
@@ -54,7 +41,7 @@ void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std:
 		if(counter--<=0)break;
 	}
 
-	std::string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
+	std::string filen = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory+"/tmp/"+sessionId+".sess";
 	logger << ("Saving session to file " + filen) << std::endl;
 	std::ofstream ofs(filen.c_str(), std::ios::binary);
 	ofs.write(value.c_str(),value.length());
@@ -66,7 +53,7 @@ void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std:
 std::map<std::string,std::string> ServiceTask::getSessionDataFromFile(const std::string& sessionId)
 {
 	std::map<std::string,std::string> valss;
-	std::string filen = serverRootDirectory+"/tmp/"+sessionId+".sess";
+	std::string filen = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory+"/tmp/"+sessionId+".sess";
 	std::ifstream ifs(filen.c_str(), std::ios::binary);
 	std::string tem,all;
 	while(getline(ifs,tem))
@@ -135,7 +122,7 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 		std::string id = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
 		//int seconds = sessionTimeout;
 		date.updateSeconds(sessionTimeout);
-		DateFormat dformat("ddd, dd-mmm-yyyy hh:mi:ss");
+		DateFormat dformat("%a, %d %b %Y %H:%M:%S");
 		std::map<std::string,std::string>::iterator it;
 
 		/*if(sessatserv)
@@ -279,7 +266,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 		gmtime_r(&(attrib.st_mtime), &tim);
 		
 		Date filemodifieddate(&tim);
-		DateFormat df("ddd, dd mmm yyyy hh:mi:ss GMT");
+		DateFormat df("%a, %d %b %Y %H:%M:%S GMT");
 		std::string lastmodDate = df.format(filemodifieddate);
 
 		bool isifmodsincvalid = false;
@@ -426,63 +413,9 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 	}
 }
 
-/*bool ServiceTask::checkSocketWaitForTimeout(const int& sock_fd, const int& writing, const int& seconds, const int& micros)
-{
-	#ifdef OS_MINGW
-		u_long iMode = 1;
-		ioctlsocket(sock_fd, FIONBIO, &iMode);
-	#else
-		fcntl(sock_fd, F_SETFL, fcntl(sock_fd, F_GETFD, 0) | O_NONBLOCK);
-	#endif
-
-	fd_set rset, wset;
-	struct timeval tv = {seconds, micros};
-	int rc;
-
-	// Guard against closed socket
-	if (sock_fd < 0)
-	{
-		return false;
-	}
-
-	// Construct the arguments to select
-	FD_ZERO(&rset);
-	FD_SET(sock_fd, &rset);
-	wset = rset;
-
-	// See if the socket is ready
-	switch (writing)
-	{
-		case 0:
-			rc = select(sock_fd+1, &rset, NULL, NULL, &tv);
-			break;
-		case 1:
-			rc = select(sock_fd+1, NULL, &wset, NULL, &tv);
-			break;
-		case 2:
-			rc = select(sock_fd+1, &rset, &wset, NULL, &tv);
-			break;
-	}
-	FD_CLR(sock_fd, &rset);
-	#ifdef OS_MINGW
-		u_long bMode = 0;
-		ioctlsocket(sock_fd, FIONBIO, &bMode);
-	#else
-		fcntl(sock_fd, F_SETFL, O_SYNC);
-	#endif	
-
-	FD_ZERO(&rset);
-	FD_ZERO(&wset);
-	// Return SOCKET_TIMED_OUT on timeout, SOCKET_OPERATION_OK
-	//otherwise
-	//(when we are able to write or when there's something to
-	//read)
-	return rc <= 0 ? false : true;
-}*/
-
 void ServiceTask::handleWebsockOpen(WebSocketData* req) {
 
-	Reflector reflector(ConfigurationData::getInstance()->dlib);
+	Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 	std::string className;
 	std::map<std::string, std::map<std::string, std::string> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
@@ -500,8 +433,8 @@ void ServiceTask::handleWebsockOpen(WebSocketData* req) {
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
 		args argus;
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
-		Method meth = srv.getMethod("onOpen", argus);
+		ClassInfo* srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
+		Method meth = srv->getMethod("onOpen", argus);
 		if(meth.getMethodName()!="")
 		{
 			// logger << ("WebSocket Controller " + className + " called") << std::endl;
@@ -517,7 +450,7 @@ void ServiceTask::handleWebsockOpen(WebSocketData* req) {
 
 void ServiceTask::handleWebsockClose(WebSocketData* req) {
 
-	Reflector reflector(ConfigurationData::getInstance()->dlib);
+	Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 	std::string className;
 	std::map<std::string, std::map<std::string, std::string> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
@@ -535,8 +468,8 @@ void ServiceTask::handleWebsockClose(WebSocketData* req) {
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
 		args argus;
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
-		Method methc = srv.getMethod("onClose", argus);
+		ClassInfo* srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
+		Method methc = srv->getMethod("onClose", argus);
 		if(methc.getMethodName()!="")
 		{
 			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
@@ -552,7 +485,7 @@ void ServiceTask::handleWebsockClose(WebSocketData* req) {
 
 void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* req, WebSocketData* response) {
 
-	Reflector reflector(ConfigurationData::getInstance()->dlib);
+	Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 	std::string className;
 	std::map<std::string, std::map<std::string, std::string> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
@@ -570,12 +503,12 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
 		args argus;
 		vals valus;
-		const ClassInfo& srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
+		ClassInfo* srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
 		argus.push_back("WebSocketData*");
 		valus.push_back(req);
 		argus.push_back("WebSocketData*");
 		valus.push_back(response);
-		Method methc = srv.getMethod("onMessage", argus);
+		Method methc = srv->getMethod("onMessage", argus);
 		if(methc.getMethodName()!="")
 		{
 			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
@@ -591,8 +524,10 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 
 void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 {
+	Timer t1;
+	t1.start();
+
 	res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-	this->serverRootDirectory = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory;
 	try
 	{
 		if(req->getRequestParseStatus().getCode()>0)
@@ -602,13 +537,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			return;
 		}
 
-		std::string& webpath = ConfigurationData::getInstance()->coreServerProperties.webPath;
-
 		if(req->getActUrlParts().size()==0)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 			res->addHeaderValue(HttpResponse::Connection, "close");
-			logger << "Context not found, Closing connection..." << std::endl;
 			return;
 		}
 
@@ -632,35 +564,23 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		}
 
 		req->normalizeUrl();
-		req->setCntxt_root(webpath+req->getCntxt_name());
+		req->setCntxt_root(ConfigurationData::getInstance()->coreServerProperties.webPath+req->getCntxt_name());
 		req->updateContent();
 
 		ConfigurationData::getInstance()->httpRequest.set(req);
 		ConfigurationData::getInstance()->httpResponse.set(res);
 		CommonUtils::setAppName(req->getCntxt_name());
 
-		SecurityHandler::populateAuthDetails(req);
+		if(ConfigurationData::getInstance()->enableSecurity) {
+			SecurityHandler::populateAuthDetails(req);
 
-		if(req->hasCookie())
-		{
-			//if(!ConfigurationData::getInstance()->coreServerProperties.sessatserv)
-			req->getSession()->setSessionAttributes(req->getCookieInfo());
-			/*else
+			if(req->hasCookie())
 			{
-				std::string id = req->getCookieInfoAttribute("FFEADID");
-				logger << id << std::endl;
-				std::map<std::string,std::string> values;
-#ifdef INC_DSTC
-				if(ConfigurationData::getInstance()->coreServerProperties.sessservdistocache)
-					values = getSessionDataFromDistocache(id);
-				else
-#endif
-					values = getSessionDataFromFile(id);
-				req->getSession()->setSessionAttributes(values);
-			}*/
+				req->getSession()->setSessionAttributes(req->getCookieInfo());
+			}
 		}
 
-		Reflector reflector(ConfigurationData::getInstance()->dlib);
+		Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 #ifdef INC_APPFLOW
 		/*if(ConfigurationData::getInstance()->applicationFlowMap.find(req->getCntxt_name())!=
@@ -694,90 +614,113 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 #endif
 
 		std::string ext = req->getExt();
-		long sessionTimeoutVar = ConfigurationData::getInstance()->coreServerProperties.sessionTimeout;
+
+		t1.end();
+		CommonUtils::tsServicePre += t1.timerNanoSeconds();
 
 		bool isContrl = false;
-		try {
-			isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
-		} catch(const HTTPResponseStatus& status) {
-			res->setHTTPResponseStatus(status);
-			isContrl = true;
-		}
 
-		bool hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
-		if(!isContrl && hasSecurity)
-		{
-			isContrl = SecurityHandler::handle(req, res, sessionTimeoutVar, reflector);
-			if(isContrl)
+		t1.start();
+		if(ConfigurationData::getInstance()->enableCors) {
+			try {
+				isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
+			} catch(const HTTPResponseStatus& status) {
+				res->setHTTPResponseStatus(status);
+				isContrl = true;
+			}
+		}
+		t1.end();
+		CommonUtils::tsServiceCors += t1.timerNanoSeconds();
+
+		t1.start();
+		bool hasSecurity = false;
+		if(ConfigurationData::getInstance()->enableSecurity) {
+			hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
+			if(!isContrl && hasSecurity)
 			{
+				isContrl = SecurityHandler::handle(req, res, ConfigurationData::getInstance()->coreServerProperties.sessionTimeout, reflector);
+				if(isContrl)
+				{
+					ext = req->getExt();
+				}
+			}
+		}
+		t1.end();
+		CommonUtils::tsServiceSec += t1.timerNanoSeconds();
+
+		t1.start();
+		bool hasFilters = false;
+		if(ConfigurationData::getInstance()->enableFilters) {
+			hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
+			if(!isContrl && hasFilters)
+			{
+				FilterHandler::handleIn(req, ext, reflector);
+
+				isContrl = !FilterHandler::handle(req, res, ext, reflector);
 				ext = req->getExt();
 			}
 		}
+		t1.end();
+		CommonUtils::tsServiceFlt += t1.timerNanoSeconds();
 
-		bool hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
-		if(!isContrl && hasFilters)
-		{
-			FilterHandler::handleIn(req, ext, reflector);
-
-			isContrl = !FilterHandler::handle(req, res, ext, reflector);
-			if(isContrl)
+		t1.start();
+		if(ConfigurationData::getInstance()->enableControllers) {
+			if(!isContrl)
 			{
-			}
-			ext = req->getExt();
-		}
-
-		if(!isContrl)
-		{
-			isContrl = ControllerHandler::handle(req, res, ext, reflector);
-			if(isContrl)
-			{
-			}
-			ext = req->getExt();
-		}
-
-		if(!isContrl)
-		{
-			isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
-			if(isContrl)
-			{
+				isContrl = ControllerHandler::handle(req, res, ext, reflector);
+				ext = req->getExt();
 			}
 		}
+		t1.end();
+		CommonUtils::tsServiceCnt += t1.timerNanoSeconds();
 
+		t1.start();
+		if(ConfigurationData::getInstance()->enableExtra) {
+			if(!isContrl)
+			{
+				isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
+			}
+		}
+		t1.end();
+		CommonUtils::tsServiceExt += t1.timerNanoSeconds();
+
+		t1.start();
 		/*After going through the controller the response might be blank, just set the HTTP version*/
 		res->update(req);
 
 		if(req->getMethod()!="TRACE" && !res->isDone())
 		{
-			//logger << ("Started processing request - phase II") << std::endl;
-
-			std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + req->getCurl();
 			if(!isContrl)
 			{
+				bool isWbsvc = false;
 #ifdef INC_WEBSVC
-				std::string wsName = ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()][wsUrl];
-				if(wsName!="")
-				{
-					if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=std::string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=std::string::npos
-							|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=std::string::npos)
+				if(ConfigurationData::getInstance()->enableSoap) {
+					std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + req->getCurl();
+					std::string wsName = ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()][wsUrl];
+					if(wsName!="")
 					{
-						SoapHandler::handle(req, res, ConfigurationData::getInstance()->dlib, wsName);
-					}
-					else
-					{
-						res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+						isWbsvc = true;
+						if(req->getHeader(HttpRequest::ContentType).find("application/soap+xml")!=std::string::npos || req->getHeader(HttpRequest::ContentType).find("text/xml")!=std::string::npos
+								|| req->getHeader(HttpRequest::ContentType).find("application/xml")!=std::string::npos)
+						{
+							SoapHandler::handle(req, res, ConfigurationData::getInstance()->dlib, wsName);
+						}
+						else
+						{
+							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+						}
 					}
 				}
 #endif
-				else
+				if(isWbsvc)
 				{
 					bool cntrlit = false;
 #ifdef INC_SCRH
-					cntrlit = ScriptHandler::handle(req, res, ConfigurationData::getInstance()->handoffs, ext);
-#endif
-					if(cntrlit)
-					{
+					if(ConfigurationData::getInstance()->enableScripts) {
+						cntrlit = ScriptHandler::handle(req, res, ConfigurationData::getInstance()->handoffs, ext);
 					}
-					else
+#endif
+					if(!cntrlit)
 					{
 						std::string pubUrlPath = req->getCntxt_root() + "/public/";
 						if(req->getUrl().find(pubUrlPath)!=0) {
@@ -797,13 +740,16 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			}
 		}
 
-		if(hasFilters) {
+		if(ConfigurationData::getInstance()->enableFilters && hasFilters) {
 			FilterHandler::handleOut(req, res, ext, reflector);
 		}
 
-		if(hasSecurity) {
-			storeSessionAttributes(res, req, sessionTimeoutVar, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
+		if(ConfigurationData::getInstance()->enableSecurity && hasSecurity) {
+			storeSessionAttributes(res, req, ConfigurationData::getInstance()->coreServerProperties.sessionTimeout, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
 		}
+
+		t1.end();
+		CommonUtils::tsServicePost += t1.timerNanoSeconds();
 	}
 	catch(const std::exception& e)
 	{
@@ -811,217 +757,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 	}
 }
 
-/*bool ServiceTask::sendData(SSL* ssl, BIO* io, const int& fd, const std::string& h1)
-{
-	if(SSLHandler::getInstance()->getIsSSL())
-	{
-		int r;
-		// Now perform renegotiation if requested
-		if(ConfigurationData::getInstance()->securityProperties.client_auth==CLIENT_AUTH_REHANDSHAKE)
-		{
-			SSL_set_verify(ssl,SSL_VERIFY_PEER |
-					SSL_VERIFY_FAIL_IF_NO_PEER_CERT,0);
-
-			// Stop the client from just resuming the un-authenticated session
-			SSL_set_session_id_context(ssl,
-					(const unsigned char*)&SSLHandler::s_server_auth_session_id_context,
-					sizeof(SSLHandler::s_server_auth_session_id_context));
-
-			if(SSL_renegotiate(ssl)<=0)
-			{
-				logger << "SSL renegotiation error" << std::endl;
-				closeSocket(ssl, io, fd);
-				return false;
-			}
-			if(SSL_do_handshake(ssl)<=0)
-			{
-				logger << "SSL renegotiation error" << std::endl;
-				closeSocket(ssl, io, fd);
-				return false;;
-			}
-			ssl->state = SSL_ST_ACCEPT;
-			if(SSL_do_handshake(ssl)<=0)
-			{
-				logger << "SSL handshake error" << std::endl;
-				closeSocket(ssl, io, fd);
-				return false;;
-			}
-		}
-		if((r=BIO_write(io, h1.c_str(), h1.length()))<=0)
-		{
-			logger << "Send failed" << std::endl;
-			closeSocket(ssl, io, fd);
-			return false;
-		}
-		if((r=BIO_flush(io))<0)
-		{
-			logger << "Error flushing BIO" << std::endl;
-			closeSocket(ssl, io, fd);
-			return false;;
-		}
-	}
-	else
-	{
-		int r;
-		if ((r=BIO_write(io, h1.c_str() , h1.length())) <= 0)
-		{
-			logger << "send failed" << std::flush;
-			closeSocket(ssl, io, fd);
-			return false;
-		}
-		if((r=BIO_flush(io))<0)
-		{
-			logger << "Error flushing BIO" << std::endl;
-			closeSocket(ssl, io, fd);
-			return false;
-		}
-	}
-	return true;
-}
-
-void ServiceTask::closeSocket(SSL* ssl, BIO* io, const int& fd)
-{
-	if(SSLHandler::getInstance()->getIsSSL())
-	{
-		SSLHandler::getInstance()->closeSSL(fd,ssl,io);
-	}
-	else
-	{
-		if(io!=NULL)BIO_free_all(io);
-		closesocket(fd);
-	}
-}
-
-bool ServiceTask::readLine(SSL* ssl, BIO* io, const int& fd, std::string& line)
-{
-	//if(!checkSocketWaitForTimeout(fd, 0, 0, 10))
-	//{
-	//	logger << "Closing connection as there was no data to read in 10us..." << std::endl;
-	//	closeSocket(ssl, io, fd);
-	//	return false;
-	//}
-	char buf[MAXBUFLENM];
-	memset(buf, 0, sizeof(buf));
-	if(SSLHandler::getInstance()->getIsSSL())
-	{
-		int er=-1;
-		er = BIO_gets(io,buf,BUFSIZZ-1);
-		int bser = SSL_get_error(ssl,er);
-		switch(bser)
-		{
-			case SSL_ERROR_WANT_READ:
-			{
-				logger << "ssl more to read error" << std::endl;
-				break;
-			}
-			case SSL_ERROR_WANT_WRITE:
-			{
-				logger << "ssl more to write error" << std::endl;
-				break;
-			}
-			case SSL_ERROR_NONE:
-			{
-				break;
-			}
-			case SSL_ERROR_ZERO_RETURN:
-			{
-				closeSocket(ssl, io, fd);
-				return false;
-			}
-			default:
-			{
-				logger << "SSL read problem" << std::endl;
-				closeSocket(ssl, io, fd);
-				return false;
-			}
-		}
-		line.append(buf, er);
-		memset(&buf[0], 0, sizeof(buf));
-	}
-	else
-	{
-		int er=-1;
-		er = BIO_gets(io,buf,BUFSIZZ-1);
-		if(er==0)
-		{
-			closeSocket(ssl, io, fd);
-			logger << "Socket closed before being serviced" << std::endl;
-			return false;
-		}
-		line.append(buf, er);
-		memset(&buf[0], 0, sizeof(buf));
-	}
-	return true;
-}
-
-bool ServiceTask::readData(SSL* ssl, BIO* io, const int& fd, const int& cntlen, std::string& content)
-{
-	//if(!checkSocketWaitForTimeout(fd, 0, 0, 10))
-	//{
-	//	logger << "Closing connection as there was no data to read in 10us..." << std::endl;
-	//	closeSocket(ssl, io, fd);
-	//	return false;
-	//}
-	char buf[MAXBUFLENM];
-	memset(buf, 0, sizeof(buf));
-	if(SSLHandler::getInstance()->getIsSSL() && cntlen>0)
-	{
-		int er=-1;
-		while(cntlen>0)
-		{
-			int readLen = MAXBUFLENM;
-			if(cntlen<MAXBUFLENM)
-				readLen = cntlen;
-			er = BIO_read(io,buf,readLen);
-			switch(SSL_get_error(ssl,er))
-			{
-				case SSL_ERROR_NONE:
-					cntlen -= er;
-					break;
-				case SSL_ERROR_ZERO_RETURN:
-				{
-					closeSocket(ssl, io, fd);
-					return false;
-				}
-				default:
-				{
-					logger << "SSL read problem" << std::endl;
-					closeSocket(ssl, io, fd);
-					return false;
-				}
-			}
-			cntlen -= er;
-			content.append(buf, er);
-			memset(&buf[0], 0, sizeof(buf));
-		}
-	}
-	else if(cntlen>0)
-	{
-		int er=-1;
-		while(cntlen>0)
-		{
-			logger << "Length is " + CastUtil::lexical_cast<std::string>(cntlen) << std::endl;
-			int readLen = MAXBUFLENM;
-			if(cntlen<MAXBUFLENM)
-				readLen = cntlen;
-			er = BIO_read(io,buf,readLen);
-			logger << "Done reading" << std::endl;
-			if(er==0)
-			{
-				closeSocket(ssl, io, fd);
-				logger << "Socket closed before being serviced" << std::endl;
-				return false;
-			}
-			else if(er>0)
-			{
-				cntlen -= er;
-				content.append(buf, er);
-				memset(&buf[0], 0, sizeof(buf));
-			}
-		}
-	}
-	return true;
-}*/
-
 void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketUtil* sockUtil)
-{}
+{
+}

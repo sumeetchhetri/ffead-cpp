@@ -28,9 +28,6 @@ THRD_PREQ=false
 #The Thread Pool size for Service pool
 THRD_PSIZ=6
 
-#The Thread Pool size for Writer pool
-W_THRD_PSIZ=2
-
 #Where to store the session state Browser cookies/Server side file
 SESS_STATE=server
 
@@ -70,7 +67,30 @@ MAX_REQUEST_ENTITY_SIZE=2147483647
 #Session File lock default time in seconds
 SESS_LCK_TIME=5
 
+PROC_PER_CORE=false
 #VHOST_ENTRY=localhost;8081;markers:default,flexApp
 #VHOST_ENTRY=localhost;8082;oauthApp:default
 
 LOGGING_ENABLED=true
+
+ENABLE_CRS=false
+
+ENABLE_SEC=false
+
+ENABLE_FLT=false
+
+ENABLE_CNT=true
+
+ENABLE_CNT_MPG=false
+
+ENABLE_CNT_PTH=false
+
+ENABLE_CNT_EXT=false
+
+ENABLE_CNT_RST=true
+
+ENABLE_EXT=false
+
+ENABLE_SCR=false
+
+ENABLE_SWS=false

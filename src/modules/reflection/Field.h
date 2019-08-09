@@ -25,13 +25,16 @@
 #include "string"
 #include "vector"
 
+typedef void* (*GetFld) (void*);
 
 class Field {
+	GetFld f;
 	std::string refName;
 	std::string accessSpecifier;
 	std::string fieldName;
 	std::string type;
 	std::string initVal;
+	friend class FFEADContext;
 public:
 	Field();
 	virtual ~Field();
@@ -44,6 +47,7 @@ public:
     void clear();
 	const std::string& getRefName() const;
 	void setRefName(const std::string& refName);
+	GetFld getIns() const;
 };
 
 #endif /* FIELD_H_ */

@@ -692,6 +692,20 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	CoreServerProperties csp(serverRootDirectory, respath, webpath, srprps, sessionTimeout, sessatserv);
 	ConfigurationData::getInstance()->setCoreServerProperties(csp);
 
+	bool enableCors = StringUtil::toLowerCopy(srprps["ENABLE_CRS"])=="true";
+	bool enableSecurity = StringUtil::toLowerCopy(srprps["ENABLE_SEC"])=="true";
+	bool enableFilters = StringUtil::toLowerCopy(srprps["ENABLE_FLT"])=="true";
+	bool enableControllers = StringUtil::toLowerCopy(srprps["ENABLE_CNT"])=="true";
+	bool enableContMpg = StringUtil::toLowerCopy(srprps["ENABLE_CNT_MPG"])=="true";
+	bool enableContPath = StringUtil::toLowerCopy(srprps["ENABLE_CNT_PTH"])=="true";
+	bool enableContExt = StringUtil::toLowerCopy(srprps["ENABLE_CNT_EXT"])=="true";
+	bool enableContRst = StringUtil::toLowerCopy(srprps["ENABLE_CNT_RST"])=="true";
+	bool enableExtra = StringUtil::toLowerCopy(srprps["ENABLE_EXT"])=="true";
+	bool enableScripts = StringUtil::toLowerCopy(srprps["ENABLE_SCR"])=="true";
+	bool enableSoap = StringUtil::toLowerCopy(srprps["ENABLE_SWS"])=="true";
+	ConfigurationData::enableFeatures(enableCors, enableSecurity, enableFilters, enableControllers,
+			enableContMpg, enableContPath, enableContExt,enableContRst, enableExtra, enableScripts, enableSoap);
+
 	strVec cmpnames;
 	try
 	{
@@ -945,6 +959,7 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
 	logger << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
+	GenericObject::init(ConfigurationData::getReflector());
 	logger << ("Initializing ffeadContext done....") << std::endl;
 }
 

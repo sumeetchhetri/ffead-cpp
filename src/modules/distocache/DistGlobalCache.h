@@ -34,7 +34,7 @@ public:
 	}
 	template <class T> void add(const std::string& key, const T& value)
 	{
-		std::string serValue = BinarySerialize::serialize<T>(value);
+		std::string serValue = BinarySerialize::serialize<T>(value, -1);
 		cl->addObjectEntry(key, serValue);
 	}
 	template <class K, class V> void addMap(const std::string& key, std::map<K,V>& value)
@@ -45,7 +45,7 @@ public:
 	template <class T> T get(const std::string& key)
 	{
 		std::string serValue = cl->getObjectEntryValue(key);
-		return BinarySerialize::unserialize<T>(serValue);
+		return BinarySerialize::unserialize<T>(serValue, -1);
 	}
 	template <class K, class V> std::map<K, V> getMap(const std::string& key)
 	{

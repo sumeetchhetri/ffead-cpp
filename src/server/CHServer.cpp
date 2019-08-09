@@ -309,144 +309,6 @@ void* service(void* arg)
 	return NULL;
 }
 
-#if !defined(OS_MINGW) && !defined(OS_DARWIN) && !defined(OS_CYGWIN)
-pid_t createChildProcess(std::string serverRootDirectory,int sp[],int sockfd)
-{
-	pid_t pid;
-	if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sp) == -1)
-	{
-		perror("socketpair");
-		exit(1);
-	}
-	if((pid=fork())==0)
-	{
-		char pidStr[10];
-		memset(pidStr, 0, 10);
-		sprintf(pidStr, "%ld", (long)getpid());
-		std::string lgname = "CHServer-";
-		lgname.append(pidStr);
-		Logger plogger = LoggerFactory::getLogger(lgname);
-
-		servd = serverRootDirectory;
-		std::string filename;
-		std::stringstream ss;
-		ss << serverRootDirectory;
-		ss << getpid();
-		ss >> filename;
-		filename.append(".cntrl");
-		plogger << ("generated file " + filename) << std::endl;
-		std::ofstream cntrlfile;
-		cntrlfile.open(filename.c_str());
-		cntrlfile << "Process Running" << std::endl;
-		cntrlfile.close();
-
-		close(sockfd);
-
-		//SelEpolKqEvPrt selEpolKqEvPrtHandler;
-		//selEpolKqEvPrtHandler.initialize(sp[1]);
-		ThreadPool pool;
-		if(!isThreadprq)
-		{
-			pool.init(30);
-		}
-
-		struct stat buffer;
-		while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
-		{
-			/*int nfds = selEpolKqEvPrtHandler.getEvents();
-			if (nfds == -1)
-			{
-				perror("poller wait child process");
-				plogger << "\n----------poller child process----" << std::endl;
-			}
-			else*/
-			{
-				int fd = receive_fd(sp[1]);
-				//selEpolKqEvPrtHandler.reRegisterServerSock();
-				#ifdef OS_MINGW
-					u_long bMode = 0;
-					ioctlsocket(fd, FIONBIO, &bMode);
-				#else
-					fcntl(fd, F_SETFL, O_SYNC);
-				#endif
-
-				char buf[10];
-				memset(buf, 0, 10);
-				int err;
-				if((err=recv(fd,buf,10,MSG_PEEK))==0)
-				{
-					close(fd);
-					plogger << "Socket conn closed before being serviced" << std::endl;
-					continue;
-				}
-
-				try
-				{
-					if(isThreadprq)
-					{
-						ServiceTask *task = new ServiceTask(fd,serverRootDirectory);
-						Thread* pthread = new Thread(&service, task);
-						pthread->execute();
-					}
-					else
-					{
-						ServiceTask *task = new ServiceTask(fd,serverRootDirectory);
-						task->setCleanUp(true);
-						pool.submit(task);
-					}
-				}
-				catch(const std::exception& err)
-				{
-					plogger << "Exception occurred while processing ServiceTask request - " << err.what() << std::endl;
-				}
-			}
-		}
-	}
-	return pid;
-}
-#endif
-
-
-/*pid_t createChildMonitProcess(int sp[])
-{
-	pid_t pid;
-	if (socketpair(AF_UNIX, SOCK_DGRAM, 0, sp) == -1)
-	{
-		perror("socketpair");
-		exit(1);
-	}
-	if((pid=fork())==0)
-	{
-		std::map<std::string,bool> stat;
-		while(1)
-		{
-			char buf[10];
-			memset(pidStr, 0, 10);
-			if(read(sp[1], buf, sizeof buf) < 0)
-			{
-				std::string temp = buf;
-				strVec tempv;
-				StringUtil::split(tempv, temp, ":");
-				if(tempv.size()==2)
-				{
-					if(tempv.at(0)=="R")
-					{
-						std::string h = "0";
-						if(stat[tempv.at(1)])
-							h = "1";
-						write(sp[0], h.c_str() , sizeof(h));
-					}
-					else if(tempv.at(0)=="W")
-					{
-						stat[tempv.at(1)] = false;
-					}
-				}
-			}
-		}
-	}
-	return pid;
-}*/
-
 void* gracefullShutdown_monitor(void* args)
 {
 	std::string* ipaddr = (std::string*)args;
@@ -635,15 +497,15 @@ int main(int argc, char* argv[])
 	{
 		ipaddr = srprps["IP_ADDR"];
 	}
+	int vhostNum = 0;
 	if(argc > 4)
 	{
-		servingAppNames = argv[4];
-		servedAppNames = StringUtil::splitAndReturn<std::vector<std::string> >(servingAppNames, ",");
+		vhostNum = CastUtil::lexical_cast<int>(argv[4]);
 	}
-	int vhostNum = 0;
 	if(argc > 5)
 	{
-		vhostNum = CastUtil::lexical_cast<int>(argv[5]);
+		servingAppNames = argv[5];
+		servedAppNames = StringUtil::splitAndReturn<std::vector<std::string> >(servingAppNames, ",");
 	}
 
 	try {
@@ -656,20 +518,19 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-
 int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirectory, std::string port, std::string ipaddr, std::vector<std::string> servedAppNames)
 {
 	//pid_t parid = getpid();
 
 	#ifndef OS_MINGW
-	/*struct sigaction act;
-	memset (&act, '\0', sizeof(act));
-	act.sa_handler = siginthandler;
+	struct sigaction act;
+	sigemptyset(&act.sa_mask);
+	act.sa_handler = sigchld_handler_server;
 	act.sa_flags = SA_RESTART;
-	if (sigaction(SIGINT, &act, NULL) < 0) {
+	if (sigaction(SIGCHLD, &act, NULL) < 0) {
 		perror ("sigaction");
-		return 1;
-	}*/
+		exit(1);
+	}
 	//signal(SIGSEGV,signalSIGSEGV);
 	//signal(SIGFPE,signalSIGFPE);
 	(void) sigignore(SIGPIPE);
@@ -744,7 +605,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
    	if(sslEnabled=="true" || sslEnabled=="TRUE")
    		isSSLEnabled = true;
 
-   	int thrdpsiz = 0, wthrdpsiz = 2;
+   	int thrdpsiz = 0;
    	std::string thrdpreq = srprps["THRD_PREQ"];
    	if(thrdpreq=="true" || thrdpreq=="TRUE")
    	{
@@ -766,19 +627,6 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 				logger << "Invalid service thread pool size defined" << std::endl;
 				thrdpsiz = CommonUtils::getProcessorCount();
 			}
-		}
-	}
-   	thrdpreq = srprps["W_THRD_PSIZ"];
-	if(thrdpreq!="")
-	{
-		try
-		{
-			wthrdpsiz = CastUtil::lexical_cast<int>(thrdpreq);
-		}
-		catch(const std::exception& e)
-		{
-			logger << "Invalid writer thread pool size defined" << std::endl;
-			wthrdpsiz = 2;
 		}
 	}
    	std::string compileEnabled = srprps["DEV_MODE"];
@@ -847,6 +695,18 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	ConfigurationData::getInstance()->coreServerProperties.sessatserv = sessatserv;
 	ConfigurationData::getInstance()->coreServerProperties.isMainServerProcess = isMain;
 	ConfigurationData::getInstance()->coreServerProperties.sessservdistocache = false;
+
+	ConfigurationData::getInstance()->enableCors = StringUtil::toLowerCopy(srprps["ENABLE_CRS"])=="true";
+	ConfigurationData::getInstance()->enableSecurity = StringUtil::toLowerCopy(srprps["ENABLE_SEC"])=="true";
+	ConfigurationData::getInstance()->enableFilters = StringUtil::toLowerCopy(srprps["ENABLE_FLT"])=="true";
+	ConfigurationData::getInstance()->enableControllers = StringUtil::toLowerCopy(srprps["ENABLE_CNT"])=="true";
+	ConfigurationData::getInstance()->enableContMpg = StringUtil::toLowerCopy(srprps["ENABLE_CNT_MPG"])=="true";
+	ConfigurationData::getInstance()->enableContPath = StringUtil::toLowerCopy(srprps["ENABLE_CNT_PTH"])=="true";
+	ConfigurationData::getInstance()->enableContExt = StringUtil::toLowerCopy(srprps["ENABLE_CNT_EXT"])=="true";
+	ConfigurationData::getInstance()->enableContRst = StringUtil::toLowerCopy(srprps["ENABLE_CNT_RST"])=="true";
+	ConfigurationData::getInstance()->enableExtra = StringUtil::toLowerCopy(srprps["ENABLE_EXT"])=="true";
+	ConfigurationData::getInstance()->enableScripts = StringUtil::toLowerCopy(srprps["ENABLE_SCR"])=="true";
+	ConfigurationData::getInstance()->enableSoap = StringUtil::toLowerCopy(srprps["ENABLE_SWS"])=="true";
 
     strVec cmpnames;
     try
@@ -1069,109 +929,181 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 
 	if(isMain)
 	{
-		propMultiMap mpmap = pread.getPropertiesMultiMap(respath+"server.prop");
-		if(mpmap.find("VHOST_ENTRY")!=mpmap.end() && mpmap["VHOST_ENTRY"].size()>0)
-		{
-			std::vector<std::string> vhosts = mpmap["VHOST_ENTRY"];
-			for(int vhi=0;vhi<(int)vhosts.size();vhi++)
-			{
-				std::vector<std::string> vhostprops = StringUtil::splitAndReturn<std::vector<std::string> >(vhosts.at(vhi), ";");
-				if(vhostprops.size()==3)
-				{
-					std::string vhostname = StringUtil::trimCopy(vhostprops.at(0));
-					std::string vhostport = StringUtil::trimCopy(vhostprops.at(1));
-					std::string vhostapps = StringUtil::trimCopy(vhostprops.at(2));
-					bool valid = true;
-					if(vhostname=="")
+		bool startedOne = false;
+		if(StringUtil::toLowerCopy(srprps["PROC_PER_CORE"])=="true" || StringUtil::toLowerCopy(srprps["PROC_PER_CORE"])=="yes") {
+			unsigned int nthreads = hardware_concurrency();
+			for (int var = 0; var < (int)nthreads; ++var) {
+				#if !defined(OS_MINGW)
+					pid = fork();
+					if(pid == 0)
 					{
-						valid = false;
-						logger << ("No host specified for Virtual-Host") << std::endl;
-					}
-					if(vhostport=="")
-					{
-						valid = false;
-						logger << ("No port specified for Virtual-Host") << std::endl;
-					}
-					if(vhostapps=="")
-					{
-						valid = false;
-						logger << ("No apps specified for Virtual-Host") << std::endl;
-					}
+						LoggerFactory::instance->setVhostNumber(var+1);
 
-					if(valid)
+						std::string lnm = "CHServer(VHost-" +
+								CastUtil::lexical_cast<std::string>(var+1) + ")";
+						serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
+								CastUtil::lexical_cast<std::string>(var+1);
+						serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, var+1);
+						exit(0);
+					}
+					else
 					{
-						std::vector<std::string> spns = StringUtil::splitAndReturn<std::vector<std::string> >(vhostapps, ",");
-						std::map<std::string, bool> updatedcontextNames;
-						std::map<std::string, std::string> updatedaliasNames;
-						for (int spni = 0; spni < (int)spns.size(); ++spni) {
-							StringUtil::trim(spns.at(spni));
-							std::string vapnm = spns.at(spni);
-							std::string valias = vapnm;
-							if(vapnm.find(":")!=std::string::npos) {
-								valias = vapnm.substr(vapnm.find(":")+1);
-								vapnm = vapnm.substr(0, vapnm.find(":"));
-							}
-							if(vapnm!="" && ConfigurationData::getInstance()->servingContexts.find(vapnm)!=
-									ConfigurationData::getInstance()->servingContexts.end())
-							{
-								updatedcontextNames[vapnm] = true;
-								if(valias!=vapnm) {
-									updatedaliasNames[valias] = vapnm;
+						serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
+								CastUtil::lexical_cast<std::string>(var+1);
+						struct stat buffer;
+						while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
+						{
+							Thread::sSleep(10);
+						}
+					}
+				#else
+					std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " \"" + ipaddr + "\" " + port
+							+ " \"\" " + CastUtil::lexical_cast<std::string>(var+1);
+					std::string vhostcmdo = ScriptHandler::chdirExecute(vhostcmd, serverRootDirectory, true);
+					logger.info("Starting new Virtual-Host at " + (ipaddr + ":" + port));
+					logger << vhostcmdo << std::endl;
+				#endif
+			}
+			startedOne = true;
+		} else {
+			propMultiMap mpmap = pread.getPropertiesMultiMap(respath+"server.prop");
+			if(mpmap.find("VHOST_ENTRY")!=mpmap.end() && mpmap["VHOST_ENTRY"].size()>0)
+			{
+				std::vector<std::string> vhosts = mpmap["VHOST_ENTRY"];
+				for(int vhi=0;vhi<(int)vhosts.size();vhi++)
+				{
+					std::vector<std::string> vhostprops = StringUtil::splitAndReturn<std::vector<std::string> >(vhosts.at(vhi), ";");
+					if(vhostprops.size()==3)
+					{
+						std::string vhostname = StringUtil::trimCopy(vhostprops.at(0));
+						std::string vhostport = StringUtil::trimCopy(vhostprops.at(1));
+						std::string vhostapps = StringUtil::trimCopy(vhostprops.at(2));
+						bool valid = true;
+						if(vhostname=="")
+						{
+							//valid = false;
+							//logger << ("No host specified for Virtual-Host") << std::endl;
+						}
+						if(vhostport=="")
+						{
+							valid = false;
+							logger << ("No port specified for Virtual-Host") << std::endl;
+						}
+						if(vhostapps=="")
+						{
+							valid = false;
+							logger << ("No apps specified for Virtual-Host") << std::endl;
+						}
+
+						if(valid)
+						{
+							StringUtil::trim(vhostapps);
+							std::map<std::string, bool> updatedcontextNames = ConfigurationData::getInstance()->servingContexts;
+							std::map<std::string, std::string> updatedaliasNames = ConfigurationData::getInstance()->appAliases;
+							if(vhostapps!="") {
+								std::vector<std::string> spns = StringUtil::splitAndReturn<std::vector<std::string> >(vhostapps, ",");
+								for (int spni = 0; spni < (int)spns.size(); ++spni) {
+									StringUtil::trim(spns.at(spni));
+									std::string vapnm = spns.at(spni);
+									std::string valias = vapnm;
+									if(vapnm.find(":")!=std::string::npos) {
+										valias = vapnm.substr(vapnm.find(":")+1);
+										vapnm = vapnm.substr(0, vapnm.find(":"));
+									}
+									if(vapnm!="" && ConfigurationData::getInstance()->servingContexts.find(vapnm)!=
+											ConfigurationData::getInstance()->servingContexts.end())
+									{
+										updatedcontextNames[vapnm] = true;
+										if(valias!=vapnm) {
+											updatedaliasNames[valias] = vapnm;
+										}
+									}
+								}
+								std::map<std::string, bool>::iterator ucit;
+								for(ucit=updatedcontextNames.begin();ucit!=updatedcontextNames.end();ucit++)
+								{
+									if(ConfigurationData::getInstance()->servingContexts.find(ucit->first)!=
+											ConfigurationData::getInstance()->servingContexts.end())
+									{
+										ConfigurationData::getInstance()->servingContexts.erase(ucit->first);
+									}
+									if(ConfigurationData::getInstance()->appAliases.find(ucit->first)!=
+											ConfigurationData::getInstance()->appAliases.end())
+									{
+										ConfigurationData::getInstance()->appAliases.erase(ucit->first);
+									}
 								}
 							}
-						}
-						std::map<std::string, bool>::iterator ucit;
-						for(ucit=updatedcontextNames.begin();ucit!=updatedcontextNames.end();ucit++)
-						{
-							if(ConfigurationData::getInstance()->servingContexts.find(ucit->first)!=
-									ConfigurationData::getInstance()->servingContexts.end())
-							{
-								ConfigurationData::getInstance()->servingContexts.erase(ucit->first);
-							}
-							if(ConfigurationData::getInstance()->appAliases.find(ucit->first)!=
-									ConfigurationData::getInstance()->appAliases.end())
-							{
-								ConfigurationData::getInstance()->appAliases.erase(ucit->first);
-							}
-						}
+							startedOne = true;
+							#if !defined(OS_MINGW)
+								pid = fork();
+								if(pid == 0)
+								{
+									LoggerFactory::instance->setVhostNumber(vhi+1);
+									ConfigurationData::getInstance()->servingContexts = updatedcontextNames;
+									ConfigurationData::getInstance()->appAliases = updatedaliasNames;
 
-					#if !defined(OS_MINGW)
-						pid = fork();
-						if(pid == 0)
-						{
-							LoggerFactory::instance->setVhostNumber(vhi+1);
-							ConfigurationData::getInstance()->servingContexts = updatedcontextNames;
-							ConfigurationData::getInstance()->appAliases = updatedaliasNames;
-
-							std::string lnm = "CHServer(VHost-" +
-									CastUtil::lexical_cast<std::string>(vhi+1) + ")";
-							serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
-									CastUtil::lexical_cast<std::string>(vhi+1);
-							serve(vhostport, vhostname, thrdpsiz, wthrdpsiz, serverRootDirectory, srprps, vhi+1);
+									std::string lnm = "CHServer(VHost-" +
+											CastUtil::lexical_cast<std::string>(vhi+1) + ")";
+									serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
+											CastUtil::lexical_cast<std::string>(vhi+1);
+									serve(vhostport, vhostname, thrdpsiz, serverRootDirectory, srprps, vhi+1);
+									exit(0);
+								}
+								else
+								{
+									serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
+											CastUtil::lexical_cast<std::string>(vhi+1);
+									struct stat buffer;
+									while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
+									{
+										Thread::sSleep(10);
+									}
+								}
+							#else
+								std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
+										+ " " + vhostapps + " " + CastUtil::lexical_cast<std::string>(vhi+1);
+								std::string vhostcmdo = ScriptHandler::chdirExecute(vhostcmd, serverRootDirectory, true);
+								logger.info("Starting new Virtual-Host at " + (vhostname + ":" + vhostport));
+								logger << vhostcmdo << std::endl;
+							#endif
 						}
-					#else
-						std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
-								+ " " + vhostapps + " " + CastUtil::lexical_cast<std::string>(vhi+1);
-						std::string vhostcmdo = ScriptHandler::chdirExecute(vhostcmd, serverRootDirectory, true);
-						logger.info("Starting new Virtual-Host at " + (vhostname + ":" + vhostport));
-						logger << vhostcmdo << std::endl;
-					#endif
 					}
+				}
+				if(!startedOne) {
+					logger << ("No valid Virtual-Hosts found, will run normal server") << std::endl;
 				}
 			}
 		}
 
-		try {
-			serve(port, ipaddr, thrdpsiz, wthrdpsiz, serverRootDirectory, srprps, vhostNum);
-		} catch(const std::exception& e) {
-			logger << e.what() << std::endl;
+		if(!startedOne) {
+			try {
+				serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, vhostNum);
+			} catch(const std::exception& e) {
+				logger << e.what() << std::endl;
+			}
 		}
 	}
 
 	return 0;
 }
 
-void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wthrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber)
+//Copied from https://github.com/awgn/speedcore/blob/master/speedcore.cpp
+unsigned int CHServer::hardware_concurrency()
+{
+    auto proc = []() -> int {
+        std::ifstream cpuinfo("/proc/cpuinfo");
+        return std::count(std::istream_iterator<std::string>(cpuinfo),
+                          std::istream_iterator<std::string>(),
+                          std::string("processor"));
+    };
+
+    auto hc = std::thread::hardware_concurrency();
+    return hc ? hc : proc();
+}
+
+
+void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::string serverRootDirectory, propMap sprops, int vhostNumber)
 {
 	std::string ipport;
 
@@ -1246,6 +1178,13 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 		return;
 	}
 
+	//Load all the FFEADContext beans so that the same copy is shared by all process
+	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
+	logger << ("Initializing ffeadContext....") << std::endl;
+	ConfigurationData::getInstance()->initializeAllSingletonBeans();
+	GenericObject::init(&(ConfigurationData::getInstance()->reflector));
+	logger << ("Initializing ffeadContext done....") << std::endl;
+
 	logger << ("Initializing WSDL files....") << std::endl;
 	ConfigurationHandler::initializeWsdls();
 	logger << ("Initializing WSDL files done....") << std::endl;
@@ -1261,33 +1200,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 	logger << ("Initializing Caches done....") << std::endl;
 
 	std::vector<std::string> files;
-	//int sp[preForked][2];
-
-	/*TODO if(preForked>0 && IS_FILE_DESC_PASSING_AVAIL)
-	{
-		#if !defined(OS_MINGW) && !defined(OS_DARWIN)
-		for(int j=0;j<preForked;j++)
-		{
-			pid_t pid = createChildProcess(serverRootDirectory,sp[j],sockfd);
-			pds[j] = pid;
-			std::stringstream ss;
-			std::string filename;
-			ss << serverRootDirectory;
-			ss << pds[j];
-			ss >> filename;
-			filename.append(".cntrl");
-			files.push_back(filename);
-		}
-		#endif
-	}
-	else*/
-	{
-		/*TODO if(!isThreadprq)
-		{
-			pool = new ThreadPool(thrdpsiz/2,thrdpsiz,true);
-			pool->start();
-		}*/
-	}
 
 #ifdef INC_DCP
 	if(isCompileEnabled)
@@ -1296,12 +1208,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 		pthread->execute();
 	}
 #endif
-
-	//Load all the FFEADContext beans so that the same copy is shared by all process
-	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
-	logger << ("Initializing ffeadContext....") << std::endl;
-	ConfigurationData::getInstance()->initializeAllSingletonBeans();
-	logger << ("Initializing ffeadContext done....") << std::endl;
 
 	//printf("server: waiting for connections...\n");
 	logger.info("Server: waiting for connections on " + ipport);
@@ -1338,24 +1244,22 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, int wth
 
 	HTTPResponseStatus::getStatusByCode(200);
 
-	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &CHServer::httpServiceFactoryMethod, thrdpsiz, wthrdpsiz);
+	unsigned int nthreads = hardware_concurrency();
+
+	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &httpServiceFactoryMethod, nthreads, &httpReadFactoryMethod);
 	handler->start();
 
-	RequestReaderHandler reader(handler, sockfd);
+	RequestReaderHandler reader(handler, true, sockfd);
 	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
-	reader.start();
+	reader.start(-1);
 
-	//bool stats = false;
-
+	//int counter = 0;
 	struct stat buffer;
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
-		//std::string lg = "Memory allocations waiting to be freed = " + CastUtil::lexical_cast<std::string>(ConfigurationData::counter);
-		//logger <<  lg << std::endl;
-		Thread::sSleep(5);
+		Thread::sSleep(10);
+		CommonUtils::printStats();
 	}
-
-	handler->stop();
 
 	std::string ip = ipport.substr(0, ipport.find(":"));
 	reader.stop(ip, CastUtil::lexical_cast<int>(port), isSSLEnabled);
@@ -1427,24 +1331,43 @@ int CHServer::techunkSiz = 0;
 int CHServer::connKeepAlive = 10;
 int CHServer::maxReqHdrCnt = 100, CHServer::maxEntitySize = 2147483647;
 
-
 HttpServiceTask* CHServer::httpServiceFactoryMethod() {
 	return new ServiceTask();
 }
 
+HttpReadTask* CHServer::httpReadFactoryMethod() {
+	return new HttpReadTask();
+}
+
 SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
-	SocketInterface* sockIntf = NULL;
-	SocketUtil* sockUtil = new SocketUtil(fd);
-	if(SSLHandler::getInstance()->getIsSSL() && sockUtil->isHttp2())
+	SocketUtil sockUtil(fd);
+	if(SSLHandler::getInstance()->getIsSSL() && sockUtil.isHttp2())
 	{
-		sockIntf = new Http2Handler(true, sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath);
+		Http2Handler* h = new Http2Handler(true, ConfigurationData::getInstance()->coreServerProperties.webPath);
+		h->fd = sockUtil.fd;
+		h->sockUtil.fd = sockUtil.fd;
+		h->sockUtil.ssl = sockUtil.ssl;
+		h->sockUtil.io = sockUtil.io;
+		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
+		h->sockUtil.closed = false;
+		h->sockUtil.inited = sockUtil.inited;
+		h->sockUtil.http2 = sockUtil.http2;
+		return h;
 	}
 	else
 	{
-		sockIntf = new Http11Handler(sockUtil, ConfigurationData::getInstance()->coreServerProperties.webPath,
+		Http11Handler* h = new Http11Handler(ConfigurationData::getInstance()->coreServerProperties.webPath,
 				techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
+		h->fd = sockUtil.fd;
+		h->sockUtil.fd = sockUtil.fd;
+		h->sockUtil.ssl = sockUtil.ssl;
+		h->sockUtil.io = sockUtil.io;
+		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
+		h->sockUtil.closed = false;
+		h->sockUtil.inited = sockUtil.inited;
+		h->sockUtil.http2 = sockUtil.http2;
+		return h;
 	}
-	return sockIntf;
 }
 
 Logger& CHServer::getLogger()

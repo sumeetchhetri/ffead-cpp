@@ -48,6 +48,7 @@ class MethStructure
 	std::map<int, std::string > argstypes;
 	std::map<int, std::map<std::string, std::vector<Marker> > > argMarkers;
 	std::string decl;
+	std::string retType;
 	std::map<std::string, std::vector<Marker> > markers;
 	friend class Reflection;
 	friend class ConfigurationHandler;

@@ -43,33 +43,33 @@ public:
 	}
 	void push_back(const T& t)
 	{
-		std::string serValue = BinarySerialize::serialize<T>(t);
+		std::string serValue = BinarySerialize::serialize<T>(t, -1);
 		cl->addCollectionEntry(cacheKey, serValue);
 	}
 	void insert(const T& t, const int& position)
 	{
-		std::string serValue = BinarySerialize::serialize<T>(t);
+		std::string serValue = BinarySerialize::serialize<T>(t, -1);
 		cl->insert(cacheKey, serValue, position);
 	}
 	void insert(const T& t, const int& position, const int& repetition)
 	{
-		std::string serValue = BinarySerialize::serialize<T>(t);
+		std::string serValue = BinarySerialize::serialize<T>(t, -1);
 		cl->insert(cacheKey, serValue, position, repetition);
 	}
 	T at(const int& position)
 	{
 		std::string serValue = cl->getCollectionEntryAt(cacheKey, position);
-		return BinarySerialize::unserialize<T>(serValue);
+		return BinarySerialize::unserialize<T>(serValue, -1);
 	}
 	T front()
 	{
 		std::string serValue = cl->getFrontValue(cacheKey);
-		return BinarySerialize::unserialize<T>(serValue);
+		return BinarySerialize::unserialize<T>(serValue, -1);
 	}
 	T back()
 	{
 		std::string serValue = cl->getBackValue(cacheKey);
-		return BinarySerialize::unserialize<T>(serValue);
+		return BinarySerialize::unserialize<T>(serValue, -1);
 	}
 	void erase(const int& position)
 	{
@@ -118,7 +118,7 @@ public:
 				if(position>=0)
 				{
 					std::string serValue = cl->getCollectionEntryAt(cacheKey, position);
-					return BinarySerialize::unserialize<T>(serValue);
+					return BinarySerialize::unserialize<T>(serValue, -1);
 				}
 				else
 				{
@@ -129,7 +129,7 @@ public:
 			{
 				if(position>=0)
 				{
-					std::string serValue = BinarySerialize::serialize<T>(v);
+					std::string serValue = BinarySerialize::serialize<T>(v, -1);
 					cl->setCollectionEntryAt(cacheKey, position, serValue);
 				}
 				else

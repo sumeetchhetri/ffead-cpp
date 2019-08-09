@@ -41,6 +41,7 @@ class Http11WebSocketHandler : public SocketInterface {
 	Http11WebSocketDataFrame readFrame();
 	Http11WebSocketDataFrame* nextFrame();
 public:
+	void addHandler(SocketInterface* handler);
 	void onOpen();
 	void onClose();
 	std::string getUrl();
@@ -48,9 +49,8 @@ public:
 	int getTimeout();
 	void* readRequest(void*& context, int& pending, int& reqPos);
 	bool writeResponse(void* req, void* res, void* context);
-	//int doIt(const Reflector& reflector, void* _temp, const Method& method, const std::string& cntxtName);
 	bool writeData(const WebSocketData& data);
-	Http11WebSocketHandler(const std::string& url, const bool& isServer, SocketUtil* sockUtil);
+	Http11WebSocketHandler(const std::string& url, const bool& isServer);
 	virtual ~Http11WebSocketHandler();
 };
 

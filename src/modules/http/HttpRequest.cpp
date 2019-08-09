@@ -793,7 +793,7 @@ void HttpRequest::updateContent()
 	{
 		updateFromContentStr();
 	}
-	else
+	else if(this->content_tfile!="")
 	{
 		updateFromContentFile();
 	}

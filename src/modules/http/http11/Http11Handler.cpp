@@ -8,9 +8,15 @@
 #include "Http11Handler.h"
 
 void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
-	//Timer t;
-	//t.start();
-	if(readFrom())return NULL;
+	if(handler!=NULL) {
+		return handler->readRequest(context, pending, reqPos);
+	}
+
+	if(readFrom()) {
+		return NULL;
+	}
+
+	HttpRequest* request = NULL;
 	if(!isHeadersDone && buffer.find("\r\n\r\n")!=std::string::npos)
 	{
 		bytesToRead = 0;
@@ -102,50 +108,74 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		isHeadersDone = false;
 		void* temp = request;
 		request = NULL;
-		//t.end();
-		//CommonUtils::tsRead += t.timerMilliSeconds();
 		return temp;
 	}
-	//t.end();
-	//CommonUtils::tsRead += t.timerMilliSeconds();
 	return NULL;
 }
 
 int Http11Handler::getTimeout() {
+	if(handler!=NULL) {
+		return handler->getTimeout();
+	}
 	return connKeepAlive;
 }
 
-Http11Handler::Http11Handler(SocketUtil* sockUtil, const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
+void Http11Handler::init(const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
 	reqPos = 0;
 	current = 0;
 	address = StringUtil::toHEX((long long)this);
+	wtl.clear();
+	buffer.clear();
 	isHeadersDone = false;
 	bytesToRead = 0;
-	request = NULL;
 	this->webpath = webpath;
 	this->chunkSize = chunkSize<=0?0:chunkSize;
 	this->isTeRequest = false;
 	this->connKeepAlive = connKeepAlive;
 	this->maxReqHdrCnt = maxReqHdrCnt;
 	this->maxEntitySize = maxEntitySize;
-	this->sockUtil = sockUtil;
-	fd = sockUtil->fd;
+	fd = sockUtil.fd;
+	this->handler = NULL;
+}
+
+Http11Handler::Http11Handler(const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
+	reqPos = 0;
+	current = 0;
+	address = StringUtil::toHEX((long long)this);
+	isHeadersDone = false;
+	bytesToRead = 0;
+	this->webpath = webpath;
+	this->chunkSize = chunkSize<=0?0:chunkSize;
+	this->isTeRequest = false;
+	this->connKeepAlive = connKeepAlive;
+	this->maxReqHdrCnt = maxReqHdrCnt;
+	this->maxEntitySize = maxEntitySize;
+	fd = sockUtil.fd;
+	this->handler = NULL;
+}
+
+void Http11Handler::addHandler(SocketInterface* handler) {
+	this->handler = handler;
 }
 
 Http11Handler::~Http11Handler() {
-	if(request!=NULL) {
-		delete request;
-		request = NULL;
+	if(handler!=NULL) {
+		delete handler;
+		handler = NULL;
 	}
 }
 
 std::string Http11Handler::getProtocol(void* context) {
+	if(handler!=NULL) {
+		return handler->getProtocol(context);
+	}
 	return "HTTP1.1";
 }
 
 bool Http11Handler::writeResponse(void* req, void* res, void* context) {
-	//Timer t;
-	//t.start();
+	if(handler!=NULL) {
+		return handler->writeResponse(req, res, context);
+	}
 
 	HttpRequest* request = (HttpRequest*)req;
 	HttpResponse* response = (HttpResponse*)res;
@@ -157,8 +187,6 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 		}
 		delete response;
 		response = NULL;
-		//t.end();
-		//CommonUtils::tsWrite += t.timerMilliSeconds();
 		return true;
 	}
 
@@ -201,9 +229,17 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 	}
 	delete response;
 	response = NULL;
-	//t.end();
-	//CommonUtils::tsWrite += t.timerMilliSeconds();
 	return true;
 }
-void Http11Handler::onOpen(){}
-void Http11Handler::onClose(){}
+void Http11Handler::onOpen(){
+	if(handler!=NULL) {
+		handler->onOpen();
+		return;
+	}
+}
+void Http11Handler::onClose(){
+	if(handler!=NULL) {
+		return handler->onClose();
+		return;
+	}
+}
