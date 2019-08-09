@@ -89,7 +89,6 @@ void HttpServiceTask::run() {
 
 	if(handlerRequest->getSif()->isClosed()) {
 		handlerRequest->doneWithWrite();
-		handlerRequest->clearObjects();
 		handlerRequest->sif->onClose();
 		if(handlerRequest->sif->allRequestsDone()) {
 			service->closeConnection(handlerRequest->sif);

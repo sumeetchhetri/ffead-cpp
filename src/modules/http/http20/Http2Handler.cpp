@@ -408,9 +408,7 @@ bool Http2Handler::writeResponse(void* req, void* res, void* si) {
 	int streamIdentifier = *(int*)si;
 
 	if(isClosed()) {
-		delete req;
 		delete (int*)si;
-		delete res;
 		return true;
 	}
 
@@ -491,10 +489,8 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si) {
 		}
 	}
 
-	delete request;
 	delete (int*)si;
 	if(completedSend) {
-		delete response;
 	}
 
 	return false;
@@ -624,10 +620,8 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 		}
 	}
 
-	delete request;
 	delete (int*)si;
 	if(completedSend) {
-		delete response;
 	}
 
 	return false;

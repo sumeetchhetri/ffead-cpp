@@ -247,9 +247,9 @@ bool Http11WebSocketHandler::writeResponse(void* req, void* res, void* context) 
 
 	if(isClosed()) {
 		if(req!=NULL) {
-			delete (WebSocketData*)req;
+			//delete (WebSocketData*)req;
 		}
-		delete wsdata;
+		//delete wsdata;
 		return true;
 	}
 
@@ -265,10 +265,10 @@ bool Http11WebSocketHandler::writeResponse(void* req, void* res, void* context) 
 	//we have computed other control options
 	writeTo(frame.getFrameData());
 	if(req!=NULL) {
-		delete (WebSocketData*)req;
+		//delete (WebSocketData*)req;
 	}
  	bool fl = writeTo(wsdata->data);
-	delete wsdata;
+	//delete wsdata;
 	return fl;
 }
 

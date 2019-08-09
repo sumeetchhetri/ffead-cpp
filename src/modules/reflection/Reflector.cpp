@@ -81,11 +81,11 @@ void Reflector::destroy(void* instance, std::string className, const std::string
 	{
 		if(className=="char")
 		{
-			delete (char*)instance;
+			delete instance;
 		}
 		else if(className=="unsigned char")
 		{
-			delete (unsigned char*)instance;
+			delete instance;
 		}
 		else if(className=="int")
 		{

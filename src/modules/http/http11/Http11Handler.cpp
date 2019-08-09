@@ -181,12 +181,6 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 	HttpResponse* response = (HttpResponse*)res;
 
 	if(isClosed()) {
-		if(request!=NULL) {
-			delete request;
-			request = NULL;
-		}
-		delete response;
-		response = NULL;
 		return true;
 	}
 
@@ -223,12 +217,6 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 		}
 	}
 
-	if(request!=NULL) {
-		delete request;
-		request = NULL;
-	}
-	delete response;
-	response = NULL;
 	return true;
 }
 void Http11Handler::onOpen(){

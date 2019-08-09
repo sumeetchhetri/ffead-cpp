@@ -115,7 +115,6 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 FFEADContext::~FFEADContext()
 {
 	//this->clearAllSingletonBeans();
-	if(reflector!=NULL)delete reflector;
 }
 
 void* FFEADContext::getBean(const Bean& bean)

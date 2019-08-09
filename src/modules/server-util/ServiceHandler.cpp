@@ -115,6 +115,7 @@ HandlerRequest::HandlerRequest() {
 }
 
 HandlerRequest::~HandlerRequest() {
+	clearObjects();
 }
 
 SocketUtil* HandlerRequest::getSocketUtil() {
