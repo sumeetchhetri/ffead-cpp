@@ -9,10 +9,8 @@
 
 SearchEngineInterface::SearchEngineInterface() {
 	reflector = NULL;
-	dlib = NULL;
 	pool = NULL;
 }
 
 SearchEngineInterface::~SearchEngineInterface() {
-	delete reflector;
 }

@@ -17,7 +17,6 @@ DataSourceInterface::DataSourceInterface() {
 }
 
 DataSourceInterface::~DataSourceInterface() {
-	delete reflector;
 }
 
 bool DataSourceInterface::executeInsertInternal(Query& query, void* entity) {
