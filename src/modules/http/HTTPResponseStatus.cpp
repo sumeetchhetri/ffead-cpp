@@ -61,7 +61,7 @@ void HTTPResponseStatus::init() {
 		statuses[503] = HTTPResponseStatus::ServiceUnavailable;
 		statuses[504] = HTTPResponseStatus::GatewayTimeout;
 		statuses[505] = HTTPResponseStatus::HttpVersionNotSupported;
-		std::map<std::string, HTTPResponseStatus>::iterator i;
+		std::map<int, HTTPResponseStatus>::iterator i;
 		for(i=statuses.begin();i!=statuses.end();++i) {
 			sstatuses[CastUtil::lexical_cast<std::string>(i->first)] = i->second;
 		}
@@ -152,7 +152,7 @@ int HTTPResponseStatus::getCode() const
 	return code;
 }
 
-int HTTPResponseStatus::getSCode() const
+std::string HTTPResponseStatus::getSCode() const
 {
 	return scode;
 }

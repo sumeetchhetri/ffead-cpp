@@ -36,7 +36,6 @@
 #include "HTTPResponseStatus.h"
 #include <libcuckoo/cuckoohash_map.hh>
 #include "SocketInterface.h"
-#include <string_view>
 
 typedef std::vector<std::string> strVec;
 #ifndef HTTPREQUEST_H_
@@ -98,7 +97,7 @@ class HttpRequest {
 	void setRequestParam(const std::string&, const std::string&);
 	void setContent_tfile(const std::string& tfile);
 	void setQueryParams(const RMap& queryParams);
-	void setAuthinfo(const std::map<std::string,std::string>&);
+	void setAuthinfo(const RMap&);
 	void normalizeUrl();
     void setCurl(std::string url);
 	void setActUrl(const std::string&);
@@ -108,7 +107,7 @@ class HttpRequest {
 	void setQueryParam(const std::string& name, const std::string& value);
 	void setSessionID(const std::string& sessionID);
 	std::string toPluginString();
-	void setHttp2Headers(std::map<std::string,std::string,cicomp> headers);
+	void setHttp2Headers(RMap headers);
 	void setContextHome(const std::string& home);
     void addHeader(const std::string& header, const std::string& value);
 	friend class ServiceTask;
@@ -167,7 +166,7 @@ public:
     std::string getActUrl() const;
     const std::vector<std::string>& getActUrlParts() const;
     std::string getSessionID() const;
-    std::map<std::string,std::string> getAuthinfo() const;
+    RMap getAuthinfo() const;
     void buildRequestC(const char* key, const char* value);
     void buildRequest(std::string key, std::string value);
     std::string toString();
@@ -185,13 +184,13 @@ public:
     bool hasCookie();
     std::map<int,std::string> getAuthOrderinfo() const;
 	std::map<int,std::string> getReqOrderinfo() const;
-	std::map<std::string,std::string> getCookieInfo() const;
+	RMap getCookieInfo() const;
     std::string getAuthOrderinfoAttribute(const int& key);
     std::string getReqOrderinfoAttribute(const int& key);
     std::string getCookieInfoAttribute(const std::string& key);
     std::string getHeader(std::string key);
     bool hasHeader(std::string key);
-    std::map<std::string,std::string> getHeaders();
+    RMap getHeaders();
     int getCORSRequestType();
     void addHeaderValue(std::string header, const std::string& value);
     std::vector<std::string> parseHeaderValue(std::string headerValue);

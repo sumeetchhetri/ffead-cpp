@@ -65,8 +65,8 @@ public:
     std::string getHeader(std::string);
     bool getCompressed();
     const std::vector<std::string> getCookies() const;
-	const std::map<std::string,std::string>& getCHeaders() const;
-	std::map<std::string,std::string> getHeaders() const;
+	const RMap& getCHeaders() const;
+	RMap getHeaders() const;
 	std::string getStatusLine() const;
 	std::string toPluginString();
 	bool isDone() const;
@@ -85,12 +85,12 @@ private:
 	std::string preamble;
 	std::string epilogue;
 	bool compressed;
-	std::map<std::string, MultipartContent> multipartFormData;
+	FMap multipartFormData;
 	std::vector<MultipartContent> contentList;
 	std::string content;
 	std::string outFileName;
 	std::vector<std::string> cookies;
-	std::map<std::string,std::string,cicomp> headers;
+	RMap headers;
 	int techunkSiz;
 	int teparts;
 	int tecurrpart;

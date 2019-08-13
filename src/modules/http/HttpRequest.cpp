@@ -297,7 +297,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						//valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu , ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -373,7 +373,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						//valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu , ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -449,7 +449,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						//valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu , ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -557,7 +557,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu, ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -632,7 +632,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu, ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -709,7 +709,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu, ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -806,7 +806,7 @@ void HttpRequest::updateFromContentStr_Old()
 		std::string valu(this->getContent());
 		StringUtil::split(params,valu , ("&"));
 		std::map<std::string ,int> indices;
-		std::map<std::string,std::string>::iterator it;
+		RMap::iterator it;
 		for(unsigned j=0;j<params.size();j++)
 		{
 			strVec param;
@@ -852,7 +852,7 @@ void HttpRequest::updateFromContentStr_Old()
 		strVec parameters;
 		StringUtil::split(parameters, param_conts, (delb));
 		std::map<std::string ,int> indices;
-		std::map<std::string,std::string>::iterator it;
+		RMap::iterator it;
 		for(unsigned j=0;j<parameters.size();j++)
 		{
 			if(parameters.at(j)=="" || parameters.at(j).find_first_not_of(" ")==std::string::npos
@@ -974,7 +974,7 @@ void HttpRequest::updateFromContentStr()
 		std::string valu = CryptoHandler::urlDecode(this->getContent());
 		StringUtil::split(params,valu , ("&"));
 		std::map<std::string ,int> indices;
-		std::map<std::string,std::string>::iterator it;
+		RMap::iterator it;
 		for(unsigned j=0;j<params.size();j++)
 		{
 			strVec param;
@@ -1555,7 +1555,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 std::string HttpRequest::toString()
 {
 	std::string ret;
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		ret += "\n" + it->first + ": " + it->second;
@@ -1588,7 +1588,7 @@ std::string HttpRequest::toString()
 			MultipartContent dat = iter->second;
 			vals+= ("\nKey: "+iter->first);
 			std::cout << dat.getHeaders().size() << std::endl;
-			std::map<std::string,std::string>::iterator it1;
+			RMap::iterator it1;
 			for(it1=dat.headers.begin();it1!=dat.headers.end();++it1)
 			{
 				vals += "\n\t" + it1->first + ": " + it1->second;
@@ -1806,12 +1806,12 @@ const std::vector<std::string>& HttpRequest::getActUrlParts() const
 	return actUrlParts;
 }
 
-std::map<std::string,std::string> HttpRequest::getAuthinfo() const
+RMap HttpRequest::getAuthinfo() const
 {
 	return authinfo;
 }
 
-void HttpRequest::setAuthinfo(const std::map<std::string,std::string>& authinfo)
+void HttpRequest::setAuthinfo(const RMap& authinfo)
 {
 	this->authinfo = authinfo;
 }
@@ -1821,7 +1821,7 @@ std::string HttpRequest::toPHPVariablesString(const std::string& def)
 {
 	std::string ret;
 	ret = "<?php";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -1923,7 +1923,7 @@ std::string HttpRequest::toPerlVariablesString()
 	ret += "\n$_GET = {};";
 	ret += "\n$_POST = {};";
 	ret += "\n$_FILES = {};\n";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -2023,7 +2023,7 @@ std::string HttpRequest::toRubyVariablesString()
 	ret += "\nGET = {}";
 	ret += "\nPOST = {}";
 	ret += "\nFILES = {}\n";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -2120,7 +2120,7 @@ std::string HttpRequest::toPythonVariablesString()
 	ret += "\nGET = {}";
 	ret += "\nPOST = {}";
 	ret += "\nFILES = {}\n";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -2217,7 +2217,7 @@ std::string HttpRequest::toLuaVariablesString()
 	ret += "\nGET = {}";
 	ret += "\nPOST = {}";
 	ret += "\nFILES = {}\n";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -2314,7 +2314,7 @@ std::string HttpRequest::toNodejsVariablesString()
 	ret += "\nGET = {};";
 	ret += "\nPOST = {};";
 	ret += "\nFILES = {};\n";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -2449,7 +2449,7 @@ std::map<int,std::string> HttpRequest::getReqOrderinfo() const
 	return reqorderinf;
 }
 
-std::map<std::string,std::string> HttpRequest::getCookieInfo() const
+RMap HttpRequest::getCookieInfo() const
 {
 	return cookieattrs;
 }
@@ -2489,7 +2489,7 @@ bool HttpRequest::hasHeader(std::string key)
 	return false;
 }
 
-std::map<std::string,std::string> HttpRequest::getHeaders()
+RMap HttpRequest::getHeaders()
 {
 	return headers;
 }
@@ -2876,7 +2876,7 @@ std::string HttpRequest::toPluginString() {
 	return text;
 }
 
-void HttpRequest::setHttp2Headers(std::map<std::string,std::string, cicomp> headers)
+void HttpRequest::setHttp2Headers(RMap headers)
 {
 	method = headers[":method"];
 	authority = headers[":authority"];
@@ -2888,7 +2888,7 @@ void HttpRequest::setHttp2Headers(std::map<std::string,std::string, cicomp> head
 	headers.erase(":path");
 	headers.erase(":authority");
 	headers.erase(":scheme");
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		buildRequest(it->first, it->second);

@@ -46,7 +46,7 @@ public:
 	HTTPResponseStatus(const HTTPResponseStatus& status, const std::string& msg);
 	virtual ~HTTPResponseStatus();
 	int getCode() const;
-	int getSCode() const;
+	std::string getSCode() const;
 	std::string getMsg() const;
 	static const HTTPResponseStatus& getStatusByCode(const int& code);
 	static const HTTPResponseStatus& getStatusByCode(const std::string& code);

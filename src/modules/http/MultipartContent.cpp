@@ -120,9 +120,8 @@ void MultipartContent::setFileName(const std::string& fileName) {
 	this->fileName = fileName;
 }
 
-std::map<std::string, std::string> MultipartContent::getHeaders() {
-	std::map<std::string, std::string> htemp = headers;
-	return htemp;
+std::map<std::string, std::string,cicomp> MultipartContent::getHeaders() {
+	return headers;
 }
 
 std::string MultipartContent::getTempFileName() const {

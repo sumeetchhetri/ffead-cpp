@@ -157,8 +157,8 @@ std::string HttpResponse::generateHeadResponse()
 		boundary = "FFEAD_SERVER_" + CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
 		for (int var = 0; var < (int)contentList.size(); ++var) {
 			content += "--" + boundary + "\r\n";
-			std::map<std::string,std::string> headers = contentList.at(var).getHeaders();
-			std::map<std::string,std::string>::iterator it;
+			RMap headers = contentList.at(var).getHeaders();
+			RMap::iterator it;
 			for(it=headers.begin();it!=headers.end();++it)
 			{
 				content += it->first + ": " + it->second + "\r\n";
@@ -182,7 +182,7 @@ std::string HttpResponse::generateHeadResponse()
 	{
 		addHeaderValue(ContentLength, CastUtil::lexical_cast<std::string>((int)content.length()));
 	}
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		resp += it->first + ": " + it->second + "\r\n";
@@ -200,7 +200,7 @@ std::string HttpResponse::generateOptionsResponse()
 	addHeaderValue("Server", "FFEAD 2.0");
 	std::string resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		resp += it->first + ": " + it->second + "\r\n";
@@ -219,7 +219,7 @@ std::string HttpResponse::generateTraceResponse(HttpRequest* req)
 	addHeaderValue("Server", "FFEAD 2.0");
 	std::string resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		resp += it->first + ": " + it->second + "\r\n";
@@ -233,7 +233,7 @@ std::string HttpResponse::generateTraceResponse(HttpRequest* req)
 	{
 		resp += "TRACE " + req->getActUrl() + " " + req->getHttpVersion();
 		resp += "\r\n";
-		std::map<std::string,std::string>::iterator it;
+		RMap::iterator it;
 		for(it=headers.begin();it!=headers.end();++it)
 		{
 			resp += it->first + ": " + it->second + "\r\n";
@@ -723,7 +723,7 @@ std::string HttpResponse::toPluginString() {
 	text += (CastUtil::lexical_cast<std::string>(this->epilogue.length()) + "\n");
 	text += (this->epilogue);
 
-	std::map<std::string,std::string>::iterator it;
+	std::map<std::string,std::string,cicomp>::iterator it;
 	text += (CastUtil::lexical_cast<std::string>(this->headers.size()) + "\n");
 	for(it=this->headers.begin();it!=this->headers.end();++it)
 	{
@@ -784,9 +784,9 @@ std::string HttpResponse::getFileExtension(const std::string& file)
 	return file;
 }
 
-const std::map<std::string,std::string>& HttpResponse::getCHeaders() const {
+const RMap& HttpResponse::getCHeaders() const {
 	return headers;
 }
-std::map<std::string,std::string> HttpResponse::getHeaders() const {
+RMap HttpResponse::getHeaders() const {
 	return headers;
 }
