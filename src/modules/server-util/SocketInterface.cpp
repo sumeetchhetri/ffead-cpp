@@ -36,7 +36,7 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 		if(SSL_accept(ssl)<=0)
 		{
 			logger << "SSL accept error" << std::endl;
-			closeSocket();
+			close(fd);
 			return false;
 		}
 		if (SSLHandler::getInstance()->securityProperties.client_auth==2 || SSLHandler::getInstance()->securityProperties.client_auth==1)
@@ -51,7 +51,7 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 				if(str == NULL)
 				{
 					logger << "Could not get client certificate subject name" << std::endl;
-					closeSocket();
+					close(fd);
 					return false;
 				}
 				printf ("\t subject: %s\n", str);
@@ -60,7 +60,7 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 				if(str == NULL)
 				{
 					logger << "Could not get client certificate issuer name" << std::endl;
-					closeSocket();
+					close(fd);
 					return false;
 				}
 				printf ("\t issuer: %s\n", str);

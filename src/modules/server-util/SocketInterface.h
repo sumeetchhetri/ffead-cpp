@@ -44,7 +44,7 @@ class ResponseData {
 
 class EventHandler {
 public:
-	virtual bool unRegisterWrite(const SOCKET& descriptor)=0;
+	virtual bool unRegisterWrite(SocketInterface* obj)=0;
 	virtual bool registerWrite(SocketInterface* obj)=0;
 	virtual ~EventHandler(){}
 };
@@ -93,6 +93,7 @@ public:
 	std::string getAddress();
 	std::string getAlpnProto();
 	bool isHttp2();
+	SocketInterface(){}
 	SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io);
 	virtual ~SocketInterface();
 	bool flush();

@@ -276,7 +276,7 @@ bool SelEpolKqEvPrt::registerWrite(SocketInterface* obj) {
 		ev.events = EPOLLOUT | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
 	#endif
 	ev.data.ptr = obj;
-	if (epoll_ctl(epoll_handle, EPOLL_CTL_MOD, descriptor, &ev) < 0)
+	if (epoll_ctl(epoll_handle, EPOLL_CTL_MOD, obj->fd, &ev) < 0)
 	{
 		perror("epoll");
 		std::cout << "Error adding to epoll cntl list" << std::endl;
@@ -296,7 +296,7 @@ bool SelEpolKqEvPrt::unRegisterWrite(SocketInterface* obj) {
 		ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
 	#endif
 	ev.data.ptr = obj;
-	if (epoll_ctl(epoll_handle, EPOLL_CTL_MOD, descriptor, &ev) < 0)
+	if (epoll_ctl(epoll_handle, EPOLL_CTL_MOD, obj->fd, &ev) < 0)
 	{
 		perror("epoll");
 		std::cout << "Error adding to epoll cntl list" << std::endl;
@@ -357,7 +357,7 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj, bool& isRe
 				  (events[index].events & EPOLLRDHUP) ||
 				  (!(events[index].events & EPOLLIN)))
 			{
-				p->close();
+				p->closeSocket();
 			}
 			else if (events[index].events & EPOLLOUT)
 			{

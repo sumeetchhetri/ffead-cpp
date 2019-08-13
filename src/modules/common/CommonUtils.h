@@ -35,6 +35,7 @@
 #endif
 #include "CastUtil.h"
 #include "LoggerFactory.h"
+#include "HTTPResponseStatus.h"
 
 
 class CommonUtils {
