@@ -36,7 +36,7 @@ void HttpServiceHandler::handleRead(SocketInterface* sif)
 }
 
 void HttpServiceHandler::handleWrite(HandlerRequest *handlerRequest) {
-	HttpServiceTask* task = new HttpWriteTask();
+	HttpWriteTask* task = new HttpWriteTask();
 	task->handlerRequest = handlerRequest;
 	task->service = this;
 	task->setCleanUp(true);

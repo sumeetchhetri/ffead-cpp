@@ -35,6 +35,7 @@ class HandlerRequest {
 	friend class ServiceHandler;
 	friend class HttpServiceTask;
 	friend class HttpReadTask;
+	friend class HttpWriteTask;
 	HandlerRequest();
 public:
 	void* getContext();

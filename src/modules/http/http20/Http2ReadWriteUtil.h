@@ -42,7 +42,7 @@ public:
 	virtual ~Http2ReadWriteUtil();
 	virtual bool writePendingDataFrame(Http2RequestResponseData&, std::string& data)=0;
 	//virtual bool writeData(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS)=0;
-	virtual bool writeInitData(Http2Frame* data)=0;
+	virtual void writeInitData(Http2Frame* data)=0;
 	virtual std::vector<std::string> getRelatedEntitiesForPP(const std::string&)=0;
 	virtual int getHighestPushPromiseStreamIdentifier()=0;
 	virtual int updateSenderWindowSize(const int& windowSize)=0;

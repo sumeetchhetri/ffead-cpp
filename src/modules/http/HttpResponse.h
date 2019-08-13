@@ -113,6 +113,7 @@ private:
 	friend class Http2Handler;
 	friend class Http2RequestResponseData;
 	friend class HttpServiceHandler;
+	friend class HttpServiceTask;
 	friend class ControllerHandler;
 	friend class ExtHandler;
 	friend class FviewHandler;
