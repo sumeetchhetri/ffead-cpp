@@ -86,6 +86,9 @@ HttpServiceTask::HttpServiceTask(ReusableInstanceHolder* h) {
 }
 
 HttpServiceTask::~HttpServiceTask() {
+	if(handlerRequest!=NULL) {
+		delete handlerRequest;
+	}
 }
 
 void HttpServiceTask::run() {
@@ -193,7 +196,18 @@ void HttpServiceTask::run() {
 
 	CommonUtils::cResps += 1;
 	handlerRequest->response = resp;
-	service->registerWriteRequest(handlerRequest);
+	int ret = handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos);
+	if(ret==0) {
+		handlerRequest->doneWithWrite(handlerRequest->reqPos);
+		handlerRequest->sif->onClose();
+		if(handlerRequest->sif->allRequestsDone()) {
+			service->closeConnection(handlerRequest->sif);
+		}
+	} else if(ret == -1) {
+		service->registerWriteRequest(handlerRequest);
+		handlerRequest = NULL;
+	}
+	//service->registerWriteRequest(handlerRequest);
 	//handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
 }
 

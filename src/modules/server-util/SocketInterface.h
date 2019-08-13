@@ -77,7 +77,7 @@ class SocketInterface {
 	friend class Http11WebSocketHandler;
 public:
 	bool completeWrite();
-	bool pushResponse(void* request, void* response, void* context, int reqPos);
+	int pushResponse(void* request, void* response, void* context, int reqPos);
 	static bool init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger);
 	int startRequest();
 	int endRequest(int reqPos);

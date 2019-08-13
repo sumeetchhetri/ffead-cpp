@@ -531,7 +531,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					CommonUtils::tsContRstExec += t.timerNanoSeconds();
 
 					t.start();
-					int serOpt = rft.serOpt>2000?-3:(rft.serOpt>1000?-2:rft.serOpt);
+					int serOpt = rft.serOpt>=2000?-3:(rft.serOpt>=1000?-2:rft.serOpt);
 					switch(serOpt) {
 						case -3: {
 							if(ouput!=NULL)res->setContent(XMLSerialize::serializeUnknown(ouput, rft.serOpt-2000, rft.rtype, req->getCntxt_name()));

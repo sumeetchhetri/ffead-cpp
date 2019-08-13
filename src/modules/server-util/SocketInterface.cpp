@@ -129,39 +129,38 @@ void SocketInterface::writeTo(const std::string& d, int reqPos) {
 	rd->_b += d;
 }
 
-bool SocketInterface::pushResponse(void* request, void* response, void* context, int reqPos) {
+int SocketInterface::pushResponse(void* request, void* response, void* context, int reqPos) {
 	Timer t;
 	t.start();
 
-	bool done = false;
+	int done = -1;
 	ResponseData* rd = wtl.find(reqPos);
 	if(isCurrentRequest(reqPos)) {
 		writeResponse(request, response, context, rd->_b, reqPos);
 		rd->done = true;
-		int ret = writeTo(rd);
-		if(ret == 1) {
+		done = writeTo(rd);
+		if(done == 1) {
 			endRequest(reqPos);
 			delete rd;
 			while(wtl.contains(++reqPos) && (rd = wtl.find(reqPos))!=NULL && rd->done) {
-				ret = writeTo(rd);
-				if(ret!=1) {
+				done = writeTo(rd);
+				if(done!=1) {
 					break;
 				}
 				endRequest(reqPos);
 				delete rd;
 			}
-			done = true;
 		}
-		if(ret == -1) {
+		if(done == -1) {
 			eh->registerWrite(this);
-		} else if(ret == 0) {
+		} else if(done == 0) {
 			endRequest(reqPos);
 			delete rd;
 		}
-	} else {
+	} else if(!rd->done) {
 		writeResponse(request, response, context, rd->_b, reqPos);
 		rd->done = true;
-		done = false;
+		done = 1;
 	}
 
 	t.end();
