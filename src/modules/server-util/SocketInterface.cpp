@@ -86,6 +86,11 @@ SocketInterface::~SocketInterface() {
 	}
 }
 
+
+bool SocketInterface::isClosed() {
+	return closed;
+}
+
 bool SocketInterface::completeWrite() {
 	Timer t;
 	t.start();
