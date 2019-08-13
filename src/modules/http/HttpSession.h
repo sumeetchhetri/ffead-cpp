@@ -26,9 +26,11 @@
 
 #ifndef HTTPSESSION_H_
 #define HTTPSESSION_H_
+#include "HTTPResponseStatus.h"
 
 
-typedef std::map<std::string, std::string> Map;
+typedef std::map<std::string, std::string, cicomp> Map;
+
 class HttpSession {
 	std::string sessionId;
 	Map sessionAttributes;

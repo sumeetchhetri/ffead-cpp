@@ -180,7 +180,7 @@ int SocketInterface::writeTo(ResponseData* d)
 		{
 			return 0;
 		}
-		outer: while (!closed)
+		while (!closed)
 		{
 			int er  = BIO_write(io, &d->_b[d->oft] , d->_b.length()-d->oft);
 			int ser = SSL_get_error(ssl, er);
@@ -193,7 +193,7 @@ int SocketInterface::writeTo(ResponseData* d)
 				case SSL_ERROR_NONE:
 				{
 					d->oft += er;
-					if(d->oft==d->_b.length()) {
+					if(d->oft==(int)d->_b.length()) {
 						return 1;
 					}
 					break;
@@ -223,7 +223,7 @@ int SocketInterface::writeTo(ResponseData* d)
 			else
 			{
 				d->oft += er;
-				if(d->oft==d->_b.length()) {
+				if(d->oft==(int)d->_b.length()) {
 					return 1;
 				}
 			}
@@ -292,7 +292,6 @@ bool SocketInterface::readFrom()
 			char b[4096];
 			int er  = BIO_read(io, b, 4096);
 			int ser = SSL_get_error(ssl, er);
-			bool flag = false;
 			switch(ser)
 			{
 				case SSL_ERROR_WANT_READ:

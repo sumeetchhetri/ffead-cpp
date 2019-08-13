@@ -46,6 +46,7 @@ class MultipartContent {
 	friend class HttpResponse;
 	friend class HttpRequest;
 	friend class ControllerHandler;
+	friend class ServiceTask;
 	void addHeader(std::string header, const std::string& value);
 public:
 	static std::string ContentId,ContentDisposition,ContentTransferEncoding,

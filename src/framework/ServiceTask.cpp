@@ -113,7 +113,7 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 
 	if(sessionchanged)
 	{
-		std::map<std::string,std::string> vals = req->getSession()->getSessionAttributes();
+		std::map<std::string,std::string, cicomp> vals = req->getSession()->getSessionAttributes();
 		std::string prevcookid = req->getCookieInfoAttribute("FFEADID");
 
 		std::string values;
