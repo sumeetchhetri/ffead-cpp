@@ -564,8 +564,8 @@ std::string Http2HPACKContext::encode(const std::map<std::string, std::string, c
 	return encoded;
 }
 
-std::map<std::string, std::string> Http2HPACKContext::decode(const std::string& data) {
-	std::map<std::string, std::string> headers;
+std::map<std::string, std::string, cicomp> Http2HPACKContext::decode(const std::string& data) {
+	std::map<std::string, std::string, cicomp> headers;
 	size_t indx = 0;
 	while(data.length()>indx)
 	{

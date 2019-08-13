@@ -58,7 +58,7 @@ void Http2RequestResponseData::updateContent() {
 	}
 }
 
-const std::map<std::string, std::string>& Http2RequestResponseData::getHeaders() const {
+const std::map<std::string, std::string, cicomp>& Http2RequestResponseData::getHeaders() const {
 	return preHeaders;
 }
 

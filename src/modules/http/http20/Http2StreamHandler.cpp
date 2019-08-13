@@ -95,7 +95,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 					return false;
 				}
 			} else if(headerf->getHeader().isEndHeaders()) {
-				std::map<std::string, std::string> wshdrs = context->decode(headerf->headerBlockFragment);
+				std::map<std::string, std::string, cicomp> wshdrs = context->decode(headerf->headerBlockFragment);
 				if(wshdrs.find(":opcode")!=wshdrs.end()) {
 					try {
 						wsrequest->dataType = CastUtil::lexical_cast<short>(wshdrs[":opcode"]);
@@ -160,7 +160,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 					requestObj = getRequestAndReInit();
 				}
 			} else if(contf->getHeader().isEndHeaders()) {
-				std::map<std::string, std::string> wshdrs = context->decode(contf->headerBlockFragment);
+				std::map<std::string, std::string, cicomp> wshdrs = context->decode(contf->headerBlockFragment);
 				if(wshdrs.find(":opcode")!=wshdrs.end()) {
 					try {
 						wsrequest->dataType = CastUtil::lexical_cast<short>(wshdrs[":opcode"]);
@@ -271,7 +271,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 
 			if(pendingSendData.isDataPending())
 			{
-				handler->writePendingDataFrame(pendingSendData);
+				//TODO handle this?? handler->writePendingDataFrame(pendingSendData);
 			}
 		} else {
 			closeConnection(frame->header.streamIdentifier, handler);
@@ -346,7 +346,7 @@ void* Http2StreamHandler::handleWebSocketRequest(Http2HPACKContext* context, Htt
 {
 	if(settings.find(Http2SettingsFrame::SETTINGS_WEBSOCKET_CAPABLE)!=settings.end() && isWebSocketRequest())
 	{
-		std::map<std::string, std::string> wsheaders;
+		std::map<std::string, std::string, cicomp> wsheaders;
 		wsheaders[":status"] = "101";
 		wsheaders["sec-websocket-protocol"] = "13";
 		Http2HeadersFrame hframe;
