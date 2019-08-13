@@ -212,7 +212,14 @@ void HttpServiceTask::run() {
 }
 
 void HttpWriteTask::run() {
-	if(!handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos)) {
+	int ret = handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos);
+	if(ret==0) {
+		handlerRequest->doneWithWrite(handlerRequest->reqPos);
+		handlerRequest->sif->onClose();
+		if(handlerRequest->sif->allRequestsDone()) {
+			service->closeConnection(handlerRequest->sif);
+		}
+	} else if(ret == -1) {
 		service->registerWriteRequest(handlerRequest);
 		handlerRequest = NULL;
 	}

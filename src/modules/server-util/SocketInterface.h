@@ -31,6 +31,7 @@
 #include "vector"
 #include <libcuckoo/cuckoohash_map.hh>
 #include "concurrentqueue.h"
+#include "map"
 
 class SocketInterface;
 
@@ -58,7 +59,9 @@ class SocketInterface {
 	Logger logger;
 	std::string buffer;
 	Mutex m;
-	cuckoohash_map<int, ResponseData*> wtl;
+	Mutex wm;
+	std::map<int, ResponseData*> wtl;
+	//cuckoohash_map<int, ResponseData*> wtl;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
 	std::string address;

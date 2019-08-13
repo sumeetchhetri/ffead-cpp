@@ -30,7 +30,7 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	address = StringUtil::toHEX((long long)this);
 	this->fd = fd;
 	http2 = SSLHandler::getAlpnProto(fd).find("h2")==0;
-	wtl.insert(0, new ResponseData());
+	wtl[0] = new ResponseData();
 }
 
 bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger) {
@@ -91,9 +91,13 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 
 SocketInterface::~SocketInterface() {
 	closeSocket();
-	cuckoohash_map<int, ResponseData*>::locked_table lt = wtl.lock_table();
+	/*cuckoohash_map<int, ResponseData*>::locked_table lt = wtl.lock_table();
 	cuckoohash_map<int, ResponseData*>::locked_table::iterator it;
 	for(it=lt.begin();it!=lt.end();++it) {
+		delete it->second;
+	}*/
+	std::map<int, ResponseData*>::iterator it;
+	for(it=wtl.begin();it!=wtl.end();++it) {
 		delete it->second;
 	}
 }
@@ -125,7 +129,9 @@ bool SocketInterface::completeWrite() {
 }
 
 void SocketInterface::writeTo(const std::string& d, int reqPos) {
+	wm.lock();
 	ResponseData* rd = wtl.find(reqPos);
+	wm.unlock();
 	rd->_b += d;
 }
 
@@ -134,7 +140,9 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 	t.start();
 
 	int done = -1;
+	wm.lock();
 	ResponseData* rd = wtl.find(reqPos);
+	wm.unlock();
 	if(isCurrentRequest(reqPos)) {
 		writeResponse(request, response, context, rd->_b, reqPos);
 		rd->done = true;
@@ -142,14 +150,22 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 		if(done == 1) {
 			endRequest(reqPos);
 			delete rd;
-			while(wtl.contains(++reqPos) && (rd = wtl.find(reqPos))!=NULL && rd->done) {
-				done = writeTo(rd);
-				if(done!=1) {
+			while(true) {
+				wm.lock();
+				if(wtl.find(++reqPos)!=wtl.end() && (rd = wtl.find(reqPos)->second)!=NULL && rd->done) {
+					wm.unlock();
+					done = writeTo(rd);
+					if(done!=1) {
+						break;
+					}
+					endRequest(reqPos);
+					delete rd;
+				} else {
+					wm.unlock();
 					break;
 				}
-				endRequest(reqPos);
-				delete rd;
 			}
+
 		}
 		if(done == -1) {
 			eh->registerWrite(this);
@@ -171,13 +187,16 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 
 int SocketInterface::startRequest() {
 	int rp = ++reqPos;
-	ResponseData* rd = new ResponseData();
-	wtl.insert(rp, rd);
+	wm.lock();
+	wtl[rp] = new ResponseData();
+	wm.unlock();
 	return rp;
 }
 
 int SocketInterface::endRequest(int reqPos) {
+	wm.lock();
 	wtl.erase(reqPos);
+	wm.unlock();
 	return ++current;
 }
 
