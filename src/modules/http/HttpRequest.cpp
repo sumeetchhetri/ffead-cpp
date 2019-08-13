@@ -168,7 +168,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 				if(temp.at(0)==HttpRequest::Authorization)
 				{
 					this->getAuthParams(temp.at(1));
-					addHeaderValue(temp.at(0), temp.at(1));
+					addHeader(temp.at(0), temp.at(1));
 				}
 				else if(temp.at(0)==HttpRequest::AcceptLanguage)
 				{
@@ -195,7 +195,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 							this->localeInfo.push_back(t);
 						}
 					}
-					addHeaderValue(temp.at(0), temp.at(1));
+					addHeader(temp.at(0), temp.at(1));
 				}
 				else if(temp.at(0)==HttpRequest::ContentType)
 				{
@@ -203,7 +203,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 					size_t s = tempi.find("boundary");
 					if(s!=std::string::npos)
 					{
-						addHeaderValue(temp.at(0), tempi.substr(0,s));
+						addHeader(temp.at(0), tempi.substr(0,s));
 						tempi = tempi.substr(s);
 						strVec results;
 						StringUtil::split(results, tempi, ("="));
@@ -215,7 +215,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 					}
 					else
 					{
-						addHeaderValue(temp.at(0), temp.at(1));
+						addHeader(temp.at(0), temp.at(1));
 					}
 				}
 				else if(temp.at(0)==HttpRequest::Cookie)
@@ -232,7 +232,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						else
 							cookieattrs[results1.at(0)] = "true";
 					}
-					addHeaderValue(temp.at(0), temp.at(1));
+					addHeader(temp.at(0), temp.at(1));
 				}
 				else
 				{
@@ -912,7 +912,7 @@ void HttpRequest::updateFromContentStr_Old()
 							key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
 							key = CryptoHandler::urlDecode(key);
 							StringUtil::replaceFirst(cont_type,"\r","");
-							datf.addHeaderValue(MultipartContent::ContentType, cont_type);
+							datf.addHeader(MultipartContent::ContentType, cont_type);
 							datf.setContent(parm);
 						}
 						else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")

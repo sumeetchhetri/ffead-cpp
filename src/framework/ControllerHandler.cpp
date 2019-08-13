@@ -260,20 +260,14 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				return true;
 			}
 
-			std::string icont = rft.icontentType;
-			std::string ocont = rft.ocontentType;
-			if(icont=="")
-				icont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
-			else if(icont!=req->getHeader(HttpRequest::ContentType) && req->getHeader(HttpRequest::ContentType).find(icont)!=0)
+			if(rft.icontentType!="" && rft.icontentType!=req->getHeader(HttpRequest::ContentType) && req->getHeader(HttpRequest::ContentType).find(rft.icontentType)!=0)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
 				res->setDone(true);
 				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				return true;
 			}
-			if(ocont=="")
-				ocont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
-			req->addHeaderValue(HttpRequest::ContentType, icont);
+			req->addHeader(HttpRequest::ContentType, rft.icontentType);
 
 			t.end();
 			CommonUtils::tsContRstInsLkp += t.timerNanoSeconds();
@@ -370,7 +364,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						case 0: {
 							argus.push_back(rft.params.at(var).type);
 							void* voidPvect = NULL;
-							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+							if(rft.icontentType==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 							{
 								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
 							}
@@ -450,7 +444,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						case 116: {
 							argus.push_back(rft.params.at(var).type);
 							void* voidPvect = NULL;
-							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+							if(rft.icontentType==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 							{
 								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
 							}
@@ -534,11 +528,17 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					int serOpt = rft.serOpt>=2000?-3:(rft.serOpt>=1000?-2:rft.serOpt);
 					switch(serOpt) {
 						case -3: {
-							if(ouput!=NULL)res->setContent(XMLSerialize::serializeUnknown(ouput, rft.serOpt-2000, rft.rtype, req->getCntxt_name()));
+							if(ouput!=NULL) {
+								res->setContent(XMLSerialize::serializeUnknown(ouput, rft.serOpt-2000, rft.rtype, req->getCntxt_name()));
+								res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+							}
 							break;
 						}
 						case -2: {
-							if(ouput!=NULL)res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt-1000, rft.rtype, rft.s, rft.sc, rft.scm, req->getCntxt_name()));
+							if(ouput!=NULL) {
+								res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt-1000, rft.rtype, rft.s, rft.sc, rft.scm, req->getCntxt_name()));
+								res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
+							}
 							break;
 						}
 						case -1: {
@@ -550,19 +550,27 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							break;
 						}
 						case 1: {
-							if(ouput!=NULL)res->setContent(*(std::string*)ouput);
+							if(ouput!=NULL) {
+								res->setContent(*(std::string*)ouput);
+								res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+							}
 							break;
 						}
 						default: {
 							if(rft.serOpt>17 || rft.serOpt==0) {
-								if(ouput!=NULL)res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt, rft.rtype, req->getCntxt_name()));
+								if(ouput!=NULL) {
+									res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt, rft.rtype, req->getCntxt_name()));
+									res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+								}
 							} else {
-								if(ouput!=NULL)res->setContent(SerializeBase::trySerialize(ouput, rft.serOpt, rft.rtype, req->getCntxt_name()));
+								if(ouput!=NULL) {
+									res->setContent(SerializeBase::trySerialize(ouput, rft.serOpt, rft.rtype, req->getCntxt_name()));
+									res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+								}
 							}
 							break;
 						}
 					}
-					res->addHeader(HttpResponse::ContentType, ocont);
 					res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(rft.statusCode));
 					delete ouput;
 					//logger << "Successfully called restcontroller output follows - " << std::endl;

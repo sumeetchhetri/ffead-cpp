@@ -148,7 +148,7 @@ std::string HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
 
 std::string HttpResponse::generateHeadResponse()
 {
-	addHeaderValue("Server", "FFEAD 2.0");
+	addHeader("Server", "FFEAD 2.0");
 	bool isTE = isHeaderValue("Transfer-Encoding", "chunked");
 	std::string resp, boundary;
 	if(this->contentList.size()>0)
@@ -172,7 +172,7 @@ std::string HttpResponse::generateHeadResponse()
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
 	if(this->getHeader("Content-Type")=="" && this->contentList.size()>0)
 	{
-		this->addHeaderValue("Content-Type", "multipart/mixed");
+		this->addHeader("Content-Type", "multipart/mixed");
 	}
 	if(this->getHeader("Content-Type")!="" && boundary!="")
 	{
@@ -180,7 +180,7 @@ std::string HttpResponse::generateHeadResponse()
 	}
 	if(!isTE && getHeader(ContentLength)=="")
 	{
-		addHeaderValue(ContentLength, CastUtil::lexical_cast<std::string>((int)content.length()));
+		addHeader(ContentLength, CastUtil::lexical_cast<std::string>((int)content.length()));
 	}
 	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
@@ -197,7 +197,7 @@ std::string HttpResponse::generateHeadResponse()
 
 std::string HttpResponse::generateOptionsResponse()
 {
-	addHeaderValue("Server", "FFEAD 2.0");
+	addHeader("Server", "FFEAD 2.0");
 	std::string resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
 	RMap::iterator it;
@@ -216,7 +216,7 @@ std::string HttpResponse::generateOptionsResponse()
 
 std::string HttpResponse::generateTraceResponse(HttpRequest* req)
 {
-	addHeaderValue("Server", "FFEAD 2.0");
+	addHeader("Server", "FFEAD 2.0");
 	std::string resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
 	RMap::iterator it;
@@ -252,7 +252,7 @@ void HttpResponse::update(HttpRequest* req)
 {
 	this->httpVers = req->httpVers;
 	this->httpVersion = req->getHttpVersion();
-	addHeaderValue(HttpResponse::AcceptRanges, "none");
+	addHeader(HttpResponse::AcceptRanges, "none");
 }
 
 void HttpResponse::setHTTPResponseStatus(const HTTPResponseStatus& status)
@@ -484,10 +484,10 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 
 	if(req->getMethod()=="HEAD")
 	{
-		res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(getContentSize(fname.c_str())));
-		res->addHeaderValue(HttpResponse::AcceptRanges, "bytes");
+		res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(getContentSize(fname.c_str())));
+		res->addHeader(HttpResponse::AcceptRanges, "bytes");
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-		res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
+		res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
 	}
 	else if(req->getMethod()=="OPTIONS" || req->getMethod()=="TRACE")
 	{
@@ -537,7 +537,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 
 					if(isifmodsincvalid && *ifmodsince>=filemodifieddate)
 					{
-						res->addHeaderValue(HttpResponse::LastModified, ifmodsincehdr);
+						res->addHeader(HttpResponse::LastModified, ifmodsincehdr);
 						//std::cout << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
 						return false;
@@ -557,7 +557,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			gmtime_r(&rt, &ti);
 			char buffer[31];
 			strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
-			res->addHeaderValue(HttpResponse::LastModified, std::string(buffer));
+			res->addHeader(HttpResponse::LastModified, std::string(buffer));
 
 			if(isCEGzip)
 			{
@@ -610,9 +610,9 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			else if(rangeValuesLst.size()>0)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::PartialContent);
-				res->addHeaderValue(HttpResponse::ContentType, "multipart/byteranges");
+				res->addHeader(HttpResponse::ContentType, "multipart/byteranges");
 				unsigned int totlen = getContentSize(fname.c_str());
-				res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
+				res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
 				for (int var = 0; var <(int)rangeValuesLst.size(); ++var) {
 					int start = rangeValuesLst.at(var).at(0);
 					int end = rangeValuesLst.at(var).at(1);
@@ -630,8 +630,8 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 							end += 1;
 						std::string cont = getContent(fname.c_str(), start, end);
 						MultipartContent conte(cont);
-						conte.addHeaderValue(MultipartContent::ContentType, type);
-						conte.addHeaderValue(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<std::string>(totlen));
+						conte.addHeader(MultipartContent::ContentType, type);
+						conte.addHeader(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<std::string>(totlen));
 						res->addContent(conte);
 					}
 				}
@@ -658,18 +658,18 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			res->teparts = (int)parts;
 			res->content = "";
 			if(res->httpVers>=1.1 && res->httpVers<1.2) {
-				res->addHeaderValue(HttpResponse::TransferEncoding, "chunked");
+				res->addHeader(HttpResponse::TransferEncoding, "chunked");
 			} else {
-				res->addHeaderValue(ContentLength, CastUtil::lexical_cast<std::string>(totlen));
+				res->addHeader(ContentLength, CastUtil::lexical_cast<std::string>(totlen));
 			}
 		}
 		else
 		{
 			res->content = getContent(fname.c_str());
-			res->addHeaderValue(ContentLength, CastUtil::lexical_cast<std::string>((int)res->content.length()));
+			res->addHeader(ContentLength, CastUtil::lexical_cast<std::string>((int)res->content.length()));
 		}
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-		res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
+		res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
 		hasContent = true;
 	}
 	return hasContent;

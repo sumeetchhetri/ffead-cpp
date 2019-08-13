@@ -92,11 +92,11 @@ MultipartContent::MultipartContent(const std::vector<std::string>& headers, cons
 						}
 					}
 				}
-				addHeaderValue(temp.at(0), temp.at(1));
+				addHeader(temp.at(0), temp.at(1));
 			}
 		}
 		if(this->headers.find(MultipartContent::ContentType)==this->headers.end()) {
-			addHeaderValue(MultipartContent::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			addHeader(MultipartContent::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 		}
 	}
 }

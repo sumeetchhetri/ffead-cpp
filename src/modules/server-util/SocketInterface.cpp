@@ -144,12 +144,16 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 	ResponseData* rd = wtl[reqPos];
 	wm.unlock();
 	if(isCurrentRequest(reqPos)) {
-		writeResponse(request, response, context, rd->_b, reqPos);
-		rd->done = true;
+		if(!rd->done) {
+			writeResponse(request, response, context, rd->_b, reqPos);
+			rd->done = true;
+		}
 		done = writeTo(rd);
-		if(done == 1) {
+		if(rd->oft==rd->_b.length()) {
 			endRequest(reqPos);
 			delete rd;
+		}
+		if(done == 1) {
 			while(true) {
 				wm.lock();
 				if(wtl.find(++reqPos)!=wtl.end() && (rd = wtl.find(reqPos)->second)!=NULL && rd->done) {
