@@ -38,7 +38,6 @@ class ResponseData {
 	std::string _b;
 	int oft;
 	bool done;
-	int reqPos;
 	friend class SocketInterface;
 };
 
@@ -93,7 +92,7 @@ public:
 	std::string getAddress();
 	std::string getAlpnProto();
 	bool isHttp2();
-	SocketInterface(){}
+	SocketInterface();
 	SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io);
 	virtual ~SocketInterface();
 	bool flush();

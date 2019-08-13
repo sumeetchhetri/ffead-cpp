@@ -71,7 +71,7 @@ void HttpRequest::getAuthParams(std::string str)
 {
 	authMethod = (str.substr(0,str.find(" ")));
 	str = str.substr(str.find(" ")+1);
-	if(strcasecmp(authMethod.c_str(), "basic"))
+	if(strcasecmp(authMethod.c_str(), "basic")==0)
 	{
 		unsigned char *input = (unsigned char *)str.c_str();
 		int length = str.length();
@@ -1335,7 +1335,7 @@ void HttpRequest::buildRequestC(const char *keyc, const char *valuec)
 
 void HttpRequest::buildRequest(std::string key, std::string value)
 {
-	if(strcasecmp(key.c_str(), "accept-language"))
+	if(strcasecmp(key.c_str(), "accept-language")==0)
 	{
 		StringUtil::trim(value);
 		strVec lemp;
@@ -1363,13 +1363,13 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		}
 		addHeader(key, value);
 	}
-	else if(strcasecmp(key.c_str(), "authorization"))
+	else if(strcasecmp(key.c_str(), "authorization")==0)
 	{
 		StringUtil::trim(value);
 		this->getAuthParams(value);
 		addHeader(key, value);
 	}
-	else if(strcasecmp(key.c_str(), "cookie"))
+	else if(strcasecmp(key.c_str(), "cookie")==0)
 	{
 		StringUtil::trim(value);
 		this->cookie = true;
@@ -1386,7 +1386,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		}
 		//addHeader(key, value);
 	}
-	else if(strcasecmp(key.c_str(), "content-type"))
+	else if(strcasecmp(key.c_str(), "content-type")==0)
 	{
 		StringUtil::trim(value);
 		std::string tempi(value);
@@ -1408,15 +1408,15 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 			addHeader(key, value);
 		}
 	}
-	else if(strcasecmp(key.c_str(), "content") && value!="")
+	else if(strcasecmp(key.c_str(), "content")==0 && value!="")
 	{
 		content.append(value);
 	}
-	else if(strcasecmp(key.c_str(), "method"))
+	else if(strcasecmp(key.c_str(), "method")==0)
 	{
 		this->setMethod(value);
 	}
-	else if(strcasecmp(key.c_str(), "httpversion"))
+	else if(strcasecmp(key.c_str(), "httpversion")==0)
 	{
 		this->httpVersion = value;
 		std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(value), "http/", "");
@@ -1428,7 +1428,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		} catch(const std::exception& e) {
 		}
 	}
-	else if(strcasecmp(key.c_str(), "getarguments"))
+	else if(strcasecmp(key.c_str(), "getarguments")==0)
 	{
 		strVec params;
 		std::map<std::string ,int> indices;
@@ -1468,7 +1468,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 	}
 	else if(key.find("url")!=std::string::npos)
 	{
-		strVec memp;
+		//strVec memp;
 		this->setActUrl(value);
 		//StringUtil::split(memp, value, ("/"));
 		/*int fs = value.find_first_of("/");
@@ -1489,7 +1489,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		}
 		this->setCntxt_root(webpath + "/" + cntxt_name);*/
 	}
-	else if(strcasecmp(key.c_str(), "httpline"))
+	else if(strcasecmp(key.c_str(), "httpline")==0)
 	{
 		strVec vemp;
 		StringUtil::split(vemp, value, (" "));
@@ -1541,10 +1541,43 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		{
 			std::string valu(vemp.at(0));
 			vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-			valu = valu.substr(valu.find("?")+1);
-			buildRequest("getarguments", valu);
+			valu = CryptoHandler::urlDecode(valu.substr(valu.find("?")+1));
+			strVec params;
+			std::map<std::string ,int> indices;
+			StringUtil::split(params, valu, ("&"));
+			for(unsigned j=0;j<params.size();j++)
+			{
+				strVec param;
+				StringUtil::split(param, params.at(j), ("="));
+				if(param.size()==2)
+				{
+					std::string attN = param.at(0);
+					StringUtil::replaceFirst(attN,"\r","");
+					StringUtil::replaceFirst(attN,"\t","");
+					StringUtil::replaceFirst(attN," ","");
+					if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
+					{
+						if(indices.find(attN)==indices.end())
+						{
+							indices[attN] = 0;
+						}
+						else
+						{
+							indices[attN] = indices[attN] + 1;
+						}
+						this->queryParams[attN.substr(0, attN.find("[")+1)
+								  + CastUtil::lexical_cast<std::string>(indices[attN])
+								  + "]"] = CryptoHandler::urlDecode(param.at(1));
+					}
+					else
+					{
+						this->setQueryParam(attN,param.at(1));
+					}
+					reqorderinf[reqorderinf.size()+1] = attN;
+				}
+			}
 		}
-		buildRequest("url", vemp.at(0));
+		this->setActUrl(vemp.at(0));
 	}
 	else
 	{

@@ -7,6 +7,18 @@
 
 #include "SocketInterface.h"
 
+SocketInterface::SocketInterface() {
+	eh = NULL;
+	http2 = false;
+	closed = false;
+	ssl = NULL;
+	io = NULL;
+	reqPos = 0;
+	current = 0;
+	http2 = false;
+	fd = -1;
+}
+
 SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	http2 = false;
 	closed = false;
@@ -138,6 +150,7 @@ bool SocketInterface::pushResponse(void* request, void* response, void* context,
 				endRequest(reqPos);
 				delete rd;
 			}
+			done = true;
 		}
 		if(ret == -1) {
 			eh->registerWrite(this);

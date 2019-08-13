@@ -200,6 +200,7 @@ void HttpServiceTask::run() {
 void HttpWriteTask::run() {
 	if(!handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos)) {
 		service->registerWriteRequest(handlerRequest);
+		handlerRequest = NULL;
 	}
 }
 
