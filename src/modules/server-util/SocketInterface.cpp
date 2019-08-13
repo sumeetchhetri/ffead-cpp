@@ -113,7 +113,7 @@ bool SocketInterface::completeWrite() {
 
 	bool done = false;
 	int reqPos = current + 1;
-	ResponseData* rd = wtl.find(reqPos);
+	ResponseData* rd = wtl[reqPos];
 	int ret = writeTo(rd);
 	if(ret == 0 || ret == 1) {
 		endRequest(reqPos);
@@ -130,7 +130,7 @@ bool SocketInterface::completeWrite() {
 
 void SocketInterface::writeTo(const std::string& d, int reqPos) {
 	wm.lock();
-	ResponseData* rd = wtl.find(reqPos);
+	ResponseData* rd = wtl[reqPos];
 	wm.unlock();
 	rd->_b += d;
 }
@@ -141,7 +141,7 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 
 	int done = -1;
 	wm.lock();
-	ResponseData* rd = wtl.find(reqPos);
+	ResponseData* rd = wtl[reqPos];
 	wm.unlock();
 	if(isCurrentRequest(reqPos)) {
 		writeResponse(request, response, context, rd->_b, reqPos);
