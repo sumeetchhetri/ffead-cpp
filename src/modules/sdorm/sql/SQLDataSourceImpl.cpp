@@ -433,11 +433,11 @@ bool SQLDataSourceImpl::allocateStmt(const bool& read) {
 	int V_OD_erg;// result of functions
 	if (read) {
 		if (this->pool != NULL)
-			conn = this->pool->checkout(false);
+			conn = this->pool->checkout();
 		V_OD_hdbc = conn->getConn();
 	} else {
 		if (this->pool != NULL)
-			conn = this->pool->checkout(true);
+			conn = this->pool->checkout();
 		V_OD_hdbc = conn->getConn();
 	}
 	V_OD_erg = SQLAllocHandle(SQL_HANDLE_STMT, V_OD_hdbc, &V_OD_hstmt);

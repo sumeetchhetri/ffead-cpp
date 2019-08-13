@@ -93,7 +93,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						re = f2(vemp);
 						//logger << "Completed method call" << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-						res->addHeaderValue(HttpResponse::ContentType, (re.find("{")==0 || re.find("[")==0)?"application/json":"text/plain");
+						res->addHeader(HttpResponse::ContentType, (re.find("{")==0 || re.find("[")==0)?"application/json":"text/plain");
 						res->setContent(re);
 					} catch(const std::exception& e) {
 						logger << "AjaxInterface exception occurred" << std::endl;
@@ -146,7 +146,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 					if(content.length()>0)
 					{
 						res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-						res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+						res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 						res->setContent(content);
 					}
 				} catch(const std::exception& e) {
@@ -202,7 +202,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 		if(content.length()>0)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+			res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 			res->setContent(content);
 		}
 	}
@@ -259,7 +259,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			if(content.length()>0)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+				res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 				res->setContent(content);
 			}
 		}

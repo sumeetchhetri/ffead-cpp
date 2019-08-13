@@ -98,7 +98,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 	#if !defined(USE_WIN_IOCP)
 		dsi = new DummySocketInterface();
 		dsi->fd = sockfd;
-		if(sockfd>0)registerForEvent(dsi, true);
+		if(sockfd>0)registerRead(dsi, true);
 	#endif
 }
 
@@ -266,8 +266,49 @@ int SelEpolKqEvPrt::getEvents()
 	return numEvents;
 }
 
-SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj)
+bool SelEpolKqEvPrt::registerWrite(SocketInterface* obj) {
+#if defined USE_EPOLL
+	struct epoll_event ev;
+	memset(&ev, 0, sizeof(ev));
+	#ifdef USE_EPOLL_LT
+		ev.events = EPOLLOUT | EPOLLERR | EPOLLHUP | EPOLLRDHUP;
+	#else
+		ev.events = EPOLLOUT | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
+	#endif
+	ev.data.ptr = obj;
+	if (epoll_ctl(epoll_handle, EPOLL_CTL_MOD, descriptor, &ev) < 0)
+	{
+		perror("epoll");
+		std::cout << "Error adding to epoll cntl list" << std::endl;
+		return false;
+	}
+#endif
+	return true;
+}
+
+bool SelEpolKqEvPrt::unRegisterWrite(SocketInterface* obj) {
+#if defined USE_EPOLL
+	struct epoll_event ev;
+	memset(&ev, 0, sizeof(ev));
+	#ifdef USE_EPOLL_LT
+		ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP;
+	#else
+		ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | EPOLLET;
+	#endif
+	ev.data.ptr = obj;
+	if (epoll_ctl(epoll_handle, EPOLL_CTL_MOD, descriptor, &ev) < 0)
+	{
+		perror("epoll");
+		std::cout << "Error adding to epoll cntl list" << std::endl;
+		return false;
+	}
+#endif
+	return true;
+}
+
+SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj, bool& isRead)
 {
+	isRead = true;
 	#if defined(USE_WIN_IOCP)
 		if(psocks.size()>index && index>=0)
 		{
@@ -318,6 +359,10 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj)
 			{
 				p->close();
 			}
+			else if (events[index].events & EPOLLOUT)
+			{
+				isRead = false;
+			}
 			obj = p;
 			return p->fd;
 		}
@@ -355,7 +400,7 @@ bool SelEpolKqEvPrt::isListeningDescriptor(const SOCKET& descriptor)
 	return false;
 }
 
-bool SelEpolKqEvPrt::registerForEvent(SocketInterface* obj, const bool& isListeningSock)
+bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningSock)
 {
 	SOCKET descriptor = obj->fd;
 	//#ifndef USE_WIN_IOCP
@@ -461,7 +506,7 @@ void* SelEpolKqEvPrt::getOptData(const int& index) {
 	return NULL;
 }
 
-bool SelEpolKqEvPrt::unRegisterForEvent(const SOCKET& descriptor)
+bool SelEpolKqEvPrt::unRegisterRead(const SOCKET& descriptor)
 {
 	if(descriptor<=0)return false;
 	#if defined(USE_WIN_IOCP)

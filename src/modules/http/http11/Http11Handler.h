@@ -8,7 +8,6 @@
 #ifndef HTTP11HANDLER_H_
 #define HTTP11HANDLER_H_
 #include "SocketInterface.h"
-#include "SocketUtil.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "ConfigurationData.h"
@@ -16,10 +15,12 @@
 class Http11Handler : public SocketInterface {
 	bool isHeadersDone;
 	int bytesToRead;
+	bool isTeRequest;
+	HttpRequest* request;
+
 	std::string webpath;
 	int chunkSize;
 	int connKeepAlive;
-	bool isTeRequest;
 	int maxReqHdrCnt;
 	int maxEntitySize;
 	SocketInterface* handler;
@@ -31,9 +32,9 @@ public:
 	std::string getProtocol(void* context);
 	int getTimeout();
 	void* readRequest(void*& context, int& pending, int& reqPos);
-	bool writeResponse(void* req, void* res, void* context);
-	void init(const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
-	Http11Handler(const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
+	bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos);
+	Http11Handler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& webpath, const int& chunkSize,
+			const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
 	virtual ~Http11Handler();
 };
 

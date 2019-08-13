@@ -52,7 +52,7 @@ void Http2StreamHandler::closeConnection(const int& lastStreamIdentifier, Http2R
 	Http2GoAwayFrame gframe;
 	gframe.lastStreamId = 0;
 	gframe.errorCode = 1;
-	handler->writeData(&gframe);
+	handler->writeInitData(&gframe);
 	//handler->close();
 	std::cout << "closed stream " << lastStreamIdentifier << std::endl;
 }
@@ -197,7 +197,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 			{
 				Http2SettingsFrame sframe;
 				sframe.header.flags.set(0);
-				handler->writeData(&sframe);
+				handler->writeInitData(&sframe);
 				std::map<uint16_t, uint32_t>::iterator itt;
 				for(itt=settings.begin();itt!=settings.end();++itt) {
 					std::cout << "client_settings[" << itt->first << "] = " << itt->second << std::endl;
@@ -229,7 +229,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 				Http2PingFrame pframe;
 				pframe.opaqueData = pingf->opaqueData;
 				pframe.header.flags.set(0);
-				handler->writeData(&pframe);
+				handler->writeInitData(&pframe);
 			}
 			else if(frameAcks.find(frame->header.type)!=frameAcks.end() && frameAcks[frame->header.type])
 			{
@@ -294,7 +294,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 				Http2WindowUpdateFrame cwuframe;
 				cwuframe.windowSizeIncrement = 65535 + frame->header.payloadLength;
 				cwuframe.header.streamIdentifier = frame->header.streamIdentifier;
-				handler->writeData(&cwuframe);
+				handler->writeInitData(&cwuframe);
 			}
 			receiverFlowControlWindow -= frame->header.payloadLength;
 
@@ -353,7 +353,7 @@ void* Http2StreamHandler::handleWebSocketRequest(Http2HPACKContext* context, Htt
 		hframe.headerBlockFragment = context->encode(wsheaders);
 		hframe.header.streamIdentifier = frame->header.streamIdentifier;
 		hframe.header.flags.set(2);
-		handler->writeData(&hframe);
+		handler->writeInitData(&hframe);
 		isWebSocket = true;
 		return getRequestAndReInit();
 	}
@@ -378,7 +378,7 @@ void Http2StreamHandler::sendPushPromiseFrames(Http2HPACKContext* context, Http2
 				ppframe.header.streamIdentifier = frame->header.streamIdentifier;
 				ppframe.headerBlockFragment = context->encode(ppframe.headers);
 				ppframe.promisedStreamId = handler->getHighestPushPromiseStreamIdentifier();
-				handler->writeData(&ppframe);
+				handler->writeInitData(&ppframe);
 				Http2RequestResponseData ppdat;
 				ppdat.preHeaders = ppframe.headers;
 				handler->addPushPromisedRequestToQ(ppdat);

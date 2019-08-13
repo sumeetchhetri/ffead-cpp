@@ -37,14 +37,13 @@ class HandlerRequest {
 	friend class HttpReadTask;
 	HandlerRequest();
 public:
-	SocketUtil* getSocketUtil();
 	void* getContext();
 	const std::string& getProtocol() const;
 	void* getRequest();
 	void* getResponse();
 	SocketInterface* getSif();
 	bool isValidWriteRequest();
-	bool doneWithWrite();
+	bool doneWithWrite(int reqPos);
 	void clearObjects();
 	virtual ~HandlerRequest();
 };
@@ -68,9 +67,11 @@ protected:
 	void submitTask(Task* task);
 	virtual void handleService(HandlerRequest* req)=0;
 	virtual void handleRead(SocketInterface* req)=0;
+	virtual void handleWrite(HandlerRequest* handlerRequest)=0;
 public:
 	void closeConnection(SocketInterface* si);
 	void registerReadRequest(SocketInterface* si);
+	void registerWriteRequest(HandlerRequest* si);
 	void start();
 	void stop();
 	ServiceHandler(const int& spoolSize);

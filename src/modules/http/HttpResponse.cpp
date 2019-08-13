@@ -257,7 +257,7 @@ void HttpResponse::update(HttpRequest* req)
 
 void HttpResponse::setHTTPResponseStatus(const HTTPResponseStatus& status)
 {
-	this->statusCode = CastUtil::lexical_cast<std::string>(status.getCode());
+	this->statusCode = status.getSCode();
 	this->statusMsg = status.getMsg();
 }
 
@@ -304,9 +304,17 @@ void HttpResponse::addContent(const MultipartContent& content)
 	contentList.push_back(content);
 }
 
+void HttpResponse::addHeader(std::string header, const std::string& value)
+{
+	if(headers.find(header)!=headers.end()) {
+		headers[header] += "," + value;
+	} else {
+		headers[header] = value;
+	}
+}
+
 void HttpResponse::addHeaderValue(std::string header, const std::string& value)
 {
-	StringUtil::toLower(header);
 	if(header!="")
 	{
 		if(VALID_RESPONSE_HEADERS.find(","+header+",")!=std::string::npos)
@@ -337,7 +345,6 @@ void HttpResponse::addHeaderValue(std::string header, const std::string& value)
 
 bool HttpResponse::isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase)
 {
-	StringUtil::toLower(header);
 	return header!="" && headers.find(header)!=headers.end()
 			&& (headers[header]==value ||
 					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
@@ -345,7 +352,6 @@ bool HttpResponse::isHeaderValue(std::string header, const std::string& value, c
 
 std::string HttpResponse::getHeader(std::string header)
 {
-	StringUtil::toLower(header);
 	if(header!="" && headers.find(header)!=headers.end())
 		return headers[header];
 	return "";
@@ -452,13 +458,12 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 	std::vector<std::string> rangesVec;
 	std::vector<std::vector<int> > rangeValuesLst = req->getRanges(rangesVec);
 
-	std::string url = req->getUrl();
+	std::string fname = req->getUrl();
 	std::string locale = CommonUtils::getLocale(StringUtil::toLowerCopy(req->getDefaultLocale()));
 	std::string type = CommonUtils::getMimeType(ext);
 
 	std::string all;
-    std::string fname = url;
-	if (url=="/")
+	if (fname=="/")
     {
 		res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 		return false;

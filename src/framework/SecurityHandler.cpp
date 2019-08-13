@@ -162,7 +162,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 			else if(aspect.role!=userRole)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
-				res->addHeaderValue(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.loginUrl);
+				res->addHeader(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.loginUrl);
 				res->setDone(true);
 				isContrl = true;
 			}
@@ -252,7 +252,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 			{
 				req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", userRole);
 				res->setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
-				res->addHeaderValue(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.welcomeFile);
+				res->addHeader(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.welcomeFile);
 				logger << ("Valid role " + userRole + " for path " + req->getCurl()) << std::endl;
 				isContrl = true;
 				res->setDone(true);

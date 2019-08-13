@@ -45,6 +45,10 @@ void ServiceHandler::registerReadRequest(SocketInterface* sif) {
 	handleRead(sif);
 }
 
+void ServiceHandler::registerWriteRequest(HandlerRequest* hr) {
+	handleWrite(hr);
+}
+
 void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos) {
 	HandlerRequest* req = new HandlerRequest;
 	req->request = request;
@@ -118,10 +122,6 @@ HandlerRequest::~HandlerRequest() {
 	clearObjects();
 }
 
-SocketUtil* HandlerRequest::getSocketUtil() {
-	return &(sif->sockUtil);
-}
-
 void HandlerRequest::clearObjects() {
 	if(request!=NULL)delete request;
 	request = NULL;
@@ -151,8 +151,8 @@ bool HandlerRequest::isValidWriteRequest() {
 	return sif->isCurrentRequest(reqPos);
 }
 
-bool HandlerRequest::doneWithWrite() {
-	sif->endRequest();
+bool HandlerRequest::doneWithWrite(int reqPos) {
+	sif->endRequest(reqPos);
 	return sif->allRequestsDone();
 }
 

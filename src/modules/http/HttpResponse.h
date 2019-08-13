@@ -36,7 +36,6 @@
 #include "DateFormat.h"
 #include "CommonUtils.h"
 
-
 typedef std::vector<unsigned char> Cont;
 class HttpResponse {
 public:
@@ -91,7 +90,7 @@ private:
 	std::string content;
 	std::string outFileName;
 	std::vector<std::string> cookies;
-	std::map<std::string,std::string> headers;
+	std::map<std::string,std::string,cicomp> headers;
 	int techunkSiz;
 	int teparts;
 	int tecurrpart;
@@ -107,13 +106,21 @@ private:
 	bool isContentRemains();
 	std::string getRemainingContent(const std::string& fname, const bool& isFirst);
 	static std::string getFileExtension(const std::string& file);
+    void addHeader(std::string header, const std::string& value);
 	friend class ServiceTask;
 	friend class HttpResponseParser;
 	friend class Http11Handler;
 	friend class Http2Handler;
 	friend class Http2RequestResponseData;
 	friend class HttpServiceHandler;
+	friend class ControllerHandler;
+	friend class ExtHandler;
+	friend class FviewHandler;
+	friend class ScriptHandler;
+	friend class SecurityHandler;
+	friend class SoapHandler;
 	friend class HttpClient;
+	friend class CORSHandler;
 };
 
 #endif /* HTTPRESPONSE_H_ */

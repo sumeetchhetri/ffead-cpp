@@ -34,13 +34,16 @@
 #include "MultipartContent.h"
 #include "Timer.h"
 #include "HTTPResponseStatus.h"
+#include <libcuckoo/cuckoohash_map.hh>
+#include "SocketInterface.h"
+#include <string_view>
 
 typedef std::vector<std::string> strVec;
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
-typedef std::map<std::string, std::string> RMap;
-typedef std::map<std::string, MultipartContent> FMap;
+typedef std::map<std::string, std::string, cicomp> RMap;
+typedef std::map<std::string, MultipartContent, cicomp> FMap;
 
 class HttpRequest {
 	static std::string VALID_REQUEST_HEADERS;
@@ -72,11 +75,11 @@ class HttpRequest {
 	std::string sessionID;
 	bool cookie;
 	std::string ranges;
-	std::map<std::string,std::string> cookieattrs;
-	std::map<std::string,std::string> authinfo;
+	RMap cookieattrs;
+	RMap authinfo;
 	std::map<int,std::string> reqorderinf;
 	std::map<int,std::string> authorderinf;
-	std::map<std::string,std::string> headers;
+	RMap headers;
 	std::vector<MultipartContent> contentList;
 	std::string preamble;
 	std::string epilogue;
@@ -105,18 +108,26 @@ class HttpRequest {
 	void setQueryParam(const std::string& name, const std::string& value);
 	void setSessionID(const std::string& sessionID);
 	std::string toPluginString();
-	void setHttp2Headers(std::map<std::string,std::string> headers);
+	void setHttp2Headers(std::map<std::string,std::string,cicomp> headers);
 	void setContextHome(const std::string& home);
+    void addHeader(const std::string& header, const std::string& value);
 	friend class ServiceTask;
-	friend class ControllerHandler;
-	friend class SecurityHandler;
 	friend class Http11Handler;
 	friend class Http2Handler;
 	friend class Http2StreamHandler;
 	friend class HttpResponse;
 	friend class HttpServiceHandler;
 	friend class HttpServiceTask;
+	friend class ControllerHandler;
+	friend class ExtHandler;
+	friend class FviewHandler;
+	friend class ScriptHandler;
+	friend class SecurityHandler;
+	friend class SoapHandler;
 	friend class HttpClient;
+	friend class SolrSearch;
+	friend class CORSHandler;
+	friend class HttpRequestBuffered;
 public:
 	enum {
 		PREFLIGHT, CORS, OTHER
@@ -207,5 +218,15 @@ public:
 	std::string getExt() const;
 	static std::string getFileExtension(const std::string& file);
 };
+
+/*
+class HttpRequestBuffered : public HttpRequest {
+	friend class Http11Handler;
+	std::string _b;
+	std::string_view bv;
+	static const std::string_view BLV;
+	HttpRequestBuffered();
+	virtual ~HttpRequestBuffered();
+};*/
 
 #endif /* HTTPREQUEST_H_ */

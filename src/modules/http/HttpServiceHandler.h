@@ -40,6 +40,17 @@ public:
 	HttpReadTask();
 };
 
+class HttpWriteTask : public Task {
+	HandlerRequest* handlerRequest;
+	HttpServiceHandler* service;
+	void run();
+	friend class HttpServiceHandler;
+	friend class CHServer;
+public:
+	virtual ~HttpWriteTask();
+	HttpWriteTask();
+};
+
 typedef HttpServiceTask* (*HttpServiceTaskFactory) ();
 typedef HttpReadTask* (*HttpReadTaskFactory) ();
 
@@ -50,6 +61,7 @@ class HttpServiceHandler : public ServiceHandler {
 	friend class HttpServiceTask;
 	void handleService(HandlerRequest* handlerRequest);
 	void handleRead(SocketInterface* sif);
+	void handleWrite(HandlerRequest* handlerRequest);
 public:
 	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr);
 	virtual ~HttpServiceHandler();

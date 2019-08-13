@@ -13,39 +13,28 @@ ConnectionPooler::ConnectionPooler() {
 }
 
 ConnectionPooler::~ConnectionPooler() {
-	// TODO Auto-generated destructor stub
 }
 
-Connection* ConnectionPooler::checkoutInternal(connVec& conns, const bool& isWrite) {
+Connection* ConnectionPooler::checkoutInternal() {
 	int counter = 0;
 	Connection* conn = NULL;
 	do {
-		mutex.lock();
-		for(unsigned int i=0;i<conns.size();i++)
-		{
-			if(!conns.at(i).isBusy())
-			{
-				conn =  &(conns.at(i));
-				conn->setBusy(true);
-				break;
+		if(!connections.try_dequeue(conn)) {
+			counter++;
+			if(conn==NULL) {
+				usleep(1*1000);
 			}
-		}
-		mutex.unlock();
-		counter++;
-		if(conn==NULL) {
-			usleep(1*1000);
 		}
 	} while(counter<5 && conn==NULL);
 	if(conn==NULL) {
 		std::vector<ConnectionNode> nodes = properties.getNodes();
 		void* c = this->newConnection(true, nodes.at(0));
-		mutex.lock();
-		conns.push_back(Connection());
-		conn = &(conns.back());
-		mutex.unlock();
-		conn->setConn(c);
-		conn->setBusy(true);
-		conn->setType(isWrite);
+		Connection* _c = new Connection();
+		_c->setConn(c);
+		_c->setNode(nodes.at(0));
+		_c->setBusy(false);
+		_c->setType(true);
+		return _c;
 	}
 	return conn;
 }
@@ -64,46 +53,31 @@ Connection* ConnectionPooler::checkout() {
 		}
 		return NULL;
 	} else {
-		return checkoutInternal(this->writeConnections, true);
+		return checkoutInternal();
 	}
 }
 
-Connection* ConnectionPooler::checkout(const bool& isWrite) {
-	return checkoutInternal(this->writeConnections, isWrite);
-}
-
-void ConnectionPooler::release(Connection* conn) {
+void ConnectionPooler::release(Connection* _c) {
 	if(getProperties().isNewConnectionStrategy()) {
-		closeConnection(conn->getConn());
-		delete conn;
+		closeConnection(_c->getConn());
+		delete _c;
 		return;
+	} else {
+		this->connections.enqueue(_c);
 	}
-	mutex.lock();
-	conn->setBusy(false);
-	mutex.unlock();
 }
 
 void ConnectionPooler::destroyPool() {
 	if(!getProperties().isNewConnectionStrategy())
 	{
-		for(int i=0;i<(int)writeConnections.size();i++)
+		Connection* _c;
+		while(connections.try_dequeue(_c))
 		{
-			//Connection* connection = this->writeConnections.at(i);
-			closeConnection(this->writeConnections.at(i).getConn());
-			//delete connection;
-		}
-		for(int i=0;i<(int)readConnections.size();i++)
-		{
-			//Connection* connection = this->readConnections.at(i);
-			closeConnection(this->readConnections.at(i).getConn());
-			//delete connection;
+			closeConnection(_c);
+			delete _c;
 		}
 	}
 	destroy();
-}
-
-const connVec& ConnectionPooler::getWriteConnections() const {
-	return writeConnections;
 }
 
 bool ConnectionPooler::isInitialized() const {
@@ -127,35 +101,12 @@ void ConnectionPooler::createPool(const ConnectionProperties& properties) {
 		ConnectionNode node = nodes.at(nodeIndex);
 		void* conn = this->newConnection(true, node);
 		if(conn!=NULL) {
-			mutex.lock();
-			this->writeConnections.push_back(Connection());
-			Connection* connection = &(this->writeConnections.back());
-			mutex.unlock();
-			connection->setConn(conn);
-			connection->setNode(node);
-			connection->setBusy(false);
-			connection->setType(true);
-			this->initialized = true;
-		} else if((int)nodes.size()==1) {
-			break;
-		}
-	}
-	nodeIndex = 0;
-	for(int i=0;i<properties.getPoolReadSize();i++)
-	{
-		if(nodeIndex>=(int)nodes.size())
-			nodeIndex = 0;
-		ConnectionNode node = nodes.at(nodeIndex);
-		void* conn = this->newConnection(false, node);
-		if(conn!=NULL) {
-			mutex.lock();
-			this->readConnections.push_back(Connection());
-			Connection* connection = &(this->readConnections.back());
-			mutex.unlock();
-			connection->setConn(conn);
-			connection->setNode(node);
-			connection->setBusy(false);
-			connection->setType(false);
+			Connection* _c = new Connection();
+			_c->setConn(conn);
+			_c->setNode(node);
+			_c->setBusy(false);
+			_c->setType(true);
+			this->connections.enqueue(_c);
 			this->initialized = true;
 		} else if((int)nodes.size()==1) {
 			break;

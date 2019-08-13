@@ -530,7 +530,7 @@ long Http2HPACKContext::decodeNumber(const std::string& data, const int& prefixS
 	return -1;
 }
 
-std::string Http2HPACKContext::encode(const std::map<std::string, std::string>& headers) {
+std::string Http2HPACKContext::encode(const std::map<std::string, std::string, cicomp>& headers) {
 	std::map<std::string, std::string>::const_iterator it;
 	std::string encoded;
 	for (it=headers.begin();it!=headers.end();++it) {

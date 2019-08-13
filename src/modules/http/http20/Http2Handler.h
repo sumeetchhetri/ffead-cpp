@@ -19,10 +19,9 @@
 #include "Http2WindowUpdateFrame.h"
 #include "Http2StreamHandler.h"
 #include "Http2AlternativeServicesFrame.h"
-#include "SocketUtil.h"
+#include "SocketInterface.h"
 #include "CommonUtils.h"
 #include "Http2ReadWriteUtil.h"
-#include "SocketInterface.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "queue"
@@ -44,13 +43,13 @@ class Http2Handler : public Http2ReadWriteUtil, public SocketInterface {
 	bool isConnInit;
 	uint32_t maxDataFrameSize;
 	std::string webpath;
+	std::atomic<int> updateRxFCWS;
 	std::queue<Http2RequestResponseData> pushPromisedRequestQ;
-	Http2Frame* readFrame();
 	Http2Frame* readFrame(std::string data);
 	Http2Frame* nextFrame();
 	Http2Frame* getFrameByType(const std::string& data, Http2FrameHeader& header);
 	std::string serialize(Http2Frame* frame);
-	bool processFrame(Http2Frame* frame, void*& request);
+	bool processFrame(Http2Frame* frame, void*& request, int reqPos);
 public:
 	void addHandler(SocketInterface* handler);
 	void onOpen();
@@ -58,21 +57,20 @@ public:
 	std::string getProtocol(void* context);
 	int getTimeout();
 	void* readRequest(void*& context, int& pending, int& reqPos);
-	bool writeResponse(void* req, void* res, void* context);
-	bool writeHttpResponse(void* req, void* res, void* si);
-	bool writeWebSocketResponse(void* req, void* res, void* si);
+	bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos);
+	bool writeHttpResponse(void* req, void* res, void* si, std::string& data);
+	bool writeWebSocketResponse(void* req, void* res, void* si, std::string& data);
 	void doIt();
 	void addPushPromisedRequestToQ(const Http2RequestResponseData& ppdat);
-	bool writeData(Http2Frame* frame);
-	bool writePendingDataFrame(Http2RequestResponseData&);
-	bool writeData(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS);
+	void writeInitData(Http2Frame* frame);
+	bool writePendingDataFrame(Http2RequestResponseData&, std::string& data);
+	bool writeData(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS, std::string& respd);
 	std::vector<std::string> getRelatedEntitiesForPP(const std::string&);
 	int getHighestPushPromiseStreamIdentifier();
 	int updateSenderWindowSize(const int& windowSize);
 	void updateMaxFrameSize(const uint32_t& val);
-	void init(const bool& isServer, const std::string& webpath);
-	Http2Handler(const bool& isServer, const std::string& webpath);
-	Http2Handler(const bool& isServer, const std::string& webpath, const std::string& settingsFrameData);
+	Http2Handler(const SOCKET& fd, SSL* ssl, BIO* io, const bool& isServer, const std::string& webpath);
+	Http2Handler(const SOCKET& fd, SSL* ssl, BIO* io, const bool& isServer, const std::string& webpath, const std::string& settingsFrameData);
 	virtual ~Http2Handler();
 	const std::string& getWebpath() const;
 	std::string getMimeType(const std::string& ext);

@@ -12,18 +12,18 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		return handler->readRequest(context, pending, reqPos);
 	}
 
+	m.lock();
 	if(readFrom()) {
 		return NULL;
 	}
-
-	HttpRequest* request = NULL;
-	if(!isHeadersDone && buffer.find("\r\n\r\n")!=std::string::npos)
+	size_t ix = buffer.find("\r\n\r\n");
+	if(!isHeadersDone && ix!=std::string::npos)
 	{
-		bytesToRead = 0;
-		std::string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
-		buffer = buffer.substr(buffer.find("\r\n\r\n")+4);
-		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, "\r\n");
 		request = new HttpRequest(webpath);
+		bytesToRead = 0;
+		std::string headers = buffer.substr(0, ix);
+		buffer = buffer.substr(ix+4);
+		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, "\r\n");
 		request->buildRequest("httpline", lines.at(0));
 		int hdrc = 0;
 		for (int var = 0; var < (int)lines.size(); ++var) {
@@ -39,9 +39,10 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 				}
 				request->buildRequest(key, value);
 				if(hdrc++>maxReqHdrCnt) {
-					close();
+					closeSocket();
 					delete request;
 					request = NULL;
+					m.unlock();
 					return NULL;
 				}
 			} else if(var!=0) {
@@ -52,9 +53,10 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		if(bytesstr!="") {
 			bytesToRead = CastUtil::lexical_cast<int>(bytesstr);
 			if(bytesToRead>maxEntitySize) {
-				close();
+				closeSocket();
 				delete request;
 				request = NULL;
+				m.unlock();
 				return NULL;
 			}
 		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find("\r\n")!=std::string::npos) {
@@ -73,7 +75,6 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		}
 		isHeadersDone = true;
 	}
-
 	if(request!=NULL && isHeadersDone)
 	{
 		if(isTeRequest && bytesToRead==0 && buffer.find("\r\n")!=std::string::npos) {
@@ -108,8 +109,10 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		isHeadersDone = false;
 		void* temp = request;
 		request = NULL;
+		m.unlock();
 		return temp;
 	}
+	m.unlock();
 	return NULL;
 }
 
@@ -120,12 +123,8 @@ int Http11Handler::getTimeout() {
 	return connKeepAlive;
 }
 
-void Http11Handler::init(const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
-	reqPos = 0;
-	current = 0;
-	address = StringUtil::toHEX((long long)this);
-	wtl.clear();
-	buffer.clear();
+Http11Handler::Http11Handler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& webpath, const int& chunkSize,
+		const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) : SocketInterface(fd, ssl, io) {
 	isHeadersDone = false;
 	bytesToRead = 0;
 	this->webpath = webpath;
@@ -134,24 +133,9 @@ void Http11Handler::init(const std::string& webpath, const int& chunkSize, const
 	this->connKeepAlive = connKeepAlive;
 	this->maxReqHdrCnt = maxReqHdrCnt;
 	this->maxEntitySize = maxEntitySize;
-	fd = sockUtil.fd;
 	this->handler = NULL;
-}
-
-Http11Handler::Http11Handler(const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
-	reqPos = 0;
-	current = 0;
-	address = StringUtil::toHEX((long long)this);
-	isHeadersDone = false;
-	bytesToRead = 0;
-	this->webpath = webpath;
-	this->chunkSize = chunkSize<=0?0:chunkSize;
-	this->isTeRequest = false;
-	this->connKeepAlive = connKeepAlive;
-	this->maxReqHdrCnt = maxReqHdrCnt;
-	this->maxEntitySize = maxEntitySize;
-	fd = sockUtil.fd;
-	this->handler = NULL;
+	this->request = NULL;
+	logger = LoggerFactory::getLogger("Http11Handler");
 }
 
 void Http11Handler::addHandler(SocketInterface* handler) {
@@ -172,9 +156,9 @@ std::string Http11Handler::getProtocol(void* context) {
 	return "HTTP1.1";
 }
 
-bool Http11Handler::writeResponse(void* req, void* res, void* context) {
+bool Http11Handler::writeResponse(void* req, void* res, void* context, std::string& data, int reqPos) {
 	if(handler!=NULL) {
-		return handler->writeResponse(req, res, context);
+		return handler->writeResponse(req, res, context, data, reqPos);
 	}
 
 	HttpRequest* request = (HttpRequest*)req;
@@ -193,27 +177,23 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 		if(StringUtil::toLowerCopy(request->getHeader(HttpRequest::Connection))!="keep-alive"
 				|| CastUtil::lexical_cast<int>(response->getStatusCode())>307 || request->getHttpVers()<1.1)
 		{
-			response->addHeaderValue(HttpResponse::Connection, "close");
+			response->addHeader(HttpResponse::Connection, "close");
 		}
 		else
 		{
-			response->addHeaderValue(HttpResponse::Connection, "keep-alive");
+			response->addHeader(HttpResponse::Connection, "keep-alive");
 		}
 	}
 
 	if(!response->isContentRemains()) {
-		std::string data = response->generateResponse(request);
-		writeTo(data);
+		data += response->generateResponse(request);
 	} else {
-		std::string data = response->generateResponse(request, false);
-		if(!writeTo(data)) {
-			bool isFirst = true;
-			while(response->hasContent && (data = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
-				isFirst = false;
-				if(writeTo(data)) {
-					break;
-				}
-			}
+		data += response->generateResponse(request, false);
+		bool isFirst = true;
+		std::string d;
+		while(response->hasContent && (d = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
+			isFirst = false;
+			data += d;
 		}
 	}
 

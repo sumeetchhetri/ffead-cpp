@@ -133,6 +133,15 @@ void MultipartContent::setTempFileName(const std::string& tempFileName) {
 	this->tempFileName = tempFileName;
 }
 
+void MultipartContent::addHeader(std::string header, const std::string& value)
+{
+	if(headers.find(header)!=headers.end()) {
+		headers[header] += "," + value;
+	} else {
+		headers[header] = value;
+	}
+}
+
 void MultipartContent::addHeaderValue(std::string header, const std::string& value)
 {
 	header = StringUtil::camelCasedCopy(header, "-");
@@ -140,7 +149,11 @@ void MultipartContent::addHeaderValue(std::string header, const std::string& val
 	{
 		if(VALID_HEADERS.find(","+StringUtil::toLowerCopy(header)+",")!=std::string::npos)
 		{
-			headers[header] = value;
+			if(headers.find(header)!=headers.end()) {
+				headers[header] += "," + value;
+			} else {
+				headers[header] = value;
+			}
 		}
 		else
 		{
@@ -150,7 +163,11 @@ void MultipartContent::addHeaderValue(std::string header, const std::string& val
 				//std::cout << ("Invalid Header std::string " + header) << std::endl;
 				return;
 			}
-			headers[header] = value;
+			if(headers.find(header)!=headers.end()) {
+				headers[header] += "," + value;
+			} else {
+				headers[header] = value;
+			}
 		}
 	}
 }

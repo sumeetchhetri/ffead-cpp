@@ -329,7 +329,6 @@ void FFEADContext::clear(const std::string& appName)
 		k = k.substr(k.find(";")+1);
 		reflector->destroy(it->second, k, appName);
 	}
-	objects.clear();
 }
 
 void FFEADContext::addBean(Bean& bean)

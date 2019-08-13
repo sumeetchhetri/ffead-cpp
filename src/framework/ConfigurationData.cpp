@@ -128,9 +128,10 @@ void ConfigurationData::initializeAllSingletonBeans() {
 				RestFunction& rf = fncl.at(var);
 				std::string vtyp = rf.rtype;
 				std::string type;
-				if(rf.serOpt%100==0) {
+				int serOpt = rf.serOpt>2000?rf.serOpt-2000:(rf.serOpt>1000?rf.serOpt-1000:rf.serOpt);
+				if(serOpt%100==0) {
 					std::string className = rf.rtype;
-					if(rf.serOpt==100) {
+					if(serOpt==100) {
 						type = "vector";
 						StringUtil::replaceFirst(className,"std::vector<","");
 						StringUtil::replaceFirst(className,"vector<","");
@@ -138,7 +139,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 							vtyp = className.substr(0,className.find(","));
 						else
 							vtyp = className.substr(0,className.find(">"));
-					} else if(rf.serOpt==200) {
+					} else if(serOpt==200) {
 						type = "list";
 						StringUtil::replaceFirst(className,"std::list<","");
 						StringUtil::replaceFirst(className,"list<","");
@@ -146,7 +147,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 							vtyp = className.substr(0,className.find(","));
 						else
 							vtyp = className.substr(0,className.find(">"));
-					} else if(rf.serOpt==300) {
+					} else if(serOpt==300) {
 						type = "set";
 						StringUtil::replaceFirst(className,"std::set<","");
 						StringUtil::replaceFirst(className,"set<","");
@@ -154,7 +155,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 							vtyp = className.substr(0,className.find(","));
 						else
 							vtyp = className.substr(0,className.find(">"));
-					} else if(rf.serOpt==400) {
+					} else if(serOpt==400) {
 						type = "multiset";
 						StringUtil::replaceFirst(className,"std::multiset<","");
 						StringUtil::replaceFirst(className,"multiset<","");
@@ -162,7 +163,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 							vtyp = className.substr(0,className.find(","));
 						else
 							vtyp = className.substr(0,className.find(">"));
-					} else if(rf.serOpt==500) {
+					} else if(serOpt==500) {
 						type = "queue";
 						StringUtil::replaceFirst(className,"std::queue<","");
 						StringUtil::replaceFirst(className,"queue<","");
@@ -170,7 +171,7 @@ void ConfigurationData::initializeAllSingletonBeans() {
 							vtyp = className.substr(0,className.find(","));
 						else
 							vtyp = className.substr(0,className.find(">"));
-					} else if(rf.serOpt==600) {
+					} else if(serOpt==600) {
 						type = "deque";
 						StringUtil::replaceFirst(className,"std::deque<","");
 						StringUtil::replaceFirst(className,"deque<","");

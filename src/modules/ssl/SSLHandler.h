@@ -50,7 +50,7 @@ public:
 	friend class ServiceTask;
 	friend class ConfigurationHandler;
 	friend class CHServer;
-	friend class SocketUtil;
+	friend class SocketInterface;
 	SecurityProperties() {
 		client_auth = 0;
 		isDHParams = false;
@@ -77,7 +77,7 @@ class SSLHandler {
 	static int select_next_protocol(unsigned char **out, unsigned char *outlen, const unsigned char *in, const unsigned int& inlen);
 	static std::string getAlpnProto(const int& fd);
 	static void removeAlpnProtoSocket(const int& fd);
-	friend class SocketUtil;
+	friend class SocketInterface;
 public:
 	bool getIsSSL() const;
 	SSL_CTX* getCtx() const;

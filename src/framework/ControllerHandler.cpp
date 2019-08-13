@@ -526,45 +526,45 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				const Method& meth = srv->getMethod(rft.name, argus);
 				if(meth.getMethodName()!="" && !invValue)
 				{
-					std::string outRetType = meth.getReturnType();
 					void* ouput = reflector.invokeMethodUnknownReturn(_temp,meth,valus,true);
 					t.end();
 					CommonUtils::tsContRstExec += t.timerNanoSeconds();
 
 					t.start();
-					std::string outcontent = "void";
-					if(ouput!=NULL)
-					{
-						if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
-						{
-							outcontent = JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, rft.s, rft.sc, rft.scm, req->getCntxt_name());
-							res->setContent(outcontent);
+					int serOpt = rft.serOpt>2000?-3:(rft.serOpt>1000?-2:rft.serOpt);
+					switch(serOpt) {
+						case -3: {
+							if(ouput!=NULL)res->setContent(XMLSerialize::serializeUnknown(ouput, rft.serOpt-2000, rft.rtype, req->getCntxt_name()));
+							break;
 						}
-						else if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_XML)
-						{
-							outcontent = XMLSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name());
-							res->setContent(outcontent);
+						case -2: {
+							if(ouput!=NULL)res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt-1000, rft.rtype, rft.s, rft.sc, rft.scm, req->getCntxt_name()));
+							break;
 						}
-						else
-						{
-							if(rft.serOpt>17 || rft.serOpt==0) {
-								res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name()));
+						case -1: {
+							if(rft.statusCode=="" && res->getContent().length()==0) {
+								res->setHTTPResponseStatus(HTTPResponseStatus::NoContent);
 							} else {
-								res->setContent(SerializeBase::trySerialize(ouput, rft.serOpt, outRetType, req->getCntxt_name()));
+								res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
 							}
+							break;
 						}
-						res->addHeaderValue(HttpResponse::ContentType, ocont);
-						res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
-						delete ouput;
-						//reflector.destroy(ouput, outRetType, req->getCntxt_name());
+						case 1: {
+							if(ouput!=NULL)res->setContent(*(std::string*)ouput);
+							break;
+						}
+						default: {
+							if(rft.serOpt>17 || rft.serOpt==0) {
+								if(ouput!=NULL)res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt, rft.rtype, req->getCntxt_name()));
+							} else {
+								if(ouput!=NULL)res->setContent(SerializeBase::trySerialize(ouput, rft.serOpt, rft.rtype, req->getCntxt_name()));
+							}
+							break;
+						}
 					}
-					else if(outRetType=="void")
-					{
-						if(rft.statusCode=="")
-							res->setHTTPResponseStatus(HTTPResponseStatus::NoContent);
-						else
-							res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
-					}
+					res->addHeader(HttpResponse::ContentType, ocont);
+					res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(rft.statusCode));
+					delete ouput;
 					//logger << "Successfully called restcontroller output follows - " << std::endl;
 					//logger << outcontent << std::endl;
 
@@ -600,7 +600,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				else
 				{
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-					//res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+					//res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 					logger << "Rest Controller Method Not Found" << std::endl;
 					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				}

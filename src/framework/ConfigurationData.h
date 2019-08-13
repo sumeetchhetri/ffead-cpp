@@ -249,7 +249,7 @@ class ConfigurationData {
 	friend class TemplateGenerator;
 	friend class ApplicationUtil;
 	friend class FFEADContext;
-	friend class SocketUtil;
+	friend class SocketInterface;
 	friend class GenericObject;
 	friend class FFEADContext;
 	friend class JobScheduler;

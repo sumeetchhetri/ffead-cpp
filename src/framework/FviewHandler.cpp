@@ -69,7 +69,7 @@ bool FviewHandler::handle(HttpRequest* req, HttpResponse* res)
 				content += "<script type=\"text/javascript\" src=\""+fviewmap[file]+".js\"></script>" + en;
 			}
 		}
-		res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+		res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->setContent(content);
 		infile.close();

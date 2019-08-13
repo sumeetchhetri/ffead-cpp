@@ -60,7 +60,7 @@ void RequestReaderHandler::addSf(SocketInterface* psi) {
 	{
 		//addToTimeoutSocks.push(psi);
 	}
-	selector.registerForEvent(psi);
+	selector.registerRead(psi);
 	psi->onOpen();
 }
 
@@ -92,7 +92,8 @@ void* RequestReaderHandler::handle(void* inp) {
 		for(int n=0;n<num;n++)
 		{
 			void* vsi = NULL;
-			SOCKET descriptor = ins->selector.getDescriptor(n, vsi);
+			bool isRead = true;
+			SOCKET descriptor = ins->selector.getDescriptor(n, vsi, isRead);
 			if(descriptor!=-1)
 			{
 				if(ins->selector.isListeningDescriptor(descriptor))
@@ -110,6 +111,7 @@ void* RequestReaderHandler::handle(void* inp) {
 							}
 						}
 						SocketInterface* sockIntf = ins->sf(newSocket);
+						sockIntf->eh = &(ins->selector);
 						ins->addSf(sockIntf);
 						CommonUtils::cSocks += 1;
 					}
@@ -117,6 +119,7 @@ void* RequestReaderHandler::handle(void* inp) {
 					sin_size = sizeof their_addr;
 					SOCKET newSocket = accept(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size);
 					SocketInterface* sockIntf = ins->sf(newSocket);
+					sockIntf->eh = &(ins->selector);
 					ins->addSf(sockIntf);
 					CommonUtils::cSocks += 1;
 #endif
@@ -124,12 +127,25 @@ void* RequestReaderHandler::handle(void* inp) {
 				else
 				{
 					SocketInterface* si = (SocketInterface*)vsi;
-					if(!si->isClosed()) {
-						ins->shi->registerReadRequest(si);
+					if(isRead) {
+						if(!si->isClosed()) {
+							ins->shi->registerReadRequest(si);
+						} else {
+							si->onClose();
+							if(si->allRequestsDone()) {
+								ins->shi->closeConnection(si);
+							}
+						}
 					} else {
-						si->onClose();
-						if(si->allRequestsDone()) {
-							ins->shi->closeConnection(si);
+						if(!si->isClosed()) {
+							if(si->completeWrite()) {
+								ins->selector.unRegisterWrite(si);
+							}
+						} else {
+							si->onClose();
+							if(si->allRequestsDone()) {
+								ins->shi->closeConnection(si);
+							}
 						}
 					}
 				}

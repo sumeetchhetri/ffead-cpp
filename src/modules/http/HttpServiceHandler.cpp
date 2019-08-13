@@ -28,8 +28,16 @@ void HttpServiceHandler::handleService(HandlerRequest* handlerRequest)
 
 void HttpServiceHandler::handleRead(SocketInterface* sif)
 {
-	HttpReadTask* task = fr();
+	HttpReadTask* task = new HttpReadTask();
 	task->sif = sif;
+	task->service = this;
+	task->setCleanUp(true);
+	submitTask(task);
+}
+
+void HttpServiceHandler::handleWrite(HandlerRequest *handlerRequest) {
+	HttpServiceTask* task = new HttpWriteTask();
+	task->handlerRequest = handlerRequest;
 	task->service = this;
 	task->setCleanUp(true);
 	submitTask(task);
@@ -78,9 +86,6 @@ HttpServiceTask::HttpServiceTask(ReusableInstanceHolder* h) {
 }
 
 HttpServiceTask::~HttpServiceTask() {
-	if(handlerRequest!=NULL) {
-		delete handlerRequest;
-	}
 }
 
 void HttpServiceTask::run() {
@@ -88,7 +93,7 @@ void HttpServiceTask::run() {
 	t.start();
 
 	if(handlerRequest->getSif()->isClosed()) {
-		handlerRequest->doneWithWrite();
+		handlerRequest->doneWithWrite(handlerRequest->reqPos);
 		handlerRequest->sif->onClose();
 		if(handlerRequest->sif->allRequestsDone()) {
 			service->closeConnection(handlerRequest->sif);
@@ -110,7 +115,7 @@ void HttpServiceTask::run() {
 		std::string mimeType = CommonUtils::getMimeType(req->ext);
 		std::string cntEncoding = service->cntEncoding;
 		if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
-			res->addHeaderValue(HttpResponse::ContentEncoding, cntEncoding);
+			res->addHeader(HttpResponse::ContentEncoding, cntEncoding);
 		}
 
 		time_t rt;
@@ -119,7 +124,7 @@ void HttpServiceTask::run() {
 		gmtime_r(&rt, &ti);
 		char buffer[31];
 		strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
-		res->addHeaderValue(HttpResponse::DateHeader, std::string(buffer));
+		res->addHeader(HttpResponse::DateHeader, std::string(buffer));
 
 		if(handlerRequest->getProtocol()=="HTTP1.1" && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
 		{
@@ -134,12 +139,13 @@ void HttpServiceTask::run() {
 				servseckey = CryptoHandler::sha1(servseckey);
 				servseckey = CryptoHandler::base64encodeStr(servseckey);
 
-				res->addHeaderValue(HttpResponse::Upgrade, "websocket");
-				res->addHeaderValue(HttpResponse::Connection, "upgrade");
-				res->addHeaderValue(HttpResponse::SecWebSocketAccept, servseckey);
+				res->addHeader(HttpResponse::Upgrade, "websocket");
+				res->addHeader(HttpResponse::Connection, "upgrade");
+				res->addHeader(HttpResponse::SecWebSocketAccept, servseckey);
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
-				handlerRequest->getSif()->addHandler(new Http11WebSocketHandler(req->getUrl(), true));
+				handlerRequest->getSif()->addHandler(new Http11WebSocketHandler(handlerRequest->getSif()->fd, handlerRequest->getSif()->ssl,
+						handlerRequest->getSif()->io, req->getUrl(), true));
 
 				WebSocketData wreq;
 				wreq.url = req->getCurl();
@@ -152,16 +158,17 @@ void HttpServiceTask::run() {
 				std::string http2settings = req->getHeader(HttpRequest::Http2Settings);
 				http2settings = CryptoHandler::base64decodeStr(http2settings);
 
-				res->addHeaderValue(HttpResponse::Upgrade, "h2c");
-				res->addHeaderValue(HttpResponse::Connection, "Upgrade");
+				res->addHeader(HttpResponse::Upgrade, "h2c");
+				res->addHeader(HttpResponse::Connection, "Upgrade");
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
 				Http2Handler* prev = (Http2Handler*)handlerRequest->getSif();
-				handlerRequest->getSif()->addHandler(new Http2Handler(true, prev->getWebpath(), http2settings));
+				handlerRequest->getSif()->addHandler(new Http2Handler(handlerRequest->getSif()->fd, handlerRequest->getSif()->ssl,
+						handlerRequest->getSif()->io, true, prev->getWebpath(), http2settings));
 			}
 			else
 			{
-				res->addHeaderValue(HttpResponse::Connection, "close");
+				res->addHeader(HttpResponse::Connection, "close");
 				res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 				res->setDone(true);
 			}
@@ -185,5 +192,25 @@ void HttpServiceTask::run() {
 	CommonUtils::tsService += t.timerNanoSeconds();
 
 	CommonUtils::cResps += 1;
-	handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
+	handlerRequest->response = resp;
+	service->registerWriteRequest(handlerRequest);
+	//handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
+}
+
+void HttpWriteTask::run() {
+	if(!handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos)) {
+		service->registerWriteRequest(handlerRequest);
+	}
+}
+
+HttpWriteTask::~HttpWriteTask() {
+	if(handlerRequest!=NULL) {
+		delete handlerRequest;
+	}
+}
+
+HttpWriteTask::HttpWriteTask() {
+	this->handlerRequest = NULL;
+	service = NULL;
+	this->hdlr = NULL;
 }

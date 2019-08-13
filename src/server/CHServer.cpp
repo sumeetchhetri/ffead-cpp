@@ -1242,7 +1242,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	} catch(const std::exception& e) {
 	}
 
-	HTTPResponseStatus::getStatusByCode(200);
+	HTTPResponseStatus::init();
 
 	unsigned int nthreads = hardware_concurrency();
 
@@ -1340,33 +1340,13 @@ HttpReadTask* CHServer::httpReadFactoryMethod() {
 }
 
 SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
-	SocketUtil sockUtil(fd);
-	if(SSLHandler::getInstance()->getIsSSL() && sockUtil.isHttp2())
-	{
-		Http2Handler* h = new Http2Handler(true, ConfigurationData::getInstance()->coreServerProperties.webPath);
-		h->fd = sockUtil.fd;
-		h->sockUtil.fd = sockUtil.fd;
-		h->sockUtil.ssl = sockUtil.ssl;
-		h->sockUtil.io = sockUtil.io;
-		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
-		h->sockUtil.closed = false;
-		h->sockUtil.inited = sockUtil.inited;
-		h->sockUtil.http2 = sockUtil.http2;
-		return h;
-	}
-	else
-	{
-		Http11Handler* h = new Http11Handler(ConfigurationData::getInstance()->coreServerProperties.webPath,
-				techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
-		h->fd = sockUtil.fd;
-		h->sockUtil.fd = sockUtil.fd;
-		h->sockUtil.ssl = sockUtil.ssl;
-		h->sockUtil.io = sockUtil.io;
-		h->sockUtil.logger = LoggerFactory::getLogger("SocketUtil");
-		h->sockUtil.closed = false;
-		h->sockUtil.inited = sockUtil.inited;
-		h->sockUtil.http2 = sockUtil.http2;
-		return h;
+	SSL* ssl;
+	BIO* io;
+	if(SocketInterface::init(fd, ssl, io, logger)) {
+		return new Http2Handler(fd, ssl, io, true, ConfigurationData::getInstance()->coreServerProperties.webPath);
+	} else {
+		return new Http11Handler(fd, ssl, io, ConfigurationData::getInstance()->coreServerProperties.webPath,
+			techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
 	}
 }
 

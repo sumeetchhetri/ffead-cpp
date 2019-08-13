@@ -70,9 +70,8 @@ std::string HttpRequest::Http2Settings = "HTTP2-Settings";
 void HttpRequest::getAuthParams(std::string str)
 {
 	authMethod = (str.substr(0,str.find(" ")));
-	StringUtil::toLower(authMethod);
 	str = str.substr(str.find(" ")+1);
-	if(authMethod=="basic")
+	if(strcasecmp(authMethod.c_str(), "basic"))
 	{
 		unsigned char *input = (unsigned char *)str.c_str();
 		int length = str.length();
@@ -1336,8 +1335,7 @@ void HttpRequest::buildRequestC(const char *keyc, const char *valuec)
 
 void HttpRequest::buildRequest(std::string key, std::string value)
 {
-	StringUtil::toLower(key);
-	if(key=="accept-language")
+	if(strcasecmp(key.c_str(), "accept-language"))
 	{
 		StringUtil::trim(value);
 		strVec lemp;
@@ -1363,15 +1361,15 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 				this->localeInfo.push_back(t);
 			}
 		}
-		addHeaderValue(key, value);
+		addHeader(key, value);
 	}
-	else if(key=="authorization")
+	else if(strcasecmp(key.c_str(), "authorization"))
 	{
 		StringUtil::trim(value);
 		this->getAuthParams(value);
-		addHeaderValue(key, value);
+		addHeader(key, value);
 	}
-	else if(key=="cookie")
+	else if(strcasecmp(key.c_str(), "cookie"))
 	{
 		StringUtil::trim(value);
 		this->cookie = true;
@@ -1386,16 +1384,16 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 			else
 				cookieattrs[results1.at(0)] = "true";
 		}
-		addHeaderValue(key, value);
+		//addHeader(key, value);
 	}
-	else if(key=="content-type")
+	else if(strcasecmp(key.c_str(), "content-type"))
 	{
 		StringUtil::trim(value);
 		std::string tempi(value);
 		size_t s = tempi.find("boundary");
 		if(s!=std::string::npos)
 		{
-			addHeaderValue(key, tempi.substr(0,s));
+			addHeader(key, tempi.substr(0,s));
 			tempi = tempi.substr(s);
 			strVec results;
 			StringUtil::split(results, tempi, ("="));
@@ -1407,18 +1405,18 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		}
 		else
 		{
-			addHeaderValue(key, value);
+			addHeader(key, value);
 		}
 	}
-	else if(key=="content" && value!="")
+	else if(strcasecmp(key.c_str(), "content") && value!="")
 	{
 		content.append(value);
 	}
-	else if(key=="method")
+	else if(strcasecmp(key.c_str(), "method"))
 	{
 		this->setMethod(value);
 	}
-	else if(key=="httpversion")
+	else if(strcasecmp(key.c_str(), "httpversion"))
 	{
 		this->httpVersion = value;
 		std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(value), "http/", "");
@@ -1430,7 +1428,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		} catch(const std::exception& e) {
 		}
 	}
-	else if(key=="getarguments")
+	else if(strcasecmp(key.c_str(), "getarguments"))
 	{
 		strVec params;
 		std::map<std::string ,int> indices;
@@ -1491,7 +1489,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		}
 		this->setCntxt_root(webpath + "/" + cntxt_name);*/
 	}
-	else if(key=="httpline")
+	else if(strcasecmp(key.c_str(), "httpline"))
 	{
 		strVec vemp;
 		StringUtil::split(vemp, value, (" "));
@@ -1550,7 +1548,6 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 	}
 	else
 	{
-		StringUtil::trim(value);
 		addHeaderValue(key, value);
 	}
 }
@@ -1607,7 +1604,6 @@ std::string HttpRequest::toString()
 
 HttpRequest::~HttpRequest()
 {
-//	/delete this;
 }
 std::string HttpRequest::getMethod() const
 {
@@ -2404,9 +2400,9 @@ std::string HttpRequest::toNodejsVariablesString()
 
 RMap HttpRequest::getAllParams()
 {
-	std::map<std::string,std::string>::iterator it;
-	std::map<std::string,std::string> reqparams = this->getRequestParams();
-	std::map<std::string,std::string> qryparams = this->getQueryParams();
+	std::map<std::string,std::string,cicomp>::iterator it;
+	std::map<std::string,std::string,cicomp> reqparams = this->getRequestParams();
+	std::map<std::string,std::string,cicomp> qryparams = this->getQueryParams();
 	for(it=qryparams.begin();it!=qryparams.end();it++)
 	{
 		reqparams[it->first] = it->second;
@@ -2481,7 +2477,6 @@ std::string HttpRequest::getCookieInfoAttribute(const std::string& key)
 
 std::string HttpRequest::getHeader(std::string key)
 {
-	StringUtil::toLower(key);
 	if(this->headers.find(key)!=this->headers.end())
 		return this->headers[key];
 	return "";
@@ -2489,7 +2484,6 @@ std::string HttpRequest::getHeader(std::string key)
 
 bool HttpRequest::hasHeader(std::string key)
 {
-	StringUtil::toLower(key);
 	if(this->headers.find(key)!=this->headers.end())
 		return true;
 	return false;
@@ -2524,9 +2518,17 @@ int HttpRequest::getCORSRequestType()
 	return -1;
 }
 
+void HttpRequest::addHeader(const std::string& header, const std::string& value)
+{
+	if(headers.find(header)!=headers.end()) {
+		headers[header] += "," + value;
+	} else {
+		headers[header] = value;
+	}
+}
+
 void HttpRequest::addHeaderValue(std::string header, const std::string& value)
 {
-	StringUtil::toLower(header);
 	if(header!="")
 	{
 		if(VALID_REQUEST_HEADERS.find(","+header+",")!=std::string::npos)
@@ -2545,16 +2547,6 @@ void HttpRequest::addHeaderValue(std::string header, const std::string& value)
 				//std::cout << ("Invalid Header std::string " + header) << std::endl;
 				return;
 			}
-			/*vector<std::string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
-			if(matres.size()==0)
-			{
-				matres = RegexUtil::search(header, "^[a-zA-Z]+[a-zA-Z0-9]*");
-				if(matres.size()==0)
-				{
-					std::cout << ("Invalid Header std::string " + header) << std::endl;
-					return;
-				}
-			}*/
 			if(headers.find(header)!=headers.end()) {
 				headers[header] += "," + value;
 			} else {
@@ -2589,15 +2581,12 @@ bool HttpRequest::isAgentAcceptsCE()
 
 bool HttpRequest::isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase)
 {
-	StringUtil::toLower(header);
 	return header!="" && headers.find(header)!=headers.end()
-			&& (headers[header]==value ||
-					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
+			&& (headers[header]==value || (ignoreCase && strcasecmp(headers[header].c_str(), value.c_str())==0));
 }
 
 bool HttpRequest::hasHeaderValuePart(std::string header, std::string valuePart, const bool& ignoreCase)
 {
-	StringUtil::toLower(header);
 	if(header!="" && headers.find(header)!=headers.end())
 	{
 		std::string hvalue = headers[header];
@@ -2887,7 +2876,7 @@ std::string HttpRequest::toPluginString() {
 	return text;
 }
 
-void HttpRequest::setHttp2Headers(std::map<std::string,std::string> headers)
+void HttpRequest::setHttp2Headers(std::map<std::string,std::string, cicomp> headers)
 {
 	method = headers[":method"];
 	authority = headers[":authority"];
