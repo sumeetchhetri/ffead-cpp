@@ -198,7 +198,7 @@ int main()
 				std::cout << "HTTP Request Is=>\n" << data << "\n\n" << std::endl;
 			}
 
-			client->connectionUnresolv(ip,port);
+			client->connection(ip,port);
 			client->sendData(data);
 			std::string tot = client->getTextData("\r\n","content-length");
 			long long millis = timer.elapsedMilliSeconds();

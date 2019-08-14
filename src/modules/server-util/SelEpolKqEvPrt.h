@@ -135,7 +135,9 @@
 
 class DummySocketInterface : public SocketInterface {
 public:
-	DummySocketInterface(){}
+	DummySocketInterface(int fd): SocketInterface(fd, NULL, NULL) {
+		closed = true;
+	}
 	~DummySocketInterface(){}
 	std::string getProtocol(void* context){return "";}
 	int getTimeout(){return -1;};

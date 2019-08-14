@@ -142,6 +142,9 @@ bool SSLClient::connection(const std::string& host, const int& port)
 	remote = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in *));
 	remote->sin_family = AF_INET;
 
+	fd_set fdset;
+	struct timeval tv;
+
 	if(host!="localhost" && host!="0.0.0.0" && host!="127.0.0.1") {
 		char* ip = get_ip((char*)host.c_str());
 		fprintf(stderr, "IP is %s\n", ip);
@@ -166,14 +169,24 @@ bool SSLClient::connection(const std::string& host, const int& port)
 
 	remote->sin_port = htons(port);
 
-	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0){
+	fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)){
 		perror("Could not connect");
 		connected = false;
 	} else {
 		connected = true;
 	}
-
 	free(remote);
+
+	FD_ZERO(&fdset);
+	FD_SET(sockfd, &fdset);
+	tv.tv_sec = 2;
+	tv.tv_usec = 0;
+
+	int rc = select(sockfd + 1, NULL, &fdset, NULL, &tv);
+	if(rc==0) {
+		connected = false;
+	}
 
 	/* Build our SSL context*/
 	init();

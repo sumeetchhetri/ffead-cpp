@@ -37,7 +37,9 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 }
 
 SelEpolKqEvPrt::~SelEpolKqEvPrt() {
-	delete dsi;
+	if(dsi!=NULL) {
+		delete dsi;
+	}
 }
 
 void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
