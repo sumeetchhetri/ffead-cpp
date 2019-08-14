@@ -13,16 +13,19 @@ bool ServiceHandler::isActive() {
 
 void* ServiceHandler::closeConnections(void *arg) {
 	ServiceHandler* ths = (ServiceHandler*)arg;
-	std::map<uintptr_t, long long> addrs;
-	std::map<uintptr_t, long long>::iterator it;
+	std::map<std::string, long long> addrs;
+	std::map<std::string, long long>::iterator it;
 	while(ths->run) {
 		Thread::sSleep(5);
 		SocketInterface* si;
 		while(ths->toBeClosedConns.try_dequeue(si)) {
 			uintptr_t addr = reinterpret_cast<uintptr_t>(si);
-			if(addrs.find(addr)==addrs.end()) {
-				addrs[addr] = Timer::getTimestamp();
+			std::string as = CastUtil::lexical_cast<std::string>(addr) + CastUtil::lexical_cast<std::string>(si->fd);
+			if(addrs.find(as)==addrs.end()) {
+				addrs[as] = Timer::getTimestamp();
 				delete si;
+			} else {
+				std::cout << "Problem cleaning up socket...." << std::endl;
 			}
 		}
 		for(it=addrs.begin();it!=addrs.end();) {

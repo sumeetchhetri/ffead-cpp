@@ -113,16 +113,23 @@ void MongoDBConnectionPool::initEnv() {
 		connectionString += "&maxPoolSize=" + CastUtil::lexical_cast<std::string>(poolmax);
 	}
 
-	if(connTimeOut!="") {
-		connectionString += "&connectTimeoutMS=" + connTimeOut;
-		connectionString += "&serverSelectionTimeoutMS=" + connTimeOut;
+	if(connTimeOut=="") {
+		connTimeOut = "10000";
 	}
+	connectionString += "&connectTimeoutMS=" + connTimeOut;
+	connectionString += "&serverSelectionTimeoutMS=" + connTimeOut;
 
 	connectionString = "mongodb://" + connectionString;
 
-	//std::cout << connectionString << std::endl;
-
 	uri = mongoc_uri_new(connectionString.c_str());
+
+	mongoc_client_t* tclient = mongoc_client_new_from_uri (uri);
+	if (!tclient) {
+		throw std::runtime_error("Unable to create mongodb connection");
+	}
+	mongoc_client_destroy(tclient);
+
+
 	mongoc_client_pool_t *pool = mongoc_client_pool_new(uri);
 	if(pool==NULL) {
 		throw std::runtime_error("Unable to create mongodb connection pool");

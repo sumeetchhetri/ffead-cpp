@@ -1268,10 +1268,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	delete (HttpServiceHandler*)handler;
 
-#ifdef INC_SDORM
-	ConfigurationHandler::destroyDataSources();
-#endif
-
 	SSLHandler::clear();
 
 	ConfigurationHandler::destroyCaches();
@@ -1321,6 +1317,10 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	//std::string lg = "Memory allocations waiting to be freed = " + CastUtil::lexical_cast<std::string>(ConfigurationData::counter);
 	//logger <<  lg << std::endl;
+
+#ifdef INC_SDORM
+	ConfigurationHandler::destroyDataSources();
+#endif
 
 	LoggerFactory::clear();
 
