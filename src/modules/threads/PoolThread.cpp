@@ -105,7 +105,6 @@ void* PoolThread::run(void *arg)
 				delete task;
 			}
 		}
-		continue;
 	}
 	ths->complete = true;
 	return NULL;

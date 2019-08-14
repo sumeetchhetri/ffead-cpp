@@ -80,6 +80,7 @@ class SocketInterface {
 	friend class Http11Handler;
 	friend class Http11WebSocketHandler;
 	friend class CommonUtils;
+	friend class DummySocketInterface;
 public:
 	bool completeWrite();
 	int pushResponse(void* request, void* response, void* context, int reqPos);

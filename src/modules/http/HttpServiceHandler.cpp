@@ -62,8 +62,10 @@ void HttpReadTask::run() {
 		int reqPos = 0;
 		void* request = sif->readRequest(context, pending, reqPos);
 		if(sif->isClosed()) {
-			sif->startRequest();
-			service->registerServiceRequest(NULL, sif, context, reqPos);
+			if(request!=NULL) {
+				delete request;
+			}
+			service->closeConnection(sif);
 			break;
 		} else if(request!=NULL) {
 			service->registerServiceRequest(request, sif, context, reqPos);
@@ -98,9 +100,7 @@ void HttpServiceTask::run() {
 	if(handlerRequest->getSif()->isClosed()) {
 		handlerRequest->doneWithWrite(handlerRequest->reqPos);
 		handlerRequest->sif->onClose();
-		if(handlerRequest->sif->allRequestsDone()) {
-			service->closeConnection(handlerRequest->sif);
-		}
+		service->closeConnection(handlerRequest->sif);
 		t.end();
 		CommonUtils::tsService += t.timerNanoSeconds();
 		return;
@@ -200,9 +200,7 @@ void HttpServiceTask::run() {
 	if(ret==0) {
 		handlerRequest->doneWithWrite(handlerRequest->reqPos);
 		handlerRequest->sif->onClose();
-		if(handlerRequest->sif->allRequestsDone()) {
-			service->closeConnection(handlerRequest->sif);
-		}
+		service->closeConnection(handlerRequest->sif);
 	}
 	//service->registerWriteRequest(handlerRequest);
 	//handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
@@ -213,9 +211,7 @@ void HttpWriteTask::run() {
 	if(ret==0) {
 		handlerRequest->doneWithWrite(handlerRequest->reqPos);
 		handlerRequest->sif->onClose();
-		if(handlerRequest->sif->allRequestsDone()) {
-			service->closeConnection(handlerRequest->sif);
-		}
+		service->closeConnection(handlerRequest->sif);
 	}
 }
 

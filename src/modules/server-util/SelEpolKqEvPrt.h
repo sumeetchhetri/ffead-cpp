@@ -135,7 +135,7 @@
 
 class DummySocketInterface : public SocketInterface {
 public:
-	DummySocketInterface(int fd): SocketInterface(fd, NULL, NULL) {
+	DummySocketInterface(): SocketInterface(-1, NULL, NULL) {
 		closed = true;
 	}
 	~DummySocketInterface(){}

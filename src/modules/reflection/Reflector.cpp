@@ -34,6 +34,13 @@ Reflector::Reflector(void* dlib)
 
 Reflector::~Reflector()
 {
+	if(_ciMap.size()>0) {
+		auto lt = _ciMap.lock_table();
+		cuckoohash_map<std::string, ClassInfo*>::locked_table::iterator it;
+		for(it=lt.begin();it!=lt.end();++it) {
+			delete it->second;
+		}
+	}
 }
 void Reflector::cleanUp()
 {
