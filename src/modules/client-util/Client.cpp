@@ -34,33 +34,34 @@ Client::~Client() {
 
 bool Client::connection(const std::string& host, const int& port)
 {
-	if(host=="localhost")
-	{
-		return connectionUnresolv(host, port);
-	}
+	sockfd = create_tcp_socket();
 
 	struct sockaddr_in *remote;
-	int tmpres;
-	char *ip;
-
-	sockfd = create_tcp_socket();
-	ip = get_ip((char*)host.c_str());
-	fprintf(stderr, "IP is %s\n", ip);
 	remote = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in *));
 	remote->sin_family = AF_INET;
-	tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
-	if( tmpres < 0)
-	{
-		free(remote);
-		perror("Can't set remote->sin_addr.s_addr");
-		return false;
+
+	if(host!="localhost" && host!="0.0.0.0" && host!="127.0.0.1") {
+		char* ip = get_ip((char*)host.c_str());
+		fprintf(stderr, "IP is %s\n", ip);
+		int tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
+		if( tmpres < 0)
+		{
+			free(remote);
+			perror("Can't set remote->sin_addr.s_addr");
+			return false;
+		}
+		else if(tmpres == 0)
+		{
+			free(remote);
+			fprintf(stderr, "%s is not a valid IP address\n", ip);
+			return false;
+		}
+		remote->sin_addr.s_addr = inet_addr(ip);
+		free(ip);
+	} else {
+		remote->sin_addr.s_addr = INADDR_ANY;
 	}
-	else if(tmpres == 0)
-	{
-		free(remote);
-		fprintf(stderr, "%s is not a valid IP address\n", ip);
-		return false;
-	}
+
 	remote->sin_port = htons(port);
 
 	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0){
@@ -70,13 +71,12 @@ bool Client::connection(const std::string& host, const int& port)
 		connected = true;
 	}
 	free(remote);
-	free(ip);
-	
+
 	return connected;
 }
 
 
-bool Client::connectionUnresolv(const std::string& host, const int& port)
+/*bool Client::connectionUnresolv(const std::string& host, const int& port)
 {
     struct addrinfo hints, *servinfo, *p;
     int rv;
@@ -99,7 +99,8 @@ bool Client::connectionUnresolv(const std::string& host, const int& port)
             continue;
         }
 
-        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+        fcntl(sockfd, F_SETFL, O_NONBLOCK);
+        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1 && (errno != EINPROGRESS)) {
         	closesocket(sockfd);
             perror("client: connect");
             connected = false;
@@ -123,7 +124,7 @@ bool Client::connectionUnresolv(const std::string& host, const int& port)
     freeaddrinfo(servinfo); // all done with this structure
 
     return connected;
-}
+}*/
 
 void Client::setSocketBlocking()
 {

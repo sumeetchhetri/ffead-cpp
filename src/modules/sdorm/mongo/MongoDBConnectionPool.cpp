@@ -127,6 +127,18 @@ void MongoDBConnectionPool::initEnv() {
 	if (!tclient) {
 		throw std::runtime_error("Unable to create mongodb connection");
 	}
+	bson_t *command, reply;
+	bool retval;
+	bson_error_t error;
+	command = BCON_NEW("ping", BCON_INT32 (1));
+	retval = mongoc_client_command_simple(tclient, "admin", command, NULL, &reply, &error);
+	if (!retval) {
+		bson_destroy (command);
+		mongoc_client_destroy(tclient);
+		mongoc_uri_destroy (uri);
+		throw std::runtime_error(error.message);
+	}
+	bson_destroy (command);
 	mongoc_client_destroy(tclient);
 
 

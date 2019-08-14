@@ -59,7 +59,7 @@ class ClientInterface
 public:
 	virtual bool connection(const std::string&, const int&)=0;
 	virtual void closeConnection()=0;
-	virtual bool connectionUnresolv(const std::string& host, const int& port)=0;
+	//virtual bool connectionUnresolv(const std::string& host, const int& port)=0;
 	virtual bool isConnected()=0;
 	virtual int sendData(std::string)=0;
 	virtual std::string getBinaryData(const int&, const bool&)=0;

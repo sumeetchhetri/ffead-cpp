@@ -322,11 +322,11 @@ void* gracefullShutdown_monitor(void* args)
 
 	if(isSSLEnabled) {
 		SSLClient sc;
-		sc.connectionUnresolv(ip,CastUtil::lexical_cast<int>(port));
+		sc.connection(ip, CastUtil::lexical_cast<int>(port));
 		sc.closeConnection();
 	} else {
 		Client sc;
-		sc.connectionUnresolv(ip,CastUtil::lexical_cast<int>(port));
+		sc.connection(ip, CastUtil::lexical_cast<int>(port));
 		sc.closeConnection();
 	}
 

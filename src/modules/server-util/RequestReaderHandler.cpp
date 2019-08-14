@@ -37,11 +37,11 @@ void RequestReaderHandler::stop(std::string ip, int port, bool isSSLEnabled) {
 
 		if(isSSLEnabled) {
 			SSLClient sc;
-			sc.connectionUnresolv(ip, port);
+			sc.connection(ip, port);
 			sc.closeConnection();
 		} else {
 			Client sc;
-			sc.connectionUnresolv(ip, port);
+			sc.connection(ip, port);
 			sc.closeConnection();
 		}
 	}
