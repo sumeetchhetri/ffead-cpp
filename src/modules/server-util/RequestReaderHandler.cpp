@@ -33,7 +33,7 @@ void RequestReaderHandler::start(unsigned int cid) {
 void RequestReaderHandler::stop(std::string ip, int port, bool isSSLEnabled) {
 	run = false;
 	while(complete<1) {
-		Thread::mSleep(500);
+		Thread::mSleep(1000);
 
 		if(isSSLEnabled) {
 			SSLClient sc;
@@ -157,6 +157,7 @@ void* RequestReaderHandler::handle(void* inp) {
 	}
 
 	if(ins->isMain) {
+		ins->shi->stop();
 		while(ins->shi->run) {
 			Thread::mSleep(100);
 		}

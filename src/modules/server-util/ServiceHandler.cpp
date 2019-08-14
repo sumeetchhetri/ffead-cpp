@@ -105,7 +105,6 @@ ServiceHandler::ServiceHandler(const int& spoolSize) {
 }
 
 ServiceHandler::~ServiceHandler() {
-	stop();
 }
 
 HandlerRequest::HandlerRequest() {
