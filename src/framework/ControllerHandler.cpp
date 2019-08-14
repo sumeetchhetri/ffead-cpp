@@ -244,7 +244,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		{
 			t.start();
 			ClassInfo* srv = ConfigurationData::getInstance()->ffeadContext.contInsMap["restcontroller_"+rft.clas+req->getCntxt_name()];
-			//ConfigurationData::getClassInfo(rft.clas, req->getCntxt_name());
 			t.end();
 			CommonUtils::tsContRstCsiLkp += t.timerNanoSeconds();
 
@@ -252,15 +251,15 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			void *_temp = srv->getSI();
 			if(_temp==NULL) {
 				_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft.clas, req->getCntxt_name());
-			}
-			if(_temp==NULL) {
-				logger << "Rest Controller Not Found" << std::endl;
-				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-				res->setDone(true);
-				return true;
+				if(_temp==NULL) {
+					logger << "Rest Controller Not Found" << std::endl;
+					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+					res->setDone(true);
+					return true;
+				}
 			}
 
-			if(rft.icontentType!="" && rft.icontentType!=req->getHeader(HttpRequest::ContentType) && req->getHeader(HttpRequest::ContentType).find(rft.icontentType)!=0)
+			if(rft.icontentType.length()>0 && rft.icontentType!=req->getHeader(HttpRequest::ContentType) && req->getHeader(HttpRequest::ContentType).find(rft.icontentType)!=0)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
 				res->setDone(true);

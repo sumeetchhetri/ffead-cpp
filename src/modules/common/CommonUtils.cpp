@@ -348,7 +348,8 @@ std::vector<std::string> CommonUtils::getFiles(const std::string& cwd, const std
 
 void CommonUtils::printStats() {
 	Logger logger = LoggerFactory::getLogger("CommonUtils");
-	std::string a = ("Connections (Sockets: "+CastUtil::lexical_cast<std::string>(cSocks)+", Requests: "+CastUtil::lexical_cast<std::string>(cReqs)+", Responses: "+CastUtil::lexical_cast<std::string>(cResps)+")\n");
+	std::string a = ("Connections (Sockets: "+CastUtil::lexical_cast<std::string>(cSocks) + ", Open Sockets: " + CastUtil::lexical_cast<std::string>(SocketInterface::openSocks)
+			+", Requests: "+CastUtil::lexical_cast<std::string>(cReqs)+", Responses: "+CastUtil::lexical_cast<std::string>(cResps)+")\n");
 	logger.info(a);
 	std::string b = ("E-E Total (EL_Pre: "+CastUtil::lexical_cast<std::string>(tsPoll1)+", EL_Wait: "+CastUtil::lexical_cast<std::string>(tsPoll)+
 			", EL_Process: "+CastUtil::lexical_cast<std::string>(tsProcess)+", Read: "+CastUtil::lexical_cast<std::string>(tsRead)+

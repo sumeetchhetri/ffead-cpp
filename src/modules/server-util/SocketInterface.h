@@ -50,6 +50,7 @@ public:
 };
 
 class SocketInterface {
+	static std::atomic<int> openSocks;
 	EventHandler* eh;
 	SSL *ssl;
 	BIO *io;
@@ -78,6 +79,7 @@ class SocketInterface {
 	friend class Http2Handler;
 	friend class Http11Handler;
 	friend class Http11WebSocketHandler;
+	friend class CommonUtils;
 public:
 	bool completeWrite();
 	int pushResponse(void* request, void* response, void* context, int reqPos);

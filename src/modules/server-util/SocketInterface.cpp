@@ -7,6 +7,8 @@
 
 #include "SocketInterface.h"
 
+std::atomic<int> SocketInterface::openSocks = 0;
+
 SocketInterface::SocketInterface() {
 	eh = NULL;
 	http2 = false;
@@ -31,6 +33,7 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	this->fd = fd;
 	http2 = SSLHandler::getAlpnProto(fd).find("h2")==0;
 	wtl[0] = new ResponseData();
+	openSocks++;
 }
 
 bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger) {
@@ -100,6 +103,7 @@ SocketInterface::~SocketInterface() {
 	for(it=wtl.begin();it!=wtl.end();++it) {
 		delete it->second;
 	}
+	openSocks--;
 }
 
 
@@ -149,11 +153,8 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 			rd->done = true;
 		}
 		done = writeTo(rd);
-		if(rd->oft==rd->_b.length()) {
-			endRequest(reqPos);
-			delete rd;
-		}
 		if(done == 1) {
+			endRequest(reqPos);
 			while(true) {
 				wm.lock();
 				if(wtl.find(++reqPos)!=wtl.end() && (rd = wtl.find(reqPos)->second)!=NULL && rd->done) {
@@ -163,7 +164,6 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 						break;
 					}
 					endRequest(reqPos);
-					delete rd;
 				} else {
 					wm.unlock();
 					break;
@@ -175,7 +175,6 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 			eh->registerWrite(this);
 		} else if(done == 0) {
 			endRequest(reqPos);
-			delete rd;
 		}
 	} else if(!rd->done) {
 		writeResponse(request, response, context, rd->_b, reqPos);
@@ -199,9 +198,13 @@ int SocketInterface::startRequest() {
 
 int SocketInterface::endRequest(int reqPos) {
 	wm.lock();
-	wtl.erase(reqPos);
+	ResponseData* rd = wtl[reqPos];
+	if(wtl.erase(reqPos)==1) {
+		++current;
+		delete rd;
+	}
 	wm.unlock();
-	return ++current;
+	return current;
 }
 
 bool SocketInterface::allRequestsDone() {

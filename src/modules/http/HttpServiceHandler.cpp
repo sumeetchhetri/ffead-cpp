@@ -203,9 +203,6 @@ void HttpServiceTask::run() {
 		if(handlerRequest->sif->allRequestsDone()) {
 			service->closeConnection(handlerRequest->sif);
 		}
-	} else if(ret == -1) {
-		service->registerWriteRequest(handlerRequest);
-		handlerRequest = NULL;
 	}
 	//service->registerWriteRequest(handlerRequest);
 	//handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
@@ -219,9 +216,6 @@ void HttpWriteTask::run() {
 		if(handlerRequest->sif->allRequestsDone()) {
 			service->closeConnection(handlerRequest->sif);
 		}
-	} else if(ret == -1) {
-		service->registerWriteRequest(handlerRequest);
-		handlerRequest = NULL;
 	}
 }
 

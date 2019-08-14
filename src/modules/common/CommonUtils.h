@@ -36,7 +36,7 @@
 #include "CastUtil.h"
 #include "LoggerFactory.h"
 #include "HTTPResponseStatus.h"
-
+#include "SocketInterface.h"
 
 class CommonUtils {
 	CommonUtils();
