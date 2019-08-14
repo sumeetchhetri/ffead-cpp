@@ -132,9 +132,7 @@ void* RequestReaderHandler::handle(void* inp) {
 							ins->shi->registerReadRequest(si);
 						} else {
 							si->onClose();
-							if(si->allRequestsDone()) {
-								ins->shi->closeConnection(si);
-							}
+							ins->shi->closeConnection(si);
 						}
 					} else {
 						if(!si->isClosed()) {
@@ -143,9 +141,7 @@ void* RequestReaderHandler::handle(void* inp) {
 							}
 						} else {
 							si->onClose();
-							if(si->allRequestsDone()) {
-								ins->shi->closeConnection(si);
-							}
+							ins->shi->closeConnection(si);
 						}
 					}
 				}

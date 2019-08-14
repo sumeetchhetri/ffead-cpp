@@ -14,24 +14,23 @@ bool ServiceHandler::isActive() {
 void* ServiceHandler::closeConnections(void *arg) {
 	ServiceHandler* ths = (ServiceHandler*)arg;
 	std::map<std::string, long long> addrs;
+	std::map<std::string, SocketInterface*> sifMap;
 	std::map<std::string, long long>::iterator it;
 	while(ths->run) {
 		Thread::sSleep(5);
 		SocketInterface* si;
 		while(ths->toBeClosedConns.try_dequeue(si)) {
-			uintptr_t addr = reinterpret_cast<uintptr_t>(si);
-			std::string as = CastUtil::lexical_cast<std::string>(addr) + CastUtil::lexical_cast<std::string>(si->fd);
+			std::string as = si->address + CastUtil::lexical_cast<std::string>(si->fd);
 			if(addrs.find(as)==addrs.end()) {
 				addrs[as] = Timer::getTimestamp();
-				delete si;
-			} else {
-				std::cout << "Problem cleaning up socket...." << std::endl;
+				sifMap[as] = si;
 			}
 		}
 		for(it=addrs.begin();it!=addrs.end();) {
 			long long t = Timer::getTimestamp();
-			if(t-it->second>10) {
+			if(t-it->second>=15) {
 				addrs.erase(it++);
+				delete sifMap[it->first];
 			} else {
 				++it;
 			}

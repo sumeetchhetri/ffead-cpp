@@ -37,12 +37,11 @@ class CastUtil {
 	template <typename T> static void primitive(const T& val, const char* fmt, std::string* d)
 	{
 		int n = snprintf(NULL, 0, fmt, val);
-		char* ty;
-		ty = (char*)malloc((n + 1) * sizeof(char));
+		char* ty = (char*)malloc((n + 5) * sizeof(char));
 		/*int c = */snprintf(ty, n+1, fmt, val);
 		//assert(strlen(ty)==n);
 		//assert(c == n);
-		d->append(ty, n);
+		d->append(ty, strlen(ty));
 		free(ty);
 	}
 public:
