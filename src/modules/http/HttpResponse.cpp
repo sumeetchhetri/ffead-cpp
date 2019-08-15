@@ -146,9 +146,9 @@ std::string HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
 	}
 }
 
-std::string HttpResponse::HDR_SRV = "Server: FFEAD 2.0\r\n";
-std::string HttpResponse::HDR_SEP = ": ";
-std::string HttpResponse::HDR_END = "\r\n";
+const std::string HttpResponse::HDR_SRV = "Server: FFEAD 2.0\r\n";
+const std::string HttpResponse::HDR_SEP = ": ";
+const std::string HttpResponse::HDR_END = "\r\n";
 
 std::string HttpResponse::generateHeadResponse()
 {
@@ -199,7 +199,7 @@ std::string HttpResponse::generateHeadResponse()
 	return resp;
 }
 
-std::string HttpResponse::HDR_CORS_ALW = "Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE\r\n";
+const std::string HttpResponse::HDR_CORS_ALW = "Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE\r\n";
 
 std::string HttpResponse::generateOptionsResponse()
 {

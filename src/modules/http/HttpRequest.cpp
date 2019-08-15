@@ -2595,7 +2595,7 @@ std::vector<std::string> HttpRequest::parseHeaderValue(std::string headerValue)
 	return StringUtil::splitAndReturn<std::vector<std::string> >(headerValue, ",");
 }
 
-std::string HttpRequest::VALID_METHODS = ",get,post,options,delete,head,put,post,trace,";
+const std::string HttpRequest::VALID_METHODS = ",get,post,options,delete,head,put,post,trace,";
 bool HttpRequest::isValidHttpMethod(const std::string& method)
 {
 	std::string lmeth = ","+method+",";
