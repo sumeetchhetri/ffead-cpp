@@ -127,6 +127,7 @@ class HttpRequest {
 	friend class SolrSearch;
 	friend class CORSHandler;
 	friend class HttpRequestBuffered;
+	static const std::string VALID_METHODS;
 public:
 	enum {
 		PREFLIGHT, CORS, OTHER

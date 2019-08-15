@@ -2595,10 +2595,11 @@ std::vector<std::string> HttpRequest::parseHeaderValue(std::string headerValue)
 	return StringUtil::splitAndReturn<std::vector<std::string> >(headerValue, ",");
 }
 
+std::string HttpRequest::VALID_METHODS = ",get,post,options,delete,head,put,post,trace,";
 bool HttpRequest::isValidHttpMethod(const std::string& method)
 {
-	std::string lmeth = StringUtil::toLowerCopy(method);
-	return lmeth=="get" || lmeth=="post" || lmeth=="options" || lmeth=="head" || lmeth=="put" || lmeth=="delete" || lmeth=="trace";
+	std::string lmeth = ","+method+",";
+	return strcasestr(VALID_METHODS.c_str(), lmeth.c_str())!=NULL;
 }
 
 bool HttpRequest::isValidHttpMethod()

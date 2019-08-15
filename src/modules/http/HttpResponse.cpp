@@ -146,37 +146,41 @@ std::string HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
 	}
 }
 
+std::string HttpResponse::HDR_SRV = "Server: FFEAD 2.0\r\n";
+std::string HttpResponse::HDR_SEP = ": ";
+std::string HttpResponse::HDR_END = "\r\n";
+
 std::string HttpResponse::generateHeadResponse()
 {
-	addHeader("Server", "FFEAD 2.0");
-	bool isTE = isHeaderValue("Transfer-Encoding", "chunked");
+	bool isTE = isHeaderValue(TransferEncoding, "chunked");
 	std::string resp, boundary;
 	if(this->contentList.size()>0)
 	{
-		content = "";
+		content.clear();
 		boundary = "FFEAD_SERVER_" + CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
 		for (int var = 0; var < (int)contentList.size(); ++var) {
-			content += "--" + boundary + "\r\n";
+			content += "--" + boundary + HDR_END;
 			RMap headers = contentList.at(var).getHeaders();
 			RMap::iterator it;
 			for(it=headers.begin();it!=headers.end();++it)
 			{
-				content += it->first + ": " + it->second + "\r\n";
+				content += it->first + HDR_SEP + it->second + HDR_END;
 			}
-			content += "\r\n";
+			content += HDR_END;
 			content += contentList.at(var).getContent();
-			content += "\r\n";
+			content += HDR_END;
 		}
-		content += "--" + boundary + "--\r\n";
+		content += "--" + boundary + "--" + HDR_END;
 	}
-	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
-	if(this->getHeader("Content-Type")=="" && this->contentList.size()>0)
+	resp = (httpVersion + " " + statusCode + " " + statusMsg + HDR_END);
+	resp += HDR_SRV;
+	if(this->getHeader(ContentType)=="" && this->contentList.size()>0)
 	{
-		this->addHeader("Content-Type", "multipart/mixed");
+		this->addHeader(ContentType, "multipart/mixed");
 	}
-	if(this->getHeader("Content-Type")!="" && boundary!="")
+	if(this->getHeader(ContentType)!="" && boundary!="")
 	{
-		headers["Content-Type"] += "; boundary=\"" + boundary + "\"";
+		headers[ContentType] += "; boundary=\"" + boundary + "\"";
 	}
 	if(!isTE && getHeader(ContentLength)=="")
 	{
@@ -185,58 +189,60 @@ std::string HttpResponse::generateHeadResponse()
 	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
-		resp += it->first + ": " + it->second + "\r\n";
+		resp += it->first + HDR_SEP + it->second + HDR_END;
 	}
 	for (int var = 0; var < (int)this->cookies.size(); var++)
 	{
-		resp += "Set-Cookie: " + this->cookies.at(var) + "\r\n";
+		resp += SetCookie + HDR_SEP + this->cookies.at(var) + HDR_END;
 	}
-	resp += "\r\n";
+	resp += HDR_END;
 	return resp;
 }
 
+std::string HttpResponse::HDR_CORS_ALW = "Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE\r\n";
+
 std::string HttpResponse::generateOptionsResponse()
 {
-	addHeader("Server", "FFEAD 2.0");
 	std::string resp;
-	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
+	resp = (httpVersion + " " + statusCode + " " + statusMsg + HDR_END);
+	resp += HDR_SRV;
 	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
-		resp += it->first + ": " + it->second + "\r\n";
+		resp += it->first + HDR_SEP + it->second + HDR_END;
 	}
 	for (int var = 0; var < (int)this->cookies.size(); var++)
 	{
-		resp += "Set-Cookie: " + this->cookies.at(var) + "\r\n";
+		resp += SetCookie + HDR_SEP + this->cookies.at(var) + HDR_END;
 	}
-	resp += "Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE\r\n";
-	resp += "\r\n";
+	resp += HDR_CORS_ALW;
+	resp += HDR_END;
 	return resp;
 }
 
 std::string HttpResponse::generateTraceResponse(HttpRequest* req)
 {
-	addHeader("Server", "FFEAD 2.0");
 	std::string resp;
-	resp = (httpVersion + " " + statusCode + " " + statusMsg + "\r\n");
+	resp = (httpVersion + " " + statusCode + " " + statusMsg + HDR_END);
+	resp += HDR_SRV;
 	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
-		resp += it->first + ": " + it->second + "\r\n";
+		resp += it->first + HDR_SEP + it->second + HDR_END;
 	}
 	for (int var = 0; var < (int)this->cookies.size(); var++)
 	{
-		resp += "Set-Cookie: " + this->cookies.at(var) + "\r\n";
+		resp += SetCookie + HDR_SEP + this->cookies.at(var) + HDR_END;
 	}
-	resp += "\r\n";
+	resp += HDR_END;
 	if(req!=NULL)
 	{
 		resp += "TRACE " + req->getActUrl() + " " + req->getHttpVersion();
-		resp += "\r\n";
+		resp += HDR_END;
 		RMap::iterator it;
 		for(it=headers.begin();it!=headers.end();++it)
 		{
-			resp += it->first + ": " + it->second + "\r\n";
+			resp += it->first + HDR_SEP + it->second + HDR_END;
 		}
 	}
 	return resp;

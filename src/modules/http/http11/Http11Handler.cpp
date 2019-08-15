@@ -147,6 +147,9 @@ Http11Handler::~Http11Handler() {
 		delete handler;
 		handler = NULL;
 	}
+	if(request!=NULL) {
+		delete request;
+	}
 }
 
 std::string Http11Handler::getProtocol(void* context) {

@@ -75,6 +75,7 @@ public:
 	std::string generateResponse(const bool& appendHeaders= true);
 	std::string generateResponse(HttpRequest *req, const bool& appendHeaders= true);
 private:
+	static const std::string HDR_SRV, HDR_SEP, HDR_END, HDR_CORS_ALW;
     bool done;
     float httpVers;
     uint32_t intCntLen;
