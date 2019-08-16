@@ -71,11 +71,11 @@ public:
 	std::string toPluginString();
 	bool isDone() const;
 	void setDone(const bool& done);
-	std::string generateResponse(const std::string& httpMethod, HttpRequest *req, const bool& appendHeaders= true);
+	void generateResponse(const std::string& httpMethod, HttpRequest *req, std::string& data, const bool& appendHeaders= true);
 	std::string generateResponse(const bool& appendHeaders= true);
-	std::string generateResponse(HttpRequest *req, const bool& appendHeaders= true);
+	void generateResponse(HttpRequest *req, std::string& data, const bool& appendHeaders= true);
 private:
-	static const std::string HDR_SRV, HDR_SEP, HDR_END, HDR_CORS_ALW;
+	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN;
     bool done;
     float httpVers;
     uint32_t intCntLen;
@@ -98,14 +98,14 @@ private:
 	bool hasContent;
 	void setCompressed(const bool& compressed);
 	void update(HttpRequest* req);
-	std::string generateHeadResponse();
-	std::string generateOptionsResponse();
-	std::string generateTraceResponse(HttpRequest* req);
+	void generateHeadResponse(std::string& resp);
+	void generateOptionsResponse(std::string& data);
+	void generateTraceResponse(HttpRequest* req, std::string& data);
 	bool updateContent(HttpRequest* req, const uint32_t& techunkSiz);
 	unsigned int getContentSize(const char *fileName);
 	std::string getContent(const char *fileName, const int& start= -1, const int& end= -1);
 	bool isContentRemains();
-	std::string getRemainingContent(const std::string& fname, const bool& isFirst);
+	bool getRemainingContent(const std::string& fname, const bool& isFirst, std::string& data);
 	static std::string getFileExtension(const std::string& file);
     void addHeader(std::string header, const std::string& value);
 	friend class ServiceTask;

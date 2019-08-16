@@ -13,7 +13,7 @@
 #include "ConfigurationData.h"
 
 class Http11Handler : public SocketInterface {
-	bool isHeadersDone;
+	bool isHeadersDone, doneReq, noBody;
 	int bytesToRead;
 	bool isTeRequest;
 	HttpRequest* request;

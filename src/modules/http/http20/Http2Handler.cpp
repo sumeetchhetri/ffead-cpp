@@ -387,8 +387,6 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si, std::string
 		hframe.header.flags.set(0);
 	}
 	data += serialize(&hframe);
-	//logger << response->generateResponse(request, false) << std::endl;
-	//logger << "write header frame " << hframe.header.streamIdentifier << std::endl;
 
 	bool completedSend = true;
 	bool isFirst = true;

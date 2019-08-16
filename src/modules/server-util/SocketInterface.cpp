@@ -118,7 +118,15 @@ bool SocketInterface::completeWrite() {
 	bool done = false;
 	int reqPos = current + 1;
 	ResponseData* rd = wtl[reqPos];
+
+	Timer t;
+	t.start();
+
 	int ret = writeTo(rd);
+
+	t.end();
+	CommonUtils::tsActWrite += t.timerNanoSeconds();
+
 	if(ret == 0 || ret == 1) {
 		endRequest(reqPos);
 		delete rd;
@@ -152,14 +160,30 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 			writeResponse(request, response, context, rd->_b, reqPos);
 			rd->done = true;
 		}
+
+		Timer t;
+		t.start();
+
 		done = writeTo(rd);
+
+		t.end();
+		CommonUtils::tsActWrite += t.timerNanoSeconds();
+
 		if(done == 1) {
 			endRequest(reqPos);
 			while(true) {
 				wm.lock();
 				if(wtl.find(++reqPos)!=wtl.end() && (rd = wtl.find(reqPos)->second)!=NULL && rd->done) {
 					wm.unlock();
+
+					Timer t;
+					t.start();
+
 					done = writeTo(rd);
+
+					t.end();
+					CommonUtils::tsActWrite += t.timerNanoSeconds();
+
 					if(done!=1) {
 						break;
 					}

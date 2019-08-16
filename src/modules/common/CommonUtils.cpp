@@ -13,8 +13,10 @@ std::atomic<long long> CommonUtils::tsPoll = 0;
 std::atomic<long long> CommonUtils::tsPoll1 = 0;
 std::atomic<long long> CommonUtils::tsProcess = 0;
 std::atomic<long long> CommonUtils::tsRead = 0;
+std::atomic<long long> CommonUtils::tsActRead = 0;
 std::atomic<long long> CommonUtils::tsService = 0;
 std::atomic<long long> CommonUtils::tsWrite = 0;
+std::atomic<long long> CommonUtils::tsActWrite = 0;
 std::atomic<long long> CommonUtils::tsServicePre = 0;
 std::atomic<long long> CommonUtils::tsServiceCors = 0;
 std::atomic<long long> CommonUtils::tsServiceSec = 0;
@@ -352,13 +354,15 @@ void CommonUtils::printStats() {
 			+", Requests: "+CastUtil::lexical_cast<std::string>(cReqs)+", Responses: "+CastUtil::lexical_cast<std::string>(cResps)+")\n");
 	logger.info(a);
 	std::string b = ("E-E Total (EL_Pre: "+CastUtil::lexical_cast<std::string>(tsPoll1)+", EL_Wait: "+CastUtil::lexical_cast<std::string>(tsPoll)+
-			", EL_Process: "+CastUtil::lexical_cast<std::string>(tsProcess)+", Read: "+CastUtil::lexical_cast<std::string>(tsRead)+
-			", Write: "+CastUtil::lexical_cast<std::string>(tsWrite)+", Service: "+CastUtil::lexical_cast<std::string>(tsService)+")\n");
+			", EL_Process: "+CastUtil::lexical_cast<std::string>(tsProcess)+", Sock_Read: "+CastUtil::lexical_cast<std::string>(tsActRead)+
+			", Req_Prep: "+CastUtil::lexical_cast<std::string>(tsRead-tsActRead)+", Sock_Write: "+CastUtil::lexical_cast<std::string>(tsActWrite)+
+			", Res_Prep: "+CastUtil::lexical_cast<std::string>(tsWrite-tsActWrite)+", Service: "+CastUtil::lexical_cast<std::string>(tsService)+")\n");
 	logger.info(b);
 	if(cReqs>0) {
-		std::string c = ("E-E Average (EL_Pre: "+CastUtil::lexical_cast<std::string>(tsPoll1/cSocks)+", EL_Wait: "+CastUtil::lexical_cast<std::string>(tsPoll/cSocks)+
-				", EL_Process: "+ CastUtil::lexical_cast<std::string>(tsProcess/cSocks)+", Read: "+CastUtil::lexical_cast<std::string>(tsRead/cReqs)+
-				", Write: "+CastUtil::lexical_cast<std::string>(tsWrite/cReqs)+", Service: "+ CastUtil::lexical_cast<std::string>(tsService/cReqs)+")\n");
+		std::string c = ("E-E Average (EL_Pre: "+CastUtil::lexical_cast<std::string>(tsPoll1/cReqs)+", EL_Wait: "+CastUtil::lexical_cast<std::string>(tsPoll/cReqs)+
+				", EL_Process: "+CastUtil::lexical_cast<std::string>(tsProcess/cReqs)+", Sock_Read: "+CastUtil::lexical_cast<std::string>(tsActRead/cReqs)+
+				", Req_Prep: "+CastUtil::lexical_cast<std::string>((tsRead-tsActRead)/cReqs)+", Sock_Write: "+CastUtil::lexical_cast<std::string>(tsActWrite/cReqs)+
+				", Res_Prep: "+CastUtil::lexical_cast<std::string>((tsWrite-tsActWrite)/cReqs)+", Service: "+CastUtil::lexical_cast<std::string>(tsService/cReqs)+")\n");
 		logger.info(c);
 	}
 	std::string d = ("Service Total (Pre: "+CastUtil::lexical_cast<std::string>(tsServicePre)+", Cors: "+CastUtil::lexical_cast<std::string>(tsServiceCors)+
