@@ -14,6 +14,8 @@
 
 class Http11Handler : public SocketInterface {
 	bool isHeadersDone;
+	bool noBody;
+	bool doneReq;
 	int bytesToRead;
 	bool isTeRequest;
 	HttpRequest* request;

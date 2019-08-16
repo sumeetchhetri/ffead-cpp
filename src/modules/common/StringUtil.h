@@ -29,6 +29,7 @@
 #include "vector"
 #include <stdio.h>
 #include "cstring"
+#include "string_view"
 
 
 class StringUtil {
@@ -51,6 +52,8 @@ public:
 	static std::string replaceAllCopy(const std::string &str, const std::string& ths, const std::string& with);
 	static std::vector<std::string> split(const std::string& input, const std::vector<std::string>& delimiters);
 	static void split(std::vector<std::string> &output, const std::string& input, const std::vector<std::string>& delimiters);
+	static std::vector<std::string_view> split(std::string_view strv, std::string_view delims = " ");
+	static void split(std::vector<std::string_view>& output, std::string_view strv, std::string_view delims = " ");
 	template < class ContainerT >
 	static void split(ContainerT& tokens, const std::string& str, const std::string& delimiters, const bool& trimEmpty= false)
 	{
@@ -117,7 +120,7 @@ public:
 		}
 		return tokens;
 	}
-	static int countOccurrences(const std::string& input, const std::string& delimiter);
+	static int countOccurrences(std::string_view input, std::string_view delimiter);
 	static void trim(std::string& str);
 	static std::string trimCopy(const std::string &str);
 	static std::string toHEX(const int&);
@@ -132,7 +135,7 @@ public:
 	static std::string toOCTAL(const unsigned long&);
 	static std::string toOCTAL(const long long&);
 	static std::string toOCTAL(const unsigned long long&);
-	static long int fromHEX(std::string hexVal);
+	static long int fromHEX(std::string_view hexVal);
 	static bool startsWith(const std::string& str, const std::string& prefix);
 	static bool endsWith(const std::string& str, const std::string& suffix);
 };

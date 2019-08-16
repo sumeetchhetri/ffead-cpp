@@ -47,7 +47,7 @@ public:
 	static char* hmac_sha512(char*, char*, const bool&);
 	static std::string sha1(const std::string&);
 	static std::string urlEncode(const std::string& str);
-	static std::string urlDecode(const std::string& str);
+	static std::string urlDecode(std::string_view str);
 	static void sanitizeHtml(std::string& data);
 };
 

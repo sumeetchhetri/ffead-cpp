@@ -18,7 +18,7 @@ void* ServiceHandler::closeConnections(void *arg) {
 	std::map<std::string, long long>::iterator it;
 	while(ths->run) {
 		Thread::sSleep(5);
-		SocketInterface* si;
+		SocketInterface* si = NULL;
 		while(ths->toBeClosedConns.try_dequeue(si)) {
 			std::string as = si->address + CastUtil::lexical_cast<std::string>(si->fd);
 			if(addrs.find(as)==addrs.end()) {
@@ -29,8 +29,9 @@ void* ServiceHandler::closeConnections(void *arg) {
 		for(it=addrs.begin();it!=addrs.end();) {
 			long long t = Timer::getTimestamp();
 			if(t-it->second>=15) {
-				addrs.erase(it++);
 				delete sifMap[it->first];
+				sifMap.erase(it->first);
+				addrs.erase(it++);
 			} else {
 				++it;
 			}

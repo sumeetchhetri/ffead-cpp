@@ -22,34 +22,34 @@
 
 #include "MultipartContent.h"
 
-std::string MultipartContent::VALID_HEADERS = ",content-id,content-type,content-disposition,content-transfer-encoding,content-location,content-base,";
+std::string_view MultipartContent::VALID_HEADERS = ",content-id,content-type,content-disposition,content-transfer-encoding,content-location,content-base,";
 
-std::string MultipartContent::ContentId = "Content-Id";
-std::string MultipartContent::ContentDisposition = "Content-Disposition";
-std::string MultipartContent::ContentTransferEncoding = "Content-Transfer-Encoding";
-std::string MultipartContent::ContentLocation = "Content-Location";
-std::string MultipartContent::ContentBase = "Content-Base";
-std::string MultipartContent::ContentLength = "Content-Length";
-std::string MultipartContent::ContentMD5 = "Content-MD5";
-std::string MultipartContent::ContentType =	"Content-Type";
+std::string_view MultipartContent::ContentId = "Content-Id";
+std::string_view MultipartContent::ContentDisposition = "Content-Disposition";
+std::string_view MultipartContent::ContentTransferEncoding = "Content-Transfer-Encoding";
+std::string_view MultipartContent::ContentLocation = "Content-Location";
+std::string_view MultipartContent::ContentBase = "Content-Base";
+std::string_view MultipartContent::ContentLength = "Content-Length";
+std::string_view MultipartContent::ContentMD5 = "Content-MD5";
+std::string_view MultipartContent::ContentType =	"Content-Type";
 
 MultipartContent::MultipartContent() {
 }
 
-MultipartContent::MultipartContent(const std::string& content)
+MultipartContent::MultipartContent(const std::string_view& content)
 {
 	setContent(content);
 }
 
-MultipartContent::MultipartContent(const std::vector<std::string>& headers, const std::string& content)
+MultipartContent::MultipartContent(const std::vector<std::string_view>& headers, const std::string_view& content)
 {
 	setContent(content);
 	if(headers.size()!=0)
 	{
 		for(unsigned int i=0;i<headers.size();i++)
 		{
-			std::vector<std::string> temp;
-			if(headers.at(i)=="\r" || headers.at(i)==""|| headers.at(i)=="\r\n" || headers.at(i).find(": ")==std::string::npos)
+			std::vector<std::string_view> temp;
+			if(headers.at(i)=="\r" || headers.at(i)==""|| headers.at(i)=="\r\n" || headers.at(i).find(": ")==std::string_view::npos)
 			{
 				continue;
 			}
@@ -58,32 +58,32 @@ MultipartContent::MultipartContent(const std::vector<std::string>& headers, cons
 			temp.push_back(headers.at(i).substr(headers.at(i).find(": ")+2));
 			if(temp.size()>1)
 			{
-				StringUtil::replaceFirst(temp.at(1), "\r", "");
-				if(temp.at(0).find("Content-Disposition")!=std::string::npos)
+				//StringUtil::replaceFirst(temp.at(1), "\r", "");
+				if(temp.at(0).find("Content-Disposition")!=std::string_view::npos)
 				{
-					std::vector<std::string> parmdef;
+					std::vector<std::string_view> parmdef;
 					StringUtil::split(parmdef, temp.at(1), (";"));
 					for(unsigned k=0;k<parmdef.size();k++)
 					{
-						if(parmdef.at(k)!="" && parmdef.at(k).find("=")!=std::string::npos)
+						if(parmdef.at(k)!="" && parmdef.at(k).find("=")!=std::string_view::npos)
 						{
 							size_t stpd = parmdef.at(k).find_first_not_of(" ");
 							size_t enpd = parmdef.at(k).find_last_not_of(" ");
-							std::string propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
-							std::vector<std::string> proplr;
+							std::string_view propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
+							std::vector<std::string_view> proplr;
 							StringUtil::split(proplr, propert, ("="));
 							if(proplr.size()==2)
 							{
 								if(proplr.at(0)=="name" && proplr.at(1)!="\"\"")
 								{
-									std::string key = proplr.at(1);
+									std::string_view key = proplr.at(1);
 									key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
 									key = CryptoHandler::urlDecode(key);
 									name = key;
 								}
 								else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")
 								{
-									std::string fna = proplr.at(1);
+									std::string_view fna = proplr.at(1);
 									fna = fna.substr(fna.find_first_not_of("\""),fna.find_last_not_of("\"")-fna.find_first_not_of("\"")+1);
 									fna = CryptoHandler::urlDecode(fna);
 									fileName = fna;
@@ -104,35 +104,35 @@ MultipartContent::MultipartContent(const std::vector<std::string>& headers, cons
 MultipartContent::~MultipartContent() {
 }
 
-std::string MultipartContent::getContent() const {
+std::string_view MultipartContent::getContent() const {
 	return content;
 }
 
-void MultipartContent::setContent(const std::string& content) {
+void MultipartContent::setContent(const std::string_view& content) {
 	this->content = content;
 }
 
-std::string MultipartContent::getFileName() const {
+std::string_view MultipartContent::getFileName() const {
 	return fileName;
 }
 
-void MultipartContent::setFileName(const std::string& fileName) {
+void MultipartContent::setFileName(const std::string_view& fileName) {
 	this->fileName = fileName;
 }
 
-std::map<std::string, std::string,cicomp> MultipartContent::getHeaders() {
+std::map<std::string_view, std::string_view,cicomp> MultipartContent::getHeaders() {
 	return headers;
 }
 
-std::string MultipartContent::getTempFileName() const {
+std::string_view MultipartContent::getTempFileName() const {
 	return tempFileName;
 }
 
-void MultipartContent::setTempFileName(const std::string& tempFileName) {
+void MultipartContent::setTempFileName(const std::string_view& tempFileName) {
 	this->tempFileName = tempFileName;
 }
 
-void MultipartContent::addHeader(std::string header, const std::string& value)
+void MultipartContent::addHeader(std::string_view header, const std::string_view& value)
 {
 	if(headers.find(header)!=headers.end()) {
 		headers[header] += "," + value;
@@ -141,12 +141,11 @@ void MultipartContent::addHeader(std::string header, const std::string& value)
 	}
 }
 
-void MultipartContent::addHeaderValue(std::string header, const std::string& value)
+void MultipartContent::addHeaderValue(std::string_view header, const std::string_view& value)
 {
-	header = StringUtil::camelCasedCopy(header, "-");
 	if(header!="")
 	{
-		if(VALID_HEADERS.find(","+StringUtil::toLowerCopy(header)+",")!=std::string::npos)
+		if(VALID_HEADERS.find(","+header+",")!=std::string_view::npos)
 		{
 			if(headers.find(header)!=headers.end()) {
 				headers[header] += "," + value;
@@ -159,7 +158,7 @@ void MultipartContent::addHeaderValue(std::string header, const std::string& val
 			std::vector<std::string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
 			if(matres.size()==0)
 			{
-				//std::cout << ("Invalid Header std::string " + header) << std::endl;
+				//std::cout << ("Invalid Header std::string_view " + header) << std::endl;
 				return;
 			}
 			if(headers.find(header)!=headers.end()) {
@@ -171,23 +170,21 @@ void MultipartContent::addHeaderValue(std::string header, const std::string& val
 	}
 }
 
-bool MultipartContent::isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase)
+bool MultipartContent::isHeaderValue(std::string_view header, const std::string_view& value, const bool& ignoreCase)
 {
-	header = StringUtil::camelCasedCopy(header, "-");
 	return header!="" && headers.find(header)!=headers.end()
-			&& (headers[header]==value ||
-					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
+			&& (headers[header]==value || (ignoreCase && strcasecmp(&headers[header][0], &value[0])==0));
 }
 
-std::string MultipartContent::getName() const {
+std::string_view MultipartContent::getName() const {
 	return name;
 }
 
-void MultipartContent::setName(const std::string& name) {
+void MultipartContent::setName(const std::string_view& name) {
 	this->name = name;
 }
 
-std::string MultipartContent::getHeader(const std::string& header)
+std::string_view MultipartContent::getHeader(const std::string_view& header)
 {
 	if(headers.find(header)!=headers.end())
 	{

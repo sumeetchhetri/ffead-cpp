@@ -37,54 +37,54 @@ public:
 
 
 class Http2HPACKHeaderTable {
-	static std::map<int, std::map<std::string, std::string> > HPACK_TABLE;
+	static std::map<int, std::map<std::string_view, std::string_view> > HPACK_TABLE;
 	static std::vector<Bits> HUFFMAN_TABLE;
 
-	static std::map<std::string, std::map<int, Bits> > HUFFMAN_LK_STRINDX_NUMINDX_TABLE;
-	static std::map<std::string, std::map<int, int> > HUFFMAN_LK_STRINDX_NUMINDX_BL_TABLE;
+	static std::map<std::string_view, std::map<int, Bits> > HUFFMAN_LK_STRINDX_NUMINDX_TABLE;
+	static std::map<std::string_view, std::map<int, int> > HUFFMAN_LK_STRINDX_NUMINDX_BL_TABLE;
 
 	static std::map<int, Bits> HUFFMAN_LK_NUMINDX_TABLE;
 	static std::map<int, int> HUFFMAN_LK_NUMINDX_BL_TABLE;
 
-	static std::map<std::string, Bits> cib;
+	static std::map<std::string_view, Bits> cib;
 	static std::map<uint32_t, std::bitset<38> > masks;
 
 	static void init();
 
-	std::map<int, std::map<std::string, std::string> > reqContextTable;
-	std::map<int, std::map<std::string, std::string> > resContextTable;
-	std::map<std::string, int> reqhnIndexTable;
-	std::map<std::string, int> reqhnvIndexTable;
+	std::map<int, std::map<std::string_view, std::string_view> > reqContextTable;
+	std::map<int, std::map<std::string_view, std::string_view> > resContextTable;
+	std::map<std::string_view, int> reqhnIndexTable;
+	std::map<std::string_view, int> reqhnvIndexTable;
 	int reqcurrentSize;
-	std::map<std::string, int> reshnIndexTable;
-	std::map<std::string, int> reshnvIndexTable;
+	std::map<std::string_view, int> reshnIndexTable;
+	std::map<std::string_view, int> reshnvIndexTable;
 	int rescurrentSize;
 	Http2HPACKHeaderTable();
 	friend class Http2HPACKContext;
 public:
 	virtual ~Http2HPACKHeaderTable();
-	int getIndexByNameAndValue(const std::string& name, const std::string& value, const bool& isRequest);
-	int getIndexByName(const std::string& name, const bool& isRequest);
-	std::map<std::string, std::string> getNameAndValueByIndex(const int& index, const bool& isRequest);
-	std::string getNameByIndex(const int& index, const bool& isRequest);
-	void addHeader(const std::string& name, const std::string& value, const bool& isRequest);
+	int getIndexByNameAndValue(std::string_view name, std::string_view value, const bool& isRequest);
+	int getIndexByName(std::string_view name, const bool& isRequest);
+	std::map<std::string_view, std::string_view> getNameAndValueByIndex(const int& index, const bool& isRequest);
+	std::string_view getNameByIndex(const int& index, const bool& isRequest);
+	void addHeader(std::string_view name, std::string_view value, const bool& isRequest);
 };
 
 class Http2HPACKContext {
 public:
 	Http2HPACKHeaderTable table;
 	bool huffmanEncoding;
-	bool decipherHuffmanValue(const int& bitnum, std::bitset<8> obvm, std::bitset<8>& bvm, std::string &out, std::bitset<8>& prev, int& last, uint32_t& indx, std::string& key, std::string& value, int& totbits, int& cub);
-	long decodeNumber(const std::string& data, const int& prefixSize, std::bitset<8> bits, size_t& index);
-	std::string encodeNumber(long number, const std::vector<bool>& prefixBits);
-	std::string encodeString(std::string value);
-	std::string decodeString(const std::string& data, size_t& indx);
-	std::string encodeHuffman(const std::string& value);
-	std::string decodeHuffman(const std::string& value);
-	std::string decodeHuffmanOld(std::string value);
+	bool decipherHuffmanValue(const int& bitnum, std::bitset<8> obvm, std::bitset<8>& bvm, std::string &out, std::bitset<8>& prev, int& last, uint32_t& indx, std::string& key, std::string_view& value, int& totbits, int& cub);
+	long decodeNumber(std::string_view data, const int& prefixSize, std::bitset<8> bits, size_t& index);
+	std::string_view encodeNumber(long number, const std::vector<bool>& prefixBits);
+	std::string_view encodeString(std::string_view value);
+	std::string_view decodeString(std::string_view data, size_t& indx);
+	std::string_view encodeHuffman(std::string_view value);
+	std::string_view decodeHuffman(std::string_view value);
+	std::string_view decodeHuffmanOld(std::string_view value);
 	Http2HPACKContext();
-	std::string encode(const std::map<std::string, std::string, cicomp>& headers);
-	std::map<std::string, std::string, cicomp> decode(const std::string& data);
+	std::string_view encode(const std::map<std::string_view, std::string_view, cicomp>& headers);
+	std::map<std::string_view, std::string_view, cicomp> decode(std::string_view data);
 	virtual ~Http2HPACKContext();
 };
 

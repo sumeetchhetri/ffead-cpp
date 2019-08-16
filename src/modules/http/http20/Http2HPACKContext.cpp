@@ -7,13 +7,13 @@
 
 #include "Http2HPACKContext.h"
 
-std::map<int, std::map<std::string, std::string> > Http2HPACKHeaderTable::HPACK_TABLE;
+std::map<int, std::map<std::string_view, std::string_view> > Http2HPACKHeaderTable::HPACK_TABLE;
 std::vector<Bits> Http2HPACKHeaderTable::HUFFMAN_TABLE;
-std::map<std::string, std::map<int, int> > Http2HPACKHeaderTable::HUFFMAN_LK_STRINDX_NUMINDX_BL_TABLE;
-std::map<std::string, std::map<int, Bits> > Http2HPACKHeaderTable::HUFFMAN_LK_STRINDX_NUMINDX_TABLE;
+std::map<std::string_view, std::map<int, int> > Http2HPACKHeaderTable::HUFFMAN_LK_STRINDX_NUMINDX_BL_TABLE;
+std::map<std::string_view, std::map<int, Bits> > Http2HPACKHeaderTable::HUFFMAN_LK_STRINDX_NUMINDX_TABLE;
 std::map<int, Bits> Http2HPACKHeaderTable::HUFFMAN_LK_NUMINDX_TABLE;
 std::map<int, int> Http2HPACKHeaderTable::HUFFMAN_LK_NUMINDX_BL_TABLE;
-std::map<std::string, Bits> Http2HPACKHeaderTable::cib;
+std::map<std::string_view, Bits> Http2HPACKHeaderTable::cib;
 std::map<uint32_t, std::bitset<38> > Http2HPACKHeaderTable::masks;
 
 void Bits::print() {
@@ -22,7 +22,7 @@ void Bits::print() {
 		char hexVal[20];
 		memset(hexVal, 0, sizeof(hexVal));
 		sprintf(hexVal, "%x", (unsigned char)bitv.at(var).to_ulong());
-		std::string hexstr(hexVal);
+		std::string_view hexstr(hexVal);
 		if(hexstr.length()==1)
 			hexstr = "0" + hexstr;
 		std::cout << hexstr;
@@ -115,67 +115,67 @@ Bits::~Bits(){
 
 void Http2HPACKHeaderTable::init() {
 	if(HPACK_TABLE.size()>0)return;
-	HPACK_TABLE[1].insert(std::pair<std::string, std::string>(":authority", ""));
-	HPACK_TABLE[2].insert(std::pair<std::string, std::string>(":method", "GET"));
-	HPACK_TABLE[3].insert(std::pair<std::string, std::string>(":method", "POST"));
-	HPACK_TABLE[4].insert(std::pair<std::string, std::string>(":path", "/"));
-	HPACK_TABLE[5].insert(std::pair<std::string, std::string>(":path", "/index.html"));
-	HPACK_TABLE[6].insert(std::pair<std::string, std::string>(":scheme", "http"));
-	HPACK_TABLE[7].insert(std::pair<std::string, std::string>(":scheme", "https"));
-	HPACK_TABLE[8].insert(std::pair<std::string, std::string>(":status", "200"));
-	HPACK_TABLE[9].insert(std::pair<std::string, std::string>(":status", "204"));
-	HPACK_TABLE[10].insert(std::pair<std::string, std::string>(":status", "206"));
-	HPACK_TABLE[11].insert(std::pair<std::string, std::string>(":status", "304"));
-	HPACK_TABLE[12].insert(std::pair<std::string, std::string>(":status", "400"));
-	HPACK_TABLE[13].insert(std::pair<std::string, std::string>(":status", "404"));
-	HPACK_TABLE[14].insert(std::pair<std::string, std::string>(":status", "500"));
-	HPACK_TABLE[15].insert(std::pair<std::string, std::string>("accept-charset", ""));
-	HPACK_TABLE[16].insert(std::pair<std::string, std::string>("accept-encoding", "gzip, deflate"));
-	HPACK_TABLE[17].insert(std::pair<std::string, std::string>("accept-language", ""));
-	HPACK_TABLE[18].insert(std::pair<std::string, std::string>("accept-ranges", ""));
-	HPACK_TABLE[19].insert(std::pair<std::string, std::string>("accept", ""));
-	HPACK_TABLE[20].insert(std::pair<std::string, std::string>("access-control-allow-origin", ""));
-	HPACK_TABLE[21].insert(std::pair<std::string, std::string>("age", ""));
-	HPACK_TABLE[22].insert(std::pair<std::string, std::string>("allow", ""));
-	HPACK_TABLE[23].insert(std::pair<std::string, std::string>("authorization", ""));
-	HPACK_TABLE[24].insert(std::pair<std::string, std::string>("cache-control", ""));
-	HPACK_TABLE[25].insert(std::pair<std::string, std::string>("content-disposition", ""));
-	HPACK_TABLE[26].insert(std::pair<std::string, std::string>("content-encoding", ""));
-	HPACK_TABLE[27].insert(std::pair<std::string, std::string>("content-language", ""));
-	HPACK_TABLE[28].insert(std::pair<std::string, std::string>("content-length", ""));
-	HPACK_TABLE[29].insert(std::pair<std::string, std::string>("content-location", ""));
-	HPACK_TABLE[30].insert(std::pair<std::string, std::string>("content-range", ""));
-	HPACK_TABLE[31].insert(std::pair<std::string, std::string>("content-type", ""));
-	HPACK_TABLE[32].insert(std::pair<std::string, std::string>("cookie", ""));
-	HPACK_TABLE[33].insert(std::pair<std::string, std::string>("date", ""));
-	HPACK_TABLE[34].insert(std::pair<std::string, std::string>("etag", ""));
-	HPACK_TABLE[35].insert(std::pair<std::string, std::string>("expect", ""));
-	HPACK_TABLE[36].insert(std::pair<std::string, std::string>("expires", ""));
-	HPACK_TABLE[37].insert(std::pair<std::string, std::string>("from", ""));
-	HPACK_TABLE[38].insert(std::pair<std::string, std::string>("host", ""));
-	HPACK_TABLE[39].insert(std::pair<std::string, std::string>("if-match", ""));
-	HPACK_TABLE[40].insert(std::pair<std::string, std::string>("if-modified-since", ""));
-	HPACK_TABLE[41].insert(std::pair<std::string, std::string>("if-none-match", ""));
-	HPACK_TABLE[42].insert(std::pair<std::string, std::string>("if-range", ""));
-	HPACK_TABLE[43].insert(std::pair<std::string, std::string>("if-unmodified-since", ""));
-	HPACK_TABLE[44].insert(std::pair<std::string, std::string>("last-modified", ""));
-	HPACK_TABLE[45].insert(std::pair<std::string, std::string>("link", ""));
-	HPACK_TABLE[46].insert(std::pair<std::string, std::string>("location", ""));
-	HPACK_TABLE[47].insert(std::pair<std::string, std::string>("max-forwards", ""));
-	HPACK_TABLE[48].insert(std::pair<std::string, std::string>("proxy-authenticate", ""));
-	HPACK_TABLE[49].insert(std::pair<std::string, std::string>("proxy-authorization", ""));
-	HPACK_TABLE[50].insert(std::pair<std::string, std::string>("range", ""));
-	HPACK_TABLE[51].insert(std::pair<std::string, std::string>("referer", ""));
-	HPACK_TABLE[52].insert(std::pair<std::string, std::string>("refresh", ""));
-	HPACK_TABLE[53].insert(std::pair<std::string, std::string>("retry-after", ""));
-	HPACK_TABLE[54].insert(std::pair<std::string, std::string>("server", ""));
-	HPACK_TABLE[55].insert(std::pair<std::string, std::string>("set-cookie", ""));
-	HPACK_TABLE[56].insert(std::pair<std::string, std::string>("strict-transport-security", ""));
-	HPACK_TABLE[57].insert(std::pair<std::string, std::string>("transfer-encoding", ""));
-	HPACK_TABLE[58].insert(std::pair<std::string, std::string>("user-agent", ""));
-	HPACK_TABLE[59].insert(std::pair<std::string, std::string>("vary", ""));
-	HPACK_TABLE[60].insert(std::pair<std::string, std::string>("via", ""));
-	HPACK_TABLE[61].insert(std::pair<std::string, std::string>("www-authenticate", ""));
+	HPACK_TABLE[1].insert(std::pair<std::string_view, std::string_view>(":authority", ""));
+	HPACK_TABLE[2].insert(std::pair<std::string_view, std::string_view>(":method", "GET"));
+	HPACK_TABLE[3].insert(std::pair<std::string_view, std::string_view>(":method", "POST"));
+	HPACK_TABLE[4].insert(std::pair<std::string_view, std::string_view>(":path", "/"));
+	HPACK_TABLE[5].insert(std::pair<std::string_view, std::string_view>(":path", "/index.html"));
+	HPACK_TABLE[6].insert(std::pair<std::string_view, std::string_view>(":scheme", "http"));
+	HPACK_TABLE[7].insert(std::pair<std::string_view, std::string_view>(":scheme", "https"));
+	HPACK_TABLE[8].insert(std::pair<std::string_view, std::string_view>(":status", "200"));
+	HPACK_TABLE[9].insert(std::pair<std::string_view, std::string_view>(":status", "204"));
+	HPACK_TABLE[10].insert(std::pair<std::string_view, std::string_view>(":status", "206"));
+	HPACK_TABLE[11].insert(std::pair<std::string_view, std::string_view>(":status", "304"));
+	HPACK_TABLE[12].insert(std::pair<std::string_view, std::string_view>(":status", "400"));
+	HPACK_TABLE[13].insert(std::pair<std::string_view, std::string_view>(":status", "404"));
+	HPACK_TABLE[14].insert(std::pair<std::string_view, std::string_view>(":status", "500"));
+	HPACK_TABLE[15].insert(std::pair<std::string_view, std::string_view>("accept-charset", ""));
+	HPACK_TABLE[16].insert(std::pair<std::string_view, std::string_view>("accept-encoding", "gzip, deflate"));
+	HPACK_TABLE[17].insert(std::pair<std::string_view, std::string_view>("accept-language", ""));
+	HPACK_TABLE[18].insert(std::pair<std::string_view, std::string_view>("accept-ranges", ""));
+	HPACK_TABLE[19].insert(std::pair<std::string_view, std::string_view>("accept", ""));
+	HPACK_TABLE[20].insert(std::pair<std::string_view, std::string_view>("access-control-allow-origin", ""));
+	HPACK_TABLE[21].insert(std::pair<std::string_view, std::string_view>("age", ""));
+	HPACK_TABLE[22].insert(std::pair<std::string_view, std::string_view>("allow", ""));
+	HPACK_TABLE[23].insert(std::pair<std::string_view, std::string_view>("authorization", ""));
+	HPACK_TABLE[24].insert(std::pair<std::string_view, std::string_view>("cache-control", ""));
+	HPACK_TABLE[25].insert(std::pair<std::string_view, std::string_view>("content-disposition", ""));
+	HPACK_TABLE[26].insert(std::pair<std::string_view, std::string_view>("content-encoding", ""));
+	HPACK_TABLE[27].insert(std::pair<std::string_view, std::string_view>("content-language", ""));
+	HPACK_TABLE[28].insert(std::pair<std::string_view, std::string_view>("content-length", ""));
+	HPACK_TABLE[29].insert(std::pair<std::string_view, std::string_view>("content-location", ""));
+	HPACK_TABLE[30].insert(std::pair<std::string_view, std::string_view>("content-range", ""));
+	HPACK_TABLE[31].insert(std::pair<std::string_view, std::string_view>("content-type", ""));
+	HPACK_TABLE[32].insert(std::pair<std::string_view, std::string_view>("cookie", ""));
+	HPACK_TABLE[33].insert(std::pair<std::string_view, std::string_view>("date", ""));
+	HPACK_TABLE[34].insert(std::pair<std::string_view, std::string_view>("etag", ""));
+	HPACK_TABLE[35].insert(std::pair<std::string_view, std::string_view>("expect", ""));
+	HPACK_TABLE[36].insert(std::pair<std::string_view, std::string_view>("expires", ""));
+	HPACK_TABLE[37].insert(std::pair<std::string_view, std::string_view>("from", ""));
+	HPACK_TABLE[38].insert(std::pair<std::string_view, std::string_view>("host", ""));
+	HPACK_TABLE[39].insert(std::pair<std::string_view, std::string_view>("if-match", ""));
+	HPACK_TABLE[40].insert(std::pair<std::string_view, std::string_view>("if-modified-since", ""));
+	HPACK_TABLE[41].insert(std::pair<std::string_view, std::string_view>("if-none-match", ""));
+	HPACK_TABLE[42].insert(std::pair<std::string_view, std::string_view>("if-range", ""));
+	HPACK_TABLE[43].insert(std::pair<std::string_view, std::string_view>("if-unmodified-since", ""));
+	HPACK_TABLE[44].insert(std::pair<std::string_view, std::string_view>("last-modified", ""));
+	HPACK_TABLE[45].insert(std::pair<std::string_view, std::string_view>("link", ""));
+	HPACK_TABLE[46].insert(std::pair<std::string_view, std::string_view>("location", ""));
+	HPACK_TABLE[47].insert(std::pair<std::string_view, std::string_view>("max-forwards", ""));
+	HPACK_TABLE[48].insert(std::pair<std::string_view, std::string_view>("proxy-authenticate", ""));
+	HPACK_TABLE[49].insert(std::pair<std::string_view, std::string_view>("proxy-authorization", ""));
+	HPACK_TABLE[50].insert(std::pair<std::string_view, std::string_view>("range", ""));
+	HPACK_TABLE[51].insert(std::pair<std::string_view, std::string_view>("referer", ""));
+	HPACK_TABLE[52].insert(std::pair<std::string_view, std::string_view>("refresh", ""));
+	HPACK_TABLE[53].insert(std::pair<std::string_view, std::string_view>("retry-after", ""));
+	HPACK_TABLE[54].insert(std::pair<std::string_view, std::string_view>("server", ""));
+	HPACK_TABLE[55].insert(std::pair<std::string_view, std::string_view>("set-cookie", ""));
+	HPACK_TABLE[56].insert(std::pair<std::string_view, std::string_view>("strict-transport-security", ""));
+	HPACK_TABLE[57].insert(std::pair<std::string_view, std::string_view>("transfer-encoding", ""));
+	HPACK_TABLE[58].insert(std::pair<std::string_view, std::string_view>("user-agent", ""));
+	HPACK_TABLE[59].insert(std::pair<std::string_view, std::string_view>("vary", ""));
+	HPACK_TABLE[60].insert(std::pair<std::string_view, std::string_view>("via", ""));
+	HPACK_TABLE[61].insert(std::pair<std::string_view, std::string_view>("www-authenticate", ""));
 
 	HUFFMAN_TABLE.push_back(Bits(0x1ff8u, 13, 0));
 	HUFFMAN_TABLE.push_back(Bits(0x7fffd8u, 23, 1));
@@ -478,7 +478,7 @@ Http2HPACKContext::Http2HPACKContext() {
 	huffmanEncoding = true;
 }
 
-std::string Http2HPACKContext::encodeNumber(long number, const std::vector<bool>& prefixBits) {
+std::string_view Http2HPACKContext::encodeNumber(long number, const std::vector<bool>& prefixBits) {
 	std::string ecval;
 	int prefixSize = (int)prefixBits.size();
 	long suffixMaxValue = pow(2, (8-prefixSize)) - 1;
@@ -509,7 +509,7 @@ std::string Http2HPACKContext::encodeNumber(long number, const std::vector<bool>
 	return ecval;
 }
 
-long Http2HPACKContext::decodeNumber(const std::string& data, const int& prefixSize, std::bitset<8> bits, size_t& index) {
+long Http2HPACKContext::decodeNumber(std::string_view data, const int& prefixSize, std::bitset<8> bits, size_t& index) {
 	long suffixMaxValue = pow(2, (8-prefixSize)) - 1;
 	for (int var = 7; var >= (8-prefixSize); var--) {
 		bits.set(var, false);
@@ -530,12 +530,12 @@ long Http2HPACKContext::decodeNumber(const std::string& data, const int& prefixS
 	return -1;
 }
 
-std::string Http2HPACKContext::encode(const std::map<std::string, std::string, cicomp>& headers) {
-	std::map<std::string, std::string>::const_iterator it;
+std::string_view Http2HPACKContext::encode(const std::map<std::string_view, std::string_view, cicomp>& headers) {
+	std::map<std::string_view, std::string_view>::const_iterator it;
 	std::string encoded;
 	for (it=headers.begin();it!=headers.end();++it) {
-		std::string name = it->first;
-		std::string value = it->second;
+		std::string_view name = it->first;
+		std::string_view value = it->second;
 		//TODO handle cookie header 8.1.2.5.  Compressing the Cookie Header Field(https://tools.ietf.org/html/draft-ietf-httpbis-http2-16#page-9)
 		int index = table.getIndexByNameAndValue(name, value, false);
 		if(index!=-1) {
@@ -564,8 +564,8 @@ std::string Http2HPACKContext::encode(const std::map<std::string, std::string, c
 	return encoded;
 }
 
-std::map<std::string, std::string, cicomp> Http2HPACKContext::decode(const std::string& data) {
-	std::map<std::string, std::string, cicomp> headers;
+std::map<std::string_view, std::string_view, cicomp> Http2HPACKContext::decode(std::string_view data) {
+	std::map<std::string_view, std::string_view, cicomp> headers;
 	size_t indx = 0;
 	while(data.length()>indx)
 	{
@@ -577,7 +577,7 @@ std::map<std::string, std::string, cicomp> Http2HPACKContext::decode(const std::
 			//Indexed header
 			prefixSize = 1;
 			long index = decodeNumber(data, prefixSize, bits, indx);
-			std::map<std::string, std::string> hm = table.getNameAndValueByIndex(index, true);
+			std::map<std::string_view, std::string_view> hm = table.getNameAndValueByIndex(index, true);
 			headers[hm.begin()->first] = hm.begin()->second;
 		} else if(bits.test(6)) {
 			//Literal indexed
@@ -585,15 +585,15 @@ std::map<std::string, std::string, cicomp> Http2HPACKContext::decode(const std::
 			if(st==64) {
 				//New name
 				indx++;
-				std::string name = decodeString(data, indx);
-				std::string value = decodeString(data, indx);
+				std::string_view name = decodeString(data, indx);
+				std::string_view value = decodeString(data, indx);
 				headers[name] = value;
 				table.addHeader(name, value, true);
 			} else {
 				//Indexed name
 				long nmindx = decodeNumber(data, prefixSize, bits, indx);
-				std::string name = table.getNameByIndex(nmindx, true);
-				std::string value = decodeString(data, indx);
+				std::string_view name = table.getNameByIndex(nmindx, true);
+				std::string_view value = decodeString(data, indx);
 				headers[name] = value;
 				table.addHeader(name, value, true);
 			}
@@ -603,14 +603,14 @@ std::map<std::string, std::string, cicomp> Http2HPACKContext::decode(const std::
 			if(st==0) {
 				//New name
 				indx++;
-				std::string name = decodeString(data, indx);
-				std::string value = decodeString(data, indx);
+				std::string_view name = decodeString(data, indx);
+				std::string_view value = decodeString(data, indx);
 				headers[name] = value;
 			} else {
 				//Indexed name
 				long nmindx = decodeNumber(data, prefixSize, bits, indx);
-				std::string name = table.getNameByIndex(nmindx, true);
-				std::string value = decodeString(data, indx);
+				std::string_view name = table.getNameByIndex(nmindx, true);
+				std::string_view value = decodeString(data, indx);
 				headers[name] = value;
 			}
 		} else if(bits.test(3)) {
@@ -619,14 +619,14 @@ std::map<std::string, std::string, cicomp> Http2HPACKContext::decode(const std::
 			if(st==16) {
 				//New name
 				indx++;
-				std::string name = decodeString(data, indx);
-				std::string value = decodeString(data, indx);
+				std::string_view name = decodeString(data, indx);
+				std::string_view value = decodeString(data, indx);
 				headers[name] = value;
 			} else {
 				//Indexed name
 				long nmindx = decodeNumber(data, prefixSize, bits, indx);
-				std::string name = table.getNameByIndex(nmindx, true);
-				std::string value = decodeString(data, indx);
+				std::string_view name = table.getNameByIndex(nmindx, true);
+				std::string_view value = decodeString(data, indx);
 				headers[name] = value;
 			}
 		} else {
@@ -637,7 +637,7 @@ std::map<std::string, std::string, cicomp> Http2HPACKContext::decode(const std::
 	return headers;
 }
 
-std::string Http2HPACKContext::encodeHuffman(const std::string& value) {
+std::string_view Http2HPACKContext::encodeHuffman(std::string_view value) {
 	std::string out;
 	int last = 0;
 	int totbits = 0;
@@ -663,7 +663,7 @@ std::string Http2HPACKContext::encodeHuffman(const std::string& value) {
 	return out;
 }
 
-std::string Http2HPACKContext::encodeString(std::string value) {
+std::string_view Http2HPACKContext::encodeString(std::string_view value) {
 	std::string encoded;
 	std::vector<bool> vallen;
 	if(huffmanEncoding)
@@ -680,7 +680,7 @@ std::string Http2HPACKContext::encodeString(std::string value) {
 	return encoded;
 }
 
-std::string Http2HPACKContext::decodeHuffman(const std::string& value) {
+std::string_view Http2HPACKContext::decodeHuffman(std::string_view value) {
 	std::map<uint32_t, std::bitset<38> >::reverse_iterator mit;
 	std::string dval;
 	int indx = 0;
@@ -702,7 +702,7 @@ std::string Http2HPACKContext::decodeHuffman(const std::string& value) {
 		for(mit=Http2HPACKHeaderTable::masks.rbegin();mit!=Http2HPACKHeaderTable::masks.rend();++mit) {
 			if((38-stbind)>=(int)mit->first) {
 				std::bitset<38> kn = k & mit->second;
-				std::string kt = kn.to_string().substr(0, mit->first);
+				std::string_view kt = kn.to_string().substr(0, mit->first);
 				if(Http2HPACKHeaderTable::cib.find(kt)!=Http2HPACKHeaderTable::cib.end())
 				{
 					dval.push_back(Http2HPACKHeaderTable::cib[kt].symbol);
@@ -744,7 +744,7 @@ std::string Http2HPACKContext::decodeHuffman(const std::string& value) {
 	return dval;
 }
 
-std::string Http2HPACKContext::decodeHuffmanOld(std::string value) {
+std::string_view Http2HPACKContext::decodeHuffmanOld(std::string_view value) {
 	std::string out;
 	uint32_t indx = 0;
 	std::bitset<8> prev;
@@ -861,7 +861,7 @@ std::string Http2HPACKContext::decodeHuffmanOld(std::string value) {
 	return out;
 }
 
-bool Http2HPACKContext::decipherHuffmanValue(const int& bitnum, std::bitset<8> obvm, std::bitset<8>& bvm, std::string &out, std::bitset<8>& prev, int& last, uint32_t& indx, std::string& key, std::string& value, int& totbits, int& cub) {
+bool Http2HPACKContext::decipherHuffmanValue(const int& bitnum, std::bitset<8> obvm, std::bitset<8>& bvm, std::string &out, std::bitset<8>& prev, int& last, uint32_t& indx, std::string& key, std::string_view& value, int& totbits, int& cub) {
 	if(key.length()==0) {
 		if(bitnum!=-1)bvm.reset(bitnum);
 		if(Http2HPACKHeaderTable::HUFFMAN_LK_NUMINDX_TABLE.find((int)bvm.to_ulong())
@@ -914,12 +914,12 @@ bool Http2HPACKContext::decipherHuffmanValue(const int& bitnum, std::bitset<8> o
 	return false;
 }
 
-std::string Http2HPACKContext::decodeString(const std::string& data, size_t& indx) {
+std::string_view Http2HPACKContext::decodeString(std::string_view data, size_t& indx) {
 	unsigned char st = data.at(indx);
 	std::bitset<8> bits(st);
 	bool isHuffmanEncoded = bits.test(7);
 	long len = decodeNumber(data, 1, bits, indx);
-	std::string value = data.substr(indx, len);
+	std::string_view value = data.substr(indx, len);
 	//CommonUtils::printHEX(value);
 	if(isHuffmanEncoded) {
 		value = decodeHuffman(value);
@@ -937,7 +937,7 @@ Http2HPACKHeaderTable::Http2HPACKHeaderTable() {
 	init();
 	this->reqContextTable = HPACK_TABLE;
 	this->reqcurrentSize = reqContextTable.size();
-	std::map<int, std::map<std::string, std::string> >::iterator it;
+	std::map<int, std::map<std::string_view, std::string_view> >::iterator it;
 	for (it=reqContextTable.begin();it!=reqContextTable.end();++it) {
 		if(it->second.begin()->second!="")
 		{
@@ -950,7 +950,7 @@ Http2HPACKHeaderTable::Http2HPACKHeaderTable() {
 	}
 	this->resContextTable = HPACK_TABLE;
 	this->rescurrentSize = resContextTable.size();
-	std::map<int, std::map<std::string, std::string> >::iterator itr;
+	std::map<int, std::map<std::string_view, std::string_view> >::iterator itr;
 	for (itr=resContextTable.begin();itr!=resContextTable.end();++itr) {
 		if(itr->second.begin()->second!="")
 		{
@@ -966,7 +966,7 @@ Http2HPACKHeaderTable::Http2HPACKHeaderTable() {
 Http2HPACKHeaderTable::~Http2HPACKHeaderTable() {
 }
 
-int Http2HPACKHeaderTable::getIndexByNameAndValue(const std::string& name, const std::string& value, const bool& isRequest) {
+int Http2HPACKHeaderTable::getIndexByNameAndValue(std::string_view name, std::string_view value, const bool& isRequest) {
 	if(isRequest)
 	{
 		if(reqhnvIndexTable.find(name+value)!=reqhnvIndexTable.end()) {
@@ -982,7 +982,7 @@ int Http2HPACKHeaderTable::getIndexByNameAndValue(const std::string& name, const
 	return -1;
 }
 
-int Http2HPACKHeaderTable::getIndexByName(const std::string& name, const bool& isRequest) {
+int Http2HPACKHeaderTable::getIndexByName(std::string_view name, const bool& isRequest) {
 	if(isRequest)
 	{
 		if(reqhnIndexTable.find(name)!=reqhnIndexTable.end()) {
@@ -998,7 +998,7 @@ int Http2HPACKHeaderTable::getIndexByName(const std::string& name, const bool& i
 	return -1;
 }
 
-std::map<std::string, std::string> Http2HPACKHeaderTable::getNameAndValueByIndex(const int& index, const bool& isRequest) {
+std::map<std::string_view, std::string_view> Http2HPACKHeaderTable::getNameAndValueByIndex(const int& index, const bool& isRequest) {
 	if(isRequest)
 	{
 		if(reqContextTable.find(index)!=reqContextTable.end()) {
@@ -1011,11 +1011,11 @@ std::map<std::string, std::string> Http2HPACKHeaderTable::getNameAndValueByIndex
 			return resContextTable[index];
 		}
 	}
-	std::map<std::string, std::string> mp;
+	std::map<std::string_view, std::string_view> mp;
 	return mp;
 }
 
-std::string Http2HPACKHeaderTable::getNameByIndex(const int& index, const bool& isRequest) {
+std::string_view Http2HPACKHeaderTable::getNameByIndex(const int& index, const bool& isRequest) {
 	if(isRequest)
 	{
 		if(reqContextTable.find(index)!=reqContextTable.end()) {
@@ -1031,12 +1031,12 @@ std::string Http2HPACKHeaderTable::getNameByIndex(const int& index, const bool& 
 	return "";
 }
 
-void Http2HPACKHeaderTable::addHeader(const std::string& name, const std::string& value, const bool& isRequest) {
+void Http2HPACKHeaderTable::addHeader(std::string_view name, std::string_view value, const bool& isRequest) {
 	if(isRequest)
 	{
 		if(getIndexByNameAndValue(name, value, isRequest)==-1)
 		{
-			reqContextTable[++reqcurrentSize].insert(std::pair<std::string, std::string>(name, value));
+			reqContextTable[++reqcurrentSize].insert(std::pair<std::string_view, std::string_view>(name, value));
 			if(value!="")
 			{
 				reqhnvIndexTable[name+value] = reqcurrentSize;
@@ -1047,7 +1047,7 @@ void Http2HPACKHeaderTable::addHeader(const std::string& name, const std::string
 	{
 		if(getIndexByNameAndValue(name, value, isRequest)==-1)
 		{
-			resContextTable[++rescurrentSize].insert(std::pair<std::string, std::string>(name, value));
+			resContextTable[++rescurrentSize].insert(std::pair<std::string_view, std::string_view>(name, value));
 			if(value!="")
 			{
 				reshnvIndexTable[name+value] = rescurrentSize;

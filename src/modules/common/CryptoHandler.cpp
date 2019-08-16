@@ -206,30 +206,59 @@ char* CryptoHandler::hmac_sha512(char* datain, char* keyin, const bool& base64)
 }
 
 
-std::string CryptoHandler::urlDecode(const std::string& str)
+std::string CryptoHandler::urlDecode(std::string_view str)
 {
-	std::string strret = str;
-	StringUtil::replaceAll(strret,"%25","%");
-	StringUtil::replaceAll(strret,"%3D","=");
-	StringUtil::replaceAll(strret,"%3A",":");
-	StringUtil::replaceAll(strret,"%20"," ");
-	StringUtil::replaceAll(strret,"%5E","^");
-	StringUtil::replaceAll(strret,"%26","&");
-	StringUtil::replaceAll(strret,"%60","`");
-	StringUtil::replaceAll(strret,"%7B","{");
-	StringUtil::replaceAll(strret,"%7D","}");
-	StringUtil::replaceAll(strret,"%7C","|");
-	StringUtil::replaceAll(strret,"%5D","]");
-	StringUtil::replaceAll(strret,"%5B","[");
-	StringUtil::replaceAll(strret,"%22","\"");
-	StringUtil::replaceAll(strret,"%3C","<");
-	StringUtil::replaceAll(strret,"%3E",">");
-	StringUtil::replaceAll(strret,"%5C","\\");
-	StringUtil::replaceAll(strret,"%23","#");
-	StringUtil::replaceAll(strret,"%3F","?");
-	StringUtil::replaceAll(strret,"%2F","/");
-	StringUtil::replaceAll(strret,"%2B","+");
-	return strret;
+	std::string dsts;
+	dsts.reserve(str.length());
+	char *dst = dsts.c_str();
+	char *src = &str[0];
+	char a, b;
+	while (*src) {
+		if ((*src == '%') && ((a = src[1]) && (b = src[2])) && (isxdigit(a) && isxdigit(b))) {
+			if (a >= 'a')
+				a -= 'a' - 'A';
+			if (a >= 'A')
+				a -= ('A' - 10);
+			else
+				a -= '0';
+			if (b >= 'a')
+				b -= 'a' - 'A';
+			if (b >= 'A')
+				b -= ('A' - 10);
+			else
+				b -= '0';
+			*dst++ = 16 * a + b;
+			src += 3;
+		} else if (*src == '+') {
+			*dst++ = ' ';
+			src++;
+		} else {
+			*dst++ = *src++;
+		}
+	}
+	*dst++ = '\0';
+	/*StringUtil::replaceAll(strret,"%25","%");
+	 StringUtil::replaceAll(strret,"%3D","=");
+	 StringUtil::replaceAll(strret,"%3A",":");
+	 StringUtil::replaceAll(strret,"%20"," ");
+	 StringUtil::replaceAll(strret,"%5E","^");
+	 StringUtil::replaceAll(strret,"%26","&");
+	 StringUtil::replaceAll(strret,"%60","`");
+	 StringUtil::replaceAll(strret,"%7B","{");
+	 StringUtil::replaceAll(strret,"%7D","}");
+	 StringUtil::replaceAll(strret,"%7C","|");
+	 StringUtil::replaceAll(strret,"%5D","]");
+	 StringUtil::replaceAll(strret,"%5B","[");
+	 StringUtil::replaceAll(strret,"%22","\"");
+	 StringUtil::replaceAll(strret,"%3C","<");
+	 StringUtil::replaceAll(strret,"%3E",">");
+	 StringUtil::replaceAll(strret,"%5C","\\");
+	 StringUtil::replaceAll(strret,"%23","#");
+	 StringUtil::replaceAll(strret,"%3F","?");
+	 StringUtil::replaceAll(strret,"%2F","/");
+	 StringUtil::replaceAll(strret,"%2B","+");
+	 return strret;*/
+	return dsts;
 }
 
 std::string CryptoHandler::urlEncode(const std::string& str)

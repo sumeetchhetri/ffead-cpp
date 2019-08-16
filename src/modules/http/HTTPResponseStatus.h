@@ -27,8 +27,8 @@
 #include "CastUtil.h"
 
 struct cicomp {
-    bool operator() (const std::string& lhs, const std::string& rhs) const {
-        return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+    bool operator() (std::string_view lhs, std::string_view rhs) const {
+        return strcasecmp(&lhs[0], &rhs[0]) < 0;
     }
 };
 

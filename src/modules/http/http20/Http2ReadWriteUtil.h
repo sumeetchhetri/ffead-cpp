@@ -13,8 +13,8 @@
 #include "Http11WebSocketDataFrame.h"
 
 class Http2RequestResponseData {
-	std::map<std::string, std::string, cicomp> preHeaders;
-	std::map<std::string, std::string, cicomp> postHeaders;
+	std::map<std::string_view, std::string_view, cicomp> preHeaders;
+	std::map<std::string_view, std::string_view, cicomp> postHeaders;
 	std::string data;
 	std::string url;
 	bool isWebSocket;

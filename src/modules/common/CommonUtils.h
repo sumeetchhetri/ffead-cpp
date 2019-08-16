@@ -43,8 +43,8 @@ class CommonUtils {
 	static CommonUtils* instance;
 	static std::string BLANK;
 	ThreadLocal contextName;
-	std::map<std::string, std::string> mimeTypes;
-	std::map<std::string, std::string> locales;
+	std::map<std::string_view, std::string_view> mimeTypes;
+	std::map<std::string_view, std::string_view> locales;
 	std::vector<std::string> appNames;
 	friend class ConfigurationHandler;
 	friend class CHServer;
@@ -68,8 +68,8 @@ public:
 	static std::string getAppName(const std::string& appName = "");
 	static void loadMimeTypes(const std::string& file);
 	static void loadLocales(const std::string& file);
-	static const std::string& getMimeType(const std::string& extension);
-	static const std::string& getLocale(const std::string& abbrev);
+	static const std::string& getMimeType(std::string_view extension);
+	static const std::string& getLocale(std::string_view abbrev);
 	static std::vector<std::string> getFiles(const std::string& cwd, const std::string& suffix, const bool& isAbs = true);
 	static void listFiles(std::vector<std::string>& files, const std::string& cwd, const std::string& suffix, const bool& isAbs = true);
 	static std::atomic<long long> tsPoll;

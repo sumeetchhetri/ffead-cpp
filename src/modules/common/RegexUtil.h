@@ -41,17 +41,17 @@ class RegexUtil {
 	static cuckoohash_map<std::string, regex_t*> patterns;
 	static bool cacheRegexes;
 	friend class ConfigurationHandler;
-	static bool isValidRegex(const std::string& pattern);
-	static regex_t* getRegex(const std::string& pattern, const bool& matchNewLine);
+	static bool isValidRegex(std::string_view pattern);
+	static regex_t* getRegex(std::string_view pattern, const bool& matchNewLine);
 public:
-	static std::vector<std::string> findWithGroups(const std::string& text, const std::string& pattern, const int& groupCount, const bool& matchNewLine= false);
-	static std::vector<std::string> findWithGroups(const std::string& text, const std::string& pattern, const bool& matchNewLine= false);
-	static std::vector<std::string> search(const std::string& text, const std::string& pattern, const bool& matchNewLine= false);
-	static void find(const std::string& text, const std::string& pattern, int &spos, int &epos, const bool& matchNewLine= false);
-	static bool matches(const std::string& text, const std::string& pattern, const bool& matchNewLine= false);
-	static int find(const std::string& text, const std::string& pattern, const bool& matchNewLine= false);
-	static std::string replaceCopy(const std::string& text, const std::string& pattern, const std::string& with, const bool& matchNewLine= false);
-	static bool replace(std::string& text, const std::string& pattern, const std::string& with, const bool& matchNewLine= false);
+	static std::vector<std::string> findWithGroups(std::string_view text, std::string_view pattern, const int& groupCount, const bool& matchNewLine= false);
+	static std::vector<std::string> findWithGroups(std::string_view text, std::string_view pattern, const bool& matchNewLine= false);
+	static std::vector<std::string> search(std::string_view text, std::string_view pattern, const bool& matchNewLine= false);
+	static void find(std::string_view text, std::string_view pattern, int &spos, int &epos, const bool& matchNewLine= false);
+	static bool matches(std::string_view text, std::string_view pattern, const bool& matchNewLine= false);
+	static int find(std::string_view text, std::string_view pattern, const bool& matchNewLine= false);
+	static std::string replaceCopy(std::string_view text, std::string_view pattern, std::string_view with, const bool& matchNewLine= false);
+	static bool replace(std::string& text, std::string_view pattern, std::string_view with, const bool& matchNewLine= false);
 	static void flushCache();
 };
 

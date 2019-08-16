@@ -58,10 +58,10 @@ std::string DateFormat::format(Date& date)
 	return std::string(buffer);
 }
 
-Date* DateFormat::parse(std::string strdate)
+Date* DateFormat::parse(std::string_view strdate)
 {
 	struct tm ti;
-	strptime(strdate.c_str(), formatspec.c_str(), &ti);
+	strptime(&strdate[0], formatspec.c_str(), &ti);
 	return new Date(&ti);
 	/*std::string temp = this->formatspec;
 	Date* date = NULL;

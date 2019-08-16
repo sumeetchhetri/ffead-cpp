@@ -104,7 +104,7 @@ void CommonUtils::loadMimeTypes(const std::string& file)
 	getInstance()->mimeTypes = pread.getProperties(file);
 }
 
-const std::string& CommonUtils::getMimeType(const std::string& extension)
+const std::string& CommonUtils::getMimeType(std::string_view extension)
 {
 	if(getInstance()->mimeTypes.find(extension)!=getInstance()->mimeTypes.end())
 	{
@@ -120,7 +120,7 @@ void CommonUtils::loadLocales(const std::string& file)
 	getInstance()->locales = pread.getProperties(file);
 }
 
-const std::string& CommonUtils::getLocale(const std::string& abbrev)
+const std::string& CommonUtils::getLocale(std::string_view abbrev)
 {
 	if(getInstance()->locales.find(abbrev)!=getInstance()->locales.end())
 	{

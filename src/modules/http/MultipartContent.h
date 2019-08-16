@@ -29,39 +29,40 @@
 #include <fstream>
 #include "ContentTypes.h"
 #include "HTTPResponseStatus.h"
+#include "string_view"
 
 
 class MultipartContent {
-	static std::string VALID_HEADERS;
-	std::map<std::string,std::string,cicomp> headers;
-	std::string content;
-	std::string tempFileName;
-	std::string fileName;
-	std::string name;
-	void setContent(const std::string& content);
-	void setName(const std::string& name);
-	void setTempFileName(const std::string& tempFileName);
-	std::string getTempFileName() const;
-	void setFileName(const std::string& fileName);
+	static std::string_view VALID_HEADERS;
+	std::map<std::string_view, std::string_view,cicomp> headers;
+	std::string_view content;
+	std::string_view tempFileName;
+	std::string_view fileName;
+	std::string_view name;
+	void setContent(const std::string_view& content);
+	void setName(const std::string_view& name);
+	void setTempFileName(const std::string_view& tempFileName);
+	std::string_view getTempFileName() const;
+	void setFileName(const std::string_view& fileName);
 	friend class HttpResponse;
 	friend class HttpRequest;
 	friend class ControllerHandler;
 	friend class ServiceTask;
-	void addHeader(std::string header, const std::string& value);
+	void addHeader(std::string_view header, const std::string_view& value);
 public:
-	static std::string ContentId,ContentDisposition,ContentTransferEncoding,
+	static std::string_view ContentId,ContentDisposition,ContentTransferEncoding,
 				  ContentLocation,ContentBase,ContentLength,ContentMD5,ContentType;
 	MultipartContent();
-	MultipartContent(const std::string& content);
-	MultipartContent(const std::vector<std::string>& headers, const std::string& content= "");
+	MultipartContent(const std::string_view& content);
+	MultipartContent(const std::vector<std::string_view>& headers, const std::string_view& content= "");
 	virtual ~MultipartContent();
-	void addHeaderValue(std::string header, const std::string& value);
-	std::string getContent() const;
-	std::string getFileName() const;
-	std::map<std::string, std::string,cicomp> getHeaders();
-	bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
-	std::string getHeader(const std::string&);
-	std::string getName() const;
+	void addHeaderValue(std::string_view header, const std::string_view& value);
+	std::string_view getContent() const;
+	std::string_view getFileName() const;
+	std::map<std::string_view, std::string_view,cicomp> getHeaders();
+	bool isHeaderValue(std::string_view header, const std::string_view& value, const bool& ignoreCase= true);
+	std::string_view getHeader(const std::string_view&);
+	std::string_view getName() const;
 	bool isAFile();
 	bool isValid();
 };

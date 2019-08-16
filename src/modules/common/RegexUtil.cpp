@@ -45,11 +45,11 @@ void RegexUtil::flushCache() {
 	}
 }
 
-bool RegexUtil::isValidRegex(const std::string& pattern) {
+bool RegexUtil::isValidRegex(std::string_view pattern) {
 	return getRegex(pattern, false)!=NULL;
 }
 
-regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLine) {
+regex_t* RegexUtil::getRegex(std::string_view pattern, const bool& matchNewLine) {
 	regex_t* regex = NULL;
 	bool found = false;
 	if(cacheRegexes) {
@@ -73,7 +73,7 @@ regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLin
 				regex = new regex_t;
 				nlpatterns.insert(pattern, regex);
 			}
-			int reti = regcomp(regex, pattern.c_str(), cflags);
+			int reti = regcomp(regex, &pattern[0], cflags);
 			if(reti!=0)
 			{
 				std::cout << ("Could not compile regex - "+pattern + " failed with error ") << reti << std::endl;
@@ -82,7 +82,7 @@ regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLin
 		else
 		{
 			regex = new regex_t;
-			int reti = regcomp(regex, pattern.c_str(), cflags);
+			int reti = regcomp(regex, &pattern[0], cflags);
 			if(reti!=0)
 			{
 				std::cout << ("Could not compile regex - "+pattern + " failed with error ") << reti << std::endl;
@@ -92,7 +92,7 @@ regex_t* RegexUtil::getRegex(const std::string& pattern, const bool& matchNewLin
 	return regex;
 }
 
-void RegexUtil::find(const std::string& text, const std::string& pattern, int &spos, int &epos, const bool& matchNewLine/* = false*/)
+void RegexUtil::find(std::string_view text, std::string_view pattern, int &spos, int &epos, const bool& matchNewLine/* = false*/)
 {
 	std::string ttext(text);
 	regex_t* regex = getRegex(pattern, matchNewLine);
@@ -112,7 +112,7 @@ void RegexUtil::find(const std::string& text, const std::string& pattern, int &s
 	}
 }
 
-bool RegexUtil::matches(const std::string& text, const std::string& pattern, const bool& matchNewLine/* = false*/)
+bool RegexUtil::matches(std::string_view text, std::string_view pattern, const bool& matchNewLine/* = false*/)
 {
 	std::string ttext(text);
 	regex_t* regex = getRegex(pattern, matchNewLine);
@@ -128,7 +128,7 @@ bool RegexUtil::matches(const std::string& text, const std::string& pattern, con
 	return false;
 }
 
-int RegexUtil::find(const std::string& text, const std::string& pattern, const bool& matchNewLine/* = false*/)
+int RegexUtil::find(std::string_view text, std::string_view pattern, const bool& matchNewLine/* = false*/)
 {
 	std::string ttext(text);
 	regex_t* regex = getRegex(pattern, matchNewLine);
@@ -146,7 +146,7 @@ int RegexUtil::find(const std::string& text, const std::string& pattern, const b
 	return -1;
 }
 
-std::vector<std::string> RegexUtil::search(const std::string& text, const std::string& pattern, const bool& matchNewLine/* = false*/) {
+std::vector<std::string> RegexUtil::search(std::string_view text, std::string_view pattern, const bool& matchNewLine/* = false*/) {
 	std::vector<std::string> vec;
 	std::string ttext(text);
 	regex_t* regex = getRegex(pattern, matchNewLine);
@@ -174,7 +174,7 @@ std::vector<std::string> RegexUtil::search(const std::string& text, const std::s
 	return vec;
 }
 
-std::string RegexUtil::replaceCopy(const std::string& text, const std::string& pattern, const std::string& with, const bool& matchNewLine/* = false*/) {
+std::string RegexUtil::replaceCopy(std::string_view text, std::string_view pattern, std::string_view with, const bool& matchNewLine/* = false*/) {
 	std::string ttext(text);
 	std::string rettxt;
 	regex_t* regex = getRegex(pattern, matchNewLine);
@@ -209,7 +209,7 @@ std::string RegexUtil::replaceCopy(const std::string& text, const std::string& p
 	return rettxt;
 }
 
-bool RegexUtil::replace(std::string& text, const std::string& pattern, const std::string& with, const bool& matchNewLine/* = false*/) {
+bool RegexUtil::replace(std::string& text, std::string_view pattern, std::string_view with, const bool& matchNewLine/* = false*/) {
 	std::string ttext(text);
 	std::string rettxt;
 	regex_t* regex = getRegex(pattern, matchNewLine);
@@ -243,7 +243,7 @@ bool RegexUtil::replace(std::string& text, const std::string& pattern, const std
 	return true;
 }
 
-std::vector<std::string> RegexUtil::findWithGroups(const std::string& text, const std::string& pattern, const bool& matchNewLine) {
+std::vector<std::string> RegexUtil::findWithGroups(std::string_view text, std::string_view pattern, const bool& matchNewLine) {
 	std::vector<std::string> data;
 	std::string ttext(text);
 	regex_t* regex = getRegex(pattern, matchNewLine);
@@ -263,7 +263,7 @@ std::vector<std::string> RegexUtil::findWithGroups(const std::string& text, cons
 	return data;
 }
 
-std::vector<std::string> RegexUtil::findWithGroups(const std::string& text, const std::string& pattern, const int& groupCount, const bool& matchNewLine /*= false*/) {
+std::vector<std::string> RegexUtil::findWithGroups(std::string_view text, std::string_view pattern, const int& groupCount, const bool& matchNewLine /*= false*/) {
 	std::vector<std::string> data;
 	std::string ttext(text);
 	regex_t* regex = getRegex(pattern, matchNewLine);

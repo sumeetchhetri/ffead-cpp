@@ -141,7 +141,7 @@ std::string StringUtil::replaceLastCopy(const std::string& str, const std::strin
 	return strn;
 }
 
-int StringUtil::countOccurrences(const std::string& input, const std::string& delimiter)
+int StringUtil::countOccurrences(std::string_view input, std::string_view delimiter)
 {
 	int counter = 0;
 	size_t index = 0;
@@ -170,6 +170,45 @@ void StringUtil::split(std::vector<std::string>& output, const std::string& inpu
 		}
 		output.swap(output1);
 	}
+}
+
+void StringUtil::split(std::vector<std::string_view>& output, std::string_view strv, std::string_view delims = " ")
+{
+    size_t first = 0;
+
+    while (first < strv.size())
+    {
+        const auto second = strv.find_first_of(delims, first);
+
+        if (first != second)
+            output.push_back(strv.substr(first, second-first));
+
+        if (second == std::string_view::npos)
+            break;
+
+        first = second + 1;
+    }
+}
+
+std::vector<std::string_view> StringUtil::split(std::string_view strv, std::string_view delims = " ")
+{
+    std::vector<std::string_view> output;
+    size_t first = 0;
+
+    while (first < strv.size())
+    {
+        const auto second = strv.find_first_of(delims, first);
+
+        if (first != second)
+            output.push_back(strv.substr(first, second-first));
+
+        if (second == std::string_view::npos)
+            break;
+
+        first = second + 1;
+    }
+
+    return output;
 }
 
 void StringUtil::trim(std::string& str)
@@ -279,14 +318,14 @@ std::string StringUtil::toOCTAL(const unsigned long long& number)
 	return hexstr;
 }
 
-long int StringUtil::fromHEX(std::string hexVal)
+long int StringUtil::fromHEX(std::string_view hexVal)
 {
 	if(hexVal.find("0x")==std::string::npos)
 	{
 		hexVal = "0x" + hexVal;
 	}
 	long int li;
-	li = strtol(hexVal.c_str(), NULL, 16);
+	li = strtol(&hexVal[0], NULL, 16);
 	return li;
 }
 

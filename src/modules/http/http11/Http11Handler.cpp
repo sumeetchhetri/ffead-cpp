@@ -16,71 +16,83 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	if(readFrom()) {
 		return NULL;
 	}
-	size_t ix = buffer.find("\r\n\r\n");
+	size_t ix = buffer.find(HttpResponse::HDR_FIN);
 	if(!isHeadersDone && ix!=std::string::npos)
 	{
 		request = new HttpRequest(webpath);
-		bytesToRead = 0;
-		std::string headers = buffer.substr(0, ix);
+		request->headerStr = buffer.substr(0, ix);
+		std::string_view headerStrV = request->headerStr;
 		buffer = buffer.substr(ix+4);
-		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, "\r\n");
-		request->buildRequest("httpline", lines.at(0));
+		size_t he = 0;
 		int hdrc = 0;
-		for (int var = 0; var < (int)lines.size(); ++var) {
-			size_t kind = std::string::npos;
-			std::string key, value;
-			if(var>0 && (kind = lines.at(var).find(":"))!=std::string::npos) {
-				if(lines.at(var).find(":")==lines.at(var).find(": ")) {
-					key = lines.at(var).substr(0, lines.at(var).find_first_of(": "));
-					value = lines.at(var).substr(lines.at(var).find_first_of(": ")+2);
+		while((he = headerStrV.find(HttpResponse::HDR_END, he))!=std::string::npos) {
+			std::string_view tv = headerStrV.substr(0, he);
+			if(request->method.length()==0) {
+				request->buildRequest("httpline", tv);
+			} else {
+				size_t hki = tv.find(HttpResponse::HDR_SEPT);
+				if(hki!=std::string::npos) {
+					request->buildRequest(tv.substr(0, hki), tv.find(HttpResponse::HDR_SEP)==std::string::npos?tv.substr(hki+1):tv.substr(hki+2));
+					if(hdrc++>maxReqHdrCnt) {
+						closeSocket();
+						delete request;
+						request = NULL;
+						m.unlock();
+						return NULL;
+					}
 				} else {
-					key = lines.at(var).substr(0, lines.at(var).find_first_of(":"));
-					value = lines.at(var).substr(lines.at(var).find_first_of(":")+1);
+					//TODO stop processing request some invalid http line
 				}
-				request->buildRequest(key, value);
-				if(hdrc++>maxReqHdrCnt) {
+			}
+			he += 2;
+		}
+		noBody = strcasestr(&request->method[0], "GET")!=NULL;
+		if(!noBody) {
+			std::string_view bytesstr = request->getHeader(HttpRequest::ContentLength);
+			if(bytesstr.length()>0) {
+				bytesToRead = CastUtil::lexical_cast<int>(bytesstr);
+				if((int)buffer.length()>=bytesToRead) {
+					request->content = buffer.substr(0, bytesToRead);
+					bytesToRead = 0;
+					buffer = buffer.substr(bytesToRead);
+					doneReq = true;
+				} else if(bytesToRead>maxEntitySize) {
 					closeSocket();
 					delete request;
 					request = NULL;
 					m.unlock();
 					return NULL;
+				} else if(bytesToRead==0) {
+					doneReq = true;
 				}
-			} else if(var!=0) {
-				//TODO stop processing request some invalid http line
-			}
-		}
-		std::string bytesstr = request->getHeader(HttpRequest::ContentLength);
-		if(bytesstr!="") {
-			bytesToRead = CastUtil::lexical_cast<int>(bytesstr);
-			if(bytesToRead>maxEntitySize) {
-				closeSocket();
-				delete request;
-				request = NULL;
-				m.unlock();
-				return NULL;
-			}
-		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find("\r\n")!=std::string::npos) {
-			bytesstr = buffer.substr(0, buffer.find("\r\n"));
-			buffer = buffer.substr(buffer.find("\r\n")+2);
-			if(bytesstr!="") {
-				isTeRequest = true;
-				bytesToRead = (int)StringUtil::fromHEX(bytesstr);
-				if(bytesToRead==0) {
-					isTeRequest = false;
-				} else if((int)buffer.length()>=bytesToRead) {
-					request->content = buffer.substr(0, bytesToRead);
-					buffer = buffer.substr(bytesToRead);
+			} else if(request->getHeader(HttpRequest::TransferEncoding).length()>0 && buffer.find(HttpResponse::HDR_SEP)!=std::string::npos) {
+				bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
+				buffer = buffer.substr(buffer.find(HttpResponse::HDR_END)+2);
+				if(bytesstr.length()>0) {
+					isTeRequest = true;
+					bytesToRead = (int)StringUtil::fromHEX(bytesstr);
+					if(bytesToRead==0) {
+						isTeRequest = false;
+						doneReq = true;
+					} else if((int)buffer.length()>=bytesToRead) {
+						request->content = buffer.substr(0, bytesToRead);
+						buffer = buffer.substr(bytesToRead);
+						bytesToRead = 0;
+						doneReq = true;
+					}
 				}
 			}
+		} else {
+			doneReq = true;
 		}
 		isHeadersDone = true;
 	}
-	if(request!=NULL && isHeadersDone)
+	if(!doneReq && isHeadersDone)
 	{
-		if(isTeRequest && bytesToRead==0 && buffer.find("\r\n")!=std::string::npos) {
-			std::string bytesstr = buffer.substr(0, buffer.find("\r\n"));
-			buffer = buffer.substr(buffer.find("\r\n")+2);
-			if(bytesstr!="") {
+		if(isTeRequest && bytesToRead==0 && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
+			std::string bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
+			buffer = buffer.substr(buffer.find(HttpResponse::HDR_END)+2);
+			if(bytesstr.length()>0) {
 				bytesToRead = (int)StringUtil::fromHEX(bytesstr);
 				if(bytesToRead==0) {
 					isTeRequest = false;
@@ -107,6 +119,9 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	{
 		reqPos = startRequest();
 		isHeadersDone = false;
+		doneReq = false;
+		bytesToRead = 0;
+		noBody = true;
 		void* temp = request;
 		request = NULL;
 		m.unlock();
@@ -126,6 +141,8 @@ int Http11Handler::getTimeout() {
 Http11Handler::Http11Handler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& webpath, const int& chunkSize,
 		const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) : SocketInterface(fd, ssl, io) {
 	isHeadersDone = false;
+	noBody = true;
+	doneReq = false;
 	bytesToRead = 0;
 	this->webpath = webpath;
 	this->chunkSize = chunkSize<=0?0:chunkSize;
@@ -175,9 +192,9 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context, std::stri
 		response->updateContent(request, chunkSize);
 	}
 
-	if(response->getHeader(HttpRequest::Connection)=="")
+	if(response->getHeader(HttpRequest::Connection).length()==0)
 	{
-		if(StringUtil::toLowerCopy(request->getHeader(HttpRequest::Connection))!="keep-alive"
+		if(strcasestr(&request->getHeader(HttpRequest::Connection)[0], "keep-alive")!=NULL
 				|| CastUtil::lexical_cast<int>(response->getStatusCode())>307 || request->getHttpVers()<1.1)
 		{
 			response->addHeader(HttpResponse::Connection, "close");
@@ -194,7 +211,7 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context, std::stri
 		data += response->generateResponse(request, false);
 		bool isFirst = true;
 		std::string d;
-		while(response->hasContent && (d = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
+		while(response->hasContent && (d = response->getRemainingContent(request->getUrl(), isFirst)).length()>0) {
 			isFirst = false;
 			data += d;
 		}

@@ -367,7 +367,7 @@ public:
 			throw ("Conversion exception - bool to " + tn);
 		}
 	}
-	template <typename T> static T lexical_cast(const std::string& vval)
+	template <typename T> static T lexical_cast(std::string_view vval)
 	{
 		T t;
 		void* vt;
@@ -397,7 +397,7 @@ public:
 				{
 					if(vval.find_first_not_of(".0")==std::string::npos) {
 					} else {
-						f = strtof(vval.c_str(), &endptr);
+						f = strtof(&vval[0], &endptr);
 						bool invalid = (f==0);
 						if(invalid)
 						{
@@ -409,7 +409,7 @@ public:
 				{
 					if(vval.find_first_not_of(".0", 1)==std::string::npos) {
 					} else {
-						f = strtof(vval.substr(1).c_str(), &endptr);
+						f = strtof(&vval[1], &endptr);
 						bool invalid = (f==0);
 						if(invalid)
 						{
@@ -420,7 +420,7 @@ public:
 			}
 			else
 			{
-				f = strtof(vval.c_str(), &endptr);
+				f = strtof(&vval[0], &endptr);
 				bool invalid = (f==0);
 				if(invalid)
 				{
@@ -442,7 +442,7 @@ public:
 				{
 					if(vval.find_first_not_of(".0")==std::string::npos) {
 					} else {
-						d = strtod(vval.c_str(), &endptr);
+						d = strtod(&vval[0], &endptr);
 						bool invalid = (d==0);
 						if(invalid)
 						{
@@ -454,7 +454,7 @@ public:
 				{
 					if(vval.find_first_not_of(".0", 1)==std::string::npos) {
 					} else {
-						d = strtod(vval.substr(1).c_str(), &endptr);
+						d = strtod(&vval[1], &endptr);
 						bool invalid = (d==0);
 						if(invalid)
 						{
@@ -465,7 +465,7 @@ public:
 			}
 			else
 			{
-				d = strtod(vval.c_str(), &endptr);
+				d = strtod(&vval[0], &endptr);
 				bool invalid = (d==0);
 				if(invalid)
 				{
@@ -477,7 +477,7 @@ public:
 		}
 		else if(tn=="long double")
 		{
-			if(sscanf(vval.c_str(), "%Lf", &ld)==1)
+			if(sscanf(&vval[0], "%Lf", &ld)==1)
 			{
 			}
 			else
@@ -496,7 +496,7 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					i = strtol(vval.c_str(), &endptr, 10);
+					i = strtol(&vval[0], &endptr, 10);
 					invalid = (i==0);
 				}
 				if(invalid)
@@ -528,7 +528,7 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					s = strtol(vval.c_str(), &endptr, 10);
+					s = strtol(&vval[0], &endptr, 10);
 					invalid = (s==0);
 				}
 				if(invalid)
@@ -548,7 +548,7 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					l = strtol(vval.c_str(), &endptr, 10);
+					l = strtol(&vval[0], &endptr, 10);
 					invalid = (l==0);
 				}
 				if(invalid)
@@ -568,7 +568,7 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					us = strtol(vval.c_str(), &endptr, 10);
+					us = strtol(&vval[0], &endptr, 10);
 					invalid = (us==0);
 				}
 				if(invalid)
@@ -588,7 +588,7 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					ui = strtol(vval.c_str(), &endptr, 10);
+					ui = strtol(&vval[0], &endptr, 10);
 					invalid = (ui==0);
 				}
 				if(invalid)
@@ -608,7 +608,7 @@ public:
 				bool invalid = false;
 				if(vval!="0")
 				{
-					ul = strtol(vval.c_str(), &endptr, 10);
+					ul = strtol(&vval[0], &endptr, 10);
 					invalid = (ul==0);
 				}
 				if(invalid)
@@ -621,7 +621,7 @@ public:
 		}
 		else if(tn=="long long")
 		{
-			if(sscanf(vval.c_str(), "%lld", &ll)==1)
+			if(sscanf(&vval[0], "%lld", &ll)==1)
 			{
 			}
 			else
@@ -633,7 +633,7 @@ public:
 		}
 		else if(tn=="unsigned long long")
 		{
-			if(sscanf(vval.c_str(), "%llu", &ull)==1)
+			if(sscanf(&vval[0], "%llu", &ull)==1)
 			{
 			}
 			else
@@ -645,9 +645,9 @@ public:
 		}
 		else if(tn=="bool")
 		{
-			if(StringUtil::toLowerCopy(vval)=="true" || StringUtil::toLowerCopy(vval)=="1")
+			if(strcasecmp(&vval[0], "true")==0 || strcasecmp(&vval[0], "1")==0)
 				b = true;
-			else if(StringUtil::toLowerCopy(vval)=="false" || StringUtil::toLowerCopy(vval)=="0")
+			else if(strcasecmp(&vval[0], "false")==0 || strcasecmp(&vval[0], "0")==0)
 				b = false;
 			else
 			{
@@ -658,7 +658,6 @@ public:
 		}
 		else if(tn==STD_STRING || tn=="string")
 		{
-			std::string str = vval;
 			if(vval.length()==0)return t;
 			void* d = new std::string(vval);
 			t = *(T*)d;

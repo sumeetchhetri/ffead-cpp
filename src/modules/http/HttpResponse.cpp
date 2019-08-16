@@ -22,50 +22,50 @@
 
 #include "HttpResponse.h"
 
-std::string HttpResponse::VALID_RESPONSE_HEADERS = ",access-control-allow-origin,access-control-allow-headers,access-control-allow-credentials,access-control-allow-methods,access-control-max-age,accept-ranges,age,allow,cache-control,connection,content-encoding,content-language,content-length,content-location,content-md5,content-disposition,content-range,content-type,date,etag,expires,last-modified,link,location,p3p,pragma,proxy-authenticate,refresh,retry-after,server,set-cookie,status,strict-transport-security,trailer,transfer-encoding,vary,via,warning,www-authenticate,";
-std::string HttpResponse::AccessControlAllowOrigin		 = "Access-Control-Allow-Origin";
-std::string HttpResponse::AccessControlAllowHeaders		 = "Access-Control-Allow-Headers";
-std::string HttpResponse::AccessControlAllowCredentials	 = "Access-Control-Allow-Credentials";
-std::string HttpResponse::AccessControlAllowMethods		 = "Access-Control-Allow-Methods";
-std::string HttpResponse::AccessControlMaxAge		 = "Access-Control-Max-Age";
-std::string HttpResponse::AcceptRanges			 = "Accept-Ranges";
-std::string HttpResponse::Age				 = "Age";
-std::string HttpResponse::Allow				 = "Allow";
-std::string HttpResponse::CacheControl			 = "Cache-Control";
-std::string HttpResponse::Connection				 = "Connection";
-std::string HttpResponse::ContentEncoding			 = "Content-Encoding";
-std::string HttpResponse::ContentLanguage			 = "Content-Language";
-std::string HttpResponse::ContentLength			 = "Content-Length";
-std::string HttpResponse::ContentLocation			 = "Content-Location";
-std::string HttpResponse::ContentMD5				 = "Content-MD5";
-std::string HttpResponse::ContentDisposition			 = "Content-Disposition";
-std::string HttpResponse::ContentRange			 = "Content-Range";
-std::string HttpResponse::ContentType			 = "Content-Type";
-std::string HttpResponse::DateHeader				 = "Date";
-std::string HttpResponse::ETag				 = "ETag";
-std::string HttpResponse::Expires				 = "Expires";
-std::string HttpResponse::LastModified			 = "Last-Modified";
-std::string HttpResponse::Link				 = "Link";
-std::string HttpResponse::Location				 = "Location";
-std::string HttpResponse::P3P				 = "P3P";
-std::string HttpResponse::Pragma				 = "Pragma";
-std::string HttpResponse::ProxyAuthenticate			 = "Proxy-Authenticate";
-std::string HttpResponse::Refresh				 = "Refresh";
-std::string HttpResponse::RetryAfter				 = "Retry-After";
-std::string HttpResponse::Server				 = "Server";
-std::string HttpResponse::SetCookie				 = "Set-Cookie";
-std::string HttpResponse::Status				 = "Status";
-std::string HttpResponse::StrictTransportSecurity		 = "Strict-Transport-Security";
-std::string HttpResponse::Trailer				 = "Trailer";
-std::string HttpResponse::TransferEncoding			 = "Transfer-Encoding";
-std::string HttpResponse::Vary				 = "Vary";
-std::string HttpResponse::Via				 = "Via";
-std::string HttpResponse::Warning				 = "Warning";
-std::string HttpResponse::WWWAuthenticate			 = "WWW-Authenticate";
-std::string HttpResponse::Upgrade = 			 "Upgrade";
-std::string HttpResponse::SecWebSocketAccept = "Sec-WebSocket-Accept";
-std::string HttpResponse::SecWebSocketVersion = "Sec-WebSocket-Version";
-std::string HttpResponse::AltSvc = "Alt-Svc";
+std::string_view HttpResponse::VALID_RESPONSE_HEADERS = ",access-control-allow-origin,access-control-allow-headers,access-control-allow-credentials,access-control-allow-methods,access-control-max-age,accept-ranges,age,allow,cache-control,connection,content-encoding,content-language,content-length,content-location,content-md5,content-disposition,content-range,content-type,date,etag,expires,last-modified,link,location,p3p,pragma,proxy-authenticate,refresh,retry-after,server,set-cookie,status,strict-transport-security,trailer,transfer-encoding,vary,via,warning,www-authenticate,";
+std::string_view HttpResponse::AccessControlAllowOrigin		 = "Access-Control-Allow-Origin";
+std::string_view HttpResponse::AccessControlAllowHeaders		 = "Access-Control-Allow-Headers";
+std::string_view HttpResponse::AccessControlAllowCredentials	 = "Access-Control-Allow-Credentials";
+std::string_view HttpResponse::AccessControlAllowMethods		 = "Access-Control-Allow-Methods";
+std::string_view HttpResponse::AccessControlMaxAge		 = "Access-Control-Max-Age";
+std::string_view HttpResponse::AcceptRanges			 = "Accept-Ranges";
+std::string_view HttpResponse::Age				 = "Age";
+std::string_view HttpResponse::Allow				 = "Allow";
+std::string_view HttpResponse::CacheControl			 = "Cache-Control";
+std::string_view HttpResponse::Connection				 = "Connection";
+std::string_view HttpResponse::ContentEncoding			 = "Content-Encoding";
+std::string_view HttpResponse::ContentLanguage			 = "Content-Language";
+std::string_view HttpResponse::ContentLength			 = "Content-Length";
+std::string_view HttpResponse::ContentLocation			 = "Content-Location";
+std::string_view HttpResponse::ContentMD5				 = "Content-MD5";
+std::string_view HttpResponse::ContentDisposition			 = "Content-Disposition";
+std::string_view HttpResponse::ContentRange			 = "Content-Range";
+std::string_view HttpResponse::ContentType			 = "Content-Type";
+std::string_view HttpResponse::DateHeader				 = "Date";
+std::string_view HttpResponse::ETag				 = "ETag";
+std::string_view HttpResponse::Expires				 = "Expires";
+std::string_view HttpResponse::LastModified			 = "Last-Modified";
+std::string_view HttpResponse::Link				 = "Link";
+std::string_view HttpResponse::Location				 = "Location";
+std::string_view HttpResponse::P3P				 = "P3P";
+std::string_view HttpResponse::Pragma				 = "Pragma";
+std::string_view HttpResponse::ProxyAuthenticate			 = "Proxy-Authenticate";
+std::string_view HttpResponse::Refresh				 = "Refresh";
+std::string_view HttpResponse::RetryAfter				 = "Retry-After";
+std::string_view HttpResponse::Server				 = "Server";
+std::string_view HttpResponse::SetCookie				 = "Set-Cookie";
+std::string_view HttpResponse::Status				 = "Status";
+std::string_view HttpResponse::StrictTransportSecurity		 = "Strict-Transport-Security";
+std::string_view HttpResponse::Trailer				 = "Trailer";
+std::string_view HttpResponse::TransferEncoding			 = "Transfer-Encoding";
+std::string_view HttpResponse::Vary				 = "Vary";
+std::string_view HttpResponse::Via				 = "Via";
+std::string_view HttpResponse::Warning				 = "Warning";
+std::string_view HttpResponse::WWWAuthenticate			 = "WWW-Authenticate";
+std::string_view HttpResponse::Upgrade = 			 "Upgrade";
+std::string_view HttpResponse::SecWebSocketAccept = "Sec-WebSocket-Accept";
+std::string_view HttpResponse::SecWebSocketVersion = "Sec-WebSocket-Version";
+std::string_view HttpResponse::AltSvc = "Alt-Svc";
 
 HttpResponse::HttpResponse() {
 	httpVersion = "HTTP/1.1";
@@ -83,7 +83,7 @@ HttpResponse::HttpResponse() {
 HttpResponse::~HttpResponse() {
 }
 
-std::string HttpResponse::generateResponse(const std::string& httpMethod, HttpRequest *req, const bool& appendHeaders /*= true*/)
+std::string_view HttpResponse::generateResponse(std::string_view httpMethod, HttpRequest *req, const bool& appendHeaders /*= true*/)
 {
 	if(httpMethod=="HEAD" && appendHeaders)
 	{
@@ -110,7 +110,7 @@ std::string HttpResponse::generateResponse(const std::string& httpMethod, HttpRe
 	}
 }
 
-std::string HttpResponse::generateResponse(HttpRequest *req, const bool& appendHeaders /*= true*/)
+std::string_view HttpResponse::generateResponse(HttpRequest *req, const bool& appendHeaders /*= true*/)
 {
 	if(req->getMethod()=="OPTIONS")
 	{
@@ -133,7 +133,7 @@ std::string HttpResponse::generateResponse(HttpRequest *req, const bool& appendH
 	}
 }
 
-std::string HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
+std::string_view HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
 {
 	if(appendHeaders)
 	{
@@ -146,14 +146,16 @@ std::string HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
 	}
 }
 
-const std::string HttpResponse::HDR_SRV = "Server: FFEAD 2.0\r\n";
-const std::string HttpResponse::HDR_SEP = ": ";
-const std::string HttpResponse::HDR_END = "\r\n";
+const std::string_view HttpResponse::HDR_SRV = "Server: FFEAD 2.0\r\n";
+const std::string_view HttpResponse::HDR_SEPT = ":";
+const std::string_view HttpResponse::HDR_SEP = ": ";
+const std::string_view HttpResponse::HDR_END = "\r\n";
+const std::string_view HttpResponse::HDR_FIN = "\r\n\r\n";
 
-std::string HttpResponse::generateHeadResponse()
+std::string_view HttpResponse::generateHeadResponse()
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
-	std::string resp, boundary;
+	std::string_view resp, boundary;
 	if(this->contentList.size()>0)
 	{
 		content.clear();
@@ -199,11 +201,11 @@ std::string HttpResponse::generateHeadResponse()
 	return resp;
 }
 
-const std::string HttpResponse::HDR_CORS_ALW = "Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE\r\n";
+const std::string_view HttpResponse::HDR_CORS_ALW = "Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE\r\n";
 
-std::string HttpResponse::generateOptionsResponse()
+std::string_view HttpResponse::generateOptionsResponse()
 {
-	std::string resp;
+	std::string_view resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + HDR_END);
 	resp += HDR_SRV;
 	RMap::iterator it;
@@ -220,9 +222,9 @@ std::string HttpResponse::generateOptionsResponse()
 	return resp;
 }
 
-std::string HttpResponse::generateTraceResponse(HttpRequest* req)
+std::string_view HttpResponse::generateTraceResponse(HttpRequest* req)
 {
-	std::string resp;
+	std::string_view resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + HDR_END);
 	resp += HDR_SRV;
 	RMap::iterator it;
@@ -249,7 +251,7 @@ std::string HttpResponse::generateTraceResponse(HttpRequest* req)
 }
 
 
-std::string HttpResponse::getHttpVersion() const
+std::string_view HttpResponse::getHttpVersion() const
 {
 	return httpVersion;
 }
@@ -267,32 +269,32 @@ void HttpResponse::setHTTPResponseStatus(const HTTPResponseStatus& status)
 	this->statusMsg = status.getMsg();
 }
 
-std::string HttpResponse::getStatusCode() const
+std::string_view HttpResponse::getStatusCode() const
 {
 	return statusCode;
 }
 
-void HttpResponse::setStatusCode(const std::string& statusCode)
+void HttpResponse::setStatusCode(std::string_view statusCode)
 {
 	this->statusCode = statusCode;
 }
 
-std::string HttpResponse::getStatusMsg() const
+std::string_view HttpResponse::getStatusMsg() const
 {
 	return statusMsg;
 }
 
-void HttpResponse::setStatusMsg(const std::string& statusMsg)
+void HttpResponse::setStatusMsg(std::string_view statusMsg)
 {
 	this->statusMsg = statusMsg;
 }
 
-std::string HttpResponse::getContent() const
+std::string_view HttpResponse::getContent() const
 {
 	return content;
 }
 
-void HttpResponse::setContent(const std::string& content)
+void HttpResponse::setContent(std::string_view content)
 {
 	this->content = content;
 	if(content!="") {
@@ -300,7 +302,7 @@ void HttpResponse::setContent(const std::string& content)
 	}
 }
 
-void HttpResponse::addCookie(const std::string& cookie)
+void HttpResponse::addCookie(std::string_view cookie)
 {
 	this->cookies.push_back(cookie);
 }
@@ -310,7 +312,7 @@ void HttpResponse::addContent(const MultipartContent& content)
 	contentList.push_back(content);
 }
 
-void HttpResponse::addHeader(std::string header, const std::string& value)
+void HttpResponse::addHeader(std::string_view header, std::string_view value)
 {
 	if(headers.find(header)!=headers.end()) {
 		headers[header] += "," + value;
@@ -319,7 +321,7 @@ void HttpResponse::addHeader(std::string header, const std::string& value)
 	}
 }
 
-void HttpResponse::addHeaderValue(std::string header, const std::string& value)
+void HttpResponse::addHeaderValue(std::string_view header, std::string_view value)
 {
 	if(header!="")
 	{
@@ -349,14 +351,13 @@ void HttpResponse::addHeaderValue(std::string header, const std::string& value)
 	}
 }
 
-bool HttpResponse::isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase)
+bool HttpResponse::isHeaderValue(std::string_view header, std::string_view value, const bool& ignoreCase)
 {
 	return header!="" && headers.find(header)!=headers.end()
-			&& (headers[header]==value ||
-					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
+			&& (headers[header]==value || (ignoreCase && strcasecmp(&headers[header][0], &value[0])==0));
 }
 
-std::string HttpResponse::getHeader(std::string header)
+std::string_view HttpResponse::getHeader(std::string_view header)
 {
 	if(header!="" && headers.find(header)!=headers.end())
 		return headers[header];
@@ -365,10 +366,10 @@ std::string HttpResponse::getHeader(std::string header)
 
 bool HttpResponse::isNonBinary()
 {
-	std::string contType = StringUtil::toLowerCopy(getHeader(ContentType));
-	return (contType.find("text")!=std::string::npos || contType.find("css")!=std::string::npos
-			|| contType.find("x-javascript")!=std::string::npos || contType.find("json")!=std::string::npos
-			|| contType.find("xml")!=std::string::npos || contType.find("html")!=std::string::npos);
+	std::string_view mimeType = getHeader(ContentType);
+	return (strcasestr(&mimeType[0], "text")!=NULL || strcasestr(&mimeType[0], "css")!=NULL
+			|| strcasestr(&mimeType[0], "x-javascript")!=NULL || strcasestr(&mimeType[0], "json")!=NULL
+			|| strcasestr(&mimeType[0], "xml")!=NULL || strcasestr(&mimeType[0], "html")!=NULL);
 }
 
 void HttpResponse::setCompressed(const bool& compressed)
@@ -385,7 +386,7 @@ const std::vector<std::string> HttpResponse::getCookies() const {
 	return cookies;
 }
 
-std::string HttpResponse::getStatusLine() const {
+std::string_view HttpResponse::getStatusLine() const {
 	return (httpVersion + " " + statusCode + " " + statusMsg);
 }
 
@@ -414,9 +415,9 @@ unsigned int HttpResponse::getContentSize(const char *fileName)
 	return siz;
 }
 
-std::string HttpResponse::getContent(const char *fileName, const int& start, const int& end)
+std::string_view HttpResponse::getContent(const char *fileName, const int& start, const int& end)
 {
-	std::string all;
+	std::string_view all;
 	if(fileName!=NULL)
 	{
 		std::ifstream myfile;
@@ -458,17 +459,17 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 	this->httpVersion = req->getHttpVersion();
 	this->httpVers = req->httpVers;
 
-	std::string ext = req->getExt();
+	std::string_view ext = req->getExt();
 
 	HttpResponse *res = this;
-	std::vector<std::string> rangesVec;
+	std::vector<std::string_view> rangesVec;
 	std::vector<std::vector<int> > rangeValuesLst = req->getRanges(rangesVec);
 
-	std::string fname = req->getUrl();
-	std::string locale = CommonUtils::getLocale(StringUtil::toLowerCopy(req->getDefaultLocale()));
-	std::string type = CommonUtils::getMimeType(ext);
+	std::string_view fname = req->getUrl();
+	std::string_view locale = CommonUtils::getLocale(req->getDefaultLocale());
+	std::string_view type = CommonUtils::getMimeType(ext);
 
-	std::string all;
+	std::string_view all;
 	if (fname=="/")
     {
 		res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
@@ -478,7 +479,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 	/*ifstream myfile;
     if(locale.find("english")==std::string::npos && (ext==".html" || ext==".htm"))
     {
-    	std::string tfname = fname;
+    	std::string_view tfname = fname;
     	StringUtil::replaceFirst(tfname, "." , ("_" + locale+"."));
     	std::ifstream gzipdfile(tfname.c_str(), std::ios::binary);
 		if(gzipdfile.good())
@@ -490,7 +491,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 
 	if(req->getMethod()=="HEAD")
 	{
-		res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(getContentSize(fname.c_str())));
+		res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(getContentSize(&fname[0])));
 		res->addHeader(HttpResponse::AcceptRanges, "bytes");
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
@@ -507,7 +508,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 		{
 			struct tm tim;
 			struct stat attrib;
-			if(stat(fname.c_str(), &attrib)!=0)
+			if(stat(&fname[0], &attrib)!=0)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 				return false;
@@ -520,7 +521,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 
 			bool isifmodsincvalid = false;
 
-			std::string ifmodsincehdr = req->getHeader(HttpRequest::IfModifiedSince);
+			std::string_view ifmodsincehdr = req->getHeader(HttpRequest::IfModifiedSince);
 
 			bool forceLoadFile = false;
 			if(ifmodsincehdr!="")
@@ -568,7 +569,8 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			if(isCEGzip)
 			{
 				bool gengzipfile = true;
-				std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".gz";
+				std::string ofname = std::string(req->getContextHome());
+				ofname += "/temp/" + req->getFile() + ".gz";
 				if(!forceLoadFile)
 				{
 					std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
@@ -580,7 +582,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 				}
 				if(gengzipfile)
 				{
-					CompressionUtil::gzipCompressFile((char*)fname.c_str(), false, (char*)ofname.c_str());
+					CompressionUtil::gzipCompressFile((char*)&fname[0], false, (char*)ofname.c_str());
 				}
 				fname = ofname;
 				res->setCompressed(true);
@@ -589,7 +591,8 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			else if(isCEDef)
 			{
 				bool genzlibfile = true;
-				std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".z";
+				std::string ofname = std::string(req->getContextHome());
+				ofname += "/temp/" + req->getFile() + ".z";
 				if(!forceLoadFile)
 				{
 					std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
@@ -601,7 +604,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 				}
 				if(genzlibfile)
 				{
-					CompressionUtil::zlibCompressFile((char*)fname.c_str(), false, (char*)ofname.c_str());
+					CompressionUtil::zlibCompressFile((char*)&fname[0], false, (char*)ofname.c_str());
 				}
 				fname = ofname;
 				res->setCompressed(true);
@@ -617,7 +620,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::PartialContent);
 				res->addHeader(HttpResponse::ContentType, "multipart/byteranges");
-				unsigned int totlen = getContentSize(fname.c_str());
+				unsigned int totlen = getContentSize(&fname[0]);
 				res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
 				for (int var = 0; var <(int)rangeValuesLst.size(); ++var) {
 					int start = rangeValuesLst.at(var).at(0);
@@ -634,7 +637,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 							end = totlen - 1;
 						else
 							end += 1;
-						std::string cont = getContent(fname.c_str(), start, end);
+						std::string_view cont = getContent(&fname[0], start, end);
 						MultipartContent conte(cont);
 						conte.addHeader(MultipartContent::ContentType, type);
 						conte.addHeader(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<std::string>(totlen));
@@ -655,7 +658,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			}
 		}
 
-		unsigned int totlen = getContentSize(fname.c_str());
+		unsigned int totlen = getContentSize(&fname[0]);
 		if(techunkSiz>0 && techunkSiz<totlen)
 		{
 			res->techunkSiz = techunkSiz;
@@ -671,7 +674,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 		}
 		else
 		{
-			res->content = getContent(fname.c_str());
+			res->content = getContent(&fname[0]);
 			res->addHeader(ContentLength, CastUtil::lexical_cast<std::string>((int)res->content.length()));
 		}
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
@@ -681,10 +684,10 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 	return hasContent;
 }
 
-std::string HttpResponse::getRemainingContent(const std::string& fname, const bool& isFirst) {
-	std::string rem;
+std::string_view HttpResponse::getRemainingContent(std::string_view fname, const bool& isFirst) {
+	std::string_view rem;
 	if(isContentRemains() && httpVers>=1.1) {
-		unsigned int totlen = getContentSize(fname.c_str());
+		unsigned int totlen = getContentSize(&fname[0]);
 		unsigned int len = totlen - techunkSiz*tecurrpart;
 		if((int)len>techunkSiz)
 		{
@@ -693,7 +696,7 @@ std::string HttpResponse::getRemainingContent(const std::string& fname, const bo
 		if(httpVers<2.0)
 		{
 			rem = StringUtil::toHEX(len) + "\r\n";
-			rem += getContent(fname.c_str(), techunkSiz*tecurrpart, len);
+			rem += getContent(&fname[0], techunkSiz*tecurrpart, len);
 			rem += "\r\n";
 			if(tecurrpart+1==teparts) {
 				rem += "0\r\n\r\n";
@@ -701,7 +704,7 @@ std::string HttpResponse::getRemainingContent(const std::string& fname, const bo
 		}
 		else
 		{
-			rem = getContent(fname.c_str(), techunkSiz*tecurrpart, len);
+			rem = getContent(&fname[0], techunkSiz*tecurrpart, len);
 		}
 		tecurrpart++;
 	} else if(isFirst || (httpVers>=1.0 && httpVers<1.1)) {
@@ -714,8 +717,8 @@ bool HttpResponse::isContentRemains() {
 	return teparts>0 && tecurrpart<teparts;
 }
 
-std::string HttpResponse::toPluginString() {
-	std::string text = (this->statusCode + "\n");
+std::string_view HttpResponse::toPluginString() {
+	std::string_view text = (this->statusCode + "\n");
 	text += (this->statusMsg + "\n");
 	text += (CastUtil::lexical_cast<std::string>(this->httpVersion) + "\n");
 	text += (this->outFileName + "\n");
@@ -784,7 +787,7 @@ void HttpResponse::setDone(const bool& done) {
 	this->done = done;
 }
 
-std::string HttpResponse::getFileExtension(const std::string& file)
+std::string_view HttpResponse::getFileExtension(std::string_view file)
 {
 	if(file.find_last_of(".")!=std::string::npos)return file.substr(file.find_last_of("."));
 	return file;
