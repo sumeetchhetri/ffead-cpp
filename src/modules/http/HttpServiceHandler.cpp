@@ -115,7 +115,7 @@ void HttpServiceTask::run() {
 		HttpResponse* res = new HttpResponse();
 		resp = res;
 
-		std::string mimeType = CommonUtils::getMimeType(req->ext);
+		std::string_view mimeType = CommonUtils::getMimeType(req->ext);
 		std::string cntEncoding = service->cntEncoding;
 		if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
 			res->addHeader(HttpResponse::ContentEncoding, cntEncoding);
@@ -137,8 +137,8 @@ void HttpServiceTask::run() {
 					|| req->hasHeaderValuePart(HttpRequest::SecWebSocketVersion, "8", false)
 					|| req->hasHeaderValuePart(HttpRequest::SecWebSocketVersion, "13", false)))
 			{
-				std::string seckey = req->getHeader(HttpRequest::SecWebSocketKey);
-				std::string servseckey = seckey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+				std::string_view seckey = req->getHeader(HttpRequest::SecWebSocketKey);
+				std::string servseckey = std::string(seckey) + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 				servseckey = CryptoHandler::sha1(servseckey);
 				servseckey = CryptoHandler::base64encodeStr(servseckey);
 
@@ -158,7 +158,7 @@ void HttpServiceTask::run() {
 			else if(req->hasHeaderValuePart(HttpRequest::Connection, "HTTP2-Settings", false)
 					&& req->isHeaderValue(HttpRequest::Upgrade, "h2c", false))
 			{
-				std::string http2settings = req->getHeader(HttpRequest::Http2Settings);
+				std::string http2settings = std::string(req->getHeader(HttpRequest::Http2Settings));
 				http2settings = CryptoHandler::base64decodeStr(http2settings);
 
 				res->addHeader(HttpResponse::Upgrade, "h2c");

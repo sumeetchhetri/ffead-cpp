@@ -29,7 +29,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 	wsUrl += req->getCurl();
 	logger << ("WsUrl is " + wsUrl) << std::endl;
 
-	std::string xmlcnttype = CommonUtils::getMimeType(".xml");
+	std::string_view xmlcnttype = CommonUtils::getMimeType(".xml");
 	std::string meth,env;
 	Element* soapenv = NULL;
 	//logger.info("request => "+req->getContent());

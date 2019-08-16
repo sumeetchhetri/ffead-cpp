@@ -73,7 +73,7 @@ public:
 	Http2Handler(const SOCKET& fd, SSL* ssl, BIO* io, const bool& isServer, const std::string& webpath, const std::string& settingsFrameData);
 	virtual ~Http2Handler();
 	const std::string& getWebpath() const;
-	std::string getMimeType(const std::string& ext);
+	std::string_view getMimeType(const std::string& ext);
 };
 
 #endif /* HTTP2HANDLER_H_ */

@@ -8,7 +8,7 @@
 #include "CommonUtils.h"
 
 CommonUtils* CommonUtils::instance = NULL;
-std::string_view CommonUtils::BLANK = "";
+std::string_view CommonUtils::BLANK = {""};
 std::atomic<long long> CommonUtils::tsPoll = 0;
 std::atomic<long long> CommonUtils::tsPoll1 = 0;
 std::atomic<long long> CommonUtils::tsProcess = 0;
@@ -108,7 +108,7 @@ void CommonUtils::loadMimeTypes(const std::string& file)
 	}
 }
 
-const std::string& CommonUtils::getMimeType(std::string_view extension)
+std::string_view CommonUtils::getMimeType(std::string_view extension)
 {
 	if(getInstance()->mimeTypes.find(extension)!=getInstance()->mimeTypes.end())
 	{

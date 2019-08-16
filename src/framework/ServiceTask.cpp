@@ -212,7 +212,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 
 	std::string url = req->getUrl();
 	std::string_view locale = CommonUtils::getLocale(req->getDefaultLocale());
-	std::string type = CommonUtils::getMimeType(ext);
+	std::string_view type = CommonUtils::getMimeType(ext);
 
 	std::string all;
     std::string fname = url;

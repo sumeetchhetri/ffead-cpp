@@ -95,7 +95,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 					return false;
 				}
 			} else if(headerf->getHeader().isEndHeaders()) {
-				std::map<std::string, std::string, cicomp> wshdrs = context->decode(headerf->headerBlockFragment);
+				std::map<std::string_view, std::string_view, cicomp> wshdrs = context->decode(headerf->headerBlockFragment);
 				if(wshdrs.find(":opcode")!=wshdrs.end()) {
 					try {
 						wsrequest->dataType = CastUtil::lexical_cast<short>(wshdrs[":opcode"]);
@@ -160,7 +160,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 					requestObj = getRequestAndReInit();
 				}
 			} else if(contf->getHeader().isEndHeaders()) {
-				std::map<std::string, std::string, cicomp> wshdrs = context->decode(contf->headerBlockFragment);
+				std::map<std::string_view, std::string_view, cicomp> wshdrs = context->decode(contf->headerBlockFragment);
 				if(wshdrs.find(":opcode")!=wshdrs.end()) {
 					try {
 						wsrequest->dataType = CastUtil::lexical_cast<short>(wshdrs[":opcode"]);
@@ -346,7 +346,7 @@ void* Http2StreamHandler::handleWebSocketRequest(Http2HPACKContext* context, Htt
 {
 	if(settings.find(Http2SettingsFrame::SETTINGS_WEBSOCKET_CAPABLE)!=settings.end() && isWebSocketRequest())
 	{
-		std::map<std::string, std::string, cicomp> wsheaders;
+		std::map<std::string_view, std::string_view, cicomp> wsheaders;
 		wsheaders[":status"] = "101";
 		wsheaders["sec-websocket-protocol"] = "13";
 		Http2HeadersFrame hframe;
@@ -364,7 +364,7 @@ void Http2StreamHandler::sendPushPromiseFrames(Http2HPACKContext* context, Http2
 {
 	if(!isWebSocket && (settings.find(Http2SettingsFrame::SETTINGS_ENABLE_PUSH)==settings.end()
 			|| settings[Http2SettingsFrame::SETTINGS_ENABLE_PUSH]!=0)) {
-		std::vector<std::string> relEntities = handler->getRelatedEntitiesForPP(request->getHeader(":path"));
+		std::vector<std::string> relEntities = handler->getRelatedEntitiesForPP(std::string(request->getHeader(":path")));
 		if(relEntities.size()>0) {
 			for (int var = 0; var < (int)relEntities.size(); ++var) {
 				Http2PushPromiseFrame ppframe;

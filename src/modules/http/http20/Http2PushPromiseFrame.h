@@ -18,7 +18,7 @@ class Http2PushPromiseFrame : public Http2Frame {
 	Http2PushPromiseFrame(std::string data, Http2FrameHeader& aheader);
 	friend class Http2Handler;
 	friend class Http2StreamHandler;
-	std::map<std::string, std::string, cicomp> headers;
+	std::map<std::string_view, std::string_view, cicomp> headers;
 public:
 	Http2PushPromiseFrame();
 	virtual ~Http2PushPromiseFrame();

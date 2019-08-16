@@ -556,7 +556,7 @@ void Http2Handler::updateMaxFrameSize(const uint32_t& val) {
 	maxDataFrameSize = val;
 }
 
-std::string Http2Handler::getMimeType(const std::string& ext) {
+std::string_view Http2Handler::getMimeType(const std::string& ext) {
 	return CommonUtils::getMimeType(ext);
 }
 
