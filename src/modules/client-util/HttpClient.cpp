@@ -46,21 +46,20 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 
 	std::string _t;
 	for (RMap::const_iterator it = request->headers.begin(); it != request->headers.end(); ++it) {
-		_t = it->first + ": " + it->second;
+		_t = std::string(it->first) + ": " + std::string(it->second);
 		headerList = curl_slist_append(headerList, _t.c_str());
 	}
 	curl_easy_setopt(_h, CURLOPT_HTTPHEADER, headerList);
 
 	if(request->authMethod.length()>0 && request->userName.length() > 0) {
-		StringUtil::toLower(request->authMethod);
-		std::string _t = request->userName + ":" + request->password;
-		if(request->authMethod=="none") {
+		std::string _t = std::string(request->userName) + ":" + std::string(request->password);
+		if(strcasecmp(&request->authMethod[0], "none")==0) {
 			curl_easy_setopt(_h, CURLOPT_HTTPAUTH, CURLAUTH_NONE);
-		} else if(request->authMethod=="basic") {
+		} else if(strcasecmp(&request->authMethod[0], "basic")==0) {
 			curl_easy_setopt(_h, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		} else if(request->authMethod=="digest") {
+		} else if(strcasecmp(&request->authMethod[0], "digest")==0) {
 			curl_easy_setopt(_h, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
-		} else if(request->authMethod=="negotiate") {
+		} else if(strcasecmp(&request->authMethod[0], "negotiate")==0) {
 #ifdef CURLAUTH_NEGOTIATE
 			curl_easy_setopt(_h, CURLOPT_HTTPAUTH, CURLAUTH_NEGOTIATE);
 #else
@@ -71,7 +70,7 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 	}
 
 	if(request->headers.find(HttpRequest::UserAgent)!=request->headers.end()) {
-		curl_easy_setopt(_h, CURLOPT_USERAGENT, request->headers[HttpRequest::UserAgent].c_str());
+		curl_easy_setopt(_h, CURLOPT_USERAGENT, &request->headers[HttpRequest::UserAgent][0]);
 	} else {
 		curl_easy_setopt(_h, CURLOPT_USERAGENT, "ffead-cpp client v2.0");
 	}

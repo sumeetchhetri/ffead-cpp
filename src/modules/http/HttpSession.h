@@ -29,7 +29,7 @@
 #include "HTTPResponseStatus.h"
 
 
-typedef std::map<std::string, std::string, cicomp> Map;
+typedef std::map<std::string_view, std::string_view, cicomp> Map;
 
 class HttpSession {
 	std::string sessionId;

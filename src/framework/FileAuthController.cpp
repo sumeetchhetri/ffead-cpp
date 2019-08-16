@@ -13,7 +13,6 @@ FileAuthController::FileAuthController(const std::string& filename, const std::s
 }
 
 FileAuthController::~FileAuthController() {
-	// TODO Auto-generated destructor stub
 }
 
 std::string FileAuthController::treat_password(const std::string& password)
@@ -29,9 +28,9 @@ bool FileAuthController::isInitialized()
 	return fl;
 }
 
-bool FileAuthController::authenticate(const std::string& username, const std::string& password)
+bool FileAuthController::authenticate(std::string_view username, std::string_view password)
 {
-	std::string userstamp = (username + delimiter + treat_password(password));
+	std::string userstamp = (std::string(username) + delimiter + std::string(password));
 	std::ifstream ifs(this->filename.c_str());
 	if(ifs.is_open())
 	{
@@ -73,7 +72,7 @@ bool FileAuthController::getPassword(const std::string& username, std::string &p
 	return passwdf;
 }
 
-std::string FileAuthController::getUserRole(const std::string& username)
+std::string FileAuthController::getUserRole(std::string_view username)
 {
 	//bool passwdf = false;
 	std::ifstream ifs(this->filename.c_str());

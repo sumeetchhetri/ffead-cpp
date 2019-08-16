@@ -137,7 +137,7 @@ public:
 	static std::string toOCTAL(const unsigned long long&);
 	static long int fromHEX(std::string_view hexVal);
 	static bool startsWith(const std::string& str, const std::string& prefix);
-	static bool endsWith(const std::string& str, const std::string& suffix);
+	static bool endsWith(std::string_view str, std::string_view suffix);
 };
 
 #endif /* STRINGUTIL_H_ */

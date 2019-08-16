@@ -31,8 +31,8 @@ class AuthController {
 public:
 	AuthController();
 	virtual ~AuthController();
-	virtual bool authenticate(const std::string& user, const std::string& password)=0;
-	virtual std::string getUserRole(const std::string& username)=0;
+	virtual bool authenticate(std::string_view username, std::string_view password)=0;
+	virtual std::string getUserRole(std::string_view username)=0;
 	virtual bool isInitialized()=0;
 };
 

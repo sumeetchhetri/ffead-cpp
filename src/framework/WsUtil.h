@@ -28,7 +28,7 @@
 #include "AfcUtil.h"
 #include "LoggerFactory.h"
 #include "ConfigurationData.h"
-
+#include "PropFileReader.h"
 
 class WsUtil {
 	Logger logger;

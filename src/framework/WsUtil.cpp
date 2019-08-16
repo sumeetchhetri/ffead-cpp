@@ -27,7 +27,6 @@ WsUtil::WsUtil() {
 }
 
 WsUtil::~WsUtil() {
-	// TODO Auto-generated destructor stub
 }
 
 std::string WsUtil::generateAllWSDL(const std::vector<WsDetails>& wsdvec, const std::string& resp, Reflection& ref, std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps)

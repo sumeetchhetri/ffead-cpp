@@ -113,8 +113,8 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 
 	if(sessionchanged)
 	{
-		std::map<std::string,std::string, cicomp> vals = req->getSession()->getSessionAttributes();
-		std::string prevcookid = req->getCookieInfoAttribute("FFEADID");
+		Map vals = req->getSession()->getSessionAttributes();
+		std::string_view prevcookid = req->getCookieInfoAttribute("FFEADID");
 
 		std::string values;
 		//logger << "session object modified " << vals.size() << std::endl;
@@ -207,11 +207,11 @@ std::string ServiceTask::getFileContents(const char *fileName, const int& start,
 
 void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::string& ext, const int& techunkSiz)
 {
-	std::vector<std::string> rangesVec;
+	std::vector<std::string_view> rangesVec;
 	std::vector<std::vector<int> > rangeValuesLst = req->getRanges(rangesVec);
 
 	std::string url = req->getUrl();
-	std::string locale = CommonUtils::getLocale(StringUtil::toLowerCopy(req->getDefaultLocale()));
+	std::string_view locale = CommonUtils::getLocale(req->getDefaultLocale());
 	std::string type = CommonUtils::getMimeType(ext);
 
 	std::string all;
@@ -226,7 +226,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
     if(locale.find("english")==std::string::npos && (ext==".html" || ext==".htm"))
     {
     	std::string tfname = fname;
-    	StringUtil::replaceFirst(tfname, "." , ("_" + locale+"."));
+    	StringUtil::replaceFirst(tfname, "." , ("_" + std::string(locale)+"."));
     	std::ifstream gzipdfile(tfname.c_str(), std::ios::binary);
 		if(gzipdfile.good())
 		{
@@ -271,7 +271,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 
 		bool isifmodsincvalid = false;
 
-		std::string ifmodsincehdr = req->getHeader(HttpRequest::IfModifiedSince);
+		std::string_view ifmodsincehdr = req->getHeader(HttpRequest::IfModifiedSince);
 
 		bool forceLoadFile = false;
 		if(ifmodsincehdr!="")
@@ -287,20 +287,20 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 
 			if(ifmodsince!=NULL)
 			{
-				logger << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
-				logger << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
-				logger << "Date Comparisons = " +CastUtil::lexical_cast<std::string>(*ifmodsince>=filemodifieddate)  << std::endl;
+				//logger << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
+				//logger << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
+				//logger << "Date Comparisons = " +CastUtil::lexical_cast<std::string>(*ifmodsince>=filemodifieddate)  << std::endl;
 
 				if(isifmodsincvalid && *ifmodsince>=filemodifieddate)
 				{
 					res->addHeader(HttpResponse::LastModified, ifmodsincehdr);
-					logger << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
+					//logger << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
 					return;
 				}
 				else if(isifmodsincvalid && *ifmodsince<filemodifieddate)
 				{
-					logger << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
+					//logger << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 					forceLoadFile = true;
 				}
 				delete ifmodsince;
@@ -312,7 +312,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 		if(res->isHeaderValue(HttpResponse::ContentEncoding, "gzip"))
 		{
 			bool gengzipfile = true;
-			std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".gz";
+			std::string ofname = std::string(req->getContextHome()) + "/temp/" + req->getFile() + ".gz";
 			if(!forceLoadFile)
 			{
 				std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
@@ -333,7 +333,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 		else if(res->isHeaderValue(HttpResponse::ContentEncoding, "deflate"))
 		{
 			bool genzlibfile = true;
-			std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".z";
+			std::string ofname = std::string(req->getContextHome()) + "/temp/" + req->getFile() + ".z";
 			if(!forceLoadFile)
 			{
 				std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
@@ -383,7 +383,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 					std::string cont = getFileContents(fname.c_str(), start, end);
 					MultipartContent conte(cont);
 					conte.addHeader(MultipartContent::ContentType, type);
-					conte.addHeader(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<std::string>(totlen));
+					conte.addHeader(HttpResponse::ContentRange, "bytes "+std::string(rangesVec.at(var))+"/"+CastUtil::lexical_cast<std::string>(totlen));
 					res->addContent(conte);
 				}
 			}
@@ -722,7 +722,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 #endif
 					if(!cntrlit)
 					{
-						std::string pubUrlPath = req->getCntxt_root() + "/public/";
+						std::string pubUrlPath = std::string(req->getCntxt_root()) + "/public/";
 						if(req->getUrl().find(pubUrlPath)!=0) {
 							std::string post = "";
 							if(req->getUrl()!=req->getCntxt_root()) {

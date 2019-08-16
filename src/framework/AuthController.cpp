@@ -23,8 +23,6 @@
 #include "AuthController.h"
 
 AuthController::AuthController() {
-	// TODO Auto-generated constructor stub
-
 }
 
 AuthController::~AuthController() {

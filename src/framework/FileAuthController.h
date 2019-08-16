@@ -18,10 +18,10 @@ public:
 	std::string treat_password(const std::string&);
 	FileAuthController(const std::string&, const std::string&);
 	virtual ~FileAuthController();
-	bool authenticate(const std::string&, const std::string&);
+	bool authenticate(std::string_view username, std::string_view password);
 	bool isInitialized();
 	bool getPassword(const std::string& username, std::string &passwd);
-	std::string getUserRole(const std::string&);
+	std::string getUserRole(std::string_view username);
 	std::string get(const std::string& username, const int& pos);
 };
 

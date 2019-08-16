@@ -25,6 +25,7 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include "HTTPResponseStatus.h"
+#include "PropFileReader.h"
 
 
 class CorsConfig {
@@ -43,12 +44,12 @@ class CorsConfig {
 	friend class ConfigurationHandler;
 public:
 	CorsConfig();
-	CorsConfig(const std::string& allwdOrigins, const std::string& allwdMethods, const std::string& allwdHeaders,
-			const std::string& exposedHeaders, const bool& allwdCredentials, const long& maxAge);
+	CorsConfig(std::string_view allwdOrigins, std::string_view allwdMethods, std::string_view allwdHeaders,
+			std::string_view exposedHeaders, const bool& allwdCredentials, const long& maxAge);
 	virtual ~CorsConfig();
-	bool isOriginAllowed(const std::string& reqOrgLst);
-	bool isMethodAllowed(const std::string& method);
-	bool isHeaderAllowed(const strVec& reqHdrLst, std::string& erheadr);
+	bool isOriginAllowed(std::string_view reqOrgLst);
+	bool isMethodAllowed(std::string_view method);
+	bool isHeaderAllowed(const strvVec& reqHdrLst, std::string& erheadr);
 };
 
 class CORSHandler {

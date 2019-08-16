@@ -44,7 +44,7 @@ bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse 
 					throw status;
 				}
 
-				strVec reqHdrLst = req->parseHeaderValue(req->getHeader(HttpResponse::AccessControlAllowHeaders));
+				strvVec reqHdrLst = req->parseHeaderValue(req->getHeader(HttpResponse::AccessControlAllowHeaders));
 
 				if(!corsConfig.isMethodAllowed(req->getHeader(HttpResponse::AccessControlAllowMethods)))
 				{
@@ -122,7 +122,7 @@ CorsConfig::CorsConfig() {
 	maxAge = -1;
 }
 
-CorsConfig::CorsConfig(const std::string& allwdOrigins, const std::string& allwdMethods, const std::string& allwdHeaders, const std::string& exposedHeaders, const bool& allwdCredentials, const long& maxAge)
+CorsConfig::CorsConfig(std::string_view allwdOrigins, std::string_view allwdMethods, std::string_view allwdHeaders, std::string_view exposedHeaders, const bool& allwdCredentials, const long& maxAge)
 {
 	this->allwdOrigins = allwdOrigins;
 	this->allwdMethods = allwdMethods;
@@ -167,35 +167,35 @@ void CorsConfig::init()
 	}
 }
 
-bool CorsConfig::isOriginAllowed(const std::string& reqOrgLst)
+bool CorsConfig::isOriginAllowed(std::string_view reqOrgLst)
 {
 	if(allwdOrigins=="*")
 	{
 		return true;
 	}
 	for (int var1 = 0; var1 < (int)allwdOriginsv.size(); ++var1) {
-		if(allwdOriginsv.at(var1)==StringUtil::toLowerCopy(reqOrgLst))
+		if(strcasecmp(allwdOriginsv.at(var1).c_str(), &reqOrgLst[0])==0)
 		{
 			return true;
 		}
 	}
 	return false;
 }
-bool CorsConfig::isMethodAllowed(const std::string& method)
+bool CorsConfig::isMethodAllowed(std::string_view method)
 {
 	if(method=="")
 	{
 		return false;
 	}
 	for (int var = 0; var < (int)allwdMethodsv.size(); ++var) {
-		if(StringUtil::toLowerCopy(method)==allwdMethodsv.at(var))
+		if(strcasecmp(allwdMethodsv.at(var).c_str(), &method[0])==0)
 		{
 			return true;
 		}
 	}
 	return false;
 }
-bool CorsConfig::isHeaderAllowed(const strVec& reqHdrLst, std::string& erheadr)
+bool CorsConfig::isHeaderAllowed(const strvVec& reqHdrLst, std::string& erheadr)
 {
 	if(allwdHeaders=="*")
 	{
@@ -203,12 +203,12 @@ bool CorsConfig::isHeaderAllowed(const strVec& reqHdrLst, std::string& erheadr)
 	}
 	for (int var = 0; var < (int)reqHdrLst.size(); ++var) {
 		for (int var1 = 0; var1 < (int)allwdHeadersv.size(); ++var1) {
-			if(allwdHeadersv.at(var1)==StringUtil::toLowerCopy(reqHdrLst.at(var)))
+			if(strcasecmp(allwdHeadersv.at(var).c_str(), &reqHdrLst.at(var)[0])==0)
 			{
 				return true;
 			}
 		}
-		erheadr = StringUtil::toUpperCopy(reqHdrLst.at(var));
+		erheadr = std::string(reqHdrLst.at(var));
 		break;
 	}
 	return false;

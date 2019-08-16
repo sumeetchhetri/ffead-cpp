@@ -147,7 +147,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		bool flag = false;
 		int prsiz = 0;
 		std::map<std::string, std::string> mapOfValues;
-		std::string rkey = req->getMethod()+req->getCurl();
+		std::string rkey = std::string(req->getMethod())+req->getCurl();
 		if(rstCntMap.find(rkey)!=rstCntMap.end()) {
 			rft = rstCntMap[rkey][0];
 			flag = true;
@@ -414,7 +414,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							if(mcont.isValid() && mcont.isAFile())
 							{
 								std::ifstream* ifs = new std::ifstream;
-								ifs->open(mcont.getTempFileName().c_str());
+								ifs->open(&mcont.getTempFileName()[0]);
 								valus.push_back(ifs);
 								allStreams.push_back(ifs);
 							}
@@ -480,7 +480,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 									if(mcont.isValid() && mcont.isAFile())
 									{
 										std::ifstream* ifs = new std::ifstream;
-										ifs->open(mcont.getTempFileName().c_str());
+										ifs->open(&mcont.getTempFileName()[0]);
 										vifs->push_back(ifs);
 										//allStreams.push_back(ifs);
 									}

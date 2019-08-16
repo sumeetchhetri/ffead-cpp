@@ -44,7 +44,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 
 		//logger << "Inside Ajax Interface Execute" << std::endl;
 		strVec vemp;
-		std::string methName = req->getRequestParam("method");
+		std::string methName = std::string(req->getRequestParam("method"));
 		if(methName=="")
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
@@ -53,12 +53,12 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 		}
 		else
 		{
-			std::string temp = req->getRequestParam("paramsize");
+			std::string_view temp = req->getRequestParam("paramsize");
 			int paramSize = 0;
 			if(temp!="")
 			{
 				try {
-					paramSize = CastUtil::lexical_cast<int>(temp.c_str());
+					paramSize = CastUtil::lexical_cast<int>(&temp[0]);
 				} catch(const std::exception& e) {
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 					paramSize = -1;
@@ -75,7 +75,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 					s >> ss;
 					ss = "param_" + ss;
 					//logger << ss << std::flush;
-					std::string tem = req->getRequestParam(ss);
+					std::string tem = std::string(req->getRequestParam(ss));
 					vemp.push_back(tem);
 				}
 				std::string libName = INTER_LIB_FILE;
@@ -111,17 +111,17 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			}
 		}
 	}
-	else if(ext==".form" && formMap->find(req->getFile())!=formMap->end())
+	else if(ext==".form" && formMap->find(std::string(req->getFile()))!=formMap->end())
 	{
 		try {
-			cntrlit = FormHandler::handle(req, res, reflector, &((*formMap)[req->getFile()]));
+			cntrlit = FormHandler::handle(req, res, reflector, &((*formMap)[std::string(req->getFile())]));
 			//logger << ("Request handled by FormHandler") << std::endl;
 		} catch(const std::exception& e) {
 			logger << "FormHandler exception occurred" << std::endl;
 			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 		}
 	}
-	else if(ext==".fview" && fviewMap->find(req->getFile())!=fviewMap->end())
+	else if(ext==".fview" && fviewMap->find(std::string(req->getFile()))!=fviewMap->end())
 	{
 		cntrlit = FviewHandler::handle(req, res);
 		//logger << ("Request handled by FviewHandler") << std::endl;

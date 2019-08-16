@@ -208,8 +208,9 @@ char* CryptoHandler::hmac_sha512(char* datain, char* keyin, const bool& base64)
 
 std::string CryptoHandler::urlDecode(std::string_view str)
 {
-	char dst[str.length()+1];
-	char *src = &str[0];
+	char dstb[str.length()+1];
+	char* dst = dstb[0];
+	char *src = (char*)&str[0];
 	char a, b;
 	while (*src) {
 		if ((*src == '%') && ((a = src[1]) && (b = src[2])) && (isxdigit(a) && isxdigit(b))) {

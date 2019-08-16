@@ -38,7 +38,7 @@
 #include "SocketInterface.h"
 #include "string_view"
 
-typedef std::vector<std::string_view> strVec;
+typedef std::vector<std::string_view> strvVec;
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
@@ -52,12 +52,12 @@ class HttpRequest {
 	std::string_view authority;
 	std::string_view scheme;
 	std::string_view host;
-	std::string_view url;
-	std::string_view curl;
-	std::string_view ext;
+	std::string url;
+	std::string curl;
+	std::string ext;
 	std::string_view cntxt_root;
 	std::string_view cntxt_home;
-	std::string_view cntxt_name;
+	std::string cntxt_name;
 	std::string_view httpVersion;
 	float httpVers;
 	bool corsRequest;
@@ -65,13 +65,13 @@ class HttpRequest {
 	std::string content;
 	std::string_view content_boundary;
 	std::string_view content_tfile;
-	std::string_view file;
+	std::string file;
 	RMap requestParams;
 	FMap requestParamsF;
 	RMap queryParams;
 	HttpSession session;
-	strVec localeInfo;
-	std::string_view actUrl;
+	strvVec localeInfo;
+	std::string actUrl;
 	std::vector<std::string_view> actUrlParts;
 	std::string_view sessionID;
 	bool cookie;
@@ -148,8 +148,8 @@ public:
     void setUrl(std::string_view url);
     HttpSession* getSession();
     std::string_view getMethod() const;
-	std::string_view getUrl() const;
-	std::string_view getCurl() const;
+    const std::string& getUrl() const;
+    const std::string& getCurl() const;
 	std::string_view getHttpVersion() const;
 	float getHttpVers() const;
 	std::string_view getContent_boundary() const;
@@ -161,10 +161,10 @@ public:
     std::string_view getRequestParamType(std::string_view);
     std::string_view getCntxt_root() const;
     std::string_view getDefaultLocale() const;
-    std::string_view getCntxt_name() const;
-    std::string_view getFile() const;
+    std::string getCntxt_name() const;
+    const std::string& getFile() const;
     void setFile(std::string_view);
-    std::string_view getActUrl() const;
+    const std::string& getActUrl() const;
     const std::vector<std::string>& getActUrlParts() const;
     std::string_view getSessionID() const;
     RMap getAuthinfo() const;
@@ -194,7 +194,7 @@ public:
     RMap getHeaders();
     int getCORSRequestType();
     void addHeaderValue(std::string_view header, std::string_view value);
-    std::vector<std::string> parseHeaderValue(std::string_view headerValue);
+    strvVec parseHeaderValue(std::string_view headerValue);
     static bool isValidHttpMethod(std::string_view method);
     bool isValidHttpMethod();
     bool isAgentAcceptsCE();
@@ -215,8 +215,8 @@ public:
 	void setUserName(std::string_view v);
 	void setAuthMethod(std::string_view v);
 	std::string_view getContextHome();
-	std::string_view getExt() const;
-	static std::string_view getFileExtension(const std::string_view& file);
+	const std::string& getExt() const;
+	static std::string getFileExtension(const std::string& file);
 };
 
 /*

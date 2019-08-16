@@ -32,13 +32,13 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 	std::string xmlcnttype = CommonUtils::getMimeType(".xml");
 	std::string meth,env;
 	Element* soapenv = NULL;
-	logger.info("request => "+req->getContent());
+	//logger.info("request => "+req->getContent());
 	Element* soapbody = NULL;
 	try
 	{
 		XmlParser parser("Validator");
 		Document doc;
-		parser.parse(req->getContent(), doc);
+		parser.parse(std::string(req->getContent()), doc);
 		soapenv = &(doc.getRootElement());
 
 		soapbody = soapenv->getElementByNameIgnoreCase("body");

@@ -8,7 +8,7 @@
 #include "CommonUtils.h"
 
 CommonUtils* CommonUtils::instance = NULL;
-std::string CommonUtils::BLANK = "";
+std::string_view CommonUtils::BLANK = "";
 std::atomic<long long> CommonUtils::tsPoll = 0;
 std::atomic<long long> CommonUtils::tsPoll1 = 0;
 std::atomic<long long> CommonUtils::tsProcess = 0;

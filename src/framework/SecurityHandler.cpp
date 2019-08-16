@@ -26,7 +26,6 @@ SecurityHandler::SecurityHandler() {
 }
 
 SecurityHandler::~SecurityHandler() {
-	// TODO Auto-generated destructor stub
 }
 
 void SecurityHandler::populateAuthDetails(HttpRequest* req)
@@ -110,7 +109,7 @@ bool SecurityHandler::hasSecurity(const std::string& cntxtName) {
 	return ConfigurationData::getInstance()->securityObjectMap[cntxtName].size()>0;
 }
 
-std::string SecurityHandler::validateSecurePath(const std::string& cntxtName, const std::string& actUrl, const std::string& username)
+std::string SecurityHandler::validateSecurePath(const std::string& cntxtName, const std::string& actUrl, std::string_view username)
 {
 	std::map<std::string, std::map<std::string, Security> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
 	std::map<std::string, Security> securityProv = securityObjectMap[cntxtName];
@@ -140,8 +139,8 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 	}
 	std::string claz;
 
-	std::string username = req->userName;
-	std::string password = req->password;
+	std::string_view username = req->userName;
+	std::string_view password = req->password;
 
 	std::string provKey = validateSecurePath(req->getCntxt_name(), req->getCurl(), username);
 	if(provKey!="")
@@ -181,8 +180,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 					if(authc.authenticate(username, password))
 					{
 						userRole = authc.getUserRole(username);
-						logger << ("Valid user " + username
-								+ ", role is "  + userRole) << std::endl;
+						//logger << ("Valid user " + username + ", role is "  + userRole) << std::endl;
 						validUser = true;
 					}
 					else
@@ -231,7 +229,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 					{
 						valusg.push_back(&username);
 						std::string userRole = reflector.invokeMethod<std::string>(_temp,methGetUserRole,valusg);
-						logger << ("Valid user " + username + ", role is "  + userRole) << std::endl;
+						//logger << ("Valid user " + username + ", role is "  + userRole) << std::endl;
 						validUser = true;
 					}
 					else

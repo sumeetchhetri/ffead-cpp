@@ -54,6 +54,7 @@
 #include "DataSourceManager.h"
 #include "CacheManager.h"
 #include "CommonUtils.h"
+#include "PropFileReader.h"
 
 class ConfigurationHandler {
 	static Marker getRestFunctionMarker(std::map<std::string, std::vector<Marker> >& markers);

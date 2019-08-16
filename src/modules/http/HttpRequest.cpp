@@ -82,11 +82,11 @@ void HttpRequest::getAuthParams(std::string_view str)
 	}
 	else
 	{
-		strVec tempv;
+		strvVec tempv;
 		StringUtil::split(tempv, str, (","));
 		for(unsigned int i=0;i<tempv.size();i++)
 		{
-			strVec tempvv;
+			strvVec tempvv;
 			StringUtil::split(tempvv, tempv.at(i), ("="));
 			std::string temr = std::string(tempvv.at(1));
 			StringUtil::trim(temr);
@@ -156,14 +156,14 @@ void HttpRequest::updateFromContentStr()
 	//cout << this->getContent() << std::flush;
 	if(this->getHeader(ContentType).find("application/x-www-form-urlencoded")==0)
 	{
-		strVec params;
+		strvVec params;
 		std::string valu = CryptoHandler::urlDecode(this->getContent());
 		StringUtil::split(params,valu , ("&"));
 		std::map<std::string_view ,int> indices;
 		RMap::iterator it;
 		for(unsigned j=0;j<params.size();j++)
 		{
-			strVec param;
+			strvVec param;
 			StringUtil::split(param, params.at(j), ("="));
 			if(param.size()==2)
 			{
@@ -521,7 +521,7 @@ void HttpRequest::buildRequest(std::string_view key, std::string_view value)
 	if(strcasecmp(&key[0], "accept-language")==0)
 	{
 		//StringUtil::trim(value);
-		strVec lemp;
+		strvVec lemp;
 		StringUtil::split(lemp, value, (","));
 		for(unsigned int li=0;li<lemp.size();li++)
 		{
@@ -556,11 +556,11 @@ void HttpRequest::buildRequest(std::string_view key, std::string_view value)
 	{
 		//StringUtil::trim(value);
 		this->cookie = true;
-		strVec results;
+		strvVec results;
 		StringUtil::split(results, value, ("; "));
 		for(int j=0;j<(int)results.size();j++)
 		{
-			strVec results1;
+			strvVec results1;
 			StringUtil::split(results1, results.at(j), ("="));
 			if(results1.size()==2)
 				cookieattrs[results1.at(0)] = results1.at(1);
@@ -578,7 +578,7 @@ void HttpRequest::buildRequest(std::string_view key, std::string_view value)
 		{
 			addHeader(key, tempi.substr(0,s));
 			tempi = tempi.substr(s);
-			strVec results;
+			strvVec results;
 			StringUtil::split(results, tempi, ("="));
 			if(results.size()==2)
 			{
@@ -614,13 +614,13 @@ void HttpRequest::buildRequest(std::string_view key, std::string_view value)
 	}
 	else if(strcasecmp(&key[0], "getarguments")==0)
 	{
-		strVec params;
+		strvVec params;
 		std::map<std::string_view ,int> indices;
 		value = CryptoHandler::urlDecode(value);
 		StringUtil::split(params, value, ("&"));
 		for(unsigned j=0;j<params.size();j++)
 		{
-			strVec param;
+			strvVec param;
 			StringUtil::split(param, params.at(j), ("="));
 			if(param.size()==2)
 			{
@@ -652,7 +652,7 @@ void HttpRequest::buildRequest(std::string_view key, std::string_view value)
 	}
 	else if(key.find("url")!=std::string::npos)
 	{
-		//strVec memp;
+		//strvVec memp;
 		this->setActUrl(value);
 		//StringUtil::split(memp, value, ("/"));
 		/*int fs = value.find_first_of("/");
@@ -675,7 +675,7 @@ void HttpRequest::buildRequest(std::string_view key, std::string_view value)
 	}
 	else if(strcasecmp(&key[0], "httpline")==0)
 	{
-		strVec vemp;
+		strvVec vemp;
 		StringUtil::split(vemp, value, (" "));
 		if(vemp.size()<3)
 		{
@@ -726,12 +726,12 @@ void HttpRequest::buildRequest(std::string_view key, std::string_view value)
 			std::string_view valu(vemp.at(0));
 			vemp[0] = valu.substr(0,vemp.at(0).find("?"));
 			valu = CryptoHandler::urlDecode(valu.substr(valu.find("?")+1));
-			strVec params;
+			strvVec params;
 			std::map<std::string_view ,int> indices;
 			StringUtil::split(params, valu, ("&"));
 			for(unsigned j=0;j<params.size();j++)
 			{
-				strVec param;
+				strvVec param;
 				StringUtil::split(param, params.at(j), ("="));
 				if(param.size()==2)
 				{
@@ -845,7 +845,7 @@ void HttpRequest::setUrl(std::string_view url)
 	this->ext = getFileExtension(turl);
 }
 
-std::string_view HttpRequest::getUrl() const
+const std::string& HttpRequest::getUrl() const
 {
 	return this->url;
 }
@@ -855,7 +855,7 @@ void HttpRequest::setCurl(std::string_view curl)
 	this->curl = curl;
 }
 
-std::string_view HttpRequest::getCurl() const
+const std::string& HttpRequest::getCurl() const
 {
 	return this->curl;
 }
@@ -952,24 +952,24 @@ std::string_view HttpRequest::getDefaultLocale() const
 		return "en";
 }
 
-std::string_view HttpRequest::getCntxt_name() const
+std::string HttpRequest::getCntxt_name() const
 {
 	return cntxt_name;
 }
 
 void HttpRequest::setCntxt_name(std::string_view cntxt_name)
 {
-	this->cntxt_name = cntxt_name;
+	this->cntxt_name = std::string(cntxt_name);
 }
 
-std::string_view HttpRequest::getFile() const
+const std::string& HttpRequest::getFile() const
 {
 	return file;
 }
 
 void HttpRequest::setFile(std::string_view file)
 {
-	if(this->file!="" && this->url.find(this->file)!=std::string::npos
+	if(this->file.length()>0 && this->url.find(this->file)!=std::string::npos
 			&& this->url.find("/")!=std::string::npos)
 	{
 		this->url = this->url.substr(0, this->url.find_last_of("/")+1) +  file;
@@ -978,11 +978,11 @@ void HttpRequest::setFile(std::string_view file)
 	{
 		this->url +=  "/" + file;
 	}
-	this->file = file;
-	this->ext = getFileExtension(file);
+	this->file = std::string(file);
+	this->ext = getFileExtension(std::string(file));
 }
 
-std::string_view HttpRequest::getActUrl() const
+const std::string& HttpRequest::getActUrl() const
 {
 	return actUrl;
 }
@@ -1773,12 +1773,13 @@ void HttpRequest::addHeaderValue(std::string_view header, std::string_view value
 	}
 }
 
-std::vector<std::string> HttpRequest::parseHeaderValue(std::string_view headerValue)
+strvVec HttpRequest::parseHeaderValue(std::string_view headerValue)
 {
 	std::string th = std::string(headerValue);
 	RegexUtil::replace(th, "\\s*,\\s*|\\s+", ",");
 	std::vector<std::string_view> tmp;
-	return StringUtil::split(tmp, th, ",");
+	StringUtil::split(tmp, th, ",");
+	return tmp;
 }
 
 const std::string HttpRequest::VALID_METHODS = ",get,post,options,delete,head,put,post,trace,";
@@ -2114,7 +2115,7 @@ void HttpRequest::setHttp2Headers(RMap headers)
 	}
 }
 
-std::string_view HttpRequest::getFileExtension(const std::string_view& file)
+std::string HttpRequest::getFileExtension(const std::string& file)
 {
 	if(file.find_last_of(".")!=std::string::npos)return file.substr(file.find_last_of("."));
 	return file;
@@ -2130,7 +2131,7 @@ void HttpRequest::setContextHome(std::string_view home)
 	this->cntxt_home = home;
 }
 
-std::string_view HttpRequest::getExt() const
+const std::string& HttpRequest::getExt() const
 {
 	return ext;
 }
