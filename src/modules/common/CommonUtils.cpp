@@ -101,7 +101,11 @@ void CommonUtils::loadMimeTypes(const std::string& file)
 {
 	if(getInstance()->mimeTypes.size()>0)return;
 	PropFileReader pread;
-	getInstance()->mimeTypes = pread.getProperties(file);
+	propMap m = pread.getProperties(file);
+	propMap::iterator i;
+	for(i=m.begin();i!=m.end();++i) {
+		getInstance()->mimeTypes[i->first] = i->second;
+	}
 }
 
 const std::string& CommonUtils::getMimeType(std::string_view extension)
@@ -117,10 +121,14 @@ void CommonUtils::loadLocales(const std::string& file)
 {
 	if(getInstance()->locales.size()>0)return;
 	PropFileReader pread;
-	getInstance()->locales = pread.getProperties(file);
+	propMap m = pread.getProperties(file);
+	propMap::iterator i;
+	for(i=m.begin();i!=m.end();++i) {
+		getInstance()->locales[i->first] = i->second;
+	}
 }
 
-const std::string& CommonUtils::getLocale(std::string_view abbrev)
+std::string_view CommonUtils::getLocale(std::string_view abbrev)
 {
 	if(getInstance()->locales.find(abbrev)!=getInstance()->locales.end())
 	{

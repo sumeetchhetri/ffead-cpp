@@ -172,7 +172,7 @@ void StringUtil::split(std::vector<std::string>& output, const std::string& inpu
 	}
 }
 
-void StringUtil::split(std::vector<std::string_view>& output, std::string_view strv, std::string_view delims = " ")
+void StringUtil::split(std::vector<std::string_view>& output, std::string_view strv, std::string_view delims)
 {
     size_t first = 0;
 
@@ -190,7 +190,7 @@ void StringUtil::split(std::vector<std::string_view>& output, std::string_view s
     }
 }
 
-std::vector<std::string_view> StringUtil::split(std::string_view strv, std::string_view delims = " ")
+std::vector<std::string_view> StringUtil::split(std::string_view strv, std::string_view delims)
 {
     std::vector<std::string_view> output;
     size_t first = 0;
@@ -320,11 +320,13 @@ std::string StringUtil::toOCTAL(const unsigned long long& number)
 
 long int StringUtil::fromHEX(std::string_view hexVal)
 {
+	long int li;
 	if(hexVal.find("0x")==std::string::npos)
 	{
-		hexVal = "0x" + hexVal;
+		std::string hx = "0x" + std::string(hexVal);
+		li = strtol(hx.c_str(), NULL, 16);
+		return li;
 	}
-	long int li;
 	li = strtol(&hexVal[0], NULL, 16);
 	return li;
 }

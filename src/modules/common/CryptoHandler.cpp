@@ -208,9 +208,7 @@ char* CryptoHandler::hmac_sha512(char* datain, char* keyin, const bool& base64)
 
 std::string CryptoHandler::urlDecode(std::string_view str)
 {
-	std::string dsts;
-	dsts.reserve(str.length());
-	char *dst = dsts.c_str();
+	char dst[str.length()+1];
 	char *src = &str[0];
 	char a, b;
 	while (*src) {
@@ -258,7 +256,7 @@ std::string CryptoHandler::urlDecode(std::string_view str)
 	 StringUtil::replaceAll(strret,"%2F","/");
 	 StringUtil::replaceAll(strret,"%2B","+");
 	 return strret;*/
-	return dsts;
+	return std::string(dst);
 }
 
 std::string CryptoHandler::urlEncode(const std::string& str)

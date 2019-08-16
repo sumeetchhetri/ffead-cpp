@@ -22,14 +22,14 @@
 
 #include "RegexUtil.h"
 
-cuckoohash_map<std::string, regex_t*> RegexUtil::patterns;
-cuckoohash_map<std::string, regex_t*> RegexUtil::nlpatterns;
+cuckoohash_map<std::string_view, regex_t*> RegexUtil::patterns;
+cuckoohash_map<std::string_view, regex_t*> RegexUtil::nlpatterns;
 bool RegexUtil::cacheRegexes = true;
 
 void RegexUtil::flushCache() {
 	if(patterns.size()>0) {
 		auto lt = patterns.lock_table();
-		cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
+		cuckoohash_map<std::string_view, regex_t*>::locked_table::iterator it;
 		for(it=lt.begin();it!=lt.end();++it) {
 			regfree(it->second);
 			delete it->second;
@@ -37,7 +37,7 @@ void RegexUtil::flushCache() {
 	}
 	if(nlpatterns.size()>0) {
 		auto lt = nlpatterns.lock_table();
-		cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
+		cuckoohash_map<std::string_view, regex_t*>::locked_table::iterator it;
 		for(it=lt.begin();it!=lt.end();++it) {
 			regfree(it->second);
 			delete it->second;
@@ -76,7 +76,7 @@ regex_t* RegexUtil::getRegex(std::string_view pattern, const bool& matchNewLine)
 			int reti = regcomp(regex, &pattern[0], cflags);
 			if(reti!=0)
 			{
-				std::cout << ("Could not compile regex - "+pattern + " failed with error ") << reti << std::endl;
+				std::cout << ("Could not compile regex - "+std::string(pattern) + " failed with error ") << reti << std::endl;
 			}
 		}
 		else
@@ -85,7 +85,7 @@ regex_t* RegexUtil::getRegex(std::string_view pattern, const bool& matchNewLine)
 			int reti = regcomp(regex, &pattern[0], cflags);
 			if(reti!=0)
 			{
-				std::cout << ("Could not compile regex - "+pattern + " failed with error ") << reti << std::endl;
+				std::cout << ("Could not compile regex - "+std::string(pattern) + " failed with error ") << reti << std::endl;
 			}
 		}
 	}
@@ -186,7 +186,7 @@ std::string RegexUtil::replaceCopy(std::string_view text, std::string_view patte
 		if(!reti) {
 			std::string match;
 			match = ttext.substr(pm.rm_so, pm.rm_eo-pm.rm_so);
-			rettxt += ttext.substr(0, pm.rm_so) + with;
+			rettxt += ttext.substr(0, pm.rm_so) + std::string(with);
 		} else {
 			rettxt += ttext;
 			break;
@@ -221,7 +221,7 @@ bool RegexUtil::replace(std::string& text, std::string_view pattern, std::string
 		if(!reti) {
 			std::string match;
 			match = ttext.substr(pm.rm_so, pm.rm_eo-pm.rm_so);
-			rettxt += ttext.substr(0, pm.rm_so) + with;
+			rettxt += ttext.substr(0, pm.rm_so) + std::string(with);
 		} else {
 			rettxt += ttext;
 			break;

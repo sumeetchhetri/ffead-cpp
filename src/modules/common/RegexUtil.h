@@ -37,8 +37,8 @@
 
 
 class RegexUtil {
-	static cuckoohash_map<std::string, regex_t*> nlpatterns;
-	static cuckoohash_map<std::string, regex_t*> patterns;
+	static cuckoohash_map<std::string_view, regex_t*> nlpatterns;
+	static cuckoohash_map<std::string_view, regex_t*> patterns;
 	static bool cacheRegexes;
 	friend class ConfigurationHandler;
 	static bool isValidRegex(std::string_view pattern);
