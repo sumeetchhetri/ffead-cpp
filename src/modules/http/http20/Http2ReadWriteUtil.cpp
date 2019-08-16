@@ -48,7 +48,7 @@ void Http2RequestResponseData::updateContent() {
 	if(!isWebSocket) {
 		HttpResponse* res = (HttpResponse*)incompleteResponse;
 		if(data.length()==0 && res!=NULL && res->isContentRemains()) {
-			data = res->getRemainingContent(url, false);
+			res->getRemainingContent(url, false, data);
 		}
 	} else {
 		WebSocketData* res = (WebSocketData*)incompleteResponse;

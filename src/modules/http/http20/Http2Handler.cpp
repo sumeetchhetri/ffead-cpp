@@ -432,7 +432,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si, std::string
 			streams[streamIdentifier].pendingSendData.data = data.substr(minreslen);
 		}
 	} else {
-		while(response->hasContent && (tmd = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
+		while(response->hasContent && response->getRemainingContent(request->getUrl(), isFirst, tmd)) {
 			isFirst = false;
 			if(senderFlowControlWindow>=(int)tmd.length()
 					&& streams[streamIdentifier].senderFlowControlWindow>=(int)tmd.length())

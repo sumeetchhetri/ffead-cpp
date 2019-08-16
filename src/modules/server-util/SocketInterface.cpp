@@ -112,8 +112,8 @@ bool SocketInterface::isClosed() {
 }
 
 bool SocketInterface::completeWrite() {
-	Timer t;
-	t.start();
+	Timer to;
+	to.start();
 
 	bool done = false;
 	int reqPos = current + 1;
@@ -135,8 +135,8 @@ bool SocketInterface::completeWrite() {
 		eh->registerWrite(this);
 	}
 
-	t.end();
-	CommonUtils::tsWrite += t.timerNanoSeconds();
+	to.end();
+	CommonUtils::tsWrite += to.timerNanoSeconds();
 	return done;
 }
 
@@ -148,8 +148,8 @@ void SocketInterface::writeTo(const std::string& d, int reqPos) {
 }
 
 int SocketInterface::pushResponse(void* request, void* response, void* context, int reqPos) {
-	Timer t;
-	t.start();
+	Timer to;
+	to.start();
 
 	int done = -1;
 	wm.lock();
@@ -206,8 +206,8 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 		done = 1;
 	}
 
-	t.end();
-	CommonUtils::tsWrite += t.timerNanoSeconds();
+	to.end();
+	CommonUtils::tsWrite += to.timerNanoSeconds();
 
 	return done;
 }
