@@ -53,7 +53,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 			}
 			he += 2;
 		}
-		noBody = strcasestr(request->method.c_str(), "GET")!=NULL;
+		noBody = strcasecmp(request->method.c_str(), "GET")==0;
 		if(!noBody) {
 			std::string bytesstr = request->getHeader(HttpRequest::ContentLength);
 			if(bytesstr.length()>0) {
@@ -94,7 +94,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		}
 		isHeadersDone = true;
 	}
-	if(!doneReq && isHeadersDone)
+	if(isHeadersDone && !doneReq)
 	{
 		if(isTeRequest && bytesToRead==0 && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
 			std::string bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
