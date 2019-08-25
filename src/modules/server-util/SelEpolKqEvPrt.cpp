@@ -356,8 +356,7 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj, bool& isRe
 			SocketInterface* p = (SocketInterface*)events[index].data.ptr;
 			if ((events[index].events & EPOLLERR) ||
 				  (events[index].events & EPOLLHUP) ||
-				  (events[index].events & EPOLLRDHUP) ||
-				  (!(events[index].events & EPOLLIN)))
+				  (events[index].events & EPOLLRDHUP))
 			{
 				p->closeSocket();
 			}

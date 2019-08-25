@@ -93,7 +93,7 @@ public:
 	int writeTo(ResponseData* d);
 	bool writeFile(int fdes, int remain_data);
 	bool isClosed();
-	bool readFrom();
+	int readFrom();
 	int getDescriptor();
 	std::string getAddress();
 	std::string getAlpnProto();

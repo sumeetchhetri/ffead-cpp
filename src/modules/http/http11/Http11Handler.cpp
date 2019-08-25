@@ -18,6 +18,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	t.start();
 
 	if(readFrom()) {
+		m.unlock();
 		return NULL;
 	}
 
@@ -201,7 +202,7 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context, std::stri
 
 	if(response->getHeader(HttpRequest::Connection).length()==0)
 	{
-		if(StringUtil::toLowerCopy(request->getHeader(HttpRequest::Connection))!="keep-alive"
+		if(strcasestr(request->getHeader(HttpRequest::Connection).c_str(), "keep-alive")==NULL
 				|| CastUtil::lexical_cast<int>(response->getStatusCode())>307 || request->getHttpVers()<1.1)
 		{
 			response->addHeader(HttpResponse::Connection, "close");

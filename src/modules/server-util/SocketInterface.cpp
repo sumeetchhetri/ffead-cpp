@@ -121,7 +121,9 @@ int SocketInterface::completeWrite() {
 	int reqPos = current + 1;
 
 	while(!allRequestsDone()) {
+		wm.lock();
 		ResponseData* rd = wtl[reqPos];
+		wm.unlock();
 
 		Timer t;
 		t.start();
@@ -273,7 +275,7 @@ int SocketInterface::writeTo(ResponseData* d)
 			}
 		}
 	}
-	return closed==true;
+	return closed?0:1;
 }
 
 bool SocketInterface::writeFile(int fdes, int remain_data)
@@ -327,7 +329,7 @@ bool SocketInterface::writeFile(int fdes, int remain_data)
 	return isClosed();
 }
 
-bool SocketInterface::readFrom()
+int SocketInterface::readFrom()
 {
 	if(SSLHandler::getInstance()->getIsSSL())
 	{
@@ -340,7 +342,7 @@ bool SocketInterface::readFrom()
 			{
 				case SSL_ERROR_WANT_READ:
 				{
-					return false;
+					return -1;
 				}
 				case SSL_ERROR_NONE:
 				{
@@ -350,7 +352,7 @@ bool SocketInterface::readFrom()
 				default:
 				{
 					closeSocket();
-					return true;
+					return 0;
 				}
 			}
 		}
@@ -363,12 +365,12 @@ bool SocketInterface::readFrom()
 			int er = recv(fd, b, 4096, 0);
 			if (er == -1 && errno == EAGAIN)
 			{
-				return false;
+				return -1;
 			}
 			else if(er<=0)
 			{
 				closeSocket();
-				return true;
+				return 0;
 			}
 			else
 			{
@@ -376,7 +378,7 @@ bool SocketInterface::readFrom()
 			}
 		}
 	}
-	return closed;
+	return closed?0:1;
 }
 
 int SocketInterface::getDescriptor() {

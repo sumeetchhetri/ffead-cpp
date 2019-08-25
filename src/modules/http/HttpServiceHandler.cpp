@@ -64,7 +64,6 @@ void HttpReadTask::run() {
 	t.start();
 
 	int pending = 1;
-	//int numReqs = 0;
 	while(pending>0)
 	{
 		void* context = NULL;
@@ -77,14 +76,8 @@ void HttpReadTask::run() {
 			service->closeConnection(sif);
 			break;
 		} else if(request!=NULL) {
-			//numReqs++;
 			service->registerServiceRequest(request, sif, context, reqPos);
 		}
-
-		/*if(numReqs>20) {
-			service->registerReadRequest(sif);
-			break;
-		}*/
 	}
 
 	t.end();
