@@ -68,11 +68,11 @@ protected:
 	void submitTask(Task* task);
 	virtual void handleService(HandlerRequest* req)=0;
 	virtual void handleRead(SocketInterface* req)=0;
-	virtual void handleWrite(HandlerRequest* handlerRequest)=0;
+	virtual void handleWrite(SocketInterface* sif)=0;
 public:
 	void closeConnection(SocketInterface* si);
 	void registerReadRequest(SocketInterface* si);
-	void registerWriteRequest(HandlerRequest* si);
+	void registerWriteRequest(SocketInterface* sif);
 	void start();
 	void stop();
 	ServiceHandler(const int& spoolSize);

@@ -136,9 +136,8 @@ void* RequestReaderHandler::handle(void* inp) {
 						}
 					} else {
 						if(!si->isClosed()) {
-							if(si->completeWrite()) {
-								ins->selector.unRegisterWrite(si);
-							}
+							ins->selector.unRegisterWrite(si);
+							ins->shi->registerWriteRequest(si);
 						} else {
 							si->onClose();
 							ins->shi->closeConnection(si);

@@ -19,6 +19,7 @@ SocketInterface::SocketInterface() {
 	current = 0;
 	http2 = false;
 	fd = -1;
+	tid = -1;
 }
 
 SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
@@ -34,6 +35,7 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	http2 = SSLHandler::getAlpnProto(fd).find("h2")==0;
 	wtl[0] = new ResponseData();
 	openSocks++;
+	tid = -1;
 }
 
 bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger) {
@@ -111,28 +113,36 @@ bool SocketInterface::isClosed() {
 	return closed;
 }
 
-bool SocketInterface::completeWrite() {
+int SocketInterface::completeWrite() {
 	Timer to;
 	to.start();
 
-	bool done = false;
+	int done = 1;
 	int reqPos = current + 1;
-	ResponseData* rd = wtl[reqPos];
 
-	Timer t;
-	t.start();
+	while(!allRequestsDone()) {
+		ResponseData* rd = wtl[reqPos];
 
-	int ret = writeTo(rd);
+		Timer t;
+		t.start();
 
-	t.end();
-	CommonUtils::tsActWrite += t.timerNanoSeconds();
+		int ret = writeTo(rd);
 
-	if(ret == 0 || ret == 1) {
-		endRequest(reqPos);
-		delete rd;
-		done = true;
-	} else {
-		eh->registerWrite(this);
+		t.end();
+		CommonUtils::tsActWrite += t.timerNanoSeconds();
+
+		if(ret == 0 || ret == 1) {
+			endRequest(reqPos);
+			delete rd;
+			if(ret==0) {
+				return 0;
+			}
+		} else {
+			eh->registerWrite(this);
+			return -1;
+		}
+
+		reqPos++;
 	}
 
 	to.end();
@@ -151,59 +161,26 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 	Timer to;
 	to.start();
 
-	int done = -1;
 	wm.lock();
 	ResponseData* rd = wtl[reqPos];
 	wm.unlock();
-	if(isCurrentRequest(reqPos)) {
-		if(!rd->done) {
-			writeResponse(request, response, context, rd->_b, reqPos);
-			rd->done = true;
-		}
 
-		Timer t;
-		t.start();
+	writeResponse(request, response, context, rd->_b, reqPos);
 
-		done = writeTo(rd);
+	Timer t;
+	t.start();
 
-		t.end();
-		CommonUtils::tsActWrite += t.timerNanoSeconds();
+	int done = writeTo(rd);
 
-		if(done == 1) {
-			endRequest(reqPos);
-			while(true) {
-				wm.lock();
-				if(wtl.find(++reqPos)!=wtl.end() && (rd = wtl.find(reqPos)->second)!=NULL && rd->done) {
-					wm.unlock();
+	t.end();
+	CommonUtils::tsActWrite += t.timerNanoSeconds();
 
-					Timer t;
-					t.start();
-
-					done = writeTo(rd);
-
-					t.end();
-					CommonUtils::tsActWrite += t.timerNanoSeconds();
-
-					if(done!=1) {
-						break;
-					}
-					endRequest(reqPos);
-				} else {
-					wm.unlock();
-					break;
-				}
-			}
-
-		}
-		if(done == -1) {
-			eh->registerWrite(this);
-		} else if(done == 0) {
-			endRequest(reqPos);
-		}
-	} else if(!rd->done) {
-		writeResponse(request, response, context, rd->_b, reqPos);
-		rd->done = true;
-		done = 1;
+	if(done == 1) {
+		endRequest(reqPos);
+	} else if(done == -1) {
+		eh->registerWrite(this);
+	} else if(done == 0) {
+		endRequest(reqPos);
 	}
 
 	to.end();

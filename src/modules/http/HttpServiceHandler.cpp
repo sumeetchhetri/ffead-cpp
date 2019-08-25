@@ -17,6 +17,14 @@ HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const Htt
 HttpServiceHandler::~HttpServiceHandler() {
 }
 
+int HttpServiceTask::getTid() {
+	return handlerRequest->sif->tid;
+}
+
+void HttpServiceTask::setTid(int tid) {
+	handlerRequest->sif->tid = tid;
+}
+
 void HttpServiceHandler::handleService(HandlerRequest* handlerRequest)
 {
 	HttpServiceTask* task = f();
@@ -35,9 +43,9 @@ void HttpServiceHandler::handleRead(SocketInterface* sif)
 	submitTask(task);
 }
 
-void HttpServiceHandler::handleWrite(HandlerRequest *handlerRequest) {
+void HttpServiceHandler::handleWrite(SocketInterface* sif) {
 	HttpWriteTask* task = new HttpWriteTask();
-	task->handlerRequest = handlerRequest;
+	task->sif = sif;
 	task->service = this;
 	task->setCleanUp(true);
 	submitTask(task);
@@ -56,7 +64,7 @@ void HttpReadTask::run() {
 	t.start();
 
 	int pending = 1;
-	int numReqs = 0;
+	//int numReqs = 0;
 	while(pending>0)
 	{
 		void* context = NULL;
@@ -69,14 +77,14 @@ void HttpReadTask::run() {
 			service->closeConnection(sif);
 			break;
 		} else if(request!=NULL) {
-			numReqs++;
+			//numReqs++;
 			service->registerServiceRequest(request, sif, context, reqPos);
 		}
 
-		if(numReqs>20) {
+		/*if(numReqs>20) {
 			service->registerReadRequest(sif);
 			break;
-		}
+		}*/
 	}
 
 	t.end();
@@ -105,7 +113,6 @@ void HttpServiceTask::run() {
 	t.start();
 
 	if(handlerRequest->getSif()->isClosed()) {
-		handlerRequest->doneWithWrite(handlerRequest->reqPos);
 		handlerRequest->sif->onClose();
 		service->closeConnection(handlerRequest->sif);
 		t.end();
@@ -205,31 +212,24 @@ void HttpServiceTask::run() {
 	handlerRequest->response = resp;
 	int ret = handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos);
 	if(ret==0) {
-		handlerRequest->doneWithWrite(handlerRequest->reqPos);
 		handlerRequest->sif->onClose();
 		service->closeConnection(handlerRequest->sif);
 	}
-	//service->registerWriteRequest(handlerRequest);
-	//handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
 }
 
 void HttpWriteTask::run() {
-	int ret = handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos);
+	int ret = sif->completeWrite();
 	if(ret==0) {
-		handlerRequest->doneWithWrite(handlerRequest->reqPos);
-		handlerRequest->sif->onClose();
-		service->closeConnection(handlerRequest->sif);
+		sif->onClose();
+		service->closeConnection(sif);
 	}
 }
 
 HttpWriteTask::~HttpWriteTask() {
-	if(handlerRequest!=NULL) {
-		delete handlerRequest;
-	}
 }
 
 HttpWriteTask::HttpWriteTask() {
-	this->handlerRequest = NULL;
+	this->sif = NULL;
 	service = NULL;
 	this->hdlr = NULL;
 }

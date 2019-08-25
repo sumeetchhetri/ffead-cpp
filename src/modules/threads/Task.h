@@ -35,6 +35,7 @@ class Task {
 	bool console;
 	bool cleanUp;
 	bool isFuture;
+	bool affinity;
 	Task(const int& priority);
 	Task(const int& tunit, const int& type);
 	friend class PoolThread;
@@ -48,6 +49,8 @@ public:
 	Task();
 	virtual ~Task();
 	virtual void run()=0;
+	void setTid(int tid);
+	int getTid();
 protected:
 	ReusableInstanceHolder* hdlr;
 	void init();

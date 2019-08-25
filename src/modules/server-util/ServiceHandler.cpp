@@ -48,8 +48,8 @@ void ServiceHandler::registerReadRequest(SocketInterface* sif) {
 	handleRead(sif);
 }
 
-void ServiceHandler::registerWriteRequest(HandlerRequest* hr) {
-	handleWrite(hr);
+void ServiceHandler::registerWriteRequest(SocketInterface* sif) {
+	handleWrite(sif);
 }
 
 void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos) {

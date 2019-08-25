@@ -38,7 +38,6 @@ class SocketInterface;
 class ResponseData {
 	std::string _b;
 	int oft;
-	bool done;
 	friend class SocketInterface;
 };
 
@@ -61,6 +60,7 @@ class SocketInterface {
 	std::string buffer;
 	Mutex m;
 	Mutex wm;
+	int tid;
 	std::map<int, ResponseData*> wtl;
 	//cuckoohash_map<int, ResponseData*> wtl;
 	std::atomic<int> reqPos;
@@ -82,7 +82,7 @@ class SocketInterface {
 	friend class CommonUtils;
 	friend class DummySocketInterface;
 public:
-	bool completeWrite();
+	int completeWrite();
 	int pushResponse(void* request, void* response, void* context, int reqPos);
 	static bool init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger);
 	int startRequest();

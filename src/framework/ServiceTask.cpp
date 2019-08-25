@@ -634,9 +634,9 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		t1.start();
 		bool hasSecurity = false;
-		if(ConfigurationData::getInstance()->enableSecurity) {
+		if(!isContrl && ConfigurationData::getInstance()->enableSecurity) {
 			hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
-			if(!isContrl && hasSecurity)
+			if(hasSecurity)
 			{
 				isContrl = SecurityHandler::handle(req, res, ConfigurationData::getInstance()->coreServerProperties.sessionTimeout, reflector);
 				if(isContrl)
@@ -650,12 +650,11 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		t1.start();
 		bool hasFilters = false;
-		if(ConfigurationData::getInstance()->enableFilters) {
+		if(!isContrl && ConfigurationData::getInstance()->enableFilters) {
 			hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
-			if(!isContrl && hasFilters)
+			if(hasFilters)
 			{
 				FilterHandler::handleIn(req, ext, reflector);
-
 				isContrl = !FilterHandler::handle(req, res, ext, reflector);
 				ext = req->getExt();
 			}
@@ -664,22 +663,16 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		CommonUtils::tsServiceFlt += t1.timerNanoSeconds();
 
 		t1.start();
-		if(ConfigurationData::getInstance()->enableControllers) {
-			if(!isContrl)
-			{
-				isContrl = ControllerHandler::handle(req, res, ext, reflector);
-				ext = req->getExt();
-			}
+		if(!isContrl && ConfigurationData::getInstance()->enableControllers) {
+			isContrl = ControllerHandler::handle(req, res, ext, reflector);
+			ext = req->getExt();
 		}
 		t1.end();
 		CommonUtils::tsServiceCnt += t1.timerNanoSeconds();
 
 		t1.start();
-		if(ConfigurationData::getInstance()->enableExtra) {
-			if(!isContrl)
-			{
-				isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
-			}
+		if(!isContrl && ConfigurationData::getInstance()->enableExtra) {
+			isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
 		}
 		t1.end();
 		CommonUtils::tsServiceExt += t1.timerNanoSeconds();
