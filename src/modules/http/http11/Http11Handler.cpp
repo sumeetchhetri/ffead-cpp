@@ -17,7 +17,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	Timer t;
 	t.start();
 
-	if(readFrom()) {
+	if(readFrom()==0) {
 		m.unlock();
 		return NULL;
 	}

@@ -49,20 +49,20 @@ public:
 };
 
 class SocketInterface {
+private:
+	SOCKET fd;
 	static std::atomic<int> openSocks;
 	EventHandler* eh;
 	SSL *ssl;
 	BIO *io;
-	SOCKET fd;
 	std::atomic<bool> closed;
 	bool http2;
 	Logger logger;
 	std::string buffer;
 	Mutex m;
-	Mutex wm;
 	int tid;
-	std::map<int, ResponseData*> wtl;
-	//cuckoohash_map<int, ResponseData*> wtl;
+	//std::map<int, ResponseData*> wtl;
+	cuckoohash_map<int, ResponseData*> wtl;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
 	std::string address;

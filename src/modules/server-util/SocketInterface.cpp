@@ -33,7 +33,7 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	address = StringUtil::toHEX((long long)this);
 	this->fd = fd;
 	http2 = SSLHandler::getAlpnProto(fd).find("h2")==0;
-	wtl[0] = new ResponseData();
+	wtl.insert(0, new ResponseData());
 	openSocks++;
 	tid = -1;
 }
@@ -96,15 +96,15 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 
 SocketInterface::~SocketInterface() {
 	closeSocket();
-	/*cuckoohash_map<int, ResponseData*>::locked_table lt = wtl.lock_table();
+	cuckoohash_map<int, ResponseData*>::locked_table lt = wtl.lock_table();
 	cuckoohash_map<int, ResponseData*>::locked_table::iterator it;
 	for(it=lt.begin();it!=lt.end();++it) {
 		delete it->second;
-	}*/
-	std::map<int, ResponseData*>::iterator it;
+	}
+	/*std::map<int, ResponseData*>::iterator it;
 	for(it=wtl.begin();it!=wtl.end();++it) {
 		delete it->second;
-	}
+	}*/
 	openSocks--;
 }
 
@@ -121,9 +121,7 @@ int SocketInterface::completeWrite() {
 	int reqPos = current + 1;
 
 	while(!allRequestsDone()) {
-		wm.lock();
-		ResponseData* rd = wtl[reqPos];
-		wm.unlock();
+		ResponseData* rd = wtl.find(reqPos);
 
 		Timer t;
 		t.start();
@@ -153,9 +151,7 @@ int SocketInterface::completeWrite() {
 }
 
 void SocketInterface::writeTo(const std::string& d, int reqPos) {
-	wm.lock();
-	ResponseData* rd = wtl[reqPos];
-	wm.unlock();
+	ResponseData* rd = wtl.find(reqPos);
 	rd->_b += d;
 }
 
@@ -163,9 +159,7 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 	Timer to;
 	to.start();
 
-	wm.lock();
-	ResponseData* rd = wtl[reqPos];
-	wm.unlock();
+	ResponseData* rd = wtl.find(reqPos);
 
 	writeResponse(request, response, context, rd->_b, reqPos);
 
@@ -193,20 +187,15 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 
 int SocketInterface::startRequest() {
 	int rp = ++reqPos;
-	wm.lock();
-	wtl[rp] = new ResponseData();
-	wm.unlock();
+	wtl.insert(rp, new ResponseData());
 	return rp;
 }
 
 int SocketInterface::endRequest(int reqPos) {
-	wm.lock();
-	ResponseData* rd = wtl[reqPos];
-	if(wtl.erase(reqPos)==1) {
-		++current;
-		delete rd;
-	}
-	wm.unlock();
+	ResponseData* rd = wtl.find(reqPos);
+	wtl.erase(reqPos);
+	++current;
+	delete rd;
 	return current;
 }
 
