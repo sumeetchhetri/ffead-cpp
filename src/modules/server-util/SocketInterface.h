@@ -51,6 +51,7 @@ public:
 class SocketInterface {
 private:
 	SOCKET fd;
+	Mutex wl;
 	static std::atomic<int> openSocks;
 	EventHandler* eh;
 	SSL *ssl;
@@ -59,14 +60,12 @@ private:
 	bool http2;
 	Logger logger;
 	std::string buffer;
-	Mutex m;
 	int tid;
-	//std::map<int, ResponseData*> wtl;
-	cuckoohash_map<int, ResponseData*> wtl;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
 	std::string address;
 	bool isBlocking();
+	ResponseData rd;
 	bool handleRenegotiation();
 	void init(const SOCKET& fd);
 	friend class RequestReaderHandler;

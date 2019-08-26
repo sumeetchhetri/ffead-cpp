@@ -12,13 +12,10 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		return handler->readRequest(context, pending, reqPos);
 	}
 
-	m.lock();
-
 	Timer t;
 	t.start();
 
 	if(readFrom()==0) {
-		m.unlock();
 		return NULL;
 	}
 
@@ -45,7 +42,6 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 						closeSocket();
 						delete request;
 						request = NULL;
-						m.unlock();
 						return NULL;
 					}
 				} else {
@@ -68,7 +64,6 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 					closeSocket();
 					delete request;
 					request = NULL;
-					m.unlock();
 					return NULL;
 				} else if(bytesToRead==0) {
 					doneReq = true;
@@ -132,10 +127,8 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		noBody = true;
 		void* temp = request;
 		request = NULL;
-		m.unlock();
 		return temp;
 	}
-	m.unlock();
 	return NULL;
 }
 

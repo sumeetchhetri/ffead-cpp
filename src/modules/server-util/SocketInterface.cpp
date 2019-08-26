@@ -33,9 +33,10 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	address = StringUtil::toHEX((long long)this);
 	this->fd = fd;
 	http2 = SSLHandler::getAlpnProto(fd).find("h2")==0;
-	wtl.insert(0, new ResponseData());
 	openSocks++;
 	tid = -1;
+	rd._b.reserve(4096);
+	rd.oft = 0;
 }
 
 bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger) {
@@ -96,15 +97,6 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 
 SocketInterface::~SocketInterface() {
 	closeSocket();
-	cuckoohash_map<int, ResponseData*>::locked_table lt = wtl.lock_table();
-	cuckoohash_map<int, ResponseData*>::locked_table::iterator it;
-	for(it=lt.begin();it!=lt.end();++it) {
-		delete it->second;
-	}
-	/*std::map<int, ResponseData*>::iterator it;
-	for(it=wtl.begin();it!=wtl.end();++it) {
-		delete it->second;
-	}*/
 	openSocks--;
 }
 
@@ -120,29 +112,24 @@ int SocketInterface::completeWrite() {
 	int done = 1;
 	int reqPos = current + 1;
 
-	while(!allRequestsDone()) {
-		ResponseData* rd = wtl.find(reqPos);
+	Timer t;
+	t.start();
 
-		Timer t;
-		t.start();
+	wl.lock();
+	int ret = writeTo(&rd);
+	wl.unlock();
 
-		int ret = writeTo(rd);
+	t.end();
+	CommonUtils::tsActWrite += t.timerNanoSeconds();
 
-		t.end();
-		CommonUtils::tsActWrite += t.timerNanoSeconds();
-
-		if(ret == 0 || ret == 1) {
-			endRequest(reqPos);
-			delete rd;
-			if(ret==0) {
-				return 0;
-			}
-		} else {
-			eh->registerWrite(this);
-			return -1;
+	if(ret == 0 || ret == 1) {
+		endRequest(reqPos);
+		if(ret==0) {
+			return 0;
 		}
-
-		reqPos++;
+	} else {
+		eh->registerWrite(this);
+		return -1;
 	}
 
 	to.end();
@@ -151,22 +138,25 @@ int SocketInterface::completeWrite() {
 }
 
 void SocketInterface::writeTo(const std::string& d, int reqPos) {
-	ResponseData* rd = wtl.find(reqPos);
-	rd->_b += d;
+	wl.lock();
+	rd._b += d;
+	wl.unlock();
 }
 
 int SocketInterface::pushResponse(void* request, void* response, void* context, int reqPos) {
 	Timer to;
 	to.start();
 
-	ResponseData* rd = wtl.find(reqPos);
-
-	writeResponse(request, response, context, rd->_b, reqPos);
+	wl.lock();
+	writeResponse(request, response, context, rd._b, reqPos);
+	wl.unlock();
 
 	Timer t;
 	t.start();
 
-	int done = writeTo(rd);
+	wl.lock();
+	int done = writeTo(&rd);
+	wl.unlock();
 
 	t.end();
 	CommonUtils::tsActWrite += t.timerNanoSeconds();
@@ -186,17 +176,11 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 }
 
 int SocketInterface::startRequest() {
-	int rp = ++reqPos;
-	wtl.insert(rp, new ResponseData());
-	return rp;
+	return ++reqPos;
 }
 
 int SocketInterface::endRequest(int reqPos) {
-	ResponseData* rd = wtl.find(reqPos);
-	wtl.erase(reqPos);
-	++current;
-	delete rd;
-	return current;
+	return ++current;
 }
 
 bool SocketInterface::allRequestsDone() {

@@ -164,7 +164,6 @@ void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		return ppreq;
 	}
 
-	m.lock();
 	if(readFrom())return NULL;
 
 	if(!this->isConnInit) {
@@ -207,7 +206,6 @@ void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	{
 		pending = buffer.length();
 	}
-	m.unlock();
 	return request;
 }
 
