@@ -189,14 +189,12 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context, std::stri
 	}
 
 	if(!response->isContentRemains()) {
-		data += response->generateResponse(request);
+		response->generateResponse(request, data);
 	} else {
-		data += response->generateResponse(request, false);
+		response->generateResponse(request, data, false);
 		bool isFirst = true;
-		std::string d;
-		while(response->hasContent && (d = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
+		while(response->hasContent && response->getRemainingContent(request->getUrl(), isFirst, data)) {
 			isFirst = false;
-			data += d;
 		}
 	}
 

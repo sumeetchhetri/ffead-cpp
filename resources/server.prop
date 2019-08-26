@@ -89,7 +89,7 @@ ENABLE_CNT_EXT=false
 
 ENABLE_CNT_RST=true
 
-ENABLE_EXT=false
+ENABLE_EXT=true
 
 ENABLE_SCR=false
 

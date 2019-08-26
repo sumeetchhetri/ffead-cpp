@@ -83,52 +83,54 @@ HttpResponse::HttpResponse() {
 HttpResponse::~HttpResponse() {
 }
 
-std::string HttpResponse::generateResponse(const std::string& httpMethod, HttpRequest *req, const bool& appendHeaders /*= true*/)
+void HttpResponse::generateResponse(const std::string& httpMethod, HttpRequest *req, std::string& data, const bool& appendHeaders /*= true*/)
 {
 	if(httpMethod=="HEAD" && appendHeaders)
 	{
-		return generateHeadResponse();
+		return generateHeadResponse(data);
 	}
 	else if(httpMethod=="OPTIONS" && appendHeaders)
 	{
-		return generateOptionsResponse();
+		return generateOptionsResponse(data);
 	}
 	else if(httpMethod=="TRACE" && appendHeaders)
 	{
-		return generateTraceResponse(req);
+		return generateTraceResponse(req, data);
 	}
 	else
 	{
 		if(appendHeaders)
 		{
-			return generateHeadResponse() + this->content;
+			generateHeadResponse(data);
+			data += this->content;
 		}
 		else
 		{
-			return generateHeadResponse();
+			generateHeadResponse(data);
 		}
 	}
 }
 
-std::string HttpResponse::generateResponse(HttpRequest *req, const bool& appendHeaders /*= true*/)
+void HttpResponse::generateResponse(HttpRequest *req, std::string& data, const bool& appendHeaders /*= true*/)
 {
 	if(req->getMethod()=="OPTIONS")
 	{
-		return generateOptionsResponse();
+		generateOptionsResponse(data);
 	}
 	else if(req->getMethod()=="TRACE")
 	{
-		return generateTraceResponse(req);
+		generateTraceResponse(req, data);
 	}
 	else
 	{
 		if(appendHeaders)
 		{
-			return generateHeadResponse() + this->content;
+			generateHeadResponse(data);
+			data += this->content;
 		}
 		else
 		{
-			return generateHeadResponse();
+			generateHeadResponse(data);
 		}
 	}
 }
@@ -137,23 +139,28 @@ std::string HttpResponse::generateResponse(const bool& appendHeaders /*= true*/)
 {
 	if(appendHeaders)
 	{
-		return generateHeadResponse() + this->content;
+		std::string data;
+		generateHeadResponse(data);
+		return data + this->content;
 	}
 	else
 	{
-		generateHeadResponse();
+		std::string data;
+		generateHeadResponse(data);
 		return this->content;
 	}
 }
 
 const std::string HttpResponse::HDR_SRV = "Server: FFEAD 2.0\r\n";
 const std::string HttpResponse::HDR_SEP = ": ";
+const std::string HttpResponse::HDR_SEPT = ":";
 const std::string HttpResponse::HDR_END = "\r\n";
+const std::string HttpResponse::HDR_FIN = "\r\n\r\n";
 
-std::string HttpResponse::generateHeadResponse()
+void HttpResponse::generateHeadResponse(std::string& resp)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
-	std::string resp, boundary;
+	std::string boundary;
 	if(this->contentList.size()>0)
 	{
 		content.clear();
@@ -196,14 +203,12 @@ std::string HttpResponse::generateHeadResponse()
 		resp += SetCookie + HDR_SEP + this->cookies.at(var) + HDR_END;
 	}
 	resp += HDR_END;
-	return resp;
 }
 
 const std::string HttpResponse::HDR_CORS_ALW = "Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE\r\n";
 
-std::string HttpResponse::generateOptionsResponse()
+void HttpResponse::generateOptionsResponse(std::string& resp)
 {
-	std::string resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + HDR_END);
 	resp += HDR_SRV;
 	RMap::iterator it;
@@ -217,12 +222,10 @@ std::string HttpResponse::generateOptionsResponse()
 	}
 	resp += HDR_CORS_ALW;
 	resp += HDR_END;
-	return resp;
 }
 
-std::string HttpResponse::generateTraceResponse(HttpRequest* req)
+void HttpResponse::generateTraceResponse(HttpRequest* req, std::string& resp)
 {
-	std::string resp;
 	resp = (httpVersion + " " + statusCode + " " + statusMsg + HDR_END);
 	resp += HDR_SRV;
 	RMap::iterator it;
@@ -245,7 +248,6 @@ std::string HttpResponse::generateTraceResponse(HttpRequest* req)
 			resp += it->first + HDR_SEP + it->second + HDR_END;
 		}
 	}
-	return resp;
 }
 
 
@@ -681,8 +683,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 	return hasContent;
 }
 
-std::string HttpResponse::getRemainingContent(const std::string& fname, const bool& isFirst) {
-	std::string rem;
+bool HttpResponse::getRemainingContent(const std::string& fname, const bool& isFirst, std::string& rem) {
 	if(isContentRemains() && httpVers>=1.1) {
 		unsigned int totlen = getContentSize(fname.c_str());
 		unsigned int len = totlen - techunkSiz*tecurrpart;
@@ -704,10 +705,12 @@ std::string HttpResponse::getRemainingContent(const std::string& fname, const bo
 			rem = getContent(fname.c_str(), techunkSiz*tecurrpart, len);
 		}
 		tecurrpart++;
+		return true;
 	} else if(isFirst || (httpVers>=1.0 && httpVers<1.1)) {
 		rem = content;
+		return true;
 	}
-	return rem;
+	return false;
 }
 
 bool HttpResponse::isContentRemains() {

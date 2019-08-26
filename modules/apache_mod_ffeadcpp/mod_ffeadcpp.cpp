@@ -635,6 +635,8 @@ static apr_status_t mod_ffeadcp_child_uninit(void* arg)
 	LoggerFactory::clear();
 
 	CommonUtils::clearInstance();
+
+	return OK;
 }
 
 static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)

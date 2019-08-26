@@ -35,9 +35,9 @@ void HttpServiceHandler::handleRead(SocketInterface* sif)
 	submitTask(task);
 }
 
-void HttpServiceHandler::handleWrite(HandlerRequest *handlerRequest) {
+void HttpServiceHandler::handleWrite(SocketInterface* sif) {
 	HttpWriteTask* task = new HttpWriteTask();
-	task->handlerRequest = handlerRequest;
+	task->sif = sif;
 	task->service = this;
 	task->setCleanUp(true);
 	submitTask(task);
@@ -207,22 +207,19 @@ void HttpServiceTask::run() {
 }
 
 void HttpWriteTask::run() {
-	int ret = handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos);
+	/*int ret = sif->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos);
 	if(ret==0) {
 		handlerRequest->doneWithWrite(handlerRequest->reqPos);
-		handlerRequest->sif->onClose();
-		service->closeConnection(handlerRequest->sif);
-	}
+		sif->onClose();
+		service->closeConnection(sif);
+	}*/
 }
 
 HttpWriteTask::~HttpWriteTask() {
-	if(handlerRequest!=NULL) {
-		delete handlerRequest;
-	}
 }
 
 HttpWriteTask::HttpWriteTask() {
-	this->handlerRequest = NULL;
+	this->sif = NULL;
 	service = NULL;
 	this->hdlr = NULL;
 }

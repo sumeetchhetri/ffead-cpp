@@ -29,8 +29,9 @@ void* ServiceHandler::closeConnections(void *arg) {
 		for(it=addrs.begin();it!=addrs.end();) {
 			long long t = Timer::getTimestamp();
 			if(t-it->second>=15) {
-				addrs.erase(it++);
 				delete sifMap[it->first];
+				sifMap.erase(it->first);
+				addrs.erase(it++);
 			} else {
 				++it;
 			}
@@ -47,8 +48,8 @@ void ServiceHandler::registerReadRequest(SocketInterface* sif) {
 	handleRead(sif);
 }
 
-void ServiceHandler::registerWriteRequest(HandlerRequest* hr) {
-	handleWrite(hr);
+void ServiceHandler::registerWriteRequest(SocketInterface* sif) {
+	handleWrite(sif);
 }
 
 void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos) {
