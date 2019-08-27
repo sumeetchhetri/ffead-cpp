@@ -17,6 +17,14 @@ HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const Htt
 HttpServiceHandler::~HttpServiceHandler() {
 }
 
+int HttpServiceTask::getTid() {
+	return handlerRequest->sif->tid;
+}
+
+ void HttpServiceTask::setTid(int tid) {
+	handlerRequest->sif->tid = tid;
+}
+
 void HttpServiceHandler::handleService(HandlerRequest* handlerRequest)
 {
 	HttpServiceTask* task = f();
@@ -98,7 +106,6 @@ void HttpServiceTask::run() {
 	t.start();
 
 	if(handlerRequest->getSif()->isClosed()) {
-		handlerRequest->doneWithWrite(handlerRequest->reqPos);
 		handlerRequest->sif->onClose();
 		service->closeConnection(handlerRequest->sif);
 		t.end();
@@ -198,21 +205,17 @@ void HttpServiceTask::run() {
 	handlerRequest->response = resp;
 	int ret = handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos);
 	if(ret==0) {
-		handlerRequest->doneWithWrite(handlerRequest->reqPos);
 		handlerRequest->sif->onClose();
 		service->closeConnection(handlerRequest->sif);
 	}
-	//service->registerWriteRequest(handlerRequest);
-	//handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), resp, handlerRequest->getContext(), handlerRequest->reqPos);
 }
 
 void HttpWriteTask::run() {
-	/*int ret = sif->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos);
+	int ret = sif->completeWrite();
 	if(ret==0) {
-		handlerRequest->doneWithWrite(handlerRequest->reqPos);
 		sif->onClose();
 		service->closeConnection(sif);
-	}*/
+	}
 }
 
 HttpWriteTask::~HttpWriteTask() {

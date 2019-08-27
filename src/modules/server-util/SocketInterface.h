@@ -59,6 +59,7 @@ class SocketInterface {
 	bool http2;
 	Logger logger;
 	std::string buffer;
+	int tid;
 	Mutex m;
 	Mutex wm;
 	std::map<int, ResponseData*> wtl;

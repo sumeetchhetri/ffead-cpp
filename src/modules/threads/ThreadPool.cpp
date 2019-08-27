@@ -117,6 +117,10 @@ void ThreadPool::joinAll() {
 }
 
 void ThreadPool::submit(Task* task) {
+	if(task->getTid()!=-1) {
+		tpool.at(task->getTid())->addTask(task);
+		return;
+	}
 	//https://stackoverflow.com/questions/33554255/c-thread-safe-increment-with-modulo-without-mutex-using-stdatomic
 	int index = currentThread ++;
 	int id = index % maxThreads;
@@ -128,6 +132,7 @@ void ThreadPool::submit(Task* task) {
 	while (!currentThread.compare_exchange_weak( oldValue, newValue, std::memory_order_relaxed ))
 		newValue = oldValue % maxThreads;
 	tpool.at(id)->addTask(task);
+	task->setTid(id);
 }
 void ThreadPool::submit(Task* task, const int& priority) {
 	if(this->prioritypooling) {
@@ -151,6 +156,10 @@ void ThreadPool::schedule(Task* task, const long long& tunit, const int& type) {
 }
 
 void ThreadPool::submit(FutureTask* task) {
+	if(task->getTid()!=-1) {
+		tpool.at(task->getTid())->addTask(task);
+		return;
+	}
 	//https://stackoverflow.com/questions/33554255/c-thread-safe-increment-with-modulo-without-mutex-using-stdatomic
 	int index = currentThread ++;
 	int id = index % maxThreads;
@@ -162,6 +171,7 @@ void ThreadPool::submit(FutureTask* task) {
 	while (!currentThread.compare_exchange_weak( oldValue, newValue, std::memory_order_relaxed ))
 		newValue = oldValue % maxThreads;
 	tpool.at(id)->addTask(task);
+	task->setTid(id);
 }
 void ThreadPool::submit(FutureTask* task, const int& priority) {
 	if(this->prioritypooling) {

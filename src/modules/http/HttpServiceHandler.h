@@ -20,6 +20,8 @@ class HttpServiceTask : public Task {
 	friend class HttpServiceHandler;
 	friend class CHServer;
 public:
+	int getTid();
+	void setTid(int tid);
 	virtual ~HttpServiceTask();
 	HttpServiceTask();
 	HttpServiceTask(ReusableInstanceHolder* h);
