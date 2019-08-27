@@ -63,7 +63,6 @@ void HttpReadTask::run() {
 	Timer t;
 	t.start();
 
-	sif->tid = -1;
 	int pending = 1;
 	while(pending>0)
 	{

@@ -38,6 +38,7 @@ class SocketInterface;
 class ResponseData {
 	std::string _b;
 	int oft;
+	bool done;
 	friend class SocketInterface;
 };
 
@@ -49,23 +50,24 @@ public:
 };
 
 class SocketInterface {
-private:
-	SOCKET fd;
-	Mutex wl;
 	static std::atomic<int> openSocks;
 	EventHandler* eh;
 	SSL *ssl;
 	BIO *io;
+	SOCKET fd;
 	std::atomic<bool> closed;
 	bool http2;
 	Logger logger;
 	std::string buffer;
-	int tid;
+	std::atomic<int> tid;
+	Mutex m;
+	Mutex wm;
+	std::map<int, ResponseData*> wtl;
+	//cuckoohash_map<int, ResponseData*> wtl;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
 	std::string address;
 	bool isBlocking();
-	ResponseData rd;
 	bool handleRenegotiation();
 	void init(const SOCKET& fd);
 	friend class RequestReaderHandler;
@@ -81,7 +83,7 @@ private:
 	friend class CommonUtils;
 	friend class DummySocketInterface;
 public:
-	int completeWrite();
+	bool completeWrite();
 	int pushResponse(void* request, void* response, void* context, int reqPos);
 	static bool init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger);
 	int startRequest();
