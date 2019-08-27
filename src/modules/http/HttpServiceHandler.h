@@ -38,6 +38,8 @@ class HttpReadTask : public Task {
 	friend class HttpServiceHandler;
 	friend class CHServer;
 public:
+	int getTid();
+	void setTid(int tid);
 	virtual ~HttpReadTask();
 	HttpReadTask();
 };
@@ -49,6 +51,8 @@ class HttpWriteTask : public Task {
 	friend class HttpServiceHandler;
 	friend class CHServer;
 public:
+	int getTid();
+	void setTid(int tid);
 	virtual ~HttpWriteTask();
 	HttpWriteTask();
 };

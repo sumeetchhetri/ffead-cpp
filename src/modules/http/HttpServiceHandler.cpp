@@ -59,6 +59,14 @@ HttpReadTask::HttpReadTask() {
 HttpReadTask::~HttpReadTask() {
 }
 
+int HttpReadTask::getTid() {
+	return sif->tid;
+}
+
+void HttpReadTask::setTid(int tid) {
+	sif->tid = tid;
+}
+
 void HttpReadTask::run() {
 	Timer t;
 	t.start();
@@ -225,4 +233,12 @@ HttpWriteTask::HttpWriteTask() {
 	this->sif = NULL;
 	service = NULL;
 	this->hdlr = NULL;
+}
+
+int HttpWriteTask::getTid() {
+	return sif->tid;
+}
+
+void HttpWriteTask::setTid(int tid) {
+	sif->tid = tid;
 }

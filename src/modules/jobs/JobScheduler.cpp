@@ -238,3 +238,10 @@ void JobScheduler::JobTask::run() {
 	}
 }
 
+int JobScheduler::JobTask::getTid() {
+	return -1;
+}
+
+void JobScheduler::JobTask::setTid(int tid) {
+}
+
