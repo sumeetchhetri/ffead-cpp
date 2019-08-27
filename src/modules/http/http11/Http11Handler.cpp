@@ -12,8 +12,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		return handler->readRequest(context, pending, reqPos);
 	}
 
-	m.lock();
-	if(readFrom()) {
+	if(readFrom()==0) {
 		return NULL;
 	}
 	size_t ix = buffer.find("\r\n\r\n");
@@ -42,7 +41,6 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 					closeSocket();
 					delete request;
 					request = NULL;
-					m.unlock();
 					return NULL;
 				}
 			} else if(var!=0) {
@@ -56,7 +54,6 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 				closeSocket();
 				delete request;
 				request = NULL;
-				m.unlock();
 				return NULL;
 			}
 		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find("\r\n")!=std::string::npos) {
@@ -109,10 +106,8 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		isHeadersDone = false;
 		void* temp = request;
 		request = NULL;
-		m.unlock();
 		return temp;
 	}
-	m.unlock();
 	return NULL;
 }
 

@@ -19,6 +19,7 @@ SocketInterface::SocketInterface() {
 	current = 0;
 	http2 = false;
 	fd = -1;
+	tid = -1;
 }
 
 SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
@@ -32,8 +33,10 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	address = StringUtil::toHEX((long long)this);
 	this->fd = fd;
 	http2 = SSLHandler::getAlpnProto(fd).find("h2")==0;
-	wtl[0] = new ResponseData();
 	openSocks++;
+	tid = -1;
+	rd._b.reserve(4096);
+	rd.oft = 0;
 }
 
 bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger) {
@@ -94,15 +97,6 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 
 SocketInterface::~SocketInterface() {
 	closeSocket();
-	/*cuckoohash_map<int, ResponseData*>::locked_table lt = wtl.lock_table();
-	cuckoohash_map<int, ResponseData*>::locked_table::iterator it;
-	for(it=lt.begin();it!=lt.end();++it) {
-		delete it->second;
-	}*/
-	std::map<int, ResponseData*>::iterator it;
-	for(it=wtl.begin();it!=wtl.end();++it) {
-		delete it->second;
-	}
 	openSocks--;
 }
 
@@ -111,100 +105,82 @@ bool SocketInterface::isClosed() {
 	return closed;
 }
 
-bool SocketInterface::completeWrite() {
+int SocketInterface::completeWrite() {
+	Timer to;
+	to.start();
+
+	int done = 1;
+	int reqPos = current + 1;
+
 	Timer t;
 	t.start();
 
-	bool done = false;
-	int reqPos = current + 1;
-	ResponseData* rd = wtl[reqPos];
-	int ret = writeTo(rd);
-	if(ret == 0 || ret == 1) {
-		endRequest(reqPos);
-		delete rd;
-		done = true;
-	} else {
-		eh->registerWrite(this);
-	}
+	wl.lock();
+	int ret = writeTo(&rd);
+	wl.unlock();
 
 	t.end();
-	CommonUtils::tsWrite += t.timerNanoSeconds();
+	CommonUtils::tsActWrite += t.timerNanoSeconds();
+
+	if(ret == 0 || ret == 1) {
+		endRequest(reqPos);
+		if(ret==0) {
+			return 0;
+		}
+	} else {
+		eh->registerWrite(this);
+		return -1;
+	}
+
+	to.end();
+	CommonUtils::tsWrite += to.timerNanoSeconds();
 	return done;
 }
 
 void SocketInterface::writeTo(const std::string& d, int reqPos) {
-	wm.lock();
-	ResponseData* rd = wtl[reqPos];
-	wm.unlock();
-	rd->_b += d;
+	wl.lock();
+	rd._b += d;
+	wl.unlock();
 }
 
 int SocketInterface::pushResponse(void* request, void* response, void* context, int reqPos) {
+	Timer to;
+	to.start();
+
+	wl.lock();
+	writeResponse(request, response, context, rd._b, reqPos);
+	wl.unlock();
+
 	Timer t;
 	t.start();
 
-	int done = -1;
-	wm.lock();
-	ResponseData* rd = wtl[reqPos];
-	wm.unlock();
-	if(isCurrentRequest(reqPos)) {
-		if(!rd->done) {
-			writeResponse(request, response, context, rd->_b, reqPos);
-			rd->done = true;
-		}
-		done = writeTo(rd);
-		if(done == 1) {
-			endRequest(reqPos);
-			while(true) {
-				wm.lock();
-				if(wtl.find(++reqPos)!=wtl.end() && (rd = wtl.find(reqPos)->second)!=NULL && rd->done) {
-					wm.unlock();
-					done = writeTo(rd);
-					if(done!=1) {
-						break;
-					}
-					endRequest(reqPos);
-				} else {
-					wm.unlock();
-					break;
-				}
-			}
-
-		}
-		if(done == -1) {
-			eh->registerWrite(this);
-		} else if(done == 0) {
-			endRequest(reqPos);
-		}
-	} else if(!rd->done) {
-		writeResponse(request, response, context, rd->_b, reqPos);
-		rd->done = true;
-		done = 1;
-	}
+	wl.lock();
+	int done = writeTo(&rd);
+	wl.unlock();
 
 	t.end();
-	CommonUtils::tsWrite += t.timerNanoSeconds();
+	CommonUtils::tsActWrite += t.timerNanoSeconds();
+
+	if(done == 1) {
+		endRequest(reqPos);
+	} else if(done == -1) {
+		eh->registerWrite(this);
+	} else if(done == 0) {
+		endRequest(reqPos);
+	}
+
+	to.end();
+	CommonUtils::tsWrite += to.timerNanoSeconds();
 
 	return done;
 }
 
 int SocketInterface::startRequest() {
-	int rp = ++reqPos;
-	wm.lock();
-	wtl[rp] = new ResponseData();
-	wm.unlock();
-	return rp;
+	return ++reqPos;
 }
 
 int SocketInterface::endRequest(int reqPos) {
-	wm.lock();
-	ResponseData* rd = wtl[reqPos];
-	if(wtl.erase(reqPos)==1) {
-		++current;
-		delete rd;
-	}
-	wm.unlock();
-	return current;
+	return ++current;
 }
 
 bool SocketInterface::allRequestsDone() {
@@ -272,7 +248,7 @@ int SocketInterface::writeTo(ResponseData* d)
 			}
 		}
 	}
-	return closed==true;
+	return closed?0:1;
 }
 
 bool SocketInterface::writeFile(int fdes, int remain_data)
@@ -326,7 +302,7 @@ bool SocketInterface::writeFile(int fdes, int remain_data)
 	return isClosed();
 }
 
-bool SocketInterface::readFrom()
+int SocketInterface::readFrom()
 {
 	if(SSLHandler::getInstance()->getIsSSL())
 	{
@@ -339,7 +315,7 @@ bool SocketInterface::readFrom()
 			{
 				case SSL_ERROR_WANT_READ:
 				{
-					return false;
+					return -1;
 				}
 				case SSL_ERROR_NONE:
 				{
@@ -349,7 +325,7 @@ bool SocketInterface::readFrom()
 				default:
 				{
 					closeSocket();
-					return true;
+					return 0;
 				}
 			}
 		}
@@ -362,12 +338,12 @@ bool SocketInterface::readFrom()
 			int er = recv(fd, b, 4096, 0);
 			if (er == -1 && errno == EAGAIN)
 			{
-				return false;
+				return -1;
 			}
 			else if(er<=0)
 			{
 				closeSocket();
-				return true;
+				return 0;
 			}
 			else
 			{
@@ -375,7 +351,7 @@ bool SocketInterface::readFrom()
 			}
 		}
 	}
-	return closed;
+	return closed?0:1;
 }
 
 int SocketInterface::getDescriptor() {

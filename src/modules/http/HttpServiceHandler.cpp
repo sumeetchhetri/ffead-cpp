@@ -21,7 +21,7 @@ int HttpServiceTask::getTid() {
 	return handlerRequest->sif->tid;
 }
 
- void HttpServiceTask::setTid(int tid) {
+void HttpServiceTask::setTid(int tid) {
 	handlerRequest->sif->tid = tid;
 }
 
@@ -63,6 +63,7 @@ void HttpReadTask::run() {
 	Timer t;
 	t.start();
 
+	sif->tid = -1;
 	int pending = 1;
 	while(pending>0)
 	{

@@ -33,7 +33,7 @@ void* PoolThread::run(void *arg)
 	{
 		Task* task;
 		ths->c_mutex.lock();
-		while (ths->condVar==0)
+		while (ths->condVar<=0)
 		ths->c_mutex.conditionalWait();
 		ths->c_mutex.unlock();
 

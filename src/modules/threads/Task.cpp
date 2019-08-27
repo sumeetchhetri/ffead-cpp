@@ -134,6 +134,6 @@ bool Task::operator <(const Task& other) {
 void Task::setTid(int tid) {
 }
 
- int Task::getTid() {
+int Task::getTid() {
 	return -1;
 }
