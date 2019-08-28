@@ -131,8 +131,8 @@ void ThreadPool::submit(Task* task) {
 	int newValue = oldValue % maxThreads;
 	while (!currentThread.compare_exchange_weak( oldValue, newValue, std::memory_order_relaxed ))
 		newValue = oldValue % maxThreads;
-	tpool.at(id)->addTask(task);
 	task->setTid(id);
+	tpool.at(id)->addTask(task);
 }
 void ThreadPool::submit(Task* task, const int& priority) {
 	if(this->prioritypooling) {
@@ -170,8 +170,8 @@ void ThreadPool::submit(FutureTask* task) {
 	int newValue = oldValue % maxThreads;
 	while (!currentThread.compare_exchange_weak( oldValue, newValue, std::memory_order_relaxed ))
 		newValue = oldValue % maxThreads;
-	tpool.at(id)->addTask(task);
 	task->setTid(id);
+	tpool.at(id)->addTask(task);
 }
 void ThreadPool::submit(FutureTask* task, const int& priority) {
 	if(this->prioritypooling) {
