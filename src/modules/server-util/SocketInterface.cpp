@@ -129,7 +129,6 @@ int SocketInterface::completeWrite() {
 
 		if(done == 0 || done == 1) {
 			endRequest(reqPos);
-			delete rd;
 			if(done==0) {
 				break;
 			}

@@ -571,7 +571,9 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						}
 					}
 					res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(rft.statusCode));
-					delete ouput;
+					int rserOpt = rft.serOpt>=2000?rft.serOpt-2000:(rft.serOpt>=1000?rft.serOpt-1000:rft.serOpt);
+					reflector.destroy(rserOpt, ouput, rft.rtype);
+					//delete ouput;
 					//logger << "Successfully called restcontroller output follows - " << std::endl;
 					//logger << outcontent << std::endl;
 

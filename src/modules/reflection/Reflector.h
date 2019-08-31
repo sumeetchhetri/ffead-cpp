@@ -84,6 +84,7 @@ public:
 		return obj;
 	}
 	void destroy(void* instance, std::string cs, const std::string& app= "");
+	void destroy(int serOpt, void* instance, std::string cs, const std::string& app= "");
 	void* invokeMethodGVP(void* instance, const Method& method, const vals& values, const bool& cleanVals = false)
 	{
 		void *obj = NULL;
