@@ -12,17 +12,24 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		return handler->readRequest(context, pending, reqPos);
 	}
 
+	Timer t;
+	t.start();
+
 	if(readFrom()==0) {
 		return NULL;
 	}
-	size_t ix = buffer.find("\r\n\r\n");
+
+	t.end();
+	CommonUtils::tsActRead += t.timerNanoSeconds();
+
+	size_t ix = buffer.find(HttpResponse::HDR_FIN);
 	if(!isHeadersDone && ix!=std::string::npos)
 	{
 		request = new HttpRequest(webpath);
 		bytesToRead = 0;
 		std::string headers = buffer.substr(0, ix);
 		buffer = buffer.substr(ix+4);
-		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, "\r\n");
+		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, HttpResponse::HDR_END);
 		request->buildRequest("httpline", lines.at(0));
 		int hdrc = 0;
 		for (int var = 0; var < (int)lines.size(); ++var) {
@@ -56,9 +63,9 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 				request = NULL;
 				return NULL;
 			}
-		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find("\r\n")!=std::string::npos) {
-			bytesstr = buffer.substr(0, buffer.find("\r\n"));
-			buffer = buffer.substr(buffer.find("\r\n")+2);
+		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
+			bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
+			buffer = buffer.substr(buffer.find(HttpResponse::HDR_END)+2);
 			if(bytesstr!="") {
 				isTeRequest = true;
 				bytesToRead = (int)StringUtil::fromHEX(bytesstr);
@@ -74,9 +81,9 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	}
 	if(request!=NULL && isHeadersDone)
 	{
-		if(isTeRequest && bytesToRead==0 && buffer.find("\r\n")!=std::string::npos) {
-			std::string bytesstr = buffer.substr(0, buffer.find("\r\n"));
-			buffer = buffer.substr(buffer.find("\r\n")+2);
+		if(isTeRequest && bytesToRead==0 && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
+			std::string bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
+			buffer = buffer.substr(buffer.find(HttpResponse::HDR_END)+2);
 			if(bytesstr!="") {
 				bytesToRead = (int)StringUtil::fromHEX(bytesstr);
 				if(bytesToRead==0) {

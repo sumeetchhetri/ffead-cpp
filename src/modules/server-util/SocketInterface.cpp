@@ -153,8 +153,8 @@ void SocketInterface::writeTo(const std::string& d, int reqPos) {
 }
 
 int SocketInterface::pushResponse(void* request, void* response, void* context, int reqPos) {
-	Timer t;
-	t.start();
+	Timer to;
+	to.start();
 
 	wm.lock();
 	ResponseData* rd = wtl[reqPos];
@@ -162,7 +162,14 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 
 	writeResponse(request, response, context, rd->_b, reqPos);
 
+	Timer t;
+	t.start();
+
 	int done = writeTo(rd);
+
+	t.end();
+	CommonUtils::tsActWrite += t.timerNanoSeconds();
+
 	if(done == 1) {
 		endRequest(reqPos);
 	} else if(done == -1) {
@@ -171,8 +178,8 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 		endRequest(reqPos);
 	}
 
-	t.end();
-	CommonUtils::tsWrite += t.timerNanoSeconds();
+	to.end();
+	CommonUtils::tsWrite += to.timerNanoSeconds();
 
 	return done;
 }
