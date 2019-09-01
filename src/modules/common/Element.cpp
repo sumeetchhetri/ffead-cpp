@@ -29,9 +29,6 @@ Element::Element() {
 }
 
 Element::~Element() {
-	for (int var = 0; var < (int)elements.size(); ++var) {
-		//delete elements.at(var);
-	}
 }
 
 void Element::copy(Element* to) {

@@ -1244,6 +1244,12 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	HTTPResponseStatus::init();
 
+	HttpRequest::init();
+
+	HttpResponse::init();
+
+	MultipartContent::init();
+
 	unsigned int nthreads = hardware_concurrency();
 
 	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &httpServiceFactoryMethod, nthreads, &httpReadFactoryMethod);

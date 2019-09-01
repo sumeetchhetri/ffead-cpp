@@ -79,7 +79,8 @@ void HttpReadTask::run() {
 		void* request = sif->readRequest(context, pending, reqPos);
 		if(sif->isClosed()) {
 			if(request!=NULL) {
-				delete request;
+				//so that request can be cleaned up correctly
+				service->registerServiceRequest(request, sif, context, reqPos);
 			}
 			service->closeConnection(sif);
 			break;
@@ -124,7 +125,7 @@ void HttpServiceTask::run() {
 	CommonUtils::cReqs += 1;
 
 	void* resp = NULL;
-	if(handlerRequest->getProtocol()=="HTTP2.0" || handlerRequest->getProtocol()=="HTTP1.1")
+	if(handlerRequest->getProtType()==1)
 	{
 		HttpRequest* req = (HttpRequest*)handlerRequest->getRequest();
 		HttpResponse* res = new HttpResponse();
@@ -144,7 +145,7 @@ void HttpServiceTask::run() {
 		strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
 		res->addHeader(HttpResponse::DateHeader, std::string(buffer));
 
-		if(handlerRequest->getProtocol()=="HTTP1.1" && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
+		if(handlerRequest->getSif()->getProtocol(handlerRequest->getContext())=="HTTP1.1" && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
 		{
 			if(req->isHeaderValue(HttpRequest::Upgrade, "websocket", true)
 					&& req->getHeader(HttpRequest::SecWebSocketKey)!=""

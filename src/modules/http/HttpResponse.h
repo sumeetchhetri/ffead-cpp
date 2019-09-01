@@ -39,6 +39,7 @@
 typedef std::vector<unsigned char> Cont;
 class HttpResponse {
 public:
+	static void init();
 	static std::string AccessControlAllowOrigin,AccessControlAllowHeaders,AccessControlAllowCredentials,
 				  AccessControlAllowMethods,AccessControlMaxAge,AcceptRanges,Age,Allow,CacheControl,
 				  Connection,ContentEncoding,ContentLanguage,ContentLength,ContentLocation,ContentMD5,
@@ -75,6 +76,7 @@ public:
 	std::string generateResponse(const bool& appendHeaders= true);
 	void generateResponse(HttpRequest *req, std::string& data, const bool& appendHeaders= true);
 private:
+	static RiMap HDRS_SW_CODES;
 	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN;
     bool done;
     float httpVers;

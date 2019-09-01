@@ -1576,7 +1576,7 @@ long SQLDataSourceImpl::getNumRows(const std::string& clasName) {
 	if(temp!=NULL) {
 		tv = *(std::vector<std::map<std::string, GenericObject> >*) temp;
 		tv.at(0).begin()->second.get(size);
-		delete temp;
+		delete (std::vector<std::map<std::string, GenericObject> >*)temp;
 	}
 	return size;
 }
@@ -1590,7 +1590,7 @@ std::vector<std::map<std::string, GenericObject> > SQLDataSourceImpl::execute(Qu
 		{
 			tv = *(std::vector<std::map<std::string, GenericObject> >*)temp;
 		}
-		delete temp;
+		delete (std::vector<std::map<std::string, GenericObject> >*)temp;
 	}
 	return tv;
 }
@@ -1619,7 +1619,7 @@ std::vector<std::map<std::string, GenericObject> > SQLDataSourceImpl::execute(Qu
 		{
 			tv = *(std::vector<std::map<std::string, GenericObject> >*)temp;
 		}
-		delete temp;
+		delete (std::vector<std::map<std::string, GenericObject> >*)temp;
 	}
 	return tv;
 }

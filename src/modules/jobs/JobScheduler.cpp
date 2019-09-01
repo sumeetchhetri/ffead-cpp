@@ -160,9 +160,6 @@ void JobScheduler::stop() {
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
 	logger << "Waiting 10 seconds for all Job Processes to shutdown....";
 	sleep(10);
-	for (int var = 0; var < (int)instance->tasks.size(); ++var) {
-		//delete instance->tasks.at(var);
-	}
 	delete instance;
 }
 

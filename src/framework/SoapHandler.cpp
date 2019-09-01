@@ -74,7 +74,6 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 				env.append(" " + it->first + "=\"" + it->second + "\" ");
 			}
 			env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-			//delete mkr;
 		}
 		else
 		{

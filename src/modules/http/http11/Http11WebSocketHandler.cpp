@@ -50,7 +50,7 @@ Http11WebSocketHandler::~Http11WebSocketHandler() {
 }
 
 std::string Http11WebSocketHandler::getProtocol(void* context) {
-	return "HTTP1.1WS";
+	return "WS1.1";
 }
 
 int Http11WebSocketHandler::getTimeout() {

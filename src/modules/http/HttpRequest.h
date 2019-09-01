@@ -41,10 +41,12 @@ typedef std::vector<std::string> strVec;
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
+typedef std::map<std::string, int, cicomp> RiMap;
 typedef std::map<std::string, std::string, cicomp> RMap;
 typedef std::map<std::string, MultipartContent, cicomp> FMap;
 
 class HttpRequest {
+	static RiMap HDRS_SW_CODES;
 	static std::string VALID_REQUEST_HEADERS;
 	std::string webpath;
 	std::string authority;
@@ -132,6 +134,7 @@ public:
 	enum {
 		PREFLIGHT, CORS, OTHER
 	};
+	static void init();
 	static std::string Accept,AcceptCharset,AcceptEncoding,AcceptLanguage,AcceptDatetime,
 				  AccessControlRequestHeaders,AccessControlRequestMethod,Authorization,
 				  CacheControl,Connection,Cookie,ContentLength,ContentMD5,ContentType,

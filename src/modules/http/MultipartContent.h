@@ -32,6 +32,7 @@
 
 
 class MultipartContent {
+	std::map<std::string, int, cicomp> HDRS_SW_CODES;
 	static std::string VALID_HEADERS;
 	std::map<std::string,std::string,cicomp> headers;
 	std::string content;
@@ -49,6 +50,7 @@ class MultipartContent {
 	friend class ServiceTask;
 	void addHeader(std::string header, const std::string& value);
 public:
+	static void init();
 	static std::string ContentId,ContentDisposition,ContentTransferEncoding,
 				  ContentLocation,ContentBase,ContentLength,ContentMD5,ContentType;
 	MultipartContent();

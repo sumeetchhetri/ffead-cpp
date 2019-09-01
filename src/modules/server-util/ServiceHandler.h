@@ -30,7 +30,7 @@ class HandlerRequest {
 	void* context;
 	void* response;
 	int reqPos;
-	std::string protocol;
+	int protType;
 	ServiceHandler* sh;
 	friend class ServiceHandler;
 	friend class HttpServiceTask;
@@ -39,7 +39,7 @@ class HandlerRequest {
 	HandlerRequest();
 public:
 	void* getContext();
-	const std::string& getProtocol() const;
+	int getProtType() const;
 	void* getRequest();
 	void* getResponse();
 	SocketInterface* getSif();

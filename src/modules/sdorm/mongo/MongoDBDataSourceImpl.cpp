@@ -679,7 +679,7 @@ std::vector<std::map<std::string, GenericObject> > MongoDBDataSourceImpl::execut
 	std::vector<std::map<std::string, GenericObject> > vec;
 	if(res!=NULL) {
 		vec = *(std::vector<std::map<std::string, GenericObject> >*)res;
-		delete res;
+		delete (std::vector<std::map<std::string, GenericObject> >*)res;
 	}
 	return vec;
 
@@ -936,7 +936,7 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName,
 				for (int var = 0; var < contSize; ++var) {
 					void* contEle = reflector->getContainerElementAt(val, var, vtyp, "std::vector", appName);
 					getBSONObjectFromObject(vtyp, contEle, b, true);
-					delete contEle;
+					reflector->destroy(contEle, vtyp);
 				}
 				bson_append_array_end(b, &child);
 				reflector->destroy(val, meth.getReturnType(), appName);
@@ -1080,7 +1080,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 				void* ob = getObject(NULL, bson_iter_value(&i)->value.v_doc.data, bson_iter_value(&i)->value.v_doc.data_len,
 						fe.getType());
 				storeProperty(clas, instance, ob, fe);
-				delete ob;
+				reflector->destroy(ob, fe.getType());
 				break;
 			}
 			case BSON_TYPE_ARRAY:
@@ -1244,7 +1244,7 @@ void* MongoDBDataSourceImpl::getObject(bson_t* data, uint8_t* buf, uint32_t len,
 							reflector->destroy(ob, te, appName);
 						}
 						storeProperty(clas, instance, veci, fe);
-						delete veci;
+						reflector->destroyContainer(veci, te, "std::vector", appName);
 					}
 					else
 					{
@@ -1463,7 +1463,7 @@ std::vector<std::map<std::string, GenericObject> > MongoDBDataSourceImpl::execut
 	std::vector<std::map<std::string, GenericObject> > vec;
 	if(res!=NULL) {
 		vec = *(std::vector<std::map<std::string, GenericObject> >*)res;
-		delete res;
+		delete (std::vector<std::map<std::string, GenericObject> >*)res;
 	}
 	return vec;
 }

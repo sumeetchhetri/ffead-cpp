@@ -67,6 +67,17 @@ std::string HttpResponse::SecWebSocketAccept = "Sec-WebSocket-Accept";
 std::string HttpResponse::SecWebSocketVersion = "Sec-WebSocket-Version";
 std::string HttpResponse::AltSvc = "Alt-Svc";
 
+RiMap HttpResponse::HDRS_SW_CODES;
+
+void HttpResponse::init() {
+	std::string t = VALID_RESPONSE_HEADERS.substr(1, VALID_RESPONSE_HEADERS.length()-1);
+	std::vector<std::string> vt;
+	StringUtil::split(vt, t, ",");
+	for(int i=0;i<(int)vt.size();i++) {
+		HDRS_SW_CODES[vt.at(i)] = i;
+	}
+}
+
 HttpResponse::HttpResponse() {
 	httpVersion = "HTTP/1.1";
 	compressed = false;
@@ -323,9 +334,9 @@ void HttpResponse::addHeader(std::string header, const std::string& value)
 
 void HttpResponse::addHeaderValue(std::string header, const std::string& value)
 {
-	if(header!="")
+	if(header.length()>0)
 	{
-		if(VALID_RESPONSE_HEADERS.find(","+header+",")!=std::string::npos)
+		if(HDRS_SW_CODES.find(header)!=HDRS_SW_CODES.end())
 		{
 			if(headers.find(header)!=headers.end()) {
 				headers[header] += "," + value;

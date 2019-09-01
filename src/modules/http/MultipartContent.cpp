@@ -33,6 +33,17 @@ std::string MultipartContent::ContentLength = "Content-Length";
 std::string MultipartContent::ContentMD5 = "Content-MD5";
 std::string MultipartContent::ContentType =	"Content-Type";
 
+std::map<std::string, int, cicomp> MultipartContent::HDRS_SW_CODES;
+
+void MultipartContent::init() {
+	std::string t = VALID_HEADERS.substr(1, VALID_HEADERS.length()-1);
+	std::vector<std::string> vt;
+	StringUtil::split(vt, t, ",");
+	for(int i=0;i<(int)vt.size();i++) {
+		HDRS_SW_CODES[vt.at(i)] = i;
+	}
+}
+
 MultipartContent::MultipartContent() {
 }
 
@@ -143,10 +154,9 @@ void MultipartContent::addHeader(std::string header, const std::string& value)
 
 void MultipartContent::addHeaderValue(std::string header, const std::string& value)
 {
-	header = StringUtil::camelCasedCopy(header, "-");
-	if(header!="")
+	if(header.length()>0)
 	{
-		if(VALID_HEADERS.find(","+StringUtil::toLowerCopy(header)+",")!=std::string::npos)
+		if(HDRS_SW_CODES.find(header)!=HDRS_SW_CODES.end())
 		{
 			if(headers.find(header)!=headers.end()) {
 				headers[header] += "," + value;

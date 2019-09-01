@@ -221,7 +221,6 @@ PoolThread::~PoolThread() {
 	{
 		Thread::sSleep(1);
 	}
-	//delete mthread;
 	logger << "Destroyed PoolThread\n" << std::flush;
 }
 

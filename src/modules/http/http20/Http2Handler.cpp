@@ -534,7 +534,7 @@ int Http2Handler::updateSenderWindowSize(const int& windowSize) {
 std::string Http2Handler::getProtocol(void* context) {
 	int streamIdentifier = *(int*)context;
 	if(streams.find(streamIdentifier)!=streams.end() && streams[streamIdentifier].isWebSocket) {
-		return "HTTP2.0WS";
+		return "WS2.0";
 	}
 	return "HTTP2.0";
 }

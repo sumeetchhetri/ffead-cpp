@@ -361,7 +361,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 
 					switch(rft.params.at(var).serOpt) {
 						case 0: {
-							argus.push_back(rft.params.at(var).type);
 							void* voidPvect = NULL;
 							if(rft.icontentType==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 							{
@@ -380,12 +379,13 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 								for(int i=0;i<(int)valus.size();++i) {
 									if(valus.at(i)!=NULL) {
-										delete valus.at(i);
+										reflector.destroy(valus.at(i), argus.at(i));
 									}
 								}
 								return true;
 							}
 							valus.push_back(voidPvect);
+							argus.push_back(rft.params.at(var).type);
 							break;
 						}
 						case 1: argus.push_back(rft.params.at(var).type);valus.push_back(new std::string(CastUtil::lexical_cast<std::string>(pmvalue)));break;
@@ -441,7 +441,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						case 114:
 						case 115:
 						case 116: {
-							argus.push_back(rft.params.at(var).type);
 							void* voidPvect = NULL;
 							if(rft.icontentType==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 							{
@@ -460,12 +459,13 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 								for(int i=0;i<(int)valus.size();++i) {
 									if(valus.at(i)!=NULL) {
-										delete valus.at(i);
+										reflector.destroy(valus.at(i), argus.at(i));
 									}
 								}
 								return true;
 							}
 							valus.push_back(voidPvect);
+							argus.push_back(rft.params.at(var).type);
 							break;
 						}
 						case 119: {
@@ -503,7 +503,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 					for(int i=0;i<(int)valus.size();++i) {
 						if(valus.at(i)!=NULL) {
-							delete valus.at(i);
+							reflector.destroy(valus.at(i), argus.at(i));
 						}
 					}
 					return true;
@@ -573,7 +573,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(rft.statusCode));
 					int rserOpt = rft.serOpt>=2000?rft.serOpt-2000:(rft.serOpt>=1000?rft.serOpt-1000:rft.serOpt);
 					reflector.destroy(rserOpt, ouput, rft.rtype);
-					//delete ouput;
 					//logger << "Successfully called restcontroller output follows - " << std::endl;
 					//logger << outcontent << std::endl;
 
@@ -582,7 +581,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							if(allStreams.at(i)->is_open()) {
 								allStreams.at(i)->close();
 								allStreams.at(i)->clear();
-								//delete allStreams.at(i);
 							}
 						}
 					}

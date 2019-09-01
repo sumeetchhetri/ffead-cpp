@@ -67,6 +67,23 @@ std::string HttpRequest::SecWebSocketExtensions = "Sec-WebSocket-Extensions";
 std::string HttpRequest::AltUsed = "Alt-Used";
 std::string HttpRequest::Http2Settings = "HTTP2-Settings";
 
+RiMap HttpRequest::HDRS_SW_CODES;
+
+void HttpRequest::init() {
+	std::string t = VALID_REQUEST_HEADERS.substr(1, VALID_REQUEST_HEADERS.length()-1);
+	std::vector<std::string> vt;
+	StringUtil::split(vt, t, ",");
+	for(int i=0;i<(int)vt.size();i++) {
+		HDRS_SW_CODES[vt.at(i)] = i;
+	}
+	HDRS_SW_CODES["content"] = 42;
+	HDRS_SW_CODES["method"] = 43;
+	HDRS_SW_CODES["httpversion"] = 44;
+	HDRS_SW_CODES["getarguments"] = 45;
+	HDRS_SW_CODES["url"] = 46;
+	HDRS_SW_CODES["httpline"] = 47;
+}
+
 void HttpRequest::getAuthParams(std::string str)
 {
 	authMethod = (str.substr(0,str.find(" ")));
@@ -1335,216 +1352,117 @@ void HttpRequest::buildRequestC(const char *keyc, const char *valuec)
 
 void HttpRequest::buildRequest(std::string key, std::string value)
 {
-	if(strcasecmp(key.c_str(), "accept-language")==0)
-	{
-		StringUtil::trim(value);
-		strVec lemp;
-		StringUtil::split(lemp, value, (","));
-		for(unsigned int li=0;li<lemp.size();li++)
-		{
-			if(lemp.at(li).find(";")==std::string::npos && lemp.at(li)!="")
-			{
-				std::string t = lemp.at(li);
-				size_t s = t.find_first_not_of(" ");
-				size_t e = t.find_last_not_of(" ")+1;
-				t = t.substr(s,e-s);
-				this->localeInfo.push_back(t);
-			}
-			else if(lemp.at(li)!="")
-			{
-				std::string t = lemp.at(li);
-				size_t s = t.find_first_not_of(" ");
-				size_t e = t.find(";");
-				t = t.substr(s,e-s);
-				e = t.find_last_not_of(" ")+1;
-				t = t.substr(0,e);
-				this->localeInfo.push_back(t);
-			}
-		}
-		addHeader(key, value);
+	int hdrswc = -1;
+	if(HDRS_SW_CODES.find(key)!=HDRS_SW_CODES.end()) {
+		hdrswc = HDRS_SW_CODES[key];
 	}
-	else if(strcasecmp(key.c_str(), "authorization")==0)
-	{
-		StringUtil::trim(value);
-		this->getAuthParams(value);
-		addHeader(key, value);
-	}
-	else if(strcasecmp(key.c_str(), "cookie")==0)
-	{
-		StringUtil::trim(value);
-		this->cookie = true;
-		strVec results;
-		StringUtil::split(results, value, ("; "));
-		for(int j=0;j<(int)results.size();j++)
+	switch(hdrswc) {
+		case 3:
 		{
-			strVec results1;
-			StringUtil::split(results1, results.at(j), ("="));
-			if(results1.size()==2)
-				cookieattrs[results1.at(0)] = results1.at(1);
-			else
-				cookieattrs[results1.at(0)] = "true";
-		}
-		//addHeader(key, value);
-	}
-	else if(strcasecmp(key.c_str(), "content-type")==0)
-	{
-		StringUtil::trim(value);
-		std::string tempi(value);
-		size_t s = tempi.find("boundary");
-		if(s!=std::string::npos)
-		{
-			addHeader(key, tempi.substr(0,s));
-			tempi = tempi.substr(s);
-			strVec results;
-			StringUtil::split(results, tempi, ("="));
-			if(results.size()==2)
+			StringUtil::trim(value);
+			strVec lemp;
+			StringUtil::split(lemp, value, (","));
+			for(unsigned int li=0;li<lemp.size();li++)
 			{
-				std::string bound = "--" + results.at(1).substr(0,results.at(1).length());
-				this->setContent_boundary(bound);
+				if(lemp.at(li).find(";")==std::string::npos && lemp.at(li)!="")
+				{
+					std::string t = lemp.at(li);
+					size_t s = t.find_first_not_of(" ");
+					size_t e = t.find_last_not_of(" ")+1;
+					t = t.substr(s,e-s);
+					this->localeInfo.push_back(t);
+				}
+				else if(lemp.at(li)!="")
+				{
+					std::string t = lemp.at(li);
+					size_t s = t.find_first_not_of(" ");
+					size_t e = t.find(";");
+					t = t.substr(s,e-s);
+					e = t.find_last_not_of(" ")+1;
+					t = t.substr(0,e);
+					this->localeInfo.push_back(t);
+				}
 			}
-		}
-		else
-		{
 			addHeader(key, value);
+			break;
 		}
-	}
-	else if(strcasecmp(key.c_str(), "content")==0 && value!="")
-	{
-		content.append(value);
-	}
-	else if(strcasecmp(key.c_str(), "method")==0)
-	{
-		this->setMethod(value);
-	}
-	else if(strcasecmp(key.c_str(), "httpversion")==0)
-	{
-		this->httpVersion = value;
-		std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(value), "http/", "");
-		StringUtil::trim(versionStr);
-		float version = -1;
-		try {
-			version = CastUtil::lexical_cast<float>(versionStr);
-			this->httpVers = version;
-		} catch(const std::exception& e) {
-		}
-	}
-	else if(strcasecmp(key.c_str(), "getarguments")==0)
-	{
-		strVec params;
-		std::map<std::string ,int> indices;
-		value = CryptoHandler::urlDecode(value);
-		StringUtil::split(params, value, ("&"));
-		for(unsigned j=0;j<params.size();j++)
+		case 7:
 		{
-			strVec param;
-			StringUtil::split(param, params.at(j), ("="));
-			if(param.size()==2)
+			StringUtil::trim(value);
+			this->getAuthParams(value);
+			addHeader(key, value);
+			break;
+		}
+		case 10:
+		{
+			StringUtil::trim(value);
+			this->cookie = true;
+			strVec results;
+			StringUtil::split(results, value, ("; "));
+			for(int j=0;j<(int)results.size();j++)
 			{
-				std::string attN = param.at(0);
-				StringUtil::replaceFirst(attN,"\r","");
-				StringUtil::replaceFirst(attN,"\t","");
-				StringUtil::replaceFirst(attN," ","");
-				if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
-				{
-					if(indices.find(attN)==indices.end())
-					{
-						indices[attN] = 0;
-					}
-					else
-					{
-						indices[attN] = indices[attN] + 1;
-					}
-					this->queryParams[attN.substr(0, attN.find("[")+1)
-							  + CastUtil::lexical_cast<std::string>(indices[attN])
-							  + "]"] = CryptoHandler::urlDecode(param.at(1));
-				}
+				strVec results1;
+				StringUtil::split(results1, results.at(j), ("="));
+				if(results1.size()==2)
+					cookieattrs[results1.at(0)] = results1.at(1);
 				else
-				{
-					this->setQueryParam(attN,param.at(1));
-				}
-				reqorderinf[reqorderinf.size()+1] = attN;
+					cookieattrs[results1.at(0)] = "true";
 			}
+			//addHeader(key, value);
+			break;
 		}
-	}
-	else if(key.find("url")!=std::string::npos)
-	{
-		//strVec memp;
-		this->setActUrl(value);
-		//StringUtil::split(memp, value, ("/"));
-		/*int fs = value.find_first_of("/");
-		int es = value.find_last_of("/");
-		if(fs==es)
+		case 13:
 		{
-			this->setCntxt_name("");
-			this->setFile(value.substr(es+1));
-		}
-		else
-		{
-			int ss = value.substr(fs+1).find("/");
-			if(ss>fs)
+			StringUtil::trim(value);
+			std::string tempi(value);
+			size_t s = tempi.find("boundary");
+			if(s!=std::string::npos)
 			{
-				this->setCntxt_name(value.substr(fs+1,ss-fs));
-				this->setFile(value.substr(es+1));
+				addHeader(key, tempi.substr(0,s));
+				tempi = tempi.substr(s);
+				strVec results;
+				StringUtil::split(results, tempi, ("="));
+				if(results.size()==2)
+				{
+					std::string bound = "--" + results.at(1).substr(0,results.at(1).length());
+					this->setContent_boundary(bound);
+				}
 			}
+			else
+			{
+				addHeader(key, value);
+			}
+			break;
 		}
-		this->setCntxt_root(webpath + "/" + cntxt_name);*/
-	}
-	else if(strcasecmp(key.c_str(), "httpline")==0)
-	{
-		strVec vemp;
-		StringUtil::split(vemp, value, (" "));
-		if(vemp.size()<3)
+		case 42:
 		{
-			status = HTTPResponseStatus::BadRequest;
-			return;
+			content.append(value);
+			break;
 		}
-		else if(!isValidHttpMethod(vemp.at(0)))
+		case 43:
 		{
-			status = HTTPResponseStatus::InvalidMethod;
-			return;
+			this->setMethod(value);
+			break;
 		}
-		else
+		case 44:
 		{
-			std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(vemp.at(2)), "http/", "");
+			this->httpVersion = value;
+			std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(value), "http/", "");
 			StringUtil::trim(versionStr);
 			float version = -1;
 			try {
 				version = CastUtil::lexical_cast<float>(versionStr);
 				this->httpVers = version;
 			} catch(const std::exception& e) {
-				status = HTTPResponseStatus::HttpVersionNotSupported;
-				return;
 			}
-			if(version<1.0 && version>1.1)
-			{
-				status = HTTPResponseStatus::HttpVersionNotSupported;
-				return;
-			}
-			if(version<1.1 && StringUtil::toLowerCopy(vemp.at(0))=="options")
-			{
-				status = HTTPResponseStatus::InvalidMethod;
-				return;
-			}
+			break;
 		}
-
-		if(!isValidHttpMethod(vemp.at(0)))
+		case 45:
 		{
-			status = HTTPResponseStatus::InvalidMethod;
-			return;
-		}
-		this->setMethod(StringUtil::toUpperCopy(vemp.at(0)));
-		vemp.erase(vemp.begin());
-		StringUtil::replaceFirst(vemp.at(1),"\r","");
-		this->httpVersion = vemp.at(1);
-		StringUtil::replaceFirst(vemp.at(0)," ","");
-		if(vemp.at(0).find("?")!=std::string ::npos)
-		{
-			std::string valu(vemp.at(0));
-			vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-			valu = CryptoHandler::urlDecode(valu.substr(valu.find("?")+1));
 			strVec params;
 			std::map<std::string ,int> indices;
-			StringUtil::split(params, valu, ("&"));
+			value = CryptoHandler::urlDecode(value);
+			StringUtil::split(params, value, ("&"));
 			for(unsigned j=0;j<params.size();j++)
 			{
 				strVec param;
@@ -1576,12 +1494,133 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 					reqorderinf[reqorderinf.size()+1] = attN;
 				}
 			}
+			break;
 		}
-		this->setActUrl(vemp.at(0));
-	}
-	else
-	{
-		addHeaderValue(key, value);
+		case 46:
+		{
+			//strVec memp;
+			this->setActUrl(value);
+			//StringUtil::split(memp, value, ("/"));
+			/*int fs = value.find_first_of("/");
+			int es = value.find_last_of("/");
+			if(fs==es)
+			{
+				this->setCntxt_name("");
+				this->setFile(value.substr(es+1));
+			}
+			else
+			{
+				int ss = value.substr(fs+1).find("/");
+				if(ss>fs)
+				{
+					this->setCntxt_name(value.substr(fs+1,ss-fs));
+					this->setFile(value.substr(es+1));
+				}
+			}
+			this->setCntxt_root(webpath + "/" + cntxt_name);*/
+			break;
+		}
+		case 47:
+		{
+			strVec vemp;
+			StringUtil::split(vemp, value, (" "));
+			if(vemp.size()<3)
+			{
+				status = HTTPResponseStatus::BadRequest;
+				return;
+			}
+			else if(!isValidHttpMethod(vemp.at(0)))
+			{
+				status = HTTPResponseStatus::InvalidMethod;
+				return;
+			}
+			else
+			{
+				std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(vemp.at(2)), "http/", "");
+				StringUtil::trim(versionStr);
+				float version = -1;
+				try {
+					version = CastUtil::lexical_cast<float>(versionStr);
+					this->httpVers = version;
+				} catch(const std::exception& e) {
+					status = HTTPResponseStatus::HttpVersionNotSupported;
+					return;
+				}
+				if(version<1.0 && version>1.1)
+				{
+					status = HTTPResponseStatus::HttpVersionNotSupported;
+					return;
+				}
+				if(version<1.1 && StringUtil::toLowerCopy(vemp.at(0))=="options")
+				{
+					status = HTTPResponseStatus::InvalidMethod;
+					return;
+				}
+			}
+
+			if(!isValidHttpMethod(vemp.at(0)))
+			{
+				status = HTTPResponseStatus::InvalidMethod;
+				return;
+			}
+			this->setMethod(StringUtil::toUpperCopy(vemp.at(0)));
+			vemp.erase(vemp.begin());
+			StringUtil::replaceFirst(vemp.at(1),"\r","");
+			this->httpVersion = vemp.at(1);
+			StringUtil::replaceFirst(vemp.at(0)," ","");
+			if(vemp.at(0).find("?")!=std::string ::npos)
+			{
+				std::string valu(vemp.at(0));
+				vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+				valu = CryptoHandler::urlDecode(valu.substr(valu.find("?")+1));
+				strVec params;
+				std::map<std::string ,int> indices;
+				StringUtil::split(params, valu, ("&"));
+				for(unsigned j=0;j<params.size();j++)
+				{
+					strVec param;
+					StringUtil::split(param, params.at(j), ("="));
+					if(param.size()==2)
+					{
+						std::string attN = param.at(0);
+						StringUtil::replaceFirst(attN,"\r","");
+						StringUtil::replaceFirst(attN,"\t","");
+						StringUtil::replaceFirst(attN," ","");
+						if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
+						{
+							if(indices.find(attN)==indices.end())
+							{
+								indices[attN] = 0;
+							}
+							else
+							{
+								indices[attN] = indices[attN] + 1;
+							}
+							this->queryParams[attN.substr(0, attN.find("[")+1)
+									  + CastUtil::lexical_cast<std::string>(indices[attN])
+									  + "]"] = CryptoHandler::urlDecode(param.at(1));
+						}
+						else
+						{
+							this->setQueryParam(attN,param.at(1));
+						}
+						reqorderinf[reqorderinf.size()+1] = attN;
+					}
+				}
+			}
+			this->setActUrl(vemp.at(0));
+			break;
+		}
+		case -1:
+		{
+			addHeaderValue(key, value);
+			break;
+		}
+		default:
+		{
+			addHeader(key, value);
+			break;
+		}
 	}
 }
 
@@ -2562,9 +2601,9 @@ void HttpRequest::addHeader(const std::string& header, const std::string& value)
 
 void HttpRequest::addHeaderValue(std::string header, const std::string& value)
 {
-	if(header!="")
+	if(header.length()>0)
 	{
-		if(VALID_REQUEST_HEADERS.find(","+header+",")!=std::string::npos)
+		if(HDRS_SW_CODES.find(header)!=HDRS_SW_CODES.end())
 		{
 			if(headers.find(header)!=headers.end()) {
 				headers[header] += "," + value;

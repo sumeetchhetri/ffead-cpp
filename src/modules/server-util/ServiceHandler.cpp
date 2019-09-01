@@ -60,7 +60,7 @@ void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif,
 	req->context = context;
 	req->sh = this;
 	req->reqPos = reqPos;
-	req->protocol = sif->getProtocol(context);
+	req->protType = sif->getProtocol(context).find("HTTP")==0?1:2;
 	handleService(req);
 }
 
@@ -115,7 +115,7 @@ HandlerRequest::HandlerRequest() {
 	request = NULL;
 	context = NULL;
 	sif = NULL;
-	protocol = "";
+	protType = -1;
 	reqPos = 0;
 	response = NULL;
 }
@@ -125,11 +125,17 @@ HandlerRequest::~HandlerRequest() {
 }
 
 void HandlerRequest::clearObjects() {
-	if(request!=NULL)delete request;
+	if(request!=NULL) {
+		protType==1?delete (HttpRequest*)request:delete (WebSocketData*)request;
+	}
 	request = NULL;
-	if(context!=NULL)delete context;
+	if(context!=NULL){
+		delete context;
+	}
 	context = NULL;
-	if(response!=NULL)delete response;
+	if(response!=NULL){
+		protType==1?delete (HttpResponse*)response:delete (WebSocketData*)response;
+	}
 	response = NULL;
 }
 
@@ -137,8 +143,8 @@ void* HandlerRequest::getContext() {
 	return context;
 }
 
-const std::string& HandlerRequest::getProtocol() const {
-	return protocol;
+int HandlerRequest::getProtType() const {
+	return protType;
 }
 
 void* HandlerRequest::getRequest() {
