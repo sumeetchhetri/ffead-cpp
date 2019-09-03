@@ -159,7 +159,6 @@ void Reflector::destroy(int serOpt, void* instance, std::string className, const
 					f(instance);
 				}
 			}
-			delete instance;
 			break;
 		}
 		case 1: delete (std::string*)instance; break;
@@ -192,7 +191,6 @@ void Reflector::destroy(int serOpt, void* instance, std::string className, const
 			StringUtil::replaceAll(vtyp, "::", "_");
 			std::string appName = CommonUtils::getAppName(app);
 			destroyContainer(instance, vtyp, "std::vector");
-			delete instance;
 			break;
 		}
 		case 101: destroyNestedContainer<std::string>("std::vector", instance); break;
@@ -223,7 +221,6 @@ void Reflector::destroy(int serOpt, void* instance, std::string className, const
 			StringUtil::replaceAll(vtyp, "::", "_");
 			std::string appName = CommonUtils::getAppName(app);
 			destroyContainer(instance, vtyp, "std::list");
-			delete instance;
 			break;
 		}
 		case 201: destroyNestedContainer<std::string>("std::list", instance); break;
@@ -254,7 +251,6 @@ void Reflector::destroy(int serOpt, void* instance, std::string className, const
 			StringUtil::replaceAll(vtyp, "::", "_");
 			std::string appName = CommonUtils::getAppName(app);
 			destroyContainer(instance, vtyp, "std::set");
-			delete instance;
 			break;
 		}
 		case 301: destroyNestedContainerSV<std::string>("std::set", instance); break;
@@ -285,7 +281,6 @@ void Reflector::destroy(int serOpt, void* instance, std::string className, const
 			StringUtil::replaceAll(vtyp, "::", "_");
 			std::string appName = CommonUtils::getAppName(app);
 			destroyContainer(instance, vtyp, "std::multiset");
-			delete instance;
 			break;
 		}
 		case 401: destroyNestedContainerSV<std::string>("std::multiset", instance); break;
@@ -316,7 +311,6 @@ void Reflector::destroy(int serOpt, void* instance, std::string className, const
 			StringUtil::replaceAll(vtyp, "::", "_");
 			std::string appName = CommonUtils::getAppName(app);
 			destroyContainer(instance, vtyp, "std::queue");
-			delete instance;
 			break;
 		}
 		case 501: destroyNestedContainer<std::string>("std::queue", instance); break;
@@ -347,7 +341,6 @@ void Reflector::destroy(int serOpt, void* instance, std::string className, const
 			StringUtil::replaceAll(vtyp, "::", "_");
 			std::string appName = CommonUtils::getAppName(app);
 			destroyContainer(instance, vtyp, "std::deque");
-			delete instance;
 			break;
 		}
 		case 601: destroyNestedContainer<std::string>("std::deque", instance); break;
