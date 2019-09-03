@@ -60,7 +60,7 @@ void FilterHandler::handleIn(HttpRequest* req, const std::string& ext, Reflector
 			if(meth.getMethodName()!="")
 			{
 				valus.push_back(req);
-				reflector.invokeMethod<void*>(_temp,meth,valus);
+				reflector.invokeMethodGVP(_temp,meth,valus);
 				//logger << "Input Filter called" << std::endl;
 			}
 			ConfigurationData::getInstance()->ffeadContext.release(_temp, "filter_"+claz, req->getCntxt_name());
@@ -90,7 +90,7 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const std::strin
 			{
 				valus.push_back(req);
 				valus.push_back(res);
-				continue_proc_request = reflector.invokeMethod<bool>(_temp,meth,valus);
+				reflector.invokeMethod<bool>(&continue_proc_request,_temp,meth,valus);
 				//logger << "Handler Filter called" << std::endl;
 			}
 			ConfigurationData::getInstance()->ffeadContext.release(_temp, "filter_"+claz, req->getCntxt_name());
@@ -117,7 +117,7 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse* res, const std::st
 			if(meth.getMethodName()!="")
 			{
 				valus.push_back(res);
-				reflector.invokeMethod<void*>(_temp,meth,valus);
+				reflector.invokeMethodGVP(_temp,meth,valus);
 				//logger << "Output Filter called" << std::endl;
 			}
 			ConfigurationData::getInstance()->ffeadContext.release(_temp, "filter_"+claz, req->getCntxt_name());

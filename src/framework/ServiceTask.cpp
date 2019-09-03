@@ -512,7 +512,8 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 		if(methc.getMethodName()!="")
 		{
 			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
-			 WebSocketData data = reflector.invokeMethod<WebSocketData>(_temp,methc,valus);
+			 WebSocketData data;
+			 reflector.invokeMethod<WebSocketData>(&data,_temp,methc,valus);
 			 logger << "WebSocket Controller onMessage" << std::endl;
 		}
 		else

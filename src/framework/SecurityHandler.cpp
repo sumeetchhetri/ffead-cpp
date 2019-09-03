@@ -221,16 +221,18 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 					return false;
 				}
 
-				bool inited = reflector.invokeMethod<bool>(_temp,methIsInitialized,valusi);
+				bool inited = false;
+				reflector.invokeMethod<bool>(&inited,_temp,methIsInitialized,valusi);
 				if(_temp!=NULL && inited)
 				{
 					valusa.push_back(&username);
 					valusa.push_back(&password);
-					bool authenticated = reflector.invokeMethod<bool>(_temp,methAuthenticate,valusa);
+					bool authenticated = reflector.invokeMethod<bool>(&authenticated,_temp,methAuthenticate,valusa);
 					if(authenticated)
 					{
 						valusg.push_back(&username);
-						std::string userRole = reflector.invokeMethod<std::string>(_temp,methGetUserRole,valusg);
+						std::string userRole;
+						reflector.invokeMethod<std::string>(&userRole,_temp,methGetUserRole,valusg);
 						logger << ("Valid user " + username + ", role is "  + userRole) << std::endl;
 						validUser = true;
 					}

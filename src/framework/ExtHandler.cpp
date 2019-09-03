@@ -24,18 +24,78 @@
 
 bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, const std::string& ext, Reflector& reflector)
 {
-	//std::string& resourcePath = ConfigurationData::getInstance()->coreServerProperties.resourcePath;
-
 	std::map<std::string, std::string>* tmplMap = &(ConfigurationData::getInstance()->templateMappingMap[req->getCntxt_name()]);
+
+	Logger logger = LoggerFactory::getLogger("ExtHandler");
+	bool cntrlit = false;
+	std::string content, claz;
+#ifdef INC_TPE
+	if(tmplMap->find(req->getCurl())!=tmplMap->end())
+	{
+		if(ddlib != NULL)
+		{
+			std::string tpefilename = tmplMap->find(req->getCurl())->second.substr(tmplMap->find(req->getCurl())->second.find(";")+1);
+			std::string tpeclasname = tmplMap->find(req->getCurl())->second.substr(0, tmplMap->find(req->getCurl())->second.find(";"));
+			cntrlit = true;
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("template_"+tpeclasname, req->getCntxt_name());
+			if(_temp!=NULL)
+			{
+				try {
+					args argus;
+					vals valus;
+					ClassInfo* srv = ConfigurationData::getClassInfo(tpeclasname, req->getCntxt_name());
+					argus.push_back("HttpRequest*");
+					argus.push_back("Context*");
+					const Method& meth = srv->getMethod("getContext", argus);
+					if(meth.getMethodName()!="")
+					{
+						Context cnt;
+						valus.push_back(req);
+						valus.push_back(&cnt);
+						reflector.invokeMethodGVP(_temp,meth,valus);
+
+						std::string fname = "_" + tpefilename + "emittTemplateHTML";
+						void* mkr = dlsym(ddlib, fname.c_str());
+						if(mkr!=NULL)
+						{
+							TemplatePtr f =  (TemplatePtr)mkr;
+							content = f(&cnt);
+						}
+						else
+						{
+							logger << ("No template found for " + fname) << std::endl;
+							res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+						}
+					}
+					else
+					{
+						logger << "Invalid Template handler, no method getContext found..." << std::endl;
+						res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+					}
+				} catch(const std::exception& e) {
+					logger << "Template exception occurred" << std::endl;
+					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+				}
+				ConfigurationData::getInstance()->ffeadContext.release(_temp, "template_"+tpeclasname, req->getCntxt_name());
+			}
+			if(content.length()>0)
+			{
+				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+				res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
+				res->setContent(content);
+			}
+		}
+		if(cntrlit && res->getStatusCode()!="404") {
+			res->setDone(true);
+		}
+		return cntrlit;
+	}
+#endif
 	std::map<std::string, std::string>* dcpMap = &(ConfigurationData::getInstance()->dcpMappingMap[req->getCntxt_name()]);
 	std::map<std::string, std::string>* vwMap = &(ConfigurationData::getInstance()->viewMappingMap[req->getCntxt_name()]);
 	std::map<std::string, std::string>* ajaxIntfMap = &(ConfigurationData::getInstance()->ajaxInterfaceMap[req->getCntxt_name()]);
 	std::map<std::string, std::string>* fviewMap = &(ConfigurationData::getInstance()->fviewMappingMap[req->getCntxt_name()]);
 	std::map<std::string, Element>* formMap = &(ConfigurationData::getInstance()->fviewFormMap[req->getCntxt_name()]);
-
-	Logger logger = LoggerFactory::getLogger("ExtHandler");
-	bool cntrlit = false;
-	std::string content, claz;
 
 	if(ajaxIntfMap->find(req->getCurl())!=ajaxIntfMap->end() && req->getMethod()=="POST" && req->getRequestParam("method")!="")
 	{
@@ -204,64 +264,6 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 			res->setContent(content);
-		}
-	}
-#endif
-#ifdef INC_TPE
-	else if(tmplMap->find(req->getCurl())!=tmplMap->end())
-	{
-		if(ddlib != NULL)
-		{
-			std::string tpefilename = tmplMap->find(req->getCurl())->second.substr(tmplMap->find(req->getCurl())->second.find(";")+1);
-			std::string tpeclasname = tmplMap->find(req->getCurl())->second.substr(0, tmplMap->find(req->getCurl())->second.find(";"));
-			cntrlit = true;
-			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("template_"+tpeclasname, req->getCntxt_name());
-			if(_temp!=NULL)
-			{
-				try {
-					args argus;
-					vals valus;
-					ClassInfo* srv = ConfigurationData::getClassInfo(tpeclasname, req->getCntxt_name());
-					argus.push_back("HttpRequest*");
-					argus.push_back("Context*");
-					const Method& meth = srv->getMethod("getContext", argus);
-					if(meth.getMethodName()!="")
-					{
-						Context cnt;
-						valus.push_back(req);
-						valus.push_back(&cnt);
-						reflector.invokeMethod<void*>(_temp,meth,valus);
-
-						std::string fname = "_" + tpefilename + "emittTemplateHTML";
-						void* mkr = dlsym(ddlib, fname.c_str());
-						if(mkr!=NULL)
-						{
-							TemplatePtr f =  (TemplatePtr)mkr;
-							content = f(&cnt);
-						}
-						else
-						{
-							logger << ("No template found for " + fname) << std::endl;
-							res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-						}
-					}
-					else
-					{
-						logger << "Invalid Template handler, no method getContext found..." << std::endl;
-						res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-					}
-				} catch(const std::exception& e) {
-					logger << "Template exception occurred" << std::endl;
-					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-				}
-				ConfigurationData::getInstance()->ffeadContext.release(_temp, "template_"+tpeclasname, req->getCntxt_name());
-			}
-			if(content.length()>0)
-			{
-				res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-				res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_SHTML);
-				res->setContent(content);
-			}
 		}
 	}
 #endif

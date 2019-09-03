@@ -607,7 +607,7 @@ void MongoDBDataSourceImpl::storeProperty(ClassInfo* clas, void* t, void* colV, 
 		valus.push_back(colV);
 		std::string methname = "set"+StringUtil::capitalizedCopy(fe.getFieldName());
 		Method meth = clas->getMethod(methname, argus);
-		reflector->invokeMethod<void*>(t,meth,valus,false);
+		reflector->invokeMethodGVP(t,meth,valus,false);
 	}
 }
 
@@ -737,67 +737,80 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName,
 
 		if(pf.getType()=="short")
 		{
-			short val = reflector->invokeMethod<short>(object,meth,valus);
+			short val;
+			reflector->invokeMethod<short>(&val,object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="int")
 		{
-			int val = reflector->invokeMethod<int>(object,meth,valus);
+			int val;
+			reflector->invokeMethod<int>(&val,object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="unsigned short")
 		{
-			unsigned short val = reflector->invokeMethod<unsigned short>(object,meth,valus);
+			unsigned short val;
+			reflector->invokeMethod<unsigned short>(&val,object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="char")
 		{
-			char val = reflector->invokeMethod<char>(object,meth,valus);
+			char val;
+			reflector->invokeMethod<char>(&val,object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="unsigned char")
 		{
-			unsigned char val = reflector->invokeMethod<unsigned char>(object,meth,valus);
+			unsigned char val;
+			reflector->invokeMethod<unsigned char>(&val,object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="unsigned int")
 		{
-			unsigned int val = reflector->invokeMethod<unsigned int>(object,meth,valus);
+			unsigned int val;
+			reflector->invokeMethod<unsigned int>(&val,object,meth,valus);
 			bson_append_int64(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="long")
 		{
-			long val = reflector->invokeMethod<long>(object,meth,valus);
+			long val;
+			reflector->invokeMethod<long>(&val,object,meth,valus);
 			bson_append_int64(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="unsigned long")
 		{
-			unsigned long val = reflector->invokeMethod<unsigned long>(object,meth,valus);
+			unsigned long val;
+			reflector->invokeMethod<unsigned long>(&val,object,meth,valus);
 			bson_append_int64(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="long long")
 		{
-			long long val = reflector->invokeMethod<long long>(object,meth,valus);
+			long long val;
+			reflector->invokeMethod<long long>(&val,object,meth,valus);
 			bson_append_int64(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="float")
 		{
-			float val = reflector->invokeMethod<float>(object,meth,valus);
+			float val;
+			reflector->invokeMethod<float>(&val,object,meth,valus);
 			bson_append_double(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="double")
 		{
-			double val = reflector->invokeMethod<double>(object,meth,valus);
+			double val;
+			reflector->invokeMethod<double>(&val,object,meth,valus);
 			bson_append_double(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="string" || pf.getType()=="std::string")
 		{
-			std::string val = reflector->invokeMethod<std::string>(object,meth,valus);
+			std::string val;
+			reflector->invokeMethod<std::string>(&val,object,meth,valus);
 			bson_append_utf8(b, col.c_str(), col.length(), val.c_str(), val.length());
 		}
 		else if(pf.getType()=="bool")
 		{
-			bool val = reflector->invokeMethod<bool>(object,meth,valus);
+			bool val;
+			reflector->invokeMethod<bool>(&val,object,meth,valus);
 			bson_append_bool(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType().find("std::vector<short,")!=std::string::npos)

@@ -98,7 +98,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			 valus.push_back(req);
 			 valus.push_back(res);
 			 //logger << ("Controller " + controller + " called") << std::endl;
-			 bool isDone = reflector.invokeMethod<bool>(_temp,meth,valus);
+			 bool isDone = false;
+			 reflector.invokeMethod<bool>(&isDone,_temp,meth,valus);
 			 if(isDone && res->getStatusCode()!="")
 				 isContrl = true;
 			 //logger << "Controller call complete" << std::endl;
