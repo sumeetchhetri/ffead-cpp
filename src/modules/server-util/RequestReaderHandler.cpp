@@ -115,7 +115,7 @@ void* RequestReaderHandler::handle(void* inp) {
 						ins->addSf(sockIntf);
 						CommonUtils::cSocks += 1;
 						if(!ins->run) {
-							clsdConns.push_back(sockIntf);
+							ins->clsdConns.push_back(sockIntf);
 						}
 					}
 #else
