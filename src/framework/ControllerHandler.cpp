@@ -530,14 +530,14 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						case -3: {
 							if(ouput!=NULL) {
 								res->setContent(XMLSerialize::serializeUnknown(ouput, rft.serOpt-2000, rft.rtype, req->getCntxt_name()));
-								res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+								res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
 							}
 							break;
 						}
 						case -2: {
 							if(ouput!=NULL) {
 								res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt-1000, rft.rtype, rft.s, rft.sc, rft.scm, req->getCntxt_name()));
-								res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
+								res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 							}
 							break;
 						}
