@@ -33,6 +33,7 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 		dsns[name] = dsnMgr;
 	} catch (const std::exception& e) {
 		logger.info("Error initializing Datasource " + appName + "@" + props.getName() + " " + std::string(e.what()));
+		return;
 	}
 
 	Reflector* ref = GenericObject::getReflector();

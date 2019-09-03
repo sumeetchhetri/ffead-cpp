@@ -136,44 +136,57 @@ void SSLClient::destroy_ctx(SSL_CTX *ctx)
 
 bool SSLClient::connection(const std::string& host, const int& port)
 {
-	if(host=="localhost")
-	{
-		return connectionUnresolv(host, port);
-	}
+	sockfd = create_tcp_socket();
 
 	struct sockaddr_in *remote;
-	int tmpres;
-	char *ip;
-
-	sockfd = create_tcp_socket();
-	ip = get_ip((char*)host.c_str());
-	fprintf(stderr, "IP is %s\n", ip);
 	remote = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in *));
 	remote->sin_family = AF_INET;
-	tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
-	if( tmpres < 0)
-	{
-		free(remote);
-		perror("Can't set remote->sin_addr.s_addr");
-		return false;
+
+	fd_set fdset;
+	struct timeval tv;
+
+	if(host!="localhost" && host!="0.0.0.0" && host!="127.0.0.1") {
+		char* ip = get_ip((char*)host.c_str());
+		fprintf(stderr, "IP is %s\n", ip);
+		int tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
+		if( tmpres < 0)
+		{
+			free(remote);
+			perror("Can't set remote->sin_addr.s_addr");
+			return false;
+		}
+		else if(tmpres == 0)
+		{
+			free(remote);
+			fprintf(stderr, "%s is not a valid IP address\n", ip);
+			return false;
+		}
+		remote->sin_addr.s_addr = inet_addr(ip);
+		free(ip);
+	} else {
+		remote->sin_addr.s_addr = INADDR_ANY;
 	}
-	else if(tmpres == 0)
-	{
-		free(remote);
-		fprintf(stderr, "%s is not a valid IP address\n", ip);
-		return false;
-	}
+
 	remote->sin_port = htons(port);
 
-	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0){
+	fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)){
 		perror("Could not connect");
 		connected = false;
 	} else {
 		connected = true;
 	}
-
 	free(remote);
-	free(ip);
+
+	FD_ZERO(&fdset);
+	FD_SET(sockfd, &fdset);
+	tv.tv_sec = 2;
+	tv.tv_usec = 0;
+
+	int rc = select(sockfd + 1, NULL, &fdset, NULL, &tv);
+	if(rc==0) {
+		connected = false;
+	}
 
 	/* Build our SSL context*/
 	init();
@@ -197,7 +210,7 @@ bool SSLClient::connection(const std::string& host, const int& port)
 	return true;
 }
 
-bool SSLClient::connectionUnresolv(const std::string& host, const int& port)
+/*bool SSLClient::connectionUnresolv(const std::string& host, const int& port)
 {
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
@@ -242,10 +255,8 @@ bool SSLClient::connectionUnresolv(const std::string& host, const int& port)
 
 	freeaddrinfo(servinfo); // all done with this structure
 
-	/* Build our SSL context*/
 	init();
 
-	/* Connect the SSL socket */
 	ssl=SSL_new(ctx);
 	sbio=BIO_new_socket(sockfd,BIO_CLOSE);
 	SSL_set_bio(ssl,sbio,sbio);
@@ -261,7 +272,7 @@ bool SSLClient::connectionUnresolv(const std::string& host, const int& port)
 	}
 	ERR_clear_error();
 	return connected;
-}
+}*/
 
 int SSLClient::sendData(std::string data)
 {

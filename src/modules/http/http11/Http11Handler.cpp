@@ -12,18 +12,24 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		return handler->readRequest(context, pending, reqPos);
 	}
 
-	if(readFrom()) {
+	Timer t;
+	t.start();
+
+	if(readFrom()==0) {
 		return NULL;
 	}
 
-	HttpRequest* request = NULL;
-	if(!isHeadersDone && buffer.find("\r\n\r\n")!=std::string::npos)
+	t.end();
+	CommonUtils::tsActRead += t.timerNanoSeconds();
+
+	size_t ix = buffer.find(HttpResponse::HDR_FIN);
+	if(!isHeadersDone && ix!=std::string::npos)
 	{
-		bytesToRead = 0;
-		std::string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
-		buffer = buffer.substr(buffer.find("\r\n\r\n")+4);
-		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, "\r\n");
 		request = new HttpRequest(webpath);
+		bytesToRead = 0;
+		std::string headers = buffer.substr(0, ix);
+		buffer = buffer.substr(ix+4);
+		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, HttpResponse::HDR_END);
 		request->buildRequest("httpline", lines.at(0));
 		int hdrc = 0;
 		for (int var = 0; var < (int)lines.size(); ++var) {
@@ -39,7 +45,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 				}
 				request->buildRequest(key, value);
 				if(hdrc++>maxReqHdrCnt) {
-					close();
+					closeSocket();
 					delete request;
 					request = NULL;
 					return NULL;
@@ -52,14 +58,14 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		if(bytesstr!="") {
 			bytesToRead = CastUtil::lexical_cast<int>(bytesstr);
 			if(bytesToRead>maxEntitySize) {
-				close();
+				closeSocket();
 				delete request;
 				request = NULL;
 				return NULL;
 			}
-		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find("\r\n")!=std::string::npos) {
-			bytesstr = buffer.substr(0, buffer.find("\r\n"));
-			buffer = buffer.substr(buffer.find("\r\n")+2);
+		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
+			bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
+			buffer = buffer.substr(buffer.find(HttpResponse::HDR_END)+2);
 			if(bytesstr!="") {
 				isTeRequest = true;
 				bytesToRead = (int)StringUtil::fromHEX(bytesstr);
@@ -73,12 +79,11 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		}
 		isHeadersDone = true;
 	}
-
 	if(request!=NULL && isHeadersDone)
 	{
-		if(isTeRequest && bytesToRead==0 && buffer.find("\r\n")!=std::string::npos) {
-			std::string bytesstr = buffer.substr(0, buffer.find("\r\n"));
-			buffer = buffer.substr(buffer.find("\r\n")+2);
+		if(isTeRequest && bytesToRead==0 && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
+			std::string bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
+			buffer = buffer.substr(buffer.find(HttpResponse::HDR_END)+2);
 			if(bytesstr!="") {
 				bytesToRead = (int)StringUtil::fromHEX(bytesstr);
 				if(bytesToRead==0) {
@@ -120,12 +125,8 @@ int Http11Handler::getTimeout() {
 	return connKeepAlive;
 }
 
-void Http11Handler::init(const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
-	reqPos = 0;
-	current = 0;
-	address = StringUtil::toHEX((long long)this);
-	wtl.clear();
-	buffer.clear();
+Http11Handler::Http11Handler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& webpath, const int& chunkSize,
+		const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) : SocketInterface(fd, ssl, io) {
 	isHeadersDone = false;
 	bytesToRead = 0;
 	this->webpath = webpath;
@@ -134,24 +135,9 @@ void Http11Handler::init(const std::string& webpath, const int& chunkSize, const
 	this->connKeepAlive = connKeepAlive;
 	this->maxReqHdrCnt = maxReqHdrCnt;
 	this->maxEntitySize = maxEntitySize;
-	fd = sockUtil.fd;
 	this->handler = NULL;
-}
-
-Http11Handler::Http11Handler(const std::string& webpath, const int& chunkSize, const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize) {
-	reqPos = 0;
-	current = 0;
-	address = StringUtil::toHEX((long long)this);
-	isHeadersDone = false;
-	bytesToRead = 0;
-	this->webpath = webpath;
-	this->chunkSize = chunkSize<=0?0:chunkSize;
-	this->isTeRequest = false;
-	this->connKeepAlive = connKeepAlive;
-	this->maxReqHdrCnt = maxReqHdrCnt;
-	this->maxEntitySize = maxEntitySize;
-	fd = sockUtil.fd;
-	this->handler = NULL;
+	this->request = NULL;
+	logger = LoggerFactory::getLogger("Http11Handler");
 }
 
 void Http11Handler::addHandler(SocketInterface* handler) {
@@ -163,6 +149,9 @@ Http11Handler::~Http11Handler() {
 		delete handler;
 		handler = NULL;
 	}
+	if(request!=NULL) {
+		delete request;
+	}
 }
 
 std::string Http11Handler::getProtocol(void* context) {
@@ -172,9 +161,9 @@ std::string Http11Handler::getProtocol(void* context) {
 	return "HTTP1.1";
 }
 
-bool Http11Handler::writeResponse(void* req, void* res, void* context) {
+bool Http11Handler::writeResponse(void* req, void* res, void* context, std::string& data, int reqPos) {
 	if(handler!=NULL) {
-		return handler->writeResponse(req, res, context);
+		return handler->writeResponse(req, res, context, data, reqPos);
 	}
 
 	HttpRequest* request = (HttpRequest*)req;
@@ -193,27 +182,21 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context) {
 		if(StringUtil::toLowerCopy(request->getHeader(HttpRequest::Connection))!="keep-alive"
 				|| CastUtil::lexical_cast<int>(response->getStatusCode())>307 || request->getHttpVers()<1.1)
 		{
-			response->addHeaderValue(HttpResponse::Connection, "close");
+			response->addHeader(HttpResponse::Connection, "close");
 		}
 		else
 		{
-			response->addHeaderValue(HttpResponse::Connection, "keep-alive");
+			response->addHeader(HttpResponse::Connection, "keep-alive");
 		}
 	}
 
 	if(!response->isContentRemains()) {
-		std::string data = response->generateResponse(request);
-		writeTo(data);
+		response->generateResponse(request, data);
 	} else {
-		std::string data = response->generateResponse(request, false);
-		if(!writeTo(data)) {
-			bool isFirst = true;
-			while(response->hasContent && (data = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
-				isFirst = false;
-				if(writeTo(data)) {
-					break;
-				}
-			}
+		response->generateResponse(request, data, false);
+		bool isFirst = true;
+		while(response->hasContent && response->getRemainingContent(request->getUrl(), isFirst, data)) {
+			isFirst = false;
 		}
 	}
 

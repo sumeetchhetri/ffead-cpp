@@ -635,6 +635,8 @@ static apr_status_t mod_ffeadcp_child_uninit(void* arg)
 	LoggerFactory::clear();
 
 	CommonUtils::clearInstance();
+
+	return OK;
 }
 
 static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
@@ -702,7 +704,13 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 	logger << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
 	GenericObject::init(ConfigurationData::getReflector());
-	logger << ("Initializing ffeadContext done....") << std::endl;
+	logger << ("Initializing ffeadContext done....") << std::endl;HTTPResponseStatus::init();
+
+	HttpRequest::init();
+
+	HttpResponse::init();
+
+	MultipartContent::init();
 }
 
 static void mod_ffeadcpp_register_hooks (apr_pool_t *p)

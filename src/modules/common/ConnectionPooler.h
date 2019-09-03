@@ -13,17 +13,14 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
-
-typedef std::vector<Connection> connVec;
+#include "concurrentqueue.h"
 
 class ConnectionPooler {
-	connVec readConnections;
-	connVec writeConnections;
-	Mutex mutex;
+	moodycamel::ConcurrentQueue<Connection*> connections;
 	bool initialized;
 	void* _env;
 	ConnectionProperties properties;
-	Connection* checkoutInternal(connVec& conns, const bool& isWrite);
+	Connection* checkoutInternal();
 protected:
 	void destroyPool();
 	void createPool(const ConnectionProperties& properties);
@@ -31,7 +28,6 @@ protected:
 	virtual void* newConnection(const bool& isWrite, const ConnectionNode& node)=0;
 	virtual void closeConnection(void* conn)=0;
 	virtual void destroy()=0;
-	const connVec& getWriteConnections() const;
 	void* getEnv();
 	void setEnv(void* env);
 	ConnectionProperties& getProps();
@@ -39,7 +35,6 @@ public:
 	ConnectionPooler();
 	virtual ~ConnectionPooler();
 	Connection* checkout();
-	Connection* checkout(const bool& isWrite);
 	void release(Connection* conn);
 	bool isInitialized() const;
 	const ConnectionProperties& getProperties() const;

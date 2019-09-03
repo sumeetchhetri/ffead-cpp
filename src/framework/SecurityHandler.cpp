@@ -162,7 +162,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 			else if(aspect.role!=userRole)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
-				res->addHeaderValue(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.loginUrl);
+				res->addHeader(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.loginUrl);
 				res->setDone(true);
 				isContrl = true;
 			}
@@ -221,16 +221,19 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 					return false;
 				}
 
-				bool inited = reflector.invokeMethod<bool>(_temp,methIsInitialized,valusi);
+				bool inited = false;
+				reflector.invokeMethod<bool>(&inited,_temp,methIsInitialized,valusi);
 				if(_temp!=NULL && inited)
 				{
 					valusa.push_back(&username);
 					valusa.push_back(&password);
-					bool authenticated = reflector.invokeMethod<bool>(_temp,methAuthenticate,valusa);
+					bool authenticated;
+					reflector.invokeMethod<bool>(&authenticated,_temp,methAuthenticate,valusa);
 					if(authenticated)
 					{
 						valusg.push_back(&username);
-						std::string userRole = reflector.invokeMethod<std::string>(_temp,methGetUserRole,valusg);
+						std::string userRole;
+						reflector.invokeMethod<std::string>(&userRole,_temp,methGetUserRole,valusg);
 						logger << ("Valid user " + username + ", role is "  + userRole) << std::endl;
 						validUser = true;
 					}
@@ -252,7 +255,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 			{
 				req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", userRole);
 				res->setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
-				res->addHeaderValue(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.welcomeFile);
+				res->addHeader(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.welcomeFile);
 				logger << ("Valid role " + userRole + " for path " + req->getCurl()) << std::endl;
 				isContrl = true;
 				res->setDone(true);

@@ -1135,7 +1135,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							CastUtil::lexical_cast<std::string>(methcounter++);
 					methods += "\nvoid " +mmn+"(void* instance)\n{";
 					methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n\t";
-					methods += "_obj->~"+classStructure.getTreatedClassName(false)+"();";
+					methods += "delete _obj;";
 					methods += "\n}";
 					ddtorisp = true;
 					refDef += ("ci.setDestRefName(\""+mmn+"\");\n");
@@ -2294,7 +2294,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 					CastUtil::lexical_cast<std::string>(methcounter++);
 			methods += "\nvoid " +mmn+"(void* instance)\n{";
 			methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n\t";
-			methods += "_obj->~"+classStructure.getTreatedClassName(false)+"();";
+			methods += "delete _obj;";
 			methods += "\n}";
 			ddtorisp = true;
 			refDef += ("ci.setDestRefName(\""+mmn+"\");\n");

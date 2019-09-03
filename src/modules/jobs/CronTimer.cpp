@@ -392,7 +392,6 @@ CronTimer::CronTimer(const std::string& cronExpression)
 }
 
 CronTimer::~CronTimer() {
-	//delete nextRunDate;
 }
 
 std::string CronTimer::toString()

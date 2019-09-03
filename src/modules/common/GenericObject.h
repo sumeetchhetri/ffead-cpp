@@ -194,8 +194,8 @@ public:
 		else
 		{
 			int serOpt = SerializeBase::identifySerOption(typeName);
-			objSerState = XMLSerialize::serialize<T>(t, serOpt);
-			objVal = XMLSerialize::unserializeToPointer<T>(objSerState, serOpt);
+			objSerState = XMLSerialize::serializeUnknown(&t, serOpt, typeName);
+			objVal = XMLSerialize::unSerializeUnknown(objSerState, serOpt, typeName);
 		}
 	}
 

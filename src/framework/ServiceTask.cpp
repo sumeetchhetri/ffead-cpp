@@ -113,7 +113,7 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 
 	if(sessionchanged)
 	{
-		std::map<std::string,std::string> vals = req->getSession()->getSessionAttributes();
+		std::map<std::string,std::string, cicomp> vals = req->getSession()->getSessionAttributes();
 		std::string prevcookid = req->getCookieInfoAttribute("FFEADID");
 
 		std::string values;
@@ -237,10 +237,10 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 
 	if(req->getMethod()=="HEAD")
 	{
-		res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(getFileSize(fname.c_str())));
-		res->addHeaderValue(HttpResponse::AcceptRanges, "bytes");
+		res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(getFileSize(fname.c_str())));
+		res->addHeader(HttpResponse::AcceptRanges, "bytes");
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-		res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
+		res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
 	}
 	else if(req->getMethod()=="OPTIONS" || req->getMethod()=="TRACE")
 	{
@@ -293,7 +293,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 
 				if(isifmodsincvalid && *ifmodsince>=filemodifieddate)
 				{
-					res->addHeaderValue(HttpResponse::LastModified, ifmodsincehdr);
+					res->addHeader(HttpResponse::LastModified, ifmodsincehdr);
 					logger << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
 					return;
@@ -307,7 +307,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 			}
 		}
 
-		res->addHeaderValue(HttpResponse::LastModified, lastmodDate);
+		res->addHeader(HttpResponse::LastModified, lastmodDate);
 
 		if(res->isHeaderValue(HttpResponse::ContentEncoding, "gzip"))
 		{
@@ -362,9 +362,9 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 		else if(rangeValuesLst.size()>0)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::PartialContent);
-			res->addHeaderValue(HttpResponse::ContentType, "multipart/byteranges");
+			res->addHeader(HttpResponse::ContentType, "multipart/byteranges");
 			unsigned int totlen = getFileSize(fname.c_str());
-			res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
+			res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
 			for (int var = 0; var <(int)rangeValuesLst.size(); ++var) {
 				int start = rangeValuesLst.at(var).at(0);
 				int end = rangeValuesLst.at(var).at(1);
@@ -382,8 +382,8 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 						end += 1;
 					std::string cont = getFileContents(fname.c_str(), start, end);
 					MultipartContent conte(cont);
-					conte.addHeaderValue(MultipartContent::ContentType, type);
-					conte.addHeaderValue(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<std::string>(totlen));
+					conte.addHeader(MultipartContent::ContentType, type);
+					conte.addHeader(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<std::string>(totlen));
 					res->addContent(conte);
 				}
 			}
@@ -396,18 +396,18 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 
 			if(parts>1 && techunkSiz>0)
 			{
-				res->addHeaderValue(HttpResponse::TransferEncoding, "chunked");
+				res->addHeader(HttpResponse::TransferEncoding, "chunked");
 				all = StringUtil::toHEX(techunkSiz) + "\r\n";
 				all += getFileContents(fname.c_str(), 0, techunkSiz);
 				all += "\r\n";
 			}
 			else
 			{
-				res->addHeaderValue(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
+				res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
 				all = getFileContents(fname.c_str());
 			}
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
+			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
 			res->setContent(all);
 		}
 	}
@@ -512,7 +512,8 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 		if(methc.getMethodName()!="")
 		{
 			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
-			 WebSocketData data = reflector.invokeMethod<WebSocketData>(_temp,methc,valus);
+			 WebSocketData data;
+			 reflector.invokeMethod<WebSocketData>(&data,_temp,methc,valus);
 			 logger << "WebSocket Controller onMessage" << std::endl;
 		}
 		else
@@ -533,14 +534,14 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		if(req->getRequestParseStatus().getCode()>0)
 		{
 			res->setHTTPResponseStatus(req->getRequestParseStatus());
-			res->addHeaderValue(HttpResponse::Connection, "close");
+			res->addHeader(HttpResponse::Connection, "close");
 			return;
 		}
 
 		if(req->getActUrlParts().size()==0)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
-			res->addHeaderValue(HttpResponse::Connection, "close");
+			res->addHeader(HttpResponse::Connection, "close");
 			return;
 		}
 
@@ -552,7 +553,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			req->setCntxt_name(ConfigurationData::getInstance()->appAliases[req->getCntxt_name()]);
 			if(ConfigurationData::getInstance()->servingContexts.find(req->getCntxt_name())==ConfigurationData::getInstance()->servingContexts.end())
 			{
-				res->addHeaderValue(HttpResponse::Connection, "close");
+				res->addHeader(HttpResponse::Connection, "close");
 				logger << "Context not found, Closing connection..." << std::endl;
 				return;
 			}
@@ -634,9 +635,9 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		t1.start();
 		bool hasSecurity = false;
-		if(ConfigurationData::getInstance()->enableSecurity) {
+		if(!isContrl && ConfigurationData::getInstance()->enableSecurity) {
 			hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
-			if(!isContrl && hasSecurity)
+			if(hasSecurity)
 			{
 				isContrl = SecurityHandler::handle(req, res, ConfigurationData::getInstance()->coreServerProperties.sessionTimeout, reflector);
 				if(isContrl)
@@ -650,12 +651,11 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		t1.start();
 		bool hasFilters = false;
-		if(ConfigurationData::getInstance()->enableFilters) {
+		if(!isContrl && ConfigurationData::getInstance()->enableFilters) {
 			hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
-			if(!isContrl && hasFilters)
+			if(hasFilters)
 			{
 				FilterHandler::handleIn(req, ext, reflector);
-
 				isContrl = !FilterHandler::handle(req, res, ext, reflector);
 				ext = req->getExt();
 			}
@@ -664,22 +664,16 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		CommonUtils::tsServiceFlt += t1.timerNanoSeconds();
 
 		t1.start();
-		if(ConfigurationData::getInstance()->enableControllers) {
-			if(!isContrl)
-			{
-				isContrl = ControllerHandler::handle(req, res, ext, reflector);
-				ext = req->getExt();
-			}
+		if(!isContrl && ConfigurationData::getInstance()->enableControllers) {
+			isContrl = ControllerHandler::handle(req, res, ext, reflector);
+			ext = req->getExt();
 		}
 		t1.end();
 		CommonUtils::tsServiceCnt += t1.timerNanoSeconds();
 
 		t1.start();
-		if(ConfigurationData::getInstance()->enableExtra) {
-			if(!isContrl)
-			{
-				isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
-			}
+		if(!isContrl && ConfigurationData::getInstance()->enableExtra) {
+			isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
 		}
 		t1.end();
 		CommonUtils::tsServiceExt += t1.timerNanoSeconds();
@@ -757,6 +751,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 	}
 }
 
-void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketUtil* sockUtil)
+void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketInterface* sockUtil)
 {
 }

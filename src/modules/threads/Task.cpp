@@ -130,3 +130,10 @@ void Task::setCleanUp(const bool& cleanUp)
 bool Task::operator <(const Task& other) {
 	return this->priority < other.priority;
 }
+
+void Task::setTid(int tid) {
+}
+
+int Task::getTid() {
+	return -1;
+}

@@ -83,7 +83,23 @@ public:
 		}
 		return obj;
 	}
+	template <class T> void invokeMethod(T* t, void* instance, const Method& method, const vals& values, const bool& cleanVals = false)
+	{
+		GetMeth f = getMethodInstance(method);
+		if(f!=NULL)
+		{
+			if(method.getReturnType()!="void")
+			{
+				void* rt = f(instance,values,cleanVals);
+				*t = *(T*)rt;
+				delete (T*)rt;
+			}
+			else
+				f(instance,values,cleanVals);
+		}
+	}
 	void destroy(void* instance, std::string cs, const std::string& app= "");
+	void destroy(int serOpt, void* instance, std::string cs, const std::string& app= "");
 	void* invokeMethodGVP(void* instance, const Method& method, const vals& values, const bool& cleanVals = false)
 	{
 		void *obj = NULL;

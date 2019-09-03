@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include "cstring"
 #include "CommonUtils.h"
-
+#include "HTTPResponseStatus.h"
 
 class Bits {
 	std::vector<std::bitset<8> > bitv;
@@ -83,8 +83,8 @@ public:
 	std::string decodeHuffman(const std::string& value);
 	std::string decodeHuffmanOld(std::string value);
 	Http2HPACKContext();
-	std::string encode(const std::map<std::string, std::string>& headers);
-	std::map<std::string, std::string> decode(const std::string& data);
+	std::string encode(const std::map<std::string, std::string, cicomp>& headers);
+	std::map<std::string, std::string, cicomp> decode(const std::string& data);
 	virtual ~Http2HPACKContext();
 };
 

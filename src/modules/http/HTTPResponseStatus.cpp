@@ -23,9 +23,9 @@
 #include "HTTPResponseStatus.h"
 
 std::map<int, HTTPResponseStatus> HTTPResponseStatus::statuses;
+std::map<std::string, HTTPResponseStatus> HTTPResponseStatus::sstatuses;
 
-HTTPResponseStatus HTTPResponseStatus::getStatusByCode(const int& code)
-{
+void HTTPResponseStatus::init() {
 	if(statuses.size()==0) {
 		statuses[100] = HTTPResponseStatus::Continue;
 		statuses[101] = HTTPResponseStatus::Switching;
@@ -61,10 +61,27 @@ HTTPResponseStatus HTTPResponseStatus::getStatusByCode(const int& code)
 		statuses[503] = HTTPResponseStatus::ServiceUnavailable;
 		statuses[504] = HTTPResponseStatus::GatewayTimeout;
 		statuses[505] = HTTPResponseStatus::HttpVersionNotSupported;
+		std::map<int, HTTPResponseStatus>::iterator i;
+		for(i=statuses.begin();i!=statuses.end();++i) {
+			sstatuses[CastUtil::lexical_cast<std::string>(i->first)] = i->second;
+		}
 	}
+}
+
+const HTTPResponseStatus& HTTPResponseStatus::getStatusByCode(const int& code)
+{
 	if(statuses.find(code)!=statuses.end())
 	{
 		return statuses[code];
+	}
+	return HTTPResponseStatus::Ok;
+}
+
+const HTTPResponseStatus& HTTPResponseStatus::getStatusByCode(const std::string& code)
+{
+	if(sstatuses.find(code)!=sstatuses.end())
+	{
+		return sstatuses[code];
 	}
 	return HTTPResponseStatus::Ok;
 }
@@ -106,31 +123,40 @@ HTTPResponseStatus HTTPResponseStatus::HttpVersionNotSupported(505, "HTTP versio
 
 HTTPResponseStatus::HTTPResponseStatus() {
 	this->code = 0;
+	this->scode = "";
 }
 
 HTTPResponseStatus::HTTPResponseStatus(const int& code, const std::string& msg) {
 	this->code = code;
 	this->msg = msg;
+	this->scode = CastUtil::lexical_cast<std::string>(code);
 }
 
 HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status) {
 	this->code = status.code;
 	this->msg = status.msg;
+	this->scode = CastUtil::lexical_cast<std::string>(code);
 }
 
 HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status, const std::string& msg) {
 	this->code = status.code;
 	this->msg = msg;
+	this->scode = CastUtil::lexical_cast<std::string>(status.code);
 }
 
 HTTPResponseStatus::~HTTPResponseStatus() {
-	// TODO Auto-generated destructor stub
 }
 
 int HTTPResponseStatus::getCode() const
 {
 	return code;
 }
+
+std::string HTTPResponseStatus::getSCode() const
+{
+	return scode;
+}
+
 std::string HTTPResponseStatus::getMsg() const
 {
 	return msg;

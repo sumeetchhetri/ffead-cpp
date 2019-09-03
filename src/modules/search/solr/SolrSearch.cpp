@@ -143,7 +143,7 @@ void SolrSearch::add(DocumentQuery& iq) {
 	rq.setUrl(uri);
 	rq.setMethod("POST");
 	rq.setContent(iq.getData());
-	rq.addHeaderValue(HttpRequest::ContentType, "application/json");
+	rq.addHeader(HttpRequest::ContentType, "application/json");
 
 	hc->execute(&rq, &rs, p);
 	if(rs.getStatusCode()!="200") {
@@ -180,7 +180,7 @@ void SolrSearch::remove(DocumentQuery& iq) {
 	rq.setUrl(uri);
 	rq.setMethod("POST");
 	rq.setContent("{\"delete\": {\"id\":\""+iq.getId()+"\"}}");
-	rq.addHeaderValue(HttpRequest::ContentType, "application/json");
+	rq.addHeader(HttpRequest::ContentType, "application/json");
 
 	hc->execute(&rq, &rs, p);
 	if(rs.getStatusCode()!="200") {

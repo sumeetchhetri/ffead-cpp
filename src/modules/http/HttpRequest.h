@@ -34,15 +34,19 @@
 #include "MultipartContent.h"
 #include "Timer.h"
 #include "HTTPResponseStatus.h"
+#include <libcuckoo/cuckoohash_map.hh>
+#include "SocketInterface.h"
 
 typedef std::vector<std::string> strVec;
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
-typedef std::map<std::string, std::string> RMap;
-typedef std::map<std::string, MultipartContent> FMap;
+typedef std::map<std::string, int, cicomp> RiMap;
+typedef std::map<std::string, std::string, cicomp> RMap;
+typedef std::map<std::string, MultipartContent, cicomp> FMap;
 
 class HttpRequest {
+	static RiMap HDRS_SW_CODES;
 	static std::string VALID_REQUEST_HEADERS;
 	std::string webpath;
 	std::string authority;
@@ -72,11 +76,11 @@ class HttpRequest {
 	std::string sessionID;
 	bool cookie;
 	std::string ranges;
-	std::map<std::string,std::string> cookieattrs;
-	std::map<std::string,std::string> authinfo;
+	RMap cookieattrs;
+	RMap authinfo;
 	std::map<int,std::string> reqorderinf;
 	std::map<int,std::string> authorderinf;
-	std::map<std::string,std::string> headers;
+	RMap headers;
 	std::vector<MultipartContent> contentList;
 	std::string preamble;
 	std::string epilogue;
@@ -95,7 +99,7 @@ class HttpRequest {
 	void setRequestParam(const std::string&, const std::string&);
 	void setContent_tfile(const std::string& tfile);
 	void setQueryParams(const RMap& queryParams);
-	void setAuthinfo(const std::map<std::string,std::string>&);
+	void setAuthinfo(const RMap&);
 	void normalizeUrl();
     void setCurl(std::string url);
 	void setActUrl(const std::string&);
@@ -105,22 +109,32 @@ class HttpRequest {
 	void setQueryParam(const std::string& name, const std::string& value);
 	void setSessionID(const std::string& sessionID);
 	std::string toPluginString();
-	void setHttp2Headers(std::map<std::string,std::string> headers);
+	void setHttp2Headers(RMap headers);
 	void setContextHome(const std::string& home);
+    void addHeader(const std::string& header, const std::string& value);
 	friend class ServiceTask;
-	friend class ControllerHandler;
-	friend class SecurityHandler;
 	friend class Http11Handler;
 	friend class Http2Handler;
 	friend class Http2StreamHandler;
 	friend class HttpResponse;
 	friend class HttpServiceHandler;
 	friend class HttpServiceTask;
+	friend class ControllerHandler;
+	friend class ExtHandler;
+	friend class FviewHandler;
+	friend class ScriptHandler;
+	friend class SecurityHandler;
+	friend class SoapHandler;
 	friend class HttpClient;
+	friend class SolrSearch;
+	friend class CORSHandler;
+	friend class HttpRequestBuffered;
+	static const std::string VALID_METHODS;
 public:
 	enum {
 		PREFLIGHT, CORS, OTHER
 	};
+	static void init();
 	static std::string Accept,AcceptCharset,AcceptEncoding,AcceptLanguage,AcceptDatetime,
 				  AccessControlRequestHeaders,AccessControlRequestMethod,Authorization,
 				  CacheControl,Connection,Cookie,ContentLength,ContentMD5,ContentType,
@@ -156,7 +170,7 @@ public:
     std::string getActUrl() const;
     const std::vector<std::string>& getActUrlParts() const;
     std::string getSessionID() const;
-    std::map<std::string,std::string> getAuthinfo() const;
+    RMap getAuthinfo() const;
     void buildRequestC(const char* key, const char* value);
     void buildRequest(std::string key, std::string value);
     std::string toString();
@@ -174,13 +188,13 @@ public:
     bool hasCookie();
     std::map<int,std::string> getAuthOrderinfo() const;
 	std::map<int,std::string> getReqOrderinfo() const;
-	std::map<std::string,std::string> getCookieInfo() const;
+	RMap getCookieInfo() const;
     std::string getAuthOrderinfoAttribute(const int& key);
     std::string getReqOrderinfoAttribute(const int& key);
     std::string getCookieInfoAttribute(const std::string& key);
     std::string getHeader(std::string key);
     bool hasHeader(std::string key);
-    std::map<std::string,std::string> getHeaders();
+    RMap getHeaders();
     int getCORSRequestType();
     void addHeaderValue(std::string header, const std::string& value);
     std::vector<std::string> parseHeaderValue(std::string headerValue);
@@ -207,5 +221,15 @@ public:
 	std::string getExt() const;
 	static std::string getFileExtension(const std::string& file);
 };
+
+/*
+class HttpRequestBuffered : public HttpRequest {
+	friend class Http11Handler;
+	std::string _b;
+	std::string_view bv;
+	static const std::string_view BLV;
+	HttpRequestBuffered();
+	virtual ~HttpRequestBuffered();
+};*/
 
 #endif /* HTTPREQUEST_H_ */

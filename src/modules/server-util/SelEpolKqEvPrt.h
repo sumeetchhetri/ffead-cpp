@@ -135,16 +135,20 @@
 
 class DummySocketInterface : public SocketInterface {
 public:
+	DummySocketInterface() {
+		closed = true;
+	}
+	~DummySocketInterface(){}
 	std::string getProtocol(void* context){return "";}
 	int getTimeout(){return -1;};
 	void* readRequest(void*& context, int& pending, int& reqPos){return NULL;}
-	bool writeResponse(void* req, void* res, void* context){return false;}
+	bool writeResponse(void* req, void* res, void* context, std::string& d, int reqPos){return false;}
 	void onOpen(){}
 	void onClose(){}
 	void addHandler(SocketInterface* handler){}
 };
 
-class SelEpolKqEvPrt {
+class SelEpolKqEvPrt : public EventHandler {
 	bool listenerMode;
 	int timeoutMilis;
 	SOCKET sockfd;
@@ -190,10 +194,12 @@ public:
 	virtual ~SelEpolKqEvPrt();
 	void initialize(SOCKET sockfd, const int& timeout);
 	int getEvents();
-	SOCKET getDescriptor(const SOCKET& index, void*& obj);
+	SOCKET getDescriptor(const SOCKET& index, void*& obj, bool& isRead);
 	bool isListeningDescriptor(const SOCKET& descriptor);
-	bool registerForEvent(SocketInterface* obj, const bool& isListeningSock = false);
-	bool unRegisterForEvent(const SOCKET& descriptor);
+	bool registerWrite(SocketInterface* obj);
+	bool unRegisterWrite(SocketInterface* obj);
+	bool registerRead(SocketInterface* obj, const bool& isListeningSock = false);
+	bool unRegisterRead(const SOCKET& descriptor);
 	void* getOptData(const int& index);
 	void reRegisterServerSock();
 	bool isInvalidDescriptor(const SOCKET& index);

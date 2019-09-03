@@ -44,7 +44,6 @@ class JobConfig
 };
 
 class JobScheduler {
-
 	class JobTask : public Task
 	{
 		void* objIns;
@@ -54,6 +53,9 @@ class JobScheduler {
 		std::atomic<bool> doRun;
 		void run();
 		friend class JobScheduler;
+		public:
+			int getTid();
+			void setTid(int tid);
 	};
 	bool isStarted;
 	std::vector<JobConfig> configs;

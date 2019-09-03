@@ -33,15 +33,15 @@ void RequestReaderHandler::start(unsigned int cid) {
 void RequestReaderHandler::stop(std::string ip, int port, bool isSSLEnabled) {
 	run = false;
 	while(complete<1) {
-		Thread::mSleep(500);
+		Thread::mSleep(1000);
 
 		if(isSSLEnabled) {
 			SSLClient sc;
-			sc.connectionUnresolv(ip, port);
+			sc.connection(ip, port);
 			sc.closeConnection();
 		} else {
 			Client sc;
-			sc.connectionUnresolv(ip, port);
+			sc.connection(ip, port);
 			sc.closeConnection();
 		}
 	}
@@ -60,7 +60,7 @@ void RequestReaderHandler::addSf(SocketInterface* psi) {
 	{
 		//addToTimeoutSocks.push(psi);
 	}
-	selector.registerForEvent(psi);
+	selector.registerRead(psi);
 	psi->onOpen();
 }
 
@@ -92,7 +92,8 @@ void* RequestReaderHandler::handle(void* inp) {
 		for(int n=0;n<num;n++)
 		{
 			void* vsi = NULL;
-			SOCKET descriptor = ins->selector.getDescriptor(n, vsi);
+			bool isRead = true;
+			SOCKET descriptor = ins->selector.getDescriptor(n, vsi, isRead);
 			if(descriptor!=-1)
 			{
 				if(ins->selector.isListeningDescriptor(descriptor))
@@ -110,25 +111,41 @@ void* RequestReaderHandler::handle(void* inp) {
 							}
 						}
 						SocketInterface* sockIntf = ins->sf(newSocket);
+						sockIntf->eh = &(ins->selector);
 						ins->addSf(sockIntf);
 						CommonUtils::cSocks += 1;
+						if(!ins->run) {
+							ins->clsdConns.push_back(sockIntf);
+						}
 					}
 #else
 					sin_size = sizeof their_addr;
 					SOCKET newSocket = accept(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size);
 					SocketInterface* sockIntf = ins->sf(newSocket);
+					sockIntf->eh = &(ins->selector);
 					ins->addSf(sockIntf);
 					CommonUtils::cSocks += 1;
+					if(!ins->run) {
+						ins->clsdConns.push_back(sockIntf);
+					}
 #endif
 				}
 				else
 				{
 					SocketInterface* si = (SocketInterface*)vsi;
-					if(!si->isClosed()) {
-						ins->shi->registerReadRequest(si);
+					if(isRead) {
+						if(!si->isClosed()) {
+							ins->shi->registerReadRequest(si);
+						} else {
+							si->onClose();
+							ins->shi->closeConnection(si);
+						}
 					} else {
-						si->onClose();
-						if(si->allRequestsDone()) {
+						if(!si->isClosed()) {
+							ins->selector.unRegisterWrite(si);
+							ins->shi->registerWriteRequest(si);
+						} else {
+							si->onClose();
 							ins->shi->closeConnection(si);
 						}
 					}
@@ -140,7 +157,12 @@ void* RequestReaderHandler::handle(void* inp) {
 		CommonUtils::tsProcess += t.timerNanoSeconds();
 	}
 
+	for(int i=0;i<(int)ins->clsdConns.size();i++) {
+		delete ins->clsdConns.at(i);
+	}
+
 	if(ins->isMain) {
+		ins->shi->stop();
 		while(ins->shi->run) {
 			Thread::mSleep(100);
 		}

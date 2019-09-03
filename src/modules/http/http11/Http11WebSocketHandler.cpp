@@ -7,74 +7,13 @@
 
 #include "Http11WebSocketHandler.h"
 
-Http11WebSocketHandler::Http11WebSocketHandler(const std::string& url, const bool& isServer) {
-	reqPos = 0;
-	current = 0;
-	address = StringUtil::toHEX((long long)this);
+Http11WebSocketHandler::Http11WebSocketHandler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& url, const bool& isServer) : SocketInterface(fd, ssl, io) {
 	logger = LoggerFactory::getLogger("Http11WebSocketHandler");
 	this->url = url;
-	fd = sockUtil.fd;
 }
 
 std::string Http11WebSocketHandler::getUrl() {
 	return this->url;
-}
-
-Http11WebSocketDataFrame Http11WebSocketHandler::readFrame() {
-	Http11WebSocketDataFrame frame;
-	std::vector<unsigned char> f2bytes;
-	if(!sockUtil.readData(2, f2bytes))
-	{
-		frame.opcode = 8;
-		return frame;
-	}
-	unsigned char f = f2bytes.at(0);
-	unsigned char s = f2bytes.at(1);
-	frame.fin = ((f >> 7) & 0x01);
-	frame.rsv1 = ((f >> 6) & 0x01);
-	frame.rsv2 = ((f >> 5) & 0x01);
-	frame.rsv3 = ((f >> 4) & 0x01);
-	frame.opcode = f & 0x0F;
-	frame.mask = ((s >> 7) & 0x01);
-	frame.payloadLength = s & 0x7F;
-	unsigned long long dataLength = frame.payloadLength;
-	if(frame.payloadLength==126) {
-		std::vector<unsigned char> extdlenbytes;
-		if(!sockUtil.readData(2, extdlenbytes))
-		{
-			frame.opcode = 8;
-			return frame;
-		}
-		frame.extendedPayloadLength = CommonUtils::charArrayToULongLong(extdlenbytes);
-		dataLength = frame.extendedPayloadLength;
-	} else if(frame.payloadLength==127) {
-		std::vector<unsigned char> extdlenbytes;
-		if(!sockUtil.readData(8, extdlenbytes))
-		{
-			frame.opcode = 8;
-			return frame;
-		}
-		frame.extendedPayloadLength = CommonUtils::charArrayToULongLong(extdlenbytes);
-		dataLength = frame.extendedPayloadLength;
-	}
-	if(frame.mask) {
-		std::vector<unsigned char> maskingbytes;
-		if(!sockUtil.readData(4, maskingbytes))
-		{
-			frame.opcode = 8;
-			return frame;
-		}
-		frame.maskingKey = CommonUtils::charArrayToULongLong(maskingbytes);
-	}
-	if(!sockUtil.readData(dataLength, frame.applicationData))
-	{
-		frame.opcode = 8;
-		return frame;
-	}
-	if(frame.mask) {
-		frame.applicationData = CommonUtils::xorEncryptDecrypt(frame.applicationData, frame.maskingKey);
-	}
-	return frame;
 }
 
 void Http11WebSocketHandler::replyPong() {
@@ -111,7 +50,7 @@ Http11WebSocketHandler::~Http11WebSocketHandler() {
 }
 
 std::string Http11WebSocketHandler::getProtocol(void* context) {
-	return "HTTP1.1WS";
+	return "WS1.1";
 }
 
 int Http11WebSocketHandler::getTimeout() {
@@ -219,7 +158,7 @@ void* Http11WebSocketHandler::readRequest(void*& context, int& pending, int& req
 	{
 		if(processFrame(frame, request)) {
 			//closed = true;
-			close();
+			closeSocket();
 			break;
 		}
 		if(request!=NULL) {
@@ -242,7 +181,7 @@ void* Http11WebSocketHandler::readRequest(void*& context, int& pending, int& req
 	return request;
 }
 
-bool Http11WebSocketHandler::writeResponse(void* req, void* res, void* context) {
+bool Http11WebSocketHandler::writeResponse(void* req, void* res, void* context, std::string& data, int reqPos) {
 	WebSocketData* wsdata  = static_cast<WebSocketData*>(res);
 
 	if(isClosed()) {
@@ -263,13 +202,13 @@ bool Http11WebSocketHandler::writeResponse(void* req, void* res, void* context) 
 	frame.payloadLength = wsdata->data.length();
 	//We will not set application data here, we will directly send the data as
 	//we have computed other control options
-	writeTo(frame.getFrameData());
+	data += frame.getFrameData();
 	if(req!=NULL) {
 		//delete (WebSocketData*)req;
 	}
- 	bool fl = writeTo(wsdata->data);
+	data += wsdata->data;
 	//delete wsdata;
-	return fl;
+	return true;
 }
 
 void Http11WebSocketHandler::addHandler(SocketInterface* handler) {}

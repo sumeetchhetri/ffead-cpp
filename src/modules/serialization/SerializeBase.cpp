@@ -223,6 +223,7 @@ void SerializeBase::addToNestedContainer(void* roott, const std::string& classNa
 int SerializeBase::identifySerOption(std::string className) {
 	int serOpt = 0;
 	StringUtil::trim(className);
+	if(className=="void")return -1;
 	if(className.find(",")!=std::string::npos)
 	{
 		className = className.substr(0, className.find(",")+1);
@@ -1778,19 +1779,10 @@ std::string SerializeBase::getSerializationMethodName(const std::string& classNa
 }
 
 std::string SerializeBase::trySerialize(void* t, int serOpt, std::string& className, const std::string& app) {
-	std::string appName = CommonUtils::getAppName(app);
 	switch(serOpt) {
 		case 1: return *(std::string*)t;
-		case 2: {
-			std::string a;
-			a += ((char*)t)[0];
-			return a;
-		}
-		case 3: {
-			std::string a;
-			a += ((unsigned char*)t)[0];
-			return a;
-		}
+		case 2: return CastUtil::lexical_cast<std::string>(*(int*)t);
+		case 3: return CastUtil::lexical_cast<std::string>(*(unsigned int*)t);
 		case 4: return CastUtil::lexical_cast<std::string>(*(int*)t);
 		case 5: return CastUtil::lexical_cast<std::string>(*(unsigned int*)t);
 		case 6: return CastUtil::lexical_cast<std::string>(*(short*)t);

@@ -8,7 +8,6 @@
 #include "TeBkFortuneTemplate.h"
 
 TeBkFortuneTemplate::~TeBkFortuneTemplate() {
-	// TODO Auto-generated destructor stub
 }
 
 void TeBkFortuneTemplate::getContext(HttpRequest* request, Context* context)

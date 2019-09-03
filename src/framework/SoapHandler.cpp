@@ -74,7 +74,6 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 				env.append(" " + it->first + "=\"" + it->second + "\" ");
 			}
 			env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-			//delete mkr;
 		}
 		else
 		{
@@ -159,7 +158,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 		logger << ("Soap fault - " + fault) << std::flush;
 	}
 	res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-	res->addHeaderValue(HttpResponse::ContentType, xmlcnttype);
+	res->addHeader(HttpResponse::ContentType, xmlcnttype);
 	res->setContent(env);
 	res->setDone(true);
 }

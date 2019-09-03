@@ -33,6 +33,17 @@ std::string MultipartContent::ContentLength = "Content-Length";
 std::string MultipartContent::ContentMD5 = "Content-MD5";
 std::string MultipartContent::ContentType =	"Content-Type";
 
+std::map<std::string, int, cicomp> MultipartContent::HDRS_SW_CODES;
+
+void MultipartContent::init() {
+	std::string t = VALID_HEADERS.substr(1, VALID_HEADERS.length()-1);
+	std::vector<std::string> vt;
+	StringUtil::split(vt, t, ",");
+	for(int i=0;i<(int)vt.size();i++) {
+		HDRS_SW_CODES[vt.at(i)] = i;
+	}
+}
+
 MultipartContent::MultipartContent() {
 }
 
@@ -92,11 +103,11 @@ MultipartContent::MultipartContent(const std::vector<std::string>& headers, cons
 						}
 					}
 				}
-				addHeaderValue(temp.at(0), temp.at(1));
+				addHeader(temp.at(0), temp.at(1));
 			}
 		}
 		if(this->headers.find(MultipartContent::ContentType)==this->headers.end()) {
-			addHeaderValue(MultipartContent::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+			addHeader(MultipartContent::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 		}
 	}
 }
@@ -120,9 +131,8 @@ void MultipartContent::setFileName(const std::string& fileName) {
 	this->fileName = fileName;
 }
 
-std::map<std::string, std::string> MultipartContent::getHeaders() {
-	std::map<std::string, std::string> htemp = headers;
-	return htemp;
+std::map<std::string, std::string,cicomp> MultipartContent::getHeaders() {
+	return headers;
 }
 
 std::string MultipartContent::getTempFileName() const {
@@ -133,14 +143,26 @@ void MultipartContent::setTempFileName(const std::string& tempFileName) {
 	this->tempFileName = tempFileName;
 }
 
+void MultipartContent::addHeader(std::string header, const std::string& value)
+{
+	if(headers.find(header)!=headers.end()) {
+		headers[header] += "," + value;
+	} else {
+		headers[header] = value;
+	}
+}
+
 void MultipartContent::addHeaderValue(std::string header, const std::string& value)
 {
-	header = StringUtil::camelCasedCopy(header, "-");
-	if(header!="")
+	if(header.length()>0)
 	{
-		if(VALID_HEADERS.find(","+StringUtil::toLowerCopy(header)+",")!=std::string::npos)
+		if(HDRS_SW_CODES.find(header)!=HDRS_SW_CODES.end())
 		{
-			headers[header] = value;
+			if(headers.find(header)!=headers.end()) {
+				headers[header] += "," + value;
+			} else {
+				headers[header] = value;
+			}
 		}
 		else
 		{
@@ -150,7 +172,11 @@ void MultipartContent::addHeaderValue(std::string header, const std::string& val
 				//std::cout << ("Invalid Header std::string " + header) << std::endl;
 				return;
 			}
-			headers[header] = value;
+			if(headers.find(header)!=headers.end()) {
+				headers[header] += "," + value;
+			} else {
+				headers[header] = value;
+			}
 		}
 	}
 }

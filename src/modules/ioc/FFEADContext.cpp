@@ -225,7 +225,7 @@ void* FFEADContext::getBean(const Bean& bean)
 			Method meth = clas->getMethod(methodName,argus);
 			void *value = getBean(beanc);
 			valus.push_back(value);
-			reflector->invokeMethod<void*>(_temp,meth,valus);
+			reflector->invokeMethodGVP(_temp,meth,valus);
 			valus.clear();
 			argus.clear();
 		}
@@ -273,7 +273,7 @@ void* FFEADContext::getBean(const Bean& bean)
 			Method meth = clas->getMethod(methodName,argus);
 			void *value = getBean(beanc);
 			valus.push_back(value);
-			reflector->invokeMethod<void*>(_temp,meth,valus);
+			reflector->invokeMethodGVP(_temp,meth,valus);
 			valus.clear();
 			argus.clear();
 		}
@@ -329,7 +329,6 @@ void FFEADContext::clear(const std::string& appName)
 		k = k.substr(k.find(";")+1);
 		reflector->destroy(it->second, k, appName);
 	}
-	objects.clear();
 }
 
 void FFEADContext::addBean(Bean& bean)

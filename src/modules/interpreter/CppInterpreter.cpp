@@ -502,7 +502,7 @@ void CppInterpreter::evaluateUpdateCustom(const std::string& sep, const std::str
 		Method meth = clas->getMethod(name,argus);
 		vals valus;
 		valus.push_back(o.getPointer());
-		reflector.invokeMethod<void*>(i.getPointer(),meth,valus);
+		reflector.invokeMethodGVP(i.getPointer(),meth,valus);
 	}
 }
 

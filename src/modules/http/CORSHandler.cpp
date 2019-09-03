@@ -61,24 +61,24 @@ bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse 
 
 				if(corsConfig.allwdCredentials)
 				{
-					res->addHeaderValue(HttpResponse::AccessControlAllowCredentials, "true");
+					res->addHeader(HttpResponse::AccessControlAllowCredentials, "true");
 				}
 				if(corsConfig.allwdOrigins=="*")
 				{
-					res->addHeaderValue(HttpResponse::AccessControlAllowOrigin, "*");
+					res->addHeader(HttpResponse::AccessControlAllowOrigin, "*");
 				}
 				else
 				{
-					res->addHeaderValue(HttpResponse::AccessControlAllowOrigin, req->getHeader(HttpRequest::Origin));
+					res->addHeader(HttpResponse::AccessControlAllowOrigin, req->getHeader(HttpRequest::Origin));
 				}
 
 				if(corsConfig.maxAge>0)
 				{
-					res->addHeaderValue(HttpResponse::AccessControlAllowMethods, CastUtil::lexical_cast<std::string>(corsConfig.maxAge));
+					res->addHeader(HttpResponse::AccessControlAllowMethods, CastUtil::lexical_cast<std::string>(corsConfig.maxAge));
 				}
 
-				res->addHeaderValue(HttpResponse::AccessControlAllowMethods, corsConfig.allwdMethods);
-				res->addHeaderValue(HttpResponse::AccessControlMaxAge, corsConfig.allwdHeaders);
+				res->addHeader(HttpResponse::AccessControlAllowMethods, corsConfig.allwdMethods);
+				res->addHeader(HttpResponse::AccessControlMaxAge, corsConfig.allwdHeaders);
 
 			}
 		}
@@ -102,11 +102,11 @@ bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse 
 
 			if(corsConfig.allwdCredentials)
 			{
-				res->addHeaderValue(HttpResponse::AccessControlAllowCredentials, "true");
+				res->addHeader(HttpResponse::AccessControlAllowCredentials, "true");
 			}
 
-			res->addHeaderValue(HttpResponse::AccessControlAllowOrigin, req->getHeader(HttpRequest::Origin));
-			res->addHeaderValue(HttpResponse::AccessControlAllowHeaders, corsConfig.exposedHeaders);
+			res->addHeader(HttpResponse::AccessControlAllowOrigin, req->getHeader(HttpRequest::Origin));
+			res->addHeader(HttpResponse::AccessControlAllowHeaders, corsConfig.exposedHeaders);
 		}
 		else
 		{

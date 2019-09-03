@@ -39,9 +39,6 @@ JSONElement::JSONElement(int type, std::string k, std::string v) {
 }
 
 JSONElement::~JSONElement() {
-	for (int var = 0; var < (int)children.size(); ++var) {
-		//delete children.at(var);
-	}
 }
 
 JSONElement& JSONElement::addChild(JSONElement ele) {

@@ -52,7 +52,7 @@
 #include <stdio.h>
 #include "Http11WebSocketDataFrame.h"
 #include "CommonUtils.h"
-#include "SocketUtil.h"
+#include "SocketInterface.h"
 
 class ServiceTask : public HttpServiceTask
 {
@@ -66,7 +66,7 @@ class ServiceTask : public HttpServiceTask
 	unsigned int getFileSize(const char *fileName);
 	std::string getFileContents(const char *fileName, const int& start= -1, const int& end= -1);
 	bool checkSocketWaitForTimeout(const int& sock_fd, const int& writing, const int& seconds, const int& micros= 0);
-	void handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketUtil* sockUtil);
+	void handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketInterface* sockUtil);
 public:
 	ServiceTask();
 	virtual ~ServiceTask();

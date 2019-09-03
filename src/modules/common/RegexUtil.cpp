@@ -32,16 +32,16 @@ void RegexUtil::flushCache() {
 		cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
 		for(it=lt.begin();it!=lt.end();++it) {
 			regfree(it->second);
+			delete it->second;
 		}
-		patterns.clear();
 	}
 	if(nlpatterns.size()>0) {
 		auto lt = nlpatterns.lock_table();
 		cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
 		for(it=lt.begin();it!=lt.end();++it) {
 			regfree(it->second);
+			delete it->second;
 		}
-		nlpatterns.clear();
 	}
 }
 

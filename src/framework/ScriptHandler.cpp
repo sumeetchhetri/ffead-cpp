@@ -238,7 +238,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		else
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
+			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
 			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
@@ -283,7 +283,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		else
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
+			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
 			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
@@ -318,7 +318,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		else
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
+			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
 			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
@@ -362,7 +362,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		else
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
+			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
 			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
@@ -397,7 +397,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		else
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
+			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
 			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}
@@ -432,7 +432,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		else
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
-			res->addHeaderValue(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
+			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
 			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
 		}

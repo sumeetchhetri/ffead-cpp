@@ -161,6 +161,5 @@ void TaskPool::stop() {
 TaskPool::~TaskPool() {
 	runFlag = false;
 	if(allowScheduledTasks) {
-		//delete mthread;
 	}
 }

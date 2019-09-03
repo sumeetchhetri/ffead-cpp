@@ -76,7 +76,7 @@ HttpResponseParser::HttpResponseParser(const std::string& vecstr, HttpResponse &
 				}
 				//logger << temp.at(0) << " => " << temp.at(1) << std::endl;
 				StringUtil::replaceFirst(temp.at(1),"\r","");
-				response.addHeaderValue(temp.at(0), temp.at(1));
+				response.addHeader(temp.at(0), temp.at(1));
 			}
 			else if(contStarts)
 			{

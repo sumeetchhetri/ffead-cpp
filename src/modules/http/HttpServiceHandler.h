@@ -20,6 +20,8 @@ class HttpServiceTask : public Task {
 	friend class HttpServiceHandler;
 	friend class CHServer;
 public:
+	int getTid();
+	void setTid(int tid);
 	virtual ~HttpServiceTask();
 	HttpServiceTask();
 	HttpServiceTask(ReusableInstanceHolder* h);
@@ -36,8 +38,23 @@ class HttpReadTask : public Task {
 	friend class HttpServiceHandler;
 	friend class CHServer;
 public:
+	int getTid();
+	void setTid(int tid);
 	virtual ~HttpReadTask();
 	HttpReadTask();
+};
+
+class HttpWriteTask : public Task {
+	SocketInterface* sif;
+	HttpServiceHandler* service;
+	void run();
+	friend class HttpServiceHandler;
+	friend class CHServer;
+public:
+	int getTid();
+	void setTid(int tid);
+	virtual ~HttpWriteTask();
+	HttpWriteTask();
 };
 
 typedef HttpServiceTask* (*HttpServiceTaskFactory) ();
@@ -50,6 +67,7 @@ class HttpServiceHandler : public ServiceHandler {
 	friend class HttpServiceTask;
 	void handleService(HandlerRequest* handlerRequest);
 	void handleRead(SocketInterface* sif);
+	void handleWrite(SocketInterface* sif);
 public:
 	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr);
 	virtual ~HttpServiceHandler();

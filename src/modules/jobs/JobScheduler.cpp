@@ -160,9 +160,6 @@ void JobScheduler::stop() {
 	Logger logger = LoggerFactory::getLogger("JOB", "JobScheduler");
 	logger << "Waiting 10 seconds for all Job Processes to shutdown....";
 	sleep(10);
-	for (int var = 0; var < (int)instance->tasks.size(); ++var) {
-		//delete instance->tasks.at(var);
-	}
 	delete instance;
 }
 
@@ -236,5 +233,12 @@ void JobScheduler::JobTask::run() {
 	} catch(const std::exception& ex) {
 		logger << "Cannot run Job as the cron std::string is invalid" << std::endl;
 	}
+}
+
+int JobScheduler::JobTask::getTid() {
+	return -1;
+}
+
+void JobScheduler::JobTask::setTid(int tid) {
 }
 

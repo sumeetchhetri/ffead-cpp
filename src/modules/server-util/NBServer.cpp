@@ -165,7 +165,8 @@ void* NBServer::servicing(void* arg)
 		for(int n=0;n<nfds;n++)
 		{
 			void* o;
-			SOCKET descriptor = server->selEpolKqEvPrtHandler.getDescriptor(n, o);
+			bool isRead;
+			SOCKET descriptor = server->selEpolKqEvPrtHandler.getDescriptor(n, o, isRead);
 			if (descriptor == server->sock)
 			{
 				new_fd = -1;
@@ -179,12 +180,12 @@ void* NBServer::servicing(void* arg)
 				else
 				{
 					server->selEpolKqEvPrtHandler.reRegisterServerSock();
-					server->selEpolKqEvPrtHandler.registerForEvent(NULL);
+					server->selEpolKqEvPrtHandler.registerRead(NULL);
 				}
 			}
 			else if (descriptor!=-1)
 			{
-				server->selEpolKqEvPrtHandler.unRegisterForEvent(descriptor);
+				server->selEpolKqEvPrtHandler.unRegisterRead(descriptor);
 				char buf[10];
 				memset(buf, 0, sizeof(buf));
 				int err;

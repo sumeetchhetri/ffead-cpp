@@ -36,10 +36,10 @@
 #include "DateFormat.h"
 #include "CommonUtils.h"
 
-
 typedef std::vector<unsigned char> Cont;
 class HttpResponse {
 public:
+	static void init();
 	static std::string AccessControlAllowOrigin,AccessControlAllowHeaders,AccessControlAllowCredentials,
 				  AccessControlAllowMethods,AccessControlMaxAge,AcceptRanges,Age,Allow,CacheControl,
 				  Connection,ContentEncoding,ContentLanguage,ContentLength,ContentLocation,ContentMD5,
@@ -66,16 +66,18 @@ public:
     std::string getHeader(std::string);
     bool getCompressed();
     const std::vector<std::string> getCookies() const;
-	const std::map<std::string,std::string>& getCHeaders() const;
-	std::map<std::string,std::string> getHeaders() const;
+	const RMap& getCHeaders() const;
+	RMap getHeaders() const;
 	std::string getStatusLine() const;
 	std::string toPluginString();
 	bool isDone() const;
 	void setDone(const bool& done);
-	std::string generateResponse(const std::string& httpMethod, HttpRequest *req, const bool& appendHeaders= true);
+	void generateResponse(const std::string& httpMethod, HttpRequest *req, std::string& data, const bool& appendHeaders= true);
 	std::string generateResponse(const bool& appendHeaders= true);
-	std::string generateResponse(HttpRequest *req, const bool& appendHeaders= true);
+	void generateResponse(HttpRequest *req, std::string& data, const bool& appendHeaders= true);
 private:
+	static RiMap HDRS_SW_CODES;
+	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN;
     bool done;
     float httpVers;
     uint32_t intCntLen;
@@ -86,34 +88,43 @@ private:
 	std::string preamble;
 	std::string epilogue;
 	bool compressed;
-	std::map<std::string, MultipartContent> multipartFormData;
+	FMap multipartFormData;
 	std::vector<MultipartContent> contentList;
 	std::string content;
 	std::string outFileName;
 	std::vector<std::string> cookies;
-	std::map<std::string,std::string> headers;
+	RMap headers;
 	int techunkSiz;
 	int teparts;
 	int tecurrpart;
 	bool hasContent;
 	void setCompressed(const bool& compressed);
 	void update(HttpRequest* req);
-	std::string generateHeadResponse();
-	std::string generateOptionsResponse();
-	std::string generateTraceResponse(HttpRequest* req);
+	void generateHeadResponse(std::string& resp);
+	void generateOptionsResponse(std::string& data);
+	void generateTraceResponse(HttpRequest* req, std::string& data);
 	bool updateContent(HttpRequest* req, const uint32_t& techunkSiz);
 	unsigned int getContentSize(const char *fileName);
 	std::string getContent(const char *fileName, const int& start= -1, const int& end= -1);
 	bool isContentRemains();
-	std::string getRemainingContent(const std::string& fname, const bool& isFirst);
+	bool getRemainingContent(const std::string& fname, const bool& isFirst, std::string& data);
 	static std::string getFileExtension(const std::string& file);
+    void addHeader(std::string header, const std::string& value);
 	friend class ServiceTask;
 	friend class HttpResponseParser;
 	friend class Http11Handler;
 	friend class Http2Handler;
 	friend class Http2RequestResponseData;
 	friend class HttpServiceHandler;
+	friend class HttpServiceTask;
+	friend class ControllerHandler;
+	friend class ExtHandler;
+	friend class FviewHandler;
+	friend class ScriptHandler;
+	friend class SecurityHandler;
+	friend class SoapHandler;
 	friend class HttpClient;
+	friend class CORSHandler;
 };
 
 #endif /* HTTPRESPONSE_H_ */

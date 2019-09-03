@@ -34,6 +34,7 @@ class RequestReaderHandler {
 	ServiceHandler* shi;
 	long siIdentifierSeries;
 	SocketInterfaceFactory sf;
+	std::vector<SocketInterface*> clsdConns;
 	bool isActive();
 	void addSf(SocketInterface* sf);
 	static void* handle(void* inp);

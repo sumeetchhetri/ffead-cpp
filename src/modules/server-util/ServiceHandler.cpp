@@ -13,21 +13,24 @@ bool ServiceHandler::isActive() {
 
 void* ServiceHandler::closeConnections(void *arg) {
 	ServiceHandler* ths = (ServiceHandler*)arg;
-	std::map<uintptr_t, long long> addrs;
-	std::map<uintptr_t, long long>::iterator it;
+	std::map<std::string, long long> addrs;
+	std::map<std::string, SocketInterface*> sifMap;
+	std::map<std::string, long long>::iterator it;
 	while(ths->run) {
 		Thread::sSleep(5);
 		SocketInterface* si;
 		while(ths->toBeClosedConns.try_dequeue(si)) {
-			uintptr_t addr = reinterpret_cast<uintptr_t>(si);
-			if(addrs.find(addr)==addrs.end()) {
-				addrs[addr] = Timer::getTimestamp();
-				delete si;
+			std::string as = si->address + CastUtil::lexical_cast<std::string>(si->fd);
+			if(addrs.find(as)==addrs.end()) {
+				addrs[as] = Timer::getTimestamp();
+				sifMap[as] = si;
 			}
 		}
 		for(it=addrs.begin();it!=addrs.end();) {
 			long long t = Timer::getTimestamp();
-			if(t-it->second>10) {
+			if(t-it->second>=15) {
+				delete sifMap[it->first];
+				sifMap.erase(it->first);
 				addrs.erase(it++);
 			} else {
 				++it;
@@ -45,6 +48,10 @@ void ServiceHandler::registerReadRequest(SocketInterface* sif) {
 	handleRead(sif);
 }
 
+void ServiceHandler::registerWriteRequest(SocketInterface* sif) {
+	handleWrite(sif);
+}
+
 void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos) {
 	HandlerRequest* req = new HandlerRequest;
 	req->request = request;
@@ -53,7 +60,7 @@ void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif,
 	req->context = context;
 	req->sh = this;
 	req->reqPos = reqPos;
-	req->protocol = sif->getProtocol(context);
+	req->protType = sif->getProtocol(context).find("HTTP")==0?1:2;
 	handleService(req);
 }
 
@@ -101,7 +108,6 @@ ServiceHandler::ServiceHandler(const int& spoolSize) {
 }
 
 ServiceHandler::~ServiceHandler() {
-	stop();
 }
 
 HandlerRequest::HandlerRequest() {
@@ -109,7 +115,7 @@ HandlerRequest::HandlerRequest() {
 	request = NULL;
 	context = NULL;
 	sif = NULL;
-	protocol = "";
+	protType = -1;
 	reqPos = 0;
 	response = NULL;
 }
@@ -118,16 +124,18 @@ HandlerRequest::~HandlerRequest() {
 	clearObjects();
 }
 
-SocketUtil* HandlerRequest::getSocketUtil() {
-	return &(sif->sockUtil);
-}
-
 void HandlerRequest::clearObjects() {
-	if(request!=NULL)delete request;
+	if(request!=NULL) {
+		protType==1?delete (HttpRequest*)request:delete (WebSocketData*)request;
+	}
 	request = NULL;
-	if(context!=NULL)delete context;
+	if(context!=NULL){
+		delete context;
+	}
 	context = NULL;
-	if(response!=NULL)delete response;
+	if(response!=NULL){
+		protType==1?delete (HttpResponse*)response:delete (WebSocketData*)response;
+	}
 	response = NULL;
 }
 
@@ -135,8 +143,8 @@ void* HandlerRequest::getContext() {
 	return context;
 }
 
-const std::string& HandlerRequest::getProtocol() const {
-	return protocol;
+int HandlerRequest::getProtType() const {
+	return protType;
 }
 
 void* HandlerRequest::getRequest() {
@@ -151,8 +159,8 @@ bool HandlerRequest::isValidWriteRequest() {
 	return sif->isCurrentRequest(reqPos);
 }
 
-bool HandlerRequest::doneWithWrite() {
-	sif->endRequest();
+bool HandlerRequest::doneWithWrite(int reqPos) {
+	sif->endRequest(reqPos);
 	return sif->allRequestsDone();
 }
 

@@ -33,7 +33,7 @@ public:
 	Client();
 	virtual ~Client();
 	bool connection(const std::string&, const int&);
-	bool connectionUnresolv(const std::string& host, const int& port);
+	//bool connectionUnresolv(const std::string& host, const int& port);
 	int sendData(std::string);
 	std::string getTextData(const std::string& hdrdelm, const std::string& cntlnhdr);
 	std::string getBinaryData(const int&, const bool&);

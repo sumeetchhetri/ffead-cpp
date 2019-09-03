@@ -36,54 +36,56 @@ void* PoolThread::run(void *arg)
 		while (ths->condVar<=0)
 		ths->c_mutex.conditionalWait();
 		ths->c_mutex.unlock();
-		bool f = ths->tasks.try_dequeue(task);
-		if(f && task==NULL)break;
 
-		ths->condVar--;
-		try
-		{
-			ths->taskCount++;
-			if(!task->isFuture)
-				task->run();
-			else
+		while(ths->tasks.try_dequeue(task)) {
+			if(task==NULL)break;
+
+			ths->condVar--;
+			try
 			{
-				FutureTask* ftask = dynamic_cast<FutureTask*>(task);
-				if(ftask!=NULL)
-				{
-					ftask->result = ftask->call();
-					ftask->taskComplete();
-				}
+				ths->taskCount++;
+				if(!task->isFuture)
+					task->run();
 				else
 				{
-					task->run();
+					FutureTask* ftask = dynamic_cast<FutureTask*>(task);
+					if(ftask!=NULL)
+					{
+						ftask->result = ftask->call();
+						ftask->taskComplete();
+					}
+					else
+					{
+						task->run();
+					}
 				}
-			}
-			if(task->cleanUp)
-			{
-				if(task->hdlr!=NULL) {
-					task->hdlr->push(task);
-				} else {
-					delete task;
-				}
-			}
-		}
-		catch(const std::exception& e)
-		{
-			ths->logger << e.what() << std::flush;
-			if(task->isFuture)
-			{
-				FutureTask* ftask = dynamic_cast<FutureTask*>(task);
-				if(ftask!=NULL)
+				if(task->cleanUp)
 				{
-					ftask->taskComplete();
+					if(task->hdlr!=NULL) {
+						task->hdlr->push(task);
+					} else {
+						delete task;
+					}
 				}
 			}
-			if(task->cleanUp)
+			catch(const std::exception& e)
 			{
-				if(task->hdlr!=NULL) {
-					task->hdlr->push(task);
-				} else {
-					delete task;
+				ths->logger << e.what() << std::flush;
+				if(task->isFuture)
+				{
+					FutureTask* ftask = dynamic_cast<FutureTask*>(task);
+					if(ftask!=NULL)
+					{
+						ftask->taskComplete();
+					}
+				}
+				if(task->cleanUp)
+				{
+					if(task->hdlr!=NULL) {
+						task->hdlr->push(task);
+					} else {
+						delete task;
+					}
 				}
 			}
 		}
@@ -105,7 +107,6 @@ void* PoolThread::run(void *arg)
 				delete task;
 			}
 		}
-		continue;
 	}
 	ths->complete = true;
 	return NULL;
@@ -220,7 +221,6 @@ PoolThread::~PoolThread() {
 	{
 		Thread::sSleep(1);
 	}
-	//delete mthread;
 	logger << "Destroyed PoolThread\n" << std::flush;
 }
 

@@ -7,49 +7,6 @@
 
 #include "Http2Handler.h"
 
-Http2Frame* Http2Handler::readFrame() {
-	std::string fd;
-	Http2FrameHeader header;
-	std::vector<unsigned char> lenbytes;
-	if(!sockUtil.readData(3, lenbytes))
-	{
-		return NULL;
-	}
-	for (int var = 0; var < 3; ++var) {
-		fd.push_back(lenbytes.at(var));
-	}
-	header.payloadLength = (int)CommonUtils::charArrayToULongLong(lenbytes);
-	std::vector<unsigned char> tfbytes;
-	if(!sockUtil.readData(2, tfbytes))
-	{
-		return NULL;
-	}
-	for (int var = 0; var < 2; ++var) {
-		fd.push_back(tfbytes.at(var));
-	}
-	header.type = tfbytes.at(0);
-	header.flags = tfbytes.at(1);
-	std::vector<unsigned char> rsibytes;
-	if(!sockUtil.readData(4, rsibytes))
-	{
-		return NULL;
-	}
-	for (int var = 0; var < 4; ++var) {
-		fd.push_back(rsibytes.at(var));
-	}
-	header.reserved = ((rsibytes.at(0) >> 7) & 0x01);
-	rsibytes[0] = rsibytes[0] & 0x7F;
-	header.streamIdentifier = (int)CommonUtils::charArrayToULongLong(rsibytes);
-	std::string payload;
-	if(!sockUtil.readData(header.payloadLength, payload))
-	{
-		return NULL;
-	}
-	fd.append(payload);
-	CommonUtils::printHEX(fd);
-	return getFrameByType(payload, header);
-}
-
 Http2Frame* Http2Handler::readFrame(std::string data) {
 	Http2FrameHeader header;
 	header.payloadLength = (int)CommonUtils::charArrayToULongLong(data.substr(0, 3));
@@ -117,13 +74,7 @@ Http2Frame* Http2Handler::getFrameByType(const std::string& data, Http2FrameHead
 	return NULL;
 }
 
-void Http2Handler::init(const bool& isServer, const std::string& webpath) {
-	reqPos = 0;
-	current = 0;
-	address = StringUtil::toHEX((long long)this);
-	logger = LoggerFactory::getLogger("Http2Handler");
-	wtl.clear();
-	buffer.clear();
+Http2Handler::Http2Handler(const SOCKET& fd, SSL* ssl, BIO* io, const bool& isServer, const std::string& webpath) : SocketInterface(fd, ssl, io) {
 	this->highestStreamIdentifier = 0;
 	this->context.huffmanEncoding = true;
 	this->highestPushPromiseStreamIdentifier = 2;
@@ -133,30 +84,11 @@ void Http2Handler::init(const bool& isServer, const std::string& webpath) {
 	this->precedingstreamId = -1;
 	this->maxDataFrameSize = 16384;
 	this->webpath = webpath;
-	fd = sockUtil.fd;
-}
-
-Http2Handler::Http2Handler(const bool& isServer, const std::string& webpath) {
-	reqPos = 0;
-	current = 0;
-	address = StringUtil::toHEX((long long)this);
+	http2 = true;
 	logger = LoggerFactory::getLogger("Http2Handler");
-	this->highestStreamIdentifier = 0;
-	this->context.huffmanEncoding = true;
-	this->highestPushPromiseStreamIdentifier = 2;
-	this->senderFlowControlWindow = 65535;
-	this->receiverFlowControlWindow = 20971520;
-	this->isConnInit = false;
-	this->precedingstreamId = -1;
-	this->maxDataFrameSize = 16384;
-	this->webpath = webpath;
-	fd = sockUtil.fd;
 }
 
-Http2Handler::Http2Handler(const bool& isServer, const std::string& webpath, const std::string& settingsFrameData) {
-	reqPos = 0;
-	current = 0;
-	address = StringUtil::toHEX((long long)this);
+Http2Handler::Http2Handler(const SOCKET& fd, SSL* ssl, BIO* io, const bool& isServer, const std::string& webpath, const std::string& settingsFrameData) : SocketInterface(fd, ssl, io) {
 	this->highestStreamIdentifier = 0;
 	this->context.huffmanEncoding = true;
 	this->highestPushPromiseStreamIdentifier = 2;
@@ -166,19 +98,20 @@ Http2Handler::Http2Handler(const bool& isServer, const std::string& webpath, con
 	this->precedingstreamId = -1;
 	this->maxDataFrameSize = 16384;
 	this->webpath = webpath;
-	fd = sockUtil.fd;
+	http2 = true;
+	logger = LoggerFactory::getLogger("Http2Handler");
 
 	Http2Frame* sframe = readFrame(settingsFrameData);
 	if(sframe!=NULL)
 	{
 		void* temp = NULL;
-		processFrame(sframe, temp);
+		processFrame(sframe, temp, 0);
 
 		if(!this->isConnInit) {
 			Http2SettingsFrame stframe;
 			stframe.settings[Http2SettingsFrame::SETTINGS_MAX_CONCURRENT_STREAMS] = 100;
 			stframe.settings[Http2SettingsFrame::SETTINGS_INITIAL_WINDOW_SIZE] = 20971520;
-			writeData(&stframe);
+			writeInitData(&stframe);
 			frameAcks[stframe.header.type] = true;
 			isConnInit = true;
 		}
@@ -191,63 +124,11 @@ int Http2Handler::getHighestPushPromiseStreamIdentifier() {
 	return val;
 }
 
-void Http2Handler::doIt() {
-	while(true)
-	{
-		std::string temp;
-		int fl = sockUtil.readLine(temp);
-		if(fl>0 && temp!="PRI * HTTP/2.0\r")
-		{
-			break;
-		}
-		else if(fl==0)
-		{
-			sockUtil.closeSocket();
-			return;
-		}
-	}
-	while(true)
-	{
-		std::string temp;
-		int fl = sockUtil.readLine(temp);
-		if(fl>0 && temp!="SM\r")
-		{
-			break;
-		}
-		else if(fl==0)
-		{
-			sockUtil.closeSocket();
-			return;
-		}
-	}
-
-	Http2SettingsFrame sframe;
-	sframe.settings[Http2SettingsFrame::SETTINGS_MAX_CONCURRENT_STREAMS] = 100;
-	sframe.settings[Http2SettingsFrame::SETTINGS_INITIAL_WINDOW_SIZE] = 20971520;
-	writeData(&sframe);
-	frameAcks[sframe.header.type] = true;
-
-	while(true)
-	{
-		Http2Frame* frame = readFrame();
-		void* request = NULL;
-		bool flag = processFrame(frame, request);
-		if(flag)
-		{
-			break;
-		}
-	}
-	sockUtil.closeSocket();
-}
-
-bool Http2Handler::processFrame(Http2Frame* frame, void*& request) {
+bool Http2Handler::processFrame(Http2Frame* frame, void*& request, int reqPos) {
 	if(frame->header.type==0) {
 		//Send Window Update if current window size is not sufficient
 		if(receiverFlowControlWindow<=frame->header.payloadLength) {
-			Http2WindowUpdateFrame cwuframe;
-			cwuframe.windowSizeIncrement = 65535 + frame->header.payloadLength;
-			cwuframe.header.streamIdentifier = 0;
-			writeData(&cwuframe);
+			updateRxFCWS = frame->header.payloadLength;
 		}
 		receiverFlowControlWindow -= frame->header.payloadLength;
 	}
@@ -295,7 +176,7 @@ void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		Http2SettingsFrame sframe;
 		sframe.settings[Http2SettingsFrame::SETTINGS_MAX_CONCURRENT_STREAMS] = 100;
 		sframe.settings[Http2SettingsFrame::SETTINGS_INITIAL_WINDOW_SIZE] = 20971520;
-		writeData(&sframe);
+		writeInitData(&sframe);
 		frameAcks[sframe.header.type] = true;
 		isConnInit = true;
 	}
@@ -305,9 +186,9 @@ void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	while((frame=nextFrame())!=NULL)
 	{
 		int streamIdentifier = frame->header.streamIdentifier;
-		if(processFrame(frame, request)) {
+		if(processFrame(frame, request, reqPos)) {
 			//closed = true;
-			close();
+			closeSocket();
 			break;
 		}
 		if(request!=NULL) {
@@ -349,14 +230,11 @@ std::string Http2Handler::serialize(Http2Frame* frame) {
 	return frameD;
 }
 
-bool Http2Handler::writeData(Http2Frame* frame) {
-	std::string serv = serialize(frame);
-	writeTo(serv);
-	CommonUtils::printHEX(serv);
-	return false;
+void Http2Handler::writeInitData(Http2Frame* frame) {
+	writeTo(serialize(frame), 0);
 }
 
-bool Http2Handler::writePendingDataFrame(Http2RequestResponseData& pendingSendData) {
+bool Http2Handler::writePendingDataFrame(Http2RequestResponseData& pendingSendData, std::string& data) {
 
 	int streamIdentifier = pendingSendData.streamIdentifier;
 
@@ -371,10 +249,7 @@ bool Http2Handler::writePendingDataFrame(Http2RequestResponseData& pendingSendDa
 			dframe.data = pendingSendData.data;
 			dframe.header.flags.set(0);
 
-			if(writeTo(serialize(&dframe))) {
-				pendingSendData.reset();
-				return true;
-			}
+			data += serialize(&dframe);
 
 			//Handle flow control for data frames
 			senderFlowControlWindow -= dframe.header.payloadLength;
@@ -392,10 +267,7 @@ bool Http2Handler::writePendingDataFrame(Http2RequestResponseData& pendingSendDa
 			dframe.header.streamIdentifier = streamIdentifier;
 			dframe.data = pendingSendData.data.substr(0, minreslen);
 			//No end of stream set for this incomplete data frame
-			if(writeTo(serialize(&dframe))) {
-				pendingSendData.reset();
-				return true;
-			}
+			data += serialize(&dframe);
 
 			pendingSendData.data = pendingSendData.data.substr(minreslen);
 			break;
@@ -404,7 +276,7 @@ bool Http2Handler::writePendingDataFrame(Http2RequestResponseData& pendingSendDa
 	return false;
 }
 
-bool Http2Handler::writeResponse(void* req, void* res, void* si) {
+bool Http2Handler::writeResponse(void* req, void* res, void* si, std::string& data, int reqPos) {
 	int streamIdentifier = *(int*)si;
 
 	if(isClosed()) {
@@ -412,22 +284,27 @@ bool Http2Handler::writeResponse(void* req, void* res, void* si) {
 		return true;
 	}
 
+	Http2WindowUpdateFrame cwuframe;
+	cwuframe.windowSizeIncrement = 65535 + updateRxFCWS;
+	cwuframe.header.streamIdentifier = 0;
+	data += serialize(&cwuframe);
+
 	if(streams[streamIdentifier].isWebSocket) {
-		return writeWebSocketResponse(req, res, si);
+		return writeWebSocketResponse(req, res, si, data);
 	} else {
-		return writeHttpResponse(req, res, si);
+		return writeHttpResponse(req, res, si, data);
 	}
 }
 
-bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si) {
+bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si, std::string& data) {
 	WebSocketData* response = (WebSocketData*)res;
-	WebSocketData* request = (WebSocketData*)req;
+	//WebSocketData* request = (WebSocketData*)req;
 	int streamIdentifier = *(int*)si;
 
 	response->updateContent(maxDataFrameSize);
 
 	Http2HeadersFrame hframe;
-	std::map<std::string, std::string> hdrs;
+	std::map<std::string, std::string,cicomp> hdrs;
 	hdrs[":opcode"] = CastUtil::lexical_cast<std::string>(response->dataType);
 	hframe.headerBlockFragment = context.encode(hdrs);
 	CommonUtils::printHEX(hframe.headerBlockFragment);
@@ -436,27 +313,23 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si) {
 	if(response->data=="") {
 		hframe.header.flags.set(6);
 	}
-	if(writeTo(serialize(&hframe))) {
-		return true;
-	}
+	data += serialize(&hframe);
 
 	bool completedSend = true;
-	std::string data;
-	while(response->data!="" && (data = response->getRemainingContent()) != "") {
-		if(senderFlowControlWindow>=(int)data.length()
-				&& streams[streamIdentifier].senderFlowControlWindow>=(int)data.length())
+	std::string tmd;
+	while(response->data!="" && (tmd = response->getRemainingContent()) != "") {
+		if(senderFlowControlWindow>=(int)tmd.length()
+				&& streams[streamIdentifier].senderFlowControlWindow>=(int)tmd.length())
 		{
 			Http2DataFrame dframe;
 			dframe.header.streamIdentifier = streamIdentifier;
-			dframe.data = data;
+			dframe.data = tmd;
 			if(!response->isContentRemains()) {
 				dframe.header.flags.set(6);
 			}
 
-			if(writeTo(serialize(&dframe))) {
-				return true;
-			}
-			logger << "write data frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << std::endl;
+			data += serialize(&dframe);
+			logger << "write tmd frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << std::endl;
 
 			//Handle flow control for data frames
 			senderFlowControlWindow -= dframe.header.payloadLength;
@@ -472,19 +345,16 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si) {
 
 			Http2DataFrame dframe;
 			dframe.header.streamIdentifier = streamIdentifier;
-			dframe.data = data.substr(0, minreslen);
+			dframe.data = tmd.substr(0, minreslen);
 			//No end of stream set for this incomplete data frame
-			logger << "write partial data frame " << dframe.header.streamIdentifier << std::endl;
-			if(writeTo(serialize(&dframe))) {
-				streams[streamIdentifier].pendingSendData.reset();
-				return true;
-			}
+			logger << "write partial tmd frame " << dframe.header.streamIdentifier << std::endl;
+			data += serialize(&dframe);
 
 			completedSend = false;
 			streams[streamIdentifier].pendingSendData.isWebSocket = streams[streamIdentifier].isWebSocket;
 			streams[streamIdentifier].pendingSendData.incompleteResponse = response;
 			streams[streamIdentifier].pendingSendData.streamIdentifier = streamIdentifier;
-			streams[streamIdentifier].pendingSendData.data = data.substr(minreslen);
+			streams[streamIdentifier].pendingSendData.data = tmd.substr(minreslen);
 			break;
 		}
 	}
@@ -496,7 +366,7 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si) {
 	return false;
 }
 
-bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
+bool Http2Handler::writeHttpResponse(void* req, void* res, void* si, std::string& data) {
 	HttpResponse* response = (HttpResponse*)res;
 	HttpRequest* request = (HttpRequest*)req;
 	int streamIdentifier = *(int*)si;
@@ -514,30 +384,25 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 	if(!response->hasContent) {
 		hframe.header.flags.set(0);
 	}
-	if(writeTo(serialize(&hframe))) {
-		return true;
-	}
+	data += serialize(&hframe);
 	//logger << response->generateResponse(request, false) << std::endl;
 	//logger << "write header frame " << hframe.header.streamIdentifier << std::endl;
 
 	bool completedSend = true;
 	bool isFirst = true;
-	std::string data;
+	std::string tmd;
 	if(!response->isContentRemains()) {
-		std::string data = response->getContent();
-		if(senderFlowControlWindow>=(int)data.length()
-				&& streams[streamIdentifier].senderFlowControlWindow>=(int)data.length())
+		if(senderFlowControlWindow>=(int)response->getContent().length()
+				&& streams[streamIdentifier].senderFlowControlWindow>=(int)response->getContent().length())
 		{
 			Http2DataFrame dframe;
 			dframe.header.streamIdentifier = streamIdentifier;
-			dframe.data = data;
+			dframe.data = response->getContent();
 			if(!response->isContentRemains()) {
 				dframe.header.flags.set(0);
 			}
 
-			if(writeTo(serialize(&dframe))) {
-				return true;
-			}
+			data += serialize(&dframe);
 			logger << "write data frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << std::endl;
 
 			//Handle flow control for data frames
@@ -557,10 +422,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 			dframe.data = data.substr(0, minreslen);
 			//No end of stream set for this incomplete data frame
 			logger << "write partial data frame " << dframe.header.streamIdentifier << std::endl;
-			if(writeTo(serialize(&dframe))) {
-				streams[streamIdentifier].pendingSendData.reset();
-				return true;
-			}
+			data += serialize(&dframe);
 
 			completedSend = false;
 			streams[streamIdentifier].pendingSendData.isWebSocket = streams[streamIdentifier].isWebSocket;
@@ -570,21 +432,19 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 			streams[streamIdentifier].pendingSendData.data = data.substr(minreslen);
 		}
 	} else {
-		while(response->hasContent && (data = response->getRemainingContent(request->getUrl(), isFirst)) != "") {
+		while(response->hasContent && response->getRemainingContent(request->getUrl(), isFirst, data)) {
 			isFirst = false;
-			if(senderFlowControlWindow>=(int)data.length()
-					&& streams[streamIdentifier].senderFlowControlWindow>=(int)data.length())
+			if(senderFlowControlWindow>=(int)tmd.length()
+					&& streams[streamIdentifier].senderFlowControlWindow>=(int)tmd.length())
 			{
 				Http2DataFrame dframe;
 				dframe.header.streamIdentifier = streamIdentifier;
-				dframe.data = data;
+				dframe.data = tmd;
 				if(!response->isContentRemains()) {
 					dframe.header.flags.set(0);
 				}
 
-				if(writeTo(serialize(&dframe))) {
-					return true;
-				}
+				data += serialize(&dframe);
 				logger << "write data frame " << dframe.header.streamIdentifier  << " " << dframe.header.payloadLength << " bytes" << std::endl;
 
 				//Handle flow control for data frames
@@ -601,20 +461,17 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 
 				Http2DataFrame dframe;
 				dframe.header.streamIdentifier = streamIdentifier;
-				dframe.data = data.substr(0, minreslen);
+				dframe.data = tmd.substr(0, minreslen);
 				//No end of stream set for this incomplete data frame
 				logger << "write partial data frame " << dframe.header.streamIdentifier << std::endl;
-				if(writeTo(serialize(&dframe))) {
-					streams[streamIdentifier].pendingSendData.reset();
-					return true;
-				}
+				data += serialize(&dframe);
 
 				completedSend = false;
 				streams[streamIdentifier].pendingSendData.isWebSocket = streams[streamIdentifier].isWebSocket;
 				streams[streamIdentifier].pendingSendData.incompleteResponse = response;
 				streams[streamIdentifier].pendingSendData.url = request->getUrl();
 				streams[streamIdentifier].pendingSendData.streamIdentifier = streamIdentifier;
-				streams[streamIdentifier].pendingSendData.data = data.substr(minreslen);
+				streams[streamIdentifier].pendingSendData.data = tmd.substr(minreslen);
 				break;
 			}
 		}
@@ -627,13 +484,13 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si) {
 	return false;
 }
 
-bool Http2Handler::writeData(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS) {
+bool Http2Handler::writeData(Http2RequestResponseData& data, Http2RequestResponseData& pendingSendData, int& streamFlowControlWindowS, std::string& respd) {
 	Http2HeadersFrame hframe;
 	hframe.headerBlockFragment = context.encode(data.preHeaders);
 	CommonUtils::printHEX(hframe.headerBlockFragment);
 	hframe.header.streamIdentifier = data.streamIdentifier;
 	hframe.header.flags.set(2);
-	writeTo(serialize(&hframe));
+	respd += serialize(&hframe);
 	CommonUtils::printHEX(serialize(&hframe));
 
 	Http2DataFrame dframe;
@@ -645,7 +502,7 @@ bool Http2Handler::writeData(Http2RequestResponseData& data, Http2RequestRespons
 	//Check the connection/stream sender window size before sending data frame
 	if(senderFlowControlWindow>=dframe.header.payloadLength && streamFlowControlWindowS>=dframe.header.payloadLength)
 	{
-		writeTo(dfdata);
+		respd += dfdata;
 		//Handle flow control for data frames
 		senderFlowControlWindow -= dframe.header.payloadLength;
 		streamFlowControlWindowS -= dframe.header.payloadLength;
@@ -677,7 +534,7 @@ int Http2Handler::updateSenderWindowSize(const int& windowSize) {
 std::string Http2Handler::getProtocol(void* context) {
 	int streamIdentifier = *(int*)context;
 	if(streams.find(streamIdentifier)!=streams.end() && streams[streamIdentifier].isWebSocket) {
-		return "HTTP2.0WS";
+		return "WS2.0";
 	}
 	return "HTTP2.0";
 }

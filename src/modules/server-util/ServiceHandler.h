@@ -30,21 +30,21 @@ class HandlerRequest {
 	void* context;
 	void* response;
 	int reqPos;
-	std::string protocol;
+	int protType;
 	ServiceHandler* sh;
 	friend class ServiceHandler;
 	friend class HttpServiceTask;
 	friend class HttpReadTask;
+	friend class HttpWriteTask;
 	HandlerRequest();
 public:
-	SocketUtil* getSocketUtil();
 	void* getContext();
-	const std::string& getProtocol() const;
+	int getProtType() const;
 	void* getRequest();
 	void* getResponse();
 	SocketInterface* getSif();
 	bool isValidWriteRequest();
-	bool doneWithWrite();
+	bool doneWithWrite(int reqPos);
 	void clearObjects();
 	virtual ~HandlerRequest();
 };
@@ -68,9 +68,11 @@ protected:
 	void submitTask(Task* task);
 	virtual void handleService(HandlerRequest* req)=0;
 	virtual void handleRead(SocketInterface* req)=0;
+	virtual void handleWrite(SocketInterface* sif)=0;
 public:
 	void closeConnection(SocketInterface* si);
 	void registerReadRequest(SocketInterface* si);
+	void registerWriteRequest(SocketInterface* sif);
 	void start();
 	void stop();
 	ServiceHandler(const int& spoolSize);

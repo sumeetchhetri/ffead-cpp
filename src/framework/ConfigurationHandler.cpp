@@ -596,11 +596,6 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											restfunction.statusCode = "200";
 										}
 									}
-									if(resfuncs.at(cntn1).getAttribute("rtype")=="")
-									{
-										logger << "Rest: invalid return type specified, will skip rest function definition.." << std::endl;
-										continue;
-									}
 									restfunction.serOpt = SerializeBase::identifySerOption(resfuncs.at(cntn1).getAttribute("rtype"));
 									/*restfunction.baseUrl = resfuncs.at(cntn1).getAttribute("baseUrl");
 									if(restfunction.baseUrl!="")
@@ -610,6 +605,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									}*/
 									restfunction.icontentType = resfuncs.at(cntn1).getAttribute("icontentType");
 									restfunction.ocontentType = resfuncs.at(cntn1).getAttribute("ocontentType");
+									if(StringUtil::toLowerCopy(restfunction.ocontentType).find(ContentTypes::CONTENT_TYPE_APPLICATION_JSON)==0) {
+										restfunction.serOpt += 1000;
+									} else if(StringUtil::toLowerCopy(restfunction.ocontentType).find(ContentTypes::CONTENT_TYPE_APPLICATION_XML)==0) {
+										restfunction.serOpt += 2000;
+									}
 									ElementList resfuncparams = resfuncs.at(cntn1).getChildElements();
 									bool hasBodyParam = false, invalidParam = false;;
 									for (unsigned int cntn2 = 0; cntn2 < resfuncparams.size(); cntn2++)
@@ -2304,6 +2304,12 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 			restfunction.meth = StringUtil::toUpperCopy(m.getName().substr(1));
 			restfunction.icontentType = m.getAttributeValue("icontentType");
 			restfunction.ocontentType = m.getAttributeValue("ocontentType");
+
+			if(StringUtil::toLowerCopy(restfunction.ocontentType).find(ContentTypes::CONTENT_TYPE_APPLICATION_JSON)==0) {
+				restfunction.serOpt += 1000;
+			} else if(StringUtil::toLowerCopy(restfunction.ocontentType).find(ContentTypes::CONTENT_TYPE_APPLICATION_XML)==0) {
+				restfunction.serOpt += 2000;
+			}
 
 			std::map<int, std::map<std::string, std::vector<Marker> > > argMarkers = cs.pubms.at(var).argMarkers;
 			std::map<int, std::map<std::string, std::vector<Marker> > >::iterator pit;

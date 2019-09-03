@@ -28,9 +28,7 @@ HttpSession::HttpSession()
 	this->dirty = false;
 }
 
-HttpSession::~HttpSession()
-{
-	//delete this;
+HttpSession::~HttpSession(){
 }
 std::string HttpSession::getSessionId() const
 {

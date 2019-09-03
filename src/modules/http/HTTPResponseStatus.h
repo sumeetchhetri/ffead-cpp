@@ -24,21 +24,32 @@
 #define HTTPRESPONSESTATUS_H_
 #include "string"
 #include "map"
+#include "CastUtil.h"
 
+struct cicomp {
+    bool operator() (const std::string& lhs, const std::string& rhs) const {
+        return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+    }
+};
 
 class HTTPResponseStatus {
 	HTTPResponseStatus(const int&, const std::string&);
 	int code;
+	std::string scode;
 	std::string msg;
 	static std::map<int, HTTPResponseStatus> statuses;
+	static std::map<std::string, HTTPResponseStatus> sstatuses;
 public:
+	static void init();
 	HTTPResponseStatus();
 	HTTPResponseStatus(const HTTPResponseStatus& status) ;
 	HTTPResponseStatus(const HTTPResponseStatus& status, const std::string& msg);
 	virtual ~HTTPResponseStatus();
 	int getCode() const;
+	std::string getSCode() const;
 	std::string getMsg() const;
-	static HTTPResponseStatus getStatusByCode(const int& code);
+	static const HTTPResponseStatus& getStatusByCode(const int& code);
+	static const HTTPResponseStatus& getStatusByCode(const std::string& code);
 
 	static HTTPResponseStatus Continue;
 	static HTTPResponseStatus Switching;

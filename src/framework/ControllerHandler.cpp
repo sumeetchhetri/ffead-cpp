@@ -98,7 +98,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			 valus.push_back(req);
 			 valus.push_back(res);
 			 //logger << ("Controller " + controller + " called") << std::endl;
-			 bool isDone = reflector.invokeMethod<bool>(_temp,meth,valus);
+			 bool isDone = false;
+			 reflector.invokeMethod<bool>(&isDone,_temp,meth,valus);
 			 if(isDone && res->getStatusCode()!="")
 				 isContrl = true;
 			 //logger << "Controller call complete" << std::endl;
@@ -244,7 +245,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		{
 			t.start();
 			ClassInfo* srv = ConfigurationData::getInstance()->ffeadContext.contInsMap["restcontroller_"+rft.clas+req->getCntxt_name()];
-			//ConfigurationData::getClassInfo(rft.clas, req->getCntxt_name());
 			t.end();
 			CommonUtils::tsContRstCsiLkp += t.timerNanoSeconds();
 
@@ -252,28 +252,22 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			void *_temp = srv->getSI();
 			if(_temp==NULL) {
 				_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft.clas, req->getCntxt_name());
-			}
-			if(_temp==NULL) {
-				logger << "Rest Controller Not Found" << std::endl;
-				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
-				res->setDone(true);
-				return true;
+				if(_temp==NULL) {
+					logger << "Rest Controller Not Found" << std::endl;
+					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
+					res->setDone(true);
+					return true;
+				}
 			}
 
-			std::string icont = rft.icontentType;
-			std::string ocont = rft.ocontentType;
-			if(icont=="")
-				icont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
-			else if(icont!=req->getHeader(HttpRequest::ContentType) && req->getHeader(HttpRequest::ContentType).find(icont)!=0)
+			if(rft.icontentType.length()>0 && rft.icontentType!=req->getHeader(HttpRequest::ContentType) && req->getHeader(HttpRequest::ContentType).find(rft.icontentType)!=0)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
 				res->setDone(true);
 				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				return true;
 			}
-			if(ocont=="")
-				ocont = ContentTypes::CONTENT_TYPE_APPLICATION_JSON;
-			req->addHeaderValue(HttpRequest::ContentType, icont);
+			req->addHeader(HttpRequest::ContentType, rft.icontentType);
 
 			t.end();
 			CommonUtils::tsContRstInsLkp += t.timerNanoSeconds();
@@ -368,9 +362,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 
 					switch(rft.params.at(var).serOpt) {
 						case 0: {
-							argus.push_back(rft.params.at(var).type);
 							void* voidPvect = NULL;
-							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+							if(rft.icontentType==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 							{
 								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
 							}
@@ -387,12 +380,13 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 								for(int i=0;i<(int)valus.size();++i) {
 									if(valus.at(i)!=NULL) {
-										delete valus.at(i);
+										reflector.destroy(valus.at(i), argus.at(i));
 									}
 								}
 								return true;
 							}
 							valus.push_back(voidPvect);
+							argus.push_back(rft.params.at(var).type);
 							break;
 						}
 						case 1: argus.push_back(rft.params.at(var).type);valus.push_back(new std::string(CastUtil::lexical_cast<std::string>(pmvalue)));break;
@@ -448,9 +442,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						case 114:
 						case 115:
 						case 116: {
-							argus.push_back(rft.params.at(var).type);
 							void* voidPvect = NULL;
-							if(icont==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
+							if(rft.icontentType==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 							{
 								voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft.params.at(var).serOpt, rft.params.at(var).type, req->getCntxt_name());
 							}
@@ -467,12 +460,13 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 								for(int i=0;i<(int)valus.size();++i) {
 									if(valus.at(i)!=NULL) {
-										delete valus.at(i);
+										reflector.destroy(valus.at(i), argus.at(i));
 									}
 								}
 								return true;
 							}
 							valus.push_back(voidPvect);
+							argus.push_back(rft.params.at(var).type);
 							break;
 						}
 						case 119: {
@@ -510,7 +504,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 					for(int i=0;i<(int)valus.size();++i) {
 						if(valus.at(i)!=NULL) {
-							delete valus.at(i);
+							reflector.destroy(valus.at(i), argus.at(i));
 						}
 					}
 					return true;
@@ -526,45 +520,60 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				const Method& meth = srv->getMethod(rft.name, argus);
 				if(meth.getMethodName()!="" && !invValue)
 				{
-					std::string outRetType = meth.getReturnType();
 					void* ouput = reflector.invokeMethodUnknownReturn(_temp,meth,valus,true);
 					t.end();
 					CommonUtils::tsContRstExec += t.timerNanoSeconds();
 
 					t.start();
-					std::string outcontent = "void";
-					if(ouput!=NULL)
-					{
-						if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
-						{
-							outcontent = JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, rft.s, rft.sc, rft.scm, req->getCntxt_name());
-							res->setContent(outcontent);
-						}
-						else if(ocont == ContentTypes::CONTENT_TYPE_APPLICATION_XML)
-						{
-							outcontent = XMLSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name());
-							res->setContent(outcontent);
-						}
-						else
-						{
-							if(rft.serOpt>17 || rft.serOpt==0) {
-								res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt, outRetType, req->getCntxt_name()));
-							} else {
-								res->setContent(SerializeBase::trySerialize(ouput, rft.serOpt, outRetType, req->getCntxt_name()));
+					int serOpt = rft.serOpt>=2000?-3:(rft.serOpt>=1000?-2:rft.serOpt);
+					switch(serOpt) {
+						case -3: {
+							if(ouput!=NULL) {
+								res->setContent(XMLSerialize::serializeUnknown(ouput, rft.serOpt-2000, rft.rtype, req->getCntxt_name()));
+								res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 							}
+							break;
 						}
-						res->addHeaderValue(HttpResponse::ContentType, ocont);
-						res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
-						delete ouput;
-						//reflector.destroy(ouput, outRetType, req->getCntxt_name());
+						case -2: {
+							if(ouput!=NULL) {
+								res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt-1000, rft.rtype, rft.s, rft.sc, rft.scm, req->getCntxt_name()));
+								res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
+							}
+							break;
+						}
+						case -1: {
+							if(rft.statusCode=="" && res->getContent().length()==0) {
+								res->setHTTPResponseStatus(HTTPResponseStatus::NoContent);
+							} else {
+								res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
+							}
+							break;
+						}
+						case 1: {
+							if(ouput!=NULL) {
+								res->setContent(*(std::string*)ouput);
+								res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+							}
+							break;
+						}
+						default: {
+							if(rft.serOpt>17 || rft.serOpt==0) {
+								if(ouput!=NULL) {
+									res->setContent(JSONSerialize::serializeUnknown(ouput, rft.serOpt, rft.rtype, req->getCntxt_name()));
+									res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+								}
+							} else {
+								if(ouput!=NULL) {
+									res->setContent(SerializeBase::trySerialize(ouput, rft.serOpt, rft.rtype, req->getCntxt_name()));
+									res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+								}
+							}
+							break;
+						}
 					}
-					else if(outRetType=="void")
-					{
-						if(rft.statusCode=="")
-							res->setHTTPResponseStatus(HTTPResponseStatus::NoContent);
-						else
-							res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
-					}
+					res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(rft.statusCode));
+					int rserOpt = rft.serOpt>=2000?rft.serOpt-2000:(rft.serOpt>=1000?rft.serOpt-1000:rft.serOpt);
+					reflector.destroy(rserOpt, ouput, rft.rtype);
 					//logger << "Successfully called restcontroller output follows - " << std::endl;
 					//logger << outcontent << std::endl;
 
@@ -573,7 +582,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							if(allStreams.at(i)->is_open()) {
 								allStreams.at(i)->close();
 								allStreams.at(i)->clear();
-								//delete allStreams.at(i);
 							}
 						}
 					}
@@ -600,7 +608,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				else
 				{
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
-					//res->addHeaderValue(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+					//res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 					logger << "Rest Controller Method Not Found" << std::endl;
 					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				}

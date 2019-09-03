@@ -35,7 +35,8 @@
 #endif
 #include "CastUtil.h"
 #include "LoggerFactory.h"
-
+#include "HTTPResponseStatus.h"
+#include "SocketInterface.h"
 
 class CommonUtils {
 	CommonUtils();
@@ -75,7 +76,9 @@ public:
 	static std::atomic<long long> tsPoll1;
 	static std::atomic<long long> tsProcess;
 	static std::atomic<long long> tsRead;
+	static std::atomic<long long> tsActRead;
 	static std::atomic<long long> tsWrite;
+	static std::atomic<long long> tsActWrite;
 	static std::atomic<long long> tsService;
 	static std::atomic<long long> tsServicePre;
 	static std::atomic<long long> tsServiceCors;

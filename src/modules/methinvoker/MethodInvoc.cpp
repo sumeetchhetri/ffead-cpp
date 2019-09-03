@@ -138,7 +138,8 @@ void* MethodInvoc::service(void* arg)
 					Element* obj = arg->getChildElements().at(0);
 					std::string objxml = obj->render();
 					std::string objClassName = obj->getTagName();
-					value = ser.unSerializeUnknown(objxml,arg->getAttribute("type"));
+					int serOpt = SerializeBase::identifySerOption(arg->getAttribute("type"));
+					value = ser.unSerializeUnknown(objxml,serOpt,arg->getAttribute("type"));
 				}
 				argus.push_back(arg->getAttribute("type"));
 				valus.push_back(value);
@@ -164,45 +165,52 @@ void* MethodInvoc::service(void* arg)
 				void *_temp = reflector.newInstanceGVP(ctor);
 				if(returnType=="void" || returnType=="")
 				{
-					reflector.invokeMethod<void*>(_temp,meth,valus,true);
+					reflector.invokeMethodGVP(_temp,meth,valus,true);
 					retValue = ("<return:void></return:void>");
 				}
 				else
 				{
 					if(returnType=="int")
 					{
-						int retv = reflector.invokeMethod<int>(_temp,meth,valus,true);
+						int retv;
+						reflector.invokeMethod<int>(&retv,_temp,meth,valus,true);
 						retValue = ("<return:int>"+CastUtil::lexical_cast<std::string>(retv)+"</return:int>");
 					}
 					else if(returnType=="long")
 					{
-						long retv = reflector.invokeMethod<long>(_temp,meth,valus,true);
+						long retv;
+						reflector.invokeMethod<long>(&retv,_temp,meth,valus,true);
 						retValue = ("<return:long>"+CastUtil::lexical_cast<std::string>(retv)+"</return:long>");
 					}
 					else if(returnType=="long long")
 					{
-						long long retv = reflector.invokeMethod<long long>(_temp,meth,valus,true);
+						long long retv;
+						reflector.invokeMethod<long long>(&retv,_temp,meth,valus,true);
 						retValue = ("<return:longlong>"+CastUtil::lexical_cast<std::string>(retv)+"</return:longlong>");
 					}
 					else if(returnType=="float")
 					{
-						float retv = reflector.invokeMethod<float>(_temp,meth,valus,true);
+						float retv;
+						reflector.invokeMethod<float>(&retv,_temp,meth,valus,true);
 						retValue = ("<return:float>"+CastUtil::lexical_cast<std::string>(retv)+"</return:float>");
 					}
 					else if(returnType=="double")
 					{
-						double retv = reflector.invokeMethod<double>(_temp,meth,valus,true);
+						double retv;
+						reflector.invokeMethod<double>(&retv,_temp,meth,valus,true);
 						retValue = ("<return:double>"+CastUtil::lexical_cast<std::string>(retv)+"</return:double>");
 					}
 					else if(returnType=="string")
 					{
-						std::string retv = reflector.invokeMethod<std::string>(_temp,meth,valus,true);
+						std::string retv;
+						reflector.invokeMethod<std::string>(&retv,_temp,meth,valus,true);
 						retValue = ("<return:string>"+retv+"</return:string>");
 					}
 					else if(returnType!="")
 					{
 						void* retobj = reflector.invokeMethodUnknownReturn(_temp,meth,valus,true);
-						std::string oxml = ser.serializeUnknown(retobj,returnType);
+						int serOpt = SerializeBase::identifySerOption(returnType);
+						std::string oxml = ser.serializeUnknown(retobj,serOpt,returnType);
 						retValue = ("<return:"+returnType+">"+oxml+"</return:"+returnType+">");
 					}
 				}

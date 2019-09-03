@@ -67,12 +67,28 @@ std::string HttpRequest::SecWebSocketExtensions = "Sec-WebSocket-Extensions";
 std::string HttpRequest::AltUsed = "Alt-Used";
 std::string HttpRequest::Http2Settings = "HTTP2-Settings";
 
+RiMap HttpRequest::HDRS_SW_CODES;
+
+void HttpRequest::init() {
+	std::string t = VALID_REQUEST_HEADERS.substr(1, VALID_REQUEST_HEADERS.length()-1);
+	std::vector<std::string> vt;
+	StringUtil::split(vt, t, ",");
+	for(int i=0;i<(int)vt.size();i++) {
+		HDRS_SW_CODES[vt.at(i)] = i;
+	}
+	HDRS_SW_CODES["content"] = 42;
+	HDRS_SW_CODES["method"] = 43;
+	HDRS_SW_CODES["httpversion"] = 44;
+	HDRS_SW_CODES["getarguments"] = 45;
+	HDRS_SW_CODES["url"] = 46;
+	HDRS_SW_CODES["httpline"] = 47;
+}
+
 void HttpRequest::getAuthParams(std::string str)
 {
 	authMethod = (str.substr(0,str.find(" ")));
-	StringUtil::toLower(authMethod);
 	str = str.substr(str.find(" ")+1);
-	if(authMethod=="basic")
+	if(strcasecmp(authMethod.c_str(), "basic")==0)
 	{
 		unsigned char *input = (unsigned char *)str.c_str();
 		int length = str.length();
@@ -169,7 +185,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 				if(temp.at(0)==HttpRequest::Authorization)
 				{
 					this->getAuthParams(temp.at(1));
-					addHeaderValue(temp.at(0), temp.at(1));
+					addHeader(temp.at(0), temp.at(1));
 				}
 				else if(temp.at(0)==HttpRequest::AcceptLanguage)
 				{
@@ -196,7 +212,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 							this->localeInfo.push_back(t);
 						}
 					}
-					addHeaderValue(temp.at(0), temp.at(1));
+					addHeader(temp.at(0), temp.at(1));
 				}
 				else if(temp.at(0)==HttpRequest::ContentType)
 				{
@@ -204,7 +220,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 					size_t s = tempi.find("boundary");
 					if(s!=std::string::npos)
 					{
-						addHeaderValue(temp.at(0), tempi.substr(0,s));
+						addHeader(temp.at(0), tempi.substr(0,s));
 						tempi = tempi.substr(s);
 						strVec results;
 						StringUtil::split(results, tempi, ("="));
@@ -216,7 +232,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 					}
 					else
 					{
-						addHeaderValue(temp.at(0), temp.at(1));
+						addHeader(temp.at(0), temp.at(1));
 					}
 				}
 				else if(temp.at(0)==HttpRequest::Cookie)
@@ -233,7 +249,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						else
 							cookieattrs[results1.at(0)] = "true";
 					}
-					addHeaderValue(temp.at(0), temp.at(1));
+					addHeader(temp.at(0), temp.at(1));
 				}
 				else
 				{
@@ -298,7 +314,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						//valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu , ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -374,7 +390,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						//valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu , ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -450,7 +466,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						//valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu , ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -558,7 +574,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu, ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -633,7 +649,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu, ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -710,7 +726,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						valu = CryptoHandler::urlDecode(valu);
 						StringUtil::split(params,valu, ("&"));
 						std::map<std::string ,int> indices;
-						std::map<std::string,std::string>::iterator it;
+						RMap::iterator it;
 						for(unsigned j=0;j<params.size();j++)
 						{
 							strVec param;
@@ -807,7 +823,7 @@ void HttpRequest::updateFromContentStr_Old()
 		std::string valu(this->getContent());
 		StringUtil::split(params,valu , ("&"));
 		std::map<std::string ,int> indices;
-		std::map<std::string,std::string>::iterator it;
+		RMap::iterator it;
 		for(unsigned j=0;j<params.size();j++)
 		{
 			strVec param;
@@ -853,7 +869,7 @@ void HttpRequest::updateFromContentStr_Old()
 		strVec parameters;
 		StringUtil::split(parameters, param_conts, (delb));
 		std::map<std::string ,int> indices;
-		std::map<std::string,std::string>::iterator it;
+		RMap::iterator it;
 		for(unsigned j=0;j<parameters.size();j++)
 		{
 			if(parameters.at(j)=="" || parameters.at(j).find_first_not_of(" ")==std::string::npos
@@ -913,7 +929,7 @@ void HttpRequest::updateFromContentStr_Old()
 							key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
 							key = CryptoHandler::urlDecode(key);
 							StringUtil::replaceFirst(cont_type,"\r","");
-							datf.addHeaderValue(MultipartContent::ContentType, cont_type);
+							datf.addHeader(MultipartContent::ContentType, cont_type);
 							datf.setContent(parm);
 						}
 						else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")
@@ -975,7 +991,7 @@ void HttpRequest::updateFromContentStr()
 		std::string valu = CryptoHandler::urlDecode(this->getContent());
 		StringUtil::split(params,valu , ("&"));
 		std::map<std::string ,int> indices;
-		std::map<std::string,std::string>::iterator it;
+		RMap::iterator it;
 		for(unsigned j=0;j<params.size();j++)
 		{
 			strVec param;
@@ -1336,229 +1352,282 @@ void HttpRequest::buildRequestC(const char *keyc, const char *valuec)
 
 void HttpRequest::buildRequest(std::string key, std::string value)
 {
-	StringUtil::toLower(key);
-	if(key=="accept-language")
-	{
-		StringUtil::trim(value);
-		strVec lemp;
-		StringUtil::split(lemp, value, (","));
-		for(unsigned int li=0;li<lemp.size();li++)
+	int hdrswc = -1;
+	if(HDRS_SW_CODES.find(key)!=HDRS_SW_CODES.end()) {
+		hdrswc = HDRS_SW_CODES[key];
+	}
+	switch(hdrswc) {
+		case 3:
 		{
-			if(lemp.at(li).find(";")==std::string::npos && lemp.at(li)!="")
+			StringUtil::trim(value);
+			strVec lemp;
+			StringUtil::split(lemp, value, (","));
+			for(unsigned int li=0;li<lemp.size();li++)
 			{
-				std::string t = lemp.at(li);
-				size_t s = t.find_first_not_of(" ");
-				size_t e = t.find_last_not_of(" ")+1;
-				t = t.substr(s,e-s);
-				this->localeInfo.push_back(t);
+				if(lemp.at(li).find(";")==std::string::npos && lemp.at(li)!="")
+				{
+					std::string t = lemp.at(li);
+					size_t s = t.find_first_not_of(" ");
+					size_t e = t.find_last_not_of(" ")+1;
+					t = t.substr(s,e-s);
+					this->localeInfo.push_back(t);
+				}
+				else if(lemp.at(li)!="")
+				{
+					std::string t = lemp.at(li);
+					size_t s = t.find_first_not_of(" ");
+					size_t e = t.find(";");
+					t = t.substr(s,e-s);
+					e = t.find_last_not_of(" ")+1;
+					t = t.substr(0,e);
+					this->localeInfo.push_back(t);
+				}
 			}
-			else if(lemp.at(li)!="")
-			{
-				std::string t = lemp.at(li);
-				size_t s = t.find_first_not_of(" ");
-				size_t e = t.find(";");
-				t = t.substr(s,e-s);
-				e = t.find_last_not_of(" ")+1;
-				t = t.substr(0,e);
-				this->localeInfo.push_back(t);
-			}
+			addHeader(key, value);
+			break;
 		}
-		addHeaderValue(key, value);
-	}
-	else if(key=="authorization")
-	{
-		StringUtil::trim(value);
-		this->getAuthParams(value);
-		addHeaderValue(key, value);
-	}
-	else if(key=="cookie")
-	{
-		StringUtil::trim(value);
-		this->cookie = true;
-		strVec results;
-		StringUtil::split(results, value, ("; "));
-		for(int j=0;j<(int)results.size();j++)
+		case 7:
 		{
-			strVec results1;
-			StringUtil::split(results1, results.at(j), ("="));
-			if(results1.size()==2)
-				cookieattrs[results1.at(0)] = results1.at(1);
-			else
-				cookieattrs[results1.at(0)] = "true";
+			StringUtil::trim(value);
+			this->getAuthParams(value);
+			addHeader(key, value);
+			break;
 		}
-		addHeaderValue(key, value);
-	}
-	else if(key=="content-type")
-	{
-		StringUtil::trim(value);
-		std::string tempi(value);
-		size_t s = tempi.find("boundary");
-		if(s!=std::string::npos)
+		case 10:
 		{
-			addHeaderValue(key, tempi.substr(0,s));
-			tempi = tempi.substr(s);
+			StringUtil::trim(value);
+			this->cookie = true;
 			strVec results;
-			StringUtil::split(results, tempi, ("="));
-			if(results.size()==2)
+			StringUtil::split(results, value, ("; "));
+			for(int j=0;j<(int)results.size();j++)
 			{
-				std::string bound = "--" + results.at(1).substr(0,results.at(1).length());
-				this->setContent_boundary(bound);
-			}
-		}
-		else
-		{
-			addHeaderValue(key, value);
-		}
-	}
-	else if(key=="content" && value!="")
-	{
-		content.append(value);
-	}
-	else if(key=="method")
-	{
-		this->setMethod(value);
-	}
-	else if(key=="httpversion")
-	{
-		this->httpVersion = value;
-		std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(value), "http/", "");
-		StringUtil::trim(versionStr);
-		float version = -1;
-		try {
-			version = CastUtil::lexical_cast<float>(versionStr);
-			this->httpVers = version;
-		} catch(const std::exception& e) {
-		}
-	}
-	else if(key=="getarguments")
-	{
-		strVec params;
-		std::map<std::string ,int> indices;
-		value = CryptoHandler::urlDecode(value);
-		StringUtil::split(params, value, ("&"));
-		for(unsigned j=0;j<params.size();j++)
-		{
-			strVec param;
-			StringUtil::split(param, params.at(j), ("="));
-			if(param.size()==2)
-			{
-				std::string attN = param.at(0);
-				StringUtil::replaceFirst(attN,"\r","");
-				StringUtil::replaceFirst(attN,"\t","");
-				StringUtil::replaceFirst(attN," ","");
-				if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
-				{
-					if(indices.find(attN)==indices.end())
-					{
-						indices[attN] = 0;
-					}
-					else
-					{
-						indices[attN] = indices[attN] + 1;
-					}
-					this->queryParams[attN.substr(0, attN.find("[")+1)
-							  + CastUtil::lexical_cast<std::string>(indices[attN])
-							  + "]"] = CryptoHandler::urlDecode(param.at(1));
-				}
+				strVec results1;
+				StringUtil::split(results1, results.at(j), ("="));
+				if(results1.size()==2)
+					cookieattrs[results1.at(0)] = results1.at(1);
 				else
-				{
-					this->setQueryParam(attN,param.at(1));
-				}
-				reqorderinf[reqorderinf.size()+1] = attN;
+					cookieattrs[results1.at(0)] = "true";
 			}
+			//addHeader(key, value);
+			break;
 		}
-	}
-	else if(key.find("url")!=std::string::npos)
-	{
-		strVec memp;
-		this->setActUrl(value);
-		//StringUtil::split(memp, value, ("/"));
-		/*int fs = value.find_first_of("/");
-		int es = value.find_last_of("/");
-		if(fs==es)
+		case 13:
 		{
-			this->setCntxt_name("");
-			this->setFile(value.substr(es+1));
-		}
-		else
-		{
-			int ss = value.substr(fs+1).find("/");
-			if(ss>fs)
+			StringUtil::trim(value);
+			std::string tempi(value);
+			size_t s = tempi.find("boundary");
+			if(s!=std::string::npos)
 			{
-				this->setCntxt_name(value.substr(fs+1,ss-fs));
-				this->setFile(value.substr(es+1));
+				addHeader(key, tempi.substr(0,s));
+				tempi = tempi.substr(s);
+				strVec results;
+				StringUtil::split(results, tempi, ("="));
+				if(results.size()==2)
+				{
+					std::string bound = "--" + results.at(1).substr(0,results.at(1).length());
+					this->setContent_boundary(bound);
+				}
 			}
+			else
+			{
+				addHeader(key, value);
+			}
+			break;
 		}
-		this->setCntxt_root(webpath + "/" + cntxt_name);*/
-	}
-	else if(key=="httpline")
-	{
-		strVec vemp;
-		StringUtil::split(vemp, value, (" "));
-		if(vemp.size()<3)
+		case 42:
 		{
-			status = HTTPResponseStatus::BadRequest;
-			return;
+			content.append(value);
+			break;
 		}
-		else if(!isValidHttpMethod(vemp.at(0)))
+		case 43:
 		{
-			status = HTTPResponseStatus::InvalidMethod;
-			return;
+			this->setMethod(value);
+			break;
 		}
-		else
+		case 44:
 		{
-			std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(vemp.at(2)), "http/", "");
+			this->httpVersion = value;
+			std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(value), "http/", "");
 			StringUtil::trim(versionStr);
 			float version = -1;
 			try {
 				version = CastUtil::lexical_cast<float>(versionStr);
 				this->httpVers = version;
 			} catch(const std::exception& e) {
-				status = HTTPResponseStatus::HttpVersionNotSupported;
-				return;
 			}
-			if(version<1.0 && version>1.1)
+			break;
+		}
+		case 45:
+		{
+			strVec params;
+			std::map<std::string ,int> indices;
+			value = CryptoHandler::urlDecode(value);
+			StringUtil::split(params, value, ("&"));
+			for(unsigned j=0;j<params.size();j++)
 			{
-				status = HTTPResponseStatus::HttpVersionNotSupported;
+				strVec param;
+				StringUtil::split(param, params.at(j), ("="));
+				if(param.size()==2)
+				{
+					std::string attN = param.at(0);
+					StringUtil::replaceFirst(attN,"\r","");
+					StringUtil::replaceFirst(attN,"\t","");
+					StringUtil::replaceFirst(attN," ","");
+					if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
+					{
+						if(indices.find(attN)==indices.end())
+						{
+							indices[attN] = 0;
+						}
+						else
+						{
+							indices[attN] = indices[attN] + 1;
+						}
+						this->queryParams[attN.substr(0, attN.find("[")+1)
+								  + CastUtil::lexical_cast<std::string>(indices[attN])
+								  + "]"] = CryptoHandler::urlDecode(param.at(1));
+					}
+					else
+					{
+						this->setQueryParam(attN,param.at(1));
+					}
+					reqorderinf[reqorderinf.size()+1] = attN;
+				}
+			}
+			break;
+		}
+		case 46:
+		{
+			//strVec memp;
+			this->setActUrl(value);
+			//StringUtil::split(memp, value, ("/"));
+			/*int fs = value.find_first_of("/");
+			int es = value.find_last_of("/");
+			if(fs==es)
+			{
+				this->setCntxt_name("");
+				this->setFile(value.substr(es+1));
+			}
+			else
+			{
+				int ss = value.substr(fs+1).find("/");
+				if(ss>fs)
+				{
+					this->setCntxt_name(value.substr(fs+1,ss-fs));
+					this->setFile(value.substr(es+1));
+				}
+			}
+			this->setCntxt_root(webpath + "/" + cntxt_name);*/
+			break;
+		}
+		case 47:
+		{
+			strVec vemp;
+			StringUtil::split(vemp, value, (" "));
+			if(vemp.size()<3)
+			{
+				status = HTTPResponseStatus::BadRequest;
 				return;
 			}
-			if(version<1.1 && StringUtil::toLowerCopy(vemp.at(0))=="options")
+			else if(!isValidHttpMethod(vemp.at(0)))
 			{
 				status = HTTPResponseStatus::InvalidMethod;
 				return;
 			}
-		}
+			else
+			{
+				std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(vemp.at(2)), "http/", "");
+				StringUtil::trim(versionStr);
+				float version = -1;
+				try {
+					version = CastUtil::lexical_cast<float>(versionStr);
+					this->httpVers = version;
+				} catch(const std::exception& e) {
+					status = HTTPResponseStatus::HttpVersionNotSupported;
+					return;
+				}
+				if(version<1.0 && version>1.1)
+				{
+					status = HTTPResponseStatus::HttpVersionNotSupported;
+					return;
+				}
+				if(version<1.1 && StringUtil::toLowerCopy(vemp.at(0))=="options")
+				{
+					status = HTTPResponseStatus::InvalidMethod;
+					return;
+				}
+			}
 
-		if(!isValidHttpMethod(vemp.at(0)))
-		{
-			status = HTTPResponseStatus::InvalidMethod;
-			return;
+			if(!isValidHttpMethod(vemp.at(0)))
+			{
+				status = HTTPResponseStatus::InvalidMethod;
+				return;
+			}
+			this->setMethod(StringUtil::toUpperCopy(vemp.at(0)));
+			vemp.erase(vemp.begin());
+			StringUtil::replaceFirst(vemp.at(1),"\r","");
+			this->httpVersion = vemp.at(1);
+			StringUtil::replaceFirst(vemp.at(0)," ","");
+			if(vemp.at(0).find("?")!=std::string ::npos)
+			{
+				std::string valu(vemp.at(0));
+				vemp[0] = valu.substr(0,vemp.at(0).find("?"));
+				valu = CryptoHandler::urlDecode(valu.substr(valu.find("?")+1));
+				strVec params;
+				std::map<std::string ,int> indices;
+				StringUtil::split(params, valu, ("&"));
+				for(unsigned j=0;j<params.size();j++)
+				{
+					strVec param;
+					StringUtil::split(param, params.at(j), ("="));
+					if(param.size()==2)
+					{
+						std::string attN = param.at(0);
+						StringUtil::replaceFirst(attN,"\r","");
+						StringUtil::replaceFirst(attN,"\t","");
+						StringUtil::replaceFirst(attN," ","");
+						if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
+						{
+							if(indices.find(attN)==indices.end())
+							{
+								indices[attN] = 0;
+							}
+							else
+							{
+								indices[attN] = indices[attN] + 1;
+							}
+							this->queryParams[attN.substr(0, attN.find("[")+1)
+									  + CastUtil::lexical_cast<std::string>(indices[attN])
+									  + "]"] = CryptoHandler::urlDecode(param.at(1));
+						}
+						else
+						{
+							this->setQueryParam(attN,param.at(1));
+						}
+						reqorderinf[reqorderinf.size()+1] = attN;
+					}
+				}
+			}
+			this->setActUrl(vemp.at(0));
+			break;
 		}
-		this->setMethod(StringUtil::toUpperCopy(vemp.at(0)));
-		vemp.erase(vemp.begin());
-		StringUtil::replaceFirst(vemp.at(1),"\r","");
-		this->httpVersion = vemp.at(1);
-		StringUtil::replaceFirst(vemp.at(0)," ","");
-		if(vemp.at(0).find("?")!=std::string ::npos)
+		case -1:
 		{
-			std::string valu(vemp.at(0));
-			vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-			valu = valu.substr(valu.find("?")+1);
-			buildRequest("getarguments", valu);
+			addHeaderValue(key, value);
+			break;
 		}
-		buildRequest("url", vemp.at(0));
-	}
-	else
-	{
-		StringUtil::trim(value);
-		addHeaderValue(key, value);
+		default:
+		{
+			addHeader(key, value);
+			break;
+		}
 	}
 }
 
 std::string HttpRequest::toString()
 {
 	std::string ret;
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		ret += "\n" + it->first + ": " + it->second;
@@ -1591,7 +1660,7 @@ std::string HttpRequest::toString()
 			MultipartContent dat = iter->second;
 			vals+= ("\nKey: "+iter->first);
 			std::cout << dat.getHeaders().size() << std::endl;
-			std::map<std::string,std::string>::iterator it1;
+			RMap::iterator it1;
 			for(it1=dat.headers.begin();it1!=dat.headers.end();++it1)
 			{
 				vals += "\n\t" + it1->first + ": " + it1->second;
@@ -1607,7 +1676,6 @@ std::string HttpRequest::toString()
 
 HttpRequest::~HttpRequest()
 {
-//	/delete this;
 }
 std::string HttpRequest::getMethod() const
 {
@@ -1810,12 +1878,12 @@ const std::vector<std::string>& HttpRequest::getActUrlParts() const
 	return actUrlParts;
 }
 
-std::map<std::string,std::string> HttpRequest::getAuthinfo() const
+RMap HttpRequest::getAuthinfo() const
 {
 	return authinfo;
 }
 
-void HttpRequest::setAuthinfo(const std::map<std::string,std::string>& authinfo)
+void HttpRequest::setAuthinfo(const RMap& authinfo)
 {
 	this->authinfo = authinfo;
 }
@@ -1825,7 +1893,7 @@ std::string HttpRequest::toPHPVariablesString(const std::string& def)
 {
 	std::string ret;
 	ret = "<?php";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -1927,7 +1995,7 @@ std::string HttpRequest::toPerlVariablesString()
 	ret += "\n$_GET = {};";
 	ret += "\n$_POST = {};";
 	ret += "\n$_FILES = {};\n";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -2027,7 +2095,7 @@ std::string HttpRequest::toRubyVariablesString()
 	ret += "\nGET = {}";
 	ret += "\nPOST = {}";
 	ret += "\nFILES = {}\n";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -2124,7 +2192,7 @@ std::string HttpRequest::toPythonVariablesString()
 	ret += "\nGET = {}";
 	ret += "\nPOST = {}";
 	ret += "\nFILES = {}\n";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -2221,7 +2289,7 @@ std::string HttpRequest::toLuaVariablesString()
 	ret += "\nGET = {}";
 	ret += "\nPOST = {}";
 	ret += "\nFILES = {}\n";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -2318,7 +2386,7 @@ std::string HttpRequest::toNodejsVariablesString()
 	ret += "\nGET = {};";
 	ret += "\nPOST = {};";
 	ret += "\nFILES = {};\n";
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		std::string header = StringUtil::toUpperCopy(it->first);
@@ -2404,9 +2472,9 @@ std::string HttpRequest::toNodejsVariablesString()
 
 RMap HttpRequest::getAllParams()
 {
-	std::map<std::string,std::string>::iterator it;
-	std::map<std::string,std::string> reqparams = this->getRequestParams();
-	std::map<std::string,std::string> qryparams = this->getQueryParams();
+	std::map<std::string,std::string,cicomp>::iterator it;
+	std::map<std::string,std::string,cicomp> reqparams = this->getRequestParams();
+	std::map<std::string,std::string,cicomp> qryparams = this->getQueryParams();
 	for(it=qryparams.begin();it!=qryparams.end();it++)
 	{
 		reqparams[it->first] = it->second;
@@ -2453,7 +2521,7 @@ std::map<int,std::string> HttpRequest::getReqOrderinfo() const
 	return reqorderinf;
 }
 
-std::map<std::string,std::string> HttpRequest::getCookieInfo() const
+RMap HttpRequest::getCookieInfo() const
 {
 	return cookieattrs;
 }
@@ -2481,7 +2549,6 @@ std::string HttpRequest::getCookieInfoAttribute(const std::string& key)
 
 std::string HttpRequest::getHeader(std::string key)
 {
-	StringUtil::toLower(key);
 	if(this->headers.find(key)!=this->headers.end())
 		return this->headers[key];
 	return "";
@@ -2489,13 +2556,12 @@ std::string HttpRequest::getHeader(std::string key)
 
 bool HttpRequest::hasHeader(std::string key)
 {
-	StringUtil::toLower(key);
 	if(this->headers.find(key)!=this->headers.end())
 		return true;
 	return false;
 }
 
-std::map<std::string,std::string> HttpRequest::getHeaders()
+RMap HttpRequest::getHeaders()
 {
 	return headers;
 }
@@ -2524,12 +2590,20 @@ int HttpRequest::getCORSRequestType()
 	return -1;
 }
 
+void HttpRequest::addHeader(const std::string& header, const std::string& value)
+{
+	if(headers.find(header)!=headers.end()) {
+		headers[header] += "," + value;
+	} else {
+		headers[header] = value;
+	}
+}
+
 void HttpRequest::addHeaderValue(std::string header, const std::string& value)
 {
-	StringUtil::toLower(header);
-	if(header!="")
+	if(header.length()>0)
 	{
-		if(VALID_REQUEST_HEADERS.find(","+header+",")!=std::string::npos)
+		if(HDRS_SW_CODES.find(header)!=HDRS_SW_CODES.end())
 		{
 			if(headers.find(header)!=headers.end()) {
 				headers[header] += "," + value;
@@ -2545,16 +2619,6 @@ void HttpRequest::addHeaderValue(std::string header, const std::string& value)
 				//std::cout << ("Invalid Header std::string " + header) << std::endl;
 				return;
 			}
-			/*vector<std::string> matres = RegexUtil::search(header, "^[a-zA-Z]+[-|a-zA-Z]+[a-zA-Z]*[a-zA-Z]$");
-			if(matres.size()==0)
-			{
-				matres = RegexUtil::search(header, "^[a-zA-Z]+[a-zA-Z0-9]*");
-				if(matres.size()==0)
-				{
-					std::cout << ("Invalid Header std::string " + header) << std::endl;
-					return;
-				}
-			}*/
 			if(headers.find(header)!=headers.end()) {
 				headers[header] += "," + value;
 			} else {
@@ -2570,10 +2634,11 @@ std::vector<std::string> HttpRequest::parseHeaderValue(std::string headerValue)
 	return StringUtil::splitAndReturn<std::vector<std::string> >(headerValue, ",");
 }
 
+const std::string HttpRequest::VALID_METHODS = ",get,post,options,delete,head,put,post,trace,";
 bool HttpRequest::isValidHttpMethod(const std::string& method)
 {
-	std::string lmeth = StringUtil::toLowerCopy(method);
-	return lmeth=="get" || lmeth=="post" || lmeth=="options" || lmeth=="head" || lmeth=="put" || lmeth=="delete" || lmeth=="trace";
+	std::string lmeth = ","+method+",";
+	return strcasestr(VALID_METHODS.c_str(), lmeth.c_str())!=NULL;
 }
 
 bool HttpRequest::isValidHttpMethod()
@@ -2589,15 +2654,12 @@ bool HttpRequest::isAgentAcceptsCE()
 
 bool HttpRequest::isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase)
 {
-	StringUtil::toLower(header);
 	return header!="" && headers.find(header)!=headers.end()
-			&& (headers[header]==value ||
-					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
+			&& (headers[header]==value || (ignoreCase && strcasecmp(headers[header].c_str(), value.c_str())==0));
 }
 
 bool HttpRequest::hasHeaderValuePart(std::string header, std::string valuePart, const bool& ignoreCase)
 {
-	StringUtil::toLower(header);
 	if(header!="" && headers.find(header)!=headers.end())
 	{
 		std::string hvalue = headers[header];
@@ -2887,7 +2949,7 @@ std::string HttpRequest::toPluginString() {
 	return text;
 }
 
-void HttpRequest::setHttp2Headers(std::map<std::string,std::string> headers)
+void HttpRequest::setHttp2Headers(RMap headers)
 {
 	method = headers[":method"];
 	authority = headers[":authority"];
@@ -2899,7 +2961,7 @@ void HttpRequest::setHttp2Headers(std::map<std::string,std::string> headers)
 	headers.erase(":path");
 	headers.erase(":authority");
 	headers.erase(":scheme");
-	std::map<std::string,std::string>::iterator it;
+	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
 		buildRequest(it->first, it->second);

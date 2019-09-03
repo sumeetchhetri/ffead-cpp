@@ -433,11 +433,11 @@ bool SQLDataSourceImpl::allocateStmt(const bool& read) {
 	int V_OD_erg;// result of functions
 	if (read) {
 		if (this->pool != NULL)
-			conn = this->pool->checkout(false);
+			conn = this->pool->checkout();
 		V_OD_hdbc = conn->getConn();
 	} else {
 		if (this->pool != NULL)
-			conn = this->pool->checkout(true);
+			conn = this->pool->checkout();
 		V_OD_hdbc = conn->getConn();
 	}
 	V_OD_erg = SQLAllocHandle(SQL_HANDLE_STMT, V_OD_hdbc, &V_OD_hstmt);
@@ -632,7 +632,10 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 				reflector->invokeMethodGVP(rel2Insmap[flv],meth,valus);
 				reflector->addToContainer(vecT,rel2Insmap[flv],clasName,"std::vector",appName);
 				reflector->destroy(rel2Insmap[flv], clasName, appName);
-				delete rvect;
+				if(rel2reltype[flv]==2)
+					reflector->destroyContainer(rvect,fldvalrel2clsmapit->second,"std::vector",appName);
+				else
+					reflector->destroy(rvect,fldvalrel2clsmapit->second,appName);
 			}
 		}
 	}
@@ -1576,7 +1579,7 @@ long SQLDataSourceImpl::getNumRows(const std::string& clasName) {
 	if(temp!=NULL) {
 		tv = *(std::vector<std::map<std::string, GenericObject> >*) temp;
 		tv.at(0).begin()->second.get(size);
-		delete temp;
+		delete (std::vector<std::map<std::string, GenericObject> >*)temp;
 	}
 	return size;
 }
@@ -1590,21 +1593,21 @@ std::vector<std::map<std::string, GenericObject> > SQLDataSourceImpl::execute(Qu
 		{
 			tv = *(std::vector<std::map<std::string, GenericObject> >*)temp;
 		}
-		delete temp;
+		delete (std::vector<std::map<std::string, GenericObject> >*)temp;
 	}
 	return tv;
 }
 
 bool SQLDataSourceImpl::executeUpdate(Query& query) {
 	bool tv = false;
-	void* temp = executeQueryInternal(query, false);
-	if(temp!=NULL)
+	if(query.isUpdate())
 	{
-		if(query.isUpdate())
+		void* temp = executeQueryInternal(query, false);
+		if(temp!=NULL)
 		{
 			tv = *(bool*)temp;
+			delete (bool*)temp;
 		}
-		delete temp;
 	}
 	return tv;
 }
@@ -1619,7 +1622,7 @@ std::vector<std::map<std::string, GenericObject> > SQLDataSourceImpl::execute(Qu
 		{
 			tv = *(std::vector<std::map<std::string, GenericObject> >*)temp;
 		}
-		delete temp;
+		delete (std::vector<std::map<std::string, GenericObject> >*)temp;
 	}
 	return tv;
 }

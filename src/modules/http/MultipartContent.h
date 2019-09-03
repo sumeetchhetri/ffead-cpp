@@ -28,11 +28,13 @@
 #include "RegexUtil.h"
 #include <fstream>
 #include "ContentTypes.h"
+#include "HTTPResponseStatus.h"
 
 
 class MultipartContent {
+	static std::map<std::string, int, cicomp> HDRS_SW_CODES;
 	static std::string VALID_HEADERS;
-	std::map<std::string,std::string> headers;
+	std::map<std::string,std::string,cicomp> headers;
 	std::string content;
 	std::string tempFileName;
 	std::string fileName;
@@ -45,7 +47,10 @@ class MultipartContent {
 	friend class HttpResponse;
 	friend class HttpRequest;
 	friend class ControllerHandler;
+	friend class ServiceTask;
+	void addHeader(std::string header, const std::string& value);
 public:
+	static void init();
 	static std::string ContentId,ContentDisposition,ContentTransferEncoding,
 				  ContentLocation,ContentBase,ContentLength,ContentMD5,ContentType;
 	MultipartContent();
@@ -55,7 +60,7 @@ public:
 	void addHeaderValue(std::string header, const std::string& value);
 	std::string getContent() const;
 	std::string getFileName() const;
-	std::map<std::string, std::string> getHeaders();
+	std::map<std::string, std::string,cicomp> getHeaders();
 	bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
 	std::string getHeader(const std::string&);
 	std::string getName() const;
