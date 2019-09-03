@@ -960,7 +960,13 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 	logger << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
 	GenericObject::init(ConfigurationData::getReflector());
-	logger << ("Initializing ffeadContext done....") << std::endl;
+	logger << ("Initializing ffeadContext done....") << std::endl;HTTPResponseStatus::init();
+
+	HttpRequest::init();
+
+	HttpResponse::init();
+
+	MultipartContent::init();
 }
 
 static ngx_int_t exit_process(ngx_cycle_t *cycle)
