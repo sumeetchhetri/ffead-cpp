@@ -114,7 +114,7 @@ void* RequestReaderHandler::handle(void* inp) {
 						sockIntf->eh = &(ins->selector);
 						ins->addSf(sockIntf);
 						CommonUtils::cSocks += 1;
-						if(!run) {
+						if(!ins->run) {
 							clsdConns.push_back(sockIntf);
 						}
 					}
@@ -125,8 +125,8 @@ void* RequestReaderHandler::handle(void* inp) {
 					sockIntf->eh = &(ins->selector);
 					ins->addSf(sockIntf);
 					CommonUtils::cSocks += 1;
-					if(!run) {
-						clsdConns.push_back(sockIntf);
+					if(!ins->run) {
+						ins->clsdConns.push_back(sockIntf);
 					}
 #endif
 				}
@@ -157,8 +157,8 @@ void* RequestReaderHandler::handle(void* inp) {
 		CommonUtils::tsProcess += t.timerNanoSeconds();
 	}
 
-	for(int i=0;i<(int)clsdConns.size();i++) {
-		delete clsdConns.at(i);
+	for(int i=0;i<(int)ins->clsdConns.size();i++) {
+		delete ins->clsdConns.at(i);
 	}
 
 	if(ins->isMain) {
