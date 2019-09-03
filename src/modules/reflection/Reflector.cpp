@@ -73,7 +73,10 @@ ClassInfo* Reflector::getClassInfo(const std::string& cs, const std::string& app
 void Reflector::destroy(void* instance, std::string className, const std::string& app) {
 	int serOpt = 0;
 	StringUtil::trim(className);
-	if(className=="void")delete instance; return;
+	if(className=="void"){
+		delete instance;
+		return;
+	}
 	if(className.find(",")!=std::string::npos)
 	{
 		className = className.substr(0, className.find(",")+1);
