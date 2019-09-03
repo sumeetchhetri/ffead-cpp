@@ -737,67 +737,67 @@ void MongoDBDataSourceImpl::getBSONObjectFromObject(const std::string& clasName,
 
 		if(pf.getType()=="short")
 		{
-			short val;
+			short val = -1;
 			reflector->invokeMethod<short>(&val,object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="int")
 		{
-			int val;
+			int val = -1;
 			reflector->invokeMethod<int>(&val,object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="unsigned short")
 		{
-			unsigned short val;
+			unsigned short val = -1;
 			reflector->invokeMethod<unsigned short>(&val,object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="char")
 		{
-			char val;
+			char val = -1;
 			reflector->invokeMethod<char>(&val,object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="unsigned char")
 		{
-			unsigned char val;
+			unsigned char val = -1;
 			reflector->invokeMethod<unsigned char>(&val,object,meth,valus);
 			bson_append_int32(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="unsigned int")
 		{
-			unsigned int val;
+			unsigned int val = -1;
 			reflector->invokeMethod<unsigned int>(&val,object,meth,valus);
 			bson_append_int64(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="long")
 		{
-			long val;
+			long val = -1;
 			reflector->invokeMethod<long>(&val,object,meth,valus);
 			bson_append_int64(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="unsigned long")
 		{
-			unsigned long val;
+			unsigned long val = -1;
 			reflector->invokeMethod<unsigned long>(&val,object,meth,valus);
 			bson_append_int64(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="long long")
 		{
-			long long val;
+			long long val = -1;
 			reflector->invokeMethod<long long>(&val,object,meth,valus);
 			bson_append_int64(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="float")
 		{
-			float val;
+			float val = -1;
 			reflector->invokeMethod<float>(&val,object,meth,valus);
 			bson_append_double(b, col.c_str(), col.length(), val);
 		}
 		else if(pf.getType()=="double")
 		{
-			double val;
+			double val = -1;
 			reflector->invokeMethod<double>(&val,object,meth,valus);
 			bson_append_double(b, col.c_str(), col.length(), val);
 		}

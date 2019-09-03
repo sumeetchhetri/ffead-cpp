@@ -227,7 +227,8 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 				{
 					valusa.push_back(&username);
 					valusa.push_back(&password);
-					bool authenticated = reflector.invokeMethod<bool>(&authenticated,_temp,methAuthenticate,valusa);
+					bool authenticated;
+					reflector.invokeMethod<bool>(&authenticated,_temp,methAuthenticate,valusa);
 					if(authenticated)
 					{
 						valusg.push_back(&username);
