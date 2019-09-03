@@ -32,7 +32,7 @@
 
 
 class MultipartContent {
-	std::map<std::string, int, cicomp> HDRS_SW_CODES;
+	static std::map<std::string, int, cicomp> HDRS_SW_CODES;
 	static std::string VALID_HEADERS;
 	std::map<std::string,std::string,cicomp> headers;
 	std::string content;

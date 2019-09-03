@@ -114,6 +114,9 @@ void* RequestReaderHandler::handle(void* inp) {
 						sockIntf->eh = &(ins->selector);
 						ins->addSf(sockIntf);
 						CommonUtils::cSocks += 1;
+						if(!run) {
+							clsdConns.push_back(sockIntf);
+						}
 					}
 #else
 					sin_size = sizeof their_addr;
@@ -122,6 +125,9 @@ void* RequestReaderHandler::handle(void* inp) {
 					sockIntf->eh = &(ins->selector);
 					ins->addSf(sockIntf);
 					CommonUtils::cSocks += 1;
+					if(!run) {
+						clsdConns.push_back(sockIntf);
+					}
 #endif
 				}
 				else
@@ -149,6 +155,10 @@ void* RequestReaderHandler::handle(void* inp) {
 
 		t.end();
 		CommonUtils::tsProcess += t.timerNanoSeconds();
+	}
+
+	for(int i=0;i<(int)clsdConns.size();i++) {
+		delete clsdConns.at(i);
 	}
 
 	if(ins->isMain) {

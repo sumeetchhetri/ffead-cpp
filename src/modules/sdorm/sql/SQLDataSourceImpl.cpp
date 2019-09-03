@@ -632,7 +632,10 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 				reflector->invokeMethodGVP(rel2Insmap[flv],meth,valus);
 				reflector->addToContainer(vecT,rel2Insmap[flv],clasName,"std::vector",appName);
 				reflector->destroy(rel2Insmap[flv], clasName, appName);
-				delete rvect;
+				if(rel2reltype[flv]==2)
+					reflector->destroyContainer(rvect,fldvalrel2clsmapit->second,"std::vector",appName);
+				else
+					reflector->destroy(rvect,fldvalrel2clsmapit->second,appName);
 			}
 		}
 	}
@@ -1597,14 +1600,14 @@ std::vector<std::map<std::string, GenericObject> > SQLDataSourceImpl::execute(Qu
 
 bool SQLDataSourceImpl::executeUpdate(Query& query) {
 	bool tv = false;
-	void* temp = executeQueryInternal(query, false);
-	if(temp!=NULL)
+	if(query.isUpdate())
 	{
-		if(query.isUpdate())
+		void* temp = executeQueryInternal(query, false);
+		if(temp!=NULL)
 		{
 			tv = *(bool*)temp;
+			delete (bool*)temp;
 		}
-		delete temp;
 	}
 	return tv;
 }
