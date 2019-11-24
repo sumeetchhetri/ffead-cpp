@@ -242,7 +242,7 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 				{
 					std::string logfilepath = logDirPath + file;
 					if(instance->vhostNumber>0) {
-						logfilepath += "." + CastUtil::lexical_cast<std::string>(instance->vhostNumber);
+						logfilepath += "." + CastUtil::fromNumber(instance->vhostNumber);
 					}
 					std::ofstream* strm = new std::ofstream();
 					//if(isLoggingEnabled) {

@@ -23,12 +23,12 @@
 #include "RemoteComponent.h"
 
 RemoteComponent::RemoteComponent() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 RemoteComponent::~RemoteComponent() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void* RemoteComponent::invoke(const std::string& name, const std::vector<GenericObject>& args, const std::string& rettyp)

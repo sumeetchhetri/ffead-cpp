@@ -126,7 +126,7 @@ Server::Server(const std::string& port, const bool& block, const int& waiting, c
 }
 
 Server::~Server() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void* Server::servicing(void* arg)
@@ -379,7 +379,7 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 		ip_addr = ipAddress.c_str();
 	else
 		return createListener(port, block);
-	std::string ports = CastUtil::lexical_cast<std::string>(port);
+	std::string ports = CastUtil::fromNumber(port);
 	if ((rv = getaddrinfo(ip_addr, ports.c_str(), &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return -1;

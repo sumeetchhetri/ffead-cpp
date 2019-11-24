@@ -13,7 +13,7 @@ MemoryCacheImpl::MemoryCacheImpl(ConnectionPooler* pool) {
 	this->defaultExpireSeconds = -1;
 	if(properties.getProperty("expiryTime")!="") {
 		try {
-			this->defaultExpireSeconds = CastUtil::lexical_cast<int>(properties.getProperty("expiryTime"));
+			this->defaultExpireSeconds = CastUtil::toInt(properties.getProperty("expiryTime"));
 		} catch(const std::exception& e) {
 		}
 	}
@@ -31,8 +31,8 @@ long long MemoryCacheImpl::increment(const std::string& key, const int& number) 
 	long long val = -1;
 	((MemoryCacheConnectionPool*)pool)->lock.lock();
 	if(((MemoryCacheConnectionPool*)pool)->internalMap.find(key)!=((MemoryCacheConnectionPool*)pool)->internalMap.end()) {
-		val = CastUtil::lexical_cast<long long>(((MemoryCacheConnectionPool*)pool)->internalMap[key]) + number;
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::lexical_cast<std::string>(val);
+		val = CastUtil::toLonglong(((MemoryCacheConnectionPool*)pool)->internalMap[key]) + number;
+		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::fromNumber(val);
 	}
 	((MemoryCacheConnectionPool*)pool)->lock.unlock();
 	return val;
@@ -42,8 +42,8 @@ long long MemoryCacheImpl::decrement(const std::string& key, const int& number) 
 	long long val = -1;
 	((MemoryCacheConnectionPool*)pool)->lock.lock();
 	if(((MemoryCacheConnectionPool*)pool)->internalMap.find(key)!=((MemoryCacheConnectionPool*)pool)->internalMap.end()) {
-		val = CastUtil::lexical_cast<long long>(((MemoryCacheConnectionPool*)pool)->internalMap[key]) - number;
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::lexical_cast<std::string>(val);
+		val = CastUtil::toLonglong(((MemoryCacheConnectionPool*)pool)->internalMap[key]) - number;
+		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::fromNumber(val);
 	}
 	((MemoryCacheConnectionPool*)pool)->lock.unlock();
 	return val;
@@ -53,8 +53,8 @@ long double MemoryCacheImpl::incrementFloat(const std::string& key, const double
 	long double val = -1.0;
 	((MemoryCacheConnectionPool*)pool)->lock.lock();
 	if(((MemoryCacheConnectionPool*)pool)->internalMap.find(key)!=((MemoryCacheConnectionPool*)pool)->internalMap.end()) {
-		val = CastUtil::lexical_cast<long double>(((MemoryCacheConnectionPool*)pool)->internalMap[key]) + number;
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::lexical_cast<std::string>(val);
+		val = CastUtil::toLongdouble(((MemoryCacheConnectionPool*)pool)->internalMap[key]) + number;
+		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::fromNumber(val);
 	}
 	((MemoryCacheConnectionPool*)pool)->lock.unlock();
 	return val;
@@ -64,8 +64,8 @@ long double MemoryCacheImpl::decrementFloat(const std::string& key, const double
 	long double val = -1.0;
 	((MemoryCacheConnectionPool*)pool)->lock.lock();
 	if(((MemoryCacheConnectionPool*)pool)->internalMap.find(key)!=((MemoryCacheConnectionPool*)pool)->internalMap.end()) {
-		val = CastUtil::lexical_cast<long double>(((MemoryCacheConnectionPool*)pool)->internalMap[key]) - number;
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::lexical_cast<std::string>(val);
+		val = CastUtil::toLongdouble(((MemoryCacheConnectionPool*)pool)->internalMap[key]) - number;
+		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::fromNumber(val);
 	}
 	((MemoryCacheConnectionPool*)pool)->lock.unlock();
 	return val;

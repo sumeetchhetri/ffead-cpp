@@ -91,7 +91,7 @@ void Logger::write(const std::string& msg, const std::string& mod, const bool& n
 	if(config==NULL)return;
 	Date dat;
 	std::string te = config->datFormat.format(dat);
-	std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<std::string>(config->vhostNumber)):"");
+	std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::fromNumber(config->vhostNumber)):"");
 	std::string fmsg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :"+msg+(newline?"\n":"");
 	config->lock->lock();
 	config->out->write(fmsg.c_str(),fmsg.length());
@@ -103,7 +103,7 @@ void Logger::write(std::ostream& (*pf) (std::ostream&), const std::string& mod)
 {
 	if(config==NULL)return;
 	Date dat;
-	std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<std::string>(config->vhostNumber)):"");
+	std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::fromNumber(config->vhostNumber)):"");
 	std::string te = config->datFormat.format(dat);
 	std::string msg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :";
 	config->lock->lock();

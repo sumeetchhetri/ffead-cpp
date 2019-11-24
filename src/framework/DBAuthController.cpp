@@ -23,10 +23,10 @@
 #include "DBAuthController.h"
 
 DBAuthController::DBAuthController() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 DBAuthController::~DBAuthController() {
-	// TODO Auto-generated destructor stub
+	
 }

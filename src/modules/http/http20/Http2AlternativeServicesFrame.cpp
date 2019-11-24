@@ -59,7 +59,7 @@ Http2AlternativeServicesFrame::Http2AlternativeServicesFrame(const std::string& 
 }
 
 Http2AlternativeServicesFrame::~Http2AlternativeServicesFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2AlternativeServicesFrame::getFrameData() {

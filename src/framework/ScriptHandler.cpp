@@ -223,7 +223,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		}
 		std::string phpcnts = req->toPHPVariablesString(def);
 		//logger << phpcnts << std::endl;
-		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".php";
+		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".php";
 		tmpf = req->getContextHome() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
@@ -240,7 +240,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
+			//res->setContent_len(CastUtil::fromNumber(content.length()));
 		}
 	}
 	else if(ext==".pl")
@@ -256,7 +256,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 			def = handoffs[req->getCntxt_name()];
 			tmpf = "/";
 		}
-		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".pl";
+		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".pl";
 		tmpf = req->getContextHome() + tmpf;
 		std::string phpcnts = req->toPerlVariablesString();
 		//logger << tmpf << std::endl;
@@ -285,7 +285,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
+			//res->setContent_len(CastUtil::fromNumber(content.length()));
 		}
 	}
 	else if(ext==".rb")
@@ -303,7 +303,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		}
 		std::string phpcnts = req->toRubyVariablesString();
 		//logger << phpcnts << std::endl;
-		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".rb";
+		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".rb";
 		tmpf = req->getContextHome() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
@@ -320,7 +320,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
+			//res->setContent_len(CastUtil::fromNumber(content.length()));
 		}
 	}
 	else if(ext==".py")
@@ -336,7 +336,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 			def = handoffs[req->getCntxt_name()];
 			tmpf = "/";
 		}
-		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".py";
+		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".py";
 		tmpf = req->getContextHome() + tmpf;
 		std::string phpcnts = req->toPythonVariablesString();
 		std::string plfile = req->getUrl();
@@ -364,7 +364,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
+			//res->setContent_len(CastUtil::fromNumber(content.length()));
 		}
 	}
 	else if(ext==".lua")
@@ -382,7 +382,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		}
 		std::string phpcnts = req->toLuaVariablesString();
 		//logger << phpcnts << std::endl;
-		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".lua";
+		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".lua";
 		tmpf = req->getContextHome() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
@@ -399,7 +399,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
+			//res->setContent_len(CastUtil::fromNumber(content.length()));
 		}
 	}
 	else if(ext==".njs")
@@ -417,7 +417,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		}
 		std::string phpcnts = req->toNodejsVariablesString();
 		//logger << phpcnts << std::endl;
-		filen = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime()) + ".njs";
+		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".njs";
 		tmpf = req->getContextHome() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
@@ -434,7 +434,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(".html"));
 			res->setContent(content);
-			//res->setContent_len(CastUtil::lexical_cast<std::string>(content.length()));
+			//res->setContent_len(CastUtil::fromNumber(content.length()));
 		}
 	}
 	return skipit;

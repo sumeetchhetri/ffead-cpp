@@ -1781,20 +1781,20 @@ std::string SerializeBase::getSerializationMethodName(const std::string& classNa
 std::string SerializeBase::trySerialize(void* t, int serOpt, std::string& className, const std::string& app) {
 	switch(serOpt) {
 		case 1: return *(std::string*)t;
-		case 2: return CastUtil::lexical_cast<std::string>(*(int*)t);
-		case 3: return CastUtil::lexical_cast<std::string>(*(unsigned int*)t);
-		case 4: return CastUtil::lexical_cast<std::string>(*(int*)t);
-		case 5: return CastUtil::lexical_cast<std::string>(*(unsigned int*)t);
-		case 6: return CastUtil::lexical_cast<std::string>(*(short*)t);
-		case 7: return CastUtil::lexical_cast<std::string>(*(unsigned short*)t);
-		case 8: return CastUtil::lexical_cast<std::string>(*(long*)t);
-		case 9: return CastUtil::lexical_cast<std::string>(*(int*)t);
-		case 10: return CastUtil::lexical_cast<std::string>(*(long long*)t);
-		case 11: return CastUtil::lexical_cast<std::string>(*(int*)t);
-		case 12: return CastUtil::lexical_cast<std::string>(*(float*)t);
-		case 13: return CastUtil::lexical_cast<std::string>(*(double*)t);
-		case 14: return CastUtil::lexical_cast<std::string>(*(long double*)t);
-		case 15: return CastUtil::lexical_cast<std::string>(*(bool*)t);
+		case 2: return CastUtil::fromNumber(*(int*)t);
+		case 3: return CastUtil::fromNumber(*(unsigned int*)t);
+		case 4: return CastUtil::fromNumber(*(int*)t);
+		case 5: return CastUtil::fromNumber(*(unsigned int*)t);
+		case 6: return CastUtil::fromNumber(*(short*)t);
+		case 7: return CastUtil::fromNumber(*(unsigned short*)t);
+		case 8: return CastUtil::fromNumber(*(long*)t);
+		case 9: return CastUtil::fromNumber(*(int*)t);
+		case 10: return CastUtil::fromNumber(*(long long*)t);
+		case 11: return CastUtil::fromNumber(*(int*)t);
+		case 12: return CastUtil::fromFloat(*(float*)t);
+		case 13: return CastUtil::fromDouble(*(double*)t);
+		case 14: return CastUtil::fromLongdouble(*(long double*)t);
+		case 15: return CastUtil::fromBool(*(bool*)t);
 		case 16: {
 			DateFormat formt;
 			return formt.format((Date*)t);

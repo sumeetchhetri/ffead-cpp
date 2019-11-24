@@ -278,7 +278,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 						StringUtil::trim(versionStr);
 						float version = -1;
 						try {
-							version = CastUtil::lexical_cast<float>(versionStr);
+							version = CastUtil::toFloat(versionStr);
 							this->httpVers = version;
 						} catch(const std::exception& e) {
 							status = HTTPResponseStatus::HttpVersionNotSupported;
@@ -338,7 +338,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 										indices[attN] = indices[attN] + 1;
 									}
 									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::lexical_cast<std::string>(indices[attN])
+											  + CastUtil::fromNumber(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
 								}
 								else
@@ -414,7 +414,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 										indices[attN] = indices[attN] + 1;
 									}
 									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::lexical_cast<std::string>(indices[attN])
+											  + CastUtil::fromNumber(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
 								}
 								else
@@ -490,7 +490,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 										indices[attN] = indices[attN] + 1;
 									}
 									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::lexical_cast<std::string>(indices[attN])
+											  + CastUtil::fromNumber(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
 								}
 								else
@@ -597,7 +597,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 										indices[attN] = indices[attN] + 1;
 									}
 									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::lexical_cast<std::string>(indices[attN])
+											  + CastUtil::fromNumber(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
 								}
 								else
@@ -672,7 +672,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 										indices[attN] = indices[attN] + 1;
 									}
 									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::lexical_cast<std::string>(indices[attN])
+											  + CastUtil::fromNumber(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
 								}
 								else
@@ -749,7 +749,7 @@ HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 										indices[attN] = indices[attN] + 1;
 									}
 									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::lexical_cast<std::string>(indices[attN])
+											  + CastUtil::fromNumber(indices[attN])
 											  + "]"] = CryptoHandler::urlDecode(param.at(1));
 								}
 								else
@@ -846,7 +846,7 @@ void HttpRequest::updateFromContentStr_Old()
 						indices[attN] = indices[attN] + 1;
 					}
 					this->requestParams[attN.substr(0, attN.find("[")+1)
-							  + CastUtil::lexical_cast<std::string>(indices[attN])
+							  + CastUtil::fromNumber(indices[attN])
 							  + "]"] = CryptoHandler::urlDecode(param.at(1));
 				}
 				else
@@ -956,7 +956,7 @@ void HttpRequest::updateFromContentStr_Old()
 						indices[attN] = indices[attN] + 1;
 					}
 					this->requestParamsF[attN.substr(0, attN.find("[")+1)
-							  + CastUtil::lexical_cast<std::string>(indices[attN])
+							  + CastUtil::fromNumber(indices[attN])
 							  + "]"] = datf;
 				}
 				else
@@ -1013,7 +1013,7 @@ void HttpRequest::updateFromContentStr()
 						indices[attN] = indices[attN] + 1;
 					}
 					this->requestParams[attN.substr(0, attN.find("[")+1)
-							  + CastUtil::lexical_cast<std::string>(indices[attN])
+							  + CastUtil::fromNumber(indices[attN])
 							  + "]"] = CryptoHandler::urlDecode(param.at(1));
 				}
 				else
@@ -1088,7 +1088,7 @@ void HttpRequest::updateFromContentStr()
 							indices[attN] = indices[attN] + 1;
 						}
 						addMultipartFormContent(attN.substr(0, attN.find("[")+1)
-								  + CastUtil::lexical_cast<std::string>(indices[attN])
+								  + CastUtil::fromNumber(indices[attN])
 								  + "]", content);
 					}
 					else if(indices.find(attN)!=indices.end() || requestParamsF.find(attN)!=requestParamsF.end())
@@ -1107,7 +1107,7 @@ void HttpRequest::updateFromContentStr()
 								indices[attN] = indices[attN] + 1;
 							}
 							addMultipartFormContent(attN+"["
-									  + CastUtil::lexical_cast<std::string>(indices[attN])
+									  + CastUtil::fromNumber(indices[attN])
 									  + "]", content);
 						}
 
@@ -1120,10 +1120,10 @@ void HttpRequest::updateFromContentStr()
 							indices[attN] = indices[attN] + 1;
 						}
 						addMultipartFormContent(attN+"["
-								  + CastUtil::lexical_cast<std::string>(indices[attN])
+								  + CastUtil::fromNumber(indices[attN])
 								  + "]", content);
 						/*std::cout << ("creating array from similar params" + attN+"["
-										  + CastUtil::lexical_cast<std::string>(indices[attN])
+										  + CastUtil::fromNumber(indices[attN])
 										  + "]") << std::endl;*/
 
 					}
@@ -1155,7 +1155,7 @@ void HttpRequest::updateFromContentStr()
 					{
 						filen = this->getContent_boundary();
 						StringUtil::replaceAll(filen, "-", "");
-						filen = this->getContextHome() + "/temp/"+ filen + CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
+						filen = this->getContextHome() + "/temp/"+ filen + CastUtil::fromNumber(Timer::getCurrentTime());
 						ofile.open(filen.c_str(), std::ios::binary | std::ios::app);
 					}
 				}
@@ -1242,7 +1242,7 @@ void HttpRequest::updateFromContentFile()
 								indices[attN] = indices[attN] + 1;
 							}
 							addMultipartFormContent(attN.substr(0, attN.find("[")+1)
-									  + CastUtil::lexical_cast<std::string>(indices[attN])
+									  + CastUtil::fromNumber(indices[attN])
 									  + "]", content);
 						}
 						else if(indices.find(attN)!=indices.end() || requestParamsF.find(attN)!=requestParamsF.end())
@@ -1261,7 +1261,7 @@ void HttpRequest::updateFromContentFile()
 									indices[attN] = indices[attN] + 1;
 								}
 								addMultipartFormContent(attN+"["
-										  + CastUtil::lexical_cast<std::string>(indices[attN])
+										  + CastUtil::fromNumber(indices[attN])
 										  + "]", content);
 							}
 
@@ -1274,7 +1274,7 @@ void HttpRequest::updateFromContentFile()
 								indices[attN] = indices[attN] + 1;
 							}
 							addMultipartFormContent(attN+"["
-									  + CastUtil::lexical_cast<std::string>(indices[attN])
+									  + CastUtil::fromNumber(indices[attN])
 									  + "]", content);
 
 						}
@@ -1306,7 +1306,7 @@ void HttpRequest::updateFromContentFile()
 						{
 							filen = this->getContent_boundary();
 							StringUtil::replaceAll(filen, "-", "");
-							filen = this->getContextHome() + "/temp/"+ filen + CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
+							filen = this->getContextHome() + "/temp/"+ filen + CastUtil::fromNumber(Timer::getCurrentTime());
 							ofile.open(filen.c_str(), std::ios::binary | std::ios::app);
 						}
 					}
@@ -1451,7 +1451,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 			StringUtil::trim(versionStr);
 			float version = -1;
 			try {
-				version = CastUtil::lexical_cast<float>(versionStr);
+				version = CastUtil::toFloat(versionStr);
 				this->httpVers = version;
 			} catch(const std::exception& e) {
 			}
@@ -1484,7 +1484,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 							indices[attN] = indices[attN] + 1;
 						}
 						this->queryParams[attN.substr(0, attN.find("[")+1)
-								  + CastUtil::lexical_cast<std::string>(indices[attN])
+								  + CastUtil::fromNumber(indices[attN])
 								  + "]"] = CryptoHandler::urlDecode(param.at(1));
 					}
 					else
@@ -1540,7 +1540,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 				StringUtil::trim(versionStr);
 				float version = -1;
 				try {
-					version = CastUtil::lexical_cast<float>(versionStr);
+					version = CastUtil::toFloat(versionStr);
 					this->httpVers = version;
 				} catch(const std::exception& e) {
 					status = HTTPResponseStatus::HttpVersionNotSupported;
@@ -1597,7 +1597,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 								indices[attN] = indices[attN] + 1;
 							}
 							this->queryParams[attN.substr(0, attN.find("[")+1)
-									  + CastUtil::lexical_cast<std::string>(indices[attN])
+									  + CastUtil::fromNumber(indices[attN])
 									  + "]"] = CryptoHandler::urlDecode(param.at(1));
 						}
 						else
@@ -1669,7 +1669,7 @@ std::string HttpRequest::toString()
 			vals+= ("\n\tTempFileName: "+dat.tempFileName);
 		}
 	}
-	ret += "\nRequest Parameters "+vals;//CastUtil::lexical_cast<std::string>(this->getRequestParams().size());
+	ret += "\nRequest Parameters "+vals;//CastUtil::fromNumber(this->getRequestParams().size());
 	return ret;
 }
 
@@ -1962,7 +1962,7 @@ std::string HttpRequest::toPHPVariablesString(const std::string& def)
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.getHeader("Content-Type") + "';";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length()) + ";";
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::fromNumber(dat.getContent().length()) + ";";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.getTempFileName() + "';";
 				ret += "\n$_FILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
@@ -1973,7 +1973,7 @@ std::string HttpRequest::toPHPVariablesString(const std::string& def)
 				ret += "\nif(!isset($_FILES['"+iter->first+"']))\n{\n$_FILES['"+iter->first+"']=array();\n}\n";
 				ret += "\n$_FILES['"+iter->first+"']['name'] = '"+ dat.getFileName() + "';";
 				ret += "\n$_FILES['"+iter->first+"']['type'] = '"+ dat.getHeader("Content-Type") + "';";
-				ret += "\n$_FILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length()) + ";";
+				ret += "\n$_FILES['"+iter->first+"']['size'] = "+ CastUtil::fromNumber(dat.getContent().length()) + ";";
 				ret += "\n$_FILES['"+iter->first+"']['tmp_name'] = '"+ dat.getTempFileName() + "';";
 				ret += "\n$_FILES['"+iter->first+"']['error'] = 0;";
 			}
@@ -2066,7 +2066,7 @@ std::string HttpRequest::toPerlVariablesString()
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
 						key.substr(key.find("{")) + "{'type'} = '"+ dat.getHeader("Content-Type") + "';";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
-						key.substr(key.find("{")) + "{'size'} = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length()) + ";";
+						key.substr(key.find("{")) + "{'size'} = "+ CastUtil::fromNumber(dat.getContent().length()) + ";";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
 						key.substr(key.find("{")) + "{'tmp_name'} = '"+ dat.getTempFileName() + "';";
 				ret += "\n$_FILES{'"+key.substr(0, key.find("{"))+"'}" +
@@ -2077,7 +2077,7 @@ std::string HttpRequest::toPerlVariablesString()
 				ret += "\nif(!exists $_FILES{'"+iter->first+"'})\n{\n$_FILES{'"+iter->first+"'}={}\n}\n";
 				ret += "\n$_FILES{'"+iter->first+"'}{'name'} = '"+ dat.getFileName() + "';";
 				ret += "\n$_FILES{'"+iter->first+"'}{'type'} = '"+ dat.getHeader("Content-Type") + "';";
-				ret += "\n$_FILES{'"+iter->first+"'}{'size'} = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length()) + ";";
+				ret += "\n$_FILES{'"+iter->first+"'}{'size'} = "+ CastUtil::fromNumber(dat.getContent().length()) + ";";
 				ret += "\n$_FILES{'"+iter->first+"'}{'tmp_name'} = '"+ dat.getTempFileName() + "';";
 				ret += "\n$_FILES{'"+iter->first+"'}{'error'} = 0;";
 			}
@@ -2163,7 +2163,7 @@ std::string HttpRequest::toRubyVariablesString()
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.getHeader("Content-Type") + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length());
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::fromNumber(dat.getContent().length());
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
@@ -2174,7 +2174,7 @@ std::string HttpRequest::toRubyVariablesString()
 				ret += "\nFILES['"+iter->first+"'] = {}";
 				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.getFileName() + "'";
 				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.getHeader("Content-Type") + "'";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length());
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::fromNumber(dat.getContent().length());
 				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0";
 			}
@@ -2260,7 +2260,7 @@ std::string HttpRequest::toPythonVariablesString()
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.getHeader("Content-Type") + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length());
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::fromNumber(dat.getContent().length());
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
@@ -2271,7 +2271,7 @@ std::string HttpRequest::toPythonVariablesString()
 				ret += "\nFILES['"+iter->first+"'] = {}";
 				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.getFileName() + "'";
 				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.getHeader("Content-Type") + "'";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length());
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::fromNumber(dat.getContent().length());
 				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0";
 			}
@@ -2357,7 +2357,7 @@ std::string HttpRequest::toLuaVariablesString()
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.getHeader("Content-Type") + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length());
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::fromNumber(dat.getContent().length());
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
@@ -2368,7 +2368,7 @@ std::string HttpRequest::toLuaVariablesString()
 				ret += "\nFILES['"+iter->first+"'] = {}";
 				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.getFileName() + "'";
 				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.getHeader("Content-Type") + "'";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length());
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::fromNumber(dat.getContent().length());
 				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.getTempFileName() + "'";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0";
 			}
@@ -2448,7 +2448,7 @@ std::string HttpRequest::toNodejsVariablesString()
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['type'] = '"+ dat.getHeader("Content-Type") + "';";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
-						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length()) + ";";
+						iter->first.substr(iter->first.find("[")) + "['size'] = "+ CastUtil::fromNumber(dat.getContent().length()) + ";";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
 						iter->first.substr(iter->first.find("[")) + "['tmp_name'] = '"+ dat.getTempFileName() + "';";
 				ret += "\nFILES['"+iter->first.substr(0, iter->first.find("["))+"']" +
@@ -2459,7 +2459,7 @@ std::string HttpRequest::toNodejsVariablesString()
 				ret += "\nif(!isset(FILES['"+iter->first+"']))\n{\nFILES['"+iter->first+"']={};\n}\n";
 				ret += "\nFILES['"+iter->first+"']['name'] = '"+ dat.getFileName() + "';";
 				ret += "\nFILES['"+iter->first+"']['type'] = '"+ dat.getHeader("Content-Type") + "';";
-				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::lexical_cast<std::string>(dat.getContent().length()) + ";";
+				ret += "\nFILES['"+iter->first+"']['size'] = "+ CastUtil::fromNumber(dat.getContent().length()) + ";";
 				ret += "\nFILES['"+iter->first+"']['tmp_name'] = '"+ dat.getTempFileName() + "';";
 				ret += "\nFILES['"+iter->first+"']['error'] = 0;";
 			}
@@ -2721,8 +2721,8 @@ std::vector<std::vector<int> > HttpRequest::getRanges(std::vector<std::string> &
 			if(rangeVals.at(0)!="" && rangeVals.at(1)!="")
 			{
 				try {
-					int start = CastUtil::lexical_cast<int>(rangeVals.at(0));
-					int end = CastUtil::lexical_cast<int>(rangeVals.at(1));
+					int start = CastUtil::toInt(rangeVals.at(0));
+					int end = CastUtil::toInt(rangeVals.at(1));
 
 					if(start<0 || start>end)
 						throw std::runtime_error("1");
@@ -2737,7 +2737,7 @@ std::vector<std::vector<int> > HttpRequest::getRanges(std::vector<std::string> &
 			else if(rangeVals.at(0)!="")
 			{
 				try {
-					int start = CastUtil::lexical_cast<int>(rangeVals.at(0));
+					int start = CastUtil::toInt(rangeVals.at(0));
 					if(start<0)
 						throw std::runtime_error("1");
 					std::vector<int> values;
@@ -2751,7 +2751,7 @@ std::vector<std::vector<int> > HttpRequest::getRanges(std::vector<std::string> &
 			else if(rangeVals.at(1)!="")
 			{
 				try {
-					int end = CastUtil::lexical_cast<int>(rangeVals.at(1));
+					int end = CastUtil::toInt(rangeVals.at(1));
 					if(end<0)
 						throw std::runtime_error("1");
 					std::vector<int> values;
@@ -2807,7 +2807,7 @@ std::string HttpRequest::getParamValue(const std::string& key)
 		return "";
 }
 
-HTTPResponseStatus HttpRequest::getRequestParseStatus() const
+HTTPResponseStatus HttpRequest::getRequestParseStatus()
 {
 	return status;
 }
@@ -2871,77 +2871,77 @@ std::string HttpRequest::toPluginString() {
 	text += (this->host + "\n");
 	text += (this->url + "\n");
 	text += (this->file + "\n");
-	text += (CastUtil::lexical_cast<std::string>(this->httpVersion) + "\n");
+	text += this->httpVersion + "\n";
 	text += (this->method + "\n");
 	text += (this->getDefaultLocale() + "\n");
 	text += (this->sessionID + "\n");
 	text += (this->actUrl + "\n");
 
-	text += (CastUtil::lexical_cast<std::string>(this->content.length()) + "\n");
+	text += (CastUtil::fromNumber(this->content.length()) + "\n");
 	text += (this->content);
 
-	text += (CastUtil::lexical_cast<std::string>(this->preamble.length()) + "\n");
+	text += (CastUtil::fromNumber(this->preamble.length()) + "\n");
 	text += (this->preamble);
 
-	text += (CastUtil::lexical_cast<std::string>(this->epilogue.length()) + "\n");
+	text += (CastUtil::fromNumber(this->epilogue.length()) + "\n");
 	text += (this->epilogue);
 
-	text += (CastUtil::lexical_cast<std::string>(this->requestParams.size()) + "\n");
+	text += (CastUtil::fromNumber(this->requestParams.size()) + "\n");
 	RMap::iterator it;
 	for(it=this->requestParams.begin();it!=this->requestParams.end();++it)
 	{
 		text += it->first + "\n";
-		text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
+		text += CastUtil::fromNumber(it->second.length()) + "\n";
 		text += it->second;
 	}
 
-	text += (CastUtil::lexical_cast<std::string>(this->queryParams.size()) + "\n");
+	text += (CastUtil::fromNumber(this->queryParams.size()) + "\n");
 	for(it=this->queryParams.begin();it!=this->queryParams.end();++it)
 	{
 		text += it->first + "\n";
-		text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
+		text += CastUtil::fromNumber(it->second.length()) + "\n";
 		text += it->second;
 	}
 
-	text += (CastUtil::lexical_cast<std::string>(this->headers.size()) + "\n");
+	text += (CastUtil::fromNumber(this->headers.size()) + "\n");
 	for(it=this->headers.begin();it!=this->headers.end();++it)
 	{
 		text += it->first + "\n";
-		text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
+		text += CastUtil::fromNumber(it->second.length()) + "\n";
 		text += it->second;
 	}
 
-	text += (CastUtil::lexical_cast<std::string>(this->requestParamsF.size()) + "\n");
+	text += (CastUtil::fromNumber(this->requestParamsF.size()) + "\n");
 	FMap::iterator fit;
 	for(fit=this->requestParamsF.begin();fit!=this->requestParamsF.end();++fit)
 	{
 		text += fit->second.name + "\n";
 		text += fit->second.fileName + "\n";
 		text += fit->second.tempFileName + "\n";
-		text += (CastUtil::lexical_cast<std::string>(fit->second.content.length()) + "\n");
+		text += (CastUtil::fromNumber(fit->second.content.length()) + "\n");
 		text += (fit->second.content);
-		text += (CastUtil::lexical_cast<std::string>(fit->second.headers.size()) + "\n");
+		text += (CastUtil::fromNumber(fit->second.headers.size()) + "\n");
 		for(it=fit->second.headers.begin();it!=fit->second.headers.end();++it)
 		{
 			text += it->first + "\n";
-			text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
+			text += CastUtil::fromNumber(it->second.length()) + "\n";
 			text += it->second;
 		}
 	}
 
-	text += (CastUtil::lexical_cast<std::string>(this->contentList.size()) + "\n");
+	text += (CastUtil::fromNumber(this->contentList.size()) + "\n");
 	for(int k=0;k<(int)this->contentList.size();k++)
 	{
 		text += this->contentList.at(k).name + "\n";
 		text += this->contentList.at(k).fileName + "\n";
 		text += this->contentList.at(k).tempFileName + "\n";
-		text += (CastUtil::lexical_cast<std::string>(this->contentList.at(k).content.length()) + "\n");
+		text += (CastUtil::fromNumber(this->contentList.at(k).content.length()) + "\n");
 		text += (this->contentList.at(k).content);
-		text += (CastUtil::lexical_cast<std::string>(this->contentList.at(k).headers.size()) + "\n");
+		text += (CastUtil::fromNumber(this->contentList.at(k).headers.size()) + "\n");
 		for(it=this->contentList.at(k).headers.begin();it!=this->contentList.at(k).headers.end();++it)
 		{
 			text += it->first + "\n";
-			text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
+			text += CastUtil::fromNumber(it->second.length()) + "\n";
 			text += it->second;
 		}
 	}

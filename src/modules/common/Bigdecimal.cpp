@@ -81,7 +81,7 @@ void Bigdecimal::create(const std::string& value)
 	while((int)temp.length()>Bigint::NUM_LENGTH)
 	{
 		try {
-			int x = CastUtil::lexical_cast<int>(temp.substr(temp.length()-Bigint::NUM_LENGTH));
+			int x = CastUtil::toInt(temp.substr(temp.length()-Bigint::NUM_LENGTH));
 			temp = temp.substr(0, temp.length()-Bigint::NUM_LENGTH);
 			parts.push_back(x);
 		} catch(const std::exception& e) {
@@ -91,7 +91,7 @@ void Bigdecimal::create(const std::string& value)
 	if(temp.length()>0)
 	{
 		try {
-			int x = CastUtil::lexical_cast<int>(temp);
+			int x = CastUtil::toInt(temp);
 			parts.push_back(x);
 		} catch(const std::exception& e) {
 			throw std::runtime_error("Invalid Bigdecimal value");
@@ -376,7 +376,7 @@ std::string Bigdecimal::toString() const
 	for (int i=0;i<(int)nparts.size();i++) {
 		if(i!=0)
 		{
-			std::string numstr = CastUtil::lexical_cast<std::string>(nparts.at(i));
+			std::string numstr = CastUtil::fromNumber(nparts.at(i));
 			for (int j = 0; j < Bigint::NUM_LENGTH-(int)numstr.length(); j++) {
 				build.append(Bigint::ZERO);
 			}
@@ -384,7 +384,7 @@ std::string Bigdecimal::toString() const
 		}
 		else
 		{
-			build.append(CastUtil::lexical_cast<std::string>(nparts.at(i)));
+			build.append(CastUtil::fromNumber(nparts.at(i)));
 		}
 	}
 	if(decimalDigits>0)

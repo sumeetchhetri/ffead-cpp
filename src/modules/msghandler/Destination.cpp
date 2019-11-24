@@ -23,12 +23,12 @@
 #include "Destination.h"
 
 Destination::Destination() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 Destination::~Destination() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Destination::getName() const

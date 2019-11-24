@@ -27,7 +27,7 @@ ComponentGen::ComponentGen() {
 }
 
 ComponentGen::~ComponentGen() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string convertfrom(std::string val)
@@ -166,9 +166,9 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 			cudata+= ("this->setDbconpoolSize("+srprps["@DB_CONN_POOL_NUM"]+");\n");
 
 			int cnt =1;
-			while(srprps["@SERVICE"+CastUtil::lexical_cast<std::string>(cnt)]!="")
+			while(srprps["@SERVICE"+CastUtil::fromNumber(cnt)]!="")
 			{
-				std::string srvc = srprps["@SERVICE"+CastUtil::lexical_cast<std::string>(cnt++)];
+				std::string srvc = srprps["@SERVICE"+CastUtil::fromNumber(cnt++)];
 				ComponentService cmps;
 				if(srvc.find("@USR_GRP_ALWD(")!=std::string::npos)
 				{
@@ -437,13 +437,13 @@ std::string ComponentGen::generateComponentCU(const std::string& fileName, std::
 								{
 									if(alwd.at(var)!="" && alwd.at(var).find("*")==std::string::npos && alwd.at(var).find("&")==std::string::npos)
 									{
-										//srvargs += alwd.at(var) + "*_"+CastUtil::lexical_cast<std::string>(var+1)+" = ("+alwd.at(var)+"*)args.at("+CastUtil::lexical_cast<std::string>(var)+");\n";
-										srvmcarg += "_"+CastUtil::lexical_cast<std::string>(var+1)+"";
-										srvargs += alwd.at(var)+ " _"+CastUtil::lexical_cast<std::string>(var+1);
-										srvmcargremote += alwd.at(var)+ " &_"+CastUtil::lexical_cast<std::string>(var+1);
-										srvmcargremotevec += "GenericObject __"+CastUtil::lexical_cast<std::string>(var+1)+";\n";
-										srvmcargremotevec += "__"+CastUtil::lexical_cast<std::string>(var+1)+" << _"+CastUtil::lexical_cast<std::string>(var+1)+";\n";
-										srvmcargremotevec += "_vec.push_back(__"+CastUtil::lexical_cast<std::string>(var+1)+");\n";
+										//srvargs += alwd.at(var) + "*_"+CastUtil::fromNumber(var+1)+" = ("+alwd.at(var)+"*)args.at("+CastUtil::fromNumber(var)+");\n";
+										srvmcarg += "_"+CastUtil::fromNumber(var+1)+"";
+										srvargs += alwd.at(var)+ " _"+CastUtil::fromNumber(var+1);
+										srvmcargremote += alwd.at(var)+ " &_"+CastUtil::fromNumber(var+1);
+										srvmcargremotevec += "GenericObject __"+CastUtil::fromNumber(var+1)+";\n";
+										srvmcargremotevec += "__"+CastUtil::fromNumber(var+1)+" << _"+CastUtil::fromNumber(var+1)+";\n";
+										srvmcargremotevec += "_vec.push_back(__"+CastUtil::fromNumber(var+1)+");\n";
 										if(var!=alwd.size()-1)
 										{
 											srvmcarg += ",";

@@ -123,7 +123,7 @@ NBServer::NBServer(const std::string& port, const int& waiting, const Service& s
 }
 
 NBServer::~NBServer() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void* NBServer::servicing(void* arg)

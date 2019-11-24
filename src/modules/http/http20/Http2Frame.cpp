@@ -8,7 +8,7 @@
 #include "Http2Frame.h"
 
 Http2Frame::~Http2Frame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 /*string Http2Frame::getFrameData() {

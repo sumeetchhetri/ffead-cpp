@@ -159,21 +159,21 @@ JSONElement& JSONElement::add(std::string k, std::string v) {
 
 JSONElement& JSONElement::add(std::string k, unsigned long long v) {
 	if(this->type == JSON_OBJECT || this->type == JSON_ARRAY) {
-		addChild(JSONElement(JSON_NUMBER, k, CastUtil::lexical_cast<std::string>(v)));
+		addChild(JSONElement(JSON_NUMBER, k, CastUtil::fromNumber(v)));
 	}
 	return *this;
 }
 
 JSONElement& JSONElement::add(std::string k, bool v) {
 	if(this->type == JSON_OBJECT || this->type == JSON_ARRAY) {
-		addChild(JSONElement(JSON_BOOL, k, CastUtil::lexical_cast<std::string>(v)));
+		addChild(JSONElement(JSON_BOOL, k, CastUtil::fromBool(v)));
 	}
 	return *this;
 }
 
 JSONElement& JSONElement::add(std::string k, long double v) {
 	if(this->type == JSON_OBJECT) {
-		addChild(JSONElement(JSON_FLOAT, k, CastUtil::lexical_cast<std::string>(v)));
+		addChild(JSONElement(JSON_FLOAT, k, CastUtil::fromLongdouble(v)));
 	}
 	return *this;
 }

@@ -291,7 +291,7 @@ void DistoCacheServiceHandler::run()
 				{
 					int position = -1;
 					try {
-						position = CastUtil::lexical_cast<int>(parts.at(3));
+						position = CastUtil::toInt(parts.at(3));
 						int size = CacheMap::size(parts.at(2));
 						if(position>=0 && position<size)
 						{
@@ -321,8 +321,8 @@ void DistoCacheServiceHandler::run()
 				{
 					int position = -1, repeats = -1;
 					try {
-						position = CastUtil::lexical_cast<int>(parts.at(3));
-						repeats = CastUtil::lexical_cast<int>(parts.at(4));
+						position = CastUtil::toInt(parts.at(3));
+						repeats = CastUtil::toInt(parts.at(4));
 						int size = CacheMap::size(parts.at(2));
 						if(position>=0 && repeats>=0 && position<size)
 						{
@@ -363,7 +363,7 @@ void DistoCacheServiceHandler::run()
 				{
 					int position = -1;
 					try {
-						position = CastUtil::lexical_cast<int>(parts.at(3));
+						position = CastUtil::toInt(parts.at(3));
 						int size = CacheMap::size(parts.at(2));
 						if(position>=0 && position<size)
 						{
@@ -393,7 +393,7 @@ void DistoCacheServiceHandler::run()
 				{
 					int position = -1;
 					try {
-						position = CastUtil::lexical_cast<int>(parts.at(3));
+						position = CastUtil::toInt(parts.at(3));
 						int size = CacheMap::size(parts.at(2));
 						if(position>=0 && position<size)
 						{
@@ -431,7 +431,7 @@ void DistoCacheServiceHandler::run()
 				{
 					int position = -1;
 					try {
-						position = CastUtil::lexical_cast<int>(parts.at(3));
+						position = CastUtil::toInt(parts.at(3));
 						int size = CacheMap::size(parts.at(2));
 						if(position>=0 && position<size)
 						{
@@ -453,7 +453,7 @@ void DistoCacheServiceHandler::run()
 				{
 					int position = -1;
 					try {
-						position = CastUtil::lexical_cast<int>(parts.at(3));
+						position = CastUtil::toInt(parts.at(3));
 						int size = CacheMap::size(parts.at(2));
 						if(position>=0 && position<size)
 						{
@@ -503,7 +503,7 @@ void DistoCacheServiceHandler::run()
 				{
 					int position = -1;
 					try {
-						position = CastUtil::lexical_cast<int>(parts.at(3));
+						position = CastUtil::toInt(parts.at(3));
 						int size = CacheMap::size(parts.at(2));
 						if(position>=0 && position<size)
 						{
@@ -535,7 +535,7 @@ void DistoCacheServiceHandler::run()
 				}
 				else if(validQuery(parts, 2, CacheMap::SIZE))
 				{
-					responseValue = CastUtil::lexical_cast<std::string>(CacheMap::size(parts.at(1)));
+					responseValue = CastUtil::fromNumber(CacheMap::size(parts.at(1)));
 				}
 				else if(validQuery(parts, 2, CacheMap::CLEAR))
 				{
@@ -543,7 +543,7 @@ void DistoCacheServiceHandler::run()
 				}
 				else if(validQuery(parts, 2, CacheMap::IS_EMPTY))
 				{
-					responseValue = CastUtil::lexical_cast<std::string>(CacheMap::isEmpty(parts.at(1)));
+					responseValue = CastUtil::fromNumber(CacheMap::isEmpty(parts.at(1)));
 				}
 				else
 				{

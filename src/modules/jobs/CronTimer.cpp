@@ -94,7 +94,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 						for (int i = 0; i < 3; ++i) {
 							int partValue = -1;
 							try {
-								partValue = CastUtil::lexical_cast<int>(parts.at(i));
+								partValue = CastUtil::toInt(parts.at(i));
 							} catch(const std::exception& e) {
 								if(position==3)
 								{
@@ -153,7 +153,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 						for (int i = 0; i < 2; ++i) {
 							int partValue = -1;
 							try {
-								partValue = CastUtil::lexical_cast<int>(parts.at(i));
+								partValue = CastUtil::toInt(parts.at(i));
 							} catch(const std::exception& e) {
 								if(position==3)
 								{
@@ -211,7 +211,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 						for (int i = 0; i < 2; ++i) {
 							int partValue = -1;
 							try {
-								partValue = CastUtil::lexical_cast<int>(parts.at(i));
+								partValue = CastUtil::toInt(parts.at(i));
 							} catch(const std::exception& e) {
 								if(parts.at(i)=="*")
 								{
@@ -273,7 +273,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 					for (int i = 0; i < (int)parts.size(); ++i) {
 						int partValue = -1;
 						try {
-							partValue = CastUtil::lexical_cast<int>(parts.at(i));
+							partValue = CastUtil::toInt(parts.at(i));
 						} catch(const std::exception& e) {
 							if(position==3)
 							{
@@ -313,7 +313,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 
 					if(valid) {
 						for (int j = 0; j < (int)vparts.size(); ++j) {
-							cpart.list += "," + CastUtil::lexical_cast<std::string>(vparts.at(j)) + ",";
+							cpart.list += "," + CastUtil::fromNumber(vparts.at(j)) + ",";
 							cpart.lstParts.push_back(vparts.at(j));
 							sort(cpart.lstParts.begin(), cpart.lstParts.end());
 						}
@@ -327,7 +327,7 @@ CronTimer::CronTimer(const std::string& cronExpression)
 
 					int partValue = -1;
 					try {
-						partValue = CastUtil::lexical_cast<int>(tst);
+						partValue = CastUtil::toInt(tst);
 					} catch(const std::exception& e) {
 						if(position==3)
 						{
@@ -418,7 +418,7 @@ std::string CronTimer::toString()
 			int start = cParts.at(var).from;
 			int end = cParts.at(var).to;
 			while(start<=end) {
-				builder.append(CastUtil::lexical_cast<std::string>(start) + " ");
+				builder.append(CastUtil::fromNumber(start) + " ");
 				start += cParts.at(var).interval;
 			}
 			builder.append(" " + types.at(var));
@@ -427,11 +427,11 @@ std::string CronTimer::toString()
 		{
 			int start = cParts.at(var).from;
 			int end = cParts.at(var).to;
-			builder.append("every " + types.at(var) + " from " + CastUtil::lexical_cast<std::string>(start) + " " + CastUtil::lexical_cast<std::string>(end));
+			builder.append("every " + types.at(var) + " from " + CastUtil::fromNumber(start) + " " + CastUtil::fromNumber(end));
 		}
 		else
 		{
-			builder.append("every " + CastUtil::lexical_cast<std::string>(cParts.at(var).from) + " " + types.at(var));
+			builder.append("every " + CastUtil::fromNumber(cParts.at(var).from) + " " + types.at(var));
 		}
 		if(var!=(int)cParts.size()-1)
 		{
@@ -471,7 +471,7 @@ bool CronTimer::isValid(const int& pos, const int& cvalue, const int& nvalue)
 		{
 			isValid = true;
 		}
-		else if(cParts.at(pos).list.find("," + CastUtil::lexical_cast<std::string>(cvalue) + ",")!=std::string::npos)
+		else if(cParts.at(pos).list.find("," + CastUtil::fromNumber(cvalue) + ",")!=std::string::npos)
 		{
 			isValid = true;
 		}

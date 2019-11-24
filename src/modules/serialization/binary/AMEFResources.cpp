@@ -18,7 +18,7 @@
 
 
 AMEFResources::~AMEFResources() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 char* AMEFResources::longTocharArray(const long& l, const int& ind)

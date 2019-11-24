@@ -64,6 +64,7 @@ ConfigurationData::ConfigurationData() {
 	enableExtra = false;
 	enableScripts = false;
 	enableSoap = false;
+	enableLogging = false;
 }
 
 ConfigurationData* ConfigurationData::getInstance() {

@@ -33,7 +33,7 @@ class Timer {
 	Mutex* m;
 	bool started;
 public:
-	Timer(bool threadsafe = true);
+	Timer(bool threadsafe = false);
 	virtual ~Timer();
 	void start();
 	void end();

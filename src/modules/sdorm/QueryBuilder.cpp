@@ -44,7 +44,7 @@ QueryBuilder::QueryBuilder() {
 }
 
 QueryBuilder::~QueryBuilder() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 GroupClause::GroupClause(QueryBuilder* qb) {

@@ -23,7 +23,7 @@ uint64_t Http2PingFrame::getOpqueData() const {
 }
 
 Http2PingFrame::~Http2PingFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2PingFrame::getFrameData() {

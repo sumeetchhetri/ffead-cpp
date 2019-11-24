@@ -36,7 +36,7 @@ SSLHandler::SSLHandler() {
 }
 
 SSLHandler::~SSLHandler() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void SSLHandler::initInstance(const SecurityProperties& securityProperties) {
@@ -100,10 +100,10 @@ void SSLHandler::init(const SecurityProperties& securityProperties) {
 		sslConfsettings.append(", CA_LIST = ");
 		sslConfsettings.append(securityProperties.ca_list);
 		sslConfsettings.append(", ISDH_PARAMS = ");
-		//sslConfsettings.append(CastUtil::lexical_cast<std::string>(securityProperties.isDHParams));
+		//sslConfsettings.append(CastUtil::fromBool(securityProperties.isDHParams));
 		//sslConfsettings.append(", CLIENT_SEC_LEVEL = ");
-		//sslConfsettings.append(CastUtil::lexical_cast<std::string>(securityProperties.client_auth));
-		logger << sslConfsettings << std::endl;
+		//sslConfsettings.append(CastUtil::fromNumber(securityProperties.client_auth));
+		//logger << sslConfsettings << std::endl;
 
 		/* Build our SSL context*/
 		ctx = SSLCommon::initialize_ctx(true);

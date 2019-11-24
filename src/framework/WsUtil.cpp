@@ -27,7 +27,7 @@ WsUtil::WsUtil() {
 }
 
 WsUtil::~WsUtil() {
-	// TODO Auto-generated destructor stub
+
 }
 
 std::string WsUtil::generateAllWSDL(const std::vector<WsDetails>& wsdvec, const std::string& resp, Reflection& ref, std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps)
@@ -100,12 +100,12 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 	StringUtil::replaceAll(ws_name, "::", "_");
 	if(StringUtil::trimCopy(ws_name)=="")
 	{
-		logger << ("No class name defined for web-service, skipping...") << std::endl;
+		if(ConfigurationData::getInstance()->enableLogging) logger << ("No class name defined for web-service, skipping...") << std::endl;
 		return;
 	}
 	if(StringUtil::trimCopy(location)=="")
 	{
-		logger << ("No location defined for web-service, skipping...") << std::endl;
+		if(ConfigurationData::getInstance()->enableLogging) logger << ("No location defined for web-service, skipping...") << std::endl;
 		return;
 	}
 	gcntxt["WS_NAME"] = ws_name;
@@ -117,7 +117,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 	}
 	gcntxt["WS_NMSPC"] = StringUtil::trimCopy(namespc);
 
-	logger << ("Web service " + ws_name + " found for appname " + appname) << std::endl;
+	if(ConfigurationData::getInstance()->enableLogging) logger << ("Web service " + ws_name + " found for appname " + appname) << std::endl;
 
 	ClassStructure *clstruct = NULL;
 	std::map<std::string, ClassStructure>::iterator it;
@@ -131,13 +131,13 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 	}
 	if(clstruct==NULL)
 	{
-		logger << ("Error generating web-service artifacts, as class "+claz + "not found...") << std::endl;
+		if(ConfigurationData::getInstance()->enableLogging) logger << ("Error generating web-service artifacts, as class "+claz + "not found...") << std::endl;
 		return;
 	}
 
 	if(clstruct->getNamespace()=="" && gcntxt["WS_NMSPC"]=="")
 	{
-		logger << ("No namespace defined for web-service, skipping...") << std::endl;
+		if(ConfigurationData::getInstance()->enableLogging) logger << ("No namespace defined for web-service, skipping...") << std::endl;
 		return;
 	}
 	if(gcntxt["WS_NMSPC"]=="")
@@ -241,10 +241,10 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 				}
 				else
 					trgnmspc = trgnms[fqcn];
-				logger << "in result " + vecn + " " + trgnmspc << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << "in result " + vecn + " " + trgnmspc << std::endl;
 				if(vecn.find("::")!=std::string::npos)
 					vecn = vecn.substr(vecn.find_last_of("::")+1);
-				logger << "in result after " + vecn + " " + trgnmspc << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << "in result after " + vecn + " " + trgnmspc << std::endl;
 				retType = "\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""+in_out_info["RETURN"]+"\" type=\""+trgnmspc+":"+vecn+"\"/>";
 			}
 		}
@@ -303,10 +303,10 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 					}
 					else
 						trgnmspc = trgnms[fqcn];
-					logger << "in result " + type + " " + trgnmspc << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << "in result " + type + " " + trgnmspc << std::endl;
 					if(type.find("::")!=std::string::npos)
 						type = type.substr(type.find_last_of("::")+1);
-					logger << "in result after " + type + " " + trgnmspc << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << "in result after " + type + " " + trgnmspc << std::endl;
 					retType = "\n<xsd:element name=\""+in_out_info["RETURN"]+"\" type=\""+trgnmspc+":"+type+"\"/>";
 				}
 			}
@@ -320,7 +320,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 			StringUtil::split(results2, results1.at(j), (" "));
 			if(results2.size()<2)
 			{
-				results2.push_back("in"+CastUtil::lexical_cast<std::string>(j+1));
+				results2.push_back("in"+CastUtil::fromNumber(j+1));
 			}
 			type = results2.at(0);
 			int srn = j;
@@ -376,7 +376,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 				}
 				else
 				{
-					logger << ("Invalid thing happening " + results1.at(j)) << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << ("Invalid thing happening " + results1.at(j)) << std::endl;
 				}
 				strMap allfs,tyfs;
 				std::string xsdobjdef, xdstype;
@@ -439,10 +439,10 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 						}
 						else
 							trgnmspc = trgnms[fqcn];
-						logger << "in result " + vecn + " " + trgnmspc << std::endl;
+						if(ConfigurationData::getInstance()->enableLogging) logger << "in result " + vecn + " " + trgnmspc << std::endl;
 						if(vecn.find("::")!=std::string::npos)
 							vecn = vecn.substr(vecn.find_last_of("::")+1);
-						logger << "in result after " + vecn + " " + trgnmspc << std::endl;
+						if(ConfigurationData::getInstance()->enableLogging) logger << "in result after " + vecn + " " + trgnmspc << std::endl;
 						inp_params.append("\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""+results2.at(1)+"\" type=\""+trgnmspc+":"+vecn+"\"/>");
 					}
 				}
@@ -457,10 +457,10 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 					}
 					else
 						trgnmspc = trgnms[fqcn];
-					logger << "in result " + type + " " + trgnmspc << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << "in result " + type + " " + trgnmspc << std::endl;
 					if(type.find("::")!=std::string::npos)
 						type = type.substr(type.find_last_of("::")+1);
-					logger << "in result after " + type + " " + trgnmspc << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << "in result after " + type + " " + trgnmspc << std::endl;
 					inp_params.append("\n<xsd:element minOccurs=\"0\" name=\""+results2.at(1)+"\" type=\""+trgnmspc+":"+type+"\"/>");
 				}
 
@@ -560,7 +560,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 						}
 						else
 						{
-							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption("std::vector<"+vecn+" > >"));
+							std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption("std::vector<"+vecn+" > >"));
 							ws_funcs.append("std::vector<"+vecn+" > "+argname+";\n");
 							ws_funcs.append("ElementList list = _req->getElementsByName(\""+argname+"\");\n");
 							ws_funcs.append("for(int i=0;i<list.size();i++)\n{\n");
@@ -569,7 +569,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 					}
 					else
 					{
-						std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(iter2->second));
+						std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(iter2->second));
 						ws_funcs.append("ele = _req->getElementByNameIgnoreCase(\""+argname+"\");\n");
 						ws_funcs.append(iter2->second+" "+argname+";\n");
 						ws_funcs.append("if(ele!=NULL)");
@@ -596,19 +596,36 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 			{
 				ws_funcs.append("_obj."+me_n+"("+args+");\n");
 			}
-			else if(pars["RETURNTYP"]=="int" || pars["RETURNTYP"]=="short" || pars["RETURNTYP"]=="float" || pars["RETURNTYP"]=="double"
-					|| pars["RETURNTYP"]=="bool" || pars["RETURNTYP"]=="long long" || pars["RETURNTYP"]=="long"
-					|| pars["RETURNTYP"]=="unsigned int" || pars["RETURNTYP"]=="unsigned short" || pars["RETURNTYP"]=="string"
+			else if(pars["RETURNTYP"]=="int" || pars["RETURNTYP"]=="short" || pars["RETURNTYP"]=="long long" || pars["RETURNTYP"]=="long"
+					|| pars["RETURNTYP"]=="unsigned int" || pars["RETURNTYP"]=="unsigned short"
 					|| pars["RETURNTYP"]=="unsigned long long" || pars["RETURNTYP"]=="unsigned long"
 					|| pars["RETURNTYP"]=="char" || pars["RETURNTYP"]=="unsigned char")
 			{
 				ws_funcs.append(pars["RETURNTYP"]+" _retval;\n");
 				ws_funcs.append("_retval = _obj."+me_n+"("+args+");\n");
-				ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+CastUtil::lexical_cast<std::string>(_retval)+\"</tns:"+pars["RETURN"]+">\";\n");
+				ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+CastUtil::fromNumber(_retval)+\"</tns:"+pars["RETURN"]+">\";\n");
+			}
+			else if(pars["RETURNTYP"]=="float" || pars["RETURNTYP"]=="double")
+			{
+				ws_funcs.append(pars["RETURNTYP"]+" _retval;\n");
+				ws_funcs.append("_retval = _obj."+me_n+"("+args+");\n");
+				ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+CastUtil::fromDouble(_retval)+\"</tns:"+pars["RETURN"]+">\";\n");
+			}
+			else if(pars["RETURNTYP"]=="bool")
+			{
+				ws_funcs.append(pars["RETURNTYP"]+" _retval;\n");
+				ws_funcs.append("_retval = _obj."+me_n+"("+args+");\n");
+				ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+CastUtil::fromBool(_retval)+\"</tns:"+pars["RETURN"]+">\";\n");
+			}
+			else if(pars["RETURNTYP"]=="string")
+			{
+				ws_funcs.append(pars["RETURNTYP"]+" _retval;\n");
+				ws_funcs.append("_retval = _obj."+me_n+"("+args+");\n");
+				ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+_retval+\"</tns:"+pars["RETURN"]+">\";\n");
 			}
 			else if(pars["RETURNTYP"]!="")
 			{
-				std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(pars["RETURNTYP"]));
+				std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(pars["RETURNTYP"]));
 				ws_funcs.append(pars["RETURNTYP"]+" _retval;\n");
 				ws_funcs.append("_retval = _obj."+me_n+"("+args+");\n");
 				if(pars["RETURNTYP"].find("vector<")!=std::string::npos)
@@ -618,13 +635,28 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 					StringUtil::replaceFirst(vecn,"vector<"," ");
 					StringUtil::replaceFirst(vecn,">"," ");
 					StringUtil::trim(vecn);
-					if(vecn=="int" || vecn=="short" || vecn=="float" || vecn=="double" || vecn=="bool" || vecn=="long long" || vecn=="long"
-							|| vecn=="string" || vecn=="unsigned int" || vecn=="unsigned short"
+					if(vecn=="int" || vecn=="short" || vecn=="long long" || vecn=="long"
+							|| vecn=="unsigned int" || vecn=="unsigned short"
 							|| vecn=="unsigned long long" || vecn=="unsigned long"
 							|| vecn=="char" || vecn=="unsigned char")
 					{
 						ws_funcs.append("for(int i=0;i<_retval.size();i++)");
-						ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+CastUtil::lexical_cast<std::string>(_retval.at(i))+\"</tns:"+pars["RETURN"]+">\";\n");
+						ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+CastUtil::fromNumber(_retval.at(i))+\"</tns:"+pars["RETURN"]+">\";\n");
+					}
+					else if(vecn=="short" || vecn=="float")
+					{
+						ws_funcs.append("for(int i=0;i<_retval.size();i++)");
+						ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+CastUtil::fromDouble(_retval.at(i))+\"</tns:"+pars["RETURN"]+">\";\n");
+					}
+					else if(vecn=="bool")
+					{
+						ws_funcs.append("for(int i=0;i<_retval.size();i++)");
+						ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+CastUtil::fromBool(_retval.at(i))+\"</tns:"+pars["RETURN"]+">\";\n");
+					}
+					else if(vecn=="string")
+					{
+						ws_funcs.append("for(int i=0;i<_retval.size();i++)");
+						ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+_retval.at(i)+\"</tns:"+pars["RETURN"]+">\";\n");
 					}
 					else
 					{

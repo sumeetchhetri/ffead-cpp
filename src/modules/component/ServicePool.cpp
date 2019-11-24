@@ -29,7 +29,7 @@ ServicePool::ServicePool()
 }
 
 ServicePool::~ServicePool() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 ServicePool* ServicePool::getInstance()
@@ -48,12 +48,12 @@ std::string ServicePool::registerService(const std::string& name, const Service&
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
 
-	std::string yr = CastUtil::lexical_cast<std::string>(timeinfo->tm_year);
-	std::string mo = CastUtil::lexical_cast<std::string>(timeinfo->tm_mon);
-	std::string da = CastUtil::lexical_cast<std::string>(timeinfo->tm_mday);
-	std::string hr = CastUtil::lexical_cast<std::string>(timeinfo->tm_hour);
-	std::string mm = CastUtil::lexical_cast<std::string>(timeinfo->tm_min);
-	std::string ms = CastUtil::lexical_cast<std::string>(((en.tv_sec * 1000000000) + en.tv_nsec)/1000000);
+	std::string yr = CastUtil::fromNumber(timeinfo->tm_year);
+	std::string mo = CastUtil::fromNumber(timeinfo->tm_mon);
+	std::string da = CastUtil::fromNumber(timeinfo->tm_mday);
+	std::string hr = CastUtil::fromNumber(timeinfo->tm_hour);
+	std::string mm = CastUtil::fromNumber(timeinfo->tm_min);
+	std::string ms = CastUtil::fromNumber(((en.tv_sec * 1000000000) + en.tv_nsec)/1000000);
 
 	std::string regName = (name+yr+mo+da+hr+mm+ms);
 	servicePool[regName] = service;

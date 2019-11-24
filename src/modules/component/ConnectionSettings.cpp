@@ -23,12 +23,12 @@
 #include "ConnectionSettings.h"
 
 ConnectionSettings::ConnectionSettings() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 ConnectionSettings::~ConnectionSettings() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 ConnectionSettings::ConnectionSettings(std::string mod,std::string src,std::string usn,std::string pas,std::string add) {

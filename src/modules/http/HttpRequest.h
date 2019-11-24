@@ -209,7 +209,7 @@ public:
     void addContent(const MultipartContent& content);
     bool isNonBinary(const std::string& mimeType);
     std::string getParamValue(const std::string&);
-    HTTPResponseStatus getRequestParseStatus() const;
+    HTTPResponseStatus getRequestParseStatus();
     std::vector<MultipartContent> getMultiPartFileList(const std::string& name);
 	std::string getPassword() const;
 	std::string getUserName() const;

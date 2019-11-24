@@ -99,7 +99,7 @@ bool Client::connection(const std::string& host, const int& port)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    std::string sport = CastUtil::lexical_cast<std::string>(port);
+    std::string sport = CastUtil::fromNumber(port);
     if ((rv = getaddrinfo(host.c_str(), sport.c_str(), &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return false;
@@ -211,7 +211,7 @@ std::string Client::getTextData(const std::string& hdrdelm, const std::string& c
 			StringUtil::trim(cntle);
 			try
 			{
-				cntlen = CastUtil::lexical_cast<int>(cntle);
+				cntlen = CastUtil::toInt(cntle);
 			}
 			catch(const std::exception& e)
 			{

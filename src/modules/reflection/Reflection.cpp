@@ -34,7 +34,7 @@ Reflection::Reflection() {
 }
 
 Reflection::~Reflection() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void Reflection::addMarker(const Marker& m) {
@@ -1132,7 +1132,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 				if(pubdecl.find("~")!=std::string::npos)
 				{
 					std::string mmn = app+ "_" + classStructure.getTreatedClassName(true) + "_m" +
-							CastUtil::lexical_cast<std::string>(methcounter++);
+							CastUtil::fromNumber(methcounter++);
 					methods += "\nvoid " +mmn+"(void* instance)\n{";
 					methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n\t";
 					methods += "delete _obj;";
@@ -1266,8 +1266,8 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						/*else if(methpm.at(j)!="")
 						{
 							refDef += ("argu.push_back(\""+methpm.at(j)+"\");\n");
-							valsd += "\t\t"+(methpm.at(j) + " *_" + CastUtil::lexical_cast<std::string>(j-1)+" = ("+methpm.at(j)+"*)values.at("+CastUtil::lexical_cast<std::string>(j-2)+");");
-							valsa += "*_" + CastUtil::lexical_cast<std::string>(j-1);
+							valsd += "\t\t"+(methpm.at(j) + " *_" + CastUtil::fromNumber(j-1)+" = ("+methpm.at(j)+"*)values.at("+CastUtil::fromNumber(j-2)+");");
+							valsa += "*_" + CastUtil::fromNumber(j-1);
 							if(methpm.at(0)!=classStructure.getFullyQualifiedClassName())
 							{
 								typedefs += methpm.at(j);
@@ -1348,27 +1348,27 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						{
 							StringUtil::replaceLast(mdecl,"*","");
 							std::string fqcn = getFullyQualifiedClassName(mdecl, classStructure.namespaces);
-							valsd += "\t\t"+(fqcn  + " *_" + CastUtil::lexical_cast<std::string>(j)+" = ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");\n");
+							valsd += "\t\t"+(fqcn  + " *_" + CastUtil::fromNumber(j)+" = ("+fqcn+"*)values.at("+CastUtil::fromNumber(j)+");\n");
 							StringUtil::replaceAll(mdecl,"*","");
 						}
 						else if(type12=="&")
 						{
 							StringUtil::replaceLast(mdecl,"&","");
 							std::string fqcn = getFullyQualifiedClassName(mdecl, classStructure.namespaces);
-							valsd += "\t\t"+(fqcn + " *_" + CastUtil::lexical_cast<std::string>(j)+" = ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");\n");
+							valsd += "\t\t"+(fqcn + " *_" + CastUtil::fromNumber(j)+" = ("+fqcn+"*)values.at("+CastUtil::fromNumber(j)+");\n");
 							StringUtil::replaceAll(mdecl,"&","");
 						}
 						else
 						{
 							std::string fqcn = getFullyQualifiedClassName(mdecl, classStructure.namespaces);
-							valsd += "\t\t"+(fqcn + " *_" + CastUtil::lexical_cast<std::string>(j)+" = ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");\n");
+							valsd += "\t\t"+(fqcn + " *_" + CastUtil::fromNumber(j)+" = ("+fqcn+"*)values.at("+CastUtil::fromNumber(j)+");\n");
 						}
 						if(type12=="*")
-							valsa += "_" + CastUtil::lexical_cast<std::string>(j);
+							valsa += "_" + CastUtil::fromNumber(j);
 						else
-							valsa += "*_" + CastUtil::lexical_cast<std::string>(j);
+							valsa += "*_" + CastUtil::fromNumber(j);
 						std::string fqcn = getTreatedFullyQualifiedClassName(mdecl, classStructure.namespaces);
-						valsades += "\t\tif(cleanvals)delete ("+fqcn+"*)values.at("+CastUtil::lexical_cast<std::string>(j)+");\n";
+						valsades += "\t\tif(cleanvals)delete ("+fqcn+"*)values.at("+CastUtil::fromNumber(j)+");\n";
 						//if(methpm.at(0)!=classStructure.getFullyQualifiedClassName())
 						//{
 							typedefs += mdecl;
@@ -1418,7 +1418,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find("<=")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " + omn + "(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1441,7 +1441,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find(">=")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1464,7 +1464,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find("<")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1487,7 +1487,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find(">")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1510,7 +1510,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find("==")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1533,7 +1533,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find("!=")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1556,7 +1556,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find("!")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1579,7 +1579,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find("+")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1602,7 +1602,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find("-")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1625,7 +1625,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find("/")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1648,7 +1648,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else if(meth.find("*")!=std::string::npos)
 						{
 							std::string omn = app+ "_" + classStructure.getTreatedClassName(true) + "_o" +
-									CastUtil::lexical_cast<std::string>(opcounter++);
+									CastUtil::fromNumber(opcounter++);
 							opers += "\nvoid* " +omn+"(void* instance,vals values,bool cleanvals)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n";
 							if(methpm.at(0)=="void")
 							{
@@ -1714,7 +1714,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							ms.name =methpm.at(1);
 							typedefs += (") ("+typdefName+");\n");
 							std::string mmn = app+ "_" + classStructure.getTreatedClassName(true) + "_m" +
-										CastUtil::lexical_cast<std::string>(methcounter++);
+										CastUtil::fromNumber(methcounter++);
 							methods += "\nvoid* " +mmn+"(void* instance,vals values,bool cleanvals)\n{\n\t";
 							if(!methstat)
 							{
@@ -1776,7 +1776,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						else
 						{
 							std::string mmn = app+ "_" + classStructure.getTreatedClassName(true) + "_m" +
-									CastUtil::lexical_cast<std::string>(methcounter++);
+									CastUtil::fromNumber(methcounter++);
 							typedefs += (") ("+typdefName+");\n");
 							methods += "\nvoid* " +mmn+"(vals values,bool cleanvals)\n{";
 							methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_retVal = NULL;\n";
@@ -1884,7 +1884,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						tms.name = fldp.at(j);
 
 						std::string fmn = app+ "_" + classStructure.getTreatedClassName(true) + "_f" +
-								CastUtil::lexical_cast<std::string>(fldcounter++);
+								CastUtil::fromNumber(fldcounter++);
 						methods += "\n"+fqcn+" " +fmn+"(void* instance)\n{\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n\treturn _obj->"+fldp.at(j)+";\n}\n";
 						refDef += ("if(f.getFieldName()!=\"\")\n{f.setRefName(\""+fmn+"\");\n\nci.addField(f);\n}\n");
 
@@ -2270,7 +2270,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 		if(!ctorisp)
 		{
 			std::string mmn = app+ "_" + classStructure.getTreatedClassName(true) + "_m" +
-					CastUtil::lexical_cast<std::string>(methcounter++);
+					CastUtil::fromNumber(methcounter++);
 			refDef += ("ctor.setName(\""+classStructure.getTreatedClassName(true)+"\");\n");
 			refDef += ("argu.clear();\n");
 			methods += "\nvoid* " +mmn+"(vals values,bool cleanvals)\n{";
@@ -2291,7 +2291,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 		if(!ddtorisp)
 		{
 			std::string mmn = app+ "_" + classStructure.getTreatedClassName(true) + "_m" +
-					CastUtil::lexical_cast<std::string>(methcounter++);
+					CastUtil::fromNumber(methcounter++);
 			methods += "\nvoid " +mmn+"(void* instance)\n{";
 			methods += "\n\t"+classStructure.getFullyQualifiedClassName()+" *_obj = ("+classStructure.getFullyQualifiedClassName()+"*)instance;\n\t";
 			methods += "delete _obj;";
@@ -2766,7 +2766,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 						if(isPrimitiveDataType(fldp.at(0)))
 						{
 							std::string typ = getTypeName(fldp.at(0));
-							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(typ));
+							std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(typ));
 							if(!ptr)
 							{
 								methods += typ + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
@@ -2789,7 +2789,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 						}
 						else if(fldp.at(0)=="Date")
 						{
-							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fldp.at(0)));
+							std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(fldp.at(0)));
 							if(!ptr)
 							{
 								methods += fldp.at(0) + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
@@ -2816,7 +2816,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 						}
 						else if(fldp.at(0)=="BinaryData")
 						{
-							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fldp.at(0)));
+							std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(fldp.at(0)));
 							if(!ptr)
 							{
 								methods += fldp.at(0) + " _objProp" + fldp.at(j) + " = " + "__obj->"+fldp.at(j) + ";\n";
@@ -2897,7 +2897,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 								fqcn += " >";
 							}
 							contType += getFullyQualifiedClassName(stlcnt, classStructure.namespaces) + ",";
-							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
+							std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(fqcn));
 
 							if(!ptr)
 							{
@@ -2925,7 +2925,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 						else
 						{
 							std::string fqcn = getFullyQualifiedClassName(fldp.at(0), classStructure.namespaces);
-							std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
+							std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(fqcn));
 							if(!ptr)
 							{
 								//methods += (fqcn+" __temp_obj_ser"+fldp.at(j)+" = __obj->"+fldp.at(j)+";\n");
@@ -3058,7 +3058,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									if(isPrimitiveDataType(argpm.at(0)))
 									{
 										argpm.at(0) = getTypeName(argpm.at(0));
-										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(argpm.at(0)));
+										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(argpm.at(0)));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
 													 +argpm.at(0)+"* _val = ("+argpm.at(0)+"*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \""
@@ -3070,7 +3070,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									}
 									else if(argpm.at(0)=="Date")
 									{
-										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(argpm.at(0)));
+										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(argpm.at(0)));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
 													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");\n"
@@ -3084,7 +3084,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									}
 									else if(argpm.at(0)=="BinaryData")
 									{
-										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(argpm.at(0)));
+										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(argpm.at(0)));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
 													+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");"
@@ -3149,7 +3149,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 
 										std::string fqcn = contType + getFullyQualifiedClassName(stlcnt, classStructure.namespaces) + " >";
 										contType += getFullyQualifiedClassName(stlcnt, classStructure.namespaces) + ",";
-										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
+										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(fqcn));
 
 										if(!ptr)
 										{
@@ -3169,7 +3169,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									else
 									{
 										std::string fqcn = getFullyQualifiedClassName(argpm.at(0), classStructure.namespaces);
-										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
+										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(fqcn));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))"
 													 + "\n__obj->"+methpm.at(1)+"(SerializeBase::unSerializeKnown<"+fqcn+" >"
@@ -3185,7 +3185,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									if(isPrimitiveDataType(methpm.at(0)))
 									{
 										methpm.at(0) = getTypeName(methpm.at(0));
-										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(methpm.at(0)));
+										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(methpm.at(0)));
 										if(!ptr)
 										{
 											methods += methpm.at(0) + " _objProp" + fldnames.at(k+1) + " = " + "__obj->"+methpm.at(1) + "();\n";
@@ -3201,7 +3201,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									}
 									else if(methpm.at(0)=="Date")
 									{
-										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(methpm.at(0)));
+										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(methpm.at(0)));
 										if(!ptr)
 										{
 											methods += methpm.at(0) + " _objProp" + fldnames.at(k+1) + " = " + "__obj->"+methpm.at(1) + "();\n";
@@ -3219,7 +3219,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									}
 									else if(methpm.at(0)=="BinaryData")
 									{
-										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(methpm.at(0)));
+										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(methpm.at(0)));
 										if(!ptr)
 										{
 											methods += methpm.at(0) + " _objProp" + fldnames.at(k+1) + " = " + "__obj->"+methpm.at(1) + "();\n";
@@ -3295,7 +3295,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 										}
 										std::string stlcontwosp = methpm.at(0);
 										StringUtil::trim(stlcontwosp);
-										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
+										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(fqcn));
 
 										if(!ptr)
 										{
@@ -3315,7 +3315,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 									else
 									{
 										std::string fqcn = getFullyQualifiedClassName(methpm.at(0), classStructure.namespaces);
-										std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
+										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(fqcn));
 										if(!ptr)
 										{
 											methods += (methpm.at(0)+" __temp_obj_ser"+fldnames.at(k+1)+" = __obj->"+methpm.at(1)+"();\n");

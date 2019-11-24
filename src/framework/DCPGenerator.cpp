@@ -24,12 +24,12 @@
 
 
 DCPGenerator::DCPGenerator() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 DCPGenerator::~DCPGenerator() {
-	// TODO Auto-generated destructor stub
+	
 }
 std::string DCPGenerator::generateDCPAll()
 {

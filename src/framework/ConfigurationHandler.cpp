@@ -23,12 +23,12 @@
 #include "ConfigurationHandler.h"
 
 ConfigurationHandler::ConfigurationHandler() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 ConfigurationHandler::~ConfigurationHandler() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void ConfigurationHandler::normalizeUrl(const std::string& appName, std::string& url) {
@@ -146,7 +146,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			{
 				try
 				{
-					ConfigurationData::getInstance()->securityProperties.client_auth = CastUtil::lexical_cast<int>(tempcl);
+					ConfigurationData::getInstance()->securityProperties.client_auth = CastUtil::toInt(tempcl);
 				}
 				catch(const std::exception& e)
 				{
@@ -157,7 +157,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			ConfigurationData::getInstance()->securityProperties.isDHParams = true;
 			try
 			{
-				ConfigurationData::getInstance()->securityProperties.isDHParams = CastUtil::lexical_cast<bool>(sslsec["ISDH_PARAMS"]);
+				ConfigurationData::getInstance()->securityProperties.isDHParams = CastUtil::toBool(sslsec["ISDH_PARAMS"]);
 			}
 			catch(const std::exception& e)
 			{
@@ -166,7 +166,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			ConfigurationData::getInstance()->securityProperties.alpnEnabled = true;
 			try
 			{
-				ConfigurationData::getInstance()->securityProperties.alpnEnabled = CastUtil::lexical_cast<bool>(sslsec["ALPN_ENABLED"]);
+				ConfigurationData::getInstance()->securityProperties.alpnEnabled = CastUtil::toBool(sslsec["ALPN_ENABLED"]);
 				if(alpnprotolist!="") {
 					logger << "ALPN protocols list = " << alpnprotolist << std::endl;
 					ConfigurationData::getInstance()->securityProperties.alpnProtoList = StringUtil::splitAndReturn<std::vector<std::string> >(alpnprotolist, ",");
@@ -205,7 +205,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		StringUtil::replaceAll(name,"/","");
 		rundyncontent += "cp -Rf $FFEAD_CPP_PATH/public/* $FFEAD_CPP_PATH/web/"+name+"/public/\n";
 		ConfigurationData::getInstance()->servingContexts[name] = true;
-		CommonUtils::addContext(name);
+		std::string scappName = name;
+		StringUtil::replaceAll(scappName, "-", "_");
+		RegexUtil::replace(scappName, "[^a-zA-Z0-9_]+", "");
+		ConfigurationData::getInstance()->servingContextAppNames[name] = scappName;
+		CommonUtils::addContext(scappName);
 
 		std::vector<std::string> adcps;
 		CommonUtils::listFiles(adcps, dcppath, ".dcp");
@@ -590,7 +594,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									if(restfunction.statusCode!="")
 									{
 										try {
-											CastUtil::lexical_cast<int>(restfunction.statusCode);
+											CastUtil::toInt(restfunction.statusCode);
 										} catch(const std::exception& e) {
 											logger << "Rest: invalid response statusCode specified, defaulting to 200.." << std::endl;
 											restfunction.statusCode = "200";
@@ -757,7 +761,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 										normalizeUrl(name, url);
 										securityObject.loginUrl = url;
 										try {
-											securityObject.sessTimeout = CastUtil::lexical_cast<long>(sessionTimeoutV);
+											securityObject.sessTimeout = CastUtil::toLong(sessionTimeoutV);
 										} catch(const std::exception& e) {
 											securityObject.sessTimeout = 3600;
 											logger << ("Security: Invalid session timeout value defined, defaulting to 1hour/3600sec") << std::endl;
@@ -863,7 +867,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						else if(cntrls.at(cntn).getTagName()=="allow-credentials")
 						{
 							try {
-								allwdCredentials = CastUtil::lexical_cast<bool>(cntrls.at(cntn).getText());
+								allwdCredentials = CastUtil::toBool(cntrls.at(cntn).getText());
 							} catch(const std::exception& e) {}
 						}
 						else if(cntrls.at(cntn).getTagName()=="expose-headers")
@@ -873,7 +877,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 						else if(cntrls.at(cntn).getTagName()=="max-age")
 						{
 							try {
-								maxAge = CastUtil::lexical_cast<long>(cntrls.at(cntn).getText());
+								maxAge = CastUtil::toLong(cntrls.at(cntn).getText());
 							} catch(const std::exception& e) {}
 						}
 					}
@@ -882,9 +886,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					logger << ("CORS Configuartion allow-origins => " + ConfigurationData::getInstance()->corsConfig.allwdOrigins
 							+ " , allow-methods => " + ConfigurationData::getInstance()->corsConfig.allwdMethods
 							+ " , allow-headers => " + ConfigurationData::getInstance()->corsConfig.allwdHeaders
-							+ " , allow-credentials => " + CastUtil::lexical_cast<std::string>(ConfigurationData::getInstance()->corsConfig.allwdCredentials)
+							+ " , allow-credentials => " + CastUtil::fromBool(ConfigurationData::getInstance()->corsConfig.allwdCredentials)
 							+ " , expose-headers => " + ConfigurationData::getInstance()->corsConfig.exposedHeaders
-							+ " , max-age => " + CastUtil::lexical_cast<std::string>(ConfigurationData::getInstance()->corsConfig.maxAge)) << std::endl;
+							+ " , max-age => " + CastUtil::fromNumber(ConfigurationData::getInstance()->corsConfig.maxAge)) << std::endl;
 				}
 #ifdef INC_JOBS
 				else if(eles.at(apps).getTagName()=="job-procs")
@@ -937,14 +941,14 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					{
 						if(elese.at(appse).getTagName()=="event")
 						{
-							nsfns += "\n\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<std::string>(appse)+"\" : function(response){" + elese.at(appse).getAttribute("cb") + "},";
+							nsfns += "\n\"_fview_cntxt_global_js_callback"+CastUtil::fromNumber(appse)+"\" : function(response){" + elese.at(appse).getAttribute("cb") + "},";
 							js += "\ndocument.getElementById('"+elese.at(appse).getAttribute("eid")+"').";
 							js += elese.at(appse).getAttribute("type") + " = function(){";
 							js += eles.at(apps).getAttribute("class")+"."+elese.at(appse).getAttribute("func")+"(";
 							std::string args = elese.at(appse).getAttribute("args");
 							if(args!="")
 								args += ",";
-							js += args + "\"_fview_cntxt_global_js_callback"+CastUtil::lexical_cast<std::string>(appse)+"\",\"/"+name+"/"+fvw+"\",_fview_namespace);}";
+							js += args + "\"_fview_cntxt_global_js_callback"+CastUtil::fromNumber(appse)+"\",\"/"+name+"/"+fvw+"\",_fview_namespace);}";
 						}
 						else if(elese.at(appse).getTagName()=="form")
 						{
@@ -1297,7 +1301,7 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 										else if(nodes.at(ncc).getTagName()=="port")
 										{
 											try {
-												cnode.port = CastUtil::lexical_cast<int>(nodes.at(ncc).getText());
+												cnode.port = CastUtil::toInt(nodes.at(ncc).getText());
 											} catch(const std::exception& e) {
 
 											}
@@ -1305,7 +1309,7 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 										else if(nodes.at(ncc).getTagName()=="readTimeout")
 										{
 											try {
-												cnode.readTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
+												cnode.readTimeout = CastUtil::toFloat(nodes.at(ncc).getText());
 											} catch(const std::exception& e) {
 
 											}
@@ -1313,7 +1317,7 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 										else if(nodes.at(ncc).getTagName()=="connectionTimeout")
 										{
 											try {
-												cnode.connectionTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
+												cnode.connectionTimeout = CastUtil::toFloat(nodes.at(ncc).getText());
 											} catch(const std::exception& e) {
 
 											}
@@ -1335,7 +1339,7 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 								if(confs.at(cns).getText()!="")
 								{
 									try {
-										psize = CastUtil::lexical_cast<int>(confs.at(cns).getText());
+										psize = CastUtil::toInt(confs.at(cns).getText());
 									} catch(const std::exception& e) {
 
 									}
@@ -1477,7 +1481,7 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 								else if(nodes.at(ncc).getTagName()=="port")
 								{
 									try {
-										cnode.port = CastUtil::lexical_cast<int>(nodes.at(ncc).getText());
+										cnode.port = CastUtil::toInt(nodes.at(ncc).getText());
 									} catch(const std::exception& e) {
 
 									}
@@ -1485,7 +1489,7 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 								else if(nodes.at(ncc).getTagName()=="readTimeout")
 								{
 									try {
-										cnode.readTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
+										cnode.readTimeout = CastUtil::toFloat(nodes.at(ncc).getText());
 									} catch(const std::exception& e) {
 
 									}
@@ -1493,7 +1497,7 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 								else if(nodes.at(ncc).getTagName()=="connectionTimeout")
 								{
 									try {
-										cnode.connectionTimeout = CastUtil::lexical_cast<float>(nodes.at(ncc).getText());
+										cnode.connectionTimeout = CastUtil::toFloat(nodes.at(ncc).getText());
 									} catch(const std::exception& e) {
 
 									}
@@ -1507,7 +1511,7 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 						if(confs.at(cns).getText()!="")
 						{
 							try {
-								psize = CastUtil::lexical_cast<int>(confs.at(cns).getText());
+								psize = CastUtil::toInt(confs.at(cns).getText());
 							} catch(const std::exception& e) {
 
 							}
@@ -1612,7 +1616,7 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 				normalizeUrl(appName, url);
 				securityObject.loginUrl = url;
 				try {
-					securityObject.sessTimeout = CastUtil::lexical_cast<long>(sessionTimeoutV);
+					securityObject.sessTimeout = CastUtil::toLong(sessionTimeoutV);
 				} catch(const std::exception& e) {
 					securityObject.sessTimeout = 3600;
 					logger << ("Security: Invalid session timeout value defined, defaulting to 1hour/3600sec") << std::endl;
@@ -2026,7 +2030,7 @@ void ConfigurationHandler::handleDataSourceEntities(const std::string& appName, 
 							dsempg.idgendbEntityName = colmrk.getAttributeValue("dbEntityName");
 							dsempg.idgentype = colmrk.getAttributeValue("type");
 							dsempg.idgenhiValueColumn = colmrk.getAttributeValue("hiValueColumn");
-							dsempg.idgenlowValue = CastUtil::lexical_cast<int>(colmrk.getAttributeValue("lowValue"));
+							dsempg.idgenlowValue = CastUtil::toInt(colmrk.getAttributeValue("lowValue"));
 							dsempg.idgenentityColumn = colmrk.getAttributeValue("entityColumn");
 							dsempg.idgencolumnName = colmrk.getAttributeValue("columnName");
 							if(dsempg.idgencolumnName=="")dsempg.idgencolumnName = csaps.at(var).name;
@@ -2294,7 +2298,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 			if(restfunction.statusCode!="")
 			{
 				try {
-					CastUtil::lexical_cast<int>(restfunction.statusCode);
+					CastUtil::toInt(restfunction.statusCode);
 				} catch(const std::exception& e) {
 					logger << "Rest: invalid response statusCode specified, defaulting to 200.." << std::endl;
 					restfunction.statusCode = "200";

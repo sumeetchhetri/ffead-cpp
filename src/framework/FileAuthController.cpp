@@ -13,7 +13,7 @@ FileAuthController::FileAuthController(const std::string& filename, const std::s
 }
 
 FileAuthController::~FileAuthController() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string FileAuthController::treat_password(const std::string& password)

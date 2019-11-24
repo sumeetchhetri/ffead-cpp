@@ -40,7 +40,7 @@ const std::map<uint16_t, uint32_t>& Http2SettingsFrame::getSettings() const {
 }
 
 Http2SettingsFrame::~Http2SettingsFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2SettingsFrame::getFrameData() {

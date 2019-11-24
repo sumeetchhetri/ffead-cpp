@@ -46,7 +46,7 @@ bool Http11WebSocketHandler::writeData(const WebSocketData& wsdata) {
 }
 
 Http11WebSocketHandler::~Http11WebSocketHandler() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http11WebSocketHandler::getProtocol(void* context) {

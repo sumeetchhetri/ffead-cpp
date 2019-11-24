@@ -171,7 +171,7 @@ std::string Message::toXml() const
 }
 
 Message::~Message() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 Destination Message::getDestination() const

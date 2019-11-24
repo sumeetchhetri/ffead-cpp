@@ -44,7 +44,7 @@ DistoCacheClientUtils::DistoCacheClientUtils(const std::string& host, const int&
 	if(!connected)
 	{
 		delete client;
-		throw std::runtime_error("Error connecting to " + host + ":" + CastUtil::lexical_cast<std::string>(port));
+		throw std::runtime_error("Error connecting to " + host + ":" + CastUtil::fromNumber(port));
 	}
 	inUse = false;
 }
@@ -183,7 +183,7 @@ std::string DistoCacheClientUtils::getMapEntryValueByPosition(const std::string&
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("getbypos mapentry "+cacheKey+" "+CastUtil::lexical_cast<std::string>(position));
+	object->addPacket("getbypos mapentry "+cacheKey+" "+CastUtil::fromNumber(position));
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
 	std::string resp = client->getBinaryData(4, false);
@@ -199,7 +199,7 @@ void DistoCacheClientUtils::setMapEntryValueByPosition(const std::string& cacheK
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("set mapentry "+cacheKey + " " + CastUtil::lexical_cast<std::string>(position));
+	object->addPacket("set mapentry "+cacheKey + " " + CastUtil::fromNumber(position));
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
@@ -215,7 +215,7 @@ void DistoCacheClientUtils::setCollectionEntryAt(const std::string& cacheKey, co
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("set collentry "+cacheKey + " " + CastUtil::lexical_cast<std::string>(position));
+	object->addPacket("set collentry "+cacheKey + " " + CastUtil::fromNumber(position));
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
@@ -247,7 +247,7 @@ void DistoCacheClientUtils::removeCollectionEntryAt(const std::string& cacheKey,
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("remove collentry "+cacheKey+" "+CastUtil::lexical_cast<std::string>(position));
+	object->addPacket("remove collentry "+cacheKey+" "+CastUtil::fromNumber(position));
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
 	std::string resp = client->getBinaryData(4, false);
@@ -262,7 +262,7 @@ std::string DistoCacheClientUtils::getCollectionEntryAt(const std::string& cache
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("get collentry "+cacheKey+" "+CastUtil::lexical_cast<std::string>(position));
+	object->addPacket("get collentry "+cacheKey+" "+CastUtil::fromNumber(position));
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
 	std::string resp = client->getBinaryData(4, false);
@@ -317,7 +317,7 @@ bool DistoCacheClientUtils::isEmpty(const std::string& cacheKey) {
 	{
 		try
 		{
-			isEmpty = CastUtil::lexical_cast<bool>(object->getPackets().at(1)->getValue());
+			isEmpty = CastUtil::toBool(object->getPackets().at(1)->getValue());
 		} catch(const std::exception& e) {
 			isEmpty = true;
 		}
@@ -345,7 +345,7 @@ void DistoCacheClientUtils::insert(const std::string& cacheKey, const std::strin
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("insert collentry "+cacheKey+" "+CastUtil::lexical_cast<std::string>(position));
+	object->addPacket("insert collentry "+cacheKey+" "+CastUtil::fromNumber(position));
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));
@@ -361,7 +361,7 @@ void DistoCacheClientUtils::insert(const std::string& cacheKey, const std::strin
 	AMEFDecoder decoder;
 
 	AMEFObject* object = new AMEFObject;
-	object->addPacket("insert collentry "+cacheKey+" "+CastUtil::lexical_cast<std::string>(position)+" "+CastUtil::lexical_cast<std::string>(repetition));
+	object->addPacket("insert collentry "+cacheKey+" "+CastUtil::fromNumber(position)+" "+CastUtil::fromNumber(repetition));
 	object->addPacket(value);
 	lock.lock();
 	client->sendData(encoder.encodeB(object));

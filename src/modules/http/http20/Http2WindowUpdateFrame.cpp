@@ -30,7 +30,7 @@ int Http2WindowUpdateFrame::getWindowSizeIncrement() const {
 }
 
 Http2WindowUpdateFrame::~Http2WindowUpdateFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2WindowUpdateFrame::getFrameData() {

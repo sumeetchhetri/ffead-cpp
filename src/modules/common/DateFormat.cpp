@@ -38,7 +38,7 @@ DateFormat::DateFormat(const std::string& format)
 
 std::string DateFormat::appendZero(const int& value)
 {
-	std::string te = CastUtil::lexical_cast<std::string>(value);
+	std::string te = CastUtil::fromNumber(value);
 	if(te.length()==1)
 		te = "0" + te;
 	return te;
@@ -225,13 +225,13 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			if(mmm!="")
 			{
-				date = new Date(CastUtil::lexical_cast<int>(yyyy),
-						mmm, CastUtil::lexical_cast<int>(dd));
+				date = new Date(CastUtil::toInt(yyyy),
+						mmm, CastUtil::toInt(dd));
 			}
 			else if(mm!="")
 			{
-				date = new Date(CastUtil::lexical_cast<int>(yyyy),
-						CastUtil::lexical_cast<int>(mm), CastUtil::lexical_cast<int>(dd));
+				date = new Date(CastUtil::toInt(yyyy),
+						CastUtil::toInt(mm), CastUtil::toInt(dd));
 			}
 			else
 			{
@@ -242,13 +242,13 @@ Date* DateFormat::parse(std::string strdate)
 		{
 			if(mmm!="")
 			{
-				date = new Date(CastUtil::lexical_cast<int>(yy),
-						mmm, CastUtil::lexical_cast<int>(dd));
+				date = new Date(CastUtil::toInt(yy),
+						mmm, CastUtil::toInt(dd));
 			}
 			else if(mm!="")
 			{
-				date = new Date(CastUtil::lexical_cast<int>(yy),
-						CastUtil::lexical_cast<int>(mm), CastUtil::lexical_cast<int>(dd));
+				date = new Date(CastUtil::toInt(yy),
+						CastUtil::toInt(mm), CastUtil::toInt(dd));
 			}
 			else
 			{
@@ -262,7 +262,7 @@ Date* DateFormat::parse(std::string strdate)
 		if(tzv!="")
 		{
 			try {
-				date->setTimeZoneOffset(CastUtil::lexical_cast<float>(tzv));
+				date->setTimeZoneOffset(CastUtil::toFloat(tzv));
 			} catch(const std::exception& e) {
 				throw std::runtime_error("Invalid Timezone specified");
 			}
@@ -278,13 +278,13 @@ Date* DateFormat::parse(std::string strdate)
 		}
 	}
 	if(hh=="")
-		hh = CastUtil::lexical_cast<std::string>(date->getHours());
+		hh = CastUtil::fromNumber(date->getHours());
 	if(mi=="")
-		mi = CastUtil::lexical_cast<std::string>(date->getMinutes());
+		mi = CastUtil::fromNumber(date->getMinutes());
 	if(ss=="")
-		ss = CastUtil::lexical_cast<std::string>(date->getSeconds());
-	date->setTime(CastUtil::lexical_cast<int>(hh),
-		CastUtil::lexical_cast<int>(mi), CastUtil::lexical_cast<int>(ss));
+		ss = CastUtil::fromNumber(date->getSeconds());
+	date->setTime(CastUtil::toInt(hh),
+		CastUtil::toInt(mi), CastUtil::toInt(ss));
 	return date;*/
 }
 

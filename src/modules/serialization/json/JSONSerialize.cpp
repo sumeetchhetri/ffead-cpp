@@ -39,18 +39,18 @@ std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& cla
 		case 1: return "\""+*(std::string*)t+"\"";
 		case 2: return "\""+std::string((char*)t)+"\"";
 		case 3: return "\""+std::string((char*)t)+"\"";
-		case 4: return "\""+CastUtil::lexical_cast<std::string>(*(int*)t)+"\"";
-		case 5: return "\""+CastUtil::lexical_cast<std::string>(*(unsigned int*)t)+"\"";
-		case 6: return "\""+CastUtil::lexical_cast<std::string>(*(short*)t)+"\"";
-		case 7: return "\""+CastUtil::lexical_cast<std::string>(*(unsigned short*)t)+"\"";
-		case 8: return "\""+CastUtil::lexical_cast<std::string>(*(long*)t)+"\"";
-		case 9: return "\""+CastUtil::lexical_cast<std::string>(*(unsigned long*)t)+"\"";
-		case 10: return "\""+CastUtil::lexical_cast<std::string>(*(long long*)t)+"\"";
-		case 11: return "\""+CastUtil::lexical_cast<std::string>(*(unsigned long long*)t)+"\"";
-		case 12: return "\""+CastUtil::lexical_cast<std::string>(*(float*)t)+"\"";
-		case 13: return "\""+CastUtil::lexical_cast<std::string>(*(double*)t)+"\"";
-		case 14: return "\""+CastUtil::lexical_cast<std::string>(*(long double*)t)+"\"";
-		case 15: return "\""+CastUtil::lexical_cast<std::string>(*(bool*)t)+"\"";
+		case 4: return "\""+CastUtil::fromNumber(*(int*)t)+"\"";
+		case 5: return "\""+CastUtil::fromNumber(*(unsigned int*)t)+"\"";
+		case 6: return "\""+CastUtil::fromNumber(*(short*)t)+"\"";
+		case 7: return "\""+CastUtil::fromNumber(*(unsigned short*)t)+"\"";
+		case 8: return "\""+CastUtil::fromNumber(*(long*)t)+"\"";
+		case 9: return "\""+CastUtil::fromNumber(*(unsigned long*)t)+"\"";
+		case 10: return "\""+CastUtil::fromNumber(*(long long*)t)+"\"";
+		case 11: return "\""+CastUtil::fromNumber(*(unsigned long long*)t)+"\"";
+		case 12: return "\""+CastUtil::fromFloat(*(float*)t)+"\"";
+		case 13: return "\""+CastUtil::fromDouble(*(double*)t)+"\"";
+		case 14: return "\""+CastUtil::fromLongdouble(*(long double*)t)+"\"";
+		case 15: return "\""+CastUtil::fromBool(*(bool*)t)+"\"";
 		case 16: {
 			DateFormat formt;
 			return "\""+formt.format(*(Date*)t)+"\"";
@@ -173,84 +173,84 @@ void JSONSerialize::addPrimitiveElementToContainer(void* _1, int serOpt, const i
 		}
 		case 4:
 		{
-			int retVal = CastUtil::lexical_cast<int>(ele->getValue());
+			int retVal = CastUtil::toInt(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 5:
 		{
-			unsigned int retVal = CastUtil::lexical_cast<unsigned int>(ele->getValue());
+			unsigned int retVal = CastUtil::toUInt(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 6:
 		{
-			short retVal = CastUtil::lexical_cast<short>(ele->getValue());
+			short retVal = CastUtil::toShort(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 7:
 		{
-			unsigned short retVal = CastUtil::lexical_cast<unsigned short>(ele->getValue());
+			unsigned short retVal = CastUtil::toUShort(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 8:
 		{
-			long retVal = CastUtil::lexical_cast<long>(ele->getValue());
+			long retVal = CastUtil::toLong(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 9:
 		{
-			unsigned long retVal = CastUtil::lexical_cast<unsigned long>(ele->getValue());
+			unsigned long retVal = CastUtil::toULong(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 10:
 		{
-			long long retVal = CastUtil::lexical_cast<long long>(ele->getValue());
+			long long retVal = CastUtil::toLonglong(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 11:
 		{
-			unsigned long long retVal = CastUtil::lexical_cast<unsigned long long>(ele->getValue());
+			unsigned long long retVal = CastUtil::toULonglong(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 12:
 		{
-			float retVal = CastUtil::lexical_cast<float>(ele->getValue());
+			float retVal = CastUtil::toFloat(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 13:
 		{
-			double retVal = CastUtil::lexical_cast<double>(ele->getValue());
+			double retVal = CastUtil::toDouble(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 14:
 		{
-			long double retVal = CastUtil::lexical_cast<long double>(ele->getValue());
+			long double retVal = CastUtil::toLongdouble(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
 		}
 		case 15:
 		{
-			bool retVal = CastUtil::lexical_cast<bool>(ele->getValue());
+			bool retVal = CastUtil::toBool(ele->getValue());
 			if(container=="std::set" || container=="std::multiset") addValueToNestedContainerSV(container, retVal, cont);
 			else addValueToNestedContainer(container, retVal, cont);
 			break;
@@ -328,73 +328,73 @@ void* JSONSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& 
 		case 4:
 		{
 			int *vt = new int;
-			*vt = CastUtil::lexical_cast<int>(*root);
+			*vt = CastUtil::toInt(*root);
 			return vt;
 		}
 		case 5:
 		{
 			unsigned int *vt = new unsigned int;
-			*vt = CastUtil::lexical_cast<unsigned int>(*root);
+			*vt = CastUtil::toUInt(*root);
 			return vt;
 		}
 		case 6:
 		{
 			short *vt = new short;
-			*vt = CastUtil::lexical_cast<short>(*root);
+			*vt = CastUtil::toShort(*root);
 			return vt;
 		}
 		case 7:
 		{
 			unsigned short *vt = new unsigned short;
-			*vt = CastUtil::lexical_cast<unsigned short>(*root);
+			*vt = CastUtil::toUShort(*root);
 			return vt;
 		}
 		case 8:
 		{
 			long *vt = new long;
-			*vt = CastUtil::lexical_cast<long>(*root);
+			*vt = CastUtil::toLong(*root);
 			return vt;
 		}
 		case 9:
 		{
 			unsigned long *vt = new unsigned long;
-			*vt = CastUtil::lexical_cast<long>(*root);
+			*vt = CastUtil::toLong(*root);
 			return vt;
 		}
 		case 10:
 		{
 			long long *vt = new long long;
-			*vt = CastUtil::lexical_cast<long long>(*root);
+			*vt = CastUtil::toLonglong(*root);
 			return vt;
 		}
 		case 11:
 		{
 			unsigned long long *vt = new unsigned long long;
-			*vt = CastUtil::lexical_cast<long>(*root);
+			*vt = CastUtil::toLong(*root);
 			return vt;
 		}
 		case 12:
 		{
 			float *vt = new float;
-			*vt = CastUtil::lexical_cast<float>(*root);
+			*vt = CastUtil::toFloat(*root);
 			return vt;
 		}
 		case 13:
 		{
 			double *vt = new double;
-			*vt = CastUtil::lexical_cast<double>(*root);
+			*vt = CastUtil::toDouble(*root);
 			return vt;
 		}
 		case 14:
 		{
 			long double *vt = new long double;
-			*vt = CastUtil::lexical_cast<long double>(*root);
+			*vt = CastUtil::toLongdouble(*root);
 			return vt;
 		}
 		case 15:
 		{
 			bool *vt = new bool;
-			*vt = CastUtil::lexical_cast<bool>(*root);
+			*vt = CastUtil::toBool(*root);
 			return vt;
 		}
 		case 16:
@@ -488,62 +488,62 @@ void JSONSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::
 		}
 		case 4:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(int*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(int*)t);
 			break;
 		}
 		case 5:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(unsigned int*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(unsigned int*)t);
 			break;
 		}
 		case 6:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(short*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(short*)t);
 			break;
 		}
 		case 7:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(unsigned short*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(unsigned short*)t);
 			break;
 		}
 		case 8:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(long*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(long*)t);
 			break;
 		}
 		case 9:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(unsigned long*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(unsigned long*)t);
 			break;
 		}
 		case 10:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(long long*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(long long*)t);
 			break;
 		}
 		case 11:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(unsigned long long*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromNumber(*(unsigned long long*)t);
 			break;
 		}
 		case 12:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(float*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromFloat(*(float*)t);
 			break;
 		}
 		case 13:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(double*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromDouble(*(double*)t);
 			break;
 		}
 		case 14:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(long double*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromLongdouble(*(long double*)t);
 			break;
 		}
 		case 15:
 		{
-			*object += "\"" + propName + "\" : " + CastUtil::lexical_cast<std::string>(*(bool*)t);
+			*object += "\"" + propName + "\" : " + CastUtil::fromBool(*(bool*)t);
 			break;
 		}
 		case 16:
@@ -590,73 +590,73 @@ void* JSONSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::st
 		case 4:
 		{
 			int *vt = new int;
-			*vt = CastUtil::lexical_cast<int>(root->getValue());
+			*vt = CastUtil::toInt(root->getValue());
 			return vt;
 		}
 		case 5:
 		{
 			unsigned int *vt = new unsigned int;
-			*vt = CastUtil::lexical_cast<unsigned int>(root->getValue());
+			*vt = CastUtil::toUInt(root->getValue());
 			return vt;
 		}
 		case 6:
 		{
 			short *vt = new short;
-			*vt = CastUtil::lexical_cast<short>(root->getValue());
+			*vt = CastUtil::toShort(root->getValue());
 			return vt;
 		}
 		case 7:
 		{
 			unsigned short *vt = new unsigned short;
-			*vt = CastUtil::lexical_cast<unsigned short>(root->getValue());
+			*vt = CastUtil::toUShort(root->getValue());
 			return vt;
 		}
 		case 8:
 		{
 			long *vt = new long;
-			*vt = CastUtil::lexical_cast<long>(root->getValue());
+			*vt = CastUtil::toLong(root->getValue());
 			return vt;
 		}
 		case 9:
 		{
 			unsigned long *vt = new unsigned long;
-			*vt = CastUtil::lexical_cast<long>(root->getValue());
+			*vt = CastUtil::toLong(root->getValue());
 			return vt;
 		}
 		case 10:
 		{
 			long long *vt = new long long;
-			*vt = CastUtil::lexical_cast<long long>(root->getValue());
+			*vt = CastUtil::toLonglong(root->getValue());
 			return vt;
 		}
 		case 11:
 		{
 			unsigned long long *vt = new unsigned long long;
-			*vt = CastUtil::lexical_cast<long>(root->getValue());
+			*vt = CastUtil::toLong(root->getValue());
 			return vt;
 		}
 		case 12:
 		{
 			float *vt = new float;
-			*vt = CastUtil::lexical_cast<float>(root->getValue());
+			*vt = CastUtil::toFloat(root->getValue());
 			return vt;
 		}
 		case 13:
 		{
 			double *vt = new double;
-			*vt = CastUtil::lexical_cast<double>(root->getValue());
+			*vt = CastUtil::toDouble(root->getValue());
 			return vt;
 		}
 		case 14:
 		{
 			long double *vt = new long double;
-			*vt = CastUtil::lexical_cast<long double>(root->getValue());
+			*vt = CastUtil::toLongdouble(root->getValue());
 			return vt;
 		}
 		case 15:
 		{
 			bool *vt = new bool;
-			*vt = CastUtil::lexical_cast<bool>(root->getValue());
+			*vt = CastUtil::toBool(root->getValue());
 			return vt;
 		}
 		case 16:

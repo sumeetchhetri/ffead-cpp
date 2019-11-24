@@ -23,10 +23,10 @@
 #include "LDAPAuthController.h"
 
 LDAPAuthController::LDAPAuthController() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 LDAPAuthController::~LDAPAuthController() {
-	// TODO Auto-generated destructor stub
+	
 }

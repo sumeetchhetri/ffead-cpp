@@ -13,7 +13,7 @@ MemcachedImpl::MemcachedImpl(ConnectionPooler* pool) {
 	this->defaultExpireSeconds = -1;
 	if(properties.getProperty("expiryTime")!="") {
 		try {
-			this->defaultExpireSeconds = CastUtil::lexical_cast<int>(properties.getProperty("expiryTime"));
+			this->defaultExpireSeconds = CastUtil::toInt(properties.getProperty("expiryTime"));
 		} catch(const std::exception& e) {
 		}
 	}
@@ -183,7 +183,6 @@ void MemcachedImpl::init() {
 }
 
 MemcachedConnectionPool::MemcachedConnectionPool(const ConnectionProperties& props) {
-	logger = LoggerFactory::getLogger("MemcachedConnectionPool");
 	createPool(props);
 }
 
@@ -210,9 +209,9 @@ void MemcachedConnectionPool::initEnv() {
 		configStr.append("--SERVER=");
 		configStr.append(getProperties().getNodes().at(var).getHost());
 		//configStr.append(":");
-		//configStr.append(CastUtil::lexical_cast<std::string>(nodes.at(var).getPort()));
+		//configStr.append(CastUtil::fromNumber(nodes.at(var).getPort()));
 		configStr.append(" --CONNECT-TIMEOUT=");
-		configStr.append(CastUtil::lexical_cast<std::string>((long)getProperties().getNodes().at(var).getConnectionTimeout()));
+		configStr.append(CastUtil::fromNumber((long)getProperties().getNodes().at(var).getConnectionTimeout()));
 		configStr.append(" ");
 	}
 
@@ -221,7 +220,7 @@ void MemcachedConnectionPool::initEnv() {
 		numConns = 5;
 	}
 	configStr.append("--POOL-MIN=1 --POOL-MAX=");
-	configStr.append(CastUtil::lexical_cast<std::string>(numConns));
+	configStr.append(CastUtil::fromNumber(numConns));
 
 	memcached_pool_st* pool = memcached_pool(configStr.c_str(), configStr.length());
 	if(pool==NULL) {

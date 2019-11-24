@@ -23,12 +23,12 @@
 #include "BinaryData.h"
 
 BinaryData::BinaryData() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 BinaryData::~BinaryData() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void BinaryData::append(const unsigned char& dat)

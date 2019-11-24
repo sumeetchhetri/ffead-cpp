@@ -122,7 +122,7 @@ class CppInterpreter {
 				{
 					int val = 0;
 					localVariables[token].get<int>(val);
-					token = CastUtil::lexical_cast<std::string>(val);
+					token = CastUtil::fromNumber(val);
 				}
 				if(st)
 					going.push_back(token);

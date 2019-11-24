@@ -68,7 +68,7 @@ void Bigint::create(const std::string& value)
 	while((int)temp.length()>NUM_LENGTH)
 	{
 		try {
-			int x = CastUtil::lexical_cast<int>(temp.substr(temp.length()-NUM_LENGTH));
+			int x = CastUtil::toInt(temp.substr(temp.length()-NUM_LENGTH));
 			temp = temp.substr(0, temp.length()-NUM_LENGTH);
 			parts.push_back(x);
 		} catch(const std::exception& e) {
@@ -78,7 +78,7 @@ void Bigint::create(const std::string& value)
 	if(temp.length()>0)
 	{
 		try {
-			int x = CastUtil::lexical_cast<int>(temp);
+			int x = CastUtil::toInt(temp);
 			parts.push_back(x);
 		} catch(const std::exception& e) {
 			throw std::runtime_error("Invalid Bigint value");
@@ -302,21 +302,21 @@ void Bigint::multiply(const Bigint& number)
 			int mult = mstring.at(i-1) - '0';
 			int carryOver = 0;
 			for (int j=0;j<(int)mparts.size();j++) {
-				std::string res = CastUtil::lexical_cast<std::string>(mparts.at(j)*mult);
+				std::string res = CastUtil::fromNumber(mparts.at(j)*mult);
 				if(j!=(int)mparts.size()-1)
 				{
 
-					std::string mrtn = CastUtil::lexical_cast<std::string>(mparts.at(j));
+					std::string mrtn = CastUtil::fromNumber(mparts.at(j));
 					if(res.length()>mrtn.length())
 					{
-						int numm = CastUtil::lexical_cast<int>(res.substr(1)) + carryOver;
-						numstr = CastUtil::lexical_cast<std::string>(numm) + numstr;
+						int numm = CastUtil::toInt(res.substr(1)) + carryOver;
+						numstr = CastUtil::fromNumber(numm) + numstr;
 						carryOver = res.at(0) - '0';
 					}
 					else
 					{
-						int numm = CastUtil::lexical_cast<int>(res) + carryOver;
-						numstr = CastUtil::lexical_cast<std::string>(numm) + numstr;
+						int numm = CastUtil::toInt(res) + carryOver;
+						numstr = CastUtil::fromNumber(numm) + numstr;
 						carryOver = 0;
 					}
 					if(j==0)
@@ -329,8 +329,8 @@ void Bigint::multiply(const Bigint& number)
 				}
 				else
 				{
-					int numm = CastUtil::lexical_cast<int>(res) + carryOver;
-					numstr = CastUtil::lexical_cast<std::string>(numm) + numstr;
+					int numm = CastUtil::toInt(res) + carryOver;
+					numstr = CastUtil::fromNumber(numm) + numstr;
 					carryOver = 0;
 				}
 			}
@@ -480,7 +480,7 @@ int Bigint::decompose(std::string fnvalue, std::string snvalue, const Bigint& nu
 		}
 		if(quotient>0)
 		{
-			build.append(CastUtil::lexical_cast<std::string>(quotient));
+			build.append(CastUtil::fromNumber(quotient));
 		}
 		if(fnvalue=="")
 		{
@@ -581,7 +581,7 @@ std::string Bigint::toString() const
 	for (int i=0;i<(int)nparts.size();i++) {
 		if(i!=0)
 		{
-			std::string numstr = CastUtil::lexical_cast<std::string>(nparts.at(i));
+			std::string numstr = CastUtil::fromNumber(nparts.at(i));
 			for (int j = 0; j < NUM_LENGTH-(int)numstr.length(); j++) {
 				build.append(ZERO);
 			}
@@ -589,7 +589,7 @@ std::string Bigint::toString() const
 		}
 		else
 		{
-			build.append(CastUtil::lexical_cast<std::string>(nparts.at(i)));
+			build.append(CastUtil::fromNumber(nparts.at(i)));
 		}
 	}
 	return build;

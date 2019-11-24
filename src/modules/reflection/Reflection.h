@@ -73,7 +73,7 @@ public:
 	{
 		if(nmspcIds.find(app+nmsp)!=nmspcIds.end())
 		{
-			return "ns" + CastUtil::lexical_cast<std::string>(nmspcIds[app+nmsp]);
+			return "ns" + CastUtil::fromNumber(nmspcIds[app+nmsp]);
 		}
 		return "";
 	}
@@ -89,7 +89,7 @@ public:
 	{
 		if(nmSpc!="" && nmspcIds.find(nmSpc)!=nmspcIds.end())
 		{
-			return "ns" + CastUtil::lexical_cast<std::string>(nmspcIds[nmSpc]) + ":" + classN;
+			return "ns" + CastUtil::fromNumber(nmspcIds[nmSpc]) + ":" + classN;
 		}
 		return classN;
 	}*/

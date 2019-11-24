@@ -23,12 +23,12 @@
 #include "BeanContext.h"
 
 RemoteComponentInt::RemoteComponentInt() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 RemoteComponentInt::~RemoteComponentInt() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void RemoteComponentInt::setBeanContext(const BeanContext& cntxt)
@@ -52,7 +52,7 @@ BeanContext::BeanContext(const std::string& host, const int& port) {
 }
 
 BeanContext::~BeanContext() {
-	// TODO Auto-generated destructor stub
+	
 }
 std::string BeanContext::getHost() const
 {

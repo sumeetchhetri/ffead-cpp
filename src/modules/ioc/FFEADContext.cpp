@@ -137,9 +137,9 @@ void* FFEADContext::getBean(const Bean& bean)
 	if(StringUtil::toLowerCopy(bean.scope)!="prototype")
 	{
 		std::string _k = bean.appName + k;
-		if(objects.contains(_k))
+		if(objects.find(_k)!=objects.end())
 		{
-			return objects.find(_k);
+			return objects[_k];
 		}
 	}
 	if(bean.inbuilt!="" && bean.value!="")
@@ -152,31 +152,31 @@ void* FFEADContext::getBean(const Bean& bean)
 		else if(bean.inbuilt=="int")
 		{
 			int *in = new int;
-			*in = CastUtil::lexical_cast<int>(bean.value);
+			*in = CastUtil::toInt(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="float")
 		{
 			float *in = new float;
-			*in = CastUtil::lexical_cast<float>(bean.value);
+			*in = CastUtil::toFloat(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="double")
 		{
 			double *in = new double;
-			*in = CastUtil::lexical_cast<double>(bean.value);
+			*in = CastUtil::toDouble(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="long")
 		{
 			long *in = new long;
-			*in = CastUtil::lexical_cast<long>(bean.value);
+			*in = CastUtil::toLong(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="long long")
 		{
 			long long *in = new long long;
-			*in = CastUtil::lexical_cast<long long>(bean.value);
+			*in = CastUtil::toLonglong(bean.value);
 			_temp = in;
 		}
 		else if(bean.inbuilt=="bool")
@@ -278,14 +278,6 @@ void* FFEADContext::getBean(const Bean& bean)
 			argus.clear();
 		}
 	}
-	if(bean.scope!="prototype")
-	{
-		std::string _k = bean.appName + k;
-		if(!objects.contains(_k))
-		{
-			objects.insert(_k, _temp);
-		}
-	}
 	return _temp;
 }
 
@@ -322,9 +314,8 @@ void FFEADContext::release(void* instance, const std::string& beanName, const st
 
 void FFEADContext::clear(const std::string& appName)
 {
-	cuckoohash_map<std::string, void*>::locked_table lt = objects.lock_table();
-	cuckoohash_map<std::string, void*>::locked_table::iterator it;
-	for(it=lt.begin();it!=lt.end();++it) {
+	std::map<std::string, void*>::iterator it;
+	for(it=objects.begin();it!=objects.end();++it) {
 		std::string k = StringUtil::replaceFirstCopy(it->first, appName, "");
 		k = k.substr(k.find(";")+1);
 		reflector->destroy(it->second, k, appName);
@@ -351,7 +342,7 @@ void FFEADContext::addBean(Bean& bean)
 		bean.name = ids;
 
 #else
-		bean.name = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
+		bean.name = CastUtil::fromNumber(Timer::getCurrentTime());
 #endif
 	}
 	if(bean.name!="" && beans.find(bean.appName+bean.name)==beans.end())
@@ -388,9 +379,17 @@ void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>
 			type = bean.clas;
 		}
 		std::string _k = bean.appName + bean.name + ";" + type;
-		if(servingContexts.find(bean.appName)!=servingContexts.end() && bean.scope!="prototype" && !objects.contains(type))
+		if(servingContexts.find(bean.appName)!=servingContexts.end() && bean.scope!="prototype" && objects.find(_k)==objects.end())
 		{
+			std::string scappName = bean.appName;
+			StringUtil::replaceAll(scappName, "-", "_");
+			RegexUtil::replace(scappName, "[^a-zA-Z0-9_]+", "");
+			CommonUtils::setAppName(scappName);
 			void* si = getBean(bean);
+			if(bean.scope!="prototype")
+			{
+				objects[_k] = si;
+			}
 			ClassInfo* clas = reflector->getClassInfo(bean.clas, bean.appName);
 			clas->si = si;
 			if(clas->getClassName()!="") {

@@ -305,7 +305,7 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si, std::s
 
 	Http2HeadersFrame hframe;
 	std::map<std::string, std::string,cicomp> hdrs;
-	hdrs[":opcode"] = CastUtil::lexical_cast<std::string>(response->dataType);
+	hdrs[":opcode"] = CastUtil::fromNumber(response->dataType);
 	hframe.headerBlockFragment = context.encode(hdrs);
 	CommonUtils::printHEX(hframe.headerBlockFragment);
 	hframe.header.streamIdentifier = streamIdentifier;
@@ -374,7 +374,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si, std::string
 	if(!response->isDone()) {
 		response->updateContent(request, maxDataFrameSize);
 	}
-	response->headers[":status"] = CastUtil::lexical_cast<std::string>(response->statusCode);
+	response->headers[":status"] = response->statusCode;
 
 	Http2HeadersFrame hframe;
 	hframe.headerBlockFragment = context.encode(response->headers);

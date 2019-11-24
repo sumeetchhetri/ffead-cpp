@@ -166,10 +166,10 @@ Date::~Date() {
 
 std::string Date::toString()
 {
-	return dayAbbr+" "+CastUtil::lexical_cast<std::string>(year)+" "+monthAbbr+" "+CastUtil::lexical_cast<std::string>(day)
-			+" "+CastUtil::lexical_cast<std::string>(hours)+":"+CastUtil::lexical_cast<std::string>(minutes)
-			+":"+CastUtil::lexical_cast<std::string>(seconds)+"."+CastUtil::lexical_cast<std::string>(nanoseconds)
-			+" "+CastUtil::lexical_cast<std::string>(timeZoneOffset);
+	return dayAbbr+" "+CastUtil::fromNumber(year)+" "+monthAbbr+" "+CastUtil::fromNumber(day)
+			+" "+CastUtil::fromNumber(hours)+":"+CastUtil::fromNumber(minutes)
+			+":"+CastUtil::fromNumber(seconds)+"."+CastUtil::fromNumber(nanoseconds)
+			+" "+CastUtil::fromFloat(timeZoneOffset);
 }
 
 Date Date::addSecondsGet(const double& seconds)
@@ -342,7 +342,7 @@ bool Date::validateDate(const int& dd, const int& mm, const int& yyyy)
 		error = false;
 	std::string mw31days = ",1,3,5,7,8,10,12,";
 	std::string mw30oldays =  ",4,6,9,11,";
-	std::string mtc = "," + CastUtil::lexical_cast<std::string>(mm) + ",";
+	std::string mtc = "," + CastUtil::fromNumber(mm) + ",";
 	if (mm==2)
 	{
 		if (!(yyyy % 4) && ((yyyy % 100) || !(yyyy % 400)))
@@ -484,8 +484,8 @@ Date::Date(const int& yyyy, const std::string& mmm, const int& dd)
 {
 	std::string mm = getMon(mmm);
 	if(mm=="-1")throw std::runtime_error("Invalid month");
-	if(!validateDate(dd,CastUtil::lexical_cast<int>(mm),yyyy))throw std::runtime_error("Invalid date");
-	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
+	if(!validateDate(dd,CastUtil::toInt(mm),yyyy))throw std::runtime_error("Invalid date");
+	long g = getDays(yyyy,CastUtil::toLong(mm),dd);
 	*this = getDateFromDays(g);
 	populateDay();
 	populateMonth();
@@ -505,12 +505,12 @@ Date::Date(const int& yyyy, const int& mm, const int& dd)
 Date::Date(const int& yy, const std::string& mmm, const int& dd, const bool& te)
 {
 	Date d;
-	std::string syyyy = CastUtil::lexical_cast<std::string>(d.year).substr(0,2) + CastUtil::lexical_cast<std::string>(yy);
-	int yyyy = CastUtil::lexical_cast<int>(syyyy);
+	std::string syyyy = CastUtil::fromNumber(d.year).substr(0,2) + CastUtil::fromNumber(yy);
+	int yyyy = CastUtil::toInt(syyyy);
 	std::string mm = getMon(mmm);
 	if(mm=="-1")throw std::runtime_error("Invalid month");
-	if(!validateDate(dd,CastUtil::lexical_cast<int>(mm),yyyy))throw std::runtime_error("Invalid date");
-	long g = getDays(yyyy,CastUtil::lexical_cast<long>(mm),dd);
+	if(!validateDate(dd,CastUtil::toInt(mm),yyyy))throw std::runtime_error("Invalid date");
+	long g = getDays(yyyy,CastUtil::toLong(mm),dd);
 	*this = getDateFromDays(g);
 	populateDay();
 	populateMonth();
@@ -520,8 +520,8 @@ Date::Date(const int& yy, const std::string& mmm, const int& dd, const bool& te)
 Date::Date(const int& yy, const int& mm, const int& dd, const bool& te)
 {
 	Date d;
-	std::string syyyy = CastUtil::lexical_cast<std::string>(d.year).substr(0,2) + CastUtil::lexical_cast<std::string>(yy);
-	int yyyy = CastUtil::lexical_cast<int>(syyyy);
+	std::string syyyy = CastUtil::fromNumber(d.year).substr(0,2) + CastUtil::fromNumber(yy);
+	int yyyy = CastUtil::toInt(syyyy);
 	if(!validateDate(dd,mm,yyyy))throw std::runtime_error("Invalid date");
 	long g = getDays(yyyy,mm,dd);
 	*this = getDateFromDays(g);

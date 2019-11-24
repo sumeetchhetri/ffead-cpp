@@ -23,12 +23,12 @@
 #include "Class.h"
 
 Class::Class() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 Class::~Class() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Class::getName() const

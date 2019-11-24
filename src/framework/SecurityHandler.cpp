@@ -26,7 +26,7 @@ SecurityHandler::SecurityHandler() {
 }
 
 SecurityHandler::~SecurityHandler() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void SecurityHandler::populateAuthDetails(HttpRequest* req)
@@ -157,7 +157,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 		{
 			if(aspect.path!="")
 			{
-				logger << ("Matched secure path " + aspect.path + ", which requires role " + aspect.role) << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << ("Matched secure path " + aspect.path + ", which requires role " + aspect.role) << std::endl;
 			}
 			else if(aspect.role!=userRole)
 			{
@@ -174,33 +174,33 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 			if(claz.find("file:")!=std::string::npos)
 			{
 				claz = req->getContextHome()+"/"+claz.substr(claz.find(":")+1);
-				logger << ("Auth handled by file " + claz) << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << ("Auth handled by file " + claz) << std::endl;
 				FileAuthController authc(claz,":");
 				if(authc.isInitialized())
 				{
 					if(authc.authenticate(username, password))
 					{
 						userRole = authc.getUserRole(username);
-						logger << ("Valid user " + username
+						if(ConfigurationData::getInstance()->enableLogging) logger << ("Valid user " + username
 								+ ", role is "  + userRole) << std::endl;
 						validUser = true;
 					}
 					else
 					{
-						logger << "Invalid user" << std::endl;
+						if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid user" << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
 						isContrl = true;
 					}
 				}
 				else
 				{
-					logger << "Invalid user repo defined" << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid user repo defined" << std::endl;
 				}
 			}
 			else if(claz.find("class:")!=std::string::npos)
 			{
 				claz = claz.substr(claz.find(":")+1);
-				logger << ("Auth handled by class " + claz) << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << ("Auth handled by class " + claz) << std::endl;
 
 				args argusi, argusa, argusg;
 				vals valusi, valusa, valusg;
@@ -217,7 +217,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 
 				if(methIsInitialized.getMethodName()=="" || methGetUserRole.getMethodName()=="" || methAuthenticate.getMethodName()=="")
 				{
-					logger << ("AuthController class needs to implement all 3 methods namely, authenticate, getUserRole and isInitialized") << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << ("AuthController class needs to implement all 3 methods namely, authenticate, getUserRole and isInitialized") << std::endl;
 					return false;
 				}
 
@@ -234,20 +234,20 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 						valusg.push_back(&username);
 						std::string userRole;
 						reflector.invokeMethod<std::string>(&userRole,_temp,methGetUserRole,valusg);
-						logger << ("Valid user " + username + ", role is "  + userRole) << std::endl;
+						if(ConfigurationData::getInstance()->enableLogging) logger << ("Valid user " + username + ", role is "  + userRole) << std::endl;
 						validUser = true;
 					}
 					else
 					{
-						logger << "Invalid user" << std::endl;
+						if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid user" << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
 						isContrl = true;
 					}
-					logger << "AuthController called" << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << "AuthController called" << std::endl;
 				}
 				else
 				{
-					logger << "AuthController not initialized" << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << "AuthController not initialized" << std::endl;
 				}
 				ConfigurationData::getInstance()->ffeadContext.release(_temp, "login-handler_"+claz, req->getCntxt_name());
 			}
@@ -256,7 +256,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 				req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", userRole);
 				res->setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
 				res->addHeader(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.welcomeFile);
-				logger << ("Valid role " + userRole + " for path " + req->getCurl()) << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << ("Valid role " + userRole + " for path " + req->getCurl()) << std::endl;
 				isContrl = true;
 				res->setDone(true);
 			}

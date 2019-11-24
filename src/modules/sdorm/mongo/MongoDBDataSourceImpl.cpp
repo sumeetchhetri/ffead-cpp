@@ -586,11 +586,11 @@ std::string MongoDBDataSourceImpl::getQueryForRelationship(const std::string& co
 	} else if(type=="short" || type=="int" || type=="unsigned short" || type=="unsigned int" || type=="long"
 			|| type=="unsigned long" || type=="long long"
 			|| type=="char" || type=="unsigned char") {
-		qstr += CastUtil::lexical_cast<std::string>(*(unsigned long long*)val) + "}";
+		qstr += CastUtil::fromNumber(*(unsigned long long*)val) + "}";
 	} else if(type=="bool") {
-		qstr += CastUtil::lexical_cast<std::string>(*(bool*)val) + "}";
+		qstr += CastUtil::fromBool(*(bool*)val) + "}";
 	} else if(type=="float" || type=="double") {
-		qstr += CastUtil::lexical_cast<std::string>(*(double*)val) + "}";
+		qstr += CastUtil::fromDouble(*(double*)val) + "}";
 	}
 	delete val;
 	return qstr;

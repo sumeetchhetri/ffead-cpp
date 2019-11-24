@@ -44,7 +44,6 @@ bool FilterHandler::getFilterForPath(const std::string& cntxtName, const std::st
 
 void FilterHandler::handleIn(HttpRequest* req, const std::string& ext, Reflector& reflector)
 {
-	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	std::vector<std::string> filters;
 	if(getFilterForPath(req->getCntxt_name(), req->getCurl(), filters, "in"))
 	{
@@ -61,7 +60,6 @@ void FilterHandler::handleIn(HttpRequest* req, const std::string& ext, Reflector
 			{
 				valus.push_back(req);
 				reflector.invokeMethodGVP(_temp,meth,valus);
-				//logger << "Input Filter called" << std::endl;
 			}
 			ConfigurationData::getInstance()->ffeadContext.release(_temp, "filter_"+claz, req->getCntxt_name());
 		}
@@ -72,7 +70,6 @@ void FilterHandler::handleIn(HttpRequest* req, const std::string& ext, Reflector
 bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
 {
 	bool continue_proc_request = true;
-	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	std::vector<std::string> filters;
 	if(getFilterForPath(req->getCntxt_name(), req->getCurl(), filters, "handle"))
 	{
@@ -91,7 +88,6 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const std::strin
 				valus.push_back(req);
 				valus.push_back(res);
 				reflector.invokeMethod<bool>(&continue_proc_request,_temp,meth,valus);
-				//logger << "Handler Filter called" << std::endl;
 			}
 			ConfigurationData::getInstance()->ffeadContext.release(_temp, "filter_"+claz, req->getCntxt_name());
 		}
@@ -101,7 +97,6 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const std::strin
 
 void FilterHandler::handleOut(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
 {
-	Logger logger = LoggerFactory::getLogger("FilterHandler");
 	std::vector<std::string> filters;
 	if(getFilterForPath(req->getCntxt_name(), req->getCurl(), filters, "out"))
 	{
@@ -118,7 +113,6 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse* res, const std::st
 			{
 				valus.push_back(res);
 				reflector.invokeMethodGVP(_temp,meth,valus);
-				//logger << "Output Filter called" << std::endl;
 			}
 			ConfigurationData::getInstance()->ffeadContext.release(_temp, "filter_"+claz, req->getCntxt_name());
 		}

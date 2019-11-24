@@ -30,7 +30,7 @@ XmlParser::XmlParser(const std::string& mode)
 }
 
 XmlParser::~XmlParser() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void XmlParser::readDocument(const std::string& filename, Document& doc)
@@ -177,42 +177,42 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
     	endTag = xml.find("/>");
     if(xml.find("< ")!=std::string::npos)
     {
-        std::string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("< ")+1) + "\n");
+        std::string errmsg = ("Invalid Start Tag - at position: " + CastUtil::fromNumber((int)xml.find("< ")+1) + "\n");
         throw XmlParseException(errmsg);
     }
     else if(xml.find("<\t")!=std::string::npos)
     {
-        std::string errmsg = ("Invalid Start Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("<\t")+1) + "\n");
+        std::string errmsg = ("Invalid Start Tag - at position: " + CastUtil::fromNumber((int)xml.find("<\t")+1) + "\n");
         throw XmlParseException(errmsg);
 
     }
     else if(xml.find("</ ")!=std::string::npos)
     {
-        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("</ ")+1) + "\n");
+        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::fromNumber((int)xml.find("</ ")+1) + "\n");
         throw XmlParseException(errmsg);
 
     }
     else if(xml.find("</\t")!=std::string::npos)
     {
-        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("</\t")+1) + "\n");
+        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::fromNumber((int)xml.find("</\t")+1) + "\n");
         throw XmlParseException(errmsg);
 
     }
     else if(xml.find("< /")!=std::string::npos)
     {
-        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("< /")+1) + "\n");
+        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::fromNumber((int)xml.find("< /")+1) + "\n");
         throw XmlParseException(errmsg);
 
     }
     else if(xml.find("/ >")!=std::string::npos)
 	{
-		std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("/ >")+1) + "\n");
+		std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::fromNumber((int)xml.find("/ >")+1) + "\n");
 		throw XmlParseException(errmsg);
 
 	}
     else if(xml.find("<\t/")!=std::string::npos)
     {
-        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::lexical_cast<std::string>((int)xml.find("<\t/")+1) + "\n");
+        std::string errmsg = ("Invalid End Tag - at position: " + CastUtil::fromNumber((int)xml.find("<\t/")+1) + "\n");
         throw XmlParseException(errmsg);
 
     }

@@ -7,6 +7,9 @@
 
 #include "TeBkRestController.h"
 
+const std::string TeBkRestController::HELLO_WORLD = "Hello, World!";
+std::string TeBkRestController::WORLD = "world";
+
 TeBkRestController::TeBkRestController() {
 }
 
@@ -15,7 +18,7 @@ TeBkRestController::~TeBkRestController() {
 
 TeBkMessage TeBkRestController::json() {
 	TeBkMessage msg;
-	msg.setMessage("Hello, World!");
+	msg.setMessage(HELLO_WORLD);
 	return msg;
 }
 
@@ -47,8 +50,7 @@ std::vector<TeBkWorld> TeBkRestController::queries(std::string queries) {
 	DataSourceInterface* sqli = DataSourceManager::getImpl();
 
 	try {
-		std::string tbName = "world";
-		sqli->startSession(&tbName);
+		sqli->startSession(&WORLD);
 		for (int c = 0; c < queryCount; ++c) {
 			int rid = rand() % 10000 + 1;
 			GenericObject id;
@@ -78,8 +80,7 @@ std::vector<TeBkWorld> TeBkRestController::updates(std::string queries) {
 	DataSourceInterface* sqli = DataSourceManager::getImpl();
 
 	try {
-		std::string tbName = "world";
-		sqli->startSession(&tbName);
+		sqli->startSession(&WORLD);
 		for (int c = 0; c < queryCount; ++c) {
 			int rid = rand() % 10000 + 1;
 			GenericObject id;
@@ -107,7 +108,7 @@ std::vector<TeBkWorld> TeBkRestController::updates(std::string queries) {
 }
 
 std::string TeBkRestController::plaintext() {
-	return "Hello, World!";
+	return HELLO_WORLD;
 }
 
 void TeBkRestController::updateCache() {
@@ -115,8 +116,7 @@ void TeBkRestController::updateCache() {
 	DataSourceInterface* sqli = DataSourceManager::getImpl();
 
 	try {
-		std::string tbName = "world";
-		sqli->startSession(&tbName);
+		sqli->startSession(&WORLD);
 		std::vector<TeBkWorld> wlist = sqli->getAll<TeBkWorld>();
 		sqli->endSession();
 		for (int c = 0; c < (int)wlist.size(); ++c) {

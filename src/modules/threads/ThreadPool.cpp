@@ -203,5 +203,5 @@ ThreadPool::~ThreadPool() {
 	for (int i = 0; i <maxThreads; i++) {
 		delete tpool.at(i);
 	}
-	logger << "Destroyed PoolThread Pool\n" << std::flush;
+	logger << "Destroyed ThreadPool\n" << std::flush;
 }

@@ -175,88 +175,138 @@ void HttpResponse::generateHeadResponse(std::string& resp)
 	if(this->contentList.size()>0)
 	{
 		content.clear();
-		boundary = "FFEAD_SERVER_" + CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
+		boundary = "FFEAD_SERVER_";
+		boundary.append(CastUtil::fromNumber(Timer::getCurrentTime()));
 		for (int var = 0; var < (int)contentList.size(); ++var) {
-			content += "--" + boundary + HDR_END;
+			content.append("--");
+			content.append(boundary);
+			content.append(HDR_END);
 			RMap headers = contentList.at(var).getHeaders();
 			RMap::iterator it;
 			for(it=headers.begin();it!=headers.end();++it)
 			{
-				content += it->first + HDR_SEP + it->second + HDR_END;
+				content.append(it->first);
+				content.append(HDR_SEP);
+				content.append(it->second);
+				content.append(HDR_END);
 			}
-			content += HDR_END;
-			content += contentList.at(var).getContent();
-			content += HDR_END;
+			content.append(HDR_END);
+			content.append(contentList.at(var).getContent());
+			content.append(HDR_END);
 		}
-		content += "--" + boundary + "--" + HDR_END;
+		content.append("--");
+		content.append(boundary);
+		content.append("--");
+		content.append(HDR_END);
 	}
-	resp = (httpVersion + " " + statusCode + " " + statusMsg + HDR_END);
-	resp += HDR_SRV;
+	resp.append(httpVersion);
+	resp.append(" ");
+	resp.append(statusCode);
+	resp.append(" ");
+	resp.append(statusMsg);
+	resp.append(HDR_END);
+	resp.append(HDR_SRV);
 	if(this->getHeader(ContentType)=="" && this->contentList.size()>0)
 	{
 		this->addHeader(ContentType, "multipart/mixed");
 	}
 	if(this->getHeader(ContentType)!="" && boundary!="")
 	{
-		headers[ContentType] += "; boundary=\"" + boundary + "\"";
+		headers[ContentType].append("; boundary=\"");
+		headers[ContentType].append(boundary);
+		headers[ContentType].append("\"");
 	}
 	if(!isTE && getHeader(ContentLength)=="")
 	{
-		addHeader(ContentLength, CastUtil::lexical_cast<std::string>((int)content.length()));
+		addHeader(ContentLength, CastUtil::fromNumber((int)content.length()));
 	}
 	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
-		resp += it->first + HDR_SEP + it->second + HDR_END;
+		resp.append(it->first);
+		resp.append(HDR_SEP);
+		resp.append(it->second);
+		resp.append(HDR_END);
 	}
 	for (int var = 0; var < (int)this->cookies.size(); var++)
 	{
-		resp += SetCookie + HDR_SEP + this->cookies.at(var) + HDR_END;
+		resp.append(SetCookie);
+		resp.append(HDR_SEP);
+		resp.append(this->cookies.at(var));
+		resp.append(HDR_END);
 	}
-	resp += HDR_END;
+	resp.append(HDR_END);
 }
 
 const std::string HttpResponse::HDR_CORS_ALW = "Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE\r\n";
 
 void HttpResponse::generateOptionsResponse(std::string& resp)
 {
-	resp = (httpVersion + " " + statusCode + " " + statusMsg + HDR_END);
-	resp += HDR_SRV;
+	resp.append(httpVersion);
+	resp.append(" ");
+	resp.append(statusCode);
+	resp.append(" ");
+	resp.append(statusMsg);
+	resp.append(HDR_END);
+	resp.append(HDR_SRV);
 	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
-		resp += it->first + HDR_SEP + it->second + HDR_END;
+		resp.append(it->first);
+		resp.append(HDR_SEP);
+		resp.append(it->second);
+		resp.append(HDR_END);
 	}
 	for (int var = 0; var < (int)this->cookies.size(); var++)
 	{
-		resp += SetCookie + HDR_SEP + this->cookies.at(var) + HDR_END;
+		resp.append(SetCookie);
+		resp.append(HDR_SEP);
+		resp.append(this->cookies.at(var));
+		resp.append(HDR_END);
 	}
-	resp += HDR_CORS_ALW;
-	resp += HDR_END;
+	resp.append(HDR_CORS_ALW);
+	resp.append(HDR_END);
 }
 
 void HttpResponse::generateTraceResponse(HttpRequest* req, std::string& resp)
 {
-	resp = (httpVersion + " " + statusCode + " " + statusMsg + HDR_END);
-	resp += HDR_SRV;
+	resp.append(httpVersion);
+	resp.append(" ");
+	resp.append(statusCode);
+	resp.append(" ");
+	resp.append(statusMsg);
+	resp.append(HDR_END);
+	resp.append(HDR_SRV);
 	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
-		resp += it->first + HDR_SEP + it->second + HDR_END;
+		resp.append(it->first);
+		resp.append(HDR_SEP);
+		resp.append(it->second);
+		resp.append(HDR_END);
 	}
 	for (int var = 0; var < (int)this->cookies.size(); var++)
 	{
-		resp += SetCookie + HDR_SEP + this->cookies.at(var) + HDR_END;
+		resp.append(SetCookie);
+		resp.append(HDR_SEP);
+		resp.append(this->cookies.at(var));
+		resp.append(HDR_END);
 	}
-	resp += HDR_END;
+	resp.append(HDR_END);
 	if(req!=NULL)
 	{
-		resp += "TRACE " + req->getActUrl() + " " + req->getHttpVersion();
-		resp += HDR_END;
+		resp.append("TRACE ");
+		resp.append(req->getActUrl());
+		resp.append(" ");
+		resp.append(req->getHttpVersion());
+		resp.append(HDR_END);
 		RMap::iterator it;
 		for(it=headers.begin();it!=headers.end();++it)
 		{
-			resp += it->first + HDR_SEP + it->second + HDR_END;
+			resp.append(it->first);
+			resp.append(HDR_SEP);
+			resp.append(it->second);
+			resp.append(HDR_END);
 		}
 	}
 }
@@ -308,7 +358,7 @@ std::string HttpResponse::getContent() const
 void HttpResponse::setContent(const std::string& content)
 {
 	this->content = content;
-	if(content!="") {
+	if(content.length()>0) {
 		hasContent = true;
 	}
 }
@@ -326,7 +376,8 @@ void HttpResponse::addContent(const MultipartContent& content)
 void HttpResponse::addHeader(std::string header, const std::string& value)
 {
 	if(headers.find(header)!=headers.end()) {
-		headers[header] += "," + value;
+		headers[header].append(",");
+		headers[header].append(value);
 	} else {
 		headers[header] = value;
 	}
@@ -339,7 +390,8 @@ void HttpResponse::addHeaderValue(std::string header, const std::string& value)
 		if(HDRS_SW_CODES.find(header)!=HDRS_SW_CODES.end())
 		{
 			if(headers.find(header)!=headers.end()) {
-				headers[header] += "," + value;
+				headers[header].append(",");
+				headers[header].append(value);
 			} else {
 				headers[header] = value;
 			}
@@ -354,7 +406,8 @@ void HttpResponse::addHeaderValue(std::string header, const std::string& value)
 				return;
 			}
 			if(headers.find(header)!=headers.end()) {
-				headers[header] += "," + value;
+				headers[header].append(",");
+				headers[header].append(value);
 			} else {
 				headers[header] = value;
 			}
@@ -371,7 +424,7 @@ bool HttpResponse::isHeaderValue(std::string header, const std::string& value, c
 
 std::string HttpResponse::getHeader(std::string header)
 {
-	if(header!="" && headers.find(header)!=headers.end())
+	if(header.length()>0 && headers.find(header)!=headers.end())
 		return headers[header];
 	return "";
 }
@@ -399,7 +452,13 @@ const std::vector<std::string> HttpResponse::getCookies() const {
 }
 
 std::string HttpResponse::getStatusLine() const {
-	return (httpVersion + " " + statusCode + " " + statusMsg);
+	std::string r;
+	r.append(httpVersion);
+	r.append(" ");
+	r.append(statusCode);
+	r.append(" ");
+	r.append(statusMsg);
+	return r;
 }
 
 unsigned int HttpResponse::getContentSize(const char *fileName)
@@ -503,7 +562,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 
 	if(req->getMethod()=="HEAD")
 	{
-		res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(getContentSize(fname.c_str())));
+		res->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber(getContentSize(fname.c_str())));
 		res->addHeader(HttpResponse::AcceptRanges, "bytes");
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
@@ -552,7 +611,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 				{
 					//std::cout << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
 					//std::cout << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
-					//std::cout << "Date Comparisons = " +CastUtil::lexical_cast<std::string>(*ifmodsince>=filemodifieddate)  << std::endl;
+					//std::cout << "Date Comparisons = " +CastUtil::fromBool(*ifmodsince>=filemodifieddate)  << std::endl;
 
 					if(isifmodsincvalid && *ifmodsince>=filemodifieddate)
 					{
@@ -631,7 +690,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 				res->setHTTPResponseStatus(HTTPResponseStatus::PartialContent);
 				res->addHeader(HttpResponse::ContentType, "multipart/byteranges");
 				unsigned int totlen = getContentSize(fname.c_str());
-				res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
+				res->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber(totlen));
 				for (int var = 0; var <(int)rangeValuesLst.size(); ++var) {
 					int start = rangeValuesLst.at(var).at(0);
 					int end = rangeValuesLst.at(var).at(1);
@@ -650,7 +709,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 						std::string cont = getContent(fname.c_str(), start, end);
 						MultipartContent conte(cont);
 						conte.addHeader(MultipartContent::ContentType, type);
-						conte.addHeader(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<std::string>(totlen));
+						conte.addHeader(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::fromNumber(totlen));
 						res->addContent(conte);
 					}
 				}
@@ -679,13 +738,13 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			if(res->httpVers>=1.1 && res->httpVers<1.2) {
 				res->addHeader(HttpResponse::TransferEncoding, "chunked");
 			} else {
-				res->addHeader(ContentLength, CastUtil::lexical_cast<std::string>(totlen));
+				res->addHeader(ContentLength, CastUtil::fromNumber(totlen));
 			}
 		}
 		else
 		{
 			res->content = getContent(fname.c_str());
-			res->addHeader(ContentLength, CastUtil::lexical_cast<std::string>((int)res->content.length()));
+			res->addHeader(ContentLength, CastUtil::fromNumber((int)res->content.length()));
 		}
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
@@ -704,11 +763,12 @@ bool HttpResponse::getRemainingContent(const std::string& fname, const bool& isF
 		}
 		if(httpVers<2.0)
 		{
-			rem = StringUtil::toHEX(len) + "\r\n";
-			rem += getContent(fname.c_str(), techunkSiz*tecurrpart, len);
-			rem += "\r\n";
+			rem.append(StringUtil::toHEX(len));
+			rem.append("\r\n");
+			rem.append(getContent(fname.c_str(), techunkSiz*tecurrpart, len));
+			rem.append("\r\n");
 			if(tecurrpart+1==teparts) {
-				rem += "0\r\n\r\n";
+				rem.append("0\r\n\r\n");
 			}
 		}
 		else
@@ -731,58 +791,58 @@ bool HttpResponse::isContentRemains() {
 std::string HttpResponse::toPluginString() {
 	std::string text = (this->statusCode + "\n");
 	text += (this->statusMsg + "\n");
-	text += (CastUtil::lexical_cast<std::string>(this->httpVersion) + "\n");
+	text += this->httpVersion + "\n";
 	text += (this->outFileName + "\n");
 
-	text += (CastUtil::lexical_cast<std::string>(this->content.length()) + "\n");
+	text += (CastUtil::fromNumber(this->content.length()) + "\n");
 	text += (this->content);
 
-	text += (CastUtil::lexical_cast<std::string>(this->preamble.length()) + "\n");
+	text += (CastUtil::fromNumber(this->preamble.length()) + "\n");
 	text += (this->preamble);
 
-	text += (CastUtil::lexical_cast<std::string>(this->epilogue.length()) + "\n");
+	text += (CastUtil::fromNumber(this->epilogue.length()) + "\n");
 	text += (this->epilogue);
 
 	std::map<std::string,std::string,cicomp>::iterator it;
-	text += (CastUtil::lexical_cast<std::string>(this->headers.size()) + "\n");
+	text += (CastUtil::fromNumber(this->headers.size()) + "\n");
 	for(it=this->headers.begin();it!=this->headers.end();++it)
 	{
 		text += it->first + "\n";
-		text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
+		text += CastUtil::fromNumber(it->second.length()) + "\n";
 		text += it->second;
 	}
 
-	text += (CastUtil::lexical_cast<std::string>(this->multipartFormData.size()) + "\n");
+	text += (CastUtil::fromNumber(this->multipartFormData.size()) + "\n");
 	FMap::iterator fit;
 	for(fit=this->multipartFormData.begin();fit!=this->multipartFormData.end();++fit)
 	{
 		text += fit->second.name + "\n";
 		text += fit->second.fileName + "\n";
 		text += fit->second.tempFileName + "\n";
-		text += (CastUtil::lexical_cast<std::string>(fit->second.content.length()) + "\n");
+		text += (CastUtil::fromNumber(fit->second.content.length()) + "\n");
 		text += (fit->second.content);
-		text += (CastUtil::lexical_cast<std::string>(fit->second.headers.size()) + "\n");
+		text += (CastUtil::fromNumber(fit->second.headers.size()) + "\n");
 		for(it=fit->second.headers.begin();it!=fit->second.headers.end();++it)
 		{
 			text += it->first + "\n";
-			text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
+			text += CastUtil::fromNumber(it->second.length()) + "\n";
 			text += it->second;
 		}
 	}
 
-	text += (CastUtil::lexical_cast<std::string>(this->contentList.size()) + "\n");
+	text += (CastUtil::fromNumber(this->contentList.size()) + "\n");
 	for(int k=0;k<(int)this->contentList.size();k++)
 	{
 		text += this->contentList.at(k).name + "\n";
 		text += this->contentList.at(k).fileName + "\n";
 		text += this->contentList.at(k).tempFileName + "\n";
-		text += (CastUtil::lexical_cast<std::string>(this->contentList.at(k).content.length()) + "\n");
+		text += (CastUtil::fromNumber(this->contentList.at(k).content.length()) + "\n");
 		text += (this->contentList.at(k).content);
-		text += (CastUtil::lexical_cast<std::string>(this->contentList.at(k).headers.size()) + "\n");
+		text += (CastUtil::fromNumber(this->contentList.at(k).headers.size()) + "\n");
 		for(it=this->contentList.at(k).headers.begin();it!=this->contentList.at(k).headers.end();++it)
 		{
 			text += it->first + "\n";
-			text += CastUtil::lexical_cast<std::string>(it->second.length()) + "\n";
+			text += CastUtil::fromNumber(it->second.length()) + "\n";
 			text += it->second;
 		}
 	}

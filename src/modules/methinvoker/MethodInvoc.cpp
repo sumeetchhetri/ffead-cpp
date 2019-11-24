@@ -29,7 +29,7 @@ MethodInvoc::MethodInvoc() {
 }
 
 MethodInvoc::~MethodInvoc() {
-	// TODO Auto-generated destructor stub
+	
 }
 MethodInvoc* MethodInvoc::instance = NULL;
 
@@ -100,37 +100,37 @@ void* MethodInvoc::service(void* arg)
 				if(arg->getAttribute("type")=="int")
 				{
 					int *vt = new int;
-					*vt = CastUtil::lexical_cast<int>(arg->getText());
+					*vt = CastUtil::toInt(arg->getText());
 					value = vt;
 				}
 				else if(arg->getAttribute("type")=="long")
 				{
 					long *vt = new long;
-					*vt = CastUtil::lexical_cast<long>(arg->getText());
+					*vt = CastUtil::toLong(arg->getText());
 					value = vt;
 				}
 				else if(arg->getAttribute("type")=="long long")
 				{
 					long long *vt = new long long;
-					*vt = CastUtil::lexical_cast<long long>(arg->getText());
+					*vt = CastUtil::toLonglong(arg->getText());
 					value = vt;
 				}
 				else if(arg->getAttribute("type")=="float")
 				{
 					float *vt = new float;
-					*vt = CastUtil::lexical_cast<float>(arg->getText());
+					*vt = CastUtil::toFloat(arg->getText());
 					value = vt;
 				}
 				else if(arg->getAttribute("type")=="double")
 				{
 					double *vt = new double;
-					*vt = CastUtil::lexical_cast<double>(arg->getText());
+					*vt = CastUtil::toDouble(arg->getText());
 					value = vt;
 				}
 				else if(arg->getAttribute("type")=="string")
 				{
 					std::string *vt = new std::string;
-					*vt = CastUtil::lexical_cast<std::string>(arg->getText());
+					*vt = arg->getText();
 					value = vt;
 				}
 				else if(arg->getAttribute("type")!="")
@@ -174,31 +174,31 @@ void* MethodInvoc::service(void* arg)
 					{
 						int retv;
 						reflector.invokeMethod<int>(&retv,_temp,meth,valus,true);
-						retValue = ("<return:int>"+CastUtil::lexical_cast<std::string>(retv)+"</return:int>");
+						retValue = ("<return:int>"+CastUtil::fromNumber(retv)+"</return:int>");
 					}
 					else if(returnType=="long")
 					{
 						long retv;
 						reflector.invokeMethod<long>(&retv,_temp,meth,valus,true);
-						retValue = ("<return:long>"+CastUtil::lexical_cast<std::string>(retv)+"</return:long>");
+						retValue = ("<return:long>"+CastUtil::fromNumber(retv)+"</return:long>");
 					}
 					else if(returnType=="long long")
 					{
 						long long retv;
 						reflector.invokeMethod<long long>(&retv,_temp,meth,valus,true);
-						retValue = ("<return:longlong>"+CastUtil::lexical_cast<std::string>(retv)+"</return:longlong>");
+						retValue = ("<return:longlong>"+CastUtil::fromNumber(retv)+"</return:longlong>");
 					}
 					else if(returnType=="float")
 					{
 						float retv;
 						reflector.invokeMethod<float>(&retv,_temp,meth,valus,true);
-						retValue = ("<return:float>"+CastUtil::lexical_cast<std::string>(retv)+"</return:float>");
+						retValue = ("<return:float>"+CastUtil::fromFloat(retv)+"</return:float>");
 					}
 					else if(returnType=="double")
 					{
 						double retv;
 						reflector.invokeMethod<double>(&retv,_temp,meth,valus,true);
-						retValue = ("<return:double>"+CastUtil::lexical_cast<std::string>(retv)+"</return:double>");
+						retValue = ("<return:double>"+CastUtil::fromDouble(retv)+"</return:double>");
 					}
 					else if(returnType=="string")
 					{

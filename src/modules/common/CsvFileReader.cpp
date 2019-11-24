@@ -23,12 +23,12 @@
 #include "CsvFileReader.h"
 
 CsvFileReader::CsvFileReader() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 CsvFileReader::~CsvFileReader() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 strVecVec CsvFileReader::getRows(const std::string& filepath)

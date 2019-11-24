@@ -41,7 +41,7 @@ bool Http2GoAwayFrame::isReserved() const {
 }
 
 Http2GoAwayFrame::~Http2GoAwayFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2GoAwayFrame::getFrameData() {

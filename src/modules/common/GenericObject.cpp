@@ -153,30 +153,30 @@ bool GenericObject::isPrimitive(const std::string& typeName) {
 std::string GenericObject::getSerilaizedState() {
 	std::string valueStr = objSerState;
 	if(objVal==NULL)return std::string();
-	if(typeName=="short") valueStr = CastUtil::lexical_cast<std::string>(*(short*)objVal);
-	else if(typeName=="int") valueStr = CastUtil::lexical_cast<std::string>(*(int*)objVal);
-	else if(typeName=="long") valueStr = CastUtil::lexical_cast<std::string>(*(long*)objVal);
-	else if(typeName=="long long") valueStr = CastUtil::lexical_cast<std::string>(*(long long*)objVal);
-	else if(typeName=="unsigned short") valueStr = CastUtil::lexical_cast<std::string>(*(unsigned short*)objVal);
-	else if(typeName=="unsigned int") valueStr = CastUtil::lexical_cast<std::string>(*(unsigned int*)objVal);
-	else if(typeName=="unsigned long") valueStr = CastUtil::lexical_cast<std::string>(*(unsigned long*)objVal);
-	else if(typeName=="unsigned long long") valueStr = CastUtil::lexical_cast<std::string>(*(unsigned long long*)objVal);
-	else if(typeName=="bool") valueStr = CastUtil::lexical_cast<std::string>(*(bool*)objVal);
-	else if(typeName=="float") valueStr = CastUtil::lexical_cast<std::string>(*(float*)objVal);
-	else if(typeName=="double") valueStr = CastUtil::lexical_cast<std::string>(*(double*)objVal);
-	else if(typeName=="long double") valueStr = CastUtil::lexical_cast<std::string>(*(long double*)objVal);
-	else if(typeName=="std::string" || typeName=="string")  valueStr = CastUtil::lexical_cast<std::string>(*(std::string*)objVal);
+	if(typeName=="short") valueStr = CastUtil::fromNumber(*(short*)objVal);
+	else if(typeName=="int") valueStr = CastUtil::fromNumber(*(int*)objVal);
+	else if(typeName=="long") valueStr = CastUtil::fromNumber(*(long*)objVal);
+	else if(typeName=="long long") valueStr = CastUtil::fromNumber(*(long long*)objVal);
+	else if(typeName=="unsigned short") valueStr = CastUtil::fromNumber(*(unsigned short*)objVal);
+	else if(typeName=="unsigned int") valueStr = CastUtil::fromNumber(*(unsigned int*)objVal);
+	else if(typeName=="unsigned long") valueStr = CastUtil::fromNumber(*(unsigned long*)objVal);
+	else if(typeName=="unsigned long long") valueStr = CastUtil::fromNumber(*(unsigned long long*)objVal);
+	else if(typeName=="bool") valueStr = CastUtil::fromBool(*(bool*)objVal);
+	else if(typeName=="float") valueStr = CastUtil::fromFloat(*(float*)objVal);
+	else if(typeName=="double") valueStr = CastUtil::fromDouble(*(double*)objVal);
+	else if(typeName=="long double") valueStr = CastUtil::fromLongdouble(*(long double*)objVal);
+	else if(typeName=="std::string" || typeName=="string")  valueStr = *(std::string*)objVal;
 	else if(typeName=="char" || typeName=="char const") {
 		char* src = (char*)objVal;
-		valueStr = CastUtil::lexical_cast<std::string>(std::string(src, cstr.size()));
+		valueStr = std::string(src, cstr.size());
 	}
 	else if(typeName=="unsigned char" || typeName=="unsigned char const") {
 		unsigned char* src = (unsigned char*)objVal;
-		valueStr = CastUtil::lexical_cast<std::string>(std::string((char*)src, ucstr.size()));
+		valueStr = std::string((char*)src, ucstr.size());
 	}
 	else if(typeName=="wchar_t" || typeName=="char wchar_t") {
 		wchar_t* src = (wchar_t*)objVal;
-		valueStr = CastUtil::lexical_cast<std::string>(std::string((char*)src, wstr.size()));
+		valueStr = std::string((char*)src, wstr.size());
 	}
 	return valueStr;
 }

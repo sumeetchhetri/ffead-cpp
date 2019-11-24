@@ -27,7 +27,7 @@ ApplicationUtil::ApplicationUtil()
 }
 
 ApplicationUtil::~ApplicationUtil() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string ApplicationUtil::buildAllApplications(const std::vector<std::string>& files, const std::vector<std::string>& apps)
@@ -105,8 +105,8 @@ std::string ApplicationUtil::buildAllApplications(const std::vector<std::string>
 							ElementList elesce = elesc.at(var1).getChildElements();
 							for (unsigned int var2 = 0; var2 < elesce.size(); var2++)
 							{
-								meth += (elesce.at(var2).getTagName() + " _" + CastUtil::lexical_cast<std::string>(var2+1) + " = CastUtil::lexical_cast<"+elesce.at(var2).getTagName()+">(\""+elesce.at(var2).getText()+"\");\n");
-								args += ("_"+CastUtil::lexical_cast<std::string>(var2+1));
+								meth += (elesce.at(var2).getTagName() + " _" + CastUtil::fromNumber(var2+1) + " = CastUtil::lexical_cast<"+elesce.at(var2).getTagName()+">(\""+elesce.at(var2).getText()+"\");\n");
+								args += ("_"+CastUtil::fromNumber(var2+1));
 								if(var2!=elesce.size()-1)
 									args += ",";
 							}

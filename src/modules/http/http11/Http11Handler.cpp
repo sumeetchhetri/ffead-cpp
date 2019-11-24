@@ -56,7 +56,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		}
 		std::string bytesstr = request->getHeader(HttpRequest::ContentLength);
 		if(bytesstr!="") {
-			bytesToRead = CastUtil::lexical_cast<int>(bytesstr);
+			bytesToRead = CastUtil::toInt(bytesstr);
 			if(bytesToRead>maxEntitySize) {
 				closeSocket();
 				delete request;
@@ -180,7 +180,7 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context, std::stri
 	if(response->getHeader(HttpRequest::Connection)=="")
 	{
 		if(StringUtil::toLowerCopy(request->getHeader(HttpRequest::Connection))!="keep-alive"
-				|| CastUtil::lexical_cast<int>(response->getStatusCode())>307 || request->getHttpVers()<1.1)
+				|| CastUtil::toInt(response->getStatusCode())>307 || request->getHttpVers()<1.1)
 		{
 			response->addHeader(HttpResponse::Connection, "close");
 		}

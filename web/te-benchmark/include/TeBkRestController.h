@@ -18,6 +18,8 @@
 
 #pragma @RestController path="/"
 class TeBkRestController {
+	static const std::string HELLO_WORLD;
+	static std::string WORLD;
 public:
 	#pragma @GET path="/json" statusCode="200" ocontentType="application/json"
 	TeBkMessage json();

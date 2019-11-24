@@ -48,8 +48,8 @@ public:
 	Task();
 	virtual ~Task();
 	virtual void run()=0;
-	void setTid(int tid);
-	int getTid();
+	virtual void setTid(int tid);
+	virtual int getTid();
 protected:
 	ReusableInstanceHolder* hdlr;
 	void init();

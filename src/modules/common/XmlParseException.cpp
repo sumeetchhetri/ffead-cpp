@@ -27,5 +27,5 @@ XmlParseException::XmlParseException(const std::string& message) {
 }
 
 XmlParseException::~XmlParseException() throw() {
-	// TODO Auto-generated destructor stub
+	
 }

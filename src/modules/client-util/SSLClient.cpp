@@ -60,7 +60,7 @@ SSLClient::SSLClient(const std::string& secFile) {
 		{
 			try
 			{
-				client_auth = CastUtil::lexical_cast<int>(tempcl);
+				client_auth = CastUtil::toInt(tempcl);
 			}
 			catch(const std::exception& e)
 			{
@@ -71,7 +71,7 @@ SSLClient::SSLClient(const std::string& secFile) {
 		isDHParams = true;
 		try
 		{
-			isDHParams = CastUtil::lexical_cast<bool>(sslsec["ISDH_PARAMS"]);
+			isDHParams = CastUtil::toBool(sslsec["ISDH_PARAMS"]);
 		}
 		catch(const std::exception& e)
 		{
@@ -219,7 +219,7 @@ bool SSLClient::connection(const std::string& host, const int& port)
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
-	std::string sport = CastUtil::lexical_cast<std::string>(port);
+	std::string sport = CastUtil::fromNumber(port);
 	if ((rv = getaddrinfo(host.c_str(), sport.c_str(), &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return false;
@@ -338,7 +338,7 @@ std::string SSLClient::getTextData(const std::string& hdrdelm, const std::string
 			cntle = cntle.substr(0,cntle.length()-1);
 			try
 			{
-				cntlen = CastUtil::lexical_cast<int>(cntle);
+				cntlen = CastUtil::toInt(cntle);
 			}
 			catch(const std::exception& e)
 			{

@@ -13,7 +13,6 @@
 #include "ConnectionPooler.h"
 
 class MemcachedConnectionPool: public ConnectionPooler {
-	Logger logger;
 	void initEnv();
 	void* newConnection(const bool& isWrite, const ConnectionNode& node);
 	void closeConnection(void* conn);

@@ -51,12 +51,12 @@ void AppContext::clear()
 }
 
 AppContext::AppContext() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 AppContext::~AppContext() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 bool AppContext::registerComponent(const std::string& name)

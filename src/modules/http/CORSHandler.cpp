@@ -74,7 +74,7 @@ bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse 
 
 				if(corsConfig.maxAge>0)
 				{
-					res->addHeader(HttpResponse::AccessControlAllowMethods, CastUtil::lexical_cast<std::string>(corsConfig.maxAge));
+					res->addHeader(HttpResponse::AccessControlAllowMethods, CastUtil::fromNumber(corsConfig.maxAge));
 				}
 
 				res->addHeader(HttpResponse::AccessControlAllowMethods, corsConfig.allwdMethods);

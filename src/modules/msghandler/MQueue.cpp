@@ -23,10 +23,10 @@
 #include "MQueue.h"
 
 MQueue::MQueue() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 MQueue::~MQueue() {
-	// TODO Auto-generated destructor stub
+	
 }

@@ -36,7 +36,7 @@ unsigned char Http2FrameHeader::getType() const {
 }
 
 Http2FrameHeader::~Http2FrameHeader() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 bool Http2FrameHeader::isEndOfStream() {

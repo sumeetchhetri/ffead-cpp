@@ -24,7 +24,7 @@
 
 bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflector, Element* ele)
 {
-	Logger logger = LoggerFactory::getLogger("FormHandler");
+	//Logger logger = LoggerFactory::getLogger("FormHandler");
 	Reflector ref;
 	//logger << ele->getTagName() << std::endl;
 	//logger << ele->render() << std::endl;
@@ -73,7 +73,7 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 		json = json.substr(0,json.length()-1);
 	}
 	json += "}";
-	logger << json << std::endl;
+	//logger << json << std::endl;
 
 	void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("form_"+ele->getAttribute("controller"), req->getCntxt_name());
 	args argus;

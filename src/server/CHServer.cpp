@@ -322,11 +322,11 @@ void* gracefullShutdown_monitor(void* args)
 
 	if(isSSLEnabled) {
 		SSLClient sc;
-		sc.connection(ip, CastUtil::lexical_cast<int>(port));
+		sc.connection(ip, CastUtil::toInt(port));
 		sc.closeConnection();
 	} else {
 		Client sc;
-		sc.connection(ip, CastUtil::lexical_cast<int>(port));
+		sc.connection(ip, CastUtil::toInt(port));
 		sc.closeConnection();
 	}
 
@@ -500,7 +500,7 @@ int main(int argc, char* argv[])
 	int vhostNum = 0;
 	if(argc > 4)
 	{
-		vhostNum = CastUtil::lexical_cast<int>(argv[4]);
+		vhostNum = CastUtil::toInt(argv[4]);
 	}
 	if(argc > 5)
 	{
@@ -583,8 +583,8 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	}
 	else
 	{
-		name = "CHServer(VHost-" + CastUtil::lexical_cast<std::string>(vhostNum) + ")";
-		serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." + CastUtil::lexical_cast<std::string>(vhostNum);
+		name = "CHServer(VHost-" + CastUtil::fromNumber(vhostNum) + ")";
+		serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." + CastUtil::fromNumber(vhostNum);
 	}
 
 	logger = LoggerFactory::getLogger(name);
@@ -593,7 +593,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
     {
     	try
 		{
-    		preForked = CastUtil::lexical_cast<int>(srprps["NUM_PROC"]);
+    		preForked = CastUtil::toInt(srprps["NUM_PROC"]);
 		}
 		catch(const std::exception& e)
 		{
@@ -620,7 +620,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		{
 			try
 			{
-				thrdpsiz = CastUtil::lexical_cast<int>(thrdpreq);
+				thrdpsiz = CastUtil::toInt(thrdpreq);
 			}
 			catch(const std::exception& e)
 			{
@@ -644,7 +644,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
    	if(srprps["SESS_TIME_OUT"]!="")
    	{
    		try {
-   			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
+   			sessionTimeout = CastUtil::toLong(srprps["SESS_TIME_OUT"]);
 		} catch(const std::exception& e) {
 			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << std::endl;
 		}
@@ -707,6 +707,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	ConfigurationData::getInstance()->enableExtra = StringUtil::toLowerCopy(srprps["ENABLE_EXT"])=="true";
 	ConfigurationData::getInstance()->enableScripts = StringUtil::toLowerCopy(srprps["ENABLE_SCR"])=="true";
 	ConfigurationData::getInstance()->enableSoap = StringUtil::toLowerCopy(srprps["ENABLE_SWS"])=="true";
+	ConfigurationData::getInstance()->enableLogging = StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true";
 
     strVec cmpnames;
     try
@@ -851,7 +852,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		try {
 			if(srprps["DISTOCACHE_POOL_SIZE"]!="")
 			{
-				distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
+				distocachepoolsize = CastUtil::toInt(srprps["DISTOCACHE_POOL_SIZE"]);
 			}
 		} catch(const std::exception& e) {
 			logger << ("Invalid poolsize specified for distocache") << std::endl;
@@ -860,7 +861,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		try {
 			if(srprps["DISTOCACHE_PORT_NO"]!="")
 			{
-				CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
+				CastUtil::toInt(srprps["DISTOCACHE_PORT_NO"]);
 				DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
 				logger << ("Session store is set to distocache store") << std::endl;
 				distocache = true;
@@ -879,7 +880,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		try {
 			if(srprps["CMP_PORT"]!="")
 			{
-				int port = CastUtil::lexical_cast<int>(srprps["CMP_PORT"]);
+				int port = CastUtil::toInt(srprps["CMP_PORT"]);
 				if(port>0)
 				{
 					ComponentHandler::trigger(srprps["CMP_PORT"]);
@@ -894,7 +895,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		try {
 			if(srprps["MESS_PORT"]!="")
 			{
-				int port = CastUtil::lexical_cast<int>(srprps["MESS_PORT"]);
+				int port = CastUtil::toInt(srprps["MESS_PORT"]);
 				if(port>0)
 				{
 					MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
@@ -909,7 +910,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		try {
 			if(srprps["MI_PORT"]!="")
 			{
-				int port = CastUtil::lexical_cast<int>(srprps["MI_PORT"]);
+				int port = CastUtil::toInt(srprps["MI_PORT"]);
 				if(port>0)
 				{
 					MethodInvoc::trigger(srprps["MI_PORT"]);
@@ -940,16 +941,16 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 						LoggerFactory::instance->setVhostNumber(var+1);
 
 						std::string lnm = "CHServer(VHost-" +
-								CastUtil::lexical_cast<std::string>(var+1) + ")";
+								CastUtil::fromNumber(var+1) + ")";
 						serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
-								CastUtil::lexical_cast<std::string>(var+1);
+								CastUtil::fromNumber(var+1);
 						serve(port, ipaddr, thrdpsiz, serverRootDirectory, srprps, var+1);
 						exit(0);
 					}
 					else
 					{
 						serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
-								CastUtil::lexical_cast<std::string>(var+1);
+								CastUtil::fromNumber(var+1);
 						struct stat buffer;
 						while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 						{
@@ -958,7 +959,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 					}
 				#else
 					std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " \"" + ipaddr + "\" " + port
-							+ " \"\" " + CastUtil::lexical_cast<std::string>(var+1);
+							+ " \"\" " + CastUtil::fromNumber(var+1);
 					std::string vhostcmdo = ScriptHandler::chdirExecute(vhostcmd, serverRootDirectory, true);
 					logger.info("Starting new Virtual-Host at " + (ipaddr + ":" + port));
 					logger << vhostcmdo << std::endl;
@@ -1044,16 +1045,16 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 									ConfigurationData::getInstance()->appAliases = updatedaliasNames;
 
 									std::string lnm = "CHServer(VHost-" +
-											CastUtil::lexical_cast<std::string>(vhi+1) + ")";
+											CastUtil::fromNumber(vhi+1) + ")";
 									serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
-											CastUtil::lexical_cast<std::string>(vhi+1);
+											CastUtil::fromNumber(vhi+1);
 									serve(vhostport, vhostname, thrdpsiz, serverRootDirectory, srprps, vhi+1);
 									exit(0);
 								}
 								else
 								{
 									serverCntrlFileNm = serverRootDirectory + "ffead.cntrl." +
-											CastUtil::lexical_cast<std::string>(vhi+1);
+											CastUtil::fromNumber(vhi+1);
 									struct stat buffer;
 									while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 									{
@@ -1062,7 +1063,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 								}
 							#else
 								std::string vhostcmd = "./vhost-server.sh " + serverRootDirectory + " " + vhostname + " " + vhostport
-										+ " " + vhostapps + " " + CastUtil::lexical_cast<std::string>(vhi+1);
+										+ " " + vhostapps + " " + CastUtil::fromNumber(vhi+1);
 								std::string vhostcmdo = ScriptHandler::chdirExecute(vhostcmd, serverRootDirectory, true);
 								logger.info("Starting new Virtual-Host at " + (vhostname + ":" + vhostport));
 								logger << vhostcmdo << std::endl;
@@ -1154,7 +1155,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	{
 		try
 		{
-			preForked = CastUtil::lexical_cast<int>(sprops["NUM_PROC"]);
+			preForked = CastUtil::toInt(sprops["NUM_PROC"]);
 		}
 		catch(const std::exception& e)
 		{
@@ -1170,7 +1171,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	//struct sockaddr_storage their_addr; // connector's address information
 	//socklen_t sin_size;
 
-	sockfd = Server::createListener(ipaddr, CastUtil::lexical_cast<int>(port), true);
+	sockfd = Server::createListener(ipaddr, CastUtil::toInt(port), true);
 
 	if(sockfd==-1)
 	{
@@ -1226,19 +1227,19 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	std::string cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["CONTENT_ENCODING"]);
 	try {
-		techunkSiz = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->coreServerProperties.sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);
+		techunkSiz = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);
 	} catch(const std::exception& e) {
 	}
 	try {
-		connKeepAlive = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->coreServerProperties.sprops["KEEP_ALIVE_SECONDS"]);
+		connKeepAlive = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["KEEP_ALIVE_SECONDS"]);
 	} catch(const std::exception& e) {
 	}
 	try {
-		maxReqHdrCnt = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->coreServerProperties.sprops["MAX_REQUEST_HEADERS_COUNT"]);
+		maxReqHdrCnt = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["MAX_REQUEST_HEADERS_COUNT"]);
 	} catch(const std::exception& e) {
 	}
 	try {
-		maxEntitySize = CastUtil::lexical_cast<int>(ConfigurationData::getInstance()->coreServerProperties.sprops["MAX_REQUEST_ENTITY_SIZE"]);
+		maxEntitySize = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["MAX_REQUEST_ENTITY_SIZE"]);
 	} catch(const std::exception& e) {
 	}
 
@@ -1268,7 +1269,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	}
 
 	std::string ip = ipport.substr(0, ipport.find(":"));
-	reader.stop(ip, CastUtil::lexical_cast<int>(port), isSSLEnabled);
+	reader.stop(ip, CastUtil::toInt(port), isSSLEnabled);
 
 	close(sockfd);
 
@@ -1321,7 +1322,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		WSACleanup();
 	#endif
 
-	//std::string lg = "Memory allocations waiting to be freed = " + CastUtil::lexical_cast<std::string>(ConfigurationData::counter);
+	//std::string lg = "Memory allocations waiting to be freed = " + CastUtil::fromNumber(ConfigurationData::counter);
 	//logger <<  lg << std::endl;
 
 #ifdef INC_SDORM

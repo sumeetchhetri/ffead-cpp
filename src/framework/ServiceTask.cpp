@@ -42,7 +42,7 @@ void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std:
 	}
 
 	std::string filen = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory+"/tmp/"+sessionId+".sess";
-	logger << ("Saving session to file " + filen) << std::endl;
+	if(ConfigurationData::getInstance()->enableLogging) logger << ("Saving session to file " + filen) << std::endl;
 	std::ofstream ofs(filen.c_str(), std::ios::binary);
 	ofs.write(value.c_str(),value.length());
 	ofs.close();
@@ -80,7 +80,7 @@ std::map<std::string,std::string> ServiceTask::getSessionDataFromFile(const std:
 			StringUtil::replaceAll(results1.at(0),"%3D","=");
 			valss[results1.at(0)] = "true";
 		}
-		logger << ("Read key/value pair " + results1.at(0) + " = " + valss[results1.at(0)]) << std::endl;
+		if(ConfigurationData::getInstance()->enableLogging) logger << ("Read key/value pair " + results1.at(0) + " = " + valss[results1.at(0)]) << std::endl;
 	}
 	return valss;
 }
@@ -100,7 +100,7 @@ std::map<std::string,std::string> ServiceTask::getSessionDataFromDistocache(cons
 	try {
 		mp = globalMap.getMap<std::string,std::string>(sessionId);
 	} catch(const std::exception& e) {
-		logger << "error readin map value"<< std::endl;
+		if(ConfigurationData::getInstance()->enableLogging) logger << "error readin map value"<< std::endl;
 	}
 	return mp;
 }
@@ -119,7 +119,7 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 		std::string values;
 		//logger << "session object modified " << vals.size() << std::endl;
 		Date date(true);
-		std::string id = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
+		std::string id = CastUtil::fromNumber(Timer::getCurrentTime());
 		//int seconds = sessionTimeout;
 		date.updateSeconds(sessionTimeout);
 		DateFormat dformat("%a, %d %b %Y %H:%M:%S");
@@ -237,7 +237,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 
 	if(req->getMethod()=="HEAD")
 	{
-		res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(getFileSize(fname.c_str())));
+		res->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber(getFileSize(fname.c_str())));
 		res->addHeader(HttpResponse::AcceptRanges, "bytes");
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
@@ -280,27 +280,27 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 			try {
 				ifmodsince = df.parse(ifmodsincehdr);
 				isifmodsincvalid = true;
-				logger << "Parsed date success" << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << "Parsed date success" << std::endl;
 			} catch(const std::exception& e) {
 				isifmodsincvalid = false;
 			}
 
 			if(ifmodsince!=NULL)
 			{
-				logger << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
-				logger << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
-				logger << "Date Comparisons = " +CastUtil::lexical_cast<std::string>(*ifmodsince>=filemodifieddate)  << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << "Date Comparisons = " +CastUtil::fromBool(*ifmodsince>=filemodifieddate)  << std::endl;
 
 				if(isifmodsincvalid && *ifmodsince>=filemodifieddate)
 				{
 					res->addHeader(HttpResponse::LastModified, ifmodsincehdr);
-					logger << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
 					return;
 				}
 				else if(isifmodsincvalid && *ifmodsince<filemodifieddate)
 				{
-					logger << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 					forceLoadFile = true;
 				}
 				delete ifmodsince;
@@ -352,7 +352,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 			req->setUrl(fname);
 		}
 
-		logger << ("Content request for " + url + " " + ext + " actual file " + fname) << std::endl;
+		if(ConfigurationData::getInstance()->enableLogging) logger << ("Content request for " + url + " " + ext + " actual file " + fname) << std::endl;
 
 		if(req->getHttpVers()<1.1 && rangeValuesLst.size()>0)
 		{
@@ -364,7 +364,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 			res->setHTTPResponseStatus(HTTPResponseStatus::PartialContent);
 			res->addHeader(HttpResponse::ContentType, "multipart/byteranges");
 			unsigned int totlen = getFileSize(fname.c_str());
-			res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
+			res->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber(totlen));
 			for (int var = 0; var <(int)rangeValuesLst.size(); ++var) {
 				int start = rangeValuesLst.at(var).at(0);
 				int end = rangeValuesLst.at(var).at(1);
@@ -383,7 +383,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 					std::string cont = getFileContents(fname.c_str(), start, end);
 					MultipartContent conte(cont);
 					conte.addHeader(MultipartContent::ContentType, type);
-					conte.addHeader(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::lexical_cast<std::string>(totlen));
+					conte.addHeader(HttpResponse::ContentRange, "bytes "+rangesVec.at(var)+"/"+CastUtil::fromNumber(totlen));
 					res->addContent(conte);
 				}
 			}
@@ -403,7 +403,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 			}
 			else
 			{
-				res->addHeader(HttpResponse::ContentLength, CastUtil::lexical_cast<std::string>(totlen));
+				res->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber(totlen));
 				all = getFileContents(fname.c_str());
 			}
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
@@ -437,13 +437,13 @@ void ServiceTask::handleWebsockOpen(WebSocketData* req) {
 		Method meth = srv->getMethod("onOpen", argus);
 		if(meth.getMethodName()!="")
 		{
-			// logger << ("WebSocket Controller " + className + " called") << std::endl;
+			// if(ConfigurationData::getInstance()->enableLogging) logger << ("WebSocket Controller " + className + " called") << std::endl;
 			 reflector.invokeMethodGVP(_temp,meth,valus);
-			 logger << "WebSocket Controller onOpen" << std::endl;
+			 if(ConfigurationData::getInstance()->enableLogging) logger << "WebSocket Controller onOpen" << std::endl;
 		}
 		else
 		{
-			logger << "Invalid WebSocket Controller" << std::endl;
+			if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid WebSocket Controller" << std::endl;
 		}
 	}
 }
@@ -474,11 +474,11 @@ void ServiceTask::handleWebsockClose(WebSocketData* req) {
 		{
 			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
 			 reflector.invokeMethodGVP(_temp,methc,valus);
-			 logger << "WebSocket Controller onClose" << std::endl;
+			 if(ConfigurationData::getInstance()->enableLogging) logger << "WebSocket Controller onClose" << std::endl;
 		}
 		else
 		{
-			logger << "Invalid WebSocket Controller" << std::endl;
+			if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid WebSocket Controller" << std::endl;
 		}
 	}
 }
@@ -514,11 +514,11 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
 			 WebSocketData data;
 			 reflector.invokeMethod<WebSocketData>(&data,_temp,methc,valus);
-			 logger << "WebSocket Controller onMessage" << std::endl;
+			 if(ConfigurationData::getInstance()->enableLogging) logger << "WebSocket Controller onMessage" << std::endl;
 		}
 		else
 		{
-			logger << "Invalid WebSocket Controller" << std::endl;
+			if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid WebSocket Controller" << std::endl;
 		}
 	}
 }
@@ -554,7 +554,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			if(ConfigurationData::getInstance()->servingContexts.find(req->getCntxt_name())==ConfigurationData::getInstance()->servingContexts.end())
 			{
 				res->addHeader(HttpResponse::Connection, "close");
-				logger << "Context not found, Closing connection..." << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << "Context not found, Closing connection..." << std::endl;
 				return;
 			}
 		}
@@ -570,7 +570,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		ConfigurationData::getInstance()->httpRequest.set(req);
 		ConfigurationData::getInstance()->httpResponse.set(res);
-		CommonUtils::setAppName(req->getCntxt_name());
+		CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames[req->getCntxt_name()]);
 
 		if(ConfigurationData::getInstance()->enableSecurity) {
 			SecurityHandler::populateAuthDetails(req);
@@ -747,7 +747,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 	}
 	catch(const std::exception& e)
 	{
-		logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
+		if(ConfigurationData::getInstance()->enableLogging) logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
 	}
 }
 

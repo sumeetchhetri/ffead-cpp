@@ -27,7 +27,7 @@ AfcUtil::AfcUtil() {
 }
 
 AfcUtil::~AfcUtil() {
-	// TODO Auto-generated destructor stub
+	
 }
 static std::map<std::string,std::string> doneMap;
 std::string AfcUtil::generateJsInterfacessAll(std::map<std::string, ClassStructure>& allclsmap, std::string &infjs, std::map<std::string, std::string>& ajintpthMap, strVec& afcd, Reflection& ref)
@@ -569,7 +569,6 @@ std::string AfcUtil::generateJsObjects(const strVec& obj, ClassStructure& classs
 		StringUtil::split(vemp, data, (" "));
 		if(vemp.size()<2)
 		{
-			logger << data << " error" <<  std::endl;
 			continue;
 		}
 
@@ -941,7 +940,7 @@ std::string AfcUtil::generateToJSONObjects(const std::string& type, const std::s
 			tempp = StringUtil::replaceAllCopy(tempp, ">", "");
 
 			std::string fqcn = ref.getFullyQualifiedClassName(tempp, classstruc.getNamespaces());
-			std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(stlcnttyp+"<"+fqcn+">"));
+			std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(stlcnttyp+"<"+fqcn+">"));
 
 			fres += "json += \"\\\""+name+"\\\" : \";\n";
 			if(!priv)
@@ -1310,17 +1309,17 @@ std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& cla
 						{
 							types.append(emp.at(j));
 							types.append(" _");
-							jsonstr += "_"+CastUtil::lexical_cast<std::string>(j-1);
-							types.append(CastUtil::lexical_cast<std::string>(j-1));
+							jsonstr += "_"+CastUtil::fromNumber(j-1);
+							types.append(CastUtil::fromNumber(j-1));
 							types.append(" = CastUtil::lexical_cast<");
 							types.append(emp.at(j));
 							types.append(">(_inp.at(");
-							types.append(CastUtil::lexical_cast<std::string>(j-2));
+							types.append(CastUtil::fromNumber(j-2));
 							types.append("));\n");
 						}
 						else
 						{
-							std::string varname = CastUtil::lexical_cast<std::string>(j-1);
+							std::string varname = CastUtil::fromNumber(j-1);
 							std::string retType = emp.at(j);
 							bool ptr = retType.find("*")!=std::string::npos;
 							std::string tempp = StringUtil::replaceAllCopy(retType, " ", "");
@@ -1357,11 +1356,11 @@ std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& cla
 									types.append("* _");
 								else
 									types.append(" _");
-								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<std::string>(j-1)+")";
+								jsonstr += "JSON.stringify(_"+CastUtil::fromNumber(j-1)+")";
 
 								types.append(varname);
 								std::string adden = "", padden = "";
-								std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(stlcnttyp+"<"+fqcn+">"));
+								std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(stlcnttyp+"<"+fqcn+">"));
 								if(ptr)
 								{
 									adden = "," +  serOpt + ", \""+stlcnttyp+"<"+fqcn+">\"";
@@ -1373,7 +1372,7 @@ std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& cla
 									adden = "," +  serOpt;
 									types.append(" = JSONSerialize::unserialize<"+stlcnttyp+"<"+fqcn+"> >(_inp.at(");
 								}
-								types.append(CastUtil::lexical_cast<std::string>(j-2));
+								types.append(CastUtil::fromNumber(j-2));
 								types.append(")"+adden+", \""+appName+"\");\n"+padden);
 							}
 							else if(fqcn=="Date" || fqcn=="BinaryData")
@@ -1386,9 +1385,9 @@ std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& cla
 									types.append(" _");
 
 								std::string adden = "", padden = "";
-								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<std::string>(j-1)+")";
+								jsonstr += "JSON.stringify(_"+CastUtil::fromNumber(j-1)+")";
 								types.append(varname);
-								std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
+								std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(fqcn));
 								if(ptr)
 								{
 									padden = "delete _" + varname + ";\n";
@@ -1400,7 +1399,7 @@ std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& cla
 									adden = "," +  serOpt;
 									types.append(" = JSONSerialize::unserialize<"+fqcn+">(_inp.at(");
 								}
-								types.append(CastUtil::lexical_cast<std::string>(j-2));
+								types.append(CastUtil::fromNumber(j-2));
 								types.append(")"+adden+", \""+appName+"\");\n"+padden);
 							}
 							else if(Reflection::isValidClass(fqcn, appName))
@@ -1413,9 +1412,9 @@ std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& cla
 									types.append(" _");
 
 								std::string adden = "", padden = "";
-								jsonstr += "JSON.stringify(_"+CastUtil::lexical_cast<std::string>(j-1)+")";
-								types.append(CastUtil::lexical_cast<std::string>(j-1));
-								std::string serOpt = CastUtil::lexical_cast<std::string>(SerializeBase::identifySerOption(fqcn));
+								jsonstr += "JSON.stringify(_"+CastUtil::fromNumber(j-1)+")";
+								types.append(CastUtil::fromNumber(j-1));
+								std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(fqcn));
 								if(ptr)
 								{
 									padden = "delete _" + varname + ";\n";
@@ -1427,7 +1426,7 @@ std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& cla
 									adden = "," +  serOpt;
 									types.append(" = JSONSerialize::unserialize<"+fqcn+">(_inp.at(");
 								}
-								types.append(CastUtil::lexical_cast<std::string>(j-2));
+								types.append(CastUtil::fromNumber(j-2));
 								types.append(")"+adden+", \""+appName+"\");\n"+padden);
 							}
 						}

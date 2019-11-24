@@ -23,7 +23,7 @@
 #include "Exception.h"
 
 Exception::Exception() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
@@ -32,7 +32,7 @@ Exception::Exception(const std::string& message) {
 }
 
 Exception::~Exception() throw() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 const std::string& Exception::getMessage() const

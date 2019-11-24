@@ -13,7 +13,7 @@ RedisCacheImpl::RedisCacheImpl(ConnectionPooler* pool) {
 	this->defaultExpireSeconds = -1;
 	if(properties.getProperty("expiryTime")!="") {
 		try {
-			this->defaultExpireSeconds = CastUtil::lexical_cast<int>(properties.getProperty("expiryTime"));
+			this->defaultExpireSeconds = CastUtil::toInt(properties.getProperty("expiryTime"));
 		} catch(const std::exception& e) {
 		}
 	}
@@ -36,7 +36,7 @@ long long RedisCacheImpl::increment(const std::string& key, const int& number) {
 	if(val=="") {
 		throw std::runtime_error("Command Failed");
 	} else {
-		return CastUtil::lexical_cast<long long>(val);
+		return CastUtil::toLonglong(val);
 	}
 }
 
@@ -46,7 +46,7 @@ long long RedisCacheImpl::decrement(const std::string& key, const int& number) {
 	if(val=="") {
 		throw std::runtime_error("Command Failed");
 	} else {
-		return CastUtil::lexical_cast<long long>(val);
+		return CastUtil::toLonglong(val);
 	}
 }
 
@@ -56,7 +56,7 @@ long double RedisCacheImpl::incrementFloat(const std::string& key, const double&
 	if(val=="") {
 		throw std::runtime_error("Command Failed");
 	} else {
-		return CastUtil::lexical_cast<long double>(val);
+		return CastUtil::toLongdouble(val);
 	}
 }
 
@@ -144,7 +144,7 @@ bool RedisCacheImpl::replyStatus(redisReply* reply) {
 
 std::string RedisCacheImpl::replyValue(redisReply* reply) {
 	if (reply->type == REDIS_REPLY_INTEGER) {
-		return CastUtil::lexical_cast<std::string>(reply->integer);
+		return CastUtil::fromNumber(reply->integer);
 	} else if (reply->type == REDIS_REPLY_STRING) {
 		std::string value;
 		for (int var = 0; var < reply->len; ++var) {
@@ -180,7 +180,6 @@ void RedisCacheImpl::init() {
 }
 
 RedisCacheConnectionPool::RedisCacheConnectionPool(const ConnectionProperties& props) {
-	logger = LoggerFactory::getLogger("RedisCacheConnectionPool");
 	createPool(props);
 }
 

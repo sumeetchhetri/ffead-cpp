@@ -27,7 +27,7 @@ CppInterpreter::CppInterpreter() {
 }
 
 CppInterpreter::~CppInterpreter() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 mapVars CppInterpreter::getLocalVariables() const
@@ -283,7 +283,7 @@ bool CppInterpreter::retState(const std::string& type, GenericObject& source, co
 		{
 			int s = 0;
 			source.get<int>(s);
-			int t = CastUtil::lexical_cast<int>(target);
+			int t = CastUtil::toInt(target);
 			if(type=="==")
 				return (s==t);
 			else if(type=="<=")
@@ -301,7 +301,7 @@ bool CppInterpreter::retState(const std::string& type, GenericObject& source, co
 		{
 			float s = 0;
 			source.get<float>(s);
-			float t = CastUtil::lexical_cast<float>(target);
+			float t = CastUtil::toFloat(target);
 			if(type=="==")
 				return (s==t);
 			else if(type=="<=")
@@ -319,7 +319,7 @@ bool CppInterpreter::retState(const std::string& type, GenericObject& source, co
 		{
 			double s = 0;
 			source.get<double>(s);
-			double t = CastUtil::lexical_cast<double>(target);
+			double t = CastUtil::toDouble(target);
 			if(type=="==")
 				return (s==t);
 			else if(type=="<=")
@@ -565,27 +565,27 @@ void CppInterpreter::evaluateUpdateInbuilt(const std::string& sep, const std::st
 			if(containsChar(curr.at(i)))
 			{
 				GenericObject o = localVariables[curr.at(i)];
-				opr.push_back(CastUtil::lexical_cast<std::string>(o.getValue<int>()));
+				opr.push_back(CastUtil::fromNumber(o.getValue<int>()));
 			}
 			else
 				opr.push_back(curr.at(i));
 		}
 		if(sep=="=")
-			*_temp = CastUtil::lexical_cast<int>(handleAssignment<int>(opr));
+			*_temp = CastUtil::toInt(handleAssignment<int>(opr));
 		else if(sep=="+=")
-			*_temp = *_temp + CastUtil::lexical_cast<int>(handleAssignment<int>(opr));
+			*_temp = *_temp + CastUtil::toInt(handleAssignment<int>(opr));
 		else if(sep=="-=")
-			*_temp = *_temp - CastUtil::lexical_cast<int>(handleAssignment<int>(opr));
+			*_temp = *_temp - CastUtil::toInt(handleAssignment<int>(opr));
 		else if(sep=="++")
 			*_temp = (*_temp+1);
 		else if(sep=="--")
 			*_temp = (*_temp-1);*/
 		if(sep=="=")
-			*_temp = CastUtil::lexical_cast<int>(res);
+			*_temp = CastUtil::toInt(res);
 		else if(sep=="+=")
-			*_temp = *_temp + CastUtil::lexical_cast<int>(res);
+			*_temp = *_temp + CastUtil::toInt(res);
 		else if(sep=="-=")
-			*_temp = *_temp - CastUtil::lexical_cast<int>(res);
+			*_temp = *_temp - CastUtil::toInt(res);
 		else if(sep=="++")
 			*_temp = (*_temp+1);
 		else if(sep=="--")
@@ -857,7 +857,7 @@ void CppInterpreter::handleStatement(std::vector<std::string>::iterator &itr)
 				{
 					GenericObject o;
 					o.set(obj.getPointer(), obj.getType());
-					std::string argname = "_argno"+CastUtil::lexical_cast<std::string>(argn++);
+					std::string argname = "_argno"+CastUtil::fromNumber(argn++);
 					localVariables[argname] = o;
 					//rhs.push_back(argname);
 					token = *(itr);
@@ -1498,7 +1498,7 @@ void CppInterpreter::eval(std::string str)
 		std::string litval;
 		litval = temp.substr(s,e);
 		temp = temp.substr(e+s+1);
-		std::string varn =  ("_"+ CastUtil::lexical_cast<std::string>(st++));
+		std::string varn =  ("_"+ CastUtil::fromNumber(st++));
 		literals[varn] = litval;
 		std::string ini = str.substr(0,s-1);
 		str = (ini + varn + temp);

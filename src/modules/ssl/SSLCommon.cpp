@@ -34,12 +34,12 @@ std::string SSLCommon::ciphers =
 
 
 SSLCommon::SSLCommon() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 SSLCommon::~SSLCommon() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 

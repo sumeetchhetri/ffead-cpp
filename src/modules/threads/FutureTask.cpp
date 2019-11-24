@@ -41,7 +41,7 @@ FutureTask::FutureTask(const int& tunit, const int& type) {
 }
 
 FutureTask::~FutureTask() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 void* FutureTask::getResult()

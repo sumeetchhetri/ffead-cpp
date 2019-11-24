@@ -23,7 +23,7 @@ unsigned int Http2ResetStreamFrame::getErrorCode() const {
 }
 
 Http2ResetStreamFrame::~Http2ResetStreamFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2ResetStreamFrame::getFrameData() {

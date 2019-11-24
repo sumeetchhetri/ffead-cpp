@@ -397,7 +397,7 @@ AMEFObject* AMEFObject::addFloatPacket(const float& doub)
 	AMEFObject* JDBObjectNew = new AMEFObject();
 	JDBObjectNew->type = DOUBLE_FLOAT_TYPE;
 	JDBObjectNew->name = "";
-	JDBObjectNew->value = CastUtil::lexical_cast<std::string>(doub);
+	JDBObjectNew->value = CastUtil::fromFloat(doub);
 	packets.push_back(JDBObjectNew);
 	return JDBObjectNew;
 }
@@ -421,7 +421,7 @@ AMEFObject* AMEFObject::addLDoublePacket(const long double& doub)
 	AMEFObject* JDBObjectNew = new AMEFObject();
 	JDBObjectNew->type = DOUBLE_FLOAT_TYPE;
 	JDBObjectNew->name = "";
-	JDBObjectNew->value = CastUtil::lexical_cast<std::string>(doub);
+	JDBObjectNew->value = CastUtil::fromLongdouble(doub);
 	packets.push_back(JDBObjectNew);
 	return JDBObjectNew;
 }
@@ -432,7 +432,7 @@ AMEFObject* AMEFObject::addDoublePacket(const double& doub)
 	AMEFObject* JDBObjectNew = new AMEFObject();
 	JDBObjectNew->type = DOUBLE_FLOAT_TYPE;
 	JDBObjectNew->name = "";
-	JDBObjectNew->value = CastUtil::lexical_cast<std::string>(doub);
+	JDBObjectNew->value = CastUtil::fromDouble(doub);
 	packets.push_back(JDBObjectNew);
 	return JDBObjectNew;
 }
@@ -693,7 +693,7 @@ unsigned short AMEFObject::getUShortValue()
 double AMEFObject::getDoubleValue()
 {
 	if(type==DOUBLE_FLOAT_TYPE)
-		return (CastUtil::lexical_cast<double>(getValueStr()));
+		return (CastUtil::toDouble(getValueStr()));
 	else
 		return -1;
 }
@@ -701,7 +701,7 @@ double AMEFObject::getDoubleValue()
 long double AMEFObject::getLongDoubleValue()
 {
 	if(type==DOUBLE_FLOAT_TYPE)
-		return (CastUtil::lexical_cast<long double>(getValueStr()));
+		return (CastUtil::toLongdouble(getValueStr()));
 	else
 		return -1;
 }
@@ -712,7 +712,7 @@ long double AMEFObject::getLongDoubleValue()
 float AMEFObject::getFloatValue()
 {
 	if(type==DOUBLE_FLOAT_TYPE)
-		return (CastUtil::lexical_cast<float>(getValueStr()));
+		return (CastUtil::toFloat(getValueStr()));
 	else
 		return -1;
 }
@@ -793,13 +793,13 @@ std::string AMEFObject::displayObject(const std::string& tab)
 		else if(obj->isChar())
 		{
 			if(obj->type==BOOLEAN_TYPE)
-				displ += CastUtil::lexical_cast<std::string>(obj->getBoolValue()) + "\n";
+				displ += CastUtil::fromBool(obj->getBoolValue()) + "\n";
 			else
 				displ += (char)obj->value[0] + "\n";
 		}
 		else if(obj->isNumberOrNullNumber())
 		{
-			displ += CastUtil::lexical_cast<std::string>(obj->getNumericValue()) + "\n";
+			displ += CastUtil::fromNumber(obj->getNumericValue()) + "\n";
 		}
 		if(obj->type==OBJECT_TYPE)
 		{

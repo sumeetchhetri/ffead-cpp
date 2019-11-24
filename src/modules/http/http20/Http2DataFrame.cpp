@@ -37,7 +37,7 @@ unsigned char Http2DataFrame::getPadLength() const {
 }
 
 Http2DataFrame::~Http2DataFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2DataFrame::getFrameData() {

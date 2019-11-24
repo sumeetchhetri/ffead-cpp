@@ -91,7 +91,7 @@ void* PoolThread::run(void *arg)
 		}
 
 		if(t.elapsedSeconds()>=10) {
-			std::string a = (ths->name+": Total Tasks handled = "+CastUtil::lexical_cast<std::string>(ths->taskCount)+"\n");
+			std::string a = (ths->name+": Total Tasks handled = "+CastUtil::fromNumber(ths->taskCount)+"\n");
 			logger.info(a);
 			t.start();
 		}
@@ -199,7 +199,7 @@ PoolThread::PoolThread(int num) {
 	mthread = new Thread(&run, this);
 	this->condVar = 0;
 	this->taskCount = 0;
-	this->name = "Thread-" + CastUtil::lexical_cast<std::string>(num);
+	this->name = "Thread-" + CastUtil::fromNumber(num);
 }
 
 PoolThread::PoolThread(TaskPool* wpool, int num) {
@@ -212,7 +212,7 @@ PoolThread::PoolThread(TaskPool* wpool, int num) {
 	mthread = new Thread(&runWithTaskPool, this);
 	this->condVar = 0;
 	this->taskCount = 0;
-	this->name = "Thread-" + CastUtil::lexical_cast<std::string>(num);
+	this->name = "Thread-" + CastUtil::fromNumber(num);
 }
 
 PoolThread::~PoolThread() {

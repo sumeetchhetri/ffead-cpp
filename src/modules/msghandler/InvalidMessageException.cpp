@@ -27,5 +27,5 @@ InvalidMessageException::InvalidMessageException(const std::string& message) {
 }
 
 InvalidMessageException::~InvalidMessageException() throw() {
-	// TODO Auto-generated destructor stub
+	
 }

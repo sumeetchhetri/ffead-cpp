@@ -35,7 +35,7 @@ void MarkerHandler::initMarkers() {
 }
 
 MarkerHandler::~MarkerHandler() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 const std::map<std::string, bool>& Marker::getAttributes() const {

@@ -8,12 +8,12 @@
 #include "TemplateGenerator.h"
 
 TemplateGenerator::TemplateGenerator() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 TemplateGenerator::~TemplateGenerator() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string TemplateGenerator::generateTempCd(const std::string& fileName, std::string &headersb, std::string &funcdefs, const std::string& app)

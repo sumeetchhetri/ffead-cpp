@@ -661,6 +661,6 @@ std::string CompressionUtil::gzipUnCompressFile(char* infile, const bool& retu, 
 }
 
 CompressionUtil::~CompressionUtil() {
-	// TODO Auto-generated destructor stub
+	
 }
 

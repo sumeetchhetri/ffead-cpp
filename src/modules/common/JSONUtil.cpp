@@ -80,7 +80,7 @@ void JSONUtil::readBalancedJSON(std::string& value, std::string& json, const boo
 	size_t eee = json.find(typeen, obs);
 	if(eee==std::string::npos)
 	{
-		throw std::runtime_error("invalid json - unbalanced " + typest + " found at " + CastUtil::lexical_cast<std::string>(obs));
+		throw std::runtime_error("invalid json - unbalanced " + typest + " found at " + CastUtil::fromNumber(obs));
 	}
 	std::string test = json.substr(obs, eee-obs+1);
 	int stcnt = StringUtil::countOccurrences(test, typest);
@@ -90,7 +90,7 @@ void JSONUtil::readBalancedJSON(std::string& value, std::string& json, const boo
 		eee = json.find(typeen, eee+1);
 		if(eee==std::string::npos)
 		{
-			throw std::runtime_error("invalid json - balancing " + typeen + " not found after " + CastUtil::lexical_cast<std::string>(eee));
+			throw std::runtime_error("invalid json - balancing " + typeen + " not found after " + CastUtil::fromNumber(eee));
 		}
 		test = json.substr(obs, eee-obs+1);
 		stcnt = StringUtil::countOccurrences(test, typest);
@@ -264,7 +264,7 @@ void JSONUtil::validateSetValue(JSONElement* element, const std::string& v)
 	{
 		try
 		{
-			CastUtil::lexical_cast<double>(value);
+			CastUtil::toDouble(value);
 		} catch(const std::exception& ex) {
 			throw std::runtime_error("invalid json - invalid double value "+value+" found for name "+ element->getName());
 		}
@@ -274,7 +274,7 @@ void JSONUtil::validateSetValue(JSONElement* element, const std::string& v)
 	{
 		try
 		{
-			CastUtil::lexical_cast<unsigned long long>(value);
+			CastUtil::toULonglong(value);
 		} catch(const std::exception& ex) {
 			throw std::runtime_error("invalid json - invalid numeric value "+value+" found for name "+ element->getName());
 		}

@@ -50,7 +50,7 @@ bool Http2PushPromiseFrame::isReserved() const {
 }
 
 Http2PushPromiseFrame::~Http2PushPromiseFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2PushPromiseFrame::getFrameData() {

@@ -38,8 +38,8 @@ protected:
 public:
 	Mutex();
 	virtual ~Mutex();
-	void lock();
-	void unlock();
+	virtual void lock();
+	virtual void unlock();
 };
 
 class DummyMutex : public Mutex {

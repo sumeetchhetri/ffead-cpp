@@ -78,7 +78,7 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 
 	if (props["TIMEOUT"].length()>0) {
 		try {
-			curl_easy_setopt(_h, CURLOPT_TIMEOUT, CastUtil::lexical_cast<int>(props["TIMEOUT"]));
+			curl_easy_setopt(_h, CURLOPT_TIMEOUT, CastUtil::toInt(props["TIMEOUT"]));
 		} catch(const std::exception& e) {
 		}
 	}
@@ -86,7 +86,7 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 	if (props["FOLLOWLOCATION"]=="true") {
 		curl_easy_setopt(_h, CURLOPT_FOLLOWLOCATION, 1L);
 		try {
-			curl_easy_setopt(_h, CURLOPT_MAXREDIRS, CastUtil::lexical_cast<int>(props["MAXREDIRS"]));
+			curl_easy_setopt(_h, CURLOPT_MAXREDIRS, CastUtil::toInt(props["MAXREDIRS"]));
 		} catch(const std::exception& e) {
 			curl_easy_setopt(_h, CURLOPT_MAXREDIRS, 2);
 		}
@@ -123,10 +123,10 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 	if (r != CURLE_OK) {
 		switch (r) {
 		case CURLE_OPERATION_TIMEDOUT:
-			response->statusCode = CastUtil::lexical_cast<std::string>(r);
+			response->statusCode = CastUtil::fromNumber(r);
 			break;
 		case CURLE_SSL_CERTPROBLEM:
-			response->statusCode = CastUtil::lexical_cast<std::string>(r);
+			response->statusCode = CastUtil::fromNumber(r);
 			response->content = curl_easy_strerror(r);
 			break;
 		default:
@@ -136,7 +136,7 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 	} else {
 		int64_t http_code = 0;
 		curl_easy_getinfo(_h, CURLINFO_RESPONSE_CODE, &http_code);
-		response->statusCode = CastUtil::lexical_cast<std::string>(static_cast<int>(http_code));
+		response->statusCode = CastUtil::fromNumber(static_cast<int>(http_code));
 		response->content = _bd;
 		if(_hd.size()!=0)
 		{
@@ -152,21 +152,21 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 
 	double val;
 	curl_easy_getinfo(_h, CURLINFO_TOTAL_TIME, &val);
-	props["TOTAL_TIME"] = CastUtil::lexical_cast<std::string>(val);
+	props["TOTAL_TIME"] = CastUtil::fromDouble(val);
 	curl_easy_getinfo(_h, CURLINFO_NAMELOOKUP_TIME, &val);
-	props["NAMELOOKUP_TIME"] = CastUtil::lexical_cast<std::string>(val);
+	props["NAMELOOKUP_TIME"] = CastUtil::fromDouble(val);
 	curl_easy_getinfo(_h, CURLINFO_CONNECT_TIME, &val);
-	props["CONNECT_TIME"] = CastUtil::lexical_cast<std::string>(val);
+	props["CONNECT_TIME"] = CastUtil::fromDouble(val);
 	curl_easy_getinfo(_h, CURLINFO_APPCONNECT_TIME, &val);
-	props["APPCONNECT_TIME"] = CastUtil::lexical_cast<std::string>(val);
+	props["APPCONNECT_TIME"] = CastUtil::fromDouble(val);
 	curl_easy_getinfo(_h, CURLINFO_PRETRANSFER_TIME, &val);
-	props["PRETRANSFER_TIME"] = CastUtil::lexical_cast<std::string>(val);
+	props["PRETRANSFER_TIME"] = CastUtil::fromDouble(val);
 	curl_easy_getinfo(_h, CURLINFO_STARTTRANSFER_TIME, &val);
-	props["STARTTRANSFER_TIME"] = CastUtil::lexical_cast<std::string>(val);
+	props["STARTTRANSFER_TIME"] = CastUtil::fromDouble(val);
 	curl_easy_getinfo(_h, CURLINFO_REDIRECT_TIME, &val);
-	props["REDIRECT_TIME"] = CastUtil::lexical_cast<std::string>(val);
+	props["REDIRECT_TIME"] = CastUtil::fromDouble(val);
 	curl_easy_getinfo(_h, CURLINFO_REDIRECT_COUNT, &val);
-	props["REDIRECT_COUNT"] = CastUtil::lexical_cast<std::string>(val);
+	props["REDIRECT_COUNT"] = CastUtil::fromDouble(val);
 	// free header list
 	curl_slist_free_all(headerList);
 	// reset curl handle

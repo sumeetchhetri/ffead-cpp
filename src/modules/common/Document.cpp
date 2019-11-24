@@ -25,7 +25,7 @@
 Element Document::nullele;
 
 Document::Document() {
-	// TODO Auto-generated constructor stub
+	
 }
 
 Document::~Document() {

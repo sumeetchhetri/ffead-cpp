@@ -8,7 +8,7 @@
 #include "IDGenerator.h"
 
 IDGenerator::IDGenerator() {
-	// TODO Auto-generated constructor stub
+	
 }
 
 void IDGenerator::init(DataSourceEntityMapping& dsemp, const bool& forceReinit) {
@@ -116,6 +116,6 @@ void IDGenerator::next(DataSourceEntityMapping& dsemp, GenericObject& id) {
 }
 
 IDGenerator::~IDGenerator() {
-	// TODO Auto-generated destructor stub
+	
 }
 

@@ -34,6 +34,7 @@
 #include <uuid.h>
 #endif
 #include "Timer.h"
+#include "map"
 
 class Bean
 {
@@ -52,7 +53,7 @@ typedef std::map<std::string,Bean> beanMap;
 class FFEADContext {
 	Logger logger;
 	beanMap beans,injbns;
-	cuckoohash_map<std::string, void*> objects;
+	std::map<std::string, void*> objects;
 	std::map<std::string, ClassInfo*> contInsMap;
 	bool cleared;
 	Reflector* reflector;

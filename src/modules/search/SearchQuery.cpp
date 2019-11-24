@@ -8,11 +8,11 @@
 #include "SearchQuery.h"
 
 SearchQuery::SearchQuery() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 SearchQuery::~SearchQuery() {
-	// TODO Auto-generated destructor stub
+	
 }
 

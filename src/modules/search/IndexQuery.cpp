@@ -59,6 +59,6 @@ IndexQuery& IndexQuery::setStatus(int status) {
 }
 
 IndexQuery::~IndexQuery() {
-	// TODO Auto-generated destructor stub
+	
 }
 

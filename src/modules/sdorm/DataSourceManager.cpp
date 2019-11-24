@@ -42,7 +42,10 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 		std::vector<std::string> v;
 		StringUtil::split(v, meth, ".");
 		if(v.size()==2) {
-			CommonUtils::setAppName(appName);
+			std::string scappName = appName;
+			StringUtil::replaceAll(scappName, "-", "_");
+			RegexUtil::replace(scappName, "[^a-zA-Z0-9_]+", "");
+			CommonUtils::setAppName(scappName);
 			ClassInfo* clas = ref->getClassInfo(v.at(0), appName);
 			if(clas->getClassName()!="") {
 				args argus;

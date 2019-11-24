@@ -12,7 +12,6 @@
 #include "ConnectionPooler.h"
 
 class RedisCacheConnectionPool: public ConnectionPooler {
-	Logger logger;
 	void initEnv();
 	void* newConnection(const bool& isWrite, const ConnectionNode& node);
 	void closeConnection(void* conn);

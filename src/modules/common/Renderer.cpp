@@ -23,12 +23,12 @@
 #include "Renderer.h"
 
 Renderer::Renderer() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 Renderer::~Renderer() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Renderer::generateStartOpenTag(const std::string& tagName)

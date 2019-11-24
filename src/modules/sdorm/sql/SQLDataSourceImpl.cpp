@@ -735,7 +735,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo* clas, void* t, int var, const st
 		{
 			unsigned short us;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_USHORT, &us, sizeof(us), &indicator);
-			fldVal = CastUtil::lexical_cast<std::string>(us);
+			fldVal = CastUtil::fromNumber(us);
 			dn = us;
 			break;
 		}
@@ -743,7 +743,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo* clas, void* t, int var, const st
 		{
 			unsigned int us;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_ULONG, &us, sizeof(us), &indicator);
-			fldVal = CastUtil::lexical_cast<std::string>(us);
+			fldVal = CastUtil::fromNumber(us);
 			dn = us;
 			break;
 		}
@@ -751,7 +751,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo* clas, void* t, int var, const st
 		{
 			unsigned char us;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_UTINYINT, &us, sizeof(us), &indicator);
-			fldVal = CastUtil::lexical_cast<std::string>(us);
+			fldVal = CastUtil::fromNumber(us);
 			dn = us;
 			break;
 		}
@@ -759,7 +759,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo* clas, void* t, int var, const st
 		{
 			unsigned long long us;
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_UBIGINT, &us, sizeof(us), &indicator);
-			fldVal = CastUtil::lexical_cast<std::string>(us);
+			fldVal = CastUtil::fromNumber(us);
 			dn = us;
 			break;
 		}
@@ -767,14 +767,14 @@ int SQLDataSourceImpl::storeProperty(ClassInfo* clas, void* t, int var, const st
 		case SQL_REAL:
 		{
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_FLOAT, &df, sizeof(df), &indicator);
-			fldVal = CastUtil::lexical_cast<std::string>(df);
+			fldVal = CastUtil::fromFloat(df);
 			break;
 		}
 		case SQL_FLOAT:
 		case SQL_DOUBLE:
 		{
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_DOUBLE, &dd, sizeof(dd), &indicator);
-			fldVal = CastUtil::lexical_cast<std::string>(dd);
+			fldVal = CastUtil::fromDouble(dd);
 			break;
 		}
 		case SQL_DECIMAL:
@@ -783,7 +783,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo* clas, void* t, int var, const st
 		case SQL_BIT:
 		{
 			ret = SQLGetData(V_OD_hstmt, var+1, SQL_C_BIT, &db, sizeof(db), &indicator);
-			fldVal = CastUtil::lexical_cast<std::string>(db);
+			fldVal = CastUtil::fromBool(db);
 			break;
 		}
 
@@ -841,7 +841,7 @@ int SQLDataSourceImpl::storeProperty(ClassInfo* clas, void* t, int var, const st
 				numBytes = (indicator > 1024) || (indicator == SQL_NO_TOTAL) ? 1024 : indicator;
 				ds.append((const char*)&buf[0], numBytes);
 			}
-			fldVal = CastUtil::lexical_cast<std::string>(ds);
+			fldVal = ds;
 			break;
 		}
 	}
@@ -1038,7 +1038,7 @@ int SQLDataSourceImpl::getProperty(const int& dataType, const int& columnSize, s
 				/*ret = */SQLGetData(V_OD_hstmt, var+1, SQL_C_CHAR, buf1, sizeof(buf1), &indicator);
 				temp.append(buf1);
 			}
-			long long number = CastUtil::lexical_cast<long long>(temp);
+			long long number = CastUtil::toLonglong(temp);
 			colValMap[colName].set(number);
 		}
 		break;
@@ -1174,7 +1174,7 @@ void SQLDataSourceImpl::bindQueryParams(Query& query)
 	while(totalParams-->0)
 	{
 		if(propPosVaues->find(par)==propPosVaues->end())
-			throw ("No parameter value found for position " + CastUtil::lexical_cast<std::string>(par));
+			throw ("No parameter value found for position " + CastUtil::fromNumber(par));
 
 		GenericObject* paramValue = &(propPosVaues->find(par)->second);
 		if(paramValue->getTypeName()=="short")
@@ -1879,14 +1879,14 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 		if(query.getStart()>0 && query.getCount()>0)
 		{
 			StringContext params;
-			params["start"] = CastUtil::lexical_cast<std::string>(query.getStart());
-			params["count"] = CastUtil::lexical_cast<std::string>(query.getCount());
+			params["start"] = CastUtil::fromNumber(query.getStart());
+			params["count"] = CastUtil::fromNumber(query.getCount());
 			query.setQuery(DialectHelper::getSQLString(dialect, DialectHelper::PAGINATION_OFFSET_SQL, query.getQuery(), params));
 		}
 		else if(query.getCount()>0)
 		{
 			StringContext params;
-			params["count"] = CastUtil::lexical_cast<std::string>(query.getCount());
+			params["count"] = CastUtil::fromNumber(query.getCount());
 			query.setQuery(DialectHelper::getSQLString(dialect, DialectHelper::PAGINATION_NO_OFFSET_SQL, query.getQuery(), params));
 		}
 	}

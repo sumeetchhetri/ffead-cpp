@@ -20,7 +20,7 @@ void* ServiceHandler::closeConnections(void *arg) {
 		Thread::sSleep(5);
 		SocketInterface* si;
 		while(ths->toBeClosedConns.try_dequeue(si)) {
-			std::string as = si->address + CastUtil::lexical_cast<std::string>(si->fd);
+			std::string as = si->address + CastUtil::fromNumber(si->fd);
 			if(addrs.find(as)==addrs.end()) {
 				addrs[as] = Timer::getTimestamp();
 				sifMap[as] = si;

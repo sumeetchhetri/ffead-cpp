@@ -88,7 +88,7 @@ private:
 		if(config==NULL)return;
 		Date dat;
 		std::string te = config->datFormat.format(dat);
-		std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::lexical_cast<std::string>(config->vhostNumber)):"");
+		std::string vhnclsn = this->className + (config->vhostNumber>0?("-"+CastUtil::fromNumber(config->vhostNumber)):"");
 		std::string msg = "[" + te + "] ("+vhnclsn + ") <"+mod+"> :";
 		config->lock->lock();
 		*config->out << msg << tmsg;

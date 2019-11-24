@@ -63,7 +63,7 @@ void HTTPResponseStatus::init() {
 		statuses[505] = HTTPResponseStatus::HttpVersionNotSupported;
 		std::map<int, HTTPResponseStatus>::iterator i;
 		for(i=statuses.begin();i!=statuses.end();++i) {
-			sstatuses[CastUtil::lexical_cast<std::string>(i->first)] = i->second;
+			sstatuses[CastUtil::fromNumber(i->first)] = i->second;
 		}
 	}
 }
@@ -129,19 +129,19 @@ HTTPResponseStatus::HTTPResponseStatus() {
 HTTPResponseStatus::HTTPResponseStatus(const int& code, const std::string& msg) {
 	this->code = code;
 	this->msg = msg;
-	this->scode = CastUtil::lexical_cast<std::string>(code);
+	this->scode = CastUtil::fromNumber(code);
 }
 
 HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status) {
 	this->code = status.code;
 	this->msg = status.msg;
-	this->scode = CastUtil::lexical_cast<std::string>(code);
+	this->scode = CastUtil::fromNumber(code);
 }
 
 HTTPResponseStatus::HTTPResponseStatus(const HTTPResponseStatus& status, const std::string& msg) {
 	this->code = status.code;
 	this->msg = msg;
-	this->scode = CastUtil::lexical_cast<std::string>(status.code);
+	this->scode = CastUtil::fromNumber(status.code);
 }
 
 HTTPResponseStatus::~HTTPResponseStatus() {

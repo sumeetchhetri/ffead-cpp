@@ -70,7 +70,7 @@ unsigned char Http2HeadersFrame::getWeight() const {
 }
 
 Http2HeadersFrame::~Http2HeadersFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2HeadersFrame::getFrameData() {

@@ -23,12 +23,12 @@
 #include "TemplateEngine.h"
 
 TemplateEngine::TemplateEngine() {
-	// TODO Auto-generated constructor stub
+	
 
 }
 
 TemplateEngine::~TemplateEngine() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 /*string TemplateEngine::evaluate(const std::string& str, const Context& cntxt)

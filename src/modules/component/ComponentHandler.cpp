@@ -164,31 +164,31 @@ void* ComponentHandler::service(void* arg)
 					{
 						int retv;
 						reflector.invokeMethod<int>(&retv,_temp,meth,valus,true);
-						retValue = ("<return:int>"+CastUtil::lexical_cast<std::string>(retv)+"</return:int>");
+						retValue = ("<return:int>"+CastUtil::fromNumber(retv)+"</return:int>");
 					}
 					else if(returnType=="long")
 					{
 						long retv;
 						reflector.invokeMethod<long>(&retv,_temp,meth,valus,true);
-						retValue = ("<return:long>"+CastUtil::lexical_cast<std::string>(retv)+"</return:long>");
+						retValue = ("<return:long>"+CastUtil::fromNumber(retv)+"</return:long>");
 					}
 					else if(returnType=="long long")
 					{
 						long long retv;
 						reflector.invokeMethod<long long>(&retv,_temp,meth,valus,true);
-						retValue = ("<return:longlong>"+CastUtil::lexical_cast<std::string>(retv)+"</return:longlong>");
+						retValue = ("<return:longlong>"+CastUtil::fromNumber(retv)+"</return:longlong>");
 					}
 					else if(returnType=="float")
 					{
 						float retv;
 						reflector.invokeMethod<float>(&retv,_temp,meth,valus,true);
-						retValue = ("<return:float>"+CastUtil::lexical_cast<std::string>(retv)+"</return:float>");
+						retValue = ("<return:float>"+CastUtil::fromFloat(retv)+"</return:float>");
 					}
 					else if(returnType=="double")
 					{
 						double retv;
 						reflector.invokeMethod<double>(&retv,_temp,meth,valus,true);
-						retValue = ("<return:double>"+CastUtil::lexical_cast<std::string>(retv)+"</return:double>");
+						retValue = ("<return:double>"+CastUtil::fromDouble(retv)+"</return:double>");
 					}
 					else if(returnType=="string")
 					{

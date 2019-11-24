@@ -24,7 +24,7 @@
 
 bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const std::string& actUrl, std::string& className)
 {
-	Timer t(false);
+	Timer t;
 	t.start();
 	std::map<std::string, std::map<std::string, std::string> >& controllerObjectMap = ConfigurationData::getInstance()->controllerObjectMap;
 	std::map<std::string, std::string>& controllerMap = controllerObjectMap[cntxtName];
@@ -45,7 +45,7 @@ bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const
 
 bool ControllerHandler::getMappingForPath(const std::string& cntxtName, const std::string& actUrl, std::string& to)
 {
-	Timer t(false);
+	Timer t;
 	t.start();
 	std::map<std::string, std::map<std::string, std::string> >& mappingObjectMap = ConfigurationData::getInstance()->mappingObjectMap;
 	std::map<std::string, std::string>& mappingMap = mappingObjectMap[cntxtName];
@@ -65,7 +65,7 @@ bool ControllerHandler::getMappingForPath(const std::string& cntxtName, const st
 }
 
 bool ControllerHandler::hasMappingExtension(std::string extwodot, HttpRequest* req) {
-	Timer t(false);
+	Timer t;
 	t.start();
 	bool f = ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->mappingextObjectMap.end()
 		&& ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].find(extwodot)
@@ -84,7 +84,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 	std::string extwodot = ext!=""?ext.substr(1):"";
 	if(ConfigurationData::getInstance()->enableContMpg && getControllerForPath(req->getCntxt_name(), req->getCurl(), controller))
 	{
-		Timer t(false);
+		Timer t;
 		t.start();
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("controller_"+controller, req->getCntxt_name());
 		args argus;
@@ -106,7 +106,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		}
 		else
 		{
-			logger << "Invalid Controller" << std::endl;
+			if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid Controller" << std::endl;
 			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 			isContrl = true;
 		}
@@ -128,18 +128,18 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			req->setActUrl(to);
 		}
 		req->setFile(to);
-		logger << ("URL mapped from " + ext + " to " + to) << std::endl;
+		if(ConfigurationData::getInstance()->enableLogging) logger << ("URL mapped from " + ext + " to " + to) << std::endl;
 	}
 	else if(ConfigurationData::getInstance()->enableContExt && hasMappingExtension(extwodot, req))
 	{
 		std::string file = req->getFile();
 		std::string fili = file.substr(0,file.find_last_of(".")+1);
 		req->setFile(fili+ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()][extwodot]);
-		logger << ("URL extension mapped from " + extwodot + " to " + ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()][extwodot]) << std::endl;
+		if(ConfigurationData::getInstance()->enableLogging) logger << ("URL extension mapped from " + extwodot + " to " + ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()][extwodot]) << std::endl;
 	}
 	else if(ConfigurationData::getInstance()->enableContRst && ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->rstCntMap.end())
 	{
-		Timer t(false);
+		Timer t;
 		t.start();
 
 		resFuncMap& rstCntMap = ConfigurationData::getInstance()->rstCntMap[req->getCntxt_name()];
@@ -200,8 +200,6 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 									paramvalue = paramvalue.substr(stpre, len);
 								}
 								mapOfValues[paramname] = paramvalue;
-								//logger << ("Restcontroller matched url : " + req->getCurl() + ",param size: " + CastUtil::lexical_cast<std::string>(prsiz) +
-								//			", against url: " + baseUrl) << std::endl;
 							}
 							else if(req->getActUrlParts().at(var-1)!=resturlparts.at(var))
 							{
@@ -253,7 +251,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			if(_temp==NULL) {
 				_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft.clas, req->getCntxt_name());
 				if(_temp==NULL) {
-					logger << "Rest Controller Not Found" << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << "Rest Controller Not Found" << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 					res->setDone(true);
 					return true;
@@ -323,7 +321,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								}
 								else if(rft.params.at(var).type!="vector-of-filestream")
 								{
-									logger << "File can only be mapped to ifstream" << std::endl;
+									if(ConfigurationData::getInstance()->enableLogging) logger << "File can only be mapped to ifstream" << std::endl;
 									res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 									res->setDone(true);
 									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
@@ -337,7 +335,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						}
 						else if(rft.params.at(var).type!="vector-of-filestream")
 						{
-							logger << "Invalid mapping specified in config, no multipart content found with name " + rft.params.at(var).name << std::endl;
+							if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid mapping specified in config, no multipart content found with name " + rft.params.at(var).name << std::endl;
 							res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 							res->setDone(true);
 							if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
@@ -348,7 +346,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					{
 						if(prsiz>1)
 						{
-							logger << "Request Body cannot be mapped to more than one argument..." << std::endl;
+							if(ConfigurationData::getInstance()->enableLogging) logger << "Request Body cannot be mapped to more than one argument..." << std::endl;
 							res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 							res->setDone(true);
 							if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
@@ -389,21 +387,21 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							argus.push_back(rft.params.at(var).type);
 							break;
 						}
-						case 1: argus.push_back(rft.params.at(var).type);valus.push_back(new std::string(CastUtil::lexical_cast<std::string>(pmvalue)));break;
+						case 1: argus.push_back(rft.params.at(var).type);valus.push_back(new std::string(pmvalue));break;
 						case 2: argus.push_back(rft.params.at(var).type);valus.push_back(new char(CastUtil::lexical_cast<char>(pmvalue)));break;
 						case 3: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned char(CastUtil::lexical_cast<unsigned char>(pmvalue)));break;
-						case 4: argus.push_back(rft.params.at(var).type);valus.push_back(new int(CastUtil::lexical_cast<int>(pmvalue)));break;
-						case 5: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned int(CastUtil::lexical_cast<unsigned int>(pmvalue)));break;
-						case 6: argus.push_back(rft.params.at(var).type);valus.push_back(new short(CastUtil::lexical_cast<short>(pmvalue)));break;
-						case 7: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned short(CastUtil::lexical_cast<unsigned short>(pmvalue)));break;
-						case 8: argus.push_back(rft.params.at(var).type);valus.push_back(new long(CastUtil::lexical_cast<long long>(pmvalue)));break;
-						case 9: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned long(CastUtil::lexical_cast<unsigned long>(pmvalue)));break;
-						case 10: argus.push_back(rft.params.at(var).type);valus.push_back(new long long(CastUtil::lexical_cast<long long>(pmvalue)));break;
-						case 11: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned long long(CastUtil::lexical_cast<unsigned long long>(pmvalue)));break;
-						case 12: argus.push_back(rft.params.at(var).type);valus.push_back(new float(CastUtil::lexical_cast<float>(pmvalue)));break;
-						case 13: argus.push_back(rft.params.at(var).type);valus.push_back(new double(CastUtil::lexical_cast<double>(pmvalue)));break;
-						case 14: argus.push_back(rft.params.at(var).type);valus.push_back(new long double(CastUtil::lexical_cast<long double>(pmvalue)));break;
-						case 15: argus.push_back(rft.params.at(var).type);valus.push_back(new bool(CastUtil::lexical_cast<bool>(pmvalue)));break;
+						case 4: argus.push_back(rft.params.at(var).type);valus.push_back(new int(CastUtil::toInt(pmvalue)));break;
+						case 5: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned int(CastUtil::toUInt(pmvalue)));break;
+						case 6: argus.push_back(rft.params.at(var).type);valus.push_back(new short(CastUtil::toShort(pmvalue)));break;
+						case 7: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned short(CastUtil::toUShort(pmvalue)));break;
+						case 8: argus.push_back(rft.params.at(var).type);valus.push_back(new long(CastUtil::toLonglong(pmvalue)));break;
+						case 9: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned long(CastUtil::toULong(pmvalue)));break;
+						case 10: argus.push_back(rft.params.at(var).type);valus.push_back(new long long(CastUtil::toLonglong(pmvalue)));break;
+						case 11: argus.push_back(rft.params.at(var).type);valus.push_back(new unsigned long long(CastUtil::toULonglong(pmvalue)));break;
+						case 12: argus.push_back(rft.params.at(var).type);valus.push_back(new float(CastUtil::toFloat(pmvalue)));break;
+						case 13: argus.push_back(rft.params.at(var).type);valus.push_back(new double(CastUtil::toDouble(pmvalue)));break;
+						case 14: argus.push_back(rft.params.at(var).type);valus.push_back(new long double(CastUtil::toLongdouble(pmvalue)));break;
+						case 15: argus.push_back(rft.params.at(var).type);valus.push_back(new bool(CastUtil::toBool(pmvalue)));break;
 						case 16: {
 							argus.push_back(rft.params.at(var).type);
 							DateFormat formt;
@@ -497,7 +495,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						}
 					}
 				} catch(const std::exception& e) {
-					logger << "Restcontroller exception occurred" << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << "Restcontroller exception occurred" << std::endl;
 					invValue= true;
 					res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 					res->setDone(true);
@@ -545,7 +543,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							if(rft.statusCode=="" && res->getContent().length()==0) {
 								res->setHTTPResponseStatus(HTTPResponseStatus::NoContent);
 							} else {
-								res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::lexical_cast<int>(rft.statusCode)));
+								res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::toInt(rft.statusCode)));
 							}
 							break;
 						}
@@ -609,11 +607,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				{
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 					//res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-					logger << "Rest Controller Method Not Found" << std::endl;
+					if(ConfigurationData::getInstance()->enableLogging) logger << "Rest Controller Method Not Found" << std::endl;
 					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft.clas, req->getCntxt_name());
 				}
 			} catch(const std::exception& e) {
-				logger << "Restcontroller exception occurred" << std::endl;
+				if(ConfigurationData::getInstance()->enableLogging) logger << "Restcontroller exception occurred" << std::endl;
 				invValue= true;
 				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				res->setDone(true);

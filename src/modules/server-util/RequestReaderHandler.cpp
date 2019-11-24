@@ -68,7 +68,7 @@ RequestReaderHandler::~RequestReaderHandler() {
 }
 
 void* RequestReaderHandler::handle(void* inp) {
-	Logger logger = LoggerFactory::getLogger("RequestReaderHandler");
+	//Logger logger = LoggerFactory::getLogger("RequestReaderHandler");
 	RequestReaderHandler* ins  = static_cast<RequestReaderHandler*>(inp);
 	struct sockaddr_storage their_addr; // connector's address information
 	socklen_t sin_size;

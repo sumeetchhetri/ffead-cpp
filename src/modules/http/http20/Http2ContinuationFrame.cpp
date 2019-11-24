@@ -22,7 +22,7 @@ const std::string& Http2ContinuationFrame::getHeaderBlockFragment() const {
 }
 
 Http2ContinuationFrame::~Http2ContinuationFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2ContinuationFrame::getFrameData() {

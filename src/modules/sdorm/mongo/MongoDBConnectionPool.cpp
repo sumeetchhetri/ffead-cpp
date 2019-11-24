@@ -38,7 +38,7 @@ void MongoDBConnectionPool::initEnv() {
 		}
 
 		if(props.getNodes().at(0).getConnectionTimeout()>0) {
-			connTimeOut = CastUtil::lexical_cast<std::string>((long)getProperties().getNodes().at(0).getConnectionTimeout());
+			connTimeOut = CastUtil::fromNumber((long)getProperties().getNodes().at(0).getConnectionTimeout());
 		}
 	}
 	else
@@ -62,10 +62,10 @@ void MongoDBConnectionPool::initEnv() {
 				connectionString += (props.getNodes().at(var).getUsername() + ":" +
 						props.getNodes().at(var).getPassword() + "@");
 			}
-			connectionString += props.getNodes().at(var).getHost() + ":" + CastUtil::lexical_cast<std::string>(port);
+			connectionString += props.getNodes().at(var).getHost() + ":" + CastUtil::fromNumber(port);
 
 			if(connTimeOut=="" && props.getNodes().at(var).getConnectionTimeout()>0) {
-				connTimeOut = CastUtil::lexical_cast<std::string>((long)getProperties().getNodes().at(var).getConnectionTimeout());
+				connTimeOut = CastUtil::fromNumber((long)getProperties().getNodes().at(var).getConnectionTimeout());
 			}
 
 			if(var!=(int)props.getNodes().size()-1) {
@@ -103,14 +103,14 @@ void MongoDBConnectionPool::initEnv() {
 	}
 
 	/*if(connectionString.at(connectionString.length()-1)=='?') {
-		connectionString += "minPoolSize=" + CastUtil::lexical_cast<std::string>(poolmin);
+		connectionString += "minPoolSize=" + CastUtil::fromNumber(poolmin);
 	} else {
-		connectionString += "&minPoolSize=" + CastUtil::lexical_cast<std::string>(poolmin);
+		connectionString += "&minPoolSize=" + CastUtil::fromNumber(poolmin);
 	}*/
 	if(connectionString.at(connectionString.length()-1)=='?') {
-		connectionString += "maxPoolSize=" + CastUtil::lexical_cast<std::string>(poolmax);
+		connectionString += "maxPoolSize=" + CastUtil::fromNumber(poolmax);
 	} else {
-		connectionString += "&maxPoolSize=" + CastUtil::lexical_cast<std::string>(poolmax);
+		connectionString += "&maxPoolSize=" + CastUtil::fromNumber(poolmax);
 	}
 
 	if(connTimeOut=="") {

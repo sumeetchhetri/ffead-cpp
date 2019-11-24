@@ -31,7 +31,7 @@ PropFileReader::PropFileReader(const bool& mergeSimProps)
 	this->mergeSimProps = mergeSimProps;
 }
 PropFileReader::~PropFileReader() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 propMap PropFileReader::getProperties(const std::string& filepath)

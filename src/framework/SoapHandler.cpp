@@ -27,12 +27,12 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 	Logger logger = LoggerFactory::getLogger("SoapHandler");
 	std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + "/";
 	wsUrl += req->getCurl();
-	logger << ("WsUrl is " + wsUrl) << std::endl;
+	if(ConfigurationData::getInstance()->enableLogging) logger << ("WsUrl is " + wsUrl) << std::endl;
 
 	std::string xmlcnttype = CommonUtils::getMimeType(".xml");
 	std::string meth,env;
 	Element* soapenv = NULL;
-	logger.info("request => "+req->getContent());
+	if(ConfigurationData::getInstance()->enableLogging) logger.info("request => "+req->getContent());
 	Element* soapbody = NULL;
 	try
 	{
@@ -124,7 +124,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		logger << ("Soap fault - " + e.getMessage()) << std::flush;
+		if(ConfigurationData::getInstance()->enableLogging) logger << ("Soap fault - " + e.getMessage()) << std::flush;
 	}
 	catch(const std::exception& faultc)
 	{
@@ -155,7 +155,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		logger << ("Soap fault - " + fault) << std::flush;
+		if(ConfigurationData::getInstance()->enableLogging) logger << ("Soap fault - " + fault) << std::flush;
 	}
 	res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	res->addHeader(HttpResponse::ContentType, xmlcnttype);

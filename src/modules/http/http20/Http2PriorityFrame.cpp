@@ -36,7 +36,7 @@ unsigned char Http2PriorityFrame::getWeight() const {
 }
 
 Http2PriorityFrame::~Http2PriorityFrame() {
-	// TODO Auto-generated destructor stub
+	
 }
 
 std::string Http2PriorityFrame::getFrameData() {
