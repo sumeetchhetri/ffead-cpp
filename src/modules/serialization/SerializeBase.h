@@ -189,10 +189,10 @@ typedef void* (*UnSer) (void*, SerializeBase*);
 
 class SerializeBase {
 	static void* dlib;
-	static cuckoohash_map<std::string, Ser> _serFMap;
-	static cuckoohash_map<std::string, SerCont> _serCFMap;
-	static cuckoohash_map<std::string, UnSer> _unserFMap;
-	static cuckoohash_map<std::string, UnSerCont> _unserCFMap;
+	static libcuckoo::cuckoohash_map<std::string, Ser> _serFMap;
+	static libcuckoo::cuckoohash_map<std::string, SerCont> _serCFMap;
+	static libcuckoo::cuckoohash_map<std::string, UnSer> _unserFMap;
+	static libcuckoo::cuckoohash_map<std::string, UnSerCont> _unserCFMap;
 	static void init(void* dlib);
 	friend class CHServer;
 	friend class ConfigurationData;

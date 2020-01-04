@@ -155,7 +155,7 @@ class SelEpolKqEvPrt : public EventHandler {
 	SOCKET curfds;
 	Mutex l;
 	DummySocketInterface* dsi;
-	cuckoohash_map<int, void*> connections;
+	libcuckoo::cuckoohash_map<int, void*> connections;
 	#ifdef USE_WIN_IOCP
 		std::map<SOCKET, void*> cntxtMap;
 		std::vector<void*> psocks;

@@ -22,14 +22,14 @@
 
 #include "RegexUtil.h"
 
-cuckoohash_map<std::string, regex_t*> RegexUtil::patterns;
-cuckoohash_map<std::string, regex_t*> RegexUtil::nlpatterns;
+libcuckoo::cuckoohash_map<std::string, regex_t*> RegexUtil::patterns;
+libcuckoo::cuckoohash_map<std::string, regex_t*> RegexUtil::nlpatterns;
 bool RegexUtil::cacheRegexes = true;
 
 void RegexUtil::flushCache() {
 	if(patterns.size()>0) {
 		auto lt = patterns.lock_table();
-		cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
+		libcuckoo::cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
 		for(it=lt.begin();it!=lt.end();++it) {
 			regfree(it->second);
 			delete it->second;
@@ -37,7 +37,7 @@ void RegexUtil::flushCache() {
 	}
 	if(nlpatterns.size()>0) {
 		auto lt = nlpatterns.lock_table();
-		cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
+		libcuckoo::cuckoohash_map<std::string, regex_t*>::locked_table::iterator it;
 		for(it=lt.begin();it!=lt.end();++it) {
 			regfree(it->second);
 			delete it->second;

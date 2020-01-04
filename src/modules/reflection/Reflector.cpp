@@ -15,7 +15,7 @@
 */
 #include "Reflector.h"
 
-cuckoohash_map<std::string, ClassInfo*> Reflector::_ciMap;
+libcuckoo::cuckoohash_map<std::string, ClassInfo*> Reflector::_ciMap;
 ClassInfo Reflector::nullclass;
 
 Reflector::Reflector()
@@ -36,7 +36,7 @@ Reflector::~Reflector()
 {
 	if(_ciMap.size()>0) {
 		auto lt = _ciMap.lock_table();
-		cuckoohash_map<std::string, ClassInfo*>::locked_table::iterator it;
+		libcuckoo::cuckoohash_map<std::string, ClassInfo*>::locked_table::iterator it;
 		for(it=lt.begin();it!=lt.end();++it) {
 			delete it->second;
 		}
