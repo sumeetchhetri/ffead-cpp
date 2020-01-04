@@ -947,6 +947,13 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 
 	ConfigurationData::setNginxServer(true);
 
+	//Load all the FFEADContext beans so that the same copy is shared by all process
+	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
+	logger << ("Initializing ffeadContext....") << std::endl;
+	ConfigurationData::getInstance()->initializeAllSingletonBeans();
+	GenericObject::init(ConfigurationData::getReflector());
+	logger << ("Initializing ffeadContext done....") << std::endl;
+
 #ifdef INC_SDORM
 	logger << ("Initializing DataSources....") << std::endl;
 	ConfigurationHandler::initializeDataSources();
@@ -956,13 +963,6 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 	logger << ("Initializing Caches....") << std::endl;
 	ConfigurationHandler::initializeCaches();
 	logger << ("Initializing Caches done....") << std::endl;
-
-	//Load all the FFEADContext beans so that the same copy is shared by all process
-	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
-	logger << ("Initializing ffeadContext....") << std::endl;
-	ConfigurationData::getInstance()->initializeAllSingletonBeans();
-	GenericObject::init(ConfigurationData::getReflector());
-	logger << ("Initializing ffeadContext done....") << std::endl;
 
 	HTTPResponseStatus::init();
 
