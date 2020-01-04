@@ -29,7 +29,8 @@ Reflector* ConfigurationData::getReflector() {
 }
 
 void ConfigurationData::enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
-		bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra, bool enableScripts, bool enableSoap) {
+		bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra, bool enableScripts,
+		bool enableSoap, bool enableLogging) {
 	getInstance()->enableCors = enableCors;
 	getInstance()->enableSecurity = enableSecurity;
 	getInstance()->enableFilters = enableFilters;
@@ -41,6 +42,7 @@ void ConfigurationData::enableFeatures(bool enableCors, bool enableSecurity, boo
 	getInstance()->enableExtra = enableExtra;
 	getInstance()->enableScripts = enableScripts;
 	getInstance()->enableSoap = enableSoap;
+	getInstance()->enableLogging = enableLogging;
 }
 
 ConfigurationData::ConfigurationData() {

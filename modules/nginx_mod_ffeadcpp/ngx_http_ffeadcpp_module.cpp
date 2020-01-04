@@ -325,7 +325,7 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 	{
 		req.buildRequest("GetArguments", std::string((const char*)r->args.data,r->args.len));
 	}
-	req.buildRequest("HttpVersion", CastUtil::lexical_cast<std::string>(r->http_version));
+	req.buildRequest("HttpVersion", CastUtil::fromNumber(r->http_version));
 
 	HttpResponse respo;
 	ServiceTask task;
@@ -341,14 +341,14 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 		std::map<std::string,std::string>::const_iterator it;
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
 			if(StringUtil::toLowerCopy(it->first)==StringUtil::toLowerCopy(HttpResponse::ContentLength)) {
-				r->headers_out.content_length_n = CastUtil::lexical_cast<int>(it->second);
+				r->headers_out.content_length_n = CastUtil::toInt(it->second);
 			} else if(!ignoreHeader(it->first)) {
 				set_custom_header_in_headers_out(r, it->first, it->second);
 			}
 		}
 
 		/* set the status line */
-		r->headers_out.status = CastUtil::lexical_cast<int>(respo.getStatusCode());
+		r->headers_out.status = CastUtil::toInt(respo.getStatusCode());
 
 		if(data.length()>0)
 		{
@@ -668,7 +668,7 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	if(srprps["SESS_TIME_OUT"]!="")
 	{
 		try {
-			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
+			sessionTimeout = CastUtil::toLong(srprps["SESS_TIME_OUT"]);
 		} catch(const std::exception& e) {
 			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << std::endl;
 		}
@@ -703,8 +703,10 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	bool enableExtra = StringUtil::toLowerCopy(srprps["ENABLE_EXT"])=="true";
 	bool enableScripts = StringUtil::toLowerCopy(srprps["ENABLE_SCR"])=="true";
 	bool enableSoap = StringUtil::toLowerCopy(srprps["ENABLE_SWS"])=="true";
+	bool enableLogging = StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true";
 	ConfigurationData::enableFeatures(enableCors, enableSecurity, enableFilters, enableControllers,
-			enableContMpg, enableContPath, enableContExt,enableContRst, enableExtra, enableScripts, enableSoap);
+			enableContMpg, enableContPath, enableContExt,enableContRst, enableExtra, enableScripts,
+			enableSoap, enableLogging);
 
 	strVec cmpnames;
 	try
@@ -818,7 +820,7 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	try {
 		if(srprps["DISTOCACHE_POOL_SIZE"]!="")
 		{
-			distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
+			distocachepoolsize = CastUtil::toInt(srprps["DISTOCACHE_POOL_SIZE"]);
 		}
 	} catch(const std::exception& e) {
 		logger << ("Invalid poolsize specified for distocache") << std::endl;
@@ -827,7 +829,7 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	try {
 		if(srprps["DISTOCACHE_PORT_NO"]!="")
 		{
-			CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
+			CastUtil::toInt(srprps["DISTOCACHE_PORT_NO"]);
 			DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
 			logger << ("Session store is set to distocache store") << std::endl;
 			distocache = true;
@@ -902,7 +904,7 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 	try {
 		if(srprps["CMP_PORT"]!="")
 		{
-			int port = CastUtil::lexical_cast<int>(srprps["CMP_PORT"]);
+			int port = CastUtil::toInt(srprps["CMP_PORT"]);
 			if(port>0)
 			{
 				ComponentHandler::trigger(srprps["CMP_PORT"]);
@@ -917,7 +919,7 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 	try {
 		if(srprps["MESS_PORT"]!="")
 		{
-			int port = CastUtil::lexical_cast<int>(srprps["MESS_PORT"]);
+			int port = CastUtil::toInt(srprps["MESS_PORT"]);
 			if(port>0)
 			{
 				MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
@@ -932,7 +934,7 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 	try {
 		if(srprps["MI_PORT"]!="")
 		{
-			int port = CastUtil::lexical_cast<int>(srprps["MI_PORT"]);
+			int port = CastUtil::toInt(srprps["MI_PORT"]);
 			if(port>0)
 			{
 				MethodInvoc::trigger(srprps["MI_PORT"]);
@@ -960,7 +962,9 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 	logger << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
 	GenericObject::init(ConfigurationData::getReflector());
-	logger << ("Initializing ffeadContext done....") << std::endl;HTTPResponseStatus::init();
+	logger << ("Initializing ffeadContext done....") << std::endl;
+
+	HTTPResponseStatus::init();
 
 	HttpRequest::init();
 
@@ -978,5 +982,6 @@ static ngx_int_t exit_process(ngx_cycle_t *cycle)
 	ConfigurationHandler::destroyCaches();
 
 	ConfigurationData::getInstance()->clearAllSingletonBeans();
+
 	return NGX_OK;
 }

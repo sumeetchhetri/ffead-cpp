@@ -259,7 +259,8 @@ class ConfigurationData {
 	friend class CacheManager;
 public:
 	static void enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
-			bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra, bool enableScripts, bool enableSoap);
+			bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra,
+			bool enableScripts, bool enableSoap, bool enableLogging);
 	static Reflector* getReflector();
 	static int getProcessId();
 	static bool isApacheServer();

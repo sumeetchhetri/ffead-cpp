@@ -179,7 +179,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	std::string serverRootDirectory;
 	serverRootDirectory.append(fconfig.path);
 
-	std::string port = CastUtil::lexical_cast<std::string>(r->server->port);
+	std::string port = CastUtil::fromNumber(r->server->port);
 	std::string content;
 
 	apr_bucket_brigade *bb = apr_brigade_create(r->pool, r->connection->bucket_alloc);
@@ -270,7 +270,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 				remain_bytes -= bytes_send;
 			}
 		}
-		r->status = CastUtil::lexical_cast<int>(respo.getStatusCode());
+		r->status = CastUtil::toInt(respo.getStatusCode());
 		return OK;
 		//ap_rprintf(r, data.c_str(), data.length());
 	} else {
@@ -371,7 +371,7 @@ void one_time_init()
    	if(srprps["SESS_TIME_OUT"]!="")
    	{
    		try {
-   			sessionTimeout = CastUtil::lexical_cast<long>(srprps["SESS_TIME_OUT"]);
+   			sessionTimeout = CastUtil::toLong(srprps["SESS_TIME_OUT"]);
 		} catch(const std::exception& e) {
 			logger << "Invalid session timeout value defined, defaulting to 1hour/3600sec" << std::endl;
 		}
@@ -406,8 +406,10 @@ void one_time_init()
 	bool enableExtra = StringUtil::toLowerCopy(srprps["ENABLE_EXT"])=="true";
 	bool enableScripts = StringUtil::toLowerCopy(srprps["ENABLE_SCR"])=="true";
 	bool enableSoap = StringUtil::toLowerCopy(srprps["ENABLE_SWS"])=="true";
+	bool enableLogging = StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true";
 	ConfigurationData::enableFeatures(enableCors, enableSecurity, enableFilters, enableControllers,
-			enableContMpg, enableContPath, enableContExt,enableContRst, enableExtra, enableScripts, enableSoap);
+			enableContMpg, enableContPath, enableContExt,enableContRst, enableExtra, enableScripts,
+			enableSoap, enableLogging);
 
     strVec cmpnames;
     try
@@ -521,7 +523,7 @@ void one_time_init()
 	try {
 		if(srprps["DISTOCACHE_POOL_SIZE"]!="")
 		{
-			distocachepoolsize = CastUtil::lexical_cast<int>(srprps["DISTOCACHE_POOL_SIZE"]);
+			distocachepoolsize = CastUtil::toInt(srprps["DISTOCACHE_POOL_SIZE"]);
 		}
 	} catch(const std::exception& e) {
 		logger << ("Invalid poolsize specified for distocache") << std::endl;
@@ -530,7 +532,7 @@ void one_time_init()
 	try {
 		if(srprps["DISTOCACHE_PORT_NO"]!="")
 		{
-			CastUtil::lexical_cast<int>(srprps["DISTOCACHE_PORT_NO"]);
+			CastUtil::toInt(srprps["DISTOCACHE_PORT_NO"]);
 			DistoCacheHandler::trigger(srprps["DISTOCACHE_PORT_NO"], distocachepoolsize);
 			logger << ("Session store is set to distocache store") << std::endl;
 			distocache = true;
@@ -647,7 +649,7 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 	try {
 		if(srprps["CMP_PORT"]!="")
 		{
-			int port = CastUtil::lexical_cast<int>(srprps["CMP_PORT"]);
+			int port = CastUtil::toInt(srprps["CMP_PORT"]);
 			if(port>0)
 			{
 				ComponentHandler::trigger(srprps["CMP_PORT"]);
@@ -662,7 +664,7 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 	try {
 		if(srprps["MESS_PORT"]!="")
 		{
-			int port = CastUtil::lexical_cast<int>(srprps["MESS_PORT"]);
+			int port = CastUtil::toInt(srprps["MESS_PORT"]);
 			if(port>0)
 			{
 				MessageHandler::trigger(srprps["MESS_PORT"],resourcePath);
@@ -677,7 +679,7 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 	try {
 		if(srprps["MI_PORT"]!="")
 		{
-			int port = CastUtil::lexical_cast<int>(srprps["MI_PORT"]);
+			int port = CastUtil::toInt(srprps["MI_PORT"]);
 			if(port>0)
 			{
 				MethodInvoc::trigger(srprps["MI_PORT"]);
@@ -704,7 +706,9 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 	logger << ("Initializing ffeadContext....") << std::endl;
 	ConfigurationData::getInstance()->initializeAllSingletonBeans();
 	GenericObject::init(ConfigurationData::getReflector());
-	logger << ("Initializing ffeadContext done....") << std::endl;HTTPResponseStatus::init();
+	logger << ("Initializing ffeadContext done....") << std::endl;
+
+	HTTPResponseStatus::init();
 
 	HttpRequest::init();
 
