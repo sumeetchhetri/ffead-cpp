@@ -32,6 +32,8 @@ class Timer {
 	timespec en;
 	Mutex* m;
 	bool started;
+	static DummyMutex _dm;
+	bool isDm;
 public:
 	Timer(bool threadsafe = false);
 	virtual ~Timer();

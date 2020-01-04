@@ -374,7 +374,7 @@ bool Http2Handler::writeHttpResponse(void* req, void* res, void* si, std::string
 	if(!response->isDone()) {
 		response->updateContent(request, maxDataFrameSize);
 	}
-	response->headers[":status"] = response->statusCode;
+	response->headers[":status"] = response->getStatusCode();
 
 	Http2HeadersFrame hframe;
 	hframe.headerBlockFragment = context.encode(response->headers);

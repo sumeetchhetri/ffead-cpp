@@ -53,15 +53,7 @@ void ServiceHandler::registerWriteRequest(SocketInterface* sif) {
 }
 
 void ServiceHandler::registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos) {
-	HandlerRequest* req = new HandlerRequest;
-	req->request = request;
-	req->response = NULL;
-	req->sif = sif;
-	req->context = context;
-	req->sh = this;
-	req->reqPos = reqPos;
-	req->protType = sif->getProtocol(context).find("HTTP")==0?1:2;
-	handleService(req);
+	handleService(request, sif, context, reqPos);
 }
 
 void ServiceHandler::submitTask(Task* task) {
@@ -126,16 +118,17 @@ HandlerRequest::~HandlerRequest() {
 
 void HandlerRequest::clearObjects() {
 	if(request!=NULL) {
-		protType==1?delete (HttpRequest*)request:delete (WebSocketData*)request;
+		if(protType==1) {
+			((HttpRequest*)request)->reset();
+		} else {
+			delete (WebSocketData*)request;
+		}
 	}
 	request = NULL;
 	if(context!=NULL){
 		delete context;
 	}
 	context = NULL;
-	if(response!=NULL){
-		protType==1?delete (HttpResponse*)response:delete (WebSocketData*)response;
-	}
 	response = NULL;
 }
 

@@ -30,7 +30,9 @@ class LoggerFactory {
 	std::map<std::string, LoggerConfig*> configs;
 	std::map<std::string, std::string> dupLogNames;
 	int vhostNumber;
+	static bool isLoggingEnabled;
 	static LoggerFactory* instance;
+	static Logger _l;
 	LoggerFactory();
 	static void setVhostNumber(const int& vhn);
 	static void init();

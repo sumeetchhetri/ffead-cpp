@@ -123,20 +123,19 @@ void HttpClient::execute(HttpRequest* request, HttpResponse* response, propMap& 
 	if (r != CURLE_OK) {
 		switch (r) {
 		case CURLE_OPERATION_TIMEDOUT:
-			response->statusCode = CastUtil::fromNumber(r);
+			response->setHTTPResponseStatus(HTTPResponseStatus::GatewayTimeout);
 			break;
 		case CURLE_SSL_CERTPROBLEM:
-			response->statusCode = CastUtil::fromNumber(r);
+			response->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 			response->content = curl_easy_strerror(r);
 			break;
 		default:
-			response->statusCode = "Operation Failed";
-			response->statusCode = "-1";
+			response->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 		}
 	} else {
 		int64_t http_code = 0;
 		curl_easy_getinfo(_h, CURLINFO_RESPONSE_CODE, &http_code);
-		response->statusCode = CastUtil::fromNumber(static_cast<int>(http_code));
+		response->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(CastUtil::fromNumber(static_cast<int>(http_code))));
 		response->content = _bd;
 		if(_hd.size()!=0)
 		{

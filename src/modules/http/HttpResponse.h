@@ -52,15 +52,14 @@ public:
     std::string getHttpVersion() const;
     void setHTTPResponseStatus(const HTTPResponseStatus& status);
     std::string getStatusCode() const;
-    void setStatusCode(const std::string& statusCode);
     std::string getStatusMsg() const;
-    void setStatusMsg(const std::string& statusMsg);
     std::string getContent() const;
 	//void setContent(const Cont& content);
 	void setContent(const std::string& content);
 	void addCookie(const std::string& cookie);
     void addContent(const MultipartContent& content);
     void addHeaderValue(std::string header, const std::string& value);
+    bool hasHeader(const std::string& header);
     bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
     bool isNonBinary();
     std::string getHeader(std::string);
@@ -83,8 +82,7 @@ private:
     uint32_t intCntLen;
     static std::string VALID_RESPONSE_HEADERS;
 	std::string httpVersion;
-	std::string statusCode;
-	std::string statusMsg;
+	const HTTPResponseStatus* status;
 	std::string preamble;
 	std::string epilogue;
 	bool compressed;
@@ -110,6 +108,7 @@ private:
 	bool getRemainingContent(const std::string& fname, const bool& isFirst, std::string& data);
 	static std::string getFileExtension(const std::string& file);
     void addHeader(std::string header, const std::string& value);
+	void reset();
 	friend class ServiceTask;
 	friend class HttpResponseParser;
 	friend class Http11Handler;
@@ -125,6 +124,7 @@ private:
 	friend class SoapHandler;
 	friend class HttpClient;
 	friend class CORSHandler;
+	friend class HttpRequest;
 };
 
 #endif /* HTTPRESPONSE_H_ */

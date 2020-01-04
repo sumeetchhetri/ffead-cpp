@@ -20,6 +20,8 @@ SocketInterface::SocketInterface() {
 	http2 = false;
 	fd = -1;
 	tid = -1;
+	rdTsk = NULL;
+	wrTsk = NULL;
 }
 
 SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
@@ -36,6 +38,8 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	wtl[0] = new ResponseData();
 	openSocks++;
 	tid = -1;
+	rdTsk = NULL;
+	wrTsk = NULL;
 }
 
 bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger) {

@@ -23,6 +23,8 @@
 #include "LoggerFactory.h"
 
 LoggerFactory* LoggerFactory::instance = NULL;
+Logger LoggerFactory::_l;
+bool LoggerFactory::isLoggingEnabled = true;
 
 LoggerFactory::LoggerFactory()
 {
@@ -102,13 +104,15 @@ void LoggerFactory::init()
 	}
 	instance = new LoggerFactory();
 	configureDefaultLogger("");
+	isLoggingEnabled = true;
 }
 
-void LoggerFactory::init(const std::string& configFile, const std::string& serverRootDirectory, const std::string& appName, const bool& isLoggingEnabled) {
+void LoggerFactory::init(const std::string& configFile, const std::string& serverRootDirectory, const std::string& appName, const bool& isLoggingEnabledT) {
 	if(instance==NULL)
 	{
 		instance = new LoggerFactory();
 	}
+	isLoggingEnabled = isLoggingEnabledT;
 	XmlParser parser("Parser");
 	Document doc;
 	parser.readDocument(configFile, doc);
@@ -266,6 +270,7 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 }
 
 Logger LoggerFactory::getLogger(const std::string& className) {
+	if(!isLoggingEnabled) return _l;
 	if(instance==NULL)
 	{
 		init();
@@ -289,6 +294,7 @@ Logger LoggerFactory::getLogger(const std::string& className) {
 }
 
 Logger LoggerFactory::getLogger(const std::string& loggerName, const std::string& className) {
+	if(!isLoggingEnabled) return _l;
 	if(instance==NULL)
 	{
 		init();

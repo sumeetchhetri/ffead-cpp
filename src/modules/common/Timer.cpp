@@ -22,17 +22,23 @@
 
 #include "Timer.h"
 
+DummyMutex Timer::_dm;
+
 Timer::Timer(bool threadsafe) {
 	if(threadsafe) {
+		isDm = false;
 		m = new Mutex;
 	} else {
-		m = new DummyMutex;
+		isDm = true;
+		m = &_dm;
 	}
 	started = false;
 }
 
 Timer::~Timer() {
-	delete m;
+	if(!isDm) {
+		delete m;
+	}
 }
 
 void Timer::start()

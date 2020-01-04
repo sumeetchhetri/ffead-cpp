@@ -18,37 +18,54 @@ HttpServiceHandler::~HttpServiceHandler() {
 }
 
 int HttpServiceTask::getTid() {
-	return handlerRequest->sif->tid;
+	return handlerRequest.sif->tid;
 }
 
 void HttpServiceTask::setTid(int tid) {
-	handlerRequest->sif->tid = tid;
+	handlerRequest.sif->tid = tid;
 }
 
-void HttpServiceHandler::handleService(HandlerRequest* handlerRequest)
+void HttpServiceHandler::handleService(void* request, SocketInterface* sif, void* context, int reqPos)
 {
-	HttpServiceTask* task = f();
-	task->handlerRequest = handlerRequest;
-	task->service = this;
-	task->setCleanUp(true);
+	HttpRequest* hreq = (HttpRequest*)request;
+	HttpServiceTask* task = NULL;
+	if(hreq->srvTask == NULL) {
+		hreq->srvTask = f();
+		task = (HttpServiceTask*)hreq->srvTask;
+		task->handlerRequest.sh = this;
+		task->service = this;
+	} else {
+		task = (HttpServiceTask*)hreq->srvTask;
+		task->handlerRequest.clearObjects();
+	}
+	task->handlerRequest.request = request;
+	task->handlerRequest.response = NULL;
+	task->handlerRequest.sif = sif;
+	task->handlerRequest.context = context;
+	task->handlerRequest.reqPos = reqPos;
+	task->handlerRequest.protType = sif->getProtocol(context).find("HTTP")==0?1:2;
 	submitTask(task);
 }
 
 void HttpServiceHandler::handleRead(SocketInterface* sif)
 {
-	HttpReadTask* task = new HttpReadTask();
-	task->sif = sif;
-	task->service = this;
-	task->setCleanUp(true);
-	submitTask(task);
+	if(sif->rdTsk == NULL) {
+		sif->rdTsk = fr();
+		HttpReadTask* task = (HttpReadTask*)sif->rdTsk;
+		task->sif = sif;
+		task->service = this;
+	}
+	submitTask(sif->rdTsk);
 }
 
 void HttpServiceHandler::handleWrite(SocketInterface* sif) {
-	HttpWriteTask* task = new HttpWriteTask();
-	task->sif = sif;
-	task->service = this;
-	task->setCleanUp(true);
-	submitTask(task);
+	if(sif->wrTsk == NULL) {
+		sif->wrTsk = new HttpWriteTask();
+		HttpWriteTask* task = (HttpWriteTask*)sif->wrTsk;
+		task->sif = sif;
+		task->service = this;
+	}
+	submitTask(sif->wrTsk);
 }
 
 HttpReadTask::HttpReadTask() {
@@ -94,29 +111,24 @@ void HttpReadTask::run() {
 }
 
 HttpServiceTask::HttpServiceTask() {
-	this->handlerRequest = NULL;
 	service = NULL;
 }
 
 HttpServiceTask::HttpServiceTask(ReusableInstanceHolder* h) {
-	this->handlerRequest = NULL;
 	service = NULL;
 	this->hdlr = h;
 }
 
 HttpServiceTask::~HttpServiceTask() {
-	if(handlerRequest!=NULL) {
-		delete handlerRequest;
-	}
 }
 
 void HttpServiceTask::run() {
 	Timer t;
 	t.start();
 
-	if(handlerRequest->getSif()->isClosed()) {
-		handlerRequest->sif->onClose();
-		service->closeConnection(handlerRequest->sif);
+	if(handlerRequest.getSif()->isClosed()) {
+		handlerRequest.sif->onClose();
+		service->closeConnection(handlerRequest.sif);
 		t.end();
 		CommonUtils::tsService += t.timerNanoSeconds();
 		return;
@@ -125,10 +137,10 @@ void HttpServiceTask::run() {
 	CommonUtils::cReqs += 1;
 
 	void* resp = NULL;
-	if(handlerRequest->getProtType()==1)
+	if(handlerRequest.getProtType()==1)
 	{
-		HttpRequest* req = (HttpRequest*)handlerRequest->getRequest();
-		HttpResponse* res = new HttpResponse();
+		HttpRequest* req = (HttpRequest*)handlerRequest.getRequest();
+		HttpResponse* res = (HttpResponse*)req->resp;
 		resp = res;
 
 		std::string mimeType = CommonUtils::getMimeType(req->ext);
@@ -145,7 +157,7 @@ void HttpServiceTask::run() {
 		strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
 		res->addHeader(HttpResponse::DateHeader, std::string(buffer));
 
-		if(handlerRequest->getSif()->getProtocol(handlerRequest->getContext())=="HTTP1.1" && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
+		if(handlerRequest.getSif()->getProtocol(handlerRequest.getContext())=="HTTP1.1" && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
 		{
 			if(req->isHeaderValue(HttpRequest::Upgrade, "websocket", true)
 					&& req->getHeader(HttpRequest::SecWebSocketKey)!=""
@@ -163,8 +175,8 @@ void HttpServiceTask::run() {
 				res->addHeader(HttpResponse::SecWebSocketAccept, servseckey);
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
-				handlerRequest->getSif()->addHandler(new Http11WebSocketHandler(handlerRequest->getSif()->fd, handlerRequest->getSif()->ssl,
-						handlerRequest->getSif()->io, req->getUrl(), true));
+				handlerRequest.getSif()->addHandler(new Http11WebSocketHandler(handlerRequest.getSif()->fd, handlerRequest.getSif()->ssl,
+						handlerRequest.getSif()->io, req->getUrl(), true));
 
 				WebSocketData wreq;
 				wreq.url = req->getCurl();
@@ -181,9 +193,9 @@ void HttpServiceTask::run() {
 				res->addHeader(HttpResponse::Connection, "Upgrade");
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
-				Http2Handler* prev = (Http2Handler*)handlerRequest->getSif();
-				handlerRequest->getSif()->addHandler(new Http2Handler(handlerRequest->getSif()->fd, handlerRequest->getSif()->ssl,
-						handlerRequest->getSif()->io, true, prev->getWebpath(), http2settings));
+				Http2Handler* prev = (Http2Handler*)handlerRequest.getSif();
+				handlerRequest.getSif()->addHandler(new Http2Handler(handlerRequest.getSif()->fd, handlerRequest.getSif()->ssl,
+						handlerRequest.getSif()->io, true, prev->getWebpath(), http2settings));
 			}
 			else
 			{
@@ -200,8 +212,8 @@ void HttpServiceTask::run() {
 	}
 	else
 	{
-		Http11WebSocketHandler* h = (Http11WebSocketHandler*)handlerRequest->getSif();
-		WebSocketData* request = (WebSocketData*)handlerRequest->getRequest();
+		Http11WebSocketHandler* h = (Http11WebSocketHandler*)handlerRequest.getSif();
+		WebSocketData* request = (WebSocketData*)handlerRequest.getRequest();
 		WebSocketData* response = new WebSocketData();
 		handleWebsockMessage(h->getUrl(), request, response);
 		resp = response;
@@ -211,11 +223,11 @@ void HttpServiceTask::run() {
 	CommonUtils::tsService += t.timerNanoSeconds();
 
 	CommonUtils::cResps += 1;
-	handlerRequest->response = resp;
-	int ret = handlerRequest->getSif()->pushResponse(handlerRequest->getRequest(), handlerRequest->response, handlerRequest->getContext(), handlerRequest->reqPos);
+	handlerRequest.response = resp;
+	int ret = handlerRequest.getSif()->pushResponse(handlerRequest.getRequest(), handlerRequest.response, handlerRequest.getContext(), handlerRequest.reqPos);
 	if(ret==0) {
-		handlerRequest->sif->onClose();
-		service->closeConnection(handlerRequest->sif);
+		handlerRequest.sif->onClose();
+		service->closeConnection(handlerRequest.sif);
 	}
 }
 

@@ -46,8 +46,11 @@ typedef std::map<std::string, std::string, cicomp> RMap;
 typedef std::map<std::string, MultipartContent, cicomp> FMap;
 
 class HttpRequest {
+	void* resp;
 	static RiMap HDRS_SW_CODES;
 	static std::string VALID_REQUEST_HEADERS;
+	std::atomic<bool> isInit;
+	Task* srvTask;
 	std::string webpath;
 	std::string authority;
 	std::string scheme;
@@ -129,7 +132,10 @@ class HttpRequest {
 	friend class SolrSearch;
 	friend class CORSHandler;
 	friend class HttpRequestBuffered;
+	friend class ServiceHandler;
+	friend class HandlerRequest;
 	static const std::string VALID_METHODS;
+	void reset();
 public:
 	enum {
 		PREFLIGHT, CORS, OTHER

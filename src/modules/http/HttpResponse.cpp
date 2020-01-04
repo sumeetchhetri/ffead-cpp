@@ -78,6 +78,17 @@ void HttpResponse::init() {
 	}
 }
 
+void HttpResponse::reset() {
+	content.clear();
+	preamble.clear();
+	epilogue.clear();
+	multipartFormData.clear();
+	contentList.clear();
+	cookies.clear();
+	outFileName.clear();
+	headers.clear();
+}
+
 HttpResponse::HttpResponse() {
 	httpVersion = "HTTP/1.1";
 	compressed = false;
@@ -88,7 +99,7 @@ HttpResponse::HttpResponse() {
 	intCntLen = -1;
 	httpVers = 0;
 	done = false;
-	statusCode = -1;
+	status = &HTTPResponseStatus::NotFound;
 }
 
 HttpResponse::~HttpResponse() {
@@ -201,22 +212,22 @@ void HttpResponse::generateHeadResponse(std::string& resp)
 	}
 	resp.append(httpVersion);
 	resp.append(" ");
-	resp.append(statusCode);
+	resp.append(status->getSCode());
 	resp.append(" ");
-	resp.append(statusMsg);
+	resp.append(status->getMsg());
 	resp.append(HDR_END);
 	resp.append(HDR_SRV);
-	if(this->getHeader(ContentType)=="" && this->contentList.size()>0)
+	if(!hasHeader(ContentType) && this->contentList.size()>0)
 	{
 		this->addHeader(ContentType, "multipart/mixed");
 	}
-	if(this->getHeader(ContentType)!="" && boundary!="")
+	if(hasHeader(ContentType) && boundary!="")
 	{
 		headers[ContentType].append("; boundary=\"");
 		headers[ContentType].append(boundary);
 		headers[ContentType].append("\"");
 	}
-	if(!isTE && getHeader(ContentLength)=="")
+	if(!isTE && !hasHeader(ContentLength))
 	{
 		addHeader(ContentLength, CastUtil::fromNumber((int)content.length()));
 	}
@@ -244,9 +255,9 @@ void HttpResponse::generateOptionsResponse(std::string& resp)
 {
 	resp.append(httpVersion);
 	resp.append(" ");
-	resp.append(statusCode);
+	resp.append(status->getSCode());
 	resp.append(" ");
-	resp.append(statusMsg);
+	resp.append(status->getMsg());
 	resp.append(HDR_END);
 	resp.append(HDR_SRV);
 	RMap::iterator it;
@@ -272,9 +283,9 @@ void HttpResponse::generateTraceResponse(HttpRequest* req, std::string& resp)
 {
 	resp.append(httpVersion);
 	resp.append(" ");
-	resp.append(statusCode);
+	resp.append(status->getSCode());
 	resp.append(" ");
-	resp.append(statusMsg);
+	resp.append(status->getMsg());
 	resp.append(HDR_END);
 	resp.append(HDR_SRV);
 	RMap::iterator it;
@@ -326,28 +337,17 @@ void HttpResponse::update(HttpRequest* req)
 
 void HttpResponse::setHTTPResponseStatus(const HTTPResponseStatus& status)
 {
-	this->statusCode = status.getSCode();
-	this->statusMsg = status.getMsg();
+	this->status = &status;
 }
 
 std::string HttpResponse::getStatusCode() const
 {
-	return statusCode;
-}
-
-void HttpResponse::setStatusCode(const std::string& statusCode)
-{
-	this->statusCode = statusCode;
+	return status->getSCode();
 }
 
 std::string HttpResponse::getStatusMsg() const
 {
-	return statusMsg;
-}
-
-void HttpResponse::setStatusMsg(const std::string& statusMsg)
-{
-	this->statusMsg = statusMsg;
+	return status->getMsg();
 }
 
 std::string HttpResponse::getContent() const
@@ -415,11 +415,15 @@ void HttpResponse::addHeaderValue(std::string header, const std::string& value)
 	}
 }
 
+bool HttpResponse::hasHeader(const std::string& header)
+{
+	return headers.find(header)!=headers.end() && headers[header].length()>0;
+}
+
 bool HttpResponse::isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase)
 {
 	return header!="" && headers.find(header)!=headers.end()
-			&& (headers[header]==value ||
-					(ignoreCase && StringUtil::toLowerCopy(headers[header])==StringUtil::toLowerCopy(value)));
+			&& (headers[header]==value || (ignoreCase && strcasecmp(headers[header].c_str(), value.c_str())==0));
 }
 
 std::string HttpResponse::getHeader(std::string header)
@@ -455,9 +459,9 @@ std::string HttpResponse::getStatusLine() const {
 	std::string r;
 	r.append(httpVersion);
 	r.append(" ");
-	r.append(statusCode);
+	r.append(status->getSCode());
 	r.append(" ");
-	r.append(statusMsg);
+	r.append(status->getMsg());
 	return r;
 }
 
@@ -789,8 +793,8 @@ bool HttpResponse::isContentRemains() {
 }
 
 std::string HttpResponse::toPluginString() {
-	std::string text = (this->statusCode + "\n");
-	text += (this->statusMsg + "\n");
+	std::string text = (this->status->getSCode() + "\n");
+	text += (this->status->getMsg() + "\n");
 	text += this->httpVersion + "\n";
 	text += (this->outFileName + "\n");
 

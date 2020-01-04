@@ -32,6 +32,7 @@
 #include <libcuckoo/cuckoohash_map.hh>
 #include "concurrentqueue.h"
 #include "map"
+#include "Task.h"
 
 class SocketInterface;
 
@@ -49,6 +50,8 @@ public:
 };
 
 class SocketInterface {
+	Task* rdTsk;
+	Task* wrTsk;
 	static std::atomic<int> openSocks;
 	EventHandler* eh;
 	SSL *ssl;
@@ -81,6 +84,7 @@ class SocketInterface {
 	friend class Http11WebSocketHandler;
 	friend class CommonUtils;
 	friend class DummySocketInterface;
+	friend class HttpServiceHandler;
 public:
 	int completeWrite();
 	int pushResponse(void* request, void* response, void* context, int reqPos);

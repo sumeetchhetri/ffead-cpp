@@ -16,7 +16,8 @@ class Http11Handler : public SocketInterface {
 	bool isHeadersDone;
 	int bytesToRead;
 	bool isTeRequest;
-	HttpRequest* request;
+	std::vector<HttpRequest*> requests;
+	HttpRequest* currReq;
 
 	std::string webpath;
 	int chunkSize;
@@ -31,6 +32,7 @@ public:
 	void onClose();
 	std::string getProtocol(void* context);
 	int getTimeout();
+	HttpRequest* getAvailableRequest();
 	void* readRequest(void*& context, int& pending, int& reqPos);
 	bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos);
 	Http11Handler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& webpath, const int& chunkSize,

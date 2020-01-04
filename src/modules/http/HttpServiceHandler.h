@@ -14,7 +14,7 @@
 class HttpServiceHandler;
 
 class HttpServiceTask : public Task {
-	HandlerRequest* handlerRequest;
+	HandlerRequest handlerRequest;
 	HttpServiceHandler* service;
 	void run();
 	friend class HttpServiceHandler;
@@ -65,7 +65,7 @@ class HttpServiceHandler : public ServiceHandler {
 	HttpServiceTaskFactory f;
 	HttpReadTaskFactory fr;
 	friend class HttpServiceTask;
-	void handleService(HandlerRequest* handlerRequest);
+	void handleService(void* request, SocketInterface* sif, void* context, int reqPos);
 	void handleRead(SocketInterface* sif);
 	void handleWrite(SocketInterface* sif);
 public:

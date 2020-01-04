@@ -36,6 +36,7 @@ class HandlerRequest {
 	friend class HttpServiceTask;
 	friend class HttpReadTask;
 	friend class HttpWriteTask;
+	friend class HttpServiceHandler;
 	HandlerRequest();
 public:
 	void* getContext();
@@ -66,7 +67,7 @@ class ServiceHandler {
 	friend class HttpReadTask;
 protected:
 	void submitTask(Task* task);
-	virtual void handleService(HandlerRequest* req)=0;
+	virtual void handleService(void* request, SocketInterface* sif, void* context, int reqPos)=0;
 	virtual void handleRead(SocketInterface* req)=0;
 	virtual void handleWrite(SocketInterface* sif)=0;
 public:

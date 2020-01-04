@@ -138,24 +138,60 @@ void HttpRequest::getOauthParams(std::string str)
 	}
 }
 
-HttpRequest::HttpRequest()
-{
+
+void HttpRequest::reset() {
 	cookie = false;
 	httpVers = 0;
 	corsRequest = false;
+	isInit = false;
+	content.clear();
+	content_boundary.clear();
+	content_tfile.clear();
+	file.clear();
+	localeInfo.clear();
+	ranges.clear();
+	userName.clear();
+	password.clear();
+	authMethod.clear();
+	actUrlParts.clear();
+	reqorderinf.clear();
+	authorderinf.clear();
+	contentList.clear();
+	requestParams.clear();
+	requestParamsF.clear();
+	queryParams.clear();
+	cookieattrs.clear();
+	authinfo.clear();
+	headers.clear();
+}
+
+HttpRequest::HttpRequest()
+{
+	srvTask = NULL;
+	resp = NULL;
+	cookie = false;
+	httpVers = 0;
+	corsRequest = false;
+	isInit = false;
 }
 
 HttpRequest::HttpRequest(const std::string& path)
 {
+	srvTask = NULL;
+	resp = NULL;
 	this->webpath = path;
 	cookie = false;
 	httpVers = 0;
 	corsRequest = false;
+	isInit = true;
 }
 
 HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
 {
+	srvTask = NULL;
+	resp = NULL;
 	this->webpath = path;
+	isInit = true;
 	if(vec.size()!=0)
 	{
 		this->setContent("");
@@ -1674,8 +1710,7 @@ std::string HttpRequest::toString()
 }
 
 
-HttpRequest::~HttpRequest()
-{
+HttpRequest::~HttpRequest() {
 }
 std::string HttpRequest::getMethod() const
 {

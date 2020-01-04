@@ -61,8 +61,7 @@ HttpResponseParser::HttpResponseParser(const std::string& vecstr, HttpResponse &
 				else
 				{
 					response.httpVersion = httpst.at(0);
-					response.setStatusCode(httpst.at(1));
-					response.setStatusMsg(httpst.at(2));
+					response.setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(httpst.at(1)));
 				}
 			}
 			else if(vec.at(i).find_first_of(":")!=std::string::npos && !contStarts)

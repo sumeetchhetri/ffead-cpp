@@ -25,12 +25,15 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	size_t ix = buffer.find(HttpResponse::HDR_FIN);
 	if(!isHeadersDone && ix!=std::string::npos)
 	{
-		request = new HttpRequest(webpath);
+		//request = new HttpRequest(webpath);
+		currReq = getAvailableRequest();
+		if(currReq == NULL) return NULL;
+		currReq->webpath = webpath;
 		bytesToRead = 0;
 		std::string headers = buffer.substr(0, ix);
 		buffer = buffer.substr(ix+4);
 		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, HttpResponse::HDR_END);
-		request->buildRequest("httpline", lines.at(0));
+		currReq->buildRequest("httpline", lines.at(0));
 		int hdrc = 0;
 		for (int var = 0; var < (int)lines.size(); ++var) {
 			size_t kind = std::string::npos;
@@ -43,27 +46,29 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 					key = lines.at(var).substr(0, lines.at(var).find_first_of(":"));
 					value = lines.at(var).substr(lines.at(var).find_first_of(":")+1);
 				}
-				request->buildRequest(key, value);
+				currReq->buildRequest(key, value);
 				if(hdrc++>maxReqHdrCnt) {
 					closeSocket();
-					delete request;
-					request = NULL;
+					currReq->reset();
+					((HttpResponse*)currReq->resp)->reset();
+					currReq = NULL;
 					return NULL;
 				}
 			} else if(var!=0) {
 				//TODO stop processing request some invalid http line
 			}
 		}
-		std::string bytesstr = request->getHeader(HttpRequest::ContentLength);
+		std::string bytesstr = currReq->getHeader(HttpRequest::ContentLength);
 		if(bytesstr!="") {
 			bytesToRead = CastUtil::toInt(bytesstr);
 			if(bytesToRead>maxEntitySize) {
 				closeSocket();
-				delete request;
-				request = NULL;
+				currReq->reset();
+				((HttpResponse*)currReq->resp)->reset();
+				currReq = NULL;
 				return NULL;
 			}
-		} else if(request->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
+		} else if(currReq->getHeader(HttpRequest::TransferEncoding)!="" && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
 			bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
 			buffer = buffer.substr(buffer.find(HttpResponse::HDR_END)+2);
 			if(bytesstr!="") {
@@ -72,14 +77,14 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 				if(bytesToRead==0) {
 					isTeRequest = false;
 				} else if((int)buffer.length()>=bytesToRead) {
-					request->content = buffer.substr(0, bytesToRead);
+					currReq->content = buffer.substr(0, bytesToRead);
 					buffer = buffer.substr(bytesToRead);
 				}
 			}
 		}
 		isHeadersDone = true;
 	}
-	if(request!=NULL && isHeadersDone)
+	if(currReq!=NULL && isHeadersDone)
 	{
 		if(isTeRequest && bytesToRead==0 && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
 			std::string bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
@@ -92,7 +97,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 			}
 		}
 		if(bytesToRead>0 && (int)buffer.length()>=bytesToRead) {
-			request->content = buffer.substr(0, bytesToRead);
+			currReq->content = buffer.substr(0, bytesToRead);
 			buffer = buffer.substr(bytesToRead);
 			bytesToRead = 0;
 		}
@@ -107,12 +112,12 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		pending = buffer.length();
 	}
 
-	if(!isTeRequest && bytesToRead==0 && request!=NULL)
+	if(!isTeRequest && bytesToRead==0 && currReq!=NULL)
 	{
 		reqPos = startRequest();
 		isHeadersDone = false;
-		void* temp = request;
-		request = NULL;
+		void* temp = currReq;
+		currReq = NULL;
 		return temp;
 	}
 	return NULL;
@@ -135,9 +140,31 @@ Http11Handler::Http11Handler(const SOCKET& fd, SSL* ssl, BIO* io, const std::str
 	this->connKeepAlive = connKeepAlive;
 	this->maxReqHdrCnt = maxReqHdrCnt;
 	this->maxEntitySize = maxEntitySize;
+	this->currReq = NULL;
 	this->handler = NULL;
-	this->request = NULL;
 	logger = LoggerFactory::getLogger("Http11Handler");
+}
+
+HttpRequest* Http11Handler::getAvailableRequest() {
+	if((int)requests.size()<10) {
+		HttpRequest* r = new HttpRequest();
+		r->resp = new HttpResponse();
+		this->requests.push_back(r);
+		return r;
+	} else {
+		for(int i=0;i<(int)requests.size();i++) {
+			if(requests.at(i)->isInit==false) {
+				return requests.at(i);
+			}
+		}
+		//TODO need to clean up requests after peak load is handled and done
+		//also need a max cap on the number of pending or active requests per connection
+		HttpRequest* r = new HttpRequest();
+		r->resp = new HttpResponse();
+		this->requests.push_back(r);
+		return r;
+	}
+	return NULL;
 }
 
 void Http11Handler::addHandler(SocketInterface* handler) {
@@ -149,8 +176,19 @@ Http11Handler::~Http11Handler() {
 		delete handler;
 		handler = NULL;
 	}
-	if(request!=NULL) {
-		delete request;
+	for(int i=0;i<(int)requests.size();i++) {
+		HttpRequest* r = requests.at(i);
+		delete (HttpResponse*)r->resp;
+		if(r->srvTask!=NULL) {
+			delete r->srvTask;
+		}
+		delete r;
+	}
+	if(rdTsk!=NULL) {
+		delete rdTsk;
+	}
+	if(wrTsk!=NULL) {
+		delete wrTsk;
 	}
 }
 
@@ -177,9 +215,9 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context, std::stri
 		response->updateContent(request, chunkSize);
 	}
 
-	if(response->getHeader(HttpRequest::Connection)=="")
+	if(response->hasHeader(HttpRequest::Connection))
 	{
-		if(StringUtil::toLowerCopy(request->getHeader(HttpRequest::Connection))!="keep-alive"
+		if(!request->isHeaderValue(HttpRequest::Connection, "keep-alive")
 				|| CastUtil::toInt(response->getStatusCode())>307 || request->getHttpVers()<1.1)
 		{
 			response->addHeader(HttpResponse::Connection, "close");
