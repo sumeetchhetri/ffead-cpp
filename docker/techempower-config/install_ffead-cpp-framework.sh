@@ -22,7 +22,6 @@ cd $IROOT
 wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
 unzip master.zip
 mv ffead-cpp-master ffead-cpp-src
-mv ${TROOT}/ffead-cpp-src ffead-cpp-src
 cd ffead-cpp-src/
 
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
@@ -76,7 +75,7 @@ cp resources/sample-odbc.ini ${IROOT}/odbc.ini
 
 cd ${IROOT}/ffead-cpp-src/
 
-make install -j${MAX_THREADS}
+make install -j4
 cd ffead-cpp-3.0-bin
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
@@ -93,6 +92,13 @@ pkill ffead-cpp
 cd ${IROOT}/ffead-cpp-src/
 cp -rf ffead-cpp-3.0-bin ${IROOT}/ffead-cpp-3.0
 rm -rf ffead-cpp-3.0-bin
+
+ln -s ${IROOT}/ffead-cpp-3.0/lib/libte_benchmark.so /usr/local/lib/libte_benchmark.so
+ln -s ${IROOT}/ffead-cpp-3.0/lib/libffead-modules.so /usr/local/lib/libffead-modules.so
+ln -s ${IROOT}/ffead-cpp-3.0/lib/libffead-framework.so /usr/local/lib/libffead-framework.so
+ln -s ${IROOT}/ffead-cpp-3.0/lib/libinter.so /usr/local/lib/libinter.so
+ln -s ${IROOT}/ffead-cpp-3.0/lib/libdinter.so /usr/local/lib/libdinter.so
+ldconfig
 
 cd ${IROOT}/ffead-cpp-3.0
 cp -f ${TROOT}/run_ffead.sh ./

@@ -143,7 +143,7 @@ void HttpRequest::reset() {
 	cookie = false;
 	httpVers = 0;
 	corsRequest = false;
-	isInit = false;
+	isInit = true;
 	content.clear();
 	content_boundary.clear();
 	content_tfile.clear();

@@ -28,6 +28,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		//request = new HttpRequest(webpath);
 		currReq = getAvailableRequest();
 		if(currReq == NULL) return NULL;
+		currReq->reset();
 		currReq->webpath = webpath;
 		bytesToRead = 0;
 		std::string headers = buffer.substr(0, ix);
