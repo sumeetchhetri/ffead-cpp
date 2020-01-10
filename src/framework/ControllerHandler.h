@@ -33,7 +33,7 @@
 #include "ConfigurationData.h"
 
 class ControllerHandler {
-	static const std::string BLANK;
+	static std::string BLANK;
 	static bool getControllerForPath(const std::string& cntxtName, const std::string& actUrl, std::string& className);
 	static bool getMappingForPath(const std::string& cntxtName, const std::string& actUrl, std::string& to);
 	static bool hasMappingExtension(std::string extwodot, HttpRequest* req);
