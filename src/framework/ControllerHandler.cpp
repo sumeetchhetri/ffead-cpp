@@ -22,6 +22,8 @@
 
 #include "ControllerHandler.h"
 
+std::string ControllerHandler::BLANK = "";
+
 bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const std::string& actUrl, std::string& className)
 {
 	Timer t;
@@ -282,7 +284,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			{
 				try
 				{
-					std::string pmvalue;
+					std::string& pmvalue = BLANK;
 					if(rft->params.at(var).from=="path")
 					{
 						pmvalue = mapOfValues[rft->params.at(var).name];

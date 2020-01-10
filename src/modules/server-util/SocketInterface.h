@@ -64,7 +64,7 @@ class SocketInterface {
 	std::atomic<int> tid;
 	Mutex m;
 	Mutex wm;
-	std::map<int, ResponseData*> wtl;
+	std::map<int, ResponseData> wtl;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
 	std::string address;

@@ -259,12 +259,11 @@ ngx_int_t set_custom_header_in_headers_out(ngx_http_request_t *r, const std::str
 
 static bool ignoreHeader(const std::string& hdr)
 {
-	std::string hdr1 = StringUtil::toLowerCopy(hdr);
-	if(hdr1==StringUtil::toLowerCopy(HttpResponse::Server)
-		|| hdr1==StringUtil::toLowerCopy(HttpResponse::DateHeader)
-		|| hdr1==StringUtil::toLowerCopy(HttpResponse::AcceptRanges)
-		|| hdr1==StringUtil::toLowerCopy(HttpResponse::ContentType)
-		|| hdr1==StringUtil::toLowerCopy(HttpResponse::Connection))
+	if(strcasecmp(hdr.c_str(), HttpResponse::Server.c_str())==0
+		|| strcasecmp(hdr.c_str(), HttpResponse::DateHeader.c_str())==0
+		|| strcasecmp(hdr.c_str(), HttpResponse::AcceptRanges.c_str())==0
+		|| strcasecmp(hdr.c_str(), HttpResponse::ContentType.c_str())==0
+		|| strcasecmp(hdr.c_str(), HttpResponse::Connection.c_str())==0)
 	{
 		return true;
 	}

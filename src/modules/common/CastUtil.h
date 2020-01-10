@@ -820,10 +820,10 @@ public:
 	static short toShort(const std::string& vval) {
 		short s = 0;
 		char* endptr;
-		if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+		/*if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 				|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 				|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
-		} else {
+		} else {*/
 			bool invalid = false;
 			if(vval!="0")
 			{
@@ -834,16 +834,16 @@ public:
 			{
 				throw std::runtime_error("Conversion exception - std::string to short");
 			}
-		}
+		//}
 		return s;
 	}
 	static int toInt(const std::string& vval) {
 		int i = 0;
 		char* endptr;
-		if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+		/*if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 				|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 				|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
-		} else {
+		} else {*/
 			bool invalid = false;
 			if(vval!="0")
 			{
@@ -854,16 +854,16 @@ public:
 			{
 				throw std::runtime_error("Conversion exception - std::string to int");
 			}
-		}
+		//}
 		return i;
 	}
 	static long toLong(const std::string& vval) {
 		long l = 0;
 		char* endptr;
-		if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+		/*if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 				|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 				|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
-		} else {
+		} else {*/
 			bool invalid = false;
 			if(vval!="0")
 			{
@@ -874,7 +874,7 @@ public:
 			{
 				throw std::runtime_error("Conversion exception - std::string to long");
 			}
-		}
+		//}
 		return l;
 	}
 	static long long toLonglong(const std::string& vval) {
@@ -891,10 +891,10 @@ public:
 	static unsigned short toUShort(const std::string& vval) {
 		unsigned short s = 0;
 		char* endptr;
-		if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+		/*if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 				|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 				|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
-		} else {
+		} else {*/
 			bool invalid = false;
 			if(vval!="0")
 			{
@@ -905,16 +905,16 @@ public:
 			{
 				throw std::runtime_error("Conversion exception - std::string to unsigned short");
 			}
-		}
+		//}
 		return s;
 	}
 	static unsigned int toUInt(const std::string& vval) {
 		unsigned int i = 0;
 		char* endptr;
-		if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+		/*if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 				|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 				|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
-		} else {
+		} else {*/
 			bool invalid = false;
 			if(vval!="0")
 			{
@@ -925,16 +925,16 @@ public:
 			{
 				throw std::runtime_error("Conversion exception - std::string to unsigned int");
 			}
-		}
+		//}
 		return i;
 	}
 	static unsigned long toULong(const std::string& vval) {
 		unsigned long l = 0;
 		char* endptr;
-		if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
+		/*if(vval=="0" || (vval.length()>0 && vval.at(0)=='0' && vval.find_first_not_of("0")==std::string::npos)
 				|| (vval.find("+0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)
 				|| (vval.find("-0")==0 && vval.find_first_not_of("0", 1)==std::string::npos)) {
-		} else {
+		} else {*/
 			bool invalid = false;
 			if(vval!="0")
 			{
@@ -945,7 +945,7 @@ public:
 			{
 				throw std::runtime_error("Conversion exception - std::string to unsigned long");
 			}
-		}
+		//}
 		return l;
 	}
 	static unsigned long long toULonglong(const std::string& vval) {

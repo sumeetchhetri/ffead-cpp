@@ -35,7 +35,6 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	address = StringUtil::toHEX((long long)this);
 	this->fd = fd;
 	http2 = SSLHandler::getAlpnProto(fd).find("h2")==0;
-	wtl[0] = new ResponseData();
 	openSocks++;
 	tid = -1;
 	rdTsk = NULL;
@@ -100,10 +99,6 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 
 SocketInterface::~SocketInterface() {
 	closeSocket();
-	std::map<int, ResponseData*>::iterator it;
-	for(it=wtl.begin();it!=wtl.end();++it) {
-		delete it->second;
-	}
 	openSocks--;
 }
 
@@ -121,12 +116,12 @@ int SocketInterface::completeWrite() {
 
 	wm.lock();
 	while(!allRequestsDone()) {
-		ResponseData* rd = wtl[reqPos];
+		ResponseData& rd = wtl[reqPos];
 
 		Timer t;
 		t.start();
 
-		done = writeTo(rd);
+		done = writeTo(&rd);
 
 		t.end();
 		CommonUtils::tsActWrite += t.timerNanoSeconds();
@@ -150,9 +145,9 @@ int SocketInterface::completeWrite() {
 
 void SocketInterface::writeTo(const std::string& d, int reqPos) {
 	wm.lock();
-	ResponseData* rd = wtl[reqPos];
+	ResponseData& rd = wtl[reqPos];
 	wm.unlock();
-	rd->_b += d;
+	rd._b += d;
 }
 
 int SocketInterface::pushResponse(void* request, void* response, void* context, int reqPos) {
@@ -160,15 +155,15 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 	to.start();
 
 	wm.lock();
-	ResponseData* rd = wtl[reqPos];
+	ResponseData& rd = wtl[reqPos];
 	wm.unlock();
 
-	writeResponse(request, response, context, rd->_b, reqPos);
+	writeResponse(request, response, context, rd._b, reqPos);
 
 	Timer t;
 	t.start();
 
-	int done = writeTo(rd);
+	int done = writeTo(&rd);
 
 	t.end();
 	CommonUtils::tsActWrite += t.timerNanoSeconds();
@@ -190,16 +185,15 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 int SocketInterface::startRequest() {
 	int rp = ++reqPos;
 	wm.lock();
-	wtl[rp] = new ResponseData();
+	wtl[rp] = ResponseData();
 	wm.unlock();
 	return rp;
 }
 
 int SocketInterface::endRequest(int reqPos) {
 	wm.lock();
-	ResponseData* rd = wtl[reqPos];
+	ResponseData& rd = wtl[reqPos];
 	wtl.erase(reqPos);
-	delete rd;
 	wm.unlock();
 	return ++current;
 }

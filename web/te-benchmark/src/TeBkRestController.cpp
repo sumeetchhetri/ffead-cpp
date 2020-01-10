@@ -41,7 +41,7 @@ std::vector<TeBkWorld> TeBkRestController::queries(std::string queries) {
 	std::vector<TeBkWorld> wlst;
 	int queryCount = 1;
 	try {
-		queryCount = CastUtil::lexical_cast<int>(queries);
+		queryCount = CastUtil::toInt(queries);
 	} catch(const std::exception& e) {
 	}
 	if(queryCount<1)queryCount=1;
@@ -71,7 +71,7 @@ std::vector<TeBkWorld> TeBkRestController::updates(std::string queries) {
 	std::vector<TeBkWorld> wlst;
 	int queryCount = 1;
 	try {
-		queryCount = CastUtil::lexical_cast<int>(queries);
+		queryCount = CastUtil::toInt(queries);
 	} catch(const std::exception& e) {
 	}
 	if(queryCount<1)queryCount=1;
@@ -121,7 +121,7 @@ void TeBkRestController::updateCache() {
 		sqli->endSession();
 		for (int c = 0; c < (int)wlist.size(); ++c) {
 			TeBkWorld& w = wlist.at(c);
-			cchi->setO(CastUtil::lexical_cast<std::string>(w.getId()), w);
+			cchi->setO(CastUtil::fromNumber(w.getId()), w);
 		}
 		delete sqli;
 		delete cchi;
@@ -135,7 +135,7 @@ void TeBkRestController::updateCache() {
 std::vector<TeBkWorld> TeBkRestController::cachedWorlds(std::string count) {
 	int queryCount = 1;
 	try {
-		queryCount = CastUtil::lexical_cast<int>(count);
+		queryCount = CastUtil::toInt(count);
 	} catch(const std::exception& e) {
 	}
 	if(queryCount<1)queryCount=1;
@@ -147,7 +147,7 @@ std::vector<TeBkWorld> TeBkRestController::cachedWorlds(std::string count) {
 		std::vector<std::string> keys;
 		for (int c = 0; c < queryCount; ++c) {
 			int rid = rand() % 10000 + 1;
-			keys.push_back(CastUtil::lexical_cast<std::string>(rid));
+			keys.push_back(CastUtil::fromNumber(rid));
 		}
 
 		std::vector<TeBkWorld> wlst = cchi->mgetO<TeBkWorld>(keys);

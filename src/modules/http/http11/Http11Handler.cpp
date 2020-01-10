@@ -25,7 +25,6 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	size_t ix = buffer.find(HttpResponse::HDR_FIN);
 	if(!isHeadersDone && ix!=std::string::npos)
 	{
-		//request = new HttpRequest(webpath);
 		currReq = getAvailableRequest();
 		if(currReq == NULL) return NULL;
 		currReq->reset();
