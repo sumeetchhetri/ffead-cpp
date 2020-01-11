@@ -73,6 +73,7 @@ class RestFunction
 	std::string statusCode;
 	std::string icontentType;
 	std::string ocontentType;
+	bool unmapped;
 	int serOpt;
 	std::string rtype;
 	SerCont sc;

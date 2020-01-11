@@ -14,6 +14,9 @@
 #include "DataSourceManager.h"
 #include <stdlib.h>
 #include "CacheManager.h"
+#include "HttpRequest.h"
+#include "HttpResponse.h"
+#include "JSONSerialize.h"
 
 
 #pragma @RestController path="/"
@@ -44,6 +47,12 @@ public:
 	std::vector<TeBkWorld> cachedWorlds(
 					#pragma @QueryParam name="count"
 					std::string count);
+
+	#pragma @GET path="/json-um" statusCode="200" ocontentType="application/json" unmapped="true"
+	void jsonUM(HttpRequest* req, HttpResponse* res);
+
+	#pragma @GET path="/plaintext-um" statusCode="200" ocontentType="text/plain" unmapped="true"
+	void plaintextUM(HttpRequest* req, HttpResponse* res);
 
 	void updateCache();
 	TeBkRestController();

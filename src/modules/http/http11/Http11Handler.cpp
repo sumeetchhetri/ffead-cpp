@@ -28,6 +28,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		currReq = getAvailableRequest();
 		if(currReq == NULL) return NULL;
 		currReq->reset();
+		((HttpResponse*)currReq->resp)->reset();
 		currReq->webpath = webpath;
 		bytesToRead = 0;
 		std::string headers = buffer.substr(0, ix);
@@ -49,8 +50,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 				currReq->buildRequest(key, value);
 				if(hdrc++>maxReqHdrCnt) {
 					closeSocket();
-					currReq->reset();
-					((HttpResponse*)currReq->resp)->reset();
+					currReq->isInit = false;
 					currReq = NULL;
 					return NULL;
 				}
@@ -63,8 +63,7 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 			bytesToRead = CastUtil::toInt(bytesstr);
 			if(bytesToRead>maxEntitySize) {
 				closeSocket();
-				currReq->reset();
-				((HttpResponse*)currReq->resp)->reset();
+				currReq->isInit = false;
 				currReq = NULL;
 				return NULL;
 			}

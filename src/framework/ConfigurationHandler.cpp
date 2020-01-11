@@ -59,14 +59,14 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	//First initialize framework markers
 	//Start Rest-full markers
 	ref.addMarker(Marker("@RestController", Marker::TYPE_CLASS, MarkerHandler::collectStr(1, "path")));
-	ref.addMarker(Marker("@GET", Marker::TYPE_METH, MarkerHandler::collectStr(4, "statusCode", "path", "icontentType", "ocontentType"),
-			MarkerHandler::collectBool(4, false, true, false, false)));
-	ref.addMarker(Marker("@PUT", Marker::TYPE_METH, MarkerHandler::collectStr(4, "statusCode", "path", "icontentType", "ocontentType"),
-			MarkerHandler::collectBool(4, false, true, false, false)));
-	ref.addMarker(Marker("@POST", Marker::TYPE_METH, MarkerHandler::collectStr(4, "statusCode", "path", "icontentType", "ocontentType"),
-			MarkerHandler::collectBool(4, false, true, false, false)));
-	ref.addMarker(Marker("@DELETE", Marker::TYPE_METH, MarkerHandler::collectStr(4, "statusCode", "path", "icontentType", "ocontentType"),
-			MarkerHandler::collectBool(4, false, true, false, false)));
+	ref.addMarker(Marker("@GET", Marker::TYPE_METH, MarkerHandler::collectStr(5, "statusCode", "path", "icontentType", "ocontentType", "unmapped"),
+			MarkerHandler::collectBool(5, false, true, false, false, false)));
+	ref.addMarker(Marker("@PUT", Marker::TYPE_METH, MarkerHandler::collectStr(5, "statusCode", "path", "icontentType", "ocontentType", "unmapped"),
+			MarkerHandler::collectBool(5, false, true, false, false, false)));
+	ref.addMarker(Marker("@POST", Marker::TYPE_METH, MarkerHandler::collectStr(5, "statusCode", "path", "icontentType", "ocontentType", "unmapped"),
+			MarkerHandler::collectBool(5, false, true, false, false, false)));
+	ref.addMarker(Marker("@DELETE", Marker::TYPE_METH, MarkerHandler::collectStr(5, "statusCode", "path", "icontentType", "ocontentType", "unmapped"),
+			MarkerHandler::collectBool(5, false, true, false, false, false)));
 	ref.addMarker(Marker("@PathParam", Marker::TYPE_ARG, MarkerHandler::collectStr(1, "name")));
 	ref.addMarker(Marker("@QueryParam", Marker::TYPE_ARG, MarkerHandler::collectStr(1, "name")));
 	ref.addMarker(Marker("@FormParam", Marker::TYPE_ARG, MarkerHandler::collectStr(1, "name")));
@@ -588,6 +588,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									restfunction.name = resfuncs.at(cntn1).getAttribute("name");
 									restfunction.path = resfuncs.at(cntn1).getAttribute("path");
 									restfunction.clas = clas;
+									restfunction.unmapped = StringUtil::toLowerCopy(resfuncs.at(cntn1).getAttribute("unmapped"))=="true";
 									restfunction.meth = StringUtil::toUpperCopy(resfuncs.at(cntn1).getAttribute("meth"));
 									restfunction.statusCode = resfuncs.at(cntn1).getAttribute("statusCode");
 									restfunction.rtype = resfuncs.at(cntn1).getAttribute("rtype");
@@ -2306,6 +2307,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 			}
 			restfunction.clas = clas;
 			restfunction.meth = StringUtil::toUpperCopy(m.getName().substr(1));
+			restfunction.unmapped = StringUtil::toLowerCopy(m.getAttributeValue("unmapped"))=="true";
 			restfunction.icontentType = m.getAttributeValue("icontentType");
 			restfunction.ocontentType = m.getAttributeValue("ocontentType");
 

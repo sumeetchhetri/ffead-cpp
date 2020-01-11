@@ -22,6 +22,12 @@ TeBkMessage TeBkRestController::json() {
 	return msg;
 }
 
+void TeBkRestController::jsonUM(HttpRequest* req, HttpResponse* res) {
+	TeBkMessage msg;
+	msg.setMessage(HELLO_WORLD);
+	res->setContent(JSONSerialize::serializeUnknown(&msg, 0, "TeBkMessage", req->getCntxt_name()));
+}
+
 TeBkWorld TeBkRestController::db() {
 	DataSourceInterface* sqli = DataSourceManager::getImpl();
 	int rid = rand() % 10000 + 1;
@@ -109,6 +115,10 @@ std::vector<TeBkWorld> TeBkRestController::updates(std::string queries) {
 
 std::string TeBkRestController::plaintext() {
 	return HELLO_WORLD;
+}
+
+void TeBkRestController::plaintextUM(HttpRequest* req, HttpResponse* res) {
+	res->setContent(HELLO_WORLD);
 }
 
 void TeBkRestController::updateCache() {

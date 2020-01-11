@@ -87,6 +87,15 @@ void HttpResponse::reset() {
 	cookies.clear();
 	outFileName.clear();
 	headers.clear();
+	hasContent = false;
+	tecurrpart = 0;
+	teparts = 0;
+	techunkSiz = 0;
+	intCntLen = -1;
+	httpVers = 0;
+	done = false;
+	status = &HTTPResponseStatus::NotFound;
+	httpVersion = "HTTP/1.1";
 }
 
 HttpResponse::HttpResponse() {
