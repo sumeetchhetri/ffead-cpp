@@ -312,7 +312,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 		if(res->isHeaderValue(HttpResponse::ContentEncoding, "gzip"))
 		{
 			bool gengzipfile = true;
-			std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".gz";
+			std::string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".gz";
 			if(!forceLoadFile)
 			{
 				std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
@@ -333,7 +333,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 		else if(res->isHeaderValue(HttpResponse::ContentEncoding, "deflate"))
 		{
 			bool genzlibfile = true;
-			std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".z";
+			std::string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".z";
 			if(!forceLoadFile)
 			{
 				std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
@@ -531,22 +531,22 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 	res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 	try
 	{
-		if(req->getRequestParseStatus().getCode()>0)
+		if(req->getRequestParseStatus()!=NULL)
 		{
-			res->setHTTPResponseStatus(req->getRequestParseStatus());
+			res->setHTTPResponseStatus(*req->getRequestParseStatus());
 			res->addHeader(HttpResponse::Connection, "close");
 			return;
 		}
 
-		if(req->getActUrlParts().size()==0)
+		/*if(req->getActUrlParts().size()==0)
 		{
 			res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 			res->addHeader(HttpResponse::Connection, "close");
 			return;
-		}
+		}*/
 
 		if(req->getCntxt_name()=="") {
-			req->setCntxt_name("default");
+			req->setDefCntxt_name();
 		}
 
 		if(ConfigurationData::getInstance()->appAliases.find(req->getCntxt_name())!=ConfigurationData::getInstance()->appAliases.end()) {
@@ -561,11 +561,11 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		if(!ConfigurationData::isServingContext(req->getCntxt_name()))
 		{
-			req->setCntxt_name("default");
+			req->setDefCntxt_name();
 		}
 
-		req->normalizeUrl();
-		req->setCntxt_root(ConfigurationData::getInstance()->coreServerProperties.webPath+req->getCntxt_name());
+		//req->normalizeUrl();
+		req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots[req->getCntxt_name()]);
 		req->updateContent();
 
 		ConfigurationData::getInstance()->httpRequest.set(req);

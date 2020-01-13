@@ -24,6 +24,11 @@
 
 std::string HttpRequest::VALID_REQUEST_HEADERS = ",accept,accept-charset,accept-encoding,accept-language,accept-datetime,access-control-request-headers,access-control-request-method,authorization,cache-control,connection,cookie,content-length,content-md5,content-type,date,expect,from,host,if-match,if-modified-since,if-none-match,if-range,if-unmodified-since,max-forwards,origin,pragma,proxy-authorization,range,referer,te,upgrade,user-agent,via,warning,transfer-encoding,sec-websocket-key,sec-websocket-version,sec-websocket-accept,sec-websocket-protocol,sec-websocket-extensions,alt-used,http2-settings,";
 
+const std::string HttpRequest::HTTP_VERS10 = "HTTP/1.0";
+const std::string HttpRequest::HTTP_VERS11 = "HTTP/1.1";
+const std::string HttpRequest::DEF_CNTXTNAME = "default";
+const std::string HttpRequest::BLANK = "";
+
 std::string HttpRequest::Accept =			 "Accept";
 std::string HttpRequest::AcceptCharset = 		 "Accept-Charset";
 std::string HttpRequest::AcceptEncoding = 		 "Accept-Encoding";
@@ -139,7 +144,7 @@ void HttpRequest::getOauthParams(std::string str)
 }
 
 
-void HttpRequest::reset() {
+void HttpRequest::reset(std::string& data, int* content_length) {
 	cookie = false;
 	httpVers = 0;
 	corsRequest = false;
@@ -162,7 +167,42 @@ void HttpRequest::reset() {
 	queryParams.clear();
 	cookieattrs.clear();
 	authinfo.clear();
-	headers.clear();
+	if(headers_data.length()>0) {
+		headers_data.clear();
+		minor_version = 1;
+		num_headers = 0;
+	} else {
+		headers.clear();
+	}
+
+	if(data.length()>0) {
+		headers_data = data;
+		char *method, *path;
+		size_t method_len, path_len;
+		num_headers = sizeof(headers_list) / sizeof(headers_list[0]);
+		if(phr_parse_request(headers_data.c_str(), headers_data.length(), (const char **)&method, &method_len, (const char **)&path, &path_len,
+					&minor_version, headers_list, &num_headers, 0, content_length)<0) {
+			status = &HTTPResponseStatus::BadRequest;
+		} else {
+			methodv = std::string_view{method, method_len};
+			actUrl = std::string_view{path, path_len};
+			httpVers = 1 + (float)minor_version/10;
+
+			size_t ids = actUrl.find_first_not_of("/");
+			if(ids != std::string::npos) {
+				size_t ide = actUrl.find("/", ids);
+				if(ide != std::string::npos) {
+					cntxt_name = actUrl.substr(ids, ide-ids);
+				} else if(actUrl.find(".")==std::string::npos) {
+					cntxt_name = actUrl.substr(ids);
+				}
+			}
+			if(actUrl.find(".")!=std::string::npos) {
+				ext = actUrl.substr(actUrl.find(".")+1);
+				file = actUrl.substr(actUrl.find_last_of("/")+1);
+			}
+		}
+	}
 }
 
 HttpRequest::HttpRequest()
@@ -173,847 +213,68 @@ HttpRequest::HttpRequest()
 	httpVers = 0;
 	corsRequest = false;
 	isInit = false;
+	minor_version = 1;
+	num_headers = 0;
+	status = NULL;
+	cntxt_root = NULL;
 }
 
-HttpRequest::HttpRequest(const std::string& path)
+HttpRequest::HttpRequest(std::string& data, int* content_length)
 {
 	srvTask = NULL;
 	resp = NULL;
-	this->webpath = path;
 	cookie = false;
 	httpVers = 0;
 	corsRequest = false;
 	isInit = true;
-}
+	minor_version = 1;
+	num_headers = 0;
+	status = NULL;
+	cntxt_root = NULL;
 
-HttpRequest::HttpRequest(const strVec& vec, const std::string& path)
-{
-	srvTask = NULL;
-	resp = NULL;
-	this->webpath = path;
-	isInit = true;
-	if(vec.size()!=0)
-	{
-		this->setContent("");
-		std::string conten;
-		bool contStarts = false;
-		this->cookie = false;
-		for(unsigned int i=0;i<vec.size();i++)
-		{
-			strVec temp,vemp,memp;
-			if((vec.at(i)=="\r" || vec.at(i)==""|| vec.at(i)=="\r\n") && !contStarts)
-			{
-				contStarts = true;
-				continue;
-			}
-			//if(!contStarts && vec.at(i)=="\r")
-			//	contStarts = true;
-			if(!contStarts && temp.size()>1 && vec.at(i).find(":")!=std::string::npos)
-			{
-				if(vec.at(i).find(":")==vec.at(i).find(": ")) {
-					temp.push_back(StringUtil::toLowerCopy(vec.at(i).substr(0, vec.at(i).find_first_of(": "))));
-					temp.push_back(vec.at(i).substr(vec.at(i).find_first_of(": ")+2));
-				} else {
-					temp.push_back(StringUtil::toLowerCopy(vec.at(i).substr(0, vec.at(i).find_first_of(":"))));
-					temp.push_back(vec.at(i).substr(vec.at(i).find_first_of(":")+1));
-				}
-				StringUtil::replaceFirst(temp.at(1),"\r","");
-				if(temp.at(0)==HttpRequest::Authorization)
-				{
-					this->getAuthParams(temp.at(1));
-					addHeader(temp.at(0), temp.at(1));
-				}
-				else if(temp.at(0)==HttpRequest::AcceptLanguage)
-				{
-					strVec lemp;
-					StringUtil::split(lemp, temp.at(1), (","));
-					for(unsigned int li=0;li<lemp.size();li++)
-					{
-						if(lemp.at(li).find(";")==std::string::npos && lemp.at(li)!="")
-						{
-							std::string t = lemp.at(li);
-							size_t s = t.find_first_not_of(" ");
-							size_t e = t.find_last_not_of(" ")+1;
-							t = t.substr(s,e-s);
-							this->localeInfo.push_back(t);
-						}
-						else if(lemp.at(li)!="")
-						{
-							std::string t = lemp.at(li);
-							size_t s = t.find_first_not_of(" ");
-							size_t e = t.find(";");
-							t = t.substr(s,e-s);
-							e = t.find_last_not_of(" ")+1;
-							t = t.substr(0,e);
-							this->localeInfo.push_back(t);
-						}
-					}
-					addHeader(temp.at(0), temp.at(1));
-				}
-				else if(temp.at(0)==HttpRequest::ContentType)
-				{
-					std::string tempi(temp.at(1));
-					size_t s = tempi.find("boundary");
-					if(s!=std::string::npos)
-					{
-						addHeader(temp.at(0), tempi.substr(0,s));
-						tempi = tempi.substr(s);
-						strVec results;
-						StringUtil::split(results, tempi, ("="));
-						if(results.size()==2)
-						{
-							std::string bound = "--" + results.at(1).substr(0,results.at(1).length());
-							this->setContent_boundary(bound);
-						}
-					}
-					else
-					{
-						addHeader(temp.at(0), temp.at(1));
-					}
-				}
-				else if(temp.at(0)==HttpRequest::Cookie)
-				{
-					this->cookie = true;
-					strVec results;
-					StringUtil::split(results, temp.at(1), ("; "));
-					for(int j=0;j<(int)results.size();j++)
-					{
-						strVec results1;
-						StringUtil::split(results1, results.at(j), ("="));
-						if(results1.size()==2)
-							cookieattrs[results1.at(0)] = results1.at(1);
-						else
-							cookieattrs[results1.at(0)] = "true";
-					}
-					addHeader(temp.at(0), temp.at(1));
-				}
-				else
-				{
-					addHeaderValue(temp.at(0), temp.at(1));
+	if(data.length()>0) {
+		headers_data = data;
+		char *method, *path;
+		size_t method_len, path_len;
+		num_headers = sizeof(headers_list) / sizeof(headers_list[0]);
+		if(phr_parse_request(headers_data.c_str(), headers_data.length(), (const char **)&method, &method_len, (const char **)&path, &path_len,
+					&minor_version, headers_list, &num_headers, 0, content_length)<0) {
+			status = &HTTPResponseStatus::BadRequest;
+		} else {
+			methodv = std::string_view{method, method_len};
+			actUrl = std::string_view{path, path_len};
+			httpVers = 1 + (float)minor_version/10;
+
+			size_t ids = actUrl.find_first_not_of("/");
+			if(ids != std::string::npos) {
+				size_t ide = actUrl.find("/", ids);
+				if(ide != std::string::npos) {
+					cntxt_name = actUrl.substr(ids, ide-ids);
+				} else if(actUrl.find(".")==std::string::npos) {
+					cntxt_name = actUrl.substr(ids);
 				}
 			}
-			else
-			{
-				std::string tem = temp.at(0);
-				if(!contStarts)
-				{
-					StringUtil::split(vemp, tem, (" "));
-					if(vemp.size()<3)
-					{
-						status = HTTPResponseStatus::BadRequest;
-						return;
-					}
-					else if(!isValidHttpMethod(vemp.at(0)))
-					{
-						status = HTTPResponseStatus::InvalidMethod;
-						return;
-					}
-					else
-					{
-						std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(vemp.at(2)), "http/", "");
-						StringUtil::trim(versionStr);
-						float version = -1;
-						try {
-							version = CastUtil::toFloat(versionStr);
-							this->httpVers = version;
-						} catch(const std::exception& e) {
-							status = HTTPResponseStatus::HttpVersionNotSupported;
-							return;
-						}
-						if(version<1.0 && version>1.1)
-						{
-							status = HTTPResponseStatus::HttpVersionNotSupported;
-							return;
-						}
-						if(version<1.1 && StringUtil::toLowerCopy(vemp.at(0))=="options")
-						{
-							status = HTTPResponseStatus::InvalidMethod;
-							return;
-						}
-					}
-				}
-				if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="get")
-				{
-					//StringUtil::replaceFirst(tem,"GET ","");
-					vemp.erase(vemp.begin());
-					this->setMethod("GET");
-					//StringUtil::split(vemp, tem, (" "));
-					StringUtil::replaceFirst(vemp.at(1),"\r","");
-					this->httpVersion = vemp.at(1);
-					StringUtil::replaceFirst(vemp.at(0)," ","");
-					if(vemp.at(0).find("?")!=std::string ::npos)
-					{
-						strVec params;
-						std::string valu(vemp.at(0));
-						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-						valu = valu.substr(valu.find("?")+1);
-						//valu = CryptoHandler::urlDecode(valu);
-						StringUtil::split(params,valu , ("&"));
-						std::map<std::string ,int> indices;
-						RMap::iterator it;
-						for(unsigned j=0;j<params.size();j++)
-						{
-							strVec param;
-							StringUtil::split(param, params.at(j), ("="));
-							if(param.size()==2)
-							{
-								std::string att = param.at(0);
-								StringUtil::replaceFirst(att,"\r","");
-								StringUtil::replaceFirst(att,"\t","");
-								StringUtil::replaceFirst(att," ","");
-								//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
-								std::string attN = CryptoHandler::urlDecode(att);
-								if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
-								{
-									if(indices.find(attN)==indices.end())
-									{
-										indices[attN] = 0;
-									}
-									else
-									{
-										indices[attN] = indices[attN] + 1;
-									}
-									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::fromNumber(indices[attN])
-											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-								}
-								else
-								{
-									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
-								}
-								reqorderinf[reqorderinf.size()+1] = att;
-							}
-						}
-					}
-					this->setActUrl(vemp.at(0));
-					memp = StringUtil::splitAndReturn<std::vector<std::string> >(vemp.at(0), ("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
-					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
-					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
-						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
-						}
-					}
-				}
-				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="head")
-				{
-					//StringUtil::replaceFirst(tem,"HEAD ","");
-					vemp.erase(vemp.begin());
-					this->setMethod("HEAD");
-					//StringUtil::split(vemp, tem, (" "));
-					StringUtil::replaceFirst(vemp.at(1),"\r","");
-					this->httpVersion = vemp.at(1);
-					StringUtil::replaceFirst(vemp.at(0)," ","");
-					if(vemp.at(0).find("?")!=std::string ::npos)
-					{
-						strVec params;
-						std::string valu(vemp.at(0));
-						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-						valu = valu.substr(valu.find("?")+1);
-						//valu = CryptoHandler::urlDecode(valu);
-						StringUtil::split(params,valu , ("&"));
-						std::map<std::string ,int> indices;
-						RMap::iterator it;
-						for(unsigned j=0;j<params.size();j++)
-						{
-							strVec param;
-							StringUtil::split(param, params.at(j), ("="));
-							if(param.size()==2)
-							{
-								std::string att = param.at(0);
-								StringUtil::replaceFirst(att,"\r","");
-								StringUtil::replaceFirst(att,"\t","");
-								StringUtil::replaceFirst(att," ","");
-								//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
-								std::string attN = CryptoHandler::urlDecode(att);
-								if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
-								{
-									if(indices.find(attN)==indices.end())
-									{
-										indices[attN] = 0;
-									}
-									else
-									{
-										indices[attN] = indices[attN] + 1;
-									}
-									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::fromNumber(indices[attN])
-											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-								}
-								else
-								{
-									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
-								}
-								reqorderinf[reqorderinf.size()+1] = att;
-							}
-						}
-					}
-					this->setActUrl(vemp.at(0));
-					memp = StringUtil::splitAndReturn<std::vector<std::string> >(vemp.at(0), ("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
-					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
-					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
-						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
-						}
-					}
-				}
-				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="trace")
-				{
-					//StringUtil::replaceFirst(tem,"TRACE ","");
-					vemp.erase(vemp.begin());
-					this->setMethod("TRACE");
-					//StringUtil::split(vemp, tem, (" "));
-					StringUtil::replaceFirst(vemp.at(1),"\r","");
-					this->httpVersion = vemp.at(1);
-					StringUtil::replaceFirst(vemp.at(0)," ","");
-					if(vemp.at(0).find("?")!=std::string ::npos)
-					{
-						strVec params;
-						std::string valu(vemp.at(0));
-						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-						valu = valu.substr(valu.find("?")+1);
-						//valu = CryptoHandler::urlDecode(valu);
-						StringUtil::split(params,valu , ("&"));
-						std::map<std::string ,int> indices;
-						RMap::iterator it;
-						for(unsigned j=0;j<params.size();j++)
-						{
-							strVec param;
-							StringUtil::split(param, params.at(j), ("="));
-							if(param.size()==2)
-							{
-								std::string att = param.at(0);
-								StringUtil::replaceFirst(att,"\r","");
-								StringUtil::replaceFirst(att,"\t","");
-								StringUtil::replaceFirst(att," ","");
-								//this->setRequestParam(att,CryptoHandler::urlDecode(param.at(1)));
-								std::string attN = CryptoHandler::urlDecode(att);
-								if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
-								{
-									if(indices.find(attN)==indices.end())
-									{
-										indices[attN] = 0;
-									}
-									else
-									{
-										indices[attN] = indices[attN] + 1;
-									}
-									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::fromNumber(indices[attN])
-											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-								}
-								else
-								{
-									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
-								}
-								reqorderinf[reqorderinf.size()+1] = att;
-							}
-						}
-					}
-					this->setActUrl(vemp.at(0));
-					memp = StringUtil::splitAndReturn<std::vector<std::string> >(vemp.at(0), ("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
-					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
-					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
-						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
-						}
-					}
-				}
-				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="options")
-				{
-					//StringUtil::replaceFirst(tem,"OPTIONS ","");
-					this->setMethod("OPTIONS");
-					vemp.erase(vemp.begin());
-					//StringUtil::split(vemp, tem, (" "));
-					StringUtil::replaceFirst(vemp.at(1),"\r","");
-					this->httpVersion = vemp.at(1);
-					StringUtil::replaceFirst(vemp.at(0)," ","");
-					this->setActUrl(vemp.at(0));
-					memp = StringUtil::splitAndReturn<std::vector<std::string> >(vemp.at(0), ("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
-					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
-					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
-						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
-						}
-					}
-				}
-				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="delete")
-				{
-					//StringUtil::replaceFirst(tem,"DELETE ","");
-					this->setMethod("DELETE");
-					vemp.erase(vemp.begin());
-					//StringUtil::split(vemp, tem, (" "));
-					StringUtil::replaceFirst(vemp.at(1),"\r","");
-					this->httpVersion = vemp.at(1);
-					StringUtil::replaceFirst(vemp.at(0)," ","");
-					if(vemp.at(0).find("?")!=std::string ::npos)
-					{
-						strVec params;
-						std::string valu(vemp.at(0));
-						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-						valu = valu.substr(valu.find("?")+1);
-						valu = CryptoHandler::urlDecode(valu);
-						StringUtil::split(params,valu, ("&"));
-						std::map<std::string ,int> indices;
-						RMap::iterator it;
-						for(unsigned j=0;j<params.size();j++)
-						{
-							strVec param;
-							StringUtil::split(param, params.at(j), ("="));
-							if(param.size()==2)
-							{
-								std::string att = param.at(0);
-								StringUtil::replaceFirst(att,"\r","");
-								StringUtil::replaceFirst(att,"\t","");
-								StringUtil::replaceFirst(att," ","");
-								std::string attN = CryptoHandler::urlDecode(att);
-								if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
-								{
-									if(indices.find(attN)==indices.end())
-									{
-										indices[attN] = 0;
-									}
-									else
-									{
-										indices[attN] = indices[attN] + 1;
-									}
-									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::fromNumber(indices[attN])
-											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-								}
-								else
-								{
-									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
-								}
-								reqorderinf[reqorderinf.size()+1] = att;
-							}
-						}
-					}
-					this->setActUrl(vemp.at(0));
-					memp = StringUtil::splitAndReturn<std::vector<std::string> >(vemp.at(0), ("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
-					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
-					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
-						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
-						}
-					}
-				}
-				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="put")
-				{
-					//StringUtil::replaceFirst(tem,"PUT ","");
-					this->setMethod("PUT");
-					vemp.erase(vemp.begin());
-					//StringUtil::split(vemp, tem, (" "));
-					StringUtil::replaceFirst(vemp.at(1),"\r","");
-					this->httpVersion = vemp.at(1);
-					StringUtil::replaceFirst(vemp.at(0)," ","");
-					if(vemp.at(0).find("?")!=std::string ::npos)
-					{
-						strVec params;
-						std::string valu(vemp.at(0));
-						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-						valu = valu.substr(valu.find("?")+1);
-						valu = CryptoHandler::urlDecode(valu);
-						StringUtil::split(params,valu, ("&"));
-						std::map<std::string ,int> indices;
-						RMap::iterator it;
-						for(unsigned j=0;j<params.size();j++)
-						{
-							strVec param;
-							StringUtil::split(param, params.at(j), ("="));
-							if(param.size()==2)
-							{
-								std::string att = param.at(0);
-								StringUtil::replaceFirst(att,"\r","");
-								StringUtil::replaceFirst(att,"\t","");
-								StringUtil::replaceFirst(att," ","");
-								std::string attN = CryptoHandler::urlDecode(att);
-								if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
-								{
-									if(indices.find(attN)==indices.end())
-									{
-										indices[attN] = 0;
-									}
-									else
-									{
-										indices[attN] = indices[attN] + 1;
-									}
-									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::fromNumber(indices[attN])
-											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-								}
-								else
-								{
-									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
-								}
-								reqorderinf[reqorderinf.size()+1] = att;
-							}
-						}
-					}
-					this->setActUrl(vemp.at(0));
-					memp = StringUtil::splitAndReturn<std::vector<std::string> >(vemp.at(0), ("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
-					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
-					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
-						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
-						}
-					}
-				}
-				else if(!contStarts && StringUtil::toLowerCopy(vemp.at(0))=="post")
-				{
-					//StringUtil::replaceFirst(tem,"POST ","");
-					this->setMethod("POST");
-					vemp.erase(vemp.begin());
-					//StringUtil::split(vemp, tem, (" "));
-					//this->setUrl(vemp.at(0));
-					//string pat(vemp.at(0));
-					StringUtil::replaceFirst(vemp.at(1),"\r","");
-					this->httpVersion = vemp.at(1);
-					StringUtil::replaceFirst(vemp.at(0)," ","");
-					if(vemp.at(0).find("?")!=std::string ::npos)
-					{
-						strVec params;
-						std::string valu(vemp.at(0));
-						vemp[0] = valu.substr(0,vemp.at(0).find("?"));
-						valu = valu.substr(valu.find("?")+1);
-						valu = CryptoHandler::urlDecode(valu);
-						StringUtil::split(params,valu, ("&"));
-						std::map<std::string ,int> indices;
-						RMap::iterator it;
-						for(unsigned j=0;j<params.size();j++)
-						{
-							strVec param;
-							StringUtil::split(param, params.at(j), ("="));
-							if(param.size()==2)
-							{
-								std::string att = param.at(0);
-								StringUtil::replaceFirst(att,"\r","");
-								StringUtil::replaceFirst(att,"\t","");
-								StringUtil::replaceFirst(att," ","");
-								std::string attN = CryptoHandler::urlDecode(att);
-								if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
-								{
-									if(indices.find(attN)==indices.end())
-									{
-										indices[attN] = 0;
-									}
-									else
-									{
-										indices[attN] = indices[attN] + 1;
-									}
-									this->queryParams[attN.substr(0, attN.find("[")+1)
-											  + CastUtil::fromNumber(indices[attN])
-											  + "]"] = CryptoHandler::urlDecode(param.at(1));
-								}
-								else
-								{
-									this->setQueryParam(attN,CryptoHandler::urlDecode(param.at(1)));
-								}
-								reqorderinf[reqorderinf.size()+1] = att;
-							}
-						}
-					}
-					this->setActUrl(vemp.at(0));
-					memp = StringUtil::splitAndReturn<std::vector<std::string> >(vemp.at(0), ("/"));
-					int fs = vemp.at(0).find_first_of("/");
-					int es = vemp.at(0).find_last_of("/");
-					if(fs==es)
-					{
-						this->setCntxt_root(path+"default");
-						this->setCntxt_name("default");
-						this->setFile(vemp.at(0).substr(es+1));
-						this->setUrl(path+"default/"+vemp.at(0));
-					}
-					else
-					{
-						int ss = vemp.at(0).substr(fs+1).find("/");
-						if(ss>fs)
-						{
-							this->setCntxt_name(vemp.at(0).substr(fs+1,ss-fs));
-							this->setCntxt_root(path+this->getCntxt_name());
-							this->setFile(vemp.at(0).substr(es+1));
-							this->setUrl(path+vemp.at(0));
-						}
-					}
-				}
-				else if(contStarts)
-				{
-					conten.append(vec.at(i));
-					if(i!=vec.size()-1)
-					{
-						conten.append("\n");
-					}
-				}
-				else
-				{
-					std::cout << ("Bad Request line - " + vec.at(i)) << std::endl;
-				}
+			if(actUrl.find(".")!=std::string::npos) {
+				ext = actUrl.substr(actUrl.find(".")+1);
+				file = actUrl.substr(actUrl.find_last_of("/")+1);
 			}
 		}
-		this->setContent(conten);
 	}
 }
 
 void HttpRequest::updateContent()
 {
-	corsRequest = getHeader(Origin)!="";
-	if(StringUtil::toLowerCopy(method)=="get")return;
-	if(this->content!="")
+	if(hasHeader(Origin)) {
+		corsRequest = getHeader(Origin)!=BLANK;
+	}
+	if(strcasecmp(method.c_str(), "get")==0)return;
+	if(this->content.length()>0)
 	{
 		updateFromContentStr();
 	}
-	else if(this->content_tfile!="")
+	else if(this->content_tfile.length()>0)
 	{
 		updateFromContentFile();
-	}
-}
-
-void HttpRequest::updateFromContentStr_Old()
-{
-	if(this->getHeader(ContentType).find("application/x-www-form-urlencoded")!=std::string::npos)
-	{
-		strVec params;
-		std::string valu(this->getContent());
-		StringUtil::split(params,valu , ("&"));
-		std::map<std::string ,int> indices;
-		RMap::iterator it;
-		for(unsigned j=0;j<params.size();j++)
-		{
-			strVec param;
-			StringUtil::split(param, params.at(j), ("="));
-			if(param.size()==2)
-			{
-				std::string att = param.at(0);
-				StringUtil::replaceFirst(att,"\r","");
-				StringUtil::replaceFirst(att,"\t","");
-				StringUtil::replaceFirst(att," ","");
-				std::string attN = CryptoHandler::urlDecode(att);
-				if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
-				{
-					if(indices.find(attN)==indices.end())
-					{
-						indices[attN] = 0;
-					}
-					else
-					{
-						indices[attN] = indices[attN] + 1;
-					}
-					this->requestParams[attN.substr(0, attN.find("[")+1)
-							  + CastUtil::fromNumber(indices[attN])
-							  + "]"] = CryptoHandler::urlDecode(param.at(1));
-				}
-				else
-				{
-					this->setRequestParam(attN,CryptoHandler::urlDecode(param.at(1)));
-				}
-				reqorderinf[reqorderinf.size()+1] = attN;
-			}
-		}
-	}
-	else if(this->getContent()!="" && this->getContent_boundary()!="")
-	{
-		std::string delb = this->getContent_boundary();
-		std::string delend = this->getContent_boundary()+"--";
-		size_t stb = this->getContent().find(delb)+delb.length()+1;
-		//size_t enb = this->getContent().find_last_not_of(delend);
-		std::string param_conts = this->getContent().substr(stb);
-		StringUtil::replaceFirst(param_conts,delend,"");
-		param_conts = param_conts.substr(0,param_conts.length()-1);
-		strVec parameters;
-		StringUtil::split(parameters, param_conts, (delb));
-		std::map<std::string ,int> indices;
-		RMap::iterator it;
-		for(unsigned j=0;j<parameters.size();j++)
-		{
-			if(parameters.at(j)=="" || parameters.at(j).find_first_not_of(" ")==std::string::npos
-					|| parameters.at(j).find_first_not_of("\r")==std::string::npos)
-				continue;
-			MultipartContent datf;
-			std::string parm = parameters.at(j);
-			size_t dis = parm.find("Content-Disposition: ");
-			if(dis==std::string::npos)
-				dis = parm.find("Content-disposition: ");
-			std::string cont_disp,cont_type;
-			if(dis!=std::string::npos)
-			{
-				size_t dist = parm.find("Content-Type: ");
-				if(dist==std::string::npos)
-					dist = parm.find("Content-type: ");
-				size_t dise;
-				if(dist==std::string::npos)
-				{
-					dist = parm.find("\r\r");
-					dise = dist + 2;
-					//cout << "\ndist = npos" << std::flush;
-				}
-				else
-				{
-					//parm = parm.substr(dist+14);
-					cont_type = parm.substr(dist+14,parm.find("\r\r")-(dist+14));
-					dise = parm.find("\r\r") + 2;
-					//cout << "\nctype = " << cont_type << std::flush;
-					//dist = dist-12;
-				}
-				cont_disp = parm.substr(dis+21,dist-(dis+21));
-				StringUtil::replaceFirst(cont_disp,"\r","");
-				//cout << "\ncdisp = " << cont_disp << std::flush;
-				//cout << "\ndise = " << dise << std::flush;
-				parm = parm.substr(dise);
-			}
-			strVec parmdef;
-			StringUtil::split(parmdef, cont_disp, (";"));
-			std::string key;
-			for(unsigned k=0;k<parmdef.size();k++)
-			{
-				if(parmdef.at(k)!="" && parmdef.at(k).find("=")!=std::string::npos)
-				{
-					size_t stpd = parmdef.at(k).find_first_not_of(" ");
-					size_t enpd = parmdef.at(k).find_last_not_of(" ");
-					//cout << "\nparmdef = " << parmdef.at(k) << std::flush;
-					//cout << "\nst en = " << stpd  << " " << enpd << std::flush;
-					std::string propert = parmdef.at(k).substr(stpd,enpd-stpd+1);
-					strVec proplr;
-					StringUtil::split(proplr, propert, ("="));
-					if(proplr.size()==2)
-					{
-						if(proplr.at(0)=="name" && proplr.at(1)!="\"\"")
-						{
-							key = proplr.at(1);
-							key = key.substr(key.find_first_not_of("\""),key.find_last_not_of("\"")-key.find_first_not_of("\"")+1);
-							key = CryptoHandler::urlDecode(key);
-							StringUtil::replaceFirst(cont_type,"\r","");
-							datf.addHeader(MultipartContent::ContentType, cont_type);
-							datf.setContent(parm);
-						}
-						else if(proplr.at(0)=="filename" && proplr.at(1)!="\"\"")
-						{
-							std::string fna = proplr.at(1);
-							fna = fna.substr(fna.find_first_not_of("\""),fna.find_last_not_of("\"")-fna.find_first_not_of("\"")+1);
-							fna = CryptoHandler::urlDecode(fna);
-							datf.setFileName(fna);
-						}
-					}
-				}
-			}
-			if(key!="")
-			{
-				std::string attN = CryptoHandler::urlDecode(key);
-				if(attN.find("[")!=std::string::npos && attN.find("]")!=std::string::npos)
-				{
-					if(indices.find(attN)==indices.end())
-					{
-						indices[attN] = 0;
-					}
-					else
-					{
-						indices[attN] = indices[attN] + 1;
-					}
-					this->requestParamsF[attN.substr(0, attN.find("[")+1)
-							  + CastUtil::fromNumber(indices[attN])
-							  + "]"] = datf;
-				}
-				else
-				{
-					this->addMultipartFormContent(attN, datf);
-				}
-				reqorderinf[reqorderinf.size()+1] = attN;
-				if(datf.getFileName()!="")
-				{
-					std::string tmpfile = this->getContextHome() + "/temp/"+ this->getContent_boundary() + datf.getContent();
-					std::ofstream os;
-					os.open(tmpfile.c_str(), std::ios::binary);
-					os.write(datf.getContent().c_str(), datf.getContent().length());
-					os.close();
-					datf.setTempFileName(tmpfile);
-					//datf.length = datf.value.length();
-				}
-				std::string hr = (key + " " + datf.getHeader("Content-Type") + " "+ datf.getFileName() +" "+ datf.getContent());
-				//cout << hr << std::flush;
-			}
-		}
 	}
 }
 
@@ -1191,7 +452,7 @@ void HttpRequest::updateFromContentStr()
 					{
 						filen = this->getContent_boundary();
 						StringUtil::replaceAll(filen, "-", "");
-						filen = this->getContextHome() + "/temp/"+ filen + CastUtil::fromNumber(Timer::getCurrentTime());
+						filen = this->getCntxt_root() + "/temp/"+ filen + CastUtil::fromNumber(Timer::getCurrentTime());
 						ofile.open(filen.c_str(), std::ios::binary | std::ios::app);
 					}
 				}
@@ -1342,7 +603,7 @@ void HttpRequest::updateFromContentFile()
 						{
 							filen = this->getContent_boundary();
 							StringUtil::replaceAll(filen, "-", "");
-							filen = this->getContextHome() + "/temp/"+ filen + CastUtil::fromNumber(Timer::getCurrentTime());
+							filen = this->getCntxt_root() + "/temp/"+ filen + CastUtil::fromNumber(Timer::getCurrentTime());
 							ofile.open(filen.c_str(), std::ios::binary | std::ios::app);
 						}
 					}
@@ -1477,12 +738,12 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		}
 		case 43:
 		{
-			this->setMethod(value);
+			//this->setMethod(value);
 			break;
 		}
 		case 44:
 		{
-			this->httpVersion = value;
+			//this->httpVersion = value;
 			std::string versionStr = StringUtil::replaceFirstCopy(StringUtil::toLowerCopy(value), "http/", "");
 			StringUtil::trim(versionStr);
 			float version = -1;
@@ -1534,26 +795,7 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 		}
 		case 46:
 		{
-			//strVec memp;
 			this->setActUrl(value);
-			//StringUtil::split(memp, value, ("/"));
-			/*int fs = value.find_first_of("/");
-			int es = value.find_last_of("/");
-			if(fs==es)
-			{
-				this->setCntxt_name("");
-				this->setFile(value.substr(es+1));
-			}
-			else
-			{
-				int ss = value.substr(fs+1).find("/");
-				if(ss>fs)
-				{
-					this->setCntxt_name(value.substr(fs+1,ss-fs));
-					this->setFile(value.substr(es+1));
-				}
-			}
-			this->setCntxt_root(webpath + "/" + cntxt_name);*/
 			break;
 		}
 		case 47:
@@ -1562,12 +804,12 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 			StringUtil::split(vemp, value, (" "));
 			if(vemp.size()<3)
 			{
-				status = HTTPResponseStatus::BadRequest;
+				status = &HTTPResponseStatus::BadRequest;
 				return;
 			}
 			else if(!isValidHttpMethod(vemp.at(0)))
 			{
-				status = HTTPResponseStatus::InvalidMethod;
+				status = &HTTPResponseStatus::InvalidMethod;
 				return;
 			}
 			else
@@ -1579,30 +821,25 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 					version = CastUtil::toFloat(versionStr);
 					this->httpVers = version;
 				} catch(const std::exception& e) {
-					status = HTTPResponseStatus::HttpVersionNotSupported;
+					status = &HTTPResponseStatus::HttpVersionNotSupported;
 					return;
 				}
 				if(version<1.0 && version>1.1)
 				{
-					status = HTTPResponseStatus::HttpVersionNotSupported;
+					status = &HTTPResponseStatus::HttpVersionNotSupported;
 					return;
 				}
 				if(version<1.1 && StringUtil::toLowerCopy(vemp.at(0))=="options")
 				{
-					status = HTTPResponseStatus::InvalidMethod;
+					status = &HTTPResponseStatus::InvalidMethod;
 					return;
 				}
 			}
 
-			if(!isValidHttpMethod(vemp.at(0)))
-			{
-				status = HTTPResponseStatus::InvalidMethod;
-				return;
-			}
-			this->setMethod(StringUtil::toUpperCopy(vemp.at(0)));
+			//this->setMethod(StringUtil::toUpperCopy(vemp.at(0)));
 			vemp.erase(vemp.begin());
 			StringUtil::replaceFirst(vemp.at(1),"\r","");
-			this->httpVersion = vemp.at(1);
+			//this->httpVersion = vemp.at(1);
 			StringUtil::replaceFirst(vemp.at(0)," ","");
 			if(vemp.at(0).find("?")!=std::string ::npos)
 			{
@@ -1663,14 +900,22 @@ void HttpRequest::buildRequest(std::string key, std::string value)
 std::string HttpRequest::toString()
 {
 	std::string ret;
-	RMap::iterator it;
-	for(it=headers.begin();it!=headers.end();++it)
-	{
-		ret += "\n" + it->first + ": " + it->second;
+	if(num_headers>0) {
+		for(int i=0;i<(int)num_headers;++i) {
+			ret += "\n" + std::string(headers_list[i].name, headers_list[i].name_len) + ": " + std::string(headers_list[i].value, headers_list[i].value_len);
+		}
+	} else {
+		RMap::iterator it;
+		for(it=headers.begin();it!=headers.end();++it)
+		{
+			ret += "\n" + it->first + ": " + it->second;
+		}
 	}
 	ret += "\nContent: "+this->getContent();
-	ret += "\nHttp Version: "+this->getHttpVersion();
-	ret += "\nMethod: "+this->getMethod();
+	ret += "\nHttp Version: ";
+	ret.append(this->getHttpVersion());
+	ret += "\nMethod: ";
+	ret.append(this->getMethod());
 	ret += "\nUrl: "+this->getUrl();
 	ret += "\nFile: "+this->getFile();
 	ret += "\nContext Name: "+this->getCntxt_name();
@@ -1712,14 +957,9 @@ std::string HttpRequest::toString()
 
 HttpRequest::~HttpRequest() {
 }
-std::string HttpRequest::getMethod() const
+std::string_view HttpRequest::getMethod() const
 {
-	return method;
-}
-
-void HttpRequest::setMethod(const std::string& method)
-{
-	this->method = method;
+	return methodv;
 }
 
 HttpSession* HttpRequest::getSession()
@@ -1754,9 +994,9 @@ float HttpRequest::getHttpVers() const
 	return this->httpVers;
 }
 
-std::string HttpRequest::getHttpVersion() const
+const std::string HttpRequest::getHttpVersion() const
 {
-	return this->httpVersion;
+	return minor_version==0?HTTP_VERS10:HTTP_VERS11;
 }
 
 std::string HttpRequest::getContent_boundary() const
@@ -1822,15 +1062,14 @@ void HttpRequest::setRequestParam(const std::string& key, const std::string& val
 	this->requestParams[key] = value;
 }
 
-std::string HttpRequest::getCntxt_root() const
+std::string& HttpRequest::getCntxt_root() const
 {
-	return cntxt_root;
+	return *cntxt_root;
 }
 
-void HttpRequest::setCntxt_root(const std::string& cntxt_root)
+void HttpRequest::setCntxt_root(std::string& cntxt_root)
 {
-	this->cntxt_root = cntxt_root;
-	this->cntxt_home = webpath + "/" + cntxt_name;
+	this->cntxt_root = &cntxt_root;
 }
 
 std::string HttpRequest::getDefaultLocale() const
@@ -1841,14 +1080,19 @@ std::string HttpRequest::getDefaultLocale() const
 		return "en";
 }
 
-std::string HttpRequest::getCntxt_name() const
+std::string HttpRequest::getCntxt_name()
 {
-	return cntxt_name;
+	return std::string(cntxt_name);
 }
 
 void HttpRequest::setCntxt_name(const std::string& cntxt_name)
 {
-	this->cntxt_name = cntxt_name;
+	this->cntxt_name = std::string_view(cntxt_name);
+}
+
+void HttpRequest::setDefCntxt_name()
+{
+	this->cntxt_name = std::string_view(DEF_CNTXTNAME);
 }
 
 std::string HttpRequest::getFile() const
@@ -1873,7 +1117,7 @@ void HttpRequest::setFile(const std::string& file)
 
 std::string HttpRequest::getActUrl() const
 {
-	return actUrl;
+	return std::string(actUrl);
 }
 
 void HttpRequest::setActUrl(const std::string& actUrl)
@@ -1898,14 +1142,14 @@ void HttpRequest::setActUrl(const std::string& actUrl)
 
 void HttpRequest::normalizeUrl()
 {
-	if(cntxt_name!="" && actUrlParts.at(0)!=cntxt_name) {
+	/*if(cntxt_name!="" && actUrlParts.at(0)!=cntxt_name) {
 		actUrlParts.insert(actUrlParts.begin(), cntxt_name);
 		curl = "/" + cntxt_name + actUrl;
 	} else {
 		curl = actUrl;
 	}
 	url = this->webpath + curl;
-	this->ext = getFileExtension(curl);
+	this->ext = getFileExtension(curl);*/
 }
 
 const std::vector<std::string>& HttpRequest::getActUrlParts() const
@@ -2582,15 +1826,31 @@ std::string HttpRequest::getCookieInfoAttribute(const std::string& key)
 	else return "";
 }
 
-std::string HttpRequest::getHeader(std::string key)
+std::string HttpRequest::getHeader(const std::string& key)
 {
+	if(num_headers>0) {
+		for(int i=0;i<num_headers;++i) {
+			if(strncasecmp(headers_list[i].name, key.c_str(), headers_list[i].name_len)==0) {
+				return std::string(headers_list[i].value, headers_list[i].value_len);
+			}
+		}
+		return BLANK;
+	}
 	if(this->headers.find(key)!=this->headers.end())
 		return this->headers[key];
-	return "";
+	return BLANK;
 }
 
 bool HttpRequest::hasHeader(std::string key)
 {
+	if(num_headers>0) {
+		for(int i=0;i<(int)num_headers;++i) {
+			if(strncasecmp(headers_list[i].name, key.c_str(), headers_list[i].name_len)==0) {
+				return true;
+			}
+		}
+		return false;
+	}
 	if(this->headers.find(key)!=this->headers.end())
 		return true;
 	return false;
@@ -2689,6 +1949,14 @@ bool HttpRequest::isAgentAcceptsCE()
 
 bool HttpRequest::isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase)
 {
+	if(num_headers>0) {
+		for(int i=0;i<(int)num_headers;++i) {
+			if(strncasecmp(headers_list[i].name, header.c_str(), headers_list[i].name_len)==0) {
+				return strncasecmp(headers_list[i].value, value.c_str(), headers_list[i].value_len)==0;
+			}
+		}
+		return false;
+	}
 	return header!="" && headers.find(header)!=headers.end()
 			&& (headers[header]==value || (ignoreCase && strcasecmp(headers[header].c_str(), value.c_str())==0));
 }
@@ -2842,7 +2110,7 @@ std::string HttpRequest::getParamValue(const std::string& key)
 		return "";
 }
 
-HTTPResponseStatus HttpRequest::getRequestParseStatus()
+const HTTPResponseStatus* HttpRequest::getRequestParseStatus()
 {
 	return status;
 }
@@ -2902,15 +2170,17 @@ void HttpRequest::setAuthMethod(std::string v) {
 }
 
 std::string HttpRequest::toPluginString() {
-	std::string text = (this->cntxt_name + "\n");
-	text += (this->host + "\n");
+	std::string text;
+	text.append(this->cntxt_name);
+	text += "\n" + this->host + "\n";
 	text += (this->url + "\n");
 	text += (this->file + "\n");
-	text += this->httpVersion + "\n";
+	text += this->getHttpVersion() + "\n";
 	text += (this->method + "\n");
 	text += (this->getDefaultLocale() + "\n");
 	text += (this->sessionID + "\n");
-	text += (this->actUrl + "\n");
+	text.append(this->actUrl);
+	text += "\n";
 
 	text += (CastUtil::fromNumber(this->content.length()) + "\n");
 	text += (this->content);
@@ -2938,14 +2208,21 @@ std::string HttpRequest::toPluginString() {
 		text += it->second;
 	}
 
-	text += (CastUtil::fromNumber(this->headers.size()) + "\n");
-	for(it=this->headers.begin();it!=this->headers.end();++it)
-	{
-		text += it->first + "\n";
-		text += CastUtil::fromNumber(it->second.length()) + "\n";
-		text += it->second;
+	text += (CastUtil::fromNumber(this->num_headers) + "\n");
+	if(num_headers>0) {
+		for(int i=0;i<(int)num_headers;++i) {
+			text += std::string(headers_list[i].name, headers_list[i].name_len) + "\n";
+			text += CastUtil::fromNumber(headers_list[i].value_len) + "\n";
+			text += std::string(headers_list[i].value, headers_list[i].value_len);
+		}
+	} else {
+		for(it=this->headers.begin();it!=this->headers.end();++it)
+		{
+			text += it->first + "\n";
+			text += CastUtil::fromNumber(it->second.length()) + "\n";
+			text += it->second;
+		}
 	}
-
 	text += (CastUtil::fromNumber(this->requestParamsF.size()) + "\n");
 	FMap::iterator fit;
 	for(fit=this->requestParamsF.begin();fit!=this->requestParamsF.end();++fit)
@@ -2989,7 +2266,7 @@ void HttpRequest::setHttp2Headers(RMap headers)
 	method = headers[":method"];
 	authority = headers[":authority"];
 	httpVers = 2.0;
-	httpVersion = "http/2";
+	//httpVersion = "http/2";
 	scheme = headers[":scheme"];
 	buildRequest("url", headers[":path"]);
 	headers.erase(":method");
@@ -3007,16 +2284,6 @@ std::string HttpRequest::getFileExtension(const std::string& file)
 {
 	if(file.find_last_of(".")!=std::string::npos)return file.substr(file.find_last_of("."));
 	return file;
-}
-
-std::string HttpRequest::getContextHome()
-{
-	return cntxt_home;
-}
-
-void HttpRequest::setContextHome(const std::string& home)
-{
-	this->cntxt_home = home;
 }
 
 std::string HttpRequest::getExt() const

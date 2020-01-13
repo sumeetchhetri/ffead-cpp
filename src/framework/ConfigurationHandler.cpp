@@ -210,6 +210,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		RegexUtil::replace(scappName, "[^a-zA-Z0-9_]+", "");
 		ConfigurationData::getInstance()->servingContextAppNames[name] = scappName;
 		CommonUtils::addContext(scappName);
+		ConfigurationData::getInstance()->servingContextAppRoots[name] = defpath;
 
 		std::vector<std::string> adcps;
 		CommonUtils::listFiles(adcps, dcppath, ".dcp");

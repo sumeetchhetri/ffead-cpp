@@ -203,6 +203,7 @@ class ConfigurationData {
 	std::map<std::string, bool> applicationFlowMap;
 	std::map<std::string, bool> servingContexts;
 	std::map<std::string, std::string> servingContextAppNames;
+	std::map<std::string, std::string> servingContextAppRoots;
 	std::vector<std::string> componentNames;
 	FFEADContext ffeadContext;
 	CorsConfig corsConfig;

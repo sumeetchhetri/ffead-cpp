@@ -141,7 +141,7 @@ bool Http2Handler::processFrame(Http2Frame* frame, void*& request, int reqPos) {
 	int streamIdentifier = frame->header.streamIdentifier;
 	if(streams.find(frame->header.streamIdentifier)==streams.end()) {
 		Http2StreamHandler& stream = streams[frame->header.streamIdentifier];
-		stream.request = new HttpRequest(webpath);
+		//TODO stream.request = new HttpRequest(webpath);
 		stream.wsrequest = new WebSocketData();
 		stream.streamIdentifier = streamIdentifier;
 		stream.context = &context;

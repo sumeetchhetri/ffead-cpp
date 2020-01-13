@@ -34,7 +34,7 @@ OAUTHController::~OAUTHController() {
 
 bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 {
-	std::map<std::string,std::string> reqParams = req->getAllParams();
+	std::map<std::string,std::string,cicomp> reqParams = req->getAllParams();
 
 	std::string hostp = req->getHeader(HttpRequest::Host);
 	int port = 8080;
@@ -45,7 +45,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 	{
 		if(reqParams["username"]!="" && reqParams["password"]!="")
 		{
-			FileAuthController fauthu(req->getContextHome()+"/users",":");
+			FileAuthController fauthu(req->getCntxt_root()+"/users",":");
 			std::string key;
 			bool flag = fauthu.getPassword(reqParams["username"],key);
 			if(flag)
@@ -111,7 +111,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 		}
 		if(mapsd["oauth_token"]!="" && mapsd["oauth_token_secret"]!="" && mapsd["tusername"]!="")
 		{
-			std::string filen = req->getContextHome()+"/"+reqParams["tusername"]+"-tokens-secrets";
+			std::string filen = req->getCntxt_root()+"/"+reqParams["tusername"]+"-tokens-secrets";
 			std::ofstream ofs(filen.c_str());
 			std::string wrf = mapsd["tusername"] + ":" + mapsd["oauth_token"] + ":" + mapsd["oauth_token_secret"]+"\n";
 			ofs.write(wrf.c_str(),wrf.length());
@@ -129,7 +129,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 	}
 	else if(req->getFile()=="authorizeUser.auth")
 	{
-		FileAuthController fauthu(req->getContextHome()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
+		FileAuthController fauthu(req->getCntxt_root()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
 		std::string key1 = "sumeet&",key;
 		bool flag = fauthu.getPassword(reqParams["tusername"],key);
 		if(reqParams["tusername"]!="" && flag)
@@ -154,7 +154,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 	}
 	else if(req->getFile()=="calledback.auth")
 	{
-		FileAuthController fauthu(req->getContextHome()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
+		FileAuthController fauthu(req->getCntxt_root()+"/"+reqParams["tusername"]+"-tokens-secrets",":");
 		std::string key1 = "sumeet&",key;
 		key = fauthu.get(reqParams["tusername"],2);
 		std::string tok = fauthu.get(reqParams["tusername"],1);
@@ -202,7 +202,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 			}
 			if(mapsd["oauth_token"]!="" && mapsd["oauth_token_secret"]!="" && mapsd["tusername"]!="")
 			{
-				std::string filen = req->getContextHome()+"/"+reqParams["tusername"]+"-access-secrets";
+				std::string filen = req->getCntxt_root()+"/"+reqParams["tusername"]+"-access-secrets";
 				std::ofstream ofs(filen.c_str());
 				std::string wrf = mapsd["tusername"] + ":" + mapsd["oauth_token"] + ":" + mapsd["oauth_token_secret"]+"\n";
 				ofs.write(wrf.c_str(),wrf.length());
@@ -234,7 +234,7 @@ bool OAUTHController::service(HttpRequest* req, HttpResponse* res)
 	}
 	else if(req->getFile()=="getResource.auth")
 	{
-		FileAuthController fauthu(req->getContextHome()+"/"+reqParams["tusername"]+"-access-secrets",":");
+		FileAuthController fauthu(req->getCntxt_root()+"/"+reqParams["tusername"]+"-access-secrets",":");
 		std::string key1 = "sumeet&",key;
 		key = fauthu.get(reqParams["tusername"],2);
 		std::string tok = fauthu.get(reqParams["tusername"],1);

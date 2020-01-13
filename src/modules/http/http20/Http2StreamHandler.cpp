@@ -42,7 +42,7 @@ Http2StreamHandler::Http2StreamHandler(Http2HPACKContext* context, const int& st
 	this->receiverFlowControlWindow = 65535;
 	this->endofstream = true;
 	this->isHeadersDone = false;
-	this->request = new HttpRequest(webpath);
+	//TODO this->request = new HttpRequest(webpath);
 	this->wsrequest = new WebSocketData();
 	this->endofsegment = false;
 }

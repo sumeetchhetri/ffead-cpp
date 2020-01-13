@@ -653,7 +653,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			if(isCEGzip)
 			{
 				bool gengzipfile = true;
-				std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".gz";
+				std::string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".gz";
 				if(!forceLoadFile)
 				{
 					std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
@@ -674,7 +674,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			else if(isCEDef)
 			{
 				bool genzlibfile = true;
-				std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".z";
+				std::string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".z";
 				if(!forceLoadFile)
 				{
 					std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);

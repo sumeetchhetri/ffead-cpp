@@ -33,6 +33,7 @@
 #include "concurrentqueue.h"
 #include "map"
 #include "Task.h"
+#include "vector"
 
 class SocketInterface;
 
@@ -98,6 +99,7 @@ public:
 	bool writeFile(int fdes, int remain_data);
 	bool isClosed();
 	int readFrom();
+	int readFrom1();
 	int getDescriptor();
 	std::string getAddress();
 	std::string getAlpnProto();

@@ -27,13 +27,12 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	{
 		currReq = getAvailableRequest();
 		if(currReq == NULL) return NULL;
-		currReq->reset();
+		std::string headers = buffer.substr(0, ix+4);
 		((HttpResponse*)currReq->resp)->reset();
-		currReq->webpath = webpath;
 		bytesToRead = 0;
-		std::string headers = buffer.substr(0, ix);
+		currReq->reset(headers, &bytesToRead);
 		buffer = buffer.substr(ix+4);
-		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, HttpResponse::HDR_END);
+		/*std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, HttpResponse::HDR_END);
 		currReq->buildRequest("httpline", lines.at(0));
 		int hdrc = 0;
 		for (int var = 0; var < (int)lines.size(); ++var) {
@@ -80,14 +79,15 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 					buffer = buffer.substr(bytesToRead);
 				}
 			}
-		}
+		}*/
 		isHeadersDone = true;
 	}
 	if(currReq!=NULL && isHeadersDone)
 	{
-		if(isTeRequest && bytesToRead==0 && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
-			std::string bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
-			buffer = buffer.substr(buffer.find(HttpResponse::HDR_END)+2);
+		size_t he = buffer.find(HttpResponse::HDR_END);
+		if(isTeRequest && bytesToRead==0 && he!=std::string::npos) {
+			std::string bytesstr = buffer.substr(0, he);
+			buffer = buffer.substr(he+2);
 			if(bytesstr!="") {
 				bytesToRead = (int)StringUtil::fromHEX(bytesstr);
 				if(bytesToRead==0) {

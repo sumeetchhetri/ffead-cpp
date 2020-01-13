@@ -95,10 +95,6 @@ void HttpReadTask::run() {
 		int reqPos = 0;
 		void* request = sif->readRequest(context, pending, reqPos);
 		if(sif->isClosed()) {
-			if(request!=NULL) {
-				//so that request can be cleaned up correctly
-				service->registerServiceRequest(request, sif, context, reqPos);
-			}
 			service->closeConnection(sif);
 			break;
 		} else if(request!=NULL) {

@@ -30,7 +30,7 @@ bool FviewHandler::handle(HttpRequest* req, HttpResponse* res)
 	//logger << ("Inside fview " + req->getFile()) << std::endl;
 	std::string file = req->getFile();
 	StringUtil::replaceFirst(file,"fview","html");
-	std::string ffile = req->getContextHome()+"/fviews/"+file;
+	std::string ffile = req->getCntxt_root()+"/fviews/"+file;
 	//logger << ffile << std::endl;
 	std::ifstream infile(ffile.c_str(), std::ios::binary);
 	std::string temp;

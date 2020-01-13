@@ -34,12 +34,12 @@ DefaultOAUTHController::~DefaultOAUTHController() {
 
 bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 {
-	std::string method = req->getMethod();
+	std::string method = std::string(req->getMethod());
 	StringUtil::toUpper(method);
 
-	std::map<std::string,std::string>::iterator it;
-	std::map<std::string,std::string> reqparams = req->getAllParams();
-	std::map<std::string,std::string> oauthparams = req->getAuthinfo();
+	std::map<std::string,std::string,cicomp>::iterator it;
+	std::map<std::string,std::string,cicomp> reqparams = req->getAllParams();
+	std::map<std::string,std::string,cicomp> oauthparams = req->getAuthinfo();
 	for(it=oauthparams.begin();it!=oauthparams.end();it++)
 	{
 		reqparams[it->first] = it->second;
@@ -69,9 +69,9 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 	}
 	std::cout << "req and oauth params" <<std::endl;
 
-	FileAuthController fauthu(req->getContextHome()+"/users",":");
-	FileAuthController fautht(req->getContextHome()+"/tokens",":");
-	FileAuthController fauthta(req->getContextHome()+"/access_tokens",":");
+	FileAuthController fauthu(req->getCntxt_root()+"/users",":");
+	FileAuthController fautht(req->getCntxt_root()+"/tokens",":");
+	FileAuthController fauthta(req->getCntxt_root()+"/access_tokens",":");
 
 	std::string key,tokk,resu,csec;
 	bool isreqtype = false;
@@ -120,7 +120,7 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 		std::string filen;
 		if(tokk=="" && req->getFile()=="request.oauth")
 		{
-			filen = req->getContextHome()+"/tokens";
+			filen = req->getCntxt_root()+"/tokens";
 			std::ofstream ofs(filen.c_str());
 			std::string oauthtok,oauthsec;
 			oauthtok = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
@@ -138,7 +138,7 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 			}
 			if(reqparams["oauth_callback"]!="")
 			{
-				filen = req->getContextHome()+"/callbacks";
+				filen = req->getCntxt_root()+"/callbacks";
 				std::ofstream ofs1(filen.c_str());
 				std::string oauth_ver = oauthtok + CastUtil::lexical_cast<std::string>(rand()%1000);
 				wrf = CryptoHandler::urlDecode(reqparams["oauth_callback"])+"?oauth_verifier="+oauth_ver+"&"+parsc;
@@ -155,7 +155,7 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 		else if(isreqtype && reqparams["oauth_token"]!="" && reqparams["oauth_consumer_key"]!=""
 				&& req->getFile()=="access.oauth")
 		{
-			filen = req->getContextHome()+"/access_tokens";
+			filen = req->getCntxt_root()+"/access_tokens";
 			std::ofstream ofs(filen.c_str());
 			std::string oauthtok,oauthsec;
 			oauthtok = CastUtil::lexical_cast<std::string>(Timer::getCurrentTime());
@@ -215,7 +215,7 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 	}
 	else if(req->getFile()=="login.oauth")
 	{
-		std::string filen = req->getContextHome()+"/callbacks";
+		std::string filen = req->getCntxt_root()+"/callbacks";
 		std::ifstream ifs(filen.c_str());
 		std::string wrf;
 		getline(ifs,wrf);
@@ -236,8 +236,8 @@ bool DefaultOAUTHController::service(HttpRequest* req, HttpResponse* res)
 	}
 	else
 	{
-		res->setStatusCode("401");
-		res->setStatusMsg("Unauthorized\r\nWWW-Authenticate: OAuth realm=\""+url+"\"");
+		res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
+		//res->setStatusMsg("Unauthorized\r\nWWW-Authenticate: OAuth realm=\""+url+"\"");
 		std::cout << "verified request token signature is invalid" << std::endl;
 		return true;
 	}

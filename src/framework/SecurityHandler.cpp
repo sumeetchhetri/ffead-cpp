@@ -173,7 +173,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 			bool validUser = false;
 			if(claz.find("file:")!=std::string::npos)
 			{
-				claz = req->getContextHome()+"/"+claz.substr(claz.find(":")+1);
+				claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
 				if(ConfigurationData::getInstance()->enableLogging) logger << ("Auth handled by file " + claz) << std::endl;
 				FileAuthController authc(claz,":");
 				if(authc.isInitialized())

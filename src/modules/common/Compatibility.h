@@ -132,6 +132,7 @@ typedef DWORD NUMEVENTS;
 #if defined(OS_DARWIN)
 #include <mach/clock.h>
 #include <mach/mach.h>
+#include <sys/sysctl.h>
 
 #define SYSCTL_CORE_COUNT   "machdep.cpu.core_count"
 

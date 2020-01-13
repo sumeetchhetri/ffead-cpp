@@ -19,7 +19,7 @@
 #define USE_SELECT 1
 
 #define HAVE_SSLINC 1
-#define HAVE_SSLLIB /usr/lib/libssl.dylib
+#define HAVE_SSLLIB /usr/local/lib/libssl.dylib
 /* #undef HAVE_REDISINC */
 /* #undef HAVE_REDISLIB */
 /* #undef HAVE_MEMCACHEDINC */

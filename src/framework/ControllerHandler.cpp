@@ -150,7 +150,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		bool flag = false;
 		int prsiz = 0;
 		std::map<std::string, std::string> mapOfValues;
-		std::string rkey = req->getMethod()+req->getCurl();
+		std::string rkey(req->getMethod());
+		rkey.append(req->getActUrl());
 		if(rstCntMap.find(rkey)!=rstCntMap.end()) {
 			rft = &(rstCntMap[rkey][0]);
 			flag = true;

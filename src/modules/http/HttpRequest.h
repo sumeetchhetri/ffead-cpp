@@ -36,6 +36,8 @@
 #include "HTTPResponseStatus.h"
 #include <libcuckoo/cuckoohash_map.hh>
 #include "SocketInterface.h"
+#include <string_view>
+#include "picohttpparser.h"
 
 typedef std::vector<std::string> strVec;
 #ifndef HTTPREQUEST_H_
@@ -51,20 +53,21 @@ class HttpRequest {
 	static std::string VALID_REQUEST_HEADERS;
 	std::atomic<bool> isInit;
 	Task* srvTask;
-	std::string webpath;
 	std::string authority;
 	std::string scheme;
 	std::string host;
 	std::string url;
 	std::string curl;
 	std::string ext;
-	std::string cntxt_root;
-	std::string cntxt_home;
-	std::string cntxt_name;
-	std::string httpVersion;
+	std::string* cntxt_root;
+	std::string_view cntxt_name;
+	int minor_version;
 	float httpVers;
 	bool corsRequest;
+	std::string headers_data;
 	std::string method;
+	std::string_view methodv;
+	std::string_view actUrl;
 	std::string content;
 	std::string content_boundary;
 	std::string content_tfile;
@@ -74,7 +77,6 @@ class HttpRequest {
 	RMap queryParams;
 	HttpSession session;
 	strVec localeInfo;
-	std::string actUrl;
 	std::vector<std::string> actUrlParts;
 	std::string sessionID;
 	bool cookie;
@@ -83,21 +85,22 @@ class HttpRequest {
 	RMap authinfo;
 	std::map<int,std::string> reqorderinf;
 	std::map<int,std::string> authorderinf;
+	struct phr_header headers_list[100];
+	size_t num_headers;
 	RMap headers;
 	std::vector<MultipartContent> contentList;
 	std::string preamble;
 	std::string epilogue;
-	HTTPResponseStatus status;
+	const HTTPResponseStatus* status;
 	std::string userName;
 	std::string password;
 	std::string authMethod;
 
 	void getAuthParams(std::string);
 	void getOauthParams(std::string str);
-	void updateFromContentStr_Old();
 	void updateFromContentStr();
 	void updateFromContentFile();
-	void setMethod(const std::string& method);
+	//void setMethod(const std::string& method);
 	void setRequestParams(const RMap&);
 	void setRequestParam(const std::string&, const std::string&);
 	void setContent_tfile(const std::string& tfile);
@@ -107,13 +110,13 @@ class HttpRequest {
     void setCurl(std::string url);
 	void setActUrl(const std::string&);
 	void setCntxt_name(const std::string&);
-	void setCntxt_root(const std::string&);
+	void setDefCntxt_name();
+	void setCntxt_root(std::string&);
 	void setContent_boundary(const std::string&);
 	void setQueryParam(const std::string& name, const std::string& value);
 	void setSessionID(const std::string& sessionID);
 	std::string toPluginString();
 	void setHttp2Headers(RMap headers);
-	void setContextHome(const std::string& home);
     void addHeader(const std::string& header, const std::string& value);
 	friend class ServiceTask;
 	friend class Http11Handler;
@@ -135,12 +138,16 @@ class HttpRequest {
 	friend class ServiceHandler;
 	friend class HandlerRequest;
 	static const std::string VALID_METHODS;
-	void reset();
+	void reset(std::string& data, int* content_length);
 public:
 	enum {
 		PREFLIGHT, CORS, OTHER
 	};
 	static void init();
+	static const std::string HTTP_VERS10;
+	static const std::string HTTP_VERS11;
+	static const std::string DEF_CNTXTNAME;
+	static const std::string BLANK;
 	static std::string Accept,AcceptCharset,AcceptEncoding,AcceptLanguage,AcceptDatetime,
 				  AccessControlRequestHeaders,AccessControlRequestMethod,Authorization,
 				  CacheControl,Connection,Cookie,ContentLength,ContentMD5,ContentType,
@@ -149,17 +156,16 @@ public:
 				  Referer,TE,Upgrade,UserAgent,Via,Warning,SecWebSocketKey,SecWebSocketVersion,
 				  SecWebSocketAccept,SecWebSocketProtocol,SecWebSocketExtensions,AltUsed,Http2Settings;
 	HttpRequest();
-	HttpRequest(const strVec&, const std::string&);
-	HttpRequest(const std::string&);
+	HttpRequest(std::string& data, int* content_length);
 	void updateContent();
 	virtual ~HttpRequest();
 	bool isCorsRequest();
     void setUrl(std::string url);
     HttpSession* getSession();
-    std::string getMethod() const;
+    std::string_view getMethod() const;
 	std::string getUrl() const;
 	std::string getCurl() const;
-	std::string getHttpVersion() const;
+	const std::string getHttpVersion() const;
 	float getHttpVers() const;
 	std::string getContent_boundary() const;
 	std::string getContent() const;
@@ -168,9 +174,9 @@ public:
     std::string getRequestParam(const std::string&);
     MultipartContent getMultipartContent(const std::string& key);
     std::string getRequestParamType(const std::string& key);
-    std::string getCntxt_root() const;
+    std::string& getCntxt_root() const;
     std::string getDefaultLocale() const;
-    std::string getCntxt_name() const;
+    std::string getCntxt_name();
     std::string getFile() const;
     void setFile(const std::string&);
     std::string getActUrl() const;
@@ -198,7 +204,7 @@ public:
     std::string getAuthOrderinfoAttribute(const int& key);
     std::string getReqOrderinfoAttribute(const int& key);
     std::string getCookieInfoAttribute(const std::string& key);
-    std::string getHeader(std::string key);
+    std::string getHeader(const std::string& key);
     bool hasHeader(std::string key);
     RMap getHeaders();
     int getCORSRequestType();
@@ -215,7 +221,7 @@ public:
     void addContent(const MultipartContent& content);
     bool isNonBinary(const std::string& mimeType);
     std::string getParamValue(const std::string&);
-    HTTPResponseStatus getRequestParseStatus();
+    const HTTPResponseStatus* getRequestParseStatus();
     std::vector<MultipartContent> getMultiPartFileList(const std::string& name);
 	std::string getPassword() const;
 	std::string getUserName() const;
@@ -223,7 +229,6 @@ public:
 	void setPassword(std::string v);
 	void setUserName(std::string v);
 	void setAuthMethod(std::string v);
-	std::string getContextHome();
 	std::string getExt() const;
 	static std::string getFileExtension(const std::string& file);
 };

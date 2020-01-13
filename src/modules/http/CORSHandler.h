@@ -47,7 +47,7 @@ public:
 			const std::string& exposedHeaders, const bool& allwdCredentials, const long& maxAge);
 	virtual ~CorsConfig();
 	bool isOriginAllowed(const std::string& reqOrgLst);
-	bool isMethodAllowed(const std::string& method);
+	bool isMethodAllowed(const std::string_view& method);
 	bool isHeaderAllowed(const strVec& reqHdrLst, std::string& erheadr);
 };
 

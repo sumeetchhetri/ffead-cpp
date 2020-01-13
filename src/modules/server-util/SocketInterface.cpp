@@ -192,7 +192,6 @@ int SocketInterface::startRequest() {
 
 int SocketInterface::endRequest(int reqPos) {
 	wm.lock();
-	ResponseData& rd = wtl[reqPos];
 	wtl.erase(reqPos);
 	wm.unlock();
 	return ++current;
