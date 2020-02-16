@@ -188,6 +188,48 @@ const std::string HttpResponse::HDR_SEPT = ":";
 const std::string HttpResponse::HDR_END = "\r\n";
 const std::string HttpResponse::HDR_FIN = "\r\n\r\n";
 
+std::string& HttpResponse::generateNginxApacheResponse() {
+	std::string boundary;
+	if(this->contentList.size()>0)
+	{
+		content.clear();
+		boundary = "FFEAD_SERVER_";
+		boundary.append(CastUtil::fromNumber(Timer::getCurrentTime()));
+		for (int var = 0; var < (int)contentList.size(); ++var) {
+			content.append("--");
+			content.append(boundary);
+			content.append(HDR_END);
+			RMap headers = contentList.at(var).getHeaders();
+			RMap::iterator it;
+			for(it=headers.begin();it!=headers.end();++it)
+			{
+				content.append(it->first);
+				content.append(HDR_SEP);
+				content.append(it->second);
+				content.append(HDR_END);
+			}
+			content.append(HDR_END);
+			content.append(contentList.at(var).getContent());
+			content.append(HDR_END);
+		}
+		content.append("--");
+		content.append(boundary);
+		content.append("--");
+		content.append(HDR_END);
+		if(!hasHeader(ContentType) && this->contentList.size()>0)
+		{
+			this->addHeader(ContentType, "multipart/mixed");
+		}
+		if(hasHeader(ContentType) && boundary!="")
+		{
+			headers[ContentType].append("; boundary=\"");
+			headers[ContentType].append(boundary);
+			headers[ContentType].append("\"");
+		}
+	}
+	return content;
+}
+
 void HttpResponse::generateHeadResponse(std::string& resp)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
@@ -340,8 +382,8 @@ std::string HttpResponse::getHttpVersion() const
 void HttpResponse::update(HttpRequest* req)
 {
 	this->httpVers = req->httpVers;
-	this->httpVersion = req->getHttpVersion();
-	addHeader(HttpResponse::AcceptRanges, "none");
+	this->httpVersion = req->httpVersion;
+	//addHeader(HttpResponse::AcceptRanges, "none");
 }
 
 void HttpResponse::setHTTPResponseStatus(const HTTPResponseStatus& status)
@@ -352,6 +394,11 @@ void HttpResponse::setHTTPResponseStatus(const HTTPResponseStatus& status)
 std::string HttpResponse::getStatusCode() const
 {
 	return status->getSCode();
+}
+
+int HttpResponse::getCode() const
+{
+	return status->getCode();
 }
 
 std::string HttpResponse::getStatusMsg() const
@@ -390,6 +437,10 @@ void HttpResponse::addHeader(std::string header, const std::string& value)
 	} else {
 		headers[header] = value;
 	}
+}
+
+void HttpResponse::setContentType(const std::string& value) {
+	headers[ContentType] = value;
 }
 
 void HttpResponse::addHeaderValue(std::string header, const std::string& value)
@@ -431,8 +482,8 @@ bool HttpResponse::hasHeader(const std::string& header)
 
 bool HttpResponse::isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase)
 {
-	return header!="" && headers.find(header)!=headers.end()
-			&& (headers[header]==value || (ignoreCase && strcasecmp(headers[header].c_str(), value.c_str())==0));
+	return headers.find(header)!=headers.end()
+			&& (strcmp(headers[header].c_str(), value.c_str())==0 || (ignoreCase && strcasecmp(headers[header].c_str(), value.c_str())==0));
 }
 
 std::string HttpResponse::getHeader(std::string header)
@@ -653,7 +704,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			if(isCEGzip)
 			{
 				bool gengzipfile = true;
-				std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".gz";
+				std::string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".gz";
 				if(!forceLoadFile)
 				{
 					std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
@@ -674,7 +725,7 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 			else if(isCEDef)
 			{
 				bool genzlibfile = true;
-				std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".z";
+				std::string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".z";
 				if(!forceLoadFile)
 				{
 					std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);

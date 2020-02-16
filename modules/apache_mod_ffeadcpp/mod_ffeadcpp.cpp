@@ -176,12 +176,7 @@ static bool ignoreHeader(const std::string& hdr)
 
 static int mod_ffeadcpp_method_handler (request_rec *r)
 {
-	std::string serverRootDirectory;
-	serverRootDirectory.append(fconfig.path);
-
-	std::string port = CastUtil::fromNumber(r->server->port);
 	std::string content;
-
 	apr_bucket_brigade *bb = apr_brigade_create(r->pool, r->connection->bucket_alloc);
 	for ( ; ; ) {
 		apr_bucket* b ;
@@ -197,7 +192,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 			}
 			else if (apr_bucket_read(b, &buf, &bytes, APR_BLOCK_READ)== APR_SUCCESS )
 			{
-				content += std::string(buf, 0, bytes);
+				content.append(buf, bytes);
 			}
 		}
 
@@ -208,31 +203,14 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	}
 	apr_brigade_destroy(bb) ;
 
-	std::string cntpath = serverRootDirectory + "/web/";
-	HttpRequest req(cntpath);
+	HttpRequest req((const char*)r->uri, strlen(r->uri), (const char*)r->args, strlen(r->args),
+					(const char*)r->method, strlen(r->method), std::move(content), r->proto_num);
 
 	const apr_array_header_t* fields = apr_table_elts(r->headers_in);
 	apr_table_entry_t* e = (apr_table_entry_t *) fields->elts;
 	for(int i = 0; i < fields->nelts; i++) {
-		req.buildRequest(e[i].key, e[i].val);
+		req.addNginxApacheHeader((const char*)e[i].key, strlen(e[i].key), (const char*)e[i].val, strlen(e[i].val));
 	}
-
-	std::string ip_address = req.getHeader(HttpRequest::Host);
-	std::string tipaddr = ip_address;
-	if(port!="80")
-		tipaddr += (":" + port);
-
-	if(content!="")
-	{
-		req.buildRequest("Content", content.c_str());
-	}
-	req.buildRequest("URL", r->uri);
-	req.buildRequest("Method", r->method);
-	if(r->args != NULL && r->args[0] != '\0')
-	{
-		req.buildRequest("GetArguments", r->args);
-	}
-	req.buildRequest("HttpVersion", r->protocol);
 
 	HttpResponse respo;
 	ServiceTask task;
@@ -244,13 +222,12 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 	}
 
 	if(respo.isDone()) {
-		std::string data = respo.generateResponse(false);
+		std::string& data = respo.generateNginxApacheResponse();
 		std::map<std::string, std::string>::const_iterator it;
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
-			if(!ignoreHeader(it->first)) {
-				apr_table_set(r->headers_out, it->first.c_str(), it->second.c_str());
-			}
+			apr_table_set(r->headers_out, it->first.c_str(), it->second.c_str());
 		}
+		ap_set_content_length(r, data.length());
 
 		char* ptr = apr_pstrdup(r->pool, respo.getHeader(HttpResponse::ContentType).c_str());
 		ap_set_content_type(r, ptr);
@@ -270,7 +247,7 @@ static int mod_ffeadcpp_method_handler (request_rec *r)
 				remain_bytes -= bytes_send;
 			}
 		}
-		r->status = CastUtil::toInt(respo.getStatusCode());
+		r->status = respo.getCode();
 		return OK;
 		//ap_rprintf(r, data.c_str(), data.length());
 	} else {

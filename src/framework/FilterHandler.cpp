@@ -22,15 +22,16 @@
 
 #include "FilterHandler.h"
 
-bool FilterHandler::hasFilters(const std::string& cntxtName) {
-	return ConfigurationData::getInstance()->filterObjectMap[cntxtName].size()>0;
+bool FilterHandler::hasFilters(std::string_view cntxtName) {
+	std::map<std::string, std::map<std::string, std::vector<std::string>, std::less<> >, std::less<> >& filterObjectMap = ConfigurationData::getInstance()->filterObjectMap;
+	return filterObjectMap.find(cntxtName)!=filterObjectMap.end() && filterObjectMap.find(cntxtName)->second.size()>0;
 }
 
-bool FilterHandler::getFilterForPath(const std::string& cntxtName, const std::string& actUrl, std::vector<std::string>& filters, const std::string& type)
+bool FilterHandler::getFilterForPath(std::string_view cntxtName, const std::string& actUrl, std::vector<std::string>& filters, const std::string& type)
 {
-	std::map<std::string, std::map<std::string, std::vector<std::string> > >& filterObjectMap = ConfigurationData::getInstance()->filterObjectMap;
-	std::map<std::string, std::vector<std::string> > filterMap = filterObjectMap[cntxtName];
-	std::map<std::string, std::vector<std::string> >::iterator it;
+	std::map<std::string, std::map<std::string, std::vector<std::string>, std::less<> >, std::less<> >& filterObjectMap = ConfigurationData::getInstance()->filterObjectMap;
+	std::map<std::string, std::vector<std::string>, std::less<> > filterMap = filterObjectMap.find(cntxtName)->second;
+	std::map<std::string, std::vector<std::string>, std::less<> >::iterator it;
 	for (it=filterMap.begin();it!=filterMap.end();++it) {
 		std::string pathurl = it->first.substr(0, it->first.length()-type.length());
 		if(StringUtil::endsWith(it->first, type) && ConfigurationData::urlMatchesPath(cntxtName, pathurl, actUrl))

@@ -10,14 +10,12 @@
 #include "SocketInterface.h"
 #include "HttpRequest.h"
 #include "HttpResponse.h"
-#include "ConfigurationData.h"
 
 class Http11Handler : public SocketInterface {
 	bool isHeadersDone;
 	int bytesToRead;
 	bool isTeRequest;
 	std::vector<HttpRequest*> requests;
-	HttpRequest* currReq;
 
 	std::string webpath;
 	int chunkSize;
@@ -33,7 +31,7 @@ public:
 	std::string getProtocol(void* context);
 	int getTimeout();
 	HttpRequest* getAvailableRequest();
-	void* readRequest(void*& context, int& pending, int& reqPos);
+	bool readRequest(void* request, void*& context, int& pending, int& reqPos);
 	bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos);
 	Http11Handler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& webpath, const int& chunkSize,
 			const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);

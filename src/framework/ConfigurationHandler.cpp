@@ -23,12 +23,9 @@
 #include "ConfigurationHandler.h"
 
 ConfigurationHandler::ConfigurationHandler() {
-	
-
 }
 
 ConfigurationHandler::~ConfigurationHandler() {
-	
 }
 
 void ConfigurationHandler::normalizeUrl(const std::string& appName, std::string& url) {
@@ -120,7 +117,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	std::string libs,ilibs,isrcs,iobjs,ideps,ipdobjs;
 	std::vector<bool> stat;
 	strVec vecvp,pathvec;
-	std::map<std::string, std::string> ajintpthMap, tpes, dcps, compnts;
+	std::map<std::string, std::string, std::less<> > ajintpthMap, tpes, dcps, compnts;
 	propMap srp;
 	XmlParser parser("Parser");
 #ifdef INC_COMP
@@ -183,7 +180,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	std::string rundyncontent;
 	std::string ajrt;
 
-	std::map<std::string, std::map<std::string, ClassStructure> > clsstrucMaps;
+	std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> > clsstrucMaps;
 
 	for(unsigned int var=0;var<webdirs.size();var++)
 	{
@@ -210,6 +207,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		RegexUtil::replace(scappName, "[^a-zA-Z0-9_]+", "");
 		ConfigurationData::getInstance()->servingContextAppNames[name] = scappName;
 		CommonUtils::addContext(scappName);
+		ConfigurationData::getInstance()->servingContextAppRoots[name] = defpath;
+
+		ConfigurationData::getInstance()->servingContextRouters[name] = NULL;
 
 		std::vector<std::string> adcps;
 		CommonUtils::listFiles(adcps, dcppath, ".dcp");
@@ -243,11 +243,11 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 		std::vector<std::string> includes;
 		CommonUtils::listFiles(includes, usrincludes, ".h");
 		//listi(usrincludes, ".h",true,includes,false);
-		std::map<std::string, ClassStructure> allclsmap;
+		std::map<std::string, ClassStructure, std::less<> > allclsmap;
 		for (unsigned int ind = 0; ind < includes.size(); ++ind)
 		{
-			std::map<std::string, ClassStructure> clsmap = ref.getClassStructures(includes.at(ind), name);
-			std::map<std::string, ClassStructure>::iterator it;
+			std::map<std::string, ClassStructure, std::less<> > clsmap = ref.getClassStructures(includes.at(ind), name);
+			std::map<std::string, ClassStructure, std::less<> >::iterator it;
 			allclsmap.insert(clsmap.begin(), clsmap.end());
 		}
 		clsstrucMaps[name] = allclsmap;
@@ -284,6 +284,13 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			}
 			if(root.getAttribute("libname")!="" && StringUtil::trimCopy(root.getAttribute("libname"))!=name) {
 				applibname = StringUtil::trimCopy(root.getAttribute("libname"));
+			}
+			if(root.getAttribute("router")!="" && StringUtil::trimCopy(root.getAttribute("router"))!="") {
+				std::string router = StringUtil::trimCopy(root.getAttribute("router"));
+				ConfigurationData::getInstance()->servingContextRouterNames[name] = router+";"+name;
+				//Bean bean1("router_"+router,"",router,"singleton",false,true,name);
+				//ConfigurationData::getInstance()->ffeadContext.addBean(bean1);
+				logger << ("Adding Router for " + name + " :: " + router) << std::endl;
 			}
 			for (unsigned int apps = 0; apps < eles.size(); apps++)
 			{
@@ -585,6 +592,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 								if(resfuncs.at(cntn1).getTagName()=="restfunction")
 								{
 									RestFunction restfunction;
+									restfunction.appName = name;
 									restfunction.name = resfuncs.at(cntn1).getAttribute("name");
 									restfunction.path = resfuncs.at(cntn1).getAttribute("path");
 									restfunction.clas = clas;
@@ -610,6 +618,9 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									}*/
 									restfunction.icontentType = resfuncs.at(cntn1).getAttribute("icontentType");
 									restfunction.ocontentType = resfuncs.at(cntn1).getAttribute("ocontentType");
+									if(restfunction.ocontentType=="") {
+										restfunction.ocontentType = ContentTypes::CONTENT_TYPE_TEXT_PLAIN;
+									}
 									if(StringUtil::toLowerCopy(restfunction.ocontentType).find(ContentTypes::CONTENT_TYPE_APPLICATION_JSON)==0) {
 										restfunction.serOpt += 1000;
 									} else if(StringUtil::toLowerCopy(restfunction.ocontentType).find(ContentTypes::CONTENT_TYPE_APPLICATION_XML)==0) {
@@ -1239,7 +1250,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 //#endif
 }
 
-void ConfigurationHandler::configureDataSources(const std::string& name, const std::string& configFile, std::map<std::string, ClassStructure>& allclsmap)
+void ConfigurationHandler::configureDataSources(const std::string& name, const std::string& configFile, std::map<std::string, ClassStructure, std::less<> >& allclsmap)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	XmlParser parser("Parser");
@@ -1249,8 +1260,8 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 	parser.readDocument(configFile, doc);
 	const Element& dbroot = doc.getRootElement();
 
-	std::map<std::string, ConnectionProperties> allProps;
-	std::map<std::string, Mapping> allMapps;
+	std::map<std::string, ConnectionProperties, std::less<> > allProps;
+	std::map<std::string, Mapping, std::less<> > allMapps;
 
 	if(dbroot.getTagName()=="sdorm")
 	{
@@ -1549,15 +1560,15 @@ void ConfigurationHandler::destroyCaches()
 	CacheManager::destroy();
 }
 
-void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps, std::vector<WsDetails>& wsdvec, std::vector<bool>& stat, strVec& vecvp, strVec& pathvec, std::map<std::string, std::string>& ajintpthMap, std::map<std::string, std::string>& tpes, const std::string& serverRootDirectory, strVec& afcd, std::string& ajrt, Reflection& ref)
+void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps, std::vector<WsDetails>& wsdvec, std::vector<bool>& stat, strVec& vecvp, strVec& pathvec, std::map<std::string, std::string, std::less<> >& ajintpthMap, std::map<std::string, std::string, std::less<> >& tpes, const std::string& serverRootDirectory, strVec& afcd, std::string& ajrt, Reflection& ref)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
-	std::map<std::string, std::map<std::string, ClassStructure> >::iterator it;
+	std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >::iterator it;
 	for (it=clsstrucMaps.begin();it!=clsstrucMaps.end();++it) {
 		bool isJsObjects = false;
 		std::string appName = it->first;
 		std::string defpath = serverRootDirectory + "/web/" + appName;
-		std::map<std::string, ClassStructure>::iterator itt;
+		std::map<std::string, ClassStructure, std::less<> >::iterator itt;
 		for (itt=it->second.begin();itt!=it->second.end();++itt) {
 			ClassStructure cs = itt->second;
 			if(cs.markers.find("@SecurityProvider")!=cs.markers.end())
@@ -1947,11 +1958,11 @@ void ConfigurationHandler::handleMarkerConfigurations(std::map<std::string, std:
 	}
 }
 
-void ConfigurationHandler::handleDataSourceEntities(const std::string& appName, std::map<std::string, Mapping>& mappings, std::map<std::string, ClassStructure>& allclsmap)
+void ConfigurationHandler::handleDataSourceEntities(const std::string& appName, std::map<std::string, Mapping, std::less<>>& mappings, std::map<std::string, ClassStructure, std::less<> >& allclsmap)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 
-	std::map<std::string, ClassStructure>::iterator itt;
+	std::map<std::string, ClassStructure, std::less<> >::iterator itt;
 	for (itt=allclsmap.begin();itt!=allclsmap.end();++itt) {
 		ClassStructure cs = itt->second;
 		std::string clas = cs.getFullyQualifiedClassName();
@@ -2291,6 +2302,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 		if(m.getName()!="")
 		{
 			RestFunction restfunction;
+			restfunction.appName = appName;
 			restfunction.name = cs.pubms.at(var).name;
 			restfunction.rtype = cs.pubms.at(var).retType;
 			restfunction.serOpt = SerializeBase::identifySerOption(cs.pubms.at(var).retType);
@@ -2310,7 +2322,9 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 			restfunction.unmapped = StringUtil::toLowerCopy(m.getAttributeValue("unmapped"))=="true";
 			restfunction.icontentType = m.getAttributeValue("icontentType");
 			restfunction.ocontentType = m.getAttributeValue("ocontentType");
-
+			if(restfunction.ocontentType=="") {
+				restfunction.ocontentType = ContentTypes::CONTENT_TYPE_TEXT_PLAIN;
+			}
 			if(StringUtil::toLowerCopy(restfunction.ocontentType).find(ContentTypes::CONTENT_TYPE_APPLICATION_JSON)==0) {
 				restfunction.serOpt += 1000;
 			} else if(StringUtil::toLowerCopy(restfunction.ocontentType).find(ContentTypes::CONTENT_TYPE_APPLICATION_XML)==0) {
@@ -2520,17 +2534,17 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 void ConfigurationHandler::initializeDataSources()
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
-	std::map<std::string, bool> mycntxts = ConfigurationData::getInstance()->servingContexts;
-	std::map<std::string, std::map<std::string, ConnectionProperties> > sdormConnProperties = ConfigurationData::getInstance()->sdormConnProperties;
-	std::map<std::string, std::map<std::string, Mapping> > sdormEntityMappings = ConfigurationData::getInstance()->sdormEntityMappings;
-	std::map<std::string, bool>::iterator mit;
+	std::map<std::string, bool, std::less<> > mycntxts = ConfigurationData::getInstance()->servingContexts;
+	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > sdormConnProperties = ConfigurationData::getInstance()->sdormConnProperties;
+	std::map<std::string, std::map<std::string, Mapping, std::less<> >, std::less<> > sdormEntityMappings = ConfigurationData::getInstance()->sdormEntityMappings;
+	std::map<std::string, bool, std::less<> >::iterator mit;
 	for (mit=mycntxts.begin();mit!=mycntxts.end();++mit) {
 		std::map<std::string, ConnectionProperties>::iterator it;
 		if(sdormConnProperties.find(mit->first)!=sdormConnProperties.end())
 		{
 			logger << "app for ds is " << mit->first << std::endl;
-			std::map<std::string, ConnectionProperties> allProps = sdormConnProperties[mit->first];
-			std::map<std::string, Mapping> allMapps = sdormEntityMappings[mit->first];
+			std::map<std::string, ConnectionProperties, std::less<> > allProps = sdormConnProperties[mit->first];
+			std::map<std::string, Mapping, std::less<> > allMapps = sdormEntityMappings[mit->first];
 			for (it=allProps.begin();it!=allProps.end();++it) {
 				logger << "ds is " << it->first << std::endl;
 				DataSourceManager::initDSN(allProps[it->first], allMapps[it->first]);
@@ -2541,13 +2555,13 @@ void ConfigurationHandler::initializeDataSources()
 
 void ConfigurationHandler::initializeCaches()
 {
-	std::map<std::string, bool> mycntxts = ConfigurationData::getInstance()->servingContexts;
-	std::map<std::string, std::map<std::string, ConnectionProperties> > cacheConnProperties = ConfigurationData::getInstance()->cacheConnProperties;
-	std::map<std::string, bool>::iterator mit;
+	std::map<std::string, bool, std::less<> > mycntxts = ConfigurationData::getInstance()->servingContexts;
+	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > cacheConnProperties = ConfigurationData::getInstance()->cacheConnProperties;
+	std::map<std::string, bool, std::less<> >::iterator mit;
 	for (mit=mycntxts.begin();mit!=mycntxts.end();++mit) {
 		if(cacheConnProperties.find(mit->first)!=cacheConnProperties.end())
 		{
-			std::map<std::string, ConnectionProperties> allProps = cacheConnProperties[mit->first];
+			std::map<std::string, ConnectionProperties, std::less<> > allProps = cacheConnProperties[mit->first];
 			std::map<std::string, ConnectionProperties>::iterator it;
 			for (it=allProps.begin();it!=allProps.end();++it) {
 				CacheManager::initCache(allProps[it->first], mit->first);
@@ -2560,9 +2574,9 @@ void ConfigurationHandler::initializeWsdls()
 {
 	Reflection ref;
 	WsUtil wsu;
-	std::map<std::string, bool> mycntxts = ConfigurationData::getInstance()->servingContexts;
-	std::map<std::string, std::vector<WsDetails> > webserviceDetailMap = ConfigurationData::getInstance()->webserviceDetailMap;
-	std::map<std::string, bool>::iterator mit;
+	std::map<std::string, bool, std::less<> > mycntxts = ConfigurationData::getInstance()->servingContexts;
+	std::map<std::string, std::vector<WsDetails>, std::less<> > webserviceDetailMap = ConfigurationData::getInstance()->webserviceDetailMap;
+	std::map<std::string, bool, std::less<> >::iterator mit;
 	for (mit=mycntxts.begin();mit!=mycntxts.end();++mit) {
 		if(webserviceDetailMap.find(mit->first)!=webserviceDetailMap.end())
 		{

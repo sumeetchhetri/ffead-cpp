@@ -280,8 +280,8 @@ bool SelEpolKqEvPrt::registerWrite(SocketInterface* obj) {
 	ev.data.ptr = obj;
 	if (epoll_ctl(epoll_handle, EPOLL_CTL_MOD, obj->fd, &ev) < 0)
 	{
-		perror("epoll");
-		std::cout << "Error adding to epoll cntl list" << std::endl;
+		//perror("epoll");
+		//std::cout << "Error adding to epoll cntl list" << std::endl;
 		return false;
 	}
 #endif
@@ -300,8 +300,8 @@ bool SelEpolKqEvPrt::unRegisterWrite(SocketInterface* obj) {
 	ev.data.ptr = obj;
 	if (epoll_ctl(epoll_handle, EPOLL_CTL_MOD, obj->fd, &ev) < 0)
 	{
-		perror("epoll");
-		std::cout << "Error adding to epoll cntl list" << std::endl;
+		//perror("epoll");
+		//std::cout << "Error adding to epoll cntl list" << std::endl;
 		return false;
 	}
 #endif
@@ -410,6 +410,9 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 			ioctlsocket(descriptor, FIONBIO, &iMode);
 		#else
 			fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
+			/*int i = 1;
+			//setsockopt(descriptor, IPPROTO_TCP, TCP_NODELAY, (void *)&i, sizeof(i));
+			setsockopt(descriptor, IPPROTO_TCP, TCP_CORK, (void *)&i, sizeof(i));*/
 		#endif
 	//#endif
 
@@ -464,7 +467,7 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 		if (epoll_ctl(epoll_handle, EPOLL_CTL_ADD, descriptor, &ev) < 0)
 		{
 			perror("epoll");
-			std::cout << "Error adding to epoll cntl list" << std::endl;
+			//std::cout << "Error adding to epoll cntl list" << std::endl;
 			return false;
 		}
 	#elif defined USE_KQUEUE

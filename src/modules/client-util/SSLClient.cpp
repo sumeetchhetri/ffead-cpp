@@ -142,6 +142,70 @@ bool SSLClient::connection(const std::string& host, const int& port)
 	remote = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in *));
 	remote->sin_family = AF_INET;
 
+	if(host!="localhost" && host!="0.0.0.0" && host!="127.0.0.1") {
+		char* ip = get_ip((char*)host.c_str());
+		fprintf(stderr, "IP is %s\n", ip);
+		int tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
+		if( tmpres < 0)
+		{
+			free(remote);
+			perror("Can't set remote->sin_addr.s_addr");
+			return false;
+		}
+		else if(tmpres == 0)
+		{
+			free(remote);
+			fprintf(stderr, "%s is not a valid IP address\n", ip);
+			return false;
+		}
+		remote->sin_addr.s_addr = inet_addr(ip);
+		free(ip);
+	} else {
+		remote->sin_addr.s_addr = INADDR_ANY;
+	}
+
+	remote->sin_port = htons(port);
+
+	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)){
+		perror("Could not connect");
+		connected = false;
+	} else {
+		connected = true;
+	}
+	free(remote);
+
+	connected = ClientInterface::isConnected(sockfd);
+
+	/* Build our SSL context*/
+	init();
+
+	/* Connect the SSL socket */
+	ssl=SSL_new(ctx);
+	sbio=BIO_new_socket(sockfd,BIO_CLOSE);
+	SSL_set_bio(ssl,sbio,sbio);
+	io=BIO_new(BIO_f_buffer());
+	ssl_bio=BIO_new(BIO_f_ssl());
+	BIO_set_ssl(ssl_bio,ssl,BIO_NOCLOSE);
+	BIO_push(io,ssl_bio);
+
+	if(SSL_connect(ssl)<=0)
+	{
+		logger << "SSL connect error";
+		return false;
+	}
+	ERR_clear_error();
+	connected = true;
+	return true;
+}
+
+bool SSLClient::connectionNB(const std::string& host, const int& port)
+{
+	sockfd = create_tcp_socket();
+
+	struct sockaddr_in *remote;
+	remote = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in *));
+	remote->sin_family = AF_INET;
+
 	fd_set fdset;
 	struct timeval tv;
 
@@ -169,7 +233,7 @@ bool SSLClient::connection(const std::string& host, const int& port)
 
 	remote->sin_port = htons(port);
 
-	fcntl(sockfd, F_SETFL, O_NONBLOCK);
+	setSocketNonBlocking(sockfd);
 	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)){
 		perror("Could not connect");
 		connected = false;
@@ -187,6 +251,7 @@ bool SSLClient::connection(const std::string& host, const int& port)
 	if(rc==0) {
 		connected = false;
 	}
+	setSocketBlocking(sockfd);
 
 	/* Build our SSL context*/
 	init();

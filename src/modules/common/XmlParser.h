@@ -41,6 +41,7 @@ class XmlParser {
 	private:
 		Logger logger;
 		std::string mode;
+		void sanitizeXml(std::string& data);
 		void readXML(std::string&, const std::string&, Element *);
 };
 

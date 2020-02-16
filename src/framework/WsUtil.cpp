@@ -23,14 +23,14 @@
 #include "WsUtil.h"
 
 WsUtil::WsUtil() {
-	logger = LoggerFactory::getLogger("WsUtil");
+	//logger = LoggerFactory::getLogger("WsUtil");
 }
 
 WsUtil::~WsUtil() {
 
 }
 
-std::string WsUtil::generateAllWSDL(const std::vector<WsDetails>& wsdvec, const std::string& resp, Reflection& ref, std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps)
+std::string WsUtil::generateAllWSDL(const std::vector<WsDetails>& wsdvec, const std::string& resp, Reflection& ref, std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps)
 {
 	std::string ret, headers="#include \"AppDefines.h\"\n#include \"Exception.h\"\n#include \"string\"\n#include <sstream>\n#include \"CastUtil.h\"\n#include \"XmlParser.h\"\n#include \"Reflection.h\"\n#include \"XMLSerialize.h\"\n";
 	for(unsigned int var = 0; var < wsdvec.size(); ++var)
@@ -78,7 +78,7 @@ std::vector<WsDetails> WsUtil::getWsDetails(const std::vector<std::string>& apps
 	return wsdvec;
 }
 
-void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps, const std::string& resp, std::string &headers, Reflection& ref)
+void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps, const std::string& resp, std::string &headers, Reflection& ref)
 {
 	typedef std::map<std::string,std::string> strMap;
 	typedef std::map<std::string,strMap> meth_Map;
@@ -88,7 +88,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 	std::string namespc = wsd.namespc;
 	std::map<std::string, std::string> outnmmp = wsd.outnmmp;
 	std::string appname = wsd.appname;
-	std::map<std::string, ClassStructure>& allclsmap = clsstrucMaps[appname];
+	std::map<std::string, ClassStructure, std::less<> >& allclsmap = clsstrucMaps[appname];
 
 	ws_inp_out_Map ws_info;
 	meth_Map meth_info;
@@ -100,12 +100,12 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 	StringUtil::replaceAll(ws_name, "::", "_");
 	if(StringUtil::trimCopy(ws_name)=="")
 	{
-		if(ConfigurationData::getInstance()->enableLogging) logger << ("No class name defined for web-service, skipping...") << std::endl;
+		//logger << ("No class name defined for web-service, skipping...") << std::endl;
 		return;
 	}
 	if(StringUtil::trimCopy(location)=="")
 	{
-		if(ConfigurationData::getInstance()->enableLogging) logger << ("No location defined for web-service, skipping...") << std::endl;
+		//logger << ("No location defined for web-service, skipping...") << std::endl;
 		return;
 	}
 	gcntxt["WS_NAME"] = ws_name;
@@ -117,10 +117,10 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 	}
 	gcntxt["WS_NMSPC"] = StringUtil::trimCopy(namespc);
 
-	if(ConfigurationData::getInstance()->enableLogging) logger << ("Web service " + ws_name + " found for appname " + appname) << std::endl;
+	//logger << ("Web service " + ws_name + " found for appname " + appname) << std::endl;
 
 	ClassStructure *clstruct = NULL;
-	std::map<std::string, ClassStructure>::iterator it;
+	std::map<std::string, ClassStructure, std::less<> >::iterator it;
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
 		if(it->second.getFullyQualifiedClassName()==claz)
@@ -131,13 +131,13 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 	}
 	if(clstruct==NULL)
 	{
-		if(ConfigurationData::getInstance()->enableLogging) logger << ("Error generating web-service artifacts, as class "+claz + "not found...") << std::endl;
+		//logger << ("Error generating web-service artifacts, as class "+claz + "not found...") << std::endl;
 		return;
 	}
 
 	if(clstruct->getNamespace()=="" && gcntxt["WS_NMSPC"]=="")
 	{
-		if(ConfigurationData::getInstance()->enableLogging) logger << ("No namespace defined for web-service, skipping...") << std::endl;
+		//logger << ("No namespace defined for web-service, skipping...") << std::endl;
 		return;
 	}
 	if(gcntxt["WS_NMSPC"]=="")
@@ -241,10 +241,10 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 				}
 				else
 					trgnmspc = trgnms[fqcn];
-				if(ConfigurationData::getInstance()->enableLogging) logger << "in result " + vecn + " " + trgnmspc << std::endl;
+				//logger << "in result " + vecn + " " + trgnmspc << std::endl;
 				if(vecn.find("::")!=std::string::npos)
 					vecn = vecn.substr(vecn.find_last_of("::")+1);
-				if(ConfigurationData::getInstance()->enableLogging) logger << "in result after " + vecn + " " + trgnmspc << std::endl;
+				//logger << "in result after " + vecn + " " + trgnmspc << std::endl;
 				retType = "\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""+in_out_info["RETURN"]+"\" type=\""+trgnmspc+":"+vecn+"\"/>";
 			}
 		}
@@ -303,10 +303,10 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 					}
 					else
 						trgnmspc = trgnms[fqcn];
-					if(ConfigurationData::getInstance()->enableLogging) logger << "in result " + type + " " + trgnmspc << std::endl;
+					//logger << "in result " + type + " " + trgnmspc << std::endl;
 					if(type.find("::")!=std::string::npos)
 						type = type.substr(type.find_last_of("::")+1);
-					if(ConfigurationData::getInstance()->enableLogging) logger << "in result after " + type + " " + trgnmspc << std::endl;
+					//logger << "in result after " + type + " " + trgnmspc << std::endl;
 					retType = "\n<xsd:element name=\""+in_out_info["RETURN"]+"\" type=\""+trgnmspc+":"+type+"\"/>";
 				}
 			}
@@ -376,7 +376,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 				}
 				else
 				{
-					if(ConfigurationData::getInstance()->enableLogging) logger << ("Invalid thing happening " + results1.at(j)) << std::endl;
+					//logger << ("Invalid thing happening " + results1.at(j)) << std::endl;
 				}
 				strMap allfs,tyfs;
 				std::string xsdobjdef, xdstype;
@@ -439,10 +439,10 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 						}
 						else
 							trgnmspc = trgnms[fqcn];
-						if(ConfigurationData::getInstance()->enableLogging) logger << "in result " + vecn + " " + trgnmspc << std::endl;
+						//logger << "in result " + vecn + " " + trgnmspc << std::endl;
 						if(vecn.find("::")!=std::string::npos)
 							vecn = vecn.substr(vecn.find_last_of("::")+1);
-						if(ConfigurationData::getInstance()->enableLogging) logger << "in result after " + vecn + " " + trgnmspc << std::endl;
+						//logger << "in result after " + vecn + " " + trgnmspc << std::endl;
 						inp_params.append("\n<xsd:element minOccurs=\"0\" maxOccurs=\"unbounded\" name=\""+results2.at(1)+"\" type=\""+trgnmspc+":"+vecn+"\"/>");
 					}
 				}
@@ -457,10 +457,10 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 					}
 					else
 						trgnmspc = trgnms[fqcn];
-					if(ConfigurationData::getInstance()->enableLogging) logger << "in result " + type + " " + trgnmspc << std::endl;
+					//logger << "in result " + type + " " + trgnmspc << std::endl;
 					if(type.find("::")!=std::string::npos)
 						type = type.substr(type.find_last_of("::")+1);
-					if(ConfigurationData::getInstance()->enableLogging) logger << "in result after " + type + " " + trgnmspc << std::endl;
+					//logger << "in result after " + type + " " + trgnmspc << std::endl;
 					inp_params.append("\n<xsd:element minOccurs=\"0\" name=\""+results2.at(1)+"\" type=\""+trgnmspc+":"+type+"\"/>");
 				}
 

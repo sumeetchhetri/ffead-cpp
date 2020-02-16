@@ -28,19 +28,18 @@
 class Client : public ClientInterface {
 	bool connected;
 	SOCKET sockfd;
-	Logger logger;
+	//Logger logger;
 public:
 	Client();
 	virtual ~Client();
 	bool connection(const std::string&, const int&);
+	bool connectionNB(const std::string&, const int&);
 	//bool connectionUnresolv(const std::string& host, const int& port);
 	int sendData(std::string);
 	std::string getTextData(const std::string& hdrdelm, const std::string& cntlnhdr);
 	std::string getBinaryData(const int&, const bool&);
 	void closeConnection();
 	bool isConnected();
-	void setSocketBlocking();
-	void setSocketNonBlocking();
 	int receive(std::string& buf, const int& flag);
 	int receivelen(std::string& buf, const int& len, const int& flag);
 	std::string getData();

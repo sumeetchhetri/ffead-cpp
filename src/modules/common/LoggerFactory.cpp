@@ -282,7 +282,7 @@ Logger LoggerFactory::getLogger(const std::string& className) {
 			return Logger(it->second, className);
 		}
 	}
-	std::string appName = CommonUtils::getAppName("");
+	std::string appName = CommonUtils::getAppName(std::string(""));
 	if(appName!="")
 	{
 		if(instance->configs.find(appName+".DEFAULT")!=instance->configs.end())
@@ -299,7 +299,7 @@ Logger LoggerFactory::getLogger(const std::string& loggerName, const std::string
 	{
 		init();
 	}
-	std::string appName = CommonUtils::getAppName("");
+	std::string appName = CommonUtils::getAppName(std::string(""));
 	if(appName!="") {
 		std::string nloggerName = appName + "." + loggerName;
 		if(instance->configs.find(nloggerName)==instance->configs.end()) {

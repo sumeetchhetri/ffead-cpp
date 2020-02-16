@@ -33,7 +33,7 @@ DCPGenerator::~DCPGenerator() {
 }
 std::string DCPGenerator::generateDCPAll()
 {
-	std::map<std::string,std::string> fileNames = ConfigurationData::getInstance()->dynamicCppPagesMap;
+	std::map<std::string,std::string, std::less<> > fileNames = ConfigurationData::getInstance()->dynamicCppPagesMap;
 	std::string bodies,headersb="#include \"AfcUtil.h\"",funcdefs;
 	std::map<std::string, std::string>::iterator it;
 	for (it=fileNames.begin();it!=fileNames.end();++it)

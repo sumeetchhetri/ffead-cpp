@@ -149,10 +149,9 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, void*
 	return false;
 }
 
-void* Http11WebSocketHandler::readRequest(void*& context, int& pending, int& reqPos) {
-	if(readFrom())return NULL;
+bool Http11WebSocketHandler::readRequest(void* request, void*& context, int& pending, int& reqPos) {
+	if(readFrom())return false;
 
-	void* request = NULL;
 	Http11WebSocketDataFrame* frame = NULL;
 	while((frame=nextFrame())!=NULL)
 	{
@@ -178,7 +177,7 @@ void* Http11WebSocketHandler::readRequest(void*& context, int& pending, int& req
 	{
 		pending = buffer.length();
 	}
-	return request;
+	return true;
 }
 
 bool Http11WebSocketHandler::writeResponse(void* req, void* res, void* context, std::string& data, int reqPos) {

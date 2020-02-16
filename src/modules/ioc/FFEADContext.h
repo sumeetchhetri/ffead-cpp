@@ -70,13 +70,16 @@ public:
 	FFEADContext();
 	virtual ~FFEADContext();
 	void* getBean(const std::string&, const std::string& appName= "default");
+	void* getBean(const std::string&, std::string_view);
 	void* getBean(const Bean&);
 	void clear(const std::string& appName= "default");
 	void addBean(Bean& bean);
-	void initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts, Reflector* reflector);
-	void clearAllSingletonBeans(const std::map<std::string, bool>& servingContexts);
+	void initializeAllSingletonBeans(const std::map<std::string, bool, std::less<> >& servingContexts, Reflector* reflector);
+	void clearAllSingletonBeans(const std::map<std::string, bool, std::less<> >& servingContexts);
 	Reflector* getReflector();
 	void release(void* instance, const std::string& beanName, const std::string& appName);
+	//TODO optimize for string_view later
+	void release(void* instance, const std::string& beanName, std::string_view appName);
 };
 
 #endif /* FFEADCONTEXT_H_ */

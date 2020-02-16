@@ -338,9 +338,9 @@ void* CHServer::dynamic_page_monitor(void* arg)
 {
 	std::string serverRootDirectory = *(std::string*)arg;
 	struct stat statbuf;
-	std::map<std::string, std::string> dcpsss = ConfigurationData::getInstance()->dynamicCppPagesMap;
-	std::map<std::string, std::string> tpes = ConfigurationData::getInstance()->templateFilesMap;
-	std::map<std::string, std::string> dcspstpes = dcpsss;
+	std::map<std::string, std::string, std::less<> > dcpsss = ConfigurationData::getInstance()->dynamicCppPagesMap;
+	std::map<std::string, std::string, std::less<> > tpes = ConfigurationData::getInstance()->templateFilesMap;
+	std::map<std::string, std::string, std::less<> > dcspstpes = dcpsss;
 	dcspstpes.insert(tpes.begin(), tpes.end());
 	std::map<std::string,long> statsinf;
 	std::map<std::string, std::string>::iterator it;
@@ -920,10 +920,6 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 			logger << ("Method Invoker Services are disabled") << std::endl;
 		}
 	#endif
-
-	#ifdef INC_JOBS
-		JobScheduler::start();
-	#endif
 	}
 
 	pid_t pid;
@@ -999,8 +995,8 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 						if(valid)
 						{
 							StringUtil::trim(vhostapps);
-							std::map<std::string, bool> updatedcontextNames = ConfigurationData::getInstance()->servingContexts;
-							std::map<std::string, std::string> updatedaliasNames = ConfigurationData::getInstance()->appAliases;
+							std::map<std::string, bool, std::less<> > updatedcontextNames = ConfigurationData::getInstance()->servingContexts;
+							std::map<std::string, std::string, std::less<> > updatedaliasNames = ConfigurationData::getInstance()->appAliases;
 							if(vhostapps!="") {
 								std::vector<std::string> spns = StringUtil::splitAndReturn<std::vector<std::string> >(vhostapps, ",");
 								for (int spni = 0; spni < (int)spns.size(); ++spni) {
@@ -1200,6 +1196,10 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	ConfigurationHandler::initializeCaches();
 	logger << ("Initializing Caches done....") << std::endl;
 
+#ifdef INC_JOBS
+	JobScheduler::start();
+#endif
+
 	std::vector<std::string> files;
 
 #ifdef INC_DCP
@@ -1265,7 +1265,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	while(stat (serverCntrlFileNm.c_str(), &buffer) == 0)
 	{
 		Thread::sSleep(10);
-		CommonUtils::printStats();
+		//CommonUtils::printStats();
 	}
 
 	std::string ip = ipport.substr(0, ipport.find(":"));
@@ -1347,8 +1347,8 @@ HttpReadTask* CHServer::httpReadFactoryMethod() {
 }
 
 SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
-	SSL* ssl;
-	BIO* io;
+	SSL* ssl = NULL;
+	BIO* io = NULL;
 	if(SocketInterface::init(fd, ssl, io, logger)) {
 		return new Http2Handler(fd, ssl, io, true, ConfigurationData::getInstance()->coreServerProperties.webPath);
 	} else {

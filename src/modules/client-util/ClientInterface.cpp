@@ -132,3 +132,23 @@ bool ClientInterface::isConnected(const SOCKET& fd) {
 	read) */
 	return rc <= 0 ? false : true;
 }
+
+void ClientInterface::setSocketBlocking(const SOCKET& sockfd)
+{
+	#ifdef OS_MINGW
+		u_long bMode = 0;
+		ioctlsocket(sockfd, FIONBIO, &bMode);
+	#else
+		fcntl(sockfd, F_SETFL, O_SYNC);
+	#endif
+}
+
+void ClientInterface::setSocketNonBlocking(const SOCKET& sockfd)
+{
+	#ifdef OS_MINGW
+		u_long iMode = 1;
+		ioctlsocket(sockfd, FIONBIO, &iMode);
+	#else
+		fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK);
+	#endif
+}

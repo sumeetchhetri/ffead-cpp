@@ -62,101 +62,101 @@
 	</security>
 	<restcontrollers>
 		<restcontroller class="DefaultRestController" path="/rest/path/rest1/">
-			<restfunction name="addNumbers" path="add/{1}/{2}" meth="GET"
+			<restfunction name="addNumbers" path="add/{1}/{2}" meth="GET" rtype="int"
 				statusCode="200">
 				<param type="int" name="1" from="path" />
 				<param type="int" name="2" from="path" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/rest/reqparam/rest1/">
-			<restfunction name="addNumbers" path="add" meth="GET"
+			<restfunction name="addNumbers" path="add" meth="GET" rtype="int"
 				statusCode="200">
 				<param type="int" name="1" from="reqparam" />
 				<param type="int" name="2" from="reqparam" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/rest/postparam/rest1/">
-			<restfunction name="addNumbers" path="add" meth="POST"
+			<restfunction name="addNumbers" path="add" meth="POST" rtype="int"
 				statusCode="200">
 				<param type="int" name="1" from="postparam" />
 				<param type="int" name="2" from="postparam" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/rest/header/rest1/">
-			<restfunction name="addNumbers" path="add" meth="GET"
+			<restfunction name="addNumbers" path="add" meth="GET" rtype="int"
 				statusCode="200">
 				<param type="int" name="a" from="header" />
 				<param type="int" name="b" from="header" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/rest/path1/rest2">
-			<restfunction name="addNumbers" path="+/{1}/{2}" meth="GET"
+			<restfunction name="addNumbers" path="+/{1}/{2}" meth="GET" rtype="int"
 				statusCode="200">
 				<param type="int" name="1" from="path" />
 				<param type="int" name="2" from="path" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/rest3">
-			<restfunction name="addNumbers" path="ad/{1}/{2}" meth="GET"
+			<restfunction name="addNumbers" path="ad/{1}/{2}" meth="GET" rtype="int"
 				statusCode="200">
 				<param type="int" name="1" from="path" />
 				<param type="int" name="2" from="path" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController">
-			<restfunction name="power" meth="GET"
+			<restfunction name="power" meth="GET" rtype="double"
 				path="/rest/controller/base{1}/power/exp{2}" statusCode="200">
 				<param type="int" name="1" from="path" />
 				<param type="int" name="2" from="path" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController">
-			<restfunction name="addNumbers" meth="GET"
+			<restfunction name="addNumbers" meth="GET" rtype="int"
 				path="/addNumbers/{1}/{2}" statusCode="200">
 				<param type="int" name="1" from="path" />
 				<param type="int" name="2" from="path" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restvec">
-			<restfunction name="testVector" path="tstvec" meth="POST"
-				statusCode="200">
+			<restfunction name="testVector" path="tstvec" meth="POST" rtype="std::vector&lt;int&gt;"
+				statusCode="200" icontentType="application/json" ocontentType="application/json">
 				<param type="std::vector&lt;int&gt;" from="body" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restvecobj">
-			<restfunction name="testVectorObject" path="tstvecobj"
-				meth="POST" icontentType="application/json" statusCode="200">
+			<restfunction name="testVectorObject" path="tstvecobj" rtype="std::vector&lt;TestMany&gt;"
+				meth="POST" icontentType="application/json" ocontentType="application/json" statusCode="200">
 				<param type="std::vector&lt;TestMany&gt;" from="body" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restobj">
-			<restfunction name="testObject" path="tstobj" meth="POST"
+			<restfunction name="testObject" path="tstobj" meth="POST" rtype="TestMany"
 				icontentType="application/json" ocontentType="application/json"
 				statusCode="200">
 				<param type="TestMany" from="body" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restvecobj">
-			<restfunction name="testVectorObject" path="tstvecobj.xml"
-				meth="POST" icontentType="application/xml" statusCode="200">
+			<restfunction name="testVectorObject" path="tstvecobj.xml" rtype="std::vector&lt;TestMany&gt;"
+				meth="POST" icontentType="application/xml" ocontentType="application/json" statusCode="200">
 				<param type="std::vector&lt;TestMany&gt;" from="body" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restobj">
-			<restfunction name="testObject" path="tstobj.xml" meth="POST"
-				icontentType="application/xml" statusCode="200">
+			<restfunction name="testObject" path="tstobj.xml" meth="POST" rtype="TestMany"
+				icontentType="application/xml" ocontentType="application/json" statusCode="200">
 				<param type="TestMany" from="body" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restupload">
-			<restfunction name="testUploadFile" path="uploadFile"
+			<restfunction name="testUploadFile" path="uploadFile" rtype="std::string"
 				meth="POST" icontentType="multipart/form-data" statusCode="200">
 				<param type="filestream" name="file" from="multipart-content" />
 				<param type="string" name="field" from="multipart-content" />
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restupload">
-			<restfunction name="testUploadFileMulti1" path="uploadFileMulti1"
+			<restfunction name="testUploadFileMulti1" path="uploadFileMulti1" rtype="std::string"
 				meth="POST" icontentType="multipart/form-data" statusCode="200">
 				<param type="filestream" name="file1" from="multipart-content" />
 				<param type="filestream" name="file2" from="multipart-content" />
@@ -165,7 +165,7 @@
 			</restfunction>
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/restupload">
-			<restfunction name="testUploadFileMulti2" path="uploadFileMulti2"
+			<restfunction name="testUploadFileMulti2" path="uploadFileMulti2" rtype="std::string"
 				meth="POST" icontentType="multipart/form-data" statusCode="200">
 				<param type="std::vector&lt;filestream&gt;" name="files" from="multipart-content" />
 				<param type="string" name="field" from="multipart-content" />
@@ -173,7 +173,7 @@
 		</restcontroller>
 		<restcontroller class="DefaultRestController" path="/sertest">
 			<restfunction name="sertest" path="s" meth="POST"
-				icontentType="application/json" ocontentType="application/json"
+				icontentType="application/json" ocontentType="application/json" rtype="TestSTLs"
 				statusCode="200">
 				<param type="TestSTLs" from="body" />
 			</restfunction>

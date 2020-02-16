@@ -291,11 +291,44 @@ void* FFEADContext::getBean(const std::string& beanName, const std::string& appN
 	return NULL;
 }
 
+void* FFEADContext::getBean(const std::string& beanName, std::string_view appName)
+{
+	std::string an = std::string(appName);
+	if(beanName!="" && beans.find(an+beanName)!=beans.end())
+	{
+		Bean& bean = beans[an+beanName];
+		return getBean(bean);
+	}
+	return NULL;
+}
+
 void FFEADContext::release(void* instance, const std::string& beanName, const std::string& appName)
 {
 	if(beanName!="" && beans.find(appName+beanName)!=beans.end())
 	{
 		Bean& bean = beans[appName+beanName];
+		if(bean.scope=="prototype")
+		{
+			std::string type;
+			if(bean.inbuilt!="" && bean.value!="")
+			{
+				type = bean.inbuilt;
+			}
+			else
+			{
+				type = bean.clas;
+			}
+			reflector->destroy(instance, type, appName);
+		}
+	}
+}
+
+void FFEADContext::release(void* instance, const std::string& beanName, std::string_view appName)
+{
+	std::string an = std::string(appName);
+	if(beanName!="" && beans.find(an+beanName)!=beans.end())
+	{
+		Bean& bean = beans[an+beanName];
 		if(bean.scope=="prototype")
 		{
 			std::string type;
@@ -349,7 +382,7 @@ void FFEADContext::addBean(Bean& bean)
 		beans[bean.appName+bean.name] = bean;
 }
 
-void FFEADContext::clearAllSingletonBeans(const std::map<std::string, bool>& servingContexts)
+void FFEADContext::clearAllSingletonBeans(const std::map<std::string, bool, std::less<> >& servingContexts)
 {
 	if(cleared)
 		return;
@@ -361,7 +394,7 @@ void FFEADContext::clearAllSingletonBeans(const std::map<std::string, bool>& ser
 	cleared = true;
 }
 
-void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool>& servingContexts, Reflector* reflector)
+void FFEADContext::initializeAllSingletonBeans(const std::map<std::string, bool, std::less<> >& servingContexts, Reflector* reflector)
 {
 	this->reflector = reflector;
 	std::map<std::string,Bean>::iterator beanIter;

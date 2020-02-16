@@ -52,6 +52,7 @@ public:
     std::string getHttpVersion() const;
     void setHTTPResponseStatus(const HTTPResponseStatus& status);
     std::string getStatusCode() const;
+    int getCode() const;
     std::string getStatusMsg() const;
     std::string getContent() const;
 	//void setContent(const Cont& content);
@@ -59,6 +60,7 @@ public:
 	void addCookie(const std::string& cookie);
     void addContent(const MultipartContent& content);
     void addHeaderValue(std::string header, const std::string& value);
+    void setContentType(const std::string& value);
     bool hasHeader(const std::string& header);
     bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
     bool isNonBinary();
@@ -74,6 +76,7 @@ public:
 	void generateResponse(const std::string& httpMethod, HttpRequest *req, std::string& data, const bool& appendHeaders= true);
 	std::string generateResponse(const bool& appendHeaders= true);
 	void generateResponse(HttpRequest *req, std::string& data, const bool& appendHeaders= true);
+	std::string& generateNginxApacheResponse();
 private:
 	static RiMap HDRS_SW_CODES;
 	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN;

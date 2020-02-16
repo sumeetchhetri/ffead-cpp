@@ -43,7 +43,7 @@ class PoolThread {
 	std::string name;
 	std::atomic<long long> taskCount;
 	std::atomic<int> condVar;
-	Logger logger;
+	//Logger logger;
 	friend class ThreadPool;
 	std::atomic<bool> runFlag;
 	std::atomic<bool> complete;

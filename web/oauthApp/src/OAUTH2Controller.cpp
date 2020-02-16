@@ -38,7 +38,7 @@ bool OAUTH2Controller::service(HttpRequest* req, HttpResponse* res)
 	{
 		if(req->getRequestParams()["username"]!="" && req->getRequestParams()["password"]!="")
 		{
-			FileAuthController fauthu(req->getContextHome()+"/users",":");
+			FileAuthController fauthu(req->getCntxt_root()+"/users",":");
 			std::string key;
 			bool flag = fauthu.getPassword(req->getRequestParams()["username"],key);
 			if(flag)
@@ -77,7 +77,7 @@ bool OAUTH2Controller::service(HttpRequest* req, HttpResponse* res)
 	{
 		if(req->getRequestParams()["access_token"]!="")
 		{
-			std::string filen = req->getContextHome()+"/access2-tokens";
+			std::string filen = req->getCntxt_root()+"/access2-tokens";
 			std::ofstream ofs(filen.c_str());
 			std::string wrf = req->getRequestParams()["access_token"];
 			ofs.write(wrf.c_str(),wrf.length());
@@ -99,7 +99,7 @@ bool OAUTH2Controller::service(HttpRequest* req, HttpResponse* res)
 	}
 	else if(req->getFile()=="getResource.auth2")
 	{
-		std::string filen = req->getContextHome()+"/access2-tokens";
+		std::string filen = req->getCntxt_root()+"/access2-tokens";
 		std::ifstream ifs(filen.c_str());
 		std::string tokse;
 		getline(ifs,tokse);

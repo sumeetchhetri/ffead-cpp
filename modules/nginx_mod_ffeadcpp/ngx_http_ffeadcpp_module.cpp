@@ -272,10 +272,16 @@ static bool ignoreHeader(const std::string& hdr)
 
 static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *r)
 {
-	std::string cntpath = "";
+	/*std::string cntpath = "";
 	cntpath.append((const char*)ffeadcpp_path.data, ffeadcpp_path.len);
 	cntpath += "/web/";
-	HttpRequest req(cntpath);
+	HttpRequest req(cntpath);*/
+
+	std::string content;
+	ngx_http_read_input_data(r, content);
+
+	HttpRequest req((const char*)r->uri.data, r->uri.len, (const char*)r->args.data, r->args.len,
+			(const char*)r->main->method_name.data, r->main->method_name.len, std::move(content), r->http_version);
 
 	ngx_int_t    rc;
 	ngx_buf_t   *b;
@@ -306,25 +312,8 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 			h = part->elts;
 			i = 0;
 		}
-		req.buildRequest(std::string((const char*)h[i].key.data, h[i].key.len), std::string((const char*)h[i].value.data, h[i].value.len));
+		req.addNginxApacheHeader((const char*)h[i].key.data, h[i].key.len, (const char*)h[i].value.data, h[i].value.len);
 	}
-
-	std::string content;
-	ngx_http_read_input_data(r, content);
-	//logger << "Input Request Data\n " << content << "\n======================\n" << std::endl;
-	//logger << "URL -> " << std::string(r->uri.data,r->uri.len) << std::endl;
-	//logger << "Method -> " << std::string(r->main->method_name.data, r->main->method_name.len) << std::endl;
-	if(content!="")
-	{
-		req.buildRequest("Content", content);
-	}
-	req.buildRequest("URL",  std::string((const char*)r->uri.data,r->uri.len));
-	req.buildRequest("Method", std::string((const char*)r->main->method_name.data, r->main->method_name.len));
-	if(r->args.len > 0)
-	{
-		req.buildRequest("GetArguments", std::string((const char*)r->args.data,r->args.len));
-	}
-	req.buildRequest("HttpVersion", CastUtil::fromNumber(r->http_version));
 
 	HttpResponse respo;
 	ServiceTask task;
@@ -336,28 +325,26 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 			set_custom_header_in_headers_out(r, std::string("Set-Cookie"), respo.getCookies().at(var));
 		}
 
-		std::string data = respo.generateResponse(false);
+		std::string& data = respo.generateNginxApacheResponse();
+		r->headers_out.content_length_n = (int)data.length();
 		std::map<std::string,std::string>::const_iterator it;
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
-			if(StringUtil::toLowerCopy(it->first)==StringUtil::toLowerCopy(HttpResponse::ContentLength)) {
-				r->headers_out.content_length_n = CastUtil::toInt(it->second);
-			} else if(!ignoreHeader(it->first)) {
-				set_custom_header_in_headers_out(r, it->first, it->second);
-			}
+			set_custom_header_in_headers_out(r, it->first, it->second);
 		}
 
 		/* set the status line */
-		r->headers_out.status = CastUtil::toInt(respo.getStatusCode());
+		r->headers_out.status = respo.getCode();
 
 		if(data.length()>0)
 		{
-			r->headers_out.content_type.data = ngx_pcalloc(r->pool, respo.getHeader(HttpResponse::ContentType).size()+1);
+			std::string contType = respo.getHeader(HttpResponse::ContentType);
+			r->headers_out.content_type.data = ngx_pcalloc(r->pool, contType.size()+1);
 			if (r->headers_out.content_type.data == NULL) {
 				ngx_http_finalize_request(r, NGX_HTTP_INTERNAL_SERVER_ERROR);
 				return;
 			}
-			ngx_cpystrn(r->headers_out.content_type.data, respo.getHeader(HttpResponse::ContentType).c_str(), respo.getHeader(HttpResponse::ContentType).size()+1);
-			r->headers_out.content_type.len = respo.getHeader(HttpResponse::ContentType).size();
+			ngx_cpystrn(r->headers_out.content_type.data, contType.c_str(), contType.size()+1);
+			r->headers_out.content_type.len = contType.size();
 
 			b = ngx_create_temp_buf(r->pool, data.size());
 			if (b == NULL) {

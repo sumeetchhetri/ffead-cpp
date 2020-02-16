@@ -22,6 +22,7 @@ SocketInterface::SocketInterface() {
 	tid = -1;
 	rdTsk = NULL;
 	wrTsk = NULL;
+	srvTsk = NULL;
 }
 
 SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
@@ -39,6 +40,7 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	tid = -1;
 	rdTsk = NULL;
 	wrTsk = NULL;
+	srvTsk = NULL;
 }
 
 bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger) {
@@ -114,8 +116,9 @@ int SocketInterface::completeWrite() {
 	int done = 1;
 	int reqPos = current + 1;
 
-	wm.lock();
-	while(!allRequestsDone()) {
+	//wm.lock();
+	bool allRequestsDoneFl = false;
+	while(!(allRequestsDoneFl = allRequestsDone())) {
 		ResponseData& rd = wtl[reqPos];
 
 		Timer t;
@@ -124,7 +127,7 @@ int SocketInterface::completeWrite() {
 		done = writeTo(&rd);
 
 		t.end();
-		CommonUtils::tsActWrite += t.timerNanoSeconds();
+		CommonUtils::tsResSockWrite += t.timerNanoSeconds();
 
 		if(done == 0 || done == 1) {
 			endRequest(reqPos);
@@ -132,21 +135,26 @@ int SocketInterface::completeWrite() {
 				break;
 			}
 		} else {
-			eh->registerWrite(this);
+			//eh->registerWrite(this);
 			break;
 		}
 	}
-	wm.unlock();
+	if(allRequestsDoneFl) {
+		if(!eh->unRegisterWrite(this)) {
+			return 0;
+		}
+	}
+	//wm.unlock();
 
 	to.end();
-	CommonUtils::tsWrite += to.timerNanoSeconds();
+	CommonUtils::tsResTotal += to.timerNanoSeconds();
 	return done;
 }
 
 void SocketInterface::writeTo(const std::string& d, int reqPos) {
-	wm.lock();
+	//wm.lock();
 	ResponseData& rd = wtl[reqPos];
-	wm.unlock();
+	//wm.unlock();
 	rd._b += d;
 }
 
@@ -154,47 +162,50 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 	Timer to;
 	to.start();
 
-	wm.lock();
+	//wm.lock();
 	ResponseData& rd = wtl[reqPos];
-	wm.unlock();
+	//wm.unlock();
 
 	writeResponse(request, response, context, rd._b, reqPos);
+	//eh->registerWrite(this);
 
 	Timer t;
 	t.start();
 
 	int done = writeTo(&rd);
 
-	t.end();
-	CommonUtils::tsActWrite += t.timerNanoSeconds();
+	/*int state = 0;
+	setsockopt(fd, IPPROTO_TCP, TCP_CORK, &state, sizeof(state));
+	state = 1;
+	setsockopt(fd, IPPROTO_TCP, TCP_CORK, &state, sizeof(state));*/
 
-	if(done == 1) {
+	t.end();
+	CommonUtils::tsResSockWrite += t.timerNanoSeconds();
+
+	if(done >= 0) {
 		endRequest(reqPos);
 	} else if(done == -1) {
 		eh->registerWrite(this);
-	} else if(done == 0) {
-		endRequest(reqPos);
 	}
 
 	to.end();
-	CommonUtils::tsWrite += to.timerNanoSeconds();
+	CommonUtils::tsResTotal += to.timerNanoSeconds();
 
-	return done;
+	return 1;
 }
 
 int SocketInterface::startRequest() {
 	int rp = ++reqPos;
-	wm.lock();
+	//wm.lock();
 	wtl[rp] = ResponseData();
-	wm.unlock();
+	//wm.unlock();
 	return rp;
 }
 
 int SocketInterface::endRequest(int reqPos) {
-	wm.lock();
-	ResponseData& rd = wtl[reqPos];
+	//wm.lock();
 	wtl.erase(reqPos);
-	wm.unlock();
+	//wm.unlock();
 	return ++current;
 }
 
@@ -208,62 +219,52 @@ bool SocketInterface::isCurrentRequest(int reqp) {
 
 int SocketInterface::writeTo(ResponseData* d)
 {
-	if(SSLHandler::getInstance()->getIsSSL())
-	{
-		if(handleRenegotiation())
-		{
-			return 0;
-		}
-		while (!closed)
-		{
-			int er  = BIO_write(io, &d->_b[d->oft] , d->_b.length()-d->oft);
-			int ser = SSL_get_error(ssl, er);
-			switch(ser)
-			{
-				case SSL_ERROR_WANT_WRITE:
-				{
-					return -1;
-				}
-				case SSL_ERROR_NONE:
-				{
+	if(ssl==NULL) {
+		int er = 0;
+		do {
+			er = send(fd, &d->_b[d->oft] , d->_b.length()-d->oft, 0);
+			switch(er) {
+				case -1:
+				case 0:
+					if (er == -1 && errno == EAGAIN) {
+						return -1;
+					} else {
+						closeSocket();
+						return 0;
+					}
+				default:
 					d->oft += er;
 					if(d->oft==(int)d->_b.length()) {
 						return 1;
 					}
 					break;
-				}
+			}
+		} while(er>0);
+	} else {
+		if(handleRenegotiation()) {
+			return 0;
+		}
+		int er = 0;
+		int ser = 0;
+		do {
+			er  = BIO_write(io, &d->_b[d->oft] , d->_b.length()-d->oft);
+			ser = SSL_get_error(ssl, er);
+			switch(ser) {
+				case SSL_ERROR_WANT_WRITE:
+					return -1;
+				case SSL_ERROR_NONE:
+					d->oft += er;
+					if(d->oft==(int)d->_b.length()) {
+						return 1;
+					}
+					break;
 				default:
-				{
 					closeSocket();
 					return 0;
-				}
 			}
-		}
+		} while(er!=0);
 	}
-	else
-	{
-		while (!closed)
-		{
-			int er = send(fd, &d->_b[d->oft] , d->_b.length()-d->oft, 0);
-			if (er == -1 && errno == EAGAIN)
-			{
-				return -1;
-			}
-			else if(er<=0)
-			{
-				closeSocket();
-				return 0;
-			}
-			else
-			{
-				d->oft += er;
-				if(d->oft==(int)d->_b.length()) {
-					return 1;
-				}
-			}
-		}
-	}
-	return closed?0:1;
+	return 1;
 }
 
 bool SocketInterface::writeFile(int fdes, int remain_data)
@@ -319,54 +320,45 @@ bool SocketInterface::writeFile(int fdes, int remain_data)
 
 int SocketInterface::readFrom()
 {
-	if(SSLHandler::getInstance()->getIsSSL())
-	{
-		while (!closed)
-		{
-			char b[4096];
-			int er  = BIO_read(io, b, 4096);
-			int ser = SSL_get_error(ssl, er);
-			switch(ser)
-			{
-				case SSL_ERROR_WANT_READ:
-				{
-					return -1;
-				}
-				case SSL_ERROR_NONE:
-				{
+	if(ssl==NULL) {
+		int er = 0;
+		char b[8192];
+		do {
+			er = recv(fd, b, 8192, 0);
+			switch(er) {
+				case -1:
+				case 0:
+					if (er == -1 && errno == EAGAIN) {
+						return -1;
+					} else {
+						closeSocket();
+						return 0;
+					}
+				default:
 					buffer.append(b, er);
 					break;
-				}
+			}
+		} while(er>0);
+	} else {
+		int er = 0;
+		int ser = 0;
+		char b[8192];
+		do {
+			er  = BIO_read(io, b, 4096);
+			ser = SSL_get_error(ssl, er);
+			switch(ser) {
+				case SSL_ERROR_WANT_READ:
+					return -1;
+				case SSL_ERROR_NONE:
+					buffer.append(b, er);
+					break;
 				default:
-				{
 					closeSocket();
 					return 0;
-				}
 			}
-		}
+		} while(er>0);
 	}
-	else
-	{
-		while (!closed)
-		{
-			char b[4096];
-			int er = recv(fd, b, 4096, 0);
-			if (er == -1 && errno == EAGAIN)
-			{
-				return -1;
-			}
-			else if(er<=0)
-			{
-				closeSocket();
-				return 0;
-			}
-			else
-			{
-				buffer.append(b, er);
-			}
-		}
-	}
-	return closed?0:1;
+	return 1;
 }
 
 int SocketInterface::getDescriptor() {

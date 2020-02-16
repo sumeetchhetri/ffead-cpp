@@ -84,12 +84,16 @@ CoreServerProperties const& ConfigurationData::getCoreServerProperties() {
 	return (getInstance()->coreServerProperties);
 }
 
-bool ConfigurationData::isServingContext(const std::string& cntxtName) {
+bool ConfigurationData::isServingContext(std::string_view cntxtName) {
 	return getInstance()->servingContexts.find(cntxtName)!=getInstance()->servingContexts.end()
-			&& getInstance()->servingContexts[cntxtName];
+			&& getInstance()->servingContexts.find(cntxtName)->second;
 }
 
 ClassInfo* ConfigurationData::getClassInfo(const std::string& cs, const std::string& app) {
+	return getInstance()->ffeadContext.reflector->getClassInfo(cs, app);
+}
+
+ClassInfo* ConfigurationData::getClassInfo(const std::string& cs, std::string_view app) {
 	return getInstance()->ffeadContext.reflector->getClassInfo(cs, app);
 }
 
@@ -119,9 +123,23 @@ void ConfigurationData::initializeAllSingletonBeans() {
 	}
 	getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts, &(getInstance()->reflector));
 
+	std::map<std::string, std::string, std::less<> >::iterator it = ConfigurationData::getInstance()->servingContextRouterNames.begin();
+	for(;it!=ConfigurationData::getInstance()->servingContextRouterNames.end();++it) {
+		std::string rt = it->second;
+		std::vector<std::string> prts = StringUtil::splitAndReturn<std::vector<std::string> >(rt, ";");
+		std::string scappName = ConfigurationData::getInstance()->servingContextAppNames[prts[1]];
+		CommonUtils::setAppName(scappName);
+		ClassInfo* rtcls = getInstance()->reflector.getClassInfo(prts[0], scappName);
+		args argus;
+		Constructor ctor = rtcls->getConstructor(argus);
+		vals values;
+		Router* router = (Router*)getInstance()->reflector.newInstanceGVP(ctor, values);
+		ConfigurationData::getInstance()->servingContextRouters[prts[1]] = router;
+	}
+
 	SerializeBase::init(ConfigurationData::getInstance()->dlib);
-	std::map<std::string, std::map<std::string, std::vector<RestFunction> > >& rstCntMap = ConfigurationData::getInstance()->rstCntMap;
-	std::map<std::string, std::map<std::string, std::vector<RestFunction> > >::iterator rsit = rstCntMap.begin();
+	std::map<std::string, std::map<std::string, std::vector<RestFunction>, std::less<> >, std::less<> >& rstCntMap = ConfigurationData::getInstance()->rstCntMap;
+	std::map<std::string, std::map<std::string, std::vector<RestFunction>, std::less<> >, std::less<> >::iterator rsit = rstCntMap.begin();
 	for(;rsit!=rstCntMap.end();++rsit) {
 		resFuncMap& rstFMp = rsit->second;
 		resFuncMap::iterator rfit = rstFMp.begin();
@@ -295,11 +313,11 @@ bool Security::isSecureConfigured()
 {
 	return secures.size()!=0;
 }
-bool Security::isLoginUrl(const std::string& url, const std::string& actUrl)
+bool Security::isLoginUrl(std::string_view url, const std::string& actUrl)
 {
-	return (actUrl==(url+"/_ffead_security_cntxt_login_url"));
+	return (actUrl==(std::string(url)+"/_ffead_security_cntxt_login_url"));
 }
-bool Security::isLoginPage(const std::string& cntxtName, const std::string& actUrl)
+bool Security::isLoginPage(std::string_view cntxtName, const std::string& actUrl)
 {
 	return actUrl==loginUrl;
 }
@@ -363,7 +381,7 @@ bool Security::addAspect(const SecureAspect& aspect)
 	}
 }
 
-SecureAspect Security::matchesPath(const std::string& cntxtName, std::string url)
+SecureAspect Security::matchesPath(std::string_view cntxtName, std::string url)
 {
 	SecureAspect aspect;
 	std::map<std::string, SecureAspect>::iterator it;
@@ -377,7 +395,7 @@ SecureAspect Security::matchesPath(const std::string& cntxtName, std::string url
 	return aspect;
 }
 
-bool ConfigurationData::urlMatchesPath(const std::string& cntxtName, std::string pathurl, std::string url)
+bool ConfigurationData::urlMatchesPath(std::string_view cntxtName, std::string pathurl, std::string url)
 {
 	if(pathurl==url)
 	{

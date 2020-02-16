@@ -52,15 +52,15 @@ public:
 	static std::string generateToJSONObjects(const std::string& type, const std::string& name, const bool& priv, const bool& end, std::string &retu, std::string &headers, std::string &objs, const std::string& typ, const bool& ptr, const std::string& app, ClassStructure& classstruc, Reflection& ref);
 	static std::string generateToJSONVectorObjects(const std::string& type, const std::string& name, const bool& priv, std::string &retu, std::string &headers, std::string &objs, const std::string& typ, const bool& ptr, const std::string& stlcnttyp, const std::string& app, ClassStructure& classstruc, Reflection& ref);
 
-	static std::string generateJsObjectsAll(std::map<std::string, ClassStructure>& allclsmap);
+	static std::string generateJsObjectsAll(std::map<std::string, ClassStructure, std::less<> >& allclsmap);
 	static std::string generateJsObjects(strVec obj, const std::string& claz, strVec pobj, const strVec& minfo);
 
 	static void writeTofile(const std::string&, const std::string&, const bool&);
 	static std::string camelCased(const std::string&);
 	static std::string reverseCamelCased(const std::string&);
 
-	static std::string generateJsInterfacessAll(std::map<std::string, ClassStructure>& allclsmap, std::string &infjs, std::map<std::string, std::string>& ajintpthMap, strVec& afcd, Reflection& ref);
-	static std::string generateJsInterfaces(const strVec& obj, ClassStructure& classstruc, const std::string& path, std::string &infjs, const std::string& appName, std::map<std::string, std::string>& ajintpthMap, Reflection& ref);
+	static std::string generateJsInterfacessAll(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &infjs, std::map<std::string, std::string, std::less<> >& ajintpthMap, strVec& afcd, Reflection& ref);
+	static std::string generateJsInterfaces(const strVec& obj, ClassStructure& classstruc, const std::string& path, std::string &infjs, const std::string& appName, std::map<std::string, std::string, std::less<> >& ajintpthMap, Reflection& ref);
 	static std::string updateAjaxInterface(const strVec& emp, ClassStructure& classstruc, const std::string& pars, const std::string& parswt, const std::string& types, const std::string& appName, Reflection& ref);
 
 

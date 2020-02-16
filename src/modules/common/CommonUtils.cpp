@@ -12,11 +12,13 @@ std::string CommonUtils::BLANK = "";
 std::atomic<long long> CommonUtils::tsPoll = 0;
 std::atomic<long long> CommonUtils::tsPoll1 = 0;
 std::atomic<long long> CommonUtils::tsProcess = 0;
-std::atomic<long long> CommonUtils::tsRead = 0;
-std::atomic<long long> CommonUtils::tsActRead = 0;
+std::atomic<long long> CommonUtils::tsReqSockRead = 0;
+std::atomic<long long> CommonUtils::tsReqParse = 0;
+std::atomic<long long> CommonUtils::tsReqPrsSrvc = 0;
+std::atomic<long long> CommonUtils::tsReqTotal = 0;
+std::atomic<long long> CommonUtils::tsResSockWrite = 0;
+std::atomic<long long> CommonUtils::tsResTotal = 0;
 std::atomic<long long> CommonUtils::tsService = 0;
-std::atomic<long long> CommonUtils::tsWrite = 0;
-std::atomic<long long> CommonUtils::tsActWrite = 0;
 std::atomic<long long> CommonUtils::tsServicePre = 0;
 std::atomic<long long> CommonUtils::tsServiceCors = 0;
 std::atomic<long long> CommonUtils::tsServiceSec = 0;
@@ -139,6 +141,16 @@ std::string CommonUtils::getAppName(const std::string& appName)
 		return *(std::string*)tlcn;
 	}
 	return appName;
+}
+
+std::string CommonUtils::getAppName(std::string_view appName)
+{
+	void* tlcn = getInstance()->contextName.get();
+	if(tlcn!=NULL)
+	{
+		return *(std::string*)tlcn;
+	}
+	return std::string(appName);
 }
 
 unsigned long long CommonUtils::charArrayToULongLong(const std::string& l)
@@ -351,15 +363,17 @@ void CommonUtils::printStats() {
 			+", Requests: "+CastUtil::fromNumber(cReqs)+", Responses: "+CastUtil::fromNumber(cResps)+")\n");
 	logger.info(a);
 	std::string b = ("E-E Total (EL_Pre: "+CastUtil::fromNumber(tsPoll1)+", EL_Wait: "+CastUtil::fromNumber(tsPoll)+
-			", EL_Process: "+CastUtil::fromNumber(tsProcess)+", Sock_Read: "+CastUtil::fromNumber(tsActRead)+
-			", Req_Prep: "+CastUtil::fromNumber(tsRead-tsActRead)+", Sock_Write: "+CastUtil::fromNumber(tsActWrite)+
-			", Res_Prep: "+CastUtil::fromNumber(tsWrite-tsActWrite)+", Service: "+CastUtil::fromNumber(tsService)+")\n");
+			", EL_Process: "+CastUtil::fromNumber(tsProcess)+", Sock_Read: "+CastUtil::fromNumber(tsReqSockRead)+
+			", Req_Parse: "+CastUtil::fromNumber(tsReqParse)+", Req_Prep: "+CastUtil::fromNumber(tsReqTotal-tsReqSockRead-tsReqPrsSrvc)+
+			", Service: "+CastUtil::fromNumber(tsService)+", Sock_Write: "+CastUtil::fromNumber(tsResSockWrite)+
+			", Res_Prep: "+CastUtil::fromNumber(tsResTotal-tsResSockWrite)+")\n");
 	logger.info(b);
 	if(cReqs>0) {
 		std::string c = ("E-E Average (EL_Pre: "+CastUtil::fromNumber(tsPoll1/cReqs)+", EL_Wait: "+CastUtil::fromNumber(tsPoll/cReqs)+
-				", EL_Process: "+CastUtil::fromNumber(tsProcess/cReqs)+", Sock_Read: "+CastUtil::fromNumber(tsActRead/cReqs)+
-				", Req_Prep: "+CastUtil::fromNumber((tsRead-tsActRead)/cReqs)+", Sock_Write: "+CastUtil::fromNumber(tsActWrite/cReqs)+
-				", Res_Prep: "+CastUtil::fromNumber((tsWrite-tsActWrite)/cReqs)+", Service: "+CastUtil::fromNumber(tsService/cReqs)+")\n");
+				", EL_Process: "+CastUtil::fromNumber(tsProcess/cReqs)+", Sock_Read: "+CastUtil::fromNumber(tsReqSockRead/cReqs)+
+				", Req_Parse: "+CastUtil::fromNumber(tsReqParse/cReqs)+", Req_Prep: "+CastUtil::fromNumber((tsReqTotal-tsReqSockRead-tsReqPrsSrvc)/cReqs)+
+				", Service: "+CastUtil::fromNumber((tsService)/cReqs)+", Sock_Write: "+CastUtil::fromNumber(tsResSockWrite/cReqs)+
+				", Res_Prep: "+CastUtil::fromNumber((tsResTotal-tsResSockWrite)/cReqs)+")\n");
 		logger.info(c);
 	}
 	std::string d = ("Service Total (Pre: "+CastUtil::fromNumber(tsServicePre)+", Cors: "+CastUtil::fromNumber(tsServiceCors)+

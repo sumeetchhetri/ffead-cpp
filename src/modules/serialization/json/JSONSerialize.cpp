@@ -37,20 +37,28 @@ std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& cla
 {
 	switch(serOpt) {
 		case 1: return "\""+*(std::string*)t+"\"";
-		case 2: return "\""+std::string((char*)t)+"\"";
-		case 3: return "\""+std::string((char*)t)+"\"";
-		case 4: return "\""+CastUtil::fromNumber(*(int*)t)+"\"";
-		case 5: return "\""+CastUtil::fromNumber(*(unsigned int*)t)+"\"";
-		case 6: return "\""+CastUtil::fromNumber(*(short*)t)+"\"";
-		case 7: return "\""+CastUtil::fromNumber(*(unsigned short*)t)+"\"";
-		case 8: return "\""+CastUtil::fromNumber(*(long*)t)+"\"";
-		case 9: return "\""+CastUtil::fromNumber(*(unsigned long*)t)+"\"";
-		case 10: return "\""+CastUtil::fromNumber(*(long long*)t)+"\"";
-		case 11: return "\""+CastUtil::fromNumber(*(unsigned long long*)t)+"\"";
-		case 12: return "\""+CastUtil::fromFloat(*(float*)t)+"\"";
-		case 13: return "\""+CastUtil::fromDouble(*(double*)t)+"\"";
-		case 14: return "\""+CastUtil::fromLongdouble(*(long double*)t)+"\"";
-		case 15: return "\""+CastUtil::fromBool(*(bool*)t)+"\"";
+		case 2: {
+			std::string s;
+			s.push_back(((unsigned char*)t)[0]);
+			return "\""+s+"\"";
+		}
+		case 3: {
+			std::string s;
+			s.push_back(((char*)t)[0]);
+			return "\""+s+"\"";
+		}
+		case 4: return CastUtil::fromNumber(*(int*)t);
+		case 5: return CastUtil::fromNumber(*(unsigned int*)t);
+		case 6: return CastUtil::fromNumber(*(short*)t);
+		case 7: return CastUtil::fromNumber(*(unsigned short*)t);
+		case 8: return CastUtil::fromNumber(*(long*)t);
+		case 9: return CastUtil::fromNumber(*(unsigned long*)t);
+		case 10: return CastUtil::fromNumber(*(long long*)t);
+		case 11: return CastUtil::fromNumber(*(unsigned long long*)t);
+		case 12: return CastUtil::fromFloat(*(float*)t);
+		case 13: return CastUtil::fromDouble(*(double*)t);
+		case 14: return CastUtil::fromLongdouble(*(long double*)t);
+		case 15: return CastUtil::fromBool(*(bool*)t);
 		case 16: {
 			DateFormat formt;
 			return "\""+formt.format(*(Date*)t)+"\"";
@@ -124,7 +132,7 @@ std::string JSONSerialize::getConatinerElementClassName(void* _1, const std::str
 	if(stlclassName.find(">")!=std::string::npos)
 	{
 		stlclassName = stlclassName.substr(stlclassName.find("<")+1);
-		return className.substr(0, className.find(">"));
+		return stlclassName.substr(0, stlclassName.find(">"));
 	}
 	else
 	{
@@ -478,12 +486,16 @@ void JSONSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::
 		}
 		case 2:
 		{
-			*object += "\"" + propName + "\" : \"" + std::string((char*)t) + "\"";
+			std::string s;
+			s.push_back(((char*)t)[0]);
+			*object += "\"" + propName + "\" : \"" + s + "\"";
 			break;
 		}
 		case 3:
 		{
-			*object += "\"" + propName + "\" : \"" + std::string((char*)t) + "\"";
+			std::string s;
+			s.push_back(((unsigned char*)t)[0]);
+			*object += "\"" + propName + "\" : \"" + s + "\"";
 			break;
 		}
 		case 4:

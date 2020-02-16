@@ -53,6 +53,7 @@
 #include "Http11WebSocketDataFrame.h"
 #include "CommonUtils.h"
 #include "SocketInterface.h"
+#include "Router.h"
 
 class ServiceTask : public HttpServiceTask
 {

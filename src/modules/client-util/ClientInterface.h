@@ -70,6 +70,8 @@ public:
 	static char* get_ip(char *host);
 	static bool isConnected(const SOCKET& fd);
 	virtual ~ClientInterface(){}
+	void setSocketBlocking(const SOCKET& sockfd);
+	void setSocketNonBlocking(const SOCKET& sockfd);
 };
 
 #endif /* CLIENT_INTERFACE_H_ */

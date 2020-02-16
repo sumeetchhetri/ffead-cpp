@@ -267,7 +267,7 @@ void Reflection::emptyBlocks(std::string& data, size_t start)
 	}
 }
 
-void Reflection::handleNamespace(std::string data, std::string namepsc, std::map<std::string, ClassStructure>& clsvec, std::map<std::string, std::vector<std::string> >& glbnmspcs, std::vector<std::string> pragmas)
+void Reflection::handleNamespace(std::string data, std::string namepsc, std::map<std::string, ClassStructure, std::less<> >& clsvec, std::map<std::string, std::vector<std::string> >& glbnmspcs, std::vector<std::string> pragmas)
 {
 	StringUtil::trim(data);
 	if(data.length()>0 && data.at(0)==';') {
@@ -695,9 +695,9 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 }
 
 
-std::map<std::string, ClassStructure> Reflection::getClassStructures(const std::string& className, const std::string& appName)
+std::map<std::string, ClassStructure, std::less<> > Reflection::getClassStructures(const std::string& className, const std::string& appName)
 {
-	std::map<std::string, ClassStructure> clsvec;
+	std::map<std::string, ClassStructure, std::less<> > clsvec;
 	std::string data;
 	std::ifstream infile;
 	infile.open(className.c_str(), std::ios::binary);
@@ -813,7 +813,7 @@ std::map<std::string, ClassStructure> Reflection::getClassStructures(const std::
 
 		std::map<std::string, std::vector<std::string> > glbnmspcs;
 		handleNamespace(data, "", clsvec, glbnmspcs, pragmas);
-		std::map<std::string, ClassStructure>::iterator it;
+		std::map<std::string, ClassStructure, std::less<> >::iterator it;
 		std::vector<std::string> remnmspcs;
 		for (it=clsvec.begin();it!=clsvec.end();++it) {
 
@@ -1056,7 +1056,7 @@ std::vector<std::string> Reflection::getAfcObjectData(ClassStructure& classStruc
 	}
 }*/
 
-std::string Reflection::generateClassDefinitionsAll(std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps, std::string &includeRef, const std::vector<std::string>& apps)
+std::string Reflection::generateClassDefinitionsAll(std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps, std::string &includeRef, const std::vector<std::string>& apps)
 {
 	std::string ret = "";
 	//includeRef = "#ifndef REFLECTOR_H_\n#define REFLECTOR_H_\n#include \"ClassInfo.h\"\n#include \"string\"\n#include \"Method.h\"\n#include \"Field.h\"\n";
@@ -1086,16 +1086,16 @@ std::string Reflection::generateClassDefinitionsAll(std::map<std::string, std::m
 	return ret;
 }
 
-std::string Reflection::generateClassDefinitions(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app)
+std::string Reflection::generateClassDefinitions(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app)
 {
 	return "";
 }
 
-std::string Reflection::generateClassDefinition(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app)
+std::string Reflection::generateClassDefinition(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app)
 {
 	std::string refDef, testStr, teststrfuncs;
 
-	std::map<std::string, ClassStructure>::iterator it;
+	std::map<std::string, ClassStructure, std::less<> >::iterator it;
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
 		int opcounter = 1, methcounter = 1, fldcounter = 1;
@@ -1349,7 +1349,6 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							StringUtil::replaceLast(mdecl,"*","");
 							std::string fqcn = getFullyQualifiedClassName(mdecl, classStructure.namespaces);
 							valsd += "\t\t"+(fqcn  + " *_" + CastUtil::fromNumber(j)+" = ("+fqcn+"*)values.at("+CastUtil::fromNumber(j)+");\n");
-							StringUtil::replaceAll(mdecl,"*","");
 						}
 						else if(type12=="&")
 						{
@@ -1375,6 +1374,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 							typdefName += mdecl;
 							//std::string fqcn = getTreatedFullyQualifiedClassName(mdecl, classStructure.namespaces);
 							methsd += fqcn + (type12=="*"?"ptr":"");
+							StringUtil::replaceAll(methsd,"*","ptr");
 							if(j!=argpm.size()-1)
 							{
 								typdefName += ",";
@@ -2368,12 +2368,12 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 	return refDef;
 }
 
-std::string Reflection::generateClassDefinition_Old(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app)
+std::string Reflection::generateClassDefinition_Old(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app)
 {
 	return "";
 }
 
-std::string Reflection::generateSerDefinitionAll(std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps, std::string &includeRef, const bool& isBinary, std::string& objs, std::string& ajaxret, std::string& headers, std::string& typerefs, const std::vector<std::string>& apps)
+std::string Reflection::generateSerDefinitionAll(std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps, std::string &includeRef, const bool& isBinary, std::string& objs, std::string& ajaxret, std::string& headers, std::string& typerefs, const std::vector<std::string>& apps)
 {
 	std::string ret = "";
 	includeRef = "\n#include \"AppDefines.h\"\n#include \"vector\"\n#include \"list\"\n#include \"queue\"\n#include \"deque\"\n#include \"set\"\n#include \"DateFormat.h\"\n" ;
@@ -2395,7 +2395,7 @@ std::string Reflection::generateSerDefinitionAll(std::map<std::string, std::map<
 	return ret;
 }
 
-std::string Reflection::generateSerDefinitions(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const bool& isBinary, std::string& objs, std::string &ajaxret, std::string& headers, std::string& typerefs, const std::string& app)
+std::string Reflection::generateSerDefinitions(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const bool& isBinary, std::string& objs, std::string &ajaxret, std::string& headers, std::string& typerefs, const std::string& app)
 {
 	//vector<std::string> includes;
 	//CommonUtils::listFiles(includes, includeDir, ".h");
@@ -2403,12 +2403,12 @@ std::string Reflection::generateSerDefinitions(std::map<std::string, ClassStruct
 	/*map<std::string, ClassStructure> allclsmap;
 	for (unsigned int var = 0; var < includes.size(); ++var)
 	{
-		std::map<std::string, ClassStructure> clsmap = getClassStructures(includes.at(var));
+		std::map<std::string, ClassStructure, std::less<> > clsmap = getClassStructures(includes.at(var));
 		allclsmap.insert(clsmap.begin(), clsmap.end());
 	}*/
 	ret = generateAllSerDefinition(allclsmap,includesDefs,typedefs,classes,methods,app);
 
-	std::map<std::string, ClassStructure>::iterator it;
+	std::map<std::string, ClassStructure, std::less<> >::iterator it;
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
 		std::vector<std::string> pinfo;
@@ -2435,13 +2435,13 @@ std::string Reflection::generateSerDefinitions(std::map<std::string, ClassStruct
 	return ret;
 }
 
-std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app)
+std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app)
 {
 	std::string ttapp = StringUtil::trimCopy(app);
 	StringUtil::replaceAll(ttapp, "-", "_");
 	RegexUtil::replace(ttapp, "[^a-zA-Z0-9_]+", "");
 	std::string refDef;
-	std::map<std::string, ClassStructure>::iterator it;
+	std::map<std::string, ClassStructure, std::less<> >::iterator it;
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
 		ClassStructure classStructure = it->second;
@@ -2798,9 +2798,8 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
-										+fldp.at(j)+";\n__obj->"
-										+fldp.at(j)+" = *(formt"+fldp.at(j)+".parse(*_val));\ndelete _val;\n}\n";
+										+"Date* _val = (Date*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"Date\", \""+fldp.at(j)+"\");"
+										+"\n__obj->"+fldp.at(j)+" = *_val;\ndelete _val;\n}\n";
 							}
 							else
 							{
@@ -2809,9 +2808,8 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 										+"base->afterAddObjectProperty(serobject);\n");
 								std::string cam = StringUtil::capitalizedCopy(fldp.at(j));
 								typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldp.at(j)+"\", i))\n{\n"
-										+"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldp.at(j)+"\");\nDateFormat formt"
-										+fldp.at(j)+";\n__obj->"
-										+fldp.at(j)+" = (formt"+fldp.at(j)+".parse(*_val));\ndelete _val;\n}\n";
+										+"Date* _val = (Date*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"Date\", \""+fldp.at(j)+"\");"
+										+"\n__obj->"+fldp.at(j)+" = _val;\n}\n";
 							}
 						}
 						else if(fldp.at(0)=="BinaryData")
@@ -3073,14 +3071,12 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 										std::string serOpt = CastUtil::fromNumber(SerializeBase::identifySerOption(argpm.at(0)));
 										if(!ptr)
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");\n"
-													 +"DateFormat formt"+cam+";\n__obj->"
-													 +methpm.at(1)+"(*(formt"+cam+".parse(*_val)));\ndelete _val;\n}\n";
+													 +"Date* _val = (Date*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"Date\", \""+fldnames.at(k+1)+"\");\n"
+													 +"__obj->"+methpm.at(1)+"(*_val);\ndelete _val;\n}\n";
 										else
 											typedefs += "if(base->isValidObjectProperty(intermediateObject, \""+fldnames.at(k+1)+"\", i))\n{\n"
-													 +"std::string* _val = (std::string*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"std::string\", \""+fldnames.at(k+1)+"\");\n"
-													 +"DateFormat formt"+cam+";\n__obj->"
-													 +methpm.at(1)+"(formt"+cam+".parse(*_val));\ndelete _val;\n}\n";
+													 +"Date* _val = (Date*)base->getObjectPrimitiveValue(base->getObjectProperty(intermediateObject, i), "+serOpt+", \"Date\", \""+fldnames.at(k+1)+"\");\n"
+													 +"__obj->"+methpm.at(1)+"(_val);\n}\n";
 									}
 									else if(argpm.at(0)=="BinaryData")
 									{
@@ -3390,21 +3386,21 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 }
 
 
-std::string Reflection::generateSerDefinition(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app)
+std::string Reflection::generateSerDefinition(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app)
 {
 	return "";
 }
 
-std::string Reflection::generateSerDefinitionBinary(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app)
+std::string Reflection::generateSerDefinitionBinary(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app)
 {
 	return "";
 }
 
-std::string Reflection::getXSDDefinitions(std::map<std::string, ClassStructure>& allclsmap, const std::string& fqcn, Reflection& ref, const std::string& appname, std::string &trgnmspc, std::set<std::string> &allnmspcs, const std::string& dfnmspc, const std::string& resp)
+std::string Reflection::getXSDDefinitions(std::map<std::string, ClassStructure, std::less<> >& allclsmap, const std::string& fqcn, Reflection& ref, const std::string& appname, std::string &trgnmspc, std::set<std::string> &allnmspcs, const std::string& dfnmspc, const std::string& resp)
 {
 	std::string int_obj_binding, obj_binding, tmpnmspc;
 	ClassStructure *clstruct = NULL;
-	std::map<std::string, ClassStructure>::iterator it;
+	std::map<std::string, ClassStructure, std::less<> >::iterator it;
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
 		if(it->second.getFullyQualifiedClassName()==fqcn)

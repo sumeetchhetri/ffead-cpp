@@ -24,10 +24,10 @@
 
 void* PoolThread::run(void *arg)
 {
-	Logger logger = LoggerFactory::getLogger("PoolThread");
+	//Logger logger = LoggerFactory::getLogger("PoolThread");
 	PoolThread* ths  = static_cast<PoolThread*>(arg);
-	Timer t;
-	t.start();
+	//Timer t;
+	//t.start();
 
 	while (ths->runFlag)
 	{
@@ -70,7 +70,7 @@ void* PoolThread::run(void *arg)
 			}
 			catch(const std::exception& e)
 			{
-				ths->logger << e.what() << std::flush;
+				//ths->logger << e.what() << std::flush;
 				if(task->isFuture)
 				{
 					FutureTask* ftask = dynamic_cast<FutureTask*>(task);
@@ -90,11 +90,11 @@ void* PoolThread::run(void *arg)
 			}
 		}
 
-		if(t.elapsedSeconds()>=10) {
+		/*if(t.elapsedSeconds()>=10) {
 			std::string a = (ths->name+": Total Tasks handled = "+CastUtil::fromNumber(ths->taskCount)+"\n");
 			logger.info(a);
 			t.start();
-		}
+		}*/
 	}
 	Task* task = NULL;
 	while(ths->tasks.try_dequeue(task))
@@ -153,7 +153,7 @@ void* PoolThread::runWithTaskPool(void *arg)
 			}
 			catch(const std::exception& e)
 			{
-				ths->logger << e.what() << std::flush;
+				//ths->logger << e.what() << std::flush;
 				if(task->isFuture)
 				{
 					FutureTask* ftask = dynamic_cast<FutureTask*>(task);
@@ -190,7 +190,7 @@ void* PoolThread::runWithTaskPool(void *arg)
 }
 
 PoolThread::PoolThread(int num) {
-	logger = LoggerFactory::getLogger("PoolThread");
+	//logger = LoggerFactory::getLogger("PoolThread");
 	this->idle = true;
 	this->thrdStarted = false;
 	this->complete = false;
@@ -203,7 +203,7 @@ PoolThread::PoolThread(int num) {
 }
 
 PoolThread::PoolThread(TaskPool* wpool, int num) {
-	logger = LoggerFactory::getLogger("PoolThread");
+	//logger = LoggerFactory::getLogger("PoolThread");
 	this->idle = true;
 	this->thrdStarted = false;
 	this->complete = false;
@@ -221,7 +221,7 @@ PoolThread::~PoolThread() {
 	{
 		Thread::sSleep(1);
 	}
-	logger << "Destroyed PoolThread\n" << std::flush;
+	//logger << "Destroyed PoolThread\n" << std::flush;
 }
 
 void PoolThread::stop() {

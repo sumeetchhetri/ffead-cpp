@@ -50,12 +50,12 @@ class Reflection {
 	static std::map<std::string,std::string> nmspcIdVals;
 	Logger logger;
 	MarkerHandler handler;
-	void handleNamespace(std::string data, std::string namepsc, std::map<std::string, ClassStructure>& clsvec, std::map<std::string, std::vector<std::string> >& glbnmspcs, std::vector<std::string> pragmas);
+	void handleNamespace(std::string data, std::string namepsc, std::map<std::string, ClassStructure, std::less<> >& clsvec, std::map<std::string, std::vector<std::string> >& glbnmspcs, std::vector<std::string> pragmas);
 	int findless(const int& a, const int& b, const int& c);
 	void collectInfo(std::string data, const std::string& flag, ClassStructure& cls, const std::vector<std::string>& mrktxt);
 	void emptyBlocks(std::string& data, size_t);
 public:
-	std::map<std::string, ClassStructure> getClassStructures(const std::string& className, const std::string&);
+	std::map<std::string, ClassStructure, std::less<> > getClassStructures(const std::string& className, const std::string&);
 	//strVec list(const std::string&);
 	static bool isValidClass(const std::string& claz, const std::string& app)
 	{
@@ -121,19 +121,19 @@ public:
 	}
 	Reflection();
 	virtual ~Reflection();
-	std::string getXSDDefinitions(std::map<std::string, ClassStructure>& allclsmap, const std::string& fqcn, Reflection& ref, const std::string& appname, std::string &trgnmspc, std::set<std::string> &allnmspcs, const std::string& dfnmspc, const std::string& resp);
+	std::string getXSDDefinitions(std::map<std::string, ClassStructure, std::less<> >& allclsmap, const std::string& fqcn, Reflection& ref, const std::string& appname, std::string &trgnmspc, std::set<std::string> &allnmspcs, const std::string& dfnmspc, const std::string& resp);
 	strVec getAfcObjectData(ClassStructure& classStructure, const bool& object, std::vector<std::string>& privf, bool &isOpForSet);
 	//strVec getAfcObjectData(const std::string&, const bool&);
 	propMap getDbTableInfo(const std::string&);
-	std::string generateClassDefinitionsAll(std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps, std::string &includeRef, const std::vector<std::string>& apps);
-	std::string generateSerDefinitionAll(std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps, std::string &includeRef, const bool& isBinary, std::string& objs, std::string& ajaxret, std::string& headers, std::string& typerefs, const std::vector<std::string>& apps);
-	std::string generateClassDefinition(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app);
-	std::string generateClassDefinition_Old(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app);
-	std::string generateSerDefinition(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app);
-	std::string generateClassDefinitions(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app);
-	std::string generateSerDefinitions(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const bool& isBinary, std::string& objs, std::string &ajaxret, std::string& headers, std::string& typerefs, const std::string& app);
-	std::string generateSerDefinitionBinary(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app);
-	std::string generateAllSerDefinition(std::map<std::string, ClassStructure>& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app);
+	std::string generateClassDefinitionsAll(std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps, std::string &includeRef, const std::vector<std::string>& apps);
+	std::string generateSerDefinitionAll(std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps, std::string &includeRef, const bool& isBinary, std::string& objs, std::string& ajaxret, std::string& headers, std::string& typerefs, const std::vector<std::string>& apps);
+	std::string generateClassDefinition(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app);
+	std::string generateClassDefinition_Old(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app);
+	std::string generateSerDefinition(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app);
+	std::string generateClassDefinitions(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app);
+	std::string generateSerDefinitions(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const bool& isBinary, std::string& objs, std::string &ajaxret, std::string& headers, std::string& typerefs, const std::string& app);
+	std::string generateSerDefinitionBinary(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app);
+	std::string generateAllSerDefinition(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, const std::string& app);
 	static std::string getTypeName(std::string type);
 	static bool isPrimitiveDataType(std::string type);
 	void addMarker(const Marker& m);

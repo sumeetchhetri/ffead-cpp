@@ -24,14 +24,12 @@
 Date::Date(const bool& utc)
 {
 	time_t rawtime;
-	struct tm timeinfo;
 	time (&rawtime);
 	if(utc)
-		gmtime_r(&rawtime, &timeinfo);
+		gmtime_r(&rawtime, &ti);
 	else
-		localtime_r(&rawtime, &timeinfo);
-	this->ti = timeinfo;
-	populateDateFields(&timeinfo);
+		localtime_r(&rawtime, &ti);
+	populateDateFields();
 }
 
 tm* Date::getTimeinfo() {
@@ -114,50 +112,61 @@ void Date::populateEpochAndTimeZone(const bool& utc)
 	nanoseconds = en.tv_nsec;
 
 	time_t rawtime;
-	struct tm t;
 	time (&rawtime);
 	if(utc)
-		gmtime_r(&rawtime, &t);
+		gmtime_r(&rawtime, &ti);
 	else
-		localtime_r(&rawtime, &t);
+		localtime_r(&rawtime, &ti);
 
-	timeZoneOffsetSecs = t.tm_gmtoff;
+	timeZoneOffsetSecs = ti.tm_gmtoff;
 	timeZoneOffset = timeZoneOffsetSecs/60;
-	timeZone = std::string(t.tm_zone);
-	isDLS = t.tm_isdst==1;	/* Daylight Savings Time flag */
+	if(ti.tm_zone!=NULL) {
+		timeZone = std::string(ti.tm_zone);
+	}
+	isDLS = ti.tm_isdst==1;	/* Daylight Savings Time flag */
 }
 
-void Date::populateDateFields(struct tm* t)
+void Date::populateDateFields()
 {
-	this->ti = *t;
 	timespec en;
 	clock_gettime(CLOCK_REALTIME, &en);
 
 	epochTime = en.tv_sec;
 	nanoseconds = en.tv_nsec;
-	seconds = t->tm_sec;		/* seconds after the minute [0-60] */
-	minutes = t->tm_min;		/* minutes after the hour [0-59] */
-	hours = t->tm_hour;	/* hours since midnight [0-23] */
+	seconds = ti.tm_sec;		/* seconds after the minute [0-60] */
+	minutes = ti.tm_min;		/* minutes after the hour [0-59] */
+	hours = ti.tm_hour;	/* hours since midnight [0-23] */
 	pmHours = hours>=13?(hours-12):hours;
 	hourdesignation = hours>=12?"PM":"AM";
-	day = t->tm_mday;	/* day of the month [1-31] */
-	dayOfYear = t->tm_yday;
-	month = t->tm_mon;		/* months since January [0-11] */
+	day = ti.tm_mday;	/* day of the month [1-31] */
+	dayOfYear = ti.tm_yday;
+	month = ti.tm_mon;		/* months since January [0-11] */
 	monthName = monthInWords(month);
 	monthAbbr = monthInWords(month, true);
-	year = t->tm_year + 1900;	/* years since 1900 */
-	weekday = t->tm_wday;
+	year = ti.tm_year + 1900;	/* years since 1900 */
+	weekday = ti.tm_wday;
 	dayName = dayInWords(weekday);
 	dayAbbr = dayInWords(weekday, true);
-	timeZoneOffsetSecs = t->tm_gmtoff;
+	timeZoneOffsetSecs = ti.tm_gmtoff;
 	timeZoneOffset = timeZoneOffsetSecs/60;
-	timeZone = std::string(t->tm_zone);
-	isDLS = t->tm_isdst==1;	/* Daylight Savings Time flag */
+	if(ti.tm_zone!=NULL) {
+		timeZone = std::string(ti.tm_zone);
+	}
+	isDLS = ti.tm_isdst==1;	/* Daylight Savings Time flag */
+}
+
+Date::Date(const std::string& strdate, const std::string& formatspec) {
+	ti.tm_zone = NULL;
+	ti.tm_isdst = 0;
+	ti.tm_gmtoff = 0;
+	strptime(strdate.c_str(), formatspec.c_str(), &ti);
+	populateDateFields();
 }
 
 Date::Date(struct tm* timeinfo)
 {
-	populateDateFields(timeinfo);
+	this->ti = *timeinfo;
+	populateDateFields();
 }
 
 Date::~Date() {
@@ -383,18 +392,18 @@ std::string Date::dayInWords(const int d, const bool& sf) {
 std::string Date::monthInWords(const int m, const bool& sf) {
 	switch(m)
 	{
-		case 1: return sf?"JAN":"JANUARY";
-		case 2: return sf?"FEB":"FEBRUARY";
-		case 3: return sf?"MAR":"MARCH";
-		case 4: return sf?"APR":"APRIL";
-		case 5: return sf?"MAY":"MAY";
-		case 6: return sf?"JUN":"JUNE";
-		case 7: return sf?"JUL":"JULY";
-		case 8: return sf?"AUG":"AUGUST";
-		case 9: return sf?"SEP":"SEPTEMBER";
-		case 10: return sf?"OCT":"OCTOBER";
-		case 11: return sf?"NOV":"NOVEMBER";
-		case 12: return sf?"DEC":"DECEMBER";
+		case 0: return sf?"JAN":"JANUARY";
+		case 1: return sf?"FEB":"FEBRUARY";
+		case 2: return sf?"MAR":"MARCH";
+		case 3: return sf?"APR":"APRIL";
+		case 4: return sf?"MAY":"MAY";
+		case 5: return sf?"JUN":"JUNE";
+		case 6: return sf?"JUL":"JULY";
+		case 7: return sf?"AUG":"AUGUST";
+		case 8: return sf?"SEP":"SEPTEMBER";
+		case 9: return sf?"OCT":"OCTOBER";
+		case 10: return sf?"NOV":"NOVEMBER";
+		case 11: return sf?"DEC":"DECEMBER";
 	}
 	return "";
 }

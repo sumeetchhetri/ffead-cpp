@@ -24,13 +24,13 @@
 
 std::string ControllerHandler::BLANK = "";
 
-bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const std::string& actUrl, std::string& className)
+bool ControllerHandler::getControllerForPath(std::string_view cntxtName, const std::string& actUrl, std::string& className)
 {
 	Timer t;
 	t.start();
-	std::map<std::string, std::map<std::string, std::string> >& controllerObjectMap = ConfigurationData::getInstance()->controllerObjectMap;
-	std::map<std::string, std::string>& controllerMap = controllerObjectMap[cntxtName];
-	std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> >& controllerObjectMap = ConfigurationData::getInstance()->controllerObjectMap;
+	std::map<std::string, std::string, std::less<> >& controllerMap = controllerObjectMap.find(cntxtName)->second;
+	std::map<std::string, std::string, std::less<> >::iterator it;
 	for (it=controllerMap.begin();it!=controllerMap.end();++it) {
 		if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
 		{
@@ -45,13 +45,13 @@ bool ControllerHandler::getControllerForPath(const std::string& cntxtName, const
 	return false;
 }
 
-bool ControllerHandler::getMappingForPath(const std::string& cntxtName, const std::string& actUrl, std::string& to)
+bool ControllerHandler::getMappingForPath(std::string_view cntxtName, const std::string& actUrl, std::string& to)
 {
 	Timer t;
 	t.start();
-	std::map<std::string, std::map<std::string, std::string> >& mappingObjectMap = ConfigurationData::getInstance()->mappingObjectMap;
-	std::map<std::string, std::string>& mappingMap = mappingObjectMap[cntxtName];
-	std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> >& mappingObjectMap = ConfigurationData::getInstance()->mappingObjectMap;
+	std::map<std::string, std::string, std::less<> >& mappingMap = mappingObjectMap.find(cntxtName)->second;
+	std::map<std::string, std::string, std::less<> >::iterator it;
 	for (it=mappingMap.begin();it!=mappingMap.end();++it) {
 		if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
 		{
@@ -70,8 +70,8 @@ bool ControllerHandler::hasMappingExtension(std::string extwodot, HttpRequest* r
 	Timer t;
 	t.start();
 	bool f = ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->mappingextObjectMap.end()
-		&& ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].find(extwodot)
-			!=ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()].end();
+		&& ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())->second.find(extwodot)
+			!=ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())->second.end();
 	t.end();
 	CommonUtils::tsContExt += t.timerNanoSeconds();
 	return f;
@@ -79,7 +79,7 @@ bool ControllerHandler::hasMappingExtension(std::string extwodot, HttpRequest* r
 
 bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
 {
-	Logger logger = LoggerFactory::getLogger("ControllerHandler");
+	//Logger logger = LoggerFactory::getLogger("ControllerHandler");
 	bool isContrl = false;
 	std::string controller;
 	std::string to;
@@ -108,7 +108,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		}
 		else
 		{
-			if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid Controller" << std::endl;
+			//logger << "Invalid Controller" << std::endl;
 			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 			isContrl = true;
 		}
@@ -130,27 +130,27 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			req->setActUrl(to);
 		}
 		req->setFile(to);
-		if(ConfigurationData::getInstance()->enableLogging) logger << ("URL mapped from " + ext + " to " + to) << std::endl;
+		//logger << ("URL mapped from " + ext + " to " + to) << std::endl;
 	}
 	else if(ConfigurationData::getInstance()->enableContExt && hasMappingExtension(extwodot, req))
 	{
 		std::string file = req->getFile();
 		std::string fili = file.substr(0,file.find_last_of(".")+1);
-		req->setFile(fili+ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()][extwodot]);
-		if(ConfigurationData::getInstance()->enableLogging) logger << ("URL extension mapped from " + extwodot + " to " + ConfigurationData::getInstance()->mappingextObjectMap[req->getCntxt_name()][extwodot]) << std::endl;
+		req->setFile(fili+ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())->second[extwodot]);
+		//logger << ("URL extension mapped from " + extwodot + " to " + ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())->second[extwodot]) << std::endl;
 	}
 	else if(ConfigurationData::getInstance()->enableContRst && ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->rstCntMap.end())
 	{
 		Timer t;
 		t.start();
 
-		resFuncMap& rstCntMap = ConfigurationData::getInstance()->rstCntMap[req->getCntxt_name()];
+		resFuncMap& rstCntMap = ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())->second;
 		resFuncMap::iterator it;
 		RestFunction* rft = NULL;
 		bool flag = false;
 		int prsiz = 0;
 		std::map<std::string, std::string> mapOfValues;
-		std::string rkey = req->getMethod()+req->getCurl();
+		std::string rkey = std::string(req->methodv)+req->getCurl();
 		if(rstCntMap.find(rkey)!=rstCntMap.end()) {
 			rft = &(rstCntMap[rkey][0]);
 			flag = true;
@@ -163,10 +163,10 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				std::vector<RestFunction> fts = it->second;
 				for(int rftc=0;rftc<(int)fts.size();rftc++)
 				{
-					RestFunction& ft = fts.at(rftc);
-					if(ft.unmapped) continue;
+					rft = &(rstCntMap[it->first][rftc]);
+					if(rft->unmapped) continue;
 
-					prsiz = ft.params.size();
+					prsiz = rft->params.size();
 
 					std::string baseUrl(it->first);
 					strVec resturlparts;
@@ -214,12 +214,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						flag = fflag;
 					}
 
-					std::string lhs = StringUtil::toUpperCopy(ft.meth);
-					if(flag && lhs==req->getMethod())
+					std::string lhs = StringUtil::toUpperCopy(rft->meth);
+					if(flag && lhs==req->methodv)
 					{
 
 						//logger << "Encountered rest controller url/method match" << std::endl;
-						rft = &ft;
 						flag = true;
 						break;
 					}
@@ -246,16 +245,16 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		if(flag)
 		{
 			t.start();
-			ClassInfo* srv = ConfigurationData::getInstance()->ffeadContext.contInsMap["restcontroller_"+rft->clas+req->getCntxt_name()];
+			ClassInfo* srv = ConfigurationData::getInstance()->ffeadContext.contInsMap["restcontroller_"+rft->clas+rft->appName];
 			t.end();
 			CommonUtils::tsContRstCsiLkp += t.timerNanoSeconds();
 
 			t.start();
 			void *_temp = srv->getSI();
 			if(_temp==NULL) {
-				_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft->clas, req->getCntxt_name());
+				_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft->clas, rft->appName);
 				if(_temp==NULL) {
-					if(ConfigurationData::getInstance()->enableLogging) logger << "Rest Controller Not Found" << std::endl;
+					//logger << "Rest Controller Not Found" << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 					res->setDone(true);
 					return true;
@@ -266,7 +265,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
 				res->setDone(true);
-				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 				return true;
 			}
 			req->addHeader(HttpRequest::ContentType, rft->icontentType);
@@ -330,10 +329,10 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 									}
 									else if(rft->params.at(var).type!="vector-of-filestream")
 									{
-										if(ConfigurationData::getInstance()->enableLogging) logger << "File can only be mapped to ifstream" << std::endl;
+										//logger << "File can only be mapped to ifstream" << std::endl;
 										res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 										res->setDone(true);
-										if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+										if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 										return true;
 									}
 								}
@@ -344,10 +343,10 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							}
 							else if(rft->params.at(var).type!="vector-of-filestream")
 							{
-								if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid mapping specified in config, no multipart content found with name " + rft->params.at(var).name << std::endl;
+								//logger << "Invalid mapping specified in config, no multipart content found with name " + rft->params.at(var).name << std::endl;
 								res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 								res->setDone(true);
-								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 								return true;
 							}
 						}
@@ -355,10 +354,10 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						{
 							if(prsiz>1)
 							{
-								if(ConfigurationData::getInstance()->enableLogging) logger << "Request Body cannot be mapped to more than one argument..." << std::endl;
+								//logger << "Request Body cannot be mapped to more than one argument..." << std::endl;
 								res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 								res->setDone(true);
-								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 								return true;
 							}
 							pmvalue = req->getContent();
@@ -372,19 +371,19 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								void* voidPvect = NULL;
 								if(rft->icontentType==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 								{
-									voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft->params.at(var).serOpt, rft->params.at(var).type, req->getCntxt_name());
+									voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft->params.at(var).serOpt, rft->params.at(var).type, rft->appName);
 								}
 								#ifdef INC_XMLSER
 								else
 								{
-									voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft->params.at(var).serOpt, rft->params.at(var).type, req->getCntxt_name());
+									voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft->params.at(var).serOpt, rft->params.at(var).type, rft->appName);
 								}
 								#endif
 								if(voidPvect==NULL)
 								{
 									res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 									res->setDone(true);
-									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 									for(int i=0;i<(int)valus.size();++i) {
 										if(valus.at(i)!=NULL) {
 											reflector.destroy(valus.at(i), argus.at(i));
@@ -452,19 +451,19 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								void* voidPvect = NULL;
 								if(rft->icontentType==ContentTypes::CONTENT_TYPE_APPLICATION_JSON)
 								{
-									voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft->params.at(var).serOpt, rft->params.at(var).type, req->getCntxt_name());
+									voidPvect = JSONSerialize::unSerializeUnknown(pmvalue, rft->params.at(var).serOpt, rft->params.at(var).type, rft->appName);
 								}
 								#ifdef INC_XMLSER
 								else
 								{
-									voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft->params.at(var).serOpt, rft->params.at(var).type, req->getCntxt_name());
+									voidPvect = XMLSerialize::unSerializeUnknown(pmvalue, rft->params.at(var).serOpt, rft->params.at(var).type, rft->appName);
 								}
 								#endif
 								if(voidPvect==NULL)
 								{
 									res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 									res->setDone(true);
-									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 									for(int i=0;i<(int)valus.size();++i) {
 										if(valus.at(i)!=NULL) {
 											reflector.destroy(valus.at(i), argus.at(i));
@@ -504,11 +503,11 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							}
 						}
 					} catch(const std::exception& e) {
-						if(ConfigurationData::getInstance()->enableLogging) logger << "Restcontroller exception occurred" << std::endl;
+						//logger << "Restcontroller exception occurred" << std::endl;
 						invValue= true;
 						res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 						res->setDone(true);
-						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 						for(int i=0;i<(int)valus.size();++i) {
 							if(valus.at(i)!=NULL) {
 								reflector.destroy(valus.at(i), argus.at(i));
@@ -536,20 +535,20 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					if(rft->unmapped) {
 						res->addHeader(HttpResponse::ContentType, rft->ocontentType);
 						res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(rft->statusCode));
-						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 					} else {
 						int serOpt = rft->serOpt>=2000?-3:(rft->serOpt>=1000?-2:rft->serOpt);
 						switch(serOpt) {
 							case -3: {
 								if(ouput!=NULL) {
-									res->setContent(XMLSerialize::serializeUnknown(ouput, rft->serOpt-2000, rft->rtype, req->getCntxt_name()));
+									res->setContent(XMLSerialize::serializeUnknown(ouput, rft->serOpt-2000, rft->rtype, rft->appName));
 									res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
 								}
 								break;
 							}
 							case -2: {
 								if(ouput!=NULL) {
-									res->setContent(JSONSerialize::serializeUnknown(ouput, rft->serOpt-1000, rft->rtype, rft->s, rft->sc, rft->scm, req->getCntxt_name()));
+									res->setContent(JSONSerialize::serializeUnknown(ouput, rft->serOpt-1000, rft->rtype, rft->s, rft->sc, rft->scm, rft->appName));
 									res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 								}
 								break;
@@ -572,12 +571,17 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							default: {
 								if(rft->serOpt>17 || rft->serOpt==0) {
 									if(ouput!=NULL) {
-										res->setContent(JSONSerialize::serializeUnknown(ouput, rft->serOpt, rft->rtype, req->getCntxt_name()));
-										res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+										if(rft->ocontentType==ContentTypes::CONTENT_TYPE_TEXT_PLAIN) {
+											res->setContent(SerializeBase::trySerialize(ouput, rft->serOpt, rft->rtype, rft->appName));
+											res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
+										} else {
+											res->setContent(JSONSerialize::serializeUnknown(ouput, rft->serOpt, rft->rtype, rft->appName));
+											res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
+										}
 									}
 								} else {
 									if(ouput!=NULL) {
-										res->setContent(SerializeBase::trySerialize(ouput, rft->serOpt, rft->rtype, req->getCntxt_name()));
+										res->setContent(SerializeBase::trySerialize(ouput, rft->serOpt, rft->rtype, rft->appName));
 										res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 									}
 								}
@@ -613,7 +617,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							it->second->clear();
 						}
 						mpvecstreams.clear();
-						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 					}
 
 					t.end();
@@ -623,15 +627,15 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				{
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 					//res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
-					if(ConfigurationData::getInstance()->enableLogging) logger << "Rest Controller Method Not Found" << std::endl;
-					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+					//logger << "Rest Controller Method Not Found" << std::endl;
+					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 				}
 			} catch(const std::exception& e) {
-				if(ConfigurationData::getInstance()->enableLogging) logger << "Restcontroller exception occurred" << std::endl;
+				//logger << "Restcontroller exception occurred" << std::endl;
 				invValue= true;
 				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				res->setDone(true);
-				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, req->getCntxt_name());
+				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 				return true;
 			}
 		}

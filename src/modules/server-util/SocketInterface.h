@@ -33,6 +33,7 @@
 #include "concurrentqueue.h"
 #include "map"
 #include "Task.h"
+#include <netinet/tcp.h>
 
 class SocketInterface;
 
@@ -46,11 +47,13 @@ class EventHandler {
 public:
 	virtual bool unRegisterWrite(SocketInterface* obj)=0;
 	virtual bool registerWrite(SocketInterface* obj)=0;
+	virtual bool registerRead(SocketInterface* obj, const bool& isListeningSock = false)=0;
 	virtual ~EventHandler(){}
 };
 
 class SocketInterface {
 	Task* rdTsk;
+	Task* srvTsk;
 	Task* wrTsk;
 	static std::atomic<int> openSocks;
 	EventHandler* eh;
@@ -62,8 +65,8 @@ class SocketInterface {
 	Logger logger;
 	std::string buffer;
 	std::atomic<int> tid;
-	Mutex m;
-	Mutex wm;
+	//Mutex m;
+	//Mutex wm;
 	std::map<int, ResponseData> wtl;
 	std::atomic<int> reqPos;
 	std::atomic<int> current;
@@ -110,7 +113,7 @@ public:
 	bool checkSocketWaitForTimeout(const int& writing, const int& seconds, const int& micros= 0);
 	virtual std::string getProtocol(void* context)=0;
 	virtual int getTimeout()=0;
-	virtual void* readRequest(void*& context, int& pending, int& reqPos)=0;
+	virtual bool readRequest(void* request, void*& context, int& pending, int& reqPos)=0;
 	virtual bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos)=0;
 	virtual void onOpen()=0;
 	virtual void onClose()=0;

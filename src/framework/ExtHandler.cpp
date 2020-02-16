@@ -24,9 +24,9 @@
 
 bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, const std::string& ext, Reflector& reflector)
 {
-	std::map<std::string, std::string>* tmplMap = &(ConfigurationData::getInstance()->templateMappingMap[req->getCntxt_name()]);
+	std::map<std::string, std::string, std::less<> >* tmplMap = &(ConfigurationData::getInstance()->templateMappingMap.find(req->getCntxt_name())->second);
 
-	Logger logger = LoggerFactory::getLogger("ExtHandler");
+	//Logger logger = LoggerFactory::getLogger("ExtHandler");
 	bool cntrlit = false;
 	std::string content, claz;
 #ifdef INC_TPE
@@ -63,17 +63,17 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						}
 						else
 						{
-							if(ConfigurationData::getInstance()->enableLogging) logger << ("No template found for " + fname) << std::endl;
+							//logger << ("No template found for " + fname) << std::endl;
 							res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 						}
 					}
 					else
 					{
-						if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid Template handler, no method getContext found..." << std::endl;
+						//logger << "Invalid Template handler, no method getContext found..." << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 					}
 				} catch(const std::exception& e) {
-					if(ConfigurationData::getInstance()->enableLogging) logger << "Template exception occurred" << std::endl;
+					//logger << "Template exception occurred" << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				}
 				ConfigurationData::getInstance()->ffeadContext.release(_temp, "template_"+tpeclasname, req->getCntxt_name());
@@ -91,11 +91,11 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 		return cntrlit;
 	}
 #endif
-	std::map<std::string, std::string>* dcpMap = &(ConfigurationData::getInstance()->dcpMappingMap[req->getCntxt_name()]);
-	std::map<std::string, std::string>* vwMap = &(ConfigurationData::getInstance()->viewMappingMap[req->getCntxt_name()]);
-	std::map<std::string, std::string>* ajaxIntfMap = &(ConfigurationData::getInstance()->ajaxInterfaceMap[req->getCntxt_name()]);
-	std::map<std::string, std::string>* fviewMap = &(ConfigurationData::getInstance()->fviewMappingMap[req->getCntxt_name()]);
-	std::map<std::string, Element>* formMap = &(ConfigurationData::getInstance()->fviewFormMap[req->getCntxt_name()]);
+	std::map<std::string, std::string, std::less<> >* dcpMap = &(ConfigurationData::getInstance()->dcpMappingMap.find(req->getCntxt_name())->second);
+	std::map<std::string, std::string, std::less<> >* vwMap = &(ConfigurationData::getInstance()->viewMappingMap.find(req->getCntxt_name())->second);
+	std::map<std::string, std::string, std::less<> >* ajaxIntfMap = &(ConfigurationData::getInstance()->ajaxInterfaceMap.find(req->getCntxt_name())->second);
+	std::map<std::string, std::string, std::less<> >* fviewMap = &(ConfigurationData::getInstance()->fviewMappingMap.find(req->getCntxt_name())->second);
+	std::map<std::string, Element, std::less<> >* formMap = &(ConfigurationData::getInstance()->fviewFormMap.find(req->getCntxt_name())->second);
 
 	if(ajaxIntfMap->find(req->getCurl())!=ajaxIntfMap->end() && req->getMethod()=="POST" && req->getRequestParam("method")!="")
 	{
@@ -142,7 +142,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				std::string funcName;
 				std::string metn,re;
 				StringUtil::replaceAll(claz, "::", "_");
-				metn = req->getCntxt_name() + "invokeAjaxMethodFor"+claz+methName;
+				metn = std::string(req->getCntxt_name()) + "invokeAjaxMethodFor"+claz+methName;
 				void *mkr = dlsym(dlib, metn.c_str());
 				if(mkr!=NULL)
 				{
@@ -156,7 +156,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						res->addHeader(HttpResponse::ContentType, (re.find("{")==0 || re.find("[")==0)?"application/json":"text/plain");
 						res->setContent(re);
 					} catch(const std::exception& e) {
-						if(ConfigurationData::getInstance()->enableLogging) logger << "AjaxInterface exception occurred" << std::endl;
+						//logger << "AjaxInterface exception occurred" << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 					}
 				}
@@ -177,7 +177,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			cntrlit = FormHandler::handle(req, res, reflector, &((*formMap)[req->getFile()]));
 			//logger << ("Request handled by FormHandler") << std::endl;
 		} catch(const std::exception& e) {
-			if(ConfigurationData::getInstance()->enableLogging) logger << "FormHandler exception occurred" << std::endl;
+			//logger << "FormHandler exception occurred" << std::endl;
 			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 		}
 	}
@@ -210,13 +210,13 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						res->setContent(content);
 					}
 				} catch(const std::exception& e) {
-					if(ConfigurationData::getInstance()->enableLogging) logger << "DCP exception occurred" << std::endl;
+					//logger << "DCP exception occurred" << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				}
 			}
 			else
 			{
-				if(ConfigurationData::getInstance()->enableLogging) logger << ("No dcp found for " + meth) << std::endl;
+				//logger << ("No dcp found for " + meth) << std::endl;
 			}
 		}
 	}
@@ -245,18 +245,18 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				}
 				else
 				{
-					if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid Dynamic View handler, no method getDocument found..." << std::endl;
+					//logger << "Invalid Dynamic View handler, no method getDocument found..." << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				}
 			} catch(const std::exception& e) {
-				if(ConfigurationData::getInstance()->enableLogging) logger << "Dview exception occurred" << std::endl;
+				//logger << "Dview exception occurred" << std::endl;
 				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 			}
 			ConfigurationData::getInstance()->ffeadContext.release(_temp, "dview_"+vwMap->find(req->getCurl())->second, req->getCntxt_name());
 		}
 		else
 		{
-			if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid Dynamic View handler" << std::endl;
+			//logger << "Invalid Dynamic View handler" << std::endl;
 		}
 
 		if(content.length()>0)

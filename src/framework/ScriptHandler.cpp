@@ -202,7 +202,7 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		appl = appl.substr(referer.find("/")+1);
 		if(appl.find(req->getCntxt_name())==0 && handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
-			if(appl==req->getCntxt_name()+"/"+handoffs[req->getCntxt_name()])
+			if(appl==req->getCntxt_name()+"/"+handoffs.find(req->getCntxt_name())->second)
 			{
 
 			}
@@ -218,13 +218,13 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
-			def = handoffs[req->getCntxt_name()];
+			def = handoffs.find(req->getCntxt_name())->second;
 			tmpf = "/";
 		}
 		std::string phpcnts = req->toPHPVariablesString(def);
 		//logger << phpcnts << std::endl;
 		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".php";
-		tmpf = req->getContextHome() + tmpf;
+		tmpf = req->getCntxt_root() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
@@ -253,11 +253,11 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
-			def = handoffs[req->getCntxt_name()];
+			def = handoffs.find(req->getCntxt_name())->second;
 			tmpf = "/";
 		}
 		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".pl";
-		tmpf = req->getContextHome() + tmpf;
+		tmpf = req->getCntxt_root() + tmpf;
 		std::string phpcnts = req->toPerlVariablesString();
 		//logger << tmpf << std::endl;
 		std::string plfile = req->getUrl();
@@ -298,13 +298,13 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
-			def = handoffs[req->getCntxt_name()];
+			def = handoffs.find(req->getCntxt_name())->second;
 			tmpf = "/";
 		}
 		std::string phpcnts = req->toRubyVariablesString();
 		//logger << phpcnts << std::endl;
 		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".rb";
-		tmpf = req->getContextHome() + tmpf;
+		tmpf = req->getCntxt_root() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
@@ -333,11 +333,11 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
-			def = handoffs[req->getCntxt_name()];
+			def = handoffs.find(req->getCntxt_name())->second;
 			tmpf = "/";
 		}
 		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".py";
-		tmpf = req->getContextHome() + tmpf;
+		tmpf = req->getCntxt_root() + tmpf;
 		std::string phpcnts = req->toPythonVariablesString();
 		std::string plfile = req->getUrl();
 		std::ifstream infile(plfile.c_str(), std::ios::binary);
@@ -377,13 +377,13 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
-			def = handoffs[req->getCntxt_name()];
+			def = handoffs.find(req->getCntxt_name())->second;
 			tmpf = "/";
 		}
 		std::string phpcnts = req->toLuaVariablesString();
 		//logger << phpcnts << std::endl;
 		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".lua";
-		tmpf = req->getContextHome() + tmpf;
+		tmpf = req->getCntxt_root() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 
@@ -412,13 +412,13 @@ bool ScriptHandler::handle(HttpRequest* req, HttpResponse* res, std::map<std::st
 		std::string filen;
 		if(handoffs.find(req->getCntxt_name())!=handoffs.end())
 		{
-			def = handoffs[req->getCntxt_name()];
+			def = handoffs.find(req->getCntxt_name())->second;
 			tmpf = "/";
 		}
 		std::string phpcnts = req->toNodejsVariablesString();
 		//logger << phpcnts << std::endl;
 		filen = CastUtil::fromNumber(Timer::getCurrentTime()) + ".njs";
-		tmpf = req->getContextHome() + tmpf;
+		tmpf = req->getCntxt_root() + tmpf;
 
 		AfcUtil::writeTofile(tmpf+filen, phpcnts, true);
 

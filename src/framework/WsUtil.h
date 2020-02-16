@@ -35,9 +35,9 @@ class WsUtil {
 public:
 	WsUtil();
 	virtual ~WsUtil();
-	void handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps, const std::string& resp, std::string &headers, Reflection& ref);
+	void handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps, const std::string& resp, std::string &headers, Reflection& ref);
 	std::vector<WsDetails> getWsDetails(const std::vector<std::string>& apps, const std::string& serverRootDirectory);
-	std::string generateAllWSDL(const std::vector<WsDetails>& wsdvec, const std::string& resp, Reflection& ref, std::map<std::string, std::map<std::string, ClassStructure> >& clsstrucMaps);
+	std::string generateAllWSDL(const std::vector<WsDetails>& wsdvec, const std::string& resp, Reflection& ref, std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps);
 };
 
 #endif /* WSUTIL_H_ */

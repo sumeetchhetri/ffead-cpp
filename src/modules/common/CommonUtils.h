@@ -66,6 +66,7 @@ public:
 	static std::string toHEX(const uint32_t& num);
 	static void setAppName(const std::string& appName);
 	static std::string getAppName(const std::string& appName = "");
+	static std::string getAppName(std::string_view);
 	static void loadMimeTypes(const std::string& file);
 	static void loadLocales(const std::string& file);
 	static const std::string& getMimeType(const std::string& extension);
@@ -75,10 +76,18 @@ public:
 	static std::atomic<long long> tsPoll;
 	static std::atomic<long long> tsPoll1;
 	static std::atomic<long long> tsProcess;
-	static std::atomic<long long> tsRead;
-	static std::atomic<long long> tsActRead;
-	static std::atomic<long long> tsWrite;
-	static std::atomic<long long> tsActWrite;
+	static std::atomic<long long> cSocks;
+	static std::atomic<long long> cReqs;
+	static std::atomic<long long> cResps;
+
+	static std::atomic<long long> tsReqSockRead;
+	static std::atomic<long long> tsReqParse;
+	static std::atomic<long long> tsReqPrsSrvc;
+	static std::atomic<long long> tsReqTotal;
+
+	static std::atomic<long long> tsResSockWrite;
+	static std::atomic<long long> tsResTotal;
+
 	static std::atomic<long long> tsService;
 	static std::atomic<long long> tsServicePre;
 	static std::atomic<long long> tsServiceCors;
@@ -97,9 +106,7 @@ public:
 	static std::atomic<long long> tsContRstPrsArgs;
 	static std::atomic<long long> tsContRstExec;
 	static std::atomic<long long> tsContRstSer;
-	static std::atomic<long long> cSocks;
-	static std::atomic<long long> cReqs;
-	static std::atomic<long long> cResps;
+
 	static CommonUtils* getInstance();
 	virtual ~CommonUtils();
 	static void printStats();

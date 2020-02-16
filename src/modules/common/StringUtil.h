@@ -29,6 +29,7 @@
 #include "vector"
 #include <stdio.h>
 #include "cstring"
+#include "string_view"
 
 
 class StringUtil {
@@ -135,6 +136,7 @@ public:
 	static long int fromHEX(std::string hexVal);
 	static bool startsWith(const std::string& str, const std::string& prefix);
 	static bool endsWith(const std::string& str, const std::string& suffix);
+	static bool endsWith(const std::string_view& str, const std::string& suffix);
 };
 
 #endif /* STRINGUTIL_H_ */

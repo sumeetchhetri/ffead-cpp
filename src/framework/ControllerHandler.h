@@ -34,8 +34,8 @@
 
 class ControllerHandler {
 	static std::string BLANK;
-	static bool getControllerForPath(const std::string& cntxtName, const std::string& actUrl, std::string& className);
-	static bool getMappingForPath(const std::string& cntxtName, const std::string& actUrl, std::string& to);
+	static bool getControllerForPath(std::string_view cntxtName, const std::string& actUrl, std::string& className);
+	static bool getMappingForPath(std::string_view cntxtName, const std::string& actUrl, std::string& to);
 	static bool hasMappingExtension(std::string extwodot, HttpRequest* req);
 public:
 	static bool handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector);

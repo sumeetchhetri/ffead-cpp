@@ -62,6 +62,7 @@ public:
 	Reflector(void*);
 	virtual ~Reflector();
 	ClassInfo* getClassInfo(const std::string&, const std::string& app= "");
+	ClassInfo* getClassInfo(const std::string&, std::string_view);
 	GetMeth getMethodInstance(const Method& method)
 	{
 		return method.getIns()!=NULL?method.getIns():(GetMeth)dlsym(dlib, method.getRefName().c_str());
@@ -99,7 +100,9 @@ public:
 		}
 	}
 	void destroy(void* instance, std::string cs, const std::string& app= "");
+	void destroy(void* instance, std::string cs, std::string_view);
 	void destroy(int serOpt, void* instance, std::string cs, const std::string& app= "");
+	void destroy(int serOpt, void* instance, std::string cs, std::string_view);
 	void* invokeMethodGVP(void* instance, const Method& method, const vals& values, const bool& cleanVals = false)
 	{
 		void *obj = NULL;

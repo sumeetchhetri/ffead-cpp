@@ -16,7 +16,11 @@ class HttpServiceHandler;
 class HttpServiceTask : public Task {
 	HandlerRequest handlerRequest;
 	HttpServiceHandler* service;
+	time_t rt;
+	struct tm ti;
+	char buffer[31];
 	void run();
+	friend class HttpReadTask;
 	friend class HttpServiceHandler;
 	friend class CHServer;
 public:
@@ -24,6 +28,7 @@ public:
 	void setTid(int tid);
 	virtual ~HttpServiceTask();
 	HttpServiceTask();
+	std::string getCntEncoding();
 	HttpServiceTask(ReusableInstanceHolder* h);
 	virtual void handle(HttpRequest* request, HttpResponse* response)=0;
 	virtual void handleWebsockOpen(WebSocketData* request)=0;
@@ -65,6 +70,8 @@ class HttpServiceHandler : public ServiceHandler {
 	HttpServiceTaskFactory f;
 	HttpReadTaskFactory fr;
 	friend class HttpServiceTask;
+	friend class HttpReadTask;
+	void sockInit(SocketInterface* si);
 	void handleService(void* request, SocketInterface* sif, void* context, int reqPos);
 	void handleRead(SocketInterface* sif);
 	void handleWrite(SocketInterface* sif);

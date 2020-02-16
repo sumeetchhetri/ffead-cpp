@@ -46,7 +46,7 @@ public:
 	std::string getUrl();
 	std::string getProtocol(void* context);
 	int getTimeout();
-	void* readRequest(void*& context, int& pending, int& reqPos);
+	bool readRequest(void* request, void*& context, int& pending, int& reqPos);
 	bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos);
 	bool writeData(const WebSocketData& data);
 	Http11WebSocketHandler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& url, const bool& isServer);

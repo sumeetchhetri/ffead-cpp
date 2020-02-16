@@ -58,7 +58,7 @@ class Date {
 	long long epochTime;
 	void populateDay();
 	void populateMonth();
-	void populateDateFields(struct tm* timeinfo);
+	void populateDateFields();
 	void populateEpochAndTimeZone(const bool& utc);
 	long getDaysInt();
 	long getDays(const long y, const long m, const long d) const;
@@ -73,6 +73,7 @@ public:
 	static std::string dayInWords(const int d, const bool& sf = false);
 	static std::string monthInWords(const int m, const bool& sf = false);
 	Date(const bool& utc= false);
+	Date(const std::string& strdate, const std::string& formatspec);
 	Date(struct tm* tim);
 	Date(const int& yyyy, const std::string& mmm, const int& dd);
 	Date(const int& yyyy, const int& mm, const int& dd);

@@ -96,8 +96,7 @@ bool CORSHandler::handle(CorsConfig& corsConfig, HttpRequest *req, HttpResponse 
 		{
 			if(!corsConfig.isMethodAllowed(req->getMethod()))
 			{
-				HTTPResponseStatus status(HTTPResponseStatus::InvalidMethod, "Unsupported HTTP method: " + req->getMethod());
-				throw status;
+				throw HTTPResponseStatus::InvalidMethod;
 			}
 
 			if(corsConfig.allwdCredentials)
@@ -189,6 +188,20 @@ bool CorsConfig::isMethodAllowed(const std::string& method)
 	}
 	for (int var = 0; var < (int)allwdMethodsv.size(); ++var) {
 		if(StringUtil::toLowerCopy(method)==allwdMethodsv.at(var))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+bool CorsConfig::isMethodAllowed(const std::string_view& method)
+{
+	if(method=="")
+	{
+		return false;
+	}
+	for (int var = 0; var < (int)allwdMethodsv.size(); ++var) {
+		if(strncasecmp(allwdMethodsv.at(var).c_str(), method.data(), allwdMethodsv.at(var).length()))
 		{
 			return true;
 		}

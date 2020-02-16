@@ -30,7 +30,6 @@
 #include "LoggerFactory.h"
 #include "Task.h"
 #include "GenericObject.h"
-#include "ConfigurationData.h"
 
 typedef void* (*JobFunction) (void*, const vals&);
 

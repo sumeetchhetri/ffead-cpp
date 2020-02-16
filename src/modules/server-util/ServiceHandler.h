@@ -33,6 +33,8 @@ class HandlerRequest {
 	int protType;
 	ServiceHandler* sh;
 	friend class ServiceHandler;
+	friend class Http11Handler;
+	friend class Http2Handler;
 	friend class HttpServiceTask;
 	friend class HttpReadTask;
 	friend class HttpWriteTask;
@@ -65,6 +67,7 @@ class ServiceHandler {
 	friend class RequestReaderHandler;
 	friend class HandlerRequest;
 	friend class HttpReadTask;
+	virtual void sockInit(SocketInterface* si)=0;
 protected:
 	void submitTask(Task* task);
 	virtual void handleService(void* request, SocketInterface* sif, void* context, int reqPos)=0;

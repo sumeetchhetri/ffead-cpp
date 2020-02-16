@@ -36,14 +36,14 @@ Server::Server()
 	sock = -1;
 	mode = 3;
 	service = NULL;
-	logger = LoggerFactory::getLogger("Server");
+	//logger = LoggerFactory::getLogger("Server");
 }
 
 Server::Server(const std::string& port, const bool& block, const int& waiting, const Service& serv, int mode)
 {
 	started = false;
 	runn = true;
-	logger = LoggerFactory::getLogger("Server");
+	//logger = LoggerFactory::getLogger("Server");
 	service = serv;
 	struct addrinfo hints, *servinfo, *p;
 	
@@ -121,7 +121,7 @@ Server::Server(const std::string& port, const bool& block, const int& waiting, c
 		exit(1);
 	}
 	#endif
-	logger << ("waiting for connections on " + port + ".....") << std::endl;
+	//logger << ("waiting for connections on " + port + ".....") << std::endl;
 	this->mode = mode;
 }
 
@@ -164,7 +164,7 @@ int Server::Send(const SOCKET& fd, const std::string& data)
 	int bytes = send(fd,data.c_str(),data.length(),0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << std::endl;
+		//logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
@@ -173,7 +173,7 @@ int Server::Send(const SOCKET& fd, const std::vector<char>& data)
 	int bytes = send(fd,&data[0],data.size(),0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << std::endl;
+		//logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
@@ -182,7 +182,7 @@ int Server::Send(const SOCKET& fd, const std::vector<unsigned char>& data)
 	int bytes = send(fd,(const char*)&data[0],data.size(),0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << std::endl;
+		//logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
@@ -191,7 +191,7 @@ int Server::Send(const SOCKET& fd, char *data)
 	int bytes = send(fd,data,sizeof data,0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << std::endl;
+		//logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
@@ -200,7 +200,7 @@ int Server::Send(const SOCKET& fd, unsigned char *data)
 	int bytes = send(fd,(const char*)data,sizeof data,0);
 	if(bytes == -1)
 	{
-		logger << "send failed" << std::endl;
+		//logger << "send failed" << std::endl;
 	}
 	return bytes;
 }
@@ -273,7 +273,7 @@ int Server::Receive(const SOCKET& fd, std::vector<std::string>& data, const int&
 	while(getline(ss,temp,'\n'))
 	{
 		data.push_back(temp);
-		logger << temp << std::endl;
+		//logger << temp << std::endl;
 	}
 	memset(&te[0], 0, sizeof(te));
 	return bytesr;

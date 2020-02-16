@@ -48,9 +48,6 @@ public:
 					#pragma @QueryParam name="count"
 					std::string count);
 
-	#pragma @GET path="/json-um" statusCode="200" ocontentType="application/json" unmapped="true"
-	void jsonUM(HttpRequest* req, HttpResponse* res);
-
 	#pragma @GET path="/plaintext-um" statusCode="200" ocontentType="text/plain" unmapped="true"
 	void plaintextUM(HttpRequest* req, HttpResponse* res);
 

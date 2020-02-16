@@ -46,6 +46,7 @@ public:
 	SSLClient(const std::string& secFile);
 	virtual ~SSLClient();
 	bool connection(const std::string&, const int&);
+	bool connectionNB(const std::string&, const int&);
 	//bool connectionUnresolv(const std::string& host, const int& port);
 	int sendData(std::string);
 	std::string getData(const std::string& hdrdelm, const std::string& cntlnhdr);

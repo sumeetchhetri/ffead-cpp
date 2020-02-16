@@ -27,6 +27,7 @@
 #include "Mutex.h"
 #include <libcuckoo/cuckoohash_map.hh>
 #include "SocketInterface.h"
+#include <netinet/tcp.h>
 
 #define MAXDESCRIPTORS 1024
 #define OP_READ     0
@@ -141,7 +142,7 @@ public:
 	~DummySocketInterface(){}
 	std::string getProtocol(void* context){return "";}
 	int getTimeout(){return -1;};
-	void* readRequest(void*& context, int& pending, int& reqPos){return NULL;}
+	bool readRequest(void* request, void*& context, int& pending, int& reqPos){return false;}
 	bool writeResponse(void* req, void* res, void* context, std::string& d, int reqPos){return false;}
 	void onOpen(){}
 	void onClose(){}

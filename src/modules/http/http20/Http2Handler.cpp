@@ -153,8 +153,7 @@ bool Http2Handler::processFrame(Http2Frame* frame, void*& request, int reqPos) {
 	return flag;
 }
 
-void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
-
+bool Http2Handler::readRequest(void* request, void*& context, int& pending, int& reqPos) {
 	if(!pushPromisedRequestQ.empty()) {
 		HttpRequest* ppreq = new HttpRequest();
 		context = new int(pushPromisedRequestQ.front().streamIdentifier);
@@ -164,7 +163,7 @@ void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		return ppreq;
 	}
 
-	if(readFrom())return NULL;
+	if(readFrom())return false;
 
 	if(!this->isConnInit) {
 		std::string clientpreface = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
@@ -181,7 +180,6 @@ void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
 		isConnInit = true;
 	}
 
-	void* request = NULL;
 	Http2Frame* frame = NULL;
 	while((frame=nextFrame())!=NULL)
 	{
@@ -206,7 +204,7 @@ void* Http2Handler::readRequest(void*& context, int& pending, int& reqPos) {
 	{
 		pending = buffer.length();
 	}
-	return request;
+	return true;
 }
 
 int Http2Handler::getTimeout() {

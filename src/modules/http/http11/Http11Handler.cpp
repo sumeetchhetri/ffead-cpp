@@ -7,30 +7,28 @@
 
 #include "Http11Handler.h"
 
-void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
-	if(handler!=NULL) {
-		return handler->readRequest(context, pending, reqPos);
-	}
+bool Http11Handler::readRequest(void* request, void*& context, int& pending, int& reqPos) {
+	//if(handler!=NULL) {
+	//	return handler->readRequest(request, context, pending, reqPos);
+	//}
 
 	Timer t;
 	t.start();
 
-	if(readFrom()==0) {
-		return NULL;
-	}
-
-	t.end();
-	CommonUtils::tsActRead += t.timerNanoSeconds();
+	HttpRequest* currReq = (HttpRequest*)request;
 
 	size_t ix = buffer.find(HttpResponse::HDR_FIN);
 	if(!isHeadersDone && ix!=std::string::npos)
 	{
-		currReq = getAvailableRequest();
-		if(currReq == NULL) return NULL;
-		currReq->reset();
-		((HttpResponse*)currReq->resp)->reset();
-		currReq->webpath = webpath;
 		bytesToRead = 0;
+		std::string headers = buffer.substr(0, ix+4);
+		buffer = buffer.substr(ix+4);
+		currReq->reset(std::move(headers), &bytesToRead);
+		((HttpResponse*)currReq->resp)->reset();
+
+		/*
+		currReq->reset();
+		currReq->webpath = webpath;
 		std::string headers = buffer.substr(0, ix);
 		buffer = buffer.substr(ix+4);
 		std::vector<std::string> lines = StringUtil::splitAndReturn<std::vector<std::string> >(headers, HttpResponse::HDR_END);
@@ -80,10 +78,12 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 					buffer = buffer.substr(bytesToRead);
 				}
 			}
-		}
+		}*/
 		isHeadersDone = true;
 	}
-	if(currReq!=NULL && isHeadersDone)
+
+	bool fl = false;
+	if(isHeadersDone)
 	{
 		if(isTeRequest && bytesToRead==0 && buffer.find(HttpResponse::HDR_END)!=std::string::npos) {
 			std::string bytesstr = buffer.substr(0, buffer.find(HttpResponse::HDR_END));
@@ -100,26 +100,21 @@ void* Http11Handler::readRequest(void*& context, int& pending, int& reqPos) {
 			buffer = buffer.substr(bytesToRead);
 			bytesToRead = 0;
 		}
+
+		if(!isTeRequest && bytesToRead==0)
+		{
+			reqPos = startRequest();
+			isHeadersDone = false;
+			fl = true;
+		}
 	}
 
-	if(pending==(int)buffer.length())
-	{
-		pending = 0;
-	}
-	else
-	{
-		pending = buffer.length();
-	}
+	pending = buffer.length();
 
-	if(!isTeRequest && bytesToRead==0 && currReq!=NULL)
-	{
-		reqPos = startRequest();
-		isHeadersDone = false;
-		void* temp = currReq;
-		currReq = NULL;
-		return temp;
-	}
-	return NULL;
+	t.end();
+	CommonUtils::tsReqParse += t.timerNanoSeconds();
+
+	return fl;
 }
 
 int Http11Handler::getTimeout() {
@@ -139,9 +134,8 @@ Http11Handler::Http11Handler(const SOCKET& fd, SSL* ssl, BIO* io, const std::str
 	this->connKeepAlive = connKeepAlive;
 	this->maxReqHdrCnt = maxReqHdrCnt;
 	this->maxEntitySize = maxEntitySize;
-	this->currReq = NULL;
 	this->handler = NULL;
-	logger = LoggerFactory::getLogger("Http11Handler");
+	//logger = LoggerFactory::getLogger("Http11Handler");
 }
 
 HttpRequest* Http11Handler::getAvailableRequest() {
@@ -178,10 +172,10 @@ Http11Handler::~Http11Handler() {
 	for(int i=0;i<(int)requests.size();i++) {
 		HttpRequest* r = requests.at(i);
 		delete (HttpResponse*)r->resp;
-		if(r->srvTask!=NULL) {
-			delete r->srvTask;
-		}
 		delete r;
+	}
+	if(srvTsk!=NULL) {
+		delete srvTsk;
 	}
 	if(rdTsk!=NULL) {
 		delete rdTsk;
@@ -206,25 +200,14 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context, std::stri
 	HttpRequest* request = (HttpRequest*)req;
 	HttpResponse* response = (HttpResponse*)res;
 
-	if(isClosed()) {
-		return true;
-	}
-
 	if(!response->isDone()) {
 		response->updateContent(request, chunkSize);
 	}
 
-	if(response->hasHeader(HttpRequest::Connection))
-	{
-		if(!request->isHeaderValue(HttpRequest::Connection, "keep-alive")
-				|| CastUtil::toInt(response->getStatusCode())>307 || request->getHttpVers()<1.1)
-		{
-			response->addHeader(HttpResponse::Connection, "close");
-		}
-		else
-		{
-			response->addHeader(HttpResponse::Connection, "keep-alive");
-		}
+	if(request->isHeaderValue(HttpRequest::Connection, "keep-alive") && request->getHttpVers()>=1.1) {
+		response->addHeader(HttpResponse::Connection, "keep-alive");
+	} else {
+		response->addHeader(HttpResponse::Connection, "close");
 	}
 
 	if(!response->isContentRemains()) {

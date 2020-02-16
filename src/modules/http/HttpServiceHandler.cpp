@@ -25,19 +25,31 @@ void HttpServiceTask::setTid(int tid) {
 	handlerRequest.sif->tid = tid;
 }
 
+void HttpServiceHandler::sockInit(SocketInterface* sif) {
+	sif->rdTsk = fr();
+	HttpReadTask* task = (HttpReadTask*)sif->rdTsk;
+	task->sif = sif;
+	task->service = this;
+
+	sif->srvTsk = f();
+	HttpServiceTask* stask = (HttpServiceTask*)sif->srvTsk;
+	stask->service = this;
+	stask->handlerRequest.sh = this;
+	stask->handlerRequest.sif = sif;
+	stask->handlerRequest.request = new HttpRequest();
+	((HttpRequest*)stask->handlerRequest.request)->resp = new HttpResponse();
+
+	sif->wrTsk = new HttpWriteTask();
+	HttpWriteTask* wtask = (HttpWriteTask*)sif->wrTsk;
+	wtask->sif = sif;
+	wtask->service = this;
+}
+
 void HttpServiceHandler::handleService(void* request, SocketInterface* sif, void* context, int reqPos)
 {
-	HttpRequest* hreq = (HttpRequest*)request;
-	HttpServiceTask* task = NULL;
-	if(hreq->srvTask == NULL) {
-		hreq->srvTask = f();
-		task = (HttpServiceTask*)hreq->srvTask;
-		task->handlerRequest.sh = this;
-		task->service = this;
-	} else {
-		task = (HttpServiceTask*)hreq->srvTask;
-		task->handlerRequest.clearObjects();
-	}
+	HttpServiceTask* task = f();
+	task->handlerRequest.sh = this;
+	task->service = this;
 	task->handlerRequest.request = request;
 	task->handlerRequest.response = NULL;
 	task->handlerRequest.sif = sif;
@@ -47,24 +59,11 @@ void HttpServiceHandler::handleService(void* request, SocketInterface* sif, void
 	submitTask(task);
 }
 
-void HttpServiceHandler::handleRead(SocketInterface* sif)
-{
-	if(sif->rdTsk == NULL) {
-		sif->rdTsk = fr();
-		HttpReadTask* task = (HttpReadTask*)sif->rdTsk;
-		task->sif = sif;
-		task->service = this;
-	}
+void HttpServiceHandler::handleRead(SocketInterface* sif) {
 	submitTask(sif->rdTsk);
 }
 
 void HttpServiceHandler::handleWrite(SocketInterface* sif) {
-	if(sif->wrTsk == NULL) {
-		sif->wrTsk = new HttpWriteTask();
-		HttpWriteTask* task = (HttpWriteTask*)sif->wrTsk;
-		task->sif = sif;
-		task->service = this;
-	}
 	submitTask(sif->wrTsk);
 }
 
@@ -89,75 +88,76 @@ void HttpReadTask::run() {
 	t.start();
 
 	int pending = 1;
-	while(pending>0)
+
+	Timer to;
+	to.start();
+	if(sif->readFrom()==0) {
+		service->closeConnection(sif);
+		to.end();
+		CommonUtils::tsReqSockRead += to.timerNanoSeconds();
+
+		t.end();
+		CommonUtils::tsReqTotal += t.timerNanoSeconds();
+		return;
+	}
+	to.end();
+	CommonUtils::tsReqSockRead += to.timerNanoSeconds();
+
+	to.start();
+	HttpServiceTask* task = (HttpServiceTask*)sif->srvTsk;
+	HandlerRequest& hr = task->handlerRequest;
+	while(pending>0 && sif->readRequest(hr.request, hr.context, pending, hr.reqPos))
 	{
-		void* context = NULL;
-		int reqPos = 0;
-		void* request = sif->readRequest(context, pending, reqPos);
-		if(sif->isClosed()) {
-			if(request!=NULL) {
-				//so that request can be cleaned up correctly
-				service->registerServiceRequest(request, sif, context, reqPos);
-			}
-			service->closeConnection(sif);
-			break;
-		} else if(request!=NULL) {
-			service->registerServiceRequest(request, sif, context, reqPos);
-		}
+		task->handlerRequest.protType = sif->getProtocol(hr.context).find("HTTP")==0?1:2;
+		task->run();
+	}
+	to.end();
+	CommonUtils::tsReqPrsSrvc += to.timerNanoSeconds();
+
+	if(sif->isClosed()) {
+		service->closeConnection(sif);
 	}
 
 	t.end();
-	CommonUtils::tsRead += t.timerNanoSeconds();
+	CommonUtils::tsReqTotal += t.timerNanoSeconds();
 }
 
 HttpServiceTask::HttpServiceTask() {
 	service = NULL;
+	rt = 0;
 }
 
 HttpServiceTask::HttpServiceTask(ReusableInstanceHolder* h) {
 	service = NULL;
 	this->hdlr = h;
+	rt = 0;
 }
 
 HttpServiceTask::~HttpServiceTask() {
+}
+
+std::string HttpServiceTask::getCntEncoding() {
+	return service->cntEncoding;
 }
 
 void HttpServiceTask::run() {
 	Timer t;
 	t.start();
 
-	if(handlerRequest.getSif()->isClosed()) {
-		handlerRequest.sif->onClose();
-		service->closeConnection(handlerRequest.sif);
-		t.end();
-		CommonUtils::tsService += t.timerNanoSeconds();
-		return;
-	}
-
 	CommonUtils::cReqs += 1;
 
-	void* resp = NULL;
 	if(handlerRequest.getProtType()==1)
 	{
 		HttpRequest* req = (HttpRequest*)handlerRequest.getRequest();
 		HttpResponse* res = (HttpResponse*)req->resp;
-		resp = res;
+		handlerRequest.response = res;
 
-		std::string mimeType = CommonUtils::getMimeType(req->ext);
-		std::string cntEncoding = service->cntEncoding;
-		if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
-			res->addHeader(HttpResponse::ContentEncoding, cntEncoding);
-		}
-
-		time_t rt;
-		struct tm ti;
 		time (&rt);
 		gmtime_r(&rt, &ti);
-		char buffer[31];
 		strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
-		res->addHeader(HttpResponse::DateHeader, std::string(buffer));
+		res->headers[HttpResponse::DateHeader] = std::string(buffer);
 
-		if(handlerRequest.getSif()->getProtocol(handlerRequest.getContext())=="HTTP1.1" && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
+		/*if(req->httpVers<2 && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
 		{
 			if(req->isHeaderValue(HttpRequest::Upgrade, "websocket", true)
 					&& req->getHeader(HttpRequest::SecWebSocketKey)!=""
@@ -203,12 +203,12 @@ void HttpServiceTask::run() {
 				res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 				res->setDone(true);
 			}
-		}
+		}*/
 
-		if(!res->isDone())
-		{
+		//if(!res->isDone())
+		//{
 			handle(req, res);
-		}
+		//}
 	}
 	else
 	{
@@ -216,14 +216,13 @@ void HttpServiceTask::run() {
 		WebSocketData* request = (WebSocketData*)handlerRequest.getRequest();
 		WebSocketData* response = new WebSocketData();
 		handleWebsockMessage(h->getUrl(), request, response);
-		resp = response;
+		handlerRequest.response = response;
 	}
 
 	t.end();
 	CommonUtils::tsService += t.timerNanoSeconds();
 
 	CommonUtils::cResps += 1;
-	handlerRequest.response = resp;
 	int ret = handlerRequest.getSif()->pushResponse(handlerRequest.getRequest(), handlerRequest.response, handlerRequest.getContext(), handlerRequest.reqPos);
 	if(ret==0) {
 		handlerRequest.sif->onClose();
@@ -232,8 +231,7 @@ void HttpServiceTask::run() {
 }
 
 void HttpWriteTask::run() {
-	int ret = sif->completeWrite();
-	if(ret==0) {
+	if(sif->completeWrite()==0) {
 		sif->onClose();
 		service->closeConnection(sif);
 	}

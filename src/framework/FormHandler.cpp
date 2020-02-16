@@ -25,10 +25,9 @@
 bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflector, Element* ele)
 {
 	//Logger logger = LoggerFactory::getLogger("FormHandler");
-	Reflector ref;
 	//logger << ele->getTagName() << std::endl;
 	//logger << ele->render() << std::endl;
-	ClassInfo* clas = ref.getClassInfo(ele->getAttribute("bean"), req->getCntxt_name());
+	ClassInfo* clas = ConfigurationData::getClassInfo(ele->getAttribute("bean"), req->getCntxt_name());
 	ElementList eles = ele->getChildElements();
 	std::string json = "{";
 	for (unsigned int apps = 0; apps < eles.size(); apps++)
@@ -86,7 +85,7 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 	{
 		int serOpt = SerializeBase::identifySerOption(ele->getAttribute("bean"));
 		//logger << ("Fetching Formcontroller for " + ele->getAttribute("bean")) << std::endl;
-		void *_beaninst = JSONSerialize::unSerializeUnknown(json, serOpt, ele->getAttribute("bean"), req->getCntxt_name());
+		void *_beaninst = JSONSerialize::unSerializeUnknown(json, serOpt, ele->getAttribute("bean"), std::string(req->getCntxt_name()));
 		valus.push_back(_beaninst);
 		valus.push_back(res);
 		reflector.invokeMethodGVP(_temp,meth,valus,false);

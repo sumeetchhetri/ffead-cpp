@@ -119,7 +119,9 @@ HandlerRequest::~HandlerRequest() {
 void HandlerRequest::clearObjects() {
 	if(request!=NULL) {
 		if(protType==1) {
-			((HttpRequest*)request)->isInit = false;
+			HttpRequest* req = (HttpRequest*)request;
+			delete (HttpResponse*)req->resp;
+			delete req;
 		} else {
 			delete (WebSocketData*)request;
 		}

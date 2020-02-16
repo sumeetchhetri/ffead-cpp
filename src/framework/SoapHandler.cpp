@@ -24,15 +24,15 @@
 
 void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::string ws_name)
 {
-	Logger logger = LoggerFactory::getLogger("SoapHandler");
+	//Logger logger = LoggerFactory::getLogger("SoapHandler");
 	std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + "/";
 	wsUrl += req->getCurl();
-	if(ConfigurationData::getInstance()->enableLogging) logger << ("WsUrl is " + wsUrl) << std::endl;
+	//logger << ("WsUrl is " + wsUrl) << std::endl;
 
 	std::string xmlcnttype = CommonUtils::getMimeType(".xml");
 	std::string meth,env;
 	Element* soapenv = NULL;
-	if(ConfigurationData::getInstance()->enableLogging) logger.info("request => "+req->getContent());
+	//logger.info("request => "+req->getContent());
 	Element* soapbody = NULL;
 	try
 	{
@@ -50,7 +50,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 		Element* method = (Element*)&(soapbody->getChildElements().at(0));
 		//logger << method.getTagName() << "----\n" << std::flush;
 		meth = method->getTagName();
-		std::string methodname = req->getCntxt_name() + meth + ws_name;
+		std::string methodname = std::string(req->getCntxt_name()) + meth + ws_name;
 		//logger << methodname << "----\n" << std::flush;
 		void *mkr = dlsym(dlib, methodname.c_str());
 		if(mkr!=NULL)
@@ -124,7 +124,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		if(ConfigurationData::getInstance()->enableLogging) logger << ("Soap fault - " + e.getMessage()) << std::flush;
+		//logger << ("Soap fault - " + e.getMessage()) << std::flush;
 	}
 	catch(const std::exception& faultc)
 	{
@@ -155,7 +155,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 			env.append(" " + it->first + "=\"" + it->second + "\" ");
 		}
 		env.append(">"+bod + "</" + soapenv->getTagNameSpc()+">");
-		if(ConfigurationData::getInstance()->enableLogging) logger << ("Soap fault - " + fault) << std::flush;
+		//logger << ("Soap fault - " + fault) << std::flush;
 	}
 	res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	res->addHeader(HttpResponse::ContentType, xmlcnttype);

@@ -32,7 +32,9 @@
 #include "SSLHandler.h"
 #include "ClassStructure.h"
 #include "SerializeBase.h"
-
+#include <functional>
+#include "string_view"
+#include "Router.h"
 
 typedef void* (*toObjectFromJson) (const std::string&);
 
@@ -69,6 +71,7 @@ class RestFunction
 	std::string name;
 	std::string path;
 	std::string clas;
+	std::string appName;
 	std::string meth;
 	std::string statusCode;
 	std::string icontentType;
@@ -88,7 +91,7 @@ class RestFunction
 	friend class ConfigurationData;
 };
 
-typedef std::map<std::string, std::vector<RestFunction> > resFuncMap;
+typedef std::map<std::string, std::vector<RestFunction>, std::less<> > resFuncMap;
 
 class SecureAspect
 {
@@ -113,9 +116,9 @@ class Security
 	std::map<std::string, std::string> securityFieldFrom;
 	bool isLoginConfigured();
 	bool isSecureConfigured();
-	bool isLoginUrl(const std::string& cntxtName, const std::string& actUrl);
-	bool isLoginPage(const std::string& cntxtName, const std::string& actUrl);
-	SecureAspect matchesPath(const std::string& cntxtName, std::string actUrl);
+	bool isLoginUrl(std::string_view, const std::string& actUrl);
+	bool isLoginPage(std::string_view, const std::string& actUrl);
+	SecureAspect matchesPath(std::string_view, std::string actUrl);
 	bool addAspect(const SecureAspect&);
 	friend class ConfigurationData;
 	friend class ConfigurationHandler;
@@ -181,38 +184,41 @@ public:
 class ConfigurationData {
 	ConfigurationData();
 	static ConfigurationData* instance;
-	std::map<std::string, std::string> appAliases;
-	std::map<std::string, std::vector<std::string> > filterMap;
-	std::map<std::string, std::map<std::string, std::vector<RestFunction> > > rstCntMap;
-	std::map<std::string, std::string> handoffs;
-	std::map<std::string, std::map<std::string, Security> > securityObjectMap;
-	std::map<std::string, std::map<std::string, std::string> > controllerObjectMap;
-	std::map<std::string, std::map<std::string, std::string> > mappingObjectMap;
-	std::map<std::string, std::map<std::string, std::string> > mappingextObjectMap;
-	std::map<std::string, std::map<std::string, std::vector<std::string> > > filterObjectMap;
-	std::map<std::string, std::map<std::string, std::string> > viewMappingMap;
-	std::map<std::string, std::map<std::string, std::string> > ajaxInterfaceMap;
-	std::map<std::string, std::map<std::string, std::string> > fviewMappingMap;
-	std::map<std::string, std::map<std::string, std::string> > wsdlMap;
-	std::map<std::string, std::map<std::string, Element> > fviewFormMap;
-	std::map<std::string, std::map<std::string, std::string> > templateMappingMap;
-	std::map<std::string, std::map<std::string, std::string> > dcpMappingMap;
-	std::map<std::string, std::map<std::string, std::string> > websocketMappingMap;
-	std::map<std::string, std::string> dynamicCppPagesMap;
-	std::map<std::string, std::string> templateFilesMap;
-	std::map<std::string, bool> applicationFlowMap;
-	std::map<std::string, bool> servingContexts;
-	std::map<std::string, std::string> servingContextAppNames;
+	std::map<std::string, std::string, std::less<> > appAliases;
+	std::map<std::string, std::vector<std::string>, std::less<> > filterMap;
+	std::map<std::string, std::map<std::string, std::vector<RestFunction>, std::less<> >, std::less<> > rstCntMap;
+	std::map<std::string, std::string, std::less<> > handoffs;
+	std::map<std::string, std::map<std::string, Security, std::less<>>, std::less<> > securityObjectMap;
+	std::map<std::string, std::map<std::string, std::string, std::less<>>, std::less<> > controllerObjectMap;
+	std::map<std::string, std::map<std::string, std::string, std::less<>>, std::less<> > mappingObjectMap;
+	std::map<std::string, std::map<std::string, std::string, std::less<>>, std::less<> > mappingextObjectMap;
+	std::map<std::string, std::map<std::string, std::vector<std::string>, std::less<> >, std::less<> > filterObjectMap;
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> > viewMappingMap;
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> > ajaxInterfaceMap;
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> > fviewMappingMap;
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> > wsdlMap;
+	std::map<std::string, std::map<std::string, Element, std::less<> >, std::less<> > fviewFormMap;
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> > templateMappingMap;
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> > dcpMappingMap;
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> > websocketMappingMap;
+	std::map<std::string, std::string, std::less<> > dynamicCppPagesMap;
+	std::map<std::string, std::string, std::less<> > templateFilesMap;
+	std::map<std::string, bool, std::less<> > applicationFlowMap;
+	std::map<std::string, bool, std::less<> > servingContexts;
+	std::map<std::string, std::string, std::less<> > servingContextAppNames;
+	std::map<std::string, std::string, std::less<> > servingContextAppRoots;
+	std::map<std::string, std::string, std::less<> > servingContextRouterNames;
+	std::map<std::string, Router*, std::less<> > servingContextRouters;
 	std::vector<std::string> componentNames;
 	FFEADContext ffeadContext;
 	CorsConfig corsConfig;
 	SecurityProperties securityProperties;
 	CoreServerProperties coreServerProperties;
-	std::map<std::string, std::map<std::string, ConnectionProperties> > sdormConnProperties;
-	std::map<std::string, std::map<std::string, Mapping> > sdormEntityMappings;
-	std::map<std::string, std::map<std::string, ConnectionProperties> > cacheConnProperties;
-	std::map<std::string, std::vector<WsDetails> > webserviceDetailMap;
-	std::map<std::string, std::map<std::string, ClassStructure> > classStructureMap;
+	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > sdormConnProperties;
+	std::map<std::string, std::map<std::string, Mapping, std::less<> >, std::less<> > sdormEntityMappings;
+	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > cacheConnProperties;
+	std::map<std::string, std::vector<WsDetails>, std::less<> > webserviceDetailMap;
+	std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> > classStructureMap;
 	Logger logger;
 	ThreadLocal httpRequest;
 	ThreadLocal httpResponse;
@@ -271,13 +277,14 @@ public:
 	static bool isNginxServer();
 	static void setNginxServer(bool isNginxServer);
 	static ClassInfo* getClassInfo(const std::string&, const std::string& app= "");
-	static bool isServingContext(const std::string& cntxtName);
+	static ClassInfo* getClassInfo(const std::string&, std::string_view);
+	static bool isServingContext(std::string_view cntxtName);
 	static ConfigurationData* getInstance();
 	static SecurityProperties const& getSecurityProperties();
 	static CoreServerProperties const& getCoreServerProperties();
 	static HttpRequest* getHttpRequest();
 	static HttpResponse* getHttpResponse();
-	static bool urlMatchesPath(const std::string& cntxtName, std::string pathurl, std::string url);
+	static bool urlMatchesPath(std::string_view cntxtName, std::string pathurl, std::string url);
 	static void initializeAllSingletonBeans();
 	static void clearAllSingletonBeans();
 	static void setCoreServerProperties(CoreServerProperties coreServerProperties);

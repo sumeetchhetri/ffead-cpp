@@ -37,6 +37,8 @@ int main()
 		WSAStartup(MAKEWORD(1,1), &wsa_data);
 	#endif
 	
+	HTTPResponseStatus::init();
+
 	PropFileReader propFileReader;
 	propMap props = propFileReader.getProperties("testValues.prop");
 
@@ -198,7 +200,11 @@ int main()
 				std::cout << "HTTP Request Is=>\n" << data << "\n\n" << std::endl;
 			}
 
-			client->connection(ip,port);
+			if(!client->connection(ip,port)) {
+				std::cout << "Unable to connect to server at " << ip << ":" << port << std::endl;
+				delete client;
+				return 0;
+			}
 			client->sendData(data);
 			std::string tot = client->getTextData("\r\n","content-length");
 			long long millis = timer.elapsedMilliSeconds();
@@ -228,7 +234,7 @@ int main()
 			{
 				if(respCntType!="")
 				{
-					if(res.getHeader("Content-Type")==respCntType)
+					if(res.getHeader("Content-Type").find(respCntType)==0)
 					{
 						ss.clear();
 						ss = "Test " + CastUtil::lexical_cast<std::string>(counter) + " " + request + " was Successfull, Response Time = " + CastUtil::lexical_cast<std::string>(millis) + "ms" + debugContentValue;

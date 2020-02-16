@@ -73,6 +73,14 @@ void XmlParser::parse(std::string xml, Document& doc)
 	}
 }
 
+void XmlParser::sanitizeXml(std::string& strret) {
+	StringUtil::replaceAll(strret,"&amp;","&");
+	StringUtil::replaceAll(strret,"&quot;","\"");
+	StringUtil::replaceAll(strret,"&apos;","'");
+	StringUtil::replaceAll(strret,"&lt;","<");
+	StringUtil::replaceAll(strret,"&gt;",">");
+}
+
 void XmlParser::readXML(std::string& xml, const std::string& parent, Element *par)
 {
 	if(xml=="")
@@ -148,6 +156,7 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
             std::string atvalue = tag.substr(0,tag.find_first_of("\""));
             tag = tag.substr(tag.find_first_of("\"")+1);
             try {
+            	sanitizeXml(atvalue);
 				if(parent!="")
 				{
 					element.addAttribute(StringUtil::trimCopy(atname),atvalue,true);
@@ -263,7 +272,10 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
 					readXML(txml,ta,&element);
 				}
 				else
+				{
+					sanitizeXml(txml);
 					element.setText(txml);
+				}
 				par->addElement(element);
 			}
 			else
@@ -274,7 +286,10 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
 					readXML(txml,ta,par);
 				}
 				else
+				{
+					sanitizeXml(txml);
 					par->setText(txml);
+				}
 			}
 			xml = xml.substr(end+tagx.length());
 		}

@@ -56,7 +56,7 @@ public:
 	void onClose();
 	std::string getProtocol(void* context);
 	int getTimeout();
-	void* readRequest(void*& context, int& pending, int& reqPos);
+	bool readRequest(void* request, void*& context, int& pending, int& reqPos);
 	bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos);
 	bool writeHttpResponse(void* req, void* res, void* si, std::string& data);
 	bool writeWebSocketResponse(void* req, void* res, void* si, std::string& data);

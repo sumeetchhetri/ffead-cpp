@@ -30,7 +30,7 @@ AfcUtil::~AfcUtil() {
 	
 }
 static std::map<std::string,std::string> doneMap;
-std::string AfcUtil::generateJsInterfacessAll(std::map<std::string, ClassStructure>& allclsmap, std::string &infjs, std::map<std::string, std::string>& ajintpthMap, strVec& afcd, Reflection& ref)
+std::string AfcUtil::generateJsInterfacessAll(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &infjs, std::map<std::string, std::string, std::less<> >& ajintpthMap, strVec& afcd, Reflection& ref)
 {
 	std::string ret;
 	/*map<std::string, ClassStructure> allclsmap;
@@ -44,7 +44,7 @@ std::string AfcUtil::generateJsInterfacessAll(std::map<std::string, ClassStructu
 		}
 		allclsmap.insert(clsmap.begin(), clsmap.end());
 	}*/
-	std::map<std::string, ClassStructure>::iterator it;
+	std::map<std::string, ClassStructure, std::less<> >::iterator it;
 	for (int var = 0; var < (int)afcd.size(); ++var) {
 		for (it=allclsmap.begin();it!=allclsmap.end();++it)
 		{
@@ -68,7 +68,7 @@ std::string AfcUtil::generateJsInterfacessAll(std::map<std::string, ClassStructu
 	return ret;
 }
 
-std::string AfcUtil::generateJsObjectsAll(std::map<std::string, ClassStructure>& allclsmap)
+std::string AfcUtil::generateJsObjectsAll(std::map<std::string, ClassStructure, std::less<> >& allclsmap)
 {
 	Reflection ref;
 	std::string ret;
@@ -79,7 +79,7 @@ std::string AfcUtil::generateJsObjectsAll(std::map<std::string, ClassStructure>&
 		std::map<std::string, ClassStructure> clsmap = ref.getClassStructures(includes.at(var));
 		allclsmap.insert(clsmap.begin(), clsmap.end());
 	}*/
-	std::map<std::string, ClassStructure>::iterator it;
+	std::map<std::string, ClassStructure, std::less<> >::iterator it;
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
 		strVec pinfo;
@@ -1245,7 +1245,7 @@ std::string AfcUtil::generateToJSONVectorObjects(const std::string& type, const 
 	return fres;
 }
 
-std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstruc, const std::string& path, std::string &infjs, const std::string& appName, std::map<std::string, std::string>& ajintpthMap, Reflection& ref)
+std::string AfcUtil::generateJsInterfaces(const strVec& obj, ClassStructure& classstruc, const std::string& path, std::string &infjs, const std::string& appName, std::map<std::string, std::string, std::less<> >& ajintpthMap, Reflection& ref)
 {
 	std::string test,intf,intff,inc;
 	//headers += "#include \"" + claz + ".h\"\n";

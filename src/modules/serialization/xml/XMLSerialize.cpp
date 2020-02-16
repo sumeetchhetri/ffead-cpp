@@ -22,8 +22,16 @@ std::string XMLSerialize::serializePrimitive(int serOpt, const std::string& clas
 {
 	switch(serOpt) {
 		case 1: return "<string>"+*(std::string*)t+"</string>";
-		case 2: return "<string>"+std::string((char*)t)+"</string>";
-		case 3: return "<string>"+std::string((char*)t)+"</string>";
+		case 2: {
+			std::string s;
+			s.push_back(((unsigned char*)t)[0]);
+			return "<char>"+s+"</char>";
+		}
+		case 3: {
+			std::string s;
+			s.push_back(((unsigned char*)t)[0]);
+			return "<uchar>"+s+"</uchar>";
+		}
 		case 4: return "<int>"+CastUtil::fromNumber(*(int*)t)+"</int>";
 		case 5: return "<uint>"+CastUtil::fromNumber(*(unsigned int*)t)+"</uint>";
 		case 6: return "<short>"+CastUtil::fromNumber(*(short*)t)+"</short>";
@@ -472,12 +480,16 @@ void XMLSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::s
 		}
 		case 2:
 		{
-			*object += "<" + propName + ">" + std::string((char*)t) + "</" + propName + ">";
+			std::string s;
+			s.push_back(((char*)t)[0]);
+			*object += "<" + propName + ">" + s + "</" + propName + ">";
 			break;
 		}
 		case 3:
 		{
-			*object += "<" + propName + ">" + std::string((char*)t) + "</" + propName + ">";
+			std::string s;
+			s.push_back(((unsigned char*)t)[0]);
+			*object += "<" + propName + ">" + s + "</" + propName + ">";
 			break;
 		}
 		case 4:

@@ -22,12 +22,6 @@ TeBkMessage TeBkRestController::json() {
 	return msg;
 }
 
-void TeBkRestController::jsonUM(HttpRequest* req, HttpResponse* res) {
-	TeBkMessage msg;
-	msg.setMessage(HELLO_WORLD);
-	res->setContent(JSONSerialize::serializeUnknown(&msg, 0, "TeBkMessage", req->getCntxt_name()));
-}
-
 TeBkWorld TeBkRestController::db() {
 	DataSourceInterface* sqli = DataSourceManager::getImpl();
 	int rid = rand() % 10000 + 1;

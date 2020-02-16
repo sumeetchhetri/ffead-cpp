@@ -34,7 +34,7 @@
 
 typedef void* (*Service)(void*);
 class Server {
-	Logger logger;
+	//Logger logger;
 	SOCKET sock;
 	int mode;
 	Service service;

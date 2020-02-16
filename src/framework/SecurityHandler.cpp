@@ -36,8 +36,8 @@ void SecurityHandler::populateAuthDetails(HttpRequest* req)
 	{
 		return;
 	}
-	std::map<std::string, std::map<std::string, Security> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
-	Security securityObject = securityObjectMap[req->getCntxt_name()][provKey];
+	std::map<std::string, std::map<std::string, Security, std::less<> >, std::less<> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
+	Security securityObject = securityObjectMap.find(req->getCntxt_name())->second[provKey];
 	std::string userfld = securityObject.securityFieldNames["username"];
 	std::string passfld = securityObject.securityFieldNames["password"];
 	std::string userfrom = securityObject.securityFieldFrom["username"];
@@ -91,14 +91,14 @@ void SecurityHandler::populateAuthDetails(HttpRequest* req)
 	req->password = password;
 }
 
-std::string SecurityHandler::isLoginPage(const std::string& cntxtName, const std::string& actUrl)
+std::string SecurityHandler::isLoginPage(std::string_view cntxtName, const std::string& actUrl)
 {
-	std::map<std::string, std::map<std::string, Security> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
-	std::map<std::string, Security> securityProv = securityObjectMap[cntxtName];
-	std::map<std::string, Security>::iterator it;
+	std::map<std::string, std::map<std::string, Security, std::less<> >, std::less<> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
+	std::map<std::string, Security, std::less<> > securityProv = securityObjectMap.find(cntxtName)->second;
+	std::map<std::string, Security, std::less<> >::iterator it;
 	for (it=securityProv.begin();it!=securityProv.end();++it) {
 		Security provider = it->second;
-		if(provider.isLoginPage(cntxtName, actUrl))
+		if(provider.isLoginPage(std::string_view(), actUrl))
 		{
 			return it->first;
 		}
@@ -106,15 +106,16 @@ std::string SecurityHandler::isLoginPage(const std::string& cntxtName, const std
 	return "";
 }
 
-bool SecurityHandler::hasSecurity(const std::string& cntxtName) {
-	return ConfigurationData::getInstance()->securityObjectMap[cntxtName].size()>0;
+bool SecurityHandler::hasSecurity(std::string_view cntxtName) {
+	std::map<std::string, std::map<std::string, Security, std::less<> >, std::less<> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
+	return securityObjectMap.find(cntxtName)!=securityObjectMap.end() && securityObjectMap.find(cntxtName)->second.size()>0;
 }
 
-std::string SecurityHandler::validateSecurePath(const std::string& cntxtName, const std::string& actUrl, const std::string& username)
+std::string SecurityHandler::validateSecurePath(std::string_view cntxtName, const std::string& actUrl, const std::string& username)
 {
-	std::map<std::string, std::map<std::string, Security> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
-	std::map<std::string, Security> securityProv = securityObjectMap[cntxtName];
-	std::map<std::string, Security>::iterator it;
+	std::map<std::string, std::map<std::string, Security, std::less<> >, std::less<> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
+	std::map<std::string, Security, std::less<> > securityProv = securityObjectMap.find(cntxtName)->second;
+	std::map<std::string, Security, std::less<> >::iterator it;
 	for (it=securityProv.begin();it!=securityProv.end();++it) {
 		Security provider = it->second;
 		SecureAspect aspect = provider.matchesPath(cntxtName, actUrl);
@@ -128,7 +129,7 @@ std::string SecurityHandler::validateSecurePath(const std::string& cntxtName, co
 
 bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& sessionTimeout, Reflector& reflector)
 {
-	std::map<std::string, std::map<std::string, Security> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
+	std::map<std::string, std::map<std::string, Security, std::less<> >, std::less<> >& securityObjectMap = ConfigurationData::getInstance()->securityObjectMap;
 	Logger logger = LoggerFactory::getLogger("SecurityHandler");
 
 	bool isContrl = false;
@@ -146,7 +147,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 	std::string provKey = validateSecurePath(req->getCntxt_name(), req->getCurl(), username);
 	if(provKey!="")
 	{
-		Security securityObject = securityObjectMap[req->getCntxt_name()][provKey];
+		Security securityObject = securityObjectMap.find(req->getCntxt_name())->second[provKey];
 		SecureAspect aspect = securityObject.matchesPath(req->getCntxt_name(), req->getCurl());
 		//long sessionTimeoutVar = sessionTimeout;
 		if(securityObject.isLoginConfigured())
@@ -157,12 +158,14 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 		{
 			if(aspect.path!="")
 			{
-				if(ConfigurationData::getInstance()->enableLogging) logger << ("Matched secure path " + aspect.path + ", which requires role " + aspect.role) << std::endl;
+				logger << ("Matched secure path " + aspect.path + ", which requires role " + aspect.role) << std::endl;
 			}
 			else if(aspect.role!=userRole)
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
-				res->addHeader(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.loginUrl);
+				std::string s = "/";
+				s.append(req->getCntxt_name());
+				res->addHeader(HttpResponse::Location, s+"/"+securityObject.loginUrl);
 				res->setDone(true);
 				isContrl = true;
 			}
@@ -173,34 +176,34 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 			bool validUser = false;
 			if(claz.find("file:")!=std::string::npos)
 			{
-				claz = req->getContextHome()+"/"+claz.substr(claz.find(":")+1);
-				if(ConfigurationData::getInstance()->enableLogging) logger << ("Auth handled by file " + claz) << std::endl;
+				claz = req->getCntxt_root()+"/"+claz.substr(claz.find(":")+1);
+				logger << ("Auth handled by file " + claz) << std::endl;
 				FileAuthController authc(claz,":");
 				if(authc.isInitialized())
 				{
 					if(authc.authenticate(username, password))
 					{
 						userRole = authc.getUserRole(username);
-						if(ConfigurationData::getInstance()->enableLogging) logger << ("Valid user " + username
+						logger << ("Valid user " + username
 								+ ", role is "  + userRole) << std::endl;
 						validUser = true;
 					}
 					else
 					{
-						if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid user" << std::endl;
+						logger << "Invalid user" << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
 						isContrl = true;
 					}
 				}
 				else
 				{
-					if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid user repo defined" << std::endl;
+					logger << "Invalid user repo defined" << std::endl;
 				}
 			}
 			else if(claz.find("class:")!=std::string::npos)
 			{
 				claz = claz.substr(claz.find(":")+1);
-				if(ConfigurationData::getInstance()->enableLogging) logger << ("Auth handled by class " + claz) << std::endl;
+				logger << ("Auth handled by class " + claz) << std::endl;
 
 				args argusi, argusa, argusg;
 				vals valusi, valusa, valusg;
@@ -217,7 +220,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 
 				if(methIsInitialized.getMethodName()=="" || methGetUserRole.getMethodName()=="" || methAuthenticate.getMethodName()=="")
 				{
-					if(ConfigurationData::getInstance()->enableLogging) logger << ("AuthController class needs to implement all 3 methods namely, authenticate, getUserRole and isInitialized") << std::endl;
+					logger << ("AuthController class needs to implement all 3 methods namely, authenticate, getUserRole and isInitialized") << std::endl;
 					return false;
 				}
 
@@ -234,20 +237,20 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 						valusg.push_back(&username);
 						std::string userRole;
 						reflector.invokeMethod<std::string>(&userRole,_temp,methGetUserRole,valusg);
-						if(ConfigurationData::getInstance()->enableLogging) logger << ("Valid user " + username + ", role is "  + userRole) << std::endl;
+						logger << ("Valid user " + username + ", role is "  + userRole) << std::endl;
 						validUser = true;
 					}
 					else
 					{
-						if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid user" << std::endl;
+						logger << "Invalid user" << std::endl;
 						res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
 						isContrl = true;
 					}
-					if(ConfigurationData::getInstance()->enableLogging) logger << "AuthController called" << std::endl;
+					logger << "AuthController called" << std::endl;
 				}
 				else
 				{
-					if(ConfigurationData::getInstance()->enableLogging) logger << "AuthController not initialized" << std::endl;
+					logger << "AuthController not initialized" << std::endl;
 				}
 				ConfigurationData::getInstance()->ffeadContext.release(_temp, "login-handler_"+claz, req->getCntxt_name());
 			}
@@ -255,8 +258,10 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 			{
 				req->getSession()->setAttribute("_FFEAD_USER_ACCESS_ROLE", userRole);
 				res->setHTTPResponseStatus(HTTPResponseStatus::TempRedirect);
-				res->addHeader(HttpResponse::Location, "/"+req->getCntxt_name()+"/"+securityObject.welcomeFile);
-				if(ConfigurationData::getInstance()->enableLogging) logger << ("Valid role " + userRole + " for path " + req->getCurl()) << std::endl;
+				std::string s = "/";
+				s.append(req->getCntxt_name());
+				res->addHeader(HttpResponse::Location, s+"/"+securityObject.welcomeFile);
+				logger << ("Valid role " + userRole + " for path " + req->getCurl()) << std::endl;
 				isContrl = true;
 				res->setDone(true);
 			}

@@ -37,11 +37,11 @@ void RequestReaderHandler::stop(std::string ip, int port, bool isSSLEnabled) {
 
 		if(isSSLEnabled) {
 			SSLClient sc;
-			sc.connection(ip, port);
+			sc.connectionNB(ip, port);
 			sc.closeConnection();
 		} else {
 			Client sc;
-			sc.connection(ip, port);
+			sc.connectionNB(ip, port);
 			sc.closeConnection();
 		}
 	}
@@ -113,6 +113,7 @@ void* RequestReaderHandler::handle(void* inp) {
 						SocketInterface* sockIntf = ins->sf(newSocket);
 						sockIntf->eh = &(ins->selector);
 						ins->addSf(sockIntf);
+						ins->shi->sockInit(sockIntf);
 						CommonUtils::cSocks += 1;
 						if(!ins->run) {
 							ins->clsdConns.push_back(sockIntf);
@@ -124,6 +125,7 @@ void* RequestReaderHandler::handle(void* inp) {
 					SocketInterface* sockIntf = ins->sf(newSocket);
 					sockIntf->eh = &(ins->selector);
 					ins->addSf(sockIntf);
+					ins->shi->sockInit(sockIntf);
 					CommonUtils::cSocks += 1;
 					if(!ins->run) {
 						ins->clsdConns.push_back(sockIntf);

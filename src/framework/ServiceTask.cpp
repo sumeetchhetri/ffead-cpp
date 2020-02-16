@@ -23,7 +23,7 @@
 #include "ServiceTask.h"
 
 ServiceTask::ServiceTask() {
-	logger = LoggerFactory::getLogger("ServiceTask");
+	//logger = LoggerFactory::getLogger("ServiceTask");
 }
 
 ServiceTask::~ServiceTask() {
@@ -42,7 +42,7 @@ void ServiceTask::saveSessionDataToFile(const std::string& sessionId, const std:
 	}
 
 	std::string filen = ConfigurationData::getInstance()->coreServerProperties.serverRootDirectory+"/tmp/"+sessionId+".sess";
-	if(ConfigurationData::getInstance()->enableLogging) logger << ("Saving session to file " + filen) << std::endl;
+	//logger << ("Saving session to file " + filen) << std::endl;
 	std::ofstream ofs(filen.c_str(), std::ios::binary);
 	ofs.write(value.c_str(),value.length());
 	ofs.close();
@@ -80,7 +80,7 @@ std::map<std::string,std::string> ServiceTask::getSessionDataFromFile(const std:
 			StringUtil::replaceAll(results1.at(0),"%3D","=");
 			valss[results1.at(0)] = "true";
 		}
-		if(ConfigurationData::getInstance()->enableLogging) logger << ("Read key/value pair " + results1.at(0) + " = " + valss[results1.at(0)]) << std::endl;
+		//logger << ("Read key/value pair " + results1.at(0) + " = " + valss[results1.at(0)]) << std::endl;
 	}
 	return valss;
 }
@@ -100,7 +100,7 @@ std::map<std::string,std::string> ServiceTask::getSessionDataFromDistocache(cons
 	try {
 		mp = globalMap.getMap<std::string,std::string>(sessionId);
 	} catch(const std::exception& e) {
-		if(ConfigurationData::getInstance()->enableLogging) logger << "error readin map value"<< std::endl;
+		//logger << "error readin map value"<< std::endl;
 	}
 	return mp;
 }
@@ -280,27 +280,27 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 			try {
 				ifmodsince = df.parse(ifmodsincehdr);
 				isifmodsincvalid = true;
-				if(ConfigurationData::getInstance()->enableLogging) logger << "Parsed date success" << std::endl;
+				//logger << "Parsed date success" << std::endl;
 			} catch(const std::exception& e) {
 				isifmodsincvalid = false;
 			}
 
 			if(ifmodsince!=NULL)
 			{
-				if(ConfigurationData::getInstance()->enableLogging) logger << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
-				if(ConfigurationData::getInstance()->enableLogging) logger << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
-				if(ConfigurationData::getInstance()->enableLogging) logger << "Date Comparisons = " +CastUtil::fromBool(*ifmodsince>=filemodifieddate)  << std::endl;
+				//logger << "IfModifiedSince header = " + ifmodsincehdr + ", date = " + ifmodsince->toString() << std::endl;
+				//logger << "Lastmodifieddate value = " + lastmodDate + ", date = " + filemodifieddate.toString() << std::endl;
+				//logger << "Date Comparisons = " +CastUtil::fromBool(*ifmodsince>=filemodifieddate)  << std::endl;
 
 				if(isifmodsincvalid && *ifmodsince>=filemodifieddate)
 				{
 					res->addHeader(HttpResponse::LastModified, ifmodsincehdr);
-					if(ConfigurationData::getInstance()->enableLogging) logger << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
+					//logger << ("File not modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotModified);
 					return;
 				}
 				else if(isifmodsincvalid && *ifmodsince<filemodifieddate)
 				{
-					if(ConfigurationData::getInstance()->enableLogging) logger << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
+					//logger << ("File modified - IfModifiedSince date = " + ifmodsincehdr + ", FileModified date = " + lastmodDate) << std::endl;
 					forceLoadFile = true;
 				}
 				delete ifmodsince;
@@ -312,7 +312,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 		if(res->isHeaderValue(HttpResponse::ContentEncoding, "gzip"))
 		{
 			bool gengzipfile = true;
-			std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".gz";
+			std::string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".gz";
 			if(!forceLoadFile)
 			{
 				std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
@@ -333,7 +333,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 		else if(res->isHeaderValue(HttpResponse::ContentEncoding, "deflate"))
 		{
 			bool genzlibfile = true;
-			std::string ofname = req->getContextHome() + "/temp/" + req->getFile() + ".z";
+			std::string ofname = req->getCntxt_root() + "/temp/" + req->getFile() + ".z";
 			if(!forceLoadFile)
 			{
 				std::ifstream gzipdfile(ofname.c_str(), std::ios::binary);
@@ -352,7 +352,7 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 			req->setUrl(fname);
 		}
 
-		if(ConfigurationData::getInstance()->enableLogging) logger << ("Content request for " + url + " " + ext + " actual file " + fname) << std::endl;
+		//logger << ("Content request for " + url + " " + ext + " actual file " + fname) << std::endl;
 
 		if(req->getHttpVers()<1.1 && rangeValuesLst.size()>0)
 		{
@@ -418,8 +418,8 @@ void ServiceTask::handleWebsockOpen(WebSocketData* req) {
 	Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 	std::string className;
-	std::map<std::string, std::map<std::string, std::string> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
-	std::map<std::string, std::string> websockcntMap = websocketMappingMap[req->getCntxt_name()];
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
+	std::map<std::string, std::string, std::less<> > websockcntMap = websocketMappingMap.find(req->getCntxt_name())->second;
 	std::map<std::string, std::string>::iterator it;
 	for (it=websockcntMap.begin();it!=websockcntMap.end();++it) {
 		if(ConfigurationData::urlMatchesPath(req->getCntxt_name(), it->first, req->getUrl()))
@@ -437,13 +437,13 @@ void ServiceTask::handleWebsockOpen(WebSocketData* req) {
 		Method meth = srv->getMethod("onOpen", argus);
 		if(meth.getMethodName()!="")
 		{
-			// if(ConfigurationData::getInstance()->enableLogging) logger << ("WebSocket Controller " + className + " called") << std::endl;
+			// logger << ("WebSocket Controller " + className + " called") << std::endl;
 			 reflector.invokeMethodGVP(_temp,meth,valus);
-			 if(ConfigurationData::getInstance()->enableLogging) logger << "WebSocket Controller onOpen" << std::endl;
+			 //logger << "WebSocket Controller onOpen" << std::endl;
 		}
 		else
 		{
-			if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid WebSocket Controller" << std::endl;
+			//logger << "Invalid WebSocket Controller" << std::endl;
 		}
 	}
 }
@@ -453,8 +453,8 @@ void ServiceTask::handleWebsockClose(WebSocketData* req) {
 	Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 	std::string className;
-	std::map<std::string, std::map<std::string, std::string> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
-	std::map<std::string, std::string> websockcntMap = websocketMappingMap[req->getCntxt_name()];
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
+	std::map<std::string, std::string, std::less<> > websockcntMap = websocketMappingMap.find(req->getCntxt_name())->second;
 	std::map<std::string, std::string>::iterator it;
 	for (it=websockcntMap.begin();it!=websockcntMap.end();++it) {
 		if(ConfigurationData::urlMatchesPath(req->getCntxt_name(), it->first, req->getUrl()))
@@ -474,11 +474,11 @@ void ServiceTask::handleWebsockClose(WebSocketData* req) {
 		{
 			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
 			 reflector.invokeMethodGVP(_temp,methc,valus);
-			 if(ConfigurationData::getInstance()->enableLogging) logger << "WebSocket Controller onClose" << std::endl;
+			 //logger << "WebSocket Controller onClose" << std::endl;
 		}
 		else
 		{
-			if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid WebSocket Controller" << std::endl;
+			//logger << "Invalid WebSocket Controller" << std::endl;
 		}
 	}
 }
@@ -488,8 +488,8 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 	Reflector& reflector = ConfigurationData::getInstance()->reflector;
 
 	std::string className;
-	std::map<std::string, std::map<std::string, std::string> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
-	std::map<std::string, std::string> websockcntMap = websocketMappingMap[req->getCntxt_name()];
+	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
+	std::map<std::string, std::string, std::less<> > websockcntMap = websocketMappingMap.find(req->getCntxt_name())->second;
 	std::map<std::string, std::string>::iterator it;
 	for (it=websockcntMap.begin();it!=websockcntMap.end();++it) {
 		if(ConfigurationData::urlMatchesPath(req->getCntxt_name(), it->first, req->getUrl()))
@@ -514,11 +514,11 @@ void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* re
 			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
 			 WebSocketData data;
 			 reflector.invokeMethod<WebSocketData>(&data,_temp,methc,valus);
-			 if(ConfigurationData::getInstance()->enableLogging) logger << "WebSocket Controller onMessage" << std::endl;
+			 //logger << "WebSocket Controller onMessage" << std::endl;
 		}
 		else
 		{
-			if(ConfigurationData::getInstance()->enableLogging) logger << "Invalid WebSocket Controller" << std::endl;
+			//logger << "Invalid WebSocket Controller" << std::endl;
 		}
 	}
 }
@@ -529,48 +529,83 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 	t1.start();
 
 	res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
+	/*After going through the controller the response might be blank, just set the HTTP version*/
+	res->update(req);
+
 	try
 	{
-		if(req->getRequestParseStatus().getCode()>0)
+		if(req->getRequestParseStatus()!=NULL)
 		{
-			res->setHTTPResponseStatus(req->getRequestParseStatus());
-			res->addHeader(HttpResponse::Connection, "close");
-			return;
-		}
-
-		if(req->getActUrlParts().size()==0)
-		{
-			res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+			res->setHTTPResponseStatus(*req->getRequestParseStatus());
 			res->addHeader(HttpResponse::Connection, "close");
 			return;
 		}
 
 		if(req->getCntxt_name()=="") {
-			req->setCntxt_name("default");
+			req->setCntxt_name(HttpRequest::DEFAULT_CTX);
 		}
 
-		if(ConfigurationData::getInstance()->appAliases.find(req->getCntxt_name())!=ConfigurationData::getInstance()->appAliases.end()) {
-			req->setCntxt_name(ConfigurationData::getInstance()->appAliases[req->getCntxt_name()]);
-			if(ConfigurationData::getInstance()->servingContexts.find(req->getCntxt_name())==ConfigurationData::getInstance()->servingContexts.end())
-			{
-				res->addHeader(HttpResponse::Connection, "close");
-				if(ConfigurationData::getInstance()->enableLogging) logger << "Context not found, Closing connection..." << std::endl;
+		Reflector& reflector = ConfigurationData::getInstance()->reflector;
+
+		if(ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())!=
+				ConfigurationData::getInstance()->servingContextRouters.end()) {
+			CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
+			Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
+			if(router!=NULL) {
+				req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
+				router->route(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib);
+				t1.end();
+				CommonUtils::tsServicePre += t1.timerNanoSeconds();
 				return;
+			}
+		} else {
+			if(ConfigurationData::getInstance()->servingContextRouters.find(HttpRequest::DEFAULT_CTX)!=
+					ConfigurationData::getInstance()->servingContextRouters.end()) {
+				req->setCntxt_name(HttpRequest::DEFAULT_CTX);
+				CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
+				Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
+				if(router!=NULL) {
+					req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
+					router->route(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib);
+					t1.end();
+					CommonUtils::tsServicePre += t1.timerNanoSeconds();
+					return;
+				}
 			}
 		}
 
-		if(!ConfigurationData::isServingContext(req->getCntxt_name()))
-		{
-			req->setCntxt_name("default");
+		if(!ConfigurationData::isServingContext(req->getCntxt_name())) {
+			if(ConfigurationData::getInstance()->appAliases.find(req->getCntxt_name())!=ConfigurationData::getInstance()->appAliases.end()) {
+				req->setCntxt_name(std::string_view{ConfigurationData::getInstance()->appAliases.find(req->getCntxt_name())->second});
+				if(ConfigurationData::getInstance()->servingContexts.find(req->getCntxt_name())==ConfigurationData::getInstance()->servingContexts.end())
+				{
+					res->addHeader(HttpResponse::Connection, "close");
+					//logger << "Context not found, Closing connection..." << std::endl;
+					return;
+				}
+			}
+
+			if(!ConfigurationData::isServingContext(req->getCntxt_name())) {
+				req->setCntxt_name(HttpRequest::DEFAULT_CTX);
+			}
 		}
 
+		CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(req->getCntxt_name())->second);
+		req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
+
 		req->normalizeUrl();
-		req->setCntxt_root(ConfigurationData::getInstance()->coreServerProperties.webPath+req->getCntxt_name());
 		req->updateContent();
 
-		ConfigurationData::getInstance()->httpRequest.set(req);
-		ConfigurationData::getInstance()->httpResponse.set(res);
-		CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames[req->getCntxt_name()]);
+		if(req->getExt().length()>0) {
+			std::string mimeType = CommonUtils::getMimeType(req->getExt());
+			std::string cntEncoding = getCntEncoding();
+			if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
+				res->addHeader(HttpResponse::ContentEncoding, cntEncoding);
+			}
+		}
+
+		ConfigurationData::getInstance()->httpRequest.reset(req);
+		ConfigurationData::getInstance()->httpResponse.reset(res);
 
 		if(ConfigurationData::getInstance()->enableSecurity) {
 			SecurityHandler::populateAuthDetails(req);
@@ -581,12 +616,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			}
 		}
 
-		Reflector& reflector = ConfigurationData::getInstance()->reflector;
-
 #ifdef INC_APPFLOW
 		/*if(ConfigurationData::getInstance()->applicationFlowMap.find(req->getCntxt_name())!=
 				ConfigurationData::getInstance()->applicationFlowMap.end() &&
-				ConfigurationData::getInstance()->applicationFlowMap[req->getCntxt_name()])
+				ConfigurationData::getInstance()->applicationFlowMap.find(req->getCntxt_name())->second)
 		{
 			if(ConfigurationData::getInstance().dlib == NULL)
 			{
@@ -679,8 +712,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		CommonUtils::tsServiceExt += t1.timerNanoSeconds();
 
 		t1.start();
-		/*After going through the controller the response might be blank, just set the HTTP version*/
-		res->update(req);
 
 		if(req->getMethod()!="TRACE" && !res->isDone())
 		{
@@ -690,7 +721,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 #ifdef INC_WEBSVC
 				if(ConfigurationData::getInstance()->enableSoap) {
 					std::string wsUrl = "http://" + ConfigurationData::getInstance()->coreServerProperties.ip_address + req->getCurl();
-					std::string wsName = ConfigurationData::getInstance()->wsdlMap[req->getCntxt_name()][wsUrl];
+					std::string wsName = ConfigurationData::getInstance()->wsdlMap.find(req->getCntxt_name())->second[wsUrl];
 					if(wsName!="")
 					{
 						isWbsvc = true;
@@ -706,7 +737,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 					}
 				}
 #endif
-				if(isWbsvc)
+				if(!isWbsvc)
 				{
 					bool cntrlit = false;
 #ifdef INC_SCRH
@@ -747,7 +778,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 	}
 	catch(const std::exception& e)
 	{
-		if(ConfigurationData::getInstance()->enableLogging) logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
+		//logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
 	}
 }
 
