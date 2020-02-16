@@ -229,11 +229,11 @@ void TebBkUmRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, void*
 	Timer t;
 	t.start();
 	std::string_view path = req->getPath();
-	if(StringUtil::endsWith(path, "/fortunes.tpe")) {
+	if(StringUtil::endsWith(path, "/fortunes")) {
 		Context ctx;
 		rc.getContext(req, &ctx);
 
-		std::string fname = "_fortunestpeemittTemplateHTML";
+		std::string fname = "_tebenchmarkumtpefortunestpeemittTemplateHTML";
 		void* mkr = dlsym(ddlib, fname.c_str());
 		if(mkr!=NULL)
 		{
