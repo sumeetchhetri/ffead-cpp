@@ -52,45 +52,17 @@ public:
 	void setMessage(const std::string& message);
 };
 
-#pragma @RestController path="/"
-class TeBkUmRestController {
-	static const std::string HELLO_WORLD;
-	static std::string WORLD;
-public:
-	#pragma @GET path="/json" statusCode="200" ocontentType="application/json"
-	TeBkUmMessage json();
-
-	#pragma @GET path="/db" statusCode="200" ocontentType="application/json"
-	TeBkUmWorld db();
-
-	#pragma @GET path="/queries" statusCode="200" ocontentType="application/json"
-	std::vector<TeBkUmWorld> queries(
-					#pragma @QueryParam name="queries"
-					std::string queries);
-
-	#pragma @GET path="/updates" statusCode="200" ocontentType="application/json"
-	std::vector<TeBkUmWorld> updates(
-					#pragma @QueryParam name="queries"
-					std::string queries);
-
-	#pragma @GET path="/plaintext" statusCode="200" ocontentType="text/plain"
-	std::string plaintext();
-
-	#pragma @GET path="/cached-worlds" statusCode="200" ocontentType="application/json"
-	std::vector<TeBkUmWorld> cachedWorlds(
-						#pragma @QueryParam name="count"
-						std::string count);
-
-	//#pragma @Template path="fortunes" file="fortunes.tpe"
-	void getContext(HttpRequest* request, Context* context);
-	void updateCache();
-	TeBkUmRestController();
-	virtual ~TeBkUmRestController();
-};
-
 #pragma @Router
 class TebBkUmRouter : public Router {
-	TeBkUmRestController rc;
+	static const std::string HELLO_WORLD;
+	static std::string WORLD;
+	bool strToNum(const char* str, int len, int& ret);
+	void db(TeBkUmWorld&);
+	void queries(const char*, int, std::vector<TeBkUmWorld>&);
+	void updates(const char*, int, std::vector<TeBkUmWorld>&);
+	void cachedWorlds(const char*, int, std::vector<TeBkUmWorld>&);
+	void getContext(HttpRequest* request, Context* context);
+	void updateCache();
 public:
 	void route(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib);
 };

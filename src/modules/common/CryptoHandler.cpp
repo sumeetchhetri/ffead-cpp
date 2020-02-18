@@ -330,3 +330,11 @@ void CryptoHandler::sanitizeHtml(std::string& data) {
     }
     data.swap(buffer);
 }
+
+void CryptoHandler::deSanitizeHtml(std::string& strret) {
+	StringUtil::replaceAll(strret,"&amp;","&");
+	StringUtil::replaceAll(strret,"&quot;","\"");
+	StringUtil::replaceAll(strret,"&apos;","'");
+	StringUtil::replaceAll(strret,"&lt;","<");
+	StringUtil::replaceAll(strret,"&gt;",">");
+}

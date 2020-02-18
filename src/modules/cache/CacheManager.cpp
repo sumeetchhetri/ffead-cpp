@@ -8,30 +8,32 @@
 #include "CacheManager.h"
 
 std::map<std::string, CacheManager*> CacheManager::caches;
-std::string CacheManager::defDsnName;
+std::map<std::string, std::string> CacheManager::defDsnNames;
 
-void CacheManager::initCache(const ConnectionProperties& props, const std::string& appName) {
+void CacheManager::initCache(const ConnectionProperties& props, const std::string& appNameN) {
 	Logger logger = LoggerFactory::getLogger("CacheManager");
 	std::string name = StringUtil::trimCopy(props.getName());
 	if(name=="")
 	{
 		throw std::runtime_error("Cache Name cannot be blank");
 	}
-	std::string appNameN = CommonUtils::getAppName(appName);
-	name = appNameN + name;
+	std::string appName = appNameN;
+	StringUtil::replaceAll(appName, "-", "_");
+	RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
+	name = appName + name;
 	if(caches.find(name)!=caches.end())
 	{
 		throw std::runtime_error("Cache Already exists");
 	}
 	if(props.getProperty("_isdefault_")=="true") {
-		defDsnName = StringUtil::trimCopy(props.getName());
+		defDsnNames[appName] = StringUtil::trimCopy(props.getName());
 	}
 
 	try {
 		CacheManager* mgr = new CacheManager(props);
 		caches[name] = mgr;
 	} catch (const std::exception& e) {
-		logger.info("Error initializing Cache " + appName + "@" + props.getName() + " " + std::string(e.what()));
+		logger.info("Error initializing Cache " + appNameN + "@" + props.getName() + " " + std::string(e.what()));
 	}
 
 	Reflector* ref = GenericObject::getReflector();
@@ -40,10 +42,7 @@ void CacheManager::initCache(const ConnectionProperties& props, const std::strin
 		std::vector<std::string> v;
 		StringUtil::split(v, meth, ".");
 		if(v.size()==2) {
-			std::string scappName = appName;
-			StringUtil::replaceAll(scappName, "-", "_");
-			RegexUtil::replace(scappName, "[^a-zA-Z0-9_]+", "");
-			CommonUtils::setAppName(scappName);
+			CommonUtils::setAppName(appName);
 			ClassInfo* clas = ref->getClassInfo(v.at(0), appName);
 			if(clas->getClassName()!="") {
 				args argus;
@@ -59,7 +58,7 @@ void CacheManager::initCache(const ConnectionProperties& props, const std::strin
 						}
 					}
 				} catch(const std::exception& e) {
-					logger.info("Error during init call for Cache " + appName + "@" + props.getName() + " " + std::string(e.what()));
+					logger.info("Error during init call for Cache " + appNameN + "@" + props.getName() + " " + std::string(e.what()));
 				}
 				ref->destroy(_temp, v.at(0), appName);
 			}
@@ -85,7 +84,7 @@ CacheInterface* CacheManager::getImpl(std::string name) {
 	std::string appName = CommonUtils::getAppName();
 	StringUtil::trim(name);
 	if(name=="") {
-		name = defDsnName;
+		name = defDsnNames[appName];
 	}
 	name = appName + name;
 	if(caches.find(name)==caches.end())

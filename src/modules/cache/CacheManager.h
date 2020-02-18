@@ -19,7 +19,7 @@
 class CacheManager {
 	Logger logger;
 	static std::map<std::string, CacheManager*> caches;
-	static std::string defDsnName;
+	static std::map<std::string, std::string> defDsnNames;
 	ConnectionProperties props;
 	ConnectionPooler* pool;
 	Reflector* reflector;

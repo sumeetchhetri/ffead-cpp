@@ -8,7 +8,7 @@
 #include "DataSourceManager.h"
 
 std::map<std::string, DataSourceManager*> DataSourceManager::dsns;
-std::string DataSourceManager::defDsnName;
+std::map<std::string, std::string> DataSourceManager::defDsnNames;
 
 void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping& mapping)
 {
@@ -18,21 +18,23 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 	{
 		throw std::runtime_error("Data Source Name cannot be blank");
 	}
-	std::string appName = CommonUtils::getAppName(mapping.getAppName());
+	std::string appName = mapping.getAppName();
+	StringUtil::replaceAll(appName, "-", "_");
+	RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
 	name = appName + name;
 	if(dsns.find(name)!=dsns.end())
 	{
 		throw std::runtime_error("Data Source Already exists");
 	}
 	if(props.getProperty("_isdefault_")=="true") {
-		defDsnName = StringUtil::trimCopy(props.getName());
+		defDsnNames[appName] = StringUtil::trimCopy(props.getName());
 	}
 
 	try {
 		DataSourceManager* dsnMgr = new DataSourceManager(props, mapping);
 		dsns[name] = dsnMgr;
 	} catch (const std::exception& e) {
-		logger.info("Error initializing Datasource " + appName + "@" + props.getName() + " " + std::string(e.what()));
+		logger.info("Error initializing Datasource " + mapping.getAppName() + "@" + props.getName() + " " + std::string(e.what()));
 		return;
 	}
 
@@ -42,10 +44,7 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 		std::vector<std::string> v;
 		StringUtil::split(v, meth, ".");
 		if(v.size()==2) {
-			std::string scappName = appName;
-			StringUtil::replaceAll(scappName, "-", "_");
-			RegexUtil::replace(scappName, "[^a-zA-Z0-9_]+", "");
-			CommonUtils::setAppName(scappName);
+			CommonUtils::setAppName(appName);
 			ClassInfo* clas = ref->getClassInfo(v.at(0), appName);
 			if(clas->getClassName()!="") {
 				args argus;
@@ -61,7 +60,7 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 						}
 					}
 				} catch(const std::exception& e) {
-					logger.info("Error during init call for Datasource " + appName + "@" + props.getName() + " " + std::string(e.what()));
+					logger.info("Error during init call for Datasource " + mapping.getAppName() + "@" + props.getName() + " " + std::string(e.what()));
 				}
 				ref->destroy(_temp, v.at(0), appName);
 			}
@@ -108,7 +107,7 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name) {
 	std::string appName = CommonUtils::getAppName();
 	StringUtil::trim(name);
 	if(name=="") {
-		name = defDsnName;
+		name = defDsnNames[appName];
 	}
 	name = appName + name;
 	if(dsns.find(name)==dsns.end())

@@ -49,6 +49,7 @@ public:
 	static std::string urlEncode(const std::string& str);
 	static std::string urlDecode(const std::string& str);
 	static void sanitizeHtml(std::string& data);
+	static void deSanitizeHtml(std::string& strret);
 };
 
 #endif /* CRYPTOHANDLER_H_ */

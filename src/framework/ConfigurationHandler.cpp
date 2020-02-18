@@ -600,6 +600,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 									restfunction.meth = StringUtil::toUpperCopy(resfuncs.at(cntn1).getAttribute("meth"));
 									restfunction.statusCode = resfuncs.at(cntn1).getAttribute("statusCode");
 									restfunction.rtype = resfuncs.at(cntn1).getAttribute("rtype");
+									CryptoHandler::deSanitizeHtml(restfunction.rtype);
 									if(restfunction.statusCode!="")
 									{
 										try {
@@ -609,7 +610,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 											restfunction.statusCode = "200";
 										}
 									}
-									restfunction.serOpt = SerializeBase::identifySerOption(resfuncs.at(cntn1).getAttribute("rtype"));
+									restfunction.serOpt = SerializeBase::identifySerOption(restfunction.rtype);
 									/*restfunction.baseUrl = resfuncs.at(cntn1).getAttribute("baseUrl");
 									if(restfunction.baseUrl!="")
 									{
@@ -634,6 +635,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 										{
 											RestFunctionParams param;
 											param.type = resfuncparams.at(cntn2).getAttribute("type");
+											CryptoHandler::deSanitizeHtml(param.type);
 											param.serOpt = SerializeBase::identifySerOption(param.type);
 											param.from = resfuncparams.at(cntn2).getAttribute("from");
 											param.name = resfuncparams.at(cntn2).getAttribute("name");
@@ -2305,6 +2307,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 			restfunction.appName = appName;
 			restfunction.name = cs.pubms.at(var).name;
 			restfunction.rtype = cs.pubms.at(var).retType;
+			CryptoHandler::deSanitizeHtml(restfunction.rtype);
 			restfunction.serOpt = SerializeBase::identifySerOption(cs.pubms.at(var).retType);
 			restfunction.path = m.getAttributeValue("path");
 			restfunction.statusCode = m.getAttributeValue("statusCode");
@@ -2342,6 +2345,7 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 
 				RestFunctionParams param;
 				param.type = cs.pubms.at(var).argstypes[pit->first];
+				CryptoHandler::deSanitizeHtml(param.type);
 				param.serOpt = SerializeBase::identifySerOption(param.type);
 				StringUtil::replaceAll(param.type, " ", "");
 

@@ -156,7 +156,7 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
             std::string atvalue = tag.substr(0,tag.find_first_of("\""));
             tag = tag.substr(tag.find_first_of("\"")+1);
             try {
-            	sanitizeXml(atvalue);
+            	//sanitizeXml(atvalue);
 				if(parent!="")
 				{
 					element.addAttribute(StringUtil::trimCopy(atname),atvalue,true);
@@ -273,7 +273,7 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
 				}
 				else
 				{
-					sanitizeXml(txml);
+					//sanitizeXml(txml);
 					element.setText(txml);
 				}
 				par->addElement(element);
@@ -287,7 +287,7 @@ void XmlParser::readXML(std::string& xml, const std::string& parent, Element *pa
 				}
 				else
 				{
-					sanitizeXml(txml);
+					//sanitizeXml(txml);
 					par->setText(txml);
 				}
 			}

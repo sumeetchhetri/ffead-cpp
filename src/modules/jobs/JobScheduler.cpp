@@ -93,6 +93,9 @@ void JobScheduler::start() {
 		std::string appName = instance->configs.at(dn).app;
 		if(clas!="" && method!="" && cron!="" && name!="")
 		{
+			StringUtil::replaceAll(appName, "-", "_");
+			RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
+			CommonUtils::setAppName(appName);
 			ClassInfo* claz = ref->getClassInfo(clas, appName);
 			logger << "JobScheduler - Got class " + claz->getClassName() << std::endl;
 			if(claz->getClassName()!="")
@@ -166,6 +169,7 @@ void JobScheduler::stop() {
 void* JobScheduler::service(void* arg)
 {
 	JobTask *task  = static_cast<JobTask*>(arg);
+	CommonUtils::setAppName(task->appName);
 	task->run();
 	delete task;
 	return NULL;

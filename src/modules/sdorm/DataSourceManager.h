@@ -23,7 +23,7 @@ class DataSourceManager;
 class DataSourceManager {
 	Logger logger;
 	static std::map<std::string, DataSourceManager*> dsns;
-	static std::string defDsnName;
+	static std::map<std::string, std::string> defDsnNames;
 	ConnectionProperties props;
 	Mapping mapping;
 	ConnectionPooler* pool;
