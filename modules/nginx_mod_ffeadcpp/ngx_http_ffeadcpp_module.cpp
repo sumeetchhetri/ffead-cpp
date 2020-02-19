@@ -337,14 +337,14 @@ static ngx_int_t ngx_http_ffeadcpp_module_handler_post_read(ngx_http_request_t *
 
 		if(data.length()>0)
 		{
-			std::string contType = respo.getHeader(HttpResponse::ContentType);
+			/*std::string contType = respo.getHeader(HttpResponse::ContentType);
 			r->headers_out.content_type.data = ngx_pcalloc(r->pool, contType.size()+1);
 			if (r->headers_out.content_type.data == NULL) {
 				ngx_http_finalize_request(r, NGX_HTTP_INTERNAL_SERVER_ERROR);
 				return;
 			}
 			ngx_cpystrn(r->headers_out.content_type.data, contType.c_str(), contType.size()+1);
-			r->headers_out.content_type.len = contType.size();
+			r->headers_out.content_type.len = contType.size();*/
 
 			b = ngx_create_temp_buf(r->pool, data.size());
 			if (b == NULL) {
