@@ -88,7 +88,10 @@ std::vector<TeBkWorld> TeBkRestController::updates(std::string queries) {
 			TeBkWorld w = sqli->get<TeBkWorld>(id);
 			int newRandomNumber = rand() % 10000 + 1;
 			if(w.getRandomNumber() == newRandomNumber) {
-				newRandomNumber -= 1;
+				newRandomNumber += 1;
+				if(newRandomNumber>=10000) {
+					newRandomNumber = 1;
+				}
 			}
 			w.setRandomNumber(newRandomNumber);
 			wlst.push_back(w);
