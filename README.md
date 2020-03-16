@@ -45,7 +45,7 @@ Features
 Quickstart (Using cmake)
 ===========
 - Install cmake >= 3.8.2 and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
-- cmake .
+- cmake -DMOD_SDORM_MONGO=on .
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
 - cd ffead-cpp-3.0-bin/ (Navigate to the ffead-cpp binary folder)
@@ -56,7 +56,7 @@ Quickstart (Using autoconf)
 ===========
 - Install [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
 - ./autogen.sh (Setup configure for your platform)
-- ./configure (Setup makefiles)
+- ./configure --enable-mod_sdormmongo (Setup makefiles)
 - Stretch a bit :-)
 - make install (Build ffead-cpp)
 - Sip some coffee
