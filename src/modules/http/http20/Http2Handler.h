@@ -55,6 +55,7 @@ public:
 	void onOpen();
 	void onClose();
 	std::string getProtocol(void* context);
+	int getType(void* context);
 	int getTimeout();
 	bool readRequest(void* request, void*& context, int& pending, int& reqPos);
 	bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos);

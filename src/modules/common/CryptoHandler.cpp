@@ -44,7 +44,8 @@ char* CryptoHandler::base64decode(unsigned char *input, const int& length)
 	bmem = BIO_new_mem_buf(input, length);
 	bmem = BIO_push(b64, bmem);
 
-	BIO_read(bmem, buffer, length);
+	int dlen = BIO_read(bmem, buffer, length);
+	buffer[dlen] = '\0';
 
 	BIO_free_all(bmem);
 
@@ -64,9 +65,9 @@ char* CryptoHandler::base64encode(const unsigned char *input, const int& length)
 	BIO_flush(b64);
 	BIO_get_mem_ptr(b64, &bptr);
 
-	char *buff = (char *)malloc(bptr->length);
-	memcpy(buff, bptr->data, bptr->length-1);
-	buff[bptr->length-1] = 0;
+	char *buff = (char *)malloc(bptr->length+1);
+	memcpy(buff, bptr->data, bptr->length);
+	buff[bptr->length] = '\0';
 
 	BIO_free_all(b64);
 
@@ -312,7 +313,15 @@ std::string CryptoHandler::sha1(const std::string& data)
 {
 	unsigned char hash[SHA_DIGEST_LENGTH];
 	SHA1((unsigned char*)data.c_str(), data.length(), hash);
-	return std::string((const char*)hash);
+	// Transform byte-array to string
+	/*std::stringstream shastr;
+	shastr << std::hex << std::setfill('0');
+	for (int i=0;i<SHA_DIGEST_LENGTH;i++)
+	{
+		shastr << std::setw(2) << (int)hash[i];
+	}
+	return shastr.str();*/
+	return std::string((const char*)hash, SHA_DIGEST_LENGTH);
 }
 
 void CryptoHandler::sanitizeHtml(std::string& data) {

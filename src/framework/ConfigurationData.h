@@ -219,6 +219,7 @@ class ConfigurationData {
 	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > cacheConnProperties;
 	std::map<std::string, std::vector<WsDetails>, std::less<> > webserviceDetailMap;
 	std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> > classStructureMap;
+	std::map<std::string, propMap, std::less<> > appPropertiesMap;
 	Logger logger;
 	ThreadLocal httpRequest;
 	ThreadLocal httpResponse;
@@ -288,6 +289,7 @@ public:
 	static void initializeAllSingletonBeans();
 	static void clearAllSingletonBeans();
 	static void setCoreServerProperties(CoreServerProperties coreServerProperties);
+	static propMap getAppProperties(const std::string& name = "");
 	virtual ~ConfigurationData();
 };
 

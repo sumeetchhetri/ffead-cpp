@@ -35,7 +35,7 @@ private:
 	std::string value;
 	int type;
 	std::vector<JSONElement> children;
-	std::map<std::string, JSONElement*> allnodes;
+	std::map<std::string, int> allnodes;
 	JSONElement(int type);
 	JSONElement(int type, std::string k, std::string v);
 public:

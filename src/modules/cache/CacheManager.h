@@ -30,7 +30,7 @@ class CacheManager {
 public:
 	CacheManager();
 	virtual ~CacheManager();
-	static CacheInterface* getImpl(std::string name = "");
+	static CacheInterface* getImpl(std::string name = "", std::string appName = "");
 };
 
 #endif /* CACHEMANAGER_H_ */

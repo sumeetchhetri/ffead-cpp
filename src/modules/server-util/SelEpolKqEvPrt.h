@@ -147,6 +147,7 @@ public:
 	void onOpen(){}
 	void onClose(){}
 	void addHandler(SocketInterface* handler){}
+	int getType(void* context) {return -1;}
 };
 
 class SelEpolKqEvPrt : public EventHandler {

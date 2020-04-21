@@ -98,7 +98,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 				std::map<std::string, std::string, cicomp> wshdrs = context->decode(headerf->headerBlockFragment);
 				if(wshdrs.find(":opcode")!=wshdrs.end()) {
 					try {
-						wsrequest->dataType = CastUtil::toShort(wshdrs[":opcode"]);
+						//wsrequest->isTextOrBinary = wshdrs[":opcode"]=="1";
 					} catch(const std::exception& e) {
 						//TODO specify proper error
 						closeConnection(frame->header.streamIdentifier, handler);
@@ -163,7 +163,7 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 				std::map<std::string, std::string, cicomp> wshdrs = context->decode(contf->headerBlockFragment);
 				if(wshdrs.find(":opcode")!=wshdrs.end()) {
 					try {
-						wsrequest->dataType = CastUtil::toShort(wshdrs[":opcode"]);
+						//wsrequest->isTextOrBinary = wshdrs[":opcode"]=="1";
 					} catch(const std::exception& e) {
 						//TODO specify proper error
 						closeConnection(frame->header.streamIdentifier, handler);
@@ -309,15 +309,15 @@ bool Http2StreamHandler::handle(Http2Frame* frame, const int& precedingStreamId,
 
 					requestObj = getRequestAndReInit();
 				} else if(dataf->getHeader().isEndOfStream()) {
-					wsrequest->data += dataf->data;
+					//wsrequest->data += dataf->data;
 					//TODO handle websocket close
 				} else if(isWebSocket && dataf->getHeader().isWsEndSegment()) {
-					wsrequest->data += dataf->data;
+					//wsrequest->data += dataf->data;
 					requestObj = getWsRequestAndReInit();
 				} else {
 					//else continue appending the data
 					if(!isWebSocket)request->content += dataf->data;
-					else wsrequest->data += dataf->data;
+					//else wsrequest->data += dataf->data;
 				}
 			} else {
 				closeConnection(frame->header.streamIdentifier, handler);

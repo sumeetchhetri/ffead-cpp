@@ -78,8 +78,7 @@ bool Http11WebSocketDataFrame::isRsv3() const {
 	return rsv3;
 }
 
-std::string Http11WebSocketDataFrame::getFrameData() {
-	std::string finaldata;
+void Http11WebSocketDataFrame::getFrameData(std::string &finaldata) {
 	std::bitset<8> firstBits;
 	firstBits.set(7, this->fin);
 	firstBits.set(6, this->rsv1);
@@ -108,29 +107,36 @@ std::string Http11WebSocketDataFrame::getFrameData() {
 	for(int u=0;u<(int)this->applicationData.size();u++) {
 		finaldata.push_back(this->applicationData.at(u));
 	}
+}
+
+std::string Http11WebSocketDataFrame::getFrameData() {
+	std::string finaldata;
+	getFrameData(finaldata);
 	return finaldata;
 }
 
-WebSocketData::WebSocketData(const std::string& data, const short& dataType)
-{
-	this->data = data;
-	this->dataType = dataType;
-	this->tecurrpart = 0;
-	this->teparts = 0;
-	this->techunkSiz = 0;
-}
+WebSocketData::WebSocketData(){}
 
-WebSocketData::WebSocketData() {
-	this->tecurrpart = 0;
-	this->teparts = 0;
-	this->techunkSiz = 0;
-	dataType = -1;
+bool WebSocketData::hasData() {
+	return textData.length()>0 || binaryData.length()>0;
 }
 
 WebSocketData::~WebSocketData() {}
 
-std::string WebSocketData::getData() const {
-	return data;
+void WebSocketData::collectText(const std::string& data) {
+	textData.append(data);
+}
+
+void WebSocketData::collectBinary(const std::string& data) {
+	binaryData.append(data);
+}
+
+std::string WebSocketData::getTextData() const {
+	return textData;
+}
+
+std::string WebSocketData::getBinaryData() const {
+	return binaryData;
 }
 
 std::string WebSocketData::getUrl() const {
@@ -141,32 +147,78 @@ std::string WebSocketData::getCntxt_name() const {
 	return cnxtName;
 }
 
-void WebSocketData::updateContent(const uint32_t& techunkSiz) {
-	unsigned int totlen = data.length();
-	if(techunkSiz>0 && techunkSiz<totlen)
-	{
-		this->techunkSiz = techunkSiz;
-		float parts = techunkSiz!=0?(float)totlen/techunkSiz:0;
-		parts = (floor(parts)<parts?floor(parts)+1:floor(parts));
-		this->teparts = (int)parts;
-	}
+void WebSocketRespponseData::pushText(const std::string &textData) {
+	more.push_back(WebSocketData());
+	more.at(more.size()-1).textData = textData;
 }
 
-bool WebSocketData::isContentRemains() {
-	return teparts>0 && tecurrpart<teparts;
+void WebSocketRespponseData::pushBinary(const std::string &binaryData) {
+	more.push_back(WebSocketData());
+	more.at(more.size()-1).binaryData = binaryData;
 }
 
-std::string WebSocketData::getRemainingContent() {
-	std::string rem;
-	if(isContentRemains()) {
-		unsigned int totlen = data.length();
-		unsigned int len = totlen - techunkSiz*tecurrpart;
-		if((int)len>techunkSiz)
-		{
-			len = techunkSiz;
+std::vector<WebSocketData> WebSocketRespponseData::getMore() {
+	return more;
+}
+
+bool WebSocketRespponseData::isEmpty() {
+	return more.size()==0;
+}
+
+WebSocketRespponseData::WebSocketRespponseData() {}
+
+void WebSocketRespponseData::reset() {
+	more.clear();
+}
+
+WebSocketRespponseData::~WebSocketRespponseData() {
+}
+
+void Http11WebSocketDataFrame::getFramePdu(WebSocketData* wres, std::string& data) {
+	Http11WebSocketDataFrame frame;
+	frame.fin = true;
+	frame.rsv1 = false;
+	frame.rsv2 = false;
+	frame.rsv3 = false;
+	frame.mask = false;
+	if(wres->textData.length()>0) {
+		frame.opcode = 1;
+		int payloadLength = wres->textData.length();
+		frame.payloadLength = payloadLength;
+
+		if(payloadLength<=125) {
+			frame.extendedPayloadLength = 0;
+		} else if(payloadLength<65535) {
+			frame.extendedPayloadLength = payloadLength;
+			frame.payloadLength = 126;
+		} else {
+			frame.extendedPayloadLength = payloadLength;
+			frame.payloadLength = 127;
 		}
-		rem = data.substr(techunkSiz*tecurrpart, len);
-		tecurrpart++;
+
+		//We will not set application data here, we will directly send the data as
+		//we have computed other control options
+		frame.getFrameData(data);
+		data += wres->textData;
 	}
-	return rem;
+	if(wres->binaryData.length()>0) {
+		frame.opcode = 2;
+		int payloadLength = wres->binaryData.length();
+		frame.payloadLength = payloadLength;
+
+		if(payloadLength<=125) {
+			frame.extendedPayloadLength = 0;
+		} else if(payloadLength<65535) {
+			frame.extendedPayloadLength = payloadLength;
+			frame.payloadLength = 126;
+		} else {
+			frame.extendedPayloadLength = payloadLength;
+			frame.payloadLength = 127;
+		}
+
+		//We will not set application data here, we will directly send the data as
+		//we have computed other control options
+		frame.getFrameData(data);
+		data += wres->binaryData;
+	}
 }

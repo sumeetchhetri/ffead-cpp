@@ -107,7 +107,6 @@ HandlerRequest::HandlerRequest() {
 	request = NULL;
 	context = NULL;
 	sif = NULL;
-	protType = -1;
 	reqPos = 0;
 	response = NULL;
 }
@@ -118,12 +117,13 @@ HandlerRequest::~HandlerRequest() {
 
 void HandlerRequest::clearObjects() {
 	if(request!=NULL) {
-		if(protType==1) {
+		if(getProtType()==1) {
 			HttpRequest* req = (HttpRequest*)request;
 			delete (HttpResponse*)req->resp;
 			delete req;
-		} else {
+		} else if(getProtType()==2) {
 			delete (WebSocketData*)request;
+			delete (WebSocketData*)response;
 		}
 	}
 	request = NULL;
@@ -139,7 +139,7 @@ void* HandlerRequest::getContext() {
 }
 
 int HandlerRequest::getProtType() const {
-	return protType;
+	return sif->getType(context);
 }
 
 void* HandlerRequest::getRequest() {

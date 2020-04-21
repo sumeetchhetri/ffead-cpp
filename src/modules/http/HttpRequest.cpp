@@ -253,6 +253,7 @@ void HttpRequest::reset(std::string&& data, int* content_length) {
 	num_params = 0;
 	ext.clear();
 	file.clear();
+	queryv = std::string_view(BLANK);
 
 	if(headers_data.length()>0) {
 		headers_data = data;
@@ -2104,37 +2105,46 @@ bool HttpRequest::isHeaderValue(std::string header, const std::string& value, co
 
 bool HttpRequest::hasHeaderValuePart(std::string header, std::string valuePart, const bool& ignoreCase)
 {
-	if(headers.find(header)!=headers.end())
-	{
-		std::string hvalue = headers[header];
-		if(hvalue==valuePart || (ignoreCase && StringUtil::toLowerCopy(hvalue)==StringUtil::toLowerCopy(valuePart)))
-		{
-			return true;
-		}
-		else if(ignoreCase)
-		{
-			StringUtil::toLower(hvalue);
-			StringUtil::toLower(valuePart);
-			std::vector<std::string> hvec = StringUtil::splitAndReturn<std::vector<std::string> >(hvalue, ",");
-			for(int yy=0;yy<(int)hvec.size();yy++)
-			{
-				std::string vp = StringUtil::toLowerCopy(hvec.at(yy));
-				StringUtil::trim(vp);
-				if(vp==valuePart) {
-					return true;
-				}
+	std::string hvalue;
+	if(num_headers>0) {
+		for(int i=0;i<(int)num_headers;++i) {
+			if(strncasecmp(headers_list[i].name, header.c_str(), headers_list[i].name_len)==0) {
+				hvalue = std::string(headers_list[i].value, headers_list[i].value_len);
+				break;
 			}
 		}
-		else
+	}
+	if(headers.find(header)!=headers.end())
+	{
+		hvalue = headers[header];
+	}
+	if(hvalue==valuePart || (ignoreCase && StringUtil::toLowerCopy(hvalue)==StringUtil::toLowerCopy(valuePart)))
+	{
+		return true;
+	}
+	else if(ignoreCase)
+	{
+		StringUtil::toLower(hvalue);
+		StringUtil::toLower(valuePart);
+		std::vector<std::string> hvec = StringUtil::splitAndReturn<std::vector<std::string> >(hvalue, ",");
+		for(int yy=0;yy<(int)hvec.size();yy++)
 		{
-			std::vector<std::string> hvec = StringUtil::splitAndReturn<std::vector<std::string> >(hvalue, ",");
-			for(int yy=0;yy<(int)hvec.size();yy++)
-			{
-				std::string vp = hvec.at(yy);
-				StringUtil::trim(vp);
-				if(vp==valuePart) {
-					return true;
-				}
+			std::string vp = StringUtil::toLowerCopy(hvec.at(yy));
+			StringUtil::trim(vp);
+			if(vp==valuePart) {
+				return true;
+			}
+		}
+	}
+	else
+	{
+		std::vector<std::string> hvec = StringUtil::splitAndReturn<std::vector<std::string> >(hvalue, ",");
+		for(int yy=0;yy<(int)hvec.size();yy++)
+		{
+			std::string vp = hvec.at(yy);
+			StringUtil::trim(vp);
+			if(vp==valuePart) {
+				return true;
 			}
 		}
 	}

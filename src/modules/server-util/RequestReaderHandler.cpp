@@ -74,11 +74,11 @@ void* RequestReaderHandler::handle(void* inp) {
 	socklen_t sin_size;
 	while(ins->isActive())
 	{
-		Timer t;
-		t.start();
+		//Timer t;
+		//t.start();
 		int num = ins->selector.getEvents();
-		t.end();
-		CommonUtils::tsPoll += t.timerNanoSeconds();
+		//t.end();
+		//CommonUtils::tsPoll += t.timerNanoSeconds();
 
 		if (num<=0)
 		{
@@ -88,7 +88,7 @@ void* RequestReaderHandler::handle(void* inp) {
 			continue;
 		}
 
-		t.start();
+		//t.start();
 		for(int n=0;n<num;n++)
 		{
 			void* vsi = NULL;
@@ -155,8 +155,8 @@ void* RequestReaderHandler::handle(void* inp) {
 			}
 		}
 
-		t.end();
-		CommonUtils::tsProcess += t.timerNanoSeconds();
+		//t.end();
+		//CommonUtils::tsProcess += t.timerNanoSeconds();
 	}
 
 	for(int i=0;i<(int)ins->clsdConns.size();i++) {

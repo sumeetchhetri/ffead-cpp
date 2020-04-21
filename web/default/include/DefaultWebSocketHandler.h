@@ -13,9 +13,10 @@ class DefaultWebSocketHandler {
 public:
 	DefaultWebSocketHandler();
 	virtual ~DefaultWebSocketHandler();
-	WebSocketData onOpen();
-	WebSocketData onMessage(WebSocketData data);
-	WebSocketData onClose();
+	bool isWriteControl();
+	bool onOpen(WebSocketData* req, WebSocketRespponseData* res, std::string uniqueAddress, void* hreq);
+	void onClose(std::string uniqueAddress);
+	bool onMessage(WebSocketData* req, WebSocketRespponseData* res, std::string uniqueAddress);
 };
 
 #endif /* DEFAULTWEBSOCKETHANDLER_H_ */

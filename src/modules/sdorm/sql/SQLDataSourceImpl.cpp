@@ -426,9 +426,9 @@ bool SQLDataSourceImpl::allocateStmt(const bool& read) {
 	{
 		return false;
 	}
-	if (this->pool != NULL && this->conn != NULL && this->conn->isType() == read && V_OD_hstmt != NULL) {
+	if (this->conn != NULL) {
 		refreshStmt();
-		//return false;
+		return true;
 	}
 	int V_OD_erg;// result of functions
 	if (read) {

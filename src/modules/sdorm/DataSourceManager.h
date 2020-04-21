@@ -33,7 +33,7 @@ class DataSourceManager {
 	friend class ConfigurationHandler;
 public:
 	virtual ~DataSourceManager();
-	static DataSourceInterface* getImpl(std::string name = "");
+	static DataSourceInterface* getImpl(std::string name = "", std::string appName = "");
 };
 
 #endif /* DATASOURCEMANAGER_H_ */

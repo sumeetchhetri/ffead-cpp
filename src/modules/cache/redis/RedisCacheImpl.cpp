@@ -176,6 +176,16 @@ void* RedisCacheImpl::executeCommand(const std::string& command, ...) {
 	return reply;
 }
 
+bool RedisCacheImpl::addToQ(const std::string& qname, const std::string& value) {
+	redisReply* reply = execute("LPUSH %s %s", qname.c_str(), value.c_str());
+	return replyStatus(reply);
+}
+
+std::string RedisCacheImpl::getFromQ(const std::string& qname) {
+	redisReply* reply = execute("RPOP %s", qname.c_str());
+	return replyValue(reply);
+}
+
 void RedisCacheImpl::init() {
 }
 

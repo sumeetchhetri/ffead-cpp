@@ -48,6 +48,8 @@ public:
 	bool flushAll();
 
 	void* executeCommand(const std::string& command, ...);
+	bool addToQ(const std::string& qname, const std::string& value);
+	std::string getFromQ(const std::string& qname);
 };
 
 #endif /* MEMCACHEDIMPL_H_ */

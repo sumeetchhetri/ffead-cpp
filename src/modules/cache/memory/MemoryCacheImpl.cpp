@@ -143,6 +143,29 @@ bool MemoryCacheImpl::replace(const std::string& key, GenericObject& value, int 
 	return status;
 }
 
+bool MemoryCacheImpl::addToQ(const std::string& qname, const std::string& value) {
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+	p->qlock.lock();
+	if(p->internalQMap.find(qname)==p->internalQMap.end()) {
+		p->internalQMap[qname];
+	}
+	p->internalQMap[qname].push(value);
+	p->qlock.unlock();
+	return false;
+}
+
+std::string MemoryCacheImpl::getFromQ(const std::string& qname) {
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+	p->qlock.lock();
+	std::string value;
+	if(p->internalQMap.find(qname)!=p->internalQMap.end() && !p->internalQMap[qname].empty()) {
+		value = p->internalQMap[qname].front();
+		p->internalQMap[qname].pop();
+	}
+	p->qlock.unlock();
+	return value;
+}
+
 void MemoryCacheImpl::init() {
 }
 

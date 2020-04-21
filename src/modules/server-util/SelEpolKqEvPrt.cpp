@@ -284,6 +284,14 @@ bool SelEpolKqEvPrt::registerWrite(SocketInterface* obj) {
 		//std::cout << "Error adding to epoll cntl list" << std::endl;
 		return false;
 	}
+#elif defined USE_KQUEUE
+	struct kevent change;
+	memset(&change, 0, sizeof(change));
+	EV_SET(&change, obj->fd, EVFILT_READ, EV_DELETE, 0, 0, obj);
+	kevent(kq, &change, 1, NULL, 0, NULL);
+	memset(&change, 0, sizeof(change));
+	EV_SET(&change, obj->fd, EVFILT_WRITE, EV_ADD, 0, 0, obj);
+	kevent(kq, &change, 1, NULL, 0, NULL);
 #endif
 	return true;
 }
@@ -304,6 +312,14 @@ bool SelEpolKqEvPrt::unRegisterWrite(SocketInterface* obj) {
 		//std::cout << "Error adding to epoll cntl list" << std::endl;
 		return false;
 	}
+#elif defined USE_KQUEUE
+	struct kevent change;
+	memset(&change, 0, sizeof(change));
+	EV_SET(&change, obj->fd, EVFILT_WRITE, EV_DELETE, 0, 0, obj);
+	kevent(kq, &change, 1, NULL, 0, NULL);
+	memset(&change, 0, sizeof(change));
+	EV_SET(&change, obj->fd, EVFILT_READ, EV_ADD, 0, 0, obj);
+	kevent(kq, &change, 1, NULL, 0, NULL);
 #endif
 	return true;
 }
@@ -506,6 +522,8 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 void* SelEpolKqEvPrt::getOptData(const int& index) {
 	#if defined USE_EPOLL
 		return events[index].data.ptr;
+	#elif defined USE_KQUEUE
+		return evlist[index].udata;
 	#endif
 	return NULL;
 }

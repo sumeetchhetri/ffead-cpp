@@ -179,6 +179,14 @@ void* MemcachedImpl::executeCommand(const std::string& command, ...) {
 	throw std::runtime_error("Not Implemented");
 }
 
+bool MemcachedImpl::addToQ(const std::string& qname, const std::string& value) {
+	return false;
+}
+
+std::string MemcachedImpl::getFromQ(const std::string& qname) {
+	return "";
+}
+
 void MemcachedImpl::init() {
 }
 

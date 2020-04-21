@@ -7,13 +7,20 @@
 
 #include "Http11Handler.h"
 
-bool Http11Handler::readRequest(void* request, void*& context, int& pending, int& reqPos) {
-	//if(handler!=NULL) {
-	//	return handler->readRequest(request, context, pending, reqPos);
-	//}
+int Http11Handler::readFrom() {
+	if(handler!=NULL) {
+		return handler->readFrom();
+	}
+	return this->SocketInterface::readFrom();
+}
 
-	Timer t;
-	t.start();
+bool Http11Handler::readRequest(void* request, void*& context, int& pending, int& reqPos) {
+	if(handler!=NULL) {
+		return handler->readRequest(request, context, pending, reqPos);
+	}
+
+	//Timer t;
+	//t.start();
 
 	HttpRequest* currReq = (HttpRequest*)request;
 
@@ -111,8 +118,8 @@ bool Http11Handler::readRequest(void* request, void*& context, int& pending, int
 
 	pending = buffer.length();
 
-	t.end();
-	CommonUtils::tsReqParse += t.timerNanoSeconds();
+	//t.end();
+	//CommonUtils::tsReqParse += t.timerNanoSeconds();
 
 	return fl;
 }
@@ -165,10 +172,6 @@ void Http11Handler::addHandler(SocketInterface* handler) {
 }
 
 Http11Handler::~Http11Handler() {
-	if(handler!=NULL) {
-		delete handler;
-		handler = NULL;
-	}
 	for(int i=0;i<(int)requests.size();i++) {
 		HttpRequest* r = requests.at(i);
 		delete (HttpResponse*)r->resp;
@@ -183,6 +186,10 @@ Http11Handler::~Http11Handler() {
 	if(wrTsk!=NULL) {
 		delete wrTsk;
 	}
+	if(handler!=NULL) {
+		delete handler;
+		handler = NULL;
+	}
 }
 
 std::string Http11Handler::getProtocol(void* context) {
@@ -190,6 +197,13 @@ std::string Http11Handler::getProtocol(void* context) {
 		return handler->getProtocol(context);
 	}
 	return "HTTP1.1";
+}
+
+int Http11Handler::getType(void* context) {
+	if(handler!=NULL) {
+		return handler->getType(context);
+	}
+	return 1;
 }
 
 bool Http11Handler::writeResponse(void* req, void* res, void* context, std::string& data, int reqPos) {
@@ -222,15 +236,15 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context, std::stri
 
 	return true;
 }
+
 void Http11Handler::onOpen(){
 	if(handler!=NULL) {
 		handler->onOpen();
-		return;
 	}
 }
+
 void Http11Handler::onClose(){
 	if(handler!=NULL) {
-		return handler->onClose();
-		return;
+		handler->onClose();
 	}
 }

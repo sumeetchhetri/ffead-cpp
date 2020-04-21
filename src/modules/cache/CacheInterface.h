@@ -85,6 +85,8 @@ public:
 	virtual bool flushAll()=0;
 	virtual std::string getValue(const std::string& key)=0;
 	virtual std::vector<std::string> getValues(const std::vector<std::string>& keys)=0;
+	virtual bool addToQ(const std::string& qname, const std::string& value)=0;
+	virtual std::string getFromQ(const std::string& qname)=0;
 
 	template<typename T> inline bool setO(const std::string& key, const T& t, int expireSeconds = -1) {
 		GenericObject o;

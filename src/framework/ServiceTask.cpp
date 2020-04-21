@@ -413,120 +413,55 @@ void ServiceTask::updateContent(HttpRequest* req, HttpResponse *res, const std::
 	}
 }
 
-void ServiceTask::handleWebsockOpen(WebSocketData* req) {
+WebSockHandler* ServiceTask::handleWebsockOpen(WebSocketData* req, WebSocketRespponseData* res, SocketInterface* sif, HttpRequest* hreq) {
+	if(!ConfigurationData::isServingContext(hreq->getCntxt_name())) {
+		if(ConfigurationData::getInstance()->appAliases.find(hreq->getCntxt_name())!=ConfigurationData::getInstance()->appAliases.end()) {
+			hreq->setCntxt_name(std::string_view{ConfigurationData::getInstance()->appAliases.find(hreq->getCntxt_name())->second});
+			if(ConfigurationData::getInstance()->servingContexts.find(hreq->getCntxt_name())==ConfigurationData::getInstance()->servingContexts.end())
+			{
+				//logger << "Context not found, Closing connection..." << std::endl;
+				return NULL;
+			}
+		}
 
-	Reflector& reflector = ConfigurationData::getInstance()->reflector;
+		if(!ConfigurationData::isServingContext(hreq->getCntxt_name())) {
+			hreq->setCntxt_name(HttpRequest::DEFAULT_CTX);
+		}
+	}
 
-	std::string className;
-	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
-	std::map<std::string, std::string, std::less<> > websockcntMap = websocketMappingMap.find(req->getCntxt_name())->second;
+	CommonUtils::setAppName(ConfigurationData::getInstance()->servingContextAppNames.find(hreq->getCntxt_name())->second);
+	hreq->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(hreq->getCntxt_name())->second);
+
+	hreq->normalizeUrl();
+	hreq->updateContent();
+
+	req->url = hreq->getCurl();
+	req->cnxtName = hreq->getCntxt_name();
+
+	std::map<std::string, std::string, std::less<> > websockcntMap = ConfigurationData::getInstance()->websocketMappingMap.find(req->getCntxt_name())->second;
 	std::map<std::string, std::string>::iterator it;
 	for (it=websockcntMap.begin();it!=websockcntMap.end();++it) {
-		if(ConfigurationData::urlMatchesPath(req->getCntxt_name(), it->first, req->getUrl()))
+		if(ConfigurationData::urlMatchesPath(req->getCntxt_name(), it->first, hreq->getCurl()))
 		{
-			className = it->second;
-			break;
+			if(it->second!="")
+			{
+				void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+it->second, req->getCntxt_name());
+				WebSockHandler* h = (WebSockHandler*)_temp;
+				h->sif = sif;
+				if(h->onOpen(req, res, sif->getAddress(), hreq))
+					return h;
+				return NULL;
+			}
+			return NULL;
 		}
 	}
-	if(className!="")
-	{
-		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
-		args argus;
-		vals valus;
-		ClassInfo* srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
-		Method meth = srv->getMethod("onOpen", argus);
-		if(meth.getMethodName()!="")
-		{
-			// logger << ("WebSocket Controller " + className + " called") << std::endl;
-			 reflector.invokeMethodGVP(_temp,meth,valus);
-			 //logger << "WebSocket Controller onOpen" << std::endl;
-		}
-		else
-		{
-			//logger << "Invalid WebSocket Controller" << std::endl;
-		}
-	}
-}
-
-void ServiceTask::handleWebsockClose(WebSocketData* req) {
-
-	Reflector& reflector = ConfigurationData::getInstance()->reflector;
-
-	std::string className;
-	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
-	std::map<std::string, std::string, std::less<> > websockcntMap = websocketMappingMap.find(req->getCntxt_name())->second;
-	std::map<std::string, std::string>::iterator it;
-	for (it=websockcntMap.begin();it!=websockcntMap.end();++it) {
-		if(ConfigurationData::urlMatchesPath(req->getCntxt_name(), it->first, req->getUrl()))
-		{
-			className = it->second;
-			break;
-		}
-	}
-	if(className!="")
-	{
-		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
-		args argus;
-		vals valus;
-		ClassInfo* srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
-		Method methc = srv->getMethod("onClose", argus);
-		if(methc.getMethodName()!="")
-		{
-			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
-			 reflector.invokeMethodGVP(_temp,methc,valus);
-			 //logger << "WebSocket Controller onClose" << std::endl;
-		}
-		else
-		{
-			//logger << "Invalid WebSocket Controller" << std::endl;
-		}
-	}
-}
-
-void ServiceTask::handleWebsockMessage(const std::string& url, WebSocketData* req, WebSocketData* response) {
-
-	Reflector& reflector = ConfigurationData::getInstance()->reflector;
-
-	std::string className;
-	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> >& websocketMappingMap = ConfigurationData::getInstance()->websocketMappingMap;
-	std::map<std::string, std::string, std::less<> > websockcntMap = websocketMappingMap.find(req->getCntxt_name())->second;
-	std::map<std::string, std::string>::iterator it;
-	for (it=websockcntMap.begin();it!=websockcntMap.end();++it) {
-		if(ConfigurationData::urlMatchesPath(req->getCntxt_name(), it->first, req->getUrl()))
-		{
-			className = it->second;
-			break;
-		}
-	}
-	if(className!="")
-	{
-		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+className, req->getCntxt_name());
-		args argus;
-		vals valus;
-		ClassInfo* srv = ConfigurationData::getClassInfo(className, req->getCntxt_name());
-		argus.push_back("WebSocketData*");
-		valus.push_back(req);
-		argus.push_back("WebSocketData*");
-		valus.push_back(response);
-		Method methc = srv->getMethod("onMessage", argus);
-		if(methc.getMethodName()!="")
-		{
-			 //logger << ("WebSocket Controller " + className + " called") << std::endl;
-			 WebSocketData data;
-			 reflector.invokeMethod<WebSocketData>(&data,_temp,methc,valus);
-			 //logger << "WebSocket Controller onMessage" << std::endl;
-		}
-		else
-		{
-			//logger << "Invalid WebSocket Controller" << std::endl;
-		}
-	}
+	return NULL;
 }
 
 void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 {
-	Timer t1;
-	t1.start();
+	//Timer t1;
+	//t1.start();
 
 	res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 	/*After going through the controller the response might be blank, just set the HTTP version*/
@@ -554,8 +489,8 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			if(router!=NULL) {
 				req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
 				router->route(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib);
-				t1.end();
-				CommonUtils::tsServicePre += t1.timerNanoSeconds();
+				//t1.end();
+				//CommonUtils::tsServicePre += t1.timerNanoSeconds();
 				return;
 			}
 		} else {
@@ -567,8 +502,8 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				if(router!=NULL) {
 					req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
 					router->route(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib);
-					t1.end();
-					CommonUtils::tsServicePre += t1.timerNanoSeconds();
+					//t1.end();
+					//CommonUtils::tsServicePre += t1.timerNanoSeconds();
 					return;
 				}
 			}
@@ -649,12 +584,12 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		std::string ext = req->getExt();
 
-		t1.end();
-		CommonUtils::tsServicePre += t1.timerNanoSeconds();
+		//t1.end();
+		//CommonUtils::tsServicePre += t1.timerNanoSeconds();
 
 		bool isContrl = false;
 
-		t1.start();
+		//t1.start();
 		if(ConfigurationData::getInstance()->enableCors) {
 			try {
 				isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
@@ -663,10 +598,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				isContrl = true;
 			}
 		}
-		t1.end();
-		CommonUtils::tsServiceCors += t1.timerNanoSeconds();
+		//t1.end();
+		//CommonUtils::tsServiceCors += t1.timerNanoSeconds();
 
-		t1.start();
+		//t1.start();
 		bool hasSecurity = false;
 		if(!isContrl && ConfigurationData::getInstance()->enableSecurity) {
 			hasSecurity = SecurityHandler::hasSecurity(req->getCntxt_name());
@@ -679,10 +614,10 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				}
 			}
 		}
-		t1.end();
-		CommonUtils::tsServiceSec += t1.timerNanoSeconds();
+		//t1.end();
+		//CommonUtils::tsServiceSec += t1.timerNanoSeconds();
 
-		t1.start();
+		//t1.start();
 		bool hasFilters = false;
 		if(!isContrl && ConfigurationData::getInstance()->enableFilters) {
 			hasFilters = FilterHandler::hasFilters(req->getCntxt_name());
@@ -693,25 +628,25 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				ext = req->getExt();
 			}
 		}
-		t1.end();
-		CommonUtils::tsServiceFlt += t1.timerNanoSeconds();
+		//t1.end();
+		//CommonUtils::tsServiceFlt += t1.timerNanoSeconds();
 
-		t1.start();
+		//t1.start();
 		if(!isContrl && ConfigurationData::getInstance()->enableControllers) {
 			isContrl = ControllerHandler::handle(req, res, ext, reflector);
 			ext = req->getExt();
 		}
-		t1.end();
-		CommonUtils::tsServiceCnt += t1.timerNanoSeconds();
+		//t1.end();
+		//CommonUtils::tsServiceCnt += t1.timerNanoSeconds();
 
-		t1.start();
+		//t1.start();
 		if(!isContrl && ConfigurationData::getInstance()->enableExtra) {
 			isContrl = ExtHandler::handle(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, ext, reflector);
 		}
-		t1.end();
-		CommonUtils::tsServiceExt += t1.timerNanoSeconds();
+		//t1.end();
+		//CommonUtils::tsServiceExt += t1.timerNanoSeconds();
 
-		t1.start();
+		//t1.start();
 
 		if(req->getMethod()!="TRACE" && !res->isDone())
 		{
@@ -773,8 +708,8 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			storeSessionAttributes(res, req, ConfigurationData::getInstance()->coreServerProperties.sessionTimeout, ConfigurationData::getInstance()->coreServerProperties.sessatserv);
 		}
 
-		t1.end();
-		CommonUtils::tsServicePost += t1.timerNanoSeconds();
+		//t1.end();
+		//CommonUtils::tsServicePost += t1.timerNanoSeconds();
 	}
 	catch(const std::exception& e)
 	{

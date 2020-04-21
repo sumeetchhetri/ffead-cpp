@@ -41,6 +41,11 @@ class ResponseData {
 	std::string _b;
 	int oft;
 	friend class SocketInterface;
+	friend class HttpServiceTask;
+	friend class WebSockHandler;
+public:
+	ResponseData();
+	virtual ~ResponseData();
 };
 
 class EventHandler {
@@ -100,7 +105,7 @@ public:
 	int writeTo(ResponseData* d);
 	bool writeFile(int fdes, int remain_data);
 	bool isClosed();
-	int readFrom();
+	virtual int readFrom();
 	int getDescriptor();
 	std::string getAddress();
 	std::string getAlpnProto();
@@ -112,6 +117,7 @@ public:
 	void closeSocket();
 	bool checkSocketWaitForTimeout(const int& writing, const int& seconds, const int& micros= 0);
 	virtual std::string getProtocol(void* context)=0;
+	virtual int getType(void* context)=0;
 	virtual int getTimeout()=0;
 	virtual bool readRequest(void* request, void*& context, int& pending, int& reqPos)=0;
 	virtual bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos)=0;

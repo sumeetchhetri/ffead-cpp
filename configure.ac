@@ -993,7 +993,8 @@ AC_CONFIG_FILES([web/default/src/autotools/Makefile
 				web/oauthApp/src/autotools/Makefile
 				web/markers/src/autotools/Makefile
 				web/te-benchmark/src/autotools/Makefile
-				web/te-benchmark-um/src/autotools/Makefile])
+				web/te-benchmark-um/src/autotools/Makefile
+				web/peer-server/src/autotools/Makefile])
 AC_OUTPUT
 
 echo "Host: $host"

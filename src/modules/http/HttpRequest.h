@@ -116,7 +116,6 @@ class HttpRequest {
 	void setContent_tfile(const std::string& tfile);
 	void setQueryParams(const RMap& queryParams);
 	void setAuthinfo(const RMap&);
-	void normalizeUrl();
     void setCurl(std::string url);
 	void setActUrl(const std::string&);
 	void setCntxt_name(std::string_view);
@@ -153,6 +152,7 @@ public:
 		PREFLIGHT, CORS, OTHER
 	};
 	static void init();
+	void normalizeUrl();
 	static const std::string DEFAULT_CTX, BLANK;
 	static std::string Accept,AcceptCharset,AcceptEncoding,AcceptLanguage,AcceptDatetime,
 				  AccessControlRequestHeaders,AccessControlRequestMethod,Authorization,

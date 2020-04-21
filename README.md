@@ -28,6 +28,7 @@ Official ffead-cpp pre-built images can be found at [dockerhub](https://cloud.do
 
 Features
 ==========
+- Webrtc Signalling (websocket + api) (horizontally scalable peerjs compatible signalling server)
 - Advanced ORM - SDORM (sql/monogo)
 - Embedded Server, Apache/Nginx support (modules)
 - Web Socket Support
@@ -64,5 +65,11 @@ Quickstart (Using autoconf)
 - cd ffead-cpp-3.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
+
+Webrtc Example (Uses peerjs)
+===========
+- Follow Quickstart (Using cmake) above
+- Once the server starts, navigate to http://localhost:8080/peer-server/index.html in 2 tabs
+- Enjoy p2p calling using the ffead-cpp webrtc (peerjs compatible) signalling server
 
 For further details checkout the [wiki](https://github.com/sumeetchhetri/ffead-cpp/wiki) page

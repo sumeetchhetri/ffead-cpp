@@ -288,6 +288,17 @@ void ConfigurationData::clearInstance() {
 	}
 }
 
+propMap ConfigurationData::getAppProperties(const std::string &name) {
+	if(name!="" && getInstance()->appPropertiesMap.find(name)!=getInstance()->appPropertiesMap.end()) {
+		return getInstance()->appPropertiesMap.find(name)->second;
+	}
+	std::string aname = CommonUtils::getAppName(name);
+	if(getInstance()->appPropertiesMap.find(aname)!=getInstance()->appPropertiesMap.end()) {
+		return getInstance()->appPropertiesMap.find(aname)->second;
+	}
+	return propMap();
+}
+
 ConfigurationData::~ConfigurationData() {
 	if(dlib!=NULL) {
 		dlclose(dlib);

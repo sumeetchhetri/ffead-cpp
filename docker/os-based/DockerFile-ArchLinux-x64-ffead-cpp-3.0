@@ -20,7 +20,7 @@ RUN unzip master.zip
 RUN rm -f master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 WORKDIR /tmp/ffead-cpp-src
-RUN cmake .
+RUN cmake -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 RUN make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-3.0-bin /tmp/
 WORKDIR /tmp

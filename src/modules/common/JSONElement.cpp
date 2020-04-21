@@ -43,10 +43,9 @@ JSONElement::~JSONElement() {
 
 JSONElement& JSONElement::addChild(JSONElement ele) {
 	this->children.push_back(ele);
-	JSONElement* child = &(this->children.back());
-	if(child->name!="" && this->type!=JSON_ARRAY)
+	if(ele.name!="" && ele.type!=JSON_ARRAY)
 	{
-		this->allnodes[child->name] = child;
+		this->allnodes[ele.name] = children.size()-1;
 	}
 	return *this;
 }
@@ -93,8 +92,9 @@ JSONElement& JSONElement::setName(const std::string& name) {
 }*/
 
 JSONElement* JSONElement::getNodeP(const std::string& name) {
-	if(allnodes.find(name)!=allnodes.end())
-		return allnodes[name];
+	if(allnodes.find(name)!=allnodes.end()) {
+		return &children[allnodes[name]];
+	}
 	return NULL;
 }
 

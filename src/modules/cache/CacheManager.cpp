@@ -80,8 +80,13 @@ void CacheManager::destroy()
 	caches.clear();
 }
 
-CacheInterface* CacheManager::getImpl(std::string name) {
-	std::string appName = CommonUtils::getAppName();
+CacheInterface* CacheManager::getImpl(std::string name, std::string appName) {
+	if(appName=="") {
+		appName = CommonUtils::getAppName();
+	} else {
+		StringUtil::replaceAll(appName, "-", "_");
+		RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
+	}
 	StringUtil::trim(name);
 	if(name=="") {
 		name = defDsnNames[appName];

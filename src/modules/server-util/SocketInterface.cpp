@@ -110,8 +110,8 @@ bool SocketInterface::isClosed() {
 }
 
 int SocketInterface::completeWrite() {
-	Timer to;
-	to.start();
+	//Timer to;
+	//to.start();
 
 	int done = 1;
 	int reqPos = current + 1;
@@ -121,13 +121,13 @@ int SocketInterface::completeWrite() {
 	while(!(allRequestsDoneFl = allRequestsDone())) {
 		ResponseData& rd = wtl[reqPos];
 
-		Timer t;
-		t.start();
+		//Timer t;
+		//t.start();
 
 		done = writeTo(&rd);
 
-		t.end();
-		CommonUtils::tsResSockWrite += t.timerNanoSeconds();
+		//t.end();
+		////CommonUtils::tsResSockWrite += t.timerNanoSeconds();
 
 		if(done == 0 || done == 1) {
 			endRequest(reqPos);
@@ -146,8 +146,8 @@ int SocketInterface::completeWrite() {
 	}
 	//wm.unlock();
 
-	to.end();
-	CommonUtils::tsResTotal += to.timerNanoSeconds();
+	//to.end();
+	////CommonUtils::tsResTotal += to.timerNanoSeconds();
 	return done;
 }
 
@@ -159,8 +159,8 @@ void SocketInterface::writeTo(const std::string& d, int reqPos) {
 }
 
 int SocketInterface::pushResponse(void* request, void* response, void* context, int reqPos) {
-	Timer to;
-	to.start();
+	//Timer to;
+	//to.start();
 
 	//wm.lock();
 	ResponseData& rd = wtl[reqPos];
@@ -169,8 +169,8 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 	writeResponse(request, response, context, rd._b, reqPos);
 	//eh->registerWrite(this);
 
-	Timer t;
-	t.start();
+	//Timer t;
+	//t.start();
 
 	int done = writeTo(&rd);
 
@@ -179,8 +179,8 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 	state = 1;
 	setsockopt(fd, IPPROTO_TCP, TCP_CORK, &state, sizeof(state));*/
 
-	t.end();
-	CommonUtils::tsResSockWrite += t.timerNanoSeconds();
+	//t.end();
+	////CommonUtils::tsResSockWrite += t.timerNanoSeconds();
 
 	if(done >= 0) {
 		endRequest(reqPos);
@@ -188,8 +188,8 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 		eh->registerWrite(this);
 	}
 
-	to.end();
-	CommonUtils::tsResTotal += to.timerNanoSeconds();
+	//to.end();
+	////CommonUtils::tsResTotal += to.timerNanoSeconds();
 
 	return 1;
 }
@@ -500,4 +500,11 @@ std::string SocketInterface::getAlpnProto() {
 
 bool SocketInterface::isHttp2() {
 	return http2;
+}
+
+ResponseData::ResponseData() {
+	oft = 0;
+}
+
+ResponseData::~ResponseData() {
 }

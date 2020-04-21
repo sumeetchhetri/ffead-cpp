@@ -2,8 +2,8 @@ cd mongodb
 docker build -t mongo-for-ffeadcpp:latest -f mongodb.dockerfile .
 cd ../mysql
 docker build -t mysql-for-ffeadcpp:latest -f mysql.dockerfile .
-cd ../postgresql
-docker build -t postgresql-for-ffeadcpp:latest -f postgresql.dockerfile .
+cd ../postgres
+docker build -t postgresql-for-ffeadcpp:latest -f postgres.dockerfile .
 cd ../ffead-cpp
 docker build -t ffead-cpp-mongo:latest -f ffead-cpp.dockerfile .
 docker build -t ffead-cpp-mysql:latest -f ffead-cpp-mysql.dockerfile .

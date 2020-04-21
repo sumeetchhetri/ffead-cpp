@@ -292,6 +292,14 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 				//ConfigurationData::getInstance()->ffeadContext.addBean(bean1);
 				logger << ("Adding Router for " + name + " :: " + router) << std::endl;
 			}
+			if(root.getAttribute("properties")!="" && StringUtil::trimCopy(root.getAttribute("properties"))!="") {
+				std::string properties = StringUtil::trimCopy(root.getAttribute("properties"));
+				propMap srprps = pread.getProperties(defpath+"config/"+properties);
+				ConfigurationData::getInstance()->appPropertiesMap[scappName] = srprps;
+				//Bean bean1("router_"+router,"",router,"singleton",false,true,name);
+				//ConfigurationData::getInstance()->ffeadContext.addBean(bean1);
+				logger << ("Adding Properties for " + name + " :: " + properties) << std::endl;
+			}
 			for (unsigned int apps = 0; apps < eles.size(); apps++)
 			{
 				if(eles.at(apps).getTagName()=="controllers")

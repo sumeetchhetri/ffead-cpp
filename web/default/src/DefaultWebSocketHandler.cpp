@@ -8,28 +8,27 @@
 #include "DefaultWebSocketHandler.h"
 
 DefaultWebSocketHandler::DefaultWebSocketHandler() {
-	// TODO Auto-generated constructor stub
-
 }
 
 DefaultWebSocketHandler::~DefaultWebSocketHandler() {
-	// TODO Auto-generated destructor stub
 }
 
-WebSocketData DefaultWebSocketHandler::onOpen() {
+bool DefaultWebSocketHandler::onOpen(WebSocketData *req, WebSocketRespponseData *res, std::string uniqueAddress, void *hreq) {
 	std::cout << "Got onOpen request for WebSocket" << std::endl;
-	WebSocketData data;
-	return data;
+	return true;
 }
 
-WebSocketData DefaultWebSocketHandler::onMessage(WebSocketData data) {
-	std::cout << "Got onMessage request for WebSocket" << std::endl;
-	std::cout << data.getData() << std::endl;
-	return data;
-}
-
-WebSocketData DefaultWebSocketHandler::onClose() {
+void DefaultWebSocketHandler::onClose(std::string uniqueAddress) {
 	std::cout << "Got onClose request for WebSocket" << std::endl;
-	WebSocketData data;
-	return data;
+}
+
+bool DefaultWebSocketHandler::isWriteControl() {
+	return false;
+}
+
+bool DefaultWebSocketHandler::onMessage(WebSocketData *req, WebSocketRespponseData *res, std::string uniqueAddress) {
+	std::cout << "Got onMessage request for WebSocket" << std::endl;
+	std::cout << req->getTextData() << std::endl;
+	res->pushText(req->getTextData());
+	return true;
 }

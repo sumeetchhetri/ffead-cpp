@@ -30,7 +30,6 @@ class HandlerRequest {
 	void* context;
 	void* response;
 	int reqPos;
-	int protType;
 	ServiceHandler* sh;
 	friend class ServiceHandler;
 	friend class Http11Handler;

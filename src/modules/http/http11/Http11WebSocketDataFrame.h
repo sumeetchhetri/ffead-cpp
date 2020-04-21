@@ -11,6 +11,63 @@
 #include "string"
 #include <math.h>
 
+/*
+ * 	 |Opcode  | Meaning                             | Reference |
+    -+--------+-------------------------------------+-----------|
+     | 0      | Continuation Frame                  | RFC 6455  |
+    -+--------+-------------------------------------+-----------|
+     | 1      | Text Frame                          | RFC 6455  |
+    -+--------+-------------------------------------+-----------|
+     | 2      | Binary Frame                        | RFC 6455  |
+    -+--------+-------------------------------------+-----------|
+     | 8      | Connection Close Frame              | RFC 6455  |
+    -+--------+-------------------------------------+-----------|
+     | 9      | Ping Frame                          | RFC 6455  |
+    -+--------+-------------------------------------+-----------|
+     | 10     | Pong Frame                          | RFC 6455  |
+    -+--------+-------------------------------------+-----------|
+ */
+class WebSocketData {
+	std::string url;
+	std::string cnxtName;
+	std::string textData;
+	std::string binaryData;
+	friend class Http11WebSocketHandler;
+	friend class Http2StreamHandler;
+	friend class Http2Handler;
+	friend class HttpServiceTask;
+	friend class ServiceTask;
+	friend class WebSocketRespponseData;
+	friend class Http11WebSocketDataFrame;
+public:
+	bool hasData();
+	void collectText(const std::string& data);
+	void collectBinary(const std::string& data);
+	std::string getTextData() const;
+	std::string getBinaryData() const;
+	std::string getUrl() const;
+	std::string getCntxt_name() const;
+	WebSocketData();
+	virtual ~WebSocketData();
+};
+
+class WebSocketRespponseData {
+	std::vector<WebSocketData> more;
+	friend class Http11WebSocketHandler;
+	friend class Http2StreamHandler;
+	friend class Http2Handler;
+	friend class HttpServiceTask;
+	friend class ServiceTask;
+	friend class Http11WebSocketDataFrame;
+public:
+	bool isEmpty();
+	void pushText(const std::string& textData);
+	void pushBinary(const std::string& binaryData);
+	std::vector<WebSocketData> getMore();
+	void reset();
+	WebSocketRespponseData();
+	virtual ~WebSocketRespponseData();
+};
 
 class Http11WebSocketDataFrame {
 	bool fin;
@@ -41,31 +98,9 @@ public:
 	bool isRsv1() const;
 	bool isRsv2() const;
 	bool isRsv3() const;
+	static void getFramePdu(WebSocketData* wres, std::string& data);
+	void getFrameData(std::string& data);
 	std::string getFrameData();
-};
-
-class WebSocketData {
-	std::string url;
-	std::string cnxtName;
-	std::string data;
-	short dataType;
-	int techunkSiz;
-	int teparts;
-	int tecurrpart;
-	friend class Http11WebSocketHandler;
-	friend class Http2StreamHandler;
-	friend class Http2Handler;
-	friend class HttpServiceTask;
-public:
-	WebSocketData();
-	WebSocketData(const std::string& data, const short& dataType);
-	std::string getData() const;
-	std::string getUrl() const;
-	std::string getCntxt_name() const;
-	virtual ~WebSocketData();
-	void updateContent(const uint32_t& techunkSiz);
-	bool isContentRemains();
-	std::string getRemainingContent();
 };
 
 #endif /* HTTP11WEBSOCKETDATAFRAME_H_ */

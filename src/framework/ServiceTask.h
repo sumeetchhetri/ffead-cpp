@@ -54,6 +54,7 @@
 #include "CommonUtils.h"
 #include "SocketInterface.h"
 #include "Router.h"
+#include "WebSockHandler.h"
 
 class ServiceTask : public HttpServiceTask
 {
@@ -71,9 +72,7 @@ class ServiceTask : public HttpServiceTask
 public:
 	ServiceTask();
 	virtual ~ServiceTask();
-	void handleWebsockOpen(WebSocketData* request);
-	void handleWebsockClose(WebSocketData* request);
-	void handleWebsockMessage(const std::string& url, WebSocketData* request, WebSocketData* response);
+	WebSockHandler* handleWebsockOpen(WebSocketData* request, WebSocketRespponseData* response, SocketInterface* sif, HttpRequest* hreq);
 	void handle(HttpRequest* req, HttpResponse* res);
 };
 

@@ -93,7 +93,8 @@ libffead_framework_la_SOURCES = \
 				../../framework/ServiceTask.cpp \
 				../../framework/SoapHandler.cpp \
 				../../framework/TemplateGenerator.cpp \
-				../../framework/WsUtil.cpp
+				../../framework/WsUtil.cpp \
+				../../framework/WebSockHandler.cpp
 libffead_modules_la_SOURCES += \
 						../../modules/cache/CacheInterface.cpp \
 						../../modules/cache/CacheManager.cpp \
@@ -246,7 +247,8 @@ libffead_framework_la_SOURCES = \
 		../../framework/ServiceTask.cpp \
 		../../framework/SoapHandler.cpp \
 		../../framework/TemplateGenerator.cpp \
-		../../framework/WsUtil.cpp
+		../../framework/WsUtil.cpp \
+		../../framework/WebSockHandler.cpp
 libffead_modules_la_SOURCES += \
 				../../modules/cache/CacheInterface.cpp \
 				../../modules/cache/CacheManager.cpp \
@@ -469,7 +471,8 @@ libffead_framework_la_SOURCES = \
 		../../framework/LDAPAuthController.cpp \
 		../../framework/ScriptHandler.cpp \
 		../../framework/SecurityHandler.cpp \
-		../../framework/ServiceTask.cpp
+		../../framework/ServiceTask.cpp \
+		../../framework/WebSockHandler.cpp
 
 if MOD_DCP
 libffead_modules_la_SOURCES += \

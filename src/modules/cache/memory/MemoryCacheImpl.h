@@ -10,11 +10,14 @@
 #include "CacheInterface.h"
 #include "ConnectionPooler.h"
 #include "Mutex.h"
+#include <queue>
 
 class MemoryCacheConnectionPool: public ConnectionPooler {
 	Logger logger;
 	Mutex lock;
 	std::map<std::string, std::string> internalMap;
+	Mutex qlock;
+	std::map<std::string, std::queue<std::string>> internalQMap;
 	void initEnv();
 	void* newConnection(const bool& isWrite, const ConnectionNode& node);
 	void closeConnection(void* conn);
@@ -49,6 +52,8 @@ public:
 	bool flushAll();
 
 	void* executeCommand(const std::string& command, ...);
+	bool addToQ(const std::string& qname, const std::string& value);
+	std::string getFromQ(const std::string& qname);
 };
 
 #endif /* MEMORYCACHEIMPL_H_ */

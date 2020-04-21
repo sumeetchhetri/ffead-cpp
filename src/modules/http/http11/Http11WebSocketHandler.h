@@ -27,28 +27,30 @@
 #include "SocketInterface.h"
 #include "SocketInterface.h"
 #include "LoggerFactory.h"
+#include "WebSockHandler.h"
 #define MAXBUFLENMWS 32768
-
-
 
 class Http11WebSocketHandler : public SocketInterface {
 	Logger logger;
 	std::string url;
+	WebSockHandler* h;
 	std::map<int, std::string> dataframes;
 	std::map<int, bool> dataframesComplete;
+	short lastOpCode;
 	void replyPong();
-	bool processFrame(Http11WebSocketDataFrame* frame, void*& request);
-	Http11WebSocketDataFrame* nextFrame();
+	bool processFrame(Http11WebSocketDataFrame* frame, WebSocketData* request);
+	bool nextFrame(Http11WebSocketDataFrame* frame);
+	friend class HttpServiceTask;
 public:
 	void addHandler(SocketInterface* handler);
 	void onOpen();
 	void onClose();
 	std::string getUrl();
 	std::string getProtocol(void* context);
+	int getType(void* context);
 	int getTimeout();
 	bool readRequest(void* request, void*& context, int& pending, int& reqPos);
 	bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos);
-	bool writeData(const WebSocketData& data);
 	Http11WebSocketHandler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& url, const bool& isServer);
 	virtual ~Http11WebSocketHandler();
 };

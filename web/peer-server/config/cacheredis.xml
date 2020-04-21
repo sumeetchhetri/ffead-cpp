@@ -1,0 +1,14 @@
+<caches>
+	<cache>
+		<nodes>
+			<node>
+				<host>localhost</host>
+				<port>6379</port>
+			</node>
+		</nodes>
+		<pool-size>10</pool-size>
+		<expiryTime>3600</expiryTime>
+		<name>peer-cached</name>
+		<type>redis</type>
+	</cache>
+</caches>

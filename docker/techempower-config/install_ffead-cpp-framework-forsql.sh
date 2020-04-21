@@ -77,43 +77,6 @@ cp resources/sample-odbcinst.ini ${IROOT}/odbcinst.ini
 cp resources/sample-odbc.ini ${IROOT}/odbc.ini
 
 cd ${IROOT}/ffead-cpp-src/
-sed -i 's|Timer t1;|//Timer t1;|g' src/framework/ServiceTask.cpp
-sed -i 's|t1.start();|//t1.start();|g' src/framework/ServiceTask.cpp
-sed -i 's|t1.end();|//t1.end();|g' src/framework/ServiceTask.cpp
-sed -i 's|CommonUtils::ts|//CommonUtils::ts|g' src/framework/ServiceTask.cpp
-sed -i 's|Timer t;|//Timer t;|g' src/framework/ControllerHandler.cpp
-sed -i 's|t.start();|//t.start();|g' src/framework/ControllerHandler.cpp
-sed -i 's|t.end();|//t.end();|g' src/framework/ControllerHandler.cpp
-sed -i 's|CommonUtils::ts|//CommonUtils::ts|g' src/framework/ControllerHandler.cpp
-sed -i 's|Timer t;|//Timer t;|g' src/modules/server-util/RequestReaderHandler.cpp
-sed -i 's|t.start();|//t.start();|g' src/modules/server-util/RequestReaderHandler.cpp
-sed -i 's|t.end();|//t.end();|g' src/modules/server-util/RequestReaderHandler.cpp
-sed -i 's|CommonUtils::ts|//CommonUtils::ts|g' src/modules/server-util/RequestReaderHandler.cpp
-sed -i 's|Timer t;|//Timer t;|g' src/modules/server-util/SocketInterface.cpp
-sed -i 's|t.start();|//t.start();|g' src/modules/server-util/SocketInterface.cpp
-sed -i 's|t.end();|//t.end();|g' src/modules/server-util/SocketInterface.cpp
-sed -i 's|CommonUtils::ts|//CommonUtils::ts|g' src/modules/server-util/SocketInterface.cpp
-sed -i 's|Timer to;|//Timer to;|g' src/modules/server-util/SocketInterface.cpp
-sed -i 's|to.start();|//to.start();|g' src/modules/server-util/SocketInterface.cpp
-sed -i 's|to.end();|//to.end();|g' src/modules/server-util/SocketInterface.cpp
-sed -i 's|CommonUtils::ts|//CommonUtils::ts|g' src/modules/server-util/SocketInterface.cpp
-sed -i 's|Timer t;|//Timer t;|g' web/te-benchmark-um/src/TeBkUm.cpp
-sed -i 's|t.start();|//t.start();|g' web/te-benchmark-um/src/TeBkUm.cpp
-sed -i 's|t.end();|//t.end();|g' web/te-benchmark-um/src/TeBkUm.cpp
-sed -i 's|CommonUtils::ts|//CommonUtils::ts|g' web/te-benchmark-um/src/TeBkUm.cpp
-sed -i 's|Timer t;|//Timer t;|g' src/modules/http/http11/Http11Handler.cpp
-sed -i 's|t.start();|//t.start();|g' src/modules/http/http11/Http11Handler.cpp
-sed -i 's|t.end();|//t.end();|g' src/modules/http/http11/Http11Handler.cpp
-sed -i 's|CommonUtils::ts|//CommonUtils::ts|g' src/modules/http/http11/Http11Handler.cpp
-sed -i 's|Timer t;|//Timer t;|g' src/modules/http/HttpServiceHandler.cpp
-sed -i 's|t.start();|//t.start();|g' src/modules/http/HttpServiceHandler.cpp
-sed -i 's|t.end();|//t.end();|g' src/modules/http/HttpServiceHandler.cpp
-sed -i 's|CommonUtils::ts|//CommonUtils::ts|g' src/modules/http/HttpServiceHandler.cpp
-sed -i 's|Timer to;|//Timer to;|g' src/modules/http/HttpServiceHandler.cpp
-sed -i 's|to.start();|//to.start();|g' src/modules/http/HttpServiceHandler.cpp
-sed -i 's|to.end();|//to.end();|g' src/modules/http/HttpServiceHandler.cpp
-sed -i 's|CommonUtils::ts|//CommonUtils::ts|g' src/modules/http/HttpServiceHandler.cpp
-#Build for sql now
 cp -f web/te-benchmark-um/sql-src/TeBkUmWorldsql.h web/te-benchmark-um/include/TeBkUmWorld.h
 cp -f web/te-benchmark-um/sql-src/TeBkUmWorldsql.cpp web/te-benchmark-um/src/TeBkUmWorld.cpp
 make install -j${MAX_THREADS}

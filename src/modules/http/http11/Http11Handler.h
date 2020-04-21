@@ -24,11 +24,15 @@ class Http11Handler : public SocketInterface {
 	int maxEntitySize;
 	SocketInterface* handler;
 	friend class CHServer;
+	friend class HttpServiceHandler;
+	friend class HttpServiceTask;
 public:
+	int readFrom();
 	void addHandler(SocketInterface* handler);
 	void onOpen();
 	void onClose();
 	std::string getProtocol(void* context);
+	int getType(void* context);
 	int getTimeout();
 	HttpRequest* getAvailableRequest();
 	bool readRequest(void* request, void*& context, int& pending, int& reqPos);

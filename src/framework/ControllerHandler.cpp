@@ -26,8 +26,8 @@ std::string ControllerHandler::BLANK = "";
 
 bool ControllerHandler::getControllerForPath(std::string_view cntxtName, const std::string& actUrl, std::string& className)
 {
-	Timer t;
-	t.start();
+	//Timer t;
+	//t.start();
 	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> >& controllerObjectMap = ConfigurationData::getInstance()->controllerObjectMap;
 	std::map<std::string, std::string, std::less<> >& controllerMap = controllerObjectMap.find(cntxtName)->second;
 	std::map<std::string, std::string, std::less<> >::iterator it;
@@ -35,20 +35,20 @@ bool ControllerHandler::getControllerForPath(std::string_view cntxtName, const s
 		if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
 		{
 			className = it->second;
-			t.end();
-			CommonUtils::tsContMpg += t.timerNanoSeconds();
+			//t.end();
+			//CommonUtils::tsContMpg += t.timerNanoSeconds();
 			return true;
 		}
 	}
-	t.end();
-	CommonUtils::tsContMpg += t.timerNanoSeconds();
+	//t.end();
+	//CommonUtils::tsContMpg += t.timerNanoSeconds();
 	return false;
 }
 
 bool ControllerHandler::getMappingForPath(std::string_view cntxtName, const std::string& actUrl, std::string& to)
 {
-	Timer t;
-	t.start();
+	//Timer t;
+	//t.start();
 	std::map<std::string, std::map<std::string, std::string, std::less<> >, std::less<> >& mappingObjectMap = ConfigurationData::getInstance()->mappingObjectMap;
 	std::map<std::string, std::string, std::less<> >& mappingMap = mappingObjectMap.find(cntxtName)->second;
 	std::map<std::string, std::string, std::less<> >::iterator it;
@@ -56,24 +56,24 @@ bool ControllerHandler::getMappingForPath(std::string_view cntxtName, const std:
 		if(ConfigurationData::urlMatchesPath(cntxtName, it->first, actUrl))
 		{
 			to = it->second;
-			t.end();
-			CommonUtils::tsContPath += t.timerNanoSeconds();
+			//t.end();
+			//CommonUtils::tsContPath += t.timerNanoSeconds();
 			return true;
 		}
 	}
-	t.end();
-	CommonUtils::tsContPath += t.timerNanoSeconds();
+	//t.end();
+	//CommonUtils::tsContPath += t.timerNanoSeconds();
 	return false;
 }
 
 bool ControllerHandler::hasMappingExtension(std::string extwodot, HttpRequest* req) {
-	Timer t;
-	t.start();
+	//Timer t;
+	//t.start();
 	bool f = ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->mappingextObjectMap.end()
 		&& ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())->second.find(extwodot)
 			!=ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())->second.end();
-	t.end();
-	CommonUtils::tsContExt += t.timerNanoSeconds();
+	//t.end();
+	//CommonUtils::tsContExt += t.timerNanoSeconds();
 	return f;
 }
 
@@ -86,8 +86,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 	std::string extwodot = ext!=""?ext.substr(1):"";
 	if(ConfigurationData::getInstance()->enableContMpg && getControllerForPath(req->getCntxt_name(), req->getCurl(), controller))
 	{
-		Timer t;
-		t.start();
+		//Timer t;
+		//t.start();
 		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("controller_"+controller, req->getCntxt_name());
 		args argus;
 		argus.push_back("HttpRequest*");
@@ -113,8 +113,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			isContrl = true;
 		}
 		ConfigurationData::getInstance()->ffeadContext.release(_temp, "controller_"+controller, req->getCntxt_name());
-		t.end();
-		CommonUtils::tsContExec += t.timerNanoSeconds();
+		//t.end();
+		//CommonUtils::tsContExec += t.timerNanoSeconds();
 	}
 	else if(ConfigurationData::getInstance()->enableContPath && getMappingForPath(req->getCntxt_name(), req->getCurl(), to))
 	{
@@ -141,8 +141,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 	}
 	else if(ConfigurationData::getInstance()->enableContRst && ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->rstCntMap.end())
 	{
-		Timer t;
-		t.start();
+		//Timer t;
+		//t.start();
 
 		resFuncMap& rstCntMap = ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())->second;
 		resFuncMap::iterator it;
@@ -239,17 +239,17 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 				}
 			}
 		}
-		t.end();
-		CommonUtils::tsContRstLkp += t.timerNanoSeconds();
+		//t.end();
+		//CommonUtils::tsContRstLkp += t.timerNanoSeconds();
 
 		if(flag)
 		{
-			t.start();
+			//t.start();
 			ClassInfo* srv = ConfigurationData::getInstance()->ffeadContext.contInsMap["restcontroller_"+rft->clas+rft->appName];
-			t.end();
-			CommonUtils::tsContRstCsiLkp += t.timerNanoSeconds();
+			//t.end();
+			//CommonUtils::tsContRstCsiLkp += t.timerNanoSeconds();
 
-			t.start();
+			//t.start();
 			void *_temp = srv->getSI();
 			if(_temp==NULL) {
 				_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft->clas, rft->appName);
@@ -270,10 +270,10 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			}
 			req->addHeader(HttpRequest::ContentType, rft->icontentType);
 
-			t.end();
-			CommonUtils::tsContRstInsLkp += t.timerNanoSeconds();
+			//t.end();
+			//CommonUtils::tsContRstInsLkp += t.timerNanoSeconds();
 
-			t.start();
+			//t.start();
 			args argus;
 			vals valus;
 			bool invValue = false;
@@ -517,21 +517,21 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					}
 				}
 			}
-			t.end();
-			CommonUtils::tsContRstPrsArgs += t.timerNanoSeconds();
+			//t.end();
+			//CommonUtils::tsContRstPrsArgs += t.timerNanoSeconds();
 
 			try
 			{
-				t.start();
+				//t.start();
 				isContrl = true;
 				const Method& meth = srv->getMethod(rft->name, argus);
 				if(meth.getMethodName()!="" && !invValue)
 				{
 					void* ouput = reflector.invokeMethodUnknownReturn(_temp,meth,valus,rft->unmapped?false:true);
-					t.end();
-					CommonUtils::tsContRstExec += t.timerNanoSeconds();
+					//t.end();
+					//CommonUtils::tsContRstExec += t.timerNanoSeconds();
 
-					t.start();
+					//t.start();
 					if(rft->unmapped) {
 						res->addHeader(HttpResponse::ContentType, rft->ocontentType);
 						res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(rft->statusCode));
@@ -620,8 +620,8 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
 					}
 
-					t.end();
-					CommonUtils::tsContRstSer += t.timerNanoSeconds();
+					//t.end();
+					//CommonUtils::tsContRstSer += t.timerNanoSeconds();
 				}
 				else
 				{

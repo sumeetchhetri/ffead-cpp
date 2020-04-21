@@ -10,6 +10,8 @@
 Http11WebSocketHandler::Http11WebSocketHandler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& url, const bool& isServer) : SocketInterface(fd, ssl, io) {
 	logger = LoggerFactory::getLogger("Http11WebSocketHandler");
 	this->url = url;
+	this->h = NULL;
+	this->lastOpCode = -1;
 }
 
 std::string Http11WebSocketHandler::getUrl() {
@@ -29,83 +31,72 @@ void Http11WebSocketHandler::replyPong() {
 	//sockUtil.sendData(pong);
 }
 
-bool Http11WebSocketHandler::writeData(const WebSocketData& wsdata) {
-	Http11WebSocketDataFrame frame;
-	frame.fin = true;
-	frame.rsv1 = false;
-	frame.rsv2 = false;
-	frame.rsv3 = false;
-	frame.opcode = wsdata.dataType;
-	frame.mask = false;
-	frame.payloadLength = wsdata.data.length();
-	//We will not set application data here, we will directly send the data as
-	//we have computed other control options
-	//sockUtil.sendData(frame.getFrameData());
-	//sockUtil.sendData(wsdata.data);
-	return false;
-}
-
 Http11WebSocketHandler::~Http11WebSocketHandler() {
-	
 }
 
 std::string Http11WebSocketHandler::getProtocol(void* context) {
 	return "WS1.1";
 }
 
+int Http11WebSocketHandler::getType(void* context) {
+	return 2;
+}
+
 int Http11WebSocketHandler::getTimeout() {
 	return -1;
 }
 
-Http11WebSocketDataFrame* Http11WebSocketHandler::nextFrame()
+bool Http11WebSocketHandler::nextFrame(Http11WebSocketDataFrame* frame)
 {
-	Http11WebSocketDataFrame* framer = NULL;
 	if(buffer.length()>=2)
 	{
-		Http11WebSocketDataFrame frame;
 		int count = 0;
 		unsigned char f = buffer.at(0);
 		unsigned char s = buffer.at(1);
-		frame.fin = ((f >> 7) & 0x01);
-		frame.rsv1 = ((f >> 6) & 0x01);
-		frame.rsv2 = ((f >> 5) & 0x01);
-		frame.rsv3 = ((f >> 4) & 0x01);
-		frame.opcode = f & 0x0F;
-		frame.mask = ((s >> 7) & 0x01);
-		frame.payloadLength = s & 0x7F;
-		unsigned long long dataLength = frame.payloadLength;
+		frame->fin = ((f >> 7) & 0x01);
+		frame->rsv1 = ((f >> 6) & 0x01);
+		frame->rsv2 = ((f >> 5) & 0x01);
+		frame->rsv3 = ((f >> 4) & 0x01);
+		frame->opcode = f & 0x0F;
+		if(lastOpCode!=frame->opcode && frame->opcode!=0) {
+			lastOpCode = frame->opcode;
+		}
+		frame->mask = ((s >> 7) & 0x01);
+		frame->payloadLength = s & 0x7F;
+		frame->maskingKey = 0;
+		frame->applicationData.clear();
+		unsigned long long dataLength = frame->payloadLength;
 		count = 2;
-		if(buffer.length()>4 && frame.payloadLength==126) {
-			frame.extendedPayloadLength = CommonUtils::charArrayToULongLong(buffer.substr(2, 2));
-			dataLength = frame.extendedPayloadLength;
+		if(buffer.length()>4 && frame->payloadLength==126) {
+			frame->extendedPayloadLength = CommonUtils::charArrayToULongLong(buffer.substr(2, 2));
+			dataLength = frame->extendedPayloadLength;
 			count += 2;
-		} else if(buffer.length()>10 && frame.payloadLength==127) {
-			frame.extendedPayloadLength = CommonUtils::charArrayToULongLong(buffer.substr(2, 8));
-			dataLength = frame.extendedPayloadLength;
+		} else if(buffer.length()>10 && frame->payloadLength==127) {
+			frame->extendedPayloadLength = CommonUtils::charArrayToULongLong(buffer.substr(2, 8));
+			dataLength = frame->extendedPayloadLength;
 			count += 8;
-		} else if(frame.payloadLength>125) {
-			return framer;
+		} else if(frame->payloadLength>125) {
+			return false;
 		}
 
-		if((frame.mask && buffer.length()>=(dataLength+4+count)) || buffer.length()>=(dataLength+count))
+		if((frame->mask && buffer.length()>=(dataLength+4+count)) || buffer.length()>=(dataLength+count))
 		{
-			if(frame.mask) {
-				frame.maskingKey = CommonUtils::charArrayToULongLong(buffer.substr(count, 4));
+			if(frame->mask) {
+				frame->maskingKey = CommonUtils::charArrayToULongLong(buffer.substr(count, 4));
 				count += 4;
 			}
-			frame.applicationData = buffer.substr(count, dataLength);
-			if(frame.mask) {
-				frame.applicationData = CommonUtils::xorEncryptDecrypt(frame.applicationData, frame.maskingKey);
+			frame->applicationData = buffer.substr(count, dataLength);
+			if(frame->mask) {
+				frame->applicationData = CommonUtils::xorEncryptDecrypt(frame->applicationData, frame->maskingKey);
 			}
 			buffer = buffer.substr(count+dataLength);
-			framer = new Http11WebSocketDataFrame();
-			*framer = frame;
+			return true;
 		}
 	}
-	return framer;
+	return false;
 }
 
-bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, void*& request)
+bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, WebSocketData* request)
 {
 	if(frame->opcode==8) {
 		//closed = true;
@@ -119,7 +110,13 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, void*
 		//TODO don't know what to do...
 		return false;
 	}
-	else if(frame->opcode==0 || frame->opcode==1 || frame->opcode==2) {
+	else if(frame->opcode==0) {
+		for(int u=0;u<(int)frame->applicationData.size();u++) {
+			dataframes[lastOpCode].push_back(frame->applicationData.at(u));
+		}
+		dataframesComplete[lastOpCode] = frame->fin;
+	}
+	else if(frame->opcode==1 || frame->opcode==2) {
 		for(int u=0;u<(int)frame->applicationData.size();u++) {
 			dataframes[frame->opcode].push_back(frame->applicationData.at(u));
 		}
@@ -135,11 +132,13 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, void*
 	{
 		if(dataframesComplete[it->first])
 		{
-			WebSocketData* wsd = new WebSocketData();
-			wsd->data = dataframes[it->first];
-			wsd->dataType = frame->opcode;
-			request = wsd;
-			logger << "Message is " << wsd->data << std::endl;
+			WebSocketData* wsd = (WebSocketData*)request;
+			if(frame->opcode==1) {
+				wsd->textData = dataframes[it->first];
+			} else {
+				wsd->binaryData = dataframes[it->first];
+			}
+			//logger << "Message is " << wsd->data << std::endl;
 			dataframes[it->first].clear();
 			dataframesComplete[it->first] = false;
 			break;
@@ -150,66 +149,85 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, void*
 }
 
 bool Http11WebSocketHandler::readRequest(void* request, void*& context, int& pending, int& reqPos) {
-	if(readFrom())return false;
-
-	Http11WebSocketDataFrame* frame = NULL;
-	while((frame=nextFrame())!=NULL)
+	bool fl = false;
+	Http11WebSocketDataFrame frame;
+	while(nextFrame(&frame))
 	{
-		if(processFrame(frame, request)) {
+		WebSocketData* wreq = (WebSocketData*)request;
+		wreq->textData.clear();
+		wreq->binaryData.clear();
+		if(processFrame(&frame, wreq)) {
 			//closed = true;
 			closeSocket();
 			break;
 		}
-		if(request!=NULL) {
-			reqPos = startRequest();
+		if(wreq->textData.length()>0 || wreq->binaryData.length()>0) {
+			//reqPos = startRequest();
+			fl = true;
 			break;
 		}
-
-		delete frame;
-		frame = NULL;
 	}
 
-	if(pending==(int)buffer.length())
-	{
-		pending = 0;
-	}
-	else
-	{
-		pending = buffer.length();
-	}
-	return true;
+	pending = buffer.length();
+	return fl;
 }
 
 bool Http11WebSocketHandler::writeResponse(void* req, void* res, void* context, std::string& data, int reqPos) {
-	WebSocketData* wsdata  = static_cast<WebSocketData*>(res);
-
-	if(isClosed()) {
-		if(req!=NULL) {
-			//delete (WebSocketData*)req;
-		}
-		//delete wsdata;
-		return true;
-	}
+	WebSocketData* wsdata  = (WebSocketData*)res;
 
 	Http11WebSocketDataFrame frame;
 	frame.fin = true;
 	frame.rsv1 = false;
 	frame.rsv2 = false;
 	frame.rsv3 = false;
-	frame.opcode = wsdata->dataType;
 	frame.mask = false;
-	frame.payloadLength = wsdata->data.length();
-	//We will not set application data here, we will directly send the data as
-	//we have computed other control options
-	data += frame.getFrameData();
-	if(req!=NULL) {
-		//delete (WebSocketData*)req;
+	if(wsdata->textData.length()>0) {
+		frame.opcode = 1;
+		int payloadLength = wsdata->textData.length();
+		frame.payloadLength = payloadLength;
+
+		if(payloadLength<=125) {
+			frame.extendedPayloadLength = 0;
+		} else if(payloadLength<65535) {
+			frame.extendedPayloadLength = payloadLength;
+			frame.payloadLength = 126;
+		} else {
+			frame.extendedPayloadLength = payloadLength;
+			frame.payloadLength = 127;
+		}
+
+		//We will not set application data here, we will directly send the data as
+		//we have computed other control options
+		frame.getFrameData(data);
+		data += wsdata->textData;
 	}
-	data += wsdata->data;
-	//delete wsdata;
+	if(wsdata->binaryData.length()>0) {
+		frame.opcode = 2;
+		int payloadLength = wsdata->binaryData.length();
+		frame.payloadLength = payloadLength;
+
+		if(payloadLength<=125) {
+			frame.extendedPayloadLength = 0;
+		} else if(payloadLength<65535) {
+			frame.extendedPayloadLength = payloadLength;
+			frame.payloadLength = 126;
+		} else {
+			frame.extendedPayloadLength = payloadLength;
+			frame.payloadLength = 127;
+		}
+
+		//We will not set application data here, we will directly send the data as
+		//we have computed other control options
+		frame.getFrameData(data);
+		data += wsdata->binaryData;
+	}
 	return true;
 }
 
 void Http11WebSocketHandler::addHandler(SocketInterface* handler) {}
 void Http11WebSocketHandler::onOpen(){}
-void Http11WebSocketHandler::onClose(){}
+void Http11WebSocketHandler::onClose(){
+	if(h!=NULL) {
+		h->onClose(getAddress());
+	}
+}

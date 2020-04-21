@@ -1,0 +1,6 @@
+<caches>
+	<cache>
+	    <name>peer-cached</name>
+	    <type>memory</type>
+	</cache>
+</caches>

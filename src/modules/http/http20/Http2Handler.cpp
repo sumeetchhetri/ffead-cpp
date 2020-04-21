@@ -299,23 +299,23 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si, std::s
 	//WebSocketData* request = (WebSocketData*)req;
 	int streamIdentifier = *(int*)si;
 
-	response->updateContent(maxDataFrameSize);
+	//response->updateContent(maxDataFrameSize);
 
 	Http2HeadersFrame hframe;
 	std::map<std::string, std::string,cicomp> hdrs;
-	hdrs[":opcode"] = CastUtil::fromNumber(response->dataType);
+	//hdrs[":opcode"] = response->isTextOrBinary?1:2;
 	hframe.headerBlockFragment = context.encode(hdrs);
 	CommonUtils::printHEX(hframe.headerBlockFragment);
 	hframe.header.streamIdentifier = streamIdentifier;
 	hframe.header.flags.set(2);
-	if(response->data=="") {
+	//if(response->data=="") {
 		hframe.header.flags.set(6);
-	}
+	//}
 	data += serialize(&hframe);
 
 	bool completedSend = true;
 	std::string tmd;
-	while(response->data!="" && (tmd = response->getRemainingContent()) != "") {
+	/*while(response->data!="" && (tmd = response->getRemainingContent()) != "") {
 		if(senderFlowControlWindow>=(int)tmd.length()
 				&& streams[streamIdentifier].senderFlowControlWindow>=(int)tmd.length())
 		{
@@ -355,7 +355,7 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si, std::s
 			streams[streamIdentifier].pendingSendData.data = tmd.substr(minreslen);
 			break;
 		}
-	}
+	}*/
 
 	delete (int*)si;
 	if(completedSend) {
@@ -535,6 +535,14 @@ std::string Http2Handler::getProtocol(void* context) {
 		return "WS2.0";
 	}
 	return "HTTP2.0";
+}
+
+int Http2Handler::getType(void* context) {
+	int streamIdentifier = *(int*)context;
+	if(streams.find(streamIdentifier)!=streams.end() && streams[streamIdentifier].isWebSocket) {
+		return 4;
+	}
+	return 3;
 }
 
 const std::string& Http2Handler::getWebpath() const {

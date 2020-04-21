@@ -52,7 +52,6 @@ public:
 	void setMessage(const std::string& message);
 };
 
-#pragma @Router
 class TeBkUmRouter : public Router {
 	static const std::string HELLO_WORLD;
 	static std::string WORLD;

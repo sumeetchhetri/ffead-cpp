@@ -43,6 +43,8 @@ void HttpServiceHandler::sockInit(SocketInterface* sif) {
 	HttpWriteTask* wtask = (HttpWriteTask*)sif->wrTsk;
 	wtask->sif = sif;
 	wtask->service = this;
+
+	sif->onOpen();
 }
 
 void HttpServiceHandler::handleService(void* request, SocketInterface* sif, void* context, int reqPos)
@@ -55,7 +57,7 @@ void HttpServiceHandler::handleService(void* request, SocketInterface* sif, void
 	task->handlerRequest.sif = sif;
 	task->handlerRequest.context = context;
 	task->handlerRequest.reqPos = reqPos;
-	task->handlerRequest.protType = sif->getProtocol(context).find("HTTP")==0?1:2;
+	//task->handlerRequest.protType = sif->getProtocol(context).find("HTTP")==0?1:2;
 	submitTask(task);
 }
 
@@ -84,42 +86,43 @@ void HttpReadTask::setTid(int tid) {
 }
 
 void HttpReadTask::run() {
-	Timer t;
-	t.start();
+	//Timer t;
+	//t.start();
 
 	int pending = 1;
 
-	Timer to;
-	to.start();
+	//Timer to;
+	//to.start();
 	if(sif->readFrom()==0) {
 		service->closeConnection(sif);
-		to.end();
-		CommonUtils::tsReqSockRead += to.timerNanoSeconds();
+		//to.end();
+		////CommonUtils::tsReqSockRead += to.timerNanoSeconds();
 
-		t.end();
-		CommonUtils::tsReqTotal += t.timerNanoSeconds();
+		//t.end();
+		////CommonUtils::tsReqTotal += t.timerNanoSeconds();
 		return;
 	}
-	to.end();
-	CommonUtils::tsReqSockRead += to.timerNanoSeconds();
+	//to.end();
+	////CommonUtils::tsReqSockRead += to.timerNanoSeconds();
 
-	to.start();
+	//to.start();
 	HttpServiceTask* task = (HttpServiceTask*)sif->srvTsk;
 	HandlerRequest& hr = task->handlerRequest;
 	while(pending>0 && sif->readRequest(hr.request, hr.context, pending, hr.reqPos))
 	{
-		task->handlerRequest.protType = sif->getProtocol(hr.context).find("HTTP")==0?1:2;
+		//task->handlerRequest.protType = sif->getProtocol(hr.context).find("HTTP")==0?1:2;
 		task->run();
 	}
-	to.end();
-	CommonUtils::tsReqPrsSrvc += to.timerNanoSeconds();
+	//to.end();
+	////CommonUtils::tsReqPrsSrvc += to.timerNanoSeconds();
 
 	if(sif->isClosed()) {
+		sif->onClose();
 		service->closeConnection(sif);
 	}
 
-	t.end();
-	CommonUtils::tsReqTotal += t.timerNanoSeconds();
+	//t.end();
+	////CommonUtils::tsReqTotal += t.timerNanoSeconds();
 }
 
 HttpServiceTask::HttpServiceTask() {
@@ -141,8 +144,8 @@ std::string HttpServiceTask::getCntEncoding() {
 }
 
 void HttpServiceTask::run() {
-	Timer t;
-	t.start();
+	//Timer t;
+	//t.start();
 
 	CommonUtils::cReqs += 1;
 
@@ -157,7 +160,7 @@ void HttpServiceTask::run() {
 		strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
 		res->headers[HttpResponse::DateHeader] = std::string(buffer);
 
-		/*if(req->httpVers<2 && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
+		if(req->httpVers<2 && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
 		{
 			if(req->isHeaderValue(HttpRequest::Upgrade, "websocket", true)
 					&& req->getHeader(HttpRequest::SecWebSocketKey)!=""
@@ -175,13 +178,46 @@ void HttpServiceTask::run() {
 				res->addHeader(HttpResponse::SecWebSocketAccept, servseckey);
 				res->setHTTPResponseStatus(HTTPResponseStatus::Switching);
 				res->setDone(true);
-				handlerRequest.getSif()->addHandler(new Http11WebSocketHandler(handlerRequest.getSif()->fd, handlerRequest.getSif()->ssl,
-						handlerRequest.getSif()->io, req->getUrl(), true));
+				Http11WebSocketHandler* hws = new Http11WebSocketHandler(handlerRequest.getSif()->fd, handlerRequest.getSif()->ssl, handlerRequest.getSif()->io, req->getUrl(), true);
 
 				WebSocketData wreq;
-				wreq.url = req->getCurl();
-				wreq.cnxtName = req->getCntxt_name();
-				handleWebsockOpen(&wreq);
+				WebSocketRespponseData wres;
+				hws->h = handleWebsockOpen(&wreq, &wres, handlerRequest.getSif(), req);
+				if(hws->h==NULL) {
+					res->headers[HttpResponse::Connection] = "close";
+					res->headers.erase(HttpResponse::Upgrade);
+					res->headers.erase(HttpResponse::SecWebSocketAccept);
+					res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
+					res->setDone(true);
+					delete hws;
+				} else {
+					//t.end();
+					////CommonUtils::tsService += t.timerNanoSeconds();
+
+					CommonUtils::cResps += 1;
+					int ret = handlerRequest.getSif()->pushResponse(handlerRequest.getRequest(), handlerRequest.response, handlerRequest.getContext(), handlerRequest.reqPos);
+					if(ret==0) {
+						handlerRequest.getSif()->addHandler(hws);
+						return;
+					}
+
+					handlerRequest.clearObjects();
+					handlerRequest.request = new WebSocketData();
+					handlerRequest.response = new WebSocketRespponseData();
+					handlerRequest.getSif()->addHandler(hws);
+					if(!handlerRequest.getSif()->isClosed()) {
+						if(!wres.isEmpty()) {
+							for (int var = 0; var < (int)wres.getMore().size(); ++var) {
+								if(!handlerRequest.getSif()->isClosed() && wres.getMore()[var].hasData()) {
+									ResponseData rd;
+									handlerRequest.getSif()->writeResponse(&wreq, &wres.getMore()[var], NULL, rd._b, -1);
+									handlerRequest.getSif()->writeTo(&rd);
+								}
+							}
+						}
+					}
+					return;
+				}
 			}
 			else if(req->hasHeaderValuePart(HttpRequest::Connection, "HTTP2-Settings", false)
 					&& req->isHeaderValue(HttpRequest::Upgrade, "h2c", false))
@@ -203,30 +239,44 @@ void HttpServiceTask::run() {
 				res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 				res->setDone(true);
 			}
-		}*/
-
-		//if(!res->isDone())
-		//{
+		} else {
 			handle(req, res);
-		//}
+		}
 	}
 	else
 	{
-		Http11WebSocketHandler* h = (Http11WebSocketHandler*)handlerRequest.getSif();
+		Http11Handler* h = (Http11Handler*)handlerRequest.getSif();
+		Http11WebSocketHandler* hws = (Http11WebSocketHandler*)h->handler;
 		WebSocketData* request = (WebSocketData*)handlerRequest.getRequest();
-		WebSocketData* response = new WebSocketData();
-		handleWebsockMessage(h->getUrl(), request, response);
-		handlerRequest.response = response;
+		WebSocketRespponseData* response = (WebSocketRespponseData*)handlerRequest.getResponse();
+		response->reset();
+		if(!hws->h->onMessage(request, response, handlerRequest.getSif()->getAddress())) {
+			//No Op
+		} else if(!hws->h->isWriteControl() && !handlerRequest.getSif()->isClosed()) {
+			if(!response->isEmpty()) {
+				for (int var = 0; var < (int)response->getMore().size(); ++var) {
+					if(!handlerRequest.getSif()->isClosed() && response->getMore()[var].hasData()) {
+						ResponseData rd;
+						handlerRequest.getSif()->writeResponse(request, &response->getMore()[var], NULL, rd._b, -1);
+						handlerRequest.getSif()->writeTo(&rd);
+					}
+				}
+			}
+		}
+
+		//t.end();
+		////CommonUtils::tsService += t.timerNanoSeconds();
+		CommonUtils::cResps += 1;
+		return;
 	}
 
-	t.end();
-	CommonUtils::tsService += t.timerNanoSeconds();
+	//t.end();
+	////CommonUtils::tsService += t.timerNanoSeconds();
 
 	CommonUtils::cResps += 1;
 	int ret = handlerRequest.getSif()->pushResponse(handlerRequest.getRequest(), handlerRequest.response, handlerRequest.getContext(), handlerRequest.reqPos);
 	if(ret==0) {
 		handlerRequest.sif->onClose();
-		service->closeConnection(handlerRequest.sif);
 	}
 }
 

@@ -10,6 +10,7 @@
 #include "ServiceHandler.h"
 #include "Task.h"
 #include "CommonUtils.h"
+#include "WebSockHandler.h"
 
 class HttpServiceHandler;
 
@@ -31,9 +32,7 @@ public:
 	std::string getCntEncoding();
 	HttpServiceTask(ReusableInstanceHolder* h);
 	virtual void handle(HttpRequest* request, HttpResponse* response)=0;
-	virtual void handleWebsockOpen(WebSocketData* request)=0;
-	virtual void handleWebsockClose(WebSocketData* request)=0;
-	virtual void handleWebsockMessage(const std::string& url, WebSocketData* request, WebSocketData* response)=0;
+	virtual WebSockHandler* handleWebsockOpen(WebSocketData* request, WebSocketRespponseData* response, SocketInterface* sif, HttpRequest* hreq)=0;
 };
 
 class HttpReadTask : public Task {
