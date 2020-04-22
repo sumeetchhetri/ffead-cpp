@@ -94,6 +94,7 @@ void HttpReadTask::run() {
 	//Timer to;
 	//to.start();
 	if(sif->readFrom()==0) {
+		sif->onClose();
 		service->closeConnection(sif);
 		//to.end();
 		////CommonUtils::tsReqSockRead += to.timerNanoSeconds();

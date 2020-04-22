@@ -231,7 +231,7 @@ endif
 			sc=`ls $${webdir}/src/*.cpp 2>/dev/null|wc -l`; \
 			if [ $$hc != 0 ] && [ $$sc != 0 ] && [ -f "$${webdir}/src/autotools/Makefile" ]; then \
 				weblibname=`echo "$${wdir}" | tr '-' '_'`; \
-				cd $${webdir}/src/autotools && make; \
+				cd $${webdir}/src/autotools && make clean && make; \
 				cd -; \
 				cp -f $${webdir}/src/autotools/.libs/*$${weblibname}* ${prefix}/lib; \
 				rm -rf $(prefix)/web/$${wdir}/src/; \

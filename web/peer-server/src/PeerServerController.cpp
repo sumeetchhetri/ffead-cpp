@@ -45,11 +45,6 @@ PeerServerController::PeerServerController() {
 	} else {
 		isDistributedMode = false;
 	}
-	runHandler = true;
-	if(isDistributedMode) {
-		peerHandlerTh = new Thread(&handle, this);
-		peerHandlerTh->execute();
-	}
 }
 
 PeerServerController::~PeerServerController() {
@@ -61,6 +56,14 @@ bool PeerServerController::onOpen(WebSocketData* wreq, WebSocketRespponseData* w
 	HttpRequest* req = (HttpRequest*)hreq;
 
 	std::string id, token, key;
+
+	if(!runHandler) {
+		runHandler = true;
+		if(isDistributedMode) {
+			Thread* peerHandlerTh = new Thread(&handle, this);
+			peerHandlerTh->execute();
+		}
+	}
 
 	if(req!=NULL) {
 		if(req->getMethod()=="POST" && req->getContent().length()>0 && req->getHeader(HttpRequest::ContentType).find("application/json")!=std::string::npos) {
@@ -245,7 +248,6 @@ bool PeerServerController::onMessage(WebSocketData *req, WebSocketRespponseData 
 }
 
 void* PeerServerController::handle(void *inp) {
-	Thread::sSleep(20);
 	PeerServerController* _i = (PeerServerController*)inp;
 	while(_i->runHandler) {
 		CacheInterface* cchi = CacheManager::getImpl("peer-cached", "peer-server");

@@ -63,7 +63,6 @@ class PeerServerController : public WebSockHandler {
 	std::string nodeIdentifier;
 	std::string authKey;
 	bool isDistributedMode;
-	Thread* peerHandlerTh;
 	volatile bool runHandler;
 	static void* handle(void* inp);
 	static std::string generateId();

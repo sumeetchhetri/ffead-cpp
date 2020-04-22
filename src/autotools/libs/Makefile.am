@@ -193,7 +193,7 @@ libffead_modules_la_SOURCES += \
 						../../modules/server-util/SelEpolKqEvPrt.cpp \
 						../../modules/server-util/Server.cpp \
 						../../modules/server-util/ServiceHandler.cpp \
-						../../modules/server-util/SocketUtil.cpp \
+						../../modules/server-util/SocketInterface.cpp \
 						../../modules/ssl/SSLCommon.cpp \
 						../../modules/ssl/SSLHandler.cpp \
 						../../modules/threads/FutureTask.cpp \
@@ -317,7 +317,7 @@ libffead_modules_la_SOURCES += \
 				../../modules/server-util/SelEpolKqEvPrt.cpp \
 				../../modules/server-util/Server.cpp \
 				../../modules/server-util/ServiceHandler.cpp \
-				../../modules/server-util/SocketUtil.cpp \
+				../../modules/server-util/SocketInterface.cpp \
 				../../modules/ssl/SSLCommon.cpp \
 				../../modules/ssl/SSLHandler.cpp \
 				../../modules/threads/FutureTask.cpp \

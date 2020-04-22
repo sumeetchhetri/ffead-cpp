@@ -58,21 +58,70 @@ bool Client::connection(const std::string& host, const int& port)
 		}
 		remote->sin_addr.s_addr = inet_addr(ip);
 		free(ip);
+
+		if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)) {
+			perror("Could not connect");
+			connected = false;
+		} else {
+			connected = true;
+		}
+
+		free(remote);
 	} else {
-		remote->sin_addr.s_addr = INADDR_ANY;
+		struct addrinfo hints, *servinfo, *p;
+		int rv;
+
+		memset(&hints, 0, sizeof hints);
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+
+		std::string ports = CastUtil::lexical_cast<std::string>(port);
+
+		if ((rv = getaddrinfo(host.c_str(), ports.c_str(), &hints, &servinfo)) != 0) {
+			fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+			return 1;
+		}
+
+		// loop through all the results and connect to the first we can
+		for(p = servinfo; p != NULL; p = p->ai_next) {
+			if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+				perror("client: socket");
+				continue;
+			}
+
+			if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+				close(sockfd);
+				//perror("client: connect");
+				continue;
+			}
+
+			break;
+		}
+
+		if (p == NULL) {
+			perror("client: failed to connect\n");
+			return false;
+		}
+
+		freeaddrinfo(servinfo);
 	}
 
-	remote->sin_port = htons(port);
+	connected = true;
 
-	if(connect(sockfd, (struct sockaddr *)remote, sizeof(struct sockaddr)) < 0 && (errno != EINPROGRESS)) {
-		perror("Could not connect");
-		connected = false;
-	} else {
-		connected = true;
+	int error = 0;
+	socklen_t len = sizeof (error);
+	int retval = getsockopt (sockfd, SOL_SOCKET, SO_ERROR, &error, &len);
+	if (retval != 0) {
+	    /* there was a problem getting the error code */
+	    fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
+	    connected = false;
 	}
-	free(remote);
 
-	connected = ClientInterface::isConnected(sockfd);
+	if (error != 0) {
+	    /* socket has a non zero error status */
+	    fprintf(stderr, "socket error: %s\n", strerror(error));
+	    connected = false;
+	}
 
 	return connected;
 }
