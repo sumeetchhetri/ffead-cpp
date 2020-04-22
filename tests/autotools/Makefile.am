@@ -3,6 +3,7 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
 
 AM_CPPFLAGS=-I"../../src/modules/common" \
 			-I"../../src/modules/client-util" \
+			-I"../../src/modules/server-util" \
 			-I"../../src/modules/http" \
 			-I"../../src/modules/threads" \
 			-I"../../src/modules/ssl"
