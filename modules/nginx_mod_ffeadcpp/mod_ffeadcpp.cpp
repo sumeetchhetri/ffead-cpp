@@ -125,7 +125,7 @@ ngx_module_t ngx_http_ffeadcpp_module = {
     &init_worker_process,          /* init process */
     NULL,                          /* init thread */
     NULL,                          /* exit thread */
-    &exit_process,                /* exit process */
+    &exit_process,                 /* exit process */
     NULL,                          /* exit master */
     NGX_MODULE_V1_PADDING
 };

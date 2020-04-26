@@ -32,6 +32,7 @@ extern "C" {
 #include "ServiceTask.h"
 #include "PropFileReader.h"
 #include "XmlParseException.h"
+#include "HttpClient.h"
 #undef strtoul
 #ifdef WINDOWS
 #include <direct.h>
@@ -829,11 +830,6 @@ static ngx_int_t init_module(ngx_cycle_t *cycle)
 	}
 #endif*/
 
-
-#ifdef INC_JOBS
-	JobScheduler::start();
-#endif
-
 	logger << ("Initializing WSDL files....") << std::endl;
 	ConfigurationHandler::initializeWsdls();
 	logger << ("Initializing WSDL files done....") << std::endl;
@@ -950,6 +946,10 @@ static ngx_int_t init_worker_process(ngx_cycle_t *cycle)
 	ConfigurationHandler::initializeCaches();
 	logger << ("Initializing Caches done....") << std::endl;
 
+#ifdef INC_JOBS
+	JobScheduler::start();
+#endif
+
 	HTTPResponseStatus::init();
 
 	HttpRequest::init();
@@ -968,6 +968,18 @@ static ngx_int_t exit_process(ngx_cycle_t *cycle)
 	ConfigurationHandler::destroyCaches();
 
 	ConfigurationData::getInstance()->clearAllSingletonBeans();
+
+#ifdef INC_JOBS
+	JobScheduler::stop();
+#endif
+
+	RegexUtil::flushCache();
+
+	HttpClient::cleanup();
+
+	LoggerFactory::clear();
+
+	CommonUtils::clearInstance();
 
 	return NGX_OK;
 }

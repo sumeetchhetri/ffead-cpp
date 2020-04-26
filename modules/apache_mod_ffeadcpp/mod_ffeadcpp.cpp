@@ -64,6 +64,7 @@
 #include "ServiceTask.h"
 #include "PropFileReader.h"
 #include "XmlParseException.h"
+#include "HttpClient.h"
 #undef strtoul
 #ifdef WINDOWS
 #include <direct.h>
@@ -523,11 +524,6 @@ void one_time_init()
 	}
 #endif*/
 
-
-#ifdef INC_JOBS
-	JobScheduler::start();
-#endif
-
 	logger << ("Initializing WSDL files....") << std::endl;
 	ConfigurationHandler::initializeWsdls();
 	logger << ("Initializing WSDL files done....") << std::endl;
@@ -611,6 +607,8 @@ static apr_status_t mod_ffeadcp_child_uninit(void* arg)
 
 	RegexUtil::flushCache();
 
+	HttpClient::cleanup();
+
 	LoggerFactory::clear();
 
 	CommonUtils::clearInstance();
@@ -685,6 +683,10 @@ static void mod_ffeadcp_child_init(apr_pool_t *p, server_rec *s)
 	logger << ("Initializing Caches....") << std::endl;
 	ConfigurationHandler::initializeCaches();
 	logger << ("Initializing Caches done....") << std::endl;
+
+#ifdef INC_JOBS
+	JobScheduler::start();
+#endif
 
 	HTTPResponseStatus::init();
 
