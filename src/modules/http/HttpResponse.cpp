@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri 
+	Copyright 2009-2020, Sumeet Chhetri 
   
     Licensed under the Apache License, Version 2.0 (the "License"); 
     you may not use this file except in compliance with the License. 
@@ -230,6 +230,87 @@ std::string& HttpResponse::generateNginxApacheResponse() {
 	return content;
 }
 
+const std::string& HttpResponse::getHeadersStr(const std::string& server, bool status_line)
+{
+	if(_headers_str.length()==0) {
+		bool isTE = isHeaderValue(TransferEncoding, "chunked");
+		std::string boundary;
+		if(this->contentList.size()>0)
+		{
+			content.clear();
+			boundary = "FFEAD_SERVER_";
+			boundary.append(CastUtil::fromNumber(Timer::getCurrentTime()));
+			for (int var = 0; var < (int)contentList.size(); ++var) {
+				content.append("--");
+				content.append(boundary);
+				content.append(HDR_END);
+				RMap headers = contentList.at(var).getHeaders();
+				RMap::iterator it;
+				for(it=headers.begin();it!=headers.end();++it)
+				{
+					content.append(it->first);
+					content.append(HDR_SEP);
+					content.append(it->second);
+					content.append(HDR_END);
+				}
+				content.append(HDR_END);
+				content.append(contentList.at(var).getContent());
+				content.append(HDR_END);
+			}
+			content.append("--");
+			content.append(boundary);
+			content.append("--");
+			content.append(HDR_END);
+		}
+		if(status_line) {
+			_headers_str.append(httpVersion);
+			_headers_str.append(" ");
+			_headers_str.append(status->getSCode());
+			_headers_str.append(" ");
+			_headers_str.append(status->getMsg());
+			_headers_str.append(HDR_END);
+		}
+		if(server.length()==0) {
+			_headers_str.append("Server: ");
+			_headers_str.append(server);
+			_headers_str.append(HDR_END);
+		} else {
+			_headers_str.append(HDR_SRV);
+		}
+		if(!hasHeader(ContentType) && this->contentList.size()>0)
+		{
+			this->addHeader(ContentType, "multipart/mixed");
+		}
+		if(hasHeader(ContentType) && boundary!="")
+		{
+			headers[ContentType].append("; boundary=\"");
+			headers[ContentType].append(boundary);
+			headers[ContentType].append("\"");
+		}
+		if(!isTE && !hasHeader(ContentLength))
+		{
+			addHeader(ContentLength, CastUtil::fromNumber((int)content.length()));
+		}
+		RMap::iterator it;
+		for(it=headers.begin();it!=headers.end();++it)
+		{
+			_headers_str.append(it->first);
+			_headers_str.append(HDR_SEP);
+			_headers_str.append(it->second);
+			_headers_str.append(HDR_END);
+		}
+		for (int var = 0; var < (int)this->cookies.size(); var++)
+		{
+			_headers_str.append(SetCookie);
+			_headers_str.append(HDR_SEP);
+			_headers_str.append(this->cookies.at(var));
+			_headers_str.append(HDR_END);
+		}
+		_headers_str.append(HDR_END);
+	}
+	return _headers_str;
+}
+
 void HttpResponse::generateHeadResponse(std::string& resp)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
@@ -386,7 +467,7 @@ void HttpResponse::update(HttpRequest* req)
 	//addHeader(HttpResponse::AcceptRanges, "none");
 }
 
-void HttpResponse::setHTTPResponseStatus(const HTTPResponseStatus& status)
+void HttpResponse::setHTTPResponseStatus(HTTPResponseStatus& status)
 {
 	this->status = &status;
 }
@@ -401,12 +482,12 @@ int HttpResponse::getCode() const
 	return status->getCode();
 }
 
-std::string HttpResponse::getStatusMsg() const
+const std::string& HttpResponse::getStatusMsg()
 {
 	return status->getMsg();
 }
 
-std::string HttpResponse::getContent() const
+const std::string& HttpResponse::getContent()
 {
 	return content;
 }
@@ -417,6 +498,14 @@ void HttpResponse::setContent(const std::string& content)
 	if(content.length()>0) {
 		hasContent = true;
 	}
+}
+
+void HttpResponse::setUrl(const std::string& url) {
+	this->_url_str = url;
+}
+
+const std::string& HttpResponse::getUrl() {
+	return _url_str;
 }
 
 void HttpResponse::addCookie(const std::string& cookie)

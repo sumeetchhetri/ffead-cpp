@@ -745,6 +745,70 @@ AM_CONDITIONAL(MOD_ALL, test "x$mod_all" = "xyes")
 ########################################################################################################
 
 
+########################################################################################################
+############################## Server Engines #########################################################
+
+AC_ARG_ENABLE(srv_emb,
+AS_HELP_STRING([--enable-srv_emb],
+               [enable srv_emb, default: yes]),
+[case "${enableval}" in
+             yes) srv_emb=yes ;;
+             no)  srv_emb=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_emb]) ;;
+esac],
+[srv_emb=yes])
+AM_CONDITIONAL(SRV_EMB, test "x$srv_emb" = "xyes")
+if test "x$srv_emb" = "xyes"; then
+    AC_DEFINE(SRV_EMB, [], [enable embedded http server engine])
+fi
+
+AC_ARG_ENABLE(srv_cinatra,
+AS_HELP_STRING([--enable-srv_cinatra],
+               [enable srv_cinatra, default: no]),
+[case "${enableval}" in
+             yes) srv_cinatra=yes ;;
+             no)  srv_cinatra=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_cinatra]) ;;
+esac],
+[srv_cinatra=no])
+AM_CONDITIONAL(SRV_CINATRA, test "x$srv_cinatra" = "xyes")
+if test "x$srv_cinatra" = "xyes"; then
+    AC_DEFINE(SRV_CINATRA, [], [enable cinatra http server engine])
+fi
+
+AC_ARG_ENABLE(srv_lithium,
+AS_HELP_STRING([--enable-srv_lithium],
+               [enable srv_lithium, default: no]),
+[case "${enableval}" in
+             yes) srv_lithium=yes ;;
+             no)  srv_lithium=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_lithium]) ;;
+esac],
+[srv_lithium=no])
+AM_CONDITIONAL(SRV_LITHIUM, test "x$srv_lithium" = "xyes")
+if test "x$srv_lithium" = "xyes"; then
+    AC_DEFINE(SRV_LITHIUM, [], [enable lithium http server engine])
+fi
+
+AC_ARG_ENABLE(srv_drogon,
+AS_HELP_STRING([--enable-srv_drogon],
+               [enable srv_drogon, default: no]),
+[case "${enableval}" in
+             yes) srv_drogon=yes ;;
+             no)  srv_drogon=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_drogon]) ;;
+esac],
+[srv_drogon=no])
+AM_CONDITIONAL(SRV_DROGON, test "x$srv_drogon" = "xyes")
+if test "x$srv_drogon" = "xyes"; then
+    AC_DEFINE(SRV_DROGON, [], [enable drogon http server engine])
+fi
+
+########################################################################################################
+########################################################################################################
+
+
+
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
 

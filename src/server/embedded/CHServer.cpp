@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ static int preForked = 5;
 static std::map<int,pid_t> pds;
 static Mutex m_mutex, p_mutex;
 
-Logger CHServer::logger;
+static Logger logger;
 
 void sigchld_handler_server(int s)
 {
@@ -164,7 +164,7 @@ void handler(int sig)
 void siginthandler(int sig)
 {
 	if(errno!=EINTR) {
-		CHServer::getLogger() << "Exiting, Got errono " << sig << std::endl;
+		logger << "Exiting, Got errono " << sig << std::endl;
 		exit(0);
 	}
 }
@@ -180,7 +180,7 @@ void signalSIGSEGV(int sig)
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Segmentation fault occurred for process" << getpid() << "\n" << std::endl;
+	logger << "Segmentation fault occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 void signalSIGCHLD(int sig)
@@ -194,7 +194,7 @@ void signalSIGCHLD(int sig)
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Child process got killed " << getpid() << "\n"  << std::endl;
+	logger << "Child process got killed " << getpid() << "\n"  << std::endl;
 	//abort();
 }
 void signalSIGABRT(int sig)
@@ -208,7 +208,7 @@ void signalSIGABRT(int sig)
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Abort signal occurred for process" << getpid() << "\n" << std::endl;
+	logger << "Abort signal occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 void signalSIGTERM(int sig)
@@ -222,7 +222,7 @@ void signalSIGTERM(int sig)
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Termination signal occurred for process" << getpid() << "\n" << std::endl;
+	logger << "Termination signal occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 
@@ -237,7 +237,7 @@ void signalSIGKILL(int sig)
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Kill signal occurred for process" << getpid() << "\n" << std::endl;
+	logger << "Kill signal occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 
@@ -252,7 +252,7 @@ void signalSIGINT(int sig)
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Interrupt signal occurred for process" << getpid() << "\n" << std::endl;
+	logger << "Interrupt signal occurred for process" << getpid() << "\n" << std::endl;
 	//abort();
 }
 
@@ -267,7 +267,7 @@ void signalSIGFPE(int sig)
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Floating point Exception occurred for process" << getpid() << "\n" << std::endl;
+	logger << "Floating point Exception occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 
@@ -282,7 +282,7 @@ void signalSIGPIPE(int sig)
 	filename.append(".cntrl");
 	remove(filename.c_str());*/
 	handler(sig);
-	CHServer::getLogger() << "Broken pipe ignore it" << getpid() << "\n" << std::endl;
+	logger << "Broken pipe ignore it" << getpid() << "\n" << std::endl;
 	//abort();
 }
 
@@ -297,7 +297,7 @@ void signalSIGILL(int sig)
 	filename.append(".cntrl");
 	remove(filename.c_str());
 	handler(sig);
-	CHServer::getLogger() << "Floating point Exception occurred for process" << getpid() << "\n" << std::endl;
+	logger << "Floating point Exception occurred for process" << getpid() << "\n" << std::endl;
 	abort();
 }
 
@@ -487,7 +487,7 @@ int main(int argc, char* argv[])
 	}
 	if(port=="")
 	{
-		port = srprps["IP_ADDR"];
+		port = srprps["PORT_NO"];
 	}
 	if(argc > 3)
 	{
@@ -1119,7 +1119,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 			ipport = "localhost:" + port;
 	}
 
-	ConfigurationData::setEmbeddedServer(true);
+	ConfigurationData::getInstance()->serverType = SERVER_BACKEND::EMBEDDED;
 	ConfigurationData::getInstance()->coreServerProperties.ip_address = ipport;
 
 	if(ConfigurationData::getInstance()->servingContexts.size()==0)
@@ -1355,9 +1355,4 @@ SocketInterface* CHServer::createSocketInterface(SOCKET fd) {
 		return new Http11Handler(fd, ssl, io, ConfigurationData::getInstance()->coreServerProperties.webPath,
 			techunkSiz, connKeepAlive*1000, maxReqHdrCnt, maxEntitySize);
 	}
-}
-
-Logger& CHServer::getLogger()
-{
-	return logger;
 }

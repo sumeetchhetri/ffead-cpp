@@ -44,3 +44,12 @@ CMakeCache.txt
 cmake_install.cmake
 **/.vagrant
 *.cpgz
+.autotools
+.externalToolBuilders/
+*-e
+*.old
+callgrind.out*
+tests/autotools/.libs/tests
+tests/autotools/tests
+src/autotools/bins/.libs/ffead-cpp
+src/autotools/bins/ffead-cpp

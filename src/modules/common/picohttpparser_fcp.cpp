@@ -34,7 +34,7 @@
 #include <x86intrin.h>
 #endif
 #endif
-#include "picohttpparser.h"
+#include "picohttpparser_fcp.h"
 #include "CastUtil.h"
 #include "string_view"
 
@@ -262,7 +262,7 @@ static const char *parse_http_version(const char *buf, const char *buf_end, int 
     return buf;
 }
 
-static const char *parse_headers(const char *buf, const char *buf_end, struct phr_header *headers, size_t *num_headers,
+static const char *parse_headers(const char *buf, const char *buf_end, struct phr_header_fcp *headers, size_t *num_headers,
                                  size_t max_headers, int *ret, int* content_length)
 {
     for (;; ++*num_headers) {
@@ -347,7 +347,7 @@ static const char *parse_headers(const char *buf, const char *buf_end, struct ph
 }
 
 static const char *parse_request(const char *buf, const char *buf_end, const char **method, size_t *method_len, const char **path,
-                                 size_t *path_len, int *minor_version, struct phr_header *headers, size_t *num_headers,
+                                 size_t *path_len, int *minor_version, struct phr_header_fcp *headers, size_t *num_headers,
                                  size_t max_headers, int *ret, int* content_length)
 {
     /* skip first empty line (some clients add CRLF after POST content) */
@@ -388,8 +388,8 @@ static const char *parse_request(const char *buf, const char *buf_end, const cha
     return parse_headers(buf, buf_end, headers, num_headers, max_headers, ret, content_length);
 }
 
-int phr_parse_request(const char *buf_start, size_t len, const char **method, size_t *method_len, const char **path,
-                      size_t *path_len, int *minor_version, struct phr_header *headers, size_t *num_headers, size_t last_len, int* content_length)
+int phr_parse_request_fcp(const char *buf_start, size_t len, const char **method, size_t *method_len, const char **path,
+                      size_t *path_len, int *minor_version, struct phr_header_fcp *headers, size_t *num_headers, size_t last_len, int* content_length)
 {
     const char *buf = buf_start, *buf_end = buf_start + len;
     size_t max_headers = *num_headers;
@@ -417,7 +417,7 @@ int phr_parse_request(const char *buf_start, size_t len, const char **method, si
 }
 
 static const char *parse_response(const char *buf, const char *buf_end, int *minor_version, int *status, const char **msg,
-                                  size_t *msg_len, struct phr_header *headers, size_t *num_headers, size_t max_headers, int *ret, int* content_length)
+                                  size_t *msg_len, struct phr_header_fcp *headers, size_t *num_headers, size_t max_headers, int *ret, int* content_length)
 {
     /* parse "HTTP/1.x" */
     if ((buf = parse_http_version(buf, buf_end, minor_version, ret)) == NULL) {
@@ -459,8 +459,8 @@ static const char *parse_response(const char *buf, const char *buf_end, int *min
     return parse_headers(buf, buf_end, headers, num_headers, max_headers, ret, content_length);
 }
 
-int phr_parse_response(const char *buf_start, size_t len, int *minor_version, int *status, const char **msg, size_t *msg_len,
-                       struct phr_header *headers, size_t *num_headers, size_t last_len, int* content_length)
+int phr_parse_response_fcp(const char *buf_start, size_t len, int *minor_version, int *status, const char **msg, size_t *msg_len,
+                       struct phr_header_fcp *headers, size_t *num_headers, size_t last_len, int* content_length)
 {
     const char *buf = buf_start, *buf_end = buf + len;
     size_t max_headers = *num_headers;
@@ -485,7 +485,7 @@ int phr_parse_response(const char *buf_start, size_t len, int *minor_version, in
     return (int)(buf - buf_start);
 }
 
-int phr_parse_headers(const char *buf_start, size_t len, struct phr_header *headers, size_t *num_headers, size_t last_len, int* content_length)
+int phr_parse_headers_fcp(const char *buf_start, size_t len, struct phr_header_fcp *headers, size_t *num_headers, size_t last_len, int* content_length)
 {
     const char *buf = buf_start, *buf_end = buf + len;
     size_t max_headers = *num_headers;
@@ -528,7 +528,7 @@ static int decode_hex(int ch)
     }
 }
 
-ssize_t phr_decode_chunked(struct phr_chunked_decoder *decoder, char *buf, size_t *_bufsz)
+ssize_t phr_decode_chunked_fcp(struct phr_chunked_decoder_fcp *decoder, char *buf, size_t *_bufsz)
 {
     size_t dst = 0, src = 0, bufsz = *_bufsz;
     ssize_t ret = -2; /* incomplete */
@@ -643,7 +643,7 @@ Exit:
     return ret;
 }
 
-int phr_decode_chunked_is_in_data(struct phr_chunked_decoder *decoder)
+int phr_decode_chunked_is_in_data_fcp(struct phr_chunked_decoder_fcp *decoder)
 {
     return decoder->_state == CHUNKED_IN_CHUNK_DATA;
 }

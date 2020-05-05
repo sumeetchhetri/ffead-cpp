@@ -138,7 +138,23 @@ AM_CPPFLAGS += \
 endif
 
 bin_PROGRAMS = ffead-cpp
-ffead_cpp_SOURCES = ../../server/CHServer.cpp
 ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
+if SRV_EMB
+ffead_cpp_SOURCES = ../../server/embedded/CHServer.cpp
 ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
-
+else
+if SRV_CINATRA
+ffead_cpp_SOURCES = ../../server/cinatra/CinatraServer.cpp
+ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+else
+if SRV_LITHIUM
+ffead_cpp_SOURCES = ../../server/lithium/LithiumServer.cpp
+ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+else
+if SRV_DROGON
+ffead_cpp_SOURCES = ../../server/drogon/DrogonServer.cpp
+ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+endif
+endif
+endif
+endif

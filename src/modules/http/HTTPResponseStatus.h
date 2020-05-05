@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (const the& "License");
     you may not use this file except in compliance with the License.
@@ -47,9 +47,9 @@ public:
 	virtual ~HTTPResponseStatus();
 	int getCode() const;
 	std::string getSCode() const;
-	std::string getMsg() const;
-	static const HTTPResponseStatus& getStatusByCode(const int& code);
-	static const HTTPResponseStatus& getStatusByCode(const std::string& code);
+	const std::string& getMsg();
+	static HTTPResponseStatus& getStatusByCode(const int& code);
+	static HTTPResponseStatus& getStatusByCode(const std::string& code);
 
 	static HTTPResponseStatus Continue;
 	static HTTPResponseStatus Switching;

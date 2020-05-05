@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -49,12 +49,6 @@ ConfigurationData::ConfigurationData() {
 	logger = LoggerFactory::getLogger("ConfigurationData");
 	dlib = NULL;
 	ddlib = NULL;
-	embeddedServer = false;
-	apacheServer = false;
-	nginxServer = false;
-	embeddedServer = false;
-	apacheServer = false;
-	nginxServer = false;
 	enableCors = false;
 	enableSecurity = false;
 	enableFilters = false;
@@ -67,6 +61,7 @@ ConfigurationData::ConfigurationData() {
 	enableScripts = false;
 	enableSoap = false;
 	enableLogging = false;
+	serverType = SERVER_BACKEND::EMBEDDED;
 }
 
 ConfigurationData* ConfigurationData::getInstance() {
@@ -509,40 +504,8 @@ HttpResponse* ConfigurationData::getHttpResponse() {
 	return getInstance()->httpRequest.getPointer<HttpResponse>();
 }
 
-bool ConfigurationData::isApacheServer() {
-	return getInstance()->apacheServer;
-}
-
-void ConfigurationData::setApacheServer(bool isApacheServer) {
-	getInstance()->apacheServer = isApacheServer;
-	if(isApacheServer) {
-		getInstance()->embeddedServer = false;
-		getInstance()->nginxServer = false;
-	}
-}
-
-bool ConfigurationData::isEmbeddedServer() {
-	return getInstance()->embeddedServer;
-}
-
-void ConfigurationData::setEmbeddedServer(bool isEmbeddedServer) {
-	getInstance()->embeddedServer = isEmbeddedServer;
-	if(isEmbeddedServer) {
-		getInstance()->apacheServer = false;
-		getInstance()->nginxServer = false;
-	}
-}
-
-bool ConfigurationData::isNginxServer() {
-	return getInstance()->nginxServer;
-}
-
-void ConfigurationData::setNginxServer(bool isNginxServer) {
-	getInstance()->nginxServer = isNginxServer;
-	if(isNginxServer) {
-		getInstance()->apacheServer = false;
-		getInstance()->embeddedServer = false;
-	}
+SERVER_BACKEND ConfigurationData::getServerType() {
+	return getInstance()->serverType;
 }
 
 int ConfigurationData::getProcessId() {

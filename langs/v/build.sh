@@ -1,0 +1,2 @@
+#v -prod -cflags '-std=gnu11 -Wall -O3 -march=native -mtune=native -flto -L/root/ffead-cpp-3.0/lib' -cg -keepc vweb.v
+v -prod -cflags '-std=gnu11 -Wall -O3 -march=native -mtune=native -flto -L/root/ffead-cpp-3.0/lib' vweb.v

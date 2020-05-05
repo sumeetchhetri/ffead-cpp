@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (const the& "License");
     you may not use this file except in compliance with the License.
@@ -181,6 +181,8 @@ public:
 	}
 };
 
+enum SERVER_BACKEND {NGINX, APACHE, OPENLITESPEED, EMBEDDED, CINATRA, LITHIUM, DROGON, VWEB, RUST};
+
 class ConfigurationData {
 	ConfigurationData();
 	static ConfigurationData* instance;
@@ -226,9 +228,7 @@ class ConfigurationData {
 	void* dlib;
 	Reflector reflector;
 	void* ddlib;
-	bool embeddedServer;
-	bool apacheServer;
-	bool nginxServer;
+	SERVER_BACKEND serverType;
 	bool enableCors;
 	bool enableSecurity;
 	bool enableFilters;
@@ -265,18 +265,13 @@ class ConfigurationData {
 	friend class JobScheduler;
 	friend class DataSourceManager;
 	friend class CacheManager;
+	friend class ServerInitUtil;
 public:
 	static void enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
 			bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra,
 			bool enableScripts, bool enableSoap, bool enableLogging);
 	static Reflector* getReflector();
 	static int getProcessId();
-	static bool isApacheServer();
-	static void setApacheServer(bool isApacheServer);
-	static bool isEmbeddedServer();
-	static void setEmbeddedServer(bool isEmbeddedServer);
-	static bool isNginxServer();
-	static void setNginxServer(bool isNginxServer);
 	static ClassInfo* getClassInfo(const std::string&, const std::string& app= "");
 	static ClassInfo* getClassInfo(const std::string&, std::string_view);
 	static bool isServingContext(std::string_view cntxtName);
@@ -290,6 +285,7 @@ public:
 	static void clearAllSingletonBeans();
 	static void setCoreServerProperties(CoreServerProperties coreServerProperties);
 	static propMap getAppProperties(const std::string& name = "");
+	static SERVER_BACKEND getServerType();
 	virtual ~ConfigurationData();
 };
 

@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -593,7 +593,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		if(ConfigurationData::getInstance()->enableCors) {
 			try {
 				isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
-			} catch(const HTTPResponseStatus& status) {
+			} catch(HTTPResponseStatus& status) {
 				res->setHTTPResponseStatus(status);
 				isContrl = true;
 			}
@@ -719,4 +719,11 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketInterface* sockUtil)
 {
+}
+
+std::string ServiceTask::getCntEncoding() {
+	if(ConfigurationData::getServerType()==SERVER_BACKEND::EMBEDDED) {
+		return HttpServiceTask::getCntEncoding();
+	}
+	return "";
 }
