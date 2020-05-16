@@ -98,8 +98,8 @@ public:
 	std::string decodeHuffman(const std::string& value);
 	std::string decodeHuffmanOld(std::string value);
 	Http2HPACKContext();
-	std::string encode(const std::map<std::string, std::string, cicomp>& headers);
-	std::map<std::string, std::string, cicomp> decode(const std::string& data);
+	std::string encode(const std::map<std::string, std::string, std::less<>>& headers);
+	std::map<std::string, std::string, std::less<>> decode(const std::string& data);
 	virtual ~Http2HPACKContext();
 };
 

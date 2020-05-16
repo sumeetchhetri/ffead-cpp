@@ -181,7 +181,8 @@ public:
 	}
 };
 
-enum SERVER_BACKEND {NGINX, APACHE, OPENLITESPEED, EMBEDDED, CINATRA, LITHIUM, DROGON, VWEB, RUST};
+enum SERVER_BACKEND {NGINX, APACHE, OPENLITESPEED, EMBEDDED, CINATRA, LITHIUM, DROGON, 
+	VWEB, V_PICO, RUST_ACTIX, RUST_HYPER, RUST_ROCKET, GO_FASTHTTP, LIBREACTOR};
 
 class ConfigurationData {
 	ConfigurationData();
@@ -233,6 +234,7 @@ class ConfigurationData {
 	bool enableSecurity;
 	bool enableFilters;
 	bool enableControllers;
+	bool enableExtControllers;
 	bool enableContMpg;
 	bool enableContPath;
 	bool enableContExt;
@@ -246,6 +248,7 @@ class ConfigurationData {
 	friend class FilterHandler;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;
+	friend class ControllerExtensionHandler;
 	friend class SecurityHandler;
 	friend class CORSHandler;
 	friend class FormHandler;

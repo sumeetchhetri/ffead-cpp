@@ -32,11 +32,17 @@
 #include "JSONSerialize.h"
 #include "ConfigurationData.h"
 
-class ControllerHandler {
+class ControllerExtensionHandler {
 	static std::string BLANK;
 	static bool getControllerForPath(std::string_view cntxtName, const std::string& actUrl, std::string& className);
-	static bool getMappingForPath(std::string_view cntxtName, const std::string& actUrl, std::string& to);
 	static bool hasMappingExtension(std::string extwodot, HttpRequest* req);
+	static bool getMappingForPath(std::string_view cntxtName, const std::string& actUrl, std::string& to);
+public:
+	static bool handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector);
+};
+
+class ControllerHandler {
+	static std::string BLANK;
 public:
 	static bool handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector);
 };

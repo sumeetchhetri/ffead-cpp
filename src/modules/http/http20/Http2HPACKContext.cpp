@@ -545,8 +545,8 @@ long Http2HPACKContext::decodeNumber(const std::string& data, const int& prefixS
 	return -1;
 }
 
-std::string Http2HPACKContext::encode(const std::map<std::string, std::string, cicomp>& headers) {
-	std::map<std::string, std::string>::const_iterator it;
+std::string Http2HPACKContext::encode(const std::map<std::string, std::string, std::less<>>& headers) {
+	std::map<std::string, std::string, std::less<>>::const_iterator it;
 	std::string encoded;
 	for (it=headers.begin();it!=headers.end();++it) {
 		std::string name = it->first;
@@ -579,8 +579,8 @@ std::string Http2HPACKContext::encode(const std::map<std::string, std::string, c
 	return encoded;
 }
 
-std::map<std::string, std::string, cicomp> Http2HPACKContext::decode(const std::string& data) {
-	std::map<std::string, std::string, cicomp> headers;
+std::map<std::string, std::string, std::less<>> Http2HPACKContext::decode(const std::string& data) {
+	std::map<std::string, std::string, std::less<>> headers;
 	size_t indx = 0;
 	while(data.length()>indx)
 	{

@@ -44,8 +44,8 @@ bool Http11Handler::readRequest(void* request, void*& context, int& pending, int
 	{
 		bytesToRead = 0;
 		std::string headers = buffer.substr(0, ix+4);
-		buffer = buffer.substr(ix+4);
 		currReq->reset(std::move(headers), &bytesToRead);
+		buffer = buffer.substr(ix+4);
 		((HttpResponse*)currReq->resp)->reset();
 
 		/*
@@ -118,7 +118,8 @@ bool Http11Handler::readRequest(void* request, void*& context, int& pending, int
 			}
 		}
 		if(bytesToRead>0 && (int)buffer.length()>=bytesToRead) {
-			currReq->content = buffer.substr(0, bytesToRead);
+			std::string content = buffer.substr(0, bytesToRead);
+			currReq->setContent(std::move(content));
 			buffer = buffer.substr(bytesToRead);
 			bytesToRead = 0;
 		}
@@ -229,23 +230,24 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context, std::stri
 	HttpRequest* request = (HttpRequest*)req;
 	HttpResponse* response = (HttpResponse*)res;
 
-	if(!response->isDone()) {
-		response->updateContent(request, chunkSize);
-	}
-
-	if(request->isHeaderValue(HttpRequest::Connection, "keep-alive") && request->getHttpVers()>=1.1) {
-		response->addHeader(HttpResponse::Connection, "keep-alive");
-	} else {
+	if(request->isClose()) {
 		response->addHeader(HttpResponse::Connection, "close");
+	} else if(request->getHttpVers()>=1.1) {
+		response->addHeader(HttpResponse::Connection, "keep-alive");
 	}
 
-	if(!response->isContentRemains()) {
+	if(response->isDone()) {
 		response->generateResponse(request, data);
 	} else {
-		response->generateResponse(request, data, false);
-		bool isFirst = true;
-		while(response->hasContent && response->getRemainingContent(request->getUrl(), isFirst, data)) {
-			isFirst = false;
+		response->updateContent(request, chunkSize);
+		if(!response->isContentRemains()) {
+			response->generateResponse(request, data);
+		} else {
+			response->generateResponse(request, data, false);
+			bool isFirst = true;
+			while(response->hasContent && response->getRemainingContent(request->getUrl(), isFirst, data)) {
+				isFirst = false;
+			}
 		}
 	}
 

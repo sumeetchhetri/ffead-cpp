@@ -80,6 +80,7 @@ public:
 	const std::string& getHeadersStr(const std::string& server, bool status_line);
 	void setUrl(const std::string& url);
 	const std::string& getUrl();
+	void addHeader(std::string header, const std::string& value);
 private:
 	static RiMap HDRS_SW_CODES;
 	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN;
@@ -115,7 +116,6 @@ private:
 	bool isContentRemains();
 	bool getRemainingContent(const std::string& fname, const bool& isFirst, std::string& data);
 	static std::string getFileExtension(const std::string& file);
-    void addHeader(std::string header, const std::string& value);
 	void reset();
 	friend class ServiceTask;
 	friend class HttpResponseParser;

@@ -33,7 +33,7 @@ fn ffead_cpp_cleanup()
     const char **out_url, size_t *out_url_len, const char **out_headers, size_t *out_headers_len, 
     const char **out_body, size_t *out_body_len
 */
-fn ffead_cpp_handle_return_all_cleanup(byteptr, u64, byteptr, u64, byteptr, int, &int, &string, &u64, &string, &u64, &string, &u64) voidptr
+fn ffead_cpp_handle_4(byteptr, u64, byteptr, u64, byteptr, int, &int, &string, &u64, &string, &u64, &string, &u64) voidptr
 
 fn ffead_cpp_get_resp_cleanup(voidptr)
 
@@ -216,7 +216,7 @@ fn (vweb mut VRequestContext) handle() {
 	hdrs_len := u64(0)
 	body_len := u64(0)
 	done := 0
-	resp := ffead_cpp_handle_return_all_cleanup(server_name.str, u64(server_name.len), vweb.rq_headers.str, u64(vweb.rq_headers.len), 
+	resp := ffead_cpp_handle_4(server_name.str, u64(server_name.len), vweb.rq_headers.str, u64(vweb.rq_headers.len), 
 		vweb.rq_body.str, vweb.rq_body.len, &done, &vweb.rs_url, &url_len, &vweb.rs_headers, &hdrs_len, &vweb.rs_body, &body_len)
 	vweb.rs_url = tos(vweb.rs_url.str, int(url_len))
 	vweb.rs_headers = tos(vweb.rs_headers.str, int(hdrs_len))

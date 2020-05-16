@@ -19,7 +19,7 @@
 /* #undef INC_MEMCACHED */
 #define INC_SDORM 1
 #define INC_SDORM_SQL 1
-#define INC_SDORM_MONGO 1
+/* #undef INC_SDORM_MONGO */
 /* #undef INC_BINSER */
 #define INC_JOBS 1
 #define APPLE 1
@@ -44,12 +44,16 @@
 /* #undef HAVE_BSDUUIDINC */
 #define HAVE_SQLINC 1
 #define HAVE_ODBCLIB /usr/local/lib/libodbc.dylib
-#define HAVE_MONGOINC 1
-#define HAVE_MONGOCLIB /usr/local/lib/libmongoc-1.0.dylib
-#define HAVE_BSONINC 1
-#define HAVE_BSONLIB /usr/local/lib/libbson-1.0.dylib
+/* #undef HAVE_MONGOINC */
+/* #undef HAVE_MONGOCLIB */
+/* #undef HAVE_BSONINC */
+/* #undef HAVE_BSONLIB */
 #define INC_JOBS 1
 /* #undef OS_BSD */
+#define SRV_EMB 1
+/* #undef SRV_CINATRA */
+/* #undef SRV_LITHIUM */
+/* #undef SRV_DROGON */
 
 #ifdef HAVE_ODBCLIB
 #define HAVE_LIBODBC 1

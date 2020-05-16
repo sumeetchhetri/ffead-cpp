@@ -31,18 +31,31 @@ Official ffead-cpp pre-built images can be found at [dockerhub](https://cloud.do
 Features
 ==========
 - Webrtc Signalling (websocket + api) (horizontally scalable peerjs compatible signalling server)
-- Advanced ORM - SDORM (sql/monogo)
-- Embedded Server, Apache/Nginx support (stable modules), Openlitespeed (experimental)
+- Multiple server backends
+    - embedded
+    - nginx
+    - apache
+    - openlitespeed (experimental)
+    - cinatra
+    - lithium
+    - drogon
+    - libreactor
+    - vweb (vlang)
+    - actix (rust)
+    - hyper (rust)
+    - rocket (rust)
 - Web Socket Support
-- HTTP2.0 Support
+- Advanced ORM - SDORM (sql/monogo)
 - Cache API (memcached/redis)
+- Search Engine API (solr/elasticsearch) -- (experimental)
 - Improved Thread/ThreadPool API(s)
-- Marker based configuration (Java style annotations)
+- Marker based configuration (java style annotations)
 - Improved autotools support
 - Reflection support
 - Serialization support
 - Date/Time Ultility functions
 - Better Logging support
+- HTTP2.0 Support
 - Dependency Injection
 
 Quickstart (Using cmake)

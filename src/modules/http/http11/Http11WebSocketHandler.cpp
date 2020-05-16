@@ -111,7 +111,7 @@ bool Http11WebSocketHandler::nextFrame(Http11WebSocketDataFrame* frame)
 	return false;
 }
 
-bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, WebSocketData* request)
+bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, WebSocketData* request, bool& isReq)
 {
 	if(frame->opcode==8) {
 		//closed = true;
@@ -148,10 +148,11 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, WebSo
 		if(dataframesComplete[it->first])
 		{
 			WebSocketData* wsd = (WebSocketData*)request;
+			isReq = true;
 			if(frame->opcode==1) {
-				wsd->textData = dataframes[it->first];
+				wsd->textData = std::move(dataframes[it->first]);
 			} else {
-				wsd->binaryData = dataframes[it->first];
+				wsd->binaryData = std::move(dataframes[it->first]);
 			}
 			//logger << "Message is " << wsd->data << std::endl;
 			dataframes[it->first].clear();
@@ -169,16 +170,12 @@ bool Http11WebSocketHandler::readRequest(void* request, void*& context, int& pen
 	while(nextFrame(&frame))
 	{
 		WebSocketData* wreq = (WebSocketData*)request;
-		wreq->textData.clear();
-		wreq->binaryData.clear();
-		if(processFrame(&frame, wreq)) {
+		if(processFrame(&frame, wreq, fl)) {
 			//closed = true;
 			closeSocket();
 			break;
 		}
-		if(wreq->textData.length()>0 || wreq->binaryData.length()>0) {
-			//reqPos = startRequest();
-			fl = true;
+		if(fl) {
 			break;
 		}
 	}

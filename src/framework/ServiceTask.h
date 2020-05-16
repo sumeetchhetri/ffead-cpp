@@ -55,6 +55,7 @@
 #include "SocketInterface.h"
 #include "Router.h"
 #include "WebSockHandler.h"
+#include "string_view"
 
 class ServiceTask : public HttpServiceTask
 {

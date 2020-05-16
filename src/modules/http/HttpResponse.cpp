@@ -144,11 +144,11 @@ void HttpResponse::generateResponse(const std::string& httpMethod, HttpRequest *
 
 void HttpResponse::generateResponse(HttpRequest *req, std::string& data, const bool& appendHeaders /*= true*/)
 {
-	if(req->getMethod()=="OPTIONS")
+	if(req->getMethod().at(0)=='o' || req->getMethod().at(0)=='O')
 	{
 		generateOptionsResponse(data);
 	}
-	else if(req->getMethod()=="TRACE")
+	else if(req->getMethod().at(0)=='t' || req->getMethod().at(0)=='T')
 	{
 		generateTraceResponse(req, data);
 	}
@@ -157,7 +157,7 @@ void HttpResponse::generateResponse(HttpRequest *req, std::string& data, const b
 		if(appendHeaders)
 		{
 			generateHeadResponse(data);
-			data += this->content;
+			data.append(this->content);
 		}
 		else
 		{
@@ -314,9 +314,9 @@ const std::string& HttpResponse::getHeadersStr(const std::string& server, bool s
 void HttpResponse::generateHeadResponse(std::string& resp)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
-	std::string boundary;
 	if(this->contentList.size()>0)
 	{
+		std::string boundary;
 		content.clear();
 		boundary = "FFEAD_SERVER_";
 		boundary.append(CastUtil::fromNumber(Timer::getCurrentTime()));
@@ -341,6 +341,17 @@ void HttpResponse::generateHeadResponse(std::string& resp)
 		content.append(boundary);
 		content.append("--");
 		content.append(HDR_END);
+
+		if(!hasHeader(ContentType) && this->contentList.size()>0)
+		{
+			this->addHeader(ContentType, "multipart/mixed");
+		}
+		if(hasHeader(ContentType) && boundary!="")
+		{
+			headers[ContentType].append("; boundary=\"");
+			headers[ContentType].append(boundary);
+			headers[ContentType].append("\"");
+		}
 	}
 	resp.append(httpVersion);
 	resp.append(" ");
@@ -349,19 +360,12 @@ void HttpResponse::generateHeadResponse(std::string& resp)
 	resp.append(status->getMsg());
 	resp.append(HDR_END);
 	resp.append(HDR_SRV);
-	if(!hasHeader(ContentType) && this->contentList.size()>0)
-	{
-		this->addHeader(ContentType, "multipart/mixed");
-	}
-	if(hasHeader(ContentType) && boundary!="")
-	{
-		headers[ContentType].append("; boundary=\"");
-		headers[ContentType].append(boundary);
-		headers[ContentType].append("\"");
-	}
 	if(!isTE && !hasHeader(ContentLength))
 	{
-		addHeader(ContentLength, CastUtil::fromNumber((int)content.length()));
+		resp.append(ContentLength);
+		resp.append(HDR_SEP);
+		resp.append(CastUtil::fromNumber((int)content.length()));
+		resp.append(HDR_END);
 	}
 	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
@@ -713,14 +717,14 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 		}
     }*/
 
-	if(req->getMethod()=="HEAD")
+	if(req->getMethod()[0]=='H')
 	{
 		res->addHeader(HttpResponse::ContentLength, CastUtil::fromNumber(getContentSize(fname.c_str())));
 		res->addHeader(HttpResponse::AcceptRanges, "bytes");
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 		res->addHeader(HttpResponse::ContentType, CommonUtils::getMimeType(ext));
 	}
-	else if(req->getMethod()=="OPTIONS" || req->getMethod()=="TRACE")
+	else if(req->getMethod()[0]=='O' || req->getMethod()[0]=='T')
 	{
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	}
@@ -782,12 +786,8 @@ bool HttpResponse::updateContent(HttpRequest* req, const uint32_t& techunkSiz)
 				}
 			}
 
-			time_t rt;
-			struct tm ti;
-			time (&rt);
-			gmtime_r(&rt, &ti);
 			char buffer[31];
-			strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
+			strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &tim);
 			res->addHeader(HttpResponse::LastModified, std::string(buffer));
 
 			if(isCEGzip)

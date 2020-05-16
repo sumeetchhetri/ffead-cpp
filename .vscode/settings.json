@@ -90,6 +90,11 @@
         "variant": "cpp",
         "*.ipp": "cpp",
         "__functional_base_03": "cpp",
-        "__functional_03": "cpp"
-    }
+        "__functional_03": "cpp",
+        "dynamic.h": "c",
+        "stdint.h": "c",
+        "err.h": "c",
+        "ffead-cpp.h": "c"
+    },
+    "git.ignoreLimitWarning": true
 }

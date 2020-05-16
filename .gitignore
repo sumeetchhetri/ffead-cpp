@@ -53,3 +53,8 @@ tests/autotools/.libs/tests
 tests/autotools/tests
 src/autotools/bins/.libs/ffead-cpp
 src/autotools/bins/ffead-cpp
+lang-server-backends/rust/hyper-ffead-cpp/target
+lang-server-backends/rust/actix-ffead-cpp/target
+lang-server-backends/rust/rocket-ffead-cpp/target
+**/ffead-cpp-3.0.build
+**/CMakeScripts

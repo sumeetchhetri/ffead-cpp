@@ -22,9 +22,10 @@
 
 #include "ControllerHandler.h"
 
+std::string ControllerExtensionHandler::BLANK = "";
 std::string ControllerHandler::BLANK = "";
 
-bool ControllerHandler::getControllerForPath(std::string_view cntxtName, const std::string& actUrl, std::string& className)
+bool ControllerExtensionHandler::getControllerForPath(std::string_view cntxtName, const std::string& actUrl, std::string& className)
 {
 	//Timer t;
 	//t.start();
@@ -45,7 +46,7 @@ bool ControllerHandler::getControllerForPath(std::string_view cntxtName, const s
 	return false;
 }
 
-bool ControllerHandler::getMappingForPath(std::string_view cntxtName, const std::string& actUrl, std::string& to)
+bool ControllerExtensionHandler::getMappingForPath(std::string_view cntxtName, const std::string& actUrl, std::string& to)
 {
 	//Timer t;
 	//t.start();
@@ -66,7 +67,7 @@ bool ControllerHandler::getMappingForPath(std::string_view cntxtName, const std:
 	return false;
 }
 
-bool ControllerHandler::hasMappingExtension(std::string extwodot, HttpRequest* req) {
+bool ControllerExtensionHandler::hasMappingExtension(std::string extwodot, HttpRequest* req) {
 	//Timer t;
 	//t.start();
 	bool f = ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->mappingextObjectMap.end()
@@ -77,13 +78,12 @@ bool ControllerHandler::hasMappingExtension(std::string extwodot, HttpRequest* r
 	return f;
 }
 
-bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
+bool ControllerExtensionHandler::handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
 {
-	//Logger logger = LoggerFactory::getLogger("ControllerHandler");
 	bool isContrl = false;
 	std::string controller;
 	std::string to;
-	std::string extwodot = ext!=""?ext.substr(1):"";
+	std::string extwodot = ext.length()>0?ext.substr(1):BLANK;
 	if(ConfigurationData::getInstance()->enableContMpg && getControllerForPath(req->getCntxt_name(), req->getCurl(), controller))
 	{
 		//Timer t;
@@ -139,7 +139,17 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		req->setFile(fili+ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())->second[extwodot]);
 		//logger << ("URL extension mapped from " + extwodot + " to " + ConfigurationData::getInstance()->mappingextObjectMap.find(req->getCntxt_name())->second[extwodot]) << std::endl;
 	}
-	else if(ConfigurationData::getInstance()->enableContRst && ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->rstCntMap.end())
+	if(isContrl && res->getStatusCode()!="404") {
+		res->setDone(true);
+	}
+	return isContrl;
+}
+
+bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector)
+{
+	bool isContrl = false;
+	//Logger logger = LoggerFactory::getLogger("ControllerHandler");
+	if(ConfigurationData::getInstance()->enableContRst && ConfigurationData::getInstance()->rstCntMap.find(req->getCntxt_name())!=ConfigurationData::getInstance()->rstCntMap.end())
 	{
 		//Timer t;
 		//t.start();

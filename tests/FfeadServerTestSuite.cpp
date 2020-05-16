@@ -173,15 +173,15 @@ int main()
 
 			if(reqContTyp!="")
 			{
-				data += "Content-Type: " + reqContTyp + "\r\n";
+				data += "content-type: " + reqContTyp + "\r\n";
 			}
 			if(content.length()>0)
 			{
-				data += "Content-Length: " + CastUtil::lexical_cast<std::string>((int)content.length()) + "\r\n";
+				data += "content-length: " + CastUtil::lexical_cast<std::string>((int)content.length()) + "\r\n";
 			}
 			if(cookies!="")
 			{
-				data += "Cookie: " + cookies + "\r\n";
+				data += "cookie: " + cookies + "\r\n";
 			}
 			if(headers!="")
 			{
@@ -216,9 +216,9 @@ int main()
 			HttpResponse res;
 			HttpResponseParser parser(tot, res);
 
-			if(res.getHeader("Set-Cookie")!="")
+			if(res.getHeader("set-cookie")!="")
 			{
-				cookies = res.getHeader("Set-Cookie");
+				cookies = res.getHeader("set-cookie");
 				cookies = cookies.substr(0, cookies.find(";"));
 			}
 
@@ -234,7 +234,7 @@ int main()
 			{
 				if(respCntType!="")
 				{
-					if(res.getHeader("Content-Type").find(respCntType)==0)
+					if(res.getHeader("content-type").find(respCntType)==0)
 					{
 						ss.clear();
 						ss = "Test " + CastUtil::lexical_cast<std::string>(counter) + " " + request + " was Successfull, Response Time = " + CastUtil::lexical_cast<std::string>(millis) + "ms" + debugContentValue;
@@ -244,14 +244,14 @@ int main()
 					{
 						ss.clear();
 						ss = "Test " + CastUtil::lexical_cast<std::string>(counter) + " " + request + " Failed, Response Time = " + CastUtil::lexical_cast<std::string>(millis) + "ms"
-								+ ", Expected ContentType = " + respCntType + ", Actual ContentType = "  + res.getHeader("Content-Type");
+								+ ", Expected ContentType = " + respCntType + ", Actual ContentType = "  + res.getHeader("content-type");
 						passedFlag = false;
 					}
 					done = true;
 				}
 				if(!done)
 				{
-					std::string cntlen = res.getHeader("Content-Length");
+					std::string cntlen = res.getHeader("content-length");
 					if(file!="")
 					{
 						std::ifstream myfile (&file[0], std::ios::binary | std::ios::ate);

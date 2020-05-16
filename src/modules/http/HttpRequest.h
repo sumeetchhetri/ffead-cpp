@@ -46,9 +46,9 @@ typedef std::vector<std::string> strVec;
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
-typedef std::map<std::string, int, cicomp> RiMap;
-typedef std::map<std::string, std::string, cicomp> RMap;
-typedef std::map<std::string, MultipartContent, cicomp> FMap;
+typedef std::map<std::string, int, std::less<> > RiMap;
+typedef std::map<std::string, std::string, std::less<> > RMap;
+typedef std::map<std::string, MultipartContent, std::less<> > FMap;
 
 class HttpRequest {
 	void* resp;
@@ -136,6 +136,7 @@ class HttpRequest {
 	friend class HttpServiceHandler;
 	friend class HttpServiceTask;
 	friend class ControllerHandler;
+	friend class ControllerExtensionHandler;
 	friend class ExtHandler;
 	friend class FviewHandler;
 	friend class ScriptHandler;
@@ -169,11 +170,13 @@ public:
 	HttpRequest(const std::string&);
 
 	HttpRequest(std::string &&data, int* content_length);
-	HttpRequest(const char* pp, size_t pl, const char* qp, size_t ql, const char* mp, size_t ml, std::string &&content, unsigned int hv);
+	HttpRequest(const char* pp, size_t pl, const char* qp, size_t ql, const char* mp, size_t ml, const std::string& content, unsigned int hv);
+	HttpRequest(void* headers_list, size_t num_headers, std::string_view rawUrl, std::string_view qv, std::string_view method, int hv, std::string_view content);
 	HttpRequest(void* headers_list, size_t num_headers, std::string_view rawUrl, std::string_view method, int hv, std::string_view content);
 	HttpRequest(std::unordered_map<std::string_view, std::string_view> header_map, std::string_view url, std::string_view qv, std::string_view method, std::string_view hv, std::string_view content);
 	HttpRequest(const char* cnt, size_t cntlen, const std::unordered_map<std::string, std::string>& header_map, const std::string& url, const std::string& queryv, const char* method, int hv);
 	HttpRequest(const char *headers, size_t headers_len, const char *body, size_t body_len);
+	HttpRequest(std::string_view rawUrl, std::string_view method, int hv, const char *headers, size_t headers_len, const char *body, size_t body_len);
 
 	void updateContent();
 	virtual ~HttpRequest();
@@ -188,7 +191,7 @@ public:
 	std::string getContent_boundary() const;
 	std::string getContent() const;
 	std::string_view getContentv() const;
-	void setContent(const std::string&);
+	void setContent(std::string &&data);
     RMap getRequestParams() const;
     std::string getRequestParam(const std::string&);
     MultipartContent getMultipartContent(const std::string& key);
@@ -224,8 +227,8 @@ public:
     std::string getAuthOrderinfoAttribute(const int& key);
     std::string getReqOrderinfoAttribute(const int& key);
     std::string getCookieInfoAttribute(const std::string& key);
-    std::string getHeader(std::string key);
-    bool hasHeader(std::string key);
+    std::string getHeader(std::string_view key);
+    bool hasHeader(std::string_view key);
     RMap getHeaders();
     int getCORSRequestType();
     void addHeaderValue(std::string header, const std::string& value);
@@ -233,6 +236,9 @@ public:
     static bool isValidHttpMethod(const std::string& method);
     bool isValidHttpMethod();
     bool isAgentAcceptsCE();
+    bool isUpgrade();
+    bool isClose();
+    bool isKeepAlive();
     bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
     bool hasHeaderValuePart(std::string header, std::string valuePart, const bool& ignoreCase= true);
     std::vector<std::vector<int> > getRanges(std::vector<std::string> &rangesVec);

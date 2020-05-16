@@ -53,7 +53,7 @@ class Http11WebSocketHandler : public SocketInterface {
 	std::map<int, bool> dataframesComplete;
 	short lastOpCode;
 	void replyPong();
-	bool processFrame(Http11WebSocketDataFrame* frame, WebSocketData* request);
+	bool processFrame(Http11WebSocketDataFrame* frame, WebSocketData* request, bool& isReq);
 	bool nextFrame(Http11WebSocketDataFrame* frame);
 	friend class HttpServiceTask;
 public:

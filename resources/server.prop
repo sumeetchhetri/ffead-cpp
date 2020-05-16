@@ -81,6 +81,8 @@ ENABLE_FLT=true
 
 ENABLE_CNT=true
 
+ENABLE_EXT_CNT=true
+
 ENABLE_CNT_MPG=true
 
 ENABLE_CNT_PTH=true

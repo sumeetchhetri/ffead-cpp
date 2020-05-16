@@ -426,9 +426,9 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 			ioctlsocket(descriptor, FIONBIO, &iMode);
 		#else
 			fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
-			/*int i = 1;
-			//setsockopt(descriptor, IPPROTO_TCP, TCP_NODELAY, (void *)&i, sizeof(i));
-			setsockopt(descriptor, IPPROTO_TCP, TCP_CORK, (void *)&i, sizeof(i));*/
+			int i = 1;
+			setsockopt(descriptor, IPPROTO_TCP, TCP_NODELAY, (void *)&i, sizeof(i));
+			//setsockopt(descriptor, IPPROTO_TCP, TCP_CORK, (void *)&i, sizeof(i));
 		#endif
 	//#endif
 

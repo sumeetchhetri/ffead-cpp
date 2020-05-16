@@ -22,6 +22,7 @@
 
 #include "map"
 #include <iostream>
+#include <functional>
 
 
 #ifndef HTTPSESSION_H_
@@ -29,7 +30,7 @@
 #include "HTTPResponseStatus.h"
 
 
-typedef std::map<std::string, std::string, cicomp> Map;
+typedef std::map<std::string, std::string, std::less<> > Map;
 
 class HttpSession {
 	std::string sessionId;

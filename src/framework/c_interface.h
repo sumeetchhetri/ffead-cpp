@@ -19,6 +19,48 @@
 
 #include "ServerInitUtil.h"
 
+struct ffead_request {
+    const char* server_str;
+    size_t server_str_len;
+    const char* method;
+    size_t method_len;
+    const char* path;
+    size_t path_len;
+    phr_header_fcp* headers;
+    size_t headers_len;
+    const char* body;
+    size_t body_len;
+    int version;
+};
+struct ffead_request1 {
+    const char* server_str;
+    size_t server_str_len;
+    const char* method;
+    size_t method_len;
+    const char* path;
+    size_t path_len;
+    const char* headers;
+    size_t headers_len;
+    const char* body;
+    size_t body_len;
+    int version;
+};
+struct ffead_request2 {
+    const char* server_str;
+    size_t server_str_len;
+    const char* method;
+    size_t method_len;
+    const char* path;
+    size_t path_len;
+    const char* qstr;
+    size_t qstr_len;
+    const char* headers;
+    size_t headers_len;
+    const char* body;
+    size_t body_len;
+    int version;
+};
+
 /*
     Bootstrap the ffead-cpp server framework
 */
@@ -34,12 +76,21 @@ extern "C" void ffead_cpp_init();
 */
 extern "C" void ffead_cpp_cleanup();
 
-/*
-    Handle a request and return the HttpResponse pointer, along-with any static file path if requested
-*/
-extern "C" void* ffead_cpp_handle_request(const char *in_headers, size_t in_headers_len, 
-    const char *in_body, size_t in_body_len, int* done, const char **out_url, size_t *out_url_len
-);
+extern "C" void* ffead_cpp_handle_1(const ffead_request *request, int* scode,
+    const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
+    const char **out_body, size_t *out_body_len);
+
+extern "C" void* ffead_cpp_handle_1s(const ffead_request *request, int* scode, const char** smsg, size_t *smsg_len,
+    const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
+    const char **out_body, size_t *out_body_len);
+
+extern "C" void* ffead_cpp_handle_1t(const ffead_request2 *request, int* scode,
+    const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
+    const char **out_body, size_t *out_body_len);
+
+extern "C" void* ffead_cpp_handle_2(const ffead_request1 *request, int* scode,
+    const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
+    const char **out_body, size_t *out_body_len);
 
 /*
     Handle a request and return the HttpResponse pointer, along-with, if with_status_line is true, then the header string
@@ -53,7 +104,7 @@ extern "C" void* ffead_cpp_handle_request(const char *in_headers, size_t in_head
         - response headers as a string
         - response body as a string
 */
-extern "C" void* ffead_cpp_handle_return_hdrs_body(const char *server_str, size_t server_str_len, 
+extern "C" void* ffead_cpp_handle_3(const char *server_str, size_t server_str_len,
     const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* done,
     const char **out_url, size_t *out_url_len, bool with_status_line, int* scode, const char** smsg, size_t *smsg_len, 
     const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
@@ -68,10 +119,17 @@ extern "C" void* ffead_cpp_handle_return_hdrs_body(const char *server_str, size_
         - response headers as a string with the http status line as well
         - response body as a string
 */
-extern "C" void* ffead_cpp_handle_return_all(const char *server_str, size_t server_str_len, 
+extern "C" void* ffead_cpp_handle_4(const char *server_str, size_t server_str_len,
     const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* done,
     const char **out_url, size_t *out_url_len, const char **out_headers, size_t *out_headers_len, 
     const char **out_body, size_t *out_body_len
+);
+
+/*
+    Handle a request and return the HttpResponse pointer, along-with any static file path if requested
+*/
+extern "C" void* ffead_cpp_handle_5(const char *in_headers, size_t in_headers_len,
+    const char *in_body, size_t in_body_len, int* done, const char **out_url, size_t *out_url_len
 );
 
 /*
@@ -113,6 +171,6 @@ extern "C" void ffead_cpp_get_resp_get_body(void* ptr, const char **out_body, si
     The response object returned from the ffead_cpp_handle_* function needs to be cleaned up eventually
     after all other required functions have been called
 */
-extern "C" void ffead_cpp_get_resp_cleanup(void* ptr);
+extern "C" void ffead_cpp_resp_cleanup(void* ptr);
 
 #endif

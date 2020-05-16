@@ -22,6 +22,10 @@
 
 #include "ServiceHandler.h"
 
+time_t ServiceHandler::rt;
+struct tm ServiceHandler::ti;
+std::string ServiceHandler::dateStr;
+
 bool ServiceHandler::isActive() {
 	return run;
 }
@@ -53,6 +57,23 @@ void* ServiceHandler::closeConnections(void *arg) {
 		}
 	}
 	return NULL;
+}
+
+void* ServiceHandler::timer(void *arg) {
+	ServiceHandler* ths = (ServiceHandler*)arg;
+	while(ths->run) {
+		time (&rt);
+		gmtime_r(&rt, &ti);
+		char buffer[31];
+		strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
+		dateStr = std::string(buffer);
+		Thread::sSleep(1);
+	}
+	return NULL;
+}
+
+std::string ServiceHandler::getDateStr() noexcept {
+	return dateStr;
 }
 
 void ServiceHandler::closeConnection(SocketInterface* si) {
@@ -92,6 +113,8 @@ void ServiceHandler::start() {
 		run = true;
 		Thread* mthread = new Thread(&closeConnections, this);
 		mthread->execute(-1);
+		Thread* tthread = new Thread(&timer, this);
+		tthread->execute();
 	}
 }
 

@@ -262,6 +262,7 @@ static int on_read(const lsi_session_t *session)
     	methods = "DELETE";break;
     case LSI_METHOD_TRACE:
     	methods = "TRACE";break;
+    default: break;
     }
 	g_api->log(NULL, LSI_LOG_INFO, "[Module:mod_ffeadcpp] on_read http_method %s\n", methods.c_str());
 
@@ -279,10 +280,12 @@ static int on_read(const lsi_session_t *session)
 	qstr = g_api->get_req_query_string(session, &qlen);
 	g_api->log(NULL, LSI_LOG_INFO, "[Module:mod_ffeadcpp] on_read URL %s\n", std::string(qstr, qlen).c_str());
 
-    HttpRequest* req = new HttpRequest(uri, (size_t)ulen, qstr, qlen, (const char*)methods.c_str(), methods.length(), std::move(content), 1100);
+	ls_xpool_t *pool = g_api->get_session_pool(session);
+	void* reqMem = ls_xpool_alloc(pool, sizeof(HttpRequest));
+    HttpRequest* req = new(reqMem) HttpRequest(uri, (size_t)ulen, qstr, qlen, (const char*)methods.c_str(), methods.length(), content, 1);
 
     const char *filt = NULL;
-	g_api->foreach(session, LSI_DATA_REQ_HEADER, filt, reqhdrcb, &req);
+	g_api->foreach(session, LSI_DATA_REQ_HEADER, filt, reqhdrcb, req);
 
 	g_api->log(NULL, LSI_LOG_INFO, "[Module:mod_ffeadcpp] on_read ffead-cpp handle start\n");
     HttpResponse respo;
@@ -319,9 +322,13 @@ static int on_read(const lsi_session_t *session)
 		}
 		g_api->end_resp(session);
 		g_api->log(NULL, LSI_LOG_INFO, "[Module:mod_ffeadcpp] on_read set code/response end\n");
-		delete req;
+
+		req->~HttpRequest();
+		ls_xpool_free(pool, reqMem);
 	} else {
-		delete req;
+		req->~HttpRequest();
+		ls_xpool_free(pool, reqMem);
+		
 		g_api->log(NULL, LSI_LOG_INFO, "[Module:mod_ffeadcpp] on_read static file request %s\n", furl.c_str());
 		struct stat sb;
 		off_t off = 0;

@@ -145,7 +145,7 @@ int SocketInterface::completeWrite() {
 		done = writeTo(&rd);
 
 		//t.end();
-		////CommonUtils::tsResSockWrite += t.timerNanoSeconds();
+		//CommonUtils::tsResSockWrite += t.timerNanoSeconds();
 
 		if(done == 0 || done == 1) {
 			endRequest(reqPos);
@@ -165,7 +165,7 @@ int SocketInterface::completeWrite() {
 	//wm.unlock();
 
 	//to.end();
-	////CommonUtils::tsResTotal += to.timerNanoSeconds();
+	//CommonUtils::tsResTotal += to.timerNanoSeconds();
 	return done;
 }
 
@@ -198,7 +198,7 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 	setsockopt(fd, IPPROTO_TCP, TCP_CORK, &state, sizeof(state));*/
 
 	//t.end();
-	////CommonUtils::tsResSockWrite += t.timerNanoSeconds();
+	//CommonUtils::tsResSockWrite += t.timerNanoSeconds();
 
 	if(done >= 0) {
 		endRequest(reqPos);
@@ -207,7 +207,7 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 	}
 
 	//to.end();
-	////CommonUtils::tsResTotal += to.timerNanoSeconds();
+	//CommonUtils::tsResTotal += to.timerNanoSeconds();
 
 	return 1;
 }

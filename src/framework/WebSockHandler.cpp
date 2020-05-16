@@ -27,12 +27,28 @@ int WebSockHandler::writeToPeer(WebSocketRespponseData* response, SocketInterfac
 		std::cout << "WS:Packets:" << response->getMore().size() << std::endl;
 		for (int var = 0; var < (int)response->getMore().size(); ++var) {
 			if(!sif->isClosed() && response->getMore()[var].hasData()) {
-#ifdef EMBEDDED_SERVER
+#ifdef SRV_EMB
 				ResponseData rd;
-				Http11WebSocketDataFrame::getFramePdu(&response->getMore()[var], rd._b);
+				WebSocketData* wres = &response->getMore()[var];
+				int type = Http11WebSocketDataFrame::getFramePdu(wres, rd._b, false);
 				int ret = sif->writeTo(&rd);
 				if(ret == 0) {
 					return 0;
+				}
+				if(type==1) {
+					rd.oft = 0;
+					rd._b = std::move(wres->textData);
+					ret = sif->writeTo(&rd);
+					if(ret == 0) {
+						return 0;
+					}
+				} else {
+					rd.oft = 0;
+					rd._b = std::move(wres->binaryData);
+					ret = sif->writeTo(&rd);
+					if(ret == 0) {
+						return 0;
+					}
 				}
 #else
 				sif->writeWsData(response);

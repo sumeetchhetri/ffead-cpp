@@ -54,6 +54,7 @@ class WebSocketData {
 	friend class ServiceTask;
 	friend class WebSocketRespponseData;
 	friend class Http11WebSocketDataFrame;
+	friend class WebSockHandler;
 public:
 	bool hasData();
 	void collectText(const std::string& data);
@@ -78,7 +79,7 @@ public:
 	bool isEmpty();
 	void pushText(const std::string& textData);
 	void pushBinary(const std::string& binaryData);
-	std::vector<WebSocketData> getMore();
+	std::vector<WebSocketData>& getMore();
 	void reset();
 	WebSocketRespponseData();
 	virtual ~WebSocketRespponseData();
@@ -113,7 +114,7 @@ public:
 	bool isRsv1() const;
 	bool isRsv2() const;
 	bool isRsv3() const;
-	static void getFramePdu(WebSocketData* wres, std::string& data);
+	static int getFramePdu(WebSocketData* wres, std::string& data, bool copyData);
 	void getFrameData(std::string& data);
 	std::string getFrameData();
 };

@@ -11,7 +11,10 @@
                 "/Users/sumeetc/Projects/GitHub/cinatra-master/include",
                 "/Users/sumeetc/Projects/GitHub/drogon-master/lib/inc",
                 "/Users/sumeetc/Projects/GitHub/drogon-master/orm_lib/inc",
+                "/Users/sumeetc/Projects/GitHub/drogon-master/orm_lib/inc",
                 "/Users/sumeetc/Projects/GitHub/trantor/",
+                "/Users/sumeetc/Projects/GitHub/libreactor/src",
+                "/Users/sumeetc/Projects/GitHub/libdynamic/src",
                 "/usr/local/opt/icu4c/include",
                 "/usr/local/opt/boost/include"
             ],

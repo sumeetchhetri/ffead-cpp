@@ -172,7 +172,7 @@ void WebSocketRespponseData::pushBinary(const std::string &binaryData) {
 	more.at(more.size()-1).binaryData = binaryData;
 }
 
-std::vector<WebSocketData> WebSocketRespponseData::getMore() {
+std::vector<WebSocketData>& WebSocketRespponseData::getMore() {
 	return more;
 }
 
@@ -189,7 +189,7 @@ void WebSocketRespponseData::reset() {
 WebSocketRespponseData::~WebSocketRespponseData() {
 }
 
-void Http11WebSocketDataFrame::getFramePdu(WebSocketData* wres, std::string& data) {
+int Http11WebSocketDataFrame::getFramePdu(WebSocketData* wres, std::string& data, bool copyData) {
 	Http11WebSocketDataFrame frame;
 	frame.fin = true;
 	frame.rsv1 = false;
@@ -214,7 +214,9 @@ void Http11WebSocketDataFrame::getFramePdu(WebSocketData* wres, std::string& dat
 		//We will not set application data here, we will directly send the data as
 		//we have computed other control options
 		frame.getFrameData(data);
-		data += wres->textData;
+		if(!copyData) {
+			data += wres->textData;
+		}
 	}
 	if(wres->binaryData.length()>0) {
 		frame.opcode = 2;
@@ -234,6 +236,9 @@ void Http11WebSocketDataFrame::getFramePdu(WebSocketData* wres, std::string& dat
 		//We will not set application data here, we will directly send the data as
 		//we have computed other control options
 		frame.getFrameData(data);
-		data += wres->binaryData;
+		if(!copyData) {
+			data += wres->binaryData;
+		}
 	}
+	return frame.opcode;
 }

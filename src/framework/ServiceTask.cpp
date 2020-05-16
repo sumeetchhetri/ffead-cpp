@@ -113,7 +113,7 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 
 	if(sessionchanged)
 	{
-		std::map<std::string,std::string, cicomp> vals = req->getSession()->getSessionAttributes();
+		std::map<std::string,std::string, std::less<>> vals = req->getSession()->getSessionAttributes();
 		std::string prevcookid = req->getCookieInfoAttribute("FFEADID");
 
 		std::string values;
@@ -469,14 +469,14 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 	try
 	{
-		if(req->getRequestParseStatus()!=NULL)
+		if(req->getRequestParseStatus()!=NULL || req->getMethod().at(0)=='t' || req->getMethod().at(0)=='T')
 		{
 			res->setHTTPResponseStatus(*req->getRequestParseStatus());
 			res->addHeader(HttpResponse::Connection, "close");
 			return;
 		}
 
-		if(req->getCntxt_name()=="") {
+		if(req->getCntxt_name().length()==0) {
 			req->setCntxt_name(HttpRequest::DEFAULT_CTX);
 		}
 
@@ -531,20 +531,11 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		req->normalizeUrl();
 		req->updateContent();
 
-		if(req->getExt().length()>0) {
-			std::string mimeType = CommonUtils::getMimeType(req->getExt());
-			std::string cntEncoding = getCntEncoding();
-			if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
-				res->addHeader(HttpResponse::ContentEncoding, cntEncoding);
-			}
-		}
-
 		ConfigurationData::getInstance()->httpRequest.reset(req);
 		ConfigurationData::getInstance()->httpResponse.reset(res);
 
 		if(ConfigurationData::getInstance()->enableSecurity) {
 			SecurityHandler::populateAuthDetails(req);
-
 			if(req->hasCookie())
 			{
 				req->getSession()->setSessionAttributes(req->getCookieInfo());
@@ -635,6 +626,9 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		if(!isContrl && ConfigurationData::getInstance()->enableControllers) {
 			isContrl = ControllerHandler::handle(req, res, ext, reflector);
 			ext = req->getExt();
+		} else if(ConfigurationData::getInstance()->enableExtControllers) {
+			isContrl = ControllerExtensionHandler::handle(req, res, ext, reflector);
+			ext = req->getExt();
 		}
 		//t1.end();
 		//CommonUtils::tsServiceCnt += t1.timerNanoSeconds();
@@ -648,7 +642,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		//t1.start();
 
-		if(req->getMethod()!="TRACE" && !res->isDone())
+		if(!res->isDone())
 		{
 			if(!isContrl)
 			{
@@ -692,6 +686,13 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 								post = "index.html";
 							}
 							req->setUrl(pubUrlPath+post);
+						}
+						if(req->getExt().length()>0) {
+							std::string mimeType = CommonUtils::getMimeType(req->getExt());
+							std::string cntEncoding = getCntEncoding();
+							if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
+								//res->addHeader(HttpResponse::ContentEncoding, cntEncoding);
+							}
 						}
 						res->setDone(false);
 						//logger << ("Static file requested") << std::endl;

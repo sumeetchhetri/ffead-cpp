@@ -32,9 +32,6 @@ class HttpServiceHandler;
 class HttpServiceTask : public Task {
 	HandlerRequest handlerRequest;
 	HttpServiceHandler* service;
-	time_t rt;
-	struct tm ti;
-	char buffer[31];
 	void run();
 	friend class HttpReadTask;
 	friend class HttpServiceHandler;

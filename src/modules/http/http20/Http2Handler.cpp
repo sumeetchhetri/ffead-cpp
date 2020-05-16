@@ -317,7 +317,7 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si, std::s
 	//response->updateContent(maxDataFrameSize);
 
 	Http2HeadersFrame hframe;
-	std::map<std::string, std::string,cicomp> hdrs;
+	std::map<std::string, std::string,std::less<>> hdrs;
 	//hdrs[":opcode"] = response->isTextOrBinary?1:2;
 	hframe.headerBlockFragment = context.encode(hdrs);
 	CommonUtils::printHEX(hframe.headerBlockFragment);

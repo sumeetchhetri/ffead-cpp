@@ -28,8 +28,8 @@
 #include "Http11WebSocketDataFrame.h"
 
 class Http2RequestResponseData {
-	std::map<std::string, std::string, cicomp> preHeaders;
-	std::map<std::string, std::string, cicomp> postHeaders;
+	std::map<std::string, std::string, std::less<>> preHeaders;
+	std::map<std::string, std::string, std::less<>> postHeaders;
 	std::string data;
 	std::string url;
 	bool isWebSocket;
@@ -47,7 +47,7 @@ public:
 	Http2RequestResponseData();
 	virtual ~Http2RequestResponseData();
 	const std::string& getData() const;
-	const std::map<std::string, std::string, cicomp>& getHeaders() const;
+	const std::map<std::string, std::string, std::less<>>& getHeaders() const;
 };
 
 class Http2ReadWriteUtil {
