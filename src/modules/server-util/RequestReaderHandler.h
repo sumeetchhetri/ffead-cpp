@@ -44,6 +44,7 @@ class RequestReaderHandler {
 	std::atomic<bool> run;
 	std::atomic<int> complete;
 	bool isMain;
+	bool isSinglEVH;
 	bool isNotRegisteredListener;
 	SOCKET listenerSock;
 	ServiceHandler* shi;
@@ -56,7 +57,7 @@ class RequestReaderHandler {
 public:
 	void start(unsigned int cid);
 	void stop(std::string, int, bool);
-	RequestReaderHandler(ServiceHandler* shi, const bool& isMain, const SOCKET& listenerSock = INVALID_SOCKET);
+	RequestReaderHandler(ServiceHandler* shi, const bool& isMain, bool isSinglEVH, const SOCKET& listenerSock = INVALID_SOCKET);
 	void registerSocketInterfaceFactory(const SocketInterfaceFactory& f);
 	virtual ~RequestReaderHandler();
 };

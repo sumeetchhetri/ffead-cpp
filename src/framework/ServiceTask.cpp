@@ -476,6 +476,16 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			return;
 		}
 
+		if(ConfigurationData::getInstance()->enableStaticResponses && ConfigurationData::getInstance()->staticResponsesMap.find(req->getPath())!=
+				ConfigurationData::getInstance()->staticResponsesMap.end()) {
+			StaticResponseData& sr = ConfigurationData::getInstance()->staticResponsesMap.find(req->getPath())->second;
+			res->setContent(sr.r);
+			res->setContentType(sr.t);
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->setDone(true);
+			return;
+		}
+
 		if(req->getCntxt_name().length()==0) {
 			req->setCntxt_name(HttpRequest::DEFAULT_CTX);
 		}
@@ -625,8 +635,8 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		//t1.start();
 		if(!isContrl && ConfigurationData::getInstance()->enableControllers) {
 			isContrl = ControllerHandler::handle(req, res, ext, reflector);
-			ext = req->getExt();
-		} else if(ConfigurationData::getInstance()->enableExtControllers) {
+		}
+		if(!isContrl && ConfigurationData::getInstance()->enableExtControllers) {
 			isContrl = ControllerExtensionHandler::handle(req, res, ext, reflector);
 			ext = req->getExt();
 		}

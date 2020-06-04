@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.8.2)
-project (ffead-cpp-3.0)
+project (ffead-cpp-4.0)
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 
@@ -24,7 +24,6 @@ option(CINATRA_INCLUDES "Cinatra includes Directory" "/cinatra/include")
 option(SRV_CINATRA "Cinatra Http Server Engine" OFF)
 option(SRV_LITHIUM "Lithium Http Server Engine" OFF)
 option(SRV_DROGON "Drogon Http Server Engine" OFF)
-option(SRV_H2O "h2o Http Server Engine" OFF)
 
 set(CMAKE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
 set(CMAKE_VERBOSE_MAKEFILE on)
@@ -71,19 +70,50 @@ if (UNIX)
     	set(OS_SOLARIS 1)
     	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthreads")
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lsocket -lnsl")
+    ELSE()
+    	set(OS_LINUX 1)
     ENDIF()
     set(CMAKE_REQUIRED_INCLUDES "/usr/local/include" "/usr/include/libbson-1.0/" "/usr/include/libmongoc-1.0/" "/usr/local/include/libbson-1.0/" "/usr/local/include/libmongoc-1.0/")
 endif (UNIX)
 if (APPLE)
+	set(OS_DARWIN 1)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/opt/openssl/include")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/opt/openssl/lib")
 	set(CMAKE_REQUIRED_INCLUDES "/usr/local/include" "/usr/local/opt/openssl/include" "/usr/local/include/libbson-1.0/" "/usr/local/include/libmongoc-1.0/")
 	include_directories("/usr/local/opt/openssl/include" "/usr/local/include/libbson-1.0/" "/usr/local/include/libmongoc-1.0/")
 endif (APPLE)
 if (MINGW)
+	set(OS_MINGW 1)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/mingw/include -L/mingw/lib -D__USE_MINGW_ANSI_STDIO=1")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/mingw/lib")
 endif (MINGW)
+
+set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
+check_symbol_exists(accept4	"sys/socket.h"	HAVE_ACCEPT4)
+
+include(CheckCSourceCompiles)
+CHECK_C_SOURCE_COMPILES("
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netinet/tcp.h>
+	int main() { return TCP_QUICKACK; }"
+HAVE_TCP_QUICKACK)
+
+include(CheckCSourceCompiles)
+CHECK_C_SOURCE_COMPILES("
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netinet/tcp.h>
+	int main() { return TCP_DEFER_ACCEPT; }"
+HAVE_TCP_DEFER_ACCEPT)
+
+include(CheckCSourceCompiles)
+CHECK_C_SOURCE_COMPILES("
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <netinet/tcp.h>
+	int main() { return TCP_FASTOPEN; }"
+HAVE_TCP_FASTOPEN)
 
 FIND_LIBRARY(HAVE_CURLLIB curl)
 if(NOT HAVE_CURLLIB)
@@ -256,8 +286,6 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost REQUIRED COMPONENTS context)
 include_directories(${Boost_INCLUDE_DIRS})
-elseif(SRV_H2O)
-set(SRV_H2O 1)
 elseif(SRV_DROGON)
 set(SRV_DROGON 1)
 find_package(PkgConfig REQUIRED)

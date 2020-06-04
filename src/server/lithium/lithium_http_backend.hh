@@ -3820,9 +3820,9 @@ struct http_ctx {
         return value;
       };
 
-      if (key == "Content-Length")
+      if (key.length()==14 && strncasecmp("content-length", key.data(), 14) == 0)
         content_length_ = atoi(get_value().data());
-      else if (key == "Content-Type") {
+      else if (key.length()==12 && strncasecmp("content-type", key.data(), 12) == 0) {
         content_type_ = get_value();
         chunked_ = (content_type_ == "chunked");
       }

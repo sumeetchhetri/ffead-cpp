@@ -11,7 +11,7 @@
 
 #include "setup.h"
 
-static reactor_status tfb(reactor_event *event)
+static reactor_status handle(reactor_event *event)
 {
 	reactor_server_session *session = (reactor_server_session *) event->data;
 
@@ -49,7 +49,7 @@ static reactor_status tfb(reactor_event *event)
 	const char* smsg;
 	size_t smsg_len;
 
-	void* fres = ffead_cpp_handle_1s(&freq, &scode, &smsg, &smsg_len, &out_url, &out_url_len, out_headers, &out_headers_len, &out_body, &out_body_len);
+	void* fres = ffead_cpp_handle_c_1(&freq, &scode, &smsg, &smsg_len, &out_url, &out_url_len, out_headers, &out_headers_len, &out_body, &out_body_len);
 
 	reactor_http_response response;
 	response.version = session->request->version;
@@ -85,17 +85,23 @@ static reactor_status tfb(reactor_event *event)
 					fread (buffer, 1, length, f);
 				}
 				fclose (f);
+				char slen[10];
+				snprintf(slen, 9, "%d", length);
 				response.body.base = (void*)buffer;
 				response.body.size = (size_t)length;
 				response.headers.count = 2;
-				response.headers.header[0].name.base = (void*)"Content-Type";
-				response.headers.header[0].name.size = 12;
-				response.headers.header[0].value.base = (void*)out_headers[i].value;
-				response.headers.header[0].value.size = out_headers[i].value_len;
-				response.headers.header[1].name.base = (void*)out_headers[i].name;
-				response.headers.header[1].name.size = out_headers[i].name_len;
-				response.headers.header[1].value.base = (void*)out_headers[i].value;
-				response.headers.header[1].value.size = out_headers[i].value_len;
+				response.headers.header[0].name.base = (void*)"Content-Length";
+				response.headers.header[0].name.size = 14;
+				response.headers.header[0].value.base = slen;
+				response.headers.header[0].value.size = strlen(slen);
+				response.headers.header[1].name.base = (void*)out_headers[0].name;
+				response.headers.header[1].name.size = out_headers[0].name_len;
+				response.headers.header[1].value.base = (void*)out_headers[0].value;
+				response.headers.header[1].value.size = out_headers[0].value_len;
+				response.headers.header[2].name.base = (void*)out_headers[1].name;
+				response.headers.header[2].name.size = out_headers[1].name_len;
+				response.headers.header[2].value.base = (void*)out_headers[1].value;
+				response.headers.header[2].value.size = out_headers[1].value_len;
 				reactor_server_respond(session, &response);
 			} else {
 				reactor_server_not_found(session);
@@ -129,7 +135,7 @@ int main(int argc, char *argv[])
 	setup();
 	reactor_construct();
 	reactor_server_construct(&server, NULL, NULL);
-	reactor_server_route(&server, tfb, NULL);
+	reactor_server_route(&server, handle, NULL);
 	(void) reactor_server_open(&server, "0.0.0.0", argv[2]);
 	printf("libreactor listening on port %s\n", argv[2]);
 	reactor_run();

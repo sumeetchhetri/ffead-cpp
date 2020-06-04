@@ -151,7 +151,7 @@ void HttpRequest::addNginxApacheHeader(const char* kp, size_t kl, const char* vp
 
 HttpRequest::HttpRequest(const char* pp, size_t pl, const char* qp, size_t ql, const char* mp, size_t ml, const std::string& data, unsigned int hv)  {
 	pathv = std::string_view{pp, pl};
-	queryv = std::string_view{qp, ql};
+	queryv = ql>0?std::string_view{qp, ql}:std::string_view(BLANK);
 	methodv = std::string_view{mp, ml};
 	httpVers = 1 + (float)hv/10;
 	httpVersion = hv==1?"HTTP/1.1":"HTTP/1.0";
@@ -187,6 +187,88 @@ HttpRequest::HttpRequest(const char* pp, size_t pl, const char* qp, size_t ql, c
 	}
 }
 
+HttpRequest::HttpRequest(const char* mp, size_t ml, const char* pp, size_t pl, const char* qp, size_t ql, const char* hp, size_t hl, const char* bp, size_t bl, int hv)  {
+	pathv = std::string_view{pp, pl};
+	queryv = ql>0?std::string_view{qp, ql}:std::string_view(BLANK);
+	methodv = std::string_view{mp, ml};
+	num_headers = 100;
+	int temp;
+	phr_parse_headers_fcp(hp, hl, headers_list, &num_headers, 0, &temp);	
+	content = std::string(bp, bl);
+	httpVers = 1 + (float)hv/10;
+	httpVersion = hv==1?"HTTP/1.1":"HTTP/1.0";
+	cntxt_root = NULL;
+	resp = NULL;
+	cookie = false;
+	httpVers = 0;
+	corsRequest = false;
+	isInit = false;
+	status = NULL;
+	minor_version = 1;
+	num_params = 0;
+
+	bool cnset = false;
+	size_t ids = pathv.find_first_not_of("/");
+	if(ids != std::string::npos) {
+		size_t ide = pathv.find("/", ids);
+		if(ide != std::string::npos) {
+			cntxt_name = pathv.substr(ids, ide-ids);
+			cnset = true;
+		} else if(pathv.find(".")==std::string::npos) {
+			cntxt_name = pathv.substr(ids);
+			cnset = true;
+		}
+	}
+	if(!cnset) {
+		cntxt_name = HttpRequest::BLANK;
+	}
+	if(pathv.find(".")!=std::string::npos) {
+		ext = pathv.substr(pathv.find("."));
+		file = pathv.substr(pathv.find_last_of("/")+1);
+	}
+}
+
+
+
+HttpRequest::HttpRequest(const char* mp, size_t ml, const char* pp, size_t pl, const char* bp, size_t bl, int hv)  {
+	pathv = std::string_view{pp, pl};
+	queryv = std::string_view(BLANK);
+	methodv = std::string_view{mp, ml};
+	num_headers = 0;
+	content = std::string(bp, bl);
+	httpVers = 1 + (float)hv/10;
+	httpVersion = hv==1?"HTTP/1.1":"HTTP/1.0";
+	cntxt_root = NULL;
+	resp = NULL;
+	cookie = false;
+	httpVers = 0;
+	corsRequest = false;
+	isInit = false;
+	status = NULL;
+	minor_version = 1;
+	num_params = 0;
+
+	bool cnset = false;
+	size_t ids = pathv.find_first_not_of("/");
+	if(ids != std::string::npos) {
+		size_t ide = pathv.find("/", ids);
+		if(ide != std::string::npos) {
+			cntxt_name = pathv.substr(ids, ide-ids);
+			cnset = true;
+		} else if(pathv.find(".")==std::string::npos) {
+			cntxt_name = pathv.substr(ids);
+			cnset = true;
+		}
+	}
+	if(!cnset) {
+		cntxt_name = HttpRequest::BLANK;
+	}
+	if(pathv.find(".")!=std::string::npos) {
+		ext = pathv.substr(pathv.find("."));
+		file = pathv.substr(pathv.find_last_of("/")+1);
+	}
+}
+
 HttpRequest::HttpRequest(const char* cnt, size_t cntlen, const std::unordered_map<std::string, std::string>& header_map, const std::string& url, const std::string& query, const char* method, int hv) {
 	cntxt_root = NULL;
 	resp = NULL;
@@ -201,8 +283,12 @@ HttpRequest::HttpRequest(const char* cnt, size_t cntlen, const std::unordered_ma
 	content = std::string(cnt, cntlen);
 
 	std::unordered_map<std::string, std::string>::const_iterator it;
-	for(it=header_map.begin();it!=header_map.end();++it) {
-		headers[it->first] = it->second;
+	this->num_headers = 0;
+	for(it=header_map.begin();it!=header_map.end();++it,this->num_headers++) {
+		headers_list[this->num_headers].name = it->first.c_str();
+		headers_list[this->num_headers].name_len = it->first.length();
+		headers_list[this->num_headers].value = it->second.c_str();
+		headers_list[this->num_headers].value_len = it->second.length();
 	}
 
 	httpVers = 1 + (float)hv/10;
@@ -259,7 +345,7 @@ HttpRequest::HttpRequest(std::unordered_map<std::string_view, std::string_view> 
 	this->methodv = method;
 
 	pathv = url;
-	queryv = qv;
+	queryv = qv.length()!=std::string::npos?qv:std::string_view(BLANK);
 	bool cnset = false;
 	size_t ids = pathv.find_first_not_of("/");
 	if(ids != std::string::npos) {
@@ -303,6 +389,7 @@ HttpRequest::HttpRequest(void* thdrlist, size_t num_headers, std::string_view ra
 	httpVersion = hv==1?"HTTP/1.1":"HTTP/1.0";
 	this->methodv = method;
 	content = std::string(cnt);
+	queryv = std::string_view(BLANK);
 
 	pathv = rawUrl;
 	size_t qidx = pathv.find("?");
@@ -355,7 +442,7 @@ HttpRequest::HttpRequest(void* thdrlist, size_t num_headers, std::string_view ra
 	content = std::string(cnt);
 
 	pathv = rawUrl;
-	queryv = qv;
+	queryv = qv.length()!=std::string::npos?qv:std::string_view(BLANK);;
 	bool cnset = false;
 	size_t ids = pathv.find_first_not_of("/");
 	if(ids != std::string::npos) {
@@ -388,11 +475,13 @@ HttpRequest::HttpRequest(std::string_view rawUrl, std::string_view method, int h
 	minor_version = hv;
 	num_params = 0;
 	int temp;
+	num_headers = 100;
 	phr_parse_headers_fcp(headers, headers_len, headers_list, &num_headers, 0, &temp);
 	httpVers = 1 + (float)hv/10;
 	httpVersion = hv==1?"HTTP/1.1":"HTTP/1.0";
 	this->methodv = method;
 	content = std::string(body, body_len);
+	queryv = std::string_view(BLANK);
 
 	pathv = rawUrl;
 	size_t qidx = pathv.find("?");
@@ -431,17 +520,18 @@ HttpRequest::HttpRequest(const char *headers, size_t headers_len, const char *bo
 	status = NULL;
 	num_headers = 0;
 	num_params = 0;
+	queryv = std::string_view(BLANK);
 
-	std::string_view headers_data{headers, headers_len};
-	if(headers_data.length()>0) {
+	if(headers_len>0) {
 		char *method, *path;
 		size_t method_len, path_len;
 		int content_length;
-		num_headers = sizeof(headers_list) / sizeof(headers_list[0]);
-		if(phr_parse_request_fcp(headers_data.data(), headers_data.length(), (const char **)&method, &method_len, (const char **)&path, &path_len,
+		num_headers = 100;
+		if(phr_parse_request_fcp(headers, headers_len, (const char **)&method, &method_len, (const char **)&path, &path_len,
 					&minor_version, headers_list, &num_headers, 0, &content_length)<0) {
 			status = &HTTPResponseStatus::BadRequest;
 		} else {
+			content = std::string(body, body_len);
 			methodv = std::string_view{method, method_len};
 			pathv = std::string_view{path, path_len};
 			size_t qidx = pathv.find("?");
@@ -486,6 +576,7 @@ HttpRequest::HttpRequest(std::string &&data, int* content_length) : headers_data
 	minor_version = 1;
 	num_headers = 0;
 	num_params = 0;
+	queryv = std::string_view(BLANK);
 
 	if(headers_data.length()>0) {
 		char *method, *path;

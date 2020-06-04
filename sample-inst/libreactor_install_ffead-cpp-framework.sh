@@ -7,7 +7,7 @@ WRIT_THREADS=$(( $MAX_THREADS / 3 ))
 SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 
 rm -rf nginxfc
-rm -rf ffead-cpp-3.0/
+rm -rf ffead-cpp-4.0/
 
 if [ ! -d "libdynamic-1.3.0" ]
 then
@@ -59,7 +59,7 @@ sed -i 's|ENABLE_SWS=true|ENABLE_SWS=false|g' resources/server.prop
 #sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac
 #sed -i 's|web/markers/src/autotools/Makefile||g' configure.ac
 
-cmake -DSRV_LIBREACTOR=on -DLIBREACTOR_INCLUDES="../libdynamic/src/ ../libreactor/src/" -DDEBUG=on -DMOD_APACHE=off -DMOD_NGINX=off -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+cmake -DSRV_EMB=on -DDEBUG=on -DMOD_APACHE=off -DMOD_NGINX=off -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 cp -f web/te-benchmark/sql-src/TeBkWorldmongo.h web/te-benchmark/include/TeBkWorld.h
 cp -f web/te-benchmark/sql-src/TeBkWorldmongo.cpp web/te-benchmark/src/TeBkWorld.cpp
 cp -f web/te-benchmark-um/sql-src/TeBkUmWorldmongo.h web/te-benchmark-um/include/TeBkUmWorld.h
@@ -71,7 +71,7 @@ rm -f /usr/local/lib/libte_benc*
 rm -f /usr/local/lib/libinter.so
 rm -f /usr/local/lib/libdinter.so
 
-cd ffead-cpp-3.0-bin
+cd ffead-cpp-4.0-bin
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
 while [ ! -f lib/libinter.so ]
@@ -85,10 +85,10 @@ done
 pkill ffead-cpp
 
 cd /root/ffead-cpp/
-cp -rf ffead-cpp-3.0-bin /root/ffead-cpp-3.0
-rm -rf ffead-cpp-3.0-bin
+cp -rf ffead-cpp-4.0-bin /root/ffead-cpp-4.0
+rm -rf ffead-cpp-4.0-bin
 
-cd /root/ffead-cpp-3.0
+cd /root/ffead-cpp-4.0
 cp -f lib/* /usr/local/lib
 ldconfig
 
@@ -98,4 +98,4 @@ chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 
 cd /root/ffead-cpp/lang-server-backends/c/libreactor
 make
-cp libreactor-ffead-cpp /root/ffead-cpp-3.0/
+cp libreactor-ffead-cpp /root/ffead-cpp-4.0/

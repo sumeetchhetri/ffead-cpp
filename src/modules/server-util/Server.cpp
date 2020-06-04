@@ -47,8 +47,9 @@ Server::Server(const std::string& port, const bool& block, const int& waiting, c
 	service = serv;
 	struct addrinfo hints, *servinfo, *p;
 	
-	int yes=1;
+	int yes = 1;
 	int rv;
+	int option = 10;
 
 	if(mode<1 || mode >3)
 		mode = 3;
@@ -82,6 +83,22 @@ Server::Server(const std::string& port, const bool& block, const int& waiting, c
 			if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
 				perror("setsockopt");
 			}
+		#ifdef HAVE_TCP_QUICKACK
+			if (setsockopt(this->sock, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
+				perror("setsockopt");
+			}
+		#endif
+		#ifdef HAVE_TCP_DEFER_ACCEPT
+			if (setsockopt(this->sock, IPPROTO_TCP, TCP_DEFER_ACCEPT, &option, sizeof(int)) == -1) {
+				perror("setsockopt");
+			}
+		#endif
+		#ifdef HAVE_TCP_FASTOPEN
+			option = 4096;
+			if (setsockopt(this->sock, IPPROTO_TCP, TCP_FASTOPEN, &option, sizeof(int)) == -1) {
+				perror("setsockopt");
+			}
+		#endif
 		#endif
 		
 		#ifdef OS_MINGW
@@ -279,10 +296,10 @@ int Server::Receive(const SOCKET& fd, std::vector<std::string>& data, const int&
 	return bytesr;
 }
 
-SOCKET Server::createListener(const int& port, const bool& block)
+SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEVH)
 {
 	SOCKET    sockfd = INVALID_SOCKET;
-	int yes = 1;
+	int yes = 1, option = 10;
 	//int rv;
 	//bool bound = false;
 
@@ -307,17 +324,31 @@ SOCKET Server::createListener(const int& port, const bool& block)
 
 	#ifdef OS_MINGW
 		BOOL bOptVal = FALSE;
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, (const char*)&bOptVal, sizeof(int)) == -1) {
+		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), (const char*)&bOptVal, sizeof(int)) == -1) {
 			perror("setsockopt");
-			return INVALID_SOCKET;
 		}
 	#else
-		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &yes, sizeof(int)) == -1) {
+		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
 			perror("setsockopt");
-			return INVALID_SOCKET;
+		}
+	#ifdef HAVE_TCP_QUICKACK
+		if (setsockopt(sockfd, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
+			perror("setsockopt");
 		}
 	#endif
-	
+	#ifdef HAVE_TCP_DEFER_ACCEPT
+		if (setsockopt(sockfd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &option, sizeof(int)) == -1) {
+			perror("setsockopt");
+		}
+	#endif
+	#ifdef HAVE_TCP_FASTOPEN
+		option = 4096;
+		if (setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN, &option, sizeof(int)) == -1) {
+			perror("setsockopt");
+		}
+	#endif
+	#endif
+
 	#ifdef OS_MINGW
 	if (::bind(sockfd, (struct sockaddr*)&self, sizeof(self)) == SOCKET_ERROR) {
 	#else
@@ -361,11 +392,11 @@ SOCKET Server::createListener(const int& port, const bool& block)
 	return sockfd;
 }
 
-SOCKET Server::createListener(const std::string& ipAddress, const int& port, const bool& block)
+SOCKET Server::createListener(const std::string& ipAddress, const int& port, const bool& block, bool isSinglEVH)
 {
 	SOCKET    sockfd;
 	struct addrinfo hints, *servinfo, *p;
-	int yes=1;
+	int yes = 1, option = 10;
 	int rv;
 	bool bound = false;
 
@@ -378,7 +409,8 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 	if(ipAddress!="")
 		ip_addr = ipAddress.c_str();
 	else
-		return createListener(port, block);
+		return createListener(port, block, isSinglEVH);
+
 	std::string ports = CastUtil::fromNumber(port);
 	if ((rv = getaddrinfo(ip_addr, ports.c_str(), &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
@@ -398,17 +430,32 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 			perror("server: socket");
 			continue;
 		}
+
 		#ifdef OS_MINGW
 			BOOL bOptVal = FALSE;
-			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, (const char*)&bOptVal, sizeof(int)) == -1) {
+			if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), (const char*)&bOptVal, sizeof(int)) == -1) {
 				perror("setsockopt");
-				return -1;
 			}
 		#else
-			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &yes, sizeof(int)) == -1) {
+			if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), &yes, sizeof(int)) == -1) {
 				perror("setsockopt");
-				return -1;
 			}
+		#ifdef HAVE_TCP_QUICKACK
+			if (setsockopt(sockfd, IPPROTO_TCP, TCP_QUICKACK, &yes, sizeof(int)) == -1) {
+				perror("setsockopt");
+			}
+		#endif
+		#ifdef HAVE_TCP_DEFER_ACCEPT
+			if (setsockopt(sockfd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &option, sizeof(int)) == -1) {
+				perror("setsockopt");
+			}
+		#endif
+		#ifdef HAVE_TCP_FASTOPEN
+			option = 4096;
+			if (setsockopt(sockfd, IPPROTO_TCP, TCP_FASTOPEN, &option, sizeof(int)) == -1) {
+				perror("setsockopt");
+			}
+		#endif
 		#endif
 		
 		#ifdef OS_MINGW

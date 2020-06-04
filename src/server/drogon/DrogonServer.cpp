@@ -98,7 +98,11 @@ void DrogonHttpHandler::handle(const HttpRequestPtr &requestptr, std::function<v
 		std::string& data = respo.generateNginxApacheResponse();
 		resp.get()->setBody(data);
 	} else {
-		resp = drogon::HttpResponse::newFileResponse(req.getUrl());
+		if(access(req.getUrl().c_str(), F_OK) != -1) {
+			resp = drogon::HttpResponse::newFileResponse(req.getUrl());
+		} else {
+			resp = drogon::HttpResponse::newNotFoundResponse();
+		}
 	}
 	callback(resp);
 }

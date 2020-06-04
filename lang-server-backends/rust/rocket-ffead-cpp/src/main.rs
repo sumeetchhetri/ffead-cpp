@@ -102,7 +102,7 @@ extern "C" {
     pub fn ffead_cpp_bootstrap(srv: *const c_char, srv_len: size_t, server_type: c_int);
     pub fn ffead_cpp_init();
     pub fn ffead_cpp_cleanup();
-    pub fn ffead_cpp_handle_1(ffead_request: *const ffead_request, status_code: *mut c_int,
+    pub fn ffead_cpp_handle_rust_1(ffead_request: *const ffead_request, status_code: *mut c_int,
         out_url: *mut *const c_char, out_url_len: *mut size_t, out_headers: *mut phr_header, out_headers_len: *mut c_int, 
         out_body: *mut *const c_char, out_body_len: *mut size_t
     ) -> *mut c_void;
@@ -146,7 +146,7 @@ impl<'a> Responder<'a> for FfeadResponse {
 
 impl Handler for CustomHandler {
     fn handle<'r>(&self, _req: &'r Request, data: Data) -> Outcome<'r> {
-	let fresp = PREV_RESP.with(|resp| resp.borrow().clone());
+		let fresp = PREV_RESP.with(|resp| resp.borrow().clone());
 		if fresp != ptr::null_mut() {
 			unsafe {
 	            ffead_cpp_resp_cleanup(fresp);
@@ -182,7 +182,7 @@ impl Handler for CustomHandler {
 
         let mut response = FfeadResponse::default();
         unsafe {
-            response.fresp = ffead_cpp_handle_1(&request, &mut response.status_code, &mut response.url, &mut response.url_len, 
+            response.fresp = ffead_cpp_handle_rust_1(&request, &mut response.status_code, &mut response.url, &mut response.url_len, 
                 response.headers.as_mut_ptr(), &mut response.headers_len, &mut response.body, &mut response.body_len);
         }
 

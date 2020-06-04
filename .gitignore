@@ -16,7 +16,6 @@ src/autotools/libs/.libs/*
 **/.deps/*
 **/.DS_Store
 autom4te.cache/
-**/Makefile
 **/Makefile.in
 .settings/
 **/*.guess
@@ -56,5 +55,12 @@ src/autotools/bins/ffead-cpp
 lang-server-backends/rust/hyper-ffead-cpp/target
 lang-server-backends/rust/actix-ffead-cpp/target
 lang-server-backends/rust/rocket-ffead-cpp/target
+lang-server-backends/rust/thruster-ffead-cpp/target
+lang-server-backends/java/firenio/target
+lang-server-backends/java/rapidoid/target
+lang-server-backends/java/wizzardo-http/target
 **/ffead-cpp-3.0.build
+**/ffead-cpp-4.0.build
 **/CMakeScripts
+**/.build
+**/.swiftpm

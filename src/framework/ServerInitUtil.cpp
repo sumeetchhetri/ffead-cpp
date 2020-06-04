@@ -364,7 +364,9 @@ void ServerInitUtil::init(Logger& logger) {
 	logger << ("Initializing Caches done....") << std::endl;
 
 #ifdef INC_JOBS
-	JobScheduler::start();
+	if(ConfigurationData::getInstance()->isJobsEnabled()) {
+		JobScheduler::start();
+	}
 #endif
 
 	HTTPResponseStatus::init();
@@ -386,7 +388,9 @@ void ServerInitUtil::cleanUp() {
 	ConfigurationData::getInstance()->clearAllSingletonBeans();
 
 #ifdef INC_JOBS
-	JobScheduler::stop();
+	if(ConfigurationData::getInstance()->isJobsEnabled()) {
+		JobScheduler::stop();
+	}
 #endif
 
 	RegexUtil::flushCache();

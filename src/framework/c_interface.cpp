@@ -16,19 +16,33 @@
 
 #include "c_interface.h"
 
+/*
+    This function should be called before any other ffead-cpp methods
+    It is responsible for boostrapping the ffead-cpp framework 
+*/
 void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type) {
     ServerInitUtil::bootstrapIB(std::string(srv, srv_len), static_cast<SERVER_BACKEND>(type));
 }
 
+/*
+    This function should be called after ffead_cpp_bootstrap
+    It is responsible for initializing configuration settings/parameters/singletons instances for ffead-cpp framework 
+*/
 void ffead_cpp_init() {
     ServerInitUtil::initIB();
 }
 
+/*
+    This should be called before application exit, responsible for cleaning up the ffead-cpp framework
+*/
 void ffead_cpp_cleanup() {
     ServerInitUtil::cleanUp();
 }
 
-void* ffead_cpp_handle_1(const ffead_request *request, int* scode,
+/*
+    Used by Actix, Hyper and Rocket (Rust)
+*/
+void* ffead_cpp_handle_rust_1(const ffead_request *request, int* scode,
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
     const char **out_body, size_t *out_body_len
 )
@@ -46,6 +60,9 @@ void* ffead_cpp_handle_1(const ffead_request *request, int* scode,
 		*scode = 0;
     } else {
     	*scode = respo->getCode();
+        const std::string& cnt = respo->getContent();
+        *out_body = cnt.c_str();
+        *out_body_len = cnt.length();
     }
     *out_headers_len = 0;
     RMap::const_iterator it = respo->getCHeaders().cbegin();
@@ -56,13 +73,52 @@ void* ffead_cpp_handle_1(const ffead_request *request, int* scode,
     	out_headers[*out_headers_len].value_len = it->second.length();
     	*out_headers_len = *out_headers_len+1;
     }
-    const std::string& cnt = respo->getContent();
-    *out_body = cnt.c_str();
-    *out_body_len = cnt.length();
+    return respo;
+}
+/*
+    Used by Thruster (Rust)
+*/
+void* ffead_cpp_handle_rust_2(const ffead_request *request, int* scode,
+    const char **out_url, size_t *out_url_len, const char **out_url_mime, size_t *out_url_mime_len,
+    phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
+)
+{
+    HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
+    		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
+    HttpResponse* respo = new HttpResponse();
+    ServiceTask task;
+    task.handle(&req, respo);
+    if(!respo->isDone()) {
+    	respo->setUrl(req.getUrl());
+		const std::string& resUrl = respo->getUrl();
+		*out_url = resUrl.c_str();
+		*out_url_len = resUrl.length();
+        const std::string& mime_type = CommonUtils::getMimeType(req.getExt());
+        *out_url_mime = mime_type.c_str();
+        *out_url_mime_len = mime_type.length();
+		*scode = 0;
+    } else {
+    	*scode = respo->getCode();
+        const std::string& cnt = respo->getContent();
+        *out_body = cnt.c_str();
+        *out_body_len = cnt.length();
+    }
+    *out_headers_len = 0;
+    RMap::const_iterator it = respo->getCHeaders().cbegin();
+    for(;it!=respo->getCHeaders().cend();++it) {
+    	out_headers[*out_headers_len].name = it->first.c_str();
+    	out_headers[*out_headers_len].name_len = it->first.length();
+    	out_headers[*out_headers_len].value = it->second.c_str();
+    	out_headers[*out_headers_len].value_len = it->second.length();
+    	*out_headers_len = *out_headers_len+1;
+    }
     return respo;
 }
 
-void* ffead_cpp_handle_1s(const ffead_request *request, int* scode, const char** smsg, size_t *smsg_len,
+/*
+    Used by libreactor (C)
+*/
+void* ffead_cpp_handle_c_1(const ffead_request *request, int* scode, const char** smsg, size_t *smsg_len,
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
     const char **out_body, size_t *out_body_len)
 {
@@ -110,6 +166,219 @@ void* ffead_cpp_handle_1s(const ffead_request *request, int* scode, const char**
     }
     return respo;
 }
+
+/*
+    Used by Crystal-Http/H2O (Crystal)
+*/
+void* ffead_cpp_handle_crystal_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
+	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 
+    phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
+)
+{
+	HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
+    		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
+    HttpResponse* respo = new HttpResponse();
+    ServiceTask task;
+    task.handle(&req, respo);
+    if(!respo->isDone()) {
+    	respo->setUrl(req.getUrl());
+		const std::string& resUrl = respo->getUrl();
+		*out_url = resUrl.c_str();
+		*out_url_len = resUrl.length();
+        const std::string& mime_type = CommonUtils::getMimeType(req.getExt());
+        *out_mime = mime_type.c_str();
+        *out_mime_len = mime_type.length();
+		*scode = 0;
+    } else {
+    	*scode = respo->getCode();
+        *smsg = respo->getStatusMsg().c_str();
+        *smsg_len = respo->getStatusMsg().length();
+        const std::string& cnt = respo->getContent();
+        *out_body = cnt.c_str();
+        *out_body_len = cnt.length();
+    }
+    *out_headers_len = 0;
+    RMap::const_iterator it = respo->getCHeaders().cbegin();
+    for(;it!=respo->getCHeaders().cend();++it) {
+    	out_headers[*out_headers_len].name = it->first.c_str();
+    	out_headers[*out_headers_len].name_len = it->first.length();
+    	out_headers[*out_headers_len].value = it->second.c_str();
+    	out_headers[*out_headers_len].value_len = it->second.length();
+    	*out_headers_len = *out_headers_len+1;
+    }
+    return respo;
+}
+
+/*
+    Used by fasthttp, atruego (golang)
+*/
+void* ffead_cpp_handle_go_1(const char *server_str, size_t server_str_len,
+	const char *method, size_t method_len, const char *path, size_t path_len, const char *query, size_t query_len, int version,
+    const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* scode,
+    const char **out_url, size_t *out_url_len,  const char **out_mime, size_t *out_mime_len,
+	phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
+)
+{
+	HttpRequest req(method, method_len, path, path_len, query, query_len, in_headers, in_headers_len, in_body, in_body_len, version);
+    HttpResponse* respo = new HttpResponse();
+    ServiceTask task;
+    task.handle(&req, respo);
+    if(!respo->isDone()) {
+    	respo->setUrl(req.getUrl());
+		const std::string& resUrl = respo->getUrl();
+		*out_url = resUrl.c_str();
+		*out_url_len = resUrl.length();
+        const std::string& mime_type = CommonUtils::getMimeType(req.getExt());
+        *out_mime = mime_type.c_str();
+        *out_mime_len = mime_type.length();
+		*scode = 0;
+    } else {
+    	*scode = respo->getCode();
+        const std::string& cnt = respo->getContent();
+        *out_body = cnt.c_str();
+        *out_body_len = cnt.length();
+    }
+    *out_headers_len = 0;
+    RMap::const_iterator it = respo->getCHeaders().cbegin();
+    for(;it!=respo->getCHeaders().cend();++it) {
+    	out_headers[*out_headers_len].name = it->first.c_str();
+    	out_headers[*out_headers_len].name_len = it->first.length();
+    	out_headers[*out_headers_len].value = it->second.c_str();
+    	out_headers[*out_headers_len].value_len = it->second.length();
+    	*out_headers_len = *out_headers_len+1;
+    }
+    return respo;
+}
+
+/*
+    Used by gnet (golang)
+*/
+void* ffead_cpp_handle_go_2(const char *server_str, size_t server_str_len,
+	const char *method, size_t method_len, const char *path, size_t path_len, int version,
+    const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* scode,
+    const char **out_url, size_t *out_url_len,  const char **out_mime, size_t *out_mime_len,
+	const char **out_body, size_t *out_body_len
+)
+{
+	HttpRequest req(method, method_len, path, path_len, NULL, 0, in_headers, in_headers_len, in_body, in_body_len, version);
+    HttpResponse* respo = new HttpResponse();
+    ServiceTask task;
+    task.handle(&req, respo);
+    if(!respo->isDone()) {
+    	respo->setUrl(req.getUrl());
+		const std::string& resUrl = respo->getUrl();
+		*out_url = resUrl.c_str();
+		*out_url_len = resUrl.length();
+        const std::string& mime_type = CommonUtils::getMimeType(req.getExt());
+        *out_mime = mime_type.c_str();
+        *out_mime_len = mime_type.length();
+		*scode = 0;
+    } else {
+    	*scode = respo->getCode();
+        std::string server;
+        if(server_str_len>0 && server_str!=NULL) {
+            server = std::string(server_str, server_str_len);
+        }
+        const std::string& hdrs = respo->getHeadersStr(server, true, true, true);
+        *out_body = hdrs.c_str();
+        *out_body_len = hdrs.length();
+    }
+    return respo;
+}
+
+/*
+    Used by vweb (vlang)
+*/
+void* ffead_cpp_handle_v(const char *server_str, size_t server_str_len,
+    const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* done,
+    const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len, 
+    const char **out_body, size_t *out_body_len
+)
+{
+    HttpRequest req(in_headers, in_headers_len, in_body, in_body_len);
+    HttpResponse* respo = new HttpResponse();
+    ServiceTask task;
+    task.handle(&req, respo);
+    if(!respo->isDone()) {
+    	respo->setUrl(req.getUrl());
+		const std::string& resUrl = respo->getUrl();
+		*out_url = resUrl.c_str();
+		*out_url_len = resUrl.length();
+        const std::string& mime_type = CommonUtils::getMimeType(req.getExt());
+        *out_mime = mime_type.c_str();
+        *out_mime_len = mime_type.length();
+		*done = 0;
+    } else {
+    	*done = respo->getCode();
+        std::string server;
+        if(server_str_len>0 && server_str!=NULL) {
+            server = std::string(server_str, server_str_len);
+        }
+        const std::string& hdrs = respo->getHeadersStr(server, true, true, true);
+        *out_body = hdrs.c_str();
+        *out_body_len = hdrs.length();
+    }
+    return respo;
+}
+
+
+/*
+    Used by firenio, wizzardo-http and rapidoid (Java)
+*/
+void* ffead_cpp_handle_java(int *scode, const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
+		const char **out_body, size_t *out_body_len, const char **out_headers, size_t *out_headers_len,
+		const char *server_str, size_t server_str_len, const char* method, size_t method_len,
+		const char* path, size_t path_len, const char* body, size_t body_len, int version,
+		int headers_len, ...
+)
+{
+    HttpRequest req(method, method_len, path, path_len, body, body_len, version);
+    va_list valist;
+	va_start(valist, headers_len);
+	for (int i = 0; i < (int)headers_len; i=i+4) {
+        const char* kp = va_arg(valist, const char*);
+        size_t kl = va_arg(valist, size_t);
+        const char* vp = va_arg(valist, const char*);
+        size_t vl = va_arg(valist, size_t);
+        req.addNginxApacheHeader(kp, kl, vp, vl);
+	}
+    HttpResponse* respo = new HttpResponse();
+    ServiceTask task;
+    task.handle(&req, respo);
+    if(!respo->isDone()) {
+    	respo->setUrl(req.getUrl());
+		const std::string& resUrl = respo->getUrl();
+		*out_url = resUrl.c_str();
+		*out_url_len = resUrl.length();
+        const std::string& mime_type = CommonUtils::getMimeType(req.getExt());
+        *out_mime = mime_type.c_str();
+        *out_mime_len = mime_type.length();
+		*scode = 0;
+    } else {
+    	*scode = respo->getCode();
+        std::string server;
+        bool isStatusLine = true;
+        bool isContent = false;
+        bool isServerLine = true;
+        if(server_str_len>0 && server_str!=NULL) {
+            server = std::string(server_str, server_str_len);
+            if(server.find("wizzardo")==0) {
+                server = "";
+                isServerLine = false;
+                isStatusLine = false;
+            }
+        }
+        const std::string& hdrs = respo->getHeadersStr(server, isStatusLine, isContent, isServerLine);
+        *out_headers = hdrs.c_str();
+        *out_headers_len = hdrs.length()-4;
+        const std::string& cnt = respo->getContent();
+        *out_body = cnt.c_str();
+        *out_body_len = cnt.length();
+    }
+    return respo;
+}
+
+
 
 void* ffead_cpp_handle_1t(const ffead_request2 *request, int* scode,
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
@@ -213,35 +482,7 @@ void* ffead_cpp_handle_3(const char *server_str, size_t server_str_len,
     if(server_str_len>0 && server_str!=NULL) {
         server = std::string(server_str, server_str_len);
     }
-    const std::string& hdrs = respo->getHeadersStr(server, false);
-    *out_headers = hdrs.c_str();
-    *out_headers_len = hdrs.length();
-    const std::string& cnt = respo->getContent();
-    *out_body = cnt.c_str();
-    *out_body_len = cnt.length();
-    return respo;
-}
-
-void* ffead_cpp_handle_4(const char *server_str, size_t server_str_len,
-    const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* done,
-    const char **out_url, size_t *out_url_len, const char **out_headers, size_t *out_headers_len, 
-    const char **out_body, size_t *out_body_len
-)
-{
-    HttpRequest req(in_headers, in_headers_len, in_body, in_body_len);
-    HttpResponse* respo = new HttpResponse();
-    ServiceTask task;
-    task.handle(&req, respo);
-    respo->setUrl(req.getUrl());
-    const std::string& resUrl = respo->getUrl();
-    *out_url = resUrl.c_str();
-    *out_url_len = resUrl.length();
-    *done = respo->isDone()?1:0;
-    std::string server;
-    if(server_str_len>0 && server_str!=NULL) {
-        server = std::string(server_str, server_str_len);
-    }
-    const std::string& hdrs = respo->getHeadersStr(server, true);
+    const std::string& hdrs = respo->getHeadersStr(server, false, false, true);
     *out_headers = hdrs.c_str();
     *out_headers_len = hdrs.length();
     const std::string& cnt = respo->getContent();
@@ -289,7 +530,7 @@ void ffead_cpp_get_resp_header_str(void* ptr, const char **headers, size_t *head
     if(server_str_len>0 && server_str!=NULL) {
         server = std::string(server_str, server_str_len);
     }
-    const std::string& hdrs = respo->getHeadersStr(server, false);
+    const std::string& hdrs = respo->getHeadersStr(server, false, false, true);
     *headers = hdrs.c_str();
     *headers_len = hdrs.length();
 }
@@ -300,7 +541,7 @@ void ffead_cpp_get_resp_header_str_with_statusline(void* ptr, const char **heade
     if(server_str_len>0 && server_str!=NULL) {
         server = std::string(server_str, server_str_len);
     }
-    const std::string& hdrs = respo->getHeadersStr(server, false);
+    const std::string& hdrs = respo->getHeadersStr(server, false, false, true);
     *headers = hdrs.c_str();
     *headers_len = hdrs.length();
 }

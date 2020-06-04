@@ -87,7 +87,7 @@ class HttpServiceHandler : public ServiceHandler {
 	void handleRead(SocketInterface* sif);
 	void handleWrite(SocketInterface* sif);
 public:
-	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr);
+	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, bool isSinglEVH, const HttpReadTaskFactory& fr);
 	virtual ~HttpServiceHandler();
 };
 

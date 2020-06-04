@@ -511,3 +511,7 @@ SERVER_BACKEND ConfigurationData::getServerType() {
 int ConfigurationData::getProcessId() {
 	return getpid();
 }
+
+bool ConfigurationData::isJobsEnabled() {
+	return getInstance()->enableJobs;
+}

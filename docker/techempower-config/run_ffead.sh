@@ -64,7 +64,9 @@ chmod 700 rtdcf/*
 
 if [ $1 = "emb" ]
 then
-	./ffead-cpp $FFEAD_CPP_PATH
+	for i in $(seq 0 $(($(nproc --all)-1))); do
+	  taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH &
+	done
 fi
 
 if [ $1 = "apache" ]
@@ -79,6 +81,84 @@ then
 	sed -i 's|<pool-size>30</pool-size>|<pool-size>3</pool-size>|g' $FFEAD_CPP_PATH/web/te-benchmark-um/config/sdorm.xml
 	sed -i 's|<pool-size>10</pool-size>|<pool-size>2</pool-size>|g' $FFEAD_CPP_PATH/web/te-benchmark-um/config/cache.xml
 	nginx -g 'daemon off;'
+fi
+
+if [ $1 = "libreactor" ]
+then
+	cd ${IROOT}
+	./libreactor-ffead-cpp $FFEAD_CPP_PATH 8080
+fi
+
+if [ $1 = "crystal-http" ]
+then
+	cd ${IROOT}
+	./crystal-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080
+fi
+
+if [ $1 = "crystal-h2o" ]
+then
+	cd ${IROOT}
+	./h2o-evloop-ffead-cpp --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080
+fi
+
+if [ $1 = "rust-actix" ]
+then
+	cd ${IROOT}
+	./actix-ffead-cpp $FFEAD_CPP_PATH 8080
+fi
+
+if [ $1 = "rust-hyper" ]
+then
+	cd ${IROOT}
+	./hyper-ffead-cpp $FFEAD_CPP_PATH 8080
+fi
+
+if [ $1 = "rust-thruster" ]
+then
+	cd ${IROOT}
+	./thruster-ffead-cpp $FFEAD_CPP_PATH 8080
+fi
+
+if [ $1 = "rust-rocket" ]
+then
+	cd ${IROOT}
+	./rocket-ffead-cpp $FFEAD_CPP_PATH 8080
+fi
+
+if [ $1 = "go-fasthttp" ]
+then
+	cd ${IROOT}
+	./fasthttp-ffead-cpp --server_directory=$FFEAD_CPP_PATH -addr=8080
+fi
+
+if [ $1 = "go-gnet" ]
+then
+	cd ${IROOT}
+	./gnet-ffead-cpp --server_directory=$FFEAD_CPP_PATH --port=8080
+fi
+
+if [ $1 = "v-vweb" ]
+then
+	cd ${IROOT}
+	./vweb --server_dir=$FFEAD_CPP_PATH --server_port=8080
+fi
+
+if [ $1 = "java-firenio" ]
+then
+	cd ${IROOT}
+	java -classpath firenio-ffead-cpp-0.1-jar-with-dependencies.jar com.firenio.ffeadcpp.FirenioFfeadCppServer $FFEAD_CPP_PATH 8080
+fi
+
+if [ $1 = "java-rapidoid" ]
+then
+	cd ${IROOT}
+	java -classpath rapidoid-ffead-cpp-1.0-jar-with-dependencies.jar com.rapidoid.ffeadcpp.Main $FFEAD_CPP_PATH 8080
+fi
+
+if [ $1 = "java-wizzardo-http" ]
+then
+	cd ${IROOT}
+	java -jar wizzardo-ffead-cpp-all-1.0.jar $FFEAD_CPP_PATH 8080
 fi
 
 wait

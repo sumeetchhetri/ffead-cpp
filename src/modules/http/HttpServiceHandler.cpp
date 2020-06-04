@@ -22,8 +22,8 @@
 
 #include "HttpServiceHandler.h"
 
-HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr)
-	: ServiceHandler(spoolSize) {
+HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, bool isSinglEVH, const HttpReadTaskFactory& fr)
+	: ServiceHandler(spoolSize, isSinglEVH) {
 	this->cntEncoding = cntEncoding;
 	this->f = f;
 	this->fr = fr;

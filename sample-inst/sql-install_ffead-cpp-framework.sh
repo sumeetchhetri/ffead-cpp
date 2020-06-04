@@ -7,7 +7,7 @@ WRIT_THREADS=$(( $MAX_THREADS / 3 ))
 SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 
 rm -rf nginxfc
-rm -rf ffead-cpp-3.0/
+rm -rf ffead-cpp-4.0/
 
 cd ffead-cpp/
 
@@ -46,7 +46,7 @@ cmake -DSRV_EMB=on -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS
 cp -f web/te-benchmark/sql-src/TeBkWorldsql.h web/te-benchmark/include/TeBkWorld.h
 cp -f web/te-benchmark/sql-src/TeBkWorldsql.cpp web/te-benchmark/src/TeBkWorld.cpp
 make install -j${MAX_THREADS}
-cd ffead-cpp-3.0-bin
+cd ffead-cpp-4.0-bin
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
 while [ ! -f lib/libinter.so ]
@@ -60,10 +60,10 @@ done
 pkill ffead-cpp
 
 cd /root/ffead-cpp/
-cp -rf ffead-cpp-3.0-bin /root/ffead-cpp-3.0
-rm -rf ffead-cpp-3.0-bin
+cp -rf ffead-cpp-4.0-bin /root/ffead-cpp-4.0
+rm -rf ffead-cpp-4.0-bin
 
-cd /root/ffead-cpp-3.0
+cd /root/ffead-cpp-4.0
 cp -f lib/* /usr/local/lib
 ldconfig
 

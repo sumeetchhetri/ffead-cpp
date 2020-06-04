@@ -22,6 +22,9 @@ AUTH_ENAB=false
 #Number of Server processes
 NUM_PROC=1
 
+#Is Single event handler thread
+EVH_SINGLE=false
+
 #The type of Threading strategy
 THRD_PREQ=false
 
@@ -96,3 +99,9 @@ ENABLE_EXT=true
 ENABLE_SCR=true
 
 ENABLE_SWS=true
+
+ENABLE_JOBS=true
+
+#Static Responses
+ENABLE_STATIC_RESP=false
+STATIC_PATH_RESP=/pt_static|text/plain|Hello, World!

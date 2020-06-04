@@ -1,7 +1,7 @@
 #!/bin/sh
 
 LSIAPIDIR=/root/openlitespeed
-FFEAD_CPP_DIR=/root/ffead-cpp-3.0
+FFEAD_CPP_DIR=/root/ffead-cpp-4.0
 
 if [ ! -f $2 ] ; then
   LSIAPIDIR=$2

@@ -50,10 +50,18 @@
 #cmakedefine HAVE_BSONLIB @HAVE_BSONLIB@
 #cmakedefine INC_JOBS @INC_JOBS@
 #cmakedefine OS_BSD @OS_BSD@
+#cmakedefine OS_SOLARIS @OS_SOLARIS@
+#cmakedefine OS_LINUX @OS_LINUX@
+#cmakedefine OS_MINGW @OS_LINUX@
+#cmakedefine OS_DARWIN @OS_LINUX@
 #cmakedefine SRV_EMB @SRV_EMB@
 #cmakedefine SRV_CINATRA @SRV_CINATRA@
 #cmakedefine SRV_LITHIUM @SRV_LITHIUM@
 #cmakedefine SRV_DROGON @SRV_DROGON@
+#cmakedefine HAVE_ACCEPT4 @HAVE_ACCEPT4@
+#cmakedefine HAVE_TCP_QUICKACK @HAVE_TCP_QUICKACK@
+#cmakedefine HAVE_TCP_DEFER_ACCEPT @HAVE_TCP_DEFER_ACCEPT@
+#cmakedefine HAVE_TCP_FASTOPEN @HAVE_TCP_FASTOPEN@
 
 #ifdef HAVE_ODBCLIB
 #define HAVE_LIBODBC 1

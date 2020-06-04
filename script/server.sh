@@ -29,4 +29,13 @@ chmod 700 $FFEAD_CPP_PATH/tests/*
 chmod 700 $FFEAD_CPP_PATH/rtdcf/*
 chmod 700 $FFEAD_CPP_PATH/rtdcf/autotools/*
 #/usr/sbin/setenforce 0
-./ffead-cpp $FFEAD_CPP_PATH > ffead.log 2>&1
+
+#if the event engine runs without a worker pool, then spwan "nproc" number of server processes 
+if grep -Fxq "EVH_SINGLE=true" $FFEAD_CPP_PATH/resources/server.prop
+then
+	for i in $(seq 0 $(($(nproc --all)-1))); do
+	  taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH > ffead.$i.log 2>&1 &
+	done
+else
+	./ffead-cpp $FFEAD_CPP_PATH > ffead.log 2>&1
+fi

@@ -14,6 +14,15 @@ service redis-server stop
 
 # libmyodbc has been removed from apt
 
+wget -q https://github.com/efficient/libcuckoo/archive/master.zip
+unzip master.zip
+rm -f master.zip
+cd libcuckoo-master
+cmake -DCMAKE_INSTALL_PREFIX=/usr .
+make install
+cd $IROOT
+rm -rf libcuckoo-master
+
 wget -q https://cdn.mysql.com/archives/mysql-connector-odbc-5.3/mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit.tar.gz
 tar xf mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit.tar.gz
 mkdir -p /usr/lib/x86_64-linux-gnu/odbc

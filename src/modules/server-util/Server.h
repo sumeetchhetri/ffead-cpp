@@ -68,8 +68,8 @@ public:
 	void start();
 	void stop();
 	
-	static SOCKET createListener(const std::string& ipAddress, const int& port, const bool& block);
-	static SOCKET createListener(const int& port, const bool& block);
+	static SOCKET createListener(const std::string& ipAddress, const int& port, const bool& block, bool isSinglEVH);
+	static SOCKET createListener(const int& port, const bool& block, bool isSinglEVH);
 };
 
 #endif /* SERVER_H_ */

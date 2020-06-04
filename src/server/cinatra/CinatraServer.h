@@ -60,6 +60,7 @@ public:
 
 class CinatraServer {
 	static libcuckoo::cuckoohash_map<std::string, CinatraSocketHandler*> websocks;
+public:
 	static void runServer(std::string ip_addr, std::string port, std::vector<std::string> servedAppNames);
 };
 

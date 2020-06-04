@@ -123,7 +123,11 @@ void CinatraServer::runServer(std::string ip_addr, std::string port, std::vector
 				int contentLength = data.length();
 				response.set_status_and_content(st, std::move(data));
 			} else {
-				response.set_static_file_abs_url(req.getUrl());
+				if(access(req.getUrl().c_str(), F_OK) != -1) {
+					response.set_static_file_abs_url(req.getUrl());
+				} else {
+					response.set_status_and_content(status_type::not_found);
+				}
 			}
 		}
 	};

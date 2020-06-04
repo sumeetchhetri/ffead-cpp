@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([ffead-cpp], [3.0], [sumeet.chhetri@gmail.com])
+AC_INIT([ffead-cpp], [4.0], [sumeet.chhetri@gmail.com])
 AM_INIT_AUTOMAKE([no-define foreign])
 AC_CONFIG_SRCDIR([src/framework/ConfigurationData.h])
 AC_CONFIG_HEADERS([src/modules/common/AppDefines.h])

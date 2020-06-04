@@ -77,7 +77,7 @@ public:
 	std::string generateResponse(const bool& appendHeaders= true);
 	void generateResponse(HttpRequest *req, std::string& data, const bool& appendHeaders= true);
 	std::string& generateNginxApacheResponse();
-	const std::string& getHeadersStr(const std::string& server, bool status_line);
+	const std::string& getHeadersStr(const std::string& server, bool status_line, bool with_content, bool with_serverline);
 	void setUrl(const std::string& url);
 	const std::string& getUrl();
 	void addHeader(std::string header, const std::string& value);

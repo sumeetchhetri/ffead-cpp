@@ -126,14 +126,16 @@ void ServiceHandler::stop() {
 	Thread::sSleep(15);
 }
 
-ServiceHandler::ServiceHandler(const int& spoolSize) {
+ServiceHandler::ServiceHandler(const int& spoolSize, bool isSinglEVH) {
 	this->spoolSize = spoolSize;
 	run = false;
 	isThreadPerRequests = false;
-	if(spoolSize <= 0) {
-		isThreadPerRequests = true;
-	} else {
-		spool.init(spoolSize, true);
+	if(!isSinglEVH) {
+		if(spoolSize <= 0) {
+			isThreadPerRequests = true;
+		} else {
+			spool.init(spoolSize, true);
+		}
 	}
 }
 

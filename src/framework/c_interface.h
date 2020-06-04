@@ -19,7 +19,7 @@
 
 #include "ServerInitUtil.h"
 
-struct ffead_request {
+typedef struct ffead_request {
     const char* server_str;
     size_t server_str_len;
     const char* method;
@@ -31,8 +31,23 @@ struct ffead_request {
     const char* body;
     size_t body_len;
     int version;
-};
-struct ffead_request1 {
+}ffead_request;
+typedef struct ffead_request3 {
+    const char* server_str;
+    size_t server_str_len;
+    const char* method;
+    size_t method_len;
+    const char* path;
+    size_t path_len;
+    const char* qstr;
+    size_t qstr_len;
+    phr_header_fcp* headers;
+    size_t headers_len;
+    const char* body;
+    size_t body_len;
+    int version;
+}ffead_request3;
+typedef struct ffead_request1 {
     const char* server_str;
     size_t server_str_len;
     const char* method;
@@ -44,8 +59,8 @@ struct ffead_request1 {
     const char* body;
     size_t body_len;
     int version;
-};
-struct ffead_request2 {
+}ffead_request1;
+typedef struct ffead_request2 {
     const char* server_str;
     size_t server_str_len;
     const char* method;
@@ -59,7 +74,28 @@ struct ffead_request2 {
     const char* body;
     size_t body_len;
     int version;
-};
+}ffead_request2;
+typedef struct ffead_response {
+    const char* out_url;
+    size_t out_url_len;
+    const char* out_mime;
+    size_t out_mime_len;
+    phr_header_fcp headers[100];
+    size_t headers_len;
+    const char* body;
+    size_t body_len;
+    int scode;
+    const char* statmsg;
+    size_t statmsg_len;
+    int done;
+    const char* headers_str;
+    size_t headers_str_len;
+    const char* headers_ss_str;
+    size_t headers_ss_str_len;
+    const char* resp_str;
+    size_t resp_str_len;
+}ffead_response;
+
 
 /*
     Bootstrap the ffead-cpp server framework
@@ -76,13 +112,65 @@ extern "C" void ffead_cpp_init();
 */
 extern "C" void ffead_cpp_cleanup();
 
-extern "C" void* ffead_cpp_handle_1(const ffead_request *request, int* scode,
+/*
+    Rust interface support functions
+*/
+extern "C" void* ffead_cpp_handle_rust_1(const ffead_request *request, int* scode,
+    const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
+    const char **out_body, size_t *out_body_len);
+extern "C" void* ffead_cpp_handle_rust_2(const ffead_request *request, int* scode,
+    const char **out_url, size_t *out_url_len, const char **out_url_mime, size_t *out_url_mime_len,
+    phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
+
+/*
+    C interface support functions
+*/
+extern "C" void* ffead_cpp_handle_c_1(const ffead_request *request, int* scode, const char** smsg, size_t *smsg_len,
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
     const char **out_body, size_t *out_body_len);
 
-extern "C" void* ffead_cpp_handle_1s(const ffead_request *request, int* scode, const char** smsg, size_t *smsg_len,
-    const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
-    const char **out_body, size_t *out_body_len);
+/*
+    Crystal interface support functions
+*/
+extern "C" void* ffead_cpp_handle_crystal_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
+	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 
+    phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
+
+/*
+    Go interface support functions
+*/
+extern "C" void* ffead_cpp_handle_go_1(const char *server_str, size_t server_str_len,
+	const char *method, size_t method_len, const char *path, size_t path_len, const char *query, size_t query_len, int version,
+	const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* scode,
+	const char **out_url, size_t *out_url_len,  const char **out_mime, size_t *out_mime_len,
+	phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
+);
+extern "C" void* ffead_cpp_handle_go_2(const char *server_str, size_t server_str_len,
+	const char *method, size_t method_len, const char *path, size_t path_len, int version,
+	const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* scode,
+	const char **out_url, size_t *out_url_len,  const char **out_mime, size_t *out_mime_len,
+	const char **out_body, size_t *out_body_len
+);
+
+/*
+    V interface support interface
+*/
+extern "C" void* ffead_cpp_handle_v(const char *server_str, size_t server_str_len,
+    const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* done,
+    const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len, 
+    const char **out_body, size_t *out_body_len
+);
+
+/*
+    Java interface support interface
+*/
+extern "C" void* ffead_cpp_handle_java(int *scode, const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
+		const char **out_body, size_t *out_body_len, const char **out_headers, size_t *out_headers_len,
+		const char *server_str, size_t server_str_len, const char* method, size_t method_len,
+		const char* path, size_t path_len, const char* body, size_t body_len, int version,
+		int headers_len, ...
+);
+
 
 extern "C" void* ffead_cpp_handle_1t(const ffead_request2 *request, int* scode,
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
@@ -91,6 +179,7 @@ extern "C" void* ffead_cpp_handle_1t(const ffead_request2 *request, int* scode,
 extern "C" void* ffead_cpp_handle_2(const ffead_request1 *request, int* scode,
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
     const char **out_body, size_t *out_body_len);
+
 
 /*
     Handle a request and return the HttpResponse pointer, along-with, if with_status_line is true, then the header string
@@ -108,21 +197,6 @@ extern "C" void* ffead_cpp_handle_3(const char *server_str, size_t server_str_le
     const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* done,
     const char **out_url, size_t *out_url_len, bool with_status_line, int* scode, const char** smsg, size_t *smsg_len, 
     const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
-);
-
-/*
-    Handle a request and return the HttpResponse pointer, along-with, 
-    server_str - is the calling server's name which will be passed in the Server header
-    Return:
-        - done flag, 1 - handled by framework, 0 - static file (needs to be handled by calling server)
-        - static file path if requested
-        - response headers as a string with the http status line as well
-        - response body as a string
-*/
-extern "C" void* ffead_cpp_handle_4(const char *server_str, size_t server_str_len,
-    const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* done,
-    const char **out_url, size_t *out_url_len, const char **out_headers, size_t *out_headers_len, 
-    const char **out_body, size_t *out_body_len
 );
 
 /*

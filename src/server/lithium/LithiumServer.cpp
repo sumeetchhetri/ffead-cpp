@@ -29,8 +29,9 @@ void LithiumServer::runServer(int port, std::vector<std::string> servedAppNames)
 	std::function<void(li::http_request&, li::http_response&)> ffead_cpp_handler = [&](li::http_request& request, li::http_response& response) {
 		std::string_view meth = request.http_ctx.method();
 		request.http_ctx.index_headers();
+		request.http_ctx.read_whole_body();
 		HttpRequest req(request.http_ctx.header_map, request.http_ctx.url_.substr(0, request.http_ctx.url_.find_last_not_of(" ")+1), 
-			request.http_ctx.get_parameters_string_, meth, request.http_ctx.http_version_, request.http_ctx.read_whole_body());
+			request.http_ctx.get_parameters_string_, meth, request.http_ctx.http_version_, request.http_ctx.body_);
 
 		HttpResponse respo;
 		ServiceTask task;
@@ -52,7 +53,11 @@ void LithiumServer::runServer(int port, std::vector<std::string> servedAppNames)
 				response.write(data);
 			}
 		} else {
-			response.http_ctx.send_static_file(req.getUrl().c_str());
+			if(access(req.getUrl().c_str(), F_OK) != -1) {
+				response.http_ctx.send_static_file(req.getUrl().c_str());
+			} else {
+				response.set_status(404);
+			}
 		}
 	};
 

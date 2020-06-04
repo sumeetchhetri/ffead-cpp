@@ -700,6 +700,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	ConfigurationData::getInstance()->enableSecurity = StringUtil::toLowerCopy(srprps["ENABLE_SEC"])=="true";
 	ConfigurationData::getInstance()->enableFilters = StringUtil::toLowerCopy(srprps["ENABLE_FLT"])=="true";
 	ConfigurationData::getInstance()->enableControllers = StringUtil::toLowerCopy(srprps["ENABLE_CNT"])=="true";
+	ConfigurationData::getInstance()->enableExtControllers = StringUtil::toLowerCopy(srprps["ENABLE_EXT_CNT"])=="true";
 	ConfigurationData::getInstance()->enableContMpg = StringUtil::toLowerCopy(srprps["ENABLE_CNT_MPG"])=="true";
 	ConfigurationData::getInstance()->enableContPath = StringUtil::toLowerCopy(srprps["ENABLE_CNT_PTH"])=="true";
 	ConfigurationData::getInstance()->enableContExt = StringUtil::toLowerCopy(srprps["ENABLE_CNT_EXT"])=="true";
@@ -708,6 +709,8 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	ConfigurationData::getInstance()->enableScripts = StringUtil::toLowerCopy(srprps["ENABLE_SCR"])=="true";
 	ConfigurationData::getInstance()->enableSoap = StringUtil::toLowerCopy(srprps["ENABLE_SWS"])=="true";
 	ConfigurationData::getInstance()->enableLogging = StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true";
+	ConfigurationData::getInstance()->enableJobs = StringUtil::toLowerCopy(srprps["ENABLE_JOBS"])=="true";
+	ConfigurationData::getInstance()->enableStaticResponses = StringUtil::toLowerCopy(srprps["ENABLE_STATIC_RESP"])=="true";
 
     strVec cmpnames;
     try
@@ -1162,12 +1165,14 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	HttpClient::init();
 
+	bool isSinglEVH = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["EVH_SINGLE"])=="true";
+
 	SOCKET sockfd;  // listen on sock_fd, new connection on new_fd
 
 	//struct sockaddr_storage their_addr; // connector's address information
 	//socklen_t sin_size;
 
-	sockfd = Server::createListener(ipaddr, CastUtil::toInt(port), true);
+	sockfd = Server::createListener(ipaddr, CastUtil::toInt(port), true, isSinglEVH);
 
 	if(sockfd==-1)
 	{
@@ -1197,7 +1202,9 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	logger << ("Initializing Caches done....") << std::endl;
 
 #ifdef INC_JOBS
-	JobScheduler::start();
+	if(StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["ENABLE_JOBS"])=="true") {
+		JobScheduler::start();
+	}
 #endif
 
 	std::vector<std::string> files;
@@ -1253,10 +1260,10 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	unsigned int nthreads = hardware_concurrency();
 
-	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &httpServiceFactoryMethod, nthreads, &httpReadFactoryMethod);
+	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &httpServiceFactoryMethod, nthreads, isSinglEVH, &httpReadFactoryMethod);
 	handler->start();
 
-	RequestReaderHandler reader(handler, true, sockfd);
+	RequestReaderHandler reader(handler, true, isSinglEVH, sockfd);
 	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
 	reader.start(-1);
 
@@ -1310,9 +1317,11 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		MethodInvoc::stop();
 	#endif
 
-	#ifdef INC_JOBS
+#ifdef INC_JOBS
+	if(StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["ENABLE_JOBS"])=="true") {
 		JobScheduler::stop();
-	#endif
+	}
+#endif
 
 	RegexUtil::flushCache();
 

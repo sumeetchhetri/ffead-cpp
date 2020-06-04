@@ -171,6 +171,8 @@ public:
 
 	HttpRequest(std::string &&data, int* content_length);
 	HttpRequest(const char* pp, size_t pl, const char* qp, size_t ql, const char* mp, size_t ml, const std::string& content, unsigned int hv);
+	HttpRequest(const char* mp, size_t ml, const char* pp, size_t pl, const char* qp, size_t ql, const char* hp, size_t hl, const char* bp, size_t bl, int hv);
+	HttpRequest(const char* mp, size_t ml, const char* pp, size_t pl, const char* bp, size_t bl, int hv);
 	HttpRequest(void* headers_list, size_t num_headers, std::string_view rawUrl, std::string_view qv, std::string_view method, int hv, std::string_view content);
 	HttpRequest(void* headers_list, size_t num_headers, std::string_view rawUrl, std::string_view method, int hv, std::string_view content);
 	HttpRequest(std::unordered_map<std::string_view, std::string_view> header_map, std::string_view url, std::string_view qv, std::string_view method, std::string_view hv, std::string_view content);

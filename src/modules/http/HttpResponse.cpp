@@ -230,7 +230,7 @@ std::string& HttpResponse::generateNginxApacheResponse() {
 	return content;
 }
 
-const std::string& HttpResponse::getHeadersStr(const std::string& server, bool status_line)
+const std::string& HttpResponse::getHeadersStr(const std::string& server, bool status_line, bool with_content, bool with_serverline)
 {
 	if(_headers_str.length()==0) {
 		bool isTE = isHeaderValue(TransferEncoding, "chunked");
@@ -270,11 +270,11 @@ const std::string& HttpResponse::getHeadersStr(const std::string& server, bool s
 			_headers_str.append(status->getMsg());
 			_headers_str.append(HDR_END);
 		}
-		if(server.length()==0) {
+		if(server.length()>0) {
 			_headers_str.append("Server: ");
 			_headers_str.append(server);
 			_headers_str.append(HDR_END);
-		} else {
+		} else if(with_serverline) {
 			_headers_str.append(HDR_SRV);
 		}
 		if(!hasHeader(ContentType) && this->contentList.size()>0)
@@ -307,6 +307,9 @@ const std::string& HttpResponse::getHeadersStr(const std::string& server, bool s
 			_headers_str.append(HDR_END);
 		}
 		_headers_str.append(HDR_END);
+		if(with_content) {
+			_headers_str.append(content);
+		}
 	}
 	return _headers_str;
 }

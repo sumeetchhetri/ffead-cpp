@@ -425,7 +425,13 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 			u_long iMode = 1;
 			ioctlsocket(descriptor, FIONBIO, &iMode);
 		#else
+#ifndef HAVE_ACCEPT4
 			fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
+#else
+			if(isListeningSock) {
+				fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
+			}
+#endif
 			int i = 1;
 			setsockopt(descriptor, IPPROTO_TCP, TCP_NODELAY, (void *)&i, sizeof(i));
 			//setsockopt(descriptor, IPPROTO_TCP, TCP_CORK, (void *)&i, sizeof(i));

@@ -99,7 +99,7 @@ public:
 	void registerWriteRequest(SocketInterface* sif);
 	void start();
 	void stop();
-	ServiceHandler(const int& spoolSize);
+	ServiceHandler(const int& spoolSize, bool isSinglEVH);
 	virtual ~ServiceHandler();
 };
 

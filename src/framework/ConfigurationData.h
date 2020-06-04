@@ -181,8 +181,27 @@ public:
 	}
 };
 
-enum SERVER_BACKEND {NGINX, APACHE, OPENLITESPEED, EMBEDDED, CINATRA, LITHIUM, DROGON, 
-	VWEB, V_PICO, RUST_ACTIX, RUST_HYPER, RUST_ROCKET, GO_FASTHTTP, LIBREACTOR};
+enum SERVER_BACKEND {
+	NGINX, APACHE, OPENLITESPEED, //All http server modules
+	EMBEDDED, //The embedded ffead-cpp server engine
+	CINATRA, LITHIUM, DROGON, //All C++ http server engines
+	C_LIBREACTOR, C_H2O, //All C http server engines
+	V_WEB, V_PICO, //All V http server engines
+	RUST_ACTIX, RUST_HYPER, RUST_ROCKET, //All Rust http server engines
+	GO_FASTHTTP, GO_ATRUEGO, GO_GNET, //All Go http server engines
+	CRYSTAL_HTTP, CRYSTAL_H2O, //All Crystal http server engines
+	JAVA_FIRENIO, JAVA_RAPIDOID, JAVA_WIZZARDO_HTTP, //All Java http server engines
+	SWIFT_NIO, //All Swift http server engines
+	D_HUNT, //All D http server engines
+};
+
+class StaticResponseData {
+	std::string r;
+	std::string t;
+	friend class ConfigurationData;
+	friend class ServiceTask;
+	friend class ConfigurationHandler;
+};
 
 class ConfigurationData {
 	ConfigurationData();
@@ -223,6 +242,7 @@ class ConfigurationData {
 	std::map<std::string, std::vector<WsDetails>, std::less<> > webserviceDetailMap;
 	std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> > classStructureMap;
 	std::map<std::string, propMap, std::less<> > appPropertiesMap;
+	std::map<std::string, StaticResponseData, std::less<> > staticResponsesMap;
 	Logger logger;
 	ThreadLocal httpRequest;
 	ThreadLocal httpResponse;
@@ -243,6 +263,8 @@ class ConfigurationData {
 	bool enableScripts;
 	bool enableSoap;
 	bool enableLogging;
+	bool enableJobs;
+	bool enableStaticResponses;
 	static void clearInstance();
 	friend class ExtHandler;
 	friend class FilterHandler;
@@ -290,6 +312,7 @@ public:
 	static propMap getAppProperties(const std::string& name = "");
 	static SERVER_BACKEND getServerType();
 	virtual ~ConfigurationData();
+	static bool isJobsEnabled();
 };
 
 #endif /* CONFIGURATIONDATA_H_ */

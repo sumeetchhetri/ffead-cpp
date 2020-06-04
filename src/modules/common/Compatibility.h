@@ -197,6 +197,9 @@ typedef int NUMEVENTS;
 #define SOCKET_ERROR   -1  // basic WinSock error
 #define closesocket(s) close(s);  // Unix uses file descriptors, WinSock doesn't...
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/types.h>

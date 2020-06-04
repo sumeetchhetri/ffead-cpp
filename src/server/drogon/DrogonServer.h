@@ -71,7 +71,7 @@ class DrogonHttpHandler : public drogon::HttpController<DrogonHttpHandler>
 public:
 	void handle(const HttpRequestPtr &req, std::function<void (const HttpResponsePtr &)> &&callback);
 	METHOD_LIST_BEGIN
-	ADD_METHOD_VIA_REGEX(DrogonHttpHandler::handle, ".*", "GET", "PUT", "POST", "DELETE", "OPTIONS");
+	ADD_METHOD_VIA_REGEX(DrogonHttpHandler::handle, ".*", Get, Post, Put, Delete, Head, Options);
 	METHOD_LIST_END
 };
 
