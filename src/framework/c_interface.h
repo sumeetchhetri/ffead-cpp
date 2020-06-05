@@ -149,7 +149,7 @@ extern "C" void* ffead_cpp_handle_go_2(const char *server_str, size_t server_str
 	const char *method, size_t method_len, const char *path, size_t path_len, int version,
 	const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* scode,
 	const char **out_url, size_t *out_url_len,  const char **out_mime, size_t *out_mime_len,
-	const char **out_body, size_t *out_body_len
+	const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 );
 
 /*
@@ -158,7 +158,7 @@ extern "C" void* ffead_cpp_handle_go_2(const char *server_str, size_t server_str
 extern "C" void* ffead_cpp_handle_v(const char *server_str, size_t server_str_len,
     const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* done,
     const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len, 
-    const char **out_body, size_t *out_body_len
+	const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 );
 
 /*

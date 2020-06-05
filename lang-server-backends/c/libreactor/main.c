@@ -60,6 +60,8 @@ static reactor_status handle(reactor_event *event)
 			response.headers.header[i].value.base = (void*)out_headers[i].value;
 			response.headers.header[i].value.size = out_headers[i].value_len;
 		}
+		response.headers.header[out_headers_len].name = reactor_vector_string("Date");
+		response.headers.header[out_headers_len].value = reactor_http_message_date(NULL);
 		response.headers.count = out_headers_len;
 		response.code = scode;
 		response.reason.base = (void*)smsg;
@@ -102,6 +104,8 @@ static reactor_status handle(reactor_event *event)
 				response.headers.header[2].name.size = out_headers[1].name_len;
 				response.headers.header[2].value.base = (void*)out_headers[1].value;
 				response.headers.header[2].value.size = out_headers[1].value_len;
+				response.headers.header[3].name = reactor_vector_string("Date");
+				response.headers.header[3].value = reactor_http_message_date(NULL);
 				reactor_server_respond(session, &response);
 			} else {
 				reactor_server_not_found(session);

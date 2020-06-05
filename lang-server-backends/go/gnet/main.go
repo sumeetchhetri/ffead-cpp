@@ -18,7 +18,7 @@ extern void* ffead_cpp_handle_go_2(const char *server_str, size_t server_str_len
 	const char *method, size_t method_len, const char *path, size_t path_len, int version,
     const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* scode,
     const char **out_url, size_t *out_url_len,  const char **out_mime, size_t *out_mime_len,
-	const char **out_resp, size_t *out_resp_len
+	const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 );
 extern void ffead_cpp_resp_cleanup(void* ptr);
 */
@@ -112,16 +112,21 @@ pipeline:
 	var outURLlen C.size_t
 	var outMime *C.char
 	var outMimelen C.size_t
-	var outResp *C.char
-	var outRespLen C.size_t
-	var scode C.int = 1
+	var outHeaders *C.char
+	var outHeadersLen C.size_t
+	var outBody *C.char
+	var outBodyLen C.size_t
+	var scode C.int
 
 	fresp := C.ffead_cpp_handle_go_2(srvStr, srvStrLen, methStr, methStrLen, pathStr, pathStrLen, 1,
-		hdrsStr, hdrsStrLen, bodyStr, bodyStrLen, &scode, &outURL, &outURLlen, &outMime, &outMimelen, &outResp, &outRespLen,
+		hdrsStr, hdrsStrLen, bodyStr, bodyStrLen, &scode, &outURL, &outURLlen, &outMime, &outMimelen, 
+		&outHeaders, &outHeadersLen, &outBody, &outBodyLen
 	)
 
 	if scode > 0 {
-		out = C.GoBytes(unsafe.Pointer(outResp), C.int(outRespLen))
+		out = append(out, C.GoBytes(unsafe.Pointer(outHeaders), C.int(outHeadersLen)))
+		out = time.Now().AppendFormat(out, "Mon, 02 Jan 2006 15:04:05 GMT\r\n\r\n")
+		out = append(out, C.GoBytes(unsafe.Pointer(outBody), C.int(outBodyLen)))
 	} else {
 		urlPath := C.GoStringN(outURL, C.int(outURLlen))
 		if _, err := os.Stat(urlPath); err == nil {

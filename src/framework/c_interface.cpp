@@ -257,7 +257,7 @@ void* ffead_cpp_handle_go_2(const char *server_str, size_t server_str_len,
 	const char *method, size_t method_len, const char *path, size_t path_len, int version,
     const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* scode,
     const char **out_url, size_t *out_url_len,  const char **out_mime, size_t *out_mime_len,
-	const char **out_body, size_t *out_body_len
+	const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 )
 {
 	HttpRequest req(method, method_len, path, path_len, NULL, 0, in_headers, in_headers_len, in_body, in_body_len, version);
@@ -279,9 +279,12 @@ void* ffead_cpp_handle_go_2(const char *server_str, size_t server_str_len,
         if(server_str_len>0 && server_str!=NULL) {
             server = std::string(server_str, server_str_len);
         }
-        const std::string& hdrs = respo->getHeadersStr(server, true, true, true);
-        *out_body = hdrs.c_str();
-        *out_body_len = hdrs.length();
+        const std::string& hdrs = respo->getHeadersStr(server, true, false, true);
+        *out_headers = hdrs.c_str();
+        *out_headers_len = hdrs.length()-2;
+        const std::string& cnt = respo->getContent();
+        *out_body = cnt.c_str();
+        *out_body_len = cnt.length();
     }
     return respo;
 }
@@ -292,7 +295,7 @@ void* ffead_cpp_handle_go_2(const char *server_str, size_t server_str_len,
 void* ffead_cpp_handle_v(const char *server_str, size_t server_str_len,
     const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* done,
     const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len, 
-    const char **out_body, size_t *out_body_len
+	const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 )
 {
     HttpRequest req(in_headers, in_headers_len, in_body, in_body_len);
@@ -314,9 +317,12 @@ void* ffead_cpp_handle_v(const char *server_str, size_t server_str_len,
         if(server_str_len>0 && server_str!=NULL) {
             server = std::string(server_str, server_str_len);
         }
-        const std::string& hdrs = respo->getHeadersStr(server, true, true, true);
-        *out_body = hdrs.c_str();
-        *out_body_len = hdrs.length();
+        const std::string& hdrs = respo->getHeadersStr(server, true, false, true);
+        *out_headers = hdrs.c_str();
+        *out_headers_len = hdrs.length()-2;
+        const std::string& cnt = respo->getContent();
+        *out_body = cnt.c_str();
+        *out_body_len = cnt.length();
     }
     return respo;
 }
@@ -370,7 +376,7 @@ void* ffead_cpp_handle_java(int *scode, const char **out_url, size_t *out_url_le
         }
         const std::string& hdrs = respo->getHeadersStr(server, isStatusLine, isContent, isServerLine);
         *out_headers = hdrs.c_str();
-        *out_headers_len = hdrs.length()-4;
+        *out_headers_len = hdrs.length()-2;
         const std::string& cnt = respo->getContent();
         *out_body = cnt.c_str();
         *out_body_len = cnt.length();

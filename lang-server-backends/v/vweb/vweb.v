@@ -19,7 +19,7 @@ import net
 import strings
 import flag
 
-#flag -lffead-modules -lffead-framework -ldefault -loauthApp -lflexApp -lmarkers -lpeer_server -lte_benchmark -lte_benchmark_um
+#flag -lffead-framework
 
 //const char* srv, size_t srv_len, int type
 fn ffead_cpp_bootstrap(byteptr, u64, int)
@@ -32,9 +32,9 @@ fn ffead_cpp_cleanup()
 	const char *server_str, size_t server_str_len,
     const char *in_headers, size_t in_headers_len, const char *in_body, size_t in_body_len, int* done,
     const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len, 
-    const char **out_body, size_t *out_body_len
+    const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 */
-fn ffead_cpp_handle_v(byteptr, u64, byteptr, u64, byteptr, u64, &int, &string, &u64, &string, &u64, &string, &u64) voidptr
+fn ffead_cpp_handle_v(byteptr, u64, byteptr, u64, byteptr, u64, &int, &string, &u64, &string, &u64, &string, &u64, &string, &u64) voidptr
 
 fn ffead_cpp_resp_cleanup(voidptr)
 
@@ -57,19 +57,37 @@ mut:
 	rs_url string
 	rs_mime string
 	rs_body string
-	done bool
+	rs_headers string
+	rs_date byteptr
+}
+
+struct DateStore {
+mut:
+	date byteptr
+}
+
+fn update_date(mut p DateStore) {
+	for {
+		p.date = C.get_date()
+		C.usleep(1000000)
+	}
 }
 
 fn run(port int) {
+	mut dt := DateStore{
+		date: C.get_date()
+	}
+
 	println('Running a Vweb app on http://localhost:$port ...')
 	l := net.listen(port) or { panic('Failed to listen') }
 	for {
 		conn := l.accept() or { panic('accept() failed') }
-		handle_conn(conn)
+		handle_conn(conn, dt)
+		go update_date(dt)
 	}
 }
 
-fn handle_conn(conn net.Socket) {
+fn handle_conn(conn net.Socket, dt DateStore) {
 	$if debug {
 		println('Got a new connection...')
 	}
@@ -88,6 +106,7 @@ fn handle_conn(conn net.Socket) {
 
 	mut vweb := VRequestContext{
 		conn: conn
+		rs_date: dt.date
 	}
 	vweb.rq_headers += first_line + "\r\n"
 
@@ -171,7 +190,7 @@ fn (vweb VRequestContext) send_response_to_client(res string) bool {
 	mut sb := strings.new_builder(1024)
 	sb.write('HTTP/1.1 200 OK\r\nContent-Type: $$vweb.rs_mime\r\nContent-Length: ')
 	sb.write(res.len.str())
-	sb.write('\r\n$HEADERS_CLOSE$res')
+	sb.write('\r\nDate: $vweb.rs_date$HEADERS_CLOSE$res')
 	vweb.conn.send_string(sb.str()) or {
 		sb.free()
 		return false 
@@ -186,11 +205,12 @@ fn (vweb VRequestContext) not_found() {
 
 fn (vweb VRequestContext) send_response() bool {
 	$if debug {
+		println('headers = $vweb.rs_headers')
 		println('response = $vweb.rs_body')
 	}
 
 	mut sb := strings.new_builder(1024)
-	sb.write('$vweb.rs_body')
+	sb.write('$vweb.rs_headersDate: $vweb.rs_date\r\n\r\n$vweb.rs_body')
 	vweb.conn.send_string(sb.str()) or { return false }
 	sb.free()
 	return true
@@ -200,16 +220,19 @@ fn (mut vweb VRequestContext) handle() {
 	server_name := 'VWeb'
 	url_len := u64(0)
 	mime_len := u64(0)
+	headers_len := u64(0)
 	body_len := u64(0)
 	done := 0
 	resp := ffead_cpp_handle_v(server_name.str, u64(server_name.len), vweb.rq_headers.str, u64(vweb.rq_headers.len), 
-		vweb.rq_body.str, u64(vweb.rq_body.len), &done, &vweb.rs_url, &url_len, &vweb.rs_mime, &mime_len, &vweb.rs_body, &body_len)
+		vweb.rq_body.str, u64(vweb.rq_body.len), &done, &vweb.rs_url, &url_len, &vweb.rs_mime, &mime_len, 
+		&vweb.rs_body, &body_len, &vweb.rs_headers, &headers_len)
 
 	$if debug {
 		println('ffead-cpp.done = $done')
 	}
 
 	if done > 0 {
+		vweb.rs_headers = tos(vweb.rs_headers.str, int(headers_len))
 		vweb.rs_body = tos(vweb.rs_body.str, int(body_len))
 		vweb.send_response()
 		ffead_cpp_resp_cleanup(resp)

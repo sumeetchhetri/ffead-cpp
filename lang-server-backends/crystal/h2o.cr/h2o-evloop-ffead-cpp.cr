@@ -92,6 +92,7 @@ class H2oFfeadCppCry < H2o
             context.response.status_code = 404
         end
       end
+      0
     end
   end
 
@@ -141,7 +142,7 @@ class H2oFfeadCppCry < H2o
   end
 
   def run : Void
-    OptionParser.parse do |parser|
+    OptionParser.parse! do |parser|
       parser.banner = ""
       parser.on("-f DIR", "--ffead-cpp-dir=DIR", "ffead-cpp directory") { |dir| @ffead_cpp_directory = dir }
       parser.on("-t PORT", "--to=PORT", "Specifies the port") { |port| @port = port.to_i }
@@ -171,4 +172,4 @@ class H2oFfeadCppCry < H2o
   end
 end
 
-H2oFfeadCppCry.run
+H2oFfeadCppCry.new.run

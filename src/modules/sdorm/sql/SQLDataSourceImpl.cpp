@@ -422,6 +422,7 @@ SQLDataSourceImpl::SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping) {
 	isTransaction = false;
 	conn = NULL;
 	logger = LoggerFactory::getLogger("SQLDataSourceImpl");
+	isSession = false;
 }
 
 SQLDataSourceImpl::~SQLDataSourceImpl() {
@@ -442,7 +443,7 @@ bool SQLDataSourceImpl::allocateStmt(const bool& read) {
 		return false;
 	}
 	if (this->conn != NULL) {
-		refreshStmt();
+		//refreshStmt();
 		return true;
 	}
 	int V_OD_erg;// result of functions
@@ -473,8 +474,10 @@ void SQLDataSourceImpl::refreshStmt() {
 }
 
 void SQLDataSourceImpl::close() {
+	if(isSession) return;
 #ifdef HAVE_LIBODBC
 	this->pool->release(conn);
+	conn = NULL;
 	V_OD_hdbc = NULL;
 	SQLFreeHandle(SQL_HANDLE_STMT, V_OD_hstmt);
 	V_OD_hstmt = NULL;
@@ -2023,10 +2026,12 @@ void* SQLDataSourceImpl::executeQuery(QueryBuilder& qb, const bool& isObj) {
 }
 
 void* SQLDataSourceImpl::getContext(void* details) {
+	isSession = true;
 	return NULL;
 }
 
 void SQLDataSourceImpl::destroyContext(void* cntxt) {
+	isSession = false;
 }
 
 SQLContext::SQLContext() {
