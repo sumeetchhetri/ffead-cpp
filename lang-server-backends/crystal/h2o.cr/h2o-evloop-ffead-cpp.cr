@@ -1,14 +1,25 @@
 require "reset/prelude"
 require "reset/patches"
-require "reset/json"
 require "h2o/h2o_evloop"
 require "option_parser"
 require "./ffead-cpp-lib"
 
-class H2oFfeadCppCry < H2o
+module FfeadCppRespTL
+  extend self
+
   @[ThreadLocal]
-  @fresponse: Void*?
-  @ffead_cpp_directory = "/root/ffead-cpp-4.0"
+  @@fresponse: Void*?
+
+  def set(a)
+    @@fresponse = a
+  end
+  def get
+    @@fresponse
+  end
+end
+
+class H2oFfeadCppCry < H2o
+  @ffead_cpp_directory = "/installs/ffead-cpp-4.0"
   @port = 8080
   @config = LibH2o::H2oGlobalconfT.new
   @ctx = LibH2o::H2oContextT.new
@@ -17,10 +28,10 @@ class H2oFfeadCppCry < H2o
 
   macro ffeadcpphandler
     Handler.new do |handler, req|
-      #puts "#{@fresponse}"
-      if !@fresponse.nil?
+      #puts "#{FfeadCppRespTL.get}"
+      if !FfeadCppRespTL.get().is_a?(Nil)
           #puts "cleaning up"
-          LibFfeadCpp.ffead_cpp_resp_cleanup(@fresponse)
+          LibFfeadCpp.ffead_cpp_resp_cleanup(FfeadCppRespTL.get)
       end
       
       generator = uninitialized LibH2o::H2oGeneratorT[2]
@@ -30,12 +41,12 @@ class H2oFfeadCppCry < H2o
       counter = 0
       while counter < req.value.headers.size
         hdr = LibFfeadCpp::PhrHeaderFcp.new
-        hdr.name = req.value.headers.entries[counter].name.base
-        hdr.name_len = req.value.headers.entries[counter].name.len
-        hdr.value = req.value.headers.entries[counter].value.base
-        hdr.value_len = req.value.headers.entries[counter].value.len
+        hdr.name = req.value.headers.entries[counter].name.value.base
+        hdr.name_len = req.value.headers.entries[counter].name.value.len
+        hdr.value = req.value.headers.entries[counter].val.base
+        hdr.value_len = req.value.headers.entries[counter].val.len
         headers << hdr
-        #puts "#{hdr.name_len} #{hdr.value_len]}"
+        #puts "#{String.new(hdr.name, hdr.name_len)} #{String.new(hdr.value, hdr.value_len)}"
         counter += 1
       end
 
@@ -52,44 +63,56 @@ class H2oFfeadCppCry < H2o
       freq.headers = headers.to_unsafe()
       freq.headers_len = counter
 
-      scode = 0;
+	  scode = 0
+	  smsg_len: UInt64 = 0
+	  out_mime_len: UInt64 = 0
+	  out_url_len: UInt64 = 0
+	  out_headers_len: UInt64 = 0
+	  out_body_len: UInt64 = 0
 
-      @fresponse = LibFfeadCpp.ffead_cpp_handle_crystal_1(pointerof(freq), pointerof(scode), out smsg, out smsg_len, out out_mime, out out_mime_len,
-              out out_url, out out_url_len, freq.headers, out out_headers_len, out out_body, out out_body_len)
-
-      #puts "#{scode} #{smsg_len} #{out_url_len} #{out_mime_len} #{out_headers_len} #{out_body_len}"
+      FfeadCppRespTL.set LibFfeadCpp.ffead_cpp_handle_crystal_picov_1(pointerof(freq), pointerof(scode), out smsg, pointerof(smsg_len), out out_mime, pointerof(out_mime_len),
+              out out_url, pointerof(out_url_len), freq.headers, pointerof(out_headers_len), out out_body, pointerof(out_body_len))
+      
+      #puts "scode=#{scode} smsg_len=#{smsg_len} out_url_len=#{out_url_len} out_mime_len=#{out_mime_len} out_headers_len=#{out_headers_len} out_body_len=#{out_body_len}"
+      #if smsg_len > 0
+      #  puts "smsg=#{String.new(smsg, smsg_len)}"
+      #end
+      #if out_mime_len > 0
+      #  puts "out_mime=#{String.new(out_mime, out_mime_len)}"
+      #end
+      #if out_url_len > 0
+      #  puts "out_url=#{String.new(out_url, out_url_len)}"
+      #end
+      #if out_body_len > 0
+      #  puts "out_body=#{String.new(out_body, out_body_len)}"
+      #end
+      
       if scode > 0
         statmsg = String.new(smsg, smsg_len)
-        body = h2o_iovec_init(out_body, out_body_len)
+        body = LibH2o::H2oIovecT.new(base: out_body, len: out_body_len)
         req.value.res.status = scode
         req.value.res.reason = statmsg
         counter = 0
         while counter < out_headers_len
           hdr = headers[counter]
-          k = String.new(hdr.name, hdr.name_len)
-          v = String.new(hdr.value, hdr.value_len)
-          #puts "#{k} = #{v}"
-          h2o_add_header(req, k, v)
+          #puts "#{String.new(hdr.name, hdr.name_len)} #{String.new(hdr.value, hdr.value_len)}"
+          LibH2o.h2o_add_header_by_str(req.offset_at(576).as(LibH2o::H2oMemPoolT*), req.offset_at(360).as(LibH2o::H2oHeadersT*), hdr.name, hdr.name_len, 1, hdr.name, hdr.value, hdr.value_len)
           counter += 1
         end
         h2o_start_response(req, generator)
         h2o_send(req, pointerof(body), 1, LibH2o::H2oSendState::H2OSendStateFinal)
       else
         out_url = String.new(out_url, out_url_len)
-        out_mime = String.new(out_mime, out_mime_len)
-        #puts "#{out_url} #{out_mime}"
+        out_mime = LibH2o::H2oIovecT.new(base: out_mime, len: out_mime_len)
         if File.exists?(out_url)
-            req.value.res.status = 200
-            req.value.res.reason = "OK"
-            file = File.open out_url, "rb"
-            bytes_to_read = file.read_byte.not_nil!
-            data = Bytes.new(bytes_to_read)
-            file.read_fully(data)
-            h2o_start_response(req, generator)
-            body = h2o_iovec_init(data, bytes_to_read)
-            h2o_send(req, pointerof(body), 1, LibH2o::H2oSendState::H2OSendStateFinal)
+        	req.value.res.reason = "OK";
+    		req.value.res.status = 200;
+        	LibH2o.h2o_file_send(req, req.value.res.status, req.value.res.reason, out_url, out_mime, 0)
         else
-            context.response.status_code = 404
+            req.value.res.status = 404
+      		req.value.res.reason = "Not Found"
+      		h2o_start_response(req, generator)
+      		h2o_send(req, NULL, 0, LibH2o::H2oSendState::H2OSendStateFinal)
         end
       end
       0
@@ -108,7 +131,7 @@ class H2oFfeadCppCry < H2o
     pointerof(addr).clear
     addr.sin_family = LibC::AF_INET
     addr.sin_addr.s_addr = 0 # 0x100007f # b32(0x7f000001)
-    addr.sin_port = @port   # b16(7890)
+    addr.sin_port = b16(8080)   # b16(7890)
 
     option = 1
     if (fd = socket(LibC::AF_INET, LibC::SOCK_STREAM | LibC::O_NONBLOCK | LibC::O_CLOEXEC, 0)) == -1 ||
@@ -142,12 +165,12 @@ class H2oFfeadCppCry < H2o
   end
 
   def run : Void
-    OptionParser.parse! do |parser|
-      parser.banner = ""
-      parser.on("-f DIR", "--ffead-cpp-dir=DIR", "ffead-cpp directory") { |dir| @ffead_cpp_directory = dir }
-      parser.on("-t PORT", "--to=PORT", "Specifies the port") { |port| @port = port.to_i }
-    end
-
+  	#OptionParser.parse! do |parser|
+	#  parser.banner = ""
+	#  parser.on("-f DIR", "--ffead-cpp-dir=DIR", "ffead-cpp directory") { |dir| @ffead_cpp_directory = dir }
+	#  parser.on("-t PORT", "--to=PORT", "Specifies the port") { |port| @port = port.to_i }
+	#end
+	
     LibFfeadCpp.ffead_cpp_bootstrap(@ffead_cpp_directory, @ffead_cpp_directory.bytesize , 13)
     LibFfeadCpp.ffead_cpp_init()
 
@@ -155,7 +178,7 @@ class H2oFfeadCppCry < H2o
     @config.server_name = h2o_iovec_init("h2o-cry")
 
     hostconf = h2o_config_register_host(pointerof(@config), h2o_iovec_init("default"), 65535)
-    register_handler(hostconf, "/*", ffeadcpphandler)
+    register_handler(hostconf, "/", ffeadcpphandler)
 
     h2o_context_init(pointerof(@ctx), @loop, pointerof(@config))
 
@@ -172,4 +195,4 @@ class H2oFfeadCppCry < H2o
   end
 end
 
-H2oFfeadCppCry.new.run
+H2oFfeadCppCry.run

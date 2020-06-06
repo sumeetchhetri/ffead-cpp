@@ -1,1 +1,1 @@
-./gnet-ffead-cpp -server_dir /root/ffead-cpp-4.0 -bind :8080 -prefork
+./gnet-ffead-cpp --server_directory=/root/ffead-cpp-3.0 --port=8080

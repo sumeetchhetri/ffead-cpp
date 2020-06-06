@@ -120,26 +120,26 @@ pipeline:
 
 	fresp := C.ffead_cpp_handle_go_2(srvStr, srvStrLen, methStr, methStrLen, pathStr, pathStrLen, 1,
 		hdrsStr, hdrsStrLen, bodyStr, bodyStrLen, &scode, &outURL, &outURLlen, &outMime, &outMimelen, 
-		&outHeaders, &outHeadersLen, &outBody, &outBodyLen
+		&outHeaders, &outHeadersLen, &outBody, &outBodyLen,
 	)
 
 	if scode > 0 {
-		out = append(out, C.GoBytes(unsafe.Pointer(outHeaders), C.int(outHeadersLen)))
-		out = time.Now().AppendFormat(out, "Mon, 02 Jan 2006 15:04:05 GMT\r\n\r\n")
-		out = append(out, C.GoBytes(unsafe.Pointer(outBody), C.int(outBodyLen)))
+		out = append(out, C.GoBytes(unsafe.Pointer(outHeaders), C.int(outHeadersLen))...)
+		out = time.Now().AppendFormat(out, "Date: Mon, 02 Jan 2006 15:04:05 GMT\r\n\r\n")
+		out = append(out, C.GoBytes(unsafe.Pointer(outBody), C.int(outBodyLen))...)
 	} else {
 		urlPath := C.GoStringN(outURL, C.int(outURLlen))
 		if _, err := os.Stat(urlPath); err == nil {
 			content, err := ioutil.ReadFile(urlPath)
 			if err != nil {
-				out = append(out, "HTTP/1.1 404 Not Found\r\nServer: gnet\r\nDate: "...)
+				out = append(out, "HTTP/1.1 404 Not Found\r\nConnection: close\r\nServer: gnet\r\nDate: "...)
 				out = time.Now().AppendFormat(out, "Mon, 02 Jan 2006 15:04:05 GMT\r\n\r\n")
 				log.Println(err)
 			} else {
 				out = appendResp(out, content)
 			}
 		} else {
-			out = append(out, "HTTP/1.1 404 Not Found\r\nServer: gnet\r\nDate: "...)
+			out = append(out, "HTTP/1.1 404 Not Found\r\nConnection: close\r\nServer: gnet\r\nDate: "...)
 			out = time.Now().AppendFormat(out, "Mon, 02 Jan 2006 15:04:05 GMT\r\n\r\n")
 		}
 	}

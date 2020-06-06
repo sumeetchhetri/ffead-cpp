@@ -8,7 +8,6 @@
 *.a
 *.lai
 **/CHS
-ffead-cpp-*/*
 include/*
 src/autotools/bins/bin/*
 src/autotools/libs/lib/*
@@ -64,3 +63,4 @@ lang-server-backends/java/wizzardo-http/target
 **/CMakeScripts
 **/.build
 **/.swiftpm
+/Debug/

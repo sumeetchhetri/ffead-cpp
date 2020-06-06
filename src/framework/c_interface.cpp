@@ -168,9 +168,9 @@ void* ffead_cpp_handle_c_1(const ffead_request *request, int* scode, const char*
 }
 
 /*
-    Used by Crystal-Http/H2O (Crystal)
+    Used by Crystal-Http/H2O (Crystal) and picov (vlang)
 */
-void* ffead_cpp_handle_crystal_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
+void* ffead_cpp_handle_crystal_picov_1(const ffead_request3 *request, int* scode, const char** smsg, size_t *smsg_len,
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 )

@@ -337,7 +337,7 @@ static const char *parse_headers(const char *buf, const char *buf_end, struct ph
         headers[*num_headers].value = value;
         headers[*num_headers].value_len = value_end - value;
         //Code added by Sumeet Chhetri for content-length lookup
-        if(strncasecmp(headers[*num_headers].name, "content-length", headers[*num_headers].name_len)==0) {
+        if(headers[*num_headers].name_len==14 && strncasecmp(headers[*num_headers].name, "content-length", headers[*num_headers].name_len)==0) {
         	std::string_view sv(headers[*num_headers].value, headers[*num_headers].value_len);
 			*content_length = CastUtil::toInt(std::string(sv));
         }

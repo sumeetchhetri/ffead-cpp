@@ -64,7 +64,7 @@ Quickstart (Using cmake)
 - cmake -DMOD_SDORM_MONGO=on .
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ffead-cpp-3.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
@@ -77,7 +77,7 @@ Quickstart (Using autoconf)
 - make install (Build ffead-cpp)
 - Sip some coffee
 - make build-apps (Build the sample applications in web + generate ffead-cpp binary)
-- cd ffead-cpp-3.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 

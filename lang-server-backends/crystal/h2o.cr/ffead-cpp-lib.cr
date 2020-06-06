@@ -25,7 +25,7 @@ lib LibFfeadCpp
     fun ffead_cpp_bootstrap(srv: LibC::Char*, srv_len: LibC::SizeT , stype: LibC::Int)
     fun ffead_cpp_init()
     fun ffead_cpp_cleanup()
-    fun ffead_cpp_handle_crystal_1(request: FfeadRequest*, scode: LibC::Int*, smsg: LibC::Char**, smsg_len: LibC::SizeT*,
+    fun ffead_cpp_handle_crystal_picov_1(request: FfeadRequest*, scode: LibC::Int*, smsg: LibC::Char**, smsg_len: LibC::SizeT*,
         out_mime: LibC::Char**, out_mime_len: LibC::SizeT*, out_url: LibC::Char**, out_url_len: LibC::SizeT*,
         out_headers: PhrHeaderFcp*, out_headers_len: LibC::SizeT*,
         out_body: LibC::Char**, out_body_len: LibC::SizeT*

@@ -1,0 +1,4 @@
+g++ -c -o c_interface.o c_interface.c -fPIC
+g++ -shared -o libffead-framework.so c_interface.o
+#For crystal h2o
+CRYSTAL_PATH=lib:/usr/share/crystal/src crystal build --prelude=empty --no-debug --release -Dgc_none -Dfiber_none -Dexcept_none -Dhash_none -Dtime_none -Dregex_none -Dextreme h2o-evloop-ffead-cpp.cr --link-flags="-Wl,-s $PWD/h2o.o -DH2O_USE_LIBUV=0" -o h2o-evloop-ffead-cpp.out
