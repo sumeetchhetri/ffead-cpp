@@ -252,7 +252,7 @@ fn main() {
 
     //let not_found_catcher = Catcher::new(404, not_found_handler);
     let config = Config::build(Environment::Staging)
-        .address("127.0.0.1")
+        .address("0.0.0.0")
         .port(port)
         .finalize().unwrap();
     rocket::custom(config).mount("/", CustomHandler::new()).launch();

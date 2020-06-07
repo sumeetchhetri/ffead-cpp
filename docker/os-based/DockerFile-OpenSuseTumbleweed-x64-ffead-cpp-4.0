@@ -25,10 +25,10 @@ RUN rm -rf /tmp/libcuckoo-master
 
 #Install ffead-cpp
 WORKDIR /tmp
-RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
-RUN unzip master.zip
-RUN rm -f master.zip
-RUN mv ffead-cpp-master ffead-cpp-src
+RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/v4.0.zip
+RUN unzip v4.0.zip
+RUN mv ffead-cpp-4.0 ffead-cpp-src
+RUN rm -f v4.0.zip
 WORKDIR /tmp/ffead-cpp-src
 RUN cmake -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 RUN make install -j4

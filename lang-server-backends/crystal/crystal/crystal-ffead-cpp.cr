@@ -80,9 +80,9 @@ class HttpServerFfeadCppCry
                 #puts "#{out_url} #{out_mime}"
                 if File.exists?(out_url)
                     file = File.open out_url, "rb"
-                    bytes_to_read = file.read_byte.not_nil!
-                    data = Bytes.new(bytes_to_read)
-                    file.read_fully(data)
+                    data = Bytes.new(file.size.to_u)
+                    file.read(data)
+                    file.close
                     context.response.content_type = out_mime
                     context.response.write(data)
                 else

@@ -111,17 +111,16 @@ fn handle_conn(conn net.Socket, dt DateStore) {
 		conn: conn
 		rs_date: dt.date
 	}
-	vweb.rq_headers += first_line + "\r\n"
+	vweb.rq_headers += first_line
 
 	mut body_len := 0
 	mut j := 0
 	for {
-		line := conn.read_line()
-		sline := strip(line)
-		if sline == '' {
+		sline := conn.read_line()
+		if sline == '\r\n' {
 			break
 		} else {
-			vweb.rq_headers += sline + "\r\n"
+			vweb.rq_headers += sline
 			if sline.starts_with('Content-Length') {
 				body_len = sline.all_after(': ').int()
 			} else if sline.starts_with('content-length') {
@@ -133,6 +132,8 @@ fn handle_conn(conn net.Socket, dt DateStore) {
 			break
 		}
 	}
+	
+	vweb.rq_headers += "\r\n"
 
 	if body_len > 0 {
 		buf := [1024]byte
@@ -155,9 +156,6 @@ fn handle_conn(conn net.Socket, dt DateStore) {
 	}
 
 	$if debug {
-		println('req.method = $vals[0]')
-		println('req.path = $vals[1]')
-		println('req.version = $vals[2]')
 		println('req.headers = $vweb.rq_headers')
 		println('req.body = $vweb.rq_body')
 	}

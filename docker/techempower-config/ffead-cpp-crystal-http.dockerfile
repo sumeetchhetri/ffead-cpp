@@ -1,8 +1,6 @@
 FROM buildpack-deps:bionic
 
 ENV IROOT=/installs
-ENV FFEAD_CPP_PATH=${IROOT}/ffead-cpp-4.0
-ENV PATH=${FFEAD_CPP_PATH}:${PATH}
 
 RUN mkdir /installs
 
@@ -16,7 +14,7 @@ RUN ./install_ffead-cpp-dependencies.sh
 
 WORKDIR /
 
-RUN ./install_ffead-cpp-framework.sh crystal-http
+RUN ./install_ffead-cpp-framework.sh
 
 WORKDIR /
 
@@ -26,6 +24,20 @@ WORKDIR /
 
 RUN ./install_ffead-cpp-nginx.sh
 
+RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/libinter.so /usr/local/lib/libdinter.so
+RUN ln -s ${IROOT}/ffead-cpp-4.0/lib/libte_benchmark_um.so /usr/local/lib/libte_benchmark_um.so
+RUN ln -s ${IROOT}/ffead-cpp-4.0/lib/libffead-modules.so /usr/local/lib/libffead-modules.so
+RUN ln -s ${IROOT}/ffead-cpp-4.0/lib/libffead-framework.so /usr/local/lib/libffead-framework.so
+RUN ln -s ${IROOT}/ffead-cpp-4.0/lib/libinter.so /usr/local/lib/libinter.so
+RUN ln -s ${IROOT}/ffead-cpp-4.0/lib/libdinter.so /usr/local/lib/libdinter.so
+RUN ldconfig
+
+RUN curl -sL "https://keybase.io/crystal/pgp_keys.asc" | apt-key add - \
+	&& echo "deb https://dist.crystal-lang.org/apt crystal main" | tee /etc/apt/sources.list.d/crystal.list \
+	&& apt-get update -y && apt install -y crystal
+WORKDIR ${IROOT}/lang-server-backends/crystal/crystal
+RUN crystal build --release --no-debug crystal-ffead-cpp.cr -o crystal-ffead-cpp.out && cp crystal-ffead-cpp.out $IROOT/
+
 WORKDIR /
 
-CMD ./run_ffead.sh emb mongo
+CMD ./run_ffead.sh ffead-cpp-4.0 crystal-http

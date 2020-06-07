@@ -32,6 +32,7 @@
 #cmakedefine USE_DEVPOLL @USE_DEVPOLL@
 #cmakedefine USE_POLL @USE_POLL@
 #cmakedefine USE_SELECT @USE_SELECT@
+#cmakedefine USE_WIN_IOCP @USE_WIN_IOCP@
 
 #cmakedefine HAVE_SSLINC @HAVE_SSLINC@
 #cmakedefine HAVE_SSLLIB @HAVE_SSLLIB@
@@ -52,8 +53,8 @@
 #cmakedefine OS_BSD @OS_BSD@
 #cmakedefine OS_SOLARIS @OS_SOLARIS@
 #cmakedefine OS_LINUX @OS_LINUX@
-#cmakedefine OS_MINGW @OS_LINUX@
-#cmakedefine OS_DARWIN @OS_LINUX@
+#cmakedefine OS_MINGW @OS_MINGW@
+#cmakedefine OS_DARWIN @OS_DARWIN@
 #cmakedefine SRV_EMB @SRV_EMB@
 #cmakedefine SRV_CINATRA @SRV_CINATRA@
 #cmakedefine SRV_LITHIUM @SRV_LITHIUM@
@@ -77,9 +78,4 @@
 
 #ifdef APPLE
 #define OS_DARWIN 1
-#endif
-
-#ifdef MINGW
-#undef USE_SELECT
-#define USE_MINGW_SELECT 1
 #endif

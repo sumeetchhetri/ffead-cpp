@@ -12,6 +12,7 @@ rm -rf ffead-cpp-4.0/
 if [ ! -d "drogon" ]
 then
 	git clone --recurse-submodules https://github.com/an-tao/drogon
+	cd drogon
 	mkdir build
 	cd build
 	cmake ..

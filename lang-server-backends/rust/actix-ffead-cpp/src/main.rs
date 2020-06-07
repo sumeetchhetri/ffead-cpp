@@ -219,7 +219,7 @@ async fn main() -> std::io::Result<()> {
     }
 	println!("Initializing ffead-cpp end...");
 
-    let addr_str = format!("{}:{}", "127.0.0.1", arg1);
+    let addr_str = format!("{}:{}", "0.0.0.0", arg1);
     HttpServer::new(|| App::new().route("/*", web::to(handle)))
         .bind(addr_str)?
         .run()

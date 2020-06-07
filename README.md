@@ -39,11 +39,20 @@ Features
     - cinatra
     - lithium
     - drogon
-    - libreactor
+    - libreactor (c)
     - vweb (vlang)
+    - picov (vlang)
     - actix (rust)
     - hyper (rust)
+    - thruster (rust)
     - rocket (rust)
+    - h2o.cr (crystal)
+    - crystal-http (crystal)
+    - fasthttp (golang)
+    - gnet (golang)
+    - firenio (java)
+    - rapidoid (java)
+    - wizzardo-http (java)
 - Web Socket Support
 - Advanced ORM - SDORM (sql/monogo)
 - Cache API (memcached/redis)

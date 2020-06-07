@@ -11,6 +11,30 @@
 
 #include "setup.h"
 
+static reactor_vector reactor_http_message_date_1(reactor_http *http)
+{
+	time_t t;
+	struct tm tm;
+	static const char *days[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	static const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+	static __thread uint64_t now, last = 0;
+	static __thread char date[30] = "Thu, 01 Jan 1970 00:00:00 GMT";
+
+	(void) http;
+	now = reactor_core_now();
+	if (now - last >= 1000000000)
+	{
+		last = now;
+		(void) time(&t);
+		(void) gmtime_r(&t, &tm);
+		(void) strftime(date, 30, "---, %d --- %Y %H:%M:%S GMT", &tm);
+		memcpy(date, days[tm.tm_wday], 3);
+		memcpy(date + 8, months[tm.tm_mon], 3);
+	}
+
+	return (reactor_vector){date, 29};
+}
+
 static reactor_status handle(reactor_event *event)
 {
 	reactor_server_session *session = (reactor_server_session *) event->data;
@@ -61,7 +85,7 @@ static reactor_status handle(reactor_event *event)
 			response.headers.header[i].value.size = out_headers[i].value_len;
 		}
 		response.headers.header[out_headers_len].name = reactor_vector_string("Date");
-		response.headers.header[out_headers_len].value = reactor_http_message_date(NULL);
+		response.headers.header[out_headers_len].value = reactor_http_message_date_1(NULL);
 		response.headers.count = out_headers_len;
 		response.code = scode;
 		response.reason.base = (void*)smsg;
@@ -105,7 +129,10 @@ static reactor_status handle(reactor_event *event)
 				response.headers.header[2].value.base = (void*)out_headers[1].value;
 				response.headers.header[2].value.size = out_headers[1].value_len;
 				response.headers.header[3].name = reactor_vector_string("Date");
-				response.headers.header[3].value = reactor_http_message_date(NULL);
+				response.headers.header[3].value = reactor_http_message_date_1(NULL);
+				response.code = 200;
+				response.reason.base = (void*)"OK";
+				response.reason.size = 2;
 				reactor_server_respond(session, &response);
 			} else {
 				reactor_server_not_found(session);

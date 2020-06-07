@@ -228,7 +228,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     }
 	println!("Initializing ffead-cpp end...");
 
-    let addr_str = format!("{}:{}", "127.0.0.1", arg1);
+    let addr_str = format!("{}:{}", "0.0.0.0", arg1);
 
     let make_svc = make_service_fn(|_| {
         async {

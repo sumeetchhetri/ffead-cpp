@@ -32,11 +32,14 @@ RUN ln -s ${IROOT}/ffead-cpp-4.0/lib/libinter.so /usr/local/lib/libinter.so
 RUN ln -s ${IROOT}/ffead-cpp-4.0/lib/libdinter.so /usr/local/lib/libdinter.so
 RUN ldconfig
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-WORKDIR ${IROOT}/lang-server-backends/rust/rocket-ffead-cpp/
-ENV PATH="/root/.cargo/bin:${PATH}"
-RUN rustup default nightly && cargo build --release && cp target/release/rocket-ffead-cpp $IROOT/
+WORKDIR ${IROOT}
+RUN apt update -y && apt install -y git
+RUN git clone https://github.com/vlang/v
+WORKDIR ${IROOT}/v
+RUN make && ./v symlink
+WORKDIR ${IROOT}/lang-server-backends/v/pico.v
+RUN chmod +x *.sh && ./build.sh && cp main $IROOT/
 
 WORKDIR /
 
-CMD ./run_ffead.sh ffead-cpp-4.0 rust-rocket
+CMD ./run_ffead.sh ffead-cpp-4.0 v-picov

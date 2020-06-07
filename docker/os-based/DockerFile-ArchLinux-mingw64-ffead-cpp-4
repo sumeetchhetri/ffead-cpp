@@ -1,0 +1,77 @@
+FROM archlinux/base
+
+RUN pacman-key --init
+RUN pacman-key --populate archlinux
+RUN pacman -Sy archlinux-keyring pacman --noconfirm --noprogressbar --needed --quiet
+RUN pacman-db-upgrade
+RUN echo "[multilib]" >> /etc/pacman.conf \
+    && echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf \
+    && pacman -Sy --noprogressbar
+
+RUN pacman -Su --noconfirm --noprogressbar --quiet
+RUN pacman -Sy --noconfirm --noprogressbar autoconf-archive make clang make git binutils patch base-devel wget
+
+COPY yay-aur.sh /
+RUN chmod +x /yay-aur.sh
+RUN /yay-aur.sh
+
+RUN pacman -Syyu --noconfirm
+
+#Add martchus.no-ip.biz repo for mingw binaries
+RUN echo "[ownstuff]" >> /etc/pacman.conf \
+    && echo "SigLevel = Optional TrustAll" >> /etc/pacman.conf \
+    && echo "Server = https://martchus.no-ip.biz/repo/arch/\$repo/os/\$arch " >> /etc/pacman.conf \
+    && pacman -Sy
+
+#RUN su docker -c 'yay -S --needed --noprogressbar --needed --noconfirm mingw-w64-gcc'
+#RUN su docker -c 'yay -S --needed --noprogressbar --needed --noconfirm mingw-w64-make'
+#RUN su docker -c 'yay -S --needed --noprogressbar --needed --noconfirm mingw-w64-configure'
+#RUN su docker -c 'yay -S --needed --noprogressbar --needed --noconfirm mingw-w64-pkg-config'
+#RUN su docker -c 'yay -S --needed --noprogressbar --needed --noconfirm mingw-w64-curl'
+#RUN su docker -c 'yay -S --needed --noprogressbar --needed --noconfirm mingw-w64-openssl'
+#RUN su docker -c 'yay -S --needed --noprogressbar --needed --noconfirm mingw-w64-unixodbc'
+#RUN su docker -c 'yay -S --needed --noprogressbar --needed --noconfirm mingw-w64-zlib'
+#RUN su docker -c 'yay -S --needed --noprogressbar --needed --noconfirm mingw-w64-jsoncpp'
+
+RUN pacman -S --noconfirm --noprogressbar mingw-w64-gcc mingw-w64-make mingw-w64-configure \
+	mingw-w64-pkg-config mingw-w64-curl mingw-w64-openssl mingw-w64-zlib  mingw-w64-jsoncpp
+
+RUN pacman -S --noconfirm --noprogressbar mingw-w64-crt mingw-w64-headers mingw-w64-readline
+RUN su docker -c 'yay -S --needed --noprogressbar --needed --noconfirm mingw-w64-unixodbc'
+RUN pacman -S --noconfirm --noprogressbar unzip
+
+#Install libcuckoo headers
+WORKDIR /tmp
+RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
+RUN unzip master.zip
+RUN rm -f master.zip
+WORKDIR /tmp/libcuckoo-master
+RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
+RUN make install
+WORKDIR /tmp
+RUN rm -rf /tmp/libcuckoo-master
+
+#Install ffead-cpp
+WORKDIR /tmp
+RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/v4.0.zip
+RUN unzip v4.0.zip
+RUN mv ffead-cpp-4.0 ffead-cpp-src
+RUN rm -f v4.0.zip
+WORKDIR /tmp/ffead-cpp-src
+RUN cmake -DCMAKE_TOOLCHAIN_FILE=mingw-64-toolchain.cmake -DSRV_EMB=on .
+RUN make install -j4
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
+WORKDIR /tmp
+RUN rm -rf /tmp/ffead-cpp-src
+
+WORKDIR /opt
+
+COPY *.sh  ./
+
+RUN chmod +x install_ffead-cpp-4.0.sh
+RUN ./install_ffead-cpp-4.0.sh
+
+WORKDIR /opt/ffead-cpp-4.0
+
+RUN chmod +x server.sh
+CMD ./server.sh

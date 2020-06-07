@@ -12,6 +12,8 @@ rm -rf ffead-cpp-4.0/
 if [ ! -d "cinatra" ]
 then
 	git clone https://github.com/sumeetchhetri/cinatra.git
+	cd cinatra
+	git checkout sum_master
 fi
 
 

@@ -38,7 +38,7 @@ struct C.ffead_request3_t {}
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 */
-fn ffead_cpp_handle_crystal_picov_1(&C.ffead_request3, &int, &string, u64, &string, u64, &string, u64, &C.phr_header, &u64, &string, &u64) voidptr
+fn ffead_cpp_handle_crystal_picov_1(&C.ffead_request3, &int, &string, &u64, &string, &u64, &string, &u64, &C.phr_header, &u64, &string, &u64) voidptr
 
 fn ffead_cpp_resp_cleanup(voidptr)
 
@@ -49,7 +49,10 @@ fn cpy_str_1(dst byteptr, src string) int {
 }
 
 fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
-	println('${req.method} ${req.path} ${req.num_headers}')
+	$if debug {
+		println('${req.method} ${req.path} ${req.num_headers}')
+	}
+	
 	mut j := 0
 	for {
 		if j == req.num_headers {
@@ -57,7 +60,9 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 		}
 		k := tos(req.headers[j].name, req.headers[j].name_len)
 		v := tos(req.headers[j].value, req.headers[j].value_len)
-		println('${k} ${v}')
+		$if debug {
+			println('${k} ${v}')
+		}
 		j = j+1
 	}
 	
