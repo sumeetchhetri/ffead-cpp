@@ -72,6 +72,8 @@ class HttpServerFfeadCppCry
                     context.response.headers[k] = v
                     counter += 1
                 end
+                context.response.headers["Server"] = "Crystal"
+                context.response.headers["Date"] = HTTP.format_time(Time.utc)
                 context.response.status_code = scode
                 context.response.print(body)
             else
@@ -83,9 +85,13 @@ class HttpServerFfeadCppCry
                     data = Bytes.new(file.size.to_u)
                     file.read(data)
                     file.close
+                    context.response.headers["Server"] = "Crystal"
+                    context.response.headers["Date"] = HTTP.format_time(Time.utc)
                     context.response.content_type = out_mime
                     context.response.write(data)
                 else
+                    context.response.headers["Server"] = "Crystal"
+                    context.response.headers["Date"] = HTTP.format_time(Time.utc)
                     context.response.status_code = 404
                 end
             end
