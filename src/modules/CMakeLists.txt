@@ -61,7 +61,7 @@ if(MINGW)
 	    "wepoll/*.cpp"
 	)
 	install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/wepoll/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
-endif(MOD_JOBS)
+endif(MINGW)
 
 file(GLOB comm_module_sources
     "common/*.h"

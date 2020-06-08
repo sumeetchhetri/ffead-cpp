@@ -32,6 +32,13 @@
 #include "exception"
 #include <stdexcept>
 
+#ifdef OS_MINGW
+struct flock {
+	int l_type;
+	int l_len;
+};
+#endif
+
 class Mutex {
 protected:
 	pthread_mutex_t mut;

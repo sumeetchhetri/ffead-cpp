@@ -102,7 +102,7 @@ class HttpServerFfeadCppCry
         LibFfeadCpp.ffead_cpp_bootstrap(@ffead_cpp_directory, @ffead_cpp_directory.bytesize , 13)
         LibFfeadCpp.ffead_cpp_init()
 
-        address = @server.bind_tcp "0.0.0.0" @port
+        address = @server.bind_tcp "0.0.0.0", @port
         puts "ffead-cpp directory #{@ffead_cpp_directory}"
         puts "Listening on http://#{address}"
         @server.listen

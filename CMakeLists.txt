@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.8.2)
 project (ffead-cpp-4.0)
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
+include(CheckSymbolExists)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_SKIP_BUILD_RPATH true)

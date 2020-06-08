@@ -41,14 +41,18 @@
 #include <sys/socket.h>
 #include <sys/uio.h>
 #elif defined(IS_SENDFILE)
+#ifndef OS_MINGW
 #include <sys/sendfile.h>
+#endif
 #endif
 #include "vector"
 #include <libcuckoo/cuckoohash_map.hh>
 #include "concurrentqueue.h"
 #include "map"
 #include "Task.h"
+#ifndef OS_MINGW
 #include <netinet/tcp.h>
+#endif
 
 class SocketInterface;
 

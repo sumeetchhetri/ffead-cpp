@@ -35,7 +35,7 @@ fi
 
 if [ "$1" = "drogon" ]
 then
-	apt install -y libjsoncpp-dev uuid-dev
+	apt install -y libjsoncpp-dev uuid-dev libsqlite3-dev
 	SRV_TYPE=SRV_DROGON
 	git clone --recurse-submodules https://github.com/an-tao/drogon
 	cd  drogon

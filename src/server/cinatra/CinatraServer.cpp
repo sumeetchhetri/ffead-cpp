@@ -121,8 +121,10 @@ void CinatraServer::runServer(std::string ip_addr, std::string port, std::vector
 				status_type st = static_cast<status_type>(respo.getCode());
 				std::string& data = respo.generateNginxApacheResponse();
 				int contentLength = data.length();
+				response.enable_response_time(true);
 				response.set_status_and_content(st, std::move(data));
 			} else {
+				response.enable_response_time(true);
 				if(access(req.getUrl().c_str(), F_OK) != -1) {
 					response.set_static_file_abs_url(req.getUrl());
 				} else {
