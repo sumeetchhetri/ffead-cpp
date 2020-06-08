@@ -86,7 +86,9 @@ static reactor_status handle(reactor_event *event)
 		}
 		response.headers.header[out_headers_len].name = reactor_vector_string("Date");
 		response.headers.header[out_headers_len].value = reactor_http_message_date_1(NULL);
-		response.headers.count = out_headers_len;
+		response.headers.header[out_headers_len+1].name = reactor_vector_string("Server");
+		response.headers.header[out_headers_len+1].value = reactor_vector_string("libreactor");
+		response.headers.count = out_headers_len+2;
 		response.code = scode;
 		response.reason.base = (void*)smsg;
 		response.reason.size = smsg_len;
@@ -130,14 +132,27 @@ static reactor_status handle(reactor_event *event)
 				response.headers.header[2].value.size = out_headers[1].value_len;
 				response.headers.header[3].name = reactor_vector_string("Date");
 				response.headers.header[3].value = reactor_http_message_date_1(NULL);
+				response.headers.header[4].name = reactor_vector_string("Server");
+				response.headers.header[4].value = reactor_vector_string("libreactor");
+				response.headers.count = 5;
 				response.code = 200;
 				response.reason.base = (void*)"OK";
 				response.reason.size = 2;
 				reactor_server_respond(session, &response);
 			} else {
+				response.headers.header[0].name = reactor_vector_string("Date");
+				response.headers.header[0].value = reactor_http_message_date_1(NULL);
+				response.headers.header[1].name = reactor_vector_string("Server");
+				response.headers.header[1].value = reactor_vector_string("libreactor");
+				response.headers.count = 2;
 				reactor_server_not_found(session);
 			}
 		} else {
+			response.headers.header[0].name = reactor_vector_string("Date");
+			response.headers.header[0].value = reactor_http_message_date_1(NULL);
+			response.headers.header[1].name = reactor_vector_string("Server");
+			response.headers.header[1].value = reactor_vector_string("libreactor");
+			response.headers.count = 2;
 			reactor_server_not_found(session);
 		}
 	}

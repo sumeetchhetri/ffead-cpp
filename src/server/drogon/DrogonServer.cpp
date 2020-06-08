@@ -92,7 +92,7 @@ void DrogonHttpHandler::handle(const HttpRequestPtr &requestptr, std::function<v
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {
 			resp.get()->addHeader(it->first, it->second);
 		}
-
+		resp.get()->inferContentTypeFromHeader();
 		drogon::HttpStatusCode st = static_cast<drogon::HttpStatusCode>(respo.getCode());
 		resp.get()->setStatusCode(st);
 		std::string& data = respo.generateNginxApacheResponse();
