@@ -90,6 +90,7 @@ public:
 	virtual ~Http2Handler();
 	const std::string& getWebpath() const;
 	std::string getMimeType(const std::string& ext);
+	bool isEmbedded();
 };
 
 #endif /* HTTP2HANDLER_H_ */

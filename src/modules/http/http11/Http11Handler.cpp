@@ -265,3 +265,7 @@ void Http11Handler::onClose(){
 		handler->onClose();
 	}
 }
+
+bool Http11Handler::isEmbedded() {
+	return true;
+}

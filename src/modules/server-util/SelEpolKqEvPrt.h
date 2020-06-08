@@ -131,6 +131,7 @@ public:
 	void onClose(){}
 	void addHandler(SocketInterface* handler){}
 	int getType(void* context) {return -1;}
+	bool isEmbedded(){return true;}
 };
 
 class SelEpolKqEvPrt : public EventHandler {

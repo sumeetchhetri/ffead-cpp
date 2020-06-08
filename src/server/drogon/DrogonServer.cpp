@@ -229,3 +229,7 @@ int DrogonSocketHandler::writeWsData(void *d) {
 	}
 	return 1;
 }
+
+bool DrogonSocketHandler::isEmbedded() {
+	return false;
+}

@@ -144,6 +144,7 @@ public:
 	virtual void onOpen()=0;
 	virtual void onClose()=0;
 	virtual void addHandler(SocketInterface* handler)=0;
+	virtual bool isEmbedded()=0;
 };
 
 #endif /* SOCKETINTERFACE_H_ */

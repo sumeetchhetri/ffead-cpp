@@ -243,3 +243,7 @@ void Http11WebSocketHandler::onClose(){
 		h->onClose(getAddress());
 	}
 }
+
+bool Http11WebSocketHandler::isEmbedded() {
+	return true;
+}

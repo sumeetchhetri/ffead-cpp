@@ -56,6 +56,7 @@ public:
 	std::string getAddress();
 	bool isClosed();
 	int writeWsData(void* d);
+	bool isEmbedded();
 };
 
 class CinatraServer {

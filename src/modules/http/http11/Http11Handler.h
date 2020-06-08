@@ -55,6 +55,7 @@ public:
 	Http11Handler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& webpath, const int& chunkSize,
 			const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
 	virtual ~Http11Handler();
+	bool isEmbedded();
 };
 
 #endif /* HTTP11HANDLER_H_ */

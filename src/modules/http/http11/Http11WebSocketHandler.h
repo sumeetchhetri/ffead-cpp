@@ -68,6 +68,7 @@ public:
 	bool writeResponse(void* req, void* res, void* context, std::string& data, int reqPos);
 	Http11WebSocketHandler(const SOCKET& fd, SSL* ssl, BIO* io, const std::string& url, const bool& isServer);
 	virtual ~Http11WebSocketHandler();
+	bool isEmbedded();
 };
 
 #endif /* HTTP11WEBSOCKETHANDLER_H_ */

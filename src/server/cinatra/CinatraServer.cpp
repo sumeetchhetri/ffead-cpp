@@ -271,3 +271,7 @@ bool CinatraSocketHandler::isClosed() {
 	return pconn->has_close();
 #endif
 }
+
+bool CinatraSocketHandler::isEmbedded() {
+	return false;
+}
