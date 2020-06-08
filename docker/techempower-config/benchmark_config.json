@@ -485,6 +485,25 @@
 			"versus": "",
 			"tags": []
 		},
+		"v-picov": {
+			"json_url": "/te-benchmark-um/json",
+			"plaintext_url": "/te-benchmark-um/plaintext",
+			"port": 8080,
+			"approach": "Realistic",
+			"classification": "Fullstack",
+			"database": "None",
+			"framework": "ffead-cpp",
+			"language": "C++",
+			"orm": "Full",
+			"platform": "None",
+			"webserver": "vweb",
+			"os": "Linux",
+			"database_os": "Linux",
+			"display_name": "ffead-cpp-v-vweb",
+			"notes": "",
+			"versus": "",
+			"tags": []
+		},
 		"java-firenio": {
 			"json_url": "/te-benchmark-um/json",
 			"plaintext_url": "/te-benchmark-um/plaintext",

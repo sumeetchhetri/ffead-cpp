@@ -39,6 +39,8 @@ then
 	SRV_TYPE=SRV_DROGON
 	git clone --recurse-submodules https://github.com/an-tao/drogon
 	cd  drogon
+	git checkout v1.0.0-beta17
+	git checkout -b v1.0.0-beta17
 	mkdir build
 	cd build
 	cmake ..
