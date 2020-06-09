@@ -4,9 +4,12 @@ version = "0.1.0"
 authors = ["Sumeet Chhetri <sumeet.chhetri@gmail.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 libc = "0.2.69"
 futures = "0.3.1"
 rocket = "0.4.4"
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1
