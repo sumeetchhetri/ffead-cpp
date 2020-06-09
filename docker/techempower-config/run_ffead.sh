@@ -125,6 +125,7 @@ fi
 
 if [ "$2" = "nginx" ]
 then
+	mkdir ${IROOT}/ffead-cpp-src
 	if [ "$3" = "mysql" ] || [ "$3" = "postgresql" ]
 	then
 		sed -i 's|/installs/ffead-cpp-4.0/|'/installs/ffead-cpp-4.0-sql/'|g' ${IROOT}/nginxfc/conf/nginx.conf

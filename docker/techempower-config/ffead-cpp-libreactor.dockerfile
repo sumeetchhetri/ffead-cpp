@@ -17,7 +17,7 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 	ldconfig
 
 WORKDIR ${IROOT}
-RUN apt-get install -y --no-install-recommends build-essential libjansson-dev wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y --no-install-recommends build-essential libjansson-dev wget && rm -rf /var/lib/apt/lists/*
 RUN wget -q https://github.com/fredrikwidlund/libdynamic/releases/download/v1.3.0/libdynamic-1.3.0.tar.gz \
 	&& tar fvxz libdynamic-1.3.0.tar.gz && cd libdynamic-1.3.0 && ./configure --prefix=/usr AR=gcc-ar NM=gcc-nm RANLIB=gcc-ranlib \
 	&& make install && rm -rf ${IROOT}/libdynamic-1.3.0 && rm -f ${IROOT}/libdynamic-1.3.0.tar.gz && \
