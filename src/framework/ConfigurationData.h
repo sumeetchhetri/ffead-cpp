@@ -293,8 +293,9 @@ class ConfigurationData {
 	friend class ServerInitUtil;
 public:
 	static void enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
-			bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra,
-			bool enableScripts, bool enableSoap, bool enableLogging);
+		bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra,
+		bool enableScripts, bool enableSoap, bool enableLogging, bool enableExtControllers, bool enableJobs,
+		bool enableStaticResponses);
 	static Reflector* getReflector();
 	static int getProcessId();
 	static ClassInfo* getClassInfo(const std::string&, const std::string& app= "");

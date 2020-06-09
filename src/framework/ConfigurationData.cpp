@@ -30,7 +30,7 @@ Reflector* ConfigurationData::getReflector() {
 
 void ConfigurationData::enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
 		bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra, bool enableScripts,
-		bool enableSoap, bool enableLogging) {
+		bool enableSoap, bool enableLogging, bool enableExtControllers, bool enableJobs, bool enableStaticResponses) {
 	getInstance()->enableCors = enableCors;
 	getInstance()->enableSecurity = enableSecurity;
 	getInstance()->enableFilters = enableFilters;
@@ -43,6 +43,9 @@ void ConfigurationData::enableFeatures(bool enableCors, bool enableSecurity, boo
 	getInstance()->enableScripts = enableScripts;
 	getInstance()->enableSoap = enableSoap;
 	getInstance()->enableLogging = enableLogging;
+	getInstance()->enableExtControllers = enableExtControllers;
+	getInstance()->enableJobs = enableJobs;
+	getInstance()->enableStaticResponses = enableStaticResponses;
 }
 
 ConfigurationData::ConfigurationData() {
@@ -53,6 +56,7 @@ ConfigurationData::ConfigurationData() {
 	enableSecurity = false;
 	enableFilters = false;
 	enableControllers = false;
+	enableExtControllers = false;
 	enableContMpg = false;
 	enableContPath = false;
 	enableContExt = false;
@@ -61,6 +65,8 @@ ConfigurationData::ConfigurationData() {
 	enableScripts = false;
 	enableSoap = false;
 	enableLogging = false;
+	enableJobs = false;
+	enableStaticResponses = false;
 	serverType = SERVER_BACKEND::EMBEDDED;
 }
 

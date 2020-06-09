@@ -106,9 +106,12 @@ void ServerInitUtil::bootstrap(std::string serverRootDirectory, Logger& logger, 
 	bool enableScripts = StringUtil::toLowerCopy(srprps["ENABLE_SCR"])=="true";
 	bool enableSoap = StringUtil::toLowerCopy(srprps["ENABLE_SWS"])=="true";
 	bool enableLogging = StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])=="true";
+	bool enableExtControllers = StringUtil::toLowerCopy(srprps["ENABLE_EXT_CNT"])=="true";
+	bool enableJobs = StringUtil::toLowerCopy(srprps["ENABLE_JOBS"])=="true";
+	bool enableStaticResponses = StringUtil::toLowerCopy(srprps["ENABLE_STATIC_RESP"])=="true";
 	ConfigurationData::enableFeatures(enableCors, enableSecurity, enableFilters, enableControllers,
 			enableContMpg, enableContPath, enableContExt,enableContRst, enableExtra, enableScripts,
-			enableSoap, enableLogging);
+			enableSoap, enableLogging, enableExtControllers, enableJobs, enableStaticResponses);
 
 	strVec cmpnames;
 	try
