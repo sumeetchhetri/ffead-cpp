@@ -14,6 +14,7 @@ use actix_files::NamedFile;
 use std::env;
 use std::cell::RefCell;
 use std::path::Path;
+use actix_web::http::header::SERVER;
 
 type RegisterResult = Either<HttpResponse, Result<NamedFile, Error>>;
 
@@ -178,6 +179,7 @@ async fn handle(_req: HttpRequest, mut body: web::Payload) -> RegisterResult {
             let v = slice_from_raw(response.headers[i].value, response.headers[i].value_len);
             response_builder.set_header(k, v);
         }
+        response_builder.set_header(SERVER, SERVER_NAME);
         let body = slice_from_raw(response.body, response.body_len);
         Either::A(response_builder.body(body))
     } else {
@@ -196,7 +198,7 @@ thread_local! {
     pub static PREV_RESP: RefCell<*mut c_void> = RefCell::new(ptr::null_mut());
 }
 
-static SERVER_NAME: &str = "Actix";
+static SERVER_NAME: &str = "actix";
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {

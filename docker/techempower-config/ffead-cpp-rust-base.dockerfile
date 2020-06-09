@@ -25,5 +25,4 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 RUN cd ${IROOT}/lang-server-backends/rust/actix-ffead-cpp && RUSTFLAGS="-C target-cpu=native" cargo build --release && cp target/release/actix-ffead-cpp $IROOT/ && rm -rf target && \
 	cd ${IROOT}/lang-server-backends/rust/hyper-ffead-cpp && RUSTFLAGS="-C target-cpu=native" cargo build --release && cp target/release/hyper-ffead-cpp $IROOT/ && rm -rf target && \
 	cd ${IROOT}/lang-server-backends/rust/thruster-ffead-cpp && RUSTFLAGS="-C target-cpu=native" cargo build --release && cp target/release/thruster-ffead-cpp $IROOT/ && rm -rf target && \
-	cd ${IROOT}/lang-server-backends/rust/rocket-ffead-cpp && rustup default nightly && RUSTFLAGS="-C target-cpu=native" cargo build --release && cp target/release/rocket-ffead-cpp $IROOT/ && rm -rf target && \
-	rm -rf ${IROOT}/lang-server-backends
+	rm -rf ${IROOT}/lang-server-backends && rm -rf /root/.rustup /root/.cargo

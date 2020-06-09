@@ -17,6 +17,7 @@ use std::fs::File;
 use std::io::Read;
 
 static SERVER_NAME: &str = "Thruster";
+static SERVER_HDR: &str = "server";
 
 thread_local! {
     pub static PREV_RESP: RefCell<*mut c_void> = RefCell::new(ptr::null_mut());
@@ -242,6 +243,7 @@ async fn index(mut ctx: Ctx, _next: MiddlewareNext<Ctx>) -> MiddlewareResult<Ctx
             let v = slice_from_raw(response.headers[i].value, response.headers[i].value_len);
             ctx.set(std::str::from_utf8(k).unwrap(), std::str::from_utf8(v).unwrap());
         }
+        ctx.set(SERVER_HDR, SERVER_NAME);
         let body = slice_from_raw(response.body, response.body_len);
         ctx.set_body(body.to_vec());
     }

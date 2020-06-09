@@ -251,7 +251,7 @@ fn main() {
     let port: u16 = arg1.parse().unwrap();
 
     //let not_found_catcher = Catcher::new(404, not_found_handler);
-    let config = Config::build(Environment::Staging)
+    let config = Config::build(Environment::Production)
         .address("0.0.0.0")
         .port(port)
         .finalize().unwrap();

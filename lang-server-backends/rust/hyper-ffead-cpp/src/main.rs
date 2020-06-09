@@ -7,14 +7,14 @@ use std::ptr;
 use std::mem;
 use std::slice;
 use std::env;
-use hyper::header::{HeaderValue};
+use hyper::header::{HeaderValue, SERVER};
 use std::path::Path;
 use std::fs;
 use futures::executor;
 use std::cell::RefCell;
 
 static NOTFOUND: &[u8] = b"Not Found";
-static SERVER_NAME: &str = "Hyper";
+static SERVER_NAME: &str = "hyper";
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
@@ -185,6 +185,7 @@ async fn index(_req: Request<Body>) -> Result<Response<Body>, hyper::Error> {
             let v = slice_from_raw(response.headers[i].value, response.headers[i].value_len);
             rheaders.insert(std::str::from_utf8(k).unwrap(), HeaderValue::from_static(std::str::from_utf8(v).unwrap()));
         }
+        rheaders.insert(SERVER, HeaderValue::from_static(SERVER_NAME));
         let body = slice_from_raw(response.body, response.body_len);
         
         Ok(resp_build.body(Body::from(body)).unwrap())

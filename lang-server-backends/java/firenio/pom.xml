@@ -51,7 +51,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>hello.TestHttpLoadServer</mainClass>
+                            <mainClass>com.firenio.ffeadcpp.FirenioFfeadCppServer</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

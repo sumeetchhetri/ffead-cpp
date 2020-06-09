@@ -781,20 +781,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "thruster-proc"
-version = "0.9.0-alpha.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcff2508c7e3127f641446db184dbea2b3b7e8d1747932779d203c6a54547b41"
-dependencies = [
- "lazy_static",
- "proc-macro2 0.4.30",
- "quote 0.6.13",
- "syn 0.15.44",
- "uuid",
-]
-
-[[package]]
-name = "thruster_techempower"
+name = "thruster-ffead-cpp"
 version = "0.1.0"
 dependencies = [
  "bytes 0.5.4",
@@ -807,6 +794,19 @@ dependencies = [
  "smallvec",
  "thruster",
  "thruster-proc",
+]
+
+[[package]]
+name = "thruster-proc"
+version = "0.9.0-alpha.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dcff2508c7e3127f641446db184dbea2b3b7e8d1747932779d203c6a54547b41"
+dependencies = [
+ "lazy_static",
+ "proc-macro2 0.4.30",
+ "quote 0.6.13",
+ "syn 0.15.44",
+ "uuid",
 ]
 
 [[package]]

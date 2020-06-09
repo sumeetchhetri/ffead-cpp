@@ -103,5 +103,5 @@ ENABLE_SWS=true
 ENABLE_JOBS=true
 
 #Static Responses
-ENABLE_STATIC_RESP=false
-STATIC_PATH_RESP=/pt_static|text/plain|Hello, World!
+ENABLE_STATIC_RESP=true
+STATIC_PATH_RESP=/plaintext|text/plain|Hello, World!
