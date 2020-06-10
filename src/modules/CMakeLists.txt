@@ -55,6 +55,14 @@ if(MOD_JOBS)
 	install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/jobs/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
 endif(MOD_JOBS)
 
+if(MINGW)
+	file(GLOB wepoll_sources
+	    "wepoll/*.h"
+	    "wepoll/*.cpp"
+	)
+	install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/wepoll/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
+endif(MINGW)
+
 file(GLOB comm_module_sources
     "common/*.h"
     "common/*.cpp"

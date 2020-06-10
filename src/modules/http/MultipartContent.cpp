@@ -1,5 +1,5 @@
 /*
-	Copyright 2010, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ std::string MultipartContent::ContentLength = "Content-Length";
 std::string MultipartContent::ContentMD5 = "Content-MD5";
 std::string MultipartContent::ContentType =	"Content-Type";
 
-std::map<std::string, int, cicomp> MultipartContent::HDRS_SW_CODES;
+std::map<std::string, int, std::less<>> MultipartContent::HDRS_SW_CODES;
 
 void MultipartContent::init() {
 	std::string t = VALID_HEADERS.substr(1, VALID_HEADERS.length()-1);
@@ -131,7 +131,7 @@ void MultipartContent::setFileName(const std::string& fileName) {
 	this->fileName = fileName;
 }
 
-std::map<std::string, std::string,cicomp> MultipartContent::getHeaders() {
+std::map<std::string, std::string, std::less<>> MultipartContent::getHeaders() {
 	return headers;
 }
 

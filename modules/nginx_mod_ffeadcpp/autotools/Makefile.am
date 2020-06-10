@@ -14,7 +14,7 @@ install-data-hook:
 	    --with-cc-opt="-I${fprefix}/include -I/usr/local/opt/openssl/include -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0 -I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0 -w -fpermissive -std=gnu++11"
 	cd ${prefix}/nginx-1.13.1 && make && make install
 	cp ${prefix}/modules/nginx_mod_ffeadcpp/nginx.conf ../../../../nginxfc/conf/
-	sed -i'' -e 's|FFEAD_PATH|'${prefix}/ffead-cpp-3.0'|g' ../../../../nginxfc/conf/nginx.conf
+	sed -i'' -e 's|FFEAD_PATH|'${prefix}/ffead-cpp-4.0'|g' ../../../../nginxfc/conf/nginx.conf
 	mv ${prefix}/nginxfc ../../../
 
 #dist_noinst_SCRIPTS = autogen.sh

@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ Reflector* ConfigurationData::getReflector() {
 
 void ConfigurationData::enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
 		bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra, bool enableScripts,
-		bool enableSoap, bool enableLogging) {
+		bool enableSoap, bool enableLogging, bool enableExtControllers, bool enableJobs, bool enableStaticResponses) {
 	getInstance()->enableCors = enableCors;
 	getInstance()->enableSecurity = enableSecurity;
 	getInstance()->enableFilters = enableFilters;
@@ -43,22 +43,20 @@ void ConfigurationData::enableFeatures(bool enableCors, bool enableSecurity, boo
 	getInstance()->enableScripts = enableScripts;
 	getInstance()->enableSoap = enableSoap;
 	getInstance()->enableLogging = enableLogging;
+	getInstance()->enableExtControllers = enableExtControllers;
+	getInstance()->enableJobs = enableJobs;
+	getInstance()->enableStaticResponses = enableStaticResponses;
 }
 
 ConfigurationData::ConfigurationData() {
 	logger = LoggerFactory::getLogger("ConfigurationData");
 	dlib = NULL;
 	ddlib = NULL;
-	embeddedServer = false;
-	apacheServer = false;
-	nginxServer = false;
-	embeddedServer = false;
-	apacheServer = false;
-	nginxServer = false;
 	enableCors = false;
 	enableSecurity = false;
 	enableFilters = false;
 	enableControllers = false;
+	enableExtControllers = false;
 	enableContMpg = false;
 	enableContPath = false;
 	enableContExt = false;
@@ -67,6 +65,9 @@ ConfigurationData::ConfigurationData() {
 	enableScripts = false;
 	enableSoap = false;
 	enableLogging = false;
+	enableJobs = false;
+	enableStaticResponses = false;
+	serverType = SERVER_BACKEND::EMBEDDED;
 }
 
 ConfigurationData* ConfigurationData::getInstance() {
@@ -509,42 +510,14 @@ HttpResponse* ConfigurationData::getHttpResponse() {
 	return getInstance()->httpRequest.getPointer<HttpResponse>();
 }
 
-bool ConfigurationData::isApacheServer() {
-	return getInstance()->apacheServer;
-}
-
-void ConfigurationData::setApacheServer(bool isApacheServer) {
-	getInstance()->apacheServer = isApacheServer;
-	if(isApacheServer) {
-		getInstance()->embeddedServer = false;
-		getInstance()->nginxServer = false;
-	}
-}
-
-bool ConfigurationData::isEmbeddedServer() {
-	return getInstance()->embeddedServer;
-}
-
-void ConfigurationData::setEmbeddedServer(bool isEmbeddedServer) {
-	getInstance()->embeddedServer = isEmbeddedServer;
-	if(isEmbeddedServer) {
-		getInstance()->apacheServer = false;
-		getInstance()->nginxServer = false;
-	}
-}
-
-bool ConfigurationData::isNginxServer() {
-	return getInstance()->nginxServer;
-}
-
-void ConfigurationData::setNginxServer(bool isNginxServer) {
-	getInstance()->nginxServer = isNginxServer;
-	if(isNginxServer) {
-		getInstance()->apacheServer = false;
-		getInstance()->embeddedServer = false;
-	}
+SERVER_BACKEND ConfigurationData::getServerType() {
+	return getInstance()->serverType;
 }
 
 int ConfigurationData::getProcessId() {
 	return getpid();
+}
+
+bool ConfigurationData::isJobsEnabled() {
+	return getInstance()->enableJobs;
 }

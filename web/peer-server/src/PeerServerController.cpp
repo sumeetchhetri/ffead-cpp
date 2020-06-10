@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -558,7 +558,7 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 			delete cchi;
 		}
 
-		JSONElement er;
+		JSONElement er = JSONElement::object();
 		er.add("id", id);
 		er.add("token", token);
 		res->setContent(JSONUtil::getDocumentStr(er));

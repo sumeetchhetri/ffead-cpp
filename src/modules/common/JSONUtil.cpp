@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -204,12 +204,12 @@ void JSONUtil::readJSON(std::string& json, const bool& isarray, JSONElement *par
 	{
 		validateSetValue(&element, value);
 	}
+
+	if(element.getType()==JSONElement::JSON_OBJECT)
+		object(value, &element);
+	else if(element.getType()==JSONElement::JSON_ARRAY)
+		array(value, &element);
 	par->addChild(element);
-	JSONElement* ele = (JSONElement*)&(par->getChildren().back());
-	if(ele->getType()==JSONElement::JSON_OBJECT)
-		object(value, ele);
-	else if(ele->getType()==JSONElement::JSON_ARRAY)
-		array(value, ele);
 	readJSON(json,isarray,par);
 }
 

@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -104,6 +104,28 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 
 	PropFileReader pread;
 	propMap srprps = pread.getProperties(respath+"/server.prop");
+
+	propMultiMap srprpsMulti = pread.getPropertiesMultiMap(respath+"/server.prop");
+	if(srprpsMulti.find("STATIC_PATH_RESP")!=srprpsMulti.end()) {
+		std::vector<std::string> paths = srprpsMulti["STATIC_PATH_RESP"];
+		for(int i=0;i<paths.size();i++) {
+			if(paths.at(i).find("|")!=std::string::npos) {
+				std::vector<std::string> lst = StringUtil::splitAndReturn<std::vector<std::string> >(StringUtil::trimCopy(paths.at(i)), "|");
+				if(lst.size()<3) continue;
+				std::string pth = StringUtil::trimCopy(lst.at(0));
+				std::string ctyp = StringUtil::trimCopy(lst.at(1));
+				if(ctyp=="") {
+					ctyp = "text/plain";
+				}
+				std::string resp = StringUtil::trimCopy(lst.at(2));
+				if(pth!="" && resp!="") {
+					StaticResponseData& sr = ConfigurationData::getInstance()->staticResponsesMap[pth];
+					sr.r = resp;
+					sr.t = ctyp;
+				}
+			}
+		}
+	}
 
 	bool isLoggingEnabled = true;
 	if(StringUtil::toLowerCopy(srprps["LOGGING_ENABLED"])!="true") {
@@ -1273,6 +1295,8 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 	std::map<std::string, ConnectionProperties, std::less<> > allProps;
 	std::map<std::string, Mapping, std::less<> > allMapps;
 
+	bool isSinglEVH = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["EVH_SINGLE"])=="true";
+
 	if(dbroot.getTagName()=="sdorm")
 	{
 		ElementList datasrcs = dbroot.getChildElements();
@@ -1366,7 +1390,7 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 
 									}
 								}
-								cprops.poolWriteSize = psize;
+								cprops.poolWriteSize = isSinglEVH?1:psize;
 							}
 							else if(confs.at(cns).getTagName()=="name")
 							{

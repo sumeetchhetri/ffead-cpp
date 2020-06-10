@@ -1,0 +1,1 @@
+java -jar build/libs/wizzardo-ffead-cpp-all-1.0.jar /root/ffead-cpp-4.0 8080

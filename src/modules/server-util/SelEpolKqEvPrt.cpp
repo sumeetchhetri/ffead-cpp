@@ -28,7 +28,11 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 	curfds = 0;
 	timeoutMilis = -1;
 #if USE_EPOLL == 1
+#ifdef OS_MINGW
+	epoll_handle = NULL;
+#else
 	epoll_handle = -1;
+#endif
 #endif
 #if USE_KQUEUE == 1
 	kq = -1;
@@ -56,9 +60,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 		listenerMode = true;
 	}
 	curfds = 1;
-	#if defined(USE_WIN_IOCP)
-		initIOCP();
-	#elif defined(USE_MINGW_SELECT)
+	#if defined(USE_MINGW_SELECT)
 		fdMax = sockfd;
 		FD_ZERO(&readfds);
 		FD_ZERO(&master);
@@ -97,63 +99,16 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 		polled_fds->events = POLLIN | POLLPRI;
 		return;
 	#endif
-	#if !defined(USE_WIN_IOCP)
-		dsi = new DummySocketInterface();
-		dsi->fd = sockfd;
-		if(sockfd>0)registerRead(dsi, true);
-	#endif
+	dsi = new DummySocketInterface();
+	dsi->fd = sockfd;
+	if(sockfd>0)registerRead(dsi, true);
 }
 
 
 int SelEpolKqEvPrt::getEvents()
 {
 	int numEvents = -1;
-	#if defined(USE_WIN_IOCP)
-		#ifdef OS_MINGW_W64
-			IOOverlappedEntry entries[64];
-			ULONG nEvents = 0;
-			if(!GetQueuedCompletionStatusEx(iocpPort,
-						(OVERLAPPED_ENTRY*)entries,
-						64,
-	                    &nEvents,
-						(DWORD)this->timeoutMilis,
-						FALSE)) {
-				int errCd = WSAGetLastError();
-				if(errCd != WAIT_TIMEOUT)
-				{
-					std::cout << "Error occurred during GetQueuedCompletionStatusEx " << WSAGetLastError() << std::endl;
-				}
-	           	return -1;
-	        }
-			psocks.clear();
-			for(long i = 0; i < (long)nEvents; i++) {
-				DWORD qty;
-				DWORD flags;
-				if(WSAGetOverlappedResult(entries[i].o->sock, (LPWSAOVERLAPPED)entries[i].o, &qty, FALSE, &flags))
-				{
-					psocks.push_back(entries[i].o);
-				}
-			}
-			return (int)psocks.size();
-		#else
-			OVERLAPPED       *pOverlapped = NULL;
-			IOOperation *lpContext = NULL;
-			DWORD            dwBytesTransfered = 0;
-			BOOL bReturn = GetQueuedCompletionStatus(iocpPort,
-								&dwBytesTransfered,
-								(LPDWORD)&lpContext,
-								&pOverlapped,
-								(DWORD)this->timeoutMilis);
-			if (FALSE == bReturn)
-			{
-				return -1;
-			}
-			IOOperation* iops = (IOOperation*)lpContext;
-			psocks.clear();
-			psocks.push_back(iops);
-			return 1;
-		#endif
-	#elif defined(USE_MINGW_SELECT)
+	#if defined(USE_MINGW_SELECT)
 	    l.lock();
 		readfds = master;
 		if(timeoutMilis>1)
@@ -327,26 +282,7 @@ bool SelEpolKqEvPrt::unRegisterWrite(SocketInterface* obj) {
 SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj, bool& isRead)
 {
 	isRead = true;
-	#if defined(USE_WIN_IOCP)
-		if(psocks.size()>index && index>=0)
-		{
-			#ifdef OS_MINGW_W64
-				l.lock();
-				SingleIOOperation* iops = (SingleIOOperation*)psocks.at(index);
-				l.unlock();
-				iocpRecv(iops->sock, &(iops->o));
-				obj = connections.find(iops->sock);
-				return iops->sock;
-			#else
-				l.lock();
-				IOOperation* iops = (IOOperation*)psocks.at(index);
-				l.unlock();
-				iocpRecv(iops->sock, iops->o);
-				obj = connections.find(iops->sock);
-				return iops->sock;
-			#endif
-		}
-	#elif defined(USE_MINGW_SELECT)
+	#if defined(USE_MINGW_SELECT)
 		int temp = 0;
 		l.lock();
 		if(FD_ISSET(index, &readfds))
@@ -420,36 +356,23 @@ bool SelEpolKqEvPrt::isListeningDescriptor(const SOCKET& descriptor)
 bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningSock)
 {
 	SOCKET descriptor = obj->fd;
-	//#ifndef USE_WIN_IOCP
-		#ifdef OS_MINGW
-			u_long iMode = 1;
-			ioctlsocket(descriptor, FIONBIO, &iMode);
-		#else
+	#ifdef OS_MINGW
+		u_long iMode = 1;
+		ioctlsocket(descriptor, FIONBIO, &iMode);
+	#else
+#ifndef HAVE_ACCEPT4
+		fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
+#else
+		if(isListeningSock) {
 			fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
-			/*int i = 1;
-			//setsockopt(descriptor, IPPROTO_TCP, TCP_NODELAY, (void *)&i, sizeof(i));
-			setsockopt(descriptor, IPPROTO_TCP, TCP_CORK, (void *)&i, sizeof(i));*/
-		#endif
-	//#endif
-
-	#if defined(USE_WIN_IOCP)
-		#ifdef OS_MINGW_W64
-			SingleIOOperation* iops = new SingleIOOperation;
-			iops->sock = descriptor;
-			memset(&(iops->o), 0, sizeof(OVERLAPPED));
-		#else
-			IOOperation *iops  = new IOOperation;
-			iops->sock = descriptor;
-			iops->o = new OVERLAPPED;
-			memset(iops->o, 0, sizeof(OVERLAPPED));
-		#endif
-		if (!addToIOCP(iops)) {
-			delete iops;
-			return false;
 		}
-		cntxtMap[descriptor] = iops;
-		connections[descriptor] = obj;
-	#elif defined(USE_MINGW_SELECT)
+#endif
+		int i = 1;
+		setsockopt(descriptor, IPPROTO_TCP, TCP_NODELAY, (void *)&i, sizeof(i));
+		//setsockopt(descriptor, IPPROTO_TCP, TCP_CORK, (void *)&i, sizeof(i));
+	#endif
+
+	#if defined(USE_MINGW_SELECT)
 		FD_SET(descriptor, &master);
 		if(descriptor > fdMax)
 			fdMax = descriptor;
@@ -531,16 +454,7 @@ void* SelEpolKqEvPrt::getOptData(const int& index) {
 bool SelEpolKqEvPrt::unRegisterRead(const SOCKET& descriptor)
 {
 	if(descriptor<=0)return false;
-	#if defined(USE_WIN_IOCP)
-		connections.erase(descriptor);
-		if(cntxtMap.find(descriptor)!=cntxtMap.end()) {
-			void* t = cntxtMap[descriptor];
-			delete t;
-			cntxtMap.erase(descriptor);
-			return true;
-		}
-		return false;
-	#elif defined(USE_MINGW_SELECT)
+	#if defined(USE_MINGW_SELECT)
 		connections.erase(descriptor);
 		FD_CLR(descriptor, &master);
 		if(fdMax==descriptor)
@@ -595,80 +509,6 @@ void SelEpolKqEvPrt::reRegisterServerSock()
 	#endif
 }
 
-#ifdef USE_WIN_IOCP
-//Function to Initialize IOCP
-bool SelEpolKqEvPrt::initIOCP()
-{
-	// Initialize Winsock
-	WSADATA wsaData;
-
-	int nResult;
-	nResult = WSAStartup(MAKEWORD(2,2), &wsaData);
-
-	if (NO_ERROR != nResult)
-	{
-		printf("\nError occurred while executing WSAStartup() %d.\n", WSAGetLastError());
-		return false; //error
-	}
-	else
-	{
-		printf("\nWSAStartup() successful.\n");
-	}
-	//Create I/O completion port
-	iocpPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0 );
-
-	if ( NULL == iocpPort)
-	{
-		printf("\nError occurred while creating IOCP: %d.\n", WSAGetLastError());
-		return false;
-	}
-	return true;
-}
-
-bool SelEpolKqEvPrt::addToIOCP(void *p)
-{
-	//Associate the socket with IOCP
-	HANDLE hTemp = NULL;
-	SOCKET sock;
-	LPWSAOVERLAPPED o;
-	#ifdef OS_MINGW_W64
-		SingleIOOperation* iops = (SingleIOOperation*)p;
-		sock = iops->sock;
-		o = &(iops->o);
-		hTemp = CreateIoCompletionPort((HANDLE)sock, iocpPort, 0, 0);
-	#else
-		IOOperation* iops = (IOOperation*)p;
-		sock = iops->sock;
-		o = iops->o;
-		hTemp = CreateIoCompletionPort((HANDLE)sock, iocpPort, (ULONG_PTR)iops, 0);
-	#endif
-	if (NULL == hTemp)
-	{
-		printf("\nError occurred while executing CreateIoCompletionPort().\n");
-		delete iops;
-		return false;
-	}
-	else
-	{
-		iocpRecv(sock, o);
-	}
-	return true;
-}
-
-void SelEpolKqEvPrt::iocpRecv(const SOCKET& sock, const LPWSAOVERLAPPED& o) {
-	//Get data.
-	DWORD dwFlags = MSG_PEEK;
-	DWORD dwBytes = 0;
-
-	char buf[2];
-	WSABUF dat;
-	dat.buf = buf;
-	dat.len = 2;
-	WSARecv(sock, &dat, 1, &dwBytes, &dwFlags, o, NULL);
-}
-#endif
-
-
 void SelEpolKqEvPrt::lock() {
 	l.lock();
 }
@@ -676,5 +516,3 @@ void SelEpolKqEvPrt::lock() {
 void SelEpolKqEvPrt::unlock() {
 	l.unlock();
 }
-
-

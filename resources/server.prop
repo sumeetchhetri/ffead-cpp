@@ -22,6 +22,9 @@ AUTH_ENAB=false
 #Number of Server processes
 NUM_PROC=1
 
+#Is Single event handler thread
+EVH_SINGLE=false
+
 #The type of Threading strategy
 THRD_PREQ=false
 
@@ -41,7 +44,7 @@ SESS_TIME_OUT=3600
 DEV_MODE=false
 
 #If you want to bind the server to a particular IP
-IP_ADDR=
+IP_ADDR=0.0.0.0
 
 #If this property is set to TRUE/true the invocation of php, perl, python, ruby, lua and nodejs scripts
 #will generate Warning/Error messages if any caused by the script while generating the HTML by the script
@@ -81,6 +84,8 @@ ENABLE_FLT=true
 
 ENABLE_CNT=true
 
+ENABLE_EXT_CNT=true
+
 ENABLE_CNT_MPG=true
 
 ENABLE_CNT_PTH=true
@@ -94,3 +99,9 @@ ENABLE_EXT=true
 ENABLE_SCR=true
 
 ENABLE_SWS=true
+
+ENABLE_JOBS=true
+
+#Static Responses
+ENABLE_STATIC_RESP=true
+STATIC_PATH_RESP=/plaintext|text/plain|Hello, World!

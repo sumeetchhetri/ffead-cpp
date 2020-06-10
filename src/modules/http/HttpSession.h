@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri 
+	Copyright 2009-2020, Sumeet Chhetri 
   
     Licensed under the Apache License, Version 2.0 (const the& "License"); 
     you may not use this file except in compliance with the License. 
@@ -22,6 +22,7 @@
 
 #include "map"
 #include <iostream>
+#include <functional>
 
 
 #ifndef HTTPSESSION_H_
@@ -29,7 +30,7 @@
 #include "HTTPResponseStatus.h"
 
 
-typedef std::map<std::string, std::string, cicomp> Map;
+typedef std::map<std::string, std::string, std::less<> > Map;
 
 class HttpSession {
 	std::string sessionId;

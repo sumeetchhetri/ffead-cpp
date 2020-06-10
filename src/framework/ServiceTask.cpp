@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ void ServiceTask::storeSessionAttributes(HttpResponse* res, HttpRequest* req, co
 
 	if(sessionchanged)
 	{
-		std::map<std::string,std::string, cicomp> vals = req->getSession()->getSessionAttributes();
+		std::map<std::string,std::string, std::less<>> vals = req->getSession()->getSessionAttributes();
 		std::string prevcookid = req->getCookieInfoAttribute("FFEADID");
 
 		std::string values;
@@ -469,14 +469,24 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 	try
 	{
-		if(req->getRequestParseStatus()!=NULL)
+		if(req->getRequestParseStatus()!=NULL || req->getMethod().at(0)=='t' || req->getMethod().at(0)=='T')
 		{
 			res->setHTTPResponseStatus(*req->getRequestParseStatus());
 			res->addHeader(HttpResponse::Connection, "close");
 			return;
 		}
 
-		if(req->getCntxt_name()=="") {
+		if(ConfigurationData::getInstance()->enableStaticResponses && ConfigurationData::getInstance()->staticResponsesMap.find(req->getPath())!=
+				ConfigurationData::getInstance()->staticResponsesMap.end()) {
+			StaticResponseData& sr = ConfigurationData::getInstance()->staticResponsesMap.find(req->getPath())->second;
+			res->setContent(sr.r);
+			res->setContentType(sr.t);
+			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
+			res->setDone(true);
+			return;
+		}
+
+		if(req->getCntxt_name().length()==0) {
 			req->setCntxt_name(HttpRequest::DEFAULT_CTX);
 		}
 
@@ -531,20 +541,11 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		req->normalizeUrl();
 		req->updateContent();
 
-		if(req->getExt().length()>0) {
-			std::string mimeType = CommonUtils::getMimeType(req->getExt());
-			std::string cntEncoding = getCntEncoding();
-			if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
-				res->addHeader(HttpResponse::ContentEncoding, cntEncoding);
-			}
-		}
-
 		ConfigurationData::getInstance()->httpRequest.reset(req);
 		ConfigurationData::getInstance()->httpResponse.reset(res);
 
 		if(ConfigurationData::getInstance()->enableSecurity) {
 			SecurityHandler::populateAuthDetails(req);
-
 			if(req->hasCookie())
 			{
 				req->getSession()->setSessionAttributes(req->getCookieInfo());
@@ -593,7 +594,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		if(ConfigurationData::getInstance()->enableCors) {
 			try {
 				isContrl = CORSHandler::handle(ConfigurationData::getInstance()->corsConfig, req, res);
-			} catch(const HTTPResponseStatus& status) {
+			} catch(HTTPResponseStatus& status) {
 				res->setHTTPResponseStatus(status);
 				isContrl = true;
 			}
@@ -634,6 +635,9 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		//t1.start();
 		if(!isContrl && ConfigurationData::getInstance()->enableControllers) {
 			isContrl = ControllerHandler::handle(req, res, ext, reflector);
+		}
+		if(!isContrl && ConfigurationData::getInstance()->enableExtControllers) {
+			isContrl = ControllerExtensionHandler::handle(req, res, ext, reflector);
 			ext = req->getExt();
 		}
 		//t1.end();
@@ -648,7 +652,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 		//t1.start();
 
-		if(req->getMethod()!="TRACE" && !res->isDone())
+		if(!res->isDone())
 		{
 			if(!isContrl)
 			{
@@ -693,6 +697,13 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 							}
 							req->setUrl(pubUrlPath+post);
 						}
+						if(req->getExt().length()>0) {
+							std::string mimeType = CommonUtils::getMimeType(req->getExt());
+							std::string cntEncoding = getCntEncoding();
+							if(req->isAgentAcceptsCE() && (cntEncoding=="gzip" || cntEncoding=="deflate") && req->isNonBinary(mimeType)) {
+								//res->addHeader(HttpResponse::ContentEncoding, cntEncoding);
+							}
+						}
 						res->setDone(false);
 						//logger << ("Static file requested") << std::endl;
 					}
@@ -719,4 +730,11 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 
 void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketInterface* sockUtil)
 {
+}
+
+std::string ServiceTask::getCntEncoding() {
+	if(ConfigurationData::getServerType()==SERVER_BACKEND::EMBEDDED) {
+		return HttpServiceTask::getCntEncoding();
+	}
+	return "";
 }

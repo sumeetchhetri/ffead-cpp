@@ -1,4 +1,19 @@
 /*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * SocketInterface.h
  *
  *  Created on: 03-Dec-2014
@@ -26,14 +41,18 @@
 #include <sys/socket.h>
 #include <sys/uio.h>
 #elif defined(IS_SENDFILE)
+#ifndef OS_MINGW
 #include <sys/sendfile.h>
+#endif
 #endif
 #include "vector"
 #include <libcuckoo/cuckoohash_map.hh>
 #include "concurrentqueue.h"
 #include "map"
 #include "Task.h"
+#ifndef OS_MINGW
 #include <netinet/tcp.h>
+#endif
 
 class SocketInterface;
 
@@ -103,6 +122,7 @@ public:
 	bool isCurrentRequest(int reqp);
 	void writeTo(const std::string& d, int reqPos);
 	int writeTo(ResponseData* d);
+	int writeWsData(void* d);
 	bool writeFile(int fdes, int remain_data);
 	bool isClosed();
 	virtual int readFrom();
@@ -124,6 +144,7 @@ public:
 	virtual void onOpen()=0;
 	virtual void onClose()=0;
 	virtual void addHandler(SocketInterface* handler)=0;
+	virtual bool isEmbedded()=0;
 };
 
 #endif /* SOCKETINTERFACE_H_ */

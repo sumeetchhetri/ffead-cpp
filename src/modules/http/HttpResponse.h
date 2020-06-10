@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri 
+	Copyright 2009-2020, Sumeet Chhetri 
   
     Licensed under the Apache License, Version 2.0 (const the& "License"); 
     you may not use this file except in compliance with the License. 
@@ -50,11 +50,11 @@ public:
 	HttpResponse();
 	virtual ~HttpResponse();
     std::string getHttpVersion() const;
-    void setHTTPResponseStatus(const HTTPResponseStatus& status);
+    void setHTTPResponseStatus(HTTPResponseStatus& status);
     std::string getStatusCode() const;
     int getCode() const;
-    std::string getStatusMsg() const;
-    std::string getContent() const;
+    const std::string& getStatusMsg();
+    const std::string& getContent();
 	//void setContent(const Cont& content);
 	void setContent(const std::string& content);
 	void addCookie(const std::string& cookie);
@@ -77,15 +77,21 @@ public:
 	std::string generateResponse(const bool& appendHeaders= true);
 	void generateResponse(HttpRequest *req, std::string& data, const bool& appendHeaders= true);
 	std::string& generateNginxApacheResponse();
+	const std::string& getHeadersStr(const std::string& server, bool status_line, bool with_content, bool with_serverline);
+	void setUrl(const std::string& url);
+	const std::string& getUrl();
+	void addHeader(std::string header, const std::string& value);
 private:
 	static RiMap HDRS_SW_CODES;
 	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN;
     bool done;
     float httpVers;
+	std::string _headers_str;
+	std::string _url_str;
     uint32_t intCntLen;
     static std::string VALID_RESPONSE_HEADERS;
 	std::string httpVersion;
-	const HTTPResponseStatus* status;
+	HTTPResponseStatus* status;
 	std::string preamble;
 	std::string epilogue;
 	bool compressed;
@@ -110,7 +116,6 @@ private:
 	bool isContentRemains();
 	bool getRemainingContent(const std::string& fname, const bool& isFirst, std::string& data);
 	static std::string getFileExtension(const std::string& file);
-    void addHeader(std::string header, const std::string& value);
 	void reset();
 	friend class ServiceTask;
 	friend class HttpResponseParser;

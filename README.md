@@ -31,18 +31,40 @@ Official ffead-cpp pre-built images can be found at [dockerhub](https://cloud.do
 Features
 ==========
 - Webrtc Signalling (websocket + api) (horizontally scalable peerjs compatible signalling server)
-- Advanced ORM - SDORM (sql/monogo)
-- Embedded Server, Apache/Nginx support (stable modules), Openlitespeed (experimental)
+- Multiple server backends
+    - embedded
+    - nginx
+    - apache
+    - openlitespeed (experimental)
+    - cinatra
+    - lithium
+    - drogon
+    - libreactor (c)
+    - vweb (vlang)
+    - picov (vlang)
+    - actix (rust)
+    - hyper (rust)
+    - thruster (rust)
+    - rocket (rust)
+    - h2o.cr (crystal)
+    - crystal-http (crystal)
+    - fasthttp (golang)
+    - gnet (golang)
+    - firenio (java)
+    - rapidoid (java)
+    - wizzardo-http (java)
 - Web Socket Support
-- HTTP2.0 Support
+- Advanced ORM - SDORM (sql/monogo)
 - Cache API (memcached/redis)
+- Search Engine API (solr/elasticsearch) -- (experimental)
 - Improved Thread/ThreadPool API(s)
-- Marker based configuration (Java style annotations)
+- Marker based configuration (java style annotations)
 - Improved autotools support
 - Reflection support
 - Serialization support
 - Date/Time Ultility functions
 - Better Logging support
+- HTTP2.0 Support
 - Dependency Injection
 
 Quickstart (Using cmake)
@@ -51,7 +73,7 @@ Quickstart (Using cmake)
 - cmake -DMOD_SDORM_MONGO=on .
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ffead-cpp-3.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
@@ -64,7 +86,7 @@ Quickstart (Using autoconf)
 - make install (Build ffead-cpp)
 - Sip some coffee
 - make build-apps (Build the sample applications in web + generate ffead-cpp binary)
-- cd ffead-cpp-3.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 

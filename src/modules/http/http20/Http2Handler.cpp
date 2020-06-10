@@ -1,4 +1,19 @@
 /*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (const the& "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * Http2Handler.cpp
  *
  *  Created on: 07-Dec-2014
@@ -302,7 +317,7 @@ bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si, std::s
 	//response->updateContent(maxDataFrameSize);
 
 	Http2HeadersFrame hframe;
-	std::map<std::string, std::string,cicomp> hdrs;
+	std::map<std::string, std::string,std::less<>> hdrs;
 	//hdrs[":opcode"] = response->isTextOrBinary?1:2;
 	hframe.headerBlockFragment = context.encode(hdrs);
 	CommonUtils::printHEX(hframe.headerBlockFragment);
@@ -567,3 +582,7 @@ std::string Http2Handler::getMimeType(const std::string& ext) {
 void Http2Handler::addHandler(SocketInterface* handler) {}
 void Http2Handler::onOpen(){}
 void Http2Handler::onClose(){}
+
+bool Http2Handler::isEmbedded() {
+	return true;
+}

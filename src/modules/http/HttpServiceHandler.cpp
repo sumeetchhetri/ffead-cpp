@@ -1,4 +1,19 @@
 /*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (const the& "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * HttpServiceHandler.cpp
  *
  *  Created on: 07-Jan-2015
@@ -7,8 +22,8 @@
 
 #include "HttpServiceHandler.h"
 
-HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr)
-	: ServiceHandler(spoolSize) {
+HttpServiceHandler::HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, bool isSinglEVH, const HttpReadTaskFactory& fr)
+	: ServiceHandler(spoolSize, isSinglEVH) {
 	this->cntEncoding = cntEncoding;
 	this->f = f;
 	this->fr = fr;
@@ -97,14 +112,14 @@ void HttpReadTask::run() {
 		sif->onClose();
 		service->closeConnection(sif);
 		//to.end();
-		////CommonUtils::tsReqSockRead += to.timerNanoSeconds();
+		//CommonUtils::tsReqSockRead += to.timerNanoSeconds();
 
 		//t.end();
-		////CommonUtils::tsReqTotal += t.timerNanoSeconds();
+		//CommonUtils::tsReqTotal += t.timerNanoSeconds();
 		return;
 	}
 	//to.end();
-	////CommonUtils::tsReqSockRead += to.timerNanoSeconds();
+	//CommonUtils::tsReqSockRead += to.timerNanoSeconds();
 
 	//to.start();
 	HttpServiceTask* task = (HttpServiceTask*)sif->srvTsk;
@@ -115,7 +130,7 @@ void HttpReadTask::run() {
 		task->run();
 	}
 	//to.end();
-	////CommonUtils::tsReqPrsSrvc += to.timerNanoSeconds();
+	//CommonUtils::tsReqPrsSrvc += to.timerNanoSeconds();
 
 	if(sif->isClosed()) {
 		sif->onClose();
@@ -123,18 +138,16 @@ void HttpReadTask::run() {
 	}
 
 	//t.end();
-	////CommonUtils::tsReqTotal += t.timerNanoSeconds();
+	//CommonUtils::tsReqTotal += t.timerNanoSeconds();
 }
 
 HttpServiceTask::HttpServiceTask() {
 	service = NULL;
-	rt = 0;
 }
 
 HttpServiceTask::HttpServiceTask(ReusableInstanceHolder* h) {
 	service = NULL;
 	this->hdlr = h;
-	rt = 0;
 }
 
 HttpServiceTask::~HttpServiceTask() {
@@ -148,7 +161,7 @@ void HttpServiceTask::run() {
 	//Timer t;
 	//t.start();
 
-	CommonUtils::cReqs += 1;
+	//CommonUtils::cReqs += 1;
 
 	if(handlerRequest.getProtType()==1)
 	{
@@ -156,12 +169,9 @@ void HttpServiceTask::run() {
 		HttpResponse* res = (HttpResponse*)req->resp;
 		handlerRequest.response = res;
 
-		time (&rt);
-		gmtime_r(&rt, &ti);
-		strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
-		res->headers[HttpResponse::DateHeader] = std::string(buffer);
+		res->headers[HttpResponse::DateHeader] = ServiceHandler::getDateStr();
 
-		if(req->httpVers<2 && req->hasHeaderValuePart(HttpRequest::Connection, "upgrade", true))
+		if(req->httpVers<2 && req->isUpgrade())
 		{
 			if(req->isHeaderValue(HttpRequest::Upgrade, "websocket", true)
 					&& req->getHeader(HttpRequest::SecWebSocketKey)!=""
@@ -193,9 +203,9 @@ void HttpServiceTask::run() {
 					delete hws;
 				} else {
 					//t.end();
-					////CommonUtils::tsService += t.timerNanoSeconds();
+					//CommonUtils::tsService += t.timerNanoSeconds();
 
-					CommonUtils::cResps += 1;
+					//CommonUtils::cResps += 1;
 					int ret = handlerRequest.getSif()->pushResponse(handlerRequest.getRequest(), handlerRequest.response, handlerRequest.getContext(), handlerRequest.reqPos);
 					if(ret==0) {
 						handlerRequest.getSif()->addHandler(hws);
@@ -266,15 +276,15 @@ void HttpServiceTask::run() {
 		}
 
 		//t.end();
-		////CommonUtils::tsService += t.timerNanoSeconds();
-		CommonUtils::cResps += 1;
+		//CommonUtils::tsService += t.timerNanoSeconds();
+		//CommonUtils::cResps += 1;
 		return;
 	}
 
 	//t.end();
-	////CommonUtils::tsService += t.timerNanoSeconds();
+	//CommonUtils::tsService += t.timerNanoSeconds();
 
-	CommonUtils::cResps += 1;
+	//CommonUtils::cResps += 1;
 	int ret = handlerRequest.getSif()->pushResponse(handlerRequest.getRequest(), handlerRequest.response, handlerRequest.getContext(), handlerRequest.reqPos);
 	if(ret==0) {
 		handlerRequest.sif->onClose();

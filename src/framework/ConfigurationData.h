@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (const the& "License");
     you may not use this file except in compliance with the License.
@@ -181,6 +181,28 @@ public:
 	}
 };
 
+enum SERVER_BACKEND {
+	NGINX, APACHE, OPENLITESPEED, //All http server modules
+	EMBEDDED, //The embedded ffead-cpp server engine
+	CINATRA, LITHIUM, DROGON, //All C++ http server engines
+	C_LIBREACTOR, C_H2O, //All C http server engines
+	V_WEB, V_PICO, //All V http server engines
+	RUST_ACTIX, RUST_HYPER, RUST_ROCKET, //All Rust http server engines
+	GO_FASTHTTP, GO_ATRUEGO, GO_GNET, //All Go http server engines
+	CRYSTAL_HTTP, CRYSTAL_H2O, //All Crystal http server engines
+	JAVA_FIRENIO, JAVA_RAPIDOID, JAVA_WIZZARDO_HTTP, //All Java http server engines
+	SWIFT_NIO, //All Swift http server engines
+	D_HUNT, //All D http server engines
+};
+
+class StaticResponseData {
+	std::string r;
+	std::string t;
+	friend class ConfigurationData;
+	friend class ServiceTask;
+	friend class ConfigurationHandler;
+};
+
 class ConfigurationData {
 	ConfigurationData();
 	static ConfigurationData* instance;
@@ -220,19 +242,19 @@ class ConfigurationData {
 	std::map<std::string, std::vector<WsDetails>, std::less<> > webserviceDetailMap;
 	std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> > classStructureMap;
 	std::map<std::string, propMap, std::less<> > appPropertiesMap;
+	std::map<std::string, StaticResponseData, std::less<> > staticResponsesMap;
 	Logger logger;
 	ThreadLocal httpRequest;
 	ThreadLocal httpResponse;
 	void* dlib;
 	Reflector reflector;
 	void* ddlib;
-	bool embeddedServer;
-	bool apacheServer;
-	bool nginxServer;
+	SERVER_BACKEND serverType;
 	bool enableCors;
 	bool enableSecurity;
 	bool enableFilters;
 	bool enableControllers;
+	bool enableExtControllers;
 	bool enableContMpg;
 	bool enableContPath;
 	bool enableContExt;
@@ -241,11 +263,14 @@ class ConfigurationData {
 	bool enableScripts;
 	bool enableSoap;
 	bool enableLogging;
+	bool enableJobs;
+	bool enableStaticResponses;
 	static void clearInstance();
 	friend class ExtHandler;
 	friend class FilterHandler;
 	friend class ConfigurationHandler;
 	friend class ControllerHandler;
+	friend class ControllerExtensionHandler;
 	friend class SecurityHandler;
 	friend class CORSHandler;
 	friend class FormHandler;
@@ -265,18 +290,14 @@ class ConfigurationData {
 	friend class JobScheduler;
 	friend class DataSourceManager;
 	friend class CacheManager;
+	friend class ServerInitUtil;
 public:
 	static void enableFeatures(bool enableCors, bool enableSecurity, bool enableFilters, bool enableControllers,
-			bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra,
-			bool enableScripts, bool enableSoap, bool enableLogging);
+		bool enableContMpg, bool enableContPath, bool enableContExt,bool enableContRst, bool enableExtra,
+		bool enableScripts, bool enableSoap, bool enableLogging, bool enableExtControllers, bool enableJobs,
+		bool enableStaticResponses);
 	static Reflector* getReflector();
 	static int getProcessId();
-	static bool isApacheServer();
-	static void setApacheServer(bool isApacheServer);
-	static bool isEmbeddedServer();
-	static void setEmbeddedServer(bool isEmbeddedServer);
-	static bool isNginxServer();
-	static void setNginxServer(bool isNginxServer);
 	static ClassInfo* getClassInfo(const std::string&, const std::string& app= "");
 	static ClassInfo* getClassInfo(const std::string&, std::string_view);
 	static bool isServingContext(std::string_view cntxtName);
@@ -290,7 +311,9 @@ public:
 	static void clearAllSingletonBeans();
 	static void setCoreServerProperties(CoreServerProperties coreServerProperties);
 	static propMap getAppProperties(const std::string& name = "");
+	static SERVER_BACKEND getServerType();
 	virtual ~ConfigurationData();
+	static bool isJobsEnabled();
 };
 
 #endif /* CONFIGURATIONDATA_H_ */

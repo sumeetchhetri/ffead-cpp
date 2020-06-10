@@ -1,4 +1,19 @@
 /*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * RequestReaderHandler.cpp
  *
  *  Created on: 02-Jan-2015
@@ -7,7 +22,7 @@
 
 #include "RequestReaderHandler.h"
 
-RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const bool& isMain, const SOCKET& listenerSock) {
+RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const bool& isMain, bool isSinglEVH, const SOCKET& listenerSock) {
 	this->shi = shi;
 	this->listenerSock = listenerSock;
 	this->isNotRegisteredListener = (listenerSock == INVALID_SOCKET);
@@ -16,6 +31,7 @@ RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const bool& isMa
 	this->sf = NULL;
 	this->complete = 0;
 	this->isMain = isMain;
+	this->isSinglEVH = isSinglEVH;
 }
 
 void RequestReaderHandler::start(unsigned int cid) {
@@ -101,13 +117,16 @@ void* RequestReaderHandler::handle(void* inp) {
 #if defined USE_EPOLL && defined(USE_EPOLL_ET)
 					while (true) {
 						sin_size = sizeof their_addr;
+#ifdef HAVE_ACCEPT4
+						SOCKET newSocket = accept4(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size, SOCK_NONBLOCK);
+#else
 						SOCKET newSocket = accept(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size);
+#endif
 						if (newSocket == -1)
 						{
-						  if ((errno == EAGAIN) ||
-							  (errno == EWOULDBLOCK))
+							if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
 							{
-							  break;
+								break;
 							}
 						}
 						SocketInterface* sockIntf = ins->sf(newSocket);
@@ -135,20 +154,39 @@ void* RequestReaderHandler::handle(void* inp) {
 				else
 				{
 					SocketInterface* si = (SocketInterface*)vsi;
-					if(isRead) {
-						if(!si->isClosed()) {
-							ins->shi->registerReadRequest(si);
+					if(ins->isSinglEVH) {
+						if(isRead) {
+							if(!si->isClosed()) {
+								si->rdTsk->run();
+							} else {
+								si->onClose();
+								ins->shi->closeConnection(si);
+							}
 						} else {
-							si->onClose();
-							ins->shi->closeConnection(si);
+							if(!si->isClosed()) {
+								ins->selector.unRegisterWrite(si);
+								ins->shi->registerWriteRequest(si);
+							} else {
+								si->onClose();
+								ins->shi->closeConnection(si);
+							}
 						}
 					} else {
-						if(!si->isClosed()) {
-							ins->selector.unRegisterWrite(si);
-							ins->shi->registerWriteRequest(si);
+						if(isRead) {
+							if(!si->isClosed()) {
+								ins->shi->registerReadRequest(si);
+							} else {
+								si->onClose();
+								ins->shi->closeConnection(si);
+							}
 						} else {
-							si->onClose();
-							ins->shi->closeConnection(si);
+							if(!si->isClosed()) {
+								ins->selector.unRegisterWrite(si);
+								ins->shi->registerWriteRequest(si);
+							} else {
+								si->onClose();
+								ins->shi->closeConnection(si);
+							}
 						}
 					}
 				}

@@ -1,4 +1,19 @@
 /*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (const the& "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * Http11WebSocketDataFrame.h
  *
  *  Created on: 30-Nov-2014
@@ -39,6 +54,7 @@ class WebSocketData {
 	friend class ServiceTask;
 	friend class WebSocketRespponseData;
 	friend class Http11WebSocketDataFrame;
+	friend class WebSockHandler;
 public:
 	bool hasData();
 	void collectText(const std::string& data);
@@ -63,7 +79,7 @@ public:
 	bool isEmpty();
 	void pushText(const std::string& textData);
 	void pushBinary(const std::string& binaryData);
-	std::vector<WebSocketData> getMore();
+	std::vector<WebSocketData>& getMore();
 	void reset();
 	WebSocketRespponseData();
 	virtual ~WebSocketRespponseData();
@@ -98,7 +114,7 @@ public:
 	bool isRsv1() const;
 	bool isRsv2() const;
 	bool isRsv3() const;
-	static void getFramePdu(WebSocketData* wres, std::string& data);
+	static int getFramePdu(WebSocketData* wres, std::string& data, bool copyData);
 	void getFrameData(std::string& data);
 	std::string getFrameData();
 };

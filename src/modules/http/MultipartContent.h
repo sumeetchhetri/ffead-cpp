@@ -1,5 +1,5 @@
 /*
-	Copyright 2010, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (const the& "License");
     you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@
 
 
 class MultipartContent {
-	static std::map<std::string, int, cicomp> HDRS_SW_CODES;
+	static std::map<std::string, int, std::less<>> HDRS_SW_CODES;
 	static std::string VALID_HEADERS;
-	std::map<std::string,std::string,cicomp> headers;
+	std::map<std::string,std::string, std::less<>> headers;
 	std::string content;
 	std::string tempFileName;
 	std::string fileName;
@@ -60,7 +60,7 @@ public:
 	void addHeaderValue(std::string header, const std::string& value);
 	std::string getContent() const;
 	std::string getFileName() const;
-	std::map<std::string, std::string,cicomp> getHeaders();
+	std::map<std::string, std::string,std::less<>> getHeaders();
 	bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
 	std::string getHeader(const std::string&);
 	std::string getName() const;

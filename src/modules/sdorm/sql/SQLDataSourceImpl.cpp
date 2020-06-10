@@ -1,4 +1,19 @@
 /*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (const the& "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * SQLDataSourceImpl.cpp
  *
  *  Created on: 10-May-2014
@@ -407,6 +422,7 @@ SQLDataSourceImpl::SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping) {
 	isTransaction = false;
 	conn = NULL;
 	logger = LoggerFactory::getLogger("SQLDataSourceImpl");
+	isSession = false;
 }
 
 SQLDataSourceImpl::~SQLDataSourceImpl() {
@@ -427,7 +443,7 @@ bool SQLDataSourceImpl::allocateStmt(const bool& read) {
 		return false;
 	}
 	if (this->conn != NULL) {
-		refreshStmt();
+		//refreshStmt();
 		return true;
 	}
 	int V_OD_erg;// result of functions
@@ -458,8 +474,10 @@ void SQLDataSourceImpl::refreshStmt() {
 }
 
 void SQLDataSourceImpl::close() {
+	if(isSession) return;
 #ifdef HAVE_LIBODBC
 	this->pool->release(conn);
+	conn = NULL;
 	V_OD_hdbc = NULL;
 	SQLFreeHandle(SQL_HANDLE_STMT, V_OD_hstmt);
 	V_OD_hstmt = NULL;
@@ -2008,10 +2026,12 @@ void* SQLDataSourceImpl::executeQuery(QueryBuilder& qb, const bool& isObj) {
 }
 
 void* SQLDataSourceImpl::getContext(void* details) {
+	isSession = true;
 	return NULL;
 }
 
 void SQLDataSourceImpl::destroyContext(void* cntxt) {
+	isSession = false;
 }
 
 SQLContext::SQLContext() {

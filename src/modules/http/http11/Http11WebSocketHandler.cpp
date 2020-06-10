@@ -1,4 +1,19 @@
 /*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (const the& "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * WebSocket.cpp
  *
  *  Created on: 30-Nov-2014
@@ -96,7 +111,7 @@ bool Http11WebSocketHandler::nextFrame(Http11WebSocketDataFrame* frame)
 	return false;
 }
 
-bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, WebSocketData* request)
+bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, WebSocketData* request, bool& isReq)
 {
 	if(frame->opcode==8) {
 		//closed = true;
@@ -133,10 +148,11 @@ bool Http11WebSocketHandler::processFrame(Http11WebSocketDataFrame* frame, WebSo
 		if(dataframesComplete[it->first])
 		{
 			WebSocketData* wsd = (WebSocketData*)request;
+			isReq = true;
 			if(frame->opcode==1) {
-				wsd->textData = dataframes[it->first];
+				wsd->textData = std::move(dataframes[it->first]);
 			} else {
-				wsd->binaryData = dataframes[it->first];
+				wsd->binaryData = std::move(dataframes[it->first]);
 			}
 			//logger << "Message is " << wsd->data << std::endl;
 			dataframes[it->first].clear();
@@ -154,16 +170,12 @@ bool Http11WebSocketHandler::readRequest(void* request, void*& context, int& pen
 	while(nextFrame(&frame))
 	{
 		WebSocketData* wreq = (WebSocketData*)request;
-		wreq->textData.clear();
-		wreq->binaryData.clear();
-		if(processFrame(&frame, wreq)) {
+		if(processFrame(&frame, wreq, fl)) {
 			//closed = true;
 			closeSocket();
 			break;
 		}
-		if(wreq->textData.length()>0 || wreq->binaryData.length()>0) {
-			//reqPos = startRequest();
-			fl = true;
+		if(fl) {
 			break;
 		}
 	}
@@ -230,4 +242,8 @@ void Http11WebSocketHandler::onClose(){
 	if(h!=NULL) {
 		h->onClose(getAddress());
 	}
+}
+
+bool Http11WebSocketHandler::isEmbedded() {
+	return true;
 }

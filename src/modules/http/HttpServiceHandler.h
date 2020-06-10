@@ -1,4 +1,19 @@
 /*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (const the& "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * HttpServiceHandler.h
  *
  *  Created on: 07-Jan-2015
@@ -17,9 +32,6 @@ class HttpServiceHandler;
 class HttpServiceTask : public Task {
 	HandlerRequest handlerRequest;
 	HttpServiceHandler* service;
-	time_t rt;
-	struct tm ti;
-	char buffer[31];
 	void run();
 	friend class HttpReadTask;
 	friend class HttpServiceHandler;
@@ -29,7 +41,7 @@ public:
 	void setTid(int tid);
 	virtual ~HttpServiceTask();
 	HttpServiceTask();
-	std::string getCntEncoding();
+	virtual std::string getCntEncoding();
 	HttpServiceTask(ReusableInstanceHolder* h);
 	virtual void handle(HttpRequest* request, HttpResponse* response)=0;
 	virtual WebSockHandler* handleWebsockOpen(WebSocketData* request, WebSocketRespponseData* response, SocketInterface* sif, HttpRequest* hreq)=0;
@@ -75,7 +87,7 @@ class HttpServiceHandler : public ServiceHandler {
 	void handleRead(SocketInterface* sif);
 	void handleWrite(SocketInterface* sif);
 public:
-	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, const HttpReadTaskFactory& fr);
+	HttpServiceHandler(const std::string& cntEncoding, const HttpServiceTaskFactory& f, const int& spoolSize, bool isSinglEVH, const HttpReadTaskFactory& fr);
 	virtual ~HttpServiceHandler();
 };
 

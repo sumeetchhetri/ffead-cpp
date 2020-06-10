@@ -49,7 +49,6 @@
 	#undef USE_DEVPOLL
 	#undef USE_POLL
 	#undef USE_SELECT
-	#undef USE_WIN_IOCP
 	#ifdef USE_EPOLL_ET
 		#undef USE_EPOLL_LT
 	#endif
@@ -89,33 +88,17 @@
 	#undef USE_WIN_IOCP
 #include <sys/select.h>
 #elif USE_WIN_IOCP == 1
+	#undef USE_WIN_IOCP
 	#undef USE_SELECT
-	#undef USE_EPOLL
+	#define USE_EPOLL
 	#undef USE_KQUEUE
 	#undef USE_EVPORT
 	#undef USE_DEVPOLL
 	#undef USE_POLL
 	#undef USE_SELECT
-	#define IOCPKEY_IO    56L
-	class IOOperation {
-		OVERLAPPED* o;
-		SOCKET sock;
-		friend class SelEpolKqEvPrt;
-	};
-	class SingleIOOperation {
-		OVERLAPPED o;
-		SOCKET sock;
-		friend class SelEpolKqEvPrt;
-		friend class IOOverlappedEntry;
-	};
-	class IOOverlappedEntry
-	{
-		ULONG_PTR key;
-		SingleIOOperation* o;
-		ULONG_PTR internal;
-		DWORD  qty;
-		friend class SelEpolKqEvPrt;
-	};
+	#define USE_EPOLL_LT
+	#undef USE_EPOLL_ET
+#include "wepoll.h"
 #elif USE_MINGW_SELECT == 1
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
@@ -148,6 +131,7 @@ public:
 	void onClose(){}
 	void addHandler(SocketInterface* handler){}
 	int getType(void* context) {return -1;}
+	bool isEmbedded(){return true;}
 };
 
 class SelEpolKqEvPrt : public EventHandler {
@@ -158,14 +142,7 @@ class SelEpolKqEvPrt : public EventHandler {
 	Mutex l;
 	DummySocketInterface* dsi;
 	libcuckoo::cuckoohash_map<int, void*> connections;
-	#ifdef USE_WIN_IOCP
-		std::map<SOCKET, void*> cntxtMap;
-		std::vector<void*> psocks;
-		HANDLE iocpPort;
-		bool initIOCP();
-		bool addToIOCP(void *p);
-		void iocpRecv(const SOCKET& sock, const LPWSAOVERLAPPED& o);
-	#elif USE_MINGW_SELECT
+	#ifdef USE_MINGW_SELECT
 		SOCKET fdMax;
 		int fdsetSize;
 		fd_set readfds;  // temp file descriptor list for select()
@@ -177,7 +154,11 @@ class SelEpolKqEvPrt : public EventHandler {
 		fd_set master[1024/FD_SETSIZE];
 	#elif defined USE_EPOLL
 		struct epoll_event events[MAXDESCRIPTORS];
+#ifdef OS_MINGW
+		HANDLE epoll_handle;
+#else
 		int epoll_handle;
+#endif
 	#elif defined USE_KQUEUE
 		int kq;
 		struct kevent evlist[MAXDESCRIPTORS];

@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri
+	Copyright 2009-2020, Sumeet Chhetri
 
     Licensed under the Apache License, Version 2.0 (const the& "License");
     you may not use this file except in compliance with the License.
@@ -32,11 +32,17 @@
 #include "JSONSerialize.h"
 #include "ConfigurationData.h"
 
-class ControllerHandler {
+class ControllerExtensionHandler {
 	static std::string BLANK;
 	static bool getControllerForPath(std::string_view cntxtName, const std::string& actUrl, std::string& className);
-	static bool getMappingForPath(std::string_view cntxtName, const std::string& actUrl, std::string& to);
 	static bool hasMappingExtension(std::string extwodot, HttpRequest* req);
+	static bool getMappingForPath(std::string_view cntxtName, const std::string& actUrl, std::string& to);
+public:
+	static bool handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector);
+};
+
+class ControllerHandler {
+	static std::string BLANK;
 public:
 	static bool handle(HttpRequest* req, HttpResponse* res, const std::string& ext, Reflector& reflector);
 };

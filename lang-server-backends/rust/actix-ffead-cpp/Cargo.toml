@@ -1,0 +1,18 @@
+[package]
+name = "actix-ffead-cpp"
+version = "0.1.0"
+authors = ["Sumeet Chhetri <sumeet.chhetri@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+libc = "0.2.69"
+actix-web = "2.0"
+actix-rt = "1.0"
+actix-http = "1.0"
+actix-files = "0.2"
+futures = "0.3.1"
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1

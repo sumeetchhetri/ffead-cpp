@@ -1,5 +1,5 @@
 /*
-	Copyright 2009-2012, Sumeet Chhetri 
+	Copyright 2009-2020, Sumeet Chhetri 
   
     Licensed under the Apache License, Version 2.0 (const the& "License"); 
     you may not use this file except in compliance with the License. 
@@ -21,6 +21,7 @@
  */
 
 #include "map"
+#include "unordered_map"
 #include "HttpSession.h"
 #include "vector"
 #include "sstream"
@@ -37,7 +38,7 @@
 #include <libcuckoo/cuckoohash_map.hh>
 #include "SocketInterface.h"
 #include <string_view>
-#include "picohttpparser.h"
+#include "picohttpparser_fcp.h"
 #include "yuarel.h"
 #include "Constants.h"
 
@@ -45,15 +46,15 @@ typedef std::vector<std::string> strVec;
 #ifndef HTTPREQUEST_H_
 #define HTTPREQUEST_H_
 
-typedef std::map<std::string, int, cicomp> RiMap;
-typedef std::map<std::string, std::string, cicomp> RMap;
-typedef std::map<std::string, MultipartContent, cicomp> FMap;
+typedef std::map<std::string, int, std::less<> > RiMap;
+typedef std::map<std::string, std::string, std::less<> > RMap;
+typedef std::map<std::string, MultipartContent, std::less<> > FMap;
 
 class HttpRequest {
 	void* resp;
 
 	std::string headers_data;
-	struct phr_header headers_list[100];
+	struct phr_header_fcp headers_list[100];
 	size_t num_headers;
 	std::string_view pathv;
 	std::string_view methodv;
@@ -80,6 +81,7 @@ class HttpRequest {
 	bool corsRequest;
 	//std::string method;
 	std::string content;
+	std::string contentv;
 	std::string content_boundary;
 	std::string content_tfile;
 	std::string file;
@@ -101,7 +103,7 @@ class HttpRequest {
 	std::vector<MultipartContent> contentList;
 	std::string preamble;
 	std::string epilogue;
-	const HTTPResponseStatus* status;
+	HTTPResponseStatus* status;
 	std::string userName;
 	std::string password;
 	std::string authMethod;
@@ -134,6 +136,7 @@ class HttpRequest {
 	friend class HttpServiceHandler;
 	friend class HttpServiceTask;
 	friend class ControllerHandler;
+	friend class ControllerExtensionHandler;
 	friend class ExtHandler;
 	friend class FviewHandler;
 	friend class ScriptHandler;
@@ -145,6 +148,8 @@ class HttpRequest {
 	friend class HttpRequestBuffered;
 	friend class ServiceHandler;
 	friend class HandlerRequest;
+	friend class CinatraServer;
+	friend class LithiumServer;
 	static const std::string VALID_METHODS;
 	void reset(std::string &&data, int* content_length);
 public:
@@ -165,7 +170,15 @@ public:
 	HttpRequest(const std::string&);
 
 	HttpRequest(std::string &&data, int* content_length);
-	HttpRequest(const char* pp, size_t pl, const char* qp, size_t ql, const char* mp, size_t ml, std::string &&content, unsigned int hv);
+	HttpRequest(const char* pp, size_t pl, const char* qp, size_t ql, const char* mp, size_t ml, const std::string& content, unsigned int hv);
+	HttpRequest(const char* mp, size_t ml, const char* pp, size_t pl, const char* qp, size_t ql, const char* hp, size_t hl, const char* bp, size_t bl, int hv);
+	HttpRequest(const char* mp, size_t ml, const char* pp, size_t pl, const char* bp, size_t bl, int hv);
+	HttpRequest(void* headers_list, size_t num_headers, std::string_view rawUrl, std::string_view qv, std::string_view method, int hv, std::string_view content);
+	HttpRequest(void* headers_list, size_t num_headers, std::string_view rawUrl, std::string_view method, int hv, std::string_view content);
+	HttpRequest(std::unordered_map<std::string_view, std::string_view> header_map, std::string_view url, std::string_view qv, std::string_view method, std::string_view hv, std::string_view content);
+	HttpRequest(const char* cnt, size_t cntlen, const std::unordered_map<std::string, std::string>& header_map, const std::string& url, const std::string& queryv, const char* method, int hv);
+	HttpRequest(const char *headers, size_t headers_len, const char *body, size_t body_len);
+	HttpRequest(std::string_view rawUrl, std::string_view method, int hv, const char *headers, size_t headers_len, const char *body, size_t body_len);
 
 	void updateContent();
 	virtual ~HttpRequest();
@@ -179,7 +192,8 @@ public:
 	float getHttpVers() const;
 	std::string getContent_boundary() const;
 	std::string getContent() const;
-	void setContent(const std::string&);
+	std::string_view getContentv() const;
+	void setContent(std::string &&data);
     RMap getRequestParams() const;
     std::string getRequestParam(const std::string&);
     MultipartContent getMultipartContent(const std::string& key);
@@ -215,8 +229,8 @@ public:
     std::string getAuthOrderinfoAttribute(const int& key);
     std::string getReqOrderinfoAttribute(const int& key);
     std::string getCookieInfoAttribute(const std::string& key);
-    std::string getHeader(std::string key);
-    bool hasHeader(std::string key);
+    std::string getHeader(std::string_view key);
+    bool hasHeader(std::string_view key);
     RMap getHeaders();
     int getCORSRequestType();
     void addHeaderValue(std::string header, const std::string& value);
@@ -224,6 +238,9 @@ public:
     static bool isValidHttpMethod(const std::string& method);
     bool isValidHttpMethod();
     bool isAgentAcceptsCE();
+    bool isUpgrade();
+    bool isClose();
+    bool isKeepAlive();
     bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
     bool hasHeaderValuePart(std::string header, std::string valuePart, const bool& ignoreCase= true);
     std::vector<std::vector<int> > getRanges(std::vector<std::string> &rangesVec);
@@ -232,7 +249,7 @@ public:
     void addContent(const MultipartContent& content);
     bool isNonBinary(const std::string& mimeType);
     std::string getParamValue(const std::string&);
-    const HTTPResponseStatus* getRequestParseStatus();
+    HTTPResponseStatus* getRequestParseStatus();
     std::vector<MultipartContent> getMultiPartFileList(const std::string& name);
 	std::string getPassword() const;
 	std::string getUserName() const;

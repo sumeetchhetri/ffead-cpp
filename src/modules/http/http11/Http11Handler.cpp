@@ -1,4 +1,19 @@
 /*
+	Copyright 2009-2020, Sumeet Chhetri
+
+    Licensed under the Apache License, Version 2.0 (const the& "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+/*
  * Http11Handler.cpp
  *
  *  Created on: 02-Jan-2015
@@ -29,8 +44,8 @@ bool Http11Handler::readRequest(void* request, void*& context, int& pending, int
 	{
 		bytesToRead = 0;
 		std::string headers = buffer.substr(0, ix+4);
-		buffer = buffer.substr(ix+4);
 		currReq->reset(std::move(headers), &bytesToRead);
+		buffer = buffer.substr(ix+4);
 		((HttpResponse*)currReq->resp)->reset();
 
 		/*
@@ -103,7 +118,8 @@ bool Http11Handler::readRequest(void* request, void*& context, int& pending, int
 			}
 		}
 		if(bytesToRead>0 && (int)buffer.length()>=bytesToRead) {
-			currReq->content = buffer.substr(0, bytesToRead);
+			std::string content = buffer.substr(0, bytesToRead);
+			currReq->setContent(std::move(content));
 			buffer = buffer.substr(bytesToRead);
 			bytesToRead = 0;
 		}
@@ -214,23 +230,24 @@ bool Http11Handler::writeResponse(void* req, void* res, void* context, std::stri
 	HttpRequest* request = (HttpRequest*)req;
 	HttpResponse* response = (HttpResponse*)res;
 
-	if(!response->isDone()) {
-		response->updateContent(request, chunkSize);
-	}
-
-	if(request->isHeaderValue(HttpRequest::Connection, "keep-alive") && request->getHttpVers()>=1.1) {
-		response->addHeader(HttpResponse::Connection, "keep-alive");
-	} else {
+	if(request->isClose()) {
 		response->addHeader(HttpResponse::Connection, "close");
+	} else if(request->getHttpVers()>=1.1) {
+		response->addHeader(HttpResponse::Connection, "keep-alive");
 	}
 
-	if(!response->isContentRemains()) {
+	if(response->isDone()) {
 		response->generateResponse(request, data);
 	} else {
-		response->generateResponse(request, data, false);
-		bool isFirst = true;
-		while(response->hasContent && response->getRemainingContent(request->getUrl(), isFirst, data)) {
-			isFirst = false;
+		response->updateContent(request, chunkSize);
+		if(!response->isContentRemains()) {
+			response->generateResponse(request, data);
+		} else {
+			response->generateResponse(request, data, false);
+			bool isFirst = true;
+			while(response->hasContent && response->getRemainingContent(request->getUrl(), isFirst, data)) {
+				isFirst = false;
+			}
 		}
 	}
 
@@ -247,4 +264,8 @@ void Http11Handler::onClose(){
 	if(handler!=NULL) {
 		handler->onClose();
 	}
+}
+
+bool Http11Handler::isEmbedded() {
+	return true;
 }
