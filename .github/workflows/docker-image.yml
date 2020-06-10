@@ -15,4 +15,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the base ffead-cpp-4.0 base docker image
-      run: docker build . --file docker/techempower-config/ffead-cpp.dockerfile --tag ffead-cpp-4.0:$(date +%s)
+      run: |
+        cp -rf web/te-benchmark-um docker/techempower-config/
+        docker build . --file docker/techempower-config/ffead-cpp.dockerfile --tag ffead-cpp-4.0:$(date +%s)
