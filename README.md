@@ -1,7 +1,7 @@
 # The ffead-cpp Framework
 
 ffead-cpp is a web-framework, application framework, utilities all bundled into one. 
-It also provides an embedded HTTP/HTT2/Web-Socket compliant high-performance server core. 
+It also provides an embedded HTTP/Web-Socket compliant high-performance server core. 
 It is a collection of modules all geared towards performing individual roles which together form the cohesive back-bone of ffead-cpp.
 
 It provides a very simple to use and maintain web-framework library with advanced features like Reflection, Dependency Injection (IOC),
@@ -21,7 +21,7 @@ directives can now be used to drive the entire configuration in ffead-cpp, so yo
 All in all ffead-cpp is the gap in the world of C++ web application or enterprise application development which I have tried to fill
 with my humble/honest effort.
 
-Starting version 3.0 ffead-cpp supports both **autoconf** and **cmake** for builds
+Starting version 4.0 ffead-cpp only **cmake** builds are supported
 
 Detailed OS specific instrauctions and docker/docker-compose scripts are located at [docker](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker)
 
@@ -59,36 +59,23 @@ Features
 - Search Engine API (solr/elasticsearch) -- (experimental)
 - Improved Thread/ThreadPool API(s)
 - Marker based configuration (java style annotations)
-- Improved autotools support
 - Reflection support
 - Serialization support
 - Date/Time Ultility functions
 - Better Logging support
-- HTTP2.0 Support
+- HTTP2.0 Support (experimental)
 - Dependency Injection
 
 Quickstart (Using cmake)
 ===========
 - Install cmake >= 3.8.2 and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
-- cmake -DMOD_SDORM_MONGO=on .
+- cmake -DSRV_EMB=on -DMOD_SDORM_MONGO=on .
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
 - cd ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
-Quickstart (Using autoconf)
-===========
-- Install [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
-- ./autogen.sh (Setup configure for your platform)
-- ./configure --enable-mod_sdormmongo (Setup makefiles)
-- Stretch a bit :-)
-- make install (Build ffead-cpp)
-- Sip some coffee
-- make build-apps (Build the sample applications in web + generate ffead-cpp binary)
-- cd ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
-- chmod +x *.sh
-- ./server.sh (Startup ffead-cpp Njoy!!)
 
 Webrtc Example (Uses peerjs)
 ===========
