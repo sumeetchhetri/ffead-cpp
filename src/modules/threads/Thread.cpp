@@ -120,7 +120,11 @@ void Thread::execute(int cid) {
 	}
 
 	if(cid>=0) {
+#ifdef OS_BSD
+		cpuset_t cpuset;
+#else
 		cpu_set_t cpuset;
+#endif
 		CPU_ZERO(&cpuset);
 		CPU_SET(cid, &cpuset);
 		if (pthread_setaffinity_np(pthread, sizeof(cpuset), &cpuset) != 0) {

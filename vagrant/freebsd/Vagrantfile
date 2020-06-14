@@ -1,21 +1,36 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-require_relative 'core'
-
 Vagrant.configure("2") do |config|
+  config.vm.define :freebsd12
+  config.vm.box = "freebsd/FreeBSD-12.0-RELEASE"
+  config.vm.box_check_update = false
+  config.vm.network "forwarded_port", guest: 8080, host: 8001
+  #config.vm.network "forwarded_port", guest: 443, host: 8443
 
-  config.vm.network :forwarded_port, guest: 8080, host: 28080
-  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.box_download_insecure = true
+  # Set freebsd shell
   config.ssh.shell = "sh"
-  
-  provider_virtualbox(config)
-  provider_libvirt(config)
+  config.vm.base_mac = "080027D14C66"
 
-  config.ssh.insert_key = false
+  # config.vm.network "public_network", type: "dhcp"
+  config.vm.network "private_network", type: "dhcp"
+
+  #config.vm.synced_folder ".", "/vagrant", :nfs => true, id: "vagrant-root",
+  #:mount_options => ['rw', 'vers=3', 'tcp', 'actimeo=2']
 
   config.vm.provider "virtualbox" do |vb|
-    vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
+    # Display the VirtualBox GUI when booting the machine
+    # vb.gui = true
+
+    # Customize the amount of memory on the VM:
+    vb.customize ["modifyvm", :id, "--memory", "2048"]
+    vb.customize ["modifyvm", :id, "--cpus", "4"]
+    vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
+    vb.customize ["modifyvm", :id, "--audio", "none"]
+    # vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+    # vb.customize ["modifyvm", :id, "--nictype2", "virtio"]
   end
-  
+
+  config.vm.provision "shell", path: "bootstrap.sh"
 end

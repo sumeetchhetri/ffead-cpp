@@ -24,6 +24,10 @@
 #define THREAD_H_
 #include "AppDefines.h"
 #include "Compatibility.h"
+#ifdef OS_BSD
+#include <sys/cpuset.h>
+#include <pthread_np.h>
+#endif
 
 typedef void* (*ThreadFunc)(void*);
 

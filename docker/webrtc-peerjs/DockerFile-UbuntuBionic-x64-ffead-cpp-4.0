@@ -41,7 +41,7 @@ RUN sed -i 's|web/markers/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/te-benchmark/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/te-benchmark-um/src/autotools/Makefile||g' configure.ac
 
-RUN cmake -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+RUN cmake -DSRV_EMB=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 RUN make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 WORKDIR /tmp
