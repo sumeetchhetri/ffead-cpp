@@ -33,7 +33,7 @@ RUN unzip v4.0.zip
 RUN mv ffead-cpp-4.0 ffead-cpp-src
 RUN rm -f v4.0.zip
 WORKDIR /tmp/ffead-cpp-src
-RUN cmake -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+RUN cmake -DSRV_EMB=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 RUN make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 WORKDIR /tmp

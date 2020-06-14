@@ -23,10 +23,7 @@ with my humble/honest effort.
 
 Starting version 4.0 ffead-cpp only **cmake** builds are supported
 
-Detailed OS specific instrauctions and docker/docker-compose scripts are located at [docker](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker)
-
-Official ffead-cpp pre-built images can be found at [dockerhub](https://cloud.docker.com/repository/docker/sumeetchhetri/ffead-cpp-3.0/tags)
-
+Detailed OS specific instructions, instructions for installing the available server backends and docker/docker-compose scripts are located at [docker](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker)
 
 Features
 ==========
