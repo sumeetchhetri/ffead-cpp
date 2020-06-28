@@ -1,0 +1,13 @@
+# Travis CI
+
+sudo: required
+dist: xenial
+language: generic
+python:
+  - "2.7"
+services:
+  - docker
+  
+script:
+	- git clone https://github.com/TechEmpower/FrameworkBenchmarks
+	- cd FrameworkBenchmarks && ./tfb --mode verify --test-dir C++/ffead-cpp
