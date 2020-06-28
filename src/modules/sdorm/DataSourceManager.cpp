@@ -100,7 +100,7 @@ void DataSourceManager::destroy()
 		}
 	}
 	dsns.clear();
-	std::map<std::string, DataSourceManager*>::iterator it1;
+	std::map<std::string, DataSourceInterface*>::iterator it1;
 	for(it1=sevhDsnImpls.begin();it1!=sevhDsnImpls.end();++it1)
 	{
 		if(it1->second!=NULL)

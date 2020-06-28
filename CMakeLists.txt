@@ -28,12 +28,11 @@ option(SRV_LITHIUM "Lithium Http Server Engine" OFF)
 option(SRV_DROGON "Drogon Http Server Engine" OFF)
 
 set(CMAKE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
-set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_VERBOSE_MAKEFILE off)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/include -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0/ -Wall -Wno-unknown-pragmas -Wno-delete-incomplete")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/lib")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 
@@ -90,6 +89,8 @@ if (MINGW)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/mingw/include -L/mingw/lib -D__USE_MINGW_ANSI_STDIO=1")
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/mingw/lib")
 endif (MINGW)
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/lib")
 
 set(CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
 check_symbol_exists(accept4	"sys/socket.h"	HAVE_ACCEPT4)

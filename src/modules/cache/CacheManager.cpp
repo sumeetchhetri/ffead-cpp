@@ -99,6 +99,15 @@ void CacheManager::destroy()
 		}
 	}
 	caches.clear();
+	std::map<std::string, CacheInterface*>::iterator it1;
+	for(it1=sevhCchImpls.begin();it1!=sevhCchImpls.end();++it1)
+	{
+		if(it1->second!=NULL)
+		{
+			delete it1->second;
+		}
+	}
+	sevhCchImpls.clear();
 }
 
 void CacheManager::cleanImpl(CacheInterface* ccImpl) {
