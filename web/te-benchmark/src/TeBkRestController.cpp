@@ -44,10 +44,10 @@ TeBkWorld TeBkRestController::db() {
 	id << rid;
 	try {
 		TeBkWorld w = sqli->get<TeBkWorld>(id);
-		delete sqli;
+		DataSourceManager::cleanImpl(sqli);
 		return w;
 	} catch(const std::exception& e) {
-		delete sqli;
+		DataSourceManager::cleanImpl(sqli);
 		throw e;
 	}
 }
@@ -74,10 +74,10 @@ std::vector<TeBkWorld> TeBkRestController::queries(std::string queries) {
 			wlst.push_back(w);
 		}
 		sqli->endSession();
-		delete sqli;
+		DataSourceManager::cleanImpl(sqli);
 		return wlst;
 	} catch(const std::exception& e) {
-		delete sqli;
+		DataSourceManager::cleanImpl(sqli);
 		throw e;
 	}
 }
@@ -117,10 +117,10 @@ std::vector<TeBkWorld> TeBkRestController::updates(std::string queries) {
 		sqli->commit();
 
 		sqli->endSession();
-		delete sqli;
+		DataSourceManager::cleanImpl(sqli);
 		return wlst;
 	} catch(const std::exception& e) {
-		delete sqli;
+		DataSourceManager::cleanImpl(sqli);
 		throw e;
 	}
 }
@@ -145,11 +145,11 @@ void TeBkRestController::updateCache() {
 			TeBkWorld& w = wlist.at(c);
 			cchi->setO(CastUtil::fromNumber(w.getId()), w);
 		}
-		delete sqli;
-		delete cchi;
+		DataSourceManager::cleanImpl(sqli);
+		CacheManager::cleanImpl(cchi);
 	} catch(const std::exception& e) {
-		delete sqli;
-		delete cchi;
+		DataSourceManager::cleanImpl(sqli);
+		CacheManager::cleanImpl(cchi);
 		throw e;
 	}
 }
@@ -174,10 +174,10 @@ std::vector<TeBkWorld> TeBkRestController::cachedWorlds(std::string count) {
 
 		std::vector<TeBkWorld> wlst = cchi->mgetO<TeBkWorld>(keys);
 
-		delete cchi;
+		CacheManager::cleanImpl(cchi);
 		return wlst;
 	} catch(const std::exception& e) {
-		delete cchi;
+		CacheManager::cleanImpl(cchi);
 		throw e;
 	}
 }

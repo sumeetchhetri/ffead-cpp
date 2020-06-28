@@ -24,6 +24,12 @@
 
 std::map<std::string, DataSourceManager*> DataSourceManager::dsns;
 std::map<std::string, std::string> DataSourceManager::defDsnNames;
+std::map<std::string, DataSourceInterface*> DataSourceManager::sevhDsnImpls;
+bool DataSourceManager::isSinglEVH = false;
+
+void DataSourceManager::init(bool issevh) {
+	isSinglEVH = issevh;
+}
 
 void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping& mapping)
 {
@@ -94,6 +100,15 @@ void DataSourceManager::destroy()
 		}
 	}
 	dsns.clear();
+	std::map<std::string, DataSourceManager*>::iterator it1;
+	for(it1=sevhDsnImpls.begin();it1!=sevhDsnImpls.end();++it1)
+	{
+		if(it1->second!=NULL)
+		{
+			delete it1->second;
+		}
+	}
+	sevhDsnImpls.clear();
 }
 
 DataSourceManager::DataSourceManager(const ConnectionProperties& props, const Mapping& mapping) {
@@ -118,6 +133,12 @@ DataSourceManager::~DataSourceManager() {
 	}
 }
 
+void DataSourceManager::cleanImpl(DataSourceInterface* dsImpl) {
+	if(!isSinglEVH) {
+		delete dsImpl;
+	}
+}
+
 DataSourceInterface* DataSourceManager::getImpl(std::string name, std::string appName) {
 	if(appName=="") {
 		appName = CommonUtils::getAppName();
@@ -130,9 +151,14 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name, std::string ap
 		name = defDsnNames[appName];
 	}
 	name = appName + name;
-	if(dsns.find(name)==dsns.end())
-	{
+	if(dsns.find(name)==dsns.end()) {
 		throw std::runtime_error("Data Source Not found...");
+	}
+	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
+	if(isSinglEVH) {
+		if(sevhDsnImpls.find(name)!=sevhDsnImpls.end()) {
+			return sevhDsnImpls[name];
+		}
 	}
 	DataSourceManager* dsnMgr = dsns[name];
 	DataSourceInterface* t = NULL;
@@ -162,6 +188,10 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name, std::string ap
 		{
 			t->init(dsemp, true);
 		}
+	}
+	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
+	if(isSinglEVH) {
+		sevhDsnImpls[name] = t;
 	}
 	return t;
 }

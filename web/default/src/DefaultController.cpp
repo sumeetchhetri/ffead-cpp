@@ -46,7 +46,7 @@ bool DefaultController::service(HttpRequest* req, HttpResponse* res)
 	std::cout << "\n Sdorm Query fetched " << tec1.size() << " rows\n" << std::flush;
 	std::vector<Test4> tec2 = sqli->getAll<Test4>();
 	std::cout << "\n Sprint Query fetched " << tec2.size() << " rows\n" << std::flush;
-	delete sqli;
+	DataSourceManager::cleanImpl(sqli);
 	return true;
 }
 

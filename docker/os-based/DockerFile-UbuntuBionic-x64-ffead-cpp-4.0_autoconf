@@ -15,10 +15,10 @@ RUN rm -rf /tmp/libcuckoo-master
 
 #Install ffead-cpp
 WORKDIR /tmp
-RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/v4.0.zip
-RUN unzip v4.0.zip
-RUN mv ffead-cpp-4.0 ffead-cpp-src
-RUN rm -f v4.0.zip
+RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+RUN unzip master.zip
+RUN mv ffead-cpp-master ffead-cpp-src
+RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
 RUN chmod +x autogen.sh
 RUN ./autogen.sh

@@ -8,10 +8,10 @@ SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 
 cd $IROOT
 
-wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/v4.0.zip
-unzip v4.0.zip
-rm -f v4.0.zip
-mv ffead-cpp-4.0 ffead-cpp-src
+wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+unzip master.zip
+rm -f master.zip
+mv ffead-cpp-master ffead-cpp-src
 mv ffead-cpp-src/lang-server-backends ${IROOT}/
 cd $IROOT
 

@@ -136,9 +136,9 @@ bool PeerServerController::onOpen(WebSocketData* wreq, WebSocketRespponseData* w
 	CacheInterface* cchi = CacheManager::getImpl();
 	try {
 		cchi->set(id, nodeIdentifier);
-		delete cchi;
+		CacheManager::cleanImpl(cchi);
 	} catch (const std::exception& e) {
-		delete cchi;
+		CacheManager::cleanImpl(cchi);
 	}
 
 	PeerState* st = new PeerState(id, token, getSif());
@@ -158,9 +158,9 @@ void PeerServerController::onClose(std::string uniqueAddress) {
 		CacheInterface* cchi = CacheManager::getImpl();
 		try {
 			cchi->remove(st->id);
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		} catch (const std::exception& e) {
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		}
 		delete st;
 		clients.erase(uniqueAddress);
@@ -199,12 +199,12 @@ bool PeerServerController::onMessage(WebSocketData *req, WebSocketRespponseData 
 			msgNodeIdentifier = cchi->getValue(id);
 			//std::cout << "WS:Req:Token " << etoken << std::endl;
 			if(msgNodeIdentifier=="") {
-				delete cchi;
+				CacheManager::cleanImpl(cchi);
 				return false;
 			}
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		} catch (const std::exception& e) {
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		}
 
 		//std::cout << "WS:Req:Id " << id << std::endl;
@@ -234,9 +234,9 @@ bool PeerServerController::onMessage(WebSocketData *req, WebSocketRespponseData 
 				try {
 					cchi->addToQ(msgNodeIdentifier, dstId+"|"+JSONUtil::getDocumentStr(el));
 					std::cout << "WS:Queuing: " << type << ":For:" << dstId << " " << uniqueAddress << " " << st->id << " " << st->token << std::endl;
-					delete cchi;
+					CacheManager::cleanImpl(cchi);
 				} catch (const std::exception& e) {
-					delete cchi;
+					CacheManager::cleanImpl(cchi);
 				}
 			}
 		}
@@ -269,9 +269,9 @@ void* PeerServerController::handle(void *inp) {
 				}
 			}
 			std::cout << "WS:PeerHandler:Process:End" << std::endl;
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		} catch (const std::exception& e) {
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		}
 		Thread::sSleep(1);
 	}
@@ -341,10 +341,10 @@ bool PeerServerRouter::isValidUser(const std::string &id, const std::string &tok
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
 			return false;
 		}
-		delete cchi;
+		CacheManager::cleanImpl(cchi);
 		return true;
 	} catch (const std::exception& e) {
-		delete cchi;
+		CacheManager::cleanImpl(cchi);
 		return false;
 	}
 }
@@ -387,9 +387,9 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		CacheInterface* cchi = CacheManager::getImpl();
 		try {
 			cchi->addToQ(dstId+"_q", JSONUtil::getDocumentStr(el));
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		} catch (const std::exception& e) {
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		}
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	} else if(StringUtil::endsWith(path, "/candidate")) {
@@ -418,9 +418,9 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		CacheInterface* cchi = CacheManager::getImpl();
 		try {
 			cchi->addToQ(dstId+"_q", JSONUtil::getDocumentStr(el));
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		} catch (const std::exception& e) {
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		}
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	} else if(StringUtil::endsWith(path, "/answer")) {
@@ -449,9 +449,9 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		CacheInterface* cchi = CacheManager::getImpl();
 		try {
 			cchi->addToQ(dstId+"_q", JSONUtil::getDocumentStr(el));
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		} catch (const std::exception& e) {
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		}
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 	} else if(StringUtil::endsWith(path, "/leave")) {
@@ -465,9 +465,9 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		try {
 			cchi->remove(id);
 			cchi->remove(id+"_q");
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		} catch (const std::exception& e) {
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		}
 		res->addHeaderValue(HttpResponse::Connection, "close");
 		res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
@@ -489,9 +489,9 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 			if(rsc.at(rsc.length()-1)==',') {
 				rsc = rsc.substr(0, rsc.length()-1);
 			}
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		} catch (const std::exception& e) {
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		}
 		rsc += "]";
 		res->setContent(rsc);
@@ -553,9 +553,9 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		CacheInterface* cchi = CacheManager::getImpl();
 		try {
 			cchi->set(id, token);
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		} catch (const std::exception& e) {
-			delete cchi;
+			CacheManager::cleanImpl(cchi);
 		}
 
 		JSONElement er = JSONElement::object();

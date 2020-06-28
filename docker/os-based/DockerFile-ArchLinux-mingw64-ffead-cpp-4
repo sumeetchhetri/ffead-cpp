@@ -40,10 +40,10 @@ RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
 RUN unzip master.zip
 RUN rm -f master.zip
 
-RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/v4.0.zip
-RUN unzip v4.0.zip
-RUN mv ffead-cpp-4.0 ffead-cpp-src
-RUN rm -f v4.0.zip
+RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+RUN unzip master.zip
+RUN mv ffead-cpp-master ffead-cpp-src
+RUN rm -f master.zip
 
 WORKDIR /tmp/libcuckoo-master
 RUN x86_64-w64-mingw32-cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .

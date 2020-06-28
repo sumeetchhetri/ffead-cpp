@@ -20,9 +20,10 @@ rm -rf libcuckoo-master
 cd $IROOT
 
 
-wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/v4.0.zip
-unzip v4.0.zip
-mv ffead-cpp-4.0 ffead-cpp-src
+wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+unzip master.zip
+rm -f master.zip
+mv ffead-cpp-master ffead-cpp-src
 mv ${TROOT}/ffead-cpp-src ffead-cpp-src
 cd ffead-cpp-src/
 
