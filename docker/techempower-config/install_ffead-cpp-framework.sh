@@ -73,6 +73,7 @@ sed -i 's|ENABLE_SCR=true|ENABLE_SCR=false|g' resources/server.prop
 sed -i 's|ENABLE_SWS=true|ENABLE_SWS=false|g' resources/server.prop
 sed -i 's|ENABLE_JOBS=true|ENABLE_JOBS=false|g' resources/server.prop
 sed -i 's|LOGGING_ENABLED=true|LOGGING_ENABLED=false|g' resources/server.prop
+sed -i 's|EVH_SINGLE=true|EVH_SINGLE=false|g' $FFEAD_CPP_PATH/resources/server.prop
 
 rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/peer-server
 
