@@ -32,6 +32,8 @@
 #include "GenericObject.h"
 
 class CacheManager {
+	static bool isSinglEVH;
+	static std::map<std::string, CacheInterface*> sevhCchImpls;
 	Logger logger;
 	static std::map<std::string, CacheManager*> caches;
 	static std::map<std::string, std::string> defDsnNames;
@@ -43,9 +45,11 @@ class CacheManager {
 	CacheManager(const ConnectionProperties& props);
 	friend class ConfigurationHandler;
 public:
+	static void init(bool isSinglEVH);
 	CacheManager();
 	virtual ~CacheManager();
 	static CacheInterface* getImpl(std::string name = "", std::string appName = "");
+	static void cleanImpl(CacheInterface*);
 };
 
 #endif /* CACHEMANAGER_H_ */

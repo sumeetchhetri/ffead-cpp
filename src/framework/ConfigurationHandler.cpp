@@ -2569,6 +2569,8 @@ void ConfigurationHandler::handleRestControllerMarker(ClassStructure& cs, const 
 
 void ConfigurationHandler::initializeDataSources()
 {
+	bool isSinglEVH = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["EVH_SINGLE"])=="true";
+	DataSourceManager::init(isSinglEVH);
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
 	std::map<std::string, bool, std::less<> > mycntxts = ConfigurationData::getInstance()->servingContexts;
 	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > sdormConnProperties = ConfigurationData::getInstance()->sdormConnProperties;
@@ -2591,6 +2593,8 @@ void ConfigurationHandler::initializeDataSources()
 
 void ConfigurationHandler::initializeCaches()
 {
+	bool isSinglEVH = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["EVH_SINGLE"])=="true";
+	CacheManager::init(isSinglEVH);
 	std::map<std::string, bool, std::less<> > mycntxts = ConfigurationData::getInstance()->servingContexts;
 	std::map<std::string, std::map<std::string, ConnectionProperties, std::less<> >, std::less<> > cacheConnProperties = ConfigurationData::getInstance()->cacheConnProperties;
 	std::map<std::string, bool, std::less<> >::iterator mit;

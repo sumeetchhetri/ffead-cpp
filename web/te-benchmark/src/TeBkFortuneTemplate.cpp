@@ -43,7 +43,7 @@ void TeBkFortuneTemplate::getContext(HttpRequest* request, Context* context)
 		nf.setMessage("Additional fortune added at request time.");
 		flst.push_back(nf);
 		std::sort (flst.begin(), flst.end());
-		delete sqli;
+		DataSourceManager::cleanImpl(sqli);
 
 		context->insert(std::pair<std::string, GenericObject>("fortunes", GenericObject()));
 		context->find("fortunes")->second << flst;

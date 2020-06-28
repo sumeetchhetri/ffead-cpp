@@ -24,6 +24,12 @@
 
 std::map<std::string, CacheManager*> CacheManager::caches;
 std::map<std::string, std::string> CacheManager::defDsnNames;
+std::map<std::string, CacheInterface*> CacheManager::sevhCchImpls;
+bool CacheManager::isSinglEVH = false;
+
+void CacheManager::init(bool issevh) {
+	isSinglEVH = issevh;
+}
 
 void CacheManager::initCache(const ConnectionProperties& props, const std::string& appNameN) {
 	Logger logger = LoggerFactory::getLogger("CacheManager");
@@ -95,6 +101,12 @@ void CacheManager::destroy()
 	caches.clear();
 }
 
+void CacheManager::cleanImpl(CacheInterface* ccImpl) {
+	if(!isSinglEVH) {
+		delete ccImpl;
+	}
+}
+
 CacheInterface* CacheManager::getImpl(std::string name, std::string appName) {
 	if(appName=="") {
 		appName = CommonUtils::getAppName();
@@ -107,9 +119,14 @@ CacheInterface* CacheManager::getImpl(std::string name, std::string appName) {
 		name = defDsnNames[appName];
 	}
 	name = appName + name;
-	if(caches.find(name)==caches.end())
-	{
+	if(caches.find(name)==caches.end()) {
 		throw std::runtime_error("Cache Not found...");
+	}
+	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
+	if(isSinglEVH) {
+		if(sevhCchImpls.find(name)!=sevhCchImpls.end()) {
+			return sevhCchImpls[name];
+		}
 	}
 	CacheManager* cchMgr = caches[name];
 	CacheInterface* t = NULL;
@@ -130,6 +147,10 @@ CacheInterface* CacheManager::getImpl(std::string name, std::string appName) {
 #endif
 	}
 	t->init();
+	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
+	if(isSinglEVH) {
+		sevhCchImpls[name] = t;
+	}
 	return t;
 }
 
