@@ -22,6 +22,8 @@ export PATH=${IROOT}/nginxfc/sbin:${PATH}
 export LD_LIBRARY_PATH=${IROOT}/:${IROOT}/lib:${FFEAD_CPP_PATH}/lib:/usr/local/lib:$LD_LIBRARY_PATH
 export ODBCINI=${IROOT}/odbc.ini
 export ODBCSYSINI=${IROOT}
+export LD_PRELOAD=/usr/local/lib/libmimalloc.so
+#export LD_PRELOAD=$IROOT/snmalloc-0.4.2/build/libsnmallocshim.so
 
 cd $FFEAD_CPP_PATH
 
