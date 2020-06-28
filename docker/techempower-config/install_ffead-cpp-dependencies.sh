@@ -21,14 +21,20 @@ make install
 cd $IROOT
 rm -rf libcuckoo-master
 
-wget -q https://cdn.mysql.com/archives/mysql-connector-odbc-8.0/mysql-connector-odbc-8.0.19-linux-glibc2.12-x86-64bit.tar.gz
-wget -q https://cdn.mysql.com/archives/mysql-connector-odbc-5.3/mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit.tar.gz
-tar xf mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit.tar.gz
 mkdir -p /usr/lib/x86_64-linux-gnu/odbc
-mv mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit/lib/libmyodbc5* /usr/lib/x86_64-linux-gnu/odbc/
-mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit/bin/myodbc-installer -d -a -n "MySQL" -t "DRIVER=/usr/lib/x86_64-linux-gnu/odbc/libmyodbc5w.so;"
-rm -f mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit.tar.gz
-rm -rf mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit
+wget -q https://downloads.mysql.com/archives/get/p/10/file/mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit.tar.gz
+tar xf mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit.tar.gz
+mv mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit/lib/libmyodbc8* /usr/lib/x86_64-linux-gnu/odbc/
+mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit/bin/myodbc-installer -d -a -n "MySQL" -t "DRIVER=/usr/lib/x86_64-linux-gnu/odbc/libmyodbc8w.so;"
+rm -f mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit.tar.gz
+rm -rf mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit
+
+#wget -q https://cdn.mysql.com/archives/mysql-connector-odbc-5.3/mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit.tar.gz
+#tar xf mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit.tar.gz
+#mv mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit/lib/libmyodbc5* /usr/lib/x86_64-linux-gnu/odbc/
+#mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit/bin/myodbc-installer -d -a -n "MySQL" -t "DRIVER=/usr/lib/x86_64-linux-gnu/odbc/libmyodbc5w.so;"
+#rm -f mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit.tar.gz
+#rm -rf mysql-connector-odbc-5.3.11-linux-ubuntu16.04-x86-64bit
 
 #wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz
 #tar xf mongo-c-driver-1.4.0.tar.gz
