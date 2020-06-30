@@ -171,20 +171,21 @@ std::string RedisCacheImpl::replyValue(redisReply* reply) {
 	return "";
 }
 
-redisReply* RedisCacheImpl::execute(const char* cmd, ...) {
+redisReply* RedisCacheImpl::execute(const char* format, ...) {
 	Connection* connection = pool->checkout();
 	redisContext* c = (redisContext*) connection->getConn();
 	va_list vl;
-	va_start(vl, cmd);
-	redisReply* reply = (redisReply*) redisvCommand(c, cmd, vl);
+	va_start(vl, format);
+	redisReply* reply = (redisReply*) redisvCommand(c, format, vl);
 	va_end(vl);
 	pool->release(connection);
 	return reply;
 }
 
-void* RedisCacheImpl::executeCommand(std::string& command, ...) {
+void* RedisCacheImpl::executeCommand(const std::string& command, ...) {
 	va_list vl;
-	va_start(vl, command);
+	std::string c = command;
+	va_start(vl, c);
 	void* reply = execute(command.c_str());
 	va_end(vl);
 	return reply;
