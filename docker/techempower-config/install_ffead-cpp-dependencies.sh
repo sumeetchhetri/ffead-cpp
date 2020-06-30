@@ -56,7 +56,8 @@ rm -rf mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit
 
 cd $IROOT
 wget -q https://github.com/microsoft/mimalloc/archive/v1.6.3.tar.gz
-tar xvf mimalloc-1.6.3.tar.gz
+tar xvf v1.6.3.tar.gz
+rm -f v1.6.3.tar.gz
 cd mimalloc-1.6.3
 mkdir -p out/release
 cmake ../.. -DCMAKE_BUILD_TYPE=Release
@@ -65,7 +66,8 @@ cd $IROOT
 rm -rf mimalloc-1.6.3
 
 wget -q https://github.com/microsoft/snmalloc/archive/0.4.2.tar.gz
-tar xvf snmalloc-0.4.2.tar.gz
+tar xvf 0.4.2.tar.gz
+rm -f 0.4.2.tar.gz
 cd snmalloc-0.4.2
 mkdir build
 cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release
