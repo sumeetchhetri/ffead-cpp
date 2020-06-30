@@ -32,7 +32,7 @@ set(CMAKE_VERBOSE_MAKEFILE off)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/include -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0/ -Wall -Wno-unknown-pragmas -Wno-delete-incomplete")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/usr/local/include -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0/ -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-undefined,error")
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 
