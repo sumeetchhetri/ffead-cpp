@@ -32,7 +32,7 @@ private:
 	Element root;
 	std::string docType;
 	Element* getElementByName(const std::string&, Element*);
-	friend class XmlParser;
+	friend class SimpleXmlParser;
 };
 
 #endif

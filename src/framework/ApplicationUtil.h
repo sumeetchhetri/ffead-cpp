@@ -22,7 +22,7 @@
 
 #ifndef APPLICATIONUTIL_H_
 #define APPLICATIONUTIL_H_
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "AfcUtil.h"
 #include "iostream"
 #include "ConfigurationData.h"

@@ -40,7 +40,7 @@ std::string ApplicationUtil::buildAllApplications(const std::vector<std::string>
 		std::string path = files.at(var).substr(0,files.at(var).find_last_of("/")+1);
 		std::string appName = apps.at(var).substr(0,apps.at(var).find_last_of("/"));
 
-		XmlParser parser("Parser");
+		SimpleXmlParser parser("Parser");
 		Document doc;
 		parser.readDocument(files.at(var), doc);
 		const Element& root = doc.getRootElement();

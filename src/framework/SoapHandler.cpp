@@ -36,7 +36,7 @@ void SoapHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, std::s
 	Element* soapbody = NULL;
 	try
 	{
-		XmlParser parser("Validator");
+		SimpleXmlParser parser("Validator");
 		Document doc;
 		parser.parse(req->getContent(), doc);
 		soapenv = &(doc.getRootElement());

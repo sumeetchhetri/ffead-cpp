@@ -14,7 +14,7 @@
     limitations under the License.  
 */
 /*
- * XmlParser.h
+ * SimpleXmlParser.h
  *
  *  Created on: Sep 11, 2009
  *      Author: sumeet
@@ -32,10 +32,10 @@
 #include "LoggerFactory.h"
 #include "StringUtil.h"
 
-class XmlParser {
+class SimpleXmlParser {
 	public:
-		XmlParser(const std::string&);
-		virtual ~XmlParser();
+		SimpleXmlParser(const std::string&);
+		virtual ~SimpleXmlParser();
 		void parse(std::string, Document&);
 		void readDocument(const std::string& filename, Document&);
 	private:

@@ -50,7 +50,7 @@ void* MethodInvoc::service(void* arg)
 	methInfo =methInfo.substr(0,methInfo.find_last_of(">")+1);
 	try
 	{
-		XmlParser parser("Parser");
+		SimpleXmlParser parser("Parser");
 		if(methInfo.find("lang=\"c++\"")!=std::string::npos || methInfo.find("lang='c++'")!=std::string::npos)
 		{
 			Document doc;

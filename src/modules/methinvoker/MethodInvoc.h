@@ -24,7 +24,7 @@
 #define METHODINVOC_H_
 
 #include "Server.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "Reflector.h"
 #include "fstream"
 #include "XMLSerialize.h"

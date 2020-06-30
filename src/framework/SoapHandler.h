@@ -28,7 +28,7 @@
 #include "HttpResponse.h"
 #include "Document.h"
 #include "LoggerFactory.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "ConfigurationData.h"
 
 class SoapHandler {

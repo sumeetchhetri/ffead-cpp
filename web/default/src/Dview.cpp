@@ -34,6 +34,6 @@ Dview::~Dview() {
 void Dview::getDocument(Document* doc)
 {
 	std::string xml = "<html><head><script src=\"1.js\"></script></head><body><input type=\"text\"/><input type=\"submit\"/></body></html>";
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 	parser.parse(xml, *doc);
 }

@@ -25,7 +25,7 @@
 #include "AppDefines.h"
 #include "TemplateEngine.h"
 #include "Reflection.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #ifdef INC_COMP
 #include "ComponentGen.h"
 #endif

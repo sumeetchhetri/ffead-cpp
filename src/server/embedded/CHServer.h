@@ -60,7 +60,7 @@
 #include "ClassInfo.h"
 
 #include "View.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "TemplateHandler.h"
 #include <stdio.h>
 #include <stdlib.h>

@@ -25,10 +25,10 @@
 std::map<std::string, DataSourceManager*> DataSourceManager::dsns;
 std::map<std::string, std::string> DataSourceManager::defDsnNames;
 std::map<std::string, DataSourceInterface*> DataSourceManager::sevhDsnImpls;
-bool DataSourceManager::isSinglEVH = false;
+bool DataSourceManager::isSingleEVH = false;
 
 void DataSourceManager::init(bool issevh) {
-	isSinglEVH = issevh;
+	isSingleEVH = issevh;
 }
 
 void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping& mapping)
@@ -134,8 +134,10 @@ DataSourceManager::~DataSourceManager() {
 }
 
 void DataSourceManager::cleanImpl(DataSourceInterface* dsImpl) {
-	if(!isSinglEVH) {
+	if(!isSingleEVH) {
 		delete dsImpl;
+	} else {
+		dsImpl->endSession();
 	}
 }
 
@@ -155,7 +157,7 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name, std::string ap
 		throw std::runtime_error("Data Source Not found...");
 	}
 	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
-	if(isSinglEVH) {
+	if(isSingleEVH) {
 		if(sevhDsnImpls.find(name)!=sevhDsnImpls.end()) {
 			return sevhDsnImpls[name];
 		}
@@ -178,6 +180,7 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name, std::string ap
 	{
 		return NULL;
 	}
+	t->isSingleEVH = isSingleEVH;
 	t->appName = dsnMgr->mapping.getAppName();
 	t->reflector = GenericObject::getReflector();
 	std::map<std::string, DataSourceEntityMapping>::iterator it;
@@ -190,7 +193,7 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name, std::string ap
 		}
 	}
 	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
-	if(isSinglEVH) {
+	if(isSingleEVH) {
 		sevhDsnImpls[name] = t;
 	}
 	return t;

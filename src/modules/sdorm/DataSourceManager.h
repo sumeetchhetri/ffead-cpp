@@ -36,7 +36,7 @@
 class DataSourceManager;
 
 class DataSourceManager {
-	static bool isSinglEVH;
+	static bool isSingleEVH;
 	static std::map<std::string, DataSourceInterface*> sevhDsnImpls;
 	Logger logger;
 	static std::map<std::string, DataSourceManager*> dsns;
@@ -49,7 +49,7 @@ class DataSourceManager {
 	static void destroy();
 	friend class ConfigurationHandler;
 public:
-	static void init(bool isSinglEVH);
+	static void init(bool isSingleEVH);
 	virtual ~DataSourceManager();
 	static DataSourceInterface* getImpl(std::string name = "", std::string appName = "");
 	static void cleanImpl(DataSourceInterface*);

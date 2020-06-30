@@ -34,7 +34,7 @@ FFEADContext::FFEADContext(const std::string& depFile, const std::string& appNam
 	reflector = NULL;
 	cleared = false;
 	logger = LoggerFactory::getLogger("FFEADContext");
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 	Document doc;
 	parser.readDocument(depFile, doc);
 	const Element& root = doc.getRootElement();

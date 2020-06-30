@@ -22,7 +22,7 @@
 
 #ifndef WSUTIL_H_
 #define WSUTIL_H_
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "Reflection.h"
 #include "TemplateEngine.h"
 #include "AfcUtil.h"

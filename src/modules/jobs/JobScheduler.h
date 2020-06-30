@@ -24,7 +24,7 @@
 #define JOBSCHEDULER_H_
 #include "CastUtil.h"
 #include "CronTimer.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "Reflector.h"
 #include "Thread.h"
 #include "LoggerFactory.h"

@@ -141,7 +141,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	strVec vecvp,pathvec;
 	std::map<std::string, std::string, std::less<> > ajintpthMap, tpes, dcps, compnts;
 	propMap srp;
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 #ifdef INC_COMP
 	ComponentGen gen;
 #endif
@@ -1285,7 +1285,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 void ConfigurationHandler::configureDataSources(const std::string& name, const std::string& configFile, std::map<std::string, ClassStructure, std::less<> >& allclsmap)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 	logger << ("started reading sdorm config file " + configFile) << std::endl;
 
 	Document doc;
@@ -1478,7 +1478,7 @@ void ConfigurationHandler::destroyDataSources()
 void ConfigurationHandler::configureCaches(const std::string& name, const std::string& configFile)
 {
 	Logger logger = LoggerFactory::getLogger("ConfigurationHandler");
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 	logger << ("started reading cache config file " + configFile) << std::endl;
 
 	Document doc;

@@ -115,7 +115,7 @@ void* BeanContext::invoke(const std::string& name, std::vector<GenericObject> ar
 		{
 		}
 		//logger << call << std::flush;
-		XmlParser parser("Parser");
+		SimpleXmlParser parser("Parser");
 		Document doc;
 		parser.parse(call, doc);
 		Element message = doc.getRootElement();

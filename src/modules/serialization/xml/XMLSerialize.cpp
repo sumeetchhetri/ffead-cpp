@@ -271,7 +271,7 @@ void XMLSerialize::addPrimitiveElementToContainer(void* _1, int serOpt, const in
 
 void* XMLSerialize::getUnserializableObject(const std::string& _1)
 {
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 	try
 	{
 		Document doc;

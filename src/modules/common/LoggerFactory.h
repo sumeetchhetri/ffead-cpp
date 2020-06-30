@@ -23,7 +23,7 @@
 #ifndef LOGGERFACTORY_H_
 #define LOGGERFACTORY_H_
 #include "Logger.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "CommonUtils.h"
 
 class LoggerFactory {

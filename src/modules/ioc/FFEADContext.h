@@ -22,7 +22,7 @@
 
 #ifndef FFEADCONTEXT_H_
 #define FFEADCONTEXT_H_
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "Reflector.h"
 #include "CastUtil.h"
 #include "StringUtil.h"

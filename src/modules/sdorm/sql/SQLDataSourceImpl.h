@@ -84,6 +84,10 @@ public:
 	std::vector<std::map<std::string, GenericObject> > execute(Query& query);
 	bool executeUpdate(Query& query);
 	std::vector<std::map<std::string, GenericObject> > execute(QueryBuilder& qb);
+
+	bool startSession(void*);
+	bool startSession();
+	bool endSession();
 protected:
 	bool executeInsert(Query& query, void* entity);
 	bool isGetDbEntityForBulkInsert();
@@ -101,9 +105,6 @@ protected:
 	void executeSequence(DataSourceEntityMapping& dsemp, GenericObject& idv);
 	void executeIdentity(DataSourceEntityMapping& dsemp, GenericObject& idv);
 	void executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject& idv);
-
-	void* getContext(void* details);
-	void destroyContext(void*);
 };
 
 #endif /* SQLDATASOURCEIMPL_H_ */

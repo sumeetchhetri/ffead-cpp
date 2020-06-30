@@ -16,7 +16,7 @@ libffead_modules_la_SOURCES =  ../../modules/common/Bigdecimal.cpp \
 						../../modules/common/Connection.cpp \
 						../../modules/common/ConnectionPooler.cpp \
 						../../modules/common/CryptoHandler.cpp \
-						../../modules/common/CsvFileReader.cpp \
+						../../modules/common/SimpleCsvFileReader.cpp \
 						../../modules/common/Date.cpp \
 						../../modules/common/DateFormat.cpp \
 						../../modules/common/DLogger.cpp \
@@ -34,7 +34,7 @@ libffead_modules_la_SOURCES =  ../../modules/common/Bigdecimal.cpp \
 						../../modules/common/Timer.cpp \
 						../../modules/common/View.cpp \
 						../../modules/common/XmlParseException.cpp \
-						../../modules/common/XmlParser.cpp \
+						../../modules/common/SimpleXmlParser.cpp \
 						../../modules/common/MarkerHandler.cpp \
 						../../modules/common/TemplateEngine.cpp \
 						../../modules/common/CastUtil.cpp \

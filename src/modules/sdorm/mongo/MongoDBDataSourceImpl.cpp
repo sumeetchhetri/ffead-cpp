@@ -75,8 +75,8 @@ std::string MongoDBDataSourceImpl::initializeDMLQueryParts(Query& cquery, bson_t
 	return collectionName;
 }
 
-std::string MongoDBDataSourceImpl::initializeQueryParts(Query& cquery, bson_t** querySpec, bson_t** fields, std::string& operationName) {
-	*fields = NULL;
+std::string MongoDBDataSourceImpl::initializeQueryParts(Query& cquery, bson_t** querySpec, bson_t** opts, std::string& operationName) {
+	*opts = NULL;
 	std::string qs = cquery.getQuery();
 	StringUtil::trim(qs);
 	std::string collectionName;
@@ -106,27 +106,13 @@ std::string MongoDBDataSourceImpl::initializeQueryParts(Query& cquery, bson_t** 
 		bson_error_t err;
 		bson_t* queryParts = bson_new_from_json((const uint8_t*)queryStrPart.c_str(), queryStrPart.length(), &err);
 		bson_iter_t i;
-		//std::cout << bson_as_json(queryParts, NULL) << std::endl;
-
-		bson_iter_init(&i, queryParts);
-		bool t = bson_iter_find(&i, "$query");
-		if(t)
+		if(bson_iter_init_find(&i, queryParts, "$query"))
 		{
 			bson_append_value(*querySpec, "$query", 6, bson_iter_value(&i));
 		}
-
-		bson_iter_init(&i, queryParts);
-		t = bson_iter_find(&i, "$orderby");
-		if(t)
+		if(bson_iter_init_find(&i, queryParts, "$opts"))
 		{
-			bson_append_value(*querySpec, "$orderby", 8, bson_iter_value(&i));
-		}
-
-		bson_iter_init(&i, queryParts);
-		t = bson_iter_find(&i, "$fields");
-		if(t)
-		{
-			*fields = bson_new_from_data(bson_iter_value(&i)->value.v_doc.data, bson_iter_value(&i)->value.v_doc.data_len);
+			*opts = bson_new_from_data(bson_iter_value(&i)->value.v_doc.data, bson_iter_value(&i)->value.v_doc.data_len);
 		}
 	}
 	return collectionName;
@@ -435,10 +421,10 @@ void MongoDBDataSourceImpl::appendGenericObject(bson_t* b, const std::string& na
 	}
 }
 
-void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query& query, bson_t* querySpec, bson_t* fields, const bool& isObj, const bool& isCountQuery) {
-	Connection* conn = _conn();
+void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query& query, bson_t* querySpec, bson_t* opts, const bool& isObj, const bool& isCountQuery) {
+	_conn();
 
-	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
+	mongoc_collection_t *collection = _collection(collectionName.c_str());
 
 	mongoc_cursor_t* cursor = NULL;
 
@@ -453,9 +439,34 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 		result = new std::vector<std::map<std::string, GenericObject> >;
 	}
 
+	if(opts!=NULL) {
+		if(query.getStart()>0) {
+			bson_iter_t i;
+			if(bson_iter_init_find(&i, opts, "$skip"))
+			{
+				bson_iter_overwrite_int64(&i, query.getStart());
+			}
+			else
+			{
+				bson_append_int64(opts, "$skip", 5, query.getStart());
+			}
+		}
+		if(query.getCount()>0) {
+			bson_iter_t i;
+			if(bson_iter_init_find(&i, opts, "$limit"))
+			{
+				bson_iter_overwrite_int64(&i, query.getCount());
+			}
+			else
+			{
+				bson_append_int64(opts, "$limit", 6, query.getCount());
+			}
+		}
+	}
+
 	if(!isCountQuery)
 	{
-		cursor = mongoc_collection_find(collection, MONGOC_QUERY_NONE, query.getStart(), query.getCount(), 0, querySpec, fields, NULL);
+		cursor = mongoc_collection_find_with_opts(collection, querySpec, opts, NULL);
 		const bson_t *doc;
 		while (mongoc_cursor_next(cursor, &doc))
 		{
@@ -477,9 +488,9 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 			mongoc_cursor_destroy (cursor);
 
 			bson_destroy(querySpec);
-			if(fields!=NULL)bson_destroy(fields);
+			if(opts!=NULL)bson_destroy(opts);
 
-			_release(conn, collection);
+			_release(collection);
 
 			if(isObj)
 			{
@@ -497,44 +508,35 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 	else
 	{
 		bson_error_t er;
-		result = new long(mongoc_collection_count(collection, MONGOC_QUERY_NONE, querySpec, query.getStart(),
-				query.getCount(), NULL, &er));
+		result = new long(mongoc_collection_count_documents(collection, querySpec, opts, NULL, NULL, &er));
 	}
 
 	bson_destroy(querySpec);
-	if(fields!=NULL)bson_destroy(fields);
+	if(opts!=NULL)bson_destroy(opts);
 
-	_release(conn, collection);
+	_release(collection);
 	return result;
 }
 
 
+void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, QueryBuilder& qb, bson_t* querySpec, bson_t* opts, const bool& isObj) {
+	_conn();
 
-void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, QueryBuilder& qb, bson_t* query, bson_t* fields, const bool& isObj) {
-	Connection* conn = _conn();
-
-	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
+	mongoc_collection_t *collection = _collection(collectionName.c_str());
 
 	mongoc_cursor_t* cursor = NULL;
-
-	bson_t* querySpec = bson_new();
-
-	if(query!=NULL)
-	{
-		bson_append_document(querySpec, "$query", 6, query);
-	}
 
 	if(qb.getColumnsAsc().size()>0 || qb.getColumnsDesc().size()>0)
 	{
 		bson_t child;
-		bson_append_document_begin(querySpec, "$orderby", 8, &child);
+		bson_append_document_begin(opts, "$orderby", 8, &child);
 		for(int i=0;i<(int)qb.getColumnsAsc().size();i++) {
 			std::string colnm = qb.getColumnsAsc().at(i);
 			bson_append_int32(&child, colnm.c_str(), colnm.length(), 1);
 		}
 		for(int i=0;i<(int)qb.getColumnsDesc().size();i++) {
 			std::string colnm = qb.getColumnsDesc().at(i);
-			bson_append_int32(&child, colnm.c_str(), colnm.length(), 1);
+			bson_append_int32(&child, colnm.c_str(), colnm.length(), -1);
 		}
 		bson_append_document_end(querySpec, &child);
 	}
@@ -550,8 +552,32 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 		result = new std::vector<std::map<std::string, GenericObject> >;
 	}
 
-	cursor = mongoc_collection_find(collection, MONGOC_QUERY_NONE, qb.getStart(), qb.getCount(), 0,
-			querySpec, fields, NULL);
+	if(opts!=NULL) {
+		if(qb.getStart()>0) {
+			bson_iter_t i;
+			if(bson_iter_init_find(&i, opts, "$skip"))
+			{
+				bson_iter_overwrite_int64(&i, qb.getStart());
+			}
+			else
+			{
+				bson_append_int64(opts, "$skip", 5, qb.getStart());
+			}
+		}
+		if(qb.getCount()>0) {
+			bson_iter_t i;
+			if(bson_iter_init_find(&i, opts, "$limit"))
+			{
+				bson_iter_overwrite_int64(&i, qb.getCount());
+			}
+			else
+			{
+				bson_append_int64(opts, "$limit", 6, qb.getCount());
+			}
+		}
+	}
+
+	cursor = mongoc_collection_find_with_opts(collection, querySpec, opts, NULL);
 	const bson_t *doc;
 	while (mongoc_cursor_next(cursor, &doc))
 	{
@@ -572,11 +598,11 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 	if (mongoc_cursor_error (cursor, &error)) {
 		mongoc_cursor_destroy (cursor);
 
-		bson_destroy(query);
+		bson_destroy(opts);
 		bson_destroy(querySpec);
-		if(fields!=NULL)bson_destroy(fields);
+		if(opts!=NULL)bson_destroy(opts);
 
-		_release(conn, collection);
+		_release(collection);
 
 		reflector->destroyContainer(result, clasName, "std::vector", appName);
 
@@ -585,11 +611,11 @@ void* MongoDBDataSourceImpl::getResults(const std::string& collectionName, Query
 
 	mongoc_cursor_destroy (cursor);
 
-	bson_destroy(query);
+	bson_destroy(opts);
 	bson_destroy(querySpec);
-	if(fields!=NULL)bson_destroy(fields);
+	if(opts!=NULL)bson_destroy(opts);
 
-	_release(conn, collection);
+	_release(collection);
 	return result;
 }
 
@@ -638,11 +664,11 @@ void MongoDBDataSourceImpl::executePreTable(DataSourceEntityMapping& dsemp, Gene
 			params["entity_column"] = dsemp.getIdgenentityColumn();
 			params["entity_name"] = dsemp.getTableName();
 			query = std::string("db.${idgen_tabname}.find({\"$query\": {\"${entity_column}\": \"${entity_name}\"}, ") +
-						std::string("\"$fields\": {\"${idgen_colname}\": 1}})");
+						std::string("{\"$opts\":{\"projection\": {\"${idgen_colname}\": 1}}})");
 		}
 		else
 		{
-			query = "db.${idgen_tabname}.find({\"$fields\": {\"${idgen_colname}\": 1}})";
+			query = "db.${idgen_tabname}.find({\"$opts\":{\"projection\": {\"${idgen_colname}\": 1}}})";
 		}
 		query = TemplateEngine::evaluate(query, params);
 
@@ -704,6 +730,8 @@ MongoDBDataSourceImpl::MongoDBDataSourceImpl(ConnectionPooler* pool, Mapping* ma
 	this->pool = pool;
 	this->mapping = mapping;
 	logger = LoggerFactory::getLogger("MongoDBDataSourceImpl");
+	conn = NULL;
+	collection = NULL;
 }
 
 MongoDBDataSourceImpl::~MongoDBDataSourceImpl() {
@@ -1440,47 +1468,47 @@ bool MongoDBDataSourceImpl::executeUpdate(Query& query) {
 		q = bson_new();
 	}
 	if(operationName=="insert") {
-		Connection* conn = _conn();
-		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
+		_conn();
+		mongoc_collection_t *collection = _collection(collectionName.c_str());
 		bson_error_t er;
 		bool fl = mongoc_collection_insert(collection, MONGOC_INSERT_NONE, data, NULL, &er);
 		if(data==NULL)bson_destroy(data);
-		_release(conn, collection);
+		_release(collection);
 		return fl;
-	} else if(operationName=="save") {
-		Connection* conn = _conn();
-		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
+	} else if(operationName=="replace") {
+		_conn();
+		mongoc_collection_t *collection = _collection(collectionName.c_str());
 		bson_error_t er;
-		bool fl = mongoc_collection_save(collection, data, NULL, &er);
+		bool fl = mongoc_collection_replace_one(collection, q, data, NULL, NULL, &er);
 		if(data==NULL)bson_destroy(data);
 		bson_destroy(q);
-		_release(conn, collection);
+		_release(collection);
 		return fl;
 	} else if(operationName=="update") {
-		Connection* conn = _conn();
-		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
+		_conn();
+		mongoc_collection_t *collection = _collection(collectionName.c_str());
 		bson_error_t er;
 		bool fl = mongoc_collection_update(collection, MONGOC_UPDATE_NONE, q, data, NULL, &er);
 		if(data==NULL)bson_destroy(data);
 		bson_destroy(q);
-		_release(conn, collection);
+		_release(collection);
 		return fl;
 	} else if(operationName=="updateMulti") {
-		Connection* conn = _conn();
-		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
+		_conn();
+		mongoc_collection_t *collection = _collection(collectionName.c_str());
 		bson_error_t er;
 		bool fl = mongoc_collection_update(collection, MONGOC_UPDATE_MULTI_UPDATE, q, data, NULL, &er);
 		if(data==NULL)bson_destroy(data);
 		bson_destroy(q);
-		_release(conn, collection);
+		_release(collection);
 		return fl;
 	} else if(operationName=="remove") {
-		Connection* conn = _conn();
-		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
+		_conn();
+		mongoc_collection_t *collection = _collection(collectionName.c_str());
 		bson_error_t er;
 		bool fl = mongoc_collection_remove(collection, MONGOC_REMOVE_NONE, q, NULL, &er);
 		bson_destroy(q);
-		_release(conn, collection);
+		_release(collection);
 		return fl;
 	}
 	return false;
@@ -1512,11 +1540,11 @@ bool MongoDBDataSourceImpl::executeInsert(Query& query, void* entity) {
 	{
 		//std::cout << bson_as_json(data, NULL) << std::endl;
 		std::string collectionName = dsemp.getTableName();
-		Connection* conn = _conn();
-		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
+		_conn();
+		mongoc_collection_t *collection = _collection(collectionName.c_str());
 		bson_error_t er;
 		fl = mongoc_collection_insert(collection, MONGOC_INSERT_NONE, data, NULL, &er);
-		_release(conn, collection);
+		_release(collection);
 	}
 	bson_destroy(data);
 	return fl;
@@ -1534,10 +1562,10 @@ void* MongoDBDataSourceImpl::getDbEntityForBulkInsert(void* entity, const std::s
 
 bool MongoDBDataSourceImpl::executeInsertBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities) {
 	std::string collectionName = mapping->getTableForClass(query.getClassName());
-	Connection* conn = _conn();
+	_conn();
 
-	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
-	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation (collection, true, NULL);
+	mongoc_collection_t *collection = _collection(collectionName.c_str());
+	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation_with_opts (collection, NULL);
 	for (int k = 0; k < (int)dbEntities.size(); k++) {
 		mongoc_bulk_operation_insert (bulk, (bson_t*)dbEntities.at(k));
 		bson_destroy((bson_t*)dbEntities.at(k));
@@ -1546,17 +1574,17 @@ bool MongoDBDataSourceImpl::executeInsertBulk(Query& query, std::vector<void*> e
 	bson_error_t error;
 	bool fl = mongoc_bulk_operation_execute (bulk, &reply, &error);
 	mongoc_bulk_operation_destroy (bulk);
-	_release(conn, collection);
+	_release(collection);
 	return fl;
 }
 
 bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, std::vector<void*> entities, std::vector<void*> dbEntities) {
 	std::string collectionName = mapping->getTableForClass(query.getClassName());
-	Connection* conn = _conn();
+	_conn();
 
 	bool fl = true;
-	mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
-	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation (collection, true, NULL);
+	mongoc_collection_t *collection = _collection(collectionName.c_str());
+	mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation_with_opts (collection, NULL);
 	for (int k = 0; k < (int)dbEntities.size(); k++) {
 		//bson_error_t er;
 
@@ -1567,36 +1595,30 @@ bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, std::vector<void*> e
 		if(isIdFound) {
 			bson_t* q = bson_new();
 			bson_type_t t = bson_iter_type(&i);
-			GenericObject go;
 			switch (t) {
 				case BSON_TYPE_INT32:
 				case BSON_TYPE_INT64:
 				case BSON_TYPE_DOUBLE:
 				{
 					long long d = getIterNumericVal(i, t);
-					go.set(d);
+					bson_append_int64(q, "_id", 3, d);
 					break;
 				}
 				case BSON_TYPE_UTF8:
 				{
 					uint32_t len;
 					const char *cs = bson_iter_utf8(&i, &len);
-					std::string s(cs, len);
-					go.set(s);
+					bson_append_utf8(q, "_id", 3, cs, len);
 					break;
 				}
 				case BSON_TYPE_OID:
 				{
-					char oidhex[25];
-					bson_oid_to_string(bson_iter_oid(&i), oidhex);
-					std::string s(oidhex);
-					go.set(s);
+					bson_append_oid(q, "_id", 3, bson_iter_oid(&i));
 					break;
 				}
 				default:
 					break;
 			}
-			appendGenericObject(q, "_id", go);
 			mongoc_bulk_operation_replace_one(bulk, q, data, false);
 			bson_destroy(q);
 		}
@@ -1606,7 +1628,7 @@ bool MongoDBDataSourceImpl::executeUpdateBulk(Query& query, std::vector<void*> e
 	bson_error_t error;
 	fl = mongoc_bulk_operation_execute (bulk, &reply, &error);
 	mongoc_bulk_operation_destroy (bulk);
-	_release(conn, collection);
+	_release(collection);
 	return fl;
 }
 
@@ -1623,11 +1645,38 @@ bool MongoDBDataSourceImpl::executeUpdate(Query& query, void* entity) {
 	if(isIdFound)
 	{
 		std::string collectionName = dsemp.getTableName();
-		Connection* conn = _conn();
-		mongoc_collection_t *collection = _collection (conn, collectionName.c_str());
+		_conn();
+		mongoc_collection_t *collection = _collection(collectionName.c_str());
+		bson_t* q = bson_new();
+		bson_type_t t = bson_iter_type(&i);
+		switch (t) {
+			case BSON_TYPE_INT32:
+			case BSON_TYPE_INT64:
+			case BSON_TYPE_DOUBLE:
+			{
+				long long d = getIterNumericVal(i, t);
+				bson_append_int64(q, "_id", 3, d);
+				break;
+			}
+			case BSON_TYPE_UTF8:
+			{
+				uint32_t len;
+				const char *cs = bson_iter_utf8(&i, &len);
+				bson_append_utf8(q, "_id", 3, cs, len);
+				break;
+			}
+			case BSON_TYPE_OID:
+			{
+				bson_append_oid(q, "_id", 3, bson_iter_oid(&i));
+				break;
+			}
+			default:
+				break;
+		}
+
 		bson_error_t er;
-		fl = mongoc_collection_save(collection, data, NULL, &er);
-		_release(conn, collection);
+		fl = mongoc_collection_replace_one(collection, q, data, NULL, NULL, &er);
+		_release(collection);
 	}
 	bson_destroy(data);
 	return fl;
@@ -1653,26 +1702,26 @@ bool MongoDBDataSourceImpl::remove(const std::string& clasName, GenericObject& i
 
 void* MongoDBDataSourceImpl::executeQuery(Query& cquery, const bool& isObj) {
 	bson_t* querySpec = bson_new();
-	bson_t* fields = NULL;
+	bson_t* opts = NULL;
 	std::string operationName;
 	std::string collectionName;
 	bool isCountQuery = false;
 	if(!isObj)
 	{
-		collectionName = initializeQueryParts(cquery, &querySpec, &fields, operationName);
+		collectionName = initializeQueryParts(cquery, &querySpec, &opts, operationName);
 		if(operationName=="findOne") {
 			cquery.setCount(1);
 			cquery.setStart(0);
 		} else if(operationName=="count") {
-			if(fields!=NULL) {
+			if(opts!=NULL) {
 				bson_destroy(querySpec);
-				bson_destroy(fields);
+				bson_destroy(opts);
 				return new double(-1);
 			}
 			isCountQuery = true;
 		} else if(operationName!="find") {
 			bson_destroy(querySpec);
-			if(fields!=NULL)bson_destroy(fields);
+			if(opts!=NULL)bson_destroy(opts);
 			return NULL;
 		}
 	}
@@ -1681,11 +1730,11 @@ void* MongoDBDataSourceImpl::executeQuery(Query& cquery, const bool& isObj) {
 		DataSourceEntityMapping& dsemp = mapping->getDataSourceEntityMapping(cquery.getClassName());
 		collectionName = dsemp.getTableName();
 	}
-	return getResults(collectionName, cquery, querySpec, fields, isObj, isCountQuery);
+	return getResults(collectionName, cquery, querySpec, opts, isObj, isCountQuery);
 }
 
 void* MongoDBDataSourceImpl::executeQuery(QueryBuilder& qb, const bool& isObj) {
-	bson_t* fields = NULL;
+	bson_t* opts = NULL;
 	bson_t* query = NULL;
 
 	std::string collectionName = qb.getTableName();
@@ -1702,26 +1751,29 @@ void* MongoDBDataSourceImpl::executeQuery(QueryBuilder& qb, const bool& isObj) {
 
 	if(!qb.isAllCols())
 	{
-		fields = NULL;
+		opts = NULL;
 		std::map<std::string, std::string> cols = qb.getColumns();
 		if(cols.size()>0)
 		{
-			fields = bson_new();
-		}
-		std::map<std::string, std::string>::iterator it;
-		for (it=cols.begin(); it!=cols.end(); ++it) {
-			if(!isClassProps)
-			{
-				bson_append_int32(fields, it->first.c_str(), it->first.length(), 1);
-			}
-			else
-			{
-				if(dsemp.getColumnForProperty(it->first)!="")
+			bson_t* projection = bson_new();
+			opts = bson_new();
+			std::map<std::string, std::string>::iterator it;
+			for (it=cols.begin(); it!=cols.end(); ++it) {
+				if(!isClassProps)
 				{
-					bson_append_int32(fields, dsemp.getColumnForProperty(it->first).c_str(),
-							dsemp.getColumnForProperty(it->first).length(), 1);
+					bson_append_int32(projection, it->first.c_str(), it->first.length(), 1);
+				}
+				else
+				{
+					if(dsemp.getColumnForProperty(it->first)!="")
+					{
+						bson_append_int32(projection, dsemp.getColumnForProperty(it->first).c_str(),
+								dsemp.getColumnForProperty(it->first).length(), 1);
+					}
 				}
 			}
+			bson_append_document(opts, "projection", 10, projection);
+			bson_destroy(projection);
 		}
 	}
 
@@ -1734,62 +1786,58 @@ void* MongoDBDataSourceImpl::executeQuery(QueryBuilder& qb, const bool& isObj) {
 	if(query==NULL) {
 		query = bson_new();
 	}
-	return getResults(collectionName, qb, query, fields, isObj);
+	return getResults(collectionName, qb, query, opts, isObj);
 }
 
-Connection* MongoDBDataSourceImpl::_conn() {
-	if(context==NULL) {
-		return pool->checkout();
-	} else {
-		return ((MongoContext*)context)->conn;
+void MongoDBDataSourceImpl::_conn() {
+	if(conn==NULL) {
+		conn = pool->checkout();
 	}
 }
 
-mongoc_collection_t* MongoDBDataSourceImpl::_collection(Connection* conn, const char* collName) {
-	if(context==NULL) {
+mongoc_collection_t* MongoDBDataSourceImpl::_collection(const char* collName) {
+	if(collection==NULL) {
 		return mongoc_client_get_collection ((mongoc_client_t*)conn->getConn(), conn->getNode().getDatabaseName().c_str(), collName);
 	} else {
-		if(((MongoContext*)context)->collection==NULL) {
-			((MongoContext*)context)->collection = mongoc_client_get_collection ((mongoc_client_t*)conn->getConn(), conn->getNode().getDatabaseName().c_str(), collName);
-		}
-		return ((MongoContext*)context)->collection;
+		return collection;
 	}
 }
 
-void MongoDBDataSourceImpl::_release(Connection* conn, mongoc_collection_t* collection) {
-	if(context==NULL) {
-		mongoc_collection_destroy (collection);
-		pool->release(conn);
+void MongoDBDataSourceImpl::_release(mongoc_collection_t* collection_o) {
+	if(collection==NULL || collection!=collection_o) {
+		mongoc_collection_destroy (collection_o);
 	}
 }
 
-void* MongoDBDataSourceImpl::getContext(void* details) {
-	MongoContext* mc = new MongoContext;
+bool MongoDBDataSourceImpl::startSession(void* details) {
+	if(collection!=NULL) {
+		mongoc_collection_destroy(collection);
+		collection = NULL;
+	}
+	_conn();
 	std::string* mcd = (std::string*)details;
-	mc->conn = pool->checkout();
 	if(mcd!=NULL && *mcd!="") {
-		mc->collection = mongoc_client_get_collection ((mongoc_client_t*)mc->conn->getConn(), mc->conn->getNode().getDatabaseName().c_str(), mcd->c_str());
-		if(mc->collection==NULL) {
+		collection = mongoc_client_get_collection ((mongoc_client_t*)conn->getConn(), conn->getNode().getDatabaseName().c_str(), mcd->c_str());
+		if(collection==NULL) {
 			throw std::runtime_error("Collection not found");
 		}
 	}
-	return mc;
+	return true;
 }
 
-void MongoDBDataSourceImpl::destroyContext(void* cntxt) {
-	if(cntxt==NULL)return;
-	MongoContext* mc = (MongoContext*)cntxt;
-	if(mc->collection!=NULL) {
-		mongoc_collection_destroy (mc->collection);
+bool MongoDBDataSourceImpl::startSession() {
+	_conn();
+	return true;
+}
+
+bool MongoDBDataSourceImpl::endSession() {
+	if(collection!=NULL) {
+		mongoc_collection_destroy(collection);
+		collection = NULL;
 	}
-	pool->release(mc->conn);
-	delete mc;
-}
-
-MongoContext::MongoContext() {
-	collection = NULL;
-	conn = NULL;
-}
-
-MongoContext::~MongoContext() {
+	if(!isSingleEVH) {
+		pool->release(conn);
+		conn = NULL;
+	}
+	return true;
 }

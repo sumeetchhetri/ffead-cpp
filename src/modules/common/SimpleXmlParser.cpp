@@ -14,26 +14,26 @@
     limitations under the License.  
 */
 /*
- * XmlParser.cpp
+ * SimpleXmlParser.cpp
  *
  *  Created on: Sep 11, 2009
  *      Author: sumeet
  */
 
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 
 
-XmlParser::XmlParser(const std::string& mode)
+SimpleXmlParser::SimpleXmlParser(const std::string& mode)
 {
-	//logger = LoggerFactory::getLogger("XmlParser");
+	//logger = LoggerFactory::getLogger("SimpleXmlParser");
 	this->mode = mode;
 }
 
-XmlParser::~XmlParser() {
+SimpleXmlParser::~SimpleXmlParser() {
 	
 }
 
-void XmlParser::readDocument(const std::string& filename, Document& doc)
+void SimpleXmlParser::readDocument(const std::string& filename, Document& doc)
 {
 	std::ifstream infile(filename.c_str());
 	std::string temp;
@@ -51,7 +51,7 @@ void XmlParser::readDocument(const std::string& filename, Document& doc)
 	parse(xml, doc);
 }
 
-void XmlParser::parse(std::string xml, Document& doc)
+void SimpleXmlParser::parse(std::string xml, Document& doc)
 {
 	StringUtil::trim(xml);
 	if(xml.find("<")==0 && xml.find(">")!=std::string::npos)
@@ -73,7 +73,7 @@ void XmlParser::parse(std::string xml, Document& doc)
 	}
 }
 
-void XmlParser::sanitizeXml(std::string& strret) {
+void SimpleXmlParser::sanitizeXml(std::string& strret) {
 	StringUtil::replaceAll(strret,"&amp;","&");
 	StringUtil::replaceAll(strret,"&quot;","\"");
 	StringUtil::replaceAll(strret,"&apos;","'");
@@ -81,7 +81,7 @@ void XmlParser::sanitizeXml(std::string& strret) {
 	StringUtil::replaceAll(strret,"&gt;",">");
 }
 
-void XmlParser::readXML(std::string& xml, const std::string& parent, Element *par)
+void SimpleXmlParser::readXML(std::string& xml, const std::string& parent, Element *par)
 {
 	if(xml=="")
 		return;

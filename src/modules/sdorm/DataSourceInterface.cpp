@@ -28,7 +28,7 @@ DataSourceInterface::DataSourceInterface() {
 	reflector = NULL;
 	mapping = NULL;
 	pool = NULL;
-	context = NULL;
+	isSingleEVH = false;
 }
 
 DataSourceInterface::~DataSourceInterface() {
@@ -94,29 +94,4 @@ void DataSourceInterface::assignId(DataSourceEntityMapping& dsemp, ClassInfo* cl
 		Method meth = clas->getMethod(methname,argus);
 		reflector->invokeMethodGVP(entity,meth,valus,true);
 	}
-}
-
-bool DataSourceInterface::startSession(void* details) {
-	if(context==NULL) {
-		context = getContext(details);
-		return true;
-	}
-	return false;
-}
-
-bool DataSourceInterface::startSession() {
-	if(context==NULL) {
-		context = getContext(NULL);
-		return true;
-	}
-	return false;
-}
-
-bool DataSourceInterface::endSession() {
-	if(context!=NULL) {
-		destroyContext(context);
-		context = NULL;
-		return true;
-	}
-	return false;
 }
