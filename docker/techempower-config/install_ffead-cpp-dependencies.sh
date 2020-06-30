@@ -60,6 +60,7 @@ tar xvf v1.6.3.tar.gz
 rm -f v1.6.3.tar.gz
 cd mimalloc-1.6.3
 mkdir -p out/release
+cd out/release
 cmake ../.. -DCMAKE_BUILD_TYPE=Release
 make && make install
 cd $IROOT
@@ -70,6 +71,7 @@ tar xvf 0.4.2.tar.gz
 rm -f 0.4.2.tar.gz
 cd snmalloc-0.4.2
 mkdir build
+cd build
 cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release
 ninja
 cd $IROOT
