@@ -23,7 +23,7 @@
 #ifndef DVIEW_H_
 #define DVIEW_H_
 #include "DynamicView.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 
 class Dview : public DynamicView {
 public:

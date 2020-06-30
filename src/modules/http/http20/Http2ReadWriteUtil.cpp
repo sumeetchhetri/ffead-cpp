@@ -54,7 +54,7 @@ bool Http2RequestResponseData::isDataPending() {
 		HttpResponse* res = (HttpResponse*)incompleteResponse;
 		return data.length()>0 || (res!=NULL && res->isContentRemains());
 	} else {
-		WebSocketData* res = (WebSocketData*)incompleteResponse;
+		//WebSocketData* res = (WebSocketData*)incompleteResponse;
 		return data.length()>0/* || (res!=NULL && res->isContentRemains())*/;
 	}
 }
@@ -66,7 +66,7 @@ void Http2RequestResponseData::updateContent() {
 			res->getRemainingContent(url, false, data);
 		}
 	} else {
-		WebSocketData* res = (WebSocketData*)incompleteResponse;
+		//WebSocketData* res = (WebSocketData*)incompleteResponse;
 		//if(data.length()==0 && res!=NULL && res->isContentRemains()) {
 		//	data = res->getRemainingContent();
 		//}

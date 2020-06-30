@@ -14,24 +14,24 @@
     limitations under the License.
 */
 /*
- * CsvFileReader.cpp
+ * SimpleCsvFileReader.cpp
  *
  *  Created on: 29-Jan-2013
  *      Author: sumeetc
  */
 
-#include "CsvFileReader.h"
+#include "SimpleCsvFileReader.h"
 
-CsvFileReader::CsvFileReader() {
+SimpleCsvFileReader::SimpleCsvFileReader() {
 	
 
 }
 
-CsvFileReader::~CsvFileReader() {
+SimpleCsvFileReader::~SimpleCsvFileReader() {
 	
 }
 
-strVecVec CsvFileReader::getRows(const std::string& filepath)
+strVecVec SimpleCsvFileReader::getRows(const std::string& filepath)
 {
 	strVecVec all;
 	std::string line;

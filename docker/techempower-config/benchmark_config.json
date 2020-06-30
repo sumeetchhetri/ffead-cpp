@@ -370,7 +370,7 @@
 			"display_name": "ffead-cpp-rust-rocket",
 			"notes": "",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"mysql": {
 			"json_url": "/te-benchmark-um/json",
@@ -393,7 +393,7 @@
 			"display_name": "ffead-cpp-mysql",
 			"notes": "",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"postgresql": {
 			"json_url": "/te-benchmark-um/json",
@@ -416,7 +416,7 @@
 			"display_name": "ffead-cpp-postgresql",
 			"notes": "",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"nginx-mongo": {
 			"json_url": "/te-benchmark-um/json",

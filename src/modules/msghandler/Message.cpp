@@ -29,7 +29,7 @@ Message::Message()
 
 Message::Message(const std::string& xml)
 {
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 	Document doc;
 	parser.parse(xml, doc);
 	const Element& message = doc.getRootElement();

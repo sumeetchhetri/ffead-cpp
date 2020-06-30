@@ -23,7 +23,7 @@
 #ifndef MESSAGEUTIL_H_
 #define MESSAGEUTIL_H_
 #include "Message.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "MessageHandler.h"
 #include "StringUtil.h"
 #include "LoggerFactory.h"

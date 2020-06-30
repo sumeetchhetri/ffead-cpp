@@ -26,7 +26,7 @@
 #include "Reflector.h"
 #include "Component.h"
 #include "Server.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "Reflector.h"
 #include "fstream"
 #include "XMLSerialize.h"

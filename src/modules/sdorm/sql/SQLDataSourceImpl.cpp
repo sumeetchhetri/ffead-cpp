@@ -476,6 +476,7 @@ void SQLDataSourceImpl::refreshStmt() {
 void SQLDataSourceImpl::close() {
 	if(isSession) return;
 #ifdef HAVE_LIBODBC
+	if(isSingleEVH) return;
 	this->pool->release(conn);
 	conn = NULL;
 	V_OD_hdbc = NULL;
@@ -2025,13 +2026,19 @@ void* SQLDataSourceImpl::executeQuery(QueryBuilder& qb, const bool& isObj) {
 	return executeQueryInternal(q, isObj);
 }
 
-void* SQLDataSourceImpl::getContext(void* details) {
+bool SQLDataSourceImpl::startSession(void* details) {
 	isSession = true;
-	return NULL;
+	return true;
 }
 
-void SQLDataSourceImpl::destroyContext(void* cntxt) {
+bool SQLDataSourceImpl::startSession() {
+	isSession = true;
+	return true;
+}
+
+bool SQLDataSourceImpl::endSession() {
 	isSession = false;
+	return true;
 }
 
 SQLContext::SQLContext() {

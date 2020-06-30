@@ -23,7 +23,7 @@
 #include "AppDefines.h"
 #include "Compatibility.h"
 #include "HttpResponseParser.h"
-#include "CsvFileReader.h"
+#include "SimpleCsvFileReader.h"
 #include "PropFileReader.h"
 #include "Timer.h"
 #include "sstream"
@@ -42,7 +42,7 @@ int main()
 	PropFileReader propFileReader;
 	propMap props = propFileReader.getProperties("testValues.prop");
 
-	CsvFileReader csvFileReader;
+	SimpleCsvFileReader csvFileReader;
 	strVecVec testCases = csvFileReader.getRows("test.csv");
 
 	Timer timer, timerc;

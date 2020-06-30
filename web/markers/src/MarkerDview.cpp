@@ -21,7 +21,7 @@
  */
 
 #include "MarkerDview.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 
 MarkerDview::MarkerDview() {
 	// TODO Auto-generated constructor stub
@@ -35,6 +35,6 @@ MarkerDview::~MarkerDview() {
 void MarkerDview::getDocument(Document* doc)
 {
 	std::string xml = "<html><head><script src=\"1.js\"></script></head><body><input type=\"text\"/><input type=\"submit\"/></body></html>";
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 	parser.parse(xml, *doc);
 }

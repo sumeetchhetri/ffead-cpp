@@ -54,7 +54,7 @@ void* ComponentHandler::service(void* arg)
 	instance->logger << ("Component method " +  methInfo) << std::endl;
 	try
 	{
-		XmlParser parser("Parser");
+		SimpleXmlParser parser("Parser");
 		instance->logger << "Bean call parsed successfully" << std::endl;
 		if(methInfo.find("lang=\"c++\"")!=std::string::npos || methInfo.find("lang='c++'")!=std::string::npos)
 		{

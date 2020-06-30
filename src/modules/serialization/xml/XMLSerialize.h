@@ -23,7 +23,7 @@
 #ifndef XMLSERIALIZE_H_
 #define XMLSERIALIZE_H_
 #include "SerializeBase.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 
 class XMLSerialize : public SerializeBase {
 	static XMLSerialize _i;
@@ -95,7 +95,7 @@ public:
 	template <class K,class V> static std::map<K,V> unSerializeToMap(const std::string& serStr, const std::string& appName = "")
 	{
 		std::map<K,V> mp;
-		XmlParser parser("Parser");
+		SimpleXmlParser parser("Parser");
 		try
 		{
 			Document doc;
@@ -162,7 +162,7 @@ public:
 	template <class K,class V> static std::map<K,V> unSerializeToMultiMap(const std::string& serStr, const std::string& appName = "")
 	{
 		std::multimap<K,V> mp;
-		XmlParser parser("Parser");
+		SimpleXmlParser parser("Parser");
 		try
 		{
 			Document doc;

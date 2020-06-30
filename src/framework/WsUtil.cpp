@@ -32,7 +32,7 @@ WsUtil::~WsUtil() {
 
 std::string WsUtil::generateAllWSDL(const std::vector<WsDetails>& wsdvec, const std::string& resp, Reflection& ref, std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps)
 {
-	std::string ret, headers="#include \"AppDefines.h\"\n#include \"Exception.h\"\n#include \"string\"\n#include <sstream>\n#include \"CastUtil.h\"\n#include \"XmlParser.h\"\n#include \"Reflection.h\"\n#include \"XMLSerialize.h\"\n";
+	std::string ret, headers="#include \"AppDefines.h\"\n#include \"Exception.h\"\n#include \"string\"\n#include <sstream>\n#include \"CastUtil.h\"\n#include \"SimpleXmlParser.h\"\n#include \"Reflection.h\"\n#include \"XMLSerialize.h\"\n";
 	for(unsigned int var = 0; var < wsdvec.size(); ++var)
 	{
 		handleWebService(ret, wsdvec.at(var), clsstrucMaps, resp, headers, ref);
@@ -49,7 +49,7 @@ std::vector<WsDetails> WsUtil::getWsDetails(const std::vector<std::string>& apps
 		std::string webdir = serverRootDirectory+"/web/"+apps.at(var);
 		std::string file = webdir+"/config/ws.xml";
 
-		XmlParser parser("Parser");
+		SimpleXmlParser parser("Parser");
 		Document doc;
 		parser.readDocument(file, doc);
 		const Element& root = doc.getRootElement();
@@ -672,7 +672,7 @@ void WsUtil::handleWebService(std::string& ws_funcs, const WsDetails& wsd, std::
 				else
 				{
 					ws_funcs.append("std::string allnmspcs;\n");
-					ws_funcs.append("XmlParser parser(\"Parser\");\n");
+					ws_funcs.append("SimpleXmlParser parser(\"Parser\");\n");
 					ws_funcs.append("Document doc;\nparser.parse(XMLSerialize::serialize<"+pars["RETURNTYP"]+" >(&_retval,"+serOpt+",\""+pars["RETURNTYP"]+"\",\""+appname+"\"), doc);\n");
 					ws_funcs.append("normalizeNamespaces(&(doc.getRootElement()),\""+appname+"\",allnmspcs);\n");
 					ws_funcs.append("_retStr += \"<tns:"+pars["RETURN"]+">\"+doc.getRootElement().renderChildren()+\"</tns:"+pars["RETURN"]+">\";\n");

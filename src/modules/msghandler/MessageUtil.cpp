@@ -48,7 +48,7 @@ void MessageUtil::setSubscriber(const std::string& subscriber)
 MessageUtil::MessageUtil(const std::string& file)
 {
 	logger = LoggerFactory::getLogger("MessageUtil");
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 	Document doc ;
 	parser.readDocument(file, doc);
 	Element* dest = doc.getRootElement().getElementByName("destination");

@@ -25,7 +25,7 @@
 #include "Destination.h"
 
 #include "InvalidMessageException.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 
 class Message {
 	Destination destination;

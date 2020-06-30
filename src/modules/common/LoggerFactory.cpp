@@ -113,7 +113,7 @@ void LoggerFactory::init(const std::string& configFile, const std::string& serve
 		instance = new LoggerFactory();
 	}
 	isLoggingEnabled = isLoggingEnabledT;
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 	Document doc;
 	parser.readDocument(configFile, doc);
 	Element& root = doc.getRootElement();

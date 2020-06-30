@@ -32,7 +32,7 @@ JobScheduler::~JobScheduler() {
 }
 
 void JobScheduler::init(const std::string& fileName, const std::string& appName) {
-	XmlParser parser("Parser");
+	SimpleXmlParser parser("Parser");
 	Document doc;
 	parser.readDocument(fileName, doc);
 	const Element& root = doc.getRootElement();

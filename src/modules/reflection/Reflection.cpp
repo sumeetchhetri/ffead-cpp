@@ -1060,7 +1060,7 @@ std::string Reflection::generateClassDefinitionsAll(std::map<std::string, std::m
 {
 	std::string ret = "";
 	//includeRef = "#ifndef REFLECTOR_H_\n#define REFLECTOR_H_\n#include \"ClassInfo.h\"\n#include \"string\"\n#include \"Method.h\"\n#include \"Field.h\"\n";
-	//includeRef += "#include \"XmlParser.h\"\n#include <stdio.h>\n#include <sys/wait.h>\n#include <stdexcept>\n#include <execinfo.h>\n#include <dlfcn.h>\n#include <cxxabi.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include \"string\"\n#include <sstream>\n#include <typeinfo>\n";
+	//includeRef += "#include \"SimpleXmlParser.h\"\n#include <stdio.h>\n#include <sys/wait.h>\n#include <stdexcept>\n#include <execinfo.h>\n#include <dlfcn.h>\n#include <cxxabi.h>\n#include <stdio.h>\n#include <stdlib.h>\n#include \"string\"\n#include <sstream>\n#include <typeinfo>\n";
 	std::string typedefs,classes,methods,opers;
 	std::string inc = "#include \"AppDefines.h\"\n#include \"Reflector.h\"\n#include \"string\"\n#include \"Method.h\"\n#include \"Field.h\"\n";
 	ret += "extern \"C\"\n{\n";

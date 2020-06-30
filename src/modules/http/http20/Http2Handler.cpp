@@ -310,7 +310,7 @@ bool Http2Handler::writeResponse(void* req, void* res, void* si, std::string& da
 }
 
 bool Http2Handler::writeWebSocketResponse(void* req, void* res, void* si, std::string& data) {
-	WebSocketData* response = (WebSocketData*)res;
+	//WebSocketData* response = (WebSocketData*)res;
 	//WebSocketData* request = (WebSocketData*)req;
 	int streamIdentifier = *(int*)si;
 

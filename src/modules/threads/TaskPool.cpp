@@ -25,7 +25,7 @@
 void* TaskPool::run(void *arg)
 {
 	TaskPool* pool  = static_cast<TaskPool*>(arg);
-	std::vector<Task*>::iterator iter;
+	//std::vector<Task*>::iterator iter;
 	while(pool->runFlag)
 	{
 		std::vector<Task*>::iterator it;

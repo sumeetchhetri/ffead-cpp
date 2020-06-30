@@ -43,23 +43,17 @@ class QueryComponent {
 	virtual ~QueryComponent();
 };
 
-class MongoContext {
-	mongoc_collection_t *collection;
-	Connection* conn;
-	friend class MongoDBDataSourceImpl;
-	MongoContext();
-	virtual ~MongoContext();
-};
-
 class MongoDBDataSourceImpl: public DataSourceInterface {
 	Logger logger;
+	Connection* conn;
+	mongoc_collection_t *collection;
 	static QueryComponent* getQueryComponent(const std::vector<Condition>& conds);
 	static void populateQueryComponents(QueryComponent* sq);
 	static bson_t* createSubMongoQuery(std::vector<Condition>& conds);
 	static void appendGenericObject(bson_t* b, const std::string& name, GenericObject& o);
 	static std::map<std::string, std::map<std::string, Condition> > toMap(std::vector<Condition>& conds);
 	void getBSONObjectFromObject(const std::string& clasName, void* object, bson_t*, const bool& isIdBsonAppend= true);
-	std::string initializeQueryParts(Query& cquery, bson_t** fields, bson_t** querySpec, std::string& operationName);
+	std::string initializeQueryParts(Query& cquery, bson_t** opts, bson_t** querySpec, std::string& operationName);
 	std::string initializeDMLQueryParts(Query& cquery, bson_t** data, bson_t** query, std::string& operationName);
 	std::string getQueryForRelationship(const std::string& column, const std::string& type, void* val);
 	void getMapOfProperties(bson_t* data, std::map<std::string, GenericObject>* map);
@@ -67,9 +61,9 @@ class MongoDBDataSourceImpl: public DataSourceInterface {
 	void storeProperty(ClassInfo* clas, void* t, void* colV, const Field& fe);
 	void* getResults(const std::string& tableNm, Query& cquery, bson_t* fields, bson_t* querySpec, const bool& isObj, const bool& isCountQuery);
 	void* getResults(const std::string& tableNm, QueryBuilder& qb, bson_t* fields, bson_t* query, const bool& isObj);
-	Connection* _conn();
-	mongoc_collection_t* _collection(Connection*, const char*);
-	void _release(Connection*, mongoc_collection_t*);
+	void _conn();
+	mongoc_collection_t* _collection(const char*);
+	void _release(mongoc_collection_t*);
 public:
 	MongoDBDataSourceImpl(ConnectionPooler* pool, Mapping* mapping);
 	~MongoDBDataSourceImpl();
@@ -100,8 +94,9 @@ protected:
 	void executeIdentity(DataSourceEntityMapping& dsemp, GenericObject& idv);
 	void executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject& idv);
 
-	void* getContext(void* details);
-	void destroyContext(void*);
+	bool startSession(void*);
+	bool startSession();
+	bool endSession();
 };
 
 #endif /* MONGODBDATASOURCEIMPL_H_ */

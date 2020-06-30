@@ -14,7 +14,7 @@
     limitations under the License.
 */
 /*
- * CsvFileReader.h
+ * SimpleCsvFileReader.h
  *
  *  Created on: 29-Jan-2013
  *      Author: sumeetc
@@ -31,10 +31,10 @@
 
 typedef std::vector<std::vector<std::string> > strVecVec;
 
-class CsvFileReader {
+class SimpleCsvFileReader {
 public:
-	CsvFileReader();
-	virtual ~CsvFileReader();
+	SimpleCsvFileReader();
+	virtual ~SimpleCsvFileReader();
 	strVecVec getRows(const std::string&);
 };
 

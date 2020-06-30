@@ -27,7 +27,7 @@
 #include "Reflector.h"
 #include "XMLSerialize.h"
 #include "GenericObject.h"
-#include "XmlParser.h"
+#include "SimpleXmlParser.h"
 #include "LoggerFactory.h"
 
 class BeanContext {

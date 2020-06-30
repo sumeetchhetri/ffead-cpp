@@ -39,11 +39,11 @@
 class DataSourceInterface : public IDGenerator {
 	friend class DataSourceManager;
 protected:
+	bool isSingleEVH;
 	ConnectionPooler* pool;
 	Mapping* mapping;
 	std::string appName;
 	Reflector* reflector;
-	void* context;
 	bool executeInsertInternal(Query& query, void* entity);
 	virtual bool executeInsert(Query& query, void* entity)=0;
 	virtual bool isGetDbEntityForBulkInsert()=0;
@@ -58,9 +58,6 @@ protected:
 	virtual long getNumRows(const std::string& clasName)=0;
 	virtual void empty(const std::string& clasName)=0;
 
-	virtual void* getContext(void*)=0;
-	virtual void destroyContext(void*)=0;
-
 	void assignId(DataSourceEntityMapping& dsemp, ClassInfo* clas, void* entity);
 public:
 	static std::string BLANK;
@@ -74,9 +71,9 @@ public:
 	virtual bool executeUpdate(Query& query)=0;
 	virtual std::vector<std::map<std::string, GenericObject> > execute(QueryBuilder& qb)=0;
 
-	bool startSession(void*);
-	bool startSession();
- 	bool endSession();
+	virtual bool startSession(void*)=0;
+	virtual bool startSession()=0;
+	virtual bool endSession()=0;
 
 	template<class T> bool insert(T& t);
 	template<class T> bool update(T& t);
