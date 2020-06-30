@@ -10,4 +10,5 @@ services:
   
 script:
   - git clone https://github.com/TechEmpower/FrameworkBenchmarks
+  - cp -f sumeetchhetri/ffead-cpp/docker/* FrameworkBenchmarks/frameworks/C++/ffead-cpp
   - cd FrameworkBenchmarks && ./tfb --mode verify --test-dir C++/ffead-cpp
