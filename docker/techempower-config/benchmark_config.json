@@ -370,7 +370,7 @@
 			"display_name": "ffead-cpp-rust-rocket",
 			"notes": "",
 			"versus": "",
-			"tags": []
+			"tags": ["broken"]
 		},
 		"mysql": {
 			"json_url": "/te-benchmark-um/json",
@@ -439,7 +439,7 @@
 			"display_name": "ffead-cpp-nginx-mongo",
 			"notes": "",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"nginx-postgresql": {
 			"json_url": "/te-benchmark-um/json",
