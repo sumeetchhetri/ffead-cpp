@@ -1,4 +1,4 @@
-FROM buildpack-deps:bionic
+FROM sumeetchhetri/ffead-cpp-v4.0-v-base:1.0
 
 ENV IROOT=/installs
 
@@ -16,11 +16,6 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 	ln -s ${IROOT}/ffead-cpp-4.0/lib/libdinter.so /usr/local/lib/libdinter.so && \
 	ldconfig
 
-WORKDIR ${IROOT}
-RUN apt update -y && apt install --no-install-recommends -y git && rm -rf /var/lib/apt/lists/*
-RUN git clone https://github.com/vlang/v
-WORKDIR ${IROOT}/v
-RUN make && ./v symlink
 WORKDIR ${IROOT}/lang-server-backends/v/pico.v
 RUN chmod +x *.sh && ./build.sh && cp main $IROOT/ && rm -rf ${IROOT}/lang-server-backends
 

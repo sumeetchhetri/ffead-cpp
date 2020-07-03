@@ -19,17 +19,16 @@ import picoev
 import picohttpparser
 import flag
 
+#flag -I ./
+#include "ffead-cpp.h"
 #flag -lffead-framework
 
-#flag -I ./
-#include "fill.h"
-
 //const char* srv, size_t srv_len, int type
-fn ffead_cpp_bootstrap(byteptr, u64, int)
+fn C.ffead_cpp_bootstrap(byteptr, u64, int)
 //no args
-fn ffead_cpp_init()
+fn C.ffead_cpp_init()
 //no args
-fn ffead_cpp_cleanup()
+fn C.ffead_cpp_cleanup()
 
 struct C.ffead_request3 {
 pub mut:
@@ -54,9 +53,9 @@ struct C.ffead_request3_t {}
 	const char **out_mime, size_t *out_mime_len, const char **out_url, size_t *out_url_len, 
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 */
-fn ffead_cpp_handle_crystal_picov_1(&C.ffead_request3, &int, &string, &u64, &string, &u64, &string, &u64, &C.phr_header, &u64, &string, &u64) voidptr
+fn C.ffead_cpp_handle_crystal_picov_1(&C.ffead_request3, &int, &string, &u64, &string, &u64, &string, &u64, &C.phr_header, &u64, &string, &u64) voidptr
 
-fn ffead_cpp_resp_cleanup(voidptr)
+fn C.ffead_cpp_resp_cleanup(voidptr)
 
 
 fn cpy_str_1(dst byteptr, src string) int {
@@ -109,7 +108,7 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 	out_body_len := u64(0)
 	headers_len := u64(0)
 	
-	resp := ffead_cpp_handle_crystal_picov_1(&freq, &scode, &smsg, &smsg_len, &out_mime, &out_mime_len, &out_url, &out_url_len, &req.headers[0], &headers_len, &out_body, &out_body_len)
+	resp := C.ffead_cpp_handle_crystal_picov_1(&freq, &scode, &smsg, &smsg_len, &out_mime, &out_mime_len, &out_url, &out_url_len, &req.headers[0], &headers_len, &out_body, &out_body_len)
 
 	$if debug {
 		println('ffead-cpp.scode = $scode')
@@ -117,7 +116,9 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 
 	if scode > 0 {
 		smsg = tos(smsg.str, int(smsg_len))
-		res.buf += cpy_str_1(res.buf, "HTTP/1.1 ${scode} ${smsg}\r\n")
+		unsafe {
+			res.buf += cpy_str_1(res.buf, "HTTP/1.1 ${scode} ${smsg}\r\n")
+		}
 		res.header_server()
 		res.header_date()
 		j = 0
@@ -127,12 +128,14 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 			}
 			k := tos(req.headers[j].name, int(req.headers[j].name_len))
 			v := tos(req.headers[j].value, int(req.headers[j].value_len))
-			res.buf += cpy_str_1(res.buf, "${k}: ${v}\r\n")
+			unsafe {
+				res.buf += cpy_str_1(res.buf, "${k}: ${v}\r\n")
+			}
 			j = j + 1
 		}
 		out_body = tos(out_body.str, int(out_body_len))
 		res.body(out_body)
-		ffead_cpp_resp_cleanup(resp)
+		C.ffead_cpp_resp_cleanup(resp)
 	} else {
 		out_mime = tos(out_mime.str, int(out_mime_len))
 		out_url = tos(out_url.str, int(out_url_len))
@@ -152,7 +155,7 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 				}
 
 				res.http_404()
-				ffead_cpp_resp_cleanup(resp)
+				C.ffead_cpp_resp_cleanup(resp)
 				return
 			}
 			res.http_ok()
@@ -160,7 +163,7 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 			res.header_date()
 			res.content_type(out_mime)
 			res.body(data)
-			ffead_cpp_resp_cleanup(resp)
+			C.ffead_cpp_resp_cleanup(resp)
 			return
 		}
 
@@ -169,7 +172,7 @@ fn callback(req picohttpparser.Request, mut res picohttpparser.Response) {
 		}
 
 		res.http_404()
-		ffead_cpp_resp_cleanup(resp)
+		C.ffead_cpp_resp_cleanup(resp)
 		return
 	}
 }
@@ -194,16 +197,16 @@ fn main() {
 	//assert 0 < server_port
 
 	println('Bootstrapping ffead-cpp start...')
-	ffead_cpp_bootstrap(server_directory.str, u64(server_directory.len), 7)
+	C.ffead_cpp_bootstrap(server_directory.str, u64(server_directory.len), 7)
 	println('Bootstrapping ffead-cpp end...')
 
 	println('Initializing ffead-cpp start...')
-	ffead_cpp_init()
+	C.ffead_cpp_init()
 	println('Initializing ffead-cpp end...')
 
 	picoev.new(server_port, &callback).serve()
 
 	println('Cleaning up ffead-cpp start...')
-	ffead_cpp_cleanup()
+	C.ffead_cpp_cleanup()
 	println('Cleaning up ffead-cpp end...')
 }

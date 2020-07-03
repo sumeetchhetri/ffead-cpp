@@ -195,7 +195,7 @@ if [ "$2" = "v-vweb" ]
 then
 	cd ${IROOT}
 	for i in $(seq 0 $(($(nproc --all)-1))); do
-		./vweb --server_dir=$FFEAD_CPP_PATH --server_port=8080
+		./vweb --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done
 fi
 
@@ -203,14 +203,14 @@ if [ "$2" = "v-picov" ]
 then
 	cd ${IROOT}
 	for i in $(seq 0 $(($(nproc --all)-1))); do
-		./main --server_dir=$FFEAD_CPP_PATH --server_port=8080
+		./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done
 fi
 
 if [ "$2" = "java-firenio" ]
 then
 	cd ${IROOT}
-	java                       	   \
+	java                       \
 	    -server                    \
 	    -XX:+UseNUMA               \
 	    -XX:+UseParallelGC         \

@@ -370,7 +370,7 @@
 			"display_name": "ffead-cpp-rust-rocket",
 			"notes": "",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"mysql": {
 			"json_url": "/te-benchmark-um/json",
