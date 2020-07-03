@@ -136,7 +136,6 @@ fi
 
 if [ "$2" = "nginx" ]
 then
-	mkdir ${IROOT}/ffead-cpp-src
 	sed -i 's|<pool-size>30</pool-size>|<pool-size>3</pool-size>|g' $FFEAD_CPP_PATH/web/te-benchmark-um/config/sdorm.xml
 	sed -i 's|<pool-size>10</pool-size>|<pool-size>2</pool-size>|g' $FFEAD_CPP_PATH/web/te-benchmark-um/config/cache.xml
 	nginx -g 'daemon off;'
