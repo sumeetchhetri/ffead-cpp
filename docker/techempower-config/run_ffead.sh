@@ -18,7 +18,16 @@ echo never > /sys/kernel/mm/transparent_hugepage/enabled
 echo 'echo never > /sys/kernel/mm/transparent_hugepage/enabled' >> /etc/rc.local
 sysctl vm.overcommit_memory=1
 
-export PATH=${IROOT}/nginxfc/sbin:${PATH}
+if [ "$2" = "nginx" ]
+then
+	if [ "$3" = "mysql" ] || [ "$3" = "postgresql" ]
+	then
+		export PATH=${IROOT}/nginx-ffead-sql/sbin:${PATH}
+	else
+		export PATH=${IROOT}/nginx-ffead-mongo/sbin:${PATH}
+	fi
+fi
+
 export LD_LIBRARY_PATH=${IROOT}/:${IROOT}/lib:${FFEAD_CPP_PATH}/lib:/usr/local/lib:$LD_LIBRARY_PATH
 export ODBCINI=${IROOT}/odbc.ini
 export ODBCSYSINI=${IROOT}
@@ -128,10 +137,6 @@ fi
 if [ "$2" = "nginx" ]
 then
 	mkdir ${IROOT}/ffead-cpp-src
-	if [ "$3" = "mysql" ] || [ "$3" = "postgresql" ]
-	then
-		sed -i 's|/installs/ffead-cpp-4.0/|'/installs/ffead-cpp-4.0-sql/'|g' ${IROOT}/nginxfc/conf/nginx.conf
-	fi
 	sed -i 's|<pool-size>30</pool-size>|<pool-size>3</pool-size>|g' $FFEAD_CPP_PATH/web/te-benchmark-um/config/sdorm.xml
 	sed -i 's|<pool-size>10</pool-size>|<pool-size>2</pool-size>|g' $FFEAD_CPP_PATH/web/te-benchmark-um/config/cache.xml
 	nginx -g 'daemon off;'

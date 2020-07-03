@@ -136,6 +136,7 @@ pkill ffead-cpp
 cd ${IROOT}/ffead-cpp-src/
 cp -rf ffead-cpp-4.0-bin ${IROOT}/ffead-cpp-4.0
 rm -rf ffead-cpp-4.0-bin
+mv ${IROOT}/nginxfc ${IROOT}/nginx-ffead-mongo
 
 cd ${IROOT}/ffead-cpp-4.0
 cp -f ${TROOT}/run_ffead.sh ./
@@ -171,6 +172,7 @@ pkill ffead-cpp
 cd ${IROOT}/ffead-cpp-src/
 cp -rf ffead-cpp-4.0-bin ${IROOT}/ffead-cpp-4.0-sql
 rm -rf ffead-cpp-4.0-bin
+mv ${IROOT}/nginxfc ${IROOT}/nginx-ffead-sql
 
 cd ${IROOT}/ffead-cpp-4.0-sql
 cp -f ${TROOT}/run_ffead.sh ./
