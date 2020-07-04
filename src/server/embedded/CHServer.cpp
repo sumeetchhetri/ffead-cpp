@@ -581,7 +581,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		ss << serverRootDirectory;
 		ss << "ffead.";
 		ss << getpid();
-		ss >> ".cntrl";
+		ss << ".cntrl";
 		ss >> serverCntrlFileNm;
 		//serverCntrlFileNm = serverRootDirectory + "ffead.cntrl";
 		name = "CHServer(Main)";
