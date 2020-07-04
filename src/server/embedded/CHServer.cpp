@@ -577,7 +577,13 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	std::string name;
 	if(isMain)
 	{
-		serverCntrlFileNm = serverRootDirectory + "ffead.cntrl";
+		std::stringstream ss;
+		ss << serverRootDirectory;
+		ss << "ffead.";
+		ss << getpid();
+		ss >> ".cntrl";
+		ss >> serverCntrlFileNm;
+		//serverCntrlFileNm = serverRootDirectory + "ffead.cntrl";
 		name = "CHServer(Main)";
 		LoggerFactory::instance->setVhostNumber(0);
 	}
