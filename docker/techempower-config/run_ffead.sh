@@ -136,6 +136,7 @@ fi
 
 if [ "$2" = "nginx" ]
 then
+	mkdir -p ${IROOT}/nginxfc/logs
 	sed -i 's|<pool-size>30</pool-size>|<pool-size>3</pool-size>|g' $FFEAD_CPP_PATH/web/te-benchmark-um/config/sdorm.xml
 	sed -i 's|<pool-size>10</pool-size>|<pool-size>2</pool-size>|g' $FFEAD_CPP_PATH/web/te-benchmark-um/config/cache.xml
 	if [ "$3" = "mysql" ] || [ "$3" = "postgresql" ]
@@ -228,7 +229,7 @@ then
 	    -XX:+UseNUMA               \
 	    -XX:+UseParallelGC         \
 	    -XX:+AggressiveOpts        \
-	    -Dlite=false               \
+	    -Dlite=true               \
 	    -Dcore=1                   \
 	    -Dframe=16                 \
 	    -DreadBuf=512              \
