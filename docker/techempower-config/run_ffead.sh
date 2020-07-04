@@ -102,7 +102,7 @@ chmod 700 rtdcf/*
 if [ "$2" = "emb" ]
 then
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
-	for i in $(seq 1 $(nproc --all)); do
+	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH &
 	done
 fi
@@ -156,7 +156,7 @@ fi
 if [ "$2" = "crystal-http" ]
 then
 	cd ${IROOT}
-	for i in $(seq 1 $(nproc --all)); do
+	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./crystal-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080 &
 	done
 fi
@@ -164,7 +164,7 @@ fi
 if [ "$2" = "crystal-h2o" ]
 then
 	cd ${IROOT}
-	for i in $(seq 1 $(nproc --all)); do
+	for i in $(seq 0 $(($(nproc --all)-1))); do
 	  taskset -c $i ./h2o-evloop-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080 &
 	done
 fi
@@ -208,7 +208,7 @@ fi
 if [ "$2" = "v-vweb" ]
 then
 	cd ${IROOT}
-	for i in $(seq 1 $(nproc --all)); do
+	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./vweb --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done
 fi
@@ -216,7 +216,7 @@ fi
 if [ "$2" = "v-picov" ]
 then
 	cd ${IROOT}
-	for i in $(seq 1 $(nproc --all)); do
+	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done
 fi
