@@ -50,12 +50,14 @@ import (
 	"runtime"
 	"strings"
 	"unsafe"
+	fastprefork "github.com/valyala/fasthttp/prefork"
 )
 
 var (
 	serverDirectory = flag.String("server_directory", "", "TCP address to listen to")
 	addr            = flag.String("addr", ":8080", "TCP address to listen to")
 	compress        = flag.Bool("compress", false, "Whether to enable transparent response compression")
+	prefork			= flag.Bool("prefork", true, "use prefork")
 )
 
 var (
@@ -148,8 +150,20 @@ func main() {
 		h = fasthttp.CompressHandler(h)
 	}
 
+	// init fasthttp server
+	server := &fasthttp.Server{
+		Name:                          SERVER,
+		Handler:                       h,
+		DisableHeaderNamesNormalizing: true,
+	}
+
+	listenAndServe := server.ListenAndServe
+	if *prefork {
+		listenAndServe = fastprefork.New(server).ListenAndServe
+	}
+
 	*addr = "0.0.0.0:" + *addr
-	if err := fasthttp.ListenAndServe(*addr, h); err != nil {
+	if err := listenAndServe(*addr); err != nil {
 		log.Fatalf("Error in ListenAndServe: %s", err)
 	}
 

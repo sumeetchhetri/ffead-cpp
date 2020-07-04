@@ -102,8 +102,8 @@ chmod 700 rtdcf/*
 if [ "$2" = "emb" ]
 then
 	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
-	for i in $(seq 0 $(($(nproc --all)-1))); do
-	  taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH &
+	for i in $(seq 1 $(nproc --all)); do
+		taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH &
 	done
 fi
 
@@ -138,7 +138,12 @@ if [ "$2" = "nginx" ]
 then
 	sed -i 's|<pool-size>30</pool-size>|<pool-size>3</pool-size>|g' $FFEAD_CPP_PATH/web/te-benchmark-um/config/sdorm.xml
 	sed -i 's|<pool-size>10</pool-size>|<pool-size>2</pool-size>|g' $FFEAD_CPP_PATH/web/te-benchmark-um/config/cache.xml
-	nginx -g 'daemon off;'
+	if [ "$3" = "mysql" ] || [ "$3" = "postgresql" ]
+	then
+		nginx -g 'daemon off;' -c ${IROOT}/nginx-ffead-sql/conf/nginx.conf
+	else
+		nginx -g 'daemon off;' -c ${IROOT}/nginx-ffead-mongo/conf/nginx.conf
+	fi
 fi
 
 if [ "$2" = "libreactor" ]
@@ -150,13 +155,17 @@ fi
 if [ "$2" = "crystal-http" ]
 then
 	cd ${IROOT}
-	./crystal-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080
+	for i in $(seq 1 $(nproc --all)); do
+		taskset -c $i ./crystal-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080 &
+	done
 fi
 
 if [ "$2" = "crystal-h2o" ]
 then
 	cd ${IROOT}
-	./h2o-evloop-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080
+	for i in $(seq 1 $(nproc --all)); do
+	  taskset -c $i ./h2o-evloop-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080 &
+	done
 fi
 
 if [ "$2" = "rust-actix" ]
@@ -198,16 +207,16 @@ fi
 if [ "$2" = "v-vweb" ]
 then
 	cd ${IROOT}
-	for i in $(seq 0 $(($(nproc --all)-1))); do
-		./vweb --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
+	for i in $(seq 1 $(nproc --all)); do
+		taskset -c $i ./vweb --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done
 fi
 
 if [ "$2" = "v-picov" ]
 then
 	cd ${IROOT}
-	for i in $(seq 0 $(($(nproc --all)-1))); do
-		./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
+	for i in $(seq 1 $(nproc --all)); do
+		taskset -c $i ./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done
 fi
 

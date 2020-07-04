@@ -182,6 +182,10 @@ func (hs *httpServer) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 	return
 }
 
+func init() {
+	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
+}
+
 func main() {
 	var port int
 	var multicore bool

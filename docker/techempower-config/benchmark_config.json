@@ -32,7 +32,6 @@
 			"query_url": "/te-benchmark-um/queries?queries=",
 			"fortune_url": "/te-benchmark-um/fortunes",
 			"update_url": "/te-benchmark-um/updates?queries=",
-			"cached_query_url": "/te-benchmark-um/cached-worlds?count=",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -45,9 +44,9 @@
 			"os": "Linux",
 			"database_os": "Linux",
 			"display_name": "ffead-cpp-nginx-mysql",
-			"notes": "mysql memcached",
+			"notes": "nginx mysql",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"lithium": {
 			"json_url": "/te-benchmark-um/json",
@@ -462,7 +461,7 @@
 			"display_name": "ffead-cpp-nginx-postgresql",
 			"notes": "",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		},
 		"redis": {
 			"cached_query_url": "/te-benchmark-um/cached-worlds?count=",
@@ -547,6 +546,10 @@
 		"apache-mongo": {
 			"json_url": "/te-benchmark-um/json",
 			"plaintext_url": "/plaintext",
+			"db_url": "/te-benchmark-um/db",
+			"query_url": "/te-benchmark-um/queries?queries=",
+			"fortune_url": "/te-benchmark-um/fortunes",
+			"update_url": "/te-benchmark-um/updates?queries=",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
@@ -559,9 +562,9 @@
 			"os": "Linux",
 			"database_os": "Linux",
 			"display_name": "ffead-cpp-apache",
-			"notes": "",
+			"notes": "apache mongo",
 			"versus": "",
-			"tags": ["broken"]
+			"tags": []
 		}
 	}]
 }
