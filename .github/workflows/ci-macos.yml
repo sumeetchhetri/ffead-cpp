@@ -54,13 +54,13 @@ jobs:
 
     - name: Install ffead-cpp
       run: |
-        cmake -DSRV_ALL=on -DCINATRA_INCLUDES=/tmp/cinatra/include -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
-        make -j2
+        cmake -DSRV_ALL=on -DCINATRA_INCLUDES=/tmp/cinatra/include -DMOD_NGINX=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+        make install -j2
         cd ffead-cpp-4.0-bin
         chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
         ./server.sh &
         COUNTER=0
-        while [ ! -f lib/libinter.so ]
+        while [ ! -f lib/libinter.dylib ]
         do
           sleep 1
           COUNTER=$((COUNTER+1))
@@ -70,7 +70,7 @@ jobs:
           fi
         done
         COUNTER=0
-        while [ ! -f lib/libdinter.so ]
+        while [ ! -f lib/libdinter.dylib ]
         do
           sleep 1
           COUNTER=$((COUNTER+1))
