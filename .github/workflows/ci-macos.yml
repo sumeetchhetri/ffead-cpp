@@ -16,7 +16,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-        brew install ossp-uuid unixodbc libmemcached boost jsoncpp apr apr-util
+        brew install ossp-uuid unixodbc libmemcached boost jsoncpp apr apr-util pkgconfig
         pushd /tmp
         wget -q https://github.com/efficient/libcuckoo/archive/master.zip
         unzip master.zip
