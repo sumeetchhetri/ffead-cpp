@@ -1,7 +1,7 @@
 FROM sumeetchhetri/ffead-cpp-4.0-base:1.0
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="1.0"
-LABEL description="Base v docker image with ffead-cpp v4.0 - commit id - 83dd80bcf3c12403e4ba9819496ffcf85acfc43b"
+LABEL description="Base java docker image with master code found on 3rd July 2020 4:18PM IST"
 
 ENV IROOT=/installs
 
@@ -13,22 +13,20 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 	ln -s ${IROOT}/ffead-cpp-4.0/lib/libdinter.so /usr/local/lib/libdinter.so && \
 	ldconfig
 	
-RUN apt update -yqq && apt install -y git make && rm -rf /var/lib/apt/lists/*
-RUN git clone https://github.com/vlang/v && cd v && make && ./v symlink
-
-WORKDIR ${IROOT}/lang-server-backends/v/vweb
-RUN chmod +x *.sh && ./build.sh && cp vweb $IROOT/
-
-WORKDIR ${IROOT}/lang-server-backends/v/pico.v
-RUN chmod +x *.sh && ./build.sh && cp main $IROOT/ && rm -rf ${IROOT}/lang-server-backends
+RUN apt update -yqq && apt install -y --no-install-recommends default-jre maven gradle && rm -rf /var/lib/apt/lists/*
+RUN cd ${IROOT}/lang-server-backends/java/firenio && mvn compile assembly:single -q && cp target/firenio-ffead-cpp-0.1-jar-with-dependencies.jar $IROOT/
+RUN cd ${IROOT}/lang-server-backends/java/rapidoid && mvn compile assembly:single -q && cp target/rapidoid-ffead-cpp-1.0-jar-with-dependencies.jar $IROOT/
+RUN cd ${IROOT}/lang-server-backends/java/wizzardo-http && gradle --refresh-dependencies clean fatJar -q && cp build/libs/wizzardo-ffead-cpp-all-1.0.jar $IROOT/
+RUN rm -rf ${IROOT}/lang-server-backends
 
 FROM buildpack-deps:bionic
 RUN apt update -yqq && apt install --no-install-recommends -yqq uuid-dev odbc-postgresql unixodbc unixodbc-dev memcached \
-	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server && rm -rf /var/lib/apt/lists/*
+	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server default-jre && rm -rf /var/lib/apt/lists/*
 COPY --from=0 /installs/ffead-cpp-4.0 /installs/ffead-cpp-4.0
 COPY --from=0 /installs/ffead-cpp-4.0-sql /installs/ffead-cpp-4.0-sql
-COPY --from=0 /installs/main /installs/
-COPY --from=0 /installs/vweb /installs/
+COPY --from=0 /installs/firenio-ffead-cpp-0.1-jar-with-dependencies.jar /installs/
+COPY --from=0 /installs/rapidoid-ffead-cpp-1.0-jar-with-dependencies.jar /installs/
+COPY --from=0 /installs/wizzardo-ffead-cpp-all-1.0.jar /installs/
 RUN mkdir -p /installs/snmalloc-0.4.2/build
 COPY --from=0 /installs/snmalloc-0.4.2/build/libsnmallocshim-1mib.so /installs/snmalloc-0.4.2/build/
 COPY --from=0 /usr/lib/x86_64-linux-gnu/odbc /usr/lib/x86_64-linux-gnu/odbc
