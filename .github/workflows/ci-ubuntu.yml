@@ -1,4 +1,4 @@
-name: Build ffead-cpp on macos
+name: Build ffead-cpp on ubuntu
 
 on:
   push:
@@ -8,15 +8,14 @@ on:
 
 jobs:
   macos:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macOS-latest]
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-        brew install ossp-uuid unixodbc libmemcached boost jsoncpp apr apr-util
+        apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev \
+        apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev \
+        zlib1g-dev cmake make clang-format-9 ninja-build libhiredis-dev
         pushd /tmp
         wget -q https://github.com/efficient/libcuckoo/archive/master.zip
         unzip master.zip

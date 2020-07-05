@@ -1,4 +1,4 @@
-name: Build ffead-cpp on ubuntu/docker
+name: Build ffead-cpp base docker image
 
 on:
   push:
@@ -7,7 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-
   docker-build:
     runs-on: ubuntu-latest
     steps:
