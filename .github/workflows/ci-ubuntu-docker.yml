@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Build ffead-cpp on ubuntu/docker
 
 on:
   push:
@@ -8,14 +8,12 @@ on:
 
 jobs:
 
-  build:
-
+  docker-build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Build the base ffead-cpp-4.0 base docker image
       run: |
         cp -rf web/te-benchmark-um docker/techempower-config/
         cd docker/techempower-config/
-        docker build . --file ffead-cpp.dockerfile --tag ffead-cpp-4.0:$(date +%s)
+        docker build . --file ffead-cpp-base.dockerfile --tag ffead-cpp-4.0:$(date +%s)

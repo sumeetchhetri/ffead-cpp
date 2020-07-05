@@ -1,0 +1,82 @@
+name: Build ffead-cpp on macos
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  macos:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+      	mkdir deps 
+        brew install ossp-uuid unixodbc libmemcached boost jsoncpp
+        cd deps
+        wget -q https://github.com/efficient/libcuckoo/archive/master.zip
+		unzip master.zip
+		rm -f master.zip
+		cd libcuckoo-master
+		cmake -DCMAKE_INSTALL_PREFIX=/usr . && make install
+		cd ..
+		rm -rf libcuckoo-master
+		wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+		tar xf mongo-c-driver-1.4.2.tar.gz
+		rm -f mongo-c-driver-1.4.2.tar.gz
+		cd mongo-c-driver-1.4.2/ && ./configure --disable-automatic-init-and-cleanup && make && make install
+		cd ..
+		rm -rf mongo-c-driver-1.4.2
+		wget -q https://github.com/redis/hiredis/archive/v0.13.3.tar.gz
+		tar xvf v0.13.3.tar.gz
+		rm -f v0.13.3.tar.gz
+		cd hiredis-0.13.3/
+		make && PREFIX=/usr make install
+		cd ..
+		rm -rf hiredis-0.13.3
+		git clone https://github.com/sumeetchhetri/cinatra.git
+		cd cinatra
+		git checkout sum_master
+		cd ..
+		git clone --recurse-submodules https://github.com/sumeetchhetri/drogon
+		cd  drogon
+		mkdir build
+		cd build
+		cmake -DCMAKE_BUILD_TYPE=Release ..
+		make && make install
+		cd ..
+		rm -rf drogon
+		cd ..
+	- name: Install ffead-cpp
+	  run: |
+		cmake -DSRV_ALL=on -DCINATRA_INCLUDES=`pwd`/deps/cinatra/include -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+		make -j2
+		cd ffead-cpp-4.0-bin
+		chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
+		./server.sh &
+		COUNTER=0
+		while [ ! -f lib/libinter.so ]
+		do
+			sleep 1
+			COUNTER=$((COUNTER+1))
+			if [ "$COUNTER" = 60 ]
+			then
+				exit 1
+			fi
+		done
+		COUNTER=0
+		while [ ! -f lib/libdinter.so ]
+		do
+			sleep 1
+			COUNTER=$((COUNTER+1))
+			if [ "$COUNTER" = 60 ]
+			then
+				exit 1
+			fi
+		done
+		pkill ffead-cpp
