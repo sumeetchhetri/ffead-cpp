@@ -7,15 +7,13 @@ on:
     branches: [ master ]
 
 jobs:
-  macos:
+  ubuntu:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-        apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev \
-        apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev \
-        zlib1g-dev cmake make clang-format-9 ninja-build libhiredis-dev
+        sudo apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev zlib1g-dev cmake make clang-format-9 ninja-build libhiredis-dev
         pushd /tmp
         wget -q https://github.com/efficient/libcuckoo/archive/master.zip
         unzip master.zip

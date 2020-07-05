@@ -22,7 +22,7 @@ jobs:
         unzip master.zip
         rm -f master.zip
         cd libcuckoo-master
-        cmake -DCMAKE_INSTALL_PREFIX=/usr . && sudo make install
+        cmake -DCMAKE_INSTALL_PREFIX=/usr/local . && sudo make install
         cd /tmp
         rm -rf libcuckoo-master
         wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
@@ -35,7 +35,7 @@ jobs:
         tar xvf v0.13.3.tar.gz
         rm -f v0.13.3.tar.gz
         cd hiredis-0.13.3/
-        make && PREFIX=/usr sudo make install
+        make && PREFIX=/usr/local sudo make install
         cd /tmp
         rm -rf hiredis-0.13.3
         git clone https://github.com/sumeetchhetri/cinatra.git
