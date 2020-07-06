@@ -16,7 +16,21 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-        brew install ossp-uuid unixodbc libmemcached boost jsoncpp apr apr-util pkgconfig
+        brew update
+        brew upgrade
+        brew install openssl@1.1 ossp-uuid unixodbc libmemcached boost jsoncpp apr apr-util pkgconfig
+        if [ -f /usr/local/lib/libssl.dylib ]; then
+          mv /usr/local/lib/libssl.dylib /usr/local/lib/libssl_bak.dylib
+        fi
+        if [ -f /usr/local/lib/libcrypto.dylib ]; then
+          mv /usr/local/lib/libcrypto.dylib /usr/local/lib/libcrypto_bak.dylib
+        fi
+        if [ -f /usr/local/Cellar/openssl@1.1/1.1.1d/lib/libssl.1.1.dylib ]; then
+          sudo ln -s /usr/local/Cellar/openssl@1.1/1.1.1d/lib/libssl.1.1.dylib /usr/local/lib/libssl.dylib
+        fi
+        if [ -f /usr/local/Cellar/openssl@1.1/1.1.1d/lib/libcrypto.1.1.dylib ]; then
+          sudo ln -s /usr/local/Cellar/openssl@1.1/1.1.1d/lib/libcrypto.1.1.dylib /usr/local/lib/libcrypto.dylib
+        fi
         pushd /tmp
         wget -q https://github.com/efficient/libcuckoo/archive/master.zip
         unzip master.zip
