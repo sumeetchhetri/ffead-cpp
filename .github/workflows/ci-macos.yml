@@ -25,11 +25,11 @@ jobs:
         if [ -f /usr/local/lib/libcrypto.dylib ]; then
           mv /usr/local/lib/libcrypto.dylib /usr/local/lib/libcrypto_bak.dylib
         fi
-        if [ -f /usr/local/Cellar/openssl@1.1/1.1.1d/lib/libssl.1.1.dylib ]; then
-          sudo ln -s /usr/local/Cellar/openssl@1.1/1.1.1d/lib/libssl.1.1.dylib /usr/local/lib/libssl.dylib
+        if [ -f /usr/local/Cellar/openssl@1.1/1.1.1g/lib/libssl.1.1.dylib ]; then
+          sudo ln -s /usr/local/Cellar/openssl@1.1/1.1.1g/lib/libssl.1.1.dylib /usr/local/lib/libssl.dylib
         fi
-        if [ -f /usr/local/Cellar/openssl@1.1/1.1.1d/lib/libcrypto.1.1.dylib ]; then
-          sudo ln -s /usr/local/Cellar/openssl@1.1/1.1.1d/lib/libcrypto.1.1.dylib /usr/local/lib/libcrypto.dylib
+        if [ -f /usr/local/Cellar/openssl@1.1/1.1.1g/lib/libcrypto.1.1.dylib ]; then
+          sudo ln -s /usr/local/Cellar/openssl@1.1/1.1.1g/lib/libcrypto.1.1.dylib /usr/local/lib/libcrypto.dylib
         fi
         pushd /tmp
         wget -q https://github.com/efficient/libcuckoo/archive/master.zip
