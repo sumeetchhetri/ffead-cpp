@@ -19,5 +19,5 @@ jobs:
         docker build . --file ffead-cpp-base.dockerfile --tag ffead-cpp-4.0:temp
         git clone https://github.com/TechEmpower/FrameworkBenchmarks
         cd FrameworkBenchmarks
-        sed -i'' -e 's/ffead-cpp-4.0-base:1.0/ffead-cpp-4.0:temp/g' frameworks/C++/ffead-cpp.dockerfile
+        sed -i'' -e 's/ffead-cpp-4.0-base:1.0/ffead-cpp-4.0:temp/g' frameworks/C++/ffead-cpp/ffead-cpp.dockerfile
         ./tfb --mode verify --test ffead-cpp
