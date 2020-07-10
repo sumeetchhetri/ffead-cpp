@@ -68,7 +68,7 @@ jobs:
 
     - name: Install ffead-cpp
       run: |
-        sed -i 's|1.13.1|1.19.1|g' modules/nginx_mod_ffeadcpp/CMakeLists.txt
+        sed -i'' -e 's/1.13.1/1.19.1/g' modules/nginx_mod_ffeadcpp/CMakeLists.txt
         cmake -DSRV_ALL=on -DCINATRA_INCLUDES=/tmp/cinatra/include -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
         make install -j2
         cd ffead-cpp-4.0-bin
