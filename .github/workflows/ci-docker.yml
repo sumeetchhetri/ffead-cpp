@@ -13,11 +13,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build the base ffead-cpp-4.0 base docker image
       run: |
-        cp -rf web/te-benchmark-um docker/techempower-config/
-        cd docker/techempower-config/
-        docker rmi -f ffead-cpp-4.0:temp
-        docker build . --file ffead-cpp-base.dockerfile --tag ffead-cpp-4.0:temp
         git clone https://github.com/TechEmpower/FrameworkBenchmarks
+        cp -f docker/Dockerfile-tfb-test FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp.dockerfile
         cd FrameworkBenchmarks
-        sed -i'' -e 's|sumeetchhetri/ffead-cpp-4.0-base:1.0|ffead-cpp-4.0:temp|g' frameworks/C++/ffead-cpp/ffead-cpp.dockerfile
         ./tfb --mode verify --test ffead-cpp

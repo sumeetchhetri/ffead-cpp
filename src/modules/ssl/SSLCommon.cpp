@@ -141,11 +141,11 @@ SSL_CTX *SSLCommon::initialize_ctx(const bool& isServer)
 	CRYPTO_set_mem_functions (ssl_malloc, ssl_realloc, ssl_free);
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	SSL_library_init ();
+	OpenSSL_add_all_algorithms();		/* load & register all cryptos, etc. */
+	SSL_load_error_strings();			/* load all error messages */
 #else
 	OPENSSL_init_ssl(0, NULL);
 #endif
-	OpenSSL_add_all_algorithms();		/* load & register all cryptos, etc. */
-	SSL_load_error_strings();			/* load all error messages */
 
 	printf ("Using OpenSSL version \"%s\"\n", SSLeay_version (SSLEAY_VERSION));
 
