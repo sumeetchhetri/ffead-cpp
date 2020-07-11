@@ -65,8 +65,9 @@ jobs:
         do
           sleep 1
           COUNTER=$((COUNTER+1))
-          if [ "$COUNTER" = 60 ]
+          if [ "$COUNTER" = 120 ]
           then
+            echo "exiting...."
             exit 1
           fi
         done
@@ -75,9 +76,11 @@ jobs:
         do
           sleep 1
           COUNTER=$((COUNTER+1))
-          if [ "$COUNTER" = 60 ]
+          if [ "$COUNTER" = 120 ]
           then
+            echo "exiting....dlib"
             exit 1
           fi
         done
+        echo "normal shutdown"
         pkill ffead-cpp

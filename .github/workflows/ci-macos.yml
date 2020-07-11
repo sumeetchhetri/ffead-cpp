@@ -87,9 +87,8 @@ jobs:
         while [ ! -f lib/libinter.dylib ]
         do
           sleep 1
-          echo "counter $COUNTER"
           COUNTER=$((COUNTER+1))
-          if [ "$COUNTER" = 60 ]
+          if [ "$COUNTER" = 120 ]
           then
             echo "exiting...."
             exit 1
@@ -99,9 +98,8 @@ jobs:
         while [ ! -f lib/libdinter.dylib ]
         do
           sleep 1
-          echo "counter dlib $COUNTER"
           COUNTER=$((COUNTER+1))
-          if [ "$COUNTER" = 60 ]
+          if [ "$COUNTER" = 120 ]
           then
             echo "exiting....dlib"
             exit 1
