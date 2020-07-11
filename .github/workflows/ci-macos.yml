@@ -87,9 +87,11 @@ jobs:
         while [ ! -f lib/libinter.dylib ]
         do
           sleep 1
+          echo "counter $COUNTER"
           COUNTER=$((COUNTER+1))
           if [ "$COUNTER" = 60 ]
           then
+            echo "exiting...."
             exit 1
           fi
         done
@@ -97,10 +99,13 @@ jobs:
         while [ ! -f lib/libdinter.dylib ]
         do
           sleep 1
+          echo "counter dlib $COUNTER"
           COUNTER=$((COUNTER+1))
           if [ "$COUNTER" = 60 ]
           then
+            echo "exiting....dlib"
             exit 1
           fi
         done
+        echo "normal shutdown"
         pkill ffead-cpp
