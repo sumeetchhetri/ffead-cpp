@@ -15,19 +15,20 @@
 */
 
 #define INC_MEMORYCACHE 1
-/* #undef INC_REDISCACHE */
+#define INC_REDISCACHE 1
 /* #undef INC_MEMCACHED */
 #define INC_SDORM 1
 #define INC_SDORM_SQL 1
-#define INC_SDORM_MONGO 1
+/* #undef INC_SDORM_MONGO */
 /* #undef INC_BINSER */
 #define INC_JOBS 1
-#define APPLE 1
+/* #undef APPLE */
 /* #undef MINGW */
+#define CYGWIN 1
 /* #undef DEBUG_MODE */
 
 /* #undef USE_EPOLL */
-#define USE_KQUEUE 1
+/* #undef USE_KQUEUE */
 /* #undef USE_EVPORT */
 /* #undef USE_DEVPOLL */
 #define USE_POLL 1
@@ -35,32 +36,32 @@
 /* #undef USE_WIN_IOCP */
 
 #define HAVE_SSLINC 1
-#define HAVE_SSLLIB /usr/local/lib/libssl.dylib
-/* #undef HAVE_REDISINC */
-/* #undef HAVE_REDISLIB */
+#define HAVE_SSLLIB /usr/lib/libssl.dll.a
+#define HAVE_REDISINC 1
+#define HAVE_REDISLIB /usr/local/lib/libhiredis.a
 /* #undef HAVE_MEMCACHEDINC */
 /* #undef HAVE_MEMCACHEDLIB */
-#define HAVE_CURLLIB /usr/lib/libcurl.dylib
+#define HAVE_CURLLIB /usr/lib/libcurl.dll.a
 #define HAVE_UUIDINC 1
 /* #undef HAVE_BSDUUIDINC */
 #define HAVE_SQLINC 1
-#define HAVE_ODBCLIB /usr/local/lib/libodbc.dylib
-#define HAVE_MONGOINC 1
-#define HAVE_MONGOCLIB /usr/local/lib/libmongoc-1.0.dylib
-#define HAVE_BSONINC 1
-#define HAVE_BSONLIB /usr/local/lib/libbson-1.0.dylib
+#define HAVE_ODBCLIB /usr/lib/libodbc.dll.a
+/* #undef HAVE_MONGOINC */
+/* #undef HAVE_MONGOCLIB */
+/* #undef HAVE_BSONINC */
+/* #undef HAVE_BSONLIB */
 #define INC_JOBS 1
 /* #undef OS_BSD */
 /* #undef OS_SOLARIS */
 #define OS_LINUX 1
 /* #undef OS_MINGW */
-#define OS_DARWIN 1
+/* #undef OS_DARWIN */
 #define SRV_EMB 1
 /* #undef SRV_CINATRA */
 /* #undef SRV_LITHIUM */
 /* #undef SRV_DROGON */
-/* #undef HAVE_ACCEPT4 */
-/* #undef HAVE_TCP_QUICKACK */
+#define HAVE_ACCEPT4 1
+#define HAVE_TCP_QUICKACK 1
 /* #undef HAVE_TCP_DEFER_ACCEPT */
 #define HAVE_TCP_FASTOPEN 1
 

@@ -22,7 +22,7 @@
 
 #ifndef SCRIPTHANDLER_H_
 #define SCRIPTHANDLER_H_
-#include "AppDefines.h"
+#include "Compatibility.h"
 #include <stdlib.h>
 #include "AfcUtil.h"
 #include "HttpRequest.h"

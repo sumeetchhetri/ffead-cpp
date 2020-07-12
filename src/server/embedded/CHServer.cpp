@@ -148,6 +148,7 @@ int receive_fd(int fd)
 void handler(int sig)
 {
 #if defined(OS_LINUX) || defined(OS_SOLARIS)
+#if !defined(CYGWIN)
 	void *array[10];
 	size_t size;
 
@@ -158,6 +159,7 @@ void handler(int sig)
 	fprintf(stderr, "Error: signal %d:\n", sig);
 	backtrace_symbols_fd(array, size, STDERR_FILENO);
 	exit(1);
+#endif
 #endif
 }
 

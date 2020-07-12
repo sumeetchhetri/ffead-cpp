@@ -36,15 +36,6 @@
 #include "Timer.h"
 #include <sys/stat.h>
 #include <fcntl.h>
-#if defined(OS_DARWIN) || defined(OS_BSD)
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/uio.h>
-#elif defined(IS_SENDFILE)
-#ifndef OS_MINGW
-#include <sys/sendfile.h>
-#endif
-#endif
 #include "vector"
 #include <libcuckoo/cuckoohash_map.hh>
 #include "concurrentqueue.h"

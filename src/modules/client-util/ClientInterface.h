@@ -23,7 +23,6 @@
 #ifndef CLIENT_INTERFACE_H_
 #define CLIENT_INTERFACE_H_
 #include "AppDefines.h"
-
 #include "Compatibility.h"
 #if !defined(OS_MINGW)
 #include <unistd.h>

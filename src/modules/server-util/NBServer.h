@@ -22,11 +22,10 @@
 
 #ifndef NBSERVER_H_
 #define NBSERVER_H_
-#include "AppDefines.h"
+#include "Compatibility.h"
 #include "iostream"
 #include <unistd.h>
 #include <errno.h>
-#include "Compatibility.h"
 #if !defined(OS_MINGW)
 #include <unistd.h>
 #include <netinet/in.h>
@@ -39,7 +38,6 @@
 #include <sys/ioctl.h>
 #include <sys/resource.h>
 #endif
-
 #include <signal.h>
 #include "string"
 #include "cstring"
