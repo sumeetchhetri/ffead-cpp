@@ -95,7 +95,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 	#elif defined USE_POLL
 		nfds=1;
 		polled_fds = (struct pollfd *)calloc(1, nfds*sizeof(struct pollfd));
-		polled_fds->fd = descriptor;
+		polled_fds->fd = sockfd;
 		polled_fds->events = POLLIN | POLLPRI;
 		return;
 	#endif
@@ -208,7 +208,7 @@ int SelEpolKqEvPrt::getEvents()
 			struct timespec tv;
 			tv.tv_sec = (timeoutMilis/1000);
 			tv.tv_nsec = (timeoutMilis%1000)*1000000;
-			numEvents = poll(polled_fds, nfds, &tv);
+			numEvents = poll(polled_fds, nfds, timeoutMilis);
 		}
 		else
 		{
@@ -376,12 +376,12 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 		FD_SET(descriptor, &master);
 		if(descriptor > fdMax)
 			fdMax = descriptor;
-		connections[descriptor] = obj;
+		connections.insert(descriptor, obj);
 	#elif defined(USE_SELECT)
 		FD_SET(descriptor%FD_SETSIZE, &master[descriptor/FD_SETSIZE]);
 		if(descriptor > fdMax)
 			fdMax = descriptor;
-		connections[descriptor] = obj;
+		connections.insert(descriptor, obj);
 	#elif defined USE_EPOLL
 		struct epoll_event ev;
 		memset(&ev, 0, sizeof(ev));
@@ -423,12 +423,12 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 			perror("devpoll");
 			return false;
 		}
-		connections[descriptor] = obj;
+		connections.insert(descriptor, obj);
 	#elif defined USE_EVPORT
 		if (port_associate(port, PORT_SOURCE_FD, descriptor, POLLIN, NULL) < 0) {
 			perror("port_associate");
 		}
-		connections[descriptor] = obj;
+		connections.insert(descriptor, obj);
 	#elif defined USE_POLL
 		l.lock();
 		curfds++;
@@ -437,7 +437,7 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 		(polled_fds+nfds)->fd = descriptor;
 		(polled_fds+nfds)->events = POLLIN | POLLPRI;
 		l.unlock();
-		connections[descriptor] = obj;
+		connections.insert(descriptor, obj);
 	#endif
 	return true;
 }

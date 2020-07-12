@@ -32,8 +32,6 @@
 #include "StringUtil.h"
 #include <math.h>
 
-
-
 class Date {
 	struct tm ti;
 	int month;

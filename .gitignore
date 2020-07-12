@@ -64,3 +64,5 @@ lang-server-backends/java/wizzardo-http/target
 **/.build
 **/.swiftpm
 /Debug/
+ffead-cpp-4.0-bin/
+build/

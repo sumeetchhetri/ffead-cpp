@@ -300,7 +300,7 @@ bool SocketInterface::writeFile(int fdes, int remain_data)
 	{
 			remain_data -= sent_bytes1;
 	}
-#elif defined(IS_SENDFILE)
+#elif defined(IS_SENDFILE) && !defined(OS_MINGW) && !defined(CYGWIN)
 	int sent_bytes = 0;
 	while (((sent_bytes = sendfile(fd, fdes, &offset, BUFSIZ)) > 0) && (remain_data > 0))
 	{
@@ -321,7 +321,7 @@ bool SocketInterface::writeFile(int fdes, int remain_data)
 		while (bytes_read > 0) {
 			int bytes_written = write(fd, p, bytes_read);
 			if (bytes_read == 0) {
-				close();
+				closeSocket();
 				return false;
 			}
 			if (bytes_written < 0) {

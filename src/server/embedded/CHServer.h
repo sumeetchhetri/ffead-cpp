@@ -133,7 +133,9 @@
     #define pwd getcwd
  #endif
 #if defined(OS_LINUX) || defined(OS_SOLARIS)
+#if !defined(CYGWIN)
 #include <execinfo.h>
+#endif
 #endif
 #include "RequestReaderHandler.h"
 #include "Http2Handler.h"
