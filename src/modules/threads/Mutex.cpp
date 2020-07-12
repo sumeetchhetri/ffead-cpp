@@ -131,7 +131,7 @@ void FileBasedLock::lock() {
 	{
 		throw std::runtime_error("Unable to create lock file");
 	}
-	if( fcntl(_fileno(fp), F_SETLK, &fl) == -1)
+	if( fcntl(fileno(fp), F_SETLK, &fl) == -1)
 	{
 		throw std::runtime_error("Unable to acquire lock on file");
 	}
