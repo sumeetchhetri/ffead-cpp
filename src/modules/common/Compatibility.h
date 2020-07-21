@@ -172,7 +172,7 @@ struct tm *localtime_r(const time_t *timep, struct tm *result);
 
 int clock_gettime (int clockid, struct timespec *tp);
 //const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
-//int inet_pton(int af, const char *src, void *dst);
+int inet_pton(int af, const char *src, void *dst);
 int inet_pton4(const char *src, unsigned char *dst);
 int inet_pton6(const char *src, unsigned char *dst);
 typedef DWORD NUMEVENTS;

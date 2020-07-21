@@ -243,8 +243,8 @@ void SSLCommon::closeSSL(const int& fd, SSL *ssl, BIO* bio)
 			 this case, try again, but first send a
 			 TCP FIN to trigger the other side's
 			 close_notify*/
-		  shutdown(fd,1);
-		  r = SSL_shutdown(ssl);
+			shutdown(fd,1);
+			r = SSL_shutdown(ssl);
 		}
 		SSL_free(ssl);
 	}

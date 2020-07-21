@@ -338,7 +338,7 @@ std::map<std::string, std::map<std::string, Condition> > MongoDBDataSourceImpl::
 			cols[cond.getLhs()]["$lt"] = cond;
 		} else if(cond.getOper()==QueryOperator::LESS_THAN_EQUALS) {
 			cols[cond.getLhs()]["$lte"] = cond;
-		} else if(cond.getOper()==QueryOperator::IN) {
+		} else if(cond.getOper()==QueryOperator::IN_) {
 			cols[cond.getLhs()]["$in"] = cond;
 		} else if(cond.getOper()==QueryOperator::NOT_IN) {
 			cols[cond.getLhs()]["$nin"] = cond;

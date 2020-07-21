@@ -31,10 +31,12 @@ static Mutex m_mutex, p_mutex;
 
 static Logger logger;
 
+#ifndef OS_MINGW
 void sigchld_handler_server(int s)
 {
 	while(waitpid(-1, NULL, WNOHANG) > 0);
 }
+#endif
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)

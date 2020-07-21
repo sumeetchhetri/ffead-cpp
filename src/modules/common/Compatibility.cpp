@@ -375,7 +375,7 @@ inet_pton6(const char *src, unsigned char *dst)
  * author:
  *      Paul Vixie, 1996.
  */
-/*int
+int
 inet_pton(int af, const char *src, void *dst)
 {
         switch (af) {
@@ -389,7 +389,7 @@ inet_pton(int af, const char *src, void *dst)
                 errno = -1;
                 return (-1);
         }
-}*/
+}
 #endif
 
 #if defined(OS_DARWIN)

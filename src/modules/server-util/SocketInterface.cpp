@@ -471,8 +471,12 @@ bool SocketInterface::checkSocketWaitForTimeout(const int& writing, const int& s
 
 bool SocketInterface::isBlocking()
 {
-	int flags = fcntl(fd, F_GETFL, 0);
-	return (flags&O_NONBLOCK)!=O_NONBLOCK;
+	#ifndef OS_MINGW
+		int flags = fcntl(fd, F_GETFL, 0);
+		return (flags&O_NONBLOCK)!=O_NONBLOCK;
+	#else
+		return false;
+	#endif
 }
 
 bool SocketInterface::handleRenegotiation()

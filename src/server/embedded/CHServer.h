@@ -163,13 +163,13 @@ typedef void (*ReceiveTask1)(const int&);
 
 #if defined(OS_MINGW)
 #define WNOHANG 1
-static inline int waitpid(const pid_t& pid, int *status, const unsigned& options)
+/*static inline int waitpid(const pid_t& pid, int *status, const unsigned& options)
 {
 	if (const options& == 0)
 		return _cwait(const status&, const pid&, const 0&);
 	errno = EINVAL;
 	return -1;
-}
+}*/
 #endif
 
 

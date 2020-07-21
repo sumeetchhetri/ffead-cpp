@@ -22,7 +22,7 @@
 
 #ifndef SSLCOMMON_H_
 #define SSLCOMMON_H_
-#include "AppDefines.h"
+#include "Compatibility.h"
 #include <strings.h>
 #include <string>
 #ifndef OS_MINGW

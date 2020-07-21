@@ -324,7 +324,7 @@ SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEV
 
 	#ifdef OS_MINGW
 		BOOL bOptVal = FALSE;
-		if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), (const char*)&bOptVal, sizeof(int)) == -1) {
+		if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
 			perror("setsockopt");
 		}
 	#else
@@ -437,7 +437,7 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 
 		#ifdef OS_MINGW
 			BOOL bOptVal = FALSE;
-			if (setsockopt(sockfd, SOL_SOCKET, (isSinglEVH?SO_REUSEADDR | SO_REUSEPORT:SO_REUSEADDR), (const char*)&bOptVal, sizeof(int)) == -1) {
+			if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&bOptVal, sizeof(int)) == -1) {
 				perror("setsockopt");
 			}
 		#else
