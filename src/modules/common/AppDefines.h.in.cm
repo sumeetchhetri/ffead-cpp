@@ -24,6 +24,7 @@
 #cmakedefine INC_JOBS @INC_JOBS@
 #cmakedefine APPLE @APPLE@
 #cmakedefine MINGW @MINGW@
+#cmakedefine CYGWIN @CYGWIN@
 #cmakedefine DEBUG_MODE @CMAKE_BUILD_TYPE@
 
 #cmakedefine USE_EPOLL @USE_EPOLL@

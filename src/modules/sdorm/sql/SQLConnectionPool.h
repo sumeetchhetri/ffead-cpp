@@ -22,13 +22,12 @@
 
 #ifndef SQLCONNECTIONPOOL_H_
 #define SQLCONNECTIONPOOL_H_
-#include "Compatibility.h"
+#include "ConnectionPooler.h"
 #ifdef HAVE_LIBODBC
 #include <sql.h>
 #include <sqlext.h>
 #include <sqltypes.h>
 #endif
-#include "ConnectionPooler.h"
 #include "LoggerFactory.h"
 
 class SQLConnectionPool: public ConnectionPooler {

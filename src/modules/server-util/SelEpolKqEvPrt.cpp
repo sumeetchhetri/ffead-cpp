@@ -93,7 +93,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 	#elif defined USE_POLL
 		nfds=1;
 		polled_fds = (struct pollfd *)calloc(1, nfds*sizeof(struct pollfd));
-		polled_fds->fd = descriptor;
+		polled_fds->fd = sockfd;
 		polled_fds->events = POLLIN | POLLPRI;
 		return;
 	#endif
@@ -206,7 +206,7 @@ int SelEpolKqEvPrt::getEvents()
 			struct timespec tv;
 			tv.tv_sec = (timeoutMilis/1000);
 			tv.tv_nsec = (timeoutMilis%1000)*1000000;
-			numEvents = poll(polled_fds, nfds, &tv);
+			numEvents = poll(polled_fds, nfds, timeoutMilis);
 		}
 		else
 		{

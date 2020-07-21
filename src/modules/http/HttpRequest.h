@@ -20,6 +20,7 @@
  *      Author: sumeet
  */
 
+#include "Compatibility.h"
 #include "map"
 #include "unordered_map"
 #include "HttpSession.h"

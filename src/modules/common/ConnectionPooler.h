@@ -22,6 +22,8 @@
 
 #ifndef CONNECTIONPOOLER_H_
 #define CONNECTIONPOOLER_H_
+#include "Compatibility.h"
+#include <time.h>
 #include "Connection.h"
 #include "Mutex.h"
 #include <unistd.h>

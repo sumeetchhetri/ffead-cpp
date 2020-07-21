@@ -123,6 +123,7 @@ FileBasedLock::~FileBasedLock() {
 }
 
 void FileBasedLock::lock() {
+#ifndef CYGWIN
 	fl.l_type = F_WRLCK;
 	fl.l_len = 0;
 	fp = fopen(lkFile.c_str(), "w+");
@@ -134,12 +135,15 @@ void FileBasedLock::lock() {
 	{
 		throw std::runtime_error("Unable to acquire lock on file");
 	}
+#endif
 }
 
 void FileBasedLock::unlock() {
+#ifndef CYGWIN
 	if(fcntl(fileno(fp), F_UNLCK, &fl) < 0)
 	{
 		throw std::runtime_error("Unable to release lock on file");
 	}
 	fclose(fp);
+#endif
 }

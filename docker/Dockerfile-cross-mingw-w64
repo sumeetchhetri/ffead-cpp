@@ -1,0 +1,14 @@
+FROM mmozeiko/mingw-w64
+RUN apt update && apt install --no-install-recommends -y git curl
+RUN git clone --depth=1 https://github.com/sumeetchhetri/ffead-cpp /ffead-cpp
+WORKDIR /ffead-cpp
+COPY libmemcached-build.patch musl-fixes.patch /ffead-cpp/
+COPY cross-build-deps.sh /ffead-cpp/
+RUN chmod +x cross-build-deps.sh && ./cross-build-deps.sh mingw-w64
+COPY cross-build.sh /ffead-cpp/
+RUN chmod +x cross-build.sh && ./cross-build.sh mingw-w64
+
+FROM alpine:3.10
+COPY --from=0 /ffead-cpp/ffead-cpp-4.0-bin /ffead-cpp-4.0
+RUN apk add openssl openssl-dev psqlodbc unixodbc unixodbc-dev curl-dev libmemcached libmemcached-dev
+RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing ossp-uuid-dev

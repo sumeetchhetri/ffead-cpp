@@ -36,6 +36,14 @@
 #include <winsock2.h>
 #include <windows.h>
 #endif
+
+#if defined(__CYGWIN__) || defined(CYGWIN)
+#define _GNU_SOURCE
+#undef __STRICT_ANSI__
+#include <sys/select.h>
+#include <strings.h>
+#endif
+
 #include "iostream"
 #include <errno.h>
 #include <signal.h>
@@ -51,6 +59,15 @@
 #include <sys/types.h>
 #include <time.h>
 #include <iostream>
+#if defined(OS_DARWIN) || defined(OS_BSD)
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/uio.h>
+#elif defined(IS_SENDFILE)
+#if !defined(OS_MINGW) && !defined(CYGWIN)
+#include <sys/sendfile.h>
+#endif
+#endif
 #ifndef _GNU_SOURCE
 	#define _GNU_SOURCE
 #endif
@@ -211,7 +228,9 @@ static inline int clock_gettime (int clockid, struct timespec *ts)
 }
 #endif
 
-
+#ifdef CYGWIN
+extern char* strptime (const char *buf, const char *fmt, struct tm *tm);
+#endif
 
 typedef int SOCKET;
 typedef int NUMEVENTS;

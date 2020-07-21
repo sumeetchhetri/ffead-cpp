@@ -26,7 +26,7 @@
 
 #ifndef picohttpparser_fcp_h
 #define picohttpparser_fcp_h
-
+#include "Compatibility.h"
 #include <sys/types.h>
 
 #ifdef _MSC_VER

@@ -22,6 +22,10 @@
 
 #ifndef HTTPRESPONSESTATUS_H_
 #define HTTPRESPONSESTATUS_H_
+#include "AppDefines.h"
+#ifdef CYGWIN
+#include <strings.h>
+#endif
 #include "string"
 #include "map"
 #include "CastUtil.h"

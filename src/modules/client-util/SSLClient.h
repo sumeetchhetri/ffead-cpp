@@ -22,6 +22,7 @@
 
 #ifndef SSLCLIENT_H_
 #define SSLCLIENT_H_
+
 #include "SSLCommon.h"
 #include "ClientInterface.h"
 #include "PropFileReader.h"
