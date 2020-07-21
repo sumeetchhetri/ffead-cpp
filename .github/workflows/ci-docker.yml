@@ -15,5 +15,6 @@ jobs:
       run: |
         git clone https://github.com/TechEmpower/FrameworkBenchmarks
         cp -f docker/Dockerfile-tfb-test FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp.dockerfile
+        cp -f docker//techempower-config/benchmark_config.json FrameworkBenchmarks/frameworks/C++/ffead-cpp/ 
         cd FrameworkBenchmarks
         ./tfb --mode verify --test ffead-cpp
