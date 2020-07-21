@@ -363,9 +363,15 @@ void FFEADContext::addBean(Bean& bean)
 		uuid_t idt;
 		uuid_generate(idt);
 		std::string ids;
-		for(int i=0;i<16;i++){
+		for(int i=0;i<16;i++) {
 			ids.push_back(idt[i]);
 		}
+		bean.name = ids;
+#elif HAVE_OSSPUUIDINC
+		uuid_t* idt;
+		uuid_rc_t status = uuid_create(&idt);
+		std::string ids((const char *) &idt, sizeof(idt));
+		uuid_destroy(idt);
 		bean.name = ids;
 #elif HAVE_BSDUUIDINC
 		uuid_t idt;

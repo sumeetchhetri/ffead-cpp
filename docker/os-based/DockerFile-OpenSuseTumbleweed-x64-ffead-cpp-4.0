@@ -2,16 +2,6 @@ FROM opensuse/tumbleweed
 
 RUN zypper in -y autoconf-archive gcc gcc-c++ make cmake libcurl-devel hiredis-devel openssl openssl-devel libmemcached-devel zlib-devel libuuid-devel unixODBC unixODBC-devel unzip wget netcat-openbsd tar gzip
 
-#Download and install mongo c driver
-WORKDIR /tmp
-RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz
-RUN tar xf mongo-c-driver-1.4.0.tar.gz
-WORKDIR /tmp/mongo-c-driver-1.4.0
-RUN ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup
-RUN make && make install
-WORKDIR /tmp
-RUN rm -rf /tmp/mongo-c-driver-1.4.0
-
 #Install libcuckoo headers
 WORKDIR /tmp
 RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
@@ -23,6 +13,14 @@ RUN make install
 WORKDIR /tmp
 RUN rm -rf /tmp/libcuckoo-master
 
+#Install mongodb c driver
+RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+RUN tar xf mongo-c-driver-1.4.2.tar.gz
+RUN rm -f mongo-c-driver-1.4.2.tar.gz
+RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup &&  make && make install
+WORKDIR /tmp
+RUN rm -rf mongo-c-driver-1.4.2
+
 #Install ffead-cpp
 WORKDIR /tmp
 RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
@@ -30,7 +28,7 @@ RUN unzip master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
-RUN cmake -DSRV_EMB=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+RUN cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 RUN make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 WORKDIR /tmp

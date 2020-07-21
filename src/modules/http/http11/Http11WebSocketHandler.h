@@ -22,15 +22,13 @@
 
 #ifndef HTTP11WEBSOCKETHANDLER_H_
 #define HTTP11WEBSOCKETHANDLER_H_
+#include "Compatibility.h"
 #include "map"
 #include "vector"
 #include "string"
 #include "string"
 #include <unistd.h>
-#include <netdb.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include "Http11WebSocketDataFrame.h"
 #include "cstring"
 #include <iostream>

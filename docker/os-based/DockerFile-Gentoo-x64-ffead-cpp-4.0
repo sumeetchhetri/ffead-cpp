@@ -3,18 +3,6 @@ FROM gentoo/stage3-amd64
 RUN emerge-webrsync
 RUN emerge sys-devel/autoconf-archive dev-db/unixODBC curl dev-libs/hiredis libmemcached cmake wget netcat tar gzip zlib
 
-#Download and install mongo c driver
-WORKDIR /tmp
-RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz
-RUN tar xf mongo-c-driver-1.4.0.tar.gz
-WORKDIR /tmp/mongo-c-driver-1.4.0
-RUN ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup
-RUN make && make install
-WORKDIR /tmp
-RUN rm -rf /tmp/mongo-c-driver-1.4.0
-RUN mv /usr/local/include/libbson-1.0 /usr/local/include/libmongoc-1.0 /usr/include/
-RUN mv /usr/local/libbson* /usr/local/libmongoc* /usr/lib/
-
 #Install libcuckoo headers
 WORKDIR /tmp
 RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
@@ -26,6 +14,14 @@ RUN make install
 WORKDIR /tmp
 RUN rm -rf /tmp/libcuckoo-master
 
+#Install mongodb c driver
+RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+RUN tar xf mongo-c-driver-1.4.2.tar.gz
+RUN rm -f mongo-c-driver-1.4.2.tar.gz
+RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup &&  make && make install
+WORKDIR /tmp
+RUN rm -rf mongo-c-driver-1.4.2
+
 #Install ffead-cpp
 WORKDIR /tmp
 RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
@@ -33,7 +29,7 @@ RUN unzip master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
-RUN cmake -DSRV_EMB=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+RUN cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 RUN make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 WORKDIR /tmp

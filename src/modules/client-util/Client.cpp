@@ -110,16 +110,20 @@ bool Client::connection(const std::string& host, const int& port)
 
 	int error = 0;
 	socklen_t len = sizeof (error);
+#if defined(OS_MINGW)
+	int retval = getsockopt (sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len);
+#else
 	int retval = getsockopt (sockfd, SOL_SOCKET, SO_ERROR, &error, &len);
+#endif
 	if (retval != 0) {
 	    /* there was a problem getting the error code */
 	    fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
 	    connected = false;
 	}
 
-	if (error != 0) {
+	if (errno != 0) {
 	    /* socket has a non zero error status */
-	    fprintf(stderr, "socket error: %s\n", strerror(error));
+	    fprintf(stderr, "socket error: %s\n", strerror(errno));
 	    connected = false;
 	}
 

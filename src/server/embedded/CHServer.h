@@ -26,12 +26,11 @@
 #include "Compatibility.h"
 #if !defined(OS_MINGW)
 #include <unistd.h>
-#include <netinet/in.h>
-#include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <arpa/inet.h>
+#include <netdb.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <sys/resource.h>
@@ -132,7 +131,7 @@
     #include <unistd.h>
     #define pwd getcwd
  #endif
-#if defined(OS_LINUX) || defined(OS_SOLARIS)
+#if defined(HAVE_EXECINFOINC)
 #include <execinfo.h>
 #endif
 #include "RequestReaderHandler.h"

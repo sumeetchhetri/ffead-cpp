@@ -118,11 +118,16 @@ void Date::populateEpochAndTimeZone(const bool& utc)
 	else
 		localtime_r(&rawtime, &ti);
 
+#if defined(OS_MINGW)
+	timeZoneOffsetSecs = 0;
+	timeZoneOffset = 0;
+#else
 	timeZoneOffsetSecs = ti.tm_gmtoff;
 	timeZoneOffset = timeZoneOffsetSecs/60;
 	if(ti.tm_zone!=NULL) {
 		timeZone = std::string(ti.tm_zone);
 	}
+#endif
 	isDLS = ti.tm_isdst==1;	/* Daylight Savings Time flag */
 }
 
@@ -147,18 +152,25 @@ void Date::populateDateFields()
 	weekday = ti.tm_wday;
 	dayName = dayInWords(weekday);
 	dayAbbr = dayInWords(weekday, true);
+#if defined(OS_MINGW)
+	timeZoneOffsetSecs = 0;
+	timeZoneOffset = 0;
+#else
 	timeZoneOffsetSecs = ti.tm_gmtoff;
 	timeZoneOffset = timeZoneOffsetSecs/60;
 	if(ti.tm_zone!=NULL) {
 		timeZone = std::string(ti.tm_zone);
 	}
+#endif
 	isDLS = ti.tm_isdst==1;	/* Daylight Savings Time flag */
 }
 
 Date::Date(const std::string& strdate, const std::string& formatspec) {
-	ti.tm_zone = NULL;
 	ti.tm_isdst = 0;
+#if !defined(OS_MINGW)
+	ti.tm_zone = NULL;
 	ti.tm_gmtoff = 0;
+#endif
 	strptime(strdate.c_str(), formatspec.c_str(), &ti);
 	populateDateFields();
 }

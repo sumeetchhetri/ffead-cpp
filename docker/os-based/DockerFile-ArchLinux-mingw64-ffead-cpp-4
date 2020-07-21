@@ -5,58 +5,85 @@ RUN pacman-key --populate archlinux
 RUN pacman -Sy archlinux-keyring pacman --noconfirm --noprogressbar --needed --quiet
 RUN pacman-db-upgrade
 RUN echo "[multilib]" >> /etc/pacman.conf \
-    && echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf \
-    && pacman -Sy --noprogressbar
-
-RUN pacman -Su --noconfirm --noprogressbar --quiet
-RUN pacman -Sy --noconfirm --noprogressbar autoconf-archive make clang make git binutils patch base-devel wget
-
-COPY yay-aur.sh /
-RUN chmod +x /yay-aur.sh
-RUN /yay-aur.sh
-
-RUN pacman -Syyu --noconfirm
-
-#Add martchus.no-ip.biz repo for mingw binaries
+    && echo "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
 RUN echo "[ownstuff]" >> /etc/pacman.conf \
     && echo "SigLevel = Optional TrustAll" >> /etc/pacman.conf \
     && echo "Server = https://martchus.no-ip.biz/repo/arch/\$repo/os/\$arch " >> /etc/pacman.conf \
-    && pacman -Sy
+    && pacman -Sy --noprogressbar
 
 RUN pacman -S --noconfirm --noprogressbar mingw-w64-gcc mingw-w64-make mingw-w64-configure \
 	mingw-w64-pkg-config mingw-w64-curl mingw-w64-openssl mingw-w64-zlib mingw-w64-jsoncpp \
-	mingw-w64-crt mingw-w64-headers mingw-w64-readline mingw-w64-cmake unzip
+	mingw-w64-crt mingw-w64-headers mingw-w64-readline mingw-w64-cmake mingw-w64-dlfcn \
+	mingw-w64-pcre unzip wget tar grep sed awk make core/binutils diffutils
 
-RUN wget -q http://www.unixodbc.org/unixODBC-2.3.7.tar.gz
+ENV TARGET=x86_64-w64-mingw32
+
+WORKDIR /tmp
+RUN wget -q ftp://ftp.unixodbc.org/pub/unixODBC/unixODBC-2.3.7.tar.gz
 RUN tar zxvf unixODBC-2.3.7.tar.gz
+RUN rm -f unixODBC-2.3.7.tar.gz
 WORKDIR unixODBC-2.3.7
-RUN ./configure --host=x86_64-w64-mingw32
-RUN make
-RUN make install
+RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar \
+	RANLIB=${TARGET}-ranlib ./configure --host=${TARGET} --prefix=/usr/${TARGET}
+RUN ${TARGET}-make
+RUN ${TARGET}-make install
+WORKDIR /tmp
+RUN rm -rf unixODBC-2.3.7
 
-#Install libcuckoo headers
+RUN wget -q https://github.com/sean-/ossp-uuid/archive/master.zip
+RUN unzip master.zip
+RUN rm -f master.zip
+WORKDIR ossp-uuid-master
+RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar \
+	RANLIB=${TARGET}-ranlib ./configure --prefix=/usr/${TARGET} --without-pgsql --without-perl --without-php --disable-static \
+	--host=x86_64 ac_cv_va_copy=C99 --enable-shared && ${TARGET}-make
+RUN mv uuid.exe uuid
+RUN cp /usr/sbin/${TARGET}-strip /usr/sbin/strip
+RUN ${TARGET}-make install
+WORKDIR /tmp
+RUN rm -rf ossp-uuid-master
+
 WORKDIR /tmp
 RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
 RUN unzip master.zip
 RUN rm -f master.zip
+RUN cd libcuckoo-master && ${TARGET}-cmake -DCMAKE_INSTALL_PREFIX=/usr/${TARGET} . && ${TARGET}-make install
+WORKDIR /tmp
+RUN rm -rf libcuckoo-master
+
+WORKDIR /tmp
+RUN wget -q https://github.com/redis/hiredis/archive/8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
+RUN unzip 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
+RUN rm -f 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
+WORKDIR hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
+RUN ${TARGET}-cmake . && ${TARGET}-make install
+WORKDIR /tmp
+RUN rm -rf hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
+
+RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+RUN tar xf mongo-c-driver-1.4.2.tar.gz
+RUN rm -f mongo-c-driver-1.4.2.tar.gz
+WORKDIR mongo-c-driver-1.4.2
+RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar \
+	RANLIB=${TARGET}-ranlib CFLAGS="-D__USE_MINGW_ANSI_STDIO=1 -D_FORTIFY_SOURCE=2" LDFLAGS="-lssp" \
+	./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl \
+	--prefix=/usr/${TARGET} --host=${TARGET} && CFLAGS="-D__USE_MINGW_ANSI_STDIO=1" LDFLAGS="-lssp" \
+	${TARGET}-make && ${TARGET}-make install -j4
+WORKDIR /tmp
+RUN rm -rf mongo-c-driver-1.4.2
+RUN rm -f /usr/${TARGET}/include/libbson-1.0/bson-compat.h
+RUN wget -q https://raw.githubusercontent.com/mongodb/mongo-c-driver/master/src/libbson/src/bson/bson-compat.h
+RUN mv bson-compat.h /usr/${TARGET}/include/libbson-1.0/
+RUN wget -q https://raw.githubusercontent.com/mongodb/mongo-c-driver/master/src/libbson/src/bson/bson-prelude.h
+RUN mv bson-prelude.h /usr/${TARGET}/include/libbson-1.0/
 
 RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
 RUN unzip master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
-
-WORKDIR /tmp/libcuckoo-master
-RUN x86_64-w64-mingw32-cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
-RUN make install
-WORKDIR /tmp
-RUN rm -rf /tmp/libcuckoo-master
-
-RUN pacman -S --noconfirm --noprogressbar mingw-w64-libsystre
-
-#Install ffead-cpp
 WORKDIR /tmp/ffead-cpp-src
-RUN cmake -DCMAKE_TOOLCHAIN_FILE=mingw-64-toolchain.cmake -DSRV_EMB=on .
-RUN make install -j4
+RUN ${TARGET}-cmake -DSRV_EMB=ON -DMOD_SDORM_MONGO=ON -DCMAKE_INC_PATH=/usr/${TARGET} .
+RUN ${TARGET}-make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src

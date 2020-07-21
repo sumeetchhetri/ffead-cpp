@@ -2,10 +2,10 @@
 
 cd $IROOT
 
-#wget -q http://nginx.org/download/nginx-1.13.1.tar.gz
-#tar xf nginx-1.13.1.tar.gz
+#wget -q http://nginx.org/download/nginx-1.19.1.tar.gz
+#tar xf nginx-1.19.1.tar.gz
 
-#cd $IROOT/nginx-1.13.1
+#cd $IROOT/nginx-1.19.1
 
 #./configure \
 #    --prefix=${IROOT}/nginxfc \

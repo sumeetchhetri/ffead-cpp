@@ -113,6 +113,15 @@ void IDGenerator::next(DataSourceEntityMapping& dsemp, GenericObject& id) {
 		}
 		id.set(ids);
 	}
+#elif HAVE_OSSPUUIDINC
+	else if(dsemp.getIdgendbEntityType()=="uuid")
+	{
+		uuid_t* idt;
+		uuid_rc_t status = uuid_create(&idt);
+		std::string ids((const char *) &idt, sizeof(idt));
+		uuid_destroy(idt);
+		id.set(ids);
+	}
 #elif HAVE_BSDUUIDINC
 	else if(dsemp.getIdgendbEntityType()=="uuid")
 	{

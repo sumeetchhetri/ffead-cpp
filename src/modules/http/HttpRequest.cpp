@@ -2453,19 +2453,22 @@ std::vector<std::string> HttpRequest::parseHeaderValue(std::string headerValue)
 	return StringUtil::splitAndReturn<std::vector<std::string> >(headerValue, ",");
 }
 
-const std::string HttpRequest::VALID_METHODS = ",get,post,options,delete,head,put,post,trace,";
+const std::string HttpRequest::VALID_METHODS = ",get,post,options,delete,head,put,trace,";
 bool HttpRequest::isValidHttpMethod(const std::string& method)
 {
 	std::string lmeth = ","+method+",";
-	return strcasestr(VALID_METHODS.c_str(), lmeth.c_str())!=NULL;
+	return strcasecmp(method.c_str(), "get") || strcasecmp(method.c_str(), "post") || strcasecmp(method.c_str(), "options")
+			|| strcasecmp(method.c_str(), "delete") || strcasecmp(method.c_str(), "head") || strcasecmp(method.c_str(), "put")
+			|| strcasecmp(method.c_str(), "trace");
 }
 
 bool HttpRequest::isValidHttpMethod()
 {
 	std::string lmeth;
 	lmeth.append(methodv);
-	lmeth = ","+lmeth+",";
-	return strcasestr(VALID_METHODS.c_str(), lmeth.c_str())!=NULL;
+	return strcasecmp(lmeth.c_str(), "get") || strcasecmp(lmeth.c_str(), "post") || strcasecmp(lmeth.c_str(), "options")
+			|| strcasecmp(lmeth.c_str(), "delete") || strcasecmp(lmeth.c_str(), "head") || strcasecmp(lmeth.c_str(), "put")
+			|| strcasecmp(lmeth.c_str(), "trace");
 }
 
 bool HttpRequest::isAgentAcceptsCE()

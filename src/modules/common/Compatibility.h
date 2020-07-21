@@ -17,6 +17,25 @@
 #ifndef MINGW_MISSING_H_
 #define MINGW_MISSING_H_
 #include "AppDefines.h"
+#if defined(OS_MINGW)
+#include <time.h>
+#include <iomanip>
+#include <sstream>
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT
+#endif
+
+#define _WIN32_WINNT 0x0600
+
+#include <ws2tcpip.h>
+#include <winsock2.h>
+#include <windows.h>
+#endif
 #include "iostream"
 #include <errno.h>
 #include <signal.h>
@@ -38,19 +57,18 @@
 #include <sched.h>
 
 #if defined(OS_MINGW)
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0600
+//#undef _WIN32_WINNT
+//#define _WIN32_WINNT 0x0600
 #define HAVE_STRUCT_TIMESPEC 1
 #include <unistd.h>
 #include <pthread.h>
-#define USE_MINGW_SELECT 1
+//#define USE_MINGW_SELECT 1
+#ifndef _WINDOWS_
 #define _WINDOWS_ 1
+#endif
 #define SQL_WCHART_CONVERT 1
 #include "windef.h"
-#include "WinBase.h"
-#include <ws2tcpip.h>
-#include <winsock2.h>
-#include <Mswsock.h>
+
 
 
 #ifndef OVERLAPPED_ENTRY /* This is a very ugly hack, but mingw doesn't have
@@ -89,12 +107,12 @@ typedef int socklen_t;
 #define S_IFLNK    0120000 /* Symbolic link */
 #define S_ISLNK(x) (((x) & S_IFMT) == S_IFLNK)
 #define S_ISSOCK(x) 0
-#define S_IRGRP 0
-#define S_IWGRP 0
-#define S_IXGRP 0
+//#define S_IRGRP 0
+//#define S_IWGRP 0
+//#define S_IXGRP 0
 #define S_ISGID 0
-#define S_IROTH 0
-#define S_IXOTH 0
+//#define S_IROTH 0
+//#define S_IXOTH 0
 
 #define WIFEXITED(x) 1
 #define WIFSIGNALED(x) 0
@@ -128,18 +146,22 @@ typedef int socklen_t;
 /* total seconds since epoch until start of unix time (january 1, 1970 00:00 UTC) */
 #define _DOVA_UNIX_SECONDS 11644473600
 
+//typedef int pid_t;
+
 #ifndef OS_MINGW_W64
-typedef int pid_t;
 struct tm *gmtime_r(const time_t *timep, struct tm *result);
 struct tm *localtime_r(const time_t *timep, struct tm *result);
 #endif
 
 int clock_gettime (int clockid, struct timespec *tp);
-const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
-int inet_pton(int af, const char *src, void *dst);
+//const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
+//int inet_pton(int af, const char *src, void *dst);
 int inet_pton4(const char *src, unsigned char *dst);
 int inet_pton6(const char *src, unsigned char *dst);
 typedef DWORD NUMEVENTS;
+extern "C" char* strptime(const char* s,
+                          const char* f,
+                          struct tm* tm);
 
 
 #else

@@ -37,7 +37,7 @@ class Http2ErrorCode {
 	{
 		if(PROTOCOL_ERROR.val!=1)
 		{
-			NO_ERROR.val = 0;
+			NO_ERROR_.val = 0;
 			PROTOCOL_ERROR.val = 1;
 			INTERNAL_ERROR.val = 2;
 			FLOW_CONTROL_ERROR.val = 3;
@@ -62,7 +62,7 @@ public:
 	{
 		return val;
 	}
-	static Http2ErrorCode NO_ERROR,
+	static Http2ErrorCode NO_ERROR_,
 		PROTOCOL_ERROR,
 		INTERNAL_ERROR,
 		FLOW_CONTROL_ERROR,

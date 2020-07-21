@@ -26,7 +26,11 @@
 #if !defined(OS_MINGW)
 #include <sys/types.h>
 #endif
+#ifdef HAVE_REGEX
 #include <regex.h>
+#else
+#include <pcreposix.h>
+#endif
 #include "vector"
 #include "map"
 #include "string"

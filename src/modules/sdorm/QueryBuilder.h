@@ -90,7 +90,7 @@ class QueryOperator {
 			NONE.val = 1;
 			EQUALS.val = 2;
 			NOT_EQUALS.val = 3;
-			IN.val = 4;
+			IN_.val = 4;
 			NOT_IN.val = 5;
 			BETWEEN.val = 6;
 			GREATER_THAN.val = 7;
@@ -117,7 +117,7 @@ public:
 	static QueryOperator NONE,
 		EQUALS,
 		NOT_EQUALS,
-		IN,
+		IN_,
 		NOT_IN,
 		BETWEEN,
 		GREATER_THAN,

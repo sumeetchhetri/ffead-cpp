@@ -35,13 +35,15 @@
 /* #undef USE_WIN_IOCP */
 
 #define HAVE_SSLINC 1
-#define HAVE_SSLLIB /usr/local/lib/libssl.dylib
+#define HAVE_SSLLIB /usr/local/opt/openssl/lib/libssl.dylib
 /* #undef HAVE_REDISINC */
 /* #undef HAVE_REDISLIB */
 /* #undef HAVE_MEMCACHEDINC */
 /* #undef HAVE_MEMCACHEDLIB */
 #define HAVE_CURLLIB /usr/lib/libcurl.dylib
+#define HAVE_EXECINFOINC 1
 #define HAVE_UUIDINC 1
+/* #undef HAVE_OSSPUUIDINC */
 /* #undef HAVE_BSDUUIDINC */
 #define HAVE_SQLINC 1
 #define HAVE_ODBCLIB /usr/local/lib/libodbc.dylib

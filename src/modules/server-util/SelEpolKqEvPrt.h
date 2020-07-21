@@ -27,7 +27,6 @@
 #include "Mutex.h"
 #include <libcuckoo/cuckoohash_map.hh>
 #include "SocketInterface.h"
-#include <netinet/tcp.h>
 
 #define MAXDESCRIPTORS 1024
 #define OP_READ     0
@@ -90,13 +89,13 @@
 #elif USE_WIN_IOCP == 1
 	#undef USE_WIN_IOCP
 	#undef USE_SELECT
-	#define USE_EPOLL
+	#undef USE_EPOLL
 	#undef USE_KQUEUE
 	#undef USE_EVPORT
 	#undef USE_DEVPOLL
 	#undef USE_POLL
 	#undef USE_SELECT
-	#define USE_EPOLL_LT
+	#define USE_EPOLL_LT 1
 	#undef USE_EPOLL_ET
 #include "wepoll.h"
 #elif USE_MINGW_SELECT == 1
@@ -154,11 +153,10 @@ class SelEpolKqEvPrt : public EventHandler {
 		fd_set master[1024/FD_SETSIZE];
 	#elif defined USE_EPOLL
 		struct epoll_event events[MAXDESCRIPTORS];
-#ifdef OS_MINGW
-		HANDLE epoll_handle;
-#else
 		int epoll_handle;
-#endif
+	#elif defined USE_WIN_IOCP
+		struct epoll_event events[MAXDESCRIPTORS];
+		HANDLE epoll_handle;
 	#elif defined USE_KQUEUE
 		int kq;
 		struct kevent evlist[MAXDESCRIPTORS];

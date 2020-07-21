@@ -29,7 +29,7 @@
 #ifdef HAVE_LIBUUID
 #include <uuid/uuid.h>
 #endif
-#ifdef HAVE_BSDUUIDINC
+#if defined(HAVE_BSDUUIDINC) || defined(HAVE_OSSPUUIDINC)
 #include <uuid.h>
 #endif
 

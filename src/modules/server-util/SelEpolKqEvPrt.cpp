@@ -27,12 +27,10 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 	sockfd = -1;
 	curfds = 0;
 	timeoutMilis = -1;
-#if USE_EPOLL == 1
-#ifdef OS_MINGW
-	epoll_handle = NULL;
-#else
+#if defined USE_EPOLL
 	epoll_handle = -1;
-#endif
+#elif defined USE_WIN_IOCP
+	epoll_handle = NULL;
 #endif
 #if USE_KQUEUE == 1
 	kq = -1;
@@ -71,7 +69,7 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 			FD_ZERO(&readfds[var]);
 			FD_ZERO(&master[var]);
 		}
-	#elif defined USE_EPOLL
+	#elif defined USE_EPOLL || defined USE_WIN_IOCP
 		epoll_handle = epoll_create1(0);
 	#elif defined USE_KQUEUE
 		kq = kqueue();
@@ -159,7 +157,7 @@ int SelEpolKqEvPrt::getEvents()
 			if(fdMax>0)
 				return fdMax+1;
 		}
-	#elif defined USE_EPOLL
+	#elif defined USE_EPOLL || defined USE_WIN_IOCP
 		numEvents = epoll_wait(epoll_handle, events, MAXDESCRIPTORS, timeoutMilis);
 	#elif defined USE_KQUEUE
 		if(timeoutMilis>1)
@@ -224,7 +222,7 @@ int SelEpolKqEvPrt::getEvents()
 }
 
 bool SelEpolKqEvPrt::registerWrite(SocketInterface* obj) {
-#if defined USE_EPOLL
+#if defined USE_EPOLL || defined USE_WIN_IOCP
 	struct epoll_event ev;
 	memset(&ev, 0, sizeof(ev));
 	#ifdef USE_EPOLL_LT
@@ -252,7 +250,7 @@ bool SelEpolKqEvPrt::registerWrite(SocketInterface* obj) {
 }
 
 bool SelEpolKqEvPrt::unRegisterWrite(SocketInterface* obj) {
-#if defined USE_EPOLL
+#if defined USE_EPOLL || defined USE_WIN_IOCP
 	struct epoll_event ev;
 	memset(&ev, 0, sizeof(ev));
 	#ifdef USE_EPOLL_LT
@@ -302,7 +300,7 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj, bool& isRe
 		l.unlock();
 		obj = connections.find(temp);
 		return temp;
-	#elif defined USE_EPOLL
+	#elif defined USE_EPOLL || defined USE_WIN_IOCP
 		if(index>-1 && index<(int)(sizeof events))
 		{
 			SocketInterface* p = (SocketInterface*)events[index].data.ptr;
@@ -376,13 +374,13 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 		FD_SET(descriptor, &master);
 		if(descriptor > fdMax)
 			fdMax = descriptor;
-		connections[descriptor] = obj;
+		connections.insert(descriptor, obj);
 	#elif defined(USE_SELECT)
 		FD_SET(descriptor%FD_SETSIZE, &master[descriptor/FD_SETSIZE]);
 		if(descriptor > fdMax)
 			fdMax = descriptor;
-		connections[descriptor] = obj;
-	#elif defined USE_EPOLL
+		connections.insert(descriptor, obj);
+	#elif defined USE_EPOLL || defined USE_WIN_IOCP
 		struct epoll_event ev;
 		memset(&ev, 0, sizeof(ev));
 		#if defined(EPOLLEXCLUSIVE)
@@ -423,12 +421,12 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 			perror("devpoll");
 			return false;
 		}
-		connections[descriptor] = obj;
+		connections.insert(descriptor, obj);
 	#elif defined USE_EVPORT
 		if (port_associate(port, PORT_SOURCE_FD, descriptor, POLLIN, NULL) < 0) {
 			perror("port_associate");
 		}
-		connections[descriptor] = obj;
+		connections.insert(descriptor, obj);
 	#elif defined USE_POLL
 		l.lock();
 		curfds++;
@@ -437,13 +435,13 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 		(polled_fds+nfds)->fd = descriptor;
 		(polled_fds+nfds)->events = POLLIN | POLLPRI;
 		l.unlock();
-		connections[descriptor] = obj;
+		connections.insert(descriptor, obj);
 	#endif
 	return true;
 }
 
 void* SelEpolKqEvPrt::getOptData(const int& index) {
-	#if defined USE_EPOLL
+	#if defined USE_EPOLL || defined USE_WIN_IOCP
 		return events[index].data.ptr;
 	#elif defined USE_KQUEUE
 		return evlist[index].udata;
@@ -464,7 +462,7 @@ bool SelEpolKqEvPrt::unRegisterRead(const SOCKET& descriptor)
 		FD_CLR(descriptor%FD_SETSIZE, &master[descriptor/FD_SETSIZE]);
 		if(fdMax==descriptor)
 			fdMax--;
-	#elif defined USE_EPOLL
+	#elif defined USE_EPOLL || defined USE_WIN_IOCP
 		struct epoll_event ev;
 		memset(&ev, 0, sizeof(ev));
 		epoll_ctl(epoll_handle, EPOLL_CTL_DEL, descriptor, &ev);

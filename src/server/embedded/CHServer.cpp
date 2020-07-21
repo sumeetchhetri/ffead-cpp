@@ -147,7 +147,7 @@ int receive_fd(int fd)
 
 void handler(int sig)
 {
-#if defined(OS_LINUX) || defined(OS_SOLARIS)
+#if defined(HAVE_EXECINFOINC)
 	void *array[10];
 	size_t size;
 

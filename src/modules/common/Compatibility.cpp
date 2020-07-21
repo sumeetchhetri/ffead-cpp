@@ -17,7 +17,23 @@
 #include "Compatibility.h"
 
 #if defined(OS_MINGW)
-#ifndef OS_MINGW_W64
+char* strptime(const char* s,
+                          const char* f,
+                          struct tm* tm) {
+  // Isn't the C++ standard lib nice? std::get_time is defined such that its
+  // format parameters are the exact same as strptime. Of course, we have to
+  // create a string stream first, and imbue it with the current C locale, and
+  // we also have to make sure we return the right things if it fails, or
+  // if it succeeds, but this is still far simpler an implementation than any
+  // of the versions in any of the C standard libraries.
+  std::istringstream input(s);
+  input.imbue(std::locale(setlocale(LC_ALL, nullptr)));
+  input >> std::get_time(tm, f);
+  if (input.fail()) {
+    return nullptr;
+  }
+  return (char*)(s + input.tellg());
+}
 struct tm *gmtime_r(const time_t *timep, struct tm *result)
 {
 	/* gmtime() in MSVCRT.DLL is thread-safe, but not reentrant */
@@ -31,7 +47,6 @@ struct tm *localtime_r(const time_t *timep, struct tm *result)
 	memcpy(result, localtime(timep), sizeof(struct tm));
 	return result;
 }
-#endif
 
 int clock_gettime (int clockid, struct timespec *tp) {
 	FILETIME ft;
@@ -186,7 +201,7 @@ inet_ntop6(const u_char *src, char *dst, size_t size)
  * author:
  *	Paul Vixie, 1996.
  */
-const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
+/*const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
 {
 	switch (af) {
 	case AF_INET:
@@ -199,8 +214,7 @@ const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
 		errno = -1;
 		return (NULL);
 	}
-	/* NOTREACHED */
-}
+}*/
 
 
 /* int
@@ -361,7 +375,7 @@ inet_pton6(const char *src, unsigned char *dst)
  * author:
  *      Paul Vixie, 1996.
  */
-int
+/*int
 inet_pton(int af, const char *src, void *dst)
 {
         switch (af) {
@@ -375,8 +389,7 @@ inet_pton(int af, const char *src, void *dst)
                 errno = -1;
                 return (-1);
         }
-        /* NOTREACHED */
-}
+}*/
 #endif
 
 #if defined(OS_DARWIN)
