@@ -17,7 +17,7 @@ cd /opt/ffead-cpp-4.0
 nohup bash -c "./server.sh > ffead.log &"
 echo "Waiting for ffead-cpp to launch on port 8080..."
 COUNTER=0
-while [ ! -f lib/libinter.dylib ]
+while [ ! -f lib/libinter.so ]
 do
   sleep 1
   COUNTER=$((COUNTER+1))
@@ -28,7 +28,7 @@ do
   fi
 done
 COUNTER=0
-while [ ! -f lib/libdinter.dylib ]
+while [ ! -f lib/libdinter.so ]
 do
   sleep 1
   COUNTER=$((COUNTER+1))

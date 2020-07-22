@@ -24,12 +24,13 @@ build_zlib() {
 	pushd ${BUILD_DIR}/zlib-${ZLIB_VERSION}
 		if [ "$1" = "mingw-w64" ]
     	then
-    		env CHOST=${TARGET} ./configure --prefix=${STAGE_DIR}
+    		env CHOST=${TARGET} ./configure --enable-shared --prefix=${STAGE_DIR}
     		make -j"$(nproc)"
     	else
-    		env CHOST=${TARGET} ./configure --archs="-fPIC" --prefix=${STAGE_DIR}
+    		env CHOST=${TARGET} ./configure --enable-shared --archs="-fPIC" --prefix=${STAGE_DIR}
 			make -j"$(nproc)"
     	fi
+    	make install
 	popd
 }
 

@@ -34,9 +34,9 @@ RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
-WORKDIR /opt
+COPY *.sh  /opt/
 
-COPY *.sh  ./
+WORKDIR /opt
 
 RUN chmod +x install_ffead-cpp-4.0.sh
 RUN ./install_ffead-cpp-4.0.sh

@@ -1,6 +1,6 @@
 FROM alpine:3.12.0
 
-RUN apk add autoconf-archive gcc g++ make cmake unzip openssl openssl-dev psqlodbc unixodbc unixodbc-dev curl-dev libmemcached libmemcached-dev wget netcat-openbsd
+RUN apk add autoconf-archive gcc g++ make cmake unzip openssl openssl-dev psqlodbc unixodbc unixodbc-dev curl-dev libmemcached libmemcached-dev wget netcat-openbsd bash
 RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing ossp-uuid-dev
 
 #Install libcuckoo headers
@@ -42,9 +42,9 @@ RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
-WORKDIR /opt
+COPY *.sh  /opt/
 
-COPY *.sh  ./
+WORKDIR /opt
 
 RUN chmod +x install_ffead-cpp-4.0.sh
 RUN ./install_ffead-cpp-4.0.sh
