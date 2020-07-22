@@ -72,9 +72,9 @@ RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TA
 WORKDIR /tmp
 RUN rm -rf mongo-c-driver-1.4.2
 RUN rm -f /usr/${TARGET}/include/libbson-1.0/bson-compat.h
-RUN wget -q https://raw.githubusercontent.com/mongodb/mongo-c-driver/master/src/libbson/src/bson/bson-compat.h
+RUN wget -q https://raw.githubusercontent.com/mongodb/mongo-c-driver/f5eb70637fdd391fe14c9a9f3ec3cfda193f3ad9/src/libbson/src/bson/bson-compat.h
 RUN mv bson-compat.h /usr/${TARGET}/include/libbson-1.0/
-RUN wget -q https://raw.githubusercontent.com/mongodb/mongo-c-driver/master/src/libbson/src/bson/bson-prelude.h
+RUN wget -q https://raw.githubusercontent.com/mongodb/mongo-c-driver/f5eb70637fdd391fe14c9a9f3ec3cfda193f3ad9/src/libbson/src/bson/bson-prelude.h
 RUN mv bson-prelude.h /usr/${TARGET}/include/libbson-1.0/
 
 RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
@@ -84,18 +84,6 @@ RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
 RUN ${TARGET}-cmake -DSRV_EMB=ON -DMOD_SDORM_MONGO=ON -DCMAKE_INC_PATH=/usr/${TARGET} .
 RUN ${TARGET}-make install -j4
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /opt/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
-
-WORKDIR /opt
-
-COPY *.sh  ./
-
-RUN chmod +x install_ffead-cpp-4.0.sh
-RUN ./install_ffead-cpp-4.0.sh
-
-WORKDIR /opt/ffead-cpp-4.0
-
-RUN chmod +x server.sh
-CMD ./server.sh

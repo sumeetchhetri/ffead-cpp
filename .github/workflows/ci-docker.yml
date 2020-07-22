@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Build the base ffead-cpp-4.0 base docker image
+    - name: Build the ffead-cpp-4.0 base docker image
       run: |
         git clone https://github.com/TechEmpower/FrameworkBenchmarks
         cp -f docker/Dockerfile-tfb-test FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp.dockerfile

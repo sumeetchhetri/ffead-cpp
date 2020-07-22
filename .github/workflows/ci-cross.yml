@@ -1,0 +1,18 @@
+name: Build ffead-cpp cross docker images
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the ffead-cpp-4.0 cross docker images
+      run: |
+      	cd docker
+        docker build -f Dockerfile-cross-musl .
+        docker build -f DockerFile-cross-archlinux-mingw64 .
