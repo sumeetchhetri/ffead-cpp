@@ -35,6 +35,8 @@
 #cmakedefine USE_SELECT @USE_SELECT@
 #cmakedefine USE_WIN_IOCP @USE_WIN_IOCP@
 
+
+#cmakedefine HAVE_REGEX @HAVE_REGEX@
 #cmakedefine HAVE_SSLINC @HAVE_SSLINC@
 #cmakedefine HAVE_SSLLIB @HAVE_SSLLIB@
 #cmakedefine HAVE_REDISINC @HAVE_REDISINC@
