@@ -14,9 +14,4 @@ jobs:
     - name: Build the ffead-cpp-4.0 os-based docker images
       run: |
         cd docker/os-based
-        docker build -f DockerFile-Alpine-x64-ffead-cpp-4.0 .
-        docker build -f DockerFile-ArchLinux-x64-ffead-cpp-4.0 .
-        docker build -f DockerFile-Centos7-x64-ffead-cpp-4.0 .
-        docker build -f DockerFile-Gentoo-x64-ffead-cpp-4.0 .
         docker build -f DockerFile-OpenSuseTumbleweed-x64-ffead-cpp-4.0 .
-        docker build -f DockerFile-UbuntuBionic-x64-ffead-cpp-4.0 .

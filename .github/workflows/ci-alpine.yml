@@ -1,0 +1,17 @@
+name: Build ffead-cpp os-based docker images
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the ffead-cpp-4.0 os-based docker images
+      run: |
+        cd docker/os-based
+        docker build -f DockerFile-Alpine-x64-ffead-cpp-4.0 .
