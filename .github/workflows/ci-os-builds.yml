@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build the ffead-cpp-4.0 os-based docker images
       run: |
-      	cd docker/os-based
+        cd docker/os-based
         docker build -f DockerFile-Alpine-x64-ffead-cpp-4.0 .
         docker build -f DockerFile-ArchLinux-x64-ffead-cpp-4.0 .
         docker build -f DockerFile-Centos7-x64-ffead-cpp-4.0 .
