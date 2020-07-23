@@ -1,4 +1,4 @@
-name: Build ffead-cpp cross docker images
+name: Cross compile ffead-cpp for musl, mingw-w64 and android
 
 on:
   push:
@@ -11,8 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Build the ffead-cpp-4.0 cross docker images
+    - name: Cross compile ffead-cpp for musl, mingw-w64 and android
       run: |
         cd docker
-        docker build -f Dockerfile-cross-musl .
+        docker build -f DockerFile-cross-musl .
+        docker build -f DockerFile-cross-android .
         docker build -f DockerFile-cross-archlinux-mingw64 .

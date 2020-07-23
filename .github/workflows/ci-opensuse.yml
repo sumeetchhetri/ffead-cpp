@@ -1,4 +1,4 @@
-name: Build ffead-cpp os-based docker images
+name: Build ffead-cpp on opensuse
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Build the ffead-cpp-4.0 os-based docker images
+    - name: Build ffead-cpp on opensuse
       run: |
         cd docker/os-based
         docker build -f DockerFile-OpenSuseTumbleweed-x64-ffead-cpp-4.0 .

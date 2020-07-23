@@ -60,6 +60,7 @@
 #cmakedefine OS_LINUX @OS_LINUX@
 #cmakedefine OS_MINGW @OS_MINGW@
 #cmakedefine OS_DARWIN @OS_DARWIN@
+#cmakedefine OS_ANDROID @OS_ANDROID@
 #cmakedefine SRV_EMB @SRV_EMB@
 #cmakedefine SRV_CINATRA @SRV_CINATRA@
 #cmakedefine SRV_LITHIUM @SRV_LITHIUM@

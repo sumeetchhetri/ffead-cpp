@@ -3,9 +3,9 @@ RUN git clone --depth=1 https://github.com/sumeetchhetri/ffead-cpp /ffead-cpp
 WORKDIR /ffead-cpp
 COPY libmemcached-build.patch musl-fixes.patch /ffead-cpp/
 COPY cross-build-deps.sh /ffead-cpp/
-RUN chmod +x cross-build-deps.sh && ./cross-build-deps.sh x86_64
+RUN chmod +x cross-build-deps.sh && ./cross-build-deps.sh musl x86_64
 COPY cross-build.sh /ffead-cpp/
-RUN chmod +x cross-build.sh && ./cross-build.sh x86_64
+RUN chmod +x cross-build.sh && ./cross-build.sh musl x86_64
 
 FROM alpine:3.10
 COPY --from=0 /ffead-cpp/ffead-cpp-4.0-bin /ffead-cpp-4.0

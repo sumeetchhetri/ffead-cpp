@@ -118,7 +118,7 @@ void Thread::execute(int cid) {
 	if(isDetached) {
 		pthread_detach(pthread);
 	}
-#if !defined(CYGWIN) && !defined(OS_MINGW)
+#if !defined(CYGWIN) && !defined(OS_MINGW) && !defined(OS_ANDROID)
 	if(cid>=0) {
 #ifdef OS_BSD
 		cpuset_t cpuset;

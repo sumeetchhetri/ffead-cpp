@@ -22,7 +22,6 @@
 
 #ifndef THREAD_H_
 #define THREAD_H_
-#include "AppDefines.h"
 #include "Compatibility.h"
 #ifdef OS_BSD
 #include <sys/cpuset.h>

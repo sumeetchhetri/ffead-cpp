@@ -1,0 +1,13 @@
+FROM buildpack-deps:bionic
+
+RUN apt update -yqq && apt install -yqq autoconf-archive gcc g++ cmake unzip wget make android-sdk
+
+WORKDIR /tmp
+RUN wget -q https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip
+RUN unzip -qq android-ndk-r21d-linux-x86_64.zip && mv android-ndk-r21d /usr/lib/android-sdk/ndk-bundle && rm -f android-ndk-r21d-linux-x86_64.zip
+
+RUN git clone --depth=1 https://github.com/sumeetchhetri/ffead-cpp /ffead-cpp
+WORKDIR /ffead-cpp
+COPY cross-build.sh cross-build-deps.sh build-android*.sh build-common*.sh /ffead-cpp/
+RUN chmod +x cross-build-deps.sh && ./cross-build-deps.sh android /usr/lib/android-sdk/ /usr/lib/android-sdk/ndk-bundle/ armeabi-v7a 23
+RUN chmod +x cross-build.sh && ./cross-build.sh android /usr/lib/android-sdk/ /usr/lib/android-sdk/ndk-bundle/ armeabi-v7a 23

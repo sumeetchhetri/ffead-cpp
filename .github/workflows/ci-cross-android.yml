@@ -1,0 +1,20 @@
+name: Cross compile ffead-cpp for android
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cross compile ffead-cpp for android
+      run: |
+        sudo su
+        cd docker
+        chmod +x *.sh
+        ./cross-build-deps.sh android /usr/lib/android/sdk /usr/lib/android/sdk/ndk armeabi-v7a 23
+        ./cross-build.sh android /usr/lib/android/sdk /usr/lib/android/sdk/ndk armeabi-v7a 23

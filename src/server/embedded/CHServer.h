@@ -22,7 +22,6 @@
 
 #ifndef CHSERVER_H_
 #define CHSERVER_H_
-#include "AppDefines.h"
 #include "Compatibility.h"
 #if !defined(OS_MINGW)
 #include <unistd.h>

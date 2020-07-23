@@ -535,7 +535,9 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 	}
 	//signal(SIGSEGV,signalSIGSEGV);
 	//signal(SIGFPE,signalSIGFPE);
+	#ifndef OS_ANDROID
 	(void) sigignore(SIGPIPE);
+	#endif
 	//(void) sigignore(SIGINT);
 	#else
 		// startup WinSock in Windows
