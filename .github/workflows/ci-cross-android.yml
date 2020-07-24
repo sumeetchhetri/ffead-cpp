@@ -18,7 +18,7 @@ jobs:
         cd docker
         chmod +x *.sh
         echo ${ANDROID_HOME}
-        ls -ltr ${ANDROID_HOME}ndk-bundle
+        ls -ltr ${ANDROID_HOME}/ndk-bundle
         ls -ltr ${ANDROID_HOME}/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin
         ./cross-build-deps.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk-bundle armeabi-v7a 23
         ./cross-build.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk-bundle armeabi-v7a 23
