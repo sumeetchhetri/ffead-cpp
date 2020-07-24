@@ -20,8 +20,8 @@ jobs:
         echo ${ANDROID_HOME}
         ls -ltr ${ANDROID_HOME}/ndk-bundle
         ls -ltr ${ANDROID_HOME}/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin
-        ./cross-build-deps.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk-bundle armeabi-v7a 23
-        ./cross-build.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk-bundle armeabi-v7a 23
+        sudo ./cross-build-deps.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk-bundle armeabi-v7a 23
+        sudo ./cross-build.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk-bundle armeabi-v7a 23
     - name: Cross compile ffead-cpp for android/docker
       run: |
         sudo su
