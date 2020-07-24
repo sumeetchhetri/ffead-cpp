@@ -296,18 +296,20 @@ build() {
 
 if [ "$1" = "musl" ]
 then
-	install_cmake_musl_cross_file
 	case $2 in
 	  i386|x86_64|aarch64|mips|mipsel)
-	  	init musl $1-linux-musl $2
-	    build musl $1-linux-musl $2
+	  	init musl $2-linux-musl $2
+	  	install_cmake_musl_cross_file
+	    build musl $2-linux-musl $2
 	    ;;
 	  arm)
 	    init musl arm-linux-musleabi $2
+	  	install_cmake_musl_cross_file
 	    build musl arm-linux-musleabi $2
 	    ;;
 	  armhf)
 	    init musl arm-linux-musleabihf $2
+	  	install_cmake_musl_cross_file
 	    build musl arm-linux-musleabihf $2
 	    ;;
 	  *)
@@ -317,10 +319,10 @@ fi
 
 if [ "$1" = "mingw-w64" ]
 then
-	install_cmake_mingw_w64_cross_file
 	ZLIB_VERSION=1.2.5
 	STAGE_ROOT=${MINGW}
 	init mingw-w64 x86_64-w64-mingw32
+	install_cmake_mingw_w64_cross_file
     build mingw-w64 x86_64-w64-mingw32
 fi
 
