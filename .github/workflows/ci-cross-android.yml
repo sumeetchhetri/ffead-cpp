@@ -12,12 +12,18 @@ jobs:
     #if: "!contains(github.event.head_commit.message, '[skip_build]')"
     steps:
     - uses: actions/checkout@v2
-    - name: Cross compile ffead-cpp for android
+    - name: Cross compile ffead-cpp for android/ubuntu
       run: |
         sudo su
         cd docker
         chmod +x *.sh
         echo ${ANDROID_HOME}
-        echo `ls -ltr ${ANDROID_HOME}`
-        ./cross-build-deps.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk armeabi-v7a 23
-        ./cross-build.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk armeabi-v7a 23
+        ls -ltr ${ANDROID_HOME}ndk-bundle
+        ls -ltr ${ANDROID_HOME}/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin
+        ./cross-build-deps.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk-bundle armeabi-v7a 23
+        ./cross-build.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk-bundle armeabi-v7a 23
+    - name: Cross compile ffead-cpp for android/docker
+      run: |
+        sudo su
+        cd docker
+        docker build -f DockerFile-cross-android .

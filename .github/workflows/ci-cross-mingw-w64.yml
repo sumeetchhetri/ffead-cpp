@@ -1,0 +1,18 @@
+name: Cross compile ffead-cpp for mingw-w64
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip_build]')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cross compile ffead-cpp for mingw-w64
+      run: |
+        cd docker
+        docker build -f DockerFile-cross-archlinux-mingw64 .
