@@ -17,5 +17,7 @@ jobs:
         sudo su
         cd docker
         chmod +x *.sh
-        ./cross-build-deps.sh android /usr/local/lib/android/sdk /usr/local/lib/android/ndk-bundle armeabi-v7a 23
-        ./cross-build.sh android /usr/local/lib/android/sdk /usr/local/lib/android/sdk/ndk-bundle armeabi-v7a 23
+        echo ${ANDROID_HOME}
+        echo `ls -ltr ${ANDROID_HOME}`
+        ./cross-build-deps.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk armeabi-v7a 23
+        ./cross-build.sh android ${ANDROID_HOME} ${ANDROID_HOME}/ndk armeabi-v7a 23

@@ -95,17 +95,17 @@ then
 	case $2 in
 	  i386|x86_64|aarch64|mips|mipsel)
 	  	init musl $2-linux-musl $2
-	  	install_cmake_mingw_w64_cross_file
+	  	install_cmake_musl_cross_file
 	    build_ffeadcpp musl
 	    ;;
 	  arm)
 	    init musl arm-linux-musleabi $2
-	  	install_cmake_mingw_w64_cross_file
+	  	install_cmake_musl_cross_file
 	    build_ffeadcpp musl
 	    ;;
 	  armhf)
 	    init musl arm-linux-musleabihf $2
-	  	install_cmake_mingw_w64_cross_file
+	  	install_cmake_musl_cross_file
 	    build_ffeadcpp musl
 	    ;;
 	  *)
