@@ -20,8 +20,7 @@ rm -rf unixODBC-2.3.7
 wget -q https://github.com/redis/hiredis/archive/v0.13.3.tar.gz
 tar zxf v0.13.3.tar.gz
 rm -f v0.13.3.tar.gz
-cp net.c hiredis-0.13.3/
-cd hiredis-0.13.3/ && rm -f net.c && wget https://raw.githubusercontent.com/sumeetchhetri/ffead-cpp/master/docker/net.c && make && PREFIX=/usr make install
+cd hiredis-0.13.3/ && rm -f net.c && wget https://raw.githubusercontent.com/sumeetchhetri/ffead-cpp/master/docker/files/net.c && make && PREFIX=/usr make install
 cd /tmp
 rm -rf hiredis-0.13.3
 

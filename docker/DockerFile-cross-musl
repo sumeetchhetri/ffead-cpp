@@ -1,7 +1,7 @@
 FROM tsl0922/musl-cross
 RUN git clone --depth=1 https://github.com/sumeetchhetri/ffead-cpp /ffead-cpp
 WORKDIR /ffead-cpp
-COPY libmemcached-build.patch musl-fixes.patch /ffead-cpp/
+COPY files/libmemcached-build.patch files/musl-fixes.patch /ffead-cpp/
 COPY cross-build-deps.sh /ffead-cpp/
 RUN chmod +x cross-build-deps.sh && ./cross-build-deps.sh musl x86_64
 COPY cross-build.sh /ffead-cpp/
