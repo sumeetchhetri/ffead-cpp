@@ -28,7 +28,7 @@ rm -f mongo-c-driver-1.4.2.tar.gz
 cd mongo-c-driver-1.4.2/
 cp /tmp/ffead-cpp-src/docker/files/bson-iter.h src/libbson/src/bson/
 cp /tmp/ffead-cpp-src/docker/files/bson-compat.h src/libbson/src/bson/
-CFLAGS="-D__USE_MINGW_ANSI_STDIO=1" LDFLAGS="-lcrypt32" ./configure --disable-automatic-init-and-cleanup --disable-tests --prefix=/mingw64/
+CFLAGS="-D__USE_MINGW_ANSI_STDIO=1" CFLAGS="-I/mingw64/x86_64-w64-mingw32/include" LDFLAGS="-lcrypt32" ./configure --disable-automatic-init-and-cleanup --disable-tests --prefix=/mingw64/
 make && make install
 rm -f /mingw64/include/libbson-1.0/bson-compat.h
 cp /tmp/ffead-cpp-src/docker/files/bson-compat_after.h /mingw64/include/libbson-1.0/bson-compat.h
