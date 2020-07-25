@@ -10,24 +10,6 @@ cp include/* /mingw64/include/
 cp lib/* /mingw64/lib/
 
 cd /tmp
-wget -q https://github.com/efficient/libcuckoo/archive/master.zip
-unzip master.zip
-rm -f master.zip
-cd /tmp/libcuckoo-master
-cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ .
-mingw32-make install
-cd /tmp
-rm -rf libcuckoo-master
-
-wget -q http://www.unixodbc.org/unixODBC-2.3.7.tar.gz
-tar zxf unixODBC-2.3.7.tar.gz
-cd unixODBC-2.3.7
-./configure
-mingw32-make
-mingw32-make install
-cd /tmp
-rm -rf unixODBC-2.3.7
-
 wget -q https://github.com/sean-/ossp-uuid/archive/master.zip
 unzip master.zip
 rm -f master.zip
@@ -53,6 +35,24 @@ cp /tmp/ffead-cpp-src/docker/files/bson-compat_after.h /mingw64/include/libbson-
 cp /tmp/ffead-cpp-src/docker/files/bson-prelude.h /mingw64/include/libbson-1.0/
 cd /tmp
 rm -rf mongo-c-driver-1.4.2
+
+wget -q https://github.com/efficient/libcuckoo/archive/master.zip
+unzip master.zip
+rm -f master.zip
+cd /tmp/libcuckoo-master
+cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ .
+mingw32-make install
+cd /tmp
+rm -rf libcuckoo-master
+
+wget -q http://www.unixodbc.org/unixODBC-2.3.7.tar.gz
+tar zxf unixODBC-2.3.7.tar.gz
+cd unixODBC-2.3.7
+./configure
+mingw32-make
+mingw32-make install
+cd /tmp
+rm -rf unixODBC-2.3.7
 
 wget -q https://github.com/redis/hiredis/archive/8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
 unzip 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
