@@ -1,0 +1,27 @@
+name: Build ffead-cpp on windows mingw
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  windows-cywgin:
+    runs-on: ${{ matrix.os }}
+    #if: "!contains(github.event.head_commit.message, '[skip_build]')"
+    strategy:
+      matrix:
+        os: [windows-2019]
+        vs: [2019]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set ENV
+      run: |
+        echo '::set-env name=PATH::C:\msys64\mingw64\bin;C:\msys64\usr\bin'
+    - name: Install toolchain
+      run: |
+        pacman -S git wget curl gdb mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-pkg-config mingw-w64-x86_64-curl mingw-w64-x86_64-openssl mingw-w64-x86_64-zlib mingw-w64-x86_64-jsoncpp mingw-w64-x86_64-crt mingw-w64-x86_64-headers mingw-w64-x86_64-readline mingw-w64-x86_64-cmake mingw-w64-x86_64-dlfcn mingw-w64-x86_64-pcre mingw-w64-x86_64-unixodbc mingw-w64-x86_64-extra-cmake-modules mingw64/mingw-w64-x86_64-cyrus-sasl diffutils unzip
+    - name: Install dependencies and ffead-cpp
+      run: |
+        bash --login -c "cd /tmp && wget https://raw.githubusercontent.com/sumeetchhetri/ffead-cpp/master/docker/install_mingw.sh && dos2unix install_mingw.sh && chmod +x install_mingw.sh && ./install_mingw.sh"
