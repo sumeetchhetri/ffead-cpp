@@ -48,7 +48,7 @@ rm -rf libcuckoo-master
 wget -q http://www.unixodbc.org/unixODBC-2.3.7.tar.gz
 tar zxf unixODBC-2.3.7.tar.gz
 cd unixODBC-2.3.7
-./configure
+./configure --prefix=/mingw64/
 mingw32-make
 mingw32-make install
 cd /tmp
