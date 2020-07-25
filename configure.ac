@@ -748,6 +748,20 @@ AM_CONDITIONAL(MOD_ALL, test "x$mod_all" = "xyes")
 ########################################################################################################
 ############################## Server Engines #########################################################
 
+AC_ARG_ENABLE(srv_all,
+AS_HELP_STRING([--enable-srv_all],
+               [enable srv_all, default: yes]),
+[case "${enableval}" in
+             yes) srv_all=yes ;;
+             no)  srv_all=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_all]) ;;
+esac],
+[srv_all=yes])
+AM_CONDITIONAL(SRV_ALL, test "x$srv_all" = "xyes")
+if test "x$srv_all" = "xyes"; then
+    AC_DEFINE(SRV_ALL, [], [enable all http server engines])
+fi
+
 AC_ARG_ENABLE(srv_emb,
 AS_HELP_STRING([--enable-srv_emb],
                [enable srv_emb, default: yes]),
