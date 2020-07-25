@@ -15,8 +15,8 @@ cd mingw64
 cp bin/* /mingw64/bin/
 cp include/* /mingw64/include/
 cp lib/* /mingw64/lib/
-cp share/* /mingw64/lib/
-cp etc/* /mingw64/lib/
+cp -rf share/* /mingw64/share/
+cp -rf etc/* /mingw64/etc/
 
 cd /tmp
 wget -q https://github.com/sean-/ossp-uuid/archive/master.zip
