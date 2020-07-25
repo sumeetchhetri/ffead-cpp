@@ -25,4 +25,4 @@ jobs:
     - name: Install dependencies and ffead-cpp
       run: |
         bash --login -c "export PATH=/mingw64/bin:/usr/bin:$PATH && cd /tmp && wget https://raw.githubusercontent.com/sumeetchhetri/ffead-cpp/master/docker/install_mingw.sh && dos2unix install_mingw.sh && chmod +x install_mingw.sh && ./install_mingw.sh"
-        @set ErrorLevel=%ErrorLevel%
+        set ErrorLevel=%ErrorLevel%
