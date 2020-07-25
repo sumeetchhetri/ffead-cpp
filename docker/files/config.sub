@@ -1389,7 +1389,7 @@ case $os in
 		os=-zvmoe
 		;;
 	-msys)
-		os=msys
+		os=-msys
 		;;
 	-none)
 		;;
