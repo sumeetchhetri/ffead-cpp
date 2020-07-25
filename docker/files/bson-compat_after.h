@@ -131,7 +131,7 @@ typedef SSIZE_T ssize_t;
 #endif
 
 #if defined(__MINGW32__) && !defined(INIT_ONCE_STATIC_INIT)
-#include <ddk/ntddk.h>
+struct RTL_RUN_ONCE;
 #define INIT_ONCE_STATIC_INIT RTL_RUN_ONCE_INIT
 typedef RTL_RUN_ONCE INIT_ONCE;
 #endif
