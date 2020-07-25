@@ -13,7 +13,7 @@ service redis-server stop
 
 cd $IROOT
 wget -q https://github.com/efficient/libcuckoo/archive/master.zip
-unzip master.zip
+unzip -qq master.zip
 rm -f master.zip
 cd libcuckoo-master
 cmake -DCMAKE_INSTALL_PREFIX=/usr .
@@ -46,7 +46,7 @@ rm -rf mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit
 #rm -rf mongo-c-driver-1.4.0 
 
 #wget -q https://github.com/redis/hiredis/archive/v0.13.3.tar.gz
-#tar xvf v0.13.3.tar.gz
+#tar xf v0.13.3.tar.gz
 #rm -f v0.13.3.tar.gz
 #cd hiredis-0.13.3/
 #make
@@ -56,7 +56,7 @@ rm -rf mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit
 
 cd $IROOT
 wget -q https://github.com/microsoft/mimalloc/archive/v1.6.3.tar.gz
-tar xvf mimalloc-1.6.3.tar.gz
+tar xf mimalloc-1.6.3.tar.gz
 cd mimalloc-1.6.3
 mkdir -p out/release
 cmake ../.. -DCMAKE_BUILD_TYPE=Release
@@ -65,7 +65,7 @@ cd $IROOT
 rm -rf mimalloc-1.6.3
 
 wget -q https://github.com/microsoft/snmalloc/archive/0.4.2.tar.gz
-tar xvf snmalloc-0.4.2.tar.gz
+tar xf snmalloc-0.4.2.tar.gz
 cd snmalloc-0.4.2
 mkdir build
 cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Release

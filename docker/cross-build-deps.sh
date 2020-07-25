@@ -54,7 +54,7 @@ build_openssl() {
     pushd ${BUILD_DIR}/openssl-OpenSSL_${OPENSSL_VERSION}
     	if [ "$1" = "android" ]
     	then
-    		wget https://wiki.openssl.org/images/7/70/Setenv-android.sh
+    		wget -q https://wiki.openssl.org/images/7/70/Setenv-android.sh
     		chmod +x Setenv-android.sh
     		dos2unix Setenv-android.sh
     		sed -i'' -e's|_ANDROID_EABI="arm-linux-androideabi-4.8"|_ANDROID_EABI="${1}"|g' Setenv-android.sh

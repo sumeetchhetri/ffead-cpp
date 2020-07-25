@@ -1,9 +1,9 @@
 wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
-unzip master.zip
+unzip -qq master.zip
 mv ffead-cpp-master ffead-cpp-src
 rm -f master.zip
 cd /tmp/ffead-cpp-src/docker
-unzip mingw64-dlfcn.zip
+unzip -qq mingw64-dlfcn.zip
 cd mingw64
 cp bin/* /mingw64/bin/
 cp include/* /mingw64/include/
@@ -11,7 +11,7 @@ cp lib/* /mingw64/lib/
 
 cd /tmp
 wget -q https://github.com/sean-/ossp-uuid/archive/master.zip
-unzip master.zip
+unzip -qq master.zip
 rm -f master.zip
 cd ossp-uuid-master
 cp /tmp/ffead-cpp-src/docker/files/config.sub .
@@ -29,7 +29,8 @@ cd mongo-c-driver-1.4.2/
 cp /tmp/ffead-cpp-src/docker/files/bson-iter.h src/libbson/src/bson/
 cp /tmp/ffead-cpp-src/docker/files/bson-compat.h src/libbson/src/bson/
 CFLAGS="-D__USE_MINGW_ANSI_STDIO=1" CFLAGS="-I/mingw64/x86_64-w64-mingw32/include" LDFLAGS="-lcrypt32" ./configure --disable-automatic-init-and-cleanup --disable-tests --prefix=/mingw64/
-make && make install
+CFLAGS="-I/mingw64/x86_64-w64-mingw32/include" make
+CFLAGS="-I/mingw64/x86_64-w64-mingw32/include" make install
 rm -f /mingw64/include/libbson-1.0/bson-compat.h
 cp /tmp/ffead-cpp-src/docker/files/bson-compat_after.h /mingw64/include/libbson-1.0/bson-compat.h
 cp /tmp/ffead-cpp-src/docker/files/bson-prelude.h /mingw64/include/libbson-1.0/
@@ -37,7 +38,7 @@ cd /tmp
 rm -rf mongo-c-driver-1.4.2
 
 wget -q https://github.com/efficient/libcuckoo/archive/master.zip
-unzip master.zip
+unzip -qq master.zip
 rm -f master.zip
 cd /tmp/libcuckoo-master
 cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ .

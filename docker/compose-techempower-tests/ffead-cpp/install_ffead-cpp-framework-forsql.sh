@@ -9,7 +9,7 @@ SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 cd $IROOT
 
 wget -q https://github.com/efficient/libcuckoo/archive/master.zip
-unzip master.zip
+unzip -qq master.zip
 rm -f master.zip
 cd libcuckoo-master
 cmake -DCMAKE_INSTALL_PREFIX=/usr .
@@ -20,7 +20,7 @@ rm -rf libcuckoo-master
 cd $IROOT
 
 wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
-unzip master.zip
+unzip -qq master.zip
 rm -f master.zip
 mv ffead-cpp-master ffead-cpp-src
 mv ${TROOT}/ffead-cpp-src ffead-cpp-src

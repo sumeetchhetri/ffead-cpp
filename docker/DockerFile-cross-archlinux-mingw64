@@ -31,7 +31,7 @@ WORKDIR /tmp
 RUN rm -rf unixODBC-2.3.7
 
 RUN wget -q https://github.com/sean-/ossp-uuid/archive/master.zip
-RUN unzip master.zip
+RUN unzip -qq master.zip
 RUN rm -f master.zip
 WORKDIR ossp-uuid-master
 RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar \
@@ -45,7 +45,7 @@ RUN rm -rf ossp-uuid-master
 
 WORKDIR /tmp
 RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
-RUN unzip master.zip
+RUN unzip -qq master.zip
 RUN rm -f master.zip
 RUN cd libcuckoo-master && ${TARGET}-cmake -DCMAKE_INSTALL_PREFIX=/usr/${TARGET} . && ${TARGET}-make install
 WORKDIR /tmp
@@ -53,7 +53,7 @@ RUN rm -rf libcuckoo-master
 
 WORKDIR /tmp
 RUN wget -q https://github.com/redis/hiredis/archive/8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
-RUN unzip 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
+RUN unzip -qq 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
 RUN rm -f 8e0264cfd6889b73c241b60736fe96ba1322ee6e.zip
 WORKDIR hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
 RUN ${TARGET}-cmake . && ${TARGET}-make install
@@ -78,7 +78,7 @@ RUN wget -q https://raw.githubusercontent.com/mongodb/mongo-c-driver/f5eb70637fd
 RUN mv bson-prelude.h /usr/${TARGET}/include/libbson-1.0/
 
 RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
-RUN unzip master.zip
+RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src

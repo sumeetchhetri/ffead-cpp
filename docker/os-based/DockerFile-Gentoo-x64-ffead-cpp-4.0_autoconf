@@ -16,7 +16,7 @@ RUN rm -rf /tmp/mongo-c-driver-1.4.0
 #Install libcuckoo headers
 WORKDIR /tmp
 RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
-RUN unzip master.zip
+RUN unzip -qq master.zip
 RUN rm -f master.zip
 WORKDIR /tmp/libcuckoo-master
 RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
@@ -27,7 +27,7 @@ RUN rm -rf /tmp/libcuckoo-master
 #Install ffead-cpp
 WORKDIR /tmp
 RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
-RUN unzip master.zip
+RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src

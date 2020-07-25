@@ -1,6 +1,6 @@
 cd /tmp
 wget -q https://github.com/efficient/libcuckoo/archive/master.zip
-unzip master.zip
+unzip -qq master.zip
 rm -f master.zip
 cd /tmp/libcuckoo-master
 cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
@@ -25,7 +25,7 @@ cd /tmp
 rm -rf hiredis-0.13.3
 
 wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
-unzip master.zip
+unzip -qq master.zip
 mv ffead-cpp-master ffead-cpp-src
 rm -f master.zip
 cd /tmp/ffead-cpp-src
