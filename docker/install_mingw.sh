@@ -1,3 +1,14 @@
+wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+unzip master.zip
+mv ffead-cpp-master ffead-cpp-src
+rm -f master.zip
+cd /tmp/ffead-cpp-src/docker
+unzip mingw64-dlfcn.zip
+cd mingw64
+cp bin/* /mingw64/bin/
+cp include/* /mingw64/include/
+cp lib/* /mingw64/lib/
+
 cd /tmp
 wget -q https://github.com/efficient/libcuckoo/archive/master.zip
 unzip master.zip
@@ -50,10 +61,6 @@ cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ . && mingw32-make in
 cd /tmp
 rm -rf hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
 
-wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
-unzip master.zip
-mv ffead-cpp-master ffead-cpp-src
-rm -f master.zip
 cd /tmp/ffead-cpp-src
 cmake -G "MinGW Makefiles" -DSRV_EMB=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=ON -DCMAKE_INC_PATH=/mingw64/ .
 mingw32-make install -j4
