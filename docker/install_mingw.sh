@@ -14,7 +14,7 @@ unzip -qq mingw64-unixodbc.zip
 cd mingw64
 cp bin/* /mingw64/bin/
 cp include/* /mingw64/include/
-cp lib/* /mingw64/lib/
+cp -rf lib/* /mingw64/lib/
 cp -rf share/* /mingw64/share/
 cp -rf etc/* /mingw64/etc/
 
