@@ -48,14 +48,6 @@ cmake -G "MinGW Makefiles" -DCMAKE_INSTALL_PREFIX=/mingw64/ . && mingw32-make in
 cd /tmp
 rm -rf hiredis-8e0264cfd6889b73c241b60736fe96ba1322ee6e
 
-cd /tmp/ffead-cpp-src
-cmake -G "MinGW Makefiles" -DSRV_EMB=on -DMOD_REDIS=on -DCMAKE_INC_PATH=/mingw64/ .
-mingw32-make install -j4
-mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
-cd /tmp
-rm -rf /tmp/ffead-cpp-src
-
-
 wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.16.2/mongo-c-driver-1.16.2.tar.gz
 tar xf mongo-c-driver-1.16.2.tar.gz
 rm -f mongo-c-driver-1.16.2.tar.gz
@@ -64,3 +56,10 @@ CC=/mingw64/bin/gcc.exe /mingw64/bin/cmake -G "MSYS Makefiles" -DCMAKE_INSTALL_P
 make install
 cd /tmp
 rm -rf mongo-c-driver-1.16.2
+
+cd /tmp/ffead-cpp-src
+cmake -G "MinGW Makefiles" -DSRV_EMB=on -DMOD_REDIS=ON -DMOD_SDORM_MONGO=ON -DCMAKE_INC_PATH=/mingw64/ .
+mingw32-make install -j4
+mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
+cd /tmp
+rm -rf /tmp/ffead-cpp-src
