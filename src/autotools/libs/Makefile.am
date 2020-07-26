@@ -535,6 +535,12 @@ AM_CPPFLAGS += \
 libffead_modules_la_SOURCES += \
 						../../modules/sdorm/gtm/GTM.cpp
 endif
+if USE_WEPOLL
+AM_CPPFLAGS += \
+				-I"../../modules/wepoll"
+libffead_modules_la_SOURCES += \
+						../../modules/wepoll/wepoll.cpp
+endif
 
 libffead_modules_la_SOURCES += \
 						../../modules/common/GenericObject.cpp

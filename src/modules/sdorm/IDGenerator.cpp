@@ -102,7 +102,7 @@ void IDGenerator::next(DataSourceEntityMapping& dsemp, GenericObject& id) {
 	{
 		executeSequence(dsemp, id);
 	}
-#ifdef HAVE_LIBUUID
+#ifdef HAVE_UUIDINC
 	else if(dsemp.getIdgendbEntityType()=="uuid")
 	{
 		uuid_t idt;

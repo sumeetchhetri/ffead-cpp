@@ -27,7 +27,7 @@
 #include "CastUtil.h"
 #include "StringUtil.h"
 #include "LoggerFactory.h"
-#ifdef HAVE_LIBUUID
+#ifdef HAVE_UUIDINC
 #include <uuid/uuid.h>
 #endif
 #if defined(HAVE_BSDUUIDINC) || defined(HAVE_OSSPUUIDINC)

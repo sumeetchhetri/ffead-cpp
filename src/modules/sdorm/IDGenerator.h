@@ -26,7 +26,7 @@
 #include "DataSourceMapping.h"
 #include "GenericObject.h"
 #include "HiloIdGenerator.h"
-#ifdef HAVE_LIBUUID
+#ifdef HAVE_UUIDINC
 #include <uuid/uuid.h>
 #endif
 #if defined(HAVE_BSDUUIDINC) || defined(HAVE_OSSPUUIDINC)

@@ -23,7 +23,7 @@
 #ifndef THREAD_H_
 #define THREAD_H_
 #include "Compatibility.h"
-#ifdef OS_BSD
+#if defined(OS_BSD) && !defined(OS_DARWIN)
 #include <sys/cpuset.h>
 #include <pthread_np.h>
 #endif
