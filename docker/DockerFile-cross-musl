@@ -1,4 +1,4 @@
-FROM tsl0922/musl-cross
+FROM sumeetchhetri/musl-cross
 RUN git clone --depth=1 https://github.com/sumeetchhetri/ffead-cpp /ffead-cpp
 WORKDIR /ffead-cpp
 COPY files/libmemcached-build.patch files/musl-fixes.patch /ffead-cpp/
@@ -6,8 +6,3 @@ COPY cross-build-deps.sh /ffead-cpp/
 RUN chmod +x cross-build-deps.sh && ./cross-build-deps.sh musl x86_64
 COPY cross-build.sh /ffead-cpp/
 RUN chmod +x cross-build.sh && ./cross-build.sh musl x86_64
-
-FROM alpine:3.10
-COPY --from=0 /ffead-cpp/ffead-cpp-4.0-bin /ffead-cpp-4.0
-RUN apk add openssl openssl-dev psqlodbc unixodbc unixodbc-dev curl-dev libmemcached libmemcached-dev
-RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing ossp-uuid-dev

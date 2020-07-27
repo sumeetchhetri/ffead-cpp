@@ -93,7 +93,7 @@ init() {
 if [ "$1" = "musl" ]
 then
 	case $2 in
-	  i386|x86_64|aarch64|mips|mipsel)
+	  i386|x86_64|aarch64|mips|mipsel|mips64|mips64el)
 	  	init musl $2-linux-musl $2
 	  	install_cmake_musl_cross_file
 	    build_ffeadcpp musl
@@ -109,7 +109,7 @@ then
 	    build_ffeadcpp musl
 	    ;;
 	  *)
-	    echo "usage: $0 musl i386|x86_64|arm|armhf|aarch64|mips|mipsel" && exit 1
+	    echo "usage: $0 musl i386|x86_64|arm|armhf|aarch64|mips|mipse|mips64|mips64ell" && exit 1
 	esac
 fi
 
