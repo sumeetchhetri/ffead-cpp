@@ -48,19 +48,19 @@ AC_ARG_WITH([top_inc_dir],
 		[],
         [],
         [with_top_inc_dir="no"])
-	if test "x${with_top_inc_dir}" != "xno"; then
-	    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir} -I/usr/local/include -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
-	else
-		CPPFLAGS="$CPPFLAGS -I/usr/local/include -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
-	fi
+if test "x${with_top_inc_dir}" != "xno"; then
+    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir} -I/usr/local/include -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
+else
+	CPPFLAGS="$CPPFLAGS -I/usr/local/include -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
+fi
 
 AC_ARG_WITH([cinatra_inc_dir],
 		[],
         [],
         [with_cinatra_inc_dir="/cinatra/include"])
-	if test "x${with_cinatra_inc_dir}" != "xno"; then
-	    CPPFLAGS="-I${with_cinatra_inc_dir} $CPPFLAGS"
-	fi
+if test "x${with_cinatra_inc_dir}" != "xno"; then
+    CPPFLAGS="-I${with_cinatra_inc_dir} $CPPFLAGS"
+fi
 
 AC_CANONICAL_HOST
 local_os_type="unknown"
@@ -1157,10 +1157,10 @@ AC_CONFIG_FILES([Makefile
                 src/autotools/bins/Makefile
                 tests/autotools/Makefile])
 if test "x$generate_apache_module" = "xyes"; then
-AC_CONFIG_FILES([modules/apache_mod_ffeadcpp/autotools/Makefile])
+	AC_CONFIG_FILES([modules/apache_mod_ffeadcpp/autotools/Makefile])
 fi
 if test "x$generate_nginx_module" = "xyes"; then
-AC_CONFIG_FILES(modules/nginx_mod_ffeadcpp/autotools/Makefile[])
+	AC_CONFIG_FILES(modules/nginx_mod_ffeadcpp/autotools/Makefile[])
 fi
 AC_CONFIG_FILES([web/default/src/autotools/Makefile
 				web/flexApp/src/autotools/Makefile

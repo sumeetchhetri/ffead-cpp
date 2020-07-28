@@ -13,6 +13,7 @@ PACFL=${PACFL//-std=gnu++0x/}
 PACFL=${PACFL//-std=c++11/}
 PACFL=${PACFL//+std=c++11/}
 PACFL=${PACFL//-std=c++0x/}
+PACFL=${PACFL//-std=gnu++17/}
 
 if [ "$DEBG" = "yes" ]; then
 	DEBG="--enable-debug=yes"

@@ -1,11 +1,16 @@
-#                                               -*- Autoconf -*-
+# -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
+# For verbose logging use refer - https://autotools.io/automake/silent.html
+# ./configure --disable-silent-rules or make V=1
 
-AC_INIT([ffead-cpp], [2.0], [sumeet.chhetri@gmail.com])
+AC_INIT([ffead-cpp], [4.0], [sumeet.chhetri@gmail.com])
 AM_INIT_AUTOMAKE([no-define foreign])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
+AM_SILENT_RULES([yes])
 AC_CONFIG_SRCDIR([../AjaxInterface.cpp])
-m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
 AC_CONFIG_MACRO_DIR([m4])
+m4_include([m4/ax_cxx_compile_stdcxx.m4])
+m4_include([m4/ax_cxx_compile_stdcxx_17.m4])
 
 LT_INIT([static shared dlopen])
 
@@ -28,12 +33,32 @@ else
     support_debug=no
 fi
 
+AC_ARG_WITH([top_inc_dir],
+		[],
+        [],
+        [with_top_inc_dir="no"])
+if test "x${with_top_inc_dir}" != "xno"; then
+    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir} -I/usr/local/include -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
+else
+	CPPFLAGS="$CPPFLAGS -I/usr/local/include -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
+fi
+
+AC_ARG_WITH([cinatra_inc_dir],
+		[],
+        [],
+        [with_cinatra_inc_dir="/cinatra/include"])
+if test "x${with_cinatra_inc_dir}" != "xno"; then
+    CPPFLAGS="-I${with_cinatra_inc_dir} $CPPFLAGS"
+fi
+
 AC_CANONICAL_HOST
 local_os_type="unknown"
+os_flavor="unknown"
 is_librt_available="yes"
-AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include"
-CPPFLAGS="$CPPFLAGS -I/usr/local/include"
-LDFLAGS="$LDFLAGS -L/usr/local/lib"
+use_wepoll="no"
+AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include -Wno-unknown-pragmas -Wno-delete-incomplete"
+CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir} -I/usr/local/include"
+LDFLAGS="$LDFLAGS -L/usr/local/lib -Wl,-undefined,error"
 case "$host" in
 *-cygwin*)
     AC_DEFINE(OS_CYGWIN, [], [set OS to cygwin])
@@ -44,9 +69,8 @@ case "$host" in
     AC_DEFINE(USE_WIN_IOCP, [], [use io completion ports on windows])
     local_os_type="mingw"
     is_librt_available="no"
-    CPPFLAGS="$CPPFLAGS -I/mingw/include -L/mingw/lib -D__USE_MINGW_ANSI_STDIO=1"
-    AM_CXXFLAGS="$AM_CXXFLAGS -I/mingw/include -L/mingw/lib"
-    LDFLAGS="$LDFLAGS -L/mingw/lib"
+    CPPFLAGS="$CPPFLAGS -D__USE_MINGW_ANSI_STDIO=1"
+    use_wepoll="yes"
     ;;
 *-linux*)
     AC_DEFINE(OS_LINUX, [], [set OS to linux])
@@ -82,15 +106,17 @@ case "$host" in
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
     AC_DEFINE(OS_FREEBSD, [], [set OS to freebsd])
     local_os_type="freebsd"
+    os_flavor="bsd"
 
     dnl our hack for freebsd system
-    AM_CXXFLAGS="$AM_CXXFLAGS -pthread"
+
     LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-netbsd*)
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
     AC_DEFINE(OS_NETBSD, [], [set OS to netbsd])
     local_os_type="netbsd"
+    os_flavor="bsd"
 
     #our hack for netbsd system
     LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
@@ -99,6 +125,7 @@ case "$host" in
     AC_DEFINE(OS_BSD, [], [set OS to bsd])
     AC_DEFINE(OS_OPENBSD, [], [set OS to openbsd])
     local_os_type="openbsd"
+    os_flavor="bsd"
 
 	#get openbsd release number, remove `.' from release number
 	OBSD_REL=`/usr/bin/uname -r | sed 's/\.//g'`
@@ -112,10 +139,27 @@ case "$host" in
     local_os_type="osf"
     ;;
 *-darwin*)
-	is_librt_available="no"
-    AC_DEFINE(OS_BSD, [], [set OS to bsd])
+    is_librt_available="no"
+    #AC_DEFINE(OS_BSD, [], [set OS to bsd])
     AC_DEFINE(OS_DARWIN, [], [set OS to darwin])
+    CPPFLAGS="$CPPFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
+    AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
+    LDFLAGS="$LDFLAGS -L/usr/local/opt/unixodbc/lib/ -L/usr/local/lib"
     local_os_type="darwin"
+    AC_ARG_WITH([ssl_inc_dir],
+		[],
+        [],
+        [with_ssl_inc_dir="/usr/local/opt/openssl/include"])
+	if test "x${with_ssl_inc_dir}" != "xno"; then
+	    CPPFLAGS="-I${with_ssl_inc_dir} $CPPFLAGS"
+	fi
+	AC_ARG_WITH([ssl_lib_dir],
+		[],
+        [],
+        [with_ssl_lib="/usr/local/opt/openssl/lib"])
+	if test "x${with_ssl_lib}" != "xno"; then
+		LDFLAGS="-L${with_ssl_lib} $LDFLAGS"
+	fi
     ;;
 *-sco*)
     AC_DEFINE(OS_SCO, [], [set OS to sco])
@@ -128,34 +172,42 @@ if test "x$mod_script" = "xtrue"; then
     AM_CXXFLAGS="$AM_CXXFLAGS -U__STRICT_ANSI__"
 fi
 
-if test "x$mod_sdormmongo" = "xtrue"; then
-	AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+if test "x$mod_sdormmongo" = "xyes"; then
+	if test "x${with_top_inc_dir}" != "xno"; then
+		AM_CXXFLAGS="$AM_CXXFLAGS -I${with_top_inc_dir}/libmongoc-1.0/ -I${with_top_inc_dir}/libbson-1.0"
+	    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir}/libmongoc-1.0/ -I${with_top_inc_dir}/libbson-1.0"
+	else
+		AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+	    CPPFLAGS="$CPPFLAGS -I/usr/include/libmongoc-1.0/ -I/usr/include/libbson-1.0 -I/usr/local/include/libmongoc-1.0/ -I/usr/local/include/libbson-1.0"
+	fi
+    AC_DEFINE(INC_SDORM_MONGO, [], [enable data-source-orm-mongo module])
+    AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
 fi
 
 # store current user given compiler flags to avoid default setup via AC_PROG_CXX
 OLD_CXXFLAGS=$CXXFLAGS
 
-STDCXX_11_SWITCH=
+STDCXX_SWITCH=
 
 dnl# Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_CXX
-AX_CXX_COMPILE_STDCXX_11(,mandatory)
+AX_CXX_COMPILE_STDCXX(17,,mandatory)
 
 # reset compiler flags to initial flags
 CXXFLAGS=$OLD_CXXFLAGS
 
 AC_PROG_MAKE_SET
 
+dnl# Checks for libraries.
+AC_DEFINE(BUILT_WITH_CONFGURE, [1], [set configure mode])
+AM_CONDITIONAL(BUILT_WITH_CONFGURE, test "x1" = "x1")
+
 dnl# Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
-
-dnl# Checks for libraries.
-AC_DEFINE(BUILT_WITH_CONFGURE, [1], [set configure mode])
-AM_CONDITIONAL(BUILT_WITH_CONFGURE, test x"1" = x"1")
 
 dnl# unixODBC wants the following to get sane behavior for ODBCINT64
 AC_CHECK_SIZEOF(long)
@@ -168,23 +220,40 @@ AC_FUNC_ERROR_AT_LINE
 AC_FUNC_FORK
 AC_FUNC_MALLOC
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([clock_gettime floor gethostbyname memset pow regcomp select socket strcasecmp strtol strtoul])
+AC_CHECK_FUNCS([clock_gettime floor gethostbyname memset pow regcomp select socket strcasecmp strtol strtoul accept4])
 AC_CHECK_LIB(pthreads, pthread_create,[], [AC_CHECK_LIB(pthread, pthread_create)])
 AC_CHECK_LIB(ssl, SSL_read, [], [AC_MSG_ERROR([ssl library not found])])
 AC_CHECK_LIB([crypto], [SHA1_Init], [], [AC_MSG_ERROR([libcrypto not found])])
 AC_CHECK_LIB(z, compress,,AC_MSG_ERROR([no zlib; please install zlib or equivalent]))
-AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
+#AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
+AC_CHECK_LIB(c, dlopen, ADD_LIBDL="", [AC_CHECK_LIB(dl, dlopen, ADD_LIBDL="-ldl")])
+AC_CHECK_LIB(rt, clock_nanosleep, [AC_DEFINE(HAVE_CLOCK_NANOSLEEP, 1, [Define if you have clock_nanosleep()])], [])
 
-if test "x$mod_sdormsql" = "xtrue"; then
-	AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+if test "x$mod_sdormsql" = "xyes"; then
+	if test "x$os_flavor" = "xbsd"; then
+		AC_CHECK_LIB(uuid, uuid_create, [], [AC_MSG_ERROR([uuid library not found])])
+	else
+		AC_CHECK_LIB(ossp-uuid, uuid_create, [],
+			[
+				AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+			])
+	fi
 	AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
+	AC_DEFINE(HAVE_LIBODBC, [1], [libodbc presence])
 fi
 
-if test "x$mod_sdormmongo" = "xtrue"; then
-	AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
-	AC_CHECK_LIB(mongoc-1.0, mongoc_init, , [AC_MSG_ERROR([Not found libmongo library])])
-	AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
+if test "x$mod_sdormmongo" = "xyes"; then
+	if test "x$os_flavor" = "xbsd"; then
+		AC_CHECK_LIB(uuid, uuid_create, [], [AC_MSG_ERROR([uuid library not found])])
+	else
+		AC_CHECK_LIB(ossp-uuid, uuid_create, [],
+			[
+				AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
+			])
+	fi
+    AC_CHECK_LIB(mongoc-1.0, mongoc_init, , [AC_MSG_ERROR([Not found libmongo library])])
+    AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
 fi
 
 if test "x$is_librt_available" = "xyes"; then	
@@ -194,13 +263,20 @@ fi
 if test "x$local_os_type" = "xmingw"; then
 	AC_CHECK_LIB(wsock32, main, , [AC_MSG_ERROR([Not found libwsock32 library])])
 	AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
+	AC_CHECK_LIB(kernel32, main, , [AC_MSG_ERROR([Not found libkernel32 library])])
 	AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
 fi
 
-AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_11_SWITCH"    
+if test "x$mod_gtm" = "xyes"; then
+    AC_CHECK_LIB(gtmshr, main, , [AC_MSG_ERROR([Not found libgtmshr library])])
+fi
+
+AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_SWITCH"
+AC_SUBST(STDCXX_SWITCH, [$STDCXX_SWITCH])
 # distribute additional compiler and linker flags among Makefiles
 # --> set and change these variables instead of CXXFLAGS or LDFLAGS (for user only)
 AC_SUBST([AM_CXXFLAGS])    
+AC_SUBST([ADD_LIBDL])
     
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
