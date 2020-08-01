@@ -1,7 +1,7 @@
 FROM centos:7
 
 RUN yum install -y --nogpgcheck tar centos-release-scl centos-release-scl-rh epel-release
-RUN yum install -y --nogpgcheck scl-utils devtoolset-7 autoconf-archive cmake3 libcurl libcurl-devel openssl openssl-devel libuuid-devel hiredis hiredis-devel zlib zlib-devel libmemcached libmemcached-devel unixODBC* tar gzip wget nmap-ncat
+RUN yum install -y --nogpgcheck scl-utils devtoolset-7 autoconf-archive autoconf automake libtool cmake3 libcurl libcurl-devel openssl openssl-devel libuuid-devel hiredis hiredis-devel zlib zlib-devel libmemcached libmemcached-devel unixODBC* tar gzip wget nmap-ncat
 RUN scl enable devtoolset-7 bash
 RUN mv /usr/bin/cc /usr/bin/cc_old
 RUN ln -s /opt/rh/devtoolset-7/root/usr/bin/gcc /usr/bin/cc

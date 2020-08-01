@@ -8,16 +8,6 @@ RUN ln -s /opt/rh/devtoolset-7/root/usr/bin/gcc /usr/bin/cc
 RUN ln -s /opt/rh/devtoolset-7/root/usr/bin/g++ /usr/bin/c++
 RUN ln -s /usr/bin/cmake3 /usr/bin/cmake
 
-#Download and install mongo c driver
-WORKDIR /tmp
-RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz
-RUN tar xf mongo-c-driver-1.4.0.tar.gz
-WORKDIR /tmp/mongo-c-driver-1.4.0
-RUN ./configure --prefix=/usr/local --libdir=/usr/local --disable-automatic-init-and-cleanup
-RUN make && make install
-WORKDIR /tmp
-RUN rm -rf /tmp/mongo-c-driver-1.4.0
-	    
 #Install libcuckoo headers
 WORKDIR /tmp
 RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
@@ -29,6 +19,14 @@ RUN make install
 WORKDIR /tmp
 RUN rm -rf /tmp/libcuckoo-master
 
+#Install mongodb c driver
+RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+RUN tar xf mongo-c-driver-1.4.2.tar.gz
+RUN rm -f mongo-c-driver-1.4.2.tar.gz
+RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
+WORKDIR /tmp
+RUN rm -rf mongo-c-driver-1.4.2
+
 #Install ffead-cpp
 WORKDIR /tmp
 RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
@@ -38,15 +36,15 @@ RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
 RUN chmod +x autogen.sh
 RUN ./autogen.sh
-RUN ./configure --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes CPPFLAGS="$CPPFLAGS -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0 -I/usr/include/libmongoc-1.0 -I/usr/include/libbson-1.0" LDFLAGS="$LDFLAGS -L/usr/local/lib"
+RUN ./configure --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_redis=yes --enable-mod_memcached=yes
 RUN make install
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
-WORKDIR /opt
+COPY *.sh  /opt/
 
-COPY *.sh  ./
+WORKDIR /opt
 
 RUN chmod +x install_ffead-cpp-4.0.sh
 RUN ./install_ffead-cpp-4.0.sh

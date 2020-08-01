@@ -37,8 +37,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 EOF
 }
 
-build_ffeadcpp() {
-	echo "=== Building ffead-cpp (${TARGET})..."
+build_ffeadcpp_cmake() {
+	echo "=== Building ffead-cpp with cmake for (${TARGET})..."
 	rm -rf build && mkdir -p build
 	pushd build
 		if [ "$1" = "android" ]
@@ -52,6 +52,20 @@ build_ffeadcpp() {
 		fi
 		make -j4 install
   	popd
+}
+
+build_ffeadcpp_autoconf() {
+	echo "=== Building ffead-cpp with autoconf with (${TARGET})..."
+	if [ "$1" = "android" ]
+	then
+		env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
+			LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
+			./configure --host="${TARGET}" --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_redis=yes
+	else
+		env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
+			./configure --host="${TARGET}" --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_redis=yes
+	fi
+	make -j4 install
 }
 
 install_cmake_musl_cross_file() {
@@ -96,17 +110,20 @@ then
 	  i386|x86_64|aarch64|mips|mipsel|mips64|mips64el)
 	  	init musl $2-linux-musl $2
 	  	install_cmake_musl_cross_file
-	    build_ffeadcpp musl
+	    build_ffeadcpp_cmake musl
+	    build_ffeadcpp_autoconf musl
 	    ;;
 	  arm)
 	    init musl arm-linux-musleabi $2
 	  	install_cmake_musl_cross_file
-	    build_ffeadcpp musl
+	    build_ffeadcpp_cmake musl
+	    build_ffeadcpp_autoconf musl
 	    ;;
 	  armhf)
 	    init musl arm-linux-musleabihf $2
 	  	install_cmake_musl_cross_file
-	    build_ffeadcpp musl
+	    build_ffeadcpp_cmake musl
+	    build_ffeadcpp_autoconf musl
 	    ;;
 	  *)
 	    echo "usage: $0 musl i386|x86_64|arm|armhf|aarch64|mips|mipse|mips64|mips64ell" && exit 1
@@ -120,6 +137,7 @@ then
 	init mingw-w64 x86_64-w64-mingw32
 	install_cmake_mingw_w64_cross_file
     build_ffeadcpp mingw-w64
+	build_ffeadcpp_autoconf mingw-w64
 fi
 
 if [ "$1" = "android" ]
@@ -139,18 +157,22 @@ then
 	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-strip ${TOOLCHAIN}/bin/armv7a-linux-androideabi-strip
 	    init android armv7a-linux-androideabi x86_32
 	    build_ffeadcpp android
+		build_ffeadcpp_autoconf android
 	    ;;
 	  arm64-v8a)
 	    init android aarch64-linux-android arm64
 	    build_ffeadcpp android
+		build_ffeadcpp_autoconf android
 	    ;;
 	  x86)
 	    init android i686-linux-android x86
 	    build_ffeadcpp android
+		build_ffeadcpp_autoconf android
 	    ;;
 	  x86-64)
 	    init android x86_64-linux-android x86-64
 	    build_ffeadcpp android
+		build_ffeadcpp_autoconf android
 	    ;;
 	  *)
 	    echo "usage: $0 android ANDROID_HOME ANDROID_NDK_ROOT armeabi-v7a|arm64-v8a|x86|x86-64 API" && exit 1
