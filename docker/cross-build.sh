@@ -56,6 +56,8 @@ build_ffeadcpp_cmake() {
 
 build_ffeadcpp_autoconf() {
 	echo "=== Building ffead-cpp with autoconf with (${TARGET})..."
+	chmod +x autogen.sh 
+	./autogen.sh
 	if [ "$1" = "android" ]
 	then
 		env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
@@ -136,7 +138,7 @@ then
 	STAGE_ROOT=${MINGW}
 	init mingw-w64 x86_64-w64-mingw32
 	install_cmake_mingw_w64_cross_file
-    build_ffeadcpp mingw-w64
+    build_ffeadcpp_cmake mingw-w64
 	build_ffeadcpp_autoconf mingw-w64
 fi
 
@@ -156,22 +158,22 @@ then
 	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-ranlib ${TOOLCHAIN}/bin/armv7a-linux-androideabi-ranlib
 	    cp ${TOOLCHAIN}/bin/arm-linux-androideabi-strip ${TOOLCHAIN}/bin/armv7a-linux-androideabi-strip
 	    init android armv7a-linux-androideabi x86_32
-	    build_ffeadcpp android
+	    build_ffeadcpp_cmake android
 		build_ffeadcpp_autoconf android
 	    ;;
 	  arm64-v8a)
 	    init android aarch64-linux-android arm64
-	    build_ffeadcpp android
+	    build_ffeadcpp_cmake android
 		build_ffeadcpp_autoconf android
 	    ;;
 	  x86)
 	    init android i686-linux-android x86
-	    build_ffeadcpp android
+	    build_ffeadcpp_cmake android
 		build_ffeadcpp_autoconf android
 	    ;;
 	  x86-64)
 	    init android x86_64-linux-android x86-64
-	    build_ffeadcpp android
+	    build_ffeadcpp_cmake android
 		build_ffeadcpp_autoconf android
 	    ;;
 	  *)

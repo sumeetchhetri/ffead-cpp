@@ -16,3 +16,4 @@ jobs:
       run: |
         cd docker/os-based
         docker build -f DockerFile-Alpine-x64-ffead-cpp-4.0 .
+        docker build -f DockerFile-Alpine-x64-ffead-cpp-4.0_autoconf .
