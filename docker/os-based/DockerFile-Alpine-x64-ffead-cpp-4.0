@@ -1,6 +1,6 @@
 FROM alpine:3.12.0
 
-RUN apk add autoconf-archive gcc g++ make cmake unzip openssl openssl-dev psqlodbc unixodbc unixodbc-dev curl-dev libmemcached libmemcached-dev wget netcat-openbsd bash
+RUN apk add autoconf-archive libtool gcc g++ make cmake unzip openssl openssl-dev psqlodbc unixodbc unixodbc-dev curl-dev libmemcached libmemcached-dev wget netcat-openbsd bash
 RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing ossp-uuid-dev
 
 #Install libcuckoo headers

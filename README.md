@@ -90,6 +90,17 @@ Quickstart (Using cmake)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
+Quickstart (Using autoconf)
+===========
+- Install autoconf, automake and libtool [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
+- ./autogen.sh
+- ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes
+- make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- Sip some coffee
+- cd ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
+- chmod +x *.sh
+- ./server.sh (Startup ffead-cpp Njoy!!)
+
 
 Webrtc Example (Uses peerjs)
 ===========

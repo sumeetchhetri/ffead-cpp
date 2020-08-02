@@ -60,12 +60,14 @@ build_ffeadcpp_autoconf() {
 	./autogen.sh
 	if [ "$1" = "android" ]
 	then
+		autoreconf -if
 		env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
 			LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
-			./configure --host="${TARGET}" --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_redis=yes
+			./configure --host="${TARGET}" --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes
 	else
-		env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
-			./configure --host="${TARGET}" --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_redis=yes
+		autoreconf -if
+		env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc CXX=${TARGET}-g++ AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
+			./configure --host="${TARGET}" --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes
 	fi
 	make -j4 install
 }

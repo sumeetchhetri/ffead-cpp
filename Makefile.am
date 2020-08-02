@@ -202,6 +202,11 @@ install-data-hook:
 	cp -Rf resources/* ${prefix}/resources/
 	cp -Rf src/autotools/libs/.libs/*ffead-* ${prefix}/lib/
 	cp -Rf src/autotools/bins/bin/ffead-cpp ${prefix}/
+if SRV_ALL
+	cp -Rf src/autotools/bins/bin/ffead-cpp-cinatra ${prefix}/
+	cp -Rf src/autotools/bins/bin/ffead-cpp-lithium ${prefix}/
+	cp -Rf src/autotools/bins/bin/ffead-cpp-drogon ${prefix}/
+endif
 	cp -Rf public/* ${prefix}/public/
 	cp -f ${includedirsall} ${prefix}/include/
 	cp -Rf rtdcf/* ${prefix}/rtdcf/

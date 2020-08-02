@@ -82,8 +82,18 @@ RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
-RUN ${TARGET}-cmake -DSRV_EMB=ON -DMOD_SDORM_MONGO=ON -DCMAKE_INC_PATH=/usr/${TARGET} .
+RUN mkdir build
+WORKDIR /tmp/ffead-cpp-src/build
+RUN ${TARGET}-cmake -DSRV_EMB=ON -DMOD_SDORM_MONGO=ON -DCMAKE_INC_PATH=/usr/${TARGET} ..
 RUN ${TARGET}-make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /opt/
+WORKDIR /tmp/ffead-cpp-src
+RUN chmod +x autogen.sh
+RUN ./autogen.sh
+RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar \
+	RANLIB=${TARGET}-ranlib ./configure --host=${TARGET} --enable-srv_emb=yes --enable-mod_sdormmongo=yes \
+	--enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes
+RUN ${TARGET}-make install
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /opt/ffead-cpp-4.0-bin_ac
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src

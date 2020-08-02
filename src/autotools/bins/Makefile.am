@@ -1,6 +1,6 @@
 
 AUTOMAKE_OPTIONS = subdir-objects
-ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
+ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
 AM_CPPFLAGS = -I"../../modules/common"
 
@@ -137,23 +137,51 @@ AM_CPPFLAGS += \
 				-I"../../modules/sdorm/gtm"
 endif
 
+if SRV_ALL
 bin_PROGRAMS = ffead-cpp
 ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_SOURCES = ../../server/embedded/CHServer.cpp
+ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+
+bin_PROGRAMS = ffead-cpp-cinatra
+ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_SOURCES = ../../server/cinatra/CinatraServer.cpp
+ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+
+bin_PROGRAMS = ffead-cpp-lithium
+ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_SOURCES = ../../server/lithium/LithiumServer.cpp
+ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+
+bin_PROGRAMS = ffead-cpp-drogon
+ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_SOURCES = ../../server/drogon/DrogonServer.cpp
+ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+else
 if SRV_EMB
+bin_PROGRAMS = ffead-cpp
+ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
 ffead_cpp_SOURCES = ../../server/embedded/CHServer.cpp
 ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
 else
 if SRV_CINATRA
+bin_PROGRAMS = ffead-cpp
+ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
 ffead_cpp_SOURCES = ../../server/cinatra/CinatraServer.cpp
 ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
 else
 if SRV_LITHIUM
+bin_PROGRAMS = ffead-cpp
+ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
 ffead_cpp_SOURCES = ../../server/lithium/LithiumServer.cpp
 ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
 else
 if SRV_DROGON
+bin_PROGRAMS = ffead-cpp
+ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
 ffead_cpp_SOURCES = ../../server/drogon/DrogonServer.cpp
 ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+endif
 endif
 endif
 endif
