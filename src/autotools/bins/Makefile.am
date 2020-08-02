@@ -138,25 +138,19 @@ AM_CPPFLAGS += \
 endif
 
 if SRV_ALL
-bin_PROGRAMS = ffead-cpp
+bin_PROGRAMS = ffead-cpp ffead-cpp-cinatra ffead-cpp-lithium ffead-cpp-drogon
 ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
 ffead_cpp_SOURCES = ../../server/embedded/CHServer.cpp
 ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
-
-bin_PROGRAMS = ffead-cpp-cinatra
-ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
-ffead_cpp_SOURCES = ../../server/cinatra/CinatraServer.cpp
-ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
-
-bin_PROGRAMS = ffead-cpp-lithium
-ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
-ffead_cpp_SOURCES = ../../server/lithium/LithiumServer.cpp
-ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
-
-bin_PROGRAMS = ffead-cpp-drogon
-ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
-ffead_cpp_SOURCES = ../../server/drogon/DrogonServer.cpp
-ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+ffead_cpp_cinatra_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_cinatra_SOURCES = ../../server/cinatra/CinatraServer.cpp
+ffead_cpp_cinatra_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+ffead_cpp_lithium_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_lithium_SOURCES = ../../server/lithium/LithiumServer.cpp
+ffead_cpp_lithium_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+ffead_cpp_drogon_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_drogon_SOURCES = ../../server/drogon/DrogonServer.cpp
+ffead_cpp_drogon_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
 else
 if SRV_EMB
 bin_PROGRAMS = ffead-cpp

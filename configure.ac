@@ -985,15 +985,16 @@ AC_CHECK_HEADER([sys/select.h],
                      [AC_DEFINE(USE_SELECT, [0], [select support not found])])
 AC_CHECK_HEADER([regex.h],
                      [AC_DEFINE(HAVE_REGEX, [1], [regex.h presence])],
-                     [have_regex_h="no"])
+                     [
+                     	AC_CHECK_HEADER([pcreposix.h], [
+                     		AC_DEFINE(HAVE_PCREREGEX, [1], [pcreposix.h presence])
+                     		AC_CHECK_LIB(pcreposix, regcomp, , [AC_MSG_ERROR([Not found libpcreposix library])])
+                     	], [])
+                     ])
 AC_CHECK_HEADER([execinfo.h],
                      [AC_DEFINE(HAVE_EXECINFOINC, [1], [execinfo.h presence])],
                      [])
 
-if test "x$have_regex_h" != "xyes"; then
-	AC_CHECK_LIB(pcreposix, regcomp, , [AC_MSG_ERROR([Not found libpcreposix library])])
-fi
-                     
 OLD_CPP=$CPP
 CPP="$CXXCPP $STDCXX_SWITCH"
 AC_CHECK_HEADER([atomic],

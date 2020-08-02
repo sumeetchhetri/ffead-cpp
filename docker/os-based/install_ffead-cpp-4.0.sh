@@ -23,6 +23,8 @@ do
   COUNTER=$((COUNTER+1))
   if [ "$COUNTER" = 120 ]
   then
+  	cat ffead.log
+  	cat logs/jobs.log
     echo "exiting...."
     exit 1
   fi
@@ -34,6 +36,8 @@ do
   COUNTER=$((COUNTER+1))
   if [ "$COUNTER" = 120 ]
   then
+  	cat ffead.log
+  	cat logs/jobs.log
     echo "exiting....dlib"
     exit 1
   fi
