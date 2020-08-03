@@ -181,7 +181,7 @@ build_uuid() {
 	        ${TARGET}-gcc -c -fPIC -o uuid_time.po uuid_time.c
 	        ${TARGET}-gcc -c -fPIC -o uuid_ui128.po uuid_ui128.c
 	        ${TARGET}-gcc -c -fPIC -o uuid_ui64.po uuid_ui64.c
-	        ${TARGET}-gcc -shared -fPIC -Wl,-soname,libuuid.so -o libuuid.so *.po
+	        ${TARGET}-gcc -shared -fPIC -Wl,-soname,libossp-uuid.so -o libossp-uuid.so *.po
 	        cp libuuid.so ${STAGE_DIR}/lib
 	    popd
 	fi
