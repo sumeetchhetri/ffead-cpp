@@ -69,7 +69,7 @@ build_ffeadcpp_autoconf() {
 	else
 		env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc CXX=${TARGET}-g++ AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
 			CPPFLAGS="-std=c++11" LDFLAGS="-L${STAGE_DIR}/lib" ./configure --host="${TARGET}" --enable-srv_emb=yes --enable-mod_sdormmongo=yes \
-			--enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes --with_top_inc_dir=${STAGE_DIR}/include
+			--enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes --with-top_inc_dir=${STAGE_DIR}/include
 	fi
 	CPPFLAGS="-std=c++17" make -j4 install
 }
