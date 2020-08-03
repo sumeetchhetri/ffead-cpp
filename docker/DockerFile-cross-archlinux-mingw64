@@ -94,7 +94,7 @@ RUN sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
 RUN sed -i'' -e "s|AX_CXX_COMPILE_STDCXX|#AX_CXX_COMPILE_STDCXX|g" configure.ac
 RUN ./autogen.sh
 RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc CXX=${TARGET}-g++ AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
-	CPPFLAGS="/usr/${TARGET}/include" LDFLAGS="-L/usr/${TARGET}/lib" ./configure --host="${TARGET}" --enable-srv_emb=yes --enable-mod_sdormmongo=yes \
+	CPPFLAGS="-I/usr/${TARGET}/include" LDFLAGS="-L/usr/${TARGET}/lib" ./configure --host="${TARGET}" --enable-srv_emb=yes --enable-mod_sdormmongo=yes \
 	--enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes
 RUN CPPFLAGS="-std=c++17" ${TARGET}-make install
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /opt/ffead-cpp-4.0-bin_ac
