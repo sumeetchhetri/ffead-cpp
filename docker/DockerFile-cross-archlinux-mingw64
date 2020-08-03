@@ -40,6 +40,18 @@ RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TA
 RUN mv uuid.exe uuid
 RUN cp /usr/sbin/${TARGET}-strip /usr/sbin/strip
 RUN ${TARGET}-make install
+RUN ${TARGET}-gcc -c -fPIC -o uuid.po uuid.c
+RUN ${TARGET}-gcc -c -fPIC -o uuid_cli.po uuid_cli.c
+RUN ${TARGET}-gcc -c -fPIC -o uuid_dce.po uuid_dce.c
+RUN ${TARGET}-gcc -c -fPIC -o uuid_mac.po uuid_mac.c
+RUN ${TARGET}-gcc -c -fPIC -o uuid_md5.po uuid_md5.c
+RUN ${TARGET}-gcc -c -fPIC -o uuid_prng.po uuid_prng.c
+RUN ${TARGET}-gcc -c -fPIC -o uuid_sha1.po uuid_sha1.c
+RUN ${TARGET}-gcc -c -fPIC -o uuid_str.po uuid_str.c
+RUN ${TARGET}-gcc -c -fPIC -o uuid_time.po uuid_time.c
+RUN ${TARGET}-gcc -c -fPIC -o uuid_ui128.po uuid_ui128.c
+RUN ${TARGET}-gcc -c -fPIC -o uuid_ui64.po uuid_ui64.c
+RUN ${TARGET}-gcc -shared -fPIC -Wl,-soname,libuuid.so -o libuuid.so *.po
 WORKDIR /tmp
 RUN rm -rf ossp-uuid-master
 
