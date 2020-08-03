@@ -52,7 +52,7 @@ RUN ${TARGET}-gcc -c -fPIC -o uuid_time.po uuid_time.c
 RUN ${TARGET}-gcc -c -fPIC -o uuid_ui128.po uuid_ui128.c
 RUN ${TARGET}-gcc -c -fPIC -o uuid_ui64.po uuid_ui64.c
 RUN ${TARGET}-gcc -shared -fPIC -Wl,-soname,libossp-uuid.so -o libossp-uuid.so *.po
-RUN cp libuuid.so /usr/${TARGET}/lib
+RUN cp libossp-uuid.so /usr/${TARGET}/lib/
 WORKDIR /tmp
 RUN rm -rf ossp-uuid-master
 
