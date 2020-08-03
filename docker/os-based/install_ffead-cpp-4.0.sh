@@ -21,7 +21,7 @@ while [ ! -f lib/libinter.so ]
 do
   sleep 1
   COUNTER=$((COUNTER+1))
-  if [ "$COUNTER" = 120 ]
+  if [ "$COUNTER" = 600 ]
   then
   	cat ffead.log
   	cat logs/jobs.log
