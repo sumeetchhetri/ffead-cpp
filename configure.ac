@@ -83,6 +83,11 @@ case "$host" in
     CPPFLAGS="$CPPFLAGS -D__USE_MINGW_ANSI_STDIO=1"
     use_wepoll="yes"
     ;;
+*android*)
+	AC_DEFINE(OS_LINUX, [], [set OS to linux])
+	local_os_type="linux"
+	os_flavor="android"
+	;;
 *-linux*)
     AC_DEFINE(OS_LINUX, [], [set OS to linux])
 	#hack for some 64-bit systems
@@ -1115,9 +1120,9 @@ if test "x$mod_sdormmongo" = "xyes"; then
     AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
 fi
 
-if test "x$is_librt_available" = "xyes"; then	
-	AC_CHECK_LIB(rt, clock_gettime,,[AC_MSG_ERROR([librt required but not found])])
-fi
+#if test "x$is_librt_available" = "xyes"; then	
+	#AC_CHECK_LIB(rt, clock_gettime,,[AC_MSG_ERROR([librt required but not found])])
+#fi
 
 if test "x$local_os_type" = "xmingw"; then
 	AC_CHECK_LIB(wsock32, main, , [AC_MSG_ERROR([Not found libwsock32 library])])

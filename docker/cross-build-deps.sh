@@ -170,18 +170,18 @@ build_uuid() {
         		./configure --prefix="${STAGE_DIR}" --without-pgsql --without-perl --without-php --disable-static --host=x86_64 ac_cv_va_copy=C99 --enable-shared
 	        make -j"$(nproc)" > /dev/null
 	        make install
-	        gcc -c -fPIC -o uuid.po uuid.c
-	        gcc -c -fPIC -o uuid_cli.po uuid_cli.c
-	        gcc -c -fPIC -o uuid_dce.po uuid_dce.c
-	        gcc -c -fPIC -o uuid_mac.po uuid_mac.c
-	        gcc -c -fPIC -o uuid_md5.po uuid_md5.c
-	        gcc -c -fPIC -o uuid_prng.po uuid_prng.c
-	        gcc -c -fPIC -o uuid_sha1.po uuid_sha1.c
-	        gcc -c -fPIC -o uuid_str.po uuid_str.c
-	        gcc -c -fPIC -o uuid_time.po uuid_time.c
-	        gcc -c -fPIC -o uuid_ui128.po uuid_ui128.c
-	        gcc -c -fPIC -o uuid_ui64.po uuid_ui64.c
-	        gcc -shared -fPIC -Wl,-soname,libuuid.so -o libuuid.so *.po
+	        ${TARGET}-gcc -c -fPIC -o uuid.po uuid.c
+	        ${TARGET}-gcc -c -fPIC -o uuid_cli.po uuid_cli.c
+	        ${TARGET}-gcc -c -fPIC -o uuid_dce.po uuid_dce.c
+	        ${TARGET}-gcc -c -fPIC -o uuid_mac.po uuid_mac.c
+	        ${TARGET}-gcc -c -fPIC -o uuid_md5.po uuid_md5.c
+	        ${TARGET}-gcc -c -fPIC -o uuid_prng.po uuid_prng.c
+	        ${TARGET}-gcc -c -fPIC -o uuid_sha1.po uuid_sha1.c
+	        ${TARGET}-gcc -c -fPIC -o uuid_str.po uuid_str.c
+	        ${TARGET}-gcc -c -fPIC -o uuid_time.po uuid_time.c
+	        ${TARGET}-gcc -c -fPIC -o uuid_ui128.po uuid_ui128.c
+	        ${TARGET}-gcc -c -fPIC -o uuid_ui64.po uuid_ui64.c
+	        ${TARGET}-gcc -shared -fPIC -Wl,-soname,libuuid.so -o libuuid.so *.po
 	        cp libuuid.so ${STAGE_DIR}/lib
 	    popd
 	fi
