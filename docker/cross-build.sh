@@ -64,14 +64,14 @@ build_ffeadcpp_autoconf() {
 	then
 		env AR=$TOOLCHAIN/bin/$TARGET-ar AS=$TOOLCHAIN/bin/$TARGET-as CC=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang CXX=$TOOLCHAIN/bin/$TARGET$ANDROID_API-clang++ \
 			LD=$TOOLCHAIN/bin/$TARGET-ld RANLIB=$TOOLCHAIN/bin/$TARGET-ranlib STRIP=$TOOLCHAIN/bin/$TARGET-strip C_INCLUDE_PATH=${STAGE_DIR}/include \
-			CPPFLAGS="-I${STAGE_DIR}/include" LDFLAGS="-L${STAGE_DIR}/lib" ./configure --host="${TARGET}" --enable-srv_emb=yes \
+			CPPFLAGS="-I${STAGE_DIR}/include -std=c++17" LDFLAGS="-L${STAGE_DIR}/lib" ./configure --host="${TARGET}" --enable-srv_emb=yes \
 			--enable-mod_sdormsql=yes --enable-mod_rediscache=yes --with-top_inc_dir=${STAGE_DIR}/include
 	else
 		env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc CXX=${TARGET}-g++ AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
-			LDFLAGS="-L${STAGE_DIR}/lib" ./configure --host="${TARGET}" --enable-srv_emb=yes --enable-mod_sdormmongo=yes \
+			CPPFLAGS="-I${STAGE_DIR}/include -std=c++17" LDFLAGS="-L${STAGE_DIR}/lib" ./configure --host="${TARGET}" --enable-srv_emb=yes --enable-mod_sdormmongo=yes \
 			--enable-mod_sdormsql=yes --enable-mod_rediscache=yes --with-top_inc_dir=${STAGE_DIR}/include
 	fi
-	CPPFLAGS="-std=c++17" make -j4 install
+	make -j4 install
 }
 
 install_cmake_musl_cross_file() {

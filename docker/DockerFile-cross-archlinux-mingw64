@@ -51,8 +51,9 @@ RUN ${TARGET}-gcc -c -fPIC -o uuid_str.po uuid_str.c
 RUN ${TARGET}-gcc -c -fPIC -o uuid_time.po uuid_time.c
 RUN ${TARGET}-gcc -c -fPIC -o uuid_ui128.po uuid_ui128.c
 RUN ${TARGET}-gcc -c -fPIC -o uuid_ui64.po uuid_ui64.c
-RUN ${TARGET}-gcc -shared -fPIC -Wl,-soname,libossp-uuid.so -o libossp-uuid.so *.po
-RUN cp libossp-uuid.so /usr/${TARGET}/lib/
+RUN ${TARGET}-gcc -shared -fPIC -Wl,-soname,libossp-uuid.dll -o libossp-uuid.dll *.po
+RUN cp libossp-uuid.dll /usr/${TARGET}/lib/
+RUN cp /usr/${TARGET}/lib/libuuid.a /usr/${TARGET}/lib/libossp-uuid.dll.a
 WORKDIR /tmp
 RUN rm -rf ossp-uuid-master
 
@@ -105,11 +106,12 @@ RUN chmod +x autogen.sh
 RUN chmod +x autogen.sh
 RUN sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
 RUN sed -i'' -e "s|AX_CXX_COMPILE_STDCXX|#AX_CXX_COMPILE_STDCXX|g" configure.ac
+RUN sed -i'' -e "s|AC_CHECK_LIB(regex|#AC_CHECK_LIB(regex|g" configure.ac
 RUN ./autogen.sh
 RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc CXX=${TARGET}-g++ AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
-	CPPFLAGS="-I/usr/${TARGET}/include" LDFLAGS="-L/usr/${TARGET}/lib" ./configure --host="${TARGET}" --enable-srv_emb=yes --enable-mod_sdormmongo=yes \
+	CPPFLAGS="-I/usr/${TARGET}/include -std=c++17" LDFLAGS="-L/usr/${TARGET}/lib -fstack-protector" ./configure --host="${TARGET}" --enable-srv_emb=yes --enable-mod_sdormmongo=yes \
 	--enable-mod_sdormsql=yes --enable-mod_rediscache=yes --with-top_inc_dir=/usr/${TARGET}/include
-RUN CPPFLAGS="-std=c++17" ${TARGET}-make install
+RUN make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /opt/ffead-cpp-4.0-bin_ac
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src

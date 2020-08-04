@@ -72,55 +72,55 @@ CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 LDFLAGS="$LDFLAGS -L/usr/local/lib -Wl,-undefined,error"
 case "$host" in
 *-cygwin*)
-    AC_DEFINE(OS_CYGWIN, [], [set OS to cygwin])
+    AC_DEFINE(OS_CYGWIN, [1], [set OS to cygwin])
     local_os_type="cygwin"
     ;;
 *mingw*)
-    AC_DEFINE(OS_MINGW, [], [set OS to mingw])
-    AC_DEFINE(USE_WIN_IOCP, [], [use io completion ports on windows])
+    AC_DEFINE(OS_MINGW, [1], [set OS to mingw])
+    AC_DEFINE(USE_WIN_IOCP, [1], [use io completion ports on windows])
     local_os_type="mingw"
     is_librt_available="no"
     CPPFLAGS="$CPPFLAGS -D__USE_MINGW_ANSI_STDIO=1"
     use_wepoll="yes"
     ;;
 *android*)
-	AC_DEFINE(OS_LINUX, [], [set OS to linux])
+	AC_DEFINE(OS_LINUX, [1], [set OS to linux])
 	local_os_type="linux"
 	os_flavor="android"
 	;;
 *-linux*)
-    AC_DEFINE(OS_LINUX, [], [set OS to linux])
+    AC_DEFINE(OS_LINUX, [1], [set OS to linux])
 	#hack for some 64-bit systems
 	#AC_DEFINE(_GNU_SOURCE, [], [set GNU source flag for linux])
     local_os_type="linux"
     ;;
 *-irix*)
-    AC_DEFINE(OS_IRIX, [], [set OS to irix])
+    AC_DEFINE(OS_IRIX, [1], [set OS to irix])
     local_os_type="irix"
     ;;
 *-sunos*)
-    AC_DEFINE(OS_SUNOS, [], [set OS to sunos])
+    AC_DEFINE(OS_SUNOS, [1], [set OS to sunos])
     local_os_type="sunos"
     AM_CXXFLAGS="$AM_CXXFLAGS -pthreads"
     LDFLAGS="$LDFLAGS -lsocket -lnsl -lresolv"
     ;;
 *-solaris*)
-    AC_DEFINE(OS_SOLARIS, [], [set OS to solaris])
+    AC_DEFINE(OS_SOLARIS, [1], [set OS to solaris])
     local_os_type="solaris"
     AM_CXXFLAGS="$AM_CXXFLAGS -pthreads"
     LDFLAGS="$LDFLAGS -lsocket -lnsl"
     ;;
 *-aix*)
-    AC_DEFINE(OS_AIX, [], [set OS to aix])
+    AC_DEFINE(OS_AIX, [1], [set OS to aix])
     local_os_type="aix"
     ;;
 *-hpux*)
-    AC_DEFINE(OS_HPUX, [], [set OS to hp-ux])
+    AC_DEFINE(OS_HPUX, [1], [set OS to hp-ux])
     local_os_type="hpux"
     ;;
 *-freebsd*)
-    AC_DEFINE(OS_BSD, [], [set OS to bsd])
-    AC_DEFINE(OS_FREEBSD, [], [set OS to freebsd])
+    AC_DEFINE(OS_BSD, [1], [set OS to bsd])
+    AC_DEFINE(OS_FREEBSD, [1], [set OS to freebsd])
     local_os_type="freebsd"
     os_flavor="bsd"
 
@@ -129,8 +129,8 @@ case "$host" in
     LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-netbsd*)
-    AC_DEFINE(OS_BSD, [], [set OS to bsd])
-    AC_DEFINE(OS_NETBSD, [], [set OS to netbsd])
+    AC_DEFINE(OS_BSD, [1], [set OS to bsd])
+    AC_DEFINE(OS_NETBSD, [1], [set OS to netbsd])
     local_os_type="netbsd"
     os_flavor="bsd"
 
@@ -138,8 +138,8 @@ case "$host" in
     LDFLAGS="$LDFLAGS -L/usr/local/v6/lib"
     ;;
 *-openbsd*)
-    AC_DEFINE(OS_BSD, [], [set OS to bsd])
-    AC_DEFINE(OS_OPENBSD, [], [set OS to openbsd])
+    AC_DEFINE(OS_BSD, [1], [set OS to bsd])
+    AC_DEFINE(OS_OPENBSD, [1], [set OS to openbsd])
     local_os_type="openbsd"
     os_flavor="bsd"
 
@@ -151,13 +151,13 @@ case "$host" in
     LIBS="$LIBS -L/usr/local/lib"
     ;;
 *-osf*)
-    AC_DEFINE(OS_OSF, [], [set OS to osf])
+    AC_DEFINE(OS_OSF, [1], [set OS to osf])
     local_os_type="osf"
     ;;
 *-darwin*)
     is_librt_available="no"
     #AC_DEFINE(OS_BSD, [], [set OS to bsd])
-    AC_DEFINE(OS_DARWIN, [], [set OS to darwin])
+    AC_DEFINE(OS_DARWIN, [1], [set OS to darwin])
     CPPFLAGS="$CPPFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
     AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/opt/unixodbc/include -I/usr/local/include/ -O2"
     LDFLAGS="$LDFLAGS -L/usr/local/opt/unixodbc/lib/ -L/usr/local/lib"
@@ -178,8 +178,8 @@ case "$host" in
 	fi
     ;;
 *-sco*)
-    AC_DEFINE(OS_SCO, [], [set OS to sco])
-    AC_DEFINE(OS_SVR4, [], [set OS to svr4])
+    AC_DEFINE(OS_SCO, [1], [set OS to sco])
+    AC_DEFINE(OS_SVR4, [1], [set OS to svr4])
     local_os_type="sco"
     AC_MSG_ERROR([We do not support SCO's products!])
 esac
@@ -905,8 +905,6 @@ AC_LANG_PUSH(C++)
 AC_CHECK_HEADER([libcuckoo/cuckoohash_map.hh],,[AC_MSG_ERROR([libcuckoo header files not found, please install libcuckoo])])
 AC_LANG_POP(C++)
 
-AC_SEARCH_LIBS(curl_easy_init, curl, [],[AC_MSG_ERROR([curl library "libcurl" not found])])
-
 AM_CONDITIONAL(MOD_APACHEMOD, test "x$generate_apache_module" = "xyes")
 if test "x$generate_apache_module" = "xyes"; then
 	AC_SUBST(GENERATE_APACHEMOD,[modules/apache_mod_ffeadcpp/autotools])
@@ -1082,16 +1080,22 @@ AC_LINK_IFELSE(
 dnl# Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_FORK
-AC_FUNC_MALLOC
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([clock_gettime floor gethostbyname memset pow regcomp select socket strcasecmp strtol strtoul accept4])
+AC_CHECK_FUNCS([malloc realloc clock_gettime floor gethostbyname memset pow regcomp select socket strcasecmp strtol strtoul accept4])
 AC_CHECK_LIB(pthreads, pthread_create,[], [AC_CHECK_LIB(pthread, pthread_create)])
-AC_CHECK_LIB(ssl, SSL_read, [], [AC_MSG_ERROR([ssl library not found])])
 AC_CHECK_LIB([crypto], [SHA1_Init], [], [AC_MSG_ERROR([libcrypto not found])])
+AC_CHECK_LIB(ssl, SSL_read, [], [AC_MSG_ERROR([ssl library not found])])
 AC_CHECK_LIB(z, compress,,AC_MSG_ERROR([no zlib; please install zlib or equivalent]))
 #AC_CHECK_LIB(c, dlopen, LIBDL="", [AC_CHECK_LIB(dl, dlopen, LIBDL="-ldl")])
 AC_CHECK_LIB(c, dlopen, ADD_LIBDL="", [AC_CHECK_LIB(dl, dlopen, ADD_LIBDL="-ldl")])
 AC_CHECK_LIB(rt, clock_nanosleep, [AC_DEFINE(HAVE_CLOCK_NANOSLEEP, 1, [Define if you have clock_nanosleep()])], [])
+
+if test "x$local_os_type" = "xmingw"; then
+	AC_CHECK_LIB(wsock32, main, , [AC_MSG_ERROR([Not found libwsock32 library])])
+	AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
+	AC_CHECK_LIB(kernel32, main, , [AC_MSG_ERROR([Not found libkernel32 library])])
+	AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
+fi
 
 if test "x$mod_sdormsql" = "xyes"; then
 	if test "x$os_flavor" = "xbsd"; then
@@ -1116,24 +1120,19 @@ if test "x$mod_sdormmongo" = "xyes"; then
 				AC_CHECK_LIB(uuid, uuid_generate, [], [AC_MSG_ERROR([uuid library not found])])
 			])
 	fi
+	AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
     AC_CHECK_LIB(mongoc-1.0, mongoc_init, , [AC_MSG_ERROR([Not found libmongo library])])
-    AC_CHECK_LIB(bson-1.0, bson_new, , [AC_MSG_ERROR([Not found libbson library])])
 fi
 
 #if test "x$is_librt_available" = "xyes"; then	
 	#AC_CHECK_LIB(rt, clock_gettime,,[AC_MSG_ERROR([librt required but not found])])
 #fi
 
-if test "x$local_os_type" = "xmingw"; then
-	AC_CHECK_LIB(wsock32, main, , [AC_MSG_ERROR([Not found libwsock32 library])])
-	AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
-	AC_CHECK_LIB(kernel32, main, , [AC_MSG_ERROR([Not found libkernel32 library])])
-	AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
-fi
-
 if test "x$mod_gtm" = "xyes"; then
     AC_CHECK_LIB(gtmshr, main, , [AC_MSG_ERROR([Not found libgtmshr library])])
 fi
+
+AC_SEARCH_LIBS(curl_easy_init, curl, [],[AC_MSG_ERROR([curl library "libcurl" not found])])
  
 AM_CXXFLAGS="$AM_CXXFLAGS $STDCXX_SWITCH"
 AC_SUBST(STDCXX_SWITCH, [$STDCXX_SWITCH])

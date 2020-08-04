@@ -310,9 +310,7 @@ SOCKET Server::createListener(const int& port, const bool& block, bool isSinglEV
 	self.sin_addr.s_addr = INADDR_ANY;
 
 	/*---Create streaming socket---*/
-	#if USE_WIN_IOCP == 1
-	if ((sockfd = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED)) == INVALID_SOCKET)
-	#elif OS_MINGW
+	#ifdef OS_MINGW
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
 	#else
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -423,9 +421,7 @@ SOCKET Server::createListener(const std::string& ipAddress, const int& port, con
 	// loop through all the results and bind to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next)
 	{
-		#if USE_WIN_IOCP == 1
-		if ((sockfd = WSASocket(p->ai_family, p->ai_socktype, p->ai_protocol, NULL, 0, WSA_FLAG_OVERLAPPED)) == INVALID_SOCKET)
-		#elif OS_MINGW
+		#ifdef OS_MINGW
 		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == INVALID_SOCKET)
 		#else
 		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
