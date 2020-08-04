@@ -103,7 +103,6 @@ RUN ${TARGET}-make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /opt/
 WORKDIR /tmp/ffead-cpp-src
 RUN chmod +x autogen.sh
-RUN chmod +x autogen.sh
 RUN sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
 RUN sed -i'' -e "s|AX_CXX_COMPILE_STDCXX|#AX_CXX_COMPILE_STDCXX|g" configure.ac
 RUN sed -i'' -e "s|AC_CHECK_LIB(regex|#AC_CHECK_LIB(regex|g" configure.ac
