@@ -1100,7 +1100,7 @@ if test "x$local_os_type" = "xmingw"; then
 	AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
 	AC_CHECK_LIB(kernel32, main, , [AC_MSG_ERROR([Not found libkernel32 library])])
 	AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
-	AC_CHECK_LIB(ssp, regcomp, , [AC_MSG_ERROR([Not found libssp library])])
+	AC_CHECK_LIB(ssp, main, , [AC_MSG_ERROR([Not found libssp library])])
 fi
 
 if test "x$mod_sdormsql" = "xyes"; then
