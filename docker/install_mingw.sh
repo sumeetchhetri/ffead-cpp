@@ -18,6 +18,7 @@ cp -rf lib/* /mingw64/lib/
 cp -rf share/* /mingw64/share/
 cp -rf etc/* /mingw64/etc/
 
+TARGET=x86_64-w64-mingw32
 cd /tmp
 wget -q https://github.com/sean-/ossp-uuid/archive/master.zip
 unzip -qq master.zip
@@ -85,7 +86,6 @@ sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
 sed -i'' -e "s|AX_CXX_COMPILE_STDCXX|#AX_CXX_COMPILE_STDCXX|g" configure.ac
 sed -i'' -e "s|AC_CHECK_LIB(regex|#AC_CHECK_LIB(regex|g" configure.ac
 ./autogen.sh
-TARGET=x86_64-w64-mingw32
 env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc CXX=${TARGET}-g++ AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
 	CPPFLAGS="-I/mingw64/include -std=c++17" LDFLAGS="-L/mingw64/lib -fstack-protector" ./configure --host="${TARGET}" --enable-srv_emb=yes --enable-mod_sdormmongo=yes \
 	--enable-mod_sdormsql=yes --enable-mod_rediscache=yes --with-top_inc_dir=/mingw64/include
