@@ -23,11 +23,26 @@ wget -q https://github.com/sean-/ossp-uuid/archive/master.zip
 unzip -qq master.zip
 rm -f master.zip
 cd ossp-uuid-master
-cp /tmp/ffead-cpp-src/docker/files/config.sub .
-./configure --prefix=/mingw64/ --without-pgsql --without-perl --without-php --disable-static --enable-shared
+env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar \
+	RANLIB=${TARGET}-ranlib CFLAGS="-D_FORTIFY_SOURCE=2" LDFLAGS="-lssp" ./configure --prefix=/mingw64/ \
+	--without-pgsql --without-perl --without-php
 make
 mv uuid.exe uuid
 make install
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid.po uuid.c
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_cli.po uuid_cli.c
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_dce.po uuid_dce.c
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_mac.po uuid_mac.c
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_md5.po uuid_md5.c
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_prng.po uuid_prng.c
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_sha1.po uuid_sha1.c
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_str.po uuid_str.c
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_time.po uuid_time.c
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_ui128.po uuid_ui128.c
+${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_ui64.po uuid_ui64.c
+${TARGET}-gcc -shared -fPIC -Wl,-soname,libossp-uuid.dll -lssp -o libossp-uuid.dll *.po
+cp libossp-uuid.dll /mingw64/lib/
+cp /mingw64/lib/libuuid.a /mingw64/lib/libossp-uuid.dll.a
 cd /tmp
 rm -rf ossp-uuid-master
 

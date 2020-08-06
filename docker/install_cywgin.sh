@@ -37,7 +37,7 @@ mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 cd /tmp/ffead-cpp-src
 chmod +x autogen.sh
 ./autogen.sh
-./configure --enable-srv_emb=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes
+./configure --enable-srv_emb=yes --enable-mod_rediscache=yes
 make install -j4
 mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-4.0-bin_ac
 cd /tmp
