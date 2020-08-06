@@ -87,6 +87,7 @@ case "$host" in
     is_exe="yes"
     ;;
 *android*)
+	AC_DEFINE(OS_ANDROID, [1], [set OS to android])
 	AC_DEFINE(OS_LINUX, [1], [set OS to linux])
 	local_os_type="linux"
 	os_flavor="android"
