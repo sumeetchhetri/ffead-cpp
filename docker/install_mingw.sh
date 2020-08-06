@@ -24,6 +24,7 @@ wget -q https://github.com/sean-/ossp-uuid/archive/master.zip
 unzip -qq master.zip
 rm -f master.zip
 cd ossp-uuid-master
+cp /tmp/ffead-cpp-src/docker/files/config.sub .
 env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar \
 	RANLIB=${TARGET}-ranlib CFLAGS="-D_FORTIFY_SOURCE=2" LDFLAGS="-lssp" ./configure --prefix=/mingw64/ \
 	--without-pgsql --without-perl --without-php
