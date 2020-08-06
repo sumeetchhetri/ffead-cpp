@@ -24,7 +24,7 @@ RUN tar zxvf unixODBC-2.3.7.tar.gz
 RUN rm -f unixODBC-2.3.7.tar.gz
 WORKDIR unixODBC-2.3.7
 RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar \
-	RANLIB=${TARGET}-ranlib ./configure --host=${TARGET} --prefix=/usr/${TARGET}
+	RANLIB=${TARGET}-ranlib CFLAGS="-D_FORTIFY_SOURCE=2" LDFLAGS="-lssp" ./configure --host=${TARGET} --prefix=/usr/${TARGET}
 RUN ${TARGET}-make
 RUN ${TARGET}-make install
 WORKDIR /tmp
@@ -35,23 +35,24 @@ RUN unzip -qq master.zip
 RUN rm -f master.zip
 WORKDIR ossp-uuid-master
 RUN env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc AR=${TARGET}-ar \
-	RANLIB=${TARGET}-ranlib ./configure --prefix=/usr/${TARGET} --without-pgsql --without-perl --without-php --disable-static \
+	RANLIB=${TARGET}-ranlib CFLAGS="-D_FORTIFY_SOURCE=2" LDFLAGS="-lssp" ./configure --prefix=/usr/${TARGET} \
+	--without-pgsql --without-perl --without-php --disable-static \
 	--host=x86_64 ac_cv_va_copy=C99 --enable-shared && ${TARGET}-make
 RUN mv uuid.exe uuid
 RUN cp /usr/sbin/${TARGET}-strip /usr/sbin/strip
 RUN ${TARGET}-make install
-RUN ${TARGET}-gcc -c -fPIC -o uuid.po uuid.c
-RUN ${TARGET}-gcc -c -fPIC -o uuid_cli.po uuid_cli.c
-RUN ${TARGET}-gcc -c -fPIC -o uuid_dce.po uuid_dce.c
-RUN ${TARGET}-gcc -c -fPIC -o uuid_mac.po uuid_mac.c
-RUN ${TARGET}-gcc -c -fPIC -o uuid_md5.po uuid_md5.c
-RUN ${TARGET}-gcc -c -fPIC -o uuid_prng.po uuid_prng.c
-RUN ${TARGET}-gcc -c -fPIC -o uuid_sha1.po uuid_sha1.c
-RUN ${TARGET}-gcc -c -fPIC -o uuid_str.po uuid_str.c
-RUN ${TARGET}-gcc -c -fPIC -o uuid_time.po uuid_time.c
-RUN ${TARGET}-gcc -c -fPIC -o uuid_ui128.po uuid_ui128.c
-RUN ${TARGET}-gcc -c -fPIC -o uuid_ui64.po uuid_ui64.c
-RUN ${TARGET}-gcc -shared -fPIC -Wl,-soname,libossp-uuid.dll -o libossp-uuid.dll *.po
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid.po uuid.c
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_cli.po uuid_cli.c
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_dce.po uuid_dce.c
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_mac.po uuid_mac.c
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_md5.po uuid_md5.c
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_prng.po uuid_prng.c
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_sha1.po uuid_sha1.c
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_str.po uuid_str.c
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_time.po uuid_time.c
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_ui128.po uuid_ui128.c
+RUN ${TARGET}-gcc -D_FORTIFY_SOURCE=2 -c -fPIC -o uuid_ui64.po uuid_ui64.c
+RUN ${TARGET}-gcc -shared -fPIC -Wl,-soname,libossp-uuid.dll -lssp -o libossp-uuid.dll *.po
 RUN cp libossp-uuid.dll /usr/${TARGET}/lib/
 RUN cp /usr/${TARGET}/lib/libuuid.a /usr/${TARGET}/lib/libossp-uuid.dll.a
 WORKDIR /tmp

@@ -70,18 +70,21 @@ use_wepoll="no"
 AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/local/include -Wno-unknown-pragmas -Wno-delete-incomplete"
 CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 LDFLAGS="$LDFLAGS -L/usr/local/lib -Wl,-undefined,error"
+is_exe="no"
 case "$host" in
 *-cygwin*)
     AC_DEFINE(OS_CYGWIN, [1], [set OS to cygwin])
     local_os_type="cygwin"
+    is_exe="yes"
     ;;
 *mingw*)
     AC_DEFINE(OS_MINGW, [1], [set OS to mingw])
     AC_DEFINE(USE_WIN_IOCP, [1], [use io completion ports on windows])
     local_os_type="mingw"
     is_librt_available="no"
-    CPPFLAGS="$CPPFLAGS -D__USE_MINGW_ANSI_STDIO=1"
+    CPPFLAGS="$CPPFLAGS -D__USE_MINGW_ANSI_STDIO=1 -D_FORTIFY_SOURCE=2"
     use_wepoll="yes"
+    is_exe="yes"
     ;;
 *android*)
 	AC_DEFINE(OS_LINUX, [1], [set OS to linux])
@@ -184,6 +187,7 @@ case "$host" in
     AC_MSG_ERROR([We do not support SCO's products!])
 esac
 
+AM_CONDITIONAL(IS_EXE, test "x$is_exe" = "xyes")
 AM_CONDITIONAL(USE_WEPOLL, test "x$use_wepoll" = "xyes")
 AC_DEFINE(BUILD_AUTOCONF, [], [set build system to autoconf/automake])
 
@@ -1095,6 +1099,7 @@ if test "x$local_os_type" = "xmingw"; then
 	AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
 	AC_CHECK_LIB(kernel32, main, , [AC_MSG_ERROR([Not found libkernel32 library])])
 	AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
+	AC_CHECK_LIB(ssp, regcomp, , [AC_MSG_ERROR([Not found libssp library])])
 fi
 
 if test "x$mod_sdormsql" = "xyes"; then

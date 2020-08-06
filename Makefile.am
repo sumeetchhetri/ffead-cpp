@@ -201,11 +201,21 @@ install-data-hook:
 	cp -f ${includedirsall} include/
 	cp -Rf resources/* ${prefix}/resources/
 	cp -Rf src/autotools/libs/.libs/*ffead-* ${prefix}/lib/
+if IS_EXE
+	cp -Rf src/autotools/bins/bin/ffead-cpp.exe ${prefix}/
+else
 	cp -Rf src/autotools/bins/bin/ffead-cpp ${prefix}/
+endif
 if SRV_ALL
+if IS_EXE
+	cp -Rf src/autotools/bins/bin/ffead-cpp-cinatra.exe ${prefix}/
+	cp -Rf src/autotools/bins/bin/ffead-cpp-lithium.exe ${prefix}/
+	cp -Rf src/autotools/bins/bin/ffead-cpp-drogon.exe ${prefix}/
+else
 	cp -Rf src/autotools/bins/bin/ffead-cpp-cinatra ${prefix}/
 	cp -Rf src/autotools/bins/bin/ffead-cpp-lithium ${prefix}/
 	cp -Rf src/autotools/bins/bin/ffead-cpp-drogon ${prefix}/
+endif
 endif
 	cp -Rf public/* ${prefix}/public/
 	cp -f ${includedirsall} ${prefix}/include/
@@ -224,9 +234,15 @@ endif
 if MOD_APACHEMOD	
 	cd modules/apache_mod_ffeadcpp/autotools && make install
 endif
+if IS_EXE
+	cp -f tests/autotools/.libs/tests.exe tests/test.csv \
+		tests/testValues.prop tests/runTests.sh \
+		tests/*.pem tests/security.prop ${prefix}/tests
+else
 	cp -f tests/autotools/.libs/tests tests/test.csv \
 		tests/testValues.prop tests/runTests.sh \
 		tests/*.pem tests/security.prop ${prefix}/tests
+endif
 	for webdir in web/*/ ; do \
 		dir=$${webdir%*/}; \
 		wdir=`echo $${dir##*/}`; \

@@ -137,6 +137,11 @@ AM_CPPFLAGS += \
 				-I"../../modules/sdorm/gtm"
 endif
 
+if USE_WEPOLL
+AM_CPPFLAGS += \
+				-I"../../modules/wepoll"
+endif
+
 if SRV_ALL
 bin_PROGRAMS = ffead-cpp ffead-cpp-cinatra ffead-cpp-lithium ffead-cpp-drogon
 ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
