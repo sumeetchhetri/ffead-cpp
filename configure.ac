@@ -74,6 +74,7 @@ is_exe="no"
 case "$host" in
 *-cygwin*)
     AC_DEFINE(OS_CYGWIN, [1], [set OS to cygwin])
+    AC_DEFINE(CYGWIN, [1], [set OS to cygwin])
     local_os_type="cygwin"
     is_exe="yes"
     ;;
@@ -1096,11 +1097,12 @@ AC_CHECK_LIB(c, dlopen, ADD_LIBDL="", [AC_CHECK_LIB(dl, dlopen, ADD_LIBDL="-ldl"
 AC_CHECK_LIB(rt, clock_nanosleep, [AC_DEFINE(HAVE_CLOCK_NANOSLEEP, 1, [Define if you have clock_nanosleep()])], [])
 
 if test "x$local_os_type" = "xmingw"; then
-	AC_CHECK_LIB(wsock32, main, , [AC_MSG_ERROR([Not found libwsock32 library])])
-	AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
-	AC_CHECK_LIB(kernel32, main, , [AC_MSG_ERROR([Not found libkernel32 library])])
-	AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
-	AC_CHECK_LIB(ssp, main, , [AC_MSG_ERROR([Not found libssp library])])
+	LIBS="-lwsock32 -lws2_32 -lkernel32 -lregex -lssp $LIBS"
+	#AC_CHECK_LIB(wsock32, main, , [AC_MSG_ERROR([Not found libwsock32 library])])
+	#AC_CHECK_LIB(ws2_32, main, , [AC_MSG_ERROR([Not found libws2_32 library])])
+	#AC_CHECK_LIB(kernel32, main, , [AC_MSG_ERROR([Not found libkernel32 library])])
+	#AC_CHECK_LIB(regex, regcomp, , [AC_MSG_ERROR([Not found libregex library])])
+	#AC_CHECK_LIB(ssp, main, , [AC_MSG_ERROR([Not found libssp library])])
 fi
 
 if test "x$mod_sdormsql" = "xyes"; then
@@ -1183,6 +1185,8 @@ AC_CONFIG_FILES([web/default/src/autotools/Makefile
 AC_OUTPUT
 
 echo "Host: $host"
+echo "LIBS: $LIBS"
+echo "CFLAGS: $CFLAGS"
 echo "CPPFLAGS: $CPPFLAGS"
 echo "AM_CXXFLAGS: $AM_CXXFLAGS"
 echo "LDFLAGS: $LDFLAGS"
@@ -1190,4 +1194,3 @@ echo "STDCXX_SWITCH: $STDCXX_SWITCH"
 echo "Debug mode: $support_debug"
 echo "Make Executable: $MAKE"
 echo "Generate Apache Module: $generate_apache_module"
-

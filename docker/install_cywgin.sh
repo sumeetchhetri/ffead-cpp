@@ -40,7 +40,7 @@ sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
 sed -i'' -e "s|AX_CXX_COMPILE_STDCXX|#AX_CXX_COMPILE_STDCXX|g" configure.ac
 sed -i'' -e "s|AC_CHECK_LIB(regex|#AC_CHECK_LIB(regex|g" configure.ac
 ./autogen.sh
-./configure --enable-srv_emb=yes --enable-mod_rediscache=yes
+CXXFLAGS="-std=c++17" ./configure --enable-srv_emb=yes --enable-mod_rediscache=yes
 make install -j4
 mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-4.0-bin_ac
 cd /tmp
