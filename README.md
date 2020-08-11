@@ -80,13 +80,25 @@ Features
 - HTTP2.0 Support (experimental)
 - Dependency Injection
 
-Quickstart (Using cmake)
+Quickstart (Using cmake/make)
 ===========
 - Install cmake >= 3.8.2 and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
+- mkdir build && cd build
 - cmake -DSRV_EMB=on -DMOD_SDORM_MONGO=on .
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ../ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
+- chmod +x *.sh
+- ./server.sh (Startup ffead-cpp Njoy!!)
+
+Quickstart (Using cmake/ninja)
+===========
+- Install cmake >= 3.8.2, ninja and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
+- mkdir build && cd build
+- cmake -GNinja -DSRV_EMB=on -DMOD_SDORM_MONGO=on .
+- ninja (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- Sip some coffee
+- cd ../ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
