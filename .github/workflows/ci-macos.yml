@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: |
-        brew unlink bazel
+        #brew unlink bazel
         brew install openssl@1.1 ossp-uuid unixodbc libmemcached boost jsoncpp apr apr-util pkgconfig httpd
         if [ -f /usr/local/lib/libssl.dylib ]; then
           sudo mv /usr/local/lib/libssl.dylib /usr/local/lib/libssl_bak.dylib
