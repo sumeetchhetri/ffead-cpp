@@ -1118,7 +1118,7 @@ if test "x$mod_sdormsql" = "xyes"; then
 	AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
 	AC_DEFINE(HAVE_LIBODBC, [1], [libodbc presence])
-    AC_CHECK_LIB(pq, main, [AC_DEFINE(HAVE_LIBPQ, [1], [libpq presence])], [])])
+    AC_CHECK_LIB(pq, main, [AC_DEFINE(HAVE_LIBPQ, [1], [libpq presence])], [])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then
@@ -1183,7 +1183,7 @@ AC_CONFIG_FILES([web/default/src/autotools/Makefile
 				web/markers/src/autotools/Makefile
 				web/te-benchmark/src/autotools/Makefile
 				web/te-benchmark-um/src/autotools/Makefile
-                web/te-benchmark-um-pq/src/autotools/Makefile
+				web/te-benchmark-um-pq/src/autotools/Makefile
 				web/peer-server/src/autotools/Makefile])
 AC_OUTPUT
 

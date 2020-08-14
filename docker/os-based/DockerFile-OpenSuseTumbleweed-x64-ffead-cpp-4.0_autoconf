@@ -1,6 +1,6 @@
 FROM opensuse/tumbleweed
 
-RUN zypper in -y autoconf-archive autoconf automake libtool perl gcc gcc-c++ make cmake libpq-dev libcurl-devel hiredis-devel openssl openssl-devel libmemcached-devel zlib-devel libuuid-devel unixODBC unixODBC-devel unzip wget netcat-openbsd tar gzip
+RUN zypper in -y autoconf-archive autoconf automake libtool perl gcc gcc-c++ make cmake postgresql-devel libcurl-devel hiredis-devel openssl openssl-devel libmemcached-devel zlib-devel libuuid-devel unixODBC unixODBC-devel unzip wget netcat-openbsd tar gzip
 
 #Install libcuckoo headers
 WORKDIR /tmp
