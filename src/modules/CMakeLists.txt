@@ -24,6 +24,13 @@ if(MOD_MEMCACHED)
 endif(MOD_MEMCACHED)
 
 if(MOD_SDORM_SQL)
+	if(HAVE_LIBPQ)
+		file(GLOB sql_pq_module_sources
+		    "sdorm/sql/libpq/*.h"
+		    "sdorm/sql/libpq/*.cpp"
+		)
+		install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/sdorm/sql/libpq/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
+	endif(HAVE_LIBPQ)
 	file(GLOB sql_module_sources
 	    "sdorm/sql/*.h"
 	    "sdorm/sql/*.cpp"
@@ -136,6 +143,6 @@ file(GLOB threads_module_sources
 )
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/src/modules/threads/ DESTINATION ${PROJECT_NAME}-bin/include FILES_MATCHING PATTERN "*.h")
 
-add_library(ffead-modules SHARED ${wepoll_sources} ${comm_module_sources} ${client_module_sources} ${cache_module_sources} ${sdorm_module_sources} ${http_module_sources} ${ioc_module_sources} ${reflection_module_sources} ${serialization_module_sources} ${search_module_sources} ${serv_module_sources} ${ssl_module_sources} ${threads_module_sources} ${mem_module_sources} ${red_module_sources} ${memc_module_sources} ${sql_module_sources} ${mongo_module_sources} ${serb_module_sources} ${job_module_sources})
+add_library(ffead-modules SHARED ${sql_pq_module_sources} ${wepoll_sources} ${comm_module_sources} ${client_module_sources} ${cache_module_sources} ${sdorm_module_sources} ${http_module_sources} ${ioc_module_sources} ${reflection_module_sources} ${serialization_module_sources} ${search_module_sources} ${serv_module_sources} ${ssl_module_sources} ${threads_module_sources} ${mem_module_sources} ${red_module_sources} ${memc_module_sources} ${sql_module_sources} ${mongo_module_sources} ${serb_module_sources} ${job_module_sources})
 set_property(TARGET ffead-modules PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(ffead-modules ${HAVE_PCREPOSIXLIB} ${HAVE_WINREGEX} ${HAVE_WSOCK32} ${HAVE_WS232} ${HAVE_DLLIB} ${HAVE_UUIDLIB} ${HAVE_CURLLIB} ${HAVE_SSLLIB} ${HAVE_REDISLIB} ${HAVE_MEMCACHEDLIB} ${HAVE_MEMCACHEDUTILLIB} ${HAVE_ODBCLIB} ${HAVE_MONGOCLIB} ${HAVE_BSONLIB} ${HAVE_ZLIB} ${HAVE_CRYPTOLIB})
+target_link_libraries(ffead-modules ${HAVE_LIBPQ} ${HAVE_PCREPOSIXLIB} ${HAVE_WINREGEX} ${HAVE_WSOCK32} ${HAVE_WS232} ${HAVE_DLLIB} ${HAVE_UUIDLIB} ${HAVE_CURLLIB} ${HAVE_SSLLIB} ${HAVE_REDISLIB} ${HAVE_MEMCACHEDLIB} ${HAVE_MEMCACHEDUTILLIB} ${HAVE_ODBCLIB} ${HAVE_MONGOCLIB} ${HAVE_BSONLIB} ${HAVE_ZLIB} ${HAVE_CRYPTOLIB})

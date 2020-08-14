@@ -4,7 +4,7 @@ cd $IROOT
 
 git clone https://github.com/sumeetchhetri/ffead-cpp
 cd ffead-cpp
-git checkout e243bc096cd570cfee1edfecbcd91f4c4056fa1a -b 4.0
+#git checkout e243bc096cd570cfee1edfecbcd91f4c4056fa1a -b 4.0
 rm -rf .git
 cd ..
 mv ffead-cpp ffead-cpp-src

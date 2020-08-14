@@ -25,6 +25,7 @@
 std::map<std::string, DataSourceManager*> DataSourceManager::dsns;
 std::map<std::string, std::string> DataSourceManager::defDsnNames;
 std::map<std::string, DataSourceInterface*> DataSourceManager::sevhDsnImpls;
+std::map<std::string, void*> DataSourceManager::sevhDsnRawImpls;
 bool DataSourceManager::isSingleEVH = false;
 
 void DataSourceManager::init(bool issevh) {
@@ -133,11 +134,48 @@ DataSourceManager::~DataSourceManager() {
 	}
 }
 
-void DataSourceManager::cleanImpl(DataSourceInterface* dsImpl) {
-	if(!isSingleEVH) {
-		delete dsImpl;
+void* DataSourceManager::getRawImpl(std::string name, std::string appName) {
+	if(appName=="") {
+		appName = CommonUtils::getAppName();
 	} else {
-		dsImpl->endSession();
+		StringUtil::replaceAll(appName, "-", "_");
+		RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
+	}
+	StringUtil::trim(name);
+	if(name=="") {
+		name = defDsnNames[appName];
+	}
+	name = appName + name;
+	if(dsns.find(name)==dsns.end()) {
+		throw std::runtime_error("Data Source Not found...");
+	}
+	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
+	if(isSingleEVH) {
+		if(sevhDsnRawImpls.find(name)!=sevhDsnRawImpls.end()) {
+			return sevhDsnRawImpls[name];
+		}
+	}
+	DataSourceManager* dsnMgr = dsns[name];
+	void* t = NULL;
+	if(StringUtil::toLowerCopy(dsnMgr->props.getType())=="sql-raw-pq")
+	{
+#if defined(INC_SDORM_SQL) && defined(HAVE_LIBPQ)
+		t = new LibpqDataSourceImpl(dsnMgr->props.getNodes().at(0).getBaseUrl());
+		((LibpqDataSourceImpl*)t)->init();
+#endif
+	}
+	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
+	if(isSingleEVH) {
+		sevhDsnRawImpls[name] = t;
+	}
+	return t;
+}
+
+void DataSourceManager::cleanRawImpl(void* dsImpl) {
+	if(!isSingleEVH) {
+#if defined(INC_SDORM_SQL) && defined(HAVE_LIBPQ)
+		delete dsImpl;
+#endif
 	}
 }
 
@@ -197,4 +235,12 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name, std::string ap
 		sevhDsnImpls[name] = t;
 	}
 	return t;
+}
+
+void DataSourceManager::cleanImpl(DataSourceInterface* dsImpl) {
+	if(!isSingleEVH) {
+		delete dsImpl;
+	} else {
+		dsImpl->endSession();
+	}
 }

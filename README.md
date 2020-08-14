@@ -96,7 +96,7 @@ Quickstart (Using cmake/ninja)
 - Install cmake >= 3.8.2, ninja and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
 - mkdir build && cd build
 - cmake -GNinja -DSRV_EMB=on -DMOD_SDORM_MONGO=on .
-- ninja (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
+- ninja install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
 - cd ../ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh

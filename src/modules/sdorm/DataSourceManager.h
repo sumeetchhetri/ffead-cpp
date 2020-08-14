@@ -27,6 +27,7 @@
 #ifdef INC_SDORM_SQL
 #include "SQLConnectionPool.h"
 #include "SQLDataSourceImpl.h"
+#include "LibpqDataSourceImpl.h"
 #endif
 #ifdef INC_SDORM_MONGO
 #include "MongoDBConnectionPool.h"
@@ -38,6 +39,7 @@ class DataSourceManager;
 class DataSourceManager {
 	static bool isSingleEVH;
 	static std::map<std::string, DataSourceInterface*> sevhDsnImpls;
+	static std::map<std::string, void*> sevhDsnRawImpls;
 	Logger logger;
 	static std::map<std::string, DataSourceManager*> dsns;
 	static std::map<std::string, std::string> defDsnNames;
@@ -53,6 +55,8 @@ public:
 	virtual ~DataSourceManager();
 	static DataSourceInterface* getImpl(std::string name = "", std::string appName = "");
 	static void cleanImpl(DataSourceInterface*);
+	static void* getRawImpl(std::string name = "", std::string appName = "");
+	static void cleanRawImpl(void*);
 };
 
 #endif /* DATASOURCEMANAGER_H_ */

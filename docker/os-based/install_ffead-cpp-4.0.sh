@@ -8,6 +8,7 @@ SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 sed -i 's|THRD_PSIZ=6|THRD_PSIZ='${SERV_THREADS}'|g' /tmp/ffead-cpp-4.0-bin/resources/server.prop
 sed -i 's|W_THRD_PSIZ=2|W_THRD_PSIZ='${WRIT_THREADS}'|g' /tmp/ffead-cpp-4.0-bin/resources/server.prop
 sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" /tmp/ffead-cpp-4.0-bin/web/te-benchmark-um/config/cache.xml
+sed -i'' -e "s|<init>TeBkUmLpqRouter.updateCache</init>||g" /tmp/ffead-cpp-4.0-bin/web/te-benchmark-um-pq/config/cache.xml
 sed -i'' -e "s|<init>TeBkRestController.updateCache</init>||g" /tmp/ffead-cpp-4.0-bin/web/te-benchmark/config/cache.xml
 
 mv /tmp/ffead-cpp-4.0-bin /opt/ffead-cpp-4.0

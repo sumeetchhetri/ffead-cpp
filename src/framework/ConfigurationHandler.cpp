@@ -1332,7 +1332,11 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 									ElementList nodes = nodec.at(nn).getChildElements();
 									for (unsigned int ncc = 0; ncc < nodes.size(); ncc++)
 									{
-										if(nodes.at(ncc).getTagName()=="username")
+										if(nodes.at(ncc).getTagName()=="url")
+										{
+											cnode.url = nodes.at(ncc).getText();
+										}
+										else if(nodes.at(ncc).getTagName()=="username")
 										{
 											cnode.username = nodes.at(ncc).getText();
 										}
@@ -1349,7 +1353,6 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 											try {
 												cnode.port = CastUtil::toInt(nodes.at(ncc).getText());
 											} catch(const std::exception& e) {
-
 											}
 										}
 										else if(nodes.at(ncc).getTagName()=="readTimeout")
@@ -1357,7 +1360,6 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 											try {
 												cnode.readTimeout = CastUtil::toFloat(nodes.at(ncc).getText());
 											} catch(const std::exception& e) {
-
 											}
 										}
 										else if(nodes.at(ncc).getTagName()=="connectionTimeout")
@@ -1365,7 +1367,6 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 											try {
 												cnode.connectionTimeout = CastUtil::toFloat(nodes.at(ncc).getText());
 											} catch(const std::exception& e) {
-
 											}
 										}
 										else if(nodes.at(ncc).getTagName()=="dsn")
@@ -1387,7 +1388,6 @@ void ConfigurationHandler::configureDataSources(const std::string& name, const s
 									try {
 										psize = CastUtil::toInt(confs.at(cns).getText());
 									} catch(const std::exception& e) {
-
 									}
 								}
 								cprops.poolWriteSize = isSinglEVH?1:psize;
@@ -1529,7 +1529,6 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 									try {
 										cnode.port = CastUtil::toInt(nodes.at(ncc).getText());
 									} catch(const std::exception& e) {
-
 									}
 								}
 								else if(nodes.at(ncc).getTagName()=="readTimeout")
@@ -1537,7 +1536,6 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 									try {
 										cnode.readTimeout = CastUtil::toFloat(nodes.at(ncc).getText());
 									} catch(const std::exception& e) {
-
 									}
 								}
 								else if(nodes.at(ncc).getTagName()=="connectionTimeout")
@@ -1545,7 +1543,6 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 									try {
 										cnode.connectionTimeout = CastUtil::toFloat(nodes.at(ncc).getText());
 									} catch(const std::exception& e) {
-
 									}
 								}
 							}
@@ -1559,7 +1556,6 @@ void ConfigurationHandler::configureCaches(const std::string& name, const std::s
 							try {
 								psize = CastUtil::toInt(confs.at(cns).getText());
 							} catch(const std::exception& e) {
-
 							}
 						}
 						cprops.poolWriteSize = psize;

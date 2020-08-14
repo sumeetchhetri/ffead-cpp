@@ -22,6 +22,7 @@
 
 #ifndef DATASOURCEINTERFACE_H_
 #define DATASOURCEINTERFACE_H_
+#include "Compatibility.h"
 #include <iostream>
 #include "Timer.h"
 #include "DateFormat.h"
