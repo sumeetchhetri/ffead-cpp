@@ -100,7 +100,7 @@ AS_IF([test "$pg_prefix" != "no"],[
 	      ACTION_IF_FOUND
 	      ],
 	      [m4_ifset([ACTION_IF_NOT_FOUND],[ACTION_IF_NOT_FOUND],
-			  [AC_MSG_ERROR(some support files for PostgreSQL were missing)])])
+			  [])])
 ])
 
 popdef([ACTION_IF_FOUND])

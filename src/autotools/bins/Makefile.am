@@ -74,10 +74,8 @@ endif
 if MOD_SDORM_SQL
 AM_CPPFLAGS += \
 				-I"../../modules/sdorm/sql"
-if HAVE_LIBPQ
 AM_CPPFLAGS += \
 				-I"../../modules/sdorm/sql/libpq"
-endif
 endif
 if MOD_SDORM_MONGO
 AM_CPPFLAGS += \
@@ -122,10 +120,8 @@ endif
 if MOD_SDORM_SQL
 AM_CPPFLAGS += \
 				-I"../../modules/sdorm/sql"
-if HAVE_LIBPQ
 AM_CPPFLAGS += \
 				-I"../../modules/sdorm/sql/libpq"
-endif
 endif
 
 if MOD_SDORM_MONGO

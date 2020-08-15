@@ -79,10 +79,8 @@ endif
 if MOD_SDORM_SQL
 includedirsall += \
 				src/modules/sdorm/sql/*.h
-if HAVE_LIBPQ
 includedirsall += \
 				src/modules/sdorm/sql/libpq/*.h
-endif
 endif
 if MOD_SDORM_MONGO
 includedirsall += \
@@ -131,10 +129,8 @@ endif
 if MOD_SDORM_SQL
 includedirsall += \
 				src/modules/sdorm/sql/*.h
-if HAVE_LIBPQ
 includedirsall += \
 				src/modules/sdorm/sql/libpq/*.h
-endif
 endif
 
 if MOD_SDORM_MONGO

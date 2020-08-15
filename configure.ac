@@ -1031,7 +1031,7 @@ if test "x$mod_sdormsql" = "xyes"; then
 	if test "x$have_pqinc" = "xyes"; then
 		AM_CXXFLAGS="$AM_CXXFLAGS ${PQINCPATH}"
 		CPPFLAGS="$CPPFLAGS ${PQINCPATH}"
-		LIBS="${LIBPQ_LIBS}"
+		LIBS="${LIBS} ${LIBPQ_LIBS}"
 		AM_CONDITIONAL(HAVE_LIBPQ, [test "x$HAVE_LIBPQ" != "x"])
 		AC_DEFINE(HAVE_LIBPQ, [1], [libpq presence])
 		AC_DEFINE(PQINCPATH, ["${PQINCPATH}"], [libpq presence])

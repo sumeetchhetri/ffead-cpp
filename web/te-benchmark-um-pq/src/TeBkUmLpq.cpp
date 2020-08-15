@@ -93,8 +93,8 @@ void TeBkUmLpqRouter::db(TeBkUmLpqWorld& w) {
 	LibpqDataSourceImpl* sqli = static_cast<LibpqDataSourceImpl*>(DataSourceManager::getRawImpl());
 	int rid = rand() % 10000 + 1;
 	try {
-		char str[5];
-		snprintf(str, 5, "%d", rid);
+		char str[6];
+		snprintf(str, 6, "%d", rid);
 		std::vector<const char*> pars;
 		pars.push_back(str);
 		sqli->executeQuery(WORLD_ONE_QUERY, pars, &w, &TeBkUmLpqRouter::dbUtil);
@@ -120,11 +120,11 @@ void TeBkUmLpqRouter::queries(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 
 	try {
 		TeBkUmLpqWorld w;
-		char str[5];
+		char str[6];
 		std::vector<const char*> pars;
 		for (int c = 0; c < queryCount; ++c) {
 			int rid = rand() % 10000 + 1;
-			snprintf(str, 5, "%d", rid);
+			snprintf(str, 6, "%d", rid);
 			pars.clear();
 			pars.push_back(str);
 			sqli->executeQuery(WORLD_ONE_QUERY, pars, &w, &TeBkUmLpqRouter::dbUtil);
@@ -146,7 +146,7 @@ void TeBkUmLpqRouter::updates(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 	LibpqDataSourceImpl* sqli = static_cast<LibpqDataSourceImpl*>(DataSourceManager::getRawImpl());
 
 	try {
-		char str[5];
+		char str[6];
 		std::vector<const char*> pars;
 		std::vector<const char*> qp;
 
@@ -167,7 +167,7 @@ void TeBkUmLpqRouter::updates(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 			}
 
 			int rid = rand() % 10000 + 1;
-			snprintf(str, 5, "%d", rid);
+			snprintf(str, 6, "%d", rid);
 			qp.clear();
 			qp.push_back(str);
 			sqli->executeQuery(WORLD_ONE_QUERY, qp, &pars, &TeBkUmLpqRouter::updatesUtil);
@@ -192,8 +192,8 @@ void TeBkUmLpqRouter::updatesUtil(void* ctx, int rn, std::vector<LibpqRes>& data
 			newRandomNumber = 1;
 		}
 	}
-	char str[5];
-	snprintf(str, 5, "%d", newRandomNumber);
+	char str[6];
+	snprintf(str, 6, "%d", newRandomNumber);
 	w->push_back(str);
 	w->push_back(data.at(0).d);
 }
