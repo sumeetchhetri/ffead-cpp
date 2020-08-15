@@ -144,70 +144,97 @@ void ServerInitUtil::bootstrap(std::string serverRootDirectory, Logger& logger, 
 	//Generate library if dev mode = true or the library is not found in prod mode
 	if(isCompileEnabled || !libpresent)
 		libpresent = false;
-
-	if(!libpresent)
-	{
-		std::string configureFilePath = rtdcfpath+"/autotools/configure";
-		if (access( configureFilePath.c_str(), F_OK ) == -1 )
+#ifdef BUILD_AUTOCONF
+		if(!libpresent)
 		{
-			std::string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
-			std::string output = ScriptHandler::execute(compres, true);
-			logger << "Set up configure for intermediate libraries\n\n" << std::endl;
+			std::string configureFilePath = rtdcfpath+"/autotools/configure";
+			if (access( configureFilePath.c_str(), F_OK ) == -1 )
+			{
+				std::string compres = rtdcfpath+"/autotools/autogen.sh "+serverRootDirectory;
+				std::string output = ScriptHandler::execute(compres, true);
+				logger << "Set up configure for intermediate libraries\n\n" << std::endl;
+			}
+
+			if (access( configureFilePath.c_str(), F_OK ) != -1 )
+			{
+				std::string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+			#ifdef DEBUG
+				compres += " --enable-debug=yes";
+			#endif
+				std::string output = ScriptHandler::execute(compres, true);
+				logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
+				logger << output << std::endl;
+
+				compres = respath+"rundyn-automake_autoconf.sh "+serverRootDirectory;
+				output = ScriptHandler::execute(compres, true);
+				logger << "Intermediate code generation task\n\n" << std::endl;
+				logger << output << std::endl;
+			}
 		}
 
-		if (access( configureFilePath.c_str(), F_OK ) != -1 )
+		void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+		void* checkddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
+		if(checkdlib==NULL || checkddlib==NULL)
 		{
-			std::string compres = respath+"rundyn-configure.sh "+serverRootDirectory;
-#ifdef DEBUG
-			compres += " --enable-debug=yes";
-#endif
+			std::string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
 			std::string output = ScriptHandler::execute(compres, true);
+			logger << "Set up configure for intermediate libraries\n\n" << std::endl;
+
+			compres = respath+"rundyn-configure.sh "+serverRootDirectory;
+			#ifdef DEBUG
+				compres += " --enable-debug=yes";
+			#endif
+			output = ScriptHandler::execute(compres, true);
 			logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
 			logger << output << std::endl;
 
-			compres = respath+"rundyn-automake.sh "+serverRootDirectory;
-			output = ScriptHandler::execute(compres, true);
+			compres = respath+"rundyn-automake_autoconf.sh "+serverRootDirectory;
+			if(!libpresent)
+			{
+				std::string output = ScriptHandler::execute(compres, true);
+				logger << "Rerunning Intermediate code generation task\n\n" << std::endl;
+				logger << output << std::endl;
+			}
+			checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+			checkddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
+		}
+
+		if(checkdlib==NULL || checkddlib==NULL)
+		{
+			logger << dlerror() << std::endl;
+			logger.info("Could not load Library");
+			exit(0);
+		}
+		else
+		{
+			dlclose(checkdlib);
+			dlclose(checkddlib);
+			logger.info("Library generated successfully");
+		}
+#else
+		if(!libpresent)
+		{
+			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory;
+			std::string output = ScriptHandler::execute(compres, true);
 			logger << "Intermediate code generation task\n\n" << std::endl;
 			logger << output << std::endl;
 		}
-	}
 
-	void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	if(checkdlib==NULL)
-	{
-		std::string compres = rtdcfpath+"/autotools/autogen-noreconf.sh "+serverRootDirectory;
-		std::string output = ScriptHandler::execute(compres, true);
-		logger << "Set up configure for intermediate libraries\n\n" << std::endl;
-
-		compres = respath+"rundyn-configure.sh "+serverRootDirectory;
-#ifdef DEBUG
-		compres += " --enable-debug=yes";
-#endif
-		output = ScriptHandler::execute(compres, true);
-		logger << "Set up makefiles for intermediate libraries\n\n" << std::endl;
-		logger << output << std::endl;
-
-		compres = respath+"rundyn-automake.sh "+serverRootDirectory;
-		if(!libpresent)
+		void* checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
+		void* checkddlib = dlopen(DINTER_LIB_FILE, RTLD_NOW);
+		if(checkdlib==NULL || checkddlib==NULL)
 		{
-			std::string output = ScriptHandler::execute(compres, true);
-			logger << "Rerunning Intermediate code generation task\n\n" << std::endl;
-			logger << output << std::endl;
+			logger << dlerror() << std::endl;
+			logger.info("Could not load Library");
+			exit(0);
 		}
-		checkdlib = dlopen(INTER_LIB_FILE, RTLD_NOW);
-	}
-
-	if(checkdlib==NULL)
-	{
-		logger << dlerror() << std::endl;
-		logger.info("Could not load Library");
-		exit(0);
-	}
-	else
-	{
-		dlclose(checkdlib);
-		logger.info("Library generated successfully");
-	}
+		else
+		{
+			dlclose(checkdlib);
+			dlclose(checkddlib);
+			logger.info("Library generated successfully");
+		}
+#endif
 
 #ifdef INC_COMP
 	for (unsigned int var1 = 0;var1<ConfigurationData::getInstance()->componentNames.size();var1++)

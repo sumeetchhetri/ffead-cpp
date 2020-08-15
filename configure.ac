@@ -12,6 +12,7 @@ AC_CONFIG_HEADERS([src/modules/common/AppDefines.h])
 AC_CONFIG_MACRO_DIR([m4])
 m4_include([m4/ax_cxx_compile_stdcxx.m4])
 m4_include([m4/ax_cxx_compile_stdcxx_17.m4])
+m4_include([m4/ax_check_postgres_db.m4])
 
 LT_INIT([static shared dlopen])
 
@@ -191,7 +192,7 @@ esac
 
 AM_CONDITIONAL(IS_EXE, test "x$is_exe" = "xyes")
 AM_CONDITIONAL(USE_WEPOLL, test "x$use_wepoll" = "xyes")
-AC_DEFINE(BUILD_AUTOCONF, [], [set build system to autoconf/automake])
+AC_DEFINE(BUILD_AUTOCONF, [1], [set build system to autoconf/automake])
 
 ########################################################################################################
 ########################## CACHE MODULES, Memory, Redis, Memcached #####################################
@@ -1026,7 +1027,16 @@ if test "x$mod_sdormsql" = "xyes"; then
 			])
 	fi
 	AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([ODBC sql.h header not found])])
-    AC_CHECK_HEADER([libpq-fe.h],,[])])
+	AX_CHECK_POSTGRES_DB()
+	if test "x$have_pqinc" = "xyes"; then
+		AM_CXXFLAGS="$AM_CXXFLAGS ${PQINCPATH}"
+		CPPFLAGS="$CPPFLAGS ${PQINCPATH}"
+		LIBS="${LIBPQ_LIBS}"
+		AM_CONDITIONAL(HAVE_LIBPQ, [test "x$HAVE_LIBPQ" != "x"])
+		AC_DEFINE(HAVE_LIBPQ, [1], [libpq presence])
+		AC_DEFINE(PQINCPATH, ["${PQINCPATH}"], [libpq presence])
+	fi
+    #AC_CHECK_HEADER([libpq-fe.h],,[])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then
@@ -1118,7 +1128,7 @@ if test "x$mod_sdormsql" = "xyes"; then
 	AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
 	AC_DEFINE(HAVE_LIBODBC, [1], [libodbc presence])
-    AC_CHECK_LIB(pq, main, [AC_DEFINE(HAVE_LIBPQ, [1], [libpq presence])], [])
+    #AC_CHECK_LIB(pq, main, [AC_DEFINE(HAVE_LIBPQ, [1], [libpq presence])], [])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then

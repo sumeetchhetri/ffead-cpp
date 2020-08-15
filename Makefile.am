@@ -79,6 +79,10 @@ endif
 if MOD_SDORM_SQL
 includedirsall += \
 				src/modules/sdorm/sql/*.h
+if HAVE_LIBPQ
+includedirsall += \
+				src/modules/sdorm/sql/libpq/*.h
+endif
 endif
 if MOD_SDORM_MONGO
 includedirsall += \
@@ -127,6 +131,10 @@ endif
 if MOD_SDORM_SQL
 includedirsall += \
 				src/modules/sdorm/sql/*.h
+if HAVE_LIBPQ
+includedirsall += \
+				src/modules/sdorm/sql/libpq/*.h
+endif
 endif
 
 if MOD_SDORM_MONGO
@@ -144,6 +152,10 @@ endif
 if MOD_GTM
 includedirsall += \
 				src/modules/sdorm/gtm/*.h
+endif
+if USE_WEPOLL
+includedirsall += \
+				src/modules/wepoll/*.h
 endif
 includedirsall += \
 				src/modules/common/*.h

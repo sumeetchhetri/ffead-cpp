@@ -240,7 +240,12 @@ if test "x$mod_sdormsql" = "xyes"; then
 	fi
 	AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
-	AC_DEFINE(HAVE_LIBODBC, [1], [libodbc presence])
+	if test "x${PQINCPATH}" != "x"; then
+		AM_CXXFLAGS="$AM_CXXFLAGS ${PQINCPATH}"
+		CPPFLAGS="$CPPFLAGS ${PQINCPATH}"
+		AC_CHECK_LIB(pq, main, , [])
+	fi
+	#AC_DEFINE(HAVE_LIBODBC, [1], [libodbc presence])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then
@@ -282,8 +287,11 @@ AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
 echo "Host: $host"
+echo "LIBS: $LIBS"
+echo "CFLAGS: $CFLAGS"
 echo "CPPFLAGS: $CPPFLAGS"
 echo "AM_CXXFLAGS: $AM_CXXFLAGS"
 echo "LDFLAGS: $LDFLAGS"
+echo "STDCXX_SWITCH: $STDCXX_SWITCH"
 echo "Debug mode: $support_debug"
 echo "Make Executable: $MAKE"

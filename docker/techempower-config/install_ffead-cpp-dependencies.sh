@@ -4,8 +4,6 @@ apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unz
 	apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev \
 	zlib1g-dev cmake make clang-format-9 ninja-build libhiredis-dev libcurl4-openssl-dev libpq-dev
 
-mv /usr/include/postgresql/* /usr/include/
-
 #redis will not start correctly on bionic with this config
 sed -i "s/bind .*/bind 127.0.0.1/g" /etc/redis/redis.conf
 

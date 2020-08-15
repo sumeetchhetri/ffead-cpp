@@ -9,8 +9,7 @@ fprefix=../../../../${packageIdentifier}
 prefix=${abs_builddir}
 
 lib_LTLIBRARIES = libte_benchmark_um_pq.la
-libte_benchmark_um_pq_la_SOURCES = ../TeBkUmWorld.cpp \
-				../TeBkUm.cpp
+libte_benchmark_um_pq_la_SOURCES = ../TeBkUmLpq.cpp
 
 libte_benchmark_um_pq_la_LDFLAGS = -no-undefined 
 libte_benchmark_um_pq_la_LIBADD = -L"${fprefix}/lib" -lffead-modules -lffead-framework

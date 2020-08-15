@@ -1236,6 +1236,12 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 #else
 	cntxt["MOD_SCRIPT"] = "false";
 #endif
+#ifdef PQINCPATH
+	if(PQINCPATH!="${PQINCPATH}")
+	cntxt["PQINCPATH"] = PQINCPATH;
+#else
+	cntxt["PQINCPATH"] = " ";
+#endif
 #else
 #ifdef INC_SDORM_SQL
 	cntxt["MOD_SDORM_SQL"] = "1";

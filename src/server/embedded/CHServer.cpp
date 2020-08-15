@@ -757,7 +757,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 		//Generate library if dev mode = true or the library is not found in prod mode
 		if(isCompileEnabled || !libpresent)
 			libpresent = false;
-	#ifdef BUILD_AUTOCONF
+#ifdef BUILD_AUTOCONF
 		if(!libpresent)
 		{
 			std::string configureFilePath = rtdcfpath+"/autotools/configure";
@@ -824,7 +824,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 			dlclose(checkddlib);
 			logger.info("Library generated successfully");
 		}
-	#else
+#else
 		if(!libpresent)
 		{
 			std::string compres = respath+"rundyn-automake.sh "+serverRootDirectory;
@@ -847,7 +847,7 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
 			dlclose(checkddlib);
 			logger.info("Library generated successfully");
 		}
-	#endif
+#endif
 
 	#ifdef INC_COMP
 		for (unsigned int var1 = 0;var1<ConfigurationData::getInstance()->componentNames.size();var1++)

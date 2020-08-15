@@ -383,6 +383,12 @@ libffead_modules_la_SOURCES += \
 						../../modules/sdorm/sql/DialectHelper.cpp \
 						../../modules/sdorm/sql/SQLConnectionPool.cpp \
 						../../modules/sdorm/sql/SQLDataSourceImpl.cpp
+if HAVE_LIBPQ
+AM_CPPFLAGS += \
+				-I"../../modules/sdorm/sql/libpq"
+libffead_modules_la_SOURCES += \
+						../../modules/sdorm/sql/libpq/LibpqDataSourceImpl.cpp
+endif
 endif
 if MOD_SDORM_MONGO
 AM_CPPFLAGS += \
@@ -508,6 +514,12 @@ libffead_modules_la_SOURCES += \
 						../../modules/sdorm/sql/DialectHelper.cpp \
 						../../modules/sdorm/sql/SQLConnectionPool.cpp \
 						../../modules/sdorm/sql/SQLDataSourceImpl.cpp
+if HAVE_LIBPQ
+AM_CPPFLAGS += \
+				-I"../../modules/sdorm/sql/libpq"
+libffead_modules_la_SOURCES += \
+						../../modules/sdorm/sql/libpq/LibpqDataSourceImpl.cpp
+endif
 endif
 
 if MOD_SDORM_MONGO
