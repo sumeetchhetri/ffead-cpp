@@ -62,7 +62,7 @@ sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/markers/src/autotools/Makefile||g' configure.ac
 sed -i 's|web/peer-server/src/autotools/Makefile||g' configure.ac
 
-cmake -DSRV_EMB=on -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DPostgreSQL_TYPE_INCLUDE_DIR="/usr/include/postgresql" .
+cmake -DSRV_EMB=on -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 
 cp resources/sample-odbcinst.ini ${IROOT}/odbcinst.ini
 cp resources/sample-odbc.ini ${IROOT}/odbc.ini

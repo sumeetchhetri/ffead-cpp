@@ -24,8 +24,10 @@
 #define WEB_TE_BENCHMARK_UM_INCLUDE_TeBkUmLpq_H_
 #include "TemplateHandler.h"
 #include "vector"
+#ifndef OS_MINGW
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 #include "DataSourceManager.h"
 #include <stdlib.h>
 #include <algorithm>

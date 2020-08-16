@@ -49,9 +49,9 @@ AC_ARG_WITH([top_inc_dir],
         [],
         [with_top_inc_dir="no"])
 if test "x${with_top_inc_dir}" != "xno"; then
-    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir} -I/usr/local/include -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
+    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir} -I/usr/local/include"
 else
-	CPPFLAGS="$CPPFLAGS -I/usr/local/include -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
+	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 fi
 
 AC_ARG_WITH([cinatra_inc_dir],
@@ -1169,6 +1169,15 @@ else
         AC_SUBST(GENERATE_NGINXMOD,[ ])
 fi
 
+NGX_CPP_FLAGS="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS -Wall -Wno-unknown-pragmas -Wno-delete-incomplete -Wno-deprecated"
+if test "x$with_top_inc_dir" != "x";then
+	NGX_LD_FLAGS="-L${with_top_inc_dir}/../lib"
+else
+	NGX_LD_FLAGS="-L/usr/local/lib"
+fi
+AC_SUBST(NGX_LD_FLAGS)
+AC_SUBST(NGX_CPP_FLAGS)
 AC_SUBST(BUILD_CPPFLAGS,[$CPPFLAGS])
 AC_SUBST(BUILD_AM_CXXFLAGS,[$AM_CXXFLAGS])
 AC_SUBST(BUILD_LDFLAGS,[$LDFLAGS])
