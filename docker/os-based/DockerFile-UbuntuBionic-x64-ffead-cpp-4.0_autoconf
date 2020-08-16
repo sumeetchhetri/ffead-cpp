@@ -1,6 +1,6 @@
 FROM ubuntu:bionic
 
-RUN apt update -yqq && apt install -yqq autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev libhiredis-dev wget netcat
+RUN apt update -yqq && apt install -yqq autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev libhiredis-dev wget netcat
 
 #Install libcuckoo headers
 WORKDIR /tmp
@@ -30,7 +30,7 @@ RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
 RUN chmod +x autogen.sh
 RUN ./autogen.sh
-RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes
+RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes --enable-apachemod=yes --enable-nginxmod=yes
 RUN make install
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 WORKDIR /tmp
