@@ -12,7 +12,6 @@ AC_CONFIG_HEADERS([src/modules/common/AppDefines.h])
 AC_CONFIG_MACRO_DIR([m4])
 m4_include([m4/ax_cxx_compile_stdcxx.m4])
 m4_include([m4/ax_cxx_compile_stdcxx_17.m4])
-m4_include([m4/ax_check_postgres_db.m4])
 
 LT_INIT([static shared dlopen])
 
@@ -332,6 +331,13 @@ esac],
 AM_CONDITIONAL(MOD_SDORM_SQL, test "x$mod_sdormsql" = "xyes")
 AM_CONDITIONAL(MOD_SDORM, test "x$mod_sdormsql" = "xyes")
 if test "x$mod_sdormsql" = "xyes"; then
+	if test "x${with_top_inc_dir}" != "xno"; then
+		AM_CXXFLAGS="$AM_CXXFLAGS -I${with_top_inc_dir}/postgresql -I${with_top_inc_dir}/pgsql"
+	    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir}/postgresql -I${with_top_inc_dir}/pgsql"
+	else
+		AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/postgresql -I/usr/include/pgsql -I/usr/local/include/postgresql -I/usr/local/include/pgsql"
+	    CPPFLAGS="$CPPFLAGS -I/usr/include/postgresql -I/usr/include/pgsql -I/usr/local/include/postgresql -I/usr/local/include/pgsql"
+	fi
     AC_DEFINE(INC_SDORM_SQL, [], [enable data-source-orm-sql module])
     AC_DEFINE(INC_SDORM, [], [enable data-source-orm module])
 fi
@@ -1027,16 +1033,7 @@ if test "x$mod_sdormsql" = "xyes"; then
 			])
 	fi
 	AC_CHECK_HEADER([sql.h],,[AC_MSG_ERROR([ODBC sql.h header not found])])
-	AX_CHECK_POSTGRES_DB()
-	if test "x$have_pqinc" = "xyes"; then
-		AM_CXXFLAGS="$AM_CXXFLAGS ${PQINCPATH}"
-		CPPFLAGS="$CPPFLAGS ${PQINCPATH}"
-		LIBS="${LIBS} ${LIBPQ_LIBS}"
-		AM_CONDITIONAL(HAVE_LIBPQ, [test "x$HAVE_LIBPQ" != "x"])
-		AC_DEFINE(HAVE_LIBPQ, [1], [libpq presence])
-		AC_DEFINE(PQINCPATH, ["${PQINCPATH}"], [libpq presence])
-	fi
-    #AC_CHECK_HEADER([libpq-fe.h],,[])
+	AC_CHECK_HEADER([libpq-fe.h],,[])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then
@@ -1128,7 +1125,7 @@ if test "x$mod_sdormsql" = "xyes"; then
 	AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
 	AC_DEFINE(HAVE_LIBODBC, [1], [libodbc presence])
-    #AC_CHECK_LIB(pq, main, [AC_DEFINE(HAVE_LIBPQ, [1], [libpq presence])], [])
+    AC_CHECK_LIB(pq, main, , [])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then

@@ -172,6 +172,16 @@ if test "x$mod_script" = "xtrue"; then
     AM_CXXFLAGS="$AM_CXXFLAGS -U__STRICT_ANSI__"
 fi
 
+if test "x$mod_sdormsql" = "xyes"; then
+	if test "x${with_top_inc_dir}" != "xno"; then
+		AM_CXXFLAGS="$AM_CXXFLAGS -I${with_top_inc_dir}/postgresql -I${with_top_inc_dir}/pgsql"
+	    CPPFLAGS="$CPPFLAGS -I${with_top_inc_dir}/postgresql -I${with_top_inc_dir}/pgsql"
+	else
+		AM_CXXFLAGS="$AM_CXXFLAGS -I/usr/include/postgresql -I/usr/include/pgsql -I/usr/local/include/postgresql -I/usr/local/include/pgsql"
+	    CPPFLAGS="$CPPFLAGS -I/usr/include/postgresql -I/usr/include/pgsql -I/usr/local/include/postgresql -I/usr/local/include/pgsql"
+	fi
+fi
+
 if test "x$mod_sdormmongo" = "xyes"; then
 	if test "x${with_top_inc_dir}" != "xno"; then
 		AM_CXXFLAGS="$AM_CXXFLAGS -I${with_top_inc_dir}/libmongoc-1.0/ -I${with_top_inc_dir}/libbson-1.0"
@@ -240,12 +250,7 @@ if test "x$mod_sdormsql" = "xyes"; then
 	fi
 	AC_CHECK_LIB(odbc, main, , [AC_MSG_ERROR([Not found libodbc library])])
 	AC_SEARCH_LIBS(SQLGetPrivateProfileString, odbcinst, [],[AC_MSG_ERROR([unixODBC library "odbcinst" not found])])
-	if test "x${PQINCPATH}" != "x"; then
-		AM_CXXFLAGS="$AM_CXXFLAGS ${PQINCPATH}"
-		CPPFLAGS="$CPPFLAGS ${PQINCPATH}"
-		AC_CHECK_LIB(pq, main, , [])
-	fi
-	#AC_DEFINE(HAVE_LIBODBC, [1], [libodbc presence])
+	AC_CHECK_LIB(pq, main, , [])
 fi
 
 if test "x$mod_sdormmongo" = "xyes"; then
