@@ -17,21 +17,23 @@
 
 LibpqDataSourceImpl::LibpqDataSourceImpl(const std::string& url) {
 	this->url = url;
+#ifdef HAVE_LIBPQ
 	conn = NULL;
+#endif
 	trx = false;
 }
 
 LibpqDataSourceImpl::~LibpqDataSourceImpl() {
-	if(conn!=NULL) {
 #ifdef HAVE_LIBPQ
+	if(conn!=NULL) {
 		PQfinish(conn);
-#endif
 	}
+#endif
 }
 
 bool LibpqDataSourceImpl::init() {
-	if(conn!=NULL) return true;
 #ifdef HAVE_LIBPQ
+	if(conn!=NULL) return true;
 	conn = PQconnectdb(url.c_str());
 	if (PQstatus(conn) == CONNECTION_BAD) {
 		fprintf(stderr, "Connection to database failed: %s\n", PQerrorMessage(conn));

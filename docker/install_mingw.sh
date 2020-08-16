@@ -80,7 +80,6 @@ cmake -G "MinGW Makefiles" -DSRV_EMB=on -DMOD_REDIS=ON -DMOD_SDORM_MONGO=ON -DCM
 mingw32-make install -j4
 mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
 cd /tmp/ffead-cpp-src
-WORKDIR /tmp/ffead-cpp-src
 chmod +x autogen.sh
 sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
 sed -i'' -e "s|AX_CXX_COMPILE_STDCXX|#AX_CXX_COMPILE_STDCXX|g" configure.ac
