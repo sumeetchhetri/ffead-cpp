@@ -9,10 +9,10 @@ SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 cd $IROOT/ffead-cpp-src/
 
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
-rm -rf web/te-benchmark-um
+#rm -rf web/te-benchmark-um
 #rm -rf web/te-benchmark-um-pq
 mv ${IROOT}/server.sh script/
-mv ${IROOT}/te-benchmark-um web/
+#mv ${IROOT}/te-benchmark-um web/
 #mv ${IROOT}/te-benchmark-um-pq web/
 sed -i 's|THRD_PSIZ=6|THRD_PSIZ='${SERV_THREADS}'|g' resources/server.prop
 sed -i 's|W_THRD_PSIZ=2|W_THRD_PSIZ='${WRIT_THREADS}'|g' resources/server.prop
@@ -38,7 +38,7 @@ sed -i 's|localhost|tfb-database|g' web/te-benchmark-um/config/sdorm.xml
 sed -i 's|localhost|tfb-database|g' web/te-benchmark-um/config/sdormmongo.xml
 sed -i 's|localhost|tfb-database|g' web/te-benchmark-um/config/sdormmysql.xml
 sed -i 's|localhost|tfb-database|g' web/te-benchmark-um/config/sdormpostgresql.xml
-sed -i 's|localhost|tfb-database|g' web/te-benchmark-um-pq/config/sdorm.prop
+sed -i 's|localhost|tfb-database|g' web/te-benchmark-um-pq/config/sdorm.xml
 sed -i 's|127.0.0.1|tfb-database|g' resources/sample-odbcinst.ini
 sed -i 's|127.0.0.1|tfb-database|g' resources/sample-odbc.ini
 sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists.txt

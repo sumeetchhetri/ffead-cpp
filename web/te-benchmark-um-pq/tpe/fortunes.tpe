@@ -1,4 +1,4 @@
-#declare std::vector<TeBkUmFortune> fortunes#
+#declare std::vector<TeBkUmLpqFortune> fortunes#
 <!DOCTYPE html>
 <html>
 <head><title>Fortunes</title></head>

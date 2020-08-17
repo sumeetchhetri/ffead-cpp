@@ -108,7 +108,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 	propMultiMap srprpsMulti = pread.getPropertiesMultiMap(respath+"/server.prop");
 	if(srprpsMulti.find("STATIC_PATH_RESP")!=srprpsMulti.end()) {
 		std::vector<std::string> paths = srprpsMulti["STATIC_PATH_RESP"];
-		for(int i=0;i<paths.size();i++) {
+		for(int i=0;i<(int)paths.size();i++) {
 			if(paths.at(i).find("|")!=std::string::npos) {
 				std::vector<std::string> lst = StringUtil::splitAndReturn<std::vector<std::string> >(StringUtil::trimCopy(paths.at(i)), "|");
 				if(lst.size()<3) continue;

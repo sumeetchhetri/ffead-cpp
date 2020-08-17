@@ -19,6 +19,7 @@
  *  Created on: 10-May-2014
  *      Author: sumeetc
  */
+//NOT THREAD SAFE
 #ifndef LibpqDataSourceIMPL_H_
 #define LibpqDataSourceIMPL_H_
 #include "Compatibility.h"
@@ -30,6 +31,16 @@
 #include "DataSourceInterface.h"
 #include "DialectHelper.h"
 
+struct LibpqParam {
+	const char* p;
+	uint16_t s;
+	uint32_t i;
+	long long li;
+	int l;
+	int t;
+	bool b;
+};
+
 struct LibpqRes {
 	const char* d;
 	int l;
@@ -38,6 +49,7 @@ struct LibpqRes {
 typedef void (*LipqResFunc) (void* ctx, int, std::vector<LibpqRes>&);
 
 class LibpqDataSourceImpl {
+	std::map<std::string, std::string> prepStmtMap;
 	Logger logger;
 	std::string url;
 	bool trx;
@@ -54,8 +66,14 @@ public:
 	bool commit();
 	bool rollback();
 
-	void executeQuery(const std::string &query, const std::vector<const char*>& pvals, void* ctx, LipqResFunc cb);
-	bool executeUpdateQuery(const std::string &query, const std::vector<const char*>& pvals);
+	static void ADD_INT2(std::vector<LibpqParam>& pvals, short i);
+	static void ADD_INT4(std::vector<LibpqParam>& pvals, int i);
+	static void ADD_INT8(std::vector<LibpqParam>& pvals, long long i);
+	static void ADD_STR(std::vector<LibpqParam>& pvals, const char* i);
+	static void ADD_BIN(std::vector<LibpqParam>& pvals, const char* i, int len);
+
+	void executeQuery(const std::string &query, const std::vector<LibpqParam>& pvals, void* ctx, LipqResFunc cb, bool isPrepared = true);
+	bool executeUpdateQuery(const std::string &query, const std::vector<LibpqParam>& pvals, bool isPrepared = true);
 };
 
 #endif /* LibpqDataSourceIMPL_H_ */

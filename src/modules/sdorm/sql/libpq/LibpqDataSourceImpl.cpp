@@ -90,16 +90,70 @@ bool LibpqDataSourceImpl::rollback() {
 	return true;
 }
 
-void LibpqDataSourceImpl::executeQuery(const std::string &query, const std::vector<const char*>& pvals, void* ctx, LipqResFunc cb) {
+void LibpqDataSourceImpl::ADD_INT2(std::vector<LibpqParam>& pvals, short i) {
+	pvals.push_back({.p = NULL, .s = htons(i), .i = 0, .li = 0, .l = 2, .t = 1, .b = 1});
+}
+
+void LibpqDataSourceImpl::ADD_INT4(std::vector<LibpqParam>& pvals, int i) {
+	pvals.push_back({.p = NULL, .s = 0, .i = htonl(i), .li = 0, .l = 4, .t = 2, .b = 1});
+}
+
+void LibpqDataSourceImpl::ADD_INT8(std::vector<LibpqParam>& pvals, long long i) {
+	pvals.push_back({.p = NULL, .s = 0, .i = 0, .li = i, .l = 8, .t = 3, .b = 1});
+}
+
+void LibpqDataSourceImpl::ADD_STR(std::vector<LibpqParam>& pvals, const char *i) {
+	pvals.push_back({.p = i, .s = 0, .i = 0, .li = 0, .l = strlen(i), .t = 4, .b = 0});
+}
+
+void LibpqDataSourceImpl::ADD_BIN(std::vector<LibpqParam>& pvals, const char *i, int len) {
+	pvals.push_back({.p = i, .s = 0, .i = 0, .li = 0, .l = len, .t = 5, .b = 1});
+}
+
+
+void LibpqDataSourceImpl::executeQuery(const std::string &query, const std::vector<LibpqParam>& pvals, void* ctx, LipqResFunc cb, bool isPrepared) {
 	int psize = (int)pvals.size();
 	const char *paramValues[psize];
+	int paramLengths[psize];
+	int paramBinary[psize];
 	for (int var = 0; var < psize; ++var) {
-		paramValues[var] = pvals.at(var);
+		if(pvals.at(var).t==1) {//short
+			paramValues[var] = (char *)&pvals.at(var).s;
+			paramLengths[var] = pvals.at(var).l;
+		} else if(pvals.at(var).t==2) {//int
+			paramValues[var] = (char *)&pvals.at(var).i;
+			paramLengths[var] = pvals.at(var).l;
+		} else if(pvals.at(var).t==3) {//long
+			paramValues[var] = (char *)&pvals.at(var).li;
+			paramLengths[var] = pvals.at(var).l;
+		} else {
+			paramValues[var] = pvals.at(var).p;
+			paramLengths[var] = pvals.at(var).l;
+		}
+		paramBinary[var] = pvals.at(var).b?1:0;
 	}
 #ifdef HAVE_LIBPQ
-	PGresult *res = PQexecParams(conn, query.c_str(), psize, NULL, paramValues, NULL, NULL, 0);
+	PGresult *res = NULL;
+	if(isPrepared) {
+		std::string stmtName;
+		if(prepStmtMap.find(query)==prepStmtMap.end()) {
+			stmtName = CastUtil::fromNumber(prepStmtMap.size()+1);
+			prepStmtMap[query] = stmtName;
+			res = PQprepare(conn, stmtName.c_str(), query.c_str(), psize, NULL);
+			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+				fprintf(stderr, "PREPARE failed: %s", PQerrorMessage(conn));
+				PQclear(res);
+				return;
+			}
+		} else {
+			stmtName = prepStmtMap[query];
+		}
+		res = PQexecPrepared(conn, stmtName.c_str(), psize, paramValues, paramLengths, paramBinary, 1);
+	} else {
+		res = PQexecParams(conn, query.c_str(), psize, NULL, paramValues, paramLengths, paramBinary, 1);
+	}
 	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-		//printf("No data retrieved\n");
+		fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
 		PQclear(res);
 		return;
 	}
@@ -118,16 +172,49 @@ void LibpqDataSourceImpl::executeQuery(const std::string &query, const std::vect
 #endif
 }
 
-bool LibpqDataSourceImpl::executeUpdateQuery(const std::string &query, const std::vector<const char*>& pvals) {
-#ifdef HAVE_LIBPQ
+bool LibpqDataSourceImpl::executeUpdateQuery(const std::string &query, const std::vector<LibpqParam>& pvals, bool isPrepared) {
 	int psize = (int)pvals.size();
 	const char *paramValues[psize];
+	int paramLengths[psize];
+	int paramBinary[psize];
 	for (int var = 0; var < psize; ++var) {
-		paramValues[var] = pvals.at(var);
+		if(pvals.at(var).t==1) {//short
+			paramValues[var] = (char *)&pvals.at(var).s;
+			paramLengths[var] = pvals.at(var).l;
+		} else if(pvals.at(var).t==2) {//int
+			paramValues[var] = (char *)&pvals.at(var).i;
+			paramLengths[var] = pvals.at(var).l;
+		} else if(pvals.at(var).t==3) {//long
+			paramValues[var] = (char *)&pvals.at(var).li;
+			paramLengths[var] = pvals.at(var).l;
+		} else {
+			paramValues[var] = pvals.at(var).p;
+			paramLengths[var] = pvals.at(var).l;
+		}
+		paramBinary[var] = pvals.at(var).b?1:0;
 	}
-	PGresult *res = PQexecParams(conn, query.c_str(), psize, NULL, paramValues, NULL, NULL, 0);
+#ifdef HAVE_LIBPQ
+	PGresult *res = NULL;
+	if(isPrepared) {
+		std::string stmtName;
+		if(prepStmtMap.find(query)==prepStmtMap.end()) {
+			stmtName = CastUtil::fromNumber(prepStmtMap.size()+1);
+			prepStmtMap[query] = stmtName;
+			res = PQprepare(conn, stmtName.c_str(), query.c_str(), psize, NULL);
+			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+				fprintf(stderr, "PREPARE failed: %s", PQerrorMessage(conn));
+				PQclear(res);
+				return false;
+			}
+		} else {
+			stmtName = prepStmtMap[query];
+		}
+		res = PQexecPrepared(conn, stmtName.c_str(), psize, paramValues, paramLengths, paramBinary, 1);
+	} else {
+		res = PQexecParams(conn, query.c_str(), psize, NULL, paramValues, paramLengths, paramBinary, 1);
+	}
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-		//printf("Update query failed\n");
+		fprintf(stderr, "UPDATE failed: %s", PQerrorMessage(conn));
 		PQclear(res);
 		return false;
 	}

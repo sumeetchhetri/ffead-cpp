@@ -741,16 +741,20 @@ int CHServer::entryPoint(int vhostNum, bool isMain, std::string serverRootDirect
     logger << INTER_LIB_FILE << std::endl;
 
     bool libpresent = true;
-    void *dlibtemp = dlopen(INTER_LIB_FILE, RTLD_NOW);
+    void *ilibtemp = dlopen(INTER_LIB_FILE, RTLD_NOW);
+    void *dlibtemp = dlopen(DINTER_LIB_FILE, RTLD_NOW);
 	//logger << endl <<dlibtemp << std::endl;
-	if(dlibtemp==NULL)
+	if(ilibtemp==NULL || dlibtemp==NULL)
 	{
 		libpresent = false;
 		logger << dlerror() << std::endl;
 		logger.info("Could not load Library");
 	}
 	else
+	{
+		dlclose(ilibtemp);
 		dlclose(dlibtemp);
+	}
 
 	if(isMain)
 	{

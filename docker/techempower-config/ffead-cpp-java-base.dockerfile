@@ -1,7 +1,7 @@
-FROM sumeetchhetri/ffead-cpp-4.0-base:1.0
+FROM sumeetchhetri/ffead-cpp-4.0-base:2.0
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="1.0"
-LABEL description="Base java docker image with master code found on 3rd July 2020 4:18PM IST"
+LABEL version="2.0"
+LABEL description="Base java docker image with master code"
 
 ENV IROOT=/installs
 

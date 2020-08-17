@@ -1,7 +1,7 @@
-FROM sumeetchhetri/ffead-cpp-4.0-base:1.0
+FROM sumeetchhetri/ffead-cpp-4.0-base:2.0
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="1.0"
-LABEL description="Base rust docker image with ffead-cpp v4.0 - commit id - 83dd80bcf3c12403e4ba9819496ffcf85acfc43b"
+LABEL description="Base rust docker image with ffead-cpp v4.0 - commit id - master"
 
 ENV IROOT=/installs
 
