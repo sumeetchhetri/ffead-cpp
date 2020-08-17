@@ -6,7 +6,7 @@ LABEL description="Base ffead-cpp docker image with commit id - master"
 ENV IROOT=/installs
 
 RUN mkdir /installs
-COPY te-benchmark-um/ /installs/te-benchmark-um/
+#COPY te-benchmark-um/ /installs/te-benchmark-um/
 
 WORKDIR ${IROOT}
 
