@@ -148,26 +148,31 @@ void TeBkUmLpqRouter::updates(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 		std::stringstream ss;
 		ss << "update world as t set randomnumber = c.randomnumber from (values";
 
-		sqli->begin();
 		int pc = 1;
 		for (int c = 0; c < queryCount; ++c) {
 			ss << "($";
 			ss << pc++;
-			ss << ",$";
+			ss << "::int4,$";
 			ss << pc++;
 			if(c!=queryCount-1) {
-				ss << "),";
+				ss << "::int4),";
 			} else {
-				ss << ")";
+				ss << "::int4)";
 			}
 
 			int rid = rand() % 10000 + 1;
 			qp.clear();
-			LibpqDataSourceImpl::ADD_INT4(pars, rid);
-			sqli->executeQuery(WORLD_ONE_QUERY, qp, &pars, &TeBkUmLpqRouter::updatesUtil);
+			LibpqDataSourceImpl::ADD_INT4(qp, rid);
+			TeBkUmLpqWorld w;
+			sqli->executeQuery(WORLD_ONE_QUERY, qp, &w, &TeBkUmLpqRouter::dbUtil);
+			wlst.push_back(w);
+
+			LibpqDataSourceImpl::ADD_INT4(pars, w.getId());
+			LibpqDataSourceImpl::ADD_INT4(pars, w.getRandomNumber());
 		}
 		ss << ") as c(randomnumber, id) where c.id = t.id";
 		
+		sqli->begin();
 		sqli->executeUpdateQuery(ss.str(), pars);
 		sqli->commit();
 		DataSourceManager::cleanRawImpl(sqli);
@@ -187,7 +192,8 @@ void TeBkUmLpqRouter::updatesUtil(void* ctx, int rn, std::vector<LibpqRes>& data
 		}
 	}
 	LibpqDataSourceImpl::ADD_INT4(*pars, newRandomNumber);
-	LibpqDataSourceImpl::ADD_BIN(*pars, (char *)data.at(1).d, 4);
+	uint32_t id = *(uint32_t *)data.at(0).d;
+	LibpqDataSourceImpl::ADD_INT4(*pars, id, false);
 }
 
 void TeBkUmLpqRouter::updateCache() {

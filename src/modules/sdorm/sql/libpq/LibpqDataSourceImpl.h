@@ -66,8 +66,8 @@ public:
 	bool commit();
 	bool rollback();
 
-	static void ADD_INT2(std::vector<LibpqParam>& pvals, short i);
-	static void ADD_INT4(std::vector<LibpqParam>& pvals, int i);
+	static void ADD_INT2(std::vector<LibpqParam>& pvals, unsigned short i, bool isH = true);
+	static void ADD_INT4(std::vector<LibpqParam>& pvals, unsigned int i, bool isH = true);
 	static void ADD_INT8(std::vector<LibpqParam>& pvals, long long i);
 	static void ADD_STR(std::vector<LibpqParam>& pvals, const char* i);
 	static void ADD_BIN(std::vector<LibpqParam>& pvals, const char* i, int len);

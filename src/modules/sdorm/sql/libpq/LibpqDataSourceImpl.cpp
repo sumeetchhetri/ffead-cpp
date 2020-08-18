@@ -90,12 +90,12 @@ bool LibpqDataSourceImpl::rollback() {
 	return true;
 }
 
-void LibpqDataSourceImpl::ADD_INT2(std::vector<LibpqParam>& pvals, short i) {
-	pvals.push_back({.p = NULL, .s = htons(i), .i = 0, .li = 0, .l = 2, .t = 1, .b = 1});
+void LibpqDataSourceImpl::ADD_INT2(std::vector<LibpqParam>& pvals, unsigned short i, bool isH) {
+	pvals.push_back({.p = NULL, .s = (isH?htons(i):i), .i = 0, .li = 0, .l = 2, .t = 1, .b = 1});
 }
 
-void LibpqDataSourceImpl::ADD_INT4(std::vector<LibpqParam>& pvals, int i) {
-	pvals.push_back({.p = NULL, .s = 0, .i = htonl(i), .li = 0, .l = 4, .t = 2, .b = 1});
+void LibpqDataSourceImpl::ADD_INT4(std::vector<LibpqParam>& pvals, unsigned int i, bool isH) {
+	pvals.push_back({.p = NULL, .s = 0, .i = (isH?htonl(i):i), .li = 0, .l = 4, .t = 2, .b = 1});
 }
 
 void LibpqDataSourceImpl::ADD_INT8(std::vector<LibpqParam>& pvals, long long i) {
