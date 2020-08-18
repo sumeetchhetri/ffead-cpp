@@ -207,7 +207,9 @@ void TeBkUmLpqRouter::updateCache() {
 
 		for (int c = 0; c < (int)wlist.size(); ++c) {
 			TeBkUmLpqWorld& w = wlist.at(c);
-			cchi->setO(CastUtil::fromNumber(w.getId()), w);
+			char str[12];
+			sprintf(str, "%d;%d", w.getId(), w.getRandomNumber());
+			cchi->setRaw(CastUtil::fromNumber(w.getId()), str);
 		}
 		DataSourceManager::cleanRawImpl(sqli);
 		CacheManager::cleanImpl(cchi);
@@ -240,7 +242,22 @@ void TeBkUmLpqRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkUmLpqW
 			keys.push_back(CastUtil::fromNumber(rid));
 		}
 
-		wlst = cchi->mgetO<TeBkUmLpqWorld>(keys);
+		std::vector<std::string> values;
+		cchi->mgetRaw(keys, values);
+
+		for (int c = 0; c < (int)values.size(); ++c) {
+			TeBkUmLpqWorld w;
+			std::string& v = values.at(c);
+			size_t fn = v.find(";");
+			int tmp = 0;
+			strToNum(v.substr(0, fn).c_str(), fn, tmp);
+			w.setId(tmp);
+			tmp = 0;
+			strToNum(v.substr(fn+1).c_str(), v.length()-fn-1, tmp);
+			w.setRandomNumber(tmp);
+			wlst.push_back(w);
+		}
+
 		CacheManager::cleanImpl(cchi);
 	} catch(const std::exception& e) {
 		CacheManager::cleanImpl(cchi);

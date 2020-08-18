@@ -91,6 +91,10 @@ public:
 	virtual bool set(const std::string& key, GenericObject& value, int expireSeconds)=0;
 	virtual bool add(const std::string& key, GenericObject& value, int expireSeconds)=0;
 	virtual bool replace(const std::string& key, GenericObject& value, int expireSeconds)=0;
+	virtual bool setRaw(const std::string& key, const char* value, int expireSeconds = -1)=0;
+	virtual bool addRaw(const std::string& key, const char* value, int expireSeconds = -1)=0;
+	virtual bool replaceRaw(const std::string& key, const char* value, int expireSeconds = -1)=0;
+	virtual void mgetRaw(const std::vector<std::string>& keys, std::vector<std::string>& values)=0;
 	virtual bool remove(const std::string& key)=0;
 	virtual long long increment(const std::string& key, const int& number = 1)=0;
 	virtual long long decrement(const std::string& key, const int& number = 1)=0;

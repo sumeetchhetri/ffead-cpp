@@ -107,7 +107,7 @@ void LibpqDataSourceImpl::ADD_STR(std::vector<LibpqParam>& pvals, const char *i)
 }
 
 void LibpqDataSourceImpl::ADD_BIN(std::vector<LibpqParam>& pvals, const char *i, int len) {
-	pvals.push_back({.p = i, .s = 0, .i = 0, .li = 0, .l = len, .t = 5, .b = 1});
+	pvals.push_back({.p = i, .s = 0, .i = 0, .li = 0, .l = (size_t)len, .t = 5, .b = 1});
 }
 
 

@@ -36,7 +36,7 @@ struct LibpqParam {
 	uint16_t s;
 	uint32_t i;
 	long long li;
-	int l;
+	size_t l;
 	int t;
 	bool b;
 };

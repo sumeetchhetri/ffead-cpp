@@ -118,6 +118,21 @@ bool RedisCacheImpl::replace(const std::string& key, GenericObject& value, int e
 	return replyStatus(reply);
 }
 
+bool RedisCacheImpl::setRaw(const std::string& key, const char* value, int expireSeconds) {
+	redisReply* reply = execute("SET %s %s EX %d", key.c_str(), value, expireSeconds);
+	return replyStatus(reply);
+}
+
+bool RedisCacheImpl::addRaw(const std::string& key, const char* value, int expireSeconds) {
+	redisReply* reply = execute("SET %s %s EX %d NX", key.c_str(), value, expireSeconds);
+	return replyStatus(reply);
+}
+
+bool RedisCacheImpl::replaceRaw(const std::string& key, const char* value, int expireSeconds) {
+	redisReply* reply = execute("SET %s %s EX %d XX", key.c_str(), value, expireSeconds);
+	return replyStatus(reply);
+}
+
 std::string RedisCacheImpl::getValue(const std::string& key) {
 	redisReply* reply = execute("GET %s", key.c_str());
 	return replyValue(reply);
@@ -125,25 +140,25 @@ std::string RedisCacheImpl::getValue(const std::string& key) {
 
 std::vector<std::string> RedisCacheImpl::getValues(const std::vector<std::string>& keys) {
 	std::vector<std::string> rv;
+	mgetRaw(keys, rv);
+	return rv;
+}
+
+void RedisCacheImpl::mgetRaw(const std::vector<std::string>& keys, std::vector<std::string>& values) {
 	std::string cmd = "MGET ";
 	for(int i=0;i<(int)keys.size();++i) {
-		cmd += keys.at(i) + " ";
+		cmd += keys.at(i) + (i==keys.size()-1?"":" ");
 	}
 	Connection* connection = pool->checkout();
 	redisContext* c = (redisContext*) connection->getConn();
 	redisReply* reply = (redisReply*) redisCommand(c, cmd.c_str());
 	if (reply->type == REDIS_REPLY_ARRAY) {
 		for (int i=0; i<(int)reply->elements; ++i) {
-			std::string rval;
-			for (int var = 0; var < (int)reply->element[i]->len; ++var) {
-				rval.push_back(reply->element[i]->str[var]);
-			}
-			rv.push_back(rval);
+			values.push_back(std::string(reply->element[i]->str, reply->element[i]->len));
 		}
 	}
 	freeReplyObject(reply);
 	pool->release(connection);
-	return rv;
 }
 
 bool RedisCacheImpl::replyStatus(redisReply* reply) {

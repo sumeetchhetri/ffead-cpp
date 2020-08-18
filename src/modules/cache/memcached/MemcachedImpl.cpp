@@ -97,23 +97,23 @@ bool MemcachedImpl::flushAll() {
 	return replyStatus(reply);
 }
 
-memcached_return_t MemcachedImpl::setInternal(const std::string& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep) {
+memcached_return_t MemcachedImpl::setInternal(const std::string& key, const char* value, size_t valLen, const int& expireSeconds, const int& setOrAddOrRep) {
 	Connection* connection = pool->checkout();
 	memcached_return_t reply;
 	if(setOrAddOrRep==1)
 	{
 		reply = memcached_set((memcached_st*)connection->getConn(),
-				key.c_str(), key.length(), value.c_str(), value.length(), (time_t)expireSeconds, (uint32_t)0);
+				key.c_str(), key.length(), value, valLen, (time_t)expireSeconds, (uint32_t)0);
 	}
 	else if(setOrAddOrRep==2)
 	{
 		reply = memcached_add((memcached_st*)connection->getConn(),
-				key.c_str(), key.length(), value.c_str(), value.length(), (time_t)expireSeconds, (uint32_t)0);
+				key.c_str(), key.length(), value, valLen, (time_t)expireSeconds, (uint32_t)0);
 	}
 	else if(setOrAddOrRep==3)
 	{
 		reply = memcached_replace((memcached_st*)connection->getConn(),
-				key.c_str(), key.length(), value.c_str(), value.length(), (time_t)expireSeconds, (uint32_t)0);
+				key.c_str(), key.length(), value, valLen, (time_t)expireSeconds, (uint32_t)0);
 	}
 	pool->release(connection);
 	return reply;
@@ -121,19 +121,34 @@ memcached_return_t MemcachedImpl::setInternal(const std::string& key, const std:
 
 bool MemcachedImpl::set(const std::string& key, GenericObject& value, int expireSeconds) {
 	std::string valueStr = value.getSerilaizedState();
-	memcached_return_t reply = setInternal(key, valueStr, expireSeconds, 1);
+	memcached_return_t reply = setInternal(key, valueStr.c_str(), valueStr.length(), expireSeconds, 1);
 	return replyStatus(reply);
 }
 
 bool MemcachedImpl::add(const std::string& key, GenericObject& value, int expireSeconds) {
 	std::string valueStr = value.getSerilaizedState();
-	memcached_return_t reply = setInternal(key, valueStr, expireSeconds, 2);
+	memcached_return_t reply = setInternal(key, valueStr.c_str(), valueStr.length(), expireSeconds, 2);
 	return replyStatus(reply);
 }
 
 bool MemcachedImpl::replace(const std::string& key, GenericObject& value, int expireSeconds) {
 	std::string valueStr = value.getSerilaizedState();
-	memcached_return_t reply = setInternal(key, valueStr, expireSeconds, 3);
+	memcached_return_t reply = setInternal(key, valueStr.c_str(), valueStr.length(), expireSeconds, 3);
+	return replyStatus(reply);
+}
+
+bool MemcachedImpl::setRaw(const std::string& key, const char* value, int expireSeconds) {
+	memcached_return_t reply = setInternal(key, value, strlen(value), expireSeconds, 1);
+	return replyStatus(reply);
+}
+
+bool MemcachedImpl::addRaw(const std::string& key, const char* value, int expireSeconds) {
+	memcached_return_t reply = setInternal(key, value, strlen(value), expireSeconds, 2);
+	return replyStatus(reply);
+}
+
+bool MemcachedImpl::replaceRaw(const std::string& key, const char* value, int expireSeconds) {
+	memcached_return_t reply = setInternal(key, value, strlen(value), expireSeconds, 3);
 	return replyStatus(reply);
 }
 
@@ -155,8 +170,13 @@ std::string MemcachedImpl::getValue(const std::string& key) {
 	return rval;
 }
 
-std::vector<std::string> MemcachedImpl::getValues(const std::vector<std::string>& skeys) {
+std::vector<std::string> MemcachedImpl::getValues(const std::vector<std::string>& keys) {
 	std::vector<std::string> rv;
+	mgetRaw(keys, rv);
+	return rv;
+}
+
+void MemcachedImpl::mgetRaw(const std::vector<std::string>& skeys, std::vector<std::string>& values) {
 	Connection* connection = pool->checkout();
 	uint32_t fl = (uint32_t)0;
 	int num = (int)skeys.size();
@@ -175,15 +195,10 @@ std::vector<std::string> MemcachedImpl::getValues(const std::vector<std::string>
 	reply = memcached_mget((memcached_st*)connection->getConn(), keys, key_length, num);
 	while ((value = memcached_fetch((memcached_st*)connection->getConn(), return_key, &return_key_length, &return_value_length, &fl, &reply)))
 	{
-		std::string rval;
-		for (int var = 0; var < (int)return_value_length; ++var) {
-			rval.push_back(value[var]);
-		}
-		rv.push_back(rval);
+		values.push_back(std::string(value, return_value_length));
 		free(value);
 	}
 	pool->release(connection);
-	return rv;
 }
 
 bool MemcachedImpl::replyStatus(const memcached_return_t& reply) {

@@ -31,416 +31,362 @@ CacheInterface::~CacheInterface() {
 }
 
 bool CacheInterface::set(const std::string& key, const char* value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	return setRaw(key, value, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const char* value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	return addRaw(key, value, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const char* value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	return replaceRaw(key, value, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const std::string& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	return setRaw(key, value.c_str(), expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const std::string& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	return addRaw(key, value.c_str(), expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const std::string& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	return replaceRaw(key, value.c_str(), expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const short& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%d", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const short& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	if(expireSeconds==-1) {
+		expireSeconds = this->defaultExpireSeconds;
+	}
+	char v[6];
+	sprintf(v, "%d", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const short& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%d", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const unsigned short& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	if(expireSeconds==-1) {
+		expireSeconds = this->defaultExpireSeconds;
+	}
+	char v[6];
+	sprintf(v, "%d", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const unsigned short& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%d", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const unsigned short& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%d", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const int& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%d", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const int& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%d", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const int& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%d", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const unsigned int& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%u", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const unsigned int& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%u", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const unsigned int& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%u", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%ld", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%ld", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%ld", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const unsigned long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%lu", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const unsigned long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%lu", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const unsigned long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%lu", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const long long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%lld", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const long long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%lld", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const long long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%lld", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const unsigned long long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%llu", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const unsigned long long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%llu", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const unsigned long long& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%llu", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const float& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%f", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const float& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%f", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const float& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%f", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const double& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%f", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const double& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%f", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const double& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%f", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const long double& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%Lf", value);
+	return setRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const long double& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%Lf", value);
+	return addRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const long double& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	char v[6];
+	sprintf(v, "%Lf", value);
+	return replaceRaw(key, v, expireSeconds);
 }
 
 bool CacheInterface::set(const std::string& key, const bool& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = set(key, ob, expireSeconds);
-	return status;
+	return setRaw(key, value?"1":"0", expireSeconds);
 }
 
 bool CacheInterface::add(const std::string& key, const bool& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = add(key, ob, expireSeconds);
-	return status;
+	return addRaw(key, value?"1":"0", expireSeconds);
 }
 
 bool CacheInterface::replace(const std::string& key, const bool& value, int expireSeconds) {
-	GenericObject ob;
-	ob.set(value);
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	bool status = replace(key, ob, expireSeconds);
-	return status;
+	return replaceRaw(key, value?"1":"0", expireSeconds);
 }
 

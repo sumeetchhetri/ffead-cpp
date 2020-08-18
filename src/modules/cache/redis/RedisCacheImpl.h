@@ -50,6 +50,11 @@ public:
 	bool add(const std::string& key, GenericObject& value, int expireSeconds);
 	bool replace(const std::string& key, GenericObject& value, int expireSeconds);
 
+	bool setRaw(const std::string& key, const char* value, int expireSeconds = -1);
+	bool addRaw(const std::string& key, const char* value, int expireSeconds = -1);
+	bool replaceRaw(const std::string& key, const char* value, int expireSeconds = -1);
+	void mgetRaw(const std::vector<std::string>& keys, std::vector<std::string>& values);
+
 	std::string getValue(const std::string& key);
 	std::vector<std::string> getValues(const std::vector<std::string>& keys);
 

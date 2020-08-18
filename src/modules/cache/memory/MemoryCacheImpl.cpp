@@ -128,12 +128,16 @@ std::string MemoryCacheImpl::getValue(const std::string& key) {
 
 std::vector<std::string> MemoryCacheImpl::getValues(const std::vector<std::string>& keys) {
 	std::vector<std::string> rv;
+	mgetRaw(keys, rv);
+	return rv;
+}
+
+void MemoryCacheImpl::mgetRaw(const std::vector<std::string>& keys, std::vector<std::string>& values) {
 	for(int i=0;i<(int)keys.size();++i) {
 		((MemoryCacheConnectionPool*)pool)->lock.lock();
-		rv.push_back(((MemoryCacheConnectionPool*)pool)->internalMap[keys.at(i)]);
+		values.push_back(((MemoryCacheConnectionPool*)pool)->internalMap[keys.at(i)]);
 		((MemoryCacheConnectionPool*)pool)->lock.unlock();
 	}
-	return rv;
 }
 
 void* MemoryCacheImpl::executeCommand(const std::string& command, ...) {
@@ -155,6 +159,21 @@ bool MemoryCacheImpl::add(const std::string& key, GenericObject& value, int expi
 bool MemoryCacheImpl::replace(const std::string& key, GenericObject& value, int expireSeconds) {
 	std::string valueStr = value.getSerilaizedState();
 	bool status = setInternal(key, valueStr, expireSeconds, 3);
+	return status;
+}
+
+bool MemoryCacheImpl::setRaw(const std::string& key, const char* value, int expireSeconds) {
+	bool status = setInternal(key, std::string(value), expireSeconds, 1);
+	return status;
+}
+
+bool MemoryCacheImpl::addRaw(const std::string& key, const char* value, int expireSeconds) {
+	bool status = setInternal(key, std::string(value), expireSeconds, 2);
+	return status;
+}
+
+bool MemoryCacheImpl::replaceRaw(const std::string& key, const char* value, int expireSeconds) {
+	bool status = setInternal(key, std::string(value), expireSeconds, 3);
 	return status;
 }
 
