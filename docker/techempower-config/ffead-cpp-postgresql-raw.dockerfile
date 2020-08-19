@@ -4,4 +4,4 @@ ENV IROOT=/installs
 
 WORKDIR /
 
-CMD ./run_ffead.sh ffead-cpp-4.0-sql emb postgresql-raw
+CMD ./run_ffead.sh ffead-cpp-4.0-sql emb postgresql-raw redis

@@ -17,9 +17,11 @@ RUN apt update -yqq && apt install -y git make && rm -rf /var/lib/apt/lists/*
 RUN git clone https://github.com/vlang/v && cd v && make && ./v symlink
 
 WORKDIR ${IROOT}/lang-server-backends/v/vweb
+#COPY vweb.v ${IROOT}/lang-server-backends/v/vweb/
 RUN chmod +x *.sh && ./build.sh && cp vweb $IROOT/
 
 WORKDIR ${IROOT}/lang-server-backends/v/pico.v
+#COPY main.v ${IROOT}/lang-server-backends/v/pico.v/
 RUN chmod +x *.sh && ./build.sh && cp main $IROOT/ && rm -rf ${IROOT}/lang-server-backends
 
 FROM buildpack-deps:bionic

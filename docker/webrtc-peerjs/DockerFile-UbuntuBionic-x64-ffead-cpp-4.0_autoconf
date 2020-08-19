@@ -34,12 +34,14 @@ RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/oauthApp/liboauthApp${CMAK
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/markers/libmarkers${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark/libte_benchmark${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um/libte_benchmark_um${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq/libte_benchmark_um_pq${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|web/default/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/markers/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/te-benchmark/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/te-benchmark-um/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/te-benchmark-um-pq/src/autotools/Makefile||g' configure.ac
 
 RUN chmod +x autogen.sh
 RUN ./autogen.sh

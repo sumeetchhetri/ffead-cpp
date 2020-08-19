@@ -378,6 +378,7 @@
 			"query_url": "/te-benchmark-um/queries?queries=",
 			"fortune_url": "/te-benchmark-um/fortunes",
 			"update_url": "/te-benchmark-um/updates?queries=",
+			"cached_query_url": "/te-benchmark-um/cached-worlds?count=",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
