@@ -1,7 +1,7 @@
 FROM sumeetchhetri/ffead-cpp-4.0-base:2.0
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="1.0"
-LABEL description="Base v docker image with ffead-cpp v4.0 - commit id - master"
+LABEL version="2.0"
+LABEL description="Base v docker image with ffead-cpp v4.0 commit id - master"
 
 ENV IROOT=/installs
 
@@ -24,7 +24,7 @@ RUN chmod +x *.sh && ./build.sh && cp main $IROOT/ && rm -rf ${IROOT}/lang-serve
 
 FROM buildpack-deps:bionic
 RUN apt update -yqq && apt install --no-install-recommends -yqq uuid-dev odbc-postgresql unixodbc unixodbc-dev memcached \
-	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server && rm -rf /var/lib/apt/lists/*
+	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server libpq-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=0 /installs/ffead-cpp-4.0 /installs/ffead-cpp-4.0
 COPY --from=0 /installs/ffead-cpp-4.0-sql /installs/ffead-cpp-4.0-sql
 COPY --from=0 /installs/main /installs/

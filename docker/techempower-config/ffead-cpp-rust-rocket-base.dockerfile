@@ -1,4 +1,7 @@
 FROM sumeetchhetri/ffead-cpp-4.0-base:2.0
+LABEL maintainer="Sumeet Chhetri"
+LABEL version="2.0"
+LABEL description="Base rust rocket docker image with ffead-cpp v4.0 - commit id - master"
 
 ENV IROOT=/installs
 
@@ -14,11 +17,10 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 WORKDIR ${IROOT}/lang-server-backends/rust/rocket-ffead-cpp/
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN rustup default nightly && cargo update && cargo build --release && cp target/release/rocket-ffead-cpp $IROOT/ && rm -rf ${IROOT}/lang-server-backends
-RUN rm -rf /root/.rustup /root/.cargo
 
 FROM buildpack-deps:bionic
 RUN apt update -yqq && apt install --no-install-recommends -yqq uuid-dev odbc-postgresql unixodbc unixodbc-dev memcached \
-	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server && rm -rf /var/lib/apt/lists/*
+	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server libpq-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=0 /installs/ffead-cpp-4.0 /installs/ffead-cpp-4.0
 COPY --from=0 /installs/ffead-cpp-4.0-sql /installs/ffead-cpp-4.0-sql
 COPY --from=0 /installs/rocket-ffead-cpp /installs/

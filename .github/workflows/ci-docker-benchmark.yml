@@ -1,4 +1,4 @@
-name: Build and test ffead-cpp base docker image
+name: Build and benchmark ffead-cpp base docker image
 
 on:
   push:
@@ -18,4 +18,4 @@ jobs:
         cp -f docker/DockerFile-tfb-test FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp.dockerfile
         cp -f docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp/
         cd FrameworkBenchmarks
-        ./tfb --mode verify --test ffead-cpp
+        ./tfb --mode benchmark --test ffead-cpp-postgresql ffead-cpp-postgresql-raw

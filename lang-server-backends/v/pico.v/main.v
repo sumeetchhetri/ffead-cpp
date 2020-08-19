@@ -59,7 +59,7 @@ fn C.ffead_cpp_resp_cleanup(voidptr)
 
 
 fn cpy_str_1(dst byteptr, src string) int {
-	C.memcpy(dst, src.str, src.len)
+	unsafe {C.memcpy(dst, src.str, src.len)}
 	return src.len
 }
 

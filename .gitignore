@@ -66,3 +66,4 @@ lang-server-backends/java/wizzardo-http/target
 /Debug/
 ffead-cpp-4.0-bin/
 build/
+nginx-*/

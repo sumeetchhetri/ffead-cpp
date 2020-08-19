@@ -21,7 +21,7 @@ RUN rm -rf ${IROOT}/lang-server-backends
 
 FROM buildpack-deps:bionic
 RUN apt update -yqq && apt install --no-install-recommends -yqq uuid-dev odbc-postgresql unixodbc unixodbc-dev memcached \
-	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server default-jre && rm -rf /var/lib/apt/lists/*
+	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server default-jre libpq-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=0 /installs/ffead-cpp-4.0 /installs/ffead-cpp-4.0
 COPY --from=0 /installs/ffead-cpp-4.0-sql /installs/ffead-cpp-4.0-sql
 COPY --from=0 /installs/firenio-ffead-cpp-0.1-jar-with-dependencies.jar /installs/

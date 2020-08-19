@@ -176,14 +176,16 @@ fn handle_conn(conn net.Socket, dt DateStore) {
 	vweb.rq_headers += "\r\n"
 
 	if body_len > 0 {
-		buf := [1024]byte
+		buf := unsafe {malloc(1024)}
 		mut len := body_len
 		if len > 1024 {
 			len = 1024
 		}
 		for {
 			m := conn.crecv(buf, len)
-			vweb.rq_body += string(byteptr(buf), m)
+			unsafe {
+				vweb.rq_body += buf.vstring_with_len(m)
+			}
 			body_len -= m
 			len = body_len
 			if len > 1024 {
