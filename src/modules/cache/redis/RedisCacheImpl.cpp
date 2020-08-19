@@ -33,7 +33,7 @@ RedisCacheImpl::RedisCacheImpl(ConnectionPooler* pool) {
 		}
 	}
 	if(this->defaultExpireSeconds<=0) {
-		this->defaultExpireSeconds = 120;
+		this->defaultExpireSeconds = 3600;
 	}
 }
 
@@ -102,34 +102,34 @@ bool RedisCacheImpl::flushAll() {
 
 bool RedisCacheImpl::set(const std::string& key, GenericObject& value, int expireSeconds) {
 	std::string valueStr = value.getSerilaizedState();
-	redisReply* reply = execute("SET %s %s EX %d", key.c_str(), valueStr.c_str(), expireSeconds);
+	redisReply* reply = execute("SET %s %s EX %d", key.c_str(), valueStr.c_str(), expireSeconds<=0?defaultExpireSeconds:expireSeconds);
 	return replyStatus(reply);
 }
 
 bool RedisCacheImpl::add(const std::string& key, GenericObject& value, int expireSeconds) {
 	std::string valueStr = value.getSerilaizedState();
-	redisReply* reply = execute("SET %s %s EX %d NX", key.c_str(), valueStr.c_str(), expireSeconds);
+	redisReply* reply = execute("SET %s %s EX %d NX", key.c_str(), valueStr.c_str(), expireSeconds<=0?defaultExpireSeconds:expireSeconds);
 	return replyStatus(reply);
 }
 
 bool RedisCacheImpl::replace(const std::string& key, GenericObject& value, int expireSeconds) {
 	std::string valueStr = value.getSerilaizedState();
-	redisReply* reply = execute("SET %s %s EX %d XX", key.c_str(), valueStr.c_str(), expireSeconds);
+	redisReply* reply = execute("SET %s %s EX %d XX", key.c_str(), valueStr.c_str(), expireSeconds<=0?defaultExpireSeconds:expireSeconds);
 	return replyStatus(reply);
 }
 
 bool RedisCacheImpl::setRaw(const std::string& key, const char* value, int expireSeconds) {
-	redisReply* reply = execute("SET %s %s EX %d", key.c_str(), value, expireSeconds);
+	redisReply* reply = execute("SET %s %s EX %d", key.c_str(), value, expireSeconds<=0?defaultExpireSeconds:expireSeconds);
 	return replyStatus(reply);
 }
 
 bool RedisCacheImpl::addRaw(const std::string& key, const char* value, int expireSeconds) {
-	redisReply* reply = execute("SET %s %s EX %d NX", key.c_str(), value, expireSeconds);
+	redisReply* reply = execute("SET %s %s EX %d NX", key.c_str(), value, expireSeconds<=0?defaultExpireSeconds:expireSeconds);
 	return replyStatus(reply);
 }
 
 bool RedisCacheImpl::replaceRaw(const std::string& key, const char* value, int expireSeconds) {
-	redisReply* reply = execute("SET %s %s EX %d XX", key.c_str(), value, expireSeconds);
+	redisReply* reply = execute("SET %s %s EX %d XX", key.c_str(), value, expireSeconds<=0?defaultExpireSeconds:expireSeconds);
 	return replyStatus(reply);
 }
 
@@ -147,7 +147,7 @@ std::vector<std::string> RedisCacheImpl::getValues(const std::vector<std::string
 void RedisCacheImpl::mgetRaw(const std::vector<std::string>& keys, std::vector<std::string>& values) {
 	std::string cmd = "MGET ";
 	for(int i=0;i<(int)keys.size();++i) {
-		cmd += keys.at(i) + (i==keys.size()-1?"":" ");
+		cmd += keys.at(i) + (i==(int)keys.size()-1?"":" ");
 	}
 	Connection* connection = pool->checkout();
 	redisContext* c = (redisContext*) connection->getConn();

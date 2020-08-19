@@ -188,6 +188,7 @@ build_uuid() {
 }
 
 build_libmemcached() {
+	#https://gitea.de/marco/aports/commit/6d7e800e8f8d0b033d99c5cc1f00dbc7fa1592ee
 	echo "=== Building libmemcached (${TARGET})..."
     curl -sLo- https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz | tar xz -C ${BUILD_DIR}
     pushd ${BUILD_DIR}/libmemcached-1.0.18

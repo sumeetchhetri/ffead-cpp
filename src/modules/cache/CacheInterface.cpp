@@ -76,7 +76,7 @@ bool CacheInterface::set(const std::string& key, const short& value, int expireS
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[7];
 	sprintf(v, "%d", value);
 	return setRaw(key, v, expireSeconds);
 }
@@ -85,7 +85,7 @@ bool CacheInterface::add(const std::string& key, const short& value, int expireS
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[7];
 	sprintf(v, "%d", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -94,7 +94,7 @@ bool CacheInterface::replace(const std::string& key, const short& value, int exp
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[7];
 	sprintf(v, "%d", value);
 	return replaceRaw(key, v, expireSeconds);
 }
@@ -103,7 +103,7 @@ bool CacheInterface::set(const std::string& key, const unsigned short& value, in
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[7];
 	sprintf(v, "%d", value);
 	return setRaw(key, v, expireSeconds);
 }
@@ -112,7 +112,7 @@ bool CacheInterface::add(const std::string& key, const unsigned short& value, in
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[7];
 	sprintf(v, "%d", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -121,7 +121,7 @@ bool CacheInterface::replace(const std::string& key, const unsigned short& value
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[7];
 	sprintf(v, "%d", value);
 	return replaceRaw(key, v, expireSeconds);
 }
@@ -130,7 +130,7 @@ bool CacheInterface::set(const std::string& key, const int& value, int expireSec
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%d", value);
 	return setRaw(key, v, expireSeconds);
 }
@@ -139,7 +139,7 @@ bool CacheInterface::add(const std::string& key, const int& value, int expireSec
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%d", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -148,7 +148,7 @@ bool CacheInterface::replace(const std::string& key, const int& value, int expir
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%d", value);
 	return replaceRaw(key, v, expireSeconds);
 }
@@ -166,7 +166,7 @@ bool CacheInterface::add(const std::string& key, const unsigned int& value, int 
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%u", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -175,7 +175,7 @@ bool CacheInterface::replace(const std::string& key, const unsigned int& value, 
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%u", value);
 	return replaceRaw(key, v, expireSeconds);
 }
@@ -184,7 +184,7 @@ bool CacheInterface::set(const std::string& key, const long& value, int expireSe
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%ld", value);
 	return setRaw(key, v, expireSeconds);
 }
@@ -193,7 +193,7 @@ bool CacheInterface::add(const std::string& key, const long& value, int expireSe
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%ld", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -202,7 +202,7 @@ bool CacheInterface::replace(const std::string& key, const long& value, int expi
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%ld", value);
 	return replaceRaw(key, v, expireSeconds);
 }
@@ -211,7 +211,7 @@ bool CacheInterface::set(const std::string& key, const unsigned long& value, int
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%lu", value);
 	return setRaw(key, v, expireSeconds);
 }
@@ -220,7 +220,7 @@ bool CacheInterface::add(const std::string& key, const unsigned long& value, int
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%lu", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -229,7 +229,7 @@ bool CacheInterface::replace(const std::string& key, const unsigned long& value,
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[11];
 	sprintf(v, "%lu", value);
 	return replaceRaw(key, v, expireSeconds);
 }
@@ -238,7 +238,7 @@ bool CacheInterface::set(const std::string& key, const long long& value, int exp
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[21];
 	sprintf(v, "%lld", value);
 	return setRaw(key, v, expireSeconds);
 }
@@ -247,7 +247,7 @@ bool CacheInterface::add(const std::string& key, const long long& value, int exp
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[21];
 	sprintf(v, "%lld", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -256,7 +256,7 @@ bool CacheInterface::replace(const std::string& key, const long long& value, int
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[21];
 	sprintf(v, "%lld", value);
 	return replaceRaw(key, v, expireSeconds);
 }
@@ -274,7 +274,7 @@ bool CacheInterface::add(const std::string& key, const unsigned long long& value
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[22];
 	sprintf(v, "%llu", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -283,7 +283,7 @@ bool CacheInterface::replace(const std::string& key, const unsigned long long& v
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[22];
 	sprintf(v, "%llu", value);
 	return replaceRaw(key, v, expireSeconds);
 }
@@ -292,7 +292,7 @@ bool CacheInterface::set(const std::string& key, const float& value, int expireS
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[22];
 	sprintf(v, "%f", value);
 	return setRaw(key, v, expireSeconds);
 }
@@ -301,7 +301,7 @@ bool CacheInterface::add(const std::string& key, const float& value, int expireS
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[317];
 	sprintf(v, "%f", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -310,7 +310,7 @@ bool CacheInterface::replace(const std::string& key, const float& value, int exp
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[317];
 	sprintf(v, "%f", value);
 	return replaceRaw(key, v, expireSeconds);
 }
@@ -319,7 +319,7 @@ bool CacheInterface::set(const std::string& key, const double& value, int expire
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[317];
 	sprintf(v, "%f", value);
 	return setRaw(key, v, expireSeconds);
 }
@@ -328,7 +328,7 @@ bool CacheInterface::add(const std::string& key, const double& value, int expire
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[317];
 	sprintf(v, "%f", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -337,7 +337,7 @@ bool CacheInterface::replace(const std::string& key, const double& value, int ex
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[317];
 	sprintf(v, "%f", value);
 	return replaceRaw(key, v, expireSeconds);
 }
@@ -346,7 +346,7 @@ bool CacheInterface::set(const std::string& key, const long double& value, int e
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[500];
 	sprintf(v, "%Lf", value);
 	return setRaw(key, v, expireSeconds);
 }
@@ -355,7 +355,7 @@ bool CacheInterface::add(const std::string& key, const long double& value, int e
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[500];
 	sprintf(v, "%Lf", value);
 	return addRaw(key, v, expireSeconds);
 }
@@ -364,7 +364,7 @@ bool CacheInterface::replace(const std::string& key, const long double& value, i
 	if(expireSeconds==-1) {
 		expireSeconds = this->defaultExpireSeconds;
 	}
-	char v[6];
+	char v[500];
 	sprintf(v, "%Lf", value);
 	return replaceRaw(key, v, expireSeconds);
 }

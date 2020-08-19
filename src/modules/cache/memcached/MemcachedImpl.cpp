@@ -25,10 +25,13 @@
 MemcachedImpl::MemcachedImpl(ConnectionPooler* pool) {
 	this->pool = pool;
 	this->properties = pool->getProperties();
-	this->defaultExpireSeconds = -1;
+	this->defaultExpireSeconds = 0;
 	if(properties.getProperty("expiryTime")!="") {
 		try {
 			this->defaultExpireSeconds = CastUtil::toInt(properties.getProperty("expiryTime"));
+			if(this->defaultExpireSeconds<0) {
+				this->defaultExpireSeconds = 0;
+			}
 		} catch(const std::exception& e) {
 		}
 	}
@@ -103,17 +106,17 @@ memcached_return_t MemcachedImpl::setInternal(const std::string& key, const char
 	if(setOrAddOrRep==1)
 	{
 		reply = memcached_set((memcached_st*)connection->getConn(),
-				key.c_str(), key.length(), value, valLen, (time_t)expireSeconds, (uint32_t)0);
+				key.c_str(), key.length(), value, valLen, (time_t)expireSeconds<=0?defaultExpireSeconds:expireSeconds, (uint32_t)0);
 	}
 	else if(setOrAddOrRep==2)
 	{
 		reply = memcached_add((memcached_st*)connection->getConn(),
-				key.c_str(), key.length(), value, valLen, (time_t)expireSeconds, (uint32_t)0);
+				key.c_str(), key.length(), value, valLen, (time_t)expireSeconds<=0?defaultExpireSeconds:expireSeconds, (uint32_t)0);
 	}
 	else if(setOrAddOrRep==3)
 	{
 		reply = memcached_replace((memcached_st*)connection->getConn(),
-				key.c_str(), key.length(), value, valLen, (time_t)expireSeconds, (uint32_t)0);
+				key.c_str(), key.length(), value, valLen, (time_t)expireSeconds<=0?defaultExpireSeconds:expireSeconds, (uint32_t)0);
 	}
 	pool->release(connection);
 	return reply;
