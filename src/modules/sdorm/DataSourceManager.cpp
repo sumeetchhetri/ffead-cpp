@@ -125,6 +125,10 @@ DataSourceManager::DataSourceManager(const ConnectionProperties& props, const Ma
 #ifdef INC_SDORM_MONGO
 		this->pool = new MongoDBConnectionPool(props);
 #endif
+	} else if(StringUtil::toLowerCopy(props.getType()) == "mongo-raw") {
+#ifdef INC_SDORM_MONGO
+		this->pool = new MongoDBRawConnectionPool(props);
+#endif
 	}
 }
 
@@ -164,6 +168,13 @@ void* DataSourceManager::getRawImpl(std::string name, std::string appName) {
 		((LibpqDataSourceImpl*)t)->init();
 #endif
 	}
+	if(StringUtil::toLowerCopy(dsnMgr->props.getType())=="mongo-raw")
+	{
+#if defined(INC_SDORM_MONGO)
+		t = new MongoDBRawDataSourceImpl(dsnMgr->pool);
+		((MongoDBRawDataSourceImpl*)t)->init();
+#endif
+	}
 	//This will cause serious issues if set/used in multi-threaded mode instead of single process mode
 	if(isSingleEVH) {
 		sevhDsnRawImpls[name] = t;
@@ -173,9 +184,19 @@ void* DataSourceManager::getRawImpl(std::string name, std::string appName) {
 
 void DataSourceManager::cleanRawImpl(void* dsImpl) {
 	if(!isSingleEVH) {
+		/*if(StringUtil::toLowerCopy(dsnMgr->props.getType())=="sql-raw-pq")
+		{
 #if defined(INC_SDORM_SQL) && defined(HAVE_LIBPQ)
-		delete dsImpl;
+			delete (LibpqDataSourceImpl*)dsImpl;
 #endif
+		}
+		if(StringUtil::toLowerCopy(dsnMgr->props.getType())=="mongo-raw")
+		{
+#if defined(INC_SDORM_MONGO)
+			delete (MongoDBRawDataSourceImpl*)dsImpl;
+#endif
+		}*/
+		delete dsImpl;
 	}
 }
 
@@ -239,7 +260,18 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name, std::string ap
 
 void DataSourceManager::cleanImpl(DataSourceInterface* dsImpl) {
 	if(!isSingleEVH) {
-		delete dsImpl;
+		if(StringUtil::toLowerCopy(dsImpl->pool->getProperties().getType())=="sql")
+		{
+#ifdef INC_SDORM_SQL
+			delete (SQLDataSourceImpl*)dsImpl;
+#endif
+		}
+		else if(StringUtil::toLowerCopy(dsImpl->pool->getProperties().getType())=="mongo")
+		{
+#ifdef INC_SDORM_MONGO
+			delete (MongoDBDataSourceImpl*)dsImpl;
+#endif
+		}
 	} else {
 		dsImpl->endSession();
 	}

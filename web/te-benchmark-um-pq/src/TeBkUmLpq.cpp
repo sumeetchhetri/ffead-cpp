@@ -269,18 +269,17 @@ void TeBkUmLpqRouter::getContext(HttpRequest* request, Context* context) {
 	LibpqDataSourceImpl* sqli = static_cast<LibpqDataSourceImpl*>(DataSourceManager::getRawImpl());
 
 	try {
-		std::vector<TeBkUmLpqFortune> flst;
+		std::vector<TeBkUmLpqFortune>* flst = new std::vector<TeBkUmLpqFortune>;
 		std::vector<LibpqParam> pars;
-		sqli->executeQuery(FORTUNE_ALL_QUERY, pars, &flst, &TeBkUmLpqRouter::getContextUtil);
+		sqli->executeQuery(FORTUNE_ALL_QUERY, pars, flst, &TeBkUmLpqRouter::getContextUtil);
 
 		TeBkUmLpqFortune nf;
 		nf.setId(0);
 		nf.setMessage("Additional fortune added at request time.");
-		flst.push_back(nf);
-		std::sort (flst.begin(), flst.end());
+		flst->push_back(nf);
+		std::sort (flst->begin(), flst->end());
 
-		context->insert(std::pair<std::string, GenericObject>("fortunes", GenericObject()));
-		context->find("fortunes")->second << flst;
+		context->insert(std::pair<std::string, void*>("fortunes", flst));
 		DataSourceManager::cleanRawImpl(sqli);
 	} catch(...) {
 		DataSourceManager::cleanRawImpl(sqli);
@@ -371,7 +370,8 @@ void TeBkUmLpqRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, voi
 		if(mkr!=NULL)
 		{
 			TeBkUmLpqTemplatePtr f =  (TeBkUmLpqTemplatePtr)mkr;
-			std::string msg = f(&ctx);
+			std::string msg;
+			f(&ctx, msg);
 			res->setContent(msg);
 			res->setContentType(ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);

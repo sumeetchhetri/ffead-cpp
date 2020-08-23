@@ -112,7 +112,22 @@ void CacheManager::destroy()
 
 void CacheManager::cleanImpl(CacheInterface* ccImpl) {
 	if(!isSinglEVH) {
-		delete ccImpl;
+		if(StringUtil::toLowerCopy(ccImpl->pool->getProperties().getType())=="memory")
+		{
+			delete (MemoryCacheImpl*)ccImpl;
+		}
+		else if(StringUtil::toLowerCopy(ccImpl->pool->getProperties().getType())=="memcached")
+		{
+#ifdef INC_MEMCACHED
+			delete (MemcachedImpl*)ccImpl;
+#endif
+		}
+		else if(StringUtil::toLowerCopy(ccImpl->pool->getProperties().getType())=="redis")
+		{
+#ifdef INC_REDISCACHE
+			delete (RedisCacheImpl*)ccImpl;
+#endif
+		}
 	}
 }
 

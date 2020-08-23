@@ -187,23 +187,26 @@ void TeBkUmRouter::getContext(HttpRequest* request, Context* context) {
 	DataSourceInterface* sqli = DataSourceManager::getImpl();
 
 	try {
-		std::vector<TeBkUmFortune> flst = sqli->getAll<TeBkUmFortune>();
-		for(int i=0;i<(int)flst.size();i++)
+		std::vector<TeBkUmFortune> flstT = sqli->getAll<TeBkUmFortune>();
+		std::vector<TeBkUmFortune>* flst = new std::vector<TeBkUmFortune>;
+		flst->swap(flstT);
+
+		for(int i=0;i<(int)flst->size();i++)
 		{
-			std::string nm = flst.at(i).getMessage();
+			std::string nm = flst->at(i).getMessage();
 			CryptoHandler::sanitizeHtml(nm);
-			flst.at(i).setMessage(nm);
+			flst->at(i).setMessage(nm);
 		}
 
 		TeBkUmFortune nf;
 		nf.setId(0);
 		nf.setMessage("Additional fortune added at request time.");
-		flst.push_back(nf);
-		std::sort (flst.begin(), flst.end());
-		DataSourceManager::cleanImpl(sqli);
+		flst->push_back(nf);
+		std::sort (flst->begin(), flst->end());
 
-		context->insert(std::pair<std::string, GenericObject>("fortunes", GenericObject()));
-		context->find("fortunes")->second << flst;
+		context->insert(std::pair<std::string, void*>("fortunes", flst));
+
+		DataSourceManager::cleanImpl(sqli);
 	} catch(...) {
 		DataSourceManager::cleanImpl(sqli);
 		throw;
@@ -284,7 +287,8 @@ void TeBkUmRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, void* 
 		if(mkr!=NULL)
 		{
 			TeBkUmTemplatePtr f =  (TeBkUmTemplatePtr)mkr;
-			std::string msg = f(&ctx);
+			std::string msg;
+			f(&ctx, msg);
 			res->setContent(msg);
 			res->setContentType(ContentTypes::CONTENT_TYPE_TEXT_SHTML);
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);

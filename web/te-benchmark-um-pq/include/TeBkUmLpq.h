@@ -43,7 +43,7 @@
 #include "yuarel.h"
 #include "Router.h"
 
-typedef std::string (*TeBkUmLpqTemplatePtr) (Context*);
+typedef void (*TeBkUmLpqTemplatePtr) (Context*, std::string&);
 
 class TeBkUmLpqWorld {
 	int id;

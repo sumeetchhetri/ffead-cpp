@@ -164,7 +164,7 @@ void LibpqDataSourceImpl::executeQuery(const std::string &query, const std::vect
 	for(int i=0; i<rows; i++) {
 		row.clear();
 		for (int j = 0; j < cols; ++j) {
-			row.push_back({.d = PQgetvalue(res, i, j), .l = PQgetlength(res, i, j)});
+			row.push_back({.n = PQfname(res, j), .d = PQgetvalue(res, i, j), .l = PQgetlength(res, i, j)});
 		}
 		cb(ctx, i, row);
 	}

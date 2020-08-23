@@ -33,23 +33,19 @@ DefTemp::~DefTemp() {
 
 void DefTemp::getContext(HttpRequest* request, Context* context)
 {
-	std::string dat = "1.js";
-	context->insert(std::pair<std::string, GenericObject>("dat", GenericObject()));
-	context->find("dat")->second << dat;
+	std::string* dat = new std::string("1.js");
+	context->insert(std::pair<std::string, void*>("dat", dat));
 
-	Test t;
-	t.setId(1);
-	t.setName("name");
-	context->insert(std::pair<std::string, GenericObject>("test", GenericObject()));
-	context->find("test")->second << t;
+	Test* t = new Test;
+	t->setId(1);
+	t->setName("name");
+	context->insert(std::pair<std::string, void*>("test", t));
 
-	std::vector<std::string> vect;
-	vect.push_back("vec1");
-	vect.push_back("vec2");
-	context->insert(std::pair<std::string, GenericObject>("vect", GenericObject()));
-	context->find("vect")->second << vect;
+	std::vector<std::string>* vect = new std::vector<std::string>;
+	vect->push_back("vec1");
+	vect->push_back("vec2");
+	context->insert(std::pair<std::string, void*>("vect", vect));
 
-	int num = 5;
-	context->insert(std::pair<std::string, GenericObject>("number", GenericObject()));
-	context->find("number")->second <<  num;
+	int* num = new int(5);
+	context->insert(std::pair<std::string, void*>("number", num));
 }

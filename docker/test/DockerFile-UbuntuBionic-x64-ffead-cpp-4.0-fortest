@@ -1,0 +1,219 @@
+FROM buildpack-deps:bionic
+
+#POSTGRESQL
+ADD postgresql/postgresql.conf postgresql.conf
+ADD postgresql/pg_hba.conf pg_hba.conf
+ADD postgresql/60-postgresql-shm.conf 60-postgresql-shm.conf
+ADD postgresql/create-postgres-database.sql create-postgres-database.sql
+ADD postgresql/create-postgres.sql create-postgres.sql
+ADD postgresql/pgdg.list pgdg.list
+
+# prepare PostgreSQL APT repository
+RUN cp pgdg.list /etc/apt/sources.list.d/
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+
+RUN apt-get -yqq update > /dev/null
+RUN apt-get -yqq install locales
+
+ENV PG_VERSION 12
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+ENV DEBIAN_FRONTEND noninteractive
+
+# install postgresql on database machine
+RUN apt-get -yqq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql postgresql-contrib
+
+# Make sure all the configuration files in main belong to postgres
+RUN mv postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf
+RUN mv pg_hba.conf /etc/postgresql/${PG_VERSION}/main/pg_hba.conf
+
+RUN chown -Rf postgres:postgres /etc/postgresql/${PG_VERSION}/main
+
+RUN mkdir /ssd
+RUN cp -R -p /var/lib/postgresql/${PG_VERSION}/main /ssd/postgresql
+RUN cp /etc/postgresql/${PG_VERSION}/main/postgresql.conf /ssd/postgresql
+RUN mv 60-postgresql-shm.conf /etc/sysctl.d/60-postgresql-shm.conf
+
+RUN chown -Rf postgres:postgres /var/run/postgresql
+RUN chmod 2777 /var/run/postgresql
+RUN chown postgres:postgres /etc/sysctl.d/60-postgresql-shm.conf
+RUN chown postgres:postgres create-postgres*
+RUN chown -Rf postgres:postgres /ssd
+
+ENV PGDATA=/ssd/postgresql
+
+USER postgres
+
+# We have to wait for postgres to start before we can use the cli
+RUN service postgresql start && \
+    until psql -c "\q"; do sleep 1; done && \
+    psql < create-postgres-database.sql && \
+    psql -a hello_world < create-postgres.sql && \
+    service postgresql stop
+#POSTGRESQL
+
+
+#MYSQL
+USER root
+
+ADD mysql/create.sql create.sql
+ADD mysql/my.cnf my.cnf
+ADD mysql/mysql.list mysql.list
+
+RUN cp mysql.list /etc/apt/sources.list.d/
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8C718D3B5072E1F5
+
+RUN apt-get update > /dev/null
+RUN apt-get install -yqq locales > /dev/null
+
+# https://bugs.mysql.com/bug.php?id=90695
+RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-server mysql-server/lowercase-table-names select Enabled\""]
+RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-community-server mysql-community-server/data-dir select 'Y'\""]
+RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-community-server mysql-community-server/root-pass password secret\""]
+RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-community-server mysql-community-server/re-root-pass password secret\""]
+RUN echo "Installing mysql-server version: $(apt-cache policy mysql-server | grep -oP "(?<=Candidate: )(.*)$")"
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install mysql-server > /dev/null
+
+RUN mv /etc/mysql/my.cnf /etc/mysql/my.cnf.orig
+RUN cp my.cnf /etc/mysql/my.cnf
+
+RUN rm -rf /ssd/mysql
+RUN rm -rf /ssd/log/mysql
+RUN cp -R -p /var/lib/mysql /ssd/
+RUN cp -R -p /var/log/mysql /ssd/log
+RUN mkdir -p /var/run/mysqld
+
+# It may seem weird that we call `service mysql start` several times, but the RUN
+# directive is a 1-time operation for building this image. Subsequent RUN calls
+# do not see running processes from prior RUN calls; therefor, each command here
+# that relies on the mysql server running will explicitly start the server and
+# perform the work required.
+RUN chown -R mysql:mysql /var/lib/mysql /var/log/mysql /var/run/mysqld /ssd && \
+    mysqld & \
+    until mysql -uroot -psecret -e "exit"; do sleep 1; done && \
+    mysqladmin -uroot -psecret flush-hosts && \
+    mysql -uroot -psecret < create.sql
+
+RUN chown -R mysql:mysql /var/lib/mysql /var/log/mysql /var/run/mysqld /ssd
+#MYSQL
+
+
+#MONGODB
+ADD mongodb/create.js create.js
+
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 4B7C549A058F8B6B
+RUN echo "deb https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org.list
+RUN apt-get -yqq update > /dev/null
+RUN DEBIAN_FRONTEND=noninteractive apt-get -yqq install apt-transport-https mongodb-org > /dev/null
+
+RUN mkdir -p /data/db
+RUN chmod 777 /data/db
+
+RUN mongod --fork --logpath /var/log/mongodb.log --bind_ip_all && sleep 10 && mongo < create.js && sleep 10
+#MONGODB
+
+RUN apt update -yqq && apt install -yqq autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev \
+	libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev libhiredis-dev wget netcat \
+	memcached redis-server gdb ninja-build telnet net-tools vim
+
+#Install libcuckoo headers
+WORKDIR /tmp
+RUN wget -q https://github.com/efficient/libcuckoo/archive/master.zip
+RUN unzip -qq master.zip
+RUN rm -f master.zip
+WORKDIR /tmp/libcuckoo-master
+RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
+RUN make install
+WORKDIR /tmp
+RUN rm -rf /tmp/libcuckoo-master
+
+#Install mongodb c driver
+RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
+RUN tar xf mongo-c-driver-1.4.2.tar.gz
+RUN rm -f mongo-c-driver-1.4.2.tar.gz
+RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
+WORKDIR /tmp
+RUN rm -rf mongo-c-driver-1.4.2
+
+#Install ffead-cpp
+WORKDIR /tmp
+RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip
+RUN unzip -qq master.zip
+RUN mv ffead-cpp-master ffead-cpp-src
+RUN rm -f master.zip
+
+WORKDIR /tmp/ffead-cpp-src
+RUN rm -rf src web
+COPY src /tmp/ffead-cpp-src/src
+COPY web /tmp/ffead-cpp-src/web
+COPY CMakeLists.txt /tmp/ffead-cpp-src/
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists.txt && \
+	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/flexApp)||g' CMakeLists.txt && \
+	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/oauthApp)||g' CMakeLists.txt && \
+	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/markers)||g' CMakeLists.txt && \
+	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark)||g' CMakeLists.txt && \
+	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/peer-server)||g' CMakeLists.txt && \
+	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/default/libdefault${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
+	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/flexApp/libflexApp${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
+	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/oauthApp/liboauthApp${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
+	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/markers/libmarkers${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
+	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/te-benchmark/libte_benchmark${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
+	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/peer-server/libpeer_server${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
+	rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/peer-server
+
+RUN mkdir build
+WORKDIR /tmp/ffead-cpp-src/build
+RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=on ..
+RUN ninja install && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-mgr/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-mgr/config/cache.xml && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-pq && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-mongo-raw
+
+WORKDIR /tmp/ffead-cpp-src/build
+RUN ninja install && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/sdormmongo.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/sdorm.xml && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/cache.xml && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-pq && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-mgr && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-mongo-orm
+
+WORKDIR /tmp/ffead-cpp-src/build
+RUN ninja install && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-pq/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-mgr && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-sql-raw
+
+WORKDIR /tmp/ffead-cpp-src/build
+RUN cp -f /tmp/ffead-cpp-src/web/te-benchmark-um/sql-src/TeBkUmWorldsql.h /tmp/ffead-cpp-src/web/te-benchmark-um/include/TeBkUmWorld.h && \
+	cp -f /tmp/ffead-cpp-src/web/te-benchmark-um/sql-src/TeBkUmWorldsql.cpp /tmp/ffead-cpp-src/web/te-benchmark-um/src/TeBkUmWorld.cpp && \
+	ninja install && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/sdormpostgresql.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/sdorm.xml && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/cache.xml && \
+	cp /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/resources/sample-odbcinst.ini /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/resources/odbcinst.ini && \
+	cp /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/resources/sample-odbc.ini /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/resources/odbc.ini && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-pq && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-mgr && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-sql-orm
+
+COPY *.sh  /opt/
+
+WORKDIR /opt
+
+RUN rm -rf /var/lib/apt/lists/* && rm -rf /tmp/ffead-cpp-src && chmod +x *.sh && ./install_ffead-cpp.sh
+
+RUN chown -Rf root:root /ssd && chown -Rf postgres:postgres /ssd/postgresql && chown -Rf mysql:mysql /ssd/mysql
+
+#RUN echo "/opt/run.sh" >> /root/.bashrc
+
+RUN sed -i 's|PORT_NO=8080|PORT_NO=9781|g' /tmp/ffead-cpp-mongo-raw/resources/server.prop && \
+	sed -i 's|PORT_NO=8080|PORT_NO=9782|g' /tmp/ffead-cpp-mongo-orm/resources/server.prop && \
+	sed -i 's|PORT_NO=8080|PORT_NO=9783|g' /tmp/ffead-cpp-sql-raw/resources/server.prop && \
+	sed -i 's|PORT_NO=8080|PORT_NO=9784|g' /tmp/ffead-cpp-sql-orm/resources/server.prop
+	
+EXPOSE 9781 9782 9783 9784
+
+CMD /bin/bash

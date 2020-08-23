@@ -67,3 +67,5 @@ lang-server-backends/java/wizzardo-http/target
 ffead-cpp-4.0-bin/
 build/
 nginx-*/
+docker/test/src
+docker/test/web

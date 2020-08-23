@@ -390,10 +390,11 @@ libffead_modules_la_SOURCES += \
 endif
 if MOD_SDORM_MONGO
 AM_CPPFLAGS += \
-				-I"../../modules/sdorm/mongo"
+				-I"../../modules/sdorm/mongo" -I"../../modules/sdorm/mongo/raw"
 libffead_modules_la_SOURCES += \
 						../../modules/sdorm/mongo/MongoDBDataSourceImpl.cpp \
-						../../modules/sdorm/mongo/MongoDBConnectionPool.cpp
+						../../modules/sdorm/mongo/MongoDBConnectionPool.cpp \
+						../../modules/sdorm/mongo/raw/MongoDBRawDataSourceImpl.cpp
 endif
 if MOD_DISTOCACHE
 AM_CPPFLAGS += \
@@ -520,10 +521,11 @@ endif
 
 if MOD_SDORM_MONGO
 AM_CPPFLAGS += \
-				-I"../../modules/sdorm/mongo"
+				-I"../../modules/sdorm/mongo" -I"../../modules/sdorm/mongo/raw"
 libffead_modules_la_SOURCES += \
 						../../modules/sdorm/mongo/MongoDBDataSourceImpl.cpp \
-						../../modules/sdorm/mongo/MongoDBConnectionPool.cpp
+						../../modules/sdorm/mongo/MongoDBConnectionPool.cpp \
+						../../modules/sdorm/mongo/raw/MongoDBRawDataSourceImpl.cpp
 endif
 if MOD_MEMCACHED
 AM_CPPFLAGS += \

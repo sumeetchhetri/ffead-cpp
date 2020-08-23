@@ -39,6 +39,7 @@ class ConnectionPooler {
 	ConnectionProperties properties;
 	Connection* checkoutInternal();
 protected:
+	void setProperties(const ConnectionProperties& properties);
 	void destroyPool();
 	void createPool(const ConnectionProperties& properties);
 	virtual void initEnv()=0;

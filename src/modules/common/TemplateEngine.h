@@ -30,14 +30,12 @@
 #include <iostream>
 
 
-typedef std::map<std::string,GenericObject> Context;
 typedef std::map<std::string,std::string> StringContext;
 class TemplateEngine {
 	TemplateEngine();
 public:
 	virtual ~TemplateEngine();
 	static std::string evaluate(const std::string&, const StringContext&);
-	//string evaluateTemplate(const std::string&, const Context&);
 };
 
 #endif /* TEMPLATEENGINE_H_ */

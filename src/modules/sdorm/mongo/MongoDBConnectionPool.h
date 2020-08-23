@@ -28,20 +28,25 @@
 #include "LoggerFactory.h"
 
 class MongoDBConnectionPool: public ConnectionPooler {
-	mongoc_uri_t* uri;
 	Logger logger;
 	void initEnv();
 	void* newConnection(const bool& isWrite, const ConnectionNode& node);
 	void closeConnection(void* conn);
 	void destroy();
+	mongoc_uri_t* uri;
 	bool isReplicaSet;
 	bool isSharded;
 	bool isUnixDomainSocket;
 	bool isSSL;
 	std::string replicaSetName;
+	std::string dbName;
+	static bool inited;
+	MongoDBConnectionPool();
+	friend class MongoDBRawConnectionPool;
+	friend class MongoDBRawDataSourceImpl;
 public:
 	MongoDBConnectionPool(const ConnectionProperties& props);
-	~MongoDBConnectionPool();
+	virtual ~MongoDBConnectionPool();
 };
 
 #endif /* MONGODBCONNECTIONPOOL_H_ */

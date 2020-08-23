@@ -99,6 +99,11 @@ bool ConnectionPooler::isInitialized() const {
 	return initialized;
 }
 
+void ConnectionPooler::setProperties(const ConnectionProperties& properties) {
+	this->properties = properties;
+	initEnv();
+}
+
 void ConnectionPooler::createPool(const ConnectionProperties& properties) {
 	this->properties = properties;
 

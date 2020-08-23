@@ -29,6 +29,7 @@
 #include "ConnectionPooler.h"
 
 class CacheInterface {
+	friend class CacheManager;
 protected:
 	int defaultExpireSeconds;
 	ConnectionPooler* pool;

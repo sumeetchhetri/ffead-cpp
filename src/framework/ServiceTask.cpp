@@ -419,7 +419,6 @@ WebSockHandler* ServiceTask::handleWebsockOpen(WebSocketData* req, WebSocketResp
 			hreq->setCntxt_name(std::string_view{ConfigurationData::getInstance()->appAliases.find(hreq->getCntxt_name())->second});
 			if(ConfigurationData::getInstance()->servingContexts.find(hreq->getCntxt_name())==ConfigurationData::getInstance()->servingContexts.end())
 			{
-				//logger << "Context not found, Closing connection..." << std::endl;
 				return NULL;
 			}
 		}
@@ -525,7 +524,6 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				if(ConfigurationData::getInstance()->servingContexts.find(req->getCntxt_name())==ConfigurationData::getInstance()->servingContexts.end())
 				{
 					res->addHeader(HttpResponse::Connection, "close");
-					//logger << "Context not found, Closing connection..." << std::endl;
 					return;
 				}
 			}

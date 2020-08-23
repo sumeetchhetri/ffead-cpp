@@ -85,6 +85,8 @@ endif
 if MOD_SDORM_MONGO
 includedirsall += \
 				src/modules/sdorm/mongo/*.h
+includedirsall += \
+				src/modules/sdorm/mongo/raw/*.h
 endif
 if MOD_DISTOCACHE
 includedirsall += \
@@ -136,6 +138,8 @@ endif
 if MOD_SDORM_MONGO
 includedirsall += \
 				src/modules/sdorm/mongo/*.h
+includedirsall += \
+				src/modules/sdorm/mongo/raw/*.h
 endif
 if MOD_MEMCACHED
 includedirsall += \

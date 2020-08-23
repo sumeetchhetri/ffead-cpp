@@ -31,7 +31,7 @@
 
 #include "TemplateEngine.h"
 
-typedef std::map<std::string, GenericObject> Context;
+typedef std::map<std::string, void*> Context;
 
 class TemplateHandler {
 public:

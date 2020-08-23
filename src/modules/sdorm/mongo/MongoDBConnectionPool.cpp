@@ -22,6 +22,16 @@
 
 #include "MongoDBConnectionPool.h"
 
+bool MongoDBConnectionPool::inited = false;
+
+MongoDBConnectionPool::MongoDBConnectionPool() {
+	isReplicaSet = false;
+	isSSL = false;
+	isUnixDomainSocket = false;
+	isSharded = false;
+	uri = NULL;
+}
+
 MongoDBConnectionPool::MongoDBConnectionPool(const ConnectionProperties& props) {
 	logger = LoggerFactory::getLogger("SQLConnectionPool");
 	std::map<std::string, std::string> mp = props.getProperties();
@@ -35,7 +45,10 @@ MongoDBConnectionPool::MongoDBConnectionPool(const ConnectionProperties& props) 
  }
 
 void MongoDBConnectionPool::initEnv() {
-	mongoc_init();
+	if(!inited) {
+		mongoc_init();
+		inited = true;
+	}
 
 	ConnectionProperties props = getProperties();
 	std::string connectionString = "";
@@ -138,6 +151,8 @@ void MongoDBConnectionPool::initEnv() {
 
 	uri = mongoc_uri_new(connectionString.c_str());
 
+	dbName = mongoc_uri_get_database(uri);
+
 	mongoc_client_t* tclient = mongoc_client_new_from_uri (uri);
 	if (!tclient) {
 		throw std::runtime_error("Unable to create mongodb connection");
@@ -188,7 +203,7 @@ void MongoDBConnectionPool::destroy() {
 	mongoc_client_pool_destroy(pool);
 	mongoc_uri_destroy(uri);
 
-	mongoc_cleanup();
+	//TODO how to cleanup mongoc_cleanup();
 }
 
 MongoDBConnectionPool::~MongoDBConnectionPool() {

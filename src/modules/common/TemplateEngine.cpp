@@ -31,19 +31,6 @@ TemplateEngine::~TemplateEngine() {
 	
 }
 
-/*string TemplateEngine::evaluate(const std::string& str, const Context& cntxt)
-{
-	std::string ret(str);
-	Context::iterator itr;
-	for(itr = cntxt.begin();itr!=cntxt.end();itr++)
-	{
-		std::string rep;
-		rep = "{$"+itr->first+"}";
-		StringUtil::replaceAll(ret,rep,itr->second);
-	}
-	return ret;
-}*/
-
 std::string TemplateEngine::evaluate(const std::string& fileName, const StringContext& cntxt)
 {
 	std::string ret,data;

@@ -67,7 +67,7 @@ jobs:
         do
           sleep 1
           COUNTER=$((COUNTER+1))
-          if [ "$COUNTER" = 120 ]
+          if [ "$COUNTER" = 240 ]
           then
             echo "exiting...."
             exit 1
@@ -78,7 +78,7 @@ jobs:
         do
           sleep 1
           COUNTER=$((COUNTER+1))
-          if [ "$COUNTER" = 120 ]
+          if [ "$COUNTER" = 240 ]
           then
             echo "exiting....dlib"
             exit 1

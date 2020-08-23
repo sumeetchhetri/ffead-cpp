@@ -73,9 +73,11 @@ void* SQLConnectionPool::newConnection(const bool& isWrite, const ConnectionNode
 		//exit(0);
 	}
 
-	int seconds = node.getConnectionTimeout()/1000;
-	SQLSetConnectAttr(conn, SQL_ATTR_CONNECTION_TIMEOUT, (SQLUINTEGER*)&seconds, 0);
-	SQLSetConnectAttr(conn, SQL_LOGIN_TIMEOUT, (SQLPOINTER)&seconds, 0);
+	if(node.getConnectionTimeout()>0) {
+		int seconds = node.getConnectionTimeout()/1000;
+		//SQLSetConnectAttr(conn, SQL_ATTR_CONNECTION_TIMEOUT, (SQLUINTEGER*)&seconds, 0);
+		//SQLSetConnectAttr(conn, SQL_LOGIN_TIMEOUT, (SQLPOINTER)&seconds, 0);
+	}
 	// 3. Connect to the datasource "MySQL-test"
 	V_OD_erg = SQLConnect(conn, (SQLCHAR*) node.getDsn().c_str(), node.getDsn().length(),
 									 (SQLCHAR*) node.getUsername().c_str(), node.getUsername().length(),

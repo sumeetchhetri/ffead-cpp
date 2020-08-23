@@ -32,6 +32,7 @@
 #ifdef INC_SDORM_MONGO
 #include "MongoDBConnectionPool.h"
 #include "MongoDBDataSourceImpl.h"
+#include "MongoDBRawDataSourceImpl.h"
 #endif
 
 class DataSourceManager;

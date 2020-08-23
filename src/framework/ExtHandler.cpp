@@ -59,7 +59,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 						if(mkr!=NULL)
 						{
 							TemplatePtr f =  (TemplatePtr)mkr;
-							content = f(&cnt);
+							f(&cnt, content);
 						}
 						else
 						{

@@ -66,7 +66,7 @@ class MongoDBDataSourceImpl: public DataSourceInterface {
 	void _release(mongoc_collection_t*);
 public:
 	MongoDBDataSourceImpl(ConnectionPooler* pool, Mapping* mapping);
-	~MongoDBDataSourceImpl();
+	virtual ~MongoDBDataSourceImpl();
 	bool startTransaction();
 	bool commit();
 	bool rollback();

@@ -30,25 +30,28 @@ void TeBkFortuneTemplate::getContext(HttpRequest* request, Context* context)
 	DataSourceInterface* sqli = DataSourceManager::getImpl();
 
 	try {
-		std::vector<TeBkFortune> flst = sqli->getAll<TeBkFortune>();
-		for(int i=0;i<(int)flst.size();i++)
+		std::vector<TeBkFortune> flstT = sqli->getAll<TeBkFortune>();
+		std::vector<TeBkFortune>* flst = new std::vector<TeBkFortune>;
+		flst->swap(flstT);
+
+		for(int i=0;i<(int)flst->size();i++)
 		{
-			std::string nm = flst.at(i).getMessage();
+			std::string nm = flst->at(i).getMessage();
 			CryptoHandler::sanitizeHtml(nm);
-			flst.at(i).setMessage(nm);
+			flst->at(i).setMessage(nm);
 		}
 
 		TeBkFortune nf;
 		nf.setId(0);
 		nf.setMessage("Additional fortune added at request time.");
-		flst.push_back(nf);
-		std::sort (flst.begin(), flst.end());
-		DataSourceManager::cleanImpl(sqli);
+		flst->push_back(nf);
+		std::sort (flst->begin(), flst->end());
 
-		context->insert(std::pair<std::string, GenericObject>("fortunes", GenericObject()));
-		context->find("fortunes")->second << flst;
+		context->insert(std::pair<std::string, void*>("fortunes", flst));
+
+		DataSourceManager::cleanImpl(sqli);
 	} catch(...) {
-		delete sqli;
+		DataSourceManager::cleanImpl(sqli);
 		throw;
 	}
 }

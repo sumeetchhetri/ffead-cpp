@@ -42,6 +42,7 @@ struct LibpqParam {
 };
 
 struct LibpqRes {
+	const char* n;
 	const char* d;
 	int l;
 };
