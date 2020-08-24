@@ -1,1 +1,1 @@
-java -classpath target/rapidoid-ffead-cpp-1.0-jar-with-dependencies.jar com.rapidoid.ffeadcpp.Main /root/ffead-cpp-4.0 8080
+java -classpath target/rapidoid-ffead-cpp-1.0-jar-with-dependencies.jar com.rapidoid.ffeadcpp.Main /root/ffead-cpp-5.0 8080

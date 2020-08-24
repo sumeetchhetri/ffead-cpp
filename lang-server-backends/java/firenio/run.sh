@@ -1,1 +1,1 @@
-java -classpath target/firenio-ffead-cpp-0.1-jar-with-dependencies.jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9999 com.firenio.ffeadcpp.FirenioFfeadCppServer /root/ffead-cpp-4.0 8080
+java -classpath target/firenio-ffead-cpp-0.1-jar-with-dependencies.jar -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9999 com.firenio.ffeadcpp.FirenioFfeadCppServer /root/ffead-cpp-5.0 8080

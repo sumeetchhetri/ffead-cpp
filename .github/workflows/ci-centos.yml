@@ -15,5 +15,5 @@ jobs:
     - name: Build ffead-cpp on centos
       run: |
         cd docker/os-based
-        docker build -f DockerFile-Centos7-x64-ffead-cpp-4.0 .
-        docker build -f DockerFile-Centos7-x64-ffead-cpp-4.0_autoconf .
+        docker build -f DockerFile-Centos7-x64-ffead-cpp-5.0 .
+        docker build -f DockerFile-Centos7-x64-ffead-cpp-5.0_autoconf .

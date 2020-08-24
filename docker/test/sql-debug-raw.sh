@@ -8,13 +8,13 @@ if [ $# -eq 0 ]; then
 	nohup bash -c "./server.sh > ffead.log &"
 	sleep 10
 	echo "ffead-cpp with sql-raw support launched"
-	curl -vvv http://localhost:9783/te-benchmark-um-pq/json
-	curl -vvv http://localhost:9783/te-benchmark-um-pq/plaintext
-	curl -vvv http://localhost:9783/te-benchmark-um-pq/fortunes
-	curl -vvv http://localhost:9783/te-benchmark-um-pq/db
-	curl -vvv http://localhost:9783/te-benchmark-um-pq/queries?queries=1
-	curl -vvv http://localhost:9783/te-benchmark-um-pq/updates?queries=1
-	curl -vvv http://localhost:9783/te-benchmark-um-pq/cached-worlds?queries=1
+	wrk -t1 -c1 -d5s http://localhost:9783/te-benchmark-um-pq/json
+	wrk -t1 -c1 -d5s http://localhost:9783/te-benchmark-um-pq/plaintext
+	wrk -t1 -c1 -d5s http://localhost:9783/te-benchmark-um-pq/fortunes
+	wrk -t1 -c1 -d5s http://localhost:9783/te-benchmark-um-pq/db
+	wrk -t1 -c1 -d5s http://localhost:9783/te-benchmark-um-pq/queries?queries=1
+	wrk -t1 -c1 -d5s http://localhost:9783/te-benchmark-um-pq/updates?queries=1
+	wrk -t1 -c1 -d5s http://localhost:9783/te-benchmark-um-pq/cached-worlds?queries=1
 fi
 if [ "$1" == "g" ]; then
 	gdb ffead-cpp

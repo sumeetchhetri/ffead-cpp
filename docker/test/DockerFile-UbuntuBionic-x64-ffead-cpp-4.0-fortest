@@ -1,20 +1,28 @@
 FROM buildpack-deps:bionic
 
-#POSTGRESQL
-ADD postgresql/postgresql.conf postgresql.conf
-ADD postgresql/pg_hba.conf pg_hba.conf
-ADD postgresql/60-postgresql-shm.conf 60-postgresql-shm.conf
-ADD postgresql/create-postgres-database.sql create-postgres-database.sql
-ADD postgresql/create-postgres.sql create-postgres.sql
-ADD postgresql/pgdg.list pgdg.list
+COPY postgresql/* ./
+ADD mysql/* ./
+ADD mongodb/* ./
+ADD wrk/* ./
 
 # prepare PostgreSQL APT repository
 RUN cp pgdg.list /etc/apt/sources.list.d/
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 
-RUN apt-get -yqq update > /dev/null
-RUN apt-get -yqq install locales
+# prepare mysql APT repository
+RUN cp mysql.list /etc/apt/sources.list.d/
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8C718D3B5072E1F5
 
+# prepare mongodb APT repository
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 4B7C549A058F8B6B
+RUN echo "deb https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org.list
+
+RUN apt-get -yqq update > /dev/null
+RUN apt-get -yqq install locales autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev \
+	libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev libhiredis-dev wget netcat \
+	memcached redis-server gdb ninja-build telnet net-tools vim
+
+#POSTGRESQL
 ENV PG_VERSION 12
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
@@ -23,7 +31,8 @@ ENV LC_ALL en_US.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 
 # install postgresql on database machine
-RUN apt-get -yqq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql postgresql-contrib
+RUN apt-get -yqq update && apt-get -yqq install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" postgresql postgresql-contrib && \
+	rm -rf /var/lib/apt/lists/*
 
 # Make sure all the configuration files in main belong to postgres
 RUN mv postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf
@@ -54,27 +63,15 @@ RUN service postgresql start && \
     service postgresql stop
 #POSTGRESQL
 
-
 #MYSQL
 USER root
-
-ADD mysql/create.sql create.sql
-ADD mysql/my.cnf my.cnf
-ADD mysql/mysql.list mysql.list
-
-RUN cp mysql.list /etc/apt/sources.list.d/
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 8C718D3B5072E1F5
-
-RUN apt-get update > /dev/null
-RUN apt-get install -yqq locales > /dev/null
-
 # https://bugs.mysql.com/bug.php?id=90695
 RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-server mysql-server/lowercase-table-names select Enabled\""]
 RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-community-server mysql-community-server/data-dir select 'Y'\""]
 RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-community-server mysql-community-server/root-pass password secret\""]
 RUN ["/bin/bash", "-c", "debconf-set-selections <<< \"mysql-community-server mysql-community-server/re-root-pass password secret\""]
 RUN echo "Installing mysql-server version: $(apt-cache policy mysql-server | grep -oP "(?<=Candidate: )(.*)$")"
-RUN DEBIAN_FRONTEND=noninteractive apt-get -y install mysql-server > /dev/null
+RUN DEBIAN_FRONTEND=noninteractive apt-get -yqq update && apt-get -y install mysql-server > /dev/null
 
 RUN mv /etc/mysql/my.cnf /etc/mysql/my.cnf.orig
 RUN cp my.cnf /etc/mysql/my.cnf
@@ -101,22 +98,13 @@ RUN chown -R mysql:mysql /var/lib/mysql /var/log/mysql /var/run/mysqld /ssd
 
 
 #MONGODB
-ADD mongodb/create.js create.js
-
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 4B7C549A058F8B6B
-RUN echo "deb https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org.list
-RUN apt-get -yqq update > /dev/null
-RUN DEBIAN_FRONTEND=noninteractive apt-get -yqq install apt-transport-https mongodb-org > /dev/null
+RUN DEBIAN_FRONTEND=noninteractive apt-get -yqq update && apt-get -yqq install apt-transport-https mongodb-org > /dev/null
 
 RUN mkdir -p /data/db
 RUN chmod 777 /data/db
 
 RUN mongod --fork --logpath /var/log/mongodb.log --bind_ip_all && sleep 10 && mongo < create.js && sleep 10
 #MONGODB
-
-RUN apt update -yqq && apt install -yqq autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev \
-	libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev libhiredis-dev wget netcat \
-	memcached redis-server gdb ninja-build telnet net-tools vim
 
 #Install libcuckoo headers
 WORKDIR /tmp
@@ -133,9 +121,28 @@ RUN rm -rf /tmp/libcuckoo-master
 RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz
 RUN tar xf mongo-c-driver-1.4.2.tar.gz
 RUN rm -f mongo-c-driver-1.4.2.tar.gz
-RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
+RUN cd mongo-c-driver-1.4.2/ && ./configure --disable-automatic-init-and-cleanup --disable-tests --disable-ssl --disable-sasl && make && make install
 WORKDIR /tmp
 RUN rm -rf mongo-c-driver-1.4.2
+
+#WRK
+WORKDIR /tmp/wrk
+RUN apt-get -yqq update && apt-get -yqq install libluajit-5.1-dev libssl-dev luajit && rm -rf /var/lib/apt/lists/* && \
+	curl -sL https://github.com/wg/wrk/archive/4.1.0.tar.gz | tar xz --strip-components=1
+ENV LDFLAGS="-O3 -march=native -flto"
+ENV CFLAGS="-I /usr/include/luajit-2.1 $LDFLAGS"
+RUN make WITH_LUAJIT=/usr WITH_OPENSSL=/usr -j "$(nproc)"
+RUN cp wrk /usr/local/bin
+
+ENV name name
+ENV server_host server_host
+ENV levels levels
+ENV duration duration
+ENV max_concurrency max_concurrency
+ENV max_threads max_threads
+ENV pipeline pipeline
+ENV accept accept
+#WRK
 
 #Install ffead-cpp
 WORKDIR /tmp
@@ -167,45 +174,45 @@ RUN mkdir build
 WORKDIR /tmp/ffead-cpp-src/build
 RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=on ..
 RUN ninja install && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-mgr/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-mgr/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-pq && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-mongo-raw
+	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr/config/cache.xml && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-mongo-raw
 
 WORKDIR /tmp/ffead-cpp-src/build
 RUN ninja install && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/sdormmongo.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/sdorm.xml && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-mgr && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-mongo-orm
+	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/sdormmongo.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/sdorm.xml && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/cache.xml && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-mongo-orm
 
 WORKDIR /tmp/ffead-cpp-src/build
 RUN ninja install && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-pq/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-mgr && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-sql-raw
+	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-raw
 
 WORKDIR /tmp/ffead-cpp-src/build
 RUN cp -f /tmp/ffead-cpp-src/web/te-benchmark-um/sql-src/TeBkUmWorldsql.h /tmp/ffead-cpp-src/web/te-benchmark-um/include/TeBkUmWorld.h && \
 	cp -f /tmp/ffead-cpp-src/web/te-benchmark-um/sql-src/TeBkUmWorldsql.cpp /tmp/ffead-cpp-src/web/te-benchmark-um/src/TeBkUmWorld.cpp && \
 	ninja install && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/sdormpostgresql.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/sdorm.xml && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um/config/cache.xml && \
-	cp /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/resources/sample-odbcinst.ini /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/resources/odbcinst.ini && \
-	cp /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/resources/sample-odbc.ini /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/resources/odbc.ini && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-4.0-bin/web/te-benchmark-um-mgr && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-sql-orm
+	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/sdormpostgresql.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/sdorm.xml && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/cache.xml && \
+	cp /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/resources/sample-odbcinst.ini /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/resources/odbcinst.ini && \
+	cp /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/resources/sample-odbc.ini /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/resources/odbc.ini && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq && \
+	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr && \
+	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-orm
 
-COPY *.sh  /opt/
+COPY *.sh  /
 
-WORKDIR /opt
+WORKDIR /
 
-RUN rm -rf /var/lib/apt/lists/* && rm -rf /tmp/ffead-cpp-src && chmod +x *.sh && ./install_ffead-cpp.sh
+RUN rm -rf /tmp/ffead-cpp-src && chmod +x *.sh && ./install_ffead-cpp.sh
 
-RUN chown -Rf root:root /ssd && chown -Rf postgres:postgres /ssd/postgresql && chown -Rf mysql:mysql /ssd/mysql
+RUN chown -Rf root:root /ssd && chown -Rf postgres:postgres /ssd/postgresql && chown -Rf mysql:mysql /ssd/mysql && chmod 777 pipeline.lua concurrency.sh pipeline.sh query.sh
 
 #RUN echo "/opt/run.sh" >> /root/.bashrc
 

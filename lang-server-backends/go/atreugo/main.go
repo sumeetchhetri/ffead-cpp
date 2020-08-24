@@ -63,7 +63,7 @@ var prefork bool
 func init() {
 	flag.StringVar(&bindHost, "bind", ":8080", "set bind host")
 	flag.BoolVar(&prefork, "prefork", false, "use prefork")
-	flag.StringVar(&ffeadCppDir, "server_dir", "/root/ffead-cpp-4.0", "ffead-cpp directory")
+	flag.StringVar(&ffeadCppDir, "server_dir", "/root/ffead-cpp-5.0", "ffead-cpp directory")
 	flag.Parse()
 	if ffeadCppDir == "" {
 		log.Fatalf("No ffead-cpp directory provided")

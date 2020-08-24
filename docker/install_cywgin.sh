@@ -33,7 +33,7 @@ mkdir build
 cd build
 cmake -DSRV_EMB=on -DMOD_REDIS=on ..
 make install -j4
-mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
+mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
 cd /tmp/ffead-cpp-src
 chmod +x autogen.sh
 sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
@@ -42,6 +42,6 @@ sed -i'' -e "s|AC_CHECK_LIB(regex|#AC_CHECK_LIB(regex|g" configure.ac
 ./autogen.sh
 CXXFLAGS="-std=c++17" ./configure --enable-srv_emb=yes --enable-mod_rediscache=yes
 make install -j4
-mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/ffead-cpp-4.0-bin_ac
+mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-5.0-bin_ac
 cd /tmp
 rm -rf /tmp/ffead-cpp-src

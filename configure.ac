@@ -3,7 +3,7 @@
 # For verbose logging use refer - https://autotools.io/automake/silent.html
 # ./configure --disable-silent-rules or make V=1
 
-AC_INIT([ffead-cpp], [4.0], [sumeet.chhetri@gmail.com])
+AC_INIT([ffead-cpp], [5.0], [sumeet.chhetri@gmail.com])
 AM_INIT_AUTOMAKE([no-define foreign])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
 AM_SILENT_RULES([yes])

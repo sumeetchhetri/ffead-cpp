@@ -78,7 +78,7 @@ mkdir build
 cd build
 cmake -G "MinGW Makefiles" -DSRV_EMB=on -DMOD_REDIS=ON -DMOD_SDORM_MONGO=ON -DCMAKE_INC_PATH=/mingw64/ ..
 mingw32-make install -j4
-mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
+mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
 cd /tmp/ffead-cpp-src
 chmod +x autogen.sh
 sed -i'' -e "s|m4_include|#m4_include|g" configure.ac

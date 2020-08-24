@@ -1,6 +1,6 @@
-FROM ubuntu:bionic
+FROM archlinux/base
 
-RUN apt update -yqq && apt install -yqq autoconf-archive autoconf automake libtool gcc g++ cmake unzip libpcre3-dev zlib1g-dev libpq-dev libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev libhiredis-dev wget netcat
+RUN pacman -Sy --noconfirm autoconf-archive autoconf automake libtool make clang unixodbc curl postgresql-libs hiredis libmemcached cmake openssh libutil-linux wget gnu-netcat tar gzip zlib unzip gawk grep sed core/binutils diffutils procps-ng
 
 #Install libcuckoo headers
 WORKDIR /tmp
@@ -28,9 +28,9 @@ RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
-RUN cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DMOD_NGINX=on .
+RUN cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 RUN make install -j4
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -38,10 +38,10 @@ COPY *.sh  /opt/
 
 WORKDIR /opt
 
-RUN chmod +x install_ffead-cpp-4.0.sh
-RUN ./install_ffead-cpp-4.0.sh
+RUN chmod +x install_ffead-cpp-5.0.sh
+RUN ./install_ffead-cpp-5.0.sh
 
-WORKDIR /opt/ffead-cpp-4.0
+WORKDIR /opt/ffead-cpp-5.0
 
 RUN chmod +x server.sh
 CMD ./server.sh

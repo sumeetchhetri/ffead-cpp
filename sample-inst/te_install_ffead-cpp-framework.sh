@@ -7,7 +7,7 @@ WRIT_THREADS=$(( $MAX_THREADS / 3 ))
 SERV_THREADS=$(( $MAX_THREADS - $WRIT_THREADS ))
 
 rm -rf nginxfc
-rm -rf ffead-cpp-4.0/
+rm -rf ffead-cpp-5.0/
 
 cd ffead-cpp/
 
@@ -55,7 +55,7 @@ rm -f /usr/local/lib/libte_benc*
 rm -f /usr/local/lib/libinter.so
 rm -f /usr/local/lib/libdinsxter.so
 
-cd ffead-cpp-4.0-bin
+cd ffead-cpp-5.0-bin
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
 while [ ! -f lib/libinter.so ]
@@ -69,10 +69,10 @@ done
 pkill ffead-cpp
 
 cd /root/ffead-cpp/
-cp -rf ffead-cpp-4.0-bin /root/ffead-cpp-4.0
-rm -rf ffead-cpp-4.0-bin
+cp -rf ffead-cpp-5.0-bin /root/ffead-cpp-5.0
+rm -rf ffead-cpp-5.0-bin
 
-cd /root/ffead-cpp-4.0
+cd /root/ffead-cpp-5.0
 cp -f lib/* /usr/local/lib
 ldconfig
 

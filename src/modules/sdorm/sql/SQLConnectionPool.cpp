@@ -74,7 +74,7 @@ void* SQLConnectionPool::newConnection(const bool& isWrite, const ConnectionNode
 	}
 
 	if(node.getConnectionTimeout()>0) {
-		int seconds = node.getConnectionTimeout()/1000;
+		//int seconds = node.getConnectionTimeout()/1000;
 		//SQLSetConnectAttr(conn, SQL_ATTR_CONNECTION_TIMEOUT, (SQLUINTEGER*)&seconds, 0);
 		//SQLSetConnectAttr(conn, SQL_LOGIN_TIMEOUT, (SQLPOINTER)&seconds, 0);
 	}

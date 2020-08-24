@@ -35,7 +35,7 @@ rm -rf ffead-cpp-src
 wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/v4.0.zip
 unzip v4.0.zip
 rm -f v4.0.zip
-mv ffead-cpp-4.0 ffead-cpp-src
+mv ffead-cpp-5.0 ffead-cpp-src
 cd ffead-cpp-src
 cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 make install -j4

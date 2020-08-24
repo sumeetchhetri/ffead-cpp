@@ -81,7 +81,7 @@ rm -f /usr/local/lib/libte_benc*
 rm -f /usr/local/lib/libinter.so
 rm -f /usr/local/lib/libdinter.so
 
-cd ffead-cpp-4.0-bin
+cd ffead-cpp-5.0-bin
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
 while [ ! -f lib/libinter.so ]
@@ -95,11 +95,11 @@ done
 pkill ffead-cpp
 
 cd ${IROOT}/ffead-cpp-src/
-cp -rf ffead-cpp-4.0-bin ${IROOT}/ffead-cpp-4.0
-rm -rf ffead-cpp-4.0-bin
+cp -rf ffead-cpp-5.0-bin ${IROOT}/ffead-cpp-5.0
+rm -rf ffead-cpp-5.0-bin
 mv ${IROOT}/nginxfc ${IROOT}/nginx-ffead-mongo
 
-cd ${IROOT}/ffead-cpp-4.0
+cd ${IROOT}/ffead-cpp-5.0
 
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 chmod 755 *.sh
@@ -118,7 +118,7 @@ cp -f web/te-benchmark-um/sql-src/TeBkUmWorldsql.h web/te-benchmark-um/include/T
 cp -f web/te-benchmark-um/sql-src/TeBkUmWorldsql.cpp web/te-benchmark-um/src/TeBkUmWorld.cpp
 make install -j${MAX_THREADS}
 
-cd ffead-cpp-4.0-bin
+cd ffead-cpp-5.0-bin
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
 while [ ! -f lib/libinter.so ]
@@ -132,11 +132,11 @@ done
 pkill ffead-cpp
 
 cd ${IROOT}/ffead-cpp-src/
-cp -rf ffead-cpp-4.0-bin ${IROOT}/ffead-cpp-4.0-sql
-rm -rf ffead-cpp-4.0-bin
+cp -rf ffead-cpp-5.0-bin ${IROOT}/ffead-cpp-5.0-sql
+rm -rf ffead-cpp-5.0-bin
 mv ${IROOT}/nginxfc ${IROOT}/nginx-ffead-sql
 
-cd ${IROOT}/ffead-cpp-4.0-sql
+cd ${IROOT}/ffead-cpp-5.0-sql
 
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 chmod 755 *.sh

@@ -324,7 +324,7 @@ fn (mut vweb FfeadCppContext) handle() {
 }
 
 fn main() {
-	mut server_directory := '/installs/ffead-cpp-4.0'
+	mut server_directory := '/installs/ffead-cpp-5.0'
 	mut server_port := 8080
 
 	mut fp := flag.new_flag_parser(os.args)

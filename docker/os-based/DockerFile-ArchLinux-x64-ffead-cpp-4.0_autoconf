@@ -32,7 +32,7 @@ RUN chmod +x autogen.sh
 RUN ./autogen.sh
 RUN ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --enable-mod_memcached=yes
 RUN make install
-RUN mv /tmp/ffead-cpp-src/ffead-cpp-4.0-bin /tmp/
+RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
 WORKDIR /tmp
 RUN rm -rf /tmp/ffead-cpp-src
 
@@ -40,10 +40,10 @@ COPY *.sh  /opt/
 
 WORKDIR /opt
 
-RUN chmod +x install_ffead-cpp-4.0.sh
-RUN ./install_ffead-cpp-4.0.sh
+RUN chmod +x install_ffead-cpp-5.0.sh
+RUN ./install_ffead-cpp-5.0.sh
 
-WORKDIR /opt/ffead-cpp-4.0
+WORKDIR /opt/ffead-cpp-5.0
 
 RUN chmod +x server.sh
 CMD ./server.sh

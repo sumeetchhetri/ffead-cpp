@@ -26,12 +26,12 @@ Both **cmake** and **autoconf** builds are supported
 Detailed OS specific instructions, instructions for installing the available server backends and docker/docker-compose scripts are located at [docker](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker)
 
 Build validated for the following Operating systems/Toolchains
- 1.  [Ubuntu](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-UbuntuBionic-x64-ffead-cpp-4.0)
- 2.  [CentOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Centos7-x64-ffead-cpp-4.0)
- 3.  [OpenSUSE](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-OpenSuseTumbleweed-x64-ffead-cpp-4.0)
- 4.  [Gentoo](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Gentoo-x64-ffead-cpp-4.0)
- 5.  [ArchLinux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-ArchLinux-x64-ffead-cpp-4.0)
- 6.  [Alpine Linux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Alpine-x64-ffead-cpp-4.0)
+ 1.  [Ubuntu](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-UbuntuBionic-x64-ffead-cpp-5.0)
+ 2.  [CentOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Centos7-x64-ffead-cpp-5.0)
+ 3.  [OpenSUSE](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-OpenSuseTumbleweed-x64-ffead-cpp-5.0)
+ 4.  [Gentoo](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Gentoo-x64-ffead-cpp-5.0)
+ 5.  [ArchLinux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-ArchLinux-x64-ffead-cpp-5.0)
+ 6.  [Alpine Linux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Alpine-x64-ffead-cpp-5.0)
  7.  [MacOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-macos.yml)
  8.  [Windows Cygwin](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-win-cygwin.yml)
  9.  [Windows mingw-w64](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-win-mingw.yml)
@@ -84,10 +84,10 @@ Quickstart (Using cmake/make)
 ===========
 - Install cmake >= 3.8.2 and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
 - mkdir build && cd build
-- cmake -DSRV_EMB=on -DMOD_SDORM_MONGO=on .
+- cmake -DSRV_EMB=on -DMOD_SDORM_MONGO=on ..
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ../ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ../ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
@@ -95,10 +95,10 @@ Quickstart (Using cmake/ninja)
 ===========
 - Install cmake >= 3.8.2, ninja and [prerequisites](https://github.com/sumeetchhetri/ffead-cpp/wiki/Prerequisites)
 - mkdir build && cd build
-- cmake -GNinja -DSRV_EMB=on -DMOD_SDORM_MONGO=on .
+- cmake -GNinja -DSRV_EMB=on -DMOD_SDORM_MONGO=on ..
 - ninja install (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ../ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ../ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 
@@ -109,7 +109,7 @@ Quickstart (Using autoconf)
 - ./configure --enable-srv_emb=yes --enable-mod_sdormmongo=yes
 - make install -j4 (Build ffead-cpp along-with the sample applications in web + generate ffead-cpp binary)
 - Sip some coffee
-- cd ffead-cpp-4.0-bin/ (Navigate to the ffead-cpp binary folder)
+- cd ffead-cpp-5.0-bin/ (Navigate to the ffead-cpp binary folder)
 - chmod +x *.sh
 - ./server.sh (Startup ffead-cpp Njoy!!)
 

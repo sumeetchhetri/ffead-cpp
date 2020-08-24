@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-4.0-base:2.0
+FROM sumeetchhetri/ffead-cpp-5.0-base:2.0
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="2.0"
 LABEL description="Base rust rocket docker image with ffead-cpp v4.0 - commit id - master"
@@ -6,11 +6,11 @@ LABEL description="Base rust rocket docker image with ffead-cpp v4.0 - commit id
 ENV IROOT=/installs
 
 RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/libinter.so /usr/local/lib/libdinter.so && \
-	ln -s ${IROOT}/ffead-cpp-4.0/lib/libte_benchmark_um.so /usr/local/lib/libte_benchmark_um.so && \
-	ln -s ${IROOT}/ffead-cpp-4.0/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
-	ln -s ${IROOT}/ffead-cpp-4.0/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
-	ln -s ${IROOT}/ffead-cpp-4.0/lib/libinter.so /usr/local/lib/libinter.so && \
-	ln -s ${IROOT}/ffead-cpp-4.0/lib/libdinter.so /usr/local/lib/libdinter.so && \
+	ln -s ${IROOT}/ffead-cpp-5.0/lib/libte_benchmark_um.so /usr/local/lib/libte_benchmark_um.so && \
+	ln -s ${IROOT}/ffead-cpp-5.0/lib/libffead-modules.so /usr/local/lib/libffead-modules.so && \
+	ln -s ${IROOT}/ffead-cpp-5.0/lib/libffead-framework.so /usr/local/lib/libffead-framework.so && \
+	ln -s ${IROOT}/ffead-cpp-5.0/lib/libinter.so /usr/local/lib/libinter.so && \
+	ln -s ${IROOT}/ffead-cpp-5.0/lib/libdinter.so /usr/local/lib/libdinter.so && \
 	ldconfig
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -21,8 +21,8 @@ RUN rustup default nightly && cargo update && cargo build --release && cp target
 FROM buildpack-deps:bionic
 RUN apt update -yqq && apt install --no-install-recommends -yqq uuid-dev odbc-postgresql unixodbc unixodbc-dev memcached \
 	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server libpq-dev && rm -rf /var/lib/apt/lists/*
-COPY --from=0 /installs/ffead-cpp-4.0 /installs/ffead-cpp-4.0
-COPY --from=0 /installs/ffead-cpp-4.0-sql /installs/ffead-cpp-4.0-sql
+COPY --from=0 /installs/ffead-cpp-5.0 /installs/ffead-cpp-5.0
+COPY --from=0 /installs/ffead-cpp-5.0-sql /installs/ffead-cpp-5.0-sql
 COPY --from=0 /installs/rocket-ffead-cpp /installs/
 RUN mkdir -p /installs/snmalloc-0.4.2/build
 COPY --from=0 /installs/snmalloc-0.4.2/build/libsnmallocshim-1mib.so /installs/snmalloc-0.4.2/build
