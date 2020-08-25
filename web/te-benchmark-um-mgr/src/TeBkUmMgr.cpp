@@ -88,6 +88,7 @@ std::string TeBkUmMgrRouter::WORLD = "world";
 std::string TeBkUmMgrRouter::FORTUNE = "fortune";
 
 void TeBkUmMgrRouter::db(TeBkUmMgrWorld& w) {
+#ifdef INC_SDORM_MONGO
 	MongoDBRawDataSourceImpl* sqli = static_cast<MongoDBRawDataSourceImpl*>(DataSourceManager::getRawImpl());
 	int rid = rand() % 10000 + 1;
 	try {
@@ -101,6 +102,7 @@ void TeBkUmMgrRouter::db(TeBkUmMgrWorld& w) {
 		DataSourceManager::cleanRawImpl(sqli);
 		throw e;
 	}
+#endif
 }
 void TeBkUmMgrRouter::dbUtil(void* ctx, int rn, std::vector<MgRawRes>& data) {
 	TeBkUmMgrWorld* w = (TeBkUmMgrWorld*)ctx;
@@ -125,6 +127,7 @@ void TeBkUmMgrRouter::queries(const char* q, int ql, std::vector<TeBkUmMgrWorld>
 	strToNum(q, ql, queryCount);
 	if(queryCount<1)queryCount=1;
 	else if(queryCount>500)queryCount=500;
+#ifdef INC_SDORM_MONGO
 
 	MongoDBRawDataSourceImpl* sqli = static_cast<MongoDBRawDataSourceImpl*>(DataSourceManager::getRawImpl());
 
@@ -144,6 +147,7 @@ void TeBkUmMgrRouter::queries(const char* q, int ql, std::vector<TeBkUmMgrWorld>
 		DataSourceManager::cleanRawImpl(sqli);
 		throw e;
 	}
+#endif
 }
 
 void TeBkUmMgrRouter::updates(const char* q, int ql, std::vector<TeBkUmMgrWorld>& wlst) {
@@ -151,7 +155,7 @@ void TeBkUmMgrRouter::updates(const char* q, int ql, std::vector<TeBkUmMgrWorld>
 	strToNum(q, ql, queryCount);
 	if(queryCount<1)queryCount=1;
 	else if(queryCount>500)queryCount=500;
-
+#ifdef INC_SDORM_MONGO
 	MongoDBRawDataSourceImpl* sqli = static_cast<MongoDBRawDataSourceImpl*>(DataSourceManager::getRawImpl());
 
 	try {
@@ -174,10 +178,12 @@ void TeBkUmMgrRouter::updates(const char* q, int ql, std::vector<TeBkUmMgrWorld>
 		DataSourceManager::cleanRawImpl(sqli);
 		throw e;
 	}
+#endif
 }
 
 void TeBkUmMgrRouter::updateCache() {
 	CacheInterface* cchi = CacheManager::getImpl();
+#ifdef INC_SDORM_MONGO
 	MongoDBRawDataSourceImpl* sqli = static_cast<MongoDBRawDataSourceImpl*>(DataSourceManager::getRawImpl());
 
 	try {
@@ -199,6 +205,7 @@ void TeBkUmMgrRouter::updateCache() {
 		CacheManager::cleanImpl(cchi);
 		throw e;
 	}
+#endif
 }
 void TeBkUmMgrRouter::updateCacheUtil(void* ctx, int rn, std::vector<MgRawRes>& data) {
 	std::vector<TeBkUmMgrWorld>* wlist = (std::vector<TeBkUmMgrWorld>*)ctx;
@@ -259,6 +266,7 @@ void TeBkUmMgrRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkUmMgrW
 }
 
 void TeBkUmMgrRouter::getContext(HttpRequest* request, Context* context) {
+#ifdef INC_SDORM_MONGO
 	MongoDBRawDataSourceImpl* sqli = static_cast<MongoDBRawDataSourceImpl*>(DataSourceManager::getRawImpl());
 
 	try {
@@ -279,6 +287,7 @@ void TeBkUmMgrRouter::getContext(HttpRequest* request, Context* context) {
 		DataSourceManager::cleanRawImpl(sqli);
 		throw;
 	}
+#endif
 }
 void TeBkUmMgrRouter::getContextUtil(void* ctx, int rn, std::vector<MgRawRes>& data) {
 	std::vector<TeBkUmMgrFortune>* flst = (std::vector<TeBkUmMgrFortune>*)ctx;
