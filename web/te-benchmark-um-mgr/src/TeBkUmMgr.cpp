@@ -104,6 +104,7 @@ void TeBkUmMgrRouter::db(TeBkUmMgrWorld& w) {
 	}
 #endif
 }
+#ifdef INC_SDORM_MONGO
 void TeBkUmMgrRouter::dbUtil(void* ctx, int rn, std::vector<MgRawRes>& data) {
 	TeBkUmMgrWorld* w = (TeBkUmMgrWorld*)ctx;
 	for(int i=0;i<(int)data.size();i++) {
@@ -121,6 +122,7 @@ void TeBkUmMgrRouter::dbUtil(void* ctx, int rn, std::vector<MgRawRes>& data) {
 		}
 	}
 }
+#endif
 
 void TeBkUmMgrRouter::queries(const char* q, int ql, std::vector<TeBkUmMgrWorld>& wlst) {
 	int queryCount = 0;
@@ -128,7 +130,6 @@ void TeBkUmMgrRouter::queries(const char* q, int ql, std::vector<TeBkUmMgrWorld>
 	if(queryCount<1)queryCount=1;
 	else if(queryCount>500)queryCount=500;
 #ifdef INC_SDORM_MONGO
-
 	MongoDBRawDataSourceImpl* sqli = static_cast<MongoDBRawDataSourceImpl*>(DataSourceManager::getRawImpl());
 
 	try {
@@ -207,6 +208,7 @@ void TeBkUmMgrRouter::updateCache() {
 	}
 #endif
 }
+#ifdef INC_SDORM_MONGO
 void TeBkUmMgrRouter::updateCacheUtil(void* ctx, int rn, std::vector<MgRawRes>& data) {
 	std::vector<TeBkUmMgrWorld>* wlist = (std::vector<TeBkUmMgrWorld>*)ctx;
 	TeBkUmMgrWorld w;
@@ -226,6 +228,7 @@ void TeBkUmMgrRouter::updateCacheUtil(void* ctx, int rn, std::vector<MgRawRes>& 
 	}
 	wlist->push_back(w);
 }
+#endif
 
 void TeBkUmMgrRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkUmMgrWorld>& wlst) {
 	int queryCount = 0;
@@ -234,7 +237,6 @@ void TeBkUmMgrRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkUmMgrW
 	else if(queryCount>500)queryCount=500;
 
 	CacheInterface* cchi = CacheManager::getImpl();
-
 	try {
 		std::vector<std::string> keys;
 		for (int c = 0; c < queryCount; ++c) {
@@ -257,7 +259,6 @@ void TeBkUmMgrRouter::cachedWorlds(const char* q, int ql, std::vector<TeBkUmMgrW
 			w.setRandomNumber(tmp);
 			wlst.push_back(w);
 		}
-
 		CacheManager::cleanImpl(cchi);
 	} catch(const std::exception& e) {
 		CacheManager::cleanImpl(cchi);
@@ -289,6 +290,7 @@ void TeBkUmMgrRouter::getContext(HttpRequest* request, Context* context) {
 	}
 #endif
 }
+#ifdef INC_SDORM_MONGO
 void TeBkUmMgrRouter::getContextUtil(void* ctx, int rn, std::vector<MgRawRes>& data) {
 	std::vector<TeBkUmMgrFortune>* flst = (std::vector<TeBkUmMgrFortune>*)ctx;
 	TeBkUmMgrFortune w;
@@ -307,6 +309,7 @@ void TeBkUmMgrRouter::getContextUtil(void* ctx, int rn, std::vector<MgRawRes>& d
 	}
 	flst->push_back(w);
 }
+#endif
 
 //https://stackoverflow.com/questions/9631225/convert-strings-specified-by-length-not-nul-terminated-to-int-float
 bool TeBkUmMgrRouter::strToNum(const char* str, int len, int& ret) {

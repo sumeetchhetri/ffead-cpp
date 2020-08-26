@@ -86,15 +86,21 @@ class TeBkUmMgrRouter : public Router {
 
 	void db(TeBkUmMgrWorld&);
 	void queries(const char*, int, std::vector<TeBkUmMgrWorld>&);
+#ifdef INC_SDORM_MONGO
 	static void dbUtil(void* ctx, int rn, std::vector<MgRawRes>& data);
+#endif
 
 	void updates(const char*, int, std::vector<TeBkUmMgrWorld>&);
 	
 	void cachedWorlds(const char*, int, std::vector<TeBkUmMgrWorld>&);
+#ifdef INC_SDORM_MONGO
 	static void updateCacheUtil(void* ctx, int rn, std::vector<MgRawRes>& data);
+#endif
 
 	void getContext(HttpRequest* request, Context* context);
+#ifdef INC_SDORM_MONGO
 	static void getContextUtil(void* ctx, int rn, std::vector<MgRawRes>& data);
+#endif
 public:
 	void updateCache();
 	void route(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib);

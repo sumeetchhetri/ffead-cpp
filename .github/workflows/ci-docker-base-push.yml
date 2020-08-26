@@ -13,7 +13,7 @@ env:
 jobs:
   push:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.event.head_commit.message == '[docker_push]'
+    if: contains(github.event.head_commit.message, '[docker_push]') && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v2
 
@@ -49,7 +49,7 @@ jobs:
 
       - name: Build base ffead-cpp-java image
         run: |
-          #cd docker/techempower-config
+          cd docker/techempower-config
           docker build . --file ffead-cpp-java-base.dockerfile --tag $JAVA_IMAGE_NAME
 
       - name: Log into registry
@@ -79,7 +79,7 @@ jobs:
 
       - name: Build base ffead-cpp-rust image
         run: |
-          #cd docker/techempower-config
+          cd docker/techempower-config
           docker build . --file ffead-cpp-rust-base.dockerfile --tag $RUST_IMAGE_NAME
 
       - name: Log into registry
@@ -109,7 +109,7 @@ jobs:
 
       - name: Build base ffead-cpp-rust-rocket image
         run: |
-          #cd docker/techempower-config
+          cd docker/techempower-config
           docker build . --file ffead-cpp-rust-rocket-base.dockerfile --tag $RUST_RKT_IMAGE_NAME
 
       - name: Log into registry

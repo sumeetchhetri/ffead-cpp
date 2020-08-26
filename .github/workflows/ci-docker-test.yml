@@ -1,0 +1,18 @@
+name: Build docker image with wrk tests for ffead-cpp
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip_build]')"
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build docker image with wrk tests for ffead-cpp
+      run: |
+        cd docker/test
+        ./build_test.sh

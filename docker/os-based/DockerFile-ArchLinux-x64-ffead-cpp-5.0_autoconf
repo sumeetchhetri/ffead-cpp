@@ -1,6 +1,6 @@
 FROM archlinux/base
 
-RUN pacman -Sy --noconfirm autoconf-archive autoconf automake libtool make clang unixodbc curl postgresql-libs hiredis libmemcached cmake openssh libutil-linux wget gnu-netcat tar gzip zlib unzip gawk grep sed core/binutils diffutils procps-ng
+RUN pacman -Sy --noconfirm autoconf-archive autoconf automake libtool make clang glibc unixodbc curl postgresql-libs hiredis libmemcached cmake openssh libutil-linux wget gnu-netcat tar gzip zlib unzip gawk grep sed core/binutils diffutils procps-ng
 
 #Install libcuckoo headers
 WORKDIR /tmp
