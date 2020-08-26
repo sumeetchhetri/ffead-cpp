@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-5.0-rust-rocket-base:2.0
+FROM sumeetchhetri/ffead-cpp-5.0-rust-rocket-base:latest
 
 ENV IROOT=/installs
 

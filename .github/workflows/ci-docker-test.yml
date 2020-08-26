@@ -15,4 +15,4 @@ jobs:
     - name: Build docker image with wrk tests for ffead-cpp
       run: |
         cd docker/test
-        ./build_test.sh
+        chmod +x *.sh && ./build_test.sh

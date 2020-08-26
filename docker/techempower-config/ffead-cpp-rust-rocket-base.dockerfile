@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-5.0-base:2.0
+FROM sumeetchhetri/ffead-cpp-5.0-base:latest
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="2.0"
 LABEL description="Base rust rocket docker image with ffead-cpp v4.0 - commit id - master"

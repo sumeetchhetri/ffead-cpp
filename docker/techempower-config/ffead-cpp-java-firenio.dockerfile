@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-5.0-java-base:2.0
+FROM sumeetchhetri/ffead-cpp-5.0-java-base:latest
 
 ENV IROOT=/installs
 

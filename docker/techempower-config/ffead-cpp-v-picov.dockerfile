@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-5.0-v-base:2.0
+FROM sumeetchhetri/ffead-cpp-5.0-v-base:latest
 
 ENV IROOT=/installs
 

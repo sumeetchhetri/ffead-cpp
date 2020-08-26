@@ -1,6 +1,6 @@
-docker rmi sumeetchhetri/ffead-cpp-5.0-base:2.0
-docker build -f ffead-cpp-base.dockerfile -t sumeetchhetri/ffead-cpp-5.0-base:2.0 .
-docker push sumeetchhetri/ffead-cpp-5.0-base:2.0
+docker rmi sumeetchhetri/ffead-cpp-5.0-base:latest
+docker build -f ffead-cpp-base.dockerfile -t sumeetchhetri/ffead-cpp-5.0-base:latest .
+docker push sumeetchhetri/ffead-cpp-5.0-base:latest
 
 docker rmi sumeetchhetri/ffead-cpp-5.0-rust-base:2.0
 docker build -f ffead-cpp-rust-base.dockerfile -t sumeetchhetri/ffead-cpp-5.0-rust-base:2.0 .
