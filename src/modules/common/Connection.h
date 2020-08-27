@@ -68,6 +68,7 @@ class Connection
 	bool busy;
 	bool type;
 	void* _conn;
+	bool outOfPool;
 	ConnectionNode node;
 public:
 	Connection();
@@ -78,6 +79,8 @@ public:
 	void setBusy(const bool& busy);
 	bool isType() const;
 	void setType(const bool& type);
+	bool isOutOfPool() const;
+	void setOutOfPool(const bool& outOfPool);
 	const ConnectionNode& getNode() const;
 	void setNode(const ConnectionNode& node);
 };

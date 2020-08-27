@@ -36,12 +36,12 @@ Connection* ConnectionPooler::checkoutInternal() {
 	do {
 		if(!connections.try_dequeue(conn)) {
 			counter++;
-			if(conn==NULL) {
-				usleep(1*1000);
-			}
+			usleep(1*1000);
+			//logger << "Trying for connection..." << std::endl;
 		}
 	} while(counter<5 && conn==NULL);
 	if(conn==NULL) {
+		//logger << "Going for new connection..." << std::endl;
 		std::vector<ConnectionNode> nodes = properties.getNodes();
 		void* c = this->newConnection(true, nodes.at(0));
 		Connection* _c = new Connection();
@@ -49,6 +49,7 @@ Connection* ConnectionPooler::checkoutInternal() {
 		_c->setNode(nodes.at(0));
 		_c->setBusy(false);
 		_c->setType(true);
+		_c->setOutOfPool(true);
 		return _c;
 	}
 	return conn;
@@ -64,6 +65,7 @@ Connection* ConnectionPooler::checkout() {
 			connection->setBusy(false);
 			connection->setType(true);
 			connection->setNode(nodes.at(0));
+			connection->setOutOfPool(false);
 			return connection;
 		}
 		return NULL;
@@ -78,6 +80,11 @@ void ConnectionPooler::release(Connection* _c) {
 		delete _c;
 		return;
 	} else {
+		if(_c->isOutOfPool()) {
+			closeConnection(_c->getConn());
+			delete _c;
+			return;
+		}
 		this->connections.enqueue(_c);
 	}
 }
@@ -126,6 +133,7 @@ void ConnectionPooler::createPool(const ConnectionProperties& properties) {
 			_c->setNode(node);
 			_c->setBusy(false);
 			_c->setType(true);
+			_c->setOutOfPool(false);
 			this->connections.enqueue(_c);
 			this->initialized = true;
 		} else if((int)nodes.size()==1) {

@@ -57,7 +57,7 @@ public:
 	static DataSourceInterface* getImpl(std::string name = "", std::string appName = "");
 	static void cleanImpl(DataSourceInterface*);
 	static void* getRawImpl(std::string name = "", std::string appName = "");
-	static void cleanRawImpl(void*);
+	static void cleanRawImpl(DataSourceType*);
 };
 
 #endif /* DATASOURCEMANAGER_H_ */

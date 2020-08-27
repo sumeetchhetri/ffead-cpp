@@ -62,13 +62,14 @@ public:
 	virtual ~MongoDBRawConnectionPool();
 };
 
-class MongoDBRawDataSourceImpl {
+class MongoDBRawDataSourceImpl : public DataSourceType {
 	Logger logger;
 	MongoDBRawConnectionPool* pool;
 	mongoc_client_t* conn;
 	mongoc_collection_t* coll;
 	mongoc_bulk_operation_t* bulk;
 public:
+	DSType getType();
 	MongoDBRawDataSourceImpl(ConnectionPooler* pool);
 	virtual ~MongoDBRawDataSourceImpl();
 

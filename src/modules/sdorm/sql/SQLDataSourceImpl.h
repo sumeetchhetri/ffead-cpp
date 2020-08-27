@@ -65,6 +65,7 @@ class SQLDataSourceImpl: public DataSourceInterface {
 	void* getElements(const std::vector<std::string>& cols, Query& q);
 	void showError(const char *fn, const SQLHANDLE& handle, const SQLSMALLINT& type);
 	void close();
+	void closeConn();
 	void bindQueryParams(Query& query);
 	Query fromQueryBuilder(QueryBuilder& qb);
 	void* executeQueryObject(Query& cquery);
@@ -75,6 +76,7 @@ class SQLDataSourceImpl: public DataSourceInterface {
 	void empty(const std::string& clasName);
 	void storePropertyInt(ClassInfo* clas, void* t, void* colV, const Field& fe, int& var);
 public:
+	DSType getType();
 	SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping);
 	~SQLDataSourceImpl();
 	bool startTransaction();

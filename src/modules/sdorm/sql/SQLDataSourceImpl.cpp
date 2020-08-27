@@ -22,6 +22,10 @@
 
 #include "SQLDataSourceImpl.h"
 
+DSType SQLDataSourceImpl::getType() {
+	return SD_ORM_SQL;
+}
+
 Query SQLDataSourceImpl::fromQueryBuilder(QueryBuilder& qb) {
 	Query q;
 	std::string qs;
@@ -426,7 +430,7 @@ SQLDataSourceImpl::SQLDataSourceImpl(ConnectionPooler* pool, Mapping* mapping) {
 }
 
 SQLDataSourceImpl::~SQLDataSourceImpl() {
-	endSession();
+	closeConn();
 }
 
 void SQLDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject& idv) {
@@ -470,11 +474,11 @@ void SQLDataSourceImpl::refreshStmt() {
 	SQLFreeStmt(V_OD_hstmt, SQL_UNBIND);
 	SQLFreeStmt(V_OD_hstmt, SQL_RESET_PARAMS);
 	SQLFreeStmt(V_OD_hstmt, SQL_CLOSE);
+	SQLCloseCursor(V_OD_hstmt);
 #endif
 }
 
-void SQLDataSourceImpl::close() {
-	if(isSession) return;
+void SQLDataSourceImpl::closeConn() {
 #ifdef HAVE_LIBODBC
 	if(isSingleEVH) return;
 	this->pool->release(conn);
@@ -482,6 +486,14 @@ void SQLDataSourceImpl::close() {
 	V_OD_hdbc = NULL;
 	SQLFreeHandle(SQL_HANDLE_STMT, V_OD_hstmt);
 	V_OD_hstmt = NULL;
+#endif
+}
+
+void SQLDataSourceImpl::close() {
+	if(isSession) return;
+	isSession = false;
+#ifdef HAVE_LIBODBC
+	refreshStmt();
 #endif
 }
 
@@ -2037,7 +2049,7 @@ bool SQLDataSourceImpl::startSession() {
 }
 
 bool SQLDataSourceImpl::endSession() {
-	isSession = false;
+	close();
 	return true;
 }
 

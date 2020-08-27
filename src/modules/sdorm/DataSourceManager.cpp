@@ -182,21 +182,24 @@ void* DataSourceManager::getRawImpl(std::string name, std::string appName) {
 	return t;
 }
 
-void DataSourceManager::cleanRawImpl(void* dsImpl) {
+void DataSourceManager::cleanRawImpl(DataSourceType* dsImpl) {
 	if(!isSingleEVH) {
-		/*if(StringUtil::toLowerCopy(dsnMgr->props.getType())=="sql-raw-pq")
+		if(dsImpl->getType()==SD_RAW_SQLPG)
 		{
 #if defined(INC_SDORM_SQL) && defined(HAVE_LIBPQ)
 			delete (LibpqDataSourceImpl*)dsImpl;
 #endif
 		}
-		if(StringUtil::toLowerCopy(dsnMgr->props.getType())=="mongo-raw")
+		else if(dsImpl->getType()==SD_RAW_MONGO)
 		{
 #if defined(INC_SDORM_MONGO)
 			delete (MongoDBRawDataSourceImpl*)dsImpl;
 #endif
-		}*/
-		delete dsImpl;
+		}
+		else
+		{
+			delete dsImpl;
+		}
 	}
 }
 
@@ -260,13 +263,13 @@ DataSourceInterface* DataSourceManager::getImpl(std::string name, std::string ap
 
 void DataSourceManager::cleanImpl(DataSourceInterface* dsImpl) {
 	if(!isSingleEVH) {
-		if(StringUtil::toLowerCopy(dsImpl->pool->getProperties().getType())=="sql")
+		if(dsImpl->getType()==SD_ORM_SQL)
 		{
 #ifdef INC_SDORM_SQL
 			delete (SQLDataSourceImpl*)dsImpl;
 #endif
 		}
-		else if(StringUtil::toLowerCopy(dsImpl->pool->getProperties().getType())=="mongo")
+		else if(dsImpl->getType()==SD_ORM_MONGO)
 		{
 #ifdef INC_SDORM_MONGO
 			delete (MongoDBDataSourceImpl*)dsImpl;

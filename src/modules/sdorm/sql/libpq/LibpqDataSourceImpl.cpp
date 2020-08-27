@@ -15,6 +15,10 @@
 */
 #include "LibpqDataSourceImpl.h"
 
+DSType LibpqDataSourceImpl::getType() {
+	return SD_RAW_SQLPG;
+}
+
 LibpqDataSourceImpl::LibpqDataSourceImpl(const std::string& url) {
 	this->url = url;
 #ifdef HAVE_LIBPQ

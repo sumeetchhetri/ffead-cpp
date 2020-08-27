@@ -44,6 +44,7 @@ Connection::Connection() {
 	this->_conn = NULL;
 	this->busy = false;
 	this->type = false;
+	this->outOfPool = false;
 }
 
 Connection::~Connection() {
@@ -51,6 +52,14 @@ Connection::~Connection() {
 
 bool Connection::isType() const {
 	return type;
+}
+
+bool Connection::isOutOfPool() const {
+	return outOfPool;
+}
+
+void Connection::setOutOfPool(const bool& outOfPool) {
+	this->outOfPool = outOfPool;
 }
 
 const ConnectionNode& Connection::getNode() const {

@@ -49,7 +49,7 @@ struct LibpqRes {
 
 typedef void (*LipqResFunc) (void* ctx, int, std::vector<LibpqRes>&);
 
-class LibpqDataSourceImpl {
+class LibpqDataSourceImpl : public DataSourceType {
 	std::map<std::string, std::string> prepStmtMap;
 	Logger logger;
 	std::string url;
@@ -58,6 +58,7 @@ class LibpqDataSourceImpl {
 	PGconn* conn; //statement
 #endif
 public:
+	DSType getType();
 	LibpqDataSourceImpl(const std::string&);
 	~LibpqDataSourceImpl();
 

@@ -26,5 +26,5 @@ jobs:
         echo '::set-env name=PATH::C:\tools\cygwin\bin;C:\tools\cygwin\usr\bin'
     - name: Install dependencies and ffead-cpp
       run: |
-        bash --login -c "cd /tmp && wget https://raw.githubusercontent.com/sumeetchhetri/ffead-cpp/master/docker/install_cywgin.sh && dos2unix install_cywgin.sh && chmod +x install_cywgin.sh && ./install_cywgin.sh"
+        bash --login -c "cd /tmp && wget https://raw.githubusercontent.com/sumeetchhetri/ffead-cpp/master/docker/install_cygwin.sh && dos2unix install_cygwin.sh && chmod +x install_cygwin.sh && ./install_cygwin.sh"
         set ErrorLevel=%ErrorLevel%

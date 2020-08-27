@@ -37,7 +37,17 @@
 #include "ConnectionPooler.h"
 #include "IDGenerator.h"
 
-class DataSourceInterface : public IDGenerator {
+enum DSType {
+	SD_ORM_MONGO, SD_ORM_SQL, SD_RAW_MONGO, SD_RAW_SQLPG
+};
+
+class DataSourceType {
+public:
+	virtual DSType getType()=0;
+	virtual ~DataSourceType(){}
+};
+
+class DataSourceInterface : public DataSourceType, public IDGenerator {
 	friend class DataSourceManager;
 protected:
 	bool isSingleEVH;
@@ -58,6 +68,7 @@ protected:
 	virtual void* executeQuery(QueryBuilder& qb, const bool& isObj)=0;
 	virtual long getNumRows(const std::string& clasName)=0;
 	virtual void empty(const std::string& clasName)=0;
+	virtual DSType getType()=0;
 
 	void assignId(DataSourceEntityMapping& dsemp, ClassInfo* clas, void* entity);
 public:

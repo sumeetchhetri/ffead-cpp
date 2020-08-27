@@ -65,6 +65,7 @@ class MongoDBDataSourceImpl: public DataSourceInterface {
 	mongoc_collection_t* _collection(const char*);
 	void _release(mongoc_collection_t*);
 public:
+	DSType getType();
 	MongoDBDataSourceImpl(ConnectionPooler* pool, Mapping* mapping);
 	virtual ~MongoDBDataSourceImpl();
 	bool startTransaction();

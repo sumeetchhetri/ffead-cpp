@@ -15,6 +15,10 @@
 */
 #include "MongoDBRawDataSourceImpl.h"
 
+DSType MongoDBRawDataSourceImpl::getType() {
+	return SD_RAW_MONGO;
+}
+
 MongoDBRawConnectionPool::MongoDBRawConnectionPool(const ConnectionProperties& props) {
 	setProperties(props);
 }

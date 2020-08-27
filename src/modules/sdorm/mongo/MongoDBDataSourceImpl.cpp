@@ -22,6 +22,10 @@
 
 #include "MongoDBDataSourceImpl.h"
 
+DSType MongoDBDataSourceImpl::getType() {
+	return SD_ORM_MONGO;
+}
+
 std::string MongoDBDataSourceImpl::initializeDMLQueryParts(Query& cquery, bson_t** data, bson_t** query, std::string& operationName) {
 	std::string qs = cquery.getQuery();
 	StringUtil::trim(qs);
@@ -709,6 +713,10 @@ MongoDBDataSourceImpl::MongoDBDataSourceImpl(ConnectionPooler* pool, Mapping* ma
 
 MongoDBDataSourceImpl::~MongoDBDataSourceImpl() {
 	endSession();
+	if(!isSingleEVH) {
+		pool->release(conn);
+		conn = NULL;
+	}
 }
 
 void MongoDBDataSourceImpl::executeCustom(DataSourceEntityMapping& dsemp, const std::string& customMethod, GenericObject& idv) {
@@ -1783,10 +1791,6 @@ bool MongoDBDataSourceImpl::endSession() {
 	if(collection!=NULL) {
 		mongoc_collection_destroy(collection);
 		collection = NULL;
-	}
-	if(!isSingleEVH) {
-		pool->release(conn);
-		conn = NULL;
 	}
 	return true;
 }

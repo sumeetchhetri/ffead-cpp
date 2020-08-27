@@ -167,9 +167,17 @@ void TeBkUmMgrRouter::updates(const char* q, int ql, std::vector<TeBkUmMgrWorld>
 			bson_append_int32(&q, "_id", 3, rid);
 			TeBkUmMgrWorld w;
 			sqli->executeQuery(&q, &w, &TeBkUmMgrRouter::dbUtil);
+			int newRandomNumber = rand() % 10000 + 1;
+			if(w.getRandomNumber() == newRandomNumber) {
+				newRandomNumber += 1;
+				if(newRandomNumber>=10000) {
+					newRandomNumber = 1;
+				}
+			}
+			w.setRandomNumber(newRandomNumber);
 			bson_t d = BSON_INITIALIZER;
 			bson_append_int32(&d, "_id", 3, w.getId());
-			bson_append_int32(&d, "randomNumber", 3, w.getRandomNumber());
+			bson_append_int32(&d, "randomNumber", 12, w.getRandomNumber());
 			sqli->addBulk(&q, &d);
 			wlst.push_back(w);
 		}
