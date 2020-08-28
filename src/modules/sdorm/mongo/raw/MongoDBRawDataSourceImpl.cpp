@@ -298,6 +298,7 @@ bool MongoDBRawDataSourceImpl::endBulk() {
 	bson_error_t error;
 	bool fl = mongoc_bulk_operation_execute (bulk, &reply, &error);
 	mongoc_bulk_operation_destroy (bulk);
+	bulk = NULL;
 	return fl;
 }
 

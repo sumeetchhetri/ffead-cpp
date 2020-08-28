@@ -701,11 +701,11 @@ void HttpRequest::reset(std::string&& data, int* content_length) {
 	actUrl.clear();
 }
 
-std::string_view HttpRequest::getPath() {
+const std::string_view& HttpRequest::getPath() {
 	return pathv;
 }
 
-std::string_view HttpRequest::getQueryStr() {
+const std::string_view& HttpRequest::getQueryStr() {
 	return queryv;
 }
 
@@ -1453,7 +1453,7 @@ std::string HttpRequest::toString()
 HttpRequest::~HttpRequest() {
 }
 
-std::string_view HttpRequest::getMethod() const
+const std::string_view& HttpRequest::getMethod() const
 {
 	return methodv;
 }
@@ -1506,11 +1506,6 @@ void HttpRequest::setContent_boundary(const std::string& content_boundary)
 std::string HttpRequest::getContent() const
 {
 	return content;
-}
-
-std::string_view HttpRequest::getContentv() const
-{
-	return contentv;
 }
 
 void HttpRequest::setContent(std::string &&data)
@@ -1579,7 +1574,7 @@ std::string HttpRequest::getDefaultLocale() const
 		return "en";
 }
 
-std::string_view HttpRequest::getCntxt_name() const
+const std::string_view& HttpRequest::getCntxt_name() const
 {
 	return cntxt_name;
 }

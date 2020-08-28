@@ -82,7 +82,6 @@ class HttpRequest {
 	bool corsRequest;
 	//std::string method;
 	std::string content;
-	std::string contentv;
 	std::string content_boundary;
 	std::string content_tfile;
 	std::string file;
@@ -186,14 +185,13 @@ public:
 	bool isCorsRequest();
     void setUrl(std::string url);
     HttpSession* getSession();
-    std::string_view getMethod() const;
+    const std::string_view& getMethod() const;
 	std::string getUrl() const;
 	std::string getCurl() const;
 	std::string getHttpVersion() const;
 	float getHttpVers() const;
 	std::string getContent_boundary() const;
 	std::string getContent() const;
-	std::string_view getContentv() const;
 	void setContent(std::string &&data);
     RMap getRequestParams() const;
     std::string getRequestParam(const std::string&);
@@ -201,7 +199,7 @@ public:
     std::string getRequestParamType(const std::string& key);
     std::string getCntxt_root() const;
     std::string getDefaultLocale() const;
-    std::string_view getCntxt_name() const;
+    const std::string_view& getCntxt_name() const;
     std::string getFile() const;
     void setFile(const std::string&);
     std::string getActUrl() const;
@@ -260,8 +258,8 @@ public:
 	void setAuthMethod(std::string v);
 	std::string getExt() const;
 	static std::string getFileExtension(const std::string& file);
-	std::string_view getPath();
-	std::string_view getQueryStr();
+	const std::string_view& getPath();
+	const std::string_view& getQueryStr();
 };
 
 /*
