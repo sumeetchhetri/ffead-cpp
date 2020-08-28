@@ -79,16 +79,16 @@ cd build
 cmake -G "MinGW Makefiles" -DSRV_EMB=on -DMOD_REDIS=ON -DMOD_SDORM_MONGO=ON -DCMAKE_INC_PATH=/mingw64/ ..
 mingw32-make install -j4
 mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
-cd /tmp/ffead-cpp-src
-chmod +x autogen.sh
-sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
-sed -i'' -e "s|AX_CXX_COMPILE_STDCXX|#AX_CXX_COMPILE_STDCXX|g" configure.ac
-sed -i'' -e "s|AC_CHECK_LIB(regex|#AC_CHECK_LIB(regex|g" configure.ac
-sed -i'' -e "s|LIBS="-lwsock32 -lws2_32 -lkernel32 -lregex -lssp|LIBS="-lwsock32 -lws2_32 -lkernel32 -lregex -lssp -ldl|g" configure.ac
-./autogen.sh
-env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc CXX=${TARGET}-g++ AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
-	CPPFLAGS="-I/mingw64/include -std=c++17" LDFLAGS="-L/mingw64/lib -fstack-protector" lt_cv_deplibs_check_method=pass_all ./configure --host="${TARGET}" \
-	--enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --with-top_inc_dir=/mingw64/include
-make install -j4
-cd /tmp
+#cd /tmp/ffead-cpp-src
+#chmod +x autogen.sh
+#sed -i'' -e "s|m4_include|#m4_include|g" configure.ac
+#sed -i'' -e "s|AX_CXX_COMPILE_STDCXX|#AX_CXX_COMPILE_STDCXX|g" configure.ac
+#sed -i'' -e "s|AC_CHECK_LIB(regex|#AC_CHECK_LIB(regex|g" configure.ac
+#sed -i'' -e 's|LIBS="-lwsock32 -lws2_32 -lkernel32 -lregex -lssp|LIBS="-lwsock32 -lws2_32 -lkernel32 -lregex -lssp -ldl|g' configure.ac
+#./autogen.sh
+#env NM=${TARGET}-nm AS=${TARGET}-as LD=${TARGET}-ld CC=${TARGET}-gcc CXX=${TARGET}-g++ AR=${TARGET}-ar RANLIB=${TARGET}-ranlib C_INCLUDE_PATH=${STAGE_DIR}/include \
+#	CPPFLAGS="-I/mingw64/include -std=c++17" LDFLAGS="-L/mingw64/lib -fstack-protector" lt_cv_deplibs_check_method=pass_all ./configure --host="${TARGET}" \
+#	--enable-srv_emb=yes --enable-mod_sdormmongo=yes --enable-mod_sdormsql=yes --enable-mod_rediscache=yes --with-top_inc_dir=/mingw64/include
+#make install -j4
+#cd /tmp
 rm -rf /tmp/ffead-cpp-src
