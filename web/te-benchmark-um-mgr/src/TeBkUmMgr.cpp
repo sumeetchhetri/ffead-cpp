@@ -186,9 +186,9 @@ void TeBkUmMgrRouter::updates(const char* q, int ql, std::vector<TeBkUmMgrWorld>
 			bson_append_int32(&d, "randomNumber", 12, w.getRandomNumber());
 			bson_append_document_end(&du, &d);
 			sqli->addBulk(&q, &du);
-			char* str = bson_as_json(&du, NULL);
+			/*char* str = bson_as_json(&du, NULL);
 			printf("%s\n", str);
-			bson_free(str);
+			bson_free(str);*/
 			bson_destroy(&du);
 			bson_destroy(&q);
 			wlst.push_back(w);
