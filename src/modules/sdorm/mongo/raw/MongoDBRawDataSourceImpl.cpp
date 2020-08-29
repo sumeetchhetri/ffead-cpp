@@ -175,10 +175,13 @@ void MongoDBRawDataSourceImpl::executeQuery(const std::string &query, void* ctx,
 	bson_error_t error;
 	bson_t* qb = bson_new_from_json((const uint8_t*)query.c_str(), query.length(), &error);
 	executeQuery(qb, ctx, cb, start, count);
+	bson_destroy(qb);
 }
 
 void MongoDBRawDataSourceImpl::executeQuery(const bson_t* query, void* ctx, MgRawResFunc cb, int start, int count) {
+	bool qi = false;
 	if(query==NULL) {
+		qi = true;
 		query = BCON_NEW ("$query", "{", "}");
 	}
 	mongoc_cursor_t* cursor = mongoc_collection_find(coll, MONGOC_QUERY_NONE, start, count, 0, query, NULL, NULL);
@@ -254,13 +257,19 @@ void MongoDBRawDataSourceImpl::executeQuery(const bson_t* query, void* ctx, MgRa
 		}
 		cb(ctx, rowNum++, row);
 	}
+	if(qi) {
+		bson_destroy((bson_t*)query);
+	}
 }
 
 bool MongoDBRawDataSourceImpl::executeUpdateQuery(const std::string &query, const std::string &data, MongoDBRawOper oper) {
 	bson_error_t error;
 	bson_t* qb = query.length()>0?bson_new_from_json((const uint8_t*)query.c_str(), query.length(), &error):bson_new();
 	bson_t* db = bson_new_from_json((const uint8_t*)query.c_str(), query.length(), &error);
-	return executeUpdateQuery(qb, db, oper);
+	bool fl = executeUpdateQuery(qb, db, oper);
+	bson_destroy(qb);
+	bson_destroy(db);
+	return fl;
 }
 
 bool MongoDBRawDataSourceImpl::executeUpdateQuery(const bson_t* query, const bson_t* data, MongoDBRawOper oper) {
@@ -290,7 +299,8 @@ bool MongoDBRawDataSourceImpl::startBulk(const std::string& collName) {
 }
 
 void MongoDBRawDataSourceImpl::addBulk(bson_t* q, bson_t* d) {
-	mongoc_bulk_operation_replace_one(bulk, q, d, false);
+	//mongoc_bulk_operation_replace_one(bulk, q, d, false);
+	mongoc_bulk_operation_update_one(bulk, q, d, false);
 }
 
 bool MongoDBRawDataSourceImpl::endBulk() {
@@ -307,10 +317,12 @@ bool MongoDBRawDataSourceImpl::executeUpdateBulkQuery(int len, MgRawBlkFunc cb) 
 	if(len>0) {
 		mongoc_bulk_operation_t* bulk = mongoc_collection_create_bulk_operation (coll, true, NULL);
 		for(int i=0;i<len;i++) {
-			bson_t q;
-			bson_t d;
+			bson_t q = BSON_INITIALIZER;
+			bson_t d = BSON_INITIALIZER;
 			cb(&q, &d);
 			mongoc_bulk_operation_replace_one(bulk, &q, &d, false);
+			bson_destroy(&d);
+			bson_destroy(&q);
 		}
 		bson_t reply;
 		bson_error_t error;

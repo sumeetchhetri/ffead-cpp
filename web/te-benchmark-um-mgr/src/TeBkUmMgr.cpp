@@ -97,6 +97,7 @@ void TeBkUmMgrRouter::db(TeBkUmMgrWorld& w) {
 		sqli->begin(WORLD);
 		sqli->executeQuery(&q, &w, &TeBkUmMgrRouter::dbUtil);
 		sqli->end();
+		bson_destroy(&q);
 		DataSourceManager::cleanRawImpl(sqli);
 	} catch(const std::exception& e) {
 		DataSourceManager::cleanRawImpl(sqli);
@@ -140,6 +141,7 @@ void TeBkUmMgrRouter::queries(const char* q, int ql, std::vector<TeBkUmMgrWorld>
 			bson_t q = BSON_INITIALIZER;
 			bson_append_int32(&q, "_id", 3, rid);
 			sqli->executeQuery(&q, &w, &TeBkUmMgrRouter::dbUtil);
+			bson_destroy(&q);
 			wlst.push_back(w);
 		}
 		sqli->end();
@@ -163,7 +165,8 @@ void TeBkUmMgrRouter::updates(const char* q, int ql, std::vector<TeBkUmMgrWorld>
 		sqli->startBulk(WORLD);
 		for (int c = 0; c < queryCount; ++c) {
 			int rid = rand() % 10000 + 1;
-			bson_t q = BSON_INITIALIZER;
+			bson_t q;
+			bson_init(&q);
 			bson_append_int32(&q, "_id", 3, rid);
 			TeBkUmMgrWorld w;
 			sqli->executeQuery(&q, &w, &TeBkUmMgrRouter::dbUtil);
@@ -175,10 +178,19 @@ void TeBkUmMgrRouter::updates(const char* q, int ql, std::vector<TeBkUmMgrWorld>
 				}
 			}
 			w.setRandomNumber(newRandomNumber);
-			bson_t d = BSON_INITIALIZER;
-			bson_append_int32(&d, "_id", 3, w.getId());
+			bson_t du;
+			bson_t d;
+			bson_init(&du);
+			bson_append_document_begin(&du, "$set", 4, &d);
+			//bson_append_int32(&d, "_id", 3, w.getId());
 			bson_append_int32(&d, "randomNumber", 12, w.getRandomNumber());
-			sqli->addBulk(&q, &d);
+			bson_append_document_end(&du, &d);
+			sqli->addBulk(&q, &du);
+			char* str = bson_as_json(&du, NULL);
+			printf("%s\n", str);
+			bson_free(str);
+			bson_destroy(&du);
+			bson_destroy(&q);
 			wlst.push_back(w);
 		}
 		sqli->endBulk();
