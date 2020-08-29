@@ -76,7 +76,6 @@ if [ "$3" = "mongo-raw" ]
 then
 	rm -f web/te-benchmark-um-pq/config/cache.xml
 	rm -f web/te-benchmark-um/config/cache.xml
-	cp -f web/te-benchmark-um-mgr/config/sdormmongo.xml web/te-benchmark-um-mgr/config/sdorm.xml
 fi
 
 if [ "$3" = "mysql" ]

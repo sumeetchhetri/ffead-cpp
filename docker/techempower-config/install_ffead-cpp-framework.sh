@@ -82,6 +82,10 @@ rm -f /usr/local/lib/libinter.so
 rm -f /usr/local/lib/libdinter.so
 
 cd ffead-cpp-5.0-bin
+#cache related dockerfiles will add the cache.xml accordingly whenever needed
+rm -f web/te-benchmark-um/config/cache.xml
+rm -f web/te-benchmark-um-pq/config/cache.xml
+rm -f web/te-benchmark-um-mgr/config/cache.xml
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
 while [ ! -f lib/libinter.so ]
@@ -105,10 +109,6 @@ chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 chmod 755 *.sh
 rm -f *.cntrl
 rm -f tmp/*.sess
-#cache related dockerfiles will add the cache.xml accordingly whenever needed
-rm -f web/te-benchmark-um/config/cache.xml
-rm -f web/te-benchmark-um-pq/config/cache.xml
-rm -f web/te-benchmark-um-mgr/config/cache.xml
 #Done building for mongodb
 
 
@@ -119,6 +119,10 @@ cp -f web/te-benchmark-um/sql-src/TeBkUmWorldsql.cpp web/te-benchmark-um/src/TeB
 make install -j${MAX_THREADS}
 
 cd ffead-cpp-5.0-bin
+#cache related dockerfiles will add the cache.xml accordingly whenever needed
+rm -f web/te-benchmark-um/config/cache.xml
+rm -f web/te-benchmark-um-pq/config/cache.xml
+rm -f web/te-benchmark-um-mgr/config/cache.xml
 chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 ./server.sh &
 while [ ! -f lib/libinter.so ]
@@ -142,8 +146,4 @@ chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
 chmod 755 *.sh
 rm -f *.cntrl
 rm -f tmp/*.sess
-#cache related dockerfiles will add the cache.xml accordingly whenever needed
-rm -f web/te-benchmark-um/config/cache.xml
-rm -f web/te-benchmark-um-pq/config/cache.xml
-rm -f web/te-benchmark-um-mgr/config/cache.xml
 #Done building for sql
