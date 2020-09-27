@@ -38,6 +38,7 @@ SocketInterface::SocketInterface() {
 	rdTsk = NULL;
 	wrTsk = NULL;
 	srvTsk = NULL;
+	useCounter = 0;
 }
 
 SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
@@ -56,6 +57,15 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	rdTsk = NULL;
 	wrTsk = NULL;
 	srvTsk = NULL;
+	useCounter = 0;
+}
+
+void SocketInterface::use() {
+	useCounter++;
+}
+
+void SocketInterface::unUse() {
+	useCounter--;
 }
 
 bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger) {

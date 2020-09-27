@@ -43,7 +43,7 @@ public:
 	HttpServiceTask();
 	virtual std::string getCntEncoding();
 	HttpServiceTask(ReusableInstanceHolder* h);
-	virtual void handle(HttpRequest* request, HttpResponse* response)=0;
+	virtual bool handle(HttpRequest* request, HttpResponse* response, SocketInterface* sif)=0;
 	virtual WebSockHandler* handleWebsockOpen(WebSocketData* request, WebSocketRespponseData* response, SocketInterface* sif, HttpRequest* hreq)=0;
 };
 

@@ -1,7 +1,7 @@
-FROM sumeetchhetri/ffead-cpp-5.0-base:latest
+FROM sumeetchhetri/ffead-cpp-5.0-base:5.1
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="2.0"
-LABEL description="Base rust rocket docker image with ffead-cpp v4.0 - commit id - master"
+LABEL version="5.1"
+LABEL description="Base rust rocket docker image with ffead-cpp v5.0 - commit id - master"
 
 ENV IROOT=/installs
 

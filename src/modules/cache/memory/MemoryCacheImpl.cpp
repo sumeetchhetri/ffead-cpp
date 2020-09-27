@@ -38,91 +38,164 @@ MemoryCacheImpl::~MemoryCacheImpl() {
 }
 
 bool MemoryCacheImpl::remove(const std::string& key) {
-	((MemoryCacheConnectionPool*)pool)->internalMap.erase(key);
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+	p->lock.lock();
+	auto it = p->internalMap.find(key);
+	bool exists = it!=p->internalMap.end();
+	if(exists) {
+		p->lrul.erase(it->second);
+		p->internalMap.erase(it);
+	}
+	p->lock.unlock();
 	return true;
 }
 
 long long MemoryCacheImpl::increment(const std::string& key, const int& number) {
 	long long val = -1;
-	((MemoryCacheConnectionPool*)pool)->lock.lock();
-	if(((MemoryCacheConnectionPool*)pool)->internalMap.find(key)!=((MemoryCacheConnectionPool*)pool)->internalMap.end()) {
-		val = CastUtil::toLonglong(((MemoryCacheConnectionPool*)pool)->internalMap[key]) + number;
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::fromNumber(val);
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+
+	p->lock.lock();
+	auto it = p->internalMap.find(key);
+	bool exists = it!=p->internalMap.end();
+	if(exists) {
+		p->lrul.splice(p->lrul.begin(), p->lrul, it->second);
+		std::string rval = it->second->second;
+
+		p->lrul.erase(it->second);
+		p->internalMap.erase(it);
+
+		val = CastUtil::toLongdouble(rval) + number;
+		p->lrul.push_front(make_pair(key, CastUtil::fromNumber(val)));
+		p->internalMap.insert(make_pair(key, p->lrul.begin()));
+		clean();
 	}
-	((MemoryCacheConnectionPool*)pool)->lock.unlock();
+	p->lock.unlock();
 	return val;
 }
 
 long long MemoryCacheImpl::decrement(const std::string& key, const int& number) {
 	long long val = -1;
-	((MemoryCacheConnectionPool*)pool)->lock.lock();
-	if(((MemoryCacheConnectionPool*)pool)->internalMap.find(key)!=((MemoryCacheConnectionPool*)pool)->internalMap.end()) {
-		val = CastUtil::toLonglong(((MemoryCacheConnectionPool*)pool)->internalMap[key]) - number;
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::fromNumber(val);
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+
+	p->lock.lock();
+	auto it = p->internalMap.find(key);
+	bool exists = it!=p->internalMap.end();
+	if(exists) {
+		p->lrul.splice(p->lrul.begin(), p->lrul, it->second);
+		std::string rval = it->second->second;
+
+		p->lrul.erase(it->second);
+		p->internalMap.erase(it);
+
+		val = CastUtil::toLongdouble(rval) - number;
+		p->lrul.push_front(make_pair(key, CastUtil::fromNumber(val)));
+		p->internalMap.insert(make_pair(key, p->lrul.begin()));
+		clean();
 	}
-	((MemoryCacheConnectionPool*)pool)->lock.unlock();
+	p->lock.unlock();
 	return val;
 }
 
 long double MemoryCacheImpl::incrementFloat(const std::string& key, const double& number) {
 	long double val = -1.0;
-	((MemoryCacheConnectionPool*)pool)->lock.lock();
-	if(((MemoryCacheConnectionPool*)pool)->internalMap.find(key)!=((MemoryCacheConnectionPool*)pool)->internalMap.end()) {
-		val = CastUtil::toLongdouble(((MemoryCacheConnectionPool*)pool)->internalMap[key]) + number;
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::fromNumber(val);
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+
+	p->lock.lock();
+	auto it = p->internalMap.find(key);
+	bool exists = it!=p->internalMap.end();
+	if(exists) {
+		p->lrul.splice(p->lrul.begin(), p->lrul, it->second);
+		std::string rval = it->second->second;
+
+		p->lrul.erase(it->second);
+		p->internalMap.erase(it);
+
+		val = CastUtil::toLongdouble(rval) + number;
+		p->lrul.push_front(make_pair(key, CastUtil::fromNumber(val)));
+		p->internalMap.insert(make_pair(key, p->lrul.begin()));
+		clean();
 	}
-	((MemoryCacheConnectionPool*)pool)->lock.unlock();
+	p->lock.unlock();
 	return val;
 }
 
 long double MemoryCacheImpl::decrementFloat(const std::string& key, const double& number) {
 	long double val = -1.0;
-	((MemoryCacheConnectionPool*)pool)->lock.lock();
-	if(((MemoryCacheConnectionPool*)pool)->internalMap.find(key)!=((MemoryCacheConnectionPool*)pool)->internalMap.end()) {
-		val = CastUtil::toLongdouble(((MemoryCacheConnectionPool*)pool)->internalMap[key]) - number;
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = CastUtil::fromNumber(val);
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+
+	p->lock.lock();
+	auto it = p->internalMap.find(key);
+	bool exists = it!=p->internalMap.end();
+	if(exists) {
+		p->lrul.splice(p->lrul.begin(), p->lrul, it->second);
+		std::string rval = it->second->second;
+
+		p->lrul.erase(it->second);
+		p->internalMap.erase(it);
+
+		val = CastUtil::toLongdouble(rval) - number;
+		p->lrul.push_front(make_pair(key, CastUtil::fromNumber(val)));
+		p->internalMap.insert(make_pair(key, p->lrul.begin()));
+		clean();
 	}
-	((MemoryCacheConnectionPool*)pool)->lock.unlock();
+	p->lock.unlock();
 	return val;
 }
 
 std::map<std::string, std::string> MemoryCacheImpl::statistics() {
-	return ((MemoryCacheConnectionPool*)pool)->internalMap;
+	std::map<std::string, std::string> m;
+	return m;
 }
 
 bool MemoryCacheImpl::flushAll() {
 	return true;
 }
 
+void MemoryCacheImpl::clean() {
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+	while(p->internalMap.size()>p->size) {
+		auto last_it = p->lrul.end(); last_it --;
+		p->internalMap.erase(last_it->first);
+		p->lrul.pop_back();
+	}
+}
+
 bool MemoryCacheImpl::setInternal(const std::string& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep) {
-	if(setOrAddOrRep==1)
-	{
-		((MemoryCacheConnectionPool*)pool)->lock.lock();
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = value;
-		((MemoryCacheConnectionPool*)pool)->lock.unlock();
-		return true;
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+
+	if(setOrAddOrRep<1 && setOrAddOrRep>3) return false;
+
+	p->lock.lock();
+	auto it = p->internalMap.find(key);
+	bool exists = it!=p->internalMap.end();
+	if(exists) {
+		p->lrul.erase(it->second);
+		p->internalMap.erase(it);
 	}
-	else if(setOrAddOrRep==2 && ((MemoryCacheConnectionPool*)pool)->internalMap.find(key)==((MemoryCacheConnectionPool*)pool)->internalMap.end())
+
+	bool flag = false;
+	if(setOrAddOrRep==1 || (setOrAddOrRep==2 && !exists) || (setOrAddOrRep==3 && exists))
 	{
-		((MemoryCacheConnectionPool*)pool)->lock.lock();
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = value;
-		((MemoryCacheConnectionPool*)pool)->lock.unlock();
-		return true;
+		p->lrul.push_front(make_pair(key, value));
+		p->internalMap.insert(make_pair(key, p->lrul.begin()));
+		clean();
+		flag = true;
 	}
-	else if(setOrAddOrRep==3 && ((MemoryCacheConnectionPool*)pool)->internalMap.find(key)!=((MemoryCacheConnectionPool*)pool)->internalMap.end())
-	{
-		((MemoryCacheConnectionPool*)pool)->lock.lock();
-		((MemoryCacheConnectionPool*)pool)->internalMap[key] = value;
-		((MemoryCacheConnectionPool*)pool)->lock.unlock();
-		return true;
-	}
-	return false;
+
+	p->lock.unlock();
+	return flag;
 }
 
 std::string MemoryCacheImpl::getValue(const std::string& key) {
-	((MemoryCacheConnectionPool*)pool)->lock.lock();
-	std::string rval = ((MemoryCacheConnectionPool*)pool)->internalMap[key];
-	((MemoryCacheConnectionPool*)pool)->lock.unlock();
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+	std::string rval;
+	p->lock.lock();
+	if(p->internalMap.count(key)>0) {
+		auto it = p->internalMap.find(key);
+		p->lrul.splice(p->lrul.begin(), p->lrul, it->second);
+		rval = it->second->second;
+	}
+	p->lock.unlock();
 	return rval;
 }
 
@@ -134,9 +207,7 @@ std::vector<std::string> MemoryCacheImpl::getValues(const std::vector<std::strin
 
 void MemoryCacheImpl::mgetRaw(const std::vector<std::string>& keys, std::vector<std::string>& values) {
 	for(int i=0;i<(int)keys.size();++i) {
-		((MemoryCacheConnectionPool*)pool)->lock.lock();
-		values.push_back(((MemoryCacheConnectionPool*)pool)->internalMap[keys.at(i)]);
-		((MemoryCacheConnectionPool*)pool)->lock.unlock();
+		values.push_back(getValue(keys.at(i)));
 	}
 }
 
@@ -204,6 +275,13 @@ void MemoryCacheImpl::init() {
 }
 
 MemoryCacheConnectionPool::MemoryCacheConnectionPool(const ConnectionProperties& props) {
+	size = 10000;
+	if(props.getProperty("size")!="") {
+		try {
+			size = CastUtil::toInt(props.getProperty("size"));
+		} catch(const std::exception& e) {
+		}
+	}
 }
 
 MemoryCacheConnectionPool::~MemoryCacheConnectionPool() {

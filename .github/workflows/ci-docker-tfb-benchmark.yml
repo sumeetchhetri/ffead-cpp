@@ -18,4 +18,4 @@ jobs:
         cp -f docker/DockerFile-tfb-test FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp.dockerfile
         cp -f docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp/
         cd FrameworkBenchmarks
-        ./tfb --mode benchmark --test ffead-cpp ffead-cpp-mongo-raw ffead-cpp-postgresql ffead-cpp-postgresql-raw
+        ./tfb --mode benchmark --test ffead-cpp-postgresql-raw ffead-cpp-postgresql-raw-async

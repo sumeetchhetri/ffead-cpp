@@ -419,3 +419,17 @@ void CommonUtils::printStats() {
 		logger.info(g);
 	}
 }
+
+std::string CommonUtils::normalizeAppName(const std::string& appName) {
+	std::string scappName = appName;
+	StringUtil::replaceAll(scappName, "-", "_");
+	RegexUtil::replace(scappName, "[^a-zA-Z0-9_]+", "");
+	return scappName;
+}
+
+std::string CommonUtils::getTpeFnName(const std::string& tpe, const std::string& appName) {
+	std::string stpe = appName + tpe;
+	RegexUtil::replace(stpe,"[/]+","/");
+	RegexUtil::replace(stpe,"[^a-zA-Z0-9_]+","");
+	return "_" + stpe + "emittTemplateHTML";
+}

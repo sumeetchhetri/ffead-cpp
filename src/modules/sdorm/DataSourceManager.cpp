@@ -32,7 +32,7 @@ void DataSourceManager::init(bool issevh) {
 	isSingleEVH = issevh;
 }
 
-void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping& mapping)
+void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping& mapping, GetClassBeanIns f)
 {
 	Logger logger = LoggerFactory::getLogger("DataSourceManager");
 	std::string name = StringUtil::trimCopy(props.getName());
@@ -67,25 +67,23 @@ void DataSourceManager::initDSN(const ConnectionProperties& props, const Mapping
 		StringUtil::split(v, meth, ".");
 		if(v.size()==2) {
 			CommonUtils::setAppName(appName);
-			ClassInfo* clas = ref->getClassInfo(v.at(0), appName);
-			if(clas->getClassName()!="") {
-				args argus;
-				vals valus;
-				const Constructor& ctor = clas->getConstructor(argus);
-				void* _temp = ref->newInstanceGVP(ctor);
-				try {
-					if(_temp!=NULL) {
-						const Method& meth = clas->getMethod(v.at(1), argus);
-						if(meth.getMethodName()!="")
-						{
-							ref->invokeMethodGVP(_temp, meth, valus);
-						}
+			ClassBeanIns cbi;
+			f(v.at(0), appName, &cbi);
+			void* _temp = cbi.instance;
+			try {
+				if(_temp!=NULL) {
+					args argus;
+					vals valus;
+					const Method& meth = cbi.clas->getMethod(v.at(1), argus);
+					if(meth.getMethodName()!="")
+					{
+						ref->invokeMethodGVP(_temp, meth, valus);
 					}
-				} catch(const std::exception& e) {
-					logger.info("Error during init call for Datasource " + mapping.getAppName() + "@" + props.getName() + " " + std::string(e.what()));
 				}
-				ref->destroy(_temp, v.at(0), appName);
+			} catch(const std::exception& e) {
+				logger.info("Error during init call for Datasource " + mapping.getAppName() + "@" + props.getName() + " " + std::string(e.what()));
 			}
+			ref->destroy(_temp, v.at(0), appName);
 		}
 	}
 }
@@ -164,7 +162,7 @@ void* DataSourceManager::getRawImpl(std::string name, std::string appName) {
 	if(StringUtil::toLowerCopy(dsnMgr->props.getType())=="sql-raw-pq")
 	{
 #if defined(INC_SDORM_SQL) && defined(HAVE_LIBPQ)
-		t = new LibpqDataSourceImpl(dsnMgr->props.getNodes().at(0).getBaseUrl());
+		t = new LibpqDataSourceImpl(dsnMgr->props.getNodes().at(0).getBaseUrl(), dsnMgr->props.getProperty("async")=="true");
 		((LibpqDataSourceImpl*)t)->init();
 #endif
 	}

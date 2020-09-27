@@ -31,7 +31,7 @@ void CacheManager::init(bool issevh) {
 	isSinglEVH = issevh;
 }
 
-void CacheManager::initCache(const ConnectionProperties& props, const std::string& appNameN) {
+void CacheManager::initCache(const ConnectionProperties& props, const std::string& appNameN, GetClassBeanIns f) {
 	Logger logger = LoggerFactory::getLogger("CacheManager");
 	std::string name = StringUtil::trimCopy(props.getName());
 	if(name=="")
@@ -42,19 +42,22 @@ void CacheManager::initCache(const ConnectionProperties& props, const std::strin
 	StringUtil::replaceAll(appName, "-", "_");
 	RegexUtil::replace(appName, "[^a-zA-Z0-9_]+", "");
 	name = appName + name;
-	if(caches.find(name)!=caches.end())
-	{
-		throw std::runtime_error("Cache Already exists");
-	}
-	if(props.getProperty("_isdefault_")=="true") {
-		defDsnNames[appName] = StringUtil::trimCopy(props.getName());
-	}
 
-	try {
-		CacheManager* mgr = new CacheManager(props);
-		caches[name] = mgr;
-	} catch (const std::exception& e) {
-		logger.info("Error initializing Cache " + appNameN + "@" + props.getName() + " " + std::string(e.what()));
+	if(StringUtil::toLowerCopy(props.getType()) != "custom") {
+		if(caches.find(name)!=caches.end())
+		{
+			throw std::runtime_error("Cache Already exists");
+		}
+		if(props.getProperty("_isdefault_")=="true") {
+			defDsnNames[appName] = StringUtil::trimCopy(props.getName());
+		}
+
+		try {
+			CacheManager* mgr = new CacheManager(props);
+			caches[name] = mgr;
+		} catch (const std::exception& e) {
+			logger.info("Error initializing Cache " + appNameN + "@" + props.getName() + " " + std::string(e.what()));
+		}
 	}
 
 	Reflector* ref = GenericObject::getReflector();
@@ -64,25 +67,23 @@ void CacheManager::initCache(const ConnectionProperties& props, const std::strin
 		StringUtil::split(v, meth, ".");
 		if(v.size()==2) {
 			CommonUtils::setAppName(appName);
-			ClassInfo* clas = ref->getClassInfo(v.at(0), appName);
-			if(clas->getClassName()!="") {
-				args argus;
-				vals valus;
-				const Constructor& ctor = clas->getConstructor(argus);
-				void* _temp = ref->newInstanceGVP(ctor);
-				try {
-					if(_temp!=NULL) {
-						const Method& meth = clas->getMethod(v.at(1), argus);
-						if(meth.getMethodName()!="")
-						{
-							ref->invokeMethodGVP(_temp, meth, valus);
-						}
+			ClassBeanIns cbi;
+			f(v.at(0), appName, &cbi);
+			void* _temp = cbi.instance;
+			try {
+				if(_temp!=NULL) {
+					args argus;
+					vals valus;
+					const Method& meth = cbi.clas->getMethod(v.at(1), argus);
+					if(meth.getMethodName()!="")
+					{
+						ref->invokeMethodGVP(_temp, meth, valus);
 					}
-				} catch(const std::exception& e) {
-					logger.info("Error during init call for Cache " + appNameN + "@" + props.getName() + " " + std::string(e.what()));
 				}
-				ref->destroy(_temp, v.at(0), appName);
+			} catch(const std::exception& e) {
+				logger.info("Error during init call for Cache " + appNameN + "@" + props.getName() + " " + std::string(e.what()));
 			}
+			ref->destroy(_temp, v.at(0), appName);
 		}
 	}
 }

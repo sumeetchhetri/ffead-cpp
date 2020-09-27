@@ -37,7 +37,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 			std::string tpefilename = tmplMap->find(req->getCurl())->second.substr(tmplMap->find(req->getCurl())->second.find(";")+1);
 			std::string tpeclasname = tmplMap->find(req->getCurl())->second.substr(0, tmplMap->find(req->getCurl())->second.find(";"));
 			cntrlit = true;
-			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("template_"+tpeclasname, req->getCntxt_name());
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(tpeclasname, req->getCntxt_name());
 			if(_temp!=NULL)
 			{
 				try {
@@ -76,7 +76,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 					//logger << "Template exception occurred" << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				}
-				ConfigurationData::getInstance()->ffeadContext.release(_temp, "template_"+tpeclasname, req->getCntxt_name());
+				ConfigurationData::getInstance()->ffeadContext.release(_temp, tpeclasname, req->getCntxt_name());
 			}
 			if(content.length()>0)
 			{
@@ -224,7 +224,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 #ifdef INC_DVIEW
 	else if(ext==".view" && vwMap->find(req->getCurl())!=vwMap->end())
 	{
-		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("dview_"+vwMap->find(req->getCurl())->second, req->getCntxt_name());
+		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(vwMap->find(req->getCurl())->second, req->getCntxt_name());
 		if(_temp!=NULL)
 		{
 			cntrlit = true;
@@ -252,7 +252,7 @@ bool ExtHandler::handle(HttpRequest* req, HttpResponse* res, void* dlib, void* d
 				//logger << "Dview exception occurred" << std::endl;
 				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 			}
-			ConfigurationData::getInstance()->ffeadContext.release(_temp, "dview_"+vwMap->find(req->getCurl())->second, req->getCntxt_name());
+			ConfigurationData::getInstance()->ffeadContext.release(_temp, vwMap->find(req->getCurl())->second, req->getCntxt_name());
 		}
 		else
 		{

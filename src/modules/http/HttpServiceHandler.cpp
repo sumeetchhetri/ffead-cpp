@@ -251,7 +251,10 @@ void HttpServiceTask::run() {
 				res->setDone(true);
 			}
 		} else {
-			handle(req, res);
+			if(!handle(req, res, handlerRequest.getSif())) {
+				//handlerRequest.getSif()->endRequest(handlerRequest.reqPos);
+				return;
+			}
 		}
 	}
 	else

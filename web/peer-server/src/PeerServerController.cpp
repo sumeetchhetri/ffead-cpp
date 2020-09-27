@@ -349,7 +349,7 @@ bool PeerServerRouter::isValidUser(const std::string &id, const std::string &tok
 	}
 }
 
-void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib) {
+bool PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, SocketInterface* sif) {
 	req->normalizeUrl();
 	res->setDone(true);
 	std::string_view path = req->getPath();
@@ -365,7 +365,7 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		std::string id, token, key, type, dstId;
 		if(auth(path, res, key, id, token)) {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 		JSONElement el;
 		JSONUtil::getDocument(req->getContent(), el);
@@ -373,14 +373,14 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		if(tmp!=NULL && (type = StringUtil::trimCopy(tmp->getValue()))!=""){};
 		if(type!="OFFER") {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 
 		tmp = el.getNodeP("dst");
 		if(tmp!=NULL && (dstId = StringUtil::trimCopy(tmp->getValue()))!=""){};
 		if(dstId=="") {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 		el.add("src", id);
 
@@ -396,7 +396,7 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		std::string id, token, key, type, dstId;
 		if(auth(path, res, key, id, token)) {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 		JSONElement el;
 		JSONUtil::getDocument(req->getContent(), el);
@@ -404,14 +404,14 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		if(tmp!=NULL && (type = StringUtil::trimCopy(tmp->getValue()))!=""){};
 		if(type!="CANDIDATE") {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 
 		tmp = el.getNodeP("dst");
 		if(tmp!=NULL && (dstId = StringUtil::trimCopy(tmp->getValue()))!=""){};
 		if(dstId=="") {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 		el.add("src", id);
 
@@ -427,7 +427,7 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		std::string id, token, key, type, dstId;
 		if(auth(path, res, key, id, token)) {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 		JSONElement el;
 		JSONUtil::getDocument(req->getContent(), el);
@@ -435,14 +435,14 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		if(tmp!=NULL && (type = StringUtil::trimCopy(tmp->getValue()))!=""){};
 		if(type!="ANSWER") {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 
 		tmp = el.getNodeP("dst");
 		if(tmp!=NULL && (dstId = StringUtil::trimCopy(tmp->getValue()))!=""){};
 		if(dstId=="") {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 		el.add("src", id);
 
@@ -458,7 +458,7 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		std::string id, token, key, type;
 		if(auth(path, res, key, id, token)) {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 
 		CacheInterface* cchi = CacheManager::getImpl();
@@ -475,7 +475,7 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		std::string id, token, key, type;
 		if(auth(path, res, key, id, token)) {
 			res->setHTTPResponseStatus(HTTPResponseStatus::Unauthorized);
-			return;
+			return true;
 		}
 
 		CacheInterface* cchi = CacheManager::getImpl();
@@ -540,7 +540,7 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 		}
 
 		if(!isAuthorizedKey(key, res)) {
-			return;
+			return true;
 		}
 
 		if(id=="") {
@@ -592,6 +592,7 @@ void PeerServerRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, vo
 	} else {
 		res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 	}
+	return true;
 }
 
 PeerServerRouter::PeerServerRouter() {

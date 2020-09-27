@@ -10,6 +10,7 @@ env:
   RUST_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-rust-base
   RUST_RKT_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-rust-rocket-base
   V_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-v-base
+  IMG_VERSION: 5.1
 jobs:
   push:
     runs-on: ubuntu-latest
@@ -38,8 +39,8 @@ jobs:
           # Strip "v" prefix from tag name
           #[[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          # Use Docker `$IMG_VERSION` tag convention
+          [ "$VERSION" == "master" ] && VERSION=$IMG_VERSION
 
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
@@ -68,8 +69,8 @@ jobs:
           # Strip "v" prefix from tag name
           #[[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          # Use Docker `$IMG_VERSION` tag convention
+          [ "$VERSION" == "master" ] && VERSION=$IMG_VERSION
 
           echo JAVA_IMAGE_ID=$JAVA_IMAGE_ID
           echo VERSION=$VERSION
@@ -98,8 +99,8 @@ jobs:
           # Strip "v" prefix from tag name
           #[[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          # Use Docker `$IMG_VERSION` tag convention
+          [ "$VERSION" == "master" ] && VERSION=$IMG_VERSION
 
           echo RUST_IMAGE_ID=$RUST_IMAGE_ID
           echo VERSION=$VERSION
@@ -128,8 +129,8 @@ jobs:
           # Strip "v" prefix from tag name
           #[[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          # Use Docker `$IMG_VERSION` tag convention
+          [ "$VERSION" == "master" ] && VERSION=$IMG_VERSION
 
           echo RUST_RKT_IMAGE_ID=$RUST_RKT_IMAGE_ID
           echo VERSION=$VERSION
@@ -158,8 +159,8 @@ jobs:
           # Strip "v" prefix from tag name
           #[[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
 
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "master" ] && VERSION=latest
+          # Use Docker `$IMG_VERSION` tag convention
+          [ "$VERSION" == "master" ] && VERSION=$IMG_VERSION
 
           echo V_IMAGE_ID=$V_IMAGE_ID
           echo VERSION=$VERSION

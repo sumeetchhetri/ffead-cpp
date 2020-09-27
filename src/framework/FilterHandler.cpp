@@ -51,7 +51,7 @@ void FilterHandler::handleIn(HttpRequest* req, const std::string& ext, Reflector
 		for (int var = 0; var < (int)filters.size(); ++var)
 		{
 			std::string claz = filters.at(var);
-			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("filter_"+claz, req->getCntxt_name());
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(claz, req->getCntxt_name());
 			args argus;
 			argus.push_back("HttpRequest*");
 			vals valus;
@@ -62,7 +62,7 @@ void FilterHandler::handleIn(HttpRequest* req, const std::string& ext, Reflector
 				valus.push_back(req);
 				reflector.invokeMethodGVP(_temp,meth,valus);
 			}
-			ConfigurationData::getInstance()->ffeadContext.release(_temp, "filter_"+claz, req->getCntxt_name());
+			ConfigurationData::getInstance()->ffeadContext.release(_temp, claz, req->getCntxt_name());
 		}
 	}
 }
@@ -77,7 +77,7 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const std::strin
 		for (int var = 0; var < (int)filters.size(); ++var)
 		{
 			std::string claz = filters.at(var);
-			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("filter_"+claz, req->getCntxt_name());
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(claz, req->getCntxt_name());
 			args argus;
 			argus.push_back("HttpRequest*");
 			argus.push_back("HttpResponse*");
@@ -90,7 +90,7 @@ bool FilterHandler::handle(HttpRequest* req, HttpResponse* res, const std::strin
 				valus.push_back(res);
 				reflector.invokeMethod<bool>(&continue_proc_request,_temp,meth,valus);
 			}
-			ConfigurationData::getInstance()->ffeadContext.release(_temp, "filter_"+claz, req->getCntxt_name());
+			ConfigurationData::getInstance()->ffeadContext.release(_temp, claz, req->getCntxt_name());
 		}
 	}
 	return continue_proc_request;
@@ -104,7 +104,7 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse* res, const std::st
 		for (int var = 0; var < (int)filters.size(); ++var)
 		{
 			std::string claz = filters.at(var);
-			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("filter_"+claz, req->getCntxt_name());
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(claz, req->getCntxt_name());
 			args argus;
 			argus.push_back("HttpResponse*");
 			vals valus;
@@ -115,7 +115,7 @@ void FilterHandler::handleOut(HttpRequest* req, HttpResponse* res, const std::st
 				valus.push_back(res);
 				reflector.invokeMethodGVP(_temp,meth,valus);
 			}
-			ConfigurationData::getInstance()->ffeadContext.release(_temp, "filter_"+claz, req->getCntxt_name());
+			ConfigurationData::getInstance()->ffeadContext.release(_temp, claz, req->getCntxt_name());
 		}
 	}
 }

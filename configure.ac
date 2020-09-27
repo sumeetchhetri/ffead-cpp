@@ -1201,6 +1201,7 @@ AC_CONFIG_FILES([web/default/src/autotools/Makefile
 				web/te-benchmark/src/autotools/Makefile
 				web/te-benchmark-um/src/autotools/Makefile
 				web/te-benchmark-um-pq/src/autotools/Makefile
+				web/te-benchmark-um-pq-async/src/autotools/Makefile
 				web/te-benchmark-um-mgr/src/autotools/Makefile])
 AC_OUTPUT
 

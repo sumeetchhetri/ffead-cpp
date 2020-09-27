@@ -76,6 +76,7 @@ public:
 	std::string getCntEncoding();
 	WebSockHandler* handleWebsockOpen(WebSocketData* request, WebSocketRespponseData* response, SocketInterface* sif, HttpRequest* hreq);
 	void handle(HttpRequest* req, HttpResponse* res);
+	bool handle(HttpRequest* req, HttpResponse* res, SocketInterface* sif);
 };
 
 #endif /* SERVICETASK_H_ */

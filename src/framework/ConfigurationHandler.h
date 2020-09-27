@@ -73,6 +73,7 @@ public:
 	static void initializeDataSources();
 	static void initializeCaches();
 	static void initializeWsdls();
+	static void populateClassBeanInstanceCb(std::string& clsn, std::string appn, ClassBeanIns* cbi);
 };
 
 #endif /* CONFIGURATIONHANDLER_H_ */

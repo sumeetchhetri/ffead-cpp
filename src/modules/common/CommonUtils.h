@@ -52,6 +52,14 @@
 #include "LoggerFactory.h"
 #include "HTTPResponseStatus.h"
 #include "SocketInterface.h"
+#include "ClassInfo.h"
+
+struct ClassBeanIns {
+	ClassInfo* clas;
+	void* instance;
+};
+
+typedef void (*GetClassBeanIns) (std::string& clsn, std::string appn, ClassBeanIns* cbi);
 
 class CommonUtils {
 	CommonUtils();
@@ -125,6 +133,8 @@ public:
 	static CommonUtils* getInstance();
 	virtual ~CommonUtils();
 	static void printStats();
+	static std::string normalizeAppName(const std::string& appName);
+	static std::string getTpeFnName(const std::string& tpe, const std::string& appName);
 };
 
 #endif /* COMMONUTILS_H_ */

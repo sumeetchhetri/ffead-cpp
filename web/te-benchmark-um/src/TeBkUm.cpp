@@ -224,7 +224,7 @@ bool TeBkUmRouter::strToNum(const char* str, int len, int& ret) {
     return true;
 }
 
-void TeBkUmRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib) {
+bool TeBkUmRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, void* ddlib, SocketInterface* sif) {
 	//Timer t;
 	//t.start();
 	std::string_view path = req->getPath();
@@ -282,8 +282,7 @@ void TeBkUmRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, void* 
 		Context ctx;
 		getContext(req, &ctx);
 
-		std::string fname = "_tebenchmarkumtpefortunestpeemittTemplateHTML";
-		void* mkr = dlsym(ddlib, fname.c_str());
+		void* mkr = dlsym(ddlib, TPE_FN_NAME.c_str());
 		if(mkr!=NULL)
 		{
 			TeBkUmTemplatePtr f =  (TeBkUmTemplatePtr)mkr;
@@ -329,4 +328,18 @@ void TeBkUmRouter::route(HttpRequest* req, HttpResponse* res, void* dlib, void* 
 		res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 	}
 	res->setDone(true);
+	return true;
+}
+
+std::string TeBkUmRouter::APP_NAME = "";
+std::string TeBkUmRouter::TPE_FN_NAME = "";
+
+TeBkUmRouter::TeBkUmRouter() {
+	if(APP_NAME=="") {
+		APP_NAME = CommonUtils::normalizeAppName("te-benchmark-um");
+		TPE_FN_NAME = CommonUtils::getTpeFnName("tpe/fortunes.tpe", "te-benchmark-um");
+	}
+}
+
+TeBkUmRouter::~TeBkUmRouter() {
 }

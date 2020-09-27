@@ -40,7 +40,7 @@ class CacheManager {
 	ConnectionProperties props;
 	ConnectionPooler* pool;
 	Reflector* reflector;
-	static void initCache(const ConnectionProperties& props, const std::string& appName);
+	static void initCache(const ConnectionProperties& props, const std::string& appName, GetClassBeanIns f);
 	static void destroy();
 	CacheManager(const ConnectionProperties& props);
 	friend class ConfigurationHandler;

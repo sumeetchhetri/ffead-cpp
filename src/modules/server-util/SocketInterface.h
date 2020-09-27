@@ -48,12 +48,9 @@
 class SocketInterface;
 
 class ResponseData {
+public:
 	std::string _b;
 	int oft;
-	friend class SocketInterface;
-	friend class HttpServiceTask;
-	friend class WebSockHandler;
-public:
 	ResponseData();
 	virtual ~ResponseData();
 };
@@ -80,6 +77,7 @@ class SocketInterface {
 	Logger logger;
 	std::string buffer;
 	std::atomic<int> tid;
+	std::atomic<int> useCounter;
 	//Mutex m;
 	//Mutex wm;
 	std::map<int, ResponseData> wtl;
@@ -103,6 +101,7 @@ class SocketInterface {
 	friend class CommonUtils;
 	friend class DummySocketInterface;
 	friend class HttpServiceHandler;
+	friend class LibpqDataSourceImpl;
 public:
 	int completeWrite();
 	int pushResponse(void* request, void* response, void* context, int reqPos);
@@ -136,6 +135,8 @@ public:
 	virtual void onClose()=0;
 	virtual void addHandler(SocketInterface* handler)=0;
 	virtual bool isEmbedded()=0;
+	void use();
+	void unUse();
 };
 
 #endif /* SOCKETINTERFACE_H_ */

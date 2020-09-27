@@ -1387,7 +1387,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 						meth = meth.substr(meth.find(" operator"));
 						StringUtil::replaceAll(meth, " ", "");
 					}
-					if(meth.find("operator<")!=std::string::npos || meth.find("operator>")!=std::string::npos || meth.find("operator<=")!=std::string::npos
+					if(meth.find("operator=")!=std::string::npos || meth.find("operator<")!=std::string::npos || meth.find("operator>")!=std::string::npos || meth.find("operator<=")!=std::string::npos
 							|| meth.find("operator>=")!=std::string::npos || meth.find("operator==")!=std::string::npos || meth.find("operator!=")!=std::string::npos || meth.find("operator!")!=std::string::npos
 							|| meth.find("operator<<")!=std::string::npos || meth.find("operator>>")!=std::string::npos || meth.find("operator+")!=std::string::npos || meth.find("operator-")!=std::string::npos
 							|| meth.find("operator*")!=std::string::npos || meth.find("operator/")!=std::string::npos || meth.find("operator[]")!=std::string::npos || meth.find("operator()")!=std::string::npos
@@ -2668,7 +2668,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 						meth = meth.substr(meth.find(" operator"));
 						StringUtil::replaceAll(meth, " ", "");
 					}
-					if(meth.find("operator<")!=std::string::npos || meth.find("operator>")!=std::string::npos || meth.find("operator<=")!=std::string::npos
+					if(meth.find("operator=")!=std::string::npos || meth.find("operator<")!=std::string::npos || meth.find("operator>")!=std::string::npos || meth.find("operator<=")!=std::string::npos
 						|| meth.find("operator>=")!=std::string::npos || meth.find("operator==")!=std::string::npos || meth.find("operator!=")!=std::string::npos || meth.find("operator!")!=std::string::npos
 						|| meth.find("operator<<")!=std::string::npos || meth.find("operator>>")!=std::string::npos || meth.find("operator+")!=std::string::npos || meth.find("operator-")!=std::string::npos
 						|| meth.find("operator*")!=std::string::npos || meth.find("operator/")!=std::string::npos || meth.find("operator[]")!=std::string::npos || meth.find("operator()")!=std::string::npos
@@ -3019,7 +3019,7 @@ std::string Reflection::generateAllSerDefinition(std::map<std::string, ClassStru
 						meth = meth.substr(meth.find(" operator"));
 						StringUtil::replaceAll(meth, " ", "");
 					}
-					if(meth.find("operator<")!=std::string::npos || meth.find("operator>")!=std::string::npos || meth.find("operator<=")!=std::string::npos
+					if(meth.find("operator=")!=std::string::npos || meth.find("operator<")!=std::string::npos || meth.find("operator>")!=std::string::npos || meth.find("operator<=")!=std::string::npos
 						|| meth.find("operator>=")!=std::string::npos || meth.find("operator==")!=std::string::npos || meth.find("operator!=")!=std::string::npos || meth.find("operator!")!=std::string::npos
 						|| meth.find("operator<<")!=std::string::npos || meth.find("operator>>")!=std::string::npos || meth.find("operator+")!=std::string::npos || meth.find("operator-")!=std::string::npos
 						|| meth.find("operator*")!=std::string::npos || meth.find("operator/")!=std::string::npos || meth.find("operator[]")!=std::string::npos || meth.find("operator()")!=std::string::npos
@@ -3764,7 +3764,7 @@ std::string Reflection::getXSDDefinitions(std::map<std::string, ClassStructure, 
 				meth = meth.substr(meth.find(" operator"));
 				StringUtil::replaceAll(meth, " ", "");
 			}
-			if(meth.find("operator<")!=std::string::npos || meth.find("operator>")!=std::string::npos || meth.find("operator<=")!=std::string::npos
+			if(meth.find("operator=")!=std::string::npos || meth.find("operator<")!=std::string::npos || meth.find("operator>")!=std::string::npos || meth.find("operator<=")!=std::string::npos
 				|| meth.find("operator>=")!=std::string::npos || meth.find("operator==")!=std::string::npos || meth.find("operator!=")!=std::string::npos || meth.find("operator!")!=std::string::npos
 				|| meth.find("operator<<")!=std::string::npos || meth.find("operator>>")!=std::string::npos || meth.find("operator+")!=std::string::npos || meth.find("operator-")!=std::string::npos
 				|| meth.find("operator*")!=std::string::npos || meth.find("operator/")!=std::string::npos || meth.find("operator[]")!=std::string::npos || meth.find("operator()")!=std::string::npos

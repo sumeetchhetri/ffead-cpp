@@ -39,6 +39,8 @@
 
 typedef SocketInterface* (*SocketInterfaceFactory) (SOCKET);
 
+class RequestReaderHandler;
+
 class RequestReaderHandler {
 	SelEpolKqEvPrt selector;
 	std::atomic<bool> run;
@@ -54,7 +56,11 @@ class RequestReaderHandler {
 	bool isActive();
 	void addSf(SocketInterface* sf);
 	static void* handle(void* inp);
+	static RequestReaderHandler* _i;
+	friend class LibpqDataSourceImpl;
 public:
+	static void setInstance(RequestReaderHandler*);
+	static RequestReaderHandler* getInstance();
 	void start(unsigned int cid);
 	void stop(std::string, int, bool);
 	RequestReaderHandler(ServiceHandler* shi, const bool& isMain, bool isSinglEVH, const SOCKET& listenerSock = INVALID_SOCKET);

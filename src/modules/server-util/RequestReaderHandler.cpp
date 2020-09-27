@@ -22,6 +22,8 @@
 
 #include "RequestReaderHandler.h"
 
+RequestReaderHandler* RequestReaderHandler::_i = NULL;
+
 RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const bool& isMain, bool isSinglEVH, const SOCKET& listenerSock) {
 	this->shi = shi;
 	this->listenerSock = listenerSock;
@@ -32,6 +34,16 @@ RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const bool& isMa
 	this->complete = 0;
 	this->isMain = isMain;
 	this->isSinglEVH = isSinglEVH;
+}
+
+void RequestReaderHandler::setInstance(RequestReaderHandler* ins) {
+	if(_i==NULL) {
+		_i = ins;
+	}
+}
+
+RequestReaderHandler* RequestReaderHandler::getInstance() {
+	return _i;
 }
 
 void RequestReaderHandler::start(unsigned int cid) {

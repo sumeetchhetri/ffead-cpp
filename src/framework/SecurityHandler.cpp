@@ -208,7 +208,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 				args argusi, argusa, argusg;
 				vals valusi, valusa, valusg;
 
-				void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("login-handler_"+claz, req->getCntxt_name());
+				void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(claz, req->getCntxt_name());
 				ClassInfo* srv = ConfigurationData::getClassInfo(claz, req->getCntxt_name());
 
 				Method methIsInitialized = srv->getMethod("isInitialized", argusi);
@@ -252,7 +252,7 @@ bool SecurityHandler::handle(HttpRequest* req, HttpResponse* res, const long& se
 				{
 					logger << "AuthController not initialized" << std::endl;
 				}
-				ConfigurationData::getInstance()->ffeadContext.release(_temp, "login-handler_"+claz, req->getCntxt_name());
+				ConfigurationData::getInstance()->ffeadContext.release(_temp, claz, req->getCntxt_name());
 			}
 			if(validUser && (aspect.role==userRole || securityObject.isLoginPage(req->getCntxt_name(), req->getCurl())))
 			{

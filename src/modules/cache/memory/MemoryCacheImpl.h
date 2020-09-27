@@ -26,11 +26,16 @@
 #include "ConnectionPooler.h"
 #include "Mutex.h"
 #include <queue>
+#include <list>
+#include <unordered_map>
+#include <utility>
 
 class MemoryCacheConnectionPool: public ConnectionPooler {
 	Logger logger;
 	Mutex lock;
-	std::map<std::string, std::string> internalMap;
+	int size;
+	std::list<std::pair<std::string, std::string>> lrul;
+	std::unordered_map<std::string, decltype(lrul.begin())> internalMap;
 	Mutex qlock;
 	std::map<std::string, std::queue<std::string>> internalQMap;
 	void initEnv();
@@ -46,6 +51,7 @@ public:
 class MemoryCacheImpl : public CacheInterface {
 	ConnectionProperties properties;
 	bool setInternal(const std::string& key, const std::string& value, const int& expireSeconds, const int& setOrAddOrRep);
+	void clean();
 public:
 	MemoryCacheImpl(ConnectionPooler* pool);
 	~MemoryCacheImpl();

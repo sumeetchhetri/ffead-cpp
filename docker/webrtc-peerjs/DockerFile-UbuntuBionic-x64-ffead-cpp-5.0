@@ -21,27 +21,34 @@ RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
 
-RUN rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/te-benchmark-um
+RUN rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/te-benchmark-um web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/flexApp)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/oauthApp)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/markers)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-mgr)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq)||g' CMakeLists.txt
+RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/default/libdefault${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/flexApp/libflexApp${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/oauthApp/liboauthApp${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/markers/libmarkers${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark/libte_benchmark${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um/libte_benchmark_um${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-mgr/libte_benchmark_um_mgr${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq/libte_benchmark_um_pq${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async/libte_benchmark_um_pq_async${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|web/default/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/markers/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/te-benchmark/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/te-benchmark-um/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/te-benchmark-um-mgr/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/te-benchmark-um-pq/src/autotools/Makefile||g' configure.ac
+RUN sed -i 's|web/te-benchmark-um-pq-async/src/autotools/Makefile||g' configure.ac
 
 RUN cmake -DSRV_EMB=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 RUN make install -j4

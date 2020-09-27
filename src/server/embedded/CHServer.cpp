@@ -1194,6 +1194,24 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		return;
 	}
 
+	std::string cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["CONTENT_ENCODING"]);
+	try {
+		techunkSiz = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);
+	} catch(const std::exception& e) {
+	}
+	try {
+		connKeepAlive = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["KEEP_ALIVE_SECONDS"]);
+	} catch(const std::exception& e) {
+	}
+	try {
+		maxReqHdrCnt = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["MAX_REQUEST_HEADERS_COUNT"]);
+	} catch(const std::exception& e) {
+	}
+	try {
+		maxEntitySize = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["MAX_REQUEST_ENTITY_SIZE"]);
+	} catch(const std::exception& e) {
+	}
+
 	//Load all the FFEADContext beans so that the same copy is shared by all process
 	//We need singleton beans so only initialize singletons(controllers,authhandlers,formhandlers..)
 	logger << ("Initializing ffeadContext....") << std::endl;
@@ -1204,6 +1222,14 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	logger << ("Initializing WSDL files....") << std::endl;
 	ConfigurationHandler::initializeWsdls();
 	logger << ("Initializing WSDL files done....") << std::endl;
+
+	unsigned int nthreads = hardware_concurrency();
+	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &httpServiceFactoryMethod, nthreads, isSinglEVH, &httpReadFactoryMethod);
+	RequestReaderHandler reader(handler, true, isSinglEVH, sockfd);
+	RequestReaderHandler::setInstance(&reader);
+	handler->start();
+	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
+	reader.start(-1);
 
 #ifdef INC_SDORM
 	logger << ("Initializing DataSources....") << std::endl;
@@ -1246,23 +1272,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	//Thread* pthread = new Thread(&gracefullShutdown_monitor, &ipport);
 	//pthread->execute();
 
-	std::string cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["CONTENT_ENCODING"]);
-	try {
-		techunkSiz = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);
-	} catch(const std::exception& e) {
-	}
-	try {
-		connKeepAlive = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["KEEP_ALIVE_SECONDS"]);
-	} catch(const std::exception& e) {
-	}
-	try {
-		maxReqHdrCnt = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["MAX_REQUEST_HEADERS_COUNT"]);
-	} catch(const std::exception& e) {
-	}
-	try {
-		maxEntitySize = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["MAX_REQUEST_ENTITY_SIZE"]);
-	} catch(const std::exception& e) {
-	}
 
 	HTTPResponseStatus::init();
 
@@ -1271,15 +1280,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	HttpResponse::init();
 
 	MultipartContent::init();
-
-	unsigned int nthreads = hardware_concurrency();
-
-	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &httpServiceFactoryMethod, nthreads, isSinglEVH, &httpReadFactoryMethod);
-	handler->start();
-
-	RequestReaderHandler reader(handler, true, isSinglEVH, sockfd);
-	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
-	reader.start(-1);
 
 	//int counter = 0;
 	struct stat buffer;

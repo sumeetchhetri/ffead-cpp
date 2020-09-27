@@ -11,6 +11,7 @@ sed -i'' -e "s|<init>TeBkRestController.updateCache</init>||g" /tmp/ffead-cpp-5.
 sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" /tmp/ffead-cpp-5.0-bin/web/te-benchmark-um/config/cache.xml
 sed -i'' -e "s|<init>TeBkUmLpqRouter.updateCache</init>||g" /tmp/ffead-cpp-5.0-bin/web/te-benchmark-um-pq/config/cache.xml
 sed -i'' -e "s|<init>TeBkUmMgrRouter.updateCache</init>||g" /tmp/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr/config/cache.xml
+sed -i'' -e "s|<init>TeBkUmLpqAsync.updateCache</init>||g" /tmp/ffead-cpp-5.0-bin/web/te-benchmark-um-pq-async/config/cache.xml
 
 mv /tmp/ffead-cpp-5.0-bin /opt/ffead-cpp-5.0
 chmod +x /opt/ffead-cpp-5.0/*.sh

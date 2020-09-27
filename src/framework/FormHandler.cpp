@@ -74,7 +74,7 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 	json += "}";
 	//logger << json << std::endl;
 
-	void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("form_"+ele->getAttribute("controller"), req->getCntxt_name());
+	void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(ele->getAttribute("controller"), req->getCntxt_name());
 	args argus;
 	argus.push_back("void*");
 	argus.push_back("HttpResponse*");
@@ -91,9 +91,9 @@ bool FormHandler::handle(HttpRequest* req, HttpResponse* res, Reflector& reflect
 		reflector.invokeMethodGVP(_temp,meth,valus,false);
 		reflector.destroy(_beaninst, ele->getAttribute("bean"));
 		//logger << "Successfully called Formcontroller" << std::endl;
-		ConfigurationData::getInstance()->ffeadContext.release(_temp, "form_"+ele->getAttribute("controller"), req->getCntxt_name());
+		ConfigurationData::getInstance()->ffeadContext.release(_temp, ele->getAttribute("controller"), req->getCntxt_name());
 		return true;
 	}
-	ConfigurationData::getInstance()->ffeadContext.release(_temp, "form_"+ele->getAttribute("controller"), req->getCntxt_name());
+	ConfigurationData::getInstance()->ffeadContext.release(_temp, ele->getAttribute("controller"), req->getCntxt_name());
 	return false;
 }

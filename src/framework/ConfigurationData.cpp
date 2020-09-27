@@ -122,20 +122,33 @@ void ConfigurationData::initializeAllSingletonBeans() {
 		std::cout << "Could not load dynamic Library" << std::endl;
 		exit(0);
 	}
-	getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts, &(getInstance()->reflector));
 
 	std::map<std::string, std::string, std::less<> >::iterator it = ConfigurationData::getInstance()->servingContextRouterNames.begin();
 	for(;it!=ConfigurationData::getInstance()->servingContextRouterNames.end();++it) {
 		std::string rt = it->second;
 		std::vector<std::string> prts = StringUtil::splitAndReturn<std::vector<std::string> >(rt, ";");
 		std::string scappName = ConfigurationData::getInstance()->servingContextAppNames[prts[1]];
+
+		Bean bean(prts[0],"",prts[0],"singleton",false,false,scappName);
+		ConfigurationData::getInstance()->ffeadContext.addBean(bean);
+	}
+
+	getInstance()->ffeadContext.initializeAllSingletonBeans(getInstance()->servingContexts, &(getInstance()->reflector));
+
+	it = ConfigurationData::getInstance()->servingContextRouterNames.begin();
+	for(;it!=ConfigurationData::getInstance()->servingContextRouterNames.end();++it) {
+		std::string rt = it->second;
+		std::vector<std::string> prts = StringUtil::splitAndReturn<std::vector<std::string> >(rt, ";");
+		std::string scappName = ConfigurationData::getInstance()->servingContextAppNames[prts[1]];
+
 		CommonUtils::setAppName(scappName);
+
 		ClassInfo* rtcls = getInstance()->reflector.getClassInfo(prts[0], scappName);
-		args argus;
-		Constructor ctor = rtcls->getConstructor(argus);
-		vals values;
-		Router* router = (Router*)getInstance()->reflector.newInstanceGVP(ctor, values);
-		ConfigurationData::getInstance()->servingContextRouters[prts[1]] = router;
+		if(rtcls->getClassName()!="") {
+			void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(prts[0], scappName);
+			Router* router = (Router*)_temp;
+			ConfigurationData::getInstance()->servingContextRouters[prts[1]] = router;
+		}
 	}
 
 	SerializeBase::init(ConfigurationData::getInstance()->dlib);

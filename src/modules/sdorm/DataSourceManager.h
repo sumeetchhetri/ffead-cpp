@@ -47,7 +47,7 @@ class DataSourceManager {
 	ConnectionProperties props;
 	Mapping mapping;
 	ConnectionPooler* pool;
-	static void initDSN(const ConnectionProperties& props, const Mapping& mapping);
+	static void initDSN(const ConnectionProperties& props, const Mapping& mapping, GetClassBeanIns f);
 	DataSourceManager(const ConnectionProperties& props, const Mapping& mapping);
 	static void destroy();
 	friend class ConfigurationHandler;

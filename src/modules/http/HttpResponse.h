@@ -81,6 +81,8 @@ public:
 	void setUrl(const std::string& url);
 	const std::string& getUrl();
 	void addHeader(std::string header, const std::string& value);
+	void generateHeadResponse(std::string& resp);
+	void update(HttpRequest* req);
 private:
 	static RiMap HDRS_SW_CODES;
 	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN;
@@ -106,8 +108,6 @@ private:
 	int tecurrpart;
 	bool hasContent;
 	void setCompressed(const bool& compressed);
-	void update(HttpRequest* req);
-	void generateHeadResponse(std::string& resp);
 	void generateOptionsResponse(std::string& data);
 	void generateTraceResponse(HttpRequest* req, std::string& data);
 	bool updateContent(HttpRequest* req, const uint32_t& techunkSiz);

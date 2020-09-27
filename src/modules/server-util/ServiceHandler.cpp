@@ -47,7 +47,7 @@ void* ServiceHandler::closeConnections(void *arg) {
 		}
 		for(it=addrs.begin();it!=addrs.end();) {
 			long long t = Timer::getTimestamp();
-			if(t-it->second>=15) {
+			if(t-it->second>=15 && sifMap[it->first]->useCounter==0) {
 				delete sifMap[it->first];
 				sifMap.erase(it->first);
 				addrs.erase(it++);

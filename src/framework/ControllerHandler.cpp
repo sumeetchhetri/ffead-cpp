@@ -88,7 +88,7 @@ bool ControllerExtensionHandler::handle(HttpRequest* req, HttpResponse* res, con
 	{
 		//Timer t;
 		//t.start();
-		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("controller_"+controller, req->getCntxt_name());
+		void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(controller, req->getCntxt_name());
 		args argus;
 		argus.push_back("HttpRequest*");
 		argus.push_back("HttpResponse*");
@@ -112,7 +112,7 @@ bool ControllerExtensionHandler::handle(HttpRequest* req, HttpResponse* res, con
 			res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 			isContrl = true;
 		}
-		ConfigurationData::getInstance()->ffeadContext.release(_temp, "controller_"+controller, req->getCntxt_name());
+		ConfigurationData::getInstance()->ffeadContext.release(_temp, controller, req->getCntxt_name());
 		//t.end();
 		//CommonUtils::tsContExec += t.timerNanoSeconds();
 	}
@@ -255,14 +255,14 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 		if(flag)
 		{
 			//t.start();
-			ClassInfo* srv = ConfigurationData::getInstance()->ffeadContext.contInsMap["restcontroller_"+rft->clas+rft->appName];
+			ClassInfo* srv = ConfigurationData::getInstance()->ffeadContext.contInsMap[rft->clas+rft->appName];
 			//t.end();
 			//CommonUtils::tsContRstCsiLkp += t.timerNanoSeconds();
 
 			//t.start();
 			void *_temp = srv->getSI();
 			if(_temp==NULL) {
-				_temp = ConfigurationData::getInstance()->ffeadContext.getBean("restcontroller_"+rft->clas, rft->appName);
+				_temp = ConfigurationData::getInstance()->ffeadContext.getBean(rft->clas, rft->appName);
 				if(_temp==NULL) {
 					//logger << "Rest Controller Not Found" << std::endl;
 					res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
@@ -275,7 +275,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 			{
 				res->setHTTPResponseStatus(HTTPResponseStatus::UnsupportedMedia);
 				res->setDone(true);
-				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 				return true;
 			}
 			req->addHeader(HttpRequest::ContentType, rft->icontentType);
@@ -342,7 +342,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 										//logger << "File can only be mapped to ifstream" << std::endl;
 										res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 										res->setDone(true);
-										if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+										if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 										return true;
 									}
 								}
@@ -356,7 +356,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								//logger << "Invalid mapping specified in config, no multipart content found with name " + rft->params.at(var).name << std::endl;
 								res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 								res->setDone(true);
-								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 								return true;
 							}
 						}
@@ -367,7 +367,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								//logger << "Request Body cannot be mapped to more than one argument..." << std::endl;
 								res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 								res->setDone(true);
-								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+								if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 								return true;
 							}
 							pmvalue = req->getContent();
@@ -393,7 +393,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								{
 									res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 									res->setDone(true);
-									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 									for(int i=0;i<(int)valus.size();++i) {
 										if(valus.at(i)!=NULL) {
 											reflector.destroy(valus.at(i), argus.at(i));
@@ -473,7 +473,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								{
 									res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 									res->setDone(true);
-									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+									if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 									for(int i=0;i<(int)valus.size();++i) {
 										if(valus.at(i)!=NULL) {
 											reflector.destroy(valus.at(i), argus.at(i));
@@ -517,7 +517,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						invValue= true;
 						res->setHTTPResponseStatus(HTTPResponseStatus::BadRequest);
 						res->setDone(true);
-						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 						for(int i=0;i<(int)valus.size();++i) {
 							if(valus.at(i)!=NULL) {
 								reflector.destroy(valus.at(i), argus.at(i));
@@ -545,7 +545,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					if(rft->unmapped) {
 						res->addHeader(HttpResponse::ContentType, rft->ocontentType);
 						res->setHTTPResponseStatus(HTTPResponseStatus::getStatusByCode(rft->statusCode));
-						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 					} else {
 						int serOpt = rft->serOpt>=2000?-3:(rft->serOpt>=1000?-2:rft->serOpt);
 						switch(serOpt) {
@@ -627,7 +627,7 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 							it->second->clear();
 						}
 						mpvecstreams.clear();
-						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+						if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 					}
 
 					//t.end();
@@ -638,14 +638,14 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 					res->setHTTPResponseStatus(HTTPResponseStatus::NotFound);
 					//res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 					//logger << "Rest Controller Method Not Found" << std::endl;
-					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+					if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 				}
 			} catch(const std::exception& e) {
 				//logger << "Restcontroller exception occurred" << std::endl;
 				invValue= true;
 				res->setHTTPResponseStatus(HTTPResponseStatus::InternalServerError);
 				res->setDone(true);
-				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, "restcontroller_"+rft->clas, rft->appName);
+				if(srv->getSI()==NULL)ConfigurationData::getInstance()->ffeadContext.release(_temp, rft->clas, rft->appName);
 				return true;
 			}
 		}

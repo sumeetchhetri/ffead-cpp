@@ -444,7 +444,7 @@ WebSockHandler* ServiceTask::handleWebsockOpen(WebSocketData* req, WebSocketResp
 		{
 			if(it->second!="")
 			{
-				void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean("websocketclass_"+it->second, req->getCntxt_name());
+				void *_temp = ConfigurationData::getInstance()->ffeadContext.getBean(it->second, req->getCntxt_name());
 				WebSockHandler* h = (WebSockHandler*)_temp;
 				h->sif = sif;
 				if(h->onOpen(req, res, sif->getAddress(), hreq))
@@ -457,7 +457,11 @@ WebSockHandler* ServiceTask::handleWebsockOpen(WebSocketData* req, WebSocketResp
 	return NULL;
 }
 
-void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
+void ServiceTask::handle(HttpRequest* req, HttpResponse* res) {
+	handle(req, res, NULL);
+}
+
+bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, SocketInterface* sif)
 {
 	//Timer t1;
 	//t1.start();
@@ -472,7 +476,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 		{
 			res->setHTTPResponseStatus(*req->getRequestParseStatus());
 			res->addHeader(HttpResponse::Connection, "close");
-			return;
+			return true;
 		}
 
 		if(ConfigurationData::getInstance()->enableStaticResponses && ConfigurationData::getInstance()->staticResponsesMap.find(req->getPath())!=
@@ -482,7 +486,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			res->setContentType(sr.t);
 			res->setHTTPResponseStatus(HTTPResponseStatus::Ok);
 			res->setDone(true);
-			return;
+			return true;
 		}
 
 		if(req->getCntxt_name().length()==0) {
@@ -497,10 +501,9 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 			Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
 			if(router!=NULL) {
 				req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
-				router->route(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib);
+				return router->route(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, sif);
 				//t1.end();
 				//CommonUtils::tsServicePre += t1.timerNanoSeconds();
-				return;
 			}
 		} else {
 			if(ConfigurationData::getInstance()->servingContextRouters.find(HttpRequest::DEFAULT_CTX)!=
@@ -510,10 +513,9 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				Router* router = ConfigurationData::getInstance()->servingContextRouters.find(req->getCntxt_name())->second;
 				if(router!=NULL) {
 					req->setCntxt_root(ConfigurationData::getInstance()->servingContextAppRoots.find(req->getCntxt_name())->second);
-					router->route(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib);
+					return router->route(req, res, ConfigurationData::getInstance()->dlib, ConfigurationData::getInstance()->ddlib, sif);
 					//t1.end();
 					//CommonUtils::tsServicePre += t1.timerNanoSeconds();
-					return;
 				}
 			}
 		}
@@ -524,7 +526,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 				if(ConfigurationData::getInstance()->servingContexts.find(req->getCntxt_name())==ConfigurationData::getInstance()->servingContexts.end())
 				{
 					res->addHeader(HttpResponse::Connection, "close");
-					return;
+					return true;
 				}
 			}
 
@@ -724,6 +726,7 @@ void ServiceTask::handle(HttpRequest* req, HttpResponse* res)
 	{
 		//logger << "Standard exception occurred while processing ServiceTask request " << std::endl;
 	}
+	return true;
 }
 
 void ServiceTask::handleWebSocket(HttpRequest* req, void* dlib, void* ddlib, SocketInterface* sockUtil)
