@@ -56,7 +56,7 @@ Ubuntu 18.04.2
 	apt update -yqq && apt install -yqq autoconf-archive gcc g++ cmake unzip libssl-dev uuid-dev odbc-postgresql unixodbc unixodbc-dev libcurl4-openssl-dev libmemcached-dev libmongoc-dev libhiredis-dev wget netcat
 
 Arch Linux
-	pacman -Sy --noconfirm autoconf-archive make clang unixodbc curl hiredis libmemcached mongo-c-driver cmake openssh libutil-linux wget gnu-netcat tar gzip zlib unzip gawk procps-ng
+	pacman -Sy --noconfirm autoconf-archive make clang unixodbc curl hiredis libmemcached mongo-c-driver cmake openssh util-linux-libs wget gnu-netcat tar gzip zlib unzip gawk procps-ng
 
 Gentoo
 	emerge-webrsync

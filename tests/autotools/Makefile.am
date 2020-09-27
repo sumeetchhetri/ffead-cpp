@@ -6,6 +6,7 @@ AM_CPPFLAGS=-I"../../src/modules/common" \
 			-I"../../src/modules/server-util" \
 			-I"../../src/modules/http" \
 			-I"../../src/modules/threads" \
+			-I"../../src/modules/reflection" \
 			-I"../../src/modules/ssl"
 
 prefix=${abs_builddir}

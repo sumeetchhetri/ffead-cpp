@@ -92,15 +92,15 @@ class LibpqDataSourceImpl : public DataSourceType, public SocketInterface {
 	std::string url;
 	bool trx;
 	bool isAsync;
-#ifdef HAVE_LIBPQ
-	PGconn* conn; //statement
 	std::queue<__AsyncReq*> Q;
 	static std::atomic<bool> done;
 	ConditionMutex c_mutex;
 	std::atomic<bool> cvar;
-#endif
+#ifdef HAVE_LIBPQ
+	PGconn* conn; //statement
 	PGresult* executeQueryInt(const std::string &query, const std::vector<LibpqParam>& pvals, bool isPrepared, int& status,
 			void* ctx, LipqResFunc cb, LipqComplFunc cmcb, void* vitem, bool isSelect, __AsyncReq**);
+#endif
 	static void* handle(void* inp);
 	__AsyncReq* getNext();
 	friend class PgReadTask;

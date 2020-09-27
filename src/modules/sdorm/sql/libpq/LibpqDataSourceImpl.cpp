@@ -71,7 +71,9 @@ void* LibpqDataSourceImpl::beginAsync(void* vitem) {
 		int status = -1;
 		std::vector<LibpqParam> pvals;
 		__AsyncReq* areq = NULL;
+#ifdef HAVE_LIBPQ
 		executeQueryInt("BEGIN", pvals, true, status, NULL, NULL, NULL, vitem, false, &areq);
+#endif
 		return areq;
 	}
 	return NULL;
@@ -82,7 +84,9 @@ void* LibpqDataSourceImpl::commitAsync(void* vitem) {
 		int status = -1;
 		std::vector<LibpqParam> pvals;
 		__AsyncReq* areq = NULL;
+#ifdef HAVE_LIBPQ
 		executeQueryInt("COMMIT", pvals, true, status, NULL, NULL, NULL, vitem, false, &areq);
+#endif
 		return areq;
 	}
 	return NULL;
@@ -93,7 +97,9 @@ void* LibpqDataSourceImpl::rollbackAsync(void* vitem) {
 		int status = -1;
 		std::vector<LibpqParam> pvals;
 		__AsyncReq* areq = NULL;
+#ifdef HAVE_LIBPQ
 		executeQueryInt("ROLLBACK", pvals, true, status, NULL, NULL, NULL, vitem, false, &areq);
+#endif
 		return areq;
 	}
 	return NULL;
@@ -366,6 +372,7 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 }
 
 void PgReadTask::run() {
+#ifdef HAVE_LIBPQ
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)sif;
 	if (!PQconsumeInput(ths->conn)) {
 		fprintf(stderr, "Failed to consume pg input: %s\n", PQerrorMessage(ths->conn));
@@ -474,11 +481,12 @@ void PgReadTask::run() {
 	flux = false;
 	submit(NULL);
 	if(hasPrepare) hasPrepare = false;
+#endif
 }
 
 void PgReadTask::submit(__AsyncReq* nitem) {
 	LibpqDataSourceImpl* ths = (LibpqDataSourceImpl*)sif;
-
+#ifdef HAVE_LIBPQ
 	if(flux && nitem!=NULL) {
 		ths->Q.push(nitem);
 		//fprintf(stdout, "Add query to Q....\n");fflush(stdout);
@@ -597,6 +605,7 @@ void PgReadTask::submit(__AsyncReq* nitem) {
 		//ths->c_mutex.unlock();
 		//fprintf(stdout, "Add query to Q....\n");fflush(stdout);
 	}
+#endif
 }
 
 void LibpqDataSourceImpl::completeAsync(void* vitem, void* ctx, LipqComplFunc cmcb) {
@@ -618,6 +627,7 @@ void LibpqDataSourceImpl::completeAsync(void* vitem, void* ctx, LipqComplFunc cm
 	}
 }
 
+#ifdef HAVE_LIBPQ
 PGresult* LibpqDataSourceImpl::executeQueryInt(const std::string &query, const std::vector<LibpqParam>& pvals, bool isPrepared, int& status,
 		void* ctx, LipqResFunc cb, LipqComplFunc cmcb, void* vitem, bool isSelect, __AsyncReq** areq) {
 	if(isAsync) {
@@ -663,7 +673,6 @@ PGresult* LibpqDataSourceImpl::executeQueryInt(const std::string &query, const s
 			}
 			paramBinary[var] = pvals.at(var).b?1:0;
 		}
-	#ifdef HAVE_LIBPQ
 		std::string stmtName;
 		if(isPrepared) {
 			if(prepStmtMap.find(query)==prepStmtMap.end()) {
@@ -691,21 +700,25 @@ PGresult* LibpqDataSourceImpl::executeQueryInt(const std::string &query, const s
 			return NULL;
 		}
 	}
-#endif
 	return NULL;
 }
+#endif
 
 void* LibpqDataSourceImpl::executeUpdateQueryAsync(const std::string &query, const std::vector<LibpqParam>& pvals, void* ctx, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
 	int status = -1;
 	__AsyncReq* areq = NULL;
+#ifdef HAVE_LIBPQ
 	executeQueryInt(query, pvals, true, status, ctx, NULL, cmcb, vitem, false, &areq);
+#endif
 	return areq;
 }
 
 void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, const std::vector<LibpqParam>& pvals, void* ctx, LipqResFunc cb, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
 	int status = -1;
 	__AsyncReq* areq = NULL;
+#ifdef HAVE_LIBPQ
 	executeQueryInt(query, pvals, true, status, ctx, cb, cmcb, vitem, true, &areq);
+#endif
 	return areq;
 }
 
