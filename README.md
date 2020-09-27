@@ -121,4 +121,4 @@ Webrtc Example (Uses peerjs)
 - Once the server starts, navigate to http://localhost:8080/peer-server/index.html in 2 tabs
 - Enjoy p2p calling using the ffead-cpp webrtc (peerjs compatible) signalling server
 
-For further details checkout the [wiki](https://github.com/sumeetchhetri/ffead-cpp/wiki) page
+For further details checkout the [wiki](https://github.com/sumeetchhetri/ffead-cpp/wiki) page 
