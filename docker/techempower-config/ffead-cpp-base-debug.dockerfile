@@ -1,10 +1,10 @@
 FROM buildpack-deps:bionic
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="5.1"
+LABEL version="5.1-debug"
 LABEL description="Base ffead-cpp docker image with commit id - master"
 
 ENV IROOT=/installs
-ENV DEBUG=off
+ENV DEBUG=on
 
 RUN mkdir /installs
 #COPY te-benchmark-um/ /installs/te-benchmark-um/
@@ -27,3 +27,5 @@ RUN ./install_ffead-cpp-framework.sh && ./install_ffead-cpp-httpd.sh && ./instal
 
 COPY run_ffead.sh /
 RUN chmod 755 /run_ffead.sh
+
+RUN apt update -yqq && apt install -yqq gdb net-tools vim

@@ -60,9 +60,9 @@ class SQLDataSourceImpl: public DataSourceInterface {
 		ntmap.clear();
 		params.clear();
 	}
-	void* getElements();
-	void* getElements(Query& q);
-	void* getElements(const std::vector<std::string>& cols, Query& q);
+	void* getElements(SQLSMALLINT& V_OD_colanz, SQLLEN& V_OD_rowanz);
+	void* getElements(Query& q, SQLSMALLINT& V_OD_colanz, SQLLEN& V_OD_rowanz);
+	void* getElements(const std::vector<std::string>& cols, Query& q, SQLSMALLINT& V_OD_colanz, SQLLEN& V_OD_rowanz);
 	void showError(const char *fn, const SQLHANDLE& handle, const SQLSMALLINT& type);
 	void close();
 	void closeConn();

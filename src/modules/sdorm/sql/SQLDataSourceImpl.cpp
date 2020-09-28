@@ -447,7 +447,7 @@ bool SQLDataSourceImpl::allocateStmt(const bool& read) {
 		return false;
 	}
 	if (this->conn != NULL) {
-		//refreshStmt();
+		refreshStmt();
 		return true;
 	}
 	int V_OD_erg;// result of functions
@@ -490,20 +490,22 @@ void SQLDataSourceImpl::closeConn() {
 }
 
 void SQLDataSourceImpl::close() {
-	if(isSession) return;
-	isSession = false;
+	if(isSession) {
+		isSession = false;
+		return;
+	}
 #ifdef HAVE_LIBODBC
 	refreshStmt();
 #endif
 }
 
-void* SQLDataSourceImpl::getElements(Query& q)
+void* SQLDataSourceImpl::getElements(Query& q, SQLSMALLINT& V_OD_colanz, SQLLEN& V_OD_rowanz)
 {
 	std::vector<std::string> cols;
-	return getElements(cols,q);
+	return getElements(cols, q, V_OD_colanz, V_OD_rowanz);
 }
 
-void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query& q)
+void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query& q, SQLSMALLINT& V_OD_colanz, SQLLEN& V_OD_rowanz)
 {
 #ifdef HAVE_LIBODBC
 	std::string clasName = q.getClassName();
@@ -517,8 +519,7 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 
 	fldMap fields = clas->getFields();
 	fldMap::iterator it;
-	void *vecT = reflector->getNewContainer(clasName,"std::vector",appName);
-	SQLSMALLINT	V_OD_colanz;
+	void *vecT = reflector->getNewContainer(clasName, "std::vector", appName);
 
 	std::map<std::string, void*> rel2Insmap;
 	std::map<std::string, void*> rel2Vecmap;
@@ -526,9 +527,11 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 	std::map<std::string, std::string> fldnmrel2clsmap;
 	std::map<std::string, int> rel2reltype;
 
-	V_OD_erg=SQLFetch(V_OD_hstmt);
-	while(V_OD_erg != SQL_NO_DATA)
+	for(int k=0;k<V_OD_rowanz;k++)
 	{
+		V_OD_erg = SQLFetch(V_OD_hstmt);
+		if(V_OD_erg == SQL_NO_DATA) break;
+
 		unsigned int var = 0;
 		args argus1;
 		std::map<std::string, void*> instances;
@@ -537,11 +540,6 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 		const Constructor& ctor = clas->getConstructor(argus1);
 		void *t = reflector->newInstanceGVP(ctor);
 
-		V_OD_erg = SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
-		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-		{
-			close();
-		}
 		bool norel = true;
 		//logger << "Number of Columns " << V_OD_colanz << std::endl;
 		for(int i=1;i<=V_OD_colanz;i++)
@@ -603,7 +601,7 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 							{
 								if(rel2Vecmap.find(fldVal)==rel2Vecmap.end())
 								{
-									void *dvecT = reflector->getNewContainer(relation.getClsName(),"std::vector",appName);
+									void *dvecT = reflector->getNewContainer(relation.getClsName(), "std::vector", appName);
 									rel2Vecmap[fldVal] = dvecT;
 								}
 								if(relVecEle==NULL)
@@ -630,18 +628,16 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 		}
 		if(fldVal!="" && rel2reltype[fldVal]==2 && rel2Vecmap.find(fldVal)!=rel2Vecmap.end() && fldvalrel2clsmap.find(fldVal)!=fldvalrel2clsmap.end())
 		{
-			reflector->addToContainer(rel2Vecmap[fldVal],relVecEle,fldvalrel2clsmap[fldVal],"std::vector",appName);
+			reflector->addToContainer(rel2Vecmap[fldVal],relVecEle,fldvalrel2clsmap[fldVal], "std::vector", appName);
 			delete relVecEle;
 		}
 		rel2Insmap[fldVal] = t;
 
 		if(norel)
 		{
-			reflector->addToContainer(vecT,t,clasName,"std::vector",appName);
+			reflector->addToContainer(vecT,t,clasName, "std::vector", appName);
 			reflector->destroy(t, clasName, appName);
 		}
-
-		V_OD_erg=SQLFetch(V_OD_hstmt);
 	}
 	if(fldvalrel2clsmap.size()>0)
 	{
@@ -661,12 +657,12 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 				std::string methname = "set"+StringUtil::capitalizedCopy(fldnmrel2clsmap[flv]);
 				Method meth = clas->getMethod(methname,argus);
 				reflector->invokeMethodGVP(rel2Insmap[flv],meth,valus);
-				reflector->addToContainer(vecT,rel2Insmap[flv],clasName,"std::vector",appName);
+				reflector->addToContainer(vecT,rel2Insmap[flv],clasName, "std::vector", appName);
 				reflector->destroy(rel2Insmap[flv], clasName, appName);
 				if(rel2reltype[flv]==2)
-					reflector->destroyContainer(rvect,fldvalrel2clsmapit->second,"std::vector",appName);
+					reflector->destroyContainer(rvect,fldvalrel2clsmapit->second, "std::vector", appName);
 				else
-					reflector->destroy(rvect,fldvalrel2clsmapit->second,appName);
+					reflector->destroy(rvect,fldvalrel2clsmapit->second, appName);
 			}
 		}
 	}
@@ -678,26 +674,22 @@ void* SQLDataSourceImpl::getElements(const std::vector<std::string>& cols, Query
 	return NULL;
 }
 
-void* SQLDataSourceImpl::getElements()
+void* SQLDataSourceImpl::getElements(SQLSMALLINT& V_OD_colanz, SQLLEN& V_OD_rowanz)
 {
 #ifdef HAVE_LIBODBC
 	int V_OD_erg;// result of functions
 	SQLCHAR colName[256];
-	SQLSMALLINT	V_OD_colanz, colNameLen, dataType, numDecimalDigits, allowsNullValues;
+	SQLSMALLINT colNameLen, dataType, numDecimalDigits, allowsNullValues;
 	SQLULEN columnSize;
 
 	std::vector<std::map<std::string, GenericObject> >* vecT = new std::vector<std::map<std::string, GenericObject> >;
 
-	V_OD_erg=SQLFetch(V_OD_hstmt);
-	while(V_OD_erg != SQL_NO_DATA)
+	for(int k=0;k<V_OD_rowanz;k++)
 	{
-		unsigned int var = 0;
+		V_OD_erg=SQLFetch(V_OD_hstmt);
+		if(V_OD_erg == SQL_NO_DATA) break;
 
-		V_OD_erg = SQLNumResultCols(V_OD_hstmt,&V_OD_colanz);
-		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
-		{
-			close();
-		}
+		unsigned int var = 0;
 
 		//logger << "Number of Columns " << V_OD_colanz << std::endl;
 
@@ -719,7 +711,6 @@ void* SQLDataSourceImpl::getElements()
 			StringUtil::toLower(columnName);
 			var = getProperty(dataType, columnSize, colValMap, columnName, var);
 		}
-		V_OD_erg=SQLFetch(V_OD_hstmt);
 		vecT->push_back(colValMap);
 	}
 	refreshStmt();
@@ -1925,7 +1916,6 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 	}
 
 	SQLRETURN V_OD_erg;
-	SQLLEN V_OD_rowanz;
 
 	if(query.getPropPosVaues().size()>0 && query.getPropNameVaues().size()>0)
 	{
@@ -1977,6 +1967,7 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 		V_OD_erg = SQLPrepare(V_OD_hstmt,(SQLCHAR*)query.getQuery().c_str(),SQL_NTS);
 		if (!SQL_SUCCEEDED(V_OD_erg))
 		{
+			std::cout << "update_query " << query.getQuery() << std::endl;
 			showError("SQLPrepare", V_OD_hstmt, SQL_HANDLE_STMT);
 			*flag = false;
 			close();
@@ -1998,30 +1989,45 @@ void* SQLDataSourceImpl::executeQueryInternal(Query& query, const bool& isObj) {
 		V_OD_erg = SQLPrepare(V_OD_hstmt,(SQLCHAR*)query.getQuery().c_str(),SQL_NTS);
 		if (!SQL_SUCCEEDED(V_OD_erg))
 		{
+			std::cout << "select_query " << query.getQuery() << std::endl;
 			showError("SQLPrepare", V_OD_hstmt, SQL_HANDLE_STMT);
 			close();
-			return vecT;
+			return NULL;
 		}
 		bindQueryParams(query);
-		V_OD_erg=SQLExecute(V_OD_hstmt);
+
+		V_OD_erg = SQLExecute(V_OD_hstmt);
 		if (!SQL_SUCCEEDED(V_OD_erg))
 		{
 			showError("SQLExecute", V_OD_hstmt, SQL_HANDLE_STMT);
 			close();
-			return vecT;
+			return NULL;
 		}
-		V_OD_erg=SQLRowCount(V_OD_hstmt,&V_OD_rowanz);
+
+		SQLSMALLINT	V_OD_colanz;
+		SQLLEN V_OD_rowanz;
+
+		V_OD_erg = SQLRowCount(V_OD_hstmt, &V_OD_rowanz);
 		if (!SQL_SUCCEEDED(V_OD_erg))
 		{
 			showError("SQLRowCount", V_OD_hstmt, SQL_HANDLE_STMT);
 			close();
-			return vecT;
+			return NULL;
 		}
+
+		V_OD_erg = SQLNumResultCols(V_OD_hstmt, &V_OD_colanz);
+		if ((V_OD_erg != SQL_SUCCESS) && (V_OD_erg != SQL_SUCCESS_WITH_INFO))
+		{
+			showError("SQLNumResultCols", V_OD_hstmt, SQL_HANDLE_STMT);
+			close();
+			return NULL;
+		}
+
 		//logger << "Number of Rows " << (int)V_OD_rowanz << std::endl;
 		if(query.getClassName()!="" && isObj)
-			return getElements(query);
+			return getElements(query, V_OD_colanz, V_OD_rowanz);
 		else
-			return getElements();
+			return getElements(V_OD_colanz, V_OD_rowanz);
 	}
 #endif
 	return NULL;
@@ -2052,6 +2058,7 @@ bool SQLDataSourceImpl::startSession() {
 
 bool SQLDataSourceImpl::endSession() {
 	close();
+	isSession = false;
 	return true;
 }
 
