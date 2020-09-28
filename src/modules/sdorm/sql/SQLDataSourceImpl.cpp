@@ -1313,13 +1313,15 @@ void SQLDataSourceImpl::showError(const char *fn, const SQLHANDLE& handle, const
 	SQLCHAR text[256];
 	SQLSMALLINT len;
 	SQLRETURN ret;
-	fprintf(stderr, "\n" "The driver reported the following diagnostics whilst running " "%s\n\n", fn);
+	fprintf(stdout, "\n" "The driver reported the following diagnostics whilst running " "%s\n\n", fn);
 
 	do
 	{
 		ret = SQLGetDiagRec(type, handle, ++i, state, &native, text, sizeof(text), &len );
-		if (SQL_SUCCEEDED(ret))
-		printf("%s:%d:%d:%s\n", state, i, native, text);
+		if (SQL_SUCCEEDED(ret)) {
+			fprintf(stdout, "%s:%d:%d:%s\n", state, i, native, text);
+		}
+		fflush(stdout);
 	}
 	while( ret == SQL_SUCCESS );
 #endif

@@ -217,8 +217,14 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, std::string q
 			ss << "::int4)";
 		}
 
-		int rid = rand() % 10000 + 1;
-		vec->at(c).setRandomNumber(rid);
+		int newRandomNumber = rand() % 10000 + 1;
+		if(vec->at(c).getRandomNumber() == newRandomNumber) {
+			newRandomNumber += 1;
+			if(newRandomNumber>=10000) {
+				newRandomNumber = 1;
+			}
+		}
+		vec->at(c).setRandomNumber(newRandomNumber);
 
 		LibpqDataSourceImpl::ADD_INT4(pars, vec->at(c).getId());
 		LibpqDataSourceImpl::ADD_INT4(pars, vec->at(c).getRandomNumber());

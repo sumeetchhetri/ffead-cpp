@@ -51,7 +51,7 @@ then
 	cp -f web/te-benchmark-um/config/cachememory.xml web/te-benchmark-um/config/cache.xml
 	cp -f web/te-benchmark-um-pq/config/cachememory.xml web/te-benchmark-um-pq/config/cache.xml
 	cp -f web/te-benchmark-um-mgr/config/cachememory.xml web/te-benchmark-um-mgr/config/cache.xml
-	cp -f web/te-benchmark-um-pq-async/config/cachememory.xml web/te-benchmark-um-pq/config/cache.xml
+	cp -f web/te-benchmark-um-pq-async/config/cachememory.xml web/te-benchmark-um-pq-async/config/cache.xml
 fi
 
 if [ "$4" = "redis" ]

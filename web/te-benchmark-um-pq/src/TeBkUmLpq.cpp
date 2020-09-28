@@ -280,7 +280,14 @@ void TeBkUmLpqRouter::updatesMultiUtil(void* ctx, int rn, std::vector<LibpqRes>&
 	strToNum(data.at(0).d, data.at(0).l, tmp);
 	w.setId(tmp);
 	strToNum(data.at(1).d, data.at(1).l, tmp);
-	w.setRandomNumber(tmp);
+	int newRandomNumber = rand() % 10000 + 1;
+	if(tmp == newRandomNumber) {
+		newRandomNumber += 1;
+		if(newRandomNumber>=10000) {
+			newRandomNumber = 1;
+		}
+	}
+	w.setRandomNumber(newRandomNumber);
 	updt->wlist->push_back(w);
 	*ss << "(" << w.getId() << "," << w.getRandomNumber() << ")";
 	updt->queryCount--;
