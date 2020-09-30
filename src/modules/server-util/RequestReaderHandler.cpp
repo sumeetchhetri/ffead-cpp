@@ -46,6 +46,19 @@ RequestReaderHandler* RequestReaderHandler::getInstance() {
 	return _i;
 }
 
+void RequestReaderHandler::startNL(unsigned int cid) {
+	if(!run) {
+		run = true;
+		selector.initialize(-1);
+		Thread* pthread = new Thread(&handle, this);
+		pthread->execute(cid);
+	}
+}
+
+void RequestReaderHandler::addListenerSocket() {
+	selector.addListeninSocket(listenerSock);
+}
+
 void RequestReaderHandler::start(unsigned int cid) {
 	if(run) {
 		return;

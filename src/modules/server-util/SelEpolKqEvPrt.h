@@ -173,8 +173,10 @@ class SelEpolKqEvPrt : public EventHandler {
 public:
 	SelEpolKqEvPrt();
 	virtual ~SelEpolKqEvPrt();
+	void initialize(const int& timeout);
 	void initialize(SOCKET sockfd, const int& timeout);
 	int getEvents();
+	void addListeninSocket(SOCKET sockfd);
 	SOCKET getDescriptor(const SOCKET& index, void*& obj, bool& isRead);
 	bool isListeningDescriptor(const SOCKET& descriptor);
 	bool registerWrite(SocketInterface* obj);

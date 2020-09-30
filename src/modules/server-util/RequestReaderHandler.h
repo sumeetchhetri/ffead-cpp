@@ -62,6 +62,8 @@ public:
 	static void setInstance(RequestReaderHandler*);
 	static RequestReaderHandler* getInstance();
 	void start(unsigned int cid);
+	void startNL(unsigned int cid);
+	void addListenerSocket();
 	void stop(std::string, int, bool);
 	RequestReaderHandler(ServiceHandler* shi, const bool& isMain, bool isSinglEVH, const SOCKET& listenerSock = INVALID_SOCKET);
 	void registerSocketInterfaceFactory(const SocketInterfaceFactory& f);

@@ -1229,7 +1229,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	RequestReaderHandler::setInstance(&reader);
 	handler->start();
 	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
-	reader.start(-1);
+	reader.startNL(-1);
 
 #ifdef INC_SDORM
 	logger << ("Initializing DataSources....") << std::endl;
@@ -1256,6 +1256,8 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 		pthread->execute();
 	}
 #endif
+
+	reader.addListenerSocket();
 
 	//printf("server: waiting for connections...\n");
 	logger.info("Server: waiting for connections on " + ipport);

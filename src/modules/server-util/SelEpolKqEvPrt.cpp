@@ -44,6 +44,71 @@ SelEpolKqEvPrt::~SelEpolKqEvPrt() {
 	}
 }
 
+void SelEpolKqEvPrt::initialize(const int& timeout)
+{
+	this->timeoutMilis = timeout;
+	curfds = 1;
+	#if defined(USE_MINGW_SELECT)
+		FD_ZERO(&readfds);
+		FD_ZERO(&master);
+	#elif defined(USE_SELECT)
+		fdsetSize = 1024/FD_SETSIZE;
+		for (int var = 0; var < fdsetSize; ++var) {
+			FD_ZERO(&readfds[var]);
+			FD_ZERO(&master[var]);
+		}
+	#elif defined USE_EPOLL || defined USE_WIN_IOCP
+		epoll_handle = epoll_create1(0);
+	#elif defined USE_KQUEUE
+		kq = kqueue();
+		if (kq == -1)
+		{
+			perror("kqueue");
+		}
+	#elif defined USE_DEVPOLL
+		if((dev_poll_fd = open("/dev/poll", O_RDWR)) <0)
+		{
+			perror("devpoll");
+		}
+		if (fcntl(dev_poll_fd, F_SETFD, FD_CLOEXEC) < 0)
+		{
+			perror("devpoll fcntl");
+		}
+	#elif defined USE_EVPORT
+		if ((port = port_create()) < 0) {
+			perror("port_create");
+		}
+	#elif defined USE_POLL
+		nfds=1;
+	#endif
+}
+
+void SelEpolKqEvPrt::addListeninSocket(SOCKET sockfd) {
+	this->sockfd = sockfd;
+	if(sockfd<=0)
+	{
+		listenerMode = false;
+		sockfd = 0;
+	}
+	else
+	{
+		listenerMode = true;
+	}
+	#if defined(USE_MINGW_SELECT)
+		fdMax = sockfd;
+	#elif defined(USE_SELECT)
+		fdMax = sockfd;
+	#elif defined USE_POLL
+		polled_fds = (struct pollfd *)calloc(1, nfds*sizeof(struct pollfd));
+		polled_fds->fd = sockfd;
+		polled_fds->events = POLLIN | POLLPRI;
+		return;
+	#endif
+	dsi = new DummySocketInterface();
+	dsi->fd = sockfd;
+	if(sockfd>0)registerRead(dsi, true);
+}
+
 void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 {
 	this->timeoutMilis = timeout;
