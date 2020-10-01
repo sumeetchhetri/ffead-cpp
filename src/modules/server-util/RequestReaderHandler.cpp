@@ -55,8 +55,11 @@ void RequestReaderHandler::startNL(unsigned int cid) {
 	}
 }
 
-void RequestReaderHandler::addListenerSocket() {
-	selector.addListeninSocket(listenerSock);
+void RequestReaderHandler::addListenerSocket(const SOCKET& listenerSock) {
+	if(listenerSock != INVALID_SOCKET) {
+		this->listenerSock = listenerSock;
+	}
+	selector.addListeningSocket(this->listenerSock);
 }
 
 void RequestReaderHandler::start(unsigned int cid) {

@@ -83,7 +83,7 @@ void SelEpolKqEvPrt::initialize(const int& timeout)
 	#endif
 }
 
-void SelEpolKqEvPrt::addListeninSocket(SOCKET sockfd) {
+void SelEpolKqEvPrt::addListeningSocket(SOCKET sockfd) {
 	this->sockfd = sockfd;
 	if(sockfd<=0)
 	{

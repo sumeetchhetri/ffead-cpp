@@ -176,7 +176,7 @@ public:
 	void initialize(const int& timeout);
 	void initialize(SOCKET sockfd, const int& timeout);
 	int getEvents();
-	void addListeninSocket(SOCKET sockfd);
+	void addListeningSocket(SOCKET sockfd);
 	SOCKET getDescriptor(const SOCKET& index, void*& obj, bool& isRead);
 	bool isListeningDescriptor(const SOCKET& descriptor);
 	bool registerWrite(SocketInterface* obj);

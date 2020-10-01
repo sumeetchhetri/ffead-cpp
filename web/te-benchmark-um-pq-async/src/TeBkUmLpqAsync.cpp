@@ -241,6 +241,8 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, std::string q
 	req->sif = NULL;
 
 	try {
+		//TODO comment below print line
+		std::cout << ss.str() << std::endl;
 		void* areq = sqli->beginAsync();
 		sqli->executeUpdateQueryAsync(ss.str(), pars, NULL, NULL, areq);
 		sqli->commitAsync(areq);

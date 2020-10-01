@@ -130,7 +130,7 @@ static reactor_status handle(reactor_event *event)
 				}
 				fclose (f);
 				char slen[10];
-				snprintf(slen, 9, "%d", length);
+				snprintf(slen, 9, "%ld", length);
 				response.body.base = (void*)buffer;
 				response.body.size = (size_t)length;
 				response.headers.count = 2;

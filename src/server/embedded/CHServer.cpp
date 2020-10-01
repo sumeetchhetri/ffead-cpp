@@ -1181,19 +1181,6 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	bool isSinglEVH = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["EVH_SINGLE"])=="true";
 
-	SOCKET sockfd;  // listen on sock_fd, new connection on new_fd
-
-	//struct sockaddr_storage their_addr; // connector's address information
-	//socklen_t sin_size;
-
-	sockfd = Server::createListener(ipaddr, CastUtil::toInt(port), true, isSinglEVH);
-
-	if(sockfd==-1)
-	{
-		logger << "Unable to start the server on the specified ip/port..." << std::endl;
-		return;
-	}
-
 	std::string cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["CONTENT_ENCODING"]);
 	try {
 		techunkSiz = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);
@@ -1225,7 +1212,7 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	unsigned int nthreads = hardware_concurrency();
 	ServiceHandler* handler = new HttpServiceHandler(cntEnc, &httpServiceFactoryMethod, nthreads, isSinglEVH, &httpReadFactoryMethod);
-	RequestReaderHandler reader(handler, true, isSinglEVH, sockfd);
+	RequestReaderHandler reader(handler, true, isSinglEVH);
 	RequestReaderHandler::setInstance(&reader);
 	handler->start();
 	reader.registerSocketInterfaceFactory(&CHServer::createSocketInterface);
@@ -1257,7 +1244,20 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 	}
 #endif
 
-	reader.addListenerSocket();
+	SOCKET sockfd;  // listen on sock_fd, new connection on new_fd
+
+	//struct sockaddr_storage their_addr; // connector's address information
+	//socklen_t sin_size;
+
+	sockfd = Server::createListener(ipaddr, CastUtil::toInt(port), true, isSinglEVH);
+
+	if(sockfd==-1)
+	{
+		logger << "Unable to start the server on the specified ip/port..." << std::endl;
+		return;
+	}
+
+	reader.addListenerSocket(sockfd);
 
 	//printf("server: waiting for connections...\n");
 	logger.info("Server: waiting for connections on " + ipport);
