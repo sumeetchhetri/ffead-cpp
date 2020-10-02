@@ -208,7 +208,7 @@ void TeBkUmLpqRouter::updates(const char* q, int ql, std::vector<TeBkUmLpqWorld>
 			LibpqDataSourceImpl::ADD_INT4(pars, w.getId());
 			LibpqDataSourceImpl::ADD_INT4(pars, w.getRandomNumber());
 		}
-		ss << ") as c(randomnumber, id) where c.id = t.id";
+		ss << ") as c(id, randomnumber) where c.id = t.id";
 		
 		sqli->begin();
 		sqli->executeUpdateQuery(ss.str(), pars);
@@ -227,9 +227,9 @@ void TeBkUmLpqRouter::updatesUtil(void* ctx, int rn, std::vector<LibpqRes>& data
 			newRandomNumber = 1;
 		}
 	}
-	LibpqDataSourceImpl::ADD_INT4(*pars, newRandomNumber);
 	uint32_t id = *(uint32_t *)data.at(0).d;
 	LibpqDataSourceImpl::ADD_INT4(*pars, id, false);
+	LibpqDataSourceImpl::ADD_INT4(*pars, newRandomNumber);
 }
 
 void TeBkUmLpqRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmLpqWorld>& wlst) {
@@ -256,7 +256,7 @@ void TeBkUmLpqRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmLpqW
 		}
 
 		sqli->executeMultiQuery(ssq.str(), &updt, &TeBkUmLpqRouter::updatesMultiUtil, &TeBkUmLpqRouter::updatesMultiUtilCh);
-		ss << ") as c(randomnumber, id) where c.id = t.id;commit";
+		ss << ") as c(id, randomnumber) where c.id = t.id;commit";
 
 		if(!updt.status) {
 			return;

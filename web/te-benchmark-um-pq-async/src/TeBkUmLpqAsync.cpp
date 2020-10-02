@@ -229,7 +229,7 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, std::string q
 		LibpqDataSourceImpl::ADD_INT4(pars, vec->at(c).getId());
 		LibpqDataSourceImpl::ADD_INT4(pars, vec->at(c).getRandomNumber());
 	}
-	ss << ") as c(randomnumber, id) where c.id = t.id";
+	ss << ") as c(id, randomnumber) where c.id = t.id";
 
 	LibpqDataSourceImpl* sqli = req->sqli;
 
