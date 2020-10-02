@@ -20,7 +20,7 @@
  *      Author: sumeet
  */
 
-//For http2 use https://nghttp2.org/documentation/libnghttp2_asio.html
+//For http2 use https://github.com/nghttp2/nghttp2/blob/master/examples/asio-sv2.cc
 //For http3 use https://github.com/litespeedtech/lsquic/blob/master/bin/http_server.c
 
 #include "CHServer.h"

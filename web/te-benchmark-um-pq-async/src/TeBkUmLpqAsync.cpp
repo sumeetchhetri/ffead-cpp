@@ -207,16 +207,6 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, std::string q
 	int pc = 1;
 	int queryCount = (int)vec->size();
 	for (int c = 0; c < queryCount; ++c) {
-		ss << "($";
-		ss << pc++;
-		ss << "::int4,$";
-		ss << pc++;
-		if(c!=queryCount-1) {
-			ss << "::int4),";
-		} else {
-			ss << "::int4)";
-		}
-
 		int newRandomNumber = rand() % 10000 + 1;
 		if(vec->at(c).getRandomNumber() == newRandomNumber) {
 			newRandomNumber += 1;
@@ -225,9 +215,10 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, std::string q
 			}
 		}
 		vec->at(c).setRandomNumber(newRandomNumber);
-
-		LibpqDataSourceImpl::ADD_INT4(pars, vec->at(c).getId());
-		LibpqDataSourceImpl::ADD_INT4(pars, vec->at(c).getRandomNumber());
+		ss << "(" << vec->at(c).getId() << "," << newRandomNumber << ")";
+		if(c!=queryCount-1) {
+			ss << ",";
+		}
 	}
 	ss << ") as c(id, randomnumber) where c.id = t.id";
 
@@ -241,10 +232,8 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, std::string q
 	req->sif = NULL;
 
 	try {
-		//TODO comment below print line
-		std::cout << ss.str() << std::endl;
 		void* areq = sqli->beginAsync();
-		sqli->executeUpdateQueryAsync(ss.str(), pars, NULL, NULL, areq);
+		sqli->executeUpdateQueryAsync(ss.str(), pars, NULL, NULL, areq, false);
 		sqli->commitAsync(areq);
 		sqli->completeAsync(areq, ar, &TeBkUmLpqAsyncRouter::updatesAsyncChU);
 	} catch(const std::exception& e) {

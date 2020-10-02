@@ -352,7 +352,7 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 										if(q->cmcb!=NULL) {
 											q->cmcb(q->ctx, true, q->query, counter);
 										} else if(item->cmcb!=NULL) {
-											item->cmcb(item->ctx, false, q->query, counter);
+											item->cmcb(item->ctx, true, q->query, counter);
 										}
 										itemDone = true;
 									}
@@ -440,7 +440,7 @@ void PgReadTask::run() {
 					if(q->cmcb!=NULL) {
 						q->cmcb(q->ctx, true, q->query, counter);
 					} else if(ritem->cmcb!=NULL) {
-						ritem->cmcb(ritem->ctx, false, q->query, counter);
+						ritem->cmcb(ritem->ctx, true, q->query, counter);
 					}
 					ritemDone = true;
 				}
@@ -469,7 +469,7 @@ void PgReadTask::run() {
 				if(q->cmcb!=NULL) {
 					q->cmcb(q->ctx, true, q->query, counter);
 				} else if(ritem->cmcb!=NULL) {
-					ritem->cmcb(ritem->ctx, false, q->query, counter);
+					ritem->cmcb(ritem->ctx, true, q->query, counter);
 				}
 				ritemDone = true;
 			}
@@ -708,7 +708,7 @@ void* LibpqDataSourceImpl::executeUpdateQueryAsync(const std::string &query, con
 	int status = -1;
 	__AsyncReq* areq = NULL;
 #ifdef HAVE_LIBPQ
-	executeQueryInt(query, pvals, true, status, ctx, NULL, cmcb, vitem, false, &areq);
+	executeQueryInt(query, pvals, isPrepared, status, ctx, NULL, cmcb, vitem, false, &areq);
 #endif
 	return areq;
 }
@@ -717,7 +717,7 @@ void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, const std
 	int status = -1;
 	__AsyncReq* areq = NULL;
 #ifdef HAVE_LIBPQ
-	executeQueryInt(query, pvals, true, status, ctx, cb, cmcb, vitem, true, &areq);
+	executeQueryInt(query, pvals, isPrepared, status, ctx, cb, cmcb, vitem, true, &areq);
 #endif
 	return areq;
 }
@@ -803,7 +803,7 @@ void LibpqDataSourceImpl::executeQuery(const std::string &query, const std::vect
 #ifdef HAVE_LIBPQ
 	int status = -1;
 	__AsyncReq* areq = NULL;
-	PGresult *res = executeQueryInt(query, pvals, true, status, NULL, NULL, NULL, NULL, true, &areq);
+	PGresult *res = executeQueryInt(query, pvals, isPrepared, status, NULL, NULL, NULL, NULL, true, &areq);
 	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 		fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
 		PQclear(res);
@@ -831,7 +831,7 @@ bool LibpqDataSourceImpl::executeUpdateQuery(const std::string &query, const std
 #ifdef HAVE_LIBPQ
 	int status = -1;
 	__AsyncReq* areq = NULL;
-	PGresult *res = executeQueryInt(query, pvals, false, status, NULL, NULL, NULL, NULL, false, &areq);
+	PGresult *res = executeQueryInt(query, pvals, isPrepared, status, NULL, NULL, NULL, NULL, false, &areq);
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 		fprintf(stderr, "UPDATE failed: %s", PQerrorMessage(conn));
 		PQclear(res);
