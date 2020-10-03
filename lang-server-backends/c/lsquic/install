@@ -1,0 +1,12 @@
+cd /tmp
+git clone https://boringssl.googlesource.com/boringssl
+cd boringssl
+git checkout 251b5169fd44345f455438312ec4e18ae07fd58c
+cmake -DCMAKE_BUILD_TYPE=Release . &&  make
+cd /tmp && mv boringssl /usr/local/
+git clone https://github.com/litespeedtech/lsquic.git
+cd lsquic
+git submodule init
+git submodule update
+cmake -GNinja -DBORINGSSL_DIR=/usr/local/boringssl -DLSQUIC_SHARED_LIB=1 -DLSQUIC_BIN=1 .
+ninja install

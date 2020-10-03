@@ -138,7 +138,7 @@ func main() {
 
 	var srvDirC, srvDirCLen = asPtrAndLength(*serverDirectory)
 	fmt.Println("Bootstrapping ffead-cpp start...")
-	C.ffead_cpp_bootstrap(srvDirC, srvDirCLen, 12)
+	C.ffead_cpp_bootstrap(srvDirC, srvDirCLen, 15)
 	fmt.Println("Bootstrapping ffead-cpp end...")
 
 	fmt.Println("Initializing ffead-cpp start...")

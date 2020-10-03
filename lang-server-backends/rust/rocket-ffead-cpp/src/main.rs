@@ -254,7 +254,7 @@ fn main() {
 
     println!("Bootstrapping ffead-cpp start...");
     unsafe {
-        ffead_cpp_bootstrap(c_server_directory.as_ptr(), arg0.len(), 11);
+        ffead_cpp_bootstrap(c_server_directory.as_ptr(), arg0.len(), 13);
     }
 	println!("Bootstrapping ffead-cpp end...");
 

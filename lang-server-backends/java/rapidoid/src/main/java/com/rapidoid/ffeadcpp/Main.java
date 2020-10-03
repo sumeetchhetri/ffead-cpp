@@ -23,7 +23,7 @@ import com.ffead.cpp.FfeadCppInterface;
 public class Main {
 
 	public static void main(String[] args) {
-		FfeadCppInterface.init(args[0].trim(), args[0].trim().length());
+		FfeadCppInterface.init(args[0].trim(), 21);
 		
 		String[] fargs = new String[args.length-2];
 		for (int i=2;i<args.length;i++) {

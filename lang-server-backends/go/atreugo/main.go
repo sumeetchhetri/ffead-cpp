@@ -145,7 +145,7 @@ func ffeadCppHandler(ctx *atreugo.RequestCtx) error {
 func main() {
 	var srvDirC, srvDirCLen = asPtrAndLength(ffeadCppDir)
 	fmt.Println("Bootstrapping ffead-cpp start...")
-	C.ffead_cpp_bootstrap(srvDirC, srvDirCLen, 12)
+	C.ffead_cpp_bootstrap(srvDirC, srvDirCLen, 16)
 	fmt.Println("Bootstrapping ffead-cpp end...")
 
 	fmt.Println("Initializing ffead-cpp start...")

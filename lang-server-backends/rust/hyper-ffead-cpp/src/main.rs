@@ -235,7 +235,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     println!("Bootstrapping ffead-cpp start...");
     unsafe {
-        ffead_cpp_bootstrap(c_server_directory.as_ptr(), arg0.len(), 10);
+        ffead_cpp_bootstrap(c_server_directory.as_ptr(), arg0.len(), 12);
     }
 	println!("Bootstrapping ffead-cpp end...");
 

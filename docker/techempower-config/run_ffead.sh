@@ -165,6 +165,12 @@ then
 	./libreactor-ffead-cpp $FFEAD_CPP_PATH 8080
 fi
 
+if [ "$2" = "h2o" ]
+then
+	cd ${IROOT}
+	./h2o_app $FFEAD_CPP_PATH 0.0.0.0 8080
+fi
+
 if [ "$2" = "crystal-http" ]
 then
 	cd ${IROOT}

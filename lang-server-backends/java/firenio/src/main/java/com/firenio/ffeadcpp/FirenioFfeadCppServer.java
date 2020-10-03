@@ -54,7 +54,7 @@ public class FirenioFfeadCppServer {
 	static final byte[]                EH = "\r\n".getBytes();
 	
     public static void main(String[] args) throws Exception {
-    	FfeadCppInterface.init(args[0].trim(), args[0].trim().length());
+    	FfeadCppInterface.init(args[0].trim(), 20);
     	
         boolean lite      = Util.getBooleanProperty("lite");
         boolean read      = Util.getBooleanProperty("read");

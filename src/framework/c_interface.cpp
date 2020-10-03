@@ -116,7 +116,7 @@ void* ffead_cpp_handle_rust_2(const ffead_request *request, int* scode,
 }
 
 /*
-    Used by libreactor (C)
+    Used by libreactor, h2o (C)
 */
 void* ffead_cpp_handle_c_1(const ffead_request *request, int* scode, const char** smsg, size_t *smsg_len,
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,

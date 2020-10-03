@@ -186,7 +186,7 @@ class H2oFfeadCppCry < H2o
 	#  parser.on("-t PORT", "--to=PORT", "Specifies the port") { |port| @port = port.to_i }
 	#end
 	
-    LibFfeadCpp.ffead_cpp_bootstrap(@ffead_cpp_directory, @ffead_cpp_directory.bytesize , 13)
+    LibFfeadCpp.ffead_cpp_bootstrap(@ffead_cpp_directory, @ffead_cpp_directory.bytesize , 19)
     LibFfeadCpp.ffead_cpp_init()
 
     h2o_config_init(pointerof(@config))

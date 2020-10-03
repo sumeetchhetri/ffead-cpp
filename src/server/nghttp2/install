@@ -1,0 +1,5 @@
+https://github.com/nghttp2/nghttp2/releases/download/v1.41.0/nghttp2-1.41.0.tar.gz
+tar xvf nghttp2-1.41.0.tar.gz
+cd nghttp2-1.41.0
+cmake -DENABLE_ASIO_LIB=on -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl -GNinja .
+ninja install

@@ -204,7 +204,6 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, std::string q
 
 	std::vector<LibpqParam> pars;
 
-	int pc = 1;
 	int queryCount = (int)vec->size();
 	for (int c = 0; c < queryCount; ++c) {
 		int newRandomNumber = rand() % 10000 + 1;

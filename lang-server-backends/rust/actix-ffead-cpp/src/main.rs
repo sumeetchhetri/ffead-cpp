@@ -227,7 +227,7 @@ async fn main() -> std::io::Result<()> {
 
     println!("Bootstrapping ffead-cpp start...");
     unsafe {
-        ffead_cpp_bootstrap(c_server_directory.as_ptr(), arg0.len(), 9);
+        ffead_cpp_bootstrap(c_server_directory.as_ptr(), arg0.len(), 11);
     }
 	println!("Bootstrapping ffead-cpp end...");
 

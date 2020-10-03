@@ -182,17 +182,18 @@ public:
 };
 
 enum SERVER_BACKEND {
-	NGINX, APACHE, OPENLITESPEED, //All http server modules
-	EMBEDDED, //The embedded ffead-cpp server engine
-	CINATRA, LITHIUM, DROGON, //All C++ http server engines
-	C_LIBREACTOR, C_H2O, //All C http server engines
-	V_WEB, V_PICO, //All V http server engines
-	RUST_ACTIX, RUST_HYPER, RUST_ROCKET, //All Rust http server engines
-	GO_FASTHTTP, GO_ATRUEGO, GO_GNET, //All Go http server engines
-	CRYSTAL_HTTP, CRYSTAL_H2O, //All Crystal http server engines
-	JAVA_FIRENIO, JAVA_RAPIDOID, JAVA_WIZZARDO_HTTP, //All Java http server engines
-	SWIFT_NIO, //All Swift http server engines
-	D_HUNT, //All D http server engines
+	NGINX, APACHE, OPENLITESPEED, //All http server modules [0, 1, 2]
+	EMBEDDED,//The embedded ffead-cpp server engine [3]
+	CINATRA, LITHIUM, DROGON, //All C++ http server engines [4, 5, 6]
+	C_LIBREACTOR, C_H2O, //All C http server engines [7, 8]
+	V_WEB, V_PICO, //All V http server engines [9, 10]
+	RUST_ACTIX, RUST_HYPER, RUST_ROCKET, RUST_THRUSTER, //All Rust http server engines [11, 12, 13, 14]
+	GO_FASTHTTP, GO_ATRUEGO, GO_GNET, //All Go http server engines [15, 16, 17]
+	CRYSTAL_HTTP, CRYSTAL_H2O, //All Crystal http server engines [18, 19]
+	JAVA_FIRENIO, JAVA_RAPIDOID, JAVA_WIZZARDO_HTTP, //All Java http server engines [20, 21, 22]
+	SWIFT_NIO, //All Swift http server engines [23]
+	D_HUNT, //All D http server engines [24]
+	EMBEDDED_NGHTTP2, C_LSQUICHTTP3, //HTTP2 and HTTP3 server engines [25, 26]
 };
 
 class StaticResponseData {

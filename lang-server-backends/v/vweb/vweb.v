@@ -343,7 +343,7 @@ fn main() {
 	//assert 0 < server_port
 
 	println('Bootstrapping ffead-cpp start...')
-	C.ffead_cpp_bootstrap(server_directory.str, u64(server_directory.len), 7)
+	C.ffead_cpp_bootstrap(server_directory.str, u64(server_directory.len), 9)
 	println('Bootstrapping ffead-cpp end...')
 
 	println('Initializing ffead-cpp start...')

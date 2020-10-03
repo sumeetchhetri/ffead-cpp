@@ -121,7 +121,7 @@ class HttpServerFfeadCppCry
             parser.on("-t PORT", "--to=PORT", "Specifies the port") { |port| @port = port.to_i }
         end
 
-        LibFfeadCpp.ffead_cpp_bootstrap(@ffead_cpp_directory, @ffead_cpp_directory.bytesize , 13)
+        LibFfeadCpp.ffead_cpp_bootstrap(@ffead_cpp_directory, @ffead_cpp_directory.bytesize , 18)
         LibFfeadCpp.ffead_cpp_init()
 
         address = @server.bind_tcp "0.0.0.0", @port, reuse_port: true
