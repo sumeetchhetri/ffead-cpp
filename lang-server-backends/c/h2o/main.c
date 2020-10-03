@@ -44,7 +44,7 @@ static h2o_pathconf_t *register_handler(h2o_hostconf_t *hostconf, const char *pa
     return pathconf;
 }
 
-static int ffeadcpp_hanlder(h2o_handler_t *self, h2o_req_t *request)
+static int ffeadcpp_handler(h2o_handler_t *self, h2o_req_t *request)
 {
 	static h2o_generator_t generator = {NULL, NULL};
 
@@ -134,7 +134,7 @@ static void on_accept(uv_stream_t *listener, int status)
     h2o_accept(&accept_ctx, sock);
 }
 
-static int create_listener(char* ip_addr, int port)
+static int create_listener(const char* ip_addr, int port)
 {
     static uv_tcp_t listener;
     struct sockaddr_in addr;
@@ -172,7 +172,7 @@ static void on_accept(h2o_socket_t *listener, const char *err)
     h2o_accept(&accept_ctx, sock);
 }
 
-static int create_listener(char* ip_addr, int port)
+static int create_listener(const char* ip_addr, int port)
 {
     struct sockaddr_in addr;
     int fd, reuseaddr_flag = 1;
@@ -252,17 +252,21 @@ int main(int argc, char **argv)
 	const char* skey = NULL;
 	const char* ciphers = NULL;
 
+	int isSSL = 0;
 	if(argc>4) {
 		scert = argv[4];
 		skey = argv[5];
 		ciphers = argv[6];
+		isSSL = 1;
 	}
 
+	int isMc = 0;
 	const char* mcip_addr = NULL;
 	int mcport = -1;
 	if(argc>7) {
 		mcip_addr = argv[7];
 		mcport = atoi(argv[8]);
+		isMc = 1;
 	}
 
     h2o_hostconf_t *hostconf;
@@ -274,7 +278,7 @@ int main(int argc, char **argv)
     h2o_config_init(&config);
     hostconf = h2o_config_register_host(&config, h2o_iovec_init(H2O_STRLIT("default")), 65535);
 
-    pathconf = register_handler(hostconf, "/", ffeadcpp_hanlder);
+    pathconf = register_handler(hostconf, "/", ffeadcpp_handler);
     if (logfh != NULL)
         h2o_access_log_register(pathconf, logfh);
 
@@ -285,10 +289,10 @@ int main(int argc, char **argv)
 #else
     h2o_context_init(&ctx, h2o_evloop_create(), &config);
 #endif
-    if (USE_MEMCACHED)
+    if (isMc==1 && USE_MEMCACHED)
         h2o_multithread_register_receiver(ctx.queue, &libmemcached_receiver, h2o_memcached_receiver);
 
-    if (USE_HTTPS && setup_ssl(scert, skey, ciphers, mcip_addr, mcport) != 0)
+    if (isSSL==1 && USE_HTTPS && setup_ssl(scert, skey, ciphers, mcip_addr, mcport) != 0)
         goto Error;
 
 

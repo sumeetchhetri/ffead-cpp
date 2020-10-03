@@ -31,7 +31,7 @@ RUN mkdir -p "${H2O_BUILD_DIR}/build" && \
     rm -rf "$H2O_BUILD_DIR"
 
 WORKDIR ${IROOT}/lang-server-backends/c/h2o
-RUN make && cp h2o_app $IROOT/ && rm -rf ${IROOT}/lang-server-backends
+RUN cmake . && make && cp h2o_app $IROOT/ && rm -rf ${IROOT}/lang-server-backends
 
 WORKDIR /
 

@@ -125,6 +125,25 @@
 			"versus": "",
 			"tags": []
 		},
+		"h2o": {
+			"json_url": "/te-benchmark-um/json",
+			"plaintext_url": "/plaintext",
+			"port": 8080,
+			"approach": "Realistic",
+			"classification": "Fullstack",
+			"database": "None",
+			"framework": "ffead-cpp",
+			"language": "C++",
+			"orm": "None",
+			"platform": "None",
+			"webserver": "h2o",
+			"os": "Linux",
+			"database_os": "Linux",
+			"display_name": "ffead-cpp-h2o",
+			"notes": "",
+			"versus": "",
+			"tags": ["broken"]
+		},
 		"crystal-h2o": {
 			"json_url": "/te-benchmark-um/json",
 			"plaintext_url": "/plaintext",
