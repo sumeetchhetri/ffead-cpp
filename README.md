@@ -52,7 +52,9 @@ Features
     - cinatra
     - lithium
     - drogon
+    - nghttp2 based HTTP2 Server
     - libreactor (c)
+    - h2o (c)
     - vweb (vlang)
     - picov (vlang)
     - actix (rust)
