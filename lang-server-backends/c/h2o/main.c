@@ -104,7 +104,7 @@ static int ffeadcpp_handler(h2o_handler_t *self, h2o_req_t *request)
 	}
 
 	ffead_cpp_resp_cleanup(fres);
-    return -1;
+    return 0;
 }
 
 static h2o_globalconf_t config;
@@ -269,18 +269,20 @@ int main(int argc, char **argv)
 		isMc = 1;
 	}
 
-    h2o_hostconf_t *hostconf;
-    h2o_access_log_filehandle_t *logfh = h2o_access_log_open_handle("/dev/stdout", NULL, H2O_LOGCONF_ESCAPE_APACHE);
-    h2o_pathconf_t *pathconf;
-
     signal(SIGPIPE, SIG_IGN);
 
     h2o_config_init(&config);
-    hostconf = h2o_config_register_host(&config, h2o_iovec_init(H2O_STRLIT("default")), 65535);
+    h2o_hostconf_t* hostconf = h2o_config_register_host(&config, h2o_iovec_init(H2O_STRLIT("default")), 65535);
 
-    pathconf = register_handler(hostconf, "/", ffeadcpp_handler);
-    if (logfh != NULL)
-        h2o_access_log_register(pathconf, logfh);
+    h2o_pathconf_t* pathconf = register_handler(hostconf, "/", ffeadcpp_handler);
+
+    if(argc>9 && argv[9]=="1") {
+    	h2o_access_log_filehandle_t *logfh = h2o_access_log_open_handle("/dev/stdout", NULL, H2O_LOGCONF_ESCAPE_APACHE);
+		if (logfh != NULL)
+			h2o_access_log_register(pathconf, logfh);
+    }
+
+    int ffeadInit = 0;
 
 #if H2O_USE_LIBUV
     uv_loop_t loop;
@@ -304,6 +306,8 @@ int main(int argc, char **argv)
 	ffead_cpp_init();
 	printf("Initializing ffead-cpp end...\n");
 
+	ffeadInit = 1;
+
     accept_ctx.ctx = &ctx;
     accept_ctx.hosts = config.hosts;
 
@@ -324,8 +328,10 @@ int main(int argc, char **argv)
 	printf("Cleaning up ffead-cpp end...\n");
 
 Error:
-	printf("Cleaning up ffead-cpp start...\n");
-	ffead_cpp_cleanup();
-	printf("Cleaning up ffead-cpp end...\n");
+	if(ffeadInit==1) {
+		printf("Cleaning up ffead-cpp start...\n");
+		ffead_cpp_cleanup();
+		printf("Cleaning up ffead-cpp end...\n");
+	}
     return 1;
 }

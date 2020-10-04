@@ -40,61 +40,49 @@ service redis-server stop
 service apache2 stop
 service memcached stop
 
-WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um
-
 if [ "$3" = "mongo" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um
 	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
 	cp -f ${WEB_DIR}/config/sdormmongo.xml ${WEB_DIR}/config/sdorm.xml
-fi
-
-if [ "$3" = "mongo-raw" ]
+elif [ "$3" = "mongo-raw" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um-mgr
 	rm -rf web/te-benchmark-um web/te-benchmark-um-pq web/te-benchmark-um-pq-async
-fi
-
-if [ "$3" = "mysql" ]
+elif [ "$3" = "mysql" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um
 	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
 	cp -f ${WEB_DIR}/config/sdormmysql.xml ${WEB_DIR}/config/sdorm.xml
-fi
-
-if [ "$3" = "postgresql" ]
+elif [ "$3" = "postgresql" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um
 	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
 	cp -f web/te-benchmark-um/config/sdormpostgresql.xml web/te-benchmark-um/config/sdorm.xml
-fi
-
-if [ "$3" = "postgresql-raw" ]
+elif [ "$3" = "postgresql-raw" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um-pq
 	rm -rf web/te-benchmark-um web/te-benchmark-um-mgr web/te-benchmark-um-pq-async
 	sed -i 's|<async>true</async>|<async>false</async>|g' ${WEB_DIR}/config/sdorm.xml
-fi
-
-if [ "$3" = "postgresql-raw-async" ]
+elif [ "$3" = "postgresql-raw-async" ]
 then
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um-pq-async
 	rm -rf web/te-benchmark-um web/te-benchmark-um-mgr web/te-benchmark-um-pq
 	sed -i 's|<async>false</async>|<async>true</async>|g' ${WEB_DIR}/config/sdorm.xml
+else
+	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um
+	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
+	sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" ${WEB_DIR}/config/cache.xml
 fi
 
 if [ "$4" = "memory" ]
 then
 	cp -f ${WEB_DIR}/config/cachememory.xml ${WEB_DIR}/config/cache.xml
-fi
-
-if [ "$4" = "redis" ]
+elif [ "$4" = "redis" ]
 then
 	service redis-server start
 	cp -f ${WEB_DIR}/config/cacheredis.xml ${WEB_DIR}/config/cache.xml
-fi
-
-if [ "$4" = "memcached" ]
+elif [ "$4" = "memcached" ]
 then
 	service memcached start
 	cp -f ${WEB_DIR}/config/cachememcached.xml ${WEB_DIR}/config/cache.xml
@@ -117,24 +105,16 @@ then
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH &
 	done
-fi
-
-if [ "$2" = "lithium" ]
+elif [ "$2" = "lithium" ]
 then
 	./ffead-cpp-lithium $FFEAD_CPP_PATH &
-fi
-
-if [ "$2" = "cinatra" ]
+elif [ "$2" = "cinatra" ]
 then
 	./ffead-cpp-cinatra $FFEAD_CPP_PATH &
-fi
-
-if [ "$2" = "drogon" ]
+elif [ "$2" = "drogon" ]
 then
 	./ffead-cpp-drogon $FFEAD_CPP_PATH &
-fi
-
-if [ "$2" = "apache" ]
+elif [ "$2" = "apache" ]
 then
 	if [ "$3" = "mysql" ] || [ "$3" = "postgresql" ]
 	then
@@ -144,9 +124,7 @@ then
 	sed -i 's|<pool-size>30</pool-size>|<pool-size>3</pool-size>|g' web/te-benchmark-um/config/sdorm.xml
 	sed -i 's|<pool-size>10</pool-size>|<pool-size>2</pool-size>|g' web/te-benchmark-um/config/cache.xml
 	apachectl -D FOREGROUND
-fi
-
-if [ "$2" = "nginx" ]
+elif [ "$2" = "nginx" ]
 then
 	mkdir -p ${IROOT}/nginxfc/logs
 	sed -i 's|<pool-size>30</pool-size>|<pool-size>3</pool-size>|g' web/te-benchmark-um/config/sdorm.xml
@@ -157,89 +135,63 @@ then
 	else
 		nginx -g 'daemon off;' -c ${IROOT}/nginx-ffead-mongo/conf/nginx.conf
 	fi
-fi
-
-if [ "$2" = "libreactor" ]
+elif [ "$2" = "libreactor" ]
 then
 	cd ${IROOT}
 	./libreactor-ffead-cpp $FFEAD_CPP_PATH 8080
-fi
-
-if [ "$2" = "h2o" ]
+elif [ "$2" = "h2o" ]
 then
 	cd ${IROOT}
 	./h2o_app $FFEAD_CPP_PATH 0.0.0.0 8080
-fi
-
-if [ "$2" = "crystal-http" ]
+elif [ "$2" = "crystal-http" ]
 then
 	cd ${IROOT}
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./crystal-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080 &
 	done
-fi
-
-if [ "$2" = "crystal-h2o" ]
+elif [ "$2" = "crystal-h2o" ]
 then
 	cd ${IROOT}
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 	  taskset -c $i ./h2o-evloop-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080 &
 	done
-fi
-
-if [ "$2" = "rust-actix" ]
+elif [ "$2" = "rust-actix" ]
 then
 	cd ${IROOT}
 	./actix-ffead-cpp $FFEAD_CPP_PATH 8080
-fi
-
-if [ "$2" = "rust-hyper" ]
+elif [ "$2" = "rust-hyper" ]
 then
 	cd ${IROOT}
 	./hyper-ffead-cpp $FFEAD_CPP_PATH 8080
-fi
-
-if [ "$2" = "rust-thruster" ]
+elif [ "$2" = "rust-thruster" ]
 then
 	cd ${IROOT}
 	./thruster-ffead-cpp $FFEAD_CPP_PATH 8080
-fi
-
-if [ "$2" = "rust-rocket" ]
+elif [ "$2" = "rust-rocket" ]
 then
 	cd ${IROOT}
 	./rocket-ffead-cpp $FFEAD_CPP_PATH 8080
-fi
-
-if [ "$2" = "go-fasthttp" ]
+elif [ "$2" = "go-fasthttp" ]
 then
 	cd ${IROOT}
 	./fasthttp-ffead-cpp --server_directory=$FFEAD_CPP_PATH -addr=8080
-fi
-
-if [ "$2" = "go-gnet" ]
+elif [ "$2" = "go-gnet" ]
 then
 	cd ${IROOT}
 	./gnet-ffead-cpp --server_directory=$FFEAD_CPP_PATH --port=8080
-fi
-
-if [ "$2" = "v-vweb" ]
+elif [ "$2" = "v-vweb" ]
 then
 	cd ${IROOT}
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./vweb --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done
-fi
-
-if [ "$2" = "v-picov" ]
+elif [ "$2" = "v-picov" ]
 then
 	cd ${IROOT}
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done
-fi
-
-if [ "$2" = "java-firenio" ]
+elif [ "$2" = "java-firenio" ]
 then
 	cd ${IROOT}
 	java                       \
@@ -261,17 +213,13 @@ then
 	    -Dcachedurl=false          \
 	    -DunsafeBuf=true           \
 	    -classpath firenio-ffead-cpp-0.1-jar-with-dependencies.jar com.firenio.ffeadcpp.FirenioFfeadCppServer $FFEAD_CPP_PATH 8080
-fi
-
-if [ "$2" = "java-rapidoid" ]
+elif [ "$2" = "java-rapidoid" ]
 then
 	cd ${IROOT}
 	java -server -XX:+UseNUMA -XX:+UseParallelGC -XX:+AggressiveOpts \
 		-classpath rapidoid-ffead-cpp-1.0-jar-with-dependencies.jar \
 		com.rapidoid.ffeadcpp.Main $FFEAD_CPP_PATH 8080 profiles=production
-fi
-
-if [ "$2" = "java-wizzardo-http" ]
+elif [ "$2" = "java-wizzardo-http" ]
 then
 	cd ${IROOT}
 	java -Xmx2G -Xms2G -server -XX:+UseNUMA -XX:+UseParallelGC -XX:+AggressiveOpts \

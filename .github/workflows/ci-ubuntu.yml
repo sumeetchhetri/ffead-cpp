@@ -54,7 +54,7 @@ jobs:
         tar xvf nghttp2-1.41.0.tar.gz
         cd nghttp2-1.41.0
         cmake -DENABLE_ASIO_LIB=on -GNinja .
-        ninja install
+        sudo ninja install
         cd /tmp
         rm -rf nghttp2-1.41.0
         popd
@@ -63,8 +63,8 @@ jobs:
       run: |
         #sudo su
         sed -i 's|1.13.1|1.19.1|g' modules/nginx_mod_ffeadcpp/CMakeLists.txt
-        cmake -DSRV_ALL=on -DCINATRA_INCLUDES=/tmp/cinatra/include -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
-        sudo make install -j2
+        cmake -GNinja -DSRV_ALL=on -DCINATRA_INCLUDES=/tmp/cinatra/include -DMOD_APACHE=on -DMOD_NGINX=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+        sudo ninja install
         cd ffead-cpp-5.0-bin
         sudo chmod 755 *.sh resources/*.sh rtdcf/autotools/*.sh
         #sudo sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" web/te-benchmark-um/config/cache.xml
