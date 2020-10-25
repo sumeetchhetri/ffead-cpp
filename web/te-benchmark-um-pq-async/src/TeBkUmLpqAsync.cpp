@@ -200,10 +200,13 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, std::string q
 	std::vector<TeBkUmLpqAsyncWorld>* vec = (std::vector<TeBkUmLpqAsyncWorld>*)req->d;
 
 	std::stringstream ss;
-	ss << "update world as t set randomnumber = c.randomnumber from (values";
+	//ss << "update world as t set randomnumber = c.randomnumber from (values";
 
 	std::vector<LibpqParam> pars;
 
+	LibpqDataSourceImpl* sqli = req->sqli;
+
+	void* areq = NULL;
 	int queryCount = (int)vec->size();
 	for (int c = 0; c < queryCount; ++c) {
 		int newRandomNumber = rand() % 10000 + 1;
@@ -214,14 +217,20 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, std::string q
 			}
 		}
 		vec->at(c).setRandomNumber(newRandomNumber);
-		ss << "(" << vec->at(c).getId() << "," << newRandomNumber << ")";
-		if(c!=queryCount-1) {
-			ss << ",";
+		if(areq==NULL) {
+			areq = sqli->beginAsync(areq);
+		} else {
+			sqli->beginAsync(areq);
 		}
+		ss.str(std::string());
+		ss << "update world set randomnumber = " << newRandomNumber << " where id = " << vec->at(c).getId();
+		sqli->executeUpdateQueryAsync(ss.str(), pars, NULL, NULL, areq, false);
+		sqli->commitAsync(areq);
+		/*if(c!=queryCount-1) {
+			ss << ",";
+		}*/
 	}
-	ss << ") as c(id, randomnumber) where c.id = t.id";
-
-	LibpqDataSourceImpl* sqli = req->sqli;
+	//ss << ") as c(id, randomnumber) where c.id = t.id";
 
 	AsyncReq* ar = new AsyncReq;
 	ar->sif = req->sif;
@@ -231,9 +240,6 @@ void TeBkUmLpqAsyncRouter::updatesAsyncChQ(void* ctx, bool status, std::string q
 	req->sif = NULL;
 
 	try {
-		void* areq = sqli->beginAsync();
-		sqli->executeUpdateQueryAsync(ss.str(), pars, NULL, NULL, areq, false);
-		sqli->commitAsync(areq);
 		sqli->completeAsync(areq, ar, &TeBkUmLpqAsyncRouter::updatesAsyncChU);
 	} catch(const std::exception& e) {
 		throw e;

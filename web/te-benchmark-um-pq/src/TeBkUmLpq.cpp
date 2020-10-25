@@ -242,7 +242,7 @@ void TeBkUmLpqRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmLpqW
 
 	try {
 		std::stringstream ss, ssq;
-		ss << "begin;update world as t set randomnumber = c.randomnumber from (values";
+		//ss << "begin;update world as t set randomnumber = c.randomnumber from (values";
 
 		UpdQrData updt;
 		updt.wlist = &wlst;
@@ -256,7 +256,7 @@ void TeBkUmLpqRouter::updatesMulti(const char* q, int ql, std::vector<TeBkUmLpqW
 		}
 
 		sqli->executeMultiQuery(ssq.str(), &updt, &TeBkUmLpqRouter::updatesMultiUtil, &TeBkUmLpqRouter::updatesMultiUtilCh);
-		ss << ") as c(id, randomnumber) where c.id = t.id;commit";
+		//ss << ") as c(id, randomnumber) where c.id = t.id;commit";
 
 		if(!updt.status) {
 			return;
@@ -289,11 +289,11 @@ void TeBkUmLpqRouter::updatesMultiUtil(void* ctx, int rn, std::vector<LibpqRes>&
 	}
 	w.setRandomNumber(newRandomNumber);
 	updt->wlist->push_back(w);
-	*ss << "(" << w.getId() << "," << w.getRandomNumber() << ")";
-	updt->queryCount--;
+	*ss << "begin;update world set randomnumber = " << newRandomNumber << " where id = " << w.getId() << ";commit;";
+	/*updt->queryCount--;
 	if(updt->queryCount>0) {
 		*ss << ",";
-	}
+	}*/
 }
 void TeBkUmLpqRouter::updatesMultiUtilCh(void* ctx, bool status, std::string query, int counter) {
 	UpdQrData* updt = (UpdQrData*)ctx;
