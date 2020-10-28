@@ -71,3 +71,6 @@ docker/test/src
 docker/test/web
 **/Makefile
 **/*.tar.gz*
+**/.swiftpm
+**/.build
+**/app.xcodeproj

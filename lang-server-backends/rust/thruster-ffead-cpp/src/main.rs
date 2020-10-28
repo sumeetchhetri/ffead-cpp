@@ -125,7 +125,7 @@ extern "C" {
     pub fn ffead_cpp_bootstrap(srv: *const c_char, srv_len: size_t, server_type: c_int);
     pub fn ffead_cpp_init();
     pub fn ffead_cpp_cleanup();
-    pub fn ffead_cpp_handle_rust_2(ffead_request: *const ffead_request, status_code: *mut c_int,
+    pub fn ffead_cpp_handle_rust_swift_1(ffead_request: *const ffead_request, status_code: *mut c_int,
         out_url: *mut *const c_char, out_url_len: *mut size_t, out_url_mime: *mut *const c_char, out_url_mime_len: *mut size_t, 
         out_headers: *mut phr_header, out_headers_len: *mut c_int, 
         out_body: *mut *const c_char, out_body_len: *mut size_t
@@ -218,7 +218,7 @@ async fn index(mut ctx: Ctx, _next: MiddlewareNext<Ctx>) -> MiddlewareResult<Ctx
 
     let mut response = FfeadResponse::default();
     unsafe {
-        response.fresp = ffead_cpp_handle_rust_2(&request, &mut response.status_code, &mut response.url, &mut response.url_len, 
+        response.fresp = ffead_cpp_handle_rust_swift_1(&request, &mut response.status_code, &mut response.url, &mut response.url_len, 
             &mut response.url_mime, &mut response.url_mime_len, response.headers.as_mut_ptr(), &mut response.headers_len, 
             &mut response.body, &mut response.body_len);
     }

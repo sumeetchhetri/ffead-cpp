@@ -1,6 +1,6 @@
-FROM sumeetchhetri/ffead-cpp-5.0-base:5.1
+FROM sumeetchhetri/ffead-cpp-5.0-base:5.2
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="5.1"
+LABEL version="5.2"
 LABEL description="Base rust rocket docker image with ffead-cpp v5.0 - commit id - master"
 
 ENV IROOT=/installs
@@ -18,7 +18,7 @@ WORKDIR ${IROOT}/lang-server-backends/rust/rocket-ffead-cpp/
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN rustup default nightly && cargo update && cargo build --release && cp target/release/rocket-ffead-cpp $IROOT/ && rm -rf ${IROOT}/lang-server-backends
 
-FROM buildpack-deps:bionic
+FROM buildpack-deps:focal
 RUN apt update -yqq && apt install --no-install-recommends -yqq uuid-dev odbc-postgresql unixodbc unixodbc-dev memcached \
 	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server libpq-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=0 /installs/ffead-cpp-5.0 /installs/ffead-cpp-5.0

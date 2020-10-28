@@ -17,8 +17,9 @@
 #include "c_interface.h"
 
 void printStr(const char* nm, const char* str, size_t str_len) {
-	printf("%s", nm);
+	printf("%s[%d] ", nm, str_len);
 	char *p = (char*)str;
+	if(str_len>50) str_len = 50;
 	for (int r = 0; r < (int)str_len; ++r) {
 		printf("%c", *p++);
 	}
@@ -27,6 +28,7 @@ void printStr(const char* nm, const char* str, size_t str_len) {
 
 void printStr1(const char* str, size_t str_len, bool nl) {
 	char *p = (char*)str;
+	if(str_len>50) str_len = 50;
 	for (int r = 0; r < (int)str_len; ++r) {
 		printf("%c", *p++);
 	}
@@ -34,7 +36,7 @@ void printStr1(const char* str, size_t str_len, bool nl) {
 }
 
 void printHdr(phr_header_fcp h) {
-	printf("Header = {");
+	printf("Header[%d,%d] = {", h.name_len, h.value_len);
 	printStr1(h.name, h.name_len, false);
 	printf(": ");
 	printStr1(h.value, h.value_len, false);
@@ -193,12 +195,76 @@ void* ffead_cpp_handle_1r(const ffead_request *request, int* scode,
 	ffead_response* resp = get_resp(*scode, out_headers);
 	*scode = resp->scode;
 	*out_headers_len = resp->headers_len;
-	*out_body = resp->body;
-	*out_body_len = resp->body_len;
-	*out_mime = resp->out_mime;
-	*out_mime_len = resp->out_mime_len;
-	*out_url = resp->out_url;
-	*out_url_len = resp->out_url_len;
+    if(resp->body) {
+        *out_body = resp->body;
+        *out_body_len = resp->body_len;
+    }
+    if(resp->out_mime) {
+        *out_mime = resp->out_mime;
+        *out_mime_len = resp->out_mime_len;
+        *out_url = resp->out_url;
+        *out_url_len = resp->out_url_len;
+    }
+	return resp;
+}
+
+void* ffead_cpp_handle_rust_swift_1(const ffead_request *request, int* scode,
+	const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
+	phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
+)
+{
+	printStr("Server = ", request->server_str, request->server_str_len);
+	printStr("Method = ", request->method, request->method_len);
+	printStr("Path = ", request->path, request->path_len);
+	printf("Version = %d\n", request->version);
+	for (int i = 0; i < (int)request->headers_len; ++i) {
+		printHdr(request->headers[i]);
+	}
+	printStr("Body = ", request->body, request->body_len);
+	fflush(stdout);
+	ffead_response* resp = get_resp(*scode, out_headers);
+	*scode = resp->scode;
+	*out_headers_len = resp->headers_len;
+    if(resp->body) {
+        *out_body = resp->body;
+        *out_body_len = resp->body_len;
+    }
+    if(resp->out_mime) {
+        *out_mime = resp->out_mime;
+        *out_mime_len = resp->out_mime_len;
+        *out_url = resp->out_url;
+        *out_url_len = resp->out_url_len;
+    }
+	return resp;
+}
+
+void* ffead_cpp_handle_d_1(const ffead_request *request, int* scode,
+	    const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
+		const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len)
+{
+	printStr("Server = ", request->server_str, request->server_str_len);
+	printStr("Method = ", request->method, request->method_len);
+	printStr("Path = ", request->path, request->path_len);
+	printf("Version = %d\n", request->version);
+	for (int i = 0; i < (int)request->headers_len; ++i) {
+		printHdr(request->headers[i]);
+	}
+	printStr("Body = ", request->body, request->body_len);
+	fflush(stdout);
+	ffead_response* resp = get_resp(*scode, NULL);
+	*scode = resp->scode;
+    if(resp->body) {
+    	*out_headers_len = resp->headers_ss_str_len;
+    	*out_headers = resp->headers_ss_str;
+        *out_body = resp->body;
+        *out_body_len = resp->body_len;
+    }
+    if(resp->out_mime) {
+        *out_mime = resp->out_mime;
+        *out_mime_len = resp->out_mime_len;
+        *out_url = resp->out_url;
+        *out_url_len = resp->out_url_len;
+    }
 	return resp;
 }
 

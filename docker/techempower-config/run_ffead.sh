@@ -141,8 +141,8 @@ then
 	./libreactor-ffead-cpp $FFEAD_CPP_PATH 8080
 elif [ "$2" = "h2o" ]
 then
-	cd ${IROOT}
-	./h2o_app $FFEAD_CPP_PATH 0.0.0.0 8080
+	cd ${H2O_PREFIX}
+	taskset -c 0 ./h2o_app -a20 -p 8080 -u ${FFEAD_CPP_PATH} &
 elif [ "$2" = "crystal-http" ]
 then
 	cd ${IROOT}
@@ -155,6 +155,17 @@ then
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 	  taskset -c $i ./h2o-evloop-ffead-cpp.out --ffead-cpp-dir=$FFEAD_CPP_PATH --to=8080 &
 	done
+elif [ "$2" = "julia-http" ]
+then
+	julia ${IROOT}/lang-server-backends/julia/http.jl/server.jl $FFEAD_CPP_PATH
+elif [ "$2" = "swift-nio" ]
+then
+	cd ${IROOT}
+	./app $FFEAD_CPP_PATH
+elif [ "$2" = "d-hunt" ]
+then
+	cd ${IROOT}
+	./hunt-minihttp -s $FFEAD_CPP_PATH
 elif [ "$2" = "rust-actix" ]
 then
 	cd ${IROOT}
@@ -188,6 +199,7 @@ then
 elif [ "$2" = "v-picov" ]
 then
 	cd ${IROOT}
+	sed -i 's|EVH_SINGLE=false|EVH_SINGLE=true|g' $FFEAD_CPP_PATH/resources/server.prop
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 		taskset -c $i ./main --server_dir=$FFEAD_CPP_PATH --server_port=8080 &
 	done

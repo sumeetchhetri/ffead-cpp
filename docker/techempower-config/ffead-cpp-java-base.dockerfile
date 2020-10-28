@@ -1,6 +1,6 @@
-FROM sumeetchhetri/ffead-cpp-5.0-base:5.1
+FROM sumeetchhetri/ffead-cpp-5.0-base:5.2
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="5.1"
+LABEL version="5.2"
 LABEL description="Base java docker image with master code"
 
 ENV IROOT=/installs
@@ -19,7 +19,7 @@ RUN cd ${IROOT}/lang-server-backends/java/rapidoid && mvn compile assembly:singl
 RUN cd ${IROOT}/lang-server-backends/java/wizzardo-http && gradle --refresh-dependencies clean fatJar -q && cp build/libs/wizzardo-ffead-cpp-all-1.0.jar $IROOT/
 RUN rm -rf ${IROOT}/lang-server-backends
 
-FROM buildpack-deps:bionic
+FROM buildpack-deps:focal
 RUN apt update -yqq && apt install --no-install-recommends -yqq uuid-dev odbc-postgresql unixodbc unixodbc-dev memcached \
 	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server default-jre libpq-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=0 /installs/ffead-cpp-5.0 /installs/ffead-cpp-5.0

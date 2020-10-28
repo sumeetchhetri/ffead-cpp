@@ -1,6 +1,6 @@
-FROM sumeetchhetri/ffead-cpp-5.0-base:5.1
+FROM sumeetchhetri/ffead-cpp-5.0-base:5.2
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="5.1"
+LABEL version="5.2"
 LABEL description="Base rust docker image with ffead-cpp v4.0 - commit id - master"
 
 ENV IROOT=/installs
@@ -21,7 +21,7 @@ RUN cd ${IROOT}/lang-server-backends/rust/actix-ffead-cpp && RUSTFLAGS="-C targe
 	cd ${IROOT}/lang-server-backends/rust/thruster-ffead-cpp && RUSTFLAGS="-C target-cpu=native" cargo build --release && cp target/release/thruster-ffead-cpp $IROOT/ && rm -rf target && \
 	rm -rf ${IROOT}/lang-server-backends && rm -rf /root/.rustup /root/.cargo
 
-FROM buildpack-deps:bionic
+FROM buildpack-deps:focal
 RUN apt update -yqq && apt install --no-install-recommends -yqq uuid-dev odbc-postgresql unixodbc unixodbc-dev memcached \
 	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server libpq-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=0 /installs/ffead-cpp-5.0 /installs/ffead-cpp-5.0

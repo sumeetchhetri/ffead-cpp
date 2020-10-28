@@ -1,6 +1,6 @@
-FROM buildpack-deps:bionic
+FROM buildpack-deps:focal
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="5.1"
+LABEL version="5.2"
 LABEL description="Base ffead-cpp docker image with commit id - master"
 
 ENV IROOT=/installs

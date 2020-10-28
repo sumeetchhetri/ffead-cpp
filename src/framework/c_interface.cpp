@@ -76,9 +76,9 @@ void* ffead_cpp_handle_rust_1(const ffead_request *request, int* scode,
     return respo;
 }
 /*
-    Used by Thruster (Rust)
+    Used by Thruster (Rust), Swift-Nio (Swift)
 */
-void* ffead_cpp_handle_rust_2(const ffead_request *request, int* scode,
+void* ffead_cpp_handle_rust_swift_1(const ffead_request *request, int* scode,
     const char **out_url, size_t *out_url_len, const char **out_url_mime, size_t *out_url_mime_len,
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len
 )
@@ -327,6 +327,40 @@ void* ffead_cpp_handle_v(const char *server_str, size_t server_str_len,
     return respo;
 }
 
+
+/*
+    Used by hunt (dlang)
+*/
+void* ffead_cpp_handle_d_1(const ffead_request *request, int* scode,
+	    const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
+		const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len)
+{
+	HttpRequest req((void*)request->headers, request->headers_len, std::string_view{request->path, request->path_len},
+	    		std::string_view{request->method, request->method_len}, request->version, std::string_view{request->body, request->body_len});
+    HttpResponse* respo = new HttpResponse();
+    ServiceTask task;
+    task.handle(&req, respo);
+    if(!respo->isDone()) {
+    	respo->setUrl(req.getUrl());
+		const std::string& resUrl = respo->getUrl();
+		*out_url = resUrl.c_str();
+		*out_url_len = resUrl.length();
+        const std::string& mime_type = CommonUtils::getMimeType(req.getExt());
+        *out_mime = mime_type.c_str();
+        *out_mime_len = mime_type.length();
+		*scode = 0;
+    } else {
+    	*scode = respo->getCode();
+        std::string server;
+        const std::string& hdrs = respo->getHeadersStr(server, true, false, false);
+        *out_headers = hdrs.c_str();
+        *out_headers_len = hdrs.length()-2;
+        const std::string& cnt = respo->getContent();
+        *out_body = cnt.c_str();
+        *out_body_len = cnt.length();
+    }
+    return respo;
+}
 
 /*
     Used by firenio, wizzardo-http and rapidoid (Java)

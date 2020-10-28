@@ -122,9 +122,17 @@ extern "C" void ffead_cpp_init();
 */
 extern "C" void ffead_cpp_cleanup();
 
+extern "C" void* ffead_cpp_handle_d_1(const ffead_request *request, int* scode,
+	    const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
+		const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
+
 extern "C" void* ffead_cpp_handle_1(const ffead_request *request, int* scode,
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
     const char **out_body, size_t *out_body_len);
+
+extern "C" void* ffead_cpp_handle_rust_swift_1(const ffead_request *request, int* scode,
+	    const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
+		phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
 extern "C" void* ffead_cpp_handle_1r(const ffead_request *request, int* scode,
     const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
 	phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
@@ -182,6 +190,11 @@ extern "C" void* ffead_cpp_handle_go1(const char *server_str, size_t server_str_
 	const char **out_url, size_t *out_url_len,  const char **out_mime, size_t *out_mime_len,
 	const char **out_body, size_t *out_body_len
 );
+
+
+extern "C" void* ffead_cpp_handle_julia_1(const ffead_request *request, int* scode,
+	    const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
+		phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
 
 /*
     Handle a request and return the HttpResponse pointer, along-with,

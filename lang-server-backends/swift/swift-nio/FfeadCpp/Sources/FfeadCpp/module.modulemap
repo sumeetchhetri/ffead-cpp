@@ -1,0 +1,5 @@
+module FfeadCpp [system] {
+  header "ffead-cpp.h"
+  link "ffead-framework"
+  export *
+}

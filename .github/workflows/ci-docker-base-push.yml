@@ -10,7 +10,7 @@ env:
   RUST_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-rust-base
   RUST_RKT_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-rust-rocket-base
   V_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-v-base
-  IMG_VERSION: 5.1
+  IMG_VERSION: 5.2
 jobs:
   push:
     runs-on: ubuntu-latest

@@ -118,7 +118,7 @@ extern "C" void ffead_cpp_cleanup();
 extern "C" void* ffead_cpp_handle_rust_1(const ffead_request *request, int* scode,
     const char **out_url, size_t *out_url_len, phr_header_fcp *out_headers, size_t *out_headers_len,
     const char **out_body, size_t *out_body_len);
-extern "C" void* ffead_cpp_handle_rust_2(const ffead_request *request, int* scode,
+extern "C" void* ffead_cpp_handle_rust_swift_1(const ffead_request *request, int* scode,
     const char **out_url, size_t *out_url_len, const char **out_url_mime, size_t *out_url_mime_len,
     phr_header_fcp *out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
 
@@ -170,6 +170,10 @@ extern "C" void* ffead_cpp_handle_java(int *scode, const char **out_url, size_t 
 		const char* path, size_t path_len, const char* body, size_t body_len, int version,
 		int headers_len, ...
 );
+
+extern "C" void* ffead_cpp_handle_d_1(const ffead_request *request, int* scode,
+	    const char **out_url, size_t *out_url_len, const char **out_mime, size_t *out_mime_len,
+		const char **out_headers, size_t *out_headers_len, const char **out_body, size_t *out_body_len);
 
 
 extern "C" void* ffead_cpp_handle_1t(const ffead_request2 *request, int* scode,

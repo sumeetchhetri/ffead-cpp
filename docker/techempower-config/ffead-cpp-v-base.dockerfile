@@ -1,6 +1,6 @@
-FROM sumeetchhetri/ffead-cpp-5.0-base:5.1
+FROM sumeetchhetri/ffead-cpp-5.0-base:5.2
 LABEL maintainer="Sumeet Chhetri"
-LABEL version="5.1"
+LABEL version="5.2"
 LABEL description="Base v docker image with ffead-cpp v4.0 commit id - master"
 
 ENV IROOT=/installs
@@ -24,7 +24,7 @@ WORKDIR ${IROOT}/lang-server-backends/v/pico.v
 #COPY main.v ${IROOT}/lang-server-backends/v/pico.v/
 RUN chmod +x *.sh && ./build.sh && cp main $IROOT/ && rm -rf ${IROOT}/lang-server-backends
 
-FROM buildpack-deps:bionic
+FROM buildpack-deps:focal
 RUN apt update -yqq && apt install --no-install-recommends -yqq uuid-dev odbc-postgresql unixodbc unixodbc-dev memcached \
 	libmemcached-dev libssl-dev libhiredis-dev zlib1g-dev libcurl4-openssl-dev redis-server libpq-dev && rm -rf /var/lib/apt/lists/*
 COPY --from=0 /installs/ffead-cpp-5.0 /installs/ffead-cpp-5.0

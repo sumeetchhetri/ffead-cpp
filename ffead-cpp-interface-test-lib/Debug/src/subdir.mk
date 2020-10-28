@@ -4,13 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/c_interface.cpp 
+../src/c_interface.cpp \
+../src/picohttpparser_fcp.cpp
 
 OBJS += \
-./src/c_interface.o 
+./src/c_interface.o \
+./src/picohttpparser_fcp.o
+
 
 CPP_DEPS += \
-./src/c_interface.d 
+./src/c_interface.d  \
+./src/picohttpparser_fcp.d
 
 
 # Each subdirectory must supply rules for building sources it contributes

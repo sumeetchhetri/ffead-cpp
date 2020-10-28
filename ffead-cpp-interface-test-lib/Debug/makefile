@@ -38,19 +38,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: libffead-cpp-interface-test-lib.so
+all: libffead-framework.so
 
 # Tool invocations
-libffead-cpp-interface-test-lib.so: $(OBJS) $(USER_OBJS)
+libffead-framework.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross G++ Linker'
-	g++ -shared -o "libffead-cpp-interface-test-lib.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -shared -o "libffead-framework.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(LIBRARIES)$(CC_DEPS)$(C++_DEPS)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(C_DEPS)$(CPP_DEPS) libffead-cpp-interface-test-lib.so
+	-$(RM) $(LIBRARIES)$(CC_DEPS)$(C++_DEPS)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(C_DEPS)$(CPP_DEPS) libffead-framework.so
 	-@echo ' '
 
 .PHONY: all clean dependents
