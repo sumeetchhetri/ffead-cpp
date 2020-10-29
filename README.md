@@ -26,48 +26,28 @@ Both **cmake** and **autoconf** builds are supported
 Detailed OS specific instructions, instructions for installing the available server backends and docker/docker-compose scripts are located at [docker](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker)
 
 Build validated for the following Operating systems/Toolchains
- 1.  [Ubuntu](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-UbuntuBionic-x64-ffead-cpp-5.0)
- 2.  [CentOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Centos7-x64-ffead-cpp-5.0)
- 3.  [OpenSUSE](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-OpenSuseTumbleweed-x64-ffead-cpp-5.0)
- 4.  [Gentoo](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Gentoo-x64-ffead-cpp-5.0)
- 5.  [ArchLinux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-ArchLinux-x64-ffead-cpp-5.0)
- 6.  [Alpine Linux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Alpine-x64-ffead-cpp-5.0)
- 7.  [MacOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-macos.yml)
- 8.  [Windows Cygwin](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-win-cygwin.yml)
- 9.  [Windows mingw-w64](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-win-mingw.yml)
- 10.  [ArchLinux (mingw-w64 cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-archlinux-mingw64)
- 11.  [Ubuntu (musl cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-musl)
- 12.  [Ubuntu (android cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-android)
+|   |   |   |
+|---|---|---|
+|[Ubuntu](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-UbuntuBionic-x64-ffead-cpp-5.0)|[CentOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Centos7-x64-ffead-cpp-5.0)|[OpenSUSE](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-OpenSuseTumbleweed-x64-ffead-cpp-5.0)|
+|[Gentoo](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Gentoo-x64-ffead-cpp-5.0)|[ArchLinux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-ArchLinux-x64-ffead-cpp-5.0)|[Alpine Linux](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/os-based/DockerFile-Alpine-x64-ffead-cpp-5.0)|
+|[MacOS](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-macos.yml)|[Windows Cygwin](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-win-cygwin.yml)|[Windows mingw-w64](https://github.com/sumeetchhetri/ffead-cpp/tree/master/.github/workflows/ci-win-mingw.yml)
+|[ArchLinux (mingw-w64 cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-archlinux-mingw64)|[Ubuntu (musl cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-musl)|[Ubuntu (android cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-android)
 
 
-Latest Techempower benchmarks - https://www.techempower.com/benchmarks/#section=test&runid=57b25c85-082a-4013-b572-b0939006eaff&hw=ph&test=json&a=2
+[Latest Techempower benchmarks](https://www.techempower.com/benchmarks/#section=test&runid=223b29a9-851d-4f0d-9b3c-bb5b89d65d97&hw=ph&test=plaintext&a=2)
 
 Features
 ==========
 - Multiple server backends
-    - embedded
-    - nginx
-    - apache
-    - openlitespeed (experimental)
-    - cinatra
-    - lithium
-    - drogon
-    - nghttp2 based HTTP2 Server
-    - libreactor (c)
-    - h2o (c)
-    - vweb (vlang)
-    - picov (vlang)
-    - actix (rust)
-    - hyper (rust)
-    - thruster (rust)
-    - rocket (rust)
-    - h2o.cr (crystal)
-    - crystal-http (crystal)
-    - fasthttp (golang)
-    - gnet (golang)
-    - firenio (java)
-    - rapidoid (java)
-    - wizzardo-http (java)
+    |   |   |   |   |
+    |---|---|---|---|
+    |embedded|nginx|apache|openlitespeed (experimental)|
+    |cinatra (c++)|lithium (c++)|drogon (c++)|nghttp2 (c++)|
+    |libreactor \(c\)|h2o \(c\)|vweb (vlang)|picov (vlang)|
+    |actix (rust)|hyper (rust)|thruster (rust)|rocket (rust)|
+    |h2o\.cr (crystal)|crystal-http (crystal)|fasthttp (golang)|gnet (golang)|
+    |firenio (java)|rapidoid (java)|wizzardo-http (java)|hunt (d)|
+    |swift-nio (swift)|http.jl (julia)||
 - Web Socket Support
 - Advanced ORM - SDORM (sql/monogo)
 - Cache API (memcached/redis)

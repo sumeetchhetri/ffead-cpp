@@ -256,7 +256,7 @@
 			"display_name": "ffead-cpp-julia-http",
 			"notes": "",
 			"versus": "",
-			"tags": []
+			"tags": ["broken"]
 		},
 		"swift-nio": {
 			"json_url": "/te-benchmark-um/json",
@@ -373,7 +373,7 @@
 			"tags": ["broken"]
 		},
 		"v-picov": {
-			"json_url": "/te-benchmark-um/json",
+			"json_url": "/te-benchmark-um-pq/json",
 			"plaintext_url": "/plaintext",
 			"db_url": "/te-benchmark-um-pq/db",
 			"query_url": "/te-benchmark-um-pq/queries?queries=",
@@ -388,7 +388,7 @@
 			"language": "C++",
 			"orm": "None",
 			"platform": "None",
-			"webserver": "vweb",
+			"webserver": "picov",
 			"os": "Linux",
 			"database_os": "Linux",
 			"display_name": "ffead-cpp-v-picov",

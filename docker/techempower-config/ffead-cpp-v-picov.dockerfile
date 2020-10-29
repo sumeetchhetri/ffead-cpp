@@ -4,4 +4,4 @@ ENV IROOT=/installs
 
 WORKDIR /
 
-CMD ./run_ffead.sh ffead-cpp-5.0 v-picov
+CMD ./run_ffead.sh ffead-cpp-5.0 v-picov postgresql-raw memory

@@ -1,10 +1,13 @@
-FROM buildpack-deps:focal
+FROM ubuntu:20.04
 LABEL maintainer="Sumeet Chhetri"
 LABEL version="5.2"
 LABEL description="Base ffead-cpp docker image with commit id - master"
 
 ENV IROOT=/installs
 ENV DEBUG=off
+
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 RUN mkdir /installs
 #COPY te-benchmark-um/ /installs/te-benchmark-um/

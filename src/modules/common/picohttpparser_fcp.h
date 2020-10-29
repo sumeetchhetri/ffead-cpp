@@ -46,10 +46,6 @@ struct phr_header_fcp {
     size_t value_len;
 };
 
-/* returns number of bytes consumed if successful, -2 if request is partial,
- * -1 if failed */
-int phr_parse_request_fcp(const char *buf, size_t len, const char **method, size_t *method_len, const char **path, size_t *path_len,
-                      int *minor_version, struct phr_header_fcp *headers, size_t *num_headers, size_t last_len, int* content_length);
 
 /* ditto */
 int phr_parse_response_fcp(const char *_buf, size_t len, int *minor_version, int *status, const char **msg, size_t *msg_len,
@@ -83,5 +79,10 @@ int phr_decode_chunked_is_in_data_fcp(struct phr_chunked_decoder_fcp *decoder);
 #ifdef __cplusplus
 }
 #endif
+
+/* returns number of bytes consumed if successful, -2 if request is partial,
+ * -1 if failed */
+extern "C" int phr_parse_request_fcp(const char *buf, size_t len, const char **method, size_t *method_len, const char **path, size_t *path_len,
+                      int *minor_version, struct phr_header_fcp *headers, size_t *num_headers, size_t last_len, int* content_length);
 
 #endif

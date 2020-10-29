@@ -16,7 +16,7 @@
 			"ffead-framework"
 		],
 		"lflags-posix": [
-			"-L/Users/sumeetc/Projects/GitHub/ffead-cpp/ffead-cpp-interface-test-lib/Debug"
+			"-L/usr/local/lib"
 		],
 		"versions": [
 			"MINIHTTP"

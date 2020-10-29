@@ -85,12 +85,12 @@ private final class HTTPHandler: ChannelInboundHandler {
                                     var rheaders = HTTPHeaders()
                                     for i in 0..<out_headers_len {
                                         let n = String.init(data: Data.init(bytes: out_headers[i].name, count: out_headers[i].name_len), encoding: String.Encoding.utf8)
-                                        let v = String.init(data: Data.init(bytes: out_headers[i].value, count: out_headers[i].value_len), encoding: String.Encoding.utf8);
+                                        let v = String.init(data: Data.init(bytes: out_headers[i].value, count: out_headers[i].value_len), encoding: String.Encoding.utf8)
                                         rheaders.add(name: n!, value: v!)
+                                        //print("\(n!) = \(v!)")
                                     }
-                                    
-                                    let responseHead = self.responseHead(headers: rheaders, scode: scode)
                                     let body = String.init(data: Data.init(bytes: out_body!, count: out_body_len), encoding: String.Encoding.utf8)
+                                    let responseHead = self.responseHead(headers: &rheaders, scode: scode)
                                     let allocator = ByteBufferAllocator()
                                     var buff = allocator.buffer(capacity: out_body_len)
                                     buff.writeString(body!)
@@ -148,8 +148,8 @@ private final class HTTPHandler: ChannelInboundHandler {
 
     private func responseHead(contentType: String, contentLength: String) -> HTTPResponseHead {
         var headers = HTTPHeaders()
-        headers.add(name: "content-type", value: contentType)
-        headers.add(name: "content-length", value: contentLength)
+        headers.add(name: "Content-Type", value: contentType)
+        headers.add(name: "Content-Length", value: contentLength)
         headers.add(name: "server", value: Constants.serverName)
         headers.add(name: "date", value: self.dateCache.currentTimestamp())
         return HTTPResponseHead(
@@ -159,8 +159,7 @@ private final class HTTPHandler: ChannelInboundHandler {
         )
     }
 
-    private func responseHead(headers: HTTPHeaders, scode: Int32) -> HTTPResponseHead {
-        var headers = HTTPHeaders()
+    private func responseHead(headers: inout HTTPHeaders, scode: Int32) -> HTTPResponseHead {
         headers.add(name: "server", value: Constants.serverName)
         headers.add(name: "date", value: self.dateCache.currentTimestamp())
         return HTTPResponseHead(

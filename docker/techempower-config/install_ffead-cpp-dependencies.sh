@@ -2,7 +2,14 @@
 
 apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev \
 	apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev \
-	zlib1g-dev cmake make clang-format-9 ninja-build libhiredis-dev libcurl4-openssl-dev libpq-dev
+	zlib1g-dev cmake make clang-format-9 ninja-build libhiredis-dev libcurl4-openssl-dev libpq-dev git \
+	wget build-essential pkg-config libpcre3-dev curl
+apt-get install --reinstall ca-certificates
+
+mkdir /usr/local/share/ca-certificates/cacert.org
+wget -P /usr/local/share/ca-certificates/cacert.org http://www.cacert.org/certs/root.crt http://www.cacert.org/certs/class3.crt
+update-ca-certificates
+git config --global http.sslCAinfo /etc/ssl/certs/ca-certificates.crt
 
 #redis will not start correctly on bionic with this config
 sed -i "s/bind .*/bind 127.0.0.1/g" /etc/redis/redis.conf
