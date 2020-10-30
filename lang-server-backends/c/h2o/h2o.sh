@@ -2,7 +2,9 @@
 
 set -e
 
-export FFEAD_CPP_PATH=${IROOT}/ffead-cpp-5.0
+export FFEAD_CPP_PATH=$1
+export LD_LIBRARY_PATH=$2
+PORT=$3
 
 CPU_COUNT=$(nproc)
 H2O_APP_PROFILE_PORT=54321
@@ -53,8 +55,9 @@ run_curl()
 
 run_h2o_app()
 {
-	LD_LIBRARY_PATH="${IROOT}/:${IROOT}/lib:${FFEAD_CPP_PATH}/lib:/usr/local/lib:$LD_LIBRARY_PATH" \
-	taskset -c "$1" "$2/h2o_app" -a20 -p 8080 -u ${FFEAD_CPP_PATH} &
+	for i in $(seq 0 $(($(nproc --all)-1))); do
+		taskset -c "$1" "$2/h2o_app" -a20 $4 -u ${FFEAD_CPP_PATH} -t1 &
+	done
 }
 
 generate_profile_data()
@@ -63,12 +66,7 @@ generate_profile_data()
 	local -r H2O_APP_PROFILE_PID=$!
 	while ! curl "$H2O_APP_PROFILE_URL" > /dev/null 2>&1; do sleep 1; done
 	run_curl json
-	run_curl db
-	run_curl queries?queries=20
-	run_curl fortunes
-	run_curl updates?queries=20
 	run_curl plaintext
-	run_curl cached-worlds?queries=20
 	kill -s SIGTERM "$H2O_APP_PROFILE_PID"
 	wait "$H2O_APP_PROFILE_PID"
 }
@@ -76,7 +74,7 @@ generate_profile_data()
 install -d "$H2O_APP_BUILD_DIR"
 pushd "$H2O_APP_BUILD_DIR"
 build_h2o_app "-fprofile-generate"
-generate_profile_data
+#generate_profile_data
 make clean
 rm -f CMakeCache.txt
 build_h2o_app "-fprofile-use"
@@ -84,5 +82,4 @@ make -j "$CPU_COUNT" install
 popd
 rm -rf "$H2O_APP_BUILD_DIR"
 #echo "Maximum database connections per thread: $DB_CONN"
-#run_h2o_app 0 "${H2O_APP_PREFIX}/bin" "${H2O_APP_PREFIX}/share/h2o_app"
-#wait
+run_h2o_app 0 "${H2O_APP_PREFIX}/bin" "${H2O_APP_PREFIX}/share/h2o_app" ${PORT}

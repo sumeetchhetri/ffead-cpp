@@ -71,13 +71,11 @@ private {
 
 		failure = null;
 		done = false;
+		int contentLength = 0;
 		_ireq.headers_len = cast(int)_headers.length;
 		int pret = phr_parse_request_fcp(cast(const char*)chunk.ptr, cast(int)chunk.length,
-					&_ireq.method, &_ireq.method_len,
-					&_ireq.path, &_ireq.path_len,
-					&_ireq.version_,
-					_headers.ptr, &_ireq.headers_len,
-					0, &_ireq.body_len);
+					&_ireq.method, &_ireq.method_len, &_ireq.path, &_ireq.path_len,
+					&_ireq.version_, _headers.ptr, &_ireq.headers_len, 0, &contentLength);
 		debug {
 			infof("buffer: %d bytes, request: %d bytes", chunk.length, pret);
 		}

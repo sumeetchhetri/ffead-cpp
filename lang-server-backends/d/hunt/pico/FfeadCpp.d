@@ -33,7 +33,7 @@ struct ffead_request {
 
 extern (C) pure @nogc nothrow int phr_parse_request_fcp(const char *buf, size_t len, const char **method,
 	size_t *method_len, const char **path, size_t *path_len,
-    int *minor_version, phr_header_fcp *headers, size_t *num_headers, size_t last_len, size_t* content_length);
+    int *minor_version, phr_header_fcp *headers, size_t *num_headers, size_t last_len, int* content_length);
 
 extern (C) pure @nogc nothrow void ffead_cpp_resp_cleanup(void* ptr);
 extern (C) pure @nogc nothrow void ffead_cpp_bootstrap(const char* srv, size_t srv_len, int type);

@@ -13,7 +13,8 @@
 		"name": "minihttp",
 		"sourcePaths": ["pico"],
 		"libs-posix": [
-			"ffead-framework"
+			"ffead-framework",
+			"ffead-modules"
 		],
 		"lflags-posix": [
 			"-L/usr/local/lib"

@@ -141,8 +141,8 @@ then
 	./libreactor-ffead-cpp $FFEAD_CPP_PATH 8080
 elif [ "$2" = "h2o" ]
 then
-	cd ${H2O_PREFIX}
-	taskset -c 0 ./h2o_app -a20 -p 8080 -u ${FFEAD_CPP_PATH} &
+	cd ${IROOT}/lang-server-backends/c/h2o
+	./h2o.sh ${FFEAD_CPP_PATH} ${LD_LIBRARY_PATH} 8080
 elif [ "$2" = "crystal-http" ]
 then
 	cd ${IROOT}

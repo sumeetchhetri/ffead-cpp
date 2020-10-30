@@ -33,7 +33,7 @@ RUN mkdir -p "${H2O_BUILD_DIR}/build" && \
 
 WORKDIR ${IROOT}/lang-server-backends/c/h2o
 RUN chmod +x h2o.sh
-RUN ./h2o.sh && rm -rf ${IROOT}/lang-server-backends
+#RUN ./h2o.sh && rm -rf ${IROOT}/lang-server-backends
 
 WORKDIR /
 
