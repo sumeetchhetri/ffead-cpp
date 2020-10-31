@@ -15,8 +15,8 @@ WORKDIR ${IROOT}
 RUN apt-get update -y && apt-get install -y --no-install-recommends clang libicu-dev libpython2.7-dev libtinfo5 libncurses5 libz3-dev \
 	 && rm -rf /var/lib/apt/lists/*
 	 
-RUN wget https://swift.org/builds/swift-5.3-release/ubuntu2004/swift-5.3-RELEASE/swift-5.3-RELEASE-ubuntu20.04.tar.gz
-RUN tar -xvzf swift-5.3-RELEASE-ubuntu20.04.tar.gz
+RUN wget -q https://swift.org/builds/swift-5.3-release/ubuntu2004/swift-5.3-RELEASE/swift-5.3-RELEASE-ubuntu20.04.tar.gz
+RUN tar -xzf swift-5.3-RELEASE-ubuntu20.04.tar.gz
 RUN mv swift-5.3-RELEASE-ubuntu20.04 /opt/ && rm -f swift-5.3-RELEASE-ubuntu20.04.tar.gz
 RUN ln -s /opt/swift-5.3-RELEASE-ubuntu20.04 /opt/swift
 

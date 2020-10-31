@@ -1,4 +1,4 @@
-FROM buildpack-deps:latest
+FROM buildpack-deps:bionic
 
 COPY postgresql/* ./
 ADD mysql/* ./
@@ -23,7 +23,7 @@ RUN apt-get -yqq install locales autoconf-archive autoconf automake libtool gcc 
 	memcached redis-server gdb ninja-build telnet net-tools vim
 
 #POSTGRESQL
-ENV PG_VERSION 12
+ENV PG_VERSION 13
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
