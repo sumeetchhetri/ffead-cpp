@@ -1,4 +1,4 @@
-FROM buildpack-deps:bionic
+FROM buildpack-deps:latest
 
 ENV IROOT=/installs
 ENV FFEAD_CPP_PATH=${IROOT}/ffead-cpp-5.0

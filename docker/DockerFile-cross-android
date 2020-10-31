@@ -1,4 +1,4 @@
-FROM buildpack-deps:bionic
+FROM buildpack-deps:latest
 
 RUN apt update -yqq && apt install -yqq autoconf-archive gcc g++ cmake unzip wget make android-sdk
 

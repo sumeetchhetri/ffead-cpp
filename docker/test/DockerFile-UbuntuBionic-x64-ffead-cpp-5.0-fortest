@@ -1,4 +1,4 @@
-FROM buildpack-deps:bionic
+FROM buildpack-deps:latest
 
 COPY postgresql/* ./
 ADD mysql/* ./

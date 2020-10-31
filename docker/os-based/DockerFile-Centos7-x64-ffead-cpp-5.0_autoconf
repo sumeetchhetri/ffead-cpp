@@ -1,4 +1,4 @@
-FROM centos:7
+FROM centos:latest
 
 RUN yum install -y --nogpgcheck tar centos-release-scl centos-release-scl-rh epel-release
 RUN yum install -y --nogpgcheck scl-utils devtoolset-7 autoconf-archive autoconf automake libtool cmake3 postgresql-devel libcurl libcurl-devel openssl openssl-devel libuuid-devel hiredis hiredis-devel zlib zlib-devel libmemcached libmemcached-devel unixODBC* tar gzip wget nmap-ncat
