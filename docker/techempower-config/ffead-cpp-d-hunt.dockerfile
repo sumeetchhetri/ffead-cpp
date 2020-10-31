@@ -20,7 +20,7 @@ RUN apt-get update && \
 
 RUN set -ex && \
         wget -q https://github.com/ldc-developers/ldc/releases/download/v${LDC_VERSION}/ldc2-${LDC_VERSION}-linux-x86_64.tar.xz && \
-        tar xzf ldc2-${LDC_VERSION}-linux-x86_64.tar.xz && \
+        tar xf ldc2-${LDC_VERSION}-linux-x86_64.tar.xz && \
         mv ldc2-${LDC_VERSION}-linux-x86_64 ${LDC_PATH} && \
         rm -rf ldc2*
 
