@@ -15,7 +15,6 @@ jobs:
     - name: Build and benchmark the ffead-cpp-5.0 base docker image
       run: |
         git clone https://github.com/TechEmpower/FrameworkBenchmarks
-        cp -f docker/DockerFile-tfb-test FrameworkBenchmarks/frameworks/C++/ffead-cpp/ffead-cpp.dockerfile
         cp -f docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp/
         cd FrameworkBenchmarks
-        ./tfb --mode benchmark --test ffead-cpp-h2o ffead-cpp-v-picov ffead-cpp-julia-http ffead-cpp-d-hunt
+        ./tfb --mode benchmark --test ffead-cpp-h2o ffead-cpp-v-picov ffead-cpp-d-hunt ffead-cpp-swift-nio

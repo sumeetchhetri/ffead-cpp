@@ -15,5 +15,5 @@ jobs:
     - name: Build ffead-cpp on opensuse
       run: |
         cd docker/os-based
-        docker build -f DockerFile-OpenSuseTumbleweed-x64-ffead-cpp-5.0 .
-        docker build -f DockerFile-OpenSuseTumbleweed-x64-ffead-cpp-5.0_autoconf .
+        docker build -f DockerFile-OpenSuse-x64-ffead-cpp-5.0 .
+        docker build -f DockerFile-OpenSuse-x64-ffead-cpp-5.0_autoconf .
