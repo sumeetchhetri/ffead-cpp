@@ -47,7 +47,8 @@ Features
     |actix (rust)|hyper (rust)|thruster (rust)|rocket (rust)|
     |h2o\.cr (crystal)|crystal-http (crystal)|fasthttp (golang)|gnet (golang)|
     |firenio (java)|rapidoid (java)|wizzardo-http (java)|hunt (d)|
-    |swift-nio (swift)|http.jl (julia)||
+    |swift-nio (swift)|http.jl (julia)|mongols \(c\)|uv-cpp (c++)|
+    |CppServer (c++)||||
 - Web Socket Support
 - Advanced ORM - SDORM (sql/monogo)
 - Cache API (memcached/redis)

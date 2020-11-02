@@ -82,5 +82,5 @@ make -j "$CPU_COUNT" install
 popd
 rm -rf "$H2O_APP_BUILD_DIR"
 #echo "Maximum database connections per thread: $DB_CONN"
-run_h2o_app 0 "${H2O_APP_PREFIX}/bin" "${H2O_APP_PREFIX}/share/h2o_app" ${PORT}
+run_h2o_app 0 "${H2O_APP_PREFIX}/bin" "${H2O_APP_PREFIX}/share/h2o_app" "-p${PORT}"
 wait

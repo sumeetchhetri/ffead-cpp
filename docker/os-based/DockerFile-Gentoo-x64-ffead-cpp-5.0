@@ -1,7 +1,7 @@
 FROM gentoo/stage3-amd64
 
 RUN emerge-webrsync
-RUN emerge sys-devel/autoconf-archive sys-devel/autoconf sys-devel/automake sys-devel/libtool dev-db/postgresql dev-db/unixODBC curl dev-libs/hiredis libmemcached cmake wget netcat tar gzip zlib
+RUN emerge sys-devel/autoconf-archive sys-devel/autoconf sys-devel/automake sys-devel/libtool dev-db/postgresql dev-db/unixODBC curl libmemcached cmake wget netcat tar gzip zlib
 
 #Install libcuckoo headers
 WORKDIR /tmp
@@ -13,6 +13,13 @@ RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/ .
 RUN make install
 WORKDIR /tmp
 RUN rm -rf /tmp/libcuckoo-master
+
+RUN wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
+RUN tar xf v1.0.0.tar.gz
+RUN rm -f v1.0.0.tar.gz
+RUN cd hiredis-1.0.0/ && cmake . && make install
+WORKDIR /tmp
+RUN rm -rf hiredis-1.0.0
 
 #Install mongodb c driver
 RUN wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.2/mongo-c-driver-1.4.2.tar.gz

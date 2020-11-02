@@ -2,7 +2,7 @@
 
 apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev \
 	apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev \
-	zlib1g-dev cmake make clang-format-9 ninja-build libhiredis-dev libcurl4-openssl-dev libpq-dev git \
+	zlib1g-dev cmake make clang-format-9 ninja-build libcurl4-openssl-dev libpq-dev git \
 	wget build-essential pkg-config libpcre3-dev curl libgtk2.0-dev libgdk-pixbuf2.0-dev
 apt-get install --reinstall ca-certificates
 
@@ -61,14 +61,13 @@ cd mongo-c-driver-1.4.2/ && \
 cd $IROOT
 rm -rf mongo-c-driver-1.4.2 
 
-#wget -q https://github.com/redis/hiredis/archive/v0.13.3.tar.gz
-#tar xf v0.13.3.tar.gz
-#rm -f v0.13.3.tar.gz
-#cd hiredis-0.13.3/
-#make
-#PREFIX=/usr make install
-#cd $IROOT
-#rm -rf hiredis-0.13.3
+wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
+tar xf v1.0.0.tar.gz
+rm -f v1.0.0.tar.gz
+cd hiredis-1.0.0/
+cmake . && make install
+cd $IROOT
+rm -rf hiredis-1.0.0
 
 cd $IROOT
 wget -q https://github.com/microsoft/mimalloc/archive/v1.6.3.tar.gz

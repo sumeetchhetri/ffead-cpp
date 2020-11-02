@@ -1,0 +1,4 @@
+on MACOS brew install gcc, comment lines 9,10,11 in src/leveldb/port/port_config.h -- #if !defined(HAVE_FDATASYNC)
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/opt/openssl/lib/pkgconfig/
+Update Makefile to change CC/CXX to /usr/local/bin/gcc-10, /usr/local/bin/g++-10
+make clean && make -j2 && sudo make install && sudo ldconfig

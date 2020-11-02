@@ -22,12 +22,12 @@ RUN cd mongo-c-driver-1.4.2/ &&  ./configure --disable-automatic-init-and-cleanu
 WORKDIR /tmp
 RUN rm -rf mongo-c-driver-1.4.2
 
-RUN wget -q https://github.com/redis/hiredis/archive/v0.13.3.tar.gz
-RUN tar xf v0.13.3.tar.gz
-RUN rm -f v0.13.3.tar.gz
-RUN cd hiredis-0.13.3/ && make && PREFIX=/usr make install
+RUN wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
+RUN tar xf v1.0.0.tar.gz
+RUN rm -f v1.0.0.tar.gz
+RUN cd hiredis-1.0.0/ && cmake . && make install
 WORKDIR /tmp
-RUN rm -rf hiredis-0.13.3
+RUN rm -rf hiredis-1.0.0
 
 #Install ffead-cpp
 WORKDIR /tmp

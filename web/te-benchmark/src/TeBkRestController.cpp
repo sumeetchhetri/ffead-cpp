@@ -172,7 +172,8 @@ std::vector<TeBkWorld> TeBkRestController::cachedWorlds(std::string count) {
 			keys.push_back(CastUtil::fromNumber(rid));
 		}
 
-		std::vector<TeBkWorld> wlst = cchi->mgetO<TeBkWorld>(keys);
+		std::vector<TeBkWorld> wlst;
+		cchi->mgetO<TeBkWorld>(keys, wlst);
 
 		CacheManager::cleanImpl(cchi);
 		return wlst;

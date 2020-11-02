@@ -147,7 +147,7 @@ AM_CPPFLAGS += \
 endif
 
 if SRV_ALL
-bin_PROGRAMS = ffead-cpp ffead-cpp-cinatra ffead-cpp-lithium ffead-cpp-drogon
+bin_PROGRAMS = ffead-cpp ffead-cpp-cinatra ffead-cpp-lithium ffead-cpp-drogon ffead-cpp-nghttp2 ffead-cpp-mongols ffead-cpp-uvcpp
 ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
 ffead_cpp_SOURCES = ../../server/embedded/CHServer.cpp
 ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
@@ -160,6 +160,15 @@ ffead_cpp_lithium_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
 ffead_cpp_drogon_LDFLAGS= -no-undefined -L../libs/.libs/
 ffead_cpp_drogon_SOURCES = ../../server/drogon/DrogonServer.cpp
 ffead_cpp_drogon_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+ffead_cpp_nghttp2_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_nghttp2_SOURCES = ../../server/nghttp2/Nghttp2Server.cpp
+ffead_cpp_nghttp2_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+ffead_cpp_mongols_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_mongols_SOURCES = ../../server/mongols/MongolsServer.cpp
+ffead_cpp_mongols_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+ffead_cpp_uvcpp_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_uvcpp_SOURCES = ../../server/uv-cpp/UvCppServer.cpp
+ffead_cpp_uvcpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
 else
 if SRV_EMB
 bin_PROGRAMS = ffead-cpp
@@ -183,6 +192,24 @@ if SRV_DROGON
 bin_PROGRAMS = ffead-cpp
 ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
 ffead_cpp_SOURCES = ../../server/drogon/DrogonServer.cpp
+ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+endif
+if SRV_NGHTTP2
+bin_PROGRAMS = ffead-cpp
+ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_SOURCES = ../../server/nghttp2/Nghttp2Server.cpp
+ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+endif
+if SRV_MONGOLS
+bin_PROGRAMS = ffead-cpp
+ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_SOURCES = ../../server/mongols/MongolsServer.cpp
+ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
+endif
+if SRV_UVCPP
+bin_PROGRAMS = ffead-cpp
+ffead_cpp_LDFLAGS= -no-undefined -L../libs/.libs/
+ffead_cpp_SOURCES = ../../server/uv-cpp/UvCppServer.cpp
 ffead_cpp_LDADD = -lffead-modules -lffead-framework @ADD_LIBDL@
 endif
 endif

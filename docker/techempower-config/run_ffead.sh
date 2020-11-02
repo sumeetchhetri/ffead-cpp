@@ -72,7 +72,6 @@ then
 else
 	WEB_DIR=$FFEAD_CPP_PATH/web/te-benchmark-um
 	rm -rf web/te-benchmark-um-mgr web/te-benchmark-um-pq web/te-benchmark-um-pq-async
-	sed -i'' -e "s|<init>TeBkUmRouter.updateCache</init>||g" ${WEB_DIR}/config/cache.xml
 fi
 
 if [ "$4" = "memory" ]

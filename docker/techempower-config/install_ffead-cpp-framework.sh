@@ -38,7 +38,6 @@ sed -i 's|EVH_SINGLE=true|EVH_SINGLE=false|g' resources/server.prop
 
 rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/peer-server
 
-sed -i 's|localhost|tfb-database|g' web/te-benchmark-um/config/sdorm.xml
 sed -i 's|localhost|tfb-database|g' web/te-benchmark-um/config/sdormmongo.xml
 sed -i 's|localhost|tfb-database|g' web/te-benchmark-um/config/sdormmysql.xml
 sed -i 's|localhost|tfb-database|g' web/te-benchmark-um/config/sdormpostgresql.xml
@@ -83,6 +82,11 @@ rm -f /usr/local/lib/libffead-*
 rm -f /usr/local/lib/libte_benc*
 rm -f /usr/local/lib/libinter.so
 rm -f /usr/local/lib/libdinter.so
+
+if [ ! -d "ffead-cpp-5.0-bin" ]
+then
+	exit 1
+fi
 
 cd ffead-cpp-5.0-bin
 #cache related dockerfiles will add the cache.xml accordingly whenever needed

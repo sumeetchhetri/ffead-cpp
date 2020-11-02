@@ -882,6 +882,48 @@ if test "x$srv_drogon" = "xyes"; then
     AC_DEFINE(SRV_DROGON, [], [enable drogon http server engine])
 fi
 
+AC_ARG_ENABLE(srv_nghttp2,
+AS_HELP_STRING([--enable-srv_nghttp2],
+               [enable srv_nghttp2, default: no]),
+[case "${enableval}" in
+             yes) srv_nghttp2=yes ;;
+             no)  srv_nghttp2=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_nghttp2]) ;;
+esac],
+[srv_nghttp2=no])
+AM_CONDITIONAL(SRV_NGHTTP2, test "x$srv_nghttp2" = "xyes")
+if test "x$srv_nghttp2" = "xyes"; then
+    AC_DEFINE(SRV_NGHTTP2, [], [enable nghttp2 http server engine])
+fi
+
+AC_ARG_ENABLE(srv_mongols,
+AS_HELP_STRING([--enable-srv_mongols],
+               [enable srv_mongols, default: no]),
+[case "${enableval}" in
+             yes) srv_mongols=yes ;;
+             no)  srv_mongols=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_mongols]) ;;
+esac],
+[srv_mongols=no])
+AM_CONDITIONAL(SRV_MONGOLS, test "x$srv_mongols" = "xyes")
+if test "x$srv_mongols" = "xyes"; then
+    AC_DEFINE(SRV_MONGOLS, [], [enable mongols http server engine])
+fi
+
+AC_ARG_ENABLE(srv_uvcpp,
+AS_HELP_STRING([--enable-srv_uvcpp],
+               [enable srv_uvcpp, default: no]),
+[case "${enableval}" in
+             yes) srv_uvcpp=yes ;;
+             no)  srv_uvcpp=no ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-srv_uvcpp]) ;;
+esac],
+[srv_uvcpp=no])
+AM_CONDITIONAL(SRV_UVCPP, test "x$srv_uvcpp" = "xyes")
+if test "x$srv_uvcpp" = "xyes"; then
+    AC_DEFINE(SRV_UVCPP, [], [enable uv-cpp http server engine])
+fi
+
 ########################################################################################################
 ########################################################################################################
 

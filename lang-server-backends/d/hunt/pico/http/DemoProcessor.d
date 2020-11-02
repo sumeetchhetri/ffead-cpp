@@ -52,5 +52,7 @@ class DemoProcessor : HttpProcessor {
 	        	send404Response();
 	        }
         }
+        
+        ffead_cpp_resp_cleanup(fres);
     }
 }

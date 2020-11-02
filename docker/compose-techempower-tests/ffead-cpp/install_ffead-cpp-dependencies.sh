@@ -2,7 +2,7 @@
 
 apt update -yqq && apt install --no-install-recommends -yqq autoconf-archive unzip uuid-dev odbc-postgresql unixodbc unixodbc-dev \
 	apache2 apache2-dev libapr1-dev libaprutil1-dev memcached libmemcached-dev redis-server libssl-dev \
-	zlib1g-dev cmake make clang-format-9 ninja-build libhiredis-dev libmongoc-dev libpq-dev
+	zlib1g-dev cmake make clang-format-9 ninja-build libmongoc-dev libpq-dev
 
 #redis will not start correctly on bionic with this config
 sed -i "s/bind .*/bind 127.0.0.1/g" /etc/redis/redis.conf
@@ -20,6 +20,14 @@ cmake -DCMAKE_INSTALL_PREFIX=/usr .
 make install
 cd $IROOT
 rm -rf libcuckoo-master
+
+wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
+tar xf v1.0.0.tar.gz
+rm -f v1.0.0.tar.gz
+cd hiredis-1.0.0/
+cmake . && make install
+cd $IROOT
+rm -rf hiredis-1.0.0
 
 mkdir -p /usr/lib/x86_64-linux-gnu/odbc
 wget -q https://downloads.mysql.com/archives/get/p/10/file/mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit.tar.gz
@@ -44,15 +52,6 @@ rm -rf mysql-connector-odbc-8.0.19-linux-ubuntu18.04-x86-64bit
 #    make && make install
 #cd $IROOT
 #rm -rf mongo-c-driver-1.4.0 
-
-#wget -q https://github.com/redis/hiredis/archive/v0.13.3.tar.gz
-#tar xf v0.13.3.tar.gz
-#rm -f v0.13.3.tar.gz
-#cd hiredis-0.13.3/
-#make
-#PREFIX=/usr make install
-#cd $IROOT
-#rm -rf hiredis-0.13.3
 
 cd $IROOT
 wget -q https://github.com/microsoft/mimalloc/archive/v1.6.3.tar.gz

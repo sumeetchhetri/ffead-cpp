@@ -8,7 +8,12 @@ enum Constants {
     static let serverName = "SwiftNIO"
 }
 
+internal final class FfeadResonse {
+	var ptr: UnsafeMutableRawPointer?
+}
+
 private final class HTTPHandler: ChannelInboundHandler {
+	private static let thread: ThreadSpecificVariable<FfeadResonse> = .init()
     public typealias InboundIn = HTTPServerRequestPart
     public typealias OutboundOut = HTTPServerResponsePart
     
@@ -33,6 +38,11 @@ private final class HTTPHandler: ChannelInboundHandler {
             body_len = hbody!.count
             break
         case .end:
+        	if HTTPHandler.thread.currentValue != nil {
+        		let fres = HTTPHandler.thread.currentValue
+        		ffead_cpp_resp_cleanup(fres!.ptr)
+        	}
+        
             var scode: Int32 = 1
             var out_url: UnsafePointer<CChar>?
             var out_url_len = 0
@@ -78,8 +88,10 @@ private final class HTTPHandler: ChannelInboundHandler {
                                     out_headers.append(phr_header_fcp())
                                 }
                                 
-                                let fres = ffead_cpp_handle_rust_swift_1(&freq, &scode, &out_url, &out_url_len, &out_mime, &out_mime_len,
+                                let fres = FfeadResonse()
+                                fres.ptr = ffead_cpp_handle_rust_swift_1(&freq, &scode, &out_url, &out_url_len, &out_mime, &out_mime_len,
                                     &out_headers, &out_headers_len, &out_body, &out_body_len)
+                                HTTPHandler.thread.currentValue = fres
                                 
                                 if scode > 0 {
                                     var rheaders = HTTPHeaders()
@@ -96,7 +108,6 @@ private final class HTTPHandler: ChannelInboundHandler {
                                     buff.writeString(body!)
                                     context.write(self.wrapOutboundOut(.head(responseHead)), promise: nil)
                                     context.write(wrapOutboundOut(.body(.byteBuffer(buff))), promise: nil)
-                                    ffead_cpp_resp_cleanup(fres)
                                 } else {
                                     let file = String.init(data: Data.init(bytes: out_url!, count: out_url_len), encoding: String.Encoding.utf8);
                                     let path = URL(fileURLWithPath: file!)
@@ -114,7 +125,6 @@ private final class HTTPHandler: ChannelInboundHandler {
                                         let responseHead = self.response404()
                                         context.write(wrapOutboundOut(.head(responseHead)), promise: nil)
                                     }
-                                    ffead_cpp_resp_cleanup(fres)
                                 }
                                 context.write(self.wrapOutboundOut(.end(nil)), promise: nil)
                             }
