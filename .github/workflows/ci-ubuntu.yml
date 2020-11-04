@@ -34,7 +34,7 @@ jobs:
         tar xf v1.0.0.tar.gz
         rm -f v1.0.0.tar.gz
         cd hiredis-1.0.0/
-        cmake . && make install
+        cmake . && sudo make install
         cd /tmp
         rm -rf hiredis-1.0.0
         git clone https://github.com/sumeetchhetri/cinatra.git
