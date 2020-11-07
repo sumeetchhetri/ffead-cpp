@@ -178,67 +178,11 @@ RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists
 	sed -i 's|install(FILES ${PROJECT_BINARY_DIR}/web/peer-server/libpeer_server${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt && \
 	rm -rf web/default web/oauthApp web/flexApp web/markers web/te-benchmark web/peer-server
 
-RUN mkdir build
-WORKDIR /tmp/ffead-cpp-src/build
-RUN cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on -DDEBUG=on ..
-RUN ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq-async && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-mongo-raw
-
-WORKDIR /tmp/ffead-cpp-src/build
-RUN ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/sdormmongo.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/sdorm.xml && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq-async && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-mongo-orm
-
-WORKDIR /tmp/ffead-cpp-src/build
-RUN ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq/config/cache.xml && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq-async && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-raw
-
-WORKDIR /tmp/ffead-cpp-src/build
-RUN cp -f /tmp/ffead-cpp-src/web/te-benchmark-um/sql-src/TeBkUmWorldsql.h /tmp/ffead-cpp-src/web/te-benchmark-um/include/TeBkUmWorld.h && \
-	cp -f /tmp/ffead-cpp-src/web/te-benchmark-um/sql-src/TeBkUmWorldsql.cpp /tmp/ffead-cpp-src/web/te-benchmark-um/src/TeBkUmWorld.cpp && \
-	ninja install && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/sdormpostgresql.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/sdorm.xml && \
-	cp -f /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/cacheredis.xml /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um/config/cache.xml && \
-	cp /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/resources/sample-odbcinst.ini /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/resources/odbcinst.ini && \
-	cp /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/resources/sample-odbc.ini /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/resources/odbc.ini && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq-async && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-orm
-
-WORKDIR /tmp/ffead-cpp-src/build
-RUN ninja install && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-pq && \
-	rm -rf /tmp/ffead-cpp-src/ffead-cpp-5.0-bin/web/te-benchmark-um-mgr && \
-	mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/ffead-cpp-sql-raw-async
-
-COPY *.sh pipeline.lua /
-
 WORKDIR /
 
+COPY *.sh pipeline.lua /
 RUN chown -Rf root:root /ssd && chown -Rf postgres:postgres /ssd/postgresql && chown -Rf mysql:mysql /ssd/mysql && chmod 777 pipeline.lua concurrency.sh pipeline.sh query.sh
 
-EXPOSE 9781 9782 9783 9784 9785
-
-RUN rm -rf /tmp/ffead-cpp-src && chmod +x *.sh && ./install_ffead-cpp.sh
-
-RUN sed -i 's|PORT_NO=8080|PORT_NO=9781|g' /tmp/ffead-cpp-mongo-raw/resources/server.prop && \
-	sed -i 's|PORT_NO=8080|PORT_NO=9782|g' /tmp/ffead-cpp-mongo-orm/resources/server.prop && \
-	sed -i 's|PORT_NO=8080|PORT_NO=9783|g' /tmp/ffead-cpp-sql-raw/resources/server.prop && \
-	sed -i 's|PORT_NO=8080|PORT_NO=9784|g' /tmp/ffead-cpp-sql-orm/resources/server.prop && \
-	sed -i 's|PORT_NO=8080|PORT_NO=9785|g' /tmp/ffead-cpp-sql-raw-async/resources/server.prop
+RUN chmod +x *.sh && ./profile.sh
 
 CMD /bin/bash

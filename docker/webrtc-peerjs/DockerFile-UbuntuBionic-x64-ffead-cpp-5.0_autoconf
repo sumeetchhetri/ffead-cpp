@@ -38,15 +38,15 @@ RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um)||g' CM
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-mgr)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq)||g' CMakeLists.txt
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async)||g' CMakeLists.txt
-RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/default/libdefault${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/flexApp/libflexApp${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/oauthApp/liboauthApp${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/markers/libmarkers${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark/libte_benchmark${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um/libte_benchmark_um${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-mgr/libte_benchmark_um_mgr${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq/libte_benchmark_um_pq${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
-RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async/libte_benchmark_um_pq_async${CMAKE_SHARED_LIBRARY_SUFFIX} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/default/libdefault${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/flexApp/libflexApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/oauthApp/liboauthApp${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/markers/libmarkers${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark/libte_benchmark${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um/libte_benchmark_um${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-mgr/libte_benchmark_um_mgr${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq/libte_benchmark_um_pq${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
+RUN sed -i 's|install(FILES ${PROJECT_SOURCE_DIR}/web/te-benchmark-um-pq-async/libte_benchmark_um_pq_async${LIB_EXT} DESTINATION ${PROJECT_NAME}-bin/lib)||g' CMakeLists.txt
 RUN sed -i 's|web/default/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/flexApp/src/autotools/Makefile||g' configure.ac
 RUN sed -i 's|web/oauthApp/src/autotools/Makefile||g' configure.ac

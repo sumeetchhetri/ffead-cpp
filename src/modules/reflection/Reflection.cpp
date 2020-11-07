@@ -861,52 +861,6 @@ std::map<std::string, ClassStructure, std::less<> > Reflection::getClassStructur
 }
 
 
-/*bool Reflection::generateClassInfoFromDD(const std::string& alldata)
-{
-	std::string data;
-	std::string flag = "";
-	std::stringstream ss;
-	ss << alldata;
-	while (getline(ss, data))
-	{
-		size_t tes;
-		if ((tes = data.find("class")) != std::string::npos)
-		{
-			std::vector<std::string> results;
-			StringUtil::replaceFirst(data,":","");
-			StringUtil::split(results, data, (" "));
-			this->classN = results.at(1);
-			if(results.size()>3)
-			{
-				this->bcvisib = results.at(2);
-				this->baseClassN = results.at(3);
-				////logger << results.size() << std::flush;
-			}
-			//StringUtil::split(results, data, (": "));
-		}
-		else if ((tes = data.find("}")) != std::string::npos)
-			break;
-		else if ((tes = data.find("public")) != std::string::npos)
-			flag = "public";
-		else if ((tes = data.find("protected")) != std::string::npos)
-			flag = "protected";
-		else if ((tes = data.find("private")) != std::string::npos)
-			flag = "private";
-		else
-		{
-			if (flag == "" && data != "{")
-				flag = "private";
-			collectInfo(data, flag);
-		}
-	}
-	////logger << pub.size() << pri.size() << pro.size() << std::flush;
-	if (this->pub.size() > 0 || this->pri.size() > 0 || this->pro.size() > 0)
-		return true;
-	else
-		return false;
-}*/
-
-
 propMap Reflection::getDbTableInfo(const std::string& file)
 {
 	propMap tabInfo;
@@ -1001,60 +955,6 @@ std::vector<std::string> Reflection::getAfcObjectData(ClassStructure& classStruc
 		return publf;
 	}
 }
-
-/*vector<std::string> Reflection::getAfcObjectData(const std::string& className, const bool& object)
-{
-	std::vector<std::string> refDef;
-	if (!generateClassInfo(className))
-	{
-		return refDef;
-	}
-	std::vector<std::string> publf, privf, protf ,publm, privm, protm;
-
-	size_t tes;
-	if (this->pub.size() > 0)
-	{
-		for (unsigned int i = 0; i < this->pub.size(); i++)
-		{
-			if((tes=this->pub.at(i).find("("))!=std::string::npos && (tes=this->pub.at(i).find(")"))!=std::string::npos)
-			{
-				publm.push_back(this->pub.at(i));
-			}
-			else
-			{
-				publf.push_back(this->pub.at(i));
-			}
-		}
-	}
-	if (this->pri.size() > 0)
-	{
-		for (unsigned int i = 0; i < this->pri.size(); i++)
-		{
-			if((tes=this->pri.at(i).find("("))!=std::string::npos && (tes=this->pri.at(i).find(")"))!=std::string::npos)
-			{
-				privm.push_back(this->pri.at(i));
-			}
-		}
-	}
-	if (this->pro.size() > 0)
-	{
-		for (unsigned int i = 0; i < this->pro.size(); i++)
-		{
-			if((tes=this->pro.at(i).find("("))!=std::string::npos && (tes=this->pro.at(i).find(")"))!=std::string::npos)
-			{
-				protm.push_back(this->pro.at(i));
-			}
-		}
-	}
-	if(!object)
-	{
-		return publm;
-	}
-	else
-	{
-		return publf;
-	}
-}*/
 
 std::string Reflection::generateClassDefinitionsAll(std::map<std::string, std::map<std::string, ClassStructure, std::less<> >, std::less<> >& clsstrucMaps, std::string &includeRef, const std::vector<std::string>& apps)
 {

@@ -15,6 +15,6 @@ jobs:
     - name: Build and benchmark the ffead-cpp-5.0 base docker image
       run: |
         git clone https://github.com/TechEmpower/FrameworkBenchmarks
-        cp -f docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp/
+        cp -rf docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp/
         cd FrameworkBenchmarks
-        ./tfb --mode benchmark --test lithium-postgres-batch ffead-cpp-postgresql-raw ffead-cpp-h2o ffead-cpp-v-picov
+        ./tfb --mode benchmark --test lithium-postgres-batch ffead-cpp-postgresql-raw ffead-cpp-postgresql-raw-profiled ffead-cpp-postgresql-raw-clibpqb-profiled
