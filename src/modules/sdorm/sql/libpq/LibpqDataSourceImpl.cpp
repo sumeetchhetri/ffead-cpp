@@ -72,7 +72,7 @@ void* LibpqDataSourceImpl::beginAsync(void* vitem) {
 		std::vector<LibpqParam> pvals;
 		__AsyncReq* areq = NULL;
 #ifdef HAVE_LIBPQ
-		executeQueryInt("BEGIN", pvals, true, status, NULL, NULL, NULL, vitem, false, &areq);
+		executeQueryIntAsync("BEGIN", std::move(pvals), true, status, NULL, NULL, NULL, NULL, NULL, NULL, vitem, false, &areq);
 #endif
 		return areq;
 	}
@@ -85,7 +85,7 @@ void* LibpqDataSourceImpl::commitAsync(void* vitem) {
 		std::vector<LibpqParam> pvals;
 		__AsyncReq* areq = NULL;
 #ifdef HAVE_LIBPQ
-		executeQueryInt("COMMIT", pvals, true, status, NULL, NULL, NULL, vitem, false, &areq);
+		executeQueryIntAsync("COMMIT", std::move(pvals), true, status, NULL, NULL, NULL, NULL, NULL, NULL, vitem, false, &areq);
 #endif
 		return areq;
 	}
@@ -98,7 +98,7 @@ void* LibpqDataSourceImpl::rollbackAsync(void* vitem) {
 		std::vector<LibpqParam> pvals;
 		__AsyncReq* areq = NULL;
 #ifdef HAVE_LIBPQ
-		executeQueryInt("ROLLBACK", pvals, true, status, NULL, NULL, NULL, vitem, false, &areq);
+		executeQueryIntAsync("ROLLBACK", std::move(pvals), true, status, NULL, NULL, NULL, NULL, NULL, NULL, vitem, false, &areq);
 #endif
 		return areq;
 	}
@@ -235,7 +235,7 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 				}
 
 				std::string stmtName;
-				if(q->isPrepared) {
+				if(q->isPrepared && psize>0) {
 					if(ths->prepStmtMap.find(q->query)==ths->prepStmtMap.end()) {
 						stmtName = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
 						ths->prepStmtMap[q->query] = stmtName;
@@ -262,7 +262,7 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 				}
 
 				int qs = -1;
-				if(q->isPrepared) {
+				if(q->isPrepared && psize>0) {
 					qs = PQsendQueryPrepared(ths->conn, stmtName.c_str(), psize, paramValues, paramLengths, paramBinary, 1);
 				} else {
 					qs = PQsendQueryParams(ths->conn, q->query.c_str(), psize, NULL, paramValues, paramLengths, paramBinary, 1);
@@ -324,6 +324,30 @@ void* LibpqDataSourceImpl::handle(void* inp) {
 											}
 											fprintf(stderr, "SELECT failed: %s", PQerrorMessage(ths->conn));
 											PQclear(res);
+										} else if(q->cb1!=NULL) {
+											int cols = PQnfields(res);
+											int rows = PQntuples(res);
+											for(int i=0; i<rows; i++) {
+												for (int j = 0; j < cols; ++j) {
+													q->cb1(q->ctx, i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
+												}
+											}
+										} else if(q->cb2!=NULL) {
+											int cols = PQnfields(res);
+											int rows = PQntuples(res);
+											for(int i=0; i<rows; i++) {
+												for (int j = 0; j < cols; ++j) {
+													q->cb2(q->ctx, i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
+												}
+											}
+										} else if(q->cb3!=NULL) {
+											int cols = PQnfields(res);
+											int rows = PQntuples(res);
+											for(int i=0; i<rows; i++) {
+												for (int j = 0; j < cols; ++j) {
+													q->cb3(q->ctx, i, j, PQgetvalue(res, i, j));
+												}
+											}
 										} else if(q->cb!=NULL) {
 											int cols = PQnfields(res);
 											int rows = PQntuples(res);
@@ -424,6 +448,57 @@ void PgReadTask::run() {
 					delete qr;
 				}
 				ritemDone = true;
+			} else if(q->cb1!=NULL) {
+				//fprintf(stdout, "SELECT response\n");fflush(stdout);
+				int cols = PQnfields(res);
+				int rows = PQntuples(res);
+				for(int i=0; i<rows; i++) {
+					for (int j = 0; j < cols; ++j) {
+						q->cb1(q->ctx, i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
+					}
+				}
+				if(ritem->cnt--==-1) {
+					if(q->cmcb!=NULL) {
+						q->cmcb(q->ctx, true, q->query, counter);
+					} else if(ritem->cmcb!=NULL) {
+						ritem->cmcb(ritem->ctx, true, q->query, counter);
+					}
+					ritemDone = true;
+				}
+			} else if(q->cb2!=NULL) {
+				//fprintf(stdout, "SELECT response\n");fflush(stdout);
+				int cols = PQnfields(res);
+				int rows = PQntuples(res);
+				for(int i=0; i<rows; i++) {
+					for (int j = 0; j < cols; ++j) {
+						q->cb2(q->ctx, i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
+					}
+				}
+				if(ritem->cnt--==-1) {
+					if(q->cmcb!=NULL) {
+						q->cmcb(q->ctx, true, q->query, counter);
+					} else if(ritem->cmcb!=NULL) {
+						ritem->cmcb(ritem->ctx, true, q->query, counter);
+					}
+					ritemDone = true;
+				}
+			} else if(q->cb3!=NULL) {
+				//fprintf(stdout, "SELECT response\n");fflush(stdout);
+				int cols = PQnfields(res);
+				int rows = PQntuples(res);
+				for(int i=0; i<rows; i++) {
+					for (int j = 0; j < cols; ++j) {
+						q->cb3(q->ctx, i, j, PQgetvalue(res, i, j));
+					}
+				}
+				if(ritem->cnt--==-1) {
+					if(q->cmcb!=NULL) {
+						q->cmcb(q->ctx, true, q->query, counter);
+					} else if(ritem->cmcb!=NULL) {
+						ritem->cmcb(ritem->ctx, true, q->query, counter);
+					}
+					ritemDone = true;
+				}
 			} else if(q->cb!=NULL) {
 				//fprintf(stdout, "SELECT response\n");fflush(stdout);
 				int cols = PQnfields(res);
@@ -518,13 +593,12 @@ void PgReadTask::submit(__AsyncReq* nitem) {
 
 			int psize = (int)q->pvals.size();
 
-			if(q->isPrepared) {
+			if(q->isPrepared && psize>0) {
 				if(ths->prepStmtMap.find(q->query)==ths->prepStmtMap.end()) {
 					//fprintf(stdout, "Prepare query....\n");fflush(stdout);
 					hasPrepare = true;
-					q->stmtName = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
-					ths->prepStmtMap[q->query] = q->stmtName;
-					int qs = PQsendPrepare(ths->conn, q->stmtName.c_str(), q->query.c_str(), psize, NULL);
+					ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
+					int qs = PQsendPrepare(ths->conn,ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
 
 					if (!qs) {
 						fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
@@ -546,8 +620,6 @@ void PgReadTask::submit(__AsyncReq* nitem) {
 						PQflush(ths->conn);
 					}
 					return;
-				} else {
-					q->stmtName = ths->prepStmtMap[q->query];
 				}
 			}
 
@@ -572,8 +644,8 @@ void PgReadTask::submit(__AsyncReq* nitem) {
 			}
 
 			int qs = -1;
-			if(q->isPrepared) {
-				qs = PQsendQueryPrepared(ths->conn, q->stmtName.c_str(), psize, paramValues, paramLengths, paramBinary, 1);
+			if(q->isPrepared && psize>0) {
+				qs = PQsendQueryPrepared(ths->conn, ths->prepStmtMap[q->query].c_str(), psize, paramValues, paramLengths, paramBinary, 1);
 			} else {
 				qs = PQsendQueryParams(ths->conn, q->query.c_str(), psize, NULL, paramValues, paramLengths, paramBinary, 1);
 			}
@@ -628,8 +700,51 @@ void LibpqDataSourceImpl::completeAsync(void* vitem, void* ctx, LipqComplFunc cm
 }
 
 #ifdef HAVE_LIBPQ
-PGresult* LibpqDataSourceImpl::executeQueryInt(const std::string &query, const std::vector<LibpqParam>& pvals, bool isPrepared, int& status,
-		void* ctx, LipqResFunc cb, LipqComplFunc cmcb, void* vitem, bool isSelect, __AsyncReq** areq) {
+PGresult* LibpqDataSourceImpl::executeQueryInt(const std::string &query, const std::vector<LibpqParam>& pvals, bool isMulti, bool isPrepared) {
+	int psize = (int)pvals.size();
+	const char *paramValues[psize];
+	int paramLengths[psize];
+	int paramBinary[psize];
+	for (int var = 0; var < psize; ++var) {
+		if(pvals.at(var).t==1) {//short
+			paramValues[var] = (char *)&pvals.at(var).s;
+			paramLengths[var] = pvals.at(var).l;
+		} else if(pvals.at(var).t==2) {//int
+			paramValues[var] = (char *)&pvals.at(var).i;
+			paramLengths[var] = pvals.at(var).l;
+		} else if(pvals.at(var).t==3) {//long
+			paramValues[var] = (char *)&pvals.at(var).li;
+			paramLengths[var] = pvals.at(var).l;
+		} else {
+			paramValues[var] = pvals.at(var).p;
+			paramLengths[var] = pvals.at(var).l;
+		}
+		paramBinary[var] = pvals.at(var).b?1:0;
+	}
+	if(isPrepared && psize>0) {
+		if(prepStmtMap.find(query)==prepStmtMap.end()) {
+			prepStmtMap[query] = CastUtil::fromNumber(prepStmtMap.size()+1);;
+			PGresult* res = PQprepare(conn, prepStmtMap[query].c_str(), query.c_str(), psize, NULL);
+			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
+				fprintf(stderr, "PREPARE failed: %s", PQerrorMessage(conn));
+				PQclear(res);
+				return NULL;
+			}
+		}
+	}
+	if(isMulti) {
+		PQsendQuery(conn, query.c_str());
+		return NULL;
+	}
+	if(isPrepared && psize>0) {
+		return PQexecPrepared(conn, prepStmtMap[query].c_str(), psize, paramValues, paramLengths, paramBinary, 1);
+	} else {
+		return PQexecParams(conn, query.c_str(), psize, NULL, paramValues, paramLengths, paramBinary, 1);
+	}
+}
+
+void LibpqDataSourceImpl::executeQueryIntAsync(const std::string &query, std::vector<LibpqParam>&& pvals, bool isPrepared, int& status,
+		void* ctx, LipqResFunc cb, LipqColResFunc1 cb1, LipqColResFunc2 cb2, LipqColResFunc3 cb3, LipqComplFunc cmcb, void* vitem, bool isSelect, __AsyncReq** areq) {
 	if(isAsync) {
 		status = 1;
 		__AsyncReq* item = vitem!=NULL?(__AsyncReq*)vitem:new __AsyncReq;
@@ -642,82 +757,62 @@ PGresult* LibpqDataSourceImpl::executeQueryInt(const std::string &query, const s
 		__AsynQuery* q = new __AsynQuery;
 		q->query = query;
 		q->isPrepared = isPrepared;
-		q->pvals = pvals;
+		q->pvals = std::move(pvals);
 		q->ctx = ctx;
 		q->cb = cb;
+		q->cb1 = cb1;
+		q->cb2 = cb2;
+		q->cb3 = cb3;
 		q->cmcb = cmcb;
 		q->isSelect = isSelect;
 		item->q.push(q);
 
 		*areq = item;
-
-		return NULL;
-	} else {
-		int psize = (int)pvals.size();
-		const char *paramValues[psize];
-		int paramLengths[psize];
-		int paramBinary[psize];
-		for (int var = 0; var < psize; ++var) {
-			if(pvals.at(var).t==1) {//short
-				paramValues[var] = (char *)&pvals.at(var).s;
-				paramLengths[var] = pvals.at(var).l;
-			} else if(pvals.at(var).t==2) {//int
-				paramValues[var] = (char *)&pvals.at(var).i;
-				paramLengths[var] = pvals.at(var).l;
-			} else if(pvals.at(var).t==3) {//long
-				paramValues[var] = (char *)&pvals.at(var).li;
-				paramLengths[var] = pvals.at(var).l;
-			} else {
-				paramValues[var] = pvals.at(var).p;
-				paramLengths[var] = pvals.at(var).l;
-			}
-			paramBinary[var] = pvals.at(var).b?1:0;
-		}
-		std::string stmtName;
-		if(isPrepared) {
-			if(prepStmtMap.find(query)==prepStmtMap.end()) {
-				stmtName = CastUtil::fromNumber(prepStmtMap.size()+1);
-				prepStmtMap[query] = stmtName;
-				PGresult* res = PQprepare(conn, stmtName.c_str(), query.c_str(), psize, NULL);
-				if (PQresultStatus(res) != PGRES_COMMAND_OK) {
-					fprintf(stderr, "PREPARE failed: %s", PQerrorMessage(conn));
-					PQclear(res);
-					return NULL;
-				}
-			} else {
-				stmtName = prepStmtMap[query];
-			}
-		}
-		if(isPrepared) {
-			return PQexecPrepared(conn, stmtName.c_str(), psize, paramValues, paramLengths, paramBinary, 1);
-		} else if (psize>0) {
-			return PQexecParams(conn, query.c_str(), psize, NULL, paramValues, paramLengths, paramBinary, 1);
-		} else {
-			int qs = PQsendQuery(conn, query.c_str());
-			if (!qs) {
-				fprintf(stderr, "Failed to send query %s\n", PQerrorMessage(conn));
-			}
-			return NULL;
-		}
 	}
-	return NULL;
 }
 #endif
 
-void* LibpqDataSourceImpl::executeUpdateQueryAsync(const std::string &query, const std::vector<LibpqParam>& pvals, void* ctx, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
+void* LibpqDataSourceImpl::executeUpdateQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
 	int status = -1;
 	__AsyncReq* areq = NULL;
 #ifdef HAVE_LIBPQ
-	executeQueryInt(query, pvals, isPrepared, status, ctx, NULL, cmcb, vitem, false, &areq);
+	executeQueryIntAsync(query, std::move(pvals), isPrepared, status, ctx, NULL, NULL, NULL, NULL, cmcb, vitem, false, &areq);
 #endif
 	return areq;
 }
 
-void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, const std::vector<LibpqParam>& pvals, void* ctx, LipqResFunc cb, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
+void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqResFunc cb, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
 	int status = -1;
 	__AsyncReq* areq = NULL;
 #ifdef HAVE_LIBPQ
-	executeQueryInt(query, pvals, isPrepared, status, ctx, cb, cmcb, vitem, true, &areq);
+	executeQueryIntAsync(query, std::move(pvals), isPrepared, status, ctx, cb, NULL, NULL, NULL, cmcb, vitem, true, &areq);
+#endif
+	return areq;
+}
+
+void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqColResFunc1 cb, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
+	int status = -1;
+	__AsyncReq* areq = NULL;
+#ifdef HAVE_LIBPQ
+	executeQueryIntAsync(query, std::move(pvals), isPrepared, status, ctx, NULL, cb, NULL, NULL, cmcb, vitem, true, &areq);
+#endif
+	return areq;
+}
+
+void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqColResFunc2 cb, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
+	int status = -1;
+	__AsyncReq* areq = NULL;
+#ifdef HAVE_LIBPQ
+	executeQueryIntAsync(query, std::move(pvals), isPrepared, status, ctx, NULL, NULL, cb, NULL, cmcb, vitem, true, &areq);
+#endif
+	return areq;
+}
+
+void* LibpqDataSourceImpl::executeQueryAsync(const std::string &query, std::vector<LibpqParam>&& pvals, void* ctx, LipqColResFunc3 cb, LipqComplFunc cmcb, void* vitem, bool isPrepared) {
+	int status = -1;
+	__AsyncReq* areq = NULL;
+#ifdef HAVE_LIBPQ
+	executeQueryIntAsync(query, std::move(pvals), isPrepared, status, ctx, NULL, NULL, NULL, cb, cmcb, vitem, true, &areq);
 #endif
 	return areq;
 }
@@ -727,10 +822,8 @@ void LibpqDataSourceImpl::executeMultiQuery(const std::string &query, void* ctx,
 		throw std::runtime_error("Please call executeQueryAsync");
 	}
 #ifdef HAVE_LIBPQ
-	int status = -1;
-	__AsyncReq* areq = NULL;
 	std::vector<LibpqParam> pvals;
-	executeQueryInt(query, pvals, false, status, NULL, NULL, NULL, NULL, true, &areq);
+	executeQueryInt(query, pvals, true, false);
 	PGresult* res = NULL;
 	bool stat = true;
 	int counter = -1;
@@ -764,15 +857,124 @@ void LibpqDataSourceImpl::executeMultiQuery(const std::string &query, void* ctx,
 #endif
 }
 
+void LibpqDataSourceImpl::executeMultiQuery(const std::string &query, void* ctx, LipqColResFunc1 cb, LipqComplFunc cmcb) {
+	if(isAsync) {
+		throw std::runtime_error("Please call executeQueryAsync");
+	}
+#ifdef HAVE_LIBPQ
+	std::vector<LibpqParam> pvals;
+	executeQueryInt(query, pvals, true, false);
+	PGresult* res = NULL;
+	bool stat = true;
+	int counter = -1;
+	while((res = PQgetResult(conn))!=NULL) {
+		counter++;
+		if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+			fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
+			if(cmcb!=NULL) {
+				cmcb(ctx, false, query, counter);
+			}
+			stat = false;
+		} else {
+			int cols = PQnfields(res);
+			int rows = PQntuples(res);
+			for(int i=0; i<rows; i++) {
+				for (int j = 0; j < cols; ++j) {
+					cb(ctx, i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
+				}
+			}
+		}
+		PQclear(res);
+	}
+	if(stat) {
+		if(cmcb!=NULL) {
+			cmcb(ctx, stat, query, counter);
+		}
+	}
+#endif
+}
+
+void LibpqDataSourceImpl::executeMultiQuery(const std::string &query, void* ctx, LipqColResFunc2 cb, LipqComplFunc cmcb) {
+	if(isAsync) {
+		throw std::runtime_error("Please call executeQueryAsync");
+	}
+#ifdef HAVE_LIBPQ
+	std::vector<LibpqParam> pvals;
+	executeQueryInt(query, pvals, true, false);
+	PGresult* res = NULL;
+	bool stat = true;
+	int counter = -1;
+	while((res = PQgetResult(conn))!=NULL) {
+		counter++;
+		if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+			fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
+			if(cmcb!=NULL) {
+				cmcb(ctx, false, query, counter);
+			}
+			stat = false;
+		} else {
+			int cols = PQnfields(res);
+			int rows = PQntuples(res);
+			for(int i=0; i<rows; i++) {
+				for (int j = 0; j < cols; ++j) {
+					cb(ctx, i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
+				}
+			}
+		}
+		PQclear(res);
+	}
+	if(stat) {
+		if(cmcb!=NULL) {
+			cmcb(ctx, stat, query, counter);
+		}
+	}
+#endif
+}
+
+void LibpqDataSourceImpl::executeMultiQuery(const std::string &query, void* ctx, LipqColResFunc3 cb, LipqComplFunc cmcb) {
+	if(isAsync) {
+		throw std::runtime_error("Please call executeQueryAsync");
+	}
+#ifdef HAVE_LIBPQ
+	std::vector<LibpqParam> pvals;
+	executeQueryInt(query, pvals, true, false);
+	PGresult* res = NULL;
+	bool stat = true;
+	int counter = -1;
+	while((res = PQgetResult(conn))!=NULL) {
+		counter++;
+		if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+			fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
+			if(cmcb!=NULL) {
+				cmcb(ctx, false, query, counter);
+			}
+			stat = false;
+		} else {
+			int cols = PQnfields(res);
+			int rows = PQntuples(res);
+			for(int i=0; i<rows; i++) {
+				for (int j = 0; j < cols; ++j) {
+					cb(ctx, i, j, PQgetvalue(res, i, j));
+				}
+			}
+		}
+		PQclear(res);
+	}
+	if(stat) {
+		if(cmcb!=NULL) {
+			cmcb(ctx, stat, query, counter);
+		}
+	}
+#endif
+}
+
 void LibpqDataSourceImpl::executeUpdateMultiQuery(const std::string &query, void* ctx, LipqComplFunc cmcb) {
 	if(isAsync) {
 		throw std::runtime_error("Please call executeQueryAsync");
 	}
 #ifdef HAVE_LIBPQ
-	int status = -1;
-	__AsyncReq* areq = NULL;
 	std::vector<LibpqParam> pvals;
-	executeQueryInt(query, pvals, false, status, NULL, NULL, NULL, NULL, true, &areq);
+	executeQueryInt(query, pvals, true, false);
 	PGresult* res = NULL;
 	int counter = -1;
 	bool stat = true;
@@ -801,9 +1003,7 @@ void LibpqDataSourceImpl::executeQuery(const std::string &query, const std::vect
 		throw std::runtime_error("Please call executeQueryAsync");
 	}
 #ifdef HAVE_LIBPQ
-	int status = -1;
-	__AsyncReq* areq = NULL;
-	PGresult *res = executeQueryInt(query, pvals, isPrepared, status, NULL, NULL, NULL, NULL, true, &areq);
+	PGresult *res = executeQueryInt(query, pvals, false, isPrepared);
 	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 		fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
 		PQclear(res);
@@ -824,14 +1024,81 @@ void LibpqDataSourceImpl::executeQuery(const std::string &query, const std::vect
 #endif
 }
 
+void LibpqDataSourceImpl::executeQuery(const std::string &query, const std::vector<LibpqParam>& pvals, void* ctx, LipqColResFunc1 cb, bool isPrepared) {
+	if(isAsync) {
+		throw std::runtime_error("Please call executeQueryAsync");
+	}
+#ifdef HAVE_LIBPQ
+	PGresult *res = executeQueryInt(query, pvals, false, isPrepared);
+	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+		fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
+		PQclear(res);
+		return;
+	}
+
+	int cols = PQnfields(res);
+	int rows = PQntuples(res);
+	for(int i=0; i<rows; i++) {
+		for (int j = 0; j < cols; ++j) {
+			cb(ctx, i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
+		}
+	}
+	PQclear(res);
+#endif
+}
+
+void LibpqDataSourceImpl::executeQuery(const std::string &query, const std::vector<LibpqParam>& pvals, void* ctx, LipqColResFunc2 cb, bool isPrepared) {
+	if(isAsync) {
+		throw std::runtime_error("Please call executeQueryAsync");
+	}
+#ifdef HAVE_LIBPQ
+	PGresult *res = executeQueryInt(query, pvals, false, isPrepared);
+	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+		fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
+		PQclear(res);
+		return;
+	}
+
+	int cols = PQnfields(res);
+	int rows = PQntuples(res);
+	for(int i=0; i<rows; i++) {
+		for (int j = 0; j < cols; ++j) {
+			cb(ctx, i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
+		}
+	}
+	PQclear(res);
+#endif
+}
+
+void LibpqDataSourceImpl::executeQuery(const std::string &query, const std::vector<LibpqParam>& pvals, void* ctx, LipqColResFunc3 cb, bool isPrepared) {
+	if(isAsync) {
+		throw std::runtime_error("Please call executeQueryAsync");
+	}
+#ifdef HAVE_LIBPQ
+	PGresult *res = executeQueryInt(query, pvals, false, isPrepared);
+	if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+		fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
+		PQclear(res);
+		return;
+	}
+
+	int cols = PQnfields(res);
+	int rows = PQntuples(res);
+	for(int i=0; i<rows; i++) {
+		for (int j = 0; j < cols; ++j) {
+			cb(ctx, i, j, PQgetvalue(res, i, j));
+		}
+	}
+	PQclear(res);
+#endif
+}
+
 bool LibpqDataSourceImpl::executeUpdateQuery(const std::string &query, const std::vector<LibpqParam>& pvals, bool isPrepared) {
 	if(isAsync) {
 		throw std::runtime_error("Please call executeUpdateQueryAsync");
 	}
 #ifdef HAVE_LIBPQ
-	int status = -1;
-	__AsyncReq* areq = NULL;
-	PGresult *res = executeQueryInt(query, pvals, isPrepared, status, NULL, NULL, NULL, NULL, false, &areq);
+	PGresult *res = executeQueryInt(query, pvals, false, isPrepared);
 	if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 		fprintf(stderr, "UPDATE failed: %s", PQerrorMessage(conn));
 		PQclear(res);

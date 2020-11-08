@@ -17,3 +17,11 @@ docker push sumeetchhetri/ffead-cpp-5.0-java-base:5.2
 docker rmi -f sumeetchhetri/ffead-cpp-5.0-rust-rocket-base:5.2
 docker build -f ffead-cpp-rust-rocket-base.dockerfile -t sumeetchhetri/ffead-cpp-5.0-rust-rocket-base:5.2 .
 docker push sumeetchhetri/ffead-cpp-5.0-rust-rocket-base:5.2
+
+docker rmi -f sumeetchhetri/ffead-cpp-5.0-sql-raw-profiled-base:5.2
+docker build -f ffead-cpp-sql-raw-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-5.0-sql-raw-profiled-base:5.2 .
+docker push sumeetchhetri/ffead-cpp-5.0-sql-raw-profiled-base:5.2
+
+docker rmi -f sumeetchhetri/ffead-cpp-5.0-sql-raw-clibpqb-profiled-base:5.2
+docker build -f ffead-cpp-sql-raw-clibpqb-profiled-base.dockerfile -t sumeetchhetri/ffead-cpp-5.0-sql-raw-clibpqb-profiled-base:5.2 .
+docker push sumeetchhetri/ffead-cpp-5.0-sql-raw-clibpqb-profiled-base:5.2

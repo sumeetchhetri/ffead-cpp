@@ -11,7 +11,14 @@ services:
 script:
   - cd ../../
   - git clone https://github.com/TechEmpower/FrameworkBenchmarks
-  - cp -f sumeetchhetri/ffead-cpp/docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp
+  - cp -rf sumeetchhetri/ffead-cpp/docker/techempower-config/* FrameworkBenchmarks/frameworks/C++/ffead-cpp
   - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um/include/
   - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um/src/
+  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-mgr/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-mgr/include/
+  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-mgr/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-mgr/src/
+  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-pq/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-pq/include/
+  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-pq/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-pq/src/
+  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-pq-async/include/*.h FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-pq-async/include/
+  - cp -f sumeetchhetri/ffead-cpp/web/te-benchmark-um-pq-async/src/*.cpp FrameworkBenchmarks/frameworks/C++/ffead-cpp/te-benchmark-um-pq-async/src/
   - cd FrameworkBenchmarks && ./tfb --mode verify --test-dir C++/ffead-cpp
+  

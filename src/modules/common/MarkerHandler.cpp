@@ -50,7 +50,6 @@ void MarkerHandler::initMarkers() {
 }
 
 MarkerHandler::~MarkerHandler() {
-	
 }
 
 const std::map<std::string, bool>& Marker::getAttributes() const {

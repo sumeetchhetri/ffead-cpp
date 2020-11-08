@@ -206,9 +206,18 @@ std::vector<std::string> MemoryCacheImpl::getValues(const std::vector<std::strin
 }
 
 void MemoryCacheImpl::mgetRaw(const std::vector<std::string>& keys, std::vector<std::string>& values) {
+	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
+	std::string rval;
+	p->lock.lock();
 	for(int i=0;i<(int)keys.size();++i) {
-		values.push_back(getValue(keys.at(i)));
+		const std::string& key = keys.at(i);
+		if(p->internalMap.count(key)>0) {
+			auto it = p->internalMap.find(key);
+			p->lrul.splice(p->lrul.begin(), p->lrul, it->second);
+			values.push_back(it->second->second);
+		}
 	}
+	p->lock.unlock();
 }
 
 void* MemoryCacheImpl::executeCommand(const std::string& command, ...) {

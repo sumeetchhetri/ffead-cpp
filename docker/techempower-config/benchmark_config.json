@@ -275,7 +275,7 @@
 			"display_name": "ffead-cpp-swift-nio",
 			"notes": "",
 			"versus": "",
-			"tags": []
+			"tags": ["broken"]
 		},
 		"rust-actix": {
 			"json_url": "/te-benchmark-um/json",
@@ -549,7 +549,7 @@
 			"db_url": "/te-benchmark-um-pq/db",
 			"query_url": "/te-benchmark-um-pq/queries?queries=",
 			"fortune_url": "/te-benchmark-um-pq/fortunes",
-			"update_url": "/te-benchmark-um-pq/updates?queries=",
+			"update_url": "/te-benchmark-um-pq/bupdates?queries=",
 			"port": 8080,
 			"approach": "Realistic",
 			"classification": "Fullstack",
