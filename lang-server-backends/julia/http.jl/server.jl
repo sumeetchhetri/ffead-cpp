@@ -1,4 +1,5 @@
 using HTTP
+using Dates
 
 struct phr_header_fcp
 	name::Ptr{UInt8}
@@ -36,7 +37,7 @@ srv = "Julia-HTTP"
 ##	fresList[i] = C_NULL
 ##end
 
-HTTP.listen("0.0.0.0", 8080) do http
+HTTP.listen("0.0.0.0", 8080, reuseaddr=true) do http
 	hdrs = Array{phr_header_fcp,1}(undef, 50)
 	c = 1
 	for header in http.message.headers
@@ -87,13 +88,15 @@ HTTP.listen("0.0.0.0", 8080) do http
 	@show out_headers_len
 	=#
 	
+	HTTP.setheader(http, "Server" => "Julia-HTTP")
+   	HTTP.setheader(http, "Date" => Dates.format(Dates.now(), Dates.RFC1123Format) * " GMT")
+   	
 	if scode[1] > 0
 		HTTP.setstatus(http, scode[1])
 		for i in 1:out_headers_len[1]
 			#println(unsafe_string(hdrs[i].name, hdrs[i].name_len))
 			HTTP.setheader(http, unsafe_string(hdrs[i].name, hdrs[i].name_len) => unsafe_string(hdrs[i].value, hdrs[i].value_len))
 		end
-		HTTP.setheader(http, "Server" => "Julia-HTTP")
 		startwrite(http)
 		write(http, unsafe_string(out_body[1], out_body_len[1]))
 	else
@@ -103,14 +106,13 @@ HTTP.listen("0.0.0.0", 8080) do http
 		if length(s) > 0
 			HTTP.setheader(http, "Content-Type" => unsafe_string(out_mime[1], out_mime_len[1]))
 			HTTP.setheader(http, "Content-Length" => string(length(s)))
-			HTTP.setheader(http, "Server" => "Julia-HTTP")
 			HTTP.setstatus(http, 200)
 			startwrite(http)
 			write(http, s)
 		else
-			startwrite(http)
-			HTTP.setheader(http, "Server" => "Julia-HTTP")
 			HTTP.setstatus(http, 404)
+			startwrite(http)
+			write(http, "Not Found")
 		end
 	end
 	
