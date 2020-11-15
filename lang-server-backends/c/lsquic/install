@@ -10,3 +10,4 @@ git submodule init
 git submodule update
 cmake -GNinja -DBORINGSSL_DIR=/usr/local/boringssl -DLSQUIC_SHARED_LIB=1 -DLSQUIC_BIN=1 .
 ninja install
+#TODO 

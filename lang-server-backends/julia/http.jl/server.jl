@@ -23,11 +23,11 @@ struct ffead_request
 end
 
 println("Bootstrapping ffead-cpp start...")
-ccall((:ffead_cpp_bootstrap, "libffead-framework.so"), Cvoid, (Cstring, Csize_t, Cint), ARGS[1], length(ARGS[1]), 10)
+ccall((:ffead_cpp_bootstrap, "ffead-framework"), Cvoid, (Cstring, Csize_t, Cint), ARGS[1], length(ARGS[1]), 10)
 println("Bootstrapping ffead-cpp end...")
 
 println("Initializing ffead-cpp start...");
-ccall((:ffead_cpp_init, "libffead-framework.so"), Cvoid, ())
+ccall((:ffead_cpp_init, "ffead-framework"), Cvoid, ())
 println("Initializing ffead-cpp end...");
 
 srv = "Julia-HTTP"
@@ -65,11 +65,11 @@ HTTP.listen("0.0.0.0", 8080, reuseaddr=true) do http
 	##if fres != C_NULL
 	##	println(Threads.threadid())
 	##	println(fres)
-	##	ccall((:ffead_cpp_resp_cleanup, "libffead-framework.so"), Cvoid, (Ptr{Cvoid},), fres)
+	##	ccall((:ffead_cpp_resp_cleanup, "ffead-framework"), Cvoid, (Ptr{Cvoid},), fres)
 	##end
 						
 	##fresList[Threads.threadid()] =
-	fres = ccall((:ffead_cpp_handle_rust_swift_1, "libffead-framework.so"), Ptr{Cvoid},
+	fres = ccall((:ffead_cpp_handle_rust_swift_1, "ffead-framework"), Ptr{Cvoid},
 					(Ref{ffead_request}, Ptr{Cvoid}, Ptr{Ptr{UInt8}}, Ptr{Cvoid}, Ptr{Ptr{UInt8}}, Ptr{Cvoid}, Ptr{phr_header_fcp}, Ptr{Cvoid},
 						Ptr{Ptr{UInt8}}, Ptr{Cvoid}), freq, scode, pointer(out_url), out_url_len,
 						pointer(out_mime), out_mime_len, hdrs, out_headers_len, pointer(out_body), out_body_len)
@@ -105,7 +105,6 @@ HTTP.listen("0.0.0.0", 8080, reuseaddr=true) do http
 		end
 		if length(s) > 0
 			HTTP.setheader(http, "Content-Type" => unsafe_string(out_mime[1], out_mime_len[1]))
-			HTTP.setheader(http, "Content-Length" => string(length(s)))
 			HTTP.setstatus(http, 200)
 			startwrite(http)
 			write(http, s)
@@ -116,9 +115,9 @@ HTTP.listen("0.0.0.0", 8080, reuseaddr=true) do http
 		end
 	end
 	
-    ccall((:ffead_cpp_resp_cleanup, "libffead-framework.so"), Cvoid, (Ptr{Cvoid},), fres)
+    ccall((:ffead_cpp_resp_cleanup, "ffead-framework"), Cvoid, (Ptr{Cvoid},), fres)
 end
 
 println("Cleaning up ffead-cpp start...")
-ccall((:ffead_cpp_cleanup, "libffead-framework.so"), Cvoid, ())
+ccall((:ffead_cpp_cleanup, "ffead-framework"), Cvoid, ())
 println("Cleaning up ffead-cpp end...")

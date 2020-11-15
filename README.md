@@ -38,17 +38,17 @@ Build validated for the following Operating systems/Toolchains
 
 Features
 ==========
-- Multiple server backends
+- Multiple server backends (HTTP 1.1/HTTP2/HTTP3)
     |   |   |   |   |
     |---|---|---|---|
-    |embedded|nginx|apache|openlitespeed (experimental)|
-    |cinatra (c++)|lithium (c++)|drogon (c++)|nghttp2 (c++)|
+    |embedded (HTTP1.1)|nghttp2 (HTTP2)|quiche (HTTP3)|nginx|
+    |apache|cinatra (c++)|lithium (c++)|drogon (c++)|
     |libreactor \(c\)|h2o \(c\)|vweb (vlang)|picov (vlang)|
     |actix (rust)|hyper (rust)|thruster (rust)|rocket (rust)|
     |h2o\.cr (crystal)|crystal-http (crystal)|fasthttp (golang)|gnet (golang)|
     |firenio (java)|rapidoid (java)|wizzardo-http (java)|hunt (d)|
     |swift-nio (swift)|http.jl (julia)|mongols \(c\)|uv-cpp (c++)|
-    |CppServer (c++)||||
+    |CppServer (c++)|openlitespeed (experimental)|||
 - Web Socket Support
 - Advanced ORM - SDORM (sql/monogo)
 - Cache API (memcached/redis)

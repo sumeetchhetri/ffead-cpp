@@ -51,7 +51,7 @@ void Nghttp2Server::handle(const request &req2, const response &res2, std::strin
 	if(respo.isDone()) {
 		for (int var = 0; var < (int)respo.getCookies().size(); var++)
 		{
-			hm.emplace("Set-Cookie", header_value{respo.getCookies().at(var)});
+			hm.emplace("set-cookie", header_value{respo.getCookies().at(var)});
 		}
 		std::map<std::string,std::string>::const_iterator it;
 		for(it=respo.getCHeaders().begin();it!=respo.getCHeaders().end();++it) {

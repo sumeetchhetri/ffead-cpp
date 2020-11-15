@@ -42,6 +42,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.342787389" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1062586156" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/opt/libpq/include"/>
+									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/quiche/examples/"/>
 									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/CppServer/include/"/>
 									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/co/include"/>
 									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/uv-cpp/"/>
@@ -67,6 +68,7 @@
 								<option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.option.debugging.level.534493737" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.364342134" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/mongols/inc/mongols"/>
+									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/quiche/examples/"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1301402407" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>

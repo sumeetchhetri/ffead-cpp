@@ -133,7 +133,6 @@ static reactor_status handle(reactor_event *event)
 				snprintf(slen, 9, "%ld", length);
 				response.body.base = (void*)buffer;
 				response.body.size = (size_t)length;
-				response.headers.count = 2;
 				response.headers.header[0].name.base = (void*)"Content-Length";
 				response.headers.header[0].name.size = 14;
 				response.headers.header[0].value.base = slen;
@@ -155,6 +154,7 @@ static reactor_status handle(reactor_event *event)
 				response.reason.base = (void*)"OK";
 				response.reason.size = 2;
 				reactor_server_respond(session, &response);
+				free(buffer);
 			} else {
 				response.headers.header[0].name = reactor_vector_string("Date");
 				response.headers.header[0].value = reactor_http_message_date_1(NULL);
