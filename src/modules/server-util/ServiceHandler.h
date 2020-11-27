@@ -36,6 +36,7 @@
 #include "map"
 #include <stdint.h>
 #include "ReusableInstanceHolder.h"
+#include "CommonUtils.h"
 
 class ServiceHandler;
 
@@ -76,7 +77,6 @@ class ServiceHandler {
 	ThreadPool spool;
 	static time_t rt;
 	static struct tm ti;
-	static std::string dateStr;
 	bool addOpenRequest(SocketInterface* si);
 	void addCloseRequest(SocketInterface* si);
 	void registerServiceRequest(void* request, SocketInterface* sif, void* context, int reqPos);
@@ -88,7 +88,8 @@ class ServiceHandler {
 	friend class HttpServiceTask;
 	virtual void sockInit(SocketInterface* si)=0;
 protected:
-	static std::string getDateStr() noexcept;
+	static std::string getDateStr();
+	static void getDateStr(std::string&);
 	void submitTask(Task* task);
 	virtual void handleService(void* request, SocketInterface* sif, void* context, int reqPos)=0;
 	virtual void handleRead(SocketInterface* req)=0;

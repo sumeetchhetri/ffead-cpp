@@ -23,8 +23,16 @@
 
 #include "CastUtil.h"
 
-libcuckoo::cuckoohash_map<std::string, std::string> CastUtil::_mangledClassNameMap;
+//libcuckoo::cuckoohash_map<std::string, std::string> CastUtil::_mangledClassNameMap;
 const std::string CastUtil::STD_STRING = "std::string";
 const std::string CastUtil::BOOL_TRUE = "true";
 const std::string CastUtil::BOOL_FALSE = "false";
 
+ThreadLocal CastUtil::_mcMap;
+
+void CastUtil::clear() {
+	std::map<std::string, std::string>* _mp = (std::map<std::string, std::string>*)_mcMap.get();
+	if(_mp!=NULL) {
+		delete _mp;
+	}
+}

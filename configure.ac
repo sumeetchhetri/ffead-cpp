@@ -427,13 +427,13 @@ fi
 
 AC_ARG_ENABLE(mod_binserialize,
 AS_HELP_STRING([--enable-mod_binserialize],
-               [enable mod_binserialize, default: yes]),
+               [enable mod_binserialize, default: no]),
 [case "${enableval}" in
              yes) mod_binserialize=yes ;;
              no)  mod_binserialize=no ;;
              *)   AC_MSG_ERROR([bad value ${enableval} for --enable-mod_binserialize]) ;;
 esac],
-[mod_binserialize=yes])
+[mod_binserialize=no])
 AM_CONDITIONAL(MOD_BINSERIALIZE, test "x$mod_binserialize" = "xyes")
 if test "x$mod_binserialize" = "xyes"; then
     AC_DEFINE(INC_BINSER, [], [enable binary serilaization module])

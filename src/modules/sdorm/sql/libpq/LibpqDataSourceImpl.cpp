@@ -416,7 +416,6 @@ void PgReadTask::run() {
 		if(hasPrepare) {
 			if (PQresultStatus(res) != PGRES_COMMAND_OK) {
 				fprintf(stderr, "PREPARE failed: %s", PQerrorMessage(ths->conn));
-				PQclear(res);
 				if(q->cmcb!=NULL) {
 					q->cmcb(q->ctx, false, q->query, counter);
 				} else if(ritem->cmcb!=NULL) {
@@ -430,9 +429,13 @@ void PgReadTask::run() {
 				delete q;
 				q = NULL;
 				ritemDone = true;
+				delete ritem;
+				ritem = NULL;
+				counter = -1;
 			} else {
-				//fprintf(stdout, "PREPARE response....\n");fflush(stdout);
+				ritem->cnt--;
 			}
+			hasPrepare = false;
 		} else if(q->isSelect) {
 			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
 				if(q->cmcb!=NULL) {
@@ -441,15 +444,16 @@ void PgReadTask::run() {
 					ritem->cmcb(ritem->ctx, false, q->query, counter);
 				}
 				fprintf(stderr, "SELECT failed: %s", PQerrorMessage(ths->conn));
-				PQclear(res);
 				while(ritem->q.size()>0) {
 					__AsynQuery* qr = ritem->q.front();
 					ritem->q.pop();
 					delete qr;
 				}
 				ritemDone = true;
+				delete ritem;
+				ritem = NULL;
+				counter = -1;
 			} else if(q->cb1!=NULL) {
-				//fprintf(stdout, "SELECT response\n");fflush(stdout);
 				int cols = PQnfields(res);
 				int rows = PQntuples(res);
 				for(int i=0; i<rows; i++) {
@@ -457,16 +461,18 @@ void PgReadTask::run() {
 						q->cb1(q->ctx, i, j, PQfname(res, j), PQgetvalue(res, i, j), PQgetlength(res, i, j));
 					}
 				}
-				if(ritem->cnt--==-1) {
+				if(ritem->cnt--==0) {
 					if(q->cmcb!=NULL) {
 						q->cmcb(q->ctx, true, q->query, counter);
 					} else if(ritem->cmcb!=NULL) {
 						ritem->cmcb(ritem->ctx, true, q->query, counter);
 					}
 					ritemDone = true;
+					delete ritem;
+					ritem = NULL;
+					counter = -1;
 				}
 			} else if(q->cb2!=NULL) {
-				//fprintf(stdout, "SELECT response\n");fflush(stdout);
 				int cols = PQnfields(res);
 				int rows = PQntuples(res);
 				for(int i=0; i<rows; i++) {
@@ -474,16 +480,18 @@ void PgReadTask::run() {
 						q->cb2(q->ctx, i, j, PQgetvalue(res, i, j), PQgetlength(res, i, j));
 					}
 				}
-				if(ritem->cnt--==-1) {
+				if(ritem->cnt--==0) {
 					if(q->cmcb!=NULL) {
 						q->cmcb(q->ctx, true, q->query, counter);
 					} else if(ritem->cmcb!=NULL) {
 						ritem->cmcb(ritem->ctx, true, q->query, counter);
 					}
 					ritemDone = true;
+					delete ritem;
+					ritem = NULL;
+					counter = -1;
 				}
 			} else if(q->cb3!=NULL) {
-				//fprintf(stdout, "SELECT response\n");fflush(stdout);
 				int cols = PQnfields(res);
 				int rows = PQntuples(res);
 				for(int i=0; i<rows; i++) {
@@ -491,16 +499,18 @@ void PgReadTask::run() {
 						q->cb3(q->ctx, i, j, PQgetvalue(res, i, j));
 					}
 				}
-				if(ritem->cnt--==-1) {
+				if(ritem->cnt--==0) {
 					if(q->cmcb!=NULL) {
 						q->cmcb(q->ctx, true, q->query, counter);
 					} else if(ritem->cmcb!=NULL) {
 						ritem->cmcb(ritem->ctx, true, q->query, counter);
 					}
 					ritemDone = true;
+					delete ritem;
+					ritem = NULL;
+					counter = -1;
 				}
 			} else if(q->cb!=NULL) {
-				//fprintf(stdout, "SELECT response\n");fflush(stdout);
 				int cols = PQnfields(res);
 				int rows = PQntuples(res);
 				std::vector<LibpqRes> row;
@@ -511,13 +521,16 @@ void PgReadTask::run() {
 					}
 					q->cb(q->ctx, i, row);
 				}
-				if(ritem->cnt--==-1) {
+				if(ritem->cnt--==0) {
 					if(q->cmcb!=NULL) {
 						q->cmcb(q->ctx, true, q->query, counter);
 					} else if(ritem->cmcb!=NULL) {
 						ritem->cmcb(ritem->ctx, true, q->query, counter);
 					}
 					ritemDone = true;
+					delete ritem;
+					ritem = NULL;
+					counter = -1;
 				}
 			}
 			delete q;
@@ -530,23 +543,27 @@ void PgReadTask::run() {
 					ritem->cmcb(ritem->ctx, false, q->query, counter);
 				}
 				fprintf(stderr, "UPDATE failed: %s", PQerrorMessage(ths->conn));
-				PQclear(res);
 				while(ritem->q.size()>0) {
 					__AsynQuery* qr = ritem->q.front();
 					ritem->q.pop();
 					delete qr;
 				}
 				ritemDone = true;
+				delete ritem;
+				ritem = NULL;
+				counter = -1;
 			} else {
-				//fprintf(stdout, "UPDATE response\n");fflush(stdout);
-			}
-			if(ritem->cnt--==-1) {
-				if(q->cmcb!=NULL) {
-					q->cmcb(q->ctx, true, q->query, counter);
-				} else if(ritem->cmcb!=NULL) {
-					ritem->cmcb(ritem->ctx, true, q->query, counter);
+				if(ritem->cnt--==0) {
+					if(q->cmcb!=NULL) {
+						q->cmcb(q->ctx, true, q->query, counter);
+					} else if(ritem->cmcb!=NULL) {
+						ritem->cmcb(ritem->ctx, true, q->query, counter);
+					}
+					ritemDone = true;
+					delete ritem;
+					ritem = NULL;
+					counter = -1;
 				}
-				ritemDone = true;
 			}
 			delete q;
 			q = NULL;
@@ -555,7 +572,6 @@ void PgReadTask::run() {
 	}
 	flux = false;
 	submit(NULL);
-	if(hasPrepare) hasPrepare = false;
 #endif
 }
 
@@ -564,28 +580,20 @@ void PgReadTask::submit(__AsyncReq* nitem) {
 #ifdef HAVE_LIBPQ
 	if(flux && nitem!=NULL) {
 		ths->Q.push(nitem);
-		//fprintf(stdout, "Add query to Q....\n");fflush(stdout);
 		return;
 	}
 
-	if(ritem!=NULL && ritem->cnt==-2 && !hasPrepare) {
-		delete ritem;
-		ritem = NULL;
-		counter = -1;
-		//fprintf(stdout, "Clear query....\n");fflush(stdout);
-	}
-
-	if(nitem==NULL && ritem==NULL) {
-		ritem = ths->getNext();
-		//fprintf(stdout, "New query from Q....\n");fflush(stdout);
-	} else if(ritem==NULL && nitem!=NULL) {
-		ritem = nitem;
-		//fprintf(stdout, "New query....\n");fflush(stdout);
+	if(ritem==NULL) {
+		if(nitem==NULL) {
+			ritem = ths->getNext();
+		} else {
+			ritem = nitem;
+		}
 	}
 
 	if(ritem!=NULL) {
-		if((hasPrepare && q!=NULL) || ritem->q.size()>0) {
-			if(!hasPrepare) {
+		if(q!=NULL || ritem->q.size()>0) {
+			if(q==NULL) {
 				counter ++;
 				q = ritem->q.front();
 				ritem->q.pop();
@@ -593,34 +601,34 @@ void PgReadTask::submit(__AsyncReq* nitem) {
 
 			int psize = (int)q->pvals.size();
 
-			if(q->isPrepared && psize>0) {
-				if(ths->prepStmtMap.find(q->query)==ths->prepStmtMap.end()) {
-					//fprintf(stdout, "Prepare query....\n");fflush(stdout);
-					hasPrepare = true;
-					ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
-					int qs = PQsendPrepare(ths->conn,ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
+			if(q->isPrepared && ths->prepStmtMap.find(q->query)==ths->prepStmtMap.end()) {
+				//fprintf(stdout, "Prepare query....\n");fflush(stdout);
+				ritem->cnt++;
+				ths->prepStmtMap[q->query] = CastUtil::fromNumber(ths->prepStmtMap.size()+1);
+				int qs = PQsendPrepare(ths->conn,ths->prepStmtMap[q->query].c_str(), q->query.c_str(), psize, NULL);
 
-					if (!qs) {
-						fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
-						if(q->cmcb!=NULL) {
-							q->cmcb(q->ctx, false, q->query, counter);
-						} else if(ritem->cmcb!=NULL) {
-							ritem->cmcb(ritem->ctx, false, q->query, counter);
-						}
-						delete q;
-						while(ritem->q.size()>0) {
-							__AsynQuery* qr = ritem->q.front();
-							ritem->q.pop();
-							delete qr;
-						}
-						delete ritem;
-						ritem = NULL;
-					} else {
-						flux = true;
-						PQflush(ths->conn);
+				if (!qs) {
+					fprintf(stderr, "Failed to prepare query %s\n", PQerrorMessage(ths->conn));
+					if(q->cmcb!=NULL) {
+						q->cmcb(q->ctx, false, q->query, counter);
+					} else if(ritem->cmcb!=NULL) {
+						ritem->cmcb(ritem->ctx, false, q->query, counter);
 					}
-					return;
+					delete q;
+					q = NULL;
+					while(ritem->q.size()>0) {
+						__AsynQuery* qr = ritem->q.front();
+						ritem->q.pop();
+						delete qr;
+					}
+					delete ritem;
+					ritem = NULL;
+				} else {
+					hasPrepare = true;
+					flux = true;
+					PQflush(ths->conn);
 				}
+				return;
 			}
 
 			const char *paramValues[psize];
@@ -644,10 +652,12 @@ void PgReadTask::submit(__AsyncReq* nitem) {
 			}
 
 			int qs = -1;
-			if(q->isPrepared && psize>0) {
+			if(q->isPrepared) {
 				qs = PQsendQueryPrepared(ths->conn, ths->prepStmtMap[q->query].c_str(), psize, paramValues, paramLengths, paramBinary, 1);
-			} else {
+			} else if(psize>0) {
 				qs = PQsendQueryParams(ths->conn, q->query.c_str(), psize, NULL, paramValues, paramLengths, paramBinary, 1);
+			} else {
+				qs = PQsendQueryParams(ths->conn, q->query.c_str(), 0, NULL, NULL, NULL, NULL, 1);
 			}
 			//fprintf(stdout, "Send query....\n");fflush(stdout);
 
@@ -659,6 +669,7 @@ void PgReadTask::submit(__AsyncReq* nitem) {
 					ritem->cmcb(ritem->ctx, false, q->query, counter);
 				}
 				delete q;
+				q = NULL;
 				while(ritem->q.size()>0) {
 					__AsynQuery* qr = ritem->q.front();
 					ritem->q.pop();
@@ -672,10 +683,7 @@ void PgReadTask::submit(__AsyncReq* nitem) {
 			}
 		}
 	} else if(nitem!=NULL) {
-		//ths->c_mutex.lock();
 		ths->Q.push(nitem);
-		//ths->c_mutex.unlock();
-		//fprintf(stdout, "Add query to Q....\n");fflush(stdout);
 	}
 #endif
 }
@@ -748,16 +756,12 @@ void LibpqDataSourceImpl::executeQueryIntAsync(const std::string &query, std::ve
 	if(isAsync) {
 		status = 1;
 		__AsyncReq* item = vitem!=NULL?(__AsyncReq*)vitem:new __AsyncReq;
-		if(vitem==NULL) {
-			item->cnt = -1;
-		} else {
-			item->cnt++;
-		}
-
 		__AsynQuery* q = new __AsynQuery;
 		q->query = query;
-		q->isPrepared = isPrepared;
-		q->pvals = std::move(pvals);
+		q->isPrepared = pvals.size()>0;
+		if(q->isPrepared) {
+			q->pvals = std::move(pvals);
+		}
 		q->ctx = ctx;
 		q->cb = cb;
 		q->cb1 = cb1;
@@ -765,8 +769,13 @@ void LibpqDataSourceImpl::executeQueryIntAsync(const std::string &query, std::ve
 		q->cb3 = cb3;
 		q->cmcb = cmcb;
 		q->isSelect = isSelect;
-		item->q.push(q);
 
+		if(vitem==NULL) {
+			item->cnt = 0;
+		} else {
+			item->cnt++;
+		}
+		item->q.push(q);
 		*areq = item;
 	}
 }

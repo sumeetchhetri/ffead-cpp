@@ -18,17 +18,14 @@ import os
 import net
 import strings
 import flag
+import time
+import io
 
 #flag -I./
 #flag dtutil.o
 #flag -lffead-framework
 
-#include <errno.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <fcntl.h>
-#include <signal.h>
+#include <string.h>
 #include "ffead-cpp.h"
 
 fn C.get_date() byteptr
@@ -61,7 +58,7 @@ const (
 
 struct FfeadCppContext {
 pub:
-	conn net.Socket
+	conn net.TcpConn
 mut:
 	rq_headers string
 	rq_body string
@@ -91,59 +88,40 @@ fn run(port int) {
 	}
 
 	println('Running a Vweb app on http://localhost:$port ...')
-	mut l := net.new_socket(C.AF_INET, C.SOCK_STREAM, 0) or {
-		panic('Failed to create socket')
-	}
-	flag := 1
-	assert C.setsockopt(l.sockfd, C.SOL_SOCKET, C.SO_REUSEADDR, &flag, sizeof(int)) == 0
-	assert C.setsockopt(l.sockfd, C.SOL_SOCKET, C.SO_REUSEPORT, &flag, sizeof(int)) == 0
-	$if linux {
-		assert C.setsockopt(l.sockfd, C.IPPROTO_TCP, C.TCP_QUICKACK, &flag, sizeof(int)) == 0
-		timeout := 10
-		assert C.setsockopt(l.sockfd, C.IPPROTO_TCP, C.TCP_DEFER_ACCEPT, &timeout, sizeof(int)) == 0
-		queue_len := 4096
-		assert C.setsockopt(l.sockfd, C.IPPROTO_TCP, C.TCP_FASTOPEN, &queue_len, sizeof(int)) == 0
-	}
-	on := 1
-	if C.setsockopt(l.sockfd, C.IPPROTO_TCP, C.TCP_NODELAY, &on, sizeof(int)) < 0 {
-		println('setup_sock.setup_sock failed')
-	}
-	/*if C.fcntl(l.sockfd, C.F_SETFL, C.O_NONBLOCK) != 0 {
-		println('fcntl failed')
-	}*/
-	l.bind(port) or {
-		panic('Failed to bind socket')
-	}
-	l.listen_backlog(C.SOMAXCONN) or {
-		panic('Failed to listen')
+	mut l := net.listen_tcp(port) or {
+		panic('failed to listen')
 	}
 	for {
-		conn := l.accept() or { panic('accept() failed') }
-		if C.setsockopt(conn.sockfd, C.IPPROTO_TCP, C.TCP_NODELAY, &on, sizeof(int)) < 0 {
-			println('setup_sock.setup_sock failed')
-		}
-		/*if C.fcntl(conn.sockfd, C.F_SETFL, C.O_NONBLOCK) != 0 {
-			println('fcntl failed')
-		}*/
-		handle_conn(conn, dt)
+		mut conn := l.accept() or { panic('accept() failed') }
+		handle_conn(mut conn, dt)
 		go update_date(mut &dt)
 	}
 }
 
-fn handle_conn(conn net.Socket, dt DateStore) {
+fn send_string(conn net.TcpConn, s string) ? {
+	conn.write(s.bytes())?
+}
+
+fn handle_conn(mut conn net.TcpConn, dt DateStore) {
+	conn.set_read_timeout(1 * time.second)
+	defer { conn.close() or {} }
 	$if debug {
 		println('Got a new connection...')
 	}
 
-	first_line := conn.read_line()
+	mut reader := io.new_buffered_reader(reader: io.make_reader(conn))
+
+	first_line := reader.read_line() or {
+		println('Failed first_line')
+		return
+	}
 	vals := first_line.split(' ')
 	if vals.len < 3 {
 		$if debug {
 			println('no vals for http')
 		}
 
-		conn.send_string(http_500) or {}
-		conn.close() or {}
+		send_string(conn, http_500) or {}
 		return
 	}
 
@@ -156,7 +134,11 @@ fn handle_conn(conn net.Socket, dt DateStore) {
 	mut body_len := 0
 	mut j := 0
 	for {
-		sline := conn.read_line()
+		sline := reader.read_line() or { 
+			println('Failed read_line')
+			send_string(conn, http_500) or {}
+			return
+		}
 		if sline == '\r\n' {
 			break
 		} else {
@@ -182,7 +164,11 @@ fn handle_conn(conn net.Socket, dt DateStore) {
 			len = 1024
 		}
 		for {
-			m := conn.crecv(buf, len)
+			m := conn.read_ptr(buf, len) or { 
+				println('Failed read_line')
+				send_string(conn, http_500) or {}
+				return
+			}
 			unsafe {
 				vweb.rq_body += buf.vstring_with_len(m)
 			}
@@ -205,7 +191,6 @@ fn handle_conn(conn net.Socket, dt DateStore) {
 	vweb.init()
 	vweb.handle()
 
-	conn.close() or {}
 	vweb.clean()
 
 	$if debug {
@@ -238,7 +223,7 @@ fn (vweb FfeadCppContext) send_response_to_client(res string) bool {
 	sb.write('\r\nDate: ')
 	sb.write_bytes(vweb.rs_date, 29)
 	sb.write('\r\n$headers_close$res')
-	vweb.conn.send_string(sb.str()) or {
+	send_string(vweb.conn, sb.str()) or {
 		sb.free()
 		return false 
 	}
@@ -247,7 +232,7 @@ fn (vweb FfeadCppContext) send_response_to_client(res string) bool {
 }
 
 fn (vweb FfeadCppContext) not_found() {
-	vweb.conn.send_string(http_404) or { return }
+	send_string(vweb.conn, http_404) or { return }
 }
 
 fn (vweb FfeadCppContext) send_response() bool {
@@ -260,7 +245,7 @@ fn (vweb FfeadCppContext) send_response() bool {
 	sb.write('${vweb.rs_headers}Date: ')
 	sb.write_bytes(vweb.rs_date, 29)
 	sb.write('\r\n\r\n$vweb.rs_body')
-	vweb.conn.send_string(sb.str()) or { return false }
+	send_string(vweb.conn, sb.str()) or { return false }
 	sb.free()
 	return true
 }

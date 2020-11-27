@@ -475,7 +475,7 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, SocketInterface* s
 		if(req->getRequestParseStatus()!=NULL || req->getMethod().at(0)=='t' || req->getMethod().at(0)=='T')
 		{
 			res->setHTTPResponseStatus(*req->getRequestParseStatus());
-			res->addHeader(HttpResponse::Connection, "close");
+			//res->addHeader(HttpResponse::Connection, "close");
 			return true;
 		}
 
@@ -525,7 +525,7 @@ bool ServiceTask::handle(HttpRequest* req, HttpResponse* res, SocketInterface* s
 				req->setCntxt_name(std::string_view{ConfigurationData::getInstance()->appAliases.find(req->getCntxt_name())->second});
 				if(ConfigurationData::getInstance()->servingContexts.find(req->getCntxt_name())==ConfigurationData::getInstance()->servingContexts.end())
 				{
-					res->addHeader(HttpResponse::Connection, "close");
+					//res->addHeader(HttpResponse::Connection, "close");
 					return true;
 				}
 			}

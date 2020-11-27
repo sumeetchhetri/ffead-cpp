@@ -43,8 +43,14 @@ class HTTPResponseStatus {
 	std::string msg;
 	static std::map<int, HTTPResponseStatus> statuses;
 	static std::map<std::string, HTTPResponseStatus> sstatuses;
+	static std::map<int, std::string> http10slines;
+	static std::map<int, std::string> http11slines;
 public:
 	static void init();
+	static const std::string& getResponseLine(int code, float version);
+	static void getResponseLine(int code, float version, std::string& b);
+	const std::string& getResponseLine(float version);
+	void getResponseLine(float version, std::string& b);
 	HTTPResponseStatus();
 	HTTPResponseStatus(const HTTPResponseStatus& status) ;
 	HTTPResponseStatus(const HTTPResponseStatus& status, const std::string& msg);

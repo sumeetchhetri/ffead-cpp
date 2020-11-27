@@ -169,7 +169,7 @@ void HttpServiceTask::run() {
 		HttpResponse* res = (HttpResponse*)req->resp;
 		handlerRequest.response = res;
 
-		res->headers[HttpResponse::DateHeader] = ServiceHandler::getDateStr();
+		//res->headers[HttpResponse::DateHeader] = ServiceHandler::getDateStr();
 
 		if(req->httpVers<2 && req->isUpgrade())
 		{

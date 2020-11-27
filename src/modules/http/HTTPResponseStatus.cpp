@@ -24,6 +24,8 @@
 
 std::map<int, HTTPResponseStatus> HTTPResponseStatus::statuses;
 std::map<std::string, HTTPResponseStatus> HTTPResponseStatus::sstatuses;
+std::map<int, std::string> HTTPResponseStatus::http10slines;
+std::map<int, std::string> HTTPResponseStatus::http11slines;
 
 void HTTPResponseStatus::init() {
 	if(statuses.size()==0) {
@@ -65,6 +67,42 @@ void HTTPResponseStatus::init() {
 		for(i=statuses.begin();i!=statuses.end();++i) {
 			sstatuses[CastUtil::fromNumber(i->first)] = i->second;
 		}
+		for(i=statuses.begin();i!=statuses.end();++i) {
+			http10slines[i->first] = "HTTP/1.0 " + CastUtil::fromNumber(i->first) + " " + i->second.msg + "\r\n";
+			http11slines[i->first] = "HTTP/1.1 " + CastUtil::fromNumber(i->first) + " " + i->second.msg + "\r\n";
+		}
+	}
+}
+
+const std::string& HTTPResponseStatus::getResponseLine(int code, float version) {
+	if(version<1.1) {
+		return http10slines[code];
+	} else {
+		return http11slines[code];
+	}
+}
+
+void HTTPResponseStatus::getResponseLine(int code, float version, std::string& b) {
+	if(version<1.1) {
+		b.append(http10slines[code]);
+	} else {
+		b.append(http11slines[code]);
+	}
+}
+
+const std::string& HTTPResponseStatus::getResponseLine(float version) {
+	if(version<1.1) {
+		return http10slines[code];
+	} else {
+		return http11slines[code];
+	}
+}
+
+void HTTPResponseStatus::getResponseLine(float version, std::string& b) {
+	if(version<1.1) {
+		b.append(http10slines[code]);
+	} else {
+		b.append(http11slines[code]);
 	}
 }
 

@@ -22,6 +22,8 @@ jobs:
         choco install -y cyg-get
         cyg-get gcc gcc-g++ autmake patch bzip2 perl tar xz autoconf automake m4 libtool make zlib-devel zlib cmake git libpq-devel curl libcurl-devel libuuid-devel gdb libssl-devel wget dos2unix unzip
     - name: Set ENV
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       run: |
         echo '::set-env name=PATH::C:\tools\cygwin\bin;C:\tools\cygwin\usr\bin'
     - name: Install dependencies and ffead-cpp

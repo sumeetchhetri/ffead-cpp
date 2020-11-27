@@ -24,7 +24,6 @@
 
 time_t ServiceHandler::rt;
 struct tm ServiceHandler::ti;
-std::string ServiceHandler::dateStr;
 
 bool ServiceHandler::isActive() {
 	return run;
@@ -59,37 +58,37 @@ void* ServiceHandler::closeConnections(void *arg) {
 	return NULL;
 }
 
-/*const char* get_date() {
+static const char* get_date() {
 	time_t t;
 	struct tm tm;
 	static const char *days[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 	static const char *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-	static __thread char date[30] = "Thu, 01 Jan 1970 00:00:00 GMT";
+	static __thread char date[59] = "Date: Thu, 01 Jan 1970 00:00:00 GMT\r\nServer: FFEAD 2.0\r\n";
 
 	time(&t);
 	gmtime_r(&t, &tm);
-	strftime(date, 30, "---, %d --- %Y %H:%M:%S GMT", &tm);
-	memcpy(date, days[tm.tm_wday], 3);
-	memcpy(date + 8, months[tm.tm_mon], 3);
+	strftime(date, 58, "Date: ---, %d --- %Y %H:%M:%S GMT\r\nServer: FFEAD 2.0\r\n", &tm);
+	memcpy(date + 6, days[tm.tm_wday], 3);
+	memcpy(date + 14, months[tm.tm_mon], 3);
 
 	return date;
-}*/
+}
 
 void* ServiceHandler::timer(void *arg) {
 	ServiceHandler* ths = (ServiceHandler*)arg;
 	while(ths->run) {
-		time (&rt);
-		gmtime_r(&rt, &ti);
-		char buffer[31];
-		strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S GMT", &ti);
-		dateStr = std::string(buffer);
+		CommonUtils::dateStr = get_date();
 		Thread::sSleep(1);
 	}
 	return NULL;
 }
 
-std::string ServiceHandler::getDateStr() noexcept {
-	return dateStr;
+void ServiceHandler::getDateStr(std::string& resp) {
+	resp.append(CommonUtils::dateStr);
+}
+
+std::string ServiceHandler::getDateStr() {
+	return std::string(CommonUtils::dateStr);
 }
 
 void ServiceHandler::closeConnection(SocketInterface* si) {

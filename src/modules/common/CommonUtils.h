@@ -64,15 +64,19 @@ typedef void (*GetClassBeanIns) (std::string& clsn, std::string appn, ClassBeanI
 class CommonUtils {
 	CommonUtils();
 	static CommonUtils* instance;
-	static std::string BLANK;
 	ThreadLocal contextName;
 	std::map<std::string, std::string> mimeTypes;
 	std::map<std::string, std::string> locales;
 	std::vector<std::string> appNames;
+	static const char* dateStr;
 	friend class ConfigurationHandler;
 	friend class CHServer;
+	friend class ServiceHandler;
 	static void addContext(std::string appName);
 public:
+	static const std::string BLANK;
+	static std::string getDateStr();
+	static void getDateStr(std::string&);
 	static void clearInstance();
 	static int getProcessorCount();
 	static unsigned long long charArrayToULongLong(const std::string& l, int ind);

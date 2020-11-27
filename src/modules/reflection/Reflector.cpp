@@ -15,8 +15,9 @@
 */
 #include "Reflector.h"
 
-libcuckoo::cuckoohash_map<std::string, ClassInfo*> Reflector::_ciMap;
+ThreadLocal Reflector::_ciMap;
 ClassInfo Reflector::nullclass;
+//libcuckoo::cuckoohash_map<std::string, ClassInfo*>
 
 Reflector::Reflector()
 {
@@ -34,16 +35,24 @@ Reflector::Reflector(void* dlib)
 
 Reflector::~Reflector()
 {
-	if(_ciMap.size()>0) {
+	/*if(_ciMap.size()>0) {
 		auto lt = _ciMap.lock_table();
 		libcuckoo::cuckoohash_map<std::string, ClassInfo*>::locked_table::iterator it;
 		for(it=lt.begin();it!=lt.end();++it) {
 			delete it->second;
 		}
-	}
+	}*/
 }
 void Reflector::cleanUp()
 {
+	std::map<std::string, ClassInfo*>* ciMap = (std::map<std::string, ClassInfo*>*)_ciMap.get();
+	if(ciMap!=NULL) {
+		std::map<std::string, ClassInfo*>::iterator it;
+		for(it=ciMap->begin();it!=ciMap->end();++it) {
+			delete it->second;
+		}
+		delete ciMap;
+	}
 }
 
 ClassInfo* Reflector::getClassInfo(const std::string& cs, const std::string& app)
@@ -53,8 +62,13 @@ ClassInfo* Reflector::getClassInfo(const std::string& cs, const std::string& app
 	if(cs.find("::")!=std::string::npos) {
 		StringUtil::replaceAll(ca, "::", "_");
 	}
-	if(_ciMap.contains(ca)) {
-		return _ciMap.find(ca);
+	if(_ciMap.get()==NULL) {
+		_ciMap.set(new std::map<std::string, ClassInfo*>);
+	}
+	std::map<std::string, ClassInfo*>* ciMap = (std::map<std::string, ClassInfo*>*)_ciMap.get();
+	std::map<std::string, ClassInfo*>::iterator it = ciMap->find(ca);
+	if(it!=ciMap->end()) {
+		return it->second;
 	}
 	void *mkr = dlsym(dlib, ca.c_str());
 	typedef ClassInfo (*RfPtr) ();
@@ -63,7 +77,7 @@ ClassInfo* Reflector::getClassInfo(const std::string& cs, const std::string& app
 	{
 		ClassInfo* t = new ClassInfo();
 		*t = f();
-		_ciMap.insert(ca, t);
+		ciMap->insert({ca, t});
 		return t;
 	}
 	else
@@ -77,8 +91,13 @@ ClassInfo* Reflector::getClassInfo(const std::string& cs, std::string_view app)
 	if(cs.find("::")!=std::string::npos) {
 		StringUtil::replaceAll(ca, "::", "_");
 	}
-	if(_ciMap.contains(ca)) {
-		return _ciMap.find(ca);
+	if(_ciMap.get()==NULL) {
+		_ciMap.set(new std::map<std::string, ClassInfo*>);
+	}
+	std::map<std::string, ClassInfo*>* ciMap = (std::map<std::string, ClassInfo*>*)_ciMap.get();
+	std::map<std::string, ClassInfo*>::iterator it = ciMap->find(ca);
+	if(it!=ciMap->end()) {
+		return it->second;
 	}
 	void *mkr = dlsym(dlib, ca.c_str());
 	typedef ClassInfo (*RfPtr) ();
@@ -87,7 +106,7 @@ ClassInfo* Reflector::getClassInfo(const std::string& cs, std::string_view app)
 	{
 		ClassInfo* t = new ClassInfo();
 		*t = f();
-		_ciMap.insert(ca, t);
+		ciMap->insert({ca, t});
 		return t;
 	}
 	else

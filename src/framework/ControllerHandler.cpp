@@ -551,14 +551,14 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 						switch(serOpt) {
 							case -3: {
 								if(ouput!=NULL) {
-									res->setContent(XMLSerialize::serializeUnknown(ouput, rft->serOpt-2000, rft->rtype, rft->appName));
+									XMLSerialize::serializeUnknown(ouput, rft->serOpt-2000, rft->rtype, res->getContentP(), rft->appName);
 									res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_XML);
 								}
 								break;
 							}
 							case -2: {
 								if(ouput!=NULL) {
-									res->setContent(JSONSerialize::serializeUnknown(ouput, rft->serOpt-1000, rft->rtype, rft->s, rft->sc, rft->scm, rft->appName));
+									JSONSerialize::serializeUnknown(ouput, rft->serOpt-1000, rft->rtype, rft->s, rft->sc, rft->scm, res->getContentP(), rft->appName);
 									res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 								}
 								break;
@@ -582,16 +582,16 @@ bool ControllerHandler::handle(HttpRequest* req, HttpResponse* res, const std::s
 								if(rft->serOpt>17 || rft->serOpt==0) {
 									if(ouput!=NULL) {
 										if(rft->ocontentType==ContentTypes::CONTENT_TYPE_TEXT_PLAIN) {
-											res->setContent(SerializeBase::trySerialize(ouput, rft->serOpt, rft->rtype, rft->appName));
+											SerializeBase::trySerialize(ouput, rft->serOpt, rft->rtype, res->getContentP(), rft->appName);
 											res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 										} else {
-											res->setContent(JSONSerialize::serializeUnknown(ouput, rft->serOpt, rft->rtype, rft->appName));
+											JSONSerialize::serializeUnknown(ouput, rft->serOpt, rft->rtype, res->getContentP(), rft->appName);
 											res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_APPLICATION_JSON);
 										}
 									}
 								} else {
 									if(ouput!=NULL) {
-										res->setContent(SerializeBase::trySerialize(ouput, rft->serOpt, rft->rtype, rft->appName));
+										SerializeBase::trySerialize(ouput, rft->serOpt, rft->rtype, res->getContentP(), rft->appName);
 										res->addHeader(HttpResponse::ContentType, ContentTypes::CONTENT_TYPE_TEXT_PLAIN);
 									}
 								}

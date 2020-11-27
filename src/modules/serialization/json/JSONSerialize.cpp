@@ -33,39 +33,136 @@ JSONSerialize::JSONSerialize(void* dlib) {
 JSONSerialize::~JSONSerialize() {
 }
 
-std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& className, void* t)
+std::string JSONSerialize::serializePrimitive(int serOpt, const std::string& className, void* t, void* serobject)
 {
+	std::string* str = (std::string*)serobject;
 	switch(serOpt) {
-		case 1: return "\""+*(std::string*)t+"\"";
+		case 1: {
+			if(str!=NULL) {
+				str->append("\""+*(std::string*)t+"\"");
+				return CommonUtils::BLANK;
+			}
+			return "\""+*(std::string*)t+"\"";
+		}
 		case 2: {
+			if(str!=NULL) {
+				str->push_back(((unsigned char*)t)[0]);
+				return CommonUtils::BLANK;
+			}
 			std::string s;
 			s.push_back(((unsigned char*)t)[0]);
 			return "\""+s+"\"";
 		}
 		case 3: {
+			if(str!=NULL) {
+				str->push_back(((char*)t)[0]);
+				return CommonUtils::BLANK;
+			}
 			std::string s;
 			s.push_back(((char*)t)[0]);
 			return "\""+s+"\"";
 		}
-		case 4: return CastUtil::fromNumber(*(int*)t);
-		case 5: return CastUtil::fromNumber(*(unsigned int*)t);
-		case 6: return CastUtil::fromNumber(*(short*)t);
-		case 7: return CastUtil::fromNumber(*(unsigned short*)t);
-		case 8: return CastUtil::fromNumber(*(long*)t);
-		case 9: return CastUtil::fromNumber(*(unsigned long*)t);
-		case 10: return CastUtil::fromNumber(*(long long*)t);
-		case 11: return CastUtil::fromNumber(*(unsigned long long*)t);
-		case 12: return CastUtil::fromFloat(*(float*)t);
-		case 13: return CastUtil::fromDouble(*(double*)t);
-		case 14: return CastUtil::fromLongdouble(*(long double*)t);
-		case 15: return CastUtil::fromBool(*(bool*)t);
+		case 4: {
+			if(str!=NULL) {
+				CastUtil::fromNumber(*(int*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromNumber(*(int*)t);
+		}
+		case 5: {
+			if(str!=NULL) {
+				CastUtil::fromNumber(*(unsigned int*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromNumber(*(unsigned int*)t);
+		}
+		case 6: {
+			if(str!=NULL) {
+				CastUtil::fromNumber(*(short*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromNumber(*(short*)t);
+		}
+		case 7: {
+			if(str!=NULL) {
+				CastUtil::fromNumber(*(unsigned short*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromNumber(*(unsigned short*)t);
+		}
+		case 8: {
+			if(str!=NULL) {
+				CastUtil::fromNumber(*(long*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromNumber(*(long*)t);
+		}
+		case 9: {
+			if(str!=NULL) {
+				CastUtil::fromNumber(*(unsigned long*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromNumber(*(unsigned long*)t);
+		}
+		case 10: {
+			if(str!=NULL) {
+				CastUtil::fromNumber(*(long long*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromNumber(*(long long*)t);
+		}
+		case 11: {
+			if(str!=NULL) {
+				CastUtil::fromNumber(*(unsigned long long*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromNumber(*(unsigned long long*)t);
+		}
+		case 12: {
+			if(str!=NULL) {
+				CastUtil::fromFloat(*(float*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromFloat(*(float*)t);
+		}
+		case 13: {
+			if(str!=NULL) {
+				CastUtil::fromDouble(*(double*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromDouble(*(double*)t);
+		}
+		case 14: {
+			if(str!=NULL) {
+				CastUtil::fromLongdouble(*(long double*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromLongdouble(*(long double*)t);
+		}
+		case 15: {
+			if(str!=NULL) {
+				CastUtil::fromBool(*(bool*)t, str);
+				return CommonUtils::BLANK;
+			}
+			return CastUtil::fromBool(*(bool*)t);
+		}
 		case 16: {
 			DateFormat formt;
+			if(str!=NULL) {
+				str->append("\""+formt.format(*(Date*)t)+"\"");
+				return CommonUtils::BLANK;
+			}
 			return "\""+formt.format(*(Date*)t)+"\"";
 		}
-		case 17: return "\""+BinaryData::serilaize(*(BinaryData*)t)+"\"";
+		case 17: {
+			if(str!=NULL) {
+				str->append("\""+BinaryData::serilaize(*(BinaryData*)t)+"\"");
+				return CommonUtils::BLANK;
+			}
+			return "\""+BinaryData::serilaize(*(BinaryData*)t)+"\"";
+		}
 	}
-	return "";
+	return CommonUtils::BLANK;
 }
 
 void* JSONSerialize::getSerializableObject()
@@ -418,14 +515,14 @@ void* JSONSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& 
 	return NULL;
 }
 
-std::string JSONSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, SerCont f3, const std::string& appName)
+std::string JSONSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, SerCont f3, void* serobject, const std::string& appName)
 {
-	return _handleAllSerialization(serOpt,className,t,appName,&_i, f1, f2, f3);
+	return _handleAllSerialization(serOpt,className,t,appName,&_i, f1, f2, f3, serobject);
 }
 
-std::string JSONSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
+std::string JSONSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, void* serobject, const std::string& appName)
 {
-	return _handleAllSerialization(serOpt,className,t,appName,&_i, NULL, NULL, NULL);
+	return _handleAllSerialization(serOpt,className,t,appName,&_i, NULL, NULL, NULL, serobject);
 }
 
 void* JSONSerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
@@ -458,7 +555,7 @@ void* JSONSerialize::getObjectProperty(void* _1, const int& counter)
 void JSONSerialize::startObjectSerialization(void* _1, const std::string& className)
 {
 	std::string* object = (std::string*)_1;
-	*object = "{";
+	*object += "{";
 }
 
 void JSONSerialize::endObjectSerialization(void* _1, const std::string& className)
@@ -469,7 +566,7 @@ void JSONSerialize::endObjectSerialization(void* _1, const std::string& classNam
 	*object += "}";
 }
 
-void JSONSerialize::afterAddObjectProperty(void* _1)
+void JSONSerialize::afterAddObjectProperty(void* _1, const std::string& propName)
 {
 	std::string* object = (std::string*)_1;
 	*object += ",";
@@ -571,10 +668,10 @@ void JSONSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::
 	}
 }
 
-void JSONSerialize::addObjectProperty(void* _1, const std::string& propName, std::string className, const std::string& t)
+void JSONSerialize::addObjectProperty(void* _1, const std::string& propName, std::string className)
 {
 	std::string* object = (std::string*)_1;
-	*object += "\"" + propName + "\" : " + t;
+	*object += "\"" + propName + "\" : ";
 }
 
 void* JSONSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName)
@@ -684,13 +781,13 @@ void* JSONSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::st
 	return NULL;
 }
 
-std::string JSONSerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName)
+std::string JSONSerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL);
+	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL, serobject);
 }
 void* JSONSerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {
-	return _handleAllUnSerialization("",serOpt,className,appName,this,true,unserObj);
+	return _handleAllUnSerialization(CommonUtils::BLANK,serOpt,className,appName,this,true,unserObj);
 }
 void* JSONSerialize::unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& appName)
 {

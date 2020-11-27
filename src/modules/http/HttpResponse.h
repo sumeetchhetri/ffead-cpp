@@ -54,6 +54,7 @@ public:
     std::string getStatusCode() const;
     int getCode() const;
     const std::string& getStatusMsg();
+    std::string* getContentP();
     const std::string& getContent();
 	//void setContent(const Cont& content);
 	void setContent(const std::string& content);
@@ -82,12 +83,14 @@ public:
 	const std::string& getUrl();
 	void addHeader(std::string header, const std::string& value);
 	void generateHeadResponse(std::string& resp);
+	void generateHeadResponse(std::string& resp, std::string& contentType, int content_length = -1);
 	void update(HttpRequest* req);
 private:
 	static RiMap HDRS_SW_CODES;
-	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN;
+	static const std::string HDR_SRV, HDR_SEP, HDR_SEPT, HDR_END, HDR_CORS_ALW, HDR_FIN, CONN_CLOSE, CONN_KAL;
     bool done;
     float httpVers;
+    bool conn_clos;
 	std::string _headers_str;
 	std::string _url_str;
     uint32_t intCntLen;

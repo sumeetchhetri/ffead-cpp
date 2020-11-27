@@ -53,21 +53,23 @@ public:
 	JSONSerialize(void*);
 	~JSONSerialize();
 
-	std::string serializePrimitive(int serOpt, const std::string& className, void* t);
+	int getSerializerType() {return 1;}
+
+	std::string serializePrimitive(int serOpt, const std::string& className, void* t, void* serobject);
 	template <class T> static std::string serialize(T& t, int serOpt, const std::string& appName = "")
 	{
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt, className,&t,appName,&_i,NULL,NULL, NULL);
+		return _handleAllSerialization(serOpt, className, &t, appName, &_i, NULL, NULL, NULL, NULL);
 	}
 	template <class T> static std::string serializePointer(T* t, int serOpt, const std::string& appName = "")
 	{
 		std::string className = CastUtil::getClassName(t);
 		if(serOpt==-1) serOpt = identifySerOption(className);
-		return _handleAllSerialization(serOpt, className,t,appName,&_i,NULL,NULL, NULL);
+		return _handleAllSerialization(serOpt, className, t, appName, &_i, NULL, NULL, NULL, NULL);
 	}
-	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName = "");
-	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, SerCont f3, const std::string& appName);
+	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, void* serobject, const std::string& appName = "");
+	static std::string serializeUnknown(void* t, int serOpt, const std::string& className, Ser f1, SerCont f2, SerCont f3, void* serobject, const std::string& appName);
 
 	/*template <class K,class V> static std::string serialize(const std::map<K,V>& mp, const std::string& appName = "")
 	{
@@ -158,12 +160,12 @@ public:
 	void* getObjectProperty(void* _1, const int& counter);
 	void startObjectSerialization(void* _1, const std::string& className);
 	void endObjectSerialization(void* _1, const std::string& className);
-	void afterAddObjectProperty(void* _1);
+	void afterAddObjectProperty(void* _1, const std::string& propName);
 	void addObjectPrimitiveProperty(void* _1, int serOpt, const std::string& propName, const std::string& className, void* t);
-	void addObjectProperty(void* _1, const std::string& propName, std::string className, const std::string& t);
+	void addObjectProperty(void* _1, const std::string& propName, std::string className);
 	void* getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName);
 	static void* unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName = "");
-	std::string serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName = "");
+	std::string serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject);
 	void* unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName = "");
 	void* unSerializeUnknownBase(const std::string& serVal, int serOpt, const std::string& className, const std::string& appName = "");
 };

@@ -23,7 +23,7 @@
 #include "CommonUtils.h"
 
 CommonUtils* CommonUtils::instance = NULL;
-std::string CommonUtils::BLANK = "";
+const std::string CommonUtils::BLANK = "";
 std::atomic<long long> CommonUtils::tsPoll = 0;
 std::atomic<long long> CommonUtils::tsPoll1 = 0;
 std::atomic<long long> CommonUtils::tsProcess = 0;
@@ -54,6 +54,8 @@ std::atomic<long long> CommonUtils::tsContRstSer = 0;
 std::atomic<long long> CommonUtils::cSocks = 0;
 std::atomic<long long> CommonUtils::cReqs = 0;
 std::atomic<long long> CommonUtils::cResps = 0;
+
+const char* CommonUtils::dateStr;
 
 CommonUtils::CommonUtils() {
 }
@@ -432,4 +434,12 @@ std::string CommonUtils::getTpeFnName(const std::string& tpe, const std::string&
 	RegexUtil::replace(stpe,"[/]+","/");
 	RegexUtil::replace(stpe,"[^a-zA-Z0-9_]+","");
 	return "_" + stpe + "emittTemplateHTML";
+}
+
+void CommonUtils::getDateStr(std::string& resp) {
+	resp.append(dateStr);
+}
+
+std::string CommonUtils::getDateStr() {
+	return std::string(dateStr);
 }

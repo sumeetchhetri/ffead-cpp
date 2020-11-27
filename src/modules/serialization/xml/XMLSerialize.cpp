@@ -33,39 +33,166 @@ XMLSerialize::XMLSerialize(void* dlib) {
 XMLSerialize::~XMLSerialize() {
 }
 
-std::string XMLSerialize::serializePrimitive(int serOpt, const std::string& className, void* t)
+std::string XMLSerialize::serializePrimitive(int serOpt, const std::string& className, void* t, void* serobject)
 {
+	std::string* str = (std::string*)serobject;
 	switch(serOpt) {
-		case 1: return "<string>"+*(std::string*)t+"</string>";
+		case 1: {
+			if(str!=NULL) {
+				str->append("<string>");
+				str->append(*(std::string*)t);
+				str->append("</string>");
+				return CommonUtils::BLANK;
+			}
+			return "<string>"+*(std::string*)t+"</string>";
+		}
 		case 2: {
+			if(str!=NULL) {
+				str->append("<char>");
+				str->push_back(((char*)t)[0]);
+				str->append("</char>");
+				return CommonUtils::BLANK;
+			}
 			std::string s;
-			s.push_back(((unsigned char*)t)[0]);
+			s.push_back(((char*)t)[0]);
 			return "<char>"+s+"</char>";
 		}
 		case 3: {
+			if(str!=NULL) {
+				str->append("<uchar>");
+				str->push_back(((unsigned char*)t)[0]);
+				str->append("</uchar>");
+				return CommonUtils::BLANK;
+			}
 			std::string s;
 			s.push_back(((unsigned char*)t)[0]);
 			return "<uchar>"+s+"</uchar>";
 		}
-		case 4: return "<int>"+CastUtil::fromNumber(*(int*)t)+"</int>";
-		case 5: return "<uint>"+CastUtil::fromNumber(*(unsigned int*)t)+"</uint>";
-		case 6: return "<short>"+CastUtil::fromNumber(*(short*)t)+"</short>";
-		case 7: return "<ushort>"+CastUtil::fromNumber(*(unsigned short*)t)+"</ushort>";
-		case 8: return "<long>"+CastUtil::fromNumber(*(long*)t)+"</long>";
-		case 9: return "<ulong>"+CastUtil::fromNumber(*(unsigned long*)t)+"</ulong>";
-		case 10: return "<llong>"+CastUtil::fromNumber(*(long long*)t)+"</llong>";
-		case 11: return "<ullong>"+CastUtil::fromNumber(*(unsigned long long*)t)+"</ullong>";
-		case 12: return "<float>"+CastUtil::fromFloat(*(float*)t)+"</float>";
-		case 13: return "<double>"+CastUtil::fromDouble(*(double*)t)+"</double>";
-		case 14: return "<ldouble>"+CastUtil::fromLongdouble(*(long double*)t)+"</ldouble>";
-		case 15: return "<bool>"+CastUtil::fromBool(*(bool*)t)+"</bool>";
+		case 4: {
+			if(str!=NULL) {
+				str->append("<int>");
+				CastUtil::fromNumber(*(int*)t, str);
+				str->append("</int>");
+				return CommonUtils::BLANK;
+			}
+			return "<int>"+CastUtil::fromNumber(*(int*)t)+"</int>";
+		}
+		case 5: {
+			if(str!=NULL) {
+				str->append("<uint>");
+				CastUtil::fromNumber(*(unsigned int*)t, str);
+				str->append("</uint>");
+				return CommonUtils::BLANK;
+			}
+			return "<uint>"+CastUtil::fromNumber(*(unsigned int*)t)+"</uint>";
+		}
+		case 6: {
+			if(str!=NULL) {
+				str->append("<short>");
+				CastUtil::fromNumber(*(short*)t, str);
+				str->append("</short>");
+				return CommonUtils::BLANK;
+			}
+			return "<short>"+CastUtil::fromNumber(*(short*)t)+"</short>";
+		}
+		case 7: {
+			if(str!=NULL) {
+				str->append("<ushort>");
+				CastUtil::fromNumber(*(unsigned short*)t, str);
+				str->append("</ushort>");
+				return CommonUtils::BLANK;
+			}
+			return "<ushort>"+CastUtil::fromNumber(*(unsigned short*)t)+"</ushort>";
+		}
+		case 8: {
+			if(str!=NULL) {
+				str->append("<long>");
+				CastUtil::fromNumber(*(long*)t, str);
+				str->append("</long>");
+				return CommonUtils::BLANK;
+			}
+			return "<long>"+CastUtil::fromNumber(*(long*)t)+"</long>";
+		}
+		case 9: {
+			if(str!=NULL) {
+				str->append("<ulong>");
+				CastUtil::fromNumber(*(unsigned long*)t, str);
+				str->append("</ulong>");
+				return CommonUtils::BLANK;
+			}
+			return "<ulong>"+CastUtil::fromNumber(*(unsigned long*)t)+"</ulong>";
+		}
+		case 10: {
+			if(str!=NULL) {
+				str->append("<llong>");
+				CastUtil::fromNumber(*(long long*)t, str);
+				str->append("</llong>");
+				return CommonUtils::BLANK;
+			}
+			return "<llong>"+CastUtil::fromNumber(*(long long*)t)+"</llong>";
+		}
+		case 11: {
+			if(str!=NULL) {
+				str->append("<ullong>");
+				CastUtil::fromNumber(*(unsigned long long*)t, str);
+				str->append("</ullong>");
+				return CommonUtils::BLANK;
+			}
+			return "<ullong>"+CastUtil::fromNumber(*(unsigned long long*)t)+"</ullong>";
+		}
+		case 12: {
+			if(str!=NULL) {
+				str->append("<float>");
+				CastUtil::fromFloat(*(float*)t, str);
+				str->append("</float>");
+				return CommonUtils::BLANK;
+			}
+			return "<float>"+CastUtil::fromFloat(*(float*)t)+"</float>";
+		}
+		case 13: {
+			if(str!=NULL) {
+				str->append("<double>");
+				CastUtil::fromDouble(*(double*)t, str);
+				str->append("</double>");
+				return CommonUtils::BLANK;
+			}
+			return "<double>"+CastUtil::fromDouble(*(double*)t)+"</double>";
+		}
+		case 14: {
+			if(str!=NULL) {
+				str->append("<ldouble>");
+				CastUtil::fromLongdouble(*(long double*)t, str);
+				str->append("</ldouble>");
+				return CommonUtils::BLANK;
+			}
+			return "<ldouble>"+CastUtil::fromLongdouble(*(long double*)t)+"</ldouble>";
+		}
+		case 15: {
+			if(str!=NULL) {
+				str->append("<bool>");
+				CastUtil::fromBool(*(bool*)t, str);
+				str->append("</bool>");
+				return CommonUtils::BLANK;
+			}
+			return "<bool>"+CastUtil::fromBool(*(bool*)t)+"</bool>";
+		}
 		case 16: {
 			DateFormat formt;
+			if(str!=NULL) {
+				str->append("<Date>"+formt.format(*(Date*)t)+"</Date>");
+				return CommonUtils::BLANK;
+			}
 			return "<Date>"+formt.format(*(Date*)t)+"</Date>";
 		}
-		case 17: return "<BinaryData>"+BinaryData::serilaize(*(BinaryData*)t)+"</BinaryData>";
+		case 17: {
+			if(str!=NULL) {
+				str->append("<BinaryData>"+BinaryData::serilaize(*(BinaryData*)t)+"</BinaryData>");
+				return CommonUtils::BLANK;
+			}
+			return "<BinaryData>"+BinaryData::serilaize(*(BinaryData*)t)+"</BinaryData>";
+		}
 	}
-	return "";
+	return CommonUtils::BLANK;
 }
 
 void* XMLSerialize::getSerializableObject()
@@ -420,9 +547,9 @@ void* XMLSerialize::getPrimitiveValue(void* _1, int serOpt, const std::string& c
 	return NULL;
 }
 
-std::string XMLSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
+std::string XMLSerialize::serializeUnknown(void* t, int serOpt, const std::string& className, void* serobject, const std::string& appName)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, &_i, NULL, NULL, NULL);
+	return _handleAllSerialization(serOpt,className,t,appName, &_i, NULL, NULL, NULL, serobject);
 }
 
 void* XMLSerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
@@ -472,7 +599,7 @@ void* XMLSerialize::getObjectProperty(void* _1, const int& counter)
 void XMLSerialize::startObjectSerialization(void* _1, const std::string& className)
 {
 	std::string* object = (std::string*)_1;
-	*object = "<"+className+">";
+	*object += "<"+className+">";
 }
 
 void XMLSerialize::endObjectSerialization(void* _1, const std::string& className)
@@ -481,7 +608,10 @@ void XMLSerialize::endObjectSerialization(void* _1, const std::string& className
 	*object += "</"+className+">";
 }
 
-void XMLSerialize::afterAddObjectProperty(void* _1){}
+void XMLSerialize::afterAddObjectProperty(void* _1, const std::string& propName) {
+	std::string* object = (std::string*)_1;
+	*object += "</" + propName + ">";
+}
 
 void XMLSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::string& propName, const std::string& className, void* t)
 {
@@ -580,7 +710,7 @@ void XMLSerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::s
 	}
 }
 
-void XMLSerialize::addObjectProperty(void* _1, const std::string& propName, std::string className, const std::string& t)
+void XMLSerialize::addObjectProperty(void* _1, const std::string& propName, std::string className)
 {
 	std::string* object = (std::string*)_1;
 
@@ -592,7 +722,7 @@ void XMLSerialize::addObjectProperty(void* _1, const std::string& propName, std:
 		className = className.substr(0, className.length()-1);
 	//TODO - any side effects??
 	//*object += "<" + propName + " type=\"" + className + "\">" + t + "</" + propName + ">";
-	*object += "<" + propName + ">" + t + "</" + propName + ">";
+	*object += "<" + propName + ">";
 }
 
 void* XMLSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName)
@@ -705,9 +835,9 @@ void* XMLSerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::str
 	return NULL;
 }
 
-std::string XMLSerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName)
+std::string XMLSerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL);
+	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL, serobject);
 }
 void* XMLSerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {

@@ -66,6 +66,8 @@ std::string HttpResponse::Upgrade = 			 "Upgrade";
 std::string HttpResponse::SecWebSocketAccept = "Sec-WebSocket-Accept";
 std::string HttpResponse::SecWebSocketVersion = "Sec-WebSocket-Version";
 std::string HttpResponse::AltSvc = "Alt-Svc";
+const std::string HttpResponse::CONN_CLOSE = "Connection: close\r\n";
+const std::string HttpResponse::CONN_KAL = "Connection: keep-alive\r\n";
 
 RiMap HttpResponse::HDRS_SW_CODES;
 
@@ -109,6 +111,7 @@ HttpResponse::HttpResponse() {
 	httpVers = 0;
 	done = false;
 	status = &HTTPResponseStatus::NotFound;
+	conn_clos = false;
 }
 
 HttpResponse::~HttpResponse() {
@@ -239,7 +242,7 @@ const std::string& HttpResponse::getHeadersStr(const std::string& server, bool s
 		{
 			content.clear();
 			boundary = "FFEAD_SERVER_";
-			boundary.append(CastUtil::fromNumber(Timer::getCurrentTime()));
+			CastUtil::fromNumber(Timer::getCurrentTime(), &boundary);
 			for (int var = 0; var < (int)contentList.size(); ++var) {
 				content.append("--");
 				content.append(boundary);
@@ -263,12 +266,7 @@ const std::string& HttpResponse::getHeadersStr(const std::string& server, bool s
 			content.append(HDR_END);
 		}
 		if(status_line) {
-			_headers_str.append(httpVersion);
-			_headers_str.append(" ");
-			_headers_str.append(status->getSCode());
-			_headers_str.append(" ");
-			_headers_str.append(status->getMsg());
-			_headers_str.append(HDR_END);
+			status->getResponseLine(httpVers, _headers_str);
 		}
 		if(server.length()>0) {
 			_headers_str.append("Server: ");
@@ -314,6 +312,47 @@ const std::string& HttpResponse::getHeadersStr(const std::string& server, bool s
 	return _headers_str;
 }
 
+void HttpResponse::generateHeadResponse(std::string& resp, std::string& contentType, int content_length)
+{
+	bool isTE = isHeaderValue(TransferEncoding, "chunked");
+	status->getResponseLine(httpVers, resp);
+	//resp.append(HDR_SRV);
+	resp.append(ContentType);
+	resp.append(HDR_SEP);
+	resp.append(contentType);
+	resp.append(HDR_END);
+	if(conn_clos) {
+		resp.append(CONN_CLOSE);
+	} else {
+		resp.append(CONN_KAL);
+	}
+	CommonUtils::getDateStr(resp);
+	content_length = content_length==-1?(int)content.length():content_length;
+	if(!isTE && !hasHeader(ContentLength) && content_length>0)
+	{
+		resp.append(ContentLength);
+		resp.append(HDR_SEP);
+		CastUtil::fromNumber(content_length, &resp);
+		resp.append(HDR_END);
+	}
+	RMap::iterator it;
+	for(it=headers.begin();it!=headers.end();++it)
+	{
+		resp.append(it->first);
+		resp.append(HDR_SEP);
+		resp.append(it->second);
+		resp.append(HDR_END);
+	}
+	for (int var = 0; var < (int)this->cookies.size(); var++)
+	{
+		resp.append(SetCookie);
+		resp.append(HDR_SEP);
+		resp.append(this->cookies.at(var));
+		resp.append(HDR_END);
+	}
+	resp.append(HDR_END);
+}
+
 void HttpResponse::generateHeadResponse(std::string& resp)
 {
 	bool isTE = isHeaderValue(TransferEncoding, "chunked");
@@ -356,18 +395,14 @@ void HttpResponse::generateHeadResponse(std::string& resp)
 			headers[ContentType].append("\"");
 		}
 	}
-	resp.append(httpVersion);
-	resp.append(" ");
-	resp.append(status->getSCode());
-	resp.append(" ");
-	resp.append(status->getMsg());
-	resp.append(HDR_END);
-	resp.append(HDR_SRV);
-	if(!isTE && !hasHeader(ContentLength))
+	status->getResponseLine(httpVers, resp);
+	//resp.append(HDR_SRV);
+	CommonUtils::getDateStr(resp);
+	if(!isTE && !hasHeader(ContentLength) && content.length()>0)
 	{
 		resp.append(ContentLength);
 		resp.append(HDR_SEP);
-		resp.append(CastUtil::fromNumber((int)content.length()));
+		CastUtil::fromNumber((int)content.length(), &resp);
 		resp.append(HDR_END);
 	}
 	RMap::iterator it;
@@ -399,6 +434,7 @@ void HttpResponse::generateOptionsResponse(std::string& resp)
 	resp.append(status->getMsg());
 	resp.append(HDR_END);
 	resp.append(HDR_SRV);
+	CommonUtils::getDateStr(resp);
 	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
@@ -427,6 +463,7 @@ void HttpResponse::generateTraceResponse(HttpRequest* req, std::string& resp)
 	resp.append(status->getMsg());
 	resp.append(HDR_END);
 	resp.append(HDR_SRV);
+	CommonUtils::getDateStr(resp);
 	RMap::iterator it;
 	for(it=headers.begin();it!=headers.end();++it)
 	{
@@ -471,6 +508,7 @@ void HttpResponse::update(HttpRequest* req)
 {
 	this->httpVers = req->httpVers;
 	this->httpVersion = req->httpVersion;
+	conn_clos = req->isClose();
 	//addHeader(HttpResponse::AcceptRanges, "none");
 }
 
@@ -497,6 +535,11 @@ const std::string& HttpResponse::getStatusMsg()
 const std::string& HttpResponse::getContent()
 {
 	return content;
+}
+
+std::string* HttpResponse::getContentP()
+{
+	return &content;
 }
 
 void HttpResponse::setContent(const std::string& content)

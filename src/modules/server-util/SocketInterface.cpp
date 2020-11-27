@@ -245,6 +245,40 @@ bool SocketInterface::isCurrentRequest(int reqp) {
 	return reqp == (current + 1);
 }
 
+int SocketInterface::writeDirect(const std::string& d, int off) {
+	if(ssl==NULL) {
+		int er = send(fd, &d[off] , d.length()-off, 0);
+		switch(er) {
+			case -1:
+			case 0:
+				if (er == -1 && errno == EAGAIN) {
+					return -1;
+				} else {
+					closeSocket();
+					return 0;
+				}
+			default:
+				return er;
+		}
+	} else {
+		if(handleRenegotiation()) {
+			return 0;
+		}
+		int er  = BIO_write(io, &d[off] , d.length()-off);
+		int ser = SSL_get_error(ssl, er);
+		switch(ser) {
+			case SSL_ERROR_WANT_WRITE:
+				return -1;
+			case SSL_ERROR_NONE:
+				return er;
+			default:
+				closeSocket();
+				return 0;
+		}
+	}
+	return -1;
+}
+
 int SocketInterface::writeTo(ResponseData* d)
 {
 	if(ssl==NULL) {

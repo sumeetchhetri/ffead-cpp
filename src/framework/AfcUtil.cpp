@@ -1521,13 +1521,13 @@ std::string AfcUtil::updateAjaxInterface(const strVec& emp, ClassStructure& clas
 			{
 				test += tempp + "* __val__ = _obj."+funcName+"("+pars+");\n";
 				test += "if(__val__!=NULL) {\n";
-				test += "return JSONSerialize::serializeUnknown(__val__,"+serOpt+", \""+stlcnttyp+"<"+fqcn+">\", \""+appName+"\");\ndelete __val__;\n}\n";
+				test += "return JSONSerialize::serializeUnknown(__val__, "+serOpt+", \""+stlcnttyp+"<"+fqcn+">\", NULL, \""+appName+"\");\ndelete __val__;\n}\n";
 				test += "else return \"\";\n";
 			}
 			else
 			{
 				test += tempp + " __val__ = _obj."+funcName+"("+pars+");\n";
-				test += "return JSONSerialize::serializeUnknown(&__val__,"+serOpt+", \""+stlcnttyp+"<"+fqcn+">\", \""+appName+"\");\n";
+				test += "return JSONSerialize::serializeUnknown(&__val__, "+serOpt+", \""+stlcnttyp+"<"+fqcn+">\", NULL, \""+appName+"\");\n";
 			}
 			test += "\n}\n";
 		}
@@ -1538,13 +1538,13 @@ std::string AfcUtil::updateAjaxInterface(const strVec& emp, ClassStructure& clas
 			{
 				test += fqcn + "* __val__ = _obj."+funcName+"("+pars+");\n";
 				test += "if(__val__!=NULL) {\n";
-				test += "return JSONSerialize::serializeUnknown(__val__,"+serOpt+", \""+fqcn+"\", \""+appName+"\");\ndelete __val__;\n}\n";
+				test += "return JSONSerialize::serializeUnknown(__val__, "+serOpt+", \""+fqcn+"\", NULL, \""+appName+"\");\ndelete __val__;\n}\n";
 				test += "else return \"\";\n";
 			}
 			else
 			{
 				test += tempp + " __val__ = _obj."+funcName+"("+pars+");\n";
-				test += "return JSONSerialize::serializeUnknown(&__val__,"+serOpt+", \""+fqcn+"\", \""+appName+"\");\n";
+				test += "return JSONSerialize::serializeUnknown(&__val__, "+serOpt+", \""+fqcn+"\", NULL, \""+appName+"\");\n";
 			}
 			test += "\n}\n";
 		}
@@ -1555,13 +1555,13 @@ std::string AfcUtil::updateAjaxInterface(const strVec& emp, ClassStructure& clas
 			{
 				test += fqcn + "* __val__ = _obj."+funcName+"("+pars+");\n";
 				test += "if(__val__!=NULL) {\n";
-				test += "return JSONSerialize::serializeUnknown(__val__,"+serOpt+", \""+fqcn+"\", \""+appName+"\");\ndelete __val__;\n}\n";
+				test += "return JSONSerialize::serializeUnknown(__val__, "+serOpt+", \""+fqcn+"\", NULL, \""+appName+"\");\ndelete __val__;\n}\n";
 				test += "else return \"\";\n";
 			}
 			else
 			{
 				test += tempp + " __val__ = _obj."+funcName+"("+pars+");\n";
-				test += "return JSONSerialize::serializeUnknown(&__val__,"+serOpt+", \""+fqcn+"\", \""+appName+"\");\n";
+				test += "return JSONSerialize::serializeUnknown(&__val__, "+serOpt+", \""+fqcn+"\", NULL, \""+appName+"\");\n";
 			}
 			test += "\n}\n";
 		}

@@ -159,7 +159,7 @@ RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 
 WORKDIR /tmp/ffead-cpp-src
-RUN rm -rf src web
+RUN rm -rf src web rtdcf
 COPY src /tmp/ffead-cpp-src/src
 COPY web /tmp/ffead-cpp-src/web
 COPY rtdcf /tmp/ffead-cpp-src/rtdcf
@@ -183,6 +183,6 @@ WORKDIR /
 COPY *.sh pipeline.lua /
 RUN chown -Rf root:root /ssd && chown -Rf postgres:postgres /ssd/postgresql && chown -Rf mysql:mysql /ssd/mysql && chmod 777 pipeline.lua concurrency.sh pipeline.sh query.sh
 
-RUN chmod +x *.sh && ./profile.sh
+RUN chmod +x *.sh
 
 CMD /bin/bash

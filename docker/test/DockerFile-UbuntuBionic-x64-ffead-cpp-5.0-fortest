@@ -159,10 +159,11 @@ RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 
 WORKDIR /tmp/ffead-cpp-src
-RUN rm -rf src web
+RUN rm -rf src web rtdcf script
 COPY src /tmp/ffead-cpp-src/src
 COPY web /tmp/ffead-cpp-src/web
 COPY rtdcf /tmp/ffead-cpp-src/rtdcf
+COPY script /tmp/ffead-cpp-src/script
 COPY CMakeLists.txt /tmp/ffead-cpp-src/
 RUN sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/default)||g' CMakeLists.txt && \
 	sed -i 's|add_subdirectory(${PROJECT_SOURCE_DIR}/web/flexApp)||g' CMakeLists.txt && \

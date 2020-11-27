@@ -29,11 +29,14 @@
 #include "cstring"
 #include <stdio.h>
 #include <assert.h>
+#include "ThreadLocal.h"
+#include "map"
 #include <libcuckoo/cuckoohash_map.hh>
 
 
 class CastUtil {
-	static libcuckoo::cuckoohash_map<std::string, std::string> _mangledClassNameMap;
+	static ThreadLocal _mcMap;
+	//static libcuckoo::cuckoohash_map<std::string, std::string> _mangledClassNameMap;
 	template <typename T> static void primitive(const T& val, const char* fmt, std::string* d)
 	{
 		int n = snprintf(NULL, 0, fmt, val);
@@ -46,25 +49,28 @@ class CastUtil {
 	}
 
 	static void numToStr(unsigned long long val, std::string* d) {
-	    int n = snprintf(NULL, 0, "%llu", val);
-		char* ty = (char*)malloc((n + 5) * sizeof(char));
-		snprintf(ty, n+1, "%llu", val);
+	    char ty[30];
+		sprintf(ty, "%llu", val);
 		d->append(ty, strlen(ty));
-		free(ty);
 	}
 public:
 	static const std::string STD_STRING;
 	static const std::string BOOL_TRUE;
 	static const std::string BOOL_FALSE;
-	CastUtil();
-	virtual ~CastUtil();
+
+	static void clear();
 
 	template <typename T> static std::string getClassName(T& t)
 	{
 		const char *mangled = typeid(t).name();
 		std::string sm(mangled);
-		if(_mangledClassNameMap.contains(sm)) {
-			std::string tn1 = _mangledClassNameMap.find(sm);
+		if(_mcMap.get()==NULL) {
+			_mcMap.set(new std::map<std::string, std::string>);
+		}
+		std::map<std::string, std::string>* _mangledClassNameMap = (std::map<std::string, std::string>*)_mcMap.get();
+		std::map<std::string, std::string>::iterator it = _mangledClassNameMap->find(sm);
+		if(it!=_mangledClassNameMap->end()) {
+			std::string tn1 = it->second;
 			if(tn1[tn1.length()-1]=='*')
 				tn1 = tn1.substr(0,tn1.length()-1);
 			return tn1;
@@ -84,7 +90,7 @@ public:
 				StringUtil::replaceAll(tn, "std::basic_string<char, std::char_traits<char>, std::allocator<char> >", "std::string");
 			}
 		}
-		_mangledClassNameMap.insert(sm, tn);
+		_mangledClassNameMap->insert({sm, tn});
 		if(tn[tn.length()-1]=='*')
 			tn = tn.substr(0,tn.length()-1);
 		return tn;
@@ -100,6 +106,9 @@ public:
 		numToStr(val, &d);
 		return d;
 	}
+	static void fromNumber(unsigned long long val, std::string* d) {
+		numToStr(val, d);
+	}
 	static std::string fromFloat(float val) {
 		std::string d;
 		int n = snprintf(NULL, 0, "%f", val);
@@ -108,6 +117,13 @@ public:
 		d.append(ty, strlen(ty));
 		free(ty);
 		return d;
+	}
+	static void fromFloat(float val, std::string* d) {
+		int n = snprintf(NULL, 0, "%f", val);
+		char* ty = (char*)malloc((n + 5) * sizeof(char));
+		snprintf(ty, n+1, "%f", val);
+		d->append(ty, strlen(ty));
+		free(ty);
 	}
 	static std::string fromDouble(double val) {
 		std::string d;
@@ -118,6 +134,13 @@ public:
 		free(ty);
 		return d;
 	}
+	static void fromDouble(double val, std::string* d) {
+		int n = snprintf(NULL, 0, "%f", val);
+		char* ty = (char*)malloc((n + 5) * sizeof(char));
+		snprintf(ty, n+1, "%f", val);
+		d->append(ty, strlen(ty));
+		free(ty);
+	}
 	static std::string fromLongdouble(long double val) {
 		std::string d;
 		int n = snprintf(NULL, 0, "%Lf", val);
@@ -127,11 +150,24 @@ public:
 		free(ty);
 		return d;
 	}
+	static void fromLongdouble(long double val, std::string* d) {
+		int n = snprintf(NULL, 0, "%Lf", val);
+		char* ty = (char*)malloc((n + 5) * sizeof(char));
+		snprintf(ty, n+1, "%Lf", val);
+		d->append(ty, strlen(ty));
+		free(ty);
+	}
 	static std::string fromBool(bool val) {
 		if(val)
 			return "true";
 		else
 			return "false";
+	}
+	static void fromBool(bool val, std::string* d) {
+		if(val)
+			d->append("true");
+		else
+			d->append("false");
 	}
 	template <typename T> static T lexical_cast(const short& val)
 	{
@@ -140,7 +176,7 @@ public:
 		if(tn==STD_STRING)
 		{
 			std::string _t;
-			primitive(val, "%d", &_t);
+			numToStr(val, &_t);
 			t = *(T*)(&_t);
 			return t;
 		}
@@ -163,7 +199,7 @@ public:
 		if(tn==STD_STRING)
 		{
 			std::string _t;
-			primitive(val, "%d", &_t);
+			numToStr(val, &_t);
 			t = *(T*)(&_t);
 			return t;
 		}
@@ -186,7 +222,7 @@ public:
 		if(tn==STD_STRING)
 		{
 			std::string _t;
-			primitive(val, "%d", &_t);
+			numToStr(val, &_t);
 			t = *(T*)(&_t);
 			return t;
 		}
@@ -209,7 +245,7 @@ public:
 		if(tn==STD_STRING)
 		{
 			std::string _t;
-			primitive(val, "%u", &_t);
+			numToStr(val, &_t);
 			t = *(T*)(&_t);
 			return t;
 		}
@@ -232,7 +268,7 @@ public:
 		if(tn==STD_STRING)
 		{
 			std::string _t;
-			primitive(val, "%ld", &_t);
+			numToStr(val, &_t);
 			t = *(T*)(&_t);
 			return t;
 		}
@@ -255,7 +291,7 @@ public:
 		if(tn==STD_STRING)
 		{
 			std::string _t;
-			primitive(val, "%lu", &_t);
+			numToStr(val, &_t);
 			t = *(T*)(&_t);
 			return t;
 		}
@@ -278,7 +314,7 @@ public:
 		if(tn==STD_STRING)
 		{
 			std::string _t;
-			primitive(val, "%lld", &_t);
+			numToStr(val, &_t);
 			t = *(T*)(&_t);
 			return t;
 		}
@@ -301,7 +337,7 @@ public:
 		if(tn==STD_STRING)
 		{
 			std::string _t;
-			primitive(val, "%llu", &_t);
+			numToStr(val, &_t);
 			t = *(T*)(&_t);
 			return t;
 		}

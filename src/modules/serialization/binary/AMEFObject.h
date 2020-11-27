@@ -51,6 +51,7 @@ class AMEFObject
 	AMEFObject* addLDoublePacket(const long double& doub);
 	friend class CacheMap;
 	friend class AMEFDecoder;
+	friend class BinarySerialize;
 public:
 	static int charArrayToInt(const std::string& l, const int& off, const int& ind);
 	static std::string intTocharArray(const int& l, const int& ind);

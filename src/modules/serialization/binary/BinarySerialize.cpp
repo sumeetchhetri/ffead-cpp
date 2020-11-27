@@ -33,7 +33,7 @@ BinarySerialize::BinarySerialize(void* dlib) {
 BinarySerialize::~BinarySerialize() {
 }
 
-std::string BinarySerialize::serializePrimitive(int serOpt, const std::string& className, void* t)
+std::string BinarySerialize::serializePrimitive(int serOpt, const std::string& className, void* t, void* serobject)
 {
 	AMEFEncoder enc;
 	AMEFObject object;
@@ -59,6 +59,11 @@ std::string BinarySerialize::serializePrimitive(int serOpt, const std::string& c
 			break;
 		}
 		case 17: object.addPacket(BinaryData::serilaize(*(BinaryData*)t), className);break;
+	}
+	if(serobject!=NULL) {
+		AMEFObject* samef = (AMEFObject*)serobject;
+		samef->addPacket(&object);
+		return CommonUtils::BLANK;
 	}
 	return enc.encodeB(&object);
 }
@@ -287,7 +292,10 @@ void BinarySerialize::cleanValidUnserializableObject(void* _1)
 	delete object;
 }
 
-void* BinarySerialize::getValidUnserializableObject(const std::string& _1){return NULL;}
+void* BinarySerialize::getValidUnserializableObject(const std::string& _1)
+{
+	return NULL;
+}
 
 int BinarySerialize::getContainerSize(void* _1)
 {
@@ -413,9 +421,9 @@ void* BinarySerialize::getPrimitiveValue(void* _1, int serOpt, const std::string
 	return NULL;
 }
 
-std::string BinarySerialize::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName)
+std::string BinarySerialize::serializeUnknown(void* t, int serOpt, const std::string& className, void* serobject, const std::string& appName)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, &_i, NULL, NULL, NULL);
+	return _handleAllSerialization(serOpt, className, t, appName, &_i, NULL, NULL, NULL, serobject);
 }
 
 void* BinarySerialize::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName)
@@ -468,9 +476,12 @@ void BinarySerialize::startObjectSerialization(void* _1, const std::string& clas
 	object->setName(className);
 }
 
-void BinarySerialize::endObjectSerialization(void* _1, const std::string& className){}
+void BinarySerialize::endObjectSerialization(void* _1, const std::string& className) {}
 
-void BinarySerialize::afterAddObjectProperty(void* _1){}
+void BinarySerialize::afterAddObjectProperty(void* _1, const std::string& propName) {
+	AMEFObject* object = static_cast<AMEFObject*>(_1);
+	object->getPackets().at(object->getPackets().size()-1)->name = propName;
+}
 
 void BinarySerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std::string& propName, const std::string& className, void* t)
 {
@@ -560,10 +571,8 @@ void BinarySerialize::addObjectPrimitiveProperty(void* _1, int serOpt, const std
 	}
 }
 
-void BinarySerialize::addObjectProperty(void* _1, const std::string& propName, std::string className, const std::string& t)
+void BinarySerialize::addObjectProperty(void* _1, const std::string& propName, std::string className)
 {
-	AMEFObject* object = static_cast<AMEFObject*>(_1);
-	object->addPacket(t, propName);
 }
 
 void* BinarySerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::string& className, const std::string& propName)
@@ -678,9 +687,9 @@ void* BinarySerialize::getObjectPrimitiveValue(void* _1, int serOpt, const std::
 	return NULL;
 }
 
-std::string BinarySerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName)
+std::string BinarySerialize::serializeUnknownBase(void* t, int serOpt, const std::string& className, const std::string& appName, void* serobject)
 {
-	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL);
+	return _handleAllSerialization(serOpt,className,t,appName, this, NULL, NULL, NULL, serobject);
 }
 void* BinarySerialize::unSerializeUnknownBase(void* unserObj, int serOpt, const std::string& className, const std::string& appName)
 {

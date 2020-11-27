@@ -140,7 +140,7 @@ public:
 		else
 		{
 			int serOpt = SerializeBase::identifySerOption(typeName);
-			objSerState = XMLSerialize::serializeUnknown(t, serOpt, typeName);
+			objSerState = XMLSerialize::serializeUnknown(t, serOpt, typeName, NULL);
 			objVal = XMLSerialize::unSerializeUnknown(objSerState, serOpt, typeName);
 		}
 	}
@@ -209,7 +209,7 @@ public:
 		else
 		{
 			int serOpt = SerializeBase::identifySerOption(typeName);
-			objSerState = XMLSerialize::serializeUnknown(&t, serOpt, typeName);
+			objSerState = XMLSerialize::serializeUnknown(&t, serOpt, typeName, NULL);
 			objVal = XMLSerialize::unSerializeUnknown(objSerState, serOpt, typeName);
 		}
 	}

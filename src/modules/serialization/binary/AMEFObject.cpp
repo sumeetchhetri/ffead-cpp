@@ -795,7 +795,7 @@ std::string AMEFObject::displayObject(const std::string& tab)
 			if(obj->type==BOOLEAN_TYPE)
 				displ += CastUtil::fromBool(obj->getBoolValue()) + "\n";
 			else
-				displ += (char)obj->value[0] + "\n";
+				displ += obj->value.substr(0,1) + "\n";
 		}
 		else if(obj->isNumberOrNullNumber())
 		{

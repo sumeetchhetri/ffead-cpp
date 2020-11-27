@@ -22,10 +22,10 @@
 
 #include "SerializeBase.h"
 
-libcuckoo::cuckoohash_map<std::string, Ser> SerializeBase::_serFMap;
-libcuckoo::cuckoohash_map<std::string, SerCont> SerializeBase::_serCFMap;
-libcuckoo::cuckoohash_map<std::string, UnSer> SerializeBase::_unserFMap;
-libcuckoo::cuckoohash_map<std::string, UnSerCont> SerializeBase::_unserCFMap;
+ThreadLocal SerializeBase::_serFMap;
+ThreadLocal SerializeBase::_serCFMap;
+ThreadLocal SerializeBase::_unserFMap;
+ThreadLocal SerializeBase::_unserCFMap;
 void* SerializeBase::dlib = NULL;
 
 void SerializeBase::init(void* dl) {
@@ -295,14 +295,14 @@ int SerializeBase::identifySerOption(std::string className) {
 	return serOpt;
 }
 
-std::string SerializeBase::_handleAllSerialization(int serOpt, std::string className, void *t, const std::string& app, SerializeBase* base, Ser f1, SerCont f2, SerCont f3)
+std::string SerializeBase::_handleAllSerialization(int serOpt, std::string className, void *t, const std::string& app, SerializeBase* base, Ser f1, SerCont f2, SerCont f3, void* serobject)
 {
 	std::string appName = CommonUtils::getAppName(app);
 	switch(serOpt) {
 		case 0: {
-			if(f1!=NULL) return f1(t, base);
+			if(f1!=NULL) return f1(t, base, serobject);
 			StringUtil::replaceAll(className, "::", "_");
-			return _ser(t,className, appName, base);
+			return _ser(t,className, appName, base, serobject);
 		}
 		case 1:
 		case 2:
@@ -320,11 +320,11 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 		case 14:
 		case 15:
 		case 16:
-		case 17: return base->serializePrimitive(serOpt, className, t);
-		case 18: return handleMultiLevelSerialization(t, className, appName, base);
+		case 17: return base->serializePrimitive(serOpt, className, t, serobject);
+		case 18: return handleMultiLevelSerialization(t, className, appName, base, serobject);
 
 		case 100: {
-			if(f2!=NULL) return f2(t, base, "vector");
+			if(f2!=NULL) return f2(t, base, "vector", serobject);
 			StringUtil::replaceFirst(className,"std::vector<","");
 			StringUtil::replaceFirst(className,"vector<","");
 			std::string vtyp;
@@ -333,42 +333,48 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			else
 				vtyp = className.substr(0,className.find(">"));
 			processClassName(vtyp);
-			return _serContainer(t, vtyp, appName, "vector", base);
+			return _serContainer(t, vtyp, appName, "vector", base, serobject);
 		}
-		case 101: return serializevec<std::string>(*(std::vector<std::string>*)t, serOpt - 100, appName, base);
-		case 102: return serializevec<char>(*(std::vector<char>*)t, serOpt - 100, appName, base);
-		case 103: return serializevec<unsigned char>(*(std::vector<unsigned char>*)t, serOpt - 100, appName, base);
-		case 104: return serializevec<int>(*(std::vector<int>*)t, serOpt - 100, appName, base);
-		case 105: return serializevec<unsigned int>(*(std::vector<unsigned int>*)t, serOpt - 100, appName, base);
-		case 106: return serializevec<short>(*(std::vector<short>*)t, serOpt - 100, appName, base);
-		case 107: return serializevec<unsigned short>(*(std::vector<unsigned short>*)t, serOpt - 100, appName, base);
-		case 108: return serializevec<long>(*(std::vector<long>*)t, serOpt - 100, appName, base);
-		case 109: return serializevec<unsigned long>(*(std::vector<unsigned long>*)t, serOpt - 100, appName, base);
-		case 110: return serializevec<long long>(*(std::vector<long long>*)t, serOpt - 100, appName, base);
-		case 111: return serializevec<unsigned long long>(*(std::vector<unsigned long long>*)t, serOpt - 100, appName, base);
-		case 112: return serializevec<float>(*(std::vector<float>*)t, serOpt - 100, appName, base);
-		case 113: return serializevec<double>(*(std::vector<double>*)t, serOpt - 100, appName, base);
-		case 114: return serializevec<long double>(*(std::vector<long double>*)t, serOpt - 100, appName, base);
+		case 101: return serializevec<std::string>(*(std::vector<std::string>*)t, serOpt - 100, appName, base, serobject);
+		case 102: return serializevec<char>(*(std::vector<char>*)t, serOpt - 100, appName, base, serobject);
+		case 103: return serializevec<unsigned char>(*(std::vector<unsigned char>*)t, serOpt - 100, appName, base, serobject);
+		case 104: return serializevec<int>(*(std::vector<int>*)t, serOpt - 100, appName, base, serobject);
+		case 105: return serializevec<unsigned int>(*(std::vector<unsigned int>*)t, serOpt - 100, appName, base, serobject);
+		case 106: return serializevec<short>(*(std::vector<short>*)t, serOpt - 100, appName, base, serobject);
+		case 107: return serializevec<unsigned short>(*(std::vector<unsigned short>*)t, serOpt - 100, appName, base, serobject);
+		case 108: return serializevec<long>(*(std::vector<long>*)t, serOpt - 100, appName, base, serobject);
+		case 109: return serializevec<unsigned long>(*(std::vector<unsigned long>*)t, serOpt - 100, appName, base, serobject);
+		case 110: return serializevec<long long>(*(std::vector<long long>*)t, serOpt - 100, appName, base, serobject);
+		case 111: return serializevec<unsigned long long>(*(std::vector<unsigned long long>*)t, serOpt - 100, appName, base, serobject);
+		case 112: return serializevec<float>(*(std::vector<float>*)t, serOpt - 100, appName, base, serobject);
+		case 113: return serializevec<double>(*(std::vector<double>*)t, serOpt - 100, appName, base, serobject);
+		case 114: return serializevec<long double>(*(std::vector<long double>*)t, serOpt - 100, appName, base, serobject);
 		case 115: {
 			std::vector<bool>* bt = (std::vector<bool>*)t;
 			int cnt = 0;
 			int size = bt->size();
-			void* object = base->getSerializableObject();
+			void* object = serobject;
+			if(object==NULL) {
+				object = base->getSerializableObject();
+			}
 			base->startContainerSerialization(object, "bool", "std::vector");
 			for(bool v: *bt)
 			{
-				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-100, appName, base));
+				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-100, appName, base, serobject));
 				base->afterAddContainerSerializableElement(object, cnt++, size);
 			}
 			base->endContainerSerialization(object, "bool", "std::vector");
-			std::string ser = base->fromSerializableObjectToString(object);
-			base->cleanSerializableObject(object);
-			return ser;
+			if(serobject==NULL) {
+				std::string ser = base->fromSerializableObjectToString(object);
+				base->cleanSerializableObject(object);
+				return ser;
+			}
+			return CommonUtils::BLANK;
 		}
-		case 116: return serializevec<Date>(*(std::vector<Date>*)t, serOpt - 100, appName, base);
+		case 116: return serializevec<Date>(*(std::vector<Date>*)t, serOpt - 100, appName, base, serobject);
 
 		case 200: {
-			if(f2!=NULL) return f2(t, base, "list");
+			if(f2!=NULL) return f2(t, base, "list", serobject);
 			StringUtil::replaceFirst(className,"std::list<","");
 			StringUtil::replaceFirst(className,"list<","");
 			std::string vtyp;
@@ -377,42 +383,48 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			else
 				vtyp = className.substr(0,className.find(">"));
 			processClassName(vtyp);
-			return _serContainer(t, vtyp, appName, "list", base);
+			return _serContainer(t, vtyp, appName, "list", base, serobject);
 		}
-		case 201: return serializelist<std::string>(*(std::list<std::string>*)t, serOpt - 200, appName, base);
-		case 202: return serializelist<char>(*(std::list<char>*)t, serOpt - 200, appName, base);
-		case 203: return serializelist<unsigned char>(*(std::list<unsigned char>*)t, serOpt - 200, appName, base);
-		case 204: return serializelist<int>(*(std::list<int>*)t, serOpt - 200, appName, base);
-		case 205: return serializelist<unsigned int>(*(std::list<unsigned int>*)t, serOpt - 200, appName, base);
-		case 206: return serializelist<short>(*(std::list<short>*)t, serOpt - 200, appName, base);
-		case 207: return serializelist<unsigned short>(*(std::list<unsigned short>*)t, serOpt - 200, appName, base);
-		case 208: return serializelist<long>(*(std::list<long>*)t, serOpt - 200, appName, base);
-		case 209: return serializelist<unsigned long>(*(std::list<unsigned long>*)t, serOpt - 200, appName, base);
-		case 210: return serializelist<long long>(*(std::list<long long>*)t, serOpt - 200, appName, base);
-		case 211: return serializelist<unsigned long long>(*(std::list<unsigned long long>*)t, serOpt - 200, appName, base);
-		case 212: return serializelist<float>(*(std::list<float>*)t, serOpt - 200, appName, base);
-		case 213: return serializelist<double>(*(std::list<double>*)t, serOpt - 200, appName, base);
-		case 214: return serializelist<long double>(*(std::list<long double>*)t, serOpt - 200, appName, base);
+		case 201: return serializelist<std::string>(*(std::list<std::string>*)t, serOpt - 200, appName, base, serobject);
+		case 202: return serializelist<char>(*(std::list<char>*)t, serOpt - 200, appName, base, serobject);
+		case 203: return serializelist<unsigned char>(*(std::list<unsigned char>*)t, serOpt - 200, appName, base, serobject);
+		case 204: return serializelist<int>(*(std::list<int>*)t, serOpt - 200, appName, base, serobject);
+		case 205: return serializelist<unsigned int>(*(std::list<unsigned int>*)t, serOpt - 200, appName, base, serobject);
+		case 206: return serializelist<short>(*(std::list<short>*)t, serOpt - 200, appName, base, serobject);
+		case 207: return serializelist<unsigned short>(*(std::list<unsigned short>*)t, serOpt - 200, appName, base, serobject);
+		case 208: return serializelist<long>(*(std::list<long>*)t, serOpt - 200, appName, base, serobject);
+		case 209: return serializelist<unsigned long>(*(std::list<unsigned long>*)t, serOpt - 200, appName, base, serobject);
+		case 210: return serializelist<long long>(*(std::list<long long>*)t, serOpt - 200, appName, base, serobject);
+		case 211: return serializelist<unsigned long long>(*(std::list<unsigned long long>*)t, serOpt - 200, appName, base, serobject);
+		case 212: return serializelist<float>(*(std::list<float>*)t, serOpt - 200, appName, base, serobject);
+		case 213: return serializelist<double>(*(std::list<double>*)t, serOpt - 200, appName, base, serobject);
+		case 214: return serializelist<long double>(*(std::list<long double>*)t, serOpt - 200, appName, base, serobject);
 		case 215: {
 			std::list<bool>* bt = (std::list<bool>*)t;
 			int cnt = 0;
 			int size = bt->size();
-			void* object = base->getSerializableObject();
+			void* object = serobject;
+			if(object==NULL) {
+				object = base->getSerializableObject();
+			}
 			base->startContainerSerialization(object, "bool", "std::list");
 			for(bool v: *bt)
 			{
-				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-200, appName, base));
+				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-200, appName, base, serobject));
 				base->afterAddContainerSerializableElement(object, cnt++, size);
 			}
 			base->endContainerSerialization(object, "bool", "std::list");
-			std::string ser = base->fromSerializableObjectToString(object);
-			base->cleanSerializableObject(object);
-			return ser;
+			if(serobject==NULL) {
+				std::string ser = base->fromSerializableObjectToString(object);
+				base->cleanSerializableObject(object);
+				return ser;
+			}
+			return CommonUtils::BLANK;
 		}
-		case 216: return serializelist<Date>(*(std::list<Date>*)t, serOpt - 200, appName, base);
+		case 216: return serializelist<Date>(*(std::list<Date>*)t, serOpt - 200, appName, base, serobject);
 
 		case 300: {
-			if(f3!=NULL) return f3(t, base, "set");
+			if(f3!=NULL) return f3(t, base, "set", serobject);
 			StringUtil::replaceFirst(className,"std::set<","");
 			StringUtil::replaceFirst(className,"set<","");
 			std::string vtyp;
@@ -421,42 +433,48 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			else
 				vtyp = className.substr(0,className.find(">"));
 			processClassName(vtyp);
-			return _serContainer(t, vtyp, appName, "set", base);
+			return _serContainer(t, vtyp, appName, "set", base, serobject);
 		}
-		case 301: return serializeset<std::string>(*(std::set<std::string>*)t, serOpt - 300, appName, base);
-		case 302: return serializeset<char>(*(std::set<char>*)t, serOpt - 300, appName, base);
-		case 303: return serializeset<unsigned char>(*(std::set<unsigned char>*)t, serOpt - 300, appName, base);
-		case 304: return serializeset<int>(*(std::set<int>*)t, serOpt - 300, appName, base);
-		case 305: return serializeset<unsigned int>(*(std::set<unsigned int>*)t, serOpt - 300, appName, base);
-		case 306: return serializeset<short>(*(std::set<short>*)t, serOpt - 300, appName, base);
-		case 307: return serializeset<unsigned short>(*(std::set<unsigned short>*)t, serOpt - 300, appName, base);
-		case 308: return serializeset<long>(*(std::set<long>*)t, serOpt - 300, appName, base);
-		case 309: return serializeset<unsigned long>(*(std::set<unsigned long>*)t, serOpt - 300, appName, base);
-		case 310: return serializeset<long long>(*(std::set<long long>*)t, serOpt - 300, appName, base);
-		case 311: return serializeset<unsigned long long>(*(std::set<unsigned long long>*)t, serOpt - 300, appName, base);
-		case 312: return serializeset<float>(*(std::set<float>*)t, serOpt - 300, appName, base);
-		case 313: return serializeset<double>(*(std::set<double>*)t, serOpt - 300, appName, base);
-		case 314: return serializeset<long double>(*(std::set<long double>*)t, serOpt - 300, appName, base);
+		case 301: return serializeset<std::string>(*(std::set<std::string>*)t, serOpt - 300, appName, base, serobject);
+		case 302: return serializeset<char>(*(std::set<char>*)t, serOpt - 300, appName, base, serobject);
+		case 303: return serializeset<unsigned char>(*(std::set<unsigned char>*)t, serOpt - 300, appName, base, serobject);
+		case 304: return serializeset<int>(*(std::set<int>*)t, serOpt - 300, appName, base, serobject);
+		case 305: return serializeset<unsigned int>(*(std::set<unsigned int>*)t, serOpt - 300, appName, base, serobject);
+		case 306: return serializeset<short>(*(std::set<short>*)t, serOpt - 300, appName, base, serobject);
+		case 307: return serializeset<unsigned short>(*(std::set<unsigned short>*)t, serOpt - 300, appName, base, serobject);
+		case 308: return serializeset<long>(*(std::set<long>*)t, serOpt - 300, appName, base, serobject);
+		case 309: return serializeset<unsigned long>(*(std::set<unsigned long>*)t, serOpt - 300, appName, base, serobject);
+		case 310: return serializeset<long long>(*(std::set<long long>*)t, serOpt - 300, appName, base, serobject);
+		case 311: return serializeset<unsigned long long>(*(std::set<unsigned long long>*)t, serOpt - 300, appName, base, serobject);
+		case 312: return serializeset<float>(*(std::set<float>*)t, serOpt - 300, appName, base, serobject);
+		case 313: return serializeset<double>(*(std::set<double>*)t, serOpt - 300, appName, base, serobject);
+		case 314: return serializeset<long double>(*(std::set<long double>*)t, serOpt - 300, appName, base, serobject);
 		case 315: {
 			std::set<bool>* bt = (std::set<bool>*)t;
 			int cnt = 0;
 			int size = bt->size();
-			void* object = base->getSerializableObject();
+			void* object = serobject;
+			if(object==NULL) {
+				object = base->getSerializableObject();
+			}
 			base->startContainerSerialization(object, "bool", "std::set");
 			for(bool v: *bt)
 			{
-				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-300, appName, base));
+				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-300, appName, base, serobject));
 				base->afterAddContainerSerializableElement(object, cnt++, size);
 			}
 			base->endContainerSerialization(object, "bool", "std::set");
-			std::string ser = base->fromSerializableObjectToString(object);
-			base->cleanSerializableObject(object);
-			return ser;
+			if(serobject==NULL) {
+				std::string ser = base->fromSerializableObjectToString(object);
+				base->cleanSerializableObject(object);
+				return ser;
+			}
+			return CommonUtils::BLANK;
 		}
-		case 316: return serializeset<Date>(*(std::set<Date>*)t, serOpt - 300, appName, base);
+		case 316: return serializeset<Date>(*(std::set<Date>*)t, serOpt - 300, appName, base, serobject);
 
 		case 400: {
-			if(f3!=NULL) return f3(t, base, "multiset");
+			if(f3!=NULL) return f3(t, base, "multiset", serobject);
 			StringUtil::replaceFirst(className,"std::multiset<","");
 			StringUtil::replaceFirst(className,"multiset<","");
 			std::string vtyp;
@@ -465,42 +483,48 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			else
 				vtyp = className.substr(0,className.find(">"));
 			processClassName(vtyp);
-			return _serContainer(t, vtyp, appName, "multiset", base);
+			return _serContainer(t, vtyp, appName, "multiset", base, serobject);
 		}
-		case 401: return serializemultiset<std::string>(*(std::multiset<std::string>*)t, serOpt - 400, appName, base);
-		case 402: return serializemultiset<char>(*(std::multiset<char>*)t, serOpt - 400, appName, base);
-		case 403: return serializemultiset<unsigned char>(*(std::multiset<unsigned char>*)t, serOpt - 400, appName, base);
-		case 404: return serializemultiset<int>(*(std::multiset<int>*)t, serOpt - 400, appName, base);
-		case 405: return serializemultiset<unsigned int>(*(std::multiset<unsigned int>*)t, serOpt - 400, appName, base);
-		case 406: return serializemultiset<short>(*(std::multiset<short>*)t, serOpt - 400, appName, base);
-		case 407: return serializemultiset<unsigned short>(*(std::multiset<unsigned short>*)t, serOpt - 400, appName, base);
-		case 408: return serializemultiset<long>(*(std::multiset<long>*)t, serOpt - 400, appName, base);
-		case 409: return serializemultiset<unsigned long>(*(std::multiset<unsigned long>*)t, serOpt - 400, appName, base);
-		case 410: return serializemultiset<long long>(*(std::multiset<long long>*)t, serOpt - 400, appName, base);
-		case 411: return serializemultiset<unsigned long long>(*(std::multiset<unsigned long long>*)t, serOpt - 400, appName, base);
-		case 412: return serializemultiset<float>(*(std::multiset<float>*)t, serOpt - 400, appName, base);
-		case 413: return serializemultiset<double>(*(std::multiset<double>*)t, serOpt - 400, appName, base);
-		case 414: return serializemultiset<long double>(*(std::multiset<long double>*)t, serOpt - 400, appName, base);
+		case 401: return serializemultiset<std::string>(*(std::multiset<std::string>*)t, serOpt - 400, appName, base, serobject);
+		case 402: return serializemultiset<char>(*(std::multiset<char>*)t, serOpt - 400, appName, base, serobject);
+		case 403: return serializemultiset<unsigned char>(*(std::multiset<unsigned char>*)t, serOpt - 400, appName, base, serobject);
+		case 404: return serializemultiset<int>(*(std::multiset<int>*)t, serOpt - 400, appName, base, serobject);
+		case 405: return serializemultiset<unsigned int>(*(std::multiset<unsigned int>*)t, serOpt - 400, appName, base, serobject);
+		case 406: return serializemultiset<short>(*(std::multiset<short>*)t, serOpt - 400, appName, base, serobject);
+		case 407: return serializemultiset<unsigned short>(*(std::multiset<unsigned short>*)t, serOpt - 400, appName, base, serobject);
+		case 408: return serializemultiset<long>(*(std::multiset<long>*)t, serOpt - 400, appName, base, serobject);
+		case 409: return serializemultiset<unsigned long>(*(std::multiset<unsigned long>*)t, serOpt - 400, appName, base, serobject);
+		case 410: return serializemultiset<long long>(*(std::multiset<long long>*)t, serOpt - 400, appName, base, serobject);
+		case 411: return serializemultiset<unsigned long long>(*(std::multiset<unsigned long long>*)t, serOpt - 400, appName, base, serobject);
+		case 412: return serializemultiset<float>(*(std::multiset<float>*)t, serOpt - 400, appName, base, serobject);
+		case 413: return serializemultiset<double>(*(std::multiset<double>*)t, serOpt - 400, appName, base, serobject);
+		case 414: return serializemultiset<long double>(*(std::multiset<long double>*)t, serOpt - 400, appName, base, serobject);
 		case 415: {
 			std::multiset<bool>* bt = (std::multiset<bool>*)t;
 			int cnt = 0;
 			int size = bt->size();
-			void* object = base->getSerializableObject();
+			void* object = serobject;
+			if(object==NULL) {
+				object = base->getSerializableObject();
+			}
 			base->startContainerSerialization(object, "bool", "std::multiset");
 			for(bool v: *bt)
 			{
-				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-400, appName, base));
+				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-400, appName, base, serobject));
 				base->afterAddContainerSerializableElement(object, cnt++, size);
 			}
 			base->endContainerSerialization(object, "bool", "std::multiset");
-			std::string ser = base->fromSerializableObjectToString(object);
-			base->cleanSerializableObject(object);
-			return ser;
+			if(serobject==NULL) {
+				std::string ser = base->fromSerializableObjectToString(object);
+				base->cleanSerializableObject(object);
+				return ser;
+			}
+			return CommonUtils::BLANK;
 		}
-		case 416: return serializemultiset<Date>(*(std::multiset<Date>*)t, serOpt - 400, appName, base);
+		case 416: return serializemultiset<Date>(*(std::multiset<Date>*)t, serOpt - 400, appName, base, serobject);
 
 		case 500: {
-			if(f2!=NULL) return f2(t, base, "queue");
+			if(f2!=NULL) return f2(t, base, "queue", serobject);
 			StringUtil::replaceFirst(className,"std::queue<","");
 			StringUtil::replaceFirst(className,"queue<","");
 			std::string vtyp;
@@ -509,44 +533,50 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			else
 				vtyp = className.substr(0,className.find(">"));
 			processClassName(vtyp);
-			return _serContainer(t, vtyp, appName, "queue", base);
+			return _serContainer(t, vtyp, appName, "queue", base, serobject);
 		}
-		case 501: return serializeq<std::string>(*(std::queue<std::string>*)t, serOpt - 500, appName, base);
-		case 502: return serializeq<char>(*(std::queue<char>*)t, serOpt - 500, appName, base);
-		case 503: return serializeq<unsigned char>(*(std::queue<unsigned char>*)t, serOpt - 500, appName, base);
-		case 504: return serializeq<int>(*(std::queue<int>*)t, serOpt - 500, appName, base);
-		case 505: return serializeq<unsigned int>(*(std::queue<unsigned int>*)t, serOpt - 500, appName, base);
-		case 506: return serializeq<short>(*(std::queue<short>*)t, serOpt - 500, appName, base);
-		case 507: return serializeq<unsigned short>(*(std::queue<unsigned short>*)t, serOpt - 500, appName, base);
-		case 508: return serializeq<long>(*(std::queue<long>*)t, serOpt - 500, appName, base);
-		case 509: return serializeq<unsigned long>(*(std::queue<unsigned long>*)t, serOpt - 500, appName, base);
-		case 510: return serializeq<long long>(*(std::queue<long long>*)t, serOpt - 500, appName, base);
-		case 511: return serializeq<unsigned long long>(*(std::queue<unsigned long long>*)t, serOpt - 500, appName, base);
-		case 512: return serializeq<float>(*(std::queue<float>*)t, serOpt - 500, appName, base);
-		case 513: return serializeq<double>(*(std::queue<double>*)t, serOpt - 500, appName, base);
-		case 514: return serializeq<long double>(*(std::queue<long double>*)t, serOpt - 500, appName, base);
+		case 501: return serializeq<std::string>(*(std::queue<std::string>*)t, serOpt - 500, appName, base, serobject);
+		case 502: return serializeq<char>(*(std::queue<char>*)t, serOpt - 500, appName, base, serobject);
+		case 503: return serializeq<unsigned char>(*(std::queue<unsigned char>*)t, serOpt - 500, appName, base, serobject);
+		case 504: return serializeq<int>(*(std::queue<int>*)t, serOpt - 500, appName, base, serobject);
+		case 505: return serializeq<unsigned int>(*(std::queue<unsigned int>*)t, serOpt - 500, appName, base, serobject);
+		case 506: return serializeq<short>(*(std::queue<short>*)t, serOpt - 500, appName, base, serobject);
+		case 507: return serializeq<unsigned short>(*(std::queue<unsigned short>*)t, serOpt - 500, appName, base, serobject);
+		case 508: return serializeq<long>(*(std::queue<long>*)t, serOpt - 500, appName, base, serobject);
+		case 509: return serializeq<unsigned long>(*(std::queue<unsigned long>*)t, serOpt - 500, appName, base, serobject);
+		case 510: return serializeq<long long>(*(std::queue<long long>*)t, serOpt - 500, appName, base, serobject);
+		case 511: return serializeq<unsigned long long>(*(std::queue<unsigned long long>*)t, serOpt - 500, appName, base, serobject);
+		case 512: return serializeq<float>(*(std::queue<float>*)t, serOpt - 500, appName, base, serobject);
+		case 513: return serializeq<double>(*(std::queue<double>*)t, serOpt - 500, appName, base, serobject);
+		case 514: return serializeq<long double>(*(std::queue<long double>*)t, serOpt - 500, appName, base, serobject);
 		case 515: {
 			std::queue<bool>* bt = (std::queue<bool>*)t;
 			DummyQueue* dptr = (DummyQueue*)bt;
 			std::deque<bool>* tt = (std::deque<bool>*)&dptr->dq;
 			int cnt = 0;
 			int size = tt->size();
-			void* object = base->getSerializableObject();
+			void* object = serobject;
+			if(object==NULL) {
+				object = base->getSerializableObject();
+			}
 			base->startContainerSerialization(object, "bool", "std::queue");
 			for(bool v: *tt)
 			{
-				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-500, appName, base));
+				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-500, appName, base, serobject));
 				base->afterAddContainerSerializableElement(object, cnt++, size);
 			}
 			base->endContainerSerialization(object, "bool", "std::queue");
-			std::string ser = base->fromSerializableObjectToString(object);
-			base->cleanSerializableObject(object);
-			return ser;
+			if(serobject==NULL) {
+				std::string ser = base->fromSerializableObjectToString(object);
+				base->cleanSerializableObject(object);
+				return ser;
+			}
+			return CommonUtils::BLANK;
 		}
-		case 516: return serializeq<Date>(*(std::queue<Date>*)t, serOpt - 500, appName, base);
+		case 516: return serializeq<Date>(*(std::queue<Date>*)t, serOpt - 500, appName, base, serobject);
 
 		case 600: {
-			if(f2!=NULL) return f2(t, base, "deque");
+			if(f2!=NULL) return f2(t, base, "deque", serobject);
 			StringUtil::replaceFirst(className,"std::deque<","");
 			StringUtil::replaceFirst(className,"deque<","");
 			std::string vtyp;
@@ -555,39 +585,45 @@ std::string SerializeBase::_handleAllSerialization(int serOpt, std::string class
 			else
 				vtyp = className.substr(0,className.find(">"));
 			processClassName(vtyp);
-			return _serContainer(t, vtyp, appName, "deque", base);
+			return _serContainer(t, vtyp, appName, "deque", base, serobject);
 		}
-		case 601: return serializedq<std::string>(*(std::deque<std::string>*)t, serOpt - 600, appName, base);
-		case 602: return serializedq<char>(*(std::deque<char>*)t, serOpt - 600, appName, base);
-		case 603: return serializedq<unsigned char>(*(std::deque<unsigned char>*)t, serOpt - 600, appName, base);
-		case 604: return serializedq<int>(*(std::deque<int>*)t, serOpt - 600, appName, base);
-		case 605: return serializedq<unsigned int>(*(std::deque<unsigned int>*)t, serOpt - 600, appName, base);
-		case 606: return serializedq<short>(*(std::deque<short>*)t, serOpt - 600, appName, base);
-		case 607: return serializedq<unsigned short>(*(std::deque<unsigned short>*)t, serOpt - 600, appName, base);
-		case 608: return serializedq<long>(*(std::deque<long>*)t, serOpt - 600, appName, base);
-		case 609: return serializedq<unsigned long>(*(std::deque<unsigned long>*)t, serOpt - 600, appName, base);
-		case 610: return serializedq<long long>(*(std::deque<long long>*)t, serOpt - 600, appName, base);
-		case 611: return serializedq<unsigned long long>(*(std::deque<unsigned long long>*)t, serOpt - 600, appName, base);
-		case 612: return serializedq<float>(*(std::deque<float>*)t, serOpt - 600, appName, base);
-		case 613: return serializedq<double>(*(std::deque<double>*)t, serOpt - 600, appName, base);
-		case 614: return serializedq<long double>(*(std::deque<long double>*)t, serOpt - 600, appName, base);
+		case 601: return serializedq<std::string>(*(std::deque<std::string>*)t, serOpt - 600, appName, base, serobject);
+		case 602: return serializedq<char>(*(std::deque<char>*)t, serOpt - 600, appName, base, serobject);
+		case 603: return serializedq<unsigned char>(*(std::deque<unsigned char>*)t, serOpt - 600, appName, base, serobject);
+		case 604: return serializedq<int>(*(std::deque<int>*)t, serOpt - 600, appName, base, serobject);
+		case 605: return serializedq<unsigned int>(*(std::deque<unsigned int>*)t, serOpt - 600, appName, base, serobject);
+		case 606: return serializedq<short>(*(std::deque<short>*)t, serOpt - 600, appName, base, serobject);
+		case 607: return serializedq<unsigned short>(*(std::deque<unsigned short>*)t, serOpt - 600, appName, base, serobject);
+		case 608: return serializedq<long>(*(std::deque<long>*)t, serOpt - 600, appName, base, serobject);
+		case 609: return serializedq<unsigned long>(*(std::deque<unsigned long>*)t, serOpt - 600, appName, base, serobject);
+		case 610: return serializedq<long long>(*(std::deque<long long>*)t, serOpt - 600, appName, base, serobject);
+		case 611: return serializedq<unsigned long long>(*(std::deque<unsigned long long>*)t, serOpt - 600, appName, base, serobject);
+		case 612: return serializedq<float>(*(std::deque<float>*)t, serOpt - 600, appName, base, serobject);
+		case 613: return serializedq<double>(*(std::deque<double>*)t, serOpt - 600, appName, base, serobject);
+		case 614: return serializedq<long double>(*(std::deque<long double>*)t, serOpt - 600, appName, base, serobject);
 		case 615: {
 			std::deque<bool>* bt = (std::deque<bool>*)t;
 			int cnt = 0;
 			int size = bt->size();
-			void* object = base->getSerializableObject();
+			void* object = serobject;
+			if(object==NULL) {
+				object = base->getSerializableObject();
+			}
 			base->startContainerSerialization(object, "bool", "std::deque");
 			for(bool v: *bt)
 			{
-				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-600, appName, base));
+				base->addContainerSerializableElement(object, serialize<bool>(v, serOpt-600, appName, base, serobject));
 				base->afterAddContainerSerializableElement(object, cnt++, size);
 			}
 			base->endContainerSerialization(object, "bool", "std::deque");
-			std::string ser = base->fromSerializableObjectToString(object);
-			base->cleanSerializableObject(object);
-			return ser;
+			if(serobject==NULL) {
+				std::string ser = base->fromSerializableObjectToString(object);
+				base->cleanSerializableObject(object);
+				return ser;
+			}
+			return CommonUtils::BLANK;
 		}
-		case 616: return serializedq<Date>(*(std::deque<Date>*)t, serOpt - 600, appName, base);
+		case 616: return serializedq<Date>(*(std::deque<Date>*)t, serOpt - 600, appName, base, serobject);
 	}
 	return "";
 }
@@ -610,13 +646,14 @@ void SerializeBase::processClassName(std::string& className)
 	StringUtil::replaceAll(className, "::", "_");
 }
 
-std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string className, const std::string& appName, SerializeBase* base)
+std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string className, const std::string& appName, SerializeBase* base, void* object)
 {
 	if(className.find(",")!=std::string::npos)
 	{
 		className = className.substr(0, className.find(",")+1);
 	}
-	void* object = base->getSerializableObject();
+	bool serref = object!=NULL;
+	if(!serref) object = base->getSerializableObject();
 	int cnt = 0;
 	if(className.find("std::vector<")==0 || className.find("vector<")==0) {
 		if(className.find("std::vector<")==0)
@@ -628,7 +665,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::vector<"+className+",", t, appName, base, NULL, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::vector<"+className+",", t, appName, base, NULL, NULL, NULL, object);
 		} else {
 			if(className.find("std::vector<bool")==0 || className.find("vector<bool")==0)
 			{
@@ -636,7 +673,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::vector<std::vector<bool> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::vector<bool>* la = (std::vector<bool>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -647,7 +684,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::vector<std::vector<Dummy> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::vector<Dummy>* la = (std::vector<Dummy>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -658,7 +695,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::vector<std::deque<Dummy> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::deque<Dummy>* la = (std::deque<Dummy>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -669,7 +706,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::vector<std::list<Dummy> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::list<Dummy>* la = (std::list<Dummy>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -680,7 +717,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::vector<std::set<Dummy> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::set<Dummy>* la = (std::set<Dummy>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -691,7 +728,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::vector<std::multiset<Dummy> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::multiset<Dummy>* la = (std::multiset<Dummy>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -709,13 +746,13 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::list<"+className+",", t, appName, base, NULL, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::list<"+className+",", t, appName, base, NULL, NULL, NULL, object);
 		} else {
 			std::list<Dummy>* ptr = (std::list<Dummy>*)t;
 			std::list<Dummy>::iterator itls = ptr->begin();
 			for(;itls!=ptr->end();++itls) {
 				std::list<Dummy>* la = (std::list<Dummy>*)&(*itls);
-				std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+				std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 				base->addContainerSerializableElementMulti(object, serval);
 				base->afterAddContainerSerializableElement(object, cnt++, 0);
 			}
@@ -732,7 +769,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::deque<"+className+",", t, appName, base, NULL, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::deque<"+className+",", t, appName, base, NULL, NULL, NULL, object);
 		} else {
 			if(className.find("std::vector<bool")==0 || className.find("vector<bool")==0)
 			{
@@ -740,7 +777,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::deque<std::vector<bool> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::vector<bool>* la = (std::vector<bool>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -751,7 +788,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::deque<std::vector<Dummy> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::vector<Dummy>* la = (std::vector<Dummy>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -762,7 +799,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::deque<std::deque<Dummy> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::deque<Dummy>* la = (std::deque<Dummy>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -773,7 +810,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::deque<std::list<Dummy> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::list<Dummy>* la = (std::list<Dummy>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -784,7 +821,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::deque<std::set<Dummy> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::set<Dummy>* la = (std::set<Dummy>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -795,7 +832,7 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 				std::deque<std::multiset<Dummy> >::iterator itls = ptr->begin();
 				for(;itls!=ptr->end();++itls) {
 					std::multiset<Dummy>* la = (std::multiset<Dummy>*)&(*itls);
-					std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+					std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 					base->addContainerSerializableElementMulti(object, serval);
 					base->afterAddContainerSerializableElement(object, cnt++, 0);
 				}
@@ -813,14 +850,14 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::queue<"+className+",", t, appName, base, NULL, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::queue<"+className+",", t, appName, base, NULL, NULL, NULL, object);
 		} else {
 			DummyQueue* dptr  = static_cast<DummyQueue*>(t);
 			std::deque<std::deque<Dummy> >* ptr = (std::deque<std::deque<Dummy> >*)&dptr->dq;
 			std::deque<std::deque<Dummy> >::iterator itls = ptr->begin();
 			for(;itls!=ptr->end();++itls) {
 				std::deque<std::deque<Dummy> >* la = (std::deque<std::deque<Dummy> >*)&(*itls);
-				std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+				std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 				base->addContainerSerializableElementMulti(object, serval);
 				base->afterAddContainerSerializableElement(object, cnt++, 0);
 			}
@@ -837,13 +874,13 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::set<"+className+",", t, appName, base, NULL, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::set<"+className+",", t, appName, base, NULL, NULL, NULL, object);
 		} else {
 			std::set<Dummy>* ptr = (std::set<Dummy>*)t;
 			std::set<Dummy>::iterator itls = ptr->begin();
 			for(;itls!=ptr->end();++itls) {
 				std::set<Dummy>* la = (std::set<Dummy>*)&(*itls);
-				std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+				std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 				base->addContainerSerializableElementMulti(object, serval);
 				base->afterAddContainerSerializableElement(object, cnt++, 0);
 			}
@@ -860,22 +897,26 @@ std::string SerializeBase::handleMultiLevelSerialization(void* t, std::string cl
 		base->startContainerSerialization(object, className, container);
 		if(className.find("<")==std::string::npos) {
 			int serOpt = identifySerOption("std::vector<"+className+",");
-			return _handleAllSerialization(serOpt, "std::multiset<"+className+",", t, appName, base, NULL, NULL, NULL);
+			return _handleAllSerialization(serOpt, "std::multiset<"+className+",", t, appName, base, NULL, NULL, NULL, object);
 		} else {
 			std::multiset<Dummy>* ptr = (std::multiset<Dummy>*)t;
 			std::multiset<Dummy>::iterator itls = ptr->begin();
 			for(;itls!=ptr->end();++itls) {
 				std::multiset<Dummy>* la = (std::multiset<Dummy>*)&(*itls);
-				std::string serval = handleMultiLevelSerialization(la, className, appName, base);
+				std::string serval = handleMultiLevelSerialization(la, className, appName, base, object);
 				base->addContainerSerializableElementMulti(object, serval);
 				base->afterAddContainerSerializableElement(object, cnt++, 0);
 			}
 		}
 		base->endContainerSerialization(object, className, "std::multiset");
 	}
-	std::string ser = base->fromSerializableObjectToString(object);
-	base->cleanSerializableObject(object);
-	return ser;
+	if(!serref) {
+		std::string ser = base->fromSerializableObjectToString(object);
+		base->cleanSerializableObject(object);
+		return ser;
+	} else {
+		return CommonUtils::BLANK;
+	}
 }
 
 SerCont SerializeBase::serContFunc(std::string& className, const std::string& appName, const std::string& type)
@@ -892,36 +933,64 @@ Ser SerializeBase::serFunc(std::string& className, const std::string& appName)
 	return (Ser)dlsym(dlib, methodname.c_str());
 }
 
-std::string SerializeBase::_serContainer(void* t, const std::string& className, const std::string& appName, const std::string& type, SerializeBase* base)
+std::string SerializeBase::_serContainer(void* t, const std::string& className, const std::string& appName, const std::string& type, SerializeBase* base, void* serobject)
 {
 	std::string serVal;
 	std::string methodname = base->getSerializationMethodName(className,appName,true,type);
 	SerCont f;
-	if(_serCFMap.contains(methodname)) {
-		f = (SerCont)_serCFMap.find(methodname);
+	if(_serCFMap.get()==NULL) {
+		_serCFMap.set(new std::map<std::string, SerCont>);
+	}
+	std::map<std::string, SerCont>* serCFMap = (std::map<std::string, SerCont>*)_serCFMap.get();
+	std::map<std::string, SerCont>::iterator it = serCFMap->find(methodname);
+	if(it!=serCFMap->end()) {
+		f = (SerCont)it->second;
 	} else {
 		f = (SerCont)dlsym(dlib, methodname.c_str());
-		_serCFMap.insert(methodname, f);
+		serCFMap->insert({methodname, f});
 	}
 	if(f!=NULL)
-		serVal = f(t, base, type);
+		serVal = f(t, base, type, serobject);
 	return serVal;
 }
 
-std::string SerializeBase::_ser(void* t, const std::string& className, const std::string& appName, SerializeBase* base)
+std::string SerializeBase::_ser(void* t, const std::string& className, const std::string& appName, SerializeBase* base, void* serobject)
 {
 	std::string serVal;
 	std::string methodname = base->getSerializationMethodName(className,appName,true);
 	Ser f;
-	if(_serFMap.contains(methodname)) {
-		f = (Ser)_serFMap.find(methodname);
+	if(_serFMap.get()==NULL) {
+		_serFMap.set(new std::map<std::string, Ser>);
+	}
+	std::map<std::string, Ser>* serCFMap = (std::map<std::string, Ser>*)_serFMap.get();
+	std::map<std::string, Ser>::iterator it = serCFMap->find(methodname);
+	if(it!=serCFMap->end()) {
+		f = (Ser)it->second;
 	} else {
 		f = (Ser)dlsym(dlib, methodname.c_str());
-		_serFMap.insert(methodname, f);
+		serCFMap->insert({methodname, f});
 	}
 	if(f!=NULL)
-		serVal = f(t, base);
+		serVal = f(t, base, serobject);
 	return serVal;
+}
+
+void SerializeBase::_ser(void* t, const std::string& methodname, SerializeBase* base, void* serobject)
+{
+	Ser f;
+	if(_serFMap.get()==NULL) {
+		_serFMap.set(new std::map<std::string, Ser>);
+	}
+	std::map<std::string, Ser>* serCFMap = (std::map<std::string, Ser>*)_serFMap.get();
+	std::map<std::string, Ser>::iterator it = serCFMap->find(methodname);
+	if(it!=serCFMap->end()) {
+		f = (Ser)it->second;
+	} else {
+		f = (Ser)dlsym(dlib, methodname.c_str());
+		serCFMap->insert({methodname, f});
+	}
+	if(f!=NULL)
+		f(t, base, serobject);
 }
 
 void* SerializeBase::_handleAllUnSerialization(const std::string& serVal, int serOpt, std::string className, const std::string& app, SerializeBase* base, const bool& isJsonSer, void* serObject)
@@ -1393,9 +1462,9 @@ void* SerializeBase::handleMultiLevelUnSerialization(void* intermediateObject, s
 	return tv;
 }
 
-std::string SerializeBase::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName, SerializeBase* base)
+std::string SerializeBase::serializeUnknown(void* t, int serOpt, const std::string& className, const std::string& appName, SerializeBase* base, void* serobject)
 {
-	return base->serializeUnknownBase(t, serOpt, className, appName);
+	return base->serializeUnknownBase(t, serOpt, className, appName, serobject);
 }
 
 void* SerializeBase::unSerializeUnknown(const std::string& objXml, int serOpt, const std::string& className, const std::string& appName, SerializeBase* base)
@@ -1704,11 +1773,16 @@ void* SerializeBase::_unserContainer(void* unserableObject, const std::string& c
 	void* obj = NULL;
 	std::string methodname = base->getSerializationMethodName(className,appName,false,type);
 	UnSerCont f;
-	if(_unserCFMap.contains(methodname)) {
-		f = (UnSerCont)_unserCFMap.find(methodname);
+	if(_unserCFMap.get()==NULL) {
+		_unserCFMap.set(new std::map<std::string, UnSerCont>);
+	}
+	std::map<std::string, UnSerCont>* serCFMap = (std::map<std::string, UnSerCont>*)_unserCFMap.get();
+	std::map<std::string, UnSerCont>::iterator it = serCFMap->find(methodname);
+	if(it!=serCFMap->end()) {
+		f = (UnSerCont)it->second;
 	} else {
 		f = (UnSerCont)dlsym(dlib, methodname.c_str());
-		_unserCFMap.insert(methodname, f);
+		serCFMap->insert({methodname, f});
 	}
 	if(f!=NULL)
 	{
@@ -1722,11 +1796,16 @@ void* SerializeBase::_unser(void* unserableObject, const std::string& className,
 	void* obj = NULL;
 	std::string methodname = base->getSerializationMethodName(className,appName,false);
 	UnSer f;
-	if(_unserFMap.contains(methodname)) {
-		f = (UnSer)_unserFMap.find(methodname);
+	if(_unserFMap.get()==NULL) {
+		_unserFMap.set(new std::map<std::string, UnSer>);
+	}
+	std::map<std::string, UnSer>* serCFMap = (std::map<std::string, UnSer>*)_unserFMap.get();
+	std::map<std::string, UnSer>::iterator it = serCFMap->find(methodname);
+	if(it!=serCFMap->end()) {
+		f = (UnSer)it->second;
 	} else {
 		f = (UnSer)dlsym(dlib, methodname.c_str());
-		_unserFMap.insert(methodname, f);
+		serCFMap->insert({methodname, f});
 	}
 	if(f!=NULL)
 	{
@@ -1770,7 +1849,7 @@ std::string SerializeBase::getSerializationMethodName(const std::string& classNa
 	}  else {
 		methodname = appName + "unSerialize" + className + (type==""?"":"Container");
 	}
-	if(type!="") {
+	if(type!=CommonUtils::BLANK) {
 		if(type=="set" || type=="std::set" || type=="multiset" || type=="std::multiset") {
 			methodname += "SV";
 		}
@@ -1800,5 +1879,75 @@ std::string SerializeBase::trySerialize(void* t, int serOpt, std::string& classN
 			return formt.format((Date*)t);
 		}
 	}
-	return "";
+	return CommonUtils::BLANK;
+}
+
+void SerializeBase::trySerialize(void* t, int serOpt, std::string& className, std::string* serobject, const std::string& app) {
+	switch(serOpt) {
+		case 1: {
+			serobject->append(*(std::string*)t);
+			break;
+		}
+		case 2: {
+			CastUtil::fromNumber(*(int*)t, serobject);
+			break;
+		}
+		case 3: {
+			CastUtil::fromNumber(*(unsigned int*)t, serobject);
+			break;
+		}
+		case 4: {
+			CastUtil::fromNumber(*(int*)t, serobject);
+			break;
+		}
+		case 5: {
+			CastUtil::fromNumber(*(unsigned int*)t, serobject);
+			break;
+		}
+		case 6: {
+			CastUtil::fromNumber(*(short*)t, serobject);
+			break;
+		}
+		case 7: {
+			CastUtil::fromNumber(*(unsigned short*)t, serobject);
+			break;
+		}
+		case 8: {
+			CastUtil::fromNumber(*(long*)t, serobject);
+			break;
+		}
+		case 9: {
+			CastUtil::fromNumber(*(unsigned long*)t, serobject);
+			break;
+		}
+		case 10: {
+			CastUtil::fromNumber(*(long long*)t, serobject);
+			break;
+		}
+		case 11: {
+			CastUtil::fromNumber(*(unsigned long long*)t, serobject);
+			break;
+		}
+		case 12: {
+			CastUtil::fromFloat(*(float*)t, serobject);
+			break;
+		}
+		case 13: {
+			CastUtil::fromDouble(*(double*)t, serobject);
+			break;
+		}
+		case 14: {
+			CastUtil::fromLongdouble(*(long double*)t, serobject);
+			break;
+		}
+		case 15: {
+			CastUtil::fromBool(*(bool*)t, serobject);
+			break;
+		}
+		case 16: {
+			DateFormat formt;
+			serobject->append(formt.format((Date*)t));
+			break;
+		}
+	}
 }

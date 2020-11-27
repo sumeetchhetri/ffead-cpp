@@ -53,11 +53,11 @@ typedef void* (*GetContEleAt) (void*,void*,int,std::string,int);
 class Reflector
 {
 	static ClassInfo nullclass;
-	static libcuckoo::cuckoohash_map<std::string, ClassInfo*> _ciMap;
+	static ThreadLocal _ciMap;
 	void* dlib;
-	void cleanUp();
 	friend class FFEADContext;
 public:
+	static void cleanUp();
 	Reflector();
 	Reflector(void*);
 	virtual ~Reflector();
