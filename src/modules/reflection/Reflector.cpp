@@ -17,7 +17,6 @@
 
 ThreadLocal Reflector::_ciMap;
 ClassInfo Reflector::nullclass;
-//libcuckoo::cuckoohash_map<std::string, ClassInfo*>
 
 Reflector::Reflector()
 {

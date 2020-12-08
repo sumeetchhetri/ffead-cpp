@@ -37,12 +37,12 @@
 #include "StringUtil.h"
 #include <iostream>
 #include <stdlib.h>
-#include <libcuckoo/cuckoohash_map.hh>
+#include <ThreadLocal.h>
 
 
 class RegexUtil {
-	static libcuckoo::cuckoohash_map<std::string, regex_t*> nlpatterns;
-	static libcuckoo::cuckoohash_map<std::string, regex_t*> patterns;
+	static ThreadLocal patterns_th;
+	static ThreadLocal nlpatterns_th;
 	static bool cacheRegexes;
 	friend class ConfigurationHandler;
 	static bool isValidRegex(const std::string& pattern);

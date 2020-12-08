@@ -25,10 +25,10 @@
 #include "Compatibility.h"
 #include "map"
 #include "Mutex.h"
-#include <libcuckoo/cuckoohash_map.hh>
 #include "SocketInterface.h"
+#include "SSLHandler.h"
 
-#define MAXDESCRIPTORS 1024
+#define MAXDESCRIPTORS 4096
 #define OP_READ     0
 #define OP_WRITE    1
 
@@ -39,6 +39,7 @@
 	#undef USE_POLL
 	#undef USE_SELECT
 	#undef USE_WIN_IOCP
+	#undef USE_IO_URING
 #include <port.h>
 #include <poll.h>
 #elif USE_EPOLL == 1
@@ -52,6 +53,7 @@
 		#undef USE_EPOLL_LT
 	#endif
 	#undef USE_WIN_IOCP
+	#undef USE_IO_URING
 #include <sys/epoll.h>
 #elif USE_KQUEUE == 1
 	#undef USE_EVPORT
@@ -60,6 +62,7 @@
 	#undef USE_POLL
 	#undef USE_SELECT
 	#undef USE_WIN_IOCP
+	#undef USE_IO_URING
 #include <sys/event.h>
 #elif USE_DEVPOLL == 1
 	#undef USE_EPOLL
@@ -68,6 +71,7 @@
 	#undef USE_POLL
 	#undef USE_SELECT
 	#undef USE_WIN_IOCP
+	#undef USE_IO_URING
 #include <sys/devpoll.h>
 #elif USE_POLL == 1 && !defined(OS_CYGWIN)
 	#undef USE_EPOLL
@@ -76,6 +80,7 @@
 	#undef USE_DEVPOLL
 	#undef USE_SELECT
 	#undef USE_WIN_IOCP
+	#undef USE_IO_URING
 #include <poll.h>
 #elif USE_POLL == 1
 	#define USE_SELECT 1
@@ -85,6 +90,7 @@
 	#undef USE_DEVPOLL
 	#undef USE_POLL
 	#undef USE_WIN_IOCP
+	#undef USE_IO_URING
 #include <sys/select.h>
 #elif USE_WIN_IOCP == 1
 	#undef USE_WIN_IOCP
@@ -97,6 +103,7 @@
 	#undef USE_SELECT
 	#define USE_EPOLL_LT 1
 	#undef USE_EPOLL_ET
+	#undef USE_IO_URING
 #include "wepoll.h"
 #elif USE_MINGW_SELECT == 1
 	#undef USE_EPOLL
@@ -106,6 +113,7 @@
 	#undef USE_POLL
 	#undef USE_SELECT
 	#undef USE_WIN_IOCP
+	#undef USE_IO_URING
 #elif USE_SELECT == 1
 	#undef USE_EPOLL
 	#undef USE_KQUEUE
@@ -113,8 +121,49 @@
 	#undef USE_DEVPOLL
 	#undef USE_POLL
 	#undef USE_WIN_IOCP
+	#undef USE_IO_URING
 #include <sys/select.h>
+#elif USE_IO_URING == 1
+	#undef USE_EPOLL
+	#undef USE_KQUEUE
+	#undef USE_EVPORT
+	#undef USE_DEVPOLL
+	#undef USE_POLL
+	#undef USE_SELECT
+	#undef USE_WIN_IOCP
+	#define MAX_CONNECTIONS     MAXDESCRIPTORS
+	#define BACKLOG             512
+	#define MAX_MESSAGE_LEN     2048
+	#define BUFFERS_COUNT       MAX_CONNECTIONS
+#include <sys/uio.h>
+#include <sys/poll.h>
+#include "liburing.h"
 #endif
+
+#if !defined(USE_EPOLL) && !defined(USE_KQUEUE) && !defined(USE_WIN_IOCP) && !defined(USE_EVPORT)
+#include <libcuckoo/cuckoohash_map.hh>
+#endif
+
+enum io_uring_events {
+    ACCEPT,
+    READ,
+    WRITE,
+    PROV_BUF
+};
+
+enum event_type {
+	ACCEPTED,
+	READ_READY,
+	WRITE_READY,
+	CLOSED,
+	ON_DATA_READ,
+	ON_DATA_WRITE,
+};
+
+class SelEpolKqEvPrt;
+
+typedef SocketInterface* (*onEvent) (SelEpolKqEvPrt* ths, SocketInterface* sfd, int type, int fd, char* buf, size_t len, bool isClosed);
+typedef bool (*eventLoopContinue) (SelEpolKqEvPrt* ths);
 
 class DummySocketInterface : public SocketInterface {
 public:
@@ -138,9 +187,12 @@ class SelEpolKqEvPrt : public EventHandler {
 	int timeoutMilis;
 	SOCKET sockfd;
 	SOCKET curfds;
+	void* context;
 	Mutex l;
 	DummySocketInterface* dsi;
-	libcuckoo::cuckoohash_map<int, void*> connections;
+	#if !defined(USE_EPOLL) && !defined(USE_KQUEUE) && !defined(USE_WIN_IOCP) && !defined(USE_EVPORT)
+		libcuckoo::cuckoohash_map<int, void*> connections;
+	#endif
 	#ifdef USE_MINGW_SELECT
 		SOCKET fdMax;
 		int fdsetSize;
@@ -168,11 +220,25 @@ class SelEpolKqEvPrt : public EventHandler {
 	    port_event_t evlist[MAXDESCRIPTORS];
 	#elif defined USE_POLL
 	    nfds_t nfds;
-	    struct pollfd *polled_fds;
+	    struct pollfd polled_fds[MAXDESCRIPTORS];
+	#elif defined USE_IO_URING
+	    struct sockaddr_in client_addr;
+	    socklen_t client_len;
+	    struct io_uring_params params;
+	    struct io_uring ring;
+	    //char** bufs;
+	    //int group_id;
 	#endif
 public:
 	SelEpolKqEvPrt();
 	virtual ~SelEpolKqEvPrt();
+#if defined(USE_IO_URING) //Not thread safe
+	void post_write(SocketInterface* sfd, const std::string& data);
+	void post_read(SocketInterface* sfd);
+#endif
+	void setCtx(void* ctx);
+	void* getCtx();
+	void loop(eventLoopContinue evlc, onEvent ev);
 	void initialize(const int& timeout);
 	void initialize(SOCKET sockfd, const int& timeout);
 	int getEvents();
@@ -184,7 +250,7 @@ public:
 	bool registerRead(SocketInterface* obj, const bool& isListeningSock = false);
 	bool unRegisterRead(const SOCKET& descriptor);
 	void* getOptData(const int& index);
-	void reRegisterServerSock();
+	void reRegisterServerSock(void* obj);
 	bool isInvalidDescriptor(const SOCKET& index);
 	void lock();
 	void unlock();

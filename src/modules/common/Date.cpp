@@ -118,7 +118,7 @@ void Date::populateEpochAndTimeZone(const bool& utc)
 	else
 		localtime_r(&rawtime, &ti);
 
-#if defined(OS_MINGW)
+#if defined(OS_MINGW) || defined(OS_SOLARIS)
 	timeZoneOffsetSecs = 0;
 	timeZoneOffset = 0;
 #else
@@ -152,7 +152,7 @@ void Date::populateDateFields()
 	weekday = ti.tm_wday;
 	dayName = dayInWords(weekday);
 	dayAbbr = dayInWords(weekday, true);
-#if defined(OS_MINGW)
+#if defined(OS_MINGW) || defined(OS_SOLARIS)
 	timeZoneOffsetSecs = 0;
 	timeZoneOffset = 0;
 #else
@@ -167,7 +167,7 @@ void Date::populateDateFields()
 
 Date::Date(const std::string& strdate, const std::string& formatspec) {
 	ti.tm_isdst = 0;
-#if !defined(OS_MINGW)
+#if !defined(OS_MINGW) && !defined(OS_SOLARIS)
 	ti.tm_zone = NULL;
 	ti.tm_gmtoff = 0;
 #endif

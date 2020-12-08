@@ -182,7 +182,6 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 			{
 				logger << "Invalid boolean value for isDHParams defined" << std::endl;
 			}
-			ConfigurationData::getInstance()->securityProperties.alpnEnabled = true;
 			try
 			{
 				ConfigurationData::getInstance()->securityProperties.alpnEnabled = CastUtil::toBool(sslsec["ALPN_ENABLED"]);
@@ -190,6 +189,7 @@ void ConfigurationHandler::handle(strVec webdirs, const strVec& webdirs1, const 
 					logger << "ALPN protocols list = " << alpnprotolist << std::endl;
 					ConfigurationData::getInstance()->securityProperties.alpnProtoList = StringUtil::splitAndReturn<std::vector<std::string> >(alpnprotolist, ",");
 				} else {
+					ConfigurationData::getInstance()->securityProperties.alpnEnabled = false;
 					logger << "No ALPN protocols defined............." << std::endl;
 				}
 			}

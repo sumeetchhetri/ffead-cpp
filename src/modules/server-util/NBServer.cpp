@@ -179,7 +179,7 @@ void* NBServer::servicing(void* arg)
 				}
 				else
 				{
-					server->selEpolKqEvPrtHandler.reRegisterServerSock();
+					server->selEpolKqEvPrtHandler.reRegisterServerSock(NULL);
 					server->selEpolKqEvPrtHandler.registerRead(NULL);
 				}
 			}

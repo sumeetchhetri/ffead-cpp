@@ -625,11 +625,16 @@ bool HttpResponse::isHeaderValue(std::string header, const std::string& value, c
 			&& (strcmp(headers[header].c_str(), value.c_str())==0 || (ignoreCase && strcasecmp(headers[header].c_str(), value.c_str())==0));
 }
 
-std::string HttpResponse::getHeader(std::string header)
-{
+std::string HttpResponse::getHeader(const std::string& header) {
 	if(header.length()>0 && headers.find(header)!=headers.end())
 		return headers[header];
 	return "";
+}
+
+const std::string& HttpResponse::getHeaderV(const std::string& header) {
+	if(header.length()>0 && headers.find(header)!=headers.end())
+		return headers[header];
+	return CommonUtils::BLANK;
 }
 
 bool HttpResponse::isNonBinary()

@@ -39,6 +39,8 @@ SocketInterface::SocketInterface() {
 	wrTsk = NULL;
 	srvTsk = NULL;
 	useCounter = 0;
+	io_uring_type = -1;
+	//io_uring_bid = -1;
 }
 
 SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
@@ -58,6 +60,8 @@ SocketInterface::SocketInterface(const SOCKET& fd, SSL* ssl, BIO* io) {
 	wrTsk = NULL;
 	srvTsk = NULL;
 	useCounter = 0;
+	io_uring_type = -1;
+	//io_uring_bid = -1;
 }
 
 void SocketInterface::use() {
@@ -83,6 +87,7 @@ bool SocketInterface::init(const SOCKET& fd, SSL*& ssl, BIO*& io, Logger& logger
 		if(SSL_accept(ssl)<=0)
 		{
 			logger << "SSL accept error" << std::endl;
+			ERR_print_errors_fp(stderr);
 			close(fd);
 			return false;
 		}
@@ -199,6 +204,10 @@ int SocketInterface::pushResponse(void* request, void* response, void* context, 
 
 	//Timer t;
 	//t.start();
+#if defined(USE_IO_URING)
+	eh->post_write(this, rd._b);
+	return 1;
+#endif
 
 	int done = writeTo(&rd);
 
@@ -232,6 +241,10 @@ int SocketInterface::startRequest() {
 
 int SocketInterface::endRequest(int reqPos) {
 	//wm.lock();
+	if(reqPos==-1) {
+		wtl.erase(++current);
+		return current;
+	}
 	wtl.erase(reqPos);
 	//wm.unlock();
 	return ++current;
@@ -382,39 +395,46 @@ bool SocketInterface::writeFile(int fdes, int remain_data)
 
 int SocketInterface::readFrom()
 {
+#if defined(USE_IO_URING)
+	return 1;
+#endif
 	if(ssl==NULL) {
 		int er = 0;
-		char b[8192];
 		do {
-			er = recv(fd, b, 8192, 0);
+			er = recv(fd, buff, 2048, 0);
 			switch(er) {
 				case -1:
 				case 0:
 					if (er == -1 && errno == EAGAIN) {
 						return -1;
 					} else {
+#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
+						eh->unRegisterRead(fd);
+#endif
 						closeSocket();
 						return 0;
 					}
 				default:
-					buffer.append(b, er);
+					buffer.append(buff, er);
 					break;
 			}
 		} while(er>0);
 	} else {
 		int er = 0;
 		int ser = 0;
-		char b[8192];
 		do {
-			er  = BIO_read(io, b, 4096);
+			er  = BIO_read(io, buff, 2048);
 			ser = SSL_get_error(ssl, er);
 			switch(ser) {
 				case SSL_ERROR_WANT_READ:
 					return -1;
 				case SSL_ERROR_NONE:
-					buffer.append(b, er);
+					buffer.append(buff, er);
 					break;
 				default:
+#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
+					eh->unRegisterRead(fd);
+#endif
 					closeSocket();
 					return 0;
 			}
@@ -443,6 +463,9 @@ bool SocketInterface::flush() {
 
 void SocketInterface::closeSocket()
 {
+#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
+	eh->unRegisterRead(fd);
+#endif
 	if(!closed)
 	{
 		if(SSLHandler::getInstance()->getIsSSL())
@@ -566,6 +589,21 @@ std::string SocketInterface::getAlpnProto() {
 
 bool SocketInterface::isHttp2() {
 	return http2;
+}
+
+bool SocketInterface::hasPendingRead() {
+	return false;
+}
+
+void SocketInterface::doneRead() {
+	if(hasPendingRead()) {
+#if defined USE_IO_URING
+		eh->post_read(this);
+#endif
+	}
+#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL) || defined(USE_EVPORT)
+	eh->registerRead(this);
+#endif
 }
 
 ResponseData::ResponseData() {

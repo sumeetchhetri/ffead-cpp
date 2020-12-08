@@ -56,6 +56,7 @@ public:
 			const int& connKeepAlive, const int& maxReqHdrCnt, const int& maxEntitySize);
 	virtual ~Http11Handler();
 	bool isEmbedded();
+	bool hasPendingRead();
 };
 
 #endif /* HTTP11HANDLER_H_ */

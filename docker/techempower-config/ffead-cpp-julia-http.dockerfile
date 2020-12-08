@@ -1,4 +1,4 @@
-FROM sumeetchhetri/ffead-cpp-5.0-base:5.2
+FROM sumeetchhetri/ffead-cpp-5.0-base:5.3
 
 ENV IROOT=/installs
 
@@ -13,7 +13,7 @@ RUN rm -f /usr/local/lib/libffead-* /usr/local/lib/libte_benc* /usr/local/lib/li
 
 WORKDIR ${IROOT}
 #RUN apt-get update -y && apt-get install -y --no-install-recommends julia
-RUN wget -q https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.2-linux-x86_64.tar.gz
+RUN wget --no-check-certificate -q https://julialang-s3.julialang.org/bin/linux/x64/1.5/julia-1.5.2-linux-x86_64.tar.gz
 RUN tar -xzf julia-1.5.2-linux-x86_64.tar.gz
 RUN mv julia-1.5.2 /opt/
 RUN rm -f julia-1.5.2-linux-x86_64.tar.gz

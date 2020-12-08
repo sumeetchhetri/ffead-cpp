@@ -153,7 +153,7 @@ bool MemoryCacheImpl::flushAll() {
 
 void MemoryCacheImpl::clean() {
 	MemoryCacheConnectionPool* p = (MemoryCacheConnectionPool*)pool;
-	while(p->internalMap.size()>p->size) {
+	while((int)p->internalMap.size()>p->size) {
 		auto last_it = p->lrul.end(); last_it --;
 		p->internalMap.erase(last_it->first);
 		p->lrul.pop_back();

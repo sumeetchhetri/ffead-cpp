@@ -66,6 +66,7 @@ class HttpWriteTask : public Task {
 	void run();
 	friend class HttpServiceHandler;
 	friend class CHServer;
+	friend class HttpServiceTask;
 public:
 	int getTid();
 	void setTid(int tid);

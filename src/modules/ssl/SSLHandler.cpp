@@ -99,7 +99,7 @@ void SSLHandler::init(const SecurityProperties& securityProperties) {
 		sslConfsettings.append(securityProperties.dh_file);
 		sslConfsettings.append(", CA_LIST = ");
 		sslConfsettings.append(securityProperties.ca_list);
-		sslConfsettings.append(", ISDH_PARAMS = ");
+		//sslConfsettings.append(", ISDH_PARAMS = ");
 		//sslConfsettings.append(CastUtil::fromBool(securityProperties.isDHParams));
 		//sslConfsettings.append(", CLIENT_SEC_LEVEL = ");
 		//sslConfsettings.append(CastUtil::fromNumber(securityProperties.client_auth));
@@ -111,11 +111,11 @@ void SSLHandler::init(const SecurityProperties& securityProperties) {
 		pass = (char*)securityProperties.sec_password.c_str();
 		SSL_CTX_set_default_passwd_cb(ctx, SSLHandler::password_cb);
 
-		SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 |
+		/*SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 |
 							SSL_OP_NO_COMPRESSION | SSL_OP_SINGLE_DH_USE |
 							SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION |
 							SSL_OP_SINGLE_ECDH_USE | SSL_OP_NO_TICKET |
-							SSL_OP_CIPHER_SERVER_PREFERENCE);
+							SSL_OP_CIPHER_SERVER_PREFERENCE);*/
 		SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
 		SSL_CTX_set_mode(ctx, SSL_MODE_RELEASE_BUFFERS);
 
@@ -137,7 +137,7 @@ void SSLHandler::init(const SecurityProperties& securityProperties) {
 		 */
 
 		/* Set our cipher list */
-		if(SSLCommon::ciphers!=""){
+		if(SSLCommon::ciphers!="") {
 			SSL_CTX_set_cipher_list(ctx, SSLCommon::ciphers.c_str());
 		}
 

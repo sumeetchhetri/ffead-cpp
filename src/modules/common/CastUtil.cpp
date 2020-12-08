@@ -23,7 +23,6 @@
 
 #include "CastUtil.h"
 
-//libcuckoo::cuckoohash_map<std::string, std::string> CastUtil::_mangledClassNameMap;
 const std::string CastUtil::STD_STRING = "std::string";
 const std::string CastUtil::BOOL_TRUE = "true";
 const std::string CastUtil::BOOL_FALSE = "false";

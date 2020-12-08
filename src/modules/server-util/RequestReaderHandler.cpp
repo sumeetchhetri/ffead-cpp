@@ -34,6 +34,7 @@ RequestReaderHandler::RequestReaderHandler(ServiceHandler* shi, const bool& isMa
 	this->complete = 0;
 	this->isMain = isMain;
 	this->isSinglEVH = isSinglEVH;
+	this->selector.setCtx(this);
 }
 
 void RequestReaderHandler::setInstance(RequestReaderHandler* ins) {
@@ -48,10 +49,7 @@ RequestReaderHandler* RequestReaderHandler::getInstance() {
 
 void RequestReaderHandler::startNL(unsigned int cid) {
 	if(!run) {
-		run = true;
 		selector.initialize(-1);
-		Thread* pthread = new Thread(&handle, this);
-		pthread->execute(cid);
 	}
 }
 
@@ -60,6 +58,11 @@ void RequestReaderHandler::addListenerSocket(const SOCKET& listenerSock) {
 		this->listenerSock = listenerSock;
 	}
 	selector.addListeningSocket(this->listenerSock);
+	if(!run) {
+		run = true;
+		Thread* pthread = new Thread(&handle, this);
+		pthread->execute(-1);
+	}
 }
 
 void RequestReaderHandler::start(unsigned int cid) {
@@ -104,14 +107,112 @@ void RequestReaderHandler::addSf(SocketInterface* psi) {
 	{
 		//addToTimeoutSocks.push(psi);
 	}
-	selector.registerRead(psi);
 	psi->onOpen();
 }
 
 RequestReaderHandler::~RequestReaderHandler() {
 }
 
+bool RequestReaderHandler::loopContinue(SelEpolKqEvPrt* ths) {
+	RequestReaderHandler* ins = static_cast<RequestReaderHandler*>(ths->getCtx());
+	return ins->isActive();
+}
+
+SocketInterface* RequestReaderHandler::loopEventCb(SelEpolKqEvPrt* ths, SocketInterface* si, int type, int fd, char* buf, size_t len, bool isClosed) {
+	RequestReaderHandler* ins = static_cast<RequestReaderHandler*>(ths->getCtx());
+	switch(type) {
+		case ACCEPTED: {
+			SocketInterface* sockIntf = ins->sf(fd);
+			sockIntf->eh = &(ins->selector);
+			ins->addSf(sockIntf);
+			ins->shi->sockInit(sockIntf);
+			CommonUtils::cSocks += 1;
+			if(!ins->run) {
+				ins->clsdConns.push_back(sockIntf);
+			}
+			return sockIntf;
+		}
+		case READ_READY: {
+			if(ins->isSinglEVH) {
+				if(!si->isClosed()) {
+					si->rdTsk->run();
+				} else {
+					si->onClose();
+					ins->shi->closeConnection(si);
+				}
+			} else {
+				if(!si->isClosed()) {
+					ins->shi->registerReadRequest(si);
+				} else {
+					si->onClose();
+					ins->shi->closeConnection(si);
+				}
+			}
+			break;
+		}
+		case WRITE_READY: {
+			if(ins->isSinglEVH) {
+				if(!si->isClosed()) {
+					ins->selector.unRegisterWrite(si);
+					ins->shi->registerWriteRequest(si);
+				} else {
+					si->onClose();
+					ins->shi->closeConnection(si);
+				}
+			} else {
+				if(!si->isClosed()) {
+					ins->selector.unRegisterWrite(si);
+					ins->shi->registerWriteRequest(si);
+				} else {
+					si->onClose();
+					ins->shi->closeConnection(si);
+				}
+			}
+			break;
+		}
+		case CLOSED: {
+			si->onClose();
+			ins->shi->closeConnection(si);
+			break;
+		}
+		case ON_DATA_READ: {
+			si->buffer.append(buf, len);
+			if(ins->isSinglEVH) {
+				si->rdTsk->run();
+			} else {
+				ins->shi->registerReadRequest(si);
+			}
+			break;
+		}
+		case ON_DATA_WRITE: {
+			si->endRequest(-1);
+			break;
+		}
+	}
+	return NULL;
+}
+
 void* RequestReaderHandler::handle(void* inp) {
+	RequestReaderHandler* ins  = static_cast<RequestReaderHandler*>(inp);
+	ins->selector.loop(&loopContinue, &loopEventCb);
+
+	for(int i=0;i<(int)ins->clsdConns.size();i++) {
+		delete ins->clsdConns.at(i);
+	}
+
+	if(ins->isMain) {
+		ins->shi->stop();
+		while(ins->shi->run) {
+			Thread::mSleep(100);
+		}
+	}
+	Thread::mSleep(500);
+	ins->complete += 1;
+	return 0;
+}
+
+//Deprecated old handler -- can be used if existing event loop need to be overriden
+void* RequestReaderHandler::handle_Old(void* inp) {
 	//Logger logger = LoggerFactory::getLogger("RequestReaderHandler");
 	RequestReaderHandler* ins  = static_cast<RequestReaderHandler*>(inp);
 	struct sockaddr_storage their_addr; // connector's address information
@@ -146,7 +247,8 @@ void* RequestReaderHandler::handle(void* inp) {
 					while (true) {
 						sin_size = sizeof their_addr;
 #ifdef HAVE_ACCEPT4
-						SOCKET newSocket = accept4(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size, SOCK_NONBLOCK);
+						SOCKET newSocket = accept4(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size,
+								SSLHandler::getInstance()->getIsSSL()?0:SOCK_NONBLOCK);
 #else
 						SOCKET newSocket = accept(ins->listenerSock, (struct sockaddr *)&(their_addr), &sin_size);
 #endif

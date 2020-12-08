@@ -30,7 +30,6 @@
 #include "Http11WebSocketHandler.h"
 #include "ThreadPool.h"
 #include "Thread.h"
-#include <libcuckoo/cuckoohash_map.hh>
 #include "concurrentqueue.h"
 #include "queue"
 #include "map"

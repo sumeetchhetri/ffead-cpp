@@ -36,12 +36,20 @@ SelEpolKqEvPrt::SelEpolKqEvPrt() {
 	kq = -1;
 #endif
 	dsi = NULL;
+	context = NULL;
 }
 
 SelEpolKqEvPrt::~SelEpolKqEvPrt() {
 	if(dsi!=NULL) {
 		delete dsi;
 	}
+#if defined USE_IO_URING
+	/*for (int i = 0; i < BUFFERS_COUNT; i++ )
+	{
+	    free(bufs[i]);
+	}
+	free(bufs);*/
+#endif
 }
 
 void SelEpolKqEvPrt::initialize(const int& timeout)
@@ -74,12 +82,62 @@ void SelEpolKqEvPrt::initialize(const int& timeout)
 		{
 			perror("devpoll fcntl");
 		}
+		for(int i=1;i<MAXDESCRIPTORS;i++) {
+			polled_fds[i].fd = -1;
+			polled_fds[i].revents = 0;
+		}
 	#elif defined USE_EVPORT
 		if ((port = port_create()) < 0) {
 			perror("port_create");
 		}
 	#elif defined USE_POLL
-		nfds=1;
+		nfds = 1;
+		for(int i=0;i<MAXDESCRIPTORS;i++) {
+			polled_fds[i].fd = -1;
+			polled_fds[i].revents = 0;
+		}
+	#elif defined USE_IO_URING
+		memset(&params, 0, sizeof(params));
+
+		if (io_uring_queue_init_params(2048, &ring, &params) < 0) {
+			perror("io_uring_init_failed...\n");
+			return;
+		}
+
+		// check if IORING_FEAT_FAST_POLL is supported
+		if (!(params.features & IORING_FEAT_FAST_POLL)) {
+			printf("IORING_FEAT_FAST_POLL not available in the kernel, quiting...\n");
+			return;
+		}
+
+		// check if buffer selection is supported
+		/*struct io_uring_probe *probe;
+		probe = io_uring_get_probe_ring(&ring);
+		if (!probe || !io_uring_opcode_supported(probe, IORING_OP_PROVIDE_BUFFERS)) {
+			printf("Buffer select not supported, skipping...\n");
+			return;
+		}
+		free(probe);
+
+		bufs = (char**) calloc(BUFFERS_COUNT, sizeof(char*));
+		for(int i=0;i<BUFFERS_COUNT;i++)
+		{
+			bufs[i] = (char*) calloc(MAX_MESSAGE_LEN, sizeof(char));
+			memset(bufs[i], 0, MAX_MESSAGE_LEN);
+		}
+		group_id = 1881;
+
+		struct io_uring_cqe* cqe;
+		struct io_uring_sqe* sqe = io_uring_get_sqe(&ring);
+		io_uring_prep_provide_buffers(sqe, bufs, MAX_MESSAGE_LEN, BUFFERS_COUNT, group_id, 0);
+
+		io_uring_submit(&ring);
+		io_uring_wait_cqe(&ring, &cqe);
+		if (cqe->res < 0) {
+			printf("cqe->res = %d\n", cqe->res);
+			return;
+		}
+		io_uring_cqe_seen(&ring, cqe);*/
 	#endif
 }
 
@@ -98,14 +156,18 @@ void SelEpolKqEvPrt::addListeningSocket(SOCKET sockfd) {
 		fdMax = sockfd;
 	#elif defined(USE_SELECT)
 		fdMax = sockfd;
-	#elif defined USE_POLL
-		polled_fds = (struct pollfd *)calloc(1, nfds*sizeof(struct pollfd));
-		polled_fds->fd = sockfd;
-		polled_fds->events = POLLIN | POLLPRI;
-		return;
 	#endif
 	dsi = new DummySocketInterface();
 	dsi->fd = sockfd;
+	#ifdef USE_IO_URING
+	    client_len = sizeof(client_addr);
+	    struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+	    io_uring_prep_accept(sqe, dsi->fd, (sockaddr*)&client_addr, &client_len, 0);
+	    io_uring_sqe_set_flags(sqe, 0);
+	    dsi->io_uring_type = ACCEPT;
+	    io_uring_sqe_set_data(sqe, dsi);
+	    return;
+	#endif
 	if(sockfd>0)registerRead(dsi, true);
 }
 
@@ -151,19 +213,74 @@ void SelEpolKqEvPrt::initialize(SOCKET sockfd, const int& timeout)
 		{
 			perror("devpoll fcntl");
 		}
+		for(int i=1;i<MAXDESCRIPTORS;i++) {
+			polled_fds[i].fd = -1;
+			polled_fds[i].revents = 0;
+		}
 	#elif defined USE_EVPORT
 		if ((port = port_create()) < 0) {
 			perror("port_create");
 		}
 	#elif defined USE_POLL
-		nfds=1;
-		polled_fds = (struct pollfd *)calloc(1, nfds*sizeof(struct pollfd));
-		polled_fds->fd = sockfd;
-		polled_fds->events = POLLIN | POLLPRI;
-		return;
+		nfds = 1;
+		for(int i=0;i<MAXDESCRIPTORS;i++) {
+			polled_fds[i].fd = -1;
+			polled_fds[i].revents = 0;
+		}
 	#endif
 	dsi = new DummySocketInterface();
 	dsi->fd = sockfd;
+	#ifdef USE_IO_URING
+		memset(&params, 0, sizeof(params));
+
+		if (io_uring_queue_init_params(2048, &ring, &params) < 0) {
+			perror("io_uring_init_failed...\n");
+			return;
+		}
+
+		// check if IORING_FEAT_FAST_POLL is supported
+		if (!(params.features & IORING_FEAT_FAST_POLL)) {
+			printf("IORING_FEAT_FAST_POLL not available in the kernel, quiting...\n");
+			return;
+		}
+
+		// check if buffer selection is supported
+		/*struct io_uring_probe *probe;
+		probe = io_uring_get_probe_ring(&ring);
+		if (!probe || !io_uring_opcode_supported(probe, IORING_OP_PROVIDE_BUFFERS)) {
+			printf("Buffer select not supported, skipping...\n");
+			return;
+		}
+		free(probe);
+
+		bufs = (char**) calloc(BUFFERS_COUNT, sizeof(char*));
+		for(int i=0;i<BUFFERS_COUNT;i++)
+		{
+			bufs[i] = (char*) calloc(MAX_MESSAGE_LEN, sizeof(char));
+			memset(bufs[i], 0, MAX_MESSAGE_LEN);
+		}
+		group_id = 1881;
+
+		struct io_uring_cqe* cqe;
+		struct io_uring_sqe* sqe = io_uring_get_sqe(&ring);
+		io_uring_prep_provide_buffers(sqe, bufs, MAX_MESSAGE_LEN, BUFFERS_COUNT, group_id, 0);
+
+		io_uring_submit(&ring);
+		io_uring_wait_cqe(&ring, &cqe);
+		if (cqe->res < 0) {
+			printf("cqe->res = %d\n", cqe->res);
+			return;
+		}
+		io_uring_cqe_seen(&ring, cqe);*/
+
+		client_len = sizeof(client_addr);
+		struct io_uring_sqe *sqe1 = io_uring_get_sqe(&ring);
+		io_uring_prep_accept(sqe1, dsi->fd, (sockaddr*)&client_addr, &client_len, 0);
+		io_uring_sqe_set_flags(sqe1, 0);
+		dsi->io_uring_type = ACCEPT;
+		io_uring_sqe_set_data(sqe1, dsi);
+		return;
+	#endif
 	if(sockfd>0)registerRead(dsi, true);
 }
 
@@ -172,7 +289,6 @@ int SelEpolKqEvPrt::getEvents()
 {
 	int numEvents = -1;
 	#if defined(USE_MINGW_SELECT)
-	    l.lock();
 		readfds = master;
 		if(timeoutMilis>1)
 		{
@@ -185,7 +301,6 @@ int SelEpolKqEvPrt::getEvents()
 		{
 			numEvents = select(fdMax+1, &readfds, NULL, NULL, NULL);
 		}
-		l.unlock();
 		if(numEvents==-1)
 		{
 			perror("select()");
@@ -196,7 +311,6 @@ int SelEpolKqEvPrt::getEvents()
 				return fdMax+1;
 		}
 	#elif defined(USE_SELECT)
-		l.lock();
 		for (int var = 0; var < fdsetSize; ++var) {
 			readfds[var] = master[var];
 			writefds[var] = master[var];
@@ -212,7 +326,6 @@ int SelEpolKqEvPrt::getEvents()
 		{
 			numEvents = select(fdMax+1, readfds, NULL, NULL, NULL);
 		}
-		l.unlock();
 		if(numEvents==-1)
 		{
 			perror("select()");
@@ -238,15 +351,15 @@ int SelEpolKqEvPrt::getEvents()
 		}
 	#elif defined USE_DEVPOLL
 		struct dvpoll pollit;
-		pollit.dp_timeout = timeoutMilis;
+		pollit.dp_timeout = timeoutMilis>1?timeoutMilis:-1;
 		pollit.dp_nfds = curfds;
 		pollit.dp_fds = polled_fds;
 		numEvents = ioctl(dev_poll_fd, DP_POLL, &pollit);
 	#elif defined USE_EVPORT
-		uint_t nevents, wevents = 0;
+		uint_t nevents = 1, wevents = 0;
 		if(timeoutMilis>1)
 		{
-			struct timespec tv
+			struct timespec tv;
 			tv.tv_sec = (timeoutMilis/1000);
 			tv.tv_nsec = (timeoutMilis%1000)*1000000;
 			//uint_t num = 0;
@@ -265,22 +378,18 @@ int SelEpolKqEvPrt::getEvents()
 		}
 		numEvents = (int)nevents;
 	#elif defined USE_POLL
-		l.lock();
 		if(timeoutMilis>1)
 		{
-			struct timespec tv;
-			tv.tv_sec = (timeoutMilis/1000);
-			tv.tv_nsec = (timeoutMilis%1000)*1000000;
-			numEvents = poll(polled_fds, nfds, timeoutMilis);
+			numEvents = poll(polled_fds, curfds+1, timeoutMilis);
 		}
 		else
 		{
-			numEvents = poll(polled_fds, nfds, NULL);
+			numEvents = poll(polled_fds, curfds+1, -1);
 		}
-		l.unlock();
-		if (numEvents == -1){
+		if (numEvents == -1) {
 			perror ("poll");
-			exit(0);
+		} else {
+			return curfds+1;
 		}
 	#endif
 	return numEvents;
@@ -347,24 +456,20 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj, bool& isRe
 	isRead = true;
 	#if defined(USE_MINGW_SELECT)
 		int temp = 0;
-		l.lock();
 		if(FD_ISSET(index, &readfds))
 		{
 			temp = index;
+			obj = connections.find(temp);
+			return temp;
 		}
-		l.unlock();
-		obj = connections.find(temp);
-		return temp;
 	#elif defined(USE_SELECT)
 		int temp = 0;
-		l.lock();
 		if(FD_ISSET(index%FD_SETSIZE, &readfds[index/FD_SETSIZE]))
 		{
 			temp = index;
+			obj = connections.find(temp);
+			return temp;
 		}
-		l.unlock();
-		obj = connections.find(temp);
-		return temp;
 	#elif defined USE_EPOLL || defined USE_WIN_IOCP
 		if(index>-1 && index<(int)(sizeof events))
 		{
@@ -388,21 +493,33 @@ SOCKET SelEpolKqEvPrt::getDescriptor(const SOCKET& index, void*& obj, bool& isRe
 			obj = evlist[index].udata;
 			return evlist[index].ident;
 		}
-	#elif defined USE_DEVPOLL
-		obj = connections.find(polled_fds[index].fd);
-		return polled_fds[index].fd;
-	#elif defined USE_EVPORT
-		if(index>-1 && index<sizeof evlist)
-		{
-			obj = connections.find((int)evlist[index].portev_object);
-			return (int)evlist[index].portev_object;
+	#elif defined USE_DEVPOLL || defined USE_POLL
+		if(polled_fds[index].fd>0) {
+			if (polled_fds[index].revents & POLLIN) {
+				polled_fds[index].revents = 0;
+				obj = connections.find(polled_fds[index].fd);
+				return polled_fds[index].fd;
+			} else if((polled_fds[index].revents & POLLERR) || (polled_fds[index].revents & POLLHUP)) {
+				obj = connections.find(polled_fds[index].fd);
+				((SocketInterface*)obj)->closeSocket();
+				int descriptor = polled_fds[index].fd;
+				polled_fds[index].fd = -1;
+				polled_fds[index].revents = 0;
+				return descriptor;
+			}
 		}
-	#elif defined USE_POLL
-		l.lock();
-		int temp = polled_fds[index].fd;
-		l.unlock();
-		obj = connections.find(temp);
-		return temp;
+	#elif defined USE_EVPORT
+		if(index>-1 && index<(int)sizeof evlist)
+		{
+			if(evlist[index].portev_events & POLLIN) {
+				obj = evlist[index].portev_user;
+				return (int)evlist[index].portev_object;
+			} else if((evlist[index].portev_events & POLLERR) || (evlist[index].portev_events & POLLHUP)) {
+				obj = evlist[index].portev_user;
+				((SocketInterface*)obj)->closeSocket();
+				return (int)evlist[index].portev_object;
+			}
+		}
 	#endif
 	return -1;
 }
@@ -418,6 +535,9 @@ bool SelEpolKqEvPrt::isListeningDescriptor(const SOCKET& descriptor)
 
 bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningSock)
 {
+	#ifdef USE_IO_URING
+		return true;
+	#endif
 	SOCKET descriptor = obj->fd;
 	#ifdef OS_MINGW
 		u_long iMode = 1;
@@ -427,6 +547,8 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 		fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
 #else
 		if(isListeningSock) {
+			fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
+		} else if(!isListeningSock && SSLHandler::getInstance()->getIsSSL()) {
 			fcntl(descriptor, F_SETFL, fcntl(descriptor, F_GETFD, 0) | O_NONBLOCK);
 		}
 #endif
@@ -478,28 +600,64 @@ bool SelEpolKqEvPrt::registerRead(SocketInterface* obj, const bool& isListeningS
 		EV_SET(&change, descriptor, EVFILT_READ, EV_ADD, 0, 0, obj);
 		kevent(kq, &change, 1, NULL, 0, NULL);
 	#elif defined USE_DEVPOLL
-		struct pollfd poll_fd;
-		poll_fd.fd = descriptor;
-		poll_fd.events = POLLIN;
-		poll_fd.revents = 0;
-		if (write(dev_poll_fd, &poll_fd, sizeof(poll_fd)) < 0) {
-			perror("devpoll");
-			return false;
+		if(isListeningSock) {
+			polled_fds[0].fd = descriptor;
+			polled_fds[0].events = POLLIN | POLLPRI | POLLERR | POLLHUP;
+			polled_fds[0].revents = 0;
+			curfds = 0;
+			if (write(dev_poll_fd, &polled_fds[0], sizeof(poll_fd)) < 0) {
+				perror("devpoll");
+				return false;
+			}
+		} else {
+			bool found = false;
+			for(int i=1;i<MAXDESCRIPTORS;i++) {
+				if(polled_fds[i].fd<0) {
+					polled_fds[i].fd = descriptor;
+					polled_fds[i].events = POLLIN | POLLPRI | POLLERR | POLLHUP;
+					polled_fds[i].revents = 0;
+					found = true;
+					if(i>curfds) {
+						curfds = i;
+					}
+					if (write(dev_poll_fd, &polled_fds[i], sizeof(poll_fd)) < 0) {
+						perror("devpoll");
+						return false;
+					}
+					break;
+				}
+			}
+			if(!found) {
+				perror("too many clients");
+			}
 		}
 		connections.insert(descriptor, obj);
 	#elif defined USE_EVPORT
-		if (port_associate(port, PORT_SOURCE_FD, descriptor, POLLIN, NULL) < 0) {
+		if (port_associate(port, PORT_SOURCE_FD, descriptor, POLLIN | POLLERR | POLLHUP, (void*)obj) < 0) {
 			perror("port_associate");
 		}
-		connections.insert(descriptor, obj);
 	#elif defined USE_POLL
-		l.lock();
-		curfds++;
-		nfds++;
-		polled_fds = (struct pollfd *)realloc(polled_fds, (nfds+1)*sizeof(struct pollfd));
-		(polled_fds+nfds)->fd = descriptor;
-		(polled_fds+nfds)->events = POLLIN | POLLPRI;
-		l.unlock();
+		if(isListeningSock) {
+			polled_fds[0].fd = descriptor;
+			polled_fds[0].events = POLLIN | POLLPRI | POLLERR | POLLHUP;
+			curfds = 0;
+		} else {
+			bool found = false;
+			for(int i=1;i<MAXDESCRIPTORS;i++) {
+				if(polled_fds[i].fd<0) {
+					polled_fds[i].fd = descriptor;
+					polled_fds[i].events = POLLIN | POLLPRI | POLLERR | POLLHUP;
+					found = true;
+					if(i>curfds) {
+						curfds = i;
+					}
+					break;
+				}
+			}
+			if(!found) {
+				perror("too many clients");
+			}
+		}
 		connections.insert(descriptor, obj);
 	#endif
 	return true;
@@ -510,20 +668,25 @@ void* SelEpolKqEvPrt::getOptData(const int& index) {
 		return events[index].data.ptr;
 	#elif defined USE_KQUEUE
 		return evlist[index].udata;
+	#elif USE_EVPORT
+		return evlist[index].portev_user;
 	#endif
 	return NULL;
 }
 
 bool SelEpolKqEvPrt::unRegisterRead(const SOCKET& descriptor)
 {
+	#ifdef USE_IO_URING
+		return true;
+	#endif
 	if(descriptor<=0)return false;
 	#if defined(USE_MINGW_SELECT)
-		connections.erase(descriptor);
+		//connections.erase(descriptor);
 		FD_CLR(descriptor, &master);
 		if(fdMax==descriptor)
 			fdMax--;
 	#elif defined(USE_SELECT)
-		connections.erase(descriptor);
+		//connections.erase(descriptor);
 		FD_CLR(descriptor%FD_SETSIZE, &master[descriptor/FD_SETSIZE]);
 		if(fdMax==descriptor)
 			fdMax--;
@@ -537,40 +700,202 @@ bool SelEpolKqEvPrt::unRegisterRead(const SOCKET& descriptor)
 		EV_SET(&change, descriptor, EVFILT_READ, EV_DELETE, 0, 0, 0);
 		kevent(kq, &change, 1, NULL, 0, NULL);
 	#elif defined USE_DEVPOLL
-		connections.erase(descriptor);
-		struct pollfd poll_fd;
-		poll_fd.fd = descriptor;
-		poll_fd.events = POLLREMOVE;
-		poll_fd.revents = 0;
-		if (write(dev_poll_fd, &poll_fd, sizeof(poll_fd)) < 0) {
-			perror("devpoll");
-			return false;
+		//connections.erase(descriptor);
+		for(int i=1;i<MAXDESCRIPTORS;i++) {
+			if(polled_fds[i].fd==descriptor) {
+				polled_fds[i].fd = -1;
+				polled_fds[i].events = POLLREMOVE;
+				polled_fds[i].revents = 0;
+				if (write(dev_poll_fd, &polled_fds[i], sizeof(poll_fd)) < 0) {
+					perror("devpoll");
+					return false;
+				}
+				break;
+			}
 		}
 	#elif defined USE_EVPORT
-		connections.erase(descriptor);
-		/*if (port_dissociate(port, PORT_SOURCE_FD, descriptor) < 0) {
+		if (port_dissociate(port, PORT_SOURCE_FD, descriptor) < 0) {
 			perror("port_dissociate");
-		}*/
+		}
 	#elif defined USE_POLL
-		connections.erase(descriptor);
-		l.lock();
-		curfds--;
-		nfds--;
-		memcpy(polled_fds+descriptor,polled_fds+descriptor+1,nfds-descriptor);
-		polled_fds = (struct pollfd *)realloc(polled_fds, nfds*sizeof(struct pollfd));
-		l.unlock();
+		//connections.erase(descriptor);
+		//l.lock();
+		for(int i=1;i<MAXDESCRIPTORS;i++) {
+			if(polled_fds[i].fd==descriptor) {
+				polled_fds[i].fd = -1;
+				polled_fds[i].revents = 0;
+				break;
+			}
+		}
+		//l.unlock();
 	#endif
 	return true;
 }
 
-void SelEpolKqEvPrt::reRegisterServerSock()
+void SelEpolKqEvPrt::reRegisterServerSock(void* obj)
 {
 	#ifdef USE_EVPORT
-		if (port_associate(port, PORT_SOURCE_FD, sockfd, POLLIN, NULL) < 0) {
+		if (port_associate(port, PORT_SOURCE_FD, sockfd, POLLIN, obj) < 0) {
 			perror("port_associate");
 		}
 	#endif
 }
+
+void SelEpolKqEvPrt::loop(eventLoopContinue evlc, onEvent ev) {
+	DummySocketInterface df;
+	df.io_uring_type = PROV_BUF;
+
+	while (evlc(this)) {
+#ifdef USE_IO_URING
+		io_uring_submit_and_wait(&ring, 1);
+		struct io_uring_cqe *cqe;
+		unsigned head;
+		unsigned count = 0;
+
+		// go through all CQEs
+		io_uring_for_each_cqe(&ring, head, cqe) {
+			++count;
+			// There is an optional `std::uintptr_t` in C++11
+			SocketInterface* udata = (SocketInterface*)io_uring_cqe_get_data(cqe);
+
+			if (cqe->res == -ENOBUFS) {
+				fprintf(stdout, "bufs in automatic buffer selection empty, this should not happen...\n");
+				fflush(stdout);
+				return;
+			} else if (udata->io_uring_type == PROV_BUF) {
+				if (cqe->res < 0) {
+					printf("cqe->res = %d\n", cqe->res);
+					return;
+				}
+			} else if (udata->io_uring_type == ACCEPT) {
+				int sock_conn_fd = cqe->res;
+				// only read when there is no error, >= 0
+				if (sock_conn_fd >= 0) {
+					SocketInterface* sifd = ev(this, udata, ACCEPTED, sock_conn_fd, NULL, -1, false);
+
+					struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+					io_uring_prep_recv(sqe, sock_conn_fd, sifd->buff, MAX_MESSAGE_LEN, 0);
+					//io_uring_sqe_set_flags(sqe, IOSQE_BUFFER_SELECT);
+					//sqe->buf_group = group_id;
+					sifd->io_uring_type = READ;
+					io_uring_sqe_set_data(sqe, sifd);
+					//add_socket_read(&ring, sock_conn_fd, group_id, MAX_MESSAGE_LEN, IOSQE_BUFFER_SELECT);
+				}
+
+				// new connected client; read data from socket and re-add accept to monitor for new connections
+				struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+				io_uring_prep_accept(sqe, udata->fd, (sockaddr*)&client_addr, &client_len, 0);
+				io_uring_sqe_set_flags(sqe, 0);
+				udata->io_uring_type = ACCEPT;
+				io_uring_sqe_set_data(sqe, udata);
+				//add_accept(&ring, sock_listen_fd, (struct sockaddr *)&client_addr, &client_len, 0);
+			} else if (udata->io_uring_type == READ) {
+				int bytes_read = cqe->res;
+				if (cqe->res <= 0) {
+					// connection closed or error
+					shutdown(udata->fd, SHUT_RDWR);
+					ev(this, udata, CLOSED, udata->fd, NULL, -1, true);
+				} else {
+					// bytes have been read into bufs, now add write to socket sqe
+					//int bid = cqe->flags >> 16;
+					//udata->io_uring_bid = bid;
+					ev(this, udata, ON_DATA_READ, udata->fd, udata->buff, bytes_read, false);
+					//add_socket_write(&ring, conn_i.fd, bid, bytes_read, 0);
+				}
+			} else if (udata->io_uring_type == WRITE) {
+				// write has been completed, first re-add the buffer
+				/*struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+				io_uring_prep_provide_buffers(sqe, bufs[udata->io_uring_bid], MAX_MESSAGE_LEN, 1, group_id, udata->io_uring_bid);
+				io_uring_sqe_set_data(sqe, &df);*/
+				//add_provide_buf(&ring, conn_i.bid, group_id);
+
+				// add a new read for the existing connection
+				struct io_uring_sqe *sqe1 = io_uring_get_sqe(&ring);
+				io_uring_prep_recv(sqe1, udata->fd, udata->buff, MAX_MESSAGE_LEN, 0);
+				//io_uring_sqe_set_flags(sqe1, IOSQE_BUFFER_SELECT);
+				//sqe1->buf_group = group_id;
+				udata->io_uring_type = READ;
+				io_uring_sqe_set_data(sqe1, udata);
+				ev(this, udata, ON_DATA_WRITE, udata->fd, NULL, -1, false);
+				//add_socket_read(&ring, conn_i.fd, group_id, MAX_MESSAGE_LEN, IOSQE_BUFFER_SELECT);
+			}
+		}
+
+		io_uring_cq_advance(&ring, count);
+#else
+		int num = getEvents();
+		if (num<=0)
+		{
+			if(num==-1) {
+				//print errors
+			}
+			continue;
+		}
+
+		struct sockaddr_storage their_addr;
+		socklen_t sin_size;
+		for(int n=0;n<num;n++)
+		{
+			void* vsi = NULL;
+			bool isRead = true;
+			SOCKET descriptor = getDescriptor(n, vsi, isRead);
+			if(descriptor!=-1)
+			{
+				SocketInterface* udata = (SocketInterface*)vsi;
+				if(isListeningDescriptor(descriptor))
+				{
+					while (true) {
+						sin_size = sizeof their_addr;
+#ifdef HAVE_ACCEPT4
+						SOCKET newSocket = accept4(descriptor, (struct sockaddr *)&(their_addr), &sin_size,
+								SSLHandler::getInstance()->getIsSSL()?0:SOCK_NONBLOCK);
+#else
+						SOCKET newSocket = accept(descriptor, (struct sockaddr *)&(their_addr), &sin_size);
+#endif
+						if(newSocket < 0)
+						{
+							if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
+							{
+								break;
+							}
+						}
+						SocketInterface* sifd = ev(this, udata, ACCEPTED, newSocket, NULL, -1, false);
+						registerRead(sifd);
+					}
+					reRegisterServerSock(udata);
+				}
+				else
+				{
+					if(READ_READY) {
+#if defined(USE_SELECT) || defined(USE_MINGW_SELECT) || defined(USE_POLL) || defined(USE_DEVPOLL)
+						unRegisterRead(descriptor);
+#endif
+					}
+					ev(this, udata, isRead?READ_READY:WRITE_READY, descriptor, NULL, -1, false);
+				}
+			}
+		}
+#endif
+	}
+}
+
+#if defined USE_IO_URING
+void SelEpolKqEvPrt::post_write(SocketInterface* sifd, const std::string& data) {
+	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+	io_uring_prep_send(sqe, sifd->fd, &data[0], data.length(), 0);
+	io_uring_sqe_set_flags(sqe, 0);
+	sifd->io_uring_type = WRITE;
+	io_uring_sqe_set_data(sqe, sifd);
+}
+void SelEpolKqEvPrt::post_read(SocketInterface* sifd) {
+	struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
+	io_uring_prep_recv(sqe, sifd->fd, sifd->buff, MAX_MESSAGE_LEN, 0);
+	//io_uring_sqe_set_flags(sqe, IOSQE_BUFFER_SELECT);
+	//sqe->buf_group = group_id;
+	sifd->io_uring_type = READ;
+	io_uring_sqe_set_data(sqe, sifd);
+}
+#endif
 
 void SelEpolKqEvPrt::lock() {
 	l.lock();
@@ -578,4 +903,12 @@ void SelEpolKqEvPrt::lock() {
 
 void SelEpolKqEvPrt::unlock() {
 	l.unlock();
+}
+
+void SelEpolKqEvPrt::setCtx(void *ctx) {
+	this->context = ctx;
+}
+
+void* SelEpolKqEvPrt::getCtx() {
+	return context;
 }

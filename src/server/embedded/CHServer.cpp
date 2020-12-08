@@ -1184,6 +1184,13 @@ void CHServer::serve(std::string port, std::string ipaddr, int thrdpsiz, std::st
 
 	bool isSinglEVH = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["EVH_SINGLE"])=="true";
 
+#ifdef USE_IO_URING
+	if(!isSinglEVH) {
+		logger << "Unable to start server with IO_URING in thread-pooled mode, please set EVH_SINGLE (Single process mode to true)" << std::endl;
+		return;
+	}
+#endif
+
 	std::string cntEnc = StringUtil::toLowerCopy(ConfigurationData::getInstance()->coreServerProperties.sprops["CONTENT_ENCODING"]);
 	try {
 		techunkSiz = CastUtil::toInt(ConfigurationData::getInstance()->coreServerProperties.sprops["TRANSFER_ENCODING_CHUNK_SIZE"]);

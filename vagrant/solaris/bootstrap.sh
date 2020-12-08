@@ -5,34 +5,30 @@
 # Install prerequisite tools
 echo "Installing dependencies"
 
-pkg install cmake openssl libmemcached gdb gcc system/header
+pkg install cmake openssl libmemcached gdb gcc system/header autoconf automake libtool
 
-pkgadd -d http://get.opencsw.org/now
-/opt/csw/bin/pkgutil -U
+#pkgadd -d http://get.opencsw.org/now
+#/opt/csw/bin/pkgutil -U
 
-/opt/csw/bin/pkgutil -y -i /opt/csw/bin/wget
+#cd /tmp
+#wget -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz 
+#tar xf mongo-c-driver-1.4.0.tar.gz
+#rm -f mongo-c-driver-1.4.0.tar.gz
+#cd mongo-c-driver-1.4.0/ && \
+#./configure --with-libbson=bundled --disable-automatic-init-and-cleanup && \
+#make && make install
+#cd /tmp
+#rm -rf mongo-c-driver-1.4.0
 
+wget -q https://github.com/redis/hiredis/archive/v1.0.0.tar.gz
+gtar xzf v1.0.0.tar.gz
+rm -f v1.0.0.tar.gz
+cd hiredis-1.0.0/
+cmake . && make install
 cd /tmp
-/opt/csw/bin/wget --no-check-certificate -q https://github.com/mongodb/mongo-c-driver/releases/download/1.4.0/mongo-c-driver-1.4.0.tar.gz 
-tar xf mongo-c-driver-1.4.0.tar.gz
-rm -f mongo-c-driver-1.4.0.tar.gz
-cd mongo-c-driver-1.4.0/ && \
-./configure --with-libbson=bundled --disable-automatic-init-and-cleanup && \
-make && make install
-cd /tmp
-rm -rf mongo-c-driver-1.4.0
+rm -rf hiredis-1.0.0
 
-/opt/csw/bin/wget --no-check-certificate -q https://github.com/redis/hiredis/archive/v0.13.3.tar.gz
-tar xvf v0.13.3.tar.gz
-rm -f v0.13.3.tar.gz
-cd hiredis-0.13.3/
-make
-PREFIX=/usr make install
-cd /tmp
-rm -rf hiredis-0.13.3
-
-cd /tmp
-/opt/csw/bin/wget --no-check-certificate -q https://github.com/efficient/libcuckoo/archive/master.zip
+wget -q https://github.com/efficient/libcuckoo/archive/master.zip
 unzip master.zip
 rm -f master.zip
 cd libcuckoo-master
@@ -42,8 +38,8 @@ cd /tmp
 rm -rf libcuckoo-master
 
 cd /tmp
-/opt/csw/bin/wget --no-check-certificate -q http://www.unixodbc.org/unixODBC-2.3.7.tar.gz
-tar xvf unixODBC-2.3.7.tar.gz
+wget -q http://www.unixodbc.org/unixODBC-2.3.7.tar.gz
+tar xf unixODBC-2.3.7.tar.gz
 rm -f unixODBC-2.3.7.tar.gz
 cd unixODBC-2.3.7
 ./configure
@@ -52,21 +48,26 @@ make install
 cd /tmp
 rm -rf unixODBC-2.3.7
 
+crle -u -s /usr/local/lib/
+crle -64 -u -s /usr/local/lib/
+
+wget -q https://github.com/ninja-build/ninja/archive/v1.10.2.zip
+unzip v1.10.2.zip
+cd ninja-1.10.2/
+cmake -Bbuild-cmake -H.
+cmake --build build-cmake
+cd build-cmake/
+mv ninja /usr/bin/
+cd /tmp
+rm -rf ninja-1.10.2/ v1.10.2.zip
+
 mkdir /opt
 cd /opt
 rm -rf ffead-cpp-src
-/opt/csw/bin/wget --no-check-certificate -q https://github.com/sumeetchhetri/ffead-cpp/archive/v4.0.zip
+wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/v5.2.tar.gz
 unzip v4.0.zip
 rm -f v4.0.zip
 mv ffead-cpp-5.0 ffead-cpp-src
 cd ffead-cpp-src
-cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
-make install -j4
-
-# Setting up passwordless sudo
-echo "vagrant ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers
-
-# Set current shell to bash
-#chsh -s /usr/local/bin/bash root
-#chsh -s bash
-#finger vivek
+cmake -GNinja -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DDEBUG=on .
+ninja install

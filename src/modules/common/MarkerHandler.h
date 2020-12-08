@@ -26,6 +26,7 @@
 #include "vector"
 #include "map"
 #include "StringUtil.h"
+#include "LoggerFactory.h"
 #include <stdarg.h>
 #include <iostream>
 

@@ -49,7 +49,6 @@ Server::Server(const std::string& port, const bool& block, const int& waiting, c
 	
 	int yes = 1;
 	int rv;
-	int option = 10;
 
 	if(mode<1 || mode >3)
 		mode = 3;
@@ -89,13 +88,14 @@ Server::Server(const std::string& port, const bool& block, const int& waiting, c
 			}
 		#endif
 		#ifdef HAVE_TCP_DEFER_ACCEPT
+			int option = 10;
 			if (setsockopt(this->sock, IPPROTO_TCP, TCP_DEFER_ACCEPT, &option, sizeof(int)) == -1) {
 				perror("setsockopt");
 			}
 		#endif
 		#ifdef HAVE_TCP_FASTOPEN
-			option = 4096;
-			if (setsockopt(this->sock, IPPROTO_TCP, TCP_FASTOPEN, &option, sizeof(int)) == -1) {
+			int option1 = 4096;
+			if (setsockopt(this->sock, IPPROTO_TCP, TCP_FASTOPEN, &option1, sizeof(int)) == -1) {
 				perror("setsockopt");
 			}
 		#endif

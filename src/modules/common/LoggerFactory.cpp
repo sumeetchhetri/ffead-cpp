@@ -31,12 +31,12 @@ LoggerFactory::LoggerFactory()
 	vhostNumber = 0;
 	if(Logger::levelMap.size()==0) {
 		Logger::levelMap[Logger::LEVEL_OFF] = 1;
-		Logger::levelMap[Logger::LEVEL_FATAL] = 2;
-		Logger::levelMap[Logger::LEVEL_ERROR] = 3;
-		Logger::levelMap[Logger::LEVEL_WARN] = 4;
-		Logger::levelMap[Logger::LEVEL_INFO] = 5;
-		Logger::levelMap[Logger::LEVEL_DEBUG] = 6;
-		Logger::levelMap[Logger::LEVEL_TRACE] = 7;
+		Logger::levelMap[Logger::LEVEL_TRACE] = 2;
+		Logger::levelMap[Logger::LEVEL_DEBUG] = 3;
+		Logger::levelMap[Logger::LEVEL_INFO] = 4;
+		Logger::levelMap[Logger::LEVEL_WARN] = 5;
+		Logger::levelMap[Logger::LEVEL_ERROR] = 6;
+		Logger::levelMap[Logger::LEVEL_FATAL] = 7;
 	}
 }
 

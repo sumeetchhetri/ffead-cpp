@@ -1,11 +1,12 @@
 FROM centos:latest
 
 RUN yum install -y --nogpgcheck epel-release 'dnf-command(config-manager)'
-RUN yum config-manager --set-enabled PowerTools
+#RUN yum config-manager --set-enabled PowerTools
 RUN dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm
 RUN dnf config-manager --set-enabled remi
 RUN dnf group install -y "Development Tools"
-RUN yum update -yqq && yum install -y --nogpgcheck --allowerasing unzip tar autoconf automake libtool cmake3 postgresql-devel libcurl libcurl-devel libmemcached libmemcached-devel openssl openssl-devel libuuid-devel zlib zlib-devel unixODBC* tar gzip wget nmap-ncat
+RUN dnf install -y libmemcached libmemcached-libs
+RUN yum update -yqq && yum install -y --nogpgcheck --allowerasing unzip tar autoconf automake libtool cmake3 postgresql-devel libcurl libcurl-devel openssl openssl-devel libuuid-devel zlib zlib-devel unixODBC* tar gzip wget nmap-ncat
 
 #Install libcuckoo headers
 WORKDIR /tmp
@@ -40,7 +41,7 @@ RUN unzip -qq master.zip
 RUN mv ffead-cpp-master ffead-cpp-src
 RUN rm -f master.zip
 WORKDIR /tmp/ffead-cpp-src
-RUN cmake -DSRV_EMB=on -DMOD_MEMCACHED=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
+RUN cmake -DSRV_EMB=on -DMOD_REDIS=on -DMOD_SDORM_MONGO=on .
 RUN make install -j4
 RUN mv /tmp/ffead-cpp-src/ffead-cpp-5.0-bin /tmp/
 WORKDIR /tmp

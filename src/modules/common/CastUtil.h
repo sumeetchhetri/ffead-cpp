@@ -31,12 +31,10 @@
 #include <assert.h>
 #include "ThreadLocal.h"
 #include "map"
-#include <libcuckoo/cuckoohash_map.hh>
 
 
 class CastUtil {
 	static ThreadLocal _mcMap;
-	//static libcuckoo::cuckoohash_map<std::string, std::string> _mangledClassNameMap;
 	template <typename T> static void primitive(const T& val, const char* fmt, std::string* d)
 	{
 		int n = snprintf(NULL, 0, fmt, val);

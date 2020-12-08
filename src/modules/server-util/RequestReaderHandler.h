@@ -34,8 +34,8 @@
 #include "SSLClient.h"
 #include "Client.h"
 #include "concurrentqueue.h"
-#include <libcuckoo/cuckoohash_map.hh>
 #include "atomic"
+#include "SSLHandler.h"
 
 typedef SocketInterface* (*SocketInterfaceFactory) (SOCKET);
 
@@ -55,10 +55,13 @@ class RequestReaderHandler {
 	std::vector<SocketInterface*> clsdConns;
 	bool isActive();
 	void addSf(SocketInterface* sf);
+	static void* handle_Old(void* inp);
 	static void* handle(void* inp);
 	static RequestReaderHandler* _i;
 	friend class LibpqDataSourceImpl;
 public:
+	static bool loopContinue(SelEpolKqEvPrt* ths);
+	static SocketInterface* loopEventCb(SelEpolKqEvPrt* ths, SocketInterface* sfd, int type, int fd, char* buf, size_t len, bool isClosed);
 	static void setInstance(RequestReaderHandler*);
 	static RequestReaderHandler* getInstance();
 	void start(unsigned int cid);

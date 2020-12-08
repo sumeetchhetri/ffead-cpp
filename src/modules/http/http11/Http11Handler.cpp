@@ -140,6 +140,10 @@ bool Http11Handler::readRequest(void* request, void*& context, int& pending, int
 	return fl;
 }
 
+bool Http11Handler::hasPendingRead() {
+	return bytesToRead>(int)buffer.length();
+}
+
 int Http11Handler::getTimeout() {
 	if(handler!=NULL) {
 		return handler->getTimeout();

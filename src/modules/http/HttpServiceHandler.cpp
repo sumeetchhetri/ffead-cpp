@@ -135,6 +135,8 @@ void HttpReadTask::run() {
 	if(sif->isClosed()) {
 		sif->onClose();
 		service->closeConnection(sif);
+	} else {
+		sif->doneRead();
 	}
 
 	//t.end();

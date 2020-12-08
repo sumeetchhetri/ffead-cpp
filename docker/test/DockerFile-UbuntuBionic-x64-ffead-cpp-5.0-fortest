@@ -151,6 +151,13 @@ ENV pipeline pipeline
 ENV accept accept
 #WRK
 
+WORKDIR /tmp
+RUN wget -q https://github.com/axboe/liburing/archive/liburing-0.7.tar.gz
+RUN tar xf liburing-0.7.tar.gz
+RUN rm -f liburing-0.7.tar.gz
+RUN cd liburing-liburing-0.7 && ./configure --prefix=/usr/local && make install
+RUN cd /tmp && rm -rf liburing-liburing-0.7
+
 #Install ffead-cpp
 WORKDIR /tmp
 RUN wget -q https://github.com/sumeetchhetri/ffead-cpp/archive/master.zip

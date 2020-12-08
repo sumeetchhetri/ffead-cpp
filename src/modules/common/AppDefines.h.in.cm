@@ -34,6 +34,7 @@
 #cmakedefine USE_POLL @USE_POLL@
 #cmakedefine USE_SELECT @USE_SELECT@
 #cmakedefine USE_WIN_IOCP @USE_WIN_IOCP@
+#cmakedefine USE_IO_URING @USE_IO_URING@
 
 #cmakedefine HAVE_LIBPQ @HAVE_LIBPQ@
 #cmakedefine HAVE_REGEX @HAVE_REGEX@

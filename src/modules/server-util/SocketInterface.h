@@ -37,7 +37,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "vector"
-#include <libcuckoo/cuckoohash_map.hh>
 #include "concurrentqueue.h"
 #include "map"
 #include "Task.h"
@@ -58,8 +57,13 @@ public:
 class EventHandler {
 public:
 	virtual bool unRegisterWrite(SocketInterface* obj)=0;
+	virtual bool unRegisterRead(const SOCKET& descriptor)=0;
 	virtual bool registerWrite(SocketInterface* obj)=0;
 	virtual bool registerRead(SocketInterface* obj, const bool& isListeningSock = false)=0;
+#if defined(USE_IO_URING)
+	virtual void post_write(SocketInterface* sfd, const std::string& data)=0;
+	virtual void post_read(SocketInterface* sfd)=0;
+#endif
 	virtual ~EventHandler(){}
 };
 
@@ -74,7 +78,10 @@ class SocketInterface {
 	SOCKET fd;
 	std::atomic<bool> closed;
 	bool http2;
+	int io_uring_type;
+	//int io_uring_bid;
 	Logger logger;
+	char buff[2048];
 	std::string buffer;
 	std::atomic<int> tid;
 	std::atomic<int> useCounter;
@@ -126,6 +133,7 @@ public:
 	virtual ~SocketInterface();
 	bool flush();
 	void closeSocket();
+	void doneRead();
 	bool checkSocketWaitForTimeout(const int& writing, const int& seconds, const int& micros= 0);
 	virtual std::string getProtocol(void* context)=0;
 	virtual int getType(void* context)=0;
@@ -136,6 +144,7 @@ public:
 	virtual void onClose()=0;
 	virtual void addHandler(SocketInterface* handler)=0;
 	virtual bool isEmbedded()=0;
+	virtual bool hasPendingRead();
 	void use();
 	void unUse();
 };

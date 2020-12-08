@@ -32,16 +32,11 @@ std::string SSLCommon::ciphers =
 	std::string("DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:") +
 	std::string("!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK");
 
-
 SSLCommon::SSLCommon() {
-	
-
 }
 
 SSLCommon::~SSLCommon() {
-	
 }
-
 
 void SSLCommon::exitSSL(const char *func)
 {
@@ -139,15 +134,14 @@ SSL_CTX *SSLCommon::initialize_ctx(const bool& isServer)
 	SSL_CTX *ctx;
 
 	CRYPTO_set_mem_functions (ssl_malloc, ssl_realloc, ssl_free);
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x20700000L)
 	SSL_library_init ();
 	OpenSSL_add_all_algorithms();		/* load & register all cryptos, etc. */
 	SSL_load_error_strings();			/* load all error messages */
-#else
-	OPENSSL_init_ssl(0, NULL);
+	ERR_load_crypto_strings();
 #endif
 
-	printf ("Using OpenSSL version \"%s\"\n", SSLeay_version (SSLEAY_VERSION));
+	printf ("Using SSL Library version \"%s\"\n", SSLeay_version (SSLEAY_VERSION));
 
 	/* Set up a SIGPIPE handler */
 	signal (SIGPIPE, SIG_IGN);
@@ -179,13 +173,6 @@ void SSLCommon::loadCerts(SSL_CTX* ctx, char* certFile, char* keyFile, const std
 {
 	if(ldcrts)
 	{
-		/* set the private key from KeyFile (may be the same as CertFile) */
-		if (1 != SSL_CTX_use_PrivateKey_file(ctx, keyFile, SSL_FILETYPE_PEM))
-		{
-			ERR_print_errors_fp(stderr);
-			std::cout << "Couldn't read private key file" << std::endl;
-			exitSSL("SSL_CTX_use_PrivateKey_file");
-		}
 		/* set the local certificate from CertFile */
 		if (1 != SSL_CTX_use_certificate_chain_file(ctx, certFile) )
 		{
@@ -193,6 +180,14 @@ void SSLCommon::loadCerts(SSL_CTX* ctx, char* certFile, char* keyFile, const std
 			std::cout << "Couldn't read certificate chain file" << std::endl;
 			exitSSL("SSL_CTX_use_certificate_chain_file");
 		}
+		/* set the private key from KeyFile (may be the same as CertFile) */
+		if (1 != SSL_CTX_use_PrivateKey_file(ctx, keyFile, SSL_FILETYPE_PEM))
+		{
+			ERR_print_errors_fp(stderr);
+			std::cout << "Couldn't read private key file" << std::endl;
+			exitSSL("SSL_CTX_use_PrivateKey_file");
+		}
+
 		/* verify private key */
 		if (1 != SSL_CTX_check_private_key(ctx))
 		{
@@ -224,7 +219,7 @@ void SSLCommon::check_cert(SSL *ssl, char *host)
   	  we set the verify depth in the ctx */
 
 	/*Check the common name*/
-	peer=SSL_get_peer_certificate(ssl);
+	peer = SSL_get_peer_certificate(ssl);
 	X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, 256);
 	if(strcasecmp(peer_CN,host)!=0) {
 		exitSSL("Common name doesn't match host name");

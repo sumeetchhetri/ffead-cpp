@@ -109,6 +109,7 @@ Marker MarkerHandler::getMarker(const std::string& name) {
 }
 
 Marker MarkerHandler::processMarker(std::string markerText, const int& where) {
+	Logger logger = LoggerFactory::getLogger("MarkerHandler");
 	StringUtil::trim(markerText);
 	if(markerText.find("#pragma ")!=0)
 	{
@@ -174,7 +175,7 @@ Marker MarkerHandler::processMarker(std::string markerText, const int& where) {
 				if(it->second) {
 					throw std::runtime_error("No value specified for mandatory attribute "+it->first+" for the marker " + targetMarker.name);
 				}
-				std::cout << "Ignoring attribute " + it->first + " for marker " + targetMarker.name << std::endl;
+				logger.info("Ignoring attribute " + it->first + " for marker " + targetMarker.name);
 				tvalues.erase(it->first);
 			}
 			else

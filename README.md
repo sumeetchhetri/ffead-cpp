@@ -34,34 +34,43 @@ Build validated for the following Operating systems/Toolchains
 |[ArchLinux (mingw-w64 cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-archlinux-mingw64)|[Ubuntu (musl cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-musl)|[Ubuntu (android cross compiler)](https://github.com/sumeetchhetri/ffead-cpp/tree/master/docker/DockerFile-cross-android)
 
 
-[Latest Techempower benchmarks](https://www.techempower.com/benchmarks/#section=test&runid=223b29a9-851d-4f0d-9b3c-bb5b89d65d97&hw=ph&test=plaintext&a=2)
+[Latest Techempower benchmarks](https://www.techempower.com/benchmarks/#section=test&runid=627e33f6-2a02-40f5-b377-a36e65f69e92&hw=ph&test=composite&a=2)
 
 Features
 ==========
-- Multiple server backends (HTTP 1.1/HTTP2/HTTP3)
+- Multiple server backends (HTTP 1.1/HTTP 2/HTTP 3)
     |   |   |   |   |
     |---|---|---|---|
-    |embedded (HTTP1.1)|nghttp2 (HTTP2)|quiche (HTTP3)|nginx|
+    |embedded (HTTP1.1)|nghttp2 (HTTP2)|quiche (HTTP3)|seastar|
     |apache|cinatra (c++)|lithium (c++)|drogon (c++)|
     |libreactor \(c\)|h2o \(c\)|vweb (vlang)|picov (vlang)|
     |actix (rust)|hyper (rust)|thruster (rust)|rocket (rust)|
     |h2o\.cr (crystal)|crystal-http (crystal)|fasthttp (golang)|gnet (golang)|
     |firenio (java)|rapidoid (java)|wizzardo-http (java)|hunt (d)|
     |swift-nio (swift)|http.jl (julia)|mongols \(c\)|uv-cpp (c++)|
-    |CppServer (c++)|openlitespeed (experimental)|||
+    |CppServer (c++)|nginx|openlitespeed (experimental)||
+- Support for multiple I/O event notification engines,
+	- io_uring - Linux kernel >= 5.6
+	- epoll - Linux
+	- kqueue - BSD/MacOS
+	- event_ports/devpoll - Solaris
+	- wepoll - Windows (IOCP based epoll library)
+	- poll/select - On all platforms that support these API's
+- Embedded HTTP Server with single process and thread-pool backends
+- SSL/TLS support
 - Web Socket Support
 - Advanced ORM - SDORM (sql/monogo)
+- Raw SQL API for postgresql (libpq)
 - Cache API (memcached/redis)
-- Search Engine API (solr/elasticsearch) -- (experimental)
 - Improved Thread/ThreadPool API(s)
 - Marker based configuration (java style annotations)
 - Reflection support
 - Serialization support
 - Date/Time Ultility functions
-- Better Logging support
-- HTTP2.0 Support (experimental)
 - Dependency Injection
+- Serverside dynamic C++ Pages and template engine (HTML/C++ pages)
 - Sample app for Webrtc Signalling (websocket + api) (horizontally scalable peerjs compatible signalling server)
+- Embedded HTTP2.0 Server support (experimental)
 
 Quickstart (Using cmake/make)
 ===========

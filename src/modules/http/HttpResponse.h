@@ -65,7 +65,8 @@ public:
     bool hasHeader(const std::string& header);
     bool isHeaderValue(std::string header, const std::string& value, const bool& ignoreCase= true);
     bool isNonBinary();
-    std::string getHeader(std::string);
+    std::string getHeader(const std::string&);
+    const std::string& getHeaderV(const std::string&);
     bool getCompressed();
     const std::vector<std::string> getCookies() const;
 	const RMap& getCHeaders() const;

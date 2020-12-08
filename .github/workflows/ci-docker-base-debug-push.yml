@@ -6,7 +6,7 @@ on:
       - master
 env:
   IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-base
-  IMG_VERSION: 5.2-debug
+  IMG_VERSION: 5.3-debug
 jobs:
   push:
     runs-on: ubuntu-latest

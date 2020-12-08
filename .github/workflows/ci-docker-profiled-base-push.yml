@@ -7,7 +7,7 @@ on:
 env:
   SQL_RAW_PROFILED_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-sql-raw-profiled-base
   SQL_RAW_CLIBPQB_PROFILED_IMAGE_NAME: sumeetchhetri/ffead-cpp-5.0-sql-raw-clibpqb-profiled-base
-  IMG_VERSION: 5.2
+  IMG_VERSION: 5.3
 jobs:
   push:
     runs-on: ubuntu-latest

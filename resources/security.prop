@@ -1,15 +1,14 @@
-CERTFILE=server.pem
-KEYFILE=server.pem
+CERTFILE=serverchain.pem
+KEYFILE=serverchain.pem
 PASSWORD=password
-DHFILE=dh1024.pem
-CA_LIST=root.pem
-RANDOM=random.pem
+DHFILE=dparams.pem
+CA_LIST=rootCA.pem
 ISDH_PARAMS=true
 CLIENT_SEC_LEVEL=0
-ALPN_ENABLED=true
+ALPN_ENABLED=false
 ALPN_PROTO_LIST=h2-16,h2,h2ws,http/1.1
 
-SRV_AUTH_PRVD=true
+SRV_AUTH_PRVD=false
 SRV_AUTH_MODE=file
 SRV_AUTH_FILE=users
 

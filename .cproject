@@ -42,6 +42,8 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base.342787389" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.base">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1062586156" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/opt/libpq/include"/>
+									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/fmt/include/"/>
+									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/seastar/include/"/>
 									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/quiche/examples/"/>
 									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/CppServer/include/"/>
 									<listOptionValue builtIn="false" value="/Users/sumeetc/Projects/GitHub/co/include"/>

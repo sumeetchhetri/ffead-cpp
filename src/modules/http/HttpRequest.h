@@ -36,7 +36,6 @@
 #include "MultipartContent.h"
 #include "Timer.h"
 #include "HTTPResponseStatus.h"
-#include <libcuckoo/cuckoohash_map.hh>
 #include "SocketInterface.h"
 #include <string_view>
 #include "picohttpparser_fcp.h"

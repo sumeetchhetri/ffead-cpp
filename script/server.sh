@@ -2,8 +2,13 @@
 
 export MALLOC_CHECK_=0
 IS_OS_DARWIN=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"darwin") != 0 {print "darwin"}'`
+IS_BSD=`uname|tr '[A-Z]' '[a-z]'|awk 'index($0,"bsd") != 0 {print "bsd"}'`
 if [ "$IS_OS_DARWIN" != "" ]; then
+	alias nproc="sysctl -n hw.ncpu"
 	export FFEAD_CPP_PATH=`cd "$(dirname server.sh)" && ABSPATH=$(pwd) && cd -`
+elif [ "$IS_BSD" != "" ]; then
+	alias nproc="sysctl -n hw.ncpu"
+	export FFEAD_CPP_PATH=`echo $(dirname $(readlink -f $0))`
 else
 	export FFEAD_CPP_PATH=`echo $(dirname $(readlink -f $0))`
 fi
@@ -30,8 +35,9 @@ chmod 700 $FFEAD_CPP_PATH/rtdcf/*
 chmod 700 $FFEAD_CPP_PATH/rtdcf/autotools/*
 #/usr/sbin/setenforce 0
 
-#if the event engine runs without a worker pool, then spwan "nproc" number of server processes 
-if grep -Fxq "EVH_SINGLE=true" $FFEAD_CPP_PATH/resources/server.prop
+#if the event engine runs without a worker pool, then spwan "nproc" number of server processes
+SINGLE_PROCESS=`grep "EVH_SINGLE=true" $FFEAD_CPP_PATH/resources/server.prop |wc -l`
+if [ $SINGLE_PROCESS -ge 1 ]
 then
 	for i in $(seq 0 $(($(nproc --all)-1))); do
 	  taskset -c $i ./ffead-cpp $FFEAD_CPP_PATH > ffead.$i.log 2>&1 &

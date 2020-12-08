@@ -90,7 +90,7 @@ void Reflection::collectInfo(std::string data, const std::string& flag, ClassStr
 	if(RegexUtil::find(data, "[ \t]*template[ \t]*<[ \t]*")!=-1)
 		return;
 	RegexUtil::replace(data, "[ \t]*const[; \t]+", "");
-
+	Logger logger = LoggerFactory::getLogger("Reflection");
 	if(data.find("(")!=std::string::npos && data.find(")")!=std::string::npos)
 	{
 		MethStructure ps;
@@ -115,11 +115,11 @@ void Reflection::collectInfo(std::string data, const std::string& flag, ClassStr
 				Marker m = handler.processMarker(prg, 2);
 				if(m.getName()!="")
 				{
-					std::cout << prg << " - Method marker Valid" << std::endl;
+					logger.debug(prg + " - Method marker Valid");
 					ps.markers[m.getName()].push_back(m);
 				}
 			} catch(const std::exception& c) {
-				std::cout << prg << " - " <<  c.what() << std::endl;
+				logger.debug(prg + " - " + c.what());
 			}
 		}
 		if(flag=="public")
@@ -146,11 +146,11 @@ void Reflection::collectInfo(std::string data, const std::string& flag, ClassStr
 				Marker m = handler.processMarker(prg, 1);
 				if(m.getName()!="")
 				{
-					std::cout << prg << " - Property marker Valid" << std::endl;
+					logger.debug(prg + " - Property marker Valid");
 					ps.markers[m.getName()].push_back(m);
 				}
 			} catch(const std::exception& c) {
-				std::cout << prg << " - " <<  c.what() << std::endl;
+				logger.debug(prg + " - " +  c.what());
 			}
 		}
 		if(flag=="public")
@@ -269,6 +269,7 @@ void Reflection::emptyBlocks(std::string& data, size_t start)
 
 void Reflection::handleNamespace(std::string data, std::string namepsc, std::map<std::string, ClassStructure, std::less<> >& clsvec, std::map<std::string, std::vector<std::string> >& glbnmspcs, std::vector<std::string> pragmas)
 {
+	Logger logger = LoggerFactory::getLogger("Reflection");
 	StringUtil::trim(data);
 	if(data.length()>0 && data.at(0)==';') {
 		data = data.substr(1);
@@ -282,7 +283,7 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 		std::string temp = data.substr(nmspcst);
 		nmspcst += temp.find(" namespace");
 	}
-	std::cout << namepsc << "||" << data << std::endl;
+	logger.debug(namepsc + "||" + data);
 	if(clsvec.find(namepsc)==clsvec.end() && RegexUtil::find(data, "^[ \t]*#[ \t]*pragma[ \t]*[^`]+`", true)==0)
 	{
 		int spos, epos;
@@ -354,15 +355,15 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 			data = data.substr(st+1, en-st-1);
 			StringUtil::trim(data);
 			StringUtil::trim(tdata);
-			std::cout << "nmspc = " << nmspc << std::endl;
-			std::cout << data << std::endl;
-			std::cout << tdata << std::endl;
+			logger.debug("nmspc = " + nmspc);
+			logger.debug(data);
+			logger.debug(tdata);
 			handleNamespace(data, nmspc, clsvec, glbnmspcs, pragmas);
 			handleNamespace(tdata, namepsc, clsvec, glbnmspcs, pragmas);
 		}
 		else
 		{
-			std::cout << "error" << std::endl;
+			logger.debug("error");
 		}
 	}
 	else if(data.find("class ")==0)
@@ -426,11 +427,11 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 					Marker m = handler.processMarker(prg, 0);
 					if(m.getName()!="")
 					{
-						std::cout << prg << " - Valid" << std::endl;
+						logger.debug(prg + " - Valid");
 					}
 					cstruc.markers[m.getName()].push_back(m);
 				} catch(const std::exception& c) {
-					std::cout << prg << " - " <<  c.what() << std::endl;
+					logger.debug(prg + " - " +  c.what());
 				}
 			}
 			clsvec[nmspc] = cstruc;
@@ -440,16 +441,16 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 			data = data.substr(st+1, en-st-1);
 			StringUtil::trim(data);
 			StringUtil::trim(tdata);
-			std::cout << "classnmpsc = " << nmspc << std::endl;
-			std::cout << data << std::endl;
-			std::cout << tdata << std::endl;
+			logger.debug("classnmpsc = " + nmspc);
+			logger.debug(data);
+			logger.debug(tdata);
 			pragmas.clear();
 			handleNamespace(data, nmspc, clsvec, glbnmspcs, pragmas);
 			handleNamespace(tdata, namepsc, clsvec, glbnmspcs, pragmas);
 		}
 		else
 		{
-			std::cout << "error" << std::endl;
+			logger.debug("error");
 		}
 		pragmas.clear();
 	}
@@ -697,6 +698,7 @@ void Reflection::handleNamespace(std::string data, std::string namepsc, std::map
 
 std::map<std::string, ClassStructure, std::less<> > Reflection::getClassStructures(const std::string& className, const std::string& appName)
 {
+	Logger logger = LoggerFactory::getLogger("Reflection");
 	std::map<std::string, ClassStructure, std::less<> > clsvec;
 	std::string data;
 	std::ifstream infile;
@@ -849,9 +851,9 @@ std::map<std::string, ClassStructure, std::less<> > Reflection::getClassStructur
 			}
 			copy(it->second.namespaces.begin(), it->second.namespaces.end(), std::back_inserter(nnspcs));
 			it->second.namespaces = nnspcs;
-			std::cout << "=========================================" << std::endl;
-			it->second.toString();
-			std::cout << "=========================================" << std::endl;
+			logger.debug("=========================================");
+			logger.debug(it->second.toString());
+			logger.debug("=========================================");
 		}
 		for (int var = 0; var < (int)remnmspcs.size(); ++var) {
 			clsvec.erase(remnmspcs.at(var));
@@ -994,7 +996,7 @@ std::string Reflection::generateClassDefinitions(std::map<std::string, ClassStru
 std::string Reflection::generateClassDefinition(std::map<std::string, ClassStructure, std::less<> >& allclsmap, std::string &includesDefs, std::string &typedefs, std::string &classes, std::string &methods, std::string &opers, const std::string& app)
 {
 	std::string refDef, testStr, teststrfuncs;
-
+	Logger logger = LoggerFactory::getLogger("Reflection");
 	std::map<std::string, ClassStructure, std::less<> >::iterator it;
 	for (it=allclsmap.begin();it!=allclsmap.end();++it)
 	{
@@ -1231,11 +1233,11 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 									Marker m = handler.processMarker(argprg, 3);
 									if(m.getName()!="")
 									{
-										std::cout << argprg << " - Valid" << std::endl;
+										logger.debug(argprg + " - Valid");
 										ms.argMarkers[argNumm][m.getName()].push_back(m);
 									}
 								} catch(const std::exception& c) {
-									std::cout << argprg << " - " <<  c.what() << std::endl;
+									logger.debug(argprg + " - " +  c.what());
 								}
 							}
 
@@ -2260,7 +2262,7 @@ std::string Reflection::generateClassDefinition(std::map<std::string, ClassStruc
 					+ "\nif(t==8){Reflector::addValueToNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, *(("+classStructure.getFullyQualifiedClassName()+"*)_instance),_vec);return NULL;}\n"
 					+ "\nif(t==9){"+classStructure.getFullyQualifiedClassName()+" *_obj = new "+classStructure.getFullyQualifiedClassName()+";\n*_obj = Reflector::getValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\nreturn _obj;\n}\n"
 					+ "\nif(t==10)return Reflector::getPValueFromNestedContainerSV<"+classStructure.getFullyQualifiedClassName()+">(contType, _vec, pos);\n"
-					+ "}";
+					+ "return NULL;}";
 		}
 		refDef += "\nreturn ci;\n}\n";
 		allclsmap[it->first] = classStructure;
@@ -3887,13 +3889,14 @@ std::string Reflection::getXSDDefinitions(std::map<std::string, ClassStructure, 
 	}
 	//obj_binding.append("</xsd:sequence>\n");
 	//obj_binding.append("</xsd:complexType>\n");
+	Logger logger = LoggerFactory::getLogger("Reflection");
 	StringContext cntxt;
-	std::cout << "nmspcid = " + nmspcid << std::endl;
-	std::cout << "dfnmspc = " + dfnmspc << std::endl;
+	logger.debug("nmspcid = " + nmspcid);
+	logger.debug("dfnmspc = " + dfnmspc);
 	std::string nmspcidval = Reflection::getNameSpaceIdValue(nmspcid);
 	if(nmspcidval=="")
 		nmspcidval = dfnmspc;
-	std::cout << "nmspcidval = " + nmspcidval << std::endl;
+	logger << ("nmspcidval = " + nmspcidval);
 	cntxt["WS_NMSPC"] = nmspcidval;
 	cntxt["OBJ"] = clstruct->getTreatedClassName(false);
 	cntxt["OBJ_MEMBERS"] = obj_binding;
